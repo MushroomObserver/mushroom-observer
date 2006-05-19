@@ -1,0 +1,31 @@
+<h1>Image: <%= sprintf("%s (%d)", @image.title, @image.id) %></h1>
+
+<%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+
+<table cellpadding="10">
+<tr>
+<td valign="top">
+
+<p>Title: <span class="Data"><%= @image.title %></span></p>
+<p>Owner: <span class="Data"><%= @image.owner %></span></p>
+<p>When: <span class="Data"><%= @image.when %></span></p>
+
+<p>Observations<br/>
+<span class="Data">
+    <% for observation in @image.observations %>
+      <%= link_to(sprintf("%s (%d)", truncate(observation.what, 20),
+                                      observation.id),
+                          :action => 'show_observation', :id => observation.id) %><br/>
+    <% end %>
+</span>
+</p>
+
+<p>Notes:<br/>
+<%= @image.notes %></p>
+
+</td>
+<td align="center">
+<img src="<%= url_for(:action => "image", :id => @image.id) %>"/>
+</td>
+</tr>
+</table>

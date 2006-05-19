@@ -1,0 +1,26 @@
+March 20, 2006 - Installed Ruby and mysql
+March 27 - Started going through blog demo
+March 28 - Started using CocoaMySQL.  Finished blog demo.
+March 29 - Downloaded Agile Web Development with Rails (DAWDR)
+March 30 -  Showed blog demo to Renee.
+April 5, 6, 7, 8, 9, 11 - Started following along with DAWDR, but with observer in mind
+April 12 - Screwed up and tried to recover from backup, ended up
+      starting over and copying stuff in as needed.
+April 13 - Worked on uploading images
+April 15, 16, 19 - more work on images
+April 19 - Figured out how to run shell commands (identify) and how to use regular
+      expressions objects.
+April 20 - Started this diary.  Work on images.
+April 21 - Got image resizing working.
+April 22 - Moved Dbpict test logic over to Image and got it working.
+April 25 - Cleaned up list_images
+April 26 - Art class.  Got show/edit_image to show image and changed background color.
+  Fixed image resizing.  Cleaned up show_image.
+April 30 - 
+May 1 - 
+May 2 - Added join tables
+May 3 - Art class.  Worked on checkboxes for selecting images.
+May 6 - Decided to not use checkboxes for selecting, but rather to think of images as
+  connected to particular observations.  Added thumbnails to show/edit_observation.
+May 8 - Add observation list to show_image.
+May 10 - Art class

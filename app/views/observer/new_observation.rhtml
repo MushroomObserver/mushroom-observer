@@ -1,0 +1,10 @@
+<h1>New Observation</h1></br>
+
+<%= start_form_tag :action => 'create_observation' %>
+<center><%= submit_tag "Create" %></center>
+<table cellpadding="10">
+<tr>
+  <%= render :partial => 'form_observations' %>
+</tr>
+</table>
+<%= end_form_tag %>

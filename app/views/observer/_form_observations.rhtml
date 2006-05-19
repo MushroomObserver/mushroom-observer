@@ -1,0 +1,25 @@
+<%= error_messages_for 'observation' %>
+
+<!--[form:observation]-->
+<td valign="top">
+<p><label for="observation_when">When</label><br/>
+<%= date_select 'observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
+
+<p><label for="observation_who"><b>Who</b> (required)</label><br/>
+<%= text_field 'observation', 'who'  %></p>
+
+<p><label for="observation_where"><b>Where</b> (required)</label><br/>
+<%= text_field 'observation', 'where'  %></p>
+
+<p><label for="observation_what">What</label><br/>
+<%= text_field 'observation', 'what'  %></p>
+
+<p><label for="observation_specimen">Herbarium Specimen Available</label><br/>
+<select id="observation_specimen" name="observation[specimen]"><option value="false" selected>False</option><option value="true">True</option></select></p>
+
+</td>
+<td valign="top">
+<p><label for="observation_notes">Notes</label><br/>
+<%= text_area 'observation', 'notes'  %></p>
+</td>
+<!--[eoform:observation]-->

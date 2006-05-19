@@ -1,0 +1,26 @@
+<h1>Editing Observation: <%= sprintf("%s (%d)", @observation.what, @observation.id) %></h1>
+
+<%= start_form_tag :action => 'update_observation', :id => @observation %>
+<br/>
+<center><%= submit_tag 'Save Edits' %></center>
+
+<table cellpadding="10">
+<tr>
+  <%= render :partial => 'form_observations' %>
+    <td valign="top">
+<%= link_to 'Add Image', :action => 'add_image', :id => @observation %><br/><br/>
+    <% i = 0
+       observation = @observation
+       for image in @observation.images
+         i = i + 1 %>
+       <table><tr><td>
+	<%= radio_button("observation", 'thumb_image_id', image.id) %>
+       </td><td align="center">
+	<img src='<%= url_for(:action => "img_thumb", :id => image.id) %>'><br/>
+         <%= sprintf("%s (%d)", truncate(image.title, 20), image.id) %>
+       </td></tr></table>
+    <% end %>
+    </td>
+</tr>
+</table>
+<%= end_form_tag %>

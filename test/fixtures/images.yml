@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+in_situ:
+  id: 1
+  content_type: image/jpeg
+  title:        In Situ
+  owner:        Mo Clue
+  when:         2006-05-11
+  notes:        What it looked like originally
+turned_over:
+  id: 2
+  content_type: image/jpeg
+  title:        Turned Over
+  owner:        Mo Clue
+  when:         2006-05-11
+  notes:        What it looked like when I turned it over

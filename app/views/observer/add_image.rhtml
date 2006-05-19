@@ -1,0 +1,30 @@
+<h1>Upload Image for <%= @observation.unique_name %></h1>
+
+<%= error_messages_for("img") %>
+
+<%= form_tag({:action => 'save_image'}, :multipart => true) %>
+<center><%= submit_tag("Upload file") %></center>
+
+<table cellpadding="10">
+<tr>
+<td>
+
+<p><label for="image_image">Upload your picture</label><br/>
+<%= file_field("image", "image") %></p>
+
+<p><label for="image_title">Title</label><br/>
+<%= text_field("image", "title") %></p>
+
+<p><label for="image_owner">Owner</label><br/>
+<%= text_field("image", "owner") %></p>
+
+<p><label for="image_when">When</label><br/>
+<%= date_select("image", "when", :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
+</td>
+<td>
+<p><label for="image_notes">Notes</label><br/>
+<%= text_area("image", "notes") %></p>
+</td>
+</table>
+
+<%= end_form_tag %>

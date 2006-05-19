@@ -1,0 +1,15 @@
+<h1>Editing Image: <%= sprintf("%s (%d)", @image.title, @image.id) %></h1>
+
+<%= start_form_tag :action => 'update_image', :id => @image %>
+<center><%= submit_tag 'Save Edits' %></center>
+<table cellpadding="10">
+<tr>
+<td valign="top">
+  <%= render :partial => 'form_images' %>
+</td>
+<td align="center">
+<img src="<%= url_for(:action => "image", :id => @image.id) %>"/>
+</td>
+</tr>
+</table>
+<%= end_form_tag %>

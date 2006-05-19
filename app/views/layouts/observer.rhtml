@@ -1,0 +1,33 @@
+<html>
+<head>
+  <META http-equiv=Content-Type content="text/html; charset=UTF-8"/>
+  <title>Mushroom Sightings: <%= controller.action_name %></title>
+  <%= stylesheet_link_tag 'scaffold' %>
+</head>
+<body>
+    <div id="banner">
+      <%= @page_title || "Mushroom Sightings" %>
+    </div>
+    <div id="columns">
+      <table>
+	<tr>
+	  <td valign="top" height="100%">
+	    <table class="LeftSide" cellpadding="20" height="100%">
+	      <tr>
+		<td valign="top">
+		  <%= link_to 'New&nbsp;Observation', :action => 'new_observation' %><br/><br/>
+		  <%= link_to 'List&nbsp;Observations', :action => 'list_observations' %><br/>
+		  <%= link_to 'List&nbsp;Images', :action => 'list_images' %>
+		</td>
+	      </tr>
+	    </table>
+	  </td>
+	  <td class="main">
+            <p style="color: green"><%= flash[:notice] %></p>
+            <%= @content_for_layout %>
+	  </td>
+	</tr>
+      </table>
+    </div>
+</body>
+</html>

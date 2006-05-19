@@ -1,0 +1,6 @@
+in_situ_detailed_unknown:
+  image_id:        1
+  observations_id: 2
+turned_over_detailed_unknown:
+  image_id:        2
+  observations_id: 2

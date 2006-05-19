@@ -1,0 +1,31 @@
+<h1>Images</h1>
+
+<table  cellpadding="5" cellspacing="0">
+  <%
+     odd_or_even = 0
+     for image in @images
+       odd_or_even = 1 - odd_or_even
+     %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td width=110 height=110 align="center" valign="middle">
+      <img src="<%= url_for(:action => "img_thumb", :id => image.id) %>"/>
+    </td>
+    <td width="80%" valign="middle">
+      <span class="ListWhen"><%= h(image.when) %>: </span>
+      <span class="ListWhat"><%= h(image.unique_name) %></span><br/>
+      <%= h(image.owner) + ': ' + h(truncate(image.notes, 80)) %>
+    </td>
+    <td class="ListActions">
+      <%= link_to 'Show', :action => 'show_image', :id => image %><br/>
+      <%= link_to 'Edit', :action => 'edit_image', :id => image %><br/>
+      <%= link_to 'Destroy', { :action => 'destroy_image', :id => image },
+                               :confirm => "Are you sure?" %>
+    </td>
+  </tr>
+  <% end %>
+</table>
+
+<%= link_to 'Previous page', { :page => @image_pages.current.previous } if @image_pages.current.previous %>
+<%= link_to 'Next page', { :page => @image_pages.current.next } if @image_pages.current.next %> 
+
+<br />

@@ -1,0 +1,36 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+minimal_unknown:
+  id:        1
+  when:      2006-05-11
+  who:       Les Clue
+  where:     Burbank, California
+detailed_unknown:
+  id:        2
+  created:   2006-05-12 17:20:00
+  modified:  2006-05-12 17:21:00
+  when:      2006-05-11
+  who:       Mo Clue
+  where:     Burbank, California
+  what:      Unknown
+  specimen:  1
+  notes:     Found in a strange place
+dirt:
+  id:        3
+  created:   2006-05-12 17:20:00
+  modified:  2006-05-12 17:20:00
+  when:      1964-01-08
+  who:       Patrick Dalton
+  where:     Kansas City, Kansas
+  what:      Zevl
+  specimen:  0
+  notes:     An old friend
+older_than_dirt:
+  id:        4
+  created:   2006-05-12 17:20:00
+  modified:  2006-05-12 17:20:00
+  when:      1963-12-05
+  who:       Nathan Wilson
+  where:     Berkeley, California
+  what:      Velosa
+  specimen:  0
+  notes:     A mushroom enthusiast
