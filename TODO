@@ -1,35 +1,5 @@
 Initial Goals:
-  Associate photos with who, when, where, what, notes
-  Add/Edit above
-  Photo support:
-
-  Photo upload
-    should get resized: use: system "command", or `command` (returns output)
-       can use: require 'session' for separating stdout/stderr
-    move dbpict logic over to image class
-
-  - Cleanup list_images
-  - edit_image should show the image
-  - link to get_image rather than new_image
-  - clean up show_image
-  - image resizing isn't working right for vertical images
-  - Reset database and images
-  - Get Add Image on Edit Observation working
-    * join table working
-    * Need to display join info as thumbnails in show_observation and edit_observation
-    * show_image should have list of observations
-    * edit_observations thumbnails are dead for now
-  - Set thumbnail to first image
-  - Thumbnail for list_observations.
-  - Use radio buttons to Select Thumbnail in Edit Observation
-  - Expanded year selection for 'When'
-
-  - Reset database
-  - Review for publication
-    - Left-hand div with new observation, new image, list/search observations,
-      list/search images
-  - Use ENV['RAILS_ENV'] to determine path to images
-  Setup SVN repository under collectivesource.com
+  Get image upload working for both dev and prod
   * Figure out how to load a script that create new database objects
     add_image_observations(path_to_img, who, when, where, what='Unknown')
   * Automatic data reset and loading including image directory (getting into testing)

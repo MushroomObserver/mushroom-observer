@@ -65,18 +65,16 @@ class Image < ActiveRecord::Base
     logger.warn(cmd)
   end
 
-  IMAGE_DIR = sprintf("/Users/velosa/observer-images/%s", ENV['RAILS_ENV'])
-
   def original_image
-    sprintf("%s/orig/%d.jpg", IMAGE_DIR, self.id)
+    sprintf("%s/orig/%d.jpg", IMG_DIR, self.id)
   end
 
   def big_image
-    sprintf("%s/640/%d.jpg", IMAGE_DIR, self.id)
+    sprintf("%s/640/%d.jpg", IMG_DIR, self.id)
   end
 
   def thumbnail
-    sprintf("%s/thumb/%d.jpg", IMAGE_DIR, self.id)
+    sprintf("%s/thumb/%d.jpg", IMG_DIR, self.id)
   end
 
   IDENTIFY_PAT = /^\S+ \w+ (\d+)x(\d+)/

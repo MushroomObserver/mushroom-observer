@@ -1,2 +1,6 @@
+development.log
 fastcgi.crash.log
+fcgi.socket-0
+lighttpd.access.log
+lighttpd.error.log
 production.log
