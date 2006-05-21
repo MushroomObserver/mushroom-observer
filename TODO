@@ -3,7 +3,7 @@ Initial Goals:
   * Figure out how to load a script that create new database objects
     add_image_observations(path_to_img, who, when, where, what='Unknown')
   * Automatic data reset and loading including image directory (getting into testing)
-  Setup test site
+  Load my mushroom data
 
   Search above
   Comments for observations and images
@@ -12,8 +12,15 @@ Initial Goals:
   Repurpose get_image for:
     Option for uploading an image directly which also creates a skeleton observation
   Hook where up to Google Maps
-  Load my mushroom data data
   Deal with flickering images
+
+Original images
+Copyright
+License
+Previous/Next
+Index by What
+Index by Who
+What to find new comments
 
 Species lists
 Names
