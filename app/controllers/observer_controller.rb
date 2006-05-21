@@ -12,7 +12,7 @@ class ObserverController < ApplicationController
   # Various -> list_observations.rhtml
   def list_observations
     @observation_pages, @observations = paginate(:observations,
-                                                 :order => "'created' desc",
+                                                 :order => "'when' desc",
                                                  :per_page => 10)
   end
 
@@ -245,7 +245,7 @@ class ObserverController < ApplicationController
   end
 
   def load_image_directory
-    dir = '/Users/velosa/Fungi/test-import'
+    dir = '/Users/velosa/Fungi/big-import'
     pat = /^#{dir}\/(.+)$/
     who = 'Nathan Wilson'
     Find.find(dir) do |f|
