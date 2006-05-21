@@ -1,5 +1,6 @@
-<h1>Observation: <%= sprintf("%s (%d)", @observation.what, @observation.id) %></h1>
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+
+<h1>Observation: <%= sprintf("%s (%d)", @observation.what, @observation.id) %></h1>
 
 <table cellpadding="10">
 <tr>

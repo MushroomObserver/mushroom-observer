@@ -29,20 +29,22 @@ class Image < ActiveRecord::Base
     end
   end
 
-  # Can't include this in image= because self.id isn't set until first save
-  def save_image
-    logger.warn("save_image: #{self.original_image}")
-    file = File.new(self.original_image, 'w')
-    file.print(@img)
-    file.close
-    logger.warn("save_image: Wrote original")
+  def create_resized_images
     result = self.calc_size
-    logger.warn("save_image: Calculated size: #{@width}x#{@height}")
+    logger.warn("create_resized_images: Calculated size: #{@width}x#{@height}")
     if result
       self.resize_image(640, 640, self.big_image)
       self.resize_image(100, 100, self.thumbnail)
     end
     return result
+  end
+
+  # Can't include this in image= because self.id isn't set until first save
+  def save_image
+    file = File.new(self.original_image, 'w')
+    file.print(@img)
+    file.close
+    return self.create_resized_images
   end
 
   def resize_image(width, height, dest)
@@ -100,6 +102,13 @@ class Image < ActiveRecord::Base
 
   def get_thumbnail
     file = File.new(self.thumbnail, 'r')
+    result = file.read
+    file.close
+    result
+  end
+
+  def get_original
+    file = File.new(self.original_image, 'r')
     result = file.read
     file.close
     result

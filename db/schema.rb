@@ -24,7 +24,6 @@ ActiveRecord::Schema.define() do
     t.column "who", :string, :limit => 100
     t.column "where", :string, :limit => 100
     t.column "what", :string, :limit => 100
-    t.column "image_name", :string, :limit => 200
     t.column "specimen", :boolean, :default => false, :null => false
     t.column "notes", :text
     t.column "thumb_image_id", :integer

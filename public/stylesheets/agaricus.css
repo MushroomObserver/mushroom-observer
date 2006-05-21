@@ -1,25 +1,50 @@
+/* Global default colors */
 body { background-color: #f6f0f2; color: #3b2821; }
 
 a { color: #a06463; }
 a:visited { color: #3b2821; }
 a:hover { color: #743931; background-color:#f6f0f2; }
 
+
+/* Banner colors */
 #banner {
     background-color: #bc9d89;
+}
+
+
+/* Colors for the left hand panel */
+.LeftSide {
+    background-color: #eccf95;
 }
 
 .LeftSide a {
     color: #a06463;
 }
 
-.LeftSide {
-    background-color: #eccf95;
-}
 
+/* Colors for even lines */
 .ListLine0 {
       background-color: #d4a833;
 }
 
+.ListLine0 a {
+      color: #b4725f;
+}
+
+.ListLine0 a:visited {
+      color: #3b2821;
+}
+
+
+/* Colors for odd lines */
 .ListLine1 {
       background-color: #b4725f;
+}
+
+.ListLine1 a {
+      color: #d4a833;
+}
+
+.ListLine1 a:visited {
+      color: #3b2821;
 }

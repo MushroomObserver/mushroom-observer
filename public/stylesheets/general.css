@@ -122,6 +122,16 @@ div.progressBar div.background {
     text-align: center;
 }
 
+#color_note {
+    text-align: right;
+    font-size: x-small;
+}
+
+#copyright {
+    text-align: center;
+    font-size: x-small;
+}
+
 H1 {
     text-align: center;
 }

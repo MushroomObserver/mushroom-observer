@@ -16,15 +16,16 @@
 	      <tr>
 		<td valign="top">
 		  <%= link_to 'New&nbsp;Observation', :action => 'new_observation' %><br/><br/>
-		  <%= link_to 'List&nbsp;Observations', :action => 'list_observations' %><br/>
-		  <%= link_to 'List&nbsp;Images', :action => 'list_images' %>
+		  <%= link_to 'Observations/Home', :action => 'list_observations' %><br/>
+		  <%= link_to 'Images', :action => 'list_images' %>
 		</td>
 	      </tr>
 	    </table>
 	  </td>
 	  <td class="main">
-            <p style="color: green"><%= flash[:notice] %></p>
+            <p><%= flash[:notice] %></p>
             <%= @content_for_layout %>
+            <div id="color_note">Colors provided by <i>Agaricus</i></div>
 	  </td>
 	</tr>
       </table>
