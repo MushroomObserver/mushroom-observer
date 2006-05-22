@@ -2,6 +2,17 @@
 
 <%= error_messages_for("img") %>
 
+<div id="copyright">
+Note: By uploading images to this site you are indicating that you
+have permission to place this image under a <a
+href="http://creativecommons.org/licenses/by-nc-sa/2.5/">Creative
+Commons Attribution-NonCommercial-ShareAlike 2.5 license</a> as these
+are the conditions under which this site will license this image to
+it's users.  In addition, you give permission for this site to use
+this image for limited commerical purposes to support this site in a
+manner similar to a non-profit corporation.<br/>
+</div>
+
 <%= form_tag({:action => 'save_image'}, :multipart => true) %>
 <center><%= submit_tag("Do It") %></center>
 

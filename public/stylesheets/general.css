@@ -132,6 +132,12 @@ div.progressBar div.background {
     font-size: x-small;
 }
 
+#license {
+    padding-top: 3px;
+    text-align: center;
+    font-size: x-small;
+}
+
 H1 {
     text-align: center;
 }
