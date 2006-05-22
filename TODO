@@ -1,15 +1,18 @@
-Initial Goals:
-  Load my mushroom data
-  * Figure out how to load a script that creates new database objects
-    add_image_observations(path_to_img, who, when, where, what='Unknown')
-
-  Research general search
+Priorities:
   Index by what and who
   Comments for observations and images
-    Way to find new comments
-  Previous/Next
+  Purpose of Site link
+  License for uploaded images
 
-  Text explaining the site: Purpose of Site
+  Research general search
+  Sorting
+  Way to find new comments
+  Previous/Next (relative to search)
+
+  More color themes: Amanita, Hygrocybe, ...
+  More notes on my images
+
+  Hook where up to Google Maps
 
   Logic for resetting image directory for testing
   More tests
@@ -17,47 +20,10 @@ Initial Goals:
   Get rid of duplicate images
   Repurpose get_image for:
     Option for uploading an image directly which also creates a skeleton observation
-  Hook where up to Google Maps
   Deal with flickering images
 
-License control for images
-
-Species lists
-Names
 Users
-
-Pages:
-edit_image
-edit_observation
-get_image
-list_images
-list_observations
-new_image -> Replaced by get_image?
-new_observation
-show_image
-show_observation
-
-Todo:
-Add search to list page
-Expand on photos:
-  DB representation of photos with id, who, when, where, observations, notes
-  
-
-Questions:
-File uploading and naming (public/images/{100,640,orig}/<photo_id>.jpg).
-Managing created and modified
-
-Future Goals:
-(Need to transcribe and integrate with below)
-
-Get created and modified working
-Namings
-Names
-Multiple namings
-Multiple photos (selected photos)
+Species lists
+Names and namings
 Herbarium records
 Undo history
-
-
-Do we need more than one controller?  Editor and Viewer?  Editor must be logged in,
-viewer's not?
