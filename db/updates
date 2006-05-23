@@ -1,0 +1,10 @@
+ALTER TABLE `images` ADD `created` datetime DEFAULT NULL ;
+ALTER TABLE `images` ADD `modified` datetime DEFAULT NULL ;
+ALTER TABLE `images` ADD `created_temp1` datetime DEFAULT NULL  AFTER `id`;
+UPDATE `images` SET `created_temp1`=`created`;
+ALTER TABLE `images` DROP `created`;
+ALTER TABLE `images` CHANGE `created_temp1` `created` datetime DEFAULT NULL ;
+ALTER TABLE `images` ADD `modified_temp1` datetime DEFAULT NULL  AFTER `created`;
+UPDATE `images` SET `modified_temp1`=`modified`;
+ALTER TABLE `images` DROP `modified`;
+ALTER TABLE `images` CHANGE `modified_temp1` `modified` datetime DEFAULT NULL ;

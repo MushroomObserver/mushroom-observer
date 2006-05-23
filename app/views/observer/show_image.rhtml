@@ -55,3 +55,8 @@ Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.owner) %>
 </td>
 </tr>
 </table>
+
+<p><span class="Date">
+Image created: <%= h(@image.created) %><br/>
+Last modified: <%= h(@image.modified) %>
+</span></p>

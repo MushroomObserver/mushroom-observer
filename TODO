@@ -1,8 +1,12 @@
 Priorities:
-  - License for uploaded images
-  Index by what and who
+  * Add created and modifed to Image
+    Need to update production database.
+  Need a link from Edit Image to Show Image
+  Index by what and who -> Name and Person classes
   Comments for observations and images
   Purpose of Site link
+
+  Line breaks not showing in comments.  Also need way to do italics.
 
   Research general search
   Sorting

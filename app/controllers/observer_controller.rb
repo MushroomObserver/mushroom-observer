@@ -31,6 +31,7 @@ class ObserverController < ApplicationController
   def create_observation
     @observation = Observation.new(params[:observation])
     @observation.created = Time.now
+    @observation.modified = @observation.created
     if @observation.save
       flash[:notice] = 'Observation was successfully created.'
       redirect_to :action => 'edit_observation', :id => @observation
@@ -54,7 +55,6 @@ class ObserverController < ApplicationController
       thumb = params[:thumbnail]
       if thumb
         thumb.each do |index, id|
-          logger.warn(sprintf("+*+*+*+ %s", id))
           @observation.thumb_image_id = id
         end
       end
@@ -108,6 +108,8 @@ class ObserverController < ApplicationController
   def update_image
     @image = Image.find(params[:id])
     if @image.update_attributes(params[:image])
+      @image.modified = Time.now
+      @image.save
       flash[:notice] = 'Image was successfully updated.'
       redirect_to :action => 'show_image', :id => @image
     else
@@ -132,6 +134,8 @@ class ObserverController < ApplicationController
   # add_image.rhtml -> edit_observation.rhtml
   def save_image
     @img = Image.new(params[:image])
+    @img.created = Time.now
+    @img.modified = @img.created
     observation = session[:observation]
     if @img.save
       if @img.save_image
@@ -192,6 +196,8 @@ class ObserverController < ApplicationController
     image = nil
     if imgs == []
       image = Image.new
+      image.created = Time.now
+      image.modified = Time.now
       image.content_type = 'image/jpeg'
       image.title = what
       image.owner = who

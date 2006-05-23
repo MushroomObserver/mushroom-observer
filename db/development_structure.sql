@@ -1,5 +1,7 @@
 CREATE TABLE `images` (
   `id` int(11) unsigned NOT NULL auto_increment,
+  `created` datetime default NULL,
+  `modified` datetime default NULL,
   `content_type` varchar(100) default NULL,
   `title` varchar(100) default NULL,
   `owner` varchar(100) default NULL,
