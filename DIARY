@@ -24,3 +24,104 @@ May 6 - Decided to not use checkboxes for selecting, but rather to think of imag
   connected to particular observations.  Added thumbnails to show/edit_observation.
 May 8 - Add observation list to show_image.
 May 10 - Art class
+
+
+May 11 - When I got home from art class, I worked for a while trying
+to get some radio buttons working.  Went to bed with no answer.
+Played more with this morning, still no joy.  Asked for a friends help
+this morning at work.  He didn't know, but in the process of talking
+through the example I had found on the web, a new possibility occurred
+to me.  Finally cracked it tonight.  I have enough stuff working now
+that it is ready to go up on the web for some initially testing.  I
+have cleaned out all the test data and want to do one more pass
+through it all to make sure everything is working and to fix any
+outstanding wonkiness.  Things are looking good for getting it online
+sometime this weekend.
+
+
+Fri May 12 - I finished the review pass.  The whole thing looks a lot
+better and much more consistent.  I was playing around with the colors
+and had the idea of setting all the colors based on actual colors from
+some of my photos.  Sort of the digital equivalent of mushroom dyeing
+:-).  I'm not going to worry about tweaking the colors for the version
+I'm planning on setting up this week, but I really like the idea for
+the actual release of the site.
+
+I also figured out how to cleanly purge the database and setup an
+automated testing framework.  Next I'm going to figure out how to get
+a bunch of data loaded into the database and then I'll work on putting
+up the site.
+
+
+Sun May 14 - Didn't feel very well this weekend.  Between that and
+Mother's day I only made a little bit more progress.  Started setting
+up some stuff on and for my web server.  Figured out some of what I
+need to load a whole bunch of data I have into the system
+automatically.
+
+
+Tues May 16 - Got SVN repository setup on DreamHost.
+
+
+Weds May 17 - We'll I finally felt well enough last night to work on stuff
+again.  I got something up and running on my webserver, but it still
+has one annoying problem that makes it essentially unusable (unable to
+load CSS file) :-(.  I've been scouring the net for a solution.  I've
+started exchanging email with another person who is using the same
+system on the same hosting service, but so far that hasn't borne any
+fruit.  It looks like I'm going to have to debug this one the hard
+way.  Also talked to Gavin Doughtie at work.  Still haven't figured out
+what's going on.
+
+In art class I created agaricus.css with the idea of having color themes
+based on different mushroom groups.
+
+
+Thurs May 18 - Fixed CSS problem by tweaking the .htaccess.
+Got source into SVN.
+
+Fri May 19 - Finally uploaded the first real image to the alpha internet website.
+Worked on getting svn configured reasonably.
+SVN log entries:
+Symlink approach to dev/prod distinction
+Ignoring log files.
+Added agaricus.css.
+Added development logs to log/.svnignore.
+Change image directory lookup to be handled in config/environments.
+Fixed the production image path.
+Switched save image button to Do It.
+Switched to Agaricus color scheme as the default.
+
+
+Sat May 20
+SVN log entries:
+Separated out themed color CSS stuff from rest of CSS.
+Moved to observer in preference to sightings.  Add more stuff to TODO.
+Added copyright.
+Added link to original image.
+Move image to the left on show image page and got rid of redundant fields.
+Got load_image_directory working as a hack to quickly load my images.
+Tweaked left hand links.
+Removed color on flash notices.
+Added 'Colors provided by ...' note.
+Moved page specific links to just under the banner.
+Updated database definition files.
+Tweak CSS files.
+
+
+Sun May 21 - Got a big set of data uploaded: 710 photos and 557
+observations.  Set out a message to CA Fungi and some mycologists to
+get their feedback.  Polled people for their preference between
+mushroomobserver.org, mushroomsightings.org and mushroomobservers.org.
+Added creative commons links and notice.
+
+
+
+Mon May 22 - Got some great feedback from Darvin.  Added created and
+modifed fields to the Image class.  Added some more images.  Had a
+snaffu with the production database and ended up having to reload the
+data and recreate the changes Darvin suggested.  Got the stats page
+working with more .htaccess magic.
+
+
+Tues May 23 - Added Observations by Name and Images by Title.

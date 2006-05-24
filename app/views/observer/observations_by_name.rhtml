@@ -1,0 +1,9 @@
+<h1>Observations by Name</h1>
+<%
+  for observation in @observations %>
+<%= link_to(sprintf("%s: %s (%s)", observation.what, observation.when, observation.who),
+            :action => 'show_observation', :id => observation.id) %><br/>
+<%
+  end
+%>
+</br>

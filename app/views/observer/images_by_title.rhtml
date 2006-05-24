@@ -1,0 +1,9 @@
+<h1>Images by Title</h1>
+<%
+  for image in @images %>
+<%= link_to(sprintf("%s: %s (%s)", image.title, image.when, image.owner),
+            :action => 'show_image', :id => image.id) %><br/>
+<%
+  end
+%>
+</br>
