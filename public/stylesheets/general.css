@@ -132,6 +132,11 @@ div.progressBar div.background {
     font-size: x-small;
 }
 
+#license-notice {
+    text-align: left;
+    font-size: x-small;
+}
+
 #license {
     padding-top: 3px;
     text-align: center;

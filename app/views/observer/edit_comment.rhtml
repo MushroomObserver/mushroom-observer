@@ -1,0 +1,14 @@
+<%= link_to 'Cancel (Show Comment)', :action => 'show_comment', :id => @comment %>
+
+<h1>Editing Comment on <%= @comment.observation.unique_name %></h1>
+
+<%= start_form_tag :action => 'update_comment', :id => @comment %>
+<center><%= submit_tag 'Save Edits' %></center>
+
+<p><label for="comment_summary">Summary</label><br/>
+<%= text_field 'comment', 'summary'  %></p>
+
+<p><label for="comment_comment">Comment</label><br/>
+<%= text_area 'comment', 'comment', "cols" => 30 %></p>
+
+<%= end_form_tag %>

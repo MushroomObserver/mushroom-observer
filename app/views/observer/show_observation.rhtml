@@ -1,10 +1,11 @@
+<%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %> |
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 
 <h1>Observation: <%= sprintf("%s (%d)", @observation.what, @observation.id) %></h1>
 
 <table cellpadding="10">
 <tr>
-    <td width="80%" valign="top">
+    <td width="75%" valign="top">
         <p>When: <span class="Data"><%= h(@observation.when) %></span></p>
         <p>Where: <span class="Data"><%= h(@observation.where) %></span></p>
         <p>What: <span class="Data"><%= h(@observation.what) %></span></p>
@@ -15,18 +16,22 @@
             'No herbarium specimen'
          end %></span></p>
          <p>Notes:</br><%= h(@observation.notes) %></p>
+      Comments:<br/>
+      <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
+        <%= link_to truncate(sprintf("<p>%s: %s</p>", comment.who, comment.summary), 120),
+                    :action => 'show_comment', :id => comment %><br/>
+      <% end %>
       <p><span class="Date">
       Observation created: <%= h(@observation.created) %><br/>
       Last modified: <%= h(@observation.modified) %>
       </span></p>
     </td>
-    <td valign="top" align="middle">
+    <td valign="top" align="middle" width="25%">
+    <%= link_to 'Add Image', :action => 'add_image', :id => @observation %><br/>
     <% for image in @observation.images %>
-      <p><%=
-link_to('<img src="' + url_for(:action => "img_thumb", :id => image.id) +
+      <p><%= link_to('<img src="' + url_for(:action => "img_thumb", :id => image.id) +
               '"/><br/>' + sprintf("%s (%d)", truncate(image.title, 20), image.id),
-            :action => 'show_image', :id => image.id) %><br/>
-      </p>
+            :action => 'show_image', :id => image.id) %></p>
     <% end %>
     </td>
 </tr>

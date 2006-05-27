@@ -1,3 +1,5 @@
+<%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
+
 <h1>Editing Observation: <%= sprintf("%s (%d)", @observation.what, @observation.id) %></h1>
 
 <%= start_form_tag :action => 'update_observation', :id => @observation %>
@@ -8,7 +10,6 @@
 <tr>
   <%= render :partial => 'form_observations' %>
     <td valign="top">
-<%= link_to 'Add Image', :action => 'add_image', :id => @observation %><br/><br/>
     <% i = 0
        observation = @observation
        for image in @observation.images

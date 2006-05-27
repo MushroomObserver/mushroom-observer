@@ -26,6 +26,56 @@ class ObserverController < ApplicationController
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
 
+  # show_observation.rhtml -> add_comment.rhtml
+  def add_comment
+    @observation = Observation.find(params[:id])
+    session[:observation] = @observation
+    @comment = Comment.new
+  end
+
+  # show_observation.rhtml -> show_comment.rhtml
+  def show_comment
+    @comment = Comment.find(params[:id])
+  end
+
+  # add_comment.rhtml -> save_comment -> add_comment.rhtml
+  def save_comment
+    @comment = Comment.new(params[:comment])
+    @comment.created = Time.now
+    observation = session[:observation]
+    @comment.observation = observation
+    if @comment.save
+      redirect_to(:action => 'show_observation', :id => observation)
+    else
+      render(:action => :add_comment)
+    end
+  end
+
+  # show_comment.rhtml -> edit_comment.rhtml
+  def edit_comment
+    @comment = Comment.find(params[:id])
+  end
+
+  # edit_comment.rhtml -> update_comment -> show_comment.rhtml
+  def update_comment
+    @comment = Comment.find(params[:id])
+    if @comment.update_attributes(params[:comment])
+      @comment.save
+      flash[:notice] = 'Comment was successfully updated.'
+      redirect_to :action => 'show_comment', :id => @comment
+    else
+      render :action => 'edit_comment'
+    end
+  end
+
+  # show_comment.rhtml -> destroy -> show_observation.rhtml
+  def destroy_comment
+    comment = Comment.find(params[:id])
+    id = comment.observation.id
+    comment.destroy
+    redirect_to :action => 'show_observation', :id => id
+  end
+
   # list_observations.rhtml -> show_observation.rhtml
   def show_observation
     @observation = Observation.find(params[:id])
@@ -134,14 +184,14 @@ class ObserverController < ApplicationController
     redirect_to :action => 'list_images'
   end
 
-  # edit_observation.rhtml -> add_image.rhtml
+  # show_observation.rhtml -> add_image.rhtml
   def add_image
     @observation = Observation.find(params[:id])
     session[:observation] = @observation
     @img = Image.new
   end
 
-  # add_image.rhtml -> edit_observation.rhtml
+  # add_image.rhtml -> save_image -> add_image.rhtml
   def save_image
     @img = Image.new(params[:image])
     @img.created = Time.now
@@ -151,11 +201,11 @@ class ObserverController < ApplicationController
       if @img.save_image
 	observation.add_image(@img)
         observation.save
-        redirect_to(:action => 'edit_observation', :id => observation.id)
+        redirect_to(:action => 'add_image', :id => observation)
       else
         logger.error("Unable to save image")
         flash[:notice] = 'Invalid image'
-        redirect_to(:action => 'edit_observation', :id => observation.id)
+        redirect_to(:action => 'add_image', :id => observation)
       end
     else
       render(:action => :add_image)

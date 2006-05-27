@@ -1,15 +1,16 @@
 Priorities:
-  Need a link from Edit Image to Show Image
-  Index by what and who -> Name and Person classes
-  Comments for observations and images
+  - Need a link from Edit Image to Show Image
+  - Reverse sense of herbarium tag in the list interface
+  Comments for observations
+    Observation comment: id, created, title, comment, who, observation_id
+    * Add Comment
+    Show Observation
+    Comment List
   Purpose of Site link
 
   Line breaks not showing in comments.  Also need way to do italics.
 
-  Research general search
-  Sorting
-  Way to find new comments
-  Previous/Next (relative to search)
+  Users
 
   More color themes: Amanita, Hygrocybe, ...
   More notes on my images
@@ -19,13 +20,18 @@ Priorities:
   Logic for resetting image directory for testing
   More tests
 
+  Research general search
+  Sorting
+  Way to find new comments
+  Previous/Next (relative to search)
+
   Get rid of duplicate images
   Repurpose get_image for:
     Option for uploading an image directly which also creates a skeleton observation
   Deal with flickering images
 
-Users
 Species lists
 Names and namings
 Herbarium records
 Undo history
+Comments for images?

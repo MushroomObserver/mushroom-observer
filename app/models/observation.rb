@@ -1,6 +1,7 @@
 class Observation < ActiveRecord::Base
   has_and_belongs_to_many :images
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
+  has_many :comments
 
   validates_presence_of :who, :where
 

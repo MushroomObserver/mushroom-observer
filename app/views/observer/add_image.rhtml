@@ -1,16 +1,17 @@
+<%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
+<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+
 <h1>Upload Image for <%= @observation.unique_name %></h1>
 
 <%= error_messages_for("img") %>
 
-<div id="copyright">
-Note: By uploading images to this site you are indicating that you
-have permission to place this image under a <a
-href="http://creativecommons.org/licenses/by-nc-sa/2.5/">Creative
-Commons Attribution-NonCommercial-ShareAlike 2.5 license</a> as these
-are the conditions under which this site will license this image to
-it's users.  In addition, you give permission for this site to use
-this image for limited commerical purposes to support this site in a
-manner similar to a non-profit corporation.<br/>
+<div id="license-notice">
+Please only upload images that you created or which you own the copyright of.<br/>
+By uploading images you are giving us permission to distribute this image to other
+users (<a
+href="http://creativecommons.org/licenses/by-nc-sa/2.5/">legalese</a>).<br/>
+You are also giving us permission to display this image	along side advertisements
+or other fund-raising tools that be used to support this site.<br/></br/>
 </div>
 
 <%= form_tag({:action => 'save_image'}, :multipart => true) %>
@@ -18,7 +19,7 @@ manner similar to a non-profit corporation.<br/>
 
 <table cellpadding="10">
 <tr>
-<td>
+<td valign="top">
 
 <p><label for="image_image">Upload your picture</label><br/>
 <%= file_field("image", "image") %></p>
@@ -32,9 +33,18 @@ manner similar to a non-profit corporation.<br/>
 <p><label for="image_when">When</label><br/>
 <%= date_select("image", "when", :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
 </td>
-<td>
+<td valign="top">
 <p><label for="image_notes">Notes</label><br/>
 <%= text_area("image", "notes") %></p>
+</td>
+<td>
+    <% for image in @observation.images %>
+      <p><%=
+link_to('<img src="' + url_for(:action => "img_thumb", :id => image.id) +
+              '"/><br/>' + sprintf("%s (%d)", truncate(image.title, 20), image.id),
+            :action => 'show_image', :id => image.id) %><br/>
+      </p>
+    <% end %>
 </td>
 </table>
 
