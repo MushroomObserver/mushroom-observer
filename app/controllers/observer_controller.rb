@@ -1,3 +1,6 @@
+# Copyright (c) 2006 Nathan Wilson
+# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
+
 require 'find'
 require 'ftools'
 

@@ -1,37 +1,41 @@
-Priorities:
-  - Need a link from Edit Image to Show Image
-  - Reverse sense of herbarium tag in the list interface
-  Comments for observations
-    Observation comment: id, created, title, comment, who, observation_id
-    * Add Comment
-    Show Observation
-    Comment List
-  Purpose of Site link
+Line breaks not showing in comments.  Also need way to do italics.
 
-  Line breaks not showing in comments.  Also need way to do italics.
+Users - Adding observations, adding comments and editing should only be done
+        by known users.
 
-  Users
+More color themes: Amanita, Hygrocybe, ...
 
-  More color themes: Amanita, Hygrocybe, ...
-  More notes on my images
+Write more notes on my images
 
-  Hook where up to Google Maps
+Hook 'where' up to Google Maps
 
-  Logic for resetting image directory for testing
-  More tests
+Logic for resetting image directory for testing
+More rails-style tests
 
-  Research general search
-  Sorting
-  Way to find new comments
-  Previous/Next (relative to search)
+General search mechanism
+Sorting
+Way to find new comments (RSS feeds?)
+Previous/Next (relative to search or index)
 
-  Get rid of duplicate images
-  Repurpose get_image for:
-    Option for uploading an image directly which also creates a skeleton observation
-  Deal with flickering images
+Check for duplicate images
 
-Species lists
-Names and namings
-Herbarium records
-Undo history
-Comments for images?
+Provide the ability to create an observation as a side effect of uploading an image
+  rather than requiring the observation to exist before allowing image upload.
+
+Local version of sight seems to having flickering images.
+
+Site news page - Need a general blog for the site
+
+Comments for images - Decide if these are well motivated or if the comments on
+  observations is enough.
+
+Species lists - Quick way to create lists of species from a foray and generate all
+  the implied observations.
+
+Names - Replace the 'what' field with an association with a list of 'Name' objects.
+  Name objects would allow for things like author citations, synonymy, references etc.
+
+Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
+
+Herbarium records - Provide a standard way to describe herbarium collections.
+

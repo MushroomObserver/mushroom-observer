@@ -1,3 +1,5 @@
+Copyright (c) 2006 Nathan Wilson
+
 March 20, 2006 - Installed Ruby and mysql
 March 27 - Started going through blog demo
 March 28 - Started using CocoaMySQL.  Finished blog demo.
@@ -116,7 +118,6 @@ mushroomobserver.org, mushroomsightings.org and mushroomobservers.org.
 Added creative commons links and notice.
 
 
-
 Mon May 22 - Got some great feedback from Darvin.  Added created and
 modifed fields to the Image class.  Added some more images.  Had a
 snaffu with the production database and ended up having to reload the
@@ -124,4 +125,17 @@ data and recreate the changes Darvin suggested.  Got the stats page
 working with more .htaccess magic.
 
 
-Tues May 23 - Added Observations by Name and Images by Title.
+Tue May 23 - Added Observations by Name and Images by Title.
+
+
+Wed May 24 - Adjusted navigation around add image to make it more
+intuitive.  Started working on comments for observations.  Reversed
+sense of herbarium indicator in list observations page.
+
+
+Fri May 26 - Deployed comments for observations
+
+
+Sat May 27 - Worked on getting locations and notes recorded for some of
+the bulk created observations.  Create intro.rhtml.  Added LICENSE and
+put some copyrights and license references into the source.
