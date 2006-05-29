@@ -2,8 +2,8 @@
 <%= link_to 'Edit', :action => 'edit_comment', :id => @comment %> |
 <%= link_to 'Destroy', :action => 'destroy_comment', :id => @comment %>
 
-<h1>Comment on <%= @comment.observation.unique_name %></h1>
+<h1>Comment on <%= h @comment.observation.unique_name %></h1>
 <p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
 <p>By: <%= @comment.who %></p>
 <p>Summary: <%= @comment.summary %></p>
-<p>Comment: <%= @comment.comment %></p>
+<p>Comment: <%= textilize @comment.comment %></p>

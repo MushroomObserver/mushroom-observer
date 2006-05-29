@@ -1,6 +1,6 @@
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<h1>Editing Observation: <%= sprintf("%s (%d)", @observation.what, @observation.id) %></h1>
+<h1>Editing Observation: <%= h @observation.unique_name %></h1>
 
 <%= start_form_tag :action => 'update_observation', :id => @observation %>
 <br/>
@@ -18,7 +18,7 @@
 	<%= radio_button("observation", 'thumb_image_id', image.id) %>
        </td><td align="center">
 	<img src='<%= url_for(:action => "img_thumb", :id => image.id) %>'><br/>
-         <%= sprintf("%s (%d)", truncate(image.title, 20), image.id) %>
+         <%= h(image.unique_name) %>
        </td></tr></table>
     <% end %>
     </td>

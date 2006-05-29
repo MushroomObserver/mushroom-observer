@@ -1,6 +1,6 @@
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<h1>Add Comment to <%= @observation.unique_name %></h1>
+<h1>Add Comment to <%= h @observation.unique_name %></h1>
 
 <%= error_messages_for("comment") %>
 

@@ -11,9 +11,9 @@
       <img src="<%= url_for(:action => "img_thumb", :id => image.id) %>"/>
     </td>
     <td width="80%" valign="middle">
-      <span class="ListWhen"><%= h(image.when) %>: </span>
-      <span class="ListWhat"><%= h(image.unique_name) %></span><br/>
-      <%= h(image.owner) + ': ' + h(truncate(image.notes, 80)) %>
+      <span class="ListWhen"><%= image.when %>: </span>
+      <span class="ListWhat"><%= h image.unique_name %></span><br/>
+      <span class="ListWho"><%= truncate(h(image.owner), MAX_WHO_LENGTH) %></span>
     </td>
     <td class="ListActions">
       <%= link_to 'Show', :action => 'show_image', :id => image %><br/>

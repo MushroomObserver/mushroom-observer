@@ -15,7 +15,7 @@ class Observation < ActiveRecord::Base
   def unique_name
     what = self.what
     if what
-      sprintf("%s (%d)", what, self.id)
+      sprintf("%s (%d)", what[0..(MAX_FIELD_LENGTH-1)], self.id)
     else
       sprintf("Observation %d", self.id)
     end

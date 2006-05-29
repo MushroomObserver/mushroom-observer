@@ -1,7 +1,7 @@
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 
-<h1>Upload Image for <%= @observation.unique_name %></h1>
+<h1>Upload Image for <%= h @observation.unique_name %></h1>
 
 <%= error_messages_for("img") %>
 
@@ -41,7 +41,7 @@ or other fund-raising tools that be used to support this site.<br/></br/>
     <% for image in @observation.images %>
       <p><%=
 link_to('<img src="' + url_for(:action => "img_thumb", :id => image.id) +
-              '"/><br/>' + sprintf("%s (%d)", truncate(image.title, 20), image.id),
+              '"/><br/>' + h(image.unique_name),
             :action => 'show_image', :id => image.id) %><br/>
       </p>
     <% end %>

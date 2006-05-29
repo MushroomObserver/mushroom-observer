@@ -1,7 +1,8 @@
 <h1>Observations by Name</h1>
 <%
   for observation in @observations %>
-<%= link_to(sprintf("%s: %s (%s)", observation.what, observation.when, observation.who),
+<%= link_to(sprintf("%s %s %s", h(observation.unique_name), observation.when,
+                    truncate(h(observation.who), MAX_WHO_LENGTH)),
             :action => 'show_observation', :id => observation.id) %><br/>
 <%
   end

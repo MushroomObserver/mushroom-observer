@@ -1,7 +1,7 @@
 <%= link_to 'Show Full Size', :action => 'show_original', :id => @image %> | 
 <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
 
-<h1>Image: <%= sprintf("%s (%d)", @image.title, @image.id) %></h1>
+<h1>Image: <%= h @image.unique_name %></h1>
 <div id="copyright">
 Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.owner) %>
 </div>
@@ -42,21 +42,20 @@ Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.owner) %>
 <p>Observations<br/>
 <span class="Data">
     <% for observation in @image.observations %>
-      <%= link_to(sprintf("%s (%d)", truncate(observation.what, 20),
-                                      observation.id),
-                          :action => 'show_observation', :id => observation.id) %><br/>
+      <%= link_to(h(observation.unique_name),
+                  :action => 'show_observation', :id => observation.id) %><br/>
     <% end %>
 </span>
 </p>
 
 <p>Notes:<br/>
-<%= @image.notes %></p>
+<%= textilize @image.notes %></p>
 
 </td>
 </tr>
 </table>
 
 <p><span class="Date">
-Image created: <%= h(@image.created) %><br/>
-Last modified: <%= h(@image.modified) %>
+Image created: <%= @image.created %><br/>
+Last modified: <%= @image.modified %>
 </span></p>

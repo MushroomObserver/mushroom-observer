@@ -11,7 +11,7 @@ class Image < ActiveRecord::Base
   def unique_name
     title = self.title
     if title
-      sprintf("%s (%d)", title, self.id)
+      sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
     else
       sprintf("Image %d", self.id)
     end

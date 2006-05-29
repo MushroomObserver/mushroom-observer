@@ -8,6 +8,9 @@ ENV['RAILS_ENV'] = 'production'
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 
+# Add a shared file for consts that are not configuration dependent
+require File.join(File.dirname(__FILE__), 'consts')
+
 Rails::Initializer.run do |config|
   # Settings in config/environments/* take precedence those specified here
   

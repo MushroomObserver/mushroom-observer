@@ -15,11 +15,11 @@
       %><br/>
     </td>
     <td width="80%" valign="middle">
-      <span class="ListWhen"><%= h(observation.when) %>: </span>
-      <span class="ListWhere"><%= h(observation.where) %></span><br/>
+      <span class="ListWhen"><%= observation.when %>: </span>
+      <span class="ListLatin"><%= h observation.unique_name %></span><br/>
+      <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span><br/>
+      <span class="ListWho"><%= truncate(h(observation.who), MAX_WHO_LENGTH) %></span>
       <span class="ListSpecimen"><%= '[H]' if observation.specimen %></span>
-      <span class="ListLatin"><%= h(observation.what) %></span><br/>
-      <%= h(observation.who) + ': ' + h(truncate(observation.notes, 80)) %>
     </td>
     <td class="ListActions">
       <%= link_to 'Show', :action => 'show_observation', :id => observation %><br/>

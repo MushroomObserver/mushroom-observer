@@ -1,7 +1,7 @@
 <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %> |
 <%= link_to 'Show Normal Size', :action => 'show_image', :id => @image %>
 
-<h1>Image: <%= sprintf("%s (%d)", @image.title, @image.id) %></h1>
+<h1>Image: <%= h @image.unique_name %></h1>
 <div id="copyright">Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.owner) %></div>
 
 <%= link_to(sprintf('<img src="' + url_for(:action => "original_image", :id => @image.id) + '"/>'),

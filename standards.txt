@@ -1,0 +1,6 @@
+Standards:
+
+Use textilize() on notes.
+Use truncate(h(str), size) on short arbitrary fields
+Don't use anything on fields of fixed types like dates
+Use h(str) on arbitrary, but size limited strings like Observation.unique_name.

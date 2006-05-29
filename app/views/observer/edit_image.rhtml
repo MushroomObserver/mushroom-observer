@@ -1,6 +1,6 @@
 <%= link_to 'Cancel (Show Image)', :action => 'show_image', :id => @image %>
 
-<h1>Editing Image: <%= sprintf("%s (%d)", @image.title, @image.id) %></h1>
+<h1>Editing Image: <%= h @image.unique_name %></h1>
 
 <%= start_form_tag :action => 'update_image', :id => @image %>
 <center><%= submit_tag 'Save Edits' %></center>
