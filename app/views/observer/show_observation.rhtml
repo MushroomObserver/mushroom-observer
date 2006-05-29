@@ -20,7 +20,7 @@
       <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
         <%= link_to sprintf("%s: %s", truncate(h(comment.who), MAX_WHO_LENGTH),
                             truncate(h(comment.summary), MAX_FIELD_LENGTH)),
-                    :action => 'show_comment', :id => comment %>
+                    :action => 'show_comment', :id => comment %><br/>
       <% end %>
       <p><span class="Date">
       Observation created: <%= @observation.created %><br/>
