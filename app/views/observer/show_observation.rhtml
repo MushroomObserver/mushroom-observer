@@ -1,5 +1,6 @@
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %> |
-<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %> |
+<%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
 
 <h1>Observation: <%= h @observation.unique_name %></h1>
 
@@ -27,13 +28,14 @@
       Last modified: <%= @observation.modified %>
       </span></p>
     </td>
-    <td valign="top" align="middle" width="25%">
-    <%= link_to 'Add Image', :action => 'add_image', :id => @observation %><br/>
+    <td valign="top" width="25%">
+	<center>
     <% for image in @observation.images %>
       <p><%= link_to('<img src="' + url_for(:action => "img_thumb", :id => image.id) +
               '"/><br/>' + h(image.unique_name),
             :action => 'show_image', :id => image.id) %></p>
     <% end %>
+	</center>
     </td>
 </tr>
 </table>

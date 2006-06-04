@@ -7,7 +7,7 @@ class Image < ActiveRecord::Base
 
   validates_format_of :content_type, :with => /^image/,
            :message => "--- you can only upload images"
-
+  
   def unique_name
     title = self.title
     if title

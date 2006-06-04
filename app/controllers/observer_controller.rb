@@ -187,31 +187,42 @@ class ObserverController < ApplicationController
     redirect_to :action => 'list_images'
   end
 
-  # show_observation.rhtml -> add_image.rhtml
-  def add_image
+  # show_observation.rhtml -> manage_images.rhtml
+  def manage_images
     @observation = Observation.find(params[:id])
     session[:observation] = @observation
     @img = Image.new
   end
-
-  # add_image.rhtml -> save_image -> add_image.rhtml
+  
+  # manage_images.rhtml -> save_image -> manage_images.rhtml
   def save_image
+    # Upload image
     @img = Image.new(params[:image])
     @img.created = Time.now
     @img.modified = @img.created
     observation = session[:observation]
     if @img.save
       if @img.save_image
-	observation.add_image(@img)
+        observation.add_image(@img)
         observation.save
-        redirect_to(:action => 'add_image', :id => observation)
       else
         logger.error("Unable to save image")
         flash[:notice] = 'Invalid image'
-        redirect_to(:action => 'add_image', :id => observation)
       end
-    else
-      render(:action => :add_image)
+    end
+    
+    # Or reuse image by id
+    observation.add_image_by_id(params[:observation][:idstr].to_i)
+    redirect_to(:action => 'manage_images', :id => observation)
+    
+    # Or delete images
+    images = params[:selected]
+    if images
+      images.each do |image_id, do_it|
+        if do_it == 'yes'
+          observation.remove_image_by_id(image_id)
+        end
+      end
     end
   end
 

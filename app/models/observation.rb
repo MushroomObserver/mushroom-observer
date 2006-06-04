@@ -30,6 +30,36 @@ class Observation < ActiveRecord::Base
     end
   end
 
+  def add_image_by_id(id)
+    if id != 0
+      img = Image.find(id)
+      if img
+        self.add_image(img)
+      end
+    end
+  end
+
+  def remove_image_by_id(id)
+    if id != 0
+      img = Image.find(id)
+      if img
+        img.observations.delete(self)
+      end
+    end
+  end
+
+  def idstr
+    ''
+  end
+  
+  def idstr=(id_field)
+    id = id_field.to_i
+    img = Image.find(:id => id)
+    unless img
+      errors.add(:notes, "unable to find a corresponding image")
+    end
+  end
+
   protected
   def validate
     errors.add(:notes,

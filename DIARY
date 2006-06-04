@@ -139,3 +139,10 @@ Fri May 26 - Deployed comments for observations
 Sat May 27 - Worked on getting locations and notes recorded for some of
 the bulk created observations.  Create intro.rhtml.  Added LICENSE and
 put some copyrights and license references into the source.
+
+Mon May 28 - Got textilize and did a general string handling cleanup pass.
+
+Tues May 29 - Added reuse_image
+
+Fri June 2 - Merged add_image and reuse_image into manage_images and added
+section section.
