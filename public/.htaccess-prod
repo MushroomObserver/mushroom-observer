@@ -1,3 +1,11 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteCond %{REQUEST_URI} ^/stats/(.*)$ [OR]
+RewriteCond %{REQUEST_URI} ^/failed_auth.html$
+RewriteRule ^.*$ - [L]
+</IfModule> 
+
 # General Apache options
 AddHandler fastcgi-script .fcgi
 AddHandler cgi-script .cgi
@@ -8,6 +16,9 @@ Options +FollowSymLinks +ExecCGI
 # 
 # Example:
 RewriteCond %{REQUEST_URI} ^/stylesheets.*
+RewriteRule .* - [L]
+
+RewriteCond %{REQUEST_URI} ^/stats.html
 RewriteRule .* - [L]
 
 # Redirect all requests not available on the filesystem to Rails
