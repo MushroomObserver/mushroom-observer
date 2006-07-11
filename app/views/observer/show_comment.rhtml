@@ -1,9 +1,11 @@
-<%= link_to 'Back', :action => 'show_observation', :id => @comment.observation %> |
-<%= link_to 'Edit', :action => 'edit_comment', :id => @comment %> |
-<%= link_to 'Destroy', :action => 'destroy_comment', :id => @comment %>
+<%= link_to 'Back', :action => 'show_observation', :id => @comment.observation %>
+<% if check_permission(@comment.user_id) %>
+	| <%= link_to 'Edit', :action => 'edit_comment', :id => @comment %>
+	| <%= link_to 'Destroy', :action => 'destroy_comment', :id => @comment %>
+<% end %>
 
-<h1>Comment on <%= h @comment.observation.unique_name %></h1>
+<div id="Title">Comment on <%= h @comment.observation.unique_name %></div>
 <p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
-<p>By: <%= @comment.who %></p>
+<p>By: <%= @comment.user.unique_name %></p>
 <p>Summary: <%= @comment.summary %></p>
 <p>Comment: <%= textilize @comment.comment %></p>

@@ -1,8 +1,10 @@
-<%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %> |
-<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %> |
-<%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
+<%= link_to 'Add Comment', :action => 'add_comment' %>
+<% if check_permission(@observation.user_id) %>
+	| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+	| <%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
+<% end %>
 
-<h1>Observation: <%= h @observation.unique_name %></h1>
+<h2>Observation: <%= h @observation.unique_name %></h2>
 
 <table cellpadding="10">
 <tr>
@@ -10,7 +12,7 @@
         <p>When: <span class="Data"><%= @observation.when %></span></p>
         <p>Where: <span class="Data"><%= h @observation.where %></span></p>
         <p>What: <span class="Data"><%= h @observation.what %></span></p>
-        <p>Who: <span class="Data"><%= h @observation.who %></span></p>
+        <p>Who: <span class="Data"><%= h @observation.user.unique_name %></span></p>
         <p><span class="Data"><%= if @observation.specimen
             'Herbarium specimen available'
          else
@@ -19,7 +21,7 @@
          <p>Notes:</br><%= textilize @observation.notes %></p>
       Comments:<br/>
       <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
-        <%= link_to sprintf("%s: %s", truncate(h(comment.who), MAX_WHO_LENGTH),
+        <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_name), MAX_WHO_LENGTH),
                             truncate(h(comment.summary), MAX_FIELD_LENGTH)),
                     :action => 'show_comment', :id => comment %><br/>
       <% end %>

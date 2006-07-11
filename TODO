@@ -1,7 +1,34 @@
-Users - Adding observations, adding comments and editing should only be done
-        by known users.
+- Discussion of color themes:
+  - Finish discussion of Agaricus theme
 
-More color themes: Amanita, Hygrocybe, ...
+Update ms.collectivesource.com
+  Database updates:
+    Dump current database
+    Convert to migrations?
+  Code
+
+More color themes: Cantharellaceae, Hygrocybe, Boletus
+
+Comments:
+  Most Recent (list_comments)
+
+Lists:
+  New
+  Most Recent
+  By Title
+    Edit - Allows add new/add by id/remove
+	Species lists - Quick way to create lists of species from a foray and generate all
+	  the implied observations.
+
+Next/Previous for observations and images
+
+Improve performance (are image coming from direct URL or is a load happening?  Number of DB queries?)
+Performance issues: Why is the table images hit twice for each time during the creation of list_observations?
+
+Register mushroomobserver.org
+
+First public release
+
 
 Write more notes on my images
 
@@ -15,20 +42,17 @@ Sorting
 Way to find new comments (RSS feeds?)
 Previous/Next (relative to search or index)
 
+confirming email when creating an account
+mailing a new password for dealing with lost passwords
+
 Check for duplicate images
 
 Provide the ability to create an observation as a side effect of uploading an image
   rather than requiring the observation to exist before allowing image upload.
 
-Local version of sight seems to having flickering images.
+Local version of site seems to having flickering images.
 
 Site news page - Need a general blog for the site
-
-Comments for images - Decide if these are well motivated or if the comments on
-  observations is enough.
-
-Species lists - Quick way to create lists of species from a foray and generate all
-  the implied observations.
 
 Names - Replace the 'what' field with an association with a list of 'Name' objects.
   Name objects would allow for things like author citations, synonymy, references etc.

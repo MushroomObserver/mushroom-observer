@@ -1,7 +1,7 @@
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 
-<h1>Upload Image for <%= h @observation.unique_name %></h1>
+<div id="Title">Upload Image for <%= h @observation.unique_name %></div>
 
 <%= error_messages_for("img") %>
 
@@ -25,9 +25,6 @@ or other fund-raising tools that be used to support this site.<br/></br/>
 
 			<p><label for="image_title">Title</label><br/>
 			<%= text_field("image", "title") %></p>
-
-			<p><label for="image_owner">Owner</label><br/>
-			<%= text_field("image", "owner") %></p>
 
 			<p><label for="image_when">When</label><br/>
 			<%= date_select("image", "when", :start_year => Time.now.year-20,

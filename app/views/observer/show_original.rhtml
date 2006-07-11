@@ -1,8 +1,10 @@
-<%= link_to 'Edit Image', :action => 'edit_image', :id => @image %> |
 <%= link_to 'Show Normal Size', :action => 'show_image', :id => @image %>
+<% if check_permission(@image.user_id) %>
+	| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+<% end %>
 
-<h1>Image: <%= h @image.unique_name %></h1>
-<div id="copyright">Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.owner) %></div>
+<div id="Title">Image: <%= h @image.unique_name %></div>
+<div id="copyright">Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %></div>
 
 <%= link_to(sprintf('<img src="' + url_for(:action => "original_image", :id => @image.id) + '"/>'),
             :action => 'show_image', :id => @image.id) %>

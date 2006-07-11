@@ -1,6 +1,6 @@
 <%= link_to 'Cancel (Show Comment)', :action => 'show_comment', :id => @comment %>
 
-<h1>Editing Comment on <%= h @comment.observation.unique_name %></h1>
+<div id="Title">Editing Comment on <%= h @comment.observation.unique_name %></div>
 
 <%= start_form_tag :action => 'update_comment', :id => @comment %>
 <center><%= submit_tag 'Save Edits' %></center>

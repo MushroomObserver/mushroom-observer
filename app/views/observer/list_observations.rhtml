@@ -1,4 +1,4 @@
-<h1>Observations</h1>
+<div id="Title">Observations</div>
 <table cellpadding="5" cellspacing="0">
   <%
      odd_or_even = 0
@@ -14,23 +14,24 @@
           end
       %><br/>
     </td>
-    <td width="80%" valign="middle">
-      <span class="ListWhen"><%= observation.when %>: </span>
-      <span class="ListLatin"><%= h observation.unique_name %></span><br/>
+    <td width="100%" valign="middle">
+	  <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListLatin">%s</span><br/>',
+	                      observation.when, h(observation.unique_name)),
+	              :action => 'show_observation', :id => observation.id) %>
       <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span><br/>
-      <span class="ListWho"><%= truncate(h(observation.who), MAX_WHO_LENGTH) %></span>
+      <span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
       <span class="ListSpecimen"><%= '[H]' if observation.specimen %></span>
     </td>
-    <td class="ListActions">
-      <%= link_to 'Show', :action => 'show_observation', :id => observation %><br/>
-      <%= link_to 'Edit', :action => 'edit_observation', :id => observation %><br/>
-      <%= link_to 'Destroy', { :action => 'destroy_observation', :id => observation },
-                               :confirm => "Are you sure?" %>
+    <td valign='middle' class="ListActions">
+	  <% if check_permission(observation.user_id) %>
+	      <%= link_to 'Edit', :action => 'edit_observation', :id => observation %><br/>
+	      <%= link_to 'Destroy', { :action => 'destroy_observation', :id => observation },
+	                               :confirm => "Are you sure?" %>
+	  <% end %>
     </td>
   </tr>
   <% end %>
 </table>
-
 <%= if @observation_pages.current.previous
       link_to("Previous page", { :page => @observation_pages.current.previous })
     end

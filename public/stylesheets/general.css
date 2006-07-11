@@ -110,7 +110,7 @@ div.progressBar div.background {
 }
 
 .ListActions {
-    font-size: x-small;
+    font-size: small;
     text-align: right;
     padding-left: lem;
 }
@@ -144,6 +144,9 @@ div.progressBar div.background {
     font-size: x-small;
 }
 
-H1 {
+#Title {
+	padding-top: 10px;
+	padding-bottom: 10px;
     text-align: center;
+	font-size: 30px;
 }

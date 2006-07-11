@@ -4,5 +4,8 @@
 class Comment < ActiveRecord::Base
 
   belongs_to :observation
+  belongs_to :user
 
+  protected
+  validates_presence_of :summary, :user
 end

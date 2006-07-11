@@ -1,0 +1,24 @@
+<%= start_form_tag :action=> "login" %>
+
+<div title="Account login" id="loginform" class="form">
+    <h3>Please login</h3>
+    
+    <% if @message %>
+      <div id="message"><%= @message %></div>
+    <% end %>
+
+    <label for="user_login">Login:</label><br/>
+    <input type="text" name="user_login" id="user_login" size="30" value=""/><br/><br/>
+
+    <label for="user_password">Password:</label><br/>
+    <input type="password" name="user_password" id="user_password" size="30"/><br/><br/>
+
+    <input type="submit" name="login" value="Login &#187;" class="primary" />
+	<br/><br/>
+Want to change your password?  Send mail to nathan at collectivesource.com.<br/>
+An automated mechanism for managing your password through your email account is planned, but has not yet been implemented.
+
+</div>
+
+<%= end_form_tag %>
+

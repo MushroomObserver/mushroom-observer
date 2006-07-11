@@ -5,10 +5,7 @@
 <p><label for="observation_when">When</label><br/>
 <%= date_select 'observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
 
-<p><label for="observation_who"><b>Who</b> (required)</label><br/>
-<%= text_field 'observation', 'who'  %></p>
-
-<p><label for="observation_where"><b>Where</b> (required)</label><br/>
+<p><label for="observation_where">Where (required)</label><br/>
 <%= text_field 'observation', 'where'  %></p>
 
 <p><label for="observation_what">What</label><br/>

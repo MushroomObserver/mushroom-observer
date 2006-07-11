@@ -1,9 +1,11 @@
-<%= link_to 'Show Full Size', :action => 'show_original', :id => @image %> | 
-<%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+<%= link_to 'Show Full Size', :action => 'show_original', :id => @image %>
+<% if check_permission(@image.user_id) %>
+	| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+<% end %>
 
-<h1>Image: <%= h @image.unique_name %></h1>
+<div id="Title">Image: <%= h @image.unique_name %></div>
 <div id="copyright">
-Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.owner) %>
+Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %>
 </div>
 
 <table cellpadding="10">

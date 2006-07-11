@@ -4,9 +4,6 @@
 <p><label for="image_title">Title</label><br/>
 <%= text_field 'image', 'title'  %></p>
 
-<p><label for="image_owner">Owner</label><br/>
-<%= text_field 'image', 'owner'  %></p>
-
 <p><label for="image_when">When</label><br/>
 <%= date_select 'image', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
 

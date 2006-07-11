@@ -4,10 +4,8 @@
 class Image < ActiveRecord::Base
   has_and_belongs_to_many :observations
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
+  belongs_to :user
 
-  validates_format_of :content_type, :with => /^image/,
-           :message => "--- you can only upload images"
-  
   def unique_name
     title = self.title
     if title
@@ -131,4 +129,10 @@ class Image < ActiveRecord::Base
     name = File.basename(file_name)
     name.gsub(/[^\w._-]/, '')
   end
+
+  validates_format_of :content_type, :with => /^image/,
+           :message => "--- you can only upload images"
+
+  validates_presence_of :user
+
 end

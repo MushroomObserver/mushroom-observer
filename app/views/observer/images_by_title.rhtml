@@ -1,8 +1,8 @@
-<h1>Images by Title</h1>
+<div id="Title">Images by Title</div>
 <%
   for image in @images %>
 <%= link_to(sprintf("%s %s %s", h(image.unique_name), image.when,
-                    truncate(h(image.owner), MAX_WHO_LENGTH)),
+                    truncate(h(image.user.unique_name), MAX_WHO_LENGTH)),
             :action => 'show_image', :id => image.id) %><br/>
 <%
   end

@@ -1,0 +1,29 @@
+<div id="Title">Color Themes</div>
+
+<p>
+	<b>General Concept:</b>
+	The Mushroom Observer website provides a number of color themes
+	based on different groups of mushrooms.  By default each page
+	gets a randomly selected theme.  However, a user can choose to
+	use a particular theme throughout the site by selecting the theme
+	on the user preference page.
+</p>
+
+<p>
+	The idea of using mushrooms for color follows in the
+	tradition of using mushrooms to dye fabrics.  Each color in a theme
+	was pulled from a photograph included in the site from the given
+	group.  The colors attempt to express the characteristic colors of
+	the group.  In a few cases, the images were adjusted using an automatic
+	color balance operation in order to get a more characteristic color.
+</p>
+
+<p>
+	The following links describe each of the available themes including links
+	to the images the colors were extracted from:
+</p>
+<p>
+	<% for name in CSS %>
+		&nbsp;&nbsp;<%= link_to(name, :action => name) %><br/>
+	<% end %>
+</p>

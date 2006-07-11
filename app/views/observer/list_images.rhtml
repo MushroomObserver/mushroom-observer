@@ -1,4 +1,4 @@
-<h1>Images</h1>
+<div id="Title">Images</div>
 
 <table  cellpadding="5" cellspacing="0">
   <%
@@ -8,18 +8,21 @@
      %>
   <tr valign="top" class="ListLine<%= odd_or_even %>">
     <td width=110 height=110 align="center" valign="middle">
-      <img src="<%= url_for(:action => "img_thumb", :id => image.id) %>"/>
+		<%= link_to sprintf('<img border=0 src="%s"/>', url_for(:action => "img_thumb", :id => image.id)),
+		            :action => 'show_image', :id => image %>
     </td>
-    <td width="80%" valign="middle">
-      <span class="ListWhen"><%= image.when %>: </span>
-      <span class="ListWhat"><%= h image.unique_name %></span><br/>
-      <span class="ListWho"><%= truncate(h(image.owner), MAX_WHO_LENGTH) %></span>
+    <td width="100%" valign="middle">
+	  <%= link_to sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span>',
+	                      image.when, h(image.unique_name)),
+	              :action => 'show_image', :id => image %><br/>
+      <span class="ListWho"><%= truncate(h(image.user.unique_name), MAX_WHO_LENGTH) %></span>
     </td>
-    <td class="ListActions">
-      <%= link_to 'Show', :action => 'show_image', :id => image %><br/>
-      <%= link_to 'Edit', :action => 'edit_image', :id => image %><br/>
-      <%= link_to 'Destroy', { :action => 'destroy_image', :id => image },
-                               :confirm => "Are you sure?" %>
+    <td valign="middle" class="ListActions">
+	  <% if check_permission(image.user_id) %>
+	      <%= link_to 'Edit', :action => 'edit_image', :id => image %><br/>
+	      <%= link_to 'Destroy', { :action => 'destroy_image', :id => image },
+	                               :confirm => "Are you sure?" %>
+	  <% end %>
     </td>
   </tr>
   <% end %>

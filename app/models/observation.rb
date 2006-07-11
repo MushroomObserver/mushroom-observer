@@ -5,8 +5,7 @@ class Observation < ActiveRecord::Base
   has_and_belongs_to_many :images
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   has_many :comments
-
-  validates_presence_of :who, :where
+  belongs_to :user
 
   def touch
     @modified = Time.new
@@ -44,6 +43,19 @@ class Observation < ActiveRecord::Base
       img = Image.find(id)
       if img
         img.observations.delete(self)
+        logger.warn(sprintf("ids: %d, %d", self.thumb_image_id, id))
+        if self.thumb_image_id == id.to_i
+          if self.images != []
+            logger.warn('more images')
+            self.thumb_image = self.images[0]
+          else
+            logger.warn('no remaining images')
+            self.thumb_image_id = nil
+          end
+          self.save
+        else
+          logger.warn('not equal')
+        end
       end
     end
   end
@@ -72,4 +84,7 @@ class Observation < ActiveRecord::Base
     find(:all,
          :order => "'when' desc")
   end
+
+  validates_presence_of :user, :where
+
 end

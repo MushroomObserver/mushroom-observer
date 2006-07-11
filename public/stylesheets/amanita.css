@@ -1,0 +1,64 @@
+phalloides { dark-cap: #787133; color: #e6edd5; light-cap: #dfe4bc; middle-cap: #beb977; }
+calyptroderma-spring { background-color: #ebcc79; color: #f9f2e0; }
+calyptroderma-fall { dark-cap: #954c23; volva: #ebe4de; light-cap: #f5bd5e; middle-cap: #c18346; }
+muscaria { background-color: #cc2616; color: #fff8c6; }
+velosa { background-color: #dd9d5f; light-veil: #faebd4; dark-veil: #f4d5a6; }
+novinupta { background-color: #d1afa5; }
+pachycolea { background-color: #383138; color: #a39eb2; light-stipe: #aa9a83; dark-brown: #60412d; }
+
+/* Global default colors */
+body { background-color: #383138; color: #bfc0bb; } /* pachycolea */
+
+a { color: #aa9a83; } /* pachycolea light-stipe */
+a:visited { color: #fff8c6; } /* muscaria yellow */
+a:hover { background-color:#cc2616; } /* muscaria red */
+
+
+/* Banner colors */
+#banner {
+    background-color: #cc2616; color: #fff8c6; /* muscaria */
+}
+
+
+/* Colors for the left hand panel */
+.LeftSide {
+    background-color: #dd9d5f; /* velosa cap */
+    color: #cc2616; /* muscaria red */
+}
+
+.LeftSide a {
+	color: #faebd4; /* velosa light veil */
+}
+
+.LeftSide a:visited {
+	color: #f4d5a6; /* velosa dark veil */
+}
+
+
+/* Colors for even lines */
+.ListLine0 {
+      background-color: #954c23; color: #ebe4de; /* calyptroderma-fall */
+}
+
+
+.ListLine0 a {
+      color: #f5bd5e; /* calyptroderma-fall light-cap */
+}
+
+.ListLine0 a:visited {
+      color: #c18346; /* calyptroderma-fall middle-cap */
+}
+
+/* Colors for odd lines */
+.ListLine1 {
+      background-color: #787133; color: #e6edd5; /* phalloides */
+}
+
+
+.ListLine1 a {
+      color: #dfe4bc; /* phalloides light-cap */
+}
+
+.ListLine1 a:visited {
+      color: #beb977; /* phalloides middle-cap */
+}

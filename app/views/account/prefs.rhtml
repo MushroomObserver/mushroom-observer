@@ -1,0 +1,20 @@
+<%= start_form_tag :action=> "prefs" %>
+
+<div title="Change Preferences" id="prefform" class="form">
+  <h3>Change Preferences</h3>
+  <%= error_messages_for 'user' %><br/>
+  
+  <label for="user_email">Email address:</label><br/>
+  <%= text_field "user", "email", :size => 60 %><br/><br/>
+  <label for="user_name">Name:</label><br/>
+  <%= text_field "user", "name", :size => 60 %><br/><br/>
+  <label for="user_name">Preferred Theme:</label><br/>
+  <%= select(:user, :theme, [["Random", "NULL"]] + CSS) %><br/><br/>
+<br/>
+<input type="submit" value="Save Prefs" class="primary" />
+<br/><br/>
+Want to change your password?  Send mail to nathan at collectivesource.com.<br/>
+An automated mechanism for managing your password through your email account is planned, but has not yet been implemented.
+
+<%= end_form_tag %>
+

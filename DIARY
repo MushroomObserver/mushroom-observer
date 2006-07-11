@@ -140,9 +140,30 @@ Sat May 27 - Worked on getting locations and notes recorded for some of
 the bulk created observations.  Create intro.rhtml.  Added LICENSE and
 put some copyrights and license references into the source.
 
-Mon May 28 - Got textilize and did a general string handling cleanup pass.
+Mon May 28 - Got textilize working and did a general string handling cleanup pass.
 
 Tues May 29 - Added reuse_image
 
 Fri June 2 - Merged add_image and reuse_image into manage_images and added
 section section.
+
+Wed July 5 - Finished first pass at users (been working on this on and off over the last month)
+Users - Adding observations, adding comments and editing should only be done
+        by known users.
+  cleanup logout page (links to pages that don't require login)
+  cleanup login page (links to pages that don't require login)
+  create account
+  email address
+  user chosen color theme
+  preference page
+  Add user foreign key for observations and images
+  user page changes:
+  Control:
+    Controller functions
+    Don't render non-permitted links
+  Admin user
+  Add created and last login dates to users
+
+  Moved 'Show' -> Title and image on list page.
+
+  Cleaned up image destroy so it gets rid of extra thumb references

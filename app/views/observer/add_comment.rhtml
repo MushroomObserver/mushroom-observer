@@ -1,19 +1,12 @@
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<h1>Add Comment to <%= h @observation.unique_name %></h1>
+<div id="Title">Add Comment to <%= h @observation.unique_name %></div>
 
-<%= error_messages_for("comment") %>
-
-<%= form_tag({:action => 'save_comment'}, :multipart => true) %>
-<center><%= submit_tag("Submit") %></center>
-
-<p><label for="comment_who">Your name</label><br/>
-<%= text_field("comment", "who") %></p>
-
-<p><label for="comment_summary">Summary</label><br/>
-<%= text_field("comment", "summary") %></p>
-
-<p><label for="comment_comment">Comment</label><br/>
-<%= text_area("comment", "comment") %></p>
-
+<%= start_form_tag :action => 'save_comment' %>
+<center><%= submit_tag "Create" %></center>
+<table cellpadding="10">
+<tr>
+  <%= render :partial => 'form_comments' %>
+</tr>
+</table>
 <%= end_form_tag %>
