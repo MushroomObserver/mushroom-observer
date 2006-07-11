@@ -10,11 +10,14 @@
   <%= text_field "user", "name", :size => 60 %><br/><br/>
   <label for="user_name">Preferred Theme:</label><br/>
   <%= select(:user, :theme, [["Random", "NULL"]] + CSS) %><br/><br/>
+  <label for="user_password">New password:</label><br/>
+  <%= password_field "user", "password", :value => '', :size => 30 %><br/><br/>
+  <label for="user_password_confirmation">Confirm new password:</label><br/>
+  <%= password_field "user", "password_confirmation", :size => 30 %><br/><br/>
 <br/>
 <input type="submit" value="Save Prefs" class="primary" />
 <br/><br/>
-Want to change your password?  Send mail to nathan at collectivesource.com.<br/>
-An automated mechanism for managing your password through your email account is planned, but has not yet been implemented.
+Forget your password?  Send mail to nathan at collectivesource.com.<br/>
+An automated mechanism for getting a new password through your email account is planned, but has not yet been implemented.
 
 <%= end_form_tag %>
-

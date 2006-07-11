@@ -7,7 +7,7 @@ class AccountController < ApplicationController
         user = User.authenticate(@params['user_login'], @params['user_password'])
         if @session['user'] = user
 
-          flash['notice']  = "Login successful"
+          flash[:notice]  = "Login successful"
           user.last_login = Time.now
           user.save
           redirect_back_or_default :action => "welcome"
@@ -26,7 +26,7 @@ class AccountController < ApplicationController
         @user.last_login = @user.created
         if @user.save      
           @session['user'] = User.authenticate(@user.login, @params['user']['password'])
-          flash['notice']  = "Signup successful"
+          flash[:notice]  = "Signup successful"
           redirect_back_or_default :action => "welcome"          
         end
       when :get
@@ -41,10 +41,22 @@ class AccountController < ApplicationController
         @user.change_email(@params['user']['email'])
         @user.change_name(@params['user']['name'])
         @user.change_theme(@params['user']['theme'])
-        
-        if @user.save      
-          flash['notice']  = "Prefs update"
-          redirect_back_or_default :action => "welcome"
+        password = @params['user']['password']
+        error = false
+        if password
+          if password == @params['user']['password_confirmation']
+            @user.change_password(password)
+          else
+            error = true
+            flash[:notice] = "Password and confirmation did not match"
+            render :action => "prefs"
+          end
+        end
+        unless error
+          if @user.save      
+            flash[:notice]  = "Preferences updated"
+            redirect_back_or_default :action => "welcome"
+          end
         end
     end      
   end  
