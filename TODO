@@ -1,22 +1,10 @@
 - Discussion of color themes:
   - Finish discussion of Agaricus theme
 
-Update ms.collectivesource.com
-  - Commit code
-  Database updates:
-    Dump current database: ~/ms_development.dump
-    schema updates
-      - create user table
-      - add user_id to comments, images and observations
-      - remove comments.who
-    Convert to migrations? Not now.
-
 More color themes: Cantharellaceae, Hygrocybe, Boletus
 
-Method for changing password
-
-Comments:
-  Most Recent (list_comments)
+- Comments:
+  - Most Recent (list_comments)
 
 Lists:
   New

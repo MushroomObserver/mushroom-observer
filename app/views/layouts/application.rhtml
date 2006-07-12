@@ -46,6 +46,10 @@
 								&nbsp;&nbsp;<%= link_to 'By&nbsp;Title', :controller => 'observer',
 								                        :action => 'images_by_title' %>
 								<br/><br/>
+								Comments:<br/>
+								&nbsp;&nbsp;<%= link_to 'Most&nbsp;Recent', :controller => 'observer',
+								                        :action => 'list_comments' %>
+								<br/><br/>
 								<% if @session['user'].nil? %>
 								Account:<br/>
 								&nbsp;&nbsp;<%= link_to 'Login', :controller => 'account',

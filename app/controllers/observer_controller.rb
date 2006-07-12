@@ -20,24 +20,12 @@ class ObserverController < ApplicationController
     render :action => 'list_observations'
   end
 
-  # left panel -> list_observations.rhtml
-  def list_observations
+  # Various -> list_comments.rhtml
+  def list_comments
     store_location
-    @observation_pages, @observations = paginate(:observations,
-                                                 :order => "'when' desc",
-                                                 :per_page => 10)
-  end
-
-  # observations_by_name.rhtml
-  def observations_by_name
-    store_location
-    @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
-  end
-
-  # images_by_title.rhtml
-  def images_by_title
-    store_location
-    @images = Image.find(:all, :order => "'title' asc, 'when' desc")
+    @comment_pages, @comments = paginate(:comments,
+                                     :order => "'created' desc",
+                                     :per_page => 10)
   end
 
   # show_observation.rhtml -> add_comment.rhtml
@@ -102,6 +90,20 @@ class ObserverController < ApplicationController
     else
       render :action => 'show_comment'
     end
+  end
+
+  # left panel -> list_observations.rhtml
+  def list_observations
+    store_location
+    @observation_pages, @observations = paginate(:observations,
+                                                 :order => "'when' desc",
+                                                 :per_page => 10)
+  end
+
+  # observations_by_name.rhtml
+  def observations_by_name
+    store_location
+    @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
   end
 
   # list_observations.rhtml -> show_observation.rhtml
@@ -190,6 +192,12 @@ class ObserverController < ApplicationController
     @image_pages, @images = paginate(:images,
                                      :order => "'when' desc",
                                      :per_page => 10)
+  end
+
+  # images_by_title.rhtml
+  def images_by_title
+    store_location
+    @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
 
   # list_images -> show_image.rhtml

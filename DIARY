@@ -167,3 +167,8 @@ Users - Adding observations, adding comments and editing should only be done
   Moved 'Show' -> Title and image on list page.
 
   Cleaned up image destroy so it gets rid of extra thumb references
+
+
+Mon July 10 - Updated external DB and website.  Added password change option.
+
+Tues July 11 - Added list_comments page.
