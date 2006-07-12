@@ -1,0 +1,33 @@
+<div id="Title">Comments</div>
+
+<table  cellpadding="5" cellspacing="0">
+  <%
+     odd_or_even = 0
+     for comment in @comments
+       odd_or_even = 1 - odd_or_even
+       observation = comment.observation
+     %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td width=100%>
+		<%= link_to sprintf('<span class="ListWhat">%s</span>', h(comment.summary)),
+		            :action => 'show_comment', :id => comment %>: 
+	    <%= link_to sprintf('<span class="ListWhat">%s</span>', h(observation.unique_name)),
+	              :action => 'show_observation', :id => observation.id %><br/>
+		<span class="ListWhen"><%= comment.created %></span>:
+		 <span class="ListWho"><%= truncate(h(comment.user.unique_name), MAX_WHO_LENGTH) %></span><br/>
+    </td>
+    <td valign="middle" class="ListActions">
+	  <% if check_permission(comment.user_id) %>
+	      <%= link_to 'Edit', :action => 'edit_comment', :id => comment %><br/>
+	      <%= link_to 'Destroy', { :action => 'destroy_comment', :id => comment },
+	                               :confirm => "Are you sure?" %>
+	  <% end %>
+    </td>
+  </tr>
+  <% end %>
+</table>
+
+<%= link_to 'Previous page', { :page => @comment_pages.current.previous } if @comment_pages.current.previous %>
+<%= link_to 'Next page', { :page => @comment_pages.current.next } if @comment_pages.current.next %> 
+
+<br />
