@@ -1,4 +1,4 @@
-<%= link_to 'Back', :action => 'show_observation', :id => @comment.observation %>
+<%= link_to 'Goto Observation', :action => 'show_observation', :id => @comment.observation %>
 <% if check_permission(@comment.user_id) %>
 	| <%= link_to 'Edit', :action => 'edit_comment', :id => @comment %>
 	| <%= link_to 'Destroy', :action => 'destroy_comment', :id => @comment %>
