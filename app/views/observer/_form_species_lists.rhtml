@@ -1,0 +1,17 @@
+<%= error_messages_for 'species_list' %>
+
+<!--[form:species_list]-->
+<td valign="top">
+<p><label for="species_list_when">When</label><br/>
+<%= date_select 'species_list', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
+
+<p><label for="species_list_where">Where (required)</label><br/>
+<%= text_field 'species_list', 'where'  %></p>
+
+<p><label for="species_list_title">Title</label><br/>
+<%= text_field 'species_list', 'title'  %></p>
+
+<p><label for="species_list_notes">Notes</label><br/>
+<%= text_area 'species_list', 'notes'  %></p>
+</td>
+<!--[eoform:species_list]-->

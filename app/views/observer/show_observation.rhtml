@@ -1,35 +1,47 @@
 <%= link_to 'Add Comment', :action => 'add_comment' %>
+| <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% if check_permission(@observation.user_id) %>
 	| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 	| <%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
 <% end %>
 
-<h2>Observation: <%= h @observation.unique_name %></h2>
+<div id="Title">Observation: <%= h @observation.unique_name %></div>
 
 <table cellpadding="10">
 <tr>
-    <td width="75%" valign="top">
-        <p>When: <span class="Data"><%= @observation.when %></span></p>
-        <p>Where: <span class="Data"><%= h @observation.where %></span></p>
-        <p>What: <span class="Data"><%= h @observation.what %></span></p>
-        <p>Who: <span class="Data"><%= h @observation.user.unique_name %></span></p>
-        <p><span class="Data"><%= if @observation.specimen
-            'Herbarium specimen available'
-         else
-            'No herbarium specimen'
-         end %></span></p>
-         <p>Notes:</br><%= textilize @observation.notes %></p>
-      Comments:<br/>
-      <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
-        <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_name), MAX_WHO_LENGTH),
-                            truncate(h(comment.summary), MAX_FIELD_LENGTH)),
-                    :action => 'show_comment', :id => comment %><br/>
-      <% end %>
-      <p><span class="Date">
-      Observation created: <%= @observation.created %><br/>
-      Last modified: <%= @observation.modified %>
-      </span></p>
-    </td>
+	<td width="75%" valign="top">
+	    <p>When: <span class="Data"><%= @observation.when %></span></p>
+	    <p>Where: <span class="Data"><%= h @observation.where %></span></p>
+	    <p>What: <span class="Data"><%= h @observation.what %></span></p>
+	    <p>Who: <span class="Data"><%= h @observation.user.unique_name %></span></p>
+	    <p><span class="Data"><%= if @observation.specimen
+	         'Herbarium specimen available'
+	     else
+	         'No herbarium specimen'
+	     end %></span>
+	    </p>
+	    <% lists = @observation.species_lists 
+	    	if lists.length > 0 %>
+				<p>Species Lists:<br/>
+		            <% for l in lists %>
+		 				<%= link_to l.unique_name, :action => 'show_species_list', :id => l %><br/>
+					<% end %>
+				</p>
+		<% end %>
+	    <p>Notes:</br><%= textilize @observation.notes %></p>
+	    <p>Comments:<br/>
+	        <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
+	            <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_name), MAX_WHO_LENGTH),
+	                                truncate(h(comment.summary), MAX_FIELD_LENGTH)),
+	                        :action => 'show_comment', :id => comment %><br/>
+	        <% end %>
+	    </p>
+	    <p><span class="Date">
+	        Observation created: <%= @observation.created %><br/>
+	        Last modified: <%= @observation.modified %>
+	        </span>
+	    </p>
+	</td>
     <td valign="top" width="25%">
 	<center>
     <% for image in @observation.images %>

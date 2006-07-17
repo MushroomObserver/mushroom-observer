@@ -29,15 +29,25 @@
 								<%= link_to 'Introduction', :controller => 'observer',
 								            :action => 'intro' %>
 								<br/><br/>
-								<%= link_to 'New&nbsp;Observation', :controller => 'observer',
-								            :action => 'new_observation' %>
-								<br/><br/>
 								Observations:<br/>
+								&nbsp;&nbsp;<%= link_to 'New&nbsp;Observation', :controller => 'observer',
+								            :action => 'new_observation' %>
+								<br/>
 								&nbsp;&nbsp;<%= link_to 'Most&nbsp;Recent', :controller => 'observer',
 								                        :action => 'list_observations' %>
 								<br/>
 								&nbsp;&nbsp;<%= link_to 'By&nbsp;Name', :controller => 'observer',
 								                        :action => 'observations_by_name' %>
+								<br/><br/>
+								Species&nbsp;Lists:<br/>
+								&nbsp;&nbsp;<%= link_to 'New&nbsp;Species&nbsp;List', :controller => 'observer',
+								            :action => 'new_species_list' %>
+								<br/>
+								&nbsp;&nbsp;<%= link_to 'Most&nbsp;Recent', :controller => 'observer',
+								                        :action => 'list_species_lists' %>
+								<br/>
+								&nbsp;&nbsp;<%= link_to 'By&nbsp;Title', :controller => 'observer',
+								                        :action => 'species_lists_by_title' %>
 								<br/><br/>
 								Images:<br/>
 								&nbsp;&nbsp;<%= link_to 'Most&nbsp;Recent', :controller => 'observer',
@@ -73,7 +83,7 @@
 						</tr>
 					</table>
 				</td>
-				<td width=100% class="main">
+				<td width=100% valign="top" class="main">
 					<p><%= flash[:notice] %></p>
 					<%= @content_for_layout %>
 				</td>

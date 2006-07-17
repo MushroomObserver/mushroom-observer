@@ -1,0 +1,74 @@
+<div id="Title">Manage Species Lists for</br><%= h @observation.unique_name %></div>
+
+	<%
+		all_lists = SpeciesList.find(:all,
+									 :conditions => sprintf("user_id = %d", session['user'].id),
+									 :order => "'modified' desc")
+		obs_lists = []
+		other_lists = []
+		for list in all_lists
+			if list.observations.member?(@observation)
+				obs_lists << list
+			else
+				other_lists << list
+			end
+		end
+		if obs_lists.length != 0 %>
+			<p>
+				This observation belongs to:<br/>
+				<table cellpadding="5" cellspacing="0">
+					<%
+						odd_or_even = 0
+				    	for species_list in obs_lists
+				            odd_or_even = 1 - odd_or_even
+				    %>
+					<tr valign="top" class="ListLine<%= odd_or_even %>">
+						<td width="100%" valign="middle">
+							<%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span><br/>',
+							                    species_list.when, h(species_list.unique_name)),
+							            :action => 'show_species_list', :id => species_list.id) %>
+							<span class="ListWhere"><%= truncate(h(species_list.where), MAX_FIELD_LENGTH) %></span>
+							<span class="ListWho"><%= truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH) %></span>
+						</td>
+						<td valign='middle' class="ListActions">
+							<% if check_permission(species_list.user_id) %>
+							   <%= link_to 'Remove', { :action => 'remove_observation_from_species_list',
+													   :observation => @observation, :species_list => species_list },
+							               :confirm => "Are you sure?" %>
+							<% end %>
+						</td>
+					</tr
+		  			<% end %>
+				</table>
+			</p>
+	<%
+		end
+		if other_lists.length != 0 %>
+			<p>
+				Lists you own that do not contain this observation:<br/>
+				<table cellpadding="5" cellspacing="0">
+					<%
+						odd_or_even = 0
+				    	for species_list in other_lists
+				            odd_or_even = 1 - odd_or_even
+				    %>
+					<tr valign="top" class="ListLine<%= odd_or_even %>">
+						<td width="100%" valign="middle">
+							<%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span><br/>',
+							                    species_list.when, h(species_list.unique_name)),
+							            :action => 'show_species_list', :id => species_list.id) %>
+							<span class="ListWhere"><%= truncate(h(species_list.where), MAX_FIELD_LENGTH) %></span>
+							<span class="ListWho"><%= truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH) %></span>
+						</td>
+						<td valign='middle' class="ListActions">
+							<% if check_permission(species_list.user_id) %>
+							   <%= link_to 'Add', { :action => 'add_observation_to_species_list',
+													   :observation => @observation, :species_list => species_list } %>
+							<% end %>
+						</td>
+					</tr
+		  			<% end %>
+				</table>
+			</p>
+	<%  end %>
+</div>

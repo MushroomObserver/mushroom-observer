@@ -1,20 +1,11 @@
-- Discussion of color themes:
-  - Finish discussion of Agaricus theme
+Next/Previous for observations and images
+  Use session to store lists and list positions
+  Get 'next' of an image to follow image list until empty then go to next observation list
+  Should there also be a species_list list?
 
 More color themes: Cantharellaceae, Hygrocybe, Boletus
 
-- Comments:
-  - Most Recent (list_comments)
-
-Lists:
-  New
-  Most Recent
-  By Title
-    Edit - Allows add new/add by id/remove
-	Species lists - Quick way to create lists of species from a foray and generate all
-	  the implied observations.
-
-Next/Previous for observations and images
+Event RSS feed
 
 Improve performance (are image coming from direct URL or is a load happening?  Number of DB queries?)
 Performance issues: Why is the table images hit twice for each time during the creation of list_observations?

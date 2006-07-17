@@ -6,9 +6,10 @@ require 'ftools'
 
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:color_themes, :image, :images_by_title, :img_thumb,
-                                                    :intro, :list_images, :list_observations,
-                                                    :observations_by_name, :original_image,
-                                                    :show_comment, :show_image, :show_observation,:show_original])
+                                                    :intro, :list_comments, :list_images, :list_observations,
+                                                    :list_species_lists, :observations_by_name, :original_image,
+                                                    :show_comment, :show_image, :show_observation,:show_original,
+                                                    :show_species_list, :species_lists_by_title])
   # Default page
   def index
     list_observations
@@ -20,7 +21,7 @@ class ObserverController < ApplicationController
     render :action => 'list_observations'
   end
 
-  # Various -> list_comments.rhtml
+  # left-hand panel -> list_comments.rhtml
   def list_comments
     store_location
     @comment_pages, @comments = paginate(:comments,
@@ -29,6 +30,10 @@ class ObserverController < ApplicationController
   end
 
   # show_observation.rhtml -> add_comment.rhtml
+  # I used the session for this based on the parallel case in one of the Rails tutorial.
+  # It seems like I could just as easily do it with the params.  However, for 'save_comment'
+  # I don't want an extra key for the observation since I'm using the params to create the
+  # comment.
   def add_comment
     @comment = Comment.new
     @observation = session[:observation]
@@ -41,6 +46,8 @@ class ObserverController < ApplicationController
   end
 
   # add_comment.rhtml -> save_comment -> add_comment.rhtml
+  # Here's where params is used to create the comment and
+  # the observation is recovered from session.
   def save_comment
     @comment = Comment.new(params[:comment])
     @comment.created = Time.now
@@ -92,7 +99,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  # left panel -> list_observations.rhtml
+  # left-hand panel -> list_observations.rhtml
   def list_observations
     store_location
     @observation_pages, @observations = paginate(:observations,
@@ -107,13 +114,14 @@ class ObserverController < ApplicationController
   end
 
   # list_observations.rhtml -> show_observation.rhtml
+  # Setup session to have the right observation.
   def show_observation
     store_location
     @observation = Observation.find(params[:id])
     session[:observation] = @observation
   end
 
-  # list_observations.rhtml -> new_observation.rhtml
+  # left-hand panel -> new_observation.rhtml
   def new_observation
     @observation = Observation.new
     @observation.what = 'Unknown'
@@ -134,6 +142,7 @@ class ObserverController < ApplicationController
   end
 
   # list_observation.rhtml, show_observation.rhtml -> edit_observation.rhtml
+  # Setup session to have the right observation.
   def edit_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
@@ -177,7 +186,15 @@ class ObserverController < ApplicationController
   def destroy_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
+      lists = @observation.species_lists
       @observation.destroy
+      # Check any species_lists to see if they are now empty.  If so destroy them.
+      # Is there a better way to do this as part of the species_list model?
+      for l in lists
+        if l.observations.length == 0
+          l.destroy
+        end
+      end
       redirect_to :action => 'list_observations'
     else
       render :action => 'show_observation'
@@ -332,9 +349,139 @@ class ObserverController < ApplicationController
               :disposition => "inline")
   end
 
+
+  # left-hand panel -> new_species_list.rhtml
+  def new_species_list
+    @species_list = SpeciesList.new
+  end
+
+  def create_species_list
+    args = params[:species_list]
+    now = Time.now
+    args["created"] = now
+    args["modified"] = now
+    args["user"] = session['user']
+    @species_list = SpeciesList.new(args)
+
+    if @species_list.save
+      flash[:notice] = 'Species list was successfully created.'
+      redirect_to :action => 'list_observations'
+      species = args["species"]
+      args.delete("species")
+      args.delete("title")
+      for s in species
+        species_name = s.strip()
+        if species_name != ''
+          args["what"] = species_name
+          obs = Observation.new(args)
+          obs.save
+          @species_list.observations << obs
+        end
+      end
+    else
+      render :action => 'new_species_list'
+    end
+  end
+
+  # list_species_list.rhtml & notes links -> show_species_list.rhtml
+  # Use session to store the current species list since this parallels
+  # the usage for show_observation.
+  def show_species_list
+    store_location
+    @species_list = SpeciesList.find(params[:id])
+    session[:species_list] = @species_list
+  end
+
+  # Needs both a species_list and an observation.
+  def remove_observation_from_species_list
+    species_list = SpeciesList.find(params[:species_list])
+    if check_user_id(species_list.user_id)
+      observation = Observation.find(params[:observation])
+      species_list.modified = Time.now
+      species_list.observations.delete(observation)
+      # Check to see if the species_list is empty.  If so, destroy it.
+      if species_list.observations.length == 0 # Is there a good way to move this behavior into the species_list model?
+        flash[:notice] = 'Deleted empty species list'
+        species_list.destroy
+      end
+      redirect_to :action => 'manage_species_lists', :id => observation
+    end
+  end
+
+  # Needs both a species_list and an observation.
+  def add_observation_to_species_list
+    species_list = SpeciesList.find(params[:species_list])
+    if check_user_id(species_list.user_id)
+      observation = Observation.find(params[:observation])
+      species_list.modified = Time.now
+      species_list.observations << observation
+      redirect_to :action => 'manage_species_lists', :id => observation
+    end
+  end
+  
+  # left-hand panel -> list_species_lists.rhtml
+  def list_species_lists
+    store_location
+    @species_list_pages, @species_lists = paginate(:species_lists,
+                                                   :order => "'when' desc",
+                                                   :per_page => 10)
+  end
+
+  # list_species_lists.rhtml -> destroy -> list_species_lists.rhtml
+  def destroy_species_list
+    @species_list = SpeciesList.find(params[:id])
+    if check_user_id(@species_list.user_id)
+      @species_list.destroy
+      redirect_to :action => 'list_species_list'
+    else
+      render :action => 'show_species_list'
+    end
+  end
+
+  # species_lists_by_title.rhtml
+  def species_lists_by_title
+    store_location
+    @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
+  end
+
+  # list_species_list.rhtml, show_species_list.rhtml -> edit_species_list.rhtml
+  # Setup session to have the right species_list.
+  def edit_species_list
+    @species_list = SpeciesList.find(params[:id])
+    if check_user_id(@species_list.user_id)
+      session[:species_list] = @species_list
+    else 
+      render :action => 'show_species_list'
+    end
+  end
+
+  # edit_species_list.rhtml -> show_species_list.rhtml
+  # Updates modified and saves changes
+  def update_species_list
+    @species_list = SpeciesList.find(params[:id])
+    if check_user_id(@species_list.user_id) # Even though edit makes this check, avoid bad guys going directly
+      if @species_list.update_attributes(params[:species_list])
+        @species_list.modified = Time.new
+        @species_list.save
+
+        flash[:notice] = 'Species List was successfully updated.'
+        redirect_to :action => 'show_species_list', :id => @species_list
+      else
+        render :action => 'edit_species_list'
+      end
+    else
+      render :action => 'show_species_list'
+    end
+  end
+
+  # show_observation.rhtml -> manage_species_lists.rhtml
+  def manage_species_lists
+    @observation = session[:observation]
+  end
+
   helper_method :check_permission
   def check_permission(user_id)
-    !@session['user'].nil? && ((user_id == session['user'].id) || (session['user'].id == 0))
+    !session['user'].nil? && ((user_id == session['user'].id) || (session['user'].id == 0))
   end
 
   protected

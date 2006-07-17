@@ -6,6 +6,7 @@ class User < ActiveRecord::Base
   has_many :comments
   has_many :images
   has_many :observations
+  has_many :species_lists
 
   def self.authenticate(login, pass)
     find_first(["login = ? AND password = ?", login, sha1(pass)])

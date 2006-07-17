@@ -172,3 +172,11 @@ Users - Adding observations, adding comments and editing should only be done
 Mon July 10 - Updated external DB and website.  Added password change option.
 
 Tues July 11 - Added list_comments page.
+
+Weds July 12 - Used migration to add species_lists and observations_species_lists.  Also removed extra user related rows from images and observations.  Implemented new_species_list.
+
+Thurs July 13 - show_species_list.  Hyper links in the notes of species_list members to the species_list.  Used under windows at work to confirm that it works reasonably well.
+
+Fri July 14 - Made reference to species_list on show_observation derived from actual link rather than getting added to observation when created.  Implemented remove_observation_from_species_list, list_species_list and destroy_species_list.
+
+Sun July 16 - species_list_by_title, edit_species_list, manage_species_lists

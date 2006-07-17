@@ -1,0 +1,10 @@
+<div id="Title">Species Lists by Title</div>
+<%
+  for species_list in @species_lists %>
+<%= link_to(sprintf("%s %s %s", h(species_list.unique_name), species_list.when,
+                    truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH)),
+            :action => 'show_species_list', :id => species_list.id) %><br/>
+<%
+  end
+%>
+</br>

@@ -1,0 +1,34 @@
+<div id="Title">Species Lists</div>
+<table cellpadding="5" cellspacing="0">
+  <%
+     odd_or_even = 0
+     for species_list in @species_lists
+       odd_or_even = 1 - odd_or_even
+     %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td width="100%" valign="middle">
+	  <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span><br/>',
+	                      species_list.when, h(species_list.unique_name)),
+	              :action => 'show_species_list', :id => species_list.id) %>
+      <span class="ListWhere"><%= truncate(h(species_list.where), MAX_FIELD_LENGTH) %></span>
+      <span class="ListWho"><%= truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH) %></span>
+    </td>
+    <td valign='middle' class="ListActions">
+	  <% if check_permission(species_list.user_id) %>
+	      <%= link_to 'Edit', :action => 'edit_species_list', :id => species_list %><br/>
+	      <%= link_to 'Destroy', { :action => 'destroy_species_list', :id => species_list },
+	                               :confirm => "Are you sure?" %>
+	  <% end %>
+    </td>
+  </tr>
+  <% end %>
+</table>
+<%= if @species_list_pages.current.previous
+      link_to("Previous page", { :page => @species_list_pages.current.previous })
+    end
+%>
+<%= if @species_list_pages.current.next
+      link_to("Next page", { :page => @species_list_pages.current.next })
+    end
+%>
+<br/>

@@ -3,6 +3,7 @@
 
 class Observation < ActiveRecord::Base
   has_and_belongs_to_many :images
+  has_and_belongs_to_many :species_lists
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   has_many :comments
   belongs_to :user
