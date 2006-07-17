@@ -135,7 +135,7 @@ class ObserverController < ApplicationController
     @observation.user = session['user']
     if @observation.save
       flash[:notice] = 'Observation was successfully created.'
-      redirect_to :action => 'edit_observation', :id => @observation
+      redirect_to :action => 'show_observation', :id => @observation
     else
       render :action => 'new_observation'
     end

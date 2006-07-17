@@ -12,7 +12,7 @@
 	<table cellpadding="5" cellspacing="0">
 	  <%
 	     odd_or_even = 0
-	     for observation in @species_list.observations.sort {|x,y| y.unique_name <=> x.unique_name }
+	     for observation in @species_list.observations.sort {|x,y| x.unique_name <=> y.unique_name }
 	       odd_or_even = 1 - odd_or_even
 	     %>
 	  <tr valign="top" class="ListLine<%= odd_or_even %>">
