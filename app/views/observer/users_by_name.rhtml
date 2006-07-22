@@ -1,0 +1,40 @@
+<div id="Title">Users by Name</div>
+<table cellpadding="5" cellspacing="5" border=1>
+	<tr class="Data">
+		<td>
+			Last login
+		</td>
+		<td>
+			Login
+		</td>
+		<td>
+			Name
+		</td>
+		<td>
+			Theme
+		</td>
+		<td>
+			Created
+		</td>
+	</tr>
+	<%
+		for user in @users %>
+			<tr>
+				<td>
+					<%= user.last_login %>
+				</td>
+				<td>
+					<%= user.login %>
+				</td>
+				<td>
+					<%= user.name %>
+				</td>
+				<td>
+					<%= user.theme %>
+				</td>
+				<td>
+					<%= user.created %>
+				</td>
+			</tr>
+	<%  end %>
+</table>

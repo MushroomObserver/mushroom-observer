@@ -5,7 +5,10 @@
 - Improve performance (are image coming from direct URL or is a load happening?  Number of DB queries?)
 - Performance issues: Why is the table images hit twice for each time during the creation of list_observations?
 
-Register mushroomobserver.org
+- Register mushroomobserver.org
+
+List window still gets scrunched under Safari
+Test under IE
 
 First public release
 
