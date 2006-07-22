@@ -5,7 +5,7 @@ require 'find'
 require 'ftools'
 
 class ObserverController < ApplicationController
-  before_filter :login_required, :except => (CSS + [:color_themes, :images_by_title,
+  before_filter :login_required, :except => (CSS + [:color_themes, :images_by_title, :index,
                                                     :intro, :list_comments, :list_images, :list_observations,
                                                     :list_species_lists, :next_observation, :observations_by_name,
                                                     :prev_observation,
