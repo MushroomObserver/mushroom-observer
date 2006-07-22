@@ -17,7 +17,7 @@
        <table><tr><td>
 	<%= radio_button("observation", 'thumb_image_id', image.id) %>
        </td><td align="center">
-	<img src='<%= url_for(:action => "img_thumb", :id => image.id) %>'><br/>
+	<%= image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0) %><br/>
          <%= h(image.unique_name) %>
        </td></tr></table>
     <% end %>

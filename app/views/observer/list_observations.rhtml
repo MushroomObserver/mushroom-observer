@@ -1,43 +1,55 @@
 <div id="Title">Observations</div>
-<table cellpadding="5" cellspacing="0">
-  <%
-     odd_or_even = 0
-     for observation in @observations
-       odd_or_even = 1 - odd_or_even
-     %>
-  <tr valign="top" class="ListLine<%= odd_or_even %>">
-    <td width=110 height=110 align="center" valign="middle">
-      <%= image = observation.thumb_image
-	if image
-	  link_to('<img border=0 src="' + url_for(:action => "img_thumb", :id => observation.thumb_image_id) + '"/>',
-            :action => 'show_observation', :id => observation.id)
-          end
-      %><br/>
-    </td>
-    <td width="100%" valign="middle">
-	  <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListLatin">%s</span><br/>',
-	                      observation.when, h(observation.unique_name)),
-	              :action => 'show_observation', :id => observation.id) %>
-      <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span><br/>
-      <span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
-      <span class="ListSpecimen"><%= '[H]' if observation.specimen %></span>
-    </td>
-    <td valign='middle' class="ListActions">
-	  <% if check_permission(observation.user_id) %>
-	      <%= link_to 'Edit', :action => 'edit_observation', :id => observation %><br/>
-	      <%= link_to 'Destroy', { :action => 'destroy_observation', :id => observation },
-	                               :confirm => "Are you sure?" %>
-	  <% end %>
-    </td>
-  </tr>
-  <% end %>
-</table>
-<%= if @observation_pages.current.previous
-      link_to("Previous page", { :page => @observation_pages.current.previous })
-    end
+	<table cellpadding="5" cellspacing="0">
+		<%
+			odd_or_even = 0
+			observation_ids = []
+			for observation in @observations
+				observation_ids.push(observation.id)
+				odd_or_even = 1 - odd_or_even
+	     %>
+		<tr valign="top" class="ListLine<%= odd_or_even %>">
+	    	<td width=110 height=110 align="center" valign="middle">
+	      		<%=
+					image = observation.thumb_image
+					if image
+						link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
+								:action => 'show_observation', :id => observation.id)
+					end
+				%><br/>
+			</td>
+			<td width="100%" valign="middle">
+				<%=
+					link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListLatin">%s</span><br/>',
+							observation.when, h(observation.unique_name)),
+							:action => 'show_observation', :id => observation.id)
+				%>
+				<span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span><br/>
+				<span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
+				<span class="ListSpecimen"><%= '[H]' if observation.specimen %></span>
+			</td>
+			<td valign='middle' class="ListActions">
+				<%
+					if check_permission(observation.user_id)
+				%>
+				<%= link_to 'Edit', :action => 'edit_observation', :id => observation %><br/>
+				<%= link_to 'Destroy', { :action => 'destroy_observation', :id => observation },
+		                    :confirm => "Are you sure?" %>
+				<%  end %>
+			</td>
+		</tr>
+		<%
+			end
+			session['observation_ids'] = observation_ids
+		%>
+	</table>
+<%=
+	if @observation_pages.current.previous
+		link_to("Previous page", { :page => @observation_pages.current.previous })
+	end
 %>
-<%= if @observation_pages.current.next
-      link_to("Next page", { :page => @observation_pages.current.next })
+<%=
+	if @observation_pages.current.next
+		link_to("Next page", { :page => @observation_pages.current.next })
     end
 %>
 <br/>

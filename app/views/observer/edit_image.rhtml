@@ -3,15 +3,15 @@
 <div id="Title">Editing Image: <%= h @image.unique_name %></div>
 
 <%= start_form_tag :action => 'update_image', :id => @image %>
-<center><%= submit_tag 'Save Edits' %></center>
-<table cellpadding="10">
-<tr>
-<td valign="top">
-  <%= render :partial => 'form_images' %>
-</td>
-<td align="center">
-<img src="<%= url_for(:action => "image", :id => @image.id) %>"/>
-</td>
-</tr>
-</table>
+	<center><%= submit_tag 'Save Edits' %></center>
+	<table cellpadding="10">
+		<tr>
+			<td valign="top">
+				<%= render :partial => 'form_images' %>
+			</td>
+			<td align="center">
+				<%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %>
+			</td>
+		</tr>
+	</table>
 <%= end_form_tag %>

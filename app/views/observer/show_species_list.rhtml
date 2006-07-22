@@ -1,5 +1,5 @@
 <% if check_permission(@species_list.user_id) %>
-  <%= link_to 'Edit Species List', :action => 'edit_species_list', :id => @species_list %>
+  <%= link_to 'Edit Species List', :action => 'edit_species_list', :id => @species_list %><br/>
 <% end %>
 
 <div id="Title">Species List: <%= h @species_list.unique_name %></div>
@@ -10,27 +10,32 @@
 <p>Notes:</br><%= textilize @species_list.notes %></p>
 <p>Members:<br/>
 	<table cellpadding="5" cellspacing="0">
-	  <%
-	     odd_or_even = 0
-	     for observation in @species_list.observations.sort {|x,y| x.unique_name <=> y.unique_name }
-	       odd_or_even = 1 - odd_or_even
-	     %>
-	  <tr valign="top" class="ListLine<%= odd_or_even %>">
-	    <td width=110 align="center" valign="middle">
-	      <%= image = observation.thumb_image
-		if image
-		  link_to('<img border=0 src="' + url_for(:action => "img_thumb", :id => observation.thumb_image_id) + '"/>',
-	            :action => 'show_observation', :id => observation.id)
-	          end
-	      %><br/>
-	    </td>
-	    <td width="100%" valign="middle">
-		  <span class="ListLatin"><%= link_to(h(observation.unique_name),
-		                                      :action => 'show_observation', :id => observation.id) %></span><br/>
-	      <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span>: 
-	      <span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
-	    </td>
-	  </tr>
-	  <% end %>
+		<%
+		odd_or_even = 0
+		observation_list = @species_list.observations.sort {|x,y| x.unique_name <=> y.unique_name }
+		observation_ids = []
+		observation_list.each { |o| observation_ids.push(o.id) }
+		session['observation_ids'] = observation_ids
+	   	for observation in observation_list
+	    	odd_or_even = 1 - odd_or_even
+	    %>
+		<tr valign="top" class="ListLine<%= odd_or_even %>">
+	    	<td width=110 align="center" valign="middle">
+				<%=
+				image = observation.thumb_image
+				if image
+		  			link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
+	            			:action => 'show_observation', :id => observation.id)
+	          	end
+	      		%><br/>
+	    	</td>
+		    <td width="100%" valign="middle">
+				<span class="ListLatin"><%= link_to(h(observation.unique_name),
+			                                        :action => 'show_observation', :id => observation.id) %></span><br/>
+		        <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span>: 
+		        <span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
+		    </td>
+	  	</tr>
+	    <% end %>
 	</table>
 </p>

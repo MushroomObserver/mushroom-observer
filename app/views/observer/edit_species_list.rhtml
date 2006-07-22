@@ -1,4 +1,5 @@
-<%= link_to 'Cancel (Show Species List)', :action => 'show_species_list', :id => @species_list %>
+<%= link_to 'Cancel (Show Species List)', :action => 'show_species_list', :id => @species_list %><br/>
+To add or remove observations, go to an existing observation and select &#8220;Manage Species List&#8221;.
 
 <div id="Title">Editing Species List: <%= h @species_list.unique_name %></div>
 
@@ -9,8 +10,6 @@
 <table cellpadding="10">
 <tr>
   <%= render :partial => 'form_species_lists' %>
-To add or remove observations from a species lists, go to the observation in question and
-select 'Manage Species Lists'.
 </tr>
 </table>
 <%= end_form_tag %>

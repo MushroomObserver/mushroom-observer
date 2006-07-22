@@ -5,9 +5,9 @@ require 'find'
 require 'ftools'
 
 class ObserverController < ApplicationController
-  before_filter :login_required, :except => (CSS + [:color_themes, :image, :images_by_title, :img_thumb,
+  before_filter :login_required, :except => (CSS + [:color_themes, :images_by_title,
                                                     :intro, :list_comments, :list_images, :list_observations,
-                                                    :list_species_lists, :observations_by_name, :original_image,
+                                                    :list_species_lists, :observations_by_name,
                                                     :show_comment, :show_image, :show_observation, :show_original,
                                                     :show_species_list, :species_lists_by_title])
   # Default page
@@ -23,6 +23,7 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> list_comments.rhtml
   def list_comments
+    session['observation_ids'] = nil
     store_location
     @comment_pages, @comments = paginate(:comments,
                                      :order => "'created' desc",
@@ -123,6 +124,7 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> new_observation.rhtml
   def new_observation
+		session['observation_ids'] = nil
     @observation = Observation.new
     @observation.what = 'Unknown'
   end
@@ -201,10 +203,44 @@ class ObserverController < ApplicationController
     end
   end
 
+  def prev_observation
+    obs = session['observation_ids']
+    index = obs.index(params[:id].to_i)
+    if index.nil? or obs.nil? or obs.length == 0
+      flash[:notice] = 'Unable to find previous observation'
+      render :action => 'show_observation'
+    else
+      index = index - 1
+      if index < 0
+        index = obs.length - 1
+      end
+      id = obs[index]
+      redirect_to :action => 'show_observation', :id => id
+    end
+  end
+
+  def next_observation
+    obs = session['observation_ids']
+    index = obs.index(params[:id].to_i)
+    if index.nil? or obs.nil? or obs.length == 0
+      flash[:notice] = 'Unable to find next observation'
+      render :action => 'show_observation'
+    else
+      index = index + 1
+      if index >= obs.length
+        index = 0
+      end
+      id = obs[index]
+      redirect_to :action => 'show_observation', :id => id
+    end
+  end
+
+      
   ## Image support
 
   # Various -> list_images.rhtml
   def list_images
+    session['observation_ids'] = nil
     store_location
     @image_pages, @images = paginate(:images,
                                      :order => "'when' desc",
@@ -213,6 +249,7 @@ class ObserverController < ApplicationController
 
   # images_by_title.rhtml
   def images_by_title
+    session['observation_ids'] = nil
     store_location
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
@@ -319,39 +356,10 @@ class ObserverController < ApplicationController
     end
   end
 
-  # image loader
-  # edit_image.rhtml, show_image.rhtml
-  def image
-    @img = Image.find(params[:id])
-    send_data(@img.get_image,
-              :filename => @img.title,
-              :type => @img.content_type,
-              :disposition => "inline")
-  end
-
-  # original image loader
-  # show_original.rhtml
-  def original_image
-    @img = Image.find(params[:id])
-    send_data(@img.get_original,
-              :filename => @img.title,
-              :type => @img.content_type,
-              :disposition => "inline")
-  end
-
-  # thumbnail loader
-  # list_images.rhtml, (select_images.rhtml)
-  def img_thumb
-    @img = Image.find(params[:id])
-    send_data(@img.get_thumbnail,
-              :filename => @img.title,
-              :type => @img.content_type,
-              :disposition => "inline")
-  end
-
 
   # left-hand panel -> new_species_list.rhtml
   def new_species_list
+		session['observation_ids'] = nil
     @species_list = SpeciesList.new
   end
 
@@ -421,6 +429,7 @@ class ObserverController < ApplicationController
   
   # left-hand panel -> list_species_lists.rhtml
   def list_species_lists
+		session['observation_ids'] = nil
     store_location
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc",
@@ -440,6 +449,7 @@ class ObserverController < ApplicationController
 
   # species_lists_by_title.rhtml
   def species_lists_by_title
+		session['observation_ids'] = nil
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
   end

@@ -127,6 +127,11 @@ div.progressBar div.background {
     font-size: x-small;
 }
 
+#textilize_note {
+    text-align: left;
+    font-size: x-small;
+}
+
 #copyright {
     text-align: center;
     font-size: x-small;

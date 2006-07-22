@@ -4,6 +4,10 @@
 	| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 	| <%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
 <% end %>
+<%	if not session['observation_ids'].nil? %>
+		<br/><%= link_to 'Prev', :action => 'prev_observation', :id => @observation %>
+		| <%= link_to 'Next', :action => 'next_observation', :id => @observation %>
+<%  end %>
 
 <div id="Title">Observation: <%= h @observation.unique_name %></div>
 
@@ -45,8 +49,7 @@
     <td valign="top" width="25%">
 	<center>
     <% for image in @observation.images %>
-      <p><%= link_to('<img src="' + url_for(:action => "img_thumb", :id => image.id) +
-              '"/><br/>' + h(image.unique_name),
+      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + h(image.unique_name),
             :action => 'show_image', :id => image.id) %></p>
     <% end %>
 	</center>

@@ -1,21 +1,25 @@
-Next/Previous for observations and images
-  Use session to store lists and list positions
-  Get 'next' of an image to follow image list until empty then go to next observation list
-  Should there also be a species_list list?
+- Next/Previous for observations
 
-More color themes: Cantharellaceae, Hygrocybe, Boletus
+- Documentation about textilize and the general Observation centric interface.
 
-Event RSS feed
-
-Documentation about textlize and the general Observation centric interface.
-
-Improve performance (are image coming from direct URL or is a load happening?  Number of DB queries?)
-Performance issues: Why is the table images hit twice for each time during the creation of list_observations?
+- Improve performance (are image coming from direct URL or is a load happening?  Number of DB queries?)
+- Performance issues: Why is the table images hit twice for each time during the creation of list_observations?
 
 Register mushroomobserver.org
 
 First public release
 
+
+More color themes: Cantharellaceae, Hygrocybe, Boletus
+
+Event RSS feed
+
+Should there be prev/next for images and comments?
+Should there also be a species_list list?
+
+Size count for species lists?
+
+Add support for uploading Name species
 
 Write more notes on my images
 

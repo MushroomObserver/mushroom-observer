@@ -47,9 +47,8 @@ or other fund-raising tools that be used to support this site.<br/></br/>
 							</td>
 							<td align="center">
 								<p><%=
-								link_to('<img src="' +
-										url_for(:action => "img_thumb", :id => image.id) +
-									    '"/><br/>' + h(image.unique_name),
+								link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
+											'<br/>' + h(image.unique_name),
 					            		:action => 'show_image', :id => image.id) %></p>
 							</td>
 						</tr>

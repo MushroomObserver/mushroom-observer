@@ -8,7 +8,7 @@
      %>
   <tr valign="top" class="ListLine<%= odd_or_even %>">
     <td width=110 height=110 align="center" valign="middle">
-		<%= link_to sprintf('<img border=0 src="%s"/>', url_for(:action => "img_thumb", :id => image.id)),
+		<%= link_to image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0),
 		            :action => 'show_image', :id => image %>
     </td>
     <td width="100%" valign="middle">

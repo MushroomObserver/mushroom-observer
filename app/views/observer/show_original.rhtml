@@ -6,7 +6,7 @@
 <div id="Title">Image: <%= h @image.unique_name %></div>
 <div id="copyright">Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %></div>
 
-<%= link_to(sprintf('<img src="' + url_for(:action => "original_image", :id => @image.id) + '"/>'),
+<%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
             :action => 'show_image', :id => @image.id) %>
 <div id="license">
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/"><img src="http://creativecommons.org/images/public/somerights20.png" width="88" height="31" alt="Creative Commons License" style="border:none" /></a><br />
