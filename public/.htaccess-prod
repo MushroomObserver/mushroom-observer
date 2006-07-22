@@ -18,6 +18,9 @@ Options +FollowSymLinks +ExecCGI
 RewriteCond %{REQUEST_URI} ^/stylesheets.*
 RewriteRule .* - [L]
 
+RewriteCond %{REQUEST_URI} ^/images/*
+RewriteRule .* - [L]
+
 RewriteCond %{REQUEST_URI} ^/stats.html
 RewriteRule .* - [L]
 
