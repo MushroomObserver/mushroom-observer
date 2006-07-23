@@ -185,4 +185,6 @@ Tues July 18 - Started next/previous
 
 Weds July 19 - Got next/previous working for observations.  Started to add documentation about textilize and provided hints for adjusting species lists.
 
-Fri July 21 - Finished up textilize reference.  Sped up interaction by going directly to images rather than going through separate methods.
+Fri July 21 - Finished up textilize reference.  Sped up interaction by going directly to images rather than going through separate methods.  Registered mushroomobserver.org and got the site running under that name.
+
+Sat July 22 - Added users_by_name page.  Added references to Ruby on Rails and FireFox.  Briefly tested with Safari and Internet Explorer.
