@@ -13,7 +13,9 @@ class User < ActiveRecord::Base
   end  
 
   def change_password(pass)
-    update_attribute "password", self.class.sha1(pass)
+    if pass != ''
+      update_attribute "password", self.class.sha1(pass)
+    end
   end
 
   def change_email(email)
