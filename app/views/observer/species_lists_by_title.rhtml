@@ -1,10 +1,37 @@
 <div id="Title">Species Lists by Title</div>
-<%
-  for species_list in @species_lists %>
-<%= link_to(sprintf("%s %s %s", h(species_list.unique_name), species_list.when,
-                    truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH)),
-            :action => 'show_species_list', :id => species_list.id) %><br/>
-<%
-  end
-%>
-</br>
+<table cellpadding="5" cellspacing="5">
+	<tr class="Data">
+		<td>
+			List Name
+		</td>
+		<td>
+			Size
+		</td>
+		<td>
+			Created
+		</td>
+		<td>
+			Owner
+		</td>
+	</tr>
+	<%
+	  for species_list in @species_lists %>
+		<tr>
+			<td>
+				<%= link_to h(species_list.unique_name), :action => 'show_species_list', :id => species_list.id %>
+			</td>
+			<td>
+				<%= species_list.observations.size %>
+			</td>
+			<td>
+				<%= species_list.when %>
+			</td>
+			<td>
+				<%= truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH) %>
+			</td>
+		</tr>
+	<%
+	  end
+	%>
+</table>
+

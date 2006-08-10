@@ -1,6 +1,8 @@
 <%= link_to 'Show Normal Size', :action => 'show_image', :id => @image %>
 <% if check_permission(@image.user_id) %>
-	| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+	|| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
+                  :confirm => "Are you sure?" %>
 <% end %>
 
 <div id="Title">Image: <%= h @image.unique_name %></div>

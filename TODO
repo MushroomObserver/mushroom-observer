@@ -1,43 +1,39 @@
 List window still gets scrunched under Safari
-- Test under IE
 
 First public release
 
+User preference for hiding observations with no images?
 
-More color themes: Cantharellaceae, Hygrocybe, Boletus
+Bug from adding data:  Is this fixable?
+  Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
+     show 1, show 2, manage 1 goes to 2
+
+More color themes: Boletus
+
+confirming email when creating an account
+mailing a new password for dealing with lost passwords
 
 Event RSS feed
+Site news page - Need a general blog for the site
 
 Should there be prev/next for images and comments?
 Should there also be a species_list list?
 
-Size count for species lists?
-
-Add support for uploading Name species
+Add support for uploading Name species lists
 
 Write more notes on my images
 
 Hook 'where' up to Google Maps
 
-Logic for resetting image directory for testing
 More rails-style tests
 
 General search mechanism
 Sorting
-Way to find new comments (RSS feeds?)
-Previous/Next (relative to search or index)
 
-confirming email when creating an account
-mailing a new password for dealing with lost passwords
-
-Check for duplicate images
+Check for duplicate images, image garbage collection
 
 Provide the ability to create an observation as a side effect of uploading an image
   rather than requiring the observation to exist before allowing image upload.
-
-Local version of site seems to having flickering images.
-
-Site news page - Need a general blog for the site
 
 Names - Replace the 'what' field with an association with a list of 'Name' objects.
   Name objects would allow for things like author citations, synonymy, references etc.

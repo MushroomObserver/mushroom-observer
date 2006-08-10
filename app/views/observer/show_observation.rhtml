@@ -1,7 +1,9 @@
 <%= link_to 'Add Comment', :action => 'add_comment' %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% if check_permission(@observation.user_id) %>
-	| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+	|| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+	| <%= link_to 'Destroy', { :action => 'destroy_observation', :id => @observation },
+                  :confirm => "Are you sure?" %>
 	| <%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
 <% end %>
 <%	if not session['observation_ids'].nil? %>

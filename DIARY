@@ -188,3 +188,18 @@ Weds July 19 - Got next/previous working for observations.  Started to add docum
 Fri July 21 - Finished up textilize reference.  Sped up interaction by going directly to images rather than going through separate methods.  Registered mushroomobserver.org and got the site running under that name.
 
 Sat July 22 - Added users_by_name page.  Added references to Ruby on Rails and FireFox.  Briefly tested with Safari and Internet Explorer.
+
+Sun Aug 6 - Finished annotating my images with locations and id notes.
+
+Wed Aug 9 - Wrote up Hygrocybe.rhtml.  Added link back to the observation for Manage Species Lists.  Added method for extending a species list with another list.  Added delete to Show * pages.  Set it up so Manage Images goes to show_observation.  Avoids a redraw problem.
+Checked in the following list of changes:
+  Added ability to extend a species list from edit_species_list
+  Added Cantharellaceae and Hygrocybe themes
+  manage_images now goes to show_observation
+  Fixed next/prev behavior
+  Added Destroy option to show pages
+  Link back to observation from manage_species_lists
+  Added list size to species_lists_by_title and put it in a table
+
+
+

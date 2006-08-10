@@ -205,35 +205,35 @@ class ObserverController < ApplicationController
   end
 
   def prev_observation
+    @observation = Observation.find(params[:id])
     obs = session['observation_ids']
     index = obs.index(params[:id].to_i)
     if index.nil? or obs.nil? or obs.length == 0
-      flash[:notice] = 'Unable to find previous observation'
-      render :action => 'show_observation'
+      index = 0
     else
       index = index - 1
       if index < 0
         index = obs.length - 1
       end
-      id = obs[index]
-      redirect_to :action => 'show_observation', :id => id
     end
+    id = obs[index]
+    redirect_to :action => 'show_observation', :id => id
   end
 
   def next_observation
+    @observation = Observation.find(params[:id])
     obs = session['observation_ids']
     index = obs.index(params[:id].to_i)
     if index.nil? or obs.nil? or obs.length == 0
-      flash[:notice] = 'Unable to find next observation'
-      render :action => 'show_observation'
+      index = 0
     else
       index = index + 1
       if index >= obs.length
         index = 0
       end
-      id = obs[index]
-      redirect_to :action => 'show_observation', :id => id
     end
+    id = obs[index]
+    redirect_to :action => 'show_observation', :id => id
   end
 
       
@@ -320,7 +320,7 @@ class ObserverController < ApplicationController
     end
   end
   
-  # manage_images.rhtml -> save_image -> manage_images.rhtml
+  # manage_images.rhtml -> save_image -> show_observation.rhtml
   def save_image
     @observation = session[:observation]
     if check_user_id(@observation.user_id)
@@ -341,7 +341,7 @@ class ObserverController < ApplicationController
     
       # Or reuse image by id
       @observation.add_image_by_id(params[:observation][:idstr].to_i)
-      redirect_to(:action => 'manage_images', :id => @observation)
+      redirect_to(:action => 'show_observation', :id => @observation)
     
       # Or delete images
       images = params[:selected]
@@ -379,13 +379,7 @@ class ObserverController < ApplicationController
       args.delete("species")
       args.delete("title")
       for s in species
-        species_name = s.strip()
-        if species_name != ''
-          args["what"] = species_name
-          obs = Observation.new(args)
-          obs.save
-          @species_list.observations << obs
-        end
+        @species_list.construct_observation(s.strip(), args)
       end
     else
       render :action => 'new_species_list'
@@ -442,7 +436,7 @@ class ObserverController < ApplicationController
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
       @species_list.destroy
-      redirect_to :action => 'list_species_list'
+      redirect_to :action => 'list_species_lists'
     else
       render :action => 'show_species_list'
     end
@@ -471,12 +465,22 @@ class ObserverController < ApplicationController
   def update_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id) # Even though edit makes this check, avoid bad guys going directly
-      if @species_list.update_attributes(params[:species_list])
-        @species_list.modified = Time.new
-        @species_list.save
-
-        flash[:notice] = 'Species List was successfully updated.'
+      args = params[:species_list]
+      if @species_list.update_attributes(args)
+        now = Time.new
+        @species_list.modified = now
         redirect_to :action => 'show_species_list', :id => @species_list
+        if @species_list.save
+          flash[:notice] = 'Species List was successfully updated.'
+          new_species = args["species"]
+          args.delete("species")
+          args.delete("title")
+          args["created"] = now
+          args["user"] = session['user']
+          for s in new_species
+            @species_list.construct_observation(s.strip(), args)
+          end
+        end
       else
         render :action => 'edit_species_list'
       end

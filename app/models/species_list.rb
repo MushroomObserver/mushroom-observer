@@ -17,5 +17,14 @@ class SpeciesList < ActiveRecord::Base
       sprintf("Species List %d", self.id)
     end
   end
-      
+  
+  def construct_observation(s, args)
+    species_name = s.strip()
+    if species_name != ''
+      args["what"] = species_name
+      obs = Observation.new(args)
+      obs.save
+      self.observations << obs
+    end
+  end
 end

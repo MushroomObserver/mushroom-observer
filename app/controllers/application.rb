@@ -2,7 +2,7 @@
 # Likewise, all the methods added will be available for all controllers.
 require 'login_system'
 
-CSS = ['Agaricus', 'Amanita']
+CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
 
 class ApplicationController < ActionController::Base
   include LoginSystem
