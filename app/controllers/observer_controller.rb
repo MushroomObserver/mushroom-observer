@@ -374,7 +374,7 @@ class ObserverController < ApplicationController
 
     if @species_list.save
       flash[:notice] = 'Species list was successfully created.'
-      redirect_to :action => 'list_observations'
+      redirect_to :action => 'list_species_lists'
       species = args["species"]
       args.delete("species")
       args.delete("title")
