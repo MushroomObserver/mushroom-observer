@@ -22,9 +22,14 @@ class SpeciesList < ActiveRecord::Base
     species_name = s.strip()
     if species_name != ''
       args["what"] = species_name
+      if args["where"] == ''
+        args["where"] = self.title
+      end
       obs = Observation.new(args)
       obs.save
       self.observations << obs
     end
   end
+  
+  validates_presence_of :title
 end
