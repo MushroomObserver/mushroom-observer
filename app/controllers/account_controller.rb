@@ -26,7 +26,7 @@ class AccountController < ApplicationController
         @user.last_login = @user.created
         if @user.save      
           @session['user'] = User.authenticate(@user.login, @params['user']['password'])
-          flash[:notice]  = "Signup successful"
+          flash[:notice]  = "Signup successful.  Verification sent to your email account."
           AccountMailer.deliver_verify(@user)
           redirect_back_or_default :action => "welcome"          
         end
@@ -101,6 +101,7 @@ class AccountController < ApplicationController
   
   def send_verify
     AccountMailer.deliver_verify(@session['user'])
+    flash[:notice] = "Verification sent to your email account."
     redirect_back_or_default :action => "welcome"
   end
 end

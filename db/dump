@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mysqldump -h msdb.collectivesource.com -u msdb -p ms_development > checkpoint
+

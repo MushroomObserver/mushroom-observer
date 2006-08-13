@@ -516,19 +516,16 @@ class ObserverController < ApplicationController
   # users_by_name.rhtml
   def users_by_name
     user = session['user']
-    if user.nil?
-      redirect_to :action => 'list_observations'
+    if check_permission(0)
+      @users = User.find(:all, :order => "'last_login' desc")
     else
-      if verify_user(user)
-        @users = User.find(:all, :order => "'last_login' desc")
-      end
+      redirect_to :action => 'list_observations'
     end
   end
 
   helper_method :check_permission
   def check_permission(user_id)
     user = session['user']
-    logger.warn(user.verified)
     !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
   end
 

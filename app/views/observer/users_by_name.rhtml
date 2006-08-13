@@ -1,4 +1,4 @@
-<div id="Title">Users by Name</div>
+<div id="Title">Users Verified</div>
 <table cellpadding="5" cellspacing="5" border=1>
 	<tr class="Data">
 		<td>
@@ -15,6 +15,9 @@
 		</td>
 		<td>
 			Created
+		</td>
+		<td>
+			Verified
 		</td>
 	</tr>
 	<%
@@ -34,6 +37,9 @@
 				</td>
 				<td>
 					<%= user.created %>
+				</td>
+				<td>
+					<%= user.verified %>
 				</td>
 			</tr>
 	<%  end %>
