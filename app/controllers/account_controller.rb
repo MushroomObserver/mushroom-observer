@@ -27,6 +27,7 @@ class AccountController < ApplicationController
         if @user.save      
           @session['user'] = User.authenticate(@user.login, @params['user']['password'])
           flash[:notice]  = "Signup successful"
+          AccountMailer.deliver_verify(@user)
           redirect_back_or_default :action => "welcome"          
         end
       when :get
@@ -76,4 +77,30 @@ class AccountController < ApplicationController
   def welcome
   end
   
+  def reverify
+  end
+  
+  def verify
+    if @params['id']
+      @user = User.find(@params['id'])
+      @user.verified = Time.now
+      @user.save
+      if @session['user'].id == @user.id
+        @session['user'].verified = Time.now
+      end
+    else
+      render :action => "reverify"
+    end
+  end
+  
+  def test_verify
+    user = @session['user']
+    email = AccountMailer.create_verify(user)
+    render(:text => "<pre>" + email.encoded + "</pre>")
+  end
+  
+  def send_verify
+    AccountMailer.deliver_verify(@session['user'])
+    redirect_back_or_default :action => "welcome"
+  end
 end

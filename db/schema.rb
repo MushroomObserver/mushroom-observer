@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define() do
+ActiveRecord::Schema.define(:version => 4) do
 
   create_table "comments", :force => true do |t|
     t.column "created", :datetime
@@ -17,7 +17,6 @@ ActiveRecord::Schema.define() do
     t.column "modified", :datetime
     t.column "content_type", :string, :limit => 100
     t.column "title", :string, :limit => 100
-    t.column "owner", :string, :limit => 100
     t.column "user_id", :integer
     t.column "when", :date
     t.column "notes", :text
@@ -32,13 +31,27 @@ ActiveRecord::Schema.define() do
     t.column "created", :datetime
     t.column "modified", :datetime
     t.column "when", :date
-    t.column "who", :string, :limit => 100
     t.column "user_id", :integer
     t.column "where", :string, :limit => 100
     t.column "what", :string, :limit => 100
     t.column "specimen", :boolean, :default => false, :null => false
     t.column "notes", :text
     t.column "thumb_image_id", :integer
+  end
+
+  create_table "observations_species_lists", :id => false, :force => true do |t|
+    t.column "observation_id", :integer, :default => 0, :null => false
+    t.column "species_list_id", :integer, :default => 0, :null => false
+  end
+
+  create_table "species_lists", :force => true do |t|
+    t.column "created", :datetime
+    t.column "modified", :datetime
+    t.column "when", :date
+    t.column "user_id", :integer
+    t.column "where", :string, :limit => 100
+    t.column "title", :string, :limit => 100
+    t.column "notes", :text
   end
 
   create_table "users", :force => true do |t|
@@ -49,6 +62,7 @@ ActiveRecord::Schema.define() do
     t.column "name", :string, :limit => 80
     t.column "created", :datetime
     t.column "last_login", :datetime
+    t.column "verified", :datetime
   end
 
 end

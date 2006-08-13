@@ -37,8 +37,10 @@ class ObserverController < ApplicationController
   # I don't want an extra key for the observation since I'm using the params to create the
   # comment.
   def add_comment
-    @comment = Comment.new
-    @observation = session[:observation]
+    if verify_user(session['user'])
+      @comment = Comment.new
+      @observation = session[:observation]
+    end
   end
 
   # show_observation.rhtml -> show_comment.rhtml
@@ -51,17 +53,20 @@ class ObserverController < ApplicationController
   # Here's where params is used to create the comment and
   # the observation is recovered from session.
   def save_comment
-    @comment = Comment.new(params[:comment])
-    @comment.created = Time.now
-    @observation = session[:observation]
-    @comment.observation = @observation
-    @comment.user = session['user']
-    if @comment.save
-      flash[:notice] = 'Comment was successfully added.'
-      redirect_to(:action => 'show_observation', :id => @observation)
-    else
-      flash[:notice] = sprintf('Unable to save comment: %s', @comment.user)
-      render :action => 'add_comment'
+    user = session['user']
+    if verify_user(user)
+      @comment = Comment.new(params[:comment])
+      @comment.created = Time.now
+      @observation = session[:observation]
+      @comment.observation = @observation
+      @comment.user = user
+      if @comment.save
+        flash[:notice] = 'Comment was successfully added.'
+        redirect_to(:action => 'show_observation', :id => @observation)
+      else
+        flash[:notice] = sprintf('Unable to save comment: %s', @comment.summary)
+        render :action => 'add_comment'
+      end
     end
   end
   
@@ -125,22 +130,27 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> new_observation.rhtml
   def new_observation
-		session['observation_ids'] = nil
-    @observation = Observation.new
-    @observation.what = 'Unknown'
+    if verify_user(@session['user'])
+  		session['observation_ids'] = nil
+      @observation = Observation.new
+      @observation.what = 'Unknown'
+    end
   end
 
   # new_observation.rhtml -> list_observations.rhtml
   def create_observation
-    @observation = Observation.new(params[:observation])
-    @observation.created = Time.now
-    @observation.modified = @observation.created
-    @observation.user = session['user']
-    if @observation.save
-      flash[:notice] = 'Observation was successfully created.'
-      redirect_to :action => 'show_observation', :id => @observation
-    else
-      render :action => 'new_observation'
+    user = session['user']
+    if verify_user(user)
+      @observation = Observation.new(params[:observation])
+      @observation.created = Time.now
+      @observation.modified = @observation.created
+      @observation.user = user
+      if @observation.save
+        flash[:notice] = 'Observation was successfully created.'
+        redirect_to :action => 'show_observation', :id => @observation
+      else
+        render :action => 'new_observation'
+      end
     end
   end
 
@@ -360,29 +370,35 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> new_species_list.rhtml
   def new_species_list
-		session['observation_ids'] = nil
-    @species_list = SpeciesList.new
+    user = session['user']
+    if verify_user(user)
+  		session['observation_ids'] = nil
+      @species_list = SpeciesList.new
+    end
   end
 
   def create_species_list
-    args = params[:species_list]
-    now = Time.now
-    args["created"] = now
-    args["modified"] = now
-    args["user"] = session['user']
-    @species_list = SpeciesList.new(args)
+    user = session['user']
+    if verify_user(user)
+      args = params[:species_list]
+      now = Time.now
+      args["created"] = now
+      args["modified"] = now
+      args["user"] = user
+      @species_list = SpeciesList.new(args)
 
-    if @species_list.save
-      flash[:notice] = 'Species list was successfully created.'
-      redirect_to :action => 'list_species_lists'
-      species = args["species"]
-      args.delete("species")
-      args.delete("title")
-      for s in species
-        @species_list.construct_observation(s.strip(), args)
+      if @species_list.save
+        flash[:notice] = 'Species list was successfully created.'
+        redirect_to :action => 'list_species_lists'
+        species = args["species"]
+        args.delete("species")
+        args.delete("title")
+        for s in species
+          @species_list.construct_observation(s.strip(), args)
+        end
+      else
+        render :action => 'new_species_list'
       end
-    else
-      render :action => 'new_species_list'
     end
   end
 
@@ -491,21 +507,29 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> manage_species_lists.rhtml
   def manage_species_lists
-    @observation = session[:observation]
+    user = session['user']
+    if verify_user(user)
+      @observation = session[:observation]
+    end
   end
 
   # users_by_name.rhtml
   def users_by_name
-    if session['user'].nil?
+    user = session['user']
+    if user.nil?
       redirect_to :action => 'list_observations'
     else
-      @users = User.find(:all, :order => "'last_login' desc")
+      if verify_user(user)
+        @users = User.find(:all, :order => "'last_login' desc")
+      end
     end
   end
 
   helper_method :check_permission
   def check_permission(user_id)
-    !session['user'].nil? && ((user_id == session['user'].id) || (session['user'].id == 0))
+    user = session['user']
+    logger.warn(user.verified)
+    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
   end
 
   protected
@@ -518,5 +542,14 @@ class ObserverController < ApplicationController
     result
   end
 
+  def verify_user(user)
+    result = false
+    if @session['user'].verified.nil?
+      redirect_to :controller => 'account', :action=> 'reverify', :id => @session['user'].id
+    else
+      result = true
+    end
+    result
+  end
   # Look in obs_extras.rb for code for uploading directory trees of images.
 end

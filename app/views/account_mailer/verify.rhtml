@@ -1,0 +1,5 @@
+Hello <%= @user.login %>
+
+Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
+
+<%= sprintf "%s/account/verify/%d", DOMAIN, @user.id %>

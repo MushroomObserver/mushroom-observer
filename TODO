@@ -2,13 +2,9 @@ List window still gets scrunched under Safari
 
 First public release
 
-User preference for hiding observations with no images?
-
 Bug from adding data:  Is this fixable?
   Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
      show 1, show 2, manage 1 goes to 2
-
-More color themes: Boletus
 
 confirming email when creating an account
 mailing a new password for dealing with lost passwords
@@ -16,29 +12,28 @@ mailing a new password for dealing with lost passwords
 Event RSS feed
 Site news page - Need a general blog for the site
 
-Should there be prev/next for images and comments?
-Should there also be a species_list list?
+More color themes: Boletus
+
+More rails-style tests
 
 Add support for uploading Name species lists
 
-Write more notes on my images
+Names - Replace the 'what' field with an association with a list of 'Name' objects.
+  Name objects would allow for things like author citations, synonymy, references, descriptions etc.
+
+Use names to support real species lists
+
+Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
 
 Hook 'where' up to Google Maps
-
-More rails-style tests
 
 General search mechanism
 Sorting
 
-Check for duplicate images, image garbage collection
-
 Provide the ability to create an observation as a side effect of uploading an image
   rather than requiring the observation to exist before allowing image upload.
 
-Names - Replace the 'what' field with an association with a list of 'Name' objects.
-  Name objects would allow for things like author citations, synonymy, references etc.
-
-Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
-
 Herbarium records - Provide a standard way to describe herbarium collections.
 
+
+Check for duplicate images, image garbage collection

@@ -1,0 +1,3 @@
+AccountMailer#new_account
+
+Find me in app/views/account_mailer/new_account.rhtml
