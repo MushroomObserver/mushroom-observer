@@ -1,16 +1,14 @@
 List window still gets scrunched under Safari
 
-First public release
-
 Bug from adding data:  Is this fixable?
   Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
      show 1, show 2, manage 1 goes to 2
 
-confirming email when creating an account
 mailing a new password for dealing with lost passwords
 
+Site News page
+
 Event RSS feed
-Site news page - Need a general blog for the site
 
 More color themes: Boletus
 
@@ -35,5 +33,9 @@ Provide the ability to create an observation as a side effect of uploading an im
 
 Herbarium records - Provide a standard way to describe herbarium collections.
 
+show_observation pages could have pagination_links instead of next/prev links.
 
 Check for duplicate images, image garbage collection
+
+New ideas:
+Group affiliations (useful for searching)

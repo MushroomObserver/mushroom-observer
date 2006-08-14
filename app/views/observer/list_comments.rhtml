@@ -1,5 +1,7 @@
 <div id="Title">Comments</div>
 
+<%= pagination_links(@comment_pages) %>
+
 <table  cellpadding="5" cellspacing="0">
   <%
      odd_or_even = 0
@@ -27,7 +29,6 @@
   <% end %>
 </table>
 
-<%= link_to 'Previous page', { :page => @comment_pages.current.previous } if @comment_pages.current.previous %>
-<%= link_to 'Next page', { :page => @comment_pages.current.next } if @comment_pages.current.next %> 
+<%= pagination_links(@comment_pages) %>
 
 <br />

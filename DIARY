@@ -201,5 +201,8 @@ Checked in the following list of changes:
   Link back to observation from manage_species_lists
   Added list size to species_lists_by_title and put it in a table
 
+Sat Aug 12 - Added verification email for new accounts.  Checked in changes and updated external site.  Ran into a bug during deployment.  Site is now ready to be more widely advertised.
 
+Sun Aug 13 - Change Next/Prev links at the bottom of list_* pages to pagination_links at the top and bottom.
 
+Mon Aug 14 - Added New Account link to Login page.

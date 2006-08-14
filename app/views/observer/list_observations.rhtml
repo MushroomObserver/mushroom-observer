@@ -1,4 +1,5 @@
 <div id="Title">Observations</div>
+	<%= pagination_links(@observation_pages) %>
 	<table cellpadding="5" cellspacing="0">
 		<%
 			odd_or_even = 0
@@ -42,14 +43,5 @@
 			session['observation_ids'] = observation_ids
 		%>
 	</table>
-<%=
-	if @observation_pages.current.previous
-		link_to("Previous page", { :page => @observation_pages.current.previous })
-	end
-%>
-<%=
-	if @observation_pages.current.next
-		link_to("Next page", { :page => @observation_pages.current.next })
-    end
-%>
+	<%= pagination_links(@observation_pages) %>
 <br/>

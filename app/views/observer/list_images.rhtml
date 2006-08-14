@@ -1,5 +1,7 @@
 <div id="Title">Images</div>
 
+<%= pagination_links(@image_pages) %>
+
 <table  cellpadding="5" cellspacing="0">
   <%
      odd_or_even = 0
@@ -28,7 +30,6 @@
   <% end %>
 </table>
 
-<%= link_to 'Previous page', { :page => @image_pages.current.previous } if @image_pages.current.previous %>
-<%= link_to 'Next page', { :page => @image_pages.current.next } if @image_pages.current.next %> 
+<%= pagination_links(@image_pages) %>
 
 <br />
