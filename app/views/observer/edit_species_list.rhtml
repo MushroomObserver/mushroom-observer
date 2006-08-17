@@ -1,6 +1,7 @@
+<% @title = 'Editing Species List: ' + h(@species_list.unique_name) %>
 <%= link_to 'Cancel (Show Species List)', :action => 'show_species_list', :id => @species_list %><br/>
 
-<div id="Title">Editing Species List: <%= h @species_list.unique_name %></div>
+<div id="Title"><%= @title %></div>
 
 <%= start_form_tag :action => 'update_species_list', :id => @species_list %>
 <br/>

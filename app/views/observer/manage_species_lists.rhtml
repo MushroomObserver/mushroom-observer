@@ -1,6 +1,7 @@
+<% @title = 'Manage Species Lists for ' + h(@observation.unique_name) %>
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %>
 
-<div id="Title">Manage Species Lists for</br><%= h @observation.unique_name %></div>
+<div id="Title"><%= @title %></div>
 
 	<%
 		all_lists = SpeciesList.find(:all,

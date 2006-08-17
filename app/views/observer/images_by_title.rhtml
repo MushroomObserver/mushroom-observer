@@ -1,4 +1,5 @@
-<div id="Title">Images by Title</div>
+<% @title = 'Images by Title' %>
+<div id="Title"><%= @title %></div>
 <%
   for image in @images %>
 <%= link_to(sprintf("%s %s %s", h(image.unique_name), image.when,

@@ -206,3 +206,5 @@ Sat Aug 12 - Added verification email for new accounts.  Checked in changes and 
 Sun Aug 13 - Change Next/Prev links at the bottom of list_* pages to pagination_links at the top and bottom.
 
 Mon Aug 14 - Added New Account link to Login page.
+
+Wed Aug 16 - Tweaked the titles so they are more distinct and include the unique name when appropriate.  Added password resetting process.

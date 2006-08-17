@@ -35,6 +35,28 @@ class AccountController < ApplicationController
     end      
   end  
   
+  def email_new_password
+    case @request.method
+      when :post
+        login = @params['user']['login']
+        @user = User.find(:first, :conditions => ["login = ?", login])
+        if @user.nil?
+          flash[:notice] = sprintf("Unable to find the user, %s.", login)
+        else
+          password = random_password(10)
+          @user.change_password(password)
+          if @user.save      
+            @session['user'] = User.authenticate(@user.login, @params['user']['password'])
+            flash[:notice]  = "Password successfully changed.  New password has been sent to your email account."
+            AccountMailer.deliver_new_password(@user, password)
+          end
+        end
+        render :action => "login"          
+      when :get
+        @user = User.new
+    end      
+  end  
+  
   def prefs
     @user = @session['user']
     case @request.method

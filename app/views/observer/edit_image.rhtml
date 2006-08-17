@@ -1,6 +1,7 @@
+<% @title = 'Editing Image: ' + h(@image.unique_name) %>
 <%= link_to 'Cancel (Show Image)', :action => 'show_image', :id => @image %>
 
-<div id="Title">Editing Image: <%= h @image.unique_name %></div>
+<div id="Title"><%= @title %></div>
 
 <%= start_form_tag :action => 'update_image', :id => @image %>
 	<center><%= submit_tag 'Save Edits' %></center>

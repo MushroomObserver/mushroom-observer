@@ -1,3 +1,4 @@
+<% @title = 'Image: ' + h(@image.unique_name) %>
 <%= link_to 'Show Normal Size', :action => 'show_image', :id => @image %>
 <% if check_permission(@image.user_id) %>
 	|| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
@@ -5,7 +6,7 @@
                   :confirm => "Are you sure?" %>
 <% end %>
 
-<div id="Title">Image: <%= h @image.unique_name %></div>
+<div id="Title"><%= @title %></div>
 <div id="copyright">Copyright &copy <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %></div>
 
 <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),

@@ -1,3 +1,4 @@
+<% @title = 'Observation: ' + h(@observation.unique_name) %>
 <%= link_to 'Add Comment', :action => 'add_comment' %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% if check_permission(@observation.user_id) %>
@@ -11,7 +12,7 @@
 		| <%= link_to 'Next', :action => 'next_observation', :id => @observation %>
 <%  end %>
 
-<div id="Title">Observation: <%= h @observation.unique_name %></div>
+<div id="Title"><%= @title %></div>
 
 <table cellpadding="10">
 <tr>

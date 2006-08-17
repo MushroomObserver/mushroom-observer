@@ -1,4 +1,5 @@
-<div id="Title">Observations</div>
+<% @title = 'Observations' %>
+<div id="Title"><%= @title %></div>
 	<%= pagination_links(@observation_pages) %>
 	<table cellpadding="5" cellspacing="0">
 		<%

@@ -1,3 +1,4 @@
+<% @title = 'Comment on ' + h(@comment.observation.unique_name) %>
 <%= link_to 'Goto Observation', :action => 'show_observation', :id => @comment.observation %>
 <% if check_permission(@comment.user_id) %>
 	|| <%= link_to 'Edit', :action => 'edit_comment', :id => @comment %>
@@ -5,7 +6,7 @@
                                :confirm => "Are you sure?" %>
 <% end %>
 
-<div id="Title">Comment on <%= h @comment.observation.unique_name %></div>
+<div id="Title"><%= @title %></div>
 <p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
 <p>By: <%= @comment.user.unique_name %></p>
 <p>Summary: <%= @comment.summary %></p>

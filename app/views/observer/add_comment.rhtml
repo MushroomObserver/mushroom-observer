@@ -1,6 +1,7 @@
+<% @title = 'Add Comment to ' + h(@observation.unique_name) %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<div id="Title">Add Comment to <%= h @observation.unique_name %></div>
+<div id="Title"><%= @title %></div>
 
 <%= start_form_tag :action => 'save_comment' %>
 <center><%= submit_tag "Create" %></center>

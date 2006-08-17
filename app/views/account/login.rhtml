@@ -17,11 +17,13 @@
 	<br/><br/>
 	
 	<p>
-	Or <%= link_to "Create a New Account", :action => "signup" %>
+		I forgot my password.  <%= link_to "Email me a new one.", :action => "email_new_password" %>
+	</p>
+	<p>
+		I don't have an account.  <%= link_to "Create a new account.", :action => "signup" %>
 	</p>
 	
-Forgot your password?  Send mail to nathan at collectivesource.com.<br/>
-An automated mechanism for managing your password through your email account is planned, but has not yet been implemented.
+If you are having problems logging into your account, send email to nathan at collectivesource.com.<br/>
 
 </div>
 

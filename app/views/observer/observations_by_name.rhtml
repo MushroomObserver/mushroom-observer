@@ -1,4 +1,5 @@
-<div id="Title">Observations by Name</div>
+<% @title = 'Observations by Name' %>
+<div id="Title"><%= @title %></div>
 <%
 	observation_ids = []
 	for observation in @observations

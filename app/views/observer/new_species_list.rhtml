@@ -1,4 +1,5 @@
-<div id="Title">New Species List</div></br>
+<% @title = 'New Species List' %>
+<div id="Title"><%= @title %></div></br>
 
 <%= start_form_tag :action => 'create_species_list' %>
 <center><%= submit_tag "Create" %></center>

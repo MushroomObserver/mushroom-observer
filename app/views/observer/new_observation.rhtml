@@ -1,4 +1,5 @@
-<div id="Title">New Observation</div></br>
+<% @title = 'New Observation' %>
+<div id="Title"><%= @title %></div></br>
 
 <%= start_form_tag :action => 'create_observation' %>
 <center><%= submit_tag "Create" %></center>

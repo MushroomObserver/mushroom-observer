@@ -1,10 +1,11 @@
+<% @title = 'Species List: ' + h(@species_list.unique_name) %>
 <% if check_permission(@species_list.user_id) %>
   <%= link_to 'Edit Species List', :action => 'edit_species_list', :id => @species_list %>
   | <%= link_to 'Destroy', { :action => 'destroy_species_list', :id => @species_list },
                              :confirm => "Are you sure?" %>
 <% end %>
 
-<div id="Title">Species List: <%= h @species_list.unique_name %></div>
+<div id="Title"><%= @title %></div>
 
 <p>When: <span class="Data"><%= @species_list.when %></span></p>
 <p>Where: <span class="Data"><%= h @species_list.where %></span></p>

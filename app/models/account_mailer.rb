@@ -8,13 +8,11 @@ class AccountMailer < ActionMailer::Base
     @from         = 'accounts@mushroomobserver.org'
   end
 
-  def new_password(sent_at = Time.now)
-    @subject    = 'AccountMailer#new_password'
-    @body       = {}
-    @recipients = ''
+  def new_password(user, password)
+    @subject    = 'New Password for Mushroom Observer Account'
+    @body["password"] = password
+    @recipients = user.email
     @bcc        = 'nathan@collectivesource.com'
-    @from       = ''
-    @sent_on    = sent_at
-    @headers    = {}
+    @from       = 'accounts@mushroomobserver.org'
   end
 end
