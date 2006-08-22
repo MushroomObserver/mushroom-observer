@@ -4,13 +4,15 @@ Bug from adding data:  Is this fixable?
   Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
      show 1, show 2, manage 1 goes to 2
 
-Event RSS feed
-
 More color themes: Boletus
 
 More rails-style tests
 
+next/prev links for images
+
 Add support for uploading Name species lists
+
+user pages
 
 Names - Replace the 'what' field with an association with a list of 'Name' objects.
   Name objects would allow for things like author citations, synonymy, references, descriptions etc.
@@ -37,3 +39,5 @@ New ideas:
 Mycology club affiliations (useful for searching)
 Copying species lists
 Local client that can only add
+Provide a strong image focus option
+Summary pages for higher level taxa

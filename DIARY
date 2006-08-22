@@ -207,4 +207,8 @@ Sun Aug 13 - Change Next/Prev links at the bottom of list_* pages to pagination_
 
 Mon Aug 14 - Added New Account link to Login page.
 
-Wed Aug 16 - Tweaked the titles so they are more distinct and include the unique name when appropriate.  Added password resetting process.
+Wed Aug 16 - Tweaked the titles so they are more distinct and include the unique name when appropriate.  Motivated by Google getting the 'show_observation' pages mixed up.  Added password resetting process.
+
+Thurs Aug 17 - Started work on RSS feed.
+
+Mon Aug 21 - Ready to release RSS feed.

@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 4) do
+ActiveRecord::Schema.define(:version => 5) do
 
   create_table "comments", :force => true do |t|
     t.column "created", :datetime
@@ -42,6 +42,20 @@ ActiveRecord::Schema.define(:version => 4) do
   create_table "observations_species_lists", :id => false, :force => true do |t|
     t.column "observation_id", :integer, :default => 0, :null => false
     t.column "species_list_id", :integer, :default => 0, :null => false
+  end
+
+  create_table "rss_events", :force => true do |t|
+    t.column "title", :string, :limit => 100
+    t.column "who", :string, :limit => 80
+    t.column "date", :datetime
+    t.column "url", :string, :limit => 100
+  end
+
+  create_table "rss_eventsCopy", :force => true do |t|
+    t.column "title", :string, :limit => 100
+    t.column "who", :string, :limit => 80
+    t.column "date", :datetime
+    t.column "url", :string, :limit => 100
   end
 
   create_table "species_lists", :force => true do |t|

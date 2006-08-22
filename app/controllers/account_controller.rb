@@ -28,6 +28,13 @@ class AccountController < ApplicationController
           @session['user'] = User.authenticate(@user.login, @params['user']['password'])
           flash[:notice]  = "Signup successful.  Verification sent to your email account."
           AccountMailer.deliver_verify(@user)
+          rss = RssEvent.new({:title => "User joined: " + @user.login,
+                              :who => @user.login,
+                              :date => now,
+                              :url => ''})
+          if rss
+            rss.save
+          end
           redirect_back_or_default :action => "welcome"          
         end
       when :get

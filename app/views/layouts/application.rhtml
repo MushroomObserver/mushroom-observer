@@ -1,6 +1,7 @@
 <html>
 <head>
   <META http-equiv=Content-Type content="text/html; charset=UTF-8"/>
+  <%= auto_discovery_link_tag(:rss , :controller => 'observer', :action  =>  'rss') %>
   <title>Mushroom Observer: <%= if @title.nil? then controller.action_name else @title end %></title>
   <%= css = nil
 	if CSS.member?(controller.action_name)

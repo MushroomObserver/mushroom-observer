@@ -1,0 +1,19 @@
+xml.instruct! :xml, :version=>"1.0" 
+xml.rss(:version=>"2.0"){
+  xml.channel{
+    xml.title("Mushroom Observer")
+    xml.link(DOMAIN + '/observer/rss')
+    xml.description("Woof - List of changes to Mushroom Observer as they happen.")
+    xml.language("en-us")
+    for event in @events
+      xml.item do
+        xml.title(event.title)
+        xml.author(event.who)
+        # rfc822
+        xml.pubDate(event.date.rfc2822)
+        xml.link(DOMAIN + event.url)
+        xml.guid(DOMAIN + event.url)
+      end
+    end
+  }
+}

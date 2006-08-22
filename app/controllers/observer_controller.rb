@@ -24,7 +24,7 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> list_comments.rhtml
   def list_comments
-    session['observation_ids'] = nil
+    @session['observation_ids'] = nil
     store_location
     @comment_pages, @comments = paginate(:comments,
                                      :order => "'created' desc",
@@ -37,9 +37,9 @@ class ObserverController < ApplicationController
   # I don't want an extra key for the observation since I'm using the params to create the
   # comment.
   def add_comment
-    if verify_user(session['user'])
+    if verify_user(@session['user'])
       @comment = Comment.new
-      @observation = session[:observation]
+      @observation = @session[:observation]
     end
   end
 
@@ -53,15 +53,22 @@ class ObserverController < ApplicationController
   # Here's where params is used to create the comment and
   # the observation is recovered from session.
   def save_comment
-    user = session['user']
+    user = @session['user']
     if verify_user(user)
       @comment = Comment.new(params[:comment])
       @comment.created = Time.now
-      @observation = session[:observation]
+      @observation = @session[:observation]
       @comment.observation = @observation
       @comment.user = user
       if @comment.save
         flash[:notice] = 'Comment was successfully added.'
+        rss = RssEvent.new({:title => 'Comment created: ' + @comment.summary,
+                            :who => user.login,
+                            :date => Time.now,
+                            :url => sprintf('/observer/show_comment/%d', @comment.id)})
+        if rss
+          rss.save
+        end
         redirect_to(:action => 'show_observation', :id => @observation)
       else
         flash[:notice] = sprintf('Unable to save comment: %s', @comment.summary)
@@ -85,6 +92,13 @@ class ObserverController < ApplicationController
       if @comment.update_attributes(params[:comment])
         @comment.save
         flash[:notice] = 'Comment was successfully updated.'
+        rss = RssEvent.new({:title => "Comment updated: " + @comment.summary,
+                            :who => @session['user'].login,
+                            :date => Time.now,
+                            :url => sprintf('/observer/show_comment/%d', @comment.id)})
+        if rss
+          rss.save
+        end
         redirect_to :action => 'show_comment', :id => @comment
       else
         render :action => 'edit_comment'
@@ -99,6 +113,13 @@ class ObserverController < ApplicationController
     @comment = Comment.find(params[:id])
     if check_user_id(@comment.user_id)
       id = @comment.observation_id
+      rss = RssEvent.new({:title => "Comment destroyed: " + @comment.summary,
+                          :who => @session['user'].login,
+                          :date => Time.now,
+                          :url => sprintf('/observer/show_observation/%d', id)})
+      if rss
+        rss.save
+      end
       @comment.destroy
       redirect_to :action => 'show_observation', :id => id
     else
@@ -125,13 +146,13 @@ class ObserverController < ApplicationController
   def show_observation
     store_location
     @observation = Observation.find(params[:id])
-    session[:observation] = @observation
+    @session[:observation] = @observation
   end
 
   # left-hand panel -> new_observation.rhtml
   def new_observation
     if verify_user(@session['user'])
-  		session['observation_ids'] = nil
+  		@session['observation_ids'] = nil
       @observation = Observation.new
       @observation.what = 'Unknown'
     end
@@ -139,27 +160,35 @@ class ObserverController < ApplicationController
 
   # new_observation.rhtml -> list_observations.rhtml
   def create_observation
-    user = session['user']
+    user = @session['user']
     if verify_user(user)
       @observation = Observation.new(params[:observation])
-      @observation.created = Time.now
-      @observation.modified = @observation.created
+      now = Time.now
+      @observation.created = now
+      @observation.modified = now
       @observation.user = user
       if @observation.save
         flash[:notice] = 'Observation was successfully created.'
+        rss = RssEvent.new({:title => "Observation created: " + @observation.unique_name,
+                            :who => user.login,
+                            :date => now,
+                            :url => sprintf('/observer/show_observation/%d', @observation.id)})
+        if rss
+          rss.save
+        end
         redirect_to :action => 'show_observation', :id => @observation
       else
         render :action => 'new_observation'
       end
     end
   end
-
+  
   # list_observation.rhtml, show_observation.rhtml -> edit_observation.rhtml
   # Setup session to have the right observation.
   def edit_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
-      session[:observation] = @observation
+      @session[:observation] = @observation
     else 
       render :action => 'show_observation'
     end
@@ -181,11 +210,18 @@ class ObserverController < ApplicationController
 
         # Why does this work and the following line doesn't?
         # Tested with 'obs_mod' rather than 'modified'.  Same effect.
-        @observation.modified = Time.new
+        @observation.modified = Time.now
         # @observation.touch
         @observation.save
 
         flash[:notice] = 'Observation was successfully updated.'
+        rss = RssEvent.new({:title => "Observation updated: " + @observation.unique_name,
+                            :who => @session['user'].login,
+                            :date => Time.now,
+                            :url => sprintf('/observer/show_observation/%d', @observation.id)})
+        if rss
+          rss.save
+        end
         redirect_to :action => 'show_observation', :id => @observation
       else
         render :action => 'edit_observation'
@@ -200,6 +236,13 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       lists = @observation.species_lists
+      rss = RssEvent.new({:title => "Observation destroyed: " + @observation.unique_name,
+                          :who => @session['user'].login,
+                          :date => Time.now,
+                          :url => '/observer/list_observations'})
+      if rss
+        rss.save
+      end
       @observation.destroy
       # Check any species_lists to see if they are now empty.  If so destroy them.
       # Is there a better way to do this as part of the species_list model?
@@ -216,7 +259,7 @@ class ObserverController < ApplicationController
 
   def prev_observation
     @observation = Observation.find(params[:id])
-    obs = session['observation_ids']
+    obs = @session['observation_ids']
     index = obs.index(params[:id].to_i)
     if index.nil? or obs.nil? or obs.length == 0
       index = 0
@@ -232,7 +275,7 @@ class ObserverController < ApplicationController
 
   def next_observation
     @observation = Observation.find(params[:id])
-    obs = session['observation_ids']
+    obs = @session['observation_ids']
     index = obs.index(params[:id].to_i)
     if index.nil? or obs.nil? or obs.length == 0
       index = 0
@@ -251,7 +294,7 @@ class ObserverController < ApplicationController
 
   # Various -> list_images.rhtml
   def list_images
-    session['observation_ids'] = nil
+    @session['observation_ids'] = nil
     store_location
     @image_pages, @images = paginate(:images,
                                      :order => "'when' desc",
@@ -260,7 +303,7 @@ class ObserverController < ApplicationController
 
   # images_by_title.rhtml
   def images_by_title
-    session['observation_ids'] = nil
+    @session['observation_ids'] = nil
     store_location
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
@@ -295,6 +338,13 @@ class ObserverController < ApplicationController
         @image.modified = Time.now
         @image.save
         flash[:notice] = 'Image was successfully updated.'
+        rss = RssEvent.new({:title => "Image updated: " + @image.unique_name,
+                            :who => @session['user'].login,
+                            :date => @image.modifed,
+                            :url => sprintf('/observer/show_image/%d', @image.id)})
+        if rss
+          rss.save
+        end
         redirect_to :action => 'show_image', :id => @image
       else
         render :action => 'edit_image'
@@ -312,6 +362,13 @@ class ObserverController < ApplicationController
       for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
         observation.thumb_image_id = nil
         observation.save
+        rss = RssEvent.new({:title => "Image destroyed: " + @image.unique_name,
+                            :who => @session['user'].login,
+                            :date => Time.now,
+                            :url => sprintf('/observer/show_observation/%d', observation.id)})
+        if rss
+          rss.save
+        end
       end
       @image.destroy
       redirect_to :action => 'list_images'
@@ -322,7 +379,7 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> manage_images.rhtml
   def manage_images
-    @observation = session[:observation]
+    @observation = @session[:observation]
     if check_user_id(@observation.user_id)
       @img = Image.new
     else
@@ -332,15 +389,22 @@ class ObserverController < ApplicationController
   
   # manage_images.rhtml -> save_image -> show_observation.rhtml
   def save_image
-    @observation = session[:observation]
+    @observation = @session[:observation]
     if check_user_id(@observation.user_id)
       # Upload image
       @img = Image.new(params[:image])
       @img.created = Time.now
       @img.modified = @img.created
-      @img.user = session['user']
+      @img.user = @session['user']
       if @img.save
         if @img.save_image
+          rss = RssEvent.new({:title => "Image created: " + @img.unique_name,
+                              :who => @session['user'].login,
+                              :date => @img.created,
+                              :url => sprintf('/observer/show_image/%d', @img.id)})
+          if rss
+            rss.save
+          end
           @observation.add_image(@img)
           @observation.save
         else
@@ -370,15 +434,15 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> new_species_list.rhtml
   def new_species_list
-    user = session['user']
+    user = @session['user']
     if verify_user(user)
-  		session['observation_ids'] = nil
+  		@session['observation_ids'] = nil
       @species_list = SpeciesList.new
     end
   end
 
   def create_species_list
-    user = session['user']
+    user = @session['user']
     if verify_user(user)
       args = params[:species_list]
       now = Time.now
@@ -389,6 +453,13 @@ class ObserverController < ApplicationController
 
       if @species_list.save
         flash[:notice] = 'Species list was successfully created.'
+        rss = RssEvent.new({:title => "Species list created: " + @species_list.unique_name,
+                            :who => user.login,
+                            :date => now,
+                            :url => sprintf('/observer/show_species_list/%d', @species_list.id)})
+        if rss
+          rss.save
+        end
         redirect_to :action => 'list_species_lists'
         species = args["species"]
         args.delete("species")
@@ -408,7 +479,7 @@ class ObserverController < ApplicationController
   def show_species_list
     store_location
     @species_list = SpeciesList.find(params[:id])
-    session[:species_list] = @species_list
+    @session[:species_list] = @species_list
   end
 
   # Needs both a species_list and an observation.
@@ -418,11 +489,6 @@ class ObserverController < ApplicationController
       observation = Observation.find(params[:observation])
       species_list.modified = Time.now
       species_list.observations.delete(observation)
-      # Check to see if the species_list is empty.  If so, destroy it.
-      if species_list.observations.length == 0 # Is there a good way to move this behavior into the species_list model?
-        flash[:notice] = 'Deleted empty species list'
-        species_list.destroy
-      end
       redirect_to :action => 'manage_species_lists', :id => observation
     end
   end
@@ -440,7 +506,7 @@ class ObserverController < ApplicationController
   
   # left-hand panel -> list_species_lists.rhtml
   def list_species_lists
-		session['observation_ids'] = nil
+		@session['observation_ids'] = nil
     store_location
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc",
@@ -451,6 +517,13 @@ class ObserverController < ApplicationController
   def destroy_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
+      rss = RssEvent.new({:title => "Species list destroyed: " + @species_list.unique_name,
+                          :who => @session['user'].login,
+                          :date => Time.now,
+                          :url => 'list_species_lists'})
+      if rss
+        rss.save
+      end
       @species_list.destroy
       redirect_to :action => 'list_species_lists'
     else
@@ -460,7 +533,7 @@ class ObserverController < ApplicationController
 
   # species_lists_by_title.rhtml
   def species_lists_by_title
-		session['observation_ids'] = nil
+		@session['observation_ids'] = nil
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
   end
@@ -470,7 +543,7 @@ class ObserverController < ApplicationController
   def edit_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
-      session[:species_list] = @species_list
+      @session[:species_list] = @species_list
     else 
       render :action => 'show_species_list'
     end
@@ -483,16 +556,23 @@ class ObserverController < ApplicationController
     if check_user_id(@species_list.user_id) # Even though edit makes this check, avoid bad guys going directly
       args = params[:species_list]
       if @species_list.update_attributes(args)
-        now = Time.new
+        now = Time.now
         @species_list.modified = now
         redirect_to :action => 'show_species_list', :id => @species_list
         if @species_list.save
           flash[:notice] = 'Species List was successfully updated.'
+          rss = RssEvent.new({:title => "Species list updated: " + @species_list.unique_name,
+                              :who => @session['user'].login,
+                              :date => now,
+                              :url => sprintf('/observer/show_species_list/%d', @species_list.id)})
+          if rss
+            rss.save
+          end
           new_species = args["species"]
           args.delete("species")
           args.delete("title")
           args["created"] = now
-          args["user"] = session['user']
+          args["user"] = @session['user']
           for s in new_species
             @species_list.construct_observation(s.strip(), args)
           end
@@ -507,15 +587,15 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> manage_species_lists.rhtml
   def manage_species_lists
-    user = session['user']
+    user = @session['user']
     if verify_user(user)
-      @observation = session[:observation]
+      @observation = @session[:observation]
     end
   end
 
   # users_by_name.rhtml
   def users_by_name
-    user = session['user']
+    user = @session['user']
     if check_permission(0)
       @users = User.find(:all, :order => "'last_login' desc")
     else
@@ -523,10 +603,16 @@ class ObserverController < ApplicationController
     end
   end
 
+  def rss
+    @headers["Content-Type"] = "application/xml" 
+    @events = RssEvent.find(:all, :order => "'date' desc")
+    render_without_layout
+  end
+  
   helper_method :check_permission
   def check_permission(user_id)
-    user = session['user']
-    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
+    user = @session['user']
+    !user.nil? && user.verified && ((user_id == @session['user'].id) || (@session['user'].id == 0))
   end
 
   protected
