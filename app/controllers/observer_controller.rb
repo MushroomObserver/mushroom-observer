@@ -8,7 +8,7 @@ class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:color_themes, :images_by_title, :index,
                                                     :intro, :list_comments, :list_images, :list_observations,
                                                     :list_species_lists, :news, :next_observation,
-                                                    :observations_by_name, :prev_observation,
+                                                    :observations_by_name, :prev_observation, :rss,
                                                     :show_comment, :show_image, :show_observation, :show_original,
                                                     :show_species_list, :species_lists_by_title])
   # Default page

@@ -8,11 +8,11 @@ xml.rss(:version=>"2.0"){
     for event in @events
       xml.item do
         xml.title(event.title)
-        xml.author(event.who)
+        xml.author("noemail@noemail.com (" + event.who + ")")
         # rfc822
         xml.pubDate(event.date.rfc2822)
         xml.link(DOMAIN + event.url)
-        xml.guid(DOMAIN + event.url)
+        xml.guid(DOMAIN + "/event/" + sprintf("%d", event.id), "isPermaLink" => "false")
       end
     end
   }

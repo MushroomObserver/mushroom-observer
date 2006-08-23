@@ -51,13 +51,6 @@ ActiveRecord::Schema.define(:version => 5) do
     t.column "url", :string, :limit => 100
   end
 
-  create_table "rss_eventsCopy", :force => true do |t|
-    t.column "title", :string, :limit => 100
-    t.column "who", :string, :limit => 80
-    t.column "date", :datetime
-    t.column "url", :string, :limit => 100
-  end
-
   create_table "species_lists", :force => true do |t|
     t.column "created", :datetime
     t.column "modified", :datetime
