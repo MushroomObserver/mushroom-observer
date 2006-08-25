@@ -340,7 +340,7 @@ class ObserverController < ApplicationController
         flash[:notice] = 'Image was successfully updated.'
         rss = RssEvent.new({:title => "Image updated: " + @image.unique_name,
                             :who => @session['user'].login,
-                            :date => @image.modifed,
+                            :date => @image.modified,
                             :url => sprintf('/observer/show_image/%d', @image.id)})
         if rss
           rss.save
