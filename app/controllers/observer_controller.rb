@@ -544,7 +544,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def email_features
     if check_permission(0)
-      @users = User.find(:all, :conditions => "feature_email=0")
+      @users = User.find(:all, :conditions => "feature_email=1")
     else
       redirect_to :action => 'list_observations'
     end
@@ -558,7 +558,7 @@ class ObserverController < ApplicationController
   end
   
   def send_feature_email
-    users = User.find(:all, :conditions => "feature_email=0")
+    users = User.find(:all, :conditions => "feature_email=1")
     for user in users
       AccountMailer.deliver_email_features(user, @params['feature_email']['content'])
     end

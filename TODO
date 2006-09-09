@@ -23,6 +23,9 @@ most recent should be based on RSS
 More image oriented display (larger thumbnails on observation page, next/prev for images)
 image titles should go away
 
+switch Observation:Most Recent to be log based.
+get rid of Images:Most Recent and Species Lists:Most Recent?
+
 ----------
 
 More color themes: Boletus
