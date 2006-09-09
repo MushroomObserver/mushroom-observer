@@ -1,6 +1,20 @@
 class SpeciesList < ActiveRecord::Base
   has_and_belongs_to_many :observations
   belongs_to :user
+  has_one :rss_log
+
+  def log(msg)
+    if self.rss_log.nil?
+      self.rss_log = RssLog.new
+    end
+    self.rss_log.addWithDate(msg)
+  end
+  
+  def orphan_log(entry)
+    self.log(entry) # Ensures that self.rss_log exists
+    self.rss_log.species_list = nil
+    self.rss_log.add(self.unique_name)
+  end
 
   def species
     ''

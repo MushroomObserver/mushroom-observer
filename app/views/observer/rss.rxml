@@ -5,14 +5,13 @@ xml.rss(:version=>"2.0"){
     xml.link(DOMAIN + '/observer/rss')
     xml.description("Woof - List of changes to Mushroom Observer as they happen.")
     xml.language("en-us")
-    for event in @events
+    for log in @logs
       xml.item do
-        xml.title(event.title)
-        xml.author("noemail@noemail.com (" + event.who + ")")
-        # rfc822
-        xml.pubDate(event.date.rfc2822)
-        xml.link(DOMAIN + event.url)
-        xml.guid(DOMAIN + "/event/" + sprintf("%d", event.id), "isPermaLink" => "false")
+        xml.title(log.title)
+        xml.description(log.notes) # ???
+        xml.pubDate(log.modified.rfc2822)
+        xml.link(DOMAIN + log.url)
+        xml.guid(DOMAIN + log.url, "isPermaLink" => "false")
       end
     end
   }

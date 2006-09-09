@@ -4,6 +4,27 @@ Bug from adding data:  Is this fixable?
   Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
      show 1, show 2, manage 1 goes to 2
 
+
+Add Calivatia booniana (2005/07-03/Photos/HPIM1251.JPG) [2006-06-26]
+
+----------
+
+Replace rss to use rss_log rather than rss_event
+
+Implement observer/log?<number>
+
+release email options and new RSS feed
+
+Testing suite for rss_log
+
+----------
+
+most recent should be based on RSS
+More image oriented display (larger thumbnails on observation page, next/prev for images)
+image titles should go away
+
+----------
+
 More color themes: Boletus
 
 More rails-style tests
@@ -11,6 +32,8 @@ More rails-style tests
 next/prev links for images
 
 Add support for uploading Name species lists
+
+Field based search mechanism
 
 user pages
 
@@ -22,9 +45,6 @@ Use names to support real species lists
 Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
 
 Hook 'where' up to Google Maps
-
-General search mechanism
-Sorting
 
 Provide the ability to create an observation as a side effect of uploading an image
   rather than requiring the observation to exist before allowing image upload.
@@ -40,4 +60,4 @@ Mycology club affiliations (useful for searching)
 Copying species lists
 Local client that can only add
 Provide a strong image focus option
-Summary pages for higher level taxa
+Summary pages for higher level taxa (somewhat related to field based search)

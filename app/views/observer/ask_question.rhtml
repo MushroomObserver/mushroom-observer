@@ -1,0 +1,10 @@
+<% @title = 'Question about ' + @observation.unique_name %>
+<div id="Title"><%= @title %></div>
+
+<%= start_form_tag :action => 'send_question', :id => @observation %>
+<center><%= submit_tag "Send" %></center>
+<br/>
+<label for="question">Enter your question below.  When you hit send it will be emailed to 
+	<%= @observation.user.legal_name %>.</label><br/><br/>
+<%= text_area 'question', 'content'  %>
+<%= end_form_tag %>

@@ -4,7 +4,7 @@
 
 <div id="Title"><%= @title %></div>
 
-<%= error_messages_for("img") %>
+<%= error_messages_for("image") %>
 
 <div id="license-notice">
 Please only upload images that you created or which you own the copyright of.<br/>
@@ -26,6 +26,9 @@ or other fund-raising tools that may be used to support this site.<br/></br/>
 
 			<p><label for="image_title">Title</label><br/>
 			<%= text_field("image", "title") %></p>
+
+			<p><label for="image_copyright_holder">Copyright Holder</label><br/>
+			<%= text_field("image", "copyright_holder") %></p>
 
 			<p><label for="image_when">When</label><br/>
 			<%= date_select("image", "when", :start_year => Time.now.year-20,

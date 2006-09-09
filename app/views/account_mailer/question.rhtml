@@ -1,0 +1,15 @@
+<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following question to you about your observation of <%= @observation.what %> (<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>):
+
+<%= h @question %>
+
+It is entirely up to whether you want to reply by emailing directly back to them.
+
+--------------------------------------------------------------------------------------------------
+
+If you feel the sender of this mail is abusing this service please forward this entire message to:
+
+webmaster@mushroomobserver.org
+
+To stop receiving these emails, either login to your Mushroom Observer account and change your preferences, or click the following URL:
+
+<%= sprintf "%s/account/no_question_email/%d", DOMAIN, @user.id %>

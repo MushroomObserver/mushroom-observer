@@ -7,6 +7,9 @@
 <p><label for="image_when">When</label><br/>
 <%= date_select 'image', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
 
+<p><label for="image_copyright_holder">Copyright Holder</label><br/>
+<%= text_field 'image', 'copyright_holder'  %></p>
+
 <p><label for="image_notes">Notes</label><br/>
 <%= text_area 'image', 'notes', "cols" => 30 %></p>
 <%= render :partial => 'textilize_help' %>

@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 5) do
+ActiveRecord::Schema.define(:version => 9) do
 
   create_table "comments", :force => true do |t|
     t.column "created", :datetime
@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(:version => 5) do
     t.column "user_id", :integer
     t.column "when", :date
     t.column "notes", :text
+    t.column "copyright_holder", :string, :limit => 100
   end
 
   create_table "images_observations", :id => false, :force => true do |t|
@@ -44,11 +45,11 @@ ActiveRecord::Schema.define(:version => 5) do
     t.column "species_list_id", :integer, :default => 0, :null => false
   end
 
-  create_table "rss_events", :force => true do |t|
-    t.column "title", :string, :limit => 100
-    t.column "who", :string, :limit => 80
-    t.column "date", :datetime
-    t.column "url", :string, :limit => 100
+  create_table "rss_logs", :force => true do |t|
+    t.column "observation_id", :integer
+    t.column "species_list_id", :integer
+    t.column "modified", :datetime
+    t.column "notes", :text
   end
 
   create_table "species_lists", :force => true do |t|
@@ -70,6 +71,9 @@ ActiveRecord::Schema.define(:version => 5) do
     t.column "created", :datetime
     t.column "last_login", :datetime
     t.column "verified", :datetime
+    t.column "feature_email", :boolean, :default => true, :null => false
+    t.column "commercial_email", :boolean, :default => true, :null => false
+    t.column "question_email", :boolean, :default => true, :null => false
   end
 
 end

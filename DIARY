@@ -212,3 +212,11 @@ Wed Aug 16 - Tweaked the titles so they are more distinct and include the unique
 Thurs Aug 17 - Started work on RSS feed.
 
 Mon Aug 21 - Ready to release RSS feed.
+
+Mon Aug 28 - Implemented email for new features, questions and commercial inquiries.  Includes user preferences for disabling each of these.  Added copyright_holder field including automated column population.
+
+Thurs Aug 31 - Started adding observation_logs, but realized that species list events wouldn't work.  Switched to rss_logs.
+
+Fri Sep 1 - Finished testing rss_logs.
+
+Sat Sep 9 - Adjusted RSS log URL to go to object.  Got show_log working for RSS items whose object has been deleted.

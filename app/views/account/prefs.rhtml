@@ -10,6 +10,15 @@
   <%= text_field "user", "name", :size => 60 %><br/><br/>
   <label for="user_name">Preferred Theme:</label><br/>
   <%= select(:user, :theme, [["Random", "NULL"]] + CSS) %><br/><br/>
+
+  <%= check_box("user", "feature_email") %>
+  <label for="feature_email">Please send me email updates when new features come out.</label><br/><br/>
+  <%= check_box("user", "commercial_email") %>
+  <label for="commercial_email">Please send me email if someone is interested in using an image of mine for commercial purposes.</label><br/>
+  <%= check_box("user", "question_email") %>
+  <label for="question_email">Please allow others to email me questions about my observations.</label><br/>
+Note that neither of these email features will cause your email address to be displayed on a webpage or allow the person who wants to contact you to optain your email address.  You will be sent an email from news@mushroomobserver.org that will contain the contact information for the person who wants to contact you.  It will be entirely up to you if you want to respond to them.
+<br/><br/>
   <label for="user_password">New password:</label><br/>
   <%= password_field "user", "password", :value => '', :size => 30 %><br/><br/>
   <label for="user_password_confirmation">Confirm new password:</label><br/>
@@ -17,7 +26,5 @@
 <br/>
 <input type="submit" value="Save Prefs" class="primary" />
 <br/><br/>
-Forget your password?  Send mail to nathan at collectivesource.com.<br/>
-An automated mechanism for getting a new password through your email account is planned, but has not yet been implemented.
 
 <%= end_form_tag %>

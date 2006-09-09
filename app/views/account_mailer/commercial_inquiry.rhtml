@@ -1,0 +1,15 @@
+<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following commercial inquiry about your image, <%= @image.title %> (<%= sprintf "%s/observer/show_image/%d", DOMAIN, @image.id %>):
+
+<%= h @commercial_inquiry %>
+
+It is entirely up to whether you want to reply by emailing directly back to them.
+
+--------------------------------------------------------------------------------------------------
+
+If you feel the sender of this mail is abusing this service please forward this entire message to:
+
+webmaster@mushroomobserver.org
+
+To stop receiving these emails, either login to your Mushroom Observer account and change your preferences, or click the following URL:
+
+<%= sprintf "%s/account/no_commercial_email/%d", DOMAIN, @user.id %>

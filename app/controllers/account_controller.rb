@@ -28,13 +28,6 @@ class AccountController < ApplicationController
           @session['user'] = User.authenticate(@user.login, @params['user']['password'])
           flash[:notice]  = "Signup successful.  Verification sent to your email account."
           AccountMailer.deliver_verify(@user)
-          rss = RssEvent.new({:title => "User joined: " + @user.login,
-                              :who => @user.login,
-                              :date => now,
-                              :url => ''})
-          if rss
-            rss.save
-          end
           redirect_back_or_default :action => "welcome"          
         end
       when :get
@@ -70,6 +63,9 @@ class AccountController < ApplicationController
       when :post
         @user.change_email(@params['user']['email'])
         @user.change_name(@params['user']['name'])
+        @user.feature_email = @params['user']['feature_email']
+        @user.commercial_email = @params['user']['commercial_email']
+        @user.question_email = @params['user']['question_email']
         @user.change_theme(@params['user']['theme'])
         password = @params['user']['password']
         error = false
@@ -122,6 +118,39 @@ class AccountController < ApplicationController
     end
   end
   
+  def no_feature_email
+    if login_check @params['id']
+      @user.feature_email = false
+      if @user.save
+        flash[:notice] = "Automated feature email disabled for " + @user.unique_name
+      end
+      user = @session['user']
+      @session['user'].feature_email = false
+    end
+  end
+  
+  def no_question_email
+    if login_check @params['id']
+      @user.question_email = false
+      if @user.save
+        flash[:notice] = "Question email disabled for " + @user.unique_name
+      end
+      user = @session['user']
+      @session['user'].question_email = false
+    end
+  end
+  
+  def no_commercial_email
+    if login_check @params['id']
+      @user.commercial_email = false
+      if @user.save
+        flash[:notice] = "Commercial email inquiries disabled for " + @user.unique_name
+      end
+      user = @session['user']
+      @session['user'].commercial_email = false
+    end
+  end
+  
   def test_verify
     user = @session['user']
     email = AccountMailer.create_verify(user)
@@ -133,4 +162,31 @@ class AccountController < ApplicationController
     flash[:notice] = "Verification sent to your email account."
     redirect_back_or_default :action => "welcome"
   end
+  
+  protected
+  
+  # Make sure the given user is the one that's logged in.  If no one is logged in
+  # then give them a chance to login.
+  def login_check(id)
+    result = !@session['user'].nil?
+    if result
+      # Undo the store_location
+      @session['return-to'] = url_for :controller => 'observer', :action => 'index'
+      if id
+        @user = User.find(id)
+        if @user != @session['user']
+          flash[:notice] = "Permission denied"
+          result = false
+        end
+      else
+        redirect_to :action => 'prefs'
+        result = false
+      end
+    else
+      store_location
+      redirect_to :action => 'login'
+    end
+    result
+  end
+  
 end

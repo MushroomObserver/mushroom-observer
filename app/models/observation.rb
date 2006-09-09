@@ -7,7 +7,21 @@ class Observation < ActiveRecord::Base
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   has_many :comments
   belongs_to :user
+  has_one :rss_log
 
+  def log(msg)
+    if self.rss_log.nil?
+      self.rss_log = RssLog.new
+    end
+    self.rss_log.addWithDate(msg)
+  end
+  
+  def orphan_log(entry)
+    self.log(entry) # Ensures that self.rss_log exists
+    self.rss_log.observation = nil
+    self.rss_log.add(self.unique_name)
+  end
+  
   def touch
     @modified = Time.new
   end
@@ -31,34 +45,33 @@ class Observation < ActiveRecord::Base
   end
 
   def add_image_by_id(id)
+    result = nil
     if id != 0
-      img = Image.find(id)
-      if img
-        self.add_image(img)
+      result = Image.find(id)
+      if result
+        self.add_image(result)
       end
     end
+    result
   end
 
   def remove_image_by_id(id)
+    img = nil
     if id != 0
       img = Image.find(id)
       if img
         img.observations.delete(self)
-        logger.warn(sprintf("ids: %d, %d", self.thumb_image_id, id))
         if self.thumb_image_id == id.to_i
           if self.images != []
-            logger.warn('more images')
             self.thumb_image = self.images[0]
           else
-            logger.warn('no remaining images')
             self.thumb_image_id = nil
           end
           self.save
-        else
-          logger.warn('not equal')
         end
       end
     end
+    img
   end
 
   def idstr

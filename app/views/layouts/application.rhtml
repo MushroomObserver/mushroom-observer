@@ -77,6 +77,14 @@
 								                        :action => 'prefs' %><br/>
 								&nbsp;&nbsp;<%= link_to 'Logout', :controller => 'account',
 								                        :action => 'logout' %>
+									<% if @session['user'].id == 0 %>
+										<br/><br/>
+										Admin:<br/>
+										&nbsp;&nbsp;<%= link_to 'Users', :controller => 'observer',
+										                        :action => 'users_by_name' %><br/>
+										&nbsp;&nbsp;<%= link_to 'Email Features', :controller => 'observer',
+										                        :action => 'email_features' %><br/>
+									<% end %>
 								<% end %>
 								<br/><br/>
 								<div id="color_note">

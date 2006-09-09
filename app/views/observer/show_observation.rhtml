@@ -1,6 +1,10 @@
 <% @title = 'Observation: ' + h(@observation.unique_name) %>
 <%= link_to 'Add Comment', :action => 'add_comment' %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
+<% questions_ok = @observation.user.question_email
+   if questions_ok %>
+	| <%= link_to 'Send Observer a Question', :action => 'ask_question', :id => @observation %>
+<% end %>
 <% if check_permission(@observation.user_id) %>
 	|| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 	| <%= link_to 'Destroy', { :action => 'destroy_observation', :id => @observation },
@@ -20,7 +24,12 @@
 	    <p>When: <span class="Data"><%= @observation.when %></span></p>
 	    <p>Where: <span class="Data"><%= h @observation.where %></span></p>
 	    <p>What: <span class="Data"><%= h @observation.what %></span></p>
-	    <p>Who: <span class="Data"><%= h @observation.user.unique_name %></span></p>
+	    <p>Who: <span class="Data">
+		<% if questions_ok %>
+			<%= link_to h(@observation.user.unique_name), :action => 'ask_question', :id => @observation %>
+		<% else %>
+			<%= h @observation.user.unique_name %></span></p>
+		<% end %>
 	    <p><span class="Data"><%= if @observation.specimen
 	         'Herbarium specimen available'
 	     else

@@ -61,14 +61,8 @@ class ObserverController < ApplicationController
       @comment.observation = @observation
       @comment.user = user
       if @comment.save
+        @observation.log(sprintf('Comment, %s, added by %s', @comment.summary, user.login))
         flash[:notice] = 'Comment was successfully added.'
-        rss = RssEvent.new({:title => 'Comment created: ' + @comment.summary,
-                            :who => user.login,
-                            :date => Time.now,
-                            :url => sprintf('/observer/show_comment/%d', @comment.id)})
-        if rss
-          rss.save
-        end
         redirect_to(:action => 'show_observation', :id => @observation)
       else
         flash[:notice] = sprintf('Unable to save comment: %s', @comment.summary)
@@ -90,14 +84,10 @@ class ObserverController < ApplicationController
     @comment = Comment.find(params[:id])
     if check_user_id(@comment.user_id) # Even though edit makes this check, avoid bad guys going directly
       if @comment.update_attributes(params[:comment])
-        @comment.save
-        flash[:notice] = 'Comment was successfully updated.'
-        rss = RssEvent.new({:title => "Comment updated: " + @comment.summary,
-                            :who => @session['user'].login,
-                            :date => Time.now,
-                            :url => sprintf('/observer/show_comment/%d', @comment.id)})
-        if rss
-          rss.save
+        if @comment.save
+          @comment.observation.log(sprintf('Comment, %s, updated by %s',
+                                           @comment.summary, @session['user'].login))
+          flash[:notice] = 'Comment was successfully updated.'
         end
         redirect_to :action => 'show_comment', :id => @comment
       else
@@ -113,13 +103,8 @@ class ObserverController < ApplicationController
     @comment = Comment.find(params[:id])
     if check_user_id(@comment.user_id)
       id = @comment.observation_id
-      rss = RssEvent.new({:title => "Comment destroyed: " + @comment.summary,
-                          :who => @session['user'].login,
-                          :date => Time.now,
-                          :url => sprintf('/observer/show_observation/%d', id)})
-      if rss
-        rss.save
-      end
+      @comment.observation.log(sprintf('Comment, %s, destroyed by %s',
+                                       @comment.summary, @session['user'].login))
       @comment.destroy
       redirect_to :action => 'show_observation', :id => id
     else
@@ -168,14 +153,8 @@ class ObserverController < ApplicationController
       @observation.modified = now
       @observation.user = user
       if @observation.save
+        @observation.log('Observation created by ' + @session['user'].login)
         flash[:notice] = 'Observation was successfully created.'
-        rss = RssEvent.new({:title => "Observation created: " + @observation.unique_name,
-                            :who => user.login,
-                            :date => now,
-                            :url => sprintf('/observer/show_observation/%d', @observation.id)})
-        if rss
-          rss.save
-        end
         redirect_to :action => 'show_observation', :id => @observation
       else
         render :action => 'new_observation'
@@ -214,14 +193,8 @@ class ObserverController < ApplicationController
         # @observation.touch
         @observation.save
 
+        @observation.log('Observation updated by ' + @session['user'].login)
         flash[:notice] = 'Observation was successfully updated.'
-        rss = RssEvent.new({:title => "Observation updated: " + @observation.unique_name,
-                            :who => @session['user'].login,
-                            :date => Time.now,
-                            :url => sprintf('/observer/show_observation/%d', @observation.id)})
-        if rss
-          rss.save
-        end
         redirect_to :action => 'show_observation', :id => @observation
       else
         render :action => 'edit_observation'
@@ -235,22 +208,12 @@ class ObserverController < ApplicationController
   def destroy_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
-      lists = @observation.species_lists
-      rss = RssEvent.new({:title => "Observation destroyed: " + @observation.unique_name,
-                          :who => @session['user'].login,
-                          :date => Time.now,
-                          :url => '/observer/list_observations'})
-      if rss
-        rss.save
+      for l in @observation.species_lists
+        l.log(sprintf('Observation, %s, destroyed by %s', @observation.unique_name, @session['user'].login))
       end
+      @observation.orphan_log('Observation destroyed by ' + @session['user'].login)
+      @observation.comments.each {|c| c.destroy }
       @observation.destroy
-      # Check any species_lists to see if they are now empty.  If so destroy them.
-      # Is there a better way to do this as part of the species_list model?
-      for l in lists
-        if l.observations.length == 0
-          l.destroy
-        end
-      end
       redirect_to :action => 'list_observations'
     else
       render :action => 'show_observation'
@@ -337,14 +300,10 @@ class ObserverController < ApplicationController
       if @image.update_attributes(params[:image])
         @image.modified = Time.now
         @image.save
-        flash[:notice] = 'Image was successfully updated.'
-        rss = RssEvent.new({:title => "Image updated: " + @image.unique_name,
-                            :who => @session['user'].login,
-                            :date => @image.modified,
-                            :url => sprintf('/observer/show_image/%d', @image.id)})
-        if rss
-          rss.save
+        for o in @image.observations
+          o.log(sprintf('Image, %s, updated by %s', @image.unique_name, @session['user'].login))
         end
+        flash[:notice] = 'Image was successfully updated.'
         redirect_to :action => 'show_image', :id => @image
       else
         render :action => 'edit_image'
@@ -359,16 +318,11 @@ class ObserverController < ApplicationController
   def destroy_image
     @image = Image.find(params[:id])
     if check_user_id(@image.user_id)
+      image_name = @image.unique_name
       for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
+        observation.log(sprintf('Image, %s, destroyed by %s', image_name, @session['user'].login))
         observation.thumb_image_id = nil
         observation.save
-        rss = RssEvent.new({:title => "Image destroyed: " + @image.unique_name,
-                            :who => @session['user'].login,
-                            :date => Time.now,
-                            :url => sprintf('/observer/show_observation/%d', observation.id)})
-        if rss
-          rss.save
-        end
       end
       @image.destroy
       redirect_to :action => 'list_images'
@@ -381,7 +335,8 @@ class ObserverController < ApplicationController
   def manage_images
     @observation = @session[:observation]
     if check_user_id(@observation.user_id)
-      @img = Image.new
+      @image = Image.new
+      @image.copyright_holder = @session['user'].legal_name
     else
       render :action => 'show_observation'
     end
@@ -392,20 +347,14 @@ class ObserverController < ApplicationController
     @observation = @session[:observation]
     if check_user_id(@observation.user_id)
       # Upload image
-      @img = Image.new(params[:image])
-      @img.created = Time.now
-      @img.modified = @img.created
-      @img.user = @session['user']
-      if @img.save
-        if @img.save_image
-          rss = RssEvent.new({:title => "Image created: " + @img.unique_name,
-                              :who => @session['user'].login,
-                              :date => @img.created,
-                              :url => sprintf('/observer/show_image/%d', @img.id)})
-          if rss
-            rss.save
-          end
-          @observation.add_image(@img)
+      @image = Image.new(params[:image])
+      @image.created = Time.now
+      @image.modified = @image.created
+      @image.user = @session['user']
+      if @image.save
+        if @image.save_image
+          @observation.log(sprintf('Image, %s, created by %s', @image.unique_name, @session['user'].login))
+          @observation.add_image(@image)
           @observation.save
         else
           logger.error("Unable to save image")
@@ -414,7 +363,10 @@ class ObserverController < ApplicationController
       end
     
       # Or reuse image by id
-      @observation.add_image_by_id(params[:observation][:idstr].to_i)
+      image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
+      if !image.nil?
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login))
+      end
       redirect_to(:action => 'show_observation', :id => @observation)
     
       # Or delete images
@@ -422,7 +374,10 @@ class ObserverController < ApplicationController
       if images
         images.each do |image_id, do_it|
           if do_it == 'yes'
-            @observation.remove_image_by_id(image_id)
+            image = @observation.remove_image_by_id(image_id)
+            if !image.nil?
+              @observation.log(sprintf('Image, %s, removed by %s', image.unique_name, @session['user'].login))
+            end
           end
         end
       end
@@ -452,14 +407,8 @@ class ObserverController < ApplicationController
       @species_list = SpeciesList.new(args)
 
       if @species_list.save
+        @species_list.log('Species list created by ' + @session['user'].login)
         flash[:notice] = 'Species list was successfully created.'
-        rss = RssEvent.new({:title => "Species list created: " + @species_list.unique_name,
-                            :who => user.login,
-                            :date => now,
-                            :url => sprintf('/observer/show_species_list/%d', @species_list.id)})
-        if rss
-          rss.save
-        end
         redirect_to :action => 'list_species_lists'
         species = args["species"]
         args.delete("species")
@@ -517,13 +466,7 @@ class ObserverController < ApplicationController
   def destroy_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
-      rss = RssEvent.new({:title => "Species list destroyed: " + @species_list.unique_name,
-                          :who => @session['user'].login,
-                          :date => Time.now,
-                          :url => 'list_species_lists'})
-      if rss
-        rss.save
-      end
+      @species_list.orphan_log('Species list destroyed by ' + @session['user'].login)
       @species_list.destroy
       redirect_to :action => 'list_species_lists'
     else
@@ -560,14 +503,8 @@ class ObserverController < ApplicationController
         @species_list.modified = now
         redirect_to :action => 'show_species_list', :id => @species_list
         if @species_list.save
+          @species_list.log('Species list updated by ' + @session['user'].login)
           flash[:notice] = 'Species List was successfully updated.'
-          rss = RssEvent.new({:title => "Species list updated: " + @species_list.unique_name,
-                              :who => @session['user'].login,
-                              :date => now,
-                              :url => sprintf('/observer/show_species_list/%d', @species_list.id)})
-          if rss
-            rss.save
-          end
           new_species = args["species"]
           args.delete("species")
           args.delete("title")
@@ -594,8 +531,8 @@ class ObserverController < ApplicationController
   end
 
   # users_by_name.rhtml
+  # Restricted to the admin user
   def users_by_name
-    user = @session['user']
     if check_permission(0)
       @users = User.find(:all, :order => "'last_login' desc")
     else
@@ -603,10 +540,95 @@ class ObserverController < ApplicationController
     end
   end
 
+  # email_features.rhtml
+  # Restricted to the admin user
+  def email_features
+    if check_permission(0)
+      @users = User.find(:all, :conditions => "feature_email=0")
+    else
+      redirect_to :action => 'list_observations'
+    end
+  end
+  
+  def test_feature_email
+    users = User.find(:all, :conditions => "feature_email=1")
+    user = users[1]
+    email = AccountMailer.create_email_features(user, @params['feature_email']['content'])
+    render(:text => "<pre>" + email.encoded + "</pre>")
+  end
+  
+  def send_feature_email
+    users = User.find(:all, :conditions => "feature_email=0")
+    for user in users
+      AccountMailer.deliver_email_features(user, @params['feature_email']['content'])
+    end
+    flash[:notice] = "Delivered feature mail."
+    redirect_to :action => 'users_by_name'
+  end
+
+  def ask_question
+    @observation = Observation.find(params['id'])
+    if !@observation.user.question_email
+      flash[:notice] = "Permission denied"
+      redirect_to :action => 'show_observation', :id => @observation
+    end
+  end
+  
+  def test_question
+    sender = @session['user']
+    observation = Observation.find(params['id'])
+    question = @params['question']['content']
+    email = AccountMailer.create_question(sender, observation, question)
+    render(:text => "<pre>" + email.encoded + "</pre>")
+  end
+  
+  def send_question
+    sender = @session['user']
+    observation = Observation.find(params['id'])
+    question = @params['question']['content']
+    AccountMailer.deliver_question(sender, observation, question)
+    flash[:notice] = "Delivered question."
+    redirect_to :action => 'show_observation', :id => observation
+  end
+
+  def commercial_inquiry
+    @image = Image.find(params['id'])
+    if !@image.user.commercial_email
+      flash[:notice] = "Permission denied"
+      redirect_to :action => 'show_image', :id => @image
+    end
+  end
+  
+  def test_commercial_inquiry
+    sender = @session['user']
+    image = Image.find(params['id'])
+    commercial_inquiry = @params['commercial_inquiry']['content']
+    email = AccountMailer.create_commercial_inquiry(sender, image, commercial_inquiry)
+    render(:text => "<pre>" + email.encoded + "</pre>")
+  end
+  
+  def send_commercial_inquiry
+    sender = @session['user']
+    image = Image.find(params['id'])
+    commercial_inquiry = @params['commercial_inquiry']['content']
+    AccountMailer.deliver_commercial_inquiry(sender, image, commercial_inquiry)
+    flash[:notice] = "Delivered commercial inquiry."
+    redirect_to :action => 'show_image', :id => image
+  end
+
   def rss
     @headers["Content-Type"] = "application/xml" 
-    @events = RssEvent.find(:all, :order => "'date' desc")
+    @logs = RssLog.find(:all, :order => "'date' desc")
     render_without_layout
+  end
+  
+  def play
+    @stuff = params
+  end
+  
+  def show_log
+    store_location
+    @log = RssLog.find(params['id'])
   end
   
   helper_method :check_permission

@@ -14,8 +14,13 @@
     <td width=100%>
 		<%= link_to sprintf('<span class="ListWhat">%s</span>', h(comment.summary)),
 		            :action => 'show_comment', :id => comment %>: 
-	    <%= link_to sprintf('<span class="ListWhat">%s</span>', h(observation.unique_name)),
-	              :action => 'show_observation', :id => observation.id %><br/>
+		<% if !observation.nil? %>
+		    <%= link_to sprintf('<span class="ListWhat">%s</span>', h(observation.unique_name)),
+		              :action => 'show_observation', :id => observation.id %>
+		<% else %>
+			(observation deleted)
+		<% end %>
+		<br/>
 		<span class="ListWhen"><%= comment.created %></span>:
 		 <span class="ListWho"><%= truncate(h(comment.user.unique_name), MAX_WHO_LENGTH) %></span><br/>
     </td>
