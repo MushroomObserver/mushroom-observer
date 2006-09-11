@@ -9,21 +9,15 @@ Add Calivatia booniana (2005/07-03/Photos/HPIM1251.JPG) [2006-06-26]
 
 ----------
 
-Replace rss to use rss_log rather than rss_event
-
-Implement observer/log?<number>
-
-release email options and new RSS feed
-
 Testing suite for rss_log
+
+rss_feed should have a date or count cut off
 
 ----------
 
-most recent should be based on RSS
+most recent should be based on RssLogs rather than creation date
 More image oriented display (larger thumbnails on observation page, next/prev for images)
 image titles should go away
-
-switch Observation:Most Recent to be log based.
 get rid of Images:Most Recent and Species Lists:Most Recent?
 
 ----------

@@ -5,6 +5,7 @@
 <center><%= submit_tag "Send" %></center>
 <br/>
 <label for="question">Enter your question below.  When you hit send it will be emailed to 
-	<%= @observation.user.legal_name %>.</label><br/><br/>
+	<%= @observation.user.legal_name %>.<br/>
+	The email will automatically include a link to this observation.</label><br/><br/>
 <%= text_area 'question', 'content'  %>
 <%= end_form_tag %>
