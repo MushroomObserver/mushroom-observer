@@ -24,6 +24,8 @@ class AccountController < ApplicationController
         @user = User.new(@params['user'])
         @user.created = Time.now
         @user.last_login = @user.created
+        @user.change_rows(5)
+        @user.change_columns(3)
         if @user.save      
           @session['user'] = User.authenticate(@user.login, @params['user']['password'])
           flash[:notice]  = "Signup successful.  Verification sent to your email account."
@@ -67,6 +69,11 @@ class AccountController < ApplicationController
         @user.commercial_email = @params['user']['commercial_email']
         @user.question_email = @params['user']['question_email']
         @user.change_theme(@params['user']['theme'])
+        @user.change_rows(@params['user']['rows'])
+        @user.change_columns(@params['user']['columns'])
+        @user.alternate_rows = @params['user']['alternate_rows']
+        @user.alternate_columns = @params['user']['alternate_columns']
+        @user.vertical_layout = @params['user']['vertical_layout']
         password = @params['user']['password']
         error = false
         if password

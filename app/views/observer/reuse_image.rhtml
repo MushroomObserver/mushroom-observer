@@ -1,0 +1,41 @@
+<% @title = 'Reuse Image for ' + h(@observation.unique_name) %>
+<%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
+<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+
+<div id="Title"><%= @title %></div>
+
+<%= error_messages_for("image") %>
+
+<%= form_tag({:action => 'reuse_image_by_id'}, :multipart => true) %>
+<center><%= submit_tag("Reuse") %></center>
+
+<p><%= text_field("observation", "idstr") %></p>
+
+<%= pagination_links(@image_pages) %>
+<table cellspacing="0">
+<%
+	row_count = 0
+	col_count = 0
+ 	for image in @images
+   		color = calc_color(row_count, col_count, @layout["alternate_rows"],
+		 				   @layout["alternate_columns"])
+		if col_count == 0 %>
+			<tr>
+ 	<% end %>
+	<td align="left" valign="top" class="ListLine<%= color %>">
+		<%= render :partial => 'image_reuse', :object => image, :locals => { :obs_id => @observation.id } %>
+	</td>
+	<%  if col_count == (@layout["columns"] - 1) %>
+			</tr>
+	<%  end
+		col_count += 1
+		if col_count >= @layout["columns"]
+			col_count = 0
+			row_count += 1
+		end
+	end
+	%>
+</table>
+<%= pagination_links(@image_pages) %>
+
+<%= end_form_tag %>

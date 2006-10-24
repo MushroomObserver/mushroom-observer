@@ -19,6 +19,7 @@
 		observation_ids = []
 		observation_list.each { |o| observation_ids.push(o.id) }
 		session['observation_ids'] = observation_ids
+		session['image_ids'] = nil
 	   	for observation in observation_list
 	    	odd_or_even = 1 - odd_or_even
 	    %>
@@ -42,3 +43,7 @@
 	    <% end %>
 	</table>
 </p>
+<% rss_log = @species_list.rss_log 
+   if rss_log %>
+	<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
+<% end %>

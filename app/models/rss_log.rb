@@ -42,7 +42,7 @@ class RssLog < ActiveRecord::Base
   end
   
   def url
-    result = sprintf("/observer/show_log/%d?time=%d", self.id, self.modified.tv_sec)
+    result = sprintf("/observer/show_rss_log/%d?time=%d", self.id, self.modified.tv_sec)
     observation = self.observation
     if observation
       result = sprintf("/observer/show_observation/%d?time=%d", observation.id, self.modified.tv_sec)

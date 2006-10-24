@@ -132,6 +132,11 @@ div.progressBar div.background {
     font-size: x-small;
 }
 
+#help_note {
+    text-align: left;
+    font-size: x-small;
+}
+
 #copyright {
     text-align: center;
     font-size: x-small;

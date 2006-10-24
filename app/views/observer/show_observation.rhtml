@@ -9,7 +9,6 @@
 	|| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 	| <%= link_to 'Destroy', { :action => 'destroy_observation', :id => @observation },
                   :confirm => "Are you sure?" %>
-	| <%= link_to 'Manage Images', :action => 'manage_images', :id => @observation %>
 <% end %>
 <%	if not session['observation_ids'].nil? %>
 		<br/><%= link_to 'Prev', :action => 'prev_observation', :id => @observation %>
@@ -54,17 +53,31 @@
 	    </p>
 	    <p><span class="Date">
 	        Observation created: <%= @observation.created %><br/>
-	        Last modified: <%= @observation.modified %>
+	        Last modified: <%= @observation.modified %><br/>
+			<% rss_log = @observation.rss_log
+			   if rss_log %>
+				<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
+			<% end %>
 	        </span>
 	    </p>
 	</td>
     <td valign="top" width="25%">
-	<center>
-    <% for image in @observation.images %>
-      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + h(image.unique_name),
-            :action => 'show_image', :id => image.id) %></p>
-    <% end %>
-	</center>
+		<% if @observation.images.length > 0 %>
+			Images:<br/>
+		<% end %>
+		<% if check_permission(@observation.user_id) %>
+			<%= link_to "Add Image", :action => 'add_image', :id => @observation %><br/>
+			<%= link_to "Reuse Image", :action => 'reuse_image', :id => @observation %><br/>
+			<% if @observation.images.length > 0 %>
+				<%= link_to"Remove Images", :action => 'remove_images', :id => @observation %><br/>
+			<% end %>
+		<% end %>
+		<center>
+	    <% for image in @observation.images %>
+	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + h(image.unique_name),
+	            :action => 'show_image', :id => image.id) %></p>
+	    <% end %>
+		</center>
     </td>
 </tr>
 </table>

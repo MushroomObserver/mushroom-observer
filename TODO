@@ -4,29 +4,49 @@ Bug from adding data:  Is this fixable?
   Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
      show 1, show 2, manage 1 goes to 2
 
-
-Add Calivatia booniana (2005/07-03/Photos/HPIM1251.JPG) [2006-06-26]
-
 ----------
 
 Testing suite for rss_log
 
-rss_feed should have a date or count cut off
+- rss_feed should have a date or count cut off
 
 ----------
 
-most recent should be based on RssLogs rather than creation date
-More image oriented display (larger thumbnails on observation page, next/prev for images)
-image titles should go away
-get rid of Images:Most Recent and Species Lists:Most Recent?
+- most recent should be based on RssLogs rather than creation date
+  - Working on list_rsslogs
+- More image oriented display (larger thumbnails on observation page, - next/prev for images)
+- image titles should go away
+- reorganize links
+- re-arrange page
+- provide support page
+
+- list_images should layout like list_observations and list_rss_logs
+
+- improve access to image upload process
+  - Implement 'add_image', 'reuse_image' and 'remove_images'.
+  - Deprecate manage_images
+  - Expand reuse_image to provide a visual approach
+
+- History link from Observation & Species List
 
 ----------
 
-More color themes: Boletus
+RSS fixes...
+
+Seem to be getting multiple rss entries for the same observation.
+
+Why is Bloglines not behaving correctly with my RSS feed?  In particular it is missing things and repeating species list entries
+
+----------
+
+Need to revise how species lists are handled to allow for chronological notes, but cumulative lists.  See:
+http://mushroomobserver.org/observer/show_species_list/8
+
+Do rss_log lists need Next/Prev?
+
+More color themes: Boletus, Coprinus (very black and white)
 
 More rails-style tests
-
-next/prev links for images
 
 Add support for uploading Name species lists
 

@@ -1,0 +1,25 @@
+<% @title = 'Add an Image for ' + h(@observation.unique_name) %>
+<%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
+<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+
+<div id="Title"><%= @title %></div>
+
+<%= error_messages_for("image") %>
+
+<div id="license-notice">
+Please only upload images that you created or which you own the copyright of.<br/>
+By uploading images you are giving us permission to distribute this image to other
+users (<a
+href="http://creativecommons.org/licenses/by-nc-sa/2.5/">legalese</a>).<br/>
+You are also giving us permission to display this image	along side advertisements
+or other fund-raising tools that may be used to support this site.<br/></br/>
+</div>
+
+<%= form_tag({:action => 'upload_image'}, :multipart => true) %>
+<center><%= submit_tag("Upload") %></center>
+
+<p><%= file_field("image", "image") %></p>
+
+<%= render :partial => 'form_images' %>
+
+<%= end_form_tag %>

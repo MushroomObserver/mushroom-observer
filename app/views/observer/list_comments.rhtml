@@ -24,13 +24,6 @@
 		<span class="ListWhen"><%= comment.created %></span>:
 		 <span class="ListWho"><%= truncate(h(comment.user.unique_name), MAX_WHO_LENGTH) %></span><br/>
     </td>
-    <td valign="middle" class="ListActions">
-	  <% if check_permission(comment.user_id) %>
-	      <%= link_to 'Edit', :action => 'edit_comment', :id => comment %><br/>
-	      <%= link_to 'Destroy', { :action => 'destroy_comment', :id => comment },
-	                               :confirm => "Are you sure?" %>
-	  <% end %>
-    </td>
   </tr>
   <% end %>
 </table>

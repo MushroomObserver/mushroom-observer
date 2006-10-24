@@ -29,6 +29,14 @@ class User < ActiveRecord::Base
   def change_theme(theme)
     self.theme = theme
   end
+
+  def change_rows(rows)
+    self.rows = rows
+  end
+
+  def change_columns(columns)
+    self.columns = columns
+  end
   
   def unique_name()
     if self.name

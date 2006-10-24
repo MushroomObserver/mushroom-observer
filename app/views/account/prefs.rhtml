@@ -8,8 +8,22 @@
   <%= text_field "user", "email", :size => 60 %><br/><br/>
   <label for="user_name">Name:</label><br/>
   <%= text_field "user", "name", :size => 60 %><br/><br/>
+
   <label for="user_name">Preferred Theme:</label><br/>
   <%= select(:user, :theme, [["Random", "NULL"]] + CSS) %><br/><br/>
+
+  List page layout:<br/>
+  
+  <%= select(:user, :rows, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
+  <label for="user_rows">rows x</label>
+  <%= select(:user, :columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
+  <label for="user_columns">columns</label><br/>
+  <%= check_box("user", "alternate_rows") %>
+  <label for="alternate_rows">Alternate row colors.</label><br/>
+  <%= check_box("user", "alternate_columns") %>
+  <label for="alternate_columns">Alternate column colors.</label><br/>
+  <%= check_box("user", "vertical_layout") %>
+  <label for="vertical_layout">Put text below images.</label><br/><br/>
 
   <%= check_box("user", "feature_email") %>
   <label for="feature_email">Please send me email updates when new features come out.</label><br/><br/>

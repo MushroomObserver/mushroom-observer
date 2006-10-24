@@ -2,21 +2,40 @@
 
 <!--[form:observation]-->
 <td valign="top">
-<p><label for="observation_when">When</label><br/>
+<p><label for="observation_when">When:</label><br/>
 <%= date_select 'observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
-
-<p><label for="observation_where">Where (required)</label><br/>
-<%= text_field 'observation', 'where'  %></p>
-
-<p><label for="observation_what">What</label><br/>
-<%= text_field 'observation', 'what'  %></p>
-
-<p><label for="observation_specimen">Herbarium Specimen Available</label><br/>
-<select id="observation_specimen" name="observation[specimen]"><option value="false" selected>False</option><option value="true">True</option></select></p>
+<br/>
+<p><label for="observation_where">Where (required):</label>
+<%= text_field 'observation', 'where'  %><br/>
+<span id="help_note">
+	Where the observation was made.<br/>
+	In the US this should be at least accurate to the county.
+</span></p>
+<br/>
+<p><label for="observation_what">What:</label>
+<%= text_field 'observation', 'what'  %><br/>
+<span id="help_note">
+	The name you would apply to this observation.  Scientific names are preferred over common
+	names, but are not required.  If you don't know what it is, just say 'Unknown'.  If you
+	find a better name for this observation in the future, please change the name by selecting
+	'Edit Observation'.
+</span></p>
+<br/>
+<p><label for="observation_specimen">Herbarium Specimen Available:</label>
+<select id="observation_specimen" name="observation[specimen]"><option value="false" selected>False</option><option value="true">True</option></select><br/>
+<span id="help_note">
+	Select 'True' when there is a dried specimen available for further study.  This can be
+	either be at an official herbarium or part of a personal herbarium.  Please note where
+	the specimen is in the notes.
+</span></p>
 
 </td>
 <td valign="top">
-<p><label for="observation_notes">Notes</label><br/>
+<p><label for="observation_notes">Notes:</label>
+	<span id="help_note">
+		Please include comments about how you arrived at the given name, any unusual features and any features
+		that are not clear from a photograph such as habitat or distinctive scent or taste.
+	</span><br/>
 <%= text_area 'observation', 'notes'  %></p>
 <%= render :partial => 'textilize_help' %>
 </td>

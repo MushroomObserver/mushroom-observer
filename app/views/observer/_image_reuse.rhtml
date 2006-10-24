@@ -1,0 +1,9 @@
+<table cellpadding=10>
+	<tr>
+		<td align="center" valign="middle" width=160>
+			<%= link_to(image_tag(sprintf("thumb/%d.jpg", image_reuse.id), :border => 0),
+							:action => 'add_image_to_obs', :id => image_reuse.id, :obs_id => obs_id)
+			%>
+		</td>
+	</tr>
+</table>

@@ -1,36 +1,29 @@
 <% @title = 'Images' %>
 <div id="Title"><%= @title %></div>
-
-<%= pagination_links(@image_pages) %>
-
-<table  cellpadding="5" cellspacing="0">
-  <%
-     odd_or_even = 0
-     for image in @images
-       odd_or_even = 1 - odd_or_even
-     %>
-  <tr valign="top" class="ListLine<%= odd_or_even %>">
-    <td width=110 height=110 align="center" valign="middle">
-		<%= link_to image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0),
-		            :action => 'show_image', :id => image %>
-    </td>
-    <td width="100%" valign="middle">
-	  <%= link_to sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span>',
-	                      image.when, h(image.unique_name)),
-	              :action => 'show_image', :id => image %><br/>
-      <span class="ListWho"><%= truncate(h(image.user.unique_name), MAX_WHO_LENGTH) %></span>
-    </td>
-    <td valign="middle" class="ListActions">
-	  <% if check_permission(image.user_id) %>
-	      <%= link_to 'Edit', :action => 'edit_image', :id => image %><br/>
-	      <%= link_to 'Destroy', { :action => 'destroy_image', :id => image },
-	                               :confirm => "Are you sure?" %>
-	  <% end %>
-    </td>
-  </tr>
-  <% end %>
-</table>
-
-<%= pagination_links(@image_pages) %>
-
-<br />
+	<%= pagination_links(@image_pages) %>
+	<table cellspacing="0">
+  	<%
+		row_count = 0
+		col_count = 0
+     	for image in @images
+       		color = calc_color(row_count, col_count, @layout["alternate_rows"],
+			 				   @layout["alternate_columns"])
+			if col_count == 0 %>
+				<tr>
+     	<% end %>
+  		<td align="left" valign="top" class="ListLine<%= color %>">
+			<%= render :partial => 'image', :object => image, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
+		</td>
+		<%  if col_count == (@layout["columns"] - 1) %>
+				</tr>
+		<%  end
+			col_count += 1
+			if col_count >= @layout["columns"]
+				col_count = 0
+				row_count += 1
+			end
+		end
+		%>
+	</table>
+	<%= pagination_links(@image_pages) %>
+<br/>

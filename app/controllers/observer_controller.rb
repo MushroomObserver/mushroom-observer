@@ -5,26 +5,46 @@ require 'find'
 require 'ftools'
 
 class ObserverController < ApplicationController
-  before_filter :login_required, :except => (CSS + [:color_themes, :images_by_title, :index,
-                                                    :intro, :list_comments, :list_images, :list_observations,
-                                                    :list_species_lists, :news, :next_observation,
-                                                    :observations_by_name, :prev_observation, :rss,
-                                                    :show_comment, :show_image, :show_observation, :show_original,
-                                                    :show_species_list, :species_lists_by_title])
+  before_filter :login_required, :except => (CSS + [:ask_webmaster_question,
+                                                    :color_themes,
+                                                    :images_by_title,
+                                                    :index,
+                                                    :intro,
+                                                    :list_comments,
+                                                    :list_images,
+                                                    :list_observations,
+                                                    :list_rss_logs,
+                                                    :list_species_lists,
+                                                    :news,
+                                                    :next_image,
+                                                    :next_observation,
+                                                    :observations_by_name,
+                                                    :prev_image,
+                                                    :prev_observation,
+                                                    :rss,
+                                                    :send_webmaster_question,
+                                                    :show_comment,
+                                                    :show_image,
+                                                    :show_observation,
+                                                    :show_original,
+                                                    :show_rss_log,
+                                                    :show_species_list,
+                                                    :species_lists_by_title])
   # Default page
   def index
-    list_observations
-    render :action => 'list_observations'
+    list_rss_logs
+    render :action => 'list_rss_logs'
   end
 
   def login
-    list_observations
-    render :action => 'list_observations'
+    list_rss_logs
+    render :action => 'list_rss_logs'
   end
 
   # left-hand panel -> list_comments.rhtml
   def list_comments
     @session['observation_ids'] = nil
+    @session['image_ids'] = nil
     store_location
     @comment_pages, @comments = paginate(:comments,
                                      :order => "'created' desc",
@@ -115,15 +135,23 @@ class ObserverController < ApplicationController
   # left-hand panel -> list_observations.rhtml
   def list_observations
     store_location
+    @layout = calc_layout_params
     @observation_pages, @observations = paginate(:observations,
                                                  :order => "'when' desc",
-                                                 :per_page => 10)
+                                                 :per_page => @layout["count"])
   end
 
   # observations_by_name.rhtml
   def observations_by_name
     store_location
-    @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
+    # Used to be:
+    # @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
+    # Now use straight SQL to avoid extracting user info for each observation
+    @data = Observation.connection.select_all("select o.id, o.what, o.when, u.name, u.login" +
+                                              " from observations o, users u" +
+                                              " where o.user_id = u.id" +
+                                              " order by 'what' asc, 'when' desc")
+    logger.warn(@data[0])
   end
 
   # list_observations.rhtml -> show_observation.rhtml
@@ -138,6 +166,7 @@ class ObserverController < ApplicationController
   def new_observation
     if verify_user(@session['user'])
   		@session['observation_ids'] = nil
+  		@session['image_ids'] = nil
       @observation = Observation.new
       @observation.what = 'Unknown'
     end
@@ -258,15 +287,18 @@ class ObserverController < ApplicationController
   # Various -> list_images.rhtml
   def list_images
     @session['observation_ids'] = nil
+		@session['image_ids'] = nil
     store_location
+    @layout = calc_layout_params
     @image_pages, @images = paginate(:images,
                                      :order => "'when' desc",
-                                     :per_page => 10)
+                                     :per_page => @layout["count"])
   end
 
   # images_by_title.rhtml
   def images_by_title
     @session['observation_ids'] = nil
+		@session['image_ids'] = nil
     store_location
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
@@ -331,8 +363,42 @@ class ObserverController < ApplicationController
     end
   end
 
-  # show_observation.rhtml -> manage_images.rhtml
+  # show_observation.rhtml -> reuse_image.rhtml
+  def reuse_image
+    @observation = @session[:observation]
+    if check_user_id(@observation.user_id)
+      @image = Image.new
+      @image.copyright_holder = @session['user'].legal_name
+      @layout = calc_layout_params
+      @image_pages, @images = paginate(:images,
+                                       :order => "'when' desc",
+                                       :per_page => @layout["count"])
+    else
+      render :action => 'show_observation'
+    end
+  end
+
+  # deprecated
   def manage_images
+    @observation = @session[:observation]
+    logger.error("manage_images has been deprecated")
+    flash[:notice] = 'manage_images has been deprecated'
+    redirect_to(:action => 'show_observation', :id => @observation)
+  end
+
+  # show_observation.rhtml -> add_image.rhtml
+  def add_image
+    @observation = @session[:observation]
+    if check_user_id(@observation.user_id)
+      @image = Image.new
+      @image.copyright_holder = @session['user'].legal_name
+    else
+      render :action => 'show_observation'
+    end
+  end
+
+  # show_observation.rhtml -> remove_images.rhtml
+  def remove_images
     @observation = @session[:observation]
     if check_user_id(@observation.user_id)
       @image = Image.new
@@ -342,8 +408,7 @@ class ObserverController < ApplicationController
     end
   end
   
-  # manage_images.rhtml -> save_image -> show_observation.rhtml
-  def save_image
+  def upload_image
     @observation = @session[:observation]
     if check_user_id(@observation.user_id)
       # Upload image
@@ -357,19 +422,21 @@ class ObserverController < ApplicationController
           @observation.add_image(@image)
           @observation.save
         else
-          logger.error("Unable to save image")
+          logger.error("Unable to upload image")
           flash[:notice] = 'Invalid image'
         end
       end
-    
-      # Or reuse image by id
-      image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
-      if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login))
-      end
       redirect_to(:action => 'show_observation', :id => @observation)
-    
-      # Or delete images
+    else
+      render :action => 'show_observation'
+    end
+  end
+
+  # remove_images.rhtml -> delete_images -> show_observation.rhtml
+  def delete_images
+    @observation = @session[:observation]
+    if check_user_id(@observation.user_id)
+      # Delete images
       images = params[:selected]
       if images
         images.each do |image_id, do_it|
@@ -381,9 +448,41 @@ class ObserverController < ApplicationController
           end
         end
       end
+      redirect_to(:action => 'show_observation', :id => @observation)
     else
       render :action => 'show_observation'
     end
+  end
+
+  def add_image_to_obs
+    @observation = Observation.find(params[:obs_id])
+    if check_user_id(@observation.user_id)
+      image = @observation.add_image_by_id(params[:id])
+      if !image.nil?
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login))
+      end
+      redirect_to(:action => 'show_observation', :id => @observation)
+    end
+  end
+  
+  # reuse_image.rhtml -> reuse_image_by_id -> show_observation.rhtml
+  def reuse_image_by_id
+    @observation = @session[:observation]
+    if check_user_id(@observation.user_id)
+      image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
+      if !image.nil?
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login))
+      end
+      redirect_to(:action => 'show_observation', :id => @observation)
+    end
+  end
+
+  # deprecated along with manage_images
+  def save_image
+    @observation = @session[:observation]
+    logger.error("save_image has been deprecated")
+    flash[:notice] = 'save_image has been deprecated'
+    redirect_to(:action => 'show_observation', :id => @observation)
   end
 
 
@@ -392,6 +491,7 @@ class ObserverController < ApplicationController
     user = @session['user']
     if verify_user(user)
   		@session['observation_ids'] = nil
+  		@session['image_ids'] = nil
       @species_list = SpeciesList.new
     end
   end
@@ -456,6 +556,7 @@ class ObserverController < ApplicationController
   # left-hand panel -> list_species_lists.rhtml
   def list_species_lists
 		@session['observation_ids'] = nil
+		@session['image_ids'] = nil
     store_location
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc",
@@ -477,6 +578,7 @@ class ObserverController < ApplicationController
   # species_lists_by_title.rhtml
   def species_lists_by_title
 		@session['observation_ids'] = nil
+		@session['image_ids'] = nil
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
   end
@@ -537,6 +639,22 @@ class ObserverController < ApplicationController
       @users = User.find(:all, :order => "'last_login' desc")
     else
       redirect_to :action => 'list_observations'
+    end
+  end
+  
+  def ask_webmaster_question
+    @user = @session['user']
+  end
+  
+  def send_webmaster_question
+    sender = @params['user']['email']
+    if sender.nil? or sender.strip == ''
+      flash[:notice] = "You must provide a return address."
+      redirect_to :action => 'ask_webmaster_question'
+    else
+      AccountMailer.deliver_webmaster_question(@params['user']['email'], @params['question']['content'])
+      flash[:notice] = "Delivered question or comment."
+      redirect_back_or_default :action => "list_rss_logs"
     end
   end
 
@@ -618,23 +736,140 @@ class ObserverController < ApplicationController
 
   def rss
     @headers["Content-Type"] = "application/xml" 
-    @logs = RssLog.find(:all, :order => "'date' desc")
+    @logs = RssLog.find(:all, :order => "'modified' desc",
+                        :conditions => "datediff(now(), modified) <= 31")
     render_without_layout
   end
   
-  def play
-    @stuff = params
+  # left-hand panel -> list_rss_logs.rhtml
+  def list_rss_logs
+    store_location
+    @layout = calc_layout_params
+    @rss_log_pages, @rss_logs = paginate(:rss_log,
+                                      :order => "'modified' desc",
+                                      :per_page => @layout["count"])
   end
   
-  def show_log
+  def show_rss_log
     store_location
-    @log = RssLog.find(params['id'])
+    @rss_log = RssLog.find(params['id'])
+  end
+
+  # Calculation of the image_ids should be lazier.  Currently it calculates all the image_ids
+  # for all the observation_ids.  Instead, image_ids should just be the ids for the 'current'
+  # observation, and if you run out of those, then walk through observation_ids until you
+  # find more images.
+  def prev_image
+    @image = Image.find(params[:id])
+    image_ids = @session['image_ids']
+    if image_ids.nil?
+      image_ids = calc_image_ids(@session['observation_ids'])
+      @session['image_ids'] = image_ids
+    end
+    index = 0
+    id = 0
+    if not image_ids.nil?
+      current_index = image_ids.index(params[:id])
+      if current_index and image_ids.length > 0
+        index = current_index - 1
+        if index < 0
+          index = image_ids.length - 1
+        end
+      end
+      id = image_ids[index]
+    end
+    redirect_to :action => 'show_image', :id => id
+  end
+
+  def next_image
+    @image = Image.find(params[:id])
+    image_ids = @session['image_ids']
+    if image_ids.nil?
+      image_ids = calc_image_ids(@session['observation_ids'])
+      @session['image_ids'] = image_ids
+    end
+    index = 0
+    id = 0
+    if not image_ids.nil?
+      current_index = image_ids.index(params[:id])
+      if current_index and image_ids.length > 0
+        index = current_index + 1
+        if index >= image_ids.length
+          index = 0
+        end
+      end
+      id = image_ids[index]
+    end
+    redirect_to :action => 'show_image', :id => id
+  end
+
+  def resize_images
+    if check_permission(0)
+      for image in Image.find(:all)
+        image.calc_size()
+        image.resize_image(160, 160, image.thumbnail)
+      end
+    else
+      flash[:notice] = "You must be an admin to access resize_images"
+    end
+    redirect_to :action => 'list_images'
   end
   
   helper_method :check_permission
   def check_permission(user_id)
     user = @session['user']
     !user.nil? && user.verified && ((user_id == @session['user'].id) || (@session['user'].id == 0))
+  end
+  
+  helper_method :calc_color
+  def calc_color(row, col, alt_rows, alt_cols)
+    color = 0
+		if alt_rows
+			color = row % 2
+		end
+		if alt_cols
+			if (col % 2) == 1
+				color = 1 - color
+			end
+		end
+		color
+	end
+
+  helper_method :calc_image_ids
+  def calc_image_ids(obs)
+    result = nil
+    if obs
+      result = []
+      for ob_id in obs:
+        img_ids = Observation.connection.select_all("select image_id from images_observations" +
+                                          " where observation_id=" + ob_id.to_s)
+        for h in img_ids
+          result.push(h['image_id'])
+        end
+      end
+      logger.warn("calc_image_ids: " + result.join(', '))
+    end
+    result
+  end
+  
+  helper_method :calc_layout_params
+  def calc_layout_params
+    result = {}
+    result["rows"] = 5
+    result["columns"] = 3
+    result["alternate_rows"] = true
+    result["alternate_columns"] = true
+    result["vertical_layout"] = true
+    user = @session['user']
+    if user
+      result["rows"] = user.rows if user.rows
+      result["columns"] = user.columns if user.columns
+      result["alternate_rows"] = user.alternate_rows
+      result["alternate_columns"] = user.alternate_columns
+      result["vertical_layout"] = user.vertical_layout
+    end
+    result["count"] = result["rows"] * result["columns"]
+    result
   end
 
   protected

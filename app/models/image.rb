@@ -7,7 +7,9 @@ class Image < ActiveRecord::Base
   belongs_to :user
 
   def unique_name
-    title = self.title
+    obs_names = []
+    self.observations.each {|o| obs_names.push(o.what)}
+    title = obs_names.sort.join(' & ')
     if title
       sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
     else
@@ -35,7 +37,7 @@ class Image < ActiveRecord::Base
     logger.warn("create_resized_images: Calculated size: #{@width}x#{@height}")
     if result
       self.resize_image(640, 640, self.big_image)
-      self.resize_image(100, 100, self.thumbnail)
+      self.resize_image(160, 160, self.thumbnail)
     end
     return result
   end
@@ -59,7 +61,7 @@ class Image < ActiveRecord::Base
     if ratio < 1
       w = ratio*@width
       h = ratio*@height
-      cmd = sprintf("convert -size %dx%d -quality 75 %s -resize %dx%d %s",
+      cmd = sprintf("convert -size %dx%d -quality 50 %s -resize %dx%d %s",
                     w, h, self.original_image, w, h, dest)
     else
       cmd = sprintf("cp %s %s", self.original_image, dest)

@@ -1,0 +1,28 @@
+<% @title = 'Remove Images from ' + h(@observation.unique_name) %>
+<%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
+<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+
+<div id="Title"><%= @title %></div>
+
+<%= error_messages_for("image") %>
+
+<%= form_tag({:action => 'delete_images'}, :multipart => true) %>
+<center><%= submit_tag("Remove") %></center>
+
+<table>
+    <% for image in @observation.images %>
+		<tr>
+			<td valign="middle">
+				<%= check_box("selected", image.id, {}, "yes", "no") %>
+			</td>
+			<td align="center">
+				<p><%=
+				link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
+							'<br/>' + h(image.unique_name),
+	            		:action => 'show_image', :id => image.id) %></p>
+			</td>
+		</tr>
+    <% end %>
+</table>
+
+<%= end_form_tag %>

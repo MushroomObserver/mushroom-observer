@@ -9,6 +9,10 @@
 	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
                   :confirm => "Are you sure?" %>
 <% end %>
+<%	if not session['observation_ids'].nil? %>
+		<br/><%= link_to 'Prev', :action => 'prev_image', :id => @image %>
+		| <%= link_to 'Next', :action => 'next_image', :id => @image %>
+<%  end %>
 
 <div id="Title"><%= @title %></div>
 <div id="copyright">Copyright &copy

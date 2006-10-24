@@ -1,0 +1,14 @@
+<% @title = 'Log for ' + h(@rss_log.title) %>
+
+<div id="Title"><%= @title %></div>
+<pre>
+<%= @rss_log.notes %></pre>
+<% observation = @rss_log.observation
+   if observation %>
+	<%= link_to "Show Observation", :action => 'show_observation', :id => observation.id %>
+<% else
+	 species_list = @rss_log.species_list 
+	 if species_list %>
+		<%= link_to "Show Species List", :action => 'show_species_list', :id => species_list.id %>
+  <% end
+   end %>

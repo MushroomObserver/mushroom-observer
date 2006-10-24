@@ -43,6 +43,13 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender.email
   end
 
+  def webmaster_question(sender, question)
+    @subject    = 'Mushroom Observer Question From ' + sender
+    @body["question"] = question
+    @recipients = 'webmaster@mushroomobserver.org'
+    @from       = sender
+  end
+
   def verify(user)
     @subject      = 'Mushroom Observer Email Verification'
     @body["user"] = user

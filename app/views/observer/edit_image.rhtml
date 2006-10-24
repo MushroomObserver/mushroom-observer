@@ -3,6 +3,8 @@
 
 <div id="Title"><%= @title %></div>
 
+<%= error_messages_for 'image' %>
+
 <%= start_form_tag :action => 'update_image', :id => @image %>
 	<center><%= submit_tag 'Save Edits' %></center>
 	<table cellpadding="10">

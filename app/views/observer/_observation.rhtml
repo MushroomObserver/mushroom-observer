@@ -1,0 +1,26 @@
+<table cellpadding=10>
+	<tr>
+		<td align="center" valign="middle" width=160>
+			<%= image = observation.thumb_image
+				if image
+					link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
+							:action => 'show_observation', :id => observation.id)
+				end
+			%>
+		</td>
+		    <% if vertical_layout %>
+	</tr>
+	<tr>
+		<td align="center" valign="middle">
+			<% else %>
+		<td valign="middle">
+			<% end %>
+			<span class="ListLatin"><%= link_to(h(observation.unique_name),
+			 									:action => 'show_observation',
+												:id => observation.id) %></span><br/>
+			<span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span><br/>
+			<span class="ListWhen"><%= observation.when %>:</span>
+			<span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
+		</td>
+	</tr>
+</table>

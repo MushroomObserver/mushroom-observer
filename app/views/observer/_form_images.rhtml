@@ -1,16 +1,18 @@
-<%= error_messages_for 'image' %>
-
 <!--[form:image]-->
-<p><label for="image_title">Title</label><br/>
-<%= text_field 'image', 'title'  %></p>
 
-<p><label for="image_when">When</label><br/>
+<p><label for="image_copyright_holder">Copyright Holder:</label><br/>
+<%= text_field 'image', 'copyright_holder' %></p>
+
+<p><label for="image_when">When:</label>
+	<span id="help_note">
+		Date the photograph or drawing was created.
+	</span><br/>
 <%= date_select 'image', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
 
-<p><label for="image_copyright_holder">Copyright Holder</label><br/>
-<%= text_field 'image', 'copyright_holder'  %></p>
-
-<p><label for="image_notes">Notes</label><br/>
+<p><label for="image_notes">Notes:</label><br/>
+	<span id="help_note">
+		Enter notes that are specific to this particular image.
+	</span><br/>
 <%= text_area 'image', 'notes', "cols" => 30 %></p>
 <%= render :partial => 'textilize_help' %>
 <!--[eoform:image]-->
