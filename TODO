@@ -8,34 +8,8 @@ Bug from adding data:  Is this fixable?
 
 Testing suite for rss_log
 
-- rss_feed should have a date or count cut off
-
-----------
-
-- most recent should be based on RssLogs rather than creation date
-  - Working on list_rsslogs
-- More image oriented display (larger thumbnails on observation page, - next/prev for images)
-- image titles should go away
-- reorganize links
-- re-arrange page
-- provide support page
-
-- list_images should layout like list_observations and list_rss_logs
-
-- improve access to image upload process
-  - Implement 'add_image', 'reuse_image' and 'remove_images'.
-  - Deprecate manage_images
-  - Expand reuse_image to provide a visual approach
-
-- History link from Observation & Species List
-
-----------
-
-RSS fixes...
-
-Seem to be getting multiple rss entries for the same observation.
-
-Why is Bloglines not behaving correctly with my RSS feed?  In particular it is missing things and repeating species list entries
+RSS fixes?
+  Why is Bloglines not behaving correctly with my RSS feed?  In particular, species lists are not showing up.
 
 ----------
 
