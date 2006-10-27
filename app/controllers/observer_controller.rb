@@ -4,6 +4,10 @@
 require 'find'
 require 'ftools'
 
+class Search
+  attr_accessor :pattern
+end
+
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:ask_webmaster_question,
                                                     :color_themes,
@@ -20,6 +24,7 @@ class ObserverController < ApplicationController
                                                     :next_observation,
                                                     :observations_by_name,
                                                     :observation_index,
+                                                    :observation_search,
                                                     :prev_image,
                                                     :prev_observation,
                                                     :rss,
@@ -148,6 +153,28 @@ class ObserverController < ApplicationController
     @layout = calc_layout_params
     @observation_pages, @observations = paginate(:observations,
                                                  :order => "'what' asc",
+                                                 :per_page => @layout["count"])
+    render :action => 'list_observations'
+  end
+
+  # left-hand panel -> observation_search.rhtml
+  def observation_search
+    store_location
+    @layout = calc_layout_params
+    search_data = params[:search]
+    if search_data
+      @session["pattern"] = search_data["pattern"]
+    end
+    pattern = @session["pattern"]
+    if pattern.nil?
+      pattern = ''
+    end
+    @search = Search.new
+    @search.pattern = pattern
+    conditions = sprintf("what like '%s%%'", pattern.gsub(/[*']/,"%"))
+    @observation_pages, @observations = paginate(:observations,
+                                                 :order => "'what' asc",
+                                                 :conditions => conditions,
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
