@@ -19,6 +19,7 @@ class ObserverController < ApplicationController
                                                     :next_image,
                                                     :next_observation,
                                                     :observations_by_name,
+                                                    :observation_index,
                                                     :prev_image,
                                                     :prev_observation,
                                                     :rss,
@@ -141,8 +142,18 @@ class ObserverController < ApplicationController
                                                  :per_page => @layout["count"])
   end
 
-  # observations_by_name.rhtml
+  # left-hand panel -> observations_by_name.rhtml
   def observations_by_name
+    store_location
+    @layout = calc_layout_params
+    @observation_pages, @observations = paginate(:observations,
+                                                 :order => "'what' asc",
+                                                 :per_page => @layout["count"])
+    render :action => 'list_observations'
+  end
+
+  # observation_index.rhtml
+  def observation_index
     store_location
     # Used to be:
     # @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
