@@ -546,13 +546,14 @@ class ObserverController < ApplicationController
       if @species_list.save
         @species_list.log('Species list created by ' + @session['user'].login)
         flash[:notice] = 'Species list was successfully created.'
-        @species_list.process_file_data(@session['user'])
+        notes = params[:member][:notes]
+        @species_list.process_file_data(@session['user'], notes)
         redirect_to :action => 'list_species_lists'
         species = args["species"]
         args.delete("species")
         args.delete("title")
         args.delete("file")
-        args["notes"] = params[:member][:notes]
+        args["notes"] = notes
         for s in species
           @species_list.construct_observation(s.strip(), args)
         end
@@ -646,12 +647,14 @@ class ObserverController < ApplicationController
         if @species_list.save
           @species_list.log('Species list updated by ' + @session['user'].login)
           flash[:notice] = 'Species List was successfully updated.'
-          @species_list.process_file_data(@session['user'])
+          notes = params[:member][:notes]
+          @species_list.process_file_data(@session['user'], notes)
           new_species = args["species"]
           args.delete("species")
           args.delete("title")
           args["created"] = now
           args["user"] = @session['user']
+          args["notes"] = notes
           for s in new_species
             @species_list.construct_observation(s.strip(), args)
           end

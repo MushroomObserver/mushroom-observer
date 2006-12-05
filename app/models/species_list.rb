@@ -78,7 +78,7 @@ class SpeciesList < ActiveRecord::Base
     end
   end
   
-  def process_file_data(user)
+  def process_file_data(user, notes)
     if self.data
       args = {}
       now = Time.now 
@@ -86,7 +86,7 @@ class SpeciesList < ActiveRecord::Base
       args["modified"] = now
       args["user"] = user
       args["where"] = self.where
-      args["notes"] = self.notes
+      args["notes"] = notes
       if self.data[0] == 91 # '[' character
         process_name_list(args)
       else
