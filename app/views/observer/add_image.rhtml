@@ -18,6 +18,8 @@ or other fund-raising tools that may be used to support this site.<br/></br/>
 <%= form_tag({:action => 'upload_image'}, :multipart => true) %>
 <center><%= submit_tag("Upload") %></center>
 
+<%= hidden_field("observation", "id") %>
+
 <p><%= file_field("image", "image") %></p>
 
 <%= render :partial => 'form_images' %>

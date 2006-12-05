@@ -1,32 +1,10 @@
-List window still gets scrunched under Safari
-
-Bug from adding data:  Is this fixable?
-  Manage Images when alternating between two FireFox tabs (splitting an existing observation seems to be a good test case - e.g., observation 388) - Confusion between which observation is 'current' in each tab
-     show 1, show 2, manage 1 goes to 2
-
-----------
-
-Testing suite for rss_log
-
-RSS fixes?
-  Why is Bloglines not behaving correctly with my RSS feed?  In particular, species lists are not showing up.
-
-----------
-
-Need to revise how species lists are handled to allow for chronological notes, but cumulative lists.  See:
-http://mushroomobserver.org/observer/show_species_list/8
-
-Do rss_log lists need Next/Prev?
-
-More color themes: Boletus, Coprinus (very black and white)
-
-More rails-style tests
-
-Add support for uploading Name species lists
+Option for not logging a change
+Need prev/next on Latest Changes page
+RSS feed data should have html line breaks in it.
 
 Field based search mechanism
 
-user pages
+General discussion blog that is searchable
 
 Names - Replace the 'what' field with an association with a list of 'Name' objects.
   Name objects would allow for things like author citations, synonymy, references, descriptions etc.
@@ -37,6 +15,8 @@ Namings - Provide a formalized way for users to associate a 'Name' with an 'Obse
 
 Hook 'where' up to Google Maps
 
+user pages
+
 Provide the ability to create an observation as a side effect of uploading an image
   rather than requiring the observation to exist before allowing image upload.
 
@@ -45,6 +25,17 @@ Herbarium records - Provide a standard way to describe herbarium collections.
 show_observation pages could have pagination_links instead of next/prev links.
 
 Check for duplicate images, image garbage collection
+
+
+Need to revise how species lists are handled to allow for chronological notes, but cumulative lists.  See:
+http://mushroomobserver.org/observer/show_species_list/8
+
+Do rss_log lists need Next/Prev?
+
+More color themes: Boletus, Coprinus (very black and white)
+
+More rails-style tests
+
 
 New ideas:
 Mycology club affiliations (useful for searching)

@@ -83,8 +83,8 @@ class ObserverController < ApplicationController
     if verify_user(user)
       @comment = Comment.new(params[:comment])
       @comment.created = Time.now
-      @observation = @session[:observation]
-      @comment.observation = @observation
+      @observation = @comment.observation
+      # @comment.observation = @observation
       @comment.user = user
       if @comment.save
         @observation.log(sprintf('Comment, %s, added by %s', @comment.summary, user.login))
@@ -189,7 +189,6 @@ class ObserverController < ApplicationController
                                               " from observations o, users u" +
                                               " where o.user_id = u.id" +
                                               " order by 'what' asc, 'when' desc")
-    logger.warn(@data[0])
   end
 
   # list_observations.rhtml -> show_observation.rhtml
@@ -403,7 +402,7 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> reuse_image.rhtml
   def reuse_image
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       @image = Image.new
       @image.copyright_holder = @session['user'].legal_name
@@ -418,7 +417,7 @@ class ObserverController < ApplicationController
 
   # deprecated
   def manage_images
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:id])
     logger.error("manage_images has been deprecated")
     flash[:notice] = 'manage_images has been deprecated'
     redirect_to(:action => 'show_observation', :id => @observation)
@@ -426,7 +425,7 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> add_image.rhtml
   def add_image
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       @image = Image.new
       @image.copyright_holder = @session['user'].legal_name
@@ -437,7 +436,7 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> remove_images.rhtml
   def remove_images
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       @image = Image.new
       @image.copyright_holder = @session['user'].legal_name
@@ -447,7 +446,7 @@ class ObserverController < ApplicationController
   end
   
   def upload_image
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:observation][:id])
     if check_user_id(@observation.user_id)
       # Upload image
       @image = Image.new(params[:image])
@@ -472,7 +471,7 @@ class ObserverController < ApplicationController
 
   # remove_images.rhtml -> delete_images -> show_observation.rhtml
   def delete_images
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:observation][:id])
     if check_user_id(@observation.user_id)
       # Delete images
       images = params[:selected]
@@ -505,7 +504,7 @@ class ObserverController < ApplicationController
   
   # reuse_image.rhtml -> reuse_image_by_id -> show_observation.rhtml
   def reuse_image_by_id
-    @observation = @session[:observation]
+    @observation = Observation.find(params[:observation][:id])
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
       if !image.nil?
@@ -547,10 +546,13 @@ class ObserverController < ApplicationController
       if @species_list.save
         @species_list.log('Species list created by ' + @session['user'].login)
         flash[:notice] = 'Species list was successfully created.'
+        @species_list.process_file_data(@session['user'])
         redirect_to :action => 'list_species_lists'
         species = args["species"]
         args.delete("species")
         args.delete("title")
+        args.delete("file")
+        args["notes"] = params[:member][:notes]
         for s in species
           @species_list.construct_observation(s.strip(), args)
         end
@@ -641,10 +643,10 @@ class ObserverController < ApplicationController
       if @species_list.update_attributes(args)
         now = Time.now
         @species_list.modified = now
-        redirect_to :action => 'show_species_list', :id => @species_list
         if @species_list.save
           @species_list.log('Species list updated by ' + @session['user'].login)
           flash[:notice] = 'Species List was successfully updated.'
+          @species_list.process_file_data(@session['user'])
           new_species = args["species"]
           args.delete("species")
           args.delete("title")
@@ -654,6 +656,7 @@ class ObserverController < ApplicationController
             @species_list.construct_observation(s.strip(), args)
           end
         end
+        redirect_to :action => 'show_species_list', :id => @species_list
       else
         render :action => 'edit_species_list'
       end
@@ -885,7 +888,6 @@ class ObserverController < ApplicationController
           result.push(h['image_id'])
         end
       end
-      logger.warn("calc_image_ids: " + result.join(', '))
     end
     result
   end

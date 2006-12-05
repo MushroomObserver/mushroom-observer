@@ -9,6 +9,7 @@
 <%= form_tag({:action => 'reuse_image_by_id'}, :multipart => true) %>
 <center><%= submit_tag("Reuse") %></center>
 
+<%= hidden_field("observation", "id") %>
 <p><%= text_field("observation", "idstr") %></p>
 
 <%= pagination_links(@image_pages) %>

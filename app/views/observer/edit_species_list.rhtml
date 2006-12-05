@@ -3,19 +3,13 @@
 
 <div id="Title"><%= @title %></div>
 
-<%= start_form_tag :action => 'update_species_list', :id => @species_list %>
+<%= form_tag({:action => 'update_species_list', :id => @species_list}, :multipart => true) %>
 <br/>
 <center><%= submit_tag 'Save Edits' %></center>
 
 <table cellpadding="10">
 	<tr>
 	    <%= render :partial => 'form_species_lists' %>
-		<td valign="top">
-			<p>
-				<label for="species_list_species">Species (enter a name on each line)</label><br/>
-				<%= text_area 'species_list', 'species'  %>
-			</p>
-		</td>
 	</tr>
 </table>
 <%= end_form_tag %>

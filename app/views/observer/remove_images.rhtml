@@ -9,6 +9,8 @@
 <%= form_tag({:action => 'delete_images'}, :multipart => true) %>
 <center><%= submit_tag("Remove") %></center>
 
+<%= hidden_field("observation", "id") %>
+
 <table>
     <% for image in @observation.images %>
 		<tr>

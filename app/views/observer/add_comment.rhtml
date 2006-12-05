@@ -5,9 +5,7 @@
 
 <%= start_form_tag :action => 'save_comment' %>
 <center><%= submit_tag "Create" %></center>
-<table cellpadding="10">
-<tr>
-  <%= render :partial => 'form_comments' %>
-</tr>
-</table>
+
+<%= render :partial => 'form_comments', :locals => { :observation_id => @observation.id }%>
+
 <%= end_form_tag %>

@@ -10,11 +10,17 @@ ActionController::Routing::Routes.draw do |map|
   # -- just remember to delete public/index.html.
   # map.connect '', :controller => "welcome"
 
+  # Ensure that '' goes to /observer/index
+  map.connect '', :controller => 'observer'
+  
+  # Route /# to /observer/show_observation/#
+  map.connect ':id', :controller => 'observer', :action => 'show_observation'
+  
   # Allow downloading Web Service WSDL as a file with an extension
   # instead of a file named 'wsdl'
-  map.connect ':controller/service.wsdl', :action => 'wsdl'
+  # map.connect ':controller/service.wsdl', :action => 'wsdl'
 
-  # Redirect to observer controller
+  # Redirect to observer controller by default
   map.connect ':controller/:action/:id', :controller => 'observer'
 
 end
