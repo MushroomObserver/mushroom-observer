@@ -37,7 +37,7 @@ class SpeciesList < ActiveRecord::Base
     now = args["created"]
     entry_text.each do |e|
       args["when"] = now
-      what = e.strip.squeeze
+      what = e.strip.squeeze(' ')
       if what != ''
         args["what"] = what
         obs = Observation.new(args)
@@ -63,7 +63,7 @@ class SpeciesList < ActiveRecord::Base
         if key == 'Date'
           args["when"] = Time.local(*(ParseDate.parsedate(value)))
         elsif key == 'Name'
-          args["what"] = value.strip.squeeze
+          args["what"] = value.strip.squeeze(' ')
         elsif key == 'Time'
           # Ignore
         else
