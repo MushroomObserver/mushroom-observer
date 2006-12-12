@@ -434,6 +434,17 @@ class ObserverController < ApplicationController
     end
   end
 
+  # test method for debugging image loading
+  def do_load_test
+    now = Time.now
+    image_field = params[:image][:image]
+    logger.warn(sprintf("  *** start %s: %s", now, image_field))
+    content_type = image_field.content_type.chomp
+    @img = image_field.read
+    logger.warn(sprintf("  *** end %s: %s", now, Time.now))
+    render :action => 'load_test'
+  end
+
   # show_observation.rhtml -> remove_images.rhtml
   def remove_images
     @observation = Observation.find(params[:id])
