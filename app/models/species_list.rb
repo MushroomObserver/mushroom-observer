@@ -8,13 +8,13 @@ class SpeciesList < ActiveRecord::Base
     if self.rss_log.nil?
       self.rss_log = RssLog.new
     end
-    self.rss_log.addWithDate(msg)
+    self.rss_log.addWithDate(msg, true)
   end
   
   def orphan_log(entry)
     self.log(entry) # Ensures that self.rss_log exists
     self.rss_log.species_list = nil
-    self.rss_log.add(self.unique_name)
+    self.rss_log.add(self.unique_name, false)
   end
 
   def species
@@ -25,9 +25,11 @@ class SpeciesList < ActiveRecord::Base
   end
 
   def file=(file_field)
-    content_type = file_field.content_type.chomp
-    if ('application/text' == content_type or 'text/plain' == content_type or 'application/octet-stream' == content_type)
-      self.data = file_field.read
+    if file_field.class == StringIO
+      content_type = file_field.content_type.chomp
+      if ('application/text' == content_type or 'text/plain' == content_type or 'application/octet-stream' == content_type)
+        self.data = file_field.read
+      end
     end
   end
   

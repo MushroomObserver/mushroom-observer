@@ -87,7 +87,7 @@ class ObserverController < ApplicationController
       # @comment.observation = @observation
       @comment.user = user
       if @comment.save
-        @observation.log(sprintf('Comment, %s, added by %s', @comment.summary, user.login))
+        @observation.log(sprintf('Comment, %s, added by %s', @comment.summary, user.login), true)
         flash[:notice] = 'Comment was successfully added.'
         redirect_to(:action => 'show_observation', :id => @observation)
       else
@@ -112,7 +112,7 @@ class ObserverController < ApplicationController
       if @comment.update_attributes(params[:comment])
         if @comment.save
           @comment.observation.log(sprintf('Comment, %s, updated by %s',
-                                           @comment.summary, @session['user'].login))
+                                           @comment.summary, @session['user'].login), true)
           flash[:notice] = 'Comment was successfully updated.'
         end
         redirect_to :action => 'show_comment', :id => @comment
@@ -130,7 +130,7 @@ class ObserverController < ApplicationController
     if check_user_id(@comment.user_id)
       id = @comment.observation_id
       @comment.observation.log(sprintf('Comment, %s, destroyed by %s',
-                                       @comment.summary, @session['user'].login))
+                                       @comment.summary, @session['user'].login), false)
       @comment.destroy
       redirect_to :action => 'show_observation', :id => id
     else
@@ -219,7 +219,7 @@ class ObserverController < ApplicationController
       @observation.modified = now
       @observation.user = user
       if @observation.save
-        @observation.log('Observation created by ' + @session['user'].login)
+        @observation.log('Observation created by ' + @session['user'].login, true)
         flash[:notice] = 'Observation was successfully created.'
         redirect_to :action => 'show_observation', :id => @observation
       else
@@ -259,7 +259,9 @@ class ObserverController < ApplicationController
         # @observation.touch
         @observation.save
 
-        @observation.log('Observation updated by ' + @session['user'].login)
+        @observation.log('Observation updated by ' + @session['user'].login,
+                         params[:log_change][:checked] == 1)
+
         flash[:notice] = 'Observation was successfully updated.'
         redirect_to :action => 'show_observation', :id => @observation
       else
@@ -370,7 +372,7 @@ class ObserverController < ApplicationController
         @image.modified = Time.now
         @image.save
         for o in @image.observations
-          o.log(sprintf('Image, %s, updated by %s', @image.unique_name, @session['user'].login))
+          o.log(sprintf('Image, %s, updated by %s', @image.unique_name, @session['user'].login), true)
         end
         flash[:notice] = 'Image was successfully updated.'
         redirect_to :action => 'show_image', :id => @image
@@ -389,7 +391,7 @@ class ObserverController < ApplicationController
     if check_user_id(@image.user_id)
       image_name = @image.unique_name
       for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
-        observation.log(sprintf('Image, %s, destroyed by %s', image_name, @session['user'].login))
+        observation.log(sprintf('Image, %s, destroyed by %s', image_name, @session['user'].login), false)
         observation.thumb_image_id = nil
         observation.save
       end
@@ -466,7 +468,7 @@ class ObserverController < ApplicationController
       @image.user = @session['user']
       if @image.save
         if @image.save_image
-          @observation.log(sprintf('Image, %s, created by %s', @image.unique_name, @session['user'].login))
+          @observation.log(sprintf('Image, %s, created by %s', @image.unique_name, @session['user'].login), true)
           @observation.add_image(@image)
           @observation.save
         else
@@ -491,7 +493,7 @@ class ObserverController < ApplicationController
           if do_it == 'yes'
             image = @observation.remove_image_by_id(image_id)
             if !image.nil?
-              @observation.log(sprintf('Image, %s, removed by %s', image.unique_name, @session['user'].login))
+              @observation.log(sprintf('Image, %s, removed by %s', image.unique_name, @session['user'].login), false)
             end
           end
         end
@@ -507,7 +509,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login))
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login), true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end
@@ -519,7 +521,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login))
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login), true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end
@@ -663,6 +665,7 @@ class ObserverController < ApplicationController
           new_species = args["species"]
           args.delete("species")
           args.delete("title")
+          args.delete("file")
           args["created"] = now
           args["user"] = @session['user']
           args["notes"] = notes

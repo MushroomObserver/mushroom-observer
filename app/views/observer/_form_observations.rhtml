@@ -21,8 +21,7 @@
 	'Edit Observation'.
 </span></p>
 <br/>
-<p><label for="observation_specimen">Herbarium Specimen Available:</label>
-<select id="observation_specimen" name="observation[specimen]"><option value="false" selected>False</option><option value="true">True</option></select><br/>
+<p><%= check_box("observation", "specimen") %><label for="observation_specimen"> Herbarium Specimen Available</label><br/>
 <span id="help_note">
 	Select 'True' when there is a dried specimen available for further study.  This can be
 	either be at an official herbarium or part of a personal herbarium.  Please note where
@@ -38,5 +37,8 @@
 	</span><br/>
 <%= text_area 'observation', 'notes'  %></p>
 <%= render :partial => 'textilize_help' %>
+
+<p><%= check_box("log_change", 'checked', :checked => 'checked') %><label for="log_change"> Log Change</label></p>
+
 </td>
 <!--[eoform:observation]-->

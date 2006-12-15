@@ -8,7 +8,7 @@ xml.rss(:version=>"2.0"){
     for log in @logs
       xml.item do
         xml.title(log.title)
-        xml.description(log.notes) # ???
+        xml.description(log.notes.gsub("\n", "<br></br>\n")) # ???
         xml.pubDate(log.modified.rfc2822)
         xml.link(DOMAIN + log.url)
         xml.guid(DOMAIN + log.url, "isPermaLink" => "false")

@@ -9,17 +9,17 @@ class Observation < ActiveRecord::Base
   belongs_to :user
   has_one :rss_log
 
-  def log(msg)
+  def log(msg, touch)
     if self.rss_log.nil?
       self.rss_log = RssLog.new
     end
-    self.rss_log.addWithDate(msg)
+    self.rss_log.addWithDate(msg, touch)
   end
   
   def orphan_log(entry)
-    self.log(entry) # Ensures that self.rss_log exists
+    self.log(entry, false) # Ensures that self.rss_log exists
     self.rss_log.observation = nil
-    self.rss_log.add(self.unique_name)
+    self.rss_log.add(self.unique_name, false)
   end
   
   def touch

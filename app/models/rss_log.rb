@@ -8,20 +8,22 @@ class RssLog < ActiveRecord::Base
     self.save
   end
   
-  def add(entry)
+  def add(entry, t)
     self.notes = sprintf("%s\n%s", entry, self.notes)
-    touch
+    if t
+      touch
+    end
   end
   
-  def addWithDate(entry)
-    add(sprintf("%s: %s", Time.now, entry))
+  def addWithDate(entry, t)
+    add(sprintf("%s: %s", Time.now, entry), t)
   end
   
   def orphan(title, entry)
     self.observation = nil
     self.species_list = nil
-    addWithDate(entry)
-    add(title)
+    addWithDate(entry, false)
+    add(title, false)
   end
         
   def title
