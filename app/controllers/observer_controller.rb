@@ -260,7 +260,7 @@ class ObserverController < ApplicationController
         @observation.save
 
         @observation.log('Observation updated by ' + @session['user'].login,
-                         params[:log_change][:checked] == 1)
+                         params[:log_change][:checked] == '1')
 
         flash[:notice] = 'Observation was successfully updated.'
         redirect_to :action => 'show_observation', :id => @observation
