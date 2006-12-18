@@ -3,7 +3,7 @@
 <%
 	observation_ids = []
 	for datum in @data
-		observation_ids.push(datum['id'])
+		observation_ids.push(datum['id'].to_i)
 %>
 <%= link_to(sprintf("%s (%s) %s %s", h(datum["what"]), datum["id"], datum["when"],
 					truncate(h(sprintf("%s (%s)", datum["name"], datum["login"])), MAX_WHO_LENGTH)),
@@ -11,6 +11,5 @@
 <%
 	end
 	session['observation_ids'] = observation_ids
-	session['image_ids'] = nil
 %>
 </br>

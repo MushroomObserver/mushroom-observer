@@ -16,9 +16,7 @@
 		<%
 			row_count = 0
 			col_count = 0
-			rss_log_ids = []
 			for rss_log in @rss_logs
-				rss_log_ids.push(rss_log.id)
 				color = calc_color(row_count, col_count, @layout["alternate_rows"],
 				 				   @layout["alternate_columns"])
 				if col_count == 0 %>
@@ -46,7 +44,6 @@
 					row_count += 1
 				end
 			end
-			session['rss_log_ids'] = rss_log_ids
 		%>
 	</table>
 	<%= pagination_links(@rss_log_pages) %>

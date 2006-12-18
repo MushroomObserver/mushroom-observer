@@ -16,9 +16,7 @@
 		<%
 			row_count = 0
 			col_count = 0
-			observation_ids = []
 			for observation in @observations
-				observation_ids.push(observation.id)
 				color = calc_color(row_count, col_count, @layout["alternate_rows"],
 				 				   @layout["alternate_columns"])
 				if col_count == 0 %>
@@ -36,8 +34,6 @@
 					row_count += 1
 				end
 			end
-			session['observation_ids'] = observation_ids
-			session['image_ids'] = nil
 		%>
 	</table>
 	<%= pagination_links(@observation_pages) %>

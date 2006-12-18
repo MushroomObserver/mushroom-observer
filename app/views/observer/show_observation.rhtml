@@ -1,5 +1,5 @@
 <% @title = 'Observation: ' + h(@observation.unique_name) %>
-<%= link_to 'Add Comment', :action => 'add_comment' %>
+<%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% questions_ok = @observation.user.question_email
    if questions_ok %>

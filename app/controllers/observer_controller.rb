@@ -50,6 +50,7 @@ class ObserverController < ApplicationController
   # left-hand panel -> list_comments.rhtml
   def list_comments
     @session['observation_ids'] = nil
+    @session['observation'] = nil
     @session['image_ids'] = nil
     store_location
     @comment_pages, @comments = paginate(:comments,
@@ -57,15 +58,10 @@ class ObserverController < ApplicationController
                                      :per_page => 10)
   end
 
-  # show_observation.rhtml -> add_comment.rhtml
-  # I used the session for this based on the parallel case in one of the Rails tutorial.
-  # It seems like I could just as easily do it with the params.  However, for 'save_comment'
-  # I don't want an extra key for the observation since I'm using the params to create the
-  # comment.
   def add_comment
     if verify_user(@session['user'])
       @comment = Comment.new
-      @observation = @session[:observation]
+      @observation = Observation.find(params[:id])
     end
   end
 
@@ -142,8 +138,11 @@ class ObserverController < ApplicationController
   def list_observations
     store_location
     @layout = calc_layout_params
+    @session['observation_ids'] = self.query_ids("select id, `when` from observations order by `when` desc")
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations,
-                                                 :order => "'when' desc",
+                                                 :order => "`when` desc",
                                                  :per_page => @layout["count"])
   end
 
@@ -151,12 +150,15 @@ class ObserverController < ApplicationController
   def observations_by_name
     store_location
     @layout = calc_layout_params
+    @session['observation_ids'] = self.query_ids("select id, `what` from observations order by `what` asc, `when` desc")
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations,
-                                                 :order => "'what' asc",
+                                                 :order => "`what` asc, `when` desc",
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
-
+  
   # left-hand panel -> observation_search.rhtml
   def observation_search
     store_location
@@ -172,8 +174,13 @@ class ObserverController < ApplicationController
     @search = Search.new
     @search.pattern = pattern
     conditions = sprintf("what like '%s%%'", pattern.gsub(/[*']/,"%"))
+    query = sprintf("select id, what from observations where %s order by `what` asc, `when` desc",
+                    conditions)
+    @session['observation_ids'] = self.query_ids(query)
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations,
-                                                 :order => "'what' asc",
+                                                 :order => "`what` asc, `when` desc",
                                                  :conditions => conditions,
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
@@ -189,6 +196,9 @@ class ObserverController < ApplicationController
                                               " from observations o, users u" +
                                               " where o.user_id = u.id" +
                                               " order by 'what' asc, 'when' desc")
+    # Moved the calculation of observation_ids into the view since it's embedded in @data
+    @session['observation'] = nil
+    @session['image_ids'] = nil
   end
 
   # list_observations.rhtml -> show_observation.rhtml
@@ -196,14 +206,15 @@ class ObserverController < ApplicationController
   def show_observation
     store_location
     @observation = Observation.find(params[:id])
-    @session[:observation] = @observation
+    @session['observation'] = params[:id].to_i
   end
 
   # left-hand panel -> new_observation.rhtml
   def new_observation
     if verify_user(@session['user'])
-  		@session['observation_ids'] = nil
-  		@session['image_ids'] = nil
+      @session['observation_ids'] = nil
+      @session['observation'] = nil
+      @session['image_ids'] = nil
       @observation = Observation.new
       @observation.what = 'Unknown'
     end
@@ -233,7 +244,7 @@ class ObserverController < ApplicationController
   def edit_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
-      @session[:observation] = @observation
+      @session['observation'] = params[:id].to_i
     else 
       render :action => 'show_observation'
     end
@@ -325,19 +336,22 @@ class ObserverController < ApplicationController
 
   # Various -> list_images.rhtml
   def list_images
-    @session['observation_ids'] = nil
-		@session['image_ids'] = nil
+    @session['observation_ids'] = []
+    @session['observation'] = nil
+    @session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
+    
     store_location
     @layout = calc_layout_params
     @image_pages, @images = paginate(:images,
-                                     :order => "'when' desc",
+                                     :order => "`when` desc",
                                      :per_page => @layout["count"])
   end
 
   # images_by_title.rhtml
   def images_by_title
     @session['observation_ids'] = nil
-		@session['image_ids'] = nil
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     store_location
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
@@ -529,7 +543,7 @@ class ObserverController < ApplicationController
 
   # deprecated along with manage_images
   def save_image
-    @observation = @session[:observation]
+    @observation = @session['observation']
     logger.error("save_image has been deprecated")
     flash[:notice] = 'save_image has been deprecated'
     redirect_to(:action => 'show_observation', :id => @observation)
@@ -540,8 +554,9 @@ class ObserverController < ApplicationController
   def new_species_list
     user = @session['user']
     if verify_user(user)
-  		@session['observation_ids'] = nil
-  		@session['image_ids'] = nil
+      @session['observation_ids'] = nil
+      @session['observation'] = nil
+      @session['image_ids'] = nil
       @species_list = SpeciesList.new
     end
   end
@@ -609,8 +624,9 @@ class ObserverController < ApplicationController
   
   # left-hand panel -> list_species_lists.rhtml
   def list_species_lists
-		@session['observation_ids'] = nil
-		@session['image_ids'] = nil
+    @session['observation_ids'] = nil
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     store_location
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc",
@@ -631,8 +647,9 @@ class ObserverController < ApplicationController
 
   # species_lists_by_title.rhtml
   def species_lists_by_title
-		@session['observation_ids'] = nil
-		@session['image_ids'] = nil
+    @session['observation_ids'] = nil
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
   end
@@ -686,7 +703,7 @@ class ObserverController < ApplicationController
   def manage_species_lists
     user = @session['user']
     if verify_user(user)
-      @observation = @session[:observation]
+      @observation = Observation.find(params[:id])
     end
   end
 
@@ -803,6 +820,11 @@ class ObserverController < ApplicationController
   def list_rss_logs
     store_location
     @layout = calc_layout_params
+    query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
+            "modified is not null order by 'modified' desc"
+    @session['observation_ids'] = self.query_ids(query)
+    @session['observation'] = nil
+    @session['image_ids'] = nil
     @rss_log_pages, @rss_logs = paginate(:rss_log,
                                       :order => "'modified' desc",
                                       :per_page => @layout["count"])
@@ -812,53 +834,65 @@ class ObserverController < ApplicationController
     store_location
     @rss_log = RssLog.find(params['id'])
   end
-
-  # Calculation of the image_ids should be lazier.  Currently it calculates all the image_ids
-  # for all the observation_ids.  Instead, image_ids should just be the ids for the 'current'
-  # observation, and if you run out of those, then walk through observation_ids until you
-  # find more images.
-  def prev_image
-    @image = Image.find(params[:id])
-    image_ids = @session['image_ids']
-    if image_ids.nil?
-      image_ids = calc_image_ids(@session['observation_ids'])
-      @session['image_ids'] = image_ids
-    end
-    index = 0
-    id = 0
-    if not image_ids.nil?
-      current_index = image_ids.index(params[:id])
-      if current_index and image_ids.length > 0
-        index = current_index - 1
-        if index < 0
-          index = image_ids.length - 1
-        end
-      end
-      id = image_ids[index]
-    end
-    redirect_to :action => 'show_image', :id => id
-  end
-
+  
   def next_image
-    @image = Image.find(params[:id])
-    image_ids = @session['image_ids']
-    if image_ids.nil?
-      image_ids = calc_image_ids(@session['observation_ids'])
-      @session['image_ids'] = image_ids
-    end
-    index = 0
-    id = 0
-    if not image_ids.nil?
-      current_index = image_ids.index(params[:id])
-      if current_index and image_ids.length > 0
-        index = current_index + 1
-        if index >= image_ids.length
-          index = 0
+    current_image_id = params[:id].to_i
+    (image_ids, current_observation) = current_image_state
+    if image_ids # nil value means it wasn't set and the session data doesn't have anything to help
+      obs_ids = @session['observation_ids']
+      if image_ids == [] # current image list is empty, try for the next
+        image_ids, current_observation = next_image_list(current_observation, obs_ids)
+      end
+      if image_ids != [] # empty list means there isn't a next_image_list with any content
+        index = image_ids.index(current_image_id)
+        if index.nil? # Not in the list so start at the first element
+          current_image_id = image_ids[0]
+        else
+          index = index + 1
+          if index >= image_ids.length # Run off the end of the current list
+            image_ids, current_observation = next_image_list(current_observation, obs_ids)
+            if image_ids != [] # Just in case
+              current_image_id = image_ids[0]
+            end
+          else
+            current_image_id = image_ids[index]
+          end
         end
       end
-      id = image_ids[index]
     end
-    redirect_to :action => 'show_image', :id => id
+    @session['image_ids'] = image_ids
+    @session['observation'] = current_observation
+    redirect_to :action => 'show_image', :id => current_image_id
+  end
+  
+  def prev_image
+    current_image_id = params[:id].to_i
+    (image_ids, current_observation) = current_image_state
+    if image_ids # nil value means it wasn't set and the session data doesn't have anything to help
+      obs_ids = @session['observation_ids']
+      if image_ids == [] # current image list is empty, try for the next
+        image_ids, current_observation = prev_image_list(current_observation, obs_ids)
+      end
+      if image_ids != [] # empty list means there isn't a next_image_list with any content
+        index = image_ids.index(current_image_id)
+        if index.nil? # Not in the list so start with the last element
+          current_image_id = image_ids[-1]
+        else
+          index = index - 1
+          if index < 0 # Run off the front of the current list
+            image_ids, current_observation = prev_image_list(current_observation, obs_ids)
+            if image_ids != [] # Just in case
+              current_image_id = image_ids[-1]
+            end
+          else
+            current_image_id = image_ids[index]
+          end
+        end
+      end
+    end
+    @session['image_ids'] = image_ids
+    @session['observation'] = current_observation
+    redirect_to :action => 'show_image', :id => current_image_id
   end
 
   def resize_images
@@ -873,6 +907,126 @@ class ObserverController < ApplicationController
     redirect_to :action => 'list_images'
   end
   
+  # Ultimately running large queries like this and storing the info in the session
+  # may become unwieldy.  Storing the query and selecting chunks will scale better.
+  helper_method :query_ids
+  def query_ids(query)
+    result = []
+    data = Observation.connection.select_all(query)
+    for d in data
+      id = d['id']
+      if id
+        result.push(id.to_i)
+      end
+    end
+    result
+  end
+
+  # Get initial image_ids and observation_id
+  helper_method :current_image_state
+  def current_image_state
+    obs_ids = @session['observation_ids']
+    observation_id = @session['observation']
+    if observation_id.nil? and obs_ids
+      if obs_ids.length > 0
+        observation_id = obs_ids[0]
+      end
+    end
+    image_ids = @session['image_ids']
+    if image_ids.nil? and observation_id
+      images = Observation.find(observation_id).images
+      image_ids = []
+      for i in images
+        image_ids.push(i.id)
+      end
+    end
+    [image_ids, observation_id]
+  end
+
+  helper_method :next_id
+  def next_id(id, id_list)
+    result = id
+    if id_list.length > 0
+      result = id_list[0]
+      index = id_list.index(id)
+      if index
+        index = index + 1
+        if index < id_list.length
+          result = id_list[index]
+        end
+      end
+    end
+    result
+  end
+
+  helper_method :next_image_list
+  def next_image_list(observation_id, id_list)
+    image_list = []
+    current_id = observation_id
+    if id_list.length > 0
+      index = id_list.index(observation_id)
+      if index.nil?
+        index = id_list.length - 1
+        observation_id = id_list[index]
+      end
+      current_id = observation_id
+      while image_list == []
+        current_id = next_id(current_id, id_list)
+        if current_id == observation_id
+          break
+        end
+        images = Observation.find(current_id).images
+        image_list = []
+        for i in images
+          image_list.push(i.id)
+        end
+      end
+    end
+    [image_list, current_id]
+  end
+  
+  helper_method :prev_id
+  def prev_id(id, id_list)
+    result = id
+    if id_list.length > 0
+      result = id_list[-1]
+      index = id_list.index(id)
+      if index
+        index = index - 1
+        if index >= 0
+          result = id_list[index]
+        end
+      end
+    end
+    result
+  end
+
+  helper_method :prev_image_list
+  def prev_image_list(observation_id, id_list)
+    image_list = []
+    current_id = observation_id
+    if id_list.length > 0
+      index = id_list.index(observation_id)
+      if index.nil?
+        index = 0
+        observation_id = id_list[index]
+      end
+      current_id = observation_id
+      while image_list == []
+        current_id = prev_id(current_id, id_list)
+        if current_id == observation_id
+          break
+        end
+        images = Observation.find(current_id).images
+        image_list = []
+        for i in images
+          image_list.push(i.id)
+        end
+      end
+    end
+    [image_list, current_id]
+  end
+
   helper_method :check_permission
   def check_permission(user_id)
     user = @session['user']
@@ -882,16 +1036,16 @@ class ObserverController < ApplicationController
   helper_method :calc_color
   def calc_color(row, col, alt_rows, alt_cols)
     color = 0
-		if alt_rows
-			color = row % 2
-		end
-		if alt_cols
-			if (col % 2) == 1
-				color = 1 - color
-			end
-		end
-		color
-	end
+    if alt_rows
+      color = row % 2
+    end
+    if alt_cols
+      if (col % 2) == 1
+        color = 1 - color
+      end
+    end
+    color
+  end
 
   helper_method :calc_image_ids
   def calc_image_ids(obs)
@@ -902,7 +1056,7 @@ class ObserverController < ApplicationController
         img_ids = Observation.connection.select_all("select image_id from images_observations" +
                                           " where observation_id=" + ob_id.to_s)
         for h in img_ids
-          result.push(h['image_id'])
+          result.push(h['image_id'].to_i)
         end
       end
     end

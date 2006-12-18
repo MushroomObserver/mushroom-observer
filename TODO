@@ -1,19 +1,24 @@
-Option for not logging a change
-Need prev/next on Latest Changes page
-RSS feed data should have html line breaks in it.
-
-Field based search mechanism
-
-General discussion blog that is searchable
-
 Names - Replace the 'what' field with an association with a list of 'Name' objects.
   Name objects would allow for things like author citations, synonymy, references, descriptions etc.
 
 Use names to support real species lists
 
 Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
+  Add confidence level for a naming
+  Add basis for naming (sight, key, references)
 
-Hook 'where' up to Google Maps
+Improve search functions:
+Make search box more available.
+  Easy for non-form pages like show_*
+  Should it be universal?  How will that interact with form pages (edit_*)?
+  Should results go in a new window or tab?
+Field based search mechanism [douglas]
+
+General discussion blog that is searchable
+
+Improve 'where'
+  lat, long, altitude
+  Hook up to Google Maps
 
 user pages
 
