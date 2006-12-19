@@ -20,6 +20,7 @@ class Observation < ActiveRecord::Base
     self.log(entry, false) # Ensures that self.rss_log exists
     self.rss_log.observation = nil
     self.rss_log.add(self.unique_name, false)
+    self.rss_log.save
   end
   
   def touch

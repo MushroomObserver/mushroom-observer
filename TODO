@@ -1,5 +1,13 @@
 Names - Replace the 'what' field with an association with a list of 'Name' objects.
   Name objects would allow for things like author citations, synonymy, references, descriptions etc.
+  Targets:
+    Name pages
+      names -> id, type, name, author
+    Spelling correction
+    Author citations
+    References
+    Synonymy
+    Descriptions
 
 Use names to support real species lists
 
