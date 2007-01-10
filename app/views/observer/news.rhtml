@@ -6,6 +6,48 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 </p>
 
 <p>
+	<h3>Tuesday January 9, 2007</h3>
+	<ol>
+	    <li>Names are now database objects rather than just strings.  They have a
+        rank, a text name an author and notes.</li>
+        <li>A show_name page shows this information as well as a list of all
+        observations that use that Name.  The show_pages can be accessed from
+        each show_observation page as well as the name_index page that is
+        available in the left-side panel.</li>
+        <li>Names can be edited on the edit_name pages that are accessible from
+        the show_name pages.  Anyone is allowed to edit any name, but
+        following the <a href="http://www.wikipedia.org/">Wikipedia</a> model,
+        a record is kept of every version.  The previous versions are stored as
+        'past names'.  A show_past_name page shows the name information for a
+        previous version of a name and is accessible from each show_name page.</li>
+        <li>Names are associated with observations through the 'what' field of the
+        observation.  When the 'what' field is changed, the names are searched
+        for a match.  The 'what' field can either be the text_name or the
+        text_name and the author for a name.  No match is found for a 'what'
+        value, then the user is given the option to create the new name.  If a
+        'what' value matches more than one name (due to different authors
+        publishing the same name), then the user is given a choice between the
+        options.  The options list how many observations use each version of
+        the name.  If you add an author to a 'what' field for a name that does
+        not have an author already, it will ask you if you want to create the
+        new name, but it will actually update the existing name.</li>
+        <li>Names given in species lists are treated in the exact same manner,
+        except that all the new names and all of the multiple matches are
+        dealt with on the same page.  There is also an option on the
+        new_species_list and edit_species_list pages to 'Just Create New
+        Names'.  This adds the names without updating the species list or
+        creating the corresponding observations.</li>
+        <li>The search box is now available on every page.</li>
+        <li>Removed the Observation Index in favor of the Name Index.</li>
+        <li>Fixed some of the list ordering to make it more intuitive.</li>
+        <li>A filter was added to the account creation process that should reduce the
+        number of bot created users.</li>
+        <li>Fixed a bug with bouncing between observations and images and using the
+        next/prev links.</li>
+	</ol>
+</p>
+
+<p>
 	<h3>Monday December 18, 2006</h3>
 	<ol>
 		<li>Added prev/next links that follow the RSS feed.</li>

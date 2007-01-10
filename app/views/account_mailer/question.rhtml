@@ -1,4 +1,4 @@
-<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following question to you about your observation of <%= @observation.what %> (<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>):
+<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following question to you about your observation of <%= @observation.name.text_name %> (<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>):
 
 <%= h @question %>
 

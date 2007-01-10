@@ -1,4 +1,4 @@
-<% @title = 'Observation: ' + h(@observation.unique_name) %>
+<% @title = 'Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %>
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% questions_ok = @observation.user.question_email
@@ -22,12 +22,13 @@
 	<td width="75%" valign="top">
 	    <p>When: <span class="Data"><%= @observation.when %></span></p>
 	    <p>Where: <span class="Data"><%= h @observation.where %></span></p>
-	    <p>What: <span class="Data"><%= h @observation.what %></span></p>
+	    <p>What: <span class="Data"><%= link_to(textilize_without_paragraph(h(@observation.base_name)),
+	                                            :action => 'show_name', :id => @observation.name_id) %></span></p>
 	    <p>Who: <span class="Data">
 		<% if questions_ok %>
-			<%= link_to h(@observation.user.unique_name), :action => 'ask_question', :id => @observation %>
+			<%= link_to h(@observation.user.unique_text_name), :action => 'ask_question', :id => @observation %>
 		<% else %>
-			<%= h @observation.user.unique_name %></span></p>
+			<%= h @observation.user.unique_text_name %></span></p>
 		<% end %>
 	    <p><span class="Data"><%= if @observation.specimen
 	         'Herbarium specimen available'
@@ -39,14 +40,14 @@
 	    	if lists.length > 0 %>
 				<p>Species Lists:<br/>
 		            <% for l in lists %>
-		 				<%= link_to l.unique_name, :action => 'show_species_list', :id => l %><br/>
+		 				<%= link_to l.unique_text_name, :action => 'show_species_list', :id => l %><br/>
 					<% end %>
 				</p>
 		<% end %>
 	    <p>Notes:</br><%= textilize @observation.notes %></p>
 	    <p>Comments:<br/>
 	        <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
-	            <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_name), MAX_WHO_LENGTH),
+	            <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_text_name), MAX_WHO_LENGTH),
 	                                truncate(h(comment.summary), MAX_FIELD_LENGTH)),
 	                        :action => 'show_comment', :id => comment %><br/>
 	        <% end %>
@@ -74,7 +75,7 @@
 		<% end %>
 		<center>
 	    <% for image in @observation.images %>
-	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + h(image.unique_name),
+	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + textilize_without_paragraph(h image.unique_format_name),
 	            :action => 'show_image', :id => image.id) %></p>
 	    <% end %>
 		</center>

@@ -22,14 +22,19 @@ class AccountController < ApplicationController
     case @request.method
       when :post
         @user = User.new(@params['user'])
-        @user.created = Time.now
-        @user.last_login = @user.created
-        @user.change_rows(5)
-        @user.change_columns(3)
-        if @user.save      
-          @session['user'] = User.authenticate(@user.login, @params['user']['password'])
-          flash[:notice]  = "Signup successful.  Verification sent to your email account."
-          AccountMailer.deliver_verify(@user)
+        if @params['user']['theme'] != '' and @params['user']['login'] != 'test_denied'
+          @user.created = Time.now
+          @user.last_login = @user.created
+          @user.change_rows(5)
+          @user.change_columns(3)
+          if @user.save      
+            @session['user'] = User.authenticate(@user.login, @params['user']['password'])
+            flash[:notice]  = "Signup successful.  Verification sent to your email account."
+            AccountMailer.deliver_verify(@user)
+            redirect_back_or_default :action => "welcome"          
+          end
+        else
+          AccountMailer.deliver_denied(@user)
           redirect_back_or_default :action => "welcome"          
         end
       when :get
@@ -129,7 +134,7 @@ class AccountController < ApplicationController
     if login_check @params['id']
       @user.feature_email = false
       if @user.save
-        flash[:notice] = "Automated feature email disabled for " + @user.unique_name
+        flash[:notice] = "Automated feature email disabled for " + @user.unique_text_name
       end
       user = @session['user']
       @session['user'].feature_email = false
@@ -140,7 +145,7 @@ class AccountController < ApplicationController
     if login_check @params['id']
       @user.question_email = false
       if @user.save
-        flash[:notice] = "Question email disabled for " + @user.unique_name
+        flash[:notice] = "Question email disabled for " + @user.unique_text_name
       end
       user = @session['user']
       @session['user'].question_email = false
@@ -151,7 +156,7 @@ class AccountController < ApplicationController
     if login_check @params['id']
       @user.commercial_email = false
       if @user.save
-        flash[:notice] = "Commercial email inquiries disabled for " + @user.unique_name
+        flash[:notice] = "Commercial email inquiries disabled for " + @user.unique_text_name
       end
       user = @session['user']
       @session['user'].commercial_email = false

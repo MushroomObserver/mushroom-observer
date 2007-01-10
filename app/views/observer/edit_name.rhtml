@@ -1,0 +1,12 @@
+<% @title = 'Editing Name: ' + textilize_without_paragraph(h @name.display_name) %>
+<%= link_to 'Cancel (Show Name)', :action => 'show_name', :id => @name %>
+
+<div id="Title"><%= @title %></div>
+
+<%= start_form_tag :action => 'update_name', :id => @name %>
+<br/>
+<center><%= submit_tag 'Save Edits' %></center>
+
+<%= render :partial => 'form_names' %>
+
+<%= end_form_tag %>

@@ -1,4 +1,4 @@
-<% @title = 'Species List: ' + h(@species_list.unique_name) %>
+<% @title = 'Species List: ' + h(@species_list.unique_text_name) %>
 <% if check_permission(@species_list.user_id) %>
   <%= link_to 'Edit Species List', :action => 'edit_species_list', :id => @species_list %>
   | <%= link_to 'Destroy', { :action => 'destroy_species_list', :id => @species_list },
@@ -9,13 +9,13 @@
 
 <p>When: <span class="Data"><%= @species_list.when %></span></p>
 <p>Where: <span class="Data"><%= h @species_list.where %></span></p>
-<p>Who: <span class="Data"><%= h @species_list.user.unique_name %></span></p>
+<p>Who: <span class="Data"><%= h @species_list.user.unique_text_name %></span></p>
 <p>Notes:</br><%= textilize @species_list.notes %></p>
 <p>Members:<br/>
 	<table cellpadding="5" cellspacing="0">
 		<%
 		odd_or_even = 0
-		observation_list = @species_list.observations.sort {|x,y| x.unique_name <=> y.unique_name }
+		observation_list = @species_list.observations.sort {|x,y| x.unique_text_name <=> y.unique_text_name }
 		observation_ids = []
 		observation_list.each { |o| observation_ids.push(o.id) }
 		session['observation_ids'] = observation_ids
@@ -34,10 +34,10 @@
 	      		%><br/>
 	    	</td>
 		    <td width="100%" valign="middle">
-				<span class="ListLatin"><%= link_to(h(observation.unique_name),
+				<span class="ListName"><%= link_to(textilize_without_paragraph(h observation.unique_format_name),
 			                                        :action => 'show_observation', :id => observation.id) %></span><br/>
 		        <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span>: 
-		        <span class="ListWho"><%= truncate(h(observation.user.unique_name), MAX_WHO_LENGTH) %></span>
+		        <span class="ListWho"><%= truncate(h(observation.user.unique_text_name), MAX_WHO_LENGTH) %></span>
 		    </td>
 	  	</tr>
 	    <% end %>

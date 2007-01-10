@@ -19,6 +19,7 @@ class ObserverController < ApplicationController
                                                     :list_observations,
                                                     :list_rss_logs,
                                                     :list_species_lists,
+                                                    :name_index,
                                                     :news,
                                                     :next_image,
                                                     :next_observation,
@@ -31,6 +32,7 @@ class ObserverController < ApplicationController
                                                     :send_webmaster_question,
                                                     :show_comment,
                                                     :show_image,
+                                                    :show_name,
                                                     :show_observation,
                                                     :show_original,
                                                     :show_rss_log,
@@ -150,11 +152,11 @@ class ObserverController < ApplicationController
   def observations_by_name
     store_location
     @layout = calc_layout_params
-    @session['observation_ids'] = self.query_ids("select id, `what` from observations order by `what` asc, `when` desc")
+    @session['observation_ids'] = self.query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
     @session['observation'] = nil
     @session['image_ids'] = nil
-    @observation_pages, @observations = paginate(:observations,
-                                                 :order => "`what` asc, `when` desc",
+    @observation_pages, @observations = paginate(:observations, :include => "name",
+                                                 :order => "names.search_name asc, `when` desc",
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
@@ -173,14 +175,14 @@ class ObserverController < ApplicationController
     end
     @search = Search.new
     @search.pattern = pattern
-    conditions = sprintf("what like '%s%%'", pattern.gsub(/[*']/,"%"))
-    query = sprintf("select id, what from observations where %s order by `what` asc, `when` desc",
+    conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
+    query = sprintf("select o.id, names.search_name from observations o, names where %s order by names.search_name asc, `when` desc",
                     conditions)
     @session['observation_ids'] = self.query_ids(query)
     @session['observation'] = nil
     @session['image_ids'] = nil
-    @observation_pages, @observations = paginate(:observations,
-                                                 :order => "`what` asc, `when` desc",
+    @observation_pages, @observations = paginate(:observations, :include => "name",
+                                                 :order => "names.search_name asc, `when` desc",
                                                  :conditions => conditions,
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
@@ -192,10 +194,10 @@ class ObserverController < ApplicationController
     # Used to be:
     # @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
     # Now use straight SQL to avoid extracting user info for each observation
-    @data = Observation.connection.select_all("select o.id, o.what, o.when, u.name, u.login" +
-                                              " from observations o, users u" +
-                                              " where o.user_id = u.id" +
-                                              " order by 'what' asc, 'when' desc")
+    @data = Observation.connection.select_all("select o.id, n.observation_name, o.when, u.name, u.login" +
+                                              " from observations o, users u, names n" +
+                                              " where o.user_id = u.id and n.id = o.name_id" +
+                                              " order by n.observation_name asc, 'when' desc")
     # Moved the calculation of observation_ids into the view since it's embedded in @data
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -207,6 +209,7 @@ class ObserverController < ApplicationController
     store_location
     @observation = Observation.find(params[:id])
     @session['observation'] = params[:id].to_i
+    @session['image_ids'] = nil
   end
 
   # left-hand panel -> new_observation.rhtml
@@ -216,7 +219,7 @@ class ObserverController < ApplicationController
       @session['observation'] = nil
       @session['image_ids'] = nil
       @observation = Observation.new
-      @observation.what = 'Unknown'
+      @observation.name = Name.find_name(:Kingdom, 'Fungi').first
     end
   end
 
@@ -249,34 +252,100 @@ class ObserverController < ApplicationController
       render :action => 'show_observation'
     end
   end
+  
+  # update_observation.rhtml -> multiple_names.rhtml
+  def multiple_names
+    @observation = Observation.find(params[:id])
+    if check_user_id(@observation.user_id)
+      @what = params[:what]
+      @names = Name.find_names(@what)
+      @session['observation'] = params[:id].to_i
+    else 
+      render :action => 'show_observation'
+    end
+  end
 
+  def update_observation_with_selected_name
+    @observation = Observation.find(params[:id])
+    if check_user_id(@observation.user_id)
+      # Verify that the user didn't change the what field
+      input_what = params[:what]
+      output_what = params[:observation][:what]
+      if input_what != output_what
+        params[:observation][:name_id] = nil
+      end
+    end
+    update_observation
+  end
+  
+  # update_observation.rhtml -> unknown_name.rhtml
+  def unknown_name
+    @observation = Observation.find(params[:id])
+    @what = params[:what]
+    if check_user_id(@observation.user_id)
+      @session['observation'] = params[:id].to_i
+    else 
+      render :action => 'show_observation'
+    end
+  end
+
+  def update_observation_with_new_name
+    @observation = Observation.find(params[:id])
+    if check_user_id(@observation.user_id)
+      input_what = params[:what]
+      output_what = params[:observation][:what]
+      if input_what == output_what
+        names = Name.names_from_string(output_what)
+        if names.last.nil?
+          flash[:notice] = "Unable to create the name %s", str
+        else
+          user = @observation.user
+          for n in names
+            n.user = user
+            n.save
+          end
+        end
+      end
+    end
+    update_observation
+  end
+  
   # edit_observation.rhtml -> show_observation.rhtml
   # Updates modified and saves changes
   def update_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id) # Even though edit makes this check, avoid bad guys going directly
-      if @observation.update_attributes(params[:observation])
-
-        thumb = params[:thumbnail]
-        if thumb
-          thumb.each do |index, id|
-            @observation.thumb_image_id = id
-          end
-        end
-
-        # Why does this work and the following line doesn't?
-        # Tested with 'obs_mod' rather than 'modified'.  Same effect.
-        @observation.modified = Time.now
-        # @observation.touch
-        @observation.save
-
-        @observation.log('Observation updated by ' + @session['user'].login,
-                         params[:log_change][:checked] == '1')
-
-        flash[:notice] = 'Observation was successfully updated.'
-        redirect_to :action => 'show_observation', :id => @observation
+      if params[:observation][:name_id].nil?
+        names = Name.find_names(params[:observation][:what])
       else
-        render :action => 'edit_observation'
+        names = [Name.find(params[:observation][:name_id])]
+      end
+      if names.length == 1
+        if @observation.update_attributes(params[:observation])
+          @observation.name = names.first
+          
+          # Why does this work and the following line doesn't?
+          # Tested with 'obs_mod' rather than 'modified'.  Same effect.
+          @observation.modified = Time.now
+          # @observation.touch
+          @observation.save
+
+          @observation.log('Observation updated by ' + @session['user'].login,
+                           params[:log_change][:checked] == '1')
+
+          flash[:notice] = 'Observation was successfully updated.'
+          redirect_to :action => 'show_observation', :id => @observation
+        else
+          render :action => 'edit_observation'
+        end
+      elsif names.length == 0
+        # @observation.what has new name
+        redirect_to :action => 'unknown_name', :id => @observation, :what => params[:observation][:what]
+      else
+        # @observation.what matches more than one name
+        @names = names
+        flash[:notice] = 'More than one matching name was found'
+        redirect_to :action => 'multiple_names', :id => @observation, :what => params[:observation][:what]
       end
     else
       render :action => 'show_observation'
@@ -288,7 +357,7 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       for l in @observation.species_lists
-        l.log(sprintf('Observation, %s, destroyed by %s', @observation.unique_name, @session['user'].login))
+        l.log(sprintf('Observation, %s, destroyed by %s', @observation.unique_text_name, @observation.id, @session['user'].login))
       end
       @observation.orphan_log('Observation destroyed by ' + @session['user'].login)
       @observation.comments.each {|c| c.destroy }
@@ -386,7 +455,7 @@ class ObserverController < ApplicationController
         @image.modified = Time.now
         @image.save
         for o in @image.observations
-          o.log(sprintf('Image, %s, updated by %s', @image.unique_name, @session['user'].login), true)
+          o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @image.id, @session['user'].login), true)
         end
         flash[:notice] = 'Image was successfully updated.'
         redirect_to :action => 'show_image', :id => @image
@@ -403,7 +472,7 @@ class ObserverController < ApplicationController
   def destroy_image
     @image = Image.find(params[:id])
     if check_user_id(@image.user_id)
-      image_name = @image.unique_name
+      image_name = @image.unique_text_name
       for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
         observation.log(sprintf('Image, %s, destroyed by %s', image_name, @session['user'].login), false)
         observation.thumb_image_id = nil
@@ -482,7 +551,7 @@ class ObserverController < ApplicationController
       @image.user = @session['user']
       if @image.save
         if @image.save_image
-          @observation.log(sprintf('Image, %s, created by %s', @image.unique_name, @session['user'].login), true)
+          @observation.log(sprintf('Image, %s, created by %s', @image.unique_text_name, @session['user'].login), true)
           @observation.add_image(@image)
           @observation.save
         else
@@ -507,7 +576,7 @@ class ObserverController < ApplicationController
           if do_it == 'yes'
             image = @observation.remove_image_by_id(image_id)
             if !image.nil?
-              @observation.log(sprintf('Image, %s, removed by %s', image.unique_name, @session['user'].login), false)
+              @observation.log(sprintf('Image, %s, removed by %s', image.unique_text_name, @session['user'].login), false)
             end
           end
         end
@@ -523,7 +592,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login), true)
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, @session['user'].login), true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end
@@ -535,7 +604,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_name, @session['user'].login), true)
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, @session['user'].login), true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end
@@ -549,45 +618,11 @@ class ObserverController < ApplicationController
     redirect_to(:action => 'show_observation', :id => @observation)
   end
 
-
   # left-hand panel -> new_species_list.rhtml
   def new_species_list
     user = @session['user']
     if verify_user(user)
-      @session['observation_ids'] = nil
-      @session['observation'] = nil
-      @session['image_ids'] = nil
-      @species_list = SpeciesList.new
-    end
-  end
-
-  def create_species_list
-    user = @session['user']
-    if verify_user(user)
-      args = params[:species_list]
-      now = Time.now
-      args["created"] = now
-      args["modified"] = now
-      args["user"] = user
-      @species_list = SpeciesList.new(args)
-
-      if @species_list.save
-        @species_list.log('Species list created by ' + @session['user'].login)
-        flash[:notice] = 'Species list was successfully created.'
-        notes = params[:member][:notes]
-        @species_list.process_file_data(@session['user'], notes)
-        redirect_to :action => 'list_species_lists'
-        species = args["species"]
-        args.delete("species")
-        args.delete("title")
-        args.delete("file")
-        args["notes"] = notes
-        for s in species
-          @species_list.construct_observation(s.strip(), args)
-        end
-      else
-        render :action => 'new_species_list'
-      end
+      read_session
     end
   end
 
@@ -629,7 +664,7 @@ class ObserverController < ApplicationController
     @session['image_ids'] = nil
     store_location
     @species_list_pages, @species_lists = paginate(:species_lists,
-                                                   :order => "'when' desc",
+                                                   :order => "'when' desc, 'id' desc",
                                                    :per_page => 10)
   end
 
@@ -654,49 +689,154 @@ class ObserverController < ApplicationController
     @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
   end
 
+  def read_session
+    # Pull all the state out of the session and clean out the session
+    @species_list = @session['species_list']
+    @session['species_list'] = nil
+    @list_members = @session['list_members']
+    @session['list_members'] = nil
+    @new_names = @session['new_names']
+    @session['new_names'] = nil
+    @multiple_names = @session['multiple_names']
+    @session['multiple_names'] = nil
+    @member_notes = @session['member_notes']
+    @session['member_notes'] = nil
+    @names_only = @session['names_only']
+    @session['names_only'] = nil
+  end
+  
   # list_species_list.rhtml, show_species_list.rhtml -> edit_species_list.rhtml
   # Setup session to have the right species_list.
   def edit_species_list
-    @species_list = SpeciesList.find(params[:id])
-    if check_user_id(@species_list.user_id)
-      @session[:species_list] = @species_list
+    species_list = SpeciesList.find(params[:id])
+    if check_user_id(species_list.user_id)
+      read_session
+      @species_list = species_list
     else 
       render :action => 'show_species_list'
     end
   end
 
-  # edit_species_list.rhtml -> show_species_list.rhtml
-  # Updates modified and saves changes
-  def update_species_list
-    @species_list = SpeciesList.find(params[:id])
-    if check_user_id(@species_list.user_id) # Even though edit makes this check, avoid bad guys going directly
-      args = params[:species_list]
-      if @species_list.update_attributes(args)
-        now = Time.now
-        @species_list.modified = now
-        if @species_list.save
-          @species_list.log('Species list updated by ' + @session['user'].login)
-          flash[:notice] = 'Species List was successfully updated.'
-          notes = params[:member][:notes]
-          @species_list.process_file_data(@session['user'], notes)
-          new_species = args["species"]
-          args.delete("species")
-          args.delete("title")
-          args.delete("file")
-          args["created"] = now
-          args["user"] = @session['user']
-          args["notes"] = notes
-          for s in new_species
-            @species_list.construct_observation(s.strip(), args)
+  def create_approved_names(name_list, approved_names, user)
+    if approved_names
+      for ns in name_list
+        name_str = ns.strip
+        if approved_names.member? name_str
+          logger.warn("  **: create_approved_names: %s" % name_str)
+          names = Name.names_from_string(name_str)
+          logger.warn("  **: %s names from %s" % [names.length, name_str])
+          if names.last.nil?
+            flash[:notice] = "Unable to create the name %s", name_str
+          else
+            for n in names
+              n.user = user
+              n.save
+            end
           end
         end
-        redirect_to :action => 'show_species_list', :id => @species_list
-      else
-        render :action => 'edit_species_list'
+      end
+    end
+  end
+
+  # Verify the user and derive the species list.  If id is provided then
+  # load the species list from the database, otherwise use the args.
+  def get_user_and_species_list(id, args, names_only)
+    user = nil
+    species_list = nil
+    now = Time.now
+    if id
+      species_list = SpeciesList.find(id)
+      user_id = species_list.user_id
+      if check_user_id(user_id)
+        user = species_list.user
+        if not names_only
+          species_list.modified = now
+          if not species_list.update_attributes(params[:species_list]) # Does save
+            species_list = nil
+          end
+        end
       end
     else
-      render :action => 'show_species_list'
+      user = @session['user']
+      if verify_user(user)
+        args["created"] = now
+        args["modified"] = now
+        args["user"] = user
+        species_list = SpeciesList.new(args)
+      else
+        user = nil
+      end
     end
+    [user, species_list]
+  end
+
+  def do_action(action, id, args, names_only, notes, sorter)
+    if args
+      # Store all the state in the session since we can't put it in the database yet
+      # and it's too awkward to pass through the URL effectively
+      @session['species_list'] = SpeciesList.new(args)
+      @session['list_members'] = sorter.all_name_strs.join("\r\n")
+      @session['new_names'] = sorter.new_name_strs.uniq
+      @session['multiple_names'] = sorter.multiple_name_strs.uniq
+      @session['member_notes'] = notes
+      if names_only
+        @session['names_only'] = ["true"]
+      else
+        @session['names_only'] = ["false"]
+      end
+    end
+    redirect_to :action => action, :id => id
+  end
+  
+  def process_species_list(id, params, type_str, action)
+    args = params[:species_list]
+    names_only = (params[:names_only][:first] != "false")
+    user, species_list = get_user_and_species_list(id, args, names_only)
+    if user
+      notes = params[:member][:notes]
+      list = params[:list][:members]
+      create_approved_names(list, params[:approved_names], user)
+      sorter = NameSorter.new
+      sorter.chosen_names = params[:chosen_names]
+      sorter.sort_names(list)
+      if species_list
+        species_list.process_file_data(sorter)
+        if sorter.only_single_names
+          if names_only
+            flash[:notice] = "All names are now in the database."
+            action = 'name_index'
+            args = nil
+          else
+            if species_list.save
+              species_list.log("Species list %s by %s" % [type_str, user.login])
+              flash[:notice] = "Species List was successfully %s." % type_str
+              sp_args = { :created => species_list.modified, :user => user, :notes => notes,
+                          :where => species_list.where }
+              sp_when = species_list.when # Can't use params since when is split up
+              logger.warn("  **: about to create %s new observations" % sorter.single_names.length)
+              for name, timestamp in sorter.single_names
+                sp_args[:when] = timestamp || sp_when
+                species_list.construct_observation(name, sp_args)
+              end
+              action = 'show_species_list'
+              id = species_list.id
+              args = nil
+            end
+          end
+        end
+      end
+      do_action(action, id, args, names_only, notes, sorter)
+    else
+      redirect_to :action => 'list_species_lists'
+    end
+  end
+
+  def update_species_list
+    process_species_list(params[:id], params, 'updated', 'edit_species_list')
+  end
+
+  def create_species_list
+    process_species_list(nil, params, 'created', 'new_species_list')
   end
 
   # show_observation.rhtml -> manage_species_lists.rhtml
@@ -826,8 +966,8 @@ class ObserverController < ApplicationController
     @session['observation'] = nil
     @session['image_ids'] = nil
     @rss_log_pages, @rss_logs = paginate(:rss_log,
-                                      :order => "'modified' desc",
-                                      :per_page => @layout["count"])
+                                         :order => "'modified' desc",
+                                         :per_page => @layout["count"])
   end
   
   def show_rss_log
@@ -907,6 +1047,68 @@ class ObserverController < ApplicationController
     redirect_to :action => 'list_images'
   end
   
+  def show_past_name
+    store_location
+    @past_name = PastName.find(params[:id])
+    @other_versions = PastName.find(:all, :conditions => "name_id = %s" % @past_name.name_id, :order => "version desc")
+  end
+  
+  # show_name.rhtml
+  def show_name
+    store_location
+    @name = Name.find(params[:id])
+    @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
+    @data = Observation.connection.select_all("select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where," +
+                                              " u.name, u.login, n.observation_name" +
+                                              " from observations o, users u, names n" +
+                                              " where n.id = " + params[:id] +
+                                              " and o.user_id = u.id and n.id = o.name_id" +
+                                              " order by o.when desc")
+    observation_ids = []
+		@data.each { |d| observation_ids.push(d.id) }
+		session['observation_ids'] = observation_ids
+		session['image_ids'] = nil
+  end
+  
+  # show_name.rhtml -> edit_name.rhtml
+  def edit_name
+    user = @session['user']
+    if verify_user(user)
+      @name = Name.find(params[:id])
+    else
+    end
+  end
+
+  # edit_name.rhtml -> show_name.rhtml
+  # Updates modified and saves changes
+  def update_name
+    user = @session['user']
+    if verify_user(user)
+      name = Name.find(params[:id])
+      past_name = PastName.make_past_name(name)
+      begin
+        name.modified = Time.new
+        name.change_text_name(params[:name][:text_name], params[:name][:author], params[:name][:rank])
+        name.notes = params[:name][:notes]
+        name.version = name.version + 1
+        name.user = user
+        past_name.save
+        name.save
+      rescue RuntimeError => err
+        flash[:notice] = err.to_s
+        redirect_to :action => 'edit_name', :id => name
+      else
+        redirect_to :action => 'show_name', :id => name
+      end
+    end
+  end
+
+  # name_index.rhtml
+  def name_index
+    store_location
+    @names = Name.find(:all, :order => "'text_name' asc, 'author' asc")
+  end
+
   # Ultimately running large queries like this and storing the info in the session
   # may become unwieldy.  Storing the query and selecting chunks will scale better.
   helper_method :query_ids

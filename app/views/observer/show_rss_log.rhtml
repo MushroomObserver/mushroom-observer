@@ -1,4 +1,4 @@
-<% @title = 'Log for ' + h(@rss_log.title) %>
+<% @title = 'Log for ' + textilize_without_paragraph(h @rss_log.title) %>
 
 <div id="Title"><%= @title %></div>
 <pre>

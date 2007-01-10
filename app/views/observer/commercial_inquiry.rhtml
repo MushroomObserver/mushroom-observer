@@ -1,4 +1,4 @@
-<% @title = 'Commercial Inquiry About ' + @image.unique_name %>
+<% @title = 'Commercial Inquiry About ' + textilize_without_paragraph h @image.unique_format_name %>
 <div id="Title"><%= @title %></div>
 
 <%= start_form_tag :action => 'send_commercial_inquiry', :id => @image %>

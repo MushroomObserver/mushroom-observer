@@ -1,4 +1,4 @@
-<% @title = 'Editing Image: ' + h(@image.unique_name) %>
+<% @title = 'Editing Image: ' + textilize_without_paragraph(h @image.unique_format_name) %>
 <%= link_to 'Cancel (Show Image)', :action => 'show_image', :id => @image %>
 
 <div id="Title"><%= @title %></div>

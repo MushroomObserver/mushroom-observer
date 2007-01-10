@@ -1,4 +1,4 @@
-<% @title = 'Add an Image for ' + h(@observation.unique_name) %>
+<% @title = 'Add an Image for ' + textilize_without_paragraph(h @observation.unique_format_name) %>
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 

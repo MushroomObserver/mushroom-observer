@@ -1,4 +1,4 @@
-<% @title = 'Question about ' + @observation.unique_name %>
+<% @title = 'Question about ' + textilize_without_paragraph h @observation.unique_format_name %>
 <div id="Title"><%= @title %></div>
 
 <%= start_form_tag :action => 'send_question', :id => @observation %>

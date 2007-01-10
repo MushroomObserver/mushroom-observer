@@ -2,12 +2,74 @@ Names - Replace the 'what' field with an association with a list of 'Name' objec
   Name objects would allow for things like author citations, synonymy, references, descriptions etc.
   Targets:
     Name pages
-      names -> id, type, name, author
+      - Name table
+      - Data creation
+		- Create all genera
+	  - Hook up to Observation
+	  - spread textilize_without_paragraph [check completeness]
+	  - separate semantics of unique_name (h vs. textilize)
+	    unique_text_name - h
+	    text_name - h
+	    format_name - textilize h
+	    unique_format_name - textilize h
+	  - show_name page
+	    observation list should be like show_species_list - images, and prev/next links should get setup
+	    should order be based on RSS log dates, modified or when - modified
+	  - name_index to replace observation_index, display rank
+	  - edit_name
+	  - tracking changes
+	    - showing history
+	Deprecate Observation.what
+	  - fix search
+	  - fix edit_observation
+	    - option to create new name
+	    - bug 'Amanita baccata sensu Borealis' changed 'Amanita baccata sensu Arora' rather
+	      than creating a new name.
+	    - select from multiples
+	  fix process_simple_list, process_name_list, construct_observation (species_list.rb)
+	    - deal with new names in update_species_list
+	    - deal with multiple names in update_species_list
+	    update create_species_list
+	      - Newly created Observations aren't getting their 'When' set
+	      - Get multiple names working with new_species_list/create_species_list
+	      - Get and member notes to propagate through the session
+	      - process_simple_list, process_name_list
+	      - Integrate the session technique into update_species_list
+	      - Testing:
+	        New members and multiple members:
+    	        - Create new list
+    	          - when not getting set
+    	        - Add to list
+    	        - Load simple species list
+    	        - Load Name list
+    	    New members
+    	    Multiple members
+    	      - 2x Amanita baccata gives two sets of linked radio buttons
+    	    Existing singles
+    - Species list log entries getting thrashed
+    - Creating new Names without an observation or species list
+    - Creation and modification dates on Names
+    - Ability to update author through Species list mechanism
+    
+    Eliminate Observation.what
+    Fix author parsing
+    Common Name? (== Group but without the group, foreign language?)
+	Grouping
+	  View members and membership
+	  Page of all members and below?
+	Better management of name clashes
     Spelling correction
     Author citations
     References
     Synonymy
+	Deprecating names
     Descriptions
+
+Name lists don't preserve datestamp
+Name comments
+
+Add user.login and what got changed to show_past_name
+Add option for adding author during species list evaluation
 
 Use names to support real species lists
 
@@ -29,6 +91,8 @@ Improve 'where'
   Hook up to Google Maps
 
 user pages
+
+Foreign language support
 
 Provide the ability to create an observation as a side effect of uploading an image
   rather than requiring the observation to exist before allowing image upload.

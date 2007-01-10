@@ -1,4 +1,4 @@
-<% @title = 'Reuse Image for ' + h(@observation.unique_name) %>
+<% @title = 'Reuse Image for ' + textlize_without_paragraph(@observation.unique_format_name) %>
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 

@@ -7,6 +7,8 @@ class User < ActiveRecord::Base
   has_many :images
   has_many :observations
   has_many :species_lists
+  has_many :names
+  has_many :past_names
 
   def self.authenticate(login, pass)
     find_first(["login = ? AND password = ?", login, sha1(pass)])
@@ -38,7 +40,7 @@ class User < ActiveRecord::Base
     self.columns = columns
   end
   
-  def unique_name()
+  def unique_text_name()
     if self.name
       sprintf("%s (%s)", self.name, self.login)
     else

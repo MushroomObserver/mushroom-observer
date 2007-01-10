@@ -1,4 +1,4 @@
-<% @title = 'Remove Images from ' + h(@observation.unique_name) %>
+<% @title = 'Remove Images from ' + textilize_without_paragraph(h @observation.unique_format_name) %>
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 
@@ -20,7 +20,7 @@
 			<td align="center">
 				<p><%=
 				link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
-							'<br/>' + h(image.unique_name),
+							'<br/>' + textilize_without_paragraph(h image.unique_format_name),
 	            		:action => 'show_image', :id => image.id) %></p>
 			</td>
 		</tr>

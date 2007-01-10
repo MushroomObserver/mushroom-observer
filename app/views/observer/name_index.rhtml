@@ -1,0 +1,11 @@
+<% @title = 'Name Index' %>
+<div id="Title"><%= @title %></div>
+<%
+	for n in @names
+%>
+<%= link_to(textilize_without_paragraph(h n.display_name),
+            :action => 'show_name', :id => n) %><br/>
+<%
+	end
+%>
+</br>

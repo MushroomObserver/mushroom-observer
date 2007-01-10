@@ -8,12 +8,12 @@
 	</p>
 
 	<p>
-		<label for="species_list_where">Where</label><br/>
+		<label for="species_list_where">Where (required)</label><br/>
 		<%= text_field 'species_list', 'where'  %>
 	</p>
 
 	<p>
-		<label for="species_list_title">Title</label><br/>
+		<label for="species_list_title">Title (required)</label><br/>
 		<%= text_field 'species_list', 'title'  %>
 	</p>
 
@@ -24,9 +24,39 @@
 	<%= render :partial => 'textilize_help' %>
 </td>
 <td valign="top">
+    <% if @new_names && (@new_names != []) %>
+         The following names could not be found.<br/>
+      <span class="Data"><p>
+      <% for n in @new_names %>
+        &nbsp;&nbsp;<%= h n %><br/>
+      <% end %>
+      </p></span>
+      <span id="help_note">
+          Click 'Save' to create these name.  If you want to correct any you entered by hand, do so in
+          the area below and click 'Save Edits' to re-evaluate the list.  If the names came from an uploaded
+          species list, create a correct file and select it for upload.<br/><br/>
+      </span>
+    <% end %>
+    <% if @multiple_names && (@multiple_names != []) %>
+         Multiple names match each of the follow entries:<br/>
+      <span class="Data"><p>
+      <% for name_str in @multiple_names %>
+        <p><%= h name_str %><br/>
+        <% for name in Name.find_names(name_str) %>
+            &nbsp;&nbsp;<%= radio_button("chosen_names", name_str, name.id) %>
+            <%= textilize_without_paragraph(h name.display_name) %> (<%= name.observations.size %>)<br/>
+        <% end %>
+        </p>
+      <% end %>
+      </p></span>
+      <span id="help_note">
+          In each case, select the intended name.  The number after each name is how many
+          observations are currently using that name..<br/><br/>
+      </span>
+    <% end %>
 	<p>
 		<label for="species_list_species">Species (enter a name on each line)</label><br/>
-		<%= text_area 'species_list', 'species'  %>
+		<%= text_area 'list', 'members', :value => @list_members  %>
 	</p>
 	<p>
 		Upload species list:<br/>
@@ -37,8 +67,13 @@
 		</span></p>
 	</p>
 	<p>
-		<label for="species_list_member_notes">Notes for each new member</label><br/>
-		<%= text_area 'member', 'notes', :rows => 5  %>
+		<label for="member_notes">Notes for each new member</label><br/>
+		<%= text_area 'member', 'notes', :value => @member_notes, :rows => 5  %>
 	</p>
+    <p><%= check_box("names_only", "first", {}, "true", "false") %><label for="names_only"> Just Create New Names</label><br/>
+    <span id="help_note">
+    	If checked then the list is only scanned for new names to add to the database.
+    	Neither a species list nor the corresponding observations are created.
+    </span></p>
 </td>
 <!--[eoform:species_list]-->

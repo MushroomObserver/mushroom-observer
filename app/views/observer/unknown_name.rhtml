@@ -1,12 +1,18 @@
-<% @title = 'Editing Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %>
+<% @title = 'Create New Name ' + h(@what) + '?'
+   @observation.what = @what %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
 <div id="Title"><%= @title %></div>
 
-<%= start_form_tag :action => 'update_observation', :id => @observation %>
+<span id="help_note">
+If you want to create the name, <%= h @what %>, and save the edits below, just click Save Edits.<br/>
+If you want to correct the name and resubmit the edits, then change the 'What' field below and
+click Save Edits.
+</span>
+
+<%= start_form_tag :action => 'update_observation_with_new_name', :id => @observation, :what => @what %>
 <br/>
 <center><%= submit_tag 'Save Edits' %></center>
-
 <table cellpadding="10">
 <tr>
   <%= render :partial => 'form_observations' %>

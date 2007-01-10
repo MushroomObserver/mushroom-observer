@@ -15,10 +15,13 @@
 <p><label for="observation_what">What:</label>
 <%= text_field 'observation', 'what'  %><br/>
 <span id="help_note">
-	The name you would apply to this observation.  Scientific names are preferred over common
-	names, but are not required.  If you don't know what it is, just say 'Unknown'.  If you
-	find a better name for this observation in the future, please change the name by selecting
+	The name you would apply to this observation.  If you don't know what it is, just say 'Unknown'.
+	If you find a better name for this observation in the future, please change the name by selecting
 	'Edit Observation'.
+	Scientific names are currently required, but do not include any author information.  If multiple
+	names apply, you will be given the option to select between them.  If the name is not recognized
+	in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
+	
 </span></p>
 <br/>
 <p><%= check_box("observation", "specimen") %><label for="observation_specimen"> Herbarium Specimen Available</label><br/>

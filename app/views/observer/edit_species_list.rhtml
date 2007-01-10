@@ -1,11 +1,11 @@
-<% @title = 'Editing Species List: ' + h(@species_list.unique_name) %>
+<% @title = 'Editing Species List: ' + h(@species_list.unique_text_name) %>
 <%= link_to 'Cancel (Show Species List)', :action => 'show_species_list', :id => @species_list %><br/>
 
 <div id="Title"><%= @title %></div>
 
-<%= form_tag({:action => 'update_species_list', :id => @species_list}, :multipart => true) %>
+<%= form_tag({:action => 'update_species_list', :id => @species_list, :approved_names => @new_names }, :multipart => true) %>
 <br/>
-<center><%= submit_tag 'Save Edits' %></center>
+<center><%= submit_tag 'Save' %></center>
 
 <table cellpadding="10">
 	<tr>

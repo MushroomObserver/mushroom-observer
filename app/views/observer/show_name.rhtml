@@ -1,0 +1,51 @@
+<% @title = 'Name: ' + h(@name.text_name) %>
+<%= link_to 'Add Comment', :action => 'add_name_comment', :id => @name %>
+| <%= link_to 'Edit', :action => 'edit_name', :id => @name %>
+
+<div id="Title"><%= textilize_without_paragraph(h @name.display_name) %></div>
+<p>
+	Rank: <%= @name.rank %><br/>
+	Name: <%= @name.text_name %><br/>
+	Author: <%= @name.author %><br/>
+	Version: <%= @name.version %><br/>
+	<% if @past_name %>
+	    <%= link_to("Previous version: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id ) %>
+	<% end %>
+</p>
+<p>
+	Notes: <%= textilize @name.notes %>
+</p>
+<p>Observations:<br/>
+	<table cellpadding="5" cellspacing="0">
+		<%
+		odd_or_even = 0
+	   	for datum in @data
+	    	odd_or_even = 1 - odd_or_even
+			id = datum["id"]
+	    %>
+		<tr valign="top" class="ListLine<%= odd_or_even %>">
+	    	<td width=110 align="center" valign="middle">
+				<%=
+				image_id = datum["thumb_image_id"]
+				if image_id
+		  			link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
+	            			:action => 'show_observation', :id => id)
+	          	end
+	      		%><br/>
+	    	</td>
+		    <td width="100%" valign="middle">
+				<span class="ListName"><%= link_to(textilize_without_paragraph(h datum["observation_name"]),
+			                                        :action => 'show_observation', :id => id) %></span><br/>
+		        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
+		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
+		        Observation made: <%= datum["when"]%>
+		    </td>
+	  	</tr>
+	    <% end %>
+	</table>
+    <p><span class="Date">
+        Name created: <%= @name.created %><br/>
+        Last modified: <%= @name.modified %><br/>
+        </span>
+    </p>
+</p>

@@ -8,6 +8,7 @@ class Observation < ActiveRecord::Base
   has_many :comments
   belongs_to :user
   has_one :rss_log
+  belongs_to :name
 
   def log(msg, touch)
     if self.rss_log.nil?
@@ -19,7 +20,7 @@ class Observation < ActiveRecord::Base
   def orphan_log(entry)
     self.log(entry, false) # Ensures that self.rss_log exists
     self.rss_log.observation = nil
-    self.rss_log.add(self.unique_name, false)
+    self.rss_log.add(self.unique_text_name, false)
     self.rss_log.save
   end
   
@@ -27,8 +28,39 @@ class Observation < ActiveRecord::Base
     @modified = Time.new
   end
 
-  def unique_name
-    what = self.what
+  def text_name
+    name = self.name
+    result = ''
+    if name
+      result = "%s %s" % [name.text_name, name.author]
+    else
+      result = self.what
+    end
+    result
+  end
+  
+  def unique_text_name
+    "%s (%s)" % [self.text_name, self.id]
+  end
+  
+  def base_name
+    name = self.name
+    result = ''
+    if name
+      result = name.observation_name
+    else
+      result = self.what
+    end
+    result
+  end
+  
+  def unique_format_name
+    name = self.name
+    if name
+      what = name.observation_name
+    else
+      what = self.what
+    end
     if what
       sprintf("%s (%d)", what[0..(MAX_FIELD_LENGTH-1)], self.id)
     else
@@ -88,13 +120,6 @@ class Observation < ActiveRecord::Base
   end
 
   protected
-  def validate
-    errors.add(:notes,
-               "at least one of Notes, What or Image must be provided") if
-      ((notes.nil? || notes=='') &&
-         (what.nil? || what==''))
-  end
-
   def self.all_observations
     find(:all,
          :order => "'when' desc")

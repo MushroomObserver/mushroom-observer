@@ -1,4 +1,4 @@
-<% @title = 'Add Comment to ' + h(@observation.unique_name) %>
+<% @title = 'Add Comment to ' + textilize_without_paragraph(h @observation.unique_format_name) %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
 <div id="Title"><%= @title %></div>

@@ -1,7 +1,7 @@
 class AccountMailer < ActionMailer::Base
 
   def commercial_inquiry(sender, image, commercial_inquiry)
-    @subject    = 'Commercial Inquiry About ' + image.unique_name
+    @subject    = 'Commercial Inquiry About ' + image.unique_text_name
     @body["sender"] = sender
     @body["image"] = image
     @body["commercial_inquiry"] = commercial_inquiry
@@ -31,7 +31,7 @@ class AccountMailer < ActionMailer::Base
   end
 
   def question(sender, observation, question)
-    @subject    = 'Question About ' + observation.unique_name
+    @subject    = 'Question About ' + observation.unique_text_name
     @body["sender"] = sender
     @body["observation"] = observation
     @body["question"] = question
@@ -55,6 +55,13 @@ class AccountMailer < ActionMailer::Base
     @body["user"] = user
     @recipients   = user.email
     @bcc          = 'nathan@collectivesource.com'
+    @from         = 'accounts@mushroomobserver.org'
+  end
+
+  def denied(user)
+    @subject      = 'Mushroom Observer User Creation Blocked'
+    @body["user"] = user
+    @recipients   = 'nathan@collectivesource.com'
     @from         = 'accounts@mushroomobserver.org'
   end
 end

@@ -1,4 +1,4 @@
-<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following commercial inquiry about your image, <%= @image.unique_name %> (<%= sprintf "%s/observer/show_image/%d", DOMAIN, @image.id %>):
+<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following commercial inquiry about your image, <%= @image.unique_text_name %> (<%= sprintf "%s/observer/show_image/%d", DOMAIN, @image.id %>):
 
 <%= h @commercial_inquiry %>
 

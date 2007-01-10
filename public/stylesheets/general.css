@@ -108,6 +108,10 @@ div.progressBar div.background {
     font-style: italic;
 }
 
+.ListName {
+    font-size: larger;
+}
+
 .ListActions {
     font-size: small;
     text-align: right;

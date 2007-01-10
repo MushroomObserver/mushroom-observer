@@ -19,7 +19,7 @@
 	  for species_list in @species_lists %>
 		<tr>
 			<td>
-				<%= link_to h(species_list.unique_name), :action => 'show_species_list', :id => species_list.id %>
+				<%= link_to h(species_list.unique_text_name), :action => 'show_species_list', :id => species_list.id %>
 			</td>
 			<td>
 				<%= species_list.observations.size %>
@@ -28,7 +28,7 @@
 				<%= species_list.when %>
 			</td>
 			<td>
-				<%= truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH) %>
+				<%= truncate(h(species_list.user.unique_text_name), MAX_WHO_LENGTH) %>
 			</td>
 		</tr>
 	<%

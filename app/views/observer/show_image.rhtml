@@ -1,4 +1,4 @@
-<% @title = 'Image: ' + h(@image.unique_name) %>
+<% @title = 'Image: ' + textilize_without_paragraph(h @image.unique_format_name) %>
 <%= link_to 'Show Full Size', :action => 'show_original', :id => @image %>
 <% commercial_inquiries_ok = @image.user.commercial_email
    if commercial_inquiries_ok %>
@@ -60,7 +60,7 @@
 <p>Observations<br/>
 <span class="Data">
     <% for observation in @image.observations %>
-      <%= link_to(h(observation.unique_name),
+      <%= link_to(textilize_without_paragraph(h observation.unique_format_name),
                   :action => 'show_observation', :id => observation.id) %><br/>
     <% end %>
 </span>

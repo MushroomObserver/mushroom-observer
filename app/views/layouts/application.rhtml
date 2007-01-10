@@ -39,7 +39,11 @@
 								<br/>
 								<%= link_to 'Latest&nbsp;Changes', :controller => 'observer',
 								            :action => 'list_rss_logs' %>
-								<br/><br/>
+            					<br/>
+								<%= link_to 'Name&nbsp;Index', :controller => 'observer',
+								                          :action => 'name_index' %>
+								<br/>
+								<br/>
 								Observations:<br/>
 								&nbsp;&nbsp;<%= link_to 'New&nbsp;Observation', :controller => 'observer',
 								            :action => 'new_observation' %>
@@ -49,9 +53,6 @@
 								<br/>
 								&nbsp;&nbsp;<%= link_to 'By&nbsp;Name', :controller => 'observer',
 								                        :action => 'observations_by_name' %>
-								<br/>
-								&nbsp;&nbsp;<%= link_to 'Index', :controller => 'observer',
-								                        :action => 'observation_index' %>
 								<br/><br/>
 								Species&nbsp;Lists:<br/>
 								&nbsp;&nbsp;<%= link_to 'New&nbsp;Species&nbsp;List', :controller => 'observer',
@@ -106,7 +107,12 @@
 					</table>
 				</td>
 				<td width=100% valign="top" class="main">
-					<p><%= flash[:notice] %></p>
+            		<%= start_form_tag :action => 'observation_search', :id => @comment %>
+                        <%= text_field("search", "pattern", :size => 10)%><%= submit_tag 'Search' %>
+                    <%= end_form_tag %>
+                    <% if flash[:notice] %>
+					  <%= flash[:notice] %><br/>
+					<% end %>
 					<%= @content_for_layout %>
 				</td>
 			</tr>

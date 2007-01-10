@@ -10,10 +10,10 @@
   <tr valign="top" class="ListLine<%= odd_or_even %>">
     <td width="100%" valign="middle">
 	  <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span><br/>',
-	                      species_list.when, h(species_list.unique_name)),
+	                      species_list.when, h(species_list.unique_text_name)),
 	              :action => 'show_species_list', :id => species_list.id) %>
       <span class="ListWhere"><%= truncate(h(species_list.where), MAX_FIELD_LENGTH) %></span>
-      <span class="ListWho"><%= truncate(h(species_list.user.unique_name), MAX_WHO_LENGTH) %></span>
+      <span class="ListWho"><%= truncate(h(species_list.user.unique_text_name), MAX_WHO_LENGTH) %></span>
     </td>
   </tr>
   <% end %>

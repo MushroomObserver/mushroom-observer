@@ -6,9 +6,20 @@ class Image < ActiveRecord::Base
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
   belongs_to :user
 
-  def unique_name
+  def unique_format_name
     obs_names = []
-    self.observations.each {|o| obs_names.push(o.what)}
+    self.observations.each {|o| obs_names.push(o.base_name)}
+    title = obs_names.sort.join(' & ')
+    if title
+      sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
+    else
+      sprintf("Image %d", self.id)
+    end
+  end
+
+  def unique_text_name
+    obs_names = []
+    self.observations.each {|o| obs_names.push(o.text_name)}
     title = obs_names.sort.join(' & ')
     if title
       sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)

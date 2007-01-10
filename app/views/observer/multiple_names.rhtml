@@ -1,20 +1,26 @@
-<% @title = 'Editing Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %>
+<% @title = 'Multiple Names Match ' + h(@what)
+   @observation.what = @what %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
 <div id="Title"><%= @title %></div>
 
-<%= start_form_tag :action => 'update_observation', :id => @observation %>
-<br/>
-<center><%= submit_tag 'Save Edits' %></center>
+<span id="help_note">
+Select the intended name.  The number after each name is how many observations are currently using that name.
+</span>
 
+<%= start_form_tag :action => 'update_observation_with_selected_name', :id => @observation, :what => @what %>
+<br/>
+<% for name in @names %>
+    <%= radio_button("observation", 'name_id', name.id) %>
+    <%= textilize_without_paragraph(h name.display_name) %> (<%= name.observations.size %>)<br/>
+<% end %>
+<center><%= submit_tag 'Save Edits' %></center>
 <table cellpadding="10">
 <tr>
   <%= render :partial => 'form_observations' %>
     <td valign="top">
-    <% i = 0
-       observation = @observation
-       for image in @observation.images
-         i = i + 1 %>
+    <% observation = @observation
+       for image in @observation.images %>
        <table><tr><td>
 	<%= radio_button("observation", 'thumb_image_id', image.id) %>
        </td><td align="center">

@@ -2,9 +2,9 @@
 
 <div id="Title"><%= @title %></div>
 
-<%= form_tag({:action => 'create_species_list', :id => @species_list}, :multipart => true) %>
+<%= form_tag({:action => 'create_species_list', :approved_names => @new_names}, :multipart => true) %>
 <br/>
-<center><%= submit_tag 'Create' %></center>
+<center><%= submit_tag 'Save' %></center>
 
 <table cellpadding="10">
 	<tr>

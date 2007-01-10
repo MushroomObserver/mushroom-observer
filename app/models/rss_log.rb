@@ -30,11 +30,11 @@ class RssLog < ActiveRecord::Base
     result = ''
     observation = self.observation
     if observation
-      result = observation.unique_name # Use the observation if present
+      result = observation.unique_format_name # Use the observation if present
     else
       species_list = self.species_list
       if species_list
-        result = species_list.unique_name # else try the species_list
+        result = species_list.unique_text_name # else try the species_list
       else
         notes = self.notes
         result = notes.split("\n")[0] unless notes.nil? # else use the first line of the text

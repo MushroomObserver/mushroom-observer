@@ -13,9 +13,9 @@
 		<td valign="middle">
 			<% end %>
 			<%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span>',
-			                      image.when, h(image.unique_name)),
+			                      image.when, textilize_without_paragraph(h image.unique_format_name)),
 			 			:action => 'show_image', :id => image.id) %><br/>
-			<span class="ListWho"><%= truncate(h(image.user.unique_name), MAX_WHO_LENGTH) %></span>
+			<span class="ListWho"><%= truncate(h(image.user.unique_text_name), MAX_WHO_LENGTH) %></span>
 		</td>
 	</tr>
 </table>

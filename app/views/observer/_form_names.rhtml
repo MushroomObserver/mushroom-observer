@@ -1,0 +1,28 @@
+<%= error_messages_for 'name' %>
+
+<!--[form:name]-->
+<!-- rank, text_name, author, notes -->
+
+<p><label for="name_rank">Rank:</label> 
+<%= select 'name', 'rank', [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phyllum, :Kingdom, :Group] %></p>
+<p><label for="name_text_name">Text Name:</label>
+<%= text_field 'name', 'text_name'  %><br/>
+<span id="help_note">
+	Unformatted version of the name without any author info.<br/>
+	E.g., Amanita muscara var. flavivolvata.
+</span></p>
+<p><label for="name_author">Author:</label>
+<%= text_field 'name', 'author'  %><br/>
+<span id="help_note">
+	The author citation using the standard ICBN format.<br/>
+	E.g., (Singer) Jenkins.
+</span></p>
+<p><label for="name_notes">Notes:</label>
+	<span id="help_note">
+		Please include notes about the validity of this name,<br/>
+		common misuses of the name, and more appropriate names<br/>
+		to be used when applicable.
+	</span><br/>
+<%= text_area 'name', 'notes'  %></p>
+<%= render :partial => 'textilize_help' %>
+<!--[eoform:name]-->

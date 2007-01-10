@@ -1,17 +1,6 @@
 <% @title = 'Observations' %>
 <div id="Title"><%= @title %></div>
-	<table width="100%">
-		<tr>
-			<td align="left">
-				<%= pagination_links(@observation_pages) %>
-			</td>
-			<td align="right">
-				<%= start_form_tag :action => 'observation_search', :id => @comment %>
-				<%= text_field("search", "pattern", :size => 10) %><%= submit_tag 'Search' %>
-				<%= end_form_tag %>
-			</td>
-		</tr>
-	</table>
+	<%= pagination_links(@observation_pages) %>
 	<table cellspacing="0">
 		<%
 			row_count = 0
