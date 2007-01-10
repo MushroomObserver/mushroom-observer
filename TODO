@@ -1,77 +1,18 @@
-Names - Replace the 'what' field with an association with a list of 'Name' objects.
-  Name objects would allow for things like author citations, synonymy, references, descriptions etc.
-  Targets:
-    Name pages
-      - Name table
-      - Data creation
-		- Create all genera
-	  - Hook up to Observation
-	  - spread textilize_without_paragraph [check completeness]
-	  - separate semantics of unique_name (h vs. textilize)
-	    unique_text_name - h
-	    text_name - h
-	    format_name - textilize h
-	    unique_format_name - textilize h
-	  - show_name page
-	    observation list should be like show_species_list - images, and prev/next links should get setup
-	    should order be based on RSS log dates, modified or when - modified
-	  - name_index to replace observation_index, display rank
-	  - edit_name
-	  - tracking changes
-	    - showing history
-	Deprecate Observation.what
-	  - fix search
-	  - fix edit_observation
-	    - option to create new name
-	    - bug 'Amanita baccata sensu Borealis' changed 'Amanita baccata sensu Arora' rather
-	      than creating a new name.
-	    - select from multiples
-	  fix process_simple_list, process_name_list, construct_observation (species_list.rb)
-	    - deal with new names in update_species_list
-	    - deal with multiple names in update_species_list
-	    update create_species_list
-	      - Newly created Observations aren't getting their 'When' set
-	      - Get multiple names working with new_species_list/create_species_list
-	      - Get and member notes to propagate through the session
-	      - process_simple_list, process_name_list
-	      - Integrate the session technique into update_species_list
-	      - Testing:
-	        New members and multiple members:
-    	        - Create new list
-    	          - when not getting set
-    	        - Add to list
-    	        - Load simple species list
-    	        - Load Name list
-    	    New members
-    	    Multiple members
-    	      - 2x Amanita baccata gives two sets of linked radio buttons
-    	    Existing singles
-    - Species list log entries getting thrashed
-    - Creating new Names without an observation or species list
-    - Creation and modification dates on Names
-    - Ability to update author through Species list mechanism
-    
+More stuff to do with Names   
     Eliminate Observation.what
-    Fix author parsing
-    Common Name? (== Group but without the group, foreign language?)
-	Grouping
+	Grouping (Agaricus is part of Agaricales, etc.)
 	  View members and membership
 	  Page of all members and below?
-	Better management of name clashes
+    Common Name support (== Group but without the group)
     Spelling correction
-    Author citations
     References
     Synonymy
 	Deprecating names
     Descriptions
 
-Name lists don't preserve datestamp
-Name comments
+Name change RSS feed
 
-Add user.login and what got changed to show_past_name
-Add option for adding author during species list evaluation
-
-Use names to support real species lists
+Name specific RSS feeds
 
 Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
   Add confidence level for a naming
@@ -92,22 +33,16 @@ Improve 'where'
 
 user pages
 
-Foreign language support
+NaME file loads don't preserve datestamp?
+Name comments rather than just notes?
 
-Provide the ability to create an observation as a side effect of uploading an image
-  rather than requiring the observation to exist before allowing image upload.
+Add user.login and what got changed to show_past_name
+
+Foreign language support
 
 Herbarium records - Provide a standard way to describe herbarium collections.
 
-show_observation pages could have pagination_links instead of next/prev links.
-
 Check for duplicate images, image garbage collection
-
-
-Need to revise how species lists are handled to allow for chronological notes, but cumulative lists.  See:
-http://mushroomobserver.org/observer/show_species_list/8
-
-Do rss_log lists need Next/Prev?
 
 More color themes: Boletus, Coprinus (very black and white)
 
