@@ -1,7 +1,7 @@
 Bugs
   - Bad What links when creating some observations
   Missing genus names
-  Bad people links
+  - Bad people links
   Disappearing images
   
 Testing names_from_string:
