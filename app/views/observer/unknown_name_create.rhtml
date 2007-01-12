@@ -1,0 +1,34 @@
+<% @title = 'Create New Name ' + h(@what) + '?'
+   @observation.what = @what %>
+<%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
+
+<div id="Title"><%= @title %></div>
+
+<span id="help_note">
+If you want to create the name, <%= h @what %>, and save the edits below, just click Save Edits.<br/>
+If you want to correct the name and resubmit, then change the 'What' field below and
+click Save Edits.
+</span>
+
+<%= start_form_tag :action => 'create_observation_with_new_name', :user_id => @session['user'].id, :what => @what %>
+<br/>
+<center><%= submit_tag 'Save Edits' %></center>
+<table cellpadding="10">
+<tr>
+  <%= render :partial => 'form_observations' %>
+    <td valign="top">
+    <% i = 0
+       observation = @observation
+       for image in @observation.images
+         i = i + 1 %>
+       <table><tr><td>
+	<%= radio_button("observation", 'thumb_image_id', image.id) %>
+       </td><td align="center">
+	<%= image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0) %><br/>
+         <%= textilize_without_paragraph(h image.unique_format_name) %>
+       </td></tr></table>
+    <% end %>
+    </td>
+</tr>
+</table>
+<%= end_form_tag %>
