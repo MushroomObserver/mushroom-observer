@@ -1,4 +1,4 @@
-<% @title = 'Comment on ' + textilize_without_paragraph(h @comment.observation.unique_format_name) %>
+<% @title = 'Comment on ' + h(@comment.observation.unique_text_name) %>
 <%= link_to 'Goto Observation', :action => 'show_observation', :id => @comment.observation %>
 <% if check_permission(@comment.user_id) %>
 	|| <%= link_to 'Edit', :action => 'edit_comment', :id => @comment %>
@@ -6,7 +6,7 @@
                                :confirm => "Are you sure?" %>
 <% end %>
 
-<div id="Title"><%= @title %></div>
+<div id="Title">Comment on <%= textilize_without_paragraph(h @comment.observation.unique_format_name) %></div>
 <p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
 <p>By: <%= @comment.user.unique_text_name %></p>
 <p>Summary: <%= @comment.summary %></p>

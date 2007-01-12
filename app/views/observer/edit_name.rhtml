@@ -1,7 +1,7 @@
-<% @title = 'Editing Name: ' + textilize_without_paragraph(h @name.display_name) %>
+<% @title = 'Editing Name: ' + h(@name.search_name) %>
 <%= link_to 'Cancel (Show Name)', :action => 'show_name', :id => @name %>
 
-<div id="Title"><%= @title %></div>
+<div id="Title">Editing Name: <%= textilize_without_paragraph(h @name.display_name) %></div>
 
 <%= start_form_tag :action => 'update_name', :id => @name %>
 <br/>

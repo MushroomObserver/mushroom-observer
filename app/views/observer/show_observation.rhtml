@@ -1,4 +1,4 @@
-<% @title = 'Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %>
+<% @title = 'Observation: ' + h(@observation.unique_text_name) %>
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% questions_ok = @observation.user.question_email
@@ -15,7 +15,7 @@
 		| <%= link_to 'Next', :action => 'next_observation', :id => @observation %>
 <%  end %>
 
-<div id="Title"><%= @title %></div>
+<div id="Title"><%= 'Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %></div>
 
 <table cellpadding="10">
 <tr>

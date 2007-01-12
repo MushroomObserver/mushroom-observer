@@ -30,7 +30,7 @@ class RssLog < ActiveRecord::Base
     result = ''
     observation = self.observation
     if observation
-      result = observation.unique_format_name # Use the observation if present
+      result = observation.unique_text_name # Use the observation if present
     else
       species_list = self.species_list
       if species_list

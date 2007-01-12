@@ -77,7 +77,7 @@ class Name < ActiveRecord::Base
     author = params[:author]
     result = nil
     if rank
-      matches = Name.find(:all, :conditions => sprintf("text_name = '%s'", text_name))
+      matches = Name.find(:all, :conditions => sprintf("search_name = '%s'", search_name))
       if matches == []
         result = Name.create_name(rank, text_name, author, display_name, observation_name, search_name)
       elsif matches.length == 1
@@ -162,20 +162,22 @@ class Name < ActiveRecord::Base
         matches = []
         name = text_name
         if author != ''
-          matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
+          matches = Name.find(:all, :conditions => "search_name = '%s'" % search_name)
         end
         if matches == []
-          matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
+          matches = Name.find(:all, :conditions => "text_name = '%s' and author is null" % text_name)
         end
         match_count = matches.length
         if match_count == 0
+          logger.warn("** names_from_string: 0 matches")
           name = Name.make_name(rank, text_name,
                                 :display_name => display_name,
                                 :observation_name => observation_name,
-                                :search_name => search_name)
-          name.change_author author
+                                :search_name => search_name,
+                                :author => author)
           result.push name
         elsif match_count == 1
+          logger.warn("** names_from_string: 1 match")
           name = matches[0]
           logger.warn("  **: name.search_name: %s" % name.search_name)
           logger.warn("  **: name.author: %s" % name.author)
@@ -226,6 +228,8 @@ class Name < ActiveRecord::Base
   
   def self.parse_name(str)
     (name, author) = parse_author(str)
+    logger.warn("**++: parse_name: name: %s" % name)
+    logger.warn("**++: parse_name: author: %s" % author)
     rank = :Group
     parse = parse_group(name)
     if parse.nil?
@@ -249,6 +253,12 @@ class Name < ActiveRecord::Base
       parse = parse_form(name)
     end
     if parse
+      if author
+        author_str = " " + author
+        parse[1] += author_str
+        parse[2] += author_str
+        parse[3] += author_str
+      end
       parse += [rank, author]
     end
     return parse

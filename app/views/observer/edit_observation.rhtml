@@ -1,7 +1,7 @@
-<% @title = 'Editing Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %>
+<% @title = 'Editing Observation: ' + h(@observation.unique_text_name) %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<div id="Title"><%= @title %></div>
+<div id="Title">Editing Observation: <%= textilize_without_paragraph(h @observation.unique_format_name) %></div>
 
 <%= start_form_tag :action => 'update_observation', :id => @observation %>
 <br/>
