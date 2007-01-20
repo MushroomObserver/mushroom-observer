@@ -1153,7 +1153,7 @@ class ObserverController < ApplicationController
                                               " and o.user_id = u.id and n.id = o.name_id" +
                                               " order by o.when desc")
     observation_ids = []
-		@data.each { |d| observation_ids.push(d.id) }
+		@data.each { |d| observation_ids.push(d["id"].to_i) }
 		session['observation_ids'] = observation_ids
 		session['image_ids'] = nil
   end
