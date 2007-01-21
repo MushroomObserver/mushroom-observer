@@ -11,6 +11,7 @@ end
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:ask_webmaster_question,
                                                     :color_themes,
+                                                    :how_to_use,
                                                     :images_by_title,
                                                     :index,
                                                     :intro,
@@ -176,7 +177,7 @@ class ObserverController < ApplicationController
     @search = Search.new
     @search.pattern = pattern
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
-    query = sprintf("select o.id, names.search_name from observations o, names where %s order by names.search_name asc, `when` desc",
+    query = sprintf("select o.id, names.search_name from observations o, names where o.name_id = names.id and %s order by names.search_name asc, `when` desc",
                     conditions)
     @session['observation_ids'] = self.query_ids(query)
     @session['observation'] = nil
@@ -212,8 +213,8 @@ class ObserverController < ApplicationController
     @session['image_ids'] = nil
   end
 
-  # left-hand panel -> new_observation.rhtml
-  def new_observation
+  # left-hand panel -> create_observation.rhtml
+  def create_observation
     if verify_user(@session['user'])
       @session['observation_ids'] = nil
       @session['observation'] = nil
@@ -223,7 +224,7 @@ class ObserverController < ApplicationController
     end
   end
   
-  # create_observation.rhtml -> multiple_names_create.rhtml
+  # construct_observation.rhtml -> multiple_names_create.rhtml
   def multiple_names_create
     args = @session[:args]
     @session[:args] = nil
@@ -236,7 +237,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  def create_observation_with_selected_name
+  def construct_observation_with_selected_name
     user_id = params[:user_id]
     if check_user_id(user_id)
       # Verify that the user didn't change the what field
@@ -246,12 +247,12 @@ class ObserverController < ApplicationController
         params[:observation][:name_id] = nil
       end
     end
-    create_observation
+    construct_observation
   end
 
-  # create_observation.rhtml -> unknown_name_create.rhtml
+  # construct_observation.rhtml -> unknown_name_create.rhtml
   # This should get merged with the source for unknown_name along
-  # with the rest of the commonality between create_observation and
+  # with the rest of the commonality between construct_observation and
   # update_observation.
   def unknown_name_create
     args = @session[:args]
@@ -265,14 +266,11 @@ class ObserverController < ApplicationController
     end
   end
 
-  def create_observation_with_new_name
+  def construct_observation_with_new_name
     user_id = params[:user_id].to_i
-    logger.warn("**++: user_id: %s" % user_id)
     if check_user_id(user_id)
       input_what = params[:what]
-      logger.warn("**++: params[:what]: %s" % params[:what])
       output_what = params[:observation][:what]
-      logger.warn("**++: params[:observation][:what]: %s" % params[:observation][:what])
       if input_what == output_what
         names = Name.names_from_string(output_what)
         if names.last.nil?
@@ -285,11 +283,11 @@ class ObserverController < ApplicationController
         end
       end
     end
-    create_observation
+    construct_observation
   end
 
-  # new_observation.rhtml -> list_observations.rhtml
-  def create_observation
+  # create_observation.rhtml -> list_observations.rhtml
+  def construct_observation
     user = @session['user']
     if verify_user(user)
       @observation = Observation.new(params[:observation])
@@ -310,7 +308,7 @@ class ObserverController < ApplicationController
           flash[:notice] = 'Observation was successfully created.'
           redirect_to :action => 'show_observation', :id => @observation
         else
-          render :action => 'new_observation'
+          render :action => 'create_observation'
         end
       elsif names.length == 0
         # @observation.what has new name
@@ -706,8 +704,8 @@ class ObserverController < ApplicationController
     redirect_to(:action => 'show_observation', :id => @observation)
   end
 
-  # left-hand panel -> new_species_list.rhtml
-  def new_species_list
+  # left-hand panel -> create_species_list.rhtml
+  def create_species_list
     user = @session['user']
     if verify_user(user)
       read_session
@@ -805,14 +803,12 @@ class ObserverController < ApplicationController
     end
   end
 
-  def create_approved_names(name_list, approved_names, user)
+  def construct_approved_names(name_list, approved_names, user)
     if approved_names
       for ns in name_list
         name_str = ns.strip
         if approved_names.member? name_str
-          logger.warn("  **: create_approved_names: %s" % name_str)
           names = Name.names_from_string(name_str)
-          logger.warn("  **: %s names from %s" % [names.length, name_str])
           if names.last.nil?
             flash[:notice] = "Unable to create the name %s", name_str
           else
@@ -883,7 +879,7 @@ class ObserverController < ApplicationController
     if user
       notes = params[:member][:notes]
       list = params[:list][:members]
-      create_approved_names(list, params[:approved_names], user)
+      construct_approved_names(list, params[:approved_names], user)
       sorter = NameSorter.new
       sorter.chosen_names = params[:chosen_names]
       sorter.sort_names(list)
@@ -901,7 +897,6 @@ class ObserverController < ApplicationController
               sp_args = { :created => species_list.modified, :user => user, :notes => notes,
                           :where => species_list.where }
               sp_when = species_list.when # Can't use params since when is split up
-              logger.warn("  **: about to create %s new observations" % sorter.single_names.length)
               for name, timestamp in sorter.single_names
                 sp_args[:when] = timestamp || sp_when
                 species_list.construct_observation(name, sp_args)
@@ -923,8 +918,8 @@ class ObserverController < ApplicationController
     process_species_list(params[:id], params, 'updated', 'edit_species_list')
   end
 
-  def create_species_list
-    process_species_list(nil, params, 'created', 'new_species_list')
+  def construct_species_list
+    process_species_list(nil, params, 'created', 'create_species_list')
   end
 
   # show_observation.rhtml -> manage_species_lists.rhtml
@@ -1153,9 +1148,9 @@ class ObserverController < ApplicationController
                                               " and o.user_id = u.id and n.id = o.name_id" +
                                               " order by o.when desc")
     observation_ids = []
-		@data.each { |d| observation_ids.push(d["id"].to_i) }
-		session['observation_ids'] = observation_ids
-		session['image_ids'] = nil
+    @data.each { |d| observation_ids.push(d["id"].to_i) }
+    session['observation_ids'] = observation_ids
+    session['image_ids'] = nil
   end
   
   # show_name.rhtml -> edit_name.rhtml

@@ -1,18 +1,9 @@
-Bugs
-  - Bad What links when creating some observations
-  Missing genus names
-  - Bad people links
-  Disappearing images
-  
-Testing names_from_string:
-  New obs with existing name
-  New obs with new name
-  New obs with multi names
-  Edit obs with existing name
-  Edit obs with new name
-  Edit obs with multi names
-  New species list with existing, new and multi names
-  Edit species list with existing, new and multi names
+Simple search by location.
+Checklists based on location
+
+Transfer names from Name.
+
+Page for Unknowns
 
 More stuff to do with Names   
     Eliminate Observation.what
