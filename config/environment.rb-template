@@ -1,0 +1,11 @@
+# SENSITIVE INFORMATION: This file should not be checked into subversion
+
+require File.join(File.dirname(__FILE__), 'environment_dev')
+
+ActionMailer::Base.server_settings = {
+	:address => "<your mail server here>",
+	:domain => "mushroomobserver.org", # Or your domain here
+	:authentication => :login, # Read docs for other authentication protocols
+	:user_name => "<username>",
+	:password => "<password>"
+}
