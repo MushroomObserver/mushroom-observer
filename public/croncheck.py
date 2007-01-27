@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import re, time
 
-file_path = "/Users/velosa/ruby/mushroom_sightings/trunk/log/development.log"
-pat = re.compile('Processing ObserverController#index \(for 127\.0\.0\.1 at (.+)\)')
+file_path = "/home/velosa/mushroomobserver.org/log/production.log"
+pat = re.compile('Processing ObserverController#index \(for 65\.111\.164\.187 at (.+)\)')
 time_format = '%Y-%m-%d %H:%M:%S'
 f = open(file_path)
 line = f.readline()
@@ -18,6 +18,6 @@ while line:
 matches.reverse()
 p = time.localtime()
 for m in matches:
-  print time.mktime(p) - time.mktime(m)
+  print "%s: %s, %s" % (time.mktime(p) - time.mktime(m), time.asctime(p), time.asctime(m))
   p = m
   pass
