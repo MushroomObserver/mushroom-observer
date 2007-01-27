@@ -24,6 +24,18 @@ RewriteRule .* - [L]
 RewriteCond %{REQUEST_URI} ^/stats.html
 RewriteRule .* - [L]
 
+RewriteCond %{REQUEST_URI} ^/robots.txt
+RewriteRule .* - [L]
+
+RewriteCond %{REQUEST_URI} ^/favicon.ico
+RewriteRule .* - [L]
+
+# RewriteCond %{REQUEST_URI} ^/safe_dump.gz
+# RewriteRule .* - [L]
+
+# RewriteCond %{REQUEST_URI} ^/images.tar
+# RewriteRule .* - [L]
+
 # Redirect all requests not available on the filesystem to Rails
 # By default the cgi dispatcher is used which is very slow
 # 
