@@ -45,7 +45,11 @@
 	</table>
     <p><span class="Date">
         Name created: <%= @name.created %><br/>
-        Last modified: <%= @name.modified %><br/>
+        Last modified: <%= @name.modified %> by <%= @name.user.unique_text_name %><br/>
+        <% rss_log = @name.rss_log 
+           if rss_log %>
+        	<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
+        <% end %>
         </span>
     </p>
 </p>

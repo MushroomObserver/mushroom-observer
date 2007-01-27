@@ -1,0 +1,20 @@
+<table cellpadding=10>
+	<tr>
+		<td align="center" valign="middle" width=160>Change to Name:
+		</td>
+		    <% if vertical_layout %>
+	</tr>
+	<tr>
+		<td align="center" valign="middle">
+			<% else %>
+		<td valign="middle">
+			<% end %>
+	<%=
+		link_to(sprintf('<span class="ListName">%s</span><br/>',
+				textilize_without_paragraph(h(name.display_name))),
+				:action => 'show_name', :id => name.id)
+	%>
+	<span class="ListWho"><br/>by <%= truncate(h(name.user.unique_text_name), MAX_WHO_LENGTH) %></span>
+		</td>
+	</tr>
+</table>

@@ -1177,6 +1177,7 @@ class ObserverController < ApplicationController
         name.user = user
         past_name.save
         name.save
+        name.log("Name updated by %s" % user.login)
       rescue RuntimeError => err
         flash[:notice] = err.to_s
         redirect_to :action => 'edit_name', :id => name

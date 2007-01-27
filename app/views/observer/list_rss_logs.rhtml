@@ -19,9 +19,14 @@
 			     species_list = rss_log.species_list
 			     if species_list: %>
 			       <%= render :partial => 'species_list', :object => species_list, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
-			  <% else %>
-		        <%= render :partial => 'rss_log', :object => rss_log, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
-		      <% end
+			  <% else
+			       name = rss_log.name
+			       if name: %>
+			         <%= render :partial => 'name', :object => name, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
+			    <% else %>
+		             <%= render :partial => 'rss_log', :object => rss_log, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
+		      <%   end
+		         end
 		       end %>
 			</td>
 			<%  if col_count == (@layout["columns"] - 1) %>

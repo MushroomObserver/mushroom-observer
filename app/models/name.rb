@@ -1,7 +1,21 @@
 class Name < ActiveRecord::Base
   has_many :observations
   has_many :past_names
+  has_one :rss_log
   belongs_to :user
+
+  def log(msg)
+    if self.rss_log.nil?
+      self.rss_log = RssLog.new
+    end
+    self.rss_log.addWithDate(msg, true)
+  end
+  
+  def orphan_log(entry)
+    self.log(entry) # Ensures that self.rss_log exists
+    self.rss_log.species_list = nil
+    self.rss_log.add(self.unique_text_name, false)
+  end
 
   # Patterns 
   ABOVE_SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s*$/

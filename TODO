@@ -1,5 +1,13 @@
+Method for tracking name changes
+  Add names to RSS feed
+    Alter name
+    Add name?  Only case that would be missed complete are names added with 'Just Create New Names', but that's somewhere you'd really like grouping of names.
+    Ultimately may not be scalable
+  Ultimately synonymy changes
+
+Checklists
+
 Simple search by location.
-Checklists based on location
 
 Transfer names from Name.
 
@@ -13,7 +21,7 @@ More stuff to do with Names
     Common Name support (== Group but without the group)
     Spelling correction
     References
-    Synonymy
+    Synonymy (accepted vs. proposed?)
 	Deprecating names
     Descriptions
 

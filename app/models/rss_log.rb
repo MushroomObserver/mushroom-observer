@@ -2,6 +2,7 @@ class RssLog < ActiveRecord::Base
 
   belongs_to :observation
   belongs_to :species_list
+  belongs_to :name
 
   def touch
     self.modified = Time.now
@@ -22,6 +23,7 @@ class RssLog < ActiveRecord::Base
   def orphan(title, entry)
     self.observation = nil
     self.species_list = nil
+    self.name = nil
     addWithDate(entry, false)
     add(title, false)
   end
@@ -36,8 +38,13 @@ class RssLog < ActiveRecord::Base
       if species_list
         result = species_list.unique_text_name # else try the species_list
       else
-        notes = self.notes
-        result = notes.split("\n")[0] unless notes.nil? # else use the first line of the text
+        name = self.name
+        if name
+          result = name.search_name
+        else
+          notes = self.notes
+          result = notes.split("\n")[0] unless notes.nil? # else use the first line of the text
+        end
       end
     end
     result
@@ -52,6 +59,11 @@ class RssLog < ActiveRecord::Base
       species_list = self.species_list
       if species_list
         result = sprintf("/observer/show_species_list/%d?time=%d", species_list.id, self.modified.tv_sec)
+      else
+        name = self.name
+        if name
+          result = sprintf("/observer/show_name/%d?time=%d", name.id, self.modified.tv_sec)
+        end
       end
     end
     result
