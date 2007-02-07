@@ -30,6 +30,9 @@ RewriteRule .* - [L]
 RewriteCond %{REQUEST_URI} ^/favicon.ico
 RewriteRule .* - [L]
 
+RewriteCond %{REQUEST_URI} ^/Russula_SOMA.ppt
+RewriteRule .* - [L]
+
 # RewriteCond %{REQUEST_URI} ^/safe_dump.gz
 # RewriteRule .* - [L]
 

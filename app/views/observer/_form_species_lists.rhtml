@@ -1,15 +1,18 @@
 <%= error_messages_for 'species_list' %>
 
 <!--[form:species_list]-->
+<!-- % if false % -->
 <% if session['checklist'] %>
   <td valign="top">
     Select Species to Add:<br/>
     <% for (name, id) in session['checklist'] %>
-      <%= check_box("checklist_names", id, { :checked => @checklist_names[id] }, "checked") %>
-      <label for="checklist_names"><%= textilize_without_paragraph(h(name)) %></label><br/>
+      <%= check_box("checklist_data", id, { :checked => @checklist_names[id] }, "checked") %>
+      <label for="checklist_names"><%= textilize_without_paragraph(h(name)) %></label>
+      <br/>
     <% end %>
   </td>
 <% end %>
+<!-- % end % -->
 <td valign="top">
     <% if @new_names && (@new_names != []) %>
          The following names could not be found.<br/>

@@ -1029,7 +1029,7 @@ class ObserverController < ApplicationController
                 species_list.construct_observation(name, sp_args)
               end
               sp_args[:when] = sp_when
-              for key, value in params[:checklist_names]
+              for key, value in params[:checklist_data]
                 if value == "checked"
                   name = Name.find(key.to_i)
                   species_list.construct_observation(name, sp_args)
@@ -1042,7 +1042,7 @@ class ObserverController < ApplicationController
           end
         end
       end
-      do_action(action, id, args, names_only, notes, params[:checklist_names], sorter)
+      do_action(action, id, args, names_only, notes, params[:checklist_data], sorter)
     else
       redirect_to :action => 'list_species_lists'
     end
@@ -1326,6 +1326,7 @@ class ObserverController < ApplicationController
   # name_index.rhtml
   def name_index
     store_location
+    @session['checklist_source'] = 0 # Meaning all species
     @names = Name.find(:all, :order => "'text_name' asc, 'author' asc")
   end
 
