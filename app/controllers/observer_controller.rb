@@ -8,6 +8,59 @@ class Search
   attr_accessor :pattern
 end
 
+class NameSorter
+  attr_reader :new_name_strs, :single_name_strs, :single_names, :multiple_name_strs
+  attr_accessor :chosen_names
+  
+  def all_name_strs
+    @new_name_strs + @multiple_name_strs + @single_name_strs
+  end
+  
+  def initialize
+    # The first four are for managing the values entered into the Species field
+    @new_name_strs = [] # List of strings
+    @single_name_strs = [] # List of strings
+    @single_names = [] # List of [Name, Time].  A Timestamp of nil implies now.
+    @multiple_name_strs = [] # List of strings
+  end
+  
+  def only_single_names
+    (@new_name_strs == []) and (@multiple_name_strs == [])
+  end
+  
+  def add_name(ns, timestamp=nil)
+    name_str = ns.strip
+    chosen = false
+    if @chosen_names
+      chosen_id = @chosen_names[name_str]
+      if chosen_id
+        @single_name_strs.push name_str
+        @single_names.push [Name.find(chosen_id), timestamp]
+        chosen = true
+      end
+    end
+    if not chosen
+      names = Name.find_names(name_str)
+      len = names.length
+      if len == 0
+        @new_name_strs.push name_str
+      elsif len == 1
+        @single_name_strs.push name_str
+        @single_names.push [names[0], nil]
+      else
+        @multiple_name_strs.push name_str
+      end
+    end
+  end
+  
+  def sort_names(name_list)
+    for n in name_list
+      add_name(n)
+    end
+  end
+
+end
+
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:ask_webmaster_question,
                                                     :color_themes,
@@ -141,6 +194,7 @@ class ObserverController < ApplicationController
   def list_observations
     store_location
     @layout = calc_layout_params
+    @session['checklist_source'] = 0 # Meaning all species
     @session['observation_ids'] = self.query_ids("select id, `when` from observations order by `when` desc")
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -153,6 +207,7 @@ class ObserverController < ApplicationController
   def observations_by_name
     store_location
     @layout = calc_layout_params
+    @session['checklist_source'] = 0 # Meaning all species
     @session['observation_ids'] = self.query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -179,6 +234,7 @@ class ObserverController < ApplicationController
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
     query = sprintf("select o.id, names.search_name from observations o, names where o.name_id = names.id and %s order by names.search_name asc, `when` desc",
                     conditions)
+    @session['checklist_source'] = nil # Meaning use observation_ids
     @session['observation_ids'] = self.query_ids(query)
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -491,6 +547,7 @@ class ObserverController < ApplicationController
 
   # Various -> list_images.rhtml
   def list_images
+    @session['checklist_source'] = 0 # Meaning all species
     @session['observation_ids'] = []
     @session['observation'] = nil
     @session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
@@ -504,6 +561,7 @@ class ObserverController < ApplicationController
 
   # images_by_title.rhtml
   def images_by_title
+    @session['checklist_source'] = 0 # Meaning all species
     @session['observation_ids'] = nil
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -704,11 +762,52 @@ class ObserverController < ApplicationController
     redirect_to(:action => 'show_observation', :id => @observation)
   end
 
+  def calc_checklist(id)
+    source = @session['checklist_source']
+    logger.warn("calc_checklist: now: %s, prev: %s" % [source, @session['prev_checklist_source']])
+    if source.nil? # Use observation_ids
+      ob_ids = @session['observation_ids']
+      if ob_ids
+        checklist = {}
+        for o in ob_ids
+          obs = Observation.find(o)
+          if obs
+            name = obs.name
+            # Generate a list of unique name strings and id strings.
+            # It's important to use strings to be able to match the
+            # information that comes back from the check_boxes.
+            checklist[[name.observation_name, name.id.to_s]] = true
+          end
+        end
+        @session['checklist'] = checklist.keys.sort
+      end
+    else
+      if source == 0
+        query = "select observation_name, id from names order by observation_name"
+      else 
+        if source == id
+          source = @session['prev_checklist_source'] || source
+        end
+        query = "select distinct names.observation_name, names.id from names, observations, observations_species_lists
+                 where observations_species_lists.species_list_id = %s
+                 and observations_species_lists.observation_id = observations.id
+                 and names.id = observations.name_id order by names.observation_name" % source
+      end
+      data = Observation.connection.select_all(query)
+      list = []
+      for d in data
+        list.push([d['observation_name'], d['id']])
+      end
+      @session['checklist'] = list
+    end
+  end
+    
   # left-hand panel -> create_species_list.rhtml
   def create_species_list
     user = @session['user']
     if verify_user(user)
       read_session
+      calc_checklist(nil)
     end
   end
 
@@ -717,8 +816,14 @@ class ObserverController < ApplicationController
   # the usage for show_observation.
   def show_species_list
     store_location
-    @species_list = SpeciesList.find(params[:id])
+    id = params[:id]
+    @species_list = SpeciesList.find(id)
     @session[:species_list] = @species_list
+    if @session['checklist_source'] != id
+      @session['prev_checklist_source'] = @session['checklist_source']
+      @session['checklist_source'] = id
+    end
+    logger.warn("show_species_list: now: %s, prev: %s" % [id, @session['prev_checklist_source']])
   end
 
   # Needs both a species_list and an observation.
@@ -777,6 +882,8 @@ class ObserverController < ApplicationController
 
   def read_session
     # Pull all the state out of the session and clean out the session
+    @checklist_names = @session['checklist_names'] || {}
+    @session['checklist_names'] = nil
     @species_list = @session['species_list']
     @session['species_list'] = nil
     @list_members = @session['list_members']
@@ -797,9 +904,29 @@ class ObserverController < ApplicationController
     species_list = SpeciesList.find(params[:id])
     if check_user_id(species_list.user_id)
       read_session
+      calc_checklist(params[:id])
       @species_list = species_list
     else 
       render :action => 'show_species_list'
+    end
+  end
+  
+  def upload_species_list
+    species_list = SpeciesList.find(params[:id])
+    if check_user_id(species_list.user_id)
+      @species_list = species_list
+    else
+      render :action => 'show_species_list'
+    end
+  end
+
+  def read_species_list
+    species_list = SpeciesList.find(params[:id])
+    if species_list
+      species_list.file = params[:species_list][:file]
+      sorter = NameSorter.new
+      species_list.process_file_data(sorter)
+      do_action('edit_species_list', params[:id], {}, false, '', {}, sorter)
     end
   end
 
@@ -854,12 +981,13 @@ class ObserverController < ApplicationController
     [user, species_list]
   end
 
-  def do_action(action, id, args, names_only, notes, sorter)
+  def do_action(action, id, args, names_only, notes, names, sorter)
     if args
       # Store all the state in the session since we can't put it in the database yet
       # and it's too awkward to pass through the URL effectively
       @session['species_list'] = SpeciesList.new(args)
       @session['list_members'] = sorter.all_name_strs.join("\r\n")
+      @session['checklist_names'] = names
       @session['new_names'] = sorter.new_name_strs.uniq
       @session['multiple_names'] = sorter.multiple_name_strs.uniq
       @session['member_notes'] = notes
@@ -884,7 +1012,6 @@ class ObserverController < ApplicationController
       sorter.chosen_names = params[:chosen_names]
       sorter.sort_names(list)
       if species_list
-        species_list.process_file_data(sorter)
         if sorter.only_single_names
           if names_only
             flash[:notice] = "All names are now in the database."
@@ -901,6 +1028,13 @@ class ObserverController < ApplicationController
                 sp_args[:when] = timestamp || sp_when
                 species_list.construct_observation(name, sp_args)
               end
+              sp_args[:when] = sp_when
+              for key, value in params[:checklist_names]
+                if value == "checked"
+                  name = Name.find(key.to_i)
+                  species_list.construct_observation(name, sp_args)
+                end
+              end
               action = 'show_species_list'
               id = species_list.id
               args = nil
@@ -908,7 +1042,7 @@ class ObserverController < ApplicationController
           end
         end
       end
-      do_action(action, id, args, names_only, notes, sorter)
+      do_action(action, id, args, names_only, notes, params[:checklist_names], sorter)
     else
       redirect_to :action => 'list_species_lists'
     end
@@ -1043,6 +1177,7 @@ class ObserverController < ApplicationController
   def list_rss_logs
     store_location
     @layout = calc_layout_params
+    @session['checklist_source'] = 0 # Meaning all species
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
             "modified is not null order by 'modified' desc"
     @session['observation_ids'] = self.query_ids(query)
@@ -1149,8 +1284,9 @@ class ObserverController < ApplicationController
                                               " order by o.when desc")
     observation_ids = []
     @data.each { |d| observation_ids.push(d["id"].to_i) }
-    session['observation_ids'] = observation_ids
-    session['image_ids'] = nil
+    @session['checklist_source'] = nil # Meaning use observation_ids
+    @session['observation_ids'] = observation_ids
+    @session['image_ids'] = nil
   end
   
   # show_name.rhtml -> edit_name.rhtml

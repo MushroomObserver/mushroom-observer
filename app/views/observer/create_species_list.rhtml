@@ -2,7 +2,7 @@
 
 <div id="Title"><%= @title %></div>
 
-<%= form_tag({:action => 'construct_species_list', :approved_names => @new_names}, :multipart => true) %>
+<%= start_form_tag :action => 'construct_species_list', :approved_names => @new_names %>
 <br/>
 <center><%= submit_tag 'Save' %></center>
 

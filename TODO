@@ -1,17 +1,22 @@
-Method for tracking name changes
-  Add names to RSS feed
-    Alter name
-    Add name?  Only case that would be missed complete are names added with 'Just Create New Names', but that's somewhere you'd really like grouping of names.
-    Ultimately may not be scalable
-  Ultimately synonymy changes
-
 Checklists
-
+    Process data
+    - Make sure data persists when missing required data, new names are given or multiples
+    - Track down bad ids after selecting Latest Changes - 621, 743, 745
+    - Correctly checklist entered species if more dialog is needed
+      params[:checklist_names][id] indicates if the given name is selected ("true", "false")
+      session[checklist] lists [observation_name, id]
+    - Deal with exhaustive checklists more efficiently
+      - Add upload_species_list functionality
+    - Should some pages reset session['checklist'] and/or 'observation_ids'?
+    - Review behavior with Edit Species List
+    - Figure out a way to merge species lists
+    Select All (like 'Save' with missing required value) [enables copying species lists]
+    
 Simple search by location.
 
-Transfer names from Name.
-
 Page for Unknowns
+
+User pages
 
 More stuff to do with Names   
     Eliminate Observation.what
@@ -25,9 +30,7 @@ More stuff to do with Names
 	Deprecating names
     Descriptions
 
-Name change RSS feed
-
-Name specific RSS feeds
+After synonomy - Transfer names from Name, RSS feed.
 
 Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
   Add confidence level for a naming
@@ -66,7 +69,6 @@ More rails-style tests
 
 New ideas:
 Mycology club affiliations (useful for searching)
-Copying species lists
+Copying and merging species lists
 Local client that can only add
-Provide a strong image focus option
 Summary pages for higher level taxa (somewhat related to field based search)
