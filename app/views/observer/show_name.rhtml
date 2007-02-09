@@ -1,4 +1,5 @@
 <% @title = 'Name: ' + h(@name.text_name) %>
+<%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @name.text_name) %><br/>
 <%= link_to 'Add Comment', :action => 'add_name_comment', :id => @name %>
 | <%= link_to 'Edit', :action => 'edit_name', :id => @name %>
 

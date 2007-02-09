@@ -1,4 +1,6 @@
 <% @title = 'Observation: ' + h(@observation.unique_text_name) %>
+<%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @observation.name.text_name) %><br/>
+
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% questions_ok = @observation.user.question_email
