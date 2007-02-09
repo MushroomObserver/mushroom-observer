@@ -194,7 +194,7 @@ class ObserverController < ApplicationController
   def list_observations
     store_location
     @layout = calc_layout_params
-    @session['checklist_source'] = 0 # Meaning all species
+    @session['checklist_source'] = nil # Meaning all species
     @session['observation_ids'] = self.query_ids("select id, `when` from observations order by `when` desc")
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -207,7 +207,7 @@ class ObserverController < ApplicationController
   def observations_by_name
     store_location
     @layout = calc_layout_params
-    @session['checklist_source'] = 0 # Meaning all species
+    @session['checklist_source'] = nil # Meaning all species
     @session['observation_ids'] = self.query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -234,7 +234,7 @@ class ObserverController < ApplicationController
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
     query = sprintf("select o.id, names.search_name from observations o, names where o.name_id = names.id and %s order by names.search_name asc, `when` desc",
                     conditions)
-    @session['checklist_source'] = nil # Meaning use observation_ids
+    @session['checklist_source'] = 0 # Meaning use observation_ids
     @session['observation_ids'] = self.query_ids(query)
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -547,7 +547,7 @@ class ObserverController < ApplicationController
 
   # Various -> list_images.rhtml
   def list_images
-    @session['checklist_source'] = 0 # Meaning all species
+    @session['checklist_source'] = nil # Meaning all species
     @session['observation_ids'] = []
     @session['observation'] = nil
     @session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
@@ -561,7 +561,7 @@ class ObserverController < ApplicationController
 
   # images_by_title.rhtml
   def images_by_title
-    @session['checklist_source'] = 0 # Meaning all species
+    @session['checklist_source'] = nil # Meaning all species
     @session['observation_ids'] = nil
     @session['observation'] = nil
     @session['image_ids'] = nil
@@ -765,7 +765,7 @@ class ObserverController < ApplicationController
   def calc_checklist(id)
     source = @session['checklist_source']
     logger.warn("calc_checklist: now: %s, prev: %s" % [source, @session['prev_checklist_source']])
-    if source.nil? # Use observation_ids
+    if source == 0 # Use observation_ids
       ob_ids = @session['observation_ids']
       if ob_ids
         checklist = {}
@@ -782,7 +782,7 @@ class ObserverController < ApplicationController
         @session['checklist'] = checklist.keys.sort
       end
     else
-      if source == 0
+      if source.nil?
         query = "select observation_name, id from names order by observation_name"
       else 
         if source == id
@@ -1177,7 +1177,7 @@ class ObserverController < ApplicationController
   def list_rss_logs
     store_location
     @layout = calc_layout_params
-    @session['checklist_source'] = 0 # Meaning all species
+    @session['checklist_source'] = nil # Meaning all species
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
             "modified is not null order by 'modified' desc"
     @session['observation_ids'] = self.query_ids(query)
@@ -1284,7 +1284,7 @@ class ObserverController < ApplicationController
                                               " order by o.when desc")
     observation_ids = []
     @data.each { |d| observation_ids.push(d["id"].to_i) }
-    @session['checklist_source'] = nil # Meaning use observation_ids
+    @session['checklist_source'] = 0 # Meaning use observation_ids
     @session['observation_ids'] = observation_ids
     @session['image_ids'] = nil
   end
@@ -1326,7 +1326,7 @@ class ObserverController < ApplicationController
   # name_index.rhtml
   def name_index
     store_location
-    @session['checklist_source'] = 0 # Meaning all species
+    @session['checklist_source'] = nil # Meaning all species
     @names = Name.find(:all, :order => "'text_name' asc, 'author' asc")
   end
 
