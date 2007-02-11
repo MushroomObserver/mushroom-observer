@@ -129,10 +129,12 @@
 					</table>
 				</td>
 				<td width=100% valign="top" class="main">
-            		<%= start_form_tag(:action => 'observation_search',
+            		<%= start_form_tag(:action => 'pattern_search',
             		                   :controller => 'observer', :id => @comment) %>
-                      <%= text_field("search", "pattern", :size => 10)%>
-                      <%= submit_tag 'Search' %>
+                      Find: <%= text_field("search", "pattern", :size => 10)%>
+                      <%= submit_tag 'Observations' %>
+                      <%= submit_tag 'Images' %>
+                      <%= submit_tag 'Locations' %>
                     <%= end_form_tag %>
                     <% if flash[:notice] %>
 					  <%= flash[:notice] %><br/>

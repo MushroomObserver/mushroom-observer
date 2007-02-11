@@ -1,23 +1,7 @@
-Google search
-
 Implement add_name_comment
 
-Checklists
-    Process data
-    - Make sure data persists when missing required data, new names are given or multiples
-    - Track down bad ids after selecting Latest Changes - 621, 743, 745
-    - Correctly checklist entered species if more dialog is needed
-      params[:checklist_names][id] indicates if the given name is selected ("true", "false")
-      session[checklist] lists [observation_name, id]
-    - Deal with exhaustive checklists more efficiently
-      - Add upload_species_list functionality
-    - Should some pages reset session['checklist'] and/or 'observation_ids'?
-    - Review behavior with Edit Species List
-    - Figure out a way to merge species lists
-    Select All (like 'Save' with missing required value) [enables copying species lists]
+Mechanism for merging species lists
     
-Simple search by location.
-
 Page for Unknowns
 
 User pages
@@ -73,6 +57,5 @@ More rails-style tests
 
 New ideas:
 Mycology club affiliations (useful for searching)
-Copying and merging species lists
 Local client that can only add
 Summary pages for higher level taxa (somewhat related to field based search)

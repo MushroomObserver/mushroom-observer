@@ -79,7 +79,7 @@ class ObserverController < ApplicationController
                                                     :next_observation,
                                                     :observations_by_name,
                                                     :observation_index,
-                                                    :observation_search,
+                                                    :pattern_search,
                                                     :prev_image,
                                                     :prev_observation,
                                                     :rss,
@@ -217,8 +217,8 @@ class ObserverController < ApplicationController
     render :action => 'list_observations'
   end
   
-  # left-hand panel -> observation_search.rhtml
-  def observation_search
+  # pattern_search.rhtml
+  def pattern_search
     store_location
     @layout = calc_layout_params
     search_data = params[:search]
@@ -229,11 +229,53 @@ class ObserverController < ApplicationController
     if pattern.nil?
       pattern = ''
     end
+    # Setup the search string for the next page
     @search = Search.new
     @search.pattern = pattern
+    if params[:commit]
+      @session["search_type"] = params[:commit]
+    end
+    case @session["search_type"]
+    when 'Images'
+      image_search(pattern)
+    when 'Locations'
+      location_search(pattern)
+    else
+      observation_search(pattern)
+    end
+  end
+  
+  def image_search(pattern)
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
-    query = sprintf("select o.id, names.search_name from observations o, names where o.name_id = names.id and %s order by names.search_name asc, `when` desc",
-                    conditions)
+    query = "select images.*, names.search_name from images, images_observations, observations, names
+      where images.id = images_observations.image_id and images_observations.observation_id = observations.id
+      and observations.name_id = names.id and %s order by names.search_name, `when` desc" % conditions
+    @session['checklist_source'] = 0 # Meaning use observation_ids
+    @session['observation_ids'] = []
+    @session['observation'] = nil
+    @session['image_ids'] = self.query_ids(query)
+    @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
+    render :action => 'list_images'
+  end
+  
+  def location_search(pattern)
+    conditions = sprintf("`where` like '%s%%'", pattern.gsub(/[*']/,"%"))
+    query = "select o.id from observations o where %s order by `when` desc" % conditions
+    @session['checklist_source'] = 0 # Meaning use observation_ids
+    @session['observation_ids'] = self.query_ids(query)
+    @session['observation'] = nil
+    @session['image_ids'] = nil
+    @observation_pages, @observations = paginate(:observations,
+                                                 :order => "`when` desc",
+                                                 :conditions => conditions,
+                                                 :per_page => @layout["count"])
+    render :action => 'list_observations'
+  end
+  
+  def observation_search(pattern)
+    conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
+    query = "select o.id, names.search_name from observations o, names
+             where o.name_id = names.id and %s order by names.search_name asc, `when` desc" % conditions
     @session['checklist_source'] = 0 # Meaning use observation_ids
     @session['observation_ids'] = self.query_ids(query)
     @session['observation'] = nil
@@ -244,7 +286,7 @@ class ObserverController < ApplicationController
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
-
+  
   # observation_index.rhtml
   def observation_index
     store_location
