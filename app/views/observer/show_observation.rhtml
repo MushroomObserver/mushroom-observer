@@ -69,7 +69,7 @@
 			Images:<br/>
 		<% end %>
 		<% if check_permission(@observation.user_id) %>
-			<%= link_to "Add Image", :action => 'add_image', :id => @observation %><br/>
+			<%= link_to "Add Images", :action => 'add_image', :id => @observation %><br/>
 			<%= link_to "Reuse Image", :action => 'reuse_image', :id => @observation %><br/>
 			<% if @observation.images.length > 0 %>
 				<%= link_to"Remove Images", :action => 'remove_images', :id => @observation %><br/>

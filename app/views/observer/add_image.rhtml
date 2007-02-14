@@ -20,7 +20,12 @@ or other fund-raising tools that may be used to support this site.<br/></br/>
 
 <%= hidden_field("observation", "id") %>
 
-<p><%= file_field("image", "image") %></p>
+<p>
+    Image 1: <%= file_field("upload", "image1") %> (default thumbnail)<br/>
+    Image 2: <%= file_field("upload", "image2") %> (optional)<br/>
+    Image 3: <%= file_field("upload", "image3") %> (optional)<br/>
+    Image 4: <%= file_field("upload", "image4") %> (optional)<br/>
+</p>
 
 <%= render :partial => 'form_images' %>
 

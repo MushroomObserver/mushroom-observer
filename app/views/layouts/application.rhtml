@@ -31,13 +31,13 @@
 								<%= link_to('Introduction', :controller => 'observer',
 								            :action => 'intro') %>
 								<br/>
-            					<%= link_to('Question', :controller => 'observer',
-            								:action => 'ask_webmaster_question') %>
-            					
-								<br/>
 								<%= link_to('How&nbsp;To&nbsp;Use',
 								            :controller => 'observer',
 								            :action => 'how_to_use') %>
+								<br/>
+            					<%= link_to('Send a Comment', :controller => 'observer',
+            								:action => 'ask_webmaster_question') %>
+            					
 								<br/><br/>
 								<%= link_to('News', :controller => 'observer',
 								            :action => 'news') %>
@@ -46,7 +46,7 @@
 								            :controller => 'observer',
 								            :action => 'list_rss_logs') %>
             					<br/>
-								<%= link_to('Name&nbsp;Index', :controller => 'observer',
+								<%= link_to('Index&nbsp;A->Z', :controller => 'observer',
 								                          :action => 'name_index') %>
 								<br/>
 								<br/>
@@ -56,11 +56,11 @@
 								                        :action => 'create_observation')
 								                 %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('By&nbsp;Date',
+								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Date',
 								                        :controller => 'observer',
 								                        :action => 'list_observations') %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('By&nbsp;Name',
+								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Name',
 								                        :controller => 'observer',
 								                        :action => 'observations_by_name')
 								                 %>
@@ -71,17 +71,17 @@
 								                        :action => 'create_species_list')
 								                 %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('By&nbsp;Date',
+								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Date',
 								                        :controller => 'observer',
 								                        :action => 'list_species_lists')
 								                 %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('By&nbsp;Title',
+								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Title',
 								                        :controller => 'observer',
 								                        :action => 'species_lists_by_title')
 								                        %>
 								<br/><br/>
-								<%= link_to('Images', :controller => 'observer',
+								<%= link_to('Newest&nbsp;Images', :controller => 'observer',
 								            :action => 'list_images') %>
 								<br/>
 								<%= link_to('Comments', :controller => 'observer',

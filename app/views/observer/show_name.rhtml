@@ -1,7 +1,6 @@
 <% @title = 'Name: ' + h(@name.text_name) %>
 <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @name.text_name) %><br/>
-<%= link_to 'Add Comment', :action => 'add_name_comment', :id => @name %>
-| <%= link_to 'Edit', :action => 'edit_name', :id => @name %>
+<%= link_to 'Edit Name', :action => 'edit_name', :id => @name %>
 
 <div id="Title"><%= textilize_without_paragraph(h @name.display_name) %></div>
 <p>
@@ -14,7 +13,7 @@
 	<% end %>
 </p>
 <p>
-	Notes: <%= textilize @name.notes %>
+	Notes and Comments: <%= textilize @name.notes %>
 </p>
 <p>Observations:<br/>
 	<table cellpadding="5" cellspacing="0">

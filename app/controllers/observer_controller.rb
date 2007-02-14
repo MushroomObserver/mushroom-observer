@@ -727,11 +727,10 @@ class ObserverController < ApplicationController
     end
   end
   
-  def upload_image
-    @observation = Observation.find(params[:observation][:id])
-    if check_user_id(@observation.user_id)
-      # Upload image
-      @image = Image.new(params[:image])
+  def process_image(args, upload)
+    if upload and upload != ""
+      args[:image] = upload
+      @image = Image.new(args)
       @image.created = Time.now
       @image.modified = @image.created
       @image.user = @session['user']
@@ -745,6 +744,18 @@ class ObserverController < ApplicationController
           flash[:notice] = 'Invalid image'
         end
       end
+    end
+  end
+    
+  def upload_image
+    @observation = Observation.find(params[:observation][:id])
+    if check_user_id(@observation.user_id)
+      # Upload image
+      args = params[:image]
+      process_image(args, params[:upload][:image1])
+      process_image(args, params[:upload][:image2])
+      process_image(args, params[:upload][:image3])
+      process_image(args, params[:upload][:image4])
       redirect_to(:action => 'show_observation', :id => @observation)
     else
       render :action => 'show_observation'
@@ -919,7 +930,7 @@ class ObserverController < ApplicationController
     @session['observation'] = nil
     @session['image_ids'] = nil
     store_location
-    @species_lists = SpeciesList.find(:all, :order => "'what' asc, 'when' desc")
+    @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
   end
 
   def read_session
@@ -1071,10 +1082,12 @@ class ObserverController < ApplicationController
                 species_list.construct_observation(name, sp_args)
               end
               sp_args[:when] = sp_when
-              for key, value in params[:checklist_data]
-                if value == "checked"
-                  name = Name.find(key.to_i)
-                  species_list.construct_observation(name, sp_args)
+              if params[:checklist_data]
+                for key, value in params[:checklist_data]
+                  if value == "checked"
+                    name = Name.find(key.to_i)
+                    species_list.construct_observation(name, sp_args)
+                  end
                 end
               end
               action = 'show_species_list'
