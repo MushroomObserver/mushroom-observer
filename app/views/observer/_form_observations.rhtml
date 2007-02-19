@@ -12,8 +12,8 @@
 	In the US this should be at least accurate to the county.
 </span></p>
 <br/>
-<p><label for="observation_what">What:</label>
-<%= text_field 'observation', 'what'  %><br/>
+<p><label for="observation_text_name">What:</label>
+<%= text_field 'observation', 'text_name', :value => @observation.text_name  %><br/>
 <span id="help_note">
 	The name you would apply to this observation.  If you don't know what it is, just say 'Unknown'.
 	If you find a better name for this observation in the future, please change the name by selecting

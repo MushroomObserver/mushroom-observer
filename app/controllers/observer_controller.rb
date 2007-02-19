@@ -290,9 +290,6 @@ class ObserverController < ApplicationController
   # observation_index.rhtml
   def observation_index
     store_location
-    # Used to be:
-    # @observations = Observation.find(:all, :order => "'what' asc, 'when' desc")
-    # Now use straight SQL to avoid extracting user info for each observation
     @data = Observation.connection.select_all("select o.id, n.observation_name, o.when, u.name, u.login" +
                                               " from observations o, users u, names n" +
                                               " where o.user_id = u.id and n.id = o.name_id" +
@@ -318,7 +315,10 @@ class ObserverController < ApplicationController
       @session['observation'] = nil
       @session['image_ids'] = nil
       @observation = Observation.new
-      @observation.name = Name.find_name(:Kingdom, 'Fungi').first
+      # Removed when Observation.what was removed since it causes the
+      # What field to get filled in with Fungi sp.  I think this was
+      # just to replace the old default of 'Unknown'
+      # @observation.name = Name.find_name(:Kingdom, 'Fungi').first
     end
   end
   
@@ -328,7 +328,7 @@ class ObserverController < ApplicationController
     @session[:args] = nil
     @observation = Observation.new(args)
     if check_user_id(@observation.user_id)
-      @what = args[:what]
+      @what = args[:text_name]
       @names = Name.find_names(@what)
     else 
       render :action => 'show_observation'
@@ -340,7 +340,7 @@ class ObserverController < ApplicationController
     if check_user_id(user_id)
       # Verify that the user didn't change the what field
       input_what = params[:what]
-      output_what = params[:observation][:what]
+      output_what = params[:observation][:text_name]
       if input_what != output_what
         params[:observation][:name_id] = nil
       end
@@ -357,7 +357,7 @@ class ObserverController < ApplicationController
     @session[:args] = nil
     @observation = Observation.new(args)
     if check_user_id(@observation.user_id)
-      @what = args[:what]
+      @what = args[:text_name]
       @session['observation'] = params[:id].to_i
     else 
       redirect_to :action => 'show_observation', :id => params[:id]
@@ -368,11 +368,11 @@ class ObserverController < ApplicationController
     user_id = params[:user_id].to_i
     if check_user_id(user_id)
       input_what = params[:what]
-      output_what = params[:observation][:what]
+      output_what = params[:observation][:text_name]
       if input_what == output_what
         names = Name.names_from_string(output_what)
         if names.last.nil?
-          flash[:notice] = "Unable to create the name %s", str
+          flash[:notice] = "Unable to create the name %s" % output_what
         else
           for n in names
             n.user_id = user_id
@@ -397,7 +397,7 @@ class ObserverController < ApplicationController
       if name_id
         names = [Name.find(name_id)]
       else
-        names = Name.find_names(@observation.what)
+        names = Name.find_names(params[:observation][:text_name])
       end
       if names.length == 1
         @observation.name = names[0]
@@ -409,13 +409,17 @@ class ObserverController < ApplicationController
           render :action => 'create_observation'
         end
       elsif names.length == 0
-        # @observation.what has new name
+        # @observation.text_name has new name
         args = params[:observation]
         args[:user_id] = user.id
         @session[:args] = params[:observation]
-        redirect_to :action => 'unknown_name_create'
+        if @observation.text_name == ''
+          redirect_to :action => 'create_observation'
+        else
+          redirect_to :action => 'unknown_name_create'
+        end
       else
-        # @observation.what matches more than one name
+        # @observation.text_name matches more than one name
         @names = names
         args = params[:observation]
         args[:user_id] = user.id
@@ -454,7 +458,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       # Verify that the user didn't change the what field
       input_what = params[:what]
-      output_what = params[:observation][:what]
+      output_what = params[:observation][:text_name]
       if input_what != output_what
         params[:observation][:name_id] = nil
       end
@@ -477,7 +481,7 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       input_what = params[:what]
-      output_what = params[:observation][:what]
+      output_what = params[:observation][:text_name]
       if input_what == output_what
         names = Name.names_from_string(output_what)
         if names.last.nil?
@@ -500,7 +504,7 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id) # Even though edit makes this check, avoid bad guys going directly
       if params[:observation][:name_id].nil?
-        names = Name.find_names(params[:observation][:what])
+        names = Name.find_names(params[:observation][:text_name])
       else
         names = [Name.find(params[:observation][:name_id])]
       end
@@ -523,13 +527,17 @@ class ObserverController < ApplicationController
           render :action => 'edit_observation'
         end
       elsif names.length == 0
-        # @observation.what has new name
-        redirect_to :action => 'unknown_name', :id => @observation, :what => params[:observation][:what]
+        # @observation.text_name has new name
+        if @observation.text_name == ''
+          redirect_to :action => 'edit_observation', :id => @observation
+        else
+          redirect_to :action => 'unknown_name', :id => @observation, :what => params[:observation][:text_name]
+        end
       else
-        # @observation.what matches more than one name
+        # @observation.text_name matches more than one name
         @names = names
         flash[:notice] = 'More than one matching name was found'
-        redirect_to :action => 'multiple_names', :id => @observation, :what => params[:observation][:what]
+        redirect_to :action => 'multiple_names', :id => @observation, :what => params[:observation][:text_name]
       end
     else
       render :action => 'show_observation'

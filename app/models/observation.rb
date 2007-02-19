@@ -27,14 +27,24 @@ class Observation < ActiveRecord::Base
   def touch
     @modified = Time.new
   end
-
+  
+  # Temporary storage for names.  This info really gets handled
+  # by the Name object, but a value may need to be stored temporarily
+  # before the Name object can be created.
+  def text_name=(text_name)
+    @text_name = text_name
+  end
+  
+  # Choose the temporary storage if it exists over the saved name
   def text_name
-    name = self.name
     result = ''
-    if name
-      result = "%s %s" % [name.text_name, name.author]
+    if self.instance_variables.member?('@text_name')
+      result = @text_name
     else
-      result = self.what
+      name = self.name
+      if name
+        result = name.search_name
+      end
     end
     result
   end
@@ -49,7 +59,7 @@ class Observation < ActiveRecord::Base
     if name
       result = name.observation_name
     else
-      result = self.what
+      result = self.text_name
     end
     result
   end
@@ -59,7 +69,7 @@ class Observation < ActiveRecord::Base
     if name
       what = name.observation_name
     else
-      what = self.what
+      what = self.text_name
     end
     if what
       sprintf("%s (%d)", what[0..(MAX_FIELD_LENGTH-1)], self.id)

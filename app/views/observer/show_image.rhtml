@@ -58,12 +58,19 @@
 <p>When: <span class="Data"><%= @image.when %></span></p>
 
 <p>Observations<br/>
-<span class="Data">
-    <% for observation in @image.observations %>
-      <%= link_to(textilize_without_paragraph(h observation.unique_format_name),
-                  :action => 'show_observation', :id => observation.id) %><br/>
+    <% for observation in @image.observations
+      text = '<span class="Data">' + textilize_without_paragraph(h observation.unique_format_name)
+      if observation.notes != ''
+          text += '</span><span id="help_note"><br/>Notes: %s...' % observation.notes[0..15]
+      end
+      len = observation.comments.length
+      if len > 0
+          text += '</span><span id="help_note"<br/>%s comments' % len
+      end
+      text += '</span>' %>
+      <%= link_to(text, :action => 'show_observation', :id => observation.id) %>
+      <br/><br/>
     <% end %>
-</span>
 </p>
 
 <p>Notes:<br/>

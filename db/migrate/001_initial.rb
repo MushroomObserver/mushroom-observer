@@ -1,6 +1,6 @@
 class Initial < ActiveRecord::Migration
-  def up
-    create_table "comments", :force => true do |t|
+  def self.up
+    create_table "comments", :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column "created", :datetime
       t.column "user_id", :integer
       t.column "summary", :string, :limit => 100
@@ -8,7 +8,7 @@ class Initial < ActiveRecord::Migration
       t.column "observation_id", :integer, :default => 0, :null => false
     end
 
-    create_table "images", :force => true do |t|
+    create_table "images", :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column "created", :datetime
       t.column "modified", :datetime
       t.column "content_type", :string, :limit => 100
@@ -19,12 +19,12 @@ class Initial < ActiveRecord::Migration
       t.column "notes", :text
     end
 
-    create_table "images_observations", :id => false, :force => true do |t|
+    create_table "images_observations", :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :id => false, :force => true do |t|
       t.column "image_id", :integer, :default => 0, :null => false
       t.column "observation_id", :integer, :default => 0, :null => false
     end
 
-    create_table "observations", :force => true do |t|
+    create_table "observations", :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column "created", :datetime
       t.column "modified", :datetime
       t.column "when", :date
@@ -37,7 +37,7 @@ class Initial < ActiveRecord::Migration
       t.column "thumb_image_id", :integer
     end
 
-    create_table "users", :force => true do |t|
+    create_table "users", :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column "login", :string, :limit => 80, :default => "", :null => false
       t.column "password", :string, :limit => 40, :default => "", :null => false
       t.column "email", :string, :limit => 80, :default => "", :null => false
@@ -46,6 +46,13 @@ class Initial < ActiveRecord::Migration
       t.column "created", :datetime
       t.column "last_login", :datetime
     end
+    
+    user = User.new
+    user.login = "admin"
+    user.change_password("admin")
+    user.email = "admin@mushroomobserver.org"
+    user.name = "Administrator"
+    user.save
   end
 
   def self.down
