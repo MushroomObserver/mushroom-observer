@@ -19,7 +19,7 @@ class Image < ActiveRecord::Base
 
   def unique_text_name
     obs_names = []
-    self.observations.each {|o| obs_names.push(o.text_name)}
+    self.observations.each {|o| obs_names.push(o.what)}
     title = obs_names.sort.join(' & ')
     if title
       sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
