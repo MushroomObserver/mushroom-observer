@@ -1,5 +1,5 @@
 <% @title = 'Multiple Names Match ' + h(@what)
-   @observation.text_name = @what %>
+   @observation.what = @what %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
 <div id="Title"><%= @title %></div>

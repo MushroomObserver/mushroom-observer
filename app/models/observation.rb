@@ -31,15 +31,23 @@ class Observation < ActiveRecord::Base
   # Temporary storage for names.  This info really gets handled
   # by the Name object, but a value may need to be stored temporarily
   # before the Name object can be created.
-  def text_name=(text_name)
-    @text_name = text_name
+  #
+  # This what= may cause problems with the database migration
+  # RemoveObservationWhat.down, but the name was preserved so
+  # the _form_observations field could remain observation_what
+  # to maintain field completion behavior in various browsers.
+  def what=(what)
+    if self.attributes.keys.member?('what')
+      write_attribute(:what, what)
+    end
+    @what = what
   end
   
   # Choose the temporary storage if it exists over the saved name
-  def text_name
+  def what
     result = ''
-    if self.instance_variables.member?('@text_name')
-      result = @text_name
+    if self.instance_variables.member?('@what')
+      result = @what
     else
       name = self.name
       if name
@@ -50,7 +58,7 @@ class Observation < ActiveRecord::Base
   end
   
   def unique_text_name
-    "%s (%s)" % [self.text_name, self.id]
+    "%s (%s)" % [self.what, self.id]
   end
   
   def base_name
@@ -59,7 +67,7 @@ class Observation < ActiveRecord::Base
     if name
       result = name.observation_name
     else
-      result = self.text_name
+      result = self.what
     end
     result
   end
@@ -69,7 +77,7 @@ class Observation < ActiveRecord::Base
     if name
       what = name.observation_name
     else
-      what = self.text_name
+      what = self.what
     end
     if what
       sprintf("%s (%d)", what[0..(MAX_FIELD_LENGTH-1)], self.id)
