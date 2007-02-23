@@ -89,6 +89,7 @@ class ObserverController < ApplicationController
                                                     :show_name,
                                                     :show_observation,
                                                     :show_original,
+                                                    :show_past_name,
                                                     :show_rss_log,
                                                     :show_species_list,
                                                     :species_lists_by_title])

@@ -10,6 +10,12 @@ More stuff to do with Names
 
 After synonomy - Transfer names from Name, RSS feed.
 
+Split up observer_controller?:
+  user pages
+  non-user pages?
+
+Python transition?
+
 Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
   Add confidence level for a naming
   Add basis for naming (sight, key, references)
