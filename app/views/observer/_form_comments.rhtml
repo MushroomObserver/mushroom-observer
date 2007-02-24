@@ -4,12 +4,12 @@
 <%= hidden_field("comment", "observation_id", :value => observation_id)%>
 <p>
 	<label for="comment_summary">Summary</label><br/>
-	<%= text_field("comment", "summary") %>
+	<%= text_field("comment", "summary", :size => 80) %>
 </p>
 
 <p>
 	<label for="comment_comment">Comment</label><br/>
-	<%= text_area("comment", "comment") %>
+	<%= text_area("comment", "comment", :cols => 80) %>
 </p>
 
 <%= render :partial => 'textilize_help' %>
