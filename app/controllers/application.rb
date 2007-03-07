@@ -6,7 +6,10 @@ CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
 
 class ApplicationController < ActionController::Base
   include LoginSystem
-  model :user
+  
+  # Following was added with the login system, but I commented it out when 'rake test'
+  # gave a warning.  Need to lookup on the web what the change is all about.
+  # model :user
 end
 
 module Enumerable

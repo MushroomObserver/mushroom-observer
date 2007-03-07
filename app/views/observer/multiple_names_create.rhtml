@@ -8,7 +8,7 @@
 Select the intended name.  The number after each name is how many observations are currently using that name.
 </span>
 
-<%= start_form_tag :action => 'construct_observation_with_selected_name', :user_id => @session['user'].id, :what => @what %>
+<% form_tag(:action => 'construct_observation_with_selected_name', :user_id => session['user'].id, :what => @what) do %>
 <br/>
 <% for name in @names %>
     <%= radio_button("observation", 'name_id', name.id) %>
@@ -31,4 +31,4 @@ Select the intended name.  The number after each name is how many observations a
     </td>
 </tr>
 </table>
-<%= end_form_tag %>
+<% end %>

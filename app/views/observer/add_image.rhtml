@@ -2,7 +2,7 @@
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 
-<div id="Title">Add an Image for <%= textilize_without_paragraph(h @observation.unique_format_name) %></div>
+<div id="Title">Add an Image for <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <%= error_messages_for("image") %>
 
@@ -15,7 +15,7 @@ You are also giving us permission to display this image	along side advertisement
 or other fund-raising tools that may be used to support this site.<br/></br/>
 </div>
 
-<%= form_tag({:action => 'upload_image'}, :multipart => true) %>
+<% form_tag({:action => 'upload_image'}, :multipart => true) do %>
 <center><%= submit_tag("Upload") %></center>
 
 <%= hidden_field("observation", "id") %>
@@ -29,4 +29,4 @@ or other fund-raising tools that may be used to support this site.<br/></br/>
 
 <%= render :partial => 'form_images' %>
 
-<%= end_form_tag %>
+<% end %>

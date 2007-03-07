@@ -5,6 +5,6 @@ class SpeciesListTest < Test::Unit::TestCase
 
   # Replace this with your real tests.
   def test_truth
-    assert_kind_of SpeciesList, species_lists(:first)
+    assert_kind_of SpeciesList, @first_species_list
   end
 end

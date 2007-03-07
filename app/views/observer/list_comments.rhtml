@@ -16,7 +16,7 @@
 		            :action => 'show_comment', :id => comment %>: 
 		<% if !observation.nil? %>
 		    <%= link_to sprintf('<span class="ListWhat">%s</span>',
-		                        textilize_without_paragraph(h observation.unique_format_name)),
+		                        textilize_without_paragraph(h(observation.unique_format_name))),
 		              :action => 'show_observation', :id => observation.id %>
 		<% else %>
 			(observation deleted)

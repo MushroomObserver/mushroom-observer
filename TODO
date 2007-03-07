@@ -13,8 +13,9 @@ After synonomy - Transfer names from Name, RSS feed.
 Split up observer_controller?:
   user pages
   non-user pages?
+  email delivery
 
-Python transition?
+Python transition?  Nuvo, Plone, SQLAlchemy
 
 Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
   Add confidence level for a naming

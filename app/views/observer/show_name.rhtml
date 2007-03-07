@@ -2,7 +2,7 @@
 <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @name.text_name) %><br/>
 <%= link_to 'Edit Name', :action => 'edit_name', :id => @name %>
 
-<div id="Title"><%= textilize_without_paragraph(h @name.display_name) %></div>
+<div id="Title"><%= textilize_without_paragraph(h(@name.display_name)) %></div>
 <p>
 	Rank: <%= @name.rank %><br/>
 	Name: <%= @name.text_name %><br/>
@@ -34,7 +34,7 @@
 	      		%><br/>
 	    	</td>
 		    <td width="100%" valign="middle">
-				<span class="ListName"><%= link_to(textilize_without_paragraph(h datum["observation_name"]),
+				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
 			                                        :action => 'show_observation', :id => id) %></span><br/>
 		        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
 		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>

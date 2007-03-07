@@ -1,3 +1,7 @@
-AccountMailer#email_features
+The following new features have been released at the Mushroom Observer website (http://mushroomobserver.org):
 
-Find me in app/views/account_mailer/email_features.rhtml
+A feature
+
+To stop receiving these emails, either login to your Mushroom Observer account and go to the Preferences link, or just click the following URL:
+
+http://localhost:3000/account/no_feature_email/1

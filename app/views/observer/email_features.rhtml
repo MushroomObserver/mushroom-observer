@@ -3,9 +3,9 @@
 Sending to
 <%= (@users.map { |u| u.login }).join(', ') %>
 <br/><br/>
-<%= start_form_tag :action => 'send_feature_email' %>
+<% form_tag(:action => 'send_feature_email') do %>
 <center><%= submit_tag "Send" %></center>
 <br/>
 <label for="feature_email">Feature Email</label><br/>
 <%= text_area 'feature_email', 'content'  %>
-<%= end_form_tag %>
+<% end %>

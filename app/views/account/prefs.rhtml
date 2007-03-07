@@ -1,4 +1,4 @@
-<%= start_form_tag :action=> "prefs" %>
+<% form_tag(:action=> "prefs") do %>
 
 <div title="Change Preferences" id="prefform" class="form">
   <h3>Change Preferences</h3>
@@ -41,4 +41,4 @@ Note that neither of these email features will cause your email address to be di
 <input type="submit" value="Save Prefs" class="primary" />
 <br/><br/>
 
-<%= end_form_tag %>
+<% end %>

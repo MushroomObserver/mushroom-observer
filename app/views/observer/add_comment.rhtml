@@ -1,11 +1,11 @@
 <% @title = 'Add Comment to ' + h(@observation.unique_text_name) %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<div id="Title">Add Comment to <%= textilize_without_paragraph(h @observation.unique_format_name) %></div>
+<div id="Title">Add Comment to <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
-<%= start_form_tag :action => 'save_comment' %>
+<% form_tag(:action => 'save_comment') do %>
 <center><%= submit_tag "Create" %></center>
 
 <%= render :partial => 'form_comments', :locals => { :observation_id => @observation.id }%>
 
-<%= end_form_tag %>
+<% end %>

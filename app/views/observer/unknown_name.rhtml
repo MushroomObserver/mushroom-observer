@@ -10,7 +10,7 @@ If you want to correct the name and resubmit, then change the 'What' field below
 click Save Edits.
 </span>
 
-<%= start_form_tag :action => 'update_observation_with_new_name', :id => @observation, :what => @what %>
+<% form_tag(:action => 'update_observation_with_new_name', :id => @observation, :what => @what) do %>
 <br/>
 <center><%= submit_tag 'Save Edits' %></center>
 <table cellpadding="10">
@@ -31,4 +31,4 @@ click Save Edits.
     </td>
 </tr>
 </table>
-<%= end_form_tag %>
+<% end %>

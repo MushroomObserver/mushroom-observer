@@ -36,7 +36,7 @@ list, create a correct file and select it for upload.
         <p><%= h name_str %><br/>
         <% for name in Name.find_names(name_str) %>
             &nbsp;&nbsp;<%= radio_button("chosen_names", name_str, name.id) %>
-            <%= textilize_without_paragraph(h name.display_name) %> (<%= name.observations.size %>)<br/>
+            <%= textilize_without_paragraph(h(name.display_name)) %> (<%= name.observations.size %>)<br/>
         <% end %>
         </p>
       <% end %>

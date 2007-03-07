@@ -3,10 +3,10 @@
 
 <div id="Title">Editing Name: <%= textilize_without_paragraph(h @name.display_name) %></div>
 
-<%= start_form_tag :action => 'update_name', :id => @name %>
+<% form_tag(:action => 'update_name', :id => @name) do %>
 <br/>
 <center><%= submit_tag 'Save Edits' %></center>
 
 <%= render :partial => 'form_names' %>
 
-<%= end_form_tag %>
+<% end %>

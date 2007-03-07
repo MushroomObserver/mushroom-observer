@@ -26,6 +26,22 @@ CREATE TABLE `images_observations` (
   `observation_id` int(11) NOT NULL default '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `names` (
+  `id` int(11) NOT NULL auto_increment,
+  `created` datetime default NULL,
+  `modified` datetime default NULL,
+  `user_id` int(11) NOT NULL default '0',
+  `version` int(11) NOT NULL default '0',
+  `rank` enum('Form','Variety','Subspecies','Species','Genus','Family','Order','Class','Phyllum','Kingdom','Group') default NULL,
+  `text_name` varchar(100) default NULL,
+  `author` varchar(100) default NULL,
+  `display_name` varchar(200) default NULL,
+  `observation_name` varchar(200) default NULL,
+  `search_name` varchar(200) default NULL,
+  `notes` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE `observations` (
   `id` int(11) unsigned NOT NULL auto_increment,
   `created` datetime default NULL,
@@ -33,10 +49,10 @@ CREATE TABLE `observations` (
   `when` date default NULL,
   `user_id` int(11) default NULL,
   `where` varchar(100) default NULL,
-  `what` varchar(100) default NULL,
   `specimen` tinyint(1) NOT NULL default '0',
   `notes` text,
   `thumb_image_id` int(11) default NULL,
+  `name_id` int(11) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -45,12 +61,30 @@ CREATE TABLE `observations_species_lists` (
   `species_list_id` int(11) NOT NULL default '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `past_names` (
+  `id` int(11) NOT NULL auto_increment,
+  `name_id` int(11) default NULL,
+  `created` datetime default NULL,
+  `modified` datetime default NULL,
+  `user_id` int(11) NOT NULL default '0',
+  `version` int(11) NOT NULL default '0',
+  `rank` enum('Form','Variety','Subspecies','Species','Genus','Family','Order','Class','Phyllum','Kingdom','Group') default NULL,
+  `text_name` varchar(100) default NULL,
+  `author` varchar(100) default NULL,
+  `display_name` varchar(200) default NULL,
+  `observation_name` varchar(200) default NULL,
+  `search_name` varchar(200) default NULL,
+  `notes` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE `rss_logs` (
   `id` int(11) NOT NULL auto_increment,
   `observation_id` int(11) default NULL,
   `species_list_id` int(11) default NULL,
   `modified` datetime default NULL,
   `notes` text,
+  `name_id` int(11) default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -83,7 +117,12 @@ CREATE TABLE `users` (
   `feature_email` tinyint(1) NOT NULL default '1',
   `commercial_email` tinyint(1) NOT NULL default '1',
   `question_email` tinyint(1) NOT NULL default '1',
+  `rows` int(11) default NULL,
+  `columns` int(11) default NULL,
+  `alternate_rows` tinyint(1) NOT NULL default '1',
+  `alternate_columns` tinyint(1) NOT NULL default '1',
+  `vertical_layout` tinyint(1) NOT NULL default '1',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO schema_info (version) VALUES (9)
+INSERT INTO schema_info (version) VALUES (13)

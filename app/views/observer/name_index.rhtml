@@ -3,7 +3,7 @@
 <%
 	for n in @names
 %>
-<%= link_to(textilize_without_paragraph(h n.display_name),
+<%= link_to(textilize_without_paragraph(h(n.display_name)),
             :action => 'show_name', :id => n) %><br/>
 <%
 	end

@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+coprinus_comatus:
+  id: 1
+  name_id: 2
+  created: 2007-02-26 20:47:00
+  modified: 2007-02-26 20:48:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Coprinus comatus
+  display_name: __Coprinus comatus__
+  observation_name: __Coprinus comatus__
+  search_name: Coprinus comatus

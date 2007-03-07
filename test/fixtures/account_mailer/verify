@@ -1,3 +1,5 @@
-AccountMailer#verify
+Hello mary
 
-Find me in app/views/account_mailer/verify.rhtml
+Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
+
+http://localhost:3000/account/verify/2

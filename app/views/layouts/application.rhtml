@@ -7,8 +7,8 @@
 	if CSS.member?(controller.action_name)
 		css = controller.action_name
 	else
-		unless @session['user'].nil?
-        	css = @session['user'].theme
+		unless session['user'].nil?
+        	css = session['user'].theme
 		end
 	end
 	unless CSS.member?(css)
@@ -87,7 +87,7 @@
 								<%= link_to('Comments', :controller => 'observer',
 								            :action => 'list_comments') %>
 								<br/><br/>
-								<% if @session['user'].nil? %>
+								<% if session['user'].nil? %>
 								Account:<br/>
 								&nbsp;&nbsp;<%= link_to('Login', :controller => 'account',
 								                        :action => 'login') %><br/>
@@ -96,14 +96,14 @@
 														:action => 'signup') %>
 								<% else %>
 								Current&nbsp;user:<br/>
-								&nbsp;&nbsp;<%= h(@session['user'].login) %><br/>
+								&nbsp;&nbsp;<%= h(session['user'].login) %><br/>
 								&nbsp;&nbsp;<%= link_to('Preferences',
 								                        :controller => 'account',
 								                        :action => 'prefs') %><br/>
 								&nbsp;&nbsp;<%= link_to('Logout',
 								                        :controller => 'account',
 								                        :action => 'logout') %>
-									<% if @session['user'].id == 0 %>
+									<% if session['user'].id == 0 %>
 										<br/><br/>
 										Admin:<br/>
 										&nbsp;&nbsp;<%= link_to('Users',
@@ -129,13 +129,13 @@
 					</table>
 				</td>
 				<td width=100% valign="top" class="main">
-            		<%= start_form_tag(:action => 'pattern_search',
-            		                   :controller => 'observer', :id => @comment) %>
+            		<% form_tag(:action => 'pattern_search',
+            		                   :controller => 'observer', :id => @comment) do %>
                       Find: <%= text_field("search", "pattern", :size => 10)%>
                       <%= submit_tag 'Observations' %>
                       <%= submit_tag 'Images' %>
                       <%= submit_tag 'Locations' %>
-                    <%= end_form_tag %>
+                    <% end -%>
                     <% if flash[:notice] %>
 					  <%= flash[:notice] %><br/>
 					<% end %>

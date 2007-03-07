@@ -17,7 +17,7 @@
 		| <%= link_to 'Next', :action => 'next_observation', :id => @observation %>
 <%  end %>
 
-<div id="Title"><%= 'Observation: ' + textilize_without_paragraph(h @observation.unique_format_name) %></div>
+<div id="Title"><%= 'Observation: ' + textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <table cellpadding="10">
 <tr>
@@ -77,7 +77,7 @@
 		<% end %>
 		<center>
 	    <% for image in @observation.images %>
-	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + textilize_without_paragraph(h image.unique_format_name),
+	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + textilize_without_paragraph(h(image.unique_format_name)),
 	            :action => 'show_image', :id => image.id) %></p>
 	    <% end %>
 		</center>

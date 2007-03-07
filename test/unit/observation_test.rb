@@ -2,61 +2,53 @@ require File.dirname(__FILE__) + '/../test_helper'
 
 class ObservationTest < Test::Unit::TestCase
   fixtures :observations
+  fixtures :users
+  fixtures :names
 
   def setup
-    @mu = Observation.find(1)
-    @du = Observation.find(2)
+    @cc_obs = Observation.new
+    @cc_obs.user = @mary
+    @cc_obs.where = "Glendale, California"
+    @cc_obs.name = @fungi
+    @cc_obs.notes = "New"
   end
-
-  # Replace this with your real tests.
+  
+  # Add an observation to the database
   def test_create
-    assert_kind_of Observation, @mu
-    assert_equal @minimal_unknown.id, @mu.id
-    assert_equal @minimal_unknown.who, @mu.who
-    assert_equal @minimal_unknown.where, @mu.where
-
-    assert_kind_of Observation, @du
-    assert_equal @detailed_unknown.id, @du.id
-    assert_equal @detailed_unknown.created, @du.created
-    assert_equal @detailed_unknown.modified, @du.modified
-    assert_equal @detailed_unknown.when, @du.when
-    assert_equal @detailed_unknown.who, @du.who
-    assert_equal @detailed_unknown.where, @du.where
-    assert_equal @detailed_unknown.what, @du.what
-    assert_equal @detailed_unknown.specimen, @du.specimen
-    assert_equal @detailed_unknown.notes, @du.notes
+    assert_kind_of Observation, observations(:minimal_unknown)
+    assert_kind_of Observation, @cc_obs
+    assert @cc_obs.save, @detailed_unknown.errors.full_messages.join("; ")
   end
 
   def test_update
-    assert_equal 'Unknown', @du.what
-    @du.what = 'Agaricus augustus'
-    assert @du.save, @du.errors.full_messages.join("; ")
-    @du.reload
-    assert_equal 'Agaricus augustus', @du.what
+    @cc_obs.save
+    assert_equal @fungi, @cc_obs.name
+    @cc_obs.name = @coprinus_comatus
+    assert @cc_obs.save, @cc_obs.errors.full_messages.join("; ")
+    @cc_obs.reload
+    assert_equal @coprinus_comatus.search_name, @cc_obs.what
   end
 
+  # Test setting a name using a string
+  
   def test_validate
-    assert_equal @minimal_unknown.who, @mu.who
-    @mu.who = nil
-    @mu.where = nil
-    assert !@mu.save
-    assert_equal 3, @mu.errors.count
-    assert_equal "can't be blank", @mu.errors.on(:who)
-    assert_equal "can't be blank", @mu.errors.on(:where)
-    assert_equal "at least one of Notes, What or Image must be provided",
-                 @mu.errors.on(:notes)
+    @cc_obs.user = nil
+    @cc_obs.where = nil
+    assert !@cc_obs.save
+    assert_equal 2, @cc_obs.errors.count
+    assert_equal "can't be blank", @cc_obs.errors.on(:user)
+    assert_equal "can't be blank", @cc_obs.errors.on(:where)
   end
 
   def test_destroy
-    @mu.destroy
-    assert_raise(ActiveRecord::RecordNotFound) { Observation.find(@mu.id) }
-    @du.destroy
-    assert_raise(ActiveRecord::RecordNotFound) { Observation.find(@du.id) }
+    @cc_obs.save
+    @cc_obs.destroy
+    assert_raise(ActiveRecord::RecordNotFound) { Observation.find(@cc_obs.id) }
   end
 
   def test_all_observations_order
-    obs = Observation.all_observations
-    assert_equal @older_than_dirt.id, obs[-1].id
-    assert_equal @dirt.id, obs[-2].id
+    obs = Observation.find(:all, :order => "id")
+    assert_equal @coprinus_comatus_obs.id, obs[2].id
+    assert_equal @detailed_unknown.id, obs[1].id
   end
 end

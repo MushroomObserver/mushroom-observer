@@ -1,0 +1,25 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+fungi:
+  id: 1
+  created: 2007-02-26 17:20:00
+  modified: 2007-02-26 17:20:00
+  user_id: 1
+  version: 0
+  rank: Kingdom
+  text_name: Fungi
+  display_name: Kingdom of __Fungi__
+  observation_name: __Fungi sp.__
+  search_name: Fungi sp.
+
+coprinus_comatus:
+  id: 2
+  created: 2007-02-27 20:47:00
+  modified: 2007-02-27 20:48:00
+  user_id: 1
+  version: 1
+  rank: Species
+  text_name: Coprinus comatus
+  author: (O.F. Müll.) Pers.
+  display_name: __Coprinus comatus__ (O.F. Müll.) Pers.
+  observation_name: __Coprinus comatus__ (O.F. Müll.) Pers.
+  search_name: Coprinus comatus (O.F. Müll.) Pers.

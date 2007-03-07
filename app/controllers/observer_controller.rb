@@ -64,6 +64,7 @@ end
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:ask_webmaster_question,
                                                     :color_themes,
+                                                    :do_load_test,
                                                     :how_to_use,
                                                     :images_by_title,
                                                     :index,
@@ -78,7 +79,6 @@ class ObserverController < ApplicationController
                                                     :next_image,
                                                     :next_observation,
                                                     :observations_by_name,
-                                                    :observation_index,
                                                     :pattern_search,
                                                     :prev_image,
                                                     :prev_observation,
@@ -106,9 +106,9 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> list_comments.rhtml
   def list_comments
-    @session['observation_ids'] = nil
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['observation_ids'] = nil
+    session['observation'] = nil
+    session['image_ids'] = nil
     store_location
     @comment_pages, @comments = paginate(:comments,
                                      :order => "'created' desc",
@@ -116,7 +116,7 @@ class ObserverController < ApplicationController
   end
 
   def add_comment
-    if verify_user(@session['user'])
+    if verify_user(session['user'])
       @comment = Comment.new
       @observation = Observation.find(params[:id])
     end
@@ -132,7 +132,7 @@ class ObserverController < ApplicationController
   # Here's where params is used to create the comment and
   # the observation is recovered from session.
   def save_comment
-    user = @session['user']
+    user = session['user']
     if verify_user(user)
       @comment = Comment.new(params[:comment])
       @comment.created = Time.now
@@ -165,7 +165,7 @@ class ObserverController < ApplicationController
       if @comment.update_attributes(params[:comment])
         if @comment.save
           @comment.observation.log(sprintf('Comment, %s, updated by %s',
-                                           @comment.summary, @session['user'].login), true)
+                                           @comment.summary, session['user'].login), true)
           flash[:notice] = 'Comment was successfully updated.'
         end
         redirect_to :action => 'show_comment', :id => @comment
@@ -183,7 +183,7 @@ class ObserverController < ApplicationController
     if check_user_id(@comment.user_id)
       id = @comment.observation_id
       @comment.observation.log(sprintf('Comment, %s, destroyed by %s',
-                                       @comment.summary, @session['user'].login), false)
+                                       @comment.summary, session['user'].login), false)
       @comment.destroy
       redirect_to :action => 'show_observation', :id => id
     else
@@ -195,10 +195,10 @@ class ObserverController < ApplicationController
   def list_observations
     store_location
     @layout = calc_layout_params
-    @session['checklist_source'] = nil # Meaning all species
-    @session['observation_ids'] = self.query_ids("select id, `when` from observations order by `when` desc")
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['checklist_source'] = nil # Meaning all species
+    session['observation_ids'] = self.query_ids("select id, `when` from observations order by `when` desc")
+    session['observation'] = nil
+    session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations,
                                                  :order => "`when` desc",
                                                  :per_page => @layout["count"])
@@ -208,10 +208,10 @@ class ObserverController < ApplicationController
   def observations_by_name
     store_location
     @layout = calc_layout_params
-    @session['checklist_source'] = nil # Meaning all species
-    @session['observation_ids'] = self.query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['checklist_source'] = nil # Meaning all species
+    session['observation_ids'] = self.query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
+    session['observation'] = nil
+    session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations, :include => "name",
                                                  :order => "names.search_name asc, `when` desc",
                                                  :per_page => @layout["count"])
@@ -224,9 +224,9 @@ class ObserverController < ApplicationController
     @layout = calc_layout_params
     search_data = params[:search]
     if search_data
-      @session["pattern"] = search_data["pattern"]
+      session["pattern"] = search_data["pattern"]
     end
-    pattern = @session["pattern"]
+    pattern = session["pattern"]
     if pattern.nil?
       pattern = ''
     end
@@ -234,9 +234,9 @@ class ObserverController < ApplicationController
     @search = Search.new
     @search.pattern = pattern
     if params[:commit]
-      @session["search_type"] = params[:commit]
+      session["search_type"] = params[:commit]
     end
-    case @session["search_type"]
+    case session["search_type"]
     when 'Images'
       image_search(pattern)
     when 'Locations'
@@ -251,10 +251,10 @@ class ObserverController < ApplicationController
     query = "select images.*, names.search_name from images, images_observations, observations, names
       where images.id = images_observations.image_id and images_observations.observation_id = observations.id
       and observations.name_id = names.id and %s order by names.search_name, `when` desc" % conditions
-    @session['checklist_source'] = 0 # Meaning use observation_ids
-    @session['observation_ids'] = []
-    @session['observation'] = nil
-    @session['image_ids'] = self.query_ids(query)
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = []
+    session['observation'] = nil
+    session['image_ids'] = self.query_ids(query)
     @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
     render :action => 'list_images'
   end
@@ -262,10 +262,10 @@ class ObserverController < ApplicationController
   def location_search(pattern)
     conditions = sprintf("`where` like '%s%%'", pattern.gsub(/[*']/,"%"))
     query = "select o.id from observations o where %s order by `when` desc" % conditions
-    @session['checklist_source'] = 0 # Meaning use observation_ids
-    @session['observation_ids'] = self.query_ids(query)
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = self.query_ids(query)
+    session['observation'] = nil
+    session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations,
                                                  :order => "`when` desc",
                                                  :conditions => conditions,
@@ -277,10 +277,10 @@ class ObserverController < ApplicationController
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
     query = "select o.id, names.search_name from observations o, names
              where o.name_id = names.id and %s order by names.search_name asc, `when` desc" % conditions
-    @session['checklist_source'] = 0 # Meaning use observation_ids
-    @session['observation_ids'] = self.query_ids(query)
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = self.query_ids(query)
+    session['observation'] = nil
+    session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations, :include => "name",
                                                  :order => "names.search_name asc, `when` desc",
                                                  :conditions => conditions,
@@ -288,33 +288,21 @@ class ObserverController < ApplicationController
     render :action => 'list_observations'
   end
   
-  # observation_index.rhtml
-  def observation_index
-    store_location
-    @data = Observation.connection.select_all("select o.id, n.observation_name, o.when, u.name, u.login" +
-                                              " from observations o, users u, names n" +
-                                              " where o.user_id = u.id and n.id = o.name_id" +
-                                              " order by n.observation_name asc, 'when' desc")
-    # Moved the calculation of observation_ids into the view since it's embedded in @data
-    @session['observation'] = nil
-    @session['image_ids'] = nil
-  end
-
   # list_observations.rhtml -> show_observation.rhtml
   # Setup session to have the right observation.
   def show_observation
     store_location
     @observation = Observation.find(params[:id])
-    @session['observation'] = params[:id].to_i
-    @session['image_ids'] = nil
+    session['observation'] = params[:id].to_i
+    session['image_ids'] = nil
   end
 
   # left-hand panel -> create_observation.rhtml
   def create_observation
-    if verify_user(@session['user'])
-      @session['observation_ids'] = nil
-      @session['observation'] = nil
-      @session['image_ids'] = nil
+    if verify_user(session['user'])
+      session['observation_ids'] = nil
+      session['observation'] = nil
+      session['image_ids'] = nil
       @observation = Observation.new
       # Removed when Observation.what was removed since it causes the
       # What field to get filled in with Fungi sp.  I think this was
@@ -325,8 +313,8 @@ class ObserverController < ApplicationController
   
   # construct_observation.rhtml -> multiple_names_create.rhtml
   def multiple_names_create
-    args = @session[:args]
-    @session[:args] = nil
+    args = session[:args]
+    session[:args] = nil
     @observation = Observation.new(args)
     if check_user_id(@observation.user_id)
       @what = args[:what]
@@ -354,12 +342,12 @@ class ObserverController < ApplicationController
   # with the rest of the commonality between construct_observation and
   # update_observation.
   def unknown_name_create
-    args = @session[:args]
-    @session[:args] = nil
+    args = session[:args]
+    session[:args] = nil
     @observation = Observation.new(args)
     if check_user_id(@observation.user_id)
       @what = args[:what]
-      @session['observation'] = params[:id].to_i
+      session['observation'] = params[:id].to_i
     else 
       redirect_to :action => 'show_observation', :id => params[:id]
     end
@@ -387,7 +375,7 @@ class ObserverController < ApplicationController
 
   # create_observation.rhtml -> list_observations.rhtml
   def construct_observation
-    user = @session['user']
+    user = session['user']
     if verify_user(user)
       @observation = Observation.new(params[:observation])
       now = Time.now
@@ -403,7 +391,7 @@ class ObserverController < ApplicationController
       if names.length == 1
         @observation.name = names[0]
         if @observation.save
-          @observation.log('Observation created by ' + @session['user'].login, true)
+          @observation.log('Observation created by ' + session['user'].login, true)
           flash[:notice] = 'Observation was successfully created.'
           redirect_to :action => 'show_observation', :id => @observation
         else
@@ -413,7 +401,7 @@ class ObserverController < ApplicationController
         # @observation.what has new name
         args = params[:observation]
         args[:user_id] = user.id
-        @session[:args] = params[:observation]
+        session[:args] = params[:observation]
         if @observation.what == ''
           redirect_to :action => 'create_observation'
         else
@@ -424,7 +412,7 @@ class ObserverController < ApplicationController
         @names = names
         args = params[:observation]
         args[:user_id] = user.id
-        @session[:args] = params[:observation]
+        session[:args] = params[:observation]
         flash[:notice] = 'More than one matching name was found'
         redirect_to :action => 'multiple_names_create'
       end
@@ -436,7 +424,7 @@ class ObserverController < ApplicationController
   def edit_observation
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
-      @session['observation'] = params[:id].to_i
+      session['observation'] = params[:id].to_i
     else 
       render :action => 'show_observation'
     end
@@ -448,7 +436,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       @what = params[:what]
       @names = Name.find_names(@what)
-      @session['observation'] = params[:id].to_i
+      session['observation'] = params[:id].to_i
     else 
       render :action => 'show_observation'
     end
@@ -472,7 +460,7 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     @what = params[:what]
     if check_user_id(@observation.user_id)
-      @session['observation'] = params[:id].to_i
+      session['observation'] = params[:id].to_i
     else 
       render :action => 'show_observation'
     end
@@ -519,7 +507,7 @@ class ObserverController < ApplicationController
           # @observation.touch
           @observation.save
 
-          @observation.log('Observation updated by ' + @session['user'].login,
+          @observation.log('Observation updated by ' + session['user'].login,
                            params[:log_change][:checked] == '1')
 
           flash[:notice] = 'Observation was successfully updated.'
@@ -550,9 +538,9 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       for l in @observation.species_lists
-        l.log(sprintf('Observation, %s, destroyed by %s', @observation.unique_text_name, @observation.id, @session['user'].login))
+        l.log(sprintf('Observation, %s, destroyed by %s', @observation.unique_text_name, @observation.id, session['user'].login))
       end
-      @observation.orphan_log('Observation destroyed by ' + @session['user'].login)
+      @observation.orphan_log('Observation destroyed by ' + session['user'].login)
       @observation.comments.each {|c| c.destroy }
       @observation.destroy
       redirect_to :action => 'list_observations'
@@ -563,7 +551,7 @@ class ObserverController < ApplicationController
 
   def prev_observation
     @observation = Observation.find(params[:id])
-    obs = @session['observation_ids']
+    obs = session['observation_ids']
     index = obs.index(params[:id].to_i)
     if index.nil? or obs.nil? or obs.length == 0
       index = 0
@@ -579,7 +567,7 @@ class ObserverController < ApplicationController
 
   def next_observation
     @observation = Observation.find(params[:id])
-    obs = @session['observation_ids']
+    obs = session['observation_ids']
     index = obs.index(params[:id].to_i)
     if index.nil? or obs.nil? or obs.length == 0
       index = 0
@@ -598,10 +586,10 @@ class ObserverController < ApplicationController
 
   # Various -> list_images.rhtml
   def list_images
-    @session['checklist_source'] = nil # Meaning all species
-    @session['observation_ids'] = []
-    @session['observation'] = nil
-    @session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
+    session['checklist_source'] = nil # Meaning all species
+    session['observation_ids'] = []
+    session['observation'] = nil
+    session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
     
     store_location
     @layout = calc_layout_params
@@ -612,10 +600,10 @@ class ObserverController < ApplicationController
 
   # images_by_title.rhtml
   def images_by_title
-    @session['checklist_source'] = nil # Meaning all species
-    @session['observation_ids'] = nil
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['checklist_source'] = nil # Meaning all species
+    session['observation_ids'] = nil
+    session['observation'] = nil
+    session['image_ids'] = nil
     store_location
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
@@ -650,7 +638,7 @@ class ObserverController < ApplicationController
         @image.modified = Time.now
         @image.save
         for o in @image.observations
-          o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @image.id, @session['user'].login), true)
+          o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @image.id, session['user'].login), true)
         end
         flash[:notice] = 'Image was successfully updated.'
         redirect_to :action => 'show_image', :id => @image
@@ -669,7 +657,7 @@ class ObserverController < ApplicationController
     if check_user_id(@image.user_id)
       image_name = @image.unique_text_name
       for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
-        observation.log(sprintf('Image, %s, destroyed by %s', image_name, @session['user'].login), false)
+        observation.log(sprintf('Image, %s, destroyed by %s', image_name, session['user'].login), false)
         observation.thumb_image_id = nil
         observation.save
       end
@@ -685,7 +673,7 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       @image = Image.new
-      @image.copyright_holder = @session['user'].legal_name
+      @image.copyright_holder = session['user'].legal_name
       @layout = calc_layout_params
       @image_pages, @images = paginate(:images,
                                        :order => "'when' desc",
@@ -708,20 +696,24 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       @image = Image.new
-      @image.copyright_holder = @session['user'].legal_name
+      @image.copyright_holder = session['user'].legal_name
     else
       render :action => 'show_observation'
     end
   end
 
-  # test method for debugging image loading
+  # test method for whatever
   def do_load_test
     now = Time.now
-    image_field = params[:image][:image]
-    logger.warn(sprintf("  *** start %s: %s", now, image_field))
-    content_type = image_field.content_type.chomp
-    @img = image_field.read
-    logger.warn(sprintf("  *** end %s: %s", now, Time.now))
+    params.each do |key, value|
+      logger.warn(sprintf("params[%s] = %s" % [key, value]))
+    end
+    thing = session.hash
+    logger.warn(sprintf("thing (a %s): %s" % [thing.class, thing]))
+    for m in session.methods.sort
+      logger.warn("  %s" % m)
+    end
+    logger.warn(session.to_yaml)
     render :action => 'load_test'
   end
 
@@ -730,7 +722,7 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       @image = Image.new
-      @image.copyright_holder = @session['user'].legal_name
+      @image.copyright_holder = session['user'].legal_name
     else
       render :action => 'show_observation'
     end
@@ -742,10 +734,10 @@ class ObserverController < ApplicationController
       @image = Image.new(args)
       @image.created = Time.now
       @image.modified = @image.created
-      @image.user = @session['user']
+      @image.user = session['user']
       if @image.save
         if @image.save_image
-          @observation.log(sprintf('Image, %s, created by %s', @image.unique_text_name, @session['user'].login), true)
+          @observation.log(sprintf('Image, %s, created by %s', @image.unique_text_name, session['user'].login), true)
           @observation.add_image(@image)
           @observation.save
         else
@@ -782,7 +774,7 @@ class ObserverController < ApplicationController
           if do_it == 'yes'
             image = @observation.remove_image_by_id(image_id)
             if !image.nil?
-              @observation.log(sprintf('Image, %s, removed by %s', image.unique_text_name, @session['user'].login), false)
+              @observation.log(sprintf('Image, %s, removed by %s', image.unique_text_name, session['user'].login), false)
             end
           end
         end
@@ -798,7 +790,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, @session['user'].login), true)
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, session['user'].login), true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end
@@ -810,7 +802,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, @session['user'].login), true)
+        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, session['user'].login), true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end
@@ -818,17 +810,17 @@ class ObserverController < ApplicationController
 
   # deprecated along with manage_images
   def save_image
-    @observation = @session['observation']
+    @observation = session['observation']
     logger.error("save_image has been deprecated")
     flash[:notice] = 'save_image has been deprecated'
     redirect_to(:action => 'show_observation', :id => @observation)
   end
 
   def calc_checklist(id)
-    source = @session['checklist_source']
-    logger.warn("calc_checklist: now: %s, prev: %s" % [source, @session['prev_checklist_source']])
+    source = session['checklist_source']
+    logger.warn("calc_checklist: now: %s, prev: %s" % [source, session['prev_checklist_source']])
     if source == 0 # Use observation_ids
-      ob_ids = @session['observation_ids']
+      ob_ids = session['observation_ids']
       if ob_ids
         checklist = {}
         for o in ob_ids
@@ -841,14 +833,14 @@ class ObserverController < ApplicationController
             checklist[[name.observation_name, name.id.to_s]] = true
           end
         end
-        @session['checklist'] = checklist.keys.sort
+        session['checklist'] = checklist.keys.sort
       end
     else
       if source.nil?
         query = "select observation_name, id from names order by observation_name"
       else 
         if source == id
-          source = @session['prev_checklist_source'] || source
+          source = session['prev_checklist_source'] || source
         end
         query = "select distinct names.observation_name, names.id from names, observations, observations_species_lists
                  where observations_species_lists.species_list_id = %s
@@ -860,13 +852,13 @@ class ObserverController < ApplicationController
       for d in data
         list.push([d['observation_name'], d['id']])
       end
-      @session['checklist'] = list
+      session['checklist'] = list
     end
   end
     
   # left-hand panel -> create_species_list.rhtml
   def create_species_list
-    user = @session['user']
+    user = session['user']
     if verify_user(user)
       read_session
       calc_checklist(nil)
@@ -880,12 +872,12 @@ class ObserverController < ApplicationController
     store_location
     id = params[:id]
     @species_list = SpeciesList.find(id)
-    @session[:species_list] = @species_list
-    if @session['checklist_source'] != id
-      @session['prev_checklist_source'] = @session['checklist_source']
-      @session['checklist_source'] = id
+    session[:species_list] = @species_list
+    if session['checklist_source'] != id
+      session['prev_checklist_source'] = session['checklist_source']
+      session['checklist_source'] = id
     end
-    logger.warn("show_species_list: now: %s, prev: %s" % [id, @session['prev_checklist_source']])
+    logger.warn("show_species_list: now: %s, prev: %s" % [id, session['prev_checklist_source']])
   end
 
   # Needs both a species_list and an observation.
@@ -912,9 +904,9 @@ class ObserverController < ApplicationController
   
   # left-hand panel -> list_species_lists.rhtml
   def list_species_lists
-    @session['observation_ids'] = nil
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['observation_ids'] = nil
+    session['observation'] = nil
+    session['image_ids'] = nil
     store_location
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc, 'id' desc",
@@ -925,7 +917,7 @@ class ObserverController < ApplicationController
   def destroy_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
-      @species_list.orphan_log('Species list destroyed by ' + @session['user'].login)
+      @species_list.orphan_log('Species list destroyed by ' + session['user'].login)
       @species_list.destroy
       redirect_to :action => 'list_species_lists'
     else
@@ -935,29 +927,29 @@ class ObserverController < ApplicationController
 
   # species_lists_by_title.rhtml
   def species_lists_by_title
-    @session['observation_ids'] = nil
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['observation_ids'] = nil
+    session['observation'] = nil
+    session['image_ids'] = nil
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
   end
 
   def read_session
     # Pull all the state out of the session and clean out the session
-    @checklist_names = @session['checklist_names'] || {}
-    @session['checklist_names'] = nil
-    @species_list = @session['species_list']
-    @session['species_list'] = nil
-    @list_members = @session['list_members']
-    @session['list_members'] = nil
-    @new_names = @session['new_names']
-    @session['new_names'] = nil
-    @multiple_names = @session['multiple_names']
-    @session['multiple_names'] = nil
-    @member_notes = @session['member_notes']
-    @session['member_notes'] = nil
-    @names_only = @session['names_only']
-    @session['names_only'] = nil
+    @checklist_names = session['checklist_names'] || {}
+    session['checklist_names'] = nil
+    @species_list = session['species_list']
+    session['species_list'] = nil
+    @list_members = session['list_members']
+    session['list_members'] = nil
+    @new_names = session['new_names']
+    session['new_names'] = nil
+    @multiple_names = session['multiple_names']
+    session['multiple_names'] = nil
+    @member_notes = session['member_notes']
+    session['member_notes'] = nil
+    @names_only = session['names_only']
+    session['names_only'] = nil
   end
   
   # list_species_list.rhtml, show_species_list.rhtml -> edit_species_list.rhtml
@@ -1030,7 +1022,7 @@ class ObserverController < ApplicationController
         end
       end
     else
-      user = @session['user']
+      user = session['user']
       if verify_user(user)
         args["created"] = now
         args["modified"] = now
@@ -1047,16 +1039,16 @@ class ObserverController < ApplicationController
     if args
       # Store all the state in the session since we can't put it in the database yet
       # and it's too awkward to pass through the URL effectively
-      @session['species_list'] = SpeciesList.new(args)
-      @session['list_members'] = sorter.all_name_strs.join("\r\n")
-      @session['checklist_names'] = names
-      @session['new_names'] = sorter.new_name_strs.uniq
-      @session['multiple_names'] = sorter.multiple_name_strs.uniq
-      @session['member_notes'] = notes
+      session['species_list'] = SpeciesList.new(args)
+      session['list_members'] = sorter.all_name_strs.join("\r\n")
+      session['checklist_names'] = names
+      session['new_names'] = sorter.new_name_strs.uniq
+      session['multiple_names'] = sorter.multiple_name_strs.uniq
+      session['member_notes'] = notes
       if names_only
-        @session['names_only'] = ["true"]
+        session['names_only'] = ["true"]
       else
-        @session['names_only'] = ["false"]
+        session['names_only'] = ["false"]
       end
     end
     redirect_to :action => action, :id => id
@@ -1122,7 +1114,7 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> manage_species_lists.rhtml
   def manage_species_lists
-    user = @session['user']
+    user = session['user']
     if verify_user(user)
       @observation = Observation.find(params[:id])
     end
@@ -1139,16 +1131,16 @@ class ObserverController < ApplicationController
   end
   
   def ask_webmaster_question
-    @user = @session['user']
+    @user = session['user']
   end
   
   def send_webmaster_question
-    sender = @params['user']['email']
+    sender = params['user']['email']
     if sender.nil? or sender.strip == ''
       flash[:notice] = "You must provide a return address."
       redirect_to :action => 'ask_webmaster_question'
     else
-      AccountMailer.deliver_webmaster_question(@params['user']['email'], @params['question']['content'])
+      AccountMailer.deliver_webmaster_question(params['user']['email'], params['question']['content'])
       flash[:notice] = "Delivered question or comment."
       redirect_back_or_default :action => "list_rss_logs"
     end
@@ -1167,14 +1159,14 @@ class ObserverController < ApplicationController
   def test_feature_email
     users = User.find(:all, :conditions => "feature_email=1")
     user = users[1]
-    email = AccountMailer.create_email_features(user, @params['feature_email']['content'])
+    email = AccountMailer.create_email_features(user, params['feature_email']['content'])
     render(:text => "<pre>" + email.encoded + "</pre>")
   end
   
   def send_feature_email
     users = User.find(:all, :conditions => "feature_email=1")
     for user in users
-      AccountMailer.deliver_email_features(user, @params['feature_email']['content'])
+      AccountMailer.deliver_email_features(user, params['feature_email']['content'])
     end
     flash[:notice] = "Delivered feature mail."
     redirect_to :action => 'users_by_name'
@@ -1189,17 +1181,17 @@ class ObserverController < ApplicationController
   end
   
   def test_question
-    sender = @session['user']
+    sender = session['user']
     observation = Observation.find(params['id'])
-    question = @params['question']['content']
+    question = params['question']['content']
     email = AccountMailer.create_question(sender, observation, question)
     render(:text => "<pre>" + email.encoded + "</pre>")
   end
   
   def send_question
-    sender = @session['user']
+    sender = session['user']
     observation = Observation.find(params['id'])
-    question = @params['question']['content']
+    question = params['question']['content']
     AccountMailer.deliver_question(sender, observation, question)
     flash[:notice] = "Delivered question."
     redirect_to :action => 'show_observation', :id => observation
@@ -1214,24 +1206,24 @@ class ObserverController < ApplicationController
   end
   
   def test_commercial_inquiry
-    sender = @session['user']
+    sender = session['user']
     image = Image.find(params['id'])
-    commercial_inquiry = @params['commercial_inquiry']['content']
+    commercial_inquiry = params['commercial_inquiry']['content']
     email = AccountMailer.create_commercial_inquiry(sender, image, commercial_inquiry)
     render(:text => "<pre>" + email.encoded + "</pre>")
   end
   
   def send_commercial_inquiry
-    sender = @session['user']
+    sender = session['user']
     image = Image.find(params['id'])
-    commercial_inquiry = @params['commercial_inquiry']['content']
+    commercial_inquiry = params['commercial_inquiry']['content']
     AccountMailer.deliver_commercial_inquiry(sender, image, commercial_inquiry)
     flash[:notice] = "Delivered commercial inquiry."
     redirect_to :action => 'show_image', :id => image
   end
 
   def rss
-    @headers["Content-Type"] = "application/xml" 
+    headers["Content-Type"] = "application/xml" 
     @logs = RssLog.find(:all, :order => "'modified' desc",
                         :conditions => "datediff(now(), modified) <= 31")
     render_without_layout
@@ -1241,12 +1233,12 @@ class ObserverController < ApplicationController
   def list_rss_logs
     store_location
     @layout = calc_layout_params
-    @session['checklist_source'] = nil # Meaning all species
+    session['checklist_source'] = nil # Meaning all species
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
             "modified is not null order by 'modified' desc"
-    @session['observation_ids'] = self.query_ids(query)
-    @session['observation'] = nil
-    @session['image_ids'] = nil
+    session['observation_ids'] = self.query_ids(query)
+    session['observation'] = nil
+    session['image_ids'] = nil
     @rss_log_pages, @rss_logs = paginate(:rss_log,
                                          :order => "'modified' desc",
                                          :per_page => @layout["count"])
@@ -1261,7 +1253,7 @@ class ObserverController < ApplicationController
     current_image_id = params[:id].to_i
     (image_ids, current_observation) = current_image_state
     if image_ids # nil value means it wasn't set and the session data doesn't have anything to help
-      obs_ids = @session['observation_ids']
+      obs_ids = session['observation_ids']
       if image_ids == [] # current image list is empty, try for the next
         image_ids, current_observation = next_image_list(current_observation, obs_ids)
       end
@@ -1282,8 +1274,8 @@ class ObserverController < ApplicationController
         end
       end
     end
-    @session['image_ids'] = image_ids
-    @session['observation'] = current_observation
+    session['image_ids'] = image_ids
+    session['observation'] = current_observation
     redirect_to :action => 'show_image', :id => current_image_id
   end
   
@@ -1291,7 +1283,7 @@ class ObserverController < ApplicationController
     current_image_id = params[:id].to_i
     (image_ids, current_observation) = current_image_state
     if image_ids # nil value means it wasn't set and the session data doesn't have anything to help
-      obs_ids = @session['observation_ids']
+      obs_ids = session['observation_ids']
       if image_ids == [] # current image list is empty, try for the next
         image_ids, current_observation = prev_image_list(current_observation, obs_ids)
       end
@@ -1312,8 +1304,8 @@ class ObserverController < ApplicationController
         end
       end
     end
-    @session['image_ids'] = image_ids
-    @session['observation'] = current_observation
+    session['image_ids'] = image_ids
+    session['observation'] = current_observation
     redirect_to :action => 'show_image', :id => current_image_id
   end
 
@@ -1348,14 +1340,14 @@ class ObserverController < ApplicationController
                                               " order by o.when desc")
     observation_ids = []
     @data.each { |d| observation_ids.push(d["id"].to_i) }
-    @session['checklist_source'] = 0 # Meaning use observation_ids
-    @session['observation_ids'] = observation_ids
-    @session['image_ids'] = nil
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = observation_ids
+    session['image_ids'] = nil
   end
   
   # show_name.rhtml -> edit_name.rhtml
   def edit_name
-    user = @session['user']
+    user = session['user']
     if verify_user(user)
       @name = Name.find(params[:id])
     else
@@ -1365,7 +1357,7 @@ class ObserverController < ApplicationController
   # edit_name.rhtml -> show_name.rhtml
   # Updates modified and saves changes
   def update_name
-    user = @session['user']
+    user = session['user']
     if verify_user(user)
       name = Name.find(params[:id])
       past_name = PastName.make_past_name(name)
@@ -1390,7 +1382,7 @@ class ObserverController < ApplicationController
   # name_index.rhtml
   def name_index
     store_location
-    @session['checklist_source'] = nil # Meaning all species
+    session['checklist_source'] = nil # Meaning all species
     @names = Name.find(:all, :order => "'text_name' asc, 'author' asc")
   end
 
@@ -1412,14 +1404,14 @@ class ObserverController < ApplicationController
   # Get initial image_ids and observation_id
   helper_method :current_image_state
   def current_image_state
-    obs_ids = @session['observation_ids']
-    observation_id = @session['observation']
+    obs_ids = session['observation_ids']
+    observation_id = session['observation']
     if observation_id.nil? and obs_ids
       if obs_ids.length > 0
         observation_id = obs_ids[0]
       end
     end
-    image_ids = @session['image_ids']
+    image_ids = session['image_ids']
     if image_ids.nil? and observation_id
       images = Observation.find(observation_id).images
       image_ids = []
@@ -1516,8 +1508,8 @@ class ObserverController < ApplicationController
 
   helper_method :check_permission
   def check_permission(user_id)
-    user = @session['user']
-    !user.nil? && user.verified && ((user_id == @session['user'].id) || (@session['user'].id == 0))
+    user = session['user']
+    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
   end
   
   helper_method :calc_color
@@ -1558,7 +1550,7 @@ class ObserverController < ApplicationController
     result["alternate_rows"] = true
     result["alternate_columns"] = true
     result["vertical_layout"] = true
-    user = @session['user']
+    user = session['user']
     if user
       result["rows"] = user.rows if user.rows
       result["columns"] = user.columns if user.columns
@@ -1582,8 +1574,8 @@ class ObserverController < ApplicationController
 
   def verify_user(user)
     result = false
-    if @session['user'].verified.nil?
-      redirect_to :controller => 'account', :action=> 'reverify', :id => @session['user'].id
+    if session['user'].verified.nil?
+      redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id
     else
       result = true
     end

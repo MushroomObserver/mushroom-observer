@@ -10,11 +10,11 @@ a really great idea.<br/>
 Nathan Wilson<br/>
 Mushroom Observer WebMaster<br/>
 <br/>
-<%= start_form_tag :action => 'send_webmaster_question' %>
+<% form_tag(:action => 'send_webmaster_question') do %>
 <center><%= submit_tag "Send" %></center>
 <br/>
 <label for="user_email">Your Email address:</label><br/>
 <%= text_field "user", "email", :size => 60 %><br/><br/>
 <label for="question_content">Send a Question to the Site Designer</label><br/>
 <%= text_area 'question', 'content'  %>
-<%= end_form_tag %>
+<% end %>

@@ -1,16 +1,27 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-bob:
-  id: 1000001
-  login: bob
-  password: 9a91e1d8d95b6315991a88121bb0aa9f03ba0dfc # test
-  
-existingbob:
-  id: 1000002
-  login: existingbob
-  password: 9a91e1d8d95b6315991a88121bb0aa9f03ba0dfc # test
-  
-longbob:
-  id: 1000003
-  login: longbob
-  password: 8e9b1a9a38e66ca572a5e8fdac8e256848842dfa # longtest
+# Rolf is an experienced user
+rolf:
+  id: 1
+  login: rolf
+  name: Rolf Singer
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  email: rolf@collectivesource.com
+  verified: 2006-03-02 21:14:00
+
+# Mary has no images
+mary:
+  id: 2
+  login: mary
+  name: Mary Newbie
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  email: mary@collectivesource.com
+  verified: 2006-03-02 21:14:00
+
+# Junk gets denied
+junk:
+  id: 3
+  login: junk
+  name: Junk Box
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  email: junk@collectivesource.com

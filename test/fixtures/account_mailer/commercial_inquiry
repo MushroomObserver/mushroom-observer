@@ -1,3 +1,15 @@
-AccountMailer#commercial_inquiry
+Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following commercial inquiry about your image,  (3) (http://localhost:3000/observer/show_image/3):
 
-Find me in app/views/account_mailer/commercial_inquiry.rhtml
+Did test_commercial_inquiry work?
+
+It is entirely up to you whether you want to reply by emailing directly back to them.
+
+--------------------------------------------------------------------------------------------------
+
+If you feel the sender of this mail is abusing this service please forward this entire message to:
+
+webmaster@mushroomobserver.org
+
+To stop receiving these emails, either login to your Mushroom Observer account and change your preferences, or click the following URL:
+
+http://localhost:3000/account/no_commercial_email/1

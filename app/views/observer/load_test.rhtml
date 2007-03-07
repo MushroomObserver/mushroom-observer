@@ -1,10 +1,3 @@
 <% @title = 'Load Test' %>
 
 <div id="Title"><%= @title %></div>
-
-<%= form_tag({:action => 'do_load_test'}, :multipart => true) %>
-<center><%= submit_tag("Upload") %></center>
-
-<p><%= file_field("image", "image") %></p>
-
-<%= end_form_tag %>

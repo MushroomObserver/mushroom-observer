@@ -6,27 +6,24 @@ class UserTest < Test::Unit::TestCase
   fixtures :users
     
   def test_auth  
-    assert_equal  @bob, User.authenticate("bob", "test")    
-    assert_nil    User.authenticate("nonbob", "test")
-
+    assert_equal  @rolf, User.authenticate("rolf", "testpassword")    
+    assert_nil    User.authenticate("nonrolf", "testpassword")
   end
 
 
   def test_passwordchange
-        
-    @longbob.change_password("nonbobpasswd")
-    assert_equal @longbob, User.authenticate("longbob", "nonbobpasswd")
-    assert_nil   User.authenticate("longbob", "longtest")
-    @longbob.change_password("longtest")
-    assert_equal @longbob, User.authenticate("longbob", "longtest")
-    assert_nil   User.authenticate("longbob", "nonbobpasswd")
-        
+    @mary.change_password("marypasswd")
+    assert_equal @mary, User.authenticate("mary", "marypasswd")
+    assert_nil   User.authenticate("mary", "longtest")
+    @mary.change_password("longtest")
+    assert_equal @mary, User.authenticate("mary", "longtest")
+    assert_nil   User.authenticate("mary", "marypasswd")
   end
   
   def test_disallowed_passwords
-
     u = User.new    
     u.login = "nonbob"
+    u.email = "nonbob@collectivesource.com"
 
     u.password = u.password_confirmation = "tiny"
     assert !u.save     
@@ -41,15 +38,15 @@ class UserTest < Test::Unit::TestCase
     assert u.errors.invalid?('password')
         
     u.password = u.password_confirmation = "bobs_secure_password"
-    assert u.save     
+    assert u.save
     assert u.errors.empty?
-        
   end
   
   def test_bad_logins
 
     u = User.new  
     u.password = u.password_confirmation = "bobs_secure_password"
+    u.email = "bob@collectivesource.com"
 
     u.login = "x"
     assert !u.save     
@@ -64,7 +61,7 @@ class UserTest < Test::Unit::TestCase
     assert u.errors.invalid?('login')
 
     u.login = "okbob"
-    assert u.save  
+    assert u.save
     assert u.errors.empty?
       
   end
@@ -72,8 +69,8 @@ class UserTest < Test::Unit::TestCase
 
   def test_collision
     u = User.new
-    u.login      = "existingbob"
-    u.password = u.password_confirmation = "bobs_secure_password"
+    u.login      = "rolf"
+    u.password = u.password_confirmation = "rolfs_secure_password"
     assert !u.save
   end
 
@@ -82,6 +79,7 @@ class UserTest < Test::Unit::TestCase
     u = User.new
     u.login      = "nonexistingbob"
     u.password = u.password_confirmation = "bobs_secure_password"
+    u.email = "nonexistingbob@collectivesource.com"
       
     assert u.save  
     
@@ -91,9 +89,10 @@ class UserTest < Test::Unit::TestCase
     u = User.new
     u.login      = "nonexistingbob"
     u.password = u.password_confirmation = "bobs_secure_password"
+    u.email = "nonexistingbob@collectivesource.com"
     assert u.save
         
-    assert_equal '98740ff87bade6d895010bceebbd9f718e7856bb', u.password
+    assert_equal '74996ba5c4aa1d583563078d8671fef076e2b466', u.password
     
   end
 

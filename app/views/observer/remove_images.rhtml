@@ -6,7 +6,7 @@
 
 <%= error_messages_for("image") %>
 
-<%= form_tag({:action => 'delete_images'}, :multipart => true) %>
+<% form_tag({:action => 'delete_images'}, :multipart => true) do %>
 <center><%= submit_tag("Remove") %></center>
 
 <%= hidden_field("observation", "id") %>
@@ -27,4 +27,4 @@
     <% end %>
 </table>
 
-<%= end_form_tag %>
+<% end %>

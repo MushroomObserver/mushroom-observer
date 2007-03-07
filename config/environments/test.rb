@@ -17,3 +17,6 @@ config.action_controller.perform_caching             = false
 # The :test delivery method accumulates sent emails in the
 # ActionMailer::Base.deliveries array.
 config.action_mailer.delivery_method = :test
+
+IMG_DIR = sprintf("/Users/velosa/observer-images/%s", ENV['RAILS_ENV'])
+DOMAIN = 'http://localhost:3000'

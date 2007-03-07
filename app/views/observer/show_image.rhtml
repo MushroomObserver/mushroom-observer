@@ -14,7 +14,7 @@
 		| <%= link_to 'Next', :action => 'next_image', :id => @image %>
 <%  end %>
 
-<div id="Title">Image: <%= textilize_without_paragraph(h @image.unique_format_name) %></div>
+<div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name)) %></div>
 <div id="copyright">Copyright &copy
 	<% if commercial_inquiries_ok %>
 	  <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),
@@ -59,7 +59,7 @@
 
 <p>Observations<br/>
     <% for observation in @image.observations
-      text = '<span class="Data">' + textilize_without_paragraph(h observation.unique_format_name)
+      text = '<span class="Data">' + textilize_without_paragraph(h(observation.unique_format_name))
       if observation.notes != ''
           text += '</span><span id="help_note"><br/>Notes: %s...' % observation.notes[0..15]
       end

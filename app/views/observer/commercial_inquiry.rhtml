@@ -1,7 +1,7 @@
 <% @title = 'Commercial Inquiry About ' + h(@image.unique_text_name) %>
 <div id="Title">Commercial Inquiry About <%= textilize_without_paragraph(h @image.unique_format_name) %></div>
 
-<%= start_form_tag :action => 'send_commercial_inquiry', :id => @image %>
+<% form_tag(:action => 'send_commercial_inquiry', :id => @image) do %>
 
 <table cellpadding="10">
 	<tr>
@@ -18,4 +18,4 @@
 		</td>
 	</tr>
 </table>
-<%= end_form_tag %>
+<% end %>

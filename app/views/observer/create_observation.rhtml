@@ -1,11 +1,11 @@
 <% @title = 'Create Observation' %>
 <div id="Title"><%= @title %></div></br>
 
-<%= start_form_tag :action => 'construct_observation' %>
+<% form_tag(:action => 'construct_observation') do %>
 <center><%= submit_tag "Create" %></center>
 <table cellpadding="10">
 <tr>
   <%= render :partial => 'form_observations' %>
 </tr>
 </table>
-<%= end_form_tag %>
+<% end %>

@@ -1,3 +1,15 @@
-AccountMailer#question
+Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following question to you about your observation of Fungi (http://localhost:3000/observer/show_observation/2):
 
-Find me in app/views/account_mailer/question.rhtml
+Where did you find it?
+
+It is entirely up to you whether you want to reply by emailing directly back to them.
+
+--------------------------------------------------------------------------------------------------
+
+If you feel the sender of this mail is abusing this service please forward this entire message to:
+
+webmaster@mushroomobserver.org
+
+To stop receiving these emails, either login to your Mushroom Observer account and change your preferences, or click the following URL:
+
+http://localhost:3000/account/no_question_email/2

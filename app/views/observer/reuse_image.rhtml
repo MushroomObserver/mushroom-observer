@@ -6,7 +6,7 @@
 
 <%= error_messages_for("image") %>
 
-<%= form_tag({:action => 'reuse_image_by_id'}, :multipart => true) %>
+<% form_tag({:action => 'reuse_image_by_id'}, :multipart => true) do %>
 <center><%= submit_tag("Reuse") %></center>
 
 <%= hidden_field("observation", "id") %>
@@ -39,4 +39,4 @@
 </table>
 <%= pagination_links(@image_pages) %>
 
-<%= end_form_tag %>
+<% end %>

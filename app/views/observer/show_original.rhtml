@@ -10,7 +10,7 @@
                   :confirm => "Are you sure?" %>
 <% end %>
 
-<div id="Title"><%= 'Image: ' + textilize_without_paragraph(h @image.unique_format_name) %></div>
+<div id="Title"><%= 'Image: ' + textilize_without_paragraph(h(@image.unique_format_name)) %></div>
 <div id="copyright">Copyright &copy
 	<% if commercial_inquiries_ok %>
 	  <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),

@@ -1,5 +1,8 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-first:
+minimal_comment:
   id: 1
-another:
-  id: 2
+  created: 2006-03-02 21:14:00
+  user_id: 1
+  summary: A comment on minimal unknown
+  comment: Wow!  That's really cool
+  observation_id: 1

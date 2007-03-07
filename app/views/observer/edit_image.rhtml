@@ -5,7 +5,7 @@
 
 <%= error_messages_for 'image' %>
 
-<%= start_form_tag :action => 'update_image', :id => @image %>
+<% form_tag(:action => 'update_image', :id => @image) do %>
 	<center><%= submit_tag 'Save Edits' %></center>
 	<table cellpadding="10">
 		<tr>
@@ -17,4 +17,4 @@
 			</td>
 		</tr>
 	</table>
-<%= end_form_tag %>
+<% end %>
