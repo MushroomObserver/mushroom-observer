@@ -10,7 +10,7 @@
 	<table cellpadding="10">
 		<tr>
 			<td valign="top">
-				<%= render :partial => 'form_images' %>
+				<%= render :partial => 'form_images', :locals => { :width => 30 } %>
 			</td>
 			<td align="center">
 				<%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %>
