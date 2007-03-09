@@ -790,7 +790,7 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
       if !image.nil?
-        @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, session['user'].login), true)
+        @observation.log("Image, %s, reused by %s" % [image.unique_text_name, session['user'].login], true)
       end
       redirect_to(:action => 'show_observation', :id => @observation)
     end

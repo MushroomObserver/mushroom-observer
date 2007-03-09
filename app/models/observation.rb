@@ -88,9 +88,7 @@ class Observation < ActiveRecord::Base
 
   def add_image(img)
     img.observations << self
-    logger.warn(self.thumb_image_id)
     unless self.thumb_image
-      logger.warn("**** Setting observation.thumb_image")
       self.thumb_image = img
     end
   end

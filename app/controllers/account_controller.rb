@@ -16,7 +16,6 @@ class AccountController < ApplicationController
           @message  = "Login unsuccessful"
       end
     end
-    doo
   end
   
   def signup

@@ -8,6 +8,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :observations
   fixtures :users
   fixtures :comments
+  fixtures :images
+  fixtures :images_observations
 
   def setup
     @controller = ObserverController.new
@@ -194,6 +196,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   # Pages that require login
   def login(user='rolf', password='testpassword')
+    get :news # Need to load a page for session to get populated
     user = User.authenticate(user, password)
     assert(user)
     session['user'] = user
@@ -222,14 +225,24 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template "show_observation"
   end
+
+  # Test reusing an image by id number.
+  def test_add_image_to_obs
+    obs = @coprinus_comatus_obs
+    image = @disconnected_coprinus_comatus_image
+    assert(!obs.images.member?(image))
+    login
+    post(:add_image_to_obs, "obs_id" => obs.id, "id" => image.id)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs2 = Observation.find(obs.id) # Need to reload observation to pick up changes
+    assert(obs2.images.member?(image))
+  end
+
 end
 
 
 class StillToCome
-  def test_add_image_to_obs
-    requires_login :add_image_to_obs
-  end
-
+  
   def test_add_observation_to_species_list
     requires_login :add_observation_to_species_list
   end

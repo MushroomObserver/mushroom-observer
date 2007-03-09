@@ -9,23 +9,43 @@ in_situ:
   when:         2006-05-11
   notes:        What it looked like originally
   copyright_holder: Bob Dobbs
+  
 turned_over:
   id: 2
   created:   2006-05-22 21:20:00
   modified:  2006-05-22 21:21:00
   content_type: image/jpeg
-  title:        Turned Over
   user_id:      1
   when:         2006-05-11
   notes:        What it looked like when I turned it over
   copyright_holder: Bob Dobbs
-commercial_inquiry_image: # image
+  
+commercial_inquiry_image:
   id: 3
   created:   2007-02-25 20:13:00
   modified:  2006-02-25 20:14:00
   content_type: image/jpeg
-  title:        Commercial Inquiry Image
   user_id:      1
   when:         2007-02-25
+  notes:        Some Notes
+  copyright_holder: Bob Dobbs
+
+disconnected_coprinus_comatus_image:
+  id: 4
+  created:   2007-03-07 20:13:00
+  modified:  2007-03-07 20:14:00
+  content_type: image/jpeg
+  user_id:      1
+  when:         2007-03-07
+  notes:        Some Notes
+  copyright_holder: Bob Dobbs
+
+connected_coprinus_comatus_image:
+  id: 5
+  created:   2007-03-08 20:13:00
+  modified:  2007-03-08 20:14:00
+  content_type: image/jpeg
+  user_id:      1
+  when:         2007-03-07
   notes:        Some Notes
   copyright_holder: Bob Dobbs
