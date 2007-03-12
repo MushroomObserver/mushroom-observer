@@ -58,9 +58,9 @@ class AccountMailer < ActionMailer::Base
     @from       = sender
   end
 
-  def denied(user)
+  def denied(user_params)
     @subject      = 'Mushroom Observer User Creation Blocked'
-    @body["user"] = user
+    @body["user_params"] = user_params
     @recipients   = 'nathan@collectivesource.com'
     @from         = 'accounts@mushroomobserver.org'
   end

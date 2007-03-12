@@ -1,9 +1,9 @@
-The request for account <%= @user.login %> was denied since the theme was set to ''.
+The request for account <%= @user_params[:login] %> was denied since the theme was set to ''.
 
 Here are all the fields for the request user:
 
-login: <%= @user.login %>
-password: <%= @user.password %>
-email: <%= @user.email %>
-theme: <%= @user.theme %>
-name: <%= @user.name %>
+login: <%= @user_params[:login] %>
+password: <%= @user_params[:password] %>
+email: <%= @user_params[:email] %>
+theme: <%= @user_params[:theme] %>
+name: <%= @user_params[:name] %>

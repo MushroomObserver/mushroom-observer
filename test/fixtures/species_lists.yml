@@ -18,3 +18,13 @@ another_species_list:
   where: Burbank, CA
   title: Another Species List
   notes: Got Skunked Again!
+
+unknown_species_list:
+  id: 3
+  created: 2006-03-09 21:14:00
+  modified: 2006-03-09 21:14:00
+  when: 2006-03-09
+  user_id: 2
+  where: Burbank, CA
+  title: List of mysteries
+  notes: Things I don't know'

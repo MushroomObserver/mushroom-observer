@@ -10,6 +10,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :comments
   fixtures :images
   fixtures :images_observations
+  fixtures :species_lists
+  fixtures :observations_species_lists
 
   def setup
     @controller = ObserverController.new
@@ -237,30 +239,106 @@ class ObserverControllerTest < Test::Unit::TestCase
     obs2 = Observation.find(obs.id) # Need to reload observation to pick up changes
     assert(obs2.images.member?(image))
   end
+  
+  def test_add_observation_to_species_list
+    sp = @first_species_list
+    obs = @coprinus_comatus_obs
+    assert(!sp.observations.member?(obs))
+    login
+    post(:add_observation_to_species_list, "species_list" => sp.id, "observation" => obs.id)
+    assert_redirected_to(:controller => "observer", :action => "manage_species_lists")
+    sp2 = SpeciesList.find(sp.id)
+    assert(sp2.observations.member?(obs))
+  end
+  
+  def test_ask_question
+    requires_login :ask_question, {:id => @coprinus_comatus_obs.id}
+  end
+
+  def test_commercial_inquiry
+    requires_login :commercial_inquiry, {:id => @in_situ.id}
+  end
+
+  def test_construct_observation
+    #  {"log_change"=>{"checked"=>"1"},
+    #   "commit"=>"Create",
+    #   "observation"=>{"where"=>"Burbank, California", "when(1i)"=>"2007", "when(2i)"=>"3", "when(3i)"=>"9",
+    #                   "notes"=>"", "what"=>"Conocybe filaris", "specimen"=>"0"},
+    #   "action"=>"construct_observation", "controller"=>"observer"}
+    log_change = {"checked"=>"1"}
+    obs_params = {}
+    # obs_params[:name_id] # Could be set to clarify ambiguous names
+    obs_params[:what] = "Coprinus comatus" # Could be unknown name to go to unknown_name_create
+    obs_params[:where] = "Burbank, California" # Required
+    obs_params["when(1i)"] = "2007"
+    obs_params["when(2i)"] = "3"
+    obs_params["when(3i)"] = "9"
+    obs_params[:specimen] = "0"
+    
+    login
+    post(:construct_observation, "observation" => obs_params, "log_change" => log_change)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+  end
 
 end
 
 
 class StillToCome
-  
-  def test_add_observation_to_species_list
-    requires_login :add_observation_to_species_list
+
+  def test_construct_species_list
+    requires_login :construct_species_list
   end
 
-  def test_ask_question
-    requires_login :ask_question
+  def test_create_species_list
+    requires_login :create_species_list
   end
 
-  def test_calc_layout_params
-    requires_login :calc_layout_params
-  end
-
-  def test_commercial_inquiry
-    requires_login :commercial_inquiry
-  end
-
-  def test_construct_observation
-    requires_login :construct_observation
+  # Should extend construct_observation so it works like construct_species_list
+  # and deprecates construct_observation_with_new_name and construct_observation_with_selected_name
+  # create_observation.rhtml -> list_observations.rhtml
+  def construct_observation
+    user = session['user']
+    if verify_user(user)
+      @observation = Observation.new(params[:observation])
+      now = Time.now
+      @observation.created = now
+      @observation.modified = now
+      @observation.user = user
+      name_id = params[:observation][:name_id]
+      if name_id
+        names = [Name.find(name_id)]
+      else
+        names = Name.find_names(params[:observation][:what])
+      end
+      if names.length == 1
+        @observation.name = names[0]
+        if @observation.save
+          @observation.log('Observation created by ' + session['user'].login, true)
+          flash[:notice] = 'Observation was successfully created.'
+          redirect_to :action => 'show_observation', :id => @observation
+        else
+          render :action => 'create_observation'
+        end
+      elsif names.length == 0
+        # @observation.what has new name
+        args = params[:observation]
+        args[:user_id] = user.id
+        session[:args] = params[:observation]
+        if @observation.what == ''
+          redirect_to :action => 'create_observation'
+        else
+          redirect_to :action => 'unknown_name_create'
+        end
+      else
+        # @observation.what matches more than one name
+        @names = names
+        args = params[:observation]
+        args[:user_id] = user.id
+        session[:args] = params[:observation]
+        flash[:notice] = 'More than one matching name was found'
+        redirect_to :action => 'multiple_names_create'
+      end
+    end
   end
 
   def test_construct_observation_with_new_name
@@ -271,16 +349,8 @@ class StillToCome
     requires_login :construct_observation_with_selected_name
   end
 
-  def test_construct_species_list
-    requires_login :construct_species_list
-  end
-
   def test_create_observation
     requires_login :create_observation
-  end
-
-  def test_create_species_list
-    requires_login :create_species_list
   end
 
   def test_current_image_state

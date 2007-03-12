@@ -21,8 +21,8 @@ class AccountController < ApplicationController
   def signup
     case request.method
       when :post
-        @user = User.new(params['user'])
         if params['user']['theme'] != '' and params['user']['login'] != 'test_denied'
+          @user = User.new(params['user'])
           @user.created = Time.now
           @user.last_login = @user.created
           @user.change_rows(5)
@@ -34,7 +34,7 @@ class AccountController < ApplicationController
             redirect_back_or_default :action => "welcome"          
           end
         else
-          AccountMailer.deliver_denied(@user)
+          AccountMailer.deliver_denied(params['user'])
           redirect_back_or_default :action => "welcome"          
         end
       when :get
