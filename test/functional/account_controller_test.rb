@@ -29,7 +29,7 @@ class AccountControllerTest < Test::Unit::TestCase
     @request.session['return-to'] = "http://localhost/bogus/location"
 
     post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "newpassword",
-                              "email" => "newbob@collectivesource.com" }
+                              "email" => "newbob@collectivesource.com", "theme" => "NULL" }
     assert(@response.has_session_object?("user"))
     
     assert_equal("http://localhost/bogus/location", @response.redirect_url)

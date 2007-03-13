@@ -24,6 +24,7 @@ class UserTest < Test::Unit::TestCase
     u = User.new    
     u.login = "nonbob"
     u.email = "nonbob@collectivesource.com"
+    u.theme = "NULL"
 
     u.password = u.password_confirmation = "tiny"
     assert !u.save     
@@ -47,6 +48,7 @@ class UserTest < Test::Unit::TestCase
     u = User.new  
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "bob@collectivesource.com"
+    u.theme = "NULL"
 
     u.login = "x"
     assert !u.save     
@@ -69,7 +71,9 @@ class UserTest < Test::Unit::TestCase
 
   def test_collision
     u = User.new
-    u.login      = "rolf"
+    u.login = "rolf"
+    u.email = "rolf@collectivesource.com"
+    u.theme = "NULL"
     u.password = u.password_confirmation = "rolfs_secure_password"
     assert !u.save
   end
@@ -77,7 +81,9 @@ class UserTest < Test::Unit::TestCase
 
   def test_create
     u = User.new
-    u.login      = "nonexistingbob"
+    u.login = "nonexistingbob"
+    u.email = "nonexistingbob@collectivesource.com"
+    u.theme = "NULL"
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "nonexistingbob@collectivesource.com"
       
@@ -90,6 +96,7 @@ class UserTest < Test::Unit::TestCase
     u.login      = "nonexistingbob"
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "nonexistingbob@collectivesource.com"
+    u.theme = "NULL"
     assert u.save
         
     assert_equal '74996ba5c4aa1d583563078d8671fef076e2b466', u.password
