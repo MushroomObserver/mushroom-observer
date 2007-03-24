@@ -638,7 +638,7 @@ class ObserverController < ApplicationController
         @image.modified = Time.now
         @image.save
         for o in @image.observations
-          o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @image.id, session['user'].login), true)
+          o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, session['user'].login), true)
         end
         flash[:notice] = 'Image was successfully updated.'
         redirect_to :action => 'show_image', :id => @image
@@ -887,7 +887,9 @@ class ObserverController < ApplicationController
       observation = Observation.find(params[:observation])
       species_list.modified = Time.now
       species_list.observations.delete(observation)
-      redirect_to :action => 'manage_species_lists', :id => observation
+      redirect_to(:action => 'manage_species_lists', :id => observation)
+    else
+      redirect_to(:action => 'show_species_list', :id => species_list)
     end
   end
 
@@ -933,34 +935,17 @@ class ObserverController < ApplicationController
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
   end
-
-  def read_session
-    # Pull all the state out of the session and clean out the session
-    @checklist_names = session['checklist_names'] || {}
-    session['checklist_names'] = nil
-    @species_list = session['species_list']
-    session['species_list'] = nil
-    @list_members = session['list_members']
-    session['list_members'] = nil
-    @new_names = session['new_names']
-    session['new_names'] = nil
-    @multiple_names = session['multiple_names']
-    session['multiple_names'] = nil
-    @member_notes = session['member_notes']
-    session['member_notes'] = nil
-    @names_only = session['names_only']
-    session['names_only'] = nil
-  end
   
   # list_species_list.rhtml, show_species_list.rhtml -> edit_species_list.rhtml
   # Setup session to have the right species_list.
   def edit_species_list
-    species_list = SpeciesList.find(params[:id])
-    if check_user_id(species_list.user_id)
-      read_session
+    spl = SpeciesList.find(params[:id])
+    if check_user_id(spl.user_id)
+      read_session # Clears @species_list
+      @species_list = spl
       calc_checklist(params[:id])
-      @species_list = species_list
-    else 
+    else
+      @species_list = spl
       render :action => 'show_species_list'
     end
   end
@@ -977,7 +962,8 @@ class ObserverController < ApplicationController
   def read_species_list
     species_list = SpeciesList.find(params[:id])
     if species_list
-      species_list.file = params[:species_list][:file]
+      file_data = params[:species_list][:file]
+      species_list.file = file_data
       sorter = NameSorter.new
       species_list.process_file_data(sorter)
       do_action('edit_species_list', params[:id], {}, false, '', {}, sorter)
@@ -1384,6 +1370,25 @@ class ObserverController < ApplicationController
     store_location
     session['checklist_source'] = nil # Meaning all species
     @names = Name.find(:all, :order => "'text_name' asc, 'author' asc")
+  end
+
+  helper_method :read_session
+  def read_session
+    # Pull all the state out of the session and clean out the session
+    @checklist_names = session['checklist_names'] || {}
+    session['checklist_names'] = nil
+    @species_list = session['species_list']
+    session['species_list'] = nil
+    @list_members = session['list_members']
+    session['list_members'] = nil
+    @new_names = session['new_names']
+    session['new_names'] = nil
+    @multiple_names = session['multiple_names']
+    session['multiple_names'] = nil
+    @member_notes = session['member_notes']
+    session['member_notes'] = nil
+    @names_only = session['names_only']
+    session['names_only'] = nil
   end
 
   # Ultimately running large queries like this and storing the info in the session

@@ -25,11 +25,15 @@ class SpeciesList < ActiveRecord::Base
   end
 
   def file=(file_field)
-    if file_field.class == StringIO
+    if file_field.kind_of?(StringIO)
       content_type = file_field.content_type.chomp
       if ('application/text' == content_type or 'text/plain' == content_type or 'application/octet-stream' == content_type)
         self.data = file_field.read
+      else
+        raise sprintf("Unrecognized content_type: %s\n", content_type)
       end
+    else
+      raise sprintf("Unrecognized file_field class: %s\n", file_field.class)
     end
   end
   

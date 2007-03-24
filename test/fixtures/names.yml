@@ -23,3 +23,17 @@ coprinus_comatus:
   display_name: __Coprinus comatus__ (O.F. Müll.) Pers.
   observation_name: __Coprinus comatus__ (O.F. Müll.) Pers.
   search_name: Coprinus comatus (O.F. Müll.) Pers.
+
+agaricus_campestris:
+  id: 3
+  created: 2007-03-19 17:20:00
+  modified: 2007-03-19 17:20:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestris
+  author: L.
+  display_name: __Agaricus campestris__ L.
+  observation_name: __Agaricus campestris__ L.
+  search_name: Agaricus campestris L.
+

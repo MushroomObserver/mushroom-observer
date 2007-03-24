@@ -27,3 +27,14 @@ coprinus_comatus_obs:
   specimen:  0
   notes:     Second fruiting in bark chips
   name_id:   2
+
+agaricus_campestris_obs:
+  id:        4
+  created:   2007-03-19 20:20:00
+  modified:  2007-03-19 20:21:00
+  when:      2007-03-19
+  user_id:   1
+  where:     Burbank, California
+  specimen:  0
+  notes:     From the lawn next door
+  name_id:   3

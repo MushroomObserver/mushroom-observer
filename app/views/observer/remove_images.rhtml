@@ -2,7 +2,7 @@
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
 
-<div id="Title">Remove Images from <%= textilize_without_paragraph(h @observation.unique_format_name) %></div>
+<div id="Title">Remove Images from <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <%= error_messages_for("image") %>
 
@@ -20,7 +20,7 @@
 			<td align="center">
 				<p><%=
 				link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
-							'<br/>' + textilize_without_paragraph(h image.unique_format_name),
+							'<br/>' + textilize_without_paragraph(h(image.unique_format_name)),
 	            		:action => 'show_image', :id => image.id) %></p>
 			</td>
 		</tr>

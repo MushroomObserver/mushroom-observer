@@ -5,7 +5,7 @@ in_situ:
   modified:  2006-05-12 17:21:00
   content_type: image/jpeg
   title:        In Situ
-  user_id:      1
+  user_id:      2
   when:         2006-05-11
   notes:        What it looked like originally
   copyright_holder: Bob Dobbs
@@ -15,7 +15,7 @@ turned_over:
   created:   2006-05-22 21:20:00
   modified:  2006-05-22 21:21:00
   content_type: image/jpeg
-  user_id:      1
+  user_id:      2
   when:         2006-05-11
   notes:        What it looked like when I turned it over
   copyright_holder: Bob Dobbs
@@ -47,5 +47,15 @@ connected_coprinus_comatus_image:
   content_type: image/jpeg
   user_id:      1
   when:         2007-03-07
+  notes:        Some Notes
+  copyright_holder: Bob Dobbs
+
+agaricus_campestris_image:
+  id: 6
+  created:   2007-03-19 20:13:00
+  modified:  2007-03-19 20:14:00
+  content_type: image/jpeg
+  user_id:      1
+  when:         2007-03-19
   notes:        Some Notes
   copyright_holder: Bob Dobbs

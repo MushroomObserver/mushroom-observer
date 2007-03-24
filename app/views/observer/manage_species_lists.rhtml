@@ -1,7 +1,7 @@
 <% @title = 'Manage Species Lists for ' + h(@observation.unique_text_name) %>
 <%= link_to 'Show Observation', :action => 'show_observation', :id => @observation %>
 
-<div id="Title">Manage Species Lists for <%= textilize_without_paragraph(h @observation.unique_format_name) %></div>
+<div id="Title">Manage Species Lists for <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 	<%
 		all_lists = SpeciesList.find(:all,

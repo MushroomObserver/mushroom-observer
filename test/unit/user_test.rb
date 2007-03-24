@@ -4,6 +4,10 @@ class UserTest < Test::Unit::TestCase
   self.use_instantiated_fixtures  = true
   
   fixtures :users
+  fixtures :images
+  fixtures :names
+  fixtures :observations
+  fixtures :images_observations
     
   def test_auth  
     assert_equal  @rolf, User.authenticate("rolf", "testpassword")    
