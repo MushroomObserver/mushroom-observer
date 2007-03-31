@@ -683,14 +683,6 @@ class ObserverController < ApplicationController
     end
   end
 
-  # deprecated
-  def manage_images
-    @observation = Observation.find(params[:id])
-    logger.error("manage_images has been deprecated")
-    flash[:notice] = 'manage_images has been deprecated'
-    redirect_to(:action => 'show_observation', :id => @observation)
-  end
-
   # show_observation.rhtml -> add_image.rhtml
   def add_image
     @observation = Observation.find(params[:id])
@@ -804,15 +796,7 @@ class ObserverController < ApplicationController
       if !image.nil?
         @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, session['user'].login), true)
       end
-      redirect_to(:action => 'show_observation', :id => @observation)
     end
-  end
-
-  # deprecated along with manage_images
-  def save_image
-    @observation = session['observation']
-    logger.error("save_image has been deprecated")
-    flash[:notice] = 'save_image has been deprecated'
     redirect_to(:action => 'show_observation', :id => @observation)
   end
 
@@ -952,9 +936,8 @@ class ObserverController < ApplicationController
   
   def upload_species_list
     species_list = SpeciesList.find(params[:id])
-    if check_user_id(species_list.user_id)
-      @species_list = species_list
-    else
+    @species_list = species_list
+    if !check_user_id(species_list.user_id)
       render :action => 'show_species_list'
     end
   end
@@ -1142,20 +1125,18 @@ class ObserverController < ApplicationController
     end
   end
   
-  def test_feature_email
-    users = User.find(:all, :conditions => "feature_email=1")
-    user = users[1]
-    email = AccountMailer.create_email_features(user, params['feature_email']['content'])
-    render(:text => "<pre>" + email.encoded + "</pre>")
-  end
-  
   def send_feature_email
-    users = User.find(:all, :conditions => "feature_email=1")
-    for user in users
-      AccountMailer.deliver_email_features(user, params['feature_email']['content'])
+    if check_permission(0)
+      users = User.find(:all, :conditions => "feature_email=1")
+      for user in users
+        AccountMailer.deliver_email_features(user, params['feature_email']['content'])
+      end
+      flash[:notice] = "Delivered feature mail."
+      redirect_to :action => 'users_by_name'
+    else
+      flash[:notice] = "Only the admin can send feature mail."
+      redirect_to :action => "list_rss_logs"
     end
-    flash[:notice] = "Delivered feature mail."
-    redirect_to :action => 'users_by_name'
   end
 
   def ask_question
@@ -1164,14 +1145,6 @@ class ObserverController < ApplicationController
       flash[:notice] = "Permission denied"
       redirect_to :action => 'show_observation', :id => @observation
     end
-  end
-  
-  def test_question
-    sender = session['user']
-    observation = Observation.find(params['id'])
-    question = params['question']['content']
-    email = AccountMailer.create_question(sender, observation, question)
-    render(:text => "<pre>" + email.encoded + "</pre>")
   end
   
   def send_question
@@ -1189,14 +1162,6 @@ class ObserverController < ApplicationController
       flash[:notice] = "Permission denied"
       redirect_to :action => 'show_image', :id => @image
     end
-  end
-  
-  def test_commercial_inquiry
-    sender = session['user']
-    image = Image.find(params['id'])
-    commercial_inquiry = params['commercial_inquiry']['content']
-    email = AccountMailer.create_commercial_inquiry(sender, image, commercial_inquiry)
-    render(:text => "<pre>" + email.encoded + "</pre>")
   end
   
   def send_commercial_inquiry
@@ -1348,7 +1313,9 @@ class ObserverController < ApplicationController
       name = Name.find(params[:id])
       past_name = PastName.make_past_name(name)
       begin
+        count = 0
         name.modified = Time.new
+        count += 1
         name.change_text_name(params[:name][:text_name], params[:name][:author], params[:name][:rank])
         name.notes = params[:name][:notes]
         name.version = name.version + 1

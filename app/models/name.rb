@@ -102,65 +102,7 @@ class Name < ActiveRecord::Base
     end
     result
   end
-
-  # Should be rewritten to use *_PAT and logic similar to change_text_name
-  # Should support arbitrary authors other than just 'sensu <Author>'
-  def self.names_from_string_OLD(str)
-    result = []
-    words = str.squeeze(' ').split(' ')
-    len = words.length
-    if len > 0
-      if words[0] == 'Unknown'
-        result.push Name.find_name(:Kingdom, 'Fungi').first
-      else
-        result.push Name.make_genus(words[0]) # species and varieties should get added as members once members happen
-        if len == 2
-          if not ['sp.', 'species'].member? words[1]
-            result.push Name.make_species(words[0], words[1])
-          end
-        elsif len == 3
-          if ['group', 'gr.', 'gp.'].member? words[2]
-            result.push Name.make_species(words[0], words[1])
-            result.push Name.make_name(:Group, sprintf('%s %s group', words[0], words[1]),
-                                       :display_name => sprintf('__%s %s__ group', words[0], words[1]))
-          elsif words[1] == 'near'
-            result.push Name.make_species(words[0], words[2])
-          else
-            result.push nil # Unrecognized str
-          end
-        elsif len == 4
-          result.push Name.make_species(words[0], words[1])
-          if ['variety', 'var.', 'v.'].member? words[2]
-            result.push Name.make_name(:Variety, sprintf('%s %s var. %s', words[0], words[1], words[3]),
-                                       :display_name => sprintf('__%s %s__ var. __%s__', words[0], words[1], words[3]))
-          elsif ['forma', 'form', 'f.'].member? words[2]
-            result.push Name.make_name(:Variety, sprintf('%s %s f. %s', words[0], words[1], words[3]),
-                                       :display_name => sprintf('__%s %s__ f. __%s__', words[0], words[1], words[3]))
-          elsif ['sensu', 'senu'].member? words[2]
-            name = result.last
-            author = "sensu %s" % words[3]
-            if name.author
-              if name.author != author
-                name = Name.create_name(name.rank, name.text_name, author,
-                                        Name.replace_author(name.observation_name, name.author, author),
-                                        Name.replace_author(name.display_name, name.author, author),
-                                        Name.replace_author(name.search_name, name.author, author))
-              end
-            else
-              name.change_author author
-            end
-            result.push name
-          else
-            result.push nil # Unrecognized str
-          end
-        end
-      end
-    end
-    result
-  end
   
-  # Should be rewritten to use *_PAT and logic similar to change_text_name
-  # Should support arbitrary authors other than just 'sensu <Author>'
   def self.names_from_string(in_str)
     result = []
     if in_str == 'Unknown'
@@ -183,7 +125,6 @@ class Name < ActiveRecord::Base
         end
         match_count = matches.length
         if match_count == 0
-          logger.warn("** names_from_string: 0 matches")
           name = Name.make_name(rank, text_name,
                                 :display_name => display_name,
                                 :observation_name => observation_name,
@@ -191,14 +132,9 @@ class Name < ActiveRecord::Base
                                 :author => author)
           result.push name
         elsif match_count == 1
-          logger.warn("** names_from_string: 1 match")
           name = matches[0]
-          logger.warn("  **: name.search_name: %s" % name.search_name)
-          logger.warn("  **: name.author: %s" % name.author)
-          logger.warn("  **: author: %s" % author)
           if name.author.nil? and author
             name.change_author author
-            logger.warn("  **: author changed: %s" % name.search_name)
           end
           result.push name
         else
@@ -242,8 +178,6 @@ class Name < ActiveRecord::Base
   
   def self.parse_name(str)
     (name, author) = parse_author(str)
-    logger.warn("**++: parse_name: name: %s" % name)
-    logger.warn("**++: parse_name: author: %s" % author)
     rank = :Group
     parse = parse_group(name)
     if parse.nil?
@@ -265,6 +199,10 @@ class Name < ActiveRecord::Base
     if parse.nil?
       rank = :Form
       parse = parse_form(name)
+    end
+    if parse.nil?
+      rank = :Genus
+      parse = parse_above_species(name)
     end
     if parse
       if author
@@ -414,7 +352,15 @@ class Name < ActiveRecord::Base
     # results must be set
     text_name, display_name, observation_name, search_name, parent_name = results
     if (parent_name and Name.find(:all, :conditions => "text_name = '%s'" % parent_name) == [])
-      raise "Parent name, %s, doesn't exist" % parent_name
+      names = Name.names_from_string(parent_name)
+      if names.last.nil?
+        raise "Unable to create the name %s" % parent_name
+      else
+        for n in names
+          n.user_id = user_id
+          n.save
+        end
+      end
     end
     matches = []
     if author != ''

@@ -37,3 +37,16 @@ agaricus_campestris:
   observation_name: __Agaricus campestris__ L.
   search_name: Agaricus campestris L.
 
+conocybe_filaris:
+  id: 4
+  created: 2007-03-28 15:50:00
+  modified: 2007-03-19 15:51:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Conocybe filaris
+  author: 
+  display_name: __Conocybe filaris__
+  observation_name: __Conocybe filaris__
+  search_name: Conocybe filaris
+  
