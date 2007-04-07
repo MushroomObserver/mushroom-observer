@@ -158,6 +158,29 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_send_webmaster_question
     post :send_webmaster_question, "user" => {"email" => "rolf@mushroomobserver.org"}, "question" => {"content" => "Some content"}
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
+
+    post :send_webmaster_question, "user" => {"email" => ""}, "question" => {"content" => "Some content"}
+    assert_equal(flash[:notice], "You must provide a return address.")
+    assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
+
+    post :send_webmaster_question, "user" => {"email" => "spam@spam.spam"}, "question" => {"content" => "Buy <a href='http://junk'>Me!</a>"}
+    assert_equal(flash[:notice], "To cut down on spam questions from unregistered users cannot contain URLs.")
+    assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
+  end
+  
+  def send_webmaster_question
+    sender = params['user']['email']
+    if sender.nil? or sender.strip == ''
+      flash[:notice] = "You must provide a return address."
+      redirect_to :action => 'ask_webmaster_question'
+    elsif /http:/ =~ params['question']['content']
+      flash[:notice] = "To cut down on spam questions from unregistered users cannot contain URLs."
+      redirect_to :action => 'ask_webmaster_question'
+    else
+      AccountMailer.deliver_webmaster_question(params['user']['email'], params['question']['content'])
+      flash[:notice] = "Delivered question or comment."
+      redirect_back_or_default :action => "list_rss_logs"
+    end
   end
 
   def test_show_comment

@@ -1108,6 +1108,9 @@ class ObserverController < ApplicationController
     if sender.nil? or sender.strip == ''
       flash[:notice] = "You must provide a return address."
       redirect_to :action => 'ask_webmaster_question'
+    elsif /http:/ =~ params['question']['content']
+      flash[:notice] = "To cut down on spam questions from unregistered users cannot contain URLs."
+      redirect_to :action => 'ask_webmaster_question'
     else
       AccountMailer.deliver_webmaster_question(params['user']['email'], params['question']['content'])
       flash[:notice] = "Delivered question or comment."

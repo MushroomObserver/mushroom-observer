@@ -1,7 +1,6 @@
 More stuff to do with Names   
-    - Eliminate Observation.what
     Merge: [create_observation, unknown_name_create, multiple_names_create], [edit_observation, unknown_name, multiple_names] 
-    Synonymy (accepted vs. proposed?)
+    Synonymy (accepted vs. proposed?) - Taxon
 	Grouping (Agaricus is part of Agaricales, etc.)
 	  View members and membership
 	  Page of all members and below?
@@ -10,22 +9,28 @@ More stuff to do with Names
 
 After synonomy - Transfer names from Name, RSS feed.
 
-Split up observer_controller?:
-  user pages
-  non-user pages?
-  email delivery
-
-Python transition?  Nuvo, Plone, SQLAlchemy
-
-Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
-  Add confidence level for a naming
-  Add basis for naming (sight, key, references)
-
-Mechanism for merging species lists
-
-Page for Unknowns
+No question email containing URLs
 
 User pages
+  [Mushroom God - Mycorhizzal + login and database password]
+  Mycorhizzal - Lichenized + update site, become another user, send feature email
+  Lichenized - Composter + change the status of others (up to Lichenized), SVN access
+  Composter - Ranking, new submissions, name editing, mailing list, edit own entries
+  Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
+  Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
+
+Split up observer_controller?:
+    user pages
+    non-user pages?
+    email delivery
+
+Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
+    Add confidence level for a naming
+    Add basis for naming (sight, key, references)
+
+Mechanism for merging species lists?
+
+Page for Unknowns
 
 More with Names
 Spelling correction
