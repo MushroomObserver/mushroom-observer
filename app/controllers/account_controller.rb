@@ -107,7 +107,7 @@ class AccountController < ApplicationController
     redirect_back_or_default :action => "welcome"
   end  
     
-  def logout
+  def logout_user
     session['user'] = nil
   end
     

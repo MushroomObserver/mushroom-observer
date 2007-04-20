@@ -49,6 +49,7 @@ CREATE TABLE `observations` (
   `when` date default NULL,
   `user_id` int(11) default NULL,
   `where` varchar(100) default NULL,
+  `what` varchar(100) default NULL,
   `specimen` tinyint(1) NOT NULL default '0',
   `notes` text,
   `thumb_image_id` int(11) default NULL,
@@ -125,4 +126,4 @@ CREATE TABLE `users` (
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO schema_info (version) VALUES (13)
+INSERT INTO schema_info (version) VALUES (12)

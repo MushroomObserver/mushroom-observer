@@ -63,7 +63,7 @@ class AccountControllerTest < Test::Unit::TestCase
     post :login, "user_login" => "rolf", "user_password" => "testpassword"
     assert(@response.has_session_object?("user"))
 
-    get :logout
+    get :logout_user
     assert(!@response.has_session_object?("user"))
 
   end
