@@ -1,11 +1,18 @@
 More stuff to do with Names   
-    Merge: [create_observation, unknown_name_create, multiple_names_create], [edit_observation, unknown_name, multiple_names] 
     Synonymy (accepted vs. proposed?) - Taxon
+        Group of Names
+        Name should be able to list synonyms
+        Add a synonym (merges Taxons)
+        Split
+        Search for synonymys
 	Grouping (Agaricus is part of Agaricales, etc.)
 	  View members and membership
 	  Page of all members and below?
+	  Should Macrolepiota include Chlorophyllum rachodes?
     Common Name support (== Group but without the group)
 	Deprecating names
+
+HowtoConfigureTheErrorPageForYourRailsApp
 
 After synonomy - Transfer names from Name, RSS feed.
 

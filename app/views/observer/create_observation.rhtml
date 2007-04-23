@@ -1,11 +1,20 @@
-<% @title = 'Create Observation' %>
+<% @title = 'Create Observation'
+   button_name = "Create" %>
+
 <div id="Title"><%= @title %></div></br>
 
-<% form_tag(:action => 'construct_observation') do %>
-<center><%= submit_tag "Create" %></center>
+<% form_tag(:action => 'construct_observation', :approved_name => @what) do %>
+<br/>
+<center><%= submit_tag(button_name) %></center>
+
 <table cellpadding="10">
-<tr>
-  <%= render :partial => 'form_observations' %>
-</tr>
+    <tr>
+        <%= render :partial => 'form_observations', :locals => {
+            :logging_optional => false,
+            :button_name => button_name,
+            :names => @names,
+            :what => @what
+        } %>
+    </tr>
 </table>
 <% end %>

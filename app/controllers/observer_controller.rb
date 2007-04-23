@@ -300,80 +300,27 @@ class ObserverController < ApplicationController
   # left-hand panel -> create_observation.rhtml
   def create_observation
     if verify_user(session['user'])
-      session['observation_ids'] = nil
-      session['observation'] = nil
-      session['image_ids'] = nil
-      @observation = Observation.new
-      # Removed when Observation.what was removed since it causes the
-      # What field to get filled in with Fungi sp.  I think this was
-      # just to replace the old default of 'Unknown'
-      # @observation.name = Name.find_name(:Kingdom, 'Fungi').first
-    end
-  end
-  
-  # construct_observation.rhtml -> multiple_names_create.rhtml
-  def multiple_names_create
-    args = session[:args]
-    session[:args] = nil
-    @observation = Observation.new(args)
-    if check_user_id(@observation.user_id)
-      @what = args[:what]
-      @names = Name.find_names(@what)
-    else 
+      session[:observation_ids] = nil
+      session[:observation] = nil
+      session[:image_ids] = nil
+      args = session[:args]
+      session[:args] = nil
+      if args
+        @observation = Observation.new(args)
+        @what = args[:what] # Given name
+        name_ids = session[:name_ids]
+        if name_ids # multiple matches
+          @names = name_ids.map {|n| Name.find(n)}
+        end
+        session[:name_ids] = nil
+      else
+        @observation = Observation.new
+      end
+    else
       render :action => 'show_observation'
     end
   end
 
-  def construct_observation_with_selected_name
-    user_id = params[:user_id]
-    if check_user_id(user_id)
-      # Verify that the user didn't change the what field
-      input_what = params[:what]
-      output_what = params[:observation][:what]
-      if input_what != output_what
-        params[:observation][:name_id] = nil
-      end
-    end
-    construct_observation
-  end
-
-  # construct_observation.rhtml -> unknown_name_create.rhtml
-  # This should get merged with the source for unknown_name along
-  # with the rest of the commonality between construct_observation and
-  # update_observation.
-  def unknown_name_create
-    args = session[:args]
-    session[:args] = nil
-    @observation = Observation.new(args)
-    if check_user_id(@observation.user_id)
-      @what = args[:what]
-      session['observation'] = params[:id].to_i
-    else 
-      redirect_to :action => 'show_observation', :id => params[:id]
-    end
-  end
-
-  def construct_observation_with_new_name
-    user_id = params[:user_id].to_i
-    if check_user_id(user_id)
-      input_what = params[:what]
-      output_what = params[:observation][:what]
-      if input_what == output_what
-        names = Name.names_from_string(output_what)
-        if names.last.nil?
-          flash[:notice] = "Unable to create the name %s" % output_what
-        else
-          for n in names
-            n.user_id = user_id
-            n.save
-          end
-        end
-      end
-    end
-    construct_observation
-  end
-
-  # create_observation.rhtml -> list_observations.rhtml
   def construct_observation
     user = session['user']
     if verify_user(user)
@@ -382,11 +329,13 @@ class ObserverController < ApplicationController
       @observation.created = now
       @observation.modified = now
       @observation.user = user
-      name_id = params[:observation][:name_id]
-      if name_id
-        names = [Name.find(name_id)]
+      if params[:chosen_name] && params[:chosen_name][:name_id]
+        names = [Name.find(params[:chosen_name][:name_id])]
       else
         names = Name.find_names(params[:observation][:what])
+      end
+      if names.length == 0
+        names = create_needed_names(params, user)
       end
       if names.length == 1
         @observation.name = names[0]
@@ -395,26 +344,16 @@ class ObserverController < ApplicationController
           flash[:notice] = 'Observation was successfully created.'
           redirect_to :action => 'show_observation', :id => @observation
         else
-          render :action => 'create_observation'
-        end
-      elsif names.length == 0
-        # @observation.what has new name
-        args = params[:observation]
-        args[:user_id] = user.id
-        session[:args] = params[:observation]
-        if @observation.what == ''
           redirect_to :action => 'create_observation'
-        else
-          redirect_to :action => 'unknown_name_create'
         end
       else
-        # @observation.what matches more than one name
-        @names = names
         args = params[:observation]
         args[:user_id] = user.id
-        session[:args] = params[:observation]
-        flash[:notice] = 'More than one matching name was found'
-        redirect_to :action => 'multiple_names_create'
+        session[:args] = args # was params[:observation]
+        if names.length > 1
+          session[:name_ids] = names.map {|n| n.id}
+        end
+        redirect_to :action => 'create_observation'
       end
     end
   end
@@ -425,109 +364,53 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       session['observation'] = params[:id].to_i
+      args = session[:args]
+      session[:args] = nil
+      if args
+        @what = args[:what]
+        logger.warn("edit_observation @what: %s" % @what)
+      end
+      name_ids = session[:name_ids]
+      if name_ids
+        @names = name_ids.map {|n| Name.find(n)}
+      end
     else 
       render :action => 'show_observation'
     end
   end
   
-  # update_observation.rhtml -> multiple_names.rhtml
-  def multiple_names
-    @observation = Observation.find(params[:id])
-    if check_user_id(@observation.user_id)
-      @what = params[:what]
-      @names = Name.find_names(@what)
-      session['observation'] = params[:id].to_i
-    else 
-      render :action => 'show_observation'
-    end
-  end
-
-  def update_observation_with_selected_name
-    @observation = Observation.find(params[:id])
-    if check_user_id(@observation.user_id)
-      # Verify that the user didn't change the what field
-      input_what = params[:what]
-      output_what = params[:observation][:what]
-      if input_what != output_what
-        params[:observation][:name_id] = nil
-      end
-    end
-    update_observation
-  end
-  
-  # update_observation.rhtml -> unknown_name.rhtml
-  def unknown_name
-    @observation = Observation.find(params[:id])
-    @what = params[:what]
-    if check_user_id(@observation.user_id)
-      session['observation'] = params[:id].to_i
-    else 
-      render :action => 'show_observation'
-    end
-  end
-
-  def update_observation_with_new_name
-    @observation = Observation.find(params[:id])
-    if check_user_id(@observation.user_id)
-      input_what = params[:what]
-      output_what = params[:observation][:what]
-      if input_what == output_what
-        names = Name.names_from_string(output_what)
-        if names.last.nil?
-          flash[:notice] = "Unable to create the name %s", str
-        else
-          user = @observation.user
-          for n in names
-            n.user = user
-            n.save
-          end
-        end
-      end
-    end
-    update_observation
-  end
-
   # edit_observation.rhtml -> show_observation.rhtml
   # Updates modified and saves changes
   def update_observation
     @observation = Observation.find(params[:id])
+    action = 'edit_observation'
     if check_user_id(@observation.user_id) # Even though edit makes this check, avoid bad guys going directly
-      if params[:observation][:name_id].nil?
-        names = Name.find_names(params[:observation][:what])
+      user = session['user']
+      if params[:chosen_name] && params[:chosen_name][:name_id]
+        names = [Name.find(params[:chosen_name][:name_id])]
       else
-        names = [Name.find(params[:observation][:name_id])]
+        names = Name.find_names(params[:observation][:what])
+      end
+      if names.length == 0
+        names = create_needed_names(params, user)
       end
       if names.length == 1
         if @observation.update_attributes(params[:observation])
           @observation.name = names.first
-          
-          # Why does this work and the following line doesn't?
-          # Tested with 'obs_mod' rather than 'modified'.  Same effect.
           @observation.modified = Time.now
-          # @observation.touch
           @observation.save
-
           @observation.log('Observation updated by ' + session['user'].login,
                            params[:log_change][:checked] == '1')
-
           flash[:notice] = 'Observation was successfully updated.'
-          redirect_to :action => 'show_observation', :id => @observation
-        else
-          render :action => 'edit_observation'
-        end
-      elsif names.length == 0
-        # @observation.what has new name
-        if @observation.what == ''
-          redirect_to :action => 'edit_observation', :id => @observation
-        else
-          redirect_to :action => 'unknown_name', :id => @observation, :what => params[:observation][:what]
+          action = 'show_observation'
         end
       else
-        # @observation.what matches more than one name
-        @names = names
-        flash[:notice] = 'More than one matching name was found'
-        redirect_to :action => 'multiple_names', :id => @observation, :what => params[:observation][:what]
+        session[:args] = params[:observation]
+        if names.length > 1
+          session[:name_ids] = names.map {|n| n.id}
+        end
       end
+      redirect_to :action => action, :id => @observation
     else
       render :action => 'show_observation'
     end
@@ -685,12 +568,17 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> add_image.rhtml
   def add_image
-    @observation = Observation.find(params[:id])
-    if check_user_id(@observation.user_id)
-      @image = Image.new
-      @image.copyright_holder = session['user'].legal_name
-    else
-      render :action => 'show_observation'
+    begin # Should figure out how to propagate this around
+      @observation = Observation.find(params[:id])
+      if check_user_id(@observation.user_id)
+        @image = Image.new
+        @image.copyright_holder = session['user'].legal_name
+      else
+        render :action => 'show_observation'
+      end
+    rescue ActiveRecord::RecordNotFound
+      flash[:notice] = 'Invalid observation'
+      redirect_to(:action => 'list_rss_logs')
     end
   end
 
@@ -802,7 +690,6 @@ class ObserverController < ApplicationController
 
   def calc_checklist(id)
     source = session['checklist_source']
-    logger.warn("calc_checklist: now: %s, prev: %s" % [source, session['prev_checklist_source']])
     if source == 0 # Use observation_ids
       ob_ids = session['observation_ids']
       if ob_ids
@@ -861,7 +748,6 @@ class ObserverController < ApplicationController
       session['prev_checklist_source'] = session['checklist_source']
       session['checklist_source'] = id
     end
-    logger.warn("show_species_list: now: %s, prev: %s" % [id, session['prev_checklist_source']])
   end
 
   # Needs both a species_list and an observation.
@@ -1538,6 +1424,25 @@ class ObserverController < ApplicationController
   end
 
   protected
+
+  def create_needed_names(params, user)
+    result = []
+    input_what = params[:approved_name]
+    output_what = params[:observation][:what]
+    if input_what == output_what
+      names = Name.names_from_string(output_what)
+      if names.last.nil?
+        flash[:notice] = "Unable to create the name %s" % output_what
+      else
+        for n in names
+          n.user = user
+          n.save
+        end
+      end
+      result.push(names.last)
+    end
+    result
+  end
 
   def check_user_id(user_id)
     result = check_permission(user_id)

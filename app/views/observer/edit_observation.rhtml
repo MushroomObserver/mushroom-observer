@@ -1,15 +1,21 @@
-<% @title = 'Editing Observation: ' + h(@observation.unique_text_name) %>
+<% @title = 'Editing Observation: ' + h(@observation.unique_text_name)
+   button_name = "Save Edits" %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
 <div id="Title">Editing Observation: <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
-<% form_tag(:action => 'update_observation', :id => @observation) do %>
+<% form_tag(:action => 'update_observation', :id => @observation, :approved_name => @what) do %>
 <br/>
-<center><%= submit_tag 'Save Edits' %></center>
+<center><%= submit_tag button_name %></center>
 
 <table cellpadding="10">
 <tr>
-  <%= render :partial => 'form_observations' %>
+  <%= render :partial => 'form_observations', :locals => {
+      :logging_optional => true,
+      :button_name => button_name,
+      :names => @names,
+      :what => @what
+  } %>
     <td valign="top">
     <% i = 0
        observation = @observation

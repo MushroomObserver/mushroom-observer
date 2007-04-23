@@ -49,4 +49,29 @@ conocybe_filaris:
   display_name: __Conocybe filaris__
   observation_name: __Conocybe filaris__
   search_name: Conocybe filaris
-  
+
+amanita_baccata_arora:
+  id: 5
+  created: 2007-04-08 08:53:20
+  modified: 2007-04-09 08:53:30
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Amanita baccata
+  author: sensu Arora
+  display_name: __Amanita baccata__ sensu Arora
+  observation_name: __Amanita baccata__ sensu Arora
+  search_name: Amanita baccata sensu Arora
+
+amanita_baccata_borealis:
+  id: 6
+  created: 2007-04-08 08:54:20
+  modified: 2007-04-09 08:54:30
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Amanita baccata
+  author: sensu Borealis
+  display_name: __Amanita baccata__ sensu Borealis
+  observation_name: __Amanita baccata__ sensu Borealis
+  search_name: Amanita baccata sensu Borealis

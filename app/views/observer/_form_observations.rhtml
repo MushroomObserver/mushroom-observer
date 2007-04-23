@@ -1,6 +1,31 @@
 <%= error_messages_for 'observation' %>
 
 <!--[form:observation]-->
+
+<% if what %>
+    <% if names %>
+        <span class="Data">
+            <br/>Multiple names match '<%= h(what) %>'.  Select the one you intended:<br/>
+            <% for n in names %>
+                &nbsp;&nbsp;<%= radio_button("chosen_name", 'name_id', n.id) %>
+                <%= textilize_without_paragraph(h(n.display_name)) %> (<%= n.observations.size %>)<br/>
+            <% end %>
+        </span>
+        <span id="help_note">
+            The number after each name is how many observations are currently using that name.
+        </span>
+    <% else %>
+        <span class="Data">
+            <p>
+                The name '<%= h(what) %>' was not recognized.<br/>
+            </p>
+        </span>
+        <span id="help_note">
+            Click '<%= button_name %>' to create this name or edit the name below to correct any typo.<br/><br/>
+        </span>
+    <% end %>
+<% end %>
+
 <td valign="top">
 <p><label for="observation_when">When:</label><br/>
 <%= date_select 'observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
@@ -13,7 +38,7 @@
 </span></p>
 <br/>
 <p><label for="observation_what">What:</label>
-<%= text_field 'observation', 'what', :value => @observation.what  %><br/>
+<%= text_field 'observation', 'what', :value => what  %><br/>
 <span id="help_note">
 	The name you would apply to this observation.  If you don't know what it is, just say 'Unknown'.
 	If you find a better name for this observation in the future, please change the name by selecting
@@ -41,7 +66,9 @@
 <%= text_area 'observation', 'notes'  %></p>
 <%= render :partial => 'textilize_help' %>
 
+<% if logging_optional %>
 <p><%= check_box("log_change", 'checked', :checked => 'checked') %><label for="log_change"> Log Change</label></p>
+<% end %>
 
 </td>
 <!--[eoform:observation]-->

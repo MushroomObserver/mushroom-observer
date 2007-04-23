@@ -25,6 +25,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :species_lists
   fixtures :observations_species_lists
   fixtures :names
+  fixtures :rss_logs
 
   def setup
     @controller = ObserverController.new
@@ -321,20 +322,101 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login :commercial_inquiry, {:id => @in_situ.id}
   end
 
-  def test_construct_observation
-    log_change = {"checked"=>"1"}
-    obs_params = {
-      # :name_id # Could be set to clarify ambiguous names
-      :what => "Coprinus comatus", # Could be unknown name to go to unknown_name_create
-      :where => "Burbank, California", # Must be set to something
-      "when(1i)" => "2007",
-      "when(2i)" => "3",
-      "when(3i)" => "9",
-      :specimen => "0"
+  def test_construct_observation_simple
+    # Test a simple observation creation
+    count = Observation.find(:all).length
+    where = "test_construct_observation_simple"
+    params = {
+      :observation => {
+        :what => "Coprinus comatus",
+        :where => where,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "9",
+        :specimen => "0"
+      }
     }
-    
-    requires_login(:construct_observation, { "observation" => obs_params, "log_change" => log_change }, false)
+    requires_login(:construct_observation, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert((count + 1) == Observation.find(:all).length)
+    obs = assigns(:observation)
+    assert_equal(obs.where, where) # Make sure it's the right observation
+    assert_not_nil(obs.rss_log)
+  end
+  
+  def test_construct_observation_new_name
+    # Test a simple observation creation
+    count = Observation.find(:all).length
+    params = {
+      :observation => {
+        :what => "New name",
+        :where => "test_construct_observation_new_name",
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "9",
+        :specimen => "0"
+      }
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "create_observation")
+    assert(count == Observation.find(:all).length) # Should not have added a new observation
+  end
+  
+  def test_construct_observation_approved_new_name
+    # Test a simple observation creation
+    count = Observation.find(:all).length
+    new_name = "New name"
+    params = {
+      :observation => {
+        :what => new_name,
+        :where => "test_construct_observation_approved_new_name",
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "9",
+        :specimen => "0"
+      },
+      :approved_name => new_name,
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert((count + 1) == Observation.find(:all).length)
+  end
+
+  def test_construct_observation_multiple_match
+    # Test a simple observation creation
+    count = Observation.find(:all).length
+    params = {
+      :observation => {
+        :what => "Amanita baccata",
+        :where => "test_construct_observation_multiple_match",
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "9",
+        :specimen => "0"
+      }
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "create_observation")
+    assert(count == Observation.find(:all).length) # Should not have added a new observation
+  end
+
+  def test_construct_observation_chosen_multiple_match
+    # Test a simple observation creation
+    count = Observation.find(:all).length
+    params = {
+      :observation => {
+        :what => "Amanita baccata",
+        :where => "test_construct_observation_chosen_multiple_match",
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "9",
+        :specimen => "0"
+      },
+      :chosen_name => { :name_id => @amanita_baccata_arora.id }
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert((count + 1) == Observation.find(:all).length)
   end
 
   def test_construct_species_list
@@ -357,6 +439,37 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_create_observation
     requires_login :create_observation
+  end
+  
+  def test_create_observation_unknown_name
+    params = {
+      :args => {
+        :what => "Easter bunny",
+        :where => "Laguna Beach, California",
+        "when(1i)" => "2007",
+        "when(2i)" => "4",
+        "when(3i)" => "1",
+        :notes => "Some notes",
+        :specimen => "1"
+      },
+    }
+    requires_login(:create_observation, params)
+  end
+  
+  def test_create_observation_multiple_names
+    params = {
+      :args => {
+        :what => "Amanita baccata",
+        :where => "Laguna Beach, California",
+        "when(1i)" => "2007",
+        "when(2i)" => "4",
+        "when(3i)" => "1",
+        :notes => "Some notes",
+        :specimen => "1"
+      },
+      :name_ids => [@amanita_baccata_arora.id, @amanita_baccata_borealis.id]
+    }
+    requires_login(:create_observation, params)
   end
 
   def test_create_species_list
@@ -451,9 +564,182 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_edit_observation
     obs = @coprinus_comatus_obs
-    params = { "id" => obs.id.to_s }
     assert("rolf" == obs.user.login)
+    params = { :id => obs.id.to_s }
     requires_user(:edit_observation, :show_observation, params)
+  end
+  
+  def test_edit_observation_unknown_name
+    obs = @coprinus_comatus_obs
+    assert("rolf" == obs.user.login)
+    params = {
+      :id => obs.id.to_s,
+      :args => {
+        :what => "Easter bunny",
+        :where => obs.where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      }
+    }
+    requires_user(:edit_observation, :show_observation, params)
+  end
+  
+  def test_edit_observation_multiple_names
+    obs = @coprinus_comatus_obs
+    assert("rolf" == obs.user.login)
+    params = {
+      :id => obs.id.to_s,
+      :args => {
+        :what => "Amanita baccata",
+        :where => "Laguna Beach, California",
+        "when(1i)" => "2007",
+        "when(2i)" => "4",
+        "when(3i)" => "1",
+        :notes => "Some notes",
+        :specimen => "1"
+      },
+      :name_ids => [@amanita_baccata_arora.id, @amanita_baccata_borealis.id]
+    }
+    requires_user(:edit_observation, :show_observation, params)
+  end
+  
+  def test_update_observation
+    obs = @detailed_unknown
+    modified = obs.rss_log.modified
+    where = "test_update_observation"
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :what => obs.what,
+        :where => where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      },
+      :log_change => { :checked => '1' }
+    }
+    requires_user(:update_observation, :show_observation, params, false, "mary")
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs = assigns(:observation)
+    assert_equal(obs.where, where)
+    assert_not_equal(obs.rss_log.modified, modified)
+  end
+
+  def test_update_observation_no_logging
+    obs = @detailed_unknown
+    modified = obs.rss_log.modified
+    where = "test_update_observation_no_logging"
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :what => obs.what,
+        :where => where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      },
+      :log_change => { :checked => '0' }
+    }
+    requires_user(:update_observation, :show_observation, params, false, "mary")
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs = assigns(:observation)
+    assert_equal(obs.where, where)
+    assert_equal(obs.rss_log.modified, modified)
+  end
+
+  def test_update_observation_new_name
+    obs = @coprinus_comatus_obs
+    what = obs.what
+    new_name = "Easter bunny"
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :what => new_name,
+        :where => obs.where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      },
+      :log_change => { :checked => '1' }
+    }
+    requires_user(:update_observation, :show_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "edit_observation")
+    obs = assigns(:observation)
+    assert_not_equal(obs.what, new_name)
+    assert_equal(obs.what, what)
+    assert_nil(obs.rss_log)
+  end
+
+  def test_update_observation_approved_new_name
+    obs = @coprinus_comatus_obs
+    what = obs.what
+    new_name = "Easter bunny"
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :what => new_name,
+        :where => obs.where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      },
+      :approved_name => new_name,
+      :log_change => { :checked => '1' }
+    }
+    requires_user(:update_observation, :show_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs = assigns(:observation)
+    assert_equal(obs.what, new_name)
+    assert_not_equal(obs.what, what)
+    assert_not_nil(obs.rss_log)
+  end
+
+  def test_update_observation_multiple_match
+    obs = @coprinus_comatus_obs
+    what = obs.what
+    new_name = "Amanita baccata"
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :what => new_name,
+        :where => obs.where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      },
+      :log_change => { :checked => '1' }
+    }
+    requires_user(:update_observation, :show_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "edit_observation")
+    obs = assigns(:observation)
+    assert_not_equal(obs.what, new_name)
+    assert_equal(obs.what, what)
+    assert_nil(obs.rss_log)
+  end
+
+  def test_update_observation_chosen_multiple_match
+    obs = @coprinus_comatus_obs
+    what = obs.what
+    new_name = "Amanita baccata"
+    params = {
+      :id => obs.id.to_s,
+      :observation => {
+        :what => new_name,
+        :where => obs.where,
+        :when => obs.when,
+        :notes => obs.notes,
+        :specimen => obs.specimen
+      },
+      :chosen_name => { :name_id => @amanita_baccata_arora.id },
+      :log_change => { :checked => '1' }
+    }
+    requires_user(:update_observation, :show_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs = assigns(:observation)
+    assert_equal(obs.what, new_name)
+    assert_not_equal(obs.what, what)
+    assert_not_nil(obs.rss_log)
   end
 
   def test_edit_species_list
@@ -789,42 +1075,6 @@ end
   
 
 class StillToCome
-
-  # These should get integrated into construct_observation and get tested with that
-  def test_construct_observation_with_new_name
-    requires_login :construct_observation_with_new_name
-  end
-
-  def test_construct_observation_with_selected_name
-    requires_login :construct_observation_with_selected_name
-  end
-  
-  def test_multiple_names
-    requires_login :multiple_names
-  end
-
-  def test_multiple_names_create
-    requires_login :multiple_names_create
-  end
-
-  def test_unknown_name
-    requires_login :unknown_name
-  end
-
-  def test_unknown_name_create
-    requires_login :unknown_name_create
-  end
-
-  # 7
-  def test_update_observation
-    requires_login :update_observation
-  end
-
-  # 6
-  def test_update_observation_with_new_name
-    requires_login :update_observation_with_new_name
-  end
-
   # 5
   def test_update_observation_with_selected_name
     requires_login :update_observation_with_selected_name

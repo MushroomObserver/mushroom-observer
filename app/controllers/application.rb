@@ -6,10 +6,26 @@ CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
 
 class ApplicationController < ActionController::Base
   include LoginSystem
+end
+
+class ErrorTest
+  # Some test functions for error handling
+  def rescue_action_in_public(exception)
+    logger.warn("In rescue_action_in_public")
+    case exception
+    when ActiveRecord::RecordNotFound
+      render(:file => "#{RAILS_ROOT}/public/404.html",
+             :status => "404 Not Found")
+    else
+      render(:file => "#{RAILS_ROOT}/public/500.html",
+             :status => "500 Error")
+    end
+  end
   
-  # Following was added with the login system, but I commented it out when 'rake test'
-  # gave a warning.  Need to lookup on the web what the change is all about.
-  # model :user
+  def local_request?
+      false
+  end
+  
 end
 
 module Enumerable

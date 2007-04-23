@@ -1,7 +1,7 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 observation_rss_log:
   id: 1
-  observation_id: 1
+  observation_id: 2
   modified: 2006-03-02 21:14:00
   notes: "Modified Observation"
 
