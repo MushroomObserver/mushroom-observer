@@ -4,29 +4,6 @@ require 'login_system'
 
 CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
 
-class ApplicationController < ActionController::Base
-  include ExceptionNotifiable
-  include LoginSystem
-  
-  before_filter(:disable_link_prefetching, :only => [
-     # account_controller methods
-    :logout_user, :delete,
-    
-    # observer_controller methods
-    :destroy_observation, :destroy_image,
-    :destroy_comment, :destroy_species_list])
-  
-  private
-  
-    def disable_link_prefetching
-      if request.env["HTTP_X_MOZ"] == "prefetch" 
-        logger.debug "prefetch detected: sending 403 Forbidden" 
-        render_nothing "403 Forbidden" 
-        return false
-      end
-    end
-end
-
 module Enumerable
   def select_rand
     tmp = self.to_a
@@ -62,21 +39,42 @@ module ActiveRecord
 end
 
 class ApplicationController < ActionController::Base
-    def paginate_by_sql(model, sql, per_page, options={})
-       if options[:count]
-           if options[:count].is_a? Integer
-               total = options[:count]
-           else
-               total = model.count_by_sql(options[:count])
-           end
-       else
-           total = model.count_by_sql_wrapping_select_query(sql)
-       end
+  include ExceptionNotifiable
+  include LoginSystem
+  
+  before_filter(:disable_link_prefetching, :only => [
+     # account_controller methods
+    :logout_user, :delete,
+    
+    # observer_controller methods
+    :destroy_observation, :destroy_image,
+    :destroy_comment, :destroy_species_list])
 
-       object_pages = Paginator.new self, total, per_page,
-            @params['page']
-       objects = model.find_by_sql_with_limit(sql,
-            object_pages.current.to_sql[1], per_page)
-       return [object_pages, objects]
-   end
+  def paginate_by_sql(model, sql, per_page, options={})
+    if options[:count]
+        if options[:count].is_a? Integer
+            total = options[:count]
+        else
+            total = model.count_by_sql(options[:count])
+        end
+    else
+        total = model.count_by_sql_wrapping_select_query(sql)
+    end
+
+    object_pages = Paginator.new self, total, per_page,
+         @params['page']
+    objects = model.find_by_sql_with_limit(sql,
+         object_pages.current.to_sql[1], per_page)
+    return [object_pages, objects]
+  end
+  
+  private
+  
+    def disable_link_prefetching
+      if request.env["HTTP_X_MOZ"] == "prefetch" 
+        logger.debug "prefetch detected: sending 403 Forbidden" 
+        render_nothing "403 Forbidden" 
+        return false
+      end
+    end
 end
