@@ -5,27 +5,26 @@ require 'login_system'
 CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
 
 class ApplicationController < ActionController::Base
+  include ExceptionNotifiable
   include LoginSystem
-end
-
-class ErrorTest
-  # Some test functions for error handling
-  def rescue_action_in_public(exception)
-    logger.warn("In rescue_action_in_public")
-    case exception
-    when ActiveRecord::RecordNotFound
-      render(:file => "#{RAILS_ROOT}/public/404.html",
-             :status => "404 Not Found")
-    else
-      render(:file => "#{RAILS_ROOT}/public/500.html",
-             :status => "500 Error")
+  
+  before_filter(:disable_link_prefetching, :only => [
+     # account_controller methods
+    :logout_user, :delete,
+    
+    # observer_controller methods
+    :destroy_observation, :destroy_image,
+    :destroy_comment, :destroy_species_list])
+  
+  private
+  
+    def disable_link_prefetching
+      if request.env["HTTP_X_MOZ"] == "prefetch" 
+        logger.debug "prefetch detected: sending 403 Forbidden" 
+        render_nothing "403 Forbidden" 
+        return false
+      end
     end
-  end
-  
-  def local_request?
-      false
-  end
-  
 end
 
 module Enumerable
