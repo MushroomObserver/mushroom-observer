@@ -841,6 +841,9 @@ class ObserverController < ApplicationController
 
   def construct_approved_names(name_list, approved_names, user)
     if approved_names
+      if approved_names.class == String
+        approved_names = approved_names.split("/")
+      end
       for ns in name_list
         name_str = ns.strip
         if approved_names.member? name_str
