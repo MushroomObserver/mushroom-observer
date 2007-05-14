@@ -161,27 +161,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
 
     post :send_webmaster_question, "user" => {"email" => ""}, "question" => {"content" => "Some content"}
-    assert_equal(flash[:notice], "You must provide a return address.")
+    assert_equal("You must provide a return address.", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
 
     post :send_webmaster_question, "user" => {"email" => "spam@spam.spam"}, "question" => {"content" => "Buy <a href='http://junk'>Me!</a>"}
-    assert_equal(flash[:notice], "To cut down on spam questions from unregistered users cannot contain URLs.")
+    assert_equal("To cut down on robot spam, questions from unregistered users cannot contain 'http:'.", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
-  end
-  
-  def send_webmaster_question
-    sender = params['user']['email']
-    if sender.nil? or sender.strip == ''
-      flash[:notice] = "You must provide a return address."
-      redirect_to :action => 'ask_webmaster_question'
-    elsif /http:/ =~ params['question']['content']
-      flash[:notice] = "To cut down on spam questions from unregistered users cannot contain URLs."
-      redirect_to :action => 'ask_webmaster_question'
-    else
-      AccountMailer.deliver_webmaster_question(params['user']['email'], params['question']['content'])
-      flash[:notice] = "Delivered question or comment."
-      redirect_back_or_default :action => "list_rss_logs"
-    end
   end
 
   def test_show_comment
@@ -236,6 +221,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     get :species_lists_by_title
     assert_response :success
     assert_template 'species_lists_by_title'
+  end
+  
+  def test_show_past_name
+    get :show_past_name, :id => 1
+    assert_response :success
+    assert_template 'show_past_name'
   end
 
   # Pages that require login
@@ -340,7 +331,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     assert((count + 1) == Observation.find(:all).length)
     obs = assigns(:observation)
-    assert_equal(obs.where, where) # Make sure it's the right observation
+    assert_equal(where, obs.where) # Make sure it's the right observation
     assert_not_nil(obs.rss_log)
   end
   
@@ -622,8 +613,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_user(:update_observation, :show_observation, params, false, "mary")
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = assigns(:observation)
-    assert_equal(obs.where, where)
-    assert_not_equal(obs.rss_log.modified, modified)
+    assert_equal(where, obs.where)
+    assert_not_equal(modified, obs.rss_log.modified)
   end
 
   def test_update_observation_no_logging
@@ -644,8 +635,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_user(:update_observation, :show_observation, params, false, "mary")
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = assigns(:observation)
-    assert_equal(obs.where, where)
-    assert_equal(obs.rss_log.modified, modified)
+    assert_equal(where, obs.where)
+    assert_equal(modified, obs.rss_log.modified)
   end
 
   def test_update_observation_new_name
@@ -666,8 +657,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_user(:update_observation, :show_observation, params, false)
     assert_redirected_to(:controller => "observer", :action => "edit_observation")
     obs = assigns(:observation)
-    assert_not_equal(obs.what, new_name)
-    assert_equal(obs.what, what)
+    assert_not_equal(new_name, obs.what)
+    assert_equal(what, obs.what)
     assert_nil(obs.rss_log)
   end
 
@@ -690,8 +681,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_user(:update_observation, :show_observation, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = assigns(:observation)
-    assert_equal(obs.what, new_name)
-    assert_not_equal(obs.what, what)
+    assert_equal(new_name, obs.what)
+    assert_not_equal(what, obs.what)
     assert_not_nil(obs.rss_log)
   end
 
@@ -713,8 +704,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_user(:update_observation, :show_observation, params, false)
     assert_redirected_to(:controller => "observer", :action => "edit_observation")
     obs = assigns(:observation)
-    assert_not_equal(obs.what, new_name)
-    assert_equal(obs.what, what)
+    assert_not_equal(new_name, obs.what)
+    assert_equal(what, obs.what)
     assert_nil(obs.rss_log)
   end
 
@@ -737,8 +728,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_user(:update_observation, :show_observation, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = assigns(:observation)
-    assert_equal(obs.what, new_name)
-    assert_not_equal(obs.what, what)
+    assert_equal(new_name, obs.what)
+    assert_not_equal(what, obs.what)
     assert_not_nil(obs.rss_log)
   end
 
@@ -817,7 +808,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login :read_species_list, params, false
     assert_redirected_to(:controller => "observer", :action => "edit_species_list")
     # Doesn't actually change list, just feeds it to edit_species_list through the session
-    assert_equal(session['list_members'], list_data)
+    assert_equal(list_data, session['list_members'])
   end
 
   def test_remove_images
@@ -851,7 +842,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_resize_images
     requires_login :resize_images, {}, false
-    assert_equal(flash[:notice], "You must be an admin to access resize_images")
+    assert_equal("You must be an admin to access resize_images", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "list_images")
     # How should real image files be handled?
   end
@@ -924,7 +915,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     session['user'] = user
     get(page, params)
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    assert_equal(flash[:notice], "Only the admin can send feature mail.")
+    assert_equal("Only the admin can send feature mail.", flash[:notice])
     user.id = 0 # Make user the admin
     session['user'] = user
     get(page, params)
@@ -940,7 +931,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     requires_login :send_question, params, false
-    assert_equal(flash[:notice], "Delivered question.")
+    assert_equal("Delivered question.", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "show_observation")
   end
 
@@ -1070,16 +1061,10 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template page.to_s
   end
-
 end
   
 
 class StillToCome
-  # 5
-  def test_update_observation_with_selected_name
-    requires_login :update_observation_with_selected_name
-  end
-
   # Add reverify test
   # Add test with theme = ''
 end
