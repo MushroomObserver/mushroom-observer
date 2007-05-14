@@ -2,7 +2,7 @@
 
 <!--[form:species_list]-->
 <!-- % if false % -->
-<% if session['checklist'] %>
+<% if session['checklist'] && (session['checklist'] != []) %>
   <td valign="top">
     Select Species to Add:<br/>
     <% for (name, id) in session['checklist'] %>
@@ -23,7 +23,7 @@
       </p></span>
       <span id="help_note">
 Click 'Save' to create these name.  If you want to correct any you<br/>
-entered by hand, do so in the area below and click 'Save Edits' to<br/>
+entered by hand, do so in the area below and click 'Save' to<br/>
 re-evaluate the list.  If the names came from an uploaded species<br/>
 list, create a correct file and select it for upload.
 <br/><br/>

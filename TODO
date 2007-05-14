@@ -1,30 +1,63 @@
+Recognition of contribution
+  Overall contribution
+  User pages
+    Contribution Summary - show_user
+    Your/User Observations - show_user_observations (using list_observations)
+    Comments for You/User - show_comments_for_user
+    Images on show_user and show_site_stats pages
+
 More stuff to do with Names   
     Synonymy (accepted vs. proposed?) - Taxon
         Group of Names
+        Add Synonym page
         Name should be able to list synonyms
-        Add a synonym (merges Taxons)
-        Split
-        Search for synonymys
-	Grouping (Agaricus is part of Agaricales, etc.)
-	  View members and membership
-	  Page of all members and below?
-	  Should Macrolepiota include Chlorophyllum rachodes?
-    Common Name support (== Group but without the group)
-	Deprecating names
+        Split up synonyms
+        Search for synonyms
+    Deprecating names
+    Warnings about using deprecated names
 
-HowtoConfigureTheErrorPageForYourRailsApp
+After synonomy & deprecation - Transfer names from Name (lose rank relationships), RSS feed.
 
-After synonomy - Transfer names from Name, RSS feed.
+Multiple licenses
+  GFDL & CC-by-sa
+  CC-by-nc-sa
+  GFDL only
+  CC-by-sa only
+  Stored on a per image basis
+  User preferences for thumbnail, normal and originals
+  wiki, nc2.5, nc3
+  
+Show all comments
 
-No question email containing URLs
+Species list functional tests
+  Add tests for adding multiple new species
+
+Contribution
+    Contribution adjustment
+    Hidden contributors?
+    Contribution by month?
+
+More user collection pages?
+  User Comments
+  User Images
+  User Species Lists
 
 User pages
-  [Mushroom God - Mycorhizzal + login and database password]
-  Mycorhizzal - Lichenized + update site, become another user, send feature email
-  Lichenized - Composter + change the status of others (up to Lichenized), SVN access
-  Composter - Ranking, new submissions, name editing, mailing list, edit own entries
-  Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
-  Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
+    [Mushroom God - Mycorhizzal + login and database password]
+    Mycorhizzal - Lichenized + update site, become another user, send feature email
+    Lichenized - Composter + change the status of others (up to Lichenized), SVN access
+    Composter - Ranking, new submissions, name editing, mailing list, edit own entries
+    Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
+    Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
+
+Yet more stuff to do with Names
+    Grouping (Agaricus is part of Agaricales, etc.)
+      View members and membership
+      Page of all members and below?
+      Should Macrolepiota include Chlorophyllum rachodes?
+    Common Name support (== Group but without the group)
+
+Add rank relationships from Name
 
 Split up observer_controller?:
     user pages

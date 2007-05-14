@@ -1,4 +1,6 @@
-<% @title = 'Observations' %>
+<%  if @title.nil?
+        @title = 'Observations'
+    end %>
 <div id="Title"><%= @title %></div>
 	<%= pagination_links(@observation_pages) %>
 	<table cellspacing="0">

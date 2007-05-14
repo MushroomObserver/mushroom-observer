@@ -74,7 +74,7 @@
 </p>
 
 <p>Notes:<br/>
-<%= textilize @image.notes %></p>
+<%= textilize(sanitize(@image.notes.to_s)) %></p>
 
 </td>
 </tr>

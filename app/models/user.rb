@@ -49,7 +49,7 @@ class User < ActiveRecord::Base
   end
   
   def legal_name()
-    if self.name
+    if self.name && self.name != ''
       self.name
     else
       self.login

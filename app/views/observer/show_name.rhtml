@@ -13,7 +13,7 @@
 	<% end %>
 </p>
 <p>
-	Notes and Comments: <%= textilize @name.notes %>
+	Notes and Comments: <%= textilize(sanitize(@name.notes.to_s)) %>
 </p>
 <p>Observations:<br/>
 	<table cellpadding="5" cellspacing="0">

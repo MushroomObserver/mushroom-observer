@@ -46,7 +46,7 @@
 					<% end %>
 				</p>
 		<% end %>
-	    <p>Notes:</br><%= textilize @observation.notes %></p>
+	    <p>Notes:</br><%= textilize(sanitize(@observation.notes.to_s)) %></p>
 	    <p>Comments:<br/>
 	        <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
 	            <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_text_name), MAX_WHO_LENGTH),

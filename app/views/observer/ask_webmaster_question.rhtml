@@ -14,7 +14,15 @@ Mushroom Observer WebMaster<br/>
 <center><%= submit_tag "Send" %></center>
 <br/>
 <label for="user_email">Your Email address:</label><br/>
-<%= text_field "user", "email", :size => 60 %><br/><br/>
+<%
+    email_value = ""
+    if @sender
+        email_value = @sender
+    elsif @user
+        email_value = @user.email
+    end
+%>
+<%= text_field("user", "email", :value => email_value, :size => 60) %><br/><br/>
 <label for="question_content">Send a Question to the Site Designer</label><br/>
-<%= text_area 'question', 'content'  %>
+<%= text_area('question', 'content', :value => @content)  %>
 <% end %>

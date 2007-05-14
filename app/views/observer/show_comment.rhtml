@@ -10,4 +10,4 @@
 <p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
 <p>By: <%= @comment.user.unique_text_name %></p>
 <p>Summary: <%= @comment.summary %></p>
-<p>Comment: <%= textilize @comment.comment %></p>
+<p>Comment: <%= textilize(sanitize(@comment.comment)) %></p>

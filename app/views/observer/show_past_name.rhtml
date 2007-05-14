@@ -10,7 +10,7 @@
         	Author: <%= @past_name.author %><br/>
         	Version: <%= @past_name.version %><br/>
             <p>
-            	Notes: <%= textilize @past_name.notes %>
+            	Notes: <%= textilize(sanitize(@past_name.notes.to_s)) %>
             </p>
         </td>
         <td valign="top" width="50%">

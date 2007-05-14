@@ -8,59 +8,6 @@ class Search
   attr_accessor :pattern
 end
 
-class NameSorter
-  attr_reader :new_name_strs, :single_name_strs, :single_names, :multiple_name_strs
-  attr_accessor :chosen_names
-  
-  def all_name_strs
-    @new_name_strs + @multiple_name_strs + @single_name_strs
-  end
-  
-  def initialize
-    # The first four are for managing the values entered into the Species field
-    @new_name_strs = [] # List of strings
-    @single_name_strs = [] # List of strings
-    @single_names = [] # List of [Name, Time].  A Timestamp of nil implies now.
-    @multiple_name_strs = [] # List of strings
-  end
-  
-  def only_single_names
-    (@new_name_strs == []) and (@multiple_name_strs == [])
-  end
-  
-  def add_name(ns, timestamp=nil)
-    name_str = ns.strip
-    chosen = false
-    if @chosen_names
-      chosen_id = @chosen_names[name_str]
-      if chosen_id
-        @single_name_strs.push name_str
-        @single_names.push [Name.find(chosen_id), timestamp]
-        chosen = true
-      end
-    end
-    if not chosen
-      names = Name.find_names(name_str)
-      len = names.length
-      if len == 0
-        @new_name_strs.push name_str
-      elsif len == 1
-        @single_name_strs.push name_str
-        @single_names.push [names[0], nil]
-      else
-        @multiple_name_strs.push name_str
-      end
-    end
-  end
-  
-  def sort_names(name_list)
-    for n in name_list
-      add_name(n)
-    end
-  end
-
-end
-
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:ask_webmaster_question,
                                                     :color_themes,
@@ -106,17 +53,17 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> list_comments.rhtml
   def list_comments
+    store_location
     session['observation_ids'] = nil
     session['observation'] = nil
     session['image_ids'] = nil
-    store_location
     @comment_pages, @comments = paginate(:comments,
                                      :order => "'created' desc",
                                      :per_page => 10)
   end
 
   def add_comment
-    if verify_user(session['user'])
+    if verify_user()
       @comment = Comment.new
       @observation = Observation.find(params[:id])
     end
@@ -133,7 +80,7 @@ class ObserverController < ApplicationController
   # the observation is recovered from session.
   def save_comment
     user = session['user']
-    if verify_user(user)
+    if verify_user()
       @comment = Comment.new(params[:comment])
       @comment.created = Time.now
       @observation = @comment.observation
@@ -299,7 +246,7 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> create_observation.rhtml
   def create_observation
-    if verify_user(session['user'])
+    if verify_user()
       session[:observation_ids] = nil
       session[:observation] = nil
       session[:image_ids] = nil
@@ -323,7 +270,7 @@ class ObserverController < ApplicationController
 
   def construct_observation
     user = session['user']
-    if verify_user(user)
+    if verify_user()
       @observation = Observation.new(params[:observation])
       now = Time.now
       @observation.created = now
@@ -729,8 +676,7 @@ class ObserverController < ApplicationController
     
   # left-hand panel -> create_species_list.rhtml
   def create_species_list
-    user = session['user']
-    if verify_user(user)
+    if verify_user()
       read_session
       calc_checklist(nil)
     end
@@ -835,7 +781,7 @@ class ObserverController < ApplicationController
       species_list.file = file_data
       sorter = NameSorter.new
       species_list.process_file_data(sorter)
-      do_action('edit_species_list', params[:id], {}, false, '', {}, sorter)
+      species_list_action('edit_species_list', params[:id], {}, false, '', {}, sorter)
     end
   end
 
@@ -846,7 +792,7 @@ class ObserverController < ApplicationController
       end
       for ns in name_list
         name_str = ns.strip
-        if approved_names.member? name_str
+        if approved_names.member?(name_str)
           names = Name.names_from_string(name_str)
           if names.last.nil?
             flash[:notice] = "Unable to create the name %s", name_str
@@ -881,7 +827,7 @@ class ObserverController < ApplicationController
       end
     else
       user = session['user']
-      if verify_user(user)
+      if verify_user()
         args["created"] = now
         args["modified"] = now
         args["user"] = user
@@ -893,7 +839,7 @@ class ObserverController < ApplicationController
     [user, species_list]
   end
 
-  def do_action(action, id, args, names_only, notes, names, sorter)
+  def species_list_action(action, id, args, names_only, notes, names, sorter)
     if args
       # Store all the state in the session since we can't put it in the database yet
       # and it's too awkward to pass through the URL effectively
@@ -956,7 +902,7 @@ class ObserverController < ApplicationController
           end
         end
       end
-      do_action(action, id, args, names_only, notes, params[:checklist_data], sorter)
+      species_list_action(action, id, args, names_only, notes, params[:checklist_data], sorter)
     else
       redirect_to :action => 'list_species_lists'
     end
@@ -972,8 +918,7 @@ class ObserverController < ApplicationController
 
   # show_observation.rhtml -> manage_species_lists.rhtml
   def manage_species_lists
-    user = session['user']
-    if verify_user(user)
+    if verify_user()
       @observation = Observation.find(params[:id])
     end
   end
@@ -987,21 +932,29 @@ class ObserverController < ApplicationController
       redirect_to :action => 'list_observations'
     end
   end
-  
+
   def ask_webmaster_question
+    @sender = session['sender']
+    session['sender'] = nil
+    @content = session['content']
+    session['content'] = nil
     @user = session['user']
   end
   
   def send_webmaster_question
     sender = params['user']['email']
+    content = params['question']['content']
     if sender.nil? or sender.strip == ''
       flash[:notice] = "You must provide a return address."
+      session['content'] = content
       redirect_to :action => 'ask_webmaster_question'
-    elsif /http:/ =~ params['question']['content']
-      flash[:notice] = "To cut down on spam questions from unregistered users cannot contain URLs."
+    elsif /http:/ =~ content
+      flash[:notice] = "To cut down on robot spam, questions from unregistered users cannot contain 'http:'."
+      session['sender'] = sender
+      session['content'] = content
       redirect_to :action => 'ask_webmaster_question'
     else
-      AccountMailer.deliver_webmaster_question(params['user']['email'], params['question']['content'])
+      AccountMailer.deliver_webmaster_question(sender, content)
       flash[:notice] = "Delivered question or comment."
       redirect_back_or_default :action => "list_rss_logs"
     end
@@ -1190,10 +1143,8 @@ class ObserverController < ApplicationController
   
   # show_name.rhtml -> edit_name.rhtml
   def edit_name
-    user = session['user']
-    if verify_user(user)
+    if verify_user()
       @name = Name.find(params[:id])
-    else
     end
   end
 
@@ -1201,7 +1152,7 @@ class ObserverController < ApplicationController
   # Updates modified and saves changes
   def update_name
     user = session['user']
-    if verify_user(user)
+    if verify_user()
       name = Name.find(params[:id])
       past_name = PastName.make_past_name(name)
       begin
@@ -1455,7 +1406,7 @@ class ObserverController < ApplicationController
     result
   end
 
-  def verify_user(user)
+  def verify_user()
     result = false
     if session['user'].verified.nil?
       redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id

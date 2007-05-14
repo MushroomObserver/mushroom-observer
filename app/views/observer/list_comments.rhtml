@@ -1,4 +1,6 @@
-<% @title = 'Comments' %>
+<%  if @title.nil?
+        @title = 'Comments'
+    end %>
 <div id="Title"><%= @title %></div>
 
 <%= pagination_links(@comment_pages) %>
