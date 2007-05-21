@@ -86,6 +86,12 @@
 								<br/>
 								<%= link_to('Comments', :controller => 'observer',
 								            :action => 'list_comments') %>
+								<br/>
+                                <%= link_to('Contributors', :controller => 'observer',
+                                            :action => 'users_by_contribution') %>
+                                <br/>
+                                <%= link_to('Site&nbsp;Stats', :controller => 'observer',
+                                            :action => 'show_site_stats') %>
 								<br/><br/>
 								<% if session['user'].nil? %>
 								Account:<br/>
@@ -97,6 +103,20 @@
 								<% else %>
 								Current&nbsp;user:<br/>
 								&nbsp;&nbsp;<%= h(session['user'].login) %><br/>
+								&nbsp;&nbsp;<%= link_to('Comments&nbsp;for&nbsp;You',
+								                        :controller => 'observer',
+								                        :action => 'show_comments_for_user',
+								                        :id => session['user']) %><br/>
+								&nbsp;&nbsp;<%= link_to('Your&nbsp;Observations',
+								                        :controller => 'observer',
+								                        :action => 'show_user_observations',
+								                        :id => session['user']) %><br/>
+                                &nbsp;&nbsp;<%= link_to('Your&nbsp;Summary',
+                                                        :controller => 'observer',
+                                                        :action => 'show_user',
+                                                        :id => session['user']) %><br/>
+
+
 								&nbsp;&nbsp;<%= link_to('Preferences',
 								                        :controller => 'account',
 								                        :action => 'prefs') %><br/>

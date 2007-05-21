@@ -1,0 +1,50 @@
+<% @title = 'List of Contributors'%>
+<%= link_to 'Site Stats', :action => 'show_site_stats' %>
+<div id="Title"><%= @title %></div>
+
+<table cellpadding="5" cellspacing="5"><tr align="middle">
+    <td valign="top" width="50%">
+        <table cellpadding="5" cellspacing="5" border=0>
+        	<%
+        		for metric, user_id, user_name in @user_ranking
+        		    if metric > 0 %>
+        			<tr>
+        				<td class="Data">
+        					<%= user_name %>
+        				</td>
+        				<td>
+        				    <%= link_to("Observations", :action => "show_user_observations", :id => user_id) %>
+        				</td>
+        				<td>
+        				    <%= link_to(metric, :action => "show_user", :id => user_id) %>
+        				</td>
+        			</tr>
+        			<% end %>
+        	<%  end %>
+        </table>
+    </td>
+    <td valign="top" align="left" width="50%">
+        The order is currently based on an automated estimation of
+        what each person has contributed to the site.  The
+        purpose of creating this order is to recognize the
+        individual contributions of the members of the
+        MushroomObserver.org community.
+        <br/><br/>
+        The current formula is a weighted sum of each
+        contribution.  The current weighting is:<br/><br/>
+        Images: <%= FIELD_WEIGHTS[:images] %><br/>
+        Current name changes: <%= FIELD_WEIGHTS[:names] %><br/>
+        Previous name changes: <%= FIELD_WEIGHTS[:past_names] %><br/>
+        Species lists: <%= FIELD_WEIGHTS[:species_lists] %><br/>
+        Species list entries: <%= FIELD_WEIGHTS[:species_list_entries] %><br/>
+        Comments: <%= FIELD_WEIGHTS[:comments] %><br/>
+        Observations: <%= FIELD_WEIGHTS[:observations] %><br/>
+        <br/>
+        Thus an observation of a species not previously in the site with
+        3 images would count as 3*<%= FIELD_WEIGHTS[:images] %>+1*<%= FIELD_WEIGHTS[:names] %>+1*<%= FIELD_WEIGHTS[:observations] %> = <%= 3*FIELD_WEIGHTS[:images] + 1*FIELD_WEIGHTS[:names] + 1*FIELD_WEIGHTS[:observations] %> points.<br/>
+        <br/>
+        These weights or the overall method of ranking is likely
+        to change over time based on feedback from the members of
+        the community.
+    </td>
+</td></table>

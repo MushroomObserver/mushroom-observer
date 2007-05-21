@@ -1,0 +1,59 @@
+<% @title = "Site Statistics" %>
+<%= link_to 'Contributors', :action => 'users_by_contribution' %>
+
+<center>
+    <table border=0>
+        <tr align="center">
+            <%
+            obs_length = 0
+            if @observations
+                obs_length = @observations.length
+            end
+            if obs_length > 0
+                %>
+                <td>
+                    <%
+                    for obs in @observations[0,3]
+                        %>
+                        <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id)),
+                                :action => 'show_observation', :id => obs.id) %><br/>
+                    <%
+                    end
+                    %>
+                </td>
+            <% end %>
+            <td valign="top" width="50%">
+                <div id="Title"><%= @title %></div>
+                <table cellpadding="5" cellspacing="5" border=0>
+                    <%
+                    total = 0
+                    for field in [:observations, :images, :names, :past_names, :species_lists,
+                                  :species_list_entries, :comments]
+                        count = @site_data[field]
+                        if count
+                            %>
+                    	    <tr>
+                    		    <td>
+                    		        <%= FIELD_TITLES[field] %>
+                    		    </td>
+                    		    <td>
+                    		        <%= count %>
+                    		    </td>
+                    	    </tr>
+                    	<% end
+                    end %>
+                </table>
+            </td>
+            <%
+            if obs_length > 3
+                %>
+                <td>
+                    <% for obs in @observations[3,3] %>
+                        <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id)),
+                                :action => 'show_observation', :id => obs.id) %><br/>
+                    <% end %>
+                </td>
+            <% end %>
+        <tr>
+    </table>
+</center>

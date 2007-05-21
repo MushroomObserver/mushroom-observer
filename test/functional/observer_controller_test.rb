@@ -222,11 +222,41 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'species_lists_by_title'
   end
+
+  def test_users_by_contribution
+    get :users_by_contribution
+    assert_response :success
+    assert_template 'users_by_contribution'
+  end
   
   def test_show_past_name
     get :show_past_name, :id => 1
     assert_response :success
     assert_template 'show_past_name'
+  end
+
+  def test_show_user
+    get :show_user, :id => 1
+    assert_response :success
+    assert_template 'show_user'
+  end
+  
+  def test_show_site_stats
+    get :show_site_stats
+    assert_response :success
+    assert_template 'show_site_stats'
+  end
+  
+  def test_show_user_observations
+    get :show_user_observations, :id => 1
+    assert_response :success
+    assert_template 'list_observations'
+  end
+  
+  def test_show_comments_for_user
+    get :show_comments_for_user, :id => 1
+    assert_response :success
+    assert_template("list_comments")
   end
 
   # Pages that require login

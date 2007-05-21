@@ -32,14 +32,19 @@ class ObserverController < ApplicationController
                                                     :rss,
                                                     :send_webmaster_question,
                                                     :show_comment,
+                                                    :show_comments_for_user,
                                                     :show_image,
                                                     :show_name,
                                                     :show_observation,
                                                     :show_original,
                                                     :show_past_name,
                                                     :show_rss_log,
+                                                    :show_site_stats,
                                                     :show_species_list,
-                                                    :species_lists_by_title])
+                                                    :show_user,
+                                                    :show_user_observations,
+                                                    :species_lists_by_title,
+                                                    :users_by_contribution])
   # Default page
   def index
     list_rss_logs
@@ -931,6 +936,63 @@ class ObserverController < ApplicationController
     else
       redirect_to :action => 'list_observations'
     end
+  end
+
+  # users_by_contribution.rhtml
+  def users_by_contribution
+    @user_ranking = SiteData.new.get_user_ranking
+  end
+
+  # show_user.rhtml
+  def show_user
+    store_location
+    id = params[:id]
+    @user_data = SiteData.new.get_user_data(id)
+    @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
+      :order => "id desc", :limit => 6)
+  end
+
+  # show_site_stats.rhtml
+  def show_site_stats
+    store_location
+    id = params[:id]
+    @site_data = SiteData.new.get_site_data
+    @observations = Observation.find(:all, :conditions => ["thumb_image_id is not null"],
+      :order => "id desc", :limit => 6)
+  end
+
+  def show_user_observations
+    store_location
+    user = User.find(params[:id])
+    @layout = calc_layout_params
+    @title = "Observations by %s" % user.legal_name
+    conditions = "observations.user_id = %s" % user.id
+    order = "observations.modified desc, `when` desc"
+    query = "select observations.id, names.search_name from observations, names
+             where observations.name_id = names.id and %s order by %s" % [conditions, order]
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = self.query_ids(query)
+    session['observation'] = nil
+    session['image_ids'] = nil
+    @observation_pages, @observations = paginate(:observations, :include => "name",
+                                                 :order => order,
+                                                 :conditions => conditions,
+                                                 :per_page => @layout["count"])
+    render :action => 'list_observations'
+  end
+
+  def show_comments_for_user
+    store_location
+    user = User.find(params[:id])
+    @title = "Comments for %s" % user.legal_name
+    session['observation_ids'] = nil
+    session['observation'] = nil
+    session['image_ids'] = nil
+    @comment_pages, @comments = paginate(:comments, :include => "observation",
+                                         :order => "comments.created desc",
+                                         :conditions => "observations.user_id = %s" % user.id,
+                                         :per_page => 10)
+    render :action => 'list_comments'
   end
 
   def ask_webmaster_question
