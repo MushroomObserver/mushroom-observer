@@ -1,0 +1,98 @@
+<%= error_messages_for 'synonym' %>
+
+<!--[form:observation]-->
+<table cellpadding="10">
+    <tr>
+        <td valign="top">
+            <%
+            synonym = @name.synonym
+            names = []
+            if synonym
+                names = synonym.names
+                %>
+                Current Synonyms:<br/>
+                <span id="help_note">
+                    Unchecked items will remain synonymized with each other.
+                </span>
+                <span class="Data">
+                    <p>
+                        <%
+                        for n in names
+                            if n != @name %>
+                                <%= check_box("existing_synonyms", n.id, { :checked => "checked" }, "checked") %>
+                                <label for="existing_synonyms">
+                                    <%= link_to(textilize_without_paragraph(h(n.display_name)),
+                                                :action => 'show_name', :id => n) %>
+                                </label>
+                                <br/>
+                            <%
+                            end
+                        end %>
+                    </p>
+                </span>
+            <% end %>
+            <%
+            if @synonym_names && @synonym_names != []
+                %>
+                <%
+                if synonym %>
+                    <hr><br/>
+                <% end %>
+                Proposed Synonyms:<br/>
+                <span id="help_note">
+                    Unchecked items will retain their relationships with each other.
+                </span>
+                <span class="Data">
+                    <p>
+                        <%
+                        for name in @synonym_names
+                            if not names.member?(name) %>
+                                <%= check_box("proposed_synonyms", name.id, { :checked => "checked" }, "checked") %>
+                                <label for="proposed_synonyms">
+                                    <%= link_to(textilize_without_paragraph(h(name.display_name)),
+                                                            :action => 'show_name', :id => name) %>
+                                </label>
+                                <br/>
+                            <%
+                            end
+                        end %>
+                    </p>
+                </span>
+            <% end %>
+        </td>
+        <td valign="top">
+            <%
+            if @new_names && (@new_names != []) %>
+                The following names could not be found.<br/>
+                <span class="Data">
+                    <p>
+                        <% for n in @new_names %>
+                            &nbsp;&nbsp;<%= h(n) %><br/>
+                        <% end %>
+                    </p>
+                </span>
+                <span id="help_note">
+                    Click 'Add' to create these name.  If you want to correct any names,<br/>
+                    do so in the area below and click 'Add' to re-evaluate the list.
+                    <br/><br/>
+                </span>
+            <% end %>
+            <p>
+                <%= check_box("deprecate", "all", { :checked => @deprecate_all }, "checked") %>
+                <label for="deprecate"> Deprecate Synonyms</label><br/>
+                <span id="help_note">
+                    If checked all listed synonyms become deprecated names.  Otherwise,<br/>
+                    they are left as they are with new names created as not deprecated.
+                </span>
+            </p>
+            <p>
+                <label for="synonym_members">Names:</label>
+            	<span id="help_note">
+            		List the names you want to be synonymized with <%= textilize_without_paragraph(h(@name.display_name)) %>.
+            	</span><br/>
+                <%= text_area 'synonym', 'members', :value => @list_members  %>
+            </p>
+        </td>
+    </tr>
+</table>
+<!--[eoform:observation]-->

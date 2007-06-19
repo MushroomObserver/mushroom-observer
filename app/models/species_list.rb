@@ -105,6 +105,35 @@ class SpeciesList < ActiveRecord::Base
     end
   end
   
+  def update_names(chosen_names)
+    if chosen_names
+      for observation in self.observations
+        name = observation.name
+        alt_name_id = chosen_names[name.search_name]
+        if alt_name_id
+          alt_name = Name.find(alt_name_id)
+          if alt_name
+            observation.name = alt_name
+            observation.save
+          end
+        end
+      end
+    end
+  end
+
+  # Tests to see if the species list includes an observation
+  # with the given name.  Primarily used by functional tests.
+  def name_included(name)
+    result = false
+    for obs in self.observations
+      if obs.name == name
+        result = true
+        break
+      end
+    end
+    return result
+  end
+
   validates_presence_of :title
   validates_presence_of :where
 end

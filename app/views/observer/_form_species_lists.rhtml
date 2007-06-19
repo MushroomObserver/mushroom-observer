@@ -14,40 +14,59 @@
 <% end %>
 <!-- % end % -->
 <td valign="top">
-    <% if @new_names && (@new_names != []) %>
-         The following names could not be found.<br/>
-      <span class="Data"><p>
-      <% for n in @new_names %>
-        &nbsp;&nbsp;<%= h(n) %><br/>
-      <% end %>
-      </p></span>
-      <span id="help_note">
-Click 'Save' to create these name.  If you want to correct any you<br/>
-entered by hand, do so in the area below and click 'Save' to<br/>
-re-evaluate the list.  If the names came from an uploaded species<br/>
-list, create a correct file and select it for upload.
-<br/><br/>
-      </span>
+    <%= render :partial => 'form_list_feedback' %>
+    <% if @deprecated_names && (@deprecated_names != []) %>
+        The following names are deprecated:<br/>
+        <span id="help_note">
+            Select any names you would prefer to use.  If you prefer a name<br/>
+            you entered then don't select one of the suggested synonyms.<br/>
+        </span>
+        <span class="Data">
+            <% for name_str in @deprecated_names
+                valid_names = []
+                for name in Name.find_names(name_str)
+                    for valid_name in name.valid_synonyms
+                        valid_names.push(valid_name)
+                    end
+                end
+                if valid_name != []
+                    %>
+                    <p>
+                        <%= h(name_str) %><br/>
+                        <% for valid_name in valid_names %>
+                            &nbsp;&nbsp;<%= radio_button("chosen_valid_names", name_str, valid_name.id) %>
+                            <%= textilize_without_paragraph(h(valid_name.display_name)) %><br/>
+                        <% end %>
+                    </p>
+                <% end %>
+            <% end %>
+        </span>
     <% end %>
-    <% if @multiple_names && (@multiple_names != []) %>
-         Multiple names match each of the follow entries:<br/>
-      <span class="Data"><p>
-      <% for name_str in @multiple_names %>
-        <p><%= h name_str %><br/>
-        <% for name in Name.find_names(name_str) %>
-            &nbsp;&nbsp;<%= radio_button("chosen_names", name_str, name.id) %>
-            <%= textilize_without_paragraph(h(name.display_name)) %> (<%= name.observations.size %>)<br/>
-        <% end %>
-        </p>
-      <% end %>
-      </p></span>
-      <span id="help_note">
-In each case, select the intended name.  The number after each<br/>
-name is how many observations are currently using that name..<br/><br/>
-      </span>
+    <% if @multiple_names && (@multiple_names != [])
+        %>
+        <br/>Multiple names match each of the follow entries:<br/>
+        <span id="help_note">
+            In each case, select the intended name.  The number after each<br/>
+            name is how many observations are currently using that name.<br/>
+        </span>
+        <span class="Data">
+            <p>
+                <% for name_str in @multiple_names
+                    %>
+                    <p>
+                        <%= h(name_str) %><br/>
+                        <% for name in Name.find_names(name_str)
+                            %>
+                            &nbsp;&nbsp;<%= radio_button("chosen_names", name_str, name.id) %>
+                            <%= textilize_without_paragraph(h(name.display_name)) %> (<%= name.observations.size %>)<br/>
+                        <% end %>
+                    </p>
+                <% end %>
+            </p>
+        </span>
     <% end %>
 	<p>
-		<label for="species_list_species">Write In Species (enter a name on each line):</label><br/>
+		<label for="list_members">Write In Species (enter a name on each line):</label><br/>
 		<%= text_area 'list', 'members', :'value' => @list_members  %>
 	</p>
 
@@ -77,10 +96,8 @@ name is how many observations are currently using that name..<br/><br/>
 		<%= text_area 'member', 'notes', :value => @member_notes, :rows => 5  %>
 	</p>
 
-    <p><%= check_box("names_only", "first", {}, "true", "false") %><label for="names_only"> Just Create New Names</label><br/>
     <span id="help_note">
-If checked then the list is only scanned for new names to add to the database.<br/>
-Neither a species list nor the corresponding observations are created.
+Bulk name creation has moved to the <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %> page.
     </span></p>
 </td>
 

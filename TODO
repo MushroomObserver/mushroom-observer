@@ -1,14 +1,45 @@
-More stuff to do with Names   
-    Synonymy (accepted vs. proposed?) - Taxon
-        Group of Names
-        Add Synonym page
-        Name should be able to list synonyms
-        Split up synonyms
-        Search for synonyms
-    Deprecating names
-    Warnings about using deprecated names
+name_index should only show names with observations
+
+Adding multiple deprecated synonyms doesn't seem to work, e.g.
+Boletus satanas = Boletus santanas Deprecated
+Boletus satanas = Boletus satanus Deprecated
+
+Agaricus silvicola (Vittad.) Peck = Agaricus abruptibulbus
+Agaricus silvicola (Vittad.) Peck = Agaricus campestris var. silvicola Vittad.
+Agaricus silvicola (Vittad.) Peck = Agaricus flavescens (Gillet) Sacc.
+
+<Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
+Genus <Genus> <Author> = Genus <Genus> <Author>
 
 After synonomy & deprecation - Transfer names from Name (lose rank relationships), RSS feed.
+
+Update deprecated names:
+Psathyrella candolleana (Fr.) Maire = Psathyrela candoleana Deprecated
+Armillaria mellea = Armillaria melea
+Boletus satanas = Boletus santanas Deprecated
+Boletus satanas = Boletus satanus Deprecated
+Gymnopus dryophilus = Gymnopus dryophila Deprecated
+Laccaria amethysteo-occidentalis G.M. Muell. = Laccaria amythysteo-occidentalis Deprecated
+Lactarius xanthogalactus Peck = Lactarius xanthogalacteus Deprecated
+Leucoagaricus rubrotinctus (Beeli) Singer = Leucoagaricus rubrotincta Deprecated
+Marasmiellus candidus (Bolton) Singer = Marasmielus candidus Deprecated
+Marasmiellus = Marasmielus
+Morchella angusticeps Peck = Morchella angusticepes Deprecated
+Omphalotus olivascens = Omphalotus olivescens Deprecated
+Psathyrella = Psathyrela
+Psathyrella gracilis = Psathyrela gracilis Deprecated
+Psathyrella longipes = Psathyrela longipes Deprecated
+Psathyrella uliginicola = Psathyrela uliginicola Deprecated
+Psathyrella longipes (Peck) A.H. Sm. = Psathyrella longtipes Deprecated
+Tremella mesenterica Retz. = Tremella mestenterica Deprecated
+Trichaptum abietinum (Dicks.) Ryvarden = Trichaptum abietinus Deprecated
+Tricholoma = Tricoloma Deprecated
+
+Remove Stemonitis deprecated Deprecated
+
+Default date for images should be based on observation
+
+Spam reduction by validating theme
 
 Multiple licenses
   GFDL & CC-by-sa
@@ -25,9 +56,10 @@ Species list functional tests
   Add tests for adding multiple new species
 
 Contribution
-    Contribution adjustment
-    Hidden contributors?
+    Hidden contributors
+    Contribution adjustment?
     Contribution by month?
+    Better design?
 
 More user collection pages?
   User Comments
@@ -35,6 +67,7 @@ More user collection pages?
   User Species Lists
 
 User pages
+    User.where (optional)
     [Mushroom God - Mycorhizzal + login and database password]
     Mycorhizzal - Lichenized + update site, become another user, send feature email
     Lichenized - Composter + change the status of others (up to Lichenized), SVN access

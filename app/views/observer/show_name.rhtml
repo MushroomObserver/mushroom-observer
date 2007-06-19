@@ -1,12 +1,43 @@
 <% @title = 'Name: ' + h(@name.text_name) %>
 <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @name.text_name) %><br/>
 <%= link_to 'Edit Name', :action => 'edit_name', :id => @name %>
+| <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %>
+| <%= link_to('Change Synonyms', :action => 'change_synonyms', :id => @name)%>
 
 <div id="Title"><%= textilize_without_paragraph(h(@name.display_name)) %></div>
 <p>
 	Rank: <%= @name.rank %><br/>
 	Name: <%= @name.text_name %><br/>
 	Author: <%= @name.author %><br/>
+	Status: <%= @name.status %><br/>
+	<%
+	synonym = @name.synonym
+	if synonym
+	    valid_synonyms = []
+	    deprecated_synonyms = []
+	    for n in synonym.names
+	        if n != @name
+	            link = link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)
+	            if n.deprecated
+	                deprecated_synonyms.push(link)
+	            else
+	                valid_synonyms.push(link)
+                end
+	        end
+	    end
+	    if valid_synonyms != []
+	        if @name.deprecated
+	            %>
+	            Preferred 
+	        <% end %>
+	        Synonym(s): <%= valid_synonyms.join(', ') %><br/>
+	    <%
+	    end
+	    if deprecated_synonyms != []
+	        %>
+	        Deprecated Synonym(s): <%= deprecated_synonyms.join(', ') %><br/>
+	    <% end %>
+	<% end %>
 	Version: <%= @name.version %><br/>
 	<% if @past_name %>
 	    <%= link_to("Previous version: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id ) %>
@@ -15,7 +46,8 @@
 <p>
 	Notes and Comments: <%= textilize(sanitize(@name.notes.to_s)) %>
 </p>
-<p>Observations:<br/>
+<p>
+    Observations:<br/>
 	<table cellpadding="5" cellspacing="0">
 		<%
 		odd_or_even = 0
@@ -43,6 +75,38 @@
 	  	</tr>
 	    <% end %>
 	</table>
+	<%
+	if @synonym_data != []
+	    %>
+	    <br/>Synonym observations:<br/>
+	    <table cellpadding="5" cellspacing="0">
+	    <%
+	    odd_or_even = 0
+	    for datum in @synonym_data
+ 	    	odd_or_even = 1 - odd_or_even
+			id = datum["id"]
+			%>
+    		<tr valign="top" class="ListLine<%= odd_or_even %>">
+    	    	<td width=110 align="center" valign="middle">
+    				<%=
+    				image_id = datum["thumb_image_id"]
+    				if image_id
+    		  			link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
+    	            			:action => 'show_observation', :id => id)
+    	          	end
+    	      		%><br/>
+    	    	</td>
+    		    <td width="100%" valign="middle">
+    				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
+    			                                        :action => 'show_observation', :id => id) %></span><br/>
+    		        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
+    		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
+    		        Observation made: <%= datum["when"]%>
+    		    </td>
+    	  	</tr>
+	    <% end %>
+	    </table>
+    <% end %>
     <p><span class="Date">
         Name created: <%= @name.created %><br/>
         Last modified: <%= @name.modified %> by <%= @name.user.unique_text_name %><br/>

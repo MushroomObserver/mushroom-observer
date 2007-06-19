@@ -75,3 +75,186 @@ amanita_baccata_borealis:
   display_name: __Amanita baccata__ sensu Borealis
   observation_name: __Amanita baccata__ sensu Borealis
   search_name: Amanita baccata sensu Borealis
+
+# No Taxon 1
+lepiota_rachodes:
+  id: 7
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lepiota rachodes
+  author: Vittad.
+  display_name: __Lepiota rachodes__ Vittad.
+  observation_name: __Lepiota rachodes__ Vittad.
+  search_name: Lepiota rachodes Vittad.
+
+# No Taxon 2
+lepiota_rhacodes:
+  id: 8
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lepiota rhacodes
+  author: Vittad.
+  display_name: __Lepiota rhacodes__ Vittad.
+  observation_name: __Lepiota rhacodes__ Vittad.
+  search_name: Lepiota rhacodes Vittad.
+
+# Taxon 1, Name 1
+macrolepiota_rachodes:
+  id: 9
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Macrolepiota rachodes
+  author: (Vittad.) Singer
+  display_name: __Macrolepiota rachodes__ (Vittad.) Singer
+  observation_name: __Macrolepiota rachodes__ (Vittad.) Singer
+  search_name: Macrolepiota rachodes (Vittad.) Singer
+  synonym_id: 1
+
+# Taxon 1, Name 2
+macrolepiota_rhacodes:
+  id: 10
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 2
+  version: 0
+  rank: Species
+  text_name: Macrolepiota rhacodes
+  author: (Vittad.) Singer
+  display_name: __Macrolepiota rhacodes__ (Vittad.) Singer
+  observation_name: __Macrolepiota rhacodes__ (Vittad.) Singer
+  search_name: Macrolepiota rhacodes (Vittad.) Singer
+  synonym_id: 1
+
+# Taxon 2, Name 1
+chlorophyllum_rachodes:
+  id: 11
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Chlorophyllum rachodes
+  author: (Vittad.) Vellinga
+  display_name: __Chlorophyllum rachodes__ (Vittad.) Vellinga
+  observation_name: __Chlorophyllum rachodes__ (Vittad.) Vellinga
+  search_name: Chlorophyllum rachodes (Vittad.) Vellinga
+  synonym_id: 2
+
+# Taxon 2, Name 2
+chlorophyllum_rhacodes:
+  id: 12
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 2
+  version: 0
+  rank: Species
+  text_name: Chlorophyllum rhacodes
+  author: (Vittad.) Vellinga
+  display_name: __Chlorophyllum rhacodes__ (Vittad.) Vellinga
+  observation_name: __Chlorophyllum rhacodes__ (Vittad.) Vellinga
+  search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
+  synonym_id: 2
+
+# Taxon 3, Name 1
+lactarius_alpinus:
+  id: 13
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius alpinus
+  author: Peck
+  display_name: __Lactarius alpinus__ Peck
+  observation_name: __Lactarius alpinus__ Peck
+  search_name: Lactarius alpinus Peck
+  synonym_id: 3
+#
+
+# Taxon 3, Name 2
+lactarius_alpigenes:
+  id: 14
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius alpigenes
+  author: Kühn.
+  display_name: __Lactarius alpigenes__ Kühn.
+  observation_name: __Lactarius alpigenes__ Kühn.
+  search_name: Lactarius alpigenes Kühn.
+  synonym_id: 3
+  deprecated: 1
+#
+
+# Taxon 3, Name 3
+lactarius_kuehneri:
+  id: 15
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius kuehneri
+  author: Joss.
+  display_name: __Lactarius kuehneri__ Joss.
+  observation_name: __Lactarius kuehneri__ Joss.
+  search_name: Lactarius kuehneri Joss.
+  synonym_id: 3
+  deprecated: 1
+#
+
+# Taxon 3, Name 4
+lactarius_subalpinus:
+  id: 16
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius subalpinus
+  author: Kühn.
+  display_name: __Lactarius subalpinus__ Kühn.
+  observation_name: __Lactarius subalpinus__ Kühn.
+  search_name: Lactarius subalpinus Kühn.
+  synonym_id: 3
+  deprecated: 1
+#
+
+# Deprecated genus
+psalliota:
+  id: 17
+  created: 2007-06-09 08:06:28
+  modified: 2007-06-09 08:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Psalliota
+  display_name: Genus __Psalliota__
+  observation_name: __Psalliota sp.__
+  search_name: Psalliota sp.
+#
+
+# Valid genus
+agaricus:
+  id: 18
+  created: 2007-06-09 08:06:28
+  modified: 2007-06-09 08:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Agaricus
+  display_name: Genus __Agaricus__
+  observation_name: __Agaricus sp.__
+  search_name: Agaricus sp.
+#

@@ -3,7 +3,34 @@
 <!--[form:observation]-->
 
 <% if what %>
-    <% if names %>
+    <% if valid_names
+        %>
+        <p>
+            <span class="Data">
+                The name '<%= h(what) %>' is deprecated.<br/>
+            </span>
+            <span id="help_note">
+                Select a valid name or click '<%= button_name %>' to use '<%= h(what) %>'.<br/>
+            </span>
+            <span class="Data">
+                Valid synonyms are:<br/>
+                <% for n in valid_names %>
+                    &nbsp;&nbsp;<%= radio_button("chosen_name", 'name_id', n.id) %>
+                    <%= textilize_without_paragraph(h(n.display_name)) %><br/>
+                <% end %>
+            </span>
+        </p>
+    <% elsif names.length == 0
+        %>
+        <span class="Data">
+            <p>
+                The name '<%= h(what) %>' was not recognized.<br/>
+            </p>
+        </span>
+        <span id="help_note">
+            Click '<%= button_name %>' to create this name or edit the name below to correct any typo.<br/><br/>
+        </span>
+    <% else %>
         <span class="Data">
             <br/>Multiple names match '<%= h(what) %>'.  Select the one you intended:<br/>
             <% for n in names %>
@@ -13,15 +40,6 @@
         </span>
         <span id="help_note">
             The number after each name is how many observations are currently using that name.
-        </span>
-    <% else %>
-        <span class="Data">
-            <p>
-                The name '<%= h(what) %>' was not recognized.<br/>
-            </p>
-        </span>
-        <span id="help_note">
-            Click '<%= button_name %>' to create this name or edit the name below to correct any typo.<br/><br/>
         </span>
     <% end %>
 <% end %>

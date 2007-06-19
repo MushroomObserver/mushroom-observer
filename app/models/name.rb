@@ -3,6 +3,7 @@ class Name < ActiveRecord::Base
   has_many :past_names
   has_one :rss_log
   belongs_to :user
+  belongs_to :synonym
 
   def log(msg)
     if self.rss_log.nil?
@@ -30,19 +31,23 @@ class Name < ActiveRecord::Base
   
   
   def self.all_ranks()
-    [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phyllum, :Kingdom, :Group]
+    [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
   end
   
   def self.ranks_above_species()
-    [:Genus, :Family, :Order, :Class, :Phyllum, :Kingdom]
+    [:Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
   end
   
-  def self.find_names(in_str)
+  def self.find_names(in_str, rank=nil)
     name = in_str.strip
     if ['Unknown', 'unknown'].member? in_str
       name = "Fungi"
     end
-    Name.find(:all, :conditions => "search_name = '%s' or text_name = '%s'" % [name, name])
+    if rank
+      Name.find(:all, :conditions => ["rank = :rank and (search_name = :name or text_name = :name)", {:rank => rank, :name => name}])
+    else
+      Name.find(:all, :conditions => ["search_name = :name or text_name = :name", {:name => name}])
+    end
   end
   
   def self.make_species(genus, species)
@@ -96,8 +101,6 @@ class Name < ActiveRecord::Base
         result = Name.create_name(rank, text_name, author, display_name, observation_name, search_name)
       elsif matches.length == 1
         result = matches.first
-      else
-        print sprintf("%s has %d matches\n", text_name, matches.length)
       end
     end
     result
@@ -389,5 +392,67 @@ class Name < ActiveRecord::Base
     self.display_name = display_name
     self.observation_name = observation_name
     self.search_name = search_name
+  end
+
+  def valid_synonyms
+    result = []
+    synonym = self.synonym
+    if synonym
+      for n in synonym.names
+        result.push(n) unless n.deprecated
+      end
+    end
+    return result
+  end
+  
+  # Ensure that this Name has no synonyms by clearing the synonym
+  # and destroying it if necessary
+  def clear_synonym
+    synonym = self.synonym
+    if synonym
+      names = synonym.names
+      if names.length <= 2 # Get rid of the synonym
+        for n in names
+          n.synonym = nil
+          n.save
+        end
+        synonym.destroy
+      else # Just clear this name
+        self.synonym = nil
+        self.save
+      end
+    end
+  end
+
+  def merge_synonyms(name)
+    synonym = self.synonym
+    name_synonym = name.synonym
+    if synonym.nil?
+      if name_synonym.nil? # No existing synonym
+        synonym = Synonym.new
+        synonym.created = Time.now
+        self.synonym = synonym
+        self.save
+        synonym.transfer(name)
+      else # Just name has a synonym
+        name_synonym.transfer(self)
+      end
+    else # self has a synonym
+      if name_synonym.nil? # but name doesn't
+        synonym.transfer(name)
+      else # both have synonyms so merge
+        for n in name_synonym.names
+          synonym.transfer(n)
+        end
+      end
+    end
+  end
+  
+  def status
+    if self.deprecated
+      "Deprecated"
+    else
+      "Valid"
+    end
   end
 end

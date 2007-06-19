@@ -1,10 +1,20 @@
-<% @title = 'Name Index' %>
-<div id="Title"><%= @title %></div>
 <%
-	for n in @names
+    if @title.nil?
+        @title = 'Name Index' %>
+        <%= link_to('All Names', :action => 'all_names')%> |
+<%
+    else %>
+        <%= link_to('Name Index', :action => 'name_index')%> |
+<%  end %>
+
+<%= link_to('Bulk Name Edit', :action => 'bulk_name_edit') %><br/>
+<div id="Title"><%= @title %></div>
+
+<%
+	for datum in @name_data
 %>
-<%= link_to(textilize_without_paragraph(h(n.display_name)),
-            :action => 'show_name', :id => n) %><br/>
+<%= link_to(textilize_without_paragraph(h(datum['display_name'])),
+            :action => 'show_name', :id => datum['id']) %><br/>
 <%
 	end
 %>

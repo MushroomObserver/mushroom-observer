@@ -1,0 +1,16 @@
+<% if @new_names && (@new_names != []) %>
+    The following names could not be found.<br/>
+    <span id="help_note">
+        Click 'Save' to create these name.  If you want to correct any you<br/>
+        entered by hand, do so in the area below and click 'Save' to<br/>
+        re-evaluate the list.  If the names came from an uploaded species<br/>
+        list, create a correct file and select it for upload.<br/>
+    </span>
+    <span class="Data">
+        <p>
+            <% for n in @new_names %>
+            &nbsp;&nbsp;<%= h(n) %><br/>
+            <% end %>
+        </p>
+    </span>
+<% end %>

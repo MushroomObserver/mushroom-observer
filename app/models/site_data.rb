@@ -98,7 +98,7 @@ private
         "group by user_id order by c desc"
     else
       query = "select count(*) as c, user_id from species_lists, observations_species_lists " +
-        "where species_lists.id=observations_species_lists.species_list_id group by user_id order by c desc"
+        "where species_lists.id=observations_species_lists.species_list_id and user_id > 0 group by user_id order by c desc"
     end
     load_field_counts(:species_list_entries, query) # 1
   end
@@ -107,10 +107,12 @@ private
     result = []
     conditions = ""
     if @user_id
-      conditions = "where user_id = %s" % @user_id # Worry about SQL injection?
+      conditions = "user_id = %s" % @user_id # Worry about SQL injection?
+    else
+      conditions = "user_id > 0"
     end
     if query.nil?
-      query = "select count(*) as c, user_id from %s %s group by user_id" % [field, conditions]
+      query = "select count(*) as c, user_id from %s where %s group by user_id" % [field, conditions]
     end
     data = User.connection.select_all(query)
     for d in data

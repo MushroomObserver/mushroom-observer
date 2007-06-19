@@ -11,7 +11,7 @@
 				if col_count == 0 %>
 		<tr>
 			<%  end %>
-			<td align="left" valign="top" class="ListLine<%= color %>">
+			<td align="center" valign="top" class="ListLine<%= color %>">
 			<% observation = rss_log.observation
 			   if observation: %>
 				<%= render :partial => 'observation', :object => observation, :locals => { :vertical_layout => @layout["vertical_layout"] } %>

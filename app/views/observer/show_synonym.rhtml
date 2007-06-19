@@ -1,0 +1,19 @@
+<% @title = 'Synonyms for ' + h(@name.text_name) %>
+<%= link_to 'Show Name', :action => 'show_name', :id => @name %>
+| <%= link_to('Change Synonyms', :action => 'change_synonyms', :id => @name)%>
+
+<div id="Title">Synonyms for
+    <%= link_to(textilize_without_paragraph(h(@name.display_name)),
+                :action => 'show_name', :id => @name) %></div>
+<%= error_messages_for 'synonym' %>
+<p>
+    <%  synonym = @name.synonym 
+        if synonym
+          for n in synonym.names %>
+              <%= link_to(textilize_without_paragraph(h(n.display_name)),
+                          :action => 'show_name', :id => n) %><br/>
+       <% end
+        else %>
+            No known synonyms for this name.<br/>
+     <% end %>
+</p>

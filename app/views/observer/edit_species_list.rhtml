@@ -4,7 +4,7 @@
 
 <div id="Title"><%= @title %></div>
 
-<% form_tag(:action => 'update_species_list', :id => @species_list, :approved_names => @new_names) do %>
+<% form_tag(:action => 'update_species_list', :id => @species_list, :approved_names => @new_names, :approved_deprecated_names => @deprecated_names) do %>
 <br/>
 <center><%= submit_tag 'Save' %></center>
 
