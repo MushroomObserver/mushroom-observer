@@ -246,13 +246,16 @@ class ObserverController < ApplicationController
   def name_search(pattern)
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
     session['checklist_source'] = nil # Meaning all species
-    @names = Name.find(:all, :conditions => conditions, :order => "'text_name' asc, 'author' asc")
-    len = @names.length
+    #@names = Name.find(:all, :conditions => conditions, :order => "'text_name' asc, 'author' asc")
+    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names, observations" +
+                                            " where observations.name_id = names.id and #{conditions}" +
+                                            " order by names.text_name asc, author asc")
+   len = @name_data.length
     if len == 0
       flash[:notice] = "No names matching '%s' found" % pattern
       redirect_to :controller => 'observer', :action => 'name_index'
     elsif len == 1
-      redirect_to(:controller => 'observer', :action => 'show_name', :id => @names[0])
+      redirect_to(:controller => 'observer', :action => 'show_name', :id => @name_data[0]['id'])
     else
       render :action => 'name_index'
     end
