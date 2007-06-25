@@ -202,7 +202,7 @@ class ObserverController < ApplicationController
   end
   
   def image_search(pattern)
-    conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
+    conditions = "names.search_name like '#{pattern.gsub(/[*']/,"%")}%'"
     query = "select images.*, names.search_name from images, images_observations, observations, names
       where images.id = images_observations.image_id and images_observations.observation_id = observations.id
       and observations.name_id = names.id and %s order by names.search_name, `when` desc" % conditions
@@ -215,7 +215,7 @@ class ObserverController < ApplicationController
   end
   
   def location_search(pattern)
-    conditions = sprintf("`where` like '%s%%'", pattern.gsub(/[*']/,"%"))
+    conditions = "`where` like '#{pattern.gsub(/[*']/,"%")}%'"
     query = "select o.id from observations o where %s order by `when` desc" % conditions
     session['checklist_source'] = 0 # Meaning use observation_ids
     session['observation_ids'] = self.query_ids(query)

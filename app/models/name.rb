@@ -51,7 +51,8 @@ class Name < ActiveRecord::Base
   end
   
   def self.format_string(str, deprecated)
-    boldness = '**'
+    # boldness = '**'
+    boldness = ''
     if deprecated
       boldness = ''
     end
@@ -184,8 +185,8 @@ class Name < ActiveRecord::Base
     self.observation_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
     unless value
       # Add boldness
-      self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
-      self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
+      # self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
+      # self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
     end
     self.deprecated = value
   end

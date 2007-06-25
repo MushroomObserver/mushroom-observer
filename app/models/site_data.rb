@@ -107,7 +107,7 @@ private
     result = []
     conditions = ""
     if @user_id
-      conditions = "user_id = %s" % @user_id # Worry about SQL injection?
+      conditions = "user_id = %s" % @user_id
     else
       conditions = "user_id > 0"
     end
