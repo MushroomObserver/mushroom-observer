@@ -1196,8 +1196,14 @@ class ObserverController < ApplicationController
   end
   
   def send_webmaster_question
-    sender = params['user']['email']
-    content = params['question']['content']
+    sender = nil
+    content = ''
+    if params['user']
+      sender = params['user']['email']
+    end
+    if params['question']
+      content = params['question']['content']
+    end
     if sender.nil? or sender.strip == ''
       flash[:notice] = "You must provide a return address."
       session['content'] = content
