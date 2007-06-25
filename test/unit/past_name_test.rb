@@ -5,6 +5,6 @@ class PastNameTest < Test::Unit::TestCase
 
   # Replace this with your real tests.
   def test_truth
-    assert_kind_of PastName, @coprinus_comatus
+    assert_kind_of PastName, @coprinus_comatus_past_name
   end
 end

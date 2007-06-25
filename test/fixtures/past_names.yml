@@ -1,5 +1,5 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-coprinus_comatus:
+coprinus_comatus_past_name:
   id: 1
   name_id: 2
   created: 2007-02-26 20:47:00
@@ -11,3 +11,18 @@ coprinus_comatus:
   display_name: __Coprinus comatus__
   observation_name: __Coprinus comatus__
   search_name: Coprinus comatus
+#
+
+coprinellus_micaceus_past_name:
+  id: 2
+  name_id: 22
+  created: 2007-06-24 12:45:55
+  modified: 2007-06-24 12:45:55
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Coprinellus micaceus
+  display_name: __Coprinellus micaceus__
+  observation_name: __Coprinellus micaceus__
+  search_name: Coprinellus micaceus
+#

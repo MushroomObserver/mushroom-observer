@@ -247,9 +247,8 @@ class ObserverController < ApplicationController
     conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
     session['checklist_source'] = nil # Meaning all species
     #@names = Name.find(:all, :conditions => conditions, :order => "'text_name' asc, 'author' asc")
-    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names, observations" +
-                                            " where observations.name_id = names.id and #{conditions}" +
-                                            " order by names.text_name asc, author asc")
+    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names" +
+                                            " where #{conditions} order by names.text_name asc, author asc")
    len = @name_data.length
     if len == 0
       flash[:notice] = "No names matching '%s' found" % pattern
@@ -579,21 +578,6 @@ class ObserverController < ApplicationController
     end
   end
 
-  # test method for whatever
-  def do_load_test
-    now = Time.now
-    params.each do |key, value|
-      logger.warn(sprintf("params[%s] = %s" % [key, value]))
-    end
-    thing = session.hash
-    logger.warn(sprintf("thing (a %s): %s" % [thing.class, thing]))
-    for m in session.methods.sort
-      logger.warn("  %s" % m)
-    end
-    logger.warn(session.to_yaml)
-    render :action => 'load_test'
-  end
-
   # show_observation.rhtml -> remove_images.rhtml
   def remove_images
     @observation = Observation.find(params[:id])
@@ -639,7 +623,57 @@ class ObserverController < ApplicationController
       render :action => 'show_observation'
     end
   end
+  
+  def test_process_image(user, upload, count, size)
+    if upload and upload != ""
+      args = {
+        :user => user,
+        :image => upload
+      }
+      @image = Image.new(args)
+      @image.id = user.id
+      @image.img_dir = TEST_IMG_DIR
+      @image.save_image
+      count += 1
+      size += File.new(@image.original_image).stat.size
+    end
+    [count, size]
+  end
+  
+  def test_upload_image
+    if verify_user()
+      @log_entry = AddImageTestLog.find(params[:log_id])
+      @log_entry.upload_start = Time.now
+      @log_entry.save # Record that upload started
+      user= session['user']
+      @log_entry.upload_data_start = Time.now # Just in case save takes a long time
+      count, size = test_process_image(user, params[:upload][:image1], 0, 0)
+      count, size = test_process_image(user, params[:upload][:image2], count, size)
+      count, size = test_process_image(user, params[:upload][:image3], count, size)
+      count, size = test_process_image(user, params[:upload][:image4], count, size)
+      @log_entry.upload_end = Time.now
+      @log_entry.image_count = count
+      @log_entry.image_bytes = size
+      @log_entry.save
+      redirect_to(:action => 'test_add_image_report')
+    end
+  end
 
+  def test_add_image
+    if verify_user()
+      @log_entry = AddImageTestLog.new
+      @log_entry.user = session['user']
+      @log_entry.save
+      @upload = {}
+    end
+  end
+  
+  def test_add_image_report
+    if verify_user()
+      @log_entries = AddImageTestLog.find(:all, :order => 'created_at')
+    end
+  end
+  
   # remove_images.rhtml -> delete_images -> show_observation.rhtml
   def delete_images
     @observation = Observation.find(params[:observation][:id])
@@ -880,7 +914,7 @@ class ObserverController < ApplicationController
         synonym_name = synonym_names.last
         synonym_name.rank = name_parse.synonym_rank if name_parse.synonym_rank
         synonym_name.user = user
-        synonym_name.deprecated = true
+        synonym_name.change_deprecated(true)
         synonym_name.save
         save_names(synonym_names[0..-2], user, deprecate) # use provided value for taxa above the lowest
       end
@@ -891,7 +925,7 @@ class ObserverController < ApplicationController
     for n in names
       logger.warn("i can #{n.search_name}")
       n.user = user
-      n.deprecated = deprecate
+      n.change_deprecated(deprecate)
       n.save
     end
   end
@@ -1383,25 +1417,83 @@ class ObserverController < ApplicationController
     end
   end
 
+  # Finds the intended name and if another name matching name exists,
+  # then ensure it is mergable.
+  def find_target_names(id_str, text_name, author)
+    id = id_str.to_i
+    page_name = Name.find(id)
+    other_name = nil
+    matches = []
+    if author != ''
+      matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
+    else
+      matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
+    end
+    for m in matches
+      if m.id != id
+        other_name = m # Just take the first one
+        break
+      end
+    end
+    if other_name
+      result = [other_name, page_name]
+      if page_name.mergable?
+        if other_name.mergable? # Need some other criterion
+          if other_name.deprecated and !page_name.deprecated # Prefer valid names
+            result = [page_name, other_name]
+          elsif (other_name.deprecated == page_name.deprecated) and (other_name.version < page_name.version)
+            # Prefer longer histories
+            result = [page_name, other_name]
+          end
+        end
+      elsif other_name.mergable?
+        result = [page_name, other_name]
+      else
+        raise "The name, %s, is already in use and both %s and %s have notes" % [text_name, page_name.search_name, other_name.search_name]
+      end
+    else
+      result = [page_name, other_name]
+    end
+    result
+  end
+    
   # edit_name.rhtml -> show_name.rhtml
   # Updates modified and saves changes
   def update_name
     user = session['user']
     if verify_user()
-      name = Name.find(params[:id])
-      past_name = PastName.make_past_name(name)
+      text_name = params[:name][:text_name].strip
+      author = params[:name][:author].strip
       begin
+        (name, old_name) = find_target_names(params[:id], text_name, author)
+        # Don't allow author to be cleared by using any author you can find...
+        if author == ''
+          author = name.author || ''
+          if author == ''
+            author = old_name.author || ''
+          end
+        end
+        past_name = PastName.make_past_name(name)
         count = 0
         name.modified = Time.new
         count += 1
-        name.change_text_name(params[:name][:text_name], params[:name][:author], params[:name][:rank])
-        name.deprecated = params[:name][:deprecated]
+        deprecated = (params[:name][:deprecated] == 'true')
+        logger.warn("*** #{deprecated.class}: '#{deprecated}'")
+        alt_ids = name.change_text_name(text_name, author, params[:name][:rank], deprecated)
         name.notes = params[:name][:notes]
         name.version = name.version + 1
         name.user = user
         past_name.save
         name.save
         name.log("Name updated by %s" % user.login)
+        if old_name # merge happened
+          for o in old_name.observations
+            o.name = name
+            o.save
+          end
+          old_name.log("Name merged with #{name.search_name}")
+          old_name.destroy
+        end
       rescue RuntimeError => err
         flash[:notice] = err.to_s
         redirect_to :action => 'edit_name', :id => name
@@ -1499,7 +1591,7 @@ class ObserverController < ApplicationController
       past_name = PastName.make_past_name(name)
       begin
         count = 0
-        name.deprecated = true
+        name.change_deprecated(true)
         name.modified = Time.new
         name.version = name.version + 1
         name.user = user

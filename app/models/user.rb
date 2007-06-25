@@ -9,6 +9,7 @@ class User < ActiveRecord::Base
   has_many :species_lists
   has_many :names
   has_many :past_names
+  has_many :test_add_image_logs
 
   def self.authenticate(login, pass)
     find(:first, :conditions => ["login = ? AND password = ?", login, sha1(pass)])

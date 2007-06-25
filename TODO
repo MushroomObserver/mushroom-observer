@@ -1,18 +1,3 @@
-name_index should only show names with observations
-
-Adding multiple deprecated synonyms doesn't seem to work, e.g.
-Boletus satanas = Boletus santanas Deprecated
-Boletus satanas = Boletus satanus Deprecated
-
-Agaricus silvicola (Vittad.) Peck = Agaricus abruptibulbus
-Agaricus silvicola (Vittad.) Peck = Agaricus campestris var. silvicola Vittad.
-Agaricus silvicola (Vittad.) Peck = Agaricus flavescens (Gillet) Sacc.
-
-<Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
-Genus <Genus> <Author> = Genus <Genus> <Author>
-
-After synonomy & deprecation - Transfer names from Name (lose rank relationships), RSS feed.
-
 Update deprecated names:
 Psathyrella candolleana (Fr.) Maire = Psathyrela candoleana Deprecated
 Armillaria mellea = Armillaria melea
@@ -36,6 +21,21 @@ Trichaptum abietinum (Dicks.) Ryvarden = Trichaptum abietinus Deprecated
 Tricholoma = Tricoloma Deprecated
 
 Remove Stemonitis deprecated Deprecated
+
+Pages for accessing the logs
+
+If there is exactly one valid name and any number of deprecated names that have the same text_name, you shouldn't get ask which you mean.
+
+Make a name you are looking at a deprecated synonym of something else
+
+Fix repeats of deprecated names when updating species lists
+
+- Make non-deprecated names bold
+
+<Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
+Genus <Genus> <Author> = Genus <Genus> <Author>
+
+Automated way to apply synonyms to your own observations (with review)
 
 Default date for images should be based on observation
 

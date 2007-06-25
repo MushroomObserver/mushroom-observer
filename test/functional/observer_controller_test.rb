@@ -1488,10 +1488,322 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login(:update_name, params, false)
     name = Name.find(name.id)
     assert_equal("(Fr.) Kühner", name.author)
-    assert_equal("__Conocybe filaris__ (Fr.) Kühner", name.display_name)
-    assert_equal("__Conocybe filaris__ (Fr.) Kühner", name.observation_name)
+    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
+    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal(@rolf, name.user)
+  end
+
+  def test_update_name_simple_merge
+    misspelt_name = @agaricus_campestrus
+    correct_name = @agaricus_campestris
+    assert_not_equal(misspelt_name, correct_name)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    assert_equal(1, misspelt_name.observations.size)
+    misspelt_obs_id = misspelt_name.observations[0].id
+    assert_equal(1, correct_name.observations.size)
+    correct_obs_id = correct_name.observations[0].id
+
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => @agaricus_campestris.text_name,
+        :author => "",
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      misspelt_name = Name.find(misspelt_name.id)
+    end
+    correct_name = Name.find(correct_name.id)
+    assert(correct_name)
+    assert(1 == correct_name.version)
+    assert(past_names+1 == correct_name.past_names.size)
+    
+    assert_equal(2, correct_name.observations.size)
+    misspelt_obs = Observation.find(misspelt_obs_id)
+    assert_equal(@agaricus_campestris, misspelt_obs.name)
+    correct_obs = Observation.find(correct_obs_id)
+    assert_equal(@agaricus_campestris, correct_obs.name)
+  end
+
+  def test_update_name_author_merge
+    misspelt_name = @amanita_baccata_borealis
+    correct_name = @amanita_baccata_arora
+    assert_not_equal(misspelt_name, correct_name)
+    assert_equal(misspelt_name.text_name, correct_name.text_name)
+    correct_author = correct_name.author
+    assert_not_equal(misspelt_name.author, correct_author)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => misspelt_name.text_name,
+        :author => correct_name.author,
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      misspelt_name = Name.find(misspelt_name.id)
+    end
+    correct_name = Name.find(correct_name.id)
+    assert(correct_name)
+    assert_equal(correct_author, correct_name.author)
+    assert(1 == correct_name.version)
+    assert(past_names+1 == correct_name.past_names.size)
+  end
+
+  # Test that merged names end up as not deprecated if the
+  # correct name is not deprecated.
+  def test_update_name_deprecated_merge
+    misspelt_name = @lactarius_alpigenes
+    assert(misspelt_name.deprecated)
+    correct_name = @lactarius_alpinus
+    assert(!correct_name.deprecated)
+    assert_not_equal(misspelt_name, correct_name)
+    assert_not_equal(misspelt_name.text_name, correct_name.text_name)
+    correct_author = correct_name.author
+    assert_not_equal(misspelt_name.author, correct_author)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => correct_name.text_name,
+        :author => correct_name.author,
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      misspelt_name = Name.find(misspelt_name.id)
+    end
+    correct_name = Name.find(correct_name.id)
+    assert(correct_name)
+    assert(!correct_name.deprecated)
+    assert_equal(correct_author, correct_name.author)
+    assert(1 == correct_name.version)
+    assert(past_names+1 == correct_name.past_names.size)
+  end
+
+  # Test that merged names end up as not deprecated even if the
+  # correct name is deprecated but the misspelt name is not deprecated
+  def test_update_name_deprecated2_merge
+    misspelt_name = @lactarius_alpinus
+    assert(!misspelt_name.deprecated)
+    correct_name = @lactarius_alpigenes
+    assert(correct_name.deprecated)
+    assert_not_equal(misspelt_name, correct_name)
+    assert_not_equal(misspelt_name.text_name, correct_name.text_name)
+    correct_author = correct_name.author
+    correct_text_name = correct_name.text_name
+    assert_not_equal(misspelt_name.author, correct_author)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => correct_name.text_name,
+        :author => correct_name.author,
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      correct_name = Name.find(correct_name.id)
+    end
+    misspelt_name = Name.find(misspelt_name.id)
+    assert(misspelt_name)
+    assert(!misspelt_name.deprecated)
+    assert_equal(correct_author, misspelt_name.author)
+    assert_equal(correct_text_name, misspelt_name.text_name)
+    assert(1 == misspelt_name.version)
+    assert(past_names+1 == misspelt_name.past_names.size)
+  end
+
+  def test_update_name_page_unmergeable
+    misspelt_name = @agaricus_campestras
+    correct_name = @agaricus_campestris
+    correct_text_name = correct_name.text_name
+    correct_author = correct_name.author
+    assert_not_equal(misspelt_name, correct_name)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    assert_equal(1, misspelt_name.observations.size)
+    misspelt_obs_id = misspelt_name.observations[0].id
+    assert_equal(1, correct_name.observations.size)
+    correct_obs_id = correct_name.observations[0].id
+
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => correct_text_name,
+        :author => "",
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    # Because misspelt name is unmergable it gets reused and
+    # corrected rather than the correct name
+    assert_raises(ActiveRecord::RecordNotFound) do
+      misspelt_name = Name.find(correct_name.id)
+    end
+    correct_name = Name.find(misspelt_name.id)
+    assert(correct_name)
+    assert(1 == correct_name.version)
+    assert(past_names+1 == correct_name.past_names.size)
+  
+    assert_equal(2, correct_name.observations.size)
+    misspelt_obs = Observation.find(misspelt_obs_id)
+    assert_equal(@agaricus_campestras, misspelt_obs.name)
+    correct_obs = Observation.find(correct_obs_id)
+    assert_equal(@agaricus_campestras, correct_obs.name)
+  end
+
+  def test_update_name_other_unmergeable
+    misspelt_name = @agaricus_campestrus
+    correct_name = @agaricus_campestras
+    correct_text_name = correct_name.text_name
+    correct_author = correct_name.author
+    assert_not_equal(misspelt_name, correct_name)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    assert_equal(1, misspelt_name.observations.size)
+    misspelt_obs_id = misspelt_name.observations[0].id
+    assert_equal(1, correct_name.observations.size)
+    correct_obs_id = correct_name.observations[0].id
+
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => correct_text_name,
+        :author => "",
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      misspelt_name = Name.find(misspelt_name.id)
+    end
+    correct_name = Name.find(correct_name.id)
+    assert(correct_name)
+    assert(1 == correct_name.version)
+    assert(past_names+1 == correct_name.past_names.size)
+  
+    assert_equal(2, correct_name.observations.size)
+    misspelt_obs = Observation.find(misspelt_obs_id)
+    assert_equal(@agaricus_campestras, misspelt_obs.name)
+    correct_obs = Observation.find(correct_obs_id)
+    assert_equal(@agaricus_campestras, correct_obs.name)
+  end
+
+  def test_update_name_neither_mergeable
+    misspelt_name = @agaricus_campestros
+    correct_name = @agaricus_campestras
+    correct_text_name = correct_name.text_name
+    correct_author = correct_name.author
+    assert_not_equal(misspelt_name, correct_name)
+    past_names = correct_name.past_names.size
+    assert(0 == correct_name.version)
+    assert_equal(1, misspelt_name.observations.size)
+    misspelt_obs_id = misspelt_name.observations[0].id
+    assert_equal(1, correct_name.observations.size)
+    correct_obs_id = correct_name.observations[0].id
+
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => correct_text_name,
+        :author => "",
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "edit_name")
+    misspelt_name = Name.find(misspelt_name.id)
+    assert(misspelt_name)
+    correct_name = Name.find(correct_name.id)
+    assert(correct_name)
+    assert(0 == correct_name.version)
+    assert(past_names == correct_name.past_names.size)
+    assert_equal(1, correct_name.observations.size)
+    assert_equal(1, misspelt_name.observations.size)
+    assert_not_equal(correct_name.observations[0], misspelt_name.observations[0])
+  end
+
+  def test_update_name_page_version_merge
+    page_name = @coprinellus_micaceus
+    other_name = @coprinellus_micaceus_no_author
+    assert(page_name.version > other_name.version)
+    assert_not_equal(page_name, other_name)
+    assert_equal(page_name.text_name, other_name.text_name)
+    correct_author = page_name.author
+    assert_not_equal(other_name.author, correct_author)
+    past_names = page_name.past_names.size
+    params = {
+      :id => page_name.id,
+      :name => {
+        :text_name => page_name.text_name,
+        :author => '',
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      destroyed_name = Name.find(other_name.id)
+    end
+    merge_name = Name.find(page_name.id)
+    assert(merge_name)
+    assert_equal(correct_author, merge_name.author)
+    assert_equal(past_names+1, merge_name.version)
+  end
+
+  def test_update_name_other_version_merge
+    page_name = @coprinellus_micaceus_no_author
+    other_name = @coprinellus_micaceus
+    assert(page_name.version < other_name.version)
+    assert_not_equal(page_name, other_name)
+    assert_equal(page_name.text_name, other_name.text_name)
+    correct_author = other_name.author
+    assert_not_equal(page_name.author, correct_author)
+    past_names = other_name.past_names.size
+    params = {
+      :id => page_name.id,
+      :name => {
+        :text_name => page_name.text_name,
+        :author => '',
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    assert_raises(ActiveRecord::RecordNotFound) do
+      destroyed_name = Name.find(page_name.id)
+    end
+    merge_name = Name.find(other_name.id)
+    assert(merge_name)
+    assert_equal(correct_author, merge_name.author)
+    assert_equal(past_names+1, merge_name.version)
   end
 
   def spl_params(spl)

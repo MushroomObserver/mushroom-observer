@@ -258,3 +258,80 @@ agaricus:
   observation_name: __Agaricus sp.__
   search_name: Agaricus sp.
 #
+
+# Misspelt name for testing merging
+agaricus_campestrus:
+  id: 19
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestrus
+  author: L.
+  display_name: __Agaricus campestrus__ L.
+  observation_name: __Agaricus campestrus__ L.
+  search_name: Agaricus campestrus L.
+#
+
+# Name with notes (not mergeable)
+agaricus_campestras:
+  id: 20
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestras
+  author: L.
+  display_name: __Agaricus campestras__ L.
+  observation_name: __Agaricus campestras__ L.
+  search_name: Agaricus campestras L.
+  notes: This is should prevent me for merging
+#
+
+# Another name with notes (not mergeable)
+agaricus_campestros:
+  id: 21
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestros
+  author: L.
+  display_name: __Agaricus campestros__ L.
+  observation_name: __Agaricus campestros__ L.
+  search_name: Agaricus campestros L.
+  notes: Need two to get an error
+#
+
+# For testing merges with existings versions
+coprinellus_micaceus:
+  id: 22
+  created: 2007-06-24 12:45:55
+  modified: 2007-06-24 12:45:55
+  user_id: 1
+  version: 1
+  rank: Species
+  text_name: Coprinellus micaceus
+  author: (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  display_name: __Coprinellus micaceus__ (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  observation_name: __Coprinellus micaceus__ (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
+#
+
+# For testing merges with existing versions
+coprinellus_micaceus_no_author:
+  id: 23
+  created: 2007-06-24 12:45:55
+  modified: 2007-06-24 12:45:55
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Coprinellus micaceus
+  author: 
+  display_name: __Coprinellus micaceus__
+  observation_name: __Coprinellus micaceus__
+  search_name: Coprinellus micaceus
+#

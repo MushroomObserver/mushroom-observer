@@ -1,0 +1,64 @@
+<% @title = 'Test Add Image Report' %>
+<%= link_to 'Test Again', :action => 'test_add_image' %>
+
+<div id="Title"><%= @title %></div>
+
+<table cellpadding="5" cellspacing="5" border=1>
+	<tr class="Data">
+		<td>
+			User
+		</td>
+		<td>
+			Created
+		</td>
+		<td>
+			Click
+		</td>
+		<td>
+			Data Start
+		</td>
+		<td>
+			Data End
+		</td>
+		<td>
+			Elapsed
+		</td>
+		<td>
+			Count
+		</td>
+		<td>
+			Bytes
+		</td>
+	</tr>
+	<%
+		for entry in @log_entries %>
+			<tr>
+				<td>
+					<%= entry.user.login %>
+				</td>
+				<td>
+					<%= entry.created_at %>
+				</td>
+				<td>
+					<%= entry.upload_start %>
+				</td>
+				<td>
+					<%= entry.upload_data_start %>
+				</td>
+				<td>
+					<%= entry.upload_end %>
+				</td>
+				<td>
+				    <% if entry.upload_data_start and entry.upload_end %>
+					    <%= entry.upload_end - entry.upload_data_start %>
+					<% end %>
+				</td>
+				<td>
+					<%= entry.image_count %>
+				</td>
+				<td>
+					<%= entry.image_bytes %>
+				</td>
+			</tr>
+	<%  end %>
+</table>

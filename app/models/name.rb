@@ -15,7 +15,7 @@ class Name < ActiveRecord::Base
   def orphan_log(entry)
     self.log(entry) # Ensures that self.rss_log exists
     self.rss_log.species_list = nil
-    self.rss_log.add(self.unique_text_name, false)
+    self.rss_log.add(self.search_name, false)
   end
 
   # Patterns 
@@ -50,14 +50,22 @@ class Name < ActiveRecord::Base
     end
   end
   
-  def self.make_species(genus, species)
-    Name.make_name :Species, sprintf('%s %s', genus, species), :display_name => sprintf('__%s %s__', genus, species)
+  def self.format_string(str, deprecated)
+    boldness = '**'
+    if deprecated
+      boldness = ''
+    end
+    "#{boldness}__#{str}__#{boldness}"
+  end
+  
+  def self.make_species(genus, species, deprecated = false)
+    Name.make_name :Species, sprintf('%s %s', genus, species), :display_name => format_string("#{genus} #{species}", deprecated)
   end
 
-  def self.make_genus(text_name)
+  def self.make_genus(text_name, deprecated = false)
     Name.make_name(:Genus, text_name,
-                   :display_name => sprintf('__%s__', text_name),
-                   :observation_name => sprintf('__%s sp.__', text_name),
+                   :display_name => format_string(text_name, deprecated),
+                   :observation_name => format_string("#{text_name} sp.", deprecated),
                    :search_name => text_name + ' sp.')
   end
 
@@ -169,6 +177,18 @@ class Name < ActiveRecord::Base
     self.search_name = Name.replace_author(self.search_name, old_author, author)
     self.author = author
   end
+  
+  def change_deprecated(value)
+    # Remove any boldness that might be there
+    self.display_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
+    self.observation_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
+    unless value
+      # Add boldness
+      self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
+      self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
+    end
+    self.deprecated = value
+  end
 
   def common_errors(in_str)
     result = true
@@ -236,76 +256,65 @@ class Name < ActiveRecord::Base
   # parse_* return: text_name, display_name, observation_name, search_name, parent_name
   
   # <Genus> (or other higher rank)
-  def self.parse_above_species(in_str)
+  def self.parse_above_species(in_str, deprecated=false)
     results = nil
     match = ABOVE_SPECIES_PAT.match(in_str)
     if match
       search_name = "%s sp." % match[1]
-      results = [match[1], "__%s__" % match[1], "__%s__" % search_name, search_name, nil]
+      results = [match[1], format_string(match[1], deprecated), format_string(search_name, deprecated), search_name, nil]
     end
     results
   end
   
   # <Genus> sp. (or other higher rank)
-  def self.parse_sp(in_str)
+  def self.parse_sp(in_str, deprecated=false)
     results = nil
     match = SP_PAT.match(in_str)
     if match
-      search_name = "%s sp." % match[1]
-      results = [match[1], "__%s__" % match[1], "__%s__" % search_name, search_name, nil]
+      search_name = "#{match[1]} sp."
+      results = [match[1], format_string(match[1], deprecated), format_string(search_name, deprecated), search_name, nil]
     end
     results
   end
   
   # <Genus> <species>
-  def self.parse_species(in_str)
+  def self.parse_species(in_str, deprecated=false)
     results = nil
     match = SPECIES_PAT.match(in_str)
     if match
-      display_name = "__%s %s__" % [match[1], match[2]]
-      text_name = "%s %s" % [match[1], match[2]]
+      text_name = "#{match[1]} #{match[2]}"
+      display_name = format_string(text_name, deprecated)
       results = [text_name, display_name, display_name, text_name, match[1]]
     end
     results
   end
   
-  # <Genus> <species> subsp. <subspecies>
-  def self.parse_subspecies(in_str)
+  def self.parse_below_species(pat, in_str, term, deprecated)
     results = nil
-    match = SUBSPECIES_PAT.match(in_str)
+    match = pat.match(in_str)
     if match
-      text_name = "%s %s subsp. %s" % [match[1], match[2], match[4]]
-      display_name = "__%s %s__ subsp. __%s__" % [match[1], match[2], match[4]]
-      results = [text_name, display_name, display_name, text_name,
-                 "%s %s" % [match[1], match[2]]]
+      sp_name = "#{match[1]} #{match[2]}"
+      sub_name = match[4]
+      text_name = "#{sp_name} #{term} #{sub_name}"
+      display_name = "#{format_string(sp_name, deprecated)} #{term} #{format_string(sub_name, deprecated)}"
+      results = [text_name, display_name, display_name, text_name, sp_name]
     end
     results
+  end
+
+  # <Genus> <species> subsp. <subspecies>
+  def self.parse_subspecies(in_str, deprecated=false)
+    parse_below_species(SUBSPECIES_PAT, in_str, 'subsp.', deprecated)
   end
   
   # <Genus> <species> var. <subspecies>
-  def self.parse_variety(in_str)
-    results = nil
-    match = VARIETY_PAT.match(in_str)
-    if match
-      text_name = "%s %s var. %s" % [match[1], match[2], match[4]]
-      display_name = "__%s %s__ var. __%s__" % [match[1], match[2], match[4]]
-      results = [text_name, display_name, display_name, text_name,
-                 "%s %s" % [match[1], match[2]]]
-    end
-    results
+  def self.parse_variety(in_str, deprecated=false)
+    parse_below_species(VARIETY_PAT, in_str, 'var.', deprecated)
   end
     
   # <Genus> <species> f. <subspecies>
-  def self.parse_form(in_str)
-    results = nil
-    match = FORM_PAT.match(in_str)
-    if match
-      text_name = "%s %s f. %s" % [match[1], match[2], match[4]]
-      display_name = "__%s %s__ f. __%s__" % [match[1], match[2], match[4]]
-      results = [text_name, display_name, display_name, text_name,
-                 "%s %s" % [match[1], match[2]]]
-    end
-    results
+  def self.parse_form(in_str, deprecated=false)
+    parse_below_species(FORM_PAT, in_str, 'f.', deprecated)
   end
   
   # <Taxon> group
@@ -328,32 +337,53 @@ class Name < ActiveRecord::Base
     results
   end
   
-  # Throws a RuntimeError with the error message if unsuccessful in anyway 
-  def change_text_name(in_str, in_author, in_rank)
-    common_errors(in_str)
-    results = nil
-    author = in_author.strip
+  def self.parse_by_rank(in_str, in_rank, in_deprecated)
     rank = in_rank.to_sym
-    if Name.ranks_above_species.member? rank
-      results = Name.parse_above_species(in_str)
+    if ranks_above_species.member? rank
+      results = parse_above_species(in_str, in_deprecated)
     elsif :Species == rank
-      results = Name.parse_species(in_str)
+      results = parse_species(in_str, in_deprecated)
     elsif :Subspecies == rank
-      results = Name.parse_subspecies(in_str)
+      results = parse_subspecies(in_str, in_deprecated)
     elsif :Variety == rank
-      results = Name.parse_variety(in_str)
+      results = parse_variety(in_str, in_deprecated)
     elsif :Form == rank
-      results = Name.parse_form(in_str)
+      results = parse_form(in_str, in_deprecated)
     elsif :Group == rank
-      results = Name.parse_group(in_str)
+      results = parse_group(in_str, in_deprecated)
     elsif
       raise "Unrecognized rank, %s" % rank
     end
     if results.nil?
       raise "%s is invalid for the rank %s" % [in_str, rank]
     end
-    # results must be set
-    text_name, display_name, observation_name, search_name, parent_name = results
+    results
+  end
+  
+  def mergable?()
+    self.notes.nil? || (self.notes == '')
+  end
+  
+  def check_for_repeats(text_name, author)
+    matches = []
+    if author != ''
+      matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
+    else
+      matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
+    end
+    for m in matches
+      if m.id != self.id
+        raise "The name, %s, is already in use" % text_name
+      end
+    end
+  end
+
+  # Throws a RuntimeError with the error message if unsuccessful in anyway 
+  def change_text_name(in_str, in_author, in_rank, in_deprecated)
+    common_errors(in_str)
+    results = nil
+    author = in_author.strip
+    text_name, display_name, observation_name, search_name, parent_name = Name.parse_by_rank(in_str, in_rank, in_deprecated)
     if (parent_name and Name.find(:all, :conditions => "text_name = '%s'" % parent_name) == [])
       names = Name.names_from_string(parent_name)
       if names.last.nil?
@@ -365,23 +395,11 @@ class Name < ActiveRecord::Base
         end
       end
     end
-    matches = []
-    if author != ''
-      matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
-      name = "%s %s" % [text_name, author]
-    else
-      matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
-      name = text_name
-    end
-    for m in matches
-      if m.id != self.id
-        # In theory this should ask for a merge.  For now it's just an error.
-        raise "The name, %s, is already in use" % name
-      end
-    end
+    # check_for_repeats(text_name, author)
     self.rank = rank
     self.text_name = text_name
     self.author = author
+    self.deprecated = in_deprecated
     if author
       display_name = "%s %s" % [display_name, author]
       if [:Species, :Subspecies, :Variety, :Form].member? rank

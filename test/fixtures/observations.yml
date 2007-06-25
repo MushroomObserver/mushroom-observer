@@ -38,3 +38,37 @@ agaricus_campestris_obs:
   specimen:  0
   notes:     From the lawn next door
   name_id:   3
+
+agaricus_campestrus_obs:
+  id:        5
+  created:   2007-06-23 20:00:00
+  modified:  2007-06-23 20:00:00
+  when:      2007-06-23
+  user_id:   1
+  where:     Burbank, California
+  specimen:  0
+  notes:     From somewhere else
+  name_id:   19
+
+agaricus_campestras_obs:
+  id:        6
+  created:   2007-06-24 12:00:00
+  modified:  2007-06-24 12:00:00
+  when:      2007-06-24
+  user_id:   1
+  where:     Burbank, California
+  specimen:  0
+  notes:     From somewhere else
+  name_id:   20
+#
+
+agaricus_campestros_obs:
+  id:        7
+  created:   2007-06-24 12:00:00
+  modified:  2007-06-24 12:00:00
+  when:      2007-06-24
+  user_id:   1
+  where:     Burbank, California
+  specimen:  0
+  notes:     From somewhere else
+  name_id:   21

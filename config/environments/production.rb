@@ -19,4 +19,5 @@ config.action_controller.perform_caching             = true
 # config.action_mailer.raise_delivery_errors = false
 
 IMG_DIR = "/home/velosa/ms.images"
+TEST_IMG_DIR = "/home/velosa/test.images"
 DOMAIN = 'http://mushroomobserver.org'

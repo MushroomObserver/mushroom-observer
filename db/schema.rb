@@ -2,7 +2,17 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 15) do
+ActiveRecord::Schema.define(:version => 17) do
+
+  create_table "add_image_test_logs", :force => true do |t|
+    t.column "user_id",           :integer
+    t.column "created_at",        :datetime
+    t.column "upload_start",      :datetime
+    t.column "upload_data_start", :datetime
+    t.column "upload_end",        :datetime
+    t.column "image_count",       :integer
+    t.column "image_bytes",       :integer
+  end
 
   create_table "comments", :force => true do |t|
     t.column "created",        :datetime

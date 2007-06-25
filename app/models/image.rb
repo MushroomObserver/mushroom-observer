@@ -5,6 +5,7 @@ class Image < ActiveRecord::Base
   has_and_belongs_to_many :observations
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
   belongs_to :user
+  attr_accessor :img_dir
 
   def unique_format_name
     obs_names = []
@@ -33,6 +34,7 @@ class Image < ActiveRecord::Base
     @img = image_field.read
     @width = false
     @height = false
+    @img_dir = IMG_DIR
   end
 
   def check_test(obs)
@@ -82,15 +84,15 @@ class Image < ActiveRecord::Base
   end
 
   def original_image
-    sprintf("%s/orig/%d.jpg", IMG_DIR, self.id)
+    sprintf("%s/orig/%d.jpg", self.img_dir, self.id)
   end
 
   def big_image
-    sprintf("%s/640/%d.jpg", IMG_DIR, self.id)
+    sprintf("%s/640/%d.jpg", self.img_dir, self.id)
   end
 
   def thumbnail
-    sprintf("%s/thumb/%d.jpg", IMG_DIR, self.id)
+    sprintf("%s/thumb/%d.jpg", self.img_dir, self.id)
   end
 
   IDENTIFY_PAT = /^\S+ \w+ (\d+)x(\d+)/

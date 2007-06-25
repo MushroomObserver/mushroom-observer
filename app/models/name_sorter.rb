@@ -37,7 +37,7 @@ class NameSorter
     @single_line_strs = [] # List of strings
     @single_names = [] # List of [Name, Time].  A Timestamp of nil implies now.
     @synonym_data = [] # List of [NameParse, [Name...]]
-   end
+  end
   
   def reset_new_names
     @new_name_strs = []
