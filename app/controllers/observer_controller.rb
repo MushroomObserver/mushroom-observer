@@ -670,7 +670,7 @@ class ObserverController < ApplicationController
   
   def test_add_image_report
     if verify_user()
-      @log_entries = AddImageTestLog.find(:all, :order => 'created_at')
+      @log_entries = AddImageTestLog.find(:all, :order => 'created_at desc')
     end
   end
   

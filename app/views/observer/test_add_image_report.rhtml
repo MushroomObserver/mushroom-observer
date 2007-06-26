@@ -49,8 +49,8 @@
 					<%= entry.upload_end %>
 				</td>
 				<td>
-				    <% if entry.upload_data_start and entry.upload_end %>
-					    <%= entry.upload_end - entry.upload_data_start %>
+				    <% if entry.created_at and entry.upload_end %>
+					    <%= entry.upload_end - entry.created_at %>
 					<% end %>
 				</td>
 				<td>
