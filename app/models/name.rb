@@ -319,16 +319,16 @@ class Name < ActiveRecord::Base
   end
   
   # <Taxon> group
-  def self.parse_group(in_str)
+  def self.parse_group(in_str, deprecated=false)
     results = nil
     match = GROUP_PAT.match(in_str)
     if match
       name_str = match[1]
-      results = parse_above_species(name_str)
-      results = parse_species(name_str) if results.nil?
-      results = parse_subspecies(name_str) if results.nil?
-      results = parse_variety(name_str) if results.nil?
-      results = parse_form(name_str) if results.nil?
+      results = parse_above_species(name_str, deprecated)
+      results = parse_species(name_str, deprecated) if results.nil?
+      results = parse_subspecies(name_str, deprecated) if results.nil?
+      results = parse_variety(name_str, deprecated) if results.nil?
+      results = parse_form(name_str, deprecated) if results.nil?
     end
     if results
       text_name, display_name, observation_name, search_name, parent_name = results
