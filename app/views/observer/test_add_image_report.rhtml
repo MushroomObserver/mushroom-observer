@@ -5,20 +5,17 @@
 
 <table cellpadding="5" cellspacing="5" border=1>
 	<tr class="Data">
+	    <td>
+	        Id
+	    </td>
 		<td>
 			User
 		</td>
 		<td>
-			Created
+			Start
 		</td>
 		<td>
-			Click
-		</td>
-		<td>
-			Data Start
-		</td>
-		<td>
-			Data End
+			End
 		</td>
 		<td>
 			Elapsed
@@ -33,17 +30,14 @@
 	<%
 		for entry in @log_entries %>
 			<tr>
+			    <td>
+			        <%= entry.id %>
+			    </td>
 				<td>
 					<%= entry.user.login %>
 				</td>
 				<td>
 					<%= entry.created_at %>
-				</td>
-				<td>
-					<%= entry.upload_start %>
-				</td>
-				<td>
-					<%= entry.upload_data_start %>
 				</td>
 				<td>
 					<%= entry.upload_end %>

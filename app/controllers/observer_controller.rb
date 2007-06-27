@@ -1139,9 +1139,13 @@ class ObserverController < ApplicationController
   def show_user
     store_location
     id = params[:id]
-    @user_data = SiteData.new.get_user_data(id)
-    @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
-      :order => "id desc", :limit => 6)
+    if id
+      @user_data = SiteData.new.get_user_data(id)
+      @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
+        :order => "id desc", :limit => 6)
+    else
+      redirect_to :action => 'users_by_contribution'
+    end
   end
 
   # show_site_stats.rhtml

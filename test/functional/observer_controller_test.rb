@@ -248,6 +248,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_template 'show_user'
   end
   
+  def test_show_user_no_id
+    get :show_user
+    assert_redirected_to(:controller => "observer", :action => "users_by_contribution")
+  end
+  
   def test_show_site_stats
     get :show_site_stats
     assert_response :success
@@ -1488,8 +1493,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login(:update_name, params, false)
     name = Name.find(name.id)
     assert_equal("(Fr.) Kühner", name.author)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
+    assert_equal("__Conocybe filaris__ (Fr.) Kühner", name.display_name)
+    assert_equal("__Conocybe filaris__ (Fr.) Kühner", name.observation_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal(@rolf, name.user)
   end
