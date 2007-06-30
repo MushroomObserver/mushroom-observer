@@ -1,7 +1,7 @@
 #  Created by Nathan Wilson on 2007-05-12.
 #  Copyright (c) 2007. All rights reserved.
 
-ALL_FIELDS = [:images, :names, :past_names, :species_lists, :species_list_entries, :comments, :observations]
+ALL_FIELDS = [:images, :names, :past_names, :species_lists, :species_list_entries, :comments, :observations, :users]
 
 FIELD_WEIGHTS = {
   :images => 10,
@@ -10,7 +10,8 @@ FIELD_WEIGHTS = {
   :species_lists => 5,
   :species_list_entries => 1,
   :comments => 1,
-  :observations => 1
+  :observations => 1,
+  :users => 0
 }
 
 FIELD_TITLES = {
@@ -20,7 +21,8 @@ FIELD_TITLES = {
   :species_lists => "Species Lists",
   :species_list_entries => "Species List Entries",
   :comments => "Comments",
-  :observations => "Observations"
+  :observations => "Observations",
+  :users => "Members"
 }
 
 # Default is field.to_s

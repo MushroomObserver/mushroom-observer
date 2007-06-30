@@ -1,45 +1,25 @@
-Update deprecated names:
-Psathyrella candolleana (Fr.) Maire = Psathyrela candoleana Deprecated
-Armillaria mellea = Armillaria melea
-Boletus satanas = Boletus santanas Deprecated
-Boletus satanas = Boletus satanus Deprecated
-Gymnopus dryophilus = Gymnopus dryophila Deprecated
-Laccaria amethysteo-occidentalis G.M. Muell. = Laccaria amythysteo-occidentalis Deprecated
-Lactarius xanthogalactus Peck = Lactarius xanthogalacteus Deprecated
-Leucoagaricus rubrotinctus (Beeli) Singer = Leucoagaricus rubrotincta Deprecated
-Marasmiellus candidus (Bolton) Singer = Marasmielus candidus Deprecated
-Marasmiellus = Marasmielus
-Morchella angusticeps Peck = Morchella angusticepes Deprecated
-Omphalotus olivascens = Omphalotus olivescens Deprecated
-Psathyrella = Psathyrela
-Psathyrella gracilis = Psathyrela gracilis Deprecated
-Psathyrella longipes = Psathyrela longipes Deprecated
-Psathyrella uliginicola = Psathyrela uliginicola Deprecated
-Psathyrella longipes (Peck) A.H. Sm. = Psathyrella longtipes Deprecated
-Tremella mesenterica Retz. = Tremella mestenterica Deprecated
-Trichaptum abietinum (Dicks.) Ryvarden = Trichaptum abietinus Deprecated
-Tricholoma = Tricoloma Deprecated
+Make non-deprecated names bold
 
-Remove Stemonitis deprecated Deprecated
+Make SVN consistent with MediaTemple
 
-Pages for accessing the logs
+Email to mushroomobserver.org needs to get fixed still.
 
-If there is exactly one valid name and any number of deprecated names that have the same text_name, you shouldn't get ask which you mean.
+Synonym issues:
+    Add test for Psathyrella gracillis group case
+    Tricholoma = Tricoloma Deprecated is hard to clean up.  End up with Tricholoma and Tricholoma (Fr.) Staude.
+    If there is exactly one valid name and any number of deprecated with the same text_name, you shouldn't get ask which you mean.
+    Make a name you are looking at a deprecated synonym of something else
+    Fix repeats of deprecated names when updating species lists
+    <Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
+    Genus <Genus> <Author> = Genus <Genus> <Author>
+    Automated way to apply synonyms to your own observations (with review)
 
-Make a name you are looking at a deprecated synonym of something else
-
-Fix repeats of deprecated names when updating species lists
-
-- Make non-deprecated names bold
-
-<Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
-Genus <Genus> <Author> = Genus <Genus> <Author>
-
-Automated way to apply synonyms to your own observations (with review)
 
 Default date for images should be based on observation
 
-Spam reduction by validating theme
+Admin stuff:
+    Pages for accessing the logs
+    Spam reduction by validating theme
 
 Multiple licenses
   GFDL & CC-by-sa
@@ -51,6 +31,8 @@ Multiple licenses
   wiki, nc2.5, nc3
   
 Show all comments
+
+Name tagging
 
 Species list functional tests
   Add tests for adding multiple new species

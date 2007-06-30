@@ -15,9 +15,15 @@
         </td>
         <td valign="top" width="50%">
             Other versions:<br/>
-            <% name = @past_name.name %>
-            <%= link_to("%s: %s" % [name.version, textilize_without_paragraph(h(name.display_name))],
-                        :action => 'show_name', :id => name) %><br/>
+            <%
+                name = @past_name.name
+                if name
+                    %>
+                    <%= link_to("%s: %s" % [name.version, textilize_without_paragraph(h(name.display_name))],
+                            :action => 'show_name', :id => name) %><br/>
+                <% else %>
+                    No current version<br/>
+                <% end %>
             <% for v in @other_versions
                 if v.version == @past_name.version %>
                     <%= "%s: %s" % [v.version, textilize_without_paragraph(h(v.display_name))] %><br/>

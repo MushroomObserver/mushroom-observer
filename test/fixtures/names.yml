@@ -7,8 +7,8 @@ fungi:
   version: 0
   rank: Kingdom
   text_name: Fungi
-  display_name: Kingdom of __Fungi__
-  observation_name: __Fungi sp.__
+  display_name: Kingdom of **__Fungi__**
+  observation_name: **__Fungi sp.__**
   search_name: Fungi sp.
 
 coprinus_comatus:
@@ -20,8 +20,8 @@ coprinus_comatus:
   rank: Species
   text_name: Coprinus comatus
   author: (O.F. Müll.) Pers.
-  display_name: __Coprinus comatus__ (O.F. Müll.) Pers.
-  observation_name: __Coprinus comatus__ (O.F. Müll.) Pers.
+  display_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
+  observation_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
   search_name: Coprinus comatus (O.F. Müll.) Pers.
 
 agaricus_campestris:
@@ -33,8 +33,8 @@ agaricus_campestris:
   rank: Species
   text_name: Agaricus campestris
   author: L.
-  display_name: __Agaricus campestris__ L.
-  observation_name: __Agaricus campestris__ L.
+  display_name: **__Agaricus campestris__** L.
+  observation_name: **__Agaricus campestris__** L.
   search_name: Agaricus campestris L.
 
 conocybe_filaris:
@@ -46,8 +46,8 @@ conocybe_filaris:
   rank: Species
   text_name: Conocybe filaris
   author: 
-  display_name: __Conocybe filaris__
-  observation_name: __Conocybe filaris__
+  display_name: **__Conocybe filaris__**
+  observation_name: **__Conocybe filaris__**
   search_name: Conocybe filaris
 
 amanita_baccata_arora:
@@ -59,8 +59,8 @@ amanita_baccata_arora:
   rank: Species
   text_name: Amanita baccata
   author: sensu Arora
-  display_name: __Amanita baccata__ sensu Arora
-  observation_name: __Amanita baccata__ sensu Arora
+  display_name: **__Amanita baccata__** sensu Arora
+  observation_name: **__Amanita baccata__** sensu Arora
   search_name: Amanita baccata sensu Arora
 
 amanita_baccata_borealis:
@@ -72,8 +72,8 @@ amanita_baccata_borealis:
   rank: Species
   text_name: Amanita baccata
   author: sensu Borealis
-  display_name: __Amanita baccata__ sensu Borealis
-  observation_name: __Amanita baccata__ sensu Borealis
+  display_name: **__Amanita baccata__** sensu Borealis
+  observation_name: **__Amanita baccata__** sensu Borealis
   search_name: Amanita baccata sensu Borealis
 
 # No Taxon 1
@@ -86,8 +86,8 @@ lepiota_rachodes:
   rank: Species
   text_name: Lepiota rachodes
   author: Vittad.
-  display_name: __Lepiota rachodes__ Vittad.
-  observation_name: __Lepiota rachodes__ Vittad.
+  display_name: **__Lepiota rachodes__** Vittad.
+  observation_name: **__Lepiota rachodes__** Vittad.
   search_name: Lepiota rachodes Vittad.
 
 # No Taxon 2
@@ -100,8 +100,8 @@ lepiota_rhacodes:
   rank: Species
   text_name: Lepiota rhacodes
   author: Vittad.
-  display_name: __Lepiota rhacodes__ Vittad.
-  observation_name: __Lepiota rhacodes__ Vittad.
+  display_name: **__Lepiota rhacodes__** Vittad.
+  observation_name: **__Lepiota rhacodes__** Vittad.
   search_name: Lepiota rhacodes Vittad.
 
 # Taxon 1, Name 1
@@ -114,8 +114,8 @@ macrolepiota_rachodes:
   rank: Species
   text_name: Macrolepiota rachodes
   author: (Vittad.) Singer
-  display_name: __Macrolepiota rachodes__ (Vittad.) Singer
-  observation_name: __Macrolepiota rachodes__ (Vittad.) Singer
+  display_name: **__Macrolepiota rachodes__** (Vittad.) Singer
+  observation_name: **__Macrolepiota rachodes__** (Vittad.) Singer
   search_name: Macrolepiota rachodes (Vittad.) Singer
   synonym_id: 1
 
@@ -129,8 +129,8 @@ macrolepiota_rhacodes:
   rank: Species
   text_name: Macrolepiota rhacodes
   author: (Vittad.) Singer
-  display_name: __Macrolepiota rhacodes__ (Vittad.) Singer
-  observation_name: __Macrolepiota rhacodes__ (Vittad.) Singer
+  display_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
+  observation_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
   search_name: Macrolepiota rhacodes (Vittad.) Singer
   synonym_id: 1
 
@@ -144,8 +144,8 @@ chlorophyllum_rachodes:
   rank: Species
   text_name: Chlorophyllum rachodes
   author: (Vittad.) Vellinga
-  display_name: __Chlorophyllum rachodes__ (Vittad.) Vellinga
-  observation_name: __Chlorophyllum rachodes__ (Vittad.) Vellinga
+  display_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
+  observation_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
   search_name: Chlorophyllum rachodes (Vittad.) Vellinga
   synonym_id: 2
 
@@ -159,8 +159,8 @@ chlorophyllum_rhacodes:
   rank: Species
   text_name: Chlorophyllum rhacodes
   author: (Vittad.) Vellinga
-  display_name: __Chlorophyllum rhacodes__ (Vittad.) Vellinga
-  observation_name: __Chlorophyllum rhacodes__ (Vittad.) Vellinga
+  display_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
+  observation_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
   search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
   synonym_id: 2
 
@@ -174,8 +174,8 @@ lactarius_alpinus:
   rank: Species
   text_name: Lactarius alpinus
   author: Peck
-  display_name: __Lactarius alpinus__ Peck
-  observation_name: __Lactarius alpinus__ Peck
+  display_name: **__Lactarius alpinus__** Peck
+  observation_name: **__Lactarius alpinus__** Peck
   search_name: Lactarius alpinus Peck
   synonym_id: 3
 #
@@ -240,8 +240,8 @@ psalliota:
   version: 0
   rank: Genus
   text_name: Psalliota
-  display_name: Genus __Psalliota__
-  observation_name: __Psalliota sp.__
+  display_name: Genus **__Psalliota__**
+  observation_name: **__Psalliota sp.__**
   search_name: Psalliota sp.
 #
 
@@ -254,8 +254,8 @@ agaricus:
   version: 0
   rank: Genus
   text_name: Agaricus
-  display_name: Genus __Agaricus__
-  observation_name: __Agaricus sp.__
+  display_name: Genus **__Agaricus__**
+  observation_name: **__Agaricus sp.__**
   search_name: Agaricus sp.
 #
 
@@ -269,8 +269,8 @@ agaricus_campestrus:
   rank: Species
   text_name: Agaricus campestrus
   author: L.
-  display_name: __Agaricus campestrus__ L.
-  observation_name: __Agaricus campestrus__ L.
+  display_name: **__Agaricus campestrus__** L.
+  observation_name: **__Agaricus campestrus__** L.
   search_name: Agaricus campestrus L.
 #
 
@@ -284,8 +284,8 @@ agaricus_campestras:
   rank: Species
   text_name: Agaricus campestras
   author: L.
-  display_name: __Agaricus campestras__ L.
-  observation_name: __Agaricus campestras__ L.
+  display_name: **__Agaricus campestras__** L.
+  observation_name: **__Agaricus campestras__** L.
   search_name: Agaricus campestras L.
   notes: This is should prevent me for merging
 #
@@ -300,8 +300,8 @@ agaricus_campestros:
   rank: Species
   text_name: Agaricus campestros
   author: L.
-  display_name: __Agaricus campestros__ L.
-  observation_name: __Agaricus campestros__ L.
+  display_name: **__Agaricus campestros__** L.
+  observation_name: **__Agaricus campestros__** L.
   search_name: Agaricus campestros L.
   notes: Need two to get an error
 #
@@ -316,8 +316,8 @@ coprinellus_micaceus:
   rank: Species
   text_name: Coprinellus micaceus
   author: (Bull.) Vilgalys, Hopple & Jacq. Johnson
-  display_name: __Coprinellus micaceus__ (Bull.) Vilgalys, Hopple & Jacq. Johnson
-  observation_name: __Coprinellus micaceus__ (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  display_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  observation_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
 #
 
@@ -331,7 +331,7 @@ coprinellus_micaceus_no_author:
   rank: Species
   text_name: Coprinellus micaceus
   author: 
-  display_name: __Coprinellus micaceus__
-  observation_name: __Coprinellus micaceus__
+  display_name: **__Coprinellus micaceus__**
+  observation_name: **__Coprinellus micaceus__**
   search_name: Coprinellus micaceus
 #

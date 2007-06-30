@@ -1493,8 +1493,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login(:update_name, params, false)
     name = Name.find(name.id)
     assert_equal("(Fr.) Kühner", name.author)
-    assert_equal("__Conocybe filaris__ (Fr.) Kühner", name.display_name)
-    assert_equal("__Conocybe filaris__ (Fr.) Kühner", name.observation_name)
+    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
+    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal(@rolf, name.user)
   end
@@ -2091,6 +2091,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     
     add_name = @lepiota_rhacodes
     assert(!add_name.deprecated)
+    assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
     assert_nil(add_name.synonym)
     add_past_name_count = add_name.past_names.length
     
@@ -2104,6 +2105,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal("__Lepiota rhacodes__ Vittad.", add_name.display_name)
     assert_equal(add_past_name_count+1, add_name.past_names.length) # past name should have been created
     assert(!add_name.past_names[-1].deprecated)
     add_synonym = add_name.synonym
