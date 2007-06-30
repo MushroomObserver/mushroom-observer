@@ -62,6 +62,7 @@ class AccountMailer < ActionMailer::Base
     @subject    = 'Mushroom Observer Question From ' + sender
     @body["question"] = question
     @recipients = WEBMASTER_EMAIL_ADDRESS
+    @bcc	= EXTRA_BCC_EMAIL_ADDRESSES
     @from       = sender
   end
 
