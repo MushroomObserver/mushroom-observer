@@ -10,20 +10,14 @@ Synonym issues:
     Genus <Genus> <Author> = Genus <Genus> <Author>
     Automated way to apply synonyms to your own observations (with review)
 
-
-Default date for images should be based on observation
-
 Admin stuff:
     Pages for accessing the logs
 
 Multiple licenses
-  GFDL & CC-by-sa
-  CC-by-nc-sa
-  GFDL only
-  CC-by-sa only
-  Stored on a per image basis
-  User preferences for thumbnail, normal and originals
-  wiki, nc2.5, nc3
+  GFDL & CC-by-sa (To allow images to be used on Wikipedia)
+  CC-by-nc-sa (Disallow commercial use)
+  Stored on a per image basis (wiki, nc2.5, nc3)
+  User preferences for default
   
 Show all comments
 

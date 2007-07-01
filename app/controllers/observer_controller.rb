@@ -569,6 +569,10 @@ class ObserverController < ApplicationController
       if check_user_id(@observation.user_id)
         @image = Image.new
         @image.copyright_holder = session['user'].legal_name
+        
+        # Set the default date to the date of the observation
+        # Don't know how to correctly test this.
+        @image.when = @observation.when
       else
         render :action => 'show_observation'
       end
@@ -1479,7 +1483,7 @@ class ObserverController < ApplicationController
         # Don't allow author to be cleared by using any author you can find...
         if author == ''
           author = name.author || ''
-          if author == ''
+          if author == '' && old_name
             author = old_name.author || ''
           end
         end
