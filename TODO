@@ -1,7 +1,3 @@
-Make non-deprecated names bold
-
-Make SVN consistent with MediaTemple
-
 Email to mushroomobserver.org needs to get fixed still.
 
 Synonym issues:
@@ -19,7 +15,6 @@ Default date for images should be based on observation
 
 Admin stuff:
     Pages for accessing the logs
-    Spam reduction by validating theme
 
 Multiple licenses
   GFDL & CC-by-sa

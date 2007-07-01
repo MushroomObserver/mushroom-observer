@@ -38,15 +38,36 @@ class AccountControllerTest < Test::Unit::TestCase
   def test_bad_signup
     @request.session['return-to'] = "http://localhost/bogus/location"
 
-    post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "wrong" }
+    # Password doesn't match
+    post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "wrong",
+      "theme" => "NULL" }
     assert(find_record_in_template("user").errors.invalid?(:password))
     
-    post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "newpassword" }
+    # No email
+    post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "newpassword",
+      "theme" => "NULL" }
     assert(find_record_in_template("user").errors.invalid?(:login))
 
-    post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "wrong" }
+    # Bad password and no email
+    post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "wrong",
+      "theme" => "NULL" }
     assert(find_record_in_template("user").errors.invalid?(:password))
     assert(find_record_in_template("user").errors.invalid?(:login))
+  end
+  
+  def test_signup_theme_errors
+    @request.session['return-to'] = "http://localhost/bogus/location"
+
+    post :signup, "user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
+                              "email" => "spam@spam.spam", "theme" => "" }
+    assert(!@response.has_session_object?("user"))
+    
+    assert_equal("http://localhost/bogus/location", @response.redirect_url)
+
+    post :signup, "user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
+                              "email" => "spam@spam.spam", "theme" => "spammer" }
+    assert(!@response.has_session_object?("user"))
+    assert_redirected_to(:controller => "account", :action => "welcome")
   end
 
   def test_invalid_login

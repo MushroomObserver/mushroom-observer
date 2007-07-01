@@ -23,10 +23,8 @@ class AccountController < ApplicationController
       when :post
         theme = params['user']['theme']
         login = params['user']['login']
-        if (theme == '') or (theme == login) or (login == 'test_denied')
-          AccountMailer.deliver_denied(params['user'])
-          redirect_back_or_default :action => "welcome"          
-        else
+        valid_themes = CSS + ["NULL"]
+        if valid_themes.member?(theme) and (login != 'test_denied')
           @user = User.new(params['user'])
           @user.created = Time.now
           @user.last_login = @user.created
@@ -38,6 +36,9 @@ class AccountController < ApplicationController
             AccountMailer.deliver_verify(@user)
             redirect_back_or_default :action => "welcome"          
           end
+        else
+          AccountMailer.deliver_denied(params['user'])
+          redirect_back_or_default :action => "welcome"          
         end
       when :get
         @user = User.new

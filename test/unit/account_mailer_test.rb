@@ -97,6 +97,7 @@ class AccountMailerTest < Test::Unit::TestCase
     @expected.body = read_fixture('webmaster_question')
     @expected.subject    = 'Mushroom Observer Question From ' + sender
     @expected.to = 'webmaster@mushroomobserver.org'
+    @expected.bcc = 'nathan@collectivesource.com'
     @expected.from = sender
 
     # verify(user)
