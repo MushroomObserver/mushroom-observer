@@ -26,6 +26,7 @@ class ObserverController < ApplicationController
                                                     :news,
                                                     :next_image,
                                                     :next_observation,
+                                                    :observation_index,
                                                     :observations_by_name,
                                                     :pattern_search,
                                                     :prev_image,
@@ -726,6 +727,7 @@ class ObserverController < ApplicationController
   def calc_checklist(id)
     source = session['checklist_source']
     list = []
+    query = nil
     if source == 0 # Use observation_ids
       ob_ids = session['observation_ids']
       if ob_ids
@@ -742,14 +744,21 @@ class ObserverController < ApplicationController
         end
         session['checklist'] = checklist.keys.sort
       end
+    elsif source == :all_observations
+      query = "select distinct names.observation_name, names.id, names.search_name from names, observations
+               where names.id = observations.name_id order by names.search_name"
+    elsif source == :all_names
+      query = "select distinct observation_name, id, search_name from names order by search_name"
     elsif not source.nil? # Used to list everything, but that's too slow
       if source == id
         source = session['prev_checklist_source'] || source
       end
-      query = "select distinct names.observation_name, names.id from names, observations, observations_species_lists
+      query = "select distinct names.observation_name, names.id, names.search_name from names, observations, observations_species_lists
                where observations_species_lists.species_list_id = %s
                and observations_species_lists.observation_id = observations.id
-               and names.id = observations.name_id order by names.observation_name" % source
+               and names.id = observations.name_id order by names.search_name" % source
+    end
+    if query
       data = Observation.connection.select_all(query)
       for d in data
         list.push([d['observation_name'], d['id']])
@@ -1105,7 +1114,7 @@ class ObserverController < ApplicationController
       if sorter.only_single_names
         sorter.create_new_synonyms()
         flash[:notice] = "All names are now in the database."
-        action = 'all_names'
+        action = 'name_index'
       elsif sorter.new_name_strs != []
         flash[:notice] = "Unrecognized names including %s given" % sorter.new_name_strs[0]
       else
@@ -1517,29 +1526,33 @@ class ObserverController < ApplicationController
     end
   end
 
-  # name_index.rhtml
-  # Just list the names that have observations
+  # List all the names
   def name_index
     store_location
     session['list_members'] = nil
     session['new_names'] = nil
-    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names, observations" +
-                                            " where observations.name_id = names.id" +
-                                            " order by names.text_name asc, author asc")
-    # @names = Name.find(:all, :order => "'text_name' asc, 'author' asc")
+    session['checklist_source'] = :all_names
+    @name_data = Name.connection.select_all("select id, display_name from names" +
+                                            " order by text_name asc, author asc")
   end
-  
-  # List all the names
-  def all_names
+
+  # Just list the names that have observations
+  def observation_index
     store_location
     session['list_members'] = nil
     session['new_names'] = nil
-    @title = "All Names"
-    @name_data = Name.connection.select_all("select id, display_name from names" +
-                                            " order by text_name asc, author asc")
+    session['checklist_source'] = :all_observations
+    @title = "Observation Index"
+    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names, observations" +
+                                            " where observations.name_id = names.id" +
+                                            " order by names.text_name asc, author asc")
     render :action => 'name_index'
   end
-
+    
+  def all_names
+    name_index # Maintaining backwards compatibility
+  end
+  
   # show_name.rhtml -> change_synonyms.rhtml
   def change_synonyms
     read_syn_session
