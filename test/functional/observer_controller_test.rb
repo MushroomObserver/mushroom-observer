@@ -111,6 +111,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_template 'name_index'
   end
 
+  def test_observation_index
+    get :observation_index
+    assert_response :success
+    assert_template 'name_index'
+  end
+
   def test_all_names
     get :all_names
     assert_response :success
@@ -168,7 +174,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
 
     post :send_webmaster_question, "user" => {"email" => ""}, "question" => {"content" => "Some content"}
-    assert_equal("You must provide a return address.", flash[:notice])
+    assert_equal("You must provide a valid return address.", flash[:notice])
+    assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
+
+    post :send_webmaster_question, "user" => {"email" => "spammer"}, "question" => {"content" => "Some content"}
+    assert_equal("You must provide a valid return address.", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
 
     post :send_webmaster_question, "user" => {"email" => "spam@spam.spam"}, "question" => {"content" => "Buy <a href='http://junk'>Me!</a>"}
@@ -638,7 +648,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :approved_names => [new_name_str, new_synonym_str]
     }
     requires_login(:update_bulk_names, params, false)
-    assert_redirected_to(:controller => "observer", :action => "all_names")
+    assert_redirected_to(:controller => "observer", :action => "name_index")
     new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
     assert(new_name)
     assert(!new_name.deprecated)
@@ -661,7 +671,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     requires_login(:update_bulk_names, params, false)
     # print "\n#{flash[:notice]}\n"
-    assert_redirected_to(:controller => "observer", :action => "all_names")
+    assert_redirected_to(:controller => "observer", :action => "name_index")
     valid_name = Name.find(valid_name.id)
     assert(!valid_name.deprecated)
     synonym_name = Name.find(synonym_name.id)
@@ -685,7 +695,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     requires_login(:update_bulk_names, params, false)
     # print "\n#{flash[:notice]}\n"
-    assert_redirected_to(:controller => "observer", :action => "all_names")
+    assert_redirected_to(:controller => "observer", :action => "name_index")
     valid_name = Name.find(valid_name.id)
     assert(!valid_name.deprecated)
     synonym_name = Name.find(synonym_name.id)
@@ -708,7 +718,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :approved_names => [valid_name.search_name, new_synonym_str]
     }
     requires_login(:update_bulk_names, params, false)
-    assert_redirected_to(:controller => "observer", :action => "all_names")
+    assert_redirected_to(:controller => "observer", :action => "name_index")
     valid_name = Name.find(valid_name.id)
     assert(!valid_name.deprecated)
     synonym_name = Name.find(:first, :conditions => ["search_name = ?", new_synonym_str])
@@ -732,7 +742,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :approved_names => [new_name_str, synonym_name.search_name]
     }
     requires_login(:update_bulk_names, params, false)
-    assert_redirected_to(:controller => "observer", :action => "all_names")
+    assert_redirected_to(:controller => "observer", :action => "name_index")
     valid_name = Name.find(:first, :conditions => ["search_name = ?", new_name_str])
     assert(valid_name)
     assert(!valid_name.deprecated)

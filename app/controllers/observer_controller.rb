@@ -728,6 +728,9 @@ class ObserverController < ApplicationController
     source = session['checklist_source']
     list = []
     query = nil
+    if source == id
+      source = session['prev_checklist_source'] || source
+    end
     if source == 0 # Use observation_ids
       ob_ids = session['observation_ids']
       if ob_ids
@@ -750,9 +753,6 @@ class ObserverController < ApplicationController
     elsif source == :all_names
       query = "select distinct observation_name, id, search_name from names order by search_name"
     elsif not source.nil? # Used to list everything, but that's too slow
-      if source == id
-        source = session['prev_checklist_source'] || source
-      end
       query = "select distinct names.observation_name, names.id, names.search_name from names, observations, observations_species_lists
                where observations_species_lists.species_list_id = %s
                and observations_species_lists.observation_id = observations.id
@@ -1221,8 +1221,8 @@ class ObserverController < ApplicationController
     if params['question']
       content = params['question']['content']
     end
-    if sender.nil? or sender.strip == ''
-      flash[:notice] = "You must provide a return address."
+    if sender.nil? or sender.strip == '' or sender.index('@').nil?
+      flash[:notice] = "You must provide a valid return address."
       session['content'] = content
       redirect_to :action => 'ask_webmaster_question'
     elsif /http:/ =~ content
@@ -1551,6 +1551,7 @@ class ObserverController < ApplicationController
     
   def all_names
     name_index # Maintaining backwards compatibility
+    render :action => 'name_index'
   end
   
   # show_name.rhtml -> change_synonyms.rhtml
