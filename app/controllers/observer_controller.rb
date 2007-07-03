@@ -747,10 +747,10 @@ class ObserverController < ApplicationController
         end
         session['checklist'] = checklist.keys.sort
       end
-    elsif source == :all_observations
+    elsif source.to_s == 'all_observations'
       query = "select distinct names.observation_name, names.id, names.search_name from names, observations
                where names.id = observations.name_id order by names.search_name"
-    elsif source == :all_names
+    elsif source.to_s == 'all_names'
       query = "select distinct observation_name, id, search_name from names order by search_name"
     elsif not source.nil? # Used to list everything, but that's too slow
       query = "select distinct names.observation_name, names.id, names.search_name from names, observations, observations_species_lists
