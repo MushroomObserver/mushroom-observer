@@ -1,5 +1,3 @@
-Email to mushroomobserver.org needs to get fixed still.
-
 Synonym issues:
     Add test for Psathyrella gracillis group case
     Tricholoma = Tricoloma Deprecated is hard to clean up.  End up with Tricholoma and Tricholoma (Fr.) Staude.
@@ -9,6 +7,9 @@ Synonym issues:
     <Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
     Genus <Genus> <Author> = Genus <Genus> <Author>
     Automated way to apply synonyms to your own observations (with review)
+New design for synoyms?
+  Deprecate (as a page) | Add Synonyms
+  Validate?
 
 Admin stuff:
     Pages for accessing the logs
@@ -24,6 +25,8 @@ Show all comments
 Name tagging
 
 Add support for OpenID?
+
+Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.  Can be used to create species lists, or simply displayed and copied for publication somewhere else.
 
 Species list functional tests
   Add tests for adding multiple new species

@@ -1,13 +1,16 @@
-<% @title = 'Image: ' + h(@image.unique_text_name) %>
+<%
+    @title = 'Image: ' + h(@image.unique_text_name)
+    for obs in @image.observations
+        %>
+        <%= link_to("About #{textilize_without_paragraph(h(obs.base_name))}", :action => "show_name", :id => obs.name_id)%>
+        | <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % obs.name.text_name) %><br/>
+    <%
+    end
+%>
 <%= link_to 'Show Full Size', :action => 'show_original', :id => @image %>
 <% commercial_inquiries_ok = @image.user.commercial_email
    if commercial_inquiries_ok %>
 	| <%= link_to 'Send Commercial Inquiry About Image', :action => 'commercial_inquiry', :id => @image %>
-<% end %>
-<% if check_permission(@image.user_id) %>
-	|| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
-	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
-                  :confirm => "Are you sure?" %>
 <% end %>
 <%	if session['observation_ids'] %>
 		<br/><%= link_to 'Prev', :action => 'prev_image', :id => @image %>
@@ -54,6 +57,12 @@
 </div>
 </td>
 <td valign="top">
+
+<% if check_permission(@image.user_id) %>
+	<%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
+                  :confirm => "Are you sure?" %>
+<% end %>
 
 <p>When: <span class="Data"><%= @image.when %></span></p>
 

@@ -432,33 +432,41 @@ class ObserverController < ApplicationController
   def prev_observation
     @observation = Observation.find(params[:id])
     obs = session['observation_ids']
-    index = obs.index(params[:id].to_i)
-    if index.nil? or obs.nil? or obs.length == 0
-      index = 0
-    else
-      index = index - 1
-      if index < 0
-        index = obs.length - 1
+    if obs
+      index = obs.index(params[:id].to_i)
+      if index.nil? or obs.nil? or obs.length == 0
+        index = 0
+      else
+        index = index - 1
+        if index < 0
+          index = obs.length - 1
+        end
       end
+      id = obs[index]
+      redirect_to(:action => 'show_observation', :id => id)
+    else
+      redirect_to(:action => 'list_rss_logs')
     end
-    id = obs[index]
-    redirect_to :action => 'show_observation', :id => id
   end
 
   def next_observation
     @observation = Observation.find(params[:id])
     obs = session['observation_ids']
-    index = obs.index(params[:id].to_i)
-    if index.nil? or obs.nil? or obs.length == 0
-      index = 0
-    else
-      index = index + 1
-      if index >= obs.length
+    if obs
+      index = obs.index(params[:id].to_i)
+      if index.nil? or obs.nil? or obs.length == 0
         index = 0
+      else
+        index = index + 1
+        if index >= obs.length
+          index = 0
+        end
       end
+      id = obs[index]
+      redirect_to(:action => 'show_observation', :id => id)
+    else
+      redirect_to(:action => 'list_rss_logs')
     end
-    id = obs[index]
-    redirect_to :action => 'show_observation', :id => id
   end
 
       
@@ -899,16 +907,7 @@ class ObserverController < ApplicationController
 
   def construct_approved_name(name_parse, approved_names, user, deprecate)
     # Don't do anything if the given names are not approved
-    logger.warn("construct_approved_name")
-    logger.warn("gots approval: #{approved_names.join(', ')}")
-    logger.warn("name_parse.name: #{name_parse.name}")
-    if name_parse.has_synonym
-      logger.warn("gots synonym")
-      logger.warn("name_parse.synonym_search_name: #{name_parse.synonym_search_name}")
-      logger.warn("name_parse.synonym_rank: #{name_parse.synonym_rank}")
-    end
     if approved_names.member?(name_parse.search_name)
-      logger.warn("there is stuff to make")
       names = Name.names_from_string(name_parse.search_name)
       if names.last.nil?
         flash[:notice] = "Unable to create the name #{name_parse.name}\n"
@@ -919,7 +918,6 @@ class ObserverController < ApplicationController
     end
     if name_parse.has_synonym && approved_names.member?(name_parse.synonym_search_name)
       synonym_names = []
-      logger.warn("there is a synonym to make")
       synonym_names = Name.names_from_string(name_parse.synonym_search_name)
       if synonym_names.last.nil?
         flash[:notice] = "Unable to create the synonym #{name_parse.synonym}\n"
@@ -936,7 +934,6 @@ class ObserverController < ApplicationController
   
   def save_names(names, user, deprecate)
     for n in names
-      logger.warn("i can #{n.search_name}")
       n.user = user
       n.change_deprecated(deprecate)
       n.save
@@ -1437,6 +1434,16 @@ class ObserverController < ApplicationController
   def edit_name
     if verify_user()
       @name = Name.find(params[:id])
+      user_id = session['user'].id
+      @can_make_changes = true
+      if user_id != 0
+        for obs in @name.observations
+          if obs.user_id != user_id
+            @can_make_changes = false
+            break
+          end
+        end
+      end
     end
   end
 
@@ -1497,11 +1504,11 @@ class ObserverController < ApplicationController
           end
         end
         past_name = PastName.make_past_name(name)
+        old_search_name = name.search_name
         count = 0
         name.modified = Time.new
         count += 1
         deprecated = (params[:name][:deprecated] == 'true')
-        logger.warn("*** #{deprecated.class}: '#{deprecated}'")
         alt_ids = name.change_text_name(text_name, author, params[:name][:rank], deprecated)
         name.notes = params[:name][:notes]
         name.version = name.version + 1
@@ -1514,7 +1521,7 @@ class ObserverController < ApplicationController
             o.name = name
             o.save
           end
-          old_name.log("Name merged with #{name.search_name}")
+          old_name.log("#{old_search_name} merged with #{name.search_name}")
           old_name.destroy
         end
       rescue RuntimeError => err

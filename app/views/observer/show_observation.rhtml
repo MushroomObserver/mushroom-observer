@@ -1,16 +1,13 @@
-<% @title = 'Observation: ' + h(@observation.unique_text_name) %>
-<%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @observation.name.text_name) %><br/>
+<% @title = 'Observation: ' + h(@observation.unique_text_name)
+   what = textilize_without_paragraph(h(@observation.base_name)) %>
+<%= link_to("About #{what}", :action => 'show_name', :id => @observation.name_id)%>
+| <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @observation.name.text_name) %><br/>
 
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
 <% questions_ok = @observation.user.question_email
    if questions_ok %>
 	| <%= link_to 'Send Observer a Question', :action => 'ask_question', :id => @observation %>
-<% end %>
-<% if check_permission(@observation.user_id) %>
-	|| <%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
-	| <%= link_to 'Destroy', { :action => 'destroy_observation', :id => @observation },
-                  :confirm => "Are you sure?" %>
 <% end %>
 <%	if not session['observation_ids'].nil? %>
 		<br/><%= link_to 'Prev', :action => 'prev_observation', :id => @observation %>
@@ -19,13 +16,17 @@
 
 <div id="Title"><%= 'Observation: ' + textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
+<% if check_permission(@observation.user_id) %>
+	<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
+	| <%= link_to 'Destroy', { :action => 'destroy_observation', :id => @observation },
+                  :confirm => "Are you sure?" %><br/>
+<% end %>
+
 <table cellpadding="10">
 <tr>
 	<td width="75%" valign="top">
 	    <p>When: <span class="Data"><%= @observation.when %></span></p>
 	    <p>Where: <span class="Data"><%= h @observation.where %></span></p>
-	    <p>What: <span class="Data"><%= link_to(textilize_without_paragraph(h(@observation.base_name)),
-	                                            :action => 'show_name', :id => @observation.name_id) %></span></p>
 	    <p>Who: <span class="Data">
 		<% if questions_ok %>
 			<%= link_to h(@observation.user.unique_text_name), :action => 'ask_question', :id => @observation %>

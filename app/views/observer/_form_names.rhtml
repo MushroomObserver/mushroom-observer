@@ -10,21 +10,37 @@
 </p>
 
 <p>
-    <label for="name_text_name">Text Name:</label>
-    <%= text_field 'name', 'text_name'  %><br/>
-    <span id="help_note">
-    	Unformatted version of the name without any author info.<br/>
-    	E.g., Amanita muscara var. flavivolvata.
-    </span>
+    <%
+    if @can_make_changes %>
+        <label for="name_text_name">Text Name:</label>
+        <%= text_field 'name', 'text_name'  %><br/>
+        <span id="help_note">
+        	Unformatted version of the name without any author info.<br/>
+        	E.g., Amanita muscara var. flavivolvata.
+        </span>
+    <% else %>
+        Text Name: <%= @name.text_name %><br/>
+        <span id="help_note">
+        	Name is in use.  Make name changes in each observation.
+        </span>
+    <% end %>
 </p>
 
 <p>
-    <label for="name_author">Author:</label>
-    <%= text_field 'name', 'author'  %><br/>
-    <span id="help_note">
-    	The author citation using the standard ICBN format.<br/>
-    	E.g., (Singer) Jenkins.
-    </span>
+    <%
+    if @can_make_changes or @name.author.nil? or (@name.author == '') %>
+        <label for="name_author">Author:</label>
+        <%= text_field 'name', 'author'  %><br/>
+        <span id="help_note">
+        	The author citation using the standard ICBN format.<br/>
+        	E.g., (Singer) Jenkins.
+        </span>
+    <% else %>
+        Author: <%= @name.author %><br/>
+        <span id="help_note">
+        	Name with this author citation is in use.  Make name changes in each observation.
+        </span>
+    <% end %>
 </p>
 
 <p>

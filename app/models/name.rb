@@ -186,7 +186,9 @@ class Name < ActiveRecord::Base
     unless value
       # Add boldness
       self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
-      self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
+      if self.display_name != self.observation_name
+        self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
+      end
     end
     self.deprecated = value
   end
