@@ -11,33 +11,21 @@
 	Author: <%= @name.author %><br/>
 	Status: <%= @name.status %><br/>
 	<%
-	synonym = @name.synonym
-	if synonym
-	    valid_synonyms = []
-	    deprecated_synonyms = []
-	    for n in synonym.names
-	        if n != @name
-	            link = link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)
-	            if n.deprecated
-	                deprecated_synonyms.push(link)
-	            else
-	                valid_synonyms.push(link)
-                end
-	        end
-	    end
-	    if valid_synonyms != []
-	        if @name.deprecated
-	            %>
-	            Preferred 
-	        <% end %>
-	        Synonym(s): <%= valid_synonyms.join(', ') %><br/>
-	    <%
-	    end
-	    if deprecated_synonyms != []
-	        %>
-	        Deprecated Synonym(s): <%= deprecated_synonyms.join(', ') %><br/>
-	    <% end %>
-	<% end %>
+	valid_synonyms, deprecated_synonyms = @name.sort_synonyms
+	if valid_synonyms != []
+	    links = valid_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
+        if @name.deprecated
+            %>
+            Preferred 
+        <% end %>
+        Synonym(s): <%= links.join(', ') %><br/>
+	<%
+	end
+    if deprecated_synonyms != []
+        links = deprecated_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
+        %>
+        Deprecated Synonym(s): <%= links.join(', ') %><br/>
+    <% end %>
 	Version: <%= @name.version %><br/>
 	<% if @past_name %>
 	    <%= link_to("Previous version: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id ) %>

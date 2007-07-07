@@ -1,7 +1,8 @@
 <% @title = 'Observation: ' + h(@observation.unique_text_name)
-   what = textilize_without_paragraph(h(@observation.base_name)) %>
-<%= link_to("About #{what}", :action => 'show_name', :id => @observation.name_id)%>
-| <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @observation.name.text_name) %><br/>
+   what = textilize_without_paragraph(h(@observation.base_name))
+   name = @observation.name %>
+<%= link_to("About #{what}", :action => 'show_name', :id => name.id)%>
+| <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % name.text_name) %><br/>
 
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
@@ -25,6 +26,22 @@
 <table cellpadding="10">
 <tr>
 	<td width="75%" valign="top">
+	    <%
+	    valid_synonyms, deprecated_synonyms = name.sort_synonyms
+        if valid_synonyms != []
+    	    links = valid_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
+    	    if name.deprecated %>
+	            Preferred
+	        <% else %>
+	            Alternative
+	        <% end %>
+	        <% if links.length > 1 %>
+	            names:
+	        <% else %>
+	            name:
+	        <% end %>
+	        <%= links.join(', ') %>
+	    <% end %>
 	    <p>When: <span class="Data"><%= @observation.when %></span></p>
 	    <p>Where: <span class="Data"><%= h @observation.where %></span></p>
 	    <p>Who: <span class="Data">

@@ -426,6 +426,24 @@ class Name < ActiveRecord::Base
     return result
   end
   
+  def sort_synonyms
+    accepted_synonyms = []
+    deprecated_synonyms = []
+    synonym = self.synonym
+  	if synonym
+  	  for n in synonym.names
+  	    if (n != self)
+  	      if n.deprecated
+  	        deprecated_synonyms.push(n)
+	        else
+	          accepted_synonyms.push(n)
+	        end
+  	    end
+  	  end
+  	end
+  	[accepted_synonyms, deprecated_synonyms]
+  end
+  	
   # Ensure that this Name has no synonyms by clearing the synonym
   # and destroying it if necessary
   def clear_synonym

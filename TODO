@@ -1,15 +1,16 @@
-Synonym issues:
-    Add test for Psathyrella gracillis group case
+Synonym bugs:
+    Add test for Psathyrella gracillis group case - Not sure what the problem is here...
     Tricholoma = Tricoloma Deprecated is hard to clean up.  End up with Tricholoma and Tricholoma (Fr.) Staude.
-    If there is exactly one valid name and any number of deprecated with the same text_name, you shouldn't get ask which you mean.
-    Make a name you are looking at a deprecated synonym of something else
     Fix repeats of deprecated names when updating species lists
     <Genus> <Author> = <Genus> <Author> doesn't seem to work.  Should try
     Genus <Genus> <Author> = Genus <Genus> <Author>
-    Automated way to apply synonyms to your own observations (with review)
 New design for synoyms?
   Deprecate (as a page) | Add Synonyms
-  Validate?
+    Make a name you are looking at a deprecated synonym of something else
+  Approve
+Synonym features
+  If there is exactly one valid name and any number of deprecated with the same text_name, you shouldn't get ask which you mean.
+  Automated way to apply synonyms to your own observations (with review)
 
 Admin stuff:
     Pages for accessing the logs
