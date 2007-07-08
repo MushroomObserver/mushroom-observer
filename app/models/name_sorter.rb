@@ -75,6 +75,14 @@ class NameSorter
     end
   end
 
+  def add_approved_deprecated_names(new_names)
+    if new_names
+      for n in new_names
+        @approved_deprecated_names += n.split("/")
+      end
+    end
+  end
+  
   def check_for_deprecated_name(name, name_str=nil)
     if name.deprecated
       str = name_str || name.search_name

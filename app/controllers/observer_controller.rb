@@ -798,6 +798,7 @@ class ObserverController < ApplicationController
   # the usage for show_observation.
   def show_species_list
     store_location
+    read_spl_session
     id = params[:id]
     @species_list = SpeciesList.find(id)
     session[:species_list] = @species_list
@@ -873,10 +874,10 @@ class ObserverController < ApplicationController
       for obs in spl.observations
         name = obs.name
         if name.deprecated
-          if @deprecated_names.nil?
-            @deprecated_names = []
+          @deprecated_names = [] if @deprecated_names.nil?
+          unless @deprecated_names.member?(name.search_name) or @deprecated_names.member?(name.text_name)
+            @deprecated_names.push(name.search_name)
           end
-          @deprecated_names.push(name.search_name)
         end
       end
       calc_checklist(params[:id])
@@ -1007,10 +1008,10 @@ class ObserverController < ApplicationController
     # to take precedence over valid names, then swap the next two lines.
     # If they need to be more carefully considered, then the lists may need to get
     # merged in the display.
-    sorter.add_chosen_names(params[:chosen_names])
-    sorter.add_chosen_names(params[:chosen_valid_names])
+    sorter.add_chosen_names(params[:chosen_names]) # hash
+    sorter.add_chosen_names(params[:chosen_valid_names]) # hash
     
-    sorter.approved_deprecated_names = params[:approved_deprecated_names]
+    sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
     sorter.check_for_deprecated_checklist(params[:checklist_data])
     if species_list
       sorter.check_for_deprecated_names(species_list.observations.map {|o| o.name})
