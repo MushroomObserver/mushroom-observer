@@ -38,16 +38,36 @@ class Name < ActiveRecord::Base
     [:Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
   end
   
-  def self.find_names(in_str, rank=nil)
+  # By default tries to weed out deprecated names, but if that results in an empty set,
+  # then it returns the deprecated ones.  Both deprecated and non-deprecated names can
+  # be returned by setting deprecated to true.
+  def self.find_names(in_str, rank=nil, deprecated=false)
     name = in_str.strip
     if ['Unknown', 'unknown'].member? in_str
       name = "Fungi"
     end
-    if rank
-      Name.find(:all, :conditions => ["rank = :rank and (search_name = :name or text_name = :name)", {:rank => rank, :name => name}])
-    else
-      Name.find(:all, :conditions => ["search_name = :name or text_name = :name", {:name => name}])
+    deprecated_condition = ''
+    unless deprecated
+      deprecated_condition = 'deprecated = 0 and '
     end
+    if rank
+      result = Name.find(:all, :conditions => ["#{deprecated_condition}rank = :rank and (search_name = :name or text_name = :name)",
+                                               {:rank => rank, :name => name}])
+      if (result == []) and Name.ranks_above_species.member?(rank.to_sym)
+        name.sub!(' ', ' sp. ')
+        result = Name.find(:all, :conditions => ["#{deprecated_condition}rank = :rank and (search_name = :name or text_name = :name)",
+                                                 {:rank => rank, :name => name}])
+      end
+      result
+    else
+      result = Name.find(:all, :conditions => ["#{deprecated_condition}(search_name = :name or text_name = :name)", {:name => name}])
+    end
+    
+    # No names that aren't deprecated, so try for ones that are deprecated
+    if result == [] and not deprecated
+      result = self.find_names(in_str, rank, true)
+    end
+    result
   end
   
   def self.format_string(str, deprecated)
