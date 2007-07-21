@@ -1,12 +1,8 @@
-Synonym bugs:
-    Add test for Psathyrella gracillis group case - Not sure what the problem is here...
-    Tricholoma = Tricoloma Deprecated is hard to clean up.  End up with Tricholoma and Tricholoma (Fr.) Staude. - Not really big deal
 New design for synonyms?
   Deprecate (as a page) | Add Synonyms
     Make a name you are looking at a deprecated synonym of something else
   Approve
 Synonym features
-  If there is exactly one valid name and any number of deprecated with the same text_name, you shouldn't get ask which you mean.
   Automated way to apply synonyms to your own observations (with review)
 
 Admin stuff:
