@@ -486,6 +486,25 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert((count + 1) == Observation.find(:all).length)
   end
 
+  def test_construct_observation_deprecated_multiple_match
+    # Test an observation creation with one of the multiple matches chosen
+    count = Observation.find(:all).length
+    params = {
+      :observation => {
+        :what => @pluteus_petasatus_deprecated.text_name,
+        :where => "test_construct_observation_deprecated_multiple_match",
+        "when(1i)" => "2007",
+        "when(2i)" => "7",
+        "when(3i)" => "20",
+        :specimen => "0"
+      },
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs = assigns(:observation)
+    assert_equal(@pluteus_petasatus_approved, obs.name)
+  end
+
   def test_construct_observation_invalid
     # Test an observation creation with an invalid name
     count = Observation.find(:all).length
@@ -1823,6 +1842,26 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(merge_name)
     assert_equal(correct_author, merge_name.author)
     assert_equal(past_names+1, merge_name.version)
+  end
+
+  def test_update_name_add_author
+    name = @strobilurus_diminutivus_no_author
+    old_text_name = name.text_name
+    new_author = 'Desjardin'
+    assert(name.observations.length > 0)
+    params = {
+      :id => name.id,
+      :name => {
+        :author => new_author,
+        :rank => :Species,
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    name = Name.find(name.id)
+    assert_equal(new_author, name.author)
+    assert_equal(old_text_name, name.text_name)
   end
 
   def spl_params(spl)

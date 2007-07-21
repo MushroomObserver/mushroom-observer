@@ -72,3 +72,16 @@ agaricus_campestros_obs:
   specimen:  0
   notes:     From somewhere else
   name_id:   21
+#
+
+strobilurus_diminutivus_obs:
+  id:        8
+  created:   2007-07-20 20:54:45
+  modified:  2007-07-20 20:54:45
+  when:      2007-07-20
+  user_id:   1
+  where:     Pipi Valley, Sierra Mountains, CA
+  specimen:  0
+  notes:     From somewhere else
+  name_id:   24
+#

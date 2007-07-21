@@ -335,3 +335,48 @@ coprinellus_micaceus_no_author:
   observation_name: **__Coprinellus micaceus__**
   search_name: Coprinellus micaceus
 #
+
+# For testing when the author is added to a name that has an observation
+strobilurus_diminutivus_no_author:
+  id: 24
+  created: 2007-07-20 20:54:45
+  modified: 2007-07-20 20:54:45
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Strobilurus diminutivus
+  display_name: **__Strobilurus diminutivus__**
+  observation_name: **__Strobilurus diminutivus__**
+  search_name: Strobilurus diminutivus
+#
+
+# For testing when there are both an approved and deprecated name with the same text name
+pluteus_petasatus_approved:
+  id: 25
+  created: 2007-07-20 20:54:45
+  modified: 2007-07-20 20:54:45
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Pluteus petasatus
+  author: (Fr.) Gillet
+  display_name: **__Pluteus petasatus__** (Fr.) Gillet
+  observation_name: **__Pluteus petasatus__** (Fr.) Gillet
+  search_name: Pluteus petasatus (Fr.) Gillet
+#
+
+# For testing the where the author is added when a name has an observation
+pluteus_petasatus_deprecated:
+  id: 26
+  created: 2007-07-20 21:12:45
+  modified: 2007-07-20 21:12:45
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Pluteus petasatus
+  author: (Fries) Gillet
+  display_name: __Pluteus petasatus__ (Fries) Gillet
+  observation_name: __Pluteus petasatus__ (Fries) Gillet
+  search_name: Pluteus petasatus (Fries) Gillet
+  deprecated: 1
+#
