@@ -46,6 +46,7 @@ class ObserverController < ApplicationController
                                                     :show_user,
                                                     :show_user_observations,
                                                     :species_lists_by_title,
+                                                    :throw_error,
                                                     :users_by_contribution])
   # Default page
   def index
@@ -1643,6 +1644,10 @@ class ObserverController < ApplicationController
       end
     end
     action
+  end
+  
+  def throw_error
+    raise "I was asked to throw an error"
   end
   
   helper_method :dump_sorter
