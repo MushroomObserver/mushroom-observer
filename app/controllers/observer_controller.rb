@@ -1647,7 +1647,11 @@ class ObserverController < ApplicationController
   end
   
   def throw_error
-    raise "I was asked to throw an error"
+    if request.env["HTTP_USER_AGENT"].index("BlackBerry")
+      raise "This is a BlackBerry!"
+    else
+      raise "#{request.env["HTTP_USER_AGENT"]}"
+    end
   end
   
   helper_method :dump_sorter
