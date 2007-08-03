@@ -15,6 +15,7 @@ class PastName < ActiveRecord::Base
     past_name.text_name = name.text_name
     past_name.author = name.author
     past_name.notes = name.notes
+    past_name.deprecated = name.deprecated
     past_name
   end
 end

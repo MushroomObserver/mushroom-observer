@@ -27,9 +27,9 @@
 <tr>
 	<td width="75%" valign="top">
 	    <%
-	    valid_synonyms, deprecated_synonyms = name.sort_synonyms
-        if valid_synonyms != []
-    	    links = valid_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
+	    approved_synonyms, deprecated_synonyms = name.sort_synonyms
+        if approved_synonyms != []
+    	    links = approved_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
     	    if name.deprecated %>
 	            Preferred
 	        <% else %>

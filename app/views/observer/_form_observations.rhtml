@@ -2,7 +2,7 @@
 
 <!--[form:observation]-->
 
-<% if what %>
+<% if what && (what != '') %>
     <% if valid_names
         %>
         <p>
@@ -30,7 +30,7 @@
         <span id="help_note">
             Click '<%= button_name %>' to create this name or edit the name below to correct any typo.<br/><br/>
         </span>
-    <% else %>
+    <% elsif names.length > 1 %>
         <span class="Data">
             <br/>Multiple names match '<%= h(what) %>'.  Select the one you intended:<br/>
             <% for n in names %>
@@ -46,17 +46,18 @@
 
 <td valign="top">
 <p><label for="observation_when">When:</label><br/>
-<%= date_select 'observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
+<%= date_select('observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year) %>
+</p> 
 <br/>
 <p><label for="observation_where">Where (required):</label>
-<%= text_field 'observation', 'where'  %><br/>
+<%= text_field('observation', 'where')  %><br/>
 <span id="help_note">
 	Where the observation was made.<br/>
 	In the US this should be at least accurate to the county.
 </span></p>
 <br/>
 <p><label for="observation_what">What:</label>
-<%= text_field 'observation', 'what', :value => what  %><br/>
+<%= text_field('observation', 'what')  %><br/>
 <span id="help_note">
 	The name you would apply to this observation.  If you don't know what it is, just say 'Unknown'.
 	If you find a better name for this observation in the future, please change the name by selecting
@@ -81,7 +82,7 @@
 		Please include comments about how you arrived at the given name, any unusual features and any features
 		that are not clear from a photograph such as habitat or distinctive scent or taste.
 	</span><br/>
-<%= text_area 'observation', 'notes'  %></p>
+<%= text_area 'observation', 'notes' %></p>
 <%= render :partial => 'textilize_help' %>
 
 <% if logging_optional %>

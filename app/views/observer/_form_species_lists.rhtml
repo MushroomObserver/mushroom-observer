@@ -23,19 +23,19 @@
         </span>
         <span class="Data">
             <% for name_str in @deprecated_names
-                valid_names = []
+                approved_names = []
                 for name in Name.find_names(name_str)
-                    for valid_name in name.valid_synonyms
-                        valid_names.push(valid_name)
+                    for approved_name in name.approved_synonyms
+                        approved_names.push(approved_name)
                     end
                 end
-                if valid_name != []
+                if approved_name != []
                     %>
                     <p>
                         <%= h(name_str) %><br/>
-                        <% for valid_name in valid_names %>
-                            &nbsp;&nbsp;<%= radio_button("chosen_valid_names", name_str, valid_name.id) %>
-                            <%= textilize_without_paragraph(h(valid_name.display_name)) %><br/>
+                        <% for approved_name in approved_names %>
+                            &nbsp;&nbsp;<%= radio_button("chosen_approved_names", name_str, approved_name.id) %>
+                            <%= textilize_without_paragraph(h(approved_name.display_name)) %><br/>
                         <% end %>
                     </p>
                 <% end %>

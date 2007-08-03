@@ -1,0 +1,26 @@
+<%
+    @title = 'Approving ' + h(@name.text_name)
+%>
+<%= link_to 'Cancel (Show Name)', :action => 'show_name', :id => @name %>
+
+<div id="Title">
+    Approving <%= textilize_without_paragraph(h(@name.display_name)) %>
+</div>
+<%= error_messages_for 'synonym' %>
+
+<p>
+    <% form_tag(:action => 'do_approval', :id => @name) do %>
+        <center><%= submit_tag 'Approve' %></center>
+        <br/>
+        <% if @approved_names %>
+        <p>
+            <%= check_box('deprecate', 'others', :checked => 'checked') %>
+            <label for="deprecate_others"> Deprecate the following synonyms:</label><br/><br/>
+            <% for n in @approved_names %>
+                <%= textilize_without_paragraph(h(n.display_name)) %><br/>
+            <% end
+           end %>
+           <br/>If you want to split up a set of synonyms, click 'Approve' or 'Cancel' and then click on the 'Change Synonyms' link.
+        </p>
+    <% end %>
+</p>

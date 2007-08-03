@@ -1,12 +1,17 @@
-New design for synonyms?
-  Deprecate (as a page) | Add Synonyms
-    Make a name you are looking at a deprecated synonym of something else
-  Approve
-Synonym features
-  Automated way to apply synonyms to your own observations (with review)
+Add citations to Names
+
+Search tweaks
+
+Multiple licenses
+  GFDL & CC-by-sa (To allow images to be used on Wikipedia)
+  CC-by-nc-sa (Disallow commercial use)
+  Stored on a per image basis (wiki, nc2.5, nc3)
+  User preferences for default
+
 
 Mobile support
-    Figure out how to tell the difference
+    - Figure out how to tell the difference
+    Look up on web for mobile support functions
     Mobilize layout:
         MO & Title on one line.
         Create a single link at the top for to go to the left-hand panel with the search buttons
@@ -17,14 +22,12 @@ Mobile support
 
 Greenphone support
 
+Synonym features
+  Automated way to apply synonyms to your own observations (with review)
+
+
 Admin stuff:
     Pages for accessing the logs
-
-Multiple licenses
-  GFDL & CC-by-sa (To allow images to be used on Wikipedia)
-  CC-by-nc-sa (Disallow commercial use)
-  Stored on a per image basis (wiki, nc2.5, nc3)
-  User preferences for default
   
 Show all comments
 

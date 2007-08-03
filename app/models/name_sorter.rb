@@ -7,7 +7,7 @@ class NameSorter
   attr_accessor :approved_deprecated_names
   attr_accessor :approved_synonym_ids
   attr_accessor :chosen_names
-  attr_accessor :chosen_valid_names
+  attr_accessor :chosen_approved_names
   attr_reader :deprecated_name_strs
   attr_reader :has_new_synonyms
   attr_reader :has_unapproved_deprecated_names
@@ -27,7 +27,7 @@ class NameSorter
     @approved_deprecated_names = [] # List of strings
     @approved_synonym_ids = [] # List of name_ids
     @chosen_names = {} # name_str -> name_id
-    @chosen_valid_names = {} # name_str -> name_id
+    @chosen_approved_names = {} # name_str -> name_id
     @deprecated_name_strs = [] # List of strings
     @has_new_synonyms = false
     @has_unapproved_deprecated_names = false

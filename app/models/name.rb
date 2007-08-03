@@ -38,12 +38,16 @@ class Name < ActiveRecord::Base
     [:Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
   end
   
+  def self.names_for_unknown()
+    ['Unknown', 'unknown', '']
+  end
+  
   # By default tries to weed out deprecated names, but if that results in an empty set,
   # then it returns the deprecated ones.  Both deprecated and non-deprecated names can
   # be returned by setting deprecated to true.
   def self.find_names(in_str, rank=nil, deprecated=false)
     name = in_str.strip
-    if ['Unknown', 'unknown'].member? in_str
+    if names_for_unknown.member? name
       name = "Fungi"
     end
     deprecated_condition = ''
@@ -137,7 +141,7 @@ class Name < ActiveRecord::Base
   
   def self.names_from_string(in_str)
     result = []
-    if in_str == 'Unknown'
+    if names_for_unknown.member? in_str
       result = Name.find_name(:Kingdom, 'Fungi')
     else
       str = in_str.gsub(" near ", " ")
@@ -435,7 +439,7 @@ class Name < ActiveRecord::Base
     self.search_name = search_name
   end
 
-  def valid_synonyms
+  def approved_synonyms
     result = []
     synonym = self.synonym
     if synonym

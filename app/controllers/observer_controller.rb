@@ -95,7 +95,7 @@ class ObserverController < ApplicationController
       # @comment.observation = @observation
       @comment.user = user
       if @comment.save
-        @observation.log(sprintf('Comment, %s, added by %s', @comment.summary, user.login), true)
+        @observation.log("Comment, #{@comment.summary}, added by #{user.login}", true)
         flash[:notice] = 'Comment was successfully added.'
         redirect_to(:action => 'show_observation', :id => @observation)
       else
@@ -301,31 +301,40 @@ class ObserverController < ApplicationController
   def construct_observation
     user = session['user']
     if verify_user()
-      @observation = Observation.new(params[:observation])
-      now = Time.now
-      @observation.created = now
-      @observation.modified = now
-      @observation.user = user
-      if params[:chosen_name] && params[:chosen_name][:name_id]
-        names = [Name.find(params[:chosen_name][:name_id])]
-      else
-        names = Name.find_names(params[:observation][:what])
-      end
-      if names.length == 0
-        names = [create_needed_names(params, user)]
-      end
-      target_name = names.first
       action = "create_observation"
-      if target_name and names.length == 1
-        if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
-          synonyms = target_name.valid_synonyms
-          session[:valid_name_ids] = synonyms.map {|n| n.id}
+      if params[:observation]
+        @observation = Observation.new(params[:observation])
+        now = Time.now
+        @observation.created = now
+        @observation.modified = now
+        @observation.user = user
+        if params[:chosen_name] && params[:chosen_name][:name_id]
+          names = [Name.find(params[:chosen_name][:name_id])]
         else
-          @observation.name = target_name
-          if @observation.save
-            @observation.log('Observation created by ' + session['user'].login, true)
-            flash[:notice] = 'Observation was successfully created.'
-            action = "show_observation"
+          names = Name.find_names(params[:observation][:what])
+          logger.warn("construct_observation: #{names.length}")
+        end
+        if names.length == 0
+          names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
+        end
+        target_name = names.first
+        if target_name and names.length == 1
+          if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
+            synonyms = target_name.approved_synonyms
+            session[:valid_name_ids] = synonyms.map {|n| n.id}
+          else
+            @observation.name = target_name
+            if @observation.save
+              @observation.log('Observation created by ' + session['user'].login, true)
+              flash[:notice] = 'Observation was successfully created.'
+              action = "show_observation"
+            else
+              if params[:observation][:where] == ''
+                flash[:notice] = 'Location not given!'
+              else
+                flash[:notice] = 'Unable to create a new Observation'
+              end
+            end
           end
         end
       end
@@ -349,10 +358,10 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
       session['observation'] = params[:id].to_i
-      args = session[:args]
-      session[:args] = nil
-      if args
-        @what = args[:what]
+      if session[:args]
+        @what = session[:args][:what]
+        @observation.attributes = session[:args]
+        session[:args] = nil
       end
       name_ids = session[:name_ids]
       if name_ids
@@ -383,12 +392,12 @@ class ObserverController < ApplicationController
         names = Name.find_names(params[:observation][:what])
       end
       if names.length == 0
-        names = [create_needed_names(params, user)]
+        names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
       end
       target_name = names.first
       if target_name and names.length == 1
         if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
-          synonyms = target_name.valid_synonyms
+          synonyms = target_name.approved_synonyms
           session[:valid_name_ids] = synonyms.map {|n| n.id}
         elsif @observation.update_attributes(params[:observation])
           @observation.name = target_name
@@ -1010,7 +1019,7 @@ class ObserverController < ApplicationController
     # If they need to be more carefully considered, then the lists may need to get
     # merged in the display.
     sorter.add_chosen_names(params[:chosen_names]) # hash
-    sorter.add_chosen_names(params[:chosen_valid_names]) # hash
+    sorter.add_chosen_names(params[:chosen_approved_names]) # hash
     
     sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
     sorter.check_for_deprecated_checklist(params[:checklist_data])
@@ -1027,7 +1036,7 @@ class ObserverController < ApplicationController
     sp_args = { :created => species_list.modified, :user => user, :notes => params[:member][:notes],
                 :where => species_list.where }
     sp_when = species_list.when # Can't use params since when is split up
-    species_list.update_names(params[:chosen_valid_names])
+    species_list.update_names(params[:chosen_approved_names])
     for name, timestamp in sorter.single_names
       sp_args[:when] = timestamp || sp_when
       species_list.construct_observation(name, sp_args)
@@ -1036,7 +1045,7 @@ class ObserverController < ApplicationController
     if params[:checklist_data]
       for key, value in params[:checklist_data]
         if value == "checked"
-          name = find_chosen_name(key.to_i, params[:chosen_valid_names])
+          name = find_chosen_name(key.to_i, params[:chosen_approved_names])
           species_list.construct_observation(name, sp_args)
         end
       end
@@ -1613,7 +1622,7 @@ class ObserverController < ApplicationController
         synonym.save
         if deprecate
           for n in sorter.all_names
-            action = deprecate_name(n, user)
+            action = deprecate_synonym(n, user)
             n.save
           end
         end
@@ -1625,7 +1634,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  def deprecate_name(name, user)
+  def deprecate_synonym(name, user)
     action = 'show_name'
     unless name.deprecated
       past_name = PastName.make_past_name(name)
@@ -1644,6 +1653,99 @@ class ObserverController < ApplicationController
       end
     end
     action
+  end
+
+  def deprecate_name
+    read_syn_session
+    if verify_user()
+      @name = Name.find(params[:id])
+      name_ids = session[:name_ids]
+      if name_ids # multiple matches or deprecated name
+        @names = name_ids.map {|n| Name.find(n)}
+      end
+      session[:name_ids] = nil
+      @what = params[:proposed_name] || ''
+    end
+  end
+
+  def do_deprecation
+    user = session['user']
+    if verify_user()
+      current_name = Name.find(params[:id])
+      proposed_name_str = (params[:proposed][:name] || '').strip
+      action = 'deprecate_name'
+      if proposed_name_str != ''
+        if params[:chosen_name] && params[:chosen_name][:name_id]
+          names = [Name.find(params[:chosen_name][:name_id])]
+        else
+          names = Name.find_names(proposed_name_str)
+        end
+        if names.length == 0
+          logger.warn("do_deprecation: create_needed_names(#{params[:approved_name]}, #{proposed_name_str}, user)")
+          names = [create_needed_names(params[:approved_name], proposed_name_str, user)]
+          logger.warn("do_deprecation: #{names.length}")
+        end
+        target_name = names.first
+        if target_name
+          if names.length == 1
+            target_name = names.first
+            current_name.merge_synonyms(target_name)
+            if target_name.deprecated
+              past_name = PastName.make_past_name(target_name)
+              target_name.change_deprecated(false)
+              target_name.version = target_name.version + 1
+              past_name.save
+              target_name.log("Preferred over #{current_name.search_name} by #{user.login}")
+            end
+            target_name.save
+            unless current_name.deprecated
+              past_name = PastName.make_past_name(current_name)
+              current_name.change_deprecated(true)
+              current_name.version = current_name.version + 1
+              past_name.save
+              current_name.log("Deprecated in favor of #{target_name.search_name} by #{user.login}")
+            end
+            current_name.save
+            action = 'show_name'
+          else # must have multiple matches
+            # setup name_ids, proposed/name
+            session[:name_ids] = names.map {|n| n.id}
+          end
+        end
+        redirect_to :action => action, :id => current_name, :proposed_name => proposed_name_str
+      end
+    end
+  end
+
+  def approve_name
+    if verify_user()
+      @name = Name.find(params[:id])
+      @approved_names = @name.approved_synonyms
+    end
+  end
+
+  def do_approval
+    user = session['user']
+    if verify_user()
+      current_name = Name.find(params[:id])
+      if params[:deprecate][:others] == '1'
+        for n in current_name.approved_synonyms
+          past_name = PastName.make_past_name(n)
+          n.version = n.version + 1
+          past_name.save
+          n.change_deprecated(true)
+          n.log("Deprecated in favor of #{current_name.search_name} by #{user.login}")
+          n.save
+        end
+      end
+      past_name = PastName.make_past_name(current_name)
+      current_name.version = current_name.version + 1
+      past_name.save
+      current_name.change_deprecated(false)
+      current_name.log("Approved by #{user.login}")
+      current_name.save
+      redirect_to :action => 'show_name', :id => current_name
+    end
   end
   
   def throw_error
@@ -1934,10 +2036,8 @@ class ObserverController < ApplicationController
 
   protected
 
-  def create_needed_names(params, user)
+  def create_needed_names(input_what, output_what, user)
     result = nil
-    input_what = params[:approved_name]
-    output_what = params[:observation][:what]
     if input_what == output_what
       names = Name.names_from_string(output_what)
       if names.last.nil?
