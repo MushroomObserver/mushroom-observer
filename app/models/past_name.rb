@@ -16,6 +16,15 @@ class PastName < ActiveRecord::Base
     past_name.author = name.author
     past_name.notes = name.notes
     past_name.deprecated = name.deprecated
+    past_name.citation = name.citation
     past_name
+  end
+  
+  def status
+    if self.deprecated
+      "Deprecated"
+    else
+      "Valid"
+    end
   end
 end

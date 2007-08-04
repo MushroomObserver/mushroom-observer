@@ -1543,6 +1543,7 @@ class ObserverControllerTest < Test::Unit::TestCase
         :text_name => name.text_name,
         :author => "(Fr.) Kühner",
         :rank => :Species,
+        :citation => "__Le Genera Galera__, 139. 1935.",
         :notes => ""
       }
     }
@@ -1552,6 +1553,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
+    assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(@rolf, name.user)
   end
 

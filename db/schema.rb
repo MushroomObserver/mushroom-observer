@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 17) do
+ActiveRecord::Schema.define(:version => 18) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -52,6 +52,7 @@ ActiveRecord::Schema.define(:version => 17) do
     t.column "synonym_id",       :integer
     t.column "deprecated",       :boolean,                                                                                                                  :default => false, :null => false
     t.column "rank",             :enum,     :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
+    t.column "citation",         :string,   :limit => 200
   end
 
   create_table "observations", :force => true do |t|
@@ -85,6 +86,7 @@ ActiveRecord::Schema.define(:version => 17) do
     t.column "search_name",      :string,   :limit => 200
     t.column "notes",            :text
     t.column "deprecated",       :boolean,                                                                                                                   :default => false, :null => false
+    t.column "citation",         :string,   :limit => 200
   end
 
   create_table "rss_logs", :force => true do |t|

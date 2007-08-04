@@ -150,13 +150,18 @@
 					</table>
 				</td>
 				<td width=100% valign="top" class="main">
-            		<% form_tag(:action => 'pattern_search',
-            		                   :controller => 'observer', :id => @comment) do %>
-                      Find: <%= text_field("search", "pattern", :size => 10)%>
+            		<%
+            		if @search.nil?
+            		    pattern = session["pattern"]
+            		else
+            		    pattern = @search.pattern
+            		end
+            		form_tag(:action => 'pattern_search',
+            		         :controller => 'observer', :id => @comment) do %>
+                      Find: <%= text_field("search", "pattern", :size => 50, :value => pattern)%>
                       <%= submit_tag 'Observations' %>
                       <%= submit_tag 'Images' %>
                       <%= submit_tag 'Names' %>
-                      <%= submit_tag 'Locations' %>
                     <% end -%>
                     <% if flash[:notice] %>
 					  <%= flash[:notice] %><br/>

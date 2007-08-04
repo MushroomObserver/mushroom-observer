@@ -6,9 +6,10 @@
     <tr>
         <td valign="top">
         	Rank: <%= @past_name.rank %><br/>
+        	Status: <%= @past_name.status %><br/>
         	Name: <%= @past_name.text_name %><br/>
         	Author: <%= @past_name.author %><br/>
-        	Version: <%= @past_name.version %><br/>
+        	Citation: <%= textilize_without_paragraph(sanitize(@past_name.citation || '')) %><br/>
             <p>
             	Notes: <%= textilize(sanitize(@past_name.notes.to_s)) %>
             </p>

@@ -44,6 +44,17 @@
 </p>
 
 <p>
+    <label for="name_citation">Citation:</label>
+	<span id="help_note">
+		Citation for the publication of this name.<br/>
+	</span>
+    <%= text_field 'name', 'citation', :cols => 80  %><br/>
+    <span id="textilize_note">
+        Citations can be formated using the Textile markup system.
+    </span>
+</p>
+
+<p>
     <label for="name_notes">Notes:</label>
 	<span id="help_note">
 		Please include notes about the validity of this name,<br/>

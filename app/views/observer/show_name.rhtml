@@ -12,9 +12,10 @@
 <div id="Title"><%= 'About: ' + textilize_without_paragraph(h(@name.display_name)) %></div>
 <p>
 	Rank: <%= @name.rank %><br/>
+	Status: <%= @name.status %><br/>
 	Name: <%= @name.text_name %><br/>
 	Author: <%= @name.author %><br/>
-	Status: <%= @name.status %><br/>
+	Citation: <%= textilize_without_paragraph(sanitize(@name.citation || '')) %><br/>
 	<%
 	approved_synonyms, deprecated_synonyms = @name.sort_synonyms
 	if approved_synonyms != []

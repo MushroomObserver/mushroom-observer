@@ -194,8 +194,6 @@ class ObserverController < ApplicationController
     case session["search_type"]
     when 'Images'
       image_search(pattern)
-    when 'Locations'
-      location_search(pattern)
     when 'Names'
       name_search(pattern)
     else
@@ -203,11 +201,16 @@ class ObserverController < ApplicationController
     end
   end
   
+  def field_search(fields, sql_pattern)
+    (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
+  end
+  
   def image_search(pattern)
-    conditions = "names.search_name like '#{pattern.gsub(/[*']/,"%")}%'"
+    sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
+    conditions = field_search(["names.search_name", "images.notes"], sql_pattern)
     query = "select images.*, names.search_name from images, images_observations, observations, names
       where images.id = images_observations.image_id and images_observations.observation_id = observations.id
-      and observations.name_id = names.id and %s order by names.search_name, `when` desc" % conditions
+      and observations.name_id = names.id and (#{conditions}) order by names.search_name, `when` desc"
     session['checklist_source'] = 0 # Meaning use observation_ids
     session['observation_ids'] = []
     session['observation'] = nil
@@ -216,24 +219,11 @@ class ObserverController < ApplicationController
     render :action => 'list_images'
   end
   
-  def location_search(pattern)
-    conditions = "`where` like '#{pattern.gsub(/[*']/,"%")}%'"
-    query = "select o.id from observations o where %s order by `when` desc" % conditions
-    session['checklist_source'] = 0 # Meaning use observation_ids
-    session['observation_ids'] = self.query_ids(query)
-    session['observation'] = nil
-    session['image_ids'] = nil
-    @observation_pages, @observations = paginate(:observations,
-                                                 :order => "`when` desc",
-                                                 :conditions => conditions,
-                                                 :per_page => @layout["count"])
-    render :action => 'list_observations'
-  end
-  
   def observation_search(pattern)
-    conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
-    query = "select o.id, names.search_name from observations o, names
-             where o.name_id = names.id and %s order by names.search_name asc, `when` desc" % conditions
+    sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
+    conditions = field_search(["names.search_name", "observations.where", "observations.notes"], sql_pattern)
+    query = "select observations.id, names.search_name from observations, names
+             where observations.name_id = names.id and (#{conditions}) order by names.search_name asc, `when` desc"
     session['checklist_source'] = 0 # Meaning use observation_ids
     session['observation_ids'] = self.query_ids(query)
     session['observation'] = nil
@@ -246,18 +236,18 @@ class ObserverController < ApplicationController
   end
   
   def name_search(pattern)
-    conditions = sprintf("names.search_name like '%s%%'", pattern.gsub(/[*']/,"%"))
+    sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
+    conditions = field_search(["names.search_name", "names.notes", "names.author"], sql_pattern)
     session['checklist_source'] = nil # Meaning all species
-    #@names = Name.find(:all, :conditions => conditions, :order => "'text_name' asc, 'author' asc")
     @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names" +
                                             " where #{conditions} order by names.text_name asc, author asc")
-   len = @name_data.length
-    if len == 0
-      flash[:notice] = "No names matching '%s' found" % pattern
-      redirect_to :controller => 'observer', :action => 'name_index'
-    elsif len == 1
+    len = @name_data.length
+    if len == 1
       redirect_to(:controller => 'observer', :action => 'show_name', :id => @name_data[0]['id'])
     else
+      if len == 0
+        flash[:notice] = "No names matching '%s' found" % pattern
+      end
       render :action => 'name_index'
     end
   end
@@ -633,15 +623,19 @@ class ObserverController < ApplicationController
   end
     
   def upload_image
-    @observation = Observation.find(params[:observation][:id])
-    if check_user_id(@observation.user_id)
-      # Upload image
-      args = params[:image]
-      process_image(args, params[:upload][:image1])
-      process_image(args, params[:upload][:image2])
-      process_image(args, params[:upload][:image3])
-      process_image(args, params[:upload][:image4])
-      redirect_to(:action => 'show_observation', :id => @observation)
+    if params[:observation]
+      @observation = Observation.find(params[:observation][:id])
+      if check_user_id(@observation.user_id)
+        # Upload image
+        args = params[:image]
+        process_image(args, params[:upload][:image1])
+        process_image(args, params[:upload][:image2])
+        process_image(args, params[:upload][:image3])
+        process_image(args, params[:upload][:image4])
+        redirect_to(:action => 'show_observation', :id => @observation)
+      else
+        render :action => 'show_observation'
+      end
     else
       render :action => 'show_observation'
     end
@@ -1524,6 +1518,7 @@ class ObserverController < ApplicationController
         count += 1
         deprecated = (params[:name][:deprecated] == 'true')
         alt_ids = name.change_text_name(text_name, author, params[:name][:rank], deprecated)
+        name.citation = params[:name][:citation]
         name.notes = params[:name][:notes]
         name.version = name.version + 1
         name.user = user
