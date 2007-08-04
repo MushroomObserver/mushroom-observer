@@ -237,7 +237,7 @@ class ObserverController < ApplicationController
   
   def name_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["names.search_name", "names.notes", "names.author"], sql_pattern)
+    conditions = field_search(["names.search_name", "names.notes", "names.citation"], sql_pattern)
     session['checklist_source'] = nil # Meaning all species
     @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names" +
                                             " where #{conditions} order by names.text_name asc, author asc")
