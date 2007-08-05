@@ -1557,6 +1557,25 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@rolf, name.user)
   end
 
+  def test_update_name_deprecated
+    name = @lactarius_alpigenes
+    assert(name.deprecated)
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => name.text_name,
+        :author => "",
+        :rank => :Species,
+        :citation => "",
+        :notes => ""
+      }
+    }
+    requires_login(:update_name, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    name = Name.find(name.id)
+    assert(name.deprecated)
+  end
+
   def test_update_name_simple_merge
     misspelt_name = @agaricus_campestrus
     correct_name = @agaricus_campestris

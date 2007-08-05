@@ -406,11 +406,11 @@ class Name < ActiveRecord::Base
   end
 
   # Throws a RuntimeError with the error message if unsuccessful in anyway 
-  def change_text_name(in_str, in_author, in_rank, in_deprecated)
+  def change_text_name(in_str, in_author, in_rank)
     common_errors(in_str)
     results = nil
     author = in_author.strip
-    text_name, display_name, observation_name, search_name, parent_name = Name.parse_by_rank(in_str, in_rank, in_deprecated)
+    text_name, display_name, observation_name, search_name, parent_name = Name.parse_by_rank(in_str, in_rank, self.deprecated)
     if (parent_name and Name.find(:all, :conditions => "text_name = '%s'" % parent_name) == [])
       names = Name.names_from_string(parent_name)
       if names.last.nil?
@@ -426,7 +426,6 @@ class Name < ActiveRecord::Base
     self.rank = rank
     self.text_name = text_name
     self.author = author
-    self.deprecated = in_deprecated
     if author
       display_name = "%s %s" % [display_name, author]
       if [:Species, :Subspecies, :Variety, :Form].member? rank

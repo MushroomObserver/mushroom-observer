@@ -1516,8 +1516,7 @@ class ObserverController < ApplicationController
         count = 0
         name.modified = Time.new
         count += 1
-        deprecated = (params[:name][:deprecated] == 'true')
-        alt_ids = name.change_text_name(text_name, author, params[:name][:rank], deprecated)
+        alt_ids = name.change_text_name(text_name, author, params[:name][:rank])
         name.citation = params[:name][:citation]
         name.notes = params[:name][:notes]
         name.version = name.version + 1

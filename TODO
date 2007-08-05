@@ -1,7 +1,9 @@
-Figure out scoring change that happened for Darvin
+instinctual work
 
-Hide name changes from default page?
-
+Bulk Name Edit issues:
+  Adding author to Pisolithus arhizus caused the name to be listed as new
+  Past Name was not created (causing score drop)
+  
 Multiple licenses
   GFDL & CC-by-sa (To allow images to be used on Wikipedia)
   CC-by-nc-sa (Disallow commercial use)
@@ -21,6 +23,8 @@ Mobile support
     
 
 Greenphone support
+
+Hide name changes from default page?
 
 Synonym features
   Automated way to apply synonyms to your own observations (with review)
