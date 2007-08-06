@@ -125,7 +125,7 @@ class AccountController < ApplicationController
       @user = User.find(params['id'])
       @user.verified = Time.now
       @user.save
-      if session['user'].id == @user.id
+      if session['user'] && (session['user'].id == @user.id)
         session['user'].verified = Time.now
       end
     else
