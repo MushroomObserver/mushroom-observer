@@ -1576,6 +1576,27 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(name.deprecated)
   end
 
+  def test_update_name_different_user
+    name = @macrolepiota_rhacodes
+    name_owner = name.user
+    user = "rolf"
+    assert(user != name_owner.login) # Make sure it's not owned by the default user
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => name.text_name,
+        :author => name.author,
+        :rank => :Species,
+        :citation => name.citation,
+        :notes => name.notes
+      }
+    }
+    requires_login(:update_name, params, false, user)
+    assert_redirected_to(:controller => "observer", :action => "show_name")
+    name = Name.find(name.id)
+    assert(name_owner == name.user)
+  end
+
   def test_update_name_simple_merge
     misspelt_name = @agaricus_campestrus
     correct_name = @agaricus_campestris
