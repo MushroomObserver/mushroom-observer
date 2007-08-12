@@ -690,7 +690,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :approved_names => [new_name_str, new_synonym_str]
     }
     requires_login(:update_bulk_names, params, false)
-    assert_redirected_to(:controller => "observer", :action => "name_index")
+    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
     assert(new_name)
     assert_equal(new_name_str, new_name.text_name)
@@ -717,7 +717,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     requires_login(:update_bulk_names, params, false)
     # print "\n#{flash[:notice]}\n"
-    assert_redirected_to(:controller => "observer", :action => "name_index")
+    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     approved_name = Name.find(approved_name.id)
     assert(!approved_name.deprecated)
     synonym_name = Name.find(synonym_name.id)
@@ -741,7 +741,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     requires_login(:update_bulk_names, params, false)
     # print "\n#{flash[:notice]}\n"
-    assert_redirected_to(:controller => "observer", :action => "name_index")
+    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     approved_name = Name.find(approved_name.id)
     assert(!approved_name.deprecated)
     synonym_name = Name.find(synonym_name.id)
@@ -764,7 +764,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :approved_names => [approved_name.search_name, new_synonym_str]
     }
     requires_login(:update_bulk_names, params, false)
-    assert_redirected_to(:controller => "observer", :action => "name_index")
+    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     approved_name = Name.find(approved_name.id)
     assert(!approved_name.deprecated)
     synonym_name = Name.find(:first, :conditions => ["search_name = ?", new_synonym_str])
@@ -788,7 +788,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :approved_names => [new_name_str, synonym_name.search_name]
     }
     requires_login(:update_bulk_names, params, false)
-    assert_redirected_to(:controller => "observer", :action => "name_index")
+    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     approved_name = Name.find(:first, :conditions => ["search_name = ?", new_name_str])
     assert(approved_name)
     assert(!approved_name.deprecated)
@@ -1603,8 +1603,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     end
     correct_name = Name.find(correct_name.id)
     assert(correct_name)
-    assert(1 == correct_name.version)
-    assert(past_names+1 == correct_name.past_names.size)
+    assert_equal(0, correct_name.version)
+    assert_equal(past_names, correct_name.past_names.size)
     
     assert_equal(2, correct_name.observations.size)
     misspelt_obs = Observation.find(misspelt_obs_id)
@@ -1621,7 +1621,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     correct_author = correct_name.author
     assert_not_equal(misspelt_name.author, correct_author)
     past_names = correct_name.past_names.size
-    assert(0 == correct_name.version)
+    assert_equal(0, correct_name.version)
     params = {
       :id => misspelt_name.id,
       :name => {
@@ -1639,8 +1639,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     correct_name = Name.find(correct_name.id)
     assert(correct_name)
     assert_equal(correct_author, correct_name.author)
-    assert(1 == correct_name.version)
-    assert(past_names+1 == correct_name.past_names.size)
+    assert_equal(0, correct_name.version)
+    assert_equal(past_names, correct_name.past_names.size)
   end
 
   # Test that merged names end up as not deprecated if the
@@ -1655,7 +1655,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     correct_author = correct_name.author
     assert_not_equal(misspelt_name.author, correct_author)
     past_names = correct_name.past_names.size
-    assert(0 == correct_name.version)
+    assert_equal(0, correct_name.version)
     params = {
       :id => misspelt_name.id,
       :name => {
@@ -1674,8 +1674,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(correct_name)
     assert(!correct_name.deprecated)
     assert_equal(correct_author, correct_name.author)
-    assert(1 == correct_name.version)
-    assert(past_names+1 == correct_name.past_names.size)
+    assert_equal(0, correct_name.version)
+    assert_equal(past_names, correct_name.past_names.size)
   end
 
   # Test that merged names end up as not deprecated even if the
@@ -1856,7 +1856,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     merge_name = Name.find(page_name.id)
     assert(merge_name)
     assert_equal(correct_author, merge_name.author)
-    assert_equal(past_names+1, merge_name.version)
+    assert_equal(past_names, merge_name.version)
   end
 
   def test_update_name_other_version_merge
@@ -1885,7 +1885,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     merge_name = Name.find(other_name.id)
     assert(merge_name)
     assert_equal(correct_author, merge_name.author)
-    assert_equal(past_names+1, merge_name.version)
+    assert_equal(past_names, merge_name.version)
   end
 
   def test_update_name_add_author
@@ -1933,6 +1933,24 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_species_list")
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count, spl.observations.size)
+  end
+
+  def test_update_species_list_text_add_multiple
+    spl = @unknown_species_list
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
+    owner = spl.user.login
+    assert("rolf" != owner)
+    requires_login(:update_species_list, params, false)
+    assert_redirected_to(:controller => "observer", :action => "list_species_lists")
+    spl = SpeciesList.find(spl.id)
+    assert(spl.observations.size == sp_count)
+    login owner
+    get(:update_species_list, params)
+    assert_redirected_to(:controller => "observer", :action => "show_species_list")
+    spl = SpeciesList.find(spl.id)
+    assert_equal(sp_count + 2, spl.observations.size)
   end
 
   def test_update_species_list_text_add

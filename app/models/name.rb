@@ -157,7 +157,7 @@ class Name < ActiveRecord::Base
           matches = Name.find(:all, :conditions => "search_name = '%s'" % search_name)
         end
         if matches == []
-          matches = Name.find(:all, :conditions => "text_name = '%s' and author is null" % text_name)
+          matches = Name.find(:all, :conditions => "text_name = '%s' and (author is null or author = '')" % text_name)
         end
         match_count = matches.length
         if match_count == 0
@@ -169,7 +169,7 @@ class Name < ActiveRecord::Base
           result.push name
         elsif match_count == 1
           name = matches[0]
-          if name.author.nil? and author
+          if (name.author.nil? or name.author == '') and author
             name.change_author author
           end
           result.push name

@@ -34,5 +34,14 @@
                 <% end 
                end %>
         </td>
+    </tr>
     <tr>
+        <td>
+            <p><span class="Date">
+                Name created: <%= @past_name.created %><br/>
+                Last modified: <%= @past_name.modified %> by <%= @past_name.user.unique_text_name %><br/>
+                </span>
+            </p>
+        </td>
+    </tr>
 </table>

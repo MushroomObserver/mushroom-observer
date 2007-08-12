@@ -1,15 +1,8 @@
-instinctual work
-
-Bulk Name Edit issues:
-  Adding author to Pisolithus arhizus caused the name to be listed as new
-  Past Name was not created (causing score drop)
-  
 Multiple licenses
   GFDL & CC-by-sa (To allow images to be used on Wikipedia)
   CC-by-nc-sa (Disallow commercial use)
   Stored on a per image basis (wiki, nc2.5, nc3)
   User preferences for default
-
 
 Mobile support
     - Figure out how to tell the difference
@@ -18,31 +11,31 @@ Mobile support
         MO & Title on one line.
         Create a single link at the top for to go to the left-hand panel with the search buttons
         Remove top pagination
-            
     Mushroom Observer - Activity Log
     
-
 Greenphone support
 
+Improve 'where'
+  lat, long, altitude
+  Hook up to Google Maps
+
+Name tagging
+
+
+
+Show all comments
+
+Add support for OpenID?
+
 Hide name changes from default page?
+
+Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.  Can be used to create species lists, or simply displayed and copied for publication somewhere else.
 
 Synonym features
   Automated way to apply synonyms to your own observations (with review)
 
-
 Admin stuff:
     Pages for accessing the logs
-  
-Show all comments
-
-Name tagging
-
-Add support for OpenID?
-
-Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.  Can be used to create species lists, or simply displayed and copied for publication somewhere else.
-
-Species list functional tests
-  Add tests for adding multiple new species
 
 Contribution
     Hidden contributors
@@ -91,18 +84,9 @@ Spelling correction
 References
 Descriptions
 
-Improve search functions:
-Make search box more available.
-  Easy for non-form pages like show_*
-  Should it be universal?  How will that interact with form pages (edit_*)?
-  Should results go in a new window or tab?
-Field based search mechanism [douglas]
+Field based search mechanism
 
 General discussion blog that is searchable
-
-Improve 'where'
-  lat, long, altitude
-  Hook up to Google Maps
 
 NaME file loads don't preserve datestamp?
 Name comments rather than just notes?
@@ -116,9 +100,6 @@ Herbarium records - Provide a standard way to describe herbarium collections.
 Check for duplicate images, image garbage collection
 
 More color themes: Boletus, Coprinus (very black and white)
-
-More rails-style tests
-
 
 New ideas:
 Mycology club affiliations (useful for searching)
