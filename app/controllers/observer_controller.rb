@@ -929,27 +929,37 @@ class ObserverController < ApplicationController
       else
         synonym_name = synonym_names.last
         synonym_name.rank = name_parse.synonym_rank if name_parse.synonym_rank
-        synonym_name.user = user
         synonym_name.change_deprecated(true)
+        if PastName.check_for_past_name(synonym_name)
+          synonym_name.log("Deprecated by #{user.login}")
+          synonym_name.user = user
+        end
         synonym_name.save
-        save_names(synonym_names[0..-2], user, deprecate) # use provided value for taxa above the lowest
+        save_names(synonym_names[0..-2], user, nil) # Don't change higher taxa
       end
     end
   end
   
   def save_names(names, user, deprecate)
     for n in names
-      n.user = user
-      n.change_deprecated(deprecate)
+      n.change_deprecated(deprecate) unless deprecate.nil?
       if PastName.check_for_past_name(n)
-        if deprecate
-          n.log("Deprecated by #{user.login}")
-        else
-          n.log("Approved by #{user.login}")
+        unless deprecate.nil?
+          if deprecate
+            n.log("Deprecated by #{user.login}")
+          else
+            n.log("Approved by #{user.login}")
+          end
         end
         n.modified = Time.now
+        n.user = user
+        n.save
+      else
+        unless n.id # Only save if it's brand new
+          n.user = user
+          n.save
+        end
       end
-      n.save
     end
   end
     
@@ -1528,8 +1538,12 @@ class ObserverController < ApplicationController
         name.user = user
         if PastName.check_for_past_name(name)
           name.log("Name updated by %s" % user.login)
+          name.save
+        else
+          unless name.id
+            raise "update_name called on a name that doesn't exist"
+          end
         end
-        name.save
         if old_name # merge happened
           for o in old_name.observations
             o.name = name
@@ -1604,7 +1618,7 @@ class ObserverController < ApplicationController
           synonym = Synonym.new
           synonym.created = timestamp
           name.synonym = synonym
-          name.modified = timestamp
+          name.modified = timestamp # Change timestamp, but not modifier
           name.save # Not creating a PastName since they don't track synonyms
         end
         proposed_synonyms = params[:proposed_synonyms] || {}
@@ -1641,13 +1655,13 @@ class ObserverController < ApplicationController
       begin
         count = 0
         name.change_deprecated(true)
-        name.modified = Time.new
-        name.version = name.version + 1
-        name.user = user
         if PastName.check_for_past_name(name)
           name.log("Name deprecated by %s" % user.login)
+          name.modified = Time.new # Only update the name if it was modified
+          name.version = name.version + 1
+          name.user = user
+          name.save
         end
-        name.save
       rescue RuntimeError => err
         flash[:notice] = err.to_s
         action = 'change_synonyms'
@@ -1692,18 +1706,18 @@ class ObserverController < ApplicationController
             target_name = names.first
             current_name.merge_synonyms(target_name)
             target_name.change_deprecated(false)
+            current_time = Time.now
             if PastName.check_for_past_name(target_name)
               target_name.log("Preferred over #{current_name.search_name} by #{user.login}")
+              target_name.modified = current_time
+              target_name.save
             end
-            current_time = Time.now
-            target_name.modified = current_time
-            target_name.save
             current_name.change_deprecated(true)
             if PastName.check_for_past_name(current_name)
               current_name.log("Deprecated in favor of #{target_name.search_name} by #{user.login}")
+              current_name.modified = current_time
+              current_name.save
             end
-            current_name.modified = current_time
-            current_name.save
             action = 'show_name'
           else # must have multiple matches
             # setup name_ids, proposed/name
@@ -1732,18 +1746,18 @@ class ObserverController < ApplicationController
           n.change_deprecated(true)
           if PastName.check_for_past_name(n)
             n.log("Deprecated in favor of #{current_name.search_name} by #{user.login}")
+            n.modified = current_time
+            n.save
           end
-          n.modified = current_time
-          n.save
         end
       end
       current_name.version = current_name.version + 1
       current_name.change_deprecated(false)
       if PastName.check_for_past_name(current_name)
         current_name.log("Approved by #{user.login}")
+        current_name.modified = current_time
+        current_name.save
       end
-      current_name.modified = current_time
-      current_name.save
       redirect_to :action => 'show_name', :id => current_name
     end
   end
@@ -2086,6 +2100,9 @@ class ObserverController < ApplicationController
         flash[:notice] = "Unable to create the name %s" % output_what
       else
         for n in names # These names are all new
+          if n.id
+            raise "Request to create an existing name"
+          end
           n.user = user
           n.save
         end
