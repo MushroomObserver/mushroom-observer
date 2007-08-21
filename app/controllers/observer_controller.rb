@@ -330,8 +330,10 @@ class ObserverController < ApplicationController
       end
       if action == "create_observation"
         args = params[:observation]
-        args[:user_id] = user.id
-        session[:args] = args
+        if args
+          args[:user_id] = user.id
+          session[:args] = args
+        end
         if target_name
           session[:name_ids] = names.map {|n| n.id}
         else
@@ -2101,9 +2103,13 @@ class ObserverController < ApplicationController
       else
         for n in names # These names are all new
           if n.id
-            raise "Request to create an existing name"
+            if PastName.check_for_past_name(n)
+              n.log("Updated by #{user.login}")
+              n.user = user
+            end
+          else
+            n.user = user
           end
-          n.user = user
           n.save
         end
       end
