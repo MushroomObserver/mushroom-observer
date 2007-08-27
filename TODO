@@ -58,6 +58,9 @@ Large features:
 
 * Summary pages for higher level taxa (somewhat related to field based search)
 
+* Machine identification
+    Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
+
 Foreign language support
 
 Yet more stuff to do with Names
@@ -70,6 +73,9 @@ Yet more stuff to do with Names
     Spelling correction
     References
     Descriptions
+
+Use RDF to make data machine readable
+    Could be used to enable identification
 
 Add support for OpenID
 
