@@ -1,35 +1,93 @@
-Multiple licenses
+* indicates a community request
+
+Current task:
+
+*** Provide support for multiple licenses.
+    Initial target is to allow the image owner to choose between a non-commercial Creative Commons license
+     and Wikipedia compatible licenses:
   GFDL & CC-by-sa (To allow images to be used on Wikipedia)
   CC-by-nc-sa (Disallow commercial use)
   Stored on a per image basis (wiki, nc2.5, nc3)
   User preferences for default
+  Need global update mechanism.  Do update on a per distinct copyright basis rather than as a completely global user basis.
+  Pages:
+    - _form_ccbyncsa25.rhtml
+    - _form_ccbyncsa30.rhtml
+    - _form_ccbysa30.rhtml
+    - show_image (display appropriate license info)
+    - show_original (display appropriate license info)
+    edit_image (change the license for this image)
+    add_image (select starting license)
+    prefs (user specified default for add_image)
+    add license_updater off of prefs (allows license change by copyright)
 
-Mobile support
-    - Figure out how to tell the difference
-    Look up on web for mobile support functions
-    Mobilize layout:
-        MO & Title on one line.
-        Create a single link at the top for to go to the left-hand panel with the search buttons
-        Remove top pagination
-    Mushroom Observer - Activity Log
-    
-Greenphone support
 
-Improve 'where'
+Large features:
+
+*** Improve 'where'
   lat, long, altitude
   Hook up to Google Maps
+  Add concept of a named location
 
-Name tagging
+** Mobile phone support
+  - Figure out how to tell the difference
+  Look up on web for mobile support functions
+  Mobilize layout:
+      MO & Title on one line.
+      Push around the divs
+      Create a single link at the top for to go to the left-hand panel with the search buttons
+      Remove pagination links from the top of the page
+  Greenphone support
+
+** Namings
+  Provide a formalized way for users to associate a 'Name' with an 'Observation'.
+      Add confidence level for a naming
+      Add basis for naming (macroscopic, key, references, microscopic, chemical, genetic)
+      Allow users to select among proposed ids or indicate that none of them seem right.
+      Provide an easy way to add a comment at the same time.
+
+** Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.
+    Can be used to create species lists, or simply displayed and copied for publication somewhere else.
+
+** Herbarium records - Provide a standard way to describe herbarium collections.
+
+* Name tagging
+  Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic
+
+* Mycology club affiliations (useful for searching)
+
+* Summary pages for higher level taxa (somewhat related to field based search)
+
+Foreign language support
+
+Yet more stuff to do with Names
+    Grouping (Agaricus is part of Agaricales, etc.)
+      View members and membership
+      Page of all members and below?
+      Should Macrolepiota include Chlorophyllum rachodes?
+    Common Name support (== Group but without the group)
+    Add rank relationships from Name
+    Spelling correction
+    References
+    Descriptions
+
+Add support for OpenID
+
+Field based search mechanism
+
+General discussion blog that is searchable
+
+Local client that can only add
 
 
 
-Show all comments
+Small features:
 
-Add support for OpenID?
+* Show all comments
 
-Hide name changes from default page?
+* Hide name changes from default page?
 
-Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.  Can be used to create species lists, or simply displayed and copied for publication somewhere else.
+Deprecate/Approve should have a comment field.
 
 Synonym features
   Automated way to apply synonyms to your own observations (with review)
@@ -50,58 +108,28 @@ More user collection pages?
 
 User pages
     User.where (optional)
-    [Mushroom God - Mycorhizzal + login and database password]
-    Mycorhizzal - Lichenized + update site, become another user, send feature email
-    Lichenized - Composter + change the status of others (up to Lichenized), SVN access
-    Composter - Ranking, new submissions, name editing, mailing list, edit own entries
-    Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
-    Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
-
-Yet more stuff to do with Names
-    Grouping (Agaricus is part of Agaricales, etc.)
-      View members and membership
-      Page of all members and below?
-      Should Macrolepiota include Chlorophyllum rachodes?
-    Common Name support (== Group but without the group)
-
-Add rank relationships from Name
+    User roles/permissions
+        [Mushroom God - Mycorhizzal + login and database password]
+        Mycorhizzal - Lichenized + update site, become another user, send feature email
+        Lichenized - Composter + change the status of others (up to Lichenized), SVN access
+        Composter - Ranking, new submissions, name editing, mailing list, edit own entries
+        Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
+        Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
 
 Split up observer_controller?:
     user pages
     non-user pages?
     email delivery
 
-Namings - Provide a formalized way for users to associate a 'Name' with an 'Observation'.
-    Add confidence level for a naming
-    Add basis for naming (sight, key, references)
-
 Mechanism for merging species lists?
 
 Page for Unknowns
-
-More with Names
-Spelling correction
-References
-Descriptions
-
-Field based search mechanism
-
-General discussion blog that is searchable
 
 NaME file loads don't preserve datestamp?
 Name comments rather than just notes?
 
 Add user.login and what got changed to show_past_name
 
-Foreign language support
-
-Herbarium records - Provide a standard way to describe herbarium collections.
-
 Check for duplicate images, image garbage collection
 
 More color themes: Boletus, Coprinus (very black and white)
-
-New ideas:
-Mycology club affiliations (useful for searching)
-Local client that can only add
-Summary pages for higher level taxa (somewhat related to field based search)
