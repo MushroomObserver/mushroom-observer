@@ -91,7 +91,7 @@ Small features:
 
 * Show all comments
 
-* Hide name changes from default page?
+* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
 
 Deprecate/Approve should have a comment field.
 
