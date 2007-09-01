@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 18) do
+ActiveRecord::Schema.define(:version => 19) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -31,11 +31,19 @@ ActiveRecord::Schema.define(:version => 18) do
     t.column "when",             :date
     t.column "notes",            :text
     t.column "copyright_holder", :string,   :limit => 100
+    t.column "license_id",       :integer,                 :default => 1, :null => false
   end
 
   create_table "images_observations", :id => false, :force => true do |t|
     t.column "image_id",       :integer, :default => 0, :null => false
     t.column "observation_id", :integer, :default => 0, :null => false
+  end
+
+  create_table "licenses", :force => true do |t|
+    t.column "display_name", :string,  :limit => 80
+    t.column "url",          :string,  :limit => 200
+    t.column "deprecated",   :boolean,                :default => false, :null => false
+    t.column "form_name",    :string,  :limit => 20
   end
 
   create_table "names", :force => true do |t|
@@ -130,6 +138,7 @@ ActiveRecord::Schema.define(:version => 18) do
     t.column "alternate_rows",    :boolean,                :default => true, :null => false
     t.column "alternate_columns", :boolean,                :default => true, :null => false
     t.column "vertical_layout",   :boolean,                :default => true, :null => false
+    t.column "license_id",        :integer,                :default => 3,    :null => false
   end
 
 end

@@ -592,6 +592,52 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(obs.name, @lactarius_subalpinus)
   end
 
+  def test_construct_observation_approved_new_species
+    # Test an observation creation with an approved new name
+    count = Name.find(:all).length
+    new_name = "Agaricus novus"
+    params = {
+      :observation => {
+        :what => new_name,
+        :where => "test_construct_observation_approved_new_species",
+        "when(1i)" => "2007",
+        "when(2i)" => "8",
+        "when(3i)" => "20",
+        :specimen => "0"
+      },
+      :approved_name => new_name,
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal((count + 1), Name.find(:all).length)
+    name = Name.find_by_text_name(new_name)
+    assert(name)
+    assert_equal(new_name, name.text_name)
+  end
+
+  def test_construct_observation_approved_new_author
+    # Test an observation creation with an approved new name
+    name = @strobilurus_diminutivus_no_author
+    assert_nil(name.author)
+    author = 'Desjardin'
+    new_name = "#{name.text_name} #{author}"
+    params = {
+      :observation => {
+        :what => new_name,
+        :where => "test_construct_observation_approved_new_author",
+        "when(1i)" => "2007",
+        "when(2i)" => "8",
+        "when(3i)" => "20",
+        :specimen => "0"
+      },
+      :approved_name => new_name,
+    }
+    requires_login(:construct_observation, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    name = Name.find(name.id)
+    assert_equal(author, name.author)
+  end
+
   def test_construct_species_list
     list_title = "List Title"
     params = {
@@ -2224,12 +2270,14 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
     selected_past_name_count = selected_name.past_names.length
+    selected_version = selected_name.version
     
     add_name = @lepiota_rhacodes
     assert(!add_name.deprecated)
     assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
     assert_nil(add_name.synonym)
     add_past_name_count = add_name.past_names.length
+    add_name_version = add_name.version
     
     params = {
       :id => selected_name.id,
@@ -2246,10 +2294,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!add_name.past_names[-1].deprecated)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
+    assert_equal(add_name_version+1, add_name.version)
 
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
     assert_equal(selected_past_name_count, selected_name.past_names.length)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2261,10 +2311,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
+    selected_version = selected_name.version
     
     add_name = @lepiota_rhacodes
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
+    add_version = add_name.version
     
     params = {
       :id => selected_name.id,
@@ -2278,9 +2330,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!add_name.deprecated)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
+    assert_equal(add_version, add_name.version)
 
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2309,6 +2363,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_1_0_a
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     assert_nil(selected_name.synonym)
     params = {
       :id => selected_name.id,
@@ -2319,6 +2374,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login(:transfer_synonyms, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name")
     selected_name = Name.find(selected_name.id)
+    assert_equal(selected_version, selected_name.version)
     synonym = selected_name.synonym
     assert_not_nil(synonym)
     assert_equal(2, synonym.names.length)
@@ -2364,9 +2420,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     add_name = @lepiota_rachodes
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
+    add_version = add_name.version
 
     selected_name = @chlorophyllum_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     start_size = selected_synonym.names.size
@@ -2383,9 +2441,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(add_name.deprecated)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
+    assert_equal(add_version+1, add_name.version)
     
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2396,10 +2456,12 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_n_1_c
     add_name = @lepiota_rachodes
     assert(!add_name.deprecated)
+    add_version = add_name.version
     assert_nil(add_name.synonym)
 
     selected_name = @chlorophyllum_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     start_size = selected_synonym.names.size
@@ -2424,11 +2486,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_name")
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2445,9 +2509,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     add_name = @lepiota_rachodes
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
+    add_version = add_name.version
 
     selected_name = @chlorophyllum_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     start_size = selected_synonym.names.size
@@ -2462,6 +2528,8 @@ class ObserverControllerTest < Test::Unit::TestCase
       end
     end
     assert_not_nil(split_name)
+    assert(!split_name.deprecated)
+    split_version = split_name.version
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
@@ -2472,11 +2540,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_name")
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2484,6 +2554,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     
     split_name = Name.find(split_name.id)
     assert(!split_name.deprecated)
+    assert_equal(split_version, split_name.version)
     assert_nil(split_name.synonym)
   end
 
@@ -2491,12 +2562,14 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_1_n_ns
     add_name = @chlorophyllum_rachodes
     assert(!add_name.deprecated)
+    add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
     
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     assert_nil(selected_name.synonym)
     
     params = {
@@ -2509,11 +2582,13 @@ class ObserverControllerTest < Test::Unit::TestCase
 
     add_name = Name.find(add_name.id)
     assert(!add_name.deprecated)
+    assert_equal(add_version, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
 
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_nil(selected_synonym)
 
@@ -2524,12 +2599,14 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_1_n_s
     add_name = @chlorophyllum_rachodes
     assert(!add_name.deprecated)
+    add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
     
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     assert_nil(selected_name.synonym)
     
     synonym_ids = (add_synonym.names.map {|n| n.id}).join('/')
@@ -2544,11 +2621,13 @@ class ObserverControllerTest < Test::Unit::TestCase
 
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
 
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2560,12 +2639,14 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_1_n_l
     add_name = @chlorophyllum_rachodes
     assert(!add_name.deprecated)
+    add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
     
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     assert_nil(selected_name.synonym)
     
     synonym_names = (add_synonym.names.map {|n| n.search_name}).join("\r\n")
@@ -2579,11 +2660,13 @@ class ObserverControllerTest < Test::Unit::TestCase
 
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
 
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2631,12 +2714,14 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_n_n_s
     add_name = @chlorophyllum_rachodes
     assert(!add_name.deprecated)
+    add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
     
     selected_name = @macrolepiota_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     selected_start_size = selected_synonym.names.size
@@ -2653,12 +2738,14 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_name")
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     assert_equal(add_start_size + selected_start_size, add_synonym.names.size)
     
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2668,12 +2755,14 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_n_n_l
     add_name = @chlorophyllum_rachodes
     assert(!add_name.deprecated)
+    add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
     
     selected_name = @macrolepiota_rachodes
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     selected_start_size = selected_synonym.names.size
@@ -2689,12 +2778,14 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_name")
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
+    assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     assert_equal(add_start_size + selected_start_size, add_synonym.names.size)
     
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
@@ -2704,6 +2795,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_transfer_synonyms_split_3_1
     selected_name = @lactarius_alpinus
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_id = selected_name.id
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -2723,6 +2815,8 @@ class ObserverControllerTest < Test::Unit::TestCase
         end
       end
     end
+    split_version = split_name.version
+    kept_version = kept_name.version
     params = {
       :id => selected_name.id,
       :synonym => { :members => "" },
@@ -2732,6 +2826,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login(:transfer_synonyms, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name")
     selected_name = Name.find(selected_name.id)
+    assert_equal(selected_version, selected_name.version)
     assert(!selected_name.deprecated)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -2739,15 +2834,18 @@ class ObserverControllerTest < Test::Unit::TestCase
     
     split_name = Name.find(split_name.id)
     assert(split_name.deprecated)
+    assert_equal(split_version, split_name.version)
     assert_nil(split_name.synonym)
     
     assert(kept_name.deprecated)
+    assert_equal(kept_version, kept_name.version)
   end
 
   # split 4 synonymized names into two sets of synonyms with two members each
   def test_transfer_synonyms_split_2_2
     selected_name = @lactarius_alpinus
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_id = selected_name.id
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -2780,6 +2878,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "show_name")
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
+    assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(selected_start_size - 2, selected_synonym.names.size)
@@ -2795,10 +2894,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(2, split_synonym.names.size)
   end
 
-  # take four synonymized names and separate off the non-deprecated one
+  # take four synonymized names and separate off one
   def test_transfer_synonyms_split_1_3
     selected_name = @lactarius_alpinus
     assert(!selected_name.deprecated)
+    selected_version = selected_name.version
     selected_id = selected_name.id
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -2814,6 +2914,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       end
     end
     assert_not_nil(split_name)
+    split_version = split_name.version
     params = {
       :id => selected_name.id,
       :synonym => { :members => "" },
@@ -2823,11 +2924,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login(:transfer_synonyms, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name")
     selected_name = Name.find(selected_name.id)
+    assert_equal(selected_version, selected_name.version)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
 
     split_name = Name.find(split_name.id)
     assert(split_name.deprecated)
+    assert_equal(split_version, split_name.version)
     split_synonym = split_name.synonym
     assert_not_nil(split_synonym)
     assert_equal(selected_start_size - 1, split_synonym.names.size)
@@ -2845,12 +2948,14 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!current_name.deprecated)
     assert_nil(current_name.synonym)
     current_past_name_count = current_name.past_names.length
+    current_version = current_name.version
     
     proposed_name = @chlorophyllum_rachodes
     assert(!proposed_name.deprecated)
     assert_not_nil(proposed_name.synonym)
     proposed_synonym_length = proposed_name.synonym.names.size
     proposed_past_name_count = proposed_name.past_names.length
+    proposed_version = proposed_name.version
     
     params = {
       :id => current_name.id,
@@ -2865,6 +2970,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!old_name.past_names[-1].deprecated)
     old_synonym = old_name.synonym
     assert_not_nil(old_synonym)
+    assert_equal(current_version+1, old_name.version)
 
     new_name = Name.find(proposed_name.id)
     assert(!new_name.deprecated)
@@ -2873,6 +2979,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_not_nil(new_synonym)
     assert_equal(old_synonym, new_synonym)
     assert_equal(proposed_synonym_length+1, new_synonym.names.size)
+    assert_equal(proposed_version, new_name.version)
   end
 
   # deprecate an existing unique name with an ambiguous name
@@ -3008,6 +3115,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(current_name.deprecated)
     assert(current_name.synonym)
     current_past_name_count = current_name.past_names.length
+    current_version = current_name.version
     approved_synonyms = current_name.approved_synonyms
     
     params = {
@@ -3021,6 +3129,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!current_name.deprecated)
     assert_equal(current_past_name_count+1, current_name.past_names.length) # past name should have been created
     assert(current_name.past_names[-1].deprecated)
+    assert_equal(current_version + 1, current_name.version)
 
     for n in approved_synonyms
       n = Name.find(n.id)

@@ -31,7 +31,7 @@ class PastName < ActiveRecord::Base
   # If a significant change has happened, then a PastName is created and saved.
   # The version number for the name is incremented as well.  Return true
   # if a PastName was created.
-  def self.check_for_past_name(name)
+  def self.check_for_past_name(name, user=nil, msg=nil)
     result = false
     if name.id
       old_name = Name.find(name.id)
@@ -44,6 +44,14 @@ class PastName < ActiveRecord::Base
         past_name = make_past_name(old_name)
         past_name.save
         name.version += 1
+        name.modified = Time.now
+        if user
+          name.user = user
+        end
+        if msg
+          name.log(msg)
+        end
+        name.save
         result = true
       end
     end

@@ -5,6 +5,11 @@
 ENV['RAILS_ENV'] = 'production'
 # ENV['RAILS_ENV'] = 'development'
 
+# Get rid of ?<timestamp> so caching works better.  See
+# http://www.deathy.net/blog/2007/06/26/rails-asset-timestamping-and-why-its-bad/
+# for more details
+ENV["RAILS_ASSET_ID"] = ""
+
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 

@@ -626,7 +626,8 @@ class ObserverController < ApplicationController
     
   def upload_image
     if params[:observation]
-      @observation = Observation.find(params[:observation][:id])
+      id = params[:observation][:id]
+      @observation = Observation.find(id)
       if check_user_id(@observation.user_id)
         # Upload image
         args = params[:image]
@@ -634,12 +635,12 @@ class ObserverController < ApplicationController
         process_image(args, params[:upload][:image2])
         process_image(args, params[:upload][:image3])
         process_image(args, params[:upload][:image4])
-        redirect_to(:action => 'show_observation', :id => @observation)
+        redirect_to(:action => 'show_observation', :id => id)
       else
-        render :action => 'show_observation'
+        render :action => 'show_observation', :id => id
       end
     else
-      render :action => 'show_observation'
+      render :action => 'list_rss_logs'
     end
   end
   
@@ -932,31 +933,27 @@ class ObserverController < ApplicationController
         synonym_name = synonym_names.last
         synonym_name.rank = name_parse.synonym_rank if name_parse.synonym_rank
         synonym_name.change_deprecated(true)
-        if PastName.check_for_past_name(synonym_name)
-          synonym_name.log("Deprecated by #{user.login}")
+        unless PastName.check_for_past_name(synonym_name, user, "Deprecated by #{user.login}")
           synonym_name.user = user
+          synonym_name.save
         end
-        synonym_name.save
         save_names(synonym_names[0..-2], user, nil) # Don't change higher taxa
       end
     end
   end
   
   def save_names(names, user, deprecate)
+    msg = nil
+    unless deprecate.nil?
+      if deprecate
+        msg = "Deprecated by #{user.login}"
+      else
+        msg = "Approved by #{user.login}"
+      end
+    end
     for n in names
       n.change_deprecated(deprecate) unless deprecate.nil?
-      if PastName.check_for_past_name(n)
-        unless deprecate.nil?
-          if deprecate
-            n.log("Deprecated by #{user.login}")
-          else
-            n.log("Approved by #{user.login}")
-          end
-        end
-        n.modified = Time.now
-        n.user = user
-        n.save
-      else
+      unless PastName.check_for_past_name(n, user, msg)
         unless n.id # Only save if it's brand new
           n.user = user
           n.save
@@ -1537,11 +1534,7 @@ class ObserverController < ApplicationController
         alt_ids = name.change_text_name(text_name, author, params[:name][:rank])
         name.citation = params[:name][:citation]
         name.notes = params[:name][:notes]
-        name.user = user
-        if PastName.check_for_past_name(name)
-          name.log("Name updated by %s" % user.login)
-          name.save
-        else
+        unless PastName.check_for_past_name(name, user, "Name updated by #{user.login}")
           unless name.id
             raise "update_name called on a name that doesn't exist"
           end
@@ -1657,13 +1650,7 @@ class ObserverController < ApplicationController
       begin
         count = 0
         name.change_deprecated(true)
-        if PastName.check_for_past_name(name)
-          name.log("Name deprecated by %s" % user.login)
-          name.modified = Time.new # Only update the name if it was modified
-          name.version = name.version + 1
-          name.user = user
-          name.save
-        end
+        PastName.check_for_past_name(name, user, "Name deprecated by #{user.login}")
       rescue RuntimeError => err
         flash[:notice] = err.to_s
         action = 'change_synonyms'
@@ -1709,17 +1696,9 @@ class ObserverController < ApplicationController
             current_name.merge_synonyms(target_name)
             target_name.change_deprecated(false)
             current_time = Time.now
-            if PastName.check_for_past_name(target_name)
-              target_name.log("Preferred over #{current_name.search_name} by #{user.login}")
-              target_name.modified = current_time
-              target_name.save
-            end
+            PastName.check_for_past_name(target_name, user, "Preferred over #{current_name.search_name} by #{user.login}")
             current_name.change_deprecated(true)
-            if PastName.check_for_past_name(current_name)
-              current_name.log("Deprecated in favor of #{target_name.search_name} by #{user.login}")
-              current_name.modified = current_time
-              current_name.save
-            end
+            PastName.check_for_past_name(current_name, user, "Deprecated in favor of #{target_name.search_name} by #{user.login}")
             action = 'show_name'
           else # must have multiple matches
             # setup name_ids, proposed/name
@@ -1743,23 +1722,14 @@ class ObserverController < ApplicationController
     if verify_user()
       current_name = Name.find(params[:id])
       if params[:deprecate][:others] == '1'
-        current_time = Time.now
         for n in current_name.approved_synonyms
           n.change_deprecated(true)
-          if PastName.check_for_past_name(n)
-            n.log("Deprecated in favor of #{current_name.search_name} by #{user.login}")
-            n.modified = current_time
-            n.save
-          end
+          PastName.check_for_past_name(n, user, "Deprecated in favor of #{current_name.search_name} by #{user.login}")
         end
       end
-      current_name.version = current_name.version + 1
+      # current_name.version = current_name.version + 1
       current_name.change_deprecated(false)
-      if PastName.check_for_past_name(current_name)
-        current_name.log("Approved by #{user.login}")
-        current_name.modified = current_time
-        current_name.save
-      end
+      PastName.check_for_past_name(current_name, user, "Approved by #{user.login}")
       redirect_to :action => 'show_name', :id => current_name
     end
   end
@@ -2103,10 +2073,7 @@ class ObserverController < ApplicationController
       else
         for n in names # These names are all new
           if n.id
-            if PastName.check_for_past_name(n)
-              n.log("Updated by #{user.login}")
-              n.user = user
-            end
+            PastName.check_for_past_name(n, user, "Updated by #{user.login}")
           else
             n.user = user
           end
