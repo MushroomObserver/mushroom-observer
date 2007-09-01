@@ -1742,6 +1742,25 @@ class ObserverController < ApplicationController
     end
   end
   
+  def cleanup_versions
+    if check_permission(1)
+      id = params[:id]
+      name = Name.find(id)
+      past_names = PastName.find(:all, :conditions => ["name_id = ?", id], :order => "version desc")
+      v = past_names.length
+      name.version = v
+      name.user_id = 1
+      name.save
+      v -= 1
+      for pn in past_names
+        pn.version = v
+        pn.save
+        v -= 1
+      end
+    end
+    redirect_to :action => 'show_name', :id => id
+  end
+    
   def do_maintenance
     if check_permission(0)
       @data = []
