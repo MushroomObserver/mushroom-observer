@@ -2,32 +2,12 @@
 
 Current task:
 
-*** Provide support for multiple licenses.
-    Initial target is to allow the image owner to choose between a non-commercial Creative Commons license
-     and Wikipedia compatible licenses:
-  GFDL & CC-by-sa (To allow images to be used on Wikipedia)
-  CC-by-nc-sa (Disallow commercial use)
-  Stored on a per image basis (wiki, nc2.5, nc3)
-  User preferences for default
-  Need global update mechanism.  Do update on a per distinct copyright basis rather than as a completely global user basis.
-  Pages:
-    - _form_ccbyncsa25.rhtml
-    - _form_ccbyncsa30.rhtml
-    - _form_ccbysa30.rhtml
-    - show_image (display appropriate license info)
-    - show_original (display appropriate license info)
-    edit_image (change the license for this image)
-    add_image (select starting license)
-    prefs (user specified default for add_image)
-    add license_updater off of prefs (allows license change by copyright)
-
-
-Large features:
-
 *** Improve 'where'
   lat, long, altitude
   Hook up to Google Maps
   Add concept of a named location
+
+Large features:
 
 ** Mobile phone support
   - Figure out how to tell the difference
@@ -37,7 +17,7 @@ Large features:
       Push around the divs
       Create a single link at the top for to go to the left-hand panel with the search buttons
       Remove pagination links from the top of the page
-  Greenphone support
+  Greenphone uploading app
 
 ** Namings
   Provide a formalized way for users to associate a 'Name' with an 'Observation'.
@@ -51,8 +31,21 @@ Large features:
 
 ** Herbarium records - Provide a standard way to describe herbarium collections.
 
+** Higher-level taxa (Agaricus is part of Agaricales, etc.)
+      View members and membership
+      Page of all members and below?
+      Should Macrolepiota include Chlorophyllum rachodes?
+      Add rank relationships from Name
+
 * Name tagging
-  Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic
+    Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic
+    Some less obvious tags: 'slime mold', 'hypogeous'...
+    Planning on both simple tags (<name> is <tag>) and full RDF support (<name> has <predicate> <value>):
+      E.g. "Boletus edulis" is "choice" and "Boletus edulis" has "edibility" of "choice"
+
+* Dynamic checklist: Enter the first part of a name "Ama" and ask for completions.  You can ask for completions
+  for "", but it will be slow.  Leads to the idea of caching the list as html since the set of names doesn't change that
+  often.
 
 * Mycology club affiliations (useful for searching)
 
@@ -64,12 +57,7 @@ Large features:
 Foreign language support
 
 Yet more stuff to do with Names
-    Grouping (Agaricus is part of Agaricales, etc.)
-      View members and membership
-      Page of all members and below?
-      Should Macrolepiota include Chlorophyllum rachodes?
     Common Name support (== Group but without the group)
-    Add rank relationships from Name
     Spelling correction
     References
     Descriptions

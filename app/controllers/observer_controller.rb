@@ -207,7 +207,7 @@ class ObserverController < ApplicationController
   
   def image_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["names.search_name", "images.notes"], sql_pattern)
+    conditions = field_search(["names.search_name", "images.notes", "images.copyright_holder"], sql_pattern)
     query = "select images.*, names.search_name from images, images_observations, observations, names
       where images.id = images_observations.image_id and images_observations.observation_id = observations.id
       and observations.name_id = names.id and (#{conditions}) order by names.search_name, `when` desc"
@@ -515,6 +515,7 @@ class ObserverController < ApplicationController
   # list_images.rhtml, show_image.rhtml -> edit_image.rhtml
   def edit_image
     @image = Image.find(params[:id])
+    @licenses = License.current_names_and_ids(@image.license)
     unless check_user_id(@image.user_id)
       render :action => 'show_image'
     end
@@ -562,8 +563,8 @@ class ObserverController < ApplicationController
   def reuse_image
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
-      @image = Image.new
-      @image.copyright_holder = session['user'].legal_name
+      # @image = Image.new
+      # @image.copyright_holder = session['user'].legal_name
       @layout = calc_layout_params
       @image_pages, @images = paginate(:images,
                                        :order => "'when' desc",
@@ -573,17 +574,51 @@ class ObserverController < ApplicationController
     end
   end
 
+  def license_updater
+    if verify_user()
+      id = session['user'].id.to_i # Make sure it's an integer
+      query = "select count(*) as license_count, copyright_holder, license_id from images where user_id = #{id} group by copyright_holder, license_id"
+      @data = Image.connection.select_all(query)
+      for datum in @data
+        license = License.find(datum['license_id'])
+        datum['license_name'] = license.display_name
+        datum['select_name'] = "updates[#{datum['license_id']}][#{datum['copyright_holder']}]"
+        datum['licenses'] = License.current_names_and_ids(license)
+        datum['selected'] = license.id
+      end
+    end
+  end
+  
+  def update_licenses
+    for current_id, value in params[:updates]
+      current_id = current_id.to_i
+      for copyright_holder, new_id in value
+        new_id = new_id.to_i
+        if current_id != new_id
+          for image in Image.find_all_by_copyright_holder_and_license_id(copyright_holder, current_id)
+            image.license_id = new_id
+            image.save
+          end
+        end
+      end
+    end
+    redirect_to :action => 'license_updater'
+  end
+  
   # show_observation.rhtml -> add_image.rhtml
   def add_image
     begin # Should figure out how to propagate this around
       @observation = Observation.find(params[:id])
       if check_user_id(@observation.user_id)
         @image = Image.new
+        @image.license = session['user'].license
         @image.copyright_holder = session['user'].legal_name
         
         # Set the default date to the date of the observation
         # Don't know how to correctly test this.
         @image.when = @observation.when
+        
+        @licenses = License.current_names_and_ids(@image.license)
       else
         render :action => 'show_observation'
       end
@@ -597,8 +632,8 @@ class ObserverController < ApplicationController
   def remove_images
     @observation = Observation.find(params[:id])
     if check_user_id(@observation.user_id)
-      @image = Image.new
-      @image.copyright_holder = session['user'].legal_name
+      # @image = Image.new
+      # @image.copyright_holder = session['user'].legal_name
     else
       render :action => 'show_observation'
     end
@@ -771,7 +806,7 @@ class ObserverController < ApplicationController
       query = "select distinct names.observation_name, names.id, names.search_name from names, observations, observations_species_lists
                where observations_species_lists.species_list_id = %s
                and observations_species_lists.observation_id = observations.id
-               and names.id = observations.name_id order by names.search_name" % source
+               and names.id = observations.name_id order by names.search_name" % source.to_i
     end
     if query
       data = Observation.connection.select_all(query)

@@ -1,18 +1,25 @@
 <!--[form:image]-->
 
-<p><label for="image_copyright_holder">Copyright Holder:</label><br/>
-<%= text_field 'image', 'copyright_holder' %></p>
+    <p><label for="image_copyright_holder">Copyright Holder:</label><br/>
+    <%= form.text_field('copyright_holder') %></p>
 
-<p><label for="image_when">When:</label>
-	<span id="help_note">
-		Date the photograph or drawing was created.
-	</span><br/>
-<%= date_select 'image', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %></p>
+    <p><label for="image_when">When:</label>
+    	<span id="help_note">
+    		Date the photograph or drawing was created.
+    	</span><br/>
+    <%= form.date_select('when', :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
 
-<p><label for="image_notes">Notes:</label><br/>
-	<span id="help_note">
-		Enter notes that are specific to this particular image.
-	</span><br/>
-<%= text_area 'image', 'notes', "cols" => width %></p>
-<%= render :partial => 'textilize_help' %>
+    <p><label for="image_license_id">License:</label><br/>
+        <span id="help_note">
+            Select <%= link_to('license', :action => 'how_to_use', :anchor => 'lic') %> you want to give for this image
+        </span><br/>
+    <%= form.select(:license_id, @licenses) %>
+
+    <p><label for="image_notes">Notes:</label><br/>
+    	<span id="help_note">
+    		Enter notes that are specific to this particular image.
+    	</span><br/>
+    <%= form.text_area('notes', "cols" => width) %></p>
+    <%= render :partial => 'textilize_help' %>
+
 <!--[eoform:image]-->

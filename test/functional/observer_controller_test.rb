@@ -27,7 +27,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :names
   fixtures :rss_logs
   fixtures :synonyms
-
+  fixtures :licenses
+  
   def setup
     @controller = ObserverController.new
     @request    = ActionController::TestRequest.new
@@ -1016,6 +1017,35 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_bulk_name_edit_list
     requires_login :bulk_name_edit
+  end
+  
+  def test_license_updater
+    requires_login :license_updater
+  end
+  
+  def test_update_licenses
+    example_image = @agaricus_campestris_image
+    user_id = example_image.user_id
+    target_license = example_image.license
+    new_license = @ccwiki30
+    assert_not_equal(target_license, new_license)
+    target_count = Image.find_all_by_user_id_and_license_id(user_id, target_license.id).length
+    assert(target_count > 0)
+    new_count = Image.find_all_by_user_id_and_license_id(user_id, new_license.id).length
+    params = {
+      :updates => {
+        target_license.id.to_s => {
+          example_image.copyright_holder => new_license.id.to_s
+        }
+      }
+    }
+    requires_login(:update_licenses, params, false)
+    assert_redirected_to(:controller => "observer", :action => "license_updater")
+    target_count_after = Image.find_all_by_user_id_and_license_id(user_id, target_license.id).length
+    assert(target_count_after < target_count)
+    new_count_after = Image.find_all_by_user_id_and_license_id(user_id, new_license.id).length
+    assert(new_count_after > new_count)
+    assert_equal(target_count_after + new_count_after, target_count + new_count)
   end
   
   def test_delete_images

@@ -5,6 +5,7 @@ class Image < ActiveRecord::Base
   has_and_belongs_to_many :observations
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
   belongs_to :user
+  belongs_to :license
   attr_accessor :img_dir
 
   def unique_format_name

@@ -1,44 +1,59 @@
-<% form_tag(:action=> "prefs") do %>
+<% form_for :user, :url => { :action => :prefs } do |form| %>
 
 <div title="Change Preferences" id="prefform" class="form">
   <h3>Change Preferences</h3>
+  <%= link_to 'Bulk License Updater', :controller => 'observer', :action => 'license_updater' %><br/>
   <%= error_messages_for 'user' %><br/>
   
   <label for="user_email">Email address:</label><br/>
-  <%= text_field "user", "email", :size => 60 %><br/><br/>
+  <%= form.text_field("email", :size => 60) %><br/><br/>
   <label for="user_name">Name:</label><br/>
-  <%= text_field "user", "name", :size => 60 %><br/><br/>
-
-  <label for="user_name">Preferred Theme:</label><br/>
-  <%= select(:user, :theme, [["Random", "NULL"]] + CSS) %><br/><br/>
+  <%= form.text_field("name", :size => 60) %><br/><br/>
+  
+  <table cellpadding="10">
+    <tr>
+        <td>
+            <label for="user_theme">Preferred Theme:</label><br/>
+            <%= form.select(:theme, [["Random", "NULL"]] + CSS) %>
+        </td>
+        <td>
+            <label for="user_license_id">Default License:</label>
+              <span id="help_note">
+                  Select default <%= link_to('license', :controller => 'observer', :action => 'how_to_use', :anchor => 'lic') %> you want for new images
+              </span><br/>
+            <%= form.select(:license_id, @licenses) %>
+        </td>
+    <tr>
+  <table>
 
   List page layout:<br/>
   
-  <%= select(:user, :rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
+  <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
   <label for="user_rows">rows x</label>
-  <%= select(:user, :columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
+  <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
   <label for="user_columns">columns</label><br/>
-  <%= check_box("user", "alternate_rows") %>
+  <%= form.check_box("alternate_rows") %>
   <label for="alternate_rows">Alternate row colors.</label><br/>
-  <%= check_box("user", "alternate_columns") %>
+  <%= form.check_box("alternate_columns") %>
   <label for="alternate_columns">Alternate column colors.</label><br/>
-  <%= check_box("user", "vertical_layout") %>
+  <%= form.check_box("vertical_layout") %>
   <label for="vertical_layout">Put text below images.</label><br/><br/>
 
-  <%= check_box("user", "feature_email") %>
+  <%= form.check_box("feature_email") %>
   <label for="feature_email">Please send me email updates when new features come out.</label><br/><br/>
-  <%= check_box("user", "commercial_email") %>
+  <%= form.check_box("commercial_email") %>
   <label for="commercial_email">Please send me email if someone is interested in using an image of mine for commercial purposes.</label><br/>
-  <%= check_box("user", "question_email") %>
+  <%= form.check_box("question_email") %>
   <label for="question_email">Please allow others to email me questions about my observations.</label><br/>
 Note that neither of these email features will cause your email address to be displayed on a webpage or allow the person who wants to contact you to optain your email address.  You will be sent an email from news@mushroomobserver.org that will contain the contact information for the person who wants to contact you.  It will be entirely up to you if you want to respond to them.
 <br/><br/>
   <label for="user_password">New password:</label><br/>
-  <%= password_field "user", "password", :value => '', :size => 30 %><br/><br/>
+  <%= form.password_field("password", :value => '', :size => 30) %><br/><br/>
   <label for="user_password_confirmation">Confirm new password:</label><br/>
-  <%= password_field "user", "password_confirmation", :size => 30 %><br/><br/>
+  <%= form.password_field("password_confirmation", :size => 30) %><br/><br/>
 <br/>
 <input type="submit" value="Save Prefs" class="primary" />
 <br/><br/>
+</div>
 
 <% end %>

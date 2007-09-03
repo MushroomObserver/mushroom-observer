@@ -7,6 +7,7 @@
     <%
     end
 %>
+
 <%= link_to 'Show Full Size', :action => 'show_original', :id => @image %>
 <% commercial_inquiries_ok = @image.user.commercial_email
    if commercial_inquiries_ok %>
@@ -30,31 +31,11 @@
 <table cellpadding="10">
 <tr>
 <td align="center">
-<%= link_to(image_tag(sprintf("640/%d.jpg", @image.id)),
-	:action => 'show_original', :id => @image.id) %><br/>
-<div id="license">
-<a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/2.5/"><img src="http://creativecommons.org/images/public/somerights20.png" width="88" height="31" alt="Creative Commons License" style="border:none" /></a><br />
-<!--
-<rdf:RDF xmlns="http://web.resource.org/cc/"
-    xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <Work rdf:about="">
-           <license rdf:resource="http://creativecommons.org/licenses/by-nc-sa/2.5/" />
-           </Work>
-
-        <License rdf:about="http://creativecommons.org/licenses/by-nc-sa/2.5/">
-        <permits rdf:resource="http://web.resource.org/cc/Reproduction" />
-        <permits rdf:resource="http://web.resource.org/cc/Distribution" />
-        <requires rdf:resource="http://web.resource.org/cc/Notice" />
-        <requires rdf:resource="http://web.resource.org/cc/Attribution" />
-        <prohibits rdf:resource="http://web.resource.org/cc/CommercialUse" />
-        <permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
-        <requires rdf:resource="http://web.resource.org/cc/ShareAlike" />
-        </License>
-</rdf:RDF>
-
--->
-</div>
+    <span about="640/#{@image.id}.jpg">
+        <%= link_to(image_tag("640/#{@image.id}.jpg"),
+        	:action => 'show_original', :id => @image.id) %><br/>
+        <%= render :partial => "form_#{@image.license.form_name}" %>
+    </span>
 </td>
 <td valign="top">
 

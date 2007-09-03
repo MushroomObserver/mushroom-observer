@@ -82,6 +82,7 @@ class AccountController < ApplicationController
         @user.alternate_rows = params['user']['alternate_rows']
         @user.alternate_columns = params['user']['alternate_columns']
         @user.vertical_layout = params['user']['vertical_layout']
+        @user.license_id = params['user']['license_id'].to_i
         password = params['user']['password']
         error = false
         if password
@@ -99,6 +100,8 @@ class AccountController < ApplicationController
             redirect_back_or_default :action => "welcome"
           end
         end
+      when :get
+        @licenses = License.current_names_and_ids(@user.license)
     end      
   end  
   

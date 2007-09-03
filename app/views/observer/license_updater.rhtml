@@ -1,0 +1,42 @@
+<% @title = "Updating Licenses for #{h(session['user'].login)}" %>
+
+<div id="Title"><%= @title %></div>
+
+<%= error_messages_for 'image' %>
+
+<% form_tag(:action => 'update_licenses') do %>
+	<center><%= submit_tag 'Update' %></center><br/>
+    <table cellpadding="5" cellspacing="5" border=1>
+    	<tr class="Data">
+    		<td>
+    			Copyright Holder
+    		</td>
+    		<td>
+    			Count
+    		</td>
+    		<td>
+    			Current License
+    		</td>
+    		<td>
+    		    New License
+    		</td>
+    	</tr>
+
+    	<% for datum in @data %>
+    	    <tr>
+    	        <td>
+    	            <%= "#{datum['copyright_holder']}" %>
+    	        </td>
+    	        <td>
+    	            <%= "#{datum['license_count']}" %>
+    	        </td>
+    	        <td>
+    	            <%= "#{datum['license_name']}" %>
+    	        </td>
+    	        <td>
+    	            <%= select_tag(datum['select_name'], options_for_select(datum['licenses'], datum['selected'])) %>
+    	        </td>
+    	    </tr>
+    	<% end %>
+    </table>
+<% end %>
