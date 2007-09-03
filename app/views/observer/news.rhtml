@@ -11,14 +11,16 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 	    <li><p>Contributors now have options for the license they contribute their images under.  The license that has
 	        been used so far (<a href="http://creativecommons.org/licenses/by-nc-sa/2.5/">Creative Commons Attribution,
 	        Non-Commercial, Share Alike License v2.5</a>, or by-nc-sa v2.5 for short) only permits non-commercial
-	        uses.  This license is not enough to allow their use on <a href="http://www.wikipedia.org/">Wikipedia</a> which requires the option for all contributed material
+	        uses.  This license is not enough to allow their use on <a href="http://www.wikipedia.org/">Wikipedia</a>
+	        which requires the option for all contributed material
 	        to be used commercially.  Support has been added for a license Wikipedia does accept,
 	        the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution, Share Alike
 	        License v3.0 license</a> (by-sa v3.0).  While I was working on this problem I also deprecated the use of
 	        by-nc-sa v2.5 in favor of the <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">3.0 version</a>.</p>
 	        <p>This means when you add a new image you can choose between the Wikipedia compatible license and the
 	        non-commercial 3.0 license.  The initial default for all users when adding new images is the Wikipedia
-	        compatible, by-sa v3.0 license.  You can change this default on your <%= link_to('Preferences', :controller => 'account', :action => 'prefs') %> page.</p>
+	        compatible, by-sa v3.0 license.  You can change this default on your <%= link_to('Preferences',
+	        :controller => 'account', :action => 'prefs') %> page.</p>
 	        <p>You can change the license for any existing image by going to that
 	        image and selecting 'Edit Image'.  You will see a new drop down menu listing the license options.
 	        If the image is currently under the by-nc-sa v2.5, then that option will still be in the list and will
@@ -26,7 +28,11 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 	        <%= link_to('Bulk License Updater', :action => 'license_updater') %>, which groups your images based
 	        on license and copyright holder and allows you to update each group in one go.</p></li>
 	        
-	    <li>Image search now includes the copyright holder field in the search.</li>
+	    <li><p>Image search now includes the copyright holder field in the search.</p></li>
+    	  
+	    <li><p>Updated the <%= link_to('Introduction', :controller => 'observer', :action => 'intro') %> and
+	    <%= link_to('How to Use', :controller => 'observer', :action => 'how_to_use') %> pages to reflect many
+	    of the recent changes.</p></li>
     	  
     </ol>
 </p>
