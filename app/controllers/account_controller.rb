@@ -101,6 +101,10 @@ class AccountController < ApplicationController
           end
         end
       when :get
+        unless @user.respond_to?(:license)
+          @user = User.find(@user.id)
+          session['user'] = @user
+        end
         @licenses = License.current_names_and_ids(@user.license)
     end      
   end  
