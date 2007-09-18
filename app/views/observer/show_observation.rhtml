@@ -48,8 +48,9 @@
 		<% if questions_ok %>
 			<%= link_to h(@observation.user.unique_text_name), :action => 'ask_question', :id => @observation %>
 		<% else %>
-			<%= h @observation.user.unique_text_name %></span></p>
+			<%= h @observation.user.unique_text_name %>
 		<% end %>
+		</span></p>
 	    <p><span class="Data"><%= if @observation.specimen
 	         'Herbarium specimen available'
 	     else
@@ -64,7 +65,7 @@
 					<% end %>
 				</p>
 		<% end %>
-	    <p>Notes:</br><%= textilize(sanitize(@observation.notes.to_s)) %></p>
+	    <p>Notes:<br/><%= textilize(sanitize(@observation.notes.to_s)) %></p>
 	    <p>Comments:<br/>
 	        <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
 	            <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_text_name), MAX_WHO_LENGTH),

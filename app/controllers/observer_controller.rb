@@ -503,12 +503,14 @@ class ObserverController < ApplicationController
   # Thumbnails should hook up to this
   def show_image
     store_location
+    @invalid = true # Until the about= thing gets resolved
     @image = Image.find(params[:id])
   end
 
   # show_image.rhtml -> show_original.rhtml
   def show_original
     store_location
+    @invalid = true # Until the about= thing gets resolved
     @image = Image.find(params[:id])
   end
 
@@ -582,6 +584,7 @@ class ObserverController < ApplicationController
       for datum in @data
         license = License.find(datum['license_id'])
         datum['license_name'] = license.display_name
+        datum['select_id'] = "updates_#{datum['license_id']}_#{datum['copyright_holder']}".gsub!(' ', '_')
         datum['select_name'] = "updates[#{datum['license_id']}][#{datum['copyright_holder']}]"
         datum['licenses'] = License.current_names_and_ids(license)
         datum['selected'] = license.id

@@ -40,132 +40,161 @@ class ObserverControllerTest < Test::Unit::TestCase
     FileUtils.rm_rf(IMG_DIR)
   end
 
+  def html_dump(label, html)
+    html_dir = '../html'
+    if File.directory?(html_dir) and html[0..11] != '<html><body>'
+      file_name = "#{html_dir}/#{label}.html"
+      count = 0
+      while File.exists?(file_name)
+        file_name = "#{html_dir}/#{label}_#{count}.html"
+        count += 1
+        if count > 100
+          raise(RangeError, "More than 100 files found with a label of '#{label}'")
+        end
+      end
+      print "Creating html_dump file: #{file_name}\n"
+      file = File.new(file_name, "w")
+      file.write(html)
+      file.close
+    end
+  end
+  
+  def get_with_dump(page, params={})
+    get(page, params)
+    html_dump(page, @response.body)
+  end
+
   def test_index
-    get :index
+    get_with_dump :index
     assert_response :success
     assert_template 'list_rss_logs'
   end
 
   def test_ask_webmaster_question
-    get :ask_webmaster_question
+    get_with_dump :ask_webmaster_question
     assert_response :success
     assert_template 'ask_webmaster_question'
   end
 
   def test_color_themes
-    get :color_themes
+    get_with_dump :color_themes
     assert_response :success
     assert_template 'color_themes'
+    for theme in CSS
+      get_with_dump theme
+      assert_response :success
+      assert_template theme
+    end
   end
-
+  
   def test_how_to_use
-    get :how_to_use
+    get_with_dump :how_to_use
     assert_response :success
     assert_template 'how_to_use'
   end
 
   def test_images_by_title
-    get :images_by_title
+    get_with_dump :images_by_title
     assert_response :success
     assert_template 'images_by_title'
   end
 
   def test_intro
-    get :intro
+    get_with_dump :intro
     assert_response :success
     assert_template 'intro'
   end
 
   def test_list_comments
-    get :list_comments
+    get_with_dump :list_comments
     assert_response :success
     assert_template 'list_comments'
   end
 
   def test_list_images
-    get :list_images
+    get_with_dump :list_images
     assert_response :success
     assert_template 'list_images'
   end
 
   def test_list_observations
-    get :list_observations
+    get_with_dump :list_observations
     assert_response :success
     assert_template 'list_observations'
   end
 
   def test_list_rss_logs
-    get :list_rss_logs
+    get_with_dump :list_rss_logs
     assert_response :success
     assert_template 'list_rss_logs'
   end
 
   def test_list_species_lists
-    get :list_species_lists
+    get_with_dump :list_species_lists
     assert_response :success
     assert_template 'list_species_lists'
   end
 
   def test_name_index
-    get :name_index
+    get_with_dump :name_index
     assert_response :success
     assert_template 'name_index'
   end
 
   def test_observation_index
-    get :observation_index
+    get_with_dump :observation_index
     assert_response :success
     assert_template 'name_index'
   end
 
   def test_all_names
-    get :all_names
+    get_with_dump :all_names
     assert_response :success
     assert_template 'name_index'
   end
 
   def test_news
-    get :news
+    get_with_dump :news
     assert_response :success
     assert_template 'news'
   end
 
   def test_next_image
-    get :next_image
+    get_with_dump :next_image
     assert_redirected_to(:controller => "observer", :action => "show_image")
   end
 
   def test_next_observation
     @request.session['observation_ids'] = [1, 2, 3]
-    get :next_observation, :id => 1
+    get_with_dump :next_observation, :id => 1
     assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 2)
   end
 
   def test_observations_by_name
-    get :observations_by_name
+    get_with_dump :observations_by_name
     assert_response :success
     assert_template 'list_observations'
   end
 
   def test_pattern_search
-    get :pattern_search
+    get_with_dump :pattern_search
     assert_response :success
     assert_template 'list_observations'
   end
 
   def test_prev_image
-    get :prev_image
+    get_with_dump :prev_image
     assert_redirected_to(:controller => "observer", :action => "show_image")
   end
 
   def test_prev_observation
     @request.session['observation_ids'] = [1, 2, 3]
-    get :prev_observation, :id => 1
+    get_with_dump :prev_observation, :id => 1
     assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 3)
   end
 
   def test_rss
-    get :rss
+    get_with_dump :rss
     assert_response :success
     assert_template 'rss'
   end
@@ -188,96 +217,96 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_show_comment
-    get :show_comment, :id => 1
+    get_with_dump :show_comment, :id => 1
     assert_response :success
     assert_template 'show_comment'
   end
 
   def test_show_image
-    get :show_image, :id => 1
+    get_with_dump :show_image, :id => 1
     assert_response :success
     assert_template 'show_image'
   end
 
   def test_show_name
-    get :show_name, :id => 1
+    get_with_dump :show_name, :id => 1
     assert_response :success
     assert_template 'show_name'
   end
 
   def test_show_observation
-    get :show_observation, :id => 1
+    get_with_dump :show_observation, :id => 1
     assert_response :success
     assert_template 'show_observation'
   end
 
   def test_show_original
-    get :show_original, :id => 1
+    get_with_dump :show_original, :id => 1
     assert_response :success
     assert_template 'show_original'
   end
 
   def test_show_past_name
-    get :show_past_name, :id => 1
+    get_with_dump :show_past_name, :id => 1
     assert_response :success
     assert_template 'show_past_name'
   end
 
   def test_show_rss_log
-    get :show_rss_log, :id => 1
+    get_with_dump :show_rss_log, :id => 1
     assert_response :success
     assert_template 'show_rss_log'
   end
 
   def test_show_species_list
-    get :show_species_list, :id => 1
+    get_with_dump :show_species_list, :id => 1
     assert_response :success
     assert_template 'show_species_list'
   end
 
   def test_species_lists_by_title
-    get :species_lists_by_title
+    get_with_dump :species_lists_by_title
     assert_response :success
     assert_template 'species_lists_by_title'
   end
 
   def test_users_by_contribution
-    get :users_by_contribution
+    get_with_dump :users_by_contribution
     assert_response :success
     assert_template 'users_by_contribution'
   end
   
   def test_show_past_name
-    get :show_past_name, :id => 1
+    get_with_dump :show_past_name, :id => 1
     assert_response :success
     assert_template 'show_past_name'
   end
 
   def test_show_user
-    get :show_user, :id => 1
+    get_with_dump :show_user, :id => 1
     assert_response :success
     assert_template 'show_user'
   end
   
   def test_show_user_no_id
-    get :show_user
+    get_with_dump :show_user
     assert_redirected_to(:controller => "observer", :action => "users_by_contribution")
   end
   
   def test_show_site_stats
-    get :show_site_stats
+    get_with_dump :show_site_stats
     assert_response :success
     assert_template 'show_site_stats'
   end
   
   def test_show_user_observations
-    get :show_user_observations, :id => 1
+    get_with_dump :show_user_observations, :id => 1
     assert_response :success
     assert_template 'list_observations'
   end
   
   def test_show_comments_for_user
-    get :show_comments_for_user, :id => 1
+    get_with_dump :show_comments_for_user, :id => 1
     assert_response :success
     assert_template("list_comments")
   end
@@ -291,12 +320,12 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
   
   def requires_login(page, params={}, stay_on_page=true, user='rolf', password='testpassword')
-    get(page, params)
+    get(page, params) # Expect redirect
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate(user, password)
     assert(user)
     session['user'] = user
-    get(page, params)
+    get_with_dump(page, params)
     if stay_on_page
       assert_response :success
       assert_template page.to_s
@@ -308,12 +337,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     if username == 'mary':
       alt_username = 'rolf'
     end
-    get(page, params)
+    get(page, params) # Expect redirect
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate(alt_username, 'testpassword')
     assert(user)
     session['user'] = user
-    get(page, params)
+    get(page, params) # Expect redirect
     if alt_page.class == Array
       assert_redirected_to(:controller => alt_page[0], :action => alt_page[1])
     else
@@ -321,7 +350,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     end
     
     login username, password
-    get(page, params)
+    get_with_dump(page, params)
     if stay_on_page
       assert_response :success
       assert_template page.to_s
@@ -336,7 +365,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     requires_login :add_image, {:id => @coprinus_comatus_obs.id}
     
     # Check that image cannot be added to an observation the user doesn't own
-    get :add_image, :id => @minimal_unknown.id
+    get_with_dump :add_image, :id => @minimal_unknown.id
     assert_response :success
     assert_template "show_observation"
   end
@@ -1400,22 +1429,22 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_email_features
     page = :email_features
-    get(page)
+    get(page) # Expect redirect
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate("rolf", "testpassword")
     assert(user)
     session['user'] = user
-    get(page)
+    get(page) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "list_observations")
     user.id = 0 # Make user the admin
     session['user'] = user
-    get(page)
+    get_with_dump(page)
     assert_response :success
     assert_template page.to_s
   end
 
   def test_login
-    get :login
+    get_with_dump :login
     assert_redirected_to(:controller => "account", :action => "login")
   end
 
@@ -1490,7 +1519,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(spl.observations.member?(obs))
     
     login owner
-    get(:remove_observation_from_species_list, params)
+    get_with_dump(:remove_observation_from_species_list, params)
     assert_redirected_to(:controller => "observer", :action => "manage_species_lists")
     spl = SpeciesList.find(spl.id)
     assert(!spl.observations.member?(obs))
@@ -1523,7 +1552,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!obs.images.member?(image))
     
     login owner
-    get(:reuse_image_by_id, params)
+    get_with_dump(:reuse_image_by_id, params)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = Observation.find(obs.id) # Reload Observation
     assert(obs.images.member?(image))
@@ -1564,17 +1593,17 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     page = :send_feature_email
-    get(page, params)
+    get(page, params) # Expect redirect
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate("rolf", "testpassword")
     assert(user)
     session['user'] = user
-    get(page, params)
+    get(page, params) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     assert_equal("Only the admin can send feature mail.", flash[:notice])
     user.id = 0 # Make user the admin
     session['user'] = user
-    get(page, params)
+    get(page, params) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "users_by_name")
   end
   
@@ -2044,7 +2073,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     spl = SpeciesList.find(spl.id)
     assert(spl.observations.size == sp_count)
     login owner
-    get(:update_species_list, params)
+    get_with_dump(:update_species_list, params)
     assert_redirected_to(:controller => "observer", :action => "show_species_list")
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count + 2, spl.observations.size)
@@ -2065,7 +2094,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     spl = SpeciesList.find(spl.id)
     assert(spl.observations.size == sp_count)
     login owner
-    get(:update_species_list, params)
+    get_with_dump(:update_species_list, params)
     assert_redirected_to(:controller => "observer", :action => "show_species_list")
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count + 1, spl.observations.size)
@@ -2274,16 +2303,16 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_users_by_name
     page = :users_by_name
-    get(page)
+    get(page) # Expect redirect
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate("rolf", "testpassword")
     assert(user)
     session['user'] = user
-    get(page)
+    get(page) # Exepct redirect
     assert_redirected_to(:controller => "observer", :action => "list_observations")
     user.id = 0 # Make user the admin
     session['user'] = user
-    get(page)
+    get_with_dump(page)
     assert_response :success
     assert_template page.to_s
   end

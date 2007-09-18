@@ -37,20 +37,50 @@
 	    <%= link_to("Previous version: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id ) %>
 	<% end %>
 </p>
-<p>
-	Notes and Comments: <%= textilize(sanitize(@name.notes.to_s)) %>
-</p>
-<p>
-    Observations:<br/>
-	<table cellpadding="5" cellspacing="0">
-		<%
-		odd_or_even = 0
-	   	for datum in @data
+
+Notes and Comments: <%= textilize(sanitize(@name.notes.to_s)) %><br/><br/>
+
+Observations:<br/>
+<table cellpadding="5" cellspacing="0">
+	<%
+	odd_or_even = 0
+   	for datum in @data
+    	odd_or_even = 1 - odd_or_even
+		id = datum["id"]
+    %>
+	<tr valign="top" class="ListLine<%= odd_or_even %>">
+    	<td width="110" align="center" valign="middle">
+			<%=
+			image_id = datum["thumb_image_id"]
+			if image_id
+	  			link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
+            			:action => 'show_observation', :id => id)
+          	end
+      		%><br/>
+    	</td>
+	    <td width="100%" valign="middle">
+			<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
+		                                        :action => 'show_observation', :id => id) %></span><br/>
+	        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
+	        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
+	        Observation made: <%= datum["when"]%>
+	    </td>
+  	</tr>
+    <% end %>
+</table>
+<%
+if @synonym_data != []
+    %>
+    <br/>Synonym observations:<br/>
+    <table cellpadding="5" cellspacing="0">
+    <%
+    odd_or_even = 0
+    for datum in @synonym_data
 	    	odd_or_even = 1 - odd_or_even
-			id = datum["id"]
-	    %>
+		id = datum["id"]
+		%>
 		<tr valign="top" class="ListLine<%= odd_or_even %>">
-	    	<td width=110 align="center" valign="middle">
+	    	<td width="110"" align="center" valign="middle">
 				<%=
 				image_id = datum["thumb_image_id"]
 				if image_id
@@ -67,47 +97,16 @@
 		        Observation made: <%= datum["when"]%>
 		    </td>
 	  	</tr>
-	    <% end %>
-	</table>
-	<%
-	if @synonym_data != []
-	    %>
-	    <br/>Synonym observations:<br/>
-	    <table cellpadding="5" cellspacing="0">
-	    <%
-	    odd_or_even = 0
-	    for datum in @synonym_data
- 	    	odd_or_even = 1 - odd_or_even
-			id = datum["id"]
-			%>
-    		<tr valign="top" class="ListLine<%= odd_or_even %>">
-    	    	<td width=110 align="center" valign="middle">
-    				<%=
-    				image_id = datum["thumb_image_id"]
-    				if image_id
-    		  			link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-    	            			:action => 'show_observation', :id => id)
-    	          	end
-    	      		%><br/>
-    	    	</td>
-    		    <td width="100%" valign="middle">
-    				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
-    			                                        :action => 'show_observation', :id => id) %></span><br/>
-    		        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
-    		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
-    		        Observation made: <%= datum["when"]%>
-    		    </td>
-    	  	</tr>
-	    <% end %>
-	    </table>
     <% end %>
-    <p><span class="Date">
-        Name created: <%= @name.created %><br/>
-        Last modified: <%= @name.modified %> by <%= @name.user.unique_text_name %><br/>
-        <% rss_log = @name.rss_log 
-           if rss_log %>
-        	<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
-        <% end %>
-        </span>
-    </p>
+    </table>
+<% end %>
+<p><span class="Date">
+    Name created: <%= @name.created %><br/>
+    Last modified: <%= @name.modified %> by <%= @name.user.unique_text_name %><br/>
+    <% rss_log = @name.rss_log 
+       if rss_log %>
+    	<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
+    <% end %>
+    </span>
 </p>
+

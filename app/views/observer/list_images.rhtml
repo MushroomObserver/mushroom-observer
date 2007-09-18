@@ -1,7 +1,7 @@
 <% @title = 'Images' %>
 <div id="Title"><%= @title %></div>
 	<%= pagination_links(@image_pages) %>
-	<table cellspacing="0">
+	<table cellspacing="0" width="100%">
   	<%
 		row_count = 0
 		col_count = 0
@@ -11,7 +11,7 @@
 			if col_count == 0 %>
 				<tr>
      	<% end %>
-  		<td align="left" valign="top" class="ListLine<%= color %>">
+  		<td align="center" valign="top" class="ListLine<%= color %>">
 			<%= render :partial => 'image', :object => image, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
 		</td>
 		<%  if col_count == (@layout["columns"] - 1) %>
@@ -23,7 +23,9 @@
 				row_count += 1
 			end
 		end
-		%>
+		if col_count != 0 %>
+	        </tr>
+		<% end %>
 	</table>
 	<%= pagination_links(@image_pages) %>
 <br/>

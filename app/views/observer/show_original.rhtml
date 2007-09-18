@@ -11,7 +11,7 @@
 <% end %>
 
 <div id="Title"><%= 'Image: ' + textilize_without_paragraph(h(@image.unique_format_name)) %></div>
-<div id="copyright">Copyright &copy
+<div id="copyright">Copyright &copy;
 	<% if commercial_inquiries_ok %>
 	  <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),
 	              :action => 'commercial_inquiry', :id => @image) %>
@@ -20,8 +20,8 @@
 	<% end %>
 </div>
 
-<span about="orig/#{@image.id}.jpg">
+<div about="orig/#{@image.id}.jpg">
     <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
                 :action => 'show_image', :id => @image.id) %>
     <%= render :partial => "form_#{@image.license.form_name}" %>
-</span>
+</div>

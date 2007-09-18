@@ -7,7 +7,7 @@
 	<tr>
 		<td valign="top">
 			Enter your commercial inquiry about this image.  When you hit send it will be emailed to 
-			<label for="commercial_inquiry"><%= @image.user.legal_name %>.</label><br/>
+			<label for="commercial_inquiry_content"><%= @image.user.legal_name %>.</label><br/>
 			The email will automatically include a link to this image.<br/><br/>
 			<%= text_area 'commercial_inquiry', 'content'  %><br/><br/>
 			<center><%= submit_tag "Send" %></center>

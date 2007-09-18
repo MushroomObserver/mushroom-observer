@@ -6,7 +6,7 @@
 
 <% form_tag(:action => 'update_licenses') do %>
 	<center><%= submit_tag 'Update' %></center><br/>
-    <table cellpadding="5" cellspacing="5" border=1>
+    <table cellpadding="5" cellspacing="5" border="1">
     	<tr class="Data">
     		<td>
     			Copyright Holder
@@ -34,7 +34,7 @@
     	            <%= "#{datum['license_name']}" %>
     	        </td>
     	        <td>
-    	            <%= select_tag(datum['select_name'], options_for_select(datum['licenses'], datum['selected'])) %>
+    	            <%= select_tag(datum['select_id'], options_for_select(datum['licenses'], datum['selected']), :name => datum['select_name']) %>
     	        </td>
     	    </tr>
     	<% end %>

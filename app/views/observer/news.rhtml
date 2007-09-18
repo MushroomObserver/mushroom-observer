@@ -5,381 +5,321 @@
 This page lists the latest changes to and news about the Mushroom Observer website.
 </p>
 
-<p>
-	<h3>Sunday September 2, 2007</h3>
-	<ol>
-	    <li><p>Contributors now have options for the license they contribute their images under.  The license that has
-	        been used so far (<a href="http://creativecommons.org/licenses/by-nc-sa/2.5/">Creative Commons Attribution,
-	        Non-Commercial, Share Alike License v2.5</a>, or by-nc-sa v2.5 for short) only permits non-commercial
-	        uses.  This license is not enough to allow their use on <a href="http://www.wikipedia.org/">Wikipedia</a>
-	        which requires the option for all contributed material
-	        to be used commercially.  Support has been added for a license Wikipedia does accept,
-	        the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution, Share Alike
-	        License v3.0 license</a> (by-sa v3.0).  While I was working on this problem I also deprecated the use of
-	        by-nc-sa v2.5 in favor of the <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">3.0 version</a>.</p>
-	        <p>This means when you add a new image you can choose between the Wikipedia compatible license and the
-	        non-commercial 3.0 license.  The initial default for all users when adding new images is the Wikipedia
-	        compatible, by-sa v3.0 license.  You can change this default on your <%= link_to('Preferences',
-	        :controller => 'account', :action => 'prefs') %> page.</p>
-	        <p>You can change the license for any existing image by going to that
-	        image and selecting 'Edit Image'.  You will see a new drop down menu listing the license options.
-	        If the image is currently under the by-nc-sa v2.5, then that option will still be in the list and will
-	        be the default.  Finally for power users, there is a new page available off the Preferences page, the
-	        <%= link_to('Bulk License Updater', :action => 'license_updater') %>, which groups your images based
-	        on license and copyright holder and allows you to update each group in one go.</p></li>
-	        
-	    <li><p>Image search now includes the copyright holder field in the search.</p></li>
-    	  
-	    <li><p>Updated the <%= link_to('Introduction', :controller => 'observer', :action => 'intro') %> and
-	    <%= link_to('How to Use', :controller => 'observer', :action => 'how_to_use') %> pages to reflect many
-	    of the recent changes.</p></li>
-    	  
-    </ol>
-</p>
+<h3>Monday September 17, 2007</h3>
+<ol>
+    <li><p>Did a whole bunch of cleanup using <a href="http://validator.w3.org/">the W3C validator</a> to ensure that
+        as much of the site as possible is valid XHTML 1.0.  In the process found many little formatting problems.  In
+        general the layout should be unchanged.  However, with browser other than Firefox there may have be significant
+        changes, but those should be more consistent with the layout in Firefox.  Please let me know if you see any
+        significant layout problems.</p>
+        <p>For anyone who cares, the Show Image and Show Original pages are not completely valid due to the use of the
+        proposed RDFa standard used to describe the Creative Commons licensing terms.  This standard is expected to be
+        ratified in the near future.</p></li>
+</ol>
 
-<p>
-	<h3>Saturday September 1, 2007</h3>
-	<ol>
-	    <li>Fixed bugs in handling version numbers and user assignment for some name changing functions.</li>
-    </ol>
-</p>
+<h3>Sunday September 2, 2007</h3>
+<ol>
+    <li><p>Contributors now have options for the license they contribute their images under.  The license that has
+        been used so far (<a href="http://creativecommons.org/licenses/by-nc-sa/2.5/">Creative Commons Attribution,
+        Non-Commercial, Share Alike License v2.5</a>, or by-nc-sa v2.5 for short) only permits non-commercial
+        uses.  This license is not enough to allow their use on <a href="http://www.wikipedia.org/">Wikipedia</a>
+        which requires the option for all contributed material
+        to be used commercially.  Support has been added for a license Wikipedia does accept,
+        the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution, Share Alike
+        License v3.0 license</a> (by-sa v3.0).  While I was working on this problem I also deprecated the use of
+        by-nc-sa v2.5 in favor of the <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">3.0 version</a>.</p>
+        <p>This means when you add a new image you can choose between the Wikipedia compatible license and the
+        non-commercial 3.0 license.  The initial default for all users when adding new images is the Wikipedia
+        compatible, by-sa v3.0 license.  You can change this default on your <%= link_to('Preferences',
+        :controller => 'account', :action => 'prefs') %> page.</p>
+        <p>You can change the license for any existing image by going to that
+        image and selecting 'Edit Image'.  You will see a new drop down menu listing the license options.
+        If the image is currently under the by-nc-sa v2.5, then that option will still be in the list and will
+        be the default.  Finally for power users, there is a new page available off the Preferences page, the
+        <%= link_to('Bulk License Updater', :action => 'license_updater') %>, which groups your images based
+        on license and copyright holder and allows you to update each group in one go.</p></li>
+        
+    <li><p>Image search now includes the copyright holder field in the search.</p></li>
+	  
+    <li><p>Updated the <%= link_to('Introduction', :controller => 'observer', :action => 'intro') %> and
+    <%= link_to('How to Use', :controller => 'observer', :action => 'how_to_use') %> pages to reflect many
+    of the recent changes.</p></li>
+	  
+</ol>
 
-<p>
-	<h3>Monday August 20, 2007</h3>
-	<ol>
-	    <li>Fixed bugs in adding author and creating new species indirectly by creating or editing observations.</li>
-    </ol>
-</p>
+<h3>Saturday September 1, 2007</h3>
+<ol>
+    <li>Fixed bugs in handling version numbers and user assignment for some name changing functions.</li>
+</ol>
 
-<p>
-	<h3>Sunday August 12, 2007</h3>
-	<ol>
-	    <li>Re-enabled Bulk Name Edit after substantially revising past name generation and compensating for lost history.</li>
-    </ol>
-</p>
+<h3>Monday August 20, 2007</h3>
+<ol>
+    <li>Fixed bugs in adding author and creating new species indirectly by creating or editing observations.</li>
+</ol>
 
-<p>
-	<h3>Friday August 3, 2007</h3>
-	<ol>
-	    <li>Added citations to Names.</li>
-	    <li>Search improvements:<br/>
-            Box is larger.<br/>
-            Search value stays in all cases.<br/>
-            Switched from just matching the beginning of the name string (unless there's a %), to searching anywhere in multple fields.<br/>
-            Removed Location search since that's included in the Observation search now.</li>
-        <li>Updated the past name page to explicitly show previous statuses and citations.</li>
-    </ol>
-</p>
+<h3>Sunday August 12, 2007</h3>
+<ol>
+    <li>Re-enabled Bulk Name Edit after substantially revising past name generation and compensating for lost history.</li>
+</ol>
 
-<p>
-	<h3>Thursday August 2, 2007</h3>
-	<ol>
-	    <li>Added Approve or Deprecate links to Show Name pages based on whether the name is deprecated or not.</li>
-        <li>Removed 'Deprecated' checkbox from the Edit Name page.</li>
-        <li>Fixed a bug in Edit Observation where providing a totally new name lost any other changes or edits made on the page.</li>
-        <li>Fixed some of the handling of 'Unknown'.</li>
-        <li>Fixed a bug in recording if a Name used to be deprecated.</li>
-	</ol>
-</p>
+<h3>Friday August 3, 2007</h3>
+<ol>
+    <li>Added citations to Names.</li>
+    <li>Search improvements:<br/>
+        Box is larger.<br/>
+        Search value stays in all cases.<br/>
+        Switched from just matching the beginning of the name string (unless there's a %), to searching anywhere in multple fields.<br/>
+        Removed Location search since that's included in the Observation search now.</li>
+    <li>Updated the past name page to explicitly show previous statuses and citations.</li>
+</ol>
 
-<p>
-	<h3>Friday July 20, 2007</h3>
-	<ol>
-	    <li>Allowed system to assume that a non-deprecated name is preferred over a deprecated name if there is ambiguity.</li>
-	    <li>Fixed bug in saving author changes when the name can't be changed that was introduced in the July 6 update.</li>
-	</ol>
-</p>
+<h3>Thursday August 2, 2007</h3>
+<ol>
+    <li>Added Approve or Deprecate links to Show Name pages based on whether the name is deprecated or not.</li>
+    <li>Removed 'Deprecated' checkbox from the Edit Name page.</li>
+    <li>Fixed a bug in Edit Observation where providing a totally new name lost any other changes or edits made on the page.</li>
+    <li>Fixed some of the handling of 'Unknown'.</li>
+    <li>Fixed a bug in recording if a Name used to be deprecated.</li>
+</ol>
 
-<p>
-	<h3>Friday July 6, 2007</h3>
-	<ol>
-	    <li>Reorganized the links on the observation, image and name pages to hopefully be more intuitive.</li>
-	    <li>Limited the ability to change the name and author of name to avoid changes to other people's observations without
-	        their approval.</li>
-	    <li>Fixed a few minor bugs.</li>
-	</ol>
-</p>
+<h3>Friday July 20, 2007</h3>
+<ol>
+    <li>Allowed system to assume that a non-deprecated name is preferred over a deprecated name if there is ambiguity.</li>
+    <li>Fixed bug in saving author changes when the name can't be changed that was introduced in the July 6 update.</li>
+</ol>
 
-<p>
-	<h3>Sunday July 1, 2007</h3>
-	<ol>
-	    <li>Updated the checklist code to give long lists after a visit to either the Observation Index or Name Index pages.</li>
-	    <li>Cleaned up the naming of Observation Index and Name Index.  All Names is still maintained, but is now the same as the Name Index.</li>
-	</ol>
-</p>
+<h3>Friday July 6, 2007</h3>
+<ol>
+    <li>Reorganized the links on the observation, image and name pages to hopefully be more intuitive.</li>
+    <li>Limited the ability to change the name and author of name to avoid changes to other people's observations without
+        their approval.</li>
+    <li>Fixed a few minor bugs.</li>
+</ol>
 
-<p>
-	<h3>Saturday June 30, 2007</h3>
-	<ol>
-	    <li>Valid names are now in bold.  Deprecated names are not.</li>
-	</ol>
-</p>
+<h3>Sunday July 1, 2007</h3>
+<ol>
+    <li>Updated the checklist code to give long lists after a visit to either the Observation Index or Name Index pages.</li>
+    <li>Cleaned up the naming of Observation Index and Name Index.  All Names is still maintained, but is now the same as the Name Index.</li>
+</ol>
 
-<p>
-	<h3>Thursday June 28, 2007</h3>
-	<ol>
-	    <li>Moved to new hosting service.</li>
-	</ol>
-</p>
+<h3>Saturday June 30, 2007</h3>
+<ol>
+    <li>Valid names are now in bold.  Deprecated names are not.</li>
+</ol>
 
-<p>
-	<h3>Sunday June 24, 2007</h3>
-	<ol>
-	    <li>If there are two names that have exactly the same name and author and at least one of them has no notes, then they will get automatically merged if one of them is edited.</li>
-	    <li>Added a facility for testing the performance of image uploading.</li>
-	    <li>Fixed an omission in the error reporting code that caused alert emails to not get sent.</li>
-	</ol>
-</p>
+<h3>Thursday June 28, 2007</h3>
+<ol>
+    <li>Moved to new hosting service.</li>
+</ol>
 
-<p>
-	<h3>Monday June 18, 2007</h3>
-	<ol>
-	    <li>Names can now be marked as deprecated.  The setting can be changed using the Edit Name page.</li>
-	    <li>Synonyms support added.  Synonyms are used to verify names of observations and in species lists.</li>
-	    <li>Synonyms can be changed for one name by selecting 'Change Synonyms' from any Show Name page.</li>
-	    <li>Larger sets of names and synonyms can be added from the Bulk Name Edit page available from any Show
-	        Name page, the Name Index page or the All Names page.</li>
-	    <li>The Name Index page only lists names that have observations.</li>
-	    <li>The All Names page lists all names in the database and can be accessed from the Name Index page.</li>
-	    <li>Fixed bug with Creating Observations immediately after creating a new account.</li>
-	</ol>
-</p>
+<h3>Sunday June 24, 2007</h3>
+<ol>
+    <li>If there are two names that have exactly the same name and author and at least one of them has no notes, then they will get automatically merged if one of them is edited.</li>
+    <li>Added a facility for testing the performance of image uploading.</li>
+    <li>Fixed an omission in the error reporting code that caused alert emails to not get sent.</li>
+</ol>
 
-<p>
-	<h3>Monday May 21, 2007</h3>
-	<ol>
-	    <li>One year anniversary!</li>
-	    <li>Added Site Stats, Contributors, Show User, User Observations and Comments for User pages.</li>
-	</ol>
-</p>
+<h3>Monday June 18, 2007</h3>
+<ol>
+    <li>Names can now be marked as deprecated.  The setting can be changed using the Edit Name page.</li>
+    <li>Synonyms support added.  Synonyms are used to verify names of observations and in species lists.</li>
+    <li>Synonyms can be changed for one name by selecting 'Change Synonyms' from any Show Name page.</li>
+    <li>Larger sets of names and synonyms can be added from the Bulk Name Edit page available from any Show
+        Name page, the Name Index page or the All Names page.</li>
+    <li>The Name Index page only lists names that have observations.</li>
+    <li>The All Names page lists all names in the database and can be accessed from the Name Index page.</li>
+    <li>Fixed bug with Creating Observations immediately after creating a new account.</li>
+</ol>
 
-<p>
-	<h3>Sunday May 13, 2007</h3>
-	<ol>
-	    <li>Fixed a variety of minor issues.</li>
-	    <li>Added 'sanitize' calls to avoid cross-site scripting vulnerabilities.</li>
-	</ol>
-</p>
+<h3>Monday May 21, 2007</h3>
+<ol>
+    <li>One year anniversary!</li>
+    <li>Added Site Stats, Contributors, Show User, User Observations and Comments for User pages.</li>
+</ol>
 
-<p>
-	<h3>Thursday May 10, 2007</h3>
-	<ol>
-	    <li>Fixed bug in creating new names when creating a species list.</li>
-	</ol>
-</p>
+<h3>Sunday May 13, 2007</h3>
+<ol>
+    <li>Fixed a variety of minor issues.</li>
+    <li>Added 'sanitize' calls to avoid cross-site scripting vulnerabilities.</li>
+</ol>
 
-<p>
-	<h3>Sunday April 29, 2007</h3>
-	<ol>
-	    <li>Substantially improved error handling.</li>
-	    <li>Fixed problem with Google Web Accelerator.</li>
-	</ol>
-</p>
+<h3>Thursday May 10, 2007</h3>
+<ol>
+    <li>Fixed bug in creating new names when creating a species list.</li>
+</ol>
 
-<p>
-	<h3>Sunday April 22, 2007</h3>
-	<ol>
-	    <li>Reorganized and simplified observation editing and creation.</li>
-	    <li>Completed unit testing for existing pages.</li>
-	</ol>
-</p>
+<h3>Sunday April 29, 2007</h3>
+<ol>
+    <li>Substantially improved error handling.</li>
+    <li>Fixed problem with Google Web Accelerator.</li>
+</ol>
 
-<p>
-	<h3>Friday February 23, 2007</h3>
-	<ol>
-	    <li>Adjusted the size of some of the notes widgets to fill more of the screen.</li>
-	</ol>
-</p>
+<h3>Sunday April 22, 2007</h3>
+<ol>
+    <li>Reorganized and simplified observation editing and creation.</li>
+    <li>Completed unit testing for existing pages.</li>
+</ol>
 
-<p>
-	<h3>Monday February 19, 2007</h3>
-	<ol>
-        <li>Added note snippet and comment count to Show Image page for easier review.</li>
-	    <li>Adjusted options available for the number of rows in list displays.</li>
-	    <li>Fixed database migration scripts.</li>
-	    <li>Internal data simplification (removed observations.what field).</li>
-	</ol>
-</p>
+<h3>Friday February 23, 2007</h3>
+<ol>
+    <li>Adjusted the size of some of the notes widgets to fill more of the screen.</li>
+</ol>
 
-<p>
-	<h3>Tuesday February 13, 2007</h3>
-	<ol>
-	    <li>Added multiple upload option for Add Images.</li>
-        <li>Changed some of the links in the left hand panel based on user feedback.</li>
-	</ol>
-</p>
+<h3>Monday February 19, 2007</h3>
+<ol>
+    <li>Added note snippet and comment count to Show Image page for easier review.</li>
+    <li>Adjusted options available for the number of rows in list displays.</li>
+    <li>Fixed database migration scripts.</li>
+    <li>Internal data simplification (removed observations.what field).</li>
+</ol>
 
-<p>
-	<h3>Saturday February 10, 2007</h3>
-	<ol>
-	    <li>Added image and location search within the site.</li>
-	</ol>
-</p>
+<h3>Tuesday February 13, 2007</h3>
+<ol>
+    <li>Added multiple upload option for Add Images.</li>
+    <li>Changed some of the links in the left hand panel based on user feedback.</li>
+</ol>
 
-<p>
-	<h3>Thursday February 8, 2007</h3>
-	<ol>
-	    <li>Added Google image search links to Observation and Name pages.</li>
-	</ol>
-</p>
+<h3>Saturday February 10, 2007</h3>
+<ol>
+    <li>Added image and location search within the site.</li>
+</ol>
 
-<p>
-	<h3>Wednesday February 7, 2007</h3>
-	<ol>
-	    <li>Added checklists.  Items in the checklist are the results of the
-                latest search or viewed species list.  Viewing large lists like
-                'Latest Changes' or 'Name Index' will reset the checklist to all
-                names.
-                </li>
-            <li>Moved loading species lists from files to a separate page off of
-                Edit Species List to avoid an interaction between the checklist
-                and file loading.</li>
-	</ol>
-</p>
+<h3>Thursday February 8, 2007</h3>
+<ol>
+    <li>Added Google image search links to Observation and Name pages.</li>
+</ol>
 
-<p>
-	<h3>Saturday January 27, 2007</h3>
-	<ol>
-	    <li>Name edits now appear in the RSS feed.</li>
-	</ol>
-</p>
+<h3>Wednesday February 7, 2007</h3>
+<ol>
+    <li>Added checklists.  Items in the checklist are the results of the
+            latest search or viewed species list.  Viewing large lists like
+            'Latest Changes' or 'Name Index' will reset the checklist to all
+            names.
+            </li>
+        <li>Moved loading species lists from files to a separate page off of
+            Edit Species List to avoid an interaction between the checklist
+            and file loading.</li>
+</ol>
 
-<p>
-	<h3>Sunday January 21, 2007</h3>
-	<ol>
-	    <li>Added How To Use page.</li>
-	    <li>Changed 'New' links to 'Create'.</li>
-	    <li>Fixed a bug with the search box.</li>
-	    <li>Fixed a couple of bugs with the next/prev links.</li>
-	</ol>
-</p>
+<h3>Saturday January 27, 2007</h3>
+<ol>
+    <li>Name edits now appear in the RSS feed.</li>
+</ol>
 
-<p>
-	<h3>Thursday January 11, 2007</h3>
-	<ol>
-	    <li>Fixed a bug with creating new species.</li>
-	    <li>Fixed many bugs with page titles, some of which were preventing pages from loading.</li>
-	</ol>
-</p>
+<h3>Sunday January 21, 2007</h3>
+<ol>
+    <li>Added How To Use page.</li>
+    <li>Changed 'New' links to 'Create'.</li>
+    <li>Fixed a bug with the search box.</li>
+    <li>Fixed a couple of bugs with the next/prev links.</li>
+</ol>
 
-        <p>
-        	<h3>Tuesday January 9, 2007</h3>
-        	<ol>
-        	    <li>Names are now database objects rather than just strings.  They have a
-                rank, a text name an author and notes.</li>
-        <li>A show_name page shows this information as well as a list of all
-        observations that use that Name.  The show_pages can be accessed from
-        each show_observation page as well as the name_index page that is
-        available in the left-side panel.</li>
-        <li>Names can be edited on the edit_name pages that are accessible from
-        the show_name pages.  Anyone is allowed to edit any name, but
-        following the <a href="http://www.wikipedia.org/">Wikipedia</a> model,
-        a record is kept of every version.  The previous versions are stored as
-        'past names'.  A show_past_name page shows the name information for a
-        previous version of a name and is accessible from each show_name page.</li>
-        <li>Names are associated with observations through the 'what' field of the
-        observation.  When the 'what' field is changed, the names are searched
-        for a match.  The 'what' field can either be the text_name or the
-        text_name and the author for a name.  No match is found for a 'what'
-        value, then the user is given the option to create the new name.  If a
-        'what' value matches more than one name (due to different authors
-        publishing the same name), then the user is given a choice between the
-        options.  The options list how many observations use each version of
-        the name.  If you add an author to a 'what' field for a name that does
-        not have an author already, it will ask you if you want to create the
-        new name, but it will actually update the existing name.</li>
-        <li>Names given in species lists are treated in the exact same manner,
-        except that all the new names and all of the multiple matches are
-        dealt with on the same page.  There is also an option on the
-        new_species_list and edit_species_list pages to 'Just Create New
-        Names'.  This adds the names without updating the species list or
-        creating the corresponding observations.</li>
-        <li>The search box is now available on every page.</li>
-        <li>Removed the Observation Index in favor of the Name Index.</li>
-        <li>Fixed some of the list ordering to make it more intuitive.</li>
-        <li>A filter was added to the account creation process that should reduce the
-        number of bot created users.</li>
-        <li>Fixed a bug with bouncing between observations and images and using the
-        next/prev links.</li>
-	</ol>
-</p>
+<h3>Thursday January 11, 2007</h3>
+<ol>
+    <li>Fixed a bug with creating new species.</li>
+    <li>Fixed many bugs with page titles, some of which were preventing pages from loading.</li>
+</ol>
 
-<p>
-	<h3>Monday December 18, 2006</h3>
-	<ol>
-		<li>Added prev/next links that follow the RSS feed.</li>
-		<li>Improved prev/next functionality throughout the site.</li>
-		<li>RSS feed descriptions now have appropriate line breaks.</li>
-	</ol>
-</p>
+<h3>Tuesday January 9, 2007</h3>
+<ol>
+	<li>Names are now database objects rather than just strings.  They have a
+    rank, a text name an author and notes.</li>
+    <li>A show_name page shows this information as well as a list of all
+    observations that use that Name.  The show_pages can be accessed from
+    each show_observation page as well as the name_index page that is
+    available in the left-side panel.</li>
+    <li>Names can be edited on the edit_name pages that are accessible from
+    the show_name pages.  Anyone is allowed to edit any name, but
+    following the <a href="http://www.wikipedia.org/">Wikipedia</a> model,
+    a record is kept of every version.  The previous versions are stored as
+    'past names'.  A show_past_name page shows the name information for a
+    previous version of a name and is accessible from each show_name page.</li>
+    <li>Names are associated with observations through the 'what' field of the
+    observation.  When the 'what' field is changed, the names are searched
+    for a match.  The 'what' field can either be the text_name or the
+    text_name and the author for a name.  No match is found for a 'what'
+    value, then the user is given the option to create the new name.  If a
+    'what' value matches more than one name (due to different authors
+    publishing the same name), then the user is given a choice between the
+    options.  The options list how many observations use each version of
+    the name.  If you add an author to a 'what' field for a name that does
+    not have an author already, it will ask you if you want to create the
+    new name, but it will actually update the existing name.</li>
+    <li>Names given in species lists are treated in the exact same manner,
+    except that all the new names and all of the multiple matches are
+    dealt with on the same page.  There is also an option on the
+    new_species_list and edit_species_list pages to 'Just Create New
+    Names'.  This adds the names without updating the species list or
+    creating the corresponding observations.</li>
+    <li>The search box is now available on every page.</li>
+    <li>Removed the Observation Index in favor of the Name Index.</li>
+    <li>Fixed some of the list ordering to make it more intuitive.</li>
+    <li>A filter was added to the account creation process that should reduce the
+    number of bot created users.</li>
+    <li>Fixed a bug with bouncing between observations and images and using the
+    next/prev links.</li>
+</ol>
 
-<p>
-	<h3>Monday December 4, 2006</h3>
-	<ol>
-		<li>Species lists can now be uploaded from files.</li>
-		<li>Separated note for species list from note that applies to member observations.</li>
-		<li>Fixed use of multiple tabs by switching from session data to hidden fields.</li>
-		<li>mushroomobserver.org/# == mushroomobserver.org/observer/show_observation/#</li>
-	</ol>
-</p>
+<h3>Monday December 18, 2006</h3>
+<ol>
+	<li>Added prev/next links that follow the RSS feed.</li>
+	<li>Improved prev/next functionality throughout the site.</li>
+	<li>RSS feed descriptions now have appropriate line breaks.</li>
+</ol>
 
-<p>
-	<h3>Monday October 26, 2006</h3>
-	<ol>
-		<li>Switched Observations-&gt;By Name to include thumbnails and follow layout.</li>
-		<li>Maintained old By Name behavior as Observations-&gt;Index.</li>
-		<li>Added simple search box to Activity Log (Latest Changes) and Observation list pages.</li>
-	</ol>
-</p>
+<h3>Monday December 4, 2006</h3>
+<ol>
+	<li>Species lists can now be uploaded from files.</li>
+	<li>Separated note for species list from note that applies to member observations.</li>
+	<li>Fixed use of multiple tabs by switching from session data to hidden fields.</li>
+	<li>mushroomobserver.org/# == mushroomobserver.org/observer/show_observation/#</li>
+</ol>
 
-<p>
-	<h3>Monday October 23, 2006</h3>
-	<ol>
-		<li>Changed default page to the RSS feed.</li>
-		<li>Changed page layout for observation and image list pages.</li>
-		<li>Added layout controls to user preferences.  Set to 10 rows x 1 column
-			and turn off 'Put text below images' to get old layout.	</li>
-		<li>Changed thumbnail image size from 100px to 160px with lower quality (jpeg 50 vs. 75).</li>
-		<li>Provided Prev/Next buttons for images.</li>
-		<li>Added link to ask the webmaster a question about the site.</li>
-		<li>Split up 'Manage Images' into 'Add Image', 'Reuse Image' and 'Remove Images' and made
-			them more visible.</li>
-		<li>'Reuse Image' allows you to look at the images.</li>
-		<li>Added links for viewing the log for observations and species lists.</li>
-		<li>Made database lookup for all observations much more efficient.</li>
-		<li>Rearranged left-hand panel.</li>
-		<li>Images no longer have titles.  They are derived from the observation(s) they are
-			connected to.</li>
-		<li>Removed Edit and Destroy links from view pages.</li>
-		<li>Add mini-icon for webpages.</li>
-	</ol>
-</p>
+<h3>Monday October 26, 2006</h3>
+<ol>
+	<li>Switched Observations-&gt;By Name to include thumbnails and follow layout.</li>
+	<li>Maintained old By Name behavior as Observations-&gt;Index.</li>
+	<li>Added simple search box to Activity Log (Latest Changes) and Observation list pages.</li>
+</ol>
 
-<p>
-	<h3>Sunday September 9, 2006</h3>
-	<ol>
-		<li>Links to email the creator of observations or images with questions or commerical inquiries.  The creator receives an email with the address of the user who wants to contact them.  It is up to the creator whether they want to respond.</li>
-		<li>User preferences added to disable the above email feature and to stop receiving emails like this letting you know about new features.</li>
-		<li>RSS feed has been overhauled to reduce the number of entries and make them more relevant.</li>
-		<li>Copyright holder now has an option to be something other than a registered user.  The user who uploads the image is the default, but it can now be changed on a per image basis.</li>
-	</ol>
-</p>
+<h3>Monday October 23, 2006</h3>
+<ol>
+	<li>Changed default page to the RSS feed.</li>
+	<li>Changed page layout for observation and image list pages.</li>
+	<li>Added layout controls to user preferences.  Set to 10 rows x 1 column
+		and turn off 'Put text below images' to get old layout.	</li>
+	<li>Changed thumbnail image size from 100px to 160px with lower quality (jpeg 50 vs. 75).</li>
+	<li>Provided Prev/Next buttons for images.</li>
+	<li>Added link to ask the webmaster a question about the site.</li>
+	<li>Split up 'Manage Images' into 'Add Image', 'Reuse Image' and 'Remove Images' and made
+		them more visible.</li>
+	<li>'Reuse Image' allows you to look at the images.</li>
+	<li>Added links for viewing the log for observations and species lists.</li>
+	<li>Made database lookup for all observations much more efficient.</li>
+	<li>Rearranged left-hand panel.</li>
+	<li>Images no longer have titles.  They are derived from the observation(s) they are
+		connected to.</li>
+	<li>Removed Edit and Destroy links from view pages.</li>
+	<li>Add mini-icon for webpages.</li>
+</ol>
 
-<p>
-	<h3>Monday August 21, 2006</h3>
-	Added RSS feed for all interesting events that happen on the site.<br/>
-	Added 'Create Account' link on login page to make it more obvious.<br/>
-	Tweaked page titles to make the site easier to index.<br/>
-</p>
+<h3>Sunday September 9, 2006</h3>
+<ol>
+	<li>Links to email the creator of observations or images with questions or commerical inquiries.  The creator receives an email with the address of the user who wants to contact them.  It is up to the creator whether they want to respond.</li>
+	<li>User preferences added to disable the above email feature and to stop receiving emails like this letting you know about new features.</li>
+	<li>RSS feed has been overhauled to reduce the number of entries and make them more relevant.</li>
+	<li>Copyright holder now has an option to be something other than a registered user.  The user who uploads the image is the default, but it can now be changed on a per image basis.</li>
+</ol>
 
-<p>
-	<h3>Sunday August 13, 2006</h3>
-	Added this news page.<br/>
-	List pages now have a better interface for paging than just next/previous,
-	and its at the top and bottom of each page.<br/>
-</p>
+<h3>Monday August 21, 2006</h3>
+Added RSS feed for all interesting events that happen on the site.<br/>
+Added 'Create Account' link on login page to make it more obvious.<br/>
+Tweaked page titles to make the site easier to index.<br/>
 
-<p>
-	<h3>Saturday August 12, 2006</h3>
-	Added email verification system to user signup.<br/>
-</p>
+<h3>Sunday August 13, 2006</h3>
+Added this news page.<br/>
+List pages now have a better interface for paging than just next/previous,
+and its at the top and bottom of each page.<br/>
+
+<h3>Saturday August 12, 2006</h3>
+Added email verification system to user signup.<br/>

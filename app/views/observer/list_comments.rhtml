@@ -5,7 +5,8 @@
 
 <%= pagination_links(@comment_pages) %>
 
-<table  cellpadding="5" cellspacing="0">
+<% if @comments.length > 0 %>
+<table cellpadding="5" cellspacing="0" width="100%">
   <%
      odd_or_even = 0
      for comment in @comments
@@ -13,7 +14,7 @@
        observation = comment.observation
      %>
   <tr valign="top" class="ListLine<%= odd_or_even %>">
-    <td width=100%>
+    <td width="100%">
 		<%= link_to sprintf('<span class="ListWhat">%s</span>', h(comment.summary)),
 		            :action => 'show_comment', :id => comment %>: 
 		<% if !observation.nil? %>
@@ -30,7 +31,8 @@
   </tr>
   <% end %>
 </table>
+<% end %>
 
 <%= pagination_links(@comment_pages) %>
 
-<br />
+<br/>

@@ -6,32 +6,28 @@
 <br/>
 <center><%= submit_tag 'Save' %></center>
 
-<table cellpadding="10">
-	<tr>
-        <%= render :partial => 'form_list_feedback' %>
-    	<p>
-    		<label for="list_members">Name Edits:</label><br/>
-    		<%= text_area 'list', 'members', :value => @list_members, :cols => 80  %><br/><br/>
-    		
-            Each line indicates a set of changes.<br/><br/>
-            
-            To ensure a name is in the database, just list the name.  E.g.,<br/>
-            <tt>&nbsp;&nbsp;Agaricus bisporus</tt><br/><br/>
-            
-            To ensure a name exists with a particular author, give the name followed by the author.  E.g.,<br/>
-            <tt>&nbsp;&nbsp;Agaricus bisporus (J.E. Lange) Pilát</tt><br/><br/>
-            
-            Add a taxon above the species level, give the rank followed by the name.  E.g.,<br/>
-            <tt>&nbsp;&nbsp;Genus Agaricus</tt><br/><br/>
-            
-            To make a name a deprecated synonym of another name, follow the valid name with the deprecated synonym.  E.g.,<br/>
-            <tt>&nbsp;&nbsp;Agaricus bisporus (J.E. Lange) Pilát = Agaricus hortensis (Cke.) Imai</tt><br/><br/>
-            
-            The changes are cummulative, so the last example by itself would ensure that the names <i>Agaricus bisporus</i>
-            (J.E. Lange) Pilát and <i>Agaricus hortensis</i> (Cke.) Imai exist, as well as making <i>A. hortensis</i> a deprecated
-            synononym of <i>A. bisporus</i>.  If a name exists with no author and you provide an author, then the existing name is updated.
-            Otherwise, if the author is given and it does not match the current author, a new name is created.<br/>
-    	</p>
-	</tr>
-</table>
+<%= render :partial => 'form_list_feedback' %>
+<p>
+	<label for="list_members">Name Edits:</label><br/>
+	<%= text_area 'list', 'members', :value => @list_members, :cols => 80  %><br/><br/>
+	
+    Each line indicates a set of changes.<br/><br/>
+    
+    To ensure a name is in the database, just list the name.  E.g.,<br/>
+    <tt>&nbsp;&nbsp;Agaricus bisporus</tt><br/><br/>
+    
+    To ensure a name exists with a particular author, give the name followed by the author.  E.g.,<br/>
+    <tt>&nbsp;&nbsp;Agaricus bisporus (J.E. Lange) Pilát</tt><br/><br/>
+    
+    Add a taxon above the species level, give the rank followed by the name.  E.g.,<br/>
+    <tt>&nbsp;&nbsp;Genus Agaricus</tt><br/><br/>
+    
+    To make a name a deprecated synonym of another name, follow the valid name with the deprecated synonym.  E.g.,<br/>
+    <tt>&nbsp;&nbsp;Agaricus bisporus (J.E. Lange) Pilát = Agaricus hortensis (Cke.) Imai</tt><br/><br/>
+    
+    The changes are cummulative, so the last example by itself would ensure that the names <i>Agaricus bisporus</i>
+    (J.E. Lange) Pilát and <i>Agaricus hortensis</i> (Cke.) Imai exist, as well as making <i>A. hortensis</i> a deprecated
+    synononym of <i>A. bisporus</i>.  If a name exists with no author and you provide an author, then the existing name is updated.
+    Otherwise, if the author is given and it does not match the current author, a new name is created.<br/>
+</p>
 <% end %>

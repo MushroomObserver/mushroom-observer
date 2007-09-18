@@ -17,7 +17,7 @@
     <%= render :partial => 'form_list_feedback' %>
     <% if @deprecated_names && (@deprecated_names != []) %>
         The following names are deprecated:<br/>
-        <span id="help_note">
+        <span class="HelpNote">
             Select any names you would prefer to use.  If you prefer a name<br/>
             you entered then don't select one of the suggested synonyms.<br/>
         </span>
@@ -45,7 +45,7 @@
     <% if @multiple_names && (@multiple_names != [])
         %>
         <br/>Multiple names match each of the follow entries:<br/>
-        <span id="help_note">
+        <span class="HelpNote">
             In each case, select the intended name.  The number after each<br/>
             name is how many observations are currently using that name.<br/>
         </span>
@@ -71,7 +71,7 @@
 	</p>
 
 	<p>
-		<label for="species_list_when">When</label><br/>
+		<label for="species_list_when_1i">When</label><br/>
 		<%= date_select 'species_list', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %>
 	</p>
 
@@ -96,9 +96,9 @@
 		<%= text_area 'member', 'notes', :value => @member_notes, :rows => 5  %>
 	</p>
 
-    <span id="help_note">
+    <span class="HelpNote">
 Bulk name creation has moved to the <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %> page.
-    </span></p>
+    </span>
 </td>
 
 <!--[eoform:species_list]-->

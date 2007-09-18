@@ -11,16 +11,16 @@
                 names = synonym.names
                 %>
                 Current Synonyms:<br/>
-                <span id="help_note">
+                <span class="HelpNote">
                     Unchecked items will no longer be synonymized with this name, but will remain synonymized with each other.
                 </span>
-                <span class="Data">
-                    <p>
+                <p>
+                    <span class="Data">
                         <%
                         for n in names
                             if n != @name %>
                                 <%= check_box("existing_synonyms", n.id, { :checked => "checked" }, "checked") %>
-                                <label for="existing_synonyms">
+                                <%= "<label for=\"existing_synonyms_#{n.id}\">" %>
                                     <%= link_to(textilize_without_paragraph(h(n.display_name)),
                                                 :action => 'show_name', :id => n) %>
                                 </label>
@@ -28,8 +28,8 @@
                             <%
                             end
                         end %>
-                    </p>
-                </span>
+                    </span>
+                </p>
             <% end %>
             <%
             if @synonym_names && @synonym_names != []
@@ -39,7 +39,7 @@
                     <hr><br/>
                 <% end %>
                 Proposed Synonyms:<br/>
-                <span id="help_note">
+                <span class="HelpNote">
                     Unchecked items will no longer be synonymized with this name, but will retain their relationships with each other.
                 </span>
                 <span class="Data">
@@ -71,7 +71,7 @@
                         <% end %>
                     </p>
                 </span>
-                <span id="help_note">
+                <span class="HelpNote">
                     Click 'Add' to create these name.  If you want to correct any names,<br/>
                     do so in the area below and click 'Add' to re-evaluate the list.
                     <br/><br/>
@@ -79,15 +79,15 @@
             <% end %>
             <p>
                 <%= check_box("deprecate", "all", { :checked => @deprecate_all }, "checked") %>
-                <label for="deprecate"> Deprecate Synonyms</label><br/>
-                <span id="help_note">
+                <label for="deprecate_all"> Deprecate Synonyms</label><br/>
+                <span class="HelpNote">
                     If checked all listed synonyms become deprecated names.  Otherwise,<br/>
                     they are left as they are with new names created as not deprecated.
                 </span>
             </p>
             <p>
                 <label for="synonym_members">Names:</label>
-            	<span id="help_note">
+            	<span class="HelpNote">
             		List the names you want to be synonymized with <%= textilize_without_paragraph(h(@name.display_name)) %>.
             	</span><br/>
                 <%= text_area 'synonym', 'members', :value => @list_members  %>

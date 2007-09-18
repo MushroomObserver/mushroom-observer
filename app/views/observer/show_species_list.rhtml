@@ -10,9 +10,10 @@
 <p>When: <span class="Data"><%= @species_list.when %></span></p>
 <p>Where: <span class="Data"><%= h(@species_list.where) %></span></p>
 <p>Who: <span class="Data"><%= h(@species_list.user.unique_text_name) %></span></p>
-<p>Notes:</br><%= textilize(sanitize(@species_list.notes.to_s)) %></p>
-<p>Members:<br/>
-	<table cellpadding="5" cellspacing="0">
+Notes:<br/><%= textilize(sanitize(@species_list.notes.to_s)) %>
+Members:<br/>
+  <% if @species_list.observations.length > 0 %>
+	<table cellpadding="5" cellspacing="0" width="100%">
 		<%
 		odd_or_even = 0
 		observation_list = @species_list.observations.sort {|x,y| x.unique_text_name <=> y.unique_text_name }
@@ -42,7 +43,8 @@
 	  	</tr>
 	    <% end %>
 	</table>
-</p>
+  <% end %>
+<br/>
 <% rss_log = @species_list.rss_log 
    if rss_log %>
 	<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>

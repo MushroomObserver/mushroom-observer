@@ -1,6 +1,8 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <META http-equiv=Content-Type content="text/html; charset=UTF-8"/>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => 'Mushroom Observer RSS'}) %>
   <title>Mushroom Observer: <%= if @title.nil? then controller.action_name else @title end %></title>
   <%= css = nil
@@ -14,8 +16,9 @@
 	unless CSS.member?(css)
 		css = CSS[rand(CSS.length)]
 	end
-	stylesheet_link_tag 'general', css %>
-	<link REL="SHORTCUT ICON" HREF=<%= sprintf('"%s/images/favicon.ico"', DOMAIN) %> />
+	stylesheet_link_tag 'general', css
+  %>
+<link rel="SHORTCUT ICON" href="http://localhost:3000/images/favicon.ico" />
 </head>
 <body>
 	<div id="banner">
@@ -25,7 +28,7 @@
 		<table>
 			<tr>
 				<td valign="top" height="100%">
-					<table class="LeftSide" cellpadding="20" height="100%">
+					<table class="LeftSide" cellpadding="20">
 						<tr>
 							<td valign="top">
 								<%= link_to('Introduction', :controller => 'observer',
@@ -144,12 +147,19 @@
 									<a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a><br/>
 									Preferred browser:<br/>
 									<a href='http://www.mozilla.com/firefox/'>FireFox</a>
+									<% if @invalid.nil? %>
+    									<p>
+                                            <a href="http://validator.w3.org/check?uri=referer"><img
+                                                src="http://www.w3.org/Icons/valid-xhtml10"
+                                                alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+                                        </p>
+                                    <% end %>
 								</div>
 							</td>
 						</tr>
 					</table>
 				</td>
-				<td width=100% valign="top" class="main">
+				<td width="100%" valign="top" class="main">
             		<%
             		if @search.nil?
             		    pattern = session["pattern"]

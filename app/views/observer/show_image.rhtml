@@ -19,7 +19,7 @@
 <%  end %>
 
 <div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name)) %></div>
-<div id="copyright">Copyright &copy
+<div id="copyright">Copyright &copy;
 	<% if commercial_inquiries_ok %>
 	  <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),
 	              :action => 'commercial_inquiry', :id => @image) %>
@@ -31,11 +31,11 @@
 <table cellpadding="10">
 <tr>
 <td align="center">
-    <span about="640/#{@image.id}.jpg">
+    <div about="640/#{@image.id}.jpg">
         <%= link_to(image_tag("640/#{@image.id}.jpg"),
         	:action => 'show_original', :id => @image.id) %><br/>
         <%= render :partial => "form_#{@image.license.form_name}" %>
-    </span>
+    </div>
 </td>
 <td valign="top">
 
@@ -51,11 +51,11 @@
     <% for observation in @image.observations
       text = '<span class="Data">' + textilize_without_paragraph(h(observation.unique_format_name))
       if observation.notes != ''
-          text += '</span><span id="help_note"><br/>Notes: %s...' % observation.notes[0..15]
+          text += '</span><span class="HelpNote"><br/>Notes: %s...' % observation.notes[0..15]
       end
       len = observation.comments.length
       if len > 0
-          text += '</span><span id="help_note"<br/>%s comments' % len
+          text += '</span><span class="HelpNote"<br/>%s comments' % len
       end
       text += '</span>' %>
       <%= link_to(text, :action => 'show_observation', :id => observation.id) %>
@@ -63,8 +63,8 @@
     <% end %>
 </p>
 
-<p>Notes:<br/>
-<%= textilize(sanitize(@image.notes.to_s)) %></p>
+Notes:<br/>
+<%= textilize(sanitize(@image.notes.to_s)) %>
 
 </td>
 </tr>

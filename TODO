@@ -2,10 +2,24 @@
 
 Current task:
 
+Improve w3c compliance
+
 *** Improve 'where'
-  lat, long, altitude
+  location:
+    where (string)
+    notes
+    user
+    lat1
+    lat2
+    long1
+    long2
+    alt1
+    alt2
+  lat/long finder
   Hook up to Google Maps
-  Add concept of a named location
+  Future ideas:
+    Explicit error and/or 'secretness'
+    Shape information from Darwin Core
 
 Large features:
 
@@ -18,6 +32,7 @@ Large features:
       Create a single link at the top for to go to the left-hand panel with the search buttons
       Remove pagination links from the top of the page
   Greenphone uploading app
+  Ability to receive observations through email
 
 ** Namings
   Provide a formalized way for users to associate a 'Name' with an 'Observation'.
@@ -25,9 +40,39 @@ Large features:
       Add basis for naming (macroscopic, key, references, microscopic, chemical, genetic)
       Allow users to select among proposed ids or indicate that none of them seem right.
       Provide an easy way to add a comment at the same time.
+  data:
+    Namings:
+      name_id
+      user
+      when
+      notes
+
+    Opinion:
+      naming_id
+      user
+      confidence
+      notes
+
+    Confidence:
+      No opinion
+      Strongly agree
+      Agree
+      Could be
+      Not sure
+      Seems unlikely
+      Disagree
+      Strongly disagree
+
+    Image opinion:
+      image_id
+      scientific_value
+      asthetic_value
+      notes
 
 ** Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.
     Can be used to create species lists, or simply displayed and copied for publication somewhere else.
+    Use to create a single observation
+    Dynamic checklists - click for completions (ajaxify?)
 
 ** Herbarium records - Provide a standard way to describe herbarium collections.
 
@@ -54,6 +99,11 @@ Large features:
 * Machine identification
     Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
 
+Notifications
+    Users could register interest in a particular name and get email when one shows up.
+    Add RSS feeds for searches, names, higher level taxa
+    Let collector know if someone has asked for collections
+
 Foreign language support
 
 Yet more stuff to do with Names
@@ -77,11 +127,13 @@ Local client that can only add
 
 Small features:
 
-* Show all comments
++* Show all comments
 
-* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
++* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
+  Might be handled by having a toggle that says 'More images'/'Less images' this would also change
+    the layout to rows with all the thumbs displayed
 
-Deprecate/Approve should have a comment field.
++ Deprecate/Approve should have a comment field.
 
 Synonym features
   Automated way to apply synonyms to your own observations (with review)

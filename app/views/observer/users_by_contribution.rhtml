@@ -2,9 +2,9 @@
 <%= link_to 'Site Stats', :action => 'show_site_stats' %>
 <div id="Title"><%= @title %></div>
 
-<table cellpadding="5" cellspacing="5"><tr align="middle">
+<table cellpadding="5" cellspacing="5"><tr align="center">
     <td valign="top" width="50%">
-        <table cellpadding="5" cellspacing="5" border=0>
+        <table cellpadding="5" cellspacing="5" border="0">
         	<%
         		for metric, user_id, user_name in @user_ranking
         		    if metric > 0 %>
@@ -47,4 +47,4 @@
         to change over time based on feedback from the members of
         the community.
     </td>
-</td></table>
+</tr></table>

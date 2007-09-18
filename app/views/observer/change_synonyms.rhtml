@@ -5,11 +5,9 @@
     Synonyms for <%= link_to(textilize_without_paragraph(h(@name.display_name)), :action => 'show_name', :id => @name) %>
 </div>
 <%= error_messages_for 'synonym' %>
-<p>
-    <% form_tag(:action => 'transfer_synonyms', :id => @name, :approved_names => @new_names,
-                :approved_synonyms => @synonym_name_ids) do %>
-        <center><%= submit_tag 'Submit Changes' %></center>
-        <br/>
-        <%= render :partial => 'form_synonyms' %>
-    <% end %>
-</p>
+<% form_tag(:action => 'transfer_synonyms', :id => @name, :approved_names => @new_names,
+            :approved_synonyms => @synonym_name_ids) do %>
+    <center><%= submit_tag 'Submit Changes' %></center>
+    <br/>
+    <%= render :partial => 'form_synonyms' %>
+<% end %>

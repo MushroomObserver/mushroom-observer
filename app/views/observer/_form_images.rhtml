@@ -3,20 +3,20 @@
     <p><label for="image_copyright_holder">Copyright Holder:</label><br/>
     <%= form.text_field('copyright_holder') %></p>
 
-    <p><label for="image_when">When:</label>
-    	<span id="help_note">
+    <p><label for="image_when_1i">When:</label>
+    	<span class="HelpNote">
     		Date the photograph or drawing was created.
     	</span><br/>
     <%= form.date_select('when', :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
 
     <p><label for="image_license_id">License:</label><br/>
-        <span id="help_note">
+        <span class="HelpNote">
             Select <%= link_to('license', :action => 'how_to_use', :anchor => 'lic') %> you want to give for this image
         </span><br/>
-    <%= form.select(:license_id, @licenses) %>
+    <%= form.select(:license_id, @licenses) %></p>
 
     <p><label for="image_notes">Notes:</label><br/>
-    	<span id="help_note">
+    	<span class="HelpNote">
     		Enter notes that are specific to this particular image.
     	</span><br/>
     <%= form.text_area('notes', "cols" => width) %></p>

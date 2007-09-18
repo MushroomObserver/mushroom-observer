@@ -2,7 +2,7 @@
 <%= link_to 'Contributors', :action => 'users_by_contribution' %>
 
 <center>
-    <table border=0>
+    <table border="0">
         <tr align="center">
             <%
             obs_length = 0
@@ -24,7 +24,7 @@
             <% end %>
             <td valign="top" width="50%">
                 <div id="Title"><%= @title %></div>
-                <table cellpadding="5" cellspacing="5" border=0>
+                <table cellpadding="5" cellspacing="5" border="0">
                     <%
                     total = 0
                     for field in [:observations, :images, :names, :past_names, :species_lists,
@@ -54,6 +54,6 @@
                     <% end %>
                 </td>
             <% end %>
-        <tr>
+        </tr>
     </table>
 </center>

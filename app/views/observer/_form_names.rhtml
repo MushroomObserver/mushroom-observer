@@ -14,13 +14,13 @@
     if @can_make_changes %>
         <label for="name_text_name">Text Name:</label>
         <%= text_field 'name', 'text_name'  %><br/>
-        <span id="help_note">
+        <span class="HelpNote">
         	Unformatted version of the name without any author info.<br/>
         	E.g., Amanita muscara var. flavivolvata.
         </span>
     <% else %>
         Text Name: <%= @name.text_name %><br/>
-        <span id="help_note">
+        <span class="HelpNote">
         	Name is in use.  Make name changes in each observation.
         </span>
     <% end %>
@@ -31,13 +31,13 @@
     if @can_make_changes or @name.author.nil? or (@name.author == '') %>
         <label for="name_author">Author:</label>
         <%= text_field 'name', 'author'  %><br/>
-        <span id="help_note">
+        <span class="HelpNote">
         	The author citation using the standard ICBN format.<br/>
         	E.g., (Singer) Jenkins.
         </span>
     <% else %>
         Author: <%= @name.author %><br/>
-        <span id="help_note">
+        <span class="HelpNote">
         	Name with this author citation is in use.  Make name changes in each observation.
         </span>
     <% end %>
@@ -45,18 +45,18 @@
 
 <p>
     <label for="name_citation">Citation:</label>
-	<span id="help_note">
+	<span class="HelpNote">
 		Citation for the publication of this name.<br/>
 	</span>
-    <%= text_field 'name', 'citation', :cols => 80  %><br/>
-    <span id="textilize_note">
+    <%= text_field 'name', 'citation', :size => 80  %><br/>
+    <span class="textilize_note">
         Citations can be formated using the Textile markup system.
     </span>
 </p>
 
 <p>
     <label for="name_notes">Notes:</label>
-	<span id="help_note">
+	<span class="HelpNote">
 		Please include notes about the validity of this name,<br/>
 		common misuses of the name, and more appropriate names<br/>
 		to be used when applicable.

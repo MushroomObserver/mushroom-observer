@@ -16,7 +16,7 @@
           <%= textilize_without_paragraph(h(n.display_name)) %> (<%= n.observations.size %>)<br/>
       <% end %>
     </span>
-    <span id="help_note">
+    <span class="HelpNote">
       The number after each name is how many observations are currently using that name.
     </span>
 <% elsif @what != '' %>
@@ -25,18 +25,16 @@
             The name '<%= h(@what) %>' was not recognized.<br/>
         </p>
     </span>
-    <span id="help_note">
+    <span class="HelpNote">
         Click 'Submit' to create this name or edit the name below to correct any typo.<br/><br/>
     </span>
 <% end %>
-<p>
-    <% form_tag(:action => 'do_deprecation', :id => @name, :approved_name => @what) do %>
-        <center><%= submit_tag 'Submit' %></center>
-        <br/>
-        <p><label for="proposed_name">Preferred name:</label>
-        <%= text_field('proposed', 'name', :value => @what) %><br/>
-        <span id="help_note">
-        	Enter the preferred name.  Author citation is recommended but not required.
-        </span></p>
-    <% end %>
-</p>
+<% form_tag(:action => 'do_deprecation', :id => @name, :approved_name => @what) do %>
+    <center><%= submit_tag 'Submit' %></center>
+    <br/>
+    <p><label for="proposed_name">Preferred name:</label>
+    <%= text_field('proposed', 'name', :value => @what) %><br/>
+    <span class="HelpNote">
+    	Enter the preferred name.  Author citation is recommended but not required.
+    </span></p>
+<% end %>
