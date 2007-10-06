@@ -18,5 +18,6 @@ config.action_controller.perform_caching             = false
 # ActionMailer::Base.deliveries array.
 config.action_mailer.delivery_method = :test
 
-IMG_DIR = sprintf("/Users/velosa/observer-images/%s", ENV['RAILS_ENV'])
+IMG_DIR = File.join(RAILS_ROOT, 'public', 'test_images')
+
 DOMAIN = 'http://localhost:3000'

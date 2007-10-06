@@ -18,6 +18,4 @@ config.action_controller.perform_caching             = true
 # Disable delivery errors if you bad email addresses should just be ignored
 # config.action_mailer.raise_delivery_errors = false
 
-IMG_DIR = "/home/19334/containers/rails/mo/public/images"
-TEST_IMG_DIR = "/home/19334/containers/rails/mo/public/test_images"
 DOMAIN = 'http://mushroomobserver.org'

@@ -15,7 +15,9 @@ Downloaded rubygems from rubyonrails.com (0.9.1) [No synaptic package]
 Rails: (first tried synaptic package, but got complaints)
   shell> sudo gem install rails --include-dependencies # 1.2.1
 
-
+RedCloth: (ruby gem for doing simplified markup)
+  shell> sudo gem install RedCloth
+  
 Setup MySQL
 The Ubuntu Synaptic install got alot of stuff running.  The server was
 already running and it automatically restarts after a reboot.
@@ -37,8 +39,8 @@ Create database.yml from database.yml-template
 
 Edit the passwords in database.yml.  You can also change the usernames
   and databases if you want, but the rest of this will assume the names
-  in the template.  I need to change the socket: line as well as documented
-  in the template.
+  in the template.  I needed to change the socket: line as well as documented
+  in the template.  Other options include /var/lib/mysql/mysql.sock and /tmp/mysql.sock.
 
 Create databases:
   shell> mysql -u root -p
@@ -60,8 +62,12 @@ Create environment.rb from environment.rb-template:
   If you want to test email, you'll need to edit environment.rb and provide
   a username and password, but otherwise you can leave it as it is.
 
+Setup image directories:
+  shell> cd ../public/images
+  shell> mkdir 640 orig thumb
+  
 Setup .htaccess
-  shell> cd ../public
+  shell> cd ..
   shell> ln -s .htaccess-dev .htaccess
 
 Get database checkpoint and corresponding images
@@ -72,6 +78,9 @@ Load database:
   shell> mysql -u mo -p observer_development
   mysql> source db/checkpoints/checkpoint
 
+Update the database:
+  shell> rake db:migrate
+  
 Start server:
   shell> script/server
 

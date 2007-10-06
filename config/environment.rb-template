@@ -1,5 +1,7 @@
 # SENSITIVE INFORMATION: This file should not be checked into subversion
 
+IMAGE_HOME = "<your image dir here>" # Used for finding image directories
+
 require File.join(File.dirname(__FILE__), 'environment_dev')
 
 ActionMailer::Base.server_settings = {
