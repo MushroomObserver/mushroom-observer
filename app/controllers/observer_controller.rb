@@ -990,7 +990,7 @@ class ObserverController < ApplicationController
       end
     end
     for n in names
-      n.change_deprecated(deprecate) unless deprecate.nil?
+      n.change_deprecated(deprecate) unless deprecate.nil? or n.id?
       unless PastName.check_for_past_name(n, user, msg)
         unless n.id # Only save if it's brand new
           n.user = user

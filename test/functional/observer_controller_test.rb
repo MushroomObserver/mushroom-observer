@@ -2363,6 +2363,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(2, add_synonym.names.size)
+
+    assert(!Name.find(@lepiota.id).deprecated)
   end
 
   # combine two Names that have no Synonym and no deprecation
@@ -2424,6 +2426,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
+    
     params = {
       :id => selected_name.id,
       :synonym => { :members => "Lepiota rachodes var. rachodes" },
@@ -2444,6 +2447,7 @@ class ObserverControllerTest < Test::Unit::TestCase
         assert(n.deprecated)
       end
     end
+    assert(!Name.find(@lepiota.id).deprecated)
   end
 
   # add new name string to Name with no Synonym but approved
@@ -2451,6 +2455,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
+
     params = {
       :id => selected_name.id,
       :synonym => { :members => "Lepiota rachodes var. rachodes\r\nLepiota rhacodes var. rhacodes" },
@@ -2472,6 +2477,7 @@ class ObserverControllerTest < Test::Unit::TestCase
         assert(n.deprecated)
       end
     end
+    assert(!Name.find(@lepiota.id).deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym
@@ -2501,6 +2507,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     assert_equal(add_version+1, add_name.version)
+    assert(!Name.find(@lepiota.id).deprecated)
     
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
@@ -2509,6 +2516,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(start_size + 1, add_synonym.names.size)
+    assert(!Name.find(@chlorophyllum.id).deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym wih the alternates checked
@@ -2561,6 +2569,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!split_name.deprecated)
     split_synonym = split_name.synonym
     assert_equal(add_synonym, split_synonym)
+    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!Name.find(@chlorophyllum.id).deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym wih the alternates not checked
@@ -2615,6 +2625,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(!split_name.deprecated)
     assert_equal(split_version, split_name.version)
     assert_nil(split_name.synonym)
+    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!Name.find(@chlorophyllum.id).deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with no approved synonyms
@@ -2652,6 +2664,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_nil(selected_synonym)
 
     assert_equal(start_size, add_synonym.names.size)
+    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!Name.find(@chlorophyllum.id).deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with all approved synonyms
@@ -2692,6 +2706,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(add_synonym, selected_synonym)
 
     assert_equal(start_size+1, add_synonym.names.size)
+    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!Name.find(@chlorophyllum.id).deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with all approved synonyms
@@ -2731,6 +2747,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(add_synonym, selected_synonym)
 
     assert_equal(start_size+1, add_synonym.names.size)
+    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!Name.find(@chlorophyllum.id).deprecated)
   end
 
   # combine two Names that each have Synonyms with no chosen names

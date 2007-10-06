@@ -380,3 +380,31 @@ pluteus_petasatus_deprecated:
   search_name: Pluteus petasatus (Fries) Gillet
   deprecated: 1
 #
+
+# Valid genus
+lepiota:
+  id: 27
+  created: 2007-07-30 08:06:28
+  modified: 2007-07-30 08:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Lepiota
+  display_name: Genus **__Lepiota__**
+  observation_name: **__Lepiota sp.__**
+  search_name: Lepiota sp.
+#
+
+# Valid genus
+chlorophyllum:
+  id: 28
+  created: 2007-07-30 22:06:28
+  modified: 2007-07-30 22:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Chlorophyllum
+  display_name: Genus **__Chlorophyllum__**
+  observation_name: **__Chlorophyllum sp.__**
+  search_name: Chlorophyllum sp.
+#
