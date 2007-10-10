@@ -33,11 +33,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     @controller = ObserverController.new
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
-    FileUtils.cp_r(IMG_DIR.gsub(/test$/, 'setup'), IMG_DIR)
+    # FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
   end
 
   def teardown
-    FileUtils.rm_rf(IMG_DIR)
+    if File.exists?(IMG_DIR)
+      FileUtils.rm_rf(IMG_DIR)
+    end
   end
 
   def html_dump(label, html)
@@ -2265,6 +2267,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_upload_image
+    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
     obs = @coprinus_comatus_obs
     img_count = obs.images.size
     file = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")

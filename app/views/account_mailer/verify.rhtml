@@ -1,5 +1,29 @@
+<% if @user.html_email %>
+<html>
+<head>
+  <title>Mushroom Observer: Welcome</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+
+<h2><b>Hello <%= @user.login %></b></h2>
+
+<p>Please <a href="<%= sprintf "%s/account/verify/%d", DOMAIN, @user.id
+%>">click here</a> to verify that you received this email and activate your
+Mushroom Observer account.&nbsp; Here are some handy links you might find
+useful:</p>
+
+<ul type=none>
+  <li><a href="<%= sprintf "%s/account/prefs/%d", DOMAIN, @user.id %>">Change your account preferences.</a>
+  <li><a href="<%= DOMAIN %>">Latest changes at Mushroom Observer.</a>
+</ul>
+
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
 Hello <%= @user.login %>
 
 Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
 
 <%= sprintf "%s/account/verify/%d", DOMAIN, @user.id %>
+<% end %>

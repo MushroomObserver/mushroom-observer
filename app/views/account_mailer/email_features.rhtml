@@ -1,3 +1,31 @@
+<% if @user.html_email %>
+<html>
+<head>
+  <title>Mushroom Observer: New Features</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+
+<h2><b>New Features</b></h2>
+
+<p>The following new features have been released at the Mushroom Observer
+website:</p>
+
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <%= textilize(sanitize(@features)) %>
+</div>
+
+<p>Here are some handy links you may find useful:</p>
+
+<ul type=none>
+  <li><a href="<%= sprintf "%s/account/no_feature_email/%d", DOMAIN, @user.id %>">Stop notifications of new features.</a>
+  <li><a href="<%= sprintf "%s/account/prefs/%d", DOMAIN, @user.id %>">Change your account preferences.</a>
+  <li><a href="<%= DOMAIN %>">Latest changes at Mushroom Observer.</a>
+</ul>
+
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
 The following new features have been released at the Mushroom Observer website (http://mushroomobserver.org):
 
 <%= @features %>
@@ -5,3 +33,4 @@ The following new features have been released at the Mushroom Observer website (
 To stop receiving these emails, either login to your Mushroom Observer account and go to the Preferences link, or just click the following URL:
 
 <%= sprintf "%s/account/no_feature_email/%d", DOMAIN, @user.id %>
+<% end %>

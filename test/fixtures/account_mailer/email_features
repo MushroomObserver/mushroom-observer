@@ -1,7 +1,28 @@
-The following new features have been released at the Mushroom Observer website (http://mushroomobserver.org):
 
-A feature
+<html>
+<head>
+  <title>Mushroom Observer: New Features</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 
-To stop receiving these emails, either login to your Mushroom Observer account and go to the Preferences link, or just click the following URL:
+<h2><b>New Features</b></h2>
 
-http://localhost:3000/account/no_feature_email/1
+<p>The following new features have been released at the Mushroom Observer
+website:</p>
+
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <p>A feature</p>
+</div>
+
+<p>Here are some handy links you may find useful:</p>
+
+<ul type=none>
+  <li><a href="http://localhost:3000/account/no_feature_email/1">Stop notifications of new features.</a>
+  <li><a href="http://localhost:3000/account/prefs/1">Change your account preferences.</a>
+  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+</ul>
+
+<br/>
+</body>
+</html>
+

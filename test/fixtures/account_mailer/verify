@@ -1,5 +1,22 @@
-Hello mary
 
-Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
+<html>
+<head>
+  <title>Mushroom Observer: Welcome</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 
-http://localhost:3000/account/verify/2
+<h2><b>Hello mary</b></h2>
+
+<p>Please <a href="http://localhost:3000/account/verify/2">click here</a> to verify that you received this email and activate your
+Mushroom Observer account.&nbsp; Here are some handy links you might find
+useful:</p>
+
+<ul type=none>
+  <li><a href="http://localhost:3000/account/prefs/2">Change your account preferences.</a>
+  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+</ul>
+
+<br/>
+</body>
+</html>
+

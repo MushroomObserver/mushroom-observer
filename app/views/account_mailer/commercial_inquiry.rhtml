@@ -1,10 +1,44 @@
+<% if @user.html_email %>
+<html>
+<head>
+  <title>Mushroom Observer: Commercial Inquiry</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+
+<h2><b>Commercial Inquiry</b></h2>
+
+<p><%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer
+website to forward the following commercial inquiry about your image, <u><%=
+@image.unique_text_name %></u>:</p>
+
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <%= textilize(sanitize(@commercial_inquiry)) %>
+</div>
+
+<p>It is entirely up to you whether you want to reply by emailing directly back
+to them.&nbsp; Here are some handy links you may find useful:</p>
+
+<ul type=none>
+  <li><a href="<%= sprintf "%s/observer/show_image/%d", DOMAIN, @image.id %>">Show this image.</a>
+  <li><a href="<%= sprintf "%s/account/no_commercial_email/%d", DOMAIN, @user.id %>">Stop receiving commercial inquiries.</a>
+  <li><a href="<%= sprintf "%s/account/prefs/%d", DOMAIN, @user.id %>">Change your account preferences.</a>
+  <li><a href="<%= DOMAIN %>">Latest changes at Mushroom Observer.</a>
+</ul>
+
+<p>If you feel the sender of this mail is abusing this service please forward
+this entire message to: webmaster@mushroomobserver.org</p>
+
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
 <%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following commercial inquiry about your image, <%= @image.unique_text_name %> (<%= sprintf "%s/observer/show_image/%d", DOMAIN, @image.id %>):
 
 <%= h @commercial_inquiry %>
 
 It is entirely up to you whether you want to reply by emailing directly back to them.
 
---------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 If you feel the sender of this mail is abusing this service please forward this entire message to:
 
@@ -13,3 +47,4 @@ webmaster@mushroomobserver.org
 To stop receiving these emails, either login to your Mushroom Observer account and change your preferences, or click the following URL:
 
 <%= sprintf "%s/account/no_commercial_email/%d", DOMAIN, @user.id %>
+<% end %>

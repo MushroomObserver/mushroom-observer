@@ -5,28 +5,30 @@
   <%= link_to 'Bulk License Updater', :controller => 'observer', :action => 'license_updater' %><br/>
   <%= error_messages_for 'user' %><br/>
   
-  <label for="user_email">Email address:</label><br/>
+  <label for="user_email"><b>Email address:</b></label><br/>
   <%= form.text_field("email", :size => 60) %><br/><br/>
-  <label for="user_name">Name:</label><br/>
+  <label for="user_name"><b>Name:</b></label><br/>
   <%= form.text_field("name", :size => 60) %><br/><br/>
   
-  <table cellpadding="10">
+  <table cellpadding="0" cellspacing="0">
     <tr>
         <td>
-            <label for="user_theme">Preferred Theme:</label><br/>
+            <label for="user_theme"><b>Preferred Theme:</b></label><br/>
             <%= form.select(:theme, [["Random", "NULL"]] + CSS) %>
         </td>
+        <td width="20">
+        </td>
         <td>
-            <label for="user_license_id">Default License:</label>
+            <label for="user_license_id"><b>Default License:</b></label>
               <span id="help_note">
                   Select default <%= link_to('license', :controller => 'observer', :action => 'how_to_use', :anchor => 'lic') %> you want for new images
               </span><br/>
             <%= form.select(:license_id, @licenses) %>
         </td>
     <tr>
-  <table>
+  <table><br/>
 
-  List page layout:<br/>
+  <b>List page layout:</b><br/>
   
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
   <label for="user_rows">rows x</label>
@@ -39,17 +41,22 @@
   <%= form.check_box("vertical_layout") %>
   <label for="vertical_layout">Put text below images.</label><br/><br/>
 
+  <b>Email preferences:</b><br/>
   <%= form.check_box("feature_email") %>
-  <label for="feature_email">Please send me email updates when new features come out.</label><br/><br/>
+  <label for="feature_email">Please send me email updates when new features come out.</label><br/>
+  <%= form.check_box("comment_email") %>
+  <label for="comment_email">Please send me email notifications when other users post comments about my observations.</label><br/>
   <%= form.check_box("commercial_email") %>
   <label for="commercial_email">Please send me email if someone is interested in using an image of mine for commercial purposes.</label><br/>
   <%= form.check_box("question_email") %>
   <label for="question_email">Please allow others to email me questions about my observations.</label><br/>
-Note that neither of these email features will cause your email address to be displayed on a webpage or allow the person who wants to contact you to optain your email address.  You will be sent an email from news@mushroomobserver.org that will contain the contact information for the person who wants to contact you.  It will be entirely up to you if you want to respond to them.
-<br/><br/>
-  <label for="user_password">New password:</label><br/>
+  <%= form.check_box("html_email") %>
+  <label for="html_email">It's okay to use HTML in my emails.</label><br/>
+  <p style='margin-left:20px; margin-right:20px'>Note that none of these email features will cause your email address to be displayed on a webpage or allow the person who wants to contact you to obtain your email address.  You will be sent an email from news@mushroomobserver.org that will contain the contact information for the person who wants to contact you.  It will be entirely up to you if you want to respond to them.</p>
+
+  <label for="user_password"><b>New password:</b></label><br/>
   <%= form.password_field("password", :value => '', :size => 30) %><br/><br/>
-  <label for="user_password_confirmation">Confirm new password:</label><br/>
+  <label for="user_password_confirmation"><b>Confirm new password:</b></label><br/>
   <%= form.password_field("password_confirmation", :size => 30) %><br/><br/>
 <br/>
 <input type="submit" value="Save Prefs" class="primary" />

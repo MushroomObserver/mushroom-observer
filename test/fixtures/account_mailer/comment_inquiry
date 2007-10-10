@@ -1,0 +1,36 @@
+
+<html>
+<head>
+  <title>Mushroom Observer: Comment about Observation</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+
+<h2><b>Comment about your Observation</b></h2>
+
+<p>The following comment was posted on the Mushroom Observer website regarding
+your observation <u>Fungi</u>:</p>
+<u>Fungi sp. (2)</u>:</p>
+
+<p><b>Created:</b> 2006-03-02 21:14:00<br/>
+<b>By:</b> Mary Newbie (mary@collectivesource.com)<br/>
+<b>Summary:</b> A comment on minimal unknown<br/>
+<b>Comment:</b></p>
+
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <p>Wow!  That&#8217;s really cool</p>
+</div>
+
+<p>It is entirely up to you if you wish to respond to this user directly.&nbsp;
+Here are some handy links you may find useful:</p>
+
+<ul type=none>
+  <li><a href="http://localhost:3000/observer/show_observation/2">Show this observation.</a>
+  <li><a href="http://localhost:3000/account/no_comment_email/2">Stop receiving notifications.</a>
+  <li><a href="http://localhost:3000/account/prefs/2">Change your account preferences.</a>
+  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+</ul>
+
+<br/>
+</body>
+</html>
+
