@@ -69,45 +69,48 @@ class AccountController < ApplicationController
 
   def prefs
     @user = session['user']
-    case request.method
-      when :post
-        @user.change_email(params['user']['email'])
-        @user.change_name(params['user']['name'])
-        @user.html_email = params['user']['html_email']
-        @user.feature_email = params['user']['feature_email']
-        @user.comment_email = params['user']['comment_email']
-        @user.commercial_email = params['user']['commercial_email']
-        @user.question_email = params['user']['question_email']
-        @user.change_theme(params['user']['theme'])
-        @user.change_rows(params['user']['rows'])
-        @user.change_columns(params['user']['columns'])
-        @user.alternate_rows = params['user']['alternate_rows']
-        @user.alternate_columns = params['user']['alternate_columns']
-        @user.vertical_layout = params['user']['vertical_layout']
-        @user.license_id = params['user']['license_id'].to_i
-        password = params['user']['password']
-        error = false
-        if password
-          if password == params['user']['password_confirmation']
-            @user.change_password(password)
-          else
-            error = true
-            flash[:notice] = "Password and confirmation did not match"
-            render :action => "prefs"
+    if @user
+      case request.method
+        when :post
+          @user.change_email(params['user']['email'])
+          @user.change_name(params['user']['name'])
+          @user.html_email = params['user']['html_email']
+          @user.feature_email = params['user']['feature_email']
+          @user.comment_email = params['user']['comment_email']
+          @user.commercial_email = params['user']['commercial_email']
+          @user.question_email = params['user']['question_email']
+          @user.change_theme(params['user']['theme'])
+          @user.change_rows(params['user']['rows'])
+          @user.change_columns(params['user']['columns'])
+          @user.alternate_rows = params['user']['alternate_rows']
+          @user.alternate_columns = params['user']['alternate_columns']
+          @user.vertical_layout = params['user']['vertical_layout']
+          @user.license_id = params['user']['license_id'].to_i
+          password = params['user']['password']
+          error = false
+          if password
+            if password == params['user']['password_confirmation']
+              @user.change_password(password)
+            else
+              error = true
+              flash[:notice] = "Password and confirmation did not match"
+              render :action => "prefs"
+            end
           end
-        end
-        unless error
-          if @user.save
-            flash[:notice]  = "Preferences updated"
-            redirect_back_or_default :action => "welcome"
+          unless error
+            if @user.save
+              flash[:notice]  = "Preferences updated"
+              redirect_back_or_default :action => "welcome"
+            end
           end
-        end
-      when :get
-        unless @user.respond_to?(:license)
-          @user = User.find(@user.id)
+        when :get
+          @user = User.find(@user.id) # Make sure we have the latest version of the user
           session['user'] = @user
-        end
-        @licenses = License.current_names_and_ids(@user.license)
+          @licenses = License.current_names_and_ids(@user.license)
+      end
+    else
+      store_location
+      redirect_to :action => 'login'
     end
   end
 
