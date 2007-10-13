@@ -1,0 +1,108 @@
+# If the locale isn't a full locale such as fr-FR or if the rails localization doesn't exist, 
+# you should define the locale_name key for globalite to display the UI locales properly.
+
+
+# entire application
+app_account: Account
+app_admin: Admin
+app_colors_from: Colors from %s
+app_comments: Comments
+app_comments_for_you: Comments for You
+app_contributors: Contributors
+app_create_account: Create Account
+app_create_list: Create List
+app_create_observation: Create Observation
+app_current_user: Current user
+app_email_features: Email Features
+app_find: Find
+app_how_to_use: How To Use
+app_images_find: Images
+app_index_a_z: Index A->Z
+app_intro: Introduction
+app_join_mailing_list: Join Mailing List
+app_latest_changes: Latest Changes
+app_login: Login
+app_logout: Logout
+app_names_find: Names
+app_newest_images: Newest Images
+app_news: News
+app_observations_find: Observations
+app_observations_left: Observations
+app_powered_by: Powered by
+app_preferences: Preferences
+app_preferred_browser: Preferred browser
+app_rss: Mushroom Observer RSS
+app_send_a_comment: Send a Comment
+app_site_stats: Site Stats
+app_sort_by_date_obs: Sort by Date
+app_sort_by_date_spl: Sort by Date
+app_sort_by_name: Sort by Name
+app_sort_by_title: Sort by Title
+app_species_list: Species Lists
+app_title: Mushroom Observer
+app_users: Users
+app_your_observations: Your Observations
+app_your_summary: Your Summary
+
+
+# observer/intro
+intro_image_sharing: >
+  <p><b>Image Sharing:</b> This site follows the principles of cooperative sharing pioneered
+  by the "Free Software Foundation":http://fsf.org, further expressed by the "Open Source 
+  software movement":http://opensource.org, and expanded to other creative efforts by the 
+  "Creative Commons":http://creativecommons.org.  Consequently all images are made available 
+  under one of the Creative Commons licenses.  In short this means that when anyone uploads 
+  one of their images to the site, they are giving others explicit permission to use those 
+  images under certain "conditions":%s in perpetuity.  This type of 
+  permission is very important for basic research.  It allows future researchers to freely 
+  use these data to expand our understanding of mushrooms.  It also significantly increases 
+  the likelihood that the data will continue to be available into the distant future.
+  </p><p>
+  If you upload your own images, this license does not mean you are giving up your copyright 
+  or your ability to make money off your images.  Depending on which license you choose, you 
+  can still require that anyone who wishes to use any of these images for commercial purposes, 
+  get in touch with the copyright holder and work out the conditions for that use.  The site 
+  includes special links on the image pages to help create those relationships.</p>
+
+intro_note: >
+  <p>Note: The administrators of this site reserve the right to remove any material they deem 
+  inappropriate or not in keeping with the purpose of this site.</p>
+
+intro_purpose: >
+  <p><b>Purpose:</b> The purpose of this site is to record observations about mushrooms,
+  help people identify mushrooms they aren't familiar with, and expand the community
+  around the scientific exploration of mushrooms (mycology). Some have asked what counts
+  as a mushroom. This site takes a very broad view. While the emphasis is on the large
+  fleshy fungi, other fungi such as lichens, rust and molds as well as fungus-like organisms
+  such as slime-molds are all welcome. Ultimately, I hope this site will become a valuable
+  resource for both amateur and professional mycologists. I like to think of it as a living
+  field guide for mushrooms or a collaborative mushroom field journal.
+  </p><p>
+  For those new to mycology, there is a huge amount of basic research that still needs to be
+  done. By some estimates less that 5% of the world's species of fungi are known to science.
+  While things are slightly better for the large fleshy fungi known as mushrooms, it is still
+  a common experience to come across a mushroom that cannot be easily identified in the available
+  books or which doesn't really fit the definition of any recognized species. This site is intended
+  to address that gap by creating a place for us to talk about and record what we've found, as
+  well as connect to the existing literature about mushrooms. Please do not feel intimidated
+  by the scientific bent of the site. Everyone is welcome to dive in and add their own mushroom
+  observations, upload mushroom photos and make comments on other people's observations.</p>
+  
+intro_source_code: >
+  <p><b>Source Code:</b> Source code for the site is available at: %s
+  and is licensed under the "Open Source MIT License":http://www.opensource.org/licenses/mit-license.php.  
+  Source code contributions are welcome.  Here's a list of "planned features":%s.  
+  All suggestions and comments are welcome.  If you would like to contribute, please send mail to:
+  </p><p>
+  <b>nathan at collectivesource.com</b></p><p>so we can coordinate our efforts.</p>
+
+intro_title: Introduction
+
+
+# observer/rss
+rss_description: List of changes to Mushroom Observer as they happen.
+rss_title: Mushroom Observer
+
+
+# observer/list_rss_logs
+rss_log_title: Activity Log

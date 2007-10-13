@@ -1,0 +1,122 @@
+# If the locale isn't a full locale such as fr-FR or if the rails localization doesn't exist, 
+# you should define the locale_name key for globalite to display the UI locales properly.
+
+
+# entire application
+app_colors_from: Cores do(a) %s
+app_comments: Comentários
+app_comments_for_you: Comentários para mim
+app_contributors: Contribuidores
+app_create_account: Novo Usuário
+app_create_list: Criar Lista
+app_create_observation: Criar Observação
+app_current_user: Usuário Atual
+app_find: Pesquisar
+app_how_to_use: Como Usar
+app_images_find: Imagens
+app_index_a_z: Índice A->Z
+app_intro: Introdução
+app_join_mailing_list: Inscreva-se na Lista de Discussão
+app_latest_changes: Últimas Alterações
+app_login: Login
+app_logout: Sair
+app_names_find: Nomes
+app_newest_images: Últimas Imagens
+app_news: Notícias
+app_observations_find: Observações
+app_observations_left: Observações
+app_powered_by: Feito com
+app_preferences: Preferências
+app_preferred_browser: Melhor visto com
+app_send_a_comment: Enviar Comentário
+app_site_stats: Estatísticas do site
+app_sort_by_date_obs: Ordenado por Data
+app_sort_by_date_spl: Ordenado por Data
+app_sort_by_name: Ordenado por Nome
+app_sort_by_title: Ordenado por Título
+app_species_list: Lista de Espécies 
+app_title: Observação de Cogumelo
+app_your_observations: Minhas Observações
+app_your_summary: Meu Resumo
+
+
+# observer/intro
+intro_image_sharing: >
+  <p><b>Compartilhando Imagens:</b> Este site segue os mesmos princípios 
+  cooperativos iniciados pela "Free Software Foundation":http://fsf.org, 
+  futuramente expressados pelo "Open Source software movement":http://opensource.org, 
+  e expandidos para outros esforços criativos pela "Creative Commons":http://creativecommons.org.  
+  Conseqüentemente todas as imagens estão disponíveis em uma das licenças 
+  Creative Commons.  Isso quer dizer que quando alguém coloca suas imagens no 
+  site, eles estão dando aos outros permissão explícita e perpétua para usar 
+  essas imagens sob certas "condições":%s.  Este tipo de 
+  permissão é muito importante para certos tipos de pesquisa. Isto permite que 
+  futuros pesquisadores possam usar livremente essas informações para expandir 
+  o conhecimento sobre cogumelos.  Além disso, aumenta a probabilidade de que 
+  essas informações continuem disponíveis num futuro distante.
+  </p><p>
+  Se você coloca uma de suas imagens, não quer dizer que você está abrindo mão de seu 
+  direito autoral ou da sua possibilidade de fazer dinheiro com as imagens.  
+  Dependendo da licença que você escolher, você pode continuar exigindo que 
+  qualquer um que quiser usar essas imagens para fins comerciais, entre em 
+  contato com o mantenedor dos direitos autorais e trabalhe em uma condição de 
+  uso. Este site inclui alguns atalhos especiais nas páginas de imagens para 
+  ajudar a criar esses relacionamentos.</p>
+
+intro_note: >
+  <p>Nota: Os administradores desse site se reservam o direito de remover 
+  qualquer material que julguem inapropriado ou fora do propósito desse site.
+  </p>
+
+intro_purpose: >
+  <p><b>Propósito:</b> O propósito deste site é registrar observações de 
+  cogumelos, ajudar pessoas a identificar cogumelos que lhes são familiar e 
+  expandir a comunidade de exploração científica de cogumelos (micologia). 
+  Alguns perguntam o que é considerado cogumelo. Este site tem uma visão bem 
+  ampla. Mesmo com ênfase em fungos carnudos e grandes, outros fundos como 
+  líquens, uredinales e mofos, assim como organismos parecidos com fungos como 
+  mofo-limo são bem-vindos. Últimamente eu tenho esperado que este site se 
+  torne uma fonte valiosa de conhecimento tanto para micologistas amadores 
+  como para profissionais. Eu gosto de pensar nele como um guia vivo de 
+  cogumelos ou como um jornal colaborativo sobre cogumelos.
+  </p><p>
+  Para os iniciantes na micologia, existe um grande montante de pesquisas 
+  básicas que precisam ser feitas. As estimativas são de que menos de 5% das 
+  espécies de fungos do planeta são conhecidos pela ciência. Enquanto as coisas 
+  são ligeiramente melhores para os grandes e carnudos fungos conhecidos como 
+  cogumelos, continua sendo comum a experiência de cruzar cogumelos que não 
+  são facilmente identificáveis nos livros disponíveis ou que simplesmente não 
+  combinam completamente com a definição de qualquer espécie catalogada. Este 
+  site tem o intuito de preencher essa lacuna criando um lugar para 
+  discutirmos e registrarmos o que encontramos, bem como nos conectar à 
+  corrente literatura sobre cogumelos. Por favor, não se sinta intimidado pela 
+  encurvatura ciêntifica do site. Todos são bem-vindos a compartilhar suas 
+  próprias observações, colocar suas fotos e a fazer comentários nas 
+  observações de outras pessoas.</p>
+
+intro_source_code: >
+  <p><b>Código Fonte:</b> O código fonte desse site está disponível em: 
+  %s e está licenciado nos termos da 
+  "Open Source MIT License":http://www.opensource.org/licenses/mit-license.php.  
+  Contribuições são bem-vindas.  Aqui você encontra a lista de "recursos planejados":%s.  
+  Sugestões e comentários são bem-vindos.  Se você quiser contribuir, por 
+  favor envie uma mensagem para:</p><p><b>nathan at collectivesource.com</b>
+  </p><p>
+  e assim poderemos coordenar nossos esforços.</p>
+
+intro_title: Introdução
+
+
+# observer/list_rss_logs
+rss_log_title: Registro de Atividades
+
+
+# To translate
+app_account: Account
+app_admin: Admin
+app_email_features: Email Features
+app_rss: Mushroom Observer RSS
+app_users: Users
+
+rss_description: List of changes to Mushroom Observer as they happen.
+rss_title: Mushroom Observer

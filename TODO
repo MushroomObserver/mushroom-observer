@@ -2,7 +2,12 @@
 
 Current task:
 
-Improve w3c compliance
+Enable internationalization/localization with Brazilian Portuguese as the example
+  - Incorporate the first set of phrases
+  - Make them visible based on browser setting
+  Translate .rhtml templates
+  Add user setting to preferences
+  Encourage other users to provide translations
 
 *** Improve 'where'
   location:

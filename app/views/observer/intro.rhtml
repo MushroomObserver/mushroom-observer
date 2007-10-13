@@ -1,80 +1,11 @@
-<% @title = 'Introduction' %>
+<% @title = lnbsp(:intro_title) %>
 <div id="Title"><%= @title %></div>
 
-<p>
-<b>Purpose:</b>
-The purpose of this site is to record observations about mushrooms,
-help people identify mushrooms they aren't familiar with, and expand
-the community around the scientific exploration of mushrooms
-(mycology).  Some have asked what counts as a mushroom.  This site
-takes a very broad view.  While the emphasis is on the large fleshy
-fungi, other fungi such as lichens, rust and molds as well as fungus-like
-organisms such as slime-molds are all welcome.
-Ultimately, I hope this site will become a valuable
-resource for both amateur and professional mycologists.  I like to think
-of it as a living field guide for mushrooms or a collaborative mushroom
-field journal.</p>
+<%= :intro_purpose.l %>
 
-<p>For those new to mycology, there is a huge amount of basic research
-that still needs to be done.  By some estimates less that 5% of the
-world's species of fungi are known to science.  While things are
-slightly better for the large fleshy fungi known as mushrooms, it is
-still a common experience to come across a mushroom that cannot be
-easily identified in the available books or which doesn't really fit
-the definition of any recognized species.  This site is intended to
-address that gap by creating a place for us to talk about and record
-what we've found, as well as connect to the existing literature about
-mushrooms.  Please do not feel intimidated by the scientific bent of
-the site.  Everyone is welcome to dive in and add their own mushroom
-observations, upload mushroom photos and make comments on other
-people's observations.</p>
+<%= textilize(:intro_image_sharing.l % "#{DOMAIN}/observer/how_to_use#lic") %>
 
-<p>
-<b>Image Sharing:</b>
-This site follows the principles of cooperative sharing pioneered by
-the <a href="http://fsf.org">Free Software Foundation</a>, further expressed
-by the <a href="http://opensource.org">Open Source software movement</a>, and
-expanded to other creative efforts by the <a
-href="http://creativecommons.org">Creative Commons</a>.  Consequently all
-images are made available under one of the Creative
-Commons licenses.  In short this means that when anyone uploads one of 
-their images to the site, they are giving others explicit permission to 
-use those images under certain <%= link_to('conditions', :controller => 'observer',
-:action => 'how_to_use', :anchor => 'lic') %> in perpetuity.  This type of
-permission is very important for basic research.  It allows future researchers 
-to freely use these data to expand our understanding of mushrooms.  It also 
-significantly increases the likelihood that the data will continue to be 
-available into the distant future.
-</p><p>
-If you upload your own images, this license does not
-mean you are giving up your copyright or your ability to make money
-off your images.  Depending on which license you choose, you
-can still require that anyone who wishes to use
-any of these images for commercial purposes, get in touch
-with the copyright holder and work out the conditions for that
-use.  The site includes special links on the image pages to help
-create those relationships.
-</p>
+<%= textilize(:intro_source_code.l % ["\"#{SVN_REPOSITORY}\":#{SVN_REPOSITORY}",
+                                      "#{SVN_REPOSITORY}/trunk/TODO"]) %>
 
-<p>
-<b>Source Code:</b> Source code for the site is available at: <a
-href="http://svn.collectivesource.com/mushroom_sightings">
-http://svn.collectivesource.com/mushroom_sightings</a> and is licensed
-under the <a
-href="http://www.opensource.org/licenses/mit-license.php">Open Source
-MIT License</a>.  Source code contributions are welcome.  Here's a
-list of <a
-href="http://svn.collectivesource.com/mushroom_sightings/trunk/TODO">planned
-features</a>.  All suggestions and comments are welcome.  If you would
-like to contribute, please send mail to:</p>
-
-<p><b>nathan at collectivesource.com</b></p>
-<p>so we can coordinate our efforts.</p>
-
-<br/>
-
-<p>
-Note: The administrators of this site reserve the right to remove any
-material they deem inappropriate or not in keeping with the purpose of
-this site.
-</p>
+<%= :intro_note.l %>

@@ -4,7 +4,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => 'Mushroom Observer RSS'}) %>
-  <title>Mushroom Observer: <%= if @title.nil? then controller.action_name else @title end %></title>
+  <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title end %></title>
   <%= css = nil
 	if CSS.member?(controller.action_name)
 		css = controller.action_name
@@ -22,7 +22,7 @@
 </head>
 <body>
 	<div id="banner">
-		<%= @page_title || "Mushroom Observer" %>
+		<%= @page_title || :app_title.l %>
 	</div>
     <div id="columns">
 		<table>
@@ -31,109 +31,109 @@
 					<table class="LeftSide" cellpadding="20">
 						<tr>
 							<td valign="top">
-								<%= link_to('Introduction', :controller => 'observer',
+								<%= link_to(lnbsp(:app_intro), :controller => 'observer',
 								            :action => 'intro') %>
 								<br/>
-								<%= link_to('How&nbsp;To&nbsp;Use',
+								<%= link_to(lnbsp(:app_how_to_use),
 								            :controller => 'observer',
 								            :action => 'how_to_use') %>
 								<br/>
-            					<%= link_to('Send a Comment', :controller => 'observer',
+            					<%= link_to(lnbsp(:app_send_a_comment), :controller => 'observer',
             								:action => 'ask_webmaster_question') %>
             					
 								<br/><br/>
-								<%= link_to('News', :controller => 'observer',
+								<%= link_to(lnbsp(:app_news), :controller => 'observer',
 								            :action => 'news') %>
 								<br/>
-								<%= link_to('Latest&nbsp;Changes',
+								<%= link_to(lnbsp(:app_latest_changes),
 								            :controller => 'observer',
 								            :action => 'list_rss_logs') %>
             					<br/>
-								<%= link_to('Index&nbsp;A->Z', :controller => 'observer',
+								<%= link_to(lnbsp(:app_index_a_z), :controller => 'observer',
 								                          :action => 'observation_index') %>
 								<br/>
 								<br/>
-								Observations:<br/>
-								&nbsp;&nbsp;<%= link_to('Create&nbsp;Observation',
+								<%= lnbsp(:app_observations_left) %>:<br/>
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_create_observation),
 								                        :controller => 'observer',
 								                        :action => 'create_observation')
 								                 %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Date',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_date_obs),
 								                        :controller => 'observer',
 								                        :action => 'list_observations') %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Name',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_name),
 								                        :controller => 'observer',
 								                        :action => 'observations_by_name')
 								                 %>
 								<br/><br/>
-								Species&nbsp;Lists:<br/>
-								&nbsp;&nbsp;<%= link_to('Create&nbsp;List',
+								<%= lnbsp(:app_species_list) %>:<br/>
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_create_list),
 								                        :controller => 'observer',
 								                        :action => 'create_species_list')
 								                 %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Date',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_date_spl),
 								                        :controller => 'observer',
 								                        :action => 'list_species_lists')
 								                 %>
 								<br/>
-								&nbsp;&nbsp;<%= link_to('Sort&nbsp;by&nbsp;Title',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_title),
 								                        :controller => 'observer',
 								                        :action => 'species_lists_by_title')
 								                        %>
 								<br/><br/>
-								<%= link_to('Newest&nbsp;Images', :controller => 'observer',
+								<%= link_to(lnbsp(:app_newest_images), :controller => 'observer',
 								            :action => 'list_images') %>
 								<br/>
-								<%= link_to('Comments', :controller => 'observer',
+								<%= link_to(lnbsp(:app_comments), :controller => 'observer',
 								            :action => 'list_comments') %>
 								<br/>
-                                <%= link_to('Contributors', :controller => 'observer',
+                                <%= link_to(lnbsp(:app_contributors), :controller => 'observer',
                                             :action => 'users_by_contribution') %>
                                 <br/>
-                                <%= link_to('Site&nbsp;Stats', :controller => 'observer',
+                                <%= link_to(lnbsp(:app_site_stats), :controller => 'observer',
                                             :action => 'show_site_stats') %>
 								<br/><br/>
 								<% if session['user'].nil? %>
-								Account:<br/>
-								&nbsp;&nbsp;<%= link_to('Login', :controller => 'account',
+								<%= lnbsp(:app_account) %>:<br/>
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_login), :controller => 'account',
 								                        :action => 'login') %><br/>
-								&nbsp;&nbsp;<%= link_to('Create&nbsp;Account',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_create_account),
 								                        :controller => 'account',
 														:action => 'signup') %>
 								<% else %>
-								Current&nbsp;user:<br/>
+								<%= lnbsp(:app_current_user) %>:<br/>
 								&nbsp;&nbsp;<%= h(session['user'].login) %><br/>
-								&nbsp;&nbsp;<%= link_to('Comments&nbsp;for&nbsp;You',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_comments_for_you),
 								                        :controller => 'observer',
 								                        :action => 'show_comments_for_user',
 								                        :id => session['user']) %><br/>
-								&nbsp;&nbsp;<%= link_to('Your&nbsp;Observations',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_your_observations),
 								                        :controller => 'observer',
 								                        :action => 'show_user_observations',
 								                        :id => session['user']) %><br/>
-                                &nbsp;&nbsp;<%= link_to('Your&nbsp;Summary',
+                                &nbsp;&nbsp;<%= link_to(lnbsp(:app_your_summary),
                                                         :controller => 'observer',
                                                         :action => 'show_user',
                                                         :id => session['user']) %><br/>
 
 
-								&nbsp;&nbsp;<%= link_to('Preferences',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_preferences),
 								                        :controller => 'account',
 								                        :action => 'prefs') %><br/>
 								&nbsp;&nbsp;<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org">Join Mailing List</a><br/>
-								&nbsp;&nbsp;<%= link_to('Logout',
+								&nbsp;&nbsp;<%= link_to(lnbsp(:app_logout),
 								                        :controller => 'account',
 								                        :action => 'logout_user') %>
 									<% if session['user'].id == 0 %>
 										<br/><br/>
 										Admin:<br/>
-										&nbsp;&nbsp;<%= link_to('Users',
+										&nbsp;&nbsp;<%= link_to(lnbsp(:app_users),
 										                        :controller => 'observer',
 										                        :action => 'users_by_name') %><br/>
-										&nbsp;&nbsp;<%= link_to('Email Features',
+										&nbsp;&nbsp;<%= link_to(lnbsp(:app_email_features),
 										                        :controller => 'observer',
 										                        :action => 'email_features') %><br/>
 									<% end %>
@@ -141,11 +141,11 @@
 								<br/><br/>
 								
 								<div id="color_note">
-									<%= link_to(sprintf('Colors from <i>%s</i>', css),
+									<%= link_to(lnbsp(:app_colors_from) % css,
 												:controller => 'observer', :action => 'color_themes') %><br/><br/>
-									Powered by:<br/>
+									<%= lnbsp(:app_powered_by) %>:<br/>
 									<a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a><br/>
-									Preferred browser:<br/>
+									<%= lnbsp(:app_preferred_browser) %>:<br/>
 									<a href='http://www.mozilla.com/firefox/'>FireFox</a>
 									<% if @invalid.nil? %>
     									<p>
@@ -168,10 +168,10 @@
             		end
             		form_tag(:action => 'pattern_search',
             		         :controller => 'observer', :id => @comment) do %>
-                      Find: <%= text_field("search", "pattern", :size => 50, :value => pattern)%>
-                      <%= submit_tag 'Observations' %>
-                      <%= submit_tag 'Images' %>
-                      <%= submit_tag 'Names' %>
+                      <%= :app_find.l %>: <%= text_field("search", "pattern", :size => 50, :value => pattern)%>
+                      <%= submit_tag :app_observations_find.l %>
+                      <%= submit_tag :app_images_find.l %>
+                      <%= submit_tag :app_names_find.l %>
                     <% end -%>
                     <% if flash[:notice] %>
 					  <%= flash[:notice] %><br/>

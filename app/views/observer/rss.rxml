@@ -1,10 +1,10 @@
 xml.instruct! :xml, :version=>"1.0" 
 xml.rss(:version=>"2.0"){
   xml.channel{
-    xml.title("Mushroom Observer")
+    xml.title(:rss_title.l)
     xml.link(DOMAIN + '/observer/list_rss_logs')
-    xml.description("List of changes to Mushroom Observer as they happen.")
-    xml.language("en-us")
+    xml.description(:rss_description.l)
+    xml.language(Locale.code.to_s)
     for log in @logs
       xml.item do
         xml.title(log.title)
