@@ -3,6 +3,8 @@
 
 
 # entire application
+app_account: Contas
+app_admin: Administração
 app_colors_from: Cores do(a) %s
 app_comments: Comentários
 app_comments_for_you: Comentários para mim
@@ -11,12 +13,13 @@ app_create_account: Novo Usuário
 app_create_list: Criar Lista
 app_create_observation: Criar Observação
 app_current_user: Usuário Atual
+app_email_all_users: Preferências de Email
 app_find: Pesquisar
 app_how_to_use: Como Usar
 app_images_find: Imagens
 app_index_a_z: Índice A->Z
 app_intro: Introdução
-app_join_mailing_list: Inscreva-se na Lista de Discussão
+app_join_mailing_list: Lista de Discussão
 app_latest_changes: Últimas Alterações
 app_login: Login
 app_logout: Sair
@@ -28,6 +31,7 @@ app_observations_left: Observações
 app_powered_by: Feito com
 app_preferences: Preferências
 app_preferred_browser: Melhor visto com
+app_rss: RSS Observações de Cogumelo
 app_send_a_comment: Enviar Comentário
 app_site_stats: Estatísticas do site
 app_sort_by_date_obs: Ordenado por Data
@@ -36,6 +40,7 @@ app_sort_by_name: Ordenado por Nome
 app_sort_by_title: Ordenado por Título
 app_species_list: Lista de Espécies 
 app_title: Observação de Cogumelo
+app_users: Usuários
 app_your_observations: Minhas Observações
 app_your_summary: Meu Resumo
 
@@ -107,16 +112,10 @@ intro_source_code: >
 intro_title: Introdução
 
 
+# observer/rss
+rss_description: Lista de alterações nas observações de cogumelo na ordem em que acontecem.
+rss_title: Observação de Cogumelo
+
+
 # observer/list_rss_logs
 rss_log_title: Registro de Atividades
-
-
-# To translate
-app_account: Account
-app_admin: Admin
-app_email_features: Email Features
-app_rss: Mushroom Observer RSS
-app_users: Users
-
-rss_description: List of changes to Mushroom Observer as they happen.
-rss_title: Mushroom Observer

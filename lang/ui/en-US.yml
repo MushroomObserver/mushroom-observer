@@ -13,7 +13,7 @@ app_create_account: Create Account
 app_create_list: Create List
 app_create_observation: Create Observation
 app_current_user: Current user
-app_email_features: Email Features
+app_email_all_users: Email All Users
 app_find: Find
 app_how_to_use: How To Use
 app_images_find: Images
@@ -43,6 +43,13 @@ app_title: Mushroom Observer
 app_users: Users
 app_your_observations: Your Observations
 app_your_summary: Your Summary
+
+
+# observer/how_to_use
+how_intro: >
+  This page provides a some short descriptions of common uses for the site followed by an overview of basic concepts used in the website.
+
+how_title: How to Use Mushroom Observer
 
 
 # observer/intro
