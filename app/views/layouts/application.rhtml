@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-  <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => 'Mushroom Observer RSS'}) %>
+  <%= auto_discovery_link_tag(:rss, {:controller => 'observer', :action  =>  'rss'}, {:title => :app_rss.l}) %>
   <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title end %></title>
   <%= css = nil
 	if CSS.member?(controller.action_name)
@@ -123,7 +123,7 @@
 								&nbsp;&nbsp;<%= link_to(lnbsp(:app_preferences),
 								                        :controller => 'account',
 								                        :action => 'prefs') %><br/>
-								&nbsp;&nbsp;<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org">Join Mailing List</a><br/>
+								&nbsp;&nbsp;<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org"><%= lnbsp(:app_join_mailing_list)%></a><br/>
 								&nbsp;&nbsp;<%= link_to(lnbsp(:app_logout),
 								                        :controller => 'account',
 								                        :action => 'logout_user') %>
@@ -133,7 +133,7 @@
 										&nbsp;&nbsp;<%= link_to(lnbsp(:app_users),
 										                        :controller => 'observer',
 										                        :action => 'users_by_name') %><br/>
-										&nbsp;&nbsp;<%= link_to(lnbsp(:app_email_features),
+										&nbsp;&nbsp;<%= link_to(lnbsp(:app_email_all_users),
 										                        :controller => 'observer',
 										                        :action => 'email_features') %><br/>
 									<% end %>
