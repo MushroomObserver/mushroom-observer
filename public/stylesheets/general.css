@@ -163,9 +163,30 @@ div.progressBar div.background {
 }
 
 #Title {
-	padding-top: 10px;
-	padding-bottom: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     text-align: center;
-	font-size: 30px;
-	line-height: 36px;
+    font-size: 30px;
+    line-height: 36px;
+}
+
+.inset {
+    padding-top: 1px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 1px;
+}
+
+.ListLine0 {
+    padding-top: 1px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 1px;
+}
+
+.ListLine1 {
+    padding-top: 1px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 1px;
 }

@@ -38,9 +38,12 @@
 	<% end %>
 </p>
 
-Notes and Comments: <%= textilize(sanitize(@name.notes.to_s)) %><br/><br/>
+<p>Notes and Comments:</p>
+<div>
+    <%= textilize(sanitize(@name.notes.to_s)) %>
+</div>
 
-Observations:<br/>
+<p>Observations:</p>
 <table cellpadding="5" cellspacing="0">
 	<%
 	odd_or_even = 0
@@ -71,7 +74,7 @@ Observations:<br/>
 <%
 if @synonym_data != []
     %>
-    <br/>Synonym observations:<br/>
+    <p>Synonym observations:</p>
     <table cellpadding="5" cellspacing="0">
     <%
     odd_or_even = 0

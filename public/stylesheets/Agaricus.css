@@ -8,15 +8,19 @@ lilaceps { stain-color: #b4725f; }
 
 /* Global default colors */
 body {
-	background-color: #f6f0f2; /* campestris */
-	color: #3b2821; /* cupreobrunneus */
+    background-color: #f6f0f2; /* campestris */
+    color: #3b2821; /* cupreobrunneus */
 }
 
 a { color: #a06463; } /* brasiliensis */
 a:visited { color: #3b2821; }  /* cupreobrunneus */
 a:hover {
-	color: #743931; /* brasiliensis */
-	background-color:#f6f0f2;  /* campestris */
+    color: #743931; /* brasiliensis */
+    background-color:#f6f0f2;  /* campestris */
+}
+
+.inset {
+    background-color: #e6e0e2;
 }
 
 

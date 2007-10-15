@@ -12,13 +12,22 @@
     <center><%= submit_tag 'Approve' %></center>
     <br/>
     <% if @approved_names %>
-    <p>
+        <p>
         <%= check_box('deprecate', 'others', :checked => 'checked') %>
         <label for="deprecate_others"> Deprecate the following synonyms:</label><br/><br/>
         <% for n in @approved_names %>
             <%= textilize_without_paragraph(h(n.display_name)) %><br/>
-        <% end
-       end %>
-       <br/>If you want to split up a set of synonyms, click 'Approve' or 'Cancel' and then click on the 'Change Synonyms' link.
+        <% end %>
+        </p>
+    <% end %>
+    <p class="HelpNote">
+         If you want to split up a set of synonyms, click 'Approve' or 'Cancel'
+         and then click on the 'Change Synonyms' link.
     </p>
+	<p><label for="comment_comment">Comments:</label><br/>
+	<%= text_area("comment", "comment", :cols => 80, :rows => 5) %><br/>
+    <span class="HelpNote">
+        Please include any notes about why this name has been approved.<br/>
+        This will be added to the notes for <%= textilize_without_paragraph(h(@name.display_name)) %>.
+    </span></p>
 <% end %>

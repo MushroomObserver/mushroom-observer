@@ -48,6 +48,9 @@ class ObserverController < ApplicationController
                                                     :species_lists_by_title,
                                                     :throw_error,
                                                     :users_by_contribution])
+
+  auto_complete_for(:name, :text_name)
+
   # Default page
   def index
     list_rss_logs
@@ -104,7 +107,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-  
+
   # show_comment.rhtml -> edit_comment.rhtml
   def edit_comment
     @comment = Comment.find(params[:id])
@@ -172,7 +175,7 @@ class ObserverController < ApplicationController
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
-  
+
   # pattern_search.rhtml
   def pattern_search
     store_location
@@ -200,11 +203,11 @@ class ObserverController < ApplicationController
       observation_search(pattern)
     end
   end
-  
+
   def field_search(fields, sql_pattern)
     (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
   end
-  
+
   def image_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
     conditions = field_search(["names.search_name", "images.notes", "images.copyright_holder"], sql_pattern)
@@ -218,7 +221,7 @@ class ObserverController < ApplicationController
     @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
     render :action => 'list_images'
   end
-  
+
   def observation_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
     conditions = field_search(["names.search_name", "observations.where", "observations.notes"], sql_pattern)
@@ -234,13 +237,14 @@ class ObserverController < ApplicationController
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
-  
+
   def name_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
     conditions = field_search(["names.search_name", "names.notes", "names.citation"], sql_pattern)
     session['checklist_source'] = nil # Meaning all species
-    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names" +
-                                            " where #{conditions} order by names.text_name asc, author asc")
+    @name_data = Name.connection.select_all("select distinct names.id, " +
+      "names.display_name from names where #{conditions} " +
+      "order by names.text_name asc, author asc")
     len = @name_data.length
     if len == 1
       redirect_to(:controller => 'observer', :action => 'show_name', :id => @name_data[0]['id'])
@@ -251,7 +255,7 @@ class ObserverController < ApplicationController
       render :action => 'name_index'
     end
   end
-  
+
   # list_observations.rhtml -> show_observation.rhtml
   # Setup session to have the right observation.
   def show_observation
@@ -301,15 +305,15 @@ class ObserverController < ApplicationController
         if params[:chosen_name] && params[:chosen_name][:name_id]
           names = [Name.find(params[:chosen_name][:name_id])]
         else
-          names = Name.find_names(params[:observation][:what])
+          names = Name.find_names(params[:name][:text_name])
           logger.warn("construct_observation: #{names.length}")
         end
         if names.length == 0
-          names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
+          names = [create_needed_names(params[:approved_name], params[:name][:text_name], user)]
         end
         target_name = names.first
         if target_name and names.length == 1
-          if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
+          if target_name.deprecated && (params[:approved_name] != params[:name][:text_name])
             synonyms = target_name.approved_synonyms
             session[:valid_name_ids] = synonyms.map {|n| n.id}
           else
@@ -343,7 +347,7 @@ class ObserverController < ApplicationController
       redirect_to :action => action, :id => @observation
     end
   end
-  
+
   # list_observation.rhtml, show_observation.rhtml -> edit_observation.rhtml
   # Setup session to have the right observation.
   def edit_observation
@@ -365,11 +369,11 @@ class ObserverController < ApplicationController
         @valid_names = valid_name_ids.map {|n| Name.find(n)}
       end
       session[:valid_name_ids] = nil
-    else 
+    else
       render :action => 'show_observation'
     end
   end
-  
+
   # edit_observation.rhtml -> show_observation.rhtml
   # Updates modified and saves changes
   def update_observation
@@ -381,14 +385,14 @@ class ObserverController < ApplicationController
       if params[:chosen_name] && params[:chosen_name][:name_id]
         names = [Name.find(params[:chosen_name][:name_id])]
       else
-        names = Name.find_names(params[:observation][:what])
+        names = Name.find_names(params[:name][:text_name])
       end
       if names.length == 0
-        names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
+        names = [create_needed_names(params[:approved_name], params[:name][:text_name], user)]
       end
       target_name = names.first
       if target_name and names.length == 1
-        if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
+        if target_name.deprecated && (params[:approved_name] != params[:name][:text_name])
           synonyms = target_name.approved_synonyms
           session[:valid_name_ids] = synonyms.map {|n| n.id}
         elsif @observation.update_attributes(params[:observation])
@@ -471,7 +475,7 @@ class ObserverController < ApplicationController
     end
   end
 
-      
+
   ## Image support
 
   # Various -> list_images.rhtml
@@ -480,7 +484,7 @@ class ObserverController < ApplicationController
     session['observation_ids'] = []
     session['observation'] = nil
     session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
-    
+
     store_location
     @layout = calc_layout_params
     @image_pages, @images = paginate(:images,
@@ -591,7 +595,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-  
+
   def update_licenses
     for current_id, value in params[:updates]
       current_id = current_id.to_i
@@ -607,7 +611,7 @@ class ObserverController < ApplicationController
     end
     redirect_to :action => 'license_updater'
   end
-  
+
   # show_observation.rhtml -> add_image.rhtml
   def add_image
     begin # Should figure out how to propagate this around
@@ -616,11 +620,11 @@ class ObserverController < ApplicationController
         @image = Image.new
         @image.license = session['user'].license
         @image.copyright_holder = session['user'].legal_name
-        
+
         # Set the default date to the date of the observation
         # Don't know how to correctly test this.
         @image.when = @observation.when
-        
+
         @licenses = License.current_names_and_ids(@image.license)
       else
         render :action => 'show_observation'
@@ -641,7 +645,7 @@ class ObserverController < ApplicationController
       render :action => 'show_observation'
     end
   end
-  
+
   def process_image(args, upload)
     if upload and upload != ""
       args[:image] = upload
@@ -661,7 +665,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-    
+
   def upload_image
     if params[:observation]
       id = params[:observation][:id]
@@ -681,7 +685,7 @@ class ObserverController < ApplicationController
       render :action => 'list_rss_logs'
     end
   end
-  
+
   def test_process_image(user, upload, count, size)
     if upload and upload != ""
       args = {
@@ -697,7 +701,7 @@ class ObserverController < ApplicationController
     end
     [count, size]
   end
-  
+
   def test_upload_image
     if verify_user()
       @log_entry = AddImageTestLog.find(params[:log_id])
@@ -725,13 +729,13 @@ class ObserverController < ApplicationController
       @upload = {}
     end
   end
-  
+
   def test_add_image_report
     if verify_user()
       @log_entries = AddImageTestLog.find(:all, :order => 'created_at desc')
     end
   end
-  
+
   # remove_images.rhtml -> delete_images -> show_observation.rhtml
   def delete_images
     @observation = Observation.find(params[:observation][:id])
@@ -764,7 +768,7 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'show_observation', :id => @observation)
     end
   end
-  
+
   # reuse_image.rhtml -> reuse_image_by_id -> show_observation.rhtml
   def reuse_image_by_id
     @observation = Observation.find(params[:observation][:id])
@@ -819,7 +823,7 @@ class ObserverController < ApplicationController
     end
     session['checklist'] = list
   end
-    
+
   # left-hand panel -> create_species_list.rhtml
   def create_species_list
     if verify_user()
@@ -876,7 +880,7 @@ class ObserverController < ApplicationController
       redirect_to :action => 'manage_species_lists', :id => observation
     end
   end
-  
+
   # left-hand panel -> list_species_lists.rhtml
   def list_species_lists
     session['observation_ids'] = nil
@@ -908,7 +912,7 @@ class ObserverController < ApplicationController
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
   end
-  
+
   # list_species_list.rhtml, show_species_list.rhtml -> edit_species_list.rhtml
   # Setup session to have the right species_list.
   def edit_species_list
@@ -931,7 +935,7 @@ class ObserverController < ApplicationController
       render :action => 'show_species_list'
     end
   end
-  
+
   def upload_species_list
     species_list = SpeciesList.find(params[:id])
     @species_list = species_list
@@ -979,7 +983,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-  
+
   def save_names(names, user, deprecate)
     msg = nil
     unless deprecate.nil?
@@ -999,7 +1003,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-    
+
   def construct_approved_names(name_list, approved_names, user, deprecate=false)
     if approved_names
       if approved_names.class == String
@@ -1058,10 +1062,10 @@ class ObserverController < ApplicationController
     session['member_notes'] = notes
     redirect_to :action => action, :id => id
   end
-  
+
   def setup_sorter(params, species_list, list)
     sorter = NameSorter.new
-    
+
     # Seems like valid selections should take precedence over multiple names,
     # but I haven't constructed a lot of examples.  If it makes more sense for multiples
     # to take precedence over valid names, then swap the next two lines.
@@ -1069,7 +1073,7 @@ class ObserverController < ApplicationController
     # merged in the display.
     sorter.add_chosen_names(params[:chosen_names]) # hash
     sorter.add_chosen_names(params[:chosen_approved_names]) # hash
-    
+
     sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
     sorter.check_for_deprecated_checklist(params[:checklist_data])
     if species_list
@@ -1078,7 +1082,7 @@ class ObserverController < ApplicationController
     sorter.sort_names(list)
     sorter
   end
-  
+
   def construct_observations(species_list, params, type_str, user, sorter)
     species_list.log("Species list %s by %s" % [type_str, user.login])
     flash[:notice] = "Species List was successfully %s." % type_str
@@ -1100,7 +1104,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-  
+
   def process_species_list(id, params, type_str, action)
     args = params[:species_list]
     user, species_list = get_user_and_species_list(id, args)
@@ -1150,7 +1154,7 @@ class ObserverController < ApplicationController
     end
     name
   end
-  
+
   def update_species_list
     process_species_list(params[:id], params, 'updated', 'edit_species_list')
   end
@@ -1158,7 +1162,7 @@ class ObserverController < ApplicationController
   def construct_species_list
     process_species_list(nil, params, 'created', 'create_species_list')
   end
-  
+
   def update_bulk_names
     id = nil
     action = 'bulk_name_edit'
@@ -1266,7 +1270,7 @@ class ObserverController < ApplicationController
     session['content'] = nil
     @user = session['user']
   end
-  
+
   def send_webmaster_question
     sender = nil
     content = ''
@@ -1301,7 +1305,7 @@ class ObserverController < ApplicationController
       redirect_to :action => 'list_observations'
     end
   end
-  
+
   def send_feature_email
     if check_permission(0)
       users = User.find(:all, :conditions => "feature_email=1")
@@ -1323,7 +1327,7 @@ class ObserverController < ApplicationController
       redirect_to :action => 'show_observation', :id => @observation
     end
   end
-  
+
   def send_question
     sender = session['user']
     observation = Observation.find(params['id'])
@@ -1340,7 +1344,7 @@ class ObserverController < ApplicationController
       redirect_to :action => 'show_image', :id => @image
     end
   end
-  
+
   def send_commercial_inquiry
     sender = session['user']
     image = Image.find(params['id'])
@@ -1351,12 +1355,12 @@ class ObserverController < ApplicationController
   end
 
   def rss
-    headers["Content-Type"] = "application/xml" 
+    headers["Content-Type"] = "application/xml"
     @logs = RssLog.find(:all, :order => "'modified' desc",
                         :conditions => "datediff(now(), modified) <= 31")
     render_without_layout
   end
-  
+
   # left-hand panel -> list_rss_logs.rhtml
   def list_rss_logs
     store_location
@@ -1371,12 +1375,12 @@ class ObserverController < ApplicationController
                                          :order => "'modified' desc",
                                          :per_page => @layout["count"])
   end
-  
+
   def show_rss_log
     store_location
     @rss_log = RssLog.find(params['id'])
   end
-  
+
   def next_image
     current_image_id = params[:id].to_i
     (image_ids, current_observation) = current_image_state
@@ -1406,7 +1410,7 @@ class ObserverController < ApplicationController
     session['observation'] = current_observation
     redirect_to :action => 'show_image', :id => current_image_id
   end
-  
+
   def prev_image
     current_image_id = params[:id].to_i
     (image_ids, current_observation) = current_image_state
@@ -1448,13 +1452,13 @@ class ObserverController < ApplicationController
     end
     redirect_to :action => 'list_images'
   end
-  
+
   def show_past_name
     store_location
     @past_name = PastName.find(params[:id])
     @other_versions = PastName.find(:all, :conditions => "name_id = %s" % @past_name.name_id, :order => "version desc")
   end
-  
+
   # show_name.rhtml
   def show_name
     # Rough testing showed implementation without synonyms takes .23-.39 secs.
@@ -1487,7 +1491,7 @@ class ObserverController < ApplicationController
     # end
     # logger.warn("show_name took %s\n" % elapsed_time)
   end
-  
+
   # show_name.rhtml -> edit_name.rhtml
   def edit_name
     if verify_user()
@@ -1544,7 +1548,7 @@ class ObserverController < ApplicationController
     end
     result
   end
-    
+
   # edit_name.rhtml -> show_name.rhtml
   # Updates modified and saves changes
   def update_name
@@ -1617,12 +1621,12 @@ class ObserverController < ApplicationController
                                             " order by names.text_name asc, author asc")
     render :action => 'name_index'
   end
-    
+
   def all_names
     name_index # Maintaining backwards compatibility
     render :action => 'name_index'
   end
-  
+
   # show_name.rhtml -> change_synonyms.rhtml
   def change_synonyms
     read_syn_session
@@ -1630,7 +1634,7 @@ class ObserverController < ApplicationController
       @name = Name.find(params[:id])
     end
   end
-  
+
   # change_synonyms.rhtml -> transfer_synonyms -> show_name.rhtml
   def transfer_synonyms
     id = params[:id]
@@ -1707,6 +1711,7 @@ class ObserverController < ApplicationController
       end
       session[:name_ids] = nil
       @what = params[:proposed_name] || ''
+      @comment = params[:comment] || ''
     end
   end
 
@@ -1715,6 +1720,7 @@ class ObserverController < ApplicationController
     if verify_user()
       current_name = Name.find(params[:id])
       proposed_name_str = (params[:proposed][:name] || '').strip
+      comment = (params[:comment][:comment] || '').strip
       action = 'deprecate_name'
       if proposed_name_str != ''
         if params[:chosen_name] && params[:chosen_name][:name_id]
@@ -1737,13 +1743,17 @@ class ObserverController < ApplicationController
             PastName.check_for_past_name(target_name, user, "Preferred over #{current_name.search_name} by #{user.login}")
             current_name.change_deprecated(true)
             PastName.check_for_past_name(current_name, user, "Deprecated in favor of #{target_name.search_name} by #{user.login}")
+            comment_join = comment == "" ? "." : ":\n"
+            current_name.prepend_notes("Deprecated in favor of" +
+              " #{target_name.search_name} by #{user.login} on " +
+              Time.now.to_formatted_s(:db) + comment_join + comment)
             action = 'show_name'
           else # must have multiple matches
             # setup name_ids, proposed/name
             session[:name_ids] = names.map {|n| n.id}
           end
         end
-        redirect_to :action => action, :id => current_name, :proposed_name => proposed_name_str
+        redirect_to :action => action, :id => current_name, :proposed_name => proposed_name_str, :comment => comment
       end
     end
   end
@@ -1768,10 +1778,14 @@ class ObserverController < ApplicationController
       # current_name.version = current_name.version + 1
       current_name.change_deprecated(false)
       PastName.check_for_past_name(current_name, user, "Approved by #{user.login}")
+      comment = (params[:comment][:comment] || '').strip
+      comment_join = comment == "" ? "." : ":\n"
+      current_name.prepend_notes("Approved by #{user.login} on " +
+        Time.now.to_formatted_s(:db) + comment_join + comment)
       redirect_to :action => 'show_name', :id => current_name
     end
   end
-  
+
   def throw_error
     if request.env["HTTP_USER_AGENT"].index("BlackBerry")
       raise "This is a BlackBerry!"
@@ -1779,7 +1793,7 @@ class ObserverController < ApplicationController
       raise "#{request.env["HTTP_USER_AGENT"]}"
     end
   end
-  
+
   def cleanup_versions
     if check_permission(1)
       id = params[:id]
@@ -1798,7 +1812,7 @@ class ObserverController < ApplicationController
     end
     redirect_to :action => 'show_name', :id => id
   end
-    
+
   def do_maintenance
     if check_permission(0)
       @data = []
@@ -1840,7 +1854,7 @@ class ObserverController < ApplicationController
       redirect_to :action => "list_rss_logs"
     end
   end
-  
+
   helper_method :dump_sorter
   def dump_sorter(sorter)
     logger.warn("tranfer_synonyms: only_single_names or only_approved_synonyms is false")
@@ -1867,7 +1881,7 @@ class ObserverController < ApplicationController
       logger.warn(n)
     end
   end
-  
+
   helper_method :synonym_action
   def synonym_action(action, id, sorter, deprecate)
     # Store all the state in the session since we can't put it in the database yet
@@ -2020,7 +2034,7 @@ class ObserverController < ApplicationController
     end
     [image_list, current_id]
   end
-  
+
   helper_method :prev_id
   def prev_id(id, id_list)
     result = id
@@ -2068,7 +2082,7 @@ class ObserverController < ApplicationController
     user = session['user']
     !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
   end
-  
+
   helper_method :calc_color
   def calc_color(row, col, alt_rows, alt_cols)
     color = 0
@@ -2098,7 +2112,7 @@ class ObserverController < ApplicationController
     end
     result
   end
-  
+
   helper_method :calc_layout_params
   def calc_layout_params
     result = {}

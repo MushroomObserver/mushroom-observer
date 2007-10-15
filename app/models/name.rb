@@ -517,4 +517,13 @@ class Name < ActiveRecord::Base
       "Valid"
     end
   end
+
+  def prepend_notes(str)
+    if !self.notes.nil? && self.notes != ""
+      self.notes = str + "<br>\n\n" + self.notes
+    else
+      self.notes = str
+    end
+    self.save
+  end
 end

@@ -1,15 +1,17 @@
-<% @title = 'Observation: ' + h(@observation.unique_text_name)
-   what = textilize_without_paragraph(h(@observation.base_name))
-   name = @observation.name %>
+<% @title       = 'Observation: ' + h(@observation.unique_text_name)
+   what         = textilize_without_paragraph(h(@observation.base_name))
+   name         = @observation.name
+   questions_ok = @observation.user.question_email %>
+
 <%= link_to("About #{what}", :action => 'show_name', :id => name.id)%>
 | <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % name.text_name) %><br/>
 
 <%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
 | <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
-<% questions_ok = @observation.user.question_email
-   if questions_ok %>
+<% if questions_ok %>
 	| <%= link_to 'Send Observer a Question', :action => 'ask_question', :id => @observation %>
 <% end %>
+
 <%	if not session['observation_ids'].nil? %>
 		<br/><%= link_to 'Prev', :action => 'prev_observation', :id => @observation %>
 		| <%= link_to 'Next', :action => 'next_observation', :id => @observation %>
@@ -23,83 +25,6 @@
                   :confirm => "Are you sure?" %><br/>
 <% end %>
 
-<table cellpadding="10">
-<tr>
-	<td width="75%" valign="top">
-	    <%
-	    approved_synonyms, deprecated_synonyms = name.sort_synonyms
-        if approved_synonyms != []
-    	    links = approved_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
-    	    if name.deprecated %>
-	            Preferred
-	        <% else %>
-	            Alternative
-	        <% end %>
-	        <% if links.length > 1 %>
-	            names:
-	        <% else %>
-	            name:
-	        <% end %>
-	        <%= links.join(', ') %>
-	    <% end %>
-	    <p>When: <span class="Data"><%= @observation.when %></span></p>
-	    <p>Where: <span class="Data"><%= h @observation.where %></span></p>
-	    <p>Who: <span class="Data">
-		<% if questions_ok %>
-			<%= link_to h(@observation.user.unique_text_name), :action => 'ask_question', :id => @observation %>
-		<% else %>
-			<%= h @observation.user.unique_text_name %>
-		<% end %>
-		</span></p>
-	    <p><span class="Data"><%= if @observation.specimen
-	         'Herbarium specimen available'
-	     else
-	         'No herbarium specimen'
-	     end %></span>
-	    </p>
-	    <% lists = @observation.species_lists 
-	    	if lists.length > 0 %>
-				<p>Species Lists:<br/>
-		            <% for l in lists %>
-		 				<%= link_to l.unique_text_name, :action => 'show_species_list', :id => l %><br/>
-					<% end %>
-				</p>
-		<% end %>
-	    <p>Notes:<br/><%= textilize(sanitize(@observation.notes.to_s)) %></p>
-	    <p>Comments:<br/>
-	        <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
-	            <%= link_to sprintf("%s: %s", truncate(h(comment.user.unique_text_name), MAX_WHO_LENGTH),
-	                                truncate(h(comment.summary), MAX_FIELD_LENGTH)),
-	                        :action => 'show_comment', :id => comment %><br/>
-	        <% end %>
-	    </p>
-	    <p><span class="Date">
-	        Observation created: <%= @observation.created %><br/>
-	        Last modified: <%= @observation.modified %><br/>
-			<% rss_log = @observation.rss_log
-			   if rss_log %>
-				<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
-			<% end %>
-	        </span>
-	    </p>
-	</td>
-    <td valign="top" width="25%">
-		<% if @observation.images.length > 0 %>
-			Images:<br/>
-		<% end %>
-		<% if check_permission(@observation.user_id) %>
-			<%= link_to "Add Images", :action => 'add_image', :id => @observation %><br/>
-			<%= link_to "Reuse Image", :action => 'reuse_image', :id => @observation %><br/>
-			<% if @observation.images.length > 0 %>
-				<%= link_to"Remove Images", :action => 'remove_images', :id => @observation %><br/>
-			<% end %>
-		<% end %>
-		<center>
-	    <% for image in @observation.images %>
-	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + textilize_without_paragraph(h(image.unique_format_name)),
-	            :action => 'show_image', :id => image.id) %></p>
-	    <% end %>
-		</center>
-    </td>
-</tr>
-</table>
+<%= render :partial => 'show_observation', :locals => {
+    :observation => @observation, :do_title => false, :skip_comment => nil } %>
+

@@ -13,6 +13,10 @@ a { color: #aa9a83; } /* pachycolea light-stipe */
 a:visited { color: #fff8c6; } /* muscaria yellow */
 a:hover { background-color:#cc2616; } /* muscaria red */
 
+.inset {
+    background-color: #484148;
+}
+
 
 /* Banner colors */
 #banner {
@@ -27,11 +31,11 @@ a:hover { background-color:#cc2616; } /* muscaria red */
 }
 
 .LeftSide a {
-	color: #faebd4; /* velosa light veil */
+    color: #faebd4; /* velosa light veil */
 }
 
 .LeftSide a:visited {
-	color: #f4d5a6; /* velosa dark veil */
+    color: #f4d5a6; /* velosa dark veil */
 }
 
 

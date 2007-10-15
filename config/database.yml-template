@@ -16,6 +16,8 @@ development:
   socket: /tmp/mysql.sock
   # For Ubuntu/Debian
   # socket: /var/run/mysqld/mysqld.sock
+  # For Fedora
+  # socket: /var/lib/mysql/mysql.sock
 
   # Connect on a TCP socket.  If omitted, the adapter will connect on the
   # domain socket given by socket instead.
@@ -34,6 +36,8 @@ test:
   socket: /tmp/mysql.sock
   # For Ubuntu/Debian
   # socket: /var/run/mysqld/mysqld.sock
+  # For Fedora
+  # socket: /var/lib/mysql/mysql.sock
 
 production:
   adapter: mysql
@@ -44,3 +48,5 @@ production:
   socket: /tmp/mysql.sock
   # For Ubuntu/Debian
   # socket: /var/run/mysqld/mysqld.sock
+  # For Fedora
+  # socket: /var/lib/mysql/mysql.sock

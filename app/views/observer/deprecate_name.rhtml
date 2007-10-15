@@ -37,4 +37,11 @@
     <span class="HelpNote">
     	Enter the preferred name.  Author citation is recommended but not required.
     </span></p>
+	<p><label for="comment_comment">Comments:</label><br/>
+	<%= text_area("comment", "comment", :cols => 80, :rows => 5, :value => @comment) %><br/>
+    <span class="HelpNote">
+        Please include any notes about why this name has been deprecated.<br/>
+        This will be added to the notes for <%= textilize_without_paragraph(h(@name.display_name)) %>.
+    </span></p>
+    
 <% end %>

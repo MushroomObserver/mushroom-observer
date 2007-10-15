@@ -8,4 +8,9 @@
 
 <%= render :partial => 'form_comments', :locals => { :observation_id => @observation.id }%>
 
+<br/><hr align="center" width="90%" />
+
+<%= render :partial => 'show_observation', :locals => {
+    :observation => @observation, :do_title => true, :skip_comment => nil } %>
+
 <% end %>
