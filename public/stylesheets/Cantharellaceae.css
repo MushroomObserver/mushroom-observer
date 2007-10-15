@@ -10,9 +10,7 @@ a { color: #ff6524; } /* cinnabarinus light-cap */
 a:visited { color: #c12900; } /* cinnabarinus dark-cap */
 a:hover { background-color:#f6ae4a; } /* californicus cap */
 
-.inset {
-    background-color: #ead8a8;
-}
+li.selected { background-color: #f6ae4a ! important }
 
 
 /* Banner colors */

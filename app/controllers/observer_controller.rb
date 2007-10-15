@@ -49,7 +49,36 @@ class ObserverController < ApplicationController
                                                     :throw_error,
                                                     :users_by_contribution])
 
-  auto_complete_for(:name, :text_name)
+  def auto_complete_for_observation_where
+    part = params[:observation][:where].downcase
+    @items = Observation.find(:all, {
+      :conditions => "LOWER(observations.where) LIKE '#{part}%'",
+      :order => "observations.where ASC",
+      :limit => 10
+    })
+    render :inline => "<%= auto_complete_result @items, 'where' %>"
+  end
+
+  def auto_complete_for_observation_what
+    part = params[:observation][:what].downcase
+    @items = []
+    if (part.index(' ').nil?)
+      @items = Name.find(:all, {
+        :conditions => "LOWER(text_name) LIKE '#{part}%' AND text_name NOT LIKE '% %'",
+        :order => "text_name ASC",
+        :limit => 10
+      })
+    end
+    if (@items.length < 10)
+      @items += Name.find(:all, {
+        :conditions => "LOWER(text_name) LIKE '#{part}%'",
+        :order => "text_name ASC",
+        :limit => 10 - @items.length
+      })
+      @items.sort! {|a,b| a['text_name'] <=> b['text_name']}
+    end
+    render :inline => "<%= auto_complete_result @items, 'text_name' %>"
+  end
 
   # Default page
   def index
@@ -305,15 +334,15 @@ class ObserverController < ApplicationController
         if params[:chosen_name] && params[:chosen_name][:name_id]
           names = [Name.find(params[:chosen_name][:name_id])]
         else
-          names = Name.find_names(params[:name][:text_name])
+          names = Name.find_names(params[:observation][:what])
           logger.warn("construct_observation: #{names.length}")
         end
         if names.length == 0
-          names = [create_needed_names(params[:approved_name], params[:name][:text_name], user)]
+          names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
         end
         target_name = names.first
         if target_name and names.length == 1
-          if target_name.deprecated && (params[:approved_name] != params[:name][:text_name])
+          if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
             synonyms = target_name.approved_synonyms
             session[:valid_name_ids] = synonyms.map {|n| n.id}
           else
@@ -385,14 +414,14 @@ class ObserverController < ApplicationController
       if params[:chosen_name] && params[:chosen_name][:name_id]
         names = [Name.find(params[:chosen_name][:name_id])]
       else
-        names = Name.find_names(params[:name][:text_name])
+        names = Name.find_names(params[:observation][:what])
       end
       if names.length == 0
-        names = [create_needed_names(params[:approved_name], params[:name][:text_name], user)]
+        names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
       end
       target_name = names.first
       if target_name and names.length == 1
-        if target_name.deprecated && (params[:approved_name] != params[:name][:text_name])
+        if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
           synonyms = target_name.approved_synonyms
           session[:valid_name_ids] = synonyms.map {|n| n.id}
         elsif @observation.update_attributes(params[:observation])
@@ -1554,7 +1583,7 @@ class ObserverController < ApplicationController
   def update_name
     user = session['user']
     if verify_user()
-      text_name = (params[:name][:text_name] || '').strip
+      text_name = (params[:observation][:what] || '').strip
       author = (params[:name][:author] || '').strip
       begin
         (name, old_name) = find_target_names(params[:id], text_name, author)

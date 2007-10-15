@@ -170,12 +170,8 @@ div.progressBar div.background {
     line-height: 36px;
 }
 
-.inset {
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 1px;
-}
+.auto_complete { color: black }
+.selected { color: black }
 
 .ListLine0 {
     padding-top: 1px;

@@ -19,10 +19,7 @@ a:hover {
     background-color:#f6f0f2;  /* campestris */
 }
 
-.inset {
-    background-color: #e6e0e2;
-}
-
+li.selected { background-color: #eccf95 ! important }
 
 /* Banner colors */
 #banner {
