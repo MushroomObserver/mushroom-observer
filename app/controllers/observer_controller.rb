@@ -54,30 +54,31 @@ class ObserverController < ApplicationController
     @items = Observation.find(:all, {
       :conditions => "LOWER(observations.where) LIKE '#{part}%'",
       :order => "observations.where ASC",
-      :limit => 10
+      :limit => 10,
     })
-    render :inline => "<%= auto_complete_result @items, 'where' %>"
+    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry['where']))) }.uniq) %>"
   end
 
   def auto_complete_for_observation_what
-    part = params[:observation][:what].downcase
+    # Added ?: after an exception was thrown in which observation was nil
+    part = params[:observation] ? params[:observation][:what].downcase : ''
     @items = []
     if (part.index(' ').nil?)
       @items = Name.find(:all, {
         :conditions => "LOWER(text_name) LIKE '#{part}%' AND text_name NOT LIKE '% %'",
         :order => "text_name ASC",
-        :limit => 10
+        :limit => 100
       })
     end
-    if (@items.length < 10)
+    if (@items.length < 100)
       @items += Name.find(:all, {
         :conditions => "LOWER(text_name) LIKE '#{part}%'",
         :order => "text_name ASC",
-        :limit => 10 - @items.length
+        :limit => 100 - @items.length
       })
       @items.sort! {|a,b| a['text_name'] <=> b['text_name']}
     end
-    render :inline => "<%= auto_complete_result @items, 'text_name' %>"
+    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry['text_name']))) }.uniq) %>"
   end
 
   # Default page

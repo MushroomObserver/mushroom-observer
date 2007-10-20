@@ -170,9 +170,6 @@ div.progressBar div.background {
     line-height: 36px;
 }
 
-.auto_complete { color: black }
-.selected { color: black }
-
 .ListLine0 {
     padding-top: 1px;
     padding-left: 10px;
@@ -185,4 +182,35 @@ div.progressBar div.background {
     padding-left: 10px;
     padding-right: 10px;
     padding-bottom: 1px;
+}
+
+div.auto_complete {
+    background-color:#fff;
+    border:1px solid #888;
+}
+div.auto_complete_scroll {
+    background-color:#fff;
+    border-right:none;
+    border-bottom:none;
+    height:250px;
+    overflow:scroll;
+    overflow-x:hidden;
+}
+div.auto_complete ul {
+    background-color:#fff;
+    color:black;
+    margin:0;
+    padding:0;
+    width:100%;
+    list-style-type:none;
+}
+div.auto_complete ul li {
+    margin:0;
+    padding:3px;
+}
+div.auto_complete ul li.selected { 
+    background-color:#ffb; 
+}
+div.indicator {
+    position:absolute;
 }
