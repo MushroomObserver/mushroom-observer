@@ -1583,7 +1583,7 @@ class ObserverController < ApplicationController
   def update_name
     user = session['user']
     if verify_user()
-      text_name = (params[:observation][:what] || '').strip
+      text_name = (params[:name][:text_name] || '').strip
       author = (params[:name][:author] || '').strip
       begin
         (name, old_name) = find_target_names(params[:id], text_name, author)
