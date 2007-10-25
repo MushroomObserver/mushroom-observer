@@ -1,5 +1,3 @@
-alert("Does this get called?");
-
 function extend_ajax_autocompleter() {
   // NOTE: THIS MUST GO **BEFORE** the text_field_with_autocomplete tags //
   var old_render = Ajax.Autocompleter.prototype.render;
