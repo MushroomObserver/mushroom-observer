@@ -50,7 +50,7 @@ class ObserverController < ApplicationController
                                                     :users_by_contribution])
 
   def auto_complete_for_observation_where
-    part = params[:observation][:where].downcase
+    part = params[:observation][:where].downcase.gsub(/[*']/,"%")
     @items = Observation.find(:all, {
       :conditions => "LOWER(observations.where) LIKE '#{part}%'",
       :order => "observations.where ASC",
@@ -61,7 +61,7 @@ class ObserverController < ApplicationController
 
   def auto_complete_for_observation_what
     # Added ?: after an exception was thrown in which observation was nil
-    part = params[:observation] ? params[:observation][:what].downcase : ''
+    part = params[:observation] ? params[:observation][:what].downcase.gsub(/[*']/,"%") : ''
     @items = []
     if (part.index(' ').nil?)
       @items = Name.find(:all, {
