@@ -106,6 +106,13 @@ class ApplicationController < ActionController::Base
         Locale.code = locale
       end
 
+      # Add a last gasp default if the selected locale doesn't match any of our
+      # existing translations.
+      if :app_title.l == '__localization_missing__'
+        logger.warn("No translation exists for: #{Locale.code}")
+        Locale.code = "en-US"
+      end
+      
       # Locale.code = "en-US"
       logger.debug "[globalite] Locale set to #{Locale.code}"
       # render the page
