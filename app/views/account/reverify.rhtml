@@ -1,12 +1,5 @@
-
 <div class="memo">
-    <h3>Reverify Account</h3>
-
-    <p>Your account, <%= session['user'].login %> has not been verified yet.</p>
-    <p>
-    Check your email for your verification URL or click the link below to have the mail resent.
-    </p>
-      
-    <%= link_to "Reverify", :action=>"send_verify"%>  
-      
+    <h3><%= :reverify_welcome.l %></h3>
+    <%= :reverify_note.l % session['user'].login %>
+    <%= link_to :reverify_link.l, :action=>"send_verify"%>  
 </div>

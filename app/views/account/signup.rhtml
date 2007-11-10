@@ -1,23 +1,22 @@
 <% form_tag(:action=> "signup") do %>
 
-<div title="Account signup" id="signupform" class="form">
-  <h3>Signup</h3>
+<div title=<%= "\"#{:signup_title.l}\"" %> id="signupform" class="form">
+  <h3><%= :signup_title.l %></h3>
   <%= error_messages_for 'user' %><br/>
   
-  <label for="user_login">Desired login:</label><br/>
+  <label for="user_login"><%= :signup_login.l %>:</label><br/>
   <%= text_field "user", "login", :size => 30 %><br/><br/>
-  <label for="user_password">Choose password:</label><br/>
+  <label for="user_password"><%= :signup_choose_password.l %>:</label><br/>
   <%= password_field "user", "password", :size => 30 %><br/><br/>
-  <label for="user_password_confirmation">Confirm password:</label><br/>
+  <label for="user_password_confirmation"><%= :signup_confirm_password.l %>:</label><br/>
   <%= password_field "user", "password_confirmation", :size => 30 %><br/><br/>
-  <label for="user_email">Email address:</label><br/>
+  <label for="user_email"><%= :signup_email_address.l %>:</label><br/>
   <%= text_field "user", "email", :size => 60 %><br/><br/>
-  <label for="user_name">Name (optional):</label><br/>
+  <label for="user_name"><%= :signup_name.l %>:</label><br/>
   <%= text_field "user", "name", :size => 60 %><br/><br/>
-  <label for="user_name">Preferred Theme (optional):</label><br/>
-  <%= select(:user, :theme, [["Random", "NULL"]] + CSS) %><br/><br/>
+  <label for="user_name"><%= :signup_preferred_theme.l %>:</label><br/>
+  <%= select(:user, :theme, [[:theme_random.l, "NULL"]] + CSS) %><br/><br/>
 <br/>
-<input type="submit" value="Signup &#187;" class="primary" />
+<input type="submit" value=<%= "\"#{:signup_button.l}\"" %> class="primary" />
 
 <% end %>
-

@@ -1,10 +1,4 @@
-
 <div class="memo">
-    <h3>Welcome <%= @user.legal_name %></h3>
-
-    <p>Your account has been verified...</p>
-    <p>
-    You should now be able to add observations, images and comment to MushroomObserver.org.
-    </p>
-    <p>Thanks for joining!</p>
+    <h3><%= "#{:verify_welcome.l} #{@user.legal_name}" %></h3>
+    <%= textilize(:verify_note.l % DOMAIN) %>
 </div>

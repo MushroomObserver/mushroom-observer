@@ -1,19 +1,11 @@
 <% @title = 'Email Question or Comment'%>
 <div id="Title"><%= @title %></div>
-Thanks for your interest in the Mushroom Observer website.  This website was
-first launched in mid-2006.  I am currently the sole site builder and maintainer.
-I welcome any questions you might have about using the site or comments on how
-the site might be improved.  I keep my <a href="http://svn.collectivesource.com/mushroom_sightings/trunk/TODO">to do list</a> online so you can
-get a peek into what I have planned and a rough order.  However, this is always
-subject to change, especially if there is some type of bug or someone submits
-a really great idea.<br/>
-Nathan Wilson<br/>
-Mushroom Observer WebMaster<br/>
-<br/>
+<%= textilize(:ask_webmaster_note.l % "#{SVN_REPOSITORY}/trunk/TODO") %>
+
 <% form_tag(:action => 'send_webmaster_question') do %>
-<center><%= submit_tag "Send" %></center>
+<center><%= submit_tag :ask_webmaster_send.l %></center>
 <br/>
-<label for="user_email">Your Email address:</label><br/>
+<label for="user_email"><%= :ask_webmaster_your_email.l%>:</label><br/>
 <%
     email_value = ""
     if @sender
@@ -23,6 +15,6 @@ Mushroom Observer WebMaster<br/>
     end
 %>
 <%= text_field("user", "email", :value => email_value, :size => 60) %><br/><br/>
-<label for="question_content">Send a Question to the Site Designer</label><br/>
+<label for="question_content"><%= :ask_webmaster_question.l %>:</label><br/>
 <%= text_area('question', 'content', :value => @content)  %>
 <% end %>

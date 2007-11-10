@@ -1,47 +1,28 @@
-<% @title = 'How to Use Mushroom Observer' %>
+<% @title = :how_title.l %>
 <div id="Title"><%= @title %></div>
 
 <p>
-This page provides a some short descriptions of common uses for the site followed by an overview of basic concepts used in the website.
+    <%= :how_intro.l %>
 </p>
-<h2>Common Tasks:</h2>
+<h2><%= :how_common_tasks.l %>:</h2>
 <ol>
-    <li><p><b>Keeping Up with Changes</b> - The default page for MushroomObserver.org is the 'Activity Log', it is also accessible through the 'Latest Changes' link on the left side of the screen.  This page lets you know what the most recent changes to the site are.  It lists new <a href="#observation">Observations</a> and <a href="#species_list">Species Lists</a> as well as significant changes to any already existing ones.  Additions of <a href="#image">Images</a> or <a href="#comment">Comments</a> are considered significant changes to the relevant <a href="#observation">Observations</a>.  Changes to <a href="#name">Names</a> are also listed.  The numbers at the top and bottom of the page let you look through older changes.  <a href="#observation">Observations</a> and <a href="#name">Names</a> created as a side effect of other changes are not separately listed.</p>
-        <p>In addition, the latest changes can be tracked using the <a href="http://en.wikipedia.org/wiki/Rss_feed">RSS feed</a> provided by the site.</p></li>
-        
-    <li><p><b>Searching</b> - There are two interesting ways to search for information in the site.  The simplest is to type a search string into the Search Box near the top of each page and click one of the buttons next to Search Box.  This will give you a list of all the <a href="#observation">Observations</a>, <a href="#image">Images</a> or <a href="#name">Names</a> who contain fields matching the given string.</p>
-        <p>You can also browse all the names currently in the database by clicking on the 'Name Index' link on the left-side of the screen.  Currently <a href="#observation">Observations</a> are only assigned to a single <a href="#name">Name</a>.  This means when you browse through the Name Index, it only lists observations that have been assigned to that name.  For example, the genus <i>Agaricus</i> only lists those observations that are in the genus, but have not been identified to species.  It does not list all the observations that have been given the name of a species within that genus.  However, if two <a href="#name">Names</a> are considered synonyms, then you can access observations for either from their Name Page.  In the case of the Search Box, if you give 'Agaricus' then all observations whose name  contains that string are listed so you get all observations that have belong to that genus.</p></li>
-    
-    <li><p><b>Getting Help with an Unknown</b> - In order to get help with an unknown, you need to have a <a href="#user">User</a> account.  These can be created easily by selecting 'New Account' from the left-hand panel.  See the discussion of <a href="#user">Users</a> below for more details.</p>
-        <p>Once you are logged in, create a new <a href="#observation">Observation</a> by selecting 'Create Observation' from the left-hand panel.  Put all the details you can into the resulting form.  In the 'What' field you can give 'Unknown' or if you think you know the genus or family or other group, give that name followed by 'sp.', e.g. Russula sp.  In the 'Notes' field provide information about habitat, odor, smell and any details you can.  Once the form is as complete as you can make it, click 'Create'.</p>
-        <p>You should now be looking at a page showing you the information you just entered.  However, if you used a name that is not currently in the database, you will be asked if you want to add the name.  This also gives you a chance to catch and fix typos.  In addition, if you a name that is considered deprecated, you will be given the option to use a preferred synonym.</p>
-        <p>Once you have created the new observation, you can upload any images you have by selecting the 'Add Image' link on the right-side of the window.  It is very important that it be either an image you took or that you have the explicit permission of the person who created the image to upload it to the site.  If you did not take the image, please update the 'Copyright Holder' field to reflect the actual owner.  This page also allows you to select the <a href="#lic">license</a> you want to release the image under.</p>
-        <p>When you add unknowns, you will generally see some sort of <a href="#comment">Comment</a> added to your <a href="#observation">Observation</a> within 24-hours.  If you find any of the suggested names compelling, you should select the 'Edit' link and update the 'What' field.  If you are asked to provide more details on the collection, it is better to select 'Edit' and add them to the 'Notes' field than to just add another comment.</p></li>
-    
-    <li><p><b>Adding Observations You Have Identified</b> - Use the same process as 'Getting Help with an Unknown', except you provide your identification in the 'What' field.  You are strongly encouraged to say something about how you arrived at the identification ('identified by sight', 'used the key in Mushrooms Demystified', 'sequenced the DNA and compared it against the data in GenBank' etc.).  In general you will only get <a href="#comment">Comments</a> if someone has a question about the collection or a suggestion for a different <a href="#name">Name</a>.</p></li>
-    
-    <li><p><b>Adding Comments</b> - When you are looking at an <a href="#observation">Observation</a> you select the 'Add Comment' link near the top of the page.  If you are not currently logged into a <a href="#user">User</a> account, you will be asked to log in.  Once you are logged in, you will be given a form asking for a Summary and your Comment.  Note that you can do some simple formating in the Comment section.  This is briefly documented below the Comment section with a link to detailed documentation.  You can also add links within a Comment using standard HTML formatting.  The HTML gets automatically cleaned to avoid security problems like script injection, so try not to get too fancy.</p></li>
-    
-    <li><p><b>Creating Species Lists</b> - Select 'Create List' from the left-hand panel.  Fill out the various fields.  In the 'Species' field, you should give each species name on a line by itself.  When you go to create the <a href="#species_list">Species List</a> each line will be checked to see if there is a match in the database.  If there is no matching <a href="#name">Name</a>, then you will be asked if you want to add the unknown names to the database.  This gives you a chance to catch and fix typos as well as a simple way to add missing names.  Each name given in the 'Species' field or loaded from a file will create a completely new observation.  The 'Species List Notes' are only shown when the entire species list is shown.  The 'Notes for each new member' are actually added as the 'Notes' field to each newly created <a href="#observation">Observation</a>.</p>
-        <p>If you wish to collect a set of existing <a href="#observation">Observations</a> into a new list, first create an empty Species List.  Then go to each of the Observations you want to add and select 'Manage Species Lists'.  This will given you the opportunity to add that Observation to any Species Lists you have created.</p>
-        <p>If you visit another Species List before you create or edit another one, you will automatically get a checklist of species from the first list to select and add to the list you are creating or editing.</p></li>
-    
+    <li><%= :how_keeping_up.l %></li>
+    <li><%= :how_searching.l %></li>
+    <li><%= :how_unknown_help.l %></li>
+    <li><%= :how_adding_observations.l %></li>
+    <li><%= :how_adding_comments.l %></li>    
+    <li><%= :how_creating_species_lists.l %></li>    
 </ol>
 
-<h2>Concepts Glossary:</h2>
+<h2><%= :how_glossary.l %>:</h2>
 <ol>
-    <li id="comment"><p><b>Comment</b> - A User's comment on a particular Observation.  Comment are the standard way to discuss an Observation or its associated Images.  A given Comment is owned by a particular User.  A Comment can only be edited or deleted by the owner or a site administrator.  You can look up all Comments that have been made about Observations you own, but clicking 'Comments for You' from the left-hand panel.</p></li>
-    
-    <li id="image"><p><b>Image</b> - A photograph or illustration of one or more mushroom species.  Images are associated with one or more Observations.  A given Image is owned by a particular User who may or may not be the copyright holder.  Only the owner or a site administrator can remove an Image or edit the associated information.  All Images in the site are required to be released under a <a href="http://creativecommons.org/licenses/by-nc-sa/2.5/">Creative Commons license</a> that allows the images to be used for any non-commercial purpose.  If you dispute the given copyright or the release of an image you are the copyright holder of, send mail to the <%= link_to("webmaster", :controller => "observer", :action => "ask_webmaster_question") %>.</p></li>
-    
-    <li id="lic"><p><b>License</b> - Images on the Mushroom Observer website are put under an explicit license.
-The current options are the <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution, Share Alike License</a> and the <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons Attribution, Non-Commercial, Share Alike License</a>.  The primary difference is whether the image can be used in any potentially commercial setting.  One of the side effects of selecting the non-commercial license is that your image cannot be used on Wikipedia.  The license can be set on a per image basis.  The looser, Wikipedia compatible license is the default for new users.  However, you can select the non-commercial license to be your default by selecting it on your Preferences page and clicking 'Save'.</p></li>
-        
-    <li id="name"><p><b>Name</b> - A name for some group of mushrooms.  Most commonly this is the name of a species, but it can be any taxon (genus, family, variety etc.).  Names can also refer to groups that are not officially recognized scientific names such as common names or functional groups like Gasteromyces.  A Name is <em>not</em> considered to be owned by a particular User.  Any User may change a Name, but all changes are associated with a User and are reviewed by the community.  To help with this review process, copies of previous versions of a Name are kept.  Names can have an acknowledged author.  The author is normally only given for scientific names.  The author should follow the standard practice of listing the person who first correctly published the name.  In the case of names at or below the species level, the author may also includes the person who transfered the species to the current genus, e.g., (Singer) Jenkins.</p></li>
-    
-    <li id="observation"><p><b>Observation</b> - A record of a single mushroom species at a particular time and place seen by a particular person.  Typically associated with a mushroom Name along with some number of Images, Comments and Species Lists.  A given Observation is owned by a particular User.  An Observation can only be edited or deleted by the owner or a site administrator.</p></li>
-    
-    <li id="species_list"><p><b>Species List</b> - A list of Observations.  Includes a date, a location and a title for the list.  A given Species List is owned by a particular User.  Only the owner or a site administrator can change or delete a Species List.  There are no strict rules for how Species Lists should be used.  This is an area that is likely to change in the future as the community comes up with clearer ideas for how lists should get used.</p></li>
-    
-    <li id="user"><p><b>User</b> - An account on MushroomObserver.org created by someone.  You are required to provide a valid email address when you first create an account.  This allows the system to stop automated programs from creating bogus accounts.  It also provides a way for other people to get in touch with you.  However, your email address will never be revealed unless you request an email be sent to another User and then only to that User.  If you are concerned about having your email address in the MushroomObserver.org database, once you have verified your account, you can go to the Preferences page and remove your address.</p></li>
+    <li id="comment"><%= :how_comment.l %></li>
+    <li id="image">
+        <%= textilize(:how_image.l % "#{DOMAIN}/observer/ask_webmaster_question") %>
+    </li>
+    <li id="lic"><%= :how_license.l %></li>
+    <li id="name"><%= :how_name.l %></li>
+    <li id="observation"><%= :how_observation.l %></li>
+    <li id="species_list"><%= :how_species_list.l %></li>
+    <li id="user"><%= :how_user.l %></li>
 </ol>

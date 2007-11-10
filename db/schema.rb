@@ -125,7 +125,6 @@ ActiveRecord::Schema.define(:version => 20) do
     t.column "login",             :string,   :limit => 80, :default => "",   :null => false
     t.column "password",          :string,   :limit => 40, :default => "",   :null => false
     t.column "email",             :string,   :limit => 80, :default => "",   :null => false
-    t.column "theme",             :string,   :limit => 40
     t.column "name",              :string,   :limit => 80
     t.column "created",           :datetime
     t.column "last_login",        :datetime
@@ -141,6 +140,7 @@ ActiveRecord::Schema.define(:version => 20) do
     t.column "license_id",        :integer,                :default => 3,    :null => false
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
+    t.column "theme",             :string,   :limit => 40
   end
 
 end

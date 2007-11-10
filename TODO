@@ -5,9 +5,17 @@ Current task:
 Enable internationalization/localization with Brazilian Portuguese as the example
   - Incorporate the first set of phrases
   - Make them visible based on browser setting
-  Translate .rhtml templates
+  - Fix year select issue with create observation in Portuguese
+  Threadish issue that Darvin reported
+  Ask Everaldo and Lu about news
+  Translate .rhtml templates for account and observer
   Add user setting to preferences
+  Figure out how to correctly translate emails (account_mailer/*.rhtml)
   Encourage other users to provide translations
+  Should the following be translated?
+    [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
+
+Fix Phyllum in past_names.  Add migration.  Should be easy.
 
 *** Improve 'where'
   location:
@@ -27,17 +35,6 @@ Enable internationalization/localization with Brazilian Portuguese as the exampl
     Shape information from Darwin Core
 
 Large features:
-
-** Mobile phone support
-  - Figure out how to tell the difference
-  Look up on web for mobile support functions
-  Mobilize layout:
-      MO & Title on one line.
-      Push around the divs
-      Create a single link at the top for to go to the left-hand panel with the search buttons
-      Remove pagination links from the top of the page
-  Greenphone uploading app
-  Ability to receive observations through email
 
 ** Namings
   Provide a formalized way for users to associate a 'Name' with an 'Observation'.
@@ -86,6 +83,18 @@ Large features:
       Page of all members and below?
       Should Macrolepiota include Chlorophyllum rachodes?
       Add rank relationships from Name
+
+** Mobile phone support
+    - Figure out how to tell the difference
+    Look up on web for mobile support functions
+    Mobilize layout:
+        MO & Title on one line.
+        Push around the divs
+        Create a single link at the top for to go to the left-hand panel with the search buttons
+        Remove pagination links from the top of the page
+    Ability to receive observations through email
+
+* High-bandwith support - 1024x768 suggested rather than 640x640 max.
 
 * Name tagging
     Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic

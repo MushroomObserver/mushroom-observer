@@ -1,7 +1,4 @@
-
 <div class="memo">
-    <h3>Welcome <%= @user.legal_name %></h3>
-
-    <p>Automated email about new features have been disabled for your account.</p>
-    <p>Login and go to the Preferences page to re-enable this feature</p>
+    <h3><%= "#{:no_features_welcome.l} #{@user.legal_name}" %></h3>
+    <%= :no_features_note.l %>
 </div>

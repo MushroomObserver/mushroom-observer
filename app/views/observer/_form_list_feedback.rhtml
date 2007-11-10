@@ -1,10 +1,7 @@
 <% if @new_names && (@new_names != []) %>
-    The following names could not be found.<br/>
+    <%= :form_list_feedback_missing_names.l %><br/>
     <span class="HelpNote">
-        Click 'Save' to create these name.  If you want to correct any you<br/>
-        entered by hand, do so in the area below and click 'Save' to<br/>
-        re-evaluate the list.  If the names came from an uploaded species<br/>
-        list, create a correct file and select it for upload.<br/>
+        <%= :form_list_feedback_missing_names_help.l %>
     </span>
     <span class="Data">
         <p>

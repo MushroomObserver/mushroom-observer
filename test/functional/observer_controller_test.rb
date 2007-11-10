@@ -3029,6 +3029,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_nil(current_name.synonym)
     current_past_name_count = current_name.past_names.length
     current_version = current_name.version
+    current_notes = current_name.notes
     
     proposed_name = @chlorophyllum_rachodes
     assert(!proposed_name.deprecated)
@@ -3036,10 +3037,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     proposed_synonym_length = proposed_name.synonym.names.size
     proposed_past_name_count = proposed_name.past_names.length
     proposed_version = proposed_name.version
+    proposed_notes = proposed_name.notes
     
     params = {
       :id => current_name.id,
       :proposed => { :name => proposed_name.text_name },
+      :comment => { :comment => "Don't like this name"}
     }
     requires_login(:do_deprecation, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name") # Success
@@ -3051,6 +3054,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     old_synonym = old_name.synonym
     assert_not_nil(old_synonym)
     assert_equal(current_version+1, old_name.version)
+    assert_not_equal(current_notes, old_name.notes)
 
     new_name = Name.find(proposed_name.id)
     assert(!new_name.deprecated)
@@ -3060,6 +3064,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(old_synonym, new_synonym)
     assert_equal(proposed_synonym_length+1, new_synonym.names.size)
     assert_equal(proposed_version, new_name.version)
+    assert_equal(proposed_notes, new_name.notes)
   end
 
   # deprecate an existing unique name with an ambiguous name
@@ -3077,6 +3082,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     params = {
       :id => current_name.id,
       :proposed => { :name => proposed_name.text_name },
+      :comment => { :comment => ""}
     }
     requires_login(:do_deprecation, params, false)
     assert_redirected_to(:controller => "observer", :action => "deprecate_name") # Fail since name can't be disambiguated
@@ -3108,7 +3114,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     params = {
       :id => current_name.id,
       :proposed => { :name => proposed_name.text_name },
-      :chosen_name => { :name_id => proposed_name.id }
+      :chosen_name => { :name_id => proposed_name.id },
+      :comment => { :comment => "Don't like this name"}
     }
     requires_login(:do_deprecation, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name") # Success
@@ -3141,6 +3148,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     params = {
       :id => current_name.id,
       :proposed => { :name => proposed_name_str },
+      :comment => { :comment => "Don't like this name"}
     }
     requires_login(:do_deprecation, params, false)
     assert_redirected_to(:controller => "observer", :action => "deprecate_name") # Fail since new name is not approved
@@ -3163,7 +3171,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     params = {
       :id => current_name.id,
       :proposed => { :name => proposed_name_str },
-      :approved_name => proposed_name_str
+      :approved_name => proposed_name_str,
+      :comment => { :comment => "Don't like this name"}
     }
     requires_login(:do_deprecation, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name") # Success
@@ -3197,10 +3206,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     current_past_name_count = current_name.past_names.length
     current_version = current_name.version
     approved_synonyms = current_name.approved_synonyms
+    current_notes = current_name.notes
     
     params = {
       :id => current_name.id,
       :deprecate => { :others => '1' },
+      :comment => { :comment => "Prefer this name"}
     }
     requires_login(:do_approval, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name") # Success
@@ -3210,6 +3221,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(current_past_name_count+1, current_name.past_names.length) # past name should have been created
     assert(current_name.past_names[-1].deprecated)
     assert_equal(current_version + 1, current_name.version)
+    assert_not_equal(current_notes, current_name.notes)
 
     for n in approved_synonyms
       n = Name.find(n.id)
@@ -3228,6 +3240,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     params = {
       :id => current_name.id,
       :deprecate => { :others => '0' },
+      :comment => { :comment => ""}
     }
     requires_login(:do_approval, params, false)
     assert_redirected_to(:controller => "observer", :action => "show_name") # Success

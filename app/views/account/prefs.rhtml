@@ -1,65 +1,66 @@
 <% form_for :user, :url => { :action => :prefs } do |form| %>
 
-<div title="Change Preferences" id="prefform" class="form">
-  <h3>Change Preferences</h3>
-  <%= link_to 'Bulk License Updater', :controller => 'observer', :action => 'license_updater' %><br/>
+<div title=<%= "\"#{:prefs_title.l}\"" %> id="prefform" class="form">
+  <h3><%= :prefs_title.l %></h3>
+  <%= link_to :bulk_license_link.l, :controller => 'observer', :action => 'license_updater' %><br/>
   <%= error_messages_for 'user' %><br/>
   
-  <label for="user_email"><b>Email address:</b></label><br/>
+  <label for="user_email"><b><%= :prefs_email.l %>:</b></label><br/>
   <%= form.text_field("email", :size => 60) %><br/><br/>
-  <label for="user_name"><b>Name:</b></label><br/>
+  <label for="user_name"><b><%= :prefs_name.l %>:</b></label><br/>
   <%= form.text_field("name", :size => 60) %><br/><br/>
   
   <table cellpadding="0" cellspacing="0">
     <tr>
         <td>
-            <label for="user_theme"><b>Preferred Theme:</b></label><br/>
-            <%= form.select(:theme, [["Random", "NULL"]] + CSS) %>
+            <label for="user_theme"><b><%= :prefs_theme.l %>:</b></label><br/>
+            <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %>
         </td>
         <td width="20">
         </td>
         <td>
-            <label for="user_license_id"><b>Default License:</b></label>
+            <label for="user_license_id"><b><%= :prefs_license.l %>:</b></label>
               <span id="help_note">
-                  Select default <%= link_to('license', :controller => 'observer', :action => 'how_to_use', :anchor => 'lic') %> you want for new images
+                  <%= textilize_without_paragraph(:prefs_license_note.l % "#{DOMAIN}/observer/how_to_user#lic") %>
               </span><br/>
             <%= form.select(:license_id, @licenses) %>
         </td>
     <tr>
   <table><br/>
 
-  <b>List page layout:</b><br/>
+  <b><%= :prefs_layout_title %>:</b><br/>
   
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
-  <label for="user_rows">rows x</label>
+  <label for="user_rows"><%= :prefs_rows_by.l %></label>
   <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
-  <label for="user_columns">columns</label><br/>
+  <label for="user_columns"><%= :prefs_columns.l %></label><br/>
   <%= form.check_box("alternate_rows") %>
-  <label for="alternate_rows">Alternate row colors.</label><br/>
+  <label for="alternate_rows"><%= :prefs_alt_row_colors.l %></label><br/>
   <%= form.check_box("alternate_columns") %>
-  <label for="alternate_columns">Alternate column colors.</label><br/>
+  <label for="alternate_columns"><%= :prefs_alt_col_colors.l %></label><br/>
   <%= form.check_box("vertical_layout") %>
-  <label for="vertical_layout">Put text below images.</label><br/><br/>
+  <label for="vertical_layout"><%= :prefs_text_below_images.l %></label><br/><br/>
 
-  <b>Email preferences:</b><br/>
+
+  <b><%= :prefs_email_prefs.l %>:</b><br/>
   <%= form.check_box("feature_email") %>
-  <label for="feature_email">Please send me email updates when new features come out.</label><br/>
+  <label for="feature_email"><%= :prefs_email_features.l %></label><br/>
   <%= form.check_box("comment_email") %>
-  <label for="comment_email">Please send me email notifications when other users post comments about my observations.</label><br/>
+  <label for="comment_email"><%= :prefs_email_comments.l %></label><br/>
   <%= form.check_box("commercial_email") %>
-  <label for="commercial_email">Please send me email if someone is interested in using an image of mine for commercial purposes.</label><br/>
+  <label for="commercial_email"><%= :prefs_email_commercial.l %></label><br/>
   <%= form.check_box("question_email") %>
-  <label for="question_email">Please allow others to email me questions about my observations.</label><br/>
+  <label for="question_email"><%= :prefs_email_questions.l %></label><br/>
   <%= form.check_box("html_email") %>
-  <label for="html_email">It's okay to use HTML in my emails.</label><br/>
-  <p style='margin-left:20px; margin-right:20px'>Note that none of these email features will cause your email address to be displayed on a webpage or allow the person who wants to contact you to obtain your email address.  You will be sent an email from news@mushroomobserver.org that will contain the contact information for the person who wants to contact you.  It will be entirely up to you if you want to respond to them.</p>
+  <label for="html_email"><%= :prefs_email_html.l %></label><br/>
+  <%= :prefs_email_note.l %>
 
-  <label for="user_password"><b>New password:</b></label><br/>
+  <label for="user_password"><b><%= :prefs_password_new.l %>:</b></label><br/>
   <%= form.password_field("password", :value => '', :size => 30) %><br/><br/>
-  <label for="user_password_confirmation"><b>Confirm new password:</b></label><br/>
+  <label for="user_password_confirmation"><b><%= :prefs_password_confirm.l %>:</b></label><br/>
   <%= form.password_field("password_confirmation", :size => 30) %><br/><br/>
 <br/>
-<input type="submit" value="Save Prefs" class="primary" />
+<input type="submit" value=<%= "\"#{:prefs_button.l}\"" %> class="primary" />
 <br/><br/>
 </div>
 

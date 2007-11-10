@@ -1,13 +1,5 @@
-
 <div class="memo">
-    <h3>Welcome</h3>
-
-    <p>You are now logged into the system...</p>
-    <p>
-    Since you are here it's safe to assume the application never called store_location, otherwise
-    you would have been redirected somewhere else after a successful login.
-    </p>
-      
-    <%= link_to "&#171; logout", :action=>"logout_user"%>  
-      
+    <h3><%= "#{:welcome_title.l} #{session['user'].legal_name}" %></h3>
+    <%= :welcome_note.l %>
+    <%= link_to :welcome_logout_link.l, :action=>"logout_user"%>  
 </div>

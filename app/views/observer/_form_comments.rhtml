@@ -3,12 +3,12 @@
 <!--[form:comment]-->
 <%= hidden_field("comment", "observation_id", :value => observation_id)%>
 <p>
-	<label for="comment_summary">Summary</label><br/>
+	<label for="comment_summary"><%= :form_comments_summary.l %></label><br/>
 	<%= text_field("comment", "summary", :size => 80) %>
 </p>
 
 <p>
-	<label for="comment_comment">Comment</label><br/>
+	<label for="comment_comment"><Comment><%= :form_comments_comment.l %></label><br/>
 	<%= text_area("comment", "comment", :cols => 80, :rows => 5) %>
 </p>
 

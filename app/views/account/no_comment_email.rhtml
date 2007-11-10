@@ -1,7 +1,4 @@
-
 <div class="memo">
-    <h3>Welcome <%= @user.legal_name %></h3>
-
-    <p>You will no longer receive email notifications when other users of the Mushroom Observer website post comments about your observations.</p>
-    <p>Login and go to the Preferences page to re-enable this feature</p>
+    <h3><%= "#{:no_comment_welcome.l} #{@user.legal_name}" %></h3>
+    <%= :no_comment_note.l %>
 </div>
