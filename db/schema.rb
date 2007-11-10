@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 20) do
+ActiveRecord::Schema.define(:version => 21) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -84,17 +84,17 @@ ActiveRecord::Schema.define(:version => 20) do
     t.column "name_id",          :integer
     t.column "created",          :datetime
     t.column "modified",         :datetime
-    t.column "user_id",          :integer,                                                                                                                   :default => 0,     :null => false
-    t.column "version",          :integer,                                                                                                                   :default => 0,     :null => false
-    t.column "rank",             :enum,     :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phyllum, :Kingdom, :Group]
+    t.column "user_id",          :integer,                                                                                                                  :default => 0,     :null => false
+    t.column "version",          :integer,                                                                                                                  :default => 0,     :null => false
     t.column "text_name",        :string,   :limit => 100
     t.column "author",           :string,   :limit => 100
     t.column "display_name",     :string,   :limit => 200
     t.column "observation_name", :string,   :limit => 200
     t.column "search_name",      :string,   :limit => 200
     t.column "notes",            :text
-    t.column "deprecated",       :boolean,                                                                                                                   :default => false, :null => false
+    t.column "deprecated",       :boolean,                                                                                                                  :default => false, :null => false
     t.column "citation",         :string,   :limit => 200
+    t.column "rank",             :enum,     :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
   end
 
   create_table "rss_logs", :force => true do |t|
@@ -125,6 +125,7 @@ ActiveRecord::Schema.define(:version => 20) do
     t.column "login",             :string,   :limit => 80, :default => "",   :null => false
     t.column "password",          :string,   :limit => 40, :default => "",   :null => false
     t.column "email",             :string,   :limit => 80, :default => "",   :null => false
+    t.column "theme",             :string,   :limit => 40
     t.column "name",              :string,   :limit => 80
     t.column "created",           :datetime
     t.column "last_login",        :datetime
@@ -140,7 +141,6 @@ ActiveRecord::Schema.define(:version => 20) do
     t.column "license_id",        :integer,                :default => 3,    :null => false
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
-    t.column "theme",             :string,   :limit => 40
   end
 
 end

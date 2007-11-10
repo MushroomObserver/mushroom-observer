@@ -6,16 +6,14 @@ Enable internationalization/localization with Brazilian Portuguese as the exampl
   - Incorporate the first set of phrases
   - Make them visible based on browser setting
   - Fix year select issue with create observation in Portuguese
-  Threadish issue that Darvin reported
-  Ask Everaldo and Lu about news
+  - Threadish issue that Darvin reported
+  - Ask Everaldo and Lu about news
   Translate .rhtml templates for account and observer
   Add user setting to preferences
   Figure out how to correctly translate emails (account_mailer/*.rhtml)
   Encourage other users to provide translations
   Should the following be translated?
     [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
-
-Fix Phyllum in past_names.  Add migration.  Should be easy.
 
 *** Improve 'where'
   location:
