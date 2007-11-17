@@ -16,12 +16,8 @@
     <input type="submit" name="login" value=<%= "\"#{:login_login.l}\"" %> class="primary" />
 	<br/><br/>
 	
-	<p>
-	    <%= textilize(:login_forgot_password.l % "#{DOMAIN}/account/email_new_password") %>
-	</p>
-	<p>
-	    <%= textilize(:login_no_account.l % "#{DOMAIN}/account/signup") %>
-	</p>
+	<%= textilize(:login_forgot_password.l % "#{DOMAIN}/account/email_new_password") %>
+	<%= textilize(:login_no_account.l % "#{DOMAIN}/account/signup") %>
 
 <%= textilize(:login_having_problems.l % "#{DOMAIN}/observer/ask_webmaster_question") %><br/>
 
