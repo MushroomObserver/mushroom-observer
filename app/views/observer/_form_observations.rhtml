@@ -44,25 +44,21 @@
     <% end %>
 <% end %>
 
-<td valign="top">
 <p>
     <label for="observation_when_1i"><%= :form_observations_when.l %>:</label><br/>
     <%= date_select('observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year) %>
 </p>
 <br/>
 
-<p>
-    <label for="observation_where"><%= :form_observations_where.l %>:</label>
-    <%= text_field_with_auto_complete('observation', 'where', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-    <span class="HelpNote"><%= :form_observations_where_help.l %></span>
-</p>
-<br/>
+<label for="observation_where"><%= :form_observations_where.l %>:</label>
+<%= text_field_with_auto_complete('observation', 'where', {}, { :skip_style => true, :indicator => 'indicator' }) %>
+<span class="HelpNote"><%= :form_observations_where_help.l %></span>
+<br/><br/>
 
-<p>
-    <label for="observation_what"><%= :form_observations_what.l %>:</label>
-    <%= text_field_with_auto_complete('observation', 'what', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-    <span class="HelpNote"><%= :form_observations_what_help.l %></span>
-</p>
+<label for="observation_what"><%= :form_observations_what.l %>:</label>
+<%= text_field_with_auto_complete('observation', 'what', {}, { :skip_style => true, :indicator => 'indicator' }) %>
+<br/>
+<span class="HelpNote"><%= :form_observations_what_help.l %></span>
 <br/>
 
 <!--
@@ -93,6 +89,4 @@
     <label for="log_change_checked"><%= :form_observations_log_change.l %></label>
 </p>
 <% end %>
-
-</td>
 <!--[eoform:observation]-->

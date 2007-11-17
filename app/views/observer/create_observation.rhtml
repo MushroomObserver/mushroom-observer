@@ -9,13 +9,15 @@
 
 <table cellpadding="10">
     <tr>
-        <%= render :partial => 'form_observations', :locals => {
-            :logging_optional => false,
-            :button_name => button_name,
-            :names => @names,
-            :valid_names => @valid_names,
-            :what => @what
-        } %>
+        <td valign="top">
+            <%= render :partial => 'form_observations', :locals => {
+                :logging_optional => false,
+                :button_name => button_name,
+                :names => @names,
+                :valid_names => @valid_names,
+                :what => @what
+            } %>
+        </td>
     </tr>
 </table>
 <% end %>

@@ -10,25 +10,25 @@
 
 <table cellpadding="10">
 <tr>
-  <%= render :partial => 'form_observations', :locals => {
-      :logging_optional => true,
-      :button_name => button_name,
-      :names => @names,
-      :valid_names => @valid_names,
-      :what => @what
-  } %>
     <td valign="top">
-    <% i = 0
-       observation = @observation
-       for image in @observation.images
-         i = i + 1 %>
-       <table><tr><td>
-	<%= radio_button("observation", 'thumb_image_id', image.id) %>
-       </td><td align="center">
-	<%= image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0) %><br/>
-         <%= textilize_without_paragraph(h(image.unique_format_name)) %>
-       </td></tr></table>
-    <% end %>
+        <%= render :partial => 'form_observations', :locals => {
+          :logging_optional => true,
+          :button_name => button_name,
+          :names => @names,
+          :valid_names => @valid_names,
+          :what => @what
+        } %>
+        <% i = 0
+           observation = @observation
+           for image in @observation.images
+             i = i + 1 %>
+           <table><tr><td>
+    	<%= radio_button("observation", 'thumb_image_id', image.id) %>
+           </td><td align="center">
+    	<%= image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0) %><br/>
+             <%= textilize_without_paragraph(h(image.unique_format_name)) %>
+           </td></tr></table>
+        <% end %>
     </td>
 </tr>
 </table>
