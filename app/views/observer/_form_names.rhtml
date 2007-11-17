@@ -4,63 +4,48 @@
 <!-- rank, text_name, author, notes -->
 
 <p>
-    <label for="name_rank">Rank:</label> 
+    <label for="name_rank"><%= :form_names_rank.l %>:</label> 
     <%= select('name', 'rank',
-               [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]) %>
+               [[:rank_form.l, :Form], [:rank_variety.l, :Variety], [:rank_subspecies.l, :Subspecies],
+                [:rank_species.l, :Species], [:rank_genus.l, :Genus], [:rank_family.l, :Family],
+                [:rank_order.l, :Order], [:rank_class.l, :Class], [:rank_phylum.l, :Phylum],
+                [:rank_kingdom.l, :Kingdom], [:rank_group.l, :Group]]) %>
 </p>
 
 <p>
     <%
     if @can_make_changes %>
-        <label for="name_text_name">Text Name:</label>
+        <label for="name_text_name"><%= :form_names_text_name.l %>:</label>
         <%= text_field 'name', 'text_name'  %><br/>
-        <span class="HelpNote">
-        	Unformatted version of the name without any author info.<br/>
-        	E.g., Amanita muscara var. flavivolvata.
-        </span>
+        <span class="HelpNote"><%= :form_names_text_name_help.l %></span>
     <% else %>
-        Text Name: <%= @name.text_name %><br/>
-        <span class="HelpNote">
-        	Name is in use.  Make name changes in each observation.
-        </span>
+        <%= :form_names_text_name.l %>: <%= @name.text_name %><br/>
+        <span class="HelpNote"><%= :form_names_text_name_locked.l %></span>
     <% end %>
 </p>
 
 <p>
     <%
     if @can_make_changes or @name.author.nil? or (@name.author == '') %>
-        <label for="name_author">Author:</label>
+        <label for="name_author"><%= :form_names_author.l %>:</label>
         <%= text_field 'name', 'author'  %><br/>
-        <span class="HelpNote">
-        	The author citation using the standard ICBN format.<br/>
-        	E.g., (Singer) Jenkins.
-        </span>
+        <span class="HelpNote"><%= :form_names_author_help.l %></span>
     <% else %>
-        Author: <%= @name.author %><br/>
-        <span class="HelpNote">
-        	Name with this author citation is in use.  Make name changes in each observation.
-        </span>
+        <%= :form_names_author.l %>: <%= @name.author %><br/>
+        <span class="HelpNote"><%= :form_names_author_locked.l %></span>
     <% end %>
 </p>
 
 <p>
-    <label for="name_citation">Citation:</label>
-	<span class="HelpNote">
-		Citation for the publication of this name.<br/>
-	</span>
+    <label for="name_citation"><%= :form_names_citation.l %>:</label>
+	<span class="HelpNote"><%= :form_names_citation_help.l %><br/></span>
     <%= text_field 'name', 'citation', :size => 80  %><br/>
-    <span class="textilize_note">
-        Citations can be formated using the Textile markup system.
-    </span>
+    <span class="textilize_note"><%= :form_names_citation_textilize_note.l %></span>
 </p>
 
 <p>
-    <label for="name_notes">Notes:</label>
-	<span class="HelpNote">
-		Please include notes about the validity of this name,<br/>
-		common misuses of the name, and more appropriate names<br/>
-		to be used when applicable.
-	</span><br/>
+    <label for="name_notes"><%= :form_names_notes.l %>:</label>
+	<span class="HelpNote"><%= :form_names_notes_help.l %></span><br/>
     <%= text_area 'name', 'notes', :cols => 80  %>
 </p>
 <%= render :partial => 'textilize_help' %>

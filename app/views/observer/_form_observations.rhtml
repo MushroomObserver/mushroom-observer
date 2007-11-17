@@ -16,14 +16,9 @@
     <% if valid_names
         %>
         <p>
-            <span class="Data">
-                The name '<%= h(what) %>' is deprecated.<br/>
-            </span>
-            <span class="HelpNote">
-                Select a valid name or click '<%= button_name %>' to use '<%= h(what) %>'.<br/>
-            </span>
-            <span class="Data">
-                Valid synonyms are:<br/>
+            <span class="Data"><%= :form_observations_deprecated.l % h(what) %></span>
+            <span class="HelpNote"><%= :form_observations_deprecated_help.l % [button_name, h(what)] %></span>
+            <span class="Data"><%= :form_observations_valid_synonyms.l %>:<br/>
                 <% for n in valid_names %>
                     &nbsp;&nbsp;<%= radio_button("chosen_name", 'name_id', n.id) %>
                     <%= textilize_without_paragraph(h(n.display_name)) %><br/>
@@ -32,50 +27,43 @@
         </p>
     <% elsif names.length == 0
         %>
-        <span class="Data">
-            <p>
-                The name '<%= h(what) %>' was not recognized.<br/>
-            </p>
-        </span>
-        <span class="HelpNote">
-            Click '<%= button_name %>' to create this name or edit the name below to correct any typo.<br/><br/>
-        </span>
+        <p>
+            <span class="Data"><%= :form_observations_not_recognized.l % h(what) %></span>
+        </p>
+        <p>
+            <span class="HelpNote"><%= :form_observations_not_recognized_help.l % button_name %></span>
+        </p>
     <% elsif names.length > 1 %>
-        <span class="Data">
-            <br/>Multiple names match '<%= h(what) %>'.  Select the one you intended:<br/>
+        <span class="Data"><br/><%= :form_observations_multiple_names.l % h(what) %>:<br/>
             <% for n in names %>
                 &nbsp;&nbsp;<%= radio_button("chosen_name", 'name_id', n.id) %>
                 <%= textilize_without_paragraph(h(n.display_name)) %> (<%= n.observations.size %>)<br/>
             <% end %>
         </span>
-        <span class="HelpNote">
-            The number after each name is how many observations are currently using that name.
-        </span>
+        <span class="HelpNote"><%= :form_observations_multiple_names_help.l %></span>
     <% end %>
 <% end %>
 
 <td valign="top">
-<p><label for="observation_when_1i">When:</label><br/>
-<%= date_select('observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year) %>
-</p><br/>
+<p>
+    <label for="observation_when_1i"><%= :form_observations_when.l %>:</label><br/>
+    <%= date_select('observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year) %>
+</p>
+<br/>
 
-<p><label for="observation_where">Where (required):</label>
-<%= text_field_with_auto_complete('observation', 'where', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-<span class="HelpNote">
-	Where the observation was made.<br/>
-	In the US this should be at least accurate to the county.
-</span></p><br/>
+<p>
+    <label for="observation_where"><%= :form_observations_where.l %>:</label>
+    <%= text_field_with_auto_complete('observation', 'where', {}, { :skip_style => true, :indicator => 'indicator' }) %>
+    <span class="HelpNote"><%= :form_observations_where_help.l %></span>
+</p>
+<br/>
 
-<p><label for="observation_what">What:</label>
-<%= text_field_with_auto_complete('observation', 'what', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-<span class="HelpNote">
-	The name you would apply to this observation.  If you don't know what it is, just say 'Unknown'.
-	If you find a better name for this observation in the future, please change the name by selecting
-	'Edit Observation'.
-	Scientific names are currently required, but do not include any author information.  If multiple
-	names apply, you will be given the option to select between them.  If the name is not recognized
-	in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
-</span></p><br/>
+<p>
+    <label for="observation_what"><%= :form_observations_what.l %>:</label>
+    <%= text_field_with_auto_complete('observation', 'what', {}, { :skip_style => true, :indicator => 'indicator' }) %>
+    <span class="HelpNote"><%= :form_observations_what_help.l %></span>
+</p>
+<br/>
 
 <!--
   This makes the second autocomplete field (what) scrollable.
@@ -86,25 +74,24 @@
 -->
 <%= javascript_tag 'Element.addClassName($("observation_what_auto_complete"), "auto_complete_scroll")' %>
 
-<p><%= check_box("observation", "specimen") %><label for="observation_specimen"> Herbarium Specimen Available</label><br/>
-<span class="HelpNote">
-	Check when there is a dried specimen available for further study.  This can be
-	either be at an official herbarium or part of a personal herbarium.  Please note where
-	the specimen is in the notes.
-</span></p>
+<p>
+    <%= check_box("observation", "specimen") %>
+    <label for="observation_specimen"><%= :form_observations_specimen_available.l %></label><br/>
+    <span class="HelpNote"><%= :form_observations_specimen_available_help.l %></span>
+</p>
 
 </td>
 <td valign="top">
-<p><label for="observation_notes">Notes:</label>
-	<span class="HelpNote">
-		Please include comments about how you arrived at the given name, any unusual features and any features
-		that are not clear from a photograph such as habitat or distinctive scent or taste.
-	</span><br/>
+<p><label for="observation_notes"><%= :form_observations_notes.l %>:</label>
+	<span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
 <%= text_area 'observation', 'notes' %></p>
 <%= render :partial => 'textilize_help' %>
 
 <% if logging_optional %>
-<p><%= check_box("log_change", 'checked', :checked => 'checked') %><label for="log_change_checked"> Log Change</label></p>
+<p>
+    <%= check_box("log_change", 'checked', :checked => 'checked') %>
+    <label for="log_change_checked"><%= :form_observations_log_change.l %></label>
+</p>
 <% end %>
 
 </td>

@@ -10,10 +10,8 @@
             if synonym
                 names = synonym.names
                 %>
-                Current Synonyms:<br/>
-                <span class="HelpNote">
-                    Unchecked items will no longer be synonymized with this name, but will remain synonymized with each other.
-                </span>
+                <%= :form_synonyms_current_synonyms.l %>:<br/>
+                <span class="HelpNote"><%= :form_synonyms_current_synonyms_help.l %></span>
                 <p>
                     <span class="Data">
                         <%
@@ -38,10 +36,8 @@
                 if synonym %>
                     <hr><br/>
                 <% end %>
-                Proposed Synonyms:<br/>
-                <span class="HelpNote">
-                    Unchecked items will no longer be synonymized with this name, but will retain their relationships with each other.
-                </span>
+                <%= :form_synonyms_proposed_synonyms.l %>:<br/>
+                <span class="HelpNote"><%= :form_synonyms_proposed_synonyms_help.l %></span>
                 <span class="Data">
                     <p>
                         <%
@@ -63,7 +59,7 @@
         <td valign="top">
             <%
             if @new_names && (@new_names != []) %>
-                The following names could not be found.<br/>
+                <%= :form_synonyms_missing_names.l %><br/>
                 <span class="Data">
                     <p>
                         <% for n in @new_names %>
@@ -71,24 +67,17 @@
                         <% end %>
                     </p>
                 </span>
-                <span class="HelpNote">
-                    Click 'Add' to create these name.  If you want to correct any names,<br/>
-                    do so in the area below and click 'Add' to re-evaluate the list.
-                    <br/><br/>
+                <span class="HelpNote"><%= :form_synonyms_missing_names_help.l %><br/><br/>
                 </span>
             <% end %>
             <p>
                 <%= check_box("deprecate", "all", { :checked => @deprecate_all }, "checked") %>
-                <label for="deprecate_all"> Deprecate Synonyms</label><br/>
-                <span class="HelpNote">
-                    If checked all listed synonyms become deprecated names.  Otherwise,<br/>
-                    they are left as they are with new names created as not deprecated.
-                </span>
+                <label for="deprecate_all"><%= :form_synonyms_deprecate_synonyms.l %></label><br/>
+                <span class="HelpNote"><%= :form_synonyms_deprecate_synonyms_help.l %></span>
             </p>
             <p>
-                <label for="synonym_members">Names:</label>
-            	<span class="HelpNote">
-            		List the names you want to be synonymized with <%= textilize_without_paragraph(h(@name.display_name)) %>.
+                <label for="synonym_members"><%= :form_synonyms_names.l %>:</label>
+            	<span class="HelpNote"><%= :form_synonyms_names_help.l % textilize_without_paragraph(h(@name.display_name)) %>
             	</span><br/>
                 <%= text_area 'synonym', 'members', :value => @list_members  %>
             </p>

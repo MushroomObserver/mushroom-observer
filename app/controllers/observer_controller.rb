@@ -1314,8 +1314,8 @@ class ObserverController < ApplicationController
       flash[:notice] = "You must provide a valid return address."
       session['content'] = content
       redirect_to :action => 'ask_webmaster_question'
-    elsif /http:/ =~ content
-      flash[:notice] = "To cut down on robot spam, questions from unregistered users cannot contain 'http:'."
+    elsif /http:/ =~ content or /<[\/a-zA-Z]+>/ =~ content
+      flash[:notice] = "To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup."
       session['sender'] = sender
       session['content'] = content
       redirect_to :action => 'ask_webmaster_question'
@@ -1387,7 +1387,8 @@ class ObserverController < ApplicationController
   def rss
     headers["Content-Type"] = "application/xml"
     @logs = RssLog.find(:all, :order => "'modified' desc",
-                        :conditions => "datediff(now(), modified) <= 31")
+                        :conditions => "datediff(now(), modified) <= 31",
+                        :limit => 100)
     render_without_layout
   end
 

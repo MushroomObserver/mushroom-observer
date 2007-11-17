@@ -16,9 +16,10 @@ your observation <u>Fungi</u>:</p>
 <b>Summary:</b> A comment on minimal unknown<br/>
 <b>Comment:</b></p>
 
-<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-  <p>Wow!  That&#8217;s really cool</p>
-</div>
+
+    <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+      <p>Wow!  That&#8217;s really cool</p>
+    </div>
 
 <p>It is entirely up to you if you wish to respond to this user directly.&nbsp;
 Here are some handy links you may find useful:</p>

@@ -2,6 +2,11 @@
 
 Current task:
 
+RSS feed bug
+Bug in combining names for image 8121.
+#welcome error from spammers
+#prev/#next error flood
+
 Enable internationalization/localization with Brazilian Portuguese as the example
   - Incorporate the first set of phrases
   - Make them visible based on browser setting
@@ -14,6 +19,7 @@ Enable internationalization/localization with Brazilian Portuguese as the exampl
   Encourage other users to provide translations
   Should the following be translated?
     [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
+    _form_names.rhtml
 
 *** Improve 'where'
   location:

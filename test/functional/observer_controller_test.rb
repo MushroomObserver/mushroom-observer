@@ -214,7 +214,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
 
     post :send_webmaster_question, "user" => {"email" => "spam@spam.spam"}, "question" => {"content" => "Buy <a href='http://junk'>Me!</a>"}
-    assert_equal("To cut down on robot spam, questions from unregistered users cannot contain 'http:'.", flash[:notice])
+    assert_equal("To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "ask_webmaster_question")
   end
 

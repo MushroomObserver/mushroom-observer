@@ -4,7 +4,7 @@
 <!-- % if false % -->
 <% if session['checklist'] && (session['checklist'] != []) %>
   <td valign="top">
-    Select Species to Add:<br/>
+    <%= :form_species_lists_species_to_add.l %>:<br/>
     <% for (name, id) in session['checklist'] %>
       <%= check_box("checklist_data", id, { :checked => @checklist_names[id] }, "checked") %>
       <label for="checklist_names"><%= textilize_without_paragraph(h(name)) %></label>
@@ -16,11 +16,8 @@
 <td valign="top">
     <%= render :partial => 'form_list_feedback' %>
     <% if @deprecated_names && (@deprecated_names != []) %>
-        The following names are deprecated:<br/>
-        <span class="HelpNote">
-            Select any names you would prefer to use.  If you prefer a name<br/>
-            you entered then don't select one of the suggested synonyms.<br/>
-        </span>
+        <%= :form_species_lists_deprecated.l %>:<br/>
+        <span class="HelpNote"><%= :form_species_lists_deprecated_help.l %></span>
         <span class="Data">
             <% for name_str in @deprecated_names
                 approved_names = []
@@ -44,11 +41,8 @@
     <% end %>
     <% if @multiple_names && (@multiple_names != [])
         %>
-        <br/>Multiple names match each of the follow entries:<br/>
-        <span class="HelpNote">
-            In each case, select the intended name.  The number after each<br/>
-            name is how many observations are currently using that name.<br/>
-        </span>
+        <br/><%= :form_species_lists_multiple_names.l %>:<br/>
+        <span class="HelpNote"><%= :form_species_lists_multiple_names_help.l %></span>
         <span class="Data">
             <p>
                 <% for name_str in @multiple_names
@@ -66,39 +60,37 @@
         </span>
     <% end %>
 	<p>
-		<label for="list_members">Write In Species (enter a name on each line):</label><br/>
+		<label for="list_members"><%= :form_species_lists_write_in_species.l %>:</label><br/>
 		<%= text_area 'list', 'members', :'value' => @list_members  %>
 	</p>
 
 	<p>
-		<label for="species_list_when_1i">When</label><br/>
+		<label for="species_list_when_1i"><%= :form_species_lists_when.l %></label><br/>
 		<%= date_select 'species_list', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year %>
 	</p>
 
 	<p>
-		<label for="species_list_where">Where (required)</label><br/>
+		<label for="species_list_where"><%= :form_species_lists_where.l %></label><br/>
 		<%= text_field 'species_list', 'where'  %>
 	</p>
 
 	<p>
-		<label for="species_list_title">Title (required)</label><br/>
+		<label for="species_list_title"><%= :form_species_lists_title.l %></label><br/>
 		<%= text_field 'species_list', 'title'  %>
 	</p>
 
 	<p>
-		<label for="species_list_notes">Species List Notes</label><br/>
+		<label for="species_list_notes"><%= :form_species_lists_list_notes.l %></label><br/>
 		<%= text_area 'species_list', 'notes'  %>
 	</p>
 	<%= render :partial => 'textilize_help' %>
 
 	<p>
-		<label for="member_notes">Notes for each new member</label><br/>
+		<label for="member_notes"><%= :form_species_lists_member_notes.l %></label><br/>
 		<%= text_area 'member', 'notes', :value => @member_notes, :rows => 5  %>
 	</p>
 
-    <span class="HelpNote">
-Bulk name creation has moved to the <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %> page.
-    </span>
+    <span class="HelpNote"><%= textilize_without_paragraph(:form_species_lists_bulk_help.l % (DOMAIN + "/observer/bulk_name_edit")) %></span>
 </td>
 
 <!--[eoform:species_list]-->

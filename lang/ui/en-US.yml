@@ -97,6 +97,107 @@ form_list_feedback_missing_names_help: >
     list, create a correct file and select it for upload.
 
 
+# observer/_form_name
+form_names_author: Author
+form_names_author_help: >
+  The author citation using the standard ICBN format.<br/>
+  E.g., (Singer) Jenkins.
+  
+form_names_author_locked: Name with this author citation is in use.  Make name changes in each observation.
+form_names_citation: Citation
+form_names_citation_help: Citation for the publication of this name.
+form_names_citation_textilize_note: Citations can be formated using the Textile markup system.
+form_names_notes: Notes
+form_names_notes_help: >
+  Please include notes about the validity of this name,<br/>
+  common misuses of the name, and more appropriate names<br/>
+  to be used when applicable.
+
+form_names_rank: Rank
+form_names_text_name: Text Name
+form_names_text_name_help: >
+  Unformatted version of the name without any author info.<br/>
+  E.g., Amanita muscara var. flavivolvata.
+
+form_names_text_name_locked: Name is in use.  Make name changes in each observation.
+
+
+# observer/_form_observations
+form_observations_deprecated: The name '%s' is deprecated.
+form_observations_deprecated_help: Select a valid name or click '%s' to use '%s'.
+form_observations_log_change: Log Change
+form_observations_multiple_names: Multiple names match '%s'.  Select the one you intended
+form_observations_multiple_names_help: The number after each name is how many observations are currently using that name.
+form_observations_not_recognized: The name '%s' was not recognized.
+form_observations_not_recognized_help: Click '%s' to create this name or edit the name below to correct any typo.
+form_observations_notes: Notes
+form_observations_notes_help: >
+  Please include comments about how you arrived at the given name, any unusual features and any features
+  that are not clear from a photograph such as habitat or distinctive scent or taste.
+
+form_observations_specimen_available: Herbarium Specimen Available
+form_observations_specimen_available_help: >
+  Check when there is a dried specimen available for further study.  This can be
+  either be at an official herbarium or part of a personal herbarium.  Please note where
+  the specimen is in the notes.
+
+form_observations_valid_synonyms: Valid synonyms are
+form_observations_what: What
+form_observations_what_help: >
+  The name you would apply to this observation.  If you don't know what it is, just say 'Unknown'.
+  If you find a better name for this observation in the future, please change the name by selecting
+  'Edit Observation'.
+  Scientific names are currently required, but do not include any author information.  If multiple
+  names apply, you will be given the option to select between them.  If the name is not recognized
+  in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
+
+form_observations_when: When
+form_observations_where: Where (required)
+form_observations_where_help: >
+  Where the observation was made.<br/>
+  In the US this should be at least accurate to the county.
+
+
+# observer/_form_species_list
+form_species_lists_bulk_help: Bulk name creation has moved to the "Bulk Name Edit":%s page.
+form_species_lists_deprecated: The following names are deprecated
+form_species_lists_deprecated_help: >
+  Select any names you would prefer to use.  If you prefer a name<br/>
+  you entered then don't select one of the suggested synonyms.<br/>
+
+form_species_lists_list_notes: Species List Notes
+form_species_lists_member_notes: Notes for each new member
+form_species_lists_multiple_names: Multiple names match each of the follow entries
+form_species_lists_multiple_names_help: >
+  In each case, select the intended name.  The number after each<br/>
+  name is how many observations are currently using that name.<br/>
+
+form_species_lists_species_to_add: Select Species to Add
+form_species_lists_title: Title (required)
+form_species_lists_when: When
+form_species_lists_where: Where (required)
+form_species_lists_write_in_species: Write In Species (enter a name on each line)
+
+
+# observer/_form_synonyms
+form_synonyms_current_synonyms: Current Synonyms
+form_synonyms_current_synonyms_help: Unchecked items will no longer be synonymized with this name, but will remain synonymized with each other.
+form_synonyms_deprecate_synonyms: Deprecate Synonyms
+form_synonyms_deprecate_synonyms_help: >
+  If checked all listed synonyms become deprecated names.  Otherwise,<br/>
+  they are left as they are with new names created as not deprecated.
+
+form_synonyms_missing_names: The following names could not be found.
+form_synonyms_missing_names_help: >
+  Click 'Add' to create these name.  If you want to correct any names,<br/>
+  do so in the area below and click 'Add' to re-evaluate the list.
+
+form_synonyms_names: Names
+form_synonyms_names_help: List the names you want to be synonymized with %s.
+form_synonyms_proposed_synonyms: Proposed Synonyms
+form_synonyms_proposed_synonyms_help: Unchecked items will no longer be synonymized with this name, but will retain their relationships with each other.
+
+
 # observer/how_to_use
 how_adding_comments: >
   <p><b>Adding Comments</b> - When you are looking at an 
@@ -405,6 +506,20 @@ prefs_rows_by: rows x
 prefs_text_below_images: Put text below images.
 prefs_theme: Preferred Theme
 prefs_title: Change Preferences
+
+
+# Ranks.  Used in _form_names.rhtml
+rank_class: Class
+rank_family: Family
+rank_form: Form
+rank_genus: Genus
+rank_group: Group
+rank_kingdom: Kingdom
+rank_order: Order
+rank_phylum: Phylum
+rank_species: Species
+rank_subspecies: Subspecies
+rank_variety: Variety
 
 
 # account/reverify
