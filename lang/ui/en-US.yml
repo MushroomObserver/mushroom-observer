@@ -20,12 +20,13 @@ app_images_find: Images
 app_index_a_z: Index A->Z
 app_intro: Introduction
 app_join_mailing_list: Join Mailing List
-app_latest_changes: Latest Changes
+app_latest: Latest
+app_latest_changes: Changes by Users
 app_login: Login
 app_logout: Logout
 app_names_find: Names
-app_newest_images: Newest Images
-app_news: News
+app_newest_images: Images
+app_news: Features and Fixes
 app_observations_find: Observations
 app_observations_left: Observations
 app_powered_by: Powered by
@@ -566,5 +567,7 @@ verify_note: >
 # account/welcome
 welcome_title: Welcome
 welcome_logout_link: Logout
+welcome_no_user_note: If you are not a spammer, please report this as an error.
+welcome_no_user_title: User not set in session
 welcome_note: >
   <p>You are now logged into the system...</p>      

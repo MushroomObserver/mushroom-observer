@@ -2006,19 +2006,22 @@ class ObserverController < ApplicationController
   # Get initial image_ids and observation_id
   helper_method :current_image_state
   def current_image_state
-    obs_ids = session['observation_ids']
     observation_id = session['observation']
-    if observation_id.nil? and obs_ids
-      if obs_ids.length > 0
-        observation_id = obs_ids[0]
+    images_ids = nil
+    obs_ids = session['observation_ids']
+    if obs_ids
+      if observation_id.nil? and obs_ids
+        if obs_ids.length > 0
+          observation_id = obs_ids[0]
+        end
       end
-    end
-    image_ids = session['image_ids']
-    if image_ids.nil? and observation_id
-      images = Observation.find(observation_id).images
-      image_ids = []
-      for i in images
-        image_ids.push(i.id)
+      image_ids = session['image_ids']
+      if image_ids.nil? and observation_id
+        images = Observation.find(observation_id).images
+        image_ids = []
+        for i in images
+          image_ids.push(i.id)
+        end
       end
     end
     [image_ids, observation_id]

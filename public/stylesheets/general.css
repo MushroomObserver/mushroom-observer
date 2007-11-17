@@ -46,10 +46,10 @@ pre {
 }
 
 #banner {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
     border-bottom: 2px solid;
-    font: small-caps 40px/40px "Times New Roman", serif;
+    font: small-caps 25px/25px "Times New Roman", serif;
     text-align: center;
 }
 

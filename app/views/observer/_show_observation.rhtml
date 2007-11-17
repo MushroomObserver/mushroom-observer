@@ -93,7 +93,7 @@
 		<% end %>
 		<center>
 	    <% for image in observation.images %>
-	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' + textilize_without_paragraph(h(image.unique_format_name)),
+	      <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>',
 	            :action => 'show_image', :id => image.id) %></p>
 	    <% end %>
 		</center>

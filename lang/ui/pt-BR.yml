@@ -20,11 +20,10 @@ app_images_find: Imagens
 app_index_a_z: Índice A->Z
 app_intro: Introdução
 app_join_mailing_list: Lista de Discussão
-app_latest_changes: Últimas Alterações
 app_login: Login
 app_logout: Sair
 app_names_find: Nomes
-app_newest_images: Últimas Imagens
+app_newest_images: Imagens
 app_news: Notícias
 app_observations_find: Observações
 app_observations_left: Observações
@@ -126,6 +125,9 @@ rss_log_title: Registro de Atividades
 
 
 ## TO BE TRANSLATED
+
+app_latest: Latest
+app_latest_changes: Changes by Users
 
 # observer/_form_comments
 form_comments_summary: Summary
@@ -262,6 +264,9 @@ rank_phylum: Phylum
 rank_species: Species
 rank_subspecies: Subspecies
 rank_variety: Variety
+
+welcome_no_user_note: If you are not a spammer, please report this as an error.
+welcome_no_user_title: User not set in session
 
 
 # TRANSLATIONS IN PROGRESS
