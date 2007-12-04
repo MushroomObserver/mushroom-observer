@@ -832,7 +832,7 @@ class ObserverController < ApplicationController
             checklist[[name.observation_name, name.id.to_s]] = true
           end
         end
-        session['checklist'] = checklist.keys.sort
+        list = checklist.keys.sort
       end
     elsif source.to_s == 'all_observations'
       query = "select distinct names.observation_name, names.id, names.search_name from names, observations
