@@ -50,8 +50,8 @@
 </p>
 <br/>
 
-<label for="observation_where"><%= :form_observations_where.l %>:</label>
-<%= text_field_with_auto_complete('observation', 'where', {}, { :skip_style => true, :indicator => 'indicator' }) %>
+<label for="observation_place_name"><%= :form_observations_where.l %>:</label>
+<%= text_field_with_auto_complete('observation', 'place_name', {}, { :skip_style => true, :indicator => 'indicator' }) %>
 <span class="HelpNote"><%= :form_observations_where_help.l %></span>
 <br/><br/>
 
@@ -81,7 +81,7 @@
 <p><label for="observation_notes"><%= :form_observations_notes.l %>:</label>
 	<span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
 <%= text_area 'observation', 'notes' %></p>
-<%= render :partial => 'textilize_help' %>
+<%= render :partial => 'shared/textilize_help' %>
 
 <% if logging_optional %>
 <p>

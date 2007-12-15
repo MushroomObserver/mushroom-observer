@@ -70,7 +70,31 @@ class ApplicationController < ActionController::Base
          object_pages.current.to_sql[1], per_page)
     return [object_pages, objects]
   end
-  
+
+  helper_method :check_permission
+  def check_permission(user_id)
+    user = session['user']
+    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
+  end
+
+  def check_user_id(user_id)
+    result = check_permission(user_id)
+    unless result
+      flash[:notice] = 'Permission denied.'
+    end
+    result
+  end
+
+  def verify_user()
+    result = false
+    if session['user'].verified.nil?
+      redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id
+    else
+      result = true
+    end
+    result
+  end
+
   private
   
     def disable_link_prefetching

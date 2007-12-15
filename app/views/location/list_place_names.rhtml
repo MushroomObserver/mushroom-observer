@@ -1,0 +1,20 @@
+<%  if @title.nil?
+        @title = 'Locations'
+    end %>
+<div id="Title"><%= @title %></div>
+
+<table cellpadding="5" cellspacing="0" width="100%">
+  <%
+     odd_or_even = 0
+     for datum in @data
+       odd_or_even = 1 - odd_or_even
+     %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td width="100%">
+		<%= location_link(datum["where"], datum["location_id"],  datum["count(1)"]) %>
+    </td>
+  </tr>
+  <% end %>
+</table>
+
+<br/>

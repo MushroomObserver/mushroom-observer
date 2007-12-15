@@ -1,0 +1,61 @@
+<%  if @title.nil?
+        @title = "#{:show_location_title.l}: #{sanitize(@location.display_name)}"
+    end %>
+
+<div id="Title"><%= @title %></div>
+
+<%= link_to(:location_all.l, :action => 'list_place_names') %> | <%= link_to(:show_location_edit.l, :action => 'edit_location', :id => @location) %>
+<br/><br/>
+<%= error_messages_for 'location' %>
+
+<table cellpadding="10">
+    <tr>
+        <td width="50%" align="center">
+            <table cellpadding="5">
+                <tr>
+                    <td></td>
+                    <td>
+                        <%= "#{:show_location_north.l}: #{@location.north}º"%>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <%= "#{:show_location_west.l}: #{@location.west}º"%>
+                    </td>
+                    <td></td>
+                    <td>
+                        <%= "#{:show_location_east.l}: #{@location.east}º"%>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <%= "#{:show_location_south.l}: #{@location.south}º"%>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </td>
+        <td width="50%" align="center">
+            <table cellpadding="5">
+                <tr><td>
+                    <%= "#{:show_location_high.l}: #{@location.high}"%>
+                </td></tr>
+                <tr><td>
+                    <%= "#{:show_location_low.l}: #{@location.low}"%>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<% if @location.notes && @location.notes != '' %>
+    <p>
+        <%= "#{:show_location_notes.l}: #{textilize(sanitize(@location.notes))}"%>
+    </p>
+<% end %>
+<p>
+    <%= "#{:show_location_observations.l}:"%><br/>
+    <%= render :partial => 'shared/observation_list' %>
+</p>

@@ -49,14 +49,15 @@ class ObserverController < ApplicationController
                                                     :throw_error,
                                                     :users_by_contribution])
 
-  def auto_complete_for_observation_where
-    part = params[:observation][:where].downcase.gsub(/[*']/,"%")
+  def auto_complete_for_observation_place_name
+    part = params[:observation][:place_name].downcase.gsub(/[*']/,"%")
     @items = Observation.find(:all, {
-      :conditions => "LOWER(observations.where) LIKE '#{part}%'",
+      :include => :location,
+      :conditions => "LOWER(observations.where) LIKE '#{part}%' or LOWER(locations.display_name) LIKE '#{part}%'",
       :order => "observations.where ASC",
       :limit => 10,
     })
-    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry['where']))) }.uniq) %>"
+    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry.place_name))) }.uniq) %>"
   end
 
   def auto_complete_for_observation_what
@@ -206,6 +207,31 @@ class ObserverController < ApplicationController
     render :action => 'list_observations'
   end
 
+  def where_search
+    store_location
+    @layout = ApplicationHelper.calc_layout_params(session['user'])
+    
+    #
+    where = params[:where]
+    if where
+      session["where"] = where
+    end
+    where = session["where"]
+    sql_pattern = "%#{where.gsub(/[*']/,"%")}%"
+    conditions = "observations.where like '#{sql_pattern}'"
+    query = "select observations.id, names.search_name from observations, names left outer join locations on observations.location_id = locations.id
+             where observations.name_id = names.id and (#{conditions}) order by names.search_name asc, `when` desc"
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = ApplicationHelper.query_ids(query)
+    session['observation'] = nil
+    session['image_ids'] = nil
+    @observation_pages, @observations = paginate(:observations, :include => [:name, :location],
+                                                 :order => "names.search_name asc, `when` desc",
+                                                 :conditions => conditions,
+                                                 :per_page => @layout["count"])
+    render :action => 'list_observations'
+  end
+
   # pattern_search.rhtml
   def pattern_search
     store_location
@@ -225,9 +251,9 @@ class ObserverController < ApplicationController
       session["search_type"] = params[:commit]
     end
     case session["search_type"]
-    when 'Images'
+    when :app_images_find.l
       image_search(pattern)
-    when 'Names'
+    when :app_names_find.l
       name_search(pattern)
     else
       observation_search(pattern)
@@ -254,14 +280,14 @@ class ObserverController < ApplicationController
 
   def observation_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["names.search_name", "observations.where", "observations.notes"], sql_pattern)
-    query = "select observations.id, names.search_name from observations, names
+    conditions = field_search(["names.search_name", "observations.where", "observations.notes", "locations.display_name"], sql_pattern)
+    query = "select observations.id, names.search_name from observations, names left outer join locations on observations.location_id = locations.id
              where observations.name_id = names.id and (#{conditions}) order by names.search_name asc, `when` desc"
     session['checklist_source'] = 0 # Meaning use observation_ids
     session['observation_ids'] = self.query_ids(query)
     session['observation'] = nil
     session['image_ids'] = nil
-    @observation_pages, @observations = paginate(:observations, :include => "name",
+    @observation_pages, @observations = paginate(:observations, :include => [:name, :location],
                                                  :order => "names.search_name asc, `when` desc",
                                                  :conditions => conditions,
                                                  :per_page => @layout["count"])
@@ -1024,7 +1050,7 @@ class ObserverController < ApplicationController
       end
     end
     for n in names
-      n.change_deprecated(deprecate) unless deprecate.nil? or n.id?
+      n.change_deprecated(deprecate) unless deprecate.nil? or n.id
       unless PastName.check_for_past_name(n, user, msg)
         unless n.id # Only save if it's brand new
           n.user = user
@@ -1498,7 +1524,7 @@ class ObserverController < ApplicationController
       read_syn_session
       @name = Name.find(params[:id])
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
-      query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where," +
+      query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where, o.location_id," +
               " u.name, u.login, n.observation_name from observations o, users u, names n" +
               " where n.id = %s and o.user_id = u.id and n.id = o.name_id order by o.when desc"
       @data = Observation.connection.select_all(query % params[:id])
@@ -1817,6 +1843,7 @@ class ObserverController < ApplicationController
     end
   end
 
+  #### Maintenance pages
   def throw_error
     if request.env["HTTP_USER_AGENT"].index("BlackBerry")
       raise "This is a BlackBerry!"
@@ -1884,6 +1911,41 @@ class ObserverController < ApplicationController
       flash[:notice] = "Maintenance operations can only be done by the admin user"
       redirect_to :action => "list_rss_logs"
     end
+  end
+
+  helper_method :query_ids
+  # Ultimately running large queries like this and storing the info in the session
+  # may become unwieldy.  Storing the query and selecting chunks will scale better.
+  def query_ids(query)
+    result = []
+    data = Observation.connection.select_all(query)
+    for d in data
+      id = d['id']
+      if id
+        result.push(id.to_i)
+      end
+    end
+    result
+  end
+
+  helper_method :calc_layout_params
+  def calc_layout_params()
+    result = {}
+    result["rows"] = 5
+    result["columns"] = 3
+    result["alternate_rows"] = true
+    result["alternate_columns"] = true
+    result["vertical_layout"] = true
+    user = session['user']
+    if user
+      result["rows"] = user.rows if user.rows
+      result["columns"] = user.columns if user.columns
+      result["alternate_rows"] = user.alternate_rows
+      result["alternate_columns"] = user.alternate_columns
+      result["vertical_layout"] = user.vertical_layout
+    end
+    result["count"] = result["rows"] * result["columns"]
+    result
   end
 
   helper_method :dump_sorter
@@ -1986,21 +2048,6 @@ class ObserverController < ApplicationController
     session['deprecated_names'] = nil
     @member_notes = session['member_notes']
     session['member_notes'] = nil
-  end
-
-  # Ultimately running large queries like this and storing the info in the session
-  # may become unwieldy.  Storing the query and selecting chunks will scale better.
-  helper_method :query_ids
-  def query_ids(query)
-    result = []
-    data = Observation.connection.select_all(query)
-    for d in data
-      id = d['id']
-      if id
-        result.push(id.to_i)
-      end
-    end
-    result
   end
 
   # Get initial image_ids and observation_id
@@ -2111,12 +2158,6 @@ class ObserverController < ApplicationController
     [image_list, current_id]
   end
 
-  helper_method :check_permission
-  def check_permission(user_id)
-    user = session['user']
-    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
-  end
-
   helper_method :calc_color
   def calc_color(row, col, alt_rows, alt_cols)
     color = 0
@@ -2147,26 +2188,6 @@ class ObserverController < ApplicationController
     result
   end
 
-  helper_method :calc_layout_params
-  def calc_layout_params
-    result = {}
-    result["rows"] = 5
-    result["columns"] = 3
-    result["alternate_rows"] = true
-    result["alternate_columns"] = true
-    result["vertical_layout"] = true
-    user = session['user']
-    if user
-      result["rows"] = user.rows if user.rows
-      result["columns"] = user.columns if user.columns
-      result["alternate_rows"] = user.alternate_rows
-      result["alternate_columns"] = user.alternate_columns
-      result["vertical_layout"] = user.vertical_layout
-    end
-    result["count"] = result["rows"] * result["columns"]
-    result
-  end
-
   protected
 
   def create_needed_names(input_what, output_what, user)
@@ -2186,24 +2207,6 @@ class ObserverController < ApplicationController
         end
       end
       result = names.last
-    end
-    result
-  end
-
-  def check_user_id(user_id)
-    result = check_permission(user_id)
-    unless result
-      flash[:notice] = 'Permission denied.'
-    end
-    result
-  end
-
-  def verify_user()
-    result = false
-    if session['user'].verified.nil?
-      redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id
-    else
-      result = true
     end
     result
   end

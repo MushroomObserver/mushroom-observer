@@ -5,6 +5,7 @@
 # entire application
 app_account: Account
 app_admin: Admin
+app_banner: Mushroom<br/>Observer
 app_colors_from: Colors from %s
 app_comments: Comments
 app_comments_for_you: Comments for You
@@ -68,6 +69,10 @@ ask_webmaster_send: Send
 ask_webmaster_your_email: Your email address
 
 
+# location/create_location
+create_location_title: Create Location
+
+
 # account/email_new_password
 email_new_password_button: Send
 email_new_password_login: Login
@@ -97,6 +102,27 @@ form_list_feedback_missing_names_help: >
     re-evaluate the list.  If the names came from an uploaded species
     list, create a correct file and select it for upload.
 
+
+# location/_form_location
+form_locations_east: East
+form_locations_help: >
+  Enter a distinct name for this location that is understandable internationally. Examples,<br/>
+  "Mitrula Marsh", Yuba Co., California, USA<br/>Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil.
+
+form_locations_highest: Highest altitude
+form_locations_lat_long_finders: Here are some lat/long finders to help you find this location
+form_locations_lat_long_help: All values should be<br/>in decimal degrees.
+form_locations_lowest: Lowest altitude
+form_locations_meters: meters
+form_locations_north: North
+form_locations_notes: Notes
+form_locations_notes_help: >
+  Enter notes that are specific to this particular location. For example, habitat type,
+  dominate plants, annual rainfall, nearby water, soil type etc.
+
+form_locations_south: South
+form_locations_west: West
+form_locations_where: Where
 
 # observer/_form_name
 form_names_author: Author
@@ -429,6 +455,11 @@ intro_source_code: >
 intro_title: Introduction
 
 
+# application_helper
+location_all: All Locations
+location_define: Define location
+
+
 # account/login
 login_forgot_password: I forgot my password.  "Email me a new one":%s.
 login_having_problems: If you are having problems logging into your account, send "email to the webmaster":%s.
@@ -539,6 +570,19 @@ rss_title: Mushroom Observer
 
 # observer/list_rss_logs
 rss_log_title: Activity Log
+
+
+# location/show_location
+show_location_edit: Edit
+show_location_east: East
+show_location_high: Highest altitude
+show_location_low: Lowest altitude
+show_location_north: North
+show_location_notes: Notes
+show_location_observations: Observations
+show_location_south: South
+show_location_title: Location
+show_location_west: West
 
 
 # account/signup
