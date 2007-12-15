@@ -35,8 +35,9 @@ class ObservationTest < Test::Unit::TestCase
     @cc_obs.user = nil
     @cc_obs.where = nil
     assert !@cc_obs.save
-    assert_equal 1, @cc_obs.errors.count
+    assert_equal 2, @cc_obs.errors.count
     assert_equal "can't be blank", @cc_obs.errors.on(:user)
+    assert_equal "can't be blank", @cc_obs.errors.on(:where)
   end
 
   def test_destroy

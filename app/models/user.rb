@@ -11,7 +11,6 @@ class User < ActiveRecord::Base
   has_many :past_names
   has_many :test_add_image_logs
   belongs_to :license
-  has_many :locations
 
   def self.authenticate(login, pass)
     find(:first, :conditions => ["login = ? AND password = ?", login, sha1(pass)])

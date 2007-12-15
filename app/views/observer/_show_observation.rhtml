@@ -27,7 +27,7 @@
 	    <% end %>
 
 	    When: <span class="Data"><%= observation.when %></span><br/>
-	    Where: <%= location_link(observation.place_name, observation.location_id) %><br/>
+	    Where: <span class="Data"><%= h observation.where %></span><br/>
 	    Who: <span class="Data">
 		<% if questions_ok %>
 			<%= link_to h(observation.user.unique_text_name), :action => 'ask_question', :id => observation %>

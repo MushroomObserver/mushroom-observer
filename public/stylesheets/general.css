@@ -2,9 +2,6 @@ body, p, ol, ul, td {
   font-family: verdana, arial, helvetica, sans-serif;
   font-size:   13px;
   line-height: 18px;
-  margin-top: 0px;
-  margin-left: 0px;
-  margin-right: 0px;
 }
 
 pre {
@@ -49,7 +46,7 @@ pre {
 }
 
 #banner {
-    padding-top: 5px;
+    padding-top: 3px;
     padding-bottom: 3px;
     border-bottom: 2px solid;
     font: small-caps 25px/25px "Times New Roman", serif;

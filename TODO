@@ -2,40 +2,36 @@
 
 Current task:
 
-Observations created through species lists end up with a NULL modification date.
-
-*** Improve 'where'
-  - - need to implement show_location
-    list observations from that location
-  - What merging should create_location do? - merges when names are the same.
-  - Create location not working
-  - Where: should use show_location when it can
-  - list_place_names should have way to show the affected observations
-  - edit_location -> update_location
-  - lat/long finder links: http://www.satsig.net/maps/lat-long-finder.htm, http://www.ccalmr.ogi.edu/nanoos/latlon.php
-
-  Hook up to Google Maps
-  altitude as ft or meters
-  Future ideas:
-    Explicit error and/or 'secretness'
-    Shape information from Darwin Core
-  Relationships between locations: Would like to be able to find all collections in Yuba Co., etc.
-  Should collections have individual lat/longs?
-
-Future location features:
-  Photos of location
-  Habitat
-
 Enable internationalization/localization with Brazilian Portuguese as the example
   - Incorporate the first set of phrases
   - Make them visible based on browser setting
   - Fix year select issue with create observation in Portuguese
   - Threadish issue that Darvin reported
   - Ask Everaldo and Lu about news
-  Translate .rhtml templates for account and observer (on hold waiting for translations)
+  Translate .rhtml templates for account and observer
   Add user setting to preferences
   Figure out how to correctly translate emails (account_mailer/*.rhtml)
   Encourage other users to provide translations
+  Should the following be translated?
+    [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
+    _form_names.rhtml
+
+*** Improve 'where'
+  location:
+    where (string)
+    notes
+    user
+    lat1
+    lat2
+    long1
+    long2
+    alt1
+    alt2
+  lat/long finder
+  Hook up to Google Maps
+  Future ideas:
+    Explicit error and/or 'secretness'
+    Shape information from Darwin Core
 
 Large features:
 
