@@ -1,41 +1,34 @@
 * indicates a community request
 
-Current task:
+Bugs:
+Observations created through species lists end up with a NULL modification date.
+Adding new species with a double space between name an author fails.
 
-Enable internationalization/localization with Brazilian Portuguese as the example
-  - Incorporate the first set of phrases
-  - Make them visible based on browser setting
-  - Fix year select issue with create observation in Portuguese
-  - Threadish issue that Darvin reported
-  - Ask Everaldo and Lu about news
-  Translate .rhtml templates for account and observer
-  Add user setting to preferences
-  Figure out how to correctly translate emails (account_mailer/*.rhtml)
-  Encourage other users to provide translations
-  Should the following be translated?
-    [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
-    _form_names.rhtml
+Active tasks:
 
-*** Improve 'where'
-  location:
-    where (string)
-    notes
-    user
-    lat1
-    lat2
-    long1
-    long2
-    alt1
-    alt2
-  lat/long finder
+*** Improve 'where' (Nathan's active task)
+  - - need to implement show_location
+    list observations from that location
+  - What merging should create_location do? - merges when names are the same.
+  - Create location not working
+  - Where: should use show_location when it can
+  - list_place_names should have way to show the affected observations
+  - edit_location -> update_location
+  - lat/long finder links: http://www.satsig.net/maps/lat-long-finder.htm, http://www.ccalmr.ogi.edu/nanoos/latlon.php
+  PastLocations
   Hook up to Google Maps
+  Release
+  
+  altitude as ft or meters
   Future ideas:
     Explicit error and/or 'secretness'
     Shape information from Darwin Core
+    Photos of location
+    Habitat descriptions
+  Relationships between locations: Would like to be able to find all collections in Yuba Co., etc.
+  Should collections have individual lat/longs?
 
-Large features:
-
-** Namings
+** Namings (Jason's active task)
   Provide a formalized way for users to associate a 'Name' with an 'Observation'.
       Add confidence level for a naming
       Add basis for naming (macroscopic, key, references, microscopic, chemical, genetic)
@@ -70,10 +63,36 @@ Large features:
       asthetic_value
       notes
 
-** Checklists - Lists of Names that have a Title and Purpose, but no associated Observations.
+
+** Enable internationalization/localization with Brazilian Portuguese as the example
+    - Incorporate the first set of phrases
+    - Make them visible based on browser setting
+    - Fix year select issue with create observation in Portuguese
+    - Threadish issue that Darvin reported
+    - Ask Everaldo and Lu about news
+    Translate .rhtml templates for account and observer (on hold waiting for translations)
+    Add user setting to preferences
+    Figure out how to correctly translate emails (account_mailer/*.rhtml)
+    Encourage other users to provide translations
+
+* Theme editor (Jason has an almost complete prototype)
+    More color themes: Boletus, Coprinus (very black and white)
+
+
+Large features:
+
+*** Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations.
     Can be used to create species lists, or simply displayed and copied for publication somewhere else.
-    Use to create a single observation
-    Dynamic checklists - click for completions (ajaxify?)
+    Use to create observations
+    Dynamic checklists based on location or user
+
+** Projects - Create a pages for describing proposed research projects.  Projects will have a public page
+    and a private page.  Each will have a principle investigator (PI) who controls who can see the private page.
+    The project pages will have an associated Species List (of Observations relevant to the project) and an
+    associated Checklist (of Names relevant to the project).  In addition there will be a set of documents
+    associated with the project that can be marked as either public or private.  Only people approved by the
+    PI are allowed to see the private documents, but anyone can see the public ones as well as the list of
+    Observations and Names.
 
 ** Herbarium records - Provide a standard way to describe herbarium collections.
 
@@ -111,6 +130,10 @@ Large features:
 
 * Machine identification
     Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
+
+Owned descriptions
+    Right now anyone can edit any part of any description for a Name.  It would be nice if there was a community
+    description and a set of owned descriptions.
 
 Notifications
     Users could register interest in a particular name and get email when one shows up.
@@ -190,5 +213,3 @@ Name comments rather than just notes?
 Add user.login and what got changed to show_past_name
 
 Check for duplicate images, image garbage collection
-
-More color themes: Boletus, Coprinus (very black and white)
