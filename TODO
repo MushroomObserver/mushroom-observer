@@ -1,9 +1,5 @@
 * indicates a community request
 
-Bugs:
-Observations created through species lists end up with a NULL modification date.
-Adding new species with a double space between name an author fails.
-
 Active tasks:
 
 *** Improve 'where' (Nathan's active task)
@@ -163,19 +159,23 @@ Local client that can only add
 
 Small features:
 
-+* Show all comments
-
 +* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
   Might be handled by having a toggle that says 'More images'/'Less images' this would also change
     the layout to rows with all the thumbs displayed
 
-+ Deprecate/Approve should have a comment field.
+Create species list location should be ajaxified
 
 Synonym features
   Automated way to apply synonyms to your own observations (with review)
 
 Admin stuff:
-    Pages for accessing the logs
+    Webpages for accessing the logs
+
+Top ten pages of Names, Images, Observations
+    Names: Best Edibles, Most Toxic, Hallucinogenic, Easiest to Learn, Easiest to Confuse ...
+    Images: Pictorial, Scientific, Humor, ...
+    Observations: Biggest, Smallest, Off season, Surprising
+    Ideally users should be able to create new top ten pages and the top ten pages themselves should get ranked somehow
 
 Contribution
     Hidden contributors

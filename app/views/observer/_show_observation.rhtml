@@ -29,11 +29,7 @@
 	    When: <span class="Data"><%= observation.when %></span><br/>
 	    Where: <span class="Data"><%= h observation.where %></span><br/>
 	    Who: <span class="Data">
-		<% if questions_ok %>
-			<%= link_to h(observation.user.unique_text_name), :action => 'ask_question', :id => observation %>
-		<% else %>
-			<%= h observation.user.unique_text_name %>
-		<% end %>
+	        <%= link_to h(observation.user.unique_text_name), :action => 'show_user', :id => observation.user %>
 		</span><br/>
 	    <span class="Data"><%= if observation.specimen
 	         'Herbarium specimen available'

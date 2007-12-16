@@ -336,7 +336,6 @@ class ObserverController < ApplicationController
           names = [Name.find(params[:chosen_name][:name_id])]
         else
           names = Name.find_names(params[:observation][:what])
-          logger.warn("construct_observation: #{names.length}")
         end
         if names.length == 0
           names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
@@ -1024,7 +1023,7 @@ class ObserverController < ApplicationController
       end
     end
     for n in names
-      n.change_deprecated(deprecate) unless deprecate.nil? or n.id?
+      n.change_deprecated(deprecate) unless deprecate.nil? or n.id
       unless PastName.check_for_past_name(n, user, msg)
         unless n.id # Only save if it's brand new
           n.user = user
@@ -1116,8 +1115,8 @@ class ObserverController < ApplicationController
   def construct_observations(species_list, params, type_str, user, sorter)
     species_list.log("Species list %s by %s" % [type_str, user.login])
     flash[:notice] = "Species List was successfully %s." % type_str
-    sp_args = { :created => species_list.modified, :user => user, :notes => params[:member][:notes],
-                :where => species_list.where }
+    sp_args = { :created => species_list.modified, :modified => species_list.modified, 
+                :user => user, :notes => params[:member][:notes], :where => species_list.where }
     sp_when = species_list.when # Can't use params since when is split up
     species_list.update_names(params[:chosen_approved_names])
     for name, timestamp in sorter.single_names
@@ -1139,7 +1138,7 @@ class ObserverController < ApplicationController
     args = params[:species_list]
     user, species_list = get_user_and_species_list(id, args)
     if user && species_list
-      list = params[:list][:members]
+      list = params[:list][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
       construct_approved_names(list, params[:approved_names], user)
       sorter = setup_sorter(params, species_list, list)
       if sorter.has_new_synonyms
@@ -1197,7 +1196,7 @@ class ObserverController < ApplicationController
     id = nil
     action = 'bulk_name_edit'
     if verify_user()
-      list = params[:list][:members]
+      list = params[:list][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
       construct_approved_names(list, params[:approved_names], session['user'])
       sorter = setup_sorter(params, nil, list)
       if sorter.only_single_names
@@ -1673,7 +1672,7 @@ class ObserverController < ApplicationController
     user = session['user']
     action = 'show_name'
     if verify_user()
-      list = params[:synonym][:members]
+      list = params[:synonym][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
       deprecate = (params[:deprecate][:all] == "checked")
       construct_approved_names(list, params[:approved_names], user, deprecate)
       sorter = NameSorter.new
@@ -1760,9 +1759,7 @@ class ObserverController < ApplicationController
           names = Name.find_names(proposed_name_str)
         end
         if names.length == 0
-          logger.warn("do_deprecation: create_needed_names(#{params[:approved_name]}, #{proposed_name_str}, user)")
           names = [create_needed_names(params[:approved_name], proposed_name_str, user)]
-          logger.warn("do_deprecation: #{names.length}")
         end
         target_name = names.first
         if target_name

@@ -5,6 +5,7 @@
 # entire application
 app_account: Account
 app_admin: Admin
+app_banner: Mushroom<br/>Observer
 app_colors_from: Colors from %s
 app_comments: Comments
 app_comments_for_you: Comments for You

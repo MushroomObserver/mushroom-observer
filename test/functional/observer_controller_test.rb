@@ -931,6 +931,34 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal([], SpeciesList.find(:all, :conditions => "title = '#{list_title}'"))
   end
 
+  def test_construct_species_list_double_space
+    list_title = "Double Space List"
+    new_name_str = "Lactarius rubidus  (Hesler and Smith) Methven"
+    params = {
+      :list => { :members => new_name_str },
+      :member => { :notes => "" },
+      :species_list => {
+        :where => "Burbank, California",
+        :title => list_title,
+        "when(1i)" => "2007",
+        "when(2i)" => "3",
+        "when(3i)" => "14",
+        :notes => "List Notes"
+      },
+      :approved_names => [new_name_str.squeeze(" ")]
+    }
+    requires_login(:construct_species_list, params, false)
+    assert_redirected_to(:controller => "observer", :action => "show_species_list")
+    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    assert_not_nil(spl)
+    obs = spl.observations[0]
+    assert_not_nil(obs)
+    assert_not_nil(obs.modified)
+    name = Name.find(:first, :conditions => ["search_name = ?", new_name_str.squeeze(" ")])
+    assert_not_nil(name)
+    assert(spl.name_included(name))
+  end
+
   def test_construct_species_list_rankless_taxon
     list_title = "List Title"
     new_name_str = "Agaricaceae"
