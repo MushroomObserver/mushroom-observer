@@ -11,6 +11,8 @@ end
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:all_names,
                                                     :ask_webmaster_question,
+                                                    :auto_complete_for_observation_where,
+                                                    :auto_complete_for_observation_what,
                                                     :color_themes,
                                                     :do_load_test,
                                                     :how_to_use,
@@ -115,14 +117,14 @@ class ObserverController < ApplicationController
     store_location
     @comment = Comment.find(params[:id])
   end
-
+  
   # add_comment.rhtml -> save_comment -> add_comment.rhtml
   # Here's where params is used to create the comment and
   # the observation is recovered from session.
   def save_comment
     user = session['user']
     if verify_user()
-      @comment = Comment.new(params[:comment])
+      @comment = Comment.new(read_param(params, :comment))
       @comment.created = Time.now
       @observation = @comment.observation
       # @comment.observation = @observation
@@ -132,7 +134,7 @@ class ObserverController < ApplicationController
         flash[:notice] = 'Comment was successfully added.'
         redirect_to(:action => 'show_observation', :id => @observation)
       else
-        flash[:notice] = sprintf('Unable to save comment: %s', @comment.summary)
+        flash[:notice] = sprintf('Unable to save comment')
         render :action => 'add_comment'
       end
     end
@@ -150,7 +152,7 @@ class ObserverController < ApplicationController
   def update_comment
     @comment = Comment.find(params[:id])
     if check_user_id(@comment.user_id) # Even though edit makes this check, avoid bad guys going directly
-      if @comment.update_attributes(params[:comment])
+      if @comment.update_attributes(read_param(params, :comment))
         if @comment.save
           @comment.observation.log(sprintf('Comment, %s, updated by %s',
                                            @comment.summary, session['user'].login), true)
@@ -326,23 +328,26 @@ class ObserverController < ApplicationController
     user = session['user']
     if verify_user()
       action = "create_observation"
-      if params[:observation]
-        @observation = Observation.new(params[:observation])
+      observation_params = read_param(params, :observation)
+      if observation_params
+        @observation = Observation.new(observation_params)
         now = Time.now
         @observation.created = now
         @observation.modified = now
         @observation.user = user
-        if params[:chosen_name] && params[:chosen_name][:name_id]
-          names = [Name.find(params[:chosen_name][:name_id])]
+        chosen_name_params = read_param(params, :chosen_name)
+        if chosen_name_params && chosen_name_params[:name_id]
+          names = [Name.find(chosen_name_params[:name_id])]
         else
-          names = Name.find_names(params[:observation][:what])
+          names = Name.find_names(observation_params[:what])
         end
+        approved_name_params = read_param(params, :approved_name)
         if names.length == 0
-          names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
+          names = [create_needed_names(approved_name_params, observation_params[:what], user)]
         end
         target_name = names.first
         if target_name and names.length == 1
-          if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
+          if target_name.deprecated && (approved_name_params != observation_params[:what])
             synonyms = target_name.approved_synonyms
             session[:valid_name_ids] = synonyms.map {|n| n.id}
           else
@@ -352,7 +357,7 @@ class ObserverController < ApplicationController
               flash[:notice] = 'Observation was successfully created.'
               action = "show_observation"
             else
-              if params[:observation][:where] == ''
+              if observation_params[:where] == ''
                 flash[:notice] = 'Location not given!'
               else
                 flash[:notice] = 'Unable to create a new Observation'
@@ -362,7 +367,7 @@ class ObserverController < ApplicationController
         end
       end
       if action == "create_observation"
-        args = params[:observation]
+        args = observation_params
         if args
           args[:user_id] = user.id
           session[:args] = args
@@ -411,31 +416,34 @@ class ObserverController < ApplicationController
     if check_user_id(@observation.user_id) # Even though edit makes this check, avoid bad guys going directly
       action = 'edit_observation'
       user = session['user']
-      if params[:chosen_name] && params[:chosen_name][:name_id]
-        names = [Name.find(params[:chosen_name][:name_id])]
+      chosen_name_params = read_param(params, :chosen_name)
+      observation_params = read_param(params, :observation)
+      approved_name_params = read_param(params, :approved_name)
+      if chosen_name_params && chosen_name_params[:name_id]
+        names = [Name.find(chosen_name_params[:name_id])]
       else
-        names = Name.find_names(params[:observation][:what])
+        names = Name.find_names(observation_params[:what])
       end
       if names.length == 0
-        names = [create_needed_names(params[:approved_name], params[:observation][:what], user)]
+        names = [create_needed_names(approved_name_params, observation_params[:what], user)]
       end
       target_name = names.first
       if target_name and names.length == 1
-        if target_name.deprecated && (params[:approved_name] != params[:observation][:what])
+        if target_name.deprecated && (approved_name_params != observation_params[:what])
           synonyms = target_name.approved_synonyms
           session[:valid_name_ids] = synonyms.map {|n| n.id}
-        elsif @observation.update_attributes(params[:observation])
+        elsif @observation.update_attributes(observation_params)
           @observation.name = target_name
           @observation.modified = Time.now
           @observation.save
           @observation.log('Observation updated by ' + session['user'].login,
-                           params[:log_change][:checked] == '1')
+                           read_param(params, :log_change)[:checked] == '1')
           flash[:notice] = 'Observation was successfully updated.'
           action = 'show_observation'
         end
       end
       if action == "edit_observation"
-        session[:args] = params[:observation]
+        session[:args] = observation_params
         if target_name
           session[:name_ids] = names.map {|n| n.id}
         else
@@ -560,7 +568,8 @@ class ObserverController < ApplicationController
   def update_image
     @image = Image.find(params[:id])
     if check_user_id(@image.user_id) # Even though edit makes this check, avoid bad guys going directly
-      if @image.update_attributes(params[:image])
+      image_params = read_param(params, :image)
+      if @image.update_attributes(image_params)
         @image.modified = Time.now
         @image.save
         for o in @image.observations
@@ -626,7 +635,7 @@ class ObserverController < ApplicationController
   end
 
   def update_licenses
-    for current_id, value in params[:updates]
+    for current_id, value in read_param(params, :updates)
       current_id = current_id.to_i
       for copyright_holder, new_id in value
         new_id = new_id.to_i
@@ -696,16 +705,18 @@ class ObserverController < ApplicationController
   end
 
   def upload_image
-    if params[:observation]
-      id = params[:observation][:id]
+    observation_params = read_param(params, :observation)
+    if observation_params
+      id = observation_params[:id]
       @observation = Observation.find(id)
       if check_user_id(@observation.user_id)
         # Upload image
         args = params[:image]
-        process_image(args, params[:upload][:image1])
-        process_image(args, params[:upload][:image2])
-        process_image(args, params[:upload][:image3])
-        process_image(args, params[:upload][:image4])
+        upload_params = read_param(params, :upload)
+        process_image(args, upload_params[:image1])
+        process_image(args, upload_params[:image2])
+        process_image(args, upload_params[:image3])
+        process_image(args, upload_params[:image4])
         redirect_to(:action => 'show_observation', :id => id)
       else
         render :action => 'show_observation', :id => id
@@ -767,10 +778,10 @@ class ObserverController < ApplicationController
 
   # remove_images.rhtml -> delete_images -> show_observation.rhtml
   def delete_images
-    @observation = Observation.find(params[:observation][:id])
+    @observation = Observation.find(read_param(params, :observation)[:id])
     if check_user_id(@observation.user_id)
       # Delete images
-      images = params[:selected]
+      images = read_param(params, :selected)
       if images
         images.each do |image_id, do_it|
           if do_it == 'yes'
@@ -788,9 +799,9 @@ class ObserverController < ApplicationController
   end
 
   def add_image_to_obs
-    @observation = Observation.find(params[:obs_id])
+    @observation = Observation.find(read_param(params, :obs_id))
     if check_user_id(@observation.user_id)
-      image = @observation.add_image_by_id(params[:id])
+      image = @observation.add_image_by_id(read_param(params, :id))
       if !image.nil?
         @observation.log("Image, %s, reused by %s" % [image.unique_text_name, session['user'].login], true)
       end
@@ -800,9 +811,10 @@ class ObserverController < ApplicationController
 
   # reuse_image.rhtml -> reuse_image_by_id -> show_observation.rhtml
   def reuse_image_by_id
-    @observation = Observation.find(params[:observation][:id])
+    observation_params = read_param(params, :observation)
+    @observation = Observation.find(observation_params[:id])
     if check_user_id(@observation.user_id)
-      image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
+      image = @observation.add_image_by_id(observation_params[:idstr].to_i)
       if !image.nil?
         @observation.log(sprintf('Image, %s, reused by %s', image.unique_text_name, session['user'].login), true)
       end
@@ -888,9 +900,9 @@ class ObserverController < ApplicationController
 
   # Needs both a species_list and an observation.
   def remove_observation_from_species_list
-    species_list = SpeciesList.find(params[:species_list])
+    species_list = SpeciesList.find(read_param(params, :species_list))
     if check_user_id(species_list.user_id)
-      observation = Observation.find(params[:observation])
+      observation = Observation.find(read_param(params, :observation))
       species_list.modified = Time.now
       species_list.observations.delete(observation)
       redirect_to(:action => 'manage_species_lists', :id => observation)
@@ -901,9 +913,9 @@ class ObserverController < ApplicationController
 
   # Needs both a species_list and an observation.
   def add_observation_to_species_list
-    species_list = SpeciesList.find(params[:species_list])
+    species_list = SpeciesList.find(read_param(params, :species_list))
     if check_user_id(species_list.user_id)
-      observation = Observation.find(params[:observation])
+      observation = Observation.find(read_param(params, :observation))
       species_list.modified = Time.now
       species_list.observations << observation
       redirect_to :action => 'manage_species_lists', :id => observation
@@ -974,13 +986,14 @@ class ObserverController < ApplicationController
   end
 
   def read_species_list
-    species_list = SpeciesList.find(params[:id])
+    id_param = read_param(params, :id)
+    species_list = SpeciesList.find(id_param)
     if species_list
-      file_data = params[:species_list][:file]
+      file_data = read_param(params, :species_list)[:file]
       species_list.file = file_data
       sorter = NameSorter.new
       species_list.process_file_data(sorter)
-      species_list_action('edit_species_list', params[:id], {}, '', {}, sorter)
+      species_list_action('edit_species_list', id_param, {}, '', {}, sorter)
     end
   end
 
@@ -1059,7 +1072,7 @@ class ObserverController < ApplicationController
       if check_user_id(user_id)
         user = species_list.user
         species_list.modified = now
-        if not species_list.update_attributes(params[:species_list]) # Does save
+        if not species_list.update_attributes(read_param(params, :species_list)) # Does save
           species_list = nil
         end
       end
@@ -1100,11 +1113,11 @@ class ObserverController < ApplicationController
     # to take precedence over valid names, then swap the next two lines.
     # If they need to be more carefully considered, then the lists may need to get
     # merged in the display.
-    sorter.add_chosen_names(params[:chosen_names]) # hash
-    sorter.add_chosen_names(params[:chosen_approved_names]) # hash
+    sorter.add_chosen_names(read_param(params, :chosen_names)) # hash
+    sorter.add_chosen_names(read_param(params, :chosen_approved_names)) # hash
 
-    sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
-    sorter.check_for_deprecated_checklist(params[:checklist_data])
+    sorter.add_approved_deprecated_names(read_param(params, :approved_deprecated_names))
+    sorter.check_for_deprecated_checklist(read_param(params, :checklist_data))
     if species_list
       sorter.check_for_deprecated_names(species_list.observations.map {|o| o.name})
     end
@@ -1116,18 +1129,19 @@ class ObserverController < ApplicationController
     species_list.log("Species list %s by %s" % [type_str, user.login])
     flash[:notice] = "Species List was successfully %s." % type_str
     sp_args = { :created => species_list.modified, :modified => species_list.modified, 
-                :user => user, :notes => params[:member][:notes], :where => species_list.where }
+                :user => user, :notes => read_param(params, :member)[:notes], :where => species_list.where }
     sp_when = species_list.when # Can't use params since when is split up
-    species_list.update_names(params[:chosen_approved_names])
+    species_list.update_names(read_param(params, :chosen_approved_names))
     for name, timestamp in sorter.single_names
       sp_args[:when] = timestamp || sp_when
       species_list.construct_observation(name, sp_args)
     end
     sp_args[:when] = sp_when
-    if params[:checklist_data]
-      for key, value in params[:checklist_data]
+    checklist_data_params = read_param(params, :checklist_data)
+    if checklist_data_params
+      for key, value in checklist_data_params
         if value == "checked"
-          name = find_chosen_name(key.to_i, params[:chosen_approved_names])
+          name = find_chosen_name(key.to_i, read_param(params, :chosen_approved_names))
           species_list.construct_observation(name, sp_args)
         end
       end
@@ -1135,11 +1149,11 @@ class ObserverController < ApplicationController
   end
 
   def process_species_list(id, params, type_str, action)
-    args = params[:species_list]
+    args = read_param(params, :species_list)
     user, species_list = get_user_and_species_list(id, args)
     if user && species_list
-      list = params[:list][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
-      construct_approved_names(list, params[:approved_names], user)
+      list = read_param(params, :list)[:members].squeeze(" ") # Get rid of extra whitespace while we're at it
+      construct_approved_names(list, read_param(params, :approved_names), user)
       sorter = setup_sorter(params, species_list, list)
       if sorter.has_new_synonyms
         flash[:notice] = "Synonyms can only be created from the Bulk Name Edit page."
@@ -1161,8 +1175,9 @@ class ObserverController < ApplicationController
         flash[:notice] = "Ambiguous names including %s given" % sorter.multiple_line_strs[0]
       end # sorter.only_single_names
       notes = ''
-      notes = params[:member][:notes] if params[:member]
-      species_list_action(action, id, args, notes, params[:checklist_data], sorter)
+      member_params = read_param(params, :member)
+      notes = member_params[:notes] if member_params
+      species_list_action(action, id, args, notes, read_param(params, :checklist_data), sorter)
     else
       redirect_to :action => 'list_species_lists'
       if session['user']
@@ -1185,7 +1200,7 @@ class ObserverController < ApplicationController
   end
 
   def update_species_list
-    process_species_list(params[:id], params, 'updated', 'edit_species_list')
+    process_species_list(read_param(params, :id), params, 'updated', 'edit_species_list')
   end
 
   def construct_species_list
@@ -1196,8 +1211,8 @@ class ObserverController < ApplicationController
     id = nil
     action = 'bulk_name_edit'
     if verify_user()
-      list = params[:list][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
-      construct_approved_names(list, params[:approved_names], session['user'])
+      list = read_param(params, :list)[:members].squeeze(" ") # Get rid of extra whitespace while we're at it
+      construct_approved_names(list, read_param(params, :approved_names), session['user'])
       sorter = setup_sorter(params, nil, list)
       if sorter.only_single_names
         sorter.create_new_synonyms()
@@ -1584,10 +1599,11 @@ class ObserverController < ApplicationController
   def update_name
     user = session['user']
     if verify_user()
-      text_name = (params[:name][:text_name] || '').strip
-      author = (params[:name][:author] || '').strip
+      name_params = read_param(params, :name)
+      text_name = (name_params[:text_name] || '').strip
+      author = (name_params[:author] || '').strip
       begin
-        (name, old_name) = find_target_names(params[:id], text_name, author)
+        (name, old_name) = find_target_names(read_param(params, :id), text_name, author)
         if text_name == ''
           text_name = name.text_name
         end
@@ -1603,9 +1619,9 @@ class ObserverController < ApplicationController
         current_time = Time.now
         name.modified = current_time
         count += 1
-        alt_ids = name.change_text_name(text_name, author, params[:name][:rank])
-        name.citation = params[:name][:citation]
-        name.notes = params[:name][:notes]
+        alt_ids = name.change_text_name(text_name, author, name_params[:rank])
+        name.citation = name_params[:citation]
+        name.notes = name_params[:notes]
         unless PastName.check_for_past_name(name, user, "Name updated by #{user.login}")
           unless name.id
             raise "update_name called on a name that doesn't exist"
@@ -1667,17 +1683,17 @@ class ObserverController < ApplicationController
 
   # change_synonyms.rhtml -> transfer_synonyms -> show_name.rhtml
   def transfer_synonyms
-    id = params[:id]
+    id = read_param(params, :id)
     name = Name.find(id)
     user = session['user']
     action = 'show_name'
     if verify_user()
-      list = params[:synonym][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
-      deprecate = (params[:deprecate][:all] == "checked")
-      construct_approved_names(list, params[:approved_names], user, deprecate)
+      list = read_param(params, :synonym)[:members].squeeze(" ") # Get rid of extra whitespace while we're at it
+      deprecate = (read_param(params, :deprecate)[:all] == "checked")
+      construct_approved_names(list, read_param(params, :approved_names), user, deprecate)
       sorter = NameSorter.new
       sorter.sort_names(list)
-      sorter.append_approved_synonyms(params[:approved_synonyms])
+      sorter.append_approved_synonyms(read_param(params, :approved_synonyms))
       if sorter.only_single_names and sorter.only_approved_synonyms
         timestamp = Time.now
         synonym = name.synonym
@@ -1688,7 +1704,7 @@ class ObserverController < ApplicationController
           name.modified = timestamp # Change timestamp, but not modifier
           name.save # Not creating a PastName since they don't track synonyms
         end
-        proposed_synonyms = params[:proposed_synonyms] || {}
+        proposed_synonyms = read_param(params, :proposed_synonyms) || {}
         for n in sorter.all_names
           if proposed_synonyms[n.id.to_s] != '0'
             synonym.transfer(n)
@@ -1700,7 +1716,7 @@ class ObserverController < ApplicationController
             synonym.transfer(n)
           end
         end
-        check_for_new_synonym(name, synonym.names, params[:existing_synonyms] || {})
+        check_for_new_synonym(name, synonym.names, read_param(params, :existing_synonyms) || {})
         synonym.modified = timestamp
         synonym.save
         if deprecate
@@ -1712,7 +1728,7 @@ class ObserverController < ApplicationController
         action = 'change_synonyms'
         dump_sorter(sorter)
       end
-      synonym_action(action, id, sorter, params[:deprecate][:all])
+      synonym_action(action, id, sorter, read_param(params, :deprecate)[:all])
     end
   end
 
@@ -1734,32 +1750,33 @@ class ObserverController < ApplicationController
   def deprecate_name
     read_syn_session
     if verify_user()
-      @name = Name.find(params[:id])
+      @name = Name.find(read_param(params, :id))
       name_ids = session[:name_ids]
       if name_ids # multiple matches or deprecated name
         @names = name_ids.map {|n| Name.find(n)}
       end
       session[:name_ids] = nil
-      @what = params[:proposed_name] || ''
-      @comment = params[:comment] || ''
+      @what = read_param(params, :proposed_name) || ''
+      @comment = read_param(params, :comment) || ''
     end
   end
 
   def do_deprecation
     user = session['user']
     if verify_user()
-      current_name = Name.find(params[:id])
-      proposed_name_str = (params[:proposed][:name] || '').strip
-      comment = (params[:comment][:comment] || '').strip
+      current_name = Name.find(read_param(params, :id))
+      proposed_name_str = (read_param(params, :proposed)[:name] || '').strip
+      comment = (read_param(params, :comment)[:comment] || '').strip
       action = 'deprecate_name'
       if proposed_name_str != ''
-        if params[:chosen_name] && params[:chosen_name][:name_id]
-          names = [Name.find(params[:chosen_name][:name_id])]
+        chosen_name_params = read_param(params, :chosen_name)
+        if chosen_name_params && chosen_name_params[:name_id]
+          names = [Name.find(chosen_name_params[:name_id])]
         else
           names = Name.find_names(proposed_name_str)
         end
         if names.length == 0
-          names = [create_needed_names(params[:approved_name], proposed_name_str, user)]
+          names = [create_needed_names(read_param(params, :approved_name), proposed_name_str, user)]
         end
         target_name = names.first
         if target_name
@@ -1796,8 +1813,8 @@ class ObserverController < ApplicationController
   def do_approval
     user = session['user']
     if verify_user()
-      current_name = Name.find(params[:id])
-      if params[:deprecate][:others] == '1'
+      current_name = Name.find(read_param(params, :id))
+      if read_param(params, :deprecate)[:others] == '1'
         for n in current_name.approved_synonyms
           n.change_deprecated(true)
           PastName.check_for_past_name(n, user, "Deprecated in favor of #{current_name.search_name} by #{user.login}")
@@ -1806,7 +1823,7 @@ class ObserverController < ApplicationController
       # current_name.version = current_name.version + 1
       current_name.change_deprecated(false)
       PastName.check_for_past_name(current_name, user, "Approved by #{user.login}")
-      comment = (params[:comment][:comment] || '').strip
+      comment = (read_param(params, :comment)[:comment] || '').strip
       comment_join = comment == "" ? "." : ":\n"
       current_name.prepend_notes("Approved by #{user.login} on " +
         Time.now.to_formatted_s(:db) + comment_join + comment)
@@ -1881,6 +1898,14 @@ class ObserverController < ApplicationController
       flash[:notice] = "Maintenance operations can only be done by the admin user"
       redirect_to :action => "list_rss_logs"
     end
+  end
+
+  helper_method :read_param
+  def read_param(params, index)
+    # Use session['return-to-params'] as a hack in case the comment parameters
+    # got lost due to a re-login.  Note that the session hash must be accessed
+    # with a string rather than a symbol.
+    params[index] || session['return-to-params'][index.to_s]
   end
 
   helper_method :dump_sorter

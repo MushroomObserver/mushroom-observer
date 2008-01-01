@@ -24,6 +24,8 @@ Active tasks:
   Relationships between locations: Would like to be able to find all collections in Yuba Co., etc.
   Should collections have individual lat/longs?
 
+Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev
+
 ** Namings (Jason's active task)
   Provide a formalized way for users to associate a 'Name' with an 'Observation'.
       Add confidence level for a naming
@@ -162,6 +164,8 @@ Small features:
 +* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
   Might be handled by having a toggle that says 'More images'/'Less images' this would also change
     the layout to rows with all the thumbs displayed
+
+Rename 'Features and Fixes' to include Date and version
 
 Create species list location should be ajaxified
 

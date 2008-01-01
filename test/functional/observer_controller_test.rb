@@ -1604,6 +1604,29 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(obs.comments.size == (comment_count + 1))
   end
 
+  # Reproduces problem with a spontaneous logout between
+  # add_comment and save_comment
+  def test_save_comment_indirect_params
+    obs = @minimal_unknown
+    comment_count = obs.comments.size
+    params = {
+      'comment' => {
+        'observation_id' => obs.id,
+        'summary' => "A Summary",
+        'comment' => "Some text."
+      }
+    }
+    # Have to do login explicitly to manage the session object correctly
+    user = User.authenticate('rolf', 'testpassword')
+    assert(user)
+    @request.session['user'] = user
+    @request.session['return-to-params'] = params
+    get_with_dump(:save_comment, {})
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    obs = Observation.find(obs.id)
+    assert(obs.comments.size == (comment_count + 1))
+  end
+
   def test_send_commercial_inquiry
     image = @commercial_inquiry_image
     params = {

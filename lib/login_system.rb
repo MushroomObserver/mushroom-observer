@@ -72,6 +72,7 @@ module LoginSystem
   # we can return to this location by calling return_location
   def store_location
     session['return-to'] = request.request_uri
+    session['return-to-params'] = request.request_parameters
   end
 
   # move to the last store_location call or to the passed default one
@@ -79,7 +80,7 @@ module LoginSystem
     if session['return-to'].nil?
       redirect_to default
     else
-      redirect_to_url session['return-to']
+      redirect_to session['return-to']
       session['return-to'] = nil
     end
   end

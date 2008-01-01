@@ -6,7 +6,6 @@ class AccountController < ApplicationController
       when :post
         user = User.authenticate(params['user_login'], params['user_password'])
         if session['user'] = user
-          logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
           flash[:notice]  = "Login successful"
           user.last_login = Time.now
           user.save
