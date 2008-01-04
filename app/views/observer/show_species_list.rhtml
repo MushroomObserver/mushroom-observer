@@ -37,7 +37,7 @@ Members:<br/>
 		    <td width="100%" valign="middle">
 				<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name)),
 			                                        :action => 'show_observation', :id => observation.id) %></span><br/>
-		        <span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span>: 
+		        <span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span>: 
 		        <span class="ListWho"><%= truncate(h(observation.user.unique_text_name), MAX_WHO_LENGTH) %></span>
 		    </td>
 	  	</tr>

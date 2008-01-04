@@ -42,30 +42,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     end
   end
 
-  def html_dump(label, html)
-    html_dir = '../html'
-    if File.directory?(html_dir) and html[0..11] != '<html><body>'
-      file_name = "#{html_dir}/#{label}.html"
-      count = 0
-      while File.exists?(file_name)
-        file_name = "#{html_dir}/#{label}_#{count}.html"
-        count += 1
-        if count > 100
-          raise(RangeError, "More than 100 files found with a label of '#{label}'")
-        end
-      end
-      print "Creating html_dump file: #{file_name}\n"
-      file = File.new(file_name, "w")
-      file.write(html)
-      file.close
-    end
-  end
-  
-  def get_with_dump(page, params={})
-    get(page, params)
-    html_dump(page, @response.body)
-  end
-
   def test_index
     get_with_dump :index
     assert_response :success
@@ -311,52 +287,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :show_comments_for_user, :id => 1
     assert_response :success
     assert_template("list_comments")
-  end
-
-  # Pages that require login
-  def login(user='rolf', password='testpassword')
-    get :news 
-    user = User.authenticate(user, password)
-    assert(user)
-    session['user'] = user
-  end
-  
-  def requires_login(page, params={}, stay_on_page=true, user='rolf', password='testpassword')
-    get(page, params) # Expect redirect
-    assert_redirected_to(:controller => "account", :action => "login")
-    user = User.authenticate(user, password)
-    assert(user)
-    session['user'] = user
-    get_with_dump(page, params)
-    if stay_on_page
-      assert_response :success
-      assert_template page.to_s
-    end
-  end
-  
-  def requires_user(page, alt_page, params={}, stay_on_page=true, username='rolf', password='testpassword')
-    alt_username = 'mary'
-    if username == 'mary':
-      alt_username = 'rolf'
-    end
-    get(page, params) # Expect redirect
-    assert_redirected_to(:controller => "account", :action => "login")
-    user = User.authenticate(alt_username, 'testpassword')
-    assert(user)
-    session['user'] = user
-    get(page, params) # Expect redirect
-    if alt_page.class == Array
-      assert_redirected_to(:controller => alt_page[0], :action => alt_page[1])
-    else
-      assert_template alt_page.to_s
-    end
-    
-    login username, password
-    get_with_dump(page, params)
-    if stay_on_page
-      assert_response :success
-      assert_template page.to_s
-    end
   end
   
   def test_add_comment

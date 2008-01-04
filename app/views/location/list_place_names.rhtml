@@ -1,0 +1,44 @@
+<%  if @title.nil?
+        @title = 'Locations'
+    end %>
+<div id="Title"><%= @title %></div>
+
+<table cellpadding="5" cellspacing="0" width="100%">
+    <tr valign="top">
+        <td>
+            <div id="SubTitle"><%= :list_place_names_known.l %></div>
+            <table cellpadding="5" cellspacing="0" width="100%">          
+              <%
+                 odd_or_even = 0
+                 for datum in @known_data
+                   odd_or_even = 1 - odd_or_even
+                 %>
+              <tr valign="top" class="ListLine<%= odd_or_even %>">
+                <td width="100%">
+            		<%= location_link(nil, datum["location_id"],  datum["cnt"]) %>
+                </td>
+              </tr>
+              <% end %>
+            </table>
+        </td>
+        <td>
+            <div id="SubTitle"><%= :list_place_names_undef.l %></div>
+            <table cellpadding="5" cellspacing="0" width="100%">          
+              <%
+                 odd_or_even = 0
+                 for datum in @undef_data
+                   odd_or_even = 1 - odd_or_even
+                 %>
+              <tr valign="top" class="ListLine<%= odd_or_even %>">
+                <td width="100%">
+            		<%= location_link(datum["where"], nil,  datum["cnt"]) %>
+            		<%= link_to("Merge", :action => 'list_merge_options', :where => datum["where"]) %>
+                </td>
+              </tr>
+              <% end %>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<br/>

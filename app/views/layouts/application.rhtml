@@ -20,6 +20,9 @@
     stylesheet_link_tag 'general', css
   %>
   <%= "<link rel=\"SHORTCUT ICON\" href=\"#{DOMAIN}/images/favicon.ico\" />"%>
+  <% if @header %>
+    <%= @header %>
+  <% end %>
 </head>
 <body>
     <div id="columns">

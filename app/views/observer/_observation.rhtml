@@ -16,7 +16,7 @@
 		<td valign="middle">
 			<% end %>
 			<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name)), :action => 'show_observation', :id => observation.id) %></span><br/>
-			<span class="ListWhere"><%= truncate(h(observation.where), MAX_FIELD_LENGTH) %></span><br/>
+			<span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span><br/>
 			<span class="ListWhen"><%= observation.when %>:</span>
 			<span class="ListWho"><%= truncate(h(observation.user.unique_text_name), MAX_WHO_LENGTH) %></span>
 		</td>

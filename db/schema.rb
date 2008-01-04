@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 21) do
+ActiveRecord::Schema.define(:version => 22) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -46,6 +46,21 @@ ActiveRecord::Schema.define(:version => 21) do
     t.column "form_name",    :string,  :limit => 20
   end
 
+  create_table "locations", :force => true do |t|
+    t.column "created",      :datetime
+    t.column "modified",     :datetime
+    t.column "user_id",      :integer,                 :default => 0, :null => false
+    t.column "version",      :integer,                 :default => 0, :null => false
+    t.column "display_name", :string,   :limit => 200
+    t.column "notes",        :text
+    t.column "north",        :float
+    t.column "south",        :float
+    t.column "west",         :float
+    t.column "east",         :float
+    t.column "high",         :float
+    t.column "low",          :float
+  end
+
   create_table "names", :force => true do |t|
     t.column "created",          :datetime
     t.column "modified",         :datetime
@@ -64,20 +79,38 @@ ActiveRecord::Schema.define(:version => 21) do
   end
 
   create_table "observations", :force => true do |t|
-    t.column "created",        :datetime
-    t.column "modified",       :datetime
-    t.column "when",           :date
-    t.column "user_id",        :integer
-    t.column "where",          :string,   :limit => 100
-    t.column "specimen",       :boolean,                 :default => false, :null => false
-    t.column "notes",          :text
-    t.column "thumb_image_id", :integer
-    t.column "name_id",        :integer
+    t.column "created",                :datetime
+    t.column "modified",               :datetime
+    t.column "when",                   :date
+    t.column "user_id",                :integer
+    t.column "where",                  :string,   :limit => 100
+    t.column "specimen",               :boolean,                 :default => false, :null => false
+    t.column "notes",                  :text
+    t.column "thumb_image_id",         :integer
+    t.column "name_id",                :integer
+    t.column "location_id",            :integer
+    t.column "is_collection_location", :boolean,                 :default => true,  :null => false
   end
 
   create_table "observations_species_lists", :id => false, :force => true do |t|
     t.column "observation_id",  :integer, :default => 0, :null => false
     t.column "species_list_id", :integer, :default => 0, :null => false
+  end
+
+  create_table "past_locations", :force => true do |t|
+    t.column "location_id",  :integer
+    t.column "created",      :datetime
+    t.column "modified",     :datetime
+    t.column "user_id",      :integer,                 :default => 0, :null => false
+    t.column "version",      :integer,                 :default => 0, :null => false
+    t.column "display_name", :string,   :limit => 200
+    t.column "notes",        :text
+    t.column "north",        :float
+    t.column "south",        :float
+    t.column "west",         :float
+    t.column "east",         :float
+    t.column "high",         :float
+    t.column "low",          :float
   end
 
   create_table "past_names", :force => true do |t|

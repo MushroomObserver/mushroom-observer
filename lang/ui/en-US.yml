@@ -69,6 +69,10 @@ ask_webmaster_send: Send
 ask_webmaster_your_email: Your email address
 
 
+# location/create_location
+create_location_title: Create Location
+
+
 # account/email_new_password
 email_new_password_button: Send
 email_new_password_login: Login
@@ -99,6 +103,27 @@ form_list_feedback_missing_names_help: >
     list, create a correct file and select it for upload.
 
 
+# location/_form_location
+form_locations_east: East
+form_locations_help: >
+  Enter a distinct name for this location that is understandable internationally. Examples,<br/>
+  "Mitrula Marsh", Yuba Co., California, USA<br/>Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil.
+
+form_locations_highest: Highest altitude
+form_locations_lat_long_finders: Here are some lat/long finders to help you find this location
+form_locations_lat_long_help: All values should be<br/>in decimal degrees.
+form_locations_lowest: Lowest altitude
+form_locations_meters: meters
+form_locations_north: North
+form_locations_notes: Notes
+form_locations_notes_help: >
+  Enter notes that are specific to this particular location. For example, habitat type,
+  dominate plants, annual rainfall, nearby water, soil type etc.
+
+form_locations_south: South
+form_locations_west: West
+form_locations_where: Where
+
 # observer/_form_name
 form_names_author: Author
 form_names_author_help: >
@@ -127,6 +152,11 @@ form_names_text_name_locked: Name is in use.  Make name changes in each observat
 # observer/_form_observations
 form_observations_deprecated: The name '%s' is deprecated.
 form_observations_deprecated_help: Select a valid name or click '%s' to use '%s'.
+form_observations_is_collection_location: Is Collection Location
+form_observations_is_collection_location_help: >
+  Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom
+  was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
+
 form_observations_log_change: Log Change
 form_observations_multiple_names: Multiple names match '%s'.  Select the one you intended
 form_observations_multiple_names_help: The number after each name is how many observations are currently using that name.
@@ -430,6 +460,24 @@ intro_source_code: >
 intro_title: Introduction
 
 
+# location/list_merge_options
+list_merge_options_near_matches: Near Matches
+list_merge_options_others: Other Available Locations
+list_merge_options_title: Merge Options for %s
+
+
+# location/list_place_names
+list_place_names_known: Known Locations (alphabetical)
+list_place_names_undef: Undefined Locations (by frequency)
+
+
+# application_helper
+location_all: All Locations
+location_define: Define This Location
+location_merge: Merge With A Defined Location
+location_show_map: Show Map
+
+
 # account/login
 login_forgot_password: I forgot my password.  "Email me a new one":%s.
 login_having_problems: If you are having problems logging into your account, send "email to the webmaster":%s.
@@ -448,6 +496,9 @@ logout_note: You are now logged out of the Mushroom Observer.  Editing functions
 # _name
 name_change: Change to Name
 
+# name/map
+name_map_about: About
+name_map_title: Distribution Map for
 
 # account/no_commercial_email
 no_commercial_welcome: Welcome
@@ -540,6 +591,71 @@ rss_title: Mushroom Observer
 
 # observer/list_rss_logs
 rss_log_title: Activity Log
+
+
+# location/show_location
+show_location_by: by
+show_location_created: Location created
+show_location_edit: Edit
+show_location_east: East
+show_location_high: Highest altitude
+show_location_low: Lowest altitude
+show_location_meters: meters
+show_location_modified: Last modified
+show_location_north: North
+show_location_notes: Notes
+show_location_observations: Observations at
+show_location_older_versions: Older Versions
+show_location_south: South
+show_location_title: Location
+show_location_west: West
+show_location_version: Version
+
+
+# observer/show_observation
+show_observation_about: About
+show_observation_add_comment: Add Comment
+show_observation_add_images: Add Images
+show_observation_alternative: Alternative
+show_observation_are_you_sure: Are you sure?
+show_observation_collection_location: Collection location
+show_observation_comments: Comments
+show_observation_created: Created
+show_observation_destroy: Destroy
+show_observation_edit: Edit
+show_observation_edit_observation: Edit Observation
+show_observation_google_images: Google Images
+show_observation_images: Images
+show_observation_last_modified: Last modiefied
+show_observation_manage_species_lists: Manage Species Lists
+show_observation_name: name
+show_observation_names: names
+show_observation_next: Next
+show_observation_notes: Notes
+show_observation_observation_created: Observation created
+show_observation_preferred: Preferred
+show_observation_previous: Prev
+show_observation_remove_images: Remove Images
+show_observation_reuse_image: Reuse Image
+show_observation_seen_at: Seen at
+show_observation_send_question: Send Observer a Question
+show_observation_show_log: Show Log
+show_observation_specimen_available: Herbarium specimen available
+show_observation_specimen_not_available: No herbarium specimen
+show_observation_summary: Summary
+show_observation_title: Observation
+show_observation_when: When
+
+
+# observer/show_name
+show_name_distribution_map: Distribution Map
+
+
+# location/show_past_location
+show_past_location_no_version: No current version
+show_past_location_other_versions: Other Versions
+show_past_location_title: Location
+show_past_location_version: Version
 
 
 # account/signup

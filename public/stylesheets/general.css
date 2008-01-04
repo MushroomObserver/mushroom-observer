@@ -12,6 +12,24 @@ pre {
   font-size: 11px;
 }
 
+.gmap {
+  background-color: #ffffff;
+  color: #000000;  
+}
+
+.gmap a {
+    color: #a06463;
+}
+
+.gmap a:visited {
+    color: #3b2821;
+}
+
+.gmap a:hover {
+    color: #743931;
+    background-color:#f6f0f2;
+}
+
 .fieldWithErrors {
   padding: 2px;
   background-color: red;
@@ -118,7 +136,7 @@ div.progressBar div.background {
 .ListActions {
     font-size: small;
     text-align: right;
-    padding-left: lem;
+    padding-left: 1em;
 }
 
 .ImageFields {
@@ -163,6 +181,14 @@ div.progressBar div.background {
     padding-top: 3px;
     text-align: center;
     font-size: x-small;
+}
+
+
+#SubTitle {
+  padding: 6px;
+  text-align: center;
+  font-size: 20px;
+  line-height: 24px;
 }
 
 #Title {

@@ -2,6 +2,9 @@
         @title = 'Observations'
     end %>
 <div id="Title"><%= @title %></div>
+<% if @links %>
+    <%= (@links.map {|l| link_to(*l) }).join(' | ') %><br/>
+<% end %>
 	<%= pagination_links(@observation_pages) %>
 	<table cellspacing="0" width="100%">
 		<%

@@ -1,0 +1,16 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+albion_0:
+  id: 1
+  location_id: 1
+  created: 2007-12-27 06:41:20
+  modified: 2007-12-27 06:41:20
+  user_id: 1
+  version: 0
+  display_name: Albion, Mendocino Co., California, USA
+  north: 39.3
+  west: -123.8
+  east: -123.7
+  south: 39.2
+  high: 100.0
+  low: 0.0

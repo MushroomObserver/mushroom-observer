@@ -25,8 +25,8 @@
                 <table cellpadding="5" cellspacing="5" border="0">
                     <%
                     total = 0
-                    for field in [:observations, :images, :names, :past_names, :species_lists,
-                                  :species_list_entries, :comments]
+                    for field in [:observations, :images, :names, :past_names, :locations, :past_locations,
+                                  :species_lists, :species_list_entries, :comments]
                         count = @user_data[field]
                         if count
                             %>

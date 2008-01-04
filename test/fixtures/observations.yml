@@ -3,7 +3,7 @@ minimal_unknown:
   id:        1
   when:      2006-05-11
   user_id:   2
-  where:     Burbank, California
+  location_id: 2
   name_id:   1
 
 detailed_unknown:
@@ -12,7 +12,7 @@ detailed_unknown:
   modified:  2006-05-12 17:21:00
   when:      2006-05-11
   user_id:   2
-  where:     Burbank, California
+  location_id: 2
   specimen:  1
   notes:     Found in a strange place
   name_id:   1
@@ -34,7 +34,7 @@ agaricus_campestris_obs:
   modified:  2007-03-19 20:21:00
   when:      2007-03-19
   user_id:   1
-  where:     Burbank, California
+  location_id: 2
   specimen:  0
   notes:     From the lawn next door
   name_id:   3
@@ -45,7 +45,7 @@ agaricus_campestrus_obs:
   modified:  2007-06-23 20:00:00
   when:      2007-06-23
   user_id:   1
-  where:     Burbank, California
+  location_id: 2
   specimen:  0
   notes:     From somewhere else
   name_id:   19
@@ -56,7 +56,7 @@ agaricus_campestras_obs:
   modified:  2007-06-24 12:00:00
   when:      2007-06-24
   user_id:   1
-  where:     Burbank, California
+  location_id: 2
   specimen:  0
   notes:     From somewhere else
   name_id:   20
@@ -68,7 +68,7 @@ agaricus_campestros_obs:
   modified:  2007-06-24 12:00:00
   when:      2007-06-24
   user_id:   1
-  where:     Burbank, California
+  location_id: 2
   specimen:  0
   notes:     From somewhere else
   name_id:   21

@@ -1,5 +1,9 @@
 <% @title = 'Name: ' + h(@name.text_name) %>
-<%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % @name.text_name) %><br/>
+<%= sprintf('<a href="http://images.google.com/images?q=%s" target="_new">Google Images</a>' % @name.text_name) %>
+<% if @data != [] %>
+    | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => @name.id) %>
+<% end %>
+<br/>
 <%= link_to 'Edit Name', :action => 'edit_name', :id => @name %>
 | <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %>
 | <%= link_to('Change Synonyms', :action => 'change_synonyms', :id => @name)%>
@@ -34,7 +38,7 @@
     <% end %>
 	Version: <%= @name.version %><br/>
 	<% if @past_name %>
-	    <%= link_to("Previous version: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id ) %>
+	    <%= link_to("Previous version: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id) %>
 	<% end %>
 </p>
 
@@ -42,6 +46,8 @@
 <div>
     <%= textilize(sanitize(@name.notes.to_s)) %>
 </div>
+
+<% if @data != [] %>
 
 <p>Observations:</p>
 <table cellpadding="5" cellspacing="0">
@@ -64,13 +70,14 @@
 	    <td width="100%" valign="middle">
 			<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
 		                                        :action => 'show_observation', :id => id) %></span><br/>
-	        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
+	        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
 	        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
 	        Observation made: <%= datum["when"]%>
 	    </td>
   	</tr>
     <% end %>
 </table>
+<% end %>
 <%
 if @synonym_data != []
     %>
@@ -83,7 +90,7 @@ if @synonym_data != []
 		id = datum["id"]
 		%>
 		<tr valign="top" class="ListLine<%= odd_or_even %>">
-	    	<td width="110"" align="center" valign="middle">
+	    	<td width="110" align="center" valign="middle">
 				<%=
 				image_id = datum["thumb_image_id"]
 				if image_id
@@ -95,7 +102,7 @@ if @synonym_data != []
 		    <td width="100%" valign="middle">
 				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
 			                                        :action => 'show_observation', :id => id) %></span><br/>
-		        <span class="ListWhere"><%= truncate(h(datum["where"]), MAX_FIELD_LENGTH) %></span>: 
+		        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
 		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
 		        Observation made: <%= datum["when"]%>
 		    </td>

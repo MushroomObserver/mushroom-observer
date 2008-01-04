@@ -1,0 +1,18 @@
+<%  if @title.nil?
+        where = sanitize(@location.display_name)
+        @title = "#{:show_location_title.l}: #{where}"
+    end %>
+
+<div id="Title"><%= @title %></div>
+
+<%= link_to("#{:show_location_observations.l} #{where}", :controller => "observer",
+            :action => "show_location_observations", :id => @location) %><br/>
+<%= link_to(:location_all.l, :action => 'list_place_names') %> |
+<%= link_to(:show_location_edit.l, :action => 'edit_location', :id => @location) %>
+<% if @past_location %>
+    | <%= link_to("#{:show_location_older_versions.l}", :action => 'show_past_location', :id => @past_location.id ) %>
+<% end %>
+<br/><br/>
+<%= error_messages_for 'location' %>
+
+<%= render :partial => 'show_location', :locals => { :location => @location } %>

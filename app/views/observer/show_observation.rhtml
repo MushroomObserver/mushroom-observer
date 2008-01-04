@@ -1,30 +1,31 @@
-<% @title       = 'Observation: ' + h(@observation.unique_text_name)
+<% @title       = "#{:show_observation_title.l} #{h(@observation.unique_text_name)}"
    what         = textilize_without_paragraph(h(@observation.base_name))
    name         = @observation.name
    questions_ok = @observation.user.question_email %>
 
-<%= link_to("About #{what}", :action => 'show_name', :id => name.id)%>
-| <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % name.text_name) %><br/>
+<%= link_to("#{:show_observation_about.l} #{what}", :action => 'show_name', :id => name.id)%>
+| <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %><br/>
 
-<%= link_to 'Add Comment', :action => 'add_comment', :id => @observation %>
-| <%= link_to 'Manage Species Lists', :action => 'manage_species_lists', :id => @observation %>
+<%= link_to :show_observation_add_comment.l, :action => 'add_comment', :id => @observation %>
+| <%= link_to :show_observation_manage_species_lists.l, :action => 'manage_species_lists', :id => @observation %>
 <% if questions_ok %>
-	| <%= link_to 'Send Observer a Question', :action => 'ask_question', :id => @observation %>
+	| <%= link_to :show_observation_send_question.l, :action => 'ask_question', :id => @observation %>
 <% end %>
 
 <%	if not session['observation_ids'].nil? %>
-		<br/><%= link_to 'Prev', :action => 'prev_observation', :id => @observation %>
-		| <%= link_to 'Next', :action => 'next_observation', :id => @observation %>
+		<br/><%= link_to :show_observation_previous.l, :action => 'prev_observation', :id => @observation %>
+		| <%= link_to :show_observation_next.l, :action => 'next_observation', :id => @observation %>
 <%  end %>
 
-<div id="Title"><%= 'Observation: ' + textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
+<div id="Title">
+    <%= "#{:show_observation_title.l}: #{textilize_without_paragraph(h(@observation.unique_format_name))}" %>
+</div>
 
 <% if check_permission(@observation.user_id) %>
-	<%= link_to 'Edit Observation', :action => 'edit_observation', :id => @observation %>
-	| <%= link_to 'Destroy', { :action => 'destroy_observation', :id => @observation },
-                  :confirm => "Are you sure?" %><br/>
+	<%= link_to :show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation %>
+	| <%= link_to :show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation },
+                  :confirm => :show_observation_are_you_sure.l %><br/>
 <% end %>
 
 <%= render :partial => 'show_observation', :locals => {
     :observation => @observation, :do_title => false, :skip_comment => nil } %>
-

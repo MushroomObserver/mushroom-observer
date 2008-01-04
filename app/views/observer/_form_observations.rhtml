@@ -50,11 +50,15 @@
 </p>
 <br/>
 
-<label for="observation_where"><%= :form_observations_where.l %>:</label>
-<%= text_field_with_auto_complete('observation', 'where', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-<span class="HelpNote"><%= :form_observations_where_help.l %></span>
+<label for="observation_place_name"><%= :form_observations_where.l %>:</label>
+<%= text_field_with_auto_complete('observation', 'place_name', {}, { :skip_style => true, :indicator => 'indicator' }) %>
+<br/><span class="HelpNote"><%= :form_observations_where_help.l %></span>
 <br/><br/>
+<%= check_box("observation", "is_collection_location") %>
+<label for="observation_is_collection_location"><%= :form_observations_is_collection_location.l %></label><br/>
+<span class="HelpNote"><%= :form_observations_is_collection_location_help.l %></span>
 
+<br/><br/><br/>
 <label for="observation_what"><%= :form_observations_what.l %>:</label>
 <%= text_field_with_auto_complete('observation', 'what', {}, { :skip_style => true, :indicator => 'indicator' }) %>
 <br/>
@@ -70,6 +74,7 @@
 -->
 <%= javascript_tag 'Element.addClassName($("observation_what_auto_complete"), "auto_complete_scroll")' %>
 
+<br/>
 <p>
     <%= check_box("observation", "specimen") %>
     <label for="observation_specimen"><%= :form_observations_specimen_available.l %></label><br/>
@@ -81,7 +86,7 @@
 <p><label for="observation_notes"><%= :form_observations_notes.l %>:</label>
 	<span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
 <%= text_area 'observation', 'notes' %></p>
-<%= render :partial => 'textilize_help' %>
+<%= render :partial => 'shared/textilize_help' %>
 
 <% if logging_optional %>
 <p>

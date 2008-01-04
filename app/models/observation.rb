@@ -9,6 +9,7 @@ class Observation < ActiveRecord::Base
   belongs_to :user
   has_one :rss_log
   belongs_to :name
+  belongs_to :location
 
   def log(msg, touch)
     if self.rss_log.nil?
@@ -135,12 +136,31 @@ class Observation < ActiveRecord::Base
     end
   end
 
+  # Abstraction over self.where and self.location.display_name
+  # Prefer location to where
+  def place_name()
+    if self.location
+      self.location.display_name
+    else
+      self.where
+    end
+  end
+  
+  def place_name=(where)
+    self.where = where
+    self.location = Location.find_by_display_name(where)
+  end
+
   protected
   def self.all_observations
     find(:all,
          :order => "'when' desc")
   end
 
-  validates_presence_of :user, :where
+  def validate
+    errors.add(:where, "where or location must be set") if (where.nil? || where == '') && location_id.nil?
+  end
+
+  validates_presence_of :user
 
 end

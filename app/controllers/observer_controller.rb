@@ -11,7 +11,7 @@ end
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:all_names,
                                                     :ask_webmaster_question,
-                                                    :auto_complete_for_observation_where,
+                                                    :auto_complete_for_observation_place_name,
                                                     :auto_complete_for_observation_what,
                                                     :color_themes,
                                                     :do_load_test,
@@ -38,6 +38,7 @@ class ObserverController < ApplicationController
                                                     :show_comment,
                                                     :show_comments_for_user,
                                                     :show_image,
+                                                    :show_location_observations,
                                                     :show_name,
                                                     :show_observation,
                                                     :show_original,
@@ -49,16 +50,18 @@ class ObserverController < ApplicationController
                                                     :show_user_observations,
                                                     :species_lists_by_title,
                                                     :throw_error,
-                                                    :users_by_contribution])
+                                                    :users_by_contribution,
+                                                    :where_search])
 
-  def auto_complete_for_observation_where
-    part = params[:observation][:where].downcase.gsub(/[*']/,"%")
+  def auto_complete_for_observation_place_name
+    part = params[:observation][:place_name].downcase.gsub(/[*']/,"%")
     @items = Observation.find(:all, {
-      :conditions => "LOWER(observations.where) LIKE '#{part}%'",
+      :include => :location,
+      :conditions => "LOWER(observations.where) LIKE '#{part}%' or LOWER(locations.display_name) LIKE '#{part}%'",
       :order => "observations.where ASC",
       :limit => 10,
     })
-    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry['where']))) }.uniq) %>"
+    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry.place_name))) }.uniq) %>"
   end
 
   def auto_complete_for_observation_what
@@ -186,7 +189,7 @@ class ObserverController < ApplicationController
     store_location
     @layout = calc_layout_params
     session['checklist_source'] = nil # Meaning all species
-    session['observation_ids'] = self.query_ids("select id, `when` from observations order by `when` desc")
+    session['observation_ids'] = query_ids("select id, `when` from observations order by `when` desc")
     session['observation'] = nil
     session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations,
@@ -199,13 +202,45 @@ class ObserverController < ApplicationController
     store_location
     @layout = calc_layout_params
     session['checklist_source'] = nil # Meaning all species
-    session['observation_ids'] = self.query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
+    session['observation_ids'] = query_ids("select o.id, n.search_name from observations o, names n where n.id = o.name_id order by text_name asc, `when` desc")
     session['observation'] = nil
     session['image_ids'] = nil
     @observation_pages, @observations = paginate(:observations, :include => "name",
                                                  :order => "names.search_name asc, `when` desc",
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
+  end
+
+  def show_selected_observations(title, conditions, order, links=nil)
+    # If provided, link should be the arguments for link_to as a list
+    store_location
+    @layout = calc_layout_params
+    @title = title
+    @links = links
+    query = "select observations.id, names.search_name from observations, names left outer join locations on observations.location_id = locations.id
+             where observations.name_id = names.id and (#{conditions}) order by #{order}"
+    session['checklist_source'] = 0 # Meaning use observation_ids
+    session['observation_ids'] = query_ids(query)
+    session['observation'] = nil
+    session['image_ids'] = nil
+    @observation_pages, @observations = paginate(:observations, :include => [:name, :location],
+                                                 :order => order,
+                                                 :conditions => conditions,
+                                                 :per_page => @layout["count"])
+    render :action => 'list_observations'
+  end
+
+  def where_search
+    where = params[:where]
+    if where
+      session["where"] = where
+    end
+    where = session["where"]
+    sql_pattern = "%#{where.gsub(/[*']/,"%")}%"
+    show_selected_observations(where, "observations.where like '#{sql_pattern}'",
+      "names.search_name asc, observations.`when` desc",
+      [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => where}],
+       [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => where}]])
   end
 
   # pattern_search.rhtml
@@ -227,9 +262,9 @@ class ObserverController < ApplicationController
       session["search_type"] = params[:commit]
     end
     case session["search_type"]
-    when 'Images'
+    when :app_images_find.l
       image_search(pattern)
-    when 'Names'
+    when :app_names_find.l
       name_search(pattern)
     else
       observation_search(pattern)
@@ -249,25 +284,17 @@ class ObserverController < ApplicationController
     session['checklist_source'] = 0 # Meaning use observation_ids
     session['observation_ids'] = []
     session['observation'] = nil
-    session['image_ids'] = self.query_ids(query)
+    session['image_ids'] = query_ids(query)
     @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
     render :action => 'list_images'
   end
 
   def observation_search(pattern)
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["names.search_name", "observations.where", "observations.notes"], sql_pattern)
-    query = "select observations.id, names.search_name from observations, names
-             where observations.name_id = names.id and (#{conditions}) order by names.search_name asc, `when` desc"
-    session['checklist_source'] = 0 # Meaning use observation_ids
-    session['observation_ids'] = self.query_ids(query)
-    session['observation'] = nil
-    session['image_ids'] = nil
-    @observation_pages, @observations = paginate(:observations, :include => "name",
-                                                 :order => "names.search_name asc, `when` desc",
-                                                 :conditions => conditions,
-                                                 :per_page => @layout["count"])
-    render :action => 'list_observations'
+    show_selected_observations(nil,
+      field_search(["names.search_name", "observations.where",
+        "observations.notes", "locations.display_name"], sql_pattern),
+      "names.search_name asc, observations.`when` desc")
   end
 
   def name_search(pattern)
@@ -520,7 +547,7 @@ class ObserverController < ApplicationController
     session['checklist_source'] = nil # Meaning all species
     session['observation_ids'] = []
     session['observation'] = nil
-    session['image_ids'] = self.query_ids("select id, `when` from images order by `when` desc")
+    session['image_ids'] = query_ids("select id, `when` from images order by `when` desc")
 
     store_location
     @layout = calc_layout_params
@@ -1274,23 +1301,18 @@ class ObserverController < ApplicationController
   end
 
   def show_user_observations
-    store_location
     user = User.find(params[:id])
-    @layout = calc_layout_params
-    @title = "Observations by %s" % user.legal_name
-    conditions = "observations.user_id = %s" % user.id
-    order = "observations.modified desc, `when` desc"
-    query = "select observations.id, names.search_name from observations, names
-             where observations.name_id = names.id and %s order by %s" % [conditions, order]
-    session['checklist_source'] = 0 # Meaning use observation_ids
-    session['observation_ids'] = self.query_ids(query)
-    session['observation'] = nil
-    session['image_ids'] = nil
-    @observation_pages, @observations = paginate(:observations, :include => "name",
-                                                 :order => order,
-                                                 :conditions => conditions,
-                                                 :per_page => @layout["count"])
-    render :action => 'list_observations'
+    show_selected_observations("Observations by %s" % user.legal_name,
+      "observations.user_id = %s" % user.id,
+      "observations.modified desc, observations.`when` desc")
+  end
+    
+  def show_location_observations
+    loc = Location.find(params[:id])
+    show_selected_observations("Observations from %s" % loc.display_name,
+      "observations.location_id = %s" % loc.id,
+      "names.search_name, observations.`when` desc",
+      [[:location_show_map.l, {:controller => 'location', :action => 'show_location', :id => loc.id}]])
   end
 
   def show_comments_for_user
@@ -1413,7 +1435,7 @@ class ObserverController < ApplicationController
     session['checklist_source'] = nil # Meaning all species
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
             "modified is not null order by 'modified' desc"
-    session['observation_ids'] = self.query_ids(query)
+    session['observation_ids'] = query_ids(query)
     session['observation'] = nil
     session['image_ids'] = nil
     @rss_log_pages, @rss_logs = paginate(:rss_log,
@@ -1512,7 +1534,7 @@ class ObserverController < ApplicationController
       read_syn_session
       @name = Name.find(params[:id])
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
-      query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where," +
+      query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where, o.location_id," +
               " u.name, u.login, n.observation_name from observations o, users u, names n" +
               " where n.id = %s and o.user_id = u.id and n.id = o.name_id order by o.when desc"
       @data = Observation.connection.select_all(query % params[:id])
@@ -2133,12 +2155,6 @@ class ObserverController < ApplicationController
     [image_list, current_id]
   end
 
-  helper_method :check_permission
-  def check_permission(user_id)
-    user = session['user']
-    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
-  end
-
   helper_method :calc_color
   def calc_color(row, col, alt_rows, alt_cols)
     color = 0
@@ -2219,15 +2235,4 @@ class ObserverController < ApplicationController
     end
     result
   end
-
-  def verify_user()
-    result = false
-    if session['user'].verified.nil?
-      redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id
-    else
-      result = true
-    end
-    result
-  end
-  # Look in obs_extras.rb for code for uploading directory trees of images.
 end

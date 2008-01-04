@@ -1,12 +1,14 @@
 #  Created by Nathan Wilson on 2007-05-12.
 #  Copyright (c) 2007. All rights reserved.
 
-ALL_FIELDS = [:images, :names, :past_names, :species_lists, :species_list_entries, :comments, :observations, :users]
+ALL_FIELDS = [:images, :names, :past_names, :locations, :past_locations, :species_lists, :species_list_entries, :comments, :observations, :users]
 
 FIELD_WEIGHTS = {
   :images => 10,
   :names => 10,
   :past_names => 10,
+  :locations => 5,
+  :past_locations => 5,
   :species_lists => 5,
   :species_list_entries => 1,
   :comments => 1,
@@ -18,6 +20,8 @@ FIELD_TITLES = {
   :images => "Images",
   :names => "Names",
   :past_names => "Previous Name Edits",
+  :locations => "Locations",
+  :past_locations => "Previous Location Edits",
   :species_lists => "Species Lists",
   :species_list_entries => "Species List Entries",
   :comments => "Comments",
@@ -90,6 +94,8 @@ private
     load_field_counts(:images) # 20
     load_field_counts(:names) # 10
     load_field_counts(:past_names) # 10
+    load_field_counts(:locations) # 5
+    load_field_counts(:past_locations) # 5
     load_field_counts(:species_lists) # 5
     load_field_counts(:comments) # 1
     load_field_counts(:observations) # 1

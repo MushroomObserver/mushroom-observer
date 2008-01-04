@@ -3,20 +3,23 @@
 Active tasks:
 
 *** Improve 'where' (Nathan's active task)
-  - - need to implement show_location
-    list observations from that location
-  - What merging should create_location do? - merges when names are the same.
-  - Create location not working
-  - Where: should use show_location when it can
-  - list_place_names should have way to show the affected observations
-  - edit_location -> update_location
-  - lat/long finder links: http://www.satsig.net/maps/lat-long-finder.htm, http://www.ccalmr.ogi.edu/nanoos/latlon.php
-  PastLocations
-  Hook up to Google Maps
+  Merge
+  Create data in the migration
   Release
   
+  update how_to_use page to include location documentation
+  interactive map for edit_location and create_location
+  map_selection
   altitude as ft or meters
   Future ideas:
+    Constrain fixed sets like country, state and county to valid values
+    Clicking on an undefined location should take logged in users to the definition page
+    Hierarchical locations
+    Smarter autocomplete
+    Map size based on window size
+    Count at each location
+    Different marker color if it's a synonym or if your own observation is included
+    Different marker color for specimens with herbarium material
     Explicit error and/or 'secretness'
     Shape information from Darwin Core
     Photos of location

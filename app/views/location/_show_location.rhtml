@@ -1,0 +1,59 @@
+<center><%= @map.div(:width => "800", :height => "480") %></center>
+<table width="100%" cellpadding="10">
+    <tr>
+        <td align="center">
+            <table cellpadding="5">
+                <tr>
+                    <td></td>
+                    <td>
+                        <%= "#{:show_location_north.l}: #{location.north}º"%>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>
+                        <%= "#{:show_location_west.l}: #{location.west}º"%>
+                    </td>
+                    <td></td>
+                    <td>
+                        <%= "#{:show_location_east.l}: #{location.east}º"%>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <%= "#{:show_location_south.l}: #{location.south}º"%>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </td>
+        <td align="center">
+            <table cellpadding="5">
+                <tr><td>
+                    <% if location.high %>
+                        <%= "#{:show_location_high.l}: #{location.high} #{:show_location_meters.l}"%>
+                    <% end %>
+                </td></tr>
+                <tr><td>
+                    <% if location.low %>
+                        <%= "#{:show_location_low.l}: #{location.low} #{:show_location_meters.l}"%>
+                    <% end %>
+                </td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<% if location.notes && location.notes != '' %>
+    <p>
+        <%= "#{:show_location_notes.l}: #{textilize(sanitize(location.notes))}"%>
+    </p>
+<% end %>
+
+<p><span class="Date">
+    <%= "#{:show_location_version.l}: #{location.version}" %><br/>
+    <%= "#{:show_location_created.l}: #{location.created}" %><br/>
+    <%= "#{:show_location_modified.l}: #{location.modified} #{:show_location_by.l} #{location.user.unique_text_name}" %><br/>
+    </span>
+</p>

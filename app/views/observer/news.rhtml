@@ -5,6 +5,42 @@
 This page lists the latest changes to and news about the Mushroom Observer website.
 </p>
 
+<h3>Thursday January 3, 2008</h3>
+<ol>
+    <li><p>At long last, I am very excited to announce a major new feature for the Mushroom Observer website - Google Maps!  The most interesting maps currently supported are Distribution Maps.  Here's an example for 
+<%= link_to("<i>Craterellus cornucopioides</i>", :controller => 'name', :action => 'map', :id => 284) %>.  To get a map for a particular name, you go to the page for a name either from the 
+<%= link_to(:app_index_a_z.l, :controller => 'observer', :action => 'observation_index') %> link on the left side of any window or by clicking an 'About ...' link at the top of an observation page.  Once you're on the page for a name, there is a new link near the top called 'Distribution Map' which takes you to the map for that name.</p>
+
+<p>So like pretty much everything on Mushroom Observer, users can add to the Distribution Map for a name.  The easiest way is when you create a new observation, use an already defined location.  The auto-completion for the Where field will list all locations that are currently being used whether they are defined or not.  Right now there are only a few values that are defined, but I'm hoping that will change quickly as users define more locations (see below).  When creating or editing an observation, there is a checkbox labeled 'Is Collection Location'.  By default it is checked.  If you uncheck, then that observation will not get put on the distribution map.  This allows you to record observations of mushrooms in places like mushroom fairs, grocery stores or other places where you may not know where the mushroom was actually collected.</p>
+
+<p>After you enter a new observation, you can check to see if that location is defined by clicking on the location link on the resulting observation page.  If it is defined, then it will take you a location page that shows you a map of just that location.  Otherwise it will do a search for observations that have that value in the where field.  The search page will include links at the top to 'Define This Location' or 'Merge With A Defined Location'.</p>
+
+<p>Clicking a 'Define This Location' link will take you to a location creation page.  The first thing to review is the name of the location.  You are strongly encouraged to end each location with country.  In the USA you are also encouraged to include the full state name along with the county.  Abbreviations are discouraged with the exception of 'Co.' for County.  Thus a good name is:</p>
+
+<p>Salt Point State Park, Sonoma Co., California, USA</p>
+
+<p>a bad name is</p>
+
+<p>Salt Point, CA</p>
+
+<p>For other countries, I don't know enough to propose a concrete proposal, so I expect conventions will evolve over time.</p>
+
+<p>Locations are currently defined as a box that completely encloses the named location.  Part of intention with making the locations an area rather than a single GPS reading is to not force people to reveal their 'spots', while still getting something that is at least accurate to the county.  To define a location you enter the extreme north and south latitudes as well as the extreme east and west longitudes for that location.  To find the latitudes and longitudes, there are links to a couple of convenient location finder pages on the location creation/editing pages.  These will open in a separate window or tab.  You can then navigate to the location on the map and read off the position.  I am hoping to integrate this functionality into Mushroom Observer, but I wanted to get this first version out to get some feedback before diving into that problem.</p>
+
+<p>In addition to the position of the location, you can also provide a maximum and minimum altitude along with some notes.  Note that the altitudes should be in meters not feet.  Once you have filled out the form, click 'Create' to define the location.  It does a bit of sanity checking to make sure that the values are reasonable and that the name of the location is unique.  An existing location can be edited by going to the page for that location and clicking 'Edit'.  Anyone can change the information for a location, but the previous version of the information is kept as a reference to allow easy recovery if someone puts in the wrong information.</p>
+
+<p>A <%= link_to('list of all locations', :controller => 'location', :action => 'list_place_names') %> in the system is available.  You can reach it by clicking the 'All Locations' link from any of the location related pages.  This page lists both the defined locations (on the left, sorted alphabetically) and the undefined locations (on the right, sorted by the number of observations associated with that location).  My hope is that people will start clicking on the undefined locations and defining them starting with the ones that are in the most widespread use.</p>
+
+<p>Next to each undefined location is a 'Merge' link as well.  This allows you to handle the case where the same location has been given but in different forms (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park').  When you click a 'Merge' link it will do a quick search for any likely candidates and present those in one list and all the remaining locations in another in case it guessed wrong.  Clicking on any of those location links will perform the merge.</p>
+
+<p>In theory it would be possible for the same location to be defined more than once (presumably by different people).  If this happens, you can propose a merge by editing one of the locations and change the Where field to the value of the other location.  This will not have any immediate effect, but a warning will be given and an email will be sent to me with the details.  I've restricted the ability to merge defined locations since that could cause significant data loss.</p>
+
+<p>Please send me your <%= link_to('feedback', :controller => 'observer', :action => 'ask_webmaster_question') %> on this feature.  I have many ideas about how map use could be expanded in the future, but as always your feedback and requests will drive the order in which I do things.</p>
+
+<p>Hope you enjoy this new functionality!</p>
+    </li>
+</ol>
+
 <h3>Monday December 31, 2007</h3>
 <ol>
     <li>Emergency bug fix related to spontaneous logouts.  Logouts still happening, but users should not be losing data

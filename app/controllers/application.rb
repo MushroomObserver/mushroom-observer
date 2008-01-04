@@ -53,6 +53,34 @@ class ApplicationController < ActionController::Base
     :destroy_observation, :destroy_image,
     :destroy_comment, :destroy_species_list, :upload_image])
 
+  def make_table_row(list)
+    result = list.map {|x| "<td>#{x}</td>"}
+    result = "<tr>#{result.join}</tr>"
+  end
+
+  def map_loc(map, loc)
+    # info = ("<span class=\"gmap\">#{link_to(loc.display_name, :controller => 'location', :action => 'show_location', :id => loc.id)}<table>" +
+    info = ("<span class=\"gmap\"><a href=\"/location/show_location/#{loc.id}\">#{loc.display_name}</a><table>" +
+      make_table_row(['',loc.north,'']) +
+      make_table_row([loc.west, '', loc.east]) +
+      make_table_row(['', loc.south, '']) + "</table></span>")
+    pline = GPolyline.new([[loc.north, loc.west],[loc.north, loc.east],
+      [loc.south, loc.east], [loc.south, loc.west], [loc.north, loc.west]],"#00ff88",3,1.0)
+    map.overlay_init(GMarker.new(loc.center(),
+      :title => loc.display_name, :info_window => info))
+    map.overlay_init(pline)
+  end
+
+  def make_map(locs)
+    result = GMap.new("map_div")
+    result.control_init(:large_map => true,:map_type => true)
+    result.center_zoom_on_points_init(*((locs.map {|l| l.south_west}) + (locs.map {|l| l.north_east})))
+    for l in locs
+      map_loc(result, l)
+    end
+    result
+  end
+
   def paginate_by_sql(model, sql, per_page, options={})
     if options[:count]
         if options[:count].is_a? Integer
@@ -70,7 +98,24 @@ class ApplicationController < ActionController::Base
          object_pages.current.to_sql[1], per_page)
     return [object_pages, objects]
   end
-  
+
+  helper_method :check_permission
+  def check_permission(user_id)
+    user = session['user']
+    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
+  end
+
+  helper_method :verify_user
+  def verify_user()
+    result = false
+    if session['user'].verified.nil?
+      redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id
+    else
+      result = true
+    end
+    result
+  end
+
   private
   
     def disable_link_prefetching

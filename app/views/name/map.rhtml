@@ -1,0 +1,18 @@
+<%  if @title.nil?
+        what = textilize_without_paragraph(sanitize(@name.display_name))
+        @title = "#{:name_map_title.l} #{sanitize(@name.search_name)}"
+    end %>
+
+<div id="Title"><%= "#{:name_map_title.l} #{what}" %></div>
+
+<%= link_to("#{:name_map_about.l} #{what}", :controller => 'observer', :id => @name.id, :action => 'show_name') %><br/>
+
+<p>
+    <center>
+        <% if @map %>
+            <%= @map.div(:width => 800, :height => 550) %>
+        <% else %>
+            No observations of <%= what %> have mappable location information.
+        <% end %>
+    </center>
+</p>
