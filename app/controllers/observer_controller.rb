@@ -236,11 +236,15 @@ class ObserverController < ApplicationController
       session["where"] = where
     end
     where = session["where"]
-    sql_pattern = "%#{where.gsub(/[*']/,"%")}%"
-    show_selected_observations(where, "observations.where like '#{sql_pattern}'",
-      "names.search_name asc, observations.`when` desc",
-      [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => where}],
-       [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => where}]])
+    if where
+      sql_pattern = "%#{where.gsub(/[*']/,"%")}%"
+      show_selected_observations(where, "observations.where like '#{sql_pattern}'",
+        "names.search_name asc, observations.`when` desc",
+        [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => where}],
+         [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => where}]])
+    else
+      redirect_to(:controller => "location", :action => "list_place_names")
+    end
   end
 
   # pattern_search.rhtml

@@ -160,6 +160,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_template 'list_observations'
   end
 
+  def test_where_search
+    get_with_dump :where_search
+    assert_response :success
+    assert_template 'list_place_names'
+  end
+
   def test_prev_image
     get_with_dump :prev_image
     assert_redirected_to(:controller => "observer", :action => "show_image")

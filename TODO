@@ -168,6 +168,22 @@ Small features:
   Might be handled by having a toggle that says 'More images'/'Less images' this would also change
     the layout to rows with all the thumbs displayed
 
+More location and user links:
+Map of all locations
+
+Links page:
+    Mykoweb: http://mykoweb.com
+    Tom Volk's Fungus Pages: http://tomvolkfungi.net/
+    Index Fungorum: http://www.indexfungorum.org/Names/Names.asp
+    Mushroom Expert: http://mushroomexpert.com/
+    EOL.org: eol.org
+    NAMA: namyco.org
+    FFSC: http://www.fungusfed.org/
+    MSA: http://www.msafungi.org/
+    MatchMaker: http://www.pfc.cfs.nrcan.gc.ca/biodiversity/matchmaker/index_e.html
+    burning silo
+    ww.fungos.net
+
 Rename 'Features and Fixes' to include Date and version
 
 Create species list location should be ajaxified
