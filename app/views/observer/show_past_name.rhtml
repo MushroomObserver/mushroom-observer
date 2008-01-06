@@ -42,7 +42,7 @@
         <td>
             <p><span class="Date">
                 Name created: <%= @past_name.created %><br/>
-                Last modified: <%= @past_name.modified %> by <%= @past_name.user.unique_text_name %><br/>
+                Last modified: <%= @past_name.modified %> by <%= link_to(@past_name.user.unique_text_name, :action => 'show_user', :id => @past_name.user.id) %><br/>
                 </span>
             </p>
         </td>

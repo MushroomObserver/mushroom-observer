@@ -8,6 +8,6 @@
 
 <div id="Title">Comment on <%= textilize_without_paragraph(h(@comment.observation.unique_format_name)) %></div>
 <p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
-<p>By: <%= @comment.user.unique_text_name %></p>
+<p>By: <%= link_to(@comment.user.unique_text_name, :action => 'show_user', :id => @comment.user.id) %></p>
 <p>Summary: <%= @comment.summary %></p>
 Comment: <%= textilize(sanitize(@comment.comment)) %>

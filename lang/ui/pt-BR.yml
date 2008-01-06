@@ -21,6 +21,7 @@ app_images_find: Imagens
 app_index_a_z: Índice A->Z
 app_intro: Introdução
 app_join_mailing_list: Lista de Discussão
+app_locations_find: Locations
 app_login: Login
 app_logout: Sair
 app_names_find: Nomes
@@ -823,6 +824,7 @@ show_observation_add_comment: Add Comment
 show_observation_add_images: Add Images
 show_observation_alternative: Alternative
 show_observation_are_you_sure: Are you sure?
+show_observation_by: By
 show_observation_collection_location: Collection location
 show_observation_comments: Comments
 show_observation_created: Created

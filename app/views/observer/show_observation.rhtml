@@ -9,7 +9,7 @@
 <%= link_to :show_observation_add_comment.l, :action => 'add_comment', :id => @observation %>
 | <%= link_to :show_observation_manage_species_lists.l, :action => 'manage_species_lists', :id => @observation %>
 <% if questions_ok %>
-	| <%= link_to :show_observation_send_question.l, :action => 'ask_question', :id => @observation %>
+	| <%= link_to :show_observation_send_question.l, :action => 'ask_observation_question', :id => @observation %>
 <% end %>
 
 <%	if not session['observation_ids'].nil? %>

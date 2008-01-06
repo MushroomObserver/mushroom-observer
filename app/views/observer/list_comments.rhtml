@@ -26,7 +26,7 @@
 		<% end %>
 		<br/>
 		<span class="ListWhen"><%= comment.created %></span>:
-		 <span class="ListWho"><%= truncate(h(comment.user.unique_text_name), MAX_WHO_LENGTH) %></span><br/>
+		 <span class="ListWho"><%= link_to(truncate(h(comment.user.unique_text_name), MAX_WHO_LENGTH), :action => 'show_user', :id => comment.user.id) %></span><br/>
     </td>
   </tr>
   <% end %>

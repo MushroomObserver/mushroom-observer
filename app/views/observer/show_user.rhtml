@@ -1,7 +1,10 @@
 <% @title = h(@user_data[:name]) %>
-<%= link_to 'Observations', :action => 'show_user_observations', :id => @user_data[:id] %>
-| <%= link_to "Comments for %s" % @user_data[:name], :action => 'show_comments_for_user', :id => @user_data[:id] %>
-| <%= link_to 'Contributors', :action => 'users_by_contribution' %>
+<%= link_to('Observations', :action => 'show_user_observations', :id => @user_data[:id]) %>
+| <%= link_to("Comments for #{@user_data[:name]}", :action => 'show_comments_for_user', :id => @user_data[:id]) %>
+| <%= link_to('Contributors', :action => 'users_by_contribution') %>
+<% if @user.question_email %>
+	| <%= link_to "Email #{@user_data[:name]}", :action => 'ask_user_question', :id => @user %>
+<% end %>
 
 <center>
     <table border="0">

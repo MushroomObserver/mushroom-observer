@@ -10,7 +10,7 @@
         		    if metric > 0 %>
         			<tr>
         				<td class="Data">
-        					<%= user_name %>
+        					<%= link_to(user_name, :action => "show_user", :id => user_id) %>
         				</td>
         				<td>
         				    <%= link_to("Observations", :action => "show_user_observations", :id => user_id) %>

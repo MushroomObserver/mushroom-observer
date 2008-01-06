@@ -162,8 +162,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_where_search
     get_with_dump :where_search
-    assert_response :success
-    assert_template 'list_place_names'
+    assert_redirected_to(:controller => "location", :action => "list_place_names")
   end
 
   def test_prev_image
@@ -329,8 +328,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(sp2.observations.member?(obs))
   end
   
-  def test_ask_question
-    requires_login :ask_question, {:id => @coprinus_comatus_obs.id}
+  def test_ask_observation_question
+    requires_login :ask_observation_question, {:id => @coprinus_comatus_obs.id}
+  end
+  
+  def test_ask_user_question
+    requires_login :ask_user_question, {:id => @mary.id}
   end
 
   def test_commercial_inquiry
@@ -1596,7 +1599,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "observer", :action => "users_by_name")
   end
   
-  def test_send_question
+  def test_send_observation_question
     obs = @minimal_unknown
     params = {
       :id => obs.id,
@@ -1604,9 +1607,23 @@ class ObserverControllerTest < Test::Unit::TestCase
         :content => "Testing question"
       }
     }
-    requires_login :send_question, params, false
+    requires_login :send_observation_question, params, false
     assert_equal("Delivered question.", flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+  end
+
+  def test_send_user_question
+    user = @mary
+    params = {
+      :id => user.id,
+      :email => {
+        :subject => "Email subject",
+        :content => "Email content"
+      }
+    }
+    requires_login :send_user_question, params, false
+    assert_equal("Delivered email.", flash[:notice])
+    assert_redirected_to(:controller => "observer", :action => "show_user")
   end
 
   def test_update_comment

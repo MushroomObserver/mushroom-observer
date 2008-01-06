@@ -71,7 +71,7 @@
 			<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
 		                                        :action => 'show_observation', :id => id) %></span><br/>
 	        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-	        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
+	        <span class="ListWho"><%= link_to(truncate(h("#{datum['name']} (#{datum['login']})"), MAX_WHO_LENGTH), :action => 'show_user', :id => datum["user_id"]) %></span><br/>
 	        Observation made: <%= datum["when"]%>
 	    </td>
   	</tr>
@@ -81,7 +81,7 @@
 <%
 if @synonym_data != []
     %>
-    <p>Synonym observations:</p>
+    <br/><p>Synonym observations:</p>
     <table cellpadding="5" cellspacing="0">
     <%
     odd_or_even = 0
@@ -103,7 +103,7 @@ if @synonym_data != []
 				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
 			                                        :action => 'show_observation', :id => id) %></span><br/>
 		        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
+		        <span class="ListWho"><%= link_to(truncate(h("#{datum['name']} (#{datum['login']})"), MAX_WHO_LENGTH), :action => 'show_user', :id => datum["user_id"]) %></span><br/>
 		        Observation made: <%= datum["when"]%>
 		    </td>
 	  	</tr>
@@ -112,7 +112,7 @@ if @synonym_data != []
 <% end %>
 <p><span class="Date">
     Name created: <%= @name.created %><br/>
-    Last modified: <%= @name.modified %> by <%= @name.user.unique_text_name %><br/>
+    Last modified: <%= @name.modified %> by <%= link_to(@name.user.unique_text_name, :action => 'show_user', :id => @name.user.id) %><br/>
     <% rss_log = @name.rss_log 
        if rss_log %>
     	<%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>

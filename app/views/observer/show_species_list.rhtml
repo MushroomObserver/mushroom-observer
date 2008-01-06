@@ -9,7 +9,7 @@
 
 <p>When: <span class="Data"><%= @species_list.when %></span></p>
 <p>Where: <span class="Data"><%= h(@species_list.where) %></span></p>
-<p>Who: <span class="Data"><%= h(@species_list.user.unique_text_name) %></span></p>
+<p>Who: <span class="Data"><%= link_to(h(@species_list.user.unique_text_name), :action => 'show_user', :id => @species_list.user.id) %></span></p>
 Notes:<br/><%= textilize(sanitize(@species_list.notes.to_s)) %>
 Members:<br/>
   <% if @species_list.observations.length > 0 %>
@@ -38,7 +38,7 @@ Members:<br/>
 				<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name)),
 			                                        :action => 'show_observation', :id => observation.id) %></span><br/>
 		        <span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span>: 
-		        <span class="ListWho"><%= truncate(h(observation.user.unique_text_name), MAX_WHO_LENGTH) %></span>
+		        <span class="ListWho"><%= link_to(truncate(h(observation.user.unique_text_name), MAX_WHO_LENGTH), :action => 'show_user', :id => observation.user.id) %></span>
 		    </td>
 	  	</tr>
 	    <% end %>

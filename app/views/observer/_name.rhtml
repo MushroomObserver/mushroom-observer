@@ -14,7 +14,7 @@
 				textilize_without_paragraph(h(name.display_name))),
 				:action => 'show_name', :id => name.id)
 	%>
-	<span class="ListWho"><br/>by <%= truncate(h(name.user.unique_text_name), MAX_WHO_LENGTH) %></span>
+	<span class="ListWho"><br/>by <%= link_to(truncate(h(name.user.unique_text_name), MAX_WHO_LENGTH), :action => 'show_user', :id => name.user.id) %></span>
 		</td>
 	</tr>
 </table>

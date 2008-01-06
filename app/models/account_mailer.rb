@@ -55,7 +55,7 @@ class AccountMailer < ActionMailer::Base
     @content_type     = user.html_email ? "text/html" : "text/plain"
   end
 
-  def question(sender, observation, question)
+  def observation_question(sender, observation, question)
     @subject             = 'Question about ' + observation.unique_text_name
     @body["sender"]      = sender
     @body["observation"] = observation
@@ -69,8 +69,20 @@ class AccountMailer < ActionMailer::Base
     @content_type        = user.html_email ? "text/html" : "text/plain"
   end
 
+  def user_question(sender, user, subject, content)
+    @subject             = subject
+    @body["sender"]      = sender
+    @body["content"]     = content
+    @body["user"]        = user
+    @recipients          = user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = sender.email
+    @content_type        = user.html_email ? "text/html" : "text/plain"
+  end
+
   def verify(user)
-    @subject      = 'Mushroom Observer Email Verification'
+    @subject      = 'Email Verification for Mushroom Observer'
     @body["user"] = user
     @recipients   = user.email
     @bcc          = EXTRA_BCC_EMAIL_ADDRESSES
@@ -79,7 +91,7 @@ class AccountMailer < ActionMailer::Base
   end
 
   def webmaster_question(sender, question)
-    @subject          = 'Mushroom Observer Question from ' + sender
+    @subject          = '[MO] Question from ' + sender
     @body["question"] = question
     @recipients       = WEBMASTER_EMAIL_ADDRESS
     @bcc	          = EXTRA_BCC_EMAIL_ADDRESSES
@@ -87,7 +99,7 @@ class AccountMailer < ActionMailer::Base
   end
 
   def denied(user_params)
-    @subject             = 'Mushroom Observer User Creation Blocked'
+    @subject             = '[MO] User Creation Blocked'
     @body["user_params"] = user_params
     @recipients          = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = ACCOUNTS_EMAIL_ADDRESS

@@ -57,7 +57,7 @@ class AccountMailerTest < Test::Unit::TestCase
 
   def test_denied
     @expected.body = read_fixture('denied')
-    @expected.subject = 'Mushroom Observer User Creation Blocked'
+    @expected.subject = '[MO] User Creation Blocked'
     @expected.to = 'nathan@collectivesource.com'
     @expected.from = 'accounts@mushroomobserver.org'
     @expected.set_content_type "text", "plain", { "charset" => CHARSET }
@@ -91,8 +91,22 @@ class AccountMailerTest < Test::Unit::TestCase
     assert_equal @expected.encoded, AccountMailer.create_new_password(@rolf, 'A password').encoded
   end
 
-  def test_question
-    @expected.body = read_fixture('question')
+  def test_user_question
+    @expected.body = read_fixture('user_question')
+    subject = 'Interesting idea'
+    @expected.subject = subject
+    @expected.to = @detailed_unknown.user.email
+    @expected.bcc = 'nathan@collectivesource.com'
+    @expected.from = 'news@mushroomobserver.org'
+    @expected.reply_to = @rolf.email
+    @expected.set_content_type "text", "html", { "charset" => CHARSET }
+
+    # user_question(sender, user, subject, content)
+    assert_equal @expected.encoded, AccountMailer.create_user_question(@rolf, @mary, subject, 'Shall we discuss it in email?').encoded
+  end
+
+  def test_observation_question
+    @expected.body = read_fixture('observation_question')
     @expected.subject = 'Question about ' + @detailed_unknown.unique_text_name
     @expected.to = @detailed_unknown.user.email
     @expected.bcc = 'nathan@collectivesource.com'
@@ -100,13 +114,13 @@ class AccountMailerTest < Test::Unit::TestCase
     @expected.reply_to = @rolf.email
     @expected.set_content_type "text", "html", { "charset" => CHARSET }
 
-    # question(sender, observation, question)
-    assert_equal @expected.encoded, AccountMailer.create_question(@rolf, @detailed_unknown, 'Where did you find it?').encoded
+    # observation_question(sender, observation, question)
+    assert_equal @expected.encoded, AccountMailer.create_observation_question(@rolf, @detailed_unknown, 'Where did you find it?').encoded
   end
 
   def test_verify
     @expected.body = read_fixture('verify')
-    @expected.subject = 'Mushroom Observer Email Verification'
+    @expected.subject = 'Email Verification for Mushroom Observer'
     @expected.to = @mary.email
     @expected.bcc = 'nathan@collectivesource.com'
     @expected.from = 'accounts@mushroomobserver.org'
@@ -119,7 +133,7 @@ class AccountMailerTest < Test::Unit::TestCase
   def test_webmaster_question
     sender = @mary.email # Technically you don't need a user, just an email address
     @expected.body = read_fixture('webmaster_question')
-    @expected.subject    = 'Mushroom Observer Question from ' + sender
+    @expected.subject    = '[MO] Question from ' + sender
     @expected.to = 'webmaster@mushroomobserver.org'
     @expected.bcc = 'nathan@collectivesource.com'
     @expected.from = sender

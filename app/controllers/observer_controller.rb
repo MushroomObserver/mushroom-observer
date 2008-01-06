@@ -229,24 +229,7 @@ class ObserverController < ApplicationController
                                                  :per_page => @layout["count"])
     render :action => 'list_observations'
   end
-
-  def where_search
-    where = params[:where]
-    if where
-      session["where"] = where
-    end
-    where = session["where"]
-    if where
-      sql_pattern = "%#{where.gsub(/[*']/,"%")}%"
-      show_selected_observations(where, "observations.where like '#{sql_pattern}'",
-        "names.search_name asc, observations.`when` desc",
-        [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => where}],
-         [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => where}]])
-    else
-      redirect_to(:controller => "location", :action => "list_place_names")
-    end
-  end
-
+  
   # pattern_search.rhtml
   def pattern_search
     store_location
@@ -270,6 +253,8 @@ class ObserverController < ApplicationController
       image_search(pattern)
     when :app_names_find.l
       name_search(pattern)
+    when :app_locations_find.l
+      location_search(pattern)
     else
       observation_search(pattern)
     end
@@ -277,6 +262,28 @@ class ObserverController < ApplicationController
 
   def field_search(fields, sql_pattern)
     (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
+  end
+
+  def location_search(pattern)
+    sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
+    show_selected_observations(pattern, "observations.where like '#{sql_pattern}'",
+      "names.search_name asc, observations.`when` desc",
+      [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => pattern}],
+       [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => pattern}],
+       [:location_all.l, {:controller => 'location', :action => 'list_place_names'}]])
+  end
+
+  def where_search
+    where = params[:where]
+    if where
+      session["where"] = where
+    end
+    where = session["where"]
+    if where
+      location_search(params[:where])
+    else
+      redirect_to(:controller => "location", :action => "list_place_names")
+    end
   end
 
   def image_search(pattern)
@@ -1287,6 +1294,7 @@ class ObserverController < ApplicationController
     store_location
     id = params[:id]
     if id
+      @user = User.find(id)
       @user_data = SiteData.new.get_user_data(id)
       @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
         :order => "id desc", :limit => 6)
@@ -1390,19 +1398,38 @@ class ObserverController < ApplicationController
     end
   end
 
-  def ask_question
-    @observation = Observation.find(params['id'])
-    if !@observation.user.question_email
+  def email_question(user, target_page, target_obj)
+    if !user.question_email
       flash[:notice] = "Permission denied"
-      redirect_to :action => 'show_observation', :id => @observation
+      redirect_to :action => target_page, :id => target_obj
     end
   end
 
-  def send_question
+  def ask_user_question
+    @user = User.find(params[:id])
+    email_question(@user, 'show_user', @user)
+  end
+
+  def send_user_question
+    sender = session['user']
+    user = User.find(params[:id])
+    subject = params['email']['subject']
+    content = params['email']['content']
+    AccountMailer.deliver_user_question(sender, user, subject, content)
+    flash[:notice] = "Delivered email."
+    redirect_to :action => 'show_user', :id => sender
+  end
+
+  def ask_observation_question
+    @observation = Observation.find(params[:id])
+    email_question(@observation.user, 'show_observation', @observation)
+  end
+
+  def send_observation_question
     sender = session['user']
     observation = Observation.find(params['id'])
     question = params['question']['content']
-    AccountMailer.deliver_question(sender, observation, question)
+    AccountMailer.deliver_observation_question(sender, observation, question)
     flash[:notice] = "Delivered question."
     redirect_to :action => 'show_observation', :id => observation
   end
@@ -1539,7 +1566,7 @@ class ObserverController < ApplicationController
       @name = Name.find(params[:id])
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
       query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where, o.location_id," +
-              " u.name, u.login, n.observation_name from observations o, users u, names n" +
+              " u.name, u.login, o.user_id, n.observation_name from observations o, users u, names n" +
               " where n.id = %s and o.user_id = u.id and n.id = o.name_id order by o.when desc"
       @data = Observation.connection.select_all(query % params[:id])
       observation_ids = []

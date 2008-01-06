@@ -1,7 +1,7 @@
 <% @title = 'Question about ' + h(@observation.unique_text_name) %>
 <div id="Title">Question about <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
-<% form_tag(:action => 'send_question', :id => @observation) do %>
+<% form_tag(:action => 'send_observation_question', :id => @observation) do %>
 <center><%= submit_tag "Send" %></center>
 <br/>
 <label for="question_content">Enter your question below.  When you hit send it will be emailed to 

@@ -58,7 +58,9 @@
             <% if skip_comment == nil || comment.id != skip_comment %>
                 <div class="ListLine<%= odd_or_even %>">
                     <p><%= :show_observation_created.l %>: <span class="Data"><%= comment.created.to_formatted_s(:db) %></span><br/>
-                    By: <span class="Data"><%= comment.user.unique_text_name %></span>
+                    <%= :show_observation_by.l %>: <span class="Data">
+                      <%= link_to(comment.user.unique_text_name, :action => 'show_user', :id => comment.user.id) %>
+                    </span>
                     <% if check_permission(comment.user_id) %>
                         <%= link_to(:show_observation_edit.l, :action => 'edit_comment', :id => comment) %>
                         | <%= link_to(:show_observation_destroy.l, { :action => 'destroy_comment', :id => comment },

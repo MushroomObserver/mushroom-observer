@@ -23,6 +23,7 @@ app_intro: Introduction
 app_join_mailing_list: Join Mailing List
 app_latest: Latest
 app_latest_changes: Changes by Users
+app_locations_find: Locations
 app_login: Login
 app_logout: Logout
 app_names_find: Names
@@ -618,6 +619,7 @@ show_observation_add_comment: Add Comment
 show_observation_add_images: Add Images
 show_observation_alternative: Alternative
 show_observation_are_you_sure: Are you sure?
+show_observation_by: By
 show_observation_collection_location: Collection location
 show_observation_comments: Comments
 show_observation_created: Created

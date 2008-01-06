@@ -54,6 +54,6 @@
 <p><span class="Date">
     <%= "#{:show_location_version.l}: #{location.version}" %><br/>
     <%= "#{:show_location_created.l}: #{location.created}" %><br/>
-    <%= "#{:show_location_modified.l}: #{location.modified} #{:show_location_by.l} #{location.user.unique_text_name}" %><br/>
+    <%= "#{:show_location_modified.l}: #{location.modified} #{:show_location_by.l} #{link_to(location.user.unique_text_name, :controller => 'observer', :action => 'show_user', :id => location.user.id)}" %><br/>
     </span>
 </p>

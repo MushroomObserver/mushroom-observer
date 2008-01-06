@@ -3,14 +3,12 @@
 Active tasks:
 
 *** Improve 'where' (Nathan's active task)
-  Merge
-  Create data in the migration
-  Release
-  
   update how_to_use page to include location documentation
   interactive map for edit_location and create_location
-  map_selection
-  altitude as ft or meters
+  use locations for species lists?
+  map search results
+  map species list
+  altitude as ft or meters?
   Future ideas:
     Constrain fixed sets like country, state and county to valid values
     Clicking on an undefined location should take logged in users to the definition page
@@ -28,6 +26,8 @@ Active tasks:
   Should collections have individual lat/longs?
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev
+
+User profile - paragraph available in preferences that gets displayed on the show_user page
 
 ** Namings (Jason's active task)
   Provide a formalized way for users to associate a 'Name' with an 'Observation'.
@@ -168,8 +168,8 @@ Small features:
   Might be handled by having a toggle that says 'More images'/'Less images' this would also change
     the layout to rows with all the thumbs displayed
 
-More location and user links:
 Map of all locations
+Location Search button
 
 Links page:
     Mykoweb: http://mykoweb.com
