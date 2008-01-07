@@ -1,0 +1,17 @@
+<%  if @title.nil?
+        @title = :map_locations_title.l % @pattern
+    end %>
+
+<div id="Title"><%= @title %></div>
+
+<%= link_to(:location_all.l, :action => 'list_place_names') %><br/>
+
+<p>
+    <center>
+        <% if @map %>
+            <%= @map.div(:width => 800, :height => 550) %>
+        <% else %>
+            <%= :map_locations_no_matches.l % @pattern %>.
+        <% end %>
+    </center>
+</p>

@@ -279,5 +279,26 @@ class LocationControllerTest < Test::Unit::TestCase
     assert_not_equal(obs.location, nil)
     assert_equal(obs.location, @albion)
   end
-  
+
+  # test_map_locations - map everything
+  def test_map_locations
+    get_with_dump :map_locations
+    assert_response :success
+    assert_template 'map_locations'
+  end
+
+  # test_map_locations_empty - map nothing
+  def test_map_locations_empty
+    get_with_dump :map_locations, :pattern => 'Never Never Land'
+    assert_response :success
+    assert_template 'map_locations'
+  end
+
+  # test_map_locations_some - map something
+  def test_map_locations_some
+    get_with_dump :map_locations, :pattern => 'California'
+    assert_response :success
+    assert_template 'map_locations'
+  end
+
 end

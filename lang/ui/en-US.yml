@@ -469,6 +469,9 @@ list_merge_options_title: Merge Options for %s
 
 # location/list_place_names
 list_place_names_known: Known Locations (alphabetical)
+list_place_names_map: Map Locations
+list_place_names_pattern_title: Locations Matching '%s'
+list_place_names_title: All Locations
 list_place_names_undef: Undefined Locations (by frequency)
 
 
@@ -493,6 +496,9 @@ login_user: User name
 logout_title: Logoff
 logout_note: You are now logged out of the Mushroom Observer.  Editing functions are disabled.
 
+# location/map_locations
+map_locations_no_matches: No locations matching '%s'
+map_locations_title: Locations matching '%s'
 
 # _name
 name_change: Change to Name

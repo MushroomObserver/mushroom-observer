@@ -1,14 +1,15 @@
 class LocationController < ApplicationController
-  before_filter :login_required, :except => ([:list_place_names, :show_location, :show_past_location])
+  before_filter :login_required, :except => ([:list_place_names, :map_locations, :show_location, :show_past_location])
 
   def list_place_names
     known_condition = ''
     undef_condition = ''
-    pattern = params[:pattern]
-    if pattern
-      sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-      known_condition = "and l.display_name like '#{sql_pattern}'"
-      undef_condition = "and o.where like '#{sql_pattern}'"
+    @pattern = params[:pattern]
+    if @pattern
+      sql_pattern = clean_sql_pattern(@pattern)
+      known_condition = "and l.display_name like '%#{sql_pattern}%'"
+      undef_condition = "and o.where like '%#{sql_pattern}%'"
+      logger.info("  ***  list_place_names: #{known_condition}, #{undef_condition}")
     end
     known_query = "select o.location_id, l.display_name, count(1) as cnt
       from observations o, locations l where o.location_id = l.id #{known_condition}
@@ -18,6 +19,22 @@ class LocationController < ApplicationController
       from observations o where o.location_id is NULL #{undef_condition}
       group by o.where order by cnt desc"
     @undef_data = Observation.connection.select_all(undef_query)
+  end
+
+  def map_locations
+    @pattern = params[:pattern]
+    locations = []
+    if @pattern && (@pattern != '')
+      locations = Location.find(:all, :conditions => "display_name like '%#{clean_sql_pattern(@pattern)}%'")
+    else
+      locations = Location.find(:all)
+    end
+    @map = nil
+    @header = nil
+    if locations.length > 0
+      @map = make_map(locations)
+      @header = "#{GMap.header}\n#{@map.to_html}"
+    end
   end
 
   def create_location

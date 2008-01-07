@@ -58,8 +58,7 @@ class ApplicationController < ActionController::Base
     result = "<tr>#{result.join}</tr>"
   end
 
-  def map_loc(map, loc)
-    # info = ("<span class=\"gmap\">#{link_to(loc.display_name, :controller => 'location', :action => 'show_location', :id => loc.id)}<table>" +
+  def map_loc(map, loc) # , icon)
     info = ("<span class=\"gmap\"><a href=\"/location/show_location/#{loc.id}\">#{loc.display_name}</a><table>" +
       make_table_row(['',loc.north,'']) +
       make_table_row([loc.west, '', loc.east]) +
@@ -67,20 +66,36 @@ class ApplicationController < ActionController::Base
     pline = GPolyline.new([[loc.north, loc.west],[loc.north, loc.east],
       [loc.south, loc.east], [loc.south, loc.west], [loc.north, loc.west]],"#00ff88",3,1.0)
     map.overlay_init(GMarker.new(loc.center(),
-      :title => loc.display_name, :info_window => info))
+      :title => loc.display_name, :info_window => info)) # , :icon => icon))
     map.overlay_init(pline)
   end
 
   def make_map(locs)
     result = GMap.new("map_div")
     result.control_init(:large_map => true,:map_type => true)
+
+    # Started playing with icons and the following got something to show up, but I decide
+    # not to pursue it further right now.
+    # result.icon_global_init( GIcon.new( :image => "/images/blue-dot.png", :icon_size => GSize.new( 24,38 ), :icon_anchor => GPoint.new(12,38), :info_window_anchor => GPoint.new(9,2) ), "blue_dot")
+    # blue_dot = Variable.new("blue_dot")
+
+    if respond_to?( "start_lat" ) && respond_to?( "start_long" )
+        map.center_zoom_init( [start_lat, start_long], Constants::GM_ZOOM )
+        map.overlay_init( GMarker.new( [start_lat, start_long], { :icon => icon_start, :title => name + " start", :info_window => "start" } ) )
+    end
+
     result.center_zoom_on_points_init(*((locs.map {|l| l.south_west}) + (locs.map {|l| l.north_east})))
     for l in locs
+      # map_loc(result, l, blue_dot)
       map_loc(result, l)
     end
     result
   end
 
+  def clean_sql_pattern(pattern)
+    pattern.gsub(/[*']/,"%")
+  end
+  
   def paginate_by_sql(model, sql, per_page, options={})
     if options[:count]
         if options[:count].is_a? Integer

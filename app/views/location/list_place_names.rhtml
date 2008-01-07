@@ -1,7 +1,16 @@
 <%  if @title.nil?
-        @title = 'Locations'
+        if @pattern
+            @title = :list_place_names_pattern_title.l % @pattern
+        else
+            @title = :list_place_names_title.l
+        end
     end %>
 <div id="Title"><%= @title %></div>
+
+<%= link_to(:list_place_names_map.l, :action => :map_locations, :pattern => @pattern) %>
+<% if @pattern %>
+    | <%= link_to(:location_all.l, :action => :list_place_names) %>
+<% end %>
 
 <table cellpadding="5" cellspacing="0" width="100%">
     <tr valign="top">

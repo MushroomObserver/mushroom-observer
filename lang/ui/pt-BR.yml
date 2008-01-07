@@ -181,6 +181,11 @@ form_names_text_name_locked: Name is in use.  Make name changes in each observat
 # observer/_form_observations
 form_observations_deprecated: The name '%s' is deprecated.
 form_observations_deprecated_help: Select a valid name or click '%s' to use '%s'.
+form_observations_is_collection_location: Is Collection Location
+form_observations_is_collection_location_help: >
+  Check when the location is where the mushroom was growing.  Uncheck when it is only where the mushroom
+  was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
+
 form_observations_log_change: Log Change
 form_observations_multiple_names: Multiple names match '%s'.  Select the one you intended
 form_observations_multiple_names_help: The number after each name is how many observations are currently using that name.
@@ -774,6 +779,20 @@ form_synonyms_proposed_synonyms: Proposed Synonyms
 form_synonyms_proposed_synonyms_help: Unchecked items will no longer be synonymized with this name, but will retain their relationships with each other.
 
 
+# location/list_merge_options
+list_merge_options_near_matches: Near Matches
+list_merge_options_others: Other Available Locations
+list_merge_options_title: Merge Options for %s
+
+
+# location/list_place_names
+list_place_names_known: Known Locations (alphabetical)
+list_place_names_map: Map Locations
+list_place_names_pattern_title: Locations Matching '%s'
+list_place_names_title: All Locations
+list_place_names_undef: Undefined Locations (by frequency)
+
+
 # application_helper
 location_all: All Locations
 location_define: Define This Location
@@ -781,7 +800,13 @@ location_merge: Merge With A Defined Location
 location_show_map: Show Map
 
 
+# location/map_locations
+map_locations_no_matches: No observations matching '%s'
+map_locations_title: Locations matching '%s'
+
+
 # name/map
+name_map_about: About
 name_map_title: Distribution Map for
 
 
@@ -854,11 +879,19 @@ show_observation_title: Observation
 show_observation_when: When
 
 
+# observer/show_name
+show_name_distribution_map: Distribution Map
+
+
 # location/show_past_location
 show_past_location_no_version: No current version
 show_past_location_other_versions: Other Versions
 show_past_location_title: Location
 show_past_location_version: Version
+
+
+# account/signup and account/prefs
+theme_random: Random
 
 
 welcome_no_user_note: If you are not a spammer, please report this as an error.
