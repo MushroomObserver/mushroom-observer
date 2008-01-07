@@ -254,7 +254,7 @@ class ObserverController < ApplicationController
     when :app_names_find.l
       name_search(pattern)
     when :app_locations_find.l
-      location_search(pattern)
+      redirect_to(:controller => 'location', :action => 'list_place_names', :pattern => pattern)
     else
       observation_search(pattern)
     end
