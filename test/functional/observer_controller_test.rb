@@ -164,6 +164,26 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :where_search
     assert_redirected_to(:controller => "location", :action => "list_place_names")
   end
+  
+  def test_where_search_for_something
+    params = {
+      :where => 'Burbank'
+    }
+    get_with_dump(:where_search, params)
+    assert_response :success
+    assert_template "list_observations"
+  end
+  
+  # Created in response to a bug seen in the wild
+  def test_where_search_next_page
+    @request.session['where'] = "Burbank"
+    params = {
+      :page => 2
+    }
+    get_with_dump(:where_search, params)
+    assert_response :success
+    assert_template "list_observations"
+  end
 
   def test_prev_image
     get_with_dump :prev_image

@@ -280,7 +280,7 @@ class ObserverController < ApplicationController
     end
     where = session["where"]
     if where
-      location_search(params[:where])
+      location_search(where)
     else
       redirect_to(:controller => "location", :action => "list_place_names")
     end
