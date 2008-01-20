@@ -486,7 +486,7 @@ location_show_map: Show Map
 login_forgot_password: I forgot my password.  "Email me a new one":%s.
 login_having_problems: If you are having problems logging into your account, send "email to the webmaster":%s.
 login_login: Login
-login_no_account: I don't have and account.  "Create a new account":%s.
+login_no_account: I don't have an account.  "Create a new account":%s.
 login_password: Password
 login_please_login: Please login
 login_user: User name

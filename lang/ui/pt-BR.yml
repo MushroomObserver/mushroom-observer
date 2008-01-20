@@ -501,7 +501,7 @@ email_new_password_title: Email New Password
 login_forgot_password: I forgot my password.  "Email me a new one":%s.
 login_having_problems: If you are having problems logging into your account, send "email to the webmaster":%s.
 login_login: Login
-login_no_account: I don't have and account.  "Create a new account":%s.
+login_no_account: I don't have an account.  "Create a new account":%s.
 login_password: Password
 login_please_login: Please login
 login_user: User name
@@ -777,6 +777,12 @@ form_synonyms_names: Names
 form_synonyms_names_help: List the names you want to be synonymized with %s.
 form_synonyms_proposed_synonyms: Proposed Synonyms
 form_synonyms_proposed_synonyms_help: Unchecked items will no longer be synonymized with this name, but will retain their relationships with each other.
+
+
+# observer/intro
+intro_talks: >
+  <p><b>Talks:</b></p>
+  <p>"Mushroom Observer: The First Year":%s
 
 
 # location/list_merge_options
