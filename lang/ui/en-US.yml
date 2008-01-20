@@ -458,6 +458,10 @@ intro_source_code: >
   </p><p>
   <b>nathan at collectivesource.com</b></p><p>so we can coordinate our efforts.</p>
 
+intro_talks: >
+  <p><b>Talks:</b></p>
+  <p>"Mushroom Observer: The First Year":%s
+
 intro_title: Introduction
 
 
