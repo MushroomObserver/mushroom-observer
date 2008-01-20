@@ -54,7 +54,7 @@ class ObserverController < ApplicationController
                                                     :where_search])
 
   def auto_complete_for_observation_place_name
-    part = params[:observation][:place_name].downcase.gsub(/[*']/,"%")
+    part = params[:observation] ? params[:observation][:place_name].downcase.gsub(/[*']/,"%") : ''
     @items = Observation.find(:all, {
       :include => :location,
       :conditions => "LOWER(observations.where) LIKE '#{part}%' or LOWER(locations.display_name) LIKE '#{part}%'",
