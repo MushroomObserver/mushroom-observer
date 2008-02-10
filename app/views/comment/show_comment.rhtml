@@ -1,0 +1,14 @@
+<% @title = 'Comment on ' + h(@comment.observation.unique_text_name(@user)) %>
+<%= link_to 'Goto Observation', :controller => 'observer',
+  :action => 'show_observation', :id => @comment.observation %>
+<% if check_permission(@comment.user_id) %>
+  || <%= link_to 'Edit', :action => 'edit_comment', :id => @comment %>
+  | <%= link_to 'Destroy', { :action => 'destroy_comment', :id => @comment },
+                :confirm => "Are you sure?" %>
+<% end %>
+
+<div id="Title">Comment on <%= textilize_without_paragraph(h(@comment.observation.unique_format_name(@user))) %></div>
+<p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
+<p>By: <%= user_link(@comment.user) %></p>
+<p>Summary: <%= @comment.summary %></p>
+Comment: <%= textilize(sanitize(@comment.comment)) %>

@@ -1,0 +1,190 @@
+<% logged_in = !@user.nil? && !@user.verified.nil? && @user.verified %>
+<% any_names = @observation.namings && @observation.namings.length > 0 %>
+<% popups = [] %>
+
+<%= javascript_include_tag :defaults %>
+<%= javascript_include_tag 'my_utilities' %>
+
+<% form_tag(:action => 'show_observation', :id => @observation) do %>
+  <p>
+    <% if any_names %>
+      <%= :show_namings_proposed_names.l %>:
+    <% else %>
+      <%= :show_namings_no_names_yet.l %>
+    <% end %>&nbsp;
+    <%= link_to :show_namings_propose_new_name.l, :action => 'create_naming',
+      :id => @observation %>
+    <% if logged_in && any_names %>
+      &nbsp;<%= javascript_tag "document.write('" +
+        submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") + "')" %>
+    <% end %>
+  </p>
+
+  <% if any_names %>
+    <div class="ThinBox">
+      <% cols = logged_in ? 7 : 5 %>
+      <table cellspacing="0" cellpadding="0">
+        <tr>
+          <th><%= lnbsp(:show_namings_proposed_name) %></th>
+          <th></th>
+          <th><%= lnbsp(:show_namings_user) %></th>
+          <th></th>
+          <th><%= lnbsp(:show_namings_consensus) %></th>
+          <%= if logged_in
+            "<th></th>
+            <th>#{lnbsp(:show_namings_your_vote)}</th>"
+          end %>
+        </tr>
+
+        <% for naming in @observation.namings.sort {|x,y| x.created <=> y.created } %>
+          <tr>
+            <td>
+              <%= link_to(textilize_without_paragraph(sanitize(naming.format_name)),
+                :controller => 'name', :action => 'show_name', :id => naming.name) %>
+              <% if check_permission(naming.user_id) %>
+                (<%= link_to(lnbsp(:show_namings_edit), :action => 'edit_naming', :id => naming) %>
+                | <%= link_to(lnbsp(:show_namings_destroy), { :action => 'destroy_naming',
+                  :id => naming }, :confirm => :show_namings_are_you_sure.l) %>)
+              <% end %>
+            </td>
+
+            <td width="20">&nbsp;</td>
+            <td width="20">
+              <span class="Data"><%= user_link(naming.user, :truncate, naming.user.login) %></span>
+            </td>
+
+            <td width="20">&nbsp;</td>
+            <% num = naming.votes.size
+              txt = num == 0 ? "" : "%d%%" % naming.average_vote
+              nvotes = naming.votes.length %>
+            <td width="20">
+              <%
+                html = ""
+                if num == 0
+                  html += "(#{lnbsp(:show_namings_no_votes)})"
+                else
+                  link = link_to_function(h(txt), "show_votes(#{naming.id})")
+                  link.gsub!(/'/, "' + \"'\" + '")
+                  html += javascript_tag "document.write('#{link}')"
+                  html += "<noscript>"
+                  html += link_to(h(txt), :action => 'show_votes', :id => naming)
+                  html += "</noscript>"
+                  popups << naming
+                end
+                if nvotes != 0
+                  html += "&nbsp;(#{nvotes})"
+                end
+              %>
+              <%= html %>
+            </td>
+
+            <% if logged_in %>
+              <td width="20">&nbsp;</td>
+              <td width="20" nowrap="nowrap">
+                <% @vote = @votes[naming.id]
+                   menu = check_permission(naming.user_id) ? @confidence_menu : @agreement_menu
+                   # It *is* still possible for the owner not to have voted.  In which case I
+                   # need to explicitly add the "No Opinion" option to their menu.
+                   menu = menu.clone.unshift(@agreement_menu.first) if
+                     check_permission(naming.user_id) && (!@vote || @vote.value < 0) %>
+                <%= select('vote', 'value', menu, {}, { :index => naming.id,
+                  :onchange => "change_vote(#{naming.id})" }) %>
+                <noscript>
+                  <%= submit_tag(:show_namings_cast.l) %>
+                </noscript>
+              </td>
+            <% end %>
+          </tr>
+
+          <% if naming.naming_reasons.length > 0 %>
+            <tr>
+              <td colspan="<%= cols %>">
+                <% for reason in naming.naming_reasons %>
+                  <% if reason.notes.nil? || reason.notes == "" %>
+                    <%= reason.label.l %>
+                  <% else %>
+                    <%= reason.label.l + ": " +
+                      textilize_without_paragraph(sanitize(reason.notes)) %>
+                  <% end %><br/>
+                <% end %>
+              </td>
+            </tr>
+          <% end # reasons %>
+        <% end # for %>
+      </table>
+    </div>
+
+    <span class="HelpNote">
+      <% if !logged_in %>
+        <%= :show_namings_please_login.l %><br/>
+      <% else %>
+    <%= :show_namings_consensus_help.l % :vote_agreement_100.l %>
+      <% end %>
+    </span>
+  <% end %>
+<% end # form %>
+
+<% @ajax = true %>
+<% for @naming in popups %>
+  <div class="popup" id="show_votes_<%= @naming.id %>"><div>
+    <%= render :partial => 'show_votes', :locals => { :do_cancel => true } %>
+  </div></div>
+<% end %>
+
+<%= javascript_tag <<EOS
+  var CHANGED = false;
+  var POPUPS = { #{@observation.namings.map {|n|
+    id = n.id.to_s
+    "#{id}: $('show_votes_' + #{id})"
+  }.join(", ")} };
+  var VOTES = { #{@observation.namings.map {|n|
+    id = n.id.to_s
+    "#{id}: $('vote_' + #{id} + '_value')"
+  }.join(", ")} };
+
+  // Popup little votes box.
+  function show_votes(this_id) {
+    for (id in POPUPS) {
+      var div = POPUPS[id]
+      if (div) {
+        if (id == this_id) {
+          center_div(div);
+          show_div(div);
+        } else {
+          hide_div(div);
+        }
+      }
+    }
+  }
+
+  // Close vote box.
+  function hide_votes(this_id) {
+    for (id in POPUPS) {
+      var div = POPUPS[id]
+      if (div)
+        hide_div(div);
+    }
+  }
+
+  // Called when vote is changed.
+  function change_vote(this_id) {
+    if (VOTES[this_id].value == 100)
+      for (id in POPUPS)
+        if (id != this_id && VOTES[id].value == 100)
+          VOTES[id].value = 80;
+    CHANGED = 1;
+  }
+
+  // Called when submit button clicked (to prevent confirmation).
+  function set_changed(flag) {
+    CHANGED = flag;
+  }
+
+  // Called when user leaves the page.
+  window.onbeforeunload = function() {
+    if (CHANGED)
+      return "#{:show_namings_lose_changes.l}"
+  }
+EOS
+%>
+

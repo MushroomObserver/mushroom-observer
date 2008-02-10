@@ -1,0 +1,15 @@
+<% @title = 'Observations Index' %>
+<div id="Title"><%= @title %></div>
+<%
+	observation_ids = []
+	for datum in @data
+		observation_ids.push(datum['id'].to_i)
+%>
+<%= link_to(sprintf("%s (%s) %s %s", textilize_without_paragraph(h(datum["observation_name"])), datum["id"], datum["when"],
+					truncate(h(sprintf("%s (%s)", datum["name"], datum["login"])), MAX_WHO_LENGTH)),
+            :controller => 'observer', :action => 'show_observation', :id => datum["id"].to_i) %><br/>
+<%
+	end
+	session[:observation_ids] = observation_ids
+%>
+</br>

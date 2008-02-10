@@ -122,7 +122,7 @@ class NameSorter
     check_for_deprecated_names(names, name_str)
     
     if @chosen_names
-      chosen_id = @chosen_names[name_str]
+      chosen_id = @chosen_names[name_str.gsub(/\W/, "_")] # Compensate for gsub in _form_species_lists
       if chosen_id
         @single_line_strs.push(line_str) # (name_str)
         chosen_name = Name.find(chosen_id)

@@ -1,97 +1,32 @@
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag "my_auto_complete" %>
-<%= javascript_tag "extend_ajax_autocompleter()" %>
-
-<!-- This is the whirly thing to show auto-completion is happening. -->
-<div id="indicator" class="indicator"><%= image_tag("indicator.gif") %></div>
-
-<!-- Make sure the whirly thingy is hidden to start with. -->
-<%= javascript_tag 'Element.hide($("indicator"))' %>
-
-<%= error_messages_for 'observation' %>
-
 <!--[form:observation]-->
 
-<% if what && (what != '') %>
-    <% if valid_names
-        %>
-        <p>
-            <span class="Data"><%= :form_observations_deprecated.l % h(what) %></span>
-            <span class="HelpNote"><%= :form_observations_deprecated_help.l % [button_name, h(what)] %></span>
-            <span class="Data"><%= :form_observations_valid_synonyms.l %>:<br/>
-                <% for n in valid_names %>
-                    &nbsp;&nbsp;<%= radio_button("chosen_name", 'name_id', n.id) %>
-                    <%= textilize_without_paragraph(h(n.display_name)) %><br/>
-                <% end %>
-            </span>
-        </p>
-    <% elsif names.length == 0
-        %>
-        <p>
-            <span class="Data"><%= :form_observations_not_recognized.l % h(what) %></span>
-        </p>
-        <p>
-            <span class="HelpNote"><%= :form_observations_not_recognized_help.l % button_name %></span>
-        </p>
-    <% elsif names.length > 1 %>
-        <span class="Data"><br/><%= :form_observations_multiple_names.l % h(what) %>:<br/>
-            <% for n in names %>
-                &nbsp;&nbsp;<%= radio_button("chosen_name", 'name_id', n.id) %>
-                <%= textilize_without_paragraph(h(n.display_name)) %> (<%= n.observations.size %>)<br/>
-            <% end %>
-        </span>
-        <span class="HelpNote"><%= :form_observations_multiple_names_help.l %></span>
-    <% end %>
-<% end %>
-
-<p>
-    <label for="observation_when_1i"><%= :form_observations_when.l %>:</label><br/>
-    <%= date_select('observation', 'when', :start_year => Time.now.year-20, :end_year => Time.now.year) %>
-</p>
-<br/>
+<label for="observation_when_1i"><%= :form_observations_when.l %>:</label>
+<%= date_select('observation', 'when', :start_year => Time.now.year-20,
+  :end_year => Time.now.year) %><br/><br/>
 
 <label for="observation_place_name"><%= :form_observations_where.l %>:</label>
-<%= text_field_with_auto_complete('observation', 'place_name', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-<br/><span class="HelpNote"><%= :form_observations_where_help.l %></span>
-<br/><br/>
+<%= text_field_with_auto_complete('observation', 'place_name', {},
+  { :skip_style => true, :indicator => 'indicator' }) %><br/>
+<span class="HelpNote"><%= :form_observations_where_help.l %></span><br/><br/>
+<%= javascript_tag "document.getElementById('place_name').focus()" %>
+<% @focused = 1  # (Tells _form_naming not to steal focus) %>
+
 <%= check_box("observation", "is_collection_location") %>
 <label for="observation_is_collection_location"><%= :form_observations_is_collection_location.l %></label><br/>
-<span class="HelpNote"><%= :form_observations_is_collection_location_help.l %></span>
+<span class="HelpNote"><%= :form_observations_is_collection_location_help.l %></span><br/><br/>
 
-<br/><br/><br/>
-<label for="observation_what"><%= :form_observations_what.l %>:</label>
-<%= text_field_with_auto_complete('observation', 'what', {}, { :skip_style => true, :indicator => 'indicator' }) %>
-<br/>
-<span class="HelpNote"><%= :form_observations_what_help.l %></span>
-<br/>
+<%= check_box("observation", "specimen") %>
+<label for="observation_specimen"><%= :form_observations_specimen_available.l %></label><br/>
+<span class="HelpNote"><%= :form_observations_specimen_available_help.l %></span><br/><br/>
 
-<!--
-  This makes the second autocomplete field (what) scrollable.
-  It just adds a new class to the popup box (created by rails).
-  The new class fixes the width (no matter how many lines match
-  the partial), and forces the browser to display scrollbars.
-  All the rest is done in the custom methods provided at the top.
--->
-<%= javascript_tag 'Element.addClassName($("observation_what_auto_complete"), "auto_complete_scroll")' %>
-
-<br/>
-<p>
-    <%= check_box("observation", "specimen") %>
-    <label for="observation_specimen"><%= :form_observations_specimen_available.l %></label><br/>
-    <span class="HelpNote"><%= :form_observations_specimen_available_help.l %></span>
-</p>
-
-</td>
-<td valign="top">
-<p><label for="observation_notes"><%= :form_observations_notes.l %>:</label>
-	<span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
-<%= text_area 'observation', 'notes' %></p>
-<%= render :partial => 'shared/textilize_help' %>
+<label for="observation_notes"><%= :form_observations_notes.l %>:</label>
+<span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
+<%= text_area 'observation', 'notes' %><br/>
+<%= render :partial => 'shared/textilize_help' %><br/><br/>
 
 <% if logging_optional %>
-<p>
-    <%= check_box("log_change", 'checked', :checked => 'checked') %>
-    <label for="log_change_checked"><%= :form_observations_log_change.l %></label>
-</p>
+  <%= check_box('log_change', 'checked', :checked => 'checked') %>
+  <label for="log_change_checked"><%= :form_observations_log_change.l %></label>
 <% end %>
+
 <!--[eoform:observation]-->

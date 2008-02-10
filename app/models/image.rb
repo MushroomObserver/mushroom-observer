@@ -8,21 +8,21 @@ class Image < ActiveRecord::Base
   belongs_to :license
   attr_accessor :img_dir
 
-  def unique_format_name
+  def unique_format_name(user=nil)
     obs_names = []
-    self.observations.each {|o| obs_names.push(o.base_name)}
-    title = obs_names.sort.join(' & ')
+    self.observations.each {|o| obs_names.push(o.format_name(user))}
+    title = obs_names.uniq.sort.join(' & ')
     if title
-      sprintf("%s (%d)", title, self.id)
+      sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
     else
       sprintf("Image %d", self.id)
     end
   end
 
-  def unique_text_name
+  def unique_text_name(user=nil)
     obs_names = []
-    self.observations.each {|o| obs_names.push(o.what)}
-    title = obs_names.sort.join(' & ')
+    self.observations.each {|o| obs_names.push(o.text_name(user))}
+    title = obs_names.uniq.sort.join(' & ')
     if title
       sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
     else
@@ -147,7 +147,7 @@ class Image < ActiveRecord::Base
   end
 
   validates_format_of :content_type, :with => /^image/,
-           :message => "--- you can only upload images"
+           :message => "You can only upload images."
 
   validates_presence_of :user
 

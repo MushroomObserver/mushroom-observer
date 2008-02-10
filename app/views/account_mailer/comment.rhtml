@@ -8,8 +8,7 @@
 <h2><b>Comment about your Observation</b></h2>
 
 <p>The following comment was posted on the Mushroom Observer website regarding
-your observation <u><%= @observation.name.text_name %></u>:</p>
-<u><%= @observation.unique_text_name %></u>:</p>
+your observation <u><%= @observation.unique_text_name(@user) %></u>:</p>
 
 <p><b>Created:</b> <%= @comment.created.to_formatted_s(:db) %><br/>
 <b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/>
@@ -17,10 +16,11 @@ your observation <u><%= @observation.name.text_name %></u>:</p>
 <b>Comment:</b></p>
 
 <% if @comment.comment %>
-    <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-      <%= textilize(sanitize(@comment.comment)) %>
-    </div>
+  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+    <%= textilize(sanitize(@comment.comment)) %>
+  </div>
 <% end %>
+
 <p>It is entirely up to you if you wish to respond to this user directly.&nbsp;
 Here are some handy links you may find useful:</p>
 
@@ -35,7 +35,7 @@ Here are some handy links you may find useful:</p>
 </body>
 </html>
 <% else ##################################################################### %>
-The following comment was posted on the Mushroom Observer website regarding your observation <%= @observation.unique_text_name %>:
+The following comment was posted on the Mushroom Observer website regarding your observation <%= @observation.unique_text_name(@user) %>:
 
 Created: <%= @comment.created.to_formatted_s(:db) %>
 By: <%= @sender.legal_name %> (<%= @sender.email %>)

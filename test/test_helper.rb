@@ -27,8 +27,35 @@ class Test::Unit::TestCase
   # Add more helper methods to be used by all tests here...
 end
 
+def debug(a=nil, b=nil, c=nil, d=nil, e=nil, f=nil)
+  @debug_file ||= File.new("debug.log", "w")
+  first = true
+  for x in [a, b, c, d, e, f]
+    @debug_file.write(" ") if !first
+    @debug_file.write(stringify(x))
+    first = false
+  end
+end
 
-def html_dump(label, html)
+def stringify(x)
+  if x.class == Array
+    y = x.map {|z| stringify(z)}
+    return "[" + y.join(", ") + "]"
+  elsif x.class == Hash
+    str = ""
+    for k, v in x
+      str += ",\n" if str != ""
+      str += k.to_s + " => " + v.stringify
+    end
+    return "{\n" + str + "\n}"
+  else
+    return x.to_s
+  end
+end
+
+# The whole purpose of this is to create a directory full of sample HTML files
+# that we can run the W3C validator on -- this has nothing to do with debugging!
+def html_dump(label, html, params)
   html_dir = '../html'
   if File.directory?(html_dir) and html[0..11] != '<html><body>'
     file_name = "#{html_dir}/#{label}.html"
@@ -42,28 +69,64 @@ def html_dump(label, html)
     end
     print "Creating html_dump file: #{file_name}\n"
     file = File.new(file_name, "w")
+    # show_params(file, params, "params")
     file.write(html)
     file.close
   end
 end
 
-def get_with_dump(page, params={})
-  get(page, params)
-  html_dump(page, @response.body)
+def show_params(file, hash, prefix)
+  if hash.is_a?(Hash)
+    hash.each {|k,v| show_params(file, v, "#{prefix}[#{k.to_s}]")}
+  else
+    file.write("#{prefix} = [#{hash.to_s}]<br>\n")
+  end
 end
 
-# Do a login
+def get_with_dump(page, params={})
+  get(page, params)
+  html_dump(page, @response.body, params)
+end
+
+def post_with_dump(page, params={})
+  post(page, params)
+  html_dump(page, @response.body, params)
+end
+
+######################################
+
+# Pages that require login
 def login(user='rolf', password='testpassword')
+  get :news
   user = User.authenticate(user, password)
   assert(user)
   session['user'] = user
 end
 
+def logout
+  session['user'] = nil
+end
+
 def requires_login(page, params={}, stay_on_page=true, user='rolf', password='testpassword')
   get(page, params) # Expect redirect
   assert_redirected_to(:controller => "account", :action => "login")
-  login(user, password)
+  user = User.authenticate(user, password)
+  assert(user)
+  session['user'] = user
   get_with_dump(page, params)
+  if stay_on_page
+    assert_response :success
+    assert_template page.to_s
+  end
+end
+
+def post_requires_login(page, params={}, stay_on_page=true, user='rolf', password='testpassword')
+  post(page, params) # Expect redirect
+  assert_redirected_to(:controller => "account", :action => "login")
+  user = User.authenticate(user, password)
+  assert(user)
+  session['user'] = user
+  post_with_dump(page, params)
   if stay_on_page
     assert_response :success
     assert_template page.to_s
@@ -77,16 +140,43 @@ def requires_user(page, alt_page, params={}, stay_on_page=true, username='rolf',
   end
   get(page, params) # Expect redirect
   assert_redirected_to(:controller => "account", :action => "login")
-  login(alt_username, 'testpassword')
+  user = User.authenticate(alt_username, 'testpassword')
+  assert(user)
+  session['user'] = user
   get(page, params) # Expect redirect
   if alt_page.class == Array
     assert_redirected_to(:controller => alt_page[0], :action => alt_page[1])
   else
     assert_template alt_page.to_s
   end
-  
-  login(username, password)
+
+  login username, password
   get_with_dump(page, params)
+  if stay_on_page
+    assert_response :success
+    assert_template page.to_s
+  end
+end
+
+def post_requires_user(page, alt_page, params={}, stay_on_page=true, username='rolf', password='testpassword')
+  alt_username = 'mary'
+  if username == 'mary':
+    alt_username = 'rolf'
+  end
+  post(page, params) # Expect redirect
+  assert_redirected_to(:controller => "account", :action => "login")
+  user = User.authenticate(alt_username, 'testpassword')
+  assert(user)
+  session['user'] = user
+  post(page, params) # Expect redirect
+  if alt_page.class == Array
+    assert_redirected_to(:controller => alt_page[0], :action => alt_page[1])
+  else
+    assert_template alt_page.to_s
+  end
+
+  login username, password
+  post_with_dump(page, params)
   if stay_on_page
     assert_response :success
     assert_template page.to_s

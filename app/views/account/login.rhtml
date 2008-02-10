@@ -2,26 +2,29 @@
 
 <div title="Account login" id="loginform" class="form">
     <h3><%= :login_please_login.l %></h3>
-    
-    <% if @message %>
-      <div id="message"><%= @message %></div>
-    <% end %>
 
     <label for="user_login"><%= :login_user.l %>:</label><br/>
-    <input type="text" name="user_login" id="user_login" size="30" value=""/><br/><br/>
+    <input type="text" name="user_login" id="user_login" size="30" value="<%= @login %>"/><br/><br/>
 
     <label for="user_password"><%= :login_password.l %>:</label><br/>
     <input type="password" name="user_password" id="user_password" size="30"/><br/><br/>
 
     <input type="submit" name="login" value=<%= "\"#{:login_login.l}\"" %> class="primary" />
 	<br/><br/>
-	
+
 	<%= textilize(:login_forgot_password.l % "#{DOMAIN}/account/email_new_password") %>
 	<%= textilize(:login_no_account.l % "#{DOMAIN}/account/signup") %>
 
 <%= textilize(:login_having_problems.l % "#{DOMAIN}/observer/ask_webmaster_question") %><br/>
 
 </div>
+
+<% @hiddens.each do |id,name,value| %>
+  <input type="hidden" id="<%=id%>" name="<%=name%>" value="<%=escape_once(value)%>" />
+<% end %>
+
+<%= javascript_tag "document.getElementById('#{@login && @login != "" ?
+    'user_password' : 'user_login'}').focus()" %>
 
 <% end %>
 

@@ -1,0 +1,23 @@
+<%= javascript_include_tag :defaults %>
+<%= javascript_include_tag 'my_auto_complete' %>
+<%= javascript_tag 'extend_ajax_autocompleter()' %>
+<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
+<%= javascript_tag 'Element.hide($("indicator"))' %>
+
+<% @title = 'Editing Species List: ' + h(@species_list.unique_text_name) %>
+<%= link_to 'Cancel (Show Species List)', :action => 'show_species_list', :id => @species_list %>
+| <%= link_to('Upload Species List', :action => 'upload_species_list', :id => @species_list)%><br/>
+
+<div id="Title"><%= @title %></div>
+
+<% form_tag(:action => 'edit_species_list', :id => @species_list,
+    :approved_names => @new_names, :approved_deprecated_names => @deprecated_names) do %>
+<br/>
+<center><%= submit_tag 'Save' %></center>
+
+<table cellpadding="10">
+	<tr>
+	    <%= render :partial => 'form_species_lists' %>
+	</tr>
+</table>
+<% end %>

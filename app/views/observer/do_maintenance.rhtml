@@ -8,6 +8,6 @@
 <br/>
 <% for datum in @data %>
     <%= link_to(textilize_without_paragraph(h(datum[:name])),
-                :action => 'show_name', :id => datum[:id]) %>
+        :controller => 'name', :action => 'show_name', :id => datum[:id]) %>
     <%= datum[:login] %> <br/>
 <% end %>

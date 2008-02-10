@@ -1,9 +1,9 @@
 <% form_for :user, :url => { :action => :prefs } do |form| %>
 
-<div title=<%= "\"#{:prefs_title.l}\"" %> id="prefform" class="form">
+<div title="<%= :prefs_title.l %>" id="prefform" class="form">
   <h3><%= :prefs_title.l %></h3>
-  <%= link_to :bulk_license_link.l, :controller => 'observer', :action => 'license_updater' %><br/>
-  <%= error_messages_for 'user' %><br/>
+  <%= link_to :bulk_license_link.l, :controller => 'image', :action => 'license_updater' %>
+  <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
   
   <label for="user_email"><b><%= :prefs_email.l %>:</b></label><br/>
   <%= form.text_field("email", :size => 60) %><br/><br/>
@@ -28,7 +28,7 @@
     <tr>
   <table><br/>
 
-  <b><%= :prefs_layout_title %>:</b><br/>
+  <b><%= :prefs_layout_title.l %>:</b><br/>
   
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
   <label for="user_rows"><%= :prefs_rows_by.l %></label>
@@ -60,7 +60,7 @@
   <label for="user_password_confirmation"><b><%= :prefs_password_confirm.l %>:</b></label><br/>
   <%= form.password_field("password_confirmation", :size => 30) %><br/><br/>
 <br/>
-<input type="submit" value=<%= "\"#{:prefs_button.l}\"" %> class="primary" />
+<input type="submit" value="<%= :prefs_button.l %>" class="primary" />
 <br/><br/>
 </div>
 

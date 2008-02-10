@@ -10,8 +10,16 @@
     <li><%= :how_searching.l %></li>
     <li><%= :how_unknown_help.l %></li>
     <li><%= :how_adding_observations.l %></li>
+    <li><%= :how_proposing_names.l %></li>    
+    <li><%= :how_voting.l % [@min_pos_vote, @min_neg_vote, :vote_no_opinion.l, @maximum_vote] %></li>
     <li><%= :how_adding_comments.l %></li>    
-    <li><%= :how_creating_species_lists.l %></li>    
+    <li><%= :how_creating_species_lists.l %></li>
+    <li><%= textilize(:how_maps.l % [
+        "#{DOMAIN}/name/map/284",
+        "#{DOMAIN}/location/show_location/4",
+        "#{DOMAIN}/location/map_locations",
+        "#{DOMAIN}/location/list_place_names"
+        ]) %></li>
 </ol>
 
 <h2><%= :how_glossary.l %>:</h2>
@@ -23,6 +31,8 @@
     <li id="lic"><%= :how_license.l %></li>
     <li id="name"><%= :how_name.l %></li>
     <li id="observation"><%= :how_observation.l %></li>
+    <li id="proposed_name"><%= :how_proposed_name.l %></li>
     <li id="species_list"><%= :how_species_list.l %></li>
     <li id="user"><%= :how_user.l %></li>
+    <li id="vote"><%= :how_vote.l % [@min_pos_vote, @min_neg_vote, @maximum_vote] %></li>
 </ol>

@@ -6,33 +6,48 @@ class NameParse
   attr_reader :name
   attr_reader :rank
   attr_reader :search_name
+  attr_reader :comment
   attr_reader :synonym
   attr_reader :synonym_rank
   attr_reader :synonym_search_name
-  
+  attr_reader :synonym_comment
+
   # spl_line can be either:
-  # <name>
-  # <name> = <synonym>
-  # where <name> is one of
-  # <search_name>
-  # <rank> <search_name>
+  #   <name>
+  #   <name> = <synonym>
+  # with an optional [comment] at the end
+  # and where <name> is one of
+  #   <search_name>
+  #   <rank> <search_name>
   # and <synonym> is either
-  # <synonym_search_name>
-  # <synonym_rank> <synonym_search_name>
+  #   <synonym_search_name>
+  #   <synonym_rank> <synonym_search_name>
   def initialize(spl_line)
     result = []
     name_str = ''
-    @line_str = spl_line.strip
+    @line_str = spl_line.strip.squeeze(" ")
     equal_pos = @line_str.index('=')
     if equal_pos
       @name = @line_str[0..equal_pos-1].strip
       @synonym = @line_str[equal_pos+1..-1].strip
+      @synonym_comment = nil
+      match = /^([^\[]*) \[(.*)\]$/.match(@synonym)
+      if match
+        @synonym = match[1]
+        @synonym_comment = match[2]
+      end
       (@synonym_rank, @synonym_search_name) = parse_rank(@synonym)
     else
       @name = @line_str
+      @comment = nil
       @synonym = nil
       @synonym_rank = nil
       @synonym_search_name = nil
+      match = /^([^\[]*) \[(.*)\]$/.match(@name)
+      if match
+        @name = match[1]
+        @comment = match[2]
+      end
     end
     (@rank, @search_name) = parse_rank(@name)
   end

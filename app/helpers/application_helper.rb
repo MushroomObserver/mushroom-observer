@@ -9,18 +9,62 @@ module ApplicationHelper
     result += " (#{count})" if count
     result = "<span class=\"Data\">#{result}</span>"
   end
-  
-  def where_search(where, count)
-    result = link_to(where_string(where, count), :controller => 'observer', :action => 'where_search', :where => where)
-  end
-  
-  def location_link(where, location_id, count=nil)
+
+  def location_link(where, location_id, count=nil, click=false)
     if location_id
       loc = Location.find(location_id)
-      result = link_to(where_string(loc.display_name, count), :controller => 'location', :action => 'show_location', :id => location_id)
+      link_string = where_string(loc.display_name, count)
+      link_string += " [Click for map]" if click
+      result = link_to(link_string, :controller => 'location', :action => 'show_location', :id => location_id)
     else
-      result = "#{where_search(where, count)}"
+      link_string = where_string(where, count)
+      link_string += " [Search]" if click
+      result = link_to(link_string, :controller => 'location', :action => 'where_search', :where => where)
     end
     result
+  end
+
+  def user_link(user, truncate=nil, name=nil)
+    begin
+      name = h(user.unique_text_name) if name.nil?
+      name = truncate(name, MAX_WHO_LENGTH) if truncate == :truncate
+      link_to(name, :controller => 'observer', :action => 'show_user', :id => user)
+    rescue
+    end
+  end
+
+  # Convert :Genus to "Genus" via internationalization.
+  def rank_as_string(rank)
+    eval(":rank_#{rank.to_s.downcase}.l")
+  end
+
+  # Convert :Genus to "Genera" via internationalization.
+  def rank_as_plural_string(rank)
+    eval(":rank_plural_#{rank.to_s.downcase}.l")
+  end
+
+  # Wrap some body text in the cute red/yellow/green box used for flash[:notice].
+  # Note: the &block thing doesn't work, despite apparently being indentical to
+  # the way form_tag does it.  Beats me.
+  def boxify(lvl, msg=nil, &block)
+    type = "Notices"  if lvl == 0 || !lvl
+    type = "Warnings" if lvl == 1
+    type = "Errors"   if lvl == 2
+    msg = capture(&block) if block_given?
+    if msg
+      "<div style='width:500px'>
+        <table class='#{type}'><tr><td>
+          #{msg}
+        </td></tr></table>
+      </div>"
+    else
+      "<div style='width:500px'>
+        <table class='#{type}'><tr><td>"
+    end
+  end
+
+  def end_boxify
+    "  </td></tr></table>
+    </div>"
   end
 end

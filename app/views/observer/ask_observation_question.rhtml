@@ -1,5 +1,5 @@
-<% @title = 'Question about ' + h(@observation.unique_text_name) %>
-<div id="Title">Question about <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
+<% @title = 'Question about ' + h(@observation.unique_text_name(@user)) %>
+<div id="Title">Question about <%= textilize_without_paragraph(h(@observation.unique_format_name(@user))) %></div>
 
 <% form_tag(:action => 'send_observation_question', :id => @observation) do %>
 <center><%= submit_tag "Send" %></center>
@@ -9,3 +9,5 @@
 	The email will automatically include a link to this observation.</label><br/><br/>
 <%= text_area 'question', 'content'  %>
 <% end %>
+
+<%= javascript_tag "document.getElementById('question_content').focus()" %>

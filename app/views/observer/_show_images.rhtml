@@ -1,0 +1,20 @@
+<% if @observation.images.length > 0 %>
+  Images:<br/>
+<% end %>
+
+<% if check_permission(@observation.user_id) %>
+  <%= link_to "Add Images", :controller => 'image', :action => 'add_image', :id => @observation %><br/>
+  <%= link_to "Reuse Image", :controller => 'image', :action => 'reuse_image', :id => @observation %><br/>
+  <% if @observation.images.length > 0 %>
+    <%= link_to "Remove Images", :controller => 'image', :action => 'remove_images', :id => @observation %><br/>
+  <% end %>
+<% end %>
+<br/>
+
+<center>
+<% for image in @observation.images %>
+  <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
+    textilize_without_paragraph(h(image.unique_format_name(@user))),
+    :controller => 'image', :action => 'show_image', :id => image.id) %></p>
+<% end %>
+</center>

@@ -47,6 +47,13 @@ module LoginSystem
     end
 
     if session['user'] and authorize?(session['user'])
+      # This merges parameters in flash[:params] into params structure.
+      # See account controller login and hide_params methods for more info.
+      if flash[:params]
+        flash[:params].each do |k,v|
+          params[k] = v if params[k].nil?
+        end
+      end
       return true
     end
 
@@ -65,6 +72,7 @@ module LoginSystem
   # example use :
   # a popup window might just close itself for instance
   def access_denied
+    flash[:params] = params
     redirect_to :controller=>"/account", :action =>"login"
   end  
   
@@ -72,7 +80,6 @@ module LoginSystem
   # we can return to this location by calling return_location
   def store_location
     session['return-to'] = request.request_uri
-    session['return-to-params'] = request.request_parameters
   end
 
   # move to the last store_location call or to the passed default one

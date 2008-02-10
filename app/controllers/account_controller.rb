@@ -3,22 +3,53 @@ class AccountController < ApplicationController
 
   def login
     case request.method
+      when :get
+        @login = ""
       when :post
         user = User.authenticate(params['user_login'], params['user_password'])
         if session['user'] = user
-          flash[:notice]  = "Login successful"
+          logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
+          flash_notice "Login successful."
           user.last_login = Time.now
           user.save
+          flash[:params] = params
           redirect_back_or_default :action => "welcome"
         else
-          @login    = params['user_login']
-          @message  = "Login unsuccessful"
+          @login = params['user_login']
+          flash_error "Login unsuccessful."
+        end
+    end
+    @hiddens = []
+    if flash[:params]
+      flash[:params].each do |obj,val|
+        hide_params(val, @hiddens, obj.to_s) if val.is_a?(Hash)
+      end
+    end
+  end
+
+  # Parameters from page that redirected to login are preserved in
+  # flash[:params].  I store them in the login page as hidden fields.
+  # When user logs in, it puts these params back into flash[:params]
+  # and redirects to the original page.  The login_required "before"
+  # filter will then merge them back into params[] automatically.
+  # This method flattens the params structure into a simple array.
+  def hide_params(obj, out, prefix)
+    if !obj.is_a?(Hash)
+      id    = prefix.gsub(/\[/, "_").gsub(/\]/, "")
+      name  = prefix
+      value = obj.to_s
+      out << [id, name, value]
+    else
+      obj.each do |k,v|
+        hide_params(v, out, "#{prefix}[#{k.to_s}]")
       end
     end
   end
 
   def signup
     case request.method
+      when :get
+        @user = User.new
       when :post
         theme = params['user']['theme']
         login = params['user']['login']
@@ -31,38 +62,41 @@ class AccountController < ApplicationController
           @user.change_columns(3)
           if @user.save
             session['user'] = User.authenticate(@user.login, params['user']['password'])
-            flash[:notice]  = "Signup successful.  Verification sent to your email account."
+            flash_notice "Signup successful.  Verification sent to your email account."
             AccountMailer.deliver_verify(@user)
             redirect_back_or_default :action => "welcome"
+          else
+            flash_object_errors(@user)
           end
         else
           AccountMailer.deliver_denied(params['user'])
           redirect_back_or_default :action => "welcome"
         end
-      when :get
-        @user = User.new
     end
   end
 
   def email_new_password
     case request.method
+      when :get
+        @user = User.new
       when :post
-        login = params['user']['login']
-        @user = User.find(:first, :conditions => ["login = ?", login])
+        @login = params['user']['login']
+        @user = User.find(:first, :conditions => ["login = ?", @login])
         if @user.nil?
-          flash[:notice] = sprintf("Unable to find the user, %s.", login)
+          flash_error "Unable to find the user '#{@login}'."
         else
           password = random_password(10)
           @user.change_password(password)
           if @user.save
             session['user'] = User.authenticate(@user.login, params['user']['password'])
-            flash[:notice]  = "Password successfully changed.  New password has been sent to your email account."
+            flash_notice "Password successfully changed.  New password has been sent to your email account."
             AccountMailer.deliver_new_password(@user, password)
+            @hiddens = []
+            render :action => "login"
+          else
+            flash_object_errors(@user)
           end
         end
-        render :action => "login"
-      when :get
-        @user = User.new
     end
   end
 
@@ -70,6 +104,9 @@ class AccountController < ApplicationController
     @user = session['user']
     if @user
       case request.method
+        when :get
+          @user = User.find(@user.id) # Make sure we have the latest version of the user
+          session['user'] = @user
         when :post
           @user.change_email(params['user']['email'])
           @user.change_name(params['user']['name'])
@@ -92,31 +129,29 @@ class AccountController < ApplicationController
               @user.change_password(password)
             else
               error = true
-              flash[:notice] = "Password and confirmation did not match"
-              render :action => "prefs"
+              flash_error "Password and confirmation did not match."
             end
           end
-          unless error
-            if @user.save
-              flash[:notice]  = "Preferences updated"
-              redirect_back_or_default :action => "welcome"
-            end
+          if error || !@user.save
+            flash_object_errors(@user)
+          else
+            flash_notice "Preferences updated."
+            redirect_back_or_default :action => "welcome"
           end
-        when :get
-          @user = User.find(@user.id) # Make sure we have the latest version of the user
-          session['user'] = @user
-          @licenses = License.current_names_and_ids(@user.license)
       end
+      @licenses = License.current_names_and_ids(@user.license)
     else
       store_location
-      redirect_to :action => 'login'
+      access_denied
     end
   end
 
   def delete
-    if params['id']
-      @user = User.find(params['id'])
-      @user.destroy
+    if check_permission(0)
+      if params['id']
+        @user = User.find(params['id'])
+        @user.destroy
+      end
     end
     redirect_back_or_default :action => "welcome"
   end
@@ -148,7 +183,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.feature_email = false
       if @user.save
-        flash[:notice] = "Automated feature email disabled for " + @user.unique_text_name
+        flash_notice "Automated feature email disabled for #{@user.unique_text_name}."
       end
       user = session['user']
       session['user'].feature_email = false
@@ -159,7 +194,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.question_email = false
       if @user.save
-        flash[:notice] = "Question email disabled for " + @user.unique_text_name
+        flash_notice "Question email disabled for #{@user.unique_text_name}."
       end
       user = session['user']
       session['user'].question_email = false
@@ -170,7 +205,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.commercial_email = false
       if @user.save
-        flash[:notice] = "Commercial email inquiries disabled for " + @user.unique_text_name
+        flash_notice "Commercial email inquiries disabled for #{@user.unique_text_name}."
       end
       user = session['user']
       session['user'].commercial_email = false
@@ -181,7 +216,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.comment_email = false
       if @user.save
-        flash[:notice] = "Comment email notifications disabled for " + @user.unique_text_name
+        flash_notice "Comment email notifications disabled for #{@user.unique_text_name}."
       end
       user = session['user']
       session['user'].comment_email = false
@@ -196,7 +231,7 @@ class AccountController < ApplicationController
 
   def send_verify
     AccountMailer.deliver_verify(session['user'])
-    flash[:notice] = "Verification sent to your email account."
+    flash_notice "Verification sent to your email account."
     redirect_back_or_default :action => "welcome"
   end
 
@@ -212,7 +247,7 @@ class AccountController < ApplicationController
       if id
         @user = User.find(id)
         if @user != session['user']
-          flash[:notice] = "Permission denied"
+          flash_error "Permission denied."
           result = false
         end
       else
@@ -221,7 +256,7 @@ class AccountController < ApplicationController
       end
     else
       store_location
-      redirect_to :action => 'login'
+      access_denied
     end
     result
   end

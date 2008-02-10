@@ -1,24 +1,49 @@
 <table cellpadding="10" width="100%">
-	<tr>
-		<td align="center" valign="middle" width="160">
-			<%= image = observation.thumb_image
-				if image
-					link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
-							:action => 'show_observation', :id => observation.id)
-				end
-			%>
-		</td>
-		    <% if vertical_layout %>
-	</tr>
-	<tr>
-		<td align="center" valign="middle">
-			<% else %>
-		<td valign="middle">
-			<% end %>
-			<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name)), :action => 'show_observation', :id => observation.id) %></span><br/>
-			<span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span><br/>
-			<span class="ListWhen"><%= observation.when %>:</span>
-			<span class="ListWho"><%= link_to(truncate(h(observation.user.unique_text_name), MAX_WHO_LENGTH), :action => 'show_user', :id => observation.user.id) %></span>
-		</td>
-	</tr>
+  <tr>
+    <td align="center" valign="middle" width="160">
+      <%= image = observation.thumb_image
+        if image
+          link_to(image_tag(sprintf("thumb/%d.jpg",
+            observation.thumb_image_id), :border => 0),
+            :action => 'show_observation', :id => observation.id)
+        end
+      %>
+    </td>
+      <% if vertical_layout %>
+  </tr>
+  <tr>
+    <td align="center" valign="middle">
+      <% else %>
+    <td valign="middle">
+      <% end %>
+      <span class="ListName"><%=
+        link_to(textilize_without_paragraph(h(observation.unique_format_name(@user))),
+        :action => 'show_observation', :id => observation.id) %></span><br/>
+      <span class="ListWhere"><%= location_link(observation.where,
+        observation.location_id) %></span><br/>
+      <span class="ListWhen"><%= observation.when %>:</span>
+      <span class="ListWho"><%= user_link(observation.user, :truncate) %></span>
+      <% rss = observation.rss_log
+         if rss && rss.notes
+           notes = rss.notes.split("\n")
+           any_interesting_notes = false
+           for note in notes
+             note.sub!(/^[^:]*\d\d:\d\d:\d\d[^:]*: */, "")
+             if !/^Observation created/.match(note) &&
+                !/^Image/.match(note)
+               any_interesting_notes = true
+               break
+             end
+           end
+           if any_interesting_notes
+             msg = notes.first
+             match = /^Image (created|reused|removed|destroyed) by /.match(msg)
+             if match
+               msg = (match[1] == "created" || match[1] == "reused") ? "Image added." : "Image removed."
+             end %>
+             <br/><span><%= textilize_without_paragraph(h(msg)) %></span>
+        <% end %>
+      <% end %>
+    </td>
+  </tr>
 </table>

@@ -45,7 +45,7 @@
                                 <%= link_to(lnbsp(:app_send_a_comment), :controller => 'observer',
                                             :action => 'ask_webmaster_question') %>
                                 <br/><br/>
-                                <%= link_to(lnbsp(:app_index_a_z), :controller => 'observer',
+                                <%= link_to(lnbsp(:app_index_a_z), :controller => 'name',
                                                   :action => 'observation_index') %>
                                 <br/><br/>
  
@@ -53,9 +53,9 @@
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_latest_changes),
                                                         :controller => 'observer',
                                                         :action => 'list_rss_logs') %> <br/>
-                                &nbsp;&nbsp;<%= link_to(lnbsp(:app_newest_images), :controller => 'observer',
+                                &nbsp;&nbsp;<%= link_to(lnbsp(:app_newest_images), :controller => 'image',
                                                         :action => 'list_images') %> <br/>
-                                &nbsp;&nbsp;<%= link_to(lnbsp(:app_comments), :controller => 'observer',
+                                &nbsp;&nbsp;<%= link_to(lnbsp(:app_comments), :controller => 'comment',
                                                         :action => 'list_comments') %> <br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_news), :controller => 'observer',
                                                         :action => 'news') %>
@@ -72,13 +72,13 @@
 
                                 <%= lnbsp(:app_species_list) %>:<br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_create_list),
-                                                        :controller => 'observer',
+                                                        :controller => 'species_list',
                                                         :action => 'create_species_list') %> <br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_date_spl),
-                                                        :controller => 'observer',
+                                                        :controller => 'species_list',
                                                         :action => 'list_species_lists') %> <br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_title),
-                                                        :controller => 'observer',
+                                                        :controller => 'species_list',
                                                         :action => 'species_lists_by_title') %>
                                 <br/><br/>
 
@@ -94,7 +94,7 @@
                                 <%= lnbsp(:app_current_user) %>:<br/>
                                 &nbsp;&nbsp;<%= h(session['user'].login) %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_comments_for_you),
-                                                        :controller => 'observer',
+                                                        :controller => 'comment',
                                                         :action => 'show_comments_for_user',
                                                         :id => session['user']) %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_your_observations),
@@ -156,7 +156,7 @@
                     <div style="padding:10px">
                         <%
                         if @search.nil?
-                            pattern = session["pattern"]
+                            pattern = session[:pattern]
                         else
                             pattern = @search.pattern
                         end
@@ -167,11 +167,13 @@
                           <%= submit_tag :app_images_find.l %>
                           <%= submit_tag :app_names_find.l %>
                           <%= submit_tag :app_locations_find.l %>
-                        <% end -%>
-                        <% if flash[:notice] %>
-                          <%= flash[:notice] %><br/>
                         <% end %>
-
+                        <% if flash[:notice] %>
+                          <%= boxify(flash[:notice_level]) %>
+                            <%= flash[:notice] %>
+                          <%= end_boxify %>
+                          <% flash_clear %>
+                        <% end %>
                         <%= @content_for_layout %>
                     </div>
                 </td>

@@ -1,0 +1,27 @@
+<!--[form:image]-->
+
+    <p><label for="image_copyright_holder"><%= :form_images_copyright_holder.l %>:</label><br/>
+    <%= form.text_field('copyright_holder') %></p>
+
+    <p><label for="image_when_1i"><%= :form_images_when.l %>:</label>
+    	<span class="HelpNote">
+    		<%= :form_images_when_help.l %>
+    	</span><br/>
+    <%= form.date_select('when', :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
+
+    <p><label for="image_license_id"><%= :form_images_license.l %>:</label><br/>
+        <span class="HelpNote">
+            <%= textilize_without_paragraph(:form_images_license_help.l % "#{DOMAIN}/observer/how_to_use#lic") %>
+        </span><br/>
+    <%= form.select(:license_id, @licenses) %></p>
+
+    <p><label for="image_notes"><%= :form_images_notes.l %>:</label><br/>
+    	<span class="HelpNote">
+    		<%= :form_images_notes_help.l %>
+    	</span><br/>
+    <%= form.text_area('notes', "cols" => width) %></p>
+    <%= render :partial => 'shared/textilize_help' %>
+
+<!--[eoform:image]-->
+
+<%= javascript_tag "document.getElementById('image_notes').focus()" %>

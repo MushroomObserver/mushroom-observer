@@ -11,7 +11,6 @@ class Comment < ActiveRecord::Base
     sender      = User.find(self.user_id)
     recipient   = User.find(observation.user_id)
     begin
-      raise "Seeing what happens if an error is thrown here"
       if recipient.comment_email
         AccountMailer.deliver_comment(sender, observation, self)
       end

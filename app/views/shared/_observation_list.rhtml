@@ -11,13 +11,13 @@
 			image_id = datum["thumb_image_id"]
 			if image_id
 	  			link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-            			:action => 'show_observation', :id => id)
+            		:controller => 'observer', :action => 'show_observation', :id => id)
           	end
       		%><br/>
     	</td>
 	    <td width="100%" valign="middle">
 			<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
-		                                       :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
+		         :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
 	        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
 	        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
 	        Observation made: <%= datum["when"]%>

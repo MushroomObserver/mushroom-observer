@@ -1,10 +1,41 @@
 * indicates a community request
 
-Bug: Tubaria/Galerina leaving the wrong image as the thumbnail.
+Bug - Notes can get lost when names get merged.  E.g., Lepista nuda/Clitocybe nuda example
+Bug - Observation index doesn't work on the actual site.
 
-* add_name from name list page with everything
+*SOMA Camp Comments:
+    Featured Mushroom pages
+    Calls for specimens
+    Checklist support
+    Sort by date (mod year)
+      Sort order pulldown.  Sort by time mod year.
+    References
+    Name notes on the observation pages
+    add_name page (from name_index)
+    Added alphabet along the top of name_index
 
 Active tasks:
+
+Add a 'needs page'
+
+Reviewing Namings:
+  - Functional review (need to go looking for pages I haven't seen)
+  Full code review
+    Changed files:
+        observer_controller.rb
+    New files:
+        _form_naming.rhtml
+        _show_comments.rhtml
+        _show_footer.rhtml
+        _show_images.rhtml
+        _show_namings.rhtml
+        _show_votes.rhtml
+        create_naming.rhtml
+        edit_naming.rhtml
+        show_votes.rhtml
+    
+  Integrate bug fixes from the head
+  Make proposed changes
 
 *** Improve 'where' (Nathan's active task)
   update how_to_use page to include location documentation
@@ -30,6 +61,12 @@ Active tasks:
   Should collections have individual lat/longs?
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev
+
+Events
+
+DAG support for names and locations
+
+Search engine that catches spelling errors.
 
 User profile - paragraph available in preferences that gets displayed on the show_user page
 
@@ -171,8 +208,10 @@ Small features:
 +* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
   Might be handled by having a toggle that says 'More images'/'Less images' this would also change
     the layout to rows with all the thumbs displayed
+Show all images when looking at a Name page (Darvin)
+Index with A-Z show have alphabet at top (Darvin)
+name_search - Added mark to give count of observations and images.
 
-Map of all locations
 Location Search button
 
 Links page:
@@ -224,11 +263,6 @@ User pages
         Composter - Ranking, new submissions, name editing, mailing list, edit own entries
         Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
         Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
-
-Split up observer_controller?:
-    user pages
-    non-user pages?
-    email delivery
 
 Mechanism for merging species lists?
 

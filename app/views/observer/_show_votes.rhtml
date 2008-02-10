@@ -1,0 +1,40 @@
+<% table = @naming.calc_vote_table %>
+<table cellpadding="0" cellspacing="5" style='margin:10px'>
+  <tr>
+    <th width="20"><%= lnbsp(:show_votes_vote) %></th>
+    <th width="20">&nbsp;</th>
+    <th width="20"><%= lnbsp(:show_votes_score) %></th>
+    <th width="5" >&nbsp;</th>
+    <th width="20"><%= lnbsp(:show_votes_users) %></th>
+  </tr>
+  <% for str in table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}
+    val = table[str][:value]
+    num = table[str][:num]
+    users = table[str][:users] %>
+    <% if val >= 0 %>
+      <tr>
+        <td><%= lnbsp(str) %></td>
+        <td>&nbsp;</td>
+        <td align="center"><%= val %></td>
+        <td>&nbsp;</td>
+        <td align="center"><%= num %></td>
+      </tr>
+    <% end %>
+  <% end %>
+  <tr>
+    <td colspan="5"><hr/></td>
+  </tr>
+  <tr>
+    <td><%= :show_votes_average.l %></td>
+    <td>&nbsp;</td>
+    <td align="center" colspan="3">
+      <%= sprintf("%.1f", @naming.average_vote) %>
+    </td>
+  </tr>
+</table>
+
+<% if do_cancel %>
+  <center>
+    <%= button_to_function(:show_votes_close.l, "hide_votes(#{@naming.id})") %>
+  </center>
+<% end %>

@@ -1,0 +1,33 @@
+<%= javascript_include_tag :defaults %>
+<%= javascript_include_tag 'my_auto_complete' %>
+<%= javascript_tag 'extend_ajax_autocompleter()' %>
+<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
+<%= javascript_tag 'Element.hide($("indicator"))' %>
+
+<% @title = 'Create Naming for Observation #' + h(@observation.id)
+   button_name = 'Create' %>
+<%= link_to 'Cancel (Show Observation)', :action => 'show_observation',
+    :id => @observation %>
+
+<div id="Title"><%= @title %></div>
+
+<% form_tag(:action => 'create_naming', :id => @observation,
+   :approved_name => @what, :method => :post) do %>
+<br/>
+<center><%= submit_tag(button_name) %></center>
+
+<table width="100%" cellpadding="10">
+  <tr>
+    <td width="75%" valign="top">
+      <%= render :partial => 'show_observation' %>
+      <%= render :partial => 'form_naming', :locals => {
+        :action      => 'create_naming',
+        :button_name => button_name } %>
+	</td>
+    <td width="25%" valign="top">
+      <%= render :partial => 'show_images' %>
+    </td>
+  </tr>
+</table>
+
+<% end #form %>

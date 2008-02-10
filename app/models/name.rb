@@ -1,50 +1,167 @@
+# Copyright (c) 2006 Nathan Wilson
+# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
+
+# Name Formats:
+#   text_name           Plain text: "Xxx yyy"         "Xxx"             "Fungi"
+#   search_name         Plain text: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
+#   display_name        Textilized: "Xxx yyy Author"  "Xxx Author"      "Kingdom of Fungi"
+#   observation_name    Textilized: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
+#
+# Regexps: (in "English")
+#   ABOVE_SPECIES_PAT   <Xxx>
+#   SP_PAT              <Xxx species|sp.>
+#   SPECIES_PAT         <Xxx yyy>
+#   SUBSPECIES_PAT      <Xxx yyy subspecies|subsp|ssp|s. yyy>
+#   VARIETY_PAT         <Xxx yyy variety|var|v. yyy>
+#   FORM_PAT            <Xxx yyy forma|form|f. yyy>
+#   AUTHOR_PAT          <Any-of-the-above Author...>  (author may have trailing space)
+#   SENSU_PAT           <Whatever sensu zzz>          (sensu and zzz grouped together)
+#   GROUP_PAT           <Whatever group|gr|gp.>
+#
+# Notes on Regexps:
+#   Extra whitespace allowed on ends and in middle.
+#   <Xxx> can have dashes; <yyy> can also have double-quotes; <Zzz> is any
+#     non-whitespace; <Whatever> is anything at all starting uppercase.
+#   <Author> is determined to start at the second uppercase letter or any
+#     punctuation mark not allowed in the taxa patterns.
+#   Each word above is grouped separately and sequentially, except as noted.
+#   [fixed "_" to be "-" in subsp/var/form pats -JPH 20071125]
+#   [added "ssp." to subsp pat (used in PLANTS database) -JPH 20071125]
+#   [fixed author pat to handle double-quotes -JPH 20071125]
+#
+# These methods return symbols:
+#   Name.all_ranks              :Form to :Kingdom, then :Group
+#   Name.ranks_above_species    :Genus to :Kingdom
+#   Name.names_for_unknown      "Unknown", "unknown", ""
+#   Name.unknown                Name instance used for "unknown".
+#
+# RSS Log:
+#   log(str)
+#   orphan_log(str)
+#
+# Look Up or Create Names:
+#   Name.find_names             Look up Names by text_name and search_name.
+#   Name.names_from_string      Look up Name, create it, return it and parents.
+#   Name.make_name              (used by names_from_string)
+#   Name.create_name            (used by make_name)
+#   Name.make_species           (not used by anyone)
+#   Name.make_genus             (not used by anyone)
+#   Name.find_name              (not used by anyone)
+#   children                    Return array of child name objects.
+#                               (only works for genera and species)
+#
+# Parsing Methods:              (These are only used within this file.)
+#   Name.parse_name             Parse arbitrary taxon, return parts.
+#   Name.parse_by_rank          Parse taxon of given rank, return parts.
+#   Name.parse_above_species    Parse "Xxx".
+#   Name.parse_sp               Parse "Xxx sp.".
+#   Name.parse_species          Parse "Xxx yyy".
+#   Name.parse_subspecies       Parse "Xxx yyy subsp. zzz".
+#   Name.parse_variety          Parse "Xxx yyy var. zzz".
+#   Name.parse_form             Parse "Xxx yyy f. zzz".
+#   Name.parse_group            Parse "Whatever group".
+#   Name.parse_author           Extract author from string.
+#   Name.parse_below_species    (used by parse_subspecies/variety/form)
+#
+# Making Changes:
+#   change_author               Changes author.
+#   change_deprecated           Changes deprecation status.
+#   change_text_name            Changes name.
+#   Name.replace_author         (used by change_author)
+#   check_for_repeats           (used by change_text_name)
+#   common_errors               (used by change_text_name)
+#
+# Synonyms:
+#   approved_synonyms
+#   sort_synonyms
+#   clear_synonym
+#   merge_synonyms
+#
+# Random Helpers and Others:
+#   mergable?                   Does this name have any notes?
+#   status                      Is this name deprecated?
+#   prepend_notes               Add notes at the top of the existing notes.
+#   Name.format_string          (used all over this file)
+
 class Name < ActiveRecord::Base
   has_many :observations
   has_many :past_names
+  has_many :namings
   has_one :rss_log
   belongs_to :user
   belongs_to :synonym
 
+  # Creates RSS log as necessary.
+  # Returns: nothing.
   def log(msg)
     if self.rss_log.nil?
       self.rss_log = RssLog.new
     end
     self.rss_log.addWithDate(msg, true)
   end
-  
+
+  # Creates RSS log as necessary.
+  # Returns: nothing.
   def orphan_log(entry)
     self.log(entry) # Ensures that self.rss_log exists
     self.rss_log.species_list = nil
     self.rss_log.add(self.search_name, false)
   end
 
-  # Patterns 
+########################################
+
+  # Patterns
   ABOVE_SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s*$/
   SP_PAT = /^\s*([A-Z][a-z\-]+)\s+(sp.|species)\s*$/
   SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s*$/
-  SUBSPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\_"]+)\s+(subspecies|subsp|s)\.?\s+([a-z\-"]+)\s*$/
-  VARIETY_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\_"]+)\s+(variety|var|v)\.?\s+([a-z\-"]+)\s*$/
-  FORM_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\_"]+)\s+(forma|form|f)\.?\s+([a-z\-"]+)\s*$/
-  AUTHOR_PAT = /^\s*([A-Z][a-z\-\s\.]+[a-z])\s+([^a-z"].*)$/ # May have trailing \s
+  SUBSPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(subspecies|subsp|ssp|s)\.?\s+([a-z\-"]+)\s*$/
+  VARIETY_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(variety|var|v)\.?\s+([a-z\-"]+)\s*$/
+  FORM_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(forma|form|f)\.?\s+([a-z\-"]+)\s*$/
+  AUTHOR_PAT = /^\s*([A-Z][a-z\-\s\.]+[a-z])\s+(([^a-z"]|auct\.).*)$/ # May have trailing \s
   SENSU_PAT = /^\s*([A-Z].*)\s+(sensu\s+\S+)\s*$/
   GROUP_PAT = /^\s*([A-Z].*)\s+(group|gr|gp)\.?\s*$/
-  
-  
+
+########################################
+
+  # Returns: array of symbols, from :Form to :Kingdom, then :Group.
   def self.all_ranks()
     [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
   end
-  
+
+  # Returns: array of symbols, from :Genus to :Kingdom.
   def self.ranks_above_species()
     [:Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
   end
-  
+
+  # Returns: array of strings: "Unknown", "unknown", and "".
   def self.names_for_unknown()
     ['Unknown', 'unknown', '']
   end
-  
-  # By default tries to weed out deprecated names, but if that results in an empty set,
-  # then it returns the deprecated ones.  Both deprecated and non-deprecated names can
-  # be returned by setting deprecated to true.
+
+  # Returns: "unknown" Name instance.
+  def self.unknown
+    Name.find(:first, :conditions => ['text_name = ?', 'Fungi'])
+  end
+
+  # Textilize a string: itallicize at least, and boldify it unless deprecated.
+  # Returns: an adulterated copy of the string.
+  # This is used throughout this file and nowhere else.
+  def self.format_string(str, deprecated)
+    boldness = '**'
+    # boldness = ''
+    if deprecated
+      boldness = ''
+    end
+    "#{boldness}__#{str}__#{boldness}"
+  end
+
+########################################
+
+  # Look up names with a given text_name or search_name.
+  # By default tries to weed out deprecated names, but if that results in an
+  # empty set, then it returns the deprecated ones.  Both deprecated and
+  # non-deprecated names can be returned by setting deprecated to true.
+  # Returns: array of Name instances.
   def self.find_names(in_str, rank=nil, deprecated=false)
     name = in_str.strip
     if names_for_unknown.member? name
@@ -66,27 +183,22 @@ class Name < ActiveRecord::Base
     else
       result = Name.find(:all, :conditions => ["#{deprecated_condition}(search_name = :name or text_name = :name)", {:name => name}])
     end
-    
+
     # No names that aren't deprecated, so try for ones that are deprecated
     if result == [] and not deprecated
       result = self.find_names(in_str, rank, true)
     end
     result
   end
-  
-  def self.format_string(str, deprecated)
-    boldness = '**'
-    # boldness = ''
-    if deprecated
-      boldness = ''
-    end
-    "#{boldness}__#{str}__#{boldness}"
-  end
-  
+
+  # Lookup a species by genus and species, creating if necessary.
+  # Returns: Name instance, NOT SAVED!
   def self.make_species(genus, species, deprecated = false)
     Name.make_name :Species, sprintf('%s %s', genus, species), :display_name => format_string("#{genus} #{species}", deprecated)
   end
 
+  # Lookup a genus, creating if necessary.
+  # Returns: Name instance, NOT SAVED!
   def self.make_genus(text_name, deprecated = false)
     Name.make_name(:Genus, text_name,
                    :display_name => format_string(text_name, deprecated),
@@ -94,20 +206,24 @@ class Name < ActiveRecord::Base
                    :search_name => text_name + ' sp.')
   end
 
-  def self.find_name(rank, text_name)
-    conditions = ''
-    if rank
-      conditions = "rank = '%s'" % rank
-    end
-    if text_name
-      if conditions
-        conditions += ' and '
-      end
-      conditions += "text_name = '%s'" % text_name
-    end
-    Name.find(:all, :conditions => conditions)
-  end
-  
+#   [This isn't used by anyone.  -JPH 20071125]
+#   def self.find_name(rank, text_name)
+#     conditions = ''
+#     if rank
+#       conditions = "rank = '%s'" % rank
+#     end
+#     if text_name
+#       if conditions
+#         conditions += ' and '
+#       end
+#       conditions += "text_name = '%s'" % text_name
+#     end
+#     Name.find(:all, :conditions => conditions)
+#   end
+
+  # Create name given all the various name formats, etc.
+  # Used only by make_name().
+  # Returns: Name instance, NOT SAVED!
   def self.create_name(rank, text_name, author, display_name, observation_name, search_name)
     result = Name.new
     now = Time.new
@@ -121,7 +237,15 @@ class Name < ActiveRecord::Base
     result.search_name = search_name
     result
   end
-  
+
+  # Lookup a name, creating it as necessary.  Requires rank, text_name,
+  # and display name, at least, supplying defaults for search_name and
+  # observation_name, and leaving author blank by default. Requires an
+  # exact match of both name and author.
+  # Returns:
+  #   zero or one match: a Name instance, NOT SAVED!
+  #   multiple matches: nil
+  # Only used by make_species(), make_genus(), and names_from_string().
   def self.make_name(rank, text_name, params)
     display_name = params[:display_name] || text_name
     observation_name = params[:observation_name] || display_name
@@ -129,7 +253,7 @@ class Name < ActiveRecord::Base
     author = params[:author]
     result = nil
     if rank
-      matches = Name.find(:all, :conditions => sprintf("search_name = '%s'", search_name))
+      matches = Name.find(:all, :conditions => ['search_name = ?', search_name])
       if matches == []
         result = Name.create_name(rank, text_name, author, display_name, observation_name, search_name)
       elsif matches.length == 1
@@ -138,11 +262,18 @@ class Name < ActiveRecord::Base
     end
     result
   end
-  
+
+  # Parses a string, creates a Name for it and all its ancestors (if any don't
+  # already exist), returns it in an array (genus first, then species and
+  # variety).  (Ancestors only go back to genus at the moment; I'm not sure
+  # this will ever change for this routine, as it is purely mechanical.) 
+  # Note: check if any results are missing an id to determine which are new.
+  # Returns: array of Name instances, NOT SAVED! (both new names and pre-
+  #   existing names which could potentially have changes such as author)
   def self.names_from_string(in_str)
     result = []
     if names_for_unknown.member? in_str
-      result = Name.find_name(:Kingdom, 'Fungi')
+      result.push Name.unknown
     else
       str = in_str.gsub(" near ", " ")
       parse = parse_name(str)
@@ -153,11 +284,13 @@ class Name < ActiveRecord::Base
         end
         matches = []
         name = text_name
-        if author != ''
+        if author.nil? || author == ''
+          matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
+        else
           matches = Name.find(:all, :conditions => "search_name = '%s'" % search_name)
-        end
-        if matches == []
-          matches = Name.find(:all, :conditions => "text_name = '%s' and (author is null or author = '')" % text_name)
+          if matches == []
+            matches = Name.find(:all, :conditions => "text_name = '%s' and (author is null or author = '')" % text_name)
+          end
         end
         match_count = matches.length
         if match_count == 0
@@ -169,7 +302,7 @@ class Name < ActiveRecord::Base
           result.push name
         elsif match_count == 1
           name = matches[0]
-          if (name.author.nil? or name.author == '') and author
+          if (name.author.nil? or name.author == '') and !author.nil? and author != ""
             name.change_author author
           end
           result.push name
@@ -181,51 +314,29 @@ class Name < ActiveRecord::Base
     result
   end
 
-  def self.replace_author(str, old_author, author)
-    name = str
-    if old_author
-      ri = name.rindex " " + old_author
-      if ri and (ri + old_author.length + 1 == name.length)
-        name = name[0..ri].strip
-      end
+  def children
+    if self.rank == :Genus
+      return Name.find(:all, :conditions => "text_name like '#{self.text_name} %' and rank = 'species'",
+        :order => "text_name asc")
+    elsif self.rank == :Species
+      return Name.find(:all, :conditions => "text_name like '#{self.text_name} %' and
+        (rank = 'Subspecies' or rank = 'Variety' or rank = 'Form')",
+        :order => "text_name asc")
+    else
+      return []
     end
-    if author
-      name += " " + author
-    end
-    return name
-  end
-  
-  def change_author(author)
-    old_author = self.author
-    self.display_name = Name.replace_author(self.display_name, old_author, author)
-    self.observation_name = Name.replace_author(self.observation_name, old_author, author)
-    self.search_name = Name.replace_author(self.search_name, old_author, author)
-    self.author = author
-  end
-  
-  def change_deprecated(value)
-    # Remove any boldness that might be there
-    self.display_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
-    self.observation_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
-    unless value
-      # Add boldness
-      self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
-      if self.display_name != self.observation_name
-        self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
-      end
-    end
-    self.deprecated = value
   end
 
-  def common_errors(in_str)
-    result = true
-    match = /^[Uu]nknown|\sspecies$|\ssp.?\s*$|\ssensu\s/.match(in_str)
-    if match
-      raise "%s is an invalid name" % in_str
-    end
-  end
-  
-  
+########################################
+
+  # Parse a string, return the following array:
+  #  0: text_name         "Xx yy v. zz"         "Xx yy"         "Xx"
+  #  1: display_name      "Xx yy v. zz Author"  "Xx yy Author"  "Xx sp. Author"
+  #  2: observation_name  "Xx yy v. zz Author"  "Xx yy Author"  "Xx Author"
+  #  3; search_name       "Xx yy v. zz Author"  "Xx yy Author"  "Xx sp. Author"
+  #  4: parent_name
+  #  5: rank              :Variety              :Species        :Genus
+  #  6: author            "Author"              "Author"        "Author"
   def self.parse_name(str)
     (name, author) = parse_author(str)
     rank = :Group
@@ -265,7 +376,8 @@ class Name < ActiveRecord::Base
     end
     return parse
   end
-  
+
+  # Pick off author, return [name, author]
   def self.parse_author(in_str)
     name = in_str
     author = nil
@@ -275,13 +387,18 @@ class Name < ActiveRecord::Base
     end
     if match
       name = match[1]
-      author = match[2].strip # Due to possible training \s
+      author = match[2].strip # Due to possible trailing \s
     end
     [name, author]
   end
-  
-  # parse_* return: text_name, display_name, observation_name, search_name, parent_name
-  
+
+  # The following methods all return the following array:
+  #  0: text_name
+  #  1: display_name
+  #  2: observation_name
+  #  3; search_name
+  #  4: parent_name
+
   # <Genus> (or other higher rank)
   def self.parse_above_species(in_str, deprecated=false)
     results = nil
@@ -292,7 +409,7 @@ class Name < ActiveRecord::Base
     end
     results
   end
-  
+
   # <Genus> sp. (or other higher rank)
   def self.parse_sp(in_str, deprecated=false)
     results = nil
@@ -303,7 +420,7 @@ class Name < ActiveRecord::Base
     end
     results
   end
-  
+
   # <Genus> <species>
   def self.parse_species(in_str, deprecated=false)
     results = nil
@@ -315,7 +432,7 @@ class Name < ActiveRecord::Base
     end
     results
   end
-  
+
   def self.parse_below_species(pat, in_str, term, deprecated)
     results = nil
     match = pat.match(in_str)
@@ -333,17 +450,17 @@ class Name < ActiveRecord::Base
   def self.parse_subspecies(in_str, deprecated=false)
     parse_below_species(SUBSPECIES_PAT, in_str, 'subsp.', deprecated)
   end
-  
+
   # <Genus> <species> var. <subspecies>
   def self.parse_variety(in_str, deprecated=false)
     parse_below_species(VARIETY_PAT, in_str, 'var.', deprecated)
   end
-    
+
   # <Genus> <species> f. <subspecies>
   def self.parse_form(in_str, deprecated=false)
     parse_below_species(FORM_PAT, in_str, 'f.', deprecated)
   end
-  
+
   # <Taxon> group
   def self.parse_group(in_str, deprecated=false)
     results = nil
@@ -363,7 +480,8 @@ class Name < ActiveRecord::Base
     end
     results
   end
-  
+
+  # Specified rank.
   def self.parse_by_rank(in_str, in_rank, in_deprecated)
     rank = in_rank.to_sym
     if ranks_above_species.member? rank
@@ -379,19 +497,105 @@ class Name < ActiveRecord::Base
     elsif :Group == rank
       results = parse_group(in_str, in_deprecated)
     elsif
-      raise "Unrecognized rank, %s" % rank
+      raise "Unrecognized rank, %s." % rank
     end
     if results.nil?
-      raise "%s is invalid for the rank %s" % [in_str, rank]
+      raise "%s is invalid for the rank %s." % [in_str, rank]
     end
     results
   end
-  
-  def mergable?()
-    self.notes.nil? || (self.notes == '')
+
+########################################
+
+  # Changes author.  Updates formatted names, as well.
+  # Returns: author, NOT SAVED!
+  def change_author(new_author)
+    old_author = self.author
+    self.author = new_author
+    self.display_name     = Name.replace_author(self.display_name,     old_author, new_author)
+    self.observation_name = Name.replace_author(self.observation_name, old_author, new_author)
+    self.search_name      = Name.replace_author(self.search_name,      old_author, new_author)
   end
-  
-  def check_for_repeats(text_name, author)
+
+  # Used by change_author().
+  def self.replace_author(str, old_author, new_author)
+    result = str
+    if old_author
+      ri = result.rindex " " + old_author
+      if ri and (ri + old_author.length + 1 == result.length)
+        result = result[0..ri].strip
+      end
+    end
+    if new_author
+      result += " " + new_author
+    end
+    return result
+  end
+
+  # Changes deprecated status.  Updates formatted names, as well.
+  # Returns: value, NOT SAVED!
+  def change_deprecated(value)
+    # Remove any boldness that might be there
+    self.display_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
+    self.observation_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
+    unless value
+      # Add boldness
+      self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
+      if self.display_name != self.observation_name
+        self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
+      end
+    end
+    self.deprecated = value
+  end
+
+  # Changes the name, creates parents as necessary, ... [This doesn't seem to
+  # be all kosher.  It used an undefined variable "rank", and it doesn't add
+  # the author to observation_name and search_name in some cases, whereas
+  # parse_name always does.  This needs to be looked at.  -JPH 20071125]
+  # Throws a RuntimeError with the error message if unsuccessful in any way.
+  # Returns: nothing, NOT SAVED!
+  def change_text_name(in_str, new_author, new_rank)
+    Name.common_errors(in_str)
+    results = nil
+    new_author = new_author.strip
+    new_text_name, new_display_name, new_observation_name, new_search_name, parent_name =
+      Name.parse_by_rank(in_str, new_rank, self.deprecated)
+    if (parent_name and Name.find(:all, :conditions => "text_name = '%s'" % parent_name) == [])
+      names = Name.names_from_string(parent_name)
+      if names.last.nil?
+        raise "Unable to create the name %s." % parent_name
+      else
+        for n in names
+          n.user_id = self.user_id
+          n.save
+        end
+      end
+    end
+    # Name.check_for_repeats(new_text_name, new_author)
+    if new_author
+      new_display_name     = "%s %s" % [new_display_name, new_author]
+      new_observation_name = "%s %s" % [new_observation_name, new_author]
+      new_search_name      = "%s %s" % [new_search_name, new_author]
+    end
+    self.rank             = new_rank
+    self.author           = new_author
+    self.text_name        = new_text_name
+    self.display_name     = new_display_name
+    self.observation_name = new_observation_name
+    self.search_name      = new_search_name
+  end
+
+  # Used by change_text_name().
+  def self.common_errors(in_str)
+    result = true
+    match = /^[Uu]nknown|\sspecies$|\ssp.?\s*$|\ssensu\s/.match(in_str)
+    if match
+      raise "%s is an invalid name." % in_str
+    end
+  end
+
+  # Used by change_text_name().
+  def self.check_for_repeats(text_name, author)
     matches = []
     if author != ''
       matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
@@ -400,85 +604,57 @@ class Name < ActiveRecord::Base
     end
     for m in matches
       if m.id != self.id
-        raise "The name, %s, is already in use" % text_name
+        raise "The name, %s, is already in use." % text_name
       end
     end
   end
 
-  # Throws a RuntimeError with the error message if unsuccessful in anyway 
-  def change_text_name(in_str, in_author, in_rank)
-    common_errors(in_str)
-    results = nil
-    author = in_author.strip
-    text_name, display_name, observation_name, search_name, parent_name = Name.parse_by_rank(in_str, in_rank, self.deprecated)
-    if (parent_name and Name.find(:all, :conditions => "text_name = '%s'" % parent_name) == [])
-      names = Name.names_from_string(parent_name)
-      if names.last.nil?
-        raise "Unable to create the name %s" % parent_name
-      else
-        for n in names
-          n.user_id = user_id
-          n.save
-        end
-      end
-    end
-    # check_for_repeats(text_name, author)
-    self.rank = rank
-    self.text_name = text_name
-    self.author = author
-    if author
-      display_name = "%s %s" % [display_name, author]
-      if [:Species, :Subspecies, :Variety, :Form].member? rank
-        observation_name = "%s %s" % [observation_name, author]
-        search_name = "%s %s" % [search_name, author]
-      end
-    end
-    self.display_name = display_name
-    self.observation_name = observation_name
-    self.search_name = search_name
-  end
+########################################
 
+  # Get list of synonyms that aren't deprecated (including potentially itself).
+  # Returns: array of Name instances.
   def approved_synonyms
     result = []
-    synonym = self.synonym
-    if synonym
-      for n in synonym.names
+    if self.synonym
+      for n in self.synonym.names
         result.push(n) unless n.deprecated
       end
     end
     return result
   end
-  
+
+  # Get list of both deprecated and valid synonyms (NOT including itself).
+  # (Each list is unsorted, however.)
+  # Returns: pair of arrays of Name instances.
   def sort_synonyms
     accepted_synonyms = []
     deprecated_synonyms = []
-    synonym = self.synonym
-  	if synonym
-  	  for n in synonym.names
+  	if self.synonym
+  	  for n in self.synonym.names
   	    if (n != self)
   	      if n.deprecated
   	        deprecated_synonyms.push(n)
-	        else
-	          accepted_synonyms.push(n)
-	        end
+	      else
+	        accepted_synonyms.push(n)
+	      end
   	    end
   	  end
   	end
   	[accepted_synonyms, deprecated_synonyms]
   end
-  	
-  # Ensure that this Name has no synonyms by clearing the synonym
-  # and destroying it if necessary
+
+  # Removes this name from its old synonym list.  It destroys the synonym
+  # list entirely if there's only one name left in it afterword.
+  # Returns: nothing.  Saves changes.
   def clear_synonym
-    synonym = self.synonym
-    if synonym
-      names = synonym.names
+    if self.synonym
+      names = self.synonym.names
       if names.length <= 2 # Get rid of the synonym
         for n in names
           n.synonym = nil
           n.save
         end
-        synonym.destroy
+        self.synonym.destroy
       else # Just clear this name
         self.synonym = nil
         self.save
@@ -486,30 +662,40 @@ class Name < ActiveRecord::Base
     end
   end
 
+  # Makes two names synonymous.  If either name already has a list of synonyms,
+  # it will merge the synonym lists into a single list.
+  # Returns: nothing.  Saves changes.
   def merge_synonyms(name)
-    synonym = self.synonym
-    name_synonym = name.synonym
-    if synonym.nil?
-      if name_synonym.nil? # No existing synonym
-        synonym = Synonym.new
-        synonym.created = Time.now
-        self.synonym = synonym
+    if self.synonym.nil?
+      if name.synonym.nil? # No existing synonym
+        self.synonym = Synonym.new
+        self.synonym.created = Time.now
         self.save
-        synonym.transfer(name)
+        self.synonym.transfer(name)
       else # Just name has a synonym
-        name_synonym.transfer(self)
+        name.synonym.transfer(self)
       end
-    else # self has a synonym
-      if name_synonym.nil? # but name doesn't
-        synonym.transfer(name)
-      else # both have synonyms so merge
-        for n in name_synonym.names
-          synonym.transfer(n)
+    else # Self has a synonym
+      if name.synonym.nil? # but name doesn't
+        self.synonym.transfer(name)
+      else # Both have synonyms so merge
+        for n in name.synonym.names
+          self.synonym.transfer(n)
         end
       end
     end
   end
-  
+
+########################################
+
+  # Can we merge this name into another?  Only if it has no notes.
+  # Returns boolean.
+  def mergable?()
+    self.notes.nil? || (self.notes == '')
+  end
+
+  # Is this name deprecated?
+  # Returns "Deprecated" or "Valid".
   def status
     if self.deprecated
       "Deprecated"
@@ -518,6 +704,8 @@ class Name < ActiveRecord::Base
     end
   end
 
+  # Stick some (Textile) notes onto the top of existing notes.
+  # Returns nothing.  Saves change.
   def prepend_notes(str)
     if !self.notes.nil? && self.notes != ""
       self.notes = str + "<br>\n\n" + self.notes

@@ -5,17 +5,14 @@
 
 <%= link_to(:location_all.l, :action => 'list_place_names') %><br/>
 
-<% form_tag(:action => 'construct_location') do %>
-<br/>
-<center><%= submit_tag("Create") %></center>
+<% form_for :location,
+            :url => { :action => :create_location } do |form| %>
+    <br/>
+    <center><%= submit_tag("Create") %></center>
 
-<table cellpadding="10">
-    <tr>
-        <%= render :partial => 'form_locations', :locals => {
-            :where => @where
+    <%= render :partial => 'form_locations', :locals => {
+        :where => @where, :form => form
         } %>
-    </tr>
-</table>
 <% end %>
 
 <br/>

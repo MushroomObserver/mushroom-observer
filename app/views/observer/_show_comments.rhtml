@@ -1,0 +1,23 @@
+<% if !@observation.comments.empty? %>
+  <p>Comments:&nbsp;&nbsp;<%= link_to 'Add Comment', :controller => 'comment',
+    :action => 'add_comment', :id => @observation %></p>
+  <% odd_or_even = 0 %>
+  <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
+    <% odd_or_even = 1 - odd_or_even %>
+    <% if skip_comment == nil || comment.id != skip_comment %>
+      <div class="ListLine<%= odd_or_even %>">
+        <p>Created: <span class="Data"><%= comment.created.to_formatted_s(:db) %></span><br/>
+        By: <%= user_link(comment.user) %>
+        <% if check_permission(comment.user_id) %>
+          (<%= link_to 'Edit', :controller => 'comment',
+            :action => 'edit_comment', :id => comment %>
+          | <%= link_to 'Destroy', { :controller => 'comment',
+            :action => 'destroy_comment', :id => comment },
+            :confirm => "Are you sure?" %>)
+        <% end %><br/>
+        Summary: <span class="Data"><%= comment.summary %></span></p>
+        <%= textilize(sanitize(comment.comment)) %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

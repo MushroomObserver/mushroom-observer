@@ -18,7 +18,7 @@ website to forward the following commercial inquiry about your image, <u> (3)</u
 to them.&nbsp; Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="http://localhost:3000/observer/show_image/3">Show this image.</a>
+  <li><a href="http://localhost:3000/image/show_image/3">Show this image.</a>
   <li><a href="http://localhost:3000/account/no_commercial_email/1">Stop receiving commercial inquiries.</a>
   <li><a href="http://localhost:3000/account/prefs/1">Change your account preferences.</a>
   <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>

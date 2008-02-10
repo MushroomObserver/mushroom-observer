@@ -12,9 +12,9 @@
 	<%=
 		link_to(sprintf('<span class="ListName">%s</span><br/>',
 				textilize_without_paragraph(h(name.display_name))),
-				:action => 'show_name', :id => name.id)
+			:controller => 'name', :action => 'show_name', :id => name.id)
 	%>
-	<span class="ListWho"><br/>by <%= link_to(truncate(h(name.user.unique_text_name), MAX_WHO_LENGTH), :action => 'show_user', :id => name.user.id) %></span>
+	<span class="ListWho"><br/>by <%= user_link(name.user, :truncate) %></span>
 		</td>
 	</tr>
 </table>

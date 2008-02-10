@@ -13,6 +13,8 @@ class RssLog < ActiveRecord::Base
     self.notes = sprintf("%s\n%s", entry, self.notes)
     if t
       touch
+    else
+      self.save
     end
   end
   

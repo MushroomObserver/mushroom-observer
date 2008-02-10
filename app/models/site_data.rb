@@ -1,7 +1,49 @@
 #  Created by Nathan Wilson on 2007-05-12.
 #  Copyright (c) 2007. All rights reserved.
 
-ALL_FIELDS = [:images, :names, :past_names, :locations, :past_locations, :species_lists, :species_list_entries, :comments, :observations, :users]
+# This file manages user rankings.
+# 
+# Global Constants:
+#   ALL_FIELDS                List of fields presumably in pleasing order.
+#   FIELD_WEIGHTS             Weight of each field in user metric.
+#   FIELD_TITLES              Title to use for each field in view.
+#   FIELD_TABLES              Name of table to count rows of for each field.
+#                             (only the exceptions; default is table name is
+#                             same as field name)
+# 
+# Public:
+#   get_site_data             Returns stats for entire site.
+#   get_user_data(user_id)    Returns stats for given user.
+#   get_user_ranking          Returns list of users sorted by ranking.
+#   get_user_metric(id)       Returns "score" of a given user.
+# 
+# Private:
+#   calc_metric(fields)       Calculates score of a single user.
+#   get_field_count(field)    Looks up number of entries in a given table.
+#   load_user_data(id=nil)    Populates @user_data (some stuff hard-coded).
+#   load_field_counts(field, query=nil)
+#                             Populates a single column in @user_data.
+# 
+# Static internal data structure: (created by load_user_data)
+#   @user_data        This is a 2-D hash keyed on user_id then field name:
+#     :images           Number of images the user has posted.
+#     ...
+#     :observations     Number of observations user has posted.
+#     :name             User's legal_name.
+#     :id               User's id.
+
+ALL_FIELDS = [
+  :images,
+  :names,
+  :past_names,
+  :locations,
+  :past_locations,
+  :species_lists,
+  :species_list_entries,
+  :comments,
+  :observations,
+  :users
+]
 
 FIELD_WEIGHTS = {
   :images => 10,
@@ -34,7 +76,6 @@ FIELD_TABLES = {
   :species_list_entries => "observations_species_lists",
 }
 
-
 class SiteData
   def get_site_data
     result = {}
@@ -43,27 +84,37 @@ class SiteData
     end
     result
   end
-  
+
   def get_user_data(id)
     load_user_data(id)
     @user_data[@user_id]
   end
-  
+
   def get_user_ranking
     load_user_data
     user_ranking = []
     for k, v in @user_data
-      metric = 0
-      for field in ALL_FIELDS
-        count = v[field] || 0
-        metric += FIELD_WEIGHTS[field] * count
-      end
+      metric = calc_metric(v)
       user_ranking.push([metric, v[:id], v[:name]])
     end
     user_ranking.sort.reverse
   end
- 
+
+  def get_user_metric(id)
+    load_user_data(id)
+    calc_metric(@user_data[id])
+  end
+
 private
+  def calc_metric(fields)
+    metric = 0
+    for field in ALL_FIELDS
+      count = fields[field] || 0
+      metric += FIELD_WEIGHTS[field] * count
+    end
+    return metric
+  end
+
   def get_field_count(field)
    result = 0
    table = FIELD_TABLES[field]
@@ -110,7 +161,7 @@ private
     end
     load_field_counts(:species_list_entries, query) # 1
   end
-  
+
   def load_field_counts(field, query=nil)
     result = []
     conditions = ""

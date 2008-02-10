@@ -10,13 +10,13 @@
         		    if metric > 0 %>
         			<tr>
         				<td class="Data">
-        					<%= link_to(user_name, :action => "show_user", :id => user_id) %>
+                            <%= user_link(user_id, :notruncate, user_name) %>
         				</td>
         				<td>
         				    <%= link_to("Observations", :action => "show_user_observations", :id => user_id) %>
         				</td>
         				<td>
-        				    <%= link_to(metric, :action => "show_user", :id => user_id) %>
+                            <%= user_link(user_id, :notruncate, metric) %>
         				</td>
         			</tr>
         			<% end %>

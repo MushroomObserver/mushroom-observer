@@ -1,0 +1,19 @@
+<% @title = 'Editing Comment on ' + @comment.observation.unique_text_name(@user) %>
+<%= link_to 'Cancel (Show Comment)', :action => 'show_comment', :id => @comment %>
+
+<div id="Title">Editing Comment on <%= textilize_without_paragraph(h(@comment.observation.unique_format_name(@user))) %></div>
+
+<% form_tag(:action => 'edit_comment', :id => @comment) do %>
+<center><%= submit_tag 'Save Edits' %></center>
+
+<%= render :partial => 'form_comments' %>
+
+<br/><hr align="center" width="90%" />
+
+<%= render :partial => 'observer/show_observation', :locals => {
+    :observation => @comment.observation,
+    :do_title => true,
+    :skip_comment => @comment.id
+} %>
+
+<% end %>

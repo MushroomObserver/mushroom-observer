@@ -1,31 +1,54 @@
-<% @title       = "#{:show_observation_title.l} #{h(@observation.unique_text_name)}"
-   what         = textilize_without_paragraph(h(@observation.base_name))
-   name         = @observation.name
+<% @title       = :show_observation_title.l + ': ' + h(@observation.unique_text_name(@user))
+   what         = textilize_without_paragraph(h(@observation.format_name(@user)))
+   name         = @observation.preferred_name(@user)
    questions_ok = @observation.user.question_email %>
 
-<%= link_to("#{:show_observation_about.l} #{what}", :action => 'show_name', :id => name.id)%>
-| <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %><br/>
-
-<%= link_to :show_observation_add_comment.l, :action => 'add_comment', :id => @observation %>
-| <%= link_to :show_observation_manage_species_lists.l, :action => 'manage_species_lists', :id => @observation %>
-<% if questions_ok %>
-	| <%= link_to :show_observation_send_question.l, :action => 'ask_observation_question', :id => @observation %>
+<% if name %>
+  <%= link_to("#{:show_observation_about.l} #{what}", :controller => 'name', :action => 'show_name', :id => name)%>
+  | <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %>
+  | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => name) %>
+  <br/>
 <% end %>
 
-<%	if not session['observation_ids'].nil? %>
-		<br/><%= link_to :show_observation_previous.l, :action => 'prev_observation', :id => @observation %>
-		| <%= link_to :show_observation_next.l, :action => 'next_observation', :id => @observation %>
-<%  end %>
+<%= link_to :show_observation_propose_new_name.l,
+    :controller => 'observer', :action => 'create_naming', :id => @observation %>
+| <%= link_to :show_observation_add_comment.l,
+    :controller => 'comment', :action => 'add_comment', :id => @observation %>
+| <%= link_to :show_observation_manage_species_lists.l,
+    :controller => 'species_list', :action => 'manage_species_lists', :id => @observation %>
+<% if questions_ok %>
+  | <%= link_to :show_observation_send_question.l,
+    :controller => 'observer', :action => 'ask_observation_question', :id => @observation %>
+<% end %>
+<br/>
 
-<div id="Title">
-    <%= "#{:show_observation_title.l}: #{textilize_without_paragraph(h(@observation.unique_format_name))}" %>
-</div>
+<% if not session[:observation_ids].nil? %>
+  <%= link_to :show_observation_previous.l, :action => 'prev_observation', :id => @observation %>
+  | <%= link_to :show_observation_next.l, :action => 'next_observation', :id => @observation %>
+  <br/>
+<% end %>
+
+<div id="Title"><%= :show_observation_title.l + ': ' +
+  textilize_without_paragraph(h(@observation.unique_format_name(@user))) %></div>
 
 <% if check_permission(@observation.user_id) %>
-	<%= link_to :show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation %>
-	| <%= link_to :show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation },
-                  :confirm => :show_observation_are_you_sure.l %><br/>
+  <%= link_to :show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation %>
+  | <%= link_to :show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation },
+                :confirm => "Are you sure?" %>
+  <br/>
 <% end %>
 
-<%= render :partial => 'show_observation', :locals => {
-    :observation => @observation, :do_title => false, :skip_comment => nil } %>
+<table width="100%" cellpadding="10">
+  <tr>
+    <td width="75%" valign="top">
+      <%= render :partial => 'show_observation' %>
+      <%= render :partial => 'show_namings' %>
+      <%= render :partial => 'show_comments', :locals => { :skip_comment => nil } %>
+      <%= render :partial => 'show_footer' %>
+	</td>
+    <td width="25%" valign="top">
+      <%= render :partial => 'show_images' %>
+    </td>
+  </tr>
+</table>
+

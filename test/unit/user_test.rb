@@ -6,6 +6,7 @@ class UserTest < Test::Unit::TestCase
   fixtures :users
   fixtures :images
   fixtures :names
+  fixtures :namings
   fixtures :observations
   fixtures :images_observations
     

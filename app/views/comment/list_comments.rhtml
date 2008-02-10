@@ -1,0 +1,33 @@
+<div id="Title"><%= @title %></div>
+
+<div class="pagination"><%= pagination_links(@comment_pages) %></div>
+
+<% if @comments.length > 0 %>
+<table cellpadding="5" cellspacing="0" width="100%">
+  <%
+     odd_or_even = 0
+     for comment in @comments
+       odd_or_even = 1 - odd_or_even
+       observation = comment.observation
+  %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td width="100%">
+      <%= link_to sprintf('<span class="ListWhat">%s</span>', h(comment.summary)),
+                :action => 'show_comment', :id => comment %>: 
+      <% if !observation.nil? %>
+        <%= link_to sprintf('<span class="ListWhat">%s</span>',
+                textilize_without_paragraph(h(observation.unique_format_name))),
+                :controller => 'observer', :action => 'show_observation', :id => observation %>
+      <% else %>
+        (observation deleted)
+      <% end %>
+      <br/>
+      <span class="ListWhen"><%= comment.created %></span>:
+      <span class="ListWho"><%= user_link(comment.user, :truncate) %></span><br/>
+    </td>
+  </tr>
+  <% end %>
+</table>
+<% end %>
+
+<div class="pagination"><%= pagination_links(@comment_pages) %></div><br/>

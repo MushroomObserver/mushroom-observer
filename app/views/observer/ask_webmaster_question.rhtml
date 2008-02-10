@@ -2,19 +2,15 @@
 <div id="Title"><%= @title %></div>
 <%= textilize(:ask_webmaster_note.l % "#{SVN_REPOSITORY}/trunk/TODO") %>
 
-<% form_tag(:action => 'send_webmaster_question') do %>
+<% form_tag(:action => 'ask_webmaster_question') do %>
 <center><%= submit_tag :ask_webmaster_send.l %></center>
 <br/>
 <label for="user_email"><%= :ask_webmaster_your_email.l%>:</label><br/>
-<%
-    email_value = ""
-    if @sender
-        email_value = @sender
-    elsif @user
-        email_value = @user.email
-    end
-%>
-<%= text_field("user", "email", :value => email_value, :size => 60) %><br/><br/>
+<%= text_field("user", "email", :value => @email, :size => 60) %><br/><br/>
 <label for="question_content"><%= :ask_webmaster_question.l %>:</label><br/>
 <%= text_area('question', 'content', :value => @content)  %>
+
+<%= javascript_tag "document.getElementById('#{@email && @email != "" && !@email_error ?
+    'question_content' : 'user_email'}').focus()" %>
+
 <% end %>

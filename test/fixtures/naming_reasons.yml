@@ -1,0 +1,8 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+cc_macro_reason:
+  id:           1
+  naming_id:    3
+  reason:       1
+  notes:        "Isn't it obvious?"
+

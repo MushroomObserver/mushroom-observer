@@ -1,0 +1,9 @@
+<p><span class="Date">
+  Observation created: <%= @observation.created %><br/>
+  Last modified: <%= @observation.modified %><br/>
+  <% rss_log = @observation.rss_log
+    if rss_log %>
+  	  <%= link_to "Show Log", :action => 'show_rss_log', :id => rss_log.id %>
+  <% end %>
+  </span>
+</p>

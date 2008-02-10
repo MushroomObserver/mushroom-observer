@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 22) do
+ActiveRecord::Schema.define(:version => 23) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -78,6 +78,20 @@ ActiveRecord::Schema.define(:version => 22) do
     t.column "citation",         :string,   :limit => 200
   end
 
+  create_table "naming_reasons", :force => true do |t|
+    t.column "naming_id", :integer
+    t.column "reason",    :integer
+    t.column "notes",     :text
+  end
+
+  create_table "namings", :force => true do |t|
+    t.column "created",        :datetime
+    t.column "modified",       :datetime
+    t.column "observation_id", :integer
+    t.column "name_id",        :integer
+    t.column "user_id",        :integer
+  end
+
   create_table "observations", :force => true do |t|
     t.column "created",                :datetime
     t.column "modified",               :datetime
@@ -90,6 +104,7 @@ ActiveRecord::Schema.define(:version => 22) do
     t.column "name_id",                :integer
     t.column "location_id",            :integer
     t.column "is_collection_location", :boolean,                 :default => true,  :null => false
+    t.column "naming_id",              :integer
   end
 
   create_table "observations_species_lists", :id => false, :force => true do |t|
@@ -174,6 +189,14 @@ ActiveRecord::Schema.define(:version => 22) do
     t.column "license_id",        :integer,                :default => 3,    :null => false
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
+  end
+
+  create_table "votes", :force => true do |t|
+    t.column "created",   :datetime
+    t.column "modified",  :datetime
+    t.column "naming_id", :integer
+    t.column "user_id",   :integer
+    t.column "value",     :integer
   end
 
 end

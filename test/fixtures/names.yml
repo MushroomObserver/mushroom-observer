@@ -178,7 +178,6 @@ lactarius_alpinus:
   observation_name: **__Lactarius alpinus__** Peck
   search_name: Lactarius alpinus Peck
   synonym_id: 3
-#
 
 # Taxon 3, Name 2
 lactarius_alpigenes:
@@ -195,7 +194,6 @@ lactarius_alpigenes:
   search_name: Lactarius alpigenes Kühn.
   synonym_id: 3
   deprecated: 1
-#
 
 # Taxon 3, Name 3
 lactarius_kuehneri:
@@ -212,7 +210,6 @@ lactarius_kuehneri:
   search_name: Lactarius kuehneri Joss.
   synonym_id: 3
   deprecated: 1
-#
 
 # Taxon 3, Name 4
 lactarius_subalpinus:
@@ -229,7 +226,6 @@ lactarius_subalpinus:
   search_name: Lactarius subalpinus Kühn.
   synonym_id: 3
   deprecated: 1
-#
 
 # Deprecated genus
 psalliota:
@@ -243,7 +239,6 @@ psalliota:
   display_name: Genus **__Psalliota__**
   observation_name: **__Psalliota sp.__**
   search_name: Psalliota sp.
-#
 
 # Valid genus
 agaricus:
@@ -257,7 +252,6 @@ agaricus:
   display_name: Genus **__Agaricus__**
   observation_name: **__Agaricus sp.__**
   search_name: Agaricus sp.
-#
 
 # Misspelt name for testing merging
 agaricus_campestrus:
@@ -272,7 +266,6 @@ agaricus_campestrus:
   display_name: **__Agaricus campestrus__** L.
   observation_name: **__Agaricus campestrus__** L.
   search_name: Agaricus campestrus L.
-#
 
 # Name with notes (not mergeable)
 agaricus_campestras:
@@ -288,7 +281,6 @@ agaricus_campestras:
   observation_name: **__Agaricus campestras__** L.
   search_name: Agaricus campestras L.
   notes: This is should prevent me for merging
-#
 
 # Another name with notes (not mergeable)
 agaricus_campestros:
@@ -304,7 +296,6 @@ agaricus_campestros:
   observation_name: **__Agaricus campestros__** L.
   search_name: Agaricus campestros L.
   notes: Need two to get an error
-#
 
 # For testing merges with existings versions
 coprinellus_micaceus:
@@ -319,7 +310,6 @@ coprinellus_micaceus:
   display_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
   observation_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
-#
 
 # For testing merges with existing versions
 coprinellus_micaceus_no_author:
@@ -334,7 +324,6 @@ coprinellus_micaceus_no_author:
   display_name: **__Coprinellus micaceus__**
   observation_name: **__Coprinellus micaceus__**
   search_name: Coprinellus micaceus
-#
 
 # For testing when the author is added to a name that has an observation
 strobilurus_diminutivus_no_author:
@@ -348,7 +337,6 @@ strobilurus_diminutivus_no_author:
   display_name: **__Strobilurus diminutivus__**
   observation_name: **__Strobilurus diminutivus__**
   search_name: Strobilurus diminutivus
-#
 
 # For testing when there are both an approved and deprecated name with the same text name
 pluteus_petasatus_approved:
@@ -363,7 +351,6 @@ pluteus_petasatus_approved:
   display_name: **__Pluteus petasatus__** (Fr.) Gillet
   observation_name: **__Pluteus petasatus__** (Fr.) Gillet
   search_name: Pluteus petasatus (Fr.) Gillet
-#
 
 # For testing the where the author is added when a name has an observation
 pluteus_petasatus_deprecated:
@@ -379,7 +366,6 @@ pluteus_petasatus_deprecated:
   observation_name: __Pluteus petasatus__ (Fries) Gillet
   search_name: Pluteus petasatus (Fries) Gillet
   deprecated: 1
-#
 
 # Valid genus
 lepiota:
@@ -393,7 +379,6 @@ lepiota:
   display_name: Genus **__Lepiota__**
   observation_name: **__Lepiota sp.__**
   search_name: Lepiota sp.
-#
 
 # Valid genus
 chlorophyllum:
@@ -407,4 +392,30 @@ chlorophyllum:
   display_name: Genus **__Chlorophyllum__**
   observation_name: **__Chlorophyllum sp.__**
   search_name: Chlorophyllum sp.
-#
+
+# Two fake names with non-alphanumerics for severe stress-testing species lists.
+bugs_bunny_one:
+  id: 29
+  created: 2008-01-31 01:01:01
+  modified: 2008-01-31 01:01:01
+  user_id: 1
+  version: 0
+  rank: Species
+  author: One
+  text_name: Warnerbros bugs-bunny
+  display_name: **__Warnerbros bugs-bunny__** One
+  observation_name: **__Warnerbros bugs-bunny__** One
+  search_name: Warnerbros bugs-bunny One
+
+bugs_bunny_two:
+  id: 30
+  created: 2008-01-31 01:01:01
+  modified: 2008-01-31 01:01:01
+  user_id: 1
+  version: 0
+  rank: Species
+  author: Two
+  text_name: Warnerbros bugs-bunny
+  display_name: **__Warnerbros bugs-bunny__** Two
+  observation_name: **__Warnerbros bugs-bunny__** Two
+  search_name: Warnerbros bugs-bunny Two

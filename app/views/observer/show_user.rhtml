@@ -1,9 +1,9 @@
 <% @title = h(@user_data[:name]) %>
 <%= link_to('Observations', :action => 'show_user_observations', :id => @user_data[:id]) %>
-| <%= link_to("Comments for #{@user_data[:name]}", :action => 'show_comments_for_user', :id => @user_data[:id]) %>
+| <%= link_to("Comments for #{@user_data[:name]}", :controller => 'comment', :action => 'show_comments_for_user', :id => @user_data[:id]) %>
 | <%= link_to('Contributors', :action => 'users_by_contribution') %>
 <% if @user.question_email %>
-	| <%= link_to "Email #{@user_data[:name]}", :action => 'ask_user_question', :id => @user %>
+   | <%= link_to "Email #{@user_data[:name]}", :action => 'ask_user_question', :id => @user %>
 <% end %>
 
 <center>
@@ -28,8 +28,7 @@
                 <table cellpadding="5" cellspacing="5" border="0">
                     <%
                     total = 0
-                    for field in [:observations, :images, :names, :past_names, :locations, :past_locations,
-                                  :species_lists, :species_list_entries, :comments]
+                    for field in ALL_FIELDS
                         count = @user_data[field]
                         if count
                             %>

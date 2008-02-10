@@ -8,7 +8,7 @@
     <tr valign="top">
         <% if @matches %>
             <td>
-                <div id="SubTitle"><%= :list_merge_options_near_matches.l %></div>
+                <div class="SubTitle"><%= :list_merge_options_near_matches.l %></div>
                 <table cellpadding="5" cellspacing="0" width="100%">          
                   <%
                      odd_or_even = 0
@@ -17,7 +17,8 @@
                      %>
                   <tr valign="top" class="ListLine<%= odd_or_even %>">
                     <td width="100%" class="Data">
-                		<%= link_to(l.display_name, :action => 'add_to_location', :where => @where, :location => l) %>
+                		<%= link_to(l.display_name, {:action => 'add_to_location', :where => @where, :location => l},
+                		            :confirm => "Do merge?  This cannot be undone.") %>
                     </td>
                   </tr>
                   <% end %>
@@ -25,7 +26,7 @@
             </td>
         <% end %>
         <td>
-            <div id="SubTitle"><%= :list_merge_options_others.l %></div>
+            <div class="SubTitle"><%= :list_merge_options_others.l %></div>
             <table cellpadding="5" cellspacing="0" width="100%">          
               <%
                  odd_or_even = 0
@@ -34,7 +35,8 @@
                  %>
               <tr valign="top" class="ListLine<%= odd_or_even %>">
                 <td width="100%" class="Data">
-            		<%= link_to(l.display_name, :action => 'add_to_location', :where => @where, :location => l) %>
+            		<%= link_to(l.display_name, {:action => 'add_to_location', :where => @where, :location => l},
+            		            :confirm => "Do merge?  This cannot be undone.") %>
                 </td>
               </tr>
               <% end %>

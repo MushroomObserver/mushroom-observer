@@ -1,0 +1,39 @@
+<!--[form:name]-->
+<!-- rank, text_name, author, notes -->
+
+<label for="name_rank"><%= :form_names_rank.l %>:</label> 
+<%= select('name', 'rank',
+           [[:rank_form.l, :Form], [:rank_variety.l, :Variety], [:rank_subspecies.l, :Subspecies],
+            [:rank_species.l, :Species], [:rank_genus.l, :Genus], [:rank_family.l, :Family],
+            [:rank_order.l, :Order], [:rank_class.l, :Class], [:rank_phylum.l, :Phylum],
+            [:rank_kingdom.l, :Kingdom], [:rank_group.l, :Group]]) %><br/><br/>
+
+<% if @can_make_changes %>
+  <label for="name_text_name"><%= :form_names_text_name.l %>:</label>
+  <%= text_field 'name', 'text_name'  %><br/>
+  <span class="HelpNote"><%= :form_names_text_name_help.l %></span>
+<% else %>
+  <%= :form_names_text_name.l %>: <%= @name.text_name %><br/>
+  <span class="HelpNote"><%= :form_names_text_name_locked.l %></span>
+<% end %><br/><br/>
+
+<% if @can_make_changes or @name.author.nil? or (@name.author == '') %>
+  <label for="name_author"><%= :form_names_author.l %>:</label>
+  <%= text_field 'name', 'author'  %><br/>
+  <span class="HelpNote"><%= :form_names_author_help.l %></span>
+<% else %>
+  <%= :form_names_author.l %>: <%= @name.author %><br/>
+  <span class="HelpNote"><%= :form_names_author_locked.l %></span>
+<% end %><br/><br/>
+
+<label for="name_citation"><%= :form_names_citation.l %>:</label>
+<span class="HelpNote"><%= :form_names_citation_help.l %></span><br/>
+<%= text_field 'name', 'citation', :size => 80  %><br/>
+<span class="textilize_note"><%= :form_names_citation_textilize_note.l %></span><br/><br/>
+
+<label for="name_notes"><%= :form_names_notes.l %>:</label>
+<span class="HelpNote"><%= :form_names_notes_help.l %></span><br/>
+<%= text_area 'name', 'notes', :cols => 80 %><br/>
+<%= render :partial => 'shared/textilize_help' %>
+
+<!--[eoform:name]-->

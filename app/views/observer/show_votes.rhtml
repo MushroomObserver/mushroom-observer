@@ -1,0 +1,5 @@
+<% @title = 'Votes for ' + h(@naming.unique_text_name) %>
+
+<div id="Title"><%= textilize_without_paragraph(@title) %></div>
+
+<%= render :partial => 'show_votes', :locals => { :do_cancel => false } %>

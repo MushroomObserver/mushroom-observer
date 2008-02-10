@@ -1,0 +1,20 @@
+<% @title = 'Add Comment to ' + h(@observation.unique_text_name) %>
+<%= link_to 'Cancel (Show Observation)', :controller => 'observer',
+  :action => 'show_observation', :id => @observation %>
+
+<div id="Title">Add Comment to <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
+
+<% form_tag(:action => 'add_comment') do %>
+<center><%= submit_tag "Create" %></center>
+
+<%= render :partial => 'form_comments' %>
+
+<br/><hr align="center" width="90%" />
+
+<%= render :partial => 'observer/show_observation', :locals => {
+    :observation => @observation,
+    :do_title => true,
+    :skip_comment => nil
+} %>
+
+<% end %>

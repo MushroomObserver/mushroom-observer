@@ -14,20 +14,24 @@ pre {
 
 .gmap {
   background-color: #ffffff;
-  color: #000000;  
+  color: #000000;
 }
 
 .gmap a {
-    color: #a06463;
+  color: #a06463;
 }
 
 .gmap a:visited {
-    color: #3b2821;
+  color: #3b2821;
 }
 
 .gmap a:hover {
-    color: #743931;
-    background-color:#f6f0f2;
+  color: #743931;
+  background-color:#f6f0f2;
+}
+
+.has_error {
+  border: solid red 2px;
 }
 
 .fieldWithErrors {
@@ -67,11 +71,11 @@ pre {
 }
 
 #banner {
-    padding-top: 5px;
-    padding-bottom: 3px;
-    border-bottom: 2px solid;
-    font: small-caps 25px/25px "Times New Roman", serif;
-    text-align: center;
+  padding-top: 5px;
+  padding-bottom: 3px;
+  border-bottom: 2px solid;
+  font: small-caps 25px/25px "Times New Roman", serif;
+  text-align: center;
 }
 
 #columns {
@@ -100,7 +104,30 @@ div.progressBar div.background {
   width: 0%;
 }
 
+.Notices .Warnings .Errors {
+  margin: 10px;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.Notices {
+  border: 2px solid green;
+}
+
+.Warnings {
+  border: 2px solid yellow;
+}
+
+.Errors {
+  border: 2px solid red;
+}
+
 .Data {
+  font-weight: bold;
+}
+
+.Name {
+  font-size: larger;
   font-weight: bold;
 }
 
@@ -121,125 +148,151 @@ div.progressBar div.background {
 }
 
 .ListWhat {
-    font-size: larger;
+  font-size: larger;
 }
 
 .ListLatin {
-    font-size: larger;
-    font-style: italic;
+  font-size: larger;
+  font-style: italic;
 }
 
 .ListName {
-    font-size: larger;
+  font-size: larger;
 }
 
 .ListActions {
-    font-size: small;
-    text-align: right;
-    padding-left: 1em;
+  font-size: small;
+  text-align: right;
+  padding-left: 1em;
 }
 
 .ImageFields {
-    font-size: larger;
+  font-size: larger;
 }
 
 .SubmitButton {
-    text-align: center;
+  text-align: center;
 }
 
 #color_note {
-    text-align: right;
-    font-size: x-small;
+  text-align: right;
+  font-size: x-small;
 }
 
 #textilize_note {
-    text-align: left;
-    font-size: x-small;
+  text-align: left;
+  font-size: x-small;
 }
 
 #help_note {
-    text-align: left;
-    font-size: x-small;
+  text-align: left;
+  font-size: x-small;
 }
 
 .HelpNote {
-    text-align: left;
-    font-size: x-small;
+  text-align: left;
+  font-size: x-small;
 }
 
 #copyright {
-    text-align: center;
-    font-size: x-small;
+  text-align: center;
+  font-size: x-small;
 }
 
 #license-notice {
-    text-align: left;
-    font-size: x-small;
+  text-align: left;
+  font-size: x-small;
 }
 
 #license {
-    padding-top: 3px;
-    text-align: center;
-    font-size: x-small;
+  padding-top: 3px;
+  text-align: center;
+  font-size: x-small;
 }
 
+#Title {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  font-size: 30px;
+  line-height: 36px;
+}
 
-#SubTitle {
+.SubTitle {
   padding: 6px;
   text-align: center;
   font-size: 20px;
   line-height: 24px;
 }
 
-#Title {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    text-align: center;
-    font-size: 30px;
-    line-height: 36px;
-}
-
 .ListLine0 {
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 1px;
+  padding-top: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 1px;
 }
 
 .ListLine1 {
-    padding-top: 1px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 1px;
+  padding-top: 1px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 1px;
+}
+
+.pagination {
+  font-size: larger;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.ThinBox {
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid;
 }
 
 div.auto_complete {
-    background-color:#fff;
-    border:1px solid #888;
+  background-color:#fff;
+  border:1px solid #888;
 }
 div.auto_complete_scroll {
-    background-color:#fff;
-    border-right:none;
-    border-bottom:none;
-    height:250px;
-    overflow:scroll;
-    overflow-x:hidden;
+  background-color:#fff;
+  border-right:none;
+  border-bottom:none;
+  height:250px;
+  overflow:scroll;
+  overflow-x:hidden;
 }
 div.auto_complete ul {
-    background-color:#fff;
-    color:black;
-    margin:0;
-    padding:0;
-    width:100%;
-    list-style-type:none;
+  background-color:#fff;
+  color:black;
+  margin:0;
+  padding:0;
+  width:100%;
+  list-style-type:none;
 }
 div.auto_complete ul li {
-    margin:0;
-    padding:3px;
+  margin:0;
+  padding:3px;
 }
-div.auto_complete ul li.selected { 
-    background-color:#ffb; 
+div.auto_complete ul li.selected {
+  background-color:#ffb;
 }
 div.indicator {
-    position:absolute;
+  position:absolute;
 }
+
+div.popup {
+  position: absolute;
+  visibility: hidden;
+  top: 0px;
+  left: 0px;
+  padding: 10px;
+  border-top: 5px solid #CCC;
+  border-left: 5px solid #BBB;
+  border-right: 5px solid #555;
+  border-bottom: 5px solid #333;
+  background: #EEE;
+  color: #000;
+}
+

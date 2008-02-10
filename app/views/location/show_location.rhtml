@@ -13,6 +13,5 @@
     | <%= link_to("#{:show_location_older_versions.l}", :action => 'show_past_location', :id => @past_location.id ) %>
 <% end %>
 <br/><br/>
-<%= error_messages_for 'location' %>
 
 <%= render :partial => 'show_location', :locals => { :location => @location } %>

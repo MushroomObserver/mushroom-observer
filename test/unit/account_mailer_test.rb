@@ -8,6 +8,7 @@ class AccountMailerTest < Test::Unit::TestCase
   fixtures :images
   fixtures :observations
   fixtures :names
+  fixtures :namings
   fixtures :comments
 
   include ActionMailer::Quoting
@@ -133,7 +134,7 @@ class AccountMailerTest < Test::Unit::TestCase
   def test_webmaster_question
     sender = @mary.email # Technically you don't need a user, just an email address
     @expected.body = read_fixture('webmaster_question')
-    @expected.subject    = '[MO] Question from ' + sender
+    @expected.subject = '[MO] Question from ' + sender
     @expected.to = 'webmaster@mushroomobserver.org'
     @expected.bcc = 'nathan@collectivesource.com'
     @expected.from = sender

@@ -1,0 +1,76 @@
+<%
+    @title = 'Image: ' + h(@image.unique_text_name(@user))
+    for obs in @image.observations
+        %>
+        <%= link_to("About #{textilize_without_paragraph(h(obs.format_name(@user)))}",
+            :controller => 'name', :action => "show_name", :id => obs.preferred_name(@user))%>
+        | <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % obs.text_name(@user)) %><br/>
+    <%
+    end
+%>
+
+<%= link_to 'Show Full Size', :action => 'show_original', :id => @image %>
+<% commercial_inquiries_ok = @image.user.commercial_email
+   if commercial_inquiries_ok %>
+	| <%= link_to 'Send Commercial Inquiry About Image',
+        :controller => 'observer', :action => 'commercial_inquiry', :id => @image %>
+<% end %>
+<%	if session[:observation_ids] %>
+		<br/><%= link_to 'Prev', :action => 'prev_image', :id => @image %>
+		| <%= link_to 'Next', :action => 'next_image', :id => @image %>
+<%  end %>
+
+<div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name(@user))) %></div>
+<div id="copyright">Copyright &copy;
+    <%= user_link(@image.user, :notruncate, "#{@image.when.year} #{@image.copyright_holder}") %>
+</div>
+
+<table cellpadding="10">
+<tr>
+<td align="center">
+    <div about="640/#{@image.id}.jpg">
+        <%= link_to(image_tag("640/#{@image.id}.jpg"),
+        	:action => 'show_original', :id => @image.id) %><br/>
+        <%= render :partial => "form_#{@image.license.form_name}" %>
+    </div>
+</td>
+<td valign="top">
+
+<% if check_permission(@image.user_id) %>
+	<%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
+	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
+                  :confirm => "Are you sure?" %>
+<% end %>
+
+<p>When: <span class="Data"><%= @image.when %></span></p>
+
+<p>Observations:<br/>
+    <% for observation in @image.observations
+      text = '<span class="Data">' + textilize_without_paragraph(h(observation.unique_format_name(@user)))
+      if observation.notes != ''
+          text += '</span><span class="HelpNote"><br/>Notes: %s...' % observation.notes[0..15]
+      end
+      len = observation.comments.length
+      if len > 0
+          text += '</span><span class="HelpNote"<br/>%s comments' % len
+      end
+      text += '</span>' %>
+      <%= link_to(text, :controller => 'observer',
+          :action => 'show_observation', :id => observation.id) %>
+      <br/><br/>
+    <% end %>
+</p>
+
+<% if @image.notes && @image.notes.to_s != "" %>
+  Notes:<br/>
+  <%= textilize(sanitize(@image.notes.to_s)) %>
+<% end %>
+
+</td>
+</tr>
+</table>
+
+<p><span class="Date">
+Image created: <%= @image.created %><br/>
+Last modified: <%= @image.modified %>
+</span></p>

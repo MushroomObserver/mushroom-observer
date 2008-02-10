@@ -5,6 +5,7 @@ minimal_unknown:
   user_id:   2
   location_id: 2
   name_id:   1
+  naming_id: 1
 
 detailed_unknown:
   id:        2
@@ -13,9 +14,10 @@ detailed_unknown:
   when:      2006-05-11
   user_id:   2
   location_id: 2
+  name_id:   1
+  naming_id: 2
   specimen:  1
   notes:     Found in a strange place
-  name_id:   1
 
 coprinus_comatus_obs:
   id:        3
@@ -23,10 +25,11 @@ coprinus_comatus_obs:
   modified:  2007-02-27 20:21:00
   when:      2007-02-27
   user_id:   1
+  name_id:   2
+  naming_id: 3
   where:     Glendale, California
   specimen:  0
   notes:     Second fruiting in bark chips
-  name_id:   2
 
 agaricus_campestris_obs:
   id:        4
@@ -35,9 +38,10 @@ agaricus_campestris_obs:
   when:      2007-03-19
   user_id:   1
   location_id: 2
+  name_id:   3
+  naming_id: 4
   specimen:  0
   notes:     From the lawn next door
-  name_id:   3
 
 agaricus_campestrus_obs:
   id:        5
@@ -46,9 +50,10 @@ agaricus_campestrus_obs:
   when:      2007-06-23
   user_id:   1
   location_id: 2
+  name_id:   19
+  naming_id: 5
   specimen:  0
   notes:     From somewhere else
-  name_id:   19
 
 agaricus_campestras_obs:
   id:        6
@@ -57,10 +62,10 @@ agaricus_campestras_obs:
   when:      2007-06-24
   user_id:   1
   location_id: 2
+  name_id:   20
+  naming_id: 6
   specimen:  0
   notes:     From somewhere else
-  name_id:   20
-#
 
 agaricus_campestros_obs:
   id:        7
@@ -69,10 +74,10 @@ agaricus_campestros_obs:
   when:      2007-06-24
   user_id:   1
   location_id: 2
+  name_id:   21
+  naming_id: 7
   specimen:  0
   notes:     From somewhere else
-  name_id:   21
-#
 
 strobilurus_diminutivus_obs:
   id:        8
@@ -80,8 +85,8 @@ strobilurus_diminutivus_obs:
   modified:  2007-07-20 20:54:45
   when:      2007-07-20
   user_id:   1
+  name_id:   24
+  naming_id: 8
   where:     Pipi Valley, Sierra Mountains, CA
   specimen:  0
   notes:     From somewhere else
-  name_id:   24
-#

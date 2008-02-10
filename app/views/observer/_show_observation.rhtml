@@ -1,105 +1,46 @@
-<% name         = observation.name
-   lists        = observation.species_lists 
-   questions_ok = observation.user.question_email %>
+<% name         = @observation.preferred_name(@user)
+   lists        = @observation.species_lists 
+   questions_ok = @observation.user.question_email %>
 
-<table cellpadding="10" width="100%">
-<tr>
-    <td width="75%" valign="top">
-        <% if do_title %>
-            <p><%= :show_observation_title.l %>:</p> 
-        <% end %>
+<p>
+<% if name 
+  approved_synonyms, deprecated_synonyms = name.sort_synonyms
+   if approved_synonyms != []
+       links = approved_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)),
+            :controller => 'name', :action => "show_name", :id => n)} %>
+    <% if name.deprecated %>
+      <%= links.length > 1 ? :show_observation_preferred_names.l : :show_observation_preferred_name.l %>:
+    <% else %>
+      <%= links.length > 1 ? :show_observation_alternative_names.l : :show_observation_alternative_name.l %>:
+    <% end %>
+    <span class="Data"><%= links.join(', ') %></span><br/>
+<% end
+end %>
 
-        <p>
-        <% approved_synonyms, deprecated_synonyms = name.sort_synonyms
-           if approved_synonyms != []
-               links = approved_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)} %>
-            <% if name.deprecated %>
-                <%= :show_observation_preferred.l %>
-            <% else %>
-                <%= :show_observation_alternative.l %>
-            <% end %>
-            <% if links.length > 1 %>
-                <%= :show_observation_names.l %>
-            <% else %>
-                    <%= :show_observation_name.l %>
-            <% end %>
-            <span class="Data"><%= links.join(', ') %></span><br/>
-        <% end %>
+<%= :show_observation_when.l %>: <span class="Data"><%= @observation.when %></span><br/>
+<% if @observation.is_collection_location %>
+  <%= :show_observation_collection_location.l %>:
+<% else %>
+  <%= :show_observation_seen_at.l %>:
+<% end %>
+<%= location_link(@observation.place_name, @observation.location_id, nil, true) %><br/>
+<%= :show_observation_who.l %>: <span class="Data">
+  <%= user_link(@observation.user) %>
+</span><br/>
+<span class="Data"><% if @observation.specimen %>
+  <%= :show_observation_specimen_available.l %>
+<% else %>
+  <%= :show_observation_specimen_not_available.l %>
+<% end %></span></p>
 
-        <%= :show_observation_when.l %>: <span class="Data"><%= observation.when %></span><br/>
-        <% if observation.is_collection_location %>
-            <%= :show_observation_collection_location.l %>:
-        <% else %>
-            <%= :show_observation_seen_at.l %>:
-        <% end %>
-        <%= location_link(observation.place_name, observation.location_id) %><br/>
-        Who: <span class="Data">
-            <%= link_to(h(observation.user.unique_text_name), :action => 'show_user', :id => observation.user) %>
-        </span><br/>
-        <span class="Data"><% if observation.specimen %>
-             <%= :show_observation_specimen_available.l %>
-         <% else %>
-             <%= :show_observation_specimen_not_available.l %>
-         <% end %></span></p>
+<% if lists.length > 0 %>
+  <p><%= :show_observation_species_lists.l %>:<br/>
+    <% for l in lists %>
+      <%= link_to l.unique_text_name, :controller => 'species_list', :action => 'show_species_list', :id => l %><br/>
+    <% end %>
+  </p>
+<% end %>
 
-        <% if lists.length > 0 %>
-                <p>Species Lists:<br/>
-                    <% for l in lists %>
-                         <%= link_to(l.unique_text_name, :action => 'show_species_list', :id => l) %><br/>
-                    <% end %>
-                </p>
-        <% end %>
-        <%= textilize("#{:show_observation_notes.l}: " + sanitize(observation.notes.to_s)) %>
-
-        <p><%= :show_observation_comments.l %>:</p>
-        <% odd_or_even = 0 %>
-        <% for comment in observation.comments.sort {|x,y| y.created <=> x.created } %>
-            <% odd_or_even = 1 - odd_or_even %>
-            <% if skip_comment == nil || comment.id != skip_comment %>
-                <div class="ListLine<%= odd_or_even %>">
-                    <p><%= :show_observation_created.l %>: <span class="Data"><%= comment.created.to_formatted_s(:db) %></span><br/>
-                    <%= :show_observation_by.l %>: <span class="Data">
-                      <%= link_to(comment.user.unique_text_name, :action => 'show_user', :id => comment.user.id) %>
-                    </span>
-                    <% if check_permission(comment.user_id) %>
-                        <%= link_to(:show_observation_edit.l, :action => 'edit_comment', :id => comment) %>
-                        | <%= link_to(:show_observation_destroy.l, { :action => 'destroy_comment', :id => comment },
-                                      :confirm => :show_observation_are_you_sure.l) %>
-                    <% end %><br/>
-                    <%= :show_observation_summary.l %>: <span class="Data"><%= comment.summary %></span></p>
-                    <%= textilize(sanitize(comment.comment)) %>
-                </div>
-            <% end %>
-        <% end %>
-
-        <p><span class="Date">
-            <%= :show_observation_observation_created.l %>: <%= observation.created %><br/>
-            Last modified: <%= observation.modified %><br/>
-            <% rss_log = observation.rss_log
-               if rss_log %>
-                <%= link_to(:show_observation_show_log.l, :action => 'show_rss_log', :id => rss_log.id) %>
-            <% end %>
-            </span>
-        </p>
-    </td>
-
-    <td valign="top" width="25%">
-        <% if observation.images.length > 0 %>
-            <%= :show_observation_images.l %>:<br/>
-        <% end %>
-        <% if check_permission(observation.user_id) %>
-            <%= link_to(:show_observation_add_images.l, :action => 'add_image', :id => observation) %><br/>
-            <%= link_to(:show_observation_reuse_image.l, :action => 'reuse_image', :id => observation) %><br/>
-            <% if observation.images.length > 0 %>
-                <%= link_to(:show_observation_remove_images.l, :action => 'remove_images', :id => observation) %><br/>
-            <% end %>
-        <% end %>
-        <center>
-        <% for image in observation.images %>
-          <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>',
-                :action => 'show_image', :id => image.id) %></p>
-        <% end %>
-        </center>
-    </td>
-</tr>
-</table>
+<% if @observation.notes.to_s != "" %>
+  <%= textilize("#{:show_observation_notes.l}: " + sanitize(@observation.notes.to_s)) %>
+<% end %>
