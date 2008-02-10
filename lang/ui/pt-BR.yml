@@ -718,6 +718,14 @@ form_synonyms_proposed_synonyms_help: Unchecked items will no longer be synonymi
 
 
 # observer/how_to_use
+how_location: >
+  <p><b>Location</b> - A place in the world.  Defined Locations associate a location name with
+  the extreme north and south latitudes and west and east longitudes of that location.  Defined Locations can also
+  have a maximum and minimum altitude and notes.  Undefined Locations just have a name.  A Location
+  is not considered to be owned by a particular User. Any User may change or define a Location, but all changes
+  are associated with a User and are reviewed by the community. To help with this review process,
+  copies of previous versions of a Location are kept.</p>
+
 how_maps: >
   <p><b>Working with Maps</b> - Currently there are three types of maps available on Mushroom Observer: Distribution Maps (e.g.,
   "Distribution map for __Craterellus cornucopioides__":%s),
