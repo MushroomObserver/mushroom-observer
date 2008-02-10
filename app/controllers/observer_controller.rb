@@ -254,7 +254,9 @@ class ObserverController < ApplicationController
   # Inputs: pattern
   # Outputs: @observations, @observation_pages, @user, @layout
   def location_search
-    pattern = session[:where]
+    # Looks harder for pattern since location_controller.where_search was using :pattern for a bit
+    # and some of the search monkeys picked up on it.
+    pattern = session[:where] || session[:pattern] || ""
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
     show_selected_observations("Observations from '#{pattern}'", "observations.where like '#{sql_pattern}'",
       "names.search_name asc, observations.`when` desc", :observation_ids,

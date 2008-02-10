@@ -21,7 +21,7 @@ class LocationController < ApplicationController
     end
     where = session[:where]
     if where
-      redirect_to :controller => "observer", :action => "location_search", :pattern => where
+      redirect_to :controller => "observer", :action => "location_search", :where => where
     else
       redirect_to :action => "list_place_names"
     end
