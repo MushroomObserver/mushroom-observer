@@ -33,20 +33,21 @@ class Naming < ActiveRecord::Base
 
   # Various name formats.
   def text_name
-    str = self.name.search_name
-    str[0..(MAX_FIELD_LENGTH-1)]
+    self.name.search_name
   end
+  
   def unique_text_name
     str = self.name.search_name
-    "%s (%s)" % [str[0..(MAX_FIELD_LENGTH-1)], self.id]
+    "%s (%s)" % [str, self.id]
   end
+  
   def format_name
-    str = self.name.observation_name
-    str[0..(MAX_FIELD_LENGTH-1)]
+    self.name.observation_name
   end
+
   def unique_format_name
     str = self.name.observation_name
-    "%s (%s)" % [str[0..(MAX_FIELD_LENGTH-1)], self.id]
+    "%s (%s)" % [str, self.id]
   end
 
   # Average all the votes.

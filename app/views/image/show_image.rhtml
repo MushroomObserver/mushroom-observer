@@ -22,7 +22,7 @@
 
 <div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name(@user))) %></div>
 <div id="copyright">Copyright &copy;
-    <%= user_link(@image.user, :notruncate, "#{@image.when.year} #{@image.copyright_holder}") %>
+    <%= user_link(@image.user, "#{@image.when.year} #{@image.copyright_holder}") %>
 </div>
 
 <table cellpadding="10">

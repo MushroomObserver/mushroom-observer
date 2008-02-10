@@ -101,21 +101,6 @@ class CurrentTest < Test::Unit::TestCase
     assert_equal(1+1, 2)
   end
 
-  # Need to create the fixtures to have a naming owned by the observer that has 'No Opinion'
-  def test_show_observation_no_opinion
-    # login as rolf
-    user = User.authenticate("rolf", "testpassword")
-    assert(user)
-    @request.session['user'] = user
-    
-    # ensure that rolf owns @obs_with_no_opinion
-    assert(user == @strobilurus_diminutivus_obs.user)
-    
-    get_with_dump :show_observation, :id => @strobilurus_diminutivus_obs.id
-    assert_response :success
-    assert_template 'show_observation'
-  end
-
 end
 
 class StillToCome

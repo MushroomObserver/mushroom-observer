@@ -19,7 +19,7 @@
 			<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"])),
 		         :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
 	        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-	        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
+	        <span class="ListWho"><%= h(datum["name"]) %></span><br/>
 	        Observation made: <%= datum["when"]%>
 	    </td>
   	</tr>

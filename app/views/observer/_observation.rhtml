@@ -22,7 +22,7 @@
       <span class="ListWhere"><%= location_link(observation.where,
         observation.location_id) %></span><br/>
       <span class="ListWhen"><%= observation.when %>:</span>
-      <span class="ListWho"><%= user_link(observation.user, :truncate) %></span>
+      <span class="ListWho"><%= user_link(observation.user) %></span>
       <% rss = observation.rss_log
          if rss && rss.notes
            notes = rss.notes.split("\n")

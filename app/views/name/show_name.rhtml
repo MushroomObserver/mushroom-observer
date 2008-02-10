@@ -84,7 +84,7 @@
                 <span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
                     :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
                 <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-                <span class="ListWho"><%= user_link(datum["user_id"], :truncate, "#{datum['name']} (#{datum['login']})") %></span><br/>
+                <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
                 Observation made: <%= datum["when"]%>
             </td>
         </tr>
@@ -117,8 +117,8 @@
 				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
 			         :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
 		        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-		        <span class="ListWho"><%= truncate(h(datum["name"]), MAX_WHO_LENGTH) %></span><br/>
-	            <span class="ListWho"><%= user_link(datum["user_id"], :truncate, "#{datum['name']} (#{datum['login']})") %></span><br/>
+		        <span class="ListWho"><%= h(datum["name"]) %></span><br/>
+	            <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
 		        Observation made: <%= datum["when"]%>
 		    </td>
 	  	</tr>

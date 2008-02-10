@@ -3,7 +3,7 @@
 <%
   for image in @images %>
 <%= link_to(sprintf("%s %s %s", textilize_without_paragraph(h(image.unique_format_name)), image.when,
-                    truncate(h(image.user.unique_text_name), MAX_WHO_LENGTH)),
+                    h(image.user.unique_text_name)),
             :action => 'show_image', :id => image.id) %><br/>
 <%
   end

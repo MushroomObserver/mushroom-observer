@@ -14,7 +14,7 @@
 				textilize_without_paragraph(h(name.display_name))),
 			:controller => 'name', :action => 'show_name', :id => name.id)
 	%>
-	<span class="ListWho"><br/>by <%= user_link(name.user, :truncate) %></span>
+	<span class="ListWho"><br/>by <%= user_link(name.user) %></span>
 		</td>
 	</tr>
 </table>

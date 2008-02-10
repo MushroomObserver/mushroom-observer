@@ -95,7 +95,7 @@ class SpeciesList < ActiveRecord::Base
   def unique_text_name
     title = self.title
     if title
-      sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
+      sprintf("%s (%d)", title, self.id)
     else
       sprintf("Species List %d", self.id)
     end

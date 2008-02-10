@@ -24,10 +24,9 @@ module ApplicationHelper
     result
   end
 
-  def user_link(user, truncate=nil, name=nil)
+  def user_link(user, name=nil)
     begin
       name = h(user.unique_text_name) if name.nil?
-      name = truncate(name, MAX_WHO_LENGTH) if truncate == :truncate
       link_to(name, :controller => 'observer', :action => 'show_user', :id => user)
     rescue
     end

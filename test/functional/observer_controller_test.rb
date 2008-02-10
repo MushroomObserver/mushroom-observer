@@ -148,6 +148,16 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_template "list_observations"
   end
 
+  # Created in response to a bug seen in the wild
+  def test_where_search_pattern
+    params = {
+      :pattern => "Burbank"
+    }
+    get_with_dump(:location_search, params)
+    assert_response :success
+    assert_template "list_observations"
+  end
+
   def test_prev_observation
     @request.session[:observation_ids] = [1, 2, 3]
     get_with_dump :prev_observation, :id => 1

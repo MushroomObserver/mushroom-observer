@@ -13,7 +13,7 @@ class Image < ActiveRecord::Base
     self.observations.each {|o| obs_names.push(o.format_name(user))}
     title = obs_names.uniq.sort.join(' & ')
     if title
-      sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
+      sprintf("%s (%d)", title, self.id)
     else
       sprintf("Image %d", self.id)
     end
@@ -24,7 +24,7 @@ class Image < ActiveRecord::Base
     self.observations.each {|o| obs_names.push(o.text_name(user))}
     title = obs_names.uniq.sort.join(' & ')
     if title
-      sprintf("%s (%d)", title[0..(MAX_FIELD_LENGTH-1)], self.id)
+      sprintf("%s (%d)", title, self.id)
     else
       sprintf("Image %d", self.id)
     end

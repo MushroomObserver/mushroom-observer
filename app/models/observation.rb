@@ -297,20 +297,21 @@ class Observation < ActiveRecord::Base
 
   # Various formats using the preferred_name.
   def text_name(user=nil)
-    str = self.preferred_name(user).search_name
-    str[0..(MAX_FIELD_LENGTH-1)]
+    self.preferred_name(user).search_name
   end
+  
   def unique_text_name(user=nil)
     str = self.preferred_name(user).search_name
-    "%s (%s)" % [str[0..(MAX_FIELD_LENGTH-1)], self.id]
+    "%s (%s)" % [str, self.id]
   end
+  
   def format_name(user=nil)
-    str = self.preferred_name(user).observation_name
-    str[0..(MAX_FIELD_LENGTH-1)]
+    self.preferred_name(user).observation_name
   end
+  
   def unique_format_name(user=nil)
     str = self.preferred_name(user).observation_name
-    "%s (%s)" % [str[0..(MAX_FIELD_LENGTH-1)], self.id]
+    "%s (%s)" % [str, self.id]
   end
 
   # ----------------------------------------
