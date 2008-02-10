@@ -19,6 +19,8 @@ a:hover {
     background-color:#f6f0f2;  /* campestris */
 }
 
+img { border-color: #3b2821; } /* cupreobrunneus */
+
 li.selected { background-color: #eccf95 ! important }
 
 /* Banner colors */

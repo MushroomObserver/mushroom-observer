@@ -886,7 +886,7 @@ class ObserverController < ApplicationController
       @naming.save
       #
       # Only change vote if changed value.
-      if params[:vote] && @vote.value != params[:vote][:value].to_i
+      if params[:vote] && (!@vote || @vote.value != params[:vote][:value].to_i)
         @naming.change_vote(@user, params[:vote][:value].to_i)
         need_to_calc_consensus = false
       end

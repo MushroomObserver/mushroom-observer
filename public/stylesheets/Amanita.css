@@ -13,6 +13,8 @@ a { color: #aa9a83; } /* pachycolea light-stipe */
 a:visited { color: #fff8c6; } /* muscaria yellow */
 a:hover { background-color:#cc2616; } /* muscaria red */
 
+img { border-color: #bfc0bb; } /* pachycolea */
+
 li.selected { background-color: #dd9d5f ! important }
 
 /* Banner colors */
