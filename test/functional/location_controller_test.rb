@@ -160,6 +160,7 @@ class LocationControllerTest < Test::Unit::TestCase
     loc = @albion
     params = { "id" => loc.id.to_s }
     requires_login(:edit_location, params)
+    assert_form_action :action => 'edit_location'
   end
 
   def update_params_from_loc(loc)

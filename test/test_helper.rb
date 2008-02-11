@@ -182,3 +182,59 @@ def post_requires_user(page, alt_page, params={}, stay_on_page=true, username='r
     assert_template page.to_s
   end
 end
+
+# Assert the existence of a given link in the response body, and check
+# that it points to the right place.
+def assert_link_in_html(label, url_opts, message = nil)
+  clean_backtrace do
+    url_opts[:only_path] = true if url_opts[:only_path].nil?
+    url = @controller.url_for(url_opts)
+    # Find each occurrance of "label", then make sure it is inside a link...
+    # i.e. that there is no </a> between it and the previous <a href="blah"> tag.
+    found_it = false
+    @response.body.gsub('&nbsp;',' ').split(label).each do |str|
+      # Find the last <a> tag in the string preceding the label.
+      atag = str[str.rindex("<a ")..-1]  
+      if !atag.include?("</a>")
+        if atag =~ /^<a href="([^"]*)"/
+          url2 = URI.unescape($1)
+          if url == url2
+            found_it = true
+            break
+          else
+            assert_block(build_message(message, "Expected <?> link to point to <?>, instead it points to <?>", label, url, url2)) { false}
+          end
+        end
+      end
+    end
+    if found_it
+      assert_block("") { true } # to count the assertion
+    else
+      assert_block(build_message(message, "Expected HTML to contain link called <?>.", label)) { false}
+    end
+  end
+end
+
+# Assert that a form exists which posts to the given url.
+def assert_form_action(url_opts, message = nil)
+  clean_backtrace do
+    url_opts[:only_path] = true if url_opts[:only_path].nil?
+    url = @controller.url_for(url_opts)
+    # Find each occurrance of <form action="blah" method="post">.
+    found_it = false
+    @response.body.split("<form action").each do |str|
+      if str =~ /^="([^"]*)" method="post"/
+        url2 = URI.unescape($1)
+        if url == url2
+          found_it = true
+          break
+        end
+      end
+    end
+    if found_it
+      assert_block("") { true } # to count the assertion
+    else
+      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>.", url)) { false}
+    end
+  end
+end

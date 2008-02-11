@@ -50,6 +50,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :index
     assert_response :success
     assert_template 'list_rss_logs'
+    # Test this fancy new link assertion.
+    assert_link_in_html 'Introduction', :action => 'intro'
+    assert_link_in_html 'Create Account', :controller => 'account', :action => 'signup'
   end
 
   def test_ask_webmaster_question
@@ -382,6 +385,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   # Test "get" side of create_observation.
   def test_create_observation
     requires_login :create_observation
+    assert_form_action :action => 'create_observation', :approved_name => ''
   end
 
   # Test constructing observations in various ways (with minimal namings).
