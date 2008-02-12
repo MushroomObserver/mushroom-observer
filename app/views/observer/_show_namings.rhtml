@@ -114,13 +114,13 @@
       </table>
     </div>
 
-    <span class="HelpNote">
+    <p class="HelpNote">
       <% if !logged_in %>
         <%= :show_namings_please_login.l %><br/>
       <% else %>
-    <%= :show_namings_consensus_help.l % :vote_agreement_100.l %>
+    <%= textilize_without_paragraph(:show_namings_consensus_help.l % [:vote_agreement_100.l, "#{DOMAIN}/observer/how_to_use#voting"]) %>
       <% end %>
-    </span>
+    </p>
   <% end %>
 <% end # form %>
 
