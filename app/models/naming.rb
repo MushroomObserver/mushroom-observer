@@ -9,8 +9,8 @@
 #   what
 #
 # Name formating:
-#   text_name               Plain text.
-#   format_name             Textilized.
+#   text_name               Plain text.  (uses name.search_name)
+#   format_name             Textilized.  (uses name.observation_name)
 #   unique_text_name        Same as above, with id added to make unique.
 #   unique_format_name
 #   [What and base_name were confusing and inconsistent. -JPH 20071123]

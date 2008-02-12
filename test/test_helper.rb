@@ -188,7 +188,7 @@ end
 def assert_link_in_html(label, url_opts, message = nil)
   clean_backtrace do
     url_opts[:only_path] = true if url_opts[:only_path].nil?
-    url = @controller.url_for(url_opts)
+    url = URI.unescape(@controller.url_for(url_opts))
     # Find each occurrance of "label", then make sure it is inside a link...
     # i.e. that there is no </a> between it and the previous <a href="blah"> tag.
     found_it = false
@@ -219,22 +219,26 @@ end
 def assert_form_action(url_opts, message = nil)
   clean_backtrace do
     url_opts[:only_path] = true if url_opts[:only_path].nil?
-    url = @controller.url_for(url_opts)
+    url = URI.unescape(@controller.url_for(url_opts))
     # Find each occurrance of <form action="blah" method="post">.
     found_it = false
+    found = {}
     @response.body.split("<form action").each do |str|
-      if str =~ /^="([^"]*)" method="post"/
+      if str =~ /^="([^"]*)" [^>]*method="post"/
         url2 = URI.unescape($1)
         if url == url2
           found_it = true
           break
         end
+        found[url2] = 1
       end
     end
     if found_it
       assert_block("") { true } # to count the assertion
+    elsif found.keys
+      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join(">, <"))) { false}
     else
-      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>.", url)) { false}
+      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false}
     end
   end
 end

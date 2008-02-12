@@ -59,6 +59,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :ask_webmaster_question
     assert_response :success
     assert_template 'ask_webmaster_question'
+    assert_form_action :action => 'ask_webmaster_question'
   end
 
   def test_color_themes
@@ -199,9 +200,10 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_show_observation
-    get_with_dump :show_observation, :id => 1
+    get_with_dump :show_observation, :id => @coprinus_comatus_obs.id
     assert_response :success
     assert_template 'show_observation'
+    assert_form_action :action => 'show_observation'
   end
 
   # Test a naming owned by the observer but the observer has 'No Opinion'.
@@ -257,15 +259,21 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_ask_observation_question
-    requires_login :ask_observation_question, {:id => @coprinus_comatus_obs.id}
+    id = @coprinus_comatus_obs.id
+    requires_login :ask_observation_question, {:id => id}
+    assert_form_action :action => 'send_observation_question', :id => id
   end
 
   def test_ask_user_question
-    requires_login :ask_user_question, {:id => @mary.id}
+    id = @mary.id
+    requires_login :ask_user_question, {:id => id}
+    assert_form_action :action => 'send_user_question', :id => id
   end
 
   def test_commercial_inquiry
-    requires_login :commercial_inquiry, {:id => @in_situ.id}
+    id = @in_situ.id
+    requires_login :commercial_inquiry, {:id => id}
+    assert_form_action :action => 'send_commercial_inquiry', :id => id
   end
 
   def test_destroy_observation
@@ -295,6 +303,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump(page)
     assert_response :success
     assert_template page.to_s
+    assert_form_action :action => 'send_feature_email'
   end
 
   def test_login
@@ -555,6 +564,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert("rolf" == obs.user.login)
     params = { :id => obs.id.to_s }
     requires_user(:edit_observation, ["observer", "show_observation"], params)
+    assert_form_action :action => 'edit_observation'
   end
 
   def test_update_observation
@@ -611,12 +621,23 @@ class ObserverControllerTest < Test::Unit::TestCase
   # ----------------------------
 
   # Now test the naming part of it.
+  def test_create_naming_get
+    obs = @coprinus_comatus_obs
+    params = {
+      :id => obs.id.to_s
+    }
+    requires_login(:create_naming, params, false)
+    assert_form_action :action => 'create_naming', :approved_name => ''
+  end
+
+  # Now test the naming part of it.
   def test_edit_naming_get
     nam = @coprinus_comatus_naming
     params = {
       :id => nam.id.to_s
     }
     requires_user(:edit_naming, ["observer", "show_observation"], params, false)
+    assert_form_action :action => 'edit_naming', :approved_name => nam.text_name
   end
 
   def test_update_observation_new_name

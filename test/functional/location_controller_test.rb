@@ -49,6 +49,7 @@ class LocationControllerTest < Test::Unit::TestCase
 
   def test_create_location
     requires_login :create_location
+    assert_form_action :action => 'create_location'
   end
 
   # A location that isn't in locations.yml

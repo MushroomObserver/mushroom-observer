@@ -35,6 +35,7 @@ class CommentControllerTest < Test::Unit::TestCase
 
   def test_add_comment
     requires_login :add_comment, {:id => 1}
+    assert_form_action :action => 'add_comment'
   end
 
   def test_edit_comment
@@ -42,6 +43,7 @@ class CommentControllerTest < Test::Unit::TestCase
     params = { "id" => comment.id.to_s }
     assert("rolf" == comment.user.login)
     requires_user(:edit_comment, :show_comment, params)
+    assert_form_action :action => 'edit_comment'
   end
 
   def test_destroy_comment

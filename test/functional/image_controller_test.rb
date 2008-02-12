@@ -76,6 +76,7 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_add_image
     requires_login :add_image, {:id => @coprinus_comatus_obs.id}
+    assert_form_action :action => 'add_image'
     # Check that image cannot be added to an observation the user doesn't own
     flash[:params] = nil # (disable the spontaneous logout fix!!!)
     get_with_dump :add_image, {:id => @minimal_unknown.id}
@@ -95,6 +96,7 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_license_updater
     requires_login :license_updater
+    assert_form_action :action => 'license_updater'
   end
 
   def test_update_licenses
@@ -156,6 +158,7 @@ class ImageControllerTest < Test::Unit::TestCase
     params = { "id" => image.id.to_s }
     assert("rolf" == image.user.login)
     requires_user(:edit_image, ['image', 'show_image'], params)
+    assert_form_action :action => 'edit_image'
   end
 
   def test_update_image
@@ -185,6 +188,7 @@ class ImageControllerTest < Test::Unit::TestCase
     params = { :id => obs.id }
     assert("rolf" == obs.user.login)
     requires_user(:remove_images, ['observer', 'show_observation'], params)
+    assert_form_action :action => 'remove_images'
   end
 
   def test_resize_images
@@ -199,6 +203,7 @@ class ImageControllerTest < Test::Unit::TestCase
     params = { :id => obs.id }
     assert("rolf" == obs.user.login)
     requires_user(:reuse_image, ['observer', 'show_observation'], params)
+    assert_form_action :action => 'reuse_image_by_id'
   end
 
   def test_reuse_image_by_id

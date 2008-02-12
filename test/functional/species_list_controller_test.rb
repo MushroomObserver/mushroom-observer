@@ -102,6 +102,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
 
   def test_create_species_list
     requires_login :create_species_list
+    assert_form_action :action => 'create_species_list'
   end
 
   # Test constructing species lists in various ways.
@@ -422,6 +423,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     requires_user(:edit_species_list, :show_species_list, params, false)
     assert_response :success
     assert_template "edit_species_list"
+    assert_form_action :action => 'edit_species_list'
   end
 
   def test_update_species_list_nochange
@@ -653,6 +655,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       :id => spl.id
     }
     requires_user(:upload_species_list, :show_species_list, params, false)
+    assert_form_action :action => 'upload_species_list'
   end
 
   def test_read_species_list

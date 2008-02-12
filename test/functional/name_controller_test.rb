@@ -59,28 +59,33 @@ class NameControllerTest < Test::Unit::TestCase
     name = @coprinus_comatus
     params = { "id" => name.id.to_s }
     requires_login(:edit_name, params)
+    assert_form_action :action => 'edit_name'
   end
 
   def test_bulk_name_edit_list
     requires_login :bulk_name_edit
+    assert_form_action :action => 'bulk_name_edit'
   end
 
   def test_change_synonyms
     name = @chlorophyllum_rachodes
     params = { :id => name.id }
     requires_login(:change_synonyms, params)
+    assert_form_action :action => 'change_synonyms', :approved_synonyms => ''
   end
 
   def test_deprecate_name
     name = @chlorophyllum_rachodes
     params = { :id => name.id }
     requires_login(:deprecate_name, params)
+    assert_form_action :action => 'deprecate_name', :approved_name => ''
   end
 
   def test_approve_name
     name = @lactarius_alpigenes
     params = { :id => name.id }
     requires_login(:approve_name, params)
+    assert_form_action :action => 'approve_name'
   end
 
   # ----------------------------
