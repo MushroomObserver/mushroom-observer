@@ -942,6 +942,12 @@ show_namings_please_login: >
   Please login to propose your own names and vote on existing names.
 
 show_namings_consensus_help: >
+  For each name listed above select your opinion of how well that name applies
+  to this observation.  Select 'Propose New Name' if you want to suggest another
+  option.  Note that only one name can be given the vote "%s".
+  See the "How to Use page":%s for details on how the votes are tallied.
+
+ignore_me: >
   Consensus: The community consensus is calculated based on the average votes
   for any names that have more than one vote, and is updated every time someone
   votes.  (The numbers in parentheses next to the community votes are the
@@ -950,7 +956,7 @@ show_namings_consensus_help: >
   see that name used whenever this website refers to this observation, vote
   "%s".  Other people, of course, will continue to see whatever the community
   decides on.  Note that you are only allowed to give one name this level of
-  vote. 
+  vote.<br/><br/>
   Synonyms: Votes for synonyms are lumped together.  It chooses your highest
   vote within a given set of synonyms.  Generally it will then use the accepted
   synonym as the community consensus (even if it has no votes!), but in cases

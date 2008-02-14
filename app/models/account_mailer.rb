@@ -107,4 +107,23 @@ class AccountMailer < ActionMailer::Base
     @recipients          = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = ACCOUNTS_EMAIL_ADDRESS
   end
+
+  # Set delivery_method to :file to cause this method to be called whenever
+  # mail is sent anywhere.  It just stuffs them all in ../mail/0001 etc.
+  def perform_delivery_file(mail)
+    path = '../mail'
+    if File.directory?(path)
+      count = 0;
+      begin
+        count += 1
+        if count >= 10000
+          raise(RangeError, "More than 10000 email files found like '#{file}'")
+        end
+        file = "%s/%04d" % [path, count]
+      end while File.exists?(file)
+      fh = File.new(file, "w")
+      fh.write(mail)
+      fh.close
+    end
+  end
 end
