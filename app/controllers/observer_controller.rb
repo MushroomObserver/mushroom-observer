@@ -227,7 +227,7 @@ class ObserverController < ApplicationController
     store_location
     @user = session['user']
     @layout = calc_layout_params
-    @pattern = session[:pattern]
+    @pattern = session[:pattern] || ''
     sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
     show_selected_observations("Observations matching '#{@pattern}'",
       field_search(["names.search_name", "observations.where",

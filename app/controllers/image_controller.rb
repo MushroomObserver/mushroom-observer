@@ -95,7 +95,7 @@ class ImageController < ApplicationController
     store_location
     @user = session['user']
     @layout = calc_layout_params
-    @pattern = session[:pattern]
+    @pattern = session[:pattern] || ''
     sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
     conditions = field_search(["n.search_name", "i.notes", "i.copyright_holder"], sql_pattern)
     query = "select i.*, n.search_name
