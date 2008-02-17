@@ -34,6 +34,8 @@
             "<th></th>
             <th>#{lnbsp(:show_namings_your_vote)}</th>"
           end %>
+          <th></th>
+          <th></th>
         </tr>
 
         <% for naming in @observation.namings.sort {|x,y| x.created <=> y.created } %>
@@ -49,7 +51,7 @@
             </td>
 
             <td width="20">&nbsp;</td>
-            <td width="20">
+            <td>
               <span class="Data"><%= user_link(naming.user, naming.user.login) %></span>
             </td>
 
@@ -57,7 +59,7 @@
             <% num = naming.votes.size
               txt = num == 0 ? "" : "%d%%" % naming.average_vote
               nvotes = naming.votes.length %>
-            <td width="20">
+            <td>
               <%
                 html = ""
                 if num == 0
@@ -80,7 +82,7 @@
 
             <% if logged_in %>
               <td width="20">&nbsp;</td>
-              <td width="20" nowrap="nowrap">
+              <td nowrap="nowrap">
                 <% @vote = @votes[naming.id]
                    menu = check_permission(naming.user_id) ? @confidence_menu : @agreement_menu
                    # It *is* still possible for the owner not to have voted.  In which case I
@@ -94,6 +96,12 @@
                 </noscript>
               </td>
             <% end %>
+
+            <td width="20">&nbsp;</td>
+            <td nowrap="nowrap"><%=
+              (naming.is_owners_favorite? ? image_tag("eye.png") : "") +
+              (naming.is_consensus? ? image_tag("eyes.png") : "")
+            %></td>
           </tr>
 
           <% if naming.naming_reasons.length > 0 %>

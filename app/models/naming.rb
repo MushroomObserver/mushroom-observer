@@ -23,6 +23,8 @@
 #   users_vote(user)        Get a given user's vote on this naming.
 #   calc_vote_table         Used by show_votes.rhtml
 #   change_vote(user, val)  Change a user's vote for this naming.
+#   is_owners_favorite?     Is this (one of) the owner's favorite(s)?
+#   is_consensus?           Is this the community consensus?
 
 class Naming < ActiveRecord::Base
   belongs_to :observation
@@ -157,6 +159,34 @@ class Naming < ActiveRecord::Base
       return false if v.user_id != self.user_id and v.value > 20
     end
     return true
+  end
+
+  # Returns true for all namings that have received the highest positive vote
+  # from the owner of the corresponding observation.
+  def is_owners_favorite?
+    obs = self.observation
+    if obs
+      owner = obs.user
+      if owner
+        votes = owner.votes.select {|v| v.naming.observation == obs}
+        max = 0
+        for vote in votes
+          max = vote.value if vote.value > 50 && vote.value > max
+        end
+        if max > 50
+          for vote in votes
+            return true if vote.naming == self && vote.value == max
+          end
+        end
+      end
+    end
+    return false
+  end
+
+  # If the community consensus clearly derives from a single naming, then this will
+  # return true for that naming.  Otherwise it returns false for everything else.
+  def is_consensus?
+    self.observation.name == self.name
   end
 
   validates_presence_of :name, :observation, :user

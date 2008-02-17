@@ -923,21 +923,21 @@ show_observation_who: Who
 
 
 # observer/_show_namings
-show_namings_proposed_names: Proposed Names
-show_namings_no_names_yet: No names have been proposed yet.
-show_namings_propose_new_name: Propose New Name
-show_namings_update_votes: Update Votes
-show_namings_proposed_name: Proposed Name
-show_namings_user: User
-show_namings_consensus: Community Vote
-show_namings_your_vote: Your Vote
-show_namings_community_favorite: This is the community favorite.
-show_namings_edit: Edit
-show_namings_destroy: Destroy
 show_namings_are_you_sure: Are You Sure?
-show_namings_no_votes: no votes
 show_namings_cast: Cast
+show_namings_community_favorite: This is the community favorite.
+show_namings_consensus: Community Vote
+show_namings_destroy: Destroy
+show_namings_edit: Edit
 show_namings_lose_changes: You must click on 'Update Votes' to save any changes you've made to your votes.
+show_namings_no_names_yet: No names have been proposed yet.
+show_namings_no_votes: no votes
+show_namings_propose_new_name: Propose New Name
+show_namings_proposed_name: Proposed Name
+show_namings_proposed_names: Proposed Names
+show_namings_update_votes: Update Votes
+show_namings_user: User
+show_namings_your_vote: Your Vote
 show_namings_please_login: >
   Please login to propose your own names and vote on existing names.
 
