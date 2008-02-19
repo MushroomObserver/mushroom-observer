@@ -1174,12 +1174,15 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(2, @coprinus_comatus_other_naming.votes.length)
   end
 
-  # Make sure Rolf can't destroy his naming since Mary has voted on it.
+  # Make sure Rolf can't destroy his naming if Dick prefers it.
   def test_rolf_destroy_rolfs_naming_when_mary_has_voted_on_it
     old_naming_id = @coprinus_comatus_naming.id
     old_vote1_id = @coprinus_comatus_owner_vote.id
     old_vote2_id = @coprinus_comatus_other_vote.id
     old_naming_reason_id = @cc_macro_reason.id
+    #
+    # Make Dick prefer it.
+    @coprinus_comatus_naming.change_vote(@dick, 100)
     #
     # Have Rolf try to destroy it.
     params = { :id => @coprinus_comatus_naming.id }
@@ -1200,8 +1203,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
     #
     # Check votes are unchanged.
-    assert_equal(70, @coprinus_comatus_naming.average_vote)
-    assert_equal(2, @coprinus_comatus_naming.votes.length)
+    assert_equal(80, @coprinus_comatus_naming.average_vote)
+    assert_equal(3, @coprinus_comatus_naming.votes.length)
     assert_equal(50, @coprinus_comatus_other_naming.average_vote)
     assert_equal(2, @coprinus_comatus_other_naming.votes.length)
   end

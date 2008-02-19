@@ -24,7 +24,10 @@
 #   calc_vote_table         Used by show_votes.rhtml
 #   change_vote(user, val)  Change a user's vote for this naming.
 #   is_owners_favorite?     Is this (one of) the owner's favorite(s)?
+#   is_users_favorite?(user) Is this (one of) the user's favorite(s)?
 #   is_consensus?           Is this the community consensus?
+#   editable?               Has anyone voted (positively) on this naming?
+#   deletable?              Has anyone made this naming their favorite?
 
 class Naming < ActiveRecord::Base
   belongs_to :observation
@@ -150,33 +153,49 @@ class Naming < ActiveRecord::Base
     return true
   end
 
-  # Has anyone voted on this?  We don't want people destroying or chaning
+  # Has anyone voted (positively) on this?  We don't want people changing
   # the name for namings that the community has voted on.
   # Returns true if no one has.
   def editable?
     for v in self.votes
-      # return false if v.user_id != self.user_id
-      return false if v.user_id != self.user_id and v.value > 20
+      return false if v.user_id != self.user_id and v.value > 50
     end
     return true
   end
 
-  # Returns true for all namings that have received the highest positive vote
-  # from the owner of the corresponding observation.
+  # Has anyone given this their strongest (positive) vote?  We don't want people
+  # destroying namings that someone else likes best.
+  # Returns true if no one has.
+  def deletable?
+    for v in self.votes
+      if v.user_id != self.user_id and v.value > 50
+        return false if self.is_users_favorite?(v.user)
+      end
+    end
+    return true
+  end
+
+  # Returns true if this naming has received the highest positive vote
+  # from the owner of the corresponding observation.  Note, multiple namings
+  # can return true for a given observation.
   def is_owners_favorite?
+    self.is_users_favorite?(self.user)
+  end
+
+  # Returns true if this naming has received the highest positive vote
+  # from the given user (among namings for the corresponding observation).
+  # Note, multiple namings can return true for a given user and observation.
+  def is_users_favorite?(user)
     obs = self.observation
     if obs
-      owner = obs.user
-      if owner
-        votes = owner.votes.select {|v| v.naming.observation == obs}
-        max = 0
+      votes = user.votes.select {|v| v.naming.observation == obs}
+      max = 0
+      for vote in votes
+        max = vote.value if vote.value > 50 && vote.value > max
+      end
+      if max > 50
         for vote in votes
-          max = vote.value if vote.value > 50 && vote.value > max
-        end
-        if max > 50
-          for vote in votes
-            return true if vote.naming == self && vote.value == max
-          end
+          return true if vote.naming == self && vote.value == max
         end
       end
     end

@@ -602,9 +602,9 @@ class ObserverController < ApplicationController
     if !check_user_id(@naming.user_id)
       flash_error "You do not own that naming."
       redirect_to :action => 'show_observation', :id => @observation
-    elsif !@naming.editable?
-      flash_warning "Sorry, someone else has chosen this as their
-        preferred naming.  You are free to propose alternate names,
+    elsif !@naming.deletable?
+      flash_warning "Sorry, someone else has given this their strongest
+        positive vote.  You are free to propose alternate names,
         but we can no longer let you delete this name."
       redirect_to :action => 'show_observation', :id => @observation
     else
@@ -841,9 +841,8 @@ class ObserverController < ApplicationController
       create_naming_reasons_helper(@naming)
       #
       # Now save everything.
-      flash_warning "Sorry, someone else has chosen this as
-        their preferred name, so we had to create a new Naming to
-        accomodate your changes."
+      flash_warning "Sorry, someone else has given this a positive vote,
+        so we had to create a new Naming to accomodate your changes."
       if !@naming.save
         flash_warning "However we were unable to create the new naming."
         flash_object_warnings(@naming)
