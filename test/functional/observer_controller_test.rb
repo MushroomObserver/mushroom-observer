@@ -539,19 +539,20 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(new_name, name.text_name)
   end
 
-  def test_construct_observation_approved_new_author
-    # Test an observation creation with an approved new name
-    name = @strobilurus_diminutivus_no_author
-    assert_nil(name.author)
-    author = 'Desjardin'
-    new_name = "#{name.text_name} #{author}"
-    test_construct_observation_generic({
-      :name => { :name => new_name },
-      :approved_name => new_name
-    }, 1,1,1)
-    name = Name.find(name.id)
-    assert_equal(author, name.author)
-  end
+  # This is no longer necessary as it will add the author immediately now without confirmation. [JPH -20080227]
+  # def test_construct_observation_approved_new_author
+  #   # Test an observation creation with an approved new name
+  #   name = @strobilurus_diminutivus_no_author
+  #   assert_nil(name.author)
+  #   author = 'Desjardin'
+  #   new_name = "#{name.text_name} #{author}"
+  #   test_construct_observation_generic({
+  #     :name => { :name => new_name },
+  #     :approved_name => new_name
+  #   }, 1,1,1)
+  #   name = Name.find(name.id)
+  #   assert_equal(author, name.author)
+  # end
 
   # ----------------------------------------------------------------
   #  Test edit_observation and edit_naming, both "get" and "post".
@@ -932,6 +933,23 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
     assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@dick))
+  end
+
+  # Test a bug in name resolution: was failing to recognize that
+  # "Genus species (With) Author" was recognized even if "Genus species"
+  # was already in the database.
+  def test_create_naming_with_author_when_name_without_author_already_exists
+    params = {
+      :id => @coprinus_comatus_obs.id,
+      :name => { :name => "Conocybe filaris (With) Author" },
+      :vote => { :value => "100" },
+    }
+    post_requires_login(:create_naming, params, false, "dick")
+    naming = Naming.find(:all).last
+    assert_redirected_to(:controller => "observer", :action => "show_observation", :id => @coprinus_comatus_obs.id)
+    assert_equal("Conocybe filaris", naming.name.text_name)
+    assert_equal("(With) Author", naming.name.author)
+    assert_equal(@conocybe_filaris.id, naming.name_id)
   end
 
   # ----------------------------

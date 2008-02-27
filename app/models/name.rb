@@ -171,17 +171,45 @@ class Name < ActiveRecord::Base
     unless deprecated
       deprecated_condition = 'deprecated = 0 and '
     end
+
+    # Look up the name.  Can get multiple matches if there are multiple names with the same name but different authors.
+    # (found via searching on text_name).  However, if the user provides an explicit author, there should be no way to
+    # get multiple matches.
     if rank
       result = Name.find(:all, :conditions => ["#{deprecated_condition}rank = :rank and (search_name = :name or text_name = :name)",
                                                {:rank => rank, :name => name}])
       if (result == []) and Name.ranks_above_species.member?(rank.to_sym)
+        # I think this serves the purpose of allowing user to search on "Genus Author", in which case (I believe)
+        # the desired matching name will have text_name="Genus" and search_name="Genus sp. Author", neither of which
+        # would match the above statement without the "sp." being added. [-JPH 20080227]
         name.sub!(' ', ' sp. ')
         result = Name.find(:all, :conditions => ["#{deprecated_condition}rank = :rank and (search_name = :name or text_name = :name)",
                                                  {:rank => rank, :name => name}])
       end
       result
     else
+      # Note: this will fail to find "Genus Author" (see above).  Just don't do it, leave the darned author off, for god's sake.
       result = Name.find(:all, :conditions => ["#{deprecated_condition}(search_name = :name or text_name = :name)", {:name => name}])
+    end
+
+    if result == []
+      # If provided a name complete with author, then check if that name exists in the database without the author.
+      name, author = Name.parse_author(in_str)
+      if !author.nil?
+        # Don't check text_name because we don't want to match a name that has a different author.
+        # (Note that name already has the "sp." inserted in the case of ranks above species.)
+        if rank
+          result = Name.find(:all, :conditions => ["#{deprecated_condition}rank = :rank and search_name = :name",
+                                                   {:rank => rank, :name => name}])
+        else
+          result = Name.find(:all, :conditions => ["#{deprecated_condition}search_name = :name", {:name => name}])
+        end
+        # If we find it, add the author to it.  Probably should ask the user for confirmation, but that looks really tricky.
+        if result.length == 1
+          result.first.change_author author
+          result.first.save
+        end
+      end
     end
 
     # No names that aren't deprecated, so try for ones that are deprecated
