@@ -43,7 +43,7 @@ class CommentController < ApplicationController
   # Outputs: @user, @comments, @comment_pages
   def show_comments_for_user
     store_location
-    @user = User.smart_find_id(params[:id])
+    @user = User.find(params[:id])
     @title = "Comments for %s" % @user.legal_name
     session[:observation_ids] = nil
     session[:observation] = nil
@@ -62,7 +62,7 @@ class CommentController < ApplicationController
   def show_comment
     store_location
     @user = session['user']
-    @comment = Comment.smart_find_id(params[:id])
+    @comment = Comment.find(params[:id])
   end
 
   # Form to create comment for an observation.
@@ -80,7 +80,7 @@ class CommentController < ApplicationController
   def add_comment
     if verify_user()
       @user = session['user']
-      @observation = Observation.smart_find_id(params[:id])
+      @observation = Observation.find(params[:id])
       if request.method == :get
         @comment = Comment.new
       else
@@ -113,7 +113,7 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @observation, @user
   def edit_comment
     @user = session['user']
-    @comment = Comment.smart_find_id(params[:id])
+    @comment = Comment.find(params[:id])
     @observation = @comment.observation if @comment
     if !check_user_id(@comment.user_id)
       render :action => 'show_comment'
@@ -135,7 +135,7 @@ class CommentController < ApplicationController
   # Outputs: none
   def destroy_comment
     @user = session['user']
-    @comment = Comment.smart_find_id(params[:id])
+    @comment = Comment.find(params[:id])
     if !check_user_id(@comment.user_id)
       render :action => 'show_comment'
     else

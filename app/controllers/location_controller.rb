@@ -116,7 +116,7 @@ class LocationController < ApplicationController
 
   def show_past_location
     store_location
-    @past_location = PastLocation.smart_find_id(params[:id])
+    @past_location = PastLocation.find(params[:id])
     @other_versions = PastLocation.find(:all, :conditions => "location_id = %s" % @past_location.location_id, :order => "version desc")
     @map = make_map([@past_location])
     @header = "#{GMap.header}\n#{finish_map(@map)}"
@@ -125,7 +125,7 @@ class LocationController < ApplicationController
   def show_location
     store_location
     id = params[:id]
-    @location = Location.smart_find_id(id)
+    @location = Location.find(id)
     # query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where, o.location_id," +
     #         " u.name, u.login, n.observation_name from observations o, users u, names n" +
     #         " where o.location_id = %s and o.user_id = u.id and n.id = o.name_id order by n.text_name, o.when desc"
@@ -174,7 +174,7 @@ class LocationController < ApplicationController
 
   # Adds the observations assoicated with obs.where set to params[:where] into the given location
   def add_to_location
-    location = Location.smart_find_id(params[:location])
+    location = Location.find(params[:location])
     where = params[:where]
     flash_notice "Successfully merged #{where} with #{location.display_name}." \
       if update_observations_by_where(location, where)
@@ -183,7 +183,7 @@ class LocationController < ApplicationController
 
   def edit_location
     store_location
-    @location = Location.smart_find_id(params[:id])
+    @location = Location.find(params[:id])
     if verify_user()
       @user = session['user']
       if request.method == :post

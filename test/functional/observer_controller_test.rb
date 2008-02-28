@@ -241,7 +241,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_show_user_no_id
-    assert_raises(RuntimeError, "Invalid User id: ''") do
+    assert_raises(ActiveRecord::RecordNotFound, "Couldn't find User without an ID") do
       get_with_dump :show_user
     end
   end

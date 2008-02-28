@@ -106,7 +106,7 @@ class NameController < ApplicationController
     # Rough testing showed implementation without synonyms takes .23-.39 secs.
     # elapsed_time = Benchmark.realtime do
       store_location
-      @name = Name.smart_find_id(params[:id])
+      @name = Name.find(params[:id])
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
       @children = @name.children
       query = "select o.id, o.when, o.modified, o.thumb_image_id, o.where,
@@ -140,7 +140,7 @@ class NameController < ApplicationController
 
   def show_past_name
     store_location
-    @past_name = PastName.smart_find_id(params[:id])
+    @past_name = PastName.find(params[:id])
     @other_versions = PastName.find(:all, :conditions => "name_id = %s" % @past_name.name_id, :order => "version desc")
   end
 
@@ -149,7 +149,7 @@ class NameController < ApplicationController
   def edit_name
     @user = session['user']
     if verify_user()
-      @name = Name.smart_find_id(params[:id])
+      @name = Name.find(params[:id])
       @can_make_changes = true
       if @user.id != 0
         for obs in @name.observations
@@ -215,7 +215,7 @@ class NameController < ApplicationController
   def change_synonyms
     if verify_user()
       @user = session['user']
-      @name = Name.smart_find_id(params[:id])
+      @name = Name.find(params[:id])
       @list_members     = nil
       @new_names        = nil
       @synonym_name_ids = []
@@ -283,7 +283,7 @@ class NameController < ApplicationController
   def deprecate_name
     if verify_user()
       @user    = session['user']
-      @name    = Name.smart_find_id(params[:id])
+      @name    = Name.find(params[:id])
       @what    = (params[:proposed] && params[:proposed][:name] ? params[:proposed][:name] : '').strip
       @comment = (params[:comment] && params[:comment][:comment] ? params[:comment][:comment] : '').strip
       @list_members     = nil
@@ -297,7 +297,7 @@ class NameController < ApplicationController
           flash_error "Must choose a preferred name."
         else
           if params[:chosen_name] && params[:chosen_name][:name_id]
-            new_names = [Name.smart_find_id(params[:chosen_name][:name_id])]
+            new_names = [Name.find(params[:chosen_name][:name_id])]
           else
             new_names = Name.find_names(@what)
           end
@@ -329,7 +329,7 @@ class NameController < ApplicationController
   def approve_name
     if verify_user()
       @user = session['user']
-      @name = Name.smart_find_id(params[:id])
+      @name = Name.find(params[:id])
       @approved_names = @name.approved_synonyms
       if request.method == :post
         if params[:deprecate][:others] == '1'
@@ -382,7 +382,7 @@ class NameController < ApplicationController
 
   def map
     name_id = params[:id]
-    @name = Name.smart_find_id(name_id)
+    @name = Name.find(name_id)
     locs = name_locs(name_id)
     @synonym_data = []
     synonym = @name.synonym

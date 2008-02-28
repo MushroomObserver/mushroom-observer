@@ -122,7 +122,7 @@ class ImageController < ApplicationController
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
-    @image = Image.smart_find_id(params[:id])
+    @image = Image.find(params[:id])
   end
 
   # Show the original size image.
@@ -135,7 +135,7 @@ class ImageController < ApplicationController
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
-    @image = Image.smart_find_id(params[:id])
+    @image = Image.find(params[:id])
   end
 
   def next_image
@@ -212,7 +212,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def add_image
     @user = session['user']
-    @observation = Observation.smart_find_id(params[:id])
+    @observation = Observation.find(params[:id])
     if !check_user_id(@observation.user_id)
       redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
     elsif request.method == :get
@@ -265,7 +265,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def remove_images
     @user = session['user']
-    @observation = Observation.smart_find_id(params[:id])
+    @observation = Observation.find(params[:id])
     if verify_user()
       if !check_user_id(@observation.user_id)
         redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
@@ -299,7 +299,7 @@ class ImageController < ApplicationController
   # Outputs: @image, @licenses, @user
   def edit_image
     @user = session['user']
-    @image = Image.smart_find_id(params[:id])
+    @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
     if verify_user()
       if !check_user_id(@image.user_id)
@@ -327,7 +327,7 @@ class ImageController < ApplicationController
   # Redirects to list_images.
   def destroy_image
     @user = session['user']
-    @image = Image.smart_find_id(params[:id])
+    @image = Image.find(params[:id])
     if verify_user()
       if !check_user_id(@image.user_id)
         redirect_to :action => 'show_image', :id => @image
@@ -353,7 +353,7 @@ class ImageController < ApplicationController
   # (See also add_image_to_obs and reuse_image_by_id.)
   def reuse_image
     @user = session['user']
-    @observation = Observation.smart_find_id(params[:id])
+    @observation = Observation.find(params[:id])
     if verify_user()
       if !check_user_id(@observation.user_id)
         redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation

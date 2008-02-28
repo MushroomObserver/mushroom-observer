@@ -209,7 +209,7 @@ class ObserverController < ApplicationController
   # Inputs: params[:id] (user id)
   # Outputs: @observations, @observation_pages, @user, @layout
   def show_user_observations
-    @user = User.smart_find_id(params[:id])
+    @user = User.find(params[:id])
     show_selected_observations("Observations by %s" % @user.legal_name,
       "observations.user_id = %s" % @user.id,
       "observations.modified desc, observations.`when` desc", :observation_ids)
@@ -241,7 +241,7 @@ class ObserverController < ApplicationController
   # Inputs: params[:id] (location id)
   # Outputs: @observations, @observation_pages, @user, @layout
   def show_location_observations
-    loc = Location.smart_find_id(params[:id])
+    loc = Location.find(params[:id])
     show_selected_observations("Observations from %s" % loc.display_name,
       "observations.location_id = %s" % loc.id,
       "names.search_name, observations.`when` desc", :observation_ids,
@@ -282,7 +282,7 @@ class ObserverController < ApplicationController
   #   @votes                        (user's vote for each naming.id)
   def show_observation
     store_location # Is this doing anything useful since there is no user check for this page?
-    @observation = Observation.smart_find_id(params[:id])
+    @observation = Observation.find(params[:id])
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
     @confidence_menu = translate_menu(Vote.confidence_menu)
@@ -299,7 +299,7 @@ class ObserverController < ApplicationController
           flashed = false
           for naming_id in params[:vote].keys
             if params[:vote][naming_id] && params[:vote][naming_id][:value]
-              naming = Naming.smart_find_id(naming_id)
+              naming = Naming.find(naming_id)
               value = params[:vote][naming_id][:value].to_i
               if naming.change_vote(@user, value) && !flashed
                 flash_notice "Successfully changed vote."
@@ -387,7 +387,7 @@ class ObserverController < ApplicationController
   def edit_observation
     @user = session['user']
     if verify_user()
-      @observation = Observation.smart_find_id(params[:id])
+      @observation = Observation.find(params[:id])
       if !check_user_id(@observation.user_id)
         redirect_to :action => 'show_observation', :id => @observation
       elsif request.method == :post &&
@@ -412,7 +412,7 @@ class ObserverController < ApplicationController
   def destroy_observation
     @user = session['user']
     if verify_user()
-      @observation = Observation.smart_find_id(params[:id])
+      @observation = Observation.find(params[:id])
       if !check_user_id(@observation.user_id)
         flash_error "You do not own this observation."
         redirect_to :action => 'show_observation', :id => @observation
@@ -526,7 +526,7 @@ class ObserverController < ApplicationController
   def create_naming
     @user = session['user']
     if verify_user()
-      @observation = Observation.smart_find_id(params[:id])
+      @observation = Observation.find(params[:id])
       # Attempt to create naming (and associated vote, etc.)
       if request.method == :post && create_naming_helper()
         redirect_to :action => 'show_observation', :id => @observation
@@ -567,7 +567,7 @@ class ObserverController < ApplicationController
   def edit_naming
     @user = session['user']
     if verify_user()
-      @naming = Naming.smart_find_id(params[:id])
+      @naming = Naming.find(params[:id])
       if @naming
         @observation = @naming.observation
         @vote = Vote.find(:first, :conditions =>
@@ -597,7 +597,7 @@ class ObserverController < ApplicationController
   # Redirects back to show_observation.
   def destroy_naming
     @user = session['user']
-    @naming = Naming.smart_find_id(params[:id])
+    @naming = Naming.find(params[:id])
     @observation = @naming.observation
     if !check_user_id(@naming.user_id)
       flash_error "You do not own that naming."
@@ -951,7 +951,7 @@ class ObserverController < ApplicationController
   #   sets @names, @valid_names
   def resolve_name_helper()
     if params[:chosen_name] && params[:chosen_name][:name_id]
-      @names = [Name.smart_find_id(params[:chosen_name][:name_id])]
+      @names = [Name.find(params[:chosen_name][:name_id])]
     else
       @names = Name.find_names(@what)
       logger.warn("resolve_name_helper: #{@names.length}")
@@ -1024,7 +1024,7 @@ class ObserverController < ApplicationController
       if !params[:vote] || !params[:vote][:value]
         raise "Invoked cast_vote without any parameters!"
       else
-        naming = Naming.smart_find_id(params[:vote][:naming_id])
+        naming = Naming.find(params[:vote][:naming_id])
         value = params[:vote][:value].to_i
         naming.change_vote(user, value)
         redirect_to :action => 'show_observation', :id => naming.observation
@@ -1037,7 +1037,7 @@ class ObserverController < ApplicationController
   # Inputs: params[:id] (naming)
   # Outputs: @naming
   def show_votes
-    @naming = Naming.smart_find_id(params[:id])
+    @naming = Naming.find(params[:id])
   end
 
 ################################################################################
@@ -1070,7 +1070,7 @@ class ObserverController < ApplicationController
   def show_user
     store_location
     id = params[:id]
-    @user = User.smart_find_id(id)
+    @user = User.find(id)
     @user_data = SiteData.new.get_user_data(id)
     @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
       :order => "id desc", :limit => 6)
@@ -1152,13 +1152,13 @@ class ObserverController < ApplicationController
   end
 
   def ask_user_question
-    @user = User.smart_find_id(params[:id])
+    @user = User.find(params[:id])
     email_question(@user, 'show_user', @user)
   end
 
   def send_user_question
     sender = session['user']
-    user = User.smart_find_id(params[:id])
+    user = User.find(params[:id])
     subject = params[:email][:subject]
     content = params[:email][:content]
     AccountMailer.deliver_user_question(sender, user, subject, content)
@@ -1167,13 +1167,13 @@ class ObserverController < ApplicationController
   end
 
   def ask_observation_question
-    @observation = Observation.smart_find_id(params[:id])
+    @observation = Observation.find(params[:id])
     email_question(@observation.user, 'show_observation', @observation)
   end
 
   def send_observation_question
     sender = session['user']
-    observation = Observation.smart_find_id(params[:id])
+    observation = Observation.find(params[:id])
     question = params[:question][:content]
     AccountMailer.deliver_observation_question(sender, observation, question)
     flash_notice "Delivered question."
@@ -1181,7 +1181,7 @@ class ObserverController < ApplicationController
   end
 
   def commercial_inquiry
-    @image = Image.smart_find_id(params[:id])
+    @image = Image.find(params[:id])
     @user = session['user']
     if !@image.user.commercial_email
       flash_error "Permission denied."
@@ -1191,7 +1191,7 @@ class ObserverController < ApplicationController
 
   def send_commercial_inquiry
     sender = session['user']
-    image = Image.smart_find_id(params[:id])
+    image = Image.find(params[:id])
     commercial_inquiry = params[:commercial_inquiry][:content]
     AccountMailer.deliver_commercial_inquiry(sender, image, commercial_inquiry)
     flash_notice "Delivered commercial inquiry."
@@ -1236,7 +1236,7 @@ class ObserverController < ApplicationController
   def show_rss_log
     store_location
     @user = session['user']
-    @rss_log = RssLog.smart_find_id(params['id'])
+    @rss_log = RssLog.find(params['id'])
   end
 
 ################################################################################

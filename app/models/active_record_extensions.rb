@@ -1,7 +1,6 @@
 #
 #  Extend ActiveRecord class.
 #
-#  smart_find_id(id)        Look up ID and give smart error message if fails.
 #  obj.formatted_errors     Gather errors for a given instance.
 #  attr_display_names       Override method names in error messages.
 #
@@ -9,17 +8,6 @@
 
 module ActiveRecord
   class Base
-
-    # This just does a generic ID look-up with an intelligent error message.
-    # (Which file am I supposed to put this stupid thing in, anyway??)
-    def self.smart_find_id(id)
-      begin
-        return self.find(id)
-      rescue ActiveRecord::RecordNotFound
-        # Not quite sure what to do at this point other than raise another error!
-        raise "Invalid #{self.to_s} id: '#{id}'"
-      end
-    end
 
     # This collects all the error messages for a given instance, and returns
     # them as an array of strings, e.g. for flash_notice().  If an error

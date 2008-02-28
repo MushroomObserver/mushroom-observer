@@ -63,7 +63,7 @@ class SpeciesListController < ApplicationController
     store_location
     @user = session['user']
     id = params[:id]
-    @species_list = SpeciesList.smart_find_id(id)
+    @species_list = SpeciesList.find(id)
     session[:species_list] = @species_list
     if session[:checklist_source] != id
       session[:prev_checklist_source] = session[:checklist_source]
@@ -165,7 +165,7 @@ class SpeciesListController < ApplicationController
   #   session[:checklist]
   def edit_species_list
     @user = session['user']
-    @species_list = SpeciesList.smart_find_id(params[:id])
+    @species_list = SpeciesList.find(params[:id])
     if verify_user()
       if !check_user_id(@species_list.user_id)
         @observation_list = sort_species_list_observations(@species_list, @user)
@@ -269,7 +269,7 @@ class SpeciesListController < ApplicationController
   # Post: goes to edit_species_list
   def upload_species_list
     @user = session['user']
-    @species_list = SpeciesList.smart_find_id(params[:id])
+    @species_list = SpeciesList.find(params[:id])
     if verify_user()
       if !check_user_id(@species_list.user_id)
         @observation_list = sort_species_list_observations(@species_list, @user)
@@ -300,7 +300,7 @@ class SpeciesListController < ApplicationController
   # Redirects to list_species_lists.
   def destroy_species_list
     @user = session['user']
-    @species_list = SpeciesList.smart_find_id(params[:id])
+    @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
       @species_list.orphan_log('Species list destroyed by ' + @user.login)
       @species_list.destroy
@@ -319,7 +319,7 @@ class SpeciesListController < ApplicationController
   def manage_species_lists
     if verify_user()
       @user = session['user']
-      @observation = Observation.smart_find_id(params[:id])
+      @observation = Observation.find(params[:id])
     end
   end
 
