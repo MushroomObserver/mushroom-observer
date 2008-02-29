@@ -1,150 +1,168 @@
-* indicates a community request
+Release each of the following as they get completed:
 
-Bug - Notes can get lost when names get merged.  E.g., Lepista nuda/Clitocybe nuda example
-Bug - Observation index doesn't work on the actual site.
+Eyes image (2)
 
-*SOMA Camp Comments:
-    Featured Mushroom pages
-    Calls for specimens
-    Checklist support
-    Sort by date (mod year)
-      Sort order pulldown.  Sort by time mod year.
-    References
-    Name notes on the observation pages
-    add_name page (from name_index)
-    Added alphabet along the top of name_index
+Bug - Helvella infula: gets confused between multiple names and deprecated names resulting in not being able to use the name or get the correct name out of the system. (4)
 
-Active tasks:
+Bug - Notes can get lost when names get merged.  E.g., Lepista nuda/Clitocybe nuda example (4)
 
-Add a 'needs page'
+Bug - Adding 'Genus species (With) Author' asks if you want to create a new name if just 'Genus species' is in the database.  It should just add the author and move on. (4)
 
-Reviewing Namings:
-  - Functional review (need to go looking for pages I haven't seen)
-  Full code review
-    Changed files:
-        observer_controller.rb
-    New files:
-        _form_naming.rhtml
-        _show_comments.rhtml
-        _show_footer.rhtml
-        _show_images.rhtml
-        _show_namings.rhtml
-        _show_votes.rhtml
-        create_naming.rhtml
-        edit_naming.rhtml
-        show_votes.rhtml
-    
-  Integrate bug fixes from the head
-  Make proposed changes
+Bug - Observation index doesn't work on the actual site. (8)
 
-*** Improve 'where' (Nathan's active task)
-  update how_to_use page to include location documentation
-  interactive map for edit_location and create_location
-  use locations for species lists?
-  map search results
-  map species list
-  altitude as ft or meters?
-  Future ideas:
-    Constrain fixed sets like country, state and county to valid values
-    Clicking on an undefined location should take logged in users to the definition page
-    Hierarchical locations
-    Smarter autocomplete
-    Map size based on window size
-    Count at each location
-    Different marker color if it's a synonym or if your own observation is included
-    Different marker color for specimens with herbarium material
-    Explicit error and/or 'secretness'
-    Shape information from Darwin Core
-    Photos of location
-    Habitat descriptions
-  Relationships between locations: Would like to be able to find all collections in Yuba Co., etc.
-  Should collections have individual lat/longs?
+Bug - Add: (4)
+Lentinellus castoreus (Fr.) Kühner & Mair
+Lentinellus occidentalis R.H. Petersen
+Lentinellus subargillaceus (Kauffman) R.H. Petersen
+Lentinellus ursinus (Fr.) Kühner
+Lentinellus ursinus f. robustus (P. Karst.) R.H. Petersen
+Lentinellus montanus O.K. Mill.
+using the bulk_name_edit feature.  Gives a different error in my local instance than the one reported through the website:
+"[ERROR] name#bulk_name_edit (NoMethodError) "undefined method `text_name' for nil:NilClass"
 
-Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev
+Bug - Don't allow names of the form <Genus> section <Section>.  Current they get interpreted as having the species epithet 'section' and an author of <Section> (e.g., Amanita section Lepidella)
 
-Events
+Bug - smart_find_id is generating spam errors.
 
-DAG support for names and locations
+Bug - Yahoo keeps truncating URLs and throwing errors.  These should get rerouted in some way.
 
-Search engine that catches spelling errors.
+Bug - Last observation on http://mushroomobserver.org/name/show_name/5314 doesn't use consensus name for that observation.
 
-User profile - paragraph available in preferences that gets displayed on the show_user page
+add_name page (from name_index) (4)
 
-** Namings (Jason's active task)
-  Provide a formalized way for users to associate a 'Name' with an 'Observation'.
-      Add confidence level for a naming
-      Add basis for naming (macroscopic, key, references, microscopic, chemical, genetic)
-      Allow users to select among proposed ids or indicate that none of them seem right.
-      Provide an easy way to add a comment at the same time.
-  data:
-    Namings:
-      name_id
-      user
-      when
-      notes
+Added alphabet along the top of name_index (4)
 
-    Opinion:
-      naming_id
-      user
-      confidence
-      notes
+Add a 'needs page' (4)
 
-    Confidence:
-      No opinion
-      Strongly agree
-      Agree
-      Could be
-      Not sure
-      Seems unlikely
-      Disagree
-      Strongly disagree
+Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev (16)
 
-    Image opinion:
-      image_id
-      scientific_value
-      asthetic_value
-      notes
+User profile - paragraph available in preferences that gets displayed on the show_user page (4)
+  Associate a user with a location (2)
+  User photo (4)
 
+Create species list location should be ajaxified (4)
 
-** Enable internationalization/localization with Brazilian Portuguese as the example
-    - Incorporate the first set of phrases
-    - Make them visible based on browser setting
-    - Fix year select issue with create observation in Portuguese
-    - Threadish issue that Darvin reported
-    - Ask Everaldo and Lu about news
-    Translate .rhtml templates for account and observer (on hold waiting for translations)
-    Add user setting to preferences
-    Figure out how to correctly translate emails (account_mailer/*.rhtml)
-    Encourage other users to provide translations
+Votes (1 point) and namings (5 points) should be included in user score (4)
 
-* Theme editor (Jason has an almost complete prototype)
-    More color themes: Boletus, Coprinus (very black and white)
+Updating an author citation currently requires visiting each observation and adding the new name.  Seems like there should be a simpler way.
 
+-----
 
-Large features:
+Potentially interesting features for improving amateur/professional communication:
 
-*** Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations.
-    Can be used to create species lists, or simply displayed and copied for publication somewhere else.
-    Use to create observations
-    Dynamic checklists based on location or user
+% Notifications
+    Email queuing (32)
+    Users could register interest in a particular name and get email when one shows up.
+    Add RSS feeds for searches, names, higher level taxa (16)
+    Add more events to the feed (Locations, Votes, New Users), but add filters for the main page.
+      E.g., Observations, Observations with Images, Species Lists, Locations, Votes, Consensus Changing Votes etc.
+      The filters would be controllable in the user preferences and would default to "Observations with Images" (24)
+    Let collector know if someone has asked for collections (call for specimens) (8)
 
-** Projects - Create a pages for describing proposed research projects.  Projects will have a public page
+% Advice on creating collections (4)
+
+% Projects - Create a pages for describing proposed research projects.  Projects will have a public page
     and a private page.  Each will have a principle investigator (PI) who controls who can see the private page.
     The project pages will have an associated Species List (of Observations relevant to the project) and an
     associated Checklist (of Names relevant to the project).  In addition there will be a set of documents
     associated with the project that can be marked as either public or private.  Only people approved by the
     PI are allowed to see the private documents, but anyone can see the public ones as well as the list of
-    Observations and Names.
+    Observations and Names. (40)
 
-** Herbarium records - Provide a standard way to describe herbarium collections.
-
-** Higher-level taxa (Agaricus is part of Agaricales, etc.)
+% Higher-level taxa (Agaricus is part of Agaricales, etc.)
       View members and membership
       Page of all members and below?
       Should Macrolepiota include Chlorophyllum rachodes?
       Add rank relationships from Name
 
-** Mobile phone support
+%? Owned descriptions (32)
+    Right now anyone can edit any part of any description for a Name.  It would be nice if there was a community
+    description and a set of owned descriptions.
+  
+%? Common name support. (40)
+
+%? Hierarchical locations (40)
+
+--------
+
+Theme editor (Jason has an almost complete prototype) (40?)
+    More color themes: Boletus, Coprinus (very black and white)
+
+Data to incorporate:
+    Rod's A.c. locations (4)
+    Mike Davis Russulas (8)
+    Ian Gibson Descriptions (16)
+    MykoWeb interface (40)
+    MushroomHobby interface (24)
+    Locations (on going)
+    Descriptions (on going)
+
+Image improvements:
+  Make it easier to add and see image notes.  Image notes should be visible on show_observation page.  Maybe with a link to add a note. (16)
+  Image rating for 'Pictorial', 'Scientific', 'Just Because' (40)
+  textarea under or beside each file in the upload page, so you can add notes to individual photos. (8)
+
+Remember me between sessions (16)
+
+Organize user preferences into logical groups (8)
+  
+Featured Mushroom pages (8)
+
+Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations. (40)
+    Can be used to create species lists, or simply displayed and copied for publication somewhere else.
+    Use to create observations
+    Dynamic checklists based on location or user
+
+Sort by date (mod year) (16)
+      Sort order pulldown.  Sort by time mod year.
+
+References (40)
+
+show_name revamp (40)
+    Name notes on the observation pages
+
+interactive map for edit_location and create_location (24)
+
+map search results (16)
+
+map species list (16)
+
+altitude as ft or meters? (8)
+
+Constrain fixed sets like country, state and county to valid values (24)
+
+Clicking on an undefined location should take logged in users to the definition page (4?)
+
+Smarter string matching for location merging (16)
+
+Map size based on window size (4)
+
+Count at each location (4)
+
+Different marker colors:
+  synonym, your own observation, specimens with herbarium material
+ 
+Shape information from Darwin Core (40)
+
+Photos of location (16)
+
+Habitat descriptions (8)
+
+Should collections have individual lat/longs? (8)
+
+Events (40)
+
+Search engine that catches spelling errors. (8)
+
+Translate .rhtml templates for account and observer (on hold waiting for translations) (40)
+
+Add language preference to user preferences (8)
+
+Figure out how to correctly translate emails (account_mailer/*.rhtml) (4)
+
+Herbarium records - Provide a standard way to describe herbarium collections. (40)
+
+Mobile phone support (40)
     - Figure out how to tell the difference
     Look up on web for mobile support functions
     Mobilize layout:
@@ -154,123 +172,59 @@ Large features:
         Remove pagination links from the top of the page
     Ability to receive observations through email
 
-* High-bandwith support - 1024x768 suggested rather than 640x640 max.
+High-bandwith support - 1024x768 suggested rather than 640x640 max. (should include image cleanup) (16)
+  Check for duplicate images, check for referenced images
 
-* Name tagging
+Name tagging (40)
     Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic
     Some less obvious tags: 'slime mold', 'hypogeous'...
     Planning on both simple tags (<name> is <tag>) and full RDF support (<name> has <predicate> <value>):
       E.g. "Boletus edulis" is "choice" and "Boletus edulis" has "edibility" of "choice"
+      Learning Calais: 5ddq5zt5rx8gu3ysekebzwar
 
-* Dynamic checklist: Enter the first part of a name "Ama" and ask for completions.  You can ask for completions
-  for "", but it will be slow.  Leads to the idea of caching the list as html since the set of names doesn't change that
-  often.
-
-* Mycology club affiliations (useful for searching)
-
-* Summary pages for higher level taxa (somewhat related to field based search)
-
-* Machine identification
-    Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
-
-Owned descriptions
-    Right now anyone can edit any part of any description for a Name.  It would be nice if there was a community
-    description and a set of owned descriptions.
-
-Notifications
-    Users could register interest in a particular name and get email when one shows up.
-    Add RSS feeds for searches, names, higher level taxa
-    Let collector know if someone has asked for collections
-
-Foreign language support
-
-Yet more stuff to do with Names
-    Common Name support (== Group but without the group)
-    Spelling correction
-    References
-    Descriptions
-
-Use RDF to make data machine readable
+Use RDF to make tags and descriptions machine readable (40)
     Could be used to enable identification
 
-Add support for OpenID
+Machine identification (160)
+    Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
 
-Field based search mechanism
+Mycology club affiliations (useful for searching) (4)
 
-General discussion blog that is searchable
+Add support for OpenID (32)
 
-Local client that can only add
+Field based search mechanism (advanced search) (40)
 
+General discussion blog that is searchable (32)
 
+Local client that can only add (160)
 
-Small features:
+'More images'/'Less images' toggle (8)
+  this would change the grid layout to rows with all the thumbs displayed
+  
+Show all images when looking at a Name page (Darvin) (4)
 
-+* Hide name changes from default page?  There's been debate about whether this is worth the added complexity.
-  Might be handled by having a toggle that says 'More images'/'Less images' this would also change
-    the layout to rows with all the thumbs displayed
-Show all images when looking at a Name page (Darvin)
-Index with A-Z show have alphabet at top (Darvin)
-name_search - Added mark to give count of observations and images.
+name_search - Added mark to give count of observations and images. (2)
 
-Location Search button
+Display content from other sites (e.g., mykoweb links page) (16)
 
-Links page:
-    Mykoweb: http://mykoweb.com
-    Tom Volk's Fungus Pages: http://tomvolkfungi.net/
-    Index Fungorum: http://www.indexfungorum.org/Names/Names.asp
-    Mushroom Expert: http://mushroomexpert.com/
-    EOL.org: eol.org
-    NAMA: namyco.org
-    FFSC: http://www.fungusfed.org/
-    MSA: http://www.msafungi.org/
-    MatchMaker: http://www.pfc.cfs.nrcan.gc.ca/biodiversity/matchmaker/index_e.html
-    burning silo
-    ww.fungos.net
+Rename 'Features and Fixes' to include Date and version (4?)
 
-Rename 'Features and Fixes' to include Date and version
-
-Create species list location should be ajaxified
-
-Synonym features
+Synonym features (8)
   Automated way to apply synonyms to your own observations (with review)
 
-Admin stuff:
+Admin stuff: (4?)
     Webpages for accessing the logs
 
-Top ten pages of Names, Images, Observations
+Top ten pages of Names, Images, Observations (40)
     Names: Best Edibles, Most Toxic, Hallucinogenic, Easiest to Learn, Easiest to Confuse ...
     Images: Pictorial, Scientific, Humor, ...
     Observations: Biggest, Smallest, Off season, Surprising
     Ideally users should be able to create new top ten pages and the top ten pages themselves should get ranked somehow
 
-Contribution
-    Hidden contributors
-    Contribution adjustment?
-    Contribution by month?
-    Better design?
+User score bonus/discount (4?)
 
-More user collection pages?
-  User Comments
-  User Images
-  User Species Lists
+Page for Unknowns (16)
 
-User pages
-    User.where (optional)
-    User roles/permissions
-        [Mushroom God - Mycorhizzal + login and database password]
-        Mycorhizzal - Lichenized + update site, become another user, send feature email
-        Lichenized - Composter + change the status of others (up to Lichenized), SVN access
-        Composter - Ranking, new submissions, name editing, mailing list, edit own entries
-        Parasite - No ranking, no new submissions, no name editing, mailing list, edit own entries
-        Extinct - No ranking, no new submissions, no name editing, no mailing list, cannot edit own entries
+Name comments rather than just notes? (32)
 
-Mechanism for merging species lists?
-
-Page for Unknowns
-
-NaME file loads don't preserve datestamp?
-Name comments rather than just notes?
-
-Add user.login and what got changed to show_past_name
-
-Check for duplicate images, image garbage collection
+Add user.login and what got changed to show_past_name (16)

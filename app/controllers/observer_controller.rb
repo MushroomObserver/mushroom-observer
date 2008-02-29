@@ -1163,7 +1163,7 @@ class ObserverController < ApplicationController
     content = params[:email][:content]
     AccountMailer.deliver_user_question(sender, user, subject, content)
     flash_notice "Delivered email."
-    redirect_to :action => 'show_user', :id => sender
+    redirect_to :action => 'show_user', :id => user
   end
 
   def ask_observation_question
