@@ -5,7 +5,6 @@ minimal_unknown:
   user_id:   2
   location_id: 2
   name_id:   1
-  naming_id: 1
 
 detailed_unknown:
   id:        2
@@ -15,7 +14,6 @@ detailed_unknown:
   user_id:   2
   location_id: 2
   name_id:   1
-  naming_id: 2
   specimen:  1
   notes:     Found in a strange place
 
@@ -26,7 +24,6 @@ coprinus_comatus_obs:
   when:      2007-02-27
   user_id:   1
   name_id:   2
-  naming_id: 3
   where:     Glendale, California
   specimen:  0
   notes:     Second fruiting in bark chips
@@ -39,7 +36,6 @@ agaricus_campestris_obs:
   user_id:   1
   location_id: 2
   name_id:   3
-  naming_id: 4
   specimen:  0
   notes:     From the lawn next door
 
@@ -51,7 +47,6 @@ agaricus_campestrus_obs:
   user_id:   1
   location_id: 2
   name_id:   19
-  naming_id: 5
   specimen:  0
   notes:     From somewhere else
 
@@ -63,7 +58,6 @@ agaricus_campestras_obs:
   user_id:   1
   location_id: 2
   name_id:   20
-  naming_id: 6
   specimen:  0
   notes:     From somewhere else
 
@@ -75,7 +69,6 @@ agaricus_campestros_obs:
   user_id:   1
   location_id: 2
   name_id:   21
-  naming_id: 7
   specimen:  0
   notes:     From somewhere else
 
@@ -86,7 +79,6 @@ strobilurus_diminutivus_obs:
   when:      2007-07-20
   user_id:   1
   name_id:   24
-  naming_id: 8
   where:     Pipi Valley, Sierra Mountains, CA
   specimen:  0
   notes:     From somewhere else

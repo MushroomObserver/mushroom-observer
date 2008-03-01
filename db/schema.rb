@@ -104,7 +104,6 @@ ActiveRecord::Schema.define(:version => 23) do
     t.column "name_id",                :integer
     t.column "location_id",            :integer
     t.column "is_collection_location", :boolean,                 :default => true,  :null => false
-    t.column "naming_id",              :integer
   end
 
   create_table "observations_species_lists", :id => false, :force => true do |t|
