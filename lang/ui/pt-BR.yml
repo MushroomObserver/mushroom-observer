@@ -929,6 +929,8 @@ show_namings_community_favorite: This is the community favorite.
 show_namings_consensus: Community Vote
 show_namings_destroy: Destroy
 show_namings_edit: Edit
+show_namings_eye_help: Observer's choice
+show_namings_eyes_help: Current consensus
 show_namings_lose_changes: You must click on 'Update Votes' to save any changes you've made to your votes.
 show_namings_no_names_yet: No names have been proposed yet.
 show_namings_no_votes: no votes

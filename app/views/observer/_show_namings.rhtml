@@ -129,6 +129,24 @@
     <%= textilize_without_paragraph(:show_namings_consensus_help.l % [:vote_agreement_100.l, "#{DOMAIN}/observer/how_to_use#voting"]) %>
       <% end %>
     </p>
+    <table width="100%">
+        <tr>
+            <td width="48">
+                <%= image_tag("eye.png") %>
+            </td>
+            <td>
+                <%= " = " + :show_namings_eye_help.l %>
+            </td>
+            <td>
+            </td>
+            <td width="48">
+                <%= image_tag("eyes.png") %>
+            </td>
+            <td>
+                <%= " = " + :show_namings_eyes_help.l %>
+            </td>
+        </tr>
+    </table>
   <% end %>
 <% end # form %>
 
