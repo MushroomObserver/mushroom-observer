@@ -675,9 +675,6 @@ class ObserverController < ApplicationController
     elsif @name && !@naming.valid?
       flash_object_errors(@naming)
       return false
-    elsif @name && !@vote.value
-      @vote.errors.add(:value, "Must choose confidence level if you're naming it.")
-      return false
     elsif @name && !@vote.valid?
       flash_object_errors(@vote)
       return false
@@ -770,10 +767,7 @@ class ObserverController < ApplicationController
     # put this above resolve_name_helper(), then it will approve names
     # silently, and that's even worse that silently creating names before
     # the user has correctly completed the form.)
-    if !@vote.value
-      flash_error "Must choose confidence level."
-      return false
-    elsif !@vote.valid?
+    if !@vote.valid?
       flash_object_errors(@vote)
       return false
     end
@@ -950,22 +944,52 @@ class ObserverController < ApplicationController
   #   uses params[:approved_name] and params[:chosen_name]
   #   sets @names, @valid_names
   def resolve_name_helper()
+    ignore_approved_name = false
     if params[:chosen_name] && params[:chosen_name][:name_id]
+      # User has chosen among multiple matching names or among multiple approved names.
       @names = [Name.find(params[:chosen_name][:name_id])]
+      # This tells it to check if this name is deprecated below EVEN IF the user didn't change the what field.
+      # This will solve the problem of multiple matching deprecated names discussed below.
+      ignore_approved_name = true
     else
+      # Look up name: can return zero to many matches.
       @names = Name.find_names(@what)
       logger.warn("resolve_name_helper: #{@names.length}")
     end
     if @names.length == 0
+      # Create temporary name object for it.  (This will not save anything
+      # EXCEPT in the case of user supplying author for existing name that
+      # has no author.)
       @names = [create_needed_names(params[:approved_name], @what, @user)]
     end
     target_name = @names.first
     @names = [] if !target_name
     if target_name && @names.length == 1
-      if target_name.deprecated && (params[:approved_name] != @what)
+      # Single matching name.  Check if it's deprecated.
+      if target_name.deprecated and (ignore_approved_name or (params[:approved_name] != @what))
+        # User has not explicitly approved the deprecated name: get list of
+        # valid synonyms.  Will display them for user to choose among.
         @valid_names = target_name.approved_synonyms
       else
+        # User has approved a deprecated name.  Go with it.
         return target_name
+      end
+    elsif @names.length > 1 && @names.reject{|n| n.deprecated} == []
+      # Multiple matches, all of which are deprecated.  Check if they all have
+      # the same set of approved names.  Pain in the butt, but otherwise can
+      # get stuck choosing between Helvella infula Fr. and H. infula Schaeff.
+      # without anyone mentioning that both are deprecated by Gyromitra infula. 
+      @valid_names = @names.first.approved_synonyms.sort
+      for n in @names
+        if n.approved_synonyms.sort != @valid_names
+          # If they have different sets of approved names (will this ever
+          # actually happen outside my twisted imagination??!) then first have
+          # the user choose among the deprecated names, THEN hopefully we'll
+          # notice that their choice is deprecated and provide them with the
+          # option of switching to one of the approved names.
+          @valid_names = []
+          break
+        end
       end
     end
     return nil

@@ -44,7 +44,7 @@ class VoteTest < Test::Unit::TestCase
     assert_equal 3, vote.errors.count
     assert_equal "can't be blank", vote.errors.on(:naming)
     assert_equal "can't be blank", vote.errors.on(:user)
-    assert_equal "can't be blank", vote.errors.on(:value)
+    assert_equal "Must choose confidence level.", vote.errors.on(:value)
     vote = Vote.new(
         :naming => @coprinus_comatus_naming,
         :user   => @rolf,

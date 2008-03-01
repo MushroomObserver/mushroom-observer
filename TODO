@@ -6,8 +6,6 @@ Bug - Helvella infula: gets confused between multiple names and deprecated names
 
 Bug - Notes can get lost when names get merged.  E.g., Lepista nuda/Clitocybe nuda example (4)
 
-Bug - Adding 'Genus species (With) Author' asks if you want to create a new name if just 'Genus species' is in the database.  It should just add the author and move on. (4)
-
 Bug - Observation index doesn't work on the actual site. (8)
 
 Bug - Add: (4)

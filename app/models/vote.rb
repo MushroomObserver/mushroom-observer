@@ -92,7 +92,7 @@ class Vote < ActiveRecord::Base
   validates_presence_of :naming, :user
   validates_each :value do |record, attr, value|
     if value.nil?
-      record.errors.add(attr, "can't be blank") 
+      record.errors.add(attr, "Must choose confidence level.") 
     elsif record.value_before_type_cast.to_s !~ /^[+-]?\d+(\.\d+)?$/
       record.errors.add(attr, "is not a number") 
     elsif value < MINIMUM_VOTE || value > MAXIMUM_VOTE
