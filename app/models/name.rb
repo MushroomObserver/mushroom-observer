@@ -25,9 +25,6 @@
 #   <Author> is determined to start at the second uppercase letter or any
 #     punctuation mark not allowed in the taxa patterns.
 #   Each word above is grouped separately and sequentially, except as noted.
-#   [fixed "_" to be "-" in subsp/var/form pats -JPH 20071125]
-#   [added "ssp." to subsp pat (used in PLANTS database) -JPH 20071125]
-#   [fixed author pat to handle double-quotes -JPH 20071125]
 #
 # These methods return symbols:
 #   Name.all_ranks              :Form to :Kingdom, then :Group

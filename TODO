@@ -1,9 +1,5 @@
 Release each of the following as they get completed:
 
-- Eyes image (2)
-
-Bug - Helvella infula: gets confused between multiple names and deprecated names resulting in not being able to use the name or get the correct name out of the system. (4)
-
 Bug - Notes can get lost when names get merged.  E.g., Lepista nuda/Clitocybe nuda example (4)
 
 Bug - Observation index doesn't work on the actual site. (8)
@@ -18,17 +14,13 @@ Lentinellus montanus O.K. Mill.
 using the bulk_name_edit feature.  Gives a different error in my local instance than the one reported through the website:
 "[ERROR] name#bulk_name_edit (NoMethodError) "undefined method `text_name' for nil:NilClass"
 
-Bug - Don't allow names of the form <Genus> section <Section>.  Current they get interpreted as having the species epithet 'section' and an author of <Section> (e.g., Amanita section Lepidella)
-
-Bug - smart_find_id is generating spam errors.
+Bug - Don't allow names of the form <Genus> section <Section>.  Current they get interpreted as having the species epithet 'section' and an author of <Section> (e.g., Amanita section Lepidella) 
 
 Bug - Yahoo keeps truncating URLs and throwing errors.  These should get rerouted in some way.
 
-Bug - Last observation on http://mushroomobserver.org/name/show_name/5314 doesn't use consensus name for that observation.
+Should calculate consensus by comparing sum of votes for each taxon, instead of average vote for each taxon. (4)
 
 add_name page (from name_index) (4)
-
-Added alphabet along the top of name_index (4)
 
 Add a 'needs page' (4)
 
@@ -37,8 +29,6 @@ Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  
 User profile - paragraph available in preferences that gets displayed on the show_user page (4)
   Associate a user with a location (2)
   User photo (4)
-
-Create species list location should be ajaxified (4)
 
 Votes (1 point) and namings (5 points) should be included in user score (4)
 

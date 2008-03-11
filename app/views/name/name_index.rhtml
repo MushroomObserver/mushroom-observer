@@ -1,21 +1,40 @@
-<%
-    if @title.nil?
-        @title = 'Name Index' %>
-        <%= link_to('Observation Index', :action => 'observation_index')%> |
-<%
-    else %>
-        <%= link_to('Name Index', :action => 'name_index')%> |
-<%  end %>
+<% if @title.nil?
+    @title = 'Name Index' %>
+    <%= link_to('Observation Index', :action => 'observation_index')%> |
+<% else %>
+    <%= link_to('Name Index', :action => 'name_index')%> |
+<% end %>
 
 <%= link_to('Bulk Name Edit', :action => 'bulk_name_edit') %><br/>
 <div id="Title"><%= @title %></div>
 
+<center><big><%=
+  letters = {}
+  for datum in @name_data
+    match = datum['display_name'].match(/([A-Z])/)
+    if match
+      datum['first_letter'] = match[1]
+      letters[match[1]] = 1
+    end
+  end
+  %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).
+    map {|l| letters[l] ? link_to(l,"##{l}") : l}.join("&nbsp;&nbsp;")
+%></big></center><br/>
+
 <%
-	for datum in @name_data
+  last_letter = nil
+  for datum in @name_data
+    if datum['first_letter'] != last_letter
+      last_letter = datum['first_letter']
+      id = { :id => last_letter }
+      if last_letter != 'A' %>
+        <br/>
+      <% end
+    else
+      id = {}
+    end
 %>
-<%= link_to(textilize_without_paragraph(h(datum['display_name'])),
-            :action => 'show_name', :id => datum['id']) %><br/>
-<%
-	end
-%>
+  <%= link_to(textilize_without_paragraph(h(datum['display_name'])),
+              { :action => 'show_name', :id => datum['id'] }, id) %><br/>
+<% end %>
 
