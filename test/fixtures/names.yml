@@ -7,7 +7,7 @@ fungi:
   version: 0
   rank: Kingdom
   text_name: Fungi
-  display_name: Kingdom of **__Fungi__**
+  display_name: **__Fungi__**
   observation_name: **__Fungi sp.__**
   search_name: Fungi sp.
 
@@ -236,7 +236,7 @@ psalliota:
   version: 0
   rank: Genus
   text_name: Psalliota
-  display_name: Genus **__Psalliota__**
+  display_name: **__Psalliota__**
   observation_name: **__Psalliota sp.__**
   search_name: Psalliota sp.
 
@@ -249,7 +249,7 @@ agaricus:
   version: 0
   rank: Genus
   text_name: Agaricus
-  display_name: Genus **__Agaricus__**
+  display_name: **__Agaricus__**
   observation_name: **__Agaricus sp.__**
   search_name: Agaricus sp.
 
@@ -376,7 +376,7 @@ lepiota:
   version: 0
   rank: Genus
   text_name: Lepiota
-  display_name: Genus **__Lepiota__**
+  display_name: **__Lepiota__**
   observation_name: **__Lepiota sp.__**
   search_name: Lepiota sp.
 
@@ -389,7 +389,7 @@ chlorophyllum:
   version: 0
   rank: Genus
   text_name: Chlorophyllum
-  display_name: Genus **__Chlorophyllum__**
+  display_name: **__Chlorophyllum__**
   observation_name: **__Chlorophyllum sp.__**
   search_name: Chlorophyllum sp.
 
