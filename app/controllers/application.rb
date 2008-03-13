@@ -179,7 +179,7 @@ class ApplicationController < ActionController::Base
     end
 
     object_pages = Paginator.new self, total, per_page,
-         @params['page']
+         params['page']
     objects = model.find_by_sql_with_limit(sql,
          object_pages.current.to_sql[1], per_page)
     return [object_pages, objects]

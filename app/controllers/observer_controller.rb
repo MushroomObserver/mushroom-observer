@@ -655,12 +655,6 @@ class ObserverController < ApplicationController
     else
       @name = resolve_name_helper()
       return false if !@name
-      # I'm allowing this, otherwise people aren't allowed to edit the reasons
-      # for proposed namings they didn't happen to create first.
-      # if @observation.has_name?(@name)
-      #   flash_warning "Someone has already proposed that name."
-      #   return false
-      # end
       @naming.name = @name
     end
     #
@@ -749,13 +743,11 @@ class ObserverController < ApplicationController
     # Resolve chosen name (see resolve_name_helper for full heuristics).
     @name = resolve_name_helper()
     return false if !@name
-    # I'm allowing this, otherwise people aren't allowed to edit the reasons
-    # for proposed namings they didn't happen to create first.  This way they
-    # can create a new naming with the same name and propound at length.
-    # if @observation.has_name?(@name)
-    #   flash_warning "Someone has already proposed that name."
-    #   return false
-    # end
+    if @observation.name_been_proposed?(@name)
+      flash_warning "Someone has already proposed that name.  If you would
+                     like to comment on it, try posting a comment instead."
+      return false
+    end
     @naming.name = @name
     if !@naming.valid?
       flash_object_errors(@naming)
@@ -806,12 +798,11 @@ class ObserverController < ApplicationController
     @what = params[:name][:name] if params[:name]
     @name = resolve_name_helper()
     return false if !@name
-    # I'm allowing this, otherwise people aren't allowed to edit the reasons
-    # for proposed namings they didn't happen to create first.
-    # if @observation.has_name?(@name, @naming)
-    #   flash_warning "Someone has already proposed that name."
-    #   return false
-    # end
+    if @naming.name != @name && @observation.name_been_proposed?(@name)
+      flash_warning "Someone has already proposed that name.  If you would
+                     like to comment on it, try posting a comment instead."
+      return false
+    end
     #
     # Owner is not allowed to change a naming once it's been used by someone
     # else.  Instead I automatically clone it and make changes to the clone.
@@ -1238,7 +1229,7 @@ class ObserverController < ApplicationController
     @logs = RssLog.find(:all, :order => "'modified' desc",
                         :conditions => "datediff(now(), modified) <= 31",
                         :limit => 100)
-    render_without_layout
+    render :action => "rss", :layout => false
   end
 
   # left-hand panel -> list_rss_logs.rhtml

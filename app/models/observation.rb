@@ -13,6 +13,7 @@ require 'active_record_extensions'
 #   naming                  Conensus Naming instance. (can be nil)
 #   name                    Conensus Name instance.   (never nil)
 #   preferred_name(user)    Name instance.   (never nil)
+#   name_been_proposed?(n)  Has someone proposed this name already?
 #   text_name(user)         Plain text.
 #   format_name(user)       Textilized.
 #   unique_text_name(user)  Same as above, with id added to make unique.
@@ -89,21 +90,22 @@ class Observation < ActiveRecord::Base
   # Returns Naming instance or nil.
   def calc_consensus
 
-    # Gather some handy overall vote stats.
-    any_votes_at_all = false   # Are there any votes for any namings at all?
-    any_positive_votes = false # Are there any "positive" votes by non-owners, i.e. votes > 50%?
-    nonowner_voted = {}        # Has anyone other than the owner voted for a given naming?
-    for naming in self.namings
-      naming_id = naming.id
-      nonowner_voted[naming_id] = false
-      for vote in naming.votes
-        any_votes_at_all = true
-        if vote.user_id != naming.user_id
-          nonowner_voted[naming_id] = true
-          any_positive_votes = true if vote.value > 50
-        end
-      end
-    end
+    # [Now that we consider all votes, this is all superfluous. -JPH 20080313]
+    # # Gather some handy overall vote stats.
+    # any_votes_at_all = false   # Are there any votes for any namings at all?
+    # any_positive_votes = false # Are there any "positive" votes by non-owners, i.e. votes > 50%?
+    # nonowner_voted = {}        # Has anyone other than the owner voted for a given naming?
+    # for naming in self.namings
+    #   naming_id = naming.id
+    #   nonowner_voted[naming_id] = false
+    #   for vote in naming.votes
+    #     any_votes_at_all = true
+    #     if vote.user_id != naming.user_id
+    #       nonowner_voted[naming_id] = true
+    #       any_positive_votes = true if vote.value > 50
+    #     end
+    #   end
+    # end
 
     # Gather votes for names and synonyms.  Note that this is trickier than one would expect
     # since it is possible to propose several synonyms for a single observation, and even
@@ -117,40 +119,41 @@ class Observation < ActiveRecord::Base
     user_wgts   = {}  # Caches user rankings.
     for naming in self.namings
       naming_id = naming.id
-      # First, are we even going to consider this naming?
-      if nonowner_voted[naming_id] || !any_positive_votes
-        name_id = naming.name_id
-        name_ages[name_id] = naming.created if !name_ages[name_id] || naming.created < name_ages[name_id]
-        # Go through all the votes for this naming.  Should be zero or one per user.
-        for vote in naming.votes
-          user_id = vote.user_id
-          val = vote.value
-          wgt = user_wgts[user_id]
-          wgt = user_wgts[user_id] = 1 if wgt.nil?   # User.get_user_metric(pn.user_id)
-          # It may be possible in the future for us to weight some "special" users zero, who knows...
-          # (It can cause a division by zero below if we ignore zero weights.)
-          if wgt > 0
-            # Record best vote for this user for this name.  This will be used later
-            # to determine which name wins in the case of the winning taxon (see below)
-            # having multiple accepted names.
-            name_votes[name_id] = {} if !name_votes[name_id]
-            if !name_votes[name_id][user_id] ||
-                name_votes[name_id][user_id][0] < val
-              name_votes[name_id][user_id] = [val, wgt]
-            end
-            # Record best vote for this user for this group of synonyms.  (Since not all taxa
-            # have synonyms, I've got to create a "fake" id that uses the synonym id if it exists,
-            # else uses the name id, but still keeps them separate.)
-            taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
-            taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
-            taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
-            if !taxon_votes[taxon_id][user_id] ||
-                taxon_votes[taxon_id][user_id][0] < val
-              taxon_votes[taxon_id][user_id] = [val, wgt]
-            end
+      # [We're considering all votes now. -JPH 20080313]
+      # # First, are we even going to consider this naming?
+      # if nonowner_voted[naming_id] || !any_positive_votes
+      name_id = naming.name_id
+      name_ages[name_id] = naming.created if !name_ages[name_id] || naming.created < name_ages[name_id]
+      # Go through all the votes for this naming.  Should be zero or one per user.
+      for vote in naming.votes
+        user_id = vote.user_id
+        val = vote.value
+        wgt = user_wgts[user_id]
+        wgt = user_wgts[user_id] = 1 if wgt.nil?   # User.get_user_metric(pn.user_id)
+        # It may be possible in the future for us to weight some "special" users zero, who knows...
+        # (It can cause a division by zero below if we ignore zero weights.)
+        if wgt > 0
+          # Record best vote for this user for this name.  This will be used later
+          # to determine which name wins in the case of the winning taxon (see below)
+          # having multiple accepted names.
+          name_votes[name_id] = {} if !name_votes[name_id]
+          if !name_votes[name_id][user_id] ||
+              name_votes[name_id][user_id][0] < val
+            name_votes[name_id][user_id] = [val, wgt]
+          end
+          # Record best vote for this user for this group of synonyms.  (Since not all taxa
+          # have synonyms, I've got to create a "fake" id that uses the synonym id if it exists,
+          # else uses the name id, but still keeps them separate.)
+          taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
+          taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
+          taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
+          if !taxon_votes[taxon_id][user_id] ||
+              taxon_votes[taxon_id][user_id][0] < val
+            taxon_votes[taxon_id][user_id] = [val, wgt]
           end
         end
       end
+      # end
     end
 
     # Now that we've weeded out potential duplicate votes, we can combine them safely.
@@ -159,8 +162,10 @@ class Observation < ActiveRecord::Base
       vote = votes[taxon_id] = [0, 0]
       for user_id in taxon_votes[taxon_id].keys
         user_vote = taxon_votes[taxon_id][user_id]
-        vote[0] += user_vote[0] # val
-        vote[1] += user_vote[1] # wgt
+        val = user_vote[0]
+        wgt = user_vote[1]
+        vote[0] += (val-50) * wgt
+        vote[1] += wgt
       end
     end
 
@@ -172,8 +177,8 @@ class Observation < ActiveRecord::Base
     best_age = nil
     best_id  = nil
     for taxon_id in votes.keys
+      val = votes[taxon_id][0]
       wgt = votes[taxon_id][1]
-      val = votes[taxon_id][0] / wgt
       age = taxon_ages[taxon_id]
       if best_val.nil? ||
          val > best_val || val == best_val && (
@@ -220,8 +225,10 @@ class Observation < ActiveRecord::Base
           vote = votes[name_id] = [0, 0]
           for user_id in name_votes[name_id].keys
             user_vote = name_votes[name_id][user_id]
-            vote[0] += user_vote[0] # val
-            vote[1] += user_vote[1] # wgt
+            val = user_vote[0]
+            wgt = user_vote[1]
+            vote[0] += (val-50) * wgt
+            vote[1] += wgt
           end
         end
 
@@ -240,8 +247,8 @@ class Observation < ActiveRecord::Base
           name_id = name.id
           vote = votes[name_id]
           if vote
+            val = vote[0]
             wgt = vote[1]
-            val = vote[0] / wgt
             age = name_ages[name_id]
             if best_val.nil? ||
                val > best_val || val == best_val && (
@@ -312,6 +319,13 @@ class Observation < ActiveRecord::Base
   def unique_format_name(user=nil)
     str = self.preferred_name(user).observation_name
     "%s (%s)" % [str, self.id]
+  end
+
+  # ----------------------------------------
+
+  # Has anyone proposed a given name yet for this observation?
+  def name_been_proposed?(name)
+    self.namings.select {|n| n.name == name}.length > 0
   end
 
   # ----------------------------------------

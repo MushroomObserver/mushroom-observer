@@ -74,4 +74,10 @@ class ObservationTest < Test::Unit::TestCase
     @minimal_unknown.remove_image_by_id(@disconnected_coprinus_comatus_image.id)
     assert_equal(@minimal_unknown.thumb_image, @connected_coprinus_comatus_image)
   end
+
+  def test_name_been_proposed
+    assert(@coprinus_comatus_obs.name_been_proposed?(@coprinus_comatus))
+    assert(@coprinus_comatus_obs.name_been_proposed?(@agaricus_campestris))
+    assert(!@coprinus_comatus_obs.name_been_proposed?(@conocybe_filaris))
+  end
 end

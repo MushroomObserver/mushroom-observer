@@ -957,6 +957,11 @@ class ObserverControllerTest < Test::Unit::TestCase
   # ----------------------------
 
   # Now have Dick vote on Mary's name.
+  # Votes: rolf=80/0, mary=60/100, dick=x/100
+  # Rolf prefers naming 3 (vote 80 -vs- 0).
+  # Mary prefers naming 9 (vote 60 -vs- 100).
+  # Dick now prefers naming 9 (vote 100).
+  # Summing, 3 gets 30+10=40, 9 gets -50+50+50=50, so 9 gets it.
   def test_cast_vote_dick
     params = {
       :vote => {
@@ -972,22 +977,18 @@ class ObserverControllerTest < Test::Unit::TestCase
     @coprinus_comatus_other_naming.reload
     #
     # Make sure observation was updated right.
-    # Rolf prefers naming 3 (vote 80 -vs- 0).
-    # Mary prefers naming 9 (vote 60 -vs- 100).
-    # Dick now prefers naming 9 (vote 100).
-    # Averaging, 3 gets 70, 9 gets 200/3=67, so 3 keeps it.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
-    #
-    # Make sure preferred_namings are right.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@dick))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
     #
     # Check votes.
     assert_equal(70, @coprinus_comatus_naming.average_vote)
     assert_equal(200/3, @coprinus_comatus_other_naming.average_vote)
     assert_equal(2, @coprinus_comatus_naming.votes.length)
     assert_equal(3, @coprinus_comatus_other_naming.votes.length)
+    #
+    # Make sure preferred_namings are right.
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@dick))
     #
     # If Dick votes on the other as well, then his first vote should
     # get demoted and his preference should change.
@@ -1006,6 +1007,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   # Now have Rolf change his vote on his own naming. (no change in prefs)
+  # Votes: rolf=100/0, mary=60/100, dick=x/x
   def test_cast_vote_rolf_change
     params = {
       :vote => {
@@ -1032,6 +1034,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   # Now have Rolf increase his vote for Mary's. (changes consensus)
+  # Votes: rolf=80/100, mary=60/100, dick=x/x
   def test_cast_vote_rolf_second_greater
     params = {
       :vote => {
@@ -1059,6 +1062,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   # Now have Rolf increase his vote for Mary's insufficiently. (no change)
+  # Votes: rolf=80/40, mary=60/100, dick=x/x
+  # Summing, 3 gets 30+10=40, 9 gets -10+50=40, so tie, so older naming (3) keeps it.
   def test_cast_vote_rolf_second_lesser
     params = {
       :vote => {
@@ -1084,10 +1089,15 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(2, @coprinus_comatus_other_naming.votes.length)
   end
 
-  # Now, have Mary delete her vote against Rolf's naming.  This has the effect
+  # Now, have Mary delete her vote against Rolf's naming.  This NO LONGER has the effect
   # of excluding Rolf's naming from the consensus calculation due to too few votes.
+  # Votes: rolf=80/0, mary=60->x/100, dick=x/x->90
+  # Summing after Dick votes,   3 gets 30+10=40, 9 gets -50+50+40=40, tie, so 3 keeps it.
+  # Summing after Mary deletes, 3 gets 30=30,    9 gets -50+50+40=40, now 9 clearly wins.
   def test_cast_vote_mary
-    @coprinus_comatus_other_naming.change_vote(@dick, 80)
+    @coprinus_comatus_other_naming.change_vote(@dick, 90)
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
+    #
     params = {
       :vote => {
         :value     => "-1",
@@ -1104,7 +1114,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     # Check votes.
     assert_equal(80, @coprinus_comatus_naming.average_vote)
     assert_equal(1, @coprinus_comatus_naming.votes.length)
-    assert_equal(60, @coprinus_comatus_other_naming.average_vote)
+    assert_equal(190/3, @coprinus_comatus_other_naming.average_vote)
     assert_equal(3, @coprinus_comatus_other_naming.votes.length)
     #
     # Make sure observation is changed correctly.
@@ -1112,37 +1122,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     #
     # Make sure preferred_namings are changed.
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
-  end
-
-  # Same thing, but this time don't have Dick give Mary's naming a positive vote.
-  # This means that there will be no positive non-owner votes, so Rolf's naming will
-  # still be considered.
-  def test_cast_vote_mary_two
-    params = {
-      :vote => {
-        :value     => "-1",
-        :naming_id => @coprinus_comatus_naming.id
-      }
-    }
-    post_requires_login(:cast_vote, params, false, "mary")
-    #
-    # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
-    #
-    # Check votes.
-    assert_equal(80, @coprinus_comatus_naming.average_vote)
-    assert_equal(1, @coprinus_comatus_naming.votes.length)
-    assert_equal(50, @coprinus_comatus_other_naming.average_vote)
-    assert_equal(2, @coprinus_comatus_other_naming.votes.length)
-    #
-    # Make sure observation is changed correctly.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
-    #
-    # Make sure preferred_namings are changed.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
   end
 

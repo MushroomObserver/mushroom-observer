@@ -4,7 +4,7 @@ IMAGE_HOME = "<your image dir here>" # Used for finding image directories
 
 require File.join(File.dirname(__FILE__), 'environment_dev')
 
-ActionMailer::Base.server_settings = {
+ActionMailer::Base.smtp_settings = {
 	:address => "<your mail server here>",
 	:domain => "mushroomobserver.org", # Or your domain here
 	:authentication => :login, # Read docs for other authentication protocols

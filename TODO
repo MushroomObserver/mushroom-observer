@@ -14,8 +14,6 @@ using the bulk_name_edit feature.  Gives a different error in my local instance 
 
 Bug - Don't allow names of the form <Genus> section <Section>.  Current they get interpreted as having the species epithet 'section' and an author of <Section> (e.g., Amanita section Lepidella) 
 
-Should calculate consensus by comparing sum of votes for each taxon, instead of average vote for each taxon. (4)
-
 add_name page (from name_index) (4)
 
 Add a 'needs page' (4)
