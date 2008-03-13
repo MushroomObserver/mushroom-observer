@@ -419,3 +419,56 @@ bugs_bunny_two:
   display_name: **__Warnerbros bugs-bunny__** Two
   observation_name: **__Warnerbros bugs-bunny__** Two
   search_name: Warnerbros bugs-bunny Two
+
+russula_brevipes_no_author:
+  id: 31
+  created: 2008-03-10 22:31:25
+  modified: 2008-03-10 22:31:27
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula brevipes
+  display_name: **__Russula brevipes__**
+  observation_name: **__Russula brevipes__**
+  search_name: Russula brevipes
+
+russula_brevipes_author_notes:
+  id: 32
+  created: 2008-03-10 22:33:00
+  modified: 2008-03-10 22:33:05
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula brevipes
+  author: Peck
+  display_name: **__Russula brevipes__** Peck
+  observation_name: **__Russula brevipes__** Peck
+  search_name: Russula brevipes Peck
+  notes: Here are some notes
+
+russula_cremoricolor_no_author_notes:
+  id: 33
+  created: 2008-03-12 20:53:08
+  modified: 2008-03-12 20:53:18
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula cremoricolor
+  display_name: **__Russula cremoricolor__**
+  observation_name: **__Russula cremoricolor__**
+  search_name: Russula cremoricolor
+  notes: Here are some notes
+
+russula_cremoricolor_author_notes:
+  id: 34
+  created: 2008-03-12 20:53:36
+  modified: 2008-03-12 20:53:40
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula cremoricolor
+  author: Earle
+  display_name: **__Russula cremoricolor__** Earle
+  observation_name: **__Russula cremoricolor__** Earle
+  search_name: Russula cremoricolor Earle
+  notes: Some different notes

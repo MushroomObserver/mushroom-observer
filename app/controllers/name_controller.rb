@@ -163,7 +163,8 @@ class NameController < ApplicationController
         text_name = (params[:name][:text_name] || '').strip
         author = (params[:name][:author] || '').strip
         begin
-          (@name, old_name) = find_target_names(params[:id], text_name, author)
+          notes = params[:name][:notes]
+          (@name, old_name) = find_target_names(params[:id], text_name, author, notes)
           if text_name == ''
             text_name = @name.text_name
           end
@@ -181,7 +182,13 @@ class NameController < ApplicationController
           count += 1
           alt_ids = @name.change_text_name(text_name, author, params[:name][:rank])
           @name.citation = params[:name][:citation]
-          @name.notes = params[:name][:notes]
+          if notes == '' && old_name # no new notes given and merge happened
+            notes = @name.notes # @name's notes
+            if notes.nil? or (notes == '')
+              notes = old_name.notes # try old_name's notes
+            end
+          end
+          @name.notes = notes
           unless PastName.check_for_past_name(@name, @user, "Name updated by #{@user.login}")
             unless @name.id
               raise "Update_name called on a name that doesn't exist."
@@ -471,7 +478,7 @@ class NameController < ApplicationController
 
   # Finds the intended name and if another name matching name exists,
   # then ensure it is mergable.
-  def find_target_names(id_str, text_name, author)
+  def find_target_names(id_str, text_name, author, notes)
     id = id_str.to_i
     page_name = Name.find(id)
     other_name = nil
@@ -501,7 +508,9 @@ class NameController < ApplicationController
       elsif other_name.mergable?
         result = [page_name, other_name]
       else
-        raise "The name, %s, is already in use and both %s and %s have notes." % [text_name, page_name.search_name, other_name.search_name]
+        if notes && (notes != '') # If the notes haven't been explicitly cleared...
+          raise "The name, %s, is already in use and both %s and %s have notes." % [text_name, page_name.search_name, other_name.search_name]
+        end
       end
     else
       result = [page_name, other_name]

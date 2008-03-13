@@ -117,7 +117,7 @@ class NameControllerTest < Test::Unit::TestCase
   #  Edit name.
   # ----------------------------
 
-  def test_update_name
+  def test_edit_name_post
     name = @conocybe_filaris
     assert(name.text_name == "Conocybe filaris")
     assert(name.author.nil?)
@@ -144,7 +144,7 @@ class NameControllerTest < Test::Unit::TestCase
   end
 
   # Test name changes in various ways.
-  def test_update_name_deprecated
+  def test_edit_name_deprecated
     name = @lactarius_alpigenes
     assert(name.deprecated)
     params = {
@@ -163,7 +163,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert(name.deprecated)
   end
 
-  def test_update_name_different_user
+  def test_edit_name_different_user
     name = @macrolepiota_rhacodes
     name_owner = name.user
     user = "rolf"
@@ -184,7 +184,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert(name_owner == name.user)
   end
 
-  def test_update_name_simple_merge
+  def test_edit_name_simple_merge
     misspelt_name = @agaricus_campestrus
     correct_name = @agaricus_campestris
     assert_not_equal(misspelt_name, correct_name)
@@ -221,7 +221,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(@agaricus_campestris, correct_obs.name)
   end
 
-  def test_update_name_author_merge
+  def test_edit_name_author_merge
     misspelt_name = @amanita_baccata_borealis
     correct_name = @amanita_baccata_arora
     assert_not_equal(misspelt_name, correct_name)
@@ -253,7 +253,7 @@ class NameControllerTest < Test::Unit::TestCase
 
   # Test that merged names end up as not deprecated if the
   # correct name is not deprecated.
-  def test_update_name_deprecated_merge
+  def test_edit_name_deprecated_merge
     misspelt_name = @lactarius_alpigenes
     assert(misspelt_name.deprecated)
     correct_name = @lactarius_alpinus
@@ -288,7 +288,7 @@ class NameControllerTest < Test::Unit::TestCase
 
   # Test that merged names end up as not deprecated even if the
   # correct name is deprecated but the misspelt name is not deprecated
-  def test_update_name_deprecated2_merge
+  def test_edit_name_deprecated2_merge
     misspelt_name = @lactarius_alpinus
     assert(!misspelt_name.deprecated)
     correct_name = @lactarius_alpigenes
@@ -323,7 +323,73 @@ class NameControllerTest < Test::Unit::TestCase
     assert(past_names+1 == misspelt_name.past_names.size)
   end
 
-  def test_update_name_page_unmergeable
+  # Test merge two names where the matching_name has notes.
+  def test_edit_name_merge_matching_notes
+    target_name = @russula_brevipes_no_author
+    matching_name = @russula_brevipes_author_notes
+    assert_not_equal(target_name, matching_name)
+    assert_equal(target_name.text_name, matching_name.text_name)
+    assert_nil(target_name.author)
+    assert_nil(target_name.notes)
+    assert_not_nil(matching_name.author)
+    notes = matching_name.notes
+    assert_not_nil(matching_name.notes)
+
+    params = {
+      :id => target_name.id,
+      :name => {
+        :text_name => target_name.text_name,
+        :citation => "",
+        :author => target_name.author,
+        :rank => target_name.rank,
+        :notes => ""
+      }
+    }
+    post_requires_login(:edit_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    merged_name = Name.find(matching_name.id)
+    assert(merged_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(target_name.id)
+    end
+    assert_equal(notes, merged_name.notes)
+  end
+
+  # Test merge two names that both start with notes, but the notes are cleared in the input.
+  def test_edit_name_merge_both_notes
+    target_name = @russula_cremoricolor_no_author_notes
+    matching_name = @russula_cremoricolor_author_notes
+    assert_not_equal(target_name, matching_name)
+    assert_equal(target_name.text_name, matching_name.text_name)
+    assert_nil(target_name.author)
+    target_notes = target_name.notes
+    assert_not_nil(target_notes)
+    assert_not_nil(matching_name.author)
+    matching_notes = matching_name.notes
+    assert_not_nil(matching_notes)
+    assert_not_equal(target_notes, matching_notes)
+
+    params = {
+      :id => target_name.id,
+      :name => {
+        :text_name => target_name.text_name,
+        :citation => "",
+        :author => target_name.author,
+        :rank => target_name.rank,
+        :notes => "" # Explicitly clear the notes
+      }
+    }
+    post_requires_login(:edit_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    merged_name = Name.find(matching_name.id)
+    assert(merged_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(target_name.id)
+    end
+    assert_equal(matching_notes, merged_name.notes)
+  end
+
+  def test_edit_name_misspelt_unmergeable
     misspelt_name = @agaricus_campestras
     correct_name = @agaricus_campestris
     correct_text_name = correct_name.text_name
@@ -364,14 +430,15 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(@agaricus_campestras, correct_obs.name)
   end
 
-  def test_update_name_other_unmergeable
+  def test_edit_name_correct_unmergeable
     misspelt_name = @agaricus_campestrus
     correct_name = @agaricus_campestras
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
+    correct_notes = correct_name.notes
     assert_not_equal(misspelt_name, correct_name)
     past_names = correct_name.past_names.size
-    assert(0 == correct_name.version)
+    assert_equal(0, correct_name.version)
     assert_equal(1, misspelt_name.namings.size)
     misspelt_obs_id = misspelt_name.namings[0].observation.id
     assert_equal(1, correct_name.namings.size)
@@ -393,8 +460,9 @@ class NameControllerTest < Test::Unit::TestCase
     end
     correct_name = Name.find(correct_name.id)
     assert(correct_name)
-    assert(1 == correct_name.version)
-    assert(past_names+1 == correct_name.past_names.size)
+    assert_equal(correct_notes, correct_name.notes)
+    assert_equal(0, correct_name.version)
+    assert_equal(past_names, correct_name.past_names.size)
 
     assert_equal(2, correct_name.namings.size)
     misspelt_obs = Observation.find(misspelt_obs_id)
@@ -403,7 +471,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(@agaricus_campestras, correct_obs.name)
   end
 
-  def test_update_name_neither_mergeable
+  def test_edit_name_neither_mergeable
     misspelt_name = @agaricus_campestros
     correct_name = @agaricus_campestras
     correct_text_name = correct_name.text_name
@@ -420,9 +488,9 @@ class NameControllerTest < Test::Unit::TestCase
       :id => misspelt_name.id,
       :name => {
         :text_name => correct_text_name,
-        :author => "",
-        :rank => :Species,
-        :notes => ""
+        :author => misspelt_name.author,
+        :rank => misspelt_name.rank,
+        :notes => misspelt_name.notes
       }
     }
     post_requires_login(:edit_name, params, false)
@@ -439,7 +507,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_not_equal(correct_name.namings[0], misspelt_name.namings[0])
   end
 
-  def test_update_name_page_version_merge
+  def test_edit_name_page_version_merge
     page_name = @coprinellus_micaceus
     other_name = @coprinellus_micaceus_no_author
     assert(page_name.version > other_name.version)
@@ -468,7 +536,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(past_names, merge_name.version)
   end
 
-  def test_update_name_other_version_merge
+  def test_edit_name_other_version_merge
     page_name = @coprinellus_micaceus_no_author
     other_name = @coprinellus_micaceus
     assert(page_name.version < other_name.version)
@@ -497,7 +565,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(past_names, merge_name.version)
   end
 
-  def test_update_name_add_author
+  def test_edit_name_add_author
     name = @strobilurus_diminutivus_no_author
     old_text_name = name.text_name
     new_author = 'Desjardin'
@@ -517,6 +585,39 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(old_text_name, name.text_name)
   end
 
+
+  # Test merge of rename with notes with name without notes
+  def test_edit_name_notes
+    target_name = @russula_brevipes_no_author
+    matching_name = @russula_brevipes_author_notes
+    assert_not_equal(target_name, matching_name)
+    assert_equal(target_name.text_name, matching_name.text_name)
+    assert_nil(target_name.author)
+    assert_nil(target_name.notes)
+    assert_not_nil(matching_name.author)
+    notes = matching_name.notes
+    assert_not_nil(matching_name.notes)
+
+    params = {
+      :id => target_name.id,
+      :name => {
+        :text_name => target_name.text_name,
+        :citation => "",
+        :author => target_name.author,
+        :rank => target_name.rank,
+        :notes => ""
+      }
+    }
+    post_requires_login(:edit_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    merged_name = Name.find(matching_name.id)
+    assert(merged_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(target_name.id)
+    end
+    assert_equal(notes, merged_name.notes)
+  end
+  
   # ----------------------------
   #  Bulk names.
   # ----------------------------

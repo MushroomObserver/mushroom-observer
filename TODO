@@ -1,7 +1,5 @@
 Release each of the following as they get completed:
 
-Bug - Notes can get lost when names get merged.  E.g., Lepista nuda/Clitocybe nuda example (4)
-
 Bug - Observation index doesn't work on the actual site. (8)
 
 Bug - Add: (4)
@@ -15,8 +13,6 @@ using the bulk_name_edit feature.  Gives a different error in my local instance 
 "[ERROR] name#bulk_name_edit (NoMethodError) "undefined method `text_name' for nil:NilClass"
 
 Bug - Don't allow names of the form <Genus> section <Section>.  Current they get interpreted as having the species epithet 'section' and an author of <Section> (e.g., Amanita section Lepidella) 
-
-Bug - Yahoo keeps truncating URLs and throwing errors.  These should get rerouted in some way.
 
 Should calculate consensus by comparing sum of votes for each taxon, instead of average vote for each taxon. (4)
 
