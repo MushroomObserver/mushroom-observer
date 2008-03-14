@@ -17,7 +17,7 @@ class VoteTest < Test::Unit::TestCase
         :modified => now,
         :naming   => @agaricus_campestris_naming,
         :user     => @mary,
-        :value    => 50
+        :value    => 1
     )
     assert vote.save, vote.errors.full_messages.join("; ")
   end
@@ -30,11 +30,11 @@ class VoteTest < Test::Unit::TestCase
     assert_equal @rolf, @coprinus_comatus_naming.user
     assert_equal @rolf, @coprinus_comatus_owner_vote.user
     @coprinus_comatus_owner_vote.modified = Time.now
-    @coprinus_comatus_owner_vote.value = 50
+    @coprinus_comatus_owner_vote.value = 1
     assert @coprinus_comatus_owner_vote.save
     assert @coprinus_comatus_owner_vote.errors.full_messages.join("; ")
     @coprinus_comatus_owner_vote.reload
-    assert_equal 50, @coprinus_comatus_owner_vote.value
+    assert_equal 1, @coprinus_comatus_owner_vote.value
   end
 
   # Make sure it fails if we screw up.
