@@ -166,7 +166,7 @@ class Naming < ActiveRecord::Base
   # Returns true if no one has.
   def editable?
     for v in self.votes
-      return false if v.user_id != self.user_id and v.value > 50
+      return false if v.user_id != self.user_id and v.value > 0
     end
     return true
   end
@@ -176,7 +176,7 @@ class Naming < ActiveRecord::Base
   # Returns true if no one has.
   def deletable?
     for v in self.votes
-      if v.user_id != self.user_id and v.value > 50
+      if v.user_id != self.user_id and v.value > 0
         return false if self.is_users_favorite?(v.user)
       end
     end
@@ -199,9 +199,9 @@ class Naming < ActiveRecord::Base
       votes = user.votes.select {|v| v.naming.observation == obs}
       max = 0
       for vote in votes
-        max = vote.value if vote.value > 50 && vote.value > max
+        max = vote.value if vote.value > 0 && vote.value > max
       end
-      if max > 50
+      if max > 0
         for vote in votes
           return true if vote.naming == self && vote.value == max
         end
