@@ -110,9 +110,11 @@ class ApplicationController < ActionController::Base
   include LoginSystem
 
   around_filter :set_locale
+  # ---AUTOLOGIN---
+  # before_filter :autologin
 
   before_filter(:disable_link_prefetching, :only => [
-     # account_controller methods
+    # account_controller methods
     :logout_user, :delete, :signup,
 
     # observer_controller methods

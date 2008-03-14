@@ -155,11 +155,7 @@
                 <td width="100%" valign="top" class="main">
                     <div style="padding:10px">
                         <%
-                        if @search.nil?
-                            pattern = session[:pattern]
-                        else
-                            pattern = @search.pattern
-                        end
+                        pattern = session[:pattern]
                         form_tag(:action => 'pattern_search',
                                  :controller => 'observer', :id => @comment) do %>
                           <%= :app_find.l %>: <%= text_field("search", "pattern", :size => 30, :value => pattern)%>

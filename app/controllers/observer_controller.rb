@@ -4,10 +4,6 @@
 require 'find'
 require 'ftools'
 
-class Search
-  attr_accessor :pattern
-end
-
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [:all_names,
                                                     :ask_webmaster_question,
@@ -117,9 +113,7 @@ class ObserverController < ApplicationController
     if pattern.nil?
       pattern = ''
     end
-    # Setup the search string for the next page
-    @search = Search.new
-    @search.pattern = pattern
+    # [params[:commit] == nil means observation_search -- don't we want to save that???  -JPH 20080313]
     if params[:commit]
       session[:search_type] = params[:commit]
     end

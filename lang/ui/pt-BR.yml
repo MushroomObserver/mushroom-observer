@@ -427,6 +427,7 @@ login_login: Login
 login_no_account: I don't have an account.  "Create a new account":%s.
 login_password: Password
 login_please_login: Please login
+login_remember_me: Remember me at this computer.
 login_user: User name
 
 
@@ -479,8 +480,10 @@ no_questions_note: >
 # account/prefs
 prefs_alt_col_colors: Alternate column colors.
 prefs_alt_row_colors: Alternate row colors.
+prefs_autologin: Auto-login
 prefs_button: Save Prefs
 prefs_columns: columns
+prefs_disabled: Disabled
 prefs_email: Email address
 prefs_email_comments: Please send me email notifications when other users post comments about my observations.
 prefs_email_commercial: Please send me email if someone is interested in using an image of mine for commercial purposes.
@@ -494,6 +497,7 @@ prefs_email_note: >
 
 prefs_email_prefs: Email preferences
 prefs_email_questions: Please allow others to email me questions about my observations.
+prefs_enabled: Enabled
 prefs_layout_title: List page layout
 prefs_license: Default License
 prefs_license_note: Select default "license":%s you want for new images

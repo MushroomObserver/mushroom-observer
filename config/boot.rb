@@ -13,39 +13,43 @@ if File.directory?("#{RAILS_ROOT}/vendor/rails")
   require "#{RAILS_ROOT}/vendor/rails/railties/lib/initializer"
 else
   require 'rubygems'
+  begin
 
 # -----------------------------------------------------------------------------
 #  I stole this from Rails 2.0.2 boot.rb.  It lets us choose which version of
 #  Rails to run from the environment.rb configuration file.  This is critical
 #  if you have multiple versions of Rails installed on your system!
 # -----------------------------------------------------------------------------
+    environment_without_comments = IO.readlines(File.dirname(__FILE__) + '/environment.rb').reject { |l| l =~ /^#/ }.join
+    environment_without_comments =~ /[^#]RAILS_GEM_VERSION = '([\d.]+)'/
+    rails_gem_version = $1
 
-  environment_without_comments = IO.readlines(File.dirname(__FILE__) + '/environment.rb').reject { |l| l =~ /^#/ }.join
-  environment_without_comments =~ /[^#]RAILS_GEM_VERSION = '([\d.]+)'/
-  rails_gem_version = $1
+    if version = defined?(RAILS_GEM_VERSION) ? RAILS_GEM_VERSION : rails_gem_version
+      # Asking for 1.1.6 will give you 1.1.6.5206, if available -- makes it easier to use beta gems
+      rails_gem = Gem.cache.search('rails', "~>#{version}.0").sort_by { |g| g.version.version }.last
 
-  if version = defined?(RAILS_GEM_VERSION) ? RAILS_GEM_VERSION : rails_gem_version
-    # Asking for 1.1.6 will give you 1.1.6.5206, if available -- makes it easier to use beta gems
-    rails_gem = Gem.cache.search('rails', "~>#{version}.0").sort_by { |g| g.version.version }.last
-
-    if rails_gem
-      gem "rails", "=#{rails_gem.version.version}"
-      require rails_gem.full_gem_path + '/lib/initializer'
-    else
-      STDERR.puts %(Cannot find gem for Rails ~>#{version}.0:
+      if rails_gem
+        gem "rails", "=#{rails_gem.version.version}"
+        require rails_gem.full_gem_path + '/lib/initializer'
+      else
+        STDERR.puts %(Cannot find gem for Rails ~>#{version}.0:
   Install the missing gem with 'gem install -v=#{version} rails', or
   change environment.rb to define RAILS_GEM_VERSION with your desired version.
 )
-      exit 1
+        exit 1
+      end
+    else
+      gem "rails"
+      require 'initializer'
     end
-  else
-    gem "rails"
-    require 'initializer'
-  end
-
 # -----------------------------------------------------------------------------
 #  </thievery>
 # -----------------------------------------------------------------------------
+
+  # Since the above seems to fail on Nathan's old setup...
+  rescue NoMethodError
+    require 'initializer'
+  end
 end
 
 Rails::Initializer.run(:set_load_path)

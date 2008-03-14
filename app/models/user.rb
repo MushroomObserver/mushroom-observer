@@ -16,6 +16,7 @@ require 'digest/sha1'
 #   unique_text_name()              Return "First Last (login)".
 #   legal_name()                    Return "First Last".
 #   find_theme                      Return preferred theme.
+#   remember_me?                    Does user want us to automatically log them in via cookie?
 #
 # Protected:
 #   User.sha1(string)               Encrypt a string and return it.
@@ -87,6 +88,10 @@ class User < ActiveRecord::Base
     else
       self.login
     end
+  end
+
+  def remember_me?
+    self.remember_me
   end
 
   protected

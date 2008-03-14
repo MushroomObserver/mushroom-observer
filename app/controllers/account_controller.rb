@@ -1,17 +1,24 @@
 class AccountController < ApplicationController
-  # model   :user
 
   def login
     case request.method
       when :get
         @login = ""
+        @remember = true
       when :post
         user = User.authenticate(params['user_login'], params['user_password'])
+        @remember = params['user'] && params['user']['remember_me'] == "1"
         if session['user'] = user
           logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
           flash_notice "Login successful."
           user.last_login = Time.now
           user.save
+          # ---AUTOLOGIN---
+          # if @remember && user.autologin
+          #   set_autologin_cookie(user)
+          # else
+          #   clear_autologin_cookie
+          # end
           flash[:params] = params
           redirect_back_or_default :action => "welcome"
         else
@@ -115,6 +122,8 @@ class AccountController < ApplicationController
           @user.comment_email = params['user']['comment_email']
           @user.commercial_email = params['user']['commercial_email']
           @user.question_email = params['user']['question_email']
+          # ---AUTOLOGIN---
+          # @user.autologin = params['user']['autologin'] == "true"
           @user.change_theme(params['user']['theme'])
           @user.change_rows(params['user']['rows'])
           @user.change_columns(params['user']['columns'])
@@ -136,6 +145,12 @@ class AccountController < ApplicationController
             flash_object_errors(@user)
           else
             flash_notice "Preferences updated."
+            # ---AUTOLOGIN---
+            # if @user.autologin
+            #   set_autologin_cookie(@user)
+            # else
+            #   clear_autologin_cookie
+            # end
             redirect_back_or_default :action => "welcome"
           end
       end
@@ -157,7 +172,9 @@ class AccountController < ApplicationController
   end
 
   def logout_user
-    session['user'] = nil
+    @user = session['user'] = nil
+    # ---AUTOLOGIN---
+    # clear_autologin_cookie
   end
 
   def welcome
