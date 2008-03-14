@@ -477,7 +477,7 @@ class NameController < ApplicationController
 ################################################################################
 
   # Finds the intended name and if another name matching name exists,
-  # then ensure it is mergable.
+  # then ensure it is mergable.  Returns [target_name, other_name]
   def find_target_names(id_str, text_name, author, notes)
     id = id_str.to_i
     page_name = Name.find(id)
@@ -494,30 +494,26 @@ class NameController < ApplicationController
         break
       end
     end
-    if other_name
-      result = [other_name, page_name]
-      if page_name.mergable?
-        if other_name.mergable? # Need some other criterion
-          if other_name.deprecated and !page_name.deprecated # Prefer valid names
-            result = [page_name, other_name]
-          elsif (other_name.deprecated == page_name.deprecated) and (other_name.version < page_name.version)
-            # Prefer longer histories
-            result = [page_name, other_name]
-          end
+    result = [page_name, other_name] # Default
+    if other_name # Is there a reason to prefer other_name?
+      if other_name.has_notes?
+        # If other_name's notes are going to get overwritten throw an error
+        if notes && (notes != '') && (other_name.notes != notes)
+          raise "The name, %s, is already in use and %s has notes" % [text_name, other_name.search_name]
         end
-      elsif other_name.mergable?
-        result = [page_name, other_name]
-      else
-        if notes && (notes != '') # If the notes haven't been explicitly cleared...
-          raise "The name, %s, is already in use and both %s and %s have notes." % [text_name, page_name.search_name, other_name.search_name]
+        result = [other_name, page_name]
+      elsif !page_name.has_notes?
+        # Neither has notes, so we need another criterion
+        if page_name.deprecated and !other_name.deprecated # Prefer valid names
+          result = [other_name, page_name]
+        elsif (other_name.deprecated == page_name.deprecated) and (other_name.version >= page_name.version)
+          result = [other_name, page_name]
         end
       end
-    else
-      result = [page_name, other_name]
     end
     result
   end
-
+  
   def deprecate_synonym(name, user)
     unless name.deprecated
       begin

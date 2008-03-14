@@ -75,7 +75,7 @@
 #   merge_synonyms
 #
 # Random Helpers and Others:
-#   mergable?                   Does this name have any notes?
+#   has_notes?                  Does this name have any notes?
 #   status                      Is this name deprecated?
 #   prepend_notes               Add notes at the top of the existing notes.
 #   Name.format_string          (used all over this file)
@@ -713,10 +713,9 @@ class Name < ActiveRecord::Base
 
 ########################################
 
-  # Can we merge this name into another?  Only if it has no notes.
   # Returns boolean.
-  def mergable?()
-    self.notes.nil? || (self.notes == '')
+  def has_notes?()
+    self.notes && (self.notes != '')
   end
 
   # Is this name deprecated?

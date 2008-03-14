@@ -507,6 +507,33 @@ class NameControllerTest < Test::Unit::TestCase
     assert_not_equal(correct_name.namings[0], misspelt_name.namings[0])
   end
 
+  def test_edit_name_correct_unmergable_with_notes # Should 'fail'
+    misspelt_name = @russula_brevipes_no_author # Shouldn't have notes
+    correct_name = @russula_brevipes_author_notes # Should have notes
+    correct_text_name = correct_name.text_name
+    correct_author = correct_name.author
+    assert_not_equal(misspelt_name, correct_name)
+    assert_nil(misspelt_name.notes)
+    assert(correct_name.notes)
+
+    params = {
+      :id => misspelt_name.id,
+      :name => {
+        :text_name => correct_text_name,
+        :author => misspelt_name.author,
+        :rank => misspelt_name.rank,
+        :notes => "Some new notes"
+      }
+    }
+    post_requires_login(:edit_name, params, false)
+    assert_response :success
+    assert_template 'edit_name'
+    misspelt_name = Name.find(misspelt_name.id)
+    assert(misspelt_name)
+    correct_name = Name.find(correct_name.id)
+    assert(correct_name)
+  end
+
   def test_edit_name_page_version_merge
     page_name = @coprinellus_micaceus
     other_name = @coprinellus_micaceus_no_author
