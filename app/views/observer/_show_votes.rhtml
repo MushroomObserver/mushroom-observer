@@ -11,7 +11,7 @@
     val = table[str][:value]
     num = table[str][:num]
     users = table[str][:users] %>
-    <% if val >= 0 %>
+    <% if val != 0 %>
       <tr>
         <td><%= lnbsp(str) %></td>
         <td>&nbsp;</td>
@@ -25,10 +25,10 @@
     <td colspan="5"><hr/></td>
   </tr>
   <tr>
-    <td><%= :show_votes_average.l %></td>
+    <td><%= :show_votes_total.l %></td>
     <td>&nbsp;</td>
     <td align="center" colspan="3">
-      <%= sprintf("%.1f", @naming.average_vote) %>
+      <%= @naming.vote_sum %>
     </td>
   </tr>
 </table>

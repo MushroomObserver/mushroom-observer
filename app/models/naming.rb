@@ -55,6 +55,14 @@ class Naming < ActiveRecord::Base
     "%s (%s)" % [str, self.id]
   end
 
+  def vote_sum
+    sum = 0
+    for v in self.votes
+      sum += v.value
+    end
+    return sum
+  end
+  
   # Average all the votes.
   # Returns integer.  (Use Vote.confidence/agreement() to interpret.)
   def average_vote

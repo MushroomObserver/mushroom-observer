@@ -164,7 +164,7 @@ class Observation < ActiveRecord::Base
         user_vote = taxon_votes[taxon_id][user_id]
         val = user_vote[0]
         wgt = user_vote[1]
-        vote[0] += (val-50) * wgt
+        vote[0] += val * wgt
         vote[1] += wgt
       end
     end
@@ -227,7 +227,7 @@ class Observation < ActiveRecord::Base
             user_vote = name_votes[name_id][user_id]
             val = user_vote[0]
             wgt = user_vote[1]
-            vote[0] += (val-50) * wgt
+            vote[0] += val * wgt
             vote[1] += wgt
           end
         end

@@ -27,32 +27,32 @@ class Vote < ActiveRecord::Base
   belongs_to :naming
 
   CONFIDENCE_VALS = [
-    [ :vote_confidence_100, 100 ],
-    [ :vote_confidence_80,   80 ],
-    [ :vote_confidence_60,   60 ],
-    [ :vote_confidence_40,   40 ],
-    [ :vote_confidence_20,   20 ],
-    [ :vote_confidence_0,     0 ]
+    [ :vote_confidence_100,  3 ],
+    [ :vote_confidence_80,   2 ],
+    [ :vote_confidence_60,   1 ],
+    [ :vote_confidence_40,  -1 ],
+    [ :vote_confidence_20,  -2 ],
+    [ :vote_confidence_0,   -3 ]
   ]
 
   AGREEMENT_VALS = [
-    [ :vote_no_opinion,     -1 ],
-    [ :vote_agreement_100, 100 ],
-    [ :vote_agreement_80,   80 ],
-    [ :vote_agreement_60,   60 ],
-    [ :vote_agreement_40,   40 ],
-    [ :vote_agreement_20,   20 ],
-    [ :vote_agreement_0,     0 ]
+    [ :vote_no_opinion,     0 ],
+    [ :vote_agreement_100,  3 ],
+    [ :vote_agreement_80,   2 ],
+    [ :vote_agreement_60,   1 ],
+    [ :vote_agreement_40,  -1 ],
+    [ :vote_agreement_20,  -2 ],
+    [ :vote_agreement_0,   -3 ]
   ]
 
   # Various useful vote values.
-  DELETE_VOTE    = -1
-  MINIMUM_VOTE   = 0
-  MIN_NEG_VOTE   = 40
-  AVERAGE_VOTE   = 50
-  MIN_POS_VOTE   = 60
-  NEXT_BEST_VOTE = 80
-  MAXIMUM_VOTE   = 100
+  DELETE_VOTE    = 0
+  MINIMUM_VOTE   = -3
+  MIN_NEG_VOTE   = -2
+  AVERAGE_VOTE   = -1
+  MIN_POS_VOTE   =  1
+  NEXT_BEST_VOTE =  2
+  MAXIMUM_VOTE   =  3
 
   # External access to the constants above.
   def self.delete_vote;    DELETE_VOTE;    end # This is used to mean "delete my vote". 
@@ -79,7 +79,7 @@ class Vote < ActiveRecord::Base
   def self.lookup_value(val, list)
     last_pair = nil
     for pair in list
-      if pair[1] >= 0
+      if pair[1] != 0
         if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
           return last_pair[0]
         end

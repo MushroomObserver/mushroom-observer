@@ -57,7 +57,7 @@
 
             <td width="20">&nbsp;</td>
             <% num = naming.votes.size
-              txt = num == 0 ? "" : "%d%%" % naming.average_vote
+              txt = num == 0 ? "" : "#{naming.vote_sum}"
               nvotes = naming.votes.length %>
             <td>
               <%

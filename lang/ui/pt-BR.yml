@@ -972,6 +972,7 @@ show_votes_score: Score
 show_votes_users: User
 show_votes_average: Average
 show_votes_close: Close
+show_votes_total: Total
 
 
 # observer/show_name
