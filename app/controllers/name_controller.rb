@@ -205,7 +205,9 @@ class NameController < ApplicationController
               g.modified = current_time
               g.save
             end
-            old_name.log("#{old_search_name} merged with #{@name.search_name}")
+            if @user.id != 0
+              old_name.log("#{old_search_name} merged with #{@name.search_name}")
+            end
             old_name.destroy
           end
         rescue RuntimeError => err
