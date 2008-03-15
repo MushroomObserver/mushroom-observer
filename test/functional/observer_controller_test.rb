@@ -119,13 +119,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :pattern_search, {:commit => nil, :search => {:pattern => "12"}}
     assert_redirected_to(:controller => "observer", :action => "observation_search")
     assert_equal("12", @request.session[:pattern])
-    get_with_dump :pattern_search, {:commit => :app_images_find.l, :search => {:pattern => "34"}}
+    get_with_dump :pattern_search, {:commit => 'Images', :search => {:pattern => "34"}}
     assert_redirected_to(:controller => "image", :action => "image_search")
     assert_equal("34", @request.session[:pattern])
-    get_with_dump :pattern_search, {:commit => :app_names_find.l, :search => {:pattern => "56"}}
+    get_with_dump :pattern_search, {:commit => 'Names', :search => {:pattern => "56"}}
     assert_redirected_to(:controller => "name", :action => "name_search")
     assert_equal("56", @request.session[:pattern])
-    get_with_dump :pattern_search, {:commit => :app_locations_find.l, :search => {:pattern => "78"}}
+    get_with_dump :pattern_search, {:commit => 'Locations', :search => {:pattern => "78"}}
     assert_redirected_to(:controller => "location", :action => "list_place_names", :pattern => "78")
   end
 

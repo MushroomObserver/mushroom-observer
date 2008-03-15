@@ -19,7 +19,7 @@ class CurrentTest < Test::Unit::TestCase
   fixtures :licenses
 
   def setup
-    @controller = NameController.new
+    @controller = ObserverController.new
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
   end
