@@ -311,7 +311,7 @@ class ObserverController < ApplicationController
         vote = naming.votes.find(:first,
           :conditions => ['user_id = ?', @user.id])
         if vote.nil?
-          vote = Vote.new(:value => -1)
+          vote = Vote.new(:value => 0)
         end
         @votes[naming.id] = vote
       end
