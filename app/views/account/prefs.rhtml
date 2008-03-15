@@ -59,7 +59,7 @@
   <%= form.password_field("password", :value => '', :size => 30) %><br/><br/>
   <label for="user_password_confirmation"><b><%= :prefs_password_confirm.l %>:</b></label><br/>
   <%= form.password_field("password_confirmation", :size => 30) %><br/><br/>
-  <% if 0 # ---AUTOLOGIN--- %>
+  <% if false # ---AUTOLOGIN--- %>
     <label for="autologin"><%= :prefs_autologin.l %></label>
     <%= form.select(:autologin, [[:prefs_enabled.l, true], [:prefs_disabled.l, false]]) %><br/>
   <% end %>

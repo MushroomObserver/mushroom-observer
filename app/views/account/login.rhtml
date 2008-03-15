@@ -9,7 +9,7 @@
     <label for="user_password"><%= :login_password.l %>:</label><br/>
     <input type="password" name="user_password" id="user_password" size="30"/><br/><br/>
 
-    <% if 0 # ---AUTOLOGIN--- %>
+    <% if false # ---AUTOLOGIN--- %>
       <%= check_box('user', 'remember_me', :checked => @remember) %>
       <label for="user_remember_me"><%= :login_remember_me.l %></label><br/><br/>
     <% end %>
