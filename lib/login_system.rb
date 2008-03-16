@@ -31,38 +31,6 @@ module LoginSystem
     true
   end
 
-  # ---AUTOLOGIN---
-  # # Filter that should run before everything else.  Checks for auto-login cookie.
-  # def autologin
-  #   if @user = session['user']
-  #     # Make sure we delete cookie if user has disabled autologin.
-  #     clear_autologin_cookie if !@user.autologin
-  #
-  #   # Log in if cookie is valid, and autologin is enabled.
-  #   elsif (cookie = cookies[:mo_user])  &&
-  #         (split = cookie.split("_")) &&
-  #         (user = User.find(:first, :conditions => ['id = ? and password = ?', split[0], split[1]])) &&
-  #         (user.autologin)
-  #     @user = session['user'] = user
-  #
-  #   # Delete invalid or blocked or disabled cookie.
-  #   else
-  #     @user = session['user'] = nil
-  #     clear_autologin_cookie
-  #   end
-  # end
-  #
-  # # Store and remove auto-login cookie.
-  # def set_autologin_cookie(user)
-  #   cookies[:mo_user] = {
-  #     :value => "#{user.id}_#{user.password}",
-  #     :expires => 1.month.from_now
-  #   }
-  # end
-  # def clear_autologin_cookie
-  #   cookies.delete :mo_user
-  # end
-
   # login_required filter. add
   #
   #   before_filter :login_required

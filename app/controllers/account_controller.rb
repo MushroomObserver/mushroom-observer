@@ -1,4 +1,5 @@
 class AccountController < ApplicationController
+  before_filter :login_required, :only => :test_autologin
 
   def login
     case request.method
@@ -14,11 +15,11 @@ class AccountController < ApplicationController
           user.last_login = Time.now
           user.save
           # ---AUTOLOGIN---
-          # if @remember && user.autologin
-          #   set_autologin_cookie(user)
-          # else
-          #   clear_autologin_cookie
-          # end
+          if @remember
+            set_autologin_cookie(user)
+          else
+            clear_autologin_cookie
+          end
           flash[:params] = params
           redirect_back_or_default :action => "welcome"
         else
@@ -122,8 +123,6 @@ class AccountController < ApplicationController
           @user.comment_email = params['user']['comment_email']
           @user.commercial_email = params['user']['commercial_email']
           @user.question_email = params['user']['question_email']
-          # ---AUTOLOGIN---
-          # @user.autologin = params['user']['autologin'] == "true"
           @user.change_theme(params['user']['theme'])
           @user.change_rows(params['user']['rows'])
           @user.change_columns(params['user']['columns'])
@@ -145,12 +144,6 @@ class AccountController < ApplicationController
             flash_object_errors(@user)
           else
             flash_notice "Preferences updated."
-            # ---AUTOLOGIN---
-            # if @user.autologin
-            #   set_autologin_cookie(@user)
-            # else
-            #   clear_autologin_cookie
-            # end
             redirect_back_or_default :action => "welcome"
           end
       end
@@ -174,7 +167,7 @@ class AccountController < ApplicationController
   def logout_user
     @user = session['user'] = nil
     # ---AUTOLOGIN---
-    # clear_autologin_cookie
+    clear_autologin_cookie
   end
 
   def welcome

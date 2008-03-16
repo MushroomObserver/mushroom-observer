@@ -87,5 +87,39 @@ class AccountControllerTest < Test::Unit::TestCase
 #     assert(!@response.has_session_object?("user"))
 # 
 #   end
-  
+
+  # Test autologin feature.
+  def test_autologin
+    #
+    # First make sure test page that requires login fails without autologin cookie.
+    get :test_autologin
+    assert_response :redirect
+    #
+    # Make sure cookie is not set if clear remember_me box in login.
+    post :login, {
+      "user_login"    => "rolf",
+      "user_password" => "testpassword",
+      :user => { :remember_me => "" }
+    }
+    assert session['user']
+    assert !cookies[:mo_user]
+    session['user'] = nil
+    get :test_autologin
+    assert_response :redirect
+    #
+    # Now clear session and try again with remember_me box set.
+    post :login, {
+      "user_login"    => "rolf",
+      "user_password" => "testpassword",
+      :user => { :remember_me => "1" }
+    }
+    assert session['user']
+    assert cookies['mo_user']
+    #
+    # And make sure autlogin will pick that cookie up and do its thing.
+    session['user'] = nil
+    @request.cookies['mo_user'] = cookies['mo_user']
+    get :test_autologin
+    assert_response :success
+  end
 end

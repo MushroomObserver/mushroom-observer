@@ -188,7 +188,6 @@ ActiveRecord::Schema.define(:version => 26) do
     t.column "license_id",        :integer,                :default => 3,    :null => false
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
-    t.column "autologin",         :boolean,                :default => true, :null => false
   end
 
   create_table "votes", :force => true do |t|

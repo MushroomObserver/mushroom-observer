@@ -111,7 +111,7 @@ class ApplicationController < ActionController::Base
 
   around_filter :set_locale
   # ---AUTOLOGIN---
-  # before_filter :autologin
+  before_filter :autologin
 
   before_filter(:disable_link_prefetching, :only => [
     # account_controller methods
@@ -120,6 +120,49 @@ class ApplicationController < ActionController::Base
     # observer_controller methods
     :destroy_observation, :destroy_image,
     :destroy_comment, :destroy_species_list, :upload_image])
+
+  # ----------------------------
+  #  Autologin stuff.
+  # ----------------------------
+
+  # Filter that should run before everything else.  Checks for auto-login cookie.
+  def autologin
+    if @user = session['user']
+      # Do nothing if already logged in: if user asked us to remember him the
+      # cookie will already be there, if not then we want to leave it out.
+
+    # Log in if cookie is valid, and autologin is enabled.
+    elsif (cookie = cookies[:mo_user])  &&
+          (split = cookie.split("_")) &&
+          (user = User.find(:first, :conditions => ['id = ? and password = ?', split[0], split[1]]))
+      @user = session['user'] = user
+
+      # Reset cookie to push expiry forward.  This way it will continue to
+      # remember the user until they are inactive for over a month.  (Else
+      # they'd have to login every month, no matter how often they login.)
+      set_autologin_cookie(user)
+
+    # Delete invalid cookies.
+    else
+      clear_autologin_cookie
+    end
+  end
+
+  # Store and remove auto-login cookie.
+  def set_autologin_cookie(user)
+    cookies[:mo_user] = {
+      :value => "#{user.id}_#{user.password}",
+      :expires => 1.month.from_now
+    }
+  end
+
+  def clear_autologin_cookie
+    cookies.delete :mo_user
+  end
+
+  # ----------------------------
+  #  End autologin stuff.
+  # ----------------------------
 
   def make_table_row(list)
     result = list.map {|x| "<td>#{x}</td>"}
