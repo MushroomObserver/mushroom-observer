@@ -41,8 +41,11 @@ class NameController < ApplicationController
 
   # Paginate and select name index data in prep for name_index view.
   # Input:   params['page'], params['letter'], @name_data
-  # Outputs: @letters, @name_data, @name_subset, @pages
+  # Outputs: @letter, @letters, @name_data, @name_subset, @page, @pages
   def name_index_helper
+    @letter = params[:letter]
+    @page = params[:page]
+
     # Gather hash of letters that actually have names.
     @letters = {}
     for d in @name_data
@@ -54,8 +57,8 @@ class NameController < ApplicationController
     end
 
     # If user's clicked on a letter, remove all names above that letter.
-    if l = params[:letter]
-      @name_data = @name_data.select {|d| d['first_letter'][0] >= l[0]}
+    if @letter
+      @name_data = @name_data.select {|d| d['first_letter'][0] >= @letter[0]}
     end
 
     # Paginate the remaining names_.

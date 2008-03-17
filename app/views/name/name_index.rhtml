@@ -32,5 +32,6 @@
 <% end %>
 
 <br/>
-<div class="pagination"><%= pagination_links(@pages) %></div>
+<% params = @letter ? { :letter => @letter } : {} %>
+<div class="pagination"><%= pagination_links(@pages, :params => params) %></div>
 
