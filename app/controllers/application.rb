@@ -66,6 +66,7 @@ end
 #
 #  make_table_row(list)         Turn list into "<tr><td>x</td>...</tr>".
 #  paginate_by_sql(model, ...)  Same as paginate, but works on lower level.
+#  paginate_array(list, per)    Just paginate pre-existing array.
 #  field_search(fields, pat)    Creates sql query: any of a list of fields like a pattern?
 #  query_ids(query)             Gets list of ids given sql query.
 #  disable_link_prefetching     Prevents browser from prefetching destroy methods.
@@ -228,6 +229,15 @@ class ApplicationController < ActionController::Base
     objects = model.find_by_sql_with_limit(sql,
          object_pages.current.to_sql[1], per_page)
     return [object_pages, objects]
+  end
+
+  # Paginate a plain old list of stuff that you've already populated.
+  # Returns Paginator object (which will draw the page number links)
+  # and the subset of the array that the user is currently viewing.
+  def paginate_array(list, per_page)
+    page  = params['page'] ? params['page'].to_i : 1
+    pages = Paginator.new self, list.length, per_page, page
+    return [pages, list[(page-1)*per_page, per_page]]
   end
 
   def field_search(fields, sql_pattern)

@@ -9,9 +9,9 @@
 #    show_name          Show info about name.
 #    show_past_name     Show past versions of name info.
 #    edit_name          Edit name info.
-#    change_synonyms    
-#    deprecate_name     
-#    approve_name       
+#    change_synonyms
+#    deprecate_name
+#    approve_name
 #    bulk_name_edit     Create/synonymize/deprecate a list of names.
 #    map                Show distribution map.
 #
@@ -39,14 +39,42 @@ class NameController < ApplicationController
     :show_past_name
   ]
 
+  # Paginate and select name index data in prep for name_index view.
+  # Input:   params['page'], params['letter'], @name_data
+  # Outputs: @letters, @name_data, @name_subset, @pages
+  def name_index_helper
+    # Gather hash of letters that actually have names.
+    @letters = {}
+    for d in @name_data
+      match = d['display_name'].match(/([A-Z])/)
+      if match
+        l = d['first_letter'] = match[1]
+        @letters[l] = true
+      end
+    end
+
+    # If user's clicked on a letter, remove all names above that letter.
+    if l = params[:letter]
+      @name_data = @name_data.select {|d| d['first_letter'][0] >= l[0]}
+    end
+
+    # Paginate the remaining names_.
+    @pages, @name_subset = paginate_array(@name_data, 100)
+  end
+
   # List all the names
   def name_index
     store_location
     session[:list_members] = nil
     session[:new_names] = nil
     session[:checklist_source] = :all_names
-    @name_data = Name.connection.select_all("select id, display_name from names" +
-                                            " order by text_name asc, author asc")
+    @title = "Name Index"
+    @name_data = Name.connection.select_all %(
+      SELECT id, display_name
+      FROM names
+      ORDER BY text_name asc, author asc
+    )
+    name_index_helper
   end
 
   # Just list the names that have observations
@@ -56,9 +84,13 @@ class NameController < ApplicationController
     session[:new_names] = nil
     session[:checklist_source] = :all_observations
     @title = "Observation Index"
-    @name_data = Name.connection.select_all("select distinct names.id, names.display_name from names, observations" +
-                                            " where observations.name_id = names.id" +
-                                            " order by names.text_name asc, author asc")
+    @name_data = Name.connection.select_all %(
+      SELECT distinct names.id, names.display_name
+      FROM names, observations
+      WHERE observations.name_id = names.id
+      ORDER BY names.text_name asc, author asc
+    )
+    name_index_helper
     render :action => 'name_index'
   end
 
@@ -77,11 +109,14 @@ class NameController < ApplicationController
     @pattern = session[:pattern]
     @title = "Names matching '#{@pattern}'"
     sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["names.search_name", "names.notes", "names.citation"], sql_pattern)
+    conditions = field_search(["search_name", "notes", "citation"], sql_pattern)
     session[:checklist_source] = :nothing
-    @name_data = Name.connection.select_all("select distinct names.id, " +
-      "names.display_name from names where #{conditions} " +
-      "order by names.text_name asc, author asc")
+    @name_data = Name.connection.select_all %(
+      SELECT distinct id, display_name
+      FROM names
+      WHERE #{conditions}
+      ORDER BY text_name asc, author asc
+    )
     len = @name_data.length
     if len == 1
       redirect_to :action => 'show_name', :id => @name_data[0]['id']
@@ -89,6 +124,7 @@ class NameController < ApplicationController
       if len == 0
         flash_warning "No names matching '#{@pattern}' found."
       end
+      name_index_helper
       render :action => 'name_index'
     end
   end
@@ -109,15 +145,21 @@ class NameController < ApplicationController
       @name = Name.find(params[:id])
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
       @children = @name.children
-      query = "select o.id, o.when, o.modified, o.thumb_image_id, o.where,
+
+      # Note, we need this second WHERE clause to picks up observations missing
+      # namings altogether -- this applies only to fungi sp's.
+      fungi_sp = params[:id] == 1 ? "or (o.name_id = %s and n.id = o.name_id and u.id = o.user_id)" : ""
+
+      query = %(
+        SELECT o.id, o.when, o.thumb_image_id, o.where,
           o.location_id, u.name, u.login, o.user_id, n.observation_name
-        from observations o, users u, names n, namings g
-        where n.id = %s and o.user_id = u.id and n.id = g.name_id and o.id = g.observation_id
-        order by o.when desc"
+        FROM observations o, users u, names n, namings g
+        WHERE (g.name_id = %s and o.id = g.observation_id and
+          n.id = o.name_id and u.id = o.user_id) #{fungi_sp}
+        ORDER BY o.when desc
+      )
 
       @data = Observation.connection.select_all(query % params[:id])
-      observation_ids = []
-      @data.each {|d| observation_ids.push(d["id"].to_i)}
 
       @synonym_data = []
       synonym = @name.synonym
@@ -125,9 +167,24 @@ class NameController < ApplicationController
         for n in synonym.names
           if n != @name
             data = Observation.connection.select_all(query % n.id)
-            data.each {|d| observation_ids.push(d["id"].to_i)}
             @synonym_data += data
           end
+        end
+      end
+
+      observation_ids = []
+      done_observation = {}
+      @user = session['user']
+      for d in @data+@synonym_data
+        id = d["id"].to_i
+        observation_ids.push(id)
+        #
+        # By default we query the consensus name above, but if the user
+        # is logged in we need to redo it and calc the preferred name for each.
+        # Note that there's no reason to do duplicate observations.
+        if @user && !done_observation[id]
+          d["observation_name"] = Observation.find(id).preferred_name(@user).observation_name
+          done_observation[id] = true
         end
       end
 
@@ -238,7 +295,7 @@ class NameController < ApplicationController
         sorter.sort_names(list)
         sorter.append_approved_synonyms(params[:approved_synonyms])
         # When does this fail??
-        if !sorter.only_single_names 
+        if !sorter.only_single_names
           dump_sorter(sorter)
         elsif !sorter.only_approved_synonyms
           flash_notice("Please confirm that this is what you intended.")
@@ -515,7 +572,7 @@ class NameController < ApplicationController
     end
     result
   end
-  
+
   def deprecate_synonym(name, user)
     unless name.deprecated
       begin

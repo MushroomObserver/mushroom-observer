@@ -1,40 +1,36 @@
-<% if @title.nil?
-    @title = 'Name Index' %>
+<% if @title != 'Observation Index' %>
     <%= link_to('Observation Index', :action => 'observation_index')%> |
-<% else %>
+<% end %>
+<% if @title != 'Name Index' %>
     <%= link_to('Name Index', :action => 'name_index')%> |
 <% end %>
-
 <%= link_to('Bulk Name Edit', :action => 'bulk_name_edit') %><br/>
 <div id="Title"><%= @title %></div>
 
 <center><big><%=
-  letters = {}
-  for datum in @name_data
-    match = datum['display_name'].match(/([A-Z])/)
-    if match
-      datum['first_letter'] = match[1]
-      letters[match[1]] = 1
-    end
-  end
+  # (Note: name_index and observation_index are obvious, but the letter link
+  # below will work even for name_search because the pattern is "passed in",
+  # so to speak, in the session, not on params[].)
   %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).
-    map {|l| letters[l] ? link_to(l,"##{l}") : l}.join("&nbsp;&nbsp;")
+    map {|l| @letters[l] ? link_to(l,"?letter=#{l}") : l}.join("&nbsp;&nbsp;")
 %></big></center><br/>
 
-<%
-  last_letter = nil
-  for datum in @name_data
+<% last_letter = nil %>
+<% for datum in @name_subset %>
+  <%=
     if datum['first_letter'] != last_letter
       last_letter = datum['first_letter']
-      id = { :id => last_letter }
-      if last_letter != 'A' %>
-        <br/>
-      <% end
-    else
-      id = {}
+      if last_letter != 'A'
+        "<br/>"
+      else
+        ""
+      end
     end
-%>
+  %>
   <%= link_to(textilize_without_paragraph(h(datum['display_name'])),
-              { :action => 'show_name', :id => datum['id'] }, id) %><br/>
+              { :action => 'show_name', :id => datum['id'] }) %><br/>
 <% end %>
+
+<br/>
+<div class="pagination"><%= pagination_links(@pages) %></div>
 

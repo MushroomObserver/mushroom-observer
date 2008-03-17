@@ -49,10 +49,11 @@ class NameControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'name_index'
     assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
-    get_with_dump :name_search, { :page => 2 }
-    assert_response :success
-    assert_template 'name_index'
-    assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
+    # There is no second page of these!
+    # get_with_dump :name_search, { :page => 2 }
+    # assert_response :success
+    # assert_template 'name_index'
+    # assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
   end
 
   def test_edit_name
