@@ -270,7 +270,7 @@ class Observation < ActiveRecord::Base
     # which doesn't necessarily create any votes associated with its naming.  Therefore this should
     # only ever happen when there is a single naming, so there is nothing arbitray in using first.
     # (I think it can also happen if zero-weighted users are voting.)
-    best = self.namings.first.name if !best && self.namings
+    best = self.namings.first.name if !best && self.namings && self.namings.length > 0
     best = Name.unknown if !best
 
     # Make changes permanent and log them.
