@@ -16,9 +16,8 @@
 #   [What and base_name were confusing and inconsistent. -JPH 20071123]
 #
 # Voting and preferences:
-#   average_vote            Get the "average" vote for this naming...
-#   average_confidence      ...converted to confidence level.
-#   average_agreement       ...converted to agreement level.
+#   vote_sum                Straight sum of votes for this naming.
+#   vote_percent            Convert cached vote score to a percentage.
 #   user_voted?(user)       Has a given user voted on this naming?
 #   users_vote(user)        Get a given user's vote on this naming.
 #   calc_vote_table         Used by show_votes.rhtml
@@ -55,6 +54,7 @@ class Naming < ActiveRecord::Base
     "%s (%s)" % [str, self.id]
   end
 
+  # Just used by functional tests right now.
   def vote_sum
     sum = 0
     for v in self.votes
@@ -62,25 +62,12 @@ class Naming < ActiveRecord::Base
     end
     return sum
   end
-  
-  # Average all the votes.
-  # Returns integer.  (Use Vote.confidence/agreement() to interpret.)
-  def average_vote
-    sum = 0
-    num = 0
-    for v in self.votes
-      sum += v.value
-      num += 1
-    end
-    return num > 0 ? sum / num : 0
-  end
 
-  def average_agreement
-    return Vote.agreement(self.average_vote)
-  end
-
-  def average_confidence
-    return Vote.confidence(self.average_vote)
+  # Just convert vote_cache to a percentage.
+  def vote_percent
+    v = self.vote_cache
+    return 0.0 if v.nil? || v == ""
+    return v * 100 / 3
   end
 
   # Has a given user voted for this naming?
@@ -156,6 +143,16 @@ class Naming < ActiveRecord::Base
       vote.value    = value
       vote.save
     end
+    # Update cached score.
+    Naming.connection.update %(
+      UPDATE namings
+      SET vote_cache=(
+        SELECT sum(votes.value)/(count(votes.value)+1)
+        FROM votes
+        WHERE namings.id = votes.naming_id
+      )
+      WHERE namings.id = #{self.id}
+    )
     # Update consensus.
     self.observation.calc_consensus
     return true

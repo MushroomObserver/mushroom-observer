@@ -234,8 +234,9 @@ class ApplicationController < ActionController::Base
   # Paginate a plain old list of stuff that you've already populated.
   # Returns Paginator object (which will draw the page number links)
   # and the subset of the array that the user is currently viewing.
-  def paginate_array(list, per_page)
-    page  = params['page'] ? params['page'].to_i : 1
+  def paginate_array(list, per_page, page=nil)
+    page = params['page'] ? params['page'] : 1 if page.nil?
+    page = page.to_i
     pages = Paginator.new self, list.length, per_page, page
     return [pages, list[(page-1)*per_page, per_page]]
   end

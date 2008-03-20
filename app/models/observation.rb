@@ -89,6 +89,7 @@ class Observation < ActiveRecord::Base
   # winning taxon.
   # Returns Naming instance or nil.
   def calc_consensus
+#result = ""
 
     # [Now that we consider all votes, this is all superfluous. -JPH 20080313]
     # # Gather some handy overall vote stats.
@@ -166,6 +167,7 @@ class Observation < ActiveRecord::Base
         wgt = user_vote[1]
         vote[0] += val * wgt
         vote[1] += wgt
+#result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt} (#{vote[0]}, #{vote[1]}) (#{votes[taxon_id][0]}, #{votes[taxon_id][1]})<br/>"
       end
     end
 
@@ -177,9 +179,10 @@ class Observation < ActiveRecord::Base
     best_age = nil
     best_id  = nil
     for taxon_id in votes.keys
-      val = votes[taxon_id][0]
       wgt = votes[taxon_id][1]
+      val = votes[taxon_id][0].to_f / (wgt + 1)
       age = taxon_ages[taxon_id]
+#result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>"
       if best_val.nil? ||
          val > best_val || val == best_val && (
          wgt > best_wgt || wgt == best_wgt && (
@@ -191,6 +194,7 @@ class Observation < ActiveRecord::Base
         best_id  = taxon_id
       end
     end
+#result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>"
 
     # Reverse our kludge that mashed names-without-synonyms and synonym-groups together.
     # In the end we just want a name.
@@ -209,6 +213,7 @@ class Observation < ActiveRecord::Base
         best = Name.find(match[2].to_i)
       end
     end
+#result += "unmash: best=#{best ? best.text_name : "nil"}<br/>"
 
     # Now deal with synonymy properly.  If there is a single accepted name, great,
     # otherwise we need to somehow disambiguate.
@@ -225,8 +230,8 @@ class Observation < ActiveRecord::Base
           vote = votes[name_id] = [0, 0]
           for user_id in name_votes[name_id].keys
             user_vote = name_votes[name_id][user_id]
-            val = user_vote[0]
             wgt = user_vote[1]
+            val = user_vote[0].to_f / (wgt + 1)
             vote[0] += val * wgt
             vote[1] += wgt
           end
@@ -265,6 +270,7 @@ class Observation < ActiveRecord::Base
         best = best_id ? Name.find(best_id) : names.first
       end
     end
+#result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>"
 
     # This should only occur for observations created by species_list.construct_observation(),
     # which doesn't necessarily create any votes associated with its naming.  Therefore this should
@@ -272,6 +278,7 @@ class Observation < ActiveRecord::Base
     # (I think it can also happen if zero-weighted users are voting.)
     best = self.namings.first.name if !best && self.namings && self.namings.length > 0
     best = Name.unknown if !best
+#result += "fallback: best=#{best ? best.text_name : "nil"}<br/>"
 
     # Make changes permanent and log them.
     old = self.name
@@ -282,6 +289,8 @@ class Observation < ActiveRecord::Base
     elsif best != old
       self.log("Consensus established: #{best.observation_name}", true)
     end
+
+#return result
   end
 
 ################################################################################

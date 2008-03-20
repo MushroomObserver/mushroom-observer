@@ -56,13 +56,12 @@
             </td>
 
             <td width="20">&nbsp;</td>
-            <% num = naming.votes.size
-              txt = num == 0 ? "" : "#{naming.vote_sum}"
+            <% txt = naming.vote_percent.round.to_s + "%"
               nvotes = naming.votes.length %>
             <td>
               <%
                 html = ""
-                if num == 0
+                if nvotes == 0
                   html += "(#{lnbsp(:show_namings_no_votes)})"
                 else
                   link = link_to_function(h(txt), "show_votes(#{naming.id})")

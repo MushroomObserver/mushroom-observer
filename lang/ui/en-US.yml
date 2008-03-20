@@ -906,7 +906,7 @@ show_votes_score: Score
 show_votes_users: User
 show_votes_average: Average
 show_votes_close: Close
-show_votes_total: Total
+show_votes_total: Overall Score (sum/n+1)
 
 
 # observer/show_name

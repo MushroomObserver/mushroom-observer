@@ -85,13 +85,18 @@
                     :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
                 <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
                 <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
-                Observation made: <%= datum["when"]%>
+                Observation made: <%= datum["when"]%><br/>
+                Community confidence:
+                  <%= v = datum["vote_cache"]
+                    v.nil? || v == "" ? "no votes" : (v.to_f*100/3).round.to_s + "%" %>
             </td>
         </tr>
         <% done_observation[id] = 1
       end
     end %>
   </table>
+  <% args = @synonym_page ? { :synonym_page => @synonym_page } : {} %>
+  <div class="pagination"><%= pagination_links(@pages, :params => args) %></div>
 <% end %>
 
 <% if @synonym_data && @synonym_data.length > 0 %>
@@ -126,6 +131,8 @@
       end
     end %>
   </table>
+  <% args = @page ? { :page => @page } : {} %>
+  <div class="pagination"><%= pagination_links(@synonym_pages, :name => 'synonym_page', :params => args) %></div>
 <% end %>
 
 <p><span class="Date">

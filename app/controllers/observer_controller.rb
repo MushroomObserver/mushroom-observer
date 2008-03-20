@@ -31,6 +31,7 @@ class ObserverController < ApplicationController
                                                     :pattern_search,
                                                     :prev_image,
                                                     :prev_observation,
+                                                    :recalc,
                                                     :rss,
                                                     :send_webmaster_question,
                                                     :show_comment,
@@ -140,6 +141,7 @@ class ObserverController < ApplicationController
 #    show_location_observations     Obvs at a defined location, by name.
 #    observation_search             Obvs that match a string.
 #
+#    recalc                         Debug: Recalcs consensus and renders show_obs.
 #    show_observation
 #    create_observation
 #    edit_observation
@@ -257,6 +259,24 @@ class ObserverController < ApplicationController
       [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => pattern}],
        [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => pattern}],
        [:location_all.l, {:controller => 'location', :action => 'list_place_names'}]])
+  end
+
+  # I'm tired of tweaking show_observation to call calc_consensus for debugging.
+  # I'll just leave this stupid action in and have it forward to show_observation.
+  def recalc
+    id = params[:id]
+    begin
+      @observation = Observation.find(id)
+      old_name = @observation.name
+      text = @observation.calc_consensus
+      new_name = @observation.name
+      flash_notice text if !text.nil? && text != ""
+      flash_notice "old_name: #{old_name.text_name}"
+      flash_notice "new_name: #{new_name.text_name}"
+    rescue
+      flash_error "Caught exception."
+    end
+    redirect_to :action => "show_observation", :id => id
   end
 
   # Display observation and related namings, comments, votes, images, etc.

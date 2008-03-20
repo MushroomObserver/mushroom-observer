@@ -860,8 +860,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     #
     # Make sure a few random methods work right, too.
     assert_equal(3, naming.vote_sum)
-    assert_equal(:vote_confidence_100, naming.average_confidence)
-    assert_equal(:vote_agreement_100, naming.average_agreement)
     assert_equal(vote, naming.users_vote(@rolf))
     assert(naming.user_voted?(@rolf))
     assert(!naming.user_voted?(@mary))
@@ -895,8 +893,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     #
     # Sure, check the votes, too, while we're at it.
     assert_equal(3, @coprinus_comatus_naming.vote_sum) # 2+1 = 3
-    assert_equal(:vote_confidence_60, @coprinus_comatus_naming.average_confidence)
-    assert_equal(:vote_agreement_60, @coprinus_comatus_naming.average_agreement)
   end
 
   # Now see what happens when a third party proposes a name, and it wins.
@@ -971,7 +967,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   # Rolf prefers naming 3 (vote 2 -vs- -3).
   # Mary prefers naming 9 (vote 1 -vs- 3).
   # Dick now prefers naming 9 (vote 3).
-  # Summing, 3 gets 2+1=3, 9 gets -3+3+3=3, so 9 keeps it (more votes wins).
+  # Summing, 3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, so 3 gets it.
   def test_cast_vote_dick
     params = {
       :vote => {
@@ -993,15 +989,16 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(3, @coprinus_comatus_other_naming.votes.length)
     #
     # Make sure observation was updated right.
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_namings are right.
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf))
+    assert_equal(@coprinus_comatus,    @coprinus_comatus_obs.preferred_name(@rolf))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@dick))
     #
     # If Dick votes on the other as well, then his first vote should
     # get demoted and his preference should change.
+    # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
     @coprinus_comatus_naming.change_vote(@dick, 3)
     @coprinus_comatus_obs.reload
     @coprinus_comatus_naming.reload
@@ -1105,8 +1102,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   # (Have Dick vote first... I forget what this was supposed to test for, but it's clearly
   # superfluous now).
   # Votes: rolf=2/-3, mary=1->x/3, dick=x/x->3
-  # Summing after Dick votes,   3 gets 2+1=3, 9 gets -3+3+3=3, tie, so 3 keeps it (older).
-  # Summing after Mary deletes, 3 gets 2=2,   9 gets -3+3+3=3, now 9 clearly wins.
+  # Summing after Dick votes,   3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, 3 keeps it.
+  # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75, 3 still keeps it in this voting algorithm, arg.
   def test_cast_vote_mary
     @coprinus_comatus_other_naming.change_vote(@dick, 3)
     assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
@@ -1131,10 +1128,10 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(3, @coprinus_comatus_other_naming.votes.length)
     #
     # Make sure observation is changed correctly.
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_namings are changed.
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf))
+    assert_equal(@coprinus_comatus,    @coprinus_comatus_obs.preferred_name(@rolf))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
   end
 
