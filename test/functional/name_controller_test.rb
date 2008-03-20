@@ -785,6 +785,26 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(target_synonym, approved_name.synonym)
   end
 
+  # Test a bug fix for the case of adding a subtaxon when the parent taxon is duplicated due to
+  # different authors.
+  def test_update_bulk_names_approved_for_dup_parents
+    parent1 = @lentinellus_ursinus_author1
+    parent2 = @lentinellus_ursinus_author2
+    assert_not_equal(parent1, parent2)
+    assert_equal(parent1.text_name, parent2.text_name)
+    assert_not_equal(parent1.author, parent2.author)
+    new_name_str = "#{parent1.text_name} f. robustus"
+    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    params = {
+      :list => { :members => "#{new_name_str}"},
+      :approved_names => [new_name_str]
+    }
+    post_requires_login(:bulk_name_edit, params, false)
+    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
+    new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
+    assert(new_name)
+  end
+
   # ----------------------------
   #  Synonyms.
   # ----------------------------

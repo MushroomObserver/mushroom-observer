@@ -1,18 +1,8 @@
 Release each of the following as they get completed:
 
-Bug - Observation index doesn't work on the actual site. (8)
+Lipik location issue
 
-Bug - Add: (4)
-Lentinellus castoreus (Fr.) Kühner & Mair
-Lentinellus occidentalis R.H. Petersen
-Lentinellus subargillaceus (Kauffman) R.H. Petersen
-Lentinellus ursinus (Fr.) Kühner
-Lentinellus ursinus f. robustus (P. Karst.) R.H. Petersen
-Lentinellus montanus O.K. Mill.
-using the bulk_name_edit feature.  Gives a different error in my local instance than the one reported through the website:
-"[ERROR] name#bulk_name_edit (NoMethodError) "undefined method `text_name' for nil:NilClass"
-
-Bug - Don't allow names of the form <Genus> section <Section>.  Current they get interpreted as having the species epithet 'section' and an author of <Section> (e.g., Amanita section Lepidella) 
+Mike prefers percentages over scores (100% more understandable than 3)
 
 add_name page (from name_index) (4)
 

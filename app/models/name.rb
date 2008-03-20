@@ -446,11 +446,11 @@ class Name < ActiveRecord::Base
     results
   end
 
-  # <Genus> <species>
+  # <Genus> <species> but reject <Genus> section
   def self.parse_species(in_str, deprecated=false)
     results = nil
     match = SPECIES_PAT.match(in_str)
-    if match
+    if match and (match[2] != 'section')
       text_name = "#{match[1]} #{match[2]}"
       display_name = format_string(text_name, deprecated)
       results = [text_name, display_name, display_name, text_name, match[1]]

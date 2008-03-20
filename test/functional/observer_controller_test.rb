@@ -398,7 +398,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   # Test constructing observations in various ways (with minimal namings).
-  def test_construct_observation_generic(params, o,g,n)
+  def test_construct_observation_generic(params, observation_count, naming_count, name_count)
     o_count = Observation.find(:all).length
     g_count = Naming.find(:all).length
     n_count = Name.find(:all).length
@@ -411,14 +411,15 @@ class ObserverControllerTest < Test::Unit::TestCase
     params[:vote] = {}            if !params[:vote]
     params[:vote][:value] = "3" if !params[:vote][:value]
     post_requires_login(:create_observation, params, false)
-    if o == 1
+    if observation_count == 1
       assert_redirected_to(:controller => "observer", :action => "show_observation")
     else
       assert_response(:success)
     end
-    assert((o_count + o) == Observation.find(:all).length)
-    assert((g_count + g) == Naming.find(:all).length)
-    assert((n_count + n) == Name.find(:all).length)
+    assert((o_count + observation_count) == Observation.find(:all).length)
+    assert((g_count + naming_count) == Naming.find(:all).length)
+    assert((n_count + name_count
+    ) == Name.find(:all).length)
   end
 
   def test_construct_observation_simple
@@ -461,6 +462,15 @@ class ObserverControllerTest < Test::Unit::TestCase
       :name => { :name => new_name },
       :approved_name => new_name
     }, 1,1,2)
+  end
+
+  def test_construct_observation_approved_section
+    # Test an observation creation with an approved section (should fail)
+    new_name = "Argus section Argus"
+    test_construct_observation_generic({
+      :name => { :name => new_name },
+      :approved_name => new_name
+    }, 0,0,0)
   end
 
   def test_construct_observation_approved_junk

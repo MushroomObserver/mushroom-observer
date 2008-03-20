@@ -472,3 +472,29 @@ russula_cremoricolor_author_notes:
   observation_name: **__Russula cremoricolor__** Earle
   search_name: Russula cremoricolor Earle
   notes: Some different notes
+
+lentinellus_ursinus_author1:
+  id: 35
+  created: 2008-03-19 08:35:30
+  modified: 2008-03-19 08:35:37
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lentinellus ursinus
+  author: Kühner
+  display_name: **__Lentinellus ursinus__** Kühner
+  observation_name: **__Lentinellus ursinus__** Kühner
+  search_name: Lentinellus ursinus Kühner
+
+lentinellus_ursinus_author2:
+  id: 36
+  created: 2008-03-19 08:35:30
+  modified: 2008-03-19 08:35:37
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lentinellus ursinus
+  author: Kuhner
+  display_name: **__Lentinellus ursinus__** Kuhner
+  observation_name: **__Lentinellus ursinus__** Kuhner
+  search_name: Lentinellus ursinus Kuhner
