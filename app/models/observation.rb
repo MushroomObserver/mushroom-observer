@@ -244,10 +244,10 @@ class Observation < ActiveRecord::Base
         # until the scientific community rules definitively.  Now we have two possible
         # names winning, but no votes on either!  If you have a problem with the one I
         # chose, then vote on the damned thing, already! :)
-        best_val = nil
-        best_wgt = nil
-        best_age = nil
-        best_id  = nil
+        best_val2 = nil
+        best_wgt2 = nil
+        best_age2 = nil
+        best_id2  = nil
         for name in names
           name_id = name.id
           vote = votes[name_id]
@@ -255,19 +255,19 @@ class Observation < ActiveRecord::Base
             val = vote[0]
             wgt = vote[1]
             age = name_ages[name_id]
-            if best_val.nil? ||
-               val > best_val || val == best_val && (
-               wgt > best_wgt || wgt == best_wgt && (
-               age < best_age
+            if best_val2.nil? ||
+               val > best_val2 || val == best_val2 && (
+               wgt > best_wgt2 || wgt == best_wgt2 && (
+               age < best_ag2e
               ))
-              best_val = val
-              best_wgt = wgt
-              best_age = age
-              best_id  = name_id
+              best_val2 = val
+              best_wgt2 = wgt
+              best_age2 = age
+              best_id2  = name_id
             end
           end
         end
-        best = best_id ? Name.find(best_id) : names.first
+        best = best_id2 ? Name.find(best_id2) : names.first
       end
     end
 #result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>"
@@ -283,6 +283,7 @@ class Observation < ActiveRecord::Base
     # Make changes permanent and log them.
     old = self.name
     self.name = best
+    self.vote_cache = best_val
     self.save
     if best != old && old
       self.log("Consensus rejected #{old.observation_name} in favor of #{best.observation_name}", true)

@@ -149,22 +149,32 @@ class NameController < ApplicationController
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
       @children = @name.children
 
-      # Note, we need this second WHERE clause to pick up observations missing
-      # namings altogether -- this applies only to fungi sp's.
-      fungi_sp = params[:id] == 1 ? "or (o.name_id = 1 and n.id = o.name_id and u.id = o.user_id)" : ""
+      # Use this to match on consensus name.
+      query1 = %(
+        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
+          u.name, u.login, o.user_id, n.observation_name, o.vote_cache
+        FROM observations o, users u, names n
+        WHERE o.name_id = %s and n.id = o.name_id and u.id = o.user_id and
+          o.vote_cache >= 0
+        ORDER BY o.vote_cache desc, o.when desc
+      )
 
-      query = %(
+      # Use this to match on non-consensus names.
+      query2 = %(
         SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
           u.name, u.login, o.user_id, n.observation_name, g.vote_cache
         FROM observations o, users u, names n, namings g
-        WHERE (g.name_id = %s and o.id = g.observation_id and
-          n.id = o.name_id and u.id = o.user_id and
-          (g.vote_cache >= 0 or o.name_id = g.name_id)) #{fungi_sp}
+        WHERE g.name_id = %s and o.id = g.observation_id and
+          n.id = o.name_id and u.id = o.user_id and g.vote_cache >= 0 and
+          o.name_id != g.name_id
         ORDER BY g.vote_cache desc, o.when desc
       )
 
       # Get list of observations matching this name explicitly.
-      @data = Observation.connection.select_all(query % params[:id])
+      @consensus_data = Observation.connection.select_all(query1 % params[:id])
+
+      # Get list of observations matching this name explicitly.
+      @other_data = Observation.connection.select_all(query2 % params[:id])
 
       # Get list of observations matching any of its synonyms.
       @synonym_data = []
@@ -172,7 +182,7 @@ class NameController < ApplicationController
       if synonym
         for n in synonym.names
           if n != @name
-            data = Observation.connection.select_all(query % n.id)
+            data = Observation.connection.select_all(query1 % n.id)
             @synonym_data += data
           end
         end
@@ -181,35 +191,44 @@ class NameController < ApplicationController
       # Remove duplicates. (Select block sets seen[id] to true and returns true
       # for the first occurrance of an id, else implicitly returns false.)
       seen = {}
-      @data = @data.select {|d|
+      @consensus_data = @consensus_data.select {|d|
         seen[d["id"]] = true if !seen[d["id"]] }
       @synonym_data = @synonym_data.select {|d|
+        seen[d["id"]] = true if !seen[d["id"]] }
+      @other_data = @other_data.select {|d|
         seen[d["id"]] = true if !seen[d["id"]] }
 
       # Gather full list of IDs for the prev/next buttons to cycle through.
       observation_ids = []
       @user = session['user']
-      for d in @data + @synonym_data
+      for d in @consensus_data + @synonym_data + @other_data
         observation_ids.push(d["id"].to_i)
       end
 
       # Paginate the two sections independently.
-      per_page = 25
-      @page = params['page']
-      @page = 1 if !@page
+      per_page = 12
+      @consensus_page = params['consensus_page']
+      @consensus_page = 1 if !@consensus_page
       @synonym_page = params['synonym_page']
       @synonym_page = 1 if !@synonym_page
-      @pages, @data = paginate_array(@data, per_page, @page)
-      @synonym_pages, @synonym_data = paginate_array(@synonym_data, per_page, @synonym_page)
-      @data = [] if !@data
+      @other_page = params['other_page']
+      @other_page = 1 if !@other_page
+      @consensus_pages, @consensus_data =
+        paginate_array(@consensus_data, per_page, @consensus_page)
+      @synonym_pages, @synonym_data =
+        paginate_array(@synonym_data, per_page, @synonym_page)
+      @other_pages, @other_data =
+        paginate_array(@other_data, per_page, @other_page)
+      @consensus_data = [] if !@consensus_data
       @synonym_data = [] if !@synonym_data
+      @other_data = [] if !@other_data
 
       # By default we query the consensus name above, but if the user
       # is logged in we need to redo it and calc the preferred name for each.
       # Note that there's no reason to do duplicate observations.  (Note, only
-      # need to do this to subset on the page we're viewing.)
+      # need to do this to subset on the page we can actually see.)
       if @user = session['user']
-        for d in @data + @synonym_data
+        for d in @consensus_data + @synonym_data + @other_data
           d["observation_name"] = Observation.find(d["id"].to_i).preferred_name(@user).observation_name
         end
       end
@@ -665,7 +684,9 @@ class NameController < ApplicationController
   def name_locs(name_id)
     Location.find(:all, {
       :include => :observations,
-      :conditions => ["observations.name_id = ? and observations.is_collection_location = true", name_id]
+      :conditions => ["observations.name_id = ? and
+        observations.is_collection_location = true and
+        observations.vote_cache >= 0", name_id]
     })
   end
 end

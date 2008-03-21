@@ -1,7 +1,6 @@
 # If the locale isn't a full locale such as fr-FR or if the rails localization doesn't exist,
 # you should define the locale_name key for globalite to display the UI locales properly.
 
-
 # entire application
 app_account: Account
 app_admin: Admin
@@ -801,11 +800,17 @@ show_name_author: Author
 show_name_citation: Citation
 show_name_deprecated: Deprecated
 show_name_deprecated_synonyms: Deprecated Synonym(s)
+show_name_distribution_map: Distribution Map
 show_name_last_modified: Last Modified
 show_name_name: Name
 show_name_name_created: Name Created
 show_name_notes_and_comments: Notes and Comments
 show_name_observations: Observations
+show_name_other_observations: Similar Observations
+show_name_other_observations_notes:
+  (Someone proposed %s for these observations, but consensus hasn't accepted
+  it.  Confidence value is for <i>this</i> name, not the consensus name.)
+
 show_name_preferred_synonyms: Preferred Synonym(s)
 show_name_previous_version: Previous Version
 show_name_rank: Rank
@@ -903,14 +908,10 @@ ignore_me: >
 # observer/_show_votes
 show_votes_vote: Vote
 show_votes_score: Score
-show_votes_users: User
+show_votes_users: Users
 show_votes_average: Average
 show_votes_close: Close
 show_votes_total: Overall Score (sum/n+1)
-
-
-# observer/show_name
-show_name_distribution_map: Distribution Map
 
 
 # location/show_past_location
@@ -937,6 +938,7 @@ signup_email_help: >
 signup_name: Name (optional)
 signup_login: Desired login
 signup_preferred_theme: Preferred Theme (optional)
+signup_random: Random
 signup_title: Account signup
 
 

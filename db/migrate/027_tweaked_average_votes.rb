@@ -1,5 +1,6 @@
 class TweakedAverageVotes < ActiveRecord::Migration
   def self.up
+    add_column :observations, "vote_cache", :float, :default => 0
     add_column :namings, "vote_cache", :float, :default => 0
 
     Naming.connection.update %(
@@ -23,6 +24,7 @@ class TweakedAverageVotes < ActiveRecord::Migration
   end
 
   def self.down
+    remove_column :observations, "vote_cache"
     remove_column :namings, "vote_cache"
 
     for match in Observation.find_by_sql %(

@@ -61,84 +61,77 @@
     </p>
 <% end %>
 
-<% done_observation = {} %>
-<% if @data && @data.length > 0 %>
-  <p><%= :show_name_observations.l %>:</p>
-  <table cellpadding="5" cellspacing="0">
-    <% odd_or_even = 0
-    for datum in @data
-      odd_or_even = 1 - odd_or_even
-      id = datum["id"]
-      if !done_observation[id] %>
+<% num_sects = 0 %>
+<% for sect in ["consensus", "synonym", "other"]
+  args = {}
+  args[:consensus_page] = @consensus_page
+  args[:synonym_page] = @synonym_page
+  args[:other_page] = @other_page
+  if sect == "consensus"
+    head  = :show_name_observations.l + ":"
+    data  = @consensus_data
+    page  = @consensus_page
+    pages = @consensus_pages
+    args.delete :consensus_page
+  elsif sect == "synonym"
+    head  = :show_name_synonym_observations.l + ":"
+    data  = @synonym_data
+    page  = @synonym_page
+    pages = @synonym_pages
+    args.delete :synonym_page
+  else
+    head  = :show_name_other_observations.l + ":<br/>" +
+            "<span class='HelpNote'>" +
+              (:show_name_other_observations_notes.l %
+                textilize_without_paragraph(h(@name.display_name)))
+            "</span>"
+    data  = @other_data
+    page  = @other_page
+    pages = @other_pages
+    args.delete :other_page
+  end
+  if data && data.length > 0 %>
+    <% if num_sects > 0 %>
+      <br/><hr></hr>
+    <% end %>
+    <% num_sects += 1 %>
+    <p><%= head %></p>
+    <table cellpadding="5" cellspacing="0">
+      <% odd_or_even = 0
+      for datum in data
+        odd_or_even = 1 - odd_or_even
+        id = datum["id"] %>
         <tr valign="top" class="ListLine<%= odd_or_even %>">
-            <td width="110" align="center" valign="middle">
-                <%=
-                image_id = datum["thumb_image_id"]
-                if image_id
-                    link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-                        :controller => 'observer', :action => 'show_observation', :id => id)
-                end
-                %><br/>
-            </td>
-            <td width="100%" valign="middle">
-                <span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
-                    :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
-                <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-                <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
-                Observation made: <%= datum["when"]%><br/>
-                Community confidence:
-                  <%= v = datum["vote_cache"]
-                    v.nil? || v == "" ? "no votes" : (v.to_f*100/3).round.to_s + "%" %>
-            </td>
+          <td width="110" align="center" valign="middle">
+            <%=
+            image_id = datum["thumb_image_id"]
+            if image_id
+              link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
+                :controller => 'observer', :action => 'show_observation', :id => id)
+            end
+            %><br/>
+          </td>
+          <td width="100%" valign="middle">
+            <span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
+              :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
+            <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>:
+            <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
+            Observation made: <%= datum["when"]%><br/>
+            Community confidence:
+              <%= v = datum["vote_cache"]
+                v.nil? || v == "" ? "no votes" : (v.to_f*100/3).round.to_s + "%" %>
+          </td>
         </tr>
-        <% done_observation[id] = 1
-      end
-    end %>
-  </table>
-  <% args = @synonym_page ? { :synonym_page => @synonym_page } : {} %>
-  <div class="pagination"><%= pagination_links(@pages, :params => args) %></div>
-<% end %>
-
-<% if @synonym_data && @synonym_data.length > 0 %>
-    <br/><hr></hr>
-  <p><%= :show_name_synonym_observations.l %>:</p>
-  <table cellpadding="5" cellspacing="0">
-    <% odd_or_even = 0
-    for datum in @synonym_data
-      odd_or_even = 1 - odd_or_even
-      id = datum["id"]
-      if !done_observation[id] %>
-		<tr valign="top" class="ListLine<%= odd_or_even %>">
-	    	<td width="110" align="center" valign="middle">
-				<%=
-				image_id = datum["thumb_image_id"]
-				if image_id
-		  			link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-	            		:controller => 'observer', :action => 'show_observation', :id => id)
-	          	end
-	      		%><br/>
-	    	</td>
-		    <td width="100%" valign="middle">
-				<span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
-			         :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
-		        <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>: 
-		        <span class="ListWho"><%= h(datum["name"]) %></span><br/>
-	            <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
-		        Observation made: <%= datum["when"]%>
-		    </td>
-	  	</tr>
-        <% done_observation[id] = 1
-      end
-    end %>
-  </table>
-  <% args = @page ? { :page => @page } : {} %>
-  <div class="pagination"><%= pagination_links(@synonym_pages, :name => 'synonym_page', :params => args) %></div>
+      <% end %>
+    </table>
+    <div class="pagination"><%= pagination_links(pages, :params => args) %></div>
+  <% end %>
 <% end %>
 
 <p><span class="Date">
     <%= :show_name_name_created.l %>: <%= @name.created %><br/>
     <%= :show_name_last_modified.l %>: <%= @name.modified %> by <%= user_link(@name.user) %><br/>
-    <% rss_log = @name.rss_log 
+    <% rss_log = @name.rss_log
        if rss_log %>
     	<%= link_to :show_name_show_log.l, :controller => 'observer', :action => 'show_rss_log', :id => rss_log.id %>
     <% end %>
