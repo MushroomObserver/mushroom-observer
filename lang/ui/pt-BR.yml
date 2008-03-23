@@ -377,10 +377,10 @@ how_voting: >
   vote altogether.  When you've changed all the votes you want to, be sure to click on
   'Update Votes' to record
   your votes.  Don't worry, if you forget and try to navigate away without casting your
-  votes it will complain.</p>
-  <p>Votes are tallied for all proposed names that have more than one vote.  (This prevents
-  someone from proposing a name with 100%% confidence and momentarily changing the consensus.)
-  The name with the strongest average vote wins, and that name will be applied to that observation
+  votes it will complain (unless you have Javascript disabled).</p>
+  <p>Votes for a name are summed and then divided by the number of votes for that name + 1.
+  This ends up favoring names with more votes, so vote early and often!  The name with
+  the highest score wins, and by default that name will be applied to that observation
   throughout the site.  In the case where multiple synonyms are proposed for an observation
   it lumps the votes together, choosing each user's strongest vote within that group of
   synonyms.  In the end, assuming that group of synonyms wins, the currently accepted name
@@ -388,9 +388,7 @@ how_voting: >
   about which name is appropriate for a given taxon, then it will use votes the best it
   can to decide between multiple accepted names.</p>
   <p>If you have a particularly strong preference for one of the names, vote "%s".  The
-  website will attach that name to that observation wherever you go.  Note, however, once
-  you have done so, there is currently no way to tell what the community consensus is.
-  This is a known issue that we are working on.</p> 
+  website will attach that name to that observation wherever you go.</p>
 
 
 # everaldo
