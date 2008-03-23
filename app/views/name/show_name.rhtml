@@ -64,21 +64,23 @@
 <% num_sects = 0 %>
 <% for sect in ["consensus", "synonym", "other"]
   args = {}
-  args[:consensus_page] = @consensus_page
-  args[:synonym_page] = @synonym_page
-  args[:other_page] = @other_page
+  args[:consensus_page] = @consensus_page if @consensus_data != [] 
+  args[:synonym_page] = @synonym_page     if @synonym_data != []   
+  args[:other_page] = @other_page         if @other_data != []     
   if sect == "consensus"
     head  = :show_name_observations.l + ":"
     data  = @consensus_data
     page  = @consensus_page
     pages = @consensus_pages
-    args.delete :consensus_page
+    arg   = :consensus_page
+    args.delete arg
   elsif sect == "synonym"
     head  = :show_name_synonym_observations.l + ":"
     data  = @synonym_data
     page  = @synonym_page
     pages = @synonym_pages
-    args.delete :synonym_page
+    arg   = :synonym_page
+    args.delete arg
   else
     head  = :show_name_other_observations.l + ":<br/>" +
             "<span class='HelpNote'>" +
@@ -88,7 +90,8 @@
     data  = @other_data
     page  = @other_page
     pages = @other_pages
-    args.delete :other_page
+    arg   = :other_page
+    args.delete arg
   end
   if data && data.length > 0 %>
     <% if num_sects > 0 %>
@@ -124,7 +127,7 @@
         </tr>
       <% end %>
     </table>
-    <div class="pagination"><%= pagination_links(pages, :params => args) %></div>
+    <div class="pagination"><%= pagination_links(pages, :name => arg, :params => args) %></div>
   <% end %>
 <% end %>
 

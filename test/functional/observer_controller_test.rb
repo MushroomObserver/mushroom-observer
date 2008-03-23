@@ -387,27 +387,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_template page.to_s
   end
 
-  # Make sure languages all have same tags.
-  def test_language_tags
-    dir = "#{RAILS_ROOT}/lang/ui"
-    assert File.directory?(dir)
-    tags = {}
-    this_tags = {}
-    files = Dir.glob("#{dir}/*.yml")
-    assert(files.length > 0)
-    for file in files
-      h = this_tags[file] = {}
-      for line in IO.readlines(file)
-        h[$1] = tags[$1] = true if line.match(/^(\w+)/)
-      end
-      assert(h["app_banner"])
-    end
-    for file in files
-      missing = tags.keys - this_tags[file].keys
-      assert_equal([], missing)
-    end
-  end
-
   # ------------------------------
   #  Test creating observations.
   # ------------------------------
