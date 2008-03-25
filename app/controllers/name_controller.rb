@@ -149,32 +149,41 @@ class NameController < ApplicationController
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
       @children = @name.children
 
-      # Use this to match on consensus name.
-      query1 = %(
+      # Matches on consensus name, any vote.
+      consensus_query = %(
+        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
+          u.name, u.login, o.user_id, n.observation_name, o.vote_cache
+        FROM observations o, users u, names n
+        WHERE o.name_id = %s and n.id = o.name_id and u.id = o.user_id
+        ORDER BY o.vote_cache desc, o.when desc
+      )
+
+      # Matches on consensus name, only non-negative votes.
+      synonym_query = %(
         SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
           u.name, u.login, o.user_id, n.observation_name, o.vote_cache
         FROM observations o, users u, names n
         WHERE o.name_id = %s and n.id = o.name_id and u.id = o.user_id and
-          o.vote_cache >= 0
+          (o.vote_cache >= 0 || o.vote_cache is null)
         ORDER BY o.vote_cache desc, o.when desc
       )
 
-      # Use this to match on non-consensus names.
-      query2 = %(
+      # Matches on non-consensus namings, any vote.
+      other_query = %(
         SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
           u.name, u.login, o.user_id, n.observation_name, g.vote_cache
         FROM observations o, users u, names n, namings g
         WHERE g.name_id = %s and o.id = g.observation_id and
-          n.id = o.name_id and u.id = o.user_id and g.vote_cache >= 0 and
+          n.id = o.name_id and u.id = o.user_id and
           o.name_id != g.name_id
         ORDER BY g.vote_cache desc, o.when desc
       )
 
-      # Get list of observations matching this name explicitly.
-      @consensus_data = Observation.connection.select_all(query1 % params[:id])
+      # Get list of observations matching on consensus: these are "reliable".
+      @consensus_data = Observation.connection.select_all(consensus_query % params[:id])
 
-      # Get list of observations matching this name explicitly.
-      @other_data = Observation.connection.select_all(query2 % params[:id])
+      # Get list of observations matching on other names: "look-alikes".
+      @other_data = Observation.connection.select_all(other_query % params[:id])
 
       # Get list of observations matching any of its synonyms.
       @synonym_data = []
@@ -182,7 +191,7 @@ class NameController < ApplicationController
       if synonym
         for n in synonym.names
           if n != @name
-            data = Observation.connection.select_all(query1 % n.id)
+            data = Observation.connection.select_all(synonym_query % n.id)
             @synonym_data += data
           end
         end

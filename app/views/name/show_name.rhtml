@@ -98,7 +98,7 @@
       <br/><hr></hr>
     <% end %>
     <% num_sects += 1 %>
-    <p><%= head %></p>
+    <p><a id="<%=sect%>"></a><%= head %></p>
     <table cellpadding="5" cellspacing="0">
       <% odd_or_even = 0
       for datum in data
@@ -127,7 +127,11 @@
         </tr>
       <% end %>
     </table>
-    <div class="pagination"><%= pagination_links(pages, :name => arg, :params => args) %></div>
+    <div class="pagination"><%=
+      x = pagination_links(pages, :name => arg, :params => args)
+      # Wow this is ugly, but I can't find an option to pass to pagination_links to do it for me.
+      x.to_s.gsub(/<a href="([^<>]*)">/, '<a href="\1#' + sect + '">')
+    %></div>
   <% end %>
 <% end %>
 
