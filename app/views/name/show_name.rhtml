@@ -1,16 +1,20 @@
 <% @title = 'Name: ' + h(@name.text_name) %>
+
+# Google Images | Distribution Map
 <%= sprintf('<a href="http://images.google.com/images?q=%s" target="_new">Google Images</a>' % @name.text_name) %>
 <% if @data != [] %>
     | <%= link_to(:show_name_distribution_map.l, :action => 'map', :id => @name.id) %>
 <% end %>
 <br/>
+
+# Edit Name | Bulk Name Edit | Change Synonyms | Approve/Deprecate
 <%= link_to 'Edit Name', :action => 'edit_name', :id => @name %>
-| <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %>
-| <%= link_to('Change Synonyms', :action => 'change_synonyms', :id => @name)%>
+  | <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %>
+  | <%= link_to('Change Synonyms', :action => 'change_synonyms', :id => @name)%>
 <% if @name.deprecated %>
-    | <%= link_to('Approve', :action => 'approve_name', :id => @name)%>
+  | <%= link_to('Approve', :action => 'approve_name', :id => @name)%>
 <% else %>
-    | <%= link_to('Deprecate', :action => 'deprecate_name', :id => @name)%>
+  | <%= link_to('Deprecate', :action => 'deprecate_name', :id => @name)%>
 <% end %>
 
 <div id="Title"><%= 'About: ' + textilize_without_paragraph(h(@name.display_name)) %></div>
@@ -61,26 +65,25 @@
     </p>
 <% end %>
 
-<% num_sects = 0 %>
-<% for sect in ["consensus", "synonym", "other"]
-  args = {}
-  args[:consensus_page] = @consensus_page if @consensus_data != [] 
-  args[:synonym_page] = @synonym_page     if @synonym_data != []   
-  args[:other_page] = @other_page         if @other_data != []     
+<%
+# -----------------------------------------
+#  Draw the three groups of observations.
+# -----------------------------------------
+num_sects = 0
+for sect in ["consensus", "synonym", "other"]
+
   if sect == "consensus"
-    head  = :show_name_observations.l + ":"
-    data  = @consensus_data
-    page  = @consensus_page
-    pages = @consensus_pages
-    arg   = :consensus_page
-    args.delete arg
+    head  = :show_name_observations.l + ":"   # Header string to display above group.
+    data  = @consensus_data                   # Data returned by sql query.
+    page  = @consensus_page                   # Page number.
+    pages = @consensus_pages                  # Pagination object.
+    arg   = :consensus_page                   # Parameter used in pagination.
   elsif sect == "synonym"
     head  = :show_name_synonym_observations.l + ":"
     data  = @synonym_data
     page  = @synonym_page
     pages = @synonym_pages
     arg   = :synonym_page
-    args.delete arg
   else
     head  = :show_name_other_observations.l + ":<br/>" +
             "<span class='HelpNote'>" +
@@ -91,14 +94,32 @@
     page  = @other_page
     pages = @other_pages
     arg   = :other_page
-    args.delete arg
   end
-  if data && data.length > 0 %>
-    <% if num_sects > 0 %>
+
+  # Skip completely if group is empty.
+  if data && data.length > 0
+
+    # These are tacked on to the pagination links' urls.
+    args = {}
+    args[:consensus_page] = @consensus_page if @consensus_data != []
+    args[:synonym_page] = @synonym_page     if @synonym_data != []
+    args[:other_page] = @other_page         if @other_data != []
+    args.delete arg
+
+    # Add line break between groups.
+    if num_sects > 0 %>
       <br/><hr></hr>
-    <% end %>
-    <% num_sects += 1 %>
+    <% end
+    num_sects += 1
+
+    # Wow this is ugly, but I can't find an option to pass to pagination_links
+    # to have it tack the "#section" thing on the end of the urls for me.
+    plinks = pagination_links(pages, :name => arg, :params => args).to_s
+    plinks.gsub!(/<a href="([^<>]*)">/, '<a href="\1#' + sect + '">')
+    %>
+
     <p><a id="<%=sect%>"></a><%= head %></p>
+    <div class="pagination"><%= plinks %></div>
     <table cellpadding="5" cellspacing="0">
       <% odd_or_even = 0
       for datum in data
@@ -127,21 +148,18 @@
         </tr>
       <% end %>
     </table>
-    <div class="pagination"><%=
-      x = pagination_links(pages, :name => arg, :params => args)
-      # Wow this is ugly, but I can't find an option to pass to pagination_links to do it for me.
-      x.to_s.gsub(/<a href="([^<>]*)">/, '<a href="\1#' + sect + '">')
-    %></div>
-  <% end %>
-<% end %>
+    <div class="pagination"><%= plinks %></div>
+
+  <% end # if data.length > 0 %>
+<% end # for section %>
 
 <p><span class="Date">
-    <%= :show_name_name_created.l %>: <%= @name.created %><br/>
-    <%= :show_name_last_modified.l %>: <%= @name.modified %> by <%= user_link(@name.user) %><br/>
-    <% rss_log = @name.rss_log
-       if rss_log %>
-    	<%= link_to :show_name_show_log.l, :controller => 'observer', :action => 'show_rss_log', :id => rss_log.id %>
-    <% end %>
-    </span>
+  <%= :show_name_name_created.l %>: <%= @name.created %><br/>
+  <%= :show_name_last_modified.l %>: <%= @name.modified %> by <%= user_link(@name.user) %><br/>
+  <% rss_log = @name.rss_log
+     if rss_log %>
+  	<%= link_to :show_name_show_log.l, :controller => 'observer', :action => 'show_rss_log', :id => rss_log.id %>
+  <% end %>
+  </span>
 </p>
 
