@@ -1,13 +1,13 @@
 <% @title = 'Name: ' + h(@name.text_name) %>
 
-# Google Images | Distribution Map
+<% # Google Images | Distribution Map %>
 <%= sprintf('<a href="http://images.google.com/images?q=%s" target="_new">Google Images</a>' % @name.text_name) %>
 <% if @data != [] %>
     | <%= link_to(:show_name_distribution_map.l, :action => 'map', :id => @name.id) %>
 <% end %>
 <br/>
 
-# Edit Name | Bulk Name Edit | Change Synonyms | Approve/Deprecate
+<% # Edit Name | Bulk Name Edit | Change Synonyms | Approve/Deprecate %>
 <%= link_to 'Edit Name', :action => 'edit_name', :id => @name %>
   | <%= link_to 'Bulk Name Edit', :action => 'bulk_name_edit' %>
   | <%= link_to('Change Synonyms', :action => 'change_synonyms', :id => @name)%>
