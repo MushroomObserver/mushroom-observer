@@ -709,14 +709,8 @@ class ObserverController < ApplicationController
       if !@naming.save
         errors << "Unable to save the naming."
       end
-      if !@vote.save
-        errors << "Unable to save your confidence level."
-      end
-      # Can't save these before @naming is saved or get infinite recursion.
-      @observation.name   = @name
-      if !@observation.save
-        errors << "Unable to cache the consensus name in observation."
-      end
+      # Update vote and community consensus.
+      @naming.change_vote(@user, @vote.value)
     end
     if errors != []
       errors.unshift("Observation was created, however had
@@ -795,9 +789,8 @@ class ObserverController < ApplicationController
       flash_notice "Naming was successfully created."
     end
     #
-    # Update community consensus.
+    # Update vote and community consensus.
     @naming.change_vote(@user, @vote.value)
-    @observation.calc_consensus
     #
     # Log actions.
     @observation.log("Naming created by #{@user.login}: #{@naming.format_name}", true)
@@ -855,7 +848,6 @@ class ObserverController < ApplicationController
       #
       # Update community consensus.
       @naming.change_vote(@user, @vote.value);
-      @observation.calc_consensus
       #
       # Log action.
       @observation.log("Naming created by #{@user.login}: #{@naming.format_name}", true)
@@ -1067,6 +1059,14 @@ class ObserverController < ApplicationController
   # Outputs: @naming
   def show_votes
     @naming = Naming.find(params[:id])
+  end
+
+  # I'm going to let anyone who's logged in do this for now.
+  def refresh_vote_cache
+    Naming.refresh_vote_cache
+    Observation.refresh_vote_cache
+    flash_notice "Refreshed vote caches."
+    redirect_to :action => 'index'
   end
 
 ################################################################################

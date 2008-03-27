@@ -21,6 +21,7 @@ require 'active_record_extensions'
 #     Notes: these last six use the current user's preferred name if it
 #     exists, otherwise uses the consensus (as cached via calc_conensus).
 #     These are the six methods views should use, not name/naming.
+#   refresh_vote_cache      Admin tool to refresh cache across all observations.
 #
 # Image stuff:
 #   add_image(img)         Add img to obv.
@@ -316,16 +317,16 @@ class Observation < ActiveRecord::Base
   def text_name(user=nil)
     self.preferred_name(user).search_name
   end
-  
+
   def unique_text_name(user=nil)
     str = self.preferred_name(user).search_name
     "%s (%s)" % [str, self.id]
   end
-  
+
   def format_name(user=nil)
     self.preferred_name(user).observation_name
   end
-  
+
   def unique_format_name(user=nil)
     str = self.preferred_name(user).observation_name
     "%s (%s)" % [str, self.id]
@@ -418,11 +419,64 @@ class Observation < ActiveRecord::Base
     self.location = Location.find_by_display_name(where)
   end
 
-  protected
-  def self.all_observations
-    find(:all,
-         :order => "'when' desc")
+  # Admin tool that refreshes the vote cache for all observations with a vote.
+  def self.refresh_vote_cache
+
+    # Catch all observations with no namings.
+    self.connection.update %(
+      UPDATE observations
+      SET vote_cache = NULL
+      WHERE(
+        SELECT count(votes.value)
+        FROM namings, votes
+        WHERE namings.observation_id = observations.id and
+              votes.naming_id = namings.id
+      ) = 0
+    )
+
+    # Catch simple case of observations with only one vote.
+    self.connection.update %(
+      UPDATE observations
+      SET vote_cache=(
+        SELECT max(votes.value)/2
+        FROM namings, votes
+        WHERE namings.observation_id = observations.id and
+              votes.naming_id = namings.id
+      )
+      WHERE(
+        SELECT count(votes.value)
+        FROM namings, votes
+        WHERE namings.observation_id = observations.id and
+              votes.naming_id = namings.id
+      ) = 1
+    )
+
+    # Now get list of all the rest.
+    data = self.connection.select_all %(
+      SELECT id
+      FROM observations
+      WHERE(
+        SELECT count(votes.value)
+        FROM namings, votes
+        WHERE namings.observation_id = observations.id and
+              votes.naming_id = namings.id
+      ) > 1
+    )
+
+    # Recalculate consensus for these one at a time.
+    for d in data
+      id = d['id']
+      o = Observation.find(id)
+      o.calc_consensus
+    end
   end
+
+  # [This *must* be a typo... -JPH 20080327]
+  # protected
+  # def self.all_observations
+  #   find(:all,
+  #        :order => "'when' desc")
+  # end
 
   # ----------------------------------------
 

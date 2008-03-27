@@ -408,7 +408,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     params[:observation]["when(2i)"] = "3"
     params[:observation]["when(3i)"] = "9"
     params[:observation][:specimen]  = "0"
-    params[:vote] = {}            if !params[:vote]
+    params[:vote] = {}          if !params[:vote]
     params[:vote][:value] = "3" if !params[:vote][:value]
     post_requires_login(:create_observation, params, false)
     if observation_count == 1
@@ -418,8 +418,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     end
     assert((o_count + observation_count) == Observation.find(:all).length)
     assert((g_count + naming_count) == Naming.find(:all).length)
-    assert((n_count + name_count
-    ) == Name.find(:all).length)
+    assert((n_count + name_count) == Name.find(:all).length)
   end
 
   def test_construct_observation_simple
@@ -433,6 +432,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     nam = assigns(:naming)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_equal(@coprinus_comatus, nam.name) # Make sure it's the right name
+    assert_equal(1.5, obs.vote_cache)
     assert_not_nil(obs.rss_log)
   end
 

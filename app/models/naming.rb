@@ -27,6 +27,7 @@
 #   is_consensus?           Is this the community consensus?
 #   editable?               Has anyone voted (positively) on this naming?
 #   deletable?              Has anyone made this naming their favorite?
+#   N.refresh_vote_cache    Monster sql query to refresh all vote_caches.
 
 class Naming < ActiveRecord::Base
   belongs_to :observation
@@ -211,6 +212,19 @@ class Naming < ActiveRecord::Base
   # return true for that naming.  Otherwise it returns false for everything else.
   def is_consensus?
     self.observation.name == self.name
+  end
+
+  # Refresh the vote_cache column across all namings.  Used my db:migrate and
+  # admin tool.
+  def self.refresh_vote_cache
+    self.connection.update %(
+      UPDATE namings
+      SET vote_cache=(
+        SELECT sum(votes.value)/(count(votes.value)+1)
+        FROM votes
+        WHERE namings.id = votes.naming_id
+      )
+    )
   end
 
   validates_presence_of :name, :observation, :user
