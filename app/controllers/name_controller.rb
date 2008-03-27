@@ -504,15 +504,12 @@ class NameController < ApplicationController
     name_id = params[:id]
     @name = Name.find(name_id)
     locs = name_locs(name_id)
-    print "NameController.map:locs.length: #{locs.length}\n"
     @synonym_data = []
     synonym = @name.synonym
     if synonym
-      print "NameController.map:locs.length: have synonym\n"
       for n in synonym.names
         if n != @name
           syn_locs = name_locs(n.id)
-          print "NameController.map:syn_locs.length: #{syn_locs.length}\n"
           for l in syn_locs
             unless locs.member?(l)
               locs.push(l)
@@ -521,7 +518,6 @@ class NameController < ApplicationController
         end
       end
     end
-    print "NameController.map:locs.length 2: #{locs.length}\n"
     @map = nil
     @header = nil
     if locs.length > 0
