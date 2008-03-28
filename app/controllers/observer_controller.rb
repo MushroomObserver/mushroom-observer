@@ -1063,7 +1063,7 @@ class ObserverController < ApplicationController
 
   # I'm going to let anyone who's logged in do this for now.
   def refresh_vote_cache
-    Naming.refresh_vote_cache
+    # Naming.refresh_vote_cache
     Observation.refresh_vote_cache
     flash_notice "Refreshed vote caches."
     redirect_to :action => 'index'

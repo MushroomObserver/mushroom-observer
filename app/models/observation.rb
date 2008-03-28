@@ -423,33 +423,33 @@ class Observation < ActiveRecord::Base
   def self.refresh_vote_cache
 
     # Catch all observations with no namings.
-    self.connection.update %(
-      UPDATE observations
-      SET vote_cache = NULL
-      WHERE(
-        SELECT count(votes.value)
-        FROM namings, votes
-        WHERE namings.observation_id = observations.id and
-              votes.naming_id = namings.id
-      ) = 0
-    )
+    # self.connection.update %(
+    #   UPDATE observations
+    #   SET vote_cache = NULL
+    #   WHERE(
+    #     SELECT count(votes.value)
+    #     FROM namings, votes
+    #     WHERE namings.observation_id = observations.id and
+    #           votes.naming_id = namings.id
+    #   ) = 0
+    # )
 
-    # Catch simple case of observations with only one vote.
-    self.connection.update %(
-      UPDATE observations
-      SET vote_cache=(
-        SELECT max(votes.value)/2
-        FROM namings, votes
-        WHERE namings.observation_id = observations.id and
-              votes.naming_id = namings.id
-      )
-      WHERE(
-        SELECT count(votes.value)
-        FROM namings, votes
-        WHERE namings.observation_id = observations.id and
-              votes.naming_id = namings.id
-      ) = 1
-    )
+    # # Catch simple case of observations with only one vote.
+    # self.connection.update %(
+    #   UPDATE observations
+    #   SET vote_cache=(
+    #     SELECT max(votes.value)/2
+    #     FROM namings, votes
+    #     WHERE namings.observation_id = observations.id and
+    #           votes.naming_id = namings.id
+    #   )
+    #   WHERE(
+    #     SELECT count(votes.value)
+    #     FROM namings, votes
+    #     WHERE namings.observation_id = observations.id and
+    #           votes.naming_id = namings.id
+    #   ) = 1
+    # )
 
     # Now get list of all the rest.
     data = self.connection.select_all %(
