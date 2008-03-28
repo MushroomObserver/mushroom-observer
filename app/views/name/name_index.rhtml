@@ -4,7 +4,8 @@
 <% if @title != 'Name Index' %>
     <%= link_to('Name Index', :action => 'name_index')%> |
 <% end %>
-<%= link_to('Bulk Name Edit', :action => 'bulk_name_edit') %><br/>
+<%= link_to('Bulk Name Edit', :action => 'bulk_name_edit') %>
+| <%= link_to('Add Name', :action => 'create_name') %><br/>
 <div id="Title"><%= @title %></div>
 
 <center><big><%=

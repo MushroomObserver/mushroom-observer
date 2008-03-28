@@ -1,7 +1,5 @@
 Release each of the following as they get completed:
 
-add_name page (from name_index) (4)
-
 Add a 'needs page' (4)
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)

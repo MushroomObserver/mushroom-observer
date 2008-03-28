@@ -63,6 +63,11 @@ class NameControllerTest < Test::Unit::TestCase
     assert_form_action :action => 'edit_name'
   end
 
+  def test_create_name
+    requires_login(:create_name)
+    assert_form_action :action => 'create_name'
+  end
+
   def test_bulk_name_edit_list
     requires_login :bulk_name_edit
     assert_form_action :action => 'bulk_name_edit'
@@ -112,6 +117,53 @@ class NameControllerTest < Test::Unit::TestCase
     get_with_dump :map, :id => @conocybe_filaris.id
     assert_response :success
     assert_template 'map'
+  end
+
+  # ----------------------------
+  #  Create name.
+  # ----------------------------
+
+  def test_create_name_post
+    text_name = "Amanita velosa"
+    author = "Lloyd"
+    name = Name.find_by_text_name(text_name)
+    assert_nil(name)
+    params = {
+      :name => {
+        :text_name => text_name,
+        :author => author,
+        :rank => :Species,
+        :citation => "__Mycol. Writ.__ 9(15). 1898.",
+        :notes => ""
+      }
+    }
+    post_requires_login(:create_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    name = Name.find_by_text_name(text_name)
+    assert(name)
+    assert_equal(text_name, name.text_name)
+    assert_equal(author, name.author)
+    assert_equal(@rolf, name.user)
+  end
+
+  def test_create_name_existing
+    name = @conocybe_filaris
+    text_name = name.text_name
+    count = Name.find(:all).length
+    params = {
+      :name => {
+        :text_name => text_name,
+        :author => "",
+        :rank => :Species,
+        :citation => "",
+        :notes => ""
+      }
+    }
+    post_requires_login(:create_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    name = Name.find_by_text_name(text_name)
+    assert_equal(@conocybe_filaris, name)
+    assert_equal(count, Name.find(:all).length)
   end
 
   # ----------------------------

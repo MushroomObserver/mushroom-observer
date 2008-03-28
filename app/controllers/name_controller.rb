@@ -255,6 +255,47 @@ class NameController < ApplicationController
     @other_versions = PastName.find(:all, :conditions => "name_id = %s" % @past_name.name_id, :order => "version desc")
   end
 
+  # name_index.rhtml -> create_name.rhtml
+  def create_name
+    @user = session['user']
+    if verify_user()
+      if request.method == :post
+        text_name = (params[:name][:text_name] || '').strip
+        author = (params[:name][:author] || '').strip
+        name_str = text_name
+        matches = nil
+        if author != ''
+          matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
+          name_str += " #{author}"
+        else
+          matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
+        end
+        if matches.length > 0
+          flash_error "The name #{name_str} already exists."
+          name = matches[0]
+        else
+          names = Name.names_from_string(name_str)
+          name = names.last
+          if name.nil?
+            raise "Unable to create the name %s." % name_str
+          end
+          name.citation = params[:name][:citation]
+          name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
+          name.notes = params[:name][:notes]
+          for n in names
+            n.user_id = @user.id
+            n.save
+          end
+        end
+        redirect_to :action => 'show_name', :id => name
+      else
+        @name = Name.new
+        @name.rank = :Species
+        @can_make_changes = true
+      end
+    end
+  end
+
   # show_name.rhtml -> edit_name.rhtml
   # Updates modified and saves changes
   def edit_name
@@ -592,8 +633,12 @@ class NameController < ApplicationController
   # Finds the intended name and if another name matching name exists,
   # then ensure it is mergable.  Returns [target_name, other_name]
   def find_target_names(id_str, text_name, author, notes)
-    id = id_str.to_i
-    page_name = Name.find(id)
+    page_name = nil
+    id = nil
+    if id_str
+      id = id_str.to_i
+      page_name = Name.find(id)
+    end
     other_name = nil
     matches = []
     if author != ''
@@ -614,6 +659,8 @@ class NameController < ApplicationController
         if notes && (notes != '') && (other_name.notes != notes)
           raise "The name, %s, is already in use and %s has notes" % [text_name, other_name.search_name]
         end
+        result = [other_name, page_name]
+      elsif page_name.nil?
         result = [other_name, page_name]
       elsif !page_name.has_notes?
         # Neither has notes, so we need another criterion

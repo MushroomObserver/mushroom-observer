@@ -1,0 +1,11 @@
+<% @title = 'Create Name' %>
+
+<div id="Title"><%= @title %></div>
+
+<% form_tag(:action => 'create_name', :id => @name) do %>
+<br/>
+<center><%= submit_tag 'Save Name' %></center>
+
+<%= render :partial => 'form_names' %>
+
+<% end %>
