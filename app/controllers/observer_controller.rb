@@ -49,6 +49,7 @@ class ObserverController < ApplicationController
                                                     :show_user_observations,
                                                     :show_votes,
                                                     :species_lists_by_title,
+                                                    :textilize_sandbox,
                                                     :throw_error,
                                                     :users_by_contribution])
 
@@ -90,6 +91,14 @@ class ObserverController < ApplicationController
     @min_pos_vote = Vote.agreement(Vote.min_pos_vote).l
     @min_neg_vote = Vote.agreement(Vote.min_neg_vote).l
     @maximum_vote = Vote.agreement(Vote.maximum_vote).l
+  end
+
+  def textile_sandbox
+    if request.method != :post
+      @code = nil
+    else
+      @code = params[:code]
+    end
   end
 
   # Perform the various searches.

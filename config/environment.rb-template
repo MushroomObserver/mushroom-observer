@@ -11,3 +11,14 @@ ActionMailer::Base.smtp_settings = {
 	:user_name => "<username>",
 	:password => "<password>"
 }
+
+class RedCloth
+  def hard_break(text)
+    # This not only disables the stupid hard_breaks thing which breaks
+    # Textile rules, but it cleans up the work-around that we used to
+    # have to do to get it to delimit paragraphs.  In English, the regex
+    # below replaces any <br> preceded by or followed by one or more
+    # newlines and replaces the whole mess with two newlines.
+    text.gsub!(/(\n{1,}(<br *\/?>)+|(<br *\/?>)+\n{1,})/, "\n\n")
+  end
+end

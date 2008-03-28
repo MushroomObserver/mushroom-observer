@@ -2,6 +2,8 @@
 	Notes can be formated using the Textile markup system.<br/>
     __italic__ =&gt; <i>italic</i><br/>
     **bold** =&gt; <b>bold</b><br/>
-	<a target="_new" href="http://hobix.com/textile/">More details</a>
+    <%= link_to "More details",
+      { :controller => "observer", :action => "textile_sandbox" },
+      { :target => "_new" } %>
 </div>
 <!--[eoform:observation]-->
