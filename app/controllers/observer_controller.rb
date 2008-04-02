@@ -276,12 +276,10 @@ class ObserverController < ApplicationController
     id = params[:id]
     begin
       @observation = Observation.find(id)
-      old_name = @observation.name
+      flash_notice "old_name: #{@observation.name.text_name}"
       text = @observation.calc_consensus
-      new_name = @observation.name
+      flash_notice "new_name: #{@observation.name.text_name}"
       flash_notice text if !text.nil? && text != ""
-      flash_notice "old_name: #{old_name.text_name}"
-      flash_notice "new_name: #{new_name.text_name}"
     rescue
       flash_error "Caught exception."
     end
@@ -718,6 +716,7 @@ class ObserverController < ApplicationController
       if !@naming.save
         errors << "Unable to save the naming."
       end
+      @observation.namings.push(@naming)
       # Update vote and community consensus.
       @naming.change_vote(@user, @vote.value)
     end
@@ -789,14 +788,10 @@ class ObserverController < ApplicationController
     if !@naming.save
       flash_object_errors(@naming)
       return false
-    # Better to have change_vote() do it.
-    # elsif @vote.save
-    #   flash_warning "Naming was successfully created, however had trouble
-    #     saving your confidence level."
-    #   flash_object_errors(@vote)
     else
       flash_notice "Naming was successfully created."
     end
+    @observation.namings.push(@naming)
     #
     # Update vote and community consensus.
     @naming.change_vote(@user, @vote.value)
@@ -848,12 +843,8 @@ class ObserverController < ApplicationController
         flash_warning "However we were unable to create the new naming."
         flash_object_warnings(@naming)
         return false
-      # Better to have change_vote() do it.
-      # elsif !@vote.save
-      #   flash_warning "The new Naming was successfully created,
-      #     however we had trouble saving your confidence level."
-      #   flash_object_warnings(@vote)
       end
+      @observation.namings.push(@naming)
       #
       # Update community consensus.
       @naming.change_vote(@user, @vote.value);

@@ -145,15 +145,17 @@ class Naming < ActiveRecord::Base
       vote.save
     end
     # Update cached score.
-    Naming.connection.update %(
-      UPDATE namings
-      SET vote_cache=(
-        SELECT sum(votes.value)/(count(votes.value)+1)
-        FROM votes
-        WHERE namings.id = votes.naming_id
-      )
-      WHERE namings.id = #{self.id}
-    )
+    sum = 0
+    wgt = 0
+    for v in self.votes
+      sum += v.value * 1.0
+      wgt += 1.0
+    end
+    sum /= wgt + 1.0
+    if self.vote_cache != sum
+      self.vote_cache = sum
+      self.save
+    end
     # Update consensus.
     self.observation.calc_consensus
     return true

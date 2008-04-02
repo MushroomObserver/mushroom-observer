@@ -825,7 +825,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     #
     # Make sure observation was updated and referenced correctly.
     assert_equal(3, @coprinus_comatus_obs.namings.length)
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
+    assert_equal(@agaricus, @coprinus_comatus_obs.name)
     #
     # Make sure naming was created correctly and referenced.
     assert_equal(@coprinus_comatus_obs, naming.observation)
@@ -933,10 +933,10 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(1, naming.votes.length)
     #
     # Make sure observation was updated right.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_namings are right.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf))
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@rolf))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
     assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@dick))
   end
