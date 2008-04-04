@@ -20,5 +20,11 @@ class RedCloth
     # below replaces any <br> preceded by or followed by one or more
     # newlines and replaces the whole mess with two newlines.
     text.gsub!(/(\n{1,}(<br *\/?>)+|(<br *\/?>)+\n{1,})/, "\n\n")
+
+    # (Oops, the other old fix that needs to be unfixed is the line containing
+    # nothing but a dot.  This regexp removes them.  The ?= thingy is a zero-
+    # width look-ahead assertion; without it, it would skip every other line
+    # if there were multiple nothing-but-a-dot lines in a row.
+    text.gsub!(/\n\.(?=\n)/, "\n")
   end
 end
