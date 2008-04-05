@@ -63,15 +63,21 @@ class ImageControllerTest < Test::Unit::TestCase
   end
 
   def test_image_search
-    @request.session[:pattern] = "34"
+    @request.session[:pattern] = "Notes"
     get_with_dump :image_search
     assert_response :success
     assert_template 'list_images'
-    assert_equal "Images matching '34'", @controller.instance_variable_get('@title')
+    assert_equal "Images matching 'Notes'", @controller.instance_variable_get('@title')
     get_with_dump :image_search, { :page => 2 }
     assert_response :success
     assert_template 'list_images'
-    assert_equal "Images matching '34'", @controller.instance_variable_get('@title')
+    assert_equal "Images matching 'Notes'", @controller.instance_variable_get('@title')
+  end
+
+  def test_image_search_by_number
+    @request.session[:pattern] = "3"
+    get_with_dump :image_search
+    assert_redirected_to(:controller => "image", :action => "show_image")
   end
 
   def test_add_image

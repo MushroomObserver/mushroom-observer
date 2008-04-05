@@ -96,20 +96,32 @@ class ImageController < ApplicationController
     @user = session['user']
     @layout = calc_layout_params
     @pattern = session[:pattern] || ''
-    sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["n.search_name", "i.notes", "i.copyright_holder"], sql_pattern)
-    query = "select i.*, n.search_name
-      from images i, images_observations io, observations o, names n
-      where i.id = io.image_id and o.id = io.observation_id
-        and n.id = o.name_id and (#{conditions})
-      order by n.search_name, `when` desc"
-    session[:checklist_source] = :nothing
-    session[:observation_ids] = []
-    session[:observation] = nil
-    session[:image_ids] = query_ids(query)
-    @title = "Images matching '#{@pattern}'"
-    @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
-    render :action => 'list_images'
+    id = @pattern.to_i
+    image = nil
+    if @pattern == id.to_s
+      begin
+        image = Image.find(id)
+      rescue ActiveRecord::RecordNotFound
+      end
+    end
+    if image
+      redirect_to(:action => 'show_image', :id => id)
+    else
+      sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
+      conditions = field_search(["n.search_name", "i.notes", "i.copyright_holder"], sql_pattern)
+      query = "select i.*, n.search_name
+        from images i, images_observations io, observations o, names n
+        where i.id = io.image_id and o.id = io.observation_id
+          and n.id = o.name_id and (#{conditions})
+        order by n.search_name, `when` desc"
+      session[:checklist_source] = :nothing
+      session[:observation_ids] = []
+      session[:observation] = nil
+      session[:image_ids] = query_ids(query)
+      @title = "Images matching '#{@pattern}'"
+      @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
+      render :action => 'list_images'
+    end
   end
 
   # Show the 640x640 (max size) version of image.

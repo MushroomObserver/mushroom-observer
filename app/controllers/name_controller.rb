@@ -109,17 +109,30 @@ class NameController < ApplicationController
     store_location
     @user = session['user']
     @layout = calc_layout_params
-    @pattern = session[:pattern]
+    @pattern = session[:pattern] || ''
     @title = "Names matching '#{@pattern}'"
-    sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
-    conditions = field_search(["search_name", "notes", "citation"], sql_pattern)
-    session[:checklist_source] = :nothing
-    @name_data = Name.connection.select_all %(
-      SELECT distinct id, display_name
-      FROM names
-      WHERE #{conditions}
-      ORDER BY text_name asc, author asc
-    )
+    id = @pattern.to_i
+    @name_data = nil
+    if @pattern == id.to_s
+      begin
+        name = Name.find(id)
+        if name
+          @name_data = [{'id' => id, 'display_name' => name.display_name}]
+        end
+      rescue ActiveRecord::RecordNotFound
+      end
+    end
+    if @name_data.nil?
+      sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
+      conditions = field_search(["search_name", "notes", "citation"], sql_pattern)
+      session[:checklist_source] = :nothing
+      @name_data = Name.connection.select_all %(
+        SELECT distinct id, display_name
+        FROM names
+        WHERE #{conditions}
+        ORDER BY text_name asc, author asc
+      )
+    end
     len = @name_data.length
     if len == 1
       redirect_to :action => 'show_name', :id => @name_data[0]['id']

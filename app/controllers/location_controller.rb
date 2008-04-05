@@ -30,21 +30,33 @@ class LocationController < ApplicationController
   def list_place_names
     known_condition = ''
     undef_condition = ''
-    @pattern = params[:pattern]
-    if @pattern
-      sql_pattern = clean_sql_pattern(@pattern)
-      known_condition = "and l.display_name like '%#{sql_pattern}%'"
-      undef_condition = "and o.where like '%#{sql_pattern}%'"
-      logger.info("  ***  list_place_names: #{known_condition}, #{undef_condition}")
+    @pattern = params[:pattern] || ''
+    id = @pattern.to_i
+    loc = nil
+    if @pattern == id.to_s
+      begin
+        loc = Location.find(id)
+      rescue ActiveRecord::RecordNotFound
+      end
     end
-    known_query = "select o.location_id, l.display_name, count(1) as cnt
-      from observations o, locations l where o.location_id = l.id #{known_condition}
-      group by o.location_id, l.display_name order by l.display_name"
-    @known_data = Observation.connection.select_all(known_query)
-    undef_query = "select o.where, count(1) as cnt
-      from observations o where o.location_id is NULL #{undef_condition}
-      group by o.where order by cnt desc"
-    @undef_data = Observation.connection.select_all(undef_query)
+    if loc
+      redirect_to(:controller => 'location', :action => 'show_location', :id => loc)
+    else
+      if @pattern
+        sql_pattern = clean_sql_pattern(@pattern)
+        known_condition = "and l.display_name like '%#{sql_pattern}%'"
+        undef_condition = "and o.where like '%#{sql_pattern}%'"
+        logger.info("  ***  list_place_names: #{known_condition}, #{undef_condition}")
+      end
+      known_query = "select o.location_id, l.display_name, count(1) as cnt
+        from observations o, locations l where o.location_id = l.id #{known_condition}
+        group by o.location_id, l.display_name order by l.display_name"
+      @known_data = Observation.connection.select_all(known_query)
+      undef_query = "select o.where, count(1) as cnt
+        from observations o where o.location_id is NULL #{undef_condition}
+        group by o.where order by cnt desc"
+      @undef_data = Observation.connection.select_all(undef_query)
+    end
   end
 
   def map_locations

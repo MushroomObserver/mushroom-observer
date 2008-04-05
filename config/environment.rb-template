@@ -26,5 +26,8 @@ class RedCloth
     # width look-ahead assertion; without it, it would skip every other line
     # if there were multiple nothing-but-a-dot lines in a row.
     text.gsub!(/\n\.(?=\n)/, "\n")
+
+    # Lone newlines get turned into explicit line breaks.
+    text.gsub!(/([^\n])\n([^\n])/, '\1<br/>\2')
   end
 end
