@@ -274,24 +274,12 @@ class ObserverController < ApplicationController
     # Looks harder for pattern since location_controller.where_search was using :pattern for a bit
     # and some of the search monkeys picked up on it.
     pattern = session[:where] || session[:pattern] || ""
-    id = pattern.to_i
-    loc = nil
-    if pattern == id.to_s
-      begin
-        loc = Location.find(id)
-      rescue ActiveRecord::RecordNotFound
-      end
-    end
-    if loc
-      redirect_to(:controller => 'location', :action => 'show_location', :id => loc)
-    else
-      sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-      show_selected_observations("Observations from '#{pattern}'", "observations.where like '#{sql_pattern}'",
-        "names.search_name asc, observations.`when` desc", :observation_ids,
-        [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => pattern}],
-         [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => pattern}],
-         [:location_all.l, {:controller => 'location', :action => 'list_place_names'}]])
-    end
+    sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
+    show_selected_observations("Observations from '#{pattern}'", "observations.where like '#{sql_pattern}'",
+      "names.search_name asc, observations.`when` desc", :observation_ids,
+      [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => pattern}],
+       [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => pattern}],
+       [:location_all.l, {:controller => 'location', :action => 'list_place_names'}]])
   end
 
   # I'm tired of tweaking show_observation to call calc_consensus for debugging.
