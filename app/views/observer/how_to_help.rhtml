@@ -1,0 +1,25 @@
+<% @title = :how_help_title.l %>
+<div id="Title"><%= @title %></div>
+
+<p>
+    <%= textilize(:how_help_intro.l % "#{DOMAIN}/observer/ask_webmaster_question") %>
+</p>
+
+<ol class="Name">
+    <li>
+        <%= :how_help_designers.l %>:
+        <span class="regular"><%= :how_help_designers_exp.l %></span>
+    </li>
+    <li>
+        <%= :how_help_developers.l %>:
+        <span class="regular"><%= textilize_without_paragraph(:how_help_developers_exp.l % "#{SVN_REPOSITORY}/trunk/TODO") %></span>
+    </li>
+    <li>
+        <%= :how_help_translators.l %>:
+        <span class="regular"><%= :how_help_translators_exp.l %></span>
+    </li>
+    <li>
+        <%= :how_help_funding.l %>:
+        <span class="regular"><%= :how_help_funding_exp.l %></span>
+    </li>
+</ol>

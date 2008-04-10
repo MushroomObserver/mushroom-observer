@@ -12,6 +12,11 @@ pre {
   font-size: 11px;
 }
 
+.regular {
+  font-size: 13px;
+  font-weight: normal;
+}
+
 .gmap {
   background-color: #ffffff;
   color: #000000;

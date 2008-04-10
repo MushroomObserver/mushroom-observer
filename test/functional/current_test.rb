@@ -27,6 +27,12 @@ class CurrentTest < Test::Unit::TestCase
   def teardown
   end
 
+  def test_how_to_help
+    get_with_dump :how_to_help
+    assert_response :success
+    assert_template 'how_to_help'
+  end
+
   def test_trivial
     assert_equal(1+1, 2)
   end

@@ -548,6 +548,7 @@ welcome_note: >
 ## TO BE TRANSLATED
 
 app_banner: Mushroom<br/>Observer
+app_how_to_help: How To Help
 app_latest: Latest
 app_latest_changes: Changes by Users
 
@@ -776,6 +777,37 @@ how_maps: >
   If this happens, you can propose a merge by editing one of the locations and change the Where field to the value of the 
   other location. This will not have any immediate effect, but a warning will be given and an email will be sent to the
   site administrators with the details. Merging defined locations is restricted since that could cause significant data loss.</p>
+
+
+# observer/how_to_help
+how_help_designers: Designers
+how_help_designers_exp: >
+  The site is pretty spare and could use an artisitc eye to help with
+  things like icons and themes.
+
+how_help_developers: Developers
+how_help_developers_exp: >
+  We have "lots of ideas":%s about how to improve the site.  The
+  framework, Ruby on Rails, is really easy to pick up and we are more than happy
+  to mentor anyone who wants to dive in.
+
+how_help_intro: >
+ This page provides a list of skills that we could really use some help with.  If
+ you're interested in helping out just "send an email":%s and let us know what you want
+ to do.
+
+how_help_funding: Funding
+how_help_funding_exp: >
+  So far Mushroom Observer has been an entirely volunteer effort, but even
+  a single full time developer would make a huge difference.
+
+how_help_title: How to Help Make Mushroom Observer Better
+
+how_help_translators: Translators
+how_help_translators_exp: >
+  The site is set up to support foreign languages.  All we need is someone
+  to do the translations.
+
 
 # observer/intro
 intro_talks: >

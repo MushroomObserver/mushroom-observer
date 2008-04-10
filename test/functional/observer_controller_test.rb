@@ -73,6 +73,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     end
   end
 
+  def test_how_to_help
+    get_with_dump :how_to_help
+    assert_response :success
+    assert_template 'how_to_help'
+  end
+
   def test_how_to_use
     get_with_dump :how_to_use
     assert_response :success

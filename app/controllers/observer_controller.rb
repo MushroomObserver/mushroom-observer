@@ -11,6 +11,7 @@ class ObserverController < ApplicationController
                                                     :auto_complete_for_name_name,
                                                     :color_themes,
                                                     :do_load_test,
+                                                    :how_to_help,
                                                     :how_to_use,
                                                     :images_by_title,
                                                     :index,
