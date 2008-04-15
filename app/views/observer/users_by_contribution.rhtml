@@ -6,17 +6,17 @@
     <td valign="top" width="50%">
         <table cellpadding="5" cellspacing="5" border="0">
         	<%
-        		for metric, user_id, user_name in @user_ranking
-        		    if metric > 0 %>
+        		for user in @users
+        		    if user && user.contribution > 0 %>
         			<tr>
         				<td class="Data">
-                            <%= user_link(user_id, user_name) %>
+                            <%= user_link(user.id, user.legal_name) %>
         				</td>
         				<td>
-        				    <%= link_to("Observations", :action => "show_user_observations", :id => user_id) %>
+        				    <%= link_to("Observations", :action => "show_user_observations", :id => user) %>
         				</td>
         				<td>
-                            <%= user_link(user_id, metric) %>
+                            <%= user_link(user.id, user.contribution) %>
         				</td>
         			</tr>
         			<% end %>
@@ -32,18 +32,25 @@
         <br/><br/>
         The current formula is a weighted sum of each
         contribution.  The current weighting is:<br/><br/>
-        Images: <%= FIELD_WEIGHTS[:images] %><br/>
-        Current name changes: <%= FIELD_WEIGHTS[:names] %><br/>
-        Previous name changes: <%= FIELD_WEIGHTS[:past_names] %><br/>
-        Current locations: <%= FIELD_WEIGHTS[:locations] %><br/>
-        Previous location edits: <%= FIELD_WEIGHTS[:past_locations] %><br/>
-        Species lists: <%= FIELD_WEIGHTS[:species_lists] %><br/>
-        Species list entries: <%= FIELD_WEIGHTS[:species_list_entries] %><br/>
-        Comments: <%= FIELD_WEIGHTS[:comments] %><br/>
-        Observations: <%= FIELD_WEIGHTS[:observations] %><br/>
+        <table style="margin-left:20px">
+          <% for field in ALL_FIELDS %>
+            <% if FIELD_WEIGHTS[field] > 0 %>
+              <%= "<tr><td nowrap='nowrap'>#{FIELD_TITLES[field]} &nbsp; </td><td>#{FIELD_WEIGHTS[field]}</td></tr>" %>
+            <% end %>
+          <% end %>
+        </table>
         <br/>
         Thus an observation of a species not previously in the site with
-        3 images would count as 3*<%= FIELD_WEIGHTS[:images] %>+1*<%= FIELD_WEIGHTS[:names] %>+1*<%= FIELD_WEIGHTS[:observations] %> = <%= 3*FIELD_WEIGHTS[:images] + 1*FIELD_WEIGHTS[:names] + 1*FIELD_WEIGHTS[:observations] %> points.<br/>
+        3 images would count as:<br/>
+        <table style="margin-left:20px">
+          <tr><td></td><td>3 * <%= FIELD_WEIGHTS[:images] %> &nbsp; </td><td>(images)</td></tr>
+          <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:names] %></td><td>(new name)</td></tr>
+          <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:observations] %></td><td>(observation)</td></tr>
+          <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:namings] %></td><td>(proposed ID)</td></tr>
+          <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:votes] %></td><td>(vote on ID)</td></tr>
+          <tr><td colspan="3"><hr/></td></tr>
+          <tr><td></td><td colspan="2"><%= 3*FIELD_WEIGHTS[:images] + FIELD_WEIGHTS[:names] + FIELD_WEIGHTS[:observations] + FIELD_WEIGHTS[:namings] + FIELD_WEIGHTS[:votes] %> points</td></tr>
+        </table>
         <br/>
         These weights or the overall method of ranking is likely
         to change over time based on feedback from the members of

@@ -8,6 +8,7 @@ rolf:
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: rolf@collectivesource.com
   verified: 2006-03-02 21:14:00
+  contribution: 10
 
 # Mary has no images
 mary:
@@ -17,6 +18,7 @@ mary:
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: mary@collectivesource.com
   verified: 2006-03-02 21:14:00
+  contribution: 10
 
 # Junk gets denied
 junk:
@@ -25,6 +27,7 @@ junk:
   name: Junk Box
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: junk@collectivesource.com
+  contribution: 10
 
 # Need third for testing votes
 dick:
@@ -33,3 +36,4 @@ dick:
   name: Tricky Dick
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   verified: 2006-03-02 21:14:00
+  contribution: 10

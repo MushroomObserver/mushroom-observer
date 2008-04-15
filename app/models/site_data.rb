@@ -2,7 +2,7 @@
 #  Copyright (c) 2007. All rights reserved.
 
 # This file manages user rankings.
-# 
+#
 # Global Constants:
 #   ALL_FIELDS                List of fields presumably in pleasing order.
 #   FIELD_WEIGHTS             Weight of each field in user metric.
@@ -10,20 +10,19 @@
 #   FIELD_TABLES              Name of table to count rows of for each field.
 #                             (only the exceptions; default is table name is
 #                             same as field name)
-# 
+#
 # Public:
 #   get_site_data             Returns stats for entire site.
 #   get_user_data(user_id)    Returns stats for given user.
-#   get_user_ranking          Returns list of users sorted by ranking.
-#   get_user_metric(id)       Returns "score" of a given user.
-# 
+#   get_all_user_data         Returns stats for all users.
+#
 # Private:
 #   calc_metric(fields)       Calculates score of a single user.
 #   get_field_count(field)    Looks up number of entries in a given table.
 #   load_user_data(id=nil)    Populates @user_data (some stuff hard-coded).
 #   load_field_counts(field, query=nil)
 #                             Populates a single column in @user_data.
-# 
+#
 # Static internal data structure: (created by load_user_data)
 #   @user_data        This is a 2-D hash keyed on user_id then field name:
 #     :images           Number of images the user has posted.
@@ -42,6 +41,8 @@ ALL_FIELDS = [
   :species_list_entries,
   :comments,
   :observations,
+  :namings,
+  :votes,
   :users
 ]
 
@@ -55,23 +56,27 @@ FIELD_WEIGHTS = {
   :species_list_entries => 1,
   :comments => 1,
   :observations => 1,
+  :namings => 1,
+  :votes => 1,
   :users => 0
 }
 
 FIELD_TITLES = {
   :images => "Images",
-  :names => "Names",
-  :past_names => "Previous Name Edits",
-  :locations => "Locations",
-  :past_locations => "Previous Location Edits",
+  :names => "New Names",
+  :past_names => "Name Changes",
+  :locations => "New Locations",
+  :past_locations => "Location Changes",
   :species_lists => "Species Lists",
   :species_list_entries => "Species List Entries",
   :comments => "Comments",
   :observations => "Observations",
+  :namings => "Proposed IDs",
+  :votes => "Votes",
   :users => "Members"
 }
 
-# Default is field.to_s
+# Default is field.to_s.  This is the table it queries to get the number of objects.
 FIELD_TABLES = {
   :species_list_entries => "observations_species_lists",
 }
@@ -90,28 +95,20 @@ class SiteData
     @user_data[@user_id]
   end
 
-  def get_user_ranking
-    load_user_data
-    user_ranking = []
-    for k, v in @user_data
-      metric = calc_metric(v)
-      user_ranking.push([metric, v[:id], v[:name]])
-    end
-    user_ranking.sort.reverse
-  end
-
-  def get_user_metric(id)
-    load_user_data(id)
-    calc_metric(@user_data[id])
+  def get_all_user_data
+    load_user_data(nil)
   end
 
 private
   def calc_metric(fields)
     metric = 0
-    for field in ALL_FIELDS
-      count = fields[field] || 0
-      metric += FIELD_WEIGHTS[field] * count
+    if fields
+      for field in ALL_FIELDS
+        count = fields[field] || 0
+        metric += FIELD_WEIGHTS[field] * count
+      end
     end
+    fields[:metric] = metric
     return metric
   end
 
@@ -138,28 +135,48 @@ private
       @user_id = id.to_i
       users = [User.find(id)]
     end
+
+    # Fill in table by performing one query for each object being counted.
     @user_data = {}
     for user in users
       @user_data[user.id] = { :name => user.legal_name, :id => user.id }
     end
-    load_field_counts(:images) # 20
-    load_field_counts(:names) # 10
-    load_field_counts(:past_names) # 10
-    load_field_counts(:locations) # 5
-    load_field_counts(:past_locations) # 5
-    load_field_counts(:species_lists) # 5
-    load_field_counts(:comments) # 1
-    load_field_counts(:observations) # 1
-    query = ""
-    if @user_id
-      query = "select count(*) as c, user_id from species_lists, observations_species_lists " +
-        "where species_lists.id=observations_species_lists.species_list_id and user_id = %s " % @user_id +
-        "group by user_id order by c desc"
-    else
-      query = "select count(*) as c, user_id from species_lists, observations_species_lists " +
-        "where species_lists.id=observations_species_lists.species_list_id and user_id > 0 group by user_id order by c desc"
+    for field in ALL_FIELDS
+      table = FIELD_TABLES[field]
+      if !table
+        load_field_counts(field) if field != :users
+      else
+        # This exception only occurs for species list entries for the moment.
+        query = ""
+        if @user_id
+          query = %(
+            SELECT count(*) as c, user_id
+            FROM species_lists s, observations_species_lists os
+            WHERE s.id=os.species_list_id and user_id = #{@user_id}
+            GROUP BY user_id
+            ORDER BY c desc
+          )
+        else
+          query = %(
+            SELECT count(*) as c, user_id
+            FROM species_lists s, observations_species_lists os
+            WHERE s.id=os.species_list_id and user_id > 0
+            GROUP BY user_id
+            ORDER BY c desc
+          )
+        end
+        load_field_counts(:species_list_entries, query)
+      end
     end
-    load_field_counts(:species_list_entries, query) # 1
+
+    # Now fix any user contribution caches that have the incorrect number.
+    for user in users
+      contribution = calc_metric(@user_data[user.id])
+      if user.contribution != contribution
+        user.contribution = contribution
+        user.save
+      end
+    end
   end
 
   def load_field_counts(field, query=nil)

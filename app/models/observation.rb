@@ -130,8 +130,10 @@ class Observation < ActiveRecord::Base
       for vote in naming.votes
         user_id = vote.user_id
         val = vote.value
-        wgt = user_wgts[user_id]
-        wgt = user_wgts[user_id] = 1 if wgt.nil?   # User.get_user_metric(pn.user_id)
+        wgt = user_wgts[user_id] 
+        if wgt.nil?
+          wgt = user_wgts[user_id] = vote.user_weight
+        end
         # It may be possible in the future for us to weight some "special" users zero, who knows...
         # (It can cause a division by zero below if we ignore zero weights.)
         if wgt > 0
@@ -181,7 +183,7 @@ class Observation < ActiveRecord::Base
     best_id  = nil
     for taxon_id in votes.keys
       wgt = votes[taxon_id][1]
-      val = votes[taxon_id][0].to_f / (wgt + 1)
+      val = votes[taxon_id][0].to_f / (wgt + 1.0)
       age = taxon_ages[taxon_id]
 #result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>"
       if best_val.nil? ||
@@ -232,7 +234,7 @@ class Observation < ActiveRecord::Base
           for user_id in name_votes[name_id].keys
             user_vote = name_votes[name_id][user_id]
             wgt = user_vote[1]
-            val = user_vote[0].to_f / (wgt + 1)
+            val = user_vote[0].to_f / (wgt + 1.0)
             vote[0] += val * wgt
             vote[1] += wgt
           end

@@ -7,8 +7,10 @@
 #
 #   Vote.confidence(value)  Find vote closest in value to the
 #   Vote.agreement(value)   given one.  Returns string.
-#   confidence
-#   agreement
+#   obj.confidence
+#   obj.agreement
+#
+#   obj.user_weight         Calculate weight from user's contribution.
 #
 #   Vote.delete_vote    Value of the special "delete" vote.
 #   Vote.minimum_vote   Value of the weakest nonzero vote.
@@ -72,6 +74,12 @@ class Vote < ActiveRecord::Base
   def self.agreement(val);  return Vote.lookup_value(val, AGREEMENT_VALS);         end
   def confidence;           return Vote.lookup_value(self.value, CONFIDENCE_VALS); end
   def agreement;            return Vote.lookup_value(self.value, AGREEMENT_VALS);  end
+
+  # Calculate user weight from cotribution score.
+  def user_weight
+    contrib = self.user ? self.user.contribution : 0
+    contrib < 1 ? 0 : Math.log(contrib) / Math.log(10)
+  end
 
   protected
 

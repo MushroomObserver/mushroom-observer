@@ -1105,7 +1105,8 @@ class ObserverController < ApplicationController
 
   # users_by_contribution.rhtml
   def users_by_contribution
-    @user_ranking = SiteData.new.get_user_ranking
+    SiteData.new
+    @users = User.find(:all, :order => "contribution desc")
   end
 
   # show_user.rhtml

@@ -93,14 +93,25 @@ class Naming < ActiveRecord::Base
     for str, val in Vote.agreement_menu
       table[str] = {
         :num   => 0,
+        :wgt   => 0,
         :value => val,
         :users => [],
       }
     end
+    tot_sum = 0
+    tot_wgt = 0
     for v in self.votes
       str = v.agreement
+      wgt = v.user_weight
+      table[str][:wgt] += wgt
       table[str][:num] += 1
-      table[str][:users] << v.user
+      tot_sum += v.value * wgt
+      tot_wgt += wgt
+    end
+    val = tot_sum.to_f / (tot_wgt + 1.0)
+    if self.vote_cache != val
+      self.vote_cache = val
+      self.save
     end
     return table
   end
@@ -148,8 +159,9 @@ class Naming < ActiveRecord::Base
     sum = 0
     wgt = 0
     for v in self.votes
-      sum += v.value * 1.0
-      wgt += 1.0
+      w = v.user_weight
+      sum += v.value * w
+      wgt += w
     end
     sum /= wgt + 1.0
     if self.vote_cache != sum
@@ -187,7 +199,7 @@ class Naming < ActiveRecord::Base
   # from the owner of the corresponding observation.  Note, multiple namings
   # can return true for a given observation.
   def is_owners_favorite?
-    self.is_users_favorite?(self.user)
+    self.is_users_favorite?(self.observation.user)
   end
 
   # Returns true if this naming has received the highest positive vote

@@ -943,7 +943,8 @@ show_votes_score: Score
 show_votes_users: Users
 show_votes_average: Average
 show_votes_close: Close
-show_votes_total: Overall Score (sum/n+1)
+show_votes_total: Overall Score<br/>(weighted sum/n+1)
+show_votes_weight: Weight
 
 
 # location/show_past_location

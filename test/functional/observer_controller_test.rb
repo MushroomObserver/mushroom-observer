@@ -1365,14 +1365,10 @@ class ObserverControllerTest < Test::Unit::TestCase
     for str in table.keys
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
-        assert(table[str][:users].member?(@rolf))
-        assert(table[str][:users].member?(@mary))
       elsif str == str1
         assert_equal(1, table[str][:num])
-        assert(table[str][:users].member?(@rolf))
       elsif str == str2
         assert_equal(1, table[str][:num])
-        assert(table[str][:users].member?(@mary))
       else
         assert_equal(0, table[str][:num])
       end
