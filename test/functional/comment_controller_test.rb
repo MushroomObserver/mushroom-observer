@@ -53,6 +53,7 @@ class CommentControllerTest < Test::Unit::TestCase
     params = {"id"=>comment.id.to_s}
     assert("rolf" == comment.user.login)
     requires_user(:destroy_comment, :show_comment, params, false)
+    assert_equal(9, @rolf.reload.contribution)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = Observation.find(obs.id) # Need to reload observation to pick up changes
     assert(!obs.comments.member?(comment))
@@ -70,6 +71,7 @@ class CommentControllerTest < Test::Unit::TestCase
     }
     post_requires_login :add_comment, params, false
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(11, @rolf.reload.contribution)
     obs = Observation.find(obs.id)
     assert(obs.comments.size == (comment_count + 1))
     comment = Comment.find(:all).last
@@ -116,6 +118,7 @@ class CommentControllerTest < Test::Unit::TestCase
     }
     assert("rolf" == comment.user.login)
     post_requires_user(:edit_comment, :show_comment, params, false)
+    assert_equal(10, @rolf.reload.contribution)
     comment = Comment.find(comment.id)
     assert(comment.summary == "New Summary")
     assert(comment.comment == "New text.")

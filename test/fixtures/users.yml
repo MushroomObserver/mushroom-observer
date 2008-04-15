@@ -35,5 +35,6 @@ dick:
   login: dick
   name: Tricky Dick
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  email: dick@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10

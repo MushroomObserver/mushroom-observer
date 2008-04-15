@@ -425,6 +425,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert((o_count + observation_count) == Observation.find(:all).length)
     assert((g_count + naming_count) == Naming.find(:all).length)
     assert((n_count + name_count) == Name.find(:all).length)
+    assert_equal(10+observation_count+2*naming_count+10*name_count, @rolf.reload.contribution)
   end
 
   def test_construct_observation_simple
@@ -604,6 +605,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:edit_observation, ["observer", "show_observation"], params, false, "mary")
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(new_where, obs.where)
     assert_equal("2001-02-03", obs.when.to_s)
@@ -628,6 +630,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:edit_observation, ["observer", "show_observation"], params, false, "mary")
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:observation)
     assert_equal(where, obs.where)
     assert_equal(modified, obs.rss_log.modified)
@@ -668,6 +671,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_response(:success)
     assert_template("edit_naming")
+    assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
@@ -684,6 +688,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    # Clones naming, creates Easter sp and E. bunny, but no votes.
+    assert_equal(31, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_equal(new_name, nam.text_name)
     assert_not_equal(old_name, nam.text_name)
@@ -701,6 +707,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_response(:success)
     assert_template("edit_naming")
+    assert_equal(10, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
@@ -717,6 +724,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    # Must be cloning naming with no vote.
+    assert_equal(11, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_equal(new_name, nam.name.text_name)
     assert_equal(new_name + " sensu Arora", nam.text_name)
@@ -734,6 +743,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_response(:success)
     assert_template("edit_naming")
+    assert_equal(10, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
     assert_equal(old_name, nam.text_name)
@@ -752,6 +762,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    # Must be cloning naming, with no vote.
+    assert_equal(11, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(start_name, nam.name)
     assert_equal(chosen_name, nam.name)
@@ -769,6 +781,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:edit_naming, ["observer", "show_observation"], params, false)
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    # Must be cloning the naming, but no votes?
+    assert_equal(11, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(start_name, nam.name)
     assert_equal(new_text_name, nam.name.text_name)
@@ -821,6 +835,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(n_count + 0, Name.find(:all).length)
     assert_equal(v_count + 1, Vote.find(:all).length)
     assert_equal(nr_count + 3, NamingReason.find(:all).length)
+    #
+    # Make sure contribution is updated correctly.
+    assert_equal(12, @rolf.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -882,6 +899,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :vote => { :value => "-1" },
     }
     post_requires_login(:create_naming, params, false)
+    assert_equal(12, @rolf.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -916,6 +934,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :vote => { :value => "3" },
     }
     post_requires_login(:create_naming, params, false, "dick")
+    assert_equal(12, @dick.reload.contribution)
     naming = Naming.find(:all).last
     #
     # Make sure the right number of objects were created.
@@ -957,8 +976,9 @@ class ObserverControllerTest < Test::Unit::TestCase
       :vote => { :value => "3" },
     }
     post_requires_login(:create_naming, params, false, "dick")
-    naming = Naming.find(:all).last
     assert_redirected_to(:controller => "observer", :action => "show_observation", :id => @coprinus_comatus_obs.id)
+    assert_equal(12, @dick.reload.contribution)
+    naming = Naming.find(:all).last
     assert_equal("Conocybe filaris", naming.name.text_name)
     assert_equal("(With) Author", naming.name.author)
     assert_equal(@conocybe_filaris.id, naming.name_id)
@@ -982,6 +1002,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:cast_vote, params, false, "dick")
+    assert_equal(11, @dick.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -1006,6 +1027,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     # get demoted and his preference should change.
     # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
     @coprinus_comatus_naming.change_vote(@dick, 3)
+    assert_equal(12, @dick.reload.contribution)
     @coprinus_comatus_obs.reload
     @coprinus_comatus_naming.reload
     @coprinus_comatus_other_naming.reload
@@ -1029,6 +1051,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:cast_vote, params, false, "rolf")
+    assert_equal(10, @rolf.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -1056,6 +1079,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:cast_vote, params, false, "rolf")
+    assert_equal(10, @rolf.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -1085,6 +1109,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:cast_vote, params, false, "rolf")
+    assert_equal(10, @rolf.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -1113,6 +1138,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_cast_vote_mary
     @coprinus_comatus_other_naming.change_vote(@dick, 3)
     assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
+    assert_equal(11, @dick.reload.contribution)
     #
     params = {
       :vote => {
@@ -1121,6 +1147,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:cast_vote, params, false, "mary")
+    assert_equal(9, @mary.reload.contribution)
     #
     # Make sure everything I need is reloaded.
     @coprinus_comatus_obs.reload
@@ -1145,6 +1172,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_rolf_destroy_rolfs_naming
     # First delete Mary's vote for it.
     @coprinus_comatus_naming.change_vote(@mary, Vote.delete_vote)
+    assert_equal(9, @mary.reload.contribution)
     #
     old_naming_id = @coprinus_comatus_naming.id
     old_vote1_id = @coprinus_comatus_owner_vote.id
@@ -1196,6 +1224,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     #
     # Make Dick prefer it.
     @coprinus_comatus_naming.change_vote(@dick, 3)
+    assert_equal(11, @dick.reload.contribution)
     #
     # Have Rolf try to destroy it.
     params = { :id => @coprinus_comatus_naming.id }
@@ -1243,8 +1272,8 @@ class ObserverControllerTest < Test::Unit::TestCase
         "4" => { :check => "0", :notes => "" }
       }
     }
-    post_requires_user(:edit_naming, ['observer', 'show_observation'],
-      params, false, "rolf")
+    post_requires_user(:edit_naming, ['observer', 'show_observation'], params, false, "rolf")
+    assert_equal(10, @rolf.reload.contribution)
     #
     # Make sure the right number of objects were created.
     assert_equal(o_count + 0, Observation.find(:all).length)
@@ -1302,8 +1331,8 @@ class ObserverControllerTest < Test::Unit::TestCase
         "4" => { :check => "0", :notes => "" }
       }
     }
-    post_requires_user(:edit_naming, ['observer', 'show_observation'],
-      params, false, "rolf")
+    post_requires_user(:edit_naming, ['observer', 'show_observation'], params, false, "rolf")
+    assert_equal(12, @rolf.reload.contribution)
     #
     # Make sure the right number of objects were created.
     assert_equal(o_count + 0, Observation.find(:all).length)

@@ -78,6 +78,7 @@ class LocationControllerTest < Test::Unit::TestCase
     post_requires_login(:create_location, params, false)
     assert_redirected_to(:controller => "location", :action => "show_location")
     assert_equal(count + 1, Location.find(:all).length)
+    assert_equal(15, @rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
   end
@@ -190,6 +191,7 @@ class LocationControllerTest < Test::Unit::TestCase
     params[:id] = loc.id
     post_requires_login(:edit_location, params, false)
     assert_redirected_to(:controller => "location", :action => "show_location")
+    assert_equal(15, @rolf.reload.contribution)
 
     # Should have created a PastLocation
     assert_equal(count + 1, PastLocation.find(:all).length)
@@ -234,6 +236,7 @@ class LocationControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "location", :action => "show_location")
     assert(loc_count == Location.find(:all).length)
     assert(past_loc_count == PastLocation.find(:all).length)
+    assert_equal(10, @rolf.reload.contribution)
   end
 
   def test_update_location_admin_merge

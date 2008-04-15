@@ -124,6 +124,7 @@ class ImageControllerTest < Test::Unit::TestCase
     post_requires_login(:license_updater, params, false)
     assert_response :success
     assert_template 'license_updater'
+    assert_equal(10, @rolf.reload.contribution)
     target_count_after = Image.find_all_by_user_id_and_license_id(user_id, target_license.id).length
     assert(target_count_after < target_count)
     new_count_after = Image.find_all_by_user_id_and_license_id(user_id, new_license.id).length
@@ -143,6 +144,7 @@ class ImageControllerTest < Test::Unit::TestCase
     params = {"id"=>obs.id.to_s, "selected"=>selected}
     post_requires_login(:remove_images, params, false, "mary")
     assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(10, @mary.reload.contribution)
     obs2 = Observation.find(obs.id) # Need to reload observation to pick up changes
     assert(!obs2.images.member?(image))
   end
@@ -155,6 +157,7 @@ class ImageControllerTest < Test::Unit::TestCase
     assert("mary" == image.user.login)
     requires_user(:destroy_image, ["image", "show_image"], params, false, "mary")
     assert_redirected_to(:controller => "image", :action => "list_images")
+    assert_equal(0, @mary.reload.contribution)
     obs = Observation.find(obs.id) # Need to reload observation to pick up changes
     assert(!obs.images.member?(image))
   end
@@ -184,6 +187,7 @@ class ImageControllerTest < Test::Unit::TestCase
     }
     post_requires_login :edit_image, params, false
     assert_redirected_to(:controller => "image", :action => "show_image")
+    assert_equal(10, @rolf.reload.contribution)
     obs = Observation.find(obs.id)
     pat = "^.*: Image, %s, updated by %s\n" % [image.unique_text_name, obs.user.login]
     assert_equal(0, obs.rss_log.notes =~ Regexp.new(pat.gsub(/\(/,'\(').gsub(/\)/,'\)')))
@@ -255,6 +259,7 @@ class ImageControllerTest < Test::Unit::TestCase
     }
     post_requires_user(:add_image, ['observer', 'show_observation'], params, false)
     assert_redirected_to(:controller => 'observer', :action => 'show_observation')
+    assert_equal(20, @rolf.reload.contribution)
     obs = Observation.find(obs.id)
     assert(obs.images.size == (img_count + 1))
   end

@@ -139,6 +139,8 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
+    # Amanita baccata is in there but not Amanita sp., so this creates two names.
+    assert_equal(30, @rolf.reload.contribution)
     name = Name.find_by_text_name(text_name)
     assert(name)
     assert_equal(text_name, name.text_name)
@@ -161,6 +163,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
+    assert_equal(10, @rolf.reload.contribution)
     name = Name.find_by_text_name(text_name)
     assert_equal(@conocybe_filaris, name)
     assert_equal(count, Name.find(:all).length)
@@ -187,7 +190,9 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:edit_name, params, false)
-    name = Name.find(name.id)
+    # Must be creating Conocybe sp, too.
+    assert_equal(30, @rolf.reload.contribution)
+    name.reload
     assert_equal("(Fr.) Kühner", name.author)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
@@ -212,6 +217,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
+    assert_equal(20, @rolf.reload.contribution)
     name = Name.find(name.id)
     assert(name.deprecated)
   end
@@ -233,6 +239,9 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:edit_name, params, false, user)
     assert_redirected_to(:controller => "name", :action => "show_name")
+    # Hmmm, this isn't catching the fact that rolf shouldn't be allowed to change the name,
+    # instead it seems to be doing nothing sinply because he's not actually chaning anything!
+    assert_equal(10, @rolf.reload.contribution)
     name = Name.find(name.id)
     assert(name_owner == name.user)
   end
@@ -660,13 +669,15 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
+    # It seems to be creating Srobilurus sp. as well?
+    assert_equal(30, @rolf.reload.contribution)
     name = Name.find(name.id)
     assert_equal(new_author, name.author)
     assert_equal(old_text_name, name.text_name)
   end
 
 
-  # Test merge of rename with notes with name without notes
+  # Test merge of name with notes with name without notes
   def test_edit_name_notes
     target_name = @russula_brevipes_no_author
     matching_name = @russula_brevipes_author_notes
@@ -690,6 +701,8 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
+    # Creates PastName but deletes old Name?
+    assert_equal(10, @rolf.reload.contribution)
     merged_name = Name.find(matching_name.id)
     assert(merged_name)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -715,6 +728,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_template 'bulk_name_edit'
     assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
     assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_synonym_str]))
+    assert_equal(10, @rolf.reload.contribution)
   end
 
   def test_update_bulk_names_approved_nn_synonym

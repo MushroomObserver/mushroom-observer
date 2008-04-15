@@ -315,15 +315,22 @@ class NameController < ApplicationController
     @user = session['user']
     if verify_user()
       @name = Name.find(params[:id])
+
+      # Only allowed to make substantive changes it you own all the references to it.
+      # I think checking that the user owns all the namings that use it is correct.
+      # Maybe we should also check observations?  But the observation simply caches
+      # the winning naming's name.  Actually not necessarily: obs might use the accepted
+      # name if the winning name is deprecated.  Hmmm, I'll check it to be safe.
       @can_make_changes = true
       if @user.id != 0
-        for obs in @name.observations
-          if obs.user.id != @user.id
+        for obj in @name.namings + @name.observations
+          if obj.user.id != @user.id
             @can_make_changes = false
             break
           end
         end
       end
+
       if request.method == :post
         text_name = (params[:name][:text_name] || '').strip
         author = (params[:name][:author] || '').strip

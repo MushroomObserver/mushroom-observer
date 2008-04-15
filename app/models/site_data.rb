@@ -95,9 +95,9 @@ class SiteData
     weight = FIELD_WEIGHTS[field]
     if weight && weight > 0 &&
        obj.respond_to?("user") && (user = obj.user)
-# print ">>>>>>>>>>>>>>> #{user.login} #{mode} #{field} #{num}\n"
       user.contribution = 0 if !user.contribution
       user.contribution += (mode == :create ? weight : -weight) * num
+# print ">>>>>>>>>>>>>>> #{user.login} #{mode} #{field} #{num}\n"
       user.save
     end
   end
