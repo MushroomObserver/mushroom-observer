@@ -42,7 +42,8 @@ require 'active_record_extensions'
 
 class Observation < ActiveRecord::Base
   has_and_belongs_to_many :images
-  has_and_belongs_to_many :species_lists
+  has_and_belongs_to_many :species_lists,
+    :after_add => :add_spl_callback, :before_remove => :remove_spl_callback
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   has_many :comments,          :dependent => :destroy
   has_many :namings,           :dependent => :destroy
@@ -55,6 +56,14 @@ class Observation < ActiveRecord::Base
     :when  => "date",
     :where => "location"
   })
+
+  def add_spl_callback(o)
+    SiteData.update_contribution(:create, self, :species_list_entries, 1)
+  end
+
+  def remove_spl_callback(o)
+    SiteData.update_contribution(:destroy, self, :species_list_entries, 1)
+  end
 
   # Creates rss_log if necessary.
   def log(msg, touch)

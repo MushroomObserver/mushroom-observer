@@ -4,7 +4,8 @@
 require 'active_record_extensions'
 
 class SpeciesList < ActiveRecord::Base
-  has_and_belongs_to_many :observations
+  has_and_belongs_to_many :observations,
+    :after_add => :add_obs_callback, :before_remove => :remove_obs_callback
   belongs_to :user
   has_one :rss_log
   attr_accessor :data
@@ -12,6 +13,14 @@ class SpeciesList < ActiveRecord::Base
   attr_display_names({
     :where => "location"
   })
+
+  def add_obs_callback(o)
+    SiteData.update_contribution(:create, self, :species_list_entries, 1)
+  end
+
+  def remove_obs_callback(o)
+    SiteData.update_contribution(:destroy, self, :species_list_entries, 1)
+  end
 
   def log(msg)
     if self.rss_log.nil?

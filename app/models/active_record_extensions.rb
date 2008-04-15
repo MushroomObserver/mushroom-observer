@@ -9,6 +9,12 @@
 module ActiveRecord
   class Base
 
+    # These two are called every time an object is created or destroyed.
+    # Pass off to SiteData, where it will decide whether this affects
+    # a user's contribution score, and if so update it appropriately.
+    def after_create; SiteData.update_contribution(:create, self); end
+    def before_destroy; SiteData.update_contribution(:destroy, self); end
+
     # This collects all the error messages for a given instance, and returns
     # them as an array of strings, e.g. for flash_notice().  If an error
     # message is a complete sentence (i.e. starts with uppercase) it does

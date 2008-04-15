@@ -438,7 +438,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     nam = assigns(:naming)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_equal(@coprinus_comatus, nam.name) # Make sure it's the right name
-    assert_equal(1.5, obs.vote_cache)
+    assert_equal("1.58085", "%.5f" % obs.vote_cache)
     assert_not_nil(obs.rss_log)
   end
 
@@ -1323,10 +1323,10 @@ class ObserverControllerTest < Test::Unit::TestCase
     @coprinus_comatus_owner_vote.reload
     #
     # Make sure observation is unchanged.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_naming is unchanged.
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf))
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@rolf))
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
     #
     # Make sure old naming is unchanged.

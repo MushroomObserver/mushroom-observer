@@ -131,6 +131,7 @@ class ApplicationController < ActionController::Base
     if @user = session['user']
       # Do nothing if already logged in: if user asked us to remember him the
       # cookie will already be there, if not then we want to leave it out.
+      @user.reload if @user.id != 0
 
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies[:mo_user])  &&

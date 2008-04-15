@@ -16,6 +16,10 @@
 #   get_user_data(user_id)    Returns stats for given user.
 #   get_all_user_data         Returns stats for all users.
 #
+#   SiteData.update_contribution(mode, obj)     Keep user.contribution
+#   SiteData.create_species_list_entries(spl)    cache up to date.
+#   SiteData.destroy_species_list_entries(spl)
+#
 # Private:
 #   calc_metric(fields)       Calculates score of a single user.
 #   get_field_count(field)    Looks up number of entries in a given table.
@@ -82,6 +86,22 @@ FIELD_TABLES = {
 }
 
 class SiteData
+
+  # This is called every time any object (not just ones we care about) is
+  # created or destroyed.  Figure out what kind of object from the class name,
+  # and then update the owner's contribution as appropriate.
+  def self.update_contribution(mode, obj, field=nil, num=1)
+    field = obj.class.to_s.tableize.to_sym if !field
+    weight = FIELD_WEIGHTS[field]
+    if weight && weight > 0 &&
+       obj.respond_to?("user") && (user = obj.user)
+# print ">>>>>>>>>>>>>>> #{user.login} #{mode} #{field} #{num}\n"
+      user.contribution = 0 if !user.contribution
+      user.contribution += (mode == :create ? weight : -weight) * num
+      user.save
+    end
+  end
+
   def get_site_data
     result = {}
     for field in ALL_FIELDS

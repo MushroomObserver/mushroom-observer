@@ -87,7 +87,7 @@
                    # It *is* still possible for the owner not to have voted.  In which case I
                    # need to explicitly add the "No Opinion" option to their menu.
                    menu = menu.clone.unshift(@agreement_menu.first) if
-                     check_permission(naming.user_id) && (!@vote || @vote.value < 0) %>
+                     check_permission(naming.user_id) && (!@vote || @vote.value == 0) %>
                 <%= select('vote', 'value', menu, {}, { :index => naming.id,
                   :onchange => "change_vote(#{naming.id})" }) %>
                 <noscript>
