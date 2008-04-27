@@ -240,7 +240,7 @@ class NameControllerTest < Test::Unit::TestCase
     post_requires_login(:edit_name, params, false, user)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # Hmmm, this isn't catching the fact that rolf shouldn't be allowed to change the name,
-    # instead it seems to be doing nothing sinply because he's not actually chaning anything!
+    # instead it seems to be doing nothing sinply because he's not actually changing anything!
     assert_equal(10, @rolf.reload.contribution)
     name = Name.find(name.id)
     assert(name_owner == name.user)
@@ -669,7 +669,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
-    # It seems to be creating Srobilurus sp. as well?
+    # It seems to be creating Strobilurus sp. as well?
     assert_equal(30, @rolf.reload.contribution)
     name = Name.find(name.id)
     assert_equal(new_author, name.author)
