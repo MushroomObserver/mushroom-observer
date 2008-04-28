@@ -718,6 +718,14 @@ form_synonyms_proposed_synonyms_help: Unchecked items will no longer be synonymi
 
 
 # observer/how_to_use
+how_describing_species: >
+  <p><b>Describing Species</b> - Select "Index A->Z":%s from the left-hand panel and select a
+  name or click any "About [name]..." link you see.  Read over any notes that already
+  exist for that name.  If you know anything else about this species you want included, click 'Edit Name'
+  and add your notes.  You are encouraged to cite references including field guides and
+  scientific paper.  Short quotes from references are fine, but please don't make extensive
+  quotes without checking with the permission of the original author.
+
 how_location: >
   <p><b>Location</b> - A place in the world.  Defined Locations associate a location name with
   the extreme north and south latitudes and west and east longitudes of that location.  Defined Locations can also
@@ -780,6 +788,17 @@ how_maps: >
 
 
 # observer/how_to_help
+how_help_business_planning: Business Planning
+how_help_business_planning_exp: >
+  So far Mushroom Observer has been an entirely volunteer effort, we are looking for
+  ways to make the site financially viable either as a non-profit or as part of a larger
+  for-profit effort.
+
+how_help_contributors: Contributors
+how_help_contributors_exp: >
+  Beyond adding pictures and descriptions of mushrooms that you've seen, you
+  can make a big difference to the site by "describing species":%s or "defining locations":%s.
+
 how_help_designers: Designers
 how_help_designers_exp: >
   The site is pretty spare and could use an artisitc eye to help with
@@ -795,11 +814,6 @@ how_help_intro: >
  This page provides a list of skills that we could really use some help with.  If
  you're interested in helping out just "send an email":%s and let us know what you want
  to do.
-
-how_help_funding: Funding
-how_help_funding_exp: >
-  So far Mushroom Observer has been an entirely volunteer effort, but even
-  a single full time developer would make a huge difference.
 
 how_help_title: How to Help Make Mushroom Observer Better
 

@@ -13,13 +13,14 @@
     <li><%= :how_proposing_names.l %></li>    
     <li id="voting"><%= :how_voting.l % [@min_pos_vote, @min_neg_vote, :vote_no_opinion.l, @maximum_vote] %></li>
     <li><%= :how_adding_comments.l %></li>    
-    <li><%= :how_creating_species_lists.l %></li>
-    <li><%= textilize(:how_maps.l % [
+    <li id="describing_species"><%= textilize(:how_describing_species.l % "#{DOMAIN}/name/observation_index") %></li>
+    <li id="maps"><%= textilize(:how_maps.l % [
         "#{DOMAIN}/name/map/284",
         "#{DOMAIN}/location/show_location/4",
         "#{DOMAIN}/location/map_locations",
         "#{DOMAIN}/location/list_place_names"
         ]) %></li>
+    <li><%= :how_creating_species_lists.l %></li>
 </ol>
 
 <h2><%= :how_glossary.l %>:</h2>
