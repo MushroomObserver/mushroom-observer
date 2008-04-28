@@ -133,11 +133,12 @@ class SpeciesList < ActiveRecord::Base
       naming.save
       if !args[:vote].nil?
         vote = Vote.new({
-          :created   => args[:created],
-          :modified  => args[:modified],
-          :naming    => naming,
-          :user      => args[:user],
-          :value     => args[:vote]
+          :created     => args[:created],
+          :modified    => args[:modified],
+          :user        => args[:user],
+          :naming      => naming,
+          :observation => obs,
+          :value       => args[:vote]
         })
         vote.save
       end

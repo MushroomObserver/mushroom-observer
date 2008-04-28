@@ -439,7 +439,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     nam = assigns(:naming)
     assert_equal(where, obs.where) # Make sure it's the right observation
     assert_equal(@coprinus_comatus, nam.name) # Make sure it's the right name
-    assert_equal("1.58085", "%.5f" % obs.vote_cache)
+    assert_equal("2.03659", "%.5f" % obs.vote_cache)
     assert_not_nil(obs.rss_log)
   end
 

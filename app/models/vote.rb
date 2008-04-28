@@ -27,6 +27,9 @@
 class Vote < ActiveRecord::Base
   belongs_to :user
   belongs_to :naming
+  belongs_to :observation
+
+  LOG10 = Math.log(10)
 
   CONFIDENCE_VALS = [
     [ :vote_confidence_100,  3 ],
@@ -78,7 +81,9 @@ class Vote < ActiveRecord::Base
   # Calculate user weight from cotribution score.
   def user_weight
     contrib = self.user ? self.user.contribution : 0
-    contrib < 1 ? 0 : Math.log(contrib) / Math.log(10)
+    contrib = contrib < 1 ? 0 : Math.log(contrib) / LOG10
+    contrib += 1 if self.observation && self.user == self.observation.user
+    return contrib
   end
 
   protected

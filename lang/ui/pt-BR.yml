@@ -1012,12 +1012,17 @@ ignore_me: >
 
 
 # observer/_show_votes
-show_votes_vote: Vote
-show_votes_score: Score
-show_votes_users: Users
 show_votes_average: Average
 show_votes_close: Close
-show_votes_total: Overall Score<br/>(weighted sum/n+1)
+show_votes_descript: >
+  User's votes are weighted by their contribution to the site
+  (log<span style='font-size:50%'>10</span> contribution).
+  In addition, the user who created the observation gets an extra vote.
+
+show_votes_score: Score
+show_votes_total: Overall Score<br/>sum(score * weight) /<br/>(total weight + 1)
+show_votes_users: Users
+show_votes_vote: Vote
 show_votes_weight: Weight
 
 

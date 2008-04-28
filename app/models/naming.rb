@@ -147,9 +147,10 @@ class Naming < ActiveRecord::Base
       # Now create/change vote.
       if !vote
         vote = Vote.new
-        vote.created = now
-        vote.naming  = self
-        vote.user    = user
+        vote.created     = now
+        vote.user        = user
+        vote.naming      = self
+        vote.observation = self.observation
       end
       vote.modified = now
       vote.value    = value

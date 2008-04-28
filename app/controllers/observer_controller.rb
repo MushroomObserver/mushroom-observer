@@ -676,10 +676,11 @@ class ObserverController < ApplicationController
     @naming.user        = @user
     @naming.observation = @observation
     @vote = Vote.new(params[:vote])
-    @vote.created  = now
-    @vote.modified = now
-    @vote.user     = @user
-    @vote.naming   = @naming
+    @vote.created     = now
+    @vote.modified    = now
+    @vote.user        = @user
+    @vote.naming      = @naming
+    @vote.observation = @observation
     #
     # Resolve chosen name (see resolve_name_helper for full heuristics).
     # I'm allowing user to create observations without a naming for now.
@@ -764,10 +765,11 @@ class ObserverController < ApplicationController
     @naming.user        = @user
     @naming.observation = @observation
     @vote = Vote.new(params[:vote])
-    @vote.created  = now
-    @vote.modified = now
-    @vote.user     = @user
-    @vote.naming   = @naming
+    @vote.created     = now
+    @vote.modified    = now
+    @vote.user        = @user
+    @vote.naming      = @naming
+    @vote.observation = @observation
     #
     # Resolve chosen name (see resolve_name_helper for full heuristics).
     @name = resolve_name_helper()
@@ -840,10 +842,11 @@ class ObserverController < ApplicationController
       @naming.observation = @observation
       @naming.name        = @name
       @vote = Vote.new(params[:vote])
-      @vote.created  = now
-      @vote.modified = now
-      @vote.user     = @user
-      @vote.naming   = @naming
+      @vote.created     = now
+      @vote.modified    = now
+      @vote.user        = @user
+      @vote.naming      = @naming
+      @vote.observation = @observation
       #
       # Finish creating the naming (create_naming_reasons_helper creates all
       # the NamingReason objects tied to the Naming).
