@@ -519,7 +519,7 @@ how_title: How to Use Mushroom Observer
 how_unknown_help: >
   <p><b>Getting Help with an Unknown</b> - In order to get help with an unknown, you need to
   have a <a href="#user">User</a> account.  These can be created easily by selecting
-  'New Account' from the left-hand panel.  See the discussion of <a href="#user">Users</a>
+  'Create Account' from the left-hand panel.  See the discussion of <a href="#user">Users</a>
   below for more details.</p>
   <p>Once you are logged in, create a new <a href="#observation">Observation</a> by
   selecting 'Create Observation' from the left-hand panel.  Put all the details you can
