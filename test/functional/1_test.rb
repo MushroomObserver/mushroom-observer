@@ -1,6 +1,14 @@
+# A convenient place to put individual tests that are currently failing to
+# speed up the edit/test cycle.
+#
+# Note that if you are using another controller you ned to update the various
+# references.  Also for some reason if you switch to using the ImageController
+# and then run the entire test suite you get errors.
+
 require File.dirname(__FILE__) + '/../test_helper'
 require 'observer_controller'
-require 'fileutils'
+# require 'fileutils'
+# require 'sequence_state'
 
 # Re-raise errors caught by the controller.
 class ObserverController; def rescue_action(e) raise e end; end
@@ -25,12 +33,9 @@ class CurrentTest < Test::Unit::TestCase
   end
 
   def teardown
-  end
-
-  def test_how_to_help
-    get_with_dump :how_to_help
-    assert_response :success
-    assert_template 'how_to_help'
+    if File.exists?(IMG_DIR)
+      FileUtils.rm_rf(IMG_DIR)
+    end
   end
 
   def test_trivial

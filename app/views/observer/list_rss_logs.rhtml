@@ -14,7 +14,7 @@
 			<td align="center" valign="top" class="ListLine<%= color %>">
 			<% observation = rss_log.observation
 			   if observation: %>
-				<%= render :partial => 'observation', :object => observation, :locals => { :vertical_layout => @layout["vertical_layout"] } %>
+				<%= render :partial => 'observation', :object => observation, :locals => { :vertical_layout => @layout["vertical_layout"], :search_params => {} } %>
 			<% else
 			     species_list = rss_log.species_list
 			     if species_list: %>

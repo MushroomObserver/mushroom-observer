@@ -166,6 +166,10 @@
                           <%= submit_tag :app_images_find.l %>
                           <%= submit_tag :app_names_find.l %>
                           <%= submit_tag :app_locations_find.l %>
+                          <% if @start %>
+                              Start: <%= Time.now.to_f - @start.to_f %>
+                              <% @start = nil %>
+                          <% end %>
                         <% end %>
                         <% if flash[:notice] %>
                           <%= boxify(flash[:notice_level]) %>

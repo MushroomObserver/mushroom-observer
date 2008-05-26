@@ -5,7 +5,7 @@
         if image
           link_to(image_tag(sprintf("thumb/%d.jpg",
             observation.thumb_image_id), :border => 0),
-            :action => 'show_observation', :id => observation.id)
+            :action => 'show_observation', :id => observation.id, :params => search_params)
         end
       %>
     </td>
@@ -18,7 +18,7 @@
       <% end %>
       <span class="ListName"><%=
         link_to(textilize_without_paragraph(h(observation.unique_format_name(@user))),
-        :action => 'show_observation', :id => observation.id) %></span><br/>
+        :action => 'show_observation', :id => observation.id, :params => search_params) %></span><br/>
       <span class="ListWhere"><%= location_link(observation.where,
         observation.location_id) %></span><br/>
       <span class="ListWhen"><%= observation.when %>:</span>

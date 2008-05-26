@@ -41,7 +41,7 @@ require 'active_record_extensions'
 #   requires presence of user and location
 
 class Observation < ActiveRecord::Base
-  has_and_belongs_to_many :images
+  has_and_belongs_to_many :images, :order => "id"
   has_and_belongs_to_many :species_lists,
     :after_add => :add_spl_callback, :before_remove => :remove_spl_callback
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"

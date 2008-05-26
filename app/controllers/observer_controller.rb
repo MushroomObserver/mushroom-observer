@@ -169,29 +169,9 @@ class ObserverController < ApplicationController
   def show_selected_observations(title, conditions, order, source, links=nil)
     # If provided, link should be the arguments for link_to as a list of lists,
     # e.g. [[:action => 'blah'], [:action => 'blah']]
-    store_location
-    @user = session['user']
-    @layout = calc_layout_params
-    @title = title
-    @links = links
-    conditions = "1=1" if !conditions || conditions == ""
-    query = "select observations.id, names.search_name
-      from observations, names
-      left outer join locations on observations.location_id = locations.id
-      where observations.name_id = names.id and (#{conditions})
-      order by #{order}"
-    session[:checklist_source] = source
-    session[:observation_ids] = query_ids(query)
-    session[:observation] = nil
-    session[:image_ids] = nil
-    @observation_pages, @observations = paginate(:observations,
-      :include => [:name, :location],
-      :order => order,
-      :conditions => conditions,
-      :per_page => @layout["count"])
-    render :action => 'list_observations'
+    show_selected_objs(title, conditions, order, source, :observations, 'list_observations', links)
   end
-
+  
   # Displays matrix of all observations, sorted by date.
   # Linked from: left-hand panel
   # Inputs: session['user']
@@ -245,10 +225,9 @@ class ObserverController < ApplicationController
     if obs
       redirect_to :action => "show_observation", :id => id
     else
-      sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
       show_selected_observations("Observations matching '#{@pattern}'",
         field_search(["names.search_name", "observations.where",
-          "observations.notes", "locations.display_name"], sql_pattern),
+          "observations.notes", "locations.display_name"], "%#{@pattern.gsub(/[*']/,"%")}%"),
         "names.search_name asc, observations.`when` desc", :observation_ids)
     end
   end
@@ -315,7 +294,17 @@ class ObserverController < ApplicationController
   #   @confidence/agreement_menu    (used to create vote menus)
   #   @votes                        (user's vote for each naming.id)
   def show_observation
+    seq_key = params[:seq_key]
+    if seq_key.nil?
+      params[:obs] = params[:id]
+      state = SequenceState.new(session, params, Observation.connection, :rss_logs, logger)
+      store_seq_state(state) # Add key and timestamp
+      seq_key = state.key
+    end
     store_location # Is this doing anything useful since there is no user check for this page?
+    @seq_key = seq_key
+    @search_seq = params[:search_seq]
+    @start = params[:start] || Time.now
     @observation = Observation.find(params[:id])
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
@@ -464,48 +453,35 @@ class ObserverController < ApplicationController
       end
     end
   end
-
-  # Go to previous observation in session[:observation_ids] (search results).
-  # Linked from: show_observation
-  # Inputs: params[:id] (observation), session[:observation_ids]
-  # Redirects to show_observation.
-  def prev_observation
-    obs = session[:observation_ids]
-    if obs
-      index = obs.index(params[:id].to_i)
-      if index.nil? or obs.nil? or obs.length == 0
-        index = 0
-      else
-        index = index - 1
-        if index < 0
-          index = obs.length - 1
-        end
-      end
-      id = obs[index]
-      redirect_to(:action => 'show_observation', :id => id)
+  
+  def next_observation
+    start = Time.now.to_f
+    state = SequenceState.new(session, params, Observation.connection, :observations, logger)
+    state.next()
+    store_seq_state(state) # Add key and timestamp
+    id = state.current_id
+    if id
+      redirect_to(:action => 'show_observation', :id => id, :search_seq => params[:search_seq], :seq_key => state.key, :start => start)
     else
       redirect_to(:action => 'list_rss_logs')
     end
+    for (key, value) in session[:seq_states]
+      if key == :count
+        logger.warn("state dump: count; #{value}")
+      else
+        logger.warn("state dump: #{key} (#{key.class}): #{value[:timestamp]}, #{value[:access_count]} (#{value[:current_id]}, #{value[:current_index]}, #{value[:next_id]}, #{value[:prev_id]})")
+      end
+    end
   end
 
-  # Go to previous observation in session[:observation_ids] (search results).
-  # Linked from: show_observation
-  # Inputs: params[:id] (observation), session[:observation_ids]
-  # Redirects to show_observation.
-  def next_observation
-    obs = session[:observation_ids]
-    if obs
-      index = obs.index(params[:id].to_i)
-      if index.nil? or obs.nil? or obs.length == 0
-        index = 0
-      else
-        index = index + 1
-        if index >= obs.length
-          index = 0
-        end
-      end
-      id = obs[index]
-      redirect_to(:action => 'show_observation', :id => id)
+  def prev_observation
+    start = Time.now.to_f
+    state = SequenceState.new(session, params, Observation.connection, :observations, logger)
+    state.prev()
+    store_seq_state(state)
+    id = state.current_id
+    if id
+      redirect_to(:action => 'show_observation', :id => id, :seq_key => state.key, :start => start)
     else
       redirect_to(:action => 'list_rss_logs')
     end
@@ -1265,6 +1241,7 @@ class ObserverController < ApplicationController
 
   # left-hand panel -> list_rss_logs.rhtml
   def list_rss_logs
+    # Not exactly sure how this ties into SearchStates
     store_location
     @user = session['user']
     @layout = calc_layout_params

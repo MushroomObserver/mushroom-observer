@@ -53,7 +53,7 @@ class ImageController < ApplicationController
   # Display matrix of images, most recent first.
   # Linked from: left-hand panel
   # Inputs: session['user']
-  # Outputs: @images, @image_pages, @user, @layout
+  # Outputs: @objs, @obj_pages, @user, @layout
   def list_images
     session[:checklist_source] = :nothing
     session[:observation_ids] = []
@@ -63,7 +63,7 @@ class ImageController < ApplicationController
     store_location
     @user = session['user']
     @layout = calc_layout_params
-    @image_pages, @images = paginate(:images,
+    @obj_pages, @objs = paginate(:images,
                                      :order => "`when` desc",
                                      :per_page => @layout["count"])
   end
@@ -90,7 +90,6 @@ class ImageController < ApplicationController
   #   session['user']
   # Outputs:
   #   Renders list_images.
-  #   @images, @image_pages, @layout
   def image_search
     store_location
     @user = session['user']
@@ -107,21 +106,16 @@ class ImageController < ApplicationController
     if image
       redirect_to(:action => 'show_image', :id => id)
     else
-      sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
-      conditions = field_search(["n.search_name", "i.notes", "i.copyright_holder"], sql_pattern)
-      query = "select i.*, n.search_name
-        from images i, images_observations io, observations o, names n
-        where i.id = io.image_id and o.id = io.observation_id
-          and n.id = o.name_id and (#{conditions})
-        order by n.search_name, `when` desc"
-      session[:checklist_source] = :nothing
-      session[:observation_ids] = []
-      session[:observation] = nil
-      session[:image_ids] = query_ids(query)
-      @title = "Images matching '#{@pattern}'"
-      @image_pages, @images = paginate_by_sql(Image, query, @layout["count"])
-      render :action => 'list_images'
+      show_selected_images("Images matching '#{@pattern}'",
+        field_search(["n.search_name", "i.notes", "i.copyright_holder"], "%#{@pattern.gsub(/[*']/,"%")}%"),
+        "n.search_name, `when` desc", :nothing)
     end
+  end
+  
+  def show_selected_images(title, conditions, order, source)
+    # If provided, link should be the arguments for link_to as a list of lists,
+    # e.g. [[:action => 'blah'], [:action => 'blah']]
+    show_selected_objs(title, conditions, order, source, :images, 'list_images')
   end
 
   # Show the 640x640 (max size) version of image.
@@ -130,6 +124,9 @@ class ImageController < ApplicationController
   # Outputs: @image, @user, @invalid
   def show_image
     store_location
+    @seq_key = params[:seq_key]
+    @search_seq = params[:search_seq]
+    @obs = params[:obs]
     @user = session['user']
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
@@ -149,65 +146,96 @@ class ImageController < ApplicationController
     @invalid = true
     @image = Image.find(params[:id])
   end
-
-  def next_image
+  
+  def inc_image_from_obs_search(state, inc_func, direction)
     current_image_id = params[:id].to_i
-    (image_ids, current_observation) = current_image_state
-    if image_ids # nil value means it wasn't set and the session data doesn't have anything to help
-      obs_ids = session[:observation_ids]
-      if image_ids == [] # current image list is empty, try for the next
-        image_ids, current_observation = next_image_list(current_observation, obs_ids)
+    current_image = Image.find(current_image_id)
+    new_image = nil
+    current_observation_id = state.current_id
+    current_observation = Observation.find(current_observation_id)
+    logger.warn("inc_image_from_obs_search: start #{current_image_id}, #{current_observation_id}")
+    if current_image && current_observation
+      images = current_observation.images
+      index = images.index(current_image)
+      if index
+        index += direction
+        if 0 <= index && index < images.length # Have to check explicitly since foo[-1] is the not nil
+          new_image = images[index]
+        end
       end
-      if image_ids != [] # empty list means there isn't a next_image_list with any content
-        index = image_ids.index(current_image_id)
-        if index.nil? # Not in the list so start at the first element
-          current_image_id = image_ids[0]
-        else
-          index = index + 1
-          if index >= image_ids.length # Run off the end of the current list
-            image_ids, current_observation = next_image_list(current_observation, obs_ids)
-            if image_ids != [] # Just in case
-              current_image_id = image_ids[0]
+      logger.warn("inc_image_from_obs_search: index #{index}")
+      if new_image.nil?
+        inc_func.call
+        count = Observation.count
+        logger.warn("inc_image_from_obs_search: before loop #{count}, #{state.current_id}, #{current_observation_id}")
+        while current_observation_id != state.current_id
+          current_observation_id = state.current_id
+          logger.warn("inc_image_from_obs_search: in loop #{current_observation_id}")
+          current_observation = Observation.find(current_observation_id)
+          if current_observation
+            if direction == -1
+              new_image = current_observation.images[-1] # Start from the last image
+            else
+              new_image = current_observation.images[0]
             end
-          else
-            current_image_id = image_ids[index]
+            count -= 1
+            logger.warn("inc_image_from_obs_search: drop count #{count}")
+            if new_image.nil? and count > 0
+              inc_func.call()
+            else
+              logger.warn("inc_image_from_obs_search: new image #{new_image.id}")
+            end
           end
         end
       end
     end
-    session[:image_ids] = image_ids
-    session[:observation] = current_observation
-    redirect_to :action => 'show_image', :id => current_image_id
+    if new_image.nil?
+      flash_warning("No new image found")
+      new_image = current_image
+      logger.warn("inc_image_from_obs_search: No new image found: #{new_image.id}")
+    end
+    store_seq_state(state)
+    logger.warn("inc_image_from_obs_search(key, current_id, query_type): just saved #{state.key}, #{state.current_id}, #{state.query_type}")
+    redirect_to :action => 'show_image', :id => new_image, :seq_key => state.key
+  end
+  
+  def inc_image(func_name, direction) # direction is 1 or -1 depending on if we're doing next or prev
+    start = Time.now.to_f
+    state = SequenceState.new(session, params, Image.connection, :images, logger)
+    inc_func = state.method(func_name)
+    @seq_key = params[:seq_key]
+    @search_state = params[:search_state]
+    case state.query_type
+    when :images
+      inc_func.call()
+      store_seq_state(state) # Add key and timestamp
+      id = state.current_id
+      if id
+        redirect_to(:action => 'show_image', :id => id, :seq_key => state.key, :start => start)
+      else
+        redirect_to(:action => 'list_rss_logs')
+      end
+      for (key, value) in session[:seq_states]
+        if key == :count
+          logger.warn("state dump: count; #{value}")
+        else
+          logger.warn("state dump: #{key} (#{key.class}): #{value[:query]}, #{value[:timestamp]}, #{value[:access_count]} (#{value[:current_id]}, #{value[:current_index]}, #{value[:next_id]}, #{value[:prev_id]})")
+        end
+      end
+    when :observations
+      # Need to walk through images for current observation, then walk through the remaining observations
+      inc_image_from_obs_search(state, inc_func, direction)
+    when :rss_logs
+      inc_image_from_obs_search(state, inc_func, direction)
+    end
+  end
+
+  def next_image
+    inc_image("next", 1)
   end
 
   def prev_image
-    current_image_id = params[:id].to_i
-    (image_ids, current_observation) = current_image_state
-    if image_ids # nil value means it wasn't set and the session data doesn't have anything to help
-      obs_ids = session[:observation_ids]
-      if image_ids == [] # current image list is empty, try for the next
-        image_ids, current_observation = prev_image_list(current_observation, obs_ids)
-      end
-      if image_ids != [] # empty list means there isn't a next_image_list with any content
-        index = image_ids.index(current_image_id)
-        if index.nil? # Not in the list so start with the last element
-          current_image_id = image_ids[-1]
-        else
-          index = index - 1
-          if index < 0 # Run off the front of the current list
-            image_ids, current_observation = prev_image_list(current_observation, obs_ids)
-            if image_ids != [] # Just in case
-              current_image_id = image_ids[-1]
-            end
-          else
-            current_image_id = image_ids[index]
-          end
-        end
-      end
-    end
-    session[:image_ids] = image_ids
-    session[:observation] = current_observation
-    redirect_to :action => 'show_image', :id => current_image_id
+    inc_image("prev", -1)
   end
 
   # Form for uploading and adding images to an observation.

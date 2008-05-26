@@ -1,14 +1,58 @@
 Release each of the following as they get completed:
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)
+  Switch list to store small state
+    State: current id, next id, prev id, current index
+      To be added: type [observation, name, image, location], sql conditions, sql ordering,
+    - General Search
+      - Next/Prev starting from RSS Log page
+        - URL key that maps into session
+      - next/prev_observation for multiple RSS Log starts
+      - pagination links working across multiple tabs
+      - next/prev observation after searching for 'Cantharelllus'
+      - next/prev observation for searches in separate tabs
+      
+      next/prev_image
+        Use cases:
+          - image search
+          show_image after observation list
+        ./controllers/image_controller.rb
+        ./views/image/show_image.rhtml
+      tests for next/prev image/observation with data
+        Image sequence from an observation sequence should be independent of the observation sequence
+          Testing.
+          Current solution doesn't feel very clean.  How does params[:obs] get generalized for other cross types?
+          Need both search_seq and seq_key so image sequence can be independent of the observation sequence
+
+      get rid of observation_ids
+        ./controllers/image_controller.rb
+        ./views/image/show_image.rhtml
+        ./views/image/reuse_image.rhtml
+        ./controllers/comment_controller.rb
+        ./controllers/name_controller.rb
+        ./controllers/observer_controller.rb
+        ./controllers/species_list_controller.rb
+        ./views/observer/show_observation.rhtml
+        show_name? - move to later if not supported
+      review allocation of search and sequence states
+      review database interaction
+      
+      later:
+        sort by modified, created, when, name, location, observer, mod year (time of year)
+        Add next/prev_location
+        Add next/prev_name?
+      
+    list_rss_logs sets the sql conditions and ordering
+    show_observation sets the type and current_id
+  Manage multiple states
 
 User profile - paragraph available in preferences that gets displayed on the show_user page (4)
   Associate a user with a location (2)
   User photo (4)
 
-Votes (1 point) and namings (5 points) should be included in user score (4)
-
 Updating an author citation currently requires visiting each observation and adding the new name.  Seems like there should be a simpler way.
+
+Hypholoma aurantiacum recognizes that it is deprecated, but doesn't suggest a valid synonym.
 
 -----
 
@@ -66,7 +110,7 @@ Image improvements:
   Image rating for 'Pictorial', 'Scientific', 'Just Because' (40)
   textarea under or beside each file in the upload page, so you can add notes to individual photos. (8)
 
-Remember me between sessions (16)
+Improve caching and Javascript awareness
 
 Organize user preferences into logical groups (8)
   
@@ -138,6 +182,7 @@ Mobile phone support (40)
 
 High-bandwith support - 1024x768 suggested rather than 640x640 max. (should include image cleanup) (16)
   Check for duplicate images, check for referenced images
+  Provide download link for images in non-standard formats (e.g., TIF)
 
 Name tagging (40)
     Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic

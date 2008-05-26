@@ -691,4 +691,101 @@ class ApplicationController < ActionController::Base
       end
     end
 
+    # session[:seq_states]
+    #  :count => Number of numeric keys allocated (used to allocate new ones)
+    #  <number> => State for a particular search
+    #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
+    # Use cases:
+    #   Multiple tabs, back button
+    # Only purge if a new state is being added
+    # Keep any state that is less than 1 hour old.
+    # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
+    def store_seq_state(state)
+      now = state.timestamp
+      result = session[:seq_states]
+      if result
+        if not result.member?(state.key)
+          result = {:count => result[:count]}
+          for (key, value) in session[:seq_states]
+            timestamp = value[:timestamp] || 0
+            age = now - timestamp
+            count = value[:access_count] || 0
+            if (age < 1.hour) || ((count > 0) && (age < 24.hours))
+              result[key] = value
+            end
+          end
+        end
+      else
+        result = {:count => 0}
+      end
+      state.timestamp = now
+      result[state.key] = state.session_data()
+      session[:seq_states] = result
+    end
+
+    # session[:search_states]
+    #  :count => Number of numeric keys allocated (used to allocate new ones)
+    #  <number> => State for a particular search
+    #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
+    # Use cases:
+    #   Multiple tabs with different searches, back button
+    # Only purge if a new state is being added
+    # Keep any state that is less than 1 hour old.
+    # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
+    def store_search_state(state)
+      now = state.timestamp
+      result = session[:search_states]
+      if result
+        if not result.member?(state.key)
+          result = {:count => result[:count]}
+          for (key, value) in session[:search_states]
+            timestamp = value[:timestamp] || 0
+            age = now - timestamp
+            count = value[:access_count] || 0
+            if (age < 1.hour) || ((count > 0) && (age < 24.hours))
+              result[key] = value
+            end
+          end
+        end
+      else
+        result = {:count => 0}
+      end
+      state.timestamp = now
+      result[state.key] = state.session_data()
+      session[:search_states] = result
+    end
+
+    def show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
+      # If provided, link should be the arguments for link_to as a list of lists,
+      # e.g. [[:action => 'blah'], [:action => 'blah']]
+      search_state = SearchState.new(session, params, obj_type, logger)
+      unless search_state.setup?
+        search_state.setup(title, conditions, order, source)
+      end
+      store_search_state(search_state)
+
+      store_location
+      @user = session['user']
+      @layout = calc_layout_params
+      @links = links
+      @title = search_state.title
+      @search_seq = search_state.key
+      query = search_state.query
+      session[:checklist_source] = search_state.source
+      session[:observation_ids] = nil
+      session[:image_ids] = nil
+      case obj_type
+      when :observations
+        session[:observation_ids] = query_ids(query)
+        type = Observation
+      when :images
+        session[:image_ids] = query_ids(query)
+        type = Image
+      end
+      session[:observation] = nil
+      
+      @obj_pages, @objs = paginate_by_sql(type, query, @layout["count"])
+      render :action => dest # 'list_observations'
+    end
+
 end

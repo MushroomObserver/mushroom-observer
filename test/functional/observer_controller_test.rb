@@ -110,9 +110,9 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_next_observation
-    @request.session[:observation_ids] = [1, 2, 3]
-    get_with_dump :next_observation, :id => 1
-    assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 2)
+    # Uses default observation query
+    get_with_dump :next_observation, :id => 2
+    assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 1)
   end
 
   def test_observations_by_name
@@ -169,8 +169,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   def test_prev_observation
-    @request.session[:observation_ids] = [1, 2, 3]
-    get_with_dump :prev_observation, :id => 1
+    # Uses default observation query
+    get_with_dump :prev_observation, :id => 2
     assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 3)
   end
 

@@ -5,7 +5,11 @@
 <%= javascript_tag 'Element.hide($("indicator"))' %>
 
 <% @title = 'Edit Naming for Observation #' + h(@observation.id)
-   button_name = 'Save Edits' %>
+   button_name = 'Save Edits'
+   search_params = {}
+   search_params[:search_seq] = @search_seq if @search_seq
+   search_params[:seq_key] = @seq_key if @seq_key
+%>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation',
     :id => @observation %>
 
@@ -25,7 +29,7 @@
         :button_name => button_name } %>
 	</td>
     <td width="25%" valign="top">
-      <%= render :partial => 'show_images' %>
+      <%= render :partial => 'show_images', :locals => { :search_params => search_params } %>
     </td>
   </tr>
 </table>

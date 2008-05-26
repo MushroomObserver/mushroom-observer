@@ -23,7 +23,7 @@ turned_over:
 commercial_inquiry_image:
   id: 3
   created:   2007-02-25 20:13:00
-  modified:  2006-02-25 20:14:00
+  modified:  2007-02-25 20:14:00
   content_type: image/jpeg
   user_id:      1
   when:         2007-02-25

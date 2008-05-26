@@ -15,10 +15,9 @@
 	| <%= link_to 'Send Commercial Inquiry About Image',
         :controller => 'observer', :action => 'commercial_inquiry', :id => @image %>
 <% end %>
-<%	if session[:observation_ids] %>
-		<br/><%= link_to 'Prev', :action => 'prev_image', :id => @image %>
-		| <%= link_to 'Next', :action => 'next_image', :id => @image %>
-<%  end %>
+<br/>
+<%= link_to('Prev', :action => 'prev_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+| <%= link_to('Next', :action => 'next_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
 
 <div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name(@user))) %></div>
 <div id="copyright">Copyright &copy;

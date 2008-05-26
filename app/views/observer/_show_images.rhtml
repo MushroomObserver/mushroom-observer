@@ -15,6 +15,6 @@
 <% for image in @observation.images %>
   <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
     textilize_without_paragraph(h(image.unique_format_name(@user))),
-    :controller => 'image', :action => 'show_image', :id => image.id) %></p>
+    :controller => 'image', :action => 'show_image', :id => image.id, :params => search_params) %></p>
 <% end %>
 </center>
