@@ -46,9 +46,7 @@ class SpeciesListController < ApplicationController
   # Outputs: @species_lists, @species_list_pages
   def list_species_lists
     store_location
-    session[:observation_ids] = nil
-    session[:observation] = nil
-    session[:image_ids] = nil
+    session_setup
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc, 'id' desc",
                                                    :per_page => 10)
@@ -72,8 +70,7 @@ class SpeciesListController < ApplicationController
     @observation_list = sort_species_list_observations(@species_list, @user)
   end
 
-  # Sort observations in species_list, stick the ids in
-  # session[:observation_ids], and return list of observation objects.
+  # Sort observations in species_list and return list of observation objects.
   # Needed by everyone using the show_species_list view.
   def sort_species_list_observations(spl, user)
     if spl.observations.length > 0
@@ -87,9 +84,6 @@ class SpeciesListController < ApplicationController
       objects = names.keys.sort {|x,y|
         (names[x].text_name <=> names[y].text_name) || (x.id <=> y.id)
       }
-      ids = objects.map {|o| o.id}
-      session[:observation_ids] = ids
-      session[:image_ids] = nil
       return objects
     else
       return nil
@@ -101,9 +95,7 @@ class SpeciesListController < ApplicationController
   # Inputs: none
   # Outputs: @species_lists
   def species_lists_by_title
-    session[:observation_ids] = nil
-    session[:observation] = nil
-    session[:image_ids] = nil
+    session_setup
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
   end
@@ -407,23 +399,10 @@ class SpeciesListController < ApplicationController
     if source == id
       source = session[:prev_checklist_source] || source
     end
+    source_str = source.to_s
     if source.to_s == 'observation_ids'
-      ob_ids = session[:observation_ids]
-      if ob_ids
-        checklist = {}
-        for ob_id in ob_ids
-          obs = Observation.find(ob_id)
-          if obs
-            name = obs.preferred_name(user)
-            # Generate a list of unique name strings and id strings.
-            # It's important to use strings to be able to match the
-            # information that comes back from the check_boxes.
-            checklist[[name.observation_name, name.id.to_s]] = true
-          end
-        end
-        # Result was getting overwritten below -JPH 20071130
-        list = checklist.keys.sort
-      end
+      # Disabled as part of new prev/next.  Not reimplemented given impending checklist work.
+      flash_warning "Search based checklists are no longer supported."
     elsif source.to_s == 'all_observations'
       query = "select distinct n.observation_name, n.id, n.search_name
         from names n, namings g

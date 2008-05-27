@@ -221,11 +221,7 @@ class NameController < ApplicationController
         seen[d["id"]] = true if !seen[d["id"]] }
 
       # Gather full list of IDs for the prev/next buttons to cycle through.
-      observation_ids = []
-      @user = session['user']
-      for d in @consensus_data + @synonym_data + @other_data
-        observation_ids.push(d["id"].to_i)
-      end
+      session_setup
 
       # Paginate the two sections independently.
       per_page = 12
@@ -256,8 +252,6 @@ class NameController < ApplicationController
       end
 
       session[:checklist_source] = :observation_ids
-      session[:observation_ids] = observation_ids
-      session[:image_ids] = nil
     # end
     # logger.warn("show_name took %s\n" % elapsed_time)
   end

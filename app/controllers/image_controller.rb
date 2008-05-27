@@ -30,7 +30,6 @@
 #
 #  Helpers:
 #    process_image(args, upload)
-#    current_image_state
 #    next_id(id, id_list)
 #    prev_id(id, id_list)
 #    next_image_list(observation_id, id_list)
@@ -56,16 +55,10 @@ class ImageController < ApplicationController
   # Outputs: @objs, @obj_pages, @user, @layout
   def list_images
     session[:checklist_source] = :nothing
-    session[:observation_ids] = []
-    session[:observation] = nil
-    session[:image_ids] = query_ids("select id, `when` from images order by `when` desc")
-
+    session_setup
     store_location
-    @user = session['user']
     @layout = calc_layout_params
-    @obj_pages, @objs = paginate(:images,
-                                     :order => "`when` desc",
-                                     :per_page => @layout["count"])
+    @obj_pages, @objs = paginate(:images, :order => "`when` desc", :per_page => @layout["count"])
   end
 
   # Display list of images sorted by title.
@@ -74,11 +67,8 @@ class ImageController < ApplicationController
   # Outputs: @images, @user
   def images_by_title
     session[:checklist_source] = :nothing
-    session[:observation_ids] = nil
-    session[:observation] = nil
-    session[:image_ids] = nil
+    session_setup
     store_location
-    @user = session['user']
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
   end
 
@@ -153,7 +143,6 @@ class ImageController < ApplicationController
     new_image = nil
     current_observation_id = state.current_id
     current_observation = Observation.find(current_observation_id)
-    logger.warn("inc_image_from_obs_search: start #{current_image_id}, #{current_observation_id}")
     if current_image && current_observation
       images = current_observation.images
       index = images.index(current_image)
@@ -163,14 +152,11 @@ class ImageController < ApplicationController
           new_image = images[index]
         end
       end
-      logger.warn("inc_image_from_obs_search: index #{index}")
       if new_image.nil?
         inc_func.call
         count = Observation.count
-        logger.warn("inc_image_from_obs_search: before loop #{count}, #{state.current_id}, #{current_observation_id}")
         while current_observation_id != state.current_id
           current_observation_id = state.current_id
-          logger.warn("inc_image_from_obs_search: in loop #{current_observation_id}")
           current_observation = Observation.find(current_observation_id)
           if current_observation
             if direction == -1
@@ -179,11 +165,8 @@ class ImageController < ApplicationController
               new_image = current_observation.images[0]
             end
             count -= 1
-            logger.warn("inc_image_from_obs_search: drop count #{count}")
             if new_image.nil? and count > 0
               inc_func.call()
-            else
-              logger.warn("inc_image_from_obs_search: new image #{new_image.id}")
             end
           end
         end
@@ -192,10 +175,8 @@ class ImageController < ApplicationController
     if new_image.nil?
       flash_warning("No new image found")
       new_image = current_image
-      logger.warn("inc_image_from_obs_search: No new image found: #{new_image.id}")
     end
     store_seq_state(state)
-    logger.warn("inc_image_from_obs_search(key, current_id, query_type): just saved #{state.key}, #{state.current_id}, #{state.query_type}")
     redirect_to :action => 'show_image', :id => new_image, :seq_key => state.key
   end
   
@@ -214,13 +195,6 @@ class ImageController < ApplicationController
         redirect_to(:action => 'show_image', :id => id, :seq_key => state.key, :start => start)
       else
         redirect_to(:action => 'list_rss_logs')
-      end
-      for (key, value) in session[:seq_states]
-        if key == :count
-          logger.warn("state dump: count; #{value}")
-        else
-          logger.warn("state dump: #{key} (#{key.class}): #{value[:query]}, #{value[:timestamp]}, #{value[:access_count]} (#{value[:current_id]}, #{value[:current_index]}, #{value[:next_id]}, #{value[:prev_id]})")
-        end
       end
     when :observations
       # Need to walk through images for current observation, then walk through the remaining observations
@@ -572,30 +546,6 @@ class ImageController < ApplicationController
   # ----------------------------
   #  Helpers.
   # ----------------------------
-
-  # Get initial image_ids and observation_id
-  helper_method :current_image_state
-  def current_image_state
-    observation_id = session[:observation]
-    images_ids = nil
-    obs_ids = session[:observation_ids]
-    if obs_ids
-      if observation_id.nil? and obs_ids
-        if obs_ids.length > 0
-          observation_id = obs_ids[0]
-        end
-      end
-      image_ids = session[:image_ids]
-      if image_ids.nil? and observation_id
-        images = Observation.find(observation_id).images
-        image_ids = []
-        for i in images
-          image_ids.push(i.id)
-        end
-      end
-    end
-    [image_ids, observation_id]
-  end
 
   helper_method :next_id
   def next_id(id, id_list)

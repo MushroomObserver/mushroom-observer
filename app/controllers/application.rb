@@ -772,14 +772,11 @@ class ApplicationController < ActionController::Base
       @search_seq = search_state.key
       query = search_state.query
       session[:checklist_source] = search_state.source
-      session[:observation_ids] = nil
-      session[:image_ids] = nil
+      session_setup
       case obj_type
       when :observations
-        session[:observation_ids] = query_ids(query)
         type = Observation
       when :images
-        session[:image_ids] = query_ids(query)
         type = Image
       end
       session[:observation] = nil
@@ -788,4 +785,10 @@ class ApplicationController < ActionController::Base
       render :action => dest # 'list_observations'
     end
 
+    def session_setup
+      session[:observation_ids] = nil if session[:observation_ids]
+      session[:observation] = nil if session[:observation]
+      session[:image_ids] = nil if session[:image_ids]
+      @user = session['user']
+    end
 end

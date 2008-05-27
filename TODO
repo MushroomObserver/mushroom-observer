@@ -25,15 +25,18 @@ Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  
           Need both search_seq and seq_key so image sequence can be independent of the observation sequence
 
       get rid of observation_ids
-        ./controllers/image_controller.rb
-        ./views/image/show_image.rhtml
-        ./views/image/reuse_image.rhtml
-        ./controllers/comment_controller.rb
-        ./controllers/name_controller.rb
-        ./controllers/observer_controller.rb
-        ./controllers/species_list_controller.rb
-        ./views/observer/show_observation.rhtml
-        show_name? - move to later if not supported
+        - ./controllers/image_controller.rb
+        - ./views/image/show_image.rhtml
+        - ./views/image/reuse_image.rhtml
+        - ./controllers/comment_controller.rb
+        - ./controllers/name_controller.rb
+        - ./controllers/observer_controller.rb
+        - ./controllers/species_list_controller.rb
+        - ./views/observer/show_observation.rhtml
+        - show_name? - move to later if not supported
+    
+      - do checklists still work?  Probably not.  species_list_controller/calc_checklist - Disabled
+      
       review allocation of search and sequence states
       review database interaction
       
@@ -120,6 +123,19 @@ Checklists - Lists of Names that have a Title and Purpose/notes, but no associat
     Can be used to create species lists, or simply displayed and copied for publication somewhere else.
     Use to create observations
     Dynamic checklists based on location or user
+    
+    Feedback from Doug Smith on species lists:
+    Mostly the feature I need to be able to make 20-100 observations
+    all with the same location and date info., based on an existing
+    species list that I have.
+
+    One thing is that after that to apply photos to the list there
+    is a lot of check back and forth, and that takes awhile.  And
+    click back to the list can be troublesome, for some of these
+    lists have almost 600 observations now, and getting that many
+    observations onto the one page with thumbs takes awhile to 
+    download.  Which adds a good few seconds to each clicking back
+    and forth.
 
 Sort by date (mod year) (16)
       Sort order pulldown.  Sort by time mod year.

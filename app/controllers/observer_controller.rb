@@ -166,7 +166,7 @@ class ObserverController < ApplicationController
 #
 ################################################################################
 
-  def show_selected_observations(title, conditions, order, source, links=nil)
+  def show_selected_observations(title, conditions, order, source=:nothing, links=nil)
     # If provided, link should be the arguments for link_to as a list of lists,
     # e.g. [[:action => 'blah'], [:action => 'blah']]
     show_selected_objs(title, conditions, order, source, :observations, 'list_observations', links)
@@ -198,7 +198,7 @@ class ObserverController < ApplicationController
     @user = User.find(params[:id])
     show_selected_observations("Observations by %s" % @user.legal_name,
       "observations.user_id = %s" % @user.id,
-      "observations.modified desc, observations.`when` desc", :observation_ids)
+      "observations.modified desc, observations.`when` desc")
   end
 
   # Searches for observations based on location, notes and consensus name
@@ -228,7 +228,7 @@ class ObserverController < ApplicationController
       show_selected_observations("Observations matching '#{@pattern}'",
         field_search(["names.search_name", "observations.where",
           "observations.notes", "locations.display_name"], "%#{@pattern.gsub(/[*']/,"%")}%"),
-        "names.search_name asc, observations.`when` desc", :observation_ids)
+        "names.search_name asc, observations.`when` desc")
     end
   end
 
@@ -241,7 +241,7 @@ class ObserverController < ApplicationController
     loc = Location.find(params[:id])
     show_selected_observations("Observations from %s" % loc.display_name,
       "observations.location_id = %s" % loc.id,
-      "names.search_name, observations.`when` desc", :observation_ids,
+      "names.search_name, observations.`when` desc", :nothing,
       [[:location_show_map.l, {:controller => 'location', :action => 'show_location', :id => loc.id}]])
   end
 
@@ -256,7 +256,7 @@ class ObserverController < ApplicationController
     pattern = session[:where] || session[:pattern] || ""
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
     show_selected_observations("Observations from '#{pattern}'", "observations.where like '#{sql_pattern}'",
-      "names.search_name asc, observations.`when` desc", :observation_ids,
+      "names.search_name asc, observations.`when` desc", :nothing,
       [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => pattern}],
        [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => pattern}],
        [:location_all.l, {:controller => 'location', :action => 'list_place_names'}]])
@@ -371,9 +371,8 @@ class ObserverController < ApplicationController
     @user = session['user']
     if verify_user()
       # Clear search list.
-      session[:observation_ids] = nil
-      session[:observation]     = nil
-      session[:image_ids]       = nil
+      session_setup
+
       # Attempt to create observation (and associated naming, vote, etc.)
       if request.method == :post && create_observation_helper()
         redirect_to :action => 'show_observation', :id => @observation
@@ -464,13 +463,6 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'show_observation', :id => id, :search_seq => params[:search_seq], :seq_key => state.key, :start => start)
     else
       redirect_to(:action => 'list_rss_logs')
-    end
-    for (key, value) in session[:seq_states]
-      if key == :count
-        logger.warn("state dump: count; #{value}")
-      else
-        logger.warn("state dump: #{key} (#{key.class}): #{value[:timestamp]}, #{value[:access_count]} (#{value[:current_id]}, #{value[:current_index]}, #{value[:next_id]}, #{value[:prev_id]})")
-      end
     end
   end
 
@@ -1248,9 +1240,7 @@ class ObserverController < ApplicationController
     session[:checklist_source] = :all_observations
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
             "modified is not null order by 'modified' desc"
-    session[:observation_ids] = query_ids(query)
-    session[:observation] = nil
-    session[:image_ids] = nil
+    session_setup
     @rss_log_pages, @rss_logs = paginate(:rss_log,
                                          :order => "'modified' desc",
                                          :per_page => @layout["count"])

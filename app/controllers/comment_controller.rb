@@ -26,10 +26,7 @@ class CommentController < ApplicationController
   # Outputs: @user, @comments, @comment_pages
   def list_comments
     store_location
-    session[:observation_ids] = nil
-    session[:observation] = nil
-    session[:image_ids] = nil
-    @user = session['user']
+    session_setup
     @title = "Comments"
     @comment_pages, @comments = paginate(:comments,
                                      :order => "'created' desc",
@@ -42,12 +39,10 @@ class CommentController < ApplicationController
   # Inputs: params[:id] (user), session['user']
   # Outputs: @user, @comments, @comment_pages
   def show_comments_for_user
+    session_setup
     store_location
     @user = User.find(params[:id])
     @title = "Comments for %s" % @user.legal_name
-    session[:observation_ids] = nil
-    session[:observation] = nil
-    session[:image_ids] = nil
     @comment_pages, @comments = paginate(:comments, :include => "observation",
                                          :order => "comments.created desc",
                                          :conditions => "observations.user_id = %s" % @user.id,
