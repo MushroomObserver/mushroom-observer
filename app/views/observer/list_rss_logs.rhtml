@@ -1,4 +1,8 @@
-<% @title = lnbsp(:rss_log_title) %>
+<%
+    @title = lnbsp(:rss_log_title)
+    search_params = {}
+    search_params[:search_seq] = @search_seq if @search_seq
+%>
 <div id="Title"><%= @title %></div>
 	<div class="pagination"><%= pagination_links(@rss_log_pages) %></div>
 	<table cellpadding="5" cellspacing="0" width="100%">
@@ -14,7 +18,7 @@
 			<td align="center" valign="top" class="ListLine<%= color %>">
 			<% observation = rss_log.observation
 			   if observation: %>
-				<%= render :partial => 'observation', :object => observation, :locals => { :vertical_layout => @layout["vertical_layout"], :search_params => {} } %>
+				<%= render :partial => 'observation', :object => observation, :locals => { :vertical_layout => @layout["vertical_layout"], :search_params => search_params } %>
 			<% else
 			     species_list = rss_log.species_list
 			     if species_list: %>

@@ -49,7 +49,7 @@ class SequenceState
       @access_count = (key_state[:access_count] || 0) + 1
     else
       logger.warn("SequenceState.initialize: making shit up: #{id}, #{search_state.query_type}") if logger
-      if query_type != search_state.query_type && search_state.query_type == :observations
+      if query_type != search_state.query_type && search_state.query_type != :images
         id = params[:obs].to_i
         logger.warn("SequenceState.initialize: query_type mismatch") if logger
       else

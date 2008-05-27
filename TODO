@@ -36,7 +36,7 @@ Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  
         - show_name? - move to later if not supported
     
       - do checklists still work?  Probably not.  species_list_controller/calc_checklist - Disabled
-      
+      list_rss_logs -> show_observation -> show_image -> next (off into the weeds)
       review allocation of search and sequence states
       review database interaction
       

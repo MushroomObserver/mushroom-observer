@@ -277,6 +277,13 @@ class ObserverController < ApplicationController
     end
     redirect_to :action => "show_observation", :id => id
   end
+  
+  # So you can start with a clean slate
+  def clear_session
+    session[:seq_states] = { :count => 0 }
+    session[:search_states] = { :count => 0 }
+    redirect_to :action => "list_rss_logs"
+  end
 
   # Display observation and related namings, comments, votes, images, etc.
   # This should be redirected_to, not rendered, due to large number of
@@ -1234,6 +1241,13 @@ class ObserverController < ApplicationController
   # left-hand panel -> list_rss_logs.rhtml
   def list_rss_logs
     # Not exactly sure how this ties into SearchStates
+    search_state = SearchState.new(session, params, :rss_logs, logger)
+    unless search_state.setup?
+      search_state.setup("Activity Log", nil, "'modified' desc", :nothing)
+    end
+    store_search_state(search_state)
+    @search_seq = search_state.key
+
     store_location
     @user = session['user']
     @layout = calc_layout_params
