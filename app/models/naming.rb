@@ -209,7 +209,9 @@ class Naming < ActiveRecord::Base
   def is_users_favorite?(user)
     obs = self.observation
     if obs
-      votes = user.votes.select {|v| v.naming.observation == obs}
+      # was
+      # votes = user.votes.select {|v| v.naming.observation == obs}
+      votes = Vote.find_all_by_observation_id_and_user_id(obs.id, user.id)
       max = 0
       for vote in votes
         max = vote.value if vote.value > 0 && vote.value > max

@@ -1,44 +1,7 @@
 Release each of the following as they get completed:
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)
-  Switch list to store small state
-    State: current id, next id, prev id, current index
-      To be added: type [observation, name, image, location], sql conditions, sql ordering,
-    - General Search
-      - Next/Prev starting from RSS Log page
-        - URL key that maps into session
-      - next/prev_observation for multiple RSS Log starts
-      - pagination links working across multiple tabs
-      - next/prev observation after searching for 'Cantharelllus'
-      - next/prev observation for searches in separate tabs
-      
-      next/prev_image
-        Use cases:
-          - image search
-          show_image after observation list
-        ./controllers/image_controller.rb
-        ./views/image/show_image.rhtml
-      tests for next/prev image/observation with data
-        Image sequence from an observation sequence should be independent of the observation sequence
-          Testing.
-          Current solution doesn't feel very clean.  How does params[:obs] get generalized for other cross types?
-          Need both search_seq and seq_key so image sequence can be independent of the observation sequence
-
-      get rid of observation_ids
-        - ./controllers/image_controller.rb
-        - ./views/image/show_image.rhtml
-        - ./views/image/reuse_image.rhtml
-        - ./controllers/comment_controller.rb
-        - ./controllers/name_controller.rb
-        - ./controllers/observer_controller.rb
-        - ./controllers/species_list_controller.rb
-        - ./views/observer/show_observation.rhtml
-        - show_name? - move to later if not supported
-    
-      - do checklists still work?  Probably not.  species_list_controller/calc_checklist - Disabled
-      list_rss_logs -> show_observation -> show_image -> next (off into the weeds)
-      review allocation of search and sequence states
-      review database interaction
+      remove timing param
       
       later:
         sort by modified, created, when, name, location, observer, mod year (time of year)

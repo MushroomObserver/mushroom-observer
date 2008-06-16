@@ -13,6 +13,37 @@ class SearchState
     result = nil
     order = @order || "'modified' desc"
     case @query_type
+    when :species_list_observations
+      result = %(
+        SELECT o.id, n.search_name
+        FROM names n, observations o, observations_species_lists osl, species_lists s
+        WHERE n.id = o.name_id and o.id = osl.observation_id and osl.species_list_id = s.id
+      )
+    when :name_observations
+      result = %(
+        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
+          u.name, u.login, o.user_id, n.observation_name, o.vote_cache
+        FROM observations o, users u, names n
+        WHERE n.id = o.name_id and u.id = o.user_id
+      )
+    when :synonym_observations
+      result = %(
+        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
+          u.name, u.login, o.user_id, n.observation_name, o.vote_cache
+        FROM observations o, users u, names n
+        WHERE n.id = o.name_id and u.id = o.user_id and
+          (o.vote_cache >= 0 || o.vote_cache is null)
+      )
+    when :other_observations
+      # Matches on non-consensus namings, any vote.
+      result = %(
+        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
+          u.name, u.login, o.user_id, n.observation_name, g.vote_cache
+        FROM observations o, users u, names n, namings g
+        WHERE o.id = g.observation_id and
+          n.id = o.name_id and u.id = o.user_id and
+          o.name_id != g.name_id
+      )
     when :observations
       result = "select observations.*, names.search_name
         from observations, names

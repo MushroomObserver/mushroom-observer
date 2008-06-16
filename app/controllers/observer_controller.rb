@@ -942,7 +942,6 @@ class ObserverController < ApplicationController
     else
       # Look up name: can return zero to many matches.
       @names = Name.find_names(@what)
-      logger.warn("resolve_name_helper: #{@names.length}")
     end
     if @names.length == 0
       # Create temporary name object for it.  (This will not save anything

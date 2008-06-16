@@ -1,4 +1,5 @@
-<% @title       = :show_observation_title.l + ': ' + h(@observation.unique_text_name(@user))
+<%
+   @title       = :show_observation_title.l + ': ' + h(@observation.unique_text_name(@user))
    what         = textilize_without_paragraph(h(@observation.format_name(@user)))
    name         = @observation.preferred_name(@user)
    questions_ok = @observation.user.question_email
@@ -13,7 +14,8 @@
   | <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %>
   | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => name) %>
   <br/>
-<% end %>
+<% end
+%>
 
 <%= link_to :show_observation_propose_new_name.l,
     :controller => 'observer', :action => 'create_naming', :id => @observation %>
@@ -24,7 +26,8 @@
 <% if questions_ok %>
   | <%= link_to :show_observation_send_question.l,
     :controller => 'observer', :action => 'ask_observation_question', :id => @observation %>
-<% end %>
+<% end
+%>
 <br/>
 
 <%= link_to(:show_observation_previous.l, :action => 'prev_observation', :id => @observation, :seq_key => @seq_key, :search_seq => @search_seq) %> |
@@ -39,7 +42,8 @@
   | <%= link_to :show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation },
                 :confirm => "Are you sure?" %>
   <br/>
-<% end %>
+<% end
+%>
 
 <table width="100%" cellpadding="10">
   <tr>
@@ -54,4 +58,3 @@
     </td>
   </tr>
 </table>
-

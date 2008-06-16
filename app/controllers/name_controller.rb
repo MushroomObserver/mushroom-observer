@@ -152,7 +152,7 @@ class NameController < ApplicationController
   def auto_complete_for_proposed_name
     auto_complete_name(:proposed, :name)
   end
-
+  
   # show_name.rhtml
   def show_name
     # Rough testing showed implementation without synonyms takes .23-.39 secs.
@@ -162,6 +162,8 @@ class NameController < ApplicationController
       @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
       @children = @name.children
 
+      # In theory much of the following should really be handled by the new search_sequences,
+      # but for now if it ain't broke...
       # Matches on consensus name, any vote.
       consensus_query = %(
         SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
@@ -200,15 +202,28 @@ class NameController < ApplicationController
 
       # Get list of observations matching any of its synonyms.
       @synonym_data = []
+      synonym_ids = []
       synonym = @name.synonym
       if synonym
         for n in synonym.names
           if n != @name
+            synonym_ids.push(n.id)
             data = Observation.connection.select_all(synonym_query % n.id)
             @synonym_data += data
           end
         end
       end
+
+      @search_seqs = {
+        "consensus" => calc_search(:name_observations, "o.name_id = %s" % params[:id], "o.vote_cache desc, o.when desc").key,
+        "synonym" => calc_search(:synonym_observations, "o.name_id in (%s)" % synonym_ids.join(", "), "o.vote_cache desc, o.when desc").key,
+        "other" => calc_search(:other_observations, "g.name_id = %s" % params[:id], "g.vote_cache desc, o.when desc").key }
+      #consensus_search = SearchState.new(session, params, :name_observations, logger)
+      #if not consensus_search.setup?
+      #  consensus_search.setup(nil, , :nothing)
+      #end
+      #store_search_state(consensus_search)
+      #@search_seqs = { "consensus" => consensus_search.key }
 
       # Remove duplicates. (Select block sets seen[id] to true and returns true
       # for the first occurrance of an id, else implicitly returns false.)
@@ -251,7 +266,7 @@ class NameController < ApplicationController
         end
       end
 
-      session[:checklist_source] = :observation_ids
+      # session[:checklist_source] = :observation_ids
     # end
     # logger.warn("show_name took %s\n" % elapsed_time)
   end

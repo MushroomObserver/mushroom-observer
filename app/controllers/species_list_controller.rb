@@ -61,6 +61,7 @@ class SpeciesListController < ApplicationController
     store_location
     @user = session['user']
     id = params[:id]
+    @search_seq = calc_search(:species_list_observations, "s.id = %s" % id, "n.search_name").key
     @species_list = SpeciesList.find(id)
     session[:species_list] = @species_list
     if session[:checklist_source] != id

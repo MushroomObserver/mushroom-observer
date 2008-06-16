@@ -809,9 +809,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert(@coprinus_comatus_other_naming.user_voted?(@rolf))
     assert(@coprinus_comatus_other_naming.user_voted?(@mary))
     assert(!@coprinus_comatus_other_naming.user_voted?(@dick))
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@dick))
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@rolf, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary, false))
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@dick, false))
     #
     # Rolf, the owner of @coprinus_comatus_obs, already has a naming, which
     # he's 80% sure of.  Create a new one (the genus Agaricus) that he's 100%
@@ -886,8 +886,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(vote, naming.users_vote(@rolf))
     assert(naming.user_voted?(@rolf))
     assert(!naming.user_voted?(@mary))
-    assert_equal(@agaricus, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
+    assert_equal(@agaricus, @coprinus_comatus_obs.preferred_name(@rolf, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary, false))
   end
 
   # Now see what happens when rolf's new naming is less confident than old.
@@ -961,9 +961,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@conocybe_filaris, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_namings are right.
-    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
-    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@dick))
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@rolf, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary, false))
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@dick, false))
   end
 
   # Test a bug in name resolution: was failing to recognize that
@@ -1019,9 +1019,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_namings are right.
-    assert_equal(@coprinus_comatus,    @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@dick))
+    assert_equal(@coprinus_comatus,    @coprinus_comatus_obs.preferred_name(@rolf, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@dick, false))
     #
     # If Dick votes on the other as well, then his first vote should
     # get demoted and his preference should change.
@@ -1037,7 +1037,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(2, @coprinus_comatus_other_naming.users_vote(@dick).value)
     assert_equal(2, @coprinus_comatus_other_naming.vote_sum)
     assert_equal(3, @coprinus_comatus_other_naming.votes.length)
-    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@dick))
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.preferred_name(@dick, false))
     assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
   end
 
@@ -1090,7 +1090,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_naming is right.
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf, false))
     #
     # Check vote.
     @coprinus_comatus_other_naming.reload
@@ -1207,8 +1207,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_namings are right.
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@rolf, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary, false))
     #
     # Check votes. (should be no change)
     assert_equal(0, @coprinus_comatus_other_naming.vote_sum)
@@ -1355,8 +1355,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@conocybe_filaris, @coprinus_comatus_obs.name)
     #
     # Make sure preferred_naming is unchanged.
-    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@rolf))
-    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary))
+    assert_equal(@conocybe_filaris, @coprinus_comatus_obs.preferred_name(@rolf, false))
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.preferred_name(@mary, false))
     #
     # Make sure old naming is unchanged.
     assert_equal(@coprinus_comatus, @coprinus_comatus_naming.name)

@@ -1,4 +1,8 @@
-<% @title = 'Species List: ' + h(@species_list.unique_text_name) %>
+<%
+    @title = 'Species List: ' + h(@species_list.unique_text_name)
+    search_params = {}
+    search_params[:search_seq] = @search_seq if @search_seq
+%>
 <% if check_permission(@species_list.user_id) %>
   <%= link_to 'Edit Species List', :action => 'edit_species_list', :id => @species_list %>
   | <%= link_to 'Destroy', { :action => 'destroy_species_list', :id => @species_list },
@@ -25,13 +29,15 @@ Members:<br/>
 				image = observation.thumb_image
 				if image
 		  			link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
-	            		:controller => 'observer', :action => 'show_observation', :id => observation.id)
+	            		:controller => 'observer', :action => 'show_observation', :id => observation.id,
+	            		:params => search_params)
 	          	end
 	      		%><br/>
 	    	</td>
 		    <td width="100%" valign="middle">
 				<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name(@user))),
-			        :controller => 'observer', :action => 'show_observation', :id => observation.id) %></span><br/>
+			        :controller => 'observer', :action => 'show_observation', :id => observation.id,
+			        :params => search_params) %></span><br/>
 		        <span class="ListWhere"><%= h(observation.where) %></span>: 
 		        <span class="ListWho"><%= user_link(observation.user) %></span>
 		    </td>

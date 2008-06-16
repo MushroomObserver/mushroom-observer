@@ -25,6 +25,10 @@ class CurrentTest < Test::Unit::TestCase
   fixtures :rss_logs
   fixtures :synonyms
   fixtures :licenses
+  fixtures :namings
+  fixtures :votes
+  fixtures :naming_reasons
+  fixtures :locations
 
   def setup
     @controller = ObserverController.new
@@ -40,5 +44,11 @@ class CurrentTest < Test::Unit::TestCase
 
   def test_trivial
     assert_equal(1+1, 2)
+  end
+  
+  def test_ask_observation_question
+    id = @coprinus_comatus_obs.id
+    requires_login :ask_observation_question, {:id => id}
+    assert_form_action :action => 'send_observation_question', :id => id
   end
 end

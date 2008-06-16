@@ -791,4 +791,15 @@ class ApplicationController < ActionController::Base
       session[:image_ids] = nil if session[:image_ids]
       @user = session['user']
     end
+
+    # Unfortunately the conditions are currently raw SQL that require knowledge of the
+    # queries in SearchState.query...
+    def calc_search(type, conditions, order)
+      search = SearchState.new(session, params, type)
+      if not search.setup?
+        search.setup(nil, conditions, order, :nothing)
+      end
+      store_search_state(search)
+      search
+    end
 end

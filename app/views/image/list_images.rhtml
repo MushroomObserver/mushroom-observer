@@ -4,7 +4,7 @@
     search_params[:search_seq] = @search_seq if @search_seq
  %>
 <div id="Title"><%= @title %></div>
-	<div class="pagination"><%= pagination_links(@obj_pages) %></div>
+	<div class="pagination"><%= pagination_links(@obj_pages, :params => search_params) %></div>
 	<% if @objs.length > 0 %>
     	<table cellspacing="0" width="100%">
       	<%

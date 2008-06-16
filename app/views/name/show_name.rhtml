@@ -1,4 +1,6 @@
-<% @title = 'Name: ' + h(@name.text_name) %>
+<%
+    @title = 'Name: ' + h(@name.text_name)
+%>
 
 <% # Google Images | Distribution Map %>
 <%= sprintf('<a href="http://images.google.com/images?q=%s" target="_new">Google Images</a>' % @name.text_name) %>
@@ -105,8 +107,11 @@ for sect in ["consensus", "synonym", "other"]
     args[:consensus_page] = @consensus_page if @consensus_data != []
     args[:synonym_page] = @synonym_page     if @synonym_data != []
     args[:other_page] = @other_page         if @other_data != []
+    args[:search_seq] = @search_seqs[sect]  if @search_seqs[sect]
     args.delete arg
-
+    link_args = {}
+    link_args[:search_seq] = @search_seqs[sect] if @search_seqs[sect]
+    
     # Add line break between groups.
     if num_sects > 0 %>
       <br/><hr></hr>
@@ -132,13 +137,15 @@ for sect in ["consensus", "synonym", "other"]
             image_id = datum["thumb_image_id"]
             if image_id
               link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-                :controller => 'observer', :action => 'show_observation', :id => id)
+                :controller => 'observer', :action => 'show_observation', :id => id,
+                :params => link_args)
             end
             %><br/>
           </td>
           <td width="100%" valign="middle">
             <span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
-              :controller => 'observer', :action => 'show_observation', :id => id) %></span><br/>
+              :controller => 'observer', :action => 'show_observation', :id => id,
+              :params => link_args) %></span><br/>
             <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>:
             <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
             Observation made: <%= datum["when"]%><br/>

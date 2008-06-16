@@ -39,7 +39,6 @@ class SequenceState
     @connection = connection
     key_state = session_state && session_state[key]
     if key_state # && (id == key_state[:current_id])
-      logger.warn("SequenceState.initialize: loading from seq_states") if logger
       @current_id = key_state[:current_id]
       @current_index = key_state[:current_index]
       @next_id = key_state[:next_id]
@@ -48,12 +47,8 @@ class SequenceState
       @query_type = key_state[:query_type]
       @access_count = (key_state[:access_count] || 0) + 1
     else
-      logger.warn("SequenceState.initialize: making shit up: #{id}, #{search_state.query_type}") if logger
       if query_type != search_state.query_type && search_state.query_type != :images
         id = params[:obs].to_i
-        logger.warn("SequenceState.initialize: query_type mismatch") if logger
-      else
-        logger.warn("SequenceState.initialize: query_type is ok") if logger
       end
       @current_id = id
       @current_index = nil

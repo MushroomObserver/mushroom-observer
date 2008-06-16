@@ -56,6 +56,8 @@ class Observation < ActiveRecord::Base
     :when  => "date",
     :where => "location"
   })
+  
+  @@preferred_name_cache = {} # Maps user.id to a preferred name
 
   def add_spl_callback(o)
     SiteData.update_contribution(:create, self, :species_list_entries, 1)
@@ -302,6 +304,7 @@ class Observation < ActiveRecord::Base
     elsif best != old
       self.log("Consensus established: #{best.observation_name}", true)
     end
+    Observation.reset_preferred_name_cache()
 
 #return result
   end
@@ -311,17 +314,29 @@ class Observation < ActiveRecord::Base
   # Look up the user's preferred name.  The logic is:
   # If the user has voted 100% for something, use that.
   # Otherwise use the community consensus.
-  def preferred_name(user=nil)
-    v100 = Vote.maximum_vote
-    if user
-      for naming in self.namings
-        vote = naming.users_vote(user)
-        if vote && vote.value == v100
-          return naming.name
+  def preferred_name(user=nil, cache_result=false)
+    id = user && user.id
+    result = @@preferred_name_cache[[self.id, id]]
+    if result.nil?
+      result = self.name
+      v100 = Vote.maximum_vote
+      if user
+        for naming in self.namings
+          vote = naming.users_vote(user)
+          if vote && vote.value == v100
+            result = naming.name
+            break
+          end
         end
       end
+      # result = self.name
+      @@preferred_name_cache[[self.id, id]] = result if cache_result
     end
-    return self.name
+    result
+  end
+  
+  def Observation.reset_preferred_name_cache()
+    # @@preferred_name_cache = {}
   end
 
   # Various formats using the preferred_name.
