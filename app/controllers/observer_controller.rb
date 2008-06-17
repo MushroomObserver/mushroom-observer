@@ -311,7 +311,6 @@ class ObserverController < ApplicationController
     store_location # Is this doing anything useful since there is no user check for this page?
     @seq_key = seq_key
     @search_seq = params[:search_seq]
-    @start = params[:start] || Time.now
     @observation = Observation.find(params[:id])
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
@@ -461,26 +460,24 @@ class ObserverController < ApplicationController
   end
   
   def next_observation
-    start = Time.now.to_f
     state = SequenceState.new(session, params, Observation.connection, :observations, logger)
     state.next()
     store_seq_state(state) # Add key and timestamp
     id = state.current_id
     if id
-      redirect_to(:action => 'show_observation', :id => id, :search_seq => params[:search_seq], :seq_key => state.key, :start => start)
+      redirect_to(:action => 'show_observation', :id => id, :search_seq => params[:search_seq], :seq_key => state.key)
     else
       redirect_to(:action => 'list_rss_logs')
     end
   end
 
   def prev_observation
-    start = Time.now.to_f
     state = SequenceState.new(session, params, Observation.connection, :observations, logger)
     state.prev()
     store_seq_state(state)
     id = state.current_id
     if id
-      redirect_to(:action => 'show_observation', :id => id, :seq_key => state.key, :start => start)
+      redirect_to(:action => 'show_observation', :id => id, :seq_key => state.key)
     else
       redirect_to(:action => 'list_rss_logs')
     end
