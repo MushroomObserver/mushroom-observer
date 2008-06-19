@@ -11,7 +11,7 @@ class SearchState
 
   def query()
     result = nil
-    order = @order || "'modified' desc"
+    order = @order
     case @query_type
     when :species_list_observations
       result = %(
@@ -53,10 +53,12 @@ class SearchState
       result = "select distinct i.*
         from images i, images_observations io, observations o, names n
         where i.id = io.image_id and o.id = io.observation_id and n.id = o.name_id"
+      order = order || "i.id"
     else
       result = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
                "modified is not null"
     end
+    order = order || "'modified' desc"
     result += " and (#{@conditions})" if @conditions
     result + " order by #{order}"
   end
@@ -93,6 +95,9 @@ class SearchState
     else
       @title = nil
       @conditions = nil
+      if (query_type == :images) and params[:obs]
+        @conditions = "o.id = %s" % params[:obs]
+      end
       @order = nil
       @source = nil
       @query_type = query_type

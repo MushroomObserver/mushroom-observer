@@ -145,7 +145,7 @@ class ImageController < ApplicationController
     current_observation = Observation.find(current_observation_id)
     if current_image && current_observation
       images = current_observation.images
-      index = images.index(current_image)
+      index = (direction == 1) ? images.rindex(current_image) : images.index(current_image)
       if index
         index += direction
         if 0 <= index && index < images.length # Have to check explicitly since foo[-1] is the not nil

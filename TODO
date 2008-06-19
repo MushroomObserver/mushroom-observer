@@ -1,7 +1,12 @@
 Release each of the following as they get completed:
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)
-      remove timing param
+      * Image order for http://mushroomobserver.org/7998
+        - Need to restrict image search to just the ones for the given observation
+      - Image lists with duplicate images (http://mushroomobserver.org/7992)
+      - Handling of image Next/Prev on show_image after going to a raw observation URL.
+      Clicking on show_observation link from a show_image page doesn't pass the search info back up.  Similar problem with show_original.
+      Potential interactions between if URLs are copied and pasted
       
       later:
         sort by modified, created, when, name, location, observer, mod year (time of year)
@@ -15,6 +20,8 @@ Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  
 User profile - paragraph available in preferences that gets displayed on the show_user page (4)
   Associate a user with a location (2)
   User photo (4)
+
+Add fields for who found the mushroom and who provided the id.
 
 Updating an author citation currently requires visiting each observation and adding the new name.  Seems like there should be a simpler way.
 
