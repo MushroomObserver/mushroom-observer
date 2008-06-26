@@ -1,21 +1,16 @@
 Release each of the following as they get completed:
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)
-      * Image order for http://mushroomobserver.org/7998
-        - Need to restrict image search to just the ones for the given observation
-      - Image lists with duplicate images (http://mushroomobserver.org/7992)
-      - Handling of image Next/Prev on show_image after going to a raw observation URL.
       Clicking on show_observation link from a show_image page doesn't pass the search info back up.  Similar problem with show_original.
-      Potential interactions between if URLs are copied and pasted
+      Potential interactions between sequences if URLs are copied and pasted
+      Next/Prev not working for the observation of a location
       
       later:
         sort by modified, created, when, name, location, observer, mod year (time of year)
         Add next/prev_location
         Add next/prev_name?
-      
-    list_rss_logs sets the sql conditions and ordering
-    show_observation sets the type and current_id
-  Manage multiple states
+
+Bug shouldn't be possible to add the same exact image multiple times (e.g., http://mushroomobserver.org/7992)
 
 User profile - paragraph available in preferences that gets displayed on the show_user page (4)
   Associate a user with a location (2)
@@ -33,7 +28,7 @@ Potentially interesting features for improving amateur/professional communicatio
 
 % Notifications
     Email queuing (32)
-    Users could register interest in a particular name and get email when one shows up.
+    Users could register interest in a particular species, genus or user and get email when one shows up.
     Add RSS feeds for searches, names, higher level taxa (16)
     Add more events to the feed (Locations, Votes, New Users), but add filters for the main page.
       E.g., Observations, Observations with Images, Species Lists, Locations, Votes, Consensus Changing Votes etc.

@@ -42,7 +42,7 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_next_image
     get_with_dump :next_image
-    assert_redirected_to(:controller => "image", :action => "show_image", :id => 5)
+    assert_redirected_to(:controller => "image", :action => "show_image", :id => 2)
   end
 
   def test_next_image_ss

@@ -201,6 +201,8 @@ class ImageController < ApplicationController
       inc_image_from_obs_search(state, inc_func, direction)
     when :rss_logs
       inc_image_from_obs_search(state, inc_func, direction)
+    else
+      redirect_to(:action => 'list_rss_logs')
     end
   end
 
