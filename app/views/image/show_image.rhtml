@@ -1,5 +1,6 @@
 <%
     @title = 'Image: ' + h(@image.unique_text_name(@user))
+    search_params = calc_search_params()
     for obs in @image.observations
         %>
         <%= link_to("About #{textilize_without_paragraph(h(obs.format_name(@user)))}",
@@ -9,7 +10,7 @@
     end
 %>
 
-<%= link_to 'Show Full Size', :action => 'show_original', :id => @image %>
+<%= link_to 'Show Full Size', :action => 'show_original', :id => @image, :params => search_params %>
 <% commercial_inquiries_ok = @image.user.commercial_email
    if commercial_inquiries_ok %>
 	| <%= link_to 'Send Commercial Inquiry About Image',
@@ -29,7 +30,7 @@
 <td align="center">
     <div about="640/#{@image.id}.jpg">
         <%= link_to(image_tag("640/#{@image.id}.jpg"),
-        	:action => 'show_original', :id => @image.id) %><br/>
+        	:action => 'show_original', :id => @image.id, :params => search_params) %><br/>
         <%= render :partial => "form_#{@image.license.form_name}" %>
     </div>
 </td>
@@ -55,7 +56,7 @@
       end
       text += '</span>' %>
       <%= link_to(text, :controller => 'observer',
-          :action => 'show_observation', :id => observation.id) %>
+          :action => 'show_observation', :id => observation.id, :params => search_params) %>
       <br/><br/>
     <% end %>
 </p>

@@ -3,10 +3,7 @@
    what         = textilize_without_paragraph(h(@observation.format_name(@user)))
    name         = @observation.preferred_name(@user)
    questions_ok = @observation.user.question_email
-   search_params = {}
-   search_params[:search_seq] = @search_seq if @search_seq
-   search_params[:obs] = @observation.id
-   # search_params[:seq_key] = @seq_key if @seq_key
+   search_params = calc_search_params()
 %>
 
 <% if name %>
@@ -18,9 +15,9 @@
 %>
 
 <%= link_to :show_observation_propose_new_name.l,
-    :controller => 'observer', :action => 'create_naming', :id => @observation %>
+    :controller => 'observer', :action => 'create_naming', :id => @observation, :params => search_params %>
 | <%= link_to :show_observation_add_comment.l,
-    :controller => 'comment', :action => 'add_comment', :id => @observation %>
+    :controller => 'comment', :action => 'add_comment', :id => @observation, :params => search_params %>
 | <%= link_to :show_observation_manage_species_lists.l,
     :controller => 'species_list', :action => 'manage_species_lists', :id => @observation %>
 <% if questions_ok %>
@@ -49,7 +46,7 @@
   <tr>
     <td width="75%" valign="top">
       <%= render :partial => 'show_observation' %>
-      <%= render :partial => 'show_namings' %>
+      <%= render :partial => 'show_namings', :locals => { :search_params => search_params } %>
       <%= render :partial => 'show_comments', :locals => { :skip_comment => nil } %>
       <%= render :partial => 'show_footer' %>
 	</td>

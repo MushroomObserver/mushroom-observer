@@ -74,6 +74,7 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @observation, @user
   def add_comment
     if verify_user()
+      pass_seq_params()
       @user = session['user']
       @observation = Observation.find(params[:id])
       if request.method == :get
@@ -86,7 +87,7 @@ class CommentController < ApplicationController
         if @comment.save
           @observation.log("Comment added by #{@user.login}: #{@comment.summary}", true)
           flash_notice "Comment was successfully added."
-          redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+          redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation, :params => calc_search_params()
         else
           flash_object_errors(@comment)
         end

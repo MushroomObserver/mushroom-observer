@@ -1,10 +1,13 @@
-<% @title = 'Add Comment to ' + h(@observation.unique_text_name) %>
+<%
+    @title = 'Add Comment to ' + h(@observation.unique_text_name)
+    search_params = calc_search_params()
+%>
 <%= link_to 'Cancel (Show Observation)', :controller => 'observer',
-  :action => 'show_observation', :id => @observation %>
+  :action => 'show_observation', :id => @observation, :params => search_params %>
 
 <div id="Title">Add Comment to <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
-<% form_tag(:action => 'add_comment') do %>
+<% form_tag(:action => 'add_comment', :params => search_params) do %>
 <center><%= submit_tag "Create" %></center>
 
 <%= render :partial => 'form_comments' %>

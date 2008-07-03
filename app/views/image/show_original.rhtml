@@ -1,5 +1,8 @@
-<% @title = 'Image: ' + h(@image.unique_text_name(@user)) %>
-<%= link_to 'Show Normal Size', :action => 'show_image', :id => @image %>
+<%
+    @title = 'Image: ' + h(@image.unique_text_name(@user))
+    search_params = calc_search_params()
+%>
+<%= link_to 'Show Normal Size', :action => 'show_image', :id => @image, :params => search_params %>
 <% commercial_inquiries_ok = @image.user.commercial_email
    if commercial_inquiries_ok %>
 	| <%= link_to 'Send Commercial Inquiry About Image',
@@ -23,6 +26,6 @@
 
 <div about="orig/#{@image.id}.jpg">
     <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
-                :action => 'show_image', :id => @image.id) %>
+                :action => 'show_image', :id => @image.id, :params => search_params) %>
     <%= render :partial => "form_#{@image.license.form_name}" %>
 </div>

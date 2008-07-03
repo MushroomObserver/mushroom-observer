@@ -309,8 +309,8 @@ class ObserverController < ApplicationController
       seq_key = state.key
     end
     store_location # Is this doing anything useful since there is no user check for this page?
+    pass_seq_params()
     @seq_key = seq_key
-    @search_seq = params[:search_seq]
     @observation = Observation.find(params[:id])
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
@@ -530,12 +530,13 @@ class ObserverController < ApplicationController
   #   @confidence_menu (used for vote option menu)
   #   @reason          (array of naming_reasons)
   def create_naming
+    pass_seq_params()
     @user = session['user']
     if verify_user()
       @observation = Observation.find(params[:id])
       # Attempt to create naming (and associated vote, etc.)
       if request.method == :post && create_naming_helper()
-        redirect_to :action => 'show_observation', :id => @observation
+        redirect_to :action => 'show_observation', :id => @observation, :params => calc_search_params()
       else
         # Create empty instances first time through.
         if request.method == :get

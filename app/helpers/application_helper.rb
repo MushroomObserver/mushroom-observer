@@ -66,4 +66,12 @@ module ApplicationHelper
     "  </td></tr></table>
     </div>"
   end
+  
+  def calc_search_params
+    search_params = {}
+    search_params[:search_seq] = @search_seq if @search_seq
+    search_params[:seq_key] = @seq_key if @seq_key
+    search_params[:obs] = @obs if @obs
+    search_params
+  end
 end

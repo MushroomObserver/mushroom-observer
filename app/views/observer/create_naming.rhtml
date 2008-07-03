@@ -6,18 +6,16 @@
 
 <% @title = 'Create Naming for Observation #' + h(@observation.id)
    button_name = 'Create'
-   search_params = {}
-   search_params[:search_seq] = @search_seq if @search_seq
-   search_params[:seq_key] = @seq_key if @seq_key
+   search_params = calc_search_params()
 %>
 
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation',
-    :id => @observation %>
+    :id => @observation, :params => search_params %>
 
 <div id="Title"><%= @title %></div>
 
 <% form_tag(:action => 'create_naming', :id => @observation,
-   :approved_name => @what) do %>
+   :approved_name => @what, :params => search_params) do %>
 <br/>
 <center><%= submit_tag(button_name) %></center>
 

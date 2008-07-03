@@ -802,4 +802,18 @@ class ApplicationController < ActionController::Base
       store_search_state(search)
       search
     end
+
+    def pass_seq_params()
+      @seq_key = params[:seq_key]
+      @search_seq = params[:search_seq]
+      @obs = params[:obs]
+    end
+  
+    def calc_search_params
+      search_params = {}
+      search_params[:search_seq] = @search_seq if @search_seq
+      search_params[:seq_key] = @seq_key if @seq_key
+      search_params[:obs] = @obs if @obs
+      search_params
+    end
 end

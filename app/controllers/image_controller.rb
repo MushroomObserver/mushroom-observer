@@ -114,9 +114,7 @@ class ImageController < ApplicationController
   # Outputs: @image, @user, @invalid
   def show_image
     store_location
-    @seq_key = params[:seq_key]
-    @search_seq = params[:search_seq]
-    @obs = params[:obs]
+    pass_seq_params()
     @user = session['user']
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
@@ -130,6 +128,7 @@ class ImageController < ApplicationController
   # Outputs: @image, @user, @invalid
   def show_original
     store_location
+    pass_seq_params()
     @user = session['user']
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
@@ -184,8 +183,7 @@ class ImageController < ApplicationController
     start = Time.now.to_f
     state = SequenceState.new(session, params, Image.connection, :images, logger)
     inc_func = state.method(func_name)
-    @seq_key = params[:seq_key]
-    @search_state = params[:search_state]
+    pass_seq_params()
     case state.query_type
     when :images
       inc_func.call()

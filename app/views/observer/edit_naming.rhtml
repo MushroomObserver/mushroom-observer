@@ -6,9 +6,7 @@
 
 <% @title = 'Edit Naming for Observation #' + h(@observation.id)
    button_name = 'Save Edits'
-   search_params = {}
-   search_params[:search_seq] = @search_seq if @search_seq
-   search_params[:seq_key] = @seq_key if @seq_key
+   search_params = calc_search_params()
 %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation',
     :id => @observation %>

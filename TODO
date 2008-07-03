@@ -1,14 +1,15 @@
 Release each of the following as they get completed:
 
 Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)
-      Clicking on show_observation link from a show_image page doesn't pass the search info back up.  Similar problem with show_original.
-      Potential interactions between sequences if URLs are copied and pasted
-      Next/Prev not working for the observation of a location
+      - Clicking on show_observation link from a show_image page doesn't pass the search info back up.  Similar problem with show_original.
+      - Next/Prev not working for the observation of a location
+      - Looses place if you name something while reviewing the RSS sequence
       
       later:
         sort by modified, created, when, name, location, observer, mod year (time of year)
         Add next/prev_location
         Add next/prev_name?
+        Potential interactions between sequences if URLs are copied and pasted
 
 Bug shouldn't be possible to add the same exact image multiple times (e.g., http://mushroomobserver.org/7992)
 

@@ -13,7 +13,7 @@
       <%= :show_namings_no_names_yet.l %>
     <% end %>&nbsp;
     <%= link_to :show_namings_propose_new_name.l, :action => 'create_naming',
-      :id => @observation %>
+      :id => @observation, :params => search_params %>
     <% if logged_in && any_names %>
       &nbsp;<%= javascript_tag "document.write('" +
         submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") + "')" %>

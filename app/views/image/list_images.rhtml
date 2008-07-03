@@ -1,7 +1,6 @@
 <%
     @title = "Images" if !@title
-    search_params = {}
-    search_params[:search_seq] = @search_seq if @search_seq
+    search_params = calc_search_params()
  %>
 <div id="Title"><%= @title %></div>
 	<div class="pagination"><%= pagination_links(@obj_pages, :params => search_params) %></div>

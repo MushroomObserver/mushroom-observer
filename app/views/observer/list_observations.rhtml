@@ -1,8 +1,7 @@
 <%  if @title.nil?
         @title = 'Observations'
     end
-    search_params = {}
-    search_params[:search_seq] = @search_seq if @search_seq
+    search_params = calc_search_params()
 %>
 <div id="Title"><%= @title %></div>
 <% if @links %>
