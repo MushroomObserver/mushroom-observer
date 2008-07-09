@@ -869,7 +869,10 @@ class ObserverController < ApplicationController
         @naming.change_vote(@user, params[:vote][:value].to_i)
         need_to_calc_consensus = false
       end
-      @observation.calc_consensus if need_to_calc_consensus
+      if need_to_calc_consensus
+        @observation.reload
+        @observation.calc_consensus
+      end
       #
       # Log actions.
       @observation.log("Naming changed by #{@user.login}: #{@naming.format_name}", need_to_log_change)

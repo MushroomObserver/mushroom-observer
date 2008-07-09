@@ -101,7 +101,7 @@ class Observation < ActiveRecord::Base
   # winning taxon.
   # Returns Naming instance or nil.
   def calc_consensus
-#result = ""
+result = ""
 
     # [Now that we consider all votes, this is all superfluous. -JPH 20080313]
     # # Gather some handy overall vote stats.
@@ -306,7 +306,7 @@ class Observation < ActiveRecord::Base
     end
     Observation.reset_preferred_name_cache()
 
-#return result
+return result
   end
 
 ################################################################################
