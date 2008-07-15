@@ -34,7 +34,7 @@ class AccountMailerTest < Test::Unit::TestCase
     @expected.set_content_type "text", "html", { "charset" => CHARSET }
 
     # comment(sender, observation, comment)
-    account_mailer = AccountMailer.create_comment(@mary, @detailed_unknown,
+    account_mailer = AccountMailer.create_comment(@mary, @detailed_unknown.user, @detailed_unknown,
       @minimal_comment)
     assert_equal @expected.encoded, account_mailer.encoded
   end

@@ -13,7 +13,7 @@ class Comment < ActiveRecord::Base
     QueuedEmail.save_comment(sender, User.find_by_login('katrina'), self) # Queue it for user 'katrina'
     begin
       if recipient.comment_email
-        AccountMailer.deliver_comment(sender, observation, self)
+        AccountMailer.deliver_comment(sender, recipient, observation, self)
       end
     rescue
       # Failing to send email should not throw an error
