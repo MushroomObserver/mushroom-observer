@@ -8,7 +8,7 @@
 <h2><b>Comment about your Observation</b></h2>
 
 <p>The following comment was posted on the Mushroom Observer website regarding
-your observation <u><%= @observation.unique_text_name(@user) %></u>:</p>
+the observation <u><%= @observation.unique_text_name(@user) %></u>:</p>
 
 <p><b>Created:</b> <%= @comment.created.to_formatted_s(:db) %><br/>
 <b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/>
@@ -35,7 +35,7 @@ Here are some handy links you may find useful:</p>
 </body>
 </html>
 <% else ##################################################################### %>
-The following comment was posted on the Mushroom Observer website regarding your observation <%= @observation.unique_text_name(@user) %>:
+The following comment was posted on the Mushroom Observer website regarding the observation <%= @observation.unique_text_name(@user) %>:
 
 Created: <%= @comment.created.to_formatted_s(:db) %>
 By: <%= @sender.legal_name %> (<%= @sender.email %>)

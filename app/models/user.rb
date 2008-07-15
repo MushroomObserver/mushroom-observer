@@ -42,6 +42,9 @@ class User < ActiveRecord::Base
   has_many :votes
   has_many :test_add_image_logs
   has_many :locations
+  has_many :queued_emails
+  has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
+  
   belongs_to :license
 
   def self.authenticate(login, pass)

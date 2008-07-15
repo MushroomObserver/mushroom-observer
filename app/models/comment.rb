@@ -10,6 +10,7 @@ class Comment < ActiveRecord::Base
     observation = Observation.find(self.observation_id)
     sender      = User.find(self.user_id)
     recipient   = User.find(observation.user_id)
+    QueuedEmail.save_comment(sender, User.find_by_login('katrina'), self) # Queue it for user 'katrina'
     begin
       if recipient.comment_email
         AccountMailer.deliver_comment(sender, observation, self)

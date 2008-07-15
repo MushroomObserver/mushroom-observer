@@ -1,1 +1,7 @@
 # See http://www.robotstxt.org/wc/norobots.html for documentation on how to use the robots.txt file
+
+User-agent: *
+Disallow: /image/next_image/
+Disallow: /image/prev_image/
+Disallow: /observer/next_observation/
+Disallow: /observer/prev_observation/

@@ -1,11 +1,25 @@
 Release each of the following as they get completed:
 
-Clean up Next/Prev when used with the Back button.  Possibly rename Next/Prev.  Make home page list the default. (16)
-      - Clicking on show_observation link from a show_image page doesn't pass the search info back up.  Similar problem with show_original.
-      - Next/Prev not working for the observation of a location
-      - Looses place if you name something while reviewing the RSS sequence
-      
-      later:
+Email queuing:
+  Focus on comment email:
+    queue for each recipient (initially just me)
+    get cron working [every 6 minutes]
+    Add observer
+    Optionally add other commentators & all comment receivers [control in user prefs]
+      Should lurkers on particular observations be supported?
+
+Bugs:
+May be fixed: Reported by Darvin on July 6, 2008:
+  To recreate:
+  http://mushroomobserver.org/image/show_image/6882?search_seq=846&obs=4337&seq_key=297
+  Look at the photo FULL SIZE, go back to medium size then hit NEXT
+Noticed July 14, 2008:
+  Search for Panaeolus, select the Genus, select observation 8363, click on an image (15529),
+    click 'Next' -> "File not found"
+
+Research Media RSS for use with PicLens
+
+More next/prev stuff:
         sort by modified, created, when, name, location, observer, mod year (time of year)
         Add next/prev_location
         Add next/prev_name?

@@ -7,8 +7,8 @@ class AccountMailer < ActionMailer::Base
   EXTRA_BCC_EMAIL_ADDRESSES = "nathan@collectivesource.com"
   EXCEPTION_RECIPIENTS      = %w{webmaster@mushroomobserver.org}
 
-  def comment(sender, observation, comment)
-    @user                = observation.user
+  def comment(sender, receiver, observation, comment)
+    @user                = receiver
     @body["sender"]      = sender
     @body["user"]        = @user
     @body["observation"] = observation

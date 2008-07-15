@@ -21,3 +21,6 @@ config.action_controller.perform_caching             = true
 DOMAIN = 'http://mushroomobserver.org'
 
 TESTING = false
+
+EMAIL_PER_MINUTE = 25
+QUEUE_DELAY = 5.minutes

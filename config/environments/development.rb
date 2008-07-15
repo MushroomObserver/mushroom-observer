@@ -26,3 +26,6 @@ config.action_mailer.delivery_method = :file
 DOMAIN = 'http://localhost:3000'
 
 TESTING = false
+
+EMAIL_PER_MINUTE = 25
+QUEUE_DELAY = 5.minutes

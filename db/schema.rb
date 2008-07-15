@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 29) do
+ActiveRecord::Schema.define(:version => 30) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -144,6 +144,30 @@ ActiveRecord::Schema.define(:version => 29) do
     t.column "deprecated",       :boolean,                                                                                                                  :default => false, :null => false
     t.column "citation",         :string,   :limit => 200
     t.column "rank",             :enum,     :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
+  end
+
+  create_table "queued_email_integers", :force => true do |t|
+    t.column "queued_email_id", :integer,                :default => 0, :null => false
+    t.column "key",             :string,  :limit => 100
+    t.column "value",           :integer,                :default => 0, :null => false
+  end
+
+  create_table "queued_email_notes", :force => true do |t|
+    t.column "queued_email_id", :integer, :default => 0, :null => false
+    t.column "value",           :text
+  end
+
+  create_table "queued_email_strings", :force => true do |t|
+    t.column "queued_email_id", :integer,                :default => 0, :null => false
+    t.column "key",             :string,  :limit => 100
+    t.column "value",           :string,  :limit => 100
+  end
+
+  create_table "queued_emails", :force => true do |t|
+    t.column "user_id",    :integer,                        :default => 0, :null => false
+    t.column "to_user_id", :integer,                        :default => 0, :null => false
+    t.column "flavor",     :enum,     :limit => [:comment]
+    t.column "queued",     :datetime
   end
 
   create_table "rss_logs", :force => true do |t|
