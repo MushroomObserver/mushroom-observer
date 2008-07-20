@@ -6,30 +6,51 @@
 
 <% form_for(:user, :url => { :action => :prefs }, :html => { :multipart => true }) do |form| %>
 
+<style>
+  div.form p { margin:0.3em 0em 0.3em 0em }
+</style>
+
 <div title="<%= :prefs_title.l %>" id="prefform" class="form">
   <h3><%= :prefs_title.l %></h3>
   <%= link_to :bulk_license_link.l, :controller => 'image', :action => 'license_updater' %>
   <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
 
-  <label for="user_email"><b><%= :prefs_email.l %>:</b></label><br/>
-  <%= form.text_field("email", :size => 60) %><br/><br/>
-  <label for="user_name"><b><%= :prefs_name.l %>:</b></label><br/>
-  <%= form.text_field("name", :size => 60) %><br/><br/>
+  <p style="margin-top:2em"><b><%= :prefs_account_section.l %>:</b></p>
 
-  <label for="user_notes"><b><%= :prefs_notes.l %>:</b></label><br/>
-  <%= form.text_area("notes", :rows => 5, :cols => 60) %><br/><br/>
-  <label for="user_place_name"><b><%= :prefs_location.l %>:</b></label><br/>
+  <p><label for="user_email"><%= :prefs_email.l %></label><br/>
+  <%= form.text_field("email", :size => 60) %></p>
+  <p><label for="user_password"><%= :prefs_password_new.l %></label><br/>
+  <%= form.password_field("password", :value => '', :size => 30) %></p>
+  <p><label for="user_password_confirmation"><%= :prefs_password_confirm.l %></label><br/>
+  <%= form.password_field("password_confirmation", :size => 30) %></p>
+
+  <p style="margin-top:2em"><b><%= :prefs_profile_section.l %>:</b></p>
+
+  <p><label for="user_name"><%= :prefs_name.l %></label><br/>
+  <%= form.text_field("name", :size => 60) %></p>
+  <p><label for="user_place_name"><%= :prefs_location.l %></label><br/>
   <%= text_field_with_auto_complete('user', 'place_name', { :size => 60 },
-    { :skip_style => true, :indicator => 'indicator' }) %><br/><br/>
-  <label for="upload_image"><b><%= @user.image_id ?
-    :prefs_image_change.l : :prefs_image_create.l %>:</b></label>
+    { :skip_style => true, :indicator => 'indicator' }) %></p>
+  <p><label for="user_notes"><%= :prefs_notes.l %></label><br/>
+  <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>
+
+  <p><label for="user_upload_image"><%= @user.image_id ?
+    :prefs_image_change.l : :prefs_image_create.l %></label>
     <%= link_to :prefs_image_reuse.l, :controller => 'image',
       :action => 'reuse_image_for_user' %>
     <%= link_to(:prefs_image_remove.l, :action => 'remove_image') \
       if @user.image %><br/>
-  <%= form.file_field("upload_image") %><br/><br/>
+  <%= form.file_field("upload_image") %></p>
+  <p><label for="copyright_holder"><%= :prefs_copyright_holder.l %></label><br/>
+  <%= text_field_tag("copyright_holder", @copyright_holder, :size => 40) %>
+  <%= select_year(@copyright_year, :field_name => "copyright_year",
+    :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
+  <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
+  <span id="help_note">(<%= :prefs_copyright_warning.l %>)</span></p>
 
-  <table cellpadding="0" cellspacing="0">
+  <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
+
+  <table cellpadding="0" cellspacing="0" style="margin-top:2em">
     <tr>
         <td>
             <label for="user_theme"><b><%= :prefs_theme.l %>:</b></label><br/>
@@ -40,15 +61,14 @@
         <td>
             <label for="user_license_id"><b><%= :prefs_license.l %>:</b></label>
               <span id="help_note">
-                  <%= textilize_without_paragraph(:prefs_license_note.l % "#{DOMAIN}/observer/how_to_user#lic") %>
+                  (<%= textilize_without_paragraph(:prefs_license_note.l % "#{DOMAIN}/observer/how_to_user#lic") %>)
               </span><br/>
             <%= form.select(:license_id, @licenses) %>
         </td>
     <tr>
   <table><br/>
 
-  <b><%= :prefs_layout_title.l %>:</b><br/>
-
+  <p style="margin-top:2em"><b><%= :prefs_layout_title.l %>:</b><br/>
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
   <label for="user_rows"><%= :prefs_rows_by.l %></label>
   <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
@@ -58,10 +78,9 @@
   <%= form.check_box("alternate_columns") %>
   <label for="alternate_columns"><%= :prefs_alt_col_colors.l %></label><br/>
   <%= form.check_box("vertical_layout") %>
-  <label for="vertical_layout"><%= :prefs_text_below_images.l %></label><br/><br/>
+  <label for="vertical_layout"><%= :prefs_text_below_images.l %></label></p>
 
-
-  <b><%= :prefs_email_prefs.l %>:</b><br/>
+  <p style="margin-top:2em"><b><%= :prefs_email_prefs.l %>:</b><br/>
   <%= form.check_box("feature_email") %>
   <label for="feature_email"><%= :prefs_email_features.l %></label><br/>
   <%= form.check_box("comment_email") %>
@@ -71,15 +90,12 @@
   <%= form.check_box("question_email") %>
   <label for="question_email"><%= :prefs_email_questions.l %></label><br/>
   <%= form.check_box("html_email") %>
-  <label for="html_email"><%= :prefs_email_html.l %></label><br/>
-  <%= :prefs_email_note.l %>
+  <label for="html_email"><%= :prefs_email_html.l %></label></p>
+  <p style="margin:0px 20px 0px 20px"><span id="help_note">
+    <%= :prefs_email_note.l %></span></p>
 
-  <label for="user_password"><b><%= :prefs_password_new.l %>:</b></label><br/>
-  <%= form.password_field("password", :value => '', :size => 30) %><br/><br/>
-  <label for="user_password_confirmation"><b><%= :prefs_password_confirm.l %>:</b></label><br/>
-  <%= form.password_field("password_confirmation", :size => 30) %><br/><br/>
 <br/>
-<input type="submit" value="<%= :prefs_button.l %>" class="primary" />
+<center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
 <br/><br/>
 </div>
 

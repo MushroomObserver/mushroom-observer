@@ -119,11 +119,15 @@ class AccountController < ApplicationController
   def prefs
     @user = session['user']
     if @user
+      @licenses = License.current_names_and_ids(@user.license)
       case request.method
         when :get
           @user = User.find(@user.id) # Make sure we have the latest version of the user
           session['user'] = @user
           @user.place_name = @user.location ? @user.location.display_name : ""
+          @copyright_holder = @user.legal_name
+          @copyright_year    = Time.now.year
+          @upload_license_id  = @user.license.id
 
         when :post
           error = false
@@ -143,6 +147,10 @@ class AccountController < ApplicationController
           @user.vertical_layout = params['user']['vertical_layout']
           @user.license_id = params['user']['license_id'].to_i
           @user.notes = params['user']['notes']
+
+          @copyright_holder  = params['copyright_holder']
+          @copyright_year    = params['date']['copyright_year'] if params['date']
+          @upload_license_id = params['upload']['license_id']   if params['upload']
 
           password = params['user']['password']
           if password
@@ -177,7 +185,9 @@ class AccountController < ApplicationController
               :modified => now,
               :user     => @user,
               :title    => @user.legal_name,
-              :when     => now
+              :when     => Time.local(@copyright_year),
+              :copyright_holder => @copyright_holder,
+              :license_id  => @upload_license_id
             )
             if !image.save
               flash_object_errors(image)
@@ -186,20 +196,18 @@ class AccountController < ApplicationController
               flash_error "Invalid image '#{name ? name : "???"}'."
             else
               @user.image = image
-              flash_notice "Uploaded image #{name ? "'#{name}'" : "##{image.id}"}.
-                If you need to <a href=\"/image/edit_image/#{image.id}\">change the
-                copyright or license</a>, please click on the image and edit it."
+              flash_notice "Uploaded image #{name ? "'#{name}'" : "##{image.id}"}."
             end
           end
 
-          if error || !@user.save
+          if error
+          elsif !@user.save
             flash_object_errors(@user)
           else
             flash_notice "Preferences updated."
             redirect_back_or_default :action => "welcome"
           end
       end
-      @licenses = License.current_names_and_ids(@user.license)
     else
       store_location
       access_denied

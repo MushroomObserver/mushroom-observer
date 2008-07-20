@@ -5,17 +5,24 @@ require 'account_controller'
 class AccountController; def rescue_action(e) raise e end; end
 
 class AccountControllerTest < Test::Unit::TestCase
-  
+
   fixtures :users
+  fixtures :images
   fixtures :licenses
   fixtures :locations
-  
+
   def setup
     @controller = AccountController.new
     @request, @response = ActionController::TestRequest.new, ActionController::TestResponse.new
     @request.host = "localhost"
   end
-  
+
+  def teardown
+    if File.exists?(IMG_DIR)
+      FileUtils.rm_rf(IMG_DIR)
+    end
+  end
+
   def test_auth_rolf
     @request.session['return-to'] = "http://localhost/bogus/location"
 
@@ -23,17 +30,17 @@ class AccountControllerTest < Test::Unit::TestCase
     assert(@response.has_session_object?("user"))
 
     assert_equal @rolf, @response.session["user"]
-    
+
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
   end
-  
+
   def test_signup
     @request.session['return-to'] = "http://localhost/bogus/location"
 
     post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "newpassword",
                               "email" => "nathan@collectivesource.com", "theme" => "NULL" }
     assert(@response.has_session_object?("user"))
-    
+
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
   end
 
@@ -44,7 +51,7 @@ class AccountControllerTest < Test::Unit::TestCase
     post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "wrong",
       "theme" => "NULL" }
     assert(find_record_in_template("user").errors.invalid?(:password))
-    
+
     # No email
     post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "newpassword",
       "theme" => "NULL" }
@@ -56,14 +63,14 @@ class AccountControllerTest < Test::Unit::TestCase
     assert(find_record_in_template("user").errors.invalid?(:password))
     assert(find_record_in_template("user").errors.invalid?(:login))
   end
-  
+
   def test_signup_theme_errors
     @request.session['return-to'] = "http://localhost/bogus/location"
 
     post :signup, "user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
                               "email" => "spam@spam.spam", "theme" => "" }
     assert(!@response.has_session_object?("user"))
-    
+
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
 
     post :signup, "user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
@@ -74,20 +81,20 @@ class AccountControllerTest < Test::Unit::TestCase
 
   def test_invalid_login
     post :login, "user_login" => "rolf", "user_password" => "not_correct"
-     
+
     assert(!@response.has_session_object?("user"))
-    
+
     assert(@response.has_template_object?("login"))
   end
-  
+
 #   def test_login_logoff
-# 
+#
 #     post :login, "user_login" => "rolf", "user_password" => "testpassword"
 #     assert(@response.has_session_object?("user"))
-# 
+#
 #     get :logout_user
 #     assert(!@response.has_session_object?("user"))
-# 
+#
 #   end
 
   # Test autologin feature.
@@ -169,5 +176,35 @@ class AccountControllerTest < Test::Unit::TestCase
     assert_equal(false, user.commercial_email)
     assert_equal(false, user.question_email)
     assert_equal(false, user.html_email)
+  end
+
+  # Test uploading mugshot for user profile.
+  def test_add_mugshot
+    # Create image directory and populate with test images.
+    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    # Open file we want to upload.
+    file = FilePlus.new("test/fixtures/images/sticky.jpg")
+    file.content_type = 'image/jpeg'
+    # It should create a new image: this is the ID it should use.
+    new_image_id = Image.find(:all).last.id + 1
+    # Post form.
+    params = {
+      :user => {
+        :upload_image => file,
+        :email        => @rolf.email,
+        :name         => @rolf.name,
+      },
+      :date => { :copyright_year => "2003" },
+      :upload => { :license_id => @ccnc25.id },
+      :copyright_holder => "Someone Else",
+    }
+    post_requires_login(:prefs, params, false)
+    # assert_redirected_to(:controller => "account", :action => "welcome")
+    @rolf.reload
+    assert_equal(new_image_id, @rolf.image_id)
+    assert_equal("Rolf Singer", @rolf.image.title)
+    assert_equal("Someone Else", @rolf.image.copyright_holder)
+    assert_equal(2003, @rolf.image.when.year)
+    assert_equal(@ccnc25, @rolf.image.license)
   end
 end

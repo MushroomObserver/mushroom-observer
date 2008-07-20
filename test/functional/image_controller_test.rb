@@ -1,10 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 require 'image_controller'
 
-class FilePlus < File
-  attr_accessor :content_type
-end
-
 class ImageControllerTest < Test::Unit::TestCase
   fixtures :images
   fixtures :observations

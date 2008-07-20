@@ -2,6 +2,12 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 require 'test_help'
 
+# Used to test image uploads.  params[:upload] is essentially a file with
+# a "content_type" field added to it.
+class FilePlus < File
+  attr_accessor :content_type
+end
+
 class Test::Unit::TestCase
   # Transactional fixtures accelerate your tests by wrapping each test method
   # in a transaction that's rolled back on completion.  This ensures that the
