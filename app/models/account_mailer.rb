@@ -14,9 +14,11 @@ class AccountMailer < ActionMailer::Base
     @body["observation"] = observation
     @body["comment"]     = comment
     @subject             = 'Comment about ' + observation.unique_text_name(@user)
-    @headers['Reply-To'] = sender.email
+    if sender
+      @headers['Reply-To'] = sender.email
+    end
     @recipients          = @user.email
-    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
     @content_type        = @user.html_email ? "text/html" : "text/plain"
   end

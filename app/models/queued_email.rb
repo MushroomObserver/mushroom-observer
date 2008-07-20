@@ -5,79 +5,87 @@ class QueuedEmail < ActiveRecord::Base
   belongs_to :user
   belongs_to :to_user, :class_name => "User", :foreign_key => "to_user_id"
   
-  # Returns: array of symbols, from :Form to :Kingdom, then :Group.
+  # Returns: array of symbols.  Essentially a constant array.
   def self.all_flavors()
-    [:comment]
+    [:comment, :feature]
   end
 
-  def self.save_comment(sender, receiver, comment)
-    qed_email = QueuedEmail.find(:first, :include => [:queued_email_integers],
-      :conditions => [
-        'queued_emails.flavor = "comment"' +
-        ' and queued_email_integers.key = "comment"' +
-        ' and queued_email_integers.value = ?', comment.id])
-    ints = QueuedEmailInteger.find_all_by_key_and_value(:comment, comment.id)
-    if qed_email
-      qed_email.queued = Time.now()
-      qed_email.save()
-    else
-      qed_email = QueuedEmail.new()
-      qed_email.user = sender
-      qed_email.to_user = receiver
-      qed_email.flavor = :comment
-      qed_email.queued = Time.now()
-      qed_email.save()
-      qed_email.add_integer(:comment, comment.id)
+  # Like initialize, but ensures that the objects is saved
+  # and is ready to have parameters added.
+  def setup(sender, receiver, flavor)
+    self.user = sender
+    self.to_user = receiver
+    self.flavor = flavor
+    self.queued = Time.now()
+    self.save()
+  end
+
+  # Centralized place to hang code after all the parameters are set.
+  # For now it makes sure the email is sent if queuing is disabled.
+  def finish
+    unless QUEUE_EMAIL
+      self.send_email
     end
-    qed_email
   end
   
-  def add_integer(key, value)
-    qed_int = QueuedEmailInteger.new()
-    qed_int.queued_email = self
-    qed_int.key = key
-    qed_int.value = value
-    qed_int.save()
-    qed_int
-  end
-  
-  def send_email
-    result = false
+  # Have to use cheesy dispatch since the object returned from the database
+  # can only be a QueuedEmail.  Might be able to solve this in a better way
+  # if there is some clever way that a constructor for a class could return
+  # a subclass of that class.  Note that the initialize functions for the
+  # subclasses would have to be changed (no save or adding values that do
+  # saves as a side effect).
+  def deliver_email
     case self.flavor
     when :comment
-      self.send_comment_email
-      result = true
+      CommentEmail.deliver_email(self)
+    when :feature
+      FeatureEmail.deliver_email(self)
     else
-      print "Unrecognized email flavor: #{self.flavor}\n"
+      raise NotImplementedError
+    end
+  end
+  
+  # The different types of email should be handled by separate classes
+  def send_email
+    result = false
+    begin
+      self.deliver_email
+      result = true
+    rescue
+      print "Unable to send queued email #{self.id}\n"
+      # Failing to send email should not throw an error in production
+      raise unless ENV['RAILS_ENV'] == 'production'
     end
     result
   end
   
-  def send_comment_email
-    observation = nil
-    comment = nil
+  # Methods for adding additional data
+  def add_integer(key, value)
+    result = QueuedEmailInteger.new()
+    result.queued_email = self
+    result.key = key.to_s
+    result.value = value
+    result.save()
+    result
+  end
+  
+  def get_integers(keys)
+    dict = {}
     for qi in self.queued_email_integers
-      case qi.key
-      when "comment"
-        comment = Comment.find(qi.value)
-      else
-        print "Unrecognized integer key: #{qi.key}\n"
-      end
+      dict[qi.key] = qi.value
     end
-    if comment
-      observation = comment.observation
-      begin
-        if User.find(observation.user_id).comment_email
-          print "Sending email\n"
-          AccountMailer.deliver_comment(self.user, self.to_user, observation, comment)
-          # On success remove from queue
-        end
-      rescue
-        # Failing to send email should not throw an error
-      end
-    else
-      print "No comment found\n"
-      # Delete this queued item, but send person who queued a note that it failed
+    result = []
+    for key in keys
+      result.push(dict[key.to_s])
     end
+    result
+  end
+
+  def set_note(value)
+    result = QueuedEmailNote.new()
+    result.queued_email = self
+    result.value = value
+    result.save()
+    result
   end
 end

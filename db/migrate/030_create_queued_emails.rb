@@ -1,7 +1,7 @@
 class CreateQueuedEmails < ActiveRecord::Migration
   def self.up
     create_table :queued_emails do |t|
-      t.column :user_id, :integer, :default => 0, :null => false
+      t.column :user_id, :integer
       t.column :to_user_id, :integer, :default => 0, :null => false
       t.column :flavor, :enum, :limit => QueuedEmail.all_flavors
       t.column :queued, :datetime

@@ -9,7 +9,7 @@
 the observation <u><%= @observation.unique_text_name(@user) %></u>:</p>
 
 <p><b>Created:</b> <%= @comment.created.to_formatted_s(:db) %><br/>
-<b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/>
+<% if @sender %><b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/><% end %>
 <b>Summary:</b> <%= @comment.summary %><br/>
 <b>Comment:</b></p>
 
@@ -36,7 +36,7 @@ Here are some handy links you may find useful:</p>
 The following comment was posted on the Mushroom Observer website regarding the observation <%= @observation.unique_text_name(@user) %>:
 
 Created: <%= @comment.created.to_formatted_s(:db) %>
-By: <%= @sender.legal_name %> (<%= @sender.email %>)
+<% if @sender %>By: <%= @sender.legal_name %> (<%= @sender.email %>)<% end %>
 Summary: <%= @comment.summary %>
 Observation: <%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>
 Comment:

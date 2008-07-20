@@ -1155,7 +1155,9 @@ class ObserverController < ApplicationController
     if check_permission(0)
       users = User.find(:all, :conditions => "feature_email=1")
       for user in users
-        AccountMailer.deliver_email_features(user, params['feature_email']['content'])
+        if user.feature_email
+          FeatureEmail.create_email(user, params['feature_email']['content'])
+        end
       end
       flash_notice "Delivered feature mail."
       redirect_to :action => 'users_by_name'

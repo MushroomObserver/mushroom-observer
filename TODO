@@ -2,11 +2,23 @@ Release each of the following as they get completed:
 
 Email queuing:
   Focus on comment email:
-    queue for each recipient (initially just me)
-    get cron working [every 6 minutes]
-    Add observer
-    Optionally add other commentators & all comment receivers [control in user prefs]
-      Should lurkers on particular observations be supported?
+    - keep queuing optional
+    - queue for all recipients
+  - Get feature email working again
+  Move over other email
+  Optionally add other commentators & all comment receivers [control in user prefs]
+    Should lurkers on particular observations be supported?
+  clean up script/send_email
+  Add option for not received your own email
+
+New user options:
+  Send me a copy of my own comments
+  Send me comments on observations I've commented on
+
+Should this get added?
+<a href="http://thepradipta416.com" title="Proud Member of the Pradipta 416">
+	<img src="http://thepradipta416.com/img/badge1.gif" alt="The Few, The Proud, The Pradipta 416"/>
+	</a>
 
 Bugs:
 May be fixed: Reported by Darvin on July 6, 2008:

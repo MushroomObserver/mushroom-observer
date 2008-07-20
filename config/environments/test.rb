@@ -23,3 +23,10 @@ IMG_DIR = File.join(RAILS_ROOT, 'public', 'test_images')
 DOMAIN = 'http://localhost:3000'
 
 TESTING = true
+
+# Queued email only gets delivered if you have run the rake
+# task email:send.  script/send_email is a cron script
+# for running email:send.
+QUEUE_EMAIL = false
+EMAIL_PER_MINUTE = 25
+QUEUE_DELAY = 5.minutes

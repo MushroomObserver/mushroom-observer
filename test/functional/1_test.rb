@@ -45,10 +45,4 @@ class CurrentTest < Test::Unit::TestCase
   def test_trivial
     assert_equal(1+1, 2)
   end
-  
-  def test_ask_observation_question
-    id = @coprinus_comatus_obs.id
-    requires_login :ask_observation_question, {:id => id}
-    assert_form_action :action => 'send_observation_question', :id => id
-  end
 end
