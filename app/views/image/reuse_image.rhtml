@@ -31,7 +31,9 @@
 			<tr>
  	<% end %>
 	<td align="left" valign="top" class="ListLine<%= color %>">
-		<%= render :partial => 'image_reuse', :object => image, :locals => { :obs_id => @observation.id } %>
+		<%= render :partial => 'image_reuse', :object => image, :locals => {
+          :link_args => { :action => 'add_image_to_obs', :id => image.id, :obs_id => @observation.id }
+        } %>
 	</td>
 	<%  if col_count == (@layout["columns"] - 1) %>
 			</tr>

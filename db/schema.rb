@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 30) do
+ActiveRecord::Schema.define(:version => 31) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -215,6 +215,9 @@ ActiveRecord::Schema.define(:version => 30) do
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
     t.column "contribution",      :integer,                :default => 0
+    t.column "notes",             :text,                   :default => "",   :null => false
+    t.column "location_id",       :integer
+    t.column "image_id",          :integer
   end
 
   create_table "votes", :force => true do |t|

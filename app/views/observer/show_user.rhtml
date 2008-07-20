@@ -6,8 +6,27 @@
    | <%= link_to "Email #{@user_data[:name]}", :action => 'ask_user_question', :id => @user %>
 <% end %>
 
+<div id="Title">Contribution Summary for<br/><%= h(@user_data[:name]) %></div>
+
+<%= if @user.image
+  link_to(image_tag(sprintf("thumb/%d.jpg", @user.image.id),
+    :border => 0, :style => "float:right"),
+    :controller => "image",
+    :action => (@user == session['user'] ? "edit_image" : "show_image"),
+    :id => @user.image.id)
+end %>
+<% if @user.location %>
+  <b>Primary Location:</b> <%= location_link(nil, @user.location.id) %><br/>
+<% end %>
+<% if @user.location && !@user.notes.empty? %>
+  <br/>
+<% end %>
+<%= if !@user.notes.empty?
+  textilize(sanitize(@user.notes))
+end %>
+
 <center>
-    <table border="0">
+    <table border="0" width="100%" style="clear:right; padding:10px">
         <tr align="center">
             <%
             obs_length = 0
@@ -16,7 +35,7 @@
             end
             if obs_length > 3
                 %>
-                <td>
+                <td align="center">
                     <% for obs in @observations[3,3] %>
                         <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id)),
                                 :action => 'show_observation', :id => obs.id) %><br/>
@@ -24,7 +43,7 @@
                 </td>
             <% end %>
             <td valign="top" width="50%">
-                <div id="Title">Contribution Summary for <%= h(@user_data[:name]) %></div>
+
                 <table cellpadding="5" cellspacing="5" border="0">
                     <%
                     total = 0
@@ -76,7 +95,7 @@
             <%
             if obs_length > 0
                 %>
-                <td>
+                <td align="center">
                     <% for obs in @observations[0,3] %>
                         <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id)),
                                 :action => 'show_observation', :id => obs.id) %><br/>

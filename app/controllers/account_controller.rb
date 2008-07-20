@@ -1,5 +1,13 @@
 class AccountController < ApplicationController
-  before_filter :login_required, :only => :test_autologin
+  before_filter :login_required, :only => [:test_autologin, :prefs]
+
+  # AJAX request used for autocompletion of location field in prefs.
+  # View: none
+  # Inputs: params[:user][:place_name]
+  # Outputs: none
+  def auto_complete_for_user_place_name
+    auto_complete_location(:user, :place_name)
+  end
 
   def login
     case request.method
@@ -115,7 +123,11 @@ class AccountController < ApplicationController
         when :get
           @user = User.find(@user.id) # Make sure we have the latest version of the user
           session['user'] = @user
+          @user.place_name = @user.location ? @user.location.display_name : ""
+
         when :post
+          error = false
+
           @user.change_email(params['user']['email'])
           @user.change_name(params['user']['name'])
           @user.html_email = params['user']['html_email']
@@ -130,8 +142,9 @@ class AccountController < ApplicationController
           @user.alternate_columns = params['user']['alternate_columns']
           @user.vertical_layout = params['user']['vertical_layout']
           @user.license_id = params['user']['license_id'].to_i
+          @user.notes = params['user']['notes']
+
           password = params['user']['password']
-          error = false
           if password
             if password == params['user']['password_confirmation']
               @user.change_password(password)
@@ -140,6 +153,45 @@ class AccountController < ApplicationController
               flash_error "Password and confirmation did not match."
             end
           end
+
+          where = @user.place_name = params['user']['place_name']
+          if where && where != ""
+            if location = Location.find_by_display_name(where)
+              @user.location = location
+              where = location.display_name
+            else
+              flash_error "Unrecognized location \"#{where}\".  Has anyone
+                defined this location or created an observation for it yet?"
+            end
+          else
+            @user.location = nil
+          end
+
+          upload = params['user']['upload_image']
+          if upload && upload != ""
+            name = upload.full_original_filename if upload.respond_to? :full_original_filename
+            now = Time.now
+            image = Image.new(
+              :image    => upload,
+              :created  => now,
+              :modified => now,
+              :user     => @user,
+              :title    => @user.legal_name,
+              :when     => now
+            )
+            if !image.save
+              flash_object_errors(image)
+            elsif !image.save_image
+              logger.error("Unable to upload image")
+              flash_error "Invalid image '#{name ? name : "???"}'."
+            else
+              @user.image = image
+              flash_notice "Uploaded image #{name ? "'#{name}'" : "##{image.id}"}.
+                If you need to <a href=\"/image/edit_image/#{image.id}\">change the
+                copyright or license</a>, please click on the image and edit it."
+            end
+          end
+
           if error || !@user.save
             flash_object_errors(@user)
           else
@@ -187,6 +239,15 @@ class AccountController < ApplicationController
     else
       render :action => "reverify"
     end
+  end
+
+  def remove_image
+    if @user && @user.image
+      @user.image = nil
+      @user.save
+      flash_notice "Removed image from your profile."
+    end
+    redirect_to :controller => "observer", :action => "show_user", :id => @user
   end
 
   def no_feature_email

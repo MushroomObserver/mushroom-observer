@@ -1,15 +1,34 @@
-<% form_for :user, :url => { :action => :prefs } do |form| %>
+<%= javascript_include_tag :defaults %>
+<%= javascript_include_tag 'my_auto_complete' %>
+<%= javascript_tag 'extend_ajax_autocompleter()' %>
+<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
+<%= javascript_tag 'Element.hide($("indicator"))' %>
+
+<% form_for(:user, :url => { :action => :prefs }, :html => { :multipart => true }) do |form| %>
 
 <div title="<%= :prefs_title.l %>" id="prefform" class="form">
   <h3><%= :prefs_title.l %></h3>
   <%= link_to :bulk_license_link.l, :controller => 'image', :action => 'license_updater' %>
   <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
-  
+
   <label for="user_email"><b><%= :prefs_email.l %>:</b></label><br/>
   <%= form.text_field("email", :size => 60) %><br/><br/>
   <label for="user_name"><b><%= :prefs_name.l %>:</b></label><br/>
   <%= form.text_field("name", :size => 60) %><br/><br/>
-  
+
+  <label for="user_notes"><b><%= :prefs_notes.l %>:</b></label><br/>
+  <%= form.text_area("notes", :rows => 5, :cols => 60) %><br/><br/>
+  <label for="user_place_name"><b><%= :prefs_location.l %>:</b></label><br/>
+  <%= text_field_with_auto_complete('user', 'place_name', { :size => 60 },
+    { :skip_style => true, :indicator => 'indicator' }) %><br/><br/>
+  <label for="upload_image"><b><%= @user.image_id ?
+    :prefs_image_change.l : :prefs_image_create.l %>:</b></label>
+    <%= link_to :prefs_image_reuse.l, :controller => 'image',
+      :action => 'reuse_image_for_user' %>
+    <%= link_to(:prefs_image_remove.l, :action => 'remove_image') \
+      if @user.image %><br/>
+  <%= form.file_field("upload_image") %><br/><br/>
+
   <table cellpadding="0" cellspacing="0">
     <tr>
         <td>
@@ -29,7 +48,7 @@
   <table><br/>
 
   <b><%= :prefs_layout_title.l %>:</b><br/>
-  
+
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
   <label for="user_rows"><%= :prefs_rows_by.l %></label>
   <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>

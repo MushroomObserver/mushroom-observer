@@ -383,7 +383,7 @@ return result
     result = nil
     if id != 0
       result = Image.find(id)
-      if result
+      if result && !self.images.include?(result)
         self.add_image(result)
       end
     end

@@ -46,6 +46,11 @@ class User < ActiveRecord::Base
   has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
   
   belongs_to :license
+  belongs_to :image         # mug shot
+  belongs_to :location      # primary location
+
+  # Used to let user enter location by name in prefs form.
+  attr_accessor :place_name
 
   def self.authenticate(login, pass)
     find(:first, :conditions => ["login = ? AND password = ?", login, sha1(pass)])

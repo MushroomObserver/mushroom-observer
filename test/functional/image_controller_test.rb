@@ -331,4 +331,30 @@ class ImageControllerTest < Test::Unit::TestCase
     obs = Observation.find(obs.id)
     assert(obs.images.size == (img_count + 1))
   end
+
+  # This is what would happen when user first opens form.
+  def test_reuse_image_for_user
+    requires_login(:reuse_image_for_user, {}, true)
+    assert_form_action :action => 'reuse_image_for_user'
+  end
+
+  # This would happen if user clicked on image.
+  def test_reuse_image_for_user_post1
+    image = @commercial_inquiry_image
+    params = { :id => image.id.to_s }
+    requires_login(:reuse_image_for_user, params, false)
+    assert(user = session['user'])
+    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user.id)
+    assert_equal(user.image_id, image.id)
+  end
+
+  # This would happen if user typed in id and submitted.
+  def test_reuse_image_for_user_post2
+    image = @commercial_inquiry_image
+    params = { :id => image.id.to_s }
+    post_requires_login(:reuse_image_for_user, params, false)
+    assert(user = session['user'])
+    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user.id)
+    assert_equal(user.image_id, image.id)
+  end
 end

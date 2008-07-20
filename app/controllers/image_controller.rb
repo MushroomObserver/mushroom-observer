@@ -17,6 +17,7 @@
 #    reuse_image         Add an already-uploaded image to an observation.
 #    add_image_to_obs    (post method #1 for reuse_image)
 #    reuse_image_by_id   (post method #2 for reuse_image)
+#    reuse_image_for_user Select an already-uploaded image to user profile.
 #    license_updater     Bulk license editor.
 #
 #  Admin Tools:
@@ -420,6 +421,35 @@ class ImageController < ApplicationController
       end
     end
     redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+  end
+
+  # Browse through matrix of recent images to let a user reuse an image
+  # they've already uploaded for their profile.  This method does get and post.
+  # Linked from: account/prefs
+  # Inputs: session['user']
+  # Outputs: @images, @image_pages, @user, @layout
+  def reuse_image_for_user
+    @user = session['user']
+    # Will return here either by typing in id and posting form, or by
+    # clicking on an image (in which case method is "get").
+    if request.method == "post" || params[:id]
+      begin
+        image = Image.find(params[:id])
+        @user.image = image
+        @user.save
+        flash_notice "Changed your image to image ##{image.id}."
+        redirect_to :controller => "observer", :action => "show_user", :id => @user
+        redirected = true
+      rescue(e)
+        flash_error "Invalid image id."
+      end
+    end
+    if !redirected
+      @layout = calc_layout_params
+      @image_pages, @images = paginate(:images,
+                                       :order => "'when' desc",
+                                       :per_page => @layout["count"])
+    end
   end
 
   # Tabular form that lets user change licenses of their images.  The table

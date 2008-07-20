@@ -7,6 +7,8 @@ class AccountController; def rescue_action(e) raise e end; end
 class AccountControllerTest < Test::Unit::TestCase
   
   fixtures :users
+  fixtures :licenses
+  fixtures :locations
   
   def setup
     @controller = AccountController.new
@@ -121,5 +123,51 @@ class AccountControllerTest < Test::Unit::TestCase
     @request.cookies['mo_user'] = cookies['mo_user']
     get :test_autologin
     assert_response :success
+  end
+
+  def test_edit_prefs
+    # First make sure it can serve the form to start with.
+    requires_login(:prefs)
+    # Now change everything.
+    params = {
+      :user => {
+        :email                 => "new_email",
+        :name                  => "new_name",
+        :notes                 => "new_notes",
+        :place_name            => "Burbank, Los Angeles Co., California, USA",
+        :theme                 => "Agaricus",
+        :license_id            => "1",
+        :rows                  => "10",
+        :columns               => "10",
+        :alternate_rows        => "",
+        :alternate_columns     => "",
+        :vertical_layout       => "",
+        :feature_email         => "",
+        :comment_email         => "",
+        :commercial_email      => "",
+        :question_email        => "",
+        :html_email            => "",
+      }
+    }
+    post_with_dump(:prefs, params)
+    assert(flash[:notice], "Preferences updated.")
+    # Make sure changes were made.
+    user = User.find_by_login("rolf").reload
+    assert_equal("new_email", user.email)
+    assert_equal("new_name", user.name)
+    assert_equal("new_notes", user.notes)
+    assert_equal(@burbank, user.location)
+    assert_equal("Agaricus", user.theme)
+    assert_equal(@ccnc25, user.license)
+    assert_equal(10, user.rows)
+    assert_equal(10, user.columns)
+    assert_equal(false, user.alternate_rows)
+    assert_equal(false, user.alternate_columns)
+    assert_equal(false, user.vertical_layout)
+    assert_equal(false, user.feature_email)
+    assert_equal(false, user.comment_email)
+    assert_equal(false, user.commercial_email)
+    assert_equal(false, user.question_email)
+    assert_equal(false, user.html_email)
   end
 end

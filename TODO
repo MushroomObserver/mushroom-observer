@@ -37,8 +37,6 @@ More next/prev stuff:
         Add next/prev_name?
         Potential interactions between sequences if URLs are copied and pasted
 
-Bug shouldn't be possible to add the same exact image multiple times (e.g., http://mushroomobserver.org/7992)
-
 User profile - paragraph available in preferences that gets displayed on the show_user page (4)
   Associate a user with a location (2)
   User photo (4)

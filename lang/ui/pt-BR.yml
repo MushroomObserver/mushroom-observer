@@ -493,10 +493,16 @@ prefs_email_note: >
 
 prefs_email_prefs: Email preferences
 prefs_email_questions: Please allow others to email me questions about my observations.
+prefs_image_create: Upload photo
+prefs_image_change: Upload new photo
+prefs_image_remove: (Remove photo.)
+prefs_image_reuse: (Use existing photo.)
 prefs_layout_title: List page layout
 prefs_license: Default License
 prefs_license_note: Select default "license":%s you want for new images
+prefs_location: Primary Location
 prefs_name: Name
+prefs_notes: About yourself
 prefs_password_confirm: Confirm new password
 prefs_password_new: New password
 prefs_rows_by: rows x
