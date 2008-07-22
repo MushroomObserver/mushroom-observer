@@ -1,10 +1,29 @@
 <% @title = h(@user_data[:name]) %>
-<%= link_to('Observations', :action => 'show_user_observations', :id => @user_data[:id]) %>
-| <%= link_to("Comments for #{@user_data[:name]}", :controller => 'comment', :action => 'show_comments_for_user', :id => @user_data[:id]) %>
-| <%= link_to('Contributors', :action => 'users_by_contribution') %>
-<% if @user.question_email %>
-   | <%= link_to "Email #{@user_data[:name]}", :action => 'ask_user_question', :id => @user %>
-<% end %>
+
+<%=
+  id   = @user_data[:id]
+  name = @user_data[:name]
+
+  links = {
+    'Images'        => url_for(:controller => "image", :action => "images_by_user", :id => id),
+    'Species Lists' => url_for(:controller => "species_list", :action => "species_lists_by_user", :id => id),
+    'Comments'      => url_for(:controller => "comment", :action => "show_comments_by_user", :id => id),
+    'Observations'  => url_for(:controller => "observer", :action => "show_user_observations", :id => id),
+  }
+
+  tabs = []
+  tabs.push ["Contributors", url_for(:controller => "observer", :action => "users_by_contribution")]
+  if @user == session["user"]
+    tabs.push ["Your Observations", links['Observations']]
+    tabs.push ["Comments for You", url_for(:controller => "comment", :action => "show_comments_for_user", :id => id)]
+    tabs.push ["Edit Profile", url_for(:controller => "account", :action => "profile")]
+  else
+    tabs.push ["Observations by #{name}", links['Observations']]
+    tabs.push ["Comments for #{name}", url_for(:controller => "comment", :action => "show_comments_for_user", :id => id)]
+    tabs.push ["Email #{name}", url_for(:controller => "observer", :action => "ask_user_question", :id => id)]
+  end
+  show_tabs(tabs)
+%>
 
 <div id="Title">Contribution Summary for<br/><%= h(@user_data[:name]) %></div>
 
@@ -12,7 +31,7 @@
   link_to(image_tag(sprintf("thumb/%d.jpg", @user.image.id),
     :border => 0, :style => "float:right"),
     :controller => "image",
-    :action => (@user == session['user'] ? "edit_image" : "show_image"),
+    :action => "show_image",
     :id => @user.image.id)
 end %>
 <% if @user.location %>
@@ -53,7 +72,14 @@ end %>
                             %>
                     	    <tr>
                     		    <td>
-                    		        <%= FIELD_TITLES[field] %>
+                    		        <%=
+                                       str = FIELD_TITLES[field]
+                                       if url = links[str]
+                                         link_to(str, url)
+                                       else
+                                         str
+                                       end
+                                    %>
                     		    </td>
                     		    <td>
                     		        <%= count %>*<%= FIELD_WEIGHTS[field]%>

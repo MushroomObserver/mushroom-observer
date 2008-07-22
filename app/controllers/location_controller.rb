@@ -79,6 +79,7 @@ class LocationController < ApplicationController
     store_location
     @user = session['user']
     @where = params[:where]
+    @set_user = (params[:set_user] == "1")
     if verify_user()
       if request.method == :get
         @location = Location.new
@@ -90,6 +91,10 @@ class LocationController < ApplicationController
         if @location # location already exists
           flash_warning "This location already exists."
           update_observations_by_where(@location, @where)
+          if @set_user
+            @user.location = @location
+            @user.save
+          end
           redirect_to(:action => 'show_location', :id => @location)
         else         # need to create location
           @location = Location.new(params[:location])
@@ -100,6 +105,10 @@ class LocationController < ApplicationController
           if @location.save()
             flash_notice "Location was successfully added."
             update_observations_by_where(@location, @where)
+            if @set_user
+              @user.location = @location
+              @user.save
+            end
             redirect_to(:action => 'show_location', :id => @location)
           else
             flash_object_errors @location

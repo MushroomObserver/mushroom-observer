@@ -1,21 +1,16 @@
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag 'my_auto_complete' %>
-<%= javascript_tag 'extend_ajax_autocompleter()' %>
-<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
-<%= javascript_tag 'Element.hide($("indicator"))' %>
-
-<% form_for(:user, :url => { :action => :prefs }, :html => { :multipart => true }) do |form| %>
-
-<style>
-  div.form p { margin:0.3em 0em 0.3em 0em }
-</style>
+<% form_for(:user, :url => { :action => :prefs }) do |form| %>
 
 <div title="<%= :prefs_title.l %>" id="prefform" class="form">
   <h3><%= :prefs_title.l %></h3>
-  <%= link_to :bulk_license_link.l, :controller => 'image', :action => 'license_updater' %>
-  <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
 
-  <p style="margin-top:2em"><b><%= :prefs_account_section.l %>:</b></p>
+  <%= 
+    tabs = []
+    tabs.push [ :bulk_license_link.l, url_for(:controller => 'image', :action => 'license_updater') ]
+    tabs.push [ :profile_link.l, url_for(:controller => 'account', :action => 'profile') ]
+    show_tabs tabs
+  %>
+
+  <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
 
   <p><label for="user_email"><%= :prefs_email.l %></label><br/>
   <%= form.text_field("email", :size => 60) %></p>
@@ -23,32 +18,6 @@
   <%= form.password_field("password", :value => '', :size => 30) %></p>
   <p><label for="user_password_confirmation"><%= :prefs_password_confirm.l %></label><br/>
   <%= form.password_field("password_confirmation", :size => 30) %></p>
-
-  <p style="margin-top:2em"><b><%= :prefs_profile_section.l %>:</b></p>
-
-  <p><label for="user_name"><%= :prefs_name.l %></label><br/>
-  <%= form.text_field("name", :size => 60) %></p>
-  <p><label for="user_place_name"><%= :prefs_location.l %></label><br/>
-  <%= text_field_with_auto_complete('user', 'place_name', { :size => 60 },
-    { :skip_style => true, :indicator => 'indicator' }) %></p>
-  <p><label for="user_notes"><%= :prefs_notes.l %></label><br/>
-  <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>
-
-  <p><label for="user_upload_image"><%= @user.image_id ?
-    :prefs_image_change.l : :prefs_image_create.l %></label>
-    <%= link_to :prefs_image_reuse.l, :controller => 'image',
-      :action => 'reuse_image_for_user' %>
-    <%= link_to(:prefs_image_remove.l, :action => 'remove_image') \
-      if @user.image %><br/>
-  <%= form.file_field("upload_image") %></p>
-  <p><label for="copyright_holder"><%= :prefs_copyright_holder.l %></label><br/>
-  <%= text_field_tag("copyright_holder", @copyright_holder, :size => 40) %>
-  <%= select_year(@copyright_year, :field_name => "copyright_year",
-    :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
-  <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
-  <span id="help_note">(<%= :prefs_copyright_warning.l %>)</span></p>
-
-  <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
 
   <table cellpadding="0" cellspacing="0" style="margin-top:2em">
     <tr>

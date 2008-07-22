@@ -1,0 +1,50 @@
+<%= javascript_include_tag :defaults %>
+<%= javascript_include_tag 'my_auto_complete' %>
+<%= javascript_tag 'extend_ajax_autocompleter()' %>
+<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
+<%= javascript_tag 'Element.hide($("indicator"))' %>
+
+<% form_for(:user, :url => { :action => :profile }, :html => { :multipart => true }) do |form| %>
+
+<div title="<%= :profile_title.l %>" id="prefform" class="form">
+  <h3><%= :profile_title.l %></h3>
+
+  <%= 
+    tabs = []
+    tabs.push [ :bulk_license_link.l, url_for(:controller => 'image', :action => 'license_updater') ]
+    tabs.push [ :prefs_link.l, url_for(:controller => 'account', :action => 'prefs') ]
+    show_tabs tabs
+  %>
+
+  <center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center>
+
+  <p><label for="user_name"><%= :profile_name.l %></label><br/>
+  <%= form.text_field("name", :size => 60) %></p>
+
+  <p><label for="user_place_name"><%= :profile_location.l %></label><br/>
+  <%= text_field_with_auto_complete('user', 'place_name', { :value => @place_name, :size => 60 },
+    { :skip_style => true, :indicator => 'indicator' }) %></p>
+
+  <p><label for="user_notes"><%= :profile_notes.l %></label><br/>
+  <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>
+
+  <p><label for="user_upload_image"><%= @user.image_id ?
+    :profile_image_change.l : :profile_image_create.l %></label>
+    <%= link_to :profile_image_reuse.l, :controller => 'image',
+      :action => 'reuse_image_for_user' %>
+    <%= link_to(:profile_image_remove.l, :action => 'remove_image') \
+      if @user.image %><br/>
+  <%= form.file_field("upload_image") %></p>
+  <p><label for="copyright_holder"><%= :profile_copyright_holder.l %></label><br/>
+  <%= text_field_tag("copyright_holder", @copyright_holder, :size => 40) %>
+  <%= select_year(@copyright_year, :field_name => "copyright_year",
+    :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
+  <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
+  <span id="help_note">(<%= :profile_copyright_warning.l %>)</span></p>
+
+<br/>
+<center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center>
+<br/><br/>
+</div>
+
+<% end %>

@@ -36,6 +36,12 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_template 'list_images'
   end
 
+  def test_images_by_user
+    get_with_dump :images_by_user, { :id => @rolf.id }
+    assert_response :success
+    assert_template 'list_images'
+  end
+
   def test_next_image
     get_with_dump :next_image
     assert_redirected_to(:controller => "image", :action => "show_image", :id => 2)

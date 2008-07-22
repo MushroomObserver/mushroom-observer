@@ -13,6 +13,7 @@
 #  Views:
 #    list_species_lists                     List of lists by date.
 #    species_lists_by_title                 List of lists by title.
+#    species_lists_by_user                  List of lists created by user.
 #    show_species_list                      Display notes/etc. and list of species.
 #    create_species_list                    Create new list.
 #    edit_species_list                      Edit existing list.
@@ -37,6 +38,7 @@ class SpeciesListController < ApplicationController
     :list_species_lists,
     :show_species_list,
     :species_lists_by_title,
+    :species_lists_by_user,
     :auto_complete_for_species_list_where
   ]
 
@@ -50,6 +52,20 @@ class SpeciesListController < ApplicationController
     @species_list_pages, @species_lists = paginate(:species_lists,
                                                    :order => "'when' desc, 'id' desc",
                                                    :per_page => 10)
+  end
+
+  # Display list of user's species_lists, sorted by date.
+  # Linked from: left-hand panel
+  # Inputs: params[:id] (user)
+  # Outputs: @title, @species_lists, @species_list_pages
+  def species_lists_by_user
+    user = User.find(params[:id])
+    store_location
+    session_setup
+    @title = "Species Lists by #{user.legal_name}"
+    @species_list_pages, @species_lists = paginate(:species_lists,
+      :conditions => "user_id = #{user.id}", :order => "'when' desc, 'id' desc", :per_page => 10)
+    render :action => "list_species_lists"
   end
 
   # Linked from: list_species_lists, show_observation, create/edit_species_list, etc. etc.

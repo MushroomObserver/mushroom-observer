@@ -6,6 +6,7 @@
 #  Views:
 #    list_images         Display matrix of images, sorted by date.
 #    images_by_title     Display list of images, sorted by title.
+#    images_by_user      Display list of images by a given user.
 #    show_image          Show in standard size (640 pixels max dimension).
 #    show_original       Show original size.
 #    prev_image          Show previous image (from search results).
@@ -43,6 +44,7 @@ class ImageController < ApplicationController
   before_filter :login_required, :except => [
     :list_images,
     :images_by_title,
+    :images_by_user,
     :image_search,
     :show_image,
     :show_original,
@@ -71,6 +73,22 @@ class ImageController < ApplicationController
     session_setup
     store_location
     @images = Image.find(:all, :order => "'title' asc, 'when' desc")
+  end
+
+  # Display list of images by a given user.
+  # Linked from observer/show_user
+  # Inputs: params[:id] (user), session['user']
+  # Outputs: @images, @user
+  def images_by_user
+    user = User.find(params[:id])
+    session[:checklist_source] = :nothing
+    session_setup
+    store_location
+    @layout = calc_layout_params
+    @title = "Images by #{user.legal_name}"
+    @obj_pages, @objs = paginate(:images, :order => "`when` desc",
+      :conditions => "user_id = #{user.id}", :per_page => @layout["count"])
+    render(:action => "list_images")
   end
 
   # Searches image notes, copyright, and consensus name (including author)

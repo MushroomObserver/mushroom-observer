@@ -1,4 +1,4 @@
-<% @title = 'Species Lists' %>
+<% @title = 'Species Lists' if !@title %>
 <div id="Title"><%= @title %></div>
 <div class="pagination"><%= pagination_links(@species_list_pages) %></div>
 <table cellpadding="5" cellspacing="0" width="100%">

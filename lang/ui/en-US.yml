@@ -726,13 +726,10 @@ no_questions_note: >
 
 
 # account/prefs
-prefs_account_section: Account Settings
 prefs_alt_col_colors: Alternate column colors.
 prefs_alt_row_colors: Alternate row colors.
 prefs_button: Save Prefs
 prefs_columns: columns
-prefs_copyright_holder: Copyright holder and license for this image
-prefs_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 prefs_email: Email address
 prefs_email_comments: Please send me email notifications when other users post comments about my observations.
 prefs_email_commercial: Please send me email if someone is interested in using an image of mine for commercial purposes.
@@ -748,23 +745,31 @@ prefs_email_note: >
 
 prefs_email_prefs: Email preferences
 prefs_email_questions: Please allow others to email me questions about my observations.
-prefs_image_create: Upload photo
-prefs_image_change: Upload new photo
-prefs_image_remove: (Remove photo.)
-prefs_image_reuse: (Switch photo.)
 prefs_layout_title: List page layout
 prefs_license: Default license
 prefs_license_note: Select default "license":%s you want for new images
-prefs_location: Primary location
-prefs_name: Name
-prefs_notes: About yourself
+prefs_link: Edit Preferences
 prefs_password_confirm: Confirm new password
 prefs_password_new: New password
-prefs_profile_section: Your Profile
 prefs_rows_by: rows x
 prefs_text_below_images: Put text below images.
 prefs_theme: Preferred theme
 prefs_title: Change Preferences
+
+
+# account/profile
+profile_button: Save Profile
+profile_copyright_holder: Copyright holder and license for this image
+profile_copyright_warning: Please only upload an image that you created or which you own the copyright of.
+profile_image_create: Upload photo
+profile_image_change: Upload new photo
+profile_image_remove: (Remove photo.)
+profile_image_reuse: (Reuse another photo.)
+profile_link: Edit Profile
+profile_location: Primary location
+profile_name: Name
+profile_notes: About yourself
+profile_title: Change Profile
 
 
 # Ranks.  Used in _form_names.rhtml

@@ -74,4 +74,10 @@ module ApplicationHelper
     search_params[:obs] = @obs if @obs
     search_params
   end
+
+  def show_tabs(tabs)
+    tabs.map do |str, url|
+      link_to(str, url)
+    end.join(" | ")
+  end
 end

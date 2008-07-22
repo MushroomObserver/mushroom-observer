@@ -33,6 +33,12 @@ class CommentControllerTest < Test::Unit::TestCase
     assert_template("list_comments")
   end
 
+  def test_show_comments_by_user
+    get_with_dump :show_comments_by_user, :id => @rolf.id
+    assert_response :success
+    assert_template("list_comments")
+  end
+
   def test_add_comment
     requires_login :add_comment, {:id => 1}
     assert_form_action :action => 'add_comment'

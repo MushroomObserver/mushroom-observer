@@ -45,6 +45,12 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert_template 'species_lists_by_title'
   end
 
+  def test_species_lists_by_user
+    get_with_dump :species_lists_by_user, { :id => @rolf.id }
+    assert_response :success
+    assert_template 'list_species_lists'
+  end
+
   def test_destroy_species_list
     spl = @first_species_list
     assert(spl)

@@ -1,5 +1,5 @@
 class AccountController < ApplicationController
-  before_filter :login_required, :only => [:test_autologin, :prefs]
+  before_filter :login_required, :only => [:test_autologin, :prefs, :profile]
 
   # AJAX request used for autocompletion of location field in prefs.
   # View: none
@@ -124,16 +124,11 @@ class AccountController < ApplicationController
         when :get
           @user = User.find(@user.id) # Make sure we have the latest version of the user
           session['user'] = @user
-          @user.place_name = @user.location ? @user.location.display_name : ""
-          @copyright_holder = @user.legal_name
-          @copyright_year    = Time.now.year
-          @upload_license_id  = @user.license.id
 
         when :post
           error = false
 
           @user.change_email(params['user']['email'])
-          @user.change_name(params['user']['name'])
           @user.html_email = params['user']['html_email']
           @user.feature_email = params['user']['feature_email']
           @user.comment_email = params['user']['comment_email']
@@ -146,11 +141,6 @@ class AccountController < ApplicationController
           @user.alternate_columns = params['user']['alternate_columns']
           @user.vertical_layout = params['user']['vertical_layout']
           @user.license_id = params['user']['license_id'].to_i
-          @user.notes = params['user']['notes']
-
-          @copyright_holder  = params['copyright_holder']
-          @copyright_year    = params['date']['copyright_year'] if params['date']
-          @upload_license_id = params['upload']['license_id']   if params['upload']
 
           password = params['user']['password']
           if password
@@ -162,14 +152,49 @@ class AccountController < ApplicationController
             end
           end
 
-          where = @user.place_name = params['user']['place_name']
-          if where && where != ""
-            if location = Location.find_by_display_name(where)
+          if error
+          elsif !@user.save
+            flash_object_errors(@user)
+          else
+            flash_notice "Preferences updated."
+            redirect_back_or_default :action => "welcome"
+          end
+      end
+    else
+      store_location
+      access_denied
+    end
+  end
+
+  def profile
+    @user = session['user']
+    if @user
+      @licenses = License.current_names_and_ids(@user.license)
+      case request.method
+        when :get
+          @user = User.find(@user.id) # Make sure we have the latest version of the user
+          session['user'] = @user
+          @place_name      = @user.location ? @user.location.display_name : ""
+          @copyright_holder = @user.legal_name
+          @copyright_year    = Time.now.year
+          @upload_license_id  = @user.license.id
+
+        when :post
+          error = false
+
+          @user.name         = params['user']['name']
+          @user.notes        = params['user']['notes']
+          @copyright_holder  = params['copyright_holder']
+          @copyright_year    = params['date']['copyright_year'] if params['date']
+          @upload_license_id = params['upload']['license_id']   if params['upload']
+
+          @place_name = params['user']['place_name']
+          if @place_name && @place_name != ""
+            if location = Location.find_by_display_name(@place_name)
               @user.location = location
-              where = location.display_name
+              @place_name = location.display_name
             else
-              flash_error "Unrecognized location \"#{where}\".  Has anyone
-                defined this location or created an observation for it yet?"
+              need_to_create_location = true
             end
           else
             @user.location = nil
@@ -203,9 +228,14 @@ class AccountController < ApplicationController
           if error
           elsif !@user.save
             flash_object_errors(@user)
+          elsif need_to_create_location
+            flash_notice "You must define this location before we can make it
+              your primary location."
+            redirect_to(:controller => "location", :action => "create_location",
+              :where => @place_name, :set_user => 1)
           else
-            flash_notice "Preferences updated."
-            redirect_back_or_default :action => "welcome"
+            flash_notice "Profile updated."
+            redirect_to(:controller => "observer", :action => "show_user", :id => @user)
           end
       end
     else

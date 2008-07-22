@@ -5,7 +5,8 @@
 #
 #  Views:
 #    list_comments              List latest comments.
-#    show_comments_for_user     Show a user's comments.
+#    show_comments_for_user     Show a comments *for* a user.
+#    show_comments_by_user      Show a comments *by* a user.
 #    show_comment               Show a single comment.
 #    add_comment                Create a comment.
 #    edit_comment               Edit a comment.
@@ -17,6 +18,7 @@ class CommentController < ApplicationController
   before_filter :login_required, :except => [
     :list_comments,
     :show_comments_for_user,
+    :show_comments_by_user,
     :show_comment
   ]
 
@@ -46,6 +48,22 @@ class CommentController < ApplicationController
     @comment_pages, @comments = paginate(:comments, :include => "observation",
                                          :order => "comments.created desc",
                                          :conditions => "observations.user_id = %s" % @user.id,
+                                         :per_page => 10)
+    render :action => 'list_comments'
+  end
+
+  # Shows comments for a given user, most recent first.
+  # Linked from: left panel
+  # View: list_comments
+  # Inputs: params[:id] (user), session['user']
+  # Outputs: @user, @comments, @comment_pages
+  def show_comments_by_user
+    session_setup
+    store_location
+    @user = User.find(params[:id])
+    @title = "Comments by %s" % @user.legal_name
+    @comment_pages, @comments = paginate(:comments, :order => "created desc",
+                                         :conditions => "user_id = %s" % @user.id,
                                          :per_page => 10)
     render :action => 'list_comments'
   end

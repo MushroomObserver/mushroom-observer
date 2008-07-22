@@ -138,22 +138,19 @@ class AccountControllerTest < Test::Unit::TestCase
     # Now change everything.
     params = {
       :user => {
-        :email                 => "new_email",
-        :name                  => "new_name",
-        :notes                 => "new_notes",
-        :place_name            => "Burbank, Los Angeles Co., California, USA",
-        :theme                 => "Agaricus",
-        :license_id            => "1",
-        :rows                  => "10",
-        :columns               => "10",
-        :alternate_rows        => "",
-        :alternate_columns     => "",
-        :vertical_layout       => "",
-        :feature_email         => "",
-        :comment_email         => "",
-        :commercial_email      => "",
-        :question_email        => "",
-        :html_email            => "",
+        :email             => "new_email",
+        :theme             => "Agaricus",
+        :license_id        => "1",
+        :rows              => "10",
+        :columns           => "10",
+        :alternate_rows    => "",
+        :alternate_columns => "",
+        :vertical_layout   => "",
+        :feature_email     => "",
+        :comment_email     => "",
+        :commercial_email  => "",
+        :question_email    => "",
+        :html_email        => "",
       }
     }
     post_with_dump(:prefs, params)
@@ -161,9 +158,6 @@ class AccountControllerTest < Test::Unit::TestCase
     # Make sure changes were made.
     user = User.find_by_login("rolf").reload
     assert_equal("new_email", user.email)
-    assert_equal("new_name", user.name)
-    assert_equal("new_notes", user.notes)
-    assert_equal(@burbank, user.location)
     assert_equal("Agaricus", user.theme)
     assert_equal(@ccnc25, user.license)
     assert_equal(10, user.rows)
@@ -176,6 +170,26 @@ class AccountControllerTest < Test::Unit::TestCase
     assert_equal(false, user.commercial_email)
     assert_equal(false, user.question_email)
     assert_equal(false, user.html_email)
+  end
+
+  def test_edit_profile
+    # First make sure it can serve the form to start with.
+    requires_login(:profile)
+    # Now change everything.
+    params = {
+      :user => {
+        :name       => "new_name",
+        :notes      => "new_notes",
+        :place_name => "Burbank, Los Angeles Co., California, USA",
+      }
+    }
+    post_with_dump(:profile, params)
+    assert(flash[:notice], "Profile updated.")
+    # Make sure changes were made.
+    user = User.find_by_login("rolf").reload
+    assert_equal("new_name", user.name)
+    assert_equal("new_notes", user.notes)
+    assert_equal(@burbank, user.location)
   end
 
   # Test uploading mugshot for user profile.
@@ -198,7 +212,7 @@ class AccountControllerTest < Test::Unit::TestCase
       :upload => { :license_id => @ccnc25.id },
       :copyright_holder => "Someone Else",
     }
-    post_requires_login(:prefs, params, false)
+    post_requires_login(:profile, params, false)
     # assert_redirected_to(:controller => "account", :action => "welcome")
     @rolf.reload
     assert_equal(new_image_id, @rolf.image_id)
