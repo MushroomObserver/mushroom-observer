@@ -12,6 +12,8 @@
 
   <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
 
+  <p><label for="user_login"><%= :prefs_login.l %></label><br/>
+  <%= form.text_field("login", :size => 60) %></p>
   <p><label for="user_email"><%= :prefs_email.l %></label><br/>
   <%= form.text_field("email", :size => 60) %></p>
   <p><label for="user_password"><%= :prefs_password_new.l %></label><br/>

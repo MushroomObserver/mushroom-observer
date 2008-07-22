@@ -138,6 +138,7 @@ class AccountControllerTest < Test::Unit::TestCase
     # Now change everything.
     params = {
       :user => {
+        :login             => "new_login",
         :email             => "new_email",
         :theme             => "Agaricus",
         :license_id        => "1",
@@ -154,9 +155,10 @@ class AccountControllerTest < Test::Unit::TestCase
       }
     }
     post_with_dump(:prefs, params)
-    assert(flash[:notice], "Preferences updated.")
+    assert_equal("Preferences updated.", flash[:notice])
     # Make sure changes were made.
-    user = User.find_by_login("rolf").reload
+    user = @rolf .reload
+    assert_equal("new_login", user.login)
     assert_equal("new_email", user.email)
     assert_equal("Agaricus", user.theme)
     assert_equal(@ccnc25, user.license)
@@ -172,6 +174,16 @@ class AccountControllerTest < Test::Unit::TestCase
     assert_equal(false, user.html_email)
   end
 
+  def test_edit_prefs_login_already_exists
+    params = {
+      :user => {
+        :login => "mary",
+        :email => "email", # (must be defined or will barf)
+      }
+    }
+    post_requires_login(:prefs, params)
+  end
+
   def test_edit_profile
     # First make sure it can serve the form to start with.
     requires_login(:profile)
@@ -184,9 +196,9 @@ class AccountControllerTest < Test::Unit::TestCase
       }
     }
     post_with_dump(:profile, params)
-    assert(flash[:notice], "Profile updated.")
+    assert_equal("Profile updated.", flash[:notice])
     # Make sure changes were made.
-    user = User.find_by_login("rolf").reload
+    user = @rolf.reload
     assert_equal("new_name", user.name)
     assert_equal("new_notes", user.notes)
     assert_equal(@burbank, user.location)
@@ -205,7 +217,6 @@ class AccountControllerTest < Test::Unit::TestCase
     params = {
       :user => {
         :upload_image => file,
-        :email        => @rolf.email,
         :name         => @rolf.name,
       },
       :date => { :copyright_year => "2003" },

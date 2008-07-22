@@ -749,6 +749,7 @@ prefs_layout_title: List page layout
 prefs_license: Default license
 prefs_license_note: Select default "license":%s you want for new images
 prefs_link: Edit Preferences
+prefs_login: Login
 prefs_password_confirm: Confirm new password
 prefs_password_new: New password
 prefs_rows_by: rows x

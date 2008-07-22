@@ -128,6 +128,7 @@ class AccountController < ApplicationController
         when :post
           error = false
 
+          @user.login = params['user']['login']
           @user.change_email(params['user']['email'])
           @user.html_email = params['user']['html_email']
           @user.feature_email = params['user']['feature_email']
