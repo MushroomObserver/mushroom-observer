@@ -43,7 +43,7 @@ class AccountMailer < ActionMailer::Base
     @body["user"]     = @user
     @body["features"] = features
     @recipients       = @user.email
-    @bcc              = EXTRA_BCC_EMAIL_ADDRESSES
+    @bcc              = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from             = NEWS_EMAIL_ADDRESS
     @content_type     = @user.html_email ? "text/html" : "text/plain"
   end
