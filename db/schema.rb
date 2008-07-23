@@ -164,9 +164,9 @@ ActiveRecord::Schema.define(:version => 31) do
   end
 
   create_table "queued_emails", :force => true do |t|
-    t.column "user_id",    :integer,                        :default => 0, :null => false
-    t.column "to_user_id", :integer,                        :default => 0, :null => false
-    t.column "flavor",     :enum,     :limit => [:comment]
+    t.column "user_id",    :integer
+    t.column "to_user_id", :integer,                                  :default => 0, :null => false
+    t.column "flavor",     :enum,     :limit => [:comment, :feature]
     t.column "queued",     :datetime
   end
 

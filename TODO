@@ -1,10 +1,7 @@
 Release each of the following as they get completed:
 
 Email queuing:
-  Focus on comment email:
-    - keep queuing optional
-    - queue for all recipients
-  - Get feature email working again
+  Focus on notification
   Move over other email
   Optionally add other commentators & all comment receivers [control in user prefs]
     Should lurkers on particular observations be supported?
@@ -14,11 +11,6 @@ Email queuing:
 New user options:
   Send me a copy of my own comments
   Send me comments on observations I've commented on
-
-Should this get added?
-<a href="http://thepradipta416.com" title="Proud Member of the Pradipta 416">
-	<img src="http://thepradipta416.com/img/badge1.gif" alt="The Few, The Proud, The Pradipta 416"/>
-	</a>
 
 Bugs:
 May be fixed: Reported by Darvin on July 6, 2008:
@@ -36,10 +28,6 @@ More next/prev stuff:
         Add next/prev_location
         Add next/prev_name?
         Potential interactions between sequences if URLs are copied and pasted
-
-User profile - paragraph available in preferences that gets displayed on the show_user page (4)
-  Associate a user with a location (2)
-  User photo (4)
 
 Add fields for who found the mushroom and who provided the id.
 
