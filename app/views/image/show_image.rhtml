@@ -21,9 +21,7 @@
 | <%= link_to('Next', :action => 'next_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
 
 <div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name(@user))) %></div>
-<div id="copyright">Copyright &copy;
-    <%= user_link(@image.user, "#{@image.when.year} #{@image.copyright_holder}") %>
-</div>
+<div id="copyright">Copyright &copy;<%= @image.when.year %> <%= @image.copyright_holder %></div>
 
 <table cellpadding="10">
 <tr>

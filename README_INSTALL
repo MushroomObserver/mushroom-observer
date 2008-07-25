@@ -1,0 +1,88 @@
+The following are notes I took while setting up a local, self-contained
+version of MushroomObserver.org on an installation of Ubuntu 6.10, Edgy Eft.
+
+Get software using Synaptic Package Manager
+(System -> Administration -> Synaptic Package Manager)
+  Ruby (1.8.4 - Ubuntu)
+  MySQL (Ver 14.12 Distrib 5.0.24a - Ubuntu)
+  svn (version 1.3.2 (r19776) - Ubuntu)
+  ImageMagick (6.2.4 - Ubuntu)
+
+Downloaded rubygems from rubyonrails.com (0.9.1) [No synaptic package]
+  shell> cd <gems-dir>
+  shell> sudo ruby setup.rb
+
+Rails: (first tried synaptic package, but got complaints)
+  shell> sudo gem install rails --include-dependencies # 1.2.1
+
+RedCloth: (ruby gem for doing simplified markup)
+  shell> sudo gem install RedCloth
+  
+Setup MySQL
+The Ubuntu Synaptic install got alot of stuff running.  The server was
+already running and it automatically restarts after a reboot.
+
+Couldn't get the User Administration section of MySQL Administrator
+to work for me, so reverted to raw mysql:
+  shell> mysql -u root
+
+Secured automatically created accounts:
+  mysql> select user, host from mysql.user;
+  mysql> SET PASSWORD FOR '<user>'@'<host>' = PASSWORD('<newpwd>');
+
+Get Mushroom Observer source
+  shell> svn checkout http://svn.collectivesource.com/mushroom_sightings/
+
+Create database.yml from database.yml-template
+  shell> cd mushroom_sightings/trunk/config
+  shell> cp database.yml-template database.yml
+
+Edit the passwords in database.yml.  You can also change the usernames
+  and databases if you want, but the rest of this will assume the names
+  in the template.  I needed to change the socket: line as well as documented
+  in the template.  Other options include /var/lib/mysql/mysql.sock and /tmp/mysql.sock.
+
+Create databases:
+  shell> mysql -u root -p
+  mysql> create database observer_development;
+  mysql> create database observer_test;
+  mysql> create database observer_production;
+
+Create 'mo' user:
+  mysql> GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,LOCK TABLES on observer_development.* to 'mo'@'localhost' identified by '<password>';
+  mysql> GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,LOCK TABLES on observer_test.* to 'mo'@'localhost' identified by '<password>';
+  mysql> GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,LOCK TABLES on observer_production.* to 'mo'@'localhost' identified by '<password>';
+
+Test user:
+  shell> mysql -u mo -p observer_development
+
+Create environment.rb from environment.rb-template:
+  shell> cp environment.rb-template environment.rb
+
+  If you want to test email, you'll need to edit environment.rb and provide
+  a username and password, but otherwise you can leave it as it is.
+
+Setup image directories:
+  shell> cd ../public/images
+  shell> mkdir 640 orig thumb
+  
+Setup .htaccess
+  shell> cd ..
+  shell> ln -s .htaccess-dev .htaccess
+
+Get database checkpoint and corresponding images
+  <need to work on this>
+
+Load database:
+  shell> cd ..
+  shell> mysql -u mo -p observer_development
+  mysql> source db/checkpoints/checkpoint
+
+Update the database:
+  shell> rake db:migrate
+  
+Start server:
+  shell> script/server
+
+Point web browser at:
+  http://localhost:3000

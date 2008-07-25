@@ -1,7 +1,6 @@
 # Filters added to this controller will be run for all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 require 'login_system'
-require 'browser_status'
 require 'active_record_extensions'
 
 CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
@@ -110,11 +109,10 @@ end
 class ApplicationController < ActionController::Base
   include ExceptionNotifiable
   include LoginSystem
-  include BrowserStatus
 
   around_filter :set_locale
-  # ---AUTOLOGIN---
   before_filter :browser_status
+  # ---AUTOLOGIN---
   before_filter :autologin
 
   before_filter(:disable_link_prefetching, :only => [
