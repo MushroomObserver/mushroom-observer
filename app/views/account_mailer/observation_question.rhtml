@@ -9,7 +9,7 @@
 
 <p><%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer
 website to forward the following question to you about your observation of
-<u><%= @observation.unique_text_name(@user) %></u>:</p>
+<u><%= @observation.unique_text_name %></u>:</p>
 
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
   <%= textilize(sanitize(@question)) %>
@@ -32,7 +32,7 @@ this entire message to: webmaster@mushroomobserver.org</p>
 </body>
 </html>
 <% else ##################################################################### %>
-<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following question to you about your observation of <%= @observation.unique_text_name(@user) %> (<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>):
+<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following question to you about your observation of <%= @observation.unique_text_name %> (<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>):
 
 <%= h @question %>
 

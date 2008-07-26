@@ -16,6 +16,7 @@
 #  7. has synonyms (i.e. can be one of a group of Name's owned by a Synonym)
 #  8. belongs to a User (who created it originally)
 #  9. has a history -- version number and asscociated PastLocation's
+#  10. has an RssLog
 #
 #  Name Formats:
 #    text_name           Plain text: "Xxx yyy"         "Xxx"             "Fungi"

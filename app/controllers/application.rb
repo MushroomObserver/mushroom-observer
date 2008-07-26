@@ -485,7 +485,7 @@ class ApplicationController < ActionController::Base
     sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
     sorter.check_for_deprecated_checklist(params[:checklist_data])
     if species_list
-      sorter.check_for_deprecated_names(species_list.observations.map {|o| o.preferred_name(user)})
+      sorter.check_for_deprecated_names(species_list.observations.map {|o| o.name})
     end
     sorter.sort_names(list)
     sorter

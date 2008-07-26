@@ -1,5 +1,5 @@
 <%
-    @title = 'Image: ' + h(@image.unique_text_name(@user))
+    @title = 'Image: ' + h(@image.unique_text_name)
     search_params = calc_search_params()
 %>
 <%= link_to 'Show Normal Size', :action => 'show_image', :id => @image, :params => search_params %>
@@ -14,7 +14,7 @@
                   :confirm => "Are you sure?" %>
 <% end %>
 
-<div id="Title"><%= 'Image: ' + textilize_without_paragraph(h(@image.unique_format_name(@user))) %></div>
+<div id="Title"><%= 'Image: ' + textilize_without_paragraph(h(@image.unique_format_name)) %></div>
 <div id="copyright">Copyright &copy;
 	<% if commercial_inquiries_ok %>
 	  <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),

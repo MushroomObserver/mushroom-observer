@@ -1,7 +1,39 @@
+#
+#  This model just stores old versions of Name's.  It saves *almost* everything
+#  in the Name object, as well as a reference to the Name itself.  It does not
+#  save the synonym.  (That would open a whole can of worms...)  Should maybe
+#  share a base class with PastLocation? 
+#
+#  Usage:
+#    # Make some changes to a Name.
+#    name.update_attributes(...)
+#
+#    # Create PastName if changes are "significant".
+#    if PastName.check_for_past_name(name)
+#      print "past name created"
+#    end
+#
+#    # Look up old version of a Name.
+#    PastName = PastName.find(
+#      :conditions => ["name_id = ? AND version = ?", name.id, version]
+#    )
+#
+#  Public Methods:
+#    (has many of the same attributes Name has)
+#    PastName.check_for_past_name(name)  Create PN if name has changed.
+#    PastName.make_past_name(name)       Create PN.
+#
+#  NOTE: this model is subtly different from PastLocation.  In the other model
+#  check_for_past_location returns an *unsaved* PastLocation; in this one
+#  check_for_past_name returns true or false, the PastName having already
+#  been saved if one was created.
+#
+################################################################################
+
 class PastName < ActiveRecord::Base
   belongs_to :name
   belongs_to :user
-  
+
   # Create a PastName from a Name.  Doesn't do any checks and doesn't save the PastName
   def self.make_past_name(name)
     past_name = PastName.new
@@ -12,7 +44,7 @@ class PastName < ActiveRecord::Base
     past_name.version = name.version
     past_name.observation_name = name.observation_name
     past_name.display_name = name.display_name
-    
+
     past_name.rank = name.rank
     past_name.text_name = name.text_name
     past_name.author = name.author
@@ -20,11 +52,6 @@ class PastName < ActiveRecord::Base
     past_name.deprecated = name.deprecated
     past_name.citation = name.citation
     past_name
-  end
-  
-  # Map nil or false to ''
-  def self.str_cmp(s1, s2)
-    (s1 || '') != (s2 || '')
   end
 
   # Looks at the given name and compares it against what's in the database.
@@ -57,12 +84,19 @@ class PastName < ActiveRecord::Base
     end
     result
   end
-  
+
   def status
     if self.deprecated
       "Deprecated"
     else
       "Valid"
     end
+  end
+
+  private
+
+  # Map nil or false to ''
+  def self.str_cmp(s1, s2) # :nodoc:
+    (s1 || '') != (s2 || '')
   end
 end

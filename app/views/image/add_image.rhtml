@@ -1,8 +1,8 @@
-<% @title = 'Add an Image for ' + h(@observation.unique_text_name(@user)) %>
+<% @title = 'Add an Image for ' + h(@observation.unique_text_name) %>
 <%= link_to 'Show Observation', :controller => 'observer', :action => 'show_observation', :id => @observation %> | 
 <%= link_to 'Edit Observation', :controller => 'observer', :action => 'edit_observation', :id => @observation %>
 
-<div id="Title">Add an Image for <%= textilize_without_paragraph(h(@observation.unique_format_name(@user))) %></div>
+<div id="Title">Add an Image for <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <div id="license-notice">
 Please only upload images that you created or which you own the copyright of.<br/>

@@ -313,7 +313,7 @@ class ImageController < ApplicationController
             if do_it == 'yes'
               image = @observation.remove_image_by_id(image_id)
               if !image.nil?
-                @observation.log("Image removed by #{@user.login}: #{image.unique_format_name(@user)}", false)
+                @observation.log("Image removed by #{@user.login}: #{image.unique_format_name}", false)
                 flash_notice "Removed image ##{image_id}."
               end
             end
@@ -344,7 +344,7 @@ class ImageController < ApplicationController
           flash_object_errors(@image)
         else
           for o in @image.observations
-            o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name(@user), @user.login), true)
+            o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @user.login), true)
           end
           flash_notice "Image was successfully updated."
           redirect_to :action => 'show_image', :id => @image
@@ -365,7 +365,7 @@ class ImageController < ApplicationController
       if !check_user_id(@image.user_id)
         redirect_to :action => 'show_image', :id => @image
       else
-        image_name = @image.unique_text_name(@user)
+        image_name = @image.unique_text_name
         for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
           observation.log("Image destroyed by #{@user.login}: #{image_name}", false)
           observation.thumb_image_id = nil
@@ -414,7 +414,7 @@ class ImageController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
       if !image.nil?
-        @observation.log("Image reused by #{@user.login}: #{image.unique_format_name(@user)}", true)
+        @observation.log("Image reused by #{@user.login}: #{image.unique_format_name}", true)
         flash_notice "Added image ##{image.id}."
       end
     end
@@ -434,7 +434,7 @@ class ImageController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
       if !image.nil?
-        @observation.log("Image reused by #{@user.login}: #{image.unique_format_name(@user)}", true)
+        @observation.log("Image reused by #{@user.login}: #{image.unique_format_name}", true)
         flash_notice "Added image ##{image.id}."
       end
     end

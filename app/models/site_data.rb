@@ -1,39 +1,3 @@
-#  Created by Nathan Wilson on 2007-05-12.
-#  Copyright (c) 2007. All rights reserved.
-
-# This file manages user rankings.
-#
-# Global Constants:
-#   ALL_FIELDS                List of fields presumably in pleasing order.
-#   FIELD_WEIGHTS             Weight of each field in user metric.
-#   FIELD_TITLES              Title to use for each field in view.
-#   FIELD_TABLES              Name of table to count rows of for each field.
-#                             (only the exceptions; default is table name is
-#                             same as field name)
-#
-# Public:
-#   get_site_data             Returns stats for entire site.
-#   get_user_data(user_id)    Returns stats for given user.
-#   get_all_user_data         Returns stats for all users.
-#
-#   SiteData.update_contribution(mode, obj)     Keep user.contribution
-#   SiteData.create_species_list_entries(spl)    cache up to date.
-#   SiteData.destroy_species_list_entries(spl)
-#
-# Private:
-#   calc_metric(fields)       Calculates score of a single user.
-#   get_field_count(field)    Looks up number of entries in a given table.
-#   load_user_data(id=nil)    Populates @user_data (some stuff hard-coded).
-#   load_field_counts(field, query=nil)
-#                             Populates a single column in @user_data.
-#
-# Static internal data structure: (created by load_user_data)
-#   @user_data        This is a 2-D hash keyed on user_id then field name:
-#     :images           Number of images the user has posted.
-#     ...
-#     :observations     Number of observations user has posted.
-#     :name             User's legal_name.
-#     :id               User's id.
 
 ALL_FIELDS = [
   :images,
@@ -85,6 +49,42 @@ FIELD_TABLES = {
   :species_list_entries => "observations_species_lists",
 }
 
+################################################################################
+#
+#  This class manages user contributions / rankings.
+#
+#  Global Constants:
+#    ALL_FIELDS                List of fields, presumably in a pleasing order.
+#    FIELD_WEIGHTS             Weight of each field in user metric.
+#    FIELD_TITLES              Title to use for each field in view.
+#    FIELD_TABLES              Name of table to count rows of for each field.
+#                              (only the exceptions; default is field name)
+#
+#  Public Methods:
+#    get_site_data             Returns stats for entire site.
+#    get_user_data(user_id)    Returns stats for given user.
+#    get_all_user_data         Returns stats for all users.
+#
+#  Callbacks:
+#    SiteData.update_contribution(mode, obj)
+#                              Keep user.contribution up to date.
+#
+#  Private:
+#    load_user_data(id=nil)    Populates @user_data (some stuff hard-coded).
+#    load_field_counts(...)    Populates a single column in @user_data.
+#    calc_metric(fields)       Calculates score of a single user.
+#    get_field_count(field)    Looks up number of entries in a given table.
+#
+#  Static internal data structure: (created by load_user_data)
+#    @user_data        This is a 2-D hash keyed on user_id then field name:
+#      :images           Number of images the user has posted.
+#      ...
+#      :observations     Number of observations user has posted.
+#      :name             User's legal_name.
+#      :id               User's id.
+#
+################################################################################
+
 class SiteData
 
   # This is called every time any object (not just ones we care about) is
@@ -97,11 +97,12 @@ class SiteData
        obj.respond_to?("user") && (user = obj.user)
       user.contribution = 0 if !user.contribution
       user.contribution += (mode == :create ? weight : -weight) * num
-# print ">>>>>>>>>>>>>>> #{user.login} #{mode} #{field} #{num}\n"
       user.save
     end
   end
 
+  # Return stats for entire site.  Returns simple hash mapping object type
+  # to number of that object: <tt>result[:images] = num_images</tt>
   def get_site_data
     result = {}
     for field in ALL_FIELDS
@@ -110,16 +111,23 @@ class SiteData
     result
   end
 
+  # Return stats for a single user.  Returns simple hash mapping object type
+  # to number of that object: <tt>result[:images] = num_images</tt>
   def get_user_data(id)
     load_user_data(id)
     @user_data[@user_id]
   end
 
+  # Load stats for all users.  Returns nothing.  Use get_user_data to query
+  # individual user's stats.
   def get_all_user_data
     load_user_data(nil)
   end
 
+################################################################################
+
 private
+
   def calc_metric(fields)
     metric = 0
     if fields

@@ -40,9 +40,9 @@ class Image < ActiveRecord::Base
   belongs_to :license
   attr_accessor :img_dir
 
-  def unique_format_name(user=nil)
+  def unique_format_name
     obs_names = []
-    self.observations.each {|o| obs_names.push(o.format_name(user))}
+    self.observations.each {|o| obs_names.push(o.format_name)}
     title = obs_names.uniq.sort.join(' & ')
     if title
       sprintf("%s (%d)", title, self.id)
@@ -51,9 +51,9 @@ class Image < ActiveRecord::Base
     end
   end
 
-  def unique_text_name(user=nil)
+  def unique_text_name
     obs_names = []
-    self.observations.each {|o| obs_names.push(o.text_name(user))}
+    self.observations.each {|o| obs_names.push(o.text_name)}
     title = obs_names.uniq.sort.join(' & ')
     if title
       sprintf("%s (%d)", title, self.id)

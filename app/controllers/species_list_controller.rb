@@ -95,7 +95,7 @@ class SpeciesListController < ApplicationController
       # preferred_name(user) lookup once for each observation.  Then
       # we can sort based on the cached results. -JPH 20071205
       for o in spl.observations
-        names[o] = o.preferred_name(user)
+        names[o] = o.name
       end
       objects = names.keys.sort {|x,y|
         (names[x].text_name <=> names[y].text_name) || (x.id <=> y.id)
@@ -452,7 +452,7 @@ class SpeciesListController < ApplicationController
     result = nil
     user = session['user']
     for obs in spl.observations
-      name = obs.preferred_name(user)
+      name = obs.name
       if name.deprecated
         result = [] if result.nil?
         unless result.member?(name.search_name) or

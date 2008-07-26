@@ -13,37 +13,29 @@ require 'active_record_extensions'
 #  6. has a consensus Name and Vote (cached)
 #  7. owned by a User
 #  8. can belong to one or more SpeciesList's
+#  9. has an RssLog
 #
 #  Voting is still in a state of flux.  At the moment users create Naming's and
 #  people Vote on them.  We combine the Vote's for each Naming, cache the Vote
 #  for each Naming in the Naming.  However no Naming necessarily wins --
 #  instead Vote's are tallied for each Synonym (see calc_consensus) for full
 #  details).  Thus the accepted Name of the winning Synonym is cached in the
-#  Observation along with its winning Vote score. 
-#
-#  Further complicating everything, we still support the concept of a
-#  "preferred name" for each individual User, based I believe, on whether they
-#  have voted "I'd call it that" on any proposed Naming (otherwise we just use
-#  the community consensus).  Thus you will see User being passed in to a
-#  number of methods that really shouldn't need to know the User.  This is
-#  almost certainly going away. 
+#  Observation along with its winning Vote score.
 #
 #  RSS log:
 #    log(msg, touch)      Add message to log (creating log if necessary).
 #    orphan_log(entry)    Same as log() except observation is about to go away.
 #
 #  Naming stuff:
-#    name                    Conensus Name instance. (never nil)
-#    text_name(user)         Plain text.
-#    format_name(user)       Textilized.
-#    unique_text_name(user)  Same as above, with id added to make unique.
-#    unique_format_name(user)
+#    name                 Conensus Name instance. (never nil)
+#    text_name            Plain text.
+#    format_name          Textilized.
+#    unique_text_name     Same as above, with id added to make unique.
+#    unique_format_name
 #
 #    calc_consensus          Calculate and cache the consensus naming/name.
-#    preferred_name(user)    Name instance. (never nil)
 #    name_been_proposed?(n)  Has someone proposed this name already?
-#    O.refresh_vote_cache          Refresh cache across all observations.
-#    O.reset_preferred_name_cache  Refresh cache of user's preferred names.
+#    O.refresh_vote_cache    Refresh cache across all observations.
 #
 #  Image stuff:
 #    add_image(img)         Add img to obv.
@@ -80,17 +72,15 @@ class Observation < ActiveRecord::Base
     :where => "location"
   })
 
-  @@preferred_name_cache = {} # Maps user.id to a preferred name
-
-  def add_spl_callback(o)
+  def add_spl_callback(o) # :nodoc:
     SiteData.update_contribution(:create, self, :species_list_entries, 1)
   end
 
-  def remove_spl_callback(o)
+  def remove_spl_callback(o) # :nodoc:
     SiteData.update_contribution(:destroy, self, :species_list_entries, 1)
   end
 
-  # Creates rss_log if necessary.
+  # Log change to the observation.  Creates new rss_log if necessary.
   def log(msg, touch)
     if self.rss_log.nil?
       self.rss_log = RssLog.new
@@ -98,7 +88,8 @@ class Observation < ActiveRecord::Base
     self.rss_log.addWithDate(msg, touch)
   end
 
-  # Creates rss_log if necessary.
+  # Log change to the observation that's about to be deleted.  Creates new
+  # rss_log if necessary.
   def orphan_log(entry)
     self.log(entry, false) # Ensures that self.rss_log exists
     self.rss_log.observation = nil
@@ -106,7 +97,7 @@ class Observation < ActiveRecord::Base
     self.rss_log.save
   end
 
-  # Just sets @modified to Time.now -- huh?
+  # Change modified time to now.
   def touch
     @modified = Time.new
   end
@@ -327,62 +318,33 @@ result = ""
     elsif best != old
       self.log("Consensus established: #{best.observation_name}", true)
     end
-    Observation.reset_preferred_name_cache()
 
 return result
   end
 
   ########################################
 
-  # Look up the user's preferred name.  The logic is:
-  # If the user has voted 100% for something, use that.
-  # Otherwise use the community consensus.
-  def preferred_name(user=nil, cache_result=false)
-    id = user && user.id
-    result = @@preferred_name_cache[[self.id, id]]
-    if result.nil?
-      result = self.name
-      v100 = Vote.maximum_vote
-      if user
-        for naming in self.namings
-          vote = naming.users_vote(user)
-          if vote && vote.value == v100
-            result = naming.name
-            break
-          end
-        end
-      end
-      # result = self.name
-      @@preferred_name_cache[[self.id, id]] = result if cache_result
-    end
-    result
+  # Name in plain text, never nil.
+  def text_name
+    self.name.search_name
   end
 
-  def Observation.reset_preferred_name_cache()
-    # @@preferred_name_cache = {}
-  end
-
-  # Various formats using the preferred_name.
-  def text_name(user=nil)
-    self.preferred_name(user).search_name
-  end
-
-  def unique_text_name(user=nil)
-    str = self.preferred_name(user).search_name
+  # Name in plain text with id to make it unique, never nil.
+  def unique_text_name
+    str = self.name.search_name
     "%s (%s)" % [str, self.id]
   end
 
-  def format_name(user=nil)
-    self.preferred_name(user).observation_name
+  # Textile-marked-up name, never nil.
+  def format_name
+    self.name.observation_name
   end
 
-  def unique_format_name(user=nil)
-    str = self.preferred_name(user).observation_name
+  # Textile-marked-up name with id to make it unique, never nil.
+  def unique_format_name
+    str = self.name.observation_name
     "%s (%s)" % [str, self.id]
   end
-
-  ########################################
-
 
   # Has anyone proposed a given name yet for this observation?
   def name_been_proposed?(name)
@@ -438,14 +400,12 @@ return result
     img
   end
 
-  # Returns empty string.  [huh?]
+  # Always returns empty string.  Used by form?
   def idstr
     ''
   end
 
-  # Adds error if couldn't find image with id in id_field.
-  # Changes nothing.
-  # Returns nothing.
+  # Adds error if couldn't find image with the given id.  Used by form?
   def idstr=(id_field)
     id = id_field.to_i
     img = Image.find(:id => id)
@@ -454,8 +414,9 @@ return result
     end
   end
 
-  # Abstraction over self.where and self.location.display_name
-  # Prefer location to where
+  # Abstraction over self.where and self.location.display_name.  Returns
+  # location name as a string, preferring "location" over "where" where both
+  # exist. 
   def place_name()
     if self.location
       self.location.display_name
@@ -464,6 +425,8 @@ return result
     end
   end
 
+  # Set both "where" and "location".  If given location doesn't exist, it sets
+  # "location" to nil.
   def place_name=(where)
     self.where = where
     self.location = Location.find_by_display_name(where)
@@ -525,13 +488,7 @@ return result
 
   protected
 
-  # List of observations sorted by date, newest first.
-  def self.all_observations
-    find(:all,
-         :order => "'when' desc")
-  end
-
-  def validate
+  def validate # :nodoc:
     errors.add(:where, "can't be blank") if (where.nil? || where == '') && location_id.nil?
   end
 

@@ -17,7 +17,7 @@
     <td valign="middle">
       <% end %>
       <span class="ListName"><%=
-        link_to(textilize_without_paragraph(h(observation.unique_format_name(@user))),
+        link_to(textilize_without_paragraph(h(observation.unique_format_name)),
         :action => 'show_observation', :id => observation.id, :params => search_params) %></span><br/>
       <span class="ListWhere"><%= location_link(observation.where,
         observation.location_id) %></span><br/>

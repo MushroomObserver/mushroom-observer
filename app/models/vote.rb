@@ -1,28 +1,43 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-# Public:
-#   Vote.confidence_menu    Structures needed by the form helper,
-#   Vote.agreement_menu     select(), to create a pulldown menu.
 #
-#   Vote.confidence(value)  Find vote closest in value to the
-#   Vote.agreement(value)   given one.  Returns string.
-#   obj.confidence
-#   obj.agreement
+#  Model describing a single vote for a single Naming.  Properties:
 #
-#   obj.user_weight         Calculate weight from user's contribution.
+#  1. has a value
+#  2. belongs to a User, Naming, and Observation
 #
-#   Vote.delete_vote    Value of the special "delete" vote.
-#   Vote.minimum_vote   Value of the weakest nonzero vote.
-#   Vote.min_neg_vote   Value of the least negative vote.
-#   Vote.average_vote   Value of the neutral vote.
-#   Vote.min_pos_vote   Value of the least positive vote.
-#   Vote.next_best_vote Value of the next-to-best vote.
-#   Vote.maximum_vote   Value of the strongest vote.
-#   Note: larger vote value indicates stronger agreement
+#  Very simple.  Right?  Well, I've complicated things by distributing
+#  vote-related functionality over three classes: Observation, Naming, and
+#  Vote.  Important methods in other classes are:
 #
-# Protected:
-#   Vote.lookup_value(val, list)    Used by confidence/agreement().
+#  * Observation#calc_consensus      Decide which Name is winner.
+#  * Observation#refresh_vote_cache  Refresh vote cache for all Observation's.
+#  * Naming#change_vote              Change a User's Vote for a given Naming.
+#  * Naming#is_users_favorite?(user) Is this Naming the given User's favorite?
+#  * Naming#calc_vote_table          
+#
+#  Public:
+#    Vote.confidence_menu    Structures needed by the form helper,
+#    Vote.agreement_menu     select(), to create a pulldown menu.
+#
+#    Vote.confidence(value)  Find vote closest in value to the
+#    Vote.agreement(value)   given one.  Returns string.
+#    obj.confidence
+#    obj.agreement
+#
+#    obj.user_weight         Calculate weight from user's contribution.
+#
+#    Vote.delete_vote    Value of the special "delete" vote.
+#    Vote.minimum_vote   Value of the weakest nonzero vote.
+#    Vote.min_neg_vote   Value of the least negative vote.
+#    Vote.average_vote   Value of the neutral vote.
+#    Vote.min_pos_vote   Value of the least positive vote.
+#    Vote.next_best_vote Value of the next-to-best vote.
+#    Vote.maximum_vote   Value of the strongest vote.
+#    Note: larger vote value indicates stronger agreement
+#
+#  Protected:
+#    Vote.lookup_value(val, list)    Used by confidence/agreement().
+#
+################################################################################
 
 class Vote < ActiveRecord::Base
   belongs_to :user
@@ -59,6 +74,7 @@ class Vote < ActiveRecord::Base
   NEXT_BEST_VOTE =  2
   MAXIMUM_VOTE   =  3
 
+  #--
   # External access to the constants above.
   def self.delete_vote;    DELETE_VOTE;    end # This is used to mean "delete my vote". 
   def self.minimum_vote;   MINIMUM_VOTE;   end # Weakest nonzero vote.
@@ -77,6 +93,7 @@ class Vote < ActiveRecord::Base
   def self.agreement(val);  return Vote.lookup_value(val, AGREEMENT_VALS);         end
   def confidence;           return Vote.lookup_value(self.value, CONFIDENCE_VALS); end
   def agreement;            return Vote.lookup_value(self.value, AGREEMENT_VALS);  end
+  #++
 
   # Calculate user weight from cotribution score.
   def user_weight

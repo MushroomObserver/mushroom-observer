@@ -1,4 +1,33 @@
-# Should share a base class with PastName
+#
+#  This model just stores old versions of Location's.  It saves *everything*
+#  in the Location object, as well as a reference to the Location itself.
+#  Should maybe share a base class with PastName?
+#
+#  Usage:
+#    # Make some changes to a Location.
+#    location.update_attributes(...)
+#
+#    # Create PastLocation if changes are "significant". (Remember to save.)
+#    past_location = PastLocation.check_for_past_location(location)
+#    past_location.save if past_location
+#
+#    # Look up old version of a Location.
+#    PastLocation = PastLocation.find(
+#      :conditions => ["location_id = ? AND version = ?", location.id, version]
+#    )
+#
+#  Public Methods:
+#    (many of the same methods Location supports)
+#    PastLocation.check_for_past_location(loc)  Create PL if loc has changed.
+#    PastLocation.make_past_location(loc)       Create PL.
+#
+#  NOTE: this model is subtly different from PastName.  In this model
+#  check_for_past_location returns an *unsaved* PastLocation; in the other
+#  check_for_past_name returns true or false, the PastName having already
+#  been saved if one was created.
+#
+################################################################################
+
 class PastLocation < ActiveRecord::Base
   belongs_to :location
   belongs_to :user
@@ -44,15 +73,10 @@ class PastLocation < ActiveRecord::Base
     past_location
   end
 
-  # Map nil or false to ''
-  def self.str_cmp(s1, s2)
-    (s1 || '') != (s2 || '')
-  end
-
   # Looks at the given location and compares it against what's in the database.
-  # If a significant change has happened, then a PastLocation is created but not saved.
-  # The version number, modified and user for the location updated as appropriate.
-  # Return the PastLocation if successfully created.
+  # If a significant change has happened, then a PastLocation is created but
+  # not saved.  The version number, modified and user for the location updated
+  # as appropriate.  Return the PastLocation if successfully created. 
   def self.check_for_past_location(location, user=nil, logger=nil)
     result = nil
     if logger
@@ -81,5 +105,12 @@ class PastLocation < ActiveRecord::Base
       end
     end
     result
+  end
+
+  private
+
+  # Map nil or false to ''
+  def self.str_cmp(s1, s2) # :nodoc:
+    (s1 || '') != (s2 || '')
   end
 end

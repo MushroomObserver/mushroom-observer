@@ -4,11 +4,11 @@
 <div id="indicator" class="indicator"><%= image_tag("indicator.gif") %></div>
 <%= javascript_tag 'Element.hide($("indicator"))' %>
 
-<% @title = 'Editing Observation: ' + h(@observation.unique_text_name(@user))
+<% @title = 'Editing Observation: ' + h(@observation.unique_text_name)
    button_name = "Save Edits" %>
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
-<div id="Title">Editing Observation: <%= textilize_without_paragraph(h(@observation.unique_format_name(@user))) %></div>
+<div id="Title">Editing Observation: <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <% form_tag(:action => 'edit_observation', :id => @observation, :approved_name => @what) do %>
 <br/>

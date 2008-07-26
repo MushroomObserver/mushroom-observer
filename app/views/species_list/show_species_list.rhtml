@@ -34,7 +34,7 @@ Members:<br/>
 	      		%><br/>
 	    	</td>
 		    <td width="100%" valign="middle">
-				<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name(@user))),
+				<span class="ListName"><%= link_to(textilize_without_paragraph(h(observation.unique_format_name)),
 			        :controller => 'observer', :action => 'show_observation', :id => observation.id,
 			        :params => search_params) %></span><br/>
 		        <span class="ListWhere"><%= h(observation.where) %></span>: 

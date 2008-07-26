@@ -264,7 +264,7 @@ class NameController < ApplicationController
       # need to do this to subset on the page we can actually see.)
       if @user = session['user']
         for d in @consensus_data + @synonym_data + @other_data
-          d["observation_name"] = Observation.find(d["id"].to_i).preferred_name(@user).observation_name
+          d["observation_name"] = Observation.find(d["id"].to_i).format_name
         end
       end
 

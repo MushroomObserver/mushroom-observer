@@ -1,11 +1,11 @@
 <%
-    @title = 'Image: ' + h(@image.unique_text_name(@user))
+    @title = 'Image: ' + h(@image.unique_text_name)
     search_params = calc_search_params()
     for obs in @image.observations
         %>
-        <%= link_to("About #{textilize_without_paragraph(h(obs.format_name(@user)))}",
-            :controller => 'name', :action => "show_name", :id => obs.preferred_name(@user))%>
-        | <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % obs.text_name(@user)) %><br/>
+        <%= link_to("About #{textilize_without_paragraph(h(obs.format_name))}",
+            :controller => 'name', :action => "show_name", :id => obs.name) %>
+        | <%= sprintf('<a href="http://images.google.com/images?q=%s">Google Images</a>' % obs.text_name) %><br/>
     <%
     end
 %>
@@ -20,7 +20,7 @@
 <%= link_to('Prev', :action => 'prev_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
 | <%= link_to('Next', :action => 'next_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
 
-<div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name(@user))) %></div>
+<div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name)) %></div>
 <div id="copyright">Copyright &copy;<%= @image.when.year %> <%= @image.copyright_holder %></div>
 
 <table cellpadding="10">
@@ -44,7 +44,7 @@
 
 <p>Observations:<br/>
     <% for observation in @image.observations
-      text = '<span class="Data">' + textilize_without_paragraph(h(observation.unique_format_name(@user)))
+      text = '<span class="Data">' + textilize_without_paragraph(h(observation.unique_format_name))
       if observation.notes != ''
           text += '</span><span class="HelpNote"><br/>Notes: %s...' % observation.notes[0..15]
       end

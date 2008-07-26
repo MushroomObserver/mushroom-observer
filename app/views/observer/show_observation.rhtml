@@ -1,7 +1,7 @@
 <%
-   @title       = :show_observation_title.l + ': ' + h(@observation.unique_text_name(@user))
-   what         = textilize_without_paragraph(h(@observation.format_name(@user)))
-   name         = @observation.preferred_name(@user)
+   @title       = :show_observation_title.l + ': ' + h(@observation.unique_text_name)
+   what         = textilize_without_paragraph(h(@observation.format_name))
+   name         = @observation.name
    questions_ok = @observation.user.question_email
    search_params = calc_search_params()
 %>
@@ -32,7 +32,7 @@
 <br/>
 
 <div id="Title"><%= :show_observation_title.l + ': ' +
-  textilize_without_paragraph(h(@observation.unique_format_name(@user))) %></div>
+  textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <% if check_permission(@observation.user_id) %>
   <%= link_to :show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation %>

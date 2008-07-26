@@ -37,7 +37,7 @@ class AccountMailer < ActionMailer::Base
     @body["user"]        = @user
     @body["observation"] = observation
     @body["comment"]     = comment
-    @subject             = 'Comment about ' + observation.unique_text_name(@user)
+    @subject             = 'Comment about ' + observation.unique_text_name
     if sender
       @headers['Reply-To'] = sender.email
     end
@@ -49,7 +49,7 @@ class AccountMailer < ActionMailer::Base
 
   def commercial_inquiry(sender, image, commercial_inquiry)
     @user                = image.user
-    @subject             = 'Commercial Inquiry about ' + image.unique_text_name(@user)
+    @subject             = 'Commercial Inquiry about ' + image.unique_text_name
     @body["sender"]      = sender
     @body["image"]       = image
     @body["commercial_inquiry"] = commercial_inquiry
@@ -85,7 +85,7 @@ class AccountMailer < ActionMailer::Base
 
   def observation_question(sender, observation, question)
     @user                = observation.user
-    @subject             = 'Question about ' + observation.unique_text_name(@user)
+    @subject             = 'Question about ' + observation.unique_text_name
     @body["sender"]      = sender
     @body["observation"] = observation
     @body["question"]    = question

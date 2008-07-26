@@ -1,7 +1,37 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
 require 'active_record_extensions'
+
+################################################################################
+#
+#  Model describing a species list.  A species list is a list of Observation's
+#  (*not* Name's).  Basic properties: 
+#
+#  1. has a date, title, and notes
+#  2. has a "where" (*not* a Location)
+#  3. is owned by a User
+#  4. has zero or more Observation's
+#  5. has an RssLog
+#
+#  Public Methods:
+#    log(msg)              Add message to RssLog
+#    orphan_log(entry)     Tell RssLog we're about to be deleted.
+#
+#    unique_text_name      Return title with id appended to make it unique.
+#
+#    construct_observation(name, args)  Create and add Observation to list.
+#    update_names(chosen_names)         Update Names in list based on "chosen_names" radio boxes.
+#    name_included(name)                Does this list include the given Name?
+#
+#    file=(file_field)             Upload text file into internal "data" field.
+#    process_file_data(sorter)     Process uploaded file.  Pass in NameSorter object.
+#
+#  Callbacks:
+#    after_add         Update user contribution when adding/removing observations.
+#    before_remove
+#
+#  Validates:
+#    must have title and "where"
+#
+################################################################################
 
 class SpeciesList < ActiveRecord::Base
   has_and_belongs_to_many :observations,
@@ -14,14 +44,15 @@ class SpeciesList < ActiveRecord::Base
     :where => "location"
   })
 
-  def add_obs_callback(o)
+  def add_obs_callback(o) # :nodoc:
     SiteData.update_contribution(:create, self, :species_list_entries, 1)
   end
 
-  def remove_obs_callback(o)
+  def remove_obs_callback(o) # :nodoc:
     SiteData.update_contribution(:destroy, self, :species_list_entries, 1)
   end
 
+  # Add message to RssLog.
   def log(msg)
     if self.rss_log.nil?
       self.rss_log = RssLog.new
@@ -29,19 +60,23 @@ class SpeciesList < ActiveRecord::Base
     self.rss_log.addWithDate(msg, true)
   end
 
+  # Inform RssLog we're about to be deleted.
   def orphan_log(entry)
     self.log(entry) # Ensures that self.rss_log exists
     self.rss_log.species_list = nil
     self.rss_log.add(self.unique_text_name, false)
   end
 
+  # Returns empty string.  Used by a form?
   def species
     ''
   end
 
+  # Does absolutely nothing.  Used by a form?
   def species=(list)
   end
 
+  # Upload file into internal "data" attribute.
   def file=(file_field)
     if file_field.kind_of?(StringIO)
       content_type = file_field.content_type.chomp
@@ -91,6 +126,7 @@ class SpeciesList < ActiveRecord::Base
     end
   end
 
+  # Process uploaded file.
   def process_file_data(sorter)
     if self.data
       if self.data[0] == 91 # '[' character
@@ -101,6 +137,7 @@ class SpeciesList < ActiveRecord::Base
     end
   end
 
+  # Return title with id appended to make in unique.
   def unique_text_name
     title = self.title
     if title
@@ -110,6 +147,8 @@ class SpeciesList < ActiveRecord::Base
     end
   end
 
+  # Create and add a minimal Observation (with associated Naming and optional
+  # Vote objects), and add it to the SpeciesList.
   def construct_observation(name, args)
     if name != ''
       obs = Observation.new({
@@ -146,7 +185,8 @@ class SpeciesList < ActiveRecord::Base
     end
   end
 
-  # (This "chosen_names" hash originates as params[:chosen_approved_names] radio boxes.)
+  # Changes names of certain Observation's based on the "chosen_names" hash
+  # (which originates as params[:chosen_approved_names] radio boxes).
   def update_names(chosen_names)
     if chosen_names
       for observation in self.observations
@@ -164,19 +204,13 @@ class SpeciesList < ActiveRecord::Base
     end
   end
 
-  # Tests to see if the species list includes an observation
-  # with the given name.  Primarily used by functional tests.
+  # Tests to see if the species list includes an observation with the given
+  # name (checks consensus only).  Primarily used by functional tests.
   def name_included(name)
-    result = false
     for observation in self.observations
-      for naming in observation.namings
-        if naming.name == name
-          result = true
-          break
-        end
-      end
+      return true if observation.name == name
     end
-    return result
+    return false
   end
 
   validates_presence_of :title

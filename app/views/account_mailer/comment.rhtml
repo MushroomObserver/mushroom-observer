@@ -6,7 +6,7 @@
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 
 <p>The following comment was posted on the Mushroom Observer website regarding
-the observation <u><%= @observation.unique_text_name(@user) %></u>:</p>
+the observation <u><%= @observation.unique_text_name %></u>:</p>
 
 <p><b>Created:</b> <%= @comment.created.to_formatted_s(:db) %><br/>
 <% if @sender %><b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/><% end %>
@@ -33,7 +33,7 @@ Here are some handy links you may find useful:</p>
 </body>
 </html>
 <% else ##################################################################### %>
-The following comment was posted on the Mushroom Observer website regarding the observation <%= @observation.unique_text_name(@user) %>:
+The following comment was posted on the Mushroom Observer website regarding the observation <%= @observation.unique_text_name %>:
 
 Created: <%= @comment.created.to_formatted_s(:db) %>
 <% if @sender %>By: <%= @sender.legal_name %> (<%= @sender.email %>)<% end %>

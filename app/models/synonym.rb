@@ -1,21 +1,22 @@
+#
+#  Simple container model to handle synonymy.  Properties:
+#
+#  1. owns two or more Name's
+#
+#  That's it.  Couldn't be easier.  Actually it's a real mess, but all the
+#  complexity of merging synonyms, etc. is dealt with in Name.
+#
+#  Public Methods:
+#    transfer(name)    Add given Name to this Synonym.
+#
+################################################################################
+
 class Synonym < ActiveRecord::Base
   has_many(:names, :order => "search_name")
-  has_one :rss_log
-  
-  def log(msg)
-    if self.rss_log.nil?
-      self.rss_log = RssLog.new
-    end
-    self.rss_log.addWithDate(msg, true)
-  end
-  
-  def orphan_log(entry)
-    self.log(entry) # Ensures that self.rss_log exists
-    self.rss_log.species_list = nil
-    self.rss_log.add(self.unique_text_name, false)
-  end
-  
-  # Add name to self, but don't transfer existing synonyms
+
+  # Add Name to self, but don't transfer that Name's synonyms.  Delete the
+  # Name's old Synonym if there aren't any Names in it anymore.  Saves
+  # everything *except* self.
   def transfer(name)
     old_synonym_id = name.synonym_id
     if old_synonym_id != id
@@ -45,5 +46,4 @@ class Synonym < ActiveRecord::Base
       end
     end
   end
-  
 end
