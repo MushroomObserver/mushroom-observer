@@ -1,23 +1,24 @@
-# Copyright (c) 2008 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-################################################################################
 #
-#  Views:
-#    name_index         Alphabetical list of all names, used or otherwise.
-#    observation_index  Alphabetical list of names people have seen.
-#    show_name          Show info about name.
-#    show_past_name     Show past versions of name info.
-#    edit_name          Edit name info.
-#    change_synonyms
-#    deprecate_name
-#    approve_name
-#    bulk_name_edit     Create/synonymize/deprecate a list of names.
-#    map                Show distribution map.
+#  Views: ("*" - login required, "R" - root required)
+#     name_index         Alphabetical list of all names, used or otherwise.
+#     observation_index  Alphabetical list of names people have seen.
+#     name_search
+#     show_name          Show info about name.
+#     show_past_name     Show past versions of name info.
+#   * create_name        Create new name.
+#   * edit_name          Edit name info.
+#   * change_synonyms    Change list of synonyms for a name.
+#   * deprecate_name     Deprecate name in favor of another.
+#   * approve_name       Flag given name as "accepted" (others could be, too).
+#   * bulk_name_edit     Create/synonymize/deprecate a list of names.
+#     map                Show distribution map.
+#
+#  AJAX:
+#     auto_complete_for_proposed_name
 #
 #  Admin Tools:
-#    cleanup_versions
-#    do_maintenance
+#   R cleanup_versions
+#   R do_maintenance
 #
 #  Helpers:
 #    name_locs(name_id)             List of locs where name has been observed.
@@ -25,6 +26,7 @@
 #    deprecate_synonym(name, user)  (used by change_synonyms)
 #    check_for_new_synonym(...)     (used by change_synonyms)
 #    dump_sorter(sorter)            Error diagnostics for change_synonyms.
+#    name_index_helper
 #
 ################################################################################
 
@@ -152,7 +154,7 @@ class NameController < ApplicationController
   def auto_complete_for_proposed_name
     auto_complete_name(:proposed, :name)
   end
-  
+
   # show_name.rhtml
   def show_name
     # Rough testing showed implementation without synonyms takes .23-.39 secs.

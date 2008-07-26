@@ -1,18 +1,26 @@
 #
-#  Extend ActiveRecord class.
+#  Extensions to ActiveRecord::Base.  This must be required explicitly by any
+#  model that needs it.
 #
-#  obj.formatted_errors     Gather errors for a given instance.
-#  attr_display_names       Override method names in error messages.
+#    after_create     Callback to update SiteData after objects are created.
+#    before_destroy   Callback to update SiteData before objects are destroyed.
+#
+#    obj.formatted_errors   Gather errors for a given instance.
+#    attr_display_names     Override method names in error messages.
 #
 ################################################################################
 
 module ActiveRecord
   class Base
 
-    # These two are called every time an object is created or destroyed.
-    # Pass off to SiteData, where it will decide whether this affects
-    # a user's contribution score, and if so update it appropriately.
+    # This is called every time an object is created.  It passes off to
+    # SiteData, where it will decide whether this affects a user's contribution
+    # score, and if so update it appropriately. 
     def after_create; SiteData.update_contribution(:create, self); end
+
+    # This is called every time an object is destroyed.  It passes off to
+    # SiteData, where it will decide whether this affects a user's contribution
+    # score, and if so update it appropriately. 
     def before_destroy; SiteData.update_contribution(:destroy, self); end
 
     # This collects all the error messages for a given instance, and returns

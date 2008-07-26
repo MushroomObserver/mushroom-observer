@@ -1,58 +1,121 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
 require 'find'
 require 'ftools'
 
+################################################################################
+#
+#  Views: ("*" - login required; "R" - root only)
+#     index
+#   * login
+#     rss
+#     list_rss_logs
+#     show_rss_log
+#
+#     show_observation
+#     next_observation
+#     prev_observation
+#   * create_observation
+#   * edit_observation
+#   * destroy_observation
+#   * create_naming
+#   * edit_naming
+#   * destroy_naming
+#   * cast_vote
+#     show_votes
+#
+#     list_observations
+#     observations_by_name
+#     show_user_observations
+#     show_location_observations
+#
+#     pattern_search
+#     observation_search
+#     location_search
+#
+#   R users_by_name
+#     users_by_contribution
+#     show_user
+#     show_site_stats
+#
+#     ask_webmaster_question
+#   R email_features
+#   R send_feature_email
+#   * ask_user_question
+#   * send_user_question
+#   * ask_observation_question
+#   * send_observation_question
+#   * commercial_inquiry
+#   * send_commercial_inquiry
+#
+#     intro
+#     how_to_help
+#     how_to_use
+#     news
+#     textile_sandbox
+#
+#     color_themes
+#     Agaricus
+#     Amanita
+#     Cantharellus
+#     Hygrocybe
+#
+#  Test Views:
+#     throw_error
+#   * throw_mobile_error
+#
+#  AJAX:
+#     auto_complete_for_observation_place_name
+#     auto_complete_for_name_name
+#
+#  Admin Tools:
+#     recalc
+#   * refresh_vote_cache
+#   * clear_session
+#
+#  Helpers:
+#    show_selected_observations(title, conditions, order, source=:nothing, links=nil)
+#    create_observation_helper()
+#    create_naming_helper()
+#    edit_naming_helper()
+#    form_naming_helper()
+#    resolve_name_helper()
+#    create_naming_reasons_helper(naming)
+#    email_question(user, target_page, target_obj)
+#    rewrite_url(obj, old_method, new_method)
+#
+################################################################################
+
 class ObserverController < ApplicationController
-  before_filter :login_required, :except => (CSS + [:all_names,
-                                                    :ask_webmaster_question,
-                                                    :auto_complete_for_observation_place_name,
-                                                    :auto_complete_for_name_name,
-                                                    :color_themes,
-                                                    :do_load_test,
-                                                    :how_to_help,
-                                                    :how_to_use,
-                                                    :images_by_title,
-                                                    :index,
-                                                    :intro,
-                                                    :list_comments,
-                                                    :list_images,
-                                                    :list_observations,
-                                                    :list_rss_logs,
-                                                    :list_species_lists,
-                                                    :location_search,
-                                                    :name_index,
-                                                    :news,
-                                                    :next_image,
-                                                    :next_observation,
-                                                    :observation_index,
-                                                    :observation_search,
-                                                    :observations_by_name,
-                                                    :pattern_search,
-                                                    :prev_image,
-                                                    :prev_observation,
-                                                    :recalc,
-                                                    :rss,
-                                                    :send_webmaster_question,
-                                                    :show_comment,
-                                                    :show_comments_for_user,
-                                                    :show_image,
-                                                    :show_location_observations,
-                                                    :show_name,
-                                                    :show_observation,
-                                                    :show_original,
-                                                    :show_past_name,
-                                                    :show_rss_log,
-                                                    :show_site_stats,
-                                                    :show_species_list,
-                                                    :show_user,
-                                                    :show_user_observations,
-                                                    :show_votes,
-                                                    :species_lists_by_title,
-                                                    :textilize_sandbox,
-                                                    :throw_error,
-                                                    :users_by_contribution])
+  before_filter :login_required, :except => (CSS + [
+    :ask_webmaster_question,
+    :auto_complete_for_name_name,
+    :auto_complete_for_observation_place_name,
+    :color_themes,
+    :how_to_help,
+    :how_to_use,
+    :index,
+    :intro,
+    :list_observations,
+    :list_rss_logs,
+    :location_search,
+    :news,
+    :next_observation,
+    :observation_search,
+    :observations_by_name,
+    :pattern_search,
+    :prev_observation,
+    :recalc,
+    :rss,
+    :show_location_observations,
+    :show_observation,
+    :show_rss_log,
+    :show_site_stats,
+    :show_user,
+    :show_user_observations,
+    :show_votes,
+    :textile_sandbox,
+    :throw_error,
+    :users_by_contribution
+  ])
 
   # Default page.  Just displays latest happenings.
   # View: list_rss_logs
@@ -77,7 +140,7 @@ class ObserverController < ApplicationController
   def throw_error
     raise "Something bad happened"
   end
-  
+
   # Used for initial investigation of specialized mobile support
   def throw_mobile_error
     if request.env["HTTP_USER_AGENT"].index("BlackBerry")
@@ -140,7 +203,7 @@ class ObserverController < ApplicationController
     end
   end
 
-################################################################################
+#--#############################################################################
 #
 #  Observation support.
 #
@@ -164,14 +227,14 @@ class ObserverController < ApplicationController
 #    show_selected_observations(...)
 #    create_observation_helper()
 #
-################################################################################
+#++#############################################################################
 
   def show_selected_observations(title, conditions, order, source=:nothing, links=nil)
     # If provided, link should be the arguments for link_to as a list of lists,
     # e.g. [[:action => 'blah'], [:action => 'blah']]
     show_selected_objs(title, conditions, order, source, :observations, 'list_observations', links)
   end
-  
+
   # Displays matrix of all observations, sorted by date.
   # Linked from: left-hand panel
   # Inputs: session['user']
@@ -277,7 +340,7 @@ class ObserverController < ApplicationController
     end
     redirect_to :action => "show_observation", :id => id
   end
-  
+
   # So you can start with a clean slate
   def clear_session
     session[:seq_states] = { :count => 0 }
@@ -458,7 +521,7 @@ class ObserverController < ApplicationController
       end
     end
   end
-  
+
   def next_observation
     state = SequenceState.new(session, params, Observation.connection, :observations, logger)
     state.next()
@@ -491,7 +554,7 @@ class ObserverController < ApplicationController
     auto_complete_location(:observation, :place_name)
   end
 
-################################################################################
+#--#############################################################################
 #
 #  Naming support.
 #
@@ -508,7 +571,7 @@ class ObserverController < ApplicationController
 #    resolve_name_helper()
 #    create_naming_reasons_helper(naming)
 #
-################################################################################
+#++#############################################################################
 
   # Form to propose new naming for an observation.
   # Linked from: show_observation
@@ -966,7 +1029,7 @@ class ObserverController < ApplicationController
       # Multiple matches, all of which are deprecated.  Check if they all have
       # the same set of approved names.  Pain in the butt, but otherwise can
       # get stuck choosing between Helvella infula Fr. and H. infula Schaeff.
-      # without anyone mentioning that both are deprecated by Gyromitra infula. 
+      # without anyone mentioning that both are deprecated by Gyromitra infula.
       @valid_names = @names.first.approved_synonyms.sort
       for n in @names
         if n.approved_synonyms.sort != @valid_names
@@ -1015,7 +1078,7 @@ class ObserverController < ApplicationController
     end
   end
 
-################################################################################
+#--#############################################################################
 #
 #  Vote support.
 #
@@ -1023,7 +1086,7 @@ class ObserverController < ApplicationController
 #    cast_vote
 #    show_votes
 #
-################################################################################
+#++#############################################################################
 
   # Create vote if none exists; change vote if exists; delete vote if setting
   # value to -1 (owner of naming is not allowed to do this).
@@ -1060,7 +1123,7 @@ class ObserverController < ApplicationController
     redirect_to :action => 'index'
   end
 
-################################################################################
+#--#############################################################################
 #
 #  User support.
 #
@@ -1069,7 +1132,7 @@ class ObserverController < ApplicationController
 #    show_user
 #    show_site_stats
 #
-################################################################################
+#++#############################################################################
 
   # users_by_name.rhtml
   # Restricted to the admin user
@@ -1105,7 +1168,7 @@ class ObserverController < ApplicationController
       :order => "id desc", :limit => 6)
   end
 
-################################################################################
+#--#############################################################################
 #
 #  Email support.
 #
@@ -1118,7 +1181,7 @@ class ObserverController < ApplicationController
 #    commercial_inquiry
 #    send_commercial_inquiry    (post method)
 #
-################################################################################
+#++#############################################################################
 
   def ask_webmaster_question
     @user = session['user']
@@ -1221,7 +1284,7 @@ class ObserverController < ApplicationController
     redirect_to :action => 'show_image', :id => image
   end
 
-################################################################################
+#--#############################################################################
 #
 #  RSS support.
 #
@@ -1230,7 +1293,7 @@ class ObserverController < ApplicationController
 #    list_rss_logs
 #    show_rss_log
 #
-################################################################################
+#++#############################################################################
 
   def rss
     headers["Content-Type"] = "application/xml"
@@ -1268,11 +1331,11 @@ class ObserverController < ApplicationController
     @rss_log = RssLog.find(params['id'])
   end
 
-################################################################################
+#--#############################################################################
 #
 #  These are for backwards compatibility.
 #
-################################################################################
+#++#############################################################################
 
   def rewrite_url(obj, old_method, new_method)
     url = request.request_uri

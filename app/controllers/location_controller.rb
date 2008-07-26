@@ -1,5 +1,21 @@
-# Copyright (c) 2008 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
+#
+#  Views: ("*" - login required, "R" - root required))
+#     where_search
+#     list_place_names
+#     map_locations
+#   * create_location
+#   * update_observations_by_where(location, where)
+#     show_past_location
+#     show_location
+#   * list_merge_options
+#   * add_to_location
+#   * edit_location
+#   R merge_locations(location, dest)
+#    
+#  Helpers:
+#     sorted_locs(where, separator=nil)
+#
+################################################################################
 
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
@@ -152,7 +168,7 @@ class LocationController < ApplicationController
     #         " where o.location_id = %s and o.user_id = u.id and n.id = o.name_id order by n.text_name, o.when desc"
     # @data = Location.connection.select_all(query % params[:id])
     @past_location = PastLocation.find(:all, :conditions => "location_id = %s and version = %s" % [@location.id, @location.version - 1]).first
-    
+
     @map = make_map([@location])
     @header = "#{GMap.header}\n#{finish_map(@map)}"
   end

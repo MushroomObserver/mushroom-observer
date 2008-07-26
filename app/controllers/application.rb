@@ -1,5 +1,11 @@
-# Filters added to this controller will be run for all controllers in the application.
-# Likewise, all the methods added will be available for all controllers.
+#
+#  This file is included in every controller.  Mostly it is made up of methods
+#  and filters in the ApplicationController class which are made available to
+#  all controllers.  But there are also several random class extensions thrown
+#  in here for lack of more appropriate place to do so. 
+#
+################################################################################
+
 require 'login_system'
 require 'active_record_extensions'
 
@@ -7,6 +13,7 @@ CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
 SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings"
 
 module Enumerable
+  # Select random value.
   def select_rand
     tmp = self.to_a
     tmp[Kernel.rand(tmp.size)]
@@ -25,25 +32,16 @@ def random_password(len)
   result
 end
 
-# This instructs ActionView how to mark form fields which have an error.
-# I just change the CSS class to "has_error", which gives it a red border.
-# This is superior to the default, which encapsulates the field in a div,
-# because that throws the layout off.  Just changing the border, while less
-# conspicuous, has no effect on the layout.
 module ActionView
+  # This instructs ActionView how to mark form fields which have an error.
+  # I just change the CSS class to "has_error", which gives it a red border.
+  # This is superior to the default, which encapsulates the field in a div,
+  # because that throws the layout off.  Just changing the border, while less
+  # conspicuous, has no effect on the layout.
   Base.field_error_proc = Proc.new{ |html_tag, instance|
     html_tag.sub(/(<\w+)/, '\1 class="has_error"')
   }
 end
-
-################################################################################
-#
-#  Extend ActiveRecord class.
-#
-#  find_by_sql_with_limit(sql, offset, limit)
-#  count_by_sql_wrapping_select_query(sql)
-#
-################################################################################
 
 module ActiveRecord
   class Base
@@ -62,47 +60,70 @@ end
 
 ################################################################################
 #
-#  These methods will be available to all controllers.
+#  Filters added to this controller will be run for all controllers in the
+#  application.  Likewise, all methods here will be available for all
+#  controllers.
 #
-#  make_table_row(list)         Turn list into "<tr><td>x</td>...</tr>".
-#  paginate_by_sql(model, ...)  Same as paginate, but works on lower level.
-#  paginate_array(list, per)    Just paginate pre-existing array.
-#  field_search(fields, pat)    Creates sql query: any of a list of fields like a pattern?
-#  query_ids(query)             Gets list of ids given sql query.
-#  disable_link_prefetching     Prevents browser from prefetching destroy methods.
-#  create_needed_names(...)     Processes a single name entered by user.
-#  translate_menu(menu)         Translate keys in a [ [:sym => val], [:sym => val], ... ] structure.
-#  auto_complete_name(...)      AJAX request for autocomplete on name.
-#  auto_complete_location(...)  AJAX request for autocomplete on location.
+#    paginate_by_sql(model, ...)  Same as paginate, but works on lower level.
+#    paginate_array(list, per)    Just paginate pre-existing array.
 #
-#  map_loc(map, loc)            Overlay one location square on map.
-#  make_map(locs)               Create and draw map.
+#    field_search(fields, pat)    Creates sql query: any of a list of fields like a pattern?
+#    query_ids(query)             Gets list of ids given sql query.
+#    clean_sql_pattern(pattern)
 #
-#  calc_color(r1,c1, r2,c2)     Calculate background color in alternating list.
-#  calc_layout_params           Gather user-pref stats for drawing matrix-list.
+#    auto_complete_name(...)      AJAX request for autocomplete on name.
+#    auto_complete_location(...)  AJAX request for autocomplete on location.
 #
-#  check_permission(user_id)    Make sure current user is a given user.
-#  check_user_id(user_id)       Same, but flashes "denied" message, too.
-#  verify_user()                Make sure current user has been verified.
+#    map_loc(map, loc)            Overlay one location square on map.
+#    make_map(locs)               Create and draw map.
+#    finish_map(map)
 #
-#  flash_clear                  Clear error messages.
-#  flash_notice(str)            Add a success message.
-#  flash_warning(str)           Add a warning message.
-#  flash_error(str)             Add an error message.
-#  flash_object_notices(obj)    Add all errors for a given instance (as notices).
-#  flash_object_warnings(obj)   Add all errors for a given instance (as warnings).
-#  flash_object_errors(obj)     Add all errors for a given instance.
+#    make_table_row(list)         Turn list into "<tr><td>x</td>...</tr>".
+#    calc_color(r1,c1, r2,c2)     Calculate background color in alternating list.
+#    calc_layout_params           Gather user-pref stats for drawing matrix-list.
 #
-#  setup_sorter(...)              Sets up a NameSorter object. (???)
-#  construct_approved_names(...)  Makes sure a list of names exists.
-#  construct_approved_name(...)   (helper)
-#  save_names(...)                (helper)
+#    check_permission(user_id)    Make sure current user is a given user.
+#    check_user_id(user_id)       Same, but flashes "denied" message, too.
+#    verify_user()                Make sure current user has been verified.
 #
-#  set_locale
-#  get_sorted_langs_from_accept_header
-#  get_valid_lang_from_accept_header
-#  standardize_locale(locale)
-#  get_matching_ui_locale(locale)
+#    flash_clear                  Clear error messages.
+#    flash_notice(str)            Add a success message.
+#    flash_warning(str)           Add a warning message.
+#    flash_error(str)             Add an error message.
+#    flash_object_notices(obj)    Add all errors for a given instance (as notices).
+#    flash_object_warnings(obj)   Add all errors for a given instance (as warnings).
+#    flash_object_errors(obj)     Add all errors for a given instance.
+#
+#    setup_sorter(...)            Sets up a NameSorter object. (???)
+#    construct_approved_names(...) Makes sure a list of names exists.
+#    construct_approved_name(...) (helper)
+#    save_names(...)              (helper)
+#    create_needed_names(...)     Processes a single name entered by user.
+#
+#    translate_menu(menu)         Translate keys in select-menu's options.
+#
+#    autologin
+#    set_autologin_cookie(user)
+#    clear_autologin_cookie
+#
+#  Private methods:
+#
+#    disable_link_prefetching     Prevents browser from prefetching destroy methods.
+#
+#    set_locale                   Internationalization stuff.
+#    get_sorted_langs_from_accept_header
+#    get_valid_lang_from_accept_header
+#    standardize_locale(locale)
+#    get_matching_ui_locale(locale)
+#
+#    pass_seq_params()
+#    store_seq_state(state)
+#    store_search_state(state)
+#    calc_search(type, conditions, order)
+#    calc_search_params
+#
+#    show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
+#    session_setup
 #
 ################################################################################
 
@@ -112,7 +133,6 @@ class ApplicationController < ActionController::Base
 
   around_filter :set_locale
   before_filter :browser_status
-  # ---AUTOLOGIN---
   before_filter :autologin
 
   before_filter(:disable_link_prefetching, :only => [
@@ -122,10 +142,6 @@ class ApplicationController < ActionController::Base
     # observer_controller methods
     :destroy_observation, :destroy_image,
     :destroy_comment, :destroy_species_list, :upload_image])
-
-  # ----------------------------
-  #  Autologin stuff.
-  # ----------------------------
 
   # Filter that should run before everything else.  Checks for auto-login cookie.
   def autologin
@@ -162,10 +178,6 @@ class ApplicationController < ActionController::Base
   def clear_autologin_cookie
     cookies.delete :mo_user
   end
-
-  # ----------------------------
-  #  End autologin stuff.
-  # ----------------------------
 
   def make_table_row(list)
     result = list.map {|x| "<td>#{x}</td>"}
@@ -580,241 +592,241 @@ class ApplicationController < ActionController::Base
 
   private
 
-    def disable_link_prefetching
-      if request.env["HTTP_X_MOZ"] == "prefetch"
-        logger.debug "prefetch detected: sending 403 Forbidden"
-        render_nothing "403 Forbidden"
-        return false
-      end
+  def disable_link_prefetching
+    if request.env["HTTP_X_MOZ"] == "prefetch"
+      logger.debug "prefetch detected: sending 403 Forbidden"
+      render_nothing "403 Forbidden"
+      return false
+    end
+  end
+
+  # Set the locale from the parameters, the session, or the navigator
+  # If none of these works, the Globalite default locale is set (en-*)
+  def set_locale
+    # Get the current path and request method (useful in the layout for changing the language)
+    @current_path = request.env['PATH_INFO']
+    @request_method = request.env['REQUEST_METHOD']
+
+    # Try to get the locale from the parameters, from the session, and then from the navigator
+    if params[:user_locale]
+      logger.debug "[globalite] #{params[:user_locale][:code]} locale passed"
+      Locale.code = params[:user_locale][:code] #get_matching_ui_locale(params[:user_locale][:code]) #|| session[:locale] || get_valid_lang_from_accept_header || Globalite.default_language
+      # Store the locale in the session
+      session[:locale] = Locale.code
+    elsif session[:locale]
+      logger.debug "[globalite] loading locale: #{session[:locale]} from session"
+      Locale.code = session[:locale]
+    else
+      # Changed code from Globalite sample app since Locale.code= didn't like 'pt-br'
+      # but did like 'pt-BR'.  standardize_locale was added to take a locale spec
+      # and enforce this standard.
+      locale = standardize_locale(get_valid_lang_from_accept_header)
+      logger.debug "[globalite] found a valid http header locale: #{locale}"
+      Locale.code = locale
     end
 
-    # Set the locale from the parameters, the session, or the navigator
-    # If none of these works, the Globalite default locale is set (en-*)
-    def set_locale
-      # Get the current path and request method (useful in the layout for changing the language)
-      @current_path = request.env['PATH_INFO']
-      @request_method = request.env['REQUEST_METHOD']
-
-      # Try to get the locale from the parameters, from the session, and then from the navigator
-      if params[:user_locale]
-        logger.debug "[globalite] #{params[:user_locale][:code]} locale passed"
-        Locale.code = params[:user_locale][:code] #get_matching_ui_locale(params[:user_locale][:code]) #|| session[:locale] || get_valid_lang_from_accept_header || Globalite.default_language
-        # Store the locale in the session
-        session[:locale] = Locale.code
-      elsif session[:locale]
-        logger.debug "[globalite] loading locale: #{session[:locale]} from session"
-        Locale.code = session[:locale]
-      else
-        # Changed code from Globalite sample app since Locale.code= didn't like 'pt-br'
-        # but did like 'pt-BR'.  standardize_locale was added to take a locale spec
-        # and enforce this standard.
-        locale = standardize_locale(get_valid_lang_from_accept_header)
-        logger.debug "[globalite] found a valid http header locale: #{locale}"
-        Locale.code = locale
-      end
-
-      # Add a last gasp default if the selected locale doesn't match any of our
-      # existing translations.
-      if :app_title.l == '__localization_missing__'
-        logger.warn("No translation exists for: #{Locale.code}")
-        Locale.code = "en-US"
-      end
-
-      # Locale.code = "en-US"
-      logger.debug "[globalite] Locale set to #{Locale.code}"
-      # render the page
-      yield
-
-      # reset the locale to its default value
-      Locale.reset!
+    # Add a last gasp default if the selected locale doesn't match any of our
+    # existing translations.
+    if :app_title.l == '__localization_missing__'
+      logger.warn("No translation exists for: #{Locale.code}")
+      Locale.code = "en-US"
     end
 
-    # Get a sorted array of the navigator languages
-    def get_sorted_langs_from_accept_header
-      accept_langs = (request.env['HTTP_ACCEPT_LANGUAGE'] || "en-us,en;q=0.5").split(/,/) rescue nil
-      return nil unless accept_langs
+    # Locale.code = "en-US"
+    logger.debug "[globalite] Locale set to #{Locale.code}"
+    # render the page
+    yield
 
-      # Extract langs and sort by weight
-      # Example HTTP_ACCEPT_LANGUAGE: "en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3"
-      wl = {}
-      accept_langs.each {|accept_lang|
-          if (accept_lang + ';q=1') =~ /^(.+?);q=([^;]+).*/
-              wl[($2.to_f rescue -1.0)]= $1
-          end
-      }
-      logger.debug "[globalite] client accepted locales: #{wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }.to_sentence}"
-      sorted_langs = wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }
+    # reset the locale to its default value
+    Locale.reset!
+  end
+
+  # Get a sorted array of the navigator languages
+  def get_sorted_langs_from_accept_header
+    accept_langs = (request.env['HTTP_ACCEPT_LANGUAGE'] || "en-us,en;q=0.5").split(/,/) rescue nil
+    return nil unless accept_langs
+
+    # Extract langs and sort by weight
+    # Example HTTP_ACCEPT_LANGUAGE: "en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3"
+    wl = {}
+    accept_langs.each {|accept_lang|
+        if (accept_lang + ';q=1') =~ /^(.+?);q=([^;]+).*/
+            wl[($2.to_f rescue -1.0)]= $1
+        end
+    }
+    logger.debug "[globalite] client accepted locales: #{wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }.to_sentence}"
+    sorted_langs = wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }
+  end
+
+  # Returns a valid language that best suits the HTTP_ACCEPT_LANGUAGE request header.
+  # If no valid language can be deduced, then <tt>nil</tt> is returned.
+  def get_valid_lang_from_accept_header
+    # Get the sorted navigator languages and find the first one that matches our available languages
+    get_sorted_langs_from_accept_header.detect{|l| get_matching_ui_locale(l) }
+  end
+
+  # standardize_locale was added to take a locale spec and enforce the standard that
+  # the lang be lower case and the country be upper case.  The Globalite Locale.code=
+  # method seems to expect this standard, but Firefox uses all lower case.
+  def standardize_locale(locale)
+    lang = locale[0,2].downcase
+    country = '*'
+    if locale[3,5]
+      country = locale[3,5].upcase
+    end
+    result = "#{lang}-#{country}".to_sym
+    logger.debug "[globalite] trying to match #{result}"
+    result
+  end
+
+  # Returns the UI locale that best matches with the parameter
+  # or nil if not found
+  def get_matching_ui_locale(locale)
+    lang = locale[0,2].downcase
+    if locale[3,5]
+      country = locale[3,5].upcase
+      logger.debug "[globalite] trying to match locale: #{lang}-#{country}"
+      locale_code = "#{lang}-#{country}".to_sym
+    else
+      logger.debug "[globalite] trying to match #{lang}-*"
+      locale_code = "#{lang}-*".to_sym
     end
 
-    # Returns a valid language that best suits the HTTP_ACCEPT_LANGUAGE request header.
-    # If no valid language can be deduced, then <tt>nil</tt> is returned.
-    def get_valid_lang_from_accept_header
-      # Get the sorted navigator languages and find the first one that matches our available languages
-      get_sorted_langs_from_accept_header.detect{|l| get_matching_ui_locale(l) }
+    # Check with exact matching
+    if Globalite.ui_locales.values.include?(locale)
+      logger.debug "[globalite] Globalite does include #{locale}"
+      locale_code
     end
 
-    # standardize_locale was added to take a locale spec and enforce the standard that
-    # the lang be lower case and the country be upper case.  The Globalite Locale.code=
-    # method seems to expect this standard, but Firefox uses all lower case.
-    def standardize_locale(locale)
-      lang = locale[0,2].downcase
-      country = '*'
-      if locale[3,5]
-        country = locale[3,5].upcase
-      end
-      result = "#{lang}-#{country}".to_sym
-      logger.debug "[globalite] trying to match #{result}"
-      result
+    # Check on the language only
+    Globalite.ui_locales.values.each do |value|
+      value.to_s =~ /#{lang}-*/ ? value : nil
     end
+  end
 
-    # Returns the UI locale that best matches with the parameter
-    # or nil if not found
-    def get_matching_ui_locale(locale)
-      lang = locale[0,2].downcase
-      if locale[3,5]
-        country = locale[3,5].upcase
-        logger.debug "[globalite] trying to match locale: #{lang}-#{country}"
-        locale_code = "#{lang}-#{country}".to_sym
-      else
-        logger.debug "[globalite] trying to match #{lang}-*"
-        locale_code = "#{lang}-*".to_sym
-      end
-
-      # Check with exact matching
-      if Globalite.ui_locales.values.include?(locale)
-        logger.debug "[globalite] Globalite does include #{locale}"
-        locale_code
-      end
-
-      # Check on the language only
-      Globalite.ui_locales.values.each do |value|
-        value.to_s =~ /#{lang}-*/ ? value : nil
-      end
-    end
-
-    # session[:seq_states]
-    #  :count => Number of numeric keys allocated (used to allocate new ones)
-    #  <number> => State for a particular search
-    #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
-    # Use cases:
-    #   Multiple tabs, back button
-    # Only purge if a new state is being added
-    # Keep any state that is less than 1 hour old.
-    # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
-    def store_seq_state(state)
-      now = state.timestamp
-      result = session[:seq_states]
-      if result
-        if not result.member?(state.key)
-          result = {:count => result[:count]}
-          for (key, value) in session[:seq_states]
-            timestamp = value[:timestamp] || 0
-            age = now - timestamp
-            count = value[:access_count] || 0
-            if (age < 1.hour) || ((count > 0) && (age < 24.hours))
-              result[key] = value
-            end
+  # session[:seq_states]
+  #  :count => Number of numeric keys allocated (used to allocate new ones)
+  #  <number> => State for a particular search
+  #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
+  # Use cases:
+  #   Multiple tabs, back button
+  # Only purge if a new state is being added
+  # Keep any state that is less than 1 hour old.
+  # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
+  def store_seq_state(state)
+    now = state.timestamp
+    result = session[:seq_states]
+    if result
+      if not result.member?(state.key)
+        result = {:count => result[:count]}
+        for (key, value) in session[:seq_states]
+          timestamp = value[:timestamp] || 0
+          age = now - timestamp
+          count = value[:access_count] || 0
+          if (age < 1.hour) || ((count > 0) && (age < 24.hours))
+            result[key] = value
           end
         end
-      else
-        result = {:count => 0}
       end
-      state.timestamp = now
-      result[state.key] = state.session_data()
-      session[:seq_states] = result
+    else
+      result = {:count => 0}
     end
+    state.timestamp = now
+    result[state.key] = state.session_data()
+    session[:seq_states] = result
+  end
 
-    # session[:search_states]
-    #  :count => Number of numeric keys allocated (used to allocate new ones)
-    #  <number> => State for a particular search
-    #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
-    # Use cases:
-    #   Multiple tabs with different searches, back button
-    # Only purge if a new state is being added
-    # Keep any state that is less than 1 hour old.
-    # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
-    def store_search_state(state)
-      now = state.timestamp
-      result = session[:search_states]
-      if result
-        if not result.member?(state.key)
-          result = {:count => result[:count]}
-          for (key, value) in session[:search_states]
-            timestamp = value[:timestamp] || 0
-            age = now - timestamp
-            count = value[:access_count] || 0
-            if (age < 1.hour) || ((count > 0) && (age < 24.hours))
-              result[key] = value
-            end
+  # session[:search_states]
+  #  :count => Number of numeric keys allocated (used to allocate new ones)
+  #  <number> => State for a particular search
+  #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
+  # Use cases:
+  #   Multiple tabs with different searches, back button
+  # Only purge if a new state is being added
+  # Keep any state that is less than 1 hour old.
+  # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
+  def store_search_state(state)
+    now = state.timestamp
+    result = session[:search_states]
+    if result
+      if not result.member?(state.key)
+        result = {:count => result[:count]}
+        for (key, value) in session[:search_states]
+          timestamp = value[:timestamp] || 0
+          age = now - timestamp
+          count = value[:access_count] || 0
+          if (age < 1.hour) || ((count > 0) && (age < 24.hours))
+            result[key] = value
           end
         end
-      else
-        result = {:count => 0}
       end
-      state.timestamp = now
-      result[state.key] = state.session_data()
-      session[:search_states] = result
+    else
+      result = {:count => 0}
     end
+    state.timestamp = now
+    result[state.key] = state.session_data()
+    session[:search_states] = result
+  end
 
-    def show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
-      # If provided, link should be the arguments for link_to as a list of lists,
-      # e.g. [[:action => 'blah'], [:action => 'blah']]
-      search_state = SearchState.new(session, params, obj_type, logger)
-      unless search_state.setup?
-        search_state.setup(title, conditions, order, source)
-      end
-      store_search_state(search_state)
+  # If provided, link should be the arguments for link_to as a list of lists,
+  # e.g. [[:action => 'blah'], [:action => 'blah']]
+  def show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
+    search_state = SearchState.new(session, params, obj_type, logger)
+    unless search_state.setup?
+      search_state.setup(title, conditions, order, source)
+    end
+    store_search_state(search_state)
 
-      store_location
-      @user = session['user']
-      @layout = calc_layout_params
-      @links = links
-      @title = search_state.title
-      @search_seq = search_state.key
-      query = search_state.query
-      session[:checklist_source] = search_state.source
-      session_setup
-      case obj_type
-      when :observations
-        type = Observation
-      when :images
-        type = Image
-      end
-      session[:observation] = nil
-      
-      @obj_pages, @objs = paginate_by_sql(type, query, @layout["count"])
-      render :action => dest # 'list_observations'
+    store_location
+    @user = session['user']
+    @layout = calc_layout_params
+    @links = links
+    @title = search_state.title
+    @search_seq = search_state.key
+    query = search_state.query
+    session[:checklist_source] = search_state.source
+    session_setup
+    case obj_type
+    when :observations
+      type = Observation
+    when :images
+      type = Image
     end
+    session[:observation] = nil
 
-    def session_setup
-      session[:observation_ids] = nil if session[:observation_ids]
-      session[:observation] = nil if session[:observation]
-      session[:image_ids] = nil if session[:image_ids]
-      @user = session['user']
-    end
+    @obj_pages, @objs = paginate_by_sql(type, query, @layout["count"])
+    render :action => dest # 'list_observations'
+  end
 
-    # Unfortunately the conditions are currently raw SQL that require knowledge of the
-    # queries in SearchState.query...
-    def calc_search(type, conditions, order)
-      search = SearchState.new(session, params, type)
-      if not search.setup?
-        search.setup(nil, conditions, order, :nothing)
-      end
-      store_search_state(search)
-      search
-    end
+  def session_setup
+    session[:observation_ids] = nil if session[:observation_ids]
+    session[:observation] = nil if session[:observation]
+    session[:image_ids] = nil if session[:image_ids]
+    @user = session['user']
+  end
 
-    def pass_seq_params()
-      @seq_key = params[:seq_key]
-      @search_seq = params[:search_seq]
-      @obs = params[:obs]
+  # Unfortunately the conditions are currently raw SQL that require knowledge of the
+  # queries in SearchState.query...
+  def calc_search(type, conditions, order)
+    search = SearchState.new(session, params, type)
+    if not search.setup?
+      search.setup(nil, conditions, order, :nothing)
     end
-  
-    def calc_search_params
-      search_params = {}
-      search_params[:search_seq] = @search_seq if @search_seq
-      search_params[:seq_key] = @seq_key if @seq_key
-      search_params[:obs] = @obs if @obs
-      search_params
-    end
+    store_search_state(search)
+    search
+  end
+
+  def pass_seq_params()
+    @seq_key = params[:seq_key]
+    @search_seq = params[:search_seq]
+    @obs = params[:obs]
+  end
+
+  def calc_search_params
+    search_params = {}
+    search_params[:search_seq] = @search_seq if @search_seq
+    search_params[:seq_key] = @seq_key if @seq_key
+    search_params[:obs] = @obs if @obs
+    search_params
+  end
 end

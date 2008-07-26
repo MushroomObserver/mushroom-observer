@@ -1,5 +1,46 @@
-#  Created by Nathan Wilson on 2007-06-08.
-#  Copyright (c) 2007. All rights reserved.
+#
+#  This class is used by NameSorter and a few controllers (e.g.
+#  NameController, SpeciesListController) to help parse lists of names, such as
+#  in bulk_name_edit, create/edit_species_list, and change_synonyms.  It splits
+#  each line up into a name and an optional synonym: 
+#
+#    Species name
+#    Species name = Synonym name
+#    Species name [comment] = Synonym name [comment]
+#
+#  The following is how I *think* it works based on a read-through.  I have
+#  not actually tested the two examples given. -JPH
+#
+#  Usage:
+#    File.new("species_list").each do |line|
+#      np = NameParse.new(line)
+#
+#      np.line_str               # "Lichenomphalia umbellifera = Omphalia ericetorum [Lichen Mushroom]"
+#      np.name                   # "Lichenomphalia umbellifera"
+#      np.search_name            # "Lichenomphalia umbellifera"
+#      np.rank                   # :Species
+#      np.comment                # nil
+#      np.find_names             # (Array of Name instances matching "L. umbellifera")
+#      np.has_synonym            # true
+#      np.synonym                # "Omphalia ericetorum"
+#      np.synonym_search_name    # "Omphalia ericetorum"
+#      np.synonym_rank           # :Species
+#      np.synonym_comment        # "Lichen Mushroom"
+#      np.find_synonym_names     # (Array of Name instances matching "L. umbellifera")
+#
+#      np.line_str               # "Phyllum Myxomycota [Highly polyphylletic]"
+#      np.name                   # "Phyllum Myxomycota"
+#      np.search_name            # "Myxomycota"
+#      np.rank                   # :Phyllum
+#      np.comment                # "Highly polyphylletic"
+#      np.find_names             # (Array of Name instances matching "Myxomycota")
+#      np.has_synonym            # false
+#    end
+#
+#  The methods find_names and find_synonym_names both use Name#find_names to
+#  look up matching Name's.
+#
+################################################################################
 
 class NameParse
   attr_reader :line_str
@@ -55,11 +96,11 @@ class NameParse
   def has_synonym()
     @synonym != nil
   end
-  
+
   def find_names()
     Name.find_names(@search_name, @rank)
   end
-  
+
   def find_synonym_names()
     result = []
     if @synonym
@@ -67,7 +108,7 @@ class NameParse
     end
     result
   end
-  
+
   def parse_rank(str)
     result = [nil, str]
     space_pos = str.index(' ')

@@ -1,84 +1,102 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-# Name Formats:
-#   text_name           Plain text: "Xxx yyy"         "Xxx"             "Fungi"
-#   search_name         Plain text: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
-#   display_name        Textilized: "Xxx yyy Author"  "Xxx Author"      "Kingdom of Fungi"
-#   observation_name    Textilized: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
 #
-# Regexps: (in "English")
-#   ABOVE_SPECIES_PAT   <Xxx>
-#   SP_PAT              <Xxx species|sp.>
-#   SPECIES_PAT         <Xxx yyy>
-#   SUBSPECIES_PAT      <Xxx yyy subspecies|subsp|ssp|s. yyy>
-#   VARIETY_PAT         <Xxx yyy variety|var|v. yyy>
-#   FORM_PAT            <Xxx yyy forma|form|f. yyy>
-#   AUTHOR_PAT          <Any-of-the-above Author...>  (author may have trailing space)
-#   SENSU_PAT           <Whatever sensu zzz>          (sensu and zzz grouped together)
-#   GROUP_PAT           <Whatever group|gr|gp.>
+#  Model to describe a single scientific name.  The related class Synonym,
+#  which can own multiple Name's, more accurately embodies the abstract concept
+#  of a species.  A Name, on the other hand, refers to a single epithet, in a
+#  single sense -- that is, a unique combination of genus, species, and author.
+#  (Name also embraces infraspecies and extrageneric taxa as well.) 
 #
-# Notes on Regexps:
-#   Extra whitespace allowed on ends and in middle.
-#   <Xxx> can have dashes; <yyy> can also have double-quotes; <Zzz> is any
-#     non-whitespace; <Whatever> is anything at all starting uppercase.
-#   <Author> is determined to start at the second uppercase letter or any
-#     punctuation mark not allowed in the taxa patterns.
-#   Each word above is grouped separately and sequentially, except as noted.
+#  The Name object's basic properties are:
 #
-# These methods return symbols:
-#   Name.all_ranks              :Form to :Kingdom, then :Group
-#   Name.ranks_above_species    :Genus to :Kingdom
-#   Name.names_for_unknown      "Unknown", "unknown", ""
-#   Name.unknown                Name instance used for "unknown".
+#  1. has a name (several different formats, see below)
+#  2. has an author (authority who first used this name in this sense)
+#  3. has a citation (publication name was first used in)
+#  4. has notes (there are plans for expanding this concept)
+#  5. has a rank (e.g. :Genus, :Species, etc.)
+#  6. can be deprecated (separate from synonymy)
+#  7. has synonyms (i.e. can be one of a group of Name's owned by a Synonym)
+#  8. belongs to a User (who created it originally)
+#  9. has a history -- version number and asscociated PastLocation's
 #
-# RSS Log:
-#   log(str)
-#   orphan_log(str)
+#  Name Formats:
+#    text_name           Plain text: "Xxx yyy"         "Xxx"             "Fungi"
+#    search_name         Plain text: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
+#    display_name        Textilized: "Xxx yyy Author"  "Xxx Author"      "Kingdom of Fungi"
+#    observation_name    Textilized: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
 #
-# Look Up or Create Names:
-#   Name.find_names             Look up Names by text_name and search_name.
-#   Name.names_from_string      Look up Name, create it, return it and parents.
-#   Name.make_name              (used by names_from_string)
-#   Name.create_name            (used by make_name)
-#   Name.make_species           (not used by anyone)
-#   Name.make_genus             (not used by anyone)
-#   Name.find_name              (not used by anyone)
-#   children                    Return array of child name objects.
-#                               (only works for genera and species)
+#  Regexps: (in "English")
+#    ABOVE_SPECIES_PAT   <Xxx>
+#    SP_PAT              <Xxx species|sp.>
+#    SPECIES_PAT         <Xxx yyy>
+#    SUBSPECIES_PAT      <Xxx yyy subspecies|subsp|ssp|s. yyy>
+#    VARIETY_PAT         <Xxx yyy variety|var|v. yyy>
+#    FORM_PAT            <Xxx yyy forma|form|f. yyy>
+#    AUTHOR_PAT          <Any-of-the-above Author...>  (author may have trailing space)
+#    SENSU_PAT           <Whatever sensu zzz>          (sensu and zzz grouped together)
+#    GROUP_PAT           <Whatever group|gr|gp.>
 #
-# Parsing Methods:              (These are only used within this file.)
-#   Name.parse_name             Parse arbitrary taxon, return parts.
-#   Name.parse_by_rank          Parse taxon of given rank, return parts.
-#   Name.parse_above_species    Parse "Xxx".
-#   Name.parse_sp               Parse "Xxx sp.".
-#   Name.parse_species          Parse "Xxx yyy".
-#   Name.parse_subspecies       Parse "Xxx yyy subsp. zzz".
-#   Name.parse_variety          Parse "Xxx yyy var. zzz".
-#   Name.parse_form             Parse "Xxx yyy f. zzz".
-#   Name.parse_group            Parse "Whatever group".
-#   Name.parse_author           Extract author from string.
-#   Name.parse_below_species    (used by parse_subspecies/variety/form)
+#  Notes on Regexps:
+#    Extra whitespace allowed on ends and in middle.
+#    <Xxx> can have dashes; <yyy> can also have double-quotes; <Zzz> is any
+#      non-whitespace; <Whatever> is anything at all starting uppercase.
+#    <Author> is determined to start at the second uppercase letter or any
+#      punctuation mark not allowed in the taxa patterns.
+#    Each word above is grouped separately and sequentially, except as noted.
 #
-# Making Changes:
-#   change_author               Changes author.
-#   change_deprecated           Changes deprecation status.
-#   change_text_name            Changes name.
-#   Name.replace_author         (used by change_author)
-#   check_for_repeats           (used by change_text_name)
-#   common_errors               (used by change_text_name)
+#  These methods return symbols:
+#    Name.all_ranks              :Form to :Kingdom, then :Group
+#    Name.ranks_above_species    :Genus to :Kingdom
+#    Name.names_for_unknown      "Unknown", "unknown", ""
+#    Name.unknown                Name instance used for "unknown".
 #
-# Synonyms:
-#   approved_synonyms
-#   sort_synonyms
-#   clear_synonym
-#   merge_synonyms
+#  RSS Log:
+#    log(str)
+#    orphan_log(str)
 #
-# Random Helpers and Others:
-#   has_notes?                  Does this name have any notes?
-#   status                      Is this name deprecated?
-#   prepend_notes               Add notes at the top of the existing notes.
-#   Name.format_string          (used all over this file)
+#  Look Up or Create Names:
+#    Name.find_names             Look up Names by text_name and search_name.
+#    Name.names_from_string      Look up Name, create it, return it and parents.
+#    Name.make_name              (used by names_from_string)
+#    Name.create_name            (used by make_name)
+#    Name.make_species           (not used by anyone)
+#    Name.make_genus             (not used by anyone)
+#    Name.find_name              (not used by anyone)
+#    children                    Return array of child name objects.
+#                                (only works for genera and species)
+#
+#  Parsing Methods:              (These are only used within this file.)
+#    Name.parse_name             Parse arbitrary taxon, return parts.
+#    Name.parse_by_rank          Parse taxon of given rank, return parts.
+#    Name.parse_above_species    Parse "Xxx".
+#    Name.parse_sp               Parse "Xxx sp.".
+#    Name.parse_species          Parse "Xxx yyy".
+#    Name.parse_subspecies       Parse "Xxx yyy subsp. zzz".
+#    Name.parse_variety          Parse "Xxx yyy var. zzz".
+#    Name.parse_form             Parse "Xxx yyy f. zzz".
+#    Name.parse_group            Parse "Whatever group".
+#    Name.parse_author           Extract author from string.
+#    Name.parse_below_species    (used by parse_subspecies/variety/form)
+#
+#  Making Changes:
+#    change_author               Changes author.
+#    change_deprecated           Changes deprecation status.
+#    change_text_name            Changes name.
+#    Name.replace_author         (used by change_author)
+#    check_for_repeats           (used by change_text_name)
+#    common_errors               (used by change_text_name)
+#
+#  Synonyms:
+#    approved_synonyms
+#    sort_synonyms
+#    clear_synonym
+#    merge_synonyms
+#
+#  Random Helpers and Others:
+#    has_notes?                  Does this name have any notes?
+#    status                      Is this name deprecated?
+#    prepend_notes               Add notes at the top of the existing notes.
+#    Name.format_string          (used all over this file)
+#
+################################################################################
 
 class Name < ActiveRecord::Base
   has_many :observations
@@ -291,7 +309,7 @@ class Name < ActiveRecord::Base
   # Parses a string, creates a Name for it and all its ancestors (if any don't
   # already exist), returns it in an array (genus first, then species and
   # variety).  (Ancestors only go back to genus at the moment; I'm not sure
-  # this will ever change for this routine, as it is purely mechanical.) 
+  # this will ever change for this routine, as it is purely mechanical.)
   # Note: check if any results are missing an id to determine which are new.
   # Returns: array of Name instances, NOT SAVED! (both new names and pre-
   #   existing names which could potentially have changes such as author)

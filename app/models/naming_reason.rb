@@ -1,37 +1,37 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
 require 'active_record_extensions'
 
-# NamingReasons are mininal objects associated with a Naming that provide the
-# user the describe how they arrived at that naming.  Each reason can have
-# zero to many reasons associated with it, although in practice only certain
-# reasons are allowed and no duplicates for a given type are allowed.
-# 
-# Each reason has a "reason" or "index", a reference to the Naming, and a
-# free-form text field for notes.  The "index" describes the type of reason;
-# it # is the outer key of the static REASONS structure (see below).  For
-# example, reason 2 is used to include a list of the references used: 
+################################################################################
 #
-#   nr = NamingReason.new {
-#     :naming => naming,
-#     :reason => 2,
-#     :notes  => "Arora's Mushrooms Demystified, mykoweb.com, Joe Cool"
-#   }
+#  Minimal model associated with a Naming that provides the user with the
+#  ability to describe how they arrived at that naming.  Each Naming can have
+#  zero to many reasons associated with it, although in practice only certain
+#  reasons are allowed and no duplicates for a given type are allowed.  Each
+#  NamingReason:
 #
-# This gives you access to the following read-only fields:
+#  1. has a "reason" or index, describing the type of reason
+#  2. has a free-form text field for notes
+#  3. belongs to a Naming
 #
-#   nr.reason       # 2
-#   nr.label        # "Used references"
-#   nr.default?     # false
-#   nr.order        # 2
-# 
-# Methods:
-#   NamingReason.reasons  Array of reason indices.
-#   reason.label          Text string to use as label in displays, forms, etc.
-#   reason.default?       Boolean: is this reason to be included by default?
-#   reason.order          Integer: use this to sort reasons for display.
-#   reason.check          Boolean: should checkbox be checked for this reason?
+#  Adding new reasons is just a matter of adding an entry to the REASONS
+#  array below.
+#
+#  Example:
+#    nr = NamingReason.new {
+#      :naming => naming,
+#      :reason => 2,
+#      :notes  => "Arora's Mushrooms Demystified, mykoweb.com, Joe Cool"
+#    }
+#
+#  This gives you access to the following read-only fields:
+#    nr.label        "Used references"
+#    nr.default?     false
+#    nr.order        2
+#
+#  Public Methods:
+#    NR.reasons      Array of reason indices.
+#    nr.check        Boolean: should checkbox be checked for this reason?
+#
+################################################################################
 
 class NamingReason < ActiveRecord::Base
   belongs_to :naming
@@ -75,10 +75,10 @@ class NamingReason < ActiveRecord::Base
   def label
     REASONS[reason][:label]
   end
-  def default?  
+  def default?
     REASONS[reason][:default]
   end
-  def order 
+  def order
     REASONS[reason][:order]
   end
 

@@ -1,5 +1,37 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
+#
+#  Model for images.  Most images are, of course, mushrooms, but mugshots use
+#  this class, as well.  They are indistinguishable at the moment.  Each image:
+#
+#  1. has a title
+#  2. has a date ("when")
+#  3. has notes
+#  4. has a copyright ("copyright_holder" and "license")
+#  5. is owned by a user
+#  6. can belong to one to many Observation's and User's
+#
+#  Images are stored in
+#    public/images/orig/#{id}.jpg       Originals.
+#    public/images/640/#{id}.jpg        Large copies.
+#    public/images/thumb/#{id}.jpg      Small copies.
+#
+#  Public Methods:
+#
+#    unique_format_name  Marked-up title.
+#    unique_text_name    Plain-text title.
+#    thumb_clients       Observations that use this image as their "thumnail".
+#
+#    image=              These three are used to upload a file.
+#    get_image
+#    save_image
+#
+#    original_image      Filename of original.
+#    big_image           Filename of large copy.
+#    thumbnail           Filename of thumbnail copy.
+#
+#    get_thumbnail       Read thumbnail into big string.
+#    get_original        Read original into much bigger string.
+#
+################################################################################
 
 class Image < ActiveRecord::Base
   has_and_belongs_to_many :observations

@@ -1,3 +1,27 @@
+#
+#  Subclass of ActionMailer::Base.  It is used to send *all* email.  See also
+#  these related classes:
+#
+#  * CommentEmail
+#  * FeatureEmail
+#  * QueuedEmail
+#
+#  Public methods:
+#    email_features(...)          Mass-mailing about new features.
+#    comment(...)                 Notify user of comment on their observation.
+#    commercial_inquiry(...)      User asking user about an image.
+#    observation_question(...)    User asking user about an observation.
+#    user_question(...)           User asking user about anything else.
+#    webmaster_question(...)      User asking webmaster a question.
+#    new_password(...)            User forgot their password.
+#    verify(...)                  Email sent to verify user's email.
+#    denied(...)                  Email sent to Nathan when sign-up is denied.
+#
+#  Private methods:
+#    perform_delivery_file(mail)  Used if delivery_method is configured as :file.
+#
+################################################################################
+
 class AccountMailer < ActionMailer::Base
 
   NEWS_EMAIL_ADDRESS        = "news@mushroomobserver.org"

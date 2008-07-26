@@ -1,33 +1,35 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-# These are used to create temporary storage that acts like a normal
-# database column.  They're used (implicity no doubt) inside the
-# create/construc/edit/update_observation/naming views/forms.
-# [I've removed them, since I think I've obviated their need. -JPH 20071124]
-#   what=(string)
-#   what
 #
-# Name formating:
-#   text_name               Plain text.  (uses name.search_name)
-#   format_name             Textilized.  (uses name.observation_name)
-#   unique_text_name        Same as above, with id added to make unique.
-#   unique_format_name
-#   [What and base_name were confusing and inconsistent. -JPH 20071123]
+#  Model used to associate a single proposed Name with an Observation.  An
+#  Observation generally has one or more Naming's, but it can have none,
+#  meaning that it is unidentified.  It's basic properties are:
 #
-# Voting and preferences:
-#   vote_sum                Straight sum of votes for this naming.
-#   vote_percent            Convert cached vote score to a percentage.
-#   user_voted?(user)       Has a given user voted on this naming?
-#   users_vote(user)        Get a given user's vote on this naming.
-#   calc_vote_table         Used by show_votes.rhtml
-#   change_vote(user, val)  Change a user's vote for this naming.
-#   is_owners_favorite?     Is this (one of) the owner's favorite(s)?
-#   is_users_favorite?(user) Is this (one of) the user's favorite(s)?
-#   is_consensus?           Is this the community consensus?
-#   editable?               Has anyone voted (positively) on this naming?
-#   deletable?              Has anyone made this naming their favorite?
-#   N.refresh_vote_cache    Monster sql query to refresh all vote_caches.
+#  1. has a Name
+#  2. owned by a User
+#  3. belongs to an Observation
+#  4. can have many Vote's (note that the consensus vote is cached here)
+#  5. has zero or more NamingReason's (in place of notes)
+#
+#  Name formating:
+#    text_name               Plain text.  (uses name.search_name)
+#    format_name             Textilized.  (uses name.observation_name)
+#    unique_text_name        Same as above, with id added to make unique.
+#    unique_format_name
+#
+#  Voting and preferences:
+#    vote_sum                Straight sum of votes for this naming.
+#    vote_percent            Convert cached vote score to a percentage.
+#    user_voted?(user)       Has a given user voted on this naming?
+#    users_vote(user)        Get a given user's vote on this naming.
+#    calc_vote_table         Used by show_votes.rhtml
+#    change_vote(user, val)  Change a user's vote for this naming.
+#    is_owners_favorite?     Is this (one of) the owner's favorite(s)?
+#    is_users_favorite?(user) Is this (one of) the user's favorite(s)?
+#    is_consensus?           Is this the community consensus?
+#    editable?               Has anyone voted (positively) on this naming?
+#    deletable?              Has anyone made this naming their favorite?
+#    N.refresh_vote_cache    Monster sql query to refresh all vote_caches.
+#
+################################################################################
 
 class Naming < ActiveRecord::Base
   belongs_to :observation
@@ -231,7 +233,7 @@ class Naming < ActiveRecord::Base
     self.observation.name == self.name
   end
 
-  # Refresh the vote_cache column across all namings.  Used my db:migrate and
+  # Refresh the vote_cache column across all namings.  Used by db:migrate and
   # admin tool.
   def self.refresh_vote_cache
     self.connection.update %(

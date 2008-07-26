@@ -1,5 +1,26 @@
 require 'active_record_extensions'
 
+################################################################################
+#
+#  Model to describe a location.  Locations are rectangular regions, not
+#  points.  Each location:
+#
+#  1. has a name
+#  2. has notes
+#  3. has north, south, east and west edges
+#  4. has an elevation
+#  5. belongs to a User (who created it originally)
+#  6. has a history -- version number and asscociated PastLocation's
+#
+#  Public Methods:
+#    north_west     [north, west]
+#    north_east     [north, east]
+#    south_west     [south, west]
+#    south_east     [south, east]
+#    center         [n+s/2, e+w/2]
+#
+################################################################################
+
 class Location < ActiveRecord::Base
   belongs_to :user
   has_many :observations
@@ -13,27 +34,27 @@ class Location < ActiveRecord::Base
     :east  => "east edge",
     :west  => "west edge",
   })
-  
+
   def north_west
     [self.north, self.west]
   end
-  
+
   def north_east
     [self.north, self.east]
   end
-  
+
   def south_west
     [self.south, self.west]
   end
-  
+
   def south_east
     [self.south, self.east]
   end
-  
+
   def center
     [(self.north + self.south)/2, (self.west + self.east)/2]
   end
-  
+
   protected
   def validate
     errors.add(:north, "Latitude should be at most 90.") if north.nil? || (north > 90)
@@ -47,7 +68,7 @@ class Location < ActiveRecord::Base
 
     errors.add(:high, "High altitude should be at least equal to the lowest altitude.") \
       if high && low && (high < low)
-  end 
+  end
 
   validates_presence_of :user, :version
   # validates_numericality_of :north, :south, :west, :east, :high, :low, :version

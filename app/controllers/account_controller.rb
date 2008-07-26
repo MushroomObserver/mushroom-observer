@@ -1,5 +1,56 @@
+#
+#  Views: ("*" - login required, "R" - root required))
+#     signup
+#     welcome
+#    
+#     verify
+#     reverify
+#     send_verify
+#    
+#     login
+#     logout_user
+#     email_new_password
+#    
+#   * prefs
+#   * profile
+#   * remove_image
+#    
+#     no_feature_email
+#     no_question_email
+#     no_commercial_email
+#     no_comment_email
+#
+#  AJAX:
+#     auto_complete_for_user_place_name
+#
+#  Admin Tools:
+#   R delete
+#
+#  Test Views:
+#     test_verify
+#
+#  Helpers:
+#    hide_params(obj, out, prefix)
+#    login_check(id)
+#
+################################################################################
+
 class AccountController < ApplicationController
-  before_filter :login_required, :only => [:test_autologin, :prefs, :profile]
+  before_filter :login_required, :except => [
+    :signup,
+    :welcome,
+    :verify,
+    :reverify,
+    :send_verify,
+    :login,
+    :logout_user,
+    :email_new_password,
+    :no_feature_email,
+    :no_question_email,
+    :no_commercial_email,
+    :no_comment_email,
+    :auto_complete_for_user_place_name
+  ]
 
   # AJAX request used for autocompletion of location field in prefs.
   # View: none
@@ -22,7 +73,6 @@ class AccountController < ApplicationController
           flash_notice "Login successful."
           user.last_login = Time.now
           user.save
-          # ---AUTOLOGIN---
           if @remember
             set_autologin_cookie(user)
           else
@@ -257,7 +307,6 @@ class AccountController < ApplicationController
 
   def logout_user
     @user = session['user'] = nil
-    # ---AUTOLOGIN---
     clear_autologin_cookie
   end
 

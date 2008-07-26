@@ -1,3 +1,17 @@
+#
+#  Very simple model to hold info about a copyright license.  Intended for use
+#  by Image, but I guess it could apply to anything including documents users
+#  might upload to the site some day.  Each license:
+#  
+#  1. has a name
+#  2. has a URL
+#  3. can be deprecated
+#  
+#  Public Methods:
+#    License.current_names_and_ids     Get list of non-deprecated licenses.
+#
+################################################################################
+
 class License < ActiveRecord::Base
   has_many :images
   has_many :users

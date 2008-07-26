@@ -1,42 +1,42 @@
-# Copyright (c) 2008 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-################################################################################
 #
-#  Views:
-#    list_images         Display matrix of images, sorted by date.
-#    images_by_title     Display list of images, sorted by title.
-#    images_by_user      Display list of images by a given user.
-#    show_image          Show in standard size (640 pixels max dimension).
-#    show_original       Show original size.
-#    prev_image          Show previous image (from search results).
-#    next_image          Show next image (from search results).
-#    add_image           Upload and add images to observation.
-#    remove_images       Remove image(s) from an observation (not destroy!)
-#    edit_image          Edit date, copyright, notes.
-#    destroy_image       Destroy image.
-#    reuse_image         Add an already-uploaded image to an observation.
-#    add_image_to_obs    (post method #1 for reuse_image)
-#    reuse_image_by_id   (post method #2 for reuse_image)
-#    reuse_image_for_user Select an already-uploaded image to user profile.
-#    license_updater     Bulk license editor.
+#  Views: ("*" - login required, "R" - root required))
+#     list_images         Display matrix of images, sorted by date.
+#     images_by_title     Display list of images, sorted by title.
+#     images_by_user      Display list of images by a given user.
+#     image_search        Search for matching images.
+#     show_image          Show in standard size (640 pixels max dimension).
+#     show_original       Show original size.
+#     prev_image          Show previous image (from search results).
+#     next_image          Show next image (from search results).
+#   * add_image           Upload and add images to observation.
+#   * remove_images       Remove image(s) from an observation (not destroy!)
+#   * edit_image          Edit date, copyright, notes.
+#   * destroy_image       Destroy image.
+#   * reuse_image         Add an already-uploaded image to an observation.
+#   * add_image_to_obs    (post method #1 for reuse_image)
+#   * reuse_image_by_id   (post method #2 for reuse_image)
+#   * reuse_image_for_user Select an already-uploaded image to user profile.
+#   * license_updater     Bulk license editor.
 #
 #  Admin Tools:
-#    resize_images      Re-create all thumbnails.
+#   R resize_images      Re-create all thumbnails.
 #
 #  Test Views:
-#    test_upload_image
-#    test_add_image
-#    test_add_image_report
-#    test_process_image(user, upload, count, size)
+#     test_upload_image
+#     test_add_image
+#     test_add_image_report
+#     test_process_image(user, upload, count, size)
 #
 #  Helpers:
 #    process_image(args, upload)
+#    calc_image_ids(obs)
 #    next_id(id, id_list)
 #    prev_id(id, id_list)
 #    next_image_list(observation_id, id_list)
 #    prev_image_list(observation_id, id_list)
-#    calc_image_ids(obs)
+#    show_selected_images(title, conditions, order, source)
+#    inc_image_from_obs_search(state, inc_func, direction)
+#    inc_image(func_name, direction)
 #
 ################################################################################
 
@@ -120,7 +120,7 @@ class ImageController < ApplicationController
         "n.search_name, `when` desc", :nothing)
     end
   end
-  
+
   def show_selected_images(title, conditions, order, source)
     # If provided, link should be the arguments for link_to as a list of lists,
     # e.g. [[:action => 'blah'], [:action => 'blah']]
@@ -154,7 +154,7 @@ class ImageController < ApplicationController
     @invalid = true
     @image = Image.find(params[:id])
   end
-  
+
   def inc_image_from_obs_search(state, inc_func, direction)
     current_image_id = params[:id].to_i
     current_image = Image.find(current_image_id)
@@ -197,7 +197,7 @@ class ImageController < ApplicationController
     store_seq_state(state)
     redirect_to :action => 'show_image', :id => new_image, :seq_key => state.key
   end
-  
+
   def inc_image(func_name, direction) # direction is 1 or -1 depending on if we're doing next or prev
     start = Time.now.to_f
     state = SequenceState.new(session, params, Image.connection, :images, logger)
@@ -521,9 +521,7 @@ class ImageController < ApplicationController
     end
   end
 
-  # ----------------------------
-  #  Testing.
-  # ----------------------------
+################################################################################
 
   def test_process_image(user, upload, count, size)
     if upload and upload != ""
@@ -575,9 +573,7 @@ class ImageController < ApplicationController
     end
   end
 
-  # ----------------------------
-  #  Admin tools.
-  # ----------------------------
+################################################################################
 
   def resize_images
     if check_permission(0)
@@ -591,9 +587,7 @@ class ImageController < ApplicationController
     redirect_to :action => 'list_images'
   end
 
-  # ----------------------------
-  #  Helpers.
-  # ----------------------------
+################################################################################
 
   helper_method :next_id
   def next_id(id, id_list)

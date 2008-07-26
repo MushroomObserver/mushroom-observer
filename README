@@ -12,9 +12,9 @@ the code for prospective developers.
 Everything you need to get a local copy of MO running on your computer is kept
 in a subversion repository at collectivesource.com.  It is world-readable, so
 just checkout a copy, and give it a shot.  (The latest stable release is in
-"trunk".)
+"trunk".  See link below.)
 
-I'm pretty you must be running a Unix-type O/S, probably Linux, but I know
+I'm pretty sure you must be running a Unix-type O/S, probably Linux, but I know
 Rails and Mysql and everything else MO needs is available in Windows, so feel
 free to be the first to try it out!  Nathan has written up excellent notes
 describing how he's installed it on Ubuntu 6.10, Edgy Eft (see below).
@@ -53,6 +53,25 @@ below), find a plugin you like, the run:
 
   script/plugin install http://svn.domain.com/path/to/plugin
 
+Rails applications run in one of three different modes: development, production
+and test.  Each has its own entirely separate database (named appropriately
++observer_development+, +observer_production+ and +observer_test+).  Otherwise
+it doesn't *really* matter which you use, but there are subtle differences: 
+
+development
+  Automatically reloads any code that has been changed.  (Only modules that
+  have been required using +require_dependency+.)  Doesn't cache data the same
+  way as the production server does.
+
+production
+  Need to restart the server whenever you change any code.  Some things are
+  cached differently than in development, so if you see different behavior on
+  the production server, start here: you might just need to reload an object.
+
+test
+  Used by unit tests.  All changes are thrown away between each test.  And
+  probably a host of other technical things.
+
 For more information:
 
 Ruby Documentation:: http://www.ruby-doc.org/core/
@@ -80,19 +99,19 @@ in the class Observation, user/account settings in User, taxonomy in Name and
 Synonym, and so on.  These are all found in <tt>app/models</tt>.  Here are the
 major ones:
 
-User::              User or account.
-Observation::       Observation data and notes.
+User::              Users: name, email, password, prefs, etc.
+Observation::       Observations: where, when, what, notes.
 Name::              Scientific name bundled with notes, citation, etc.
-Location::          Location: lat/long/elev, notes, etc.
-Image::             Image: mostly mushrooms, but also mugshots or anything else.
-Comment::           Comment: attached to an Observation now, later will attach to other things, too.
-SpeciesList::       Set of Observation's (*_not_* Name's).
+Location::          Locations: lat/long/elev, notes, etc.
+Image::             Images: mostly mushrooms, but also mugshots or anything else.
+Comment::           Comments: attached to an Observation now, later will attach to other things, too.
+SpeciesList::       Set of Observations (*_not_* Names).
 
-Naming and voting on observations use these:
+These are used in naming and voting on observations:
 
 Naming::            Proposed Name for a given Observation.
-NamingReason::      Reasons
-Vote::              Vote on a given Naming for a given Observation.
+NamingReason::      Reasons for proposing a name: appearance, literature, etc.
+Vote::              Votes on a given Naming for a given Observation.
 
 Emails use several:
 
@@ -108,7 +127,7 @@ And a few other random database classes:
 Synonym::           Group of synonymized Name's.
 PastName::          Old versions of Name's.
 PastLocation::      Old versions of Location's.
-License::           License types available for Image's to use.
+License::           Types of licenses available for Image's to use.
 RssLog::            Used to report changes via RSS feed.
 
 The following non-database-related classes are also found in
@@ -180,8 +199,8 @@ ImageController::       Deals with images.
 CommentController::     Deals with comments.
 SpeciesListController:: Deals with species lists.
 
-These controllers are just subclasses of ActionController::Base.  Actions are
-just instance methods.  These correspond directly to the URL:
+These controllers are just subclasses of ActionController.  Actions are just
+instance methods.  These correspond directly to the URL of the request:
 
   http://mushroomobserver.org/controller/action
 
@@ -193,15 +212,15 @@ and the "id" parameter is shortened to a bare integer:
   http://mo.org/observer/show_user/3    Show summary for user #3.
 
 Controller methods -- that is, actions -- have access to quite a number of
-helpers and data.  Here are just a few, see ActionController::Base for more:
+helpers and data.  Here are just a few, see ActionController for more:
 
-session['user']:: Session: hash of data that follows the user around from request to request.
-cookies[:mo_user]:: It is trivial to read or write cookies on the user's browser.
-request.method:: You have access to the full CGI request object.
-flash[:notice]:: Temporary storage: this hash persists only until the next request.
-@user:: If user is logged in this will be their User object.
-@js:: True if javascript is enabled on the user's browser.
-@ua[:ie7]:: Quick way to tell what browser the user is running.
+<tt>session['user']</tt>:: Session: hash of data that follows the user around from request to request.
+<tt>cookies[:mo_user]</tt>:: It is trivial to read or write cookies on the user's browser.
+<tt>request.method</tt>:: You have access to the full CGI request object.
+<tt>flash[:notice]</tt>:: Temporary storage: this hash persists only until the next request.
+<tt>@user</tt>:: If user is logged in this will be their User object.
+<tt>@js</tt>:: True if javascript is enabled on the user's browser.
+<tt>@ua[:ie7]</tt>:: Quick way to tell what browser the user is running.
 
 Controller methods are very deeply interconnected with views.  I've never quite
 understood the underlying mechanics, but views have access to all the
@@ -214,7 +233,7 @@ By default a template of the same name as the action is rendered
 overridden in a number of ways.  This can get quite complicated, and you must
 be careful not to accidentally attempt to render two templates.  Example:
 
-  class ExampleController << ActionController::Base
+  class ExampleController << ActionController
 
     # This causes autologin() to be run before every action.
     before_filter :autologin
@@ -255,8 +274,8 @@ ActionController Docs:: http://api.rubyonrails.org/classes/ActionController/Base
 
 == Views
 
-Views, unlike Models and Controllers, are not classes, or strictly speaking
-even Ruby code at all.  They are templates in which you may (and frequently
+Views, unlike models and controllers, are not classes, or strictly speaking
+even ruby code at all.  They are templates in which you may (and frequently
 will) embed Ruby code.  All the views are found in:
 
   app/views/#{controller}/#{action}.rhtml
@@ -297,7 +316,15 @@ You have access to hundreds of amazing helper methods in these view templates,
 from simple tag helpers like image_tag() and link_to() to complicated things
 like text_field_with_autocomplete() and paginate().  And, as mentioned in the
 section on controllers, you have access to a number of things from the
-controller.
+controller.  You can also "publish" controller methods for use in view by
+using the +helper_method+ directive:
+
+  class SomeController
+    helper_method :my_helper
+    def my_helper(args)
+      ...
+    end
+  end
 
 I still to this day have no idea what the actual class context ruby code in
 these templates is run under.  It has something to do with ERb and (obviously)
@@ -383,7 +410,7 @@ in scientific names, and in "internationalization" strings (see below).
 
 All user-supplied text should be run through +sanitize+ or +html_escape+ to
 strip out any potentially harmful HTML.  (Note +h+ is an alias for
-+html_escape+.) 
++html_escape+.)
 
 * internationalization
 
@@ -401,4 +428,10 @@ out the link under the *Ruby on Rails* section near the top of this document.
 Try to remember to comment your code in such a way that *rdoc* can understand
 it.  There is a huge amount of work to do to comment old code, but going
 forward it would be nice if we started to do this.  Wouldn't it?
+
+* unit tests
+
+Write tests for every bug you fix!  Better yet, write tests for every new
+feature you add.  Some people suggest testing new code in *test* before even
+trying it out on the website.  Okay, maybe you can go too far...
 

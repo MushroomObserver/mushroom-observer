@@ -1,16 +1,12 @@
-# Copyright (c) 2008 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-################################################################################
 #
-#  Views:
-#    list_comments              List latest comments.
-#    show_comments_for_user     Show a comments *for* a user.
-#    show_comments_by_user      Show a comments *by* a user.
-#    show_comment               Show a single comment.
-#    add_comment                Create a comment.
-#    edit_comment               Edit a comment.
-#    destroy_comment            Destroy comment.
+#  Views: ("*" - login required)
+#     list_comments              List latest comments.
+#     show_comments_for_user     Show a comments *for* a user.
+#     show_comments_by_user      Show a comments *by* a user.
+#     show_comment               Show a single comment.
+#   * add_comment                Create a comment.
+#   * edit_comment               Edit a comment.
+#   * destroy_comment            Destroy comment.
 #
 ################################################################################
 

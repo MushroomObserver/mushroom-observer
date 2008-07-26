@@ -1,27 +1,19 @@
-# Copyright (c) 2008 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
-################################################################################
 #
-#  NOTE: There is some ambiguity between observations and names that makes this
-#  slightly confusing.  The end result of a species list is actually a list of
-#  *observations*, not species.  However, creation and editing is generally
-#  accomplished via names alone (although see manage_species_lists for the one
-#  exception).  In the end all these names cause rudimentary observations to
-#  spring into existence.
+#  Views: ("*" - login required)
+#     list_species_lists                     List of lists by date.
+#     species_lists_by_title                 List of lists by title.
+#     species_lists_by_user                  List of lists created by user.
+#     show_species_list                      Display notes/etc. and list of species.
+#   * create_species_list                    Create new list.
+#   * edit_species_list                      Edit existing list.
+#   * upload_species_list                    Same as edit_species_list but gets list from file.
+#   * destroy_species_list                   Destroy list.
+#   * manage_species_lists                   Add/remove an observation from a user's lists.
+#   * add_observation_to_species_list        (post method)
+#   * remove_observation_from_species_list   (post method)
 #
-#  Views:
-#    list_species_lists                     List of lists by date.
-#    species_lists_by_title                 List of lists by title.
-#    species_lists_by_user                  List of lists created by user.
-#    show_species_list                      Display notes/etc. and list of species.
-#    create_species_list                    Create new list.
-#    edit_species_list                      Edit existing list.
-#    upload_species_list                    Same as edit_species_list but gets list from file.
-#    destroy_species_list                   Destroy list.
-#    manage_species_lists                   Add/remove an observation from a user's lists.
-#    remove_observation_from_species_list   (post method)
-#    add_observation_to_species_list        (post method)
+#  AJAX:
+#     auto_complete_for_species_list_where
 #
 #  Helpers:
 #    calc_checklist(id)                   Get list of names for LHS of _species_list_form.
@@ -30,6 +22,13 @@
 #    process_species_list(...)            Create/update species list using form data.
 #    construct_observations(...)          Create observations for new names added to list.
 #    find_chosen_name(id, alternatives)   (helper)
+#
+#  NOTE: There is some ambiguity between observations and names that makes this
+#  slightly confusing.  The end result of a species list is actually a list of
+#  *observations*, not species.  However, creation and editing is generally
+#  accomplished via names alone (although see manage_species_lists for the one
+#  exception).  In the end all these names cause rudimentary observations to
+#  spring into existence.
 #
 ################################################################################
 

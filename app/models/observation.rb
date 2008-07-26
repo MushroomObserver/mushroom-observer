@@ -1,52 +1,75 @@
-# Copyright (c) 2006 Nathan Wilson
-# Licensed under the MIT License: http://www.opensource.org/licenses/mit-license.php
-
 require 'active_record_extensions'
 
-# RSS log:
-#   log(msg, touch)      Add message to log (creating log if necessary).
-#   orphan_log(entry)    Same as log() except observation is about to go away.
-#   touch                [huh? what is @modified used for?]
+################################################################################
 #
-# Naming stuff:
-#   calc_consensus          Calculate and cache the consensus naming/name.
-#   naming                  Conensus Naming instance. (can be nil)
-#   name                    Conensus Name instance.   (never nil)
-#   preferred_name(user)    Name instance.   (never nil)
-#   name_been_proposed?(n)  Has someone proposed this name already?
-#   text_name(user)         Plain text.
-#   format_name(user)       Textilized.
-#   unique_text_name(user)  Same as above, with id added to make unique.
-#   unique_format_name(user)
-#     Notes: these last six use the current user's preferred name if it
-#     exists, otherwise uses the consensus (as cached via calc_conensus).
-#     These are the six methods views should use, not name/naming.
-#   refresh_vote_cache      Admin tool to refresh cache across all observations.
+#  Model describing an observation.  Conceptually very simple, but since it is
+#  at the nexus of many other objects, it gets a bit complex.  Properties:
 #
-# Image stuff:
-#   add_image(img)         Add img to obv.
-#   add_image_by_id(id)    Add img to obv.
-#   remove_image_by_id(id) Remove img from obv.
-#   idstr                  [These two must somehow be used implicitly
-#   idstr=(id_field)       by the view.]
+#  1. has a date (when observation was made, not created)
+#  2. has a location (called "where" until a Location is created, then "location")
+#  3. has notes, and a few flags (e.g. voucher?)
+#  4. can have one or more Image's (including one "thumb_image")
+#  5. can have one or more Naming's
+#  6. has a consensus Name and Vote (cached)
+#  7. owned by a User
+#  8. can belong to one or more SpeciesList's
 #
-# Location/Where ambiguity:
-#   place_name             Get location name or where, whichever exists.
-#   place_name=            Set where if cannot find location by that name.
+#  Voting is still in a state of flux.  At the moment users create Naming's and
+#  people Vote on them.  We combine the Vote's for each Naming, cache the Vote
+#  for each Naming in the Naming.  However no Naming necessarily wins --
+#  instead Vote's are tallied for each Synonym (see calc_consensus) for full
+#  details).  Thus the accepted Name of the winning Synonym is cached in the
+#  Observation along with its winning Vote score. 
 #
-# Protected:
-#   self.all_observations  List of observations sorted by date, newest first.
+#  Further complicating everything, we still support the concept of a
+#  "preferred name" for each individual User, based I believe, on whether they
+#  have voted "I'd call it that" on any proposed Naming (otherwise we just use
+#  the community consensus).  Thus you will see User being passed in to a
+#  number of methods that really shouldn't need to know the User.  This is
+#  almost certainly going away. 
 #
-# Validates:
-#   requires presence of user and location
+#  RSS log:
+#    log(msg, touch)      Add message to log (creating log if necessary).
+#    orphan_log(entry)    Same as log() except observation is about to go away.
+#
+#  Naming stuff:
+#    name                    Conensus Name instance. (never nil)
+#    text_name(user)         Plain text.
+#    format_name(user)       Textilized.
+#    unique_text_name(user)  Same as above, with id added to make unique.
+#    unique_format_name(user)
+#
+#    calc_consensus          Calculate and cache the consensus naming/name.
+#    preferred_name(user)    Name instance. (never nil)
+#    name_been_proposed?(n)  Has someone proposed this name already?
+#    O.refresh_vote_cache          Refresh cache across all observations.
+#    O.reset_preferred_name_cache  Refresh cache of user's preferred names.
+#
+#  Image stuff:
+#    add_image(img)         Add img to obv.
+#    add_image_by_id(id)    Add img to obv.
+#    remove_image_by_id(id) Remove img from obv.
+#
+#  Location/Where ambiguity:
+#    place_name             Get location name or where, whichever exists.
+#    place_name=            Set where if cannot find location by that name.
+#
+#  Callbacks:
+#    add_spl_callback(o)    Updates SiteData when obs is added to species list.
+#    remove_spl_callback(o) Updates SiteData when obs is removed from species list.
+#
+#  Validates:
+#    requires presence of user and location
+#
+################################################################################
 
 class Observation < ActiveRecord::Base
   has_and_belongs_to_many :images, :order => "id"
   has_and_belongs_to_many :species_lists,
     :after_add => :add_spl_callback, :before_remove => :remove_spl_callback
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
-  has_many :comments,          :dependent => :destroy
-  has_many :namings,           :dependent => :destroy
+  has_many :comments, :dependent => :destroy
+  has_many :namings,  :dependent => :destroy
   has_one :rss_log
   belongs_to :name      # (used to cache consensus name)
   belongs_to :location
@@ -56,7 +79,7 @@ class Observation < ActiveRecord::Base
     :when  => "date",
     :where => "location"
   })
-  
+
   @@preferred_name_cache = {} # Maps user.id to a preferred name
 
   def add_spl_callback(o)
@@ -88,7 +111,7 @@ class Observation < ActiveRecord::Base
     @modified = Time.new
   end
 
-################################################################################
+  ########################################
 
   # Get the community consensus on what the name should be.  It just adds up
   # the votes (eventually I would like to weight by contribution), and picks
@@ -141,7 +164,7 @@ result = ""
       for vote in naming.votes
         user_id = vote.user_id
         val = vote.value
-        wgt = user_wgts[user_id] 
+        wgt = user_wgts[user_id]
         if wgt.nil?
           wgt = user_wgts[user_id] = vote.user_weight
         end
@@ -309,7 +332,7 @@ result = ""
 return result
   end
 
-################################################################################
+  ########################################
 
   # Look up the user's preferred name.  The logic is:
   # If the user has voted 100% for something, use that.
@@ -334,7 +357,7 @@ return result
     end
     result
   end
-  
+
   def Observation.reset_preferred_name_cache()
     # @@preferred_name_cache = {}
   end
@@ -358,14 +381,15 @@ return result
     "%s (%s)" % [str, self.id]
   end
 
-  # ----------------------------------------
+  ########################################
+
 
   # Has anyone proposed a given name yet for this observation?
   def name_been_proposed?(name)
     self.namings.select {|n| n.name == name}.length > 0
   end
 
-  # ----------------------------------------
+  ########################################
 
   # Add image to this observation, making thumbnail if none set already.
   # Saves changes.  Returns nothing.
@@ -497,14 +521,7 @@ return result
     end
   end
 
-  # [This *must* be a typo... -JPH 20080327]
-  # protected
-  # def self.all_observations
-  #   find(:all,
-  #        :order => "'when' desc")
-  # end
-
-  # ----------------------------------------
+################################################################################
 
   protected
 

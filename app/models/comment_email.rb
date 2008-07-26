@@ -1,9 +1,9 @@
 # Class for holding code specific to QueuedEmails intended to send comment emails.
 #
-# The separation is nice, but it kind of violates some of Rails assumptions.  In particular,
-# the initialize if dangerous since it does saves.  However, I can't figure out a way to
-# get these out of the database so as long the creation is explicit in code things should
-# be fine.
+# The separation is nice, but it kind of violates some of Rails assumptions.
+# The initialize is dangerous since it does saves.  However, I can't figure out
+# a way to get these out of the database.  As long as the creation is explicit
+# in code things should be fine. 
 class CommentEmail < QueuedEmail
   def self.find_or_create_email(sender, receiver, comment)
     # Check for an already queued matching email
