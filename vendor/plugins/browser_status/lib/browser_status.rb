@@ -137,6 +137,10 @@ module BrowserStatus
       %(<noscript><meta HTTP-EQUIV="REFRESH" content="0; url=#{
         reload_with_args(:_js => 'off')
       }"></noscript>)
+
+    # Apparently actionview will sometimes crash if you return nil.
+    else
+      ""
     end
   end
 
