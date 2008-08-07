@@ -227,6 +227,27 @@ class ApplicationController < ActionController::Base
     pattern.gsub(/[*']/,"%")
   end
 
+  # Creates sql query: any of a list of fields like a pattern?
+  def field_search(fields, sql_pattern)
+    (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
+  end
+
+  # Ultimately running large queries like this and storing the info in the session
+  # may become unwieldy.  Storing the query and selecting chunks will scale better.
+  def query_ids(query)
+    result = []
+    data = Observation.connection.select_all(query)
+    for d in data
+      id = d['id']
+      if id
+        result.push(id.to_i)
+      end
+    end
+    result
+  end
+
+################################################################################
+
   def paginate_by_sql(model, sql, per_page, options={})
     if options[:count]
         if options[:count].is_a? Integer
@@ -255,23 +276,88 @@ class ApplicationController < ActionController::Base
     return [pages, list[(page-1)*per_page, per_page]]
   end
 
-  def field_search(fields, sql_pattern)
-    (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
+  # Initialize PaginationLetters object.  Takes list of arbitrary items.
+  # By default it takes first letter of <tt>item.to_s</tt>, but you can override
+  # this by supplying a block.  Takes an optional hash of arguments:
+  #   :arg    Name of argument in params to use.  (default is 'letter')
+  #
+  #   def action
+  #     # Create list of objects.
+  #     list = Model.find(...)
+  #     # Initialize letter paginator.
+  #     letters, list = paginate_letters(list, length) {|i| i.title[0,1]}
+  #     # Initialize standard page-number paginator.
+  #     numbers, list = paginate_array(list, length)
+  #   end
+  #
+  #   view.rhtml:
+  #     <%# Insert pagination links for letters. %>
+  #     <div><%= pagination_letters(letters) %></div>
+  #     <%# Insert pagination links for numbers. %>
+  #     <div><%= pagination_numbers(numbers, letters) %></div>
+  #
+  # Note, pagination_links() does not know about this letter paginator, so it
+  # will not supply the 'letter' parameter correctly.  Thus you need to use
+  # this pagination_numbers() wrapper if you want to have both paginators.
+  def paginate_letters(list, length=50, args={})
+    # Don't draw links if too short.
+    list = [] if !list
+    return [nil, list] if list.length < length
+
+    obj = PaginationLetters.new
+    obj.letters = letters = {}
+    obj.used    = used    = {}
+    obj.arg     = arg     = args[:arg] || 'letter'
+    obj.letter  = letter  = params[arg]
+
+    # Gather map of items to their first letter, as well as a hash of letters
+    # that are used.
+    for item in list
+      if block_given?
+        l = yield(item)
+        l ||= "_"
+        l = l[0,1].upcase
+        l = "_" if !l.match(/^[A-Z]$/)
+      elsif item.to_s.match(/([a-z])/i)
+        l= $~[1].upcase
+      else
+        l= "_"
+      end
+      letters[item] = l
+      used[l] = true
+    end
+    return [nil, list] if used.keys.length <= 1
+
+    # If user has clicked on a letter, remove all items above that letter.
+    if letter && letter.match(/^([A-Z])/)
+      letter = $~[1]
+      list = list.select do |item|
+        letters[item] >= letter
+      end
+      obj.letter = letter
+    else
+      obj.letter = nil
+    end
+
+    return [obj, list]
   end
 
-  # Ultimately running large queries like this and storing the info in the session
-  # may become unwieldy.  Storing the query and selecting chunks will scale better.
-  def query_ids(query)
-    result = []
-    data = Observation.connection.select_all(query)
-    for d in data
-      id = d['id']
-      if id
-        result.push(id.to_i)
-      end
-    end
-    result
+  # Simple class to handle pagination by letter.
+  class PaginationLetters
+    # Maps items to letters.
+    attr_accessor :letters
+
+    # Hash of letters that we have items for.
+    attr_accessor :used
+
+    # Argument in params to use.
+    attr_accessor :arg
+
+    # Current letter.
+    attr_accessor :letter
   end
+
+################################################################################
 
   helper_method :calc_color
   def calc_color(row, col, alt_rows, alt_cols)

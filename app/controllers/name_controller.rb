@@ -47,24 +47,9 @@ class NameController < ApplicationController
   def name_index_helper
     @letter = params[:letter]
     @page = params[:page]
-
-    # Gather hash of letters that actually have names.
-    @letters = {}
-    for d in @name_data
-      match = d['display_name'].match(/([A-Z])/)
-      if match
-        l = d['first_letter'] = match[1]
-        @letters[l] = true
-      end
-    end
-
-    # If user's clicked on a letter, remove all names above that letter.
-    if @letter
-      @name_data = @name_data.select {|d| d['first_letter'][0] >= @letter[0]}
-    end
-
-    # Paginate the remaining names_.
-    @pages, @name_subset = paginate_array(@name_data, 100)
+    @letters, @name_subset = paginate_letters(@name_data, 100) \
+      {|d| d['display_name'].match(/([a-z])/i) ? $~[1] : nil}
+    @pages, @name_subset = paginate_array(@name_subset, 100)
   end
 
   # List all the names

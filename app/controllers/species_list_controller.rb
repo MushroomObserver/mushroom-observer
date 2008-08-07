@@ -84,23 +84,19 @@ class SpeciesListController < ApplicationController
       session[:checklist_source] = id
     end
     @observation_list = sort_species_list_observations(@species_list, @user)
+    @letters, @observation_list = paginate_letters(@observation_list, 100) {|o| o.text_name[0,1]}
+    @pages,   @observation_list = paginate_array(@observation_list, 100)
   end
 
   # Sort observations in species_list and return list of observation objects.
   # Needed by everyone using the show_species_list view.
   def sort_species_list_observations(spl, user)
     if spl.observations.length > 0
-      names = {}
-      # I've changed this around so we only have to do the expensive
-      # preferred_name(user) lookup once for each observation.  Then
-      # we can sort based on the cached results. -JPH 20071205
-      for o in spl.observations
-        names[o] = o.name
+      return spl.observations.sort do |x,y|
+        (x.name.text_name <=> y.name.text_name) || # obs.name should never be nil
+        (x.when <=> y.when) ||
+        (x.id <=> y.id)
       end
-      objects = names.keys.sort {|x,y|
-        (names[x].text_name <=> names[y].text_name) || (x.id <=> y.id)
-      }
-      return objects
     else
       return nil
     end
@@ -176,8 +172,7 @@ class SpeciesListController < ApplicationController
     @species_list = SpeciesList.find(params[:id])
     if verify_user()
       if !check_user_id(@species_list.user_id)
-        @observation_list = sort_species_list_observations(@species_list, @user)
-        render :action => 'show_species_list'
+        redirect_to(:action => 'show_species_list', :id => @species_list)
       elsif request.method == :get
         @checklist_names  = {}
         @list_members     = nil
@@ -280,8 +275,7 @@ class SpeciesListController < ApplicationController
     @species_list = SpeciesList.find(params[:id])
     if verify_user()
       if !check_user_id(@species_list.user_id)
-        @observation_list = sort_species_list_observations(@species_list, @user)
-        render :action => 'show_species_list'
+        redirect_to(:action => 'show_species_list', :id => @species_list)
       elsif request.method == :get
         @observation_list = sort_species_list_observations(@species_list, @user)
       else
@@ -315,8 +309,7 @@ class SpeciesListController < ApplicationController
       flash_notice "Species list destroyed."
       redirect_to :action => 'list_species_lists'
     else
-      @observation_list = sort_species_list_observations(@species_list, @user)
-      render :action => 'show_species_list'
+      redirect_to(:action => 'show_species_list', :id => @species_list)
     end
   end
 

@@ -57,7 +57,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     id = spl.id
     params = {"id"=>id.to_s}
     assert("rolf" == spl.user.login)
-    requires_user(:destroy_species_list, :show_species_list, params, false)
+    requires_user(:destroy_species_list, ["species_list", "show_species_list"], params, false)
     assert_redirected_to(:controller => "species_list", :action => "list_species_lists")
     assert_raises(ActiveRecord::RecordNotFound) do
       spl = SpeciesList.find(id) # Need to reload observation to pick up changes
@@ -436,7 +436,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     spl = @first_species_list
     params = { "id" => spl.id.to_s }
     assert("rolf" == spl.user.login)
-    requires_user(:edit_species_list, :show_species_list, params, false)
+    requires_user(:edit_species_list, ["species_list", "show_species_list"], params, false)
     assert_response :success
     assert_template "edit_species_list"
     assert_form_action :action => 'edit_species_list'
@@ -446,7 +446,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     spl = @unknown_species_list
     sp_count = spl.observations.size
     params = spl_params(spl)
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user(:edit_species_list, ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(10, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -461,8 +461,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     owner = spl.user.login
     assert("rolf" != owner)
     post_requires_login(:edit_species_list, params, false)
-    assert_response :success
-    assert_template "show_species_list"
+    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(10, @rolf.reload.contribution)
     spl = SpeciesList.find(spl.id)
     assert(spl.observations.size == sp_count)
@@ -485,8 +484,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     owner = spl.user.login
     assert("rolf" != owner)
     post_requires_login(:edit_species_list, params, false)
-    assert_response :success
-    assert_template "show_species_list"
+    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(10, @rolf.reload.contribution)
     spl = SpeciesList.find(spl.id)
     assert(spl.observations.size == sp_count)
@@ -506,7 +504,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "New name"
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user(:edit_species_list, ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_response :success
     assert_template "edit_species_list"
     assert_equal(10, spl.user.reload.contribution)
@@ -520,7 +518,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = spl_params(spl)
     params[:list][:members] = "New name"
     params[:approved_names] = ["New name"]
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     # Creates New sp and New name, as well as an observations/splentry/naming.
     assert_equal(33, spl.user.reload.contribution)
@@ -535,7 +533,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(!spl.name_included(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_response :success
     assert_template "edit_species_list"
     assert_equal(10, spl.user.reload.contribution)
@@ -552,7 +550,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = spl_params(spl)
     params[:list][:members] = name.text_name
     params[:chosen_names] = {name.text_name.gsub(/\W/,"_") => name.id}
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -567,7 +565,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_response :success
     assert_template "edit_species_list"
     assert_equal(10, spl.user.reload.contribution)
@@ -584,7 +582,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
     params[:approved_deprecated_names] = [name.text_name]
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -599,7 +597,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = "checked"
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -614,7 +612,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = "checked"
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_response :success
     assert_template "edit_species_list"
     assert_equal(10, spl.user.reload.contribution)
@@ -631,7 +629,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = "checked"
     params[:approved_deprecated_names] = [name.search_name]
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -649,7 +647,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:checklist_data][name.id.to_s] = "checked"
     params[:approved_deprecated_names] = [name.search_name]
     params[:chosen_approved_names] = { name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -669,7 +667,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:list][:members] = name.text_name
     params[:approved_deprecated_names] = name.text_name
     params[:chosen_approved_names] = { name.text_name.gsub(/\W/,"_") => approved_name.id.to_s }
-    post_requires_user(:edit_species_list, :show_species_list, params, false, spl.user.login)
+    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
     assert_redirected_to(:controller => "species_list", :action => "show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
@@ -687,7 +685,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = {
       :id => spl.id
     }
-    requires_user(:upload_species_list, :show_species_list, params, false)
+    requires_user("upload_species_list", ["species_list", "show_species_list"], params, false)
     assert_form_action :action => 'upload_species_list'
   end
 

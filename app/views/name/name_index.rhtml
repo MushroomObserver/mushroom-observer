@@ -8,13 +8,7 @@
 | <%= link_to('Add Name', :action => 'create_name') %><br/>
 <div id="Title"><%= @title %></div>
 
-<center><big><%=
-  # (Note: name_index and observation_index are obvious, but the letter link
-  # below will work even for name_search because the pattern is "passed in",
-  # so to speak, in the session, not on params[].)
-  %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).
-    map {|l| @letters[l] ? link_to(l,"?letter=#{l}") : l}.join("&nbsp;&nbsp;")
-%></big></center><br/>
+<div class="pagination"><%= pagination_letters(@letters) %></div>
 
 <% last_letter = nil %>
 <% for datum in @name_subset %>
@@ -33,6 +27,5 @@
 <% end %>
 
 <br/>
-<% args = @letter ? { :letter => @letter } : {} %>
-<div class="pagination"><%= pagination_links(@pages, :params => args) %></div>
+<div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
 

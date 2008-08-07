@@ -386,6 +386,10 @@ You can tell it to run only a single test script like this:
 
   rake test TEST=test/functional/observer_controller_test.rb
 
+Actually, that command runs your test twice for some reason, this works better:
+
+  ruby -Ilib:test test/functional/observer_controller_test.rb
+
 (That will save you *a lot* of time!)
 
 For more information:  (I can't find any good documentation of this.)

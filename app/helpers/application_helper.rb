@@ -80,4 +80,28 @@ module ApplicationHelper
       link_to(str, url)
     end.join(" | ")
   end
+
+  # Insert letter pagination links.  See ApplicationController#paginate_letters.
+  def pagination_letters(letters, args={})
+    if letters
+      params = (args[:params] || {}).clone
+      %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
+        params[letters.arg] = letter
+        letters.used[letter] ? link_to(letter, params) : letter
+      end.join(' ')
+    else
+      ''
+    end
+  end
+
+  # Wrapper on ActionView::Helpers#pagination_links designed to work with
+  # pagination_letters.  (Just needs to add a parameter to the pagination
+  # links, that's all.)
+  def pagination_numbers(pages, letters, args={})
+    if letters
+      args[:params] ||= {}
+      args[:params][letters.arg] = letters.letter
+    end
+    pagination_links(pages, args)
+  end
 end
