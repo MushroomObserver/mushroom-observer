@@ -246,7 +246,7 @@ module BrowserStatus
     # Put it back together.
     return addr if args.keys == []
     return addr + '?' + args.keys.sort.map \
-        {|k| CGI.escape(k) + '=' + args[k]}.join('&')
+        {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&')
   end
 
   private
