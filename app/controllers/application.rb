@@ -302,7 +302,7 @@ class ApplicationController < ActionController::Base
   def paginate_letters(list, length=50, args={})
     # Don't draw links if too short.
     list = [] if !list
-    return [nil, list] if list.length < length
+    return [nil, list] if list.length == 0
 
     obj = PaginationLetters.new
     obj.letters = letters = {}

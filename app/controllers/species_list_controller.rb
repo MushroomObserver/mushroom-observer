@@ -438,6 +438,10 @@ class SpeciesListController < ApplicationController
       end
     end
     session[:checklist] = list
+print "----------------------------------------\n"
+print "source = #{source.to_s}\n"
+print "list length = #{list.length}\n"
+print "----------------------------------------\n"
   end
 
   # Get list of names from species_list that are deprecated.

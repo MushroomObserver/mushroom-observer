@@ -1,11 +1,10 @@
 <!--[form:species_list]-->
 
-<!-- % if false % -->
 <% if session[:checklist] && (session[:checklist] != []) %>
   <td valign="top">
     <%= :form_species_lists_species_to_add.l %>:<br/>
     <% i = 0
-       max = 100
+       max = 100000
        for (name, id) in session[:checklist]
          i += 1
          break if i > max %>
@@ -15,7 +14,6 @@
     <% end %>
   </td>
 <% end %>
-<!-- % end % -->
 
 <td valign="top">
     <%= render :partial => 'shared/form_list_feedback' %>
