@@ -49,6 +49,10 @@ FIELD_TABLES = {
   :species_list_entries => "observations_species_lists",
 }
 
+FIELD_CONDITIONS = {
+  :users => "verified is not null"
+}
+
 ################################################################################
 #
 #  This class manages user contributions / rankings.
@@ -147,6 +151,9 @@ private
      table = field
    end
    query = "select count(*) as c from %s" % table
+   if FIELD_CONDITIONS[field]
+     query += " where #{FIELD_CONDITIONS[field]}"
+   end
    data = User.connection.select_all(query)
    for d in data
      result = d['c'].to_i

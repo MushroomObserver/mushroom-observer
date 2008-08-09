@@ -68,7 +68,8 @@ class User < ActiveRecord::Base
   has_many :locations
   has_many :queued_emails
   has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
-
+  has_many :notifications
+  
   belongs_to :license       # user's default license
   belongs_to :image         # mug shot
   belongs_to :location      # primary location
@@ -122,6 +123,11 @@ class User < ActiveRecord::Base
     end
   end
 
+  # This should become a database field
+  def mailing_address()
+    "[mailing address]"
+  end
+  
   def remember_me?
     self.remember_me
   end

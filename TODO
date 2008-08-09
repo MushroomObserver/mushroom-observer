@@ -2,6 +2,21 @@ Release each of the following as they get completed:
 
 Email queuing:
   Focus on notification
+    more unit tests (checking email generation more)
+    show_notifications should match color theme
+    show_notifications could happen after creating a naming or modifying a species list
+    providing mailing address as a user preference
+    email to self should be a user preference
+    handle species list alert
+    User Summary should have a list of that User's notification with ability to Delete or Edit (to change the alert): observer/show_notifications
+    Notifications:
+      Particular Name gets applied: name_id, user, note
+        Select notification based on name_id, queue emails, show notes
+      Every comment (user preference?): user
+      Name contained in a higher taxon gets applied: name_id, user, note
+      Track a particular observation [comments namings, consensus change] (observer gets this by default): observation_id, user
+      User creates comment, observation or naming: user_id, user
+      id, user_id, flavor, obj_id, note
   Move over other email
   Optionally add other commentators & all comment receivers [control in user prefs]
     Should lurkers on particular observations be supported?

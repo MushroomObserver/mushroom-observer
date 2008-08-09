@@ -32,4 +32,4 @@ TESTING = false
 # for running email:send.
 QUEUE_EMAIL = true
 EMAIL_PER_MINUTE = 25
-QUEUE_DELAY = 5.minutes
+QUEUE_DELAY = 5.seconds

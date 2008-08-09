@@ -1,0 +1,25 @@
+<%
+    display_name = textilize_without_paragraph(h(@name.display_name))
+    @title = :email_tracking_title.l + " " + display_name
+%>
+
+<%= link_to(:email_tracking_cancel.l, :action => 'show_name', :id => @name) %>
+<div id="Title"><%= @title %></div>
+<p>
+<%= :email_tracking_help.l %>
+</p>
+<% form_tag(:action => 'email_tracking', :id => @name) do %>
+    <p>
+        <%= if @notification
+                "#{submit_tag(:email_tracking_update.l)} #{submit_tag(:email_tracking_disable.l)}"
+            else
+                submit_tag(:email_tracking_enable.l)
+            end
+        %>
+    </p>
+    <label for="notification_note_template"><%= :email_tracking_note.l %></label>:<br/>
+    <span class="HelpNote"><%= :email_tracking_note_help.l %></span><br/>
+    <%= text_area 'notification', 'note_template', :cols => 80, :value => @note_template  %><br/>
+<% end %>
+
+<%= javascript_tag "document.getElementById('notification_note_template').focus()" %>

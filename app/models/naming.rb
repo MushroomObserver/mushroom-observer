@@ -37,7 +37,31 @@ class Naming < ActiveRecord::Base
   belongs_to :user
   has_many   :naming_reasons,    :dependent => :destroy
   has_many   :votes,             :dependent => :destroy
+  
+  def after_create
+    super
+    for n in Notification.find_all_by_flavor_and_obj_id(:name, self.name.id)
+      @initial_name_id = self.name_id
+      NamingEmail.create_email(n, self)
+    end
+  end
 
+
+  # Detect name changes in namings
+  def after_initialize
+    @initial_name_id = self.name_id
+  end
+
+  def after_update
+    for n in Notification.find_all_by_flavor_and_obj_id(:name, self.name_id)
+      if @initial_name_id != self.name_id
+        @initial_name_id = self.name_id
+        NamingEmail.create_email(n, self)
+      end
+    end
+  end
+  
+  
   # Various name formats.
   def text_name
     self.name.search_name

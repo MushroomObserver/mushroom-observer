@@ -12,6 +12,7 @@ class NameControllerTest < Test::Unit::TestCase
   fixtures :locations
   fixtures :synonyms
   fixtures :past_names
+  fixtures :notifications
 
   def setup
     @controller = NameController.new
@@ -1806,4 +1807,100 @@ class NameControllerTest < Test::Unit::TestCase
       assert(!n.deprecated)
     end
   end
+  
+  # ----------------------------
+  #  Email Tracking (Naming Notifications).
+  # ----------------------------
+
+  def test_email_tracking
+    name = @coprinus_comatus
+    params = { "id" => name.id.to_s }
+    requires_login(:email_tracking, params)
+    assert_response :success
+    assert_form_action :action => 'email_tracking'
+  end
+
+  def test_email_tracking_enable_no_note
+    name = @conocybe_filaris
+    count_before = Notification.find(:all).length
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert_nil(notification)
+    params = {
+      :id => name.id,
+      :commit => 'Enable',
+      :notification => {
+        :note_template => ""
+      }
+    }
+    post_requires_login(:email_tracking, params, false)
+    count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    assert_equal(count_before+1, count_after)
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert(notification)
+    assert_nil(notification.note_template)
+    assert_nil(notification.calc_note(@rolf, @coprinus_comatus_obs))
+  end
+
+  def test_email_tracking_enable_with_note
+    name = @conocybe_filaris
+    count_before = Notification.find(:all).length
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert_nil(notification)
+    params = {
+      :id => name.id,
+      :commit => 'Enable',
+      :notification => {
+        :note_template => 'A note about :observation from :observer'
+      }
+    }
+    post_requires_login(:email_tracking, params, false)
+    count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    assert_equal(count_before+1, count_after)
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert(notification)
+    assert(notification.note_template)
+    assert(notification.calc_note(@mary, @coprinus_comatus_obs))
+  end
+
+  def test_email_tracking_update_add_note
+    name = @coprinus_comatus
+    count_before = Notification.find(:all).length
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert(notification)
+    assert_nil(notification.note_template)
+    params = {
+      :id => name.id,
+      :commit => 'Update',
+      :notification => {
+        :note_template => 'A note about :observation from :observer'
+      }
+    }
+    post_requires_login(:email_tracking, params, false)
+    count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    assert_equal(count_before, count_after)
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert(notification)
+    assert(notification.note_template)
+    assert(notification.calc_note(@rolf, @coprinus_comatus_obs))
+  end
+
+  def test_email_tracking_disable
+    name = @coprinus_comatus
+    count_before = Notification.find(:all).length
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert(notification)
+    params = {
+      :id => name.id,
+      :commit => "Disable",
+      :notification => {
+        :note_template => 'A note about :observation from :observer'
+      }
+    }
+    post_requires_login(:email_tracking, params, false)
+    # count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    # assert_equal(count_before - 1, count_after)
+    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    assert_nil(notification)
+  end
+
 end

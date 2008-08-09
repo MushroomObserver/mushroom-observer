@@ -583,6 +583,42 @@ class NameController < ApplicationController
     end
   end
 
+  def email_tracking
+    name_id = params[:id]
+    if verify_user()
+      user = session['user']
+      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, user.id)
+      if request.method == :post
+        name = Name.find(name_id)
+        case params[:commit]
+        when :email_tracking_enable.l, :email_tracking_update.l
+          note_template = params[:notification][:note_template]
+          note_template = nil if note_template == ''
+          if @notification.nil?
+            @notification = Notification.new(:flavor => :name, :user => user, :obj_id => name_id,
+                :note_template => note_template)
+            flash_notice("Now tracking #{name.text_name}.")          
+          else
+            @notification.note_template = note_template
+            flash_notice("Updated tracking messages.")          
+          end
+          @notification.save
+        when :email_tracking_disable.l
+          @notification.destroy()
+          flash_notice("No longer tracking #{name.text_name}.")
+        end
+        redirect_to(:action => 'show_name', :id => name_id)
+      else
+        @name = Name.find(name_id)
+        if @notification
+          @note_template = @notification.note_template
+        else
+          @note_template = :email_tracking_note_template.l % [@name.text_name, user.mailing_address, user.legal_name]
+        end
+      end
+    end
+  end
+  
   def cleanup_versions
     if check_permission(1)
       id = params[:id]

@@ -7,12 +7,13 @@
 <h2><%= :how_common_tasks.l %>:</h2>
 <ol>
     <li><%= :how_keeping_up.l %></li>
-    <li><%= :how_searching.l %></li>
+    <li id="searching"><%= :how_searching.l %></li>
     <li><%= :how_unknown_help.l %></li>
     <li><%= :how_adding_observations.l %></li>
     <li><%= :how_proposing_names.l %></li>    
     <li id="voting"><%= :how_voting.l % [@min_pos_vote, @min_neg_vote, :vote_no_opinion.l, @maximum_vote] %></li>
-    <li><%= :how_adding_comments.l %></li>    
+    <li><%= :how_adding_comments.l %></li>
+    <li id="tracking"><%= :how_tracking_species.l %></li>
     <li id="describing_species"><%= textilize(:how_describing_species.l % "#{DOMAIN}/name/observation_index") %></li>
     <li id="maps"><%= textilize(:how_maps.l % [
         "#{DOMAIN}/name/map/284",

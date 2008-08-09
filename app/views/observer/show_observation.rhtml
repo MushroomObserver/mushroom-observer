@@ -10,6 +10,9 @@
   <%= link_to("#{:show_observation_about.l} #{what}", :controller => 'name', :action => 'show_name', :id => name)%>
   | <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %>
   | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => name) %>
+  <% if @has_notifications %>
+    | View Notifications
+  <% end %>
   <br/>
 <% end
 %>

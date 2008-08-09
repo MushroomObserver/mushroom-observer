@@ -1,0 +1,12 @@
+<% @title = 'Notifications for ' + textilize_without_paragraph(h(@naming.name.display_name)) %>
+<%= link_to 'Show Observation', :controller => 'observer',
+  :action => 'show_observation', :id => @observation %>
+
+<div id="Title"><%= @title %></div>
+<% for n in @notifications %>
+    <p>
+    <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+        <%= textilize(n.calc_note(@user, @observation)) %>
+    </div>
+    </p>
+<% end %>

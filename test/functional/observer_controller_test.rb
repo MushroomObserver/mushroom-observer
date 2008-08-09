@@ -28,6 +28,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :votes
   fixtures :naming_reasons
   fixtures :locations
+  fixtures :notifications
 
   def setup
     @controller = ObserverController.new
@@ -404,7 +405,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   # Test constructing observations in various ways (with minimal namings).
-  def test_construct_observation_generic(params, observation_count, naming_count, name_count)
+  def test_construct_observation_generic(params, observation_count, naming_count, name_count, page=nil)
     o_count = Observation.find(:all).length
     g_count = Naming.find(:all).length
     n_count = Name.find(:all).length
@@ -418,7 +419,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     params[:vote][:value] = "3" if !params[:vote][:value]
     post_requires_login(:create_observation, params, false)
     if observation_count == 1
-      assert_redirected_to(:controller => "observer", :action => "show_observation")
+      assert_redirected_to(:controller => "observer", :action => (page || "show_observation"))
     else
       assert_response(:success)
     end
@@ -554,6 +555,27 @@ class ObserverControllerTest < Test::Unit::TestCase
     name = Name.find_by_text_name(new_name)
     assert(name)
     assert_equal(new_name, name.text_name)
+  end
+
+  def test_construct_observation_with_notification
+    count_before = QueuedEmail.find(:all).length
+    name = @agaricus_campestris
+    notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)
+    assert_equal(2, notifications.length)
+
+    where = "test_construct_observation_simple"
+    test_construct_observation_generic({
+      :observation => { :where => where },
+      :name => { :name => name.text_name }
+    }, 1,1,0, "show_notifications")
+    obs = assigns(:observation)
+    nam = assigns(:naming)
+    assert_equal(where, obs.where) # Make sure it's the right observation
+    assert_equal(name, nam.name) # Make sure it's the right name
+    assert_not_nil(obs.rss_log)
+    
+    count_after = QueuedEmail.find(:all).length
+    assert_equal(count_before+2, count_after)
   end
 
   # This is no longer necessary as it will add the author immediately now without confirmation. [JPH -20080227]

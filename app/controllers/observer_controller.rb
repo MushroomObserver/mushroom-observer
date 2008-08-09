@@ -443,24 +443,48 @@ class ObserverController < ApplicationController
       session_setup
 
       # Attempt to create observation (and associated naming, vote, etc.)
-      if request.method == :post && create_observation_helper()
-        redirect_to :action => 'show_observation', :id => @observation
+      if request.method == :post
+        if create_observation_helper()
+          if has_notifications(@naming, @user)
+            redirect_to(:action => 'show_notifications', :naming => @naming, :observation => @observation)
+          else
+            redirect_to(:action => 'show_observation', :id => @observation)
+          end
+        else
+          form_naming_helper()
+        end
       else
         # Create empty instances first time through.
-        if request.method == :get
-          @observation = Observation.new
-          @naming      = Naming.new
-          @vote        = Vote.new
-          @what        = '' # can't be nil else rails tries to call @name.name
-          @names       = nil
-          @valid_names = nil
-        end
-        # Sets up some temp arrays needed by _form_naming.rhtml.
+        @observation = Observation.new
+        @naming      = Naming.new
+        @vote        = Vote.new
+        @what        = '' # can't be nil else rails tries to call @name.name
+        @names       = nil
+        @valid_names = nil
         form_naming_helper()
       end
     end
   end
 
+  # Displays notifications related to a given naming and users.
+  # Inputs: params[:naming], params[:observation], session['user']
+  # Outputs:
+  #   @notifications
+  def show_notifications
+    naming_id = params[:naming]
+    @naming = Naming.find(naming_id)
+    @observation = Observation.find(params[:observation])
+    @user = session['user']
+    notifications = []
+    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, @user.id)
+      naming_id, notification_id = q.get_integers([:naming, :notification])
+      if @naming.id == naming_id
+        notifications.push(Notification.find(notification_id))
+      end
+    end
+    @notifications = notifications.sort_by { rand }
+  end
+  
   # Form to edit an existing observation.
   # Linked from: left panel
   # Inputs (get):
@@ -568,7 +592,7 @@ class ObserverController < ApplicationController
 #    create_naming_helper()
 #    edit_naming_helper()
 #    form_naming_helper()
-#    resolve_name_helper()
+#    resolve_name_helper(user, what)
 #    create_naming_reasons_helper(naming)
 #
 #++#############################################################################
@@ -644,10 +668,10 @@ class ObserverController < ApplicationController
           ['naming_id = ? AND user_id = ?', @naming.id, @naming.user_id])
       end
       if !check_user_id(@naming.user_id)
-        redirect_to :action => 'show_observation', :id => @observation
+        redirect_to :action => 'show_observation', :id => @observation, :params => calc_search_params()
       # Attempt to update naming (and associated vote, etc.)
       elsif request.method == :post && edit_naming_helper()
-        redirect_to :action => 'show_observation', :id => @observation
+        redirect_to :action => 'show_observation', :id => @observation, :params => calc_search_params()
       else
         # Initialize the "what" field.
         if request.method == :get
@@ -697,93 +721,137 @@ class ObserverController < ApplicationController
 
 ################################################################################
 
-  def create_observation_helper()
+  # Helper function for initializing the objects needed by create_observation
+  def create_observation_objects(params)
+    success = true
     # Roughly create and populate observation, naming, and vote instances.
     # Don't save them until we're sure everything is right.
+    names = nil
+    valid_names = nil
     now = Time.now
-    @user = session['user']
-    @observation = Observation.new(params[:observation])
-    @observation.created  = now
-    @observation.modified = now
-    @observation.user     = @user
-    @naming = Naming.new(params[:naming])
-    @naming.created     = now
-    @naming.modified    = now
-    @naming.user        = @user
-    @naming.observation = @observation
-    @vote = Vote.new(params[:vote])
-    @vote.created     = now
-    @vote.modified    = now
-    @vote.user        = @user
-    @vote.naming      = @naming
-    @vote.observation = @observation
+    user = session['user']
+    observation = Observation.new(params[:observation])
+    observation.created  = now
+    observation.modified = now
+    observation.user     = user
+    naming = Naming.new(params[:naming])
+    naming.created     = now
+    naming.modified    = now
+    naming.user        = user
+    naming.observation = observation
+    vote = Vote.new(params[:vote])
+    vote.created     = now
+    vote.modified    = now
+    vote.user        = user
+    vote.naming      = naming
+    vote.observation = observation
     #
     # Resolve chosen name (see resolve_name_helper for full heuristics).
     # I'm allowing user to create observations without a naming for now.
-    @what = params[:name][:name]
-    if !@what || Name.names_for_unknown.member?(@what.strip)
-      @name = nil
+    what = params[:name][:name]
+    if !what || Name.names_for_unknown.member?(what.strip)
+      name = nil
     else
-      @name = resolve_name_helper()
-      return false if !@name
-      @naming.name = @name
+      (name, names, valid_names) = resolve_name_helper(user, what)
+      if name
+        naming.name = name
+      else
+        success = false
+      end
     end
+    [success, observation, name, names, naming, user, valid_names, vote, what]
+  end
+  
+  # Helper function for validating the objects needed by create_observation
+  def validate_co_objects(observation, name, naming, vote)
     #
     # Do some simple validation before saving stuff.  (Name(s) might have
     # already been saved, but there's nothing we can do about that.  If we
-    # put this above resolve_name_helper(), then it will approve names
+    # put this above resolve_name_helper(user, what), then it will approve names
     # silently, and that's even worse that silently creating names before
     # the user has correctly completed the form.)
-    if !@observation.valid?
-      flash_object_errors(@observation)
-      return false
-    elsif @name && !@naming.valid?
-      flash_object_errors(@naming)
-      return false
-    elsif @name && !@vote.valid?
-      flash_object_errors(@vote)
-      return false
-    end
-    #
-    # Now if the user has named it, finish creating the naming
-    # (create_naming_reasons_helper creates all the NamingReason objects tied
-    # to the Naming).
-    if @name
-      create_naming_reasons_helper(@naming)
+    result = false
+    if !observation.valid?
+      flash_object_errors(observation)
+    elsif name && !naming.valid?
+      flash_object_errors(naming)
+    elsif name && !vote.valid?
+      flash_object_errors(vote)
     else
-      @observation.name = Name.unknown
+      result = true
     end
+    result
+  end
+  
+  # Helper function for determining if there are notifications for the given
+  # naming and user.
+  def has_notifications(naming, user)
+    result = false
+    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, user.id)
+      naming_id, = q.get_integers([:naming])
+      if naming.id == naming_id
+        result = true
+        break
+      end
+    end
+    result
+  end
+  
+  # Helper function for saving the objects needed by create_observation
+  def save_co_objects(observation, name, naming, user, vote)
+    result = true
     #
     # Finally, save everything.
-    if !@observation.save
-        flash_object_errors(@observation)
-        return false
-    end
-    #
-    # Beyond this point errors are non-fatal.
-    errors = []
-    if @name
-      if !@naming.save
-        errors << "Unable to save the naming."
-      end
-      @observation.namings.push(@naming)
-      # Update vote and community consensus.
-      @naming.change_vote(@user, @vote.value)
-    end
-    if errors != []
-      errors.unshift("Observation was created, however had
-        trouble with the following:")
-      flash_warning errors.join("<br/>")
-      flash_object_warnings(@naming)
-      flash_object_warnings(@vote)
-      flash_object_warnings(@observation)
+    if !observation.save
+        flash_object_errors(observation)
+        result = false
     else
-      flash_notice "Observation was successfully created."
+      #
+      # Beyond this point errors are non-fatal.
+      errors = []
+      if name
+        if !naming.save
+          errors << "Unable to save the naming."
+        end
+        observation.namings.push(naming)
+        # Update vote and community consensus.
+        naming.change_vote(user, vote.value)
+      end
+      if errors != []
+        errors.unshift("Observation was created, however had
+          trouble with the following:")
+        flash_warning errors.join("<br/>")
+        flash_object_warnings(naming)
+        flash_object_warnings(vote)
+        flash_object_warnings(observation)
+      else
+        flash_notice "Observation was successfully created."
+      end
+      #
+      # Log actions.
+      observation.log("Observation created by #{user.login}.", true)
     end
-    #
-    # Log actions.
-    @observation.log("Observation created by #{@user.login}.", true)
-    return true
+    result
+  end
+  
+  # Always called from :post
+  def create_observation_helper()
+    success, @observation, @name, @names, @naming, @user, @valid_names, @vote, @what =
+      create_observation_objects(params)
+    success = validate_co_objects(@observation, @name, @naming, @vote) if success
+    if success
+      #
+      # Now if the user has named it, finish creating the naming
+      # (create_naming_reasons_helper creates all the NamingReason objects tied
+      # to the Naming).
+      if @name
+        create_naming_reasons_helper(@naming)
+      else
+        @observation.name = Name.unknown
+      end
+      success = save_co_objects(@observation, @name, @naming, @user, @vote)
+    end
+    success
   end
 
   def create_naming_helper()
@@ -808,7 +876,7 @@ class ObserverController < ApplicationController
     @vote.observation = @observation
     #
     # Resolve chosen name (see resolve_name_helper for full heuristics).
-    @name = resolve_name_helper()
+    @name, @names, @valid_names = resolve_name_helper(@user, @what)
     return false if !@name
     if @observation.name_been_proposed?(@name)
       flash_warning "Someone has already proposed that name.  If you would
@@ -858,7 +926,7 @@ class ObserverController < ApplicationController
     #
     # Resolve chosen name (see resolve_name_helper for full heuristics).
     @what = params[:name][:name] if params[:name]
-    @name = resolve_name_helper()
+    @name, @names, @valid_names = resolve_name_helper(@user, @what)
     return false if !@name
     if @naming.name != @name && @observation.name_been_proposed?(@name)
       flash_warning "Someone has already proposed that name.  If you would
@@ -995,55 +1063,58 @@ class ObserverController < ApplicationController
   #   requires @user and @what to be set
   #   uses params[:approved_name] and params[:chosen_name]
   #   sets @names, @valid_names
-  def resolve_name_helper()
+  def resolve_name_helper(user, what)
+    name = nil
+    names = nil
+    valid_name = nil
     ignore_approved_name = false
     if params[:chosen_name] && params[:chosen_name][:name_id]
       # User has chosen among multiple matching names or among multiple approved names.
-      @names = [Name.find(params[:chosen_name][:name_id])]
+      names = [Name.find(params[:chosen_name][:name_id])]
       # This tells it to check if this name is deprecated below EVEN IF the user didn't change the what field.
       # This will solve the problem of multiple matching deprecated names discussed below.
       ignore_approved_name = true
     else
       # Look up name: can return zero to many matches.
-      @names = Name.find_names(@what)
+      names = Name.find_names(what)
     end
-    if @names.length == 0
+    if names.length == 0
       # Create temporary name object for it.  (This will not save anything
       # EXCEPT in the case of user supplying author for existing name that
       # has no author.)
-      @names = [create_needed_names(params[:approved_name], @what, @user)]
+      names = [create_needed_names(params[:approved_name], what, user)]
     end
-    target_name = @names.first
-    @names = [] if !target_name
-    if target_name && @names.length == 1
+    target_name = names.first
+    names = [] if !target_name
+    if target_name && names.length == 1
       # Single matching name.  Check if it's deprecated.
-      if target_name.deprecated and (ignore_approved_name or (params[:approved_name] != @what))
+      if target_name.deprecated and (ignore_approved_name or (params[:approved_name] != what))
         # User has not explicitly approved the deprecated name: get list of
         # valid synonyms.  Will display them for user to choose among.
-        @valid_names = target_name.approved_synonyms
+        valid_names = target_name.approved_synonyms
       else
         # User has approved a deprecated name.  Go with it.
-        return target_name
+        name = target_name
       end
-    elsif @names.length > 1 && @names.reject{|n| n.deprecated} == []
+    elsif names.length > 1 && names.reject{|n| n.deprecated} == []
       # Multiple matches, all of which are deprecated.  Check if they all have
       # the same set of approved names.  Pain in the butt, but otherwise can
       # get stuck choosing between Helvella infula Fr. and H. infula Schaeff.
       # without anyone mentioning that both are deprecated by Gyromitra infula.
-      @valid_names = @names.first.approved_synonyms.sort
-      for n in @names
-        if n.approved_synonyms.sort != @valid_names
+      valid_names = names.first.approved_synonyms.sort
+      for n in names
+        if n.approved_synonyms.sort != valid_names
           # If they have different sets of approved names (will this ever
           # actually happen outside my twisted imagination??!) then first have
           # the user choose among the deprecated names, THEN hopefully we'll
           # notice that their choice is deprecated and provide them with the
           # option of switching to one of the approved names.
-          @valid_names = []
+          valid_names = []
           break
         end
       end
     end
-    return nil
+    [name, names, valid_names]
   end
 
   # Creates all the reasons for a naming.

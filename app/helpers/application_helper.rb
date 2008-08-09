@@ -77,8 +77,12 @@ module ApplicationHelper
 
   def show_tabs(tabs)
     tabs.map do |str, url|
-      link_to(str, url)
-    end.join(" | ")
+      if url[0..6] == 'http://'
+        "<a href=\"#{url}\" target=\"_new\">#{str}</a>"
+      else
+        link_to(str, url)
+      end
+    end.join(' | ')
   end
 
   # Insert letter pagination links.  See ApplicationController#paginate_letters.

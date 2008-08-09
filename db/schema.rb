@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 31) do
+ActiveRecord::Schema.define(:version => 32) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -93,6 +93,13 @@ ActiveRecord::Schema.define(:version => 31) do
     t.column "vote_cache",     :float,    :default => 0.0
   end
 
+  create_table "notifications", :force => true do |t|
+    t.column "user_id",       :integer,                                                        :default => 0, :null => false
+    t.column "flavor",        :enum,    :limit => [:name, :observation, :user, :all_comments]
+    t.column "obj_id",        :integer
+    t.column "note_template", :text
+  end
+
   create_table "observations", :force => true do |t|
     t.column "created",                :datetime
     t.column "modified",               :datetime
@@ -164,10 +171,10 @@ ActiveRecord::Schema.define(:version => 31) do
   end
 
   create_table "queued_emails", :force => true do |t|
-    t.column "user_id",    :integer,                        :default => 0, :null => false
-    t.column "to_user_id", :integer,                        :default => 0, :null => false
-    t.column "flavor",     :enum,     :limit => [:comment]
+    t.column "user_id",    :integer
+    t.column "to_user_id", :integer,                                           :default => 0, :null => false
     t.column "queued",     :datetime
+    t.column "flavor",     :enum,     :limit => [:comment, :feature, :naming]
   end
 
   create_table "rss_logs", :force => true do |t|

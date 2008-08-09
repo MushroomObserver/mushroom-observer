@@ -7,7 +7,7 @@ class QueuedEmail < ActiveRecord::Base
   
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_flavors()
-    [:comment, :feature]
+    [:comment, :feature, :naming]
   end
 
   # Like initialize, but ensures that the objects is saved
@@ -40,6 +40,8 @@ class QueuedEmail < ActiveRecord::Base
       CommentEmail.deliver_email(self)
     when :feature
       FeatureEmail.deliver_email(self)
+    when :naming
+      NamingEmail.deliver_email(self)
     else
       raise NotImplementedError
     end

@@ -72,6 +72,29 @@ class AccountMailer < ActionMailer::Base
     @content_type     = @user.html_email ? "text/html" : "text/plain"
   end
 
+  def naming_for_observer(observer, naming, notification)
+    @user                 = observer
+    @subject              = 'Mushroom Observer Research Request'
+    @body["user"]         = @user
+    @body["naming"]       = naming
+    @body["notification"] = notification
+    @recipients           = @user.email
+    @bcc                  = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                 = NEWS_EMAIL_ADDRESS
+    @content_type         = @user.html_email ? "text/html" : "text/plain"
+  end
+
+  def naming_for_tracker(tracker, naming)
+    @user             = tracker
+    @subject          = 'Mushroom Observer Naming Notification'
+    @body["user"]     = @user
+    @body["naming"]   = naming
+    @recipients       = @user.email
+    @bcc              = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from             = NEWS_EMAIL_ADDRESS
+    @content_type     = @user.html_email ? "text/html" : "text/plain"
+  end
+  
   def new_password(user, password)
     @user             = user
     @subject          = 'New Password for Mushroom Observer Account'

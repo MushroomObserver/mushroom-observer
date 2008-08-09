@@ -48,6 +48,44 @@ app_your_observations: Your Observations
 app_your_summary: Your Summary
 
 
+# name/email_tracking
+email_tracking_cancel: Cancel (Show Name)
+email_tracking_disable: Disable
+email_tracking_enable: Enable
+email_tracking_flash_message: Click 'View Notifications' if you would like to help with research related to %s.
+email_tracking_help: >
+  If you enable tracking then an note will be sent to the email
+  address you have provided whenever this name is applied to an observation.
+  A link to this page will be given in each tracking email.
+
+email_tracking_note: Template for notifying an observer
+email_tracking_note_help: >
+  Provide a note template that will be sent as an email or show to the observer when this name
+  is applied to an observation.  If you leave it it blank, then the observer will not be notified.
+
+email_tracking_note_template: >
+  Dear :observer,
+  
+  
+  I am currently doing research related to %s.
+  
+  
+  If possible, please make a dried specimen of any of the mushrooms described in :observation and
+  send them to:
+  
+  
+  %s
+  
+  
+  Thanks,
+  
+  
+  %s
+
+email_tracking_title: Email Tracking for
+email_tracking_update: Update
+
+
 # observer/license_updater
 bulk_license_link: Bulk License Updater
 
@@ -516,6 +554,19 @@ how_species_list: >
 
 how_title: How to Use Mushroom Observer
 
+how_tracking_species: >
+  <p><b>Tracking a Particular Species Through Email</b> - Mushroom Observer allows you to
+  request an email anytime a particular <a href="#name">Name</a> is given to an
+  <a href="#observation">Observation</a>.  To turn this on for a particular Name, go to
+  the page for that Name (see <a href="#searching">Searching</a>) and click 'Email Tracking'.
+  By default the person
+  who made the observation that was given that name will be sent an email to let them know
+  you are interested in their observation.  You can customize your request to the observer.
+  If you don't provide any instructions, then they will not be sent an email.  If the observer
+  gives the name at the time the observation is created, they will be shown your message
+  immediately through the website.  You can modify or disable your request for a particular
+  Name by going back to that name and again selecting 'Email Tracking'.
+
 how_unknown_help: >
   <p><b>Getting Help with an Unknown</b> - In order to get help with an unknown, you need to
   have a <a href="#user">User</a> account.  These can be created easily by selecting
@@ -860,11 +911,19 @@ show_location_version: Version
 
 
 # name/show_name
+show_name_add_name: Add Name
+show_name_approve: Approve
 show_name_author: Author
+show_name_bulk_name_edit: Bulk Name Edit
+show_name_change_synonyms: Change Synonyms
 show_name_citation: Citation
+show_name_deprecate: Deprecate
 show_name_deprecated: Deprecated
 show_name_deprecated_synonyms: Deprecated Synonym(s)
 show_name_distribution_map: Distribution Map
+show_name_edit_name: Edit Name
+show_name_email_tracking: Email Tracking
+show_name_google_images: Google Images
 show_name_last_modified: Last Modified
 show_name_name: Name
 show_name_name_created: Name Created

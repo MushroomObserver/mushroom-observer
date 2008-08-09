@@ -1,0 +1,38 @@
+<%
+    obs = @naming.observation
+    name = @naming.name
+    if @user.html_email
+%>
+<html>
+<head>
+  <title>Mushroom Observer: Naming Notification</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+
+<p>An <a href="<%= "#{DOMAIN}/#{obs.id}" %>">observation</a> on the Mushroom Observer website
+has been given the name
+<a href="<%= "#{DOMAIN}/name/show_name/#{name.id}" %>"><%= textilize_without_paragraph(h(name.display_name)) %></a> which you are currently tracking.</p>
+
+<p>Here are some handy links you may find useful:</p>
+
+<ul type=none>
+  <li><a href="<%= "#{DOMAIN}/name/email_tracking/#{@naming.id}" %>">Update or disable notifications for this name.</a>
+  <li><a href="<%= "#{DOMAIN}/observer/show_notifications/#{@user.id}" %>">Review your notifications.</a>
+</ul>
+
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+An observation, <%= "#{DOMAIN}/#{obs.id}" %>, on the Mushroom Observer website
+has been given the name <%= name.text_name %> which you are currently tracking.
+
+To update or disable notifications for the name just go to the following URL:
+
+<%= "#{DOMAIN}/name/email_tracking/#{@naming.id}" %>
+
+To review you notifications:
+
+<%= "#{DOMAIN}/observer/show_notifications/#{@user.id}" %>
+
+<% end %>
