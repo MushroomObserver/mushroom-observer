@@ -172,9 +172,9 @@ ActiveRecord::Schema.define(:version => 32) do
 
   create_table "queued_emails", :force => true do |t|
     t.column "user_id",    :integer
-    t.column "to_user_id", :integer,                                  :default => 0, :null => false
-    t.column "flavor",     :enum,     :limit => [:comment, :feature]
+    t.column "to_user_id", :integer,                                           :default => 0, :null => false
     t.column "queued",     :datetime
+    t.column "flavor",     :enum,     :limit => [:comment, :feature, :naming]
   end
 
   create_table "rss_logs", :force => true do |t|

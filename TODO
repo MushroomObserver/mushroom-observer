@@ -23,6 +23,29 @@ Email queuing:
   clean up script/send_email
   Add option for not received your own email
 
+Improve deployment process:
+  Dump server db
+  Start image tar on server
+Migrate local database back to current production version
+  Upload db
+  Modify news and how to.
+  Upload images
+  cksum image tarball
+  Review code
+  Do local migration
+  Run tests
+  Checkin changes
+  Checkout code.
+  Shutdown server.
+  Move log
+  Run migration.
+  rake cache:refresh_queued_emails
+  Startup server.
+  Test server.
+
+Make image tarball creation automatic
+Create a backup directory that can be swapped with the current directory.  Logs and images should by shared through symlinks.
+
 New user options:
   Send me a copy of my own comments
   Send me comments on observations I've commented on
