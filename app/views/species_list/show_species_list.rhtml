@@ -2,11 +2,17 @@
     @title = 'Species List: ' + h(@species_list.unique_text_name)
     search_params = calc_search_params()
 %>
-<% if check_permission(@species_list.user_id) %>
-  <%= link_to 'Edit Species List', :action => 'edit_species_list', :id => @species_list %>
-  | <%= link_to 'Destroy', { :action => 'destroy_species_list', :id => @species_list },
-                             :confirm => "Are you sure?" %>
-<% end %>
+<%=
+  tabs = []
+  if check_permission(@species_list.user_id)
+    tabs.push url_for('Edit Species List', :action => 'edit_species_list', :id => @species_list)
+    tabs.push url_for('Destroy', { :action => 'destroy_species_list', :id => @species_list }, :confirm => "Are you sure?")
+  end
+  tabs.push ['Plain Text',  { :action => 'make_report', :id => @species_list, :type => 'txt' }, { :target => '_new' }]
+  tabs.push ['Rich Text',   { :action => 'make_report', :id => @species_list, :type => 'rtf' }, { :target => '_new' }]
+  tabs.push ['Spreadsheet', { :action => 'make_report', :id => @species_list, :type => 'csv' }, { :target => '_new' }]
+  show_tabs(tabs)
+%>
 
 <div id="Title"><%= @title %></div>
 

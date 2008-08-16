@@ -1,24 +1,34 @@
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag "my_auto_complete" %>
-<%= javascript_tag "extend_ajax_autocompleter()" %>
-<div id="indicator" class="indicator"><%= image_tag("indicator.gif") %></div>
-<%= javascript_tag 'Element.hide($("indicator"))' %>
+<% if @js %>
+  <%= javascript_include_tag 'prototype' %>
+  <%= javascript_include_tag 'controls' %>
+  <%= javascript_include_tag 'effects' %>
+  <%= javascript_include_tag 'my_auto_complete' %>
+  <%= javascript_tag 'extend_ajax_autocompleter()' %>
+  <div id='indicator' class='indicator'><%= image_tag('indicator.gif') %></div>
+  <%= javascript_tag 'Element.hide($("indicator"))' %>
+<% end %>
+  
+<% @title = 'Create Observation' %>
 
-<% @title = 'Editing Observation: ' + h(@observation.unique_text_name)
-   button_name = "Save Edits" %>
+<% @title = 'Editing Observation: ' + h(@observation.unique_text_name) %>
+
 <%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
 
 <div id="Title">Editing Observation: <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <% form_tag(:action => 'edit_observation', :id => @observation, :approved_name => @what) do %>
 <br/>
-<center><%= submit_tag button_name %></center>
+<center><%= submit_tag 'Save Edits' %></center>
 
 <table cellpadding="10">
   <tr>
     <td valign="top">
       <%= render :partial => 'form_observations', :locals => {
+        :action           => 'edit_observation',
         :logging_optional => true,
+        :include_naming   => false,
+        :include_images   => false,
+        :button_name      => 'Save Edits',
       } %>
     </td>
     <td valign="top">
@@ -36,4 +46,6 @@
     </td>
   </tr>
 </table>
+
+<center><%= submit_tag 'Save Edits' %></center>
 <% end %>

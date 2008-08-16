@@ -1,10 +1,15 @@
+require 'rtf'
+
+################################################################################
 #
 #  Views: ("*" - login required)
 #     list_species_lists                     List of lists by date.
 #     species_lists_by_title                 List of lists by title.
 #     species_lists_by_user                  List of lists created by user.
 #     show_species_list                      Display notes/etc. and list of species.
+#     make_report                            Display contents of species list as report.
 #   * create_species_list                    Create new list.
+#   * create_darvin                          Darvin's create form.
 #   * edit_species_list                      Edit existing list.
 #   * upload_species_list                    Same as edit_species_list but gets list from file.
 #   * destroy_species_list                   Destroy list.
@@ -88,6 +93,26 @@ class SpeciesListController < ApplicationController
     @pages,   @observation_list = paginate_array(@observation_list, 100)
   end
 
+  # Linked from: show_species_list
+  # Inputs:
+  #   params[:id] (species_list)
+  #   params[:type] (file extension)
+  # Renders a report.
+  def make_report
+    names = SpeciesList.find(params[:id].to_i).names
+    case params[:type]
+    when 'txt':
+      render(:text => darvin_to_txt(names), :content_type => "text/plain")
+    when 'rtf':
+      render(:text => darvin_to_rtf(names), :content_type => "text/richtext")
+    when 'csv':
+      render(:text => darvin_to_csv(names), :content_type => "text/plain")
+    else
+      flash_error("Don't support report filetype *.#{params[:type]}.")
+      redirect_to :action => "show_species_list", :id => @species_list
+    end
+  end
+
   # Sort observations in species_list and return list of observation objects.
   # Needed by everyone using the show_species_list view.
   def sort_species_list_observations(spl, user)
@@ -148,6 +173,61 @@ class SpeciesListController < ApplicationController
         calc_checklist(nil)
       else
         process_species_list('created')
+      end
+    end
+  end
+
+  # Specialized form for creating a new species list, at Darvin's request.
+  # Linked from: create_species_list
+  # Inputs:
+  #  session['user']
+  #  params[:results]
+  # Outputs:
+  #  @names
+  def create_darvin
+    @genera = Name.connection.select_values %(
+      SELECT text_name FROM names
+      WHERE rank = 'Genus'
+      ORDER BY text_name
+    )
+    @species = Name.connection.select_all %(
+      SELECT text_name as n, deprecated as d, synonym_id as s FROM names
+      WHERE rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form'
+      ORDER BY text_name
+    )
+    valid = {}
+    for rec in @species
+      n, d, s = rec.values_at('n', 'd', 's')
+      valid[s] ||= n if s.to_i > 0 && d.to_i == 1
+    end
+    @species = @species.map do |rec|
+      n, d, s = rec.values_at('n', 'd', 's')
+      d && valid[s] && n != valid[s] ? "#{n} = #{valid[s]}" : n
+    end
+    @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
+    if request.method == :post
+      @objs = @names.map do |str|
+        Name.find_by_text_name(str)
+      end
+      case params[:commit]
+      when 'Create List':
+        @checklist_names  = {}
+        @list_members     = params[:results]
+        @new_names        = nil
+        @multiple_names   = nil
+        @deprecated_names = nil
+        @member_notes     = nil
+        session[:checklist_source] = :nothing
+        calc_checklist(nil)
+        render(:action => 'create_species_list')
+      when 'Show as Plain Text':
+        render(:text => darvin_to_txt(@objs), :content_type => "text/plain")
+      when 'Show as Rich Text':
+        render(:text => darvin_to_rtf(@objs), :content_type => "text/richtext")
+      when 'Show as Spreadsheet':
+        render(:text => darvin_to_csv(@objs), :content_type => "text/plain")
+      else
+        flash_error("Invalid commit button, \"#{params[:commit]}\".")
       end
     end
   end
@@ -521,5 +601,44 @@ class SpeciesListController < ApplicationController
       end
     end
     name
+  end
+
+  # Display list of names as rich text.
+  def darvin_to_txt(names)
+    names.map do |name|
+      name.text_name
+    end.join("\r\n")
+  end
+
+  # Display list of names as csv file.
+  def darvin_to_csv(names)
+    names.map do |name|
+      [name.text_name, name.author, name.citation].map do |str|
+        if str && str.match(/['",\\]/)
+          str.gsub!(/(['\\])/) {|s| "\\" + s}
+          "'#{str}'"
+        else
+          str.to_s
+        end
+      end.join(",")
+    end.join("\r\n")
+  end
+
+  # Display list of names as rich text.
+  def darvin_to_rtf(names)
+    doc = RTF::Document.new(RTF::Font::SWISS)
+    for name in names
+      rank      = name.rank
+      text_name = name.text_name
+      author    = name.author
+      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
+        doc.italic {|n| n << text_name}
+      else
+        doc << text_name
+      end
+      doc << " " + author if author && author != ""
+      doc.line_break
+    end
+    return doc.to_rtf
   end
 end

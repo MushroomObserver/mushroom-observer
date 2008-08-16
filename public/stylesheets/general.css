@@ -259,13 +259,6 @@ div.progressBar div.background {
 div.auto_complete {
   background-color:#fff;
   border:1px solid #888;
-}
-div.auto_complete_scroll {
-  background-color:#fff;
-  border-right:none;
-  border-bottom:none;
-  height:250px;
-  overflow:scroll;
   overflow-x:hidden;
 }
 div.auto_complete ul {
@@ -299,5 +292,13 @@ div.popup {
   border-bottom: 5px solid #333;
   background: #EEE;
   color: #000;
+}
+
+div.form_image {
+  margin-bottom: 5px;
+  padding: 2px 5px 2px 5px;
+}
+div.form_image p {
+  margin: 4px 0px 4px 0px;
 }
 

@@ -1,0 +1,164 @@
+{\rtf1\ansi\deff0\deflang\plain\fs24
+{\fonttbl
+{\f0\froman Times New Roman;}
+{\f1\fmodern Courier;}
+}
+{\info
+{\createim\yr2005\mo11\dy8\hr15\min16}
+}
+{\pard\ql
+{\b\fs36
+Example Program
+}
+\par}
+{\pard\qj
+This document is automatically generated using the RTF Ruby library by Peter Wood. This serves as an example of what can be achieved in document creation via the library. The source code that was used to generate it is listed below...
+\par}
+{\pard\ql\li300
+{\f1\fs16
+{\line}
+ 1   #!/usr/bin/env ruby
+{\line}
+ 2   
+{\line}
+ 3   require 'rubygems'
+{\line}
+ 4   require 'rtf'
+{\line}
+ 5   
+{\line}
+ 6   include RTF
+{\line}
+ 7   
+{\line}
+ 8   fonts = [Font.new(Font::ROMAN, 'Times New Roman'),
+{\line}
+ 9            Font.new(Font::MODERN, 'Courier')]
+{\line}
+10   
+{\line}
+11   styles = \{\}
+{\line}
+12   styles['PS_HEADING']              = ParagraphStyle.new
+{\line}
+13   styles['PS_NORMAL']               = ParagraphStyle.new
+{\line}
+14   styles['PS_NORMAL'].justification = ParagraphStyle::FULL_JUSTIFY
+{\line}
+15   styles['PS_INDENTED']             = ParagraphStyle.new
+{\line}
+16   styles['PS_INDENTED'].left_indent = 300
+{\line}
+17   styles['PS_TITLE']                = ParagraphStyle.new
+{\line}
+18   styles['PS_TITLE'].space_before   = 100
+{\line}
+19   styles['PS_TITLE'].space_after    = 200
+{\line}
+20   styles['CS_HEADING']              = CharacterStyle.new
+{\line}
+21   styles['CS_HEADING'].bold         = true
+{\line}
+22   styles['CS_HEADING'].font_size    = 36
+{\line}
+23   styles['CS_CODE']                 = CharacterStyle.new
+{\line}
+24   styles['CS_CODE'].font            = fonts[1]
+{\line}
+25   styles['CS_CODE'].font_size       = 16
+{\line}
+26   
+{\line}
+27   document = Document.new(fonts[0])
+{\line}
+28   
+{\line}
+29   document.paragraph(styles['PS_HEADING']) do |p1|
+{\line}
+30      p1.apply(styles['CS_HEADING']) << 'Example Program'
+{\line}
+31   end
+{\line}
+32   
+{\line}
+33   document.paragraph(styles['PS_NORMAL']) do |p1|
+{\line}
+34      p1 << 'This document is automatically generated using the RTF Ruby '
+{\line}
+35      p1 << 'library by Peter Wood. This serves as an example of what can '
+{\line}
+36      p1 << 'be achieved in document creation via the library. The source '
+{\line}
+37      p1 << 'code that was used to generate it is listed below...'
+{\line}
+38   end
+{\line}
+39   
+{\line}
+40   document.paragraph(styles['PS_INDENTED']) do |p1|
+{\line}
+41      n = 1
+{\line}
+42      p1.apply(styles['CS_CODE']) do |p2|
+{\line}
+43         File.open('example03.rb') do |file|
+{\line}
+44            file.each_line do |line|
+{\line}
+45               p2.line_break
+{\line}
+46               p2 << "#\{n > 9 ? '' : ' '\}#\{n\}   #\{line.chomp\}"
+{\line}
+47               n += 1
+{\line}
+48            end
+{\line}
+49         end
+{\line}
+50      end
+{\line}
+51   end
+{\line}
+52   
+{\line}
+53   document.paragraph(styles['PS_TITLE']) do |p1|
+{\line}
+54      p1.italic do |p2|
+{\line}
+55         p2.bold << 'Listing 1:'
+{\line}
+56         p2 << ' Generator program code listing.'
+{\line}
+57      end
+{\line}
+58   end
+{\line}
+59   
+{\line}
+60   document.paragraph(styles['PS_NORMAL']) do |p1|
+{\line}
+61      p1 << "This example shows the creation of a new document and the "
+{\line}
+62      p1 << "of textual content to it. The example also provides examples "
+{\line}
+63      p1 << "of using block scope to delimit style scope (lines 35-40)."
+{\line}
+64   end
+{\line}
+65   
+{\line}
+66   File.open('example03.rtf', 'w') \{|file| file.write(document.to_rtf)\}
+}
+\par}
+{\pard\ql\sb100\sa200
+{\i
+{\b
+Listing 1:
+}
+ Generator program code listing.
+}
+\par}
+{\pard\qj
+This example shows the creation of a new document and the of textual content to it. The example also provides examples of using block scope to delimit style scope (lines 35-40).
+\par}
+}

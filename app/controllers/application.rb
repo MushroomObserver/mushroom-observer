@@ -504,29 +504,45 @@ class ApplicationController < ActionController::Base
     return result
   end
 
+  # # Process AJAX request for autocompletion of mushroom name.  Pass in the
+  # # name of the field (eg. :proposed, :name), and it renders the result.
+  # # Inputs: params[arg1][arg2]
+  # def auto_complete_name(arg1, arg2)
+  #   # Added ?: after an exception was thrown in which name was nil
+  #   part = params[arg1] ? params[arg1][arg2].downcase.gsub(/[*']/,"%") : ''
+  #   @items = []
+  #   if (part.index(' ').nil?)
+  #     @items = Name.find(:all, {
+  #       :conditions => "LOWER(text_name) LIKE '#{part}%' AND text_name NOT LIKE '% %'",
+  #       :order => "text_name ASC",
+  #       :limit => 100
+  #     })
+  #   end
+  #   if (@items.length < 100)
+  #     @items += Name.find(:all, {
+  #       :conditions => "LOWER(text_name) LIKE '#{part}%'",
+  #       :order => "text_name ASC",
+  #       :limit => 100 - @items.length
+  #     })
+  #     @items.sort! {|a,b| a['text_name'] <=> b['text_name']}
+  #   end
+  #   render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry['text_name']))) }.uniq) %>"
+  # end
+
   # Process AJAX request for autocompletion of mushroom name.  Pass in the
-  # name of the field (eg. :proposed, :name), and it renders the result.
+  # name of the field (eg. :proposed, :name).  It reads the first letter of
+  # the field, and returns all the names beginning with that letter.
   # Inputs: params[arg1][arg2]
+  # Outputs: renders sorted list of names, one per line, in plain text
   def auto_complete_name(arg1, arg2)
-    # Added ?: after an exception was thrown in which name was nil
-    part = params[arg1] ? params[arg1][arg2].downcase.gsub(/[*']/,"%") : ''
-    @items = []
-    if (part.index(' ').nil?)
-      @items = Name.find(:all, {
-        :conditions => "LOWER(text_name) LIKE '#{part}%' AND text_name NOT LIKE '% %'",
-        :order => "text_name ASC",
-        :limit => 100
-      })
-    end
-    if (@items.length < 100)
-      @items += Name.find(:all, {
-        :conditions => "LOWER(text_name) LIKE '#{part}%'",
-        :order => "text_name ASC",
-        :limit => 100 - @items.length
-      })
-      @items.sort! {|a,b| a['text_name'] <=> b['text_name']}
-    end
-    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry['text_name']))) }.uniq) %>"
+    part = params[arg1] ? params[arg1][arg2] : ''
+    letter = part[0,1].downcase
+    @items = Name.connection.select_values %(
+      SELECT text_name FROM names
+      WHERE LOWER(text_name) LIKE '#{letter}%'
+      ORDER BY text_name ASC
+    )
+    render(:inline => '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
   end
 
   # Process AJAX request for autocompletion of location name.  Pass in the

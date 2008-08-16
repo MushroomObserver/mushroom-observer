@@ -39,52 +39,53 @@
                         <tr>
                             <td valign="top" align="left">
                                 <%= link_to(lnbsp(:app_intro), :controller => 'observer',
-                                            :action => 'intro') %> <br/>
+                                            :action => 'intro') %><br/>
                                 <%= link_to(lnbsp(:app_how_to_use),
                                             :controller => 'observer',
-                                            :action => 'how_to_use') %> <br/>
+                                            :action => 'how_to_use') %><br/>
                                 <%= link_to(lnbsp(:app_how_to_help),
                                             :controller => 'observer',
-                                            :action => 'how_to_help') %> <br/>
+                                            :action => 'how_to_help') %><br/>
                                 <%= link_to(lnbsp(:app_send_a_comment), :controller => 'observer',
-                                            :action => 'ask_webmaster_question') %>
-                                <br/><br/>
+                                            :action => 'ask_webmaster_question') %><br/>
+                                <br/>
+
                                 <%= link_to(lnbsp(:app_index_a_z), :controller => 'name',
-                                                  :action => 'observation_index') %>
-                                <br/><br/>
+                                                  :action => 'observation_index') %><br/>
+                                <br/>
  
                                 <%= lnbsp(:app_latest) %>:<br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_latest_changes),
                                                         :controller => 'observer',
-                                                        :action => 'list_rss_logs') %> <br/>
+                                                        :action => 'list_rss_logs') %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_newest_images), :controller => 'image',
-                                                        :action => 'list_images') %> <br/>
+                                                        :action => 'list_images') %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_comments), :controller => 'comment',
-                                                        :action => 'list_comments') %> <br/>
+                                                        :action => 'list_comments') %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_news), :controller => 'observer',
-                                                        :action => 'news') %>
-                                <br/><br/>
+                                                        :action => 'news') %><br/>
+                                <br/>
 
                                 <%= lnbsp(:app_observations_left) %>:<br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_create_observation),
                                                         :controller => 'observer',
-                                                        :action => 'create_observation') %> <br/>
+                                                        :action => 'create_observation') %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_date_obs),
                                                         :controller => 'observer',
-                                                        :action => 'list_observations') %> <br/>
+                                                        :action => 'list_observations') %><br/>
                                 <br/>
 
                                 <%= lnbsp(:app_species_list) %>:<br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_create_list),
                                                         :controller => 'species_list',
-                                                        :action => 'create_species_list') %> <br/>
+                                                        :action => 'create_species_list') %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_date_spl),
                                                         :controller => 'species_list',
-                                                        :action => 'list_species_lists') %> <br/>
+                                                        :action => 'list_species_lists') %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_sort_by_title),
                                                         :controller => 'species_list',
-                                                        :action => 'species_lists_by_title') %>
-                                <br/><br/>
+                                                        :action => 'species_lists_by_title') %><br/>
+                                <br/>
 
                                 <% if session['user'].nil? %>
                                 <%= lnbsp(:app_account) %>:<br/>
@@ -93,7 +94,6 @@
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_create_account),
                                                         :controller => 'account',
                                                         :action => 'signup') %>
-
                                 <% else %>
                                 <%= lnbsp(:app_current_user) %>:<br/>
                                 &nbsp;&nbsp;<%= h(session['user'].login) %><br/>
@@ -116,7 +116,6 @@
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_logout),
                                                         :controller => 'account',
                                                         :action => 'logout_user') %>
-
                                     <% if session['user'].id == 0 %>
                                         <br/><br/>
                                         Admin:<br/>
@@ -127,14 +126,14 @@
                                                                 :controller => 'observer',
                                                                 :action => 'email_features') %><br/>
                                     <% end %>
-                                <% end %>
-                                <br/><br/>
+                                <% end %><br/>
+                                <br/>
 
                                 <%= link_to(lnbsp(:app_contributors), :controller => 'observer',
-                                            :action => 'users_by_contribution') %> <br/>
+                                            :action => 'users_by_contribution') %><br/>
                                 <%= link_to(lnbsp(:app_site_stats), :controller => 'observer',
-                                            :action => 'show_site_stats') %>
-                                <br/><br/>
+                                            :action => 'show_site_stats') %><br/>
+                                <br/>
 
                                 <div id="color_note">
                                     <%= link_to(lnbsp(:app_colors_from) % css,

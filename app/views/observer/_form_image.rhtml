@@ -1,0 +1,45 @@
+<!--[form:image]-->
+
+<div id="image_<%= index %>_box" class="form_image">
+
+<% @image = @images[index] %>
+
+<p><nobr><label for="image_<%= index %>_image">Upload Image:</label>
+<%= file_field('image', 'image', :index => index) %>
+<% if @js %>
+  <span style="left-width:10px">&nbsp;</span>
+  <%= button_to_function("More &raquo;", "image_on(#{index})",
+    { :id => "image_#{index}_more" }) %>
+  <%= button_to_function("&laquo; Less", "image_off(#{index})",
+    { :id => "image_#{index}_less" }) %>
+  <%= javascript_tag("Element.hide('image_#{index}_less')") %>
+<% end %>
+</nobr></p>
+
+<div id="image_<%= index %>_div" style="line-height:100%">
+  <p><label for="image_<%= index %>_copyright_holder">Copyright Holder:</label>
+  <%= text_field('image', 'copyright_holder', :index => index) %></p>
+
+  <p><label for="image_<%= index %>_when_1i">When Was It Taken:</label>
+  <%= date_select('image', 'when', :index => index,
+    :start_year => Time.now.year-20, :end_year => Time.now.year,
+    :onchange => "CHANGED_DATES[#{index}] = true") %></p>
+
+  <p><label for="image_<%= index %>_license_id">Select a <%= link_to("License", :action => "how_to_use", :anchor => "lic") %>:</label>
+  <%= select('image', :license_id, @licenses, :index => index) %></p>
+
+  <p><label for="image_<%= index %>_notes"><%= :form_images_notes.l %>:</label>
+  <span class="HelpNote"> <%= :form_images_notes_help.l %></span><br/>
+  <%= text_area('image', 'notes', :index => index, :cols => 80, :rows => 1) %></p>
+</div>
+
+<%= if @js
+  javascript_tag %(
+    CHANGED_DATES[#{index}] = false;
+    Element.hide('image_#{index}_div');
+  )
+end %>
+
+</div>
+
+<!--[eoform:image]-->

@@ -75,12 +75,16 @@ module ApplicationHelper
     search_params
   end
 
+  # This is a temporary place-holder used to display the tabs in the upper
+  # left of the page body.  Some day we'd like to do something to make these
+  # more visible.
   def show_tabs(tabs)
-    tabs.map do |str, url|
-      if url[0..6] == 'http://'
+    tabs.map do |args|
+      str, url = *args
+      if url.is_a?(String) && (url[0..6] == 'http://')
         "<a href=\"#{url}\" target=\"_new\">#{str}</a>"
       else
-        link_to(str, url)
+        link_to(*args)
       end
     end.join(' | ')
   end

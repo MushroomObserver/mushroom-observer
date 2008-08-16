@@ -1,30 +1,41 @@
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag 'my_auto_complete' %>
-<%= javascript_tag 'extend_ajax_autocompleter()' %>
-<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
-<%= javascript_tag 'Element.hide($("indicator"))' %>
-
-<% @title = 'Create Observation'
-   button_name = "Create" %>
+<% if @js %>
+  <%= javascript_include_tag 'prototype' %>
+  <%= javascript_include_tag 'controls' %>
+  <%= javascript_include_tag 'effects' %>
+  <%= javascript_include_tag 'my_auto_complete' %>
+  <%= javascript_tag 'extend_ajax_autocompleter()' %>
+  <div id='indicator' class='indicator'><%= image_tag('indicator.gif') %></div>
+  <%= javascript_tag 'Element.hide($("indicator"))' %>
+<% end %>
+  
+<% @title = 'Create Observation' %>
 
 <div id="Title"><%= @title %></div>
 
-<% form_tag(:action => 'create_observation', :approved_name => @what) do %>
+<% form_tag({ :action => 'create_observation', :approved_name => @what },
+  { :multipart => true }) do %>
 <br/>
-<center><%= submit_tag(button_name) %></center>
+<center><%= submit_tag('Create') %></center>
 
 <table cellpadding="10">
   <tr>
     <td valign="top">
-      <%= render :partial => 'form_observations',
-        :locals => { :logging_optional => false } %>
-    </td>
-    <td valign="top">
-      <%= render :partial => 'form_naming', :locals => {
-        :action      => 'create_observation',
-        :button_name => button_name } %>
+      <%= render :partial => 'form_observations', :locals => {
+        :action           => 'create_observation',
+        :logging_optional => false,
+        :include_naming   => true,
+        :include_images   => true,
+        :button_name      => 'Create',
+      } %>
     </td>
   </tr>
 </table>
 
+<%= hidden_field_tag("good_images", @good_images.map {|o| o.id}.join(" ")) %>
+
+<center><%= submit_tag('Create') %></center>
 <% end # form %>
+
+<br/>
+<br/>
+<br/>

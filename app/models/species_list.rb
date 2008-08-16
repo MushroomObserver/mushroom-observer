@@ -20,6 +20,7 @@ require 'active_record_extensions'
 #    construct_observation(name, args)  Create and add Observation to list.
 #    update_names(chosen_names)         Update Names in list based on "chosen_names" radio boxes.
 #    name_included(name)                Does this list include the given Name?
+#    names                              Get sorted list of name objects.
 #
 #    file=(file_field)             Upload text file into internal "data" field.
 #    process_file_data(sorter)     Process uploaded file.  Pass in NameSorter object.
@@ -65,6 +66,17 @@ class SpeciesList < ActiveRecord::Base
     self.log(entry) # Ensures that self.rss_log exists
     self.rss_log.species_list = nil
     self.rss_log.add(self.unique_text_name, false)
+  end
+
+  # Get list of Name objects, sorted by text_name.
+  def names
+    # Takes 0.11 seconds on Sebastopol Observations.
+    ids = self.observations.map {|o| o.name_id}.uniq
+    Name.find(:all, :conditions => ['id IN (?)', ids], :order => 'text_name ASC')
+    
+    # Takes 0.41 seconds on Sebastopol Observations.
+    # self.observations.map {|o| o.name_id}.
+    #   uniq.map {|id| Name.find(id)}.sort_by {|n| n.text_name}
   end
 
   # Returns empty string.  Used by a form?

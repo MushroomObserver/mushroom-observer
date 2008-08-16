@@ -169,7 +169,7 @@ module BrowserStatus
     elsif params[:_js]
       @js = (params[:_js] == 'on')
     else
-      @js = (!session[:_js].nil?)
+      @js = (session[:_js] == true)
     end
     session[:_js] = @js
 

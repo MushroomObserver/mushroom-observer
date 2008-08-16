@@ -206,9 +206,9 @@ form_naming_name_help: >
   in the database, then you will be given the option to add the name or fix the spelling if it's just a typo.
 
 form_naming_name_help_create: >
-  The name you would apply to this observation.  If you don't know what it is, just leave this
-  side of the page blank.  If you find a better name in the future, you can always propose a
-  new name.
+  The name you would apply to this observation.  If you don't know what it is,
+  just leave it blank.  If you find a better name in the future, you can always
+  propose a name later.
 
 form_naming_not_recognized: The name '%s' was not recognized.
 form_naming_not_recognized_help: Click '%s' to create this name or edit the name below to correct any typo.
@@ -236,8 +236,8 @@ form_observations_specimen_available_help: >
 form_observations_when: When
 form_observations_where: Where (required)
 form_observations_where_help: >
-  Where the observation was made.<br/>
-  In the US this should be at least accurate to the county.
+  Where the observation was made. In the US this should be at least accurate to
+  the county.<br/>Example: *Albion, Mendocino Co., California, USA*
 
 
 # observer/_form_species_list

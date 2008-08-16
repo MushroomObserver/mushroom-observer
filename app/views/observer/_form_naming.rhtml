@@ -36,43 +36,67 @@
   <% end %>
 <% end %>
 
-<%# Yes, "name name" is stupid, but it avoids the even stupider requirement
-  # of creating dummy what() and what=() methods in the Naming model. %>
-<label for="name_name"><%= :form_naming_name.l %>:</label>
-<%= text_field_with_auto_complete('name', 'name', { :value => @what },
-  { :skip_style => true, :indicator => 'indicator' }) %><br/>
-<% if action == 'create_observation' %>
-  <span class="HelpNote"><%= :form_naming_name_help_create.l %></span><br/>
-<% end %>
-<span class="HelpNote"><%= :form_naming_name_help.l %></span><br/><br/>
-<%= javascript_tag "document.getElementById('name_name').focus()" if !@focused %>
+<%# -------------------- Name Autocompleter -------------------- %>
 
-<%
-# This makes the autocomplete field (what) scrollable.  It just adds a
-# new class to the popup box (created by rails).  The new class fixes the width
-# (no matter how many lines match the partial), and forces the browser to
-# display scrollbars.  All the rest is done in the custom methods provided at
-# the top of create/edit_observation/naming.rhtml.
+<nobr>
+  <label for="name_name"><%= :form_naming_name.l %>:</label>
+  <%= text_field('name', 'name', { :value => @what }) %>
+  <span style="margin-left:20px">&nbsp;</span>
+  <label for="vote_value"><%= :form_naming_confidence.l %>:</label>
+  <%= select('vote', 'value', @confidence_menu, { :include_blank =>
+    action == 'edit_naming' ? false : true }) %>
+</nobr><br/>
+<% if !show_reasons %>
+  <span class="HelpNote"><%= :form_naming_name_help_create.l %></span>
+<% end %>
+<span class="HelpNote"><%= :form_naming_name_help.l %></span><br/>
+
+<% if @js %>
+  <div class="auto_complete" id="name_name_auto_complete"></div>
+  <%= javascript_tag %(
+    new NameAutocompleter('name_name', 'name_name_auto_complete',
+      '/observer/auto_complete_for_name_name', {
+        inherit_width: #{@ua[:ie] ? 1 : 0},
+        onChange: function(v) {
+          if (v && v != "") Element.show('reasons_div');
+        }
+      }
+    );
+  ) %>
+<% end %>
+
+<%# -------------------- Naming Reasons -------------------- %>
+
+<%=
+  html = "<br/>"
+  for r in @reason.values.sort {|a,b| a.order <=> b.order}
+    i        = r.reason
+    label    = r.label.l
+    check    = !r.notes.nil?
+    notes    = r.notes.nil? ? '' : r.notes
+    default  = r.default?
+    checkbox = check_box('reason', 'check', { :index => i, :checked => check,
+      :onclick => "Element.toggle('reason_#{i}_div'); setTimeout(function(){$('reason_#{i}_notes').focus()},0.25)" })
+    label    = "<label for='reason_#{i}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
+    textarea = text_area('reason', 'notes', { :index => i, :cols => 80, :rows => 1, :value => notes })
+    textarea += "<br/>"
+    if @js
+      textarea = "<div id='reason_#{i}_div'>#{textarea}</div>"
+      if !check
+        textarea += javascript_tag("Element.hide('reason_#{i}_div')")
+      end
+    end
+    html += checkbox + label + textarea
+  end
+  if !show_reasons && @js && @what.to_s == ""
+    html = "<div id='reasons_div'>#{html}</div>"
+    html += javascript_tag("Element.hide('reasons_div')");
+  end
+  html
 %>
-<%= javascript_tag 'Element.addClassName($("name_name_auto_complete"),
-  "auto_complete_scroll")' %>
 
-<label for="vote_value"><%= :form_naming_confidence.l %>:</label>
-<%= select('vote', 'value', @confidence_menu, { :include_blank =>
-  action == 'edit_naming' ? false : true }) %><br/>
-<span class="HelpNote"><%= :form_naming_confidence_help.l %></span><br/><br/>
+<%= hidden_field_tag("was_js_on", "yes") if @js %>
 
-<% for r in @reason.values.sort {|a,b| a.order <=> b.order}
-  i       = r.reason
-  label   = r.label.l
-  check   = !r.notes.nil?
-  notes   = r.notes.nil? ? '' : r.notes
-  default = r.default? %>
-  <%= check_box('reason', 'check', { :index => i, :checked => check }) %>
-  <label for="reason_<%= i %>_check"><%= label %>
-    <%= default ? '(default)' : '' %></label><br/>
-  <%= text_area('reason', 'notes', { :index => i, :cols => 40, :rows => 2,
-    :value => notes }) %><br/><br/>
-<% end %>
+<%= javascript_tag "document.getElementById('name_name').focus()" %>
 
 <!--[eoform:naming]-->

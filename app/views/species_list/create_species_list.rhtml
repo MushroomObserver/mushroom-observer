@@ -8,6 +8,8 @@
 
 <div id="Title"><%= @title %></div>
 
+<%= link_to("Darvin's Special", :action => 'create_darvin') %>
+
 <% form_tag(:action => 'create_species_list', :approved_names => @new_names,
     :approved_deprecated_names => @deprecated_names) do %>
 <br/>

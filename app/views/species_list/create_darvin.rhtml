@@ -1,0 +1,95 @@
+<%= javascript_include_tag 'prototype' %>
+<%= javascript_include_tag 'controls' %>
+<%= javascript_include_tag 'effects' %>
+<%= javascript_include_tag 'darvin' %>
+<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
+<%= javascript_tag 'Element.hide($("indicator"))' %>
+
+<% @title = "Darvin's Special" %>
+<div id="Title"><%= @title %></div>
+
+<noscript>
+ <p>This page will not work if javascript is disabled.</p>
+</noscript>
+
+<style type="text/css"><!--
+  th {
+    font-size: 120%;
+  }
+  div.scroller {
+    color: black;
+    background: white;
+    height: 450px;
+    overflow: auto;
+    margin: 0;
+    border: 1px solid #888;
+    padding: 0;
+    font-style: italic;
+  }
+  ul {
+    margin: 0px 5px 0px 5px;
+    border: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+--></style>
+
+<table cols="3" width="100%">
+ <tr>
+  <th>Genera</th>
+  <th>Species</th>
+  <th>Selected</th>
+ </tr>
+
+ <tr>
+  <td align="left">
+   <div id="genera" class="scroller"></div>
+  </td>
+  <td align="left">
+   <div id="species" class="scroller"></div>
+  </td>
+  <td align="left">
+   <div id="names" class="scroller"></div>
+  </td>
+ </tr>
+
+ <tr>
+  <td colspan="3" align="center">
+   <br/>
+   <%= form_tag({:action => 'create_darvin'}, {}) %>
+    <%= submit_tag('Create List') %>&nbsp;&nbsp;
+    <%= submit_tag('Show as Plain Text') %>&nbsp;&nbsp;
+    <%= submit_tag('Show as Rich Text') %>&nbsp;&nbsp;
+    <%= submit_tag('Show as Spreadsheet') %>&nbsp;&nbsp;
+    <%= hidden_field_tag('results', @names.join("\n")) %>
+   </form>
+  </td>
+ </tr>
+</table>
+
+<%= javascript_tag %(
+  var GENERA  = [#{@genera.map  {|n| "'#{n}'"}.join(",")}];
+  var SPECIES = [#{@species.map {|n| "'#{n}'"}.join(",")}];
+  var NAMES   = [];
+  darvin_initialize_names();
+  darvin_draw("genera", GENERA);
+  darvin_draw("names", NAMES);
+) %>
+
+<p><span class="HelpNote"><b>Create List:</b> Click on a genus in the first
+column to pull up a list of species in that genus.  Click on any of these taxa
+to add species to your list.  Deprecated names are automatically linked to the
+corresponding accepted name.  Your species list is shown in the third column.
+You may remove names from this list by clicking on them. </span></p> 
+
+<p><span class="HelpNote"><b>Save List:</b> When you are finished, click on any
+of the buttons at the bottom of the page.  "Create List" takes you back to the
+standard creation form, where you will be able to enter date, location, notes,
+etc. before saving the list.</span></p> 
+
+<p><span class="HelpNote"><b>Reports:</b> The plain text report gives you a
+simple list of taxa with no formatting.  Rich text can be used to import the
+list into Microsoft Word with all the formatting intact.  Spreadsheet produces
+a CSV file, with name, author, and citation columns.  Common names are not
+available yet.  (Click on "back" button in browser to return to this
+form.)</span></p> 

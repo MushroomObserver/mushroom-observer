@@ -65,6 +65,7 @@ require 'ftools'
 #  AJAX:
 #     auto_complete_for_observation_place_name
 #     auto_complete_for_name_name
+#   * image_form
 #
 #  Admin Tools:
 #     recalc
@@ -201,6 +202,19 @@ class ObserverController < ApplicationController
     else
       redirect_to(:controller => 'observer', :action => 'observation_search')
     end
+  end
+
+  # AJAX callback that creates a new image form for create_observation.
+  def image_form
+    @user = session['user']
+    index = params[:id].to_i
+    @images = []
+    @images[index] = image = Image.new
+    image.when     = Time.utc(1950)  # (bogus time to indicate default)
+    image.license  = @user.license
+    image.copyright_holder = @user.legal_name
+    @licenses = License.current_names_and_ids(@user.license)
+    render(:partial => 'form_image', :locals => { :index => index })
   end
 
 #--#############################################################################
@@ -446,21 +460,34 @@ class ObserverController < ApplicationController
       if request.method == :post
         if create_observation_helper()
           if has_unshown_notifications(@naming, @user)
-            redirect_to(:action => 'show_notifications', :naming => @naming, :observation => @observation)
+            redirect_to(:action => 'show_notifications', :naming => @naming.id, :observation => @observation.id)
           else
-            redirect_to(:action => 'show_observation', :id => @observation)
+            redirect_to(:action => 'show_observation', :id => @observation.id)
           end
         else
           form_naming_helper()
+          if @images == []
+            @images = [image = Image.new]
+            image.when    = Time.utc(1950)  # (bogus time to indicate default)
+            image.license = @user.license
+            image.copyright_holder = @user.legal_name
+            @licenses     = License.current_names_and_ids(@user.license)
+          end
         end
       else
         # Create empty instances first time through.
-        @observation = Observation.new
-        @naming      = Naming.new
-        @vote        = Vote.new
-        @what        = '' # can't be nil else rails tries to call @name.name
-        @names       = nil
-        @valid_names = nil
+        @observation  = Observation.new
+        @naming       = Naming.new
+        @vote         = Vote.new
+        @what         = '' # can't be nil else rails tries to call @name.name
+        @names        = nil
+        @valid_names  = nil
+        @images       = [image = Image.new] # Create one blank image.
+        image.when    = Time.utc(1950)  # (bogus time to indicate default)
+        image.license = @user.license
+        image.copyright_holder = @user.legal_name
+        @licenses     = License.current_names_and_ids(@user.license)
+        @good_images  = [] # List of images already downloaded, but not attached to observation yet.
         form_naming_helper()
       end
     end
@@ -485,7 +512,6 @@ class ObserverController < ApplicationController
     end
     @notifications = notifications.sort_by { rand }
   end
-
 
   # Lists notifications that the given user has created.
   # Inputs: session['user']
@@ -778,7 +804,7 @@ class ObserverController < ApplicationController
     end
     [success, observation, name, names, naming, user, valid_names, vote, what]
   end
-  
+
   # Helper function for validating the objects needed by create_observation
   def validate_co_objects(observation, name, naming, vote)
     #
@@ -799,7 +825,7 @@ class ObserverController < ApplicationController
     end
     result
   end
-  
+
   # Helper function for determining if there are notifications for the given
   # naming and user.
   def has_unshown_notifications(naming, user, flavor=:naming)
@@ -813,7 +839,7 @@ class ObserverController < ApplicationController
     end
     result
   end
-  
+
   # Helper function for saving the objects needed by create_observation
   def save_co_objects(observation, name, naming, user, vote)
     result = true
@@ -850,14 +876,58 @@ class ObserverController < ApplicationController
     end
     result
   end
-  
+
   # Always called from :post
   def create_observation_helper()
+
+    # First attempt to upload any images.  We will attach them to the observation
+    # later, assuming we can create it.  Problem is if anything goes wrong, we
+    # cannot repopulate the image forms (security issue associated with giving
+    # file upload fields default values).  So we need to do this immediately,
+    # even if observation creation fails.  Keep a list of images we've downloaded
+    # successfully in @good_images (stored in hidden form field).
+    @bad_images = []
+    @good_images = (params['good_images'] || '').split(" ").map do |id|
+      Image.find(id.to_i)
+    end
+    if params['image']
+      i = 0
+      while args = params['image'][i.to_s]
+        if (upload = params['image'][i.to_s]['image']) && upload != ''
+          name = upload.full_original_filename if upload.respond_to? :full_original_filename
+          image = Image.new(args)
+          image.created = Time.now
+          image.modified = image.created
+          # If image.when is 1950 it means user never saw the form field, so we should use default instead.
+          image.when = @observation.when if image.when.year == 1950
+          image.user = @user
+          if !image.save || !image.save_image
+            logger.error("Unable to upload image")
+            flash_error("Had problems uploading image '#{name ? name : "???"}'.")
+            @bad_images.push(image)
+            flash_object_errors(image)
+          else
+            flash_notice("Uploaded image " + (name ? "'#{name}'" : "##{image.id}") + ".")
+            @good_images.push(image)
+          end
+        end
+        i += 1
+      end
+    end
+    @images = @bad_images
+
+    # Now try to create image, naming, naming_reasons, vote.  Care must be
+    # taken to do this in the right order, otherwise we risk creating objects
+    # multiple times while user works out the typos associated with other objects.
+    # Example: creates observation and vote, but name is deprecated so reloads
+    # form, then creates observation and vote a second time when user confirms
+    # choice of name.  Instead, validate everything before saving anything.
+    # Then save everything, starting with observation.
     success, @observation, @name, @names, @naming, @user, @valid_names, @vote, @what =
       create_observation_objects(params)
     success = validate_co_objects(@observation, @name, @naming, @vote) if success
+    success = false if @bad_images != []
     if success
-      #
       # Now if the user has named it, finish creating the naming
       # (create_naming_reasons_helper creates all the NamingReason objects tied
       # to the Naming).
@@ -867,6 +937,15 @@ class ObserverController < ApplicationController
         @observation.name = Name.unknown
       end
       success = save_co_objects(@observation, @name, @naming, @user, @vote)
+    end
+
+    # Now it is safe to attach images.
+    if success && @good_images.length > 0
+      for image in @good_images
+        @observation.log("Image created by #{@user.login}: #{image.unique_format_name}", true)
+        @observation.add_image(image)
+      end
+      @observation.save
     end
     success
   end
@@ -1139,11 +1218,12 @@ class ObserverController < ApplicationController
   # MUST BE CLEARED before calling this!
   def create_naming_reasons_helper(naming)
     any_reasons = false
+    was_js_on = (params[:was_js_on] == "yes")
     for i in NamingReason.reasons
       if params[:reason] && params[:reason][i.to_s] # (this obviates the need to create reasons in test suite)
         check = params[:reason][i.to_s][:check]
         notes = params[:reason][i.to_s][:notes]
-        if check == "1" || !notes.nil? && notes != ""
+        if check == "1" || !was_js_on && !notes.nil? && notes != ""
           reason = NamingReason.new(
             :naming => naming,
             :reason => i,

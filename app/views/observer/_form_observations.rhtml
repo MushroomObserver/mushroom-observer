@@ -5,11 +5,21 @@
   :end_year => Time.now.year) %><br/><br/>
 
 <label for="observation_place_name"><%= :form_observations_where.l %>:</label>
-<%= text_field_with_auto_complete('observation', 'place_name', {},
-  { :skip_style => true, :indicator => 'indicator' }) %><br/>
-<span class="HelpNote"><%= :form_observations_where_help.l %></span><br/><br/>
-<%= javascript_tag "document.getElementById('place_name').focus()" %>
-<% @focused = 1  # (Tells _form_naming not to steal focus) %>
+<%= if @js
+  text_field_with_auto_complete('observation', 'place_name', { :size => 60 },
+    { :skip_style => true, :indicator => 'indicator' })
+else
+  text_field('observation', 'place_name', :size => 60)
+end %><br/>
+<span class="HelpNote"><%= textilize_without_paragraph(:form_observations_where_help.l) %></span><br/><br/>
+
+<%= if include_naming
+  render(:partial => 'form_naming', :locals => {
+    :action       => action,
+    :button_name  => button_name,
+    :show_reasons => false,
+  }) + "<br/>"
+end %>
 
 <%= check_box("observation", "is_collection_location") %>
 <label for="observation_is_collection_location"><%= :form_observations_is_collection_location.l %></label><br/>
@@ -17,16 +27,72 @@
 
 <%= check_box("observation", "specimen") %>
 <label for="observation_specimen"><%= :form_observations_specimen_available.l %></label><br/>
-<span class="HelpNote"><%= :form_observations_specimen_available_help.l %></span><br/><br/>
+<span class="HelpNote"><%= :form_observations_specimen_available_help.l %></span><br/>
+
+<center><%= submit_tag(button_name) %></center><br/>
 
 <label for="observation_notes"><%= :form_observations_notes.l %>:</label>
 <span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
-<%= text_area 'observation', 'notes' %><br/>
-<%= render :partial => 'shared/textilize_help' %><br/><br/>
+<%= text_area('observation', 'notes', :cols => 80) %><br/>
+<%= render :partial => 'shared/textilize_help' %>
 
 <% if logging_optional %>
+  <br/>
   <%= check_box('log_change', 'checked', :checked => 'checked') %>
   <label for="log_change_checked"><%= :form_observations_log_change.l %></label>
 <% end %>
+
+<% if @js && include_images %>
+  <br/>
+  <%# table wrapper gets browsers to collapse the div to fit the form %>
+  <table><tr><td>
+
+  <% if @js %>
+    <%= javascript_tag %(
+      var NEXT_IMAGE_INDEX = #{@images.length};
+      var CHANGED_DATES = [];
+    ) %>
+  <% end %>
+
+  <div id="image_forms">
+    <%= render(:partial => 'form_image', :locals => { :index => 0 }) %>
+    <% i = 1 %>
+    <% while i < @images.length %>
+      <%= render(:partial => 'form_image', :locals => { :index => i }) %>
+      <% i += 1 %>
+    <% end %>
+  </div>
+
+  <% if @js %>
+    <a href="#" onclick="new Ajax.Updater('image_forms', '/observer/image_form/' + (NEXT_IMAGE_INDEX++), {asynchronous:true, evalScripts:true, insertion:Insertion.Bottom}); return false">More Images...</a>
+
+    <%= javascript_tag %(
+      function image_on(i) {
+        Element.show('image_'+i+'_div');
+        Element.show('image_'+i+'_less');
+        Element.hide('image_'+i+'_more');
+        $('image_'+i+'_box').style.border = '1px solid #888';
+        if (!CHANGED_DATES['+i+']) {
+          $('image_'+i+'_when_1i').value = $('observation_when_1i').value;
+          $('image_'+i+'_when_2i').value = $('observation_when_2i').value;
+          $('image_'+i+'_when_3i').value = $('observation_when_3i').value;
+        }
+        return false;
+      }
+    
+      function image_off(i) {
+        Element.show('image_'+i+'_more');
+        Element.hide('image_'+i+'_div');
+        Element.hide('image_'+i+'_less');
+        $('image_'+i+'_box').style.border = '0';
+        return false;
+      }
+    ) %>
+  <% end %>
+
+  </td></tr></table>
+<% end %>
+
+<%= javascript_tag "document.getElementById('observation_place_name').focus()" %>
 
 <!--[eoform:observation]-->

@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: RTF::TableNode</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">RTF::TableNode</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../../files/lib/rtf/node_rb.html">
+                lib/rtf/node.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                <a href="ContainerNode.html">
+                ContainerNode
+               </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This class represents a table node within an <a href="../RTF.html">RTF</a>
+document. Table nodes are specialised container nodes that contain only
+TableRowNodes and have their size specified when they are created an cannot
+be resized after that.
+</p>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000129">border_width=</a>&nbsp;&nbsp;
+      <a href="#M000135">column_shading_color</a>&nbsp;&nbsp;
+      <a href="#M000131">column_shading_colour</a>&nbsp;&nbsp;
+      <a href="#M000128">columns</a>&nbsp;&nbsp;
+      <a href="#M000126">new</a>&nbsp;&nbsp;
+      <a href="#M000136">row_shading_color</a>&nbsp;&nbsp;
+      <a href="#M000130">row_shading_colour</a>&nbsp;&nbsp;
+      <a href="#M000127">rows</a>&nbsp;&nbsp;
+      <a href="#M000137">shading_color</a>&nbsp;&nbsp;
+      <a href="#M000132">shading_colour</a>&nbsp;&nbsp;
+      <a href="#M000133">store</a>&nbsp;&nbsp;
+      <a href="#M000134">to_rtf</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+    <div id="attribute-list">
+      <h3 class="section-bar">Attributes</h3>
+
+      <div class="name-list">
+        <table>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">cell_margin</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">cell_margin</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000126" class="method-detail">
+        <a name="M000126"></a>
+
+        <div class="method-heading">
+          <a href="#M000126" class="method-signature">
+          <span class="method-name">new</span><span class="method-args">(parent, rows, columns, *widths)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This is a constructor for the <a href="TableNode.html">TableNode</a> class.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">parent:</td><td>A reference to the node that owns the table.
+
+</td></tr>
+<tr><td valign="top"><a href="TableNode.html#M000127">rows</a>:</td><td>The number of <a href="TableNode.html#M000127">rows</a> in the tabkle.
+
+</td></tr>
+<tr><td valign="top"><a href="TableNode.html#M000128">columns</a>:</td><td>The number of <a href="TableNode.html#M000128">columns</a> in the table.
+
+</td></tr>
+<tr><td valign="top">*widths:</td><td>One or more integers specifying the widths of the table <a
+href="TableNode.html#M000128">columns</a>.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000126-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000126-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 526</span>
+526:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">parent</span>, <span class="ruby-identifier">rows</span>, <span class="ruby-identifier">columns</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">widths</span>)
+527:          <span class="ruby-keyword kw">super</span>(<span class="ruby-identifier">parent</span>) <span class="ruby-keyword kw">do</span>
+528:             <span class="ruby-identifier">entries</span> = []
+529:             <span class="ruby-identifier">rows</span>.<span class="ruby-identifier">times</span> {<span class="ruby-identifier">entries</span>.<span class="ruby-identifier">push</span>(<span class="ruby-constant">TableRowNode</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword kw">self</span>, <span class="ruby-identifier">columns</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">widths</span>))}
+530:             <span class="ruby-identifier">entries</span>
+531:          <span class="ruby-keyword kw">end</span>
+532:          <span class="ruby-ivar">@cell_margin</span> = <span class="ruby-value">100</span>
+533:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000129" class="method-detail">
+        <a name="M000129"></a>
+
+        <div class="method-heading">
+          <a href="#M000129" class="method-signature">
+          <span class="method-name">border_width=</span><span class="method-args">(width)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a border width setting to all of the sides on all of
+the cells within a table.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">width:</td><td>The border width setting to apply. Negative values are ignored and zero
+switches the border off.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000129-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000129-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 551</span>
+551:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">border_width=</span>(<span class="ruby-identifier">width</span>)
+552:          <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">row</span><span class="ruby-operator">|</span> <span class="ruby-identifier">row</span>.<span class="ruby-identifier">border_width</span> = <span class="ruby-identifier">width</span>}
+553:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000135" class="method-detail">
+        <a name="M000135"></a>
+
+        <div class="method-heading">
+          <span class="method-name">column_shading_color</span><span class="method-args">(index, colour)</span>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Alias for <a href="TableNode.html#M000131">column_shading_colour</a>
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000131" class="method-detail">
+        <a name="M000131"></a>
+
+        <div class="method-heading">
+          <a href="#M000131" class="method-signature">
+          <span class="method-name">column_shading_colour</span><span class="method-args">(index, colour)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a shading colour to a specified column within a <a
+href="TableNode.html">TableNode</a> object.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">index:</td><td>The offset from the first column of the column to have shading applied to
+it.
+
+</td></tr>
+<tr><td valign="top">colour:</td><td>A reference to a <a href="Colour.html">Colour</a> object representing the
+shading colour to be used. Set to nil to clear shading.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000131-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000131-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 576</span>
+576:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">column_shading_colour</span>(<span class="ruby-identifier">index</span>, <span class="ruby-identifier">colour</span>)
+577:          <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">row</span><span class="ruby-operator">|</span>
+578:             <span class="ruby-identifier">cell</span> = <span class="ruby-identifier">row</span>[<span class="ruby-identifier">index</span>]
+579:             <span class="ruby-identifier">cell</span>.<span class="ruby-identifier">shading_colour</span> = <span class="ruby-identifier">colour</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">cell</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+580:          <span class="ruby-keyword kw">end</span>
+581:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000128" class="method-detail">
+        <a name="M000128"></a>
+
+        <div class="method-heading">
+          <a href="#M000128" class="method-signature">
+          <span class="method-name">columns</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Attribute accessor.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000128-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000128-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 541</span>
+541:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">columns</span>
+542:          <span class="ruby-identifier">entries</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">length</span>
+543:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000136" class="method-detail">
+        <a name="M000136"></a>
+
+        <div class="method-heading">
+          <span class="method-name">row_shading_color</span><span class="method-args">(index, colour)</span>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Alias for <a href="TableNode.html#M000130">row_shading_colour</a>
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000130" class="method-detail">
+        <a name="M000130"></a>
+
+        <div class="method-heading">
+          <a href="#M000130" class="method-signature">
+          <span class="method-name">row_shading_colour</span><span class="method-args">(index, colour)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a shading colour to a specified row within a <a
+href="TableNode.html">TableNode</a> object.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">index:</td><td>The offset from the first row of the row to have shading applied to it.
+
+</td></tr>
+<tr><td valign="top">colour:</td><td>A reference to a <a href="Colour.html">Colour</a> object representing the
+shading colour to be used. Set to nil to clear shading.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000130-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000130-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 563</span>
+563:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">row_shading_colour</span>(<span class="ruby-identifier">index</span>, <span class="ruby-identifier">colour</span>)
+564:          <span class="ruby-identifier">row</span> = <span class="ruby-keyword kw">self</span>[<span class="ruby-identifier">index</span>]
+565:          <span class="ruby-identifier">row</span>.<span class="ruby-identifier">shading_colour</span> = <span class="ruby-identifier">colour</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">row</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+566:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000127" class="method-detail">
+        <a name="M000127"></a>
+
+        <div class="method-heading">
+          <a href="#M000127" class="method-signature">
+          <span class="method-name">rows</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Attribute accessor.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000127-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000127-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 536</span>
+536:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">rows</span>
+537:          <span class="ruby-identifier">entries</span>.<span class="ruby-identifier">size</span>
+538:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000137" class="method-detail">
+        <a name="M000137"></a>
+
+        <div class="method-heading">
+          <span class="method-name">shading_color</span><span class="method-args">(colour)</span>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Alias for <a href="TableNode.html#M000132">shading_colour</a>
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000132" class="method-detail">
+        <a name="M000132"></a>
+
+        <div class="method-heading">
+          <a href="#M000132" class="method-signature">
+          <span class="method-name">shading_colour</span><span class="method-args">(colour) {|row[y], x, y| ...}</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method provides a means of assigning a shading colour to a selection
+of cells within a table. The method accepts a block that takes three
+parameters - a <a href="TableCellNode.html">TableCellNode</a> representing
+a cell within the table, an integer representing the x offset of the cell
+and an integer representing the y offset of the cell. If the block returns
+true then shading will be applied to the cell.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">colour:</td><td>A reference to a <a href="Colour.html">Colour</a> object representing the
+shading colour to be applied. Set to nil to remove shading.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000132-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000132-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 593</span>
+593:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">shading_colour</span>(<span class="ruby-identifier">colour</span>)
+594:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">block_given?</span>
+595:             <span class="ruby-value">0</span>.<span class="ruby-identifier">upto</span>(<span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">-</span> <span class="ruby-value">1</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">x</span><span class="ruby-operator">|</span>
+596:                <span class="ruby-identifier">row</span> = <span class="ruby-keyword kw">self</span>[<span class="ruby-identifier">x</span>]
+597:                <span class="ruby-value">0</span>.<span class="ruby-identifier">upto</span>(<span class="ruby-identifier">row</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">-</span> <span class="ruby-value">1</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">y</span><span class="ruby-operator">|</span>
+598:                   <span class="ruby-identifier">apply</span> = <span class="ruby-keyword kw">yield</span> <span class="ruby-identifier">row</span>[<span class="ruby-identifier">y</span>], <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>
+599:                   <span class="ruby-identifier">row</span>[<span class="ruby-identifier">y</span>].<span class="ruby-identifier">shading_colour</span> = <span class="ruby-identifier">colour</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">apply</span>
+600:                <span class="ruby-keyword kw">end</span>
+601:             <span class="ruby-keyword kw">end</span>
+602:          <span class="ruby-keyword kw">end</span>
+603:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000133" class="method-detail">
+        <a name="M000133"></a>
+
+        <div class="method-heading">
+          <a href="#M000133" class="method-signature">
+          <span class="method-name">store</span><span class="method-args">(node)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method overloads the <a href="TableNode.html#M000133">store</a> method
+inherited from the <a href="ContainerNode.html">ContainerNode</a> class to
+forbid addition of further nodes.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">node:</td><td>A reference to the node to be added.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000133-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000133-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 610</span>
+610:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">store</span>(<span class="ruby-identifier">node</span>)
+611:          <span class="ruby-constant">RTFError</span>.<span class="ruby-identifier">fire</span>(<span class="ruby-value str">&quot;Table nodes cannot have nodes added to.&quot;</span>)
+612:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000134" class="method-detail">
+        <a name="M000134"></a>
+
+        <div class="method-heading">
+          <a href="#M000134" class="method-signature">
+          <span class="method-name">to_rtf</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method generates the <a href="../RTF.html">RTF</a> document text for a
+<a href="TableCellNode.html">TableCellNode</a> object.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000134-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000134-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 615</span>
+615:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">to_rtf</span>
+616:          <span class="ruby-identifier">text</span> = <span class="ruby-constant">StringIO</span>.<span class="ruby-identifier">new</span>
+617:          <span class="ruby-identifier">size</span> = <span class="ruby-value">0</span>
+618: 
+619:          <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">row</span><span class="ruby-operator">|</span>
+620:             <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+621:                <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">&quot;\n&quot;</span>
+622:             <span class="ruby-keyword kw">else</span>
+623:                <span class="ruby-identifier">size</span> = <span class="ruby-value">1</span>
+624:             <span class="ruby-keyword kw">end</span>
+625:             <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">row</span>.<span class="ruby-identifier">to_rtf</span>
+626:          <span class="ruby-keyword kw">end</span>
+627: 
+628:          <span class="ruby-identifier">text</span>.<span class="ruby-identifier">string</span>
+629:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

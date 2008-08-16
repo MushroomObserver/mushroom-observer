@@ -419,7 +419,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     params[:vote][:value] = "3" if !params[:vote][:value]
     post_requires_login(:create_observation, params, false)
     if observation_count == 1
-      assert_redirected_to(:controller => "observer", :action => (page || "show_observation"))
+      if page != :notest
+        assert_redirected_to(:controller => "observer", :action => (page || "show_observation"))
+      end
     else
       assert_response(:success)
     end
@@ -567,7 +569,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     test_construct_observation_generic({
       :observation => { :where => where },
       :name => { :name => name.text_name }
-    }, 1,1,0, "show_notifications")
+    }, 1,1,0, 'show_notifications')
     obs = assigns(:observation)
     nam = assigns(:naming)
     assert_equal(where, obs.where) # Make sure it's the right observation
