@@ -10,6 +10,7 @@ class AccountMailerTest < Test::Unit::TestCase
   fixtures :names
   fixtures :namings
   fixtures :comments
+  fixtures :notifications
 
   include ActionMailer::Quoting
 
@@ -142,6 +143,28 @@ class AccountMailerTest < Test::Unit::TestCase
 
     # verify(user)
     assert_equal @expected.encoded, AccountMailer.create_webmaster_question(sender, 'A question').encoded
+  end
+
+  def test_naming_for_observer
+    @expected.body = read_fixture('naming_for_observer')
+    @expected.subject = 'Mushroom Observer Research Request'
+    @expected.to = @rolf.email
+    @expected.bcc = 'nathan@collectivesource.com'
+    @expected.from = 'news@mushroomobserver.org'
+    @expected.set_content_type "text", "html", { "charset" => CHARSET }
+
+    assert_equal @expected.encoded, AccountMailer.create_naming_for_observer(@rolf, @agaricus_campestris_naming, @agaricus_campestris_notification_with_note).encoded
+  end
+
+  def test_naming_for_tracker
+    @expected.body = read_fixture('naming_for_tracker')
+    @expected.subject = 'Mushroom Observer Naming Notification'
+    @expected.to = @mary.email
+    @expected.bcc = 'nathan@collectivesource.com'
+    @expected.from = 'news@mushroomobserver.org'
+    @expected.set_content_type "text", "html", { "charset" => CHARSET }
+
+    assert_equal @expected.encoded, AccountMailer.create_naming_for_tracker(@mary, @agaricus_campestris_naming).encoded
   end
 
   private

@@ -1,10 +1,17 @@
 Release each of the following as they get completed:
 
+Rod: Basic observations quality hints in email (herbarium, # of photos),
+  Summarize species list changes
+Tom Volk:
+  Wants to have students make observations as part of course.
+  Encourages idea of rating observations and images
+
 Email queuing:
   Focus on notification
-    more unit tests (checking email generation more)
-    show_notifications should match color theme
-    show_notifications could happen after creating a naming or modifying a species list
+    genus notifications: has_notifications(@naming, @user)
+      warn about taxa above Genus
+      tests for higher taxa
+    show_notifications could happen after creating or modifying a species list
     providing mailing address as a user preference
     email to self should be a user preference
     handle species list alert
@@ -118,7 +125,7 @@ Theme editor (Jason has an almost complete prototype) (40?)
 Data to incorporate:
     Rod's A.c. locations (4)
     Mike Davis Russulas (8)
-    Ian Gibson Descriptions (16)
+    Ian Gibson Descriptions (MatchMaker) (16)
     MykoWeb interface (40)
     MushroomHobby interface (24)
     Locations (on going)

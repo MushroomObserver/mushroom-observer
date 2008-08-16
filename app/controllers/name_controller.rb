@@ -613,7 +613,9 @@ class NameController < ApplicationController
         if @notification
           @note_template = @notification.note_template
         else
-          @note_template = :email_tracking_note_template.l % [@name.text_name, user.mailing_address, user.legal_name]
+          mailing_address = user.mailing_address.strip
+          mailing_address = '[mailing address for collections]' if '' == mailing_address
+          @note_template = :email_tracking_note_template.l % [@name.text_name, mailing_address, user.legal_name]
         end
       end
     end

@@ -56,7 +56,8 @@ email_tracking_flash_message: Click 'View Notifications' if you would like to he
 email_tracking_help: >
   If you enable tracking then an note will be sent to the email
   address you have provided whenever this name is applied to an observation.
-  A link to this page will be given in each tracking email.
+  A link to this page will be given in each tracking email.  You can
+  save your mailing address for collections in %s.
 
 email_tracking_note: Template for notifying an observer
 email_tracking_note_help: >
@@ -84,7 +85,7 @@ email_tracking_note_template: >
 
 email_tracking_title: Email Tracking for
 email_tracking_update: Update
-
+email_tracking_your_profile: your profile
 
 # observer/license_updater
 bulk_license_link: Bulk License Updater
@@ -704,6 +705,10 @@ list_merge_options_others: Other Available Locations
 list_merge_options_title: Merge Options for %s
 
 
+# observer/list_notifications
+list_notifications_title: Notifications for %s
+
+
 # location/list_place_names
 list_place_names_known: Known Locations (alphabetical)
 list_place_names_map: Map Locations
@@ -819,6 +824,7 @@ profile_image_remove: (Remove photo.)
 profile_image_reuse: (Reuse another photo.)
 profile_link: Edit Profile
 profile_location: Primary location
+profile_mailing_address: Mailing Address for Collections
 profile_name: Name
 profile_notes: About yourself
 profile_title: Change Profile
@@ -1049,6 +1055,17 @@ show_past_location_other_versions: Other Versions
 show_past_location_title: Location
 show_past_location_version: Version
 
+
+# observer/show_user
+show_user_comments_for: Comments for %s
+show_user_comments_for_you: Comments for You
+show_user_contributors: Contributors
+show_user_edit_profile: Edit Profile
+show_user_email_to: Email %s
+show_user_mailing_address: Mailing Address for Collections
+show_user_observations_by: Observations by %s
+show_user_your_notifications: Your Email Alerts
+show_user_your_observations: Your Observations
 
 # account/signup
 signup_button: Signup

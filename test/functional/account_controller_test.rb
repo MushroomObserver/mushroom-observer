@@ -218,6 +218,7 @@ class AccountControllerTest < Test::Unit::TestCase
       :user => {
         :upload_image => file,
         :name         => @rolf.name,
+        :mailing_address => @rolf.mailing_address,
       },
       :date => { :copyright_year => "2003" },
       :upload => { :license_id => @ccnc25.id },

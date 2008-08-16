@@ -1,4 +1,7 @@
-<% if @user.html_email %>
+<%
+    verify_link = "#{DOMAIN}/account/verify/#{@user.id}"
+    if @user.html_email
+%>
 <html>
 <head>
   <title>Mushroom Observer: Welcome</title>
@@ -7,8 +10,7 @@
 
 <h2><b>Hello <%= @user.login %></b></h2>
 
-<p>Please <a href="<%= sprintf "%s/account/verify/%d", DOMAIN, @user.id
-%>">click here</a> to verify that you received this email and activate your
+<p>Please <a href="<%= verify_link %>">click here</a> (<%= verify_link %>) to verify that you received this email and activate your
 Mushroom Observer account.&nbsp; Here are some handy links you might find
 useful:</p>
 
@@ -25,5 +27,5 @@ Hello <%= @user.login %>
 
 Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
 
-<%= sprintf "%s/account/verify/%d", DOMAIN, @user.id %>
+<%= verify_link %>
 <% end %>

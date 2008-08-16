@@ -38,29 +38,32 @@ class Naming < ActiveRecord::Base
   has_many   :naming_reasons,    :dependent => :destroy
   has_many   :votes,             :dependent => :destroy
   
-  def after_create
-    super
-    for n in Notification.find_all_by_flavor_and_obj_id(:name, self.name.id)
+  def create_emails(current_name_id=nil)
+    if self.name_id != current_name_id
       @initial_name_id = self.name_id
-      NamingEmail.create_email(n, self)
+      taxa = self.name.ancestors
+      taxa.push(self.name)
+      for taxon in taxa
+        for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
+          NamingEmail.create_email(n, self)
+        end
+      end
     end
   end
-
-
+      
+  def after_create
+    super
+    create_emails()
+  end
+  
   # Detect name changes in namings
   def after_initialize
     @initial_name_id = self.name_id
   end
-
-  def after_update
-    for n in Notification.find_all_by_flavor_and_obj_id(:name, self.name_id)
-      if @initial_name_id != self.name_id
-        @initial_name_id = self.name_id
-        NamingEmail.create_email(n, self)
-      end
-    end
-  end
   
+  def after_update
+    create_emails(@initial_name_id)
+  end
   
   # Various name formats.
   def text_name

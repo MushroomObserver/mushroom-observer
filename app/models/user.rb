@@ -123,9 +123,19 @@ class User < ActiveRecord::Base
     end
   end
 
-  # This should become a database field
-  def mailing_address()
-    "[mailing address]"
+  def percent_complete()
+    max = 3
+    result = 0
+    if self.notes && self.notes != ""
+      result += 1
+    end
+    if self.location_id
+      result += 1
+    end
+    if self.image_id
+      result += 1
+    end
+    result * 100 / max
   end
   
   def remember_me?

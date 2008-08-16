@@ -359,16 +359,32 @@ class Name < ActiveRecord::Base
   end
 
   def children
+    result = []
     if self.rank == :Genus
-      return Name.find(:all, :conditions => "text_name like '#{self.text_name} %' and rank = 'species'",
+      result = Name.find(:all, :conditions => "text_name like '#{self.text_name} %' and rank = 'species'",
         :order => "text_name asc")
     elsif self.rank == :Species
-      return Name.find(:all, :conditions => "text_name like '#{self.text_name} %' and
+      result = Name.find(:all, :conditions => "text_name like '#{self.text_name} %' and
         (rank = 'Subspecies' or rank = 'Variety' or rank = 'Form')",
         :order => "text_name asc")
-    else
-      return []
     end
+    result
+  end
+
+  # Currently just parses the text name to find Genus and possible Species.  Ultimately
+  # this should get high level clades, but I don't have a good source for that data yet.
+  def ancestors
+    result = []
+    if [:Form, :Variety, :Subspecies, :Species].member?(self.rank)
+      tokens = self.text_name.split(' ')
+      result = Name.find(:all, :conditions => "text_name like '#{tokens[0]}' and rank = 'genus'",
+        :order => "text_name asc")
+      if self.rank != :Species
+        result += Name.find(:all, :conditions => "text_name like '#{tokens[0]} #{tokens[1]}' and rank = 'species'",
+        :order => "text_name asc")
+      end
+    end
+    result
   end
 
 ########################################

@@ -9,8 +9,24 @@
         		for user in @users
         		    if user && user.contribution > 0 %>
         			<tr>
-        				<td class="Data">
+        			    <td>
+        			    <%= if user.image
+                          link_to(image_tag(sprintf("thumb/%d.jpg", user.image.id),
+                            :border => 0),
+                            :controller => "image",
+                            :action => "show_image",
+                            :id => user.image.id)
+                        end %>
+                        </td>
+        				<td>
+        				    <span class="Data">
                             <%= user_link(user.id, user.legal_name) %>
+                            </span>
+                            <% if @user and (user.id == @user.id) %>
+                                <%= link_to("(#{user.percent_complete}%)", :controller => "account", :action => "profile") %>    
+                            <% else %>
+                                <%= "(#{user.percent_complete}%)" %>
+                            <% end %>
         				</td>
         				<td>
         				    <%= link_to("Observations", :action => "show_user_observations", :id => user) %>

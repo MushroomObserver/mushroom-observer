@@ -6,7 +6,7 @@
 <%= link_to(:email_tracking_cancel.l, :action => 'show_name', :id => @name) %>
 <div id="Title"><%= @title %></div>
 <p>
-<%= :email_tracking_help.l %>
+<%= :email_tracking_help.l % link_to(:email_tracking_your_profile.l, :controller => "account", :action => "profile") %>
 </p>
 <% form_tag(:action => 'email_tracking', :id => @name) do %>
     <p>

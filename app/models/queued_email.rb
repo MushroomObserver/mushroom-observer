@@ -71,14 +71,18 @@ class QueuedEmail < ActiveRecord::Base
     result
   end
   
-  def get_integers(keys)
+  def get_integers(keys, return_dict=false)
     dict = {}
     for qi in self.queued_email_integers
       dict[qi.key] = qi.value
     end
-    result = []
-    for key in keys
-      result.push(dict[key.to_s])
+    if return_dict
+      result = dict
+    else
+      result = []
+      for key in keys
+        result.push(dict[key.to_s])
+      end
     end
     result
   end

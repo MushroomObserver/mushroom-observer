@@ -233,11 +233,12 @@ class AccountController < ApplicationController
         when :post
           error = false
 
-          @user.name         = params['user']['name']
-          @user.notes        = params['user']['notes']
-          @copyright_holder  = params['copyright_holder']
-          @copyright_year    = params['date']['copyright_year'] if params['date']
-          @upload_license_id = params['upload']['license_id']   if params['upload']
+          @user.name            = params['user']['name']
+          @user.notes           = params['user']['notes']
+          @user.mailing_address = params['user']['mailing_address']
+          @copyright_holder     = params['copyright_holder']
+          @copyright_year       = params['date']['copyright_year'] if params['date']
+          @upload_license_id    = params['upload']['license_id']   if params['upload']
 
           @place_name = params['user']['place_name']
           if @place_name && @place_name != ""

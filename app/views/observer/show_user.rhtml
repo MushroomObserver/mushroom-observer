@@ -12,15 +12,16 @@
   }
 
   tabs = []
-  tabs.push ["Contributors", url_for(:controller => "observer", :action => "users_by_contribution")]
+  tabs.push [:show_user_contributors.l, url_for(:controller => "observer", :action => "users_by_contribution")]
   if @user == session["user"]
-    tabs.push ["Your Observations", links['Observations']]
-    tabs.push ["Comments for You", url_for(:controller => "comment", :action => "show_comments_for_user", :id => id)]
-    tabs.push ["Edit Profile", url_for(:controller => "account", :action => "profile")]
+    tabs.push [:show_user_your_observations.l, links['Observations']]
+    tabs.push [:show_user_comments_for_you.l, url_for(:controller => "comment", :action => "show_comments_for_user", :id => id)]
+    tabs.push [:show_user_your_notifications.l, url_for(:controller => "observer", :action => "list_notifications")]
+    tabs.push [:show_user_edit_profile.l, url_for(:controller => "account", :action => "profile")]
   else
-    tabs.push ["Observations by #{name}", links['Observations']]
-    tabs.push ["Comments for #{name}", url_for(:controller => "comment", :action => "show_comments_for_user", :id => id)]
-    tabs.push ["Email #{name}", url_for(:controller => "observer", :action => "ask_user_question", :id => id)]
+    tabs.push [:show_user_observations_by.l % name, links['Observations']]
+    tabs.push [:show_user_comments_for.l % name, url_for(:controller => "comment", :action => "show_comments_for_user", :id => id)]
+    tabs.push [:show_user_email_to.l % name, url_for(:controller => "observer", :action => "ask_user_question", :id => id)]
   end
   show_tabs(tabs)
 %>
@@ -37,7 +38,10 @@ end %>
 <% if @user.location %>
   <b>Primary Location:</b> <%= location_link(nil, @user.location.id) %><br/>
 <% end %>
-<% if @user.location && !@user.notes.empty? %>
+<% if @user.mailing_address != '' %>
+  <b><%= :show_user_mailing_address.l %>:</b> <%= @user.mailing_address %><br/>
+<% end %>
+<% if !@user.notes.empty? %>
   <br/>
 <% end %>
 <%= if !@user.notes.empty?

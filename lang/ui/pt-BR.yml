@@ -517,6 +517,7 @@ profile_image_remove: (Remove photo.)
 profile_image_reuse: (Reuse another photo.)
 profile_link: Edit Profile
 profile_location: Primary location
+profile_mailing_address: Mailing Address for Collections
 profile_name: Name
 profile_notes: About yourself
 profile_title: Change Profile
@@ -610,6 +611,7 @@ email_tracking_note_template: >
 
 email_tracking_title: Email Tracking for
 email_tracking_update: Update
+email_tracking_your_profile: your profile
 
 
 # observer/_form_comments
@@ -903,6 +905,10 @@ list_merge_options_others: Other Available Locations
 list_merge_options_title: Merge Options for %s
 
 
+# observer/list_notifications
+list_notifications_title: Notifications for %s
+
+
 # location/list_place_names
 list_place_names_known: Known Locations (alphabetical)
 list_place_names_map: Map Locations
@@ -1134,6 +1140,18 @@ show_past_location_no_version: No current version
 show_past_location_other_versions: Other Versions
 show_past_location_title: Location
 show_past_location_version: Version
+
+
+# observer/show_user
+show_user_comments_for: Comments for %s
+show_user_comments_for_you: Comments for You
+show_user_contributors: Contributors
+show_user_edit_profile: Edit Profile
+show_user_email_to: Email %s
+show_user_mailing_address: Mailing Address for Collections
+show_user_observations_by: Observations by %s
+show_user_your_notifications: Your Email Alerts
+show_user_your_observations: Your Observations
 
 
 # account/signup

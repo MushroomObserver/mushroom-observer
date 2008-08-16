@@ -6,6 +6,7 @@
     <% odd_or_even = 1 - odd_or_even %>
     <% if skip_comment == nil || comment.id != skip_comment %>
       <div class="ListLine<%= odd_or_even %>">
+          <table><tr><td width="100%">
         <p>Created: <span class="Data"><%= comment.created.to_formatted_s(:db) %></span><br/>
         By: <%= user_link(comment.user) %>
         <% if check_permission(comment.user_id) %>
@@ -17,7 +18,19 @@
         <% end %><br/>
         Summary: <span class="Data"><%= comment.summary %></span></p>
         <%= textilize(sanitize(comment.comment)) %>
-      </div>
+      <%
+        user = comment.user
+        if user.image_id %>
+            </td><td>
+            <%= if user.image
+              link_to(image_tag(sprintf("thumb/%d.jpg", user.image.id),
+                :border => 0),
+                :controller => "image",
+                :action => "show_image",
+                :id => user.image.id)
+            end %>
+        <% end %>
+	  </td></tr></table></div>
     <% end %>
   <% end %>
 <% end %>

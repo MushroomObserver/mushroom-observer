@@ -7,7 +7,7 @@
 
 <h2><b>Hello mary</b></h2>
 
-<p>Please <a href="http://localhost:3000/account/verify/2">click here</a> to verify that you received this email and activate your
+<p>Please <a href="http://localhost:3000/account/verify/2">click here</a> (http://localhost:3000/account/verify/2) to verify that you received this email and activate your
 Mushroom Observer account.&nbsp; Here are some handy links you might find
 useful:</p>
 

@@ -445,7 +445,7 @@ class ObserverController < ApplicationController
       # Attempt to create observation (and associated naming, vote, etc.)
       if request.method == :post
         if create_observation_helper()
-          if has_notifications(@naming, @user)
+          if has_unshown_notifications(@naming, @user)
             redirect_to(:action => 'show_notifications', :naming => @naming, :observation => @observation)
           else
             redirect_to(:action => 'show_observation', :id => @observation)
@@ -477,14 +477,27 @@ class ObserverController < ApplicationController
     @user = session['user']
     notifications = []
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, @user.id)
-      naming_id, notification_id = q.get_integers([:naming, :notification])
-      if @naming.id == naming_id
+      naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
+      if shown.nil?
         notifications.push(Notification.find(notification_id))
+        q.add_integer(:shown, 1)
       end
     end
     @notifications = notifications.sort_by { rand }
   end
-  
+
+
+  # Lists notifications that the given user has created.
+  # Inputs: session['user']
+  # Outputs:
+  #   @notifications
+  def list_notifications
+    if verify_user()
+      @user = session['user']
+      @notifications = Notification.find_all_by_user_id(@user.id, :order => :flavor)
+    end
+  end
+
   # Form to edit an existing observation.
   # Linked from: left panel
   # Inputs (get):
@@ -623,7 +636,11 @@ class ObserverController < ApplicationController
       @observation = Observation.find(params[:id])
       # Attempt to create naming (and associated vote, etc.)
       if request.method == :post && create_naming_helper()
-        redirect_to :action => 'show_observation', :id => @observation, :params => calc_search_params()
+        if has_unshown_notifications(@naming, @user)
+          redirect_to(:action => 'show_notifications', :naming => @naming, :observation => @observation)
+        else
+          redirect_to :action => 'show_observation', :id => @observation, :params => calc_search_params()
+        end
       else
         # Create empty instances first time through.
         if request.method == :get
@@ -785,11 +802,11 @@ class ObserverController < ApplicationController
   
   # Helper function for determining if there are notifications for the given
   # naming and user.
-  def has_notifications(naming, user)
+  def has_unshown_notifications(naming, user, flavor=:naming)
     result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, user.id)
-      naming_id, = q.get_integers([:naming])
-      if naming.id == naming_id
+    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+      ints = q.get_integers([:shown], true)
+      unless ints[:shown]
         result = true
         break
       end
@@ -1218,6 +1235,7 @@ class ObserverController < ApplicationController
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new
+    @user = session['user']
     @users = User.find(:all, :order => "contribution desc")
   end
 

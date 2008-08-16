@@ -9,15 +9,30 @@
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 
+    <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+
 <p>An <a href="<%= "#{DOMAIN}/#{obs.id}" %>">observation</a> on the Mushroom Observer website
 has been given the name
-<a href="<%= "#{DOMAIN}/name/show_name/#{name.id}" %>"><%= textilize_without_paragraph(h(name.display_name)) %></a> which you are currently tracking.</p>
+<a href="<%= "#{DOMAIN}/name/show_name/#{name.id}" %>"><%= textilize_without_paragraph(h(name.display_name)) %></a> which you are currently tracking.  You can contact either the observer or the identifier by going to the appropriate link below and clicking
+the email link near the top of the page.</p>
+
+<p>
+Observer: <a href="<%= "#{DOMAIN}/observer/observer/show_user/#{obs.user_id}" %>"><%= obs.user.legal_name %></a><br/>
+Identifier: <a href="<%= "#{DOMAIN}/observer/observer/show_user/#{@naming.user_id}" %>"><%= @naming.user.legal_name %></a><br/>
+<% if obs.specimen %>
+  <%= :show_observation_specimen_available.l %>
+<% else %>
+  <%= :show_observation_specimen_not_available.l %>
+<% end %><br/>
+Image Count: <%= obs.images.length %><br/>
+</p>
+</div>
 
 <p>Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="<%= "#{DOMAIN}/name/email_tracking/#{@naming.id}" %>">Update or disable notifications for this name.</a>
-  <li><a href="<%= "#{DOMAIN}/observer/show_notifications/#{@user.id}" %>">Review your notifications.</a>
+  <li><a href="<%= "#{DOMAIN}/name/email_tracking/#{@naming.name_id}" %>">Update or disable notifications for this name.</a>
+  <li><a href="<%= "#{DOMAIN}/observer/list_notifications" %>">Review your notifications.</a>
 </ul>
 
 <br/>
@@ -26,13 +41,24 @@ has been given the name
 <% else ##################################################################### %>
 An observation, <%= "#{DOMAIN}/#{obs.id}" %>, on the Mushroom Observer website
 has been given the name <%= name.text_name %> which you are currently tracking.
+You can contact either the observer or the identifier by going to the appropriate
+link below and clicking the email link near the top of the page.
+
+Observer: <%= obs.user.legal_name %> (<%= "#{DOMAIN}/observer/observer/show_user/#{obs.user_id}" %>)
+Identifier: <%= @naming.user.legal_name %> (<%= "#{DOMAIN}/observer/observer/show_user/#{@naming.user_id}" %>)
+<%= if obs.specimen
+  :show_observation_specimen_available.l
+else
+  :show_observation_specimen_not_available.l
+end %>
+Image Count: <%= obs.images.length %>
 
 To update or disable notifications for the name just go to the following URL:
 
-<%= "#{DOMAIN}/name/email_tracking/#{@naming.id}" %>
+<%= "#{DOMAIN}/name/email_tracking/#{@naming.name_id}" %>
 
-To review you notifications:
+To review your notifications:
 
-<%= "#{DOMAIN}/observer/show_notifications/#{@user.id}" %>
+<%= "#{DOMAIN}/observer/list_notifications" %>
 
 <% end %>

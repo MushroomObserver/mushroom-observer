@@ -11,8 +11,9 @@
 
   <%= 
     tabs = []
-    tabs.push [ :bulk_license_link.l, url_for(:controller => 'image', :action => 'license_updater') ]
-    tabs.push [ :prefs_link.l, url_for(:controller => 'account', :action => 'prefs') ]
+    tabs.push [:bulk_license_link.l, url_for(:controller => 'image', :action => 'license_updater') ]
+    tabs.push [:show_user_your_notifications.l, url_for(:controller => "observer", :action => "list_notifications")]
+    tabs.push [:prefs_link.l, url_for(:controller => 'account', :action => 'prefs') ]
     show_tabs tabs
   %>
 
@@ -21,15 +22,15 @@
   <p><label for="user_name"><%= :profile_name.l %></label><br/>
   <%= form.text_field("name", :size => 60) %></p>
 
-  <p><label for="user_place_name"><%= :profile_location.l %></label><br/>
+  <p><label for="user_place_name"><%= :profile_location.l %></label> (33%)<br/>
   <%= text_field_with_auto_complete('user', 'place_name', { :value => @place_name, :size => 60 },
     { :skip_style => true, :indicator => 'indicator' }) %></p>
 
-  <p><label for="user_notes"><%= :profile_notes.l %></label><br/>
+  <p><label for="user_notes"><%= :profile_notes.l %></label> (33%)<br/>
   <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>
 
   <p><label for="user_upload_image"><%= @user.image_id ?
-    :profile_image_change.l : :profile_image_create.l %></label>
+    :profile_image_change.l : :profile_image_create.l %></label> (33%)
     <%= link_to :profile_image_reuse.l, :controller => 'image',
       :action => 'reuse_image_for_user' %>
     <%= link_to(:profile_image_remove.l, :action => 'remove_image') \
@@ -41,6 +42,9 @@
     :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
   <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
   <span id="help_note">(<%= :profile_copyright_warning.l %>)</span></p>
+
+  <p><label for="user_mailing_address"><%= :profile_mailing_address.l %></label><br/>
+  <%= form.text_area("mailing_address", :rows => 5, :cols => 60) %></p>
 
 <br/>
 <center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center>

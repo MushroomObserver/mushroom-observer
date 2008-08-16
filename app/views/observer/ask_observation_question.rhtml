@@ -6,7 +6,7 @@
 <br/>
 <label for="question_content">Enter your question below.  When you hit send it will be emailed to 
 	<%= @observation.user.legal_name %>.<br/>
-	The email will automatically include a link to this observation.</label><br/><br/>
+	The email will automatically include a link to this observation as well as your email address.</label><br/><br/>
 <%= text_area 'question', 'content'  %>
 <% end %>
 

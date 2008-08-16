@@ -11,7 +11,7 @@ agaricus_campestris_notification_with_note:
   user_id: 2
   flavor: name
   obj_id: 3
-  note_template: A note about :observation from :observer
+  note_template: A note about :observation for :observer
 
 agaricus_campestris_notification_without_note:
   id: 3
