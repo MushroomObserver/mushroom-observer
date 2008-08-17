@@ -610,6 +610,9 @@ class NameController < ApplicationController
         redirect_to(:action => 'show_name', :id => name_id)
       else
         @name = Name.find(name_id)
+        if [:Family, :Order, :Class, :Phylum, :Kingdom, :Group].member?(@name.rank)
+          flash_warning("Enabled only for #{@name.search_name} - Contained taxa not yet support for #{@name.rank}")
+        end
         if @notification
           @note_template = @notification.note_template
         else

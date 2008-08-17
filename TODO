@@ -1,15 +1,13 @@
 Release each of the following as they get completed:
 
-Rod: Basic observations quality hints in email (herbarium, # of photos),
-  Summarize species list changes
+Rod: Summarize species list changes
 Tom Volk:
   Wants to have students make observations as part of course.
   Encourages idea of rating observations and images
 
 Email queuing:
   Focus on notification
-    genus notifications: has_notifications(@naming, @user)
-      warn about taxa above Genus
+    genus notifications:
       tests for higher taxa
     show_notifications could happen after creating or modifying a species list
     providing mailing address as a user preference
@@ -17,11 +15,9 @@ Email queuing:
     handle species list alert
     User Summary should have a list of that User's notification with ability to Delete or Edit (to change the alert): observer/show_notifications
     Notifications:
-      Particular Name gets applied: name_id, user, note
-        Select notification based on name_id, queue emails, show notes
-      Every comment (user preference?): user
       Name contained in a higher taxon gets applied: name_id, user, note
-      Track a particular observation [comments namings, consensus change] (observer gets this by default): observation_id, user
+      Every comment (user preference?): user
+      Particular observation [comments namings, consensus change] (observer gets this by default): observation_id, user
       User creates comment, observation or naming: user_id, user
       id, user_id, flavor, obj_id, note
   Move over other email
@@ -145,7 +141,7 @@ Featured Mushroom pages (8)
 Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations. (40)
     Can be used to create species lists, or simply displayed and copied for publication somewhere else.
     Use to create observations
-    Dynamic checklists based on location or user
+    Dynamic checklists based on location or user or the result of a search
     
     Feedback from Doug Smith on species lists:
     Mostly the feature I need to be able to make 20-100 observations
