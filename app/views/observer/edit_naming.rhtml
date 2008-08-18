@@ -1,12 +1,4 @@
-<% if @js %>
-  <%= javascript_include_tag 'prototype' %>
-  <%= javascript_include_tag 'controls' %>
-  <%= javascript_include_tag 'effects' %>
-  <%= javascript_include_tag 'my_auto_complete' %>
-  <%= javascript_tag 'extend_ajax_autocompleter()' %>
-  <div id='indicator' class='indicator'><%= image_tag('indicator.gif') %></div>
-  <%= javascript_tag 'Element.hide($("indicator"))' %>
-<% end %>
+<%= javascript_include_auto_complete %>
   
 <% @title = 'Create Observation' %>
 

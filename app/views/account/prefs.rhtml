@@ -45,23 +45,23 @@
   <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
   <label for="user_columns"><%= :prefs_columns.l %></label><br/>
   <%= form.check_box("alternate_rows") %>
-  <label for="alternate_rows"><%= :prefs_alt_row_colors.l %></label><br/>
+  <label for="user_alternate_rows"><%= :prefs_alt_row_colors.l %></label><br/>
   <%= form.check_box("alternate_columns") %>
-  <label for="alternate_columns"><%= :prefs_alt_col_colors.l %></label><br/>
+  <label for="user_alternate_columns"><%= :prefs_alt_col_colors.l %></label><br/>
   <%= form.check_box("vertical_layout") %>
-  <label for="vertical_layout"><%= :prefs_text_below_images.l %></label></p>
+  <label for="user_vertical_layout"><%= :prefs_text_below_images.l %></label></p>
 
   <p style="margin-top:2em"><b><%= :prefs_email_prefs.l %>:</b></p>
   <%= form.check_box("feature_email") %>
-  <label for="feature_email"><%= :prefs_email_features.l %></label><br/>
+  <label for="user_feature_email"><%= :prefs_email_features.l %></label><br/>
   <%= form.check_box("comment_email") %>
-  <label for="comment_email"><%= :prefs_email_comments.l %></label><br/>
+  <label for="user_comment_email"><%= :prefs_email_comments.l %></label><br/>
   <%= form.check_box("commercial_email") %>
-  <label for="commercial_email"><%= :prefs_email_commercial.l %></label><br/>
+  <label for="user_commercial_email"><%= :prefs_email_commercial.l %></label><br/>
   <%= form.check_box("question_email") %>
-  <label for="question_email"><%= :prefs_email_questions.l %></label><br/>
+  <label for="user_question_email"><%= :prefs_email_questions.l %></label><br/>
   <%= form.check_box("html_email") %>
-  <label for="html_email"><%= :prefs_email_html.l %></label>
+  <label for="user_html_email"><%= :prefs_email_html.l %></label>
   <p style="margin:0px 20px 0px 20px"><span id="help_note">
     <%= :prefs_email_note.l %></span></p>
 

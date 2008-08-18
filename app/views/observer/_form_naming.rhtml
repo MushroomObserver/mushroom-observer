@@ -40,7 +40,7 @@
 
 <nobr>
   <label for="name_name"><%= :form_naming_name.l %>:</label>
-  <%= text_field('name', 'name', { :value => @what }) %>
+  <%= text_field('name', 'name', :value => @what) %>
   <span style="margin-left:20px">&nbsp;</span>
   <label for="vote_value"><%= :form_naming_confidence.l %>:</label>
   <%= select('vote', 'value', @confidence_menu, { :include_blank =>
@@ -50,20 +50,8 @@
   <span class="HelpNote"><%= :form_naming_name_help_create.l %></span>
 <% end %>
 <span class="HelpNote"><%= :form_naming_name_help.l %></span><br/>
-
-<% if @js %>
-  <div class="auto_complete" id="name_name_auto_complete"></div>
-  <%= javascript_tag %(
-    new NameAutocompleter('name_name', 'name_name_auto_complete',
-      '/observer/auto_complete_for_name_name', {
-        inherit_width: #{@ua[:ie] ? 1 : 0},
-        onChange: function(v) {
-          if (v && v != "") Element.show('reasons_div');
-        }
-      }
-    );
-  ) %>
-<% end %>
+<%= turn_into_name_auto_completer('name_name', :onChange =>
+  %( function(v) { if (v && v != "") Element.show('reasons_div') } )) %>
 
 <%# -------------------- Naming Reasons -------------------- %>
 
@@ -75,12 +63,13 @@
     check    = !r.notes.nil?
     notes    = r.notes.nil? ? '' : r.notes
     default  = r.default?
+    onclick  = "Element.toggle('reason_#{i}_div'); setTimeout(function() { if ($('reason_#{i}_check').checked) $('reason_#{i}_notes').focus() }, 0.25)"
     checkbox = check_box('reason', 'check', { :index => i, :checked => check,
-      :onclick => "Element.toggle('reason_#{i}_div'); setTimeout(function(){$('reason_#{i}_notes').focus()},0.25)" })
+      :onclick => can_do_ajax? ? onclick : 1})
     label    = "<label for='reason_#{i}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
     textarea = text_area('reason', 'notes', { :index => i, :cols => 80, :rows => 1, :value => notes })
     textarea += "<br/>"
-    if @js
+    if can_do_ajax?
       textarea = "<div id='reason_#{i}_div'>#{textarea}</div>"
       if !check
         textarea += javascript_tag("Element.hide('reason_#{i}_div')")
@@ -88,14 +77,14 @@
     end
     html += checkbox + label + textarea
   end
-  if !show_reasons && @js && @what.to_s == ""
+  if can_do_ajax? && !show_reasons && @what.to_s == ""
     html = "<div id='reasons_div'>#{html}</div>"
     html += javascript_tag("Element.hide('reasons_div')");
   end
   html
 %>
 
-<%= hidden_field_tag("was_js_on", "yes") if @js %>
+<%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
 
 <%= javascript_tag "document.getElementById('name_name').focus()" %>
 

@@ -63,8 +63,6 @@ require 'ftools'
 #   * throw_mobile_error
 #
 #  AJAX:
-#     auto_complete_for_observation_place_name
-#     auto_complete_for_name_name
 #   * image_form
 #
 #  Admin Tools:
@@ -88,8 +86,6 @@ require 'ftools'
 class ObserverController < ApplicationController
   before_filter :login_required, :except => (CSS + [
     :ask_webmaster_question,
-    :auto_complete_for_name_name,
-    :auto_complete_for_observation_place_name,
     :color_themes,
     :how_to_help,
     :how_to_use,
@@ -235,7 +231,6 @@ class ObserverController < ApplicationController
 #    destroy_observation
 #    prev_observation
 #    next_observation
-#    auto_complete_for_observation_place_name
 #
 #  Helpers:
 #    show_selected_observations(...)
@@ -609,14 +604,6 @@ class ObserverController < ApplicationController
     end
   end
 
-  # AJAX request used for autocompletion of "where" field in _form_observation.
-  # View: none
-  # Inputs: params[:observation][:place_name]
-  # Outputs: none
-  def auto_complete_for_observation_place_name
-    auto_complete_location(:observation, :place_name)
-  end
-
 #--#############################################################################
 #
 #  Naming support.
@@ -625,7 +612,6 @@ class ObserverController < ApplicationController
 #    create_naming
 #    edit_naming
 #    destroy_naming
-#    auto_complete_for_name_name
 #
 #  Helpers:
 #    create_naming_helper()
@@ -752,14 +738,6 @@ class ObserverController < ApplicationController
       flash_notice "Successfully destroyed naming."
       redirect_to :action => 'show_observation', :id => @observation
     end
-  end
-
-  # AJAX request used for autocompletion of "what" field in _form_naming.
-  # View: none
-  # Inputs: params[:name][:name]
-  # Outputs: none
-  def auto_complete_for_name_name
-    auto_complete_name(:name, :name)
   end
 
 ################################################################################

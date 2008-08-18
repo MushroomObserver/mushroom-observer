@@ -1,3 +1,74 @@
+#
+# This documentation is still under construction...
+#
+# Supported query_types:
+#   :images
+#   ...
+#
+# Usage of session[]:
+#   session[:search_states][:count]    Number of states allocated.
+#   session[:search_states][0...]      State for a particular search.
+#     :title
+#     :conditions
+#     :order
+#     :source
+#     :query_type
+#     :access_count     Number of times used.
+#     :timestamp        Time last used.
+# 
+#   session[:seq_states][:count]    Number of states allocated.
+#   session[:seq_states][0...]      State for a particular search.
+#     :current_id
+#     :current_index
+#     :next_id
+#     :prev_id
+#     :query
+#     :query_type
+#     :access_count     Number of times used.
+#     :timestamp        Time last used.
+# 
+# Usage of params[]:
+#   :search_seq
+#   :seq_key
+#   :id
+#   :obs
+# 
+# Methods in application_controller:
+#   store_search_state(state)     Stores search state in session.
+#   store_seq_state(state)        Stores sequence state in session.
+# 
+# Instance vars:
+#   @key              Copy of data stored in session[:seq_states][@key].
+#   @current_id
+#   @current_index
+#   @next_id
+#   @prev_id
+#   @query
+#   @query_type
+#   @access_count
+#   @timestamp
+# 
+#   @connection       Database connection, e.g. Name.connection.
+#   @cache            Simple list of object ids (integers).
+#   @start_index      Index of first object in cache.
+#   @count            Number of objects in cache.  (Same as @cache.length.)
+#   @has_full_cache   Does cache contain entire query?
+#   @logger           Optional: logs...
+# 
+# Model methods:
+#   new(session, params, connection, query_type, logger)
+#   session_data()
+#   query_ids(query, start, count)
+#   reload_cache(index, count)
+#   have_index(index)
+#   index_from_cache(search_id)
+#   index_from_id(search_id, index_hint)
+#   id_from_index(index)
+#   next()
+#   prev()
+# 
+################################################################################
+
 class SequenceState
 
   attr_accessor :current_id
@@ -9,9 +80,13 @@ class SequenceState
   attr_accessor :access_count
   attr_reader :query
   attr_reader :query_type
-  
+
   DEFAULT_CACHE_SIZE = 16
-  
+
+  # Look up sequence state (key in params[:seq_key]), or create new one if none
+  # specified/found.  Pass in the controller's +session+ and +params+, a
+  # database +connection+ (e.g. <tt>Names.connection</tt>), query type (see
+  # top of page for list of supported types), and optional logger.
   def initialize(session, params, connection, query_type, logger=nil)
     session_state = session[:seq_states]
     key = params[:seq_key]
@@ -27,7 +102,7 @@ class SequenceState
       end
     end
     search_state = SearchState.new(session, params, query_type, logger)
-    
+
     # Need setup
     @key = key.to_s
     @logger = logger
@@ -59,6 +134,7 @@ class SequenceState
     end
   end
 
+  # Return hash of data stored in session[:seq_states][key].
   def session_data()
     {
       :current_id => @current_id,
@@ -71,7 +147,10 @@ class SequenceState
       :timestamp => @timestamp,
     }
   end
-  
+
+  # Query database, returning a simple list of object ids (numbers not strings).
+  # This should not be called, since it only partially sets the relevant
+  # instance variables -- use reload_cache instead.
   def query_ids(query, start, count)
     result = []
     if start.nil? or count.nil?
@@ -90,6 +169,9 @@ class SequenceState
     result
   end
 
+  # Query database, and populate some or all of cache (depending on the
+  # optional +index+ and +count+ arguments).  Cache is a simple list of
+  # object ids.  Protects against negative +index+.
   def reload_cache(index=nil, count=nil)
     # For now just load all the ids into the cache.
     # If performance gets bad then we can be smarter
@@ -102,7 +184,8 @@ class SequenceState
     @start_index = index || 0
     @count = @cache.length
   end
-  
+
+  # Does cache contain index?
   def have_index(index)
     result = false
     if @cache
@@ -110,7 +193,8 @@ class SequenceState
     end
     result
   end
-  
+
+  # Get index of object (id is +search_id+) in cache, or nil if not found.
   def index_from_cache(search_id)
     unless @cache
       reload_cache()
@@ -125,6 +209,8 @@ class SequenceState
     nil
   end
 
+  # Get index of object (id is +search_id+).  Searches cache first, then
+  # looks near the top, then loads entire query.  Returns index or nil.
   def index_from_id(search_id, index_hint = 0)
     result = index_from_cache(search_id)
     if result.nil?
@@ -139,7 +225,7 @@ class SequenceState
     end
     result
   end
-  
+
   # Uses cached previous result if available
   # Returns nil if index is out of range
   def id_from_index(index)
@@ -155,7 +241,7 @@ class SequenceState
     end
     result
   end
-  
+
   # Move state to the next item
   def next()
       result = self.next_id

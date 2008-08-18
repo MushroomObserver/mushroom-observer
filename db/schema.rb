@@ -222,10 +222,10 @@ ActiveRecord::Schema.define(:version => 33) do
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
     t.column "contribution",      :integer,                :default => 0
-    t.column "notes",             :text,                   :default => "",   :null => false
+    t.column "notes",             :text,                                     :null => false
     t.column "location_id",       :integer
     t.column "image_id",          :integer
-    t.column "mailing_address",   :text,                   :default => "",   :null => false
+    t.column "mailing_address",   :text,                                     :null => false
   end
 
   create_table "votes", :force => true do |t|

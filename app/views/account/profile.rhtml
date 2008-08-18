@@ -1,8 +1,4 @@
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag 'my_auto_complete' %>
-<%= javascript_tag 'extend_ajax_autocompleter()' %>
-<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
-<%= javascript_tag 'Element.hide($("indicator"))' %>
+<%= javascript_include_auto_complete %>
 
 <% form_for(:user, :url => { :action => :profile }, :html => { :multipart => true }) do |form| %>
 
@@ -23,8 +19,8 @@
   <%= form.text_field("name", :size => 60) %></p>
 
   <p><label for="user_place_name"><%= :profile_location.l %></label> (33%)<br/>
-  <%= text_field_with_auto_complete('user', 'place_name', { :value => @place_name, :size => 60 },
-    { :skip_style => true, :indicator => 'indicator' }) %></p>
+  <%= text_field('user', 'place_name', :value => @place_name, :size => 60) %></p>
+  <%= turn_into_location_auto_completer("user_place_name") %>
 
   <p><label for="user_notes"><%= :profile_notes.l %></label> (33%)<br/>
   <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>

@@ -17,9 +17,6 @@ require 'rtf'
 #   * add_observation_to_species_list        (post method)
 #   * remove_observation_from_species_list   (post method)
 #
-#  AJAX:
-#     auto_complete_for_species_list_where
-#
 #  Helpers:
 #    calc_checklist(id)                   Get list of names for LHS of _species_list_form.
 #    sort_species_list_observations(...)  Get list of observations for show_species_list.
@@ -42,8 +39,7 @@ class SpeciesListController < ApplicationController
     :list_species_lists,
     :show_species_list,
     :species_lists_by_title,
-    :species_lists_by_user,
-    :auto_complete_for_species_list_where
+    :species_lists_by_user
   ]
 
   # Display list of all species_lists, sorted by date.
@@ -135,14 +131,6 @@ class SpeciesListController < ApplicationController
     session_setup
     store_location
     @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
-  end
-
-  # AJAX request used for autocompletion of "where" field in _form_species_list.
-  # View: none
-  # Inputs: params[:species_list][:where]
-  # Outputs: none
-  def auto_complete_for_species_list_where
-    auto_complete_location(:species_list, :where)
   end
 
   # Form for creating a new species list.

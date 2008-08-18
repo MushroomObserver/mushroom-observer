@@ -1,16 +1,18 @@
-<%= javascript_include_tag 'prototype' %>
-<%= javascript_include_tag 'controls' %>
-<%= javascript_include_tag 'effects' %>
-<%= javascript_include_tag 'darvin' %>
-<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
-<%= javascript_tag 'Element.hide($("indicator"))' %>
+<% if can_do_ajax? %>
+  <%= javascript_include_tag 'prototype' %>
+  <%= javascript_include_tag 'controls' %>
+  <%= javascript_include_tag 'effects' %>
+  <%= javascript_include_tag 'darvin' %>
+<% end %>
 
 <% @title = "Darvin's Special" %>
 <div id="Title"><%= @title %></div>
 
-<noscript>
+<% if !@js %>
  <p>This page will not work if javascript is disabled.</p>
-</noscript>
+<% else if true %>
+ <p>This page will not work on your browser, sorry!</p>
+<% else %>
 
 <style type="text/css"><!--
   th {
@@ -93,3 +95,6 @@ list into Microsoft Word with all the formatting intact.  Spreadsheet produces
 a CSV file, with name, author, and citation columns.  Common names are not
 available yet.  (Click on "back" button in browser to return to this
 form.)</span></p> 
+
+  <% end %>
+<% end %>

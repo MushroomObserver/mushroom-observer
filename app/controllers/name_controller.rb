@@ -14,7 +14,7 @@
 #     map                Show distribution map.
 #
 #  AJAX:
-#     auto_complete_for_proposed_name
+#     auto_complete_name
 #
 #  Admin Tools:
 #   R cleanup_versions
@@ -32,7 +32,7 @@
 
 class NameController < ApplicationController
   before_filter :login_required, :except => [
-    :auto_complete_for_proposed_name,
+    :auto_complete_name,
     :map,
     :name_index,
     :name_search,
@@ -40,6 +40,21 @@ class NameController < ApplicationController
     :show_name,
     :show_past_name
   ]
+
+  # Process AJAX request for autocompletion of mushroom name.  It reads the
+  # first letter of the field, and returns all the names beginning with it.
+  # Inputs: params[:name]
+  # Outputs: renders sorted list of names, one per line, in plain text
+  def auto_complete_name
+    part = params[:name] || ''
+    letter = part[0,1].downcase
+    @items = Name.connection.select_values %(
+      SELECT text_name FROM names
+      WHERE LOWER(text_name) LIKE '#{letter}%'
+      ORDER BY text_name ASC
+    )
+    render(:inline => '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
+  end
 
   # Paginate and select name index data in prep for name_index view.
   # Input:   params['page'], params['letter'], @name_data

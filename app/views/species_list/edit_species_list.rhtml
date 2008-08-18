@@ -1,8 +1,4 @@
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag 'my_auto_complete' %>
-<%= javascript_tag 'extend_ajax_autocompleter()' %>
-<div id="indicator" class="indicator"><%= image_tag('indicator.gif') %></div>
-<%= javascript_tag 'Element.hide($("indicator"))' %>
+<%= javascript_include_auto_complete %>
 
 <% @title = 'Editing Species List: ' + h(@species_list.unique_text_name) %>
 <%= link_to 'Cancel (Show Species List)', :action => 'show_species_list', :id => @species_list %>

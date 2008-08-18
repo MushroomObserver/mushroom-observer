@@ -11,6 +11,9 @@
 #   * add_to_location
 #   * edit_location
 #   R merge_locations(location, dest)
+#
+#  AJAX:
+#     auto_complete_location
 #    
 #  Helpers:
 #     sorted_locs(where, separator=nil)
@@ -23,8 +26,24 @@ class LocationController < ApplicationController
     :map_locations,
     :show_location,
     :show_past_location,
-    :where_search
+    :where_search,
+    :auto_complete_location
   ]
+
+  # AJAX request used for autocompletion of location fields.
+  # View: none
+  # Inputs: params[:location]
+  # Outputs: <ul> list of possible matches
+  def auto_complete_location
+    part = (params[:location] || '').downcase.gsub(/[*']/,"%")
+    @items = Observation.find(:all, {
+      :include => :location,
+      :conditions => "LOWER(observations.where) LIKE '#{part}%' or LOWER(locations.display_name) LIKE '#{part}%'",
+      :order => "observations.where ASC, locations.display_name ASC",
+      :limit => 10,
+    })
+    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry.place_name))) }.uniq) %>"
+  end
 
   # Either displays matrix of observations at a location alphabetically
   # if a location is given, else lists all location names.

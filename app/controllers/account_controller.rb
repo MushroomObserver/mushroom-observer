@@ -20,9 +20,6 @@
 #     no_commercial_email
 #     no_comment_email
 #
-#  AJAX:
-#     auto_complete_for_user_place_name
-#
 #  Admin Tools:
 #   R delete
 #
@@ -48,17 +45,8 @@ class AccountController < ApplicationController
     :no_feature_email,
     :no_question_email,
     :no_commercial_email,
-    :no_comment_email,
-    :auto_complete_for_user_place_name
+    :no_comment_email
   ]
-
-  # AJAX request used for autocompletion of location field in prefs.
-  # View: none
-  # Inputs: params[:user][:place_name]
-  # Outputs: none
-  def auto_complete_for_user_place_name
-    auto_complete_location(:user, :place_name)
-  end
 
   def login
     case request.method
