@@ -46,7 +46,7 @@ class SearchState
       )
     when :observations
       result = "select observations.*, names.search_name
-        from observations, names
+        from names, observations
         left outer join locations on observations.location_id = locations.id
         where observations.name_id = names.id"
     when :images

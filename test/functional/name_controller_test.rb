@@ -78,7 +78,7 @@ class NameControllerTest < Test::Unit::TestCase
     name = @chlorophyllum_rachodes
     params = { :id => name.id }
     requires_login(:change_synonyms, params)
-    assert_form_action :action => 'change_synonyms', :approved_synonyms => ''
+    assert_form_action :action => 'change_synonyms', :approved_synonyms => []
   end
 
   def test_deprecate_name

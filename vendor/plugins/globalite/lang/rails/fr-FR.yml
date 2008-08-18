@@ -59,7 +59,7 @@ array_connector: 'et'
 array_skip_last_comma: 'false'
 
 # Active Record error messages:
-active_record_helper_error_description: 'il y a eu un problème avec les champs suivant:'
+active_record_helper_error_description: 'il y a eu un problème avec les champs suivants:'
 active_record_helper_header_message: pluralize{{error_count}, erreur} pendant l'enregistrement de '{failed_object}'
 
 date_helper_month_names:

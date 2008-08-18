@@ -13,7 +13,7 @@ class QueuedEmail < ActiveRecord::Base
   # Like initialize, but ensures that the objects is saved
   # and is ready to have parameters added.
   def setup(sender, receiver, flavor)
-    self.user = sender
+    self.user_id = sender ? sender.id : 0
     self.to_user = receiver
     self.flavor = flavor
     self.queued = Time.now()

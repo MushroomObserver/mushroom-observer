@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 33) do
+ActiveRecord::Schema.define() do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -185,6 +185,12 @@ ActiveRecord::Schema.define(:version => 33) do
     t.column "name_id",         :integer
     t.column "synonym_id",      :integer
   end
+
+  create_table "schema_migrations", :id => false, :force => true do |t|
+    t.column "version", :string, :null => false
+  end
+
+  add_index "schema_migrations", ["version"], :name => "unique_schema_migrations", :unique => true
 
   create_table "species_lists", :force => true do |t|
     t.column "created",  :datetime

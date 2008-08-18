@@ -33,6 +33,12 @@ Rails::Initializer.run do |config|
   # (create the session table with 'rake create_sessions_table')
   # config.action_controller.session_store = :active_record_store
 
+#   # A secret is required to generate an integrity hash for cookie session data.
+#   config.action_controller.session = {
+#     :session_key => 'mo_session',
+#     :secret => '1f58da43b4419cd9c1a7ffb87c062a910ebd2925d3475aefe298e2a44d5e86541125c91c2fb8482b7c04f7dd89ecf997c09a6e28a2d01fc4819c75d2996e6641'
+#   }
+
   # Enable page/fragment caching by setting a file-based store
   # (remember to create the caching directory and make it readable to the application)
   # config.action_controller.fragment_cache_store = :file_store, "#{RAILS_ROOT}/cache"

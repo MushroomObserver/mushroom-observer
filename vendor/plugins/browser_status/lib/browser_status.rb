@@ -19,16 +19,14 @@
 #      before_filter :browser_status
 #      ...
 #  
-#  3) Now you have access to the following class variables from your
-#  controllers and views:
+#  3) Now you have access to the following from your controllers and views: 
 #  
 #    @js                boolean: is javascript enabled?
 #    @ua                hash with keys :ie, :ns, :mac, :text, :robot, etc.
 #    @ua_version        float: e.g. 6.0 or 7.0 for :ie
-#    @cookies_enabled   boolean: are cookies enabled?
-#    @session_working   boolean: is session object working?
-#  
-#  
+#    cookies_enabled?   boolean: are cookies enabled?
+#    session_working?   boolean: is session object working?
+#    can_do_ajax?       boolean: can browser do AJAX?
 #  
 #  = How it works
 #  
@@ -97,12 +95,13 @@
 #    @ua[:ie8]
 #  
 #    @ua[:ns]       Mozilla-compatible browsers.
-#    @ua[:ns2]
-#    @ua[:ns3]
-#    @ua[:ns4]
 #    @ua[:ns5]
+#    @ua[:ns6]
+#    @ua[:ns7]
+#    @ua[:ns8]
 #  
 #    @ua[:mac]      Mac browsers (??).
+#    @ua[:opera]    Opera (also sets :ie, but not @ua_version).
 #    @ua[:text]     Text-only browser.
 #    @ua[:robot]    Web-crawlers.
 #  
@@ -146,8 +145,9 @@ module BrowserStatus
 
   # This is designed to be run as a before_filter at the top of
   # application_controller, before anthing else is run.  It sets several
-  # "global" class variables that are available to all controllers and views.
-  def browser_status
+  # "global" instance variables that are available to all controllers and
+  # views.
+  def browser_status 
 
     # Is the session working?
     if session[:_working]
@@ -178,6 +178,7 @@ module BrowserStatus
     env = request.env['HTTP_USER_AGENT']
     if ua = _user_agent(env)
       @ua[ua] = true
+      @ua[:opera] = true if env.match(/Opera/)
       # Include major version number for NS and IE browsers.
       if ua == :ie && env.match(/MSIE ((\d+)(\.\d+)?)/) ||
          ua == :ns && env.match(/Mozilla\/((\d+)(\.\d+)?)/)
@@ -193,6 +194,40 @@ module BrowserStatus
     # print "@ua              = [#{@ua             }]\n"
     # print "@ua_version      = [#{@ua_version     }]\n"
     # print "------------------------------------\n"
+  end
+
+  # Is javascript enabled on browser?  Strictly speaking, it just checks if
+  # the browser can do <tt>window.location = ...</tt>, but this is a good
+  # proxy for checking if javascript is enabled at all.  You can also use
+  # the instance variable <tt>@js</tt> for the same purpose.
+  def javascript_enabled?
+    @js
+  end
+
+  # Are cookies enabled on browser?  Doesn't determine if user is throwing
+  # them away periodically, or whenever they close their browser.  Shorthand
+  # for <tt>@cookies_enabled</tt>.
+  def cookies_enabled?
+    @cookies_enabled
+  end
+
+  # Is session working?  (i.e. are cookies enabled or whatever the +session+
+  # object needs to work?)  Shorthand for <tt>@session_working</tt>.
+  def session_working?
+    @session_working
+  end
+
+  # Check to make sure browser can handle AJAX.  This doubles as a "will
+  # prototype and scriptaculous work?" test, I believe.  The criteria clearly
+  # need to be refined...
+  def can_do_ajax?
+    @js && (
+      @ua[:ie] && @ua_version >= 5.5 ||
+      @ua[:ns] && @ua_version >= 7.1 ||
+      # firefox >= 1.0
+      # safari >= 1.2
+      @ua[:mac]
+    )
   end
 
   # Take URL that got us to this page and add one or more parameters to it.
@@ -215,9 +250,11 @@ module BrowserStatus
     addr, parms = url.split('?')
     for arg in parms ? parms.split('&') : []
       var, val = arg.split('=')
-      var = CGI.unescape(var)
-      # See note below about precedence in case of redundancy.
-      args[var] = val if !args.has_key?(var)
+      if var && var != ''
+        var = CGI.unescape(var)
+        # See note below about precedence in case of redundancy.
+        args[var] = val if !args.has_key?(var)
+      end
     end
 
     # Deal with the special "/object/45" => "/object/show?id=45" case.

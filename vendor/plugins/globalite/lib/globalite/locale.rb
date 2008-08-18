@@ -16,17 +16,11 @@ class Locale
     "#{Globalite.language}-#{Globalite.country}".to_sym
   end
   
+  #
   def self.set_code(locale)
-    lang, country = locale.to_s.split('-')
-    if country # Make sure locale is of the form <lang>-<country>
-      if Globalite.languages.include?(lang.to_sym) # Is this a known language
-        Globalite.language = lang.to_sym # then use it
-        if Globalite.locales.include?(locale.to_sym) # Is this a known locale
-          Globalite.country = country.to_sym # then use the country as well
-        else
-          Globalite.country = :* # else use the generic version of this language
-        end
-      end
+    if locale.to_s.split('-') && locale.to_s.length.between?(4,5) && Globalite.locales.include?(locale.to_sym) 
+       Globalite.language = locale.to_s.split('-')[0].downcase.to_sym if locale.to_s.split('-')[0]
+       Globalite.country = locale.to_s.split('-')[1].upcase.to_sym if locale.to_s.split('-')[1]
     end
   end
   

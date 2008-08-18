@@ -32,7 +32,7 @@ class NamingReasonTest < Test::Unit::TestCase
     assert !nr.save
     assert_equal 3, nr.errors.count
     assert_equal "can't be blank", nr.errors.on(:naming)
-    assert_equal ["is not recognized", "can't be blank"], nr.errors.on(:reason)
+    assert_equal ["can't be blank", "is not recognized"], nr.errors.on(:reason).sort
     nr = NamingReason.new(
         :naming => @coprinus_comatus_naming,
         :reason => 999

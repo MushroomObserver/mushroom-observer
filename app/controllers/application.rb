@@ -9,8 +9,10 @@
 require 'login_system'
 require 'active_record_extensions'
 
-CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
-SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings"
+if !defined? CSS
+  CSS = ['Agaricus', 'Amanita', 'Cantharellaceae', 'Hygrocybe']
+  SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings"
+end
 
 module Enumerable
   # Select random value.

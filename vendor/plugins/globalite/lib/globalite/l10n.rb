@@ -92,7 +92,7 @@ module Globalite
       country = country.to_s.upcase.to_sym if country.class == Symbol
       country = country.upcase.to_sym if country.class == String && !country.empty?
 
-      if @@locales.include?("#{current_language}-#{country}".to_sym) || country == :*
+      if @@locales.include?("#{current_language}-#{country}".to_sym)
         @@current_country = country
       elsif locales.each {|locale| locale =~ /[a-z][a-z]-#{country.to_s}/ }
         locales.each do |key| 

@@ -30,6 +30,8 @@ class UserTest < Test::Unit::TestCase
     u.login = "nonbob"
     u.email = "nonbob@collectivesource.com"
     u.theme = "NULL"
+    u.notes = ""
+    u.mailing_address = ""
 
     u.password = u.password_confirmation = "tiny"
     assert !u.save     
@@ -54,6 +56,8 @@ class UserTest < Test::Unit::TestCase
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "bob@collectivesource.com"
     u.theme = "NULL"
+    u.notes = ""
+    u.mailing_address = ""
 
     u.login = "x"
     assert !u.save     
@@ -79,6 +83,8 @@ class UserTest < Test::Unit::TestCase
     u.login = "rolf"
     u.email = "rolf@collectivesource.com"
     u.theme = "NULL"
+    u.notes = ""
+    u.mailing_address = ""
     u.password = u.password_confirmation = "rolfs_secure_password"
     assert !u.save
   end
@@ -89,6 +95,8 @@ class UserTest < Test::Unit::TestCase
     u.login = "nonexistingbob"
     u.email = "nonexistingbob@collectivesource.com"
     u.theme = "NULL"
+    u.notes = ""
+    u.mailing_address = ""
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "nonexistingbob@collectivesource.com"
       
@@ -102,6 +110,8 @@ class UserTest < Test::Unit::TestCase
     u.password = u.password_confirmation = "bobs_secure_password"
     u.email = "nonexistingbob@collectivesource.com"
     u.theme = "NULL"
+    u.notes = ""
+    u.mailing_address = ""
     assert u.save
         
     assert_equal '74996ba5c4aa1d583563078d8671fef076e2b466', u.password
