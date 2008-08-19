@@ -634,6 +634,20 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Helper function for determining if there are notifications for the given
+  # user and flavor.
+  def has_unshown_notifications(user, flavor=:naming)
+    result = false
+    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
+      ints = q.get_integers([:shown], true)
+      unless ints[:shown]
+        result = true
+        break
+      end
+    end
+    result
+  end
+
 ################################################################################
 
   private

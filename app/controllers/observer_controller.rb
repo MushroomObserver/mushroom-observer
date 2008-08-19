@@ -454,8 +454,8 @@ class ObserverController < ApplicationController
       # Attempt to create observation (and associated naming, vote, etc.)
       if request.method == :post
         if create_observation_helper()
-          if has_unshown_notifications(@naming, @user)
-            redirect_to(:action => 'show_notifications', :naming => @naming.id, :observation => @observation.id)
+          if has_unshown_notifications(@user, :naming)
+            redirect_to(:action => 'show_notifications')
           else
             redirect_to(:action => 'show_observation', :id => @observation.id)
           end
@@ -493,19 +493,16 @@ class ObserverController < ApplicationController
   # Outputs:
   #   @notifications
   def show_notifications
-    naming_id = params[:naming]
-    @naming = Naming.find(naming_id)
-    @observation = Observation.find(params[:observation])
     @user = session['user']
-    notifications = []
+    data = []
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, @user.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
-        notifications.push(Notification.find(notification_id))
+        data.push([Notification.find(notification_id), Naming.find(naming_id)])
         q.add_integer(:shown, 1)
       end
     end
-    @notifications = notifications.sort_by { rand }
+    @data = data.sort_by { rand }
   end
 
   # Lists notifications that the given user has created.
@@ -648,8 +645,8 @@ class ObserverController < ApplicationController
       @observation = Observation.find(params[:id])
       # Attempt to create naming (and associated vote, etc.)
       if request.method == :post && create_naming_helper()
-        if has_unshown_notifications(@naming, @user)
-          redirect_to(:action => 'show_notifications', :naming => @naming, :observation => @observation)
+        if has_unshown_notifications(@user, :naming)
+          redirect_to(:action => 'show_notifications')
         else
           redirect_to :action => 'show_observation', :id => @observation, :params => calc_search_params()
         end
@@ -800,20 +797,6 @@ class ObserverController < ApplicationController
       flash_object_errors(vote)
     else
       result = true
-    end
-    result
-  end
-
-  # Helper function for determining if there are notifications for the given
-  # naming and user.
-  def has_unshown_notifications(naming, user, flavor=:naming)
-    result = false
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
-      ints = q.get_integers([:shown], true)
-      unless ints[:shown]
-        result = true
-        break
-      end
     end
     result
   end

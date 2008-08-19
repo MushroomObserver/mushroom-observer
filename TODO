@@ -1,5 +1,19 @@
 Release each of the following as they get completed:
 
+Upgrade to Rails 2.1
+User vetting
+  set of taxa
+  by invitation or application?
+  need some sort of human verification
+  request vetting of a particular observation
+many taxa per user
+
+World expert
+Local expert
+Knowledgeable
+Learning [Has herbarium, has microscope...]
+Newbie - Default
+
 Rod: Summarize species list changes
 Tom Volk:
   Wants to have students make observations as part of course.

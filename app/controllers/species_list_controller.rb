@@ -310,7 +310,11 @@ class SpeciesListController < ApplicationController
       # succeeds, so we can redirect to show_species_list.
       elsif @species_list.save
         construct_observations(@species_list, params, type_str, @user, sorter)
-        redirect_to :action => 'show_species_list', :id => @species_list
+        if has_unshown_notifications(@user, :naming)
+          redirect_to(:controller => 'observer', :action => 'show_notifications')
+        else
+          redirect_to(:action => 'show_species_list', :id => @species_list)
+        end
         return
       else
         flash_object_errors(@species_list)

@@ -354,7 +354,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:chosen_approved_names] = { deprecated_checklist_name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
 
     post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
     assert_equal(50, @rolf.reload.contribution)
     spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
     assert(spl.name_included(deprecated_name))
@@ -467,7 +467,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(spl.observations.size == sp_count)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
     assert_equal(16, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count + 2, spl.observations.size)
@@ -490,7 +490,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(spl.observations.size == sp_count)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count + 1, spl.observations.size)

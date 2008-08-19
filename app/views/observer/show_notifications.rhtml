@@ -1,15 +1,15 @@
-<% @title = 'Notifications for ' + textilize_without_paragraph(h(@naming.name.display_name)) %>
+<% @title = 'New Notifications for ' + textilize_without_paragraph(h(@user.legal_name)) %>
 <%= link_to 'Show Observation', :controller => 'observer',
   :action => 'show_observation', :id => @observation %>
 
 <div id="Title"><%= @title %></div>
 <%
     odd_or_even = 0
-    for n in @notifications
+    for notification, naming in @data
         odd_or_even = 1 - odd_or_even %>
         <p>
             <div class="ListLine<%= odd_or_even %>" style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-                <%= textilize(n.calc_note(@user, @observation)) %>
+                <%= textilize(notification.calc_note(@user, naming.observation)) %>
             </div>
         </p>
 <%
