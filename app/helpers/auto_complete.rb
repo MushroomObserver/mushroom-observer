@@ -82,17 +82,6 @@ module ApplicationHelper
     }.merge(opts))
   end
 
-  # Check to make sure browser can handle auto-completion.
-  def can_do_ajax?
-    @js && (
-      @ua[:ie] && @ua_version >= 5.5 ||
-      @ua[:ns] && @ua_version >= 7.1 ||
-      # firefox >= 1.0
-      # safari >= 1.2
-      @ua[:mac]
-    )
-  end
-
   # Include everything needed for auto-completion.
   def javascript_include_auto_complete
     if can_do_ajax?
