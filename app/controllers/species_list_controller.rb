@@ -186,7 +186,7 @@ class SpeciesListController < ApplicationController
     valid = {}
     for rec in @species
       n, d, s = rec.values_at('n', 'd', 's')
-      valid[s] ||= n if s.to_i > 0 && d.to_i == 1
+      valid[s] ||= n if s.to_i > 0 && d.to_i != 1
     end
     @species = @species.map do |rec|
       n, d, s = rec.values_at('n', 'd', 's')

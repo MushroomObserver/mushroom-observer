@@ -60,9 +60,9 @@
    <br/>
    <%= form_tag({:action => 'create_darvin'}, {}) %>
     <%= submit_tag('Create List') %>&nbsp;&nbsp;
-    <%= submit_tag('Show as Plain Text') %>&nbsp;&nbsp;
-    <%= submit_tag('Show as Rich Text') %>&nbsp;&nbsp;
-    <%= submit_tag('Show as Spreadsheet') %>&nbsp;&nbsp;
+    <%= submit_tag('Save as Plain Text') %>&nbsp;&nbsp;
+    <%= submit_tag('Save as Rich Text') %>&nbsp;&nbsp;
+    <%= submit_tag('Save as Spreadsheet') %>&nbsp;&nbsp;
     <%= hidden_field_tag('results', @names.join("\n")) %>
    </form>
   </td>
