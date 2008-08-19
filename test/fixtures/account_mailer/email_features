@@ -17,9 +17,12 @@ website:</p>
 <p>Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="http://localhost:3000/account/no_feature_email/1">Stop notifications of new features.</a>
-  <li><a href="http://localhost:3000/account/prefs/1">Change your account preferences.</a>
-  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+  <li>Stop notifications of new features:
+    <a href="http://localhost:3000/account/no_feature_email/1">http://localhost:3000/account/no_feature_email/1</a></li>
+  <li>Change your account preferences:
+    <a href="http://localhost:3000/account/prefs/1">http://localhost:3000/account/prefs/1</a></li>
+  <li>Latest changes at Mushroom Observer:
+    <a href="http://localhost:3000">http://localhost:3000</a></li>
 </ul>
 
 <br/>

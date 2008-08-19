@@ -19,10 +19,18 @@ website to forward the following question to you about your observation of
 to them.&nbsp; Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>">Show this observation.</a>
-  <li><a href="<%= sprintf "%s/account/no_question_email/%d", DOMAIN, @user.id %>">Stop receiving inquiries.</a>
-  <li><a href="<%= sprintf "%s/account/prefs/%d", DOMAIN, @user.id %>">Change your account preferences.</a>
-  <li><a href="<%= DOMAIN %>">Latest changes at Mushroom Observer.</a>
+  <li>Show this observation:
+    <%= url = "#{DOMAIN}/observer/show_observation/#{@observation.id}"
+    link_to(url, url) %></li>
+  <li>Stop receiving inquiries:
+    <%= url = "#{DOMAIN}/account/no_question_email/#{@user.id}"
+    link_to(url, url) %></li>
+  <li>Change your account preferences:
+    <%= url = "#{DOMAIN}/account/prefs/#{@user.id}"
+    link_to(url, url) %></li>
+  <li>Latest changes at Mushroom Observer:
+    <%= url = DOMAIN
+    link_to(url, url) %></li>
 </ul>
 
 <p>If you feel the sender of this mail is abusing this service please forward
@@ -34,17 +42,16 @@ this entire message to: webmaster@mushroomobserver.org</p>
 <% else ##################################################################### %>
 <%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following question to you about your observation of <%= @observation.unique_text_name %> (<%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>):
 
-<%= h @question %>
+<%= @question %>
 
-It is entirely up to you whether you want to reply by emailing directly back to them.
+--------------------------------------------------
 
---------------------------------------------------------------------------------
+It is entirely up to you whether you want to reply by emailing directly back to them.  Here are some handy links you may find useful:
 
-If you feel the sender of this mail is abusing this service please forward this entire message to:
+Show this observation: <%= url = "#{DOMAIN}/observer/show_observation/#{@observation.id}" %>
+Stop receiving inquiries: <%= url = "#{DOMAIN}/account/no_question_email/#{@user.id}" %>
+Change your account preferences: <%= url = "#{DOMAIN}/account/prefs/#{@user.id}" %>
+Latest changes at Mushroom Observer: <%= url = DOMAIN %>
 
-webmaster@mushroomobserver.org
-
-To stop receiving these emails, either login to your Mushroom Observer account and change your preferences, or click the following URL:
-
-<%= sprintf "%s/account/no_question_email/%d", DOMAIN, @user.id %>
+If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org
 <% end %>

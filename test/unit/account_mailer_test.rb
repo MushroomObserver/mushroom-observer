@@ -18,6 +18,7 @@ class AccountMailerTest < Test::Unit::TestCase
     ActionMailer::Base.delivery_method = :test
     ActionMailer::Base.perform_deliveries = true
     ActionMailer::Base.deliveries = []
+    Locale.code = 'en-US'
 
     @expected = TMail::Mail.new
     @expected.mime_version = '1.0'

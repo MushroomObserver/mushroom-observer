@@ -2,7 +2,7 @@
 # migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 
-ActiveRecord::Schema.define(:version => 33) do
+ActiveRecord::Schema.define() do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.column "user_id",           :integer
@@ -171,10 +171,10 @@ ActiveRecord::Schema.define(:version => 33) do
   end
 
   create_table "queued_emails", :force => true do |t|
-    t.column "user_id",    :integer
-    t.column "to_user_id", :integer,                                           :default => 0, :null => false
+    t.column "user_id",    :integer,                        :default => 0, :null => false
+    t.column "to_user_id", :integer,                        :default => 0, :null => false
+    t.column "flavor",     :enum,     :limit => [:comment]
     t.column "queued",     :datetime
-    t.column "flavor",     :enum,     :limit => [:comment, :feature, :naming]
   end
 
   create_table "rss_logs", :force => true do |t|
@@ -185,6 +185,12 @@ ActiveRecord::Schema.define(:version => 33) do
     t.column "name_id",         :integer
     t.column "synonym_id",      :integer
   end
+
+  create_table "schema_migrations", :id => false, :force => true do |t|
+    t.column "version", :string, :null => false
+  end
+
+  add_index "schema_migrations", ["version"], :name => "unique_schema_migrations", :unique => true
 
   create_table "species_lists", :force => true do |t|
     t.column "created",  :datetime
@@ -222,10 +228,10 @@ ActiveRecord::Schema.define(:version => 33) do
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
     t.column "contribution",      :integer,                :default => 0
-    t.column "notes",             :text,                   :default => "",   :null => false
+    t.column "notes",             :text,                                     :null => false
     t.column "location_id",       :integer
     t.column "image_id",          :integer
-    t.column "mailing_address",   :text,                   :default => "",   :null => false
+    t.column "mailing_address",   :text,                                     :null => false
   end
 
   create_table "votes", :force => true do |t|

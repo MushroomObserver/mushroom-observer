@@ -7,13 +7,14 @@
 
 <h2><b>Hello mary</b></h2>
 
-<p>Please <a href="http://localhost:3000/account/verify/2">click here</a> (http://localhost:3000/account/verify/2) to verify that you received this email and activate your
-Mushroom Observer account.&nbsp; Here are some handy links you might find
-useful:</p>
+<p>Please click on this link, <a href="http://localhost:3000/account/verify/2">http://localhost:3000/account/verify/2</a>, to verify that you received this email and activate your Mushroom
+Observer account.&nbsp; Here are some handy links you might find useful:</p> 
 
 <ul type=none>
-  <li><a href="http://localhost:3000/account/prefs/2">Change your account preferences.</a>
-  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+  <li>Change your account preferences:
+    <a href="http://localhost:3000/account/prefs/2">http://localhost:3000/account/prefs/2</a></li>
+  <li>Latest changes at Mushroom Observer:
+    <a href="http://localhost:3000">http://localhost:3000</a></li>
 </ul>
 
 <br/>

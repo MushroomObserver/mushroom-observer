@@ -25,8 +25,10 @@ Image Count: 0<br/>
 <p>Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="http://localhost:3000/name/email_tracking/3">Update or disable notifications for this name.</a>
-  <li><a href="http://localhost:3000/observer/list_notifications">Review your notifications.</a>
+  <li>Update or disable notifications for this name:
+    <a href="http://localhost:3000/name/email_tracking/3">http://localhost:3000/name/email_tracking/3</a></li>
+  <li>Review your notifications:
+    <a href="http://localhost:3000/observer/list_notifications">http://localhost:3000/observer/list_notifications</a></li>
 </ul>
 
 <br/>

@@ -8,6 +8,7 @@ require 'rtf'
 #     species_lists_by_user                  List of lists created by user.
 #     show_species_list                      Display notes/etc. and list of species.
 #     make_report                            Display contents of species list as report.
+#     report.ext                             Create actual report.
 #   * create_species_list                    Create new list.
 #   * create_darvin                          Darvin's create form.
 #   * edit_species_list                      Edit existing list.
@@ -93,10 +94,23 @@ class SpeciesListController < ApplicationController
   # Inputs:
   #   params[:id] (species_list)
   #   params[:type] (file extension)
-  # Renders a report.
+  # Redirects to report.ext (so browser will get the filename right).
   def make_report
-    names = SpeciesList.find(params[:id].to_i).names
-    case params[:type]
+    spl = SpeciesList.find(params[:id].to_i)
+    names = spl ? spl.names : []
+    ids = names.map {|name| name.id}
+    flash[:ids] = ids
+    redirect_to("/species_list/report.#{params[:type]}")
+  end
+
+  # Linked from: show_species_list and create_darvin
+  # Inputs:
+  #   flash[:ids]
+  # Renders a report.
+  def report
+    ids = flash[:ids]
+    names = Name.find(:all, :conditions => ['id in (?)', ids])
+    case params[:ext]
     when 'txt':
       render(:text => darvin_to_txt(names), :content_type => "text/plain")
     when 'rtf':
@@ -104,8 +118,8 @@ class SpeciesListController < ApplicationController
     when 'csv':
       render(:text => darvin_to_csv(names), :content_type => "text/plain")
     else
-      flash_error("Don't support report filetype *.#{params[:type]}.")
-      redirect_to :action => "show_species_list", :id => @species_list
+      flash_error("Don't support report filetype *.#{params[:ext]}.")
+      redirect_to(:controller => "observer", :action => "index")
     end
   end
 
@@ -194,9 +208,7 @@ class SpeciesListController < ApplicationController
     end
     @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
     if request.method == :post
-      @objs = @names.map do |str|
-        Name.find_by_text_name(str)
-      end
+      ids = @names.map {|str| Name.find_by_text_name(str)}.map {|name| name.id}
       case params[:commit]
       when 'Create List':
         @checklist_names  = {}
@@ -208,12 +220,15 @@ class SpeciesListController < ApplicationController
         session[:checklist_source] = :nothing
         calc_checklist(nil)
         render(:action => 'create_species_list')
-      when 'Show as Plain Text':
-        render(:text => darvin_to_txt(@objs), :content_type => "text/plain")
-      when 'Show as Rich Text':
-        render(:text => darvin_to_rtf(@objs), :content_type => "text/richtext")
-      when 'Show as Spreadsheet':
-        render(:text => darvin_to_csv(@objs), :content_type => "text/plain")
+      when 'Save as Plain Text':
+        flash[:ids] = ids
+        redirect_to('/species_list/report.txt')
+      when 'Save as Rich Text':
+        flash[:ids] = ids
+        redirect_to('/species_list/report.rtf')
+      when 'Save as Spreadsheet':
+        flash[:ids] = ids
+        redirect_to('/species_list/report.csv')
       else
         flash_error("Invalid commit button, \"#{params[:commit]}\".")
       end

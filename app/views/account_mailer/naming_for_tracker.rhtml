@@ -31,18 +31,19 @@ Image Count: <%= obs.images.length %><br/>
 <p>Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="<%= "#{DOMAIN}/name/email_tracking/#{@naming.name_id}" %>">Update or disable notifications for this name.</a>
-  <li><a href="<%= "#{DOMAIN}/observer/list_notifications" %>">Review your notifications.</a>
+  <li>Update or disable notifications for this name:
+    <%= url = "#{DOMAIN}/name/email_tracking/#{@naming.name_id}"
+    link_to(url, url) %></li>
+  <li>Review your notifications:
+    <%= url = "#{DOMAIN}/observer/list_notifications"
+    link_to(url, url) %></li>
 </ul>
 
 <br/>
 </body>
 </html>
 <% else ##################################################################### %>
-An observation, <%= "#{DOMAIN}/#{obs.id}" %>, on the Mushroom Observer website
-has been given the name <%= name.text_name %> which you are currently tracking.
-You can contact either the observer or the identifier by going to the appropriate
-link below and clicking the email link near the top of the page.
+An observation, <%= "#{DOMAIN}/#{obs.id}" %>, on the Mushroom Observer website has been given the name <%= name.text_name %> which you are currently tracking. You can contact either the observer or the identifier by going to the appropriate link below and clicking the email link near the top of the page.
 
 Observer: <%= obs.user.legal_name %> (<%= "#{DOMAIN}/observer/observer/show_user/#{obs.user_id}" %>)
 Identifier: <%= @naming.user.legal_name %> (<%= "#{DOMAIN}/observer/observer/show_user/#{@naming.user_id}" %>)
@@ -60,5 +61,4 @@ To update or disable notifications for the name just go to the following URL:
 To review your notifications:
 
 <%= "#{DOMAIN}/observer/list_notifications" %>
-
 <% end %>

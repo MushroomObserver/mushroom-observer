@@ -18,10 +18,14 @@ website to forward the following email to you:</p>
 to them.&nbsp; Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="http://localhost:3000/observer/show_user/1">Show this user.</a>
-  <li><a href="http://localhost:3000/account/no_question_email/2">Stop receiving inquiries.</a>
-  <li><a href="http://localhost:3000/account/prefs/2">Change your account preferences.</a>
-  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+  <li>Show this user:
+    <a href="http://localhost:3000/observer/show_user/1">http://localhost:3000/observer/show_user/1</a></li>
+  <li>Stop receiving inquiries:
+    <a href="http://localhost:3000/account/no_question_email/2">http://localhost:3000/account/no_question_email/2</a></li>
+  <li>Change your account preferences:
+    <a href="http://localhost:3000/account/prefs/2">http://localhost:3000/account/prefs/2</a></li>
+  <li>Latest changes at Mushroom Observer:
+    <a href="http://localhost:3000">http://localhost:3000</a></li>
 </ul>
 
 <p>If you feel the sender of this mail is abusing this service please forward

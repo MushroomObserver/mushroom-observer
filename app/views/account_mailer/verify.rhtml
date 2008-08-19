@@ -10,13 +10,17 @@
 
 <h2><b>Hello <%= @user.login %></b></h2>
 
-<p>Please <a href="<%= verify_link %>">click here</a> (<%= verify_link %>) to verify that you received this email and activate your
-Mushroom Observer account.&nbsp; Here are some handy links you might find
-useful:</p>
+<p>Please click on this link, <a href="<%= verify_link %>"><%= verify_link
+%></a>, to verify that you received this email and activate your Mushroom
+Observer account.&nbsp; Here are some handy links you might find useful:</p> 
 
 <ul type=none>
-  <li><a href="<%= sprintf "%s/account/prefs/%d", DOMAIN, @user.id %>">Change your account preferences.</a>
-  <li><a href="<%= DOMAIN %>">Latest changes at Mushroom Observer.</a>
+  <li>Change your account preferences:
+    <%= url = "#{DOMAIN}/account/prefs/#{@user.id}"
+    link_to(url, url) %></li>
+  <li>Latest changes at Mushroom Observer:
+    <%= url = DOMAIN
+    link_to(url, url) %></li>
 </ul>
 
 <br/>

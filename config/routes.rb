@@ -20,6 +20,9 @@ ActionController::Routing::Routes.draw do |map|
   # instead of a file named 'wsdl'
   # map.connect ':controller/service.wsdl', :action => 'wsdl'
 
+  # Handle the checklist reports.
+  map.connect ':controller/:action.:ext'
+
   # Redirect to observer controller by default
   map.connect ':controller/:action/:id', :controller => 'observer'
 

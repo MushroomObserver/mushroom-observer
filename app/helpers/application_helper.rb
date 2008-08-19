@@ -68,7 +68,7 @@ module ApplicationHelper
     "  </td></tr></table>
     </div>"
   end
-  
+
   def calc_search_params
     search_params = {}
     search_params[:search_seq] = @search_seq if @search_seq
@@ -113,5 +113,45 @@ module ApplicationHelper
       args[:params][letters.arg] = letters.letter
     end
     pagination_links(pages, args)
+  end
+
+  # Wrapper on textilize (and +textilize_without_paragraph+) to fix long urls
+  # by turning them into links and abbreviating the text actually shown.
+  def textilize(raw)
+    # This was copied from the Rails helper.  For some reason I can't use alias
+    # to save it and call it within this method.
+    if raw.blank?
+      return ""
+    else
+      str = RedCloth.new(raw, [ :hard_breaks ])
+      str.hard_breaks = true if str.respond_to?("hard_breaks=")
+      str = str.to_html
+    end
+
+    # Remove pre-existing links first, replacing with "<XXXnn>".
+    hrefs = []
+    str.gsub!(/(href=["'][^"']*["'])/) do |href|
+      hrefs.push(href)
+      "<XXX#{hrefs.length - 1}>"
+    end
+
+    # Now turn bare urls into links.
+    str.gsub!(/([a-z]+:\/\/\S+)/) do |url|
+      extra = url.sub!(/([^\w\/]+$)/, "") ? $1 : ""
+      if url.length > 30
+        if url.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
+          url2 = $1 + "/..."
+        else
+          url2 = url[0..30] + "..."
+        end
+      else
+        url2 = url
+      end
+      "<a href=\"#{url}\">#{url2}</a>"
+    end
+
+    # Put pre-existing links back in.
+    str.gsub!(/<XXX(\d+)>/) {|n| hrefs[n.to_i]}
+    return str
   end
 end

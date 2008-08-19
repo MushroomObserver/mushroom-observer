@@ -23,10 +23,14 @@ the observation <u>Fungi sp. (2)</u>:</p>
 Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li><a href="http://localhost:3000/observer/show_observation/2">Show this observation.</a>
-  <li><a href="http://localhost:3000/account/no_comment_email/2">Stop receiving notifications.</a>
-  <li><a href="http://localhost:3000/account/prefs/2">Change your account preferences.</a>
-  <li><a href="http://localhost:3000">Latest changes at Mushroom Observer.</a>
+  <li>Show this observation:
+    <a href="http://localhost:3000/observer/show_observation/2">http://localhost:3000/observer/show_observation/2</a></li>
+  <li>Stop receiving notifications:
+    <a href="http://localhost:3000/account/no_comment_email/2">http://localhost:3000/account/no_comment_email/2</a></li>
+  <li>Change your account preferences:
+    <a href="http://localhost:3000/account/prefs/2">http://localhost:3000/account/prefs/2</a></li>
+  <li>Latest changes at Mushroom Observer:
+    <a href="http://localhost:3000">http://localhost:3000</a></li>
 </ul>
 
 <br/>
