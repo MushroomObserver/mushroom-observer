@@ -2,10 +2,10 @@
   <%= javascript_include_tag 'prototype' %>
   <%= javascript_include_tag 'controls' %>
   <%= javascript_include_tag 'effects' %>
-  <%= javascript_include_tag 'darvin' %>
+  <%= javascript_include_tag 'name_list' %>
 <% end %>
 
-<% @title = "Darvin's Special" %>
+<% @title = "Name List Generator" %>
 <div id="Title"><%= @title %></div>
 
 <% if !@js %>
@@ -58,7 +58,7 @@
  <tr>
   <td colspan="3" align="center">
    <br/>
-   <%= form_tag({:action => 'create_darvin'}, {}) %>
+   <%= form_tag({:action => 'name_lister'}, {}) %>
     <%= submit_tag('Create List') %>&nbsp;&nbsp;
     <%= submit_tag('Save as Plain Text') %>&nbsp;&nbsp;
     <%= submit_tag('Save as Rich Text') %>&nbsp;&nbsp;
@@ -73,9 +73,9 @@
   var GENERA  = [#{@genera.map  {|n| "'#{n}'"}.join(",")}];
   var SPECIES = [#{@species.map {|n| "'#{n}'"}.join(",")}];
   var NAMES   = [];
-  darvin_initialize_names();
-  darvin_draw("genera", GENERA);
-  darvin_draw("names", NAMES);
+  name_list_initialize_names();
+  name_list_draw("genera", GENERA);
+  name_list_draw("names", NAMES);
 ) %>
 
 <p><span class="HelpNote"><b>Create List:</b> Click on a genus in the first

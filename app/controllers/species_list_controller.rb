@@ -10,7 +10,7 @@ require 'rtf'
 #     make_report                            Display contents of species list as report.
 #     report.ext                             Create actual report.
 #   * create_species_list                    Create new list.
-#   * create_darvin                          Darvin's create form.
+#   * name_lister                            Efficient javascripty way to build a list of names.
 #   * edit_species_list                      Edit existing list.
 #   * upload_species_list                    Same as edit_species_list but gets list from file.
 #   * destroy_species_list                   Destroy list.
@@ -103,7 +103,7 @@ class SpeciesListController < ApplicationController
     redirect_to("/species_list/report.#{params[:type]}")
   end
 
-  # Linked from: show_species_list and create_darvin
+  # Linked from: show_species_list and name_lister
   # Inputs:
   #   flash[:ids]
   # Renders a report.
@@ -112,11 +112,14 @@ class SpeciesListController < ApplicationController
     names = Name.find(:all, :conditions => ['id in (?)', ids])
     case params[:ext]
     when 'txt':
-      render(:text => darvin_to_txt(names), :content_type => "text/plain")
+      @headers['Content-Disposition'] = 'attachment; filename="report.txt"'
+      render(:text => name_list_to_txt(names), :content_type => "text/plain")
     when 'rtf':
-      render(:text => darvin_to_rtf(names), :content_type => "text/richtext")
+      @headers['Content-Disposition'] = 'attachment; filename="report.rtf"'
+      render(:text => name_list_to_rtf(names), :content_type => "text/richtext")
     when 'csv':
-      render(:text => darvin_to_csv(names), :content_type => "text/plain")
+      @headers['Content-Disposition'] = 'attachment; filename="report.csv"'
+      render(:text => name_list_to_csv(names), :content_type => "text/plain")
     else
       flash_error("Don't support report filetype *.#{params[:ext]}.")
       redirect_to(:controller => "observer", :action => "index")
@@ -186,7 +189,7 @@ class SpeciesListController < ApplicationController
   #  params[:results]
   # Outputs:
   #  @names
-  def create_darvin
+  def name_lister
     @genera = Name.connection.select_values %(
       SELECT text_name FROM names
       WHERE rank = 'Genus'
@@ -611,14 +614,14 @@ class SpeciesListController < ApplicationController
   end
 
   # Display list of names as rich text.
-  def darvin_to_txt(names)
+  def name_list_to_txt(names)
     names.map do |name|
       name.text_name
     end.join("\r\n")
   end
 
   # Display list of names as csv file.
-  def darvin_to_csv(names)
+  def name_list_to_csv(names)
     names.map do |name|
       [name.text_name, name.author, name.citation].map do |str|
         if str && str.match(/['",\\]/)
@@ -632,7 +635,7 @@ class SpeciesListController < ApplicationController
   end
 
   # Display list of names as rich text.
-  def darvin_to_rtf(names)
+  def name_list_to_rtf(names)
     doc = RTF::Document.new(RTF::Font::SWISS)
     for name in names
       rank      = name.rank

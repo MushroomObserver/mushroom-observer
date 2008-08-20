@@ -14,7 +14,7 @@ function de(e, mode, name) {
       if (species.substr(0,name.length) == name)
         list.push(species);
     }
-    darvin_draw('species', list);
+    name_list_draw('species', list);
   }
 
   // Click on species adds name.
@@ -34,8 +34,8 @@ function de(e, mode, name) {
     if (last == null || last < name)
       new_list.push(name);
     NAMES = new_list;
-    darvin_draw('names', NAMES);
-    darvin_set_names();
+    name_list_draw('names', NAMES);
+    name_list_set_names();
   }
 
   // Click on name deletes it.
@@ -45,8 +45,8 @@ function de(e, mode, name) {
       if (NAMES[i] != name)
         new_list.push(NAMES[i]);
     NAMES = new_list;
-    darvin_draw('names', NAMES);
-    darvin_set_names();
+    name_list_draw('names', NAMES);
+    name_list_set_names();
   }
 }
 
@@ -55,7 +55,7 @@ var IEFIX = (navigator.appVersion.indexOf('MSIE') > 0 &&
 
 // Draw contents of one of the three columns.  Section is 'genera', 'species'
 // or 'names'; list is GENERA, SPECIES or NAMES.
-function darvin_draw(section, list) {
+function name_list_draw(section, list) {
   var s = section.charAt(0);
   var html = '';
   for (var i=0; i<list.length; i++) {
@@ -77,7 +77,7 @@ function darvin_draw(section, list) {
 }
 
 // Concat names in NAMES and store in hidden 'results' field.
-function darvin_set_names() {
+function name_list_set_names() {
   var val = '';
   for (var i=0; i<NAMES.length; i++)
     val += NAMES[i] + "\n";
@@ -85,7 +85,7 @@ function darvin_set_names() {
 }
 
 // Reverse of above: parse hidden 'results' field, and populate NAMES.
-function darvin_initialize_names() {
+function name_list_initialize_names() {
   var str = $('results').value || '';
   str += "\n";
   var x;
