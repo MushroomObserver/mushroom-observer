@@ -52,7 +52,6 @@ app_your_summary: Your Summary
 email_tracking_cancel: Cancel (Show Name)
 email_tracking_disable: Disable
 email_tracking_enable: Enable
-email_tracking_flash_message: Click 'View Notifications' if you would like to help with research related to %s.
 email_tracking_help: >
   If you enable tracking then an note will be sent to the email
   address you have provided whenever this name is applied to an observation.
@@ -556,9 +555,11 @@ how_species_list: >
 how_title: How to Use Mushroom Observer
 
 how_tracking_species: >
-  <p><b>Tracking a Particular Species Through Email</b> - Mushroom Observer allows you to
+  <p><b>Tracking a Particular Species or Genus Through Email</b> - Mushroom Observer allows you to
   request an email anytime a particular <a href="#name">Name</a> is given to an
-  <a href="#observation">Observation</a>.  To turn this on for a particular Name, go to
+  <a href="#observation">Observation</a>.  If that Name is a genus or species it will
+  also send you an email whenever a species or subspecies is observed.
+  To turn this on for a particular Name, go to
   the page for that Name (see <a href="#searching">Searching</a>) and click 'Email Tracking'.
   By default the person
   who made the observation that was given that name will be sent an email to let them know
@@ -566,7 +567,8 @@ how_tracking_species: >
   If you don't provide any instructions, then they will not be sent an email.  If the observer
   gives the name at the time the observation is created, they will be shown your message
   immediately through the website.  You can modify or disable your request for a particular
-  Name by going back to that name and again selecting 'Email Tracking'.
+  Name by going back to that name and again selecting 'Email Tracking' and clicking the
+  'Disable' button on the page that comes up.
 
 how_unknown_help: >
   <p><b>Getting Help with an Unknown</b> - In order to get help with an unknown, you need to
@@ -706,7 +708,7 @@ list_merge_options_title: Merge Options for %s
 
 
 # observer/list_notifications
-list_notifications_title: Notifications for %s
+list_notifications_title: Email Alerts for %s
 
 
 # location/list_place_names

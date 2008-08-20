@@ -186,12 +186,6 @@ ActiveRecord::Schema.define(:version => 33) do
     t.column "synonym_id",      :integer
   end
 
-  create_table "schema_migrations", :id => false, :force => true do |t|
-    t.column "version", :string, :null => false
-  end
-
-  add_index "schema_migrations", ["version"], :name => "unique_schema_migrations", :unique => true
-
   create_table "species_lists", :force => true do |t|
     t.column "created",  :datetime
     t.column "modified", :datetime
@@ -228,10 +222,10 @@ ActiveRecord::Schema.define(:version => 33) do
     t.column "comment_email",     :boolean,                :default => true, :null => false
     t.column "html_email",        :boolean,                :default => true, :null => false
     t.column "contribution",      :integer,                :default => 0
-    t.column "notes",             :text,                                     :null => false
+    t.column "notes",             :text,                   :default => "",   :null => false
     t.column "location_id",       :integer
     t.column "image_id",          :integer
-    t.column "mailing_address",   :text,                                     :null => false
+    t.column "mailing_address",   :text,                   :default => "",   :null => false
   end
 
   create_table "votes", :force => true do |t|

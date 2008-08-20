@@ -579,7 +579,6 @@ create_location_title: Create Location
 email_tracking_cancel: Cancel (Show Name)
 email_tracking_disable: Disable
 email_tracking_enable: Enable
-email_tracking_flash_message: Click 'View Notifications' if you would like to help with research related to %s.
 email_tracking_help: >
   If you enable tracking then an note will be sent to the email
   address you have provided whenever this name is applied to an observation.
@@ -906,7 +905,7 @@ list_merge_options_title: Merge Options for %s
 
 
 # observer/list_notifications
-list_notifications_title: Notifications for %s
+list_notifications_title: Email Alerts for %s
 
 
 # location/list_place_names
