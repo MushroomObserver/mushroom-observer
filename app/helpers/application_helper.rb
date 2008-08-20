@@ -152,7 +152,7 @@ module ApplicationHelper
     end
 
     # Now turn bare urls into links.
-    str.gsub!(/([a-z]+:\/\/\S+)/) do |url|
+    str.gsub!(/([a-z]+:\/\/[^\s<>]+)/) do |url|
       extra = url.sub!(/([^\w\/]+$)/, '') ? $1 : ''
       if url.length > 30
         if url.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
