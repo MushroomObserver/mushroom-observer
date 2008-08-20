@@ -117,6 +117,8 @@ module ApplicationHelper
     if !str.to_s.empty?
       arg = args[:name] || :page
       page = params[arg].to_i
+      page = 1 if page < 1
+      page = pages.length if page > pages.length
       if page > 1
         url = reload_with_args(arg => page - 1)
         str = link_to('&laquo; Prev', url) + ' | ' + str
