@@ -64,7 +64,7 @@ class NameController < ApplicationController
     @page = params[:page]
     @letters, @name_subset = paginate_letters(@name_data, 100) \
       {|d| d['display_name'].match(/([a-z])/i) ? $~[1] : nil}
-    @pages, @name_subset = paginate_array(@name_subset, 100)
+    @pages, @name_subset = paginate_array(@name_subset, @letter.to_s.empty? ? 100: 1e6)
   end
 
   # List all the names

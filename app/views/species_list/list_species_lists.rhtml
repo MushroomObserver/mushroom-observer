@@ -1,6 +1,6 @@
 <% @title = 'Species Lists' if !@title %>
 <div id="Title"><%= @title %></div>
-<div class="pagination"><%= pagination_links(@species_list_pages) %></div>
+<%= pagination_numbers(@species_list_pages) %>
 <table cellpadding="5" cellspacing="0" width="100%">
   <%
      odd_or_even = 0
@@ -18,5 +18,5 @@
   </tr>
   <% end %>
 </table>
-<div class="pagination"><%= pagination_links(@species_list_pages) %></div>
+<%= pagination_numbers(@species_list_pages) %>
 <br/>

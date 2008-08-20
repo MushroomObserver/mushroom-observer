@@ -135,9 +135,9 @@ for sect in ["consensus", "synonym", "other"]
     <% end
     num_sects += 1
 
-    # Wow this is ugly, but I can't find an option to pass to pagination_links
+    # Wow this is ugly, but I can't find an option to pass to pagination_numbers
     # to have it tack the "#section" thing on the end of the urls for me.
-    plinks = pagination_links(pages, :name => arg, :params => args).to_s
+    plinks = pagination_numbers(pages, nil, :name => arg, :params => args).to_s
     plinks.gsub!(/<a href="([^<>]*)">/, '<a href="\1#' + sect + '">')
     %>
 

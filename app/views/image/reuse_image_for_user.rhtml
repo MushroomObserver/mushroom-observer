@@ -14,7 +14,7 @@
   </span><br/>
 </p>
 
-<div class="pagination"><%= pagination_links(@image_pages) %></div>
+<%= pagination_numbers(@image_pages) %>
 <table cellspacing="0">
 <%
 	row_count = 0
@@ -41,7 +41,7 @@
 	end
 	%>
 </table>
-<div class="pagination"><%= pagination_links(@image_pages) %></div>
+<%= pagination_numbers(@image_pages) %>
 
 <%= javascript_tag "document.getElementById('id').focus()" %>
 

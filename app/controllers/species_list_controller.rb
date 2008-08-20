@@ -87,7 +87,7 @@ class SpeciesListController < ApplicationController
     end
     @observation_list = sort_species_list_observations(@species_list, @user)
     @letters, @observation_list = paginate_letters(@observation_list, 100) {|o| o.text_name[0,1]}
-    @pages,   @observation_list = paginate_array(@observation_list, 100)
+    @pages,   @observation_list = paginate_array(@observation_list, params[:letter].to_s.empty? ? 100 : 1e6)
   end
 
   # Linked from: show_species_list

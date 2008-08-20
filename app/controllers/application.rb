@@ -327,11 +327,14 @@ class ApplicationController < ActionController::Base
     end
     return [nil, list] if used.keys.length <= 1
 
-    # If user has clicked on a letter, remove all items above that letter.
+    # If user has clicked on a letter, remove all items:
+    # 1) above that letter (Douglas's preference)
+    # 2) above and below that letter (Darvin's preference)  <---
     if letter && letter.match(/^([A-Z])/)
       letter = $~[1]
       list = list.select do |item|
-        letters[item] >= letter
+        # letters[item] >= letter
+        letters[item] == letter
       end
       obj.letter = letter
     else

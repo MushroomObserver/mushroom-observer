@@ -3,7 +3,7 @@
     search_params = calc_search_params()
 %>
 <div id="Title"><%= @title %></div>
-	<div class="pagination"><%= pagination_links(@rss_log_pages) %></div>
+	<%= pagination_numbers(@rss_log_pages) %>
 	<table cellpadding="5" cellspacing="0" width="100%">
 		<%
 			row_count = 0
@@ -45,5 +45,5 @@
 		        </tr>
 			<% end %>
 	</table>
-	<div class="pagination"><%= pagination_links(@rss_log_pages) %></div>
+	<%= pagination_numbers(@rss_log_pages) %>
 <br/>

@@ -95,24 +95,40 @@ module ApplicationHelper
   def pagination_letters(letters, args={})
     if letters
       params = (args[:params] || {}).clone
-      %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
+      str = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
         params[letters.arg] = letter
         letters.used[letter] ? link_to(letter, params) : letter
       end.join(' ')
+      return %(<div class="pagination">#{str}</div>)
     else
-      ''
+      return ''
     end
   end
 
   # Wrapper on ActionView::Helpers#pagination_links designed to work with
   # pagination_letters.  (Just needs to add a parameter to the pagination
   # links, that's all.)
-  def pagination_numbers(pages, letters, args={})
+  def pagination_numbers(pages, letters=nil, args={})
     if letters
       args[:params] ||= {}
       args[:params][letters.arg] = letters.letter
     end
-    pagination_links(pages, args)
+    str = pagination_links(pages, args)
+    if !str.to_s.empty?
+      arg = args[:name] || :page
+      page = params[arg].to_i
+      if page > 1
+        url = reload_with_args(arg => page - 1)
+        str = link_to('&laquo; Prev', url) + ' | ' + str
+      end
+      if page < pages.length
+        url = reload_with_args(arg => page + 1)
+        str = str + ' | ' + link_to('Next &raquo;', url)
+      end
+      return %(<div class="pagination">#{str}</div>)
+    else
+      return ''
+    end
   end
 
   # Wrapper on textilize (and +textilize_without_paragraph+) to fix long urls
@@ -121,10 +137,10 @@ module ApplicationHelper
     # This was copied from the Rails helper.  For some reason I can't use alias
     # to save it and call it within this method.
     if raw.blank?
-      return ""
+      return ''
     else
       str = RedCloth.new(raw, [ :hard_breaks ])
-      str.hard_breaks = true if str.respond_to?("hard_breaks=")
+      str.hard_breaks = true if str.respond_to?('hard_breaks=')
       str = str.to_html
     end
 
@@ -137,12 +153,12 @@ module ApplicationHelper
 
     # Now turn bare urls into links.
     str.gsub!(/([a-z]+:\/\/\S+)/) do |url|
-      extra = url.sub!(/([^\w\/]+$)/, "") ? $1 : ""
+      extra = url.sub!(/([^\w\/]+$)/, '') ? $1 : ''
       if url.length > 30
         if url.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
-          url2 = $1 + "/..."
+          url2 = $1 + '/...'
         else
-          url2 = url[0..30] + "..."
+          url2 = url[0..30] + '...'
         end
       else
         url2 = url

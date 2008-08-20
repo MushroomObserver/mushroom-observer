@@ -1,6 +1,6 @@
 <div id="Title"><%= @title %></div>
 
-<div class="pagination"><%= pagination_links(@comment_pages) %></div>
+<%= pagination_numbers(@comment_pages) %>
 
 <% if @comments.length > 0 %>
 <table cellpadding="5" cellspacing="0" width="100%">
@@ -30,4 +30,4 @@
 </table>
 <% end %>
 
-<div class="pagination"><%= pagination_links(@comment_pages) %></div><br/>
+<%= pagination_numbers(@comment_pages) %><br/>

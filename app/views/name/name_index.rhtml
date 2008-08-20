@@ -9,6 +9,7 @@
 <div id="Title"><%= @title %></div>
 
 <div class="pagination"><%= pagination_letters(@letters) %></div>
+<div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
 
 <% last_letter = nil %>
 <% for datum in @name_subset %>
@@ -28,4 +29,5 @@
 
 <br/>
 <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
+<div class="pagination"><%= pagination_letters(@letters) %></div>
 

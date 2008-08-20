@@ -19,7 +19,7 @@
   button or the text field were for until I read the code. -JPH 20071206] -->
 </p>
 
-<div class="pagination"><%= pagination_links(@image_pages) %></div>
+<%= pagination_numbers(@image_pages) %>
 <table cellspacing="0">
 <%
 	row_count = 0
@@ -46,7 +46,7 @@
 	end
 	%>
 </table>
-<div class="pagination"><%= pagination_links(@image_pages) %></div>
+<%= pagination_numbers(@image_pages) %>
 
 <%= javascript_tag "document.getElementById('observation_idstr').focus()" %>
 

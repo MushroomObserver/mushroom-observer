@@ -7,7 +7,7 @@
 <% if @links %>
     <%= (@links.map {|l| link_to(*l) }).join(' | ') %><br/>
 <% end %>
-	<div class="pagination"><%= pagination_links(@obj_pages, :params => search_params) %></div>
+	<%= pagination_numbers(@obj_pages, nil, :params => search_params) %>
 	<% if @objs.length > 0 %>
     	<table cellspacing="0" width="100%">
     		<%
@@ -36,5 +36,5 @@
     			<% end %>
     	</table>
     <% end %>
-	<div class="pagination"><%= pagination_links(@obj_pages) %></div>
+	<%= pagination_numbers(@obj_pages, nil, :params => search_params) %>
 <br/>

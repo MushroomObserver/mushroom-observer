@@ -23,6 +23,8 @@ Notes:<br/><%= textilize(sanitize(@species_list.notes.to_s)) %>
 Members:<br/>
   <% if @observation_list %>
     <div class="pagination"><%= pagination_letters(@letters) %></div>
+    <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
+
 	<table cellpadding="5" cellspacing="0" width="100%">
 		<%
         odd_or_even = 0
@@ -51,7 +53,9 @@ Members:<br/>
 	  	</tr>
 	    <% end %>
 	</table>
+
     <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
+    <div class="pagination"><%= pagination_letters(@letters) %></div>
   <% end %>
 <br/>
 <% rss_log = @species_list.rss_log 
