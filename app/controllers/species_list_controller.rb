@@ -8,7 +8,6 @@ require 'rtf'
 #     species_lists_by_user                  List of lists created by user.
 #     show_species_list                      Display notes/etc. and list of species.
 #     make_report                            Display contents of species list as report.
-#     report.ext                             Create actual report.
 #   * create_species_list                    Create new list.
 #   * name_lister                            Efficient javascripty way to build a list of names.
 #   * edit_species_list                      Edit existing list.
@@ -25,6 +24,9 @@ require 'rtf'
 #    process_species_list(...)            Create/update species list using form data.
 #    construct_observations(...)          Create observations for new names added to list.
 #    find_chosen_name(id, alternatives)   (helper)
+#    render_name_list_as_txt(names)       Display list as text file.
+#    render_name_list_as_rtf(names)       Display list as richtext file.
+#    render_name_list_as_csv(names)       Display list as csv spreadsheet.
 #
 #  NOTE: There is some ambiguity between observations and names that makes this
 #  slightly confusing.  The end result of a species list is actually a list of
@@ -96,33 +98,20 @@ class SpeciesListController < ApplicationController
   #   params[:type] (file extension)
   # Redirects to report.ext (so browser will get the filename right).
   def make_report
-    spl = SpeciesList.find(params[:id].to_i)
+    id = params[:id].to_i
+    spl = SpeciesList.find(id)
     names = spl ? spl.names : []
-    ids = names.map {|name| name.id}
-    flash[:ids] = ids
-    redirect_to("/species_list/report.#{params[:type]}")
-  end
-
-  # Linked from: show_species_list and name_lister
-  # Inputs:
-  #   flash[:ids]
-  # Renders a report.
-  def report
-    ids = flash[:ids]
-    names = Name.find(:all, :conditions => ['id in (?)', ids])
-    case params[:ext]
+    # names = Name.find(:all, :conditions => ['id in (?)', ids])
+    case params[:type]
     when 'txt':
-      @headers['Content-Disposition'] = 'attachment; filename="report.txt"'
-      render(:text => name_list_to_txt(names), :content_type => "text/plain")
+      render_name_list_as_txt(names)
     when 'rtf':
-      @headers['Content-Disposition'] = 'attachment; filename="report.rtf"'
-      render(:text => name_list_to_rtf(names), :content_type => "text/richtext")
+      render_name_list_as_rtf(names)
     when 'csv':
-      @headers['Content-Disposition'] = 'attachment; filename="report.csv"'
-      render(:text => name_list_to_csv(names), :content_type => "text/plain")
+      render_name_list_as_csv(names)
     else
-      flash_error("Don't support report filetype *.#{params[:ext]}.")
-      redirect_to(:controller => "observer", :action => "index")
+      flash_error("We don't support report filetype *.#{params[:type]}.")
+      redirect_to(:action => "show_species_list", :id => params[:id])
     end
   end
 
@@ -211,7 +200,7 @@ class SpeciesListController < ApplicationController
     end
     @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
     if request.method == :post
-      ids = @names.map {|str| Name.find_by_text_name(str)}.map {|name| name.id}
+      objs = @names.map {|str| Name.find_by_text_name(str)}
       case params[:commit]
       when 'Create List':
         @checklist_names  = {}
@@ -224,14 +213,11 @@ class SpeciesListController < ApplicationController
         calc_checklist(nil)
         render(:action => 'create_species_list')
       when 'Save as Plain Text':
-        flash[:ids] = ids
-        redirect_to('/species_list/report.txt')
+        render_name_list_as_txt(objs)
       when 'Save as Rich Text':
-        flash[:ids] = ids
-        redirect_to('/species_list/report.rtf')
+        render_name_list_as_rtf(objs)
       when 'Save as Spreadsheet':
-        flash[:ids] = ids
-        redirect_to('/species_list/report.csv')
+        render_name_list_as_csv(objs)
       else
         flash_error("Invalid commit button, \"#{params[:commit]}\".")
       end
@@ -614,15 +600,17 @@ class SpeciesListController < ApplicationController
   end
 
   # Display list of names as rich text.
-  def name_list_to_txt(names)
-    names.map do |name|
+  def render_name_list_as_txt(names)
+    str = names.map do |name|
       name.text_name
     end.join("\r\n")
+    @headers['Content-Disposition'] = 'attachment; filename="report.txt"'
+    render(:text => str, :content_type => "text/plain")
   end
 
   # Display list of names as csv file.
-  def name_list_to_csv(names)
-    names.map do |name|
+  def render_name_list_as_csv(names)
+    str = names.map do |name|
       [name.text_name, name.author, name.citation].map do |str|
         if str && str.match(/['",\\]/)
           str.gsub!(/(['\\])/) {|s| "\\" + s}
@@ -632,10 +620,12 @@ class SpeciesListController < ApplicationController
         end
       end.join(",")
     end.join("\r\n")
+    @headers['Content-Disposition'] = 'attachment; filename="report.csv"'
+    render(:text => str, :content_type => "text/plain")
   end
 
   # Display list of names as rich text.
-  def name_list_to_rtf(names)
+  def render_name_list_as_rtf(names)
     doc = RTF::Document.new(RTF::Font::SWISS)
     for name in names
       rank      = name.rank
@@ -649,6 +639,8 @@ class SpeciesListController < ApplicationController
       doc << " " + author if author && author != ""
       doc.line_break
     end
-    return doc.to_rtf
+    str = doc.to_rtf
+    @headers['Content-Disposition'] = 'attachment; filename="report.rtf"'
+    render(:text => str, :content_type => "text/richtext")
   end
 end

@@ -163,6 +163,9 @@ module ApplicationHelper
       else
         url2 = url
       end
+      # These are the only things that would really f--- things up.
+      # ... and actually Textile doesn't let these things through, anyway.
+      url = url.gsub(/"/, '%22').gsub(/</, '%3C').gsub(/>/, '%3E')
       "<a href=\"#{url}\">#{url2}</a>"
     end
 

@@ -8,9 +8,9 @@
     tabs.push url_for('Edit Species List', :action => 'edit_species_list', :id => @species_list)
     tabs.push url_for('Destroy', { :action => 'destroy_species_list', :id => @species_list }, :confirm => "Are you sure?")
   end
-  tabs.push ['Plain Text',  { :action => 'make_report', :id => @species_list, :type => 'txt' }, { :target => '_new' }]
-  tabs.push ['Rich Text',   { :action => 'make_report', :id => @species_list, :type => 'rtf' }, { :target => '_new' }]
-  tabs.push ['Spreadsheet', { :action => 'make_report', :id => @species_list, :type => 'csv' }, { :target => '_new' }]
+  tabs.push ['Save as Plain Text',  { :action => 'make_report', :id => @species_list, :type => 'txt' }, { :target => '_new' }]
+  tabs.push ['Save as Rich Text',   { :action => 'make_report', :id => @species_list, :type => 'rtf' }, { :target => '_new' }]
+  tabs.push ['Save as Spreadsheet', { :action => 'make_report', :id => @species_list, :type => 'csv' }, { :target => '_new' }]
   show_tabs(tabs)
 %>
 
