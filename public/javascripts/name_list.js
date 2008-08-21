@@ -90,7 +90,7 @@ function name_list_draw(section, list) {
     } else {
       name = name.escapeHTML();
     }
-    val = val.replace(/'/g, "\\'")
+    val = val.replace(/'/g, "\\'").replace(/"/g, '&quot;')
     html += '<li' +
       ' id="' + s + i + '"' +
       ' onmouseout="de(\''  + s + i + '\',0,0)"' +
