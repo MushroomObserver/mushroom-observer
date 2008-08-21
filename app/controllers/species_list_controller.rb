@@ -42,7 +42,8 @@ class SpeciesListController < ApplicationController
     :list_species_lists,
     :show_species_list,
     :species_lists_by_title,
-    :species_lists_by_user
+    :species_lists_by_user,
+    :make_report
   ]
 
   # Display list of all species_lists, sorted by date.
@@ -602,26 +603,46 @@ class SpeciesListController < ApplicationController
   # Display list of names as rich text.
   def render_name_list_as_txt(names)
     str = names.map do |name|
-      name.text_name
+      if name.author.to_s != ''
+        name.text_name + ' ' + name.author
+      else
+        name.text_name
+      end
     end.join("\r\n")
-    @headers['Content-Disposition'] = 'attachment; filename="report.txt"'
-    render(:text => str, :content_type => "text/plain")
+    str = Iconv.conv('ISO-8859-1', 'UTF-8', str)
+    send_data(str,
+      :type => 'text/plain; charset=ISO-8859-1',
+      :disposition => 'attachment; filename="report.txt"'
+    )
   end
 
   # Display list of names as csv file.
   def render_name_list_as_csv(names)
-    str = names.map do |name|
-      [name.text_name, name.author, name.citation].map do |str|
-        if str && str.match(/['",\\]/)
-          str.gsub!(/(['\\])/) {|s| "\\" + s}
-          "'#{str}'"
+
+    # For now leave my version.  Not sure why FasterCSV isn't working...
+    str = "name,author,citation,valid\r\n" + names.map do |name|
+      [name.text_name, name.author, name.citation, name.valid? ? 1 : 0].map do |str|
+        str = str.to_s
+        if str.match(/[",\s]/)
+          '"' + str.gsub('"', '""') + '"'
         else
-          str.to_s
+          str
         end
       end.join(",")
     end.join("\r\n")
-    @headers['Content-Disposition'] = 'attachment; filename="report.csv"'
-    render(:text => str, :content_type => "text/plain")
+    str = Iconv.conv('ISO-8859-1', 'UTF-8', str)
+
+#     str = FasterCSV.generate do |csv|
+#       csv << ['name', 'author', 'citation', 'valid']
+#       names.each do |name|
+#         csv << [name.text_name, name.author, name.citation, name.valid ? 1 : 0]
+#       end
+#     end
+
+    send_data(str,
+      :type => 'text/csv; charset=ISO-8859-1; header=present',
+      :disposition => 'attachment; filename="report.csv"'
+    )
   end
 
   # Display list of names as rich text.
@@ -631,16 +652,24 @@ class SpeciesListController < ApplicationController
       rank      = name.rank
       text_name = name.text_name
       author    = name.author
-      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
-        doc.italic {|n| n << text_name}
+      if name.valid?
+        node = doc.bold
       else
-        doc << text_name
+        node = doc
       end
-      doc << " " + author if author && author != ""
+      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
+        node.italic {|n| n << text_name}
+      else
+        node << text_name
+      end
+      node << " " + author if author && author != ""
       doc.line_break
     end
     str = doc.to_rtf
-    @headers['Content-Disposition'] = 'attachment; filename="report.rtf"'
-    render(:text => str, :content_type => "text/richtext")
+    str = Iconv.conv('ISO-8859-1', 'UTF-8', str)
+    send_data(str,
+      :type => 'text/rtf; charset=ISO-8859-1',
+      :disposition => 'attachment; filename="report.rtf"'
+    )
   end
 end
