@@ -200,11 +200,20 @@ class SpeciesListController < ApplicationController
       d.to_i == 1 ? n : n + '*'
     end
 
+    # How many times is each name used?
+    occurs = {}
+    for rec in @species
+      n = rec['n']
+      occurs[n] ||= 0
+      occurs[n] += 1
+    end
+
     # Build map from synonym_id to list of valid names.
     valid = {}
     for rec in @species
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      n += '|' + a if a.to_s != ''
+      need_author = occurs[n] > 1 || params[:all] == '1'
+      n += '|' + a if a.to_s != '' && need_author
       if s.to_i > 0 && d.to_i != 1
         l = valid[s] ||= []
         l.push(n) if !l.include?(n)
@@ -213,10 +222,13 @@ class SpeciesListController < ApplicationController
 
     # Now insert valid synonyms after each deprecated name.  Stick a "*" after
     # all accepted names (including, of course, the accepted synonyms).
+    # Include author after names, using a "|" to help make it easy for
+    # javascript to parse it correctly.
     @species = @species.map do |rec|
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+      need_author = occurs[n] > 1 || params[:all] == '1'
       n += '*' if d.to_i != 1
-      n += '|' + a if a.to_s != ''
+      n += '|' + a if a.to_s != '' && need_author
       d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
     end.flatten
 

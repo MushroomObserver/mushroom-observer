@@ -11,7 +11,7 @@ function de(e, mode, name) {
     var list = [name];
     var last = false;
     if (name.charAt(name.length-1) == '*')
-      name = name.substr(0,name.length-1)
+      name = name.substr(0,name.length-1);
     name += ' ';
     for (var i=0; i<SPECIES.length; i++) {
       var species = SPECIES[i];
