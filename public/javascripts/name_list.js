@@ -71,6 +71,11 @@ function name_list_draw(section, list) {
     var val = list[i];
     var name = val;
     var author = '';
+    var star = false;
+    if (name.charAt(name.length-1) == '*') {
+      name = name.substr(0,name.length-1);
+      star = true;
+    }
     var x = name.indexOf('|');
     if (x > 0) {
       author = ' <span class="normal">' + name.substr(x+1) + '</span>';
@@ -80,8 +85,8 @@ function name_list_draw(section, list) {
       val = val.substr(2) + '*';
       name = '<span style="margin-left:10px">&nbsp;</span>= <b>' +
         name.substr(2) + '</b>';
-    } else if (name.charAt(name.length-1) == '*') {
-      name = '<b>' + name.substr(0,name.length-1) + '</b>';
+    } else if (star) {
+      name = '<b>' + name + '</b>';
     }
     html += '<li' +
       ' id="' + s + i + '"' +

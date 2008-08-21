@@ -227,8 +227,8 @@ class SpeciesListController < ApplicationController
     @species = @species.map do |rec|
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
       need_author = occurs[n] > 1 || params[:all] == '1'
-      n += '*' if d.to_i != 1
       n += '|' + a if a.to_s != '' && need_author
+      n += '*' if d.to_i != 1
       d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
     end.flatten
 
