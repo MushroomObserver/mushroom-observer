@@ -180,26 +180,47 @@ class SpeciesListController < ApplicationController
   # Outputs:
   #  @names
   def name_lister
-    @genera = Name.connection.select_values %(
-      SELECT text_name FROM names
+    @genera = Name.connection.select_all %(
+      SELECT text_name as n, deprecated as d
+      FROM names
       WHERE rank = 'Genus'
       ORDER BY text_name
     )
+
     @species = Name.connection.select_all %(
-      SELECT text_name as n, deprecated as d, synonym_id as s FROM names
+      SELECT text_name as n, author as a, deprecated as d, synonym_id as s
+      FROM names
       WHERE rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form'
       ORDER BY text_name
     )
+
+    # Place "*" after all accepted genera.
+    @genera = @genera.map do |rec|
+      n, d = rec.values_at('n', 'd')
+      d.to_i == 1 ? n : n + '*'
+    end
+
+    # Build map from synonym_id to list of valid names.
     valid = {}
     for rec in @species
-      n, d, s = rec.values_at('n', 'd', 's')
-      valid[s] ||= n if s.to_i > 0 && d.to_i != 1
+      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+      if s.to_i > 0 && d.to_i != 1
+        l = valid[s] ||= []
+        l.push(n) if !l.include?(n)
+      end
     end
+
+    # Now insert valid synonyms after each deprecated name.  Stick a "*" after
+    # all accepted names (including, of course, the accepted synonyms).
     @species = @species.map do |rec|
-      n, d, s = rec.values_at('n', 'd', 's')
-      d.to_i == 1 && valid[s] && n != valid[s] ? "#{n} = #{valid[s]}" : n
-    end
+      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+      n += '*' if d.to_i != 1
+      d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
+    end.flatten
+
+    # Names are passed in as string, one name per line.
     @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
+
     if request.method == :post
       objs = @names.map {|str| Name.find_by_text_name(str)}
       case params[:commit]
@@ -603,7 +624,7 @@ class SpeciesListController < ApplicationController
   # Display list of names as rich text.
   def render_name_list_as_txt(names)
     str = names.map do |name|
-      if name.author.to_s != ''
+      if false && name.author.to_s != ''
         name.text_name + ' ' + name.author
       else
         name.text_name

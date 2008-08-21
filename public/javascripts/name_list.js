@@ -9,10 +9,19 @@ function de(e, mode, name) {
   // Click on genus changes list of species.
   else if (e.charAt(0) == 'g') {
     var list = [name];
+    var last = false;
+    if (name.charAt(name.length-1) == '*')
+      name = name.substr(0,name.length-1)
+    name += ' ';
     for (var i=0; i<SPECIES.length; i++) {
       var species = SPECIES[i];
-      if (species.substr(0,name.length) == name)
+      if (species.substr(0,name.length) == name ||
+        species.charAt(0) == '=' && last) {
         list.push(species);
+        last = true;
+      } else {
+        last = false;
+      }
     }
     name_list_draw('species', list);
   }
@@ -59,12 +68,26 @@ function name_list_draw(section, list) {
   var s = section.charAt(0);
   var html = '';
   for (var i=0; i<list.length; i++) {
+    var name = list[i];
+    var str = name;
+    var x = str.indexOf('|');
+    if (x > 0) {
+      var author = str.substr(x+1);
+      str = str.substr(0,x) + ' <span class="normal">' + author + '</span>';
+    }
+    if (str.charAt(0) == '=') {
+      name = name.substr(2) + '*';
+      str = '<span style="margin-left:10px">&nbsp;</span>= <b>' +
+        str.substr(2) + '</b>';
+    } else if (str.charAt(str.length-1) == '*') {
+      str = '<b>' + str.substr(0,str.length-1) + '</b>';
+    }
     html += '<li' +
       ' id="' + s + i + '"' +
       ' onmouseout="de(\''  + s + i + '\',0,0)"' +
       ' onmouseover="de(\'' + s + i + '\',1,0)"' +
-      ' onclick="de(\''     + s + i + '\',2,\'' + list[i] + '\')"' +
-      '><nobr>' + list[i] + '</nobr></li>'
+      ' onclick="de(\''     + s + i + '\',2,\'' + name + '\')"' +
+      '><nobr>' + str + '</nobr></li>';
   }
   html = '<ul>' + html + '</ul>';
   var e = $(section);
