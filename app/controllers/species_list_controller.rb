@@ -197,7 +197,7 @@ class SpeciesListController < ApplicationController
     end
     @species = @species.map do |rec|
       n, d, s = rec.values_at('n', 'd', 's')
-      d && valid[s] && n != valid[s] ? "#{n} = #{valid[s]}" : n
+      d.to_i == 1 && valid[s] && n != valid[s] ? "#{n} = #{valid[s]}" : n
     end
     @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
     if request.method == :post
