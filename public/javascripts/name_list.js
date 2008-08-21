@@ -78,16 +78,19 @@ function name_list_draw(section, list) {
     }
     var x = name.indexOf('|');
     if (x > 0) {
-      author = ' <span class="normal">' + name.substr(x+1) + '</span>';
+      author = ' <span class="normal">' + name.substr(x+1).escapeHTML() + '</span>';
       name = name.substr(0,x);
     }
     if (name.charAt(0) == '=') {
       val = val.substr(2) + '*';
       name = '<span style="margin-left:10px">&nbsp;</span>= <b>' +
-        name.substr(2) + '</b>';
+        name.substr(2).escapeHTML() + '</b>';
     } else if (star) {
-      name = '<b>' + name + '</b>';
+      name = '<b>' + name.escapeHTML() + '</b>';
+    } else {
+      name = name.escapeHTML();
     }
+    val = val.replace(/'/g, "\\'")
     html += '<li' +
       ' id="' + s + i + '"' +
       ' onmouseout="de(\''  + s + i + '\',0,0)"' +

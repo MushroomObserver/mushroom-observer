@@ -75,8 +75,8 @@
 </table>
 
 <%= javascript_tag %(
-  var GENERA  = [#{@genera.map  {|n| "'#{n}'"}.join(",")}];
-  var SPECIES = [#{@species.map {|n| "'#{n}'"}.join(",")}];
+  var GENERA  = [#{@genera.map  {|n| "'#{escape_javascript(n)}'"}.join(",")}];
+  var SPECIES = [#{@species.map {|n| "'#{escape_javascript(n)}'"}.join(",")}];
   var NAMES   = [];
   name_list_initialize_names();
   name_list_draw("genera", GENERA);

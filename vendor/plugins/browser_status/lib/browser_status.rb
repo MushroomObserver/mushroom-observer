@@ -222,7 +222,8 @@ module BrowserStatus
   # need to be refined...
   def can_do_ajax?
     @js && (
-      @ua[:ie] && @ua_version >= 5.5 ||
+      @ua[:opera] ||
+      @ua[:ie] && @ua_version.to_f >= 5.5 ||
       @ua[:ns] ||
       # firefox >= 1.0
       # safari >= 1.2

@@ -237,8 +237,8 @@ class SpeciesListController < ApplicationController
 
     if request.method == :post
       objs = @names.map do |str|
+        str.sub!(/\*$/, '')
         name, author = str.split('|')
-        name = name.sub(/\*$/, '')
         if author
           Name.find_by_text_name_and_author(name, author)
         else
@@ -661,27 +661,13 @@ class SpeciesListController < ApplicationController
 
   # Display list of names as csv file.
   def render_name_list_as_csv(names)
-
-    # For now leave my version.  Not sure why FasterCSV isn't working...
-    str = "name,author,citation,valid\r\n" + names.map do |name|
-      [name.text_name, name.author, name.citation, name.valid? ? 1 : 0].map do |str|
-        str = str.to_s
-        if str.match(/[",\s]/)
-          '"' + str.gsub('"', '""') + '"'
-        else
-          str
-        end
-      end.join(",")
-    end.join("\r\n")
-    str = Iconv.conv('ISO-8859-1', 'UTF-8', str)
-
-#     str = FasterCSV.generate do |csv|
-#       csv << ['name', 'author', 'citation', 'valid']
-#       names.each do |name|
-#         csv << [name.text_name, name.author, name.citation, name.valid ? 1 : 0]
-#       end
-#     end
-
+    str = FasterCSV.generate do |csv|
+      csv << ['name', 'author', 'citation', 'valid']
+      names.each do |name|
+        csv << [name.text_name, name.author, name.citation,
+          name.deprecated ? '' : '1'].map {|v| v == '' ? nil : v}
+      end
+    end
     send_data(str,
       :type => 'text/csv; charset=ISO-8859-1; header=present',
       :disposition => 'attachment; filename="report.csv"'
@@ -695,17 +681,17 @@ class SpeciesListController < ApplicationController
       rank      = name.rank
       text_name = name.text_name
       author    = name.author
-      if name.valid?
-        node = doc.bold
-      else
+      if name.deprecated
         node = doc
+      else
+        node = doc.bold
       end
       if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
         node.italic {|n| n << text_name}
       else
         node << text_name
       end
-      node << " " + author if author && author != ""
+      doc << " " + author if author && author != ""
       doc.line_break
     end
     str = doc.to_rtf
