@@ -204,6 +204,7 @@ class SpeciesListController < ApplicationController
     valid = {}
     for rec in @species
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+      n += '|' + a if a.to_s != ''
       if s.to_i > 0 && d.to_i != 1
         l = valid[s] ||= []
         l.push(n) if !l.include?(n)
@@ -215,6 +216,7 @@ class SpeciesListController < ApplicationController
     @species = @species.map do |rec|
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
       n += '*' if d.to_i != 1
+      n += '|' + a if a.to_s != ''
       d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
     end.flatten
 
@@ -222,7 +224,15 @@ class SpeciesListController < ApplicationController
     @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
 
     if request.method == :post
-      objs = @names.map {|str| Name.find_by_text_name(str)}
+      objs = @names.map do |str|
+        name, author = str.split('|')
+        name = name.sub(/\*$/, '')
+        if author
+          Name.find_by_text_name_and_author(name, author)
+        else
+          Name.find_by_text_name(name)
+        end
+      end
       case params[:commit]
       when 'Create List':
         @checklist_names  = {}

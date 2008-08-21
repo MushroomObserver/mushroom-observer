@@ -68,26 +68,27 @@ function name_list_draw(section, list) {
   var s = section.charAt(0);
   var html = '';
   for (var i=0; i<list.length; i++) {
-    var name = list[i];
-    var str = name;
-    var x = str.indexOf('|');
+    var val = list[i];
+    var name = val;
+    var author = '';
+    var x = name.indexOf('|');
     if (x > 0) {
-      var author = str.substr(x+1);
-      str = str.substr(0,x) + ' <span class="normal">' + author + '</span>';
+      author = ' <span class="normal">' + name.substr(x+1) + '</span>';
+      name = name.substr(0,x);
     }
-    if (str.charAt(0) == '=') {
-      name = name.substr(2) + '*';
-      str = '<span style="margin-left:10px">&nbsp;</span>= <b>' +
-        str.substr(2) + '</b>';
-    } else if (str.charAt(str.length-1) == '*') {
-      str = '<b>' + str.substr(0,str.length-1) + '</b>';
+    if (name.charAt(0) == '=') {
+      val = val.substr(2) + '*';
+      name = '<span style="margin-left:10px">&nbsp;</span>= <b>' +
+        name.substr(2) + '</b>';
+    } else if (name.charAt(name.length-1) == '*') {
+      name = '<b>' + name.substr(0,name.length-1) + '</b>';
     }
     html += '<li' +
       ' id="' + s + i + '"' +
       ' onmouseout="de(\''  + s + i + '\',0,0)"' +
       ' onmouseover="de(\'' + s + i + '\',1,0)"' +
-      ' onclick="de(\''     + s + i + '\',2,\'' + name + '\')"' +
-      '><nobr>' + str + '</nobr></li>';
+      ' onclick="de(\''     + s + i + '\',2,\'' + val + '\')"' +
+      '><nobr>' + name + author + '</nobr></li>';
   }
   html = '<ul>' + html + '</ul>';
   var e = $(section);
