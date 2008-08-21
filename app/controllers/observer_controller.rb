@@ -1267,7 +1267,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def users_by_name
     if check_permission(0)
-      @users = User.find(:all, :order => "'last_login' desc")
+      @users = User.find(:all, :order => "last_login desc")
     else
       redirect_to :action => 'list_observations'
     end
@@ -1427,7 +1427,7 @@ class ObserverController < ApplicationController
 
   def rss
     headers["Content-Type"] = "application/xml"
-    @logs = RssLog.find(:all, :order => "'modified' desc",
+    @logs = RssLog.find(:all, :order => "modified desc",
                         :conditions => "datediff(now(), modified) <= 31",
                         :limit => 100)
     render :action => "rss", :layout => false
@@ -1438,7 +1438,7 @@ class ObserverController < ApplicationController
     # Not exactly sure how this ties into SearchStates
     search_state = SearchState.new(session, params, :rss_logs, logger)
     unless search_state.setup?
-      search_state.setup("Activity Log", nil, "'modified' desc", :nothing)
+      search_state.setup("Activity Log", nil, "modified desc", :nothing)
     end
     store_search_state(search_state)
     @search_seq = search_state.key
@@ -1448,10 +1448,10 @@ class ObserverController < ApplicationController
     @layout = calc_layout_params
     session[:checklist_source] = :all_observations
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
-            "modified is not null order by 'modified' desc"
+            "modified is not null order by modified desc"
     session_setup
     @rss_log_pages, @rss_logs = paginate(:rss_log,
-                                         :order => "'modified' desc",
+                                         :order => "modified desc",
                                          :per_page => @layout["count"])
   end
 

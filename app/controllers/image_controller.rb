@@ -72,7 +72,7 @@ class ImageController < ApplicationController
     session[:checklist_source] = :nothing
     session_setup
     store_location
-    @images = Image.find(:all, :order => "'title' asc, 'when' desc")
+    @images = Image.find(:all, :order => "title asc, `when` desc")
   end
 
   # Display list of images by a given user.
@@ -395,7 +395,7 @@ class ImageController < ApplicationController
         # @image.copyright_holder = @user.legal_name
         @layout = calc_layout_params
         @image_pages, @images = paginate(:images,
-                                         :order => "'when' desc",
+                                         :order => "`when` desc",
                                          :per_page => @layout["count"])
       end
     end
@@ -465,7 +465,7 @@ class ImageController < ApplicationController
     if !redirected
       @layout = calc_layout_params
       @image_pages, @images = paginate(:images,
-                                       :order => "'when' desc",
+                                       :order => "`when` desc",
                                        :per_page => @layout["count"])
     end
   end

@@ -54,7 +54,7 @@ class SpeciesListController < ApplicationController
     store_location
     session_setup
     @species_list_pages, @species_lists = paginate(:species_lists,
-                                                   :order => "'when' desc, 'id' desc",
+                                                   :order => "`when` desc, id desc",
                                                    :per_page => 10)
   end
 
@@ -68,7 +68,7 @@ class SpeciesListController < ApplicationController
     session_setup
     @title = "Species Lists by #{user.legal_name}"
     @species_list_pages, @species_lists = paginate(:species_lists,
-      :conditions => "user_id = #{user.id}", :order => "'when' desc, 'id' desc", :per_page => 10)
+      :conditions => "user_id = #{user.id}", :order => "`when` desc, id desc", :per_page => 10)
     render :action => "list_species_lists"
   end
 
@@ -137,7 +137,7 @@ class SpeciesListController < ApplicationController
   def species_lists_by_title
     session_setup
     store_location
-    @species_lists = SpeciesList.find(:all, :order => "'title' asc, 'when' desc")
+    @species_lists = SpeciesList.find(:all, :order => "title asc, `when` desc")
   end
 
   # Form for creating a new species list.

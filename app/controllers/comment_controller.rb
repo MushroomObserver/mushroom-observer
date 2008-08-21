@@ -27,7 +27,7 @@ class CommentController < ApplicationController
     session_setup
     @title = "Comments"
     @comment_pages, @comments = paginate(:comments,
-                                     :order => "'created' desc",
+                                     :order => "created desc",
                                      :per_page => 10)
   end
 

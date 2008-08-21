@@ -8,6 +8,8 @@
 <% @title = "Name List Generator" %>
 <div id="Title"><%= @title %></div>
 
+<%= link_to("Classic Species List Generator", :action => 'create_species_list') %>
+
 <% if !@js %>
  <p>This page will not work if javascript is disabled.</p>
 <% else if !can_do_ajax? %>
