@@ -1,1 +1,4 @@
-checkpoints
+local_dump
+checkpoint
+schema.rb
+schema-annotated.rb
