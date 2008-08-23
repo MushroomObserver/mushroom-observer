@@ -12,7 +12,7 @@
 <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
 
 <% last_letter = nil %>
-<% for datum in @name_subset %>
+<% for datum in @name_subset || [] %>
   <%=
     if datum['first_letter'] != last_letter
       last_letter = datum['first_letter']

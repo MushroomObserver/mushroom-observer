@@ -248,7 +248,7 @@ class SpeciesListController < ApplicationController
       case params[:commit]
       when 'Create List':
         @checklist_names  = {}
-        @list_members     = params[:results]
+        @list_members     = params[:results].gsub('|',' ').gsub('*','')
         @new_names        = nil
         @multiple_names   = nil
         @deprecated_names = nil
