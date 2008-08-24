@@ -136,9 +136,10 @@ Object.extend(NameAutocompleter.prototype, {
     var part = this.getToken();
 
     // Need to request list for new first-letter?
-    if (this.letter == null || part.charAt(0) != this.letter) {
-      this.letter = part.charAt(0);
-      if (this.species.length == 0 || this.species[0].charAt(0) != this.letter) {
+    if (this.letter == null || part.charAt(0).toLowerCase() != this.letter) {
+      this.letter = part.charAt(0).toLowerCase();
+      if (this.species.length == 0 ||
+          this.species[0].charAt(0).toLowerCase() != this.letter) {
         this.loading = true;
         this.old_getUpdatedChoices();
         return;
@@ -155,7 +156,7 @@ Object.extend(NameAutocompleter.prototype, {
     // Get list of matches.
     for (var i=0; i<this.species.length; i++) {
       var str = this.species[i];
-      if (str.substr(0,plen) == part) {
+      if (str.substr(0,plen).toLowerCase() == part.toLowerCase()) {
         if (str.length > plen)
           more_detail = true;
         results.push(i);
@@ -166,7 +167,7 @@ Object.extend(NameAutocompleter.prototype, {
     if (more_detail) {
       if (results.length > 1) {
         // Suppress genus if only one matches, display only species now.
-        if (this.species[results[0]] == part)
+        if (this.species[results[0]].toLowerCase() == part.toLowerCase())
           results.shift();
 
         // Suppress species when still choosing among multiple genera.
