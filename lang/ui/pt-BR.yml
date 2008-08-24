@@ -928,6 +928,43 @@ map_locations_no_matches: No observations matching '%s'
 map_locations_title: Locations matching '%s'
  
 
+# species_list/name_lister
+name_lister_title: Name List Generator
+name_lister_classic: Classic Species List Generator
+name_lister_no_js: This page will not work if javascript is disabled.
+name_lister_bad_browser: This page will not work on your browser, sorry!
+name_lister_genera: Genera
+name_lister_species: Species
+name_lister_names: Selected
+name_lister_submit_spl: Create Species List
+name_lister_submit_txt: Save as Plain Text
+name_lister_submit_rtf: Save as Rich Text
+name_lister_submit_csv: Save as Spreadsheet
+name_lister_help: >
+  *Create List:* Click on a genus in the first column to pull up a list of
+  species in that genus.  Select any of these taxa and press return or
+  double-click to add species to your list.  Accepted names are in boldface;
+  deprecated names are followed by one or more accepted alternatives.  You may
+  choose any.  To remove a name, select it in the third column, and press
+  delete or double-click.  (You may also use arrows, control-arrows, page
+  up/down, and home/end to navigate.) 
+  
+  
+  *Save List:* When you are finished, click on any of the buttons at the bottom
+  of the page.  "Create Species List" takes you back to the old creation form,
+  where you will be able to enter date, location, notes, etc. before saving the
+  list.
+  
+  
+  *Reports:* The plain text report gives you a simple list of taxa with no
+  formatting.  Rich text can be used to import the list into Microsoft Word
+  complete with authors and all the formatting intact.  Spreadsheet produces a
+  CSV file, with name, author, citation, and accepted columns.  Common names
+  are not available yet.  Reports should automatically download in a separate
+  tab or window; if not, go to File -> Save As, then use the browser's Back
+  button to return here. 
+
+
 # name/map
 name_map_about: About
 name_map_title: Distribution Map for

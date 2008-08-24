@@ -194,7 +194,11 @@ div.progressBar div.background {
   font-size: x-small;
 }
 
-.HelpNote {
+div.HelpNote {
+  margin: 5px 10px 5px 10px;
+}
+
+.HelpNote, div.HelpNote p {
   text-align: left;
   font-size: x-small;
 }

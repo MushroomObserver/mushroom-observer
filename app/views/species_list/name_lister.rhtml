@@ -5,19 +5,21 @@
   <%= javascript_include_tag 'name_list' %>
 <% end %>
 
-<% @title = "Name List Generator" %>
+<% @title = :name_lister_title.l %>
 <div id="Title"><%= @title %></div>
 
-<%= link_to("Classic Species List Generator", :action => 'create_species_list') %>
+<%= link_to(:name_lister_classic.l, :action => 'create_species_list') %>
+<br/>
+<br/>
 
 <% if !@js %>
- <p>This page will not work if javascript is disabled.</p>
+ <%= textilize(:name_lister_no_js.l) %>
 <% else if !can_do_ajax? %>
- <p>This page will not work on your browser, sorry!</p>
+ <%= textilize(:name_lister_bad_browser.l) %>
 <% else %>
 
 <style type="text/css"><!--
-  th {
+  table.scroller th {
     font-size: 120%;
   }
   div.scroller {
@@ -30,33 +32,36 @@
     padding: 0;
     font-style: italic;
   }
-  ul {
-    margin: 0px 5px 0px 5px;
+  div.scroller ul {
+    margin: 0;
     border: 0;
     padding: 0;
     list-style-type: none;
   }
-  span.normal {
+  div.scroller li {
+    padding: 0px 5px 0px 5px;
+  }
+  div.scroller span.normal {
     font-style: normal;
   }
 --></style>
 
-<table cols="3" width="100%">
+<table cols="3" width="100%" class="scroller">
  <tr>
-  <th width="33%">Genera</th>
-  <th width="33%">Species</th>
-  <th width="33%">Selected</th>
+  <th width="20%"><%= :name_lister_genera.l %></th>
+  <th width="40%"><%= :name_lister_species.l %></th>
+  <th width="40%"><%= :name_lister_names.l %></th>
  </tr>
 
  <tr>
   <td align="left">
-   <div id="genera" class="scroller"></div>
+   <div id="genera" class="scroller" onclick="nl_focus('g')"></div>
   </td>
   <td align="left">
-   <div id="species" class="scroller"></div>
+   <div id="species" class="scroller" onclick="nl_focus('s')"></div>
   </td>
   <td align="left">
-   <div id="names" class="scroller"></div>
+   <div id="names" class="scroller" onclick="nl_focus('n')"></div>
   </td>
  </tr>
 
@@ -64,42 +69,29 @@
   <td colspan="3" align="center">
    <br/>
    <%= form_tag({:action => 'name_lister'}, {}) %>
-    <%= submit_tag('Create List') %>&nbsp;&nbsp;
-    <%= submit_tag('Save as Plain Text') %>&nbsp;&nbsp;
-    <%= submit_tag('Save as Rich Text') %>&nbsp;&nbsp;
-    <%= submit_tag('Save as Spreadsheet') %>&nbsp;&nbsp;
+    <%= submit_tag(:name_lister_submit_spl.l) %>&nbsp;&nbsp;
+    <%= submit_tag(:name_lister_submit_txt.l) %>&nbsp;&nbsp;
+    <%= submit_tag(:name_lister_submit_rtf.l) %>&nbsp;&nbsp;
+    <%= submit_tag(:name_lister_submit_csv.l) %>&nbsp;&nbsp;
     <%= hidden_field_tag('results', @names.join("\n")) %>
    </form>
   </td>
  </tr>
 </table>
 
+<div id="test"></div>
+
 <%= javascript_tag %(
-  var GENERA  = [#{@genera.map  {|n| "'#{escape_javascript(n)}'"}.join(",")}];
-  var SPECIES = [#{@species.map {|n| "'#{escape_javascript(n)}'"}.join(",")}];
-  var NAMES   = [];
-  name_list_initialize_names();
-  name_list_draw("genera", GENERA);
-  name_list_draw("names", NAMES);
+  var NL_GENERA  = [#{@genera.map  {|n| "'#{escape_javascript(n)}'"}.join(",")}];
+  var NL_SPECIES = [#{@species.map {|n| "'#{escape_javascript(n)}'"}.join(",")}];
+  var NL_NAMES   = [];
+  nl_initialize_names();
+  nl_draw('g', NL_GENERA);
+  nl_draw('n', NL_NAMES);
+  Event.observe(document, 'keypress', nl_key);
 ) %>
 
-<p><span class="HelpNote"><b>Create List:</b> Click on a genus in the first
-column to pull up a list of species in that genus.  Click on any of these taxa
-to add species to your list.  Deprecated names are automatically linked to the
-corresponding accepted name.  Your species list is shown in the third column.
-You may remove names from this list by clicking on them. </span></p> 
-
-<p><span class="HelpNote"><b>Save List:</b> When you are finished, click on any
-of the buttons at the bottom of the page.  "Create List" takes you back to the
-standard creation form, where you will be able to enter date, location, notes,
-etc. before saving the list.</span></p> 
-
-<p><span class="HelpNote"><b>Reports:</b> The plain text report gives you a
-simple list of taxa with no formatting.  Rich text can be used to import the
-list into Microsoft Word with all the formatting intact.  Spreadsheet produces
-a CSV file, with name, author, and citation columns.  Common names are not
-available yet.  (Click on "back" button in browser to return to this
-form.)</span></p> 
+<div class="HelpNote"><%= textilize(:name_lister_help.l) %></div>
 
   <% end %>
 <% end %>

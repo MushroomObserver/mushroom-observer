@@ -246,7 +246,7 @@ class SpeciesListController < ApplicationController
         end
       end
       case params[:commit]
-      when 'Create List':
+      when :name_lister_submit_spl.l:
         @checklist_names  = {}
         @list_members     = params[:results].gsub('|',' ').gsub('*','')
         @new_names        = nil
@@ -256,11 +256,11 @@ class SpeciesListController < ApplicationController
         session[:checklist_source] = :nothing
         calc_checklist(nil)
         render(:action => 'create_species_list')
-      when 'Save as Plain Text':
+      when :name_lister_submit_txt.l:
         render_name_list_as_txt(objs)
-      when 'Save as Rich Text':
+      when :name_lister_submit_rtf.l:
         render_name_list_as_rtf(objs)
-      when 'Save as Spreadsheet':
+      when :name_lister_submit_csv.l:
         render_name_list_as_csv(objs)
       else
         flash_error("Invalid commit button, \"#{params[:commit]}\".")
