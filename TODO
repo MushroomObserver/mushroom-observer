@@ -1,6 +1,8 @@
 Release each of the following as they get completed:
 
-Taxa with notifications
+Need to track down user 167 and observation 3035
+
+List taxa with notifications
 
 Upgrade to Rails 2.1
 User vetting
@@ -51,9 +53,9 @@ Migrate local database back to current production version
   Do local migration
   Run tests
   Checkin changes
+  Move log
   Checkout code.
   Shutdown server.
-  Move log
   Run migration.
   rake cache:refresh_queued_emails
   Startup server.
