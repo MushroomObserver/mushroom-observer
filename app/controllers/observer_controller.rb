@@ -1338,7 +1338,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def email_features
     if check_permission(0)
-      @users = User.find(:all, :conditions => "feature_email=1 and verified in not null")
+      @users = User.find(:all, :conditions => "feature_email=1 and verified is not null")
     else
       redirect_to :action => 'list_observations'
     end
