@@ -1,6 +1,13 @@
 // Which column key strokes will go to.
 var NL_FOCUS = null;
 
+// Kludge to tell it to ignore click event on outer div after processing click
+// event within one of the three columns.
+var NL_IGNORE_UNFOCUS = false;
+
+// Accumulator for typed letters, used to search in columns.
+var NL_WORD = "";
+
 // Cursor position in each column.
 var NL_CURSOR = {
   g: null,
@@ -42,10 +49,12 @@ function nb(s, i) {
 
 // Click on item.
 function nc(s, i) {
+  nl_clear_word();
   nl_focus(s);
   nl_move_cursor(s, i);
   if (s == 'g')
     nl_select_genus(NL_GENERA[i]);
+  NL_IGNORE_UNFOCUS = true;
 }
 
 // Double-click on item.
@@ -59,8 +68,44 @@ function nd(s, i) {
 // Called when user presses a key.  We keep track of where user is typing by
 // updating NL_FOCUS (value is 'g', 's' or 'n').
 function nl_key(event) {
-  if (!NL_FOCUS) return;
 
+  // Normal letters.
+  var c = String.fromCharCode(event.keyCode || event.which).toLowerCase();
+  if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey ||
+      event.keyCode == Event.KEY_BACKSPACE) {
+
+    // Update word with new letter or backspace.
+    if (event.keyCode != Event.KEY_BACKSPACE) {
+      NL_WORD += c;
+      // If start typing with no focus, assume they mean genus.
+      if (!NL_FOCUS) NL_FOCUS = 'g';
+    } else if (NL_WORD != '') {
+      NL_WORD = NL_WORD.substr(0, NL_WORD.length - 1);
+    }
+
+    // Search for partial word.
+    var list = NL_FOCUS == 'g' ? NL_GENERA :
+               NL_FOCUS == 's' ? NL_SPECIES_CUR : NL_NAMES;
+    var word = NL_WORD;
+    if (NL_FOCUS == 's')
+      word = NL_SPECIES_CUR[0].replace(/\*$|\|.*/, '') + ' ' + NL_WORD;
+    nl_search(list, word);
+
+    // Update test div just below columns.
+    nl_update_word(word);
+    Event.stop(event);
+    return false;
+  }
+
+  // Clear word if user does *anything* else.
+  var old_word = NL_WORD;
+  nl_clear_word();
+
+  // Cursors, etc. must be explicitly focused to work.  (Otherwise you can use
+  // them to navigate through the page as a whole.)
+  if (!NL_FOCUS) return true;
+
+  // Other strokes.
   var i = NL_CURSOR[NL_FOCUS];
   switch(event.keyCode) {
 
@@ -86,14 +131,23 @@ function nl_key(event) {
 
     // Switch columns.
     case Event.KEY_LEFT:
-      NL_FOCUS = (NL_FOCUS == 'g') ? 'n' :
-                 (NL_FOCUS == 's') ? 'g' : 's';
+      NL_FOCUS = (NL_FOCUS == 'g') ? 'n' : (NL_FOCUS == 's') ? 'g' : 's';
       nl_draw_cursors();
       break;
     case Event.KEY_RIGHT:
+      NL_FOCUS = (NL_FOCUS == 'g') ? 's' : (NL_FOCUS == 's') ? 'n' : 'g';
+      nl_draw_cursors();
+      break;
     case Event.KEY_TAB:
-      NL_FOCUS = (NL_FOCUS == 'g') ? 's' :
-                 (NL_FOCUS == 's') ? 'n' : 'g';
+      if (event.shiftKey) {
+        NL_FOCUS = (NL_FOCUS == 'g') ? 'n' : (NL_FOCUS == 's') ? 'g' : 's';
+      } else if (NL_FOCUS == 'g') {
+        // Select current genus AND move to species column if press tab in genus column.
+        nl_select_genus(NL_GENERA[i]);
+        NL_FOCUS = 's';
+      } else {
+        NL_FOCUS = (NL_FOCUS == 's') ? 'n' : 'g';
+      }
       nl_draw_cursors();
       break;
 
@@ -109,22 +163,19 @@ function nl_key(event) {
       break;
 
     // Delete item under cursor.
-    case Event.KEY_BACKSPACE:
     case Event.KEY_DELETE:
       if (NL_FOCUS == 'n' && i != null)
         nl_remove_name(NL_NAMES[i]);
       break;
 
-    // Break keyboard focus.
-    case Event.KEY_ESC:
-      nl_focus(null);
-      break;
-
     // Let the rest pass through.
     default:
-      return;
+      return true;
   }
+
+  // Stop all events that we processed successfully.
   Event.stop(event);
+  return false;
 }
 
 // ---------------------------------  HTML  ------------------------------------
@@ -133,6 +184,27 @@ function nl_key(event) {
 function nl_focus(s) {
   NL_FOCUS = s;
   nl_draw_cursors();
+}
+
+// Unfocus to let user scroll the page with keyboard.
+function nl_unfocus() {
+  if (!NL_IGNORE_UNFOCUS) {
+    NL_FOCUS = null;
+    nl_draw_cursors();
+  } else {
+    NL_IGNORE_UNFOCUS = false;
+  }
+}
+
+// Update partial word accumulated from typing normal letters.
+function nl_update_word(val) {
+  $('word').innerHTML = val == '' ? '&nbsp;' : val;
+}
+
+// Clear partial word (after mving cursor, clicking on something, etc.)
+function nl_clear_word() {
+  if (NL_WORD != '')
+    nl_update_word(NL_WORD = '');
 }
 
 // Move cursor.
@@ -257,6 +329,18 @@ function nl_select_genus(name) {
   NL_SPECIES_CUR = list;
   nl_draw('s', list);
   nl_warp('s');
+}
+
+// Search in list for word and move cursor there.
+function nl_search(list, word) {
+  var word_len = word.length;
+  word = word.toLowerCase();
+  for (var i=0; i<list.length; i++) {
+    if (list[i].substr(0,word_len).toLowerCase() == word) {
+      nl_move_cursor(NL_FOCUS, i);
+      break;
+    }
+  }
 }
 
 // Insert a name.

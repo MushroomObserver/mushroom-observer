@@ -448,6 +448,9 @@ class ObserverController < ApplicationController
   def create_observation
     @user = session['user']
     if verify_user()
+      # There was some case where this was not getting set.  Now it will *always* get set.
+      @licenses = License.current_names_and_ids(@user.license)
+
       # Clear search list.
       session_setup
 
@@ -466,7 +469,6 @@ class ObserverController < ApplicationController
             image.when    = Time.utc(1950)  # (bogus time to indicate default)
             image.license = @user.license
             image.copyright_holder = @user.legal_name
-            @licenses     = License.current_names_and_ids(@user.license)
           end
         end
       else
@@ -481,7 +483,6 @@ class ObserverController < ApplicationController
         image.when    = Time.utc(1950)  # (bogus time to indicate default)
         image.license = @user.license
         image.copyright_holder = @user.legal_name
-        @licenses     = License.current_names_and_ids(@user.license)
         @good_images  = [] # List of images already downloaded, but not attached to observation yet.
         form_naming_helper()
       end

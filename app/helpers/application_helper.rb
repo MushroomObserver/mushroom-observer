@@ -172,7 +172,7 @@ module ApplicationHelper
     end
 
     # Put pre-existing links back in.
-    str.gsub!(/<XXX(\d+)>/) {|n| hrefs[n.to_i]}
+    str.gsub!(/<XXX(\d+)>/) {|n| hrefs[$1.to_i]}
     return str
   end
 end

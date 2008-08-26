@@ -930,6 +930,8 @@ map_locations_title: Locations matching '%s'
 
 # species_list/name_lister
 name_lister_title: Name List Generator
+name_lister_charset: Character Encoding
+name_lister_charset_help: (Try changing this if authors get garbled.)
 name_lister_classic: Classic Species List Generator
 name_lister_no_js: This page will not work if javascript is disabled.
 name_lister_bad_browser: This page will not work on your browser, sorry!
@@ -946,8 +948,8 @@ name_lister_help: >
   double-click to add species to your list.  Accepted names are in boldface;
   deprecated names are followed by one or more accepted alternatives.  You may
   choose any.  To remove a name, select it in the third column, and press
-  delete or double-click.  (You may also use arrows, control-arrows, page
-  up/down, and home/end to navigate.) 
+  delete or double-click.  (You may also use arrows to navigate, or type
+  partial names to search for names.)
   
   
   *Save List:* When you are finished, click on any of the buttons at the bottom
