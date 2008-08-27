@@ -1,5 +1,3 @@
-<div id='outer' onClick='nl_unfocus()'>
-
 <% if can_do_ajax? %>
   <%= javascript_include_tag 'prototype' %>
   <%= javascript_include_tag 'controls' %>
@@ -97,11 +95,10 @@
   nl_draw('g', NL_GENERA);
   nl_draw('n', NL_NAMES);
   Event.observe(document, 'keypress', nl_key);
+  Event.observe(document, 'click', nl_unfocus);
 ) %>
 
 <div class="HelpNote"><%= textilize(:name_lister_help.l) %></div>
 
   <% end %>
 <% end %>
-
-</div>

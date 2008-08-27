@@ -690,14 +690,14 @@ class SpeciesListController < ApplicationController
   # essentially writing Iconv myself, I can't pinpoint which characters are
   # causing problems.  Gosh, wouldn't it be nice if Iconv gave us a callback?
   def safe_iconv(to, from, str)
-    cd = Iconv.new(to, from)
+    iconv = Iconv.new(to, from)
     str.split("\n").map do |line|
       begin
-        cd.iconv(line)
+        iconv.iconv(line)
       rescue
         line.gsub(/[^ -~\t\r]/, '?')
       end
-    end.join("\n") + cd.iconv(nil)
+    end.join("\n") + iconv.iconv(nil)
   end
 
   # Display list of names as plain text.
@@ -761,10 +761,20 @@ class SpeciesListController < ApplicationController
       doc.line_break
     end
     str = doc.to_rtf
-    # Presuably some day ruby-rtf will be able to handle special characters,
-    # and this will all be moot, but until then this seems to work best.
-    str = make_iso8859_safe(str)
-    str = safe_iconv('ISO-8859-1', 'UTF-8', str)
+
+    # This is a temporary kludge to encode non-ASCII characters correctly
+    # using \u#### RTF escape sequences.
+    str.gsub!(/[^ -~\t\r\n]/) do |char|
+      safe = make_iso8859_safe(char)
+      begin
+        uni = *char.unpack('U')
+        uni -= 65536 if uni >= 32768
+        "\\u" + uni.to_s + safe
+      rescue
+        safe
+      end
+    end
+
     send_data(str,
       :type => 'text/rtf; charset=ISO-8859-1',
       :disposition => 'attachment; filename="report.rtf"'

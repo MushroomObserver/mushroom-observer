@@ -69,6 +69,10 @@ function nd(s, i) {
 // updating NL_FOCUS (value is 'g', 's' or 'n').
 function nl_key(event) {
 
+  // Cursors, etc. must be explicitly focused to work.  (Otherwise you can't
+  // use them to navigate through the page as a whole.)
+  if (!NL_FOCUS) return true;
+
   // Normal letters.
   var c = String.fromCharCode(event.keyCode || event.which).toLowerCase();
   if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey ||
@@ -100,10 +104,6 @@ function nl_key(event) {
   // Clear word if user does *anything* else.
   var old_word = NL_WORD;
   nl_clear_word();
-
-  // Cursors, etc. must be explicitly focused to work.  (Otherwise you can use
-  // them to navigate through the page as a whole.)
-  if (!NL_FOCUS) return true;
 
   // Other strokes.
   var i = NL_CURSOR[NL_FOCUS];

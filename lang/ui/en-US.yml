@@ -766,7 +766,7 @@ name_lister_help: >
   deprecated names are followed by one or more accepted alternatives.  You may
   choose any.  To remove a name, select it in the third column, and press
   delete or double-click.  (You may also use arrows to navigate, or type
-  partial names to search for names.)
+  partial names to search within a column.)
   
   
   *Save List:* When you are finished, click on any of the buttons at the bottom

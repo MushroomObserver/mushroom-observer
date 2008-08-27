@@ -168,8 +168,11 @@ module BrowserStatus
       @js = (session[:js_override] == :on)
     elsif params[:_js]
       @js = (params[:_js] == 'on')
-    else
+    elsif session[:_js] != nil
       @js = (session[:_js] == true)
+    else
+      # This is the initial assumption.
+      @js = true
     end
     session[:_js] = @js
 
