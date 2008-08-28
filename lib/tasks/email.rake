@@ -23,7 +23,6 @@ namespace :email do
     for e in QueuedEmail.find(:all)
       if e.queued + QUEUE_DELAY < Time.now() # Has it been queued (and unchanged) for QUEUE_DELAY or more
         if e.send_email
-	  print "Sent #{e.flavor} email from #{e.user and e.user.login} to #{e.to_user.login}\n"
           e.destroy
           count += 1
           if count >= EMAIL_PER_MINUTE
