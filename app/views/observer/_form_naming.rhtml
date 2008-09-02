@@ -38,6 +38,7 @@
 
 <%# -------------------- Name Autocompleter -------------------- %>
 
+<div id="test"></div>
 <nobr>
   <label for="name_name"><%= :form_naming_name.l %>:</label>
   <%= text_field('name', 'name', :value => @what) %>
@@ -52,7 +53,7 @@
 <span class="HelpNote"><%= :form_naming_name_help.l %></span><br/>
 <%= turn_into_name_auto_completer('name_name', :onChange =>
   %( function(v) { if (v && v != "") Element.show('reasons_div') } )) %>
-
+ 
 <%# -------------------- Naming Reasons -------------------- %>
 
 <%=

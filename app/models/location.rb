@@ -18,6 +18,7 @@ require 'active_record_extensions'
 #    south_west     [south, west]
 #    south_east     [south, east]
 #    center         [n+s/2, e+w/2]
+#    set_search_name
 #
 ################################################################################
 
@@ -34,6 +35,10 @@ class Location < ActiveRecord::Base
     :east  => "east edge",
     :west  => "west edge",
   })
+
+  def before_save
+    self.set_search_name
+  end
 
   def north_west
     [self.north, self.west]
@@ -53,6 +58,13 @@ class Location < ActiveRecord::Base
 
   def center
     [(self.north + self.south)/2, (self.west + self.east)/2]
+  end
+
+  def set_search_name
+    str = self.display_name.to_ascii
+    str.gsub!(/\W+/, ' ')
+    str.gsub!(/ (a|an|the|in|on|of|as|at|by|to) /, ' ')
+    self.search_name = str.strip.downcase
   end
 
   protected

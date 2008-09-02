@@ -43,17 +43,21 @@ class NameController < ApplicationController
 
   # Process AJAX request for autocompletion of mushroom name.  It reads the
   # first letter of the field, and returns all the names beginning with it.
-  # Inputs: params[:name]
+  # Inputs: params[:letter]
   # Outputs: renders sorted list of names, one per line, in plain text
   def auto_complete_name
-    part = params[:name] || ''
-    letter = part[0,1].downcase
-    @items = Name.connection.select_values %(
-      SELECT text_name FROM names
-      WHERE LOWER(text_name) LIKE '#{letter}%'
-      ORDER BY text_name ASC
-    )
-    render(:inline => '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
+    letter = params[:letter] || ''
+    if letter.length > 0
+      @items = Name.connection.select_values %(
+        SELECT text_name FROM names
+        WHERE LOWER(text_name) LIKE '#{letter}%'
+        ORDER BY text_name ASC
+      )
+    else
+      letter = ' '
+      @items = []
+    end
+    render(:inline => letter + '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
   end
 
   # Paginate and select name index data in prep for name_index view.

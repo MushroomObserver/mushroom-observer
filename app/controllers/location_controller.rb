@@ -30,19 +30,31 @@ class LocationController < ApplicationController
     :auto_complete_location
   ]
 
-  # AJAX request used for autocompletion of location fields.
-  # View: none
-  # Inputs: params[:location]
-  # Outputs: <ul> list of possible matches
+  # Process AJAX request for autocompletion of location fields.  It reads the
+  # first letter of the field, and returns all the locations (or "wheres")
+  # with words beginning with that letter.
+  # Inputs: params[:letter]
+  # Outputs: renders sorted list of names, one per line, in plain text
   def auto_complete_location
-    part = (params[:location] || '').downcase.gsub(/[*']/,"%")
-    @items = Observation.find(:all, {
-      :include => :location,
-      :conditions => "LOWER(observations.where) LIKE '#{part}%' or LOWER(locations.display_name) LIKE '#{part}%'",
-      :order => "observations.where ASC, locations.display_name ASC",
-      :limit => 10,
-    })
-    render :inline => "<%= content_tag('ul', @items.map { |entry| content_tag('li', content_tag('nobr', h(entry.place_name))) }.uniq) %>"
+    letter = params[:letter] || ''
+    if letter.length > 0
+      @items = Observation.connection.select_values %(
+        SELECT DISTINCT IF(observations.location_id > 0, locations.display_name, observations.where) AS x
+        FROM observations
+        LEFT OUTER JOIN locations ON locations.id = observations.location_id
+        WHERE (
+          LOWER(observations.where) LIKE '#{letter}%' OR
+          LOWER(observations.where) LIKE '% #{letter}%' OR
+          LOWER(locations.search_name) LIKE '#{letter}%' OR
+          LOWER(locations.search_name) LIKE '% #{letter}%'
+        )
+        ORDER BY x ASC
+      )
+    else
+      letter = ' '
+      @items = []
+    end
+    render(:inline => letter + '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
   end
 
   # Either displays matrix of observations at a location alphabetically

@@ -1,4 +1,5 @@
 require 'rtf'
+require 'string_extensions'
 
 ################################################################################
 #
@@ -648,73 +649,26 @@ class SpeciesListController < ApplicationController
   private
 
   # Exception thrown if try to render a report in a charset we don't handle.
-  class UnsupportedCharset < ArgumentError
-  end
-
-  # These are not valid characters in ISO-8859-1.
-  NON_ISO8859_CHARS = {
-    "\xC3\xA9"     => 'e',   # é
-    "\xC3\xAD"     => 'i',   # í
-    "\xC3\xB6"     => 'o',   # ö
-    "\xC3\xB8"     => 'o',   # ø
-    "\xC3\xBC"     => 'u',   # ü
-    "\xC4\x3F"     => 'c',   # č
-    "\xC4\x8C"     => 'C',   # Č
-    "\xC4\x8D"     => 'c',   # č
-    "\xC4\x91"     => 'd',   # đ
-    "\xC4\x9B"     => 'e',   # ě
-    "\xC5\x9A"     => 'S',   # Ś
-    "\xC5\xA0"     => 'S',   # Š
-    "\xE2\x80\x93" => '-',   # –
-    "\xE2\x80\x94" => '-',   # —
-    "\xE2\x80\x99" => "'",   # ’
-    "\xE2\x80\x9C" => '"',   # “
-    "\xE2\x80\x9D" => '"',   # ”
-    "\xE2\x80\xA6" => '...', # …
-    "\xEF\xBF\xBD" => '',    # �
-  }
-
-  NON_ISO8859_CHARS_RE = Regexp.new(NON_ISO8859_CHARS.keys.join('|'))
-
-  # Iconv dies if any bad characters are present.  I'd prefer to degrade them
-  # gracefully by simply removing the adornments.  The other method
-  # (+safe_iconv+) removes *everything* that isn't plain ASCII.
-  def make_iso8859_safe(str)
-    str.gsub(NON_ISO8859_CHARS_RE) {|c| NON_ISO8859_CHARS[c]}
-  end
-
-  # Since Iconv gives us no control whatsoever, we have to be careful.  Convert
-  # line-by-line and strip out special characters (even ones Iconv might be
-  # able to handle unfortunately) from lines that fail.  I see no other way to
-  # do this, since UTF-8 characters can be 1, 2 or 3 bytes long.  Without
-  # essentially writing Iconv myself, I can't pinpoint which characters are
-  # causing problems.  Gosh, wouldn't it be nice if Iconv gave us a callback?
-  def safe_iconv(to, from, str)
-    iconv = Iconv.new(to, from)
-    str.split("\n").map do |line|
-      begin
-        iconv.iconv(line)
-      rescue
-        line.gsub(/[^ -~\t\r]/, '?')
-      end
-    end.join("\n") + iconv.iconv(nil)
+  class UnsupportedCharsetError < ArgumentError
   end
 
   # Display list of names as plain text.
   def render_name_list_as_txt(names, charset=nil)
     charset ||= 'UTF-8'
     charset = charset.upcase
-    raise UnsupportedCharset if !['UTF-8', 'ISO-8859-1'].include?(charset)
+    raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1', 'UTF-8'].include?(charset)
     str = names.map do |name|
-      if false && name.author.to_s != ''
+      if true && name.author.to_s != ''
         name.text_name + ' ' + name.author
       else
         name.text_name
       end
     end.join("\r\n")
-    str = make_iso8859_safe(str) if charset == 'ISO-8859-1'
-    str = safe_iconv(charset, 'UTF-8', str) if charset != 'UTF-8'
-    str = "\xEF\xBB\xBF" + str if charset == 'UTF-8'
+    str = case charset
+      when 'ASCII': str.to_ascii
+      when 'UTF-8': "\xEF\xBB\xBF" + str
+      else str.iconv(charset)
+    end
     send_data(str,
       :type => "text/plain; charset=#{charset}",
       :disposition => 'attachment; filename="report.txt"'
@@ -725,7 +679,7 @@ class SpeciesListController < ApplicationController
   def render_name_list_as_csv(names, charset=nil)
     charset ||= 'ISO-8859-1'
     charset = charset.upcase
-    raise UnsupportedCharset if !['ISO-8859-1'].include?(charset)
+    raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1'].include?(charset)
     str = FasterCSV.generate do |csv|
       csv << ['name', 'author', 'citation', 'valid']
       names.each do |name|
@@ -733,8 +687,11 @@ class SpeciesListController < ApplicationController
           name.deprecated ? '' : '1'].map {|v| v == '' ? nil : v}
       end
     end
-    str = make_iso8859_safe(str) if charset == 'ISO-8859-1'
-    str = safe_iconv(charset, 'UTF-8', str) if charset != 'UTF-8'
+    str = case charset
+      when 'UTF-8': str
+      when 'ASCII': str.to_ascii
+      else str.iconv(charset)
+    end
     send_data(str,
       :type => "text/csv; charset=#{charset}; header=present",
       :disposition => 'attachment; filename="report.csv"'
@@ -765,7 +722,8 @@ class SpeciesListController < ApplicationController
     # This is a temporary kludge to encode non-ASCII characters correctly
     # using \u#### RTF escape sequences.
     str.gsub!(/[^ -~\t\r\n]/) do |char|
-      safe = make_iso8859_safe(char)
+      safe = char.to_ascii
+      safe = '?' if safe.length > 1
       begin
         uni = *char.unpack('U')
         uni -= 65536 if uni >= 32768

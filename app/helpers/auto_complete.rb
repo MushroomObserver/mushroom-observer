@@ -23,11 +23,11 @@ module ApplicationHelper
 
   # Turn a text_field into an auto-completer.
   # id:: id of text_field
-  # opts:: any of these: (see prototype and my_autocomplete.js for more)
+  # opts:: any of these: (see prototype and cached_auto_complete.js for more)
   #   :url              URL of AJAX callback (required)
   #   :div_id           DOM ID of div ("<id>_auto_complete")
   #   :div_class        CSS class of div ("auto_complete")
-  #   :js_class         JS autocompleter class ("MyAutocompleter")
+  #   :js_class         JS autocompleter class ("CachedAutocompleter")
   #   :inherit_width    Inherit width of pulldown from text field?
   #
   def turn_into_auto_completer(id, opts={})
@@ -35,7 +35,7 @@ module ApplicationHelper
       url       = nil
       div_id    = "#{id}_auto_complete"
       div_class = "auto_complete"
-      js_class  = "MyAutocompleter"
+      js_class  = "CachedAutocompleter"
       js_args   = ""
       opts.each_pair do |key, val|
         case key
@@ -64,10 +64,10 @@ module ApplicationHelper
   def turn_into_location_auto_completer(id, opts={})
     opts = {
       :url           => '/location/auto_complete_location',
-      :paramName     => 'location',
       :indicator     => 'indicator',
-      :frequency     => 1.0,
-      :js_class      => 'MyAutocompleter',
+      :frequency     => 0.1,
+      :wordMatch     => true,
+      :js_class      => 'CachedAutocompleter',
     }.clone.merge(opts)
     turn_into_auto_completer(id, opts)
   end
@@ -76,8 +76,10 @@ module ApplicationHelper
   def turn_into_name_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
       :url           => '/name/auto_complete_name',
-      :paramName     => 'name',
-      :js_class      => 'NameAutocompleter',
+      :indicator     => 'indicator',
+      :frequency     => 0.1,
+      :collapse      => true,
+      :js_class      => 'CachedAutocompleter',
       :inherit_width => (@ua[:ie] ? 1 : 0),
     }.merge(opts))
   end
@@ -87,9 +89,9 @@ module ApplicationHelper
     if can_do_ajax?
       "<div id='indicator' class='indicator'>" + image_tag('indicator.gif') + "</div>" +
       javascript_include_tag('prototype') +
-      javascript_include_tag('controls') +
       javascript_include_tag('effects') +
-      javascript_include_tag('my_auto_complete') +
+      javascript_include_tag('controls') +
+      javascript_include_tag('cached_auto_complete') +
       javascript_tag('Element.hide($("indicator"))')
     end
   end
