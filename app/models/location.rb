@@ -1,4 +1,5 @@
 require 'active_record_extensions'
+require 'string_extensions'
 
 ################################################################################
 #
