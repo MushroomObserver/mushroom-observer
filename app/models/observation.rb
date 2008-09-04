@@ -105,40 +105,23 @@ class Observation < ActiveRecord::Base
   ########################################
 
   # Get the community consensus on what the name should be.  It just adds up
-  # the votes (eventually I would like to weight by contribution), and picks
-  # the winner.  To break a tie it takes the one with the most votes (again
-  # I would like to weight by contribution).  Failing that it takes the oldest
-  # one.  Note, it now disregards any namings that only the owner has voted on,
-  # unless there are no non-owner votes > 50.  Note, it now also lumps all
-  # synonyms together when deciding the winning "taxon", using votes for the
-  # separate synonyms only when there are multiple "accepted" names for the
-  # winning taxon.
-  # Returns Naming instance or nil.
+  # the votes weighted by user contribution, and picks the winner.  To break a
+  # tie it takes the one with the most votes (again weighted by contribution).
+  # Failing that it takes the oldest one.  Note, it lumps all synonyms together
+  # when deciding the winning "taxon", using votes for the separate synonyms
+  # only when there are multiple "accepted" names for the winning taxon. 
+  #
+  # Returns Naming instance or nil.  Refreshes vote_cache as a side-effect.
   def calc_consensus
+    self.reload
 result = ""
 
-    # [Now that we consider all votes, this is all superfluous. -JPH 20080313]
-    # # Gather some handy overall vote stats.
-    # any_votes_at_all = false   # Are there any votes for any namings at all?
-    # any_positive_votes = false # Are there any "positive" votes by non-owners, i.e. votes > 50%?
-    # nonowner_voted = {}        # Has anyone other than the owner voted for a given naming?
-    # for naming in self.namings
-    #   naming_id = naming.id
-    #   nonowner_voted[naming_id] = false
-    #   for vote in naming.votes
-    #     any_votes_at_all = true
-    #     if vote.user_id != naming.user_id
-    #       nonowner_voted[naming_id] = true
-    #       any_positive_votes = true if vote.value > 50
-    #     end
-    #   end
-    # end
-
-    # Gather votes for names and synonyms.  Note that this is trickier than one would expect
-    # since it is possible to propose several synonyms for a single observation, and even
-    # worse perhaps, one can even propose the very same name multiple times.  Thus a user can
-    # potentially vote for a given *name* (not naming) multiple times.  Likewise, of course,
-    # for synonyms.  I choose the strongest vote in such cases.
+    # Gather votes for names and synonyms.  Note that this is trickier than one
+    # would expect since it is possible to propose several synonyms for a
+    # single observation, and even worse perhaps, one can even propose the very
+    # same name multiple times.  Thus a user can potentially vote for a given
+    # *name* (not naming) multiple times.  Likewise, of course, for synonyms.
+    # I choose the strongest vote in such cases. 
     name_votes  = {}  # Records the strongest vote for a given name for a given user.
     taxon_votes = {}  # Records the strongest vote for any names in a group of synonyms for a given user.
     name_ages   = {}  # Records the oldest date that a name was proposed.
@@ -146,12 +129,10 @@ result = ""
     user_wgts   = {}  # Caches user rankings.
     for naming in self.namings
       naming_id = naming.id
-      # [We're considering all votes now. -JPH 20080313]
-      # # First, are we even going to consider this naming?
-      # if nonowner_voted[naming_id] || !any_positive_votes
       name_id = naming.name_id
       name_ages[name_id] = naming.created if !name_ages[name_id] || naming.created < name_ages[name_id]
-      # Go through all the votes for this naming.  Should be zero or one per user.
+      # Go through all the votes for this naming.  Should be zero or one per
+      # user. 
       for vote in naming.votes
         user_id = vote.user_id
         val = vote.value
@@ -159,20 +140,22 @@ result = ""
         if wgt.nil?
           wgt = user_wgts[user_id] = vote.user_weight
         end
-        # It may be possible in the future for us to weight some "special" users zero, who knows...
-        # (It can cause a division by zero below if we ignore zero weights.)
+        # It may be possible in the future for us to weight some "special"
+        # users zero, who knows...  (It can cause a division by zero below if
+        # we ignore zero weights.) 
         if wgt > 0
-          # Record best vote for this user for this name.  This will be used later
-          # to determine which name wins in the case of the winning taxon (see below)
-          # having multiple accepted names.
+          # Record best vote for this user for this name.  This will be used
+          # later to determine which name wins in the case of the winning taxon
+          # (see below) having multiple accepted names. 
           name_votes[name_id] = {} if !name_votes[name_id]
           if !name_votes[name_id][user_id] ||
               name_votes[name_id][user_id][0] < val
             name_votes[name_id][user_id] = [val, wgt]
           end
-          # Record best vote for this user for this group of synonyms.  (Since not all taxa
-          # have synonyms, I've got to create a "fake" id that uses the synonym id if it exists,
-          # else uses the name id, but still keeps them separate.)
+          # Record best vote for this user for this group of synonyms.  (Since
+          # not all taxa have synonyms, I've got to create a "fake" id that
+          # uses the synonym id if it exists, else uses the name id, but still
+          # keeps them separate.) 
           taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
           taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
           taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
@@ -182,10 +165,10 @@ result = ""
           end
         end
       end
-      # end
     end
 
-    # Now that we've weeded out potential duplicate votes, we can combine them safely.
+    # Now that we've weeded out potential duplicate votes, we can combine them
+    # safely. 
     votes = {}
     for taxon_id in taxon_votes.keys
       vote = votes[taxon_id] = [0, 0]
@@ -199,9 +182,9 @@ result = ""
       end
     end
 
-    # Now we can determine the winner among the set of synonym-groups.  (Nathan calls
-    # these synonym-groups "taxa", because it better uniquely represents the underlying
-    # mushroom taxon, while it might have multiple names.)
+    # Now we can determine the winner among the set of synonym-groups.  (Nathan
+    # calls these synonym-groups "taxa", because it better uniquely represents
+    # the underlying mushroom taxon, while it might have multiple names.) 
     best_val = nil
     best_wgt = nil
     best_age = nil
@@ -224,12 +207,13 @@ result = ""
     end
 #result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>"
 
-    # Reverse our kludge that mashed names-without-synonyms and synonym-groups together.
-    # In the end we just want a name.
+    # Reverse our kludge that mashed names-without-synonyms and synonym-groups
+    # together.  In the end we just want a name. 
     if best_id
       match = /^(.)(\d+)/.match(best_id)
-      # Synonym id: go through namings and pick first one that belongs to this synonym group.
-      # Any will do for our purposes, because we will convert it to the currently accepted name below.
+      # Synonym id: go through namings and pick first one that belongs to this
+      # synonym group.  Any will do for our purposes, because we will convert
+      # it to the currently accepted name below. 
       if match[1] == "s"
         for naming in self.namings
           if naming.name.synonym_id.to_s == match[2]
@@ -243,8 +227,8 @@ result = ""
     end
 #result += "unmash: best=#{best ? best.text_name : "nil"}<br/>"
 
-    # Now deal with synonymy properly.  If there is a single accepted name, great,
-    # otherwise we need to somehow disambiguate.
+    # Now deal with synonymy properly.  If there is a single accepted name,
+    # great, otherwise we need to somehow disambiguate. 
     if best && best.synonym
       names = best.approved_synonyms
       names = best.synonym.names if names.length == 0
@@ -252,7 +236,8 @@ result = ""
         best = names.first
       elsif names.length > 1
 
-        # First combine votes for each name; exactly analagous to what we did with taxa above.
+        # First combine votes for each name; exactly analagous to what we did
+        # with taxa above. 
         votes = {}
         for name_id in name_votes.keys
           vote = votes[name_id] = [0, 0]
@@ -265,13 +250,14 @@ result = ""
           end
         end
 
-        # Now pick the winner among the ambiguous names.  If none are voted on, just pick
-        # the first one (I grow weary of these games).  This latter is all too real of a
-        # possibility: users may vigorously debate deprecated names, then at some later
-        # date two *new* names are created for the taxon, both are considered "accepted"
-        # until the scientific community rules definitively.  Now we have two possible
-        # names winning, but no votes on either!  If you have a problem with the one I
-        # chose, then vote on the damned thing, already! :)
+        # Now pick the winner among the ambiguous names.  If none are voted on,
+        # just pick the first one (I grow weary of these games).  This latter
+        # is all too real of a possibility: users may vigorously debate
+        # deprecated names, then at some later date two *new* names are created
+        # for the taxon, both are considered "accepted" until the scientific
+        # community rules definitively.  Now we have two possible names
+        # winning, but no votes on either!  If you have a problem with the one
+        # I chose, then vote on the damned thing, already! :) 
         best_val2 = nil
         best_wgt2 = nil
         best_age2 = nil
@@ -300,10 +286,12 @@ result = ""
     end
 #result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>"
 
-    # This should only occur for observations created by species_list.construct_observation(),
-    # which doesn't necessarily create any votes associated with its naming.  Therefore this should
-    # only ever happen when there is a single naming, so there is nothing arbitray in using first.
-    # (I think it can also happen if zero-weighted users are voting.)
+    # This should only occur for observations created by
+    # species_list.construct_observation(), which doesn't necessarily create
+    # any votes associated with its naming.  Therefore this should only ever
+    # happen when there is a single naming, so there is nothing arbitray in
+    # using first.  (I think it can also happen if zero-weighted users are
+    # voting.) 
     best = self.namings.first.name if !best && self.namings && self.namings.length > 0
     best = Name.unknown if !best
 #result += "fallback: best=#{best ? best.text_name : "nil"}<br/>"
@@ -434,52 +422,7 @@ return result
 
   # Admin tool that refreshes the vote cache for all observations with a vote.
   def self.refresh_vote_cache
-
-    # Catch all observations with no namings.
-    # self.connection.update %(
-    #   UPDATE observations
-    #   SET vote_cache = NULL
-    #   WHERE(
-    #     SELECT count(votes.value)
-    #     FROM namings, votes
-    #     WHERE namings.observation_id = observations.id and
-    #           votes.naming_id = namings.id
-    #   ) = 0
-    # )
-
-    # # Catch simple case of observations with only one vote.
-    # self.connection.update %(
-    #   UPDATE observations
-    #   SET vote_cache=(
-    #     SELECT max(votes.value)/2
-    #     FROM namings, votes
-    #     WHERE namings.observation_id = observations.id and
-    #           votes.naming_id = namings.id
-    #   )
-    #   WHERE(
-    #     SELECT count(votes.value)
-    #     FROM namings, votes
-    #     WHERE namings.observation_id = observations.id and
-    #           votes.naming_id = namings.id
-    #   ) = 1
-    # )
-
-    # Now get list of all the rest.
-    data = self.connection.select_all %(
-      SELECT id
-      FROM observations
-      WHERE(
-        SELECT count(votes.value)
-        FROM namings, votes
-        WHERE namings.observation_id = observations.id and
-              votes.naming_id = namings.id
-      ) > 1
-    )
-
-    # Recalculate consensus for these one at a time.
-    for d in data
-      id = d['id']
-      o = Observation.find(id)
+    for o in Observation.find(:all)
       o.calc_consensus
     end
   end

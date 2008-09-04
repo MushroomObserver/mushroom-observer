@@ -20,6 +20,7 @@ coprinus_comatus_naming:
   user_id:         1
   name_id:         2
   observation_id:  3
+  vote_cache:      1
 
 agaricus_campestris_naming:
   id:              4
@@ -60,6 +61,7 @@ strobilurus_diminutivus_naming:
   user_id:         1
   name_id:         24
   observation_id:  8
+  vote_cache:      0
 
 coprinus_comatus_other_naming:
   id:              9

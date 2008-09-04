@@ -128,12 +128,12 @@ class Name < ActiveRecord::Base
 
   # Patterns
   ABOVE_SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s*$/
-  SP_PAT = /^\s*([A-Z][a-z\-]+)\s+(sp.|species)\s*$/
+  SP_PAT = /^\s*([A-Z][a-z\-]+)\s+(sp\.?|species)\s*$/
   SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s*$/
   SUBSPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(subspecies|subsp|ssp|s)\.?\s+([a-z\-"]+)\s*$/
   VARIETY_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(variety|var|v)\.?\s+([a-z\-"]+)\s*$/
   FORM_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(forma|form|f)\.?\s+([a-z\-"]+)\s*$/
-  AUTHOR_PAT = /^\s*([A-Z][a-z\-\s\.]+[a-z])\s+(([^a-z"]|auct\.).*)$/ # May have trailing \s
+  AUTHOR_PAT = /^\s*("?[A-Z][a-z\-\s\."]+[a-z]"?)\s+(([^a-z"]|auct\.).*)$/ # May have trailing \s
   SENSU_PAT = /^\s*([A-Z].*)\s+(sensu\s+\S+)\s*$/
   GROUP_PAT = /^\s*([A-Z].*)\s+(group|gr|gp)\.?\s*$/
 

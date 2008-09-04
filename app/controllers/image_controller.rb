@@ -12,6 +12,7 @@
 #   * remove_images       Remove image(s) from an observation (not destroy!)
 #   * edit_image          Edit date, copyright, notes.
 #   * destroy_image       Destroy image.
+#   * remove_image        Remove an image from an observation.
 #   * reuse_image         Add an already-uploaded image to an observation.
 #   * add_image_to_obs    (post method #1 for reuse_image)
 #   * reuse_image_by_id   (post method #2 for reuse_image)
@@ -375,6 +376,33 @@ class ImageController < ApplicationController
         flash_notice "Image destroyed."
         redirect_to :action => 'list_images'
       end
+    end
+  end
+
+  # Callback to remove a single image from an observation.
+  # Linked from: observer/edit_observation
+  # Inputs: params[:image_id], params[:observation_id], session['user']
+  # Redirects to show_observation.
+  def remove_image
+    @user = session['user']
+    @image = Image.find(params[:image_id])
+    @observation = Observation.find(params[:observation_id])
+    if verify_user()
+      if !check_user_id(@observation.user_id)
+        flash_warning('You do not have permission to remove images from this observation.');
+      elsif !@observation.images.include?(@image)
+        flash_warning("This observation doesn't have that image!")
+      else
+        @observation.images.delete(@image)
+        @observation.log("Image removed: #{@image.unique_text_name}", false)
+        if @observation.thumb_image_id == @image.id
+          @observation.thumb_image_id = nil
+          @observation.save
+        end
+        flash_notice('Image removed.')
+      end
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+        :id => @observation.id)
     end
   end
 

@@ -1,4 +1,5 @@
 <%= javascript_include_auto_complete %>
+<%= javascript_include_tag('window') %>
   
 <% @title = 'Create Observation' %>
 
@@ -12,32 +13,13 @@
 <br/>
 <center><%= submit_tag 'Save Edits' %></center>
 
-<table cellpadding="10">
-  <tr>
-    <td valign="top">
-      <%= render :partial => 'form_observations', :locals => {
-        :action           => 'edit_observation',
-        :logging_optional => true,
-        :include_naming   => false,
-        :include_images   => false,
-        :button_name      => 'Save Edits',
-      } %>
-    </td>
-    <td valign="top">
-      <% i = 0
-         observation = @observation
-         for image in @observation.images
-           i = i + 1 %>
-         <table><tr><td>
-      <%= radio_button("observation", 'thumb_image_id', image.id) %>
-         </td><td align="center">
-      <%= image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0) %><br/>
-           <%= textilize_without_paragraph(h(image.unique_format_name)) %>
-         </td></tr></table>
-      <% end %>
-    </td>
-  </tr>
-</table>
+<%= render :partial => 'form_observations', :locals => {
+  :action           => 'edit_observation',
+  :logging_optional => true,
+  :include_naming   => false,
+  :include_images   => true,
+  :button_name      => 'Save Edits',
+} %>
 
 <center><%= submit_tag 'Save Edits' %></center>
 <% end %>

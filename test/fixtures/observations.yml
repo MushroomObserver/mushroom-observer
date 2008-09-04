@@ -27,6 +27,7 @@ coprinus_comatus_obs:
   where:     Glendale, California
   specimen:  0
   notes:     Second fruiting in bark chips
+  vote_cache: 1
 
 agaricus_campestris_obs:
   id:        4
@@ -82,3 +83,4 @@ strobilurus_diminutivus_obs:
   where:     Pipi Valley, Sierra Mountains, CA
   specimen:  0
   notes:     From somewhere else
+  vote_cache: 0

@@ -9,7 +9,9 @@ config.cache_classes     = false
 config.whiny_nils        = true
 
 # Enable the breakpoint server that script/breakpointer connects to
-config.breakpoint_server = true
+if RAILS_GEM_VERSION < '2.0'
+  config.breakpoint_server = true
+end
 
 # Show full error reports and disable caching
 config.action_controller.consider_all_requests_local = true

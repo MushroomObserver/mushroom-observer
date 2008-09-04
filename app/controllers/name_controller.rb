@@ -57,7 +57,7 @@ class NameController < ApplicationController
       letter = ' '
       @items = []
     end
-    render(:inline => letter + '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
+    render(:inline => letter + '<%= @items.uniq.map {|n| h(n) + "\n"}.join("") %>')
   end
 
   # Paginate and select name index data in prep for name_index view.

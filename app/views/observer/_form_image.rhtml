@@ -2,9 +2,8 @@
 
 <div id="image_<%= index %>_box" class="form_image">
 
-<% @image = @images[index] %>
-
-<p><nobr><label for="image_<%= index %>_image">Upload Image:</label>
+<p><nobr>
+<%= radio_button('observation', 'thumb_image_id', image.id) %>
 <%= file_field('image', 'image', :index => index) %>
 <% if @js %>
   <span style="left-width:10px">&nbsp;</span>

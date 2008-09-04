@@ -2,6 +2,9 @@
 
 IMAGE_HOME = "<your image dir here>" # Used for finding image directories
 
+# RAILS_GEM_VERSION = '1.2.4'
+RAILS_GEM_VERSION = '2.1.0'
+
 require File.join(File.dirname(__FILE__), 'environment_dev')
 
 ActionMailer::Base.smtp_settings = {
@@ -12,22 +15,36 @@ ActionMailer::Base.smtp_settings = {
 	:password => "<password>"
 }
 
-class RedCloth
-  def hard_break(text)
-    # This not only disables the stupid hard_breaks thing which breaks
-    # Textile rules, but it cleans up the work-around that we used to
-    # have to do to get it to delimit paragraphs.  In English, the regex
-    # below replaces any <br> preceded by or followed by one or more
-    # newlines and replaces the whole mess with two newlines.
-    text.gsub!(/(\n{1,}(<br *\/?>)+|(<br *\/?>)+\n{1,})/, "\n\n")
+# RedCloth 4.x is a compiled extension, so we can't tinker any more.  We can
+# tell that we're using 4.x because RedCloth is a Module instead of a Class.
+if RedCloth.class == Class
+  class RedCloth
+    def hard_break(text)
+      # This not only disables the stupid hard_breaks thing which breaks
+      # Textile rules, but it cleans up the work-around that we used to
+      # have to do to get it to delimit paragraphs.  In English, the regex
+      # below replaces any <br> preceded by or followed by one or more
+      # newlines and replaces the whole mess with two newlines.
+      text.gsub!(/(\n{1,}(<br *\/?>)+|(<br *\/?>)+\n{1,})/, "\n\n")
+  
+      # (Oops, the other old fix that needs to be unfixed is the line containing
+      # nothing but a dot.  This regexp removes them.  The ?= thingy is a zero-
+      # width look-ahead assertion; without it, it would skip every other line
+      # if there were multiple nothing-but-a-dot lines in a row.
+      text.gsub!(/\n\.(?=\n)/, "\n")
+  
+      # Lone newlines get turned into explicit line breaks.
+      text.gsub!(/([^\n])\n([^\n])/, '\1<br/>\2')
+    end
+  end
+end
 
-    # (Oops, the other old fix that needs to be unfixed is the line containing
-    # nothing but a dot.  This regexp removes them.  The ?= thingy is a zero-
-    # width look-ahead assertion; without it, it would skip every other line
-    # if there were multiple nothing-but-a-dot lines in a row.
-    text.gsub!(/\n\.(?=\n)/, "\n")
-
-    # Lone newlines get turned into explicit line breaks.
-    text.gsub!(/([^\n])\n([^\n])/, '\1<br/>\2')
+# I need this in order to run it on Rails 1.x for some reason.  Apparently
+# string.chars now returns an enumerator, which doesn't have a [] method.
+if RAILS_GEM_VERSION < '2.0'
+  class String
+    def first(limit=1)
+      self.to_s[0..(limit-1)]
+    end
   end
 end
