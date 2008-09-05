@@ -596,15 +596,17 @@ class Name < ActiveRecord::Base
   # Returns: value, NOT SAVED!
   def change_deprecated(value)
     # Remove any boldness that might be there
-    self.display_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
-    self.observation_name.gsub!(/\*\*([^*]+)\*\*/, '\1')
+    dname = self.display_name.gsub(/\*\*([^*]+)\*\*/, '\1')
+    oname = self.observation_name.gsub(/\*\*([^*]+)\*\*/, '\1')
     unless value
       # Add boldness
-      self.display_name.gsub!(/(__[^_]+__)/, '**\1**')
-      if self.display_name != self.observation_name
-        self.observation_name.gsub!(/(__[^_]+__)/, '**\1**')
+      dname.gsub!(/(__[^_]+__)/, '**\1**')
+      if dname != oname
+        oname.gsub!(/(__[^_]+__)/, '**\1**')
       end
     end
+    self.display_name = dname
+    self.observation_name = oname
     self.deprecated = value
   end
 
