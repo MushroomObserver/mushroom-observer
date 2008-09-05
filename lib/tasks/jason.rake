@@ -49,6 +49,7 @@ namespace :jason do
   desc "Convert all notes to HTML using textilize to test RedCloth."
   task(:test_redcloth => :environment) do
     include ActionView::Helpers::TextHelper # (for textilize)
+    include ApplicationHelper
     notes = YAML::load(File.open('notes.yml'))
     print "Textilizing #{notes.length} strings...\n"
     notes.map! do |str|

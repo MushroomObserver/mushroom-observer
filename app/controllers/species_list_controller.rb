@@ -717,23 +717,7 @@ class SpeciesListController < ApplicationController
       doc << " " + author if author && author != ""
       doc.line_break
     end
-    str = doc.to_rtf
-
-    # This is a temporary kludge to encode non-ASCII characters correctly
-    # using \u#### RTF escape sequences.
-    str.gsub!(/[^ -~\t\r\n]/) do |char|
-      safe = char.to_ascii
-      safe = '?' if safe.length > 1
-      begin
-        uni = *char.unpack('U')
-        uni -= 65536 if uni >= 32768
-        "\\u" + uni.to_s + safe
-      rescue
-        safe
-      end
-    end
-
-    send_data(str,
+    send_data(doc.to_rtf,
       :type => 'text/rtf; charset=ISO-8859-1',
       :disposition => 'attachment; filename="report.rtf"'
     )
