@@ -55,7 +55,7 @@ else
 
         # Post-filters: not catching all the itallics, and seeing spans where
         # they don't belong.
-        result.gsub!(/_+([A-Za-z0-9]+)_+/, '<i>\\1</i>')
+        result.gsub!(/_+([A-Z][A-Za-z0-9]+)_+/, '<i>\\1</i>')
         result.gsub!(/<span>(.*?)<\/span>/, '%\\1%')
 
         return result
