@@ -14,10 +14,10 @@ in a subversion repository at collectivesource.com.  It is world-readable, so
 just checkout a copy, and give it a shot.  (The latest stable release is in
 "trunk".  See link below.)
 
-I'm pretty sure you must be running a Unix-type O/S, probably Linux, but I know
-Rails and Mysql and everything else MO needs is available in Windows, so feel
-free to be the first to try it out!  Nathan has written up excellent notes
-describing how he's installed it on Ubuntu 6.10, Edgy Eft (see below).
+I'm pretty sure you must be running a Unix-type O/S, Linux and MacOSX have been
+tested, but I know Rails and Mysql and everything else MO needs is available in
+Windows, so feel free to be the first to try it out!  Nathan has written up excellent
+notes describing how he's installed it on Ubuntu 6.10, Edgy Eft (see below).
 
 You'll at very least need to install ruby, rails and mysql.  Fortunately
 these are all very popular so it's easy to find pre-built binaries for most

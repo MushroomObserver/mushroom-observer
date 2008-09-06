@@ -1,6 +1,37 @@
+Need code review:
+451 vs. 454 (453)
+U    app/models/location.rb
+U    app/views/observer/_form_naming.rhtml
+U    app/views/layouts/application.rhtml
+U    app/views/species_list/name_lister.rhtml
+U    app/helpers/auto_complete.rb
+A    app/helpers/string_extensions.rb
+U    app/controllers/name_controller.rb
+U    app/controllers/species_list_controller.rb
+U    app/controllers/location_controller.rb
+A    db/migrate/034_add_location_search_name.rb
+D    public/javascripts/my_auto_complete.js
+U    public/javascripts/prototype.js
+A    public/javascripts/cached_auto_complete.js
+U    public/javascripts/effects.js
+U    public/javascripts/dragdrop.js
+U    public/javascripts/controls.js
+
+Features for Open Naturalists:
+Common Names
+Events
+Different language files
+Show EOL pages (preferably components)
+Field Guides
+Theme cleanup
+Move MO-First-Year stuff somewhere else.
+  Suggests database driven document support
+
 Release each of the following as they get completed:
 
 Need to track down user 167 and observation 3035
+
+Darvin's problem with 'Backwards'
 
 List taxa with notifications
 
