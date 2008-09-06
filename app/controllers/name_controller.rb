@@ -108,12 +108,10 @@ class NameController < ApplicationController
   # View: name_index
   # Inputs:
   #   session[:pattern]
-  #   session['user']
   # Only one match: redirects to show_name.
   # Multiple matches: sets @name_data and renders name_index.
   def name_search
     store_location
-    @user = session['user']
     @layout = calc_layout_params
     @pattern = session[:pattern] || ''
     @title = "Names matching '#{@pattern}'"
@@ -266,7 +264,7 @@ class NameController < ApplicationController
       # is logged in we need to redo it and calc the preferred name for each.
       # Note that there's no reason to do duplicate observations.  (Note, only
       # need to do this to subset on the page we can actually see.)
-      if @user = session['user']
+      if @user
         for d in @consensus_data + @synonym_data + @other_data
           d["observation_name"] = Observation.find(d["id"].to_i).format_name
         end
@@ -285,7 +283,6 @@ class NameController < ApplicationController
 
   # name_index.rhtml -> create_name.rhtml
   def create_name
-    @user = session['user']
     if verify_user()
       if request.method == :post
         text_name = (params[:name][:text_name] || '').strip
@@ -329,7 +326,6 @@ class NameController < ApplicationController
   # show_name.rhtml -> edit_name.rhtml
   # Updates modified and saves changes
   def edit_name
-    @user = session['user']
     if verify_user()
       @name = Name.find(params[:id])
 
@@ -412,7 +408,6 @@ class NameController < ApplicationController
   # change_synonyms.rhtml -> transfer_synonyms -> show_name.rhtml
   def change_synonyms
     if verify_user()
-      @user = session['user']
       @name = Name.find(params[:id])
       @list_members     = nil
       @new_names        = nil
@@ -480,7 +475,6 @@ class NameController < ApplicationController
 
   def deprecate_name
     if verify_user()
-      @user    = session['user']
       @name    = Name.find(params[:id])
       @what    = (params[:proposed] && params[:proposed][:name] ? params[:proposed][:name] : '').strip
       @comment = (params[:comment] && params[:comment][:comment] ? params[:comment][:comment] : '').strip
@@ -526,7 +520,6 @@ class NameController < ApplicationController
 
   def approve_name
     if verify_user()
-      @user = session['user']
       @name = Name.find(params[:id])
       @approved_names = @name.approved_synonyms
       if request.method == :post
@@ -552,7 +545,6 @@ class NameController < ApplicationController
   # name_index/create_species_list -> bulk_name_edit
   def bulk_name_edit
     if verify_user()
-      @user = session['user']
       @list_members = nil
       @new_names    = nil
       if request.method == :post
@@ -607,8 +599,7 @@ class NameController < ApplicationController
   def email_tracking
     name_id = params[:id]
     if verify_user()
-      user = session['user']
-      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, user.id)
+      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
       if request.method == :post
         name = Name.find(name_id)
         case params[:commit]
@@ -616,7 +607,7 @@ class NameController < ApplicationController
           note_template = params[:notification][:note_template]
           note_template = nil if note_template == ''
           if @notification.nil?
-            @notification = Notification.new(:flavor => :name, :user => user, :obj_id => name_id,
+            @notification = Notification.new(:flavor => :name, :user => @user, :obj_id => name_id,
                 :note_template => note_template)
             flash_notice("Now tracking #{name.text_name}.")          
           else
@@ -637,9 +628,9 @@ class NameController < ApplicationController
         if @notification
           @note_template = @notification.note_template
         else
-          mailing_address = user.mailing_address.strip
+          mailing_address = @user.mailing_address.strip
           mailing_address = '[mailing address for collections]' if '' == mailing_address
-          @note_template = :email_tracking_note_template.l % [@name.text_name, mailing_address, user.legal_name]
+          @note_template = :email_tracking_note_template.l % [@name.text_name, mailing_address, @user.legal_name]
         end
       end
     end

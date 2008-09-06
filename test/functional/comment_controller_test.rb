@@ -104,7 +104,7 @@ class CommentControllerTest < Test::Unit::TestCase
     # Will have to test hidden inputs, etc. in account controller tester.
     user = User.authenticate('rolf', 'testpassword')
     assert(user)
-    session['user'] = user
+    session[:user_id] = user.id
     post_with_dump(:add_comment, {})
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     obs = Observation.find(obs.id)

@@ -106,11 +106,11 @@ def login(user='rolf', password='testpassword')
   get :news
   user = User.authenticate(user, password)
   assert(user)
-  session['user'] = user
+  session[:user_id] = user.id
 end
 
 def logout
-  session['user'] = nil
+  session[:user_id] = nil
 end
 
 def requires_login(page, params={}, stay_on_page=true, user='rolf', password='testpassword')
@@ -118,7 +118,7 @@ def requires_login(page, params={}, stay_on_page=true, user='rolf', password='te
   assert_redirected_to(:controller => "account", :action => "login")
   user = User.authenticate(user, password)
   assert(user)
-  session['user'] = user
+  session[:user_id] = user.id
   get_with_dump(page, params)
   if stay_on_page
     assert_response :success
@@ -131,7 +131,7 @@ def post_requires_login(page, params={}, stay_on_page=true, user='rolf', passwor
   assert_redirected_to(:controller => "account", :action => "login")
   user = User.authenticate(user, password)
   assert(user)
-  session['user'] = user
+  session[:user_id] = user.id
   post_with_dump(page, params)
   if stay_on_page
     assert_response :success
@@ -148,7 +148,7 @@ def requires_user(page, alt_page, params={}, stay_on_page=true, username='rolf',
   assert_redirected_to(:controller => "account", :action => "login")
   user = User.authenticate(alt_username, 'testpassword')
   assert(user)
-  session['user'] = user
+  session[:user_id] = user.id
   get(page, params) # Expect redirect
   if alt_page.class == Array
     assert_redirected_to(:controller => alt_page[0], :action => alt_page[1])
@@ -173,7 +173,7 @@ def post_requires_user(page, alt_page, params={}, stay_on_page=true, username='r
   assert_redirected_to(:controller => "account", :action => "login")
   user = User.authenticate(alt_username, 'testpassword')
   assert(user)
-  session['user'] = user
+  session[:user_id] = user.id
   post(page, params) # Expect redirect
   if alt_page.class == Array
     assert_redirected_to(:controller => alt_page[0], :action => alt_page[1])

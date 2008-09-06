@@ -1,5 +1,5 @@
 <div class="memo">
     <h3><%= :reverify_welcome.l %></h3>
-    <%= :reverify_note.l % session['user'].login %>
+    <%= :reverify_note.l % @user.login %>
     <%= link_to :reverify_link.l, :action=>"send_verify"%>  
 </div>

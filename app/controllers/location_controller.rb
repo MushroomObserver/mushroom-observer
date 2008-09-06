@@ -124,7 +124,6 @@ class LocationController < ApplicationController
 
   def create_location
     store_location
-    @user = session['user']
     @where = params[:where]
     @set_user = (params[:set_user] == "1")
     if verify_user()
@@ -253,7 +252,6 @@ class LocationController < ApplicationController
     store_location
     @location = Location.find(params[:id])
     if verify_user()
-      @user = session['user']
       if request.method == :post
         matching_name = Location.find_by_display_name(params[:location][:display_name])
         if matching_name && (matching_name != @location)
@@ -295,7 +293,7 @@ class LocationController < ApplicationController
       flash_warning "Because it can be destructive, only the admin can merge existing locations.
         An email requesting the proposed merge has been sent to the admins."
       content = "I attempted to merge the locations, #{location.display_name} and #{dest.display_name}."
-      AccountMailer.deliver_webmaster_question(session['user']['email'], content)
+      AccountMailer.deliver_webmaster_question(@user.email, content)
     end
     redirect_to(:action => 'show_location', :id => id)
   end

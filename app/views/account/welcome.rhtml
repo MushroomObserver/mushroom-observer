@@ -1,6 +1,6 @@
 <div class="memo">
-    <% if session['user'] %>
-        <h3><%= "#{:welcome_title.l} #{session['user'].legal_name}" %></h3>
+    <% if @user %>
+        <h3><%= "#{:welcome_title.l} #{@user.legal_name}" %></h3>
         <%= :welcome_note.l %>
         <%= link_to :welcome_logout_link.l, :action=>"logout_user"%>
     <% else %>

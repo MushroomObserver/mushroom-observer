@@ -55,7 +55,7 @@ class ImageController < ApplicationController
 
   # Display matrix of images, most recent first.
   # Linked from: left-hand panel
-  # Inputs: session['user']
+  # Inputs: none
   # Outputs: @objs, @obj_pages, @user, @layout
   def list_images
     session[:checklist_source] = :nothing
@@ -67,7 +67,7 @@ class ImageController < ApplicationController
 
   # Display list of images sorted by title.
   # Not used by anyone.
-  # Inputs: session['user']
+  # Inputs: none
   # Outputs: @images, @user
   def images_by_title
     session[:checklist_source] = :nothing
@@ -78,7 +78,7 @@ class ImageController < ApplicationController
 
   # Display list of images by a given user.
   # Linked from observer/show_user
-  # Inputs: params[:id] (user), session['user']
+  # Inputs: params[:id] (user)
   # Outputs: @images, @user
   def images_by_user
     user = User.find(params[:id])
@@ -97,12 +97,10 @@ class ImageController < ApplicationController
   # Redirected from: pattern_search (search bar)
   # Inputs:
   #   session[:pattern]
-  #   session['user']
   # Outputs:
   #   Renders list_images.
   def image_search
     store_location
-    @user = session['user']
     @layout = calc_layout_params
     @pattern = session[:pattern] || ''
     id = @pattern.to_i
@@ -130,12 +128,11 @@ class ImageController < ApplicationController
 
   # Show the 640x640 (max size) version of image.
   # Linked from: thumbnails, next/prev_image, images_by_title, etc.
-  # Inputs: params[:id] (image), session['user']
+  # Inputs: params[:id] (image)
   # Outputs: @image, @user, @invalid
   def show_image
     store_location
     pass_seq_params()
-    @user = session['user']
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
@@ -144,12 +141,11 @@ class ImageController < ApplicationController
 
   # Show the original size image.
   # Linked from: show_image
-  # Inputs: params[:id] (image), session['user']
+  # Inputs: params[:id] (image)
   # Outputs: @image, @user, @invalid
   def show_original
     store_location
     pass_seq_params()
-    @user = session['user']
     # This marks this page as invalid XHTML.  Has something to do with a
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
@@ -235,7 +231,7 @@ class ImageController < ApplicationController
   # Form for uploading and adding images to an observation.
   # Linked from: show_observation, reuse_image, and
   #   create/edit_naming (via _show_images partial)
-  # Inputs: params[:id] (observation), session['user']
+  # Inputs: params[:id] (observation)
   #   params[:upload][:image1-4]
   #   params[:image][:copyright_holder]
   #   params[:image][:when]
@@ -245,7 +241,6 @@ class ImageController < ApplicationController
   #   @licenses     (options for license select menu)
   # Redirects to show_observation.
   def add_image
-    @user = session['user']
     @observation = Observation.find(params[:id])
     if !check_user_id(@observation.user_id)
       redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
@@ -268,7 +263,6 @@ class ImageController < ApplicationController
   end
 
   def process_image(args, upload)
-    @user = session['user']
     if upload and upload != ""
       name = upload.full_original_filename if upload.respond_to? :full_original_filename
       args[:image] = upload
@@ -292,13 +286,12 @@ class ImageController < ApplicationController
 
   # Form used to remove one or more images from an observation (not destroy!)
   # Linked from: show_observation, create/edit_naming (via _show_images partial)
-  # Inputs: params[:id] (observation), session['user']
+  # Inputs: params[:id] (observation)
   #   params[:observation][:id]
   #   params[:selected][image_id]       (value of "yes" means delete)
   # Outputs: @observation, @user
   # Redirects to show_observation.
   def remove_images
-    @user = session['user']
     @observation = Observation.find(params[:id])
     if verify_user()
       if !check_user_id(@observation.user_id)
@@ -327,12 +320,11 @@ class ImageController < ApplicationController
 
   # Form for editing date/license/notes on an image.
   # Linked from: show_image/original
-  # Inputs: params[:id] (image), session['user']
+  # Inputs: params[:id] (image)
   #   params[:comment][:summary]
   #   params[:comment][:comment]
   # Outputs: @image, @licenses, @user
   def edit_image
-    @user = session['user']
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
     if verify_user()
@@ -357,10 +349,9 @@ class ImageController < ApplicationController
   # Callback to destroy an image.
   # Should this be allowed?  How do we cleanup corresponding observations?
   # Linked from: show_image/original
-  # Inputs: params[:id] (image), session['user']
+  # Inputs: params[:id] (image)
   # Redirects to list_images.
   def destroy_image
-    @user = session['user']
     @image = Image.find(params[:id])
     if verify_user()
       if !check_user_id(@image.user_id)
@@ -381,10 +372,9 @@ class ImageController < ApplicationController
 
   # Callback to remove a single image from an observation.
   # Linked from: observer/edit_observation
-  # Inputs: params[:image_id], params[:observation_id], session['user']
+  # Inputs: params[:image_id], params[:observation_id]
   # Redirects to show_observation.
   def remove_image
-    @user = session['user']
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
     if verify_user()
@@ -409,11 +399,10 @@ class ImageController < ApplicationController
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
   # Linked from: show_observation
-  # Inputs: params[:id] (observation), session['user']
+  # Inputs: params[:id] (observation)
   # Outputs: @images, @image_pages, @observation, @user, @layout
   # (See also add_image_to_obs and reuse_image_by_id.)
   def reuse_image
-    @user = session['user']
     @observation = Observation.find(params[:id])
     if verify_user()
       if !check_user_id(@observation.user_id)
@@ -434,10 +423,8 @@ class ImageController < ApplicationController
   # Inputs:
   #   params[:id]       (image)
   #   params[:obs_id]   (observation)
-  #   session['user']
   # Redirects to show_observation.
   def add_image_to_obs
-    @user = session['user']
     @observation = Observation.find(params[:obs_id])
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
@@ -454,10 +441,8 @@ class ImageController < ApplicationController
   # Inputs:
   #   params[:observation][:id]     (observation)
   #   params[:observation][:idstr]  (image)
-  #   session['user']
   # Redirects to show_observation.
   def reuse_image_by_id
-    @user = session['user']
     @observation = Observation.find(params[:observation][:id])
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
@@ -472,10 +457,9 @@ class ImageController < ApplicationController
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for their profile.  This method does get and post.
   # Linked from: account/prefs
-  # Inputs: session['user']
+  # Inputs: none
   # Outputs: @images, @image_pages, @user, @layout
   def reuse_image_for_user
-    @user = session['user']
     # Will return here either by typing in id and posting form, or by
     # clicking on an image (in which case method is "get").
     if request.method == "post" || params[:id]
@@ -502,7 +486,7 @@ class ImageController < ApplicationController
   # groups all the images of a given copyright holder and license type into
   # a single row.  This lets you change all of Rolf's licenses in one stroke.
   # Linked from: account/prefs
-  # Inputs: session['user']
+  # Inputs:
   #   params[:updates][license_id][copyright_holder]   (new license_id)
   # Outputs: @data, @user
   #   @data[n]['copyright_holder']  Person who actually holds copyright.
@@ -514,7 +498,6 @@ class ImageController < ApplicationController
   #   @data[n]['select_name']       Name of HTML select menu element.
   #   @data[n]['licenses']          Options for select menu.
   def license_updater
-    @user = session['user']
     if verify_user()
       #
       # Process any changes.
@@ -572,12 +555,11 @@ class ImageController < ApplicationController
       @log_entry = AddImageTestLog.find(params[:log_id])
       @log_entry.upload_start = Time.now
       @log_entry.save # Record that upload started
-      user= session['user']
       @log_entry.upload_data_start = Time.now # Just in case save takes a long time
-      count, size = test_process_image(user, params[:upload][:image1], 0, 0)
-      count, size = test_process_image(user, params[:upload][:image2], count, size)
-      count, size = test_process_image(user, params[:upload][:image3], count, size)
-      count, size = test_process_image(user, params[:upload][:image4], count, size)
+      count, size = test_process_image(@user, params[:upload][:image1], 0, 0)
+      count, size = test_process_image(@user, params[:upload][:image2], count, size)
+      count, size = test_process_image(@user, params[:upload][:image3], count, size)
+      count, size = test_process_image(@user, params[:upload][:image4], count, size)
       @log_entry.upload_end = Time.now
       @log_entry.image_count = count
       @log_entry.image_bytes = size
@@ -589,7 +571,7 @@ class ImageController < ApplicationController
   def test_add_image
     if verify_user()
       @log_entry = AddImageTestLog.new
-      @log_entry.user = session['user']
+      @log_entry.user = @user
       @log_entry.save
       @upload = {}
     end

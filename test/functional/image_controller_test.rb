@@ -345,9 +345,9 @@ class ImageControllerTest < Test::Unit::TestCase
     image = @commercial_inquiry_image
     params = { :id => image.id.to_s }
     requires_login(:reuse_image_for_user, params, false)
-    assert(user = session['user'])
-    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user.id)
-    assert_equal(user.image_id, image.id)
+    assert(user_id = session[:user_id])
+    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user_id)
+    assert_equal(User.find(user_id).image_id, image.id)
   end
 
   # This would happen if user typed in id and submitted.
@@ -355,8 +355,8 @@ class ImageControllerTest < Test::Unit::TestCase
     image = @commercial_inquiry_image
     params = { :id => image.id.to_s }
     post_requires_login(:reuse_image_for_user, params, false)
-    assert(user = session['user'])
-    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user.id)
-    assert_equal(user.image_id, image.id)
+    assert(user_id = session[:user_id])
+    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user_id)
+    assert_equal(User.find(user_id).image_id, image.id)
   end
 end

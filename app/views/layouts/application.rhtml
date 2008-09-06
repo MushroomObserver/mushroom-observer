@@ -10,8 +10,8 @@
     if CSS.member?(controller.action_name)
         css = controller.action_name
     else
-        unless session['user'].nil?
-            css = session['user'].theme
+        unless @user.nil?
+            css = @user.theme
         end
     end
     unless CSS.member?(css)
@@ -87,7 +87,7 @@
                                                         :action => 'species_lists_by_title') %><br/>
                                 <br/>
 
-                                <% if session['user'].nil? %>
+                                <% if @user.nil? %>
                                 <%= lnbsp(:app_account) %>:<br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_login), :controller => 'account',
                                                         :action => 'login') %><br/>
@@ -96,19 +96,19 @@
                                                         :action => 'signup') %>
                                 <% else %>
                                 <%= lnbsp(:app_current_user) %>:<br/>
-                                &nbsp;&nbsp;<%= h(session['user'].login) %><br/>
+                                &nbsp;&nbsp;<%= h(@user.login) %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_comments_for_you),
                                                         :controller => 'comment',
                                                         :action => 'show_comments_for_user',
-                                                        :id => session['user']) %><br/>
+                                                        :id => @user.id) %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_your_observations),
                                                         :controller => 'observer',
                                                         :action => 'show_user_observations',
-                                                        :id => session['user']) %><br/>
+                                                        :id => @user.id) %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_your_summary),
                                                         :controller => 'observer',
                                                         :action => 'show_user',
-                                                        :id => session['user']) %><br/>
+                                                        :id => @user.id) %><br/>
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_preferences),
                                                         :controller => 'account',
                                                         :action => 'prefs') %><br/>
@@ -116,7 +116,7 @@
                                 &nbsp;&nbsp;<%= link_to(lnbsp(:app_logout),
                                                         :controller => 'account',
                                                         :action => 'logout_user') %>
-                                    <% if session['user'].id == 0 %>
+                                    <% if @user.id == 0 %>
                                         <br/><br/>
                                         Admin:<br/>
                                         &nbsp;&nbsp;<%= link_to(lnbsp(:app_users),

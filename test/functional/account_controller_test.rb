@@ -27,9 +27,9 @@ class AccountControllerTest < Test::Unit::TestCase
     @request.session['return-to'] = "http://localhost/bogus/location"
 
     post :login, "user_login" => "rolf", "user_password" => "testpassword"
-    assert(@response.has_session_object?("user"))
+    assert(@response.has_session_object?(:user_id))
 
-    assert_equal @rolf, @response.session["user"]
+    assert_equal @rolf.id, @response.session[:user_id]
 
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
   end
@@ -39,7 +39,7 @@ class AccountControllerTest < Test::Unit::TestCase
 
     post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "newpassword",
                               "email" => "nathan@collectivesource.com", "mailing_address" => "", "theme" => "NULL", "notes" => "" }
-    assert(@response.has_session_object?("user"))
+    assert(@response.has_session_object?(:user_id))
 
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
   end
@@ -110,9 +110,9 @@ class AccountControllerTest < Test::Unit::TestCase
       "user_password" => "testpassword",
       :user => { :remember_me => "" }
     }
-    assert session['user']
+    assert session[:user_id]
     assert !cookies[:mo_user]
-    session['user'] = nil
+    session[:user_id] = nil
     get :test_autologin
     assert_response :redirect
     #
@@ -122,11 +122,11 @@ class AccountControllerTest < Test::Unit::TestCase
       "user_password" => "testpassword",
       :user => { :remember_me => "1" }
     }
-    assert session['user']
+    assert session[:user_id]
     assert cookies['mo_user']
     #
     # And make sure autlogin will pick that cookie up and do its thing.
-    session['user'] = nil
+    session[:user_id] = nil
     @request.cookies['mo_user'] = cookies['mo_user']
     get :test_autologin
     assert_response :success

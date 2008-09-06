@@ -176,7 +176,6 @@ class ObserverController < ApplicationController
   #   observation_search
   def pattern_search
     store_location
-    @user = session['user']
     @layout = calc_layout_params
     search_data = params[:search]
     if search_data
@@ -245,7 +244,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of all observations, sorted by date.
   # Linked from: left-hand panel
-  # Inputs: session['user']
+  # Inputs: none
   # Outputs: @observations, @observation_pages, @user, @layout
   def list_observations
     show_selected_observations("Observations", "", "observations.`when` desc", :all_observations)
@@ -278,11 +277,9 @@ class ObserverController < ApplicationController
   # View: list_observations
   # Inputs:
   #   session[:pattern]
-  #   session['user']
   # Outputs: @observations, @observation_pages, @user, @layout
   def observation_search
     store_location
-    @user = session['user']
     @layout = calc_layout_params
     @pattern = session[:pattern] || ''
     id = @pattern.to_i
@@ -334,11 +331,10 @@ class ObserverController < ApplicationController
   end
 
   # Displays notifications related to a given naming and users.
-  # Inputs: params[:naming], params[:observation], session['user']
+  # Inputs: params[:naming], params[:observation]
   # Outputs:
   #   @notifications
   def show_notifications
-    @user = session['user']
     data = []
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, @user.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
@@ -351,12 +347,11 @@ class ObserverController < ApplicationController
   end
 
   # Lists notifications that the given user has created.
-  # Inputs: session['user']
+  # Inputs: none
   # Outputs:
   #   @notifications
   def list_notifications
     if verify_user()
-      @user = session['user']
       @notifications = Notification.find_all_by_user_id(@user.id, :order => :flavor)
     end
   end
@@ -371,7 +366,7 @@ class ObserverController < ApplicationController
   #   _show_comments
   #   _show_footer
   # Linked from countless views as a fall-back.
-  # Inputs: params[:id], session['user']
+  # Inputs: params[:id]
   # Outputs:
   #   @observation, @user
   #   @confidence/agreement_menu    (used to create vote menus)
@@ -393,7 +388,6 @@ class ObserverController < ApplicationController
     @confidence_menu = translate_menu(Vote.confidence_menu)
     @agreement_menu  = translate_menu(Vote.agreement_menu)
     @votes = Hash.new
-    @user = session['user']
     if @user && @user.verified
       #
       # This happens when user clicks on "Update Votes".
@@ -459,7 +453,6 @@ class ObserverController < ApplicationController
   # Linked from: left panel
   #
   # Inputs:
-  #   session['user']
   #   params[:observation][...]         observation args
   #   params[:name][:name]              name
   #   params[:approved_name]            old name
@@ -481,7 +474,6 @@ class ObserverController < ApplicationController
   #   @good_images                      list of images already downloaded
   #
   def create_observation
-    @user = session['user']
     if verify_user()
       # These are needed to create pulldown menus in form.
       @licenses = License.current_names_and_ids(@user.license)
@@ -560,7 +552,6 @@ class ObserverController < ApplicationController
   # Linked from: left panel
   #
   # Inputs:
-  #   session['user']
   #   params[:id]                       observation id
   #   params[:observation][...]         observation args
   #   params[:image][n][...]            image args
@@ -574,7 +565,6 @@ class ObserverController < ApplicationController
   #   @good_images                      list of images already attached
   #
   def edit_observation
-    @user = session['user']
     if verify_user()
       @observation = Observation.find(params[:id])
       @licenses = License.current_names_and_ids(@user.license)
@@ -613,10 +603,9 @@ class ObserverController < ApplicationController
 
   # Callback to destroy an observation (and associated namings, votes, etc.)
   # Linked from: show_observation
-  # Inputs: params[:id] (observation), session['user']
+  # Inputs: params[:id] (observation)
   # Redirects to list_observations.
   def destroy_observation
-    @user = session['user']
     if verify_user()
       @observation = Observation.find(params[:id])
       if !check_user_id(@observation.user_id)
@@ -641,7 +630,6 @@ class ObserverController < ApplicationController
   # Linked from: show_observation
   #
   # Inputs (post):
-  #   session['user']
   #   params[:id]                       observation id
   #   params[:name][:name]              name
   #   params[:approved_name]            old name
@@ -658,7 +646,6 @@ class ObserverController < ApplicationController
   #
   def create_naming
     pass_seq_params()
-    @user = session['user']
     if verify_user()
       @observation = Observation.find(params[:id])
       @confidence_menu = translate_menu(Vote.confidence_menu)
@@ -723,7 +710,6 @@ class ObserverController < ApplicationController
   # Linked from: show_observation
   #
   # Inputs:
-  #   session['user']
   #   params[:id]                       naming id
   #   params[:name][:name]              name
   #   params[:approved_name]            old name
@@ -739,7 +725,6 @@ class ObserverController < ApplicationController
   #   @reason                           array of naming_reasons
   #
   def edit_naming
-    @user = session['user']
     if verify_user()
       @naming = Naming.find(params[:id])
       @observation = @naming.observation
@@ -845,10 +830,9 @@ class ObserverController < ApplicationController
 
   # Callback to destroy a naming (and associated votes, etc.)
   # Linked from: show_observation
-  # Inputs: params[:id] (observation), session['user']
+  # Inputs: params[:id] (observation)
   # Redirects back to show_observation.
   def destroy_naming
-    @user = session['user']
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
     if !check_user_id(@naming.user_id)
@@ -898,17 +882,16 @@ class ObserverController < ApplicationController
   # Create vote if none exists; change vote if exists; delete vote if setting
   # value to -1 (owner of naming is not allowed to do this).
   # Linked from: show_observation
-  # Inputs: params[], session['user']
+  # Inputs: params[]
   # Redirects to show_observation.
   def cast_vote
-    user = session['user']
     if verify_user()
       if !params[:vote] || !params[:vote][:value]
         raise "Invoked cast_vote without any parameters!"
       else
         naming = Naming.find(params[:vote][:naming_id])
         value = params[:vote][:value].to_i
-        naming.change_vote(user, value)
+        naming.change_vote(@user, value)
         redirect_to(:action => 'show_observation', :id => naming.observation.id)
       end
     end
@@ -954,7 +937,6 @@ class ObserverController < ApplicationController
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new
-    @user = session['user']
     @users = User.find(:all, :order => "contribution desc")
   end
 
@@ -992,7 +974,6 @@ class ObserverController < ApplicationController
 #++#############################################################################
 
   def ask_webmaster_question
-    @user = session['user']
     @email = params[:user][:email] if params[:user]
     @content = params[:question][:content] if params[:question]
     @email_error = false
@@ -1051,7 +1032,7 @@ class ObserverController < ApplicationController
   end
 
   def send_user_question
-    sender = session['user']
+    sender = @user
     user = User.find(params[:id])
     subject = params[:email][:subject]
     content = params[:email][:content]
@@ -1066,7 +1047,7 @@ class ObserverController < ApplicationController
   end
 
   def send_observation_question
-    sender = session['user']
+    sender = @user
     observation = Observation.find(params[:id])
     question = params[:question][:content]
     AccountMailer.deliver_observation_question(sender, observation, question)
@@ -1076,7 +1057,6 @@ class ObserverController < ApplicationController
 
   def commercial_inquiry
     @image = Image.find(params[:id])
-    @user = session['user']
     if !@image.user.commercial_email
       flash_error "Permission denied."
       redirect_to(:action => 'show_image', :id => @image.id)
@@ -1084,7 +1064,7 @@ class ObserverController < ApplicationController
   end
 
   def send_commercial_inquiry
-    sender = session['user']
+    sender = @user
     image = Image.find(params[:id])
     commercial_inquiry = params[:commercial_inquiry][:content]
     AccountMailer.deliver_commercial_inquiry(sender, image, commercial_inquiry)
@@ -1122,7 +1102,6 @@ class ObserverController < ApplicationController
     @search_seq = search_state.key
 
     store_location
-    @user = session['user']
     @layout = calc_layout_params
     session[:checklist_source] = :all_observations
     query = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
@@ -1135,7 +1114,6 @@ class ObserverController < ApplicationController
 
   def show_rss_log
     store_location
-    @user = session['user']
     @rss_log = RssLog.find(params['id'])
   end
 

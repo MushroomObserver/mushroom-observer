@@ -56,7 +56,7 @@ class AccountController < ApplicationController
       when :post
         user = User.authenticate(params['user_login'], params['user_password'])
         @remember = params['user'] && params['user']['remember_me'] == "1"
-        if session['user'] = user
+        if set_session_user(user)
           logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
           flash_notice "Login successful."
           user.last_login = Time.now
@@ -115,7 +115,8 @@ class AccountController < ApplicationController
           @user.change_rows(5)
           @user.change_columns(3)
           if @user.save
-            session['user'] = User.authenticate(@user.login, params['user']['password'])
+            user = User.authenticate(@user.login, params['user']['password'])
+            set_session_user(user)
             flash_notice "Signup successful.  Verification sent to your email account."
             AccountMailer.deliver_verify(@user)
             redirect_back_or_default :action => "welcome"
@@ -142,7 +143,8 @@ class AccountController < ApplicationController
           password = random_password(10)
           @user.change_password(password)
           if @user.save
-            session['user'] = User.authenticate(@user.login, params['user']['password'])
+            user = User.authenticate(@user.login, params['user']['password'])
+            set_session_user(user)
             flash_notice "Password successfully changed.  New password has been sent to your email account."
             AccountMailer.deliver_new_password(@user, password)
             @hiddens = []
@@ -155,13 +157,11 @@ class AccountController < ApplicationController
   end
 
   def prefs
-    @user = session['user']
     if @user
       @licenses = License.current_names_and_ids(@user.license)
       case request.method
         when :get
-          @user = User.find(@user.id) # Make sure we have the latest version of the user
-          session['user'] = @user
+          @user.reload # Make sure we have the latest version of the user
 
         when :post
           error = false
@@ -206,13 +206,11 @@ class AccountController < ApplicationController
   end
 
   def profile
-    @user = session['user']
     if @user
       @licenses = License.current_names_and_ids(@user.license)
       case request.method
         when :get
-          @user = User.find(@user.id) # Make sure we have the latest version of the user
-          session['user'] = @user
+          @user.reload # Make sure we have the latest version of the user
           @place_name      = @user.location ? @user.location.display_name : ""
           @copyright_holder = @user.legal_name
           @copyright_year    = Time.now.year
@@ -295,7 +293,7 @@ class AccountController < ApplicationController
   end
 
   def logout_user
-    @user = session['user'] = nil
+    @user = set_session_user(nil)
     clear_autologin_cookie
   end
 
@@ -310,9 +308,6 @@ class AccountController < ApplicationController
       @user = User.find(params['id'])
       @user.verified = Time.now
       @user.save
-      if session['user'] && (session['user'].id == @user.id)
-        session['user'].verified = Time.now
-      end
     else
       render :action => "reverify"
     end
@@ -333,8 +328,6 @@ class AccountController < ApplicationController
       if @user.save
         flash_notice "Automated feature email disabled for #{@user.unique_text_name}."
       end
-      user = session['user']
-      session['user'].feature_email = false
     end
   end
 
@@ -344,8 +337,6 @@ class AccountController < ApplicationController
       if @user.save
         flash_notice "Question email disabled for #{@user.unique_text_name}."
       end
-      user = session['user']
-      session['user'].question_email = false
     end
   end
 
@@ -355,8 +346,6 @@ class AccountController < ApplicationController
       if @user.save
         flash_notice "Commercial email inquiries disabled for #{@user.unique_text_name}."
       end
-      user = session['user']
-      session['user'].commercial_email = false
     end
   end
 
@@ -366,19 +355,17 @@ class AccountController < ApplicationController
       if @user.save
         flash_notice "Comment email notifications disabled for #{@user.unique_text_name}."
       end
-      user = session['user']
-      session['user'].comment_email = false
     end
   end
 
   def test_verify
-    user = session['user']
-    email = AccountMailer.create_verify(user)
+    @user = get_session_user
+    email = AccountMailer.create_verify(@user)
     render(:text => "<pre>" + email.encoded + "</pre>")
   end
 
   def send_verify
-    AccountMailer.deliver_verify(session['user'])
+    AccountMailer.deliver_verify(get_session_user)
     flash_notice "Verification sent to your email account."
     redirect_back_or_default :action => "welcome"
   end
@@ -388,13 +375,13 @@ class AccountController < ApplicationController
   # Make sure the given user is the one that's logged in.  If no one is logged in
   # then give them a chance to login.
   def login_check(id)
-    result = !session['user'].nil?
+    result = !get_session_user.nil?
     if result
       # Undo the store_location
       session['return-to'] = url_for :controller => 'observer', :action => 'index'
       if id
-        @user = User.find(id)
-        if @user != session['user']
+        user = User.find(id)
+        if user != get_session_user
           flash_error "Permission denied."
           result = false
         end

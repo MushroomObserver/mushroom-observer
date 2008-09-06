@@ -74,13 +74,12 @@ class SpeciesListController < ApplicationController
   end
 
   # Linked from: list_species_lists, show_observation, create/edit_species_list, etc. etc.
-  # Inputs: params[:id] (species_list), session['user']
+  # Inputs: params[:id] (species_list)
   # Outputs: @species_list, @observation_list, @user
   # Use session to store the current species list since this parallels
   # the usage for show_observation.
   def show_species_list
     store_location
-    @user = session['user']
     id = params[:id]
     @search_seq = calc_search(:species_list_observations, "s.id = %s" % id, "n.search_name").key
     @species_list = SpeciesList.find(id)
@@ -142,8 +141,7 @@ class SpeciesListController < ApplicationController
 
   # Form for creating a new species list.
   # Linked from: left-hand panel
-  # Inputs:
-  #   session['user']
+  # Inputs: none
   # Outputs:
   #   @user
   #   @checklist_names
@@ -155,7 +153,6 @@ class SpeciesListController < ApplicationController
   #   @member_notes
   #   session[:checklist]
   def create_species_list
-    @user = session['user']
     @species_list = SpeciesList.new
     if verify_user()
       if request.method == :get
@@ -175,7 +172,6 @@ class SpeciesListController < ApplicationController
   # Specialized form for creating a new species list, at Darvin's request.
   # Linked from: create_species_list
   # Inputs:
-  #  session['user']
   #  params[:results]
   # Outputs:
   #  @names
@@ -273,7 +269,6 @@ class SpeciesListController < ApplicationController
   # Linked from: show/upload_species_list
   # Inputs:
   #   params[:id] (species_list)
-  #   session['user']
   # Outputs:
   #   @user
   #   @checklist_names
@@ -285,7 +280,6 @@ class SpeciesListController < ApplicationController
   #   @member_notes
   #   session[:checklist]
   def edit_species_list
-    @user = session['user']
     @species_list = SpeciesList.find(params[:id])
     if verify_user()
       if !check_user_id(@species_list.user_id)
@@ -387,12 +381,11 @@ class SpeciesListController < ApplicationController
 
   # Form to let user create/edit species_list from file.
   # Linked from: edit_species_list
-  # Inputs: params[:id] (species_list), session['user']
+  # Inputs: params[:id] (species_list)
   #   params[:species_list][:file]
   # Get: @species_list, @user
   # Post: goes to edit_species_list
   def upload_species_list
-    @user = session['user']
     @species_list = SpeciesList.find(params[:id])
     if verify_user()
       if !check_user_id(@species_list.user_id)
@@ -419,10 +412,9 @@ class SpeciesListController < ApplicationController
 
   # Callback to destroy a list.
   # Linked from: show_species_list
-  # Inputs: params[:id] (species_list), session['user']
+  # Inputs: params[:id] (species_list)
   # Redirects to list_species_lists.
   def destroy_species_list
-    @user = session['user']
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
       @species_list.orphan_log('Species list destroyed by ' + @user.login)
@@ -436,11 +428,10 @@ class SpeciesListController < ApplicationController
 
   # Form to let user add/remove an observation from his various lists.
   # Linked from: show_observation
-  # Inputs: params[:id] (observation), session['user']
+  # Inputs: params[:id] (observation)
   # Outputs: @observation, @user
   def manage_species_lists
     if verify_user()
-      @user = session['user']
       @observation = Observation.find(params[:id])
     end
   end
@@ -525,7 +516,6 @@ class SpeciesListController < ApplicationController
     source = session[:checklist_source]
     list = []
     query = nil
-    user = session['user']
     if source == id
       source = session[:prev_checklist_source] || source
     end
@@ -564,7 +554,6 @@ class SpeciesListController < ApplicationController
   # Get list of names from species_list that are deprecated.
   def get_list_of_deprecated_names(spl)
     result = nil
-    user = session['user']
     for obs in spl.observations
       name = obs.name
       if name.deprecated

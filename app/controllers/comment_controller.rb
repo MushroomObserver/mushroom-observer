@@ -20,7 +20,7 @@ class CommentController < ApplicationController
 
   # Show list of latest comments.
   # Linked from: left-hand panel
-  # Inputs: params[:page], session['user']
+  # Inputs: params[:page]
   # Outputs: @user, @comments, @comment_pages
   def list_comments
     store_location
@@ -34,7 +34,7 @@ class CommentController < ApplicationController
   # Shows comments for a given user, most recent first.
   # Linked from: left panel
   # View: list_comments
-  # Inputs: params[:id] (user), session['user']
+  # Inputs: params[:id] (user)
   # Outputs: @user, @comments, @comment_pages
   def show_comments_for_user
     session_setup
@@ -51,7 +51,7 @@ class CommentController < ApplicationController
   # Shows comments for a given user, most recent first.
   # Linked from: left panel
   # View: list_comments
-  # Inputs: params[:id] (user), session['user']
+  # Inputs: params[:id] (user)
   # Outputs: @user, @comments, @comment_pages
   def show_comments_by_user
     session_setup
@@ -66,11 +66,10 @@ class CommentController < ApplicationController
 
   # Display comment by itself.
   # Linked from: show_observation, list_comments
-  # Inputs: params[:id] (comment), session['user']
+  # Inputs: params[:id] (comment)
   # Outputs: @comment, @user
   def show_comment
     store_location
-    @user = session['user']
     @comment = Comment.find(params[:id])
   end
 
@@ -80,7 +79,6 @@ class CommentController < ApplicationController
   #   params[:id] (observation)
   #   params[:comment][:summary]
   #   params[:comment][:comment]
-  #   session['user']
   # Success:
   #   Redirects to show_observation.
   # Failure:
@@ -89,7 +87,6 @@ class CommentController < ApplicationController
   def add_comment
     if verify_user()
       pass_seq_params()
-      @user = session['user']
       @observation = Observation.find(params[:id])
       if request.method == :get
         @comment = Comment.new
@@ -115,14 +112,12 @@ class CommentController < ApplicationController
   #   params[:id]
   #   params[:comment][:summary]
   #   params[:comment][:comment]
-  #   session['user']
   # Success:
   #   Redirects to show_comment.
   # Failure:
   #   Renders edit_comment again.
   #   Outputs: @comment, @observation, @user
   def edit_comment
-    @user = session['user']
     @comment = Comment.find(params[:id])
     @observation = @comment.observation if @comment
     if !check_user_id(@comment.user_id)
@@ -141,10 +136,9 @@ class CommentController < ApplicationController
   # Callback to destroy a comment.
   # Linked from: show_comment, show_observation
   # Redirects to show_observation.
-  # Inputs: params[:id], session['user']
+  # Inputs: params[:id]
   # Outputs: none
   def destroy_comment
-    @user = session['user']
     @comment = Comment.find(params[:id])
     if !check_user_id(@comment.user_id)
       render :action => 'show_comment'

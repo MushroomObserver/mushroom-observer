@@ -101,9 +101,11 @@ end
 #
 #    translate_menu(menu)         Translate keys in select-menu's options.
 #
-#    autologin
-#    set_autologin_cookie(user)
-#    clear_autologin_cookie
+#    autologin                    Before filter that logs user in automatically.
+#    set_autologin_cookie(user)   Set autologin cookie.
+#    clear_autologin_cookie       Clear autologin cookie.
+#    set_session_user(user)       Store user in session (ID only).
+#    get_session_user             Retrieve user from session.
 #
 #  Private methods:
 #
@@ -144,7 +146,7 @@ class ApplicationController < ActionController::Base
 
   # Filter that should run before everything else.  Checks for auto-login cookie.
   def autologin
-    if @user = session['user']
+    if @user = get_session_user
       # Do nothing if already logged in: if user asked us to remember him the
       # cookie will already be there, if not then we want to leave it out.
       @user.reload if @user.id != 0
@@ -153,7 +155,7 @@ class ApplicationController < ActionController::Base
     elsif (cookie = cookies[:mo_user])  &&
           (split = cookie.split("_")) &&
           (user = User.find(:first, :conditions => ['id = ? and password = ?', split[0], split[1]]))
-      @user = session['user'] = user
+      @user = set_session_user(user)
 
       # Reset cookie to push expiry forward.  This way it will continue to
       # remember the user until they are inactive for over a month.  (Else
@@ -176,6 +178,28 @@ class ApplicationController < ActionController::Base
 
   def clear_autologin_cookie
     cookies.delete :mo_user
+  end
+
+  # Store user in session (ID only).
+  def set_session_user(user)
+    session[:user_id] = user ? user.id : nil 
+    return user
+  end
+
+  # Retrieve currently logged in user from session, if any.
+  # Returns User object or nil.
+  def get_session_user
+    id = session[:user_id]
+    id.nil? ? nil : id != 0 || !TESTING ? User.find(id) : begin
+      # (for some reason I can't add this to the test fixtures)
+      user = User.new
+      user.login = 'root'
+      user.name = 'root'
+      user.verified = Time.now
+      user.email = 'root@blah.com'
+      user.id = 0
+      user
+    end
   end
 
   def make_table_row(list)
@@ -382,8 +406,7 @@ class ApplicationController < ActionController::Base
     result["alternate_rows"] = true
     result["alternate_columns"] = true
     result["vertical_layout"] = true
-    user = session['user']
-    if user
+    if user = get_session_user
       result["rows"] = user.rows if user.rows
       result["columns"] = user.columns if user.columns
       result["alternate_rows"] = user.alternate_rows
@@ -441,14 +464,14 @@ class ApplicationController < ActionController::Base
 
   helper_method :check_permission
   def check_permission(user_id)
-    user = session['user']
-    !user.nil? && user.verified && ((user_id == session['user'].id) || (session['user'].id == 0))
+    user = get_session_user
+    !user.nil? && user.verified && ((user_id == user.id) || (user.id == 0))
   end
 
   def verify_user()
     result = false
-    if session['user'].verified.nil?
-      redirect_to :controller => 'account', :action=> 'reverify', :id => session['user'].id
+    if get_session_user.verified.nil?
+      redirect_to :controller => 'account', :action=> 'reverify', :id => get_session_user.id
     else
       result = true
     end
@@ -519,11 +542,9 @@ class ApplicationController < ActionController::Base
   #   params[:chosen_approved_names]      ?
   #   params[:approved_deprecated_names]  ?
   #   params[:checklist_data]             ?
-  #   session['user']                     (needed to resolve observation names)
   # Returns: NameSorter object
   def setup_sorter(params, species_list, list)
     sorter = NameSorter.new
-    user = session['user']
 
     # Seems like valid selections should take precedence over multiple names,
     # but I haven't constructed a lot of examples.  If it makes more sense for multiples
@@ -843,7 +864,7 @@ class ApplicationController < ActionController::Base
     store_search_state(search_state)
 
     store_location
-    @user = session['user']
+    @user = get_session_user
     @layout = calc_layout_params
     @links = links
     @title = search_state.title
@@ -867,7 +888,7 @@ class ApplicationController < ActionController::Base
     session[:observation_ids] = nil if session[:observation_ids]
     session[:observation] = nil if session[:observation]
     session[:image_ids] = nil if session[:image_ids]
-    @user = session['user']
+    @user = get_session_user
   end
 
   # Unfortunately the conditions are currently raw SQL that require knowledge of the

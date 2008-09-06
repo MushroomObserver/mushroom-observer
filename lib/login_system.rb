@@ -46,7 +46,8 @@ module LoginSystem
       return true
     end
 
-    if session['user'] and authorize?(session['user'])
+    user = get_session_user
+    if user and authorize?(user)
       # This merges parameters in flash[:params] into params structure.
       # See account controller login and hide_params methods for more info.
       if flash[:params]

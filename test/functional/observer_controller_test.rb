@@ -219,7 +219,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     # login as rolf
     user = User.authenticate("rolf", "testpassword")
     assert(user)
-    @request.session['user'] = user
+    @request.session[:user_id] = user.id
 
     # ensure that rolf owns @obs_with_no_opinion
     assert(user == @strobilurus_diminutivus_obs.user)
@@ -302,11 +302,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate("rolf", "testpassword")
     assert(user)
-    session['user'] = user
+    session[:user_id] = user.id
     get(page) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "list_observations")
     user.id = 0 # Make user the admin
-    session['user'] = user
+    session[:user_id] = user.id
     get_with_dump(page)
     assert_response :success
     assert_template page.to_s
@@ -341,12 +341,12 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate("rolf", "testpassword")
     assert(user)
-    session['user'] = user
+    session[:user_id] = user.id
     get(page, params) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
     assert_equal("Only the admin can send feature mail.", flash[:notice])
     user.id = 0 # Make user the admin
-    session['user'] = user
+    session[:user_id] = user.id
     get(page, params) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "users_by_name")
   end
@@ -384,11 +384,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "account", :action => "login")
     user = User.authenticate("rolf", "testpassword")
     assert(user)
-    session['user'] = user
+    session[:user_id] = user.id
     get(page) # Exepct redirect
     assert_redirected_to(:controller => "observer", :action => "list_observations")
     user.id = 0 # Make user the admin
-    session['user'] = user
+    session[:user_id] = user.id
     get_with_dump(page)
     assert_response :success
     assert_template page.to_s
