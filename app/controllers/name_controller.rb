@@ -311,8 +311,10 @@ class NameController < ApplicationController
           name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
           name.notes = params[:name][:notes]
           for n in names
-            n.user_id = @user.id
-            n.save
+            if n
+              n.user_id = @user.id
+              n.save
+            end
           end
         end
         redirect_to :action => 'show_name', :id => name

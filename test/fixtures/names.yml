@@ -498,3 +498,31 @@ lentinellus_ursinus_author2:
   display_name: **__Lentinellus ursinus__** Kuhner
   observation_name: **__Lentinellus ursinus__** Kuhner
   search_name: Lentinellus ursinus Kuhner
+
+# Genus with correct author
+macrocybe_pegler:
+  id: 37
+  created: 2008-09-05 22:30:00
+  modified: 2008-09-05 22:30:00
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Macrocybe
+  author: (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  display_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  observation_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  search_name: Macrocybe sp.
+
+# Genus with incorrect author
+macrocybe_titans:
+  id: 38
+  created: 2008-09-05 22:30:00
+  modified: 2008-09-05 22:30:00
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Macrocybe
+  author: Titans
+  display_name: **__Macrocybe__** Titans
+  observation_name: **__Macrocybe__** Titans
+  search_name: Macrocybe sp.

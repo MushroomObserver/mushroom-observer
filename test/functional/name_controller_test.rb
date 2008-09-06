@@ -170,6 +170,28 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(count, Name.find(:all).length)
   end
 
+  def test_create_name_author_conflict
+    text_name = "Macrocybe crassa"
+    name = Name.find_by_text_name(text_name)
+    assert_nil(name)
+    params = {
+      :name => {
+        :text_name => text_name,
+        :author => "",
+        :rank => :Species,
+        :citation => "",
+        :notes => ""
+      }
+    }
+    post_requires_login(:create_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    assert_equal(20, @rolf.reload.contribution)
+    name = Name.find_by_text_name(text_name)
+    assert(name)
+    assert_equal(text_name, name.text_name)
+    assert_equal(@rolf, name.user)
+  end
+
   # ----------------------------
   #  Edit name.
   # ----------------------------

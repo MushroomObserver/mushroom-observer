@@ -309,7 +309,8 @@ class Name < ActiveRecord::Base
 
   # Parses a string, creates a Name for it and all its ancestors (if any don't
   # already exist), returns it in an array (genus first, then species and
-  # variety).  (Ancestors only go back to genus at the moment; I'm not sure
+  # variety).  If there is ambiguity (due to different authors), then nil
+  # is returned in that slot.  (Ancestors only go back to genus at the moment; I'm not sure
   # this will ever change for this routine, as it is purely mechanical.)
   # Note: check if any results are missing an id to determine which are new.
   # Returns: array of Name instances, NOT SAVED! (both new names and pre-

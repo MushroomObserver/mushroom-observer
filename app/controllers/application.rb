@@ -416,12 +416,14 @@ class ApplicationController < ActionController::Base
         flash_error "Unable to create the name '#{output_what}'."
       else
         for n in names
-          if n.id # (if it has an id it already exists)
-            PastName.check_for_past_name(n, user, "Updated by #{user.login}.")
-          else # (if it doesn't have an id it is new)
-            n.user = user
+          if n
+            if n.id # (if it has an id it already exists)
+              PastName.check_for_past_name(n, user, "Updated by #{user.login}.")
+            else # (if it doesn't have an id it is new)
+              n.user = user
+            end
+            n.save
           end
-          n.save
         end
       end
       result = names.last
