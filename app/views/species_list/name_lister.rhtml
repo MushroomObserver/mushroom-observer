@@ -18,34 +18,6 @@
  <%= textilize(:name_lister_bad_browser.l) %>
 <% else %>
 
-<style type="text/css"><!--
-  table.scroller th {
-    font-size: 120%;
-  }
-  div.scroller {
-    color: black;
-    background: white;
-    height: 450px;
-    overflow: auto;
-    margin: 0;
-    border: 1px solid #888;
-    padding: 0;
-    font-style: italic;
-  }
-  div.scroller ul {
-    margin: 0;
-    border: 0;
-    padding: 0;
-    list-style-type: none;
-  }
-  div.scroller li {
-    padding: 0px 5px 0px 5px;
-  }
-  div.scroller span.normal {
-    font-style: normal;
-  }
---></style>
-
 <table cols="3" width="100%" class="scroller">
  <tr>
   <th width="20%"><%= :name_lister_genera.l %></th>
@@ -94,7 +66,7 @@
   nl_initialize_names();
   nl_draw('g', NL_GENERA);
   nl_draw('n', NL_NAMES);
-  Event.observe(document, 'keypress', nl_key);
+  Event.observe(document, 'keydown', nl_keydown);
   Event.observe(document, 'click', nl_unfocus);
 ) %>
 

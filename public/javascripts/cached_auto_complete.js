@@ -127,6 +127,8 @@ var CachedAutocompleter = Class.create(base, {
     // Token stuff doesn't seem to work right -- this seems to disable it.
     this.tokenBounds = [-1];
     this.updateElement(this.getCurrentEntry());
+    if (this.options.collapse && this.element.value.indexOf(' ') < 0)
+      this.oldElementValue = this.element.value += ' ';
     this.getUpdatedChoices();
   },
 

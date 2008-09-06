@@ -65,9 +65,10 @@ function nd(s, i) {
     nl_remove_name(NL_NAMES[i]);
 }
 
+
 // Called when user presses a key.  We keep track of where user is typing by
 // updating NL_FOCUS (value is 'g', 's' or 'n').
-function nl_key(event) {
+function nl_keydown(event) {
 
   // Cursors, etc. must be explicitly focused to work.  (Otherwise you can't
   // use them to navigate through the page as a whole.)
