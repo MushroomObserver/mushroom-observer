@@ -35,3 +35,5 @@ TESTING = false
 QUEUE_EMAIL = true
 EMAIL_PER_MINUTE = 25
 QUEUE_DELAY = 5.seconds
+
+require 'ruby-debug'
