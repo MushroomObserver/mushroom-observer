@@ -218,10 +218,19 @@ class NameController < ApplicationController
         end
       end
 
-      @search_seqs = {
-        "consensus" => calc_search(:name_observations, "o.name_id = %s" % params[:id], "o.vote_cache desc, o.when desc").key,
-        "synonym" => calc_search(:synonym_observations, "o.name_id in (%s)" % synonym_ids.join(", "), "o.vote_cache desc, o.when desc").key,
-        "other" => calc_search(:other_observations, "g.name_id = %s" % params[:id], "g.vote_cache desc, o.when desc").key }
+      @search_seqs = {}
+      if @consensus_data.length > 0
+        @search_seqs["consensus"] = calc_search(:name_observations,
+          "o.name_id = %s" % params[:id], "o.vote_cache desc, o.when desc").key
+      end
+      if @synonym_data.length > 0
+        @search_seqs["synonym"] = calc_search(:synonym_observations,
+          "o.name_id in (%s)" % synonym_ids.join(", "), "o.vote_cache desc, o.when desc").key
+      end
+      if @other_data.length > 0
+        @search_seqs["other"] = calc_search(:other_observations,
+          "g.name_id = %s" % params[:id], "g.vote_cache desc, o.when desc").key
+      end
       #consensus_search = SearchState.new(session, params, :name_observations, logger)
       #if not consensus_search.setup?
       #  consensus_search.setup(nil, , :nothing)
