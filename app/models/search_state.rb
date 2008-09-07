@@ -1,18 +1,96 @@
-class SearchState
+#
+#  See docs at top of SequenceState class for usage, valid query_types, and
+#  other information.  These two classes are meant to work cosely together.
+#  
+#  Attributes in database:
+#    query_type          Query type, e.g. :image.
+#    title               Title to use in view.
+#    conditions          SQL conditions.
+#    order               SQL order.
+#    source              Goes in session[:checklist_source]
+#    access_count        Number of times used.
+#    timestamp           Last time used.
+#  
+#  Instance vars:
+#    @cache              Simple list of object ids (integers).
+#    @start_index        Index of first object in cache.
+#    @count              Number of objects in cache.  (Same as @cache.length.)
+#    @has_full_cache     Does cache contain entire query?
+#    @logger             Optional logger.
+#  
+#  Model methods:
+#    SearchState.lookup(params, query_type, logger)
+#                            Look up a search state, creating one if necessary.
+#    state.setup(title, conditions, order, source)
+#                            Set the standard options.
+#    state.setup?            Has this state been set up yet?
+#                              (just checks if title has been set)
+#    state.query             Create SQL query given options set in setup.
+#    state.log(message)      Add debug message to server log (given in lookup).
+#    SearchState.cleanup     Clean out old states.
+# 
+################################################################################
 
-  attr_accessor :title
-  attr_accessor :conditions
-  attr_accessor :order
-  attr_accessor :source
-  attr_accessor :timestamp
-  attr_accessor :key
-  attr_accessor :access_count
-  attr_reader :query_type
+class SearchState < ActiveRecord::Base
 
+  def self.lookup(params, query_type=:rss_logs, logger=nil)
+    # Look up existing state.
+    if id = params[:search_seq]
+      state = self.find(id)
+      state.timestamp = Time.now
+      state.access_count += 1
+    # Create new state.
+    else
+      self.cleanup
+      state = self.new
+      state.title = nil
+      if (query_type == :images) and params[:obs]
+        state.conditions = "o.id = %d" % params[:obs].to_i
+      else
+        state.conditions = nil
+      end
+      state.order = nil
+      state.source = nil
+      state.query_type = query_type
+      state.timestamp = Time.now
+      state.access_count = 0
+    end
+    @logger = logger
+    return state
+  end
+
+  # Add debug message to system log.  (logger provided to +lookup+)
+  def log(msg)
+    @logger.warn(msg) if @logger
+  end
+
+  # For backward compatibility: wrap this attribute so it returns a symbol.
+  def query_type
+    val = super
+    val = nil if val == ''
+    val = val.to_sym if val.is_a?(String)
+    return val
+  end
+
+  # Has this state been set up yet?  (just checks if +title+ has been set)
+  def setup?()
+    self.title && (self.title != '')
+  end
+
+  # Provide query parameters to new search state.
+  def setup(title, conditions, order, source)
+    self.title = title
+    conditions = nil if conditions == ''
+    self.conditions = conditions
+    self.order = order
+    self.source = source
+  end
+
+  # Build SQL statement for this search.
   def query()
     result = nil
-    order = @order
-    case @query_type
+    order = self.order
+    case self.query_type
     when :species_list_observations
       result = %(
         SELECT o.id, n.search_name
@@ -54,91 +132,27 @@ class SearchState
         from images i, images_observations io, observations o, names n
         where i.id = io.image_id and o.id = io.observation_id and n.id = o.name_id"
       order = order || "i.id"
-    else
+    when :rss_logs
       result = "select observation_id as id, modified from rss_logs where observation_id is not null and " +
                "modified is not null"
+    else
+      raise(ArgumentError, "Missing or invalid query type: \"#{self.query_type}\"")
     end
-    order = order || "'modified' desc"
-    result += " and (#{@conditions})" if @conditions
+    order = order || "modified desc"
+    result += " and (#{self.conditions})" if self.conditions
     result + " order by #{order}"
   end
-  
-  def initialize(session, params, query_type=:rss_logs, logger=nil)
-    session_state = session[:search_states]
-    key = params[:search_seq]
-    @timestamp = Time.now.to_i
-    if key.nil? # Need a new key
-      key = 0
-      if session_state
-        if session_state[:count]
-          key = session_state[:count].to_i + 1
-        end
-        session_state[:count] = key
-      end
-    end
-    @key = key.to_s
-    @logger = logger
-    @conditions = nil
-    @order = nil
-    # I'm sure there's a more rubyish way to the following
-    key_state = session_state && session_state[key]
-    if key_state
-      @title = key_state[:title]
-      if key_state[:conditions] && (key_state[:conditions] != '')
-        @conditions = key_state[:conditions]
-      end
-      @order = key_state[:order]
-      @source = key_state[:source]
-      @query_type = key_state[:query_type]
-      @logger.warn("SearchState.initialize: #{query_type}, #{@query_type}") if @logger
-      @access_count = (key_state[:access_count] || 0) + 1
-    else
-      @title = nil
-      @conditions = nil
-      if (query_type == :images) and params[:obs]
-        @conditions = "o.id = %s" % params[:obs]
-      end
-      @order = nil
-      @source = nil
-      @query_type = query_type
-      @access_count = 0
-    end
-    if logger
-      if session_state
-        if session_state[key]
-          for (key, value) in session_state[key]
-            logger.warn("SearchState.initialize: key: #{key}, value: #{value}")
-          end
-        else
-          logger.warn("SearchState.initialize: No search states matching #{key} found")
-        end
-      else
-        logger.warn("SearchState.initialize: No search states found")
-      end
-    end
-  end
 
-  def setup?()
-    @title && (@title != '')
-  end
-  
-  def setup(title, conditions, order, source)
-    @title = title
-    conditions = nil if conditions == ''
-    @conditions = conditions
-    @order = order
-    @source = source
-  end
-  
-  def session_data()
-    {
-      :title => @title,
-      :conditions => @conditions,
-      :order => @order,
-      :source => @source,
-      :query_type => @query_type,
-      :access_count => @access_count,
-      :timestamp => @timestamp,
-    }
+  # Only keep unused states around for an hour, and used states for a day.
+  # This goes through the whole lot, and destroys old ones.
+  def self.cleanup
+    now = Time.now
+    for state in self.find(:all)
+      age = now - state.timestamp
+      count = state.access_count.to_i
+      unless (age < 1.hour) || ((count > 0) && (age < 24.hours))
+        state.destroy
+      end
+    end
   end
 end

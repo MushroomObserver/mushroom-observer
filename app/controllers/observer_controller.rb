@@ -375,9 +375,9 @@ class ObserverController < ApplicationController
     seq_key = params[:seq_key]
     if seq_key.nil?
       params[:obs] = params[:id]
-      state = SequenceState.new(session, params, Observation.connection, :rss_logs, logger)
-      store_seq_state(state) # Add key and timestamp
-      seq_key = state.key
+      state = SequenceState.lookup(params, :rss_logs, logger)
+      state.save # Add key and timestamp
+      seq_key = state.id
     end
     store_location # Is this doing anything useful since there is no user check for this page?
     pass_seq_params()
@@ -425,12 +425,13 @@ class ObserverController < ApplicationController
 
   # Go to next observation: renders show_observation.
   def next_observation
-    state = SequenceState.new(session, params, Observation.connection, :observations, logger)
+    state = SequenceState.lookup(params, :observations, logger)
     state.next()
-    store_seq_state(state) # Add key and timestamp
+    state.save # Add key and timestamp
     id = state.current_id
     if id
-      redirect_to(:action => 'show_observation', :id => id, :search_seq => params[:search_seq], :seq_key => state.key)
+      redirect_to(:action => 'show_observation', :id => id,
+        :search_seq => params[:search_seq], :seq_key => state.id)
     else
       redirect_to(:action => 'list_rss_logs')
     end
@@ -438,12 +439,13 @@ class ObserverController < ApplicationController
 
   # Go to previous observation: renders show_observation.
   def prev_observation
-    state = SequenceState.new(session, params, Observation.connection, :observations, logger)
+    state = SequenceState.lookup(params, :observations, logger)
     state.prev()
-    store_seq_state(state)
+    state.save
     id = state.current_id
     if id
-      redirect_to(:action => 'show_observation', :id => id, :seq_key => state.key)
+      redirect_to(:action => 'show_observation', :id => id,
+        :search_seq => params[:search_seq], :seq_key => state.id)
     else
       redirect_to(:action => 'list_rss_logs')
     end
@@ -1094,12 +1096,12 @@ class ObserverController < ApplicationController
   # left-hand panel -> list_rss_logs.rhtml
   def list_rss_logs
     # Not exactly sure how this ties into SearchStates
-    search_state = SearchState.new(session, params, :rss_logs, logger)
+    search_state = SearchState.lookup(params, :rss_logs, logger)
     unless search_state.setup?
       search_state.setup("Activity Log", nil, "modified desc", :nothing)
     end
-    store_search_state(search_state)
-    @search_seq = search_state.key
+    search_state.save
+    @search_seq = search_state.id
 
     store_location
     @layout = calc_layout_params

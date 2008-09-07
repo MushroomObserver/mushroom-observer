@@ -118,8 +118,6 @@ end
 #    get_matching_ui_locale(locale)
 #
 #    pass_seq_params()
-#    store_seq_state(state)
-#    store_search_state(state)
 #    calc_search(type, conditions, order)
 #    calc_search_params
 #
@@ -271,21 +269,48 @@ class ApplicationController < ActionController::Base
 
 ################################################################################
 
+  # Paginate a list which is implicitly created using the given SQL query.
+  # Returns a list of "pages" and objects themselves.
+  #
+  # *NOTE*: The objects returned are NOT actually proper object instances --
+  # they are merely wrappers masquerading as objects.  If your query incudes
+  # multiple tables, all the values selected get crammed into the list of
+  # attributes for +model+.  For example, if you are paginating observations
+  # and including the user and name: 
+  # 
+  #   [pages, objs] = paginate_by_sql(Observation, %(
+  #     SELECT o.*, u.login, n.search_name, n.deprecated
+  #     FROM observations o, users u, names, n
+  #     WHERE u.id = o.user_id AND n.id = o.name_id AND etc.
+  #   ), 50)
+  #
+  #   for obj in objs
+  #     obj.when            These observation attributes are as expected.
+  #     obj.what
+  #     obj.where
+  #     obj.notes
+  #     obj.login           This attribute comes from users.
+  #     obj.search_name     These attributes come from names.
+  #     obj.deprecated
+  #   end
+  #
+  # Yikes!  Not exactly what I'd call Principle of Least Surprise...
+  # See ActiveRecord::Base#find_by_sql for more information.
   def paginate_by_sql(model, sql, per_page, options={})
     if options[:count]
-        if options[:count].is_a? Integer
-            total = options[:count]
-        else
-            total = model.count_by_sql(options[:count])
-        end
+      if options[:count].is_a? Integer
+        total = options[:count]
+      else
+        total = model.count_by_sql(options[:count])
+      end
     else
-        total = model.count_by_sql_wrapping_select_query(sql)
+      total = model.count_by_sql_wrapping_select_query(sql)
     end
 
     object_pages = Paginator.new self, total, per_page,
-         params['page']
+      params['page']
     objects = model.find_by_sql_with_limit(sql,
-         object_pages.current.to_sql[1], per_page)
+      object_pages.current.to_sql[1], per_page)
     return [object_pages, objects]
   end
 
@@ -790,85 +815,21 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # session[:seq_states]
-  #  :count => Number of numeric keys allocated (used to allocate new ones)
-  #  <number> => State for a particular search
-  #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
-  # Use cases:
-  #   Multiple tabs, back button
-  # Only purge if a new state is being added
-  # Keep any state that is less than 1 hour old.
-  # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
-  def store_seq_state(state)
-    now = state.timestamp
-    result = session[:seq_states]
-    if result
-      if not result.member?(state.key)
-        result = {:count => result[:count]}
-        for (key, value) in session[:seq_states]
-          timestamp = value[:timestamp] || 0
-          age = now - timestamp
-          count = value[:access_count] || 0
-          if (age < 1.hour) || ((count > 0) && (age < 24.hours))
-            result[key] = value
-          end
-        end
-      end
-    else
-      result = {:count => 0}
-    end
-    state.timestamp = now
-    result[state.key] = state.session_data()
-    session[:seq_states] = result
-  end
-
-  # session[:search_states]
-  #  :count => Number of numeric keys allocated (used to allocate new ones)
-  #  <number> => State for a particular search
-  #         [:current_id, :current_index, :next_id, :prev_id, :timestamp, :count]
-  # Use cases:
-  #   Multiple tabs with different searches, back button
-  # Only purge if a new state is being added
-  # Keep any state that is less than 1 hour old.
-  # Keep any state with :count > 0 whose timestamp is less than 24 hours ago.
-  def store_search_state(state)
-    now = state.timestamp
-    result = session[:search_states]
-    if result
-      if not result.member?(state.key)
-        result = {:count => result[:count]}
-        for (key, value) in session[:search_states]
-          timestamp = value[:timestamp] || 0
-          age = now - timestamp
-          count = value[:access_count] || 0
-          if (age < 1.hour) || ((count > 0) && (age < 24.hours))
-            result[key] = value
-          end
-        end
-      end
-    else
-      result = {:count => 0}
-    end
-    state.timestamp = now
-    result[state.key] = state.session_data()
-    session[:search_states] = result
-  end
-
   # If provided, link should be the arguments for link_to as a list of lists,
   # e.g. [[:action => 'blah'], [:action => 'blah']]
   def show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
-    search_state = SearchState.new(session, params, obj_type, logger)
+    search_state = SearchState.lookup(params, obj_type, logger)
     unless search_state.setup?
       search_state.setup(title, conditions, order, source)
     end
-    store_search_state(search_state)
+    search_state.save
 
     store_location
     @user = get_session_user
     @layout = calc_layout_params
     @links = links
     @title = search_state.title
-    @search_seq = search_state.key
+    @search_seq = search_state.id
     query = search_state.query
     session[:checklist_source] = search_state.source
     session_setup
@@ -881,7 +842,7 @@ class ApplicationController < ActionController::Base
     session[:observation] = nil
 
     @obj_pages, @objs = paginate_by_sql(type, query, @layout["count"])
-    render :action => dest # 'list_observations'
+    render(:action => dest) # 'list_observations'
   end
 
   def session_setup
@@ -894,11 +855,11 @@ class ApplicationController < ActionController::Base
   # Unfortunately the conditions are currently raw SQL that require knowledge of the
   # queries in SearchState.query...
   def calc_search(type, conditions, order)
-    search = SearchState.new(session, params, type)
+    search = SearchState.lookup(session, params, type)
     if not search.setup?
       search.setup(nil, conditions, order, :nothing)
     end
-    store_search_state(search)
+    search.save
     search
   end
 

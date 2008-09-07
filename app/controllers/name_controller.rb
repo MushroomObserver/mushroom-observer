@@ -221,22 +221,22 @@ class NameController < ApplicationController
       @search_seqs = {}
       if @consensus_data.length > 0
         @search_seqs["consensus"] = calc_search(:name_observations,
-          "o.name_id = %s" % params[:id], "o.vote_cache desc, o.when desc").key
+          "o.name_id = %s" % params[:id], "o.vote_cache desc, o.when desc").id
       end
       if @synonym_data.length > 0
         @search_seqs["synonym"] = calc_search(:synonym_observations,
-          "o.name_id in (%s)" % synonym_ids.join(", "), "o.vote_cache desc, o.when desc").key
+          "o.name_id in (%s)" % synonym_ids.join(", "), "o.vote_cache desc, o.when desc").id
       end
       if @other_data.length > 0
         @search_seqs["other"] = calc_search(:other_observations,
-          "g.name_id = %s" % params[:id], "g.vote_cache desc, o.when desc").key
+          "g.name_id = %s" % params[:id], "g.vote_cache desc, o.when desc").id
       end
-      #consensus_search = SearchState.new(session, params, :name_observations, logger)
+      #consensus_search = SearchState.lookup(params, :name_observations, logger)
       #if not consensus_search.setup?
       #  consensus_search.setup(nil, , :nothing)
       #end
-      #store_search_state(consensus_search)
-      #@search_seqs = { "consensus" => consensus_search.key }
+      #consensus_search.save
+      #@search_seqs = { "consensus" => consensus_search.id }
 
       # Remove duplicates. (Select block sets seen[id] to true and returns true
       # for the first occurrance of an id, else implicitly returns false.)

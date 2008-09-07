@@ -29,6 +29,8 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :naming_reasons
   fixtures :locations
   fixtures :notifications
+  fixtures :search_states
+  fixtures :sequence_states
 
   def setup
     @controller = ObserverController.new
@@ -113,7 +115,17 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_next_observation
     # Uses default observation query
     get_with_dump :next_observation, :id => 2
-    assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 1)
+    id = SequenceState.find(:all).last.id
+    assert_redirected_to(:controller => "observer", :action => "show_observation",
+      :id => 1, :search_seq => nil, :seq_key => id)
+  end
+
+  def test_prev_observation
+    # Uses default observation query
+    get_with_dump :prev_observation, :id => 2
+    id = SequenceState.find(:all).last.id
+    assert_redirected_to(:controller => "observer", :action => "show_observation",
+      :id => 3, :search_seq => nil, :seq_key => id)
   end
 
   def test_observations_by_name
@@ -167,12 +179,6 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump(:location_search, params)
     assert_response :success
     assert_template "list_observations"
-  end
-
-  def test_prev_observation
-    # Uses default observation query
-    get_with_dump :prev_observation, :id => 2
-    assert_redirected_to(:controller => "observer", :action => "show_observation", :id => 3)
   end
 
   def test_rss

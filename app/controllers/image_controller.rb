@@ -191,22 +191,21 @@ class ImageController < ApplicationController
       flash_warning("No new image found")
       new_image = current_image
     end
-    store_seq_state(state)
-    redirect_to :action => 'show_image', :id => new_image, :seq_key => state.key
+    state.save
+    redirect_to :action => 'show_image', :id => new_image, :seq_key => state.id
   end
 
   def inc_image(func_name, direction) # direction is 1 or -1 depending on if we're doing next or prev
-    start = Time.now.to_f
-    state = SequenceState.new(session, params, Image.connection, :images, logger)
+    state = SequenceState.lookup(params, :images, logger)
     inc_func = state.method(func_name)
     pass_seq_params()
     case state.query_type
     when :images
       inc_func.call()
-      store_seq_state(state) # Add key and timestamp
+      state.save # Add key and timestamp
       id = state.current_id
       if id
-        redirect_to(:action => 'show_image', :id => id, :seq_key => state.key, :start => start)
+        redirect_to(:action => 'show_image', :id => id, :seq_key => state.id)
       else
         redirect_to(:action => 'list_rss_logs')
       end

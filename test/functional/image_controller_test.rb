@@ -48,16 +48,14 @@ class ImageControllerTest < Test::Unit::TestCase
   end
 
   def test_next_image_ss
-    state = SequenceState.new({}, {}, Image.connection, :images)
+    state = SequenceState.lookup({}, :images)
     state.next()
     state.next()
     next_id = state.current_id
     state.prev()
-    seq_states = {}
-    seq_states[state.key] = state.session_data()
-    @request.session[:seq_states] = seq_states
+    state.save
     params = {
-      :seq_key => state.key,
+      :seq_key => state.id,
       :id => state.current_id
     }
     get_with_dump :next_image, params
@@ -66,30 +64,27 @@ class ImageControllerTest < Test::Unit::TestCase
 
   # Test next_image in the context of a search
   def test_next_image_search
-    search_state = SearchState.new({}, {}, :images)
-    search_state.setup('Title', @controller.field_search(["n.search_name", "i.notes", "i.copyright_holder"], "%Notes%"),
+    search_state = SearchState.lookup({}, :images)
+    search_state.setup('Title', @controller.field_search(["n.search_name",
+      "i.notes", "i.copyright_holder"], "%Notes%"),
       "n.search_name, `when` desc", :nothing)
-    search_states = {}
-    search_states[search_state.key] = search_state.session_data()
-    @request.session[:search_states] = search_states
+    search_state.save
     params = {
-      :search_seq => search_state.key
+      :search_seq => search_state.id
     }
-    state = SequenceState.new(@request.session, params, Image.connection, :images)
-
+    state = SequenceState.lookup(params, :images)
     state.prev() # Really go to the start of the list
     state.next() # Peek ahead
     next_id = state.current_id
     state.prev() # Go back
-    seq_states = {}
-    seq_states[state.key] = state.session_data()
-    @request.session[:seq_states] = seq_states
+    state.save
     params = {
-      :seq_key => state.key,
+      :seq_key => state.id,
       :id => state.current_id
     }
     get_with_dump :next_image, params # Now try it for real
-    assert_redirected_to(:controller => "image", :action => "show_image", :id => next_id)
+    assert_redirected_to(:controller => "image", :action => "show_image",
+      :id => next_id, :seq_key => state.id)
   end
 
   def test_prev_image
@@ -98,15 +93,13 @@ class ImageControllerTest < Test::Unit::TestCase
   end
 
   def test_prev_image_ss
-    state = SequenceState.new({}, {}, Image.connection, :images)
+    state = SequenceState.lookup({}, :images)
     state.next()
     prev_id = state.current_id
     state.next()
-    seq_states = {}
-    seq_states[state.key] = state.session_data()
-    @request.session[:seq_states] = seq_states
+    state.save
     params = {
-      :seq_key => state.key,
+      :seq_key => state.id,
       :id => state.current_id
     }
     get_with_dump :prev_image, params
@@ -143,7 +136,7 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'list_images'
   end
-  
+
   def test_image_search_by_number
     @request.session[:pattern] = "3"
     get_with_dump :image_search
