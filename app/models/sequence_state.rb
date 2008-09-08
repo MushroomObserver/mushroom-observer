@@ -253,14 +253,11 @@ class SequenceState < ActiveRecord::Base
   # Only keep unused states around for an hour, and used states for a day.
   # This goes through the whole lot, and destroys old ones.
   def self.cleanup
-    now = Time.now
-    for state in self.find(:all)
-      age = now - state.timestamp
-      count = state.access_count.to_i
-      unless (age < 1.hour) || ((count > 0) && (age < 24.hours))
-        state.destroy
-      end
-    end
+    self.connection.delete %(
+      DELETE FROM sequence_states
+      WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) AND
+            (timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY) OR access_count = 0)
+    )
   end
 
 ################################################################################
