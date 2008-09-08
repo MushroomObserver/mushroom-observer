@@ -1584,7 +1584,7 @@ class ObserverController < ApplicationController
     new_method = old_method if !new_method
     class_eval(<<-EOS)
       def #{old_method}
-        redirect_to_url rewrite_url('#{obj}', '#{old_method}', '#{new_method}')
+        redirect_to rewrite_url('#{obj}', '#{old_method}', '#{new_method}')
       end
     EOS
   end
