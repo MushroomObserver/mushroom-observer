@@ -117,8 +117,7 @@ class SequenceState < ActiveRecord::Base
   # page for list of supported types), and optional logger.
   def self.lookup(params, query_type, logger=nil)
     # Look up existing state.
-    if id = params[:seq_key]
-      state = self.find(id)
+    if (id = params[:seq_key]) and (state = self.safe_find(id))
       state.timestamp = Time.now
       state.access_count += 1
     # Create new state.
@@ -147,6 +146,15 @@ class SequenceState < ActiveRecord::Base
     @count = nil
     @logger = logger
     return state
+  end
+
+  # Lookup state with given ID, returning nil if it no longer exists.
+  def self.safe_find(id)
+    begin
+      self.find(id)
+    rescue ActiveRecord::RecordNotFound
+      nil
+    end
   end
 
   # Add debug message to system log.  (logger provided to +lookup+)

@@ -1,7 +1,7 @@
 #
 #  See docs at top of SequenceState class for usage, valid query_types, and
 #  other information.  These two classes are meant to work cosely together.
-#  
+#
 #  Attributes in database:
 #    query_type          Query type, e.g. :image.
 #    title               Title to use in view.
@@ -10,14 +10,14 @@
 #    source              Goes in session[:checklist_source]
 #    access_count        Number of times used.
 #    timestamp           Last time used.
-#  
+#
 #  Instance vars:
 #    @cache              Simple list of object ids (integers).
 #    @start_index        Index of first object in cache.
 #    @count              Number of objects in cache.  (Same as @cache.length.)
 #    @has_full_cache     Does cache contain entire query?
 #    @logger             Optional logger.
-#  
+#
 #  Model methods:
 #    SearchState.lookup(params, query_type, logger)
 #                            Look up a search state, creating one if necessary.
@@ -28,15 +28,29 @@
 #    state.query             Create SQL query given options set in setup.
 #    state.log(message)      Add debug message to server log (given in lookup).
 #    SearchState.cleanup     Clean out old states.
-# 
+#    SearchState.all_query_types
+#                            List of allowed query_type values (symbols).
+#
 ################################################################################
 
 class SearchState < ActiveRecord::Base
 
+  # Set of allowed query_types (used to define enum type in database).
+  def self.all_query_types
+    [
+      :species_list_observations,
+      :name_observations,
+      :synonym_observations,
+      :other_observations,
+      :observations,
+      :images,
+      :rss_logs
+    ]
+  end
+
   def self.lookup(params, query_type=:rss_logs, logger=nil)
     # Look up existing state.
-    if id = params[:search_seq]
-      state = self.find(id)
+    if (id = params[:search_seq]) and (state = self.safe_find(id))
       state.timestamp = Time.now
       state.access_count += 1
     # Create new state.
@@ -57,6 +71,15 @@ class SearchState < ActiveRecord::Base
     end
     @logger = logger
     return state
+  end
+
+  # Lookup state with given ID, returning nil if it no longer exists.
+  def self.safe_find(id)
+    begin
+      self.find(id)
+    rescue ActiveRecord::RecordNotFound
+      nil
+    end
   end
 
   # Add debug message to system log.  (logger provided to +lookup+)
