@@ -403,8 +403,6 @@ class SpeciesListController < ApplicationController
         @deprecated_names = sorter.deprecated_name_strs.uniq.sort
         @checklist_names  = {}
         @member_notes     = ''
-        # Is there a better way to give unit test access to @list_members???
-        flash[:list_members] = @list_members
         render :action => 'edit_species_list'
       end
     end
@@ -548,7 +546,7 @@ class SpeciesListController < ApplicationController
         list.push([d['observation_name'], d['id']])
       end
     end
-    session[:checklist] = list
+    # session[:checklist] = list
   end
 
   # Get list of names from species_list that are deprecated.

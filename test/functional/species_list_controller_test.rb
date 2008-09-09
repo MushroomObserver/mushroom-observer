@@ -708,6 +708,6 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert_template("edit_species_list")
     assert_equal(10, @rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
-    assert_equal(list_data, flash[:list_members])
+    assert_equal(list_data, @controller.instance_variable_get('@list_members'))
   end
 end
