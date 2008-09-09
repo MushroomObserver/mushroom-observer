@@ -127,7 +127,6 @@ end
 ################################################################################
 
 class ApplicationController < ActionController::Base
-  include ExceptionNotifiable
   include LoginSystem
 
   around_filter :set_locale
@@ -855,7 +854,7 @@ class ApplicationController < ActionController::Base
   # Unfortunately the conditions are currently raw SQL that require knowledge of the
   # queries in SearchState.query...
   def calc_search(type, conditions, order)
-    search = SearchState.lookup(session, params, type)
+    search = SearchState.lookup(params, type)
     if not search.setup?
       search.setup(nil, conditions, order, :nothing)
     end
