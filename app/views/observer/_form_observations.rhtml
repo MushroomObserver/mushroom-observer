@@ -39,6 +39,7 @@ end %>
 <% if include_images %>
   <table><tr><td>
   <%# table wrapper gets browsers to collapse the divs to fit the forms %>
+  <% @observation.thumb_image_id ||= 0 %>
 
   <% if @good_images != [] %>
     <b>Images:</b><br/>
@@ -84,11 +85,9 @@ end %>
 
   <div id="image_forms">
     <% i = 0 %>
-    <% while i <= @images.length %>
-      <%= render(:partial => 'form_image', :locals => {
-        :image => @images[i] || @new_image,
-        :index => i,
-      }) %>
+    <% @images.push(@new_image) %>
+    <% while i < @images.length %>
+      <%= render(:partial => 'form_image', :locals => { :index => i }) %>
       <% i += 1 %>
     <% end %>
   </div>
@@ -101,13 +100,14 @@ end %>
 
     <%= javascript_tag %(
       var IMAGE_FORM = "#{
-        str = render(:partial => 'form_image', :locals => {
-          :image => @new_image,
-          :index => 0,
-        })
-        str.gsub!('image_0_', 'image_<XXX>_')
-        str.gsub!('(0)', '(<XXX>)')
-        str.gsub!('[0]', '[<XXX>]')
+        i = @images.length - 1
+        str = render(:partial => 'form_image', :locals => { :index => i })
+        str.gsub!("image_#{i}_", 'image_<XXX>_')
+        str.gsub!("image_id_#{i}", 'image_id_<XXX>')
+        str.gsub!("(#{i})", '(<XXX>)')
+        str.gsub!("[#{i}]", '[<XXX>]')
+        str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-<XXX>"')
+        str.sub!("checked=\"checked\" ", '')
         str = escape_javascript(str)
         str.gsub('</script>', '</"+"script>')
       }";
@@ -130,7 +130,7 @@ end %>
         var div = $('image_'+i+'_box');
         div.style.border = '1px solid #888';
         Element.ensureVisible(div);
-        if (!CHANGED_DATES['+i+']) {
+        if (!CHANGED_DATES[i]) {
           $('image_'+i+'_when_1i').value = $('observation_when_1i').value;
           $('image_'+i+'_when_2i').value = $('observation_when_2i').value;
           $('image_'+i+'_when_3i').value = $('observation_when_3i').value;

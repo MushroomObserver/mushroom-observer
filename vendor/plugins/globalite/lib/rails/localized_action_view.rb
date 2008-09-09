@@ -78,31 +78,31 @@ module ActionView
       #   <%= f.date_select :published_date, :locale => @locale %>
       # </p>
       #
-      def date_select(object_name, method, options = {})
+      def date_select(object_name, method, options = {}, html = {})
         if options[:locale]
           @original_locale = Locale.code
           Locale.code = options[:locale]
         end 
         options.reverse_merge!( :order => :date_helper_order.l )
-        @selector = InstanceTag.new(object_name, method, self, nil, options.delete(:object)).to_date_select_tag(options)
+        @selector = InstanceTag.new(object_name, method, self, nil, options.delete(:object)).to_date_select_tag(options, html)
         Locale.code = @original_locale if options[:locale]
         return @selector
       end
 
       # Blend default options with localized :order option
       # Look at date_select for an usage example
-      def datetime_select(object_name, method, options = {})
+      def datetime_select(object_name, method, options = {}, html = {})
         if options[:locale]
           @original_locale = Locale.code
           Locale.code = options[:locale]
         end
         options.reverse_merge!( :order => :date_helper_order.l )
-        @selector = InstanceTag.new(object_name, method, self, nil, options.delete(:object)).to_datetime_select_tag(options)
+        @selector = InstanceTag.new(object_name, method, self, nil, options.delete(:object)).to_datetime_select_tag(options, html)
         Locale.code = @original_locale if options[:locale]
         return @selector
       end
 
-      def select_month(date, options = {}, html_options = {})
+      def select_month(date, options = {}, html_options = {}, html = {})
         if options[:locale]
           @original_locale = Locale.code
           Locale.code = options[:locale]
@@ -130,7 +130,7 @@ module ActionView
               %(<option value="#{month_number}">#{month_name}</option>\n)
             )
           end
-          @selector = select_html(options[:field_name] || 'month', month_options, options)
+          @selector = select_html(options[:field_name] || 'month', month_options, options, html)
         end
         Locale.code = @original_locale if options[:locale]
         return @selector

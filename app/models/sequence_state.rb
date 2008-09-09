@@ -19,19 +19,21 @@
 #  Usage:
 #    # Within controller...
 #    def index_of_users_observations
-#      @user = User.find(params[:id])
 #      # Create new search.
-#      @search_state = SearchState.lookup({:user => @user}, :user_observations)
+#      @search_state = SearchState.lookup({}, :observations)
+#      @search_state.setup("#{@user.login}'s Observations", 'observations.user_id = #{@user.id}')
 #      @search_state.save
+#
+#      # Use search to get list of results.
 #      @observations = Observation.find_by_sql(@search_state.query)
-#      render(:action => 'observation_index')
 #    end
+#
 #    def show_observation
-#      # Grab search from params[:search_seq].
-#      @search_state = SearchState.lookup(params, :default_query_type)
-#      @search_state.save
-#      # Grab sequence from params[:seq_key] (or create if not done so yet).
-#      @sequence_state = SequenceState.lookup(params, :default_query_type)
+#      # Grab sequence from params[:seq_key].  If none given, will create one
+#      # using the search_state from params[:search_seq]... if that doesn't
+#      # exist either, then it creates a default using query type (:observations).
+#      # Note, it gets current place in sequence from params[:id] -- hard-coded.
+#      @sequence_state = SequenceState.lookup(params, :observations)
 #      @sequence_state.save
 #    end
 #
@@ -40,25 +42,23 @@
 #      link_to(observation.title,
 #        :action => 'show_observation',
 #        :id => observation.id,
-#        :search_seq => @search_state.id # (pass search into show_observation)
+#        :search_seq => @search_state.id   # (pass search into show_obs)
 #      )
 #    end
 #
 #    # Within show_observation view...
 #    link_to('Prev'
 #      :action => 'show_observation',
-#      :id => @sequence_state.prev.current_id,
-#      :search_seq => @search_state.id, # (pass search into show_observation)
-#      :seq_key => @sequence_state.id   # (keep track of place within search)
+#      :id => @sequence_state.prev,
+#      :seq_key => @sequence_state.id   # (keep copy of search results)
 #    )
 #    link_to('Next'
 #      :action => 'show_observation',
-#      :id => @sequence_state.next.current_id,
-#      :search_seq => @search_state.id, # (pass search into show_observation)
-#      :seq_key => @sequence_state.id   # (keep track of place within search)
+#      :id => @sequence_state.next,
+#      :seq_key => @sequence_state.id   # (keep copy of search results)
 #    )
 #
-#  Supported query_types:
+#  Supported query_types: (see SearchState#query for details)
 #    :species_list_observations
 #    :name_observations
 #    :synonym_observations

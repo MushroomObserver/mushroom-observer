@@ -520,8 +520,10 @@ class ObserverController < ApplicationController
         success = false                    if @bad_images != []
 
         # If everything checks out save observation.
-        if success
-          success = save_observation(@observation)
+        if success &&
+          (success = save_observation(@observation))
+          flash_notice 'Observation was successfully created.'
+          @observation.log("Observation created by #{@user.login}.", true)
         end
 
         # Once observation is saved we can save everything else.
@@ -582,14 +584,23 @@ class ObserverController < ApplicationController
         @good_images = @observation.images
 
       else
-        # Upload images first.
+        # Update observation first.
+        success = update_observation_object(@observation, params[:observation])
+
+        # Now try to upload images.
         @good_images = update_good_images(params[:good_images])
         @bad_images  = create_image_objects(params[:image], @observation, @good_images)
         attach_good_images(@observation, @good_images)
 
-        # Update observation now.
-        success = update_observation_object(@observation, params[:observation],
-          (params[:log_change] ? (params[:log_change][:checked] == '1') : false))
+        # Only save observation if there are changes.
+        if success && @observation.changed?
+          @observation.modified = Time.now
+          if success = save_observation(@observation)
+            flash_notice 'Observation was successfully updated.'
+            @observation.log("Observation updated by #{@user.login}.",
+              (params[:log_change] ? (params[:log_change][:checked] == '1') : false))
+          end
+        end
 
         # Redirect to show_observation on success.
         if success && @bad_images == []
@@ -1224,11 +1235,20 @@ class ObserverController < ApplicationController
   # Save observation now that everything is created successfully.
   def save_observation(observation)
     success = true
-    if observation.save
-      flash_notice 'Observation was successfully created.'
-      observation.log("Observation created by #{@user.login}.", true)
-    else
+    if !observation.save
       flash_error "Couldn't save observation."
+      flash_object_errors(observation)
+      success = false
+    end
+    return success
+  end
+
+  # Update observation, check if valid.
+  def update_observation_object(observation, args)
+    success = true
+    observation.attributes = args
+    if !observation.valid?
+      session[:observation] = observation.id
       flash_object_errors(observation)
       success = false
     end
@@ -1245,38 +1265,6 @@ class ObserverController < ApplicationController
       flash_object_warnings(naming)
       success = false
     end
-    return success
-  end
-
-  # Update observation and log changes.
-  def update_observation_object(observation, args, log)
-    success = true
-
-    old_when = observation.when
-    old_where = observation.place_name
-    old_notes = observation.notes
-    old_thumb = observation.thumb_image_id
-    old_specimen = observation.specimen
-    old_collection = observation.is_collection_location
-
-    if !observation.update_attributes(args)
-      session[:observation] = observation.id
-      flash_object_errors(observation)
-      success = false
-
-    # Only save changes if there ARE changes!
-    elsif old_when != observation.when ||
-          old_where != observation.place_name ||
-          old_notes != observation.notes ||
-          old_thumb != observation.thumb_image_id ||
-          old_specimen != observation.specimen ||
-          old_collection != observation.is_collection_location
-      observation.modified = Time.now
-      observation.save
-      flash_notice 'Observation was successfully updated.'
-      observation.log("Observation updated by #{@user.login}.", log)
-    end
-
     return success
   end
 
@@ -1404,10 +1392,16 @@ class ObserverController < ApplicationController
           else
             flash_notice("Uploaded image " + (name ? "'#{name}'" : "##{image.id}") + '.')
             good_images.push(image)
+            if observation.thumb_image_id == -i
+              observation.thumb_image_id = image.id
+            end
           end
         end
         i += 1
       end
+    end
+    if observation.thumb_image_id && observation.thumb_image_id < 0
+      observation.thumb_image_id = nil
     end
     return bad_images
   end
