@@ -48,6 +48,16 @@ class SearchState < ActiveRecord::Base
     ]
   end
 
+  # Look up a search state.  Looks for the one referred to by
+  # params[:search_seq], or creates one if not found (e.g. culled by garbage
+  # collection).
+  #
+  # Internal note: this method must be able to create and essentially setup
+  # a fully-working query in case this is being called implicitly by
+  # SequenceState.lookup, since in that case search_state.setup cannot be
+  # called.  Thus there is a case (and presumably will be more later) in which
+  # other magic +params+ are used (params[:obs] in :image_search) to tweak the
+  # conditions.
   def self.lookup(params, query_type=:rss_logs, logger=nil)
     # Look up existing state.
     if (id = params[:search_seq]) and (state = self.safe_find(id))
@@ -58,7 +68,9 @@ class SearchState < ActiveRecord::Base
       self.cleanup
       state = self.new
       state.title = nil
-      if (query_type == :images) and params[:obs]
+      if query_type == :images
+        raise ArgumentError, "Image search missing observation ID." \
+          if !params[:obs]
         state.conditions = "o.id = %d" % params[:obs].to_i
       else
         state.conditions = nil
@@ -171,6 +183,11 @@ class SearchState < ActiveRecord::Base
   def self.cleanup
     self.connection.delete %(
       DELETE FROM search_states
+      WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) AND
+            (timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY) OR access_count = 0)
+    )
+    self.connection.delete %(
+      DELETE FROM sequence_states
       WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) AND
             (timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY) OR access_count = 0)
     )

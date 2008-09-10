@@ -73,4 +73,29 @@ class SearchStateTest < Test::Unit::TestCase
     assert_state_exists(s24)
     assert_state_not_exists(s25)
   end
+
+  def test_query_types
+    for query_type, params in [
+      [ :species_list_observations, {} ],
+      [ :name_observations, {} ],
+      [ :synonym_observations, {} ],
+      [ :other_observations, {} ],
+      [ :observations, {} ],
+      [ :images, { :obs => 2 } ],
+      [ :rss_logs, {} ]
+    ] do
+      # Create new state and save.
+      state = SearchState.lookup(params, query_type)
+      state.save
+      id = state.id
+
+      # Look it up and test.
+      params[:search_seq] = id.to_s
+      state = SearchState.lookup(params)
+      assert_equal(id, state.id)
+      assert_equal(1, state.access_count)
+      assert_equal(query_type, state.query_type)
+      assert(state.query)
+    end
+  end
 end

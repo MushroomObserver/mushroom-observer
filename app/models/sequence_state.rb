@@ -47,14 +47,17 @@
 #    end
 #
 #    # Within show_observation view...
-#    link_to('Prev'
+#    prev_id = @sequence_state.prev     # (move to previous state)
+#    cur_id  = @sequence_state.next     # (move back to current state)
+#    next_id = @sequence_state.next     # (move to next state)
+#    link_to('Prev',
 #      :action => 'show_observation',
-#      :id => @sequence_state.prev,
+#      :id => prev_id,
 #      :seq_key => @sequence_state.id   # (keep copy of search results)
 #    )
-#    link_to('Next'
+#    link_to('Next',
 #      :action => 'show_observation',
-#      :id => @sequence_state.next,
+#      :id => next_id,
 #      :seq_key => @sequence_state.id   # (keep copy of search results)
 #    )
 #
@@ -225,6 +228,8 @@ class SequenceState < ActiveRecord::Base
       prev_index = self.current_index - 1
       calc_prev = self.id_from_index(prev_index)
       result = calc_prev
+print "----------------------------------------\n"
+print "#{self.current_index}, #{prev_index}, #{calc_prev}\n"
     end
     if calc_prev == result # No change
       self.prev_id = self.id_from_index(prev_index - 1)
@@ -261,11 +266,7 @@ class SequenceState < ActiveRecord::Base
   # Only keep unused states around for an hour, and used states for a day.
   # This goes through the whole lot, and destroys old ones.
   def self.cleanup
-    self.connection.delete %(
-      DELETE FROM sequence_states
-      WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) AND
-            (timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY) OR access_count = 0)
-    )
+    SearchState.cleanup
   end
 
 ################################################################################

@@ -114,6 +114,8 @@ class AccountController < ApplicationController
           @user.last_login = @user.created
           @user.change_rows(5)
           @user.change_columns(3)
+          @user.mailing_address = ''
+          @user.notes = ''
           if @user.save
             user = User.authenticate(@user.login, params['user']['password'])
             set_session_user(user)
