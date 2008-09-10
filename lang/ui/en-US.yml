@@ -175,8 +175,8 @@ form_names_citation_help: Citation for the publication of this name.
 form_names_citation_textilize_note: Citations can be formated using the Textile markup system.
 form_names_notes: Notes
 form_names_notes_help: >
-  Please include notes about the validity of this name,<br/>
-  common misuses of the name, and more appropriate names<br/>
+  Please include notes about the validity of this name,
+  common misuses of the name, and more appropriate names
   to be used when applicable.
 
 form_names_rank: Rank
@@ -186,6 +186,31 @@ form_names_text_name_help: >
   E.g., Amanita muscara var. flavivolvata.
 
 form_names_text_name_locked: Name is in use.  Make name changes in each observation.
+
+form_names_gen_desc: General Description
+form_names_diag_desc: Diagnostic Description
+form_names_distribution: Distribution
+form_names_habitat: Habitat
+form_names_look_alikes: Look Alikes
+form_names_uses: Uses
+
+form_names_gen_desc_help: >
+  Describe the general appearance of this taxon.
+
+form_names_diag_desc_help: >
+  Describe what distinguishes this taxon from closely related taxa.
+
+form_names_distribution_help: >
+  Where geographically has this taxon been found and where is it expected to occur?
+
+form_names_habitat_help: >
+  What habitats has taxon has been found in?
+
+form_names_look_alikes_help: >
+  What other taxa look similar to this one?
+
+form_names_uses_help: >
+  How has this taxon been used by people? 
 
 
 # observer/_form_naming

@@ -48,7 +48,9 @@ class PastName < ActiveRecord::Base
     past_name.rank = name.rank
     past_name.text_name = name.text_name
     past_name.author = name.author
-    past_name.notes = name.notes
+    for f in Name.all_note_fields
+      past_name.send("#{f}=", name.send(f))
+    end
     past_name.deprecated = name.deprecated
     past_name.citation = name.citation
     past_name
@@ -62,9 +64,16 @@ class PastName < ActiveRecord::Base
     result = false
     if name.id
       old_name = Name.find(name.id)
-      if (str_cmp(name.text_name, old_name.text_name) or
+      note_field_changed = false
+      for f in Name.all_note_fields
+        if str_cmp(name.send(f), old_name.send(f))
+          note_field_changed = true
+          break
+        end
+      end
+      if (note_field_changed or
+        str_cmp(name.text_name, old_name.text_name) or
         str_cmp(name.author, old_name.author) or
-        str_cmp(name.notes, old_name.notes) or
         (name.deprecated != old_name.deprecated) or
         str_cmp(name.citation, old_name.citation) or
         str_cmp(name.rank, old_name.rank))

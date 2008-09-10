@@ -31,9 +31,17 @@
 <%= text_field 'name', 'citation', :size => 80  %><br/>
 <span class="HelpNote"><%= :form_names_citation_textilize_note.l %></span><br/><br/>
 
-<label for="name_notes"><%= :form_names_notes.l %>:</label>
-<span class="HelpNote"><%= :form_names_notes_help.l %></span><br/>
-<%= text_area 'name', 'notes', :cols => 80 %><br/>
-<%= render :partial => 'shared/textilize_help' %>
+<p>
+    <%= render :partial => 'shared/textilize_help' %>
+</p>
+<br/>
+
+<% for f in Name.all_note_fields %>
+    <p>
+        <label for="name_notes"><%= "form_names_#{f}".to_sym.l %>:</label>
+        <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l %></span><br/>
+        <%= text_area 'name', "#{f}", :cols => 80 %>
+    </p>
+<% end %>
 
 <!--[eoform:name]-->

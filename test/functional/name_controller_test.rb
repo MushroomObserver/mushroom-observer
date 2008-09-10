@@ -124,6 +124,14 @@ class NameControllerTest < Test::Unit::TestCase
   #  Create name.
   # ----------------------------
 
+  def empty_notes
+    result = {}
+    for f in Name.all_note_fields
+      result[f] = ""
+    end
+    result
+  end
+  
   def test_create_name_post
     text_name = "Amanita velosa"
     author = "Lloyd"
@@ -134,10 +142,11 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => text_name,
         :author => author,
         :rank => :Species,
-        :citation => "__Mycol. Writ.__ 9(15). 1898.",
-        :notes => ""
+        :citation => "__Mycol. Writ.__ 9(15). 1898."
       }
     }
+    params[:name].merge!(empty_notes)
+    
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
@@ -158,10 +167,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => text_name,
         :author => "",
         :rank => :Species,
-        :citation => "",
-        :notes => ""
+        :citation => ""
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_equal(10, @rolf.reload.contribution)
@@ -179,10 +188,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => text_name,
         :author => "",
         :rank => :Species,
-        :citation => "",
-        :notes => ""
+        :citation => ""
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_equal(20, @rolf.reload.contribution)
@@ -208,10 +217,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => name.text_name,
         :author => "(Fr.) Kühner",
         :rank => :Species,
-        :citation => "__Le Genera Galera__, 139. 1935.",
-        :notes => ""
+        :citation => "__Le Genera Galera__, 139. 1935."
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     # Must be creating Conocybe sp, too.
     assert_equal(30, @rolf.reload.contribution)
@@ -234,10 +243,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => name.text_name,
         :author => "",
         :rank => :Species,
-        :citation => "",
-        :notes => ""
+        :citation => ""
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_equal(20, @rolf.reload.contribution)
@@ -256,10 +265,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => name.text_name,
         :author => name.author,
         :rank => :Species,
-        :citation => name.citation,
-        :notes => name.notes
+        :citation => name.citation
       }
     }
+    params[:name].merge!(name.all_notes)
     post_requires_login(:edit_name, params, false, user)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # Hmmm, this isn't catching the fact that rolf shouldn't be allowed to change the name,
@@ -285,10 +294,10 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => @agaricus_campestris.text_name,
         :author => "",
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -320,10 +329,10 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => misspelt_name.text_name,
         :author => correct_name.author,
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -354,10 +363,10 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => correct_name.text_name,
         :author => correct_name.author,
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -390,10 +399,10 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => correct_name.text_name,
         :author => correct_name.author,
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -426,10 +435,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => target_name.text_name,
         :citation => "",
         :author => target_name.author,
-        :rank => target_name.rank,
-        :notes => ""
+        :rank => target_name.rank
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     merged_name = Name.find(matching_name.id)
@@ -460,10 +469,10 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => target_name.text_name,
         :citation => "",
         :author => target_name.author,
-        :rank => target_name.rank,
-        :notes => "" # Explicitly clear the notes
+        :rank => target_name.rank
       }
     }
+    params[:name].merge!(empty_notes) # Explicitly clear the notes
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     merged_name = Name.find(matching_name.id)
@@ -492,10 +501,10 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => correct_text_name,
         :author => "",
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # Because misspelt name is unmergable it gets reused and
@@ -534,10 +543,10 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => correct_text_name,
         :author => "",
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -574,10 +583,13 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => correct_text_name,
         :author => misspelt_name.author,
-        :rank => misspelt_name.rank,
-        :notes => misspelt_name.notes
+        :rank => misspelt_name.rank
       }
     }
+    all_notes = empty_notes
+    all_notes[:notes] = misspelt_name.notes
+    params[:name].merge!(all_notes)
+    
     post_requires_login(:edit_name, params, false)
     assert_response :success
     assert_template 'edit_name'
@@ -606,10 +618,13 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => correct_text_name,
         :author => misspelt_name.author,
-        :rank => misspelt_name.rank,
-        :notes => "Some new notes"
+        :rank => misspelt_name.rank
       }
     }
+    all_notes = empty_notes
+    all_notes[:notes] = "Some new notes"
+    params[:name].merge!(all_notes)
+
     post_requires_login(:edit_name, params, false)
     assert_response :success
     assert_template 'edit_name'
@@ -633,10 +648,11 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => page_name.text_name,
         :author => '',
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
+    
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -662,10 +678,11 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => page_name.text_name,
         :author => '',
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
+    
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -686,10 +703,11 @@ class NameControllerTest < Test::Unit::TestCase
       :id => name.id,
       :name => {
         :author => new_author,
-        :rank => :Species,
-        :notes => ""
+        :rank => :Species
       }
     }
+    params[:name].merge!(empty_notes)
+    
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # It seems to be creating Strobilurus sp. as well?
@@ -718,10 +736,11 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => target_name.text_name,
         :citation => "",
         :author => target_name.author,
-        :rank => target_name.rank,
-        :notes => ""
+        :rank => target_name.rank
       }
     }
+    params[:name].merge!(empty_notes)
+    
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # Creates PastName but deletes old Name?

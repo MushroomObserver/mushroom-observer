@@ -106,6 +106,15 @@ class Name < ActiveRecord::Base
   has_one :rss_log
   belongs_to :user
   belongs_to :synonym
+  
+  # Returns: array of symbols.  Essentially a constant array.
+  def self.new_note_fields()
+    [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
+  end
+  
+  def self.all_note_fields()
+    new_note_fields.push(:notes)
+  end
 
   # Creates RSS log as necessary.
   # Returns: nothing.
@@ -750,6 +759,31 @@ class Name < ActiveRecord::Base
   end
 
 ########################################
+
+  # Returns a hashtable contain all the notes
+  def all_notes()
+    result = {}
+    for f in Name.all_note_fields
+      result[f] = self.send(f)
+    end
+    result
+  end
+  
+  def set_notes(notes)
+    for f in Name.all_note_fields
+      self.send("#{f}=", notes[f])
+    end
+  end
+  
+  def has_any_notes?()
+    result = false
+    for f in Name.all_note_fields
+      field = self.send(f)
+      result = field && (field != '')
+      break if result
+    end
+    result
+  end
 
   # Returns boolean.
   def has_notes?()

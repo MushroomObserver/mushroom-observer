@@ -6,16 +6,26 @@
     <tr>
         <td valign="top">
         	<p>
-                Rank: <%= @past_name.rank %><br/>
-                Status: <%= @past_name.status %><br/>
-                Name: <%= @past_name.text_name %><br/>
-                Author: <%= @past_name.author %><br/>
-                Citation: <%= textilize_without_paragraph(sanitize(@past_name.citation || '')) %><br/>
+                <%= :show_name_rank.l %>: <%= @past_name.rank %><br/>
+                <%= :show_name_status.l %>: <%= @past_name.status %><br/>
+                <%= :show_name_name.l %>: <%= @past_name.text_name %><br/>
+                <%= :show_name_author.l %>: <%= @past_name.author %><br/>
+                <%= :show_name_citation.l %>: <%= textilize_without_paragraph(sanitize(@past_name.citation || '')) %><br/>
             </p>
-            <p>Notes:</p>
-            <div>
-                <%= textilize(sanitize(@past_name.notes.to_s)) %>
-            </div>
+
+            <%
+              odd_or_even = 0
+              for f in Name.all_note_fields
+                value = @past_name.send(f).to_s
+                if value != ''
+                  odd_or_even = 1 - odd_or_even %>
+                  <%= "form_names_#{f}".to_sym.l %>:
+                  <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+                      <%= textilize(sanitize(value)) %>
+                  </div>
+                  <br/>
+            <%  end
+            end %>
         </td>
         <td valign="top" width="50%">
             Other versions:<br/>

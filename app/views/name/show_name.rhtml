@@ -63,12 +63,19 @@
 	<% end %>
 </p>
 
-<% if @name.notes.to_s != "" %>
-    <p><%= :show_name_notes_and_comments.l %>:</p>
-    <div>
-        <%= textilize(sanitize(@name.notes.to_s)) %>
-    </div>
-<% end %>
+<%
+  odd_or_even = 0
+  for f in Name.all_note_fields
+    value = @name.send(f).to_s
+    if value != ''
+      odd_or_even = 1 - odd_or_even %>
+      <%= "form_names_#{f}".to_sym.l %>:
+      <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+          <%= textilize(sanitize(value)) %>
+      </div>
+      <br/>
+<%  end
+end %>
 
 <% if @children != [] %>
     <p><%= rank_as_plural_string(@children[0].rank) %>:</p>

@@ -128,7 +128,7 @@ class NameController < ApplicationController
     end
     if @name_data.nil?
       sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
-      conditions = field_search(["search_name", "notes", "citation"], sql_pattern)
+      conditions = field_search(["search_name", "citation"] + Name.all_note_fields, sql_pattern)
       session[:checklist_source] = :nothing
       @name_data = Name.connection.select_all %(
         SELECT distinct id, display_name
@@ -315,7 +315,9 @@ class NameController < ApplicationController
           end
           name.citation = params[:name][:citation]
           name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
-          name.notes = params[:name][:notes]
+          for f in Name.all_note_fields
+            name.send("#{f}=", params[:name][f])
+          end
           for n in names
             if n
               n.user_id = @user.id
@@ -332,6 +334,17 @@ class NameController < ApplicationController
     end
   end
 
+  def blank_notes(note_hash)
+    result = true
+    for key, value in note_hash
+      unless (value.nil? or value == '')
+        result = false
+        break
+      end
+    end
+    result
+  end
+  
   # show_name.rhtml -> edit_name.rhtml
   # Updates modified and saves changes
   def edit_name
@@ -357,8 +370,11 @@ class NameController < ApplicationController
         text_name = (params[:name][:text_name] || '').strip
         author = (params[:name][:author] || '').strip
         begin
-          notes = params[:name][:notes]
-          (@name, old_name) = find_target_names(params[:id], text_name, author, notes)
+          all_notes = {}
+          for f in Name.all_note_fields
+            all_notes[f] = params[:name][f]
+          end
+          (@name, old_name) = find_target_names(params[:id], text_name, author, all_notes)
           if text_name == ''
             text_name = @name.text_name
           end
@@ -376,13 +392,14 @@ class NameController < ApplicationController
           count += 1
           alt_ids = @name.change_text_name(text_name, author, params[:name][:rank])
           @name.citation = params[:name][:citation]
-          if notes == '' && old_name # no new notes given and merge happened
-            notes = @name.notes # @name's notes
-            if notes.nil? or (notes == '')
-              notes = old_name.notes # try old_name's notes
+          if blank_notes(all_notes) && old_name # no new notes given and merge happened
+            all_notes = @name.all_notes
+            if blank_notes(all_notes)
+              all_notes = old_name.all_notes # try old_name's notes
             end
           end
-          @name.notes = notes
+          @name.set_notes(all_notes)
+          
           unless PastName.check_for_past_name(@name, @user, "Name updated by #{@user.login}")
             unless @name.id
               raise "Update_name called on a name that doesn't exist."
@@ -710,7 +727,7 @@ class NameController < ApplicationController
 
   # Finds the intended name and if another name matching name exists,
   # then ensure it is mergable.  Returns [target_name, other_name]
-  def find_target_names(id_str, text_name, author, notes)
+  def find_target_names(id_str, text_name, author, all_notes)
     page_name = nil
     id = nil
     if id_str
@@ -732,15 +749,15 @@ class NameController < ApplicationController
     end
     result = [page_name, other_name] # Default
     if other_name # Is there a reason to prefer other_name?
-      if other_name.has_notes?
+      if other_name.has_any_notes?
         # If other_name's notes are going to get overwritten throw an error
-        if notes && (notes != '') && (other_name.notes != notes)
+        if !blank_notes(all_notes) && (other_name.all_notes != all_notes)
           raise "The name, %s, is already in use and %s has notes" % [text_name, other_name.search_name]
         end
         result = [other_name, page_name]
       elsif page_name.nil?
         result = [other_name, page_name]
-      elsif !page_name.has_notes?
+      elsif !page_name.has_any_notes?
         # Neither has notes, so we need another criterion
         if page_name.deprecated and !other_name.deprecated # Prefer valid names
           result = [other_name, page_name]
