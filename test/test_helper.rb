@@ -251,9 +251,15 @@ end
 
 # Assert that a response body is same as contents of a given file.
 # Pass in a block to use as a filter on both contents of response and file.
-def assert_response_equal_file(file)
+def assert_response_equal_file(file, &block)
+  assert_string_equal_file(file, @response.body.clone, &block)
+end
+
+# Assert that a string is same as contents of a given file.
+# Pass in a block to use as a filter on both contents of response and file.
+def assert_string_equal_file(file, str)
   body1 = File.open(file) {|fh| fh.read}
-  body2 = @response.body.clone
+  body2 = str
   if block_given?
     body1 = yield(body1)
     body2 = yield(body2)
