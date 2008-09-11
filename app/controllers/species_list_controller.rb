@@ -44,7 +44,8 @@ class SpeciesListController < ApplicationController
     :show_species_list,
     :species_lists_by_title,
     :species_lists_by_user,
-    :make_report
+    :make_report,
+    :name_lister
   ]
 
   # Display list of all species_lists, sorted by date.
@@ -208,7 +209,7 @@ class SpeciesListController < ApplicationController
     valid = {}
     for rec in @species
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      need_author = occurs[n] > 1 || params[:all] == '1'
+      need_author = occurs[n] > 1
       n += '|' + a if a.to_s != '' && need_author
       if s.to_i > 0 && d.to_i != 1
         l = valid[s] ||= []
@@ -222,17 +223,17 @@ class SpeciesListController < ApplicationController
     # javascript to parse it correctly.
     @species = @species.map do |rec|
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      need_author = occurs[n] > 1 || params[:all] == '1'
+      need_author = occurs[n] > 1
       n += '|' + a if a.to_s != '' && need_author
       n += '*' if d.to_i != 1
       d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
     end.flatten
 
     # Names are passed in as string, one name per line.
-    @names = (params[:results] || "").chomp.split("\n").map {|n| n.to_s.chomp}
+    @names = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
 
     if request.method == :post
-      objs = @names.map do |str|
+      @objs = @names.map do |str|
         str.sub!(/\*$/, '')
         name, author = str.split('|')
         if author
@@ -240,7 +241,7 @@ class SpeciesListController < ApplicationController
         else
           Name.find_by_text_name(name)
         end
-      end
+      end.select {|n| !n.nil?}
 
       case params[:commit]
       when :name_lister_submit_spl.l:
@@ -254,11 +255,11 @@ class SpeciesListController < ApplicationController
         calc_checklist(nil)
         render(:action => 'create_species_list')
       when :name_lister_submit_txt.l:
-        render_name_list_as_txt(objs)
+        render_name_list_as_txt(@objs)
       when :name_lister_submit_rtf.l:
-        render_name_list_as_rtf(objs)
+        render_name_list_as_rtf(@objs)
       when :name_lister_submit_csv.l:
-        render_name_list_as_csv(objs)
+        render_name_list_as_csv(@objs)
       else
         flash_error("Invalid commit button, \"#{params[:commit]}\".")
       end

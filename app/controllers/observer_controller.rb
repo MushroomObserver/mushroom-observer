@@ -463,7 +463,7 @@ class ObserverController < ApplicationController
   #   params[:reason][n][...]           naming_reason args
   #   params[:image][n][...]            image args
   #   params[:good_images]              images already downloaded
-  #   params[:was_js_on]                was form javascripty?
+  #   params[:was_js_on]                was form javascripty? ('yes' = true)
   #
   # Outputs:
   #   @observation, @naming, @vote      empty objects
@@ -649,7 +649,7 @@ class ObserverController < ApplicationController
   #   params[:chosen_name][:name_id]    name radio boxes
   #   params[:vote][...]                vote args
   #   params[:reason][n][...]           naming_reason args
-  #   params[:was_js_on]                was form javascripty?
+  #   params[:was_js_on]                was form javascripty? ('yes' = true)
   #
   # Outputs:
   #   @observation, @naming, @vote      empty objects
@@ -729,7 +729,7 @@ class ObserverController < ApplicationController
   #   params[:chosen_name][:name_id]    name radio boxes
   #   params[:vote][...]                vote args
   #   params[:reason][n][...]           naming_reason args
-  #   params[:was_js_on]                was form javascripty?
+  #   params[:was_js_on]                was form javascripty? ('yes' = true)
   #
   # Outputs:
   #   @observation, @naming, @vote      empty objects
@@ -1376,7 +1376,7 @@ class ObserverController < ApplicationController
     if args
       i = 0
       while args2 = args[i.to_s]
-        if (upload = args2['image']) && upload != ''
+        if (upload = args2[:image]) && upload != ''
           name = upload.full_original_filename if upload.respond_to? :full_original_filename
           image = Image.new(args2)
           image.created = Time.now
@@ -1421,6 +1421,7 @@ class ObserverController < ApplicationController
       notes = params["image_#{image.id}_notes"]
       if image.notes != notes
         image.notes = notes
+        image.modified = Time.now
         image.save
         flash_notice("Updated notes on image ##{image.id}.")
       end

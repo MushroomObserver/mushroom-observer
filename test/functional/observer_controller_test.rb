@@ -1418,4 +1418,153 @@ class ObserverControllerTest < Test::Unit::TestCase
       end
     end
   end
+
+  # -----------------------------------
+  #  Test extended observation forms.
+  # -----------------------------------
+
+  def test_javascripty_name_reasons
+
+    # If javascript isn't enabled, then checkbox isn't required.
+    @request.session[:user_id] = 1
+    post(:create_observation, {
+      :observation => { :where => 'where', :when => Time.now },
+      :name => { :name => @coprinus_comatus.text_name },
+      :vote => { :value => 3 },
+      :reason => {
+        "1" => { :check => '0', :notes => ''    },
+        "2" => { :check => '0', :notes => 'foo' },
+        "3" => { :check => '1', :notes => ''    },
+        "4" => { :check => '1', :notes => 'bar' }
+      },
+    })
+    assert_response(302) # redirected = created observation successfully
+    naming = Naming.find(assigns(:naming).id)
+    reasons = naming.naming_reasons.map {|nr| nr.reason}.sort
+    assert_equal([2,3,4], reasons)
+
+    # If javascript IS enabled, then checkbox IS required.
+    @request.session[:user_id] = 1
+    post(:create_observation, {
+      :observation => { :where => 'where', :when => Time.now },
+      :name => { :name => @coprinus_comatus.text_name },
+      :vote => { :value => 3 },
+      :reason => {
+        "1" => { :check => '0', :notes => ''    },
+        "2" => { :check => '0', :notes => 'foo' },
+        "3" => { :check => '1', :notes => ''    },
+        "4" => { :check => '1', :notes => 'bar' }
+      },
+      :was_js_on => 'yes'
+    })
+    assert_response(302) # redirected = created observation successfully
+    naming = Naming.find(assigns(:naming).id)
+    reasons = naming.naming_reasons.map {|nr| nr.reason}.sort
+    assert_equal([3,4], reasons)
+  end
+
+  def test_create_with_image_upload
+    time0 = Time.utc(2000)
+    time1 = Time.utc(2001)
+    time2 = Time.utc(2002)
+    time3 = Time.utc(2003)
+    now   = 1.week.ago
+
+    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    file = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
+    file.content_type = 'image/jpeg'
+
+    new_image_1 = Image.new({
+      :copyright_holder => 'holder_1',
+      :when => time1,
+      :notes => 'notes_1',
+      :user_id => 1,
+      :content_type => 'image/jpeg',
+      :created => now,
+      :modified => now,
+    })
+    new_image_1.save   
+
+    new_image_2 = Image.new({
+      :copyright_holder => 'holder_2',
+      :when => time2,
+      :notes => 'notes_2',
+      :user_id => 2,
+      :content_type => 'image/jpeg',
+      :created => now,
+      :modified => now,
+    })
+    new_image_2.save   
+
+    @request.session[:user_id] = 1
+    post(:create_observation, {
+      :observation => {
+        :where => 'zzyzx',
+        :when => time0,
+        :thumb_image_id => 0,   # (make new image the thumbnail)
+        :notes => 'blah',
+      },
+      :image => { '0' => {
+        :image => file,
+        :copyright_holder => 'holder_3',
+        :when => time3,
+        :notes => 'notes_3'
+      }},
+      # (attach these two images once observation created)
+      :good_images => "#{new_image_1.id} #{new_image_2.id}",
+      "image_#{new_image_1.id}_notes" => 'notes_1',
+      "image_#{new_image_2.id}_notes" => 'notes_2_new',
+    })
+    assert_response(302) # redirected = created observation successfully
+    # print flash[:notice], "\n"
+
+    obs = Observation.find_by_where('zzyzx')
+    assert_equal(1, obs.user_id)
+    assert_equal(time0, obs.when)
+    assert_equal('zzyzx', obs.place_name)
+
+    imgs = obs.images.sort_by {|x| x.id}
+    img_ids = imgs.map {|i| i.id}
+    assert_equal([new_image_1.id, new_image_2.id, new_image_2.id+1], img_ids)
+    assert_equal(new_image_2.id+1, obs.thumb_image_id)
+    assert_equal('holder_1', imgs[0].copyright_holder)
+    assert_equal('holder_2', imgs[1].copyright_holder)
+    assert_equal('holder_3', imgs[2].copyright_holder)
+    assert_equal(time1, imgs[0].when)
+    assert_equal(time2, imgs[1].when)
+    assert_equal(time3, imgs[2].when)
+    assert_equal('notes_1',     imgs[0].notes)
+    assert_equal('notes_2_new', imgs[1].notes)
+    assert_equal('notes_3',     imgs[2].notes)
+    assert(imgs[0].modified < 1.day.ago)
+    assert(imgs[1].modified > 1.day.ago)
+  end
+
+  def test_image_upload_when_create_fails
+    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    file = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
+    file.content_type = 'image/jpeg'
+
+    @request.session[:user_id] = 1
+    post(:create_observation, {
+      :observation => {
+        :where => '',  # will cause failure
+        :when => Time.now,
+      },
+      :image => { '0' => {
+        :image => file,
+        :copyright_holder => 'zuul',
+        :when => Time.now,
+      }},
+    })
+    assert_response(200) # success = failure, paradoxically
+    # print flash[:notice], "\n"
+
+    # Make sure image was created, but that it is unattached, and that it has
+    # been kept in the @good_images array for attachment later.
+    img = Image.find_by_copyright_holder('zuul')
+    assert(img)
+    assert_equal([], img.observations)
+    assert([img.id], @controller.instance_variable_get('@good_images').map {|i| i.id})
+  end
 end

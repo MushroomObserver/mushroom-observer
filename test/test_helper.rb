@@ -248,3 +248,25 @@ def assert_form_action(url_opts, message = nil)
     end
   end
 end
+
+# Assert that a response body is same as contents of a given file.
+# Pass in a block to use as a filter on both contents of response and file.
+def assert_response_equal_file(file)
+  body1 = File.open(file) {|fh| fh.read}
+  body2 = @response.body.clone
+  if block_given?
+    body1 = yield(body1)
+    body2 = yield(body2)
+  end
+  if body1 != body2
+    # Write out expected (old) and received (new) files for debugging purposes.
+    File.open(file + '.old', 'w') {|fh| fh.write(body1)}
+    File.open(file + '.new', 'w') {|fh| fh.write(body2)}
+    diffs = `diff #{file}.old #{file}.new`
+    raise "Files #{file}.old and #{file}.new differ:\n" + diffs
+  else
+    # Clean out old files from previous failure.
+    File.delete(file + '.old') if File.exists?(file + '.old')
+    File.delete(file + '.new') if File.exists?(file + '.new')
+  end
+end

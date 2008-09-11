@@ -68,9 +68,7 @@ class SearchState < ActiveRecord::Base
       self.cleanup
       state = self.new
       state.title = nil
-      if query_type == :images
-        raise ArgumentError, "Image search missing observation ID." \
-          if !params[:obs]
+      if (query_type == :images) and params[:obs]
         state.conditions = "o.id = %d" % params[:obs].to_i
       else
         state.conditions = nil
@@ -113,7 +111,7 @@ class SearchState < ActiveRecord::Base
   end
 
   # Provide query parameters to new search state.
-  def setup(title, conditions, order, source)
+  def setup(title, conditions=nil, order=nil, source=:nothing)
     self.title = title
     conditions = nil if conditions == ''
     self.conditions = conditions

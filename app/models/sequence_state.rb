@@ -228,8 +228,6 @@ class SequenceState < ActiveRecord::Base
       prev_index = self.current_index - 1
       calc_prev = self.id_from_index(prev_index)
       result = calc_prev
-print "----------------------------------------\n"
-print "#{self.current_index}, #{prev_index}, #{calc_prev}\n"
     end
     if calc_prev == result # No change
       self.prev_id = self.id_from_index(prev_index - 1)

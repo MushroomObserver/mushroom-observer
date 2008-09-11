@@ -20,6 +20,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   fixtures :names
   fixtures :locations
   fixtures :users
+  fixtures :notifications
 
   def setup
     @controller = SpeciesListController.new
@@ -709,5 +710,85 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert_equal(10, @rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
     assert_equal(list_data, @controller.instance_variable_get('@list_members'))
+  end
+
+  # ----------------------------
+  #  Name lister and reports.
+  # ----------------------------
+
+  def test_make_report
+    now = Time.now
+
+    tapinella = Name.new({
+      :user_id => 1,
+      :author => '(Batsch) Šutara',
+      :text_name => 'Tapinella atrotomentosa',
+      :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
+      :deprecated => false,
+      :rank => :Species,
+    })
+    tapinella.save
+
+    list = @first_species_list
+    args = {
+      :where    => 'limbo',
+      :when     => now,
+      :created  => now,
+      :modified => now,
+      :user     => @rolf,
+      :specimen => false,
+    }
+    list.construct_observation(tapinella, args)
+    list.construct_observation(@fungi, args)
+    list.construct_observation(@coprinus_comatus, args)
+    list.construct_observation(@lactarius_alpigenes, args)
+    list.save # just in case
+
+    get(:make_report, { :id => list.id, :type => 'txt' })
+    assert_response_equal_file('test/fixtures/reports/test.txt')
+
+    get(:make_report, { :id => list.id, :type => 'rtf' })
+    assert_response_equal_file('test/fixtures/reports/test.rtf') do |x|
+      x.sub(/\{\\createim\\yr.*\}/, '')
+    end
+
+    get(:make_report, { :id => list.id, :type => 'csv' })
+    assert_response_equal_file('test/fixtures/reports/test.csv')
+  end
+
+  def test_name_lister
+    # This will have to be very rudimentary, since the vast majority of the
+    # complexity is in Javascript.  Sigh.
+    get(:name_lister)
+
+    params = {
+      :results => [
+        'Amanita baccata|sensu Borealis*',
+        'Coprinus comatus*',
+        'Fungi*',
+        'Lactarius alpigenes'
+      ].join("\n")
+    }
+
+    @request.session[:user_id] = 1
+    post(:name_lister, params.merge({ :commit => 'Create Species List' }))
+    ids = @controller.instance_variable_get('@objs').map {|n| n.id}
+    assert_equal([6, 2, 1, 14], ids)
+    assert_response(:success)
+    assert_template('create_species_list')
+
+    @request.session[:user_id] = nil
+    post(:name_lister, params.merge({ :commit => 'Save as Plain Text' }))
+    assert_response_equal_file('test/fixtures/reports/test2.txt')
+
+    @request.session[:user_id] = nil
+    post(:name_lister, params.merge({ :commit => 'Save as Rich Text' }))
+    assert_response_equal_file('test/fixtures/reports/test2.rtf') do |x|
+      x.sub(/\{\\createim\\yr.*\}/, '')
+    end
+
+    @request.session[:user_id] = nil
+    post(:name_lister, params.merge({ :commit => 'Save as Spreadsheet' }))
+    assert_response_equal_file('test/fixtures/reports/test2.csv')
   end
 end
