@@ -662,6 +662,12 @@ class NameController < ApplicationController
     end
   end
   
+  def eol
+    headers["Content-Type"] = "application/xml"
+    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')")
+    render(:action => "eol", :layout => false)
+  end
+
   def cleanup_versions
     if check_permission(1)
       id = params[:id]

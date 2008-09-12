@@ -108,12 +108,21 @@ class Name < ActiveRecord::Base
   belongs_to :synonym
   
   # Returns: array of symbols.  Essentially a constant array.
-  def self.new_note_fields()
+  def self.all_review_statuses()
+    [:unreviewed, :unvetted, :vetted]
+  end
+  
+  # Returns: array of symbols.  Essentially a constant array.
+  def self.min_eol_note_fields()
     [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
   end
   
+  def self.eol_note_fields()
+    min_eol_note_fields
+  end
+  
   def self.all_note_fields()
-    new_note_fields.push(:notes)
+    eol_note_fields.push(:notes)
   end
 
   # Creates RSS log as necessary.
@@ -760,6 +769,19 @@ class Name < ActiveRecord::Base
 
 ########################################
 
+  def reviewed_observations()
+    # For now require that the vote cache be greater than 2.5 and that the naming apply this name
+    # to the given observation is vetted or unvetted (not unreviewed)
+    result = []
+    for obs in Observation.find(:all, :conditions => "name_id = #{self.id}", :order => "vote_cache desc")
+      naming = Naming.find_by_name_id_and_observation_id(self.id, obs.id)
+      if [:unvetted, :vetted].member?(naming.review_status)
+        result.push(obs)
+      end
+    end
+    result
+  end
+  
   # Returns a hashtable contain all the notes
   def all_notes()
     result = {}

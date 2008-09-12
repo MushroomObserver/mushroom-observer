@@ -53,6 +53,7 @@ class PastName < ActiveRecord::Base
     end
     past_name.deprecated = name.deprecated
     past_name.citation = name.citation
+    past_name.review_status = name.review_status
     past_name
   end
 
@@ -81,6 +82,7 @@ class PastName < ActiveRecord::Base
         past_name.save
         name.version += 1
         name.modified = Time.now
+        name.review_status = :unreviewed # This gets more complicated once the user can change the review_status
         if user
           name.user = user
         end

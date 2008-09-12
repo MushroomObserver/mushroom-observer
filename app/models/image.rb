@@ -40,6 +40,11 @@ class Image < ActiveRecord::Base
   belongs_to :license
   attr_accessor :img_dir
 
+  # Returns: array of symbols.  Essentially a constant array.
+  def self.all_qualities()
+    [:unreviewed, :low, :medium, :high]
+  end
+  
   def unique_format_name
     obs_names = []
     self.observations.each {|o| obs_names.push(o.format_name)}

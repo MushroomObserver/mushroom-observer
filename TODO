@@ -1,21 +1,56 @@
-Need code review:
-451 vs. 454 (453)
-U    app/models/location.rb
-U    app/views/observer/_form_naming.rhtml
-U    app/views/layouts/application.rhtml
-U    app/views/species_list/name_lister.rhtml
-U    app/helpers/auto_complete.rb
-A    app/helpers/string_extensions.rb
-U    app/controllers/name_controller.rb
-U    app/controllers/species_list_controller.rb
-U    app/controllers/location_controller.rb
-A    db/migrate/034_add_location_search_name.rb
-D    public/javascripts/my_auto_complete.js
-U    public/javascripts/prototype.js
-A    public/javascripts/cached_auto_complete.js
-U    public/javascripts/effects.js
-U    public/javascripts/dragdrop.js
-U    public/javascripts/controls.js
+Features for EOL Class support:
+XML output:
+  - Mark Names and Images as vetted
+    - Really want a quality value for images, but that has to wait
+    - Names get vetted column (Unreviewed, Unvetted, Vetted)
+  Complete review of A. calyptroderma on real MO site
+  Switch vetting to Naming rather than Image
+    Mark as vetted: Name.159, Images(12054, 8519, 8514, 12227, 4626, 4611, 4894, 668, 669, 723, 722)
+
+update names set review_status='vetted' where id=159
+update namings set review_status='vetted' where id in (209, 524, 525, 570, 571, 1096, 2426, 3151, 3152, 3155, 3179, 3305, 4863, 4864, 4928, 5030, 5111, 6888, 6889, 6980, 6981, 7092, 7557, 7619, 7620, 7622, 7623, 7625, 7626, 7627, 7693, 7694, 7698, 7699, 7700, 7744, 7821, 9684)
+update images set quality='high' where id in (12054, 8519, 8514, 12227, 4626, 4611, 4894, 668, 669, 723, 722);
+
+  Provide a vetting status that can only be modified by particular users.
+    Images should be vetted relative to a name
+    At this point I'm planning on three states, Unreviewed (default state for new data), Unvetted
+      (review for basic coherence and appropriateness), and Vetted (reviewed by a recognized mycologist).
+    Both names and images will have a vetting status.  
+    Only Unvetted and Vetted data will get sent to EOL.  
+    Initially only myself, the professors and a few other well known heavy users of the site will have the
+      ability to change the vetting status.  The person who set the vetting status will be listed.  
+    This may be done by the beginning of next week (9/15).
+
+  Expanded ability to review what a user has contributed.  
+    This will allow professors to easily review the contributions made by a student.
+    I've included a proposed workflow below.  
+    By the end of September.
+
+  Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
+    Mid-October.
+
+  Implement NameNotes:
+    6) Allow users to create new field categories.
+
+    7) Allow individual fields to be versioned.
+
+    8) Differentiate between author and editor.
+
+    9) Support multiple authors and editors.  
+    Only an author can add an author.  
+    Anyone can be an editor.
+
+    10) Mark notes by language and readership level (Novice, General, Expert).  
+    Allow users to set a preferred language and preferred readership level.
+    Items 6-10 are likely to be released together around the end of October.
+
+    11) Allow vetters to nominate new vetters.  
+    Might include more specificity for vetters based on taxa and/or geographic area.
+    Delivery TBD.
+
+    12) Provide a voting scheme for notes and images.  
+    Delivery TBD.
+
 
 Features for Open Naturalists:
 Common Names
@@ -34,6 +69,8 @@ Need to track down user 167 and observation 3035
 Darvin's problem with 'Backwards'
 
 List taxa with notifications
+
+Naming parsing issues:  Foo Bar, Foo  bar, foo bar (last one only if the name doesn't already exist)
 
 Upgrade to Rails 2.1
 User vetting
