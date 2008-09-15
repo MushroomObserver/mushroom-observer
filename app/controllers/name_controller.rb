@@ -33,6 +33,8 @@
 class NameController < ApplicationController
   before_filter :login_required, :except => [
     :auto_complete_name,
+    :eol,
+    :eol_preview,
     :map,
     :name_index,
     :name_search,
