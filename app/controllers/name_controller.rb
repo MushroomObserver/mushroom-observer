@@ -679,13 +679,13 @@ class NameController < ApplicationController
   
   def eol
     headers["Content-Type"] = "application/xml"
-    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')")
+    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')", :order => "search_name")
     render(:action => "eol", :layout => false)
   end
 
   # Show the data getting sent to EOL
   def eol_preview
-    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')")
+    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')", :order => "search_name")
   end
   
   def cleanup_versions

@@ -1,5 +1,6 @@
 Features for EOL Class support:
   
+  Notifications for reviewers
   Need to be able to search past_names for vetted data
 
   Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
@@ -114,7 +115,7 @@ Migrate local database back to current production version
   Checkout code.
   Shutdown server.
   Run migration.
-  rake cache:refresh_queued_emails
+  rake cache:refresh_name_review_status
   Startup server.
   Test server.
 
