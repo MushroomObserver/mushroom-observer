@@ -1,35 +1,18 @@
 Features for EOL Class support:
-XML output:
-  - Mark Names and Images as vetted
-    - Really want a quality value for images, but that has to wait
-    - Names get vetted column (Unreviewed, Unvetted, Vetted)
-  Complete review of A. calyptroderma on real MO site
-  Switch vetting to Naming rather than Image
-    Mark as vetted: Name.159, Images(12054, 8519, 8514, 12227, 4626, 4611, 4894, 668, 669, 723, 722)
+  
+  Need to be able to search past_names for vetted data
 
-update names set review_status='vetted' where id=159
-update namings set review_status='vetted' where id in (209, 524, 525, 570, 571, 1096, 2426, 3151, 3152, 3155, 3179, 3305, 4863, 4864, 4928, 5030, 5111, 6888, 6889, 6980, 6981, 7092, 7557, 7619, 7620, 7622, 7623, 7625, 7626, 7627, 7693, 7694, 7698, 7699, 7700, 7744, 7821, 9684)
-update images set quality='high' where id in (12054, 8519, 8514, 12227, 4626, 4611, 4894, 668, 669, 723, 722);
-
-  Provide a vetting status that can only be modified by particular users.
-    Images should be vetted relative to a name
-    At this point I'm planning on three states, Unreviewed (default state for new data), Unvetted
-      (review for basic coherence and appropriateness), and Vetted (reviewed by a recognized mycologist).
-    Both names and images will have a vetting status.  
-    Only Unvetted and Vetted data will get sent to EOL.  
-    Initially only myself, the professors and a few other well known heavy users of the site will have the
-      ability to change the vetting status.  The person who set the vetting status will be listed.  
-    This may be done by the beginning of next week (9/15).
+  Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
+    End of September.
 
   Expanded ability to review what a user has contributed.  
     This will allow professors to easily review the contributions made by a student.
     I've included a proposed workflow below.  
-    By the end of September.
+    Early October.
 
-  Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
-    Mid-October.
-
-  Implement NameNotes:
+  Implement NameNotes: Mid-October
+    Add license management for NameNotes
+    
     6) Allow users to create new field categories.
 
     7) Allow individual fields to be versioned.
@@ -51,6 +34,11 @@ update images set quality='high' where id in (12054, 8519, 8514, 12227, 4626, 46
     12) Provide a voting scheme for notes and images.  
     Delivery TBD.
 
+Interface for managing user groups
+Review process should focus on unreviewed material
+Should be a way to find observations that have no opinion
+Reviews should have date stamps and people associated with them
+Pages to list most valuable incomplete name pages
 
 Features for Open Naturalists:
 Common Names
@@ -119,6 +107,7 @@ Migrate local database back to current production version
   cksum image tarball
   Review code
   Do local migration
+  Dump local db
   Run tests
   Checkin changes
   Move log

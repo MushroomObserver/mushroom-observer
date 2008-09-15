@@ -69,6 +69,9 @@ class User < ActiveRecord::Base
   has_many :queued_emails
   has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
   has_many :notifications
+  has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
+  has_many :reviewed_names, :class_name => "Name", :foreign_key => "reviewer_id"
+  has_and_belongs_to_many :user_groups
   
   belongs_to :license       # user's default license
   belongs_to :image         # mug shot
@@ -138,10 +141,21 @@ class User < ActiveRecord::Base
     result * 100 / max
   end
   
+  def in_group(group_name)
+    result = false
+    for g in self.user_groups
+      if g.name = group_name
+        result = true
+        break
+      end
+    end
+    return result
+  end
+  
   def remember_me?
     self.remember_me
   end
-
+  
   protected
 
   def self.sha1(pass)

@@ -199,6 +199,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Return true if and only if the current user is a reviewer
+  def is_reviewer
+    result = false
+    user = get_session_user
+    if !user.nil?
+      result = user.in_group('reviewer')
+    end
+    result
+  end
+  
   def make_table_row(list)
     result = list.map {|x| "<td>#{x}</td>"}
     result = "<tr>#{result.join}</tr>"

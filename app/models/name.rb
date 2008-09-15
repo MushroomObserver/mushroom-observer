@@ -106,10 +106,11 @@ class Name < ActiveRecord::Base
   has_one :rss_log
   belongs_to :user
   belongs_to :synonym
+  belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
   
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_review_statuses()
-    [:unreviewed, :unvetted, :vetted]
+    [:unreviewed, :unvetted, :vetted, :inaccurate]
   end
   
   # Returns: array of symbols.  Essentially a constant array.
@@ -774,8 +775,7 @@ class Name < ActiveRecord::Base
     # to the given observation is vetted or unvetted (not unreviewed)
     result = []
     for obs in Observation.find(:all, :conditions => "name_id = #{self.id}", :order => "vote_cache desc")
-      naming = Naming.find_by_name_id_and_observation_id(self.id, obs.id)
-      if [:unvetted, :vetted].member?(naming.review_status)
+      if [:unvetted, :vetted].member?(obs.review_status())
         result.push(obs)
       end
     end

@@ -11,6 +11,7 @@ coprinus_comatus_past_name:
   display_name: __Coprinus comatus__
   observation_name: __Coprinus comatus__
   search_name: Coprinus comatus
+  review_status: unreviewed
 #
 
 coprinellus_micaceus_past_name:
@@ -25,4 +26,5 @@ coprinellus_micaceus_past_name:
   display_name: __Coprinellus micaceus__
   observation_name: __Coprinellus micaceus__
   search_name: Coprinellus micaceus
+  review_status: unreviewed
 #

@@ -10,6 +10,7 @@ fungi:
   display_name: **__Fungi__**
   observation_name: **__Fungi sp.__**
   search_name: Fungi sp.
+  review_status: unreviewed
 
 coprinus_comatus:
   id: 2
@@ -23,6 +24,7 @@ coprinus_comatus:
   display_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
   observation_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
   search_name: Coprinus comatus (O.F. Müll.) Pers.
+  review_status: unreviewed
 
 agaricus_campestris:
   id: 3
@@ -36,6 +38,7 @@ agaricus_campestris:
   display_name: **__Agaricus campestris__** L.
   observation_name: **__Agaricus campestris__** L.
   search_name: Agaricus campestris L.
+  review_status: unreviewed
 
 conocybe_filaris:
   id: 4
@@ -49,6 +52,7 @@ conocybe_filaris:
   display_name: **__Conocybe filaris__**
   observation_name: **__Conocybe filaris__**
   search_name: Conocybe filaris
+  review_status: unreviewed
 
 amanita_baccata_arora:
   id: 5
@@ -62,6 +66,7 @@ amanita_baccata_arora:
   display_name: **__Amanita baccata__** sensu Arora
   observation_name: **__Amanita baccata__** sensu Arora
   search_name: Amanita baccata sensu Arora
+  review_status: unreviewed
 
 amanita_baccata_borealis:
   id: 6
@@ -75,6 +80,7 @@ amanita_baccata_borealis:
   display_name: **__Amanita baccata__** sensu Borealis
   observation_name: **__Amanita baccata__** sensu Borealis
   search_name: Amanita baccata sensu Borealis
+  review_status: unreviewed
 
 # No Taxon 1
 lepiota_rachodes:
@@ -89,6 +95,7 @@ lepiota_rachodes:
   display_name: **__Lepiota rachodes__** Vittad.
   observation_name: **__Lepiota rachodes__** Vittad.
   search_name: Lepiota rachodes Vittad.
+  review_status: unreviewed
 
 # No Taxon 2
 lepiota_rhacodes:
@@ -103,6 +110,7 @@ lepiota_rhacodes:
   display_name: **__Lepiota rhacodes__** Vittad.
   observation_name: **__Lepiota rhacodes__** Vittad.
   search_name: Lepiota rhacodes Vittad.
+  review_status: unreviewed
 
 # Taxon 1, Name 1
 macrolepiota_rachodes:
@@ -118,6 +126,7 @@ macrolepiota_rachodes:
   observation_name: **__Macrolepiota rachodes__** (Vittad.) Singer
   search_name: Macrolepiota rachodes (Vittad.) Singer
   synonym_id: 1
+  review_status: unreviewed
 
 # Taxon 1, Name 2
 macrolepiota_rhacodes:
@@ -133,6 +142,7 @@ macrolepiota_rhacodes:
   observation_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
   search_name: Macrolepiota rhacodes (Vittad.) Singer
   synonym_id: 1
+  review_status: unreviewed
 
 # Taxon 2, Name 1
 chlorophyllum_rachodes:
@@ -148,6 +158,7 @@ chlorophyllum_rachodes:
   observation_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
   search_name: Chlorophyllum rachodes (Vittad.) Vellinga
   synonym_id: 2
+  review_status: unreviewed
 
 # Taxon 2, Name 2
 chlorophyllum_rhacodes:
@@ -163,6 +174,7 @@ chlorophyllum_rhacodes:
   observation_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
   search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
   synonym_id: 2
+  review_status: unreviewed
 
 # Taxon 3, Name 1
 lactarius_alpinus:
@@ -178,6 +190,7 @@ lactarius_alpinus:
   observation_name: **__Lactarius alpinus__** Peck
   search_name: Lactarius alpinus Peck
   synonym_id: 3
+  review_status: unreviewed
 
 # Taxon 3, Name 2
 lactarius_alpigenes:
@@ -194,6 +207,7 @@ lactarius_alpigenes:
   search_name: Lactarius alpigenes Kühn.
   synonym_id: 3
   deprecated: 1
+  review_status: unreviewed
 
 # Taxon 3, Name 3
 lactarius_kuehneri:
@@ -210,6 +224,7 @@ lactarius_kuehneri:
   search_name: Lactarius kuehneri Joss.
   synonym_id: 3
   deprecated: 1
+  review_status: unreviewed
 
 # Taxon 3, Name 4
 lactarius_subalpinus:
@@ -226,6 +241,7 @@ lactarius_subalpinus:
   search_name: Lactarius subalpinus Kühn.
   synonym_id: 3
   deprecated: 1
+  review_status: unreviewed
 
 # Deprecated genus
 psalliota:
@@ -239,6 +255,7 @@ psalliota:
   display_name: **__Psalliota__**
   observation_name: **__Psalliota sp.__**
   search_name: Psalliota sp.
+  review_status: unreviewed
 
 # Valid genus
 agaricus:
@@ -252,6 +269,7 @@ agaricus:
   display_name: **__Agaricus__**
   observation_name: **__Agaricus sp.__**
   search_name: Agaricus sp.
+  review_status: unreviewed
 
 # Misspelt name for testing merging
 agaricus_campestrus:
@@ -266,6 +284,7 @@ agaricus_campestrus:
   display_name: **__Agaricus campestrus__** L.
   observation_name: **__Agaricus campestrus__** L.
   search_name: Agaricus campestrus L.
+  review_status: unreviewed
 
 # Name with notes (not mergeable)
 agaricus_campestras:
@@ -281,6 +300,7 @@ agaricus_campestras:
   observation_name: **__Agaricus campestras__** L.
   search_name: Agaricus campestras L.
   notes: This is should prevent me for merging
+  review_status: unreviewed
 
 # Another name with notes (not mergeable)
 agaricus_campestros:
@@ -296,6 +316,7 @@ agaricus_campestros:
   observation_name: **__Agaricus campestros__** L.
   search_name: Agaricus campestros L.
   notes: Need two to get an error
+  review_status: unreviewed
 
 # For testing merges with existings versions
 coprinellus_micaceus:
@@ -310,6 +331,7 @@ coprinellus_micaceus:
   display_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
   observation_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
   search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  review_status: unreviewed
 
 # For testing merges with existing versions
 coprinellus_micaceus_no_author:
@@ -324,6 +346,7 @@ coprinellus_micaceus_no_author:
   display_name: **__Coprinellus micaceus__**
   observation_name: **__Coprinellus micaceus__**
   search_name: Coprinellus micaceus
+  review_status: unreviewed
 
 # For testing when the author is added to a name that has an observation
 strobilurus_diminutivus_no_author:
@@ -337,6 +360,7 @@ strobilurus_diminutivus_no_author:
   display_name: **__Strobilurus diminutivus__**
   observation_name: **__Strobilurus diminutivus__**
   search_name: Strobilurus diminutivus
+  review_status: unreviewed
 
 # For testing when there are both an approved and deprecated name with the same text name
 pluteus_petasatus_approved:
@@ -351,6 +375,7 @@ pluteus_petasatus_approved:
   display_name: **__Pluteus petasatus__** (Fr.) Gillet
   observation_name: **__Pluteus petasatus__** (Fr.) Gillet
   search_name: Pluteus petasatus (Fr.) Gillet
+  review_status: unreviewed
 
 # For testing the where the author is added when a name has an observation
 pluteus_petasatus_deprecated:
@@ -366,6 +391,7 @@ pluteus_petasatus_deprecated:
   observation_name: __Pluteus petasatus__ (Fries) Gillet
   search_name: Pluteus petasatus (Fries) Gillet
   deprecated: 1
+  review_status: unreviewed
 
 # Valid genus
 lepiota:
@@ -379,6 +405,7 @@ lepiota:
   display_name: **__Lepiota__**
   observation_name: **__Lepiota sp.__**
   search_name: Lepiota sp.
+  review_status: unreviewed
 
 # Valid genus
 chlorophyllum:
@@ -392,6 +419,7 @@ chlorophyllum:
   display_name: **__Chlorophyllum__**
   observation_name: **__Chlorophyllum sp.__**
   search_name: Chlorophyllum sp.
+  review_status: unreviewed
 
 # Two fake names with non-alphanumerics for severe stress-testing species lists.
 bugs_bunny_one:
@@ -406,6 +434,7 @@ bugs_bunny_one:
   display_name: **__Warnerbros bugs-bunny__** One
   observation_name: **__Warnerbros bugs-bunny__** One
   search_name: Warnerbros bugs-bunny One
+  review_status: unreviewed
 
 bugs_bunny_two:
   id: 30
@@ -419,6 +448,7 @@ bugs_bunny_two:
   display_name: **__Warnerbros bugs-bunny__** Two
   observation_name: **__Warnerbros bugs-bunny__** Two
   search_name: Warnerbros bugs-bunny Two
+  review_status: unreviewed
 
 russula_brevipes_no_author:
   id: 31
@@ -431,6 +461,7 @@ russula_brevipes_no_author:
   display_name: **__Russula brevipes__**
   observation_name: **__Russula brevipes__**
   search_name: Russula brevipes
+  review_status: unreviewed
 
 russula_brevipes_author_notes:
   id: 32
@@ -445,6 +476,7 @@ russula_brevipes_author_notes:
   observation_name: **__Russula brevipes__** Peck
   search_name: Russula brevipes Peck
   notes: Here are some notes
+  review_status: unreviewed
 
 russula_cremoricolor_no_author_notes:
   id: 33
@@ -458,6 +490,7 @@ russula_cremoricolor_no_author_notes:
   observation_name: **__Russula cremoricolor__**
   search_name: Russula cremoricolor
   notes: Here are some notes
+  review_status: unreviewed
 
 russula_cremoricolor_author_notes:
   id: 34
@@ -472,6 +505,7 @@ russula_cremoricolor_author_notes:
   observation_name: **__Russula cremoricolor__** Earle
   search_name: Russula cremoricolor Earle
   notes: Some different notes
+  review_status: unreviewed
 
 lentinellus_ursinus_author1:
   id: 35
@@ -485,6 +519,7 @@ lentinellus_ursinus_author1:
   display_name: **__Lentinellus ursinus__** Kühner
   observation_name: **__Lentinellus ursinus__** Kühner
   search_name: Lentinellus ursinus Kühner
+  review_status: unreviewed
 
 lentinellus_ursinus_author2:
   id: 36
@@ -498,6 +533,7 @@ lentinellus_ursinus_author2:
   display_name: **__Lentinellus ursinus__** Kuhner
   observation_name: **__Lentinellus ursinus__** Kuhner
   search_name: Lentinellus ursinus Kuhner
+  review_status: unreviewed
 
 # Genus with correct author
 macrocybe_pegler:
@@ -512,6 +548,7 @@ macrocybe_pegler:
   display_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
   observation_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
   search_name: Macrocybe sp.
+  review_status: unreviewed
 
 # Genus with incorrect author
 macrocybe_titans:
@@ -526,3 +563,4 @@ macrocybe_titans:
   display_name: **__Macrocybe__** Titans
   observation_name: **__Macrocybe__** Titans
   search_name: Macrocybe sp.
+  review_status: unreviewed

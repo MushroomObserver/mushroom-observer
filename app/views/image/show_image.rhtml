@@ -21,7 +21,7 @@
 | <%= link_to('Next', :action => 'next_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
 
 <div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name)) %></div>
-<div id="copyright">Copyright &copy;<%= @image.when.year %> <%= @image.copyright_holder %></div>
+<div id="copyright">Copyright &copy;<%= @image.when.year %> <%= user_link(@image.user, @image.copyright_holder) %></div>
 
 <table cellpadding="10">
 <tr>
@@ -39,6 +39,29 @@
 	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
                   :confirm => "Are you sure?" %>
 <% end %>
+
+<p>
+  Quality: <span class="Data"><%= @image.quality.to_sym.l %></span>
+  <% if @image.reviewer %>
+    <span class="HelpNote">
+      (<%= "#{:show_image_reviewed_by.l}: #{user_link(@image.reviewer, @image.reviewer.login)}" %>)
+    </span>
+  <% end %>
+  <% if @is_reviewer %>
+    <br/><%= link_to(:low.l, :action => 'set_image_quality', :value => :low,
+                     :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    | <%= link_to(:low_and_next.l, :action => 'set_image_quality', :value => :low, :next => true,
+                  :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <br/><%= link_to(:medium.l, :action => 'set_image_quality', :value => :medium,
+                     :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    | <%= link_to(:medium_and_next.l, :action => 'set_image_quality', :value => :medium, :next => true,
+                  :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <br/><%= link_to(:high.l, :action => 'set_image_quality', :value => :high,
+                     :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    | <%= link_to(:high_and_next.l, :action => 'set_image_quality', :value => :high, :next => true,
+                  :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+  <% end %>
+</p>
 
 <p>When: <span class="Data"><%= @image.when %></span></p>
 

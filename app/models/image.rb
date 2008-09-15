@@ -38,6 +38,7 @@ class Image < ActiveRecord::Base
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
   belongs_to :user
   belongs_to :license
+  belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
   attr_accessor :img_dir
 
   # Returns: array of symbols.  Essentially a constant array.

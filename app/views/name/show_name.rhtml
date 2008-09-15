@@ -61,6 +61,17 @@
 	<% if @past_name %>
 	    <%= link_to("#{:show_name_previous_version.l}: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id) %>
 	<% end %>
+	<br/><%= :show_name_content_status.l %>: <%= @name.review_status.l %>
+	<% if @name.reviewer %>
+    <span class="HelpNote">
+      <br/>&nbsp;&nbsp;(<%= "#{:show_name_latest_review.l}: #{@name.last_review ? @name.last_review.strftime("%Y-%m-%d") : 'Unknown'} by #{user_link(@name.reviewer, @name.reviewer.login)}" %>)
+    </span>
+  <% end %>
+	<% if @is_reviewer %>
+	  <br/>&nbsp;&nbsp;<%= link_to(:unvetted.l, :action => 'set_review_status', :value => :unvetted, :id => @name) %>
+	  <br/>&nbsp;&nbsp;<%= link_to(:vetted.l, :action => 'set_review_status', :value => :vetted, :id => @name) %>
+	  <br/>&nbsp;&nbsp;<%= link_to(:inaccurate.l, :action => 'set_review_status', :value => :inaccurate, :id => @name) %>
+	<% end %>
 </p>
 
 <%

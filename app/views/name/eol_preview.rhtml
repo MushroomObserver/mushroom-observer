@@ -1,0 +1,35 @@
+<%
+@title = :eol_preview_title.l
+odd_or_even = 0
+%>
+<div id="Title"><%= @title %></div>
+<%= textilize(:eol_preview_explanation.l) %>
+<%
+for taxon in @taxa
+  odd_or_even = 1 - odd_or_even
+%>
+  <div class="ListLine<%= odd_or_even %>" style="padding-top:10px; padding-bottom:10px;">
+    <p>
+<%=
+    link_to(textilize_without_paragraph(taxon.display_name), :controller => "name", :action => "show_name",
+            :id => taxon.id)
+%>
+    </p>
+<%
+    for obs in taxon.reviewed_observations
+      for image in obs.images
+        if [:medium, :high].member?(image.quality)
+%>
+<%=
+          link_to(image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0),
+                  :controller => 'observer', :action => 'show_observation', :id => obs.id)
+%>
+<%
+        end
+      end
+    end
+%>
+  </div>
+<%
+end
+%>

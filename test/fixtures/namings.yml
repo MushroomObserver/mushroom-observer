@@ -4,6 +4,7 @@ minimal_unknown_naming:
   user_id:         2
   name_id:         1
   observation_id:  1
+  review_status: unreviewed
 
 detailed_unknown_naming:
   id:              2
@@ -12,6 +13,7 @@ detailed_unknown_naming:
   user_id:         2
   name_id:         1
   observation_id:  2
+  review_status: unreviewed
 
 coprinus_comatus_naming:
   id:              3
@@ -21,6 +23,7 @@ coprinus_comatus_naming:
   name_id:         2
   observation_id:  3
   vote_cache:      1
+  review_status: unreviewed
 
 agaricus_campestris_naming:
   id:              4
@@ -29,6 +32,7 @@ agaricus_campestris_naming:
   user_id:         1
   name_id:         3
   observation_id:  4
+  review_status: unreviewed
 
 agaricus_campestrus_naming:
   id:              5
@@ -37,6 +41,7 @@ agaricus_campestrus_naming:
   user_id:         1
   name_id:         19
   observation_id:  5
+  review_status: unreviewed
 
 agaricus_campestras_naming:
   id:              6
@@ -45,6 +50,7 @@ agaricus_campestras_naming:
   user_id:         1
   name_id:         20
   observation_id:  6
+  review_status: unreviewed
 
 agaricus_campestros_naming:
   id:              7
@@ -53,6 +59,7 @@ agaricus_campestros_naming:
   user_id:         1
   name_id:         21
   observation_id:  7
+  review_status: unreviewed
 
 strobilurus_diminutivus_naming:
   id:              8
@@ -62,6 +69,7 @@ strobilurus_diminutivus_naming:
   name_id:         24
   observation_id:  8
   vote_cache:      0
+  review_status: unreviewed
 
 coprinus_comatus_other_naming:
   id:              9
@@ -70,3 +78,4 @@ coprinus_comatus_other_naming:
   user_id:         2
   name_id:         3
   observation_id:  3
+  review_status: unreviewed

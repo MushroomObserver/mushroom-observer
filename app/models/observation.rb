@@ -104,6 +104,35 @@ class Observation < ActiveRecord::Base
 
   ########################################
 
+  # Return the review status based on the votes on the consensus name by current reviewers.
+  # Possible return values:
+  #   :unreviewed - No reviewers have voted for the consensus
+  #   :inaccurate - Some reviewer doubts the consensus (vote.value < 0)
+  #   :vetted - All reviewers that have voted on the current consensus fully support this name
+  #   :unvetted - Some reviewer is not completely confident in this naming (vote.value < 3)
+  # It probably makes sense to cache this result at some point.
+  def review_status
+    naming = Naming.find_by_name_id_and_observation_id(self.name_id, self.id)
+    votes = Vote.find_all_by_naming_id(naming.id)
+    status = :unreviewed
+    for v in votes
+      if v.user.in_group('reviewer')
+        value = v.value
+        if value < 0
+          status = :inaccurate
+          break
+        elsif status != :inaccurate
+          if value < 3
+            status = :unvetted
+          elsif status == :unreviewed
+            status = :vetted
+          end
+        end
+      end
+    end
+    status
+  end
+    
   # Get the community consensus on what the name should be.  It just adds up
   # the votes weighted by user contribution, and picks the winner.  To break a
   # tie it takes the one with the most votes (again weighted by contribution).

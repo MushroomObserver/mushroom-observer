@@ -268,6 +268,7 @@ class NameController < ApplicationController
       @consensus_data = [] if !@consensus_data
       @synonym_data = [] if !@synonym_data
       @other_data = [] if !@other_data
+      @is_reviewer = is_reviewer
 
       # By default we query the consensus name above, but if the user
       # is logged in we need to redo it and calc the preferred name for each.
@@ -284,6 +285,18 @@ class NameController < ApplicationController
     # logger.warn("show_name took %s\n" % elapsed_time)
   end
 
+  def set_review_status
+    id = params[:id]
+    if is_reviewer
+      name = Name.find(id)
+      name.review_status = params[:value]
+      name.reviewer_id = session[:user_id]
+      name.last_review = Time.now()
+      name.save
+    end
+    redirect_to(:action => 'show_name', :id => id)
+  end
+  
   def show_past_name
     store_location
     @past_name = PastName.find(params[:id])
@@ -668,6 +681,11 @@ class NameController < ApplicationController
     render(:action => "eol", :layout => false)
   end
 
+  # Show the data getting sent to EOL
+  def eol_preview
+    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')")
+  end
+  
   def cleanup_versions
     if check_permission(1)
       id = params[:id]

@@ -36,4 +36,15 @@ namespace :cache do
     QueuedEmail.connection.update("update queued_emails set flavor=flavor_tmp")
     ActiveRecord::Migration.remove_column :queued_emails, :flavor_tmp
   end
+  
+  desc "Reset the name review_status enum"
+  task(:refresh_name_review_status => :environment) do
+    print "Refreshing review_status enum for names...\n"
+    ActiveRecord::Migration.add_column :names, :review_status_tmp, :enum, :limit => Name.all_review_statuses
+    Name.connection.update("update names set review_status_tmp=review_status+0")
+    ActiveRecord::Migration.remove_column :names, :review_status
+    ActiveRecord::Migration.add_column :names, :review_status, :enum, :limit => Name.all_review_statuses
+    Name.connection.update("update names set review_status=review_status_tmp")
+    ActiveRecord::Migration.remove_column :names, :review_status_tmp
+  end
 end

@@ -3,6 +3,12 @@
 <table cellpadding="5" cellspacing="5" border="1">
 	<tr class="Data">
 		<td>
+			Verified
+		</td>
+		<td>
+		  Groups
+		</td>
+		<td>
 			Last login
 		</td>
 		<td>
@@ -20,13 +26,16 @@
 		<td>
 			Created (<%= @users.length %>)
 		</td>
-		<td>
-			Verified
-		</td>
 	</tr>
 	<%
 		for user in @users %>
 			<tr>
+				<td>
+					<%= user.verified %>
+				</td>
+				<td>
+				  <%= user.user_groups.map { |g| g.name }.join(',') %>
+				</td>
 				<td>
 					<%= user.last_login %>
 				</td>
@@ -44,9 +53,6 @@
 				</td>
 				<td>
 					<%= user.created %>
-				</td>
-				<td>
-					<%= user.verified %>
 				</td>
 			</tr>
 	<%  end %>

@@ -86,6 +86,31 @@ email_tracking_title: Email Tracking for
 email_tracking_update: Update
 email_tracking_your_profile: your profile
 
+
+# name/eol_preview
+eol_preview_title: EOL Preview
+eol_preview_explanation: >
+  <p>This page provides links to or shows the content that is currently scheduled for delivery to the
+  "Encyclopedia of Life":http://eol.org (EOL).  The features related to this effort are still very new and far from polished
+  since it has been implemented quickly to meet the immediate needs to develop the fungus related content on
+  the EOL.  The content delivered from Mushroom Observer to the EOL will be credit both as comming from
+  the Mushroom Observer website and the individual content providers.</p>
+  <p>On this page each section represents one taxon.  The descriptive paragraphs for each listed taxon
+  will be sent with the exception of any paragraphs marked 'Notes'.  Both the taxa and the images that
+  are being sent have been at least quickly reviewed by expert members of the Mushroom Observer community.</p>
+  <p>The review status of a specific taxon is given on the page for that taxon and can only be set
+  by a designated expert.  Images are selected based on the voting history of specific observations and 
+  their quality.  Currently only designated experts can set the quality level of an image, but this is expected 
+  to become a open voting process for the entire Mushroom Observer community in the near future.</p>
+  <p>Currently the designated experts are either mycology professors that are teaching classes that are 
+  planning to provide data to EOL through the Mushroom
+  Observer or individuals in the Mushroom Observer community who have shown dedication to the site
+  and are recognized experts in mushroom or fungal identification.  All aspect of the process of providing 
+  data to EOL are under discussion and open to change so please send any questions or comments you have to
+  the Mushroom Observer webmaster.</p>
+  <p>The best way to participate in this amazing opportunity is to find a taxon you care about and work
+  to expand the descriptive paragraphs for this taxon.</p>
+
 # observer/license_updater
 bulk_license_link: Bulk License Updater
 
@@ -963,6 +988,10 @@ rss_title: Mushroom Observer
 rss_log_title: Activity Log
 
 
+# image/show_image
+show_image_reviewed_by: Reviewed by
+
+
 # location/show_location
 show_location_by: by
 show_location_created: Location created
@@ -989,6 +1018,7 @@ show_name_author: Author
 show_name_bulk_name_edit: Bulk Name Edit
 show_name_change_synonyms: Change Synonyms
 show_name_citation: Citation
+show_name_content_status: Content status
 show_name_deprecate: Deprecate
 show_name_deprecated: Deprecated
 show_name_deprecated_synonyms: Deprecated Synonym(s)
@@ -997,6 +1027,7 @@ show_name_edit_name: Edit Name
 show_name_email_tracking: Email Tracking
 show_name_google_images: Google Images
 show_name_last_modified: Last Modified
+show_name_latest_review: Latest review
 show_name_name: Name
 show_name_name_created: Name Created
 show_name_notes_and_comments: Notes and Comments
@@ -1173,3 +1204,18 @@ welcome_no_user_note: If you are not a spammer, please report this as an error.
 welcome_no_user_title: User not set in session
 welcome_note: >
   <p>You are now logged into the system...</p>
+
+
+# Image quality values
+unreviewed: Unreviewed
+low: Low
+medium: Good
+high: Excellent
+low_and_next: Low & Next
+medium_and_next: Good & Next
+high_and_next: Excellent & Next
+
+# Name vetting values
+unvetted: Reviewed
+vetted: Approved
+inaccurate: Inaccurate

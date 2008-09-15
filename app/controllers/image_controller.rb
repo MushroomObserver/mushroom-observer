@@ -137,6 +137,7 @@ class ImageController < ApplicationController
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
     @image = Image.find(params[:id])
+    @is_reviewer = is_reviewer
   end
 
   # Show the original size image.
@@ -207,15 +208,17 @@ class ImageController < ApplicationController
       if id
         redirect_to(:action => 'show_image', :id => id, :seq_key => state.id)
       else
-        redirect_to(:action => 'list_rss_logs')
+        redirect_to(:controller => 'observer', :action => 'list_rss_logs')
       end
     when :observations
       # Need to walk through images for current observation, then walk through the remaining observations
       inc_image_from_obs_search(state, inc_func, direction)
     when :rss_logs
       inc_image_from_obs_search(state, inc_func, direction)
+    when :name_observations
+      inc_image_from_obs_search(state, inc_func, direction)
     else
-      redirect_to(:action => 'list_rss_logs')
+      redirect_to(:controller => 'observer', :action => 'list_rss_logs')
     end
   end
 
@@ -227,6 +230,18 @@ class ImageController < ApplicationController
     inc_image("prev", -1)
   end
 
+  def set_image_quality
+    id = params[:id]
+    if is_reviewer
+      image = Image.find(id)
+      image.quality = params[:value]
+      image.reviewer_id = session[:user_id]
+      image.save
+    end
+    redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image', :id => id,
+               :seq_key => params[:seq_key], :search_seq => params[:search_seq], :obs => params[:obs])
+  end
+  
   # Form for uploading and adding images to an observation.
   # Linked from: show_observation, reuse_image, and
   #   create/edit_naming (via _show_images partial)

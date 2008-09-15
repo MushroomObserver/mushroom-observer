@@ -82,7 +82,7 @@ class PastName < ActiveRecord::Base
         past_name.save
         name.version += 1
         name.modified = Time.now
-        name.review_status = :unreviewed # This gets more complicated once the user can change the review_status
+        name.review_status = :unreviewed # review_status changes don't trigger past_name change
         if user
           name.user = user
         end
