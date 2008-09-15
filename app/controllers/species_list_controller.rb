@@ -104,11 +104,11 @@ class SpeciesListController < ApplicationController
     spl = SpeciesList.find(id)
     names = spl ? spl.names : []
     case params[:type]
-    when 'txt':
+    when 'txt'
       render_name_list_as_txt(names)
-    when 'rtf':
+    when 'rtf'
       render_name_list_as_rtf(names)
-    when 'csv':
+    when 'csv'
       render_name_list_as_csv(names)
     else
       flash_error("We don't support report filetype *.#{params[:type]}.")
@@ -244,7 +244,7 @@ class SpeciesListController < ApplicationController
       end.select {|n| !n.nil?}
 
       case params[:commit]
-      when :name_lister_submit_spl.l:
+      when :name_lister_submit_spl.l
         @checklist_names  = {}
         @list_members     = params[:results].gsub('|',' ').gsub('*','')
         @new_names        = nil
@@ -254,11 +254,11 @@ class SpeciesListController < ApplicationController
         session[:checklist_source] = :nothing
         calc_checklist(nil)
         render(:action => 'create_species_list')
-      when :name_lister_submit_txt.l:
+      when :name_lister_submit_txt.l
         render_name_list_as_txt(@objs)
-      when :name_lister_submit_rtf.l:
+      when :name_lister_submit_rtf.l
         render_name_list_as_rtf(@objs)
-      when :name_lister_submit_csv.l:
+      when :name_lister_submit_csv.l
         render_name_list_as_csv(@objs)
       else
         flash_error("Invalid commit button, \"#{params[:commit]}\".")

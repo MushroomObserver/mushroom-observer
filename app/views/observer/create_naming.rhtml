@@ -17,15 +17,19 @@
 <table width="100%" cellpadding="10">
   <tr>
     <td width="75%" valign="top">
-      <%= render :partial => 'show_observation' %>
-      <%= render :partial => 'form_naming', :locals => {
+      <%= render(:partial => 'show_observation', :locals => {
+        :observation => @observation,
+      }) %>
+      <%= render(:partial => 'form_naming', :locals => {
         :action       => 'create_naming',
         :button_name  => 'Create',
         :show_reasons => true,
-      } %>
+      }) %>
 	</td>
     <td width="25%" valign="top">
-      <%= render :partial => 'show_images', :locals => { :search_params => search_params } %>
+      <%= render(:partial => 'show_images', :locals => {
+        :search_params => search_params
+      }) %>
     </td>
   </tr>
 </table>

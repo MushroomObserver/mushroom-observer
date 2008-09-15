@@ -1,6 +1,6 @@
-<% name         = @observation.name
-   lists        = @observation.species_lists 
-   questions_ok = @observation.user.question_email %>
+<% name         = observation.name
+   lists        = observation.species_lists 
+   questions_ok = observation.user.question_email %>
 
 <p>
 <% if name 
@@ -17,17 +17,17 @@
 <% end
 end %>
 
-<%= :show_observation_when.l %>: <span class="Data"><%= @observation.when %></span><br/>
-<% if @observation.is_collection_location %>
+<%= :show_observation_when.l %>: <span class="Data"><%= observation.when %></span><br/>
+<% if observation.is_collection_location %>
   <%= :show_observation_collection_location.l %>:
 <% else %>
   <%= :show_observation_seen_at.l %>:
 <% end %>
-<%= location_link(@observation.place_name, @observation.location_id, nil, true) %><br/>
+<%= location_link(observation.place_name, observation.location_id, nil, true) %><br/>
 <%= :show_observation_who.l %>: <span class="Data">
-  <%= user_link(@observation.user) %>
+  <%= user_link(observation.user) %>
 </span><br/>
-<span class="Data"><% if @observation.specimen %>
+<span class="Data"><% if observation.specimen %>
   <%= :show_observation_specimen_available.l %>
 <% else %>
   <%= :show_observation_specimen_not_available.l %>
@@ -41,6 +41,6 @@ end %>
   </p>
 <% end %>
 
-<% if @observation.notes.to_s != "" %>
-  <%= textilize("#{:show_observation_notes.l}: " + sanitize(@observation.notes.to_s)) %>
+<% if observation.notes.to_s != "" %>
+  <%= textilize("#{:show_observation_notes.l}: " + sanitize(observation.notes.to_s)) %>
 <% end %>

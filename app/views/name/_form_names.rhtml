@@ -1,7 +1,7 @@
 <!--[form:name]-->
 <!-- rank, text_name, author, notes -->
 
-<label for="name_rank"><%= :form_names_rank.l %>:</label> 
+<label for="name_rank"><%= :form_names_rank.l %>:</label>
 <%= select('name', 'rank',
            [[:rank_form.l, :Form], [:rank_variety.l, :Variety], [:rank_subspecies.l, :Subspecies],
             [:rank_species.l, :Species], [:rank_genus.l, :Genus], [:rank_family.l, :Family],
@@ -43,5 +43,7 @@
         <%= text_area 'name', "#{f}", :cols => 80 %>
     </p>
 <% end %>
+
+<%= javascript_tag "document.getElementById('name_text_name').focus()" %>
 
 <!--[eoform:name]-->

@@ -873,12 +873,13 @@ class ObserverController < ApplicationController
     begin
       @observation = Observation.find(id)
       flash_notice "old_name: #{@observation.name.text_name}"
-      text = @observation.calc_consensus
-      flash_notice "new_name: #{@observation.name.text_name}"
+      text = @observation.calc_consensus(true)
       flash_notice text if !text.nil? && text != ''
+      flash_notice "new_name: #{@observation.name.text_name}"
     rescue
       flash_error 'Caught exception.'
     end
+    # render(:text => '', :layout => true)
     redirect_to(:action => 'show_observation', :id => id)
   end
 

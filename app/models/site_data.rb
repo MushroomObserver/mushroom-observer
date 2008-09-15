@@ -1,9 +1,7 @@
 
 ALL_FIELDS = [
   :images,
-  :names,
   :past_names,
-  :locations,
   :past_locations,
   :species_lists,
   :species_list_entries,
@@ -16,9 +14,7 @@ ALL_FIELDS = [
 
 FIELD_WEIGHTS = {
   :images => 10,
-  :names => 10,
   :past_names => 10,
-  :locations => 5,
   :past_locations => 5,
   :species_lists => 5,
   :species_list_entries => 1,
@@ -31,9 +27,7 @@ FIELD_WEIGHTS = {
 
 FIELD_TITLES = {
   :images => "Images",
-  :names => "New Names",
   :past_names => "Name Changes",
-  :locations => "New Locations",
   :past_locations => "Location Changes",
   :species_lists => "Species Lists",
   :species_list_entries => "Species List Entries",
@@ -95,14 +89,17 @@ class SiteData
   # created or destroyed.  Figure out what kind of object from the class name,
   # and then update the owner's contribution as appropriate.
   def self.update_contribution(mode, obj, field=nil, num=1)
-    field = obj.class.to_s.tableize.to_sym if !field
+    field = obj.class.to_s.sub(/.*::/,'').tableize.to_sym if !field
     weight = FIELD_WEIGHTS[field]
+# print ">>>> #{mode} #{field} #{weight} #{num} (##{obj.id}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''})"
     if weight && weight > 0 &&
-       obj.respond_to?("user") && (user = obj.user)
+       obj.respond_to?('user_id') && (user = User.find_by_id(obj.user_id))
       user.contribution = 0 if !user.contribution
       user.contribution += (mode == :create ? weight : -weight) * num
+# print " -> #{user.contribution}"
       user.save
     end
+# print "\n"
   end
 
   # Return stats for entire site.  Returns simple hash mapping object type
@@ -145,20 +142,20 @@ private
   end
 
   def get_field_count(field)
-   result = 0
-   table = FIELD_TABLES[field]
-   if table.nil?
-     table = field
-   end
-   query = "select count(*) as c from %s" % table
-   if FIELD_CONDITIONS[field]
-     query += " where #{FIELD_CONDITIONS[field]}"
-   end
-   data = User.connection.select_all(query)
-   for d in data
-     result = d['c'].to_i
-   end
-   result
+    result = 0
+    table = FIELD_TABLES[field]
+    if table.nil?
+      table = field
+    end
+    query = "select count(*) as c from %s" % table
+    if FIELD_CONDITIONS[field]
+      query += " where #{FIELD_CONDITIONS[field]}"
+    end
+    data = User.connection.select_all(query)
+    for d in data
+      result = d['c'].to_i
+    end
+    result
   end
 
   def load_user_data(id=nil)

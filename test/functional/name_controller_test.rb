@@ -131,7 +131,7 @@ class NameControllerTest < Test::Unit::TestCase
     end
     result
   end
-  
+
   def test_create_name_post
     text_name = "Amanita velosa"
     author = "Lloyd"
@@ -146,7 +146,7 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     params[:name].merge!(empty_notes)
-    
+
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
@@ -209,7 +209,7 @@ class NameControllerTest < Test::Unit::TestCase
     name = @conocybe_filaris
     assert(name.text_name == "Conocybe filaris")
     assert(name.author.nil?)
-    past_names = name.past_names.size
+    past_names = name.versions.size
     assert(0 == name.version)
     params = {
       :id => name.id,
@@ -249,7 +249,8 @@ class NameControllerTest < Test::Unit::TestCase
     params[:name].merge!(empty_notes)
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_equal(20, @rolf.reload.contribution)
+    # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
+    assert_equal(30, @rolf.reload.contribution)
     name = Name.find(name.id)
     assert(name.deprecated)
   end
@@ -282,7 +283,7 @@ class NameControllerTest < Test::Unit::TestCase
     misspelt_name = @agaricus_campestrus
     correct_name = @agaricus_campestris
     assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert(0 == correct_name.version)
     assert_equal(1, misspelt_name.namings.size)
     misspelt_obs_id = misspelt_name.namings[0].observation.id
@@ -306,7 +307,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_name = Name.find(correct_name.id)
     assert(correct_name)
     assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.past_names.size)
+    assert_equal(past_names, correct_name.versions.size)
 
     assert_equal(3, correct_name.namings.size)
     misspelt_obs = Observation.find(misspelt_obs_id)
@@ -322,7 +323,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(misspelt_name.text_name, correct_name.text_name)
     correct_author = correct_name.author
     assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert_equal(0, correct_name.version)
     params = {
       :id => misspelt_name.id,
@@ -342,7 +343,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert(correct_name)
     assert_equal(correct_author, correct_name.author)
     assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.past_names.size)
+    assert_equal(past_names, correct_name.versions.size)
   end
 
   # Test that merged names end up as not deprecated if the
@@ -356,7 +357,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_not_equal(misspelt_name.text_name, correct_name.text_name)
     correct_author = correct_name.author
     assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert_equal(0, correct_name.version)
     params = {
       :id => misspelt_name.id,
@@ -377,7 +378,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert(!correct_name.deprecated)
     assert_equal(correct_author, correct_name.author)
     assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.past_names.size)
+    assert_equal(past_names, correct_name.versions.size)
   end
 
   # Test that merged names end up as not deprecated even if the
@@ -392,7 +393,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_author = correct_name.author
     correct_text_name = correct_name.text_name
     assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert(0 == correct_name.version)
     params = {
       :id => misspelt_name.id,
@@ -414,7 +415,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(correct_author, misspelt_name.author)
     assert_equal(correct_text_name, misspelt_name.text_name)
     assert(1 == misspelt_name.version)
-    assert(past_names+1 == misspelt_name.past_names.size)
+    assert(past_names+1 == misspelt_name.versions.size)
   end
 
   # Test merge two names where the matching_name has notes.
@@ -489,7 +490,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
     assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert(0 == correct_name.version)
     assert_equal(1, misspelt_name.namings.size)
     misspelt_obs_id = misspelt_name.namings[0].observation.id
@@ -515,7 +516,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_name = Name.find(misspelt_name.id)
     assert(correct_name)
     assert(1 == correct_name.version)
-    assert(past_names+1 == correct_name.past_names.size)
+    assert(past_names+1 == correct_name.versions.size)
 
     assert_equal(3, correct_name.namings.size)
     misspelt_obs = Observation.find(misspelt_obs_id)
@@ -531,7 +532,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_author = correct_name.author
     correct_notes = correct_name.notes
     assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert_equal(0, correct_name.version)
     assert_equal(1, misspelt_name.namings.size)
     misspelt_obs_id = misspelt_name.namings[0].observation.id
@@ -556,7 +557,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert(correct_name)
     assert_equal(correct_notes, correct_name.notes)
     assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.past_names.size)
+    assert_equal(past_names, correct_name.versions.size)
 
     assert_equal(2, correct_name.namings.size)
     misspelt_obs = Observation.find(misspelt_obs_id)
@@ -571,7 +572,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
     assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.past_names.size
+    past_names = correct_name.versions.size
     assert(0 == correct_name.version)
     assert_equal(1, misspelt_name.namings.size)
     misspelt_obs_id = misspelt_name.namings[0].observation.id
@@ -589,7 +590,7 @@ class NameControllerTest < Test::Unit::TestCase
     all_notes = empty_notes
     all_notes[:notes] = misspelt_name.notes
     params[:name].merge!(all_notes)
-    
+
     post_requires_login(:edit_name, params, false)
     assert_response :success
     assert_template 'edit_name'
@@ -598,7 +599,7 @@ class NameControllerTest < Test::Unit::TestCase
     correct_name = Name.find(correct_name.id)
     assert(correct_name)
     assert(0 == correct_name.version)
-    assert(past_names == correct_name.past_names.size)
+    assert(past_names == correct_name.versions.size)
     assert_equal(1, correct_name.namings.size)
     assert_equal(1, misspelt_name.namings.size)
     assert_not_equal(correct_name.namings[0], misspelt_name.namings[0])
@@ -642,7 +643,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(page_name.text_name, other_name.text_name)
     correct_author = page_name.author
     assert_not_equal(other_name.author, correct_author)
-    past_names = page_name.past_names.size
+    past_names = page_name.versions.size
     params = {
       :id => page_name.id,
       :name => {
@@ -652,7 +653,7 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     params[:name].merge!(empty_notes)
-    
+
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -672,7 +673,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(page_name.text_name, other_name.text_name)
     correct_author = other_name.author
     assert_not_equal(page_name.author, correct_author)
-    past_names = other_name.past_names.size
+    past_names = other_name.versions.size
     params = {
       :id => page_name.id,
       :name => {
@@ -682,7 +683,7 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     params[:name].merge!(empty_notes)
-    
+
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -707,7 +708,7 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     params[:name].merge!(empty_notes)
-    
+
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     # It seems to be creating Strobilurus sp. as well?
@@ -716,7 +717,6 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(new_author, name.author)
     assert_equal(old_text_name, name.text_name)
   end
-
 
   # Test merge of name with notes with name without notes
   def test_edit_name_notes
@@ -740,11 +740,11 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     params[:name].merge!(empty_notes)
-    
+
     post_requires_login(:edit_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
-    # Creates PastName but deletes old Name?
-    assert_equal(10, @rolf.reload.contribution)
+    # (creates Russula since not in fixtures, changes R. brevipes, deletes some name, but leaves past_name)
+    assert_equal(30, @rolf.reload.contribution)
     merged_name = Name.find(matching_name.id)
     assert(merged_name)
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -752,7 +752,7 @@ class NameControllerTest < Test::Unit::TestCase
     end
     assert_equal(notes, merged_name.notes)
   end
-  
+
   # ----------------------------
   #  Bulk names.
   # ----------------------------
@@ -922,14 +922,14 @@ class NameControllerTest < Test::Unit::TestCase
     selected_name = @lepiota_rachodes
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
-    selected_past_name_count = selected_name.past_names.length
+    selected_past_name_count = selected_name.versions.length
     selected_version = selected_name.version
 
     add_name = @lepiota_rhacodes
     assert(!add_name.deprecated)
     assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
     assert_nil(add_name.synonym)
-    add_past_name_count = add_name.past_names.length
+    add_past_name_count = add_name.versions.length
     add_name_version = add_name.version
 
     params = {
@@ -943,15 +943,15 @@ class NameControllerTest < Test::Unit::TestCase
     add_name = Name.find(add_name.id)
     assert(add_name.deprecated)
     assert_equal("__Lepiota rhacodes__ Vittad.", add_name.display_name)
-    assert_equal(add_past_name_count+1, add_name.past_names.length) # past name should have been created
-    assert(!add_name.past_names[-1].deprecated)
+    assert_equal(add_past_name_count+1, add_name.versions.length) # past name should have been created
+    assert(add_name.versions.latest.deprecated)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     assert_equal(add_name_version+1, add_name.version)
 
     selected_name = Name.find(selected_name.id)
     assert(!selected_name.deprecated)
-    assert_equal(selected_past_name_count, selected_name.past_names.length)
+    assert_equal(selected_past_name_count, selected_name.versions.length)
     assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -1620,7 +1620,7 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lepiota_rachodes
     assert(!current_name.deprecated)
     assert_nil(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
     current_version = current_name.version
     current_notes = current_name.notes
 
@@ -1628,22 +1628,22 @@ class NameControllerTest < Test::Unit::TestCase
     assert(!proposed_name.deprecated)
     assert_not_nil(proposed_name.synonym)
     proposed_synonym_length = proposed_name.synonym.names.size
-    proposed_past_name_count = proposed_name.past_names.length
+    proposed_past_name_count = proposed_name.versions.length
     proposed_version = proposed_name.version
     proposed_notes = proposed_name.notes
 
     params = {
       :id => current_name.id,
       :proposed => { :name => proposed_name.text_name },
-      :comment => { :comment => "Don't like this name"}
+      :comment => { :comment => "Don't like this name" }
     }
     post_requires_login(:deprecate_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name") # Success
 
     old_name = Name.find(current_name.id)
     assert(old_name.deprecated)
-    assert_equal(current_past_name_count+1, old_name.past_names.length) # past name should have been created
-    assert(!old_name.past_names[-1].deprecated)
+    assert_equal(current_past_name_count+1, old_name.versions.length) # past name should have been created
+    assert(old_name.versions.latest.deprecated)
     old_synonym = old_name.synonym
     assert_not_nil(old_synonym)
     assert_equal(current_version+1, old_name.version)
@@ -1651,7 +1651,7 @@ class NameControllerTest < Test::Unit::TestCase
 
     new_name = Name.find(proposed_name.id)
     assert(!new_name.deprecated)
-    assert_equal(proposed_past_name_count, new_name.past_names.length)
+    assert_equal(proposed_past_name_count, new_name.versions.length)
     new_synonym = new_name.synonym
     assert_not_nil(new_synonym)
     assert_equal(old_synonym, new_synonym)
@@ -1665,12 +1665,12 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lepiota_rachodes
     assert(!current_name.deprecated)
     assert_nil(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
 
     proposed_name = @amanita_baccata_arora # Ambiguous text name
     assert(!proposed_name.deprecated)
     assert_nil(proposed_name.synonym)
-    proposed_past_name_count = proposed_name.past_names.length
+    proposed_past_name_count = proposed_name.versions.length
 
     params = {
       :id => current_name.id,
@@ -1683,12 +1683,12 @@ class NameControllerTest < Test::Unit::TestCase
 
     old_name = Name.find(current_name.id)
     assert(!old_name.deprecated)
-    assert_equal(current_past_name_count, old_name.past_names.length)
+    assert_equal(current_past_name_count, old_name.versions.length)
     assert_nil(old_name.synonym)
 
     new_name = Name.find(proposed_name.id)
     assert(!new_name.deprecated)
-    assert_equal(proposed_past_name_count, new_name.past_names.length)
+    assert_equal(proposed_past_name_count, new_name.versions.length)
     assert_nil(new_name.synonym)
   end
 
@@ -1697,13 +1697,13 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lepiota_rachodes
     assert(!current_name.deprecated)
     assert_nil(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
 
     proposed_name = @amanita_baccata_arora # Ambiguous text name
     assert(!proposed_name.deprecated)
     assert_nil(proposed_name.synonym)
     proposed_synonym_length = 0
-    proposed_past_name_count = proposed_name.past_names.length
+    proposed_past_name_count = proposed_name.versions.length
 
     params = {
       :id => current_name.id,
@@ -1716,14 +1716,14 @@ class NameControllerTest < Test::Unit::TestCase
 
     old_name = Name.find(current_name.id)
     assert(old_name.deprecated)
-    assert_equal(current_past_name_count+1, old_name.past_names.length) # past name should have been created
-    assert(!old_name.past_names[-1].deprecated)
+    assert_equal(current_past_name_count+1, old_name.versions.length) # past name should have been created
+    assert(old_name.versions.latest.deprecated)
     old_synonym = old_name.synonym
     assert_not_nil(old_synonym)
 
     new_name = Name.find(proposed_name.id)
     assert(!new_name.deprecated)
-    assert_equal(proposed_past_name_count, new_name.past_names.length)
+    assert_equal(proposed_past_name_count, new_name.versions.length)
     new_synonym = new_name.synonym
     assert_not_nil(new_synonym)
     assert_equal(old_synonym, new_synonym)
@@ -1735,7 +1735,7 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lepiota_rachodes
     assert(!current_name.deprecated)
     assert_nil(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
 
     proposed_name_str = "New name"
 
@@ -1750,7 +1750,7 @@ class NameControllerTest < Test::Unit::TestCase
 
     old_name = Name.find(current_name.id)
     assert(!old_name.deprecated)
-    assert_equal(current_past_name_count, old_name.past_names.length)
+    assert_equal(current_past_name_count, old_name.versions.length)
     assert_nil(old_name.synonym)
   end
 
@@ -1759,7 +1759,7 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lepiota_rachodes
     assert(!current_name.deprecated)
     assert_nil(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
 
     proposed_name_str = "New name"
 
@@ -1767,15 +1767,15 @@ class NameControllerTest < Test::Unit::TestCase
       :id => current_name.id,
       :proposed => { :name => proposed_name_str },
       :approved_name => proposed_name_str,
-      :comment => { :comment => "Don't like this name"}
+      :comment => { :comment => "Don't like this name" }
     }
     post_requires_login(:deprecate_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name") # Success
 
     old_name = Name.find(current_name.id)
     assert(old_name.deprecated)
-    assert_equal(current_past_name_count+1, old_name.past_names.length) # past name should have been created
-    assert(!old_name.past_names[-1].deprecated)
+    assert_equal(current_past_name_count+1, old_name.versions.length) # past name should have been created
+    assert(old_name.versions.latest.deprecated)
     old_synonym = old_name.synonym
     assert_not_nil(old_synonym)
 
@@ -1796,7 +1796,7 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lactarius_alpigenes
     assert(current_name.deprecated)
     assert(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
     current_version = current_name.version
     approved_synonyms = current_name.approved_synonyms
     current_notes = current_name.notes
@@ -1811,8 +1811,8 @@ class NameControllerTest < Test::Unit::TestCase
 
     current_name = Name.find(current_name.id)
     assert(!current_name.deprecated)
-    assert_equal(current_past_name_count+1, current_name.past_names.length) # past name should have been created
-    assert(current_name.past_names[-1].deprecated)
+    assert_equal(current_past_name_count+1, current_name.versions.length) # past name should have been created
+    assert(!current_name.versions.latest.deprecated)
     assert_equal(current_version + 1, current_name.version)
     assert_not_equal(current_notes, current_name.notes)
 
@@ -1827,7 +1827,7 @@ class NameControllerTest < Test::Unit::TestCase
     current_name = @lactarius_alpigenes
     assert(current_name.deprecated)
     assert(current_name.synonym)
-    current_past_name_count = current_name.past_names.length
+    current_past_name_count = current_name.versions.length
     approved_synonyms = current_name.approved_synonyms
 
     params = {
@@ -1840,15 +1840,15 @@ class NameControllerTest < Test::Unit::TestCase
 
     current_name = Name.find(current_name.id)
     assert(!current_name.deprecated)
-    assert_equal(current_past_name_count+1, current_name.past_names.length) # past name should have been created
-    assert(current_name.past_names[-1].deprecated)
+    assert_equal(current_past_name_count+1, current_name.versions.length) # past name should have been created
+    assert(!current_name.versions.latest.deprecated)
 
     for n in approved_synonyms
       n = Name.find(n.id)
       assert(!n.deprecated)
     end
   end
-  
+
   # ----------------------------
   #  Email Tracking (Naming Notifications).
   # ----------------------------
@@ -1943,5 +1943,4 @@ class NameControllerTest < Test::Unit::TestCase
     notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
   end
-
 end

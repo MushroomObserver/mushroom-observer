@@ -5,7 +5,7 @@
 <%= textilize_without_paragraph(h(@rss_log.notes)) %></pre>
 <% observation = @rss_log.observation
    if observation %>
-	<%= link_to "Show Observation", :action => 'show_observation', :id => observation %>
+	<%= link_to("Show Observation", :action => 'show_observation', :id => observation.id) %>
 <% else
 	 species_list = @rss_log.species_list 
 	 if species_list %>

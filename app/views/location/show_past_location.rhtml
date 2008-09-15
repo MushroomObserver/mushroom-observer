@@ -3,22 +3,16 @@
 <div id="Title"><%= "#{:show_past_location_version.l} #{@past_location.version}: #{textilize_without_paragraph(h(@past_location.display_name))}" %></div>
 
 <%= :show_past_location_other_versions.l %>:<br/>
-<%
-    location = @past_location.location
-    if location
-        %>
-        <%= link_to("#{location.version}: #{textilize_without_paragraph(h(location.display_name))}",
-                    :action => 'show_location', :id => location) %><br/>
-    <% else %>
-        <%= :show_past_location_no_version.l %><br/>
-    <% end %>
-<% for v in @other_versions
-    if v.version == @past_location.version %>
-        <%= "#{v.version}: #{textilize_without_paragraph(h(v.display_name))}" %><br/>
-    <% else %>
-        <%= link_to("#{v.version}: #{textilize_without_paragraph(h(v.display_name))}",
-                    :action => 'show_past_location', :id => v.id) %><br/>
-    <% end 
-   end %>
+<% for v in @other_versions %>
+  <%= if v.version == @location.version
+    link_to("#{v.version}: #{textilize_without_paragraph(h(v.display_name))}",
+      :action => 'show_location', :id => @location.id)
+  elsif v.version == @past_location.version
+    "#{v.version}: #{textilize_without_paragraph(h(v.display_name))}"
+  else
+    link_to("#{v.version}: #{textilize_without_paragraph(h(v.display_name))}",
+      :action => 'show_past_location', :id => @location.id, :version => v.version)
+  end %><br/>
+<% end %>
 
 <%= render :partial => 'show_location', :locals => { :location => @past_location } %>

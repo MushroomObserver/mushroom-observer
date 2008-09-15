@@ -327,7 +327,7 @@ class ImageController < ApplicationController
             end
           end
         end
-        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation)
+        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
       end
     end
   end
@@ -354,7 +354,7 @@ class ImageController < ApplicationController
             o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @user.login), true)
           end
           flash_notice "Image was successfully updated."
-          redirect_to :action => 'show_image', :id => @image
+          redirect_to(:action => 'show_image', :id => @image.id)
         end
       end
     end
@@ -369,7 +369,7 @@ class ImageController < ApplicationController
     @image = Image.find(params[:id])
     if verify_user()
       if !check_user_id(@image.user_id)
-        redirect_to :action => 'show_image', :id => @image
+        redirect_to(:action => 'show_image', :id => @image.id)
       else
         image_name = @image.unique_text_name
         for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
@@ -379,7 +379,7 @@ class ImageController < ApplicationController
         end
         @image.destroy
         flash_notice "Image destroyed."
-        redirect_to :action => 'list_images'
+        redirect_to(:action => 'list_images')
       end
     end
   end
@@ -420,7 +420,7 @@ class ImageController < ApplicationController
     @observation = Observation.find(params[:id])
     if verify_user()
       if !check_user_id(@observation.user_id)
-        redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
       else
         # @image = Image.new
         # @image.copyright_holder = @user.legal_name
@@ -447,7 +447,7 @@ class ImageController < ApplicationController
         flash_notice "Added image ##{image.id}."
       end
     end
-    redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
   end
 
   # Second post method for reuse_image: user has entered an image id in the
@@ -465,7 +465,7 @@ class ImageController < ApplicationController
         flash_notice "Added image ##{image.id}."
       end
     end
-    redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
   end
 
   # Browse through matrix of recent images to let a user reuse an image

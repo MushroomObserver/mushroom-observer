@@ -37,9 +37,9 @@ class CommentEmail < QueuedEmail
     (comment_id,) = email.get_integers([:comment])
     comment = Comment.find(comment_id) if comment_id
     if comment
-      observation = comment.observation
+      object = comment.object
       if email.to_user.comment_email # Make sure it hasn't changed
-        AccountMailer.deliver_comment(email.user, email.to_user, observation, comment)
+        AccountMailer.deliver_comment(email.user, email.to_user, object, comment)
       end
     else
       print "No comment found (#{self.id})\n"

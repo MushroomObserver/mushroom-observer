@@ -165,7 +165,8 @@ class NameController < ApplicationController
     # elapsed_time = Benchmark.realtime do
       store_location
       @name = Name.find(params[:id])
-      @past_name = PastName.find(:all, :conditions => "name_id = %s and version = %s" % [@name.id, @name.version - 1]).first
+      @past_name = @name.versions.latest
+      @past_name = @past_name.previous if @past_name
       @children = @name.children
 
       # In theory much of the following should really be handled by the new search_sequences,
@@ -301,8 +302,10 @@ class NameController < ApplicationController
   
   def show_past_name
     store_location
-    @past_name = PastName.find(params[:id])
-    @other_versions = PastName.find(:all, :conditions => "name_id = %s" % @past_name.name_id, :order => "version desc")
+    @name = Name.find(params[:id].to_i)
+    @past_name = Name.find(params[:id].to_i) # clone or dclone?
+    @past_name.revert_to(params[:version].to_i)
+    @other_versions = @name.versions.reverse
   end
 
   # name_index.rhtml -> create_name.rhtml
@@ -403,7 +406,6 @@ class NameController < ApplicationController
           old_search_name = @name.search_name
           count = 0
           current_time = Time.now
-          @name.modified = current_time
           count += 1
           alt_ids = @name.change_text_name(text_name, author, params[:name][:rank])
           @name.citation = params[:name][:citation]
@@ -415,11 +417,8 @@ class NameController < ApplicationController
           end
           @name.set_notes(all_notes)
           
-          unless PastName.check_for_past_name(@name, @user, "Name updated by #{@user.login}")
-            unless @name.id
-              raise "Update_name called on a name that doesn't exist."
-            end
-          end
+          raise "Update_name called on a name that doesn't exist." if !@name.id
+          @name.save_if_changed(@user, "Name updated by #{@user.login}", current_time)
           if old_name # merge happened
             for o in old_name.observations
               o.name = @name
@@ -473,9 +472,9 @@ class NameController < ApplicationController
           if synonym.nil?
             synonym = Synonym.new
             synonym.created = timestamp
+            synonym.save
             @name.synonym = synonym
-            @name.modified = timestamp # Change timestamp, but not modifier
-            @name.save # Not creating a PastName since they don't track synonyms
+            @name.save_if_changed(@user, nil, timestamp)
           end
           proposed_synonyms = params[:proposed_synonyms] || {}
           for n in sorter.all_names
@@ -544,14 +543,14 @@ class NameController < ApplicationController
               @name.merge_synonyms(target_name)
               target_name.change_deprecated(false)
               current_time = Time.now
-              PastName.check_for_past_name(target_name, @user, "Preferred over #{@name.search_name} by #{@user.login}.")
+              target_name.save_if_changed(@user, "Preferred over #{@name.search_name} by #{@user.login}.", current_time)
               @name.change_deprecated(true)
-              PastName.check_for_past_name(@name, @user, "Deprecated in favor of #{target_name.search_name} by #{@user.login}.")
               comment_join = @comment == "" ? "." : ":\n"
               @name.prepend_notes("Deprecated in favor of" +
                 " #{target_name.search_name} by #{@user.login} on " +
                 Time.now.to_formatted_s(:db) + comment_join + @comment)
-              redirect_to :action => 'show_name', :id => @name
+              @name.save_if_changed(@user, "Deprecated in favor of #{target_name.search_name} by #{@user.login}.", current_time)
+              redirect_to(:action => 'show_name', :id => @name.id)
             end
           end
         end
@@ -564,20 +563,20 @@ class NameController < ApplicationController
       @name = Name.find(params[:id])
       @approved_names = @name.approved_synonyms
       if request.method == :post
+        now = Time.now
         if params[:deprecate][:others] == '1'
           for n in @name.approved_synonyms
             n.change_deprecated(true)
-            PastName.check_for_past_name(n, @user, "Deprecated in favor of #{@name.search_name} by #{@user.login}")
+            n.save_if_changed(@user, "Deprecated in favor of #{@name.search_name} by #{@user.login}", now)
           end
         end
-        # @name.version = @name.version + 1
         @name.change_deprecated(false)
-        PastName.check_for_past_name(@name, @user, "Approved by #{@user.login}")
         comment = (params[:comment] && params[:comment][:comment] ?
            params[:comment][:comment] : "").strip
         comment_join = comment == "" ? "." : ":\n"
         @name.prepend_notes("Approved by #{@user.login} on " +
           Time.now.to_formatted_s(:db) + comment_join + comment)
+        @name.save_if_changed(@user, "Approved by #{@user.login}", now)
         redirect_to :action => 'show_name', :id => @name
       end
     end
@@ -690,63 +689,65 @@ class NameController < ApplicationController
   
   def cleanup_versions
     if check_permission(1)
-      id = params[:id]
-      name = Name.find(id)
-      past_names = PastName.find(:all, :conditions => ["name_id = ?", id], :order => "version desc")
-      v = past_names.length
-      name.version = v
-      name.user_id = 1
-      name.save
-      v -= 1
-      for pn in past_names
-        pn.version = v
-        pn.save
-        v -= 1
-      end
+      flash_error("Better check this method to make sure it still works as expected since changing to acts_as_versioned. -JPH 20080911")
+#       id = params[:id]
+#       name = Name.find(id)
+#       past_names = PastName.find(:all, :conditions => ["name_id = ?", id], :order => "version desc")
+#       v = past_names.length
+#       name.version = v
+#       name.user_id = 1
+#       name.save
+#       v -= 1
+#       for pn in past_names
+#         pn.version = v
+#         pn.save
+#         v -= 1
+#       end
     end
     redirect_to :action => 'show_name', :id => id
   end
 
   def do_maintenance
     if check_permission(0)
-      @data = []
-      @users = {}
-      for n in Name.find(:all)
-        eldest_obs = nil
-        for o in n.observations
-          if eldest_obs.nil? or (o.created < eldest_obs.created)
-            eldest_obs = o
-          end
-        end
-        if eldest_obs
-          user = eldest_obs.user
-          if n.user != user
-            found_user = false
-            for p in n.past_names
-              if p.user == user
-                found_user = true
-              end
-            end
-            unless found_user
-              if @users[user.login]
-                @users[user.login] += 1
-              else
-                @users[user.login] = 1
-              end
-              @data.push({:name => n.display_name, :id => n.id, :login => user.login})
-              pn = PastName.make_past_name(n)
-              pn.user = user
-              pn.save
-              n.version += 1
-              n.save
-            end
-          end
-        end
-      end
+      flash_error("Better check this method to make sure it still works as expected since changing to acts_as_versioned. -JPH 20080911")
+#       @data = []
+#       @users = {}
+#       for n in Name.find(:all)
+#         eldest_obs = nil
+#         for o in n.observations
+#           if eldest_obs.nil? or (o.created < eldest_obs.created)
+#             eldest_obs = o
+#           end
+#         end
+#         if eldest_obs
+#           user = eldest_obs.user
+#           if n.user != user
+#             found_user = false
+#             for p in n.past_names
+#               if p.user == user
+#                 found_user = true
+#               end
+#             end
+#             unless found_user
+#               if @users[user.login]
+#                 @users[user.login] += 1
+#               else
+#                 @users[user.login] = 1
+#               end
+#               @data.push({:name => n.display_name, :id => n.id, :login => user.login})
+#               pn = PastName.make_past_name(n) <-- this will not work
+#               pn.user = user                      (but I have no idea what
+#               pn.save                             this action does, so I can't
+#               n.version += 1                      suggest how to fix it...)
+#               n.save
+#             end
+#           end
+#         end
+#       end
     else
       flash_error "Maintenance operations can only be done by the admin user."
-      redirect_to :controller => "observer", :action => "list_rss_logs"
     end
+    redirect_to :controller => "observer", :action => "list_rss_logs"
   end
 
 ################################################################################
@@ -800,7 +801,7 @@ class NameController < ApplicationController
       begin
         count = 0
         name.change_deprecated(true)
-        PastName.check_for_past_name(name, user, "Name deprecated by #{user.login}.")
+        name.save_if_changed(user, "Name deprecated by #{user.login}.")
       rescue RuntimeError => err
         flash_error err.to_s
         return false

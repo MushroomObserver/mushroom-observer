@@ -7,40 +7,44 @@
 %>
 
 <% if name %>
-  <%= link_to("#{:show_observation_about.l} #{what}", :controller => 'name', :action => 'show_name', :id => name)%>
+  <%= link_to("#{:show_observation_about.l} #{what}", :controller => 'name', :action => 'show_name', :id => name.id)%>
   | <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %>
-  | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => name) %>
+  | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => name.id) %>
   <% if @has_notifications %>
     | View Notifications
   <% end %>
+  <% if @user && [0, 1, 252].include?(@user.id) %>
+    | <%= link_to('Debug Consensus', :action => 'recalc', :id => @observation.id) %>
+  <% end %>
   <br/>
-<% end
-%>
+<% end %>
 
-<%= link_to :show_observation_propose_new_name.l,
-    :controller => 'observer', :action => 'create_naming', :id => @observation, :params => search_params %>
-| <%= link_to :show_observation_add_comment.l,
-    :controller => 'comment', :action => 'add_comment', :id => @observation, :params => search_params %>
-| <%= link_to :show_observation_manage_species_lists.l,
-    :controller => 'species_list', :action => 'manage_species_lists', :id => @observation %>
+<%= link_to(:show_observation_propose_new_name.l, :controller => 'observer', :action => 'create_naming',
+  :id => @observation.id, :params => search_params) %>
+| <%= link_to(:show_observation_add_comment.l, :controller => 'comment', :action => 'add_comment',
+  :id => @observation.id, :type => 'Observation', :params => search_params) %>
+| <%= link_to(:show_observation_manage_species_lists.l, :controller => 'species_list',
+  :action => 'manage_species_lists', :id => @observation.id) %>
 <% if questions_ok %>
-  | <%= link_to :show_observation_send_question.l,
-    :controller => 'observer', :action => 'ask_observation_question', :id => @observation %>
+  | <%= link_to(:show_observation_send_question.l,
+    :controller => 'observer', :action => 'ask_observation_question', :id => @observation.id) %>
 <% end
 %>
 <br/>
 
-<%= link_to(:show_observation_previous.l, :action => 'prev_observation', :id => @observation, :seq_key => @seq_key, :search_seq => @search_seq) %> |
-<%= link_to(:show_observation_next.l, :action => 'next_observation', :id => @observation, :seq_key => @seq_key, :search_seq => @search_seq) %>
+<%= link_to(:show_observation_previous.l, :action => 'prev_observation',
+  :id => @observation.id, :seq_key => @seq_key, :search_seq => @search_seq) %> |
+<%= link_to(:show_observation_next.l, :action => 'next_observation',
+  :id => @observation.id, :seq_key => @seq_key, :search_seq => @search_seq) %>
 <br/>
 
 <div id="Title"><%= :show_observation_title.l + ': ' +
   textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
 
 <% if check_permission(@observation.user_id) %>
-  <%= link_to :show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation %>
-  | <%= link_to :show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation },
-                :confirm => "Are you sure?" %>
+  <%= link_to(:show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation.id) %>
+  | <%= link_to(:show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation.id },
+                :confirm => "Are you sure?") %>
   <br/>
 <% end
 %>
@@ -48,13 +52,13 @@
 <table width="100%" cellpadding="10">
   <tr>
     <td width="75%" valign="top">
-      <%= render :partial => 'show_observation' %>
-      <%= render :partial => 'show_namings', :locals => { :search_params => search_params } %>
-      <%= render :partial => 'show_comments', :locals => { :skip_comment => nil } %>
-      <%= render :partial => 'show_footer' %>
+      <%= render(:partial => 'show_observation', :locals => { :observation => @observation }) %>
+      <%= render(:partial => 'show_namings', :locals => { :search_params => search_params }) %>
+      <%= render(:partial => 'show_comments', :locals => { :skip_comment => nil }) %>
+      <%= render(:partial => 'show_footer') %>
 	</td>
     <td width="25%" valign="top">
-      <%= render :partial => 'show_images', :locals => { :search_params => search_params } %>
+      <%= render(:partial => 'show_images', :locals => { :search_params => search_params }) %>
     </td>
   </tr>
 </table>

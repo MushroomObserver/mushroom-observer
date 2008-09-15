@@ -1,4 +1,5 @@
 require 'active_record_extensions'
+require 'acts_as_versioned_extensions'
 require 'string_extensions'
 
 ################################################################################
@@ -26,7 +27,10 @@ require 'string_extensions'
 class Location < ActiveRecord::Base
   belongs_to :user
   has_many :observations
-  has_many :past_locations
+
+  acts_as_versioned(:class_name => 'PastLocation', :table_name => 'past_locations')
+  non_versioned_columns.push('created', 'search_name')
+  ignore_if_changed('modified', 'user_id')
 
   attr_display_names({
     :high  => "high elevation",

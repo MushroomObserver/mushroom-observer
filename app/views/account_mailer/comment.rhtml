@@ -1,12 +1,16 @@
-<% if @user.html_email %>
+<%
+  type = @comment.object_type
+  title = type.titleize
+  small_title = title.downcase
+  if @user.html_email %>
 <html>
 <head>
-  <title>Mushroom Observer: Comment about Observation</title>
+  <title>Mushroom Observer: Comment about <%= title %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 
 <p>The following comment was posted on the Mushroom Observer website regarding
-the observation <u><%= @observation.unique_text_name %></u>:</p>
+the <%= small_title %> <u><%= @object.unique_text_name %></u>:</p>
 
 <p><b>Created:</b> <%= @comment.created.to_formatted_s(:db) %><br/>
 <% if @sender %><b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/><% end %>
@@ -23,8 +27,8 @@ the observation <u><%= @observation.unique_text_name %></u>:</p>
 Here are some handy links you may find useful:</p>
 
 <ul type=none>
-  <li>Show this observation:
-    <%= url = "#{DOMAIN}/observer/show_observation/#{@observation.id}"
+  <li>Show this <%= small_title %>:
+    <%= url = "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"
     link_to(url, url) %></li>
   <li>Stop receiving notifications:
     <%= url = "#{DOMAIN}/account/no_comment_email/#{@user.id}"
@@ -41,12 +45,12 @@ Here are some handy links you may find useful:</p>
 </body>
 </html>
 <% else ##################################################################### %>
-The following comment was posted on the Mushroom Observer website regarding the observation <%= @observation.unique_text_name %>:
+The following comment was posted on the Mushroom Observer website regarding the <%= small_title %> <%= @object.unique_text_name %>:
 
 Created: <%= @comment.created.to_formatted_s(:db) %>
 <% if @sender %>By: <%= @sender.legal_name %> (<%= @sender.email %>)<% end %>
 Summary: <%= @comment.summary %>
-Observation: <%= sprintf "%s/observer/show_observation/%d", DOMAIN, @observation.id %>
+<%= title %>: <%= sprintf("%s/%s/%s/%d", DOMAIN, @object.show_controller, @object.show_action, @object.id) %>
 Comment:
 
 <%= @comment.comment %>
@@ -55,7 +59,7 @@ Comment:
 
 It is entirely up to you if you wish to respond to this user directly.  Here are some handy links you may find useful:
 
-Show this observation: <%= "#{DOMAIN}/observer/show_observation/#{@observation.id}" %>
+Show this <%= small_title %>: <%= "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}" %>
 Stop receiving notifications: <%= "#{DOMAIN}/account/no_comment_email/#{@user.id}" %>
 Change your account preferences: <%= "#{DOMAIN}/account/prefs/#{@user.id}" %>
 Latest changes at Mushroom Observer: <%= DOMAIN %>

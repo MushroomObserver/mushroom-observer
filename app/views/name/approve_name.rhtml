@@ -1,13 +1,13 @@
 <%
     @title = 'Approving ' + h(@name.text_name)
 %>
-<%= link_to 'Cancel (Show Name)', :action => 'show_name', :id => @name %>
+<%= link_to('Cancel (Show Name)', :action => 'show_name', :id => @name.id) %>
 
 <div id="Title">
     Approving <%= textilize_without_paragraph(h(@name.display_name)) %>
 </div>
 
-<% form_tag(:action => 'approve_name', :id => @name) do %>
+<% form_tag(:action => 'approve_name', :id => @name.id) do %>
     <center><%= submit_tag 'Approve' %></center>
     <br/>
     <% if @approved_names %>

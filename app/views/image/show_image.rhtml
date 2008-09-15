@@ -17,8 +17,8 @@
         :controller => 'observer', :action => 'commercial_inquiry', :id => @image %>
 <% end %>
 <br/>
-<%= link_to('Prev', :action => 'prev_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-| <%= link_to('Next', :action => 'next_image', :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+<%= link_to('Prev', :action => 'prev_image', :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+| <%= link_to('Next', :action => 'next_image', :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
 
 <div id="Title">Image: <%= textilize_without_paragraph(h(@image.unique_format_name)) %></div>
 <div id="copyright">Copyright &copy;<%= @image.when.year %> <%= user_link(@image.user, @image.copyright_holder) %></div>

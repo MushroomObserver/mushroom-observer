@@ -60,12 +60,12 @@
         3 images would count as:<br/>
         <table style="margin-left:20px">
           <tr><td></td><td>3 * <%= FIELD_WEIGHTS[:images] %> &nbsp; </td><td>(images)</td></tr>
-          <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:names] %></td><td>(new name)</td></tr>
+          <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:past_names] %></td><td>(name)</td></tr>
           <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:observations] %></td><td>(observation)</td></tr>
           <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:namings] %></td><td>(proposed ID)</td></tr>
           <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:votes] %></td><td>(vote on ID)</td></tr>
           <tr><td colspan="3"><hr/></td></tr>
-          <tr><td></td><td colspan="2"><%= 3*FIELD_WEIGHTS[:images] + FIELD_WEIGHTS[:names] + FIELD_WEIGHTS[:observations] + FIELD_WEIGHTS[:namings] + FIELD_WEIGHTS[:votes] %> points</td></tr>
+          <tr><td></td><td colspan="2"><%= 3*FIELD_WEIGHTS[:images] + FIELD_WEIGHTS[:past_names] + FIELD_WEIGHTS[:observations] + FIELD_WEIGHTS[:namings] + FIELD_WEIGHTS[:votes] %> points</td></tr>
         </table>
         <br/>
         These weights or the overall method of ranking is likely

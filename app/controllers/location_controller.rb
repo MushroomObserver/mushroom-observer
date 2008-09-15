@@ -183,8 +183,10 @@ class LocationController < ApplicationController
 
   def show_past_location
     store_location
-    @past_location = PastLocation.find(params[:id])
-    @other_versions = PastLocation.find(:all, :conditions => "location_id = %s" % @past_location.location_id, :order => "version desc")
+    @location = Location.find(params[:id])
+    @past_location = Location.find(params[:id].to_i) # clone or dclone?
+    @past_location.revert_to(params[:version].to_i)
+    @other_versions = @location.versions.reverse
     @map = make_map([@past_location])
     @header = "#{GMap.header}\n#{finish_map(@map)}"
   end
@@ -197,8 +199,8 @@ class LocationController < ApplicationController
     #         " u.name, u.login, n.observation_name from observations o, users u, names n" +
     #         " where o.location_id = %s and o.user_id = u.id and n.id = o.name_id order by n.text_name, o.when desc"
     # @data = Location.connection.select_all(query % params[:id])
-    @past_location = PastLocation.find(:all, :conditions => "location_id = %s and version = %s" % [@location.id, @location.version - 1]).first
-
+    @past_location = @location.versions.latest
+    @past_location = @past_location.previous if @past_location
     @map = make_map([@location])
     @header = "#{GMap.header}\n#{finish_map(@map)}"
   end
@@ -258,16 +260,11 @@ class LocationController < ApplicationController
           merge_locations(@location, matching_name)
         else
           @location.attributes = params[:location]
-          past_loc = PastLocation.check_for_past_location(@location, @user)
-          if past_loc
-            if @location.save
-              flash_notice "Location was successfully updated."
-              flash_warning "Failed to save log of changes, though." \
-                if !past_loc.save
-              redirect_to(:action => 'show_location', :id => @location)
-            else
-              flash_object_errors @location
-            end
+          if @location.save_if_changed(@user)
+            flash_notice "Location was successfully updated."
+            redirect_to(:action => 'show_location', :id => @location)
+          elsif @location.errors.length > 0
+            flash_object_errors @location
           else
             flash_warning "No update needed."
             redirect_to(:action => 'show_location', :id => @location)
@@ -284,7 +281,7 @@ class LocationController < ApplicationController
         obs.location = dest
         obs.save
       end
-      for past_loc in location.past_locations
+      for past_loc in location.versions
         past_loc.destroy
       end
       location.destroy

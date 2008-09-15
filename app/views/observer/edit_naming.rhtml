@@ -4,7 +4,7 @@
 
 <% @title = 'Edit Naming for Observation #' + h(@observation.id) %>
 
-<%= link_to 'Cancel (Show Observation)', :action => 'show_observation', :id => @observation %>
+<%= link_to('Cancel (Show Observation)', :action => 'show_observation', :id => @observation.id) %>
 
 <div id="Title"><%= @title %></div>
 
@@ -15,17 +15,19 @@
 <table width="100%" cellpadding="10">
   <tr>
     <td width="75%" valign="top">
-      <%= render :partial => 'show_observation' %>
-      <%= render :partial => 'form_naming', :locals => {
+      <%= render(:partial => 'show_observation', :locals => {
+        :observation => @observation,
+      }) %>
+      <%= render(:partial => 'form_naming', :locals => {
         :action       => 'edit_naming',
         :button_name  => 'Save Edits',
         :show_reasons => true,
-      } %>
+      }) %>
 	</td>
     <td width="25%" valign="top">
-      <%= render :partial => 'show_images', :locals => {
+      <%= render(:partial => 'show_images', :locals => {
         :search_params => calc_search_params()
-      } %>
+      }) %>
     </td>
   </tr>
 </table>

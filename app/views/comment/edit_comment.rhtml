@@ -1,7 +1,7 @@
-<% @title = 'Editing Comment on ' + @comment.observation.unique_text_name %>
+<% @title = 'Editing Comment on ' + @object.unique_text_name %>
 <%= link_to 'Cancel (Show Comment)', :action => 'show_comment', :id => @comment %>
 
-<div id="Title">Editing Comment on <%= textilize_without_paragraph(h(@comment.observation.unique_format_name)) %></div>
+<div id="Title">Editing Comment on <%= textilize_without_paragraph(h(@object.unique_format_name)) %></div>
 
 <% form_tag(:action => 'edit_comment', :id => @comment) do %>
 <center><%= submit_tag 'Save Edits' %></center>
@@ -10,10 +10,13 @@
 
 <br/><hr align="center" width="90%" />
 
-<%= render :partial => 'observer/show_observation', :locals => {
-    :observation => @comment.observation,
-    :do_title => true,
-    :skip_comment => @comment.id
-} %>
+<%= case @comment.object_type
+  when 'Observation'
+    render(:partial => 'observer/show_observation', :locals => {
+      :observation => @object,
+    })
+  else
+    raise(ArgumentError, "We appear to have forgotten to tell add_comment how to display objects of type \"#{@comment.object_type}\".")
+end %>
 
 <% end %>

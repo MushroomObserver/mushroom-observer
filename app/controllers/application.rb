@@ -472,15 +472,9 @@ class ApplicationController < ActionController::Base
       if names.last.nil?
         flash_error "Unable to create the name '#{output_what}'."
       else
+        now = Time.now
         for n in names
-          if n
-            if n.id # (if it has an id it already exists)
-              PastName.check_for_past_name(n, user, "Updated by #{user.login}.")
-            else # (if it doesn't have an id it is new)
-              n.user = user
-            end
-            n.save
-          end
+          n.save_if_changed(user, "Updated by #{user.login}.", now) if n
         end
       end
       result = names.last
@@ -658,10 +652,7 @@ class ApplicationController < ActionController::Base
         # only save comment if name didn't exist
         synonym_name.notes = name_parse.synonym_comment if !synonym_name.id && name_parse.synonym_comment
         synonym_name.change_deprecated(true)
-        unless PastName.check_for_past_name(synonym_name, user, "Deprecated by #{user.login}")
-          synonym_name.user = user
-          synonym_name.save
-        end
+        synonym_name.save_if_changed(user, "Deprecated by #{user.login}")
         save_names(synonym_names[0..-2], user, nil) # Don't change higher taxa
       end
     end
@@ -682,14 +673,9 @@ class ApplicationController < ActionController::Base
       end
     end
     for n in names
-      if n # Could be nil if parent is ambiguuous with respect to the author
+      if n # Could be nil if parent is ambiguous with respect to the author
         n.change_deprecated(deprecate) unless deprecate.nil? or n.id
-        unless PastName.check_for_past_name(n, user, msg)
-          unless n.id # Only save if it's brand new
-            n.user = user
-            n.save
-          end
-        end
+        n.save_if_changed(user, msg)
       end
     end
   end

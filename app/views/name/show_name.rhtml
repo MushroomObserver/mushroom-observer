@@ -59,7 +59,8 @@
     <% end %>
 	<%= :show_name_version.l %>: <%= @name.version %><br/>
 	<% if @past_name %>
-	    <%= link_to("#{:show_name_previous_version.l}: %s" % @past_name.version, :action => 'show_past_name', :id => @past_name.id) %>
+	    <%= link_to("#{:show_name_previous_version.l}: %d" % @past_name.version,
+          :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
 	<% end %>
 	<br/><%= :show_name_content_status.l %>: <%= @name.review_status.l %>
 	<% if @name.reviewer %>

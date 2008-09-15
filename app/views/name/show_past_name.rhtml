@@ -12,7 +12,27 @@
                 <%= :show_name_author.l %>: <%= @past_name.author %><br/>
                 <%= :show_name_citation.l %>: <%= textilize_without_paragraph(sanitize(@past_name.citation || '')) %><br/>
             </p>
-
+        </td>
+        <td valign="top" width="50%">
+            Other versions:<br/>
+            <% for v in @other_versions %>
+                <%= '<b>' if !v.deprecated %>
+                <% if v.version == @past_name.version %>
+                    <%= "%s: %s" % [v.version, textilize_without_paragraph(h(v.display_name))] %>
+                <% elsif v.version == @name.version %>
+                    <%= link_to("%s: %s" % [v.version, textilize_without_paragraph(h(v.display_name))],
+                        :action => 'show_name', :id => @name.id) %>
+                <% else %>
+                    <%= link_to("%s: %s" % [v.version, textilize_without_paragraph(h(v.display_name))],
+                        :action => 'show_past_name', :id => @name.id, :version => v.version) %>
+                <% end %>
+                <%= '</b>' if !v.deprecated %>
+                <br/>
+            <% end %>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
             <%
               odd_or_even = 0
               for f in Name.all_note_fields
@@ -26,30 +46,7 @@
                   <br/>
             <%  end
             end %>
-        </td>
-        <td valign="top" width="50%">
-            Other versions:<br/>
-            <%
-                name = @past_name.name
-                if name
-                    %>
-                    <%= link_to("%s: %s" % [name.version, textilize_without_paragraph(h(name.display_name))],
-                            :action => 'show_name', :id => name) %><br/>
-                <% else %>
-                    No current version<br/>
-                <% end %>
-            <% for v in @other_versions
-                if v.version == @past_name.version %>
-                    <%= "%s: %s" % [v.version, textilize_without_paragraph(h(v.display_name))] %><br/>
-                <% else %>
-                    <%= link_to("%s: %s" % [v.version, textilize_without_paragraph(h(v.display_name))],
-                                :action => 'show_past_name', :id => v.id) %><br/>
-                <% end 
-               end %>
-        </td>
-    </tr>
-    <tr>
-        <td>
+
             <p><span class="Date">
                 Name created: <%= @past_name.created %><br/>
                 Last modified: <%= @past_name.modified %> by <%= user_link(@past_name.user) %><br/>

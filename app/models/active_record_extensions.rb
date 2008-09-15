@@ -65,6 +65,29 @@ module ActiveRecord
     def self.get_attr_display_names
       {}
     end
+
+    # Return the name of the controller (as a simple lowercase string)
+    # that handles the "show_<object>" action for this object.
+    #   user.show_controller => 'observer'
+    #   name.show_controller => 'name'
+    def show_controller
+      case self.class.to_s
+        when 'Observation', 'Naming', 'Vote', 'User'
+          return 'observer'
+        when 'Name', 'SpeciesList', 'Location'
+          return type
+        else
+          raise(ArgumentError, "Invalid object type, \"#{self.class.to_s.underscore}\".")
+      end
+    end
+
+    # Return the name of the "show_<object>" action (as a simple
+    # lowercase string) that displays this object.
+    #   user.show_action => 'show_user'
+    #   name.show_action => 'show_name'
+    def show_action
+      'show_' + self.class.to_s.underscore
+    end
   end
 end
 

@@ -10,7 +10,8 @@
 <%= link_to(:location_all.l, :action => 'list_place_names') %> |
 <%= link_to(:show_location_edit.l, :action => 'edit_location', :id => @location) %>
 <% if @past_location %>
-    | <%= link_to("#{:show_location_older_versions.l}", :action => 'show_past_location', :id => @past_location.id ) %>
+    | <%= link_to("#{:show_location_older_versions.l}", :action => 'show_past_location',
+        :id => @location.id, :version => @past_location.version ) %>
 <% end %>
 <br/><br/>
 

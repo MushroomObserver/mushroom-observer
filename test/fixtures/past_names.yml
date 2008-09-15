@@ -2,7 +2,6 @@
 coprinus_comatus_past_name:
   id: 1
   name_id: 2
-  created: 2007-02-26 20:47:00
   modified: 2007-02-26 20:48:00
   user_id: 1
   version: 0
@@ -17,7 +16,6 @@ coprinus_comatus_past_name:
 coprinellus_micaceus_past_name:
   id: 2
   name_id: 22
-  created: 2007-06-24 12:45:55
   modified: 2007-06-24 12:45:55
   user_id: 1
   version: 0

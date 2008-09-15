@@ -159,8 +159,7 @@
                     <div style="padding:10px">
                         <%
                         pattern = session[:pattern]
-                        form_tag(:action => 'pattern_search',
-                                 :controller => 'observer', :id => @comment) do %>
+                        form_tag(:controller => 'observer', :action => 'pattern_search') do %>
                           <%= :app_find.l %>: <%= text_field("search", "pattern", :size => 30, :value => pattern)%>
                           <%= submit_tag :app_observations_find.l %>
                           <%= submit_tag :app_images_find.l %>

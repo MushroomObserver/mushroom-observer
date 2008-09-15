@@ -1,6 +1,6 @@
 <% @title = 'New Notifications for ' + textilize_without_paragraph(h(@user.legal_name)) %>
-<%= link_to 'Show Observation', :controller => 'observer',
-  :action => 'show_observation', :id => @observation %>
+<%= link_to('Show Observation', :controller => 'observer',
+  :action => 'show_observation', :id => @observation.id) %>
 
 <div id="Title"><%= @title %></div>
 <%

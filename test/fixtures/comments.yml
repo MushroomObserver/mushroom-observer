@@ -5,4 +5,5 @@ minimal_comment:
   user_id: 1
   summary: A comment on minimal unknown
   comment: Wow!  That's really cool
-  observation_id: 1
+  object_type: Observation
+  object_id: 1

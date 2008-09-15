@@ -60,7 +60,7 @@ class Observation < ActiveRecord::Base
   has_and_belongs_to_many :species_lists,
     :after_add => :add_spl_callback, :before_remove => :remove_spl_callback
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
-  has_many :comments, :dependent => :destroy
+  has_many :comments, :dependent => :destroy, :as => :object
   has_many :namings,  :dependent => :destroy
   has_one :rss_log
   belongs_to :name      # (used to cache consensus name)
@@ -141,9 +141,9 @@ class Observation < ActiveRecord::Base
   # only when there are multiple "accepted" names for the winning taxon. 
   #
   # Returns Naming instance or nil.  Refreshes vote_cache as a side-effect.
-  def calc_consensus
+  def calc_consensus(debug=false)
     self.reload
-result = ""
+result = "" if debug
 
     # Gather votes for names and synonyms.  Note that this is trickier than one
     # would expect since it is possible to propose several synonyms for a
@@ -188,6 +188,7 @@ result = ""
           taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
           taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
           taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
+result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
           if !taxon_votes[taxon_id][user_id] ||
               taxon_votes[taxon_id][user_id][0] < val
             taxon_votes[taxon_id][user_id] = [val, wgt]
@@ -207,7 +208,7 @@ result = ""
         wgt = user_vote[1]
         vote[0] += val * wgt
         vote[1] += wgt
-#result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt} (#{vote[0]}, #{vote[1]}) (#{votes[taxon_id][0]}, #{votes[taxon_id][1]})<br/>"
+result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
       end
     end
 
@@ -222,7 +223,7 @@ result = ""
       wgt = votes[taxon_id][1]
       val = votes[taxon_id][0].to_f / (wgt + 1.0)
       age = taxon_ages[taxon_id]
-#result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>"
+result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
       if best_val.nil? ||
          val > best_val || val == best_val && (
          wgt > best_wgt || wgt == best_wgt && (
@@ -234,7 +235,7 @@ result = ""
         best_id  = taxon_id
       end
     end
-#result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>"
+result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>" if debug
 
     # Reverse our kludge that mashed names-without-synonyms and synonym-groups
     # together.  In the end we just want a name. 
@@ -254,7 +255,7 @@ result = ""
         best = Name.find(match[2].to_i)
       end
     end
-#result += "unmash: best=#{best ? best.text_name : "nil"}<br/>"
+result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
 
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate. 
@@ -264,6 +265,7 @@ result = ""
       if names.length == 1
         best = names.first
       elsif names.length > 1
+result += "Multiple approved synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
 
         # First combine votes for each name; exactly analagous to what we did
         # with taxa above. 
@@ -272,10 +274,11 @@ result = ""
           vote = votes[name_id] = [0, 0]
           for user_id in name_votes[name_id].keys
             user_vote = name_votes[name_id][user_id]
+            val = user_vote[0]
             wgt = user_vote[1]
-            val = user_vote[0].to_f / (wgt + 1.0)
             vote[0] += val * wgt
             vote[1] += wgt
+result += "vote: name_id=#{name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
           end
         end
 
@@ -295,13 +298,14 @@ result = ""
           name_id = name.id
           vote = votes[name_id]
           if vote
-            val = vote[0]
             wgt = vote[1]
+            val = vote[0].to_f / (wgt + 1.0)
             age = name_ages[name_id]
+result += "#{name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
             if best_val2.nil? ||
                val > best_val2 || val == best_val2 && (
                wgt > best_wgt2 || wgt == best_wgt2 && (
-               age < best_ag2e
+               age < best_age2
               ))
               best_val2 = val
               best_wgt2 = wgt
@@ -310,10 +314,11 @@ result = ""
             end
           end
         end
+result += "best: id=#{best_id2}, val=#{best_val2}, wgt=#{best_wgt2}, age=#{best_age2}<br/>" if debug
         best = best_id2 ? Name.find(best_id2) : names.first
       end
     end
-#result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>"
+result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>" if debug
 
     # This should only occur for observations created by
     # species_list.construct_observation(), which doesn't necessarily create
@@ -323,7 +328,7 @@ result = ""
     # voting.) 
     best = self.namings.first.name if !best && self.namings && self.namings.length > 0
     best = Name.unknown if !best
-#result += "fallback: best=#{best ? best.text_name : "nil"}<br/>"
+result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
 
     # Make changes permanent and log them.
     old = self.name
@@ -336,7 +341,7 @@ result = ""
       self.log("Consensus established: #{best.observation_name}", true)
     end
 
-return result
+return result if debug
   end
 
   ########################################

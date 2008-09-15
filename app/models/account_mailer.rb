@@ -8,7 +8,7 @@
 #
 #  Public methods:
 #    email_features(...)          Mass-mailing about new features.
-#    comment(...)                 Notify user of comment on their observation.
+#    comment(...)                 Notify user of comment on their object.
 #    commercial_inquiry(...)      User asking user about an image.
 #    observation_question(...)    User asking user about an observation.
 #    user_question(...)           User asking user about anything else.
@@ -31,13 +31,13 @@ class AccountMailer < ActionMailer::Base
   EXTRA_BCC_EMAIL_ADDRESSES = "nathan@collectivesource.com"
   EXCEPTION_RECIPIENTS      = %w{webmaster@mushroomobserver.org}
 
-  def comment(sender, receiver, observation, comment)
+  def comment(sender, receiver, object, comment)
     @user                = receiver
     @body["sender"]      = sender
     @body["user"]        = @user
-    @body["observation"] = observation
+    @body["object"]      = @object = object
     @body["comment"]     = comment
-    @subject             = 'Comment about ' + observation.unique_text_name
+    @subject             = 'Comment about ' + object.unique_text_name
     if sender
       @headers['Reply-To'] = sender.email
     end

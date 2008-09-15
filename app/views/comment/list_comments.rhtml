@@ -8,18 +8,19 @@
      odd_or_even = 0
      for comment in @comments
        odd_or_even = 1 - odd_or_even
-       observation = comment.observation
+       object = comment.object
   %>
   <tr valign="top" class="ListLine<%= odd_or_even %>">
     <td width="100%">
-      <%= link_to sprintf('<span class="ListWhat">%s</span>', h(comment.summary)),
-                :action => 'show_comment', :id => comment %>: 
-      <% if !observation.nil? %>
-        <%= link_to sprintf('<span class="ListWhat">%s</span>',
-                textilize_without_paragraph(h(observation.unique_format_name))),
-                :controller => 'observer', :action => 'show_observation', :id => observation %>
+      <%= link_to(sprintf('<span class="ListWhat">%s</span>', h(comment.summary)),
+                :action => 'show_comment', :id => comment.id) %>: 
+      <% if object %>
+        <%= link_to(sprintf('<span class="ListWhat">%s</span>',
+                textilize_without_paragraph(h(object.unique_format_name))),
+                :controller => object.show_controller, :action => object.show_action,
+                :id => object.id) %>
       <% else %>
-        (observation deleted)
+        (object deleted)
       <% end %>
       <br/>
       <span class="ListWhen"><%= comment.created %></span>:

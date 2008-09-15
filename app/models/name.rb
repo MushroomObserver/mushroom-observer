@@ -1,9 +1,12 @@
+require 'acts_as_versioned_extensions'
+
+################################################################################
 #
 #  Model to describe a single scientific name.  The related class Synonym,
 #  which can own multiple Name's, more accurately embodies the abstract concept
 #  of a species.  A Name, on the other hand, refers to a single epithet, in a
 #  single sense -- that is, a unique combination of genus, species, and author.
-#  (Name also embraces infraspecies and extrageneric taxa as well.) 
+#  (Name also embraces infraspecies and extrageneric taxa as well.)
 #
 #  The Name object's basic properties are:
 #
@@ -101,27 +104,31 @@
 
 class Name < ActiveRecord::Base
   has_many :observations
-  has_many :past_names
   has_many :namings
   has_one :rss_log
   belongs_to :user
   belongs_to :synonym
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
-  
+
+  acts_as_versioned(:class_name => 'PastName', :table_name => 'past_names')
+  non_versioned_columns.push('created', 'synonym_id')
+  ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review')
+  # (note: ignore_if_changed is in app/models/acts_as_versioned_extensions)
+
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_review_statuses()
     [:unreviewed, :unvetted, :vetted, :inaccurate]
   end
-  
+
   # Returns: array of symbols.  Essentially a constant array.
   def self.min_eol_note_fields()
     [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
   end
-  
+
   def self.eol_note_fields()
     min_eol_note_fields
   end
-  
+
   def self.all_note_fields()
     eol_note_fields.push(:notes)
   end
@@ -781,7 +788,7 @@ class Name < ActiveRecord::Base
     end
     result
   end
-  
+
   # Returns a hashtable contain all the notes
   def all_notes()
     result = {}
@@ -790,13 +797,13 @@ class Name < ActiveRecord::Base
     end
     result
   end
-  
+
   def set_notes(notes)
     for f in Name.all_note_fields
       self.send("#{f}=", notes[f])
     end
   end
-  
+
   def has_any_notes?()
     result = false
     for f in Name.all_note_fields
@@ -823,13 +830,12 @@ class Name < ActiveRecord::Base
   end
 
   # Stick some (Textile) notes onto the top of existing notes.
-  # Returns nothing.  Saves change.
+  # Returns nothing.  DOES NOT SAVE!
   def prepend_notes(str)
     if !self.notes.nil? && self.notes != ""
       self.notes = str + "<br>\n\n" + self.notes
     else
       self.notes = str
     end
-    self.save
   end
 end

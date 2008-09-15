@@ -1,13 +1,13 @@
 <%= javascript_include_auto_complete %>
 
 <% @title = 'Deprecating ' + h(@name.text_name) %>
-<%= link_to 'Cancel', :action => 'show_name', :id => @name %>
+<%= link_to('Cancel', :action => 'show_name', :id => @name.id) %>
 
 <div id="Title">
   Deprecating <%= textilize_without_paragraph(h(@name.display_name)) %>
 </div>
 
-<% form_tag(:action => 'deprecate_name', :id => @name, :approved_name => @what) do %>
+<% form_tag(:action => 'deprecate_name', :id => @name.id, :approved_name => @what) do %>
   <center><%= submit_tag 'Submit' %></center>
 
   <% if @names && @names.length > 0 %>

@@ -40,8 +40,8 @@ class CommentControllerTest < Test::Unit::TestCase
   end
 
   def test_add_comment
-    requires_login :add_comment, {:id => 1}
-    assert_form_action :action => 'add_comment'
+    requires_login :add_comment, {:id => 1, :type => 'Observation'}
+    assert_form_action(:action => 'add_comment', :id => 1, :type => 'Observation')
   end
 
   def test_edit_comment
@@ -54,7 +54,7 @@ class CommentControllerTest < Test::Unit::TestCase
 
   def test_destroy_comment
     comment = @minimal_comment
-    obs = comment.observation
+    obs = comment.object
     assert(obs.comments.member?(comment))
     params = {"id"=>comment.id.to_s}
     assert("rolf" == comment.user.login)
@@ -70,6 +70,7 @@ class CommentControllerTest < Test::Unit::TestCase
     comment_count = obs.comments.size
     params = {
       :id => obs.id,
+      :type => 'Observation',
       :comment => {
         :summary => "A Summary",
         :comment => "Some text."
@@ -92,6 +93,7 @@ class CommentControllerTest < Test::Unit::TestCase
     comment_count = obs.comments.size
     comment_params = {
       :id => obs.id,
+      :type => 'Observation',
       :comment => {
         "summary" => "Garble",
         "comment" => "Blarble."
