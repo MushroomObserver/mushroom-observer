@@ -20,6 +20,7 @@
     stylesheet_link_tag 'general', css
   %>
   <%= "<link rel=\"SHORTCUT ICON\" href=\"#{DOMAIN}/images/favicon.ico\" />"%>
+  <%= sort_javascript_includes.map {|m| javascript_include_tag(m)} %>
   <% if @header %>
     <%= @header %>
   <% end %>

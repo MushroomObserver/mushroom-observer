@@ -1,3 +1,4 @@
+require_dependency 'javascript'
 require_dependency 'auto_complete'
 
 # Methods added to this helper will be available to all templates in the application.

@@ -1,9 +1,8 @@
+<% javascript_include 'vote_popup' %>
+
 <% logged_in = !@user.nil? && !@user.verified.nil? && @user.verified %>
 <% any_names = @observation.namings && @observation.namings.length > 0 %>
 <% popups = [] %>
-
-<%= javascript_include_tag :defaults %>
-<%= javascript_include_tag 'my_utilities' %>
 
 <% form_tag(:action => 'show_observation', :id => @observation) do %>
   <p>
@@ -14,9 +13,8 @@
     <% end %>&nbsp;
     <%= link_to :show_namings_propose_new_name.l, :action => 'create_naming',
       :id => @observation, :params => search_params %>
-    <% if logged_in && any_names %>
-      &nbsp;<%= javascript_tag "document.write('" +
-        submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") + "')" %>
+    <% if logged_in && any_names && can_do_ajax? %>
+      &nbsp;<%= submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") %>
     <% end %>
   </p>
 
@@ -64,12 +62,9 @@
                 if nvotes == 0
                   html += "(#{lnbsp(:show_namings_no_votes)})"
                 else
-                  link = link_to_function(h(txt), "show_votes(#{naming.id})")
-                  link.gsub!(/'/, "' + \"'\" + '")
-                  html += javascript_tag "document.write('#{link}')"
-                  html += "<noscript>"
-                  html += link_to(h(txt), :action => 'show_votes', :id => naming)
-                  html += "</noscript>"
+                  html += can_do_ajax? ?
+                    link_to_function(h(txt), "show_votes(#{naming.id})") :
+                    link_to(h(txt), :action => 'show_votes', :id => naming.id)
                   popups << naming
                 end
                 if nvotes != 0
@@ -90,9 +85,7 @@
                      check_permission(naming.user_id) && (!@vote || @vote.value == 0) %>
                 <%= select('vote', 'value', menu, {}, { :index => naming.id,
                   :onchange => "change_vote(#{naming.id})" }) %>
-                <noscript>
-                  <%= submit_tag(:show_namings_cast.l) %>
-                </noscript>
+                <%= submit_tag(:show_namings_cast.l) if !can_do_ajax? %>
               </td>
             <% end %>
 
@@ -149,67 +142,29 @@
   <% end %>
 <% end %>
 
-<% @ajax = true %>
-<% for @naming in popups %>
-  <div class="popup" id="show_votes_<%= @naming.id %>"><div>
-    <%= render :partial => 'show_votes', :locals => { :do_cancel => true } %>
-  </div></div>
+<% if can_do_ajax? %>
+  <% @ajax = true %>
+  <% for @naming in popups %>
+    <div class="popup" id="show_votes_<%= @naming.id %>"><div>
+      <%= render :partial => 'show_votes', :locals => { :do_cancel => true } %>
+    </div></div>
+  <% end %>
+
+  <%= javascript_tag %(
+    var CHANGED = false;
+    var POPUPS = { #{@observation.namings.map {|n|
+      id = n.id.to_s
+      "#{id}: $('show_votes_' + #{id})"
+    }.join(", ")} };
+    var VOTES = { #{@observation.namings.map {|n|
+      id = n.id.to_s
+      "#{id}: $('vote_' + #{id} + '_value')"
+    }.join(", ")} };
+
+    // Called when user leaves the page.
+    window.onbeforeunload = function() {
+      if (CHANGED)
+        return "#{:show_namings_lose_changes.l}"
+    }
+  ) %>
 <% end %>
-
-<%= javascript_tag <<EOS
-  var CHANGED = false;
-  var POPUPS = { #{@observation.namings.map {|n|
-    id = n.id.to_s
-    "#{id}: $('show_votes_' + #{id})"
-  }.join(", ")} };
-  var VOTES = { #{@observation.namings.map {|n|
-    id = n.id.to_s
-    "#{id}: $('vote_' + #{id} + '_value')"
-  }.join(", ")} };
-
-  // Popup little votes box.
-  function show_votes(this_id) {
-    for (id in POPUPS) {
-      var div = POPUPS[id]
-      if (div) {
-        if (id == this_id) {
-          center_div(div);
-          show_div(div);
-        } else {
-          hide_div(div);
-        }
-      }
-    }
-  }
-
-  // Close vote box.
-  function hide_votes(this_id) {
-    for (id in POPUPS) {
-      var div = POPUPS[id]
-      if (div)
-        hide_div(div);
-    }
-  }
-
-  // Called when vote is changed.
-  function change_vote(this_id) {
-    if (VOTES[this_id].value == 100)
-      for (id in POPUPS)
-        if (id != this_id && VOTES[id].value == 100)
-          VOTES[id].value = 80;
-    CHANGED = 1;
-  }
-
-  // Called when submit button clicked (to prevent confirmation).
-  function set_changed(flag) {
-    CHANGED = flag;
-  }
-
-  // Called when user leaves the page.
-  window.onbeforeunload = function() {
-    if (CHANGED)
-      return "#{:show_namings_lose_changes.l}"
-  }
-EOS
-%>
-

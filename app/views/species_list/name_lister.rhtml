@@ -1,8 +1,8 @@
 <% if can_do_ajax? %>
-  <%= javascript_include_tag 'prototype' %>
-  <%= javascript_include_tag 'effects' %>
-  <%= javascript_include_tag 'controls' %>
-  <%= javascript_include_tag 'name_list' %>
+  <% javascript_include 'prototype' %>
+  <% javascript_include 'effects' %>
+  <% javascript_include 'controls' %>
+  <% javascript_include 'name_list' %>
 <% end %>
 
 <% @title = :name_lister_title.l %>

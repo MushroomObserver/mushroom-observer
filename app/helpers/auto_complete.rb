@@ -11,12 +11,12 @@
 # == Usage
 #
 # app/view/some/action.rhtml:
-#   <%= javascript_include_auto_complete %>
+#   <% javascript_include_auto_complete %>
 #   <% form = form_for(:thingy) do %>
 #     Location: <%= form.text_field(:place) %>
 #     <%= turn_into_location_auto_completer('thingy_place') %>
 #   <% end %>
-# 
+#
 ################################################################################
 
 module ApplicationHelper
@@ -87,11 +87,11 @@ module ApplicationHelper
   # Include everything needed for auto-completion.
   def javascript_include_auto_complete
     if can_do_ajax?
+      javascript_include 'prototype'
+      javascript_include 'effects'
+      javascript_include 'controls'
+      javascript_include 'cached_auto_complete'
       "<div id='indicator' class='indicator'>" + image_tag('indicator.gif') + "</div>" +
-      javascript_include_tag('prototype') +
-      javascript_include_tag('effects') +
-      javascript_include_tag('controls') +
-      javascript_include_tag('cached_auto_complete') +
       javascript_tag('Element.hide($("indicator"))')
     end
   end
