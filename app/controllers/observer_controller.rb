@@ -336,6 +336,7 @@ class ObserverController < ApplicationController
   #   @notifications
   def show_notifications
     data = []
+    @observation = Observation.find(params[:id])
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, @user.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
