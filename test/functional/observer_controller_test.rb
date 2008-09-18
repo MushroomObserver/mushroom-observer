@@ -421,6 +421,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     params[:observation]["when(2i)"] = "3"
     params[:observation]["when(3i)"] = "9"
     params[:observation][:specimen]  = "0"
+    params[:observation][:thumb_image_id] = "0" if !params[:observation][:thumb_image_id]
     params[:vote] = {}          if !params[:vote]
     params[:vote][:value] = "3" if !params[:vote][:value]
     post_requires_login(:create_observation, params, false)
@@ -435,13 +436,16 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert((g_count + naming_count) == Naming.find(:all).length)
     assert((n_count + name_count) == Name.find(:all).length)
     assert_equal(10+observation_count+2*naming_count+10*name_count, @rolf.reload.contribution)
+    if observation_count == 1
+      assert_not_equal(0, @controller.instance_variable_get('@observation').thumb_image_id)
+    end
   end
 
   def test_construct_observation_simple
     # Test a simple observation creation with an approved unique name
     where = "test_construct_observation_simple"
     test_construct_observation_generic({
-      :observation => { :where => where },
+      :observation => { :where => where, :thumb_image_id => '0' },
       :name => { :name => "Coprinus comatus" }
     }, 1,1,0)
     obs = assigns(:observation)
@@ -450,6 +454,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(@coprinus_comatus.id, nam.name_id) # Make sure it's the right name
     assert_equal("2.03659", "%.5f" % obs.vote_cache)
     assert_not_nil(obs.rss_log)
+    # This was getting set to zero instead of nil if no images were uploaded when obs was created.
+    assert_equal(nil, obs.thumb_image_id)
   end
 
   def test_construct_observation_unknown
@@ -629,7 +635,8 @@ class ObserverControllerTest < Test::Unit::TestCase
         "when(2i)" => "2",
         "when(3i)" => "3",
         :notes => new_notes,
-        :specimen => new_specimen
+        :specimen => new_specimen,
+        :thumb_image_id => "0",
       },
       :log_change => { :checked => '1' }
     }
@@ -642,6 +649,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(new_notes, obs.notes)
     assert_equal(new_specimen, obs.specimen)
     assert_not_equal(modified, obs.rss_log.modified)
+    assert_not_equal(0, obs.thumb_image_id)
   end
 
   def test_update_observation_no_logging
@@ -1483,7 +1491,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :created => now,
       :modified => now,
     })
-    new_image_1.save   
+    new_image_1.save
 
     new_image_2 = Image.new({
       :copyright_holder => 'holder_2',
@@ -1494,7 +1502,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :created => now,
       :modified => now,
     })
-    new_image_2.save   
+    new_image_2.save
 
     @request.session[:user_id] = 1
     post(:create_observation, {

@@ -1401,7 +1401,7 @@ class ObserverController < ApplicationController
         i += 1
       end
     end
-    if observation.thumb_image_id && observation.thumb_image_id <= 0
+    if observation.thumb_image_id && observation.thumb_image_id.to_i <= 0
       observation.thumb_image_id = nil
     end
     return bad_images
