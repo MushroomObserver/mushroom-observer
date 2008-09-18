@@ -3,22 +3,22 @@
 <div title="<%= :signup_title.l %>" id="signupform" class="form">
   <h3><%= :signup_title.l %></h3>
   
-  <label for="user_login"><%= :signup_login.l %>:</label><br/>
-  <%= text_field "user", "login", :size => 30 %><br/><br/>
-  <label for="user_password"><%= :signup_choose_password.l %>:</label><br/>
-  <%= password_field "user", "password", :size => 30 %><br/><br/>
-  <label for="user_password_confirmation"><%= :signup_confirm_password.l %>:</label><br/>
-  <%= password_field "user", "password_confirmation", :size => 30 %><br/><br/>
-  <label for="user_email"><%= :signup_email_address.l %>:</label><br/>
-  <%= text_field "user", "email", :size => 60 %><br/>
+  <label for="new_user_login"><%= :signup_login.l %>:</label><br/>
+  <%= text_field "new_user", "login", :size => 30 %><br/><br/>
+  <label for="new_user_password"><%= :signup_choose_password.l %>:</label><br/>
+  <%= password_field "new_user", "password", :size => 30 %><br/><br/>
+  <label for="new_user_password_confirmation"><%= :signup_confirm_password.l %>:</label><br/>
+  <%= password_field "new_user", "password_confirmation", :size => 30 %><br/><br/>
+  <label for="new_user_email"><%= :signup_email_address.l %>:</label><br/>
+  <%= text_field "new_user", "email", :size => 60 %><br/>
   <span class="HelpNote"><%= :signup_email_help.l %></span><br/><br/>
-  <label for="user_name"><%= :signup_name.l %>:</label><br/>
-  <%= text_field "user", "name", :size => 60 %><br/><br/>
-  <label for="user_name"><%= :signup_preferred_theme.l %>:</label><br/>
-  <%= select(:user, :theme, [[:theme_random.l, "NULL"]] + CSS) %><br/><br/>
+  <label for="new_user_name"><%= :signup_name.l %>:</label><br/>
+  <%= text_field "new_user", "name", :size => 60 %><br/><br/>
+  <label for="new_user_name"><%= :signup_preferred_theme.l %>:</label><br/>
+  <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + CSS) %><br/><br/>
 <br/>
 <input type="submit" value="<%= :signup_button.l %>" class="primary" />
 
-<%= javascript_tag "document.getElementById('user_login').focus()" %>
+<%= javascript_tag "document.getElementById('new_user_login').focus()" %>
 
 <% end %>

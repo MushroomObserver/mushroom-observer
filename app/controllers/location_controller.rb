@@ -141,7 +141,7 @@ class LocationController < ApplicationController
             @user.location = @location
             @user.save
           end
-          redirect_to(:action => 'show_location', :id => @location)
+          redirect_to(:action => 'show_location', :id => @location.id)
         else         # need to create location
           @location = Location.new(params[:location])
           @location.created = Time.now
@@ -155,7 +155,7 @@ class LocationController < ApplicationController
               @user.location = @location
               @user.save
             end
-            redirect_to(:action => 'show_location', :id => @location)
+            redirect_to(:action => 'show_location', :id => @location.id)
           else
             flash_object_errors @location
           end
@@ -262,12 +262,12 @@ class LocationController < ApplicationController
           @location.attributes = params[:location]
           if @location.save_if_changed(@user)
             flash_notice "Location was successfully updated."
-            redirect_to(:action => 'show_location', :id => @location)
+            redirect_to(:action => 'show_location', :id => @location.id)
           elsif @location.errors.length > 0
             flash_object_errors @location
           else
             flash_warning "No update needed."
-            redirect_to(:action => 'show_location', :id => @location)
+            redirect_to(:action => 'show_location', :id => @location.id)
           end
         end
       end

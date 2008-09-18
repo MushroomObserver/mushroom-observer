@@ -56,7 +56,7 @@ class ImageController < ApplicationController
   # Display matrix of images, most recent first.
   # Linked from: left-hand panel
   # Inputs: none
-  # Outputs: @objs, @obj_pages, @user, @layout
+  # Outputs: @objs, @obj_pages, @layout
   def list_images
     session[:checklist_source] = :nothing
     session_setup
@@ -68,7 +68,7 @@ class ImageController < ApplicationController
   # Display list of images sorted by title.
   # Not used by anyone.
   # Inputs: none
-  # Outputs: @images, @user
+  # Outputs: @images
   def images_by_title
     session[:checklist_source] = :nothing
     session_setup
@@ -79,7 +79,7 @@ class ImageController < ApplicationController
   # Display list of images by a given user.
   # Linked from observer/show_user
   # Inputs: params[:id] (user)
-  # Outputs: @images, @user
+  # Outputs: @images
   def images_by_user
     user = User.find(params[:id])
     session[:checklist_source] = :nothing
@@ -129,7 +129,7 @@ class ImageController < ApplicationController
   # Show the 640x640 (max size) version of image.
   # Linked from: thumbnails, next/prev_image, images_by_title, etc.
   # Inputs: params[:id] (image)
-  # Outputs: @image, @user, @invalid
+  # Outputs: @image, @invalid
   def show_image
     store_location
     pass_seq_params()
@@ -143,7 +143,7 @@ class ImageController < ApplicationController
   # Show the original size image.
   # Linked from: show_image
   # Inputs: params[:id] (image)
-  # Outputs: @image, @user, @invalid
+  # Outputs: @image, @invalid
   def show_original
     store_location
     pass_seq_params()
@@ -251,7 +251,7 @@ class ImageController < ApplicationController
   #   params[:image][:when]
   #   params[:image][:license_id]
   #   params[:image][:notes]
-  # Outputs: @image, @observation, @user
+  # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
   # Redirects to show_observation.
   def add_image
@@ -303,7 +303,7 @@ class ImageController < ApplicationController
   # Inputs: params[:id] (observation)
   #   params[:observation][:id]
   #   params[:selected][image_id]       (value of "yes" means delete)
-  # Outputs: @observation, @user
+  # Outputs: @observation
   # Redirects to show_observation.
   def remove_images
     @observation = Observation.find(params[:id])
@@ -337,7 +337,7 @@ class ImageController < ApplicationController
   # Inputs: params[:id] (image)
   #   params[:comment][:summary]
   #   params[:comment][:comment]
-  # Outputs: @image, @licenses, @user
+  # Outputs: @image, @licenses
   def edit_image
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
@@ -414,7 +414,7 @@ class ImageController < ApplicationController
   # they've already uploaded for another observation.
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
-  # Outputs: @images, @image_pages, @observation, @user, @layout
+  # Outputs: @images, @image_pages, @observation, @layout
   # (See also add_image_to_obs and reuse_image_by_id.)
   def reuse_image
     @observation = Observation.find(params[:id])
@@ -472,7 +472,7 @@ class ImageController < ApplicationController
   # they've already uploaded for their profile.  This method does get and post.
   # Linked from: account/prefs
   # Inputs: none
-  # Outputs: @images, @image_pages, @user, @layout
+  # Outputs: @images, @image_pages, @layout
   def reuse_image_for_user
     # Will return here either by typing in id and posting form, or by
     # clicking on an image (in which case method is "get").
@@ -482,7 +482,7 @@ class ImageController < ApplicationController
         @user.image = image
         @user.save
         flash_notice "Changed your image to image ##{image.id}."
-        redirect_to :controller => "observer", :action => "show_user", :id => @user
+        redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
         redirected = true
       rescue(e)
         flash_error "Invalid image id."
@@ -502,7 +502,7 @@ class ImageController < ApplicationController
   # Linked from: account/prefs
   # Inputs:
   #   params[:updates][license_id][copyright_holder]   (new license_id)
-  # Outputs: @data, @user
+  # Outputs: @data
   #   @data[n]['copyright_holder']  Person who actually holds copyright.
   #   @data[n]['license_count']     Number of images this guy holds with this type of license.
   #   @data[n]['selected']          ID of current license.

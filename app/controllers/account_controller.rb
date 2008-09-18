@@ -67,7 +67,7 @@ class AccountController < ApplicationController
             clear_autologin_cookie
           end
           flash[:params] = params
-          redirect_back_or_default :action => "welcome"
+          redirect_back_or_default(:action => "welcome")
         else
           @login = params['user_login']
           flash_error "Login unsuccessful."
@@ -103,31 +103,31 @@ class AccountController < ApplicationController
   def signup
     case request.method
       when :get
-        @user = User.new
+        @new_user = User.new
       when :post
-        theme = params['user']['theme']
-        login = params['user']['login']
+        theme = params['new_user']['theme']
+        login = params['new_user']['login']
         valid_themes = CSS + ["NULL"]
         if valid_themes.member?(theme) and (login != 'test_denied')
-          @user = User.new(params['user'])
-          @user.created = Time.now
-          @user.last_login = @user.created
-          @user.change_rows(5)
-          @user.change_columns(3)
-          @user.mailing_address = ''
-          @user.notes = ''
-          if @user.save
-            user = User.authenticate(@user.login, params['user']['password'])
+          @new_user = User.new(params['new_user'])
+          @new_user.created = Time.now
+          @new_user.last_login = @new_user.created
+          @new_user.change_rows(5)
+          @new_user.change_columns(3)
+          @new_user.mailing_address = ''
+          @new_user.notes = ''
+          if @new_user.save
+            user = User.authenticate(@new_user.login, params['new_user']['password'])
             set_session_user(user)
             flash_notice "Signup successful.  Verification sent to your email account."
-            AccountMailer.deliver_verify(@user)
-            redirect_back_or_default :action => "welcome"
+            AccountMailer.deliver_verify(@new_user)
+            redirect_back_or_default(:action => "welcome")
           else
-            flash_object_errors(@user)
+            flash_object_errors(@new_user)
           end
         else
-          AccountMailer.deliver_denied(params['user'])
-          redirect_back_or_default :action => "welcome"
+          AccountMailer.deliver_denied(params['new_user'])
+          redirect_back_or_default(:action => "welcome")
         end
     end
   end
@@ -135,24 +135,24 @@ class AccountController < ApplicationController
   def email_new_password
     case request.method
       when :get
-        @user = User.new
+        @new_user = User.new
       when :post
-        @login = params['user']['login']
-        @user = User.find(:first, :conditions => ["login = ?", @login])
-        if @user.nil?
+        @login = params['new_user']['login']
+        @new_user = User.find(:first, :conditions => ["login = ?", @login])
+        if @new_user.nil?
           flash_error "Unable to find the user '#{@login}'."
         else
           password = random_password(10)
-          @user.change_password(password)
-          if @user.save
-            user = User.authenticate(@user.login, params['user']['password'])
+          @new_user.change_password(password)
+          if @new_user.save
+            user = User.authenticate(@new_user.login, params['new_user']['password'])
             set_session_user(user)
             flash_notice "Password successfully changed.  New password has been sent to your email account."
-            AccountMailer.deliver_new_password(@user, password)
+            AccountMailer.deliver_new_password(@new_user, password)
             @hiddens = []
-            render :action => "login"
+            render(:action => "login")
           else
-            flash_object_errors(@user)
+            flash_object_errors(@new_user)
           end
         end
     end
@@ -291,7 +291,7 @@ class AccountController < ApplicationController
         @user.destroy
       end
     end
-    redirect_back_or_default :action => "welcome"
+    redirect_back_or_default(:action => "welcome")
   end
 
   def logout_user
@@ -311,7 +311,7 @@ class AccountController < ApplicationController
       @user.verified = Time.now
       @user.save
     else
-      render :action => "reverify"
+      render(:action => "reverify")
     end
   end
 
@@ -321,7 +321,7 @@ class AccountController < ApplicationController
       @user.save
       flash_notice "Removed image from your profile."
     end
-    redirect_to :controller => "observer", :action => "show_user", :id => @user
+    redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
   end
 
   def no_feature_email
@@ -369,7 +369,7 @@ class AccountController < ApplicationController
   def send_verify
     AccountMailer.deliver_verify(get_session_user)
     flash_notice "Verification sent to your email account."
-    redirect_back_or_default :action => "welcome"
+    redirect_back_or_default(:action => "welcome")
   end
 
   protected
@@ -380,7 +380,7 @@ class AccountController < ApplicationController
     result = !get_session_user.nil?
     if result
       # Undo the store_location
-      session['return-to'] = url_for :controller => 'observer', :action => 'index'
+      session['return-to'] = url_for(:controller => 'observer', :action => 'index')
       if id
         user = User.find(id)
         if user != get_session_user
@@ -388,7 +388,7 @@ class AccountController < ApplicationController
           result = false
         end
       else
-        redirect_to :action => 'prefs'
+        redirect_to(:action => 'prefs')
         result = false
       end
     else

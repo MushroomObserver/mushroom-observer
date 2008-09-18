@@ -37,7 +37,7 @@ class AccountControllerTest < Test::Unit::TestCase
   def test_signup
     @request.session['return-to'] = "http://localhost/bogus/location"
 
-    post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "newpassword",
+    post :signup, "new_user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "newpassword",
                               "email" => "nathan@collectivesource.com", "mailing_address" => "", "theme" => "NULL", "notes" => "" }
     assert(@response.has_session_object?(:user_id))
 
@@ -48,32 +48,32 @@ class AccountControllerTest < Test::Unit::TestCase
     @request.session['return-to'] = "http://localhost/bogus/location"
 
     # Password doesn't match
-    post :signup, "user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "wrong",
+    post :signup, "new_user" => { "login" => "newbob", "password" => "newpassword", "password_confirmation" => "wrong",
       "mailing_address" => "", "theme" => "NULL", "notes" => "" }
-    assert(@response.template_objects["user"].errors.invalid?(:password))
+    assert(@response.template_objects["new_user"].errors.invalid?(:password))
 
     # No email
-    post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "newpassword",
+    post :signup, "new_user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "newpassword",
       "mailing_address" => "", "theme" => "NULL", "notes" => "" }
-    assert(@response.template_objects["user"].errors.invalid?(:login))
+    assert(@response.template_objects["new_user"].errors.invalid?(:login))
 
     # Bad password and no email
-    post :signup, "user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "wrong",
+    post :signup, "new_user" => { "login" => "yo", "password" => "newpassword", "password_confirmation" => "wrong",
       "mailing_address" => "", "theme" => "NULL", "notes" => "" }
-    assert(@response.template_objects["user"].errors.invalid?(:password))
-    assert(@response.template_objects["user"].errors.invalid?(:login))
+    assert(@response.template_objects["new_user"].errors.invalid?(:password))
+    assert(@response.template_objects["new_user"].errors.invalid?(:login))
   end
 
   def test_signup_theme_errors
     @request.session['return-to'] = "http://localhost/bogus/location"
 
-    post :signup, "user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
+    post :signup, "new_user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
                               "email" => "spam@spam.spam", "mailing_address" => "", "theme" => "", "notes" => "" }
     assert(!@response.has_session_object?("user"))
 
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
 
-    post :signup, "user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
+    post :signup, "new_user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
                               "email" => "spam@spam.spam", "mailing_address" => "", "theme" => "spammer", "notes" => "" }
     assert(!@response.has_session_object?("user"))
     assert_redirected_to(:controller => "account", :action => "welcome")

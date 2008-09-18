@@ -76,7 +76,7 @@ class SpeciesListController < ApplicationController
 
   # Linked from: list_species_lists, show_observation, create/edit_species_list, etc. etc.
   # Inputs: params[:id] (species_list)
-  # Outputs: @species_list, @observation_list, @user
+  # Outputs: @species_list, @observation_list
   # Use session to store the current species list since this parallels
   # the usage for show_observation.
   def show_species_list
@@ -144,7 +144,6 @@ class SpeciesListController < ApplicationController
   # Linked from: left-hand panel
   # Inputs: none
   # Outputs:
-  #   @user
   #   @checklist_names
   #   @species_list
   #   @list_members
@@ -271,7 +270,6 @@ class SpeciesListController < ApplicationController
   # Inputs:
   #   params[:id] (species_list)
   # Outputs:
-  #   @user
   #   @checklist_names
   #   @species_list
   #   @list_members
@@ -384,7 +382,7 @@ class SpeciesListController < ApplicationController
   # Linked from: edit_species_list
   # Inputs: params[:id] (species_list)
   #   params[:species_list][:file]
-  # Get: @species_list, @user
+  # Get: @species_list
   # Post: goes to edit_species_list
   def upload_species_list
     @species_list = SpeciesList.find(params[:id])
@@ -428,7 +426,7 @@ class SpeciesListController < ApplicationController
   # Form to let user add/remove an observation from his various lists.
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
-  # Outputs: @observation, @user
+  # Outputs: @observation
   def manage_species_lists
     if verify_user()
       @observation = Observation.find(params[:id])

@@ -245,7 +245,7 @@ class ObserverController < ApplicationController
   # Displays matrix of all observations, sorted by date.
   # Linked from: left-hand panel
   # Inputs: none
-  # Outputs: @observations, @observation_pages, @user, @layout
+  # Outputs: @observations, @observation_pages, @layout
   def list_observations
     show_selected_observations("Observations", "", "observations.`when` desc", :all_observations)
   end
@@ -253,7 +253,7 @@ class ObserverController < ApplicationController
   # Displays matrix of all observations, alphabetically.
   # Linked from: nowhere
   # View: list_observations
-  # Outputs: @observations, @observation_pages, @user, @layout
+  # Outputs: @observations, @observation_pages, @layout
   def observations_by_name
     show_selected_observations("Observations", "",
       "names.search_name asc, observations.`when` desc", :all_observations)
@@ -263,11 +263,11 @@ class ObserverController < ApplicationController
   # Linked from: left panel, show_user, users_by_contribution
   # View: list_observations
   # Inputs: params[:id] (user id)
-  # Outputs: @observations, @observation_pages, @user, @layout
+  # Outputs: @observations, @observation_pages, @layout
   def show_user_observations
-    @user = User.find(params[:id])
-    show_selected_observations("Observations by %s" % @user.legal_name,
-      "observations.user_id = %s" % @user.id,
+    user = User.find(params[:id])
+    show_selected_observations("Observations by %s" % user.legal_name,
+      "observations.user_id = %s" % user.id,
       "observations.modified desc, observations.`when` desc")
   end
 
@@ -277,7 +277,7 @@ class ObserverController < ApplicationController
   # View: list_observations
   # Inputs:
   #   session[:pattern]
-  # Outputs: @observations, @observation_pages, @user, @layout
+  # Outputs: @observations, @observation_pages, @layout
   def observation_search
     store_location
     @layout = calc_layout_params
@@ -304,7 +304,7 @@ class ObserverController < ApplicationController
   # Linked from: show_location
   # View: list_observations
   # Inputs: params[:id] (location id)
-  # Outputs: @observations, @observation_pages, @user, @layout
+  # Outputs: @observations, @observation_pages, @layout
   def show_location_observations
     loc = Location.find(params[:id])
     show_selected_observations("Observations from %s" % loc.display_name,
@@ -317,7 +317,7 @@ class ObserverController < ApplicationController
   # Redirected from: where_search
   # View: list_pbservations
   # Inputs: pattern
-  # Outputs: @observations, @observation_pages, @user, @layout
+  # Outputs: @observations, @observation_pages, @layout
   def location_search
     # Looks harder for pattern since location_controller.where_search was using :pattern for a bit
     # and some of the search monkeys picked up on it.
@@ -368,7 +368,7 @@ class ObserverController < ApplicationController
   # Linked from countless views as a fall-back.
   # Inputs: params[:id]
   # Outputs:
-  #   @observation, @user
+  #   @observation
   #   @confidence/agreement_menu    (used to create vote menus)
   #   @votes                        (user's vote for each naming.id)
   def show_observation
@@ -958,7 +958,7 @@ class ObserverController < ApplicationController
   def show_user
     store_location
     id = params[:id]
-    @user = User.find(id)
+    @show_user = User.find(id)
     @user_data = SiteData.new.get_user_data(id)
     @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
       :order => "id desc", :limit => 6)
@@ -1041,18 +1041,18 @@ class ObserverController < ApplicationController
   end
 
   def ask_user_question
-    @user = User.find(params[:id])
-    email_question(@user, 'show_user', @user)
+    @target = User.find(params[:id])
+    email_question(@target, 'show_user', @user)
   end
 
   def send_user_question
     sender = @user
-    user = User.find(params[:id])
+    target = User.find(params[:id])
     subject = params[:email][:subject]
     content = params[:email][:content]
-    AccountMailer.deliver_user_question(sender, user, subject, content)
+    AccountMailer.deliver_user_question(sender, target, subject, content)
     flash_notice "Delivered email."
-    redirect_to(:action => 'show_user', :id => user.id)
+    redirect_to(:action => 'show_user', :id => target.id)
   end
 
   def ask_observation_question
