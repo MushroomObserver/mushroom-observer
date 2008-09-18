@@ -22,14 +22,23 @@ module ActiveRecord
         #
         def save_if_changed(user=nil, log=nil, time=nil)
           result = false
-          if !self.id
+          if self.new_record?
+# print ">>>>>>>> New #{self.class}: ##{self.id} #{self.text_name}\n"
             self.user = user if user
             result = self.save
-          elsif self.changed?
+          elsif self.altered?
+# print ">>>>>>>> Altered #{self.class}: ##{self.id} #{self.text_name}\n"
             self.modified = time || Time.now
             self.user = user if user
             result = self.save
             self.log(log) if result && log 
+          elsif self.changed?
+# print ">>>>>>>> Changed #{self.class}: ##{self.id} #{self.text_name}\n"
+            self.modified = time || Time.now
+            result = self.save
+          else
+            # do nothing
+# print ">>>>>>>> Unchanged #{self.class}: ##{self.id} #{self.text_name}\n"
           end
           return result
         end
