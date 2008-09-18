@@ -47,4 +47,20 @@ namespace :cache do
     Name.connection.update("update names set review_status=review_status_tmp")
     ActiveRecord::Migration.remove_column :names, :review_status_tmp
   end
+  
+  desc "Add reviewers"
+  task(:add_reviewers => :environment) do
+    group = UserGroup.find_by_name('reviewers')
+    for login in ['Anne Pringle', 'Marie', 'tbarbaro']
+      user = User.find_by_login(login)
+      unless user.user_groups.member?(group)
+        user.user_groups << group
+        user.save
+        print "Added #{login} to the reviewers group\n"
+      else
+        print "#{login} is already in the reviewers group\n"
+      end
+    end
+  end
+  
 end

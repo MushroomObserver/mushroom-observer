@@ -726,6 +726,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
       :deprecated => false,
       :rank => :Species,
+      :review_status => :unreviewed
     })
     tapinella.save
 

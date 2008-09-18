@@ -196,7 +196,7 @@ class LocationControllerTest < Test::Unit::TestCase
     # Should have created a PastLocation
     assert_equal(count + 1, Location::PastLocation.find(:all).length)
 
-    # Shoul now look like Barton Flats
+    # Should now look like Barton Flats
     loc = Location.find(loc.id)
     new_params = update_params_from_loc(loc)
     assert_not_equal(new_params, old_params)

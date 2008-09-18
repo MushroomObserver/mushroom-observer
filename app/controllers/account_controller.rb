@@ -372,6 +372,42 @@ class AccountController < ApplicationController
     redirect_back_or_default(:action => "welcome")
   end
 
+  def add_user_to_group
+    redirect = true
+    if session['user_id'].to_i == 0
+      case request.method
+        when :post
+          user_name = params['user_name']
+          user = User.find_by_login(user_name)
+          if user
+            group_name = params['group_name']
+            user_group = UserGroup.find_by_name(group_name)
+            if user_group
+              if user.user_groups.member?(user_group)
+                flash_warning "#{user_name} is already a member of #{group_name}"
+              else
+                user.user_groups << user_group
+                if user.save
+                  flash_notice "#{user_name} added to #{group_name}"
+                end
+              end
+            else
+              flash_error "Unable to find the group, '#{group_name}'"
+            end
+          else
+            flash_error "Unable to find the user, '#{user_name}'"
+          end
+        when :get
+          redirect = false
+      end
+    else
+      flash_error "Permission denied"
+    end
+    if redirect
+      redirect_back_or_default(:controller => 'observer', :action => 'index')
+    end
+  end
+  
   protected
 
   # Make sure the given user is the one that's logged in.  If no one is logged in

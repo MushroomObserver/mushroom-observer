@@ -270,7 +270,7 @@ how_proposing_names: >
   have at least one name proposed (by the owner).  From here you may either click on 'Propose New
   Name' or vote on existing names.  In either case you will have to log in before you are allowed
   to do so.</p>
-  <p>When you click on 'Propose New Name' you will be presented with a form much like the one used
+  <p>When you click on 'Propose Alternate Name' you will be presented with a form much like the one used
   to create an observation.  In addition to the name, you are required to choose a confidence level.
   This is your <a href="#vote">Vote</a>, and you may change it on the Show Observation page at any
   time you like.  And as with creating an observation, you are strongly encouraged to give some
@@ -565,6 +565,12 @@ welcome_note: >
 
 ## TO BE TRANSLATED
 
+# add_user_to_group
+add_user_to_group_add: Add
+add_user_to_group_group: Group name
+add_user_to_group_user: User name
+
+app_add_to_group: Add to Group
 app_banner: Mushroom<br/>Observer
 app_how_to_help: How To Help
 app_latest: Latest
@@ -573,6 +579,12 @@ app_latest_changes: Changes by Users
 
 # location/create_location
 create_location_title: Create Location
+
+
+# name/edit_name
+edit_name_cancel: Cancel (Show Name)
+edit_name_save_edits: Save Edits
+edit_name_title: Editing Description
 
 
 # name/email_tracking
@@ -827,7 +839,7 @@ form_synonyms_proposed_synonyms_help: Unchecked items will no longer be synonymi
 how_describing_species: >
   <p><b>Describing Species</b> - Select "Index A->Z":%s from the left-hand panel and select a
   name or click any "About [name]..." link you see.  Read over any notes that already
-  exist for that name.  If you know anything else about this species you want included, click 'Edit Name'
+  exist for that name.  If you know anything else about this species you want included, click 'Edit Description'
   and add your notes.  You are encouraged to cite references including field guides and
   scientific paper.  Short quotes from references are fine, but please don't make extensive
   quotes without checking with the permission of the original author.
@@ -1102,7 +1114,7 @@ show_observation_observation_created: Observation created
 show_observation_preferred_name: Preferred Name
 show_observation_preferred_names: Preferred Names
 show_observation_previous: Prev
-show_observation_propose_new_name: Propose New Name
+show_observation_propose_new_name: Propose Alternate Name
 show_observation_remove_images: Remove Images
 show_observation_reuse_image: Reuse Image
 show_observation_seen_at: Seen at
@@ -1129,7 +1141,7 @@ show_namings_eyes_help: Current consensus
 show_namings_lose_changes: You must click on 'Update Votes' to save any changes you've made to your votes.
 show_namings_no_names_yet: No names have been proposed yet.
 show_namings_no_votes: no votes
-show_namings_propose_new_name: Propose New Name
+show_namings_propose_new_name: Propose Alternate Name
 show_namings_proposed_name: Proposed Name
 show_namings_proposed_names: Proposed Names
 show_namings_update_votes: Update Votes
@@ -1140,7 +1152,7 @@ show_namings_please_login: >
 
 show_namings_consensus_help: >
   For each name listed above select your opinion of how well that name applies
-  to this observation.  Select 'Propose New Name' if you want to suggest another
+  to this observation.  Select 'Propose Alternate Name' if you want to suggest another
   option.  Note that only one name can be given the vote "%s".
   See the "How to Use page":%s for details on how the votes are tallied.
 
@@ -1188,7 +1200,7 @@ show_name_deprecate: Deprecate
 show_name_deprecated: Deprecated
 show_name_deprecated_synonyms: Deprecated Synonym(s)
 show_name_distribution_map: Distribution Map
-show_name_edit_name: Edit Name
+show_name_edit_name: Edit Description
 show_name_email_tracking: Email Tracking
 show_name_google_images: Google Images
 show_name_last_modified: Last Modified
@@ -1281,3 +1293,15 @@ high_and_next: Excellent & Next
 unvetted: Reviewed
 vetted: Approved
 inaccurate: Inaccurate
+
+# Site stat fields
+images: Images
+past_names: Description Changes
+past_locations: Location Changes
+species_lists: Species Lists
+species_list_entries: Species List Entries
+comments: Comments
+observations: Observations
+namings: Proposed IDs
+votes: Votes
+users: Members

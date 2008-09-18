@@ -77,7 +77,7 @@ end %>
                     	    <tr>
                     		    <td>
                     		        <%=
-                                       str = FIELD_TITLES[field]
+                                       str = field.l
                                        if url = links[str]
                                          link_to(str, url)
                                        else

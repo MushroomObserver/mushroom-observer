@@ -51,7 +51,7 @@
         <table style="margin-left:20px">
           <% for field in ALL_FIELDS %>
             <% if FIELD_WEIGHTS[field] > 0 %>
-              <%= "<tr><td nowrap='nowrap'>#{FIELD_TITLES[field]} &nbsp; </td><td>#{FIELD_WEIGHTS[field]}</td></tr>" %>
+              <%= "<tr><td nowrap='nowrap'>#{field.l} &nbsp; </td><td>#{FIELD_WEIGHTS[field]}</td></tr>" %>
             <% end %>
           <% end %>
         </table>

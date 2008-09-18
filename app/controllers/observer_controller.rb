@@ -538,7 +538,7 @@ class ObserverController < ApplicationController
 
           # Check for notifications.
           if has_unshown_notifications(@user, :naming)
-            redirect_to(:action => 'show_notifications')
+            redirect_to(:action => 'show_notifications', :id => @observation.id)
           else
             redirect_to(:action => 'show_observation', :id => @observation.id)
           end
@@ -706,7 +706,7 @@ class ObserverController < ApplicationController
 
           # Check for notifications.
           if has_unshown_notifications(@user, :naming)
-            redirect_to(:action => 'show_notifications')
+            redirect_to(:action => 'show_notifications', :id => @observation.id)
           else
             redirect_to(:action => 'show_observation', :id => @observation.id, :params => calc_search_params)
           end

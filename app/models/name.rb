@@ -305,6 +305,7 @@ class Name < ActiveRecord::Base
     result.display_name = display_name
     result.observation_name = observation_name
     result.search_name = search_name
+    result.review_status = :unreviewed
     result
   end
 

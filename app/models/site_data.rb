@@ -25,19 +25,6 @@ FIELD_WEIGHTS = {
   :users => 0
 }
 
-FIELD_TITLES = {
-  :images => "Images",
-  :past_names => "Name Changes",
-  :past_locations => "Location Changes",
-  :species_lists => "Species Lists",
-  :species_list_entries => "Species List Entries",
-  :comments => "Comments",
-  :observations => "Observations",
-  :namings => "Proposed IDs",
-  :votes => "Votes",
-  :users => "Members"
-}
-
 # Default is field.to_s.  This is the table it queries to get the number of objects.
 FIELD_TABLES = {
   :species_list_entries => "observations_species_lists",

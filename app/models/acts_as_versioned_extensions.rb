@@ -14,7 +14,7 @@ module ActiveRecord
         #   object.save_if_changed(user, "#{user.login} changed blah")
         #
         # Pass in the timestamp if you are changing multiple objects and want
-        # them all to ave the exact same timetstamp.  Defaults to now. 
+        # them all to have the exact same timetstamp.  Defaults to now. 
         #
         # Returns true if there were changes and it successfully saved them.
         # Check object.errors on false to see if it failed due to errors.

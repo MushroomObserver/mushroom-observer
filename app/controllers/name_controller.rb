@@ -687,69 +687,6 @@ class NameController < ApplicationController
     @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')", :order => "search_name")
   end
   
-  def cleanup_versions
-    if check_permission(1)
-      flash_error("Better check this method to make sure it still works as expected since changing to acts_as_versioned. -JPH 20080911")
-#       id = params[:id]
-#       name = Name.find(id)
-#       past_names = PastName.find(:all, :conditions => ["name_id = ?", id], :order => "version desc")
-#       v = past_names.length
-#       name.version = v
-#       name.user_id = 1
-#       name.save
-#       v -= 1
-#       for pn in past_names
-#         pn.version = v
-#         pn.save
-#         v -= 1
-#       end
-    end
-    redirect_to :action => 'show_name', :id => id
-  end
-
-  def do_maintenance
-    if check_permission(0)
-      flash_error("Better check this method to make sure it still works as expected since changing to acts_as_versioned. -JPH 20080911")
-#       @data = []
-#       @users = {}
-#       for n in Name.find(:all)
-#         eldest_obs = nil
-#         for o in n.observations
-#           if eldest_obs.nil? or (o.created < eldest_obs.created)
-#             eldest_obs = o
-#           end
-#         end
-#         if eldest_obs
-#           user = eldest_obs.user
-#           if n.user != user
-#             found_user = false
-#             for p in n.past_names
-#               if p.user == user
-#                 found_user = true
-#               end
-#             end
-#             unless found_user
-#               if @users[user.login]
-#                 @users[user.login] += 1
-#               else
-#                 @users[user.login] = 1
-#               end
-#               @data.push({:name => n.display_name, :id => n.id, :login => user.login})
-#               pn = PastName.make_past_name(n) <-- this will not work
-#               pn.user = user                      (but I have no idea what
-#               pn.save                             this action does, so I can't
-#               n.version += 1                      suggest how to fix it...)
-#               n.save
-#             end
-#           end
-#         end
-#       end
-    else
-      flash_error "Maintenance operations can only be done by the admin user."
-    end
-    redirect_to :controller => "observer", :action => "list_rss_logs"
-  end
-
 ################################################################################
 
   # Finds the intended name and if another name matching name exists,
