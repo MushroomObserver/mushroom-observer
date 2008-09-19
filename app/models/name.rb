@@ -1,4 +1,4 @@
-require 'acts_as_versioned_extensions'
+require_dependency 'acts_as_versioned_extensions'
 
 ################################################################################
 #
