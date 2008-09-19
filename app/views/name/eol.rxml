@@ -16,6 +16,10 @@ xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
         xml.dwc(:Kingdom, "Fungi")
         xml.dwc(:ScientificName, taxon.search_name)
         xml.dcterms(:modified, taxon.modified.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        citation = taxon.citation
+        if citation and citation != ''
+          xml.reference(textilize_without_paragraph(citation))
+        end
         for f in Name.eol_note_fields
           value = taxon.send(f)
           if value && value != '':

@@ -340,7 +340,10 @@ class ObserverController < ApplicationController
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(:naming, @user.id)
       naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
       if shown.nil?
-        data.push([Notification.find(notification_id), Naming.find(naming_id)])
+        notification = Notification.find(notification_id)
+        if notification.note_template
+          data.push([notification, Naming.find(naming_id)])
+        end
         q.add_integer(:shown, 1)
       end
     end

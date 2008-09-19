@@ -292,10 +292,12 @@ class NameController < ApplicationController
     id = params[:id]
     if is_reviewer
       name = Name.find(id)
-      name.review_status = params[:value]
-      name.reviewer_id = session[:user_id]
-      name.last_review = Time.now()
+      past_name = name.versions.latest
+      past_name.review_status = name.review_status = params[:value]
+      past_name.reviewer_id = name.reviewer_id = session[:user_id]
+      past_name.last_review = name.last_review = Time.now()
       name.save
+      past_name.save
     end
     redirect_to(:action => 'show_name', :id => id)
   end
@@ -416,8 +418,15 @@ class NameController < ApplicationController
             end
           end
           @name.set_notes(all_notes)
-          
           raise "Update_name called on a name that doesn't exist." if !@name.id
+          if is_reviewer
+            @name.reviewer = @user
+            @name.last_review = Time.now()
+            @name.review_status = :unvetted
+          else
+            @name.reviewer = nil
+            @name.review_status = :unreviewed
+          end
           @name.save_if_changed(@user, "Name updated by #{@user.login}", current_time)
           if old_name # merge happened
             for o in old_name.observations

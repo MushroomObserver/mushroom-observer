@@ -1,22 +1,22 @@
 Features for EOL Class support:
   
+  Tests:
+    show_notifications shouldn't show empty notifications
+    add_user_to_group
+    Site Stats for observation with no images
+    Approve existing name and verify both Name and PastName
+    Default transition for a non-reviewer and a reviewer
+    Reviewer tests for image quality, names and votes
+    
   Caused by name.review_status being NULL:
-    Name problem with A. virginiensis
-    Name problem with Lepiota blah group
-  Cleanup Obs. 7001. - Need to wait for Debug Consensus...
-    update votes set naming_id=6980 where naming_id=6981
-    Debug Consensus
-    delete from namings where id=6981
-  Site Stats page with observation with no images.
-    Need test for show_notifications as a result of create_observation
-    Handed off to Jason to deal with thumb_image_id going to 0
+    Name problem with A. virginiensis (species vanished!)
   
-  Code review for comments and as_versioned:
-    Do comments update the RSS log correctly
-      Comments for observations, images and names?
-  Citation as a reference
-  Notifications for reviewers
+  - Citation as a reference (name/eol)
   Need to be able to search past_names for vetted data
+    Trying to get versioning working correctly for names
+      Changes don't take review_status to :unreviewed
+      reviewer and last_review aren't propagating to past_names
+      marking something 'Inaccurate' crashes
 
   Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
     End of September.
@@ -51,6 +51,7 @@ Features for EOL Class support:
     Delivery TBD.
 
 Herbarium status gets __localization_missing__ in email for observation by forestwander ided by debbie
+Notifications for reviewers
 Interface for managing user groups
 Review process should focus on unreviewed material
 Should be a way to find observations that have no opinion

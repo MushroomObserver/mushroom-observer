@@ -685,10 +685,13 @@ class ApplicationController < ActionController::Base
   def has_unshown_notifications(user, flavor=:naming)
     result = false
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
-      ints = q.get_integers([:shown], true)
-      unless ints[:shown]
-        result = true
-        break
+      ints = q.get_integers(["shown", "notification"], true)
+      unless ints["shown"]
+        notification = Notification.find(ints["notification"].to_i)
+        if notification and notification.note_template
+          result = true
+          break
+        end
       end
     end
     result

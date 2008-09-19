@@ -468,7 +468,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(spl.observations.size == sp_count)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
+    assert_redirected_to(:controller=>"species_list", :action=>"show_species_list")
     assert_equal(16, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count + 2, spl.observations.size)
@@ -491,13 +491,22 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert(spl.observations.size == sp_count)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
+    assert_redirected_to(:controller=>"species_list", :action=>"show_species_list")
     assert_equal(13, spl.user.reload.contribution)
     spl = SpeciesList.find(spl.id)
     assert_equal(sp_count + 1, spl.observations.size)
     assert_equal("New Place", spl.where)
     assert_equal("New Title", spl.title)
     assert_equal("New notes.", spl.notes)
+  end
+
+  def test_update_species_list_text_notifications
+    spl = @first_species_list
+    sp_count = spl.observations.size
+    params = spl_params(spl)
+    params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
+    post_requires_login(:edit_species_list, params, false)
+    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
   end
 
   def test_update_species_list_new_name
