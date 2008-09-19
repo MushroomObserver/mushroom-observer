@@ -91,8 +91,6 @@ module ApplicationHelper
       javascript_include 'effects'
       javascript_include 'controls'
       javascript_include 'cached_auto_complete'
-      "<div id='indicator' class='indicator'>" + image_tag('indicator.gif') + "</div>" +
-      javascript_tag('Element.hide($("indicator"))')
     end
   end
 end
