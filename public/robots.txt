@@ -5,3 +5,4 @@ Disallow: /image/next_image/
 Disallow: /image/prev_image/
 Disallow: /observer/next_observation/
 Disallow: /observer/prev_observation/
+Disallow: /name/eol_preview
