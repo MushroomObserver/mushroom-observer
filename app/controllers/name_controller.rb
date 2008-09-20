@@ -238,7 +238,7 @@ class NameController < ApplicationController
       #if not consensus_search.setup?
       #  consensus_search.setup(nil, , :nothing)
       #end
-      #consensus_search.save
+      #consensus_search.save if !is_robot?
       #@search_seqs = { "consensus" => consensus_search.id }
 
       # Remove duplicates. (Select block sets seen[id] to true and returns true

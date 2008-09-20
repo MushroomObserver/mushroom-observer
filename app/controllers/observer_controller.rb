@@ -380,7 +380,7 @@ class ObserverController < ApplicationController
     if seq_key.nil?
       params[:obs] = params[:id]
       state = SequenceState.lookup(params, :rss_logs, logger)
-      state.save # Add key and timestamp
+      state.save if !is_robot?
       seq_key = state.id
     end
     store_location # Is this doing anything useful since there is no user check for this page?
@@ -431,7 +431,7 @@ class ObserverController < ApplicationController
   def next_observation
     state = SequenceState.lookup(params, :observations, logger)
     state.next()
-    state.save # Add key and timestamp
+    state.save if !is_robot?
     id = state.current_id
     if id
       redirect_to(:action => 'show_observation', :id => id,
@@ -445,7 +445,7 @@ class ObserverController < ApplicationController
   def prev_observation
     state = SequenceState.lookup(params, :observations, logger)
     state.prev()
-    state.save
+    state.save !is_robot?
     id = state.current_id
     if id
       redirect_to(:action => 'show_observation', :id => id,
@@ -483,7 +483,7 @@ class ObserverController < ApplicationController
     if verify_user()
       # These are needed to create pulldown menus in form.
       @licenses = License.current_names_and_ids(@user.license)
-      @new_image = init_image()
+      @new_image = init_image(Time.now)
       @confidence_menu = translate_menu(Vote.confidence_menu)
 
       # Clear search list.
@@ -551,6 +551,7 @@ class ObserverController < ApplicationController
         else
           @reason = init_naming_reasons(params[:reason])
           @images = @bad_images
+          @new_image.when = @observation.when
         end
       end
     end
@@ -576,7 +577,7 @@ class ObserverController < ApplicationController
     if verify_user()
       @observation = Observation.find(params[:id])
       @licenses = License.current_names_and_ids(@user.license)
-      @new_image = init_image()
+      @new_image = init_image(@observation.when)
 
       # Make sure user owns this observation!
       if !check_user_id(@observation.user_id)
@@ -613,6 +614,7 @@ class ObserverController < ApplicationController
         # Reload form if anything failed.
         else
           @images = @bad_images
+          @new_image.when = @observation.when
         end
       end
     end
@@ -1116,7 +1118,7 @@ class ObserverController < ApplicationController
     unless search_state.setup?
       search_state.setup("Activity Log", nil, "modified desc", :nothing)
     end
-    search_state.save
+    search_state.save if !is_robot?
     @search_seq = search_state.id
 
     store_location
@@ -1450,9 +1452,9 @@ class ObserverController < ApplicationController
   end
 
   # Initialize image for the dynamic image form at the bottom.
-  def init_image
+  def init_image(default_date)
     image = Image.new
-    image.when             = Time.utc(1950)  # (bogus time to indicate default)
+    image.when             = default_date
     image.license          = @user.license
     image.copyright_holder = @user.legal_name
     return image

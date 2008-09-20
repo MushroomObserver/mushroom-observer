@@ -21,13 +21,17 @@
 #  
 #  3) Now you have access to the following from your controllers and views: 
 #  
-#    @js                boolean: is javascript enabled?
-#    @ua                hash with keys :ie, :ns, :mac, :text, :robot, etc.
-#    @ua_version        float: e.g. 6.0 or 7.0 for :ie
 #    cookies_enabled?   boolean: are cookies enabled?
 #    session_working?   boolean: is session object working?
 #    can_do_ajax?       boolean: can browser do AJAX?
-#  
+#    is_robot?          boolean: did request come from robot?
+#
+#  I'm going to deprecate these in favor of controller/helper methods:
+#
+#    @js                boolean: is javascript enabled?
+#    @ua                hash with keys :ie, :ns, :mac, :text, :robot, etc.
+#    @ua_version        float: e.g. 6.0 or 7.0 for :ie
+#
 #  = How it works
 #  
 #  == Javascript
@@ -234,6 +238,11 @@ module BrowserStatus
     )
   end
 
+  # Check if the request came from a robot.
+  def is_robot?
+    @ua[:robot]
+  end
+
   # Take URL that got us to this page and add one or more parameters to it.
   # Returns new URL.
   #
@@ -300,7 +309,7 @@ module BrowserStatus
     return :ie    if ua.match(/Opera/)
     return :mac   if ua.match(/iCab|OmniWeb/)
     return :robot if !ua.match(/^Mozilla/)
-    return :robot if ua.match(/Googlebot|PBWF|fouineur|Ask Jeeves.Teoma|Black Widow|FDSE robot|Pimptrain's robot|ChristCrawler|sharp-info-agent|SpiderView|Sleek Spider/)
+    return :robot if ua.match(/bot\.htm|robot|crawler|spider|slurp|Googlebot|PBWF|fouineur|Ask Jeeves|Black Widow|sharp-info-agent/i)
     return :ie    if ua.match(/compatible. MSIE/)
     return :mac   if ua.match(/Konqueror|Camino|Chimera|K-Meleon|Safari/)
     return :ns    if ua.match(/Epiphany|Galeon|Firefox|Netscape/)

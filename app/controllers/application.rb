@@ -820,7 +820,7 @@ class ApplicationController < ActionController::Base
     unless search_state.setup?
       search_state.setup(title, conditions, order, source)
     end
-    search_state.save
+    search_state.save if !is_robot?
 
     store_location
     @user = get_session_user
@@ -857,7 +857,7 @@ class ApplicationController < ActionController::Base
     if not search.setup?
       search.setup(nil, conditions, order, :nothing)
     end
-    search.save
+    search.save if !is_robot?
     search
   end
 

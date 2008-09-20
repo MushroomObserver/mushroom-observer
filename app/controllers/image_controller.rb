@@ -192,7 +192,7 @@ class ImageController < ApplicationController
       flash_warning("No new image found")
       new_image = current_image
     end
-    state.save
+    state.save if !is_robot?
     redirect_to :action => 'show_image', :id => new_image, :seq_key => state.id
   end
 
@@ -203,7 +203,7 @@ class ImageController < ApplicationController
     case state.query_type
     when :images
       inc_func.call()
-      state.save # Add key and timestamp
+      state.save if !is_robot?
       id = state.current_id
       if id
         redirect_to(:action => 'show_image', :id => id, :seq_key => state.id)
