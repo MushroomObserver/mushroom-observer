@@ -1,7 +1,7 @@
 <!--[form:observation]-->
 
 <label for="observation_when_1i"><%= :form_observations_when.l %>:</label>
-<%= date_select('observation', 'when', :start_year => Time.now.year-20,
+<%= date_select('observation', 'when', :start_year => 1980,
   :end_year => Time.now.year) %><br/><br/>
 
 <label for="observation_place_name"><%= :form_observations_where.l %>:</label>

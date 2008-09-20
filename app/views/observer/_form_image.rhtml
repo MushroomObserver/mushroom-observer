@@ -23,7 +23,7 @@
   <p><label for="image_<%= index %>_when_1i">When Was It Taken:</label>
     
   <%= date_select('image', 'when', { :index => index,
-    :start_year => Time.now.year-20, :end_year => Time.now.year },
+    :start_year => 1980, :end_year => Time.now.year },
     { :onchange => "CHANGED_DATES[#{index}] = true" }) %></p>
 
   <p><label for="image_<%= index %>_license_id">Select a <%= link_to("License", :action => "how_to_use", :anchor => "lic") %>:</label>

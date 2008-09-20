@@ -35,7 +35,7 @@
   <p><label for="copyright_holder"><%= :profile_copyright_holder.l %></label><br/>
   <%= text_field_tag("copyright_holder", @copyright_holder, :size => 40) %>
   <%= select_year(@copyright_year, :field_name => "copyright_year",
-    :start_year => Time.now.year-20, :end_year => Time.now.year) %></p>
+    :start_year => 1980, :end_year => Time.now.year) %></p>
   <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
   <span id="help_note">(<%= :profile_copyright_warning.l %>)</span></p>
 
