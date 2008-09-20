@@ -183,7 +183,7 @@ module BrowserStatus
     # What is the user agent?
     @ua = {}
     env = request.env['HTTP_USER_AGENT']
-    if ua = _user_agent(env)
+    if ua = parse_user_agent(env)
       @ua[ua] = true
       @ua[:opera] = true if env.match(/Opera/)
       # Include major version number for NS and IE browsers.
@@ -299,11 +299,9 @@ module BrowserStatus
         {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&')
   end
 
-  private
-
   # This does not catch everything.  But it should catch 99% of the browsers
   # that hit your site.  See http://www.zytrax.com/tech/web/browser_ids.htm
-  def _user_agent(ua) # :nodoc:
+  def parse_user_agent(ua) # :nodoc:
     return nil    if ua.nil?
     return :text  if ua.match(/^(Lynx|Links|ELinks|Dillo|W3C|w3m|wget|.*OffByOne)/)
     return :ie    if ua.match(/Opera/)

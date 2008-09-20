@@ -65,4 +65,24 @@ namespace :jason do
     end
     print "Done!\n"
   end
+
+  desc "Get list of browser ID strings from apache logs."
+  task(:apache_browser_ids) do
+    require 'vendor/plugins/browser_status/lib/browser_status'
+    include BrowserStatus
+
+    ids = {}
+    for file in Dir.glob('../../../logs/access_log-*')
+      print "Processing #{file}...\n"
+      File.open(file) do |fh|
+        fh.each_line do |line|
+          ip, date, url, status, size, refer, ua =
+            line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"])" "([^"]*)"/)
+          ids[ua] = parse_user_agent(ua)
+        end
+      end
+    end
+
+    print ids.keys.sort_by {|ua| ids[ua].to_s + "\t" + ua.to_s}.join("\n"), "\n"
+  end
 end
