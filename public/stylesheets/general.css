@@ -286,7 +286,6 @@ div.indicator {
 
 div.popup {
   position: absolute;
-  visibility: hidden;
   top: 0px;
   left: 0px;
   padding: 10px;

@@ -1,3 +1,5 @@
+<% javascript_include 'prototype' %>
+<% javascript_include 'element_extensions' %>
 <% javascript_include 'vote_popup' %>
 
 <% logged_in = !@user.nil? && !@user.verified.nil? && @user.verified %>
@@ -145,7 +147,7 @@
 <% if can_do_ajax? %>
   <% @ajax = true %>
   <% for @naming in popups %>
-    <div class="popup" id="show_votes_<%= @naming.id %>"><div>
+    <div class="popup" id="show_votes_<%= @naming.id %>" style="display:none"><div>
       <%= render :partial => 'show_votes', :locals => { :do_cancel => true } %>
     </div></div>
   <% end %>

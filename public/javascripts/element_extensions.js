@@ -70,3 +70,20 @@ Element.ensureVisible = function(e) {
     window.scrollTo(sx+dx, sy+dy);
 };
 
+// Try to center an object in the window.
+Element.center = function(e) {
+  var win = Element.windowSize();
+  var ew = e.offsetWidth;
+  var eh = e.offsetHeight;
+  var sx = document.documentElement.scrollLeft || document.body.scrollLeft;
+  var sy = document.documentElement.scrollTop  || document.body.scrollTop;
+  var sw = win[0];
+  var sh = win[1];
+  var x = Math.round((sw - ew) / 2);
+  var y = Math.round((sh - eh) / 2);
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  e.style.left = (x + sx) + "px";
+  e.style.top  = (y + sy) + "px";
+};
+
