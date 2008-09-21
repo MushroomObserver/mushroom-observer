@@ -25,12 +25,13 @@
 #    session_working?   boolean: is session object working?
 #    can_do_ajax?       boolean: can browser do AJAX?
 #    is_robot?          boolean: did request come from robot?
-#
-#  I'm going to deprecate these in favor of controller/helper methods:
+#    is_text_only?      boolean: is browser text-only? (includes robots)
+#    is_like_gecko?     boolean: is rendering engine Gecko or Gecko-like?
+#    is_ie_compatible?  boolean: is rendering engine IE-compatible?
 #
 #    @js                boolean: is javascript enabled?
-#    @ua                hash with keys :ie, :ns, :mac, :text, :robot, etc.
-#    @ua_version        float: e.g. 6.0 or 7.0 for :ie
+#    @ua                user agent: :ie, :firefox, :safari, :robot, :text, etc.
+#    @ua_version        floating point number or nil
 #
 #  = How it works
 #  
@@ -79,37 +80,24 @@
 #  
 #  == Browser Type
 #  
-#  We just look at <tt>request.env["HTTP_USER_AGENT"]</tt> and separate
-#  browsers into major categories.  If you want finer control, you'll have to
-#  look at the environment variable in all its hideous complexity yourself. 
-#  See http://www.zytrax.com/tech/web/browser_ids.htm for more details.
+#  We just look at <tt>request.env["HTTP_USER_AGENT"]</tt>.  We do not pretend
+#  to catch all possibilities, just the major ones.  If you need finer control,
+#  you will have to look at the environment string yourself.  See
+#  http://www.zytrax.com/tech/web/browser_ids.htm for more details. 
 #  
-#  Currently I just recognize IE-compatible, Netscape-compatible, as well as
-#  most text-only browsers and robots.  Most things are assumed to be
-#  Netscape-compatible, while I know of only a few things (e.g.  Opera) that
-#  are IE-compatible.  I separated out Mac browsers since I know nothing about
-#  Macs.  It also recognizes the version number of IE and Netscape-compatible
-#  browsers, putting the full version number (as a float) in
-#  <tt>@ua_version</tt>.
-#  
-#    @ua[:ie]       IE-compatible browsers.
-#    @ua[:ie5]
-#    @ua[:ie6]
-#    @ua[:ie7]
-#    @ua[:ie8]
-#  
-#    @ua[:ns]       Mozilla-compatible browsers.
-#    @ua[:ns5]
-#    @ua[:ns6]
-#    @ua[:ns7]
-#    @ua[:ns8]
-#  
-#    @ua[:mac]      Mac browsers (??).
-#    @ua[:opera]    Opera (also sets :ie, but not @ua_version).
-#    @ua[:text]     Text-only browser.
-#    @ua[:robot]    Web-crawlers.
-#  
-#  
+#  These are the types we handle, in rough order of popularity at my sites:
+#    :robot      Web-crawlers for search engines, like Googlebot.
+#    :firefox    Firefox.  (IE and Firefox are neck-and-neck, actually.)
+#    :netscape   Netscape.  (Much like Firefox, but no one uses it any more.)
+#    :ie         Internet Explorer.
+#    :safari     Safari.
+#    :opera      Opera.  (Very similar to IE... but not always.)
+#    :chrome     Google Chrome.  (Very similar to Safari.)
+#    :gecko      Others that use Gecko engine.  (Version is date: YYYYMMDD.nn)
+#    :mozilla    Others that claim to be Mozilla-compatible (don't trust them!)
+#    :other      Others that we don't know/care about.
+#    :text       Text-only browsers like lynx, etc.
+#
 #  
 #  
 #  Author:: Jason Hollinger
@@ -190,6 +178,7 @@ module BrowserStatus
     # print "@js              = [#{@js             }]\n"
     # print "@ua              = [#{@ua             }]\n"
     # print "@ua_version      = [#{@ua_version     }]\n"
+    # print "HTTP_USER_AGENT  = [#{env             }]\n"
     # print "------------------------------------\n"
   end
 
@@ -219,18 +208,37 @@ module BrowserStatus
   # need to be refined...
   def can_do_ajax?
     @js && (
-      @ua[:opera] ||
-      @ua[:ie] && @ua_version.to_f >= 5.5 ||
-      @ua[:ns] ||
-      # firefox >= 1.0
-      # safari >= 1.2
-      @ua[:mac]
+      @ua == :ie       && @ua_version >= 5.5 ||
+      @ua == :firefox  && @ua_version >= 1.0 ||
+      @ua == :safari   && @ua_version >= 1.2 ||
+      @ua == :opera    && @ua_version >= 0.0 ||
+      @ua == :chrome   && @ua_version >= 0.0 ||
+      @ua == :netscape && @ua_version >= 7.0
     )
   end
 
   # Check if the request came from a robot.
   def is_robot?
     @ua == :robot
+  end
+
+  # Check if browser's rendering engine is Gecko or Gecko-like (e.g. Safari).
+  def is_like_gecko?
+    [:firefox, :netscape, :safari, :chrome, :gecko].include? @ua
+  end
+ 
+  # Check if browser's rendering engine is IE-compatible (i.e. IE or Opera).
+  def is_ie_compatible?
+    [:ie, :opera].include? @ua
+  end
+
+  # Is browser text-only?  I'm throwing robots in here as well, since they
+  # strip out formatting of all kinds.  You still need to serve important
+  # images, though, as users will still want to be able to download them (and
+  # robots need to be able to see them).  But it is helpful to simplify
+  # formatting.
+  def is_text_only?
+    @ua == :text || @ua == :robot
   end
 
   # Take URL that got us to this page and add one or more parameters to it.
@@ -289,18 +297,25 @@ module BrowserStatus
         {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&')
   end
 
-  # This does not catch everything.  But it should catch 99% of the browsers
-  # that hit your site.  See http://www.zytrax.com/tech/web/browser_ids.htm
-  def parse_user_agent(ua) # :nodoc:
-    return [:other]            if ua.nil? || ua == '-'
-    return [:text]             if ua.match(/^(Lynx|Links|ELinks|Dillo)/)
-    return [:robot]            if ua.match(/http:|\w+@[\w\-]+\.\w+|robot|crawler|spider|slurp|googlebot|surveybot|webgobbler|morfeus|nutch|linkaider|linklint|linkwalker|metalogger|page-store|network diagnostics/i)
-    return [:opera, $1.to_f]   if ua.match(/Opera[ \/](\d+\.\d+)/)
-    return [:ie, $1.to_f]      if ua.match(/ MSIE (\d+\.\d+)/)
-    return [:safari, $1.to_f]  if ua.match(/Safari\/(\d+(\.\d+)?)/)
-    return [:firefox, $1.to_f] if ua.match(/Firefox\/(\d+\.\d+)/)
-    return [:gecko, $1.to_f]   if ua.match(/Gecko\/(\d{8})/)
-    return [:mozilla, $1.to_f] if ua.match(/Mozilla\/(\d+\.\d+)/)
-    return [:other]
+  # Parse the user_agent string from apache.  This does not catch everything.
+  # But it should catch 99% of the browsers that hit your site.  See
+  # http://www.zytrax.com/tech/web/browser_ids.htm
+  #
+  # Returns browser name and version:
+  #   name, version = parse_user_agent(request.env['HTTP_USER_AGENT'])
+  def parse_user_agent(ua)
+    return [:other,    0.0    ] if ua.nil? || ua == '-'
+    return [:text,     0.0    ] if ua.match(/^(Lynx|Links|ELinks|Dillo)/)
+    return [:robot,    0.0    ] if ua.match(/http:|\w+@[\w\-]+\.\w+|robot|crawler|spider|slurp|googlebot|surveybot|webgobbler|morfeus|nutch|linkaider|linklint|linkwalker|metalogger|page-store|network diagnostics/i)
+    return [:opera,    $1.to_f] if ua.match(/Opera[ \/](\d+\.\d+)/)
+    return [:ie,       $1.to_f] if ua.match(/ MSIE (\d+\.\d+)/)
+    return [:chrome,   $1.to_f] if ua.match(/Chrome\/(\d+\.\d+)/)
+    return [:safari,   $1.to_f] if ua.match(/Version\/(\d+(\.\d+)?).*Safari/)
+    return [:safari,   2.0    ] if ua.match(/Safari/)
+    return [:firefox,  $1.to_f] if ua.match(/Firefox\/(\d+\.\d+)/)
+    return [:netscape, $1.to_f] if ua.match(/Netscape\/(\d+\.\d+)/)
+    return [:gecko,    $1.to_f] if ua.match(/Gecko\/(\d{8})/)
+    return [:mozilla,  $1.to_f] if ua.match(/Mozilla\/(\d+\.\d+)/)
+    return [:other,    0.0    ]
   end
 end

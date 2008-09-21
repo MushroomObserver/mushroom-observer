@@ -80,7 +80,7 @@ module ApplicationHelper
       :frequency     => 0.1,
       :collapse      => true,
       :js_class      => 'CachedAutocompleter',
-      :inherit_width => (@ua[:ie] ? 1 : 0),
+      :inherit_width => (@ua == :ie ? 1 : 0),
     }.merge(opts))
   end
 
