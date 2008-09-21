@@ -24,12 +24,6 @@ class ImageControllerTest < Test::Unit::TestCase
     end
   end
 
-  def test_images_by_title
-    get_with_dump :images_by_title
-    assert_response :success
-    assert_template 'images_by_title'
-  end
-
   def test_list_images
     get_with_dump :list_images
     assert_response :success

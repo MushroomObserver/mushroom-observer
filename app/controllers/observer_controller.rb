@@ -1625,7 +1625,6 @@ class ObserverController < ApplicationController
   action_has_moved 'species_list', 'add_observation_to_species_list'
 
   action_has_moved 'image', 'list_images'
-  action_has_moved 'image', 'images_by_title'
   action_has_moved 'image', 'show_image'
   action_has_moved 'image', 'show_original'
   action_has_moved 'image', 'next_image'

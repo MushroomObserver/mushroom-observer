@@ -1,7 +1,6 @@
 #
 #  Views: ("*" - login required, "R" - root required))
 #     list_images         Display matrix of images, sorted by date.
-#     images_by_title     Display list of images, sorted by title.
 #     images_by_user      Display list of images by a given user.
 #     image_search        Search for matching images.
 #     show_image          Show in standard size (640 pixels max dimension).
@@ -44,7 +43,6 @@
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
     :list_images,
-    :images_by_title,
     :images_by_user,
     :image_search,
     :show_image,
@@ -63,17 +61,6 @@ class ImageController < ApplicationController
     store_location
     @layout = calc_layout_params
     @obj_pages, @objs = paginate(:images, :order => "`when` desc", :per_page => @layout["count"])
-  end
-
-  # Display list of images sorted by title.
-  # Not used by anyone.
-  # Inputs: none
-  # Outputs: @images
-  def images_by_title
-    session[:checklist_source] = :nothing
-    session_setup
-    store_location
-    @images = Image.find(:all, :order => "title asc, `when` desc")
   end
 
   # Display list of images by a given user.
@@ -127,7 +114,7 @@ class ImageController < ApplicationController
   end
 
   # Show the 640x640 (max size) version of image.
-  # Linked from: thumbnails, next/prev_image, images_by_title, etc.
+  # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
   # Outputs: @image, @invalid
   def show_image

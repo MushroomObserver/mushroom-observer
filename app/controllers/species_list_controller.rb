@@ -490,7 +490,6 @@ class SpeciesListController < ApplicationController
   #     observation_search      :observation_ids (results of search)
   #     show_user_observations  :observation_ids (that user's observations)
   #     list_images             :nothing
-  #     images_by_title         :nothing
   #     image_search            :nothing
   #     name_index              :all_names
   #     show_name               :observation_ids (that name)
