@@ -12,15 +12,18 @@ namespace :email do
   task(:send => :environment) do
     count = 0
     for e in QueuedEmail.find(:all)
-      if e.queued + QUEUE_DELAY < Time.now() # Has it been queued (and unchanged) for QUEUE_DELAY or more
+      now = Time.now()
+      print "e.queued: #{e.queued}, #{e.queued + QUEUE_DELAY} < #{now}\n"
+      if e.queued + QUEUE_DELAY < now # Has it been queued (and unchanged) for QUEUE_DELAY or more
         if e.send_email
+          print "Sent email\n"
           count += 1
           if count >= EMAIL_PER_MINUTE
             break
           end
         end
+        e.destroy # Tried to send it, but it failed
       end
-      e.destroy
     end
   end
   
