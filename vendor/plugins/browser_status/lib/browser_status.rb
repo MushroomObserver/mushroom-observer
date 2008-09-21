@@ -181,18 +181,8 @@ module BrowserStatus
     session[:_js] = @js
 
     # What is the user agent?
-    @ua = {}
     env = request.env['HTTP_USER_AGENT']
-    if ua = parse_user_agent(env)
-      @ua[ua] = true
-      @ua[:opera] = true if env.match(/Opera/)
-      # Include major version number for NS and IE browsers.
-      if ua == :ie && env.match(/MSIE ((\d+)(\.\d+)?)/) ||
-         ua == :ns && env.match(/Mozilla\/((\d+)(\.\d+)?)/)
-        @ua_version = $~[1].to_f
-        @ua[(ua.to_s + $~[2]).to_sym] = true
-      end
-    end
+    @ua, @ua_version = parse_user_agent(env)
 
     # print "------------------------------------\n"
     # print "@session_working = [#{@session_working}]\n"
@@ -240,7 +230,7 @@ module BrowserStatus
 
   # Check if the request came from a robot.
   def is_robot?
-    @ua[:robot]
+    @ua == :robot
   end
 
   # Take URL that got us to this page and add one or more parameters to it.
@@ -302,16 +292,15 @@ module BrowserStatus
   # This does not catch everything.  But it should catch 99% of the browsers
   # that hit your site.  See http://www.zytrax.com/tech/web/browser_ids.htm
   def parse_user_agent(ua) # :nodoc:
-    return nil    if ua.nil?
-    return :text  if ua.match(/^(Lynx|Links|ELinks|Dillo|W3C|w3m|wget|.*OffByOne)/)
-    return :ie    if ua.match(/Opera/)
-    return :mac   if ua.match(/iCab|OmniWeb/)
-    return :robot if !ua.match(/^Mozilla/)
-    return :robot if ua.match(/bot\.htm|robot|crawler|spider|slurp|Googlebot|PBWF|fouineur|Ask Jeeves|Black Widow|sharp-info-agent/i)
-    return :ie    if ua.match(/compatible. MSIE/)
-    return :mac   if ua.match(/Konqueror|Camino|Chimera|K-Meleon|Safari/)
-    return :ns    if ua.match(/Epiphany|Galeon|Firefox|Netscape/)
-    return :ns    if ua.match(/Gecko/)  # (Mozilla is "the rest with Gecko in it")
-    return nil
+    return [:other]            if ua.nil? || ua == '-'
+    return [:text]             if ua.match(/^(Lynx|Links|ELinks|Dillo)/)
+    return [:robot]            if ua.match(/http:|\w+@[\w\-]+\.\w+|robot|crawler|spider|slurp|googlebot|surveybot|webgobbler|morfeus|nutch|linkaider|linklint|linkwalker|metalogger|page-store|network diagnostics/i)
+    return [:opera, $1.to_f]   if ua.match(/Opera[ \/](\d+\.\d+)/)
+    return [:ie, $1.to_f]      if ua.match(/ MSIE (\d+\.\d+)/)
+    return [:safari, $1.to_f]  if ua.match(/Safari\/(\d+(\.\d+)?)/)
+    return [:firefox, $1.to_f] if ua.match(/Firefox\/(\d+\.\d+)/)
+    return [:gecko, $1.to_f]   if ua.match(/Gecko\/(\d{8})/)
+    return [:mozilla, $1.to_f] if ua.match(/Mozilla\/(\d+\.\d+)/)
+    return [:other]
   end
 end
