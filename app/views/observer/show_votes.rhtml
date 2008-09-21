@@ -2,4 +2,4 @@
 
 <div id="Title"><%= textilize_without_paragraph(@title) %></div>
 
-<%= render :partial => 'show_votes', :locals => { :do_cancel => false } %>
+<%= render(:partial => 'show_votes', :locals => { :do_cancel => false }) %>

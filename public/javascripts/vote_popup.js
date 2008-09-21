@@ -5,8 +5,8 @@ function show_votes(this_id) {
     var div = POPUPS[id]
     if (div) {
       if (id == this_id) {
-        Element.show(div);
         Element.center(div);
+        Element.show(div);
       } else {
         Element.hide(div);
       }

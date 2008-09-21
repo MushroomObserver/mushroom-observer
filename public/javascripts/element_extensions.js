@@ -16,20 +16,31 @@ Element.windowSize = function() {
   var sh1 = document.body.clientHeight;
   var sh2 = document.documentElement.clientHeight;
   var sh3 = window.innerHeight;
-  sw = sw1 != 0 && sw1 != dw ? sw1 : sw2 != 0 ? sw2 : dw;
-  sh = sh1 != 0 && sh1 != dh ? sh1 : sh2 != 0 ? sh2 : dh;
-  if (sh3 != 0 && sh3 < sh) sh = sh3;
+  sw = sw2 == 0 ? sw1 : sw2;
+  sh = sh2 == 0 ? sh1 : sh3 > 0 && sh3 < sh2 ? sh3 : sh2;
   return [sw, sh];
 };
+
+// alert("dw "+dw+"\n" + "sw1 "+sw1+"\n" + "sw2 "+sw2+"\n" + "dh "+dh+"\n" + "sh1 "+sh1+"\n" + "sh2 "+sh2+"\n" + "sh3 "+sh3+"\n");
+//      X   X   X   X   X   X   X   X   X
+//      i55 ie6 ie7 op9 ns8 ff1 ff3 chr saf
+// dw   0   0   0   0   Y   Y   Y   x   x
+// sw1  Y   x   Y   Y   Y   Y   Y   Y   Y
+// sw2  0   Y   Y   Y   Y   Y   Y   Y   Y
+// dh   0   0   0   0   x   x   x   x   x
+// sh1  Y   x   x   Y   x   x   x   x   x
+// sh2  0   Y   Y   x   Y   Y   Y   Y   Y
+// sh3  0   0   0   Y   Y   x   x   x   x
 
 // Try to make sure an object is completely visible.
 Element.ensureVisible = function(e) {
   var pos = Element.cumulativeOffset(e);
+  var siz = Element.getDimensions(e);
   var win = Element.windowSize();
   var ex  = pos[0];
   var ey  = pos[1];
-  var ew  = e.offsetWidth;
-  var eh  = e.offsetHeight;
+  var ew  = siz.width
+  var eh  = siz.height
   var sx  = document.documentElement.scrollLeft || document.body.scrollLeft;
   var sy  = document.documentElement.scrollTop  || document.body.scrollTop;
   var sw  = win[0];
@@ -73,8 +84,9 @@ Element.ensureVisible = function(e) {
 // Try to center an object in the window.
 Element.center = function(e) {
   var win = Element.windowSize();
-  var ew = e.offsetWidth;
-  var eh = e.offsetHeight;
+  var siz = Element.getDimensions(e);
+  var ew = siz.width;
+  var eh = siz.height;
   var sx = document.documentElement.scrollLeft || document.body.scrollLeft;
   var sy = document.documentElement.scrollTop  || document.body.scrollTop;
   var sw = win[0];

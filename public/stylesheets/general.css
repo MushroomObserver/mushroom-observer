@@ -288,6 +288,9 @@ div.popup {
   position: absolute;
   top: 0px;
   left: 0px;
+  width: 50%;
+}
+div.popup_frame {
   padding: 10px;
   border-top: 5px solid #CCC;
   border-left: 5px solid #BBB;

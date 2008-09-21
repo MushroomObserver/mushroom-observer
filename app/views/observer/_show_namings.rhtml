@@ -147,9 +147,13 @@
 <% if can_do_ajax? %>
   <% @ajax = true %>
   <% for @naming in popups %>
-    <div class="popup" id="show_votes_<%= @naming.id %>" style="display:none"><div>
-      <%= render :partial => 'show_votes', :locals => { :do_cancel => true } %>
-    </div></div>
+    <div class="popup" id="show_votes_<%= @naming.id %>" style="display:none">
+      <table width="50%"><tr><td>
+        <div class="popup_frame" id="show_votes_<%= @naming.id %>_frame">
+          <%= render(:partial => 'show_votes', :locals => { :do_cancel => true }) %>
+        </div>
+      </td></tr></table>
+    </div>
   <% end %>
 
   <%= javascript_tag %(
