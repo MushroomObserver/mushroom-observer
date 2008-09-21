@@ -70,19 +70,20 @@ namespace :jason do
   task(:apache_browser_ids) do
     require 'vendor/plugins/browser_status/lib/browser_status'
     include BrowserStatus
-
     ids = {}
-    for file in Dir.glob('../../../logs/access_log-*')
+    for file in Dir.glob('../../../logs/access_log-*').sort
       print "Processing #{file}...\n"
       File.open(file) do |fh|
         fh.each_line do |line|
-          ip, date, url, status, size, refer, ua =
-            line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"])" "([^"]*)"/)
-          ids[ua] = parse_user_agent(ua)
+          if match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
+            ua = match[7]
+	    ua = "#{parse_user_agent(ua)}: #{ua}"
+            ids[ua] = 0 if !ids[ua]
+	    ids[ua] += 1
+	  end
         end
       end
     end
-
-    print ids.keys.sort_by {|ua| ids[ua].to_s + "\t" + ua.to_s}.join("\n"), "\n"
+    print ids.keys.sort.map {|ua| "#{ids[ua]} #{ua}"}.join("\n"), "\n"
   end
 end
