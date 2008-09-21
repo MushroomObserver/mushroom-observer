@@ -71,19 +71,28 @@ namespace :jason do
     require 'vendor/plugins/browser_status/lib/browser_status'
     include BrowserStatus
     ids = {}
+    totals = {}
     for file in Dir.glob('../../../logs/access_log-*').sort
-      print "Processing #{file}...\n"
       File.open(file) do |fh|
         fh.each_line do |line|
           if match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
             ua = match[7]
-	    ua = "#{parse_user_agent(ua)}: #{ua}"
-            ids[ua] = 0 if !ids[ua]
-	    ids[ua] += 1
+	    type, ver = parse_user_agent(ua)
+	    str = ver ? "#{type}_#{ver}" : type.to_s || 'none'
+            ids[ua] ||= [str, 0]
+	    ids[ua][1] += 1
+	    totals[str] ||= 0
+	    totals[str] += 1
 	  end
         end
       end
     end
-    print ids.keys.sort.map {|ua| "#{ids[ua]} #{ua}"}.join("\n"), "\n"
+    print ids.keys.
+      sort_by {|ua| ids[ua][0]}.
+      map {|ua| "#{ids[ua].join(' ')} #{ua}\n"}.
+      join(''), "\n"
+    print totals.keys.sort.
+      map {|str| "#{str} #{totals[str]}\n"}.
+      join('')
   end
 end
