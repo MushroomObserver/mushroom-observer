@@ -205,6 +205,10 @@ class Name < ActiveRecord::Base
   # non-deprecated names can be returned by setting deprecated to true.
   # Returns: array of Name instances.
   def self.find_names(in_str, rank=nil, deprecated=false)
+
+    # This converts "sp" to "sp." in "Lactarius sp" and "Lactarius sp Author".
+    in_str = in_str.strip.sub(/^("?[A-Z][a-z\-]+"? sp)(?= |$)/, '\\1.')
+
     name = in_str.strip
     if names_for_unknown.member? name
       name = "Fungi"
@@ -427,31 +431,20 @@ class Name < ActiveRecord::Base
   #  6: author            "Author"              "Author"        "Author"
   def self.parse_name(str)
     (name, author) = parse_author(str)
-    rank = :Group
-    parse = parse_group(name)
-    if parse.nil?
+    if parse = parse_group(name)
+      rank = :Group
+    elsif parse = parse_sp(name)
       rank = :Genus
-      parse = parse_sp(name)
-    end
-    if parse.nil?
+    elsif parse = parse_species(name)
       rank = :Species
-      parse = parse_species(name)
-    end
-    if parse.nil?
+    elsif parse = parse_subspecies(name)
       rank = :Subspecies
-      parse = parse_subspecies(name)
-    end
-    if parse.nil?
+    elsif parse = parse_variety(name)
       rank = :Variety
-      parse = parse_variety(name)
-    end
-    if parse.nil?
+    elsif parse = parse_form(name)
       rank = :Form
-      parse = parse_form(name)
-    end
-    if parse.nil?
+    elsif parse = parse_above_species(name)
       rank = :Genus
-      parse = parse_above_species(name)
     end
     if parse
       if author
