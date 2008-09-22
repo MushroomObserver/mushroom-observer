@@ -149,7 +149,7 @@ module ApplicationHelper
 
     # Remove pre-existing links first, replacing with "<XXXnn>".
     hrefs = []
-    str.gsub!(/(href=["'][^"']*["'])/) do |href|
+    str.gsub!(/(href=["'][^"']*["']|<img[^>]*>)/) do |href|
       hrefs.push(href)
       "<XXX#{hrefs.length - 1}>"
     end

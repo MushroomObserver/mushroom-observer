@@ -95,4 +95,12 @@ namespace :jason do
       map {|str| "#{str} #{totals[str]}\n"}.
       join('')
   end
+
+  desc "test"
+  task(:test => :environment) do
+    include ActionView::Helpers::TextHelper # (for textilize)
+    include ApplicationHelper
+    str = '<img href="http://blah.com/blah.jpg"> !http://blah.com/foo.jpg!'
+    print textilize(str).to_s
+  end
 end
