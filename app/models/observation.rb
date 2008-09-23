@@ -397,14 +397,16 @@ return result if debug
       result = matches.first
     else
       best_naming = matches.first
-      best_value  = matches.first.vote_cache
-      for naming in matches
-        if naming.vote_cache > best_value
-          best_naming = naming
-          best_value  = naming.vote_cache
+      if best_naming
+        best_value  = matches.first.vote_cache
+        for naming in matches
+          if naming.vote_cache > best_value
+            best_naming = naming
+            best_value  = naming.vote_cache
+          end
         end
+        result = best_naming
       end
-      result = best_naming
     end
     return result
   end
