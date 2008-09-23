@@ -27,7 +27,6 @@
 #    is_consensus?           Is this the community consensus?
 #    editable?               Has anyone voted (positively) on this naming?
 #    deletable?              Has anyone made this naming their favorite?
-#    N.refresh_vote_cache    Monster sql query to refresh all vote_caches.
 #
 ################################################################################
 
@@ -185,19 +184,6 @@ class Naming < ActiveRecord::Base
       vote.value    = value
       vote.save
     end
-    # Update cached score.
-    sum = 0
-    wgt = 0
-    for v in self.votes
-      w = v.user_weight
-      sum += v.value * w
-      wgt += w
-    end
-    sum /= wgt + 1.0
-    if self.vote_cache != sum
-      self.vote_cache = sum
-      self.save
-    end
     # Update consensus.
     self.observation.calc_consensus
     return true
@@ -254,23 +240,12 @@ class Naming < ActiveRecord::Base
     return false
   end
 
-  # If the community consensus clearly derives from a single naming, then this will
-  # return true for that naming.  Otherwise it returns false for everything else.
+  # If the community consensus clearly derives from a single naming, then this
+  # will return true for that naming.  It returns false for everything else. 
+  # See observation.consensus_naming for a more accurate method that takes
+  # synonymy into account.
   def is_consensus?
     self.observation.name == self.name
-  end
-
-  # Refresh the vote_cache column across all namings.  Used by db:migrate and
-  # admin tool.
-  def self.refresh_vote_cache
-    self.connection.update %(
-      UPDATE namings
-      SET vote_cache=(
-        SELECT sum(votes.value)/(count(votes.value)+1)
-        FROM votes
-        WHERE namings.id = votes.naming_id
-      )
-    )
   end
 
   validates_presence_of :name, :observation, :user

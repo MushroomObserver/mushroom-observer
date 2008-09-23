@@ -35,6 +35,7 @@ require 'active_record_extensions'
 #
 #    calc_consensus          Calculate and cache the consensus naming/name.
 #    name_been_proposed?(n)  Has someone proposed this name already?
+#    consensus_naming        Guess which naming is responsible for consensus.
 #    O.refresh_vote_cache    Refresh cache across all observations.
 #
 #  Image stuff:
@@ -160,6 +161,8 @@ result = "" if debug
       naming_id = naming.id
       name_id = naming.name_id
       name_ages[name_id] = naming.created if !name_ages[name_id] || naming.created < name_ages[name_id]
+      sum_val = 0
+      sum_wgt = 0
       # Go through all the votes for this naming.  Should be zero or one per
       # user. 
       for vote in naming.votes
@@ -173,6 +176,9 @@ result = "" if debug
         # users zero, who knows...  (It can cause a division by zero below if
         # we ignore zero weights.) 
         if wgt > 0
+          # Calculate score for naming.vote_cache.
+          sum_val += val * wgt
+          sum_wgt += wgt
           # Record best vote for this user for this name.  This will be used
           # later to determine which name wins in the case of the winning taxon
           # (see below) having multiple accepted names. 
@@ -194,6 +200,12 @@ result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id
             taxon_votes[taxon_id][user_id] = [val, wgt]
           end
         end
+      end
+      # Note: this is used by consensus_naming(), not this method.
+      value = sum_wgt > 0 ? sum_val.to_f / (sum_wgt + 1.0) : 0.0
+      if naming.vote_cache != value
+        naming.vote_cache = value
+        naming.save
       end
     end
 
@@ -371,6 +383,30 @@ return result if debug
   # Has anyone proposed a given name yet for this observation?
   def name_been_proposed?(name)
     self.namings.select {|n| n.name == name}.length > 0
+  end
+
+  # Try to guess which naming is responsible for the consensus.
+  def consensus_naming
+    result = nil
+    matches = self.namings.select {|n| n.name_id == self.name_id}
+    if matches == [] && self.name && self.name.synonym
+      synonyms = self.name.synonym.names
+      matches = self.namings.select {|n| synonyms.include? n.name}
+    end
+    if matches.length == 1
+      result = matches.first
+    else
+      best_naming = matches.first
+      best_value  = matches.first.vote_cache
+      for naming in matches
+        if naming.vote_cache > best_value
+          best_naming = naming
+          best_value  = naming.vote_cache
+        end
+      end
+      result = best_naming
+    end
+    return result
   end
 
   ########################################

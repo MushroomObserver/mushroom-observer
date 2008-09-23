@@ -1,10 +1,13 @@
-<% javascript_include 'prototype' %>
-<% javascript_include 'element_extensions' %>
-<% javascript_include 'vote_popup' %>
+<%
+  javascript_include 'prototype'
+  javascript_include 'element_extensions'
+  javascript_include 'vote_popup'
 
-<% logged_in = !@user.nil? && !@user.verified.nil? && @user.verified %>
-<% any_names = @observation.namings && @observation.namings.length > 0 %>
-<% popups = [] %>
+  logged_in = !@user.nil? && !@user.verified.nil? && @user.verified
+  consensus = @observation.consensus_naming
+  any_names = @observation.namings && @observation.namings.length > 0
+  popups = []
+%>
 
 <% form_tag(:action => 'show_observation', :id => @observation) do %>
   <p>
@@ -38,7 +41,7 @@
           <th></th>
         </tr>
 
-        <% for naming in @observation.namings.sort {|x,y| x.created <=> y.created } %>
+        <% for naming in @observation.namings.sort_by {|n| n.created} %>
           <tr>
             <td>
               <%= link_to(textilize_without_paragraph(sanitize(naming.format_name)),
@@ -49,7 +52,6 @@
                   :id => naming }, :confirm => :show_namings_are_you_sure.l) %>)
               <% end %>
             </td>
-
             <td width="20">&nbsp;</td>
             <td>
               <span class="Data"><%= user_link(naming.user, naming.user.login) %></span>
@@ -94,7 +96,7 @@
             <td width="20">&nbsp;</td>
             <td nowrap="nowrap"><%=
               (naming.is_owners_favorite? ? image_tag("eye.png") : "") +
-              (naming.is_consensus? ? image_tag("eyes.png") : "")
+              (naming == consensus ? image_tag("eyes.png") : "")
             %></td>
           </tr>
 
