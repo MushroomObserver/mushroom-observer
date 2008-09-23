@@ -219,6 +219,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_form_action :action => 'show_observation'
   end
 
+  def test_show_observation_no_naming
+    get_with_dump :show_observation, :id => @unknown_with_no_naming.id
+    assert_response :success
+    assert_template 'show_observation'
+    assert_form_action :action => 'show_observation'
+  end
+
   # Test a naming owned by the observer but the observer has 'No Opinion'.
   # This is a regression test for a bug in _show_namings.rhtml
   def test_show_observation_no_opinion
