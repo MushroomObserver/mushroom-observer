@@ -1,4 +1,17 @@
 namespace :jason do
+  desc "Test rake environment."
+  task(:test => :environment) do
+    print "Success!\n"
+  end
+
+  desc "Test textile."
+  task(:test_textile => :environment) do
+    include ActionView::Helpers::TextHelper # (for textilize)
+    include ApplicationHelper
+    str = '<img href="http://blah.com/blah.jpg"> !http://blah.com/foo.jpg!'
+    print textilize(str).to_s
+  end
+
   desc "Check for non-ISO-8859-1 characters in name authors."
   task(:check_for_special_characters => :environment) do
     print "Writing file \"y\"...\n"
@@ -72,7 +85,7 @@ namespace :jason do
     include BrowserStatus
     ids = {}
     totals = {}
-    for file in Dir.glob('../../../logs/access_log-*').sort
+    for file in Dir.glob('../../../logs/access_log-2008-09-11-*').sort
       File.open(file) do |fh|
         fh.each_line do |line|
           if match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
@@ -94,13 +107,5 @@ namespace :jason do
     print totals.keys.sort.
       map {|str| "#{str} #{totals[str]}\n"}.
       join('')
-  end
-
-  desc "test"
-  task(:test => :environment) do
-    include ActionView::Helpers::TextHelper # (for textilize)
-    include ApplicationHelper
-    str = '<img href="http://blah.com/blah.jpg"> !http://blah.com/foo.jpg!'
-    print textilize(str).to_s
   end
 end
