@@ -332,7 +332,9 @@ class SpeciesListController < ApplicationController
     @species_list.attributes = args
     #
     # This just makes sure all the names (that have been approved) exist.
-    list = params[:list][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
+    list = params[:list][:members].
+      squeeze(" ").   # Get rid of extra whitespace while we're at it
+      gsub('_', ' ')  # And turn underscores into spaces
     construct_approved_names(list, params[:approved_names], @user)
     #
     # Sets up a NameSorter object.  Does NOT affect species_list.

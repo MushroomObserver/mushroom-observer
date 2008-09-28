@@ -386,7 +386,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'create_species_list'
     assert_equal(10, @rolf.reload.contribution)
-    assert_equal("Warnerbros bugs-bunny\r\n", @controller.instance_variable_get('@list_members'))
+    assert_equal("Warnerbros bugs-bunny", @controller.instance_variable_get('@list_members'))
     assert_equal([], @controller.instance_variable_get('@new_names'))
     assert_equal(["Warnerbros bugs-bunny"], @controller.instance_variable_get('@multiple_names'))
     assert_equal([], @controller.instance_variable_get('@deprecated_names'))
@@ -800,5 +800,83 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = nil
     post(:name_lister, params.merge({ :commit => 'Save as Spreadsheet' }))
     assert_response_equal_file('test/fixtures/reports/test2.csv')
+  end
+
+  def test_name_resolution
+    params = {
+      :species_list => {
+        :when  => Time.now,
+        :where => 'somewhere',
+        :title => 'title',
+        :notes => 'notes',
+      },
+      :member => { :notes => "" },
+      :list => {},
+    }
+    @request.session[:user_id] = 1
+
+    params[:list][:members] = [
+      'Fungi',
+      'Agaricus sp',
+      'Psalliota sp.',
+      '"One"',
+      '"Two" sp',
+      '"Three" sp.',
+      'Agaricus "blah"',
+      'Chlorophyllum Author',
+      'Lepiota sp Author',
+    ].join("\n")
+    params[:approved_names] = [
+      'Psalliota sp.',
+      '"One"',
+      '"Two" sp',
+      '"Three" sp.',
+      'Agaricus "blah"',
+      'Chlorophyllum Author',
+      'Lepiota sp Author',
+    ].join('/')
+    post(:create_species_list, params)
+    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_equal([
+      'Fungi sp.',
+      'Agaricus sp.',
+      'Psalliota sp.',
+      'Chlorophyllum sp. Author',
+      'Lepiota sp. Author',
+      '"One" sp.',
+      '"Two" sp.',
+      '"Three" sp.',
+      'Agaricus "blah"',
+    ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}.sort)
+
+    params[:list][:members] = [
+      'Fungi',
+      'Agaricus sp',
+      'Psalliota sp.',
+      '"One"',
+      '"Two" sp',
+      '"Three" sp.',
+      'Agaricus "blah"',
+      'Chlorophyllum Author',
+      'Lepiota sp Author',
+      'Lepiota sp. Author',
+    ].join("\n")
+    params[:approved_names] = [
+      'Psalliota sp.',
+    ].join('/')
+    post(:create_species_list, params)
+    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_equal([
+      'Fungi sp.',
+      'Agaricus sp.',
+      'Psalliota sp.',
+      'Chlorophyllum sp. Author',
+      'Lepiota sp. Author',
+      'Lepiota sp. Author',
+      '"One" sp.',
+      '"Two" sp.',
+      '"Three" sp.',
+      'Agaricus "blah"',
+    ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}.sort)
   end
 end

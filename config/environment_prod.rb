@@ -68,3 +68,32 @@ end
 # end
 
 # Include your application configuration below
+
+# Temporary thing to log every request as soon as it hits Ruby -- or at least
+# as close as I can make it.  I think this is mighty close to the socket accept
+# system call...
+if defined? TCPServer
+  class TCPServer
+    alias old_accept accept
+    def accept(*args)
+      result = old_accept(*args)
+      RAILS_DEFAULT_LOGGER.warn(">>> #{Time.now} Received request.")
+      result
+    end
+  end
+end
+if defined? Mongrel
+  module Mongrel
+    class HttpServer
+      @@my_request_id = 0
+      alias old_process_client process_client
+      def process_client(*args)
+        id = @@my_request_id += 1
+        RAILS_DEFAULT_LOGGER.warn(">>> #{Time.now} Request ##{id} start.")
+        result = old_process_client(*args)
+        RAILS_DEFAULT_LOGGER.warn(">>> #{Time.now} Request ##{id} done.")
+        result
+      end
+    end
+  end
+end

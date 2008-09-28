@@ -198,6 +198,7 @@ class NameSorter
     # Need all deprecated names even when another name is chosen
     # in case something else forces a redisplay
     names = name_parse.find_names()
+# print "add_name: #{names ? names.map {|x| x ? "[#{x.id} #{x.search_name}]" : '[nil]'}.join(', ') : 'nil'}\n"
     check_for_deprecated_names(names, name_str)
 
     if @chosen_names
@@ -315,7 +316,9 @@ class NameSorter
   # Add a list of name strings.
   def sort_names(name_list)
     for n in name_list
-      add_name(n)
+      if n.match(/\S/)
+        add_name(n)
+      end
     end
   end
 end

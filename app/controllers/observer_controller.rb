@@ -1505,6 +1505,7 @@ class ObserverController < ApplicationController
       else
         # Look up name: can return zero (unrecognized), one (unambiguous match),
         # or many (multiple authors match).
+        what = what.squeeze(' ').strip.gsub('_', ' ')
         names = Name.find_names(what)
       end
 

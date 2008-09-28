@@ -153,15 +153,15 @@ class Name < ActiveRecord::Base
 ########################################
 
   # Patterns
-  ABOVE_SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s*$/
-  SP_PAT = /^\s*([A-Z][a-z\-]+)\s+(sp\.?|species)\s*$/
-  SPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s*$/
-  SUBSPECIES_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(subspecies|subsp|ssp|s)\.?\s+([a-z\-"]+)\s*$/
-  VARIETY_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(variety|var|v)\.?\s+([a-z\-"]+)\s*$/
-  FORM_PAT = /^\s*([A-Z][a-z\-]+)\s+([a-z\-"]+)\s+(forma|form|f)\.?\s+([a-z\-"]+)\s*$/
-  AUTHOR_PAT = /^\s*("?[A-Z][a-z\-\s\."]+[a-z]"?)\s+(([^a-z"]|auct\.).*)$/ # May have trailing \s
-  SENSU_PAT = /^\s*([A-Z].*)\s+(sensu\s+\S+)\s*$/
-  GROUP_PAT = /^\s*([A-Z].*)\s+(group|gr|gp)\.?\s*$/
+  ABOVE_SPECIES_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s*$/
+  SP_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+(sp\.?|species)\s*$/
+  SPECIES_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s*$/
+  SUBSPECIES_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s+(subspecies|subsp|ssp|s)\.?\s+([a-z\-"]+)\s*$/
+  VARIETY_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s+(variety|var|v)\.?\s+([a-z\-"]+)\s*$/
+  FORM_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s+(forma|form|f)\.?\s+([a-z\-"]+)\s*$/
+  AUTHOR_PAT = /^\s*("?[A-Z][a-z\-\s\."]+[a-z"](?: sp\.)?)\s+(([^a-z"]|auct\.).*)$/ # May have trailing \s
+  SENSU_PAT = /^\s*("?[A-Z].*)\s+(sensu\s+\S+)\s*$/
+  GROUP_PAT = /^\s*("?[A-Z].*)\s+(group|gr|gp)\.?\s*$/
 
 ########################################
 
@@ -206,8 +206,13 @@ class Name < ActiveRecord::Base
   # Returns: array of Name instances.
   def self.find_names(in_str, rank=nil, deprecated=false)
 
-    # This converts "sp" to "sp." in "Lactarius sp" and "Lactarius sp Author".
-    in_str = in_str.strip.sub(/^("?[A-Z][a-z\-]+"? sp)(?= |$)/, '\\1.')
+    # This removes the "sp" or "sp." in "Lactarius sp" and "Lactarius sp Author".
+    in_str = in_str.strip
+    if m = SP_PAT.match(in_str)
+      in_str = m[1]
+    elsif (m1 = AUTHOR_PAT.match(in_str)) and (m2 = SP_PAT.match(m1[1])) and (ABOVE_SPECIES_PAT.match(m2[1]))
+      in_str = "#{m2[1]} #{m1[2]}"
+    end
 
     name = in_str.strip
     if names_for_unknown.member? name
@@ -232,10 +237,12 @@ class Name < ActiveRecord::Base
         result = Name.find(:all, :conditions => ["#{deprecated_condition}rank = :rank and (search_name = :name or text_name = :name)",
                                                  {:rank => rank, :name => name}])
       end
-      result
     else
-      # Note: this will fail to find "Genus Author" (see above).  Just don't do it, leave the darned author off, for god's sake.
       result = Name.find(:all, :conditions => ["#{deprecated_condition}(search_name = :name or text_name = :name)", {:name => name}])
+      if (result == []) and (m = AUTHOR_PAT.match(name)) and ABOVE_SPECIES_PAT.match(m[1])
+        name = m[1] + ' sp. ' + m[2]
+        result = Name.find(:all, :conditions => ["#{deprecated_condition}(search_name = :name or text_name = :name)", {:name => name}])
+      end
     end
 
     if result == []

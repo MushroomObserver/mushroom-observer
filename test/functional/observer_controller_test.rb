@@ -837,6 +837,214 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(new_text_name, nam.name.text_name)
   end
 
+  def test_name_resolution
+    params = {
+      :observation => {
+        :when => Time.now,
+        :where => 'somewhere',
+        :specimen => '0',
+        :thumb_image_id => '0',
+      },
+      :name => {},
+      :vote => { :value => "3" },
+    }
+    @request.session[:user_id] = 1
+
+    # Can we create observation with existing genus?
+    # -----------------------------------------------
+    params[:name][:name] = 'Agaricus'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+
+    params[:name][:name] = 'Agaricus sp'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+
+    params[:name][:name] = 'Agaricus sp.'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+
+    # Can we create observation with genus and add author?
+    # -----------------------------------------------------
+    params[:name][:name] = 'Agaricus Author'
+    params[:approved_name] = 'Agaricus Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal('Agaricus sp. Author', @agaricus.reload.search_name)
+    @agaricus.author = nil
+    @agaricus.search_name = 'Agaricus sp.'
+    @agaricus.save
+
+    params[:name][:name] = 'Agaricus sp Author'
+    params[:approved_name] = 'Agaricus sp Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal('Agaricus sp. Author', @agaricus.reload.search_name)
+    @agaricus.author = nil
+    @agaricus.search_name = 'Agaricus sp.'
+    @agaricus.save
+
+    params[:name][:name] = 'Agaricus sp. Author'
+    params[:approved_name] = 'Agaricus sp. Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal('Agaricus sp. Author', @agaricus.reload.search_name)
+
+    # Can we create observation with genus specifying author?
+    # --------------------------------------------------------
+    params[:name][:name] = 'Agaricus Author'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+
+    params[:name][:name] = 'Agaricus sp Author'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+
+    params[:name][:name] = 'Agaricus sp. Author'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@agaricus.id, assigns(:observation).name_id)
+
+    # Can we create observation with deprecated genus?
+    # -------------------------------------------------
+    params[:name][:name] = 'Psalliota'
+    params[:approved_name] = 'Psalliota'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@psalliota.id, assigns(:observation).name_id)
+
+    params[:name][:name] = 'Psalliota sp'
+    params[:approved_name] = 'Psalliota sp'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@psalliota.id, assigns(:observation).name_id)
+
+    params[:name][:name] = 'Psalliota sp.'
+    params[:approved_name] = 'Psalliota sp.'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@psalliota.id, assigns(:observation).name_id)
+
+    # Can we create observation with deprecated genus, adding author?
+    # ----------------------------------------------------------------
+    params[:name][:name] = 'Psalliota Author'
+    params[:approved_name] = 'Psalliota Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@psalliota.id, assigns(:observation).name_id)
+    assert_equal('Psalliota sp. Author', @psalliota.reload.search_name)
+    @psalliota.author = nil
+    @psalliota.search_name = 'Psalliota sp.'
+    @psalliota.save
+
+    params[:name][:name] = 'Psalliota sp Author'
+    params[:approved_name] = 'Psalliota sp Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@psalliota.id, assigns(:observation).name_id)
+    assert_equal('Psalliota sp. Author', @psalliota.reload.search_name)
+    @psalliota.author = nil
+    @psalliota.search_name = 'Psalliota sp.'
+    @psalliota.save
+
+    params[:name][:name] = 'Psalliota sp. Author'
+    params[:approved_name] = 'Psalliota sp. Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(@psalliota.id, assigns(:observation).name_id)
+    assert_equal('Psalliota sp. Author', @psalliota.reload.search_name)
+
+    # Can we create new quoted genus?
+    # --------------------------------
+    params[:name][:name] = '"One"'
+    params[:approved_name] = '"One"'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal('"One" sp.', assigns(:observation).name.search_name)
+
+    params[:name][:name] = '"Two" sp'
+    params[:approved_name] = '"Two" sp'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"Two"', assigns(:observation).name.text_name)
+    assert_equal('"Two" sp.', assigns(:observation).name.search_name)
+
+    params[:name][:name] = '"Three" sp.'
+    params[:approved_name] = '"Three" sp.'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"Three"', assigns(:observation).name.text_name)
+    assert_equal('"Three" sp.', assigns(:observation).name.search_name)
+
+    params[:name][:name] = '"One"'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+
+    params[:name][:name] = '"One" sp'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+
+    params[:name][:name] = '"One" sp.'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+
+    # Can we create species under the quoted genus?
+    # ----------------------------------------------
+    params[:name][:name] = '"One" foo'
+    params[:approved_name] = '"One" foo'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One" foo', assigns(:observation).name.text_name)
+
+    params[:name][:name] = '"One" "bar"'
+    params[:approved_name] = '"One" "bar"'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One" "bar"', assigns(:observation).name.text_name)
+
+    params[:name][:name] = '"One" Author'
+    params[:approved_name] = '"One" Author'
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
+
+    params[:name][:name] = '"One" sp Author'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
+
+    params[:name][:name] = '"One" sp. Author'
+    params[:approved_name] = nil
+    post(:create_observation, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal('"One"', assigns(:observation).name.text_name)
+    assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
+  end
+
   # ------------------------------------------------------------
   #  Test proposing new names, casting and changing votes, and
   #  setting and changing preferred_namings.
