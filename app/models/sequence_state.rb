@@ -195,7 +195,7 @@ class SequenceState < ActiveRecord::Base
       # higher index.
       # If current has a lower index, then find next_id's index
       calc_current_index = self.index_from_id(self.current_id) # Current from current index
-      if calc_current_index >= self.current_index
+      if calc_current_index && calc_current_index >= self.current_index
         # Base next on current
         self.prev_id = self.current_id
         new_index = calc_current_index + 1
@@ -239,7 +239,7 @@ class SequenceState < ActiveRecord::Base
       # higher index.
       # If current has a lower index, then find prev_id's index
       calc_current_index = self.index_from_id(self.current_id) # Current from current index
-      if calc_current_index >= self.current_index
+      if calc_current_index && calc_current_index >= self.current_index
         # Base prev on current
         self.next_id = self.current_id
         new_index = calc_current_index - 1
