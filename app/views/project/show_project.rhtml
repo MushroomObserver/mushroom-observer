@@ -26,7 +26,7 @@
       <p><%= "#{:show_project_by.l}: #{user_link(@project.user)}" %></p>
       <p><%= "#{:show_project_user_group.l}: #{@project.user_group.name}" %></p>
       <p><%= "#{:show_project_admin_group.l}: #{@project.admin_group.name}" %></p>
-      <p><%= "#{:show_project_summary.l}: #{@project.summary}" %></p>
+      <p><%= "#{:show_project_summary.l}: #{textilize(sanitize(@project.summary))}" %></p>
 
       <% if @user and @project.user_group.users.member?(@user) %>
         <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>
