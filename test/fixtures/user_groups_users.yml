@@ -1,0 +1,33 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+reviewer_rolf:
+  user_id: 1
+  user_group_id: 1
+
+eol_user_rolf:
+  user_id: 1
+  user_group_id: 2
+
+eol_user_mary:
+  user_id: 2
+  user_group_id: 2
+
+eol_user_katrina:
+  user_id: 5
+  user_group_id: 2
+
+eol_admin_rolf:
+  user_id: 1
+  user_group_id: 3
+
+eol_admin_mary:
+  user_id: 2
+  user_group_id: 3
+
+bolete_user_dick:
+  user_id: 4
+  user_group_id: 4
+
+bolete_admin_dick:
+  user_id: 4
+  user_group_id: 5

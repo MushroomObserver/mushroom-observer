@@ -204,7 +204,7 @@ class ApplicationController < ActionController::Base
     result = false
     user = get_session_user
     if !user.nil?
-      result = user.in_group('reviewer')
+      result = user.in_group('reviewers')
     end
     result
   end

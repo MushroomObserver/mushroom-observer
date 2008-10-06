@@ -957,7 +957,7 @@ class ObserverController < ApplicationController
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new
-    @users = User.find(:all, :order => "contribution desc")
+    @users = User.find(:all, :order => "contribution desc, name, login")
   end
 
   # show_user.rhtml

@@ -1,0 +1,34 @@
+<% @title = @title || :list_projects_title.l %>
+
+<% # Add Project %>
+<%=
+    tabs = [[:list_projects_add_project.l,
+             url_for(:action => 'add_project')]]
+    show_tabs tabs
+%>
+
+<div id="Title"><%= @title %></div>
+
+<%= pagination_numbers(@project_pages) %>
+
+<% if @projects.length > 0 %>
+<table cellpadding="5" cellspacing="0" width="100%">
+  <%
+     odd_or_even = 0
+     for project in @projects
+       odd_or_even = 1 - odd_or_even
+  %>
+  <tr valign="top" class="ListLine<%= odd_or_even %>">
+    <td width="100%">
+      <%= link_to(sprintf('<span class="ListWhat">%s</span>', h(project.title)),
+                :action => 'show_project', :id => project.id) %>: 
+      <br/>
+      <span class="ListWhen"><%= project.created_at %></span>:
+      <span class="ListWho"><%= user_link(project.user) %></span><br/>
+    </td>
+  </tr>
+  <% end %>
+</table>
+<% end %>
+
+<%= pagination_numbers(@project_pages) %><br/>

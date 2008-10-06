@@ -564,3 +564,17 @@ macrocybe_titans:
   observation_name: **__Macrocybe__** Titans
   search_name: Macrocybe sp.
   review_status: unreviewed
+
+boletus_edulis:
+  id: 39
+  created: 2008-10-05 16:16:50
+  modified: 2008-10-05 16:17:08
+  user_id: 4
+  version: 1
+  rank: Species
+  text_name: Boletus edulis
+  author: Bull.
+  display_name: **__Boletus edulis__** Bull.
+  observation_name: **__Boletus edulis__** Bull.
+  search_name: Boletus edulis Bull.
+  review_status: unreviewed

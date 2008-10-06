@@ -169,7 +169,7 @@ class CommentController < ApplicationController
       object = @comment.object
       summary = @comment.summary
       if @comment.destroy
-        object.log("Comment destroyed by #{@user.login}: #{sum}", false) \
+        object.log("Comment destroyed by #{@user.login}: #{summary}", false) \
           if @object.respond_to?(:log)
         flash_notice "Comment destroyed."
       else

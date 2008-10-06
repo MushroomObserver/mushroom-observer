@@ -1943,4 +1943,32 @@ class NameControllerTest < Test::Unit::TestCase
     notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
   end
+
+  def test_set_review_status_reviewer
+    name = @coprinus_comatus
+    assert_equal(:unreviewed, name.review_status)
+    assert(@rolf.in_group('reviewers'))
+    params = {
+      :id => name.id,
+      :value => 'vetted'
+    }
+    post_requires_login(:set_review_status, params, false, @rolf.login)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    name = Name.find(name.id) # Reload
+    assert_equal(:vetted, name.review_status)
+  end
+
+  def test_set_review_status_non_reviewer
+    name = @coprinus_comatus
+    assert_equal(:unreviewed, name.review_status)
+    assert(!@mary.in_group('reviewers'))
+    params = {
+      :id => name.id,
+      :value => 'vetted'
+    }
+    post_requires_login(:set_review_status, params, false, @mary.login)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    name = Name.find(name.id) # Reload
+    assert_equal(:unreviewed, name.review_status)
+  end
 end

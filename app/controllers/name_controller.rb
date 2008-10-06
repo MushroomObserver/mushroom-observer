@@ -164,7 +164,8 @@ class NameController < ApplicationController
     # Rough testing showed implementation without synonyms takes .23-.39 secs.
     # elapsed_time = Benchmark.realtime do
       store_location
-      @name = Name.find(params[:id])
+      name_id = params[:id]
+      @name = Name.find(name_id)
       @past_name = @name.versions.latest
       @past_name = @past_name.previous if @past_name
       @children = @name.children
@@ -202,10 +203,10 @@ class NameController < ApplicationController
       )
 
       # Get list of observations matching on consensus: these are "reliable".
-      @consensus_data = Observation.connection.select_all(consensus_query % params[:id])
+      @consensus_data = Observation.connection.select_all(consensus_query % name_id)
 
       # Get list of observations matching on other names: "look-alikes".
-      @other_data = Observation.connection.select_all(other_query % params[:id])
+      @other_data = Observation.connection.select_all(other_query % name_id)
 
       # Get list of observations matching any of its synonyms.
       @synonym_data = []
@@ -224,7 +225,7 @@ class NameController < ApplicationController
       @search_seqs = {}
       if @consensus_data.length > 0
         @search_seqs["consensus"] = calc_search(:name_observations,
-          "o.name_id = %s" % params[:id], "o.vote_cache desc, o.when desc").id
+          "o.name_id = %s" % name_id, "o.vote_cache desc, o.when desc").id
       end
       if @synonym_data.length > 0
         @search_seqs["synonym"] = calc_search(:synonym_observations,
@@ -232,7 +233,7 @@ class NameController < ApplicationController
       end
       if @other_data.length > 0
         @search_seqs["other"] = calc_search(:other_observations,
-          "g.name_id = %s" % params[:id], "g.vote_cache desc, o.when desc").id
+          "g.name_id = %s" % name_id, "g.vote_cache desc, o.when desc").id
       end
       #consensus_search = SearchState.lookup(params, :name_observations, logger)
       #if not consensus_search.setup?
@@ -277,12 +278,23 @@ class NameController < ApplicationController
       # is logged in we need to redo it and calc the preferred name for each.
       # Note that there's no reason to do duplicate observations.  (Note, only
       # need to do this to subset on the page we can actually see.)
+      projects = []
       if @user
         for d in @consensus_data + @synonym_data + @other_data
           d["observation_name"] = Observation.find(d["id"].to_i).format_name
         end
+        for group in @user.user_groups
+          project = group.project
+          if project
+            projects.push(project)
+          end
+        end
+        projects.sort! {|x,y| x.title <=> y.title }
       end
+      @user_projects = projects unless projects == []
 
+      @existing_drafts = DraftName.find_all_by_name_id(name_id, :include => :project, :order => "projects.title") # for view/edit draft section
+      @existing_drafts = nil if @existing_drafts == []
       # session[:checklist_source] = :observation_ids
     # end
     # logger.warn("show_name took %s\n" % elapsed_time)

@@ -252,6 +252,29 @@ how_observation: >
   particular User.  An Observation can only be edited or deleted by the owner or a site
   administrator.</p>
 
+
+how_projects: >
+  <p><b>Projects</b> - Projects are a way for a group of people to work together for a while
+  to create a set of work that they want to keep out of the public eye until they are ready
+  to publish the work.  The original purpose was to support university classes where there was
+  a desire to keep a more controlled environment, but it is also intended to support groups
+  working on publications and other similar focused efforts.</p>
+  Anyone can create a new project by clicking on "List Projects":%s in the left-handle panel
+  and then clicking 'Add Project'.  The person who creates the project is always a member and
+  and an administrator for that project.  An administrator for a project can add new members
+  by clicking the 'Add Members' link at the top of a project's 'Show Project' page. Administrators
+  can also make other users administrators for the project by going to one of the 'Change Status'
+  links available on the 'Show Project' or 'Add Members' pages.
+  Users can send requests to the admins for a project.  These requests get emailed to the
+  administrators and contain links for changing that user's status.</p>
+  <p>Currently the primary focus of projects if for creating draft description pages for
+  fungal species.  You can create a new draft by going to the current description page for a
+  species and clicking the appropriate project under "Create New Draft for".  Note that you
+  must be a member of a project to be able to create a draft description for that project.
+  At the moment (Oct. 2008) only one person can have a draft for a given species. This limitation
+  is expected to go away by the end of Oct. 2008. By that time it will also be possible to
+  publish a draft back to the originating species description.</p>
+
 how_proposed_name: >
   <p><b>Proposed Name</b> - A name as proposed for a given Observation.  Any number of
   names may be proposed for a single observation by members of the community.  No special
@@ -1305,3 +1328,92 @@ observations: Observations
 namings: Proposed IDs
 votes: Votes
 users: Members
+
+# Project pages
+add_members_add_one_member: Add
+add_members_change_status: Change Status
+add_members_show_project: Show Project
+add_members_title: Add Users to
+
+add_project_submit: Create
+add_project_title: Create New Project
+
+admin_request_change_member_status: Change User's Status
+admin_request_handy_links: Here are some handy links that you may find useful
+admin_request_message: Message
+admin_request_show_user: Show details on sender
+admin_request_subject: Subject
+admin_request_submit: Send
+admin_request_title: Admin Request for
+
+app_list_projects: List Projects
+
+change_member_status_admins: Current Project Admins
+change_member_status_change_status: Change Status
+change_member_status_edit: Edit Project
+change_member_status_list_projects: List Projects
+change_member_status_make_admin: Make Admin
+change_member_status_make_admin_help: >
+  Make Admin - Allows user to perform admin functions.<br/>
+  They will be able to add or remove members, change the ability for other
+  members to perform admin functions, and edit any draft names for this project.
+  User is also made a member of the project if they are not already.
+
+change_member_status_make_member: Make Regular Member
+change_member_status_make_member_help: >
+  Make Regular Member - Ensures that user is a member of the project, but not in the admin group.<br/>
+  Afterwords the user will be able to view and create draft names for this project.
+  They will be the only non-admin members able to edit their drafts.
+
+change_member_status_members: Current Project Members
+change_member_status_remove_member: Remove Member
+change_member_status_remove_member_help: >
+  Remove Member - Removes all member and admin priviledges for a project.<br/>
+  User will no longer be able view or create draft names for this project.
+  They will not be able to perform any admin functions.
+
+change_member_status_show_project: Show Project (Cancel)
+change_member_status_title: Changing User Status of %s for %s
+
+edit_draft_show_draft: Show Draft (Cancel)
+edit_draft_show_project: Show Project
+edit_draft_submit: Save Edits
+edit_draft_title: Editing Draft for
+
+edit_project_are_you_sure: Are you sure?
+edit_project_destroy: Destroy Project
+edit_project_list_projects: List Projects
+edit_project_show_project: Show Project (Cancel)
+edit_project_submit: Save Edits
+edit_project_title: Editing Project
+
+form_projects_summary: Summary
+form_projects_title: Title
+
+list_projects_add_project: Add Project
+list_projects_title: Projects
+
+show_draft_about: About
+show_draft_edit_draft: Edit Draft
+show_draft_list_projects: List Projects
+show_draft_show_project: Show Project
+show_draft_title: Draft of %s for %s
+
+show_name_create_draft: Create New Draft for
+show_name_draft_help: >
+  Drafts are new versions of the description fields for a name being worked on within a project.
+  Only members of the project can view drafts.  Only the owner of a draft can edit them.
+  You can create a new draft version of the description fields for this name for any project you are a member of.
+
+show_name_existing_drafts: Existing Drafts
+
+show_project_add_members: Add Members
+show_project_admin_group: Admin Group
+show_project_admin_request: Admin Request
+show_project_by: Owned By
+show_project_created: Created
+show_project_edit: Edit Project
+show_project_list_projects: List Projects
+show_project_summary: Summary
+show_project_title: Project
+show_project_user_group: User Group

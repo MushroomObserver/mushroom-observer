@@ -1,35 +1,42 @@
 Bug fixes:
-  September 20, 2008 7:55:41 PM PDT
-    ActionView::TemplateError (undefined method `year' for nil:NilClass) on line #24 of image/show_image.rhtml:
+  September 21, 2008 12:45:36 PM PDT
+    ActiveRecord::StatementInvalid (Mysql::Error: Unknown table 'g' in where clause: 
 
+  September 20, 2008 7:55:41 PM PDT
+    ActionView::TemplateError (undefined method `year' for nil:NilClass) on line #24 of ima
+ge/show_image.rhtml:
+
+  September 20, 2008 10:05:29 PM PDT
+    ActionView::TemplateError (undefined method `observation_name' for nil:NilClass) on line #20 of observer/_observation.rhtml:
+    Rendering /home/19334/containers/rails/mo/public/500.html (500 Internal Server Error)
+    Can't reproduce.
+    
+  Avoid generating 'Genus sp' as species.
+
+  Caused by name.review_status being NULL:
+    Name problem with A. virginiensis (species vanished!)
 
 Features for EOL Class support:
   
-  Tests:
+  Missing Tests:
     show_notifications shouldn't show empty notifications
     add_user_to_group
     Site Stats for observation with no images
     Approve existing name and verify both Name and PastName
     Default transition for a non-reviewer and a reviewer
     Reviewer tests for image quality, names and votes
-    
-  Caused by name.review_status being NULL:
-    Name problem with A. virginiensis (species vanished!)
-  
-  - Citation as a reference (name/eol)
-  Need to be able to search past_names for vetted data
-    Trying to get versioning working correctly for names
-      Changes don't take review_status to :unreviewed
-      reviewer and last_review aren't propagating to past_names
-      marking something 'Inaccurate' crashes
 
   Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
     End of September.
+    Mechanism for publishing a draft
 
   Expanded ability to review what a user has contributed.  
     This will allow professors to easily review the contributions made by a student.
     I've included a proposed workflow below.  
     Early October.
+    Need general way to review what's been reviewed
+    Need to speed up eol_preview and eol
+    Need to be able to search past_names for vetted data
 
   Implement NameNotes: Mid-October
     Add license management for NameNotes

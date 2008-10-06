@@ -35,6 +35,14 @@ module ApplicationHelper
     end
   end
 
+  def project_link(project, name=nil)
+    begin
+      name = h(project.title) if name.nil?
+      link_to(name, :controller => 'project', :action => 'show_project', :id => project.id)
+    rescue
+    end
+  end
+
   # Convert :Genus to "Genus" via internationalization.
   def rank_as_string(rank)
     eval(":rank_#{rank.to_s.downcase}.l")

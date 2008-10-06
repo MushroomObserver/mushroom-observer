@@ -103,7 +103,7 @@ end
 
 # Pages that require login
 def login(user='rolf', password='testpassword')
-  get :news
+  # get :news
   user = User.authenticate(user, password)
   assert(user)
   session[:user_id] = user.id

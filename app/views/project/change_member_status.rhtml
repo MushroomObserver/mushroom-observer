@@ -1,0 +1,48 @@
+<% @title = @title || (:change_member_status_title.l % [@candidate.legal_name, @project.title]) %>
+
+<% # List Projects | Edit Project | Show Project (Cancel) %>
+<%=
+    tabs = [[:change_member_status_list_projects.l,
+             url_for(:action => 'list_projects')]]
+    if check_permission(@project.user_id)
+        tabs.push([:change_member_status_edit.l,
+                   url_for(:action => 'edit_project', :id => @project.id)])
+    end
+    tabs.push([:change_member_status_show_project.l, url_for(:action => 'show_project', :id => @project.id)])
+    show_tabs tabs
+%>
+
+<div id="Title"><%= @title %></div>
+
+<% form_tag(:action => 'change_member_status', :id => @project.id, :candidate => @candidate.id) do %>
+<center>
+  <table cellpadding="10">
+    <tr>
+      <td align="center">
+        <%= submit_tag(:change_member_status_make_member.l) %>
+      </td>
+      <td>
+        <%= :change_member_status_make_member_help.l %>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <%= submit_tag(:change_member_status_remove_member.l) %>
+      </td>
+      <td>
+        <%= :change_member_status_remove_member_help.l %>
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <%= submit_tag(:change_member_status_make_admin.l) %>
+      </td>
+      <td>
+        <%= :change_member_status_make_admin_help.l %>
+      </td>
+    </tr>
+  </table>
+</center>
+<br/>
+<% end %>
+<%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>

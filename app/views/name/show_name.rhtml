@@ -9,10 +9,10 @@
                "http://images.google.com/images?q=#{@name.text_name}"]
     if @data != []
         tabs.push [:show_name_distribution_map.l,
-                   url_for(:action => 'map', :id => @name) ]
+                   url_for(:action => 'map', :id => @name.id) ]
     end
     tabs.push [:show_name_email_tracking.l,
-                url_for(:action => 'email_tracking', :id => @name)]
+                url_for(:action => 'email_tracking', :id => @name.id)]
     show_tabs tabs
 %>
 <br/>
@@ -20,60 +20,105 @@
 <% # Edit Name | Bulk Name Edit | Add Name | Change Synonyms | Approve/Deprecate %>
 <%=
     tabs = [[:show_name_edit_name.l,
-             url_for(:action => 'edit_name', :id => @name)],
+             url_for(:action => 'edit_name', :id => @name.id)],
             [:show_name_bulk_name_edit.l,
              url_for(:action => 'bulk_name_edit')],
             [:show_name_add_name.l,
              url_for(:action => 'create_name')],
             [:show_name_change_synonyms.l,
-             url_for(:action => 'change_synonyms', :id => @name)]]
+             url_for(:action => 'change_synonyms', :id => @name.id)]]
     if @name.deprecated
         tabs.push([:show_name_approve.l,
-                   url_for(:action => 'approve_name', :id => @name)])
+                   url_for(:action => 'approve_name', :id => @name.id)])
     else
         tabs.push([:show_name_deprecate.l,
-                   url_for(:action => 'deprecate_name', :id => @name)])
+                   url_for(:action => 'deprecate_name', :id => @name.id)])
     end
     show_tabs tabs
 %>
 
 <div id="Title"><%= 'About: ' + textilize_without_paragraph(h(@name.display_name)) %></div>
-<p>
-	<%= :show_name_rank.l %>: <%= rank_as_string(@name.rank) %><br/>
-	<%= :show_name_status.l %>: <%= @name.status == "Valid" ? :show_name_valid.l : :show_name_deprecated.l %><br/>
-	<%= :show_name_name.l %>: <%= @name.text_name %><br/>
-	<%= :show_name_author.l %>: <%= @name.author %><br/>
-	<%= :show_name_citation.l %>: <%= textilize_without_paragraph(sanitize(@name.citation || '')) %><br/>
-	<%
-	approved_synonyms, deprecated_synonyms = @name.sort_synonyms
-	if approved_synonyms != []
-	    links = approved_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
-        %>
-        <%= @name.deprecated ? :show_name_preferred_synonyms.l : :show_name_synonyms.l %>: <%= links.join(', ') %><br/>
-	<%
-	end
-    if deprecated_synonyms != []
-        links = deprecated_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n)}
-        %>
-        <%= :show_name_deprecated_synonyms.l %>: <%= links.join(', ') %><br/>
-    <% end %>
-	<%= :show_name_version.l %>: <%= @name.version %><br/>
-	<% if @past_name %>
-	    <%= link_to("#{:show_name_previous_version.l}: %d" % @past_name.version,
-          :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
-	<% end %>
-	<br/><%= :show_name_content_status.l %>: <%= @name.review_status.l %>
-	<% if @name.reviewer %>
-    <span class="HelpNote">
-      <br/>&nbsp;&nbsp;(<%= "#{:show_name_latest_review.l}: #{@name.last_review ? @name.last_review.strftime("%Y-%m-%d") : 'Unknown'} by #{user_link(@name.reviewer, @name.reviewer.login)}" %>)
-    </span>
-  <% end %>
-	<% if @is_reviewer %>
-	  <br/>&nbsp;&nbsp;<%= link_to(:unvetted.l, :action => 'set_review_status', :value => :unvetted, :id => @name) %>
-	  <br/>&nbsp;&nbsp;<%= link_to(:vetted.l, :action => 'set_review_status', :value => :vetted, :id => @name) %>
-	  <br/>&nbsp;&nbsp;<%= link_to(:inaccurate.l, :action => 'set_review_status', :value => :inaccurate, :id => @name) %>
-	<% end %>
-</p>
+<table cellpadding="5" width="100%">
+  <tr>
+    <td valiagn="top" width="50%">
+      <p>
+      	<%= :show_name_rank.l %>: <%= rank_as_string(@name.rank) %><br/>
+      	<%= :show_name_status.l %>:
+      	  <%= @name.status == "Valid" ? :show_name_valid.l : :show_name_deprecated.l %><br/>
+      	<%= :show_name_name.l %>: <%= @name.text_name %><br/>
+      	<%= :show_name_author.l %>: <%= @name.author %><br/>
+      	<%= :show_name_citation.l %>: <%= textilize_without_paragraph(sanitize(@name.citation || '')) %><br/>
+      	<%
+      	approved_synonyms, deprecated_synonyms = @name.sort_synonyms
+      	if approved_synonyms != []
+      	    links = approved_synonyms.map{|n|
+      	      link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n.id)
+      	    }
+              %>
+              <%= @name.deprecated ? :show_name_preferred_synonyms.l : :show_name_synonyms.l %>: <%= links.join(', ') %><br/>
+      	<%
+      	end
+          if deprecated_synonyms != []
+              links = deprecated_synonyms.map{|n|
+                link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n.id)
+              }
+              %>
+              <%= :show_name_deprecated_synonyms.l %>: <%= links.join(', ') %><br/>
+          <% end %>
+      	<%= :show_name_version.l %>: <%= @name.version %><br/>
+      	<% if @past_name %>
+      	    <%= link_to("#{:show_name_previous_version.l}: %d" % @past_name.version,
+                :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
+      	<% end %>
+      	<br/><%= :show_name_content_status.l %>: <%= @name.review_status.l %>
+      	<% if @name.reviewer %>
+          <span class="HelpNote">
+            <br/>&nbsp;&nbsp;(<%=
+              "#{:show_name_latest_review.l}: #{@name.last_review ? @name.last_review.strftime("%Y-%m-%d") : 'Unknown'} by #{user_link(@name.reviewer, @name.reviewer.login)}"
+            %>)
+          </span>
+        <% end %>
+      	<% if @is_reviewer %>
+      	  <br/>&nbsp;&nbsp;<%=
+      	    link_to(:unvetted.l, :action => 'set_review_status', :value => :unvetted, :id => @name.id)
+      	  %>
+      	  <br/>&nbsp;&nbsp;<%=
+      	    link_to(:vetted.l, :action => 'set_review_status', :value => :vetted, :id => @name.id)
+      	  %>
+      	  <br/>&nbsp;&nbsp;<%=
+      	    link_to(:inaccurate.l, :action => 'set_review_status', :value => :inaccurate, :id => @name.id)
+      	  %>
+      	<% end %>
+      </p>
+    </td>
+    <td valign="top" width="50%">
+      <p>
+        <% if @existing_drafts or @user_projects %>
+          <span class='HelpNote'>
+            <%= :show_name_draft_help.l %><br/>
+          </span>
+        <% end %>
+        <% if @existing_drafts %>
+          <%= :show_name_existing_drafts.l %><br/>
+          <% for draft in @existing_drafts %>
+            &nbsp;&nbsp;<%= link_to(draft.project.title, :controller => :project, :action => 'show_draft',
+                                    :id => draft.id) %>
+            (<%= user_link(draft.user) %>)<br/>
+          <% end %>
+        <% end %>
+      </p>
+      <p>
+        <% if @user_projects %>
+          <%= :show_name_create_draft.l %><br/>
+          <% for project in @user_projects %>
+            &nbsp;&nbsp;<%= link_to(project.title, :controller => :project, :action => 'create_or_edit_draft',
+                                    :project => project.id, :name => @name.id) %><br/>
+          <% end %>
+        <% end %>
+      </p>
+    </td>
+  </tr>
+</table>
 
 <%
   odd_or_even = 0
@@ -98,7 +143,7 @@ end %>
             i += 1
             break if i > max %>
             <%= link_to(textilize_without_paragraph(h(child.display_name)),
-                :action => 'show_name', :id => child) %><br/>
+                :action => 'show_name', :id => child.id) %><br/>
         <% end %>
         <%= "And #{@children.length - i + 1} more...<br/>" if i > max %>
     </p>

@@ -1,0 +1,8 @@
+<% @title = @title || :add_project_title.l %>
+<%= link_to("Cancel", :action => :list_projects) %>
+
+<div id="Title"><%= @title %></div>
+<% form_tag(:action => 'add_project') do %>
+  <center><%= submit_tag :add_project_submit.l %></center>
+  <%= render :partial => 'form_projects' %>
+<% end %>

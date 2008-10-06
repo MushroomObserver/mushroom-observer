@@ -1,0 +1,43 @@
+<% @title = @title || "#{:show_project_title.l}: #{@project.title}" %>
+
+<% # List Projects | Edit Project %>
+<%=
+    tabs = [[:show_project_list_projects.l,
+             url_for(:action => 'list_projects')]]
+    tabs.push([:show_project_admin_request.l,
+        url_for(:action => 'admin_request', :id => @project.id)])
+    if check_permission(@project.user_id)
+        tabs.push([:show_project_edit.l,
+                   url_for(:action => 'edit_project', :id => @project.id)])
+    end
+    if @project.admin_group.users.member?(@user)
+      tabs.push([:show_project_add_members.l,
+                 url_for(:action => 'add_members', :id => @project.id)])
+    end
+    show_tabs tabs
+%>
+
+<div id="Title"><%= @title %></div>
+
+<table cellpadding="10">
+  <tr>
+    <td valign="top">
+      <p><%= "#{:show_project_created.l}: #{@project.created_at.to_formatted_s(:db)}"%></p>
+      <p><%= "#{:show_project_by.l}: #{user_link(@project.user)}" %></p>
+      <p><%= "#{:show_project_user_group.l}: #{@project.user_group.name}" %></p>
+      <p><%= "#{:show_project_admin_group.l}: #{@project.admin_group.name}" %></p>
+      <p><%= "#{:show_project_summary.l}: #{@project.summary}" %></p>
+
+      <% if @user and @project.user_group.users.member?(@user) %>
+        <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>
+      <% end %>
+    </td>
+    <td valign="top">
+      <% for draft in @project.draft_names %>
+        <%= link_to(textilize_without_paragraph(draft.name.display_name),
+                    :action => "show_draft", :id => draft.id) %>
+        (<%= user_link(draft.user) %>)
+      <% end %>
+    </td>
+  </tr>
+</table>

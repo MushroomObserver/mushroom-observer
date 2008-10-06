@@ -1,10 +1,29 @@
 # If the locale isn't a full locale such as fr-FR or if the rails localization doesn't exist,
 # you should define the locale_name key for globalite to display the UI locales properly.
 
+# project/add_members
+add_members_add_one_member: Add
+add_members_change_status: Change Status
+add_members_show_project: Show Project
+add_members_title: Add Users to
+
+# project/add_project
+add_project_submit: Create
+add_project_title: Create New Project
+
 # add_user_to_group
 add_user_to_group_add: Add
 add_user_to_group_group: Group name
 add_user_to_group_user: User name
+
+# admin_request email
+admin_request_change_member_status: Change User's Status
+admin_request_handy_links: Here are some handy links that you may find useful
+admin_request_message: Message
+admin_request_show_user: Show details on sender
+admin_request_subject: Subject
+admin_request_submit: Send
+admin_request_title: Admin Request for
 
 # entire application
 app_account: Account
@@ -29,6 +48,7 @@ app_intro: Introduction
 app_join_mailing_list: Join Mailing List
 app_latest: Latest
 app_latest_changes: Changes by Users
+app_list_projects: List Projects
 app_locations_find: Locations
 app_login: Login
 app_logout: Logout
@@ -54,10 +74,80 @@ app_your_observations: Your Observations
 app_your_summary: Your Summary
 
 
+# observer/ask_webmaster_question
+ask_webmaster_note: >
+  <p>Thanks for your interest in the Mushroom Observer website.  This website was
+  first launched in mid-2006.  I am currently the primary (but no longer only!)
+  developer and maintainer.
+  I welcome any questions you might have about using the site or comments on how
+  the site might be improved.  I keep my "to do list":%s online so you can
+  get a peek into what I have planned and a rough order.  However, this is always
+  subject to change, especially if there is some type of bug or someone submits
+  a really great idea.</p><p>
+  Nathan Wilson<br/>
+  Mushroom Observer WebMaster</p>
+
+ask_webmaster_question: Question or Comment
+ask_webmaster_send: Send
+ask_webmaster_your_email: Your email address
+
+# observer/license_updater
+bulk_license_link: Bulk License Updater
+
+
+# project/change_member_status
+change_member_status_admins: Current Project Admins
+change_member_status_change_status: Change Status
+change_member_status_edit: Edit Project
+change_member_status_list_projects: List Projects
+change_member_status_make_admin: Make Admin
+change_member_status_make_admin_help: >
+  Make Admin - Allows user to perform admin functions.<br/>
+  They will be able to add or remove members, change the ability for other
+  members to perform admin functions, and edit any draft names for this project.
+  User is also made a member of the project if they are not already.
+
+change_member_status_make_member: Make Regular Member
+change_member_status_make_member_help: >
+  Make Regular Member - Ensures that user is a member of the project, but not in the admin group.<br/>
+  Afterwords the user will be able to view and create draft names for this project.
+  They will be the only non-admin members able to edit their drafts.
+
+change_member_status_members: Current Project Members
+change_member_status_remove_member: Remove Member
+change_member_status_remove_member_help: >
+  Remove Member - Removes all member and admin priviledges for a project.<br/>
+  User will no longer be able view or create draft names for this project.
+  They will not be able to perform any admin functions.
+
+change_member_status_show_project: Show Project (Cancel)
+change_member_status_title: Changing User Status of %s for %s
+
+
+# location/create_location
+create_location_title: Create Location
+
+
+# project/edit_draft
+edit_draft_show_draft: Show Draft (Cancel)
+edit_draft_show_project: Show Project
+edit_draft_submit: Save Edits
+edit_draft_title: Editing Draft for
+
+
 # name/edit_name
 edit_name_cancel: Cancel (Show Name)
 edit_name_save_edits: Save Edits
 edit_name_title: Editing Description
+
+
+# project/edit_project
+edit_project_are_you_sure: Are you sure?
+edit_project_destroy: Destroy Project
+edit_project_list_projects: List Projects
+edit_project_show_project: Show Project (Cancel)
+edit_project_submit: Save Edits
+edit_project_title: Editing Project
 
 
 # name/email_tracking
@@ -99,6 +189,12 @@ email_tracking_update: Update
 email_tracking_your_profile: your profile
 
 
+# account/email_new_password
+email_new_password_button: Send
+email_new_password_login: Login
+email_new_password_title: Email New Password
+
+
 # name/eol_preview
 eol_preview_title: EOL Preview
 eol_preview_explanation: >
@@ -122,37 +218,6 @@ eol_preview_explanation: >
   the Mushroom Observer webmaster.</p>
   <p>The best way to participate in this amazing opportunity is to find a taxon you care about and work
   to expand the descriptive paragraphs for this taxon.</p>
-
-# observer/license_updater
-bulk_license_link: Bulk License Updater
-
-
-# observer/ask_webmaster_question
-ask_webmaster_note: >
-  <p>Thanks for your interest in the Mushroom Observer website.  This website was
-  first launched in mid-2006.  I am currently the primary (but no longer only!)
-  developer and maintainer.
-  I welcome any questions you might have about using the site or comments on how
-  the site might be improved.  I keep my "to do list":%s online so you can
-  get a peek into what I have planned and a rough order.  However, this is always
-  subject to change, especially if there is some type of bug or someone submits
-  a really great idea.</p><p>
-  Nathan Wilson<br/>
-  Mushroom Observer WebMaster</p>
-
-ask_webmaster_question: Question or Comment
-ask_webmaster_send: Send
-ask_webmaster_your_email: Your email address
-
-
-# location/create_location
-create_location_title: Create Location
-
-
-# account/email_new_password
-email_new_password_button: Send
-email_new_password_login: Login
-email_new_password_title: Email New Password
 
 
 # observer/_form_comments
@@ -299,6 +364,11 @@ form_observations_where: Where (required)
 form_observations_where_help: >
   Where the observation was made. In the US this should be at least accurate to
   the county.<br/>Example: *Albion, Mendocino Co., California, USA*
+
+
+# project/_form_projects
+form_projects_summary: Summary
+form_projects_title: Title
 
 
 # observer/_form_species_list
@@ -558,6 +628,28 @@ how_observation: >
   particular User.  An Observation can only be edited or deleted by the owner or a site
   administrator.</p>
 
+how_projects: >
+  <p><b>Projects</b> - Projects are a way for a group of people to work together 
+  to create a set of work that they want to keep out of the public eye until they are ready
+  to publish it.  The original purpose was to support university classes where there was
+  a desire to keep a more controlled environment while the class was going.  Projects
+  are also intended to support groups working on publications and other similar focused efforts.</p>
+  <p>Anyone can create a new project by clicking on "List Projects":%s in the left-handle panel
+  and then clicking 'Add Project'.  The person who creates the project is always a member and
+  and an administrator for that project.  An administrator for a project can add new members
+  by clicking the 'Add Members' link at the top of a project's 'Show Project' page. Administrators
+  can also make other users administrators for the project by going to one of the 'Change Status'
+  links available on the 'Show Project' or 'Add Members' pages.
+  Users can send requests to the admins for a project.  These requests get emailed to the
+  admins and contain a link for changing that user's status.</p>
+  <p>Currently the primary focus of projects is creating draft description pages for
+  fungal species.  You can create a new draft by going to the current description page for a
+  species and clicking the appropriate project under "Create New Draft for".  Note that you
+  must be a member of a project to create a draft description for that project.
+  At the moment (Oct. 2008) only one person can have a draft for a given species. This limitation
+  is expected to go away by the end of Oct. 2008. By that time it will also be possible to
+  publish a draft back to the originating species description.</p>
+
 how_proposed_name: >
   <p><b>Proposed Name</b> - A name as proposed for a given Observation.  Any number of
   names may be proposed for a single observation by members of the community.  No special
@@ -781,6 +873,11 @@ list_place_names_title: All Locations
 list_place_names_undef: Undefined Locations (by frequency)
 
 
+# project/list_projects
+list_projects_add_project: Add Project
+list_projects_title: Projects
+
+
 # application_helper
 location_all: All Locations
 location_define: Define This Location
@@ -1000,6 +1097,14 @@ rss_title: Mushroom Observer
 rss_log_title: Activity Log
 
 
+# project/show_draft
+show_draft_about: About
+show_draft_edit_draft: Edit Draft
+show_draft_list_projects: List Projects
+show_draft_show_project: Show Project
+show_draft_title: Draft of %s for %s
+
+
 # image/show_image
 show_image_reviewed_by: Reviewed by
 
@@ -1031,11 +1136,18 @@ show_name_bulk_name_edit: Bulk Name Edit
 show_name_change_synonyms: Change Synonyms
 show_name_citation: Citation
 show_name_content_status: Content status
+show_name_create_draft: Create New Draft for
 show_name_deprecate: Deprecate
 show_name_deprecated: Deprecated
 show_name_deprecated_synonyms: Deprecated Synonym(s)
 show_name_distribution_map: Distribution Map
+show_name_draft_help: >
+  Drafts are new versions of the description fields for a name being worked on within a project.
+  Only members of the project can view drafts.  Only the owner of a draft can edit them.
+  You can create a new draft version of the description fields for this name for any project you are a member of.
+
 show_name_edit_name: Edit Description
+show_name_existing_drafts: Existing Drafts
 show_name_email_tracking: Email Tracking
 show_name_google_images: Google Images
 show_name_last_modified: Last Modified
@@ -1141,6 +1253,19 @@ ignore_me: >
   synonym as the community consensus (even if it has no votes!), but in cases
   where there is still debate (multiple "accepted" names), it uses the winner
   among the accepted names.
+
+
+# project/show_project
+show_project_add_members: Add Members
+show_project_admin_group: Admin Group
+show_project_admin_request: Admin Request
+show_project_by: Owned By
+show_project_created: Created
+show_project_edit: Edit Project
+show_project_list_projects: List Projects
+show_project_summary: Summary
+show_project_title: Project
+show_project_user_group: User Group
 
 
 # observer/_show_votes

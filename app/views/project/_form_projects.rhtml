@@ -1,0 +1,12 @@
+<!--[form:project]-->
+
+<label for="project_title"><%= :form_projects_title.l %></label>:<br/>
+<%= text_field("project", "title", :size => 80) %><br/><br/>
+
+<label for="project_summary"><%= :form_projects_summary.l %></label>:<br/>
+<%= text_area("project", "summary", :cols => 80, :rows => 5) %><br/>
+<%= render :partial => 'shared/textilize_help' %>
+
+<%= javascript_tag "document.getElementById('project_title').focus()" %>
+
+<!--[eoform:project]-->

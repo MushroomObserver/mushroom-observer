@@ -1,0 +1,13 @@
+<% @title = "#{:admin_request_title.l} #{h(@project.title)}" %>
+<div id="Title"><%= @title %></div>
+
+<% form_tag(:action => 'send_admin_request', :id => @project.id) do %>
+<center><%= submit_tag :admin_request_submit.l %></center>
+<br/>
+<label for="email_subject"><%= :admin_request_subject.l %></label>:<br/>
+<%= text_field 'email', 'subject', :size => 70  %><br/><br/>
+<label for="email_content"><%= :admin_request_message.l %></label>:<br/>
+<%= text_area 'email', 'content', :cols => 80  %>
+<% end %>
+
+<%= javascript_tag "document.getElementById('email_subject').focus()" %>

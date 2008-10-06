@@ -133,6 +133,18 @@ class AccountMailer < ActionMailer::Base
     @content_type        = user.html_email ? "text/html" : "text/plain"
   end
 
+  def admin_request(sender, project, subject, message)
+    @subject             = subject
+    @body["sender"]      = sender
+    @body["message"]     = message
+    @body["project"]     = project
+    @recipients          = project.admin_group.users.map() {|a| a.email }
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = sender.email
+    @content_type        = "text/plain"
+  end
+
   def verify(user)
     @subject      = 'Email Verification for Mushroom Observer'
     @body["user"] = user

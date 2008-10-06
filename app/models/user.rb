@@ -71,6 +71,8 @@ class User < ActiveRecord::Base
   has_many :notifications
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
   has_many :reviewed_names, :class_name => "Name", :foreign_key => "reviewer_id"
+  has_many :projects
+  
   has_and_belongs_to_many :user_groups
   
   belongs_to :license       # user's default license
@@ -144,7 +146,7 @@ class User < ActiveRecord::Base
   def in_group(group_name)
     result = false
     for g in self.user_groups
-      if g.name = group_name
+      if g.name == group_name
         result = true
         break
       end

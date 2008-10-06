@@ -7,10 +7,14 @@ class AccountMailerTest < Test::Unit::TestCase
   fixtures :users
   fixtures :images
   fixtures :observations
+  fixtures :images_observations
   fixtures :names
   fixtures :namings
   fixtures :comments
   fixtures :notifications
+  fixtures :projects
+  fixtures :user_groups
+  fixtures :user_groups_users
 
   def setup
     Locale.code = "en-US"
@@ -42,6 +46,10 @@ class AccountMailerTest < Test::Unit::TestCase
     assert_string_equal_file("#{FIXTURES_PATH}/user_question",
       AccountMailer.create_user_question(@rolf, @mary, 'Interesting idea',
         'Shall we discuss it in email?').encoded)
+
+    assert_string_equal_file("#{FIXTURES_PATH}/admin_request",
+      AccountMailer.create_admin_request(@katrina, @eol_project,
+        'Please do something or other', 'and this is why...').encoded)
 
     assert_string_equal_file("#{FIXTURES_PATH}/observation_question",
       AccountMailer.create_observation_question(@rolf, @detailed_unknown,

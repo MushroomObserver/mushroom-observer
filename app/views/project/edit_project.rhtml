@@ -1,0 +1,21 @@
+<% @title = @title || "#{:edit_project_title.l}: #{@project.title}" %>
+
+<% # List Projects | Destroy Project | Show Project (Cancel) %>
+<%=
+    tabs = [[:edit_project_list_projects.l,
+             url_for(:action => 'list_projects')]]
+    if check_permission(@project.user_id)
+        tabs.push([:edit_project_destroy.l,
+                   url_for(:action => 'destroy_project', :id => @project.id, 
+                           :confirm => :edit_project_are_you_sure)])
+    end
+    tabs.push([:edit_project_show_project.l,
+               url_for(:action => 'show_project', :id => @project.id)])
+    show_tabs tabs
+%>
+
+<div id="Title"><%= @title %></div>
+<% form_tag(:action => 'edit_project', :id => @project.id) do %>
+  <center><%= submit_tag :edit_project_submit.l %></center>
+  <%= render :partial => 'form_projects' %>
+<% end %>

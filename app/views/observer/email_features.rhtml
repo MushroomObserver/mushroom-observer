@@ -1,11 +1,14 @@
 <% @title = 'Email Features'%>
 <div id="Title"><%= @title %></div>
-Sending to
-<%= (@users.map { |u| u.login }).join(', ') %>
+Sending to <%= @users.length %> users
 <br/><br/>
 <% form_tag(:action => 'send_feature_email') do %>
-<center><%= submit_tag "Send" %></center>
+<center><%= submit_tag("Send") %></center>
 <br/>
 <label for="feature_email_content">Feature Email</label><br/>
-<%= text_area 'feature_email', 'content'  %>
+<%= text_area('feature_email', 'content', :cols => 80)  %><br/>
+<p>
+  Users:
+  <%= (@users.map { |u| u.login }).join(', ') %>
+</p>
 <% end %>

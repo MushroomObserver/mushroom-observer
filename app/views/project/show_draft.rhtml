@@ -1,0 +1,38 @@
+<%
+  name = @draft_name.name
+  format_name = textilize_without_paragraph(name.display_name)
+  project = @draft_name.project
+  @title = "#{:show_draft_title.l}" % [name.text_name, project.title]
+  display_title = "#{:show_draft_title.l}" % [format_name, project.title]
+%>
+
+<% # About <Name> | List Projects | Show Project | Edit Draft %>
+<%=
+    tabs = [["#{:show_draft_about.l} #{format_name}",
+             url_for(:controller => 'name', :action => 'show_name', :id => name.id)],
+             [:show_draft_list_projects.l,
+              url_for(:action => 'list_projects')],
+            [:show_draft_show_project.l,
+             url_for(:action => 'show_project', :id => project.id)]]
+    if @draft_name.user_id == @user.id
+      tabs.push([:show_draft_edit_draft.l,
+                 url_for(:action => 'edit_draft', :id => @draft_name.id)])
+    end
+    show_tabs tabs
+%>
+
+<div id="Title"><%= display_title %></div>
+
+<%
+  odd_or_even = 0
+  for f in Name.all_note_fields
+    value = @draft_name.send(f).to_s
+    if value != ''
+      odd_or_even = 1 - odd_or_even %>
+      <%= "form_names_#{f}".to_sym.l %>:
+      <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+          <%= textilize(sanitize(value)) %>
+      </div>
+      <br/>
+<%  end
+end %>

@@ -1,0 +1,10 @@
+<%= @message %>
+
+--------------------------------------------------
+
+<%= :admin_request_handy_links.l %>
+
+<%= :admin_request_show_user.l %>: <%= "#{DOMAIN}/observer/show_user/#{@sender.id}" %>
+<%= :admin_request_change_member_status.l %>: <%= "#{DOMAIN}/project/change_user_status/#{@project.id}?user=#{@sender.id}" %>
+
+If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org
