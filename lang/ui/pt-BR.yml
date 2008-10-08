@@ -252,28 +252,28 @@ how_observation: >
   particular User.  An Observation can only be edited or deleted by the owner or a site
   administrator.</p>
 
-
 how_projects: >
-  <p><b>Projects</b> - Projects are a way for a group of people to work together for a while
+  <p><b>Projects</b> - Projects are a way for a group of people to work together 
   to create a set of work that they want to keep out of the public eye until they are ready
-  to publish the work.  The original purpose was to support university classes where there was
-  a desire to keep a more controlled environment, but it is also intended to support groups
-  working on publications and other similar focused efforts.</p>
-  Anyone can create a new project by clicking on "List Projects":%s in the left-handle panel
+  to publish it.  The original purpose was to support university classes where there was
+  a desire to keep a more controlled environment while the class was going.  Projects
+  are also intended to support groups working on publications and other similar focused efforts.</p>
+  <p>Anyone can create a new project by clicking on "List Projects":%s in the left-handle panel
   and then clicking 'Add Project'.  The person who creates the project is always a member and
   and an administrator for that project.  An administrator for a project can add new members
   by clicking the 'Add Members' link at the top of a project's 'Show Project' page. Administrators
   can also make other users administrators for the project by going to one of the 'Change Status'
   links available on the 'Show Project' or 'Add Members' pages.
-  Users can send requests to the admins for a project.  These requests get emailed to the
-  administrators and contain links for changing that user's status.</p>
-  <p>Currently the primary focus of projects if for creating draft description pages for
+  Any user can send requests to the admins for a project.  These requests get emailed to the
+  admins and contain a link for changing that user's status.</p>
+  <p>Currently the primary focus of projects is creating draft description pages for
   fungal species.  You can create a new draft by going to the current description page for a
   species and clicking the appropriate project under "Create New Draft for".  Note that you
-  must be a member of a project to be able to create a draft description for that project.
-  At the moment (Oct. 2008) only one person can have a draft for a given species. This limitation
-  is expected to go away by the end of Oct. 2008. By that time it will also be possible to
-  publish a draft back to the originating species description.</p>
+  must be a member of a project to create a draft description for that project.  Once you have
+  completed a draft, you can publish the draft by clicking "Publish Draft" on the "Show Draft"
+  page.  You must click "Destroy Draft" to remove a draft from a project.
+  At the moment (Oct. 2008) only one draft can exist for a given species.
+  This limitation is expected to go away by the end of Oct. 2008.</p>
 
 how_proposed_name: >
   <p><b>Proposed Name</b> - A name as proposed for a given Observation.  Any number of
