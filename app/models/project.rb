@@ -5,10 +5,10 @@ class Project < ActiveRecord::Base
   has_many :draft_names
   
   def is_member?(user)
-    self.user_group.users.member?(user)
+    user and (self.user_group.users.member?(user) or (user.id == 0))
   end
   
   def is_admin?(user)
-    self.admin_group.users.member?(user)
+    user and (self.admin_group.users.member?(user) or (user.id == 0))
   end
 end

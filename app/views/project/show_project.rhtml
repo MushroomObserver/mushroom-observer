@@ -10,7 +10,7 @@
         tabs.push([:show_project_edit.l,
                    url_for(:action => 'edit_project', :id => @project.id)])
     end
-    if @project.admin_group.users.member?(@user)
+    if @project.is_admin?(@user)
       tabs.push([:show_project_add_members.l,
                  url_for(:action => 'add_members', :id => @project.id)])
     end

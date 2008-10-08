@@ -23,4 +23,7 @@ class DraftName < ActiveRecord::Base
     result.user_id = user_id
   end
   
+  def can_edit?(editor)
+    (editor == self.user) or self.project.is_admin?(editor)
+  end
 end

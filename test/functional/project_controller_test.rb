@@ -55,11 +55,7 @@ class ProjectControllerTest < ActionController::TestCase
     assert_equal([@rolf], admin_group.users)
   end
 
-  def test_add_project_existing
-    title = @eol_project.title
-    summary = "The Entoloma On Line Project"
-    project = Project.find_by_title(title)
-    assert(project)
+  def add_project_helper(title, summary)
     params = {
       :project => {
         :title => title,
@@ -68,36 +64,18 @@ class ProjectControllerTest < ActionController::TestCase
     }
     post_requires_login(:add_project, params, false)
     assert_form_action(:action => 'add_project') # Failure
+  end
+  
+  def test_add_project_existing
+    add_project_helper(@eol_project.title, "The Entoloma On Line Project")
   end
 
   def test_add_project_empty_name
-    title = ''
-    summary = "The Empty Project"
-    project = Project.find_by_title(title)
-    assert_nil(project)
-    params = {
-      :project => {
-        :title => title,
-        :summary => summary
-      }
-    }
-    post_requires_login(:add_project, params, false)
-    assert_form_action(:action => 'add_project') # Failure
+    add_project_helper('', "The Empty Project")
   end
 
   def test_add_project_existing_user_group
-    title = 'reviewers'
-    summary = "Journal Reviewers"
-    project = Project.find_by_title(title)
-    assert_nil(project)
-    params = {
-      :project => {
-        :title => title,
-        :summary => summary
-      }
-    }
-    post_requires_login(:add_project, params, false)
-    assert_form_action(:action => 'add_project') # Failure
+    add_project_helper('reviewers', "Journal Reviewers")
   end
   
   def test_edit_project
@@ -127,30 +105,24 @@ class ProjectControllerTest < ActionController::TestCase
     assert_equal(summary, project.summary)
   end
 
-  def test_edit_project_empty_name  
-    project = @eol_project
+  def edit_project_helper(title, project)
     params = {
       :id => project.id,
       :project => {
-        :title => '',
+        :title => title,
         :summary => project.summary
       }
     }
     post_requires_user(:edit_project, "show_project", params, false)
     assert_form_action(:action => 'edit_project') # Failure
   end
+
+  def test_edit_project_empty_name  
+    edit_project_helper('', @eol_project)
+  end
   
   def test_edit_project_existing
-    project = @eol_project
-    params = {
-      :id => project.id,
-      :project => {
-        :title => @bolete_project.title,
-        :summary => project.summary
-      }
-    }
-    post_requires_user(:edit_project, "show_project", params, false)
-    assert_form_action(:action => 'edit_project') # Failure
+    edit_project_helper(@bolete_project.title, @eol_project)
   end
 
   def test_destroy_project
@@ -160,15 +132,45 @@ class ProjectControllerTest < ActionController::TestCase
     assert(user_group)
     admin_group = project.admin_group
     assert(admin_group)
+    total_draft_count = DraftName.find(:all).size
+    project_draft_count = project.draft_names.size
+    assert(project_draft_count > 0)
     params = {"id"=>project.id.to_s}
-    requires_user(:destroy_project, "show_project", params, false)
+    requires_user(:destroy_project, "show_project", params, false, @dick.login)
     assert_redirected_to(:action => "list_projects")
     assert_raises(ActiveRecord::RecordNotFound) do
-      user_group = UserGroup.find(user_group.id) # Need to reload user group to pick up changes
+      project = Project.find(project.id)
     end
     assert_raises(ActiveRecord::RecordNotFound) do
-      admin_group = UserGroup.find(admin_group.id) # Need to reload user group to pick up changes
+      user_group = UserGroup.find(user_group.id)
     end
+    assert_raises(ActiveRecord::RecordNotFound) do
+      admin_group = UserGroup.find(admin_group.id)
+    end
+    assert_equal(total_draft_count - project_draft_count, DraftName.find(:all).size)
+  end
+
+  def destroy_project_helper(project, changer)
+    assert(project)
+    total_draft_count = DraftName.find(:all).size
+    project_draft_count = project.draft_names.size
+    assert(project_draft_count > 0)
+    params = {"id"=>project.id.to_s}
+    requires_user(:destroy_project, "show_project", params, false, changer.login)
+    assert_template("show_project")
+    assert(Project.find(project.id))
+    assert(UserGroup.find(project.user_group.id))
+    assert(UserGroup.find(project.admin_group.id))
+    assert_equal(total_draft_count, DraftName.find(:all).size)
+  end
+  
+  def test_destroy_project_other
+    destroy_project_helper(@bolete_project, @rolf)
+  end
+
+  def test_destroy_project_member
+    assert(@eol_project.is_member?(@katrina))
+    destroy_project_helper(@eol_project, @katrina)
   end
 
   def test_send_admin_request
@@ -311,7 +313,13 @@ class ProjectControllerTest < ActionController::TestCase
   end
 
   def test_add_members
-    requires_login(:add_members, { :id => 1})
+    requires_login(:add_members, { :id => @eol_project.id})
+  end
+
+  def test_add_members_non_admin
+    project_id = @eol_project.id
+    requires_login(:add_members, { :id => project_id}, false, @katrina.login)
+    assert_redirected_to(:action => 'show_project', :id => project_id)
   end
 
   # Ensure that draft owner can see a draft they own
@@ -342,56 +350,37 @@ class ProjectControllerTest < ActionController::TestCase
     assert_redirected_to(:controller => "project", :action => "show_project")
   end
 
-  def test_create_or_edit_draft_owner
-    draft = @draft_coprinus_comatus
+  def create_or_edit_draft_tester(draft, project, name, user=nil, page=nil)
+    if user
+      assert_not_equal(draft.user, user)
+    else
+      user = draft.user
+    end
+    page = page || "edit_draft"
     count = DraftName.find(:all).size
     params = {
-      :project => @eol_project.id,
-      :name => @coprinus_comatus.id
+      :project => project.id,
+      :name => name.id
     }
-    requires_login(:create_or_edit_draft, params, false, draft.user.login)
-    assert_redirected_to(:controller => "project", :action => "edit_draft", :id => draft.id)
+    requires_login(:create_or_edit_draft, params, false, user.login)
+    assert_redirected_to(:controller => "project", :action => page, :id => draft.id)
     assert_equal(count, DraftName.find(:all).size)
+  end
+
+  def test_create_or_edit_draft_owner
+    create_or_edit_draft_tester(@draft_coprinus_comatus, @eol_project, @coprinus_comatus)
   end
 
   def test_create_or_edit_draft_admin
-    draft = @draft_coprinus_comatus
-    assert_not_equal(draft.user, @mary)
-    count = DraftName.find(:all).size
-    params = {
-      :project => @eol_project.id,
-      :name => @coprinus_comatus.id
-    }
-    requires_login(:create_or_edit_draft, params, false, @mary.login)
-    assert_redirected_to(:controller => "project", :action => "edit_draft", :id => draft.id)
-    assert_equal(count, DraftName.find(:all).size)
+    create_or_edit_draft_tester(@draft_coprinus_comatus, @eol_project, @coprinus_comatus, @mary)
   end
 
   def test_create_or_edit_draft_not_owner
-    draft = @draft_agaricus_campestris
-    assert_not_equal(draft.user, @katrina)
-    count = DraftName.find(:all).size
-    params = {
-      :project => @eol_project.id,
-      :name => @agaricus_campestris.id
-    }
-    requires_login(:create_or_edit_draft, params, false, @katrina.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
-    assert_equal(count, DraftName.find(:all).size)
+    create_or_edit_draft_tester(@draft_agaricus_campestris, @eol_project, @agaricus_campestris, @katrina, "show_draft")
   end
 
   def test_create_or_edit_draft_not_project
-    draft = @draft_boletus_edulis
-    assert_not_equal(draft.user, @katrina)
-    count = DraftName.find(:all).size
-    params = {
-      :project => @eol_project.id,
-      :name => @boletus_edulis.id
-    }
-    requires_login(:create_or_edit_draft, params, false, @katrina.login)
-    # Technically this ends up redirecting to show_project by way of show_draft
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
-    assert_equal(count, DraftName.find(:all).size)
+    create_or_edit_draft_tester(@draft_boletus_edulis, @eol_project, @boletus_edulis, @katrina, "show_draft")
   end
 
   def test_create_or_edit_draft_new_draft
@@ -416,97 +405,158 @@ class ProjectControllerTest < ActionController::TestCase
     assert_equal(count, DraftName.find(:all).size)
   end
 
+  def edit_draft_tester(draft, user=nil, success=true)
+    if user
+      assert_not_equal(user, draft.user)
+    else
+      user = draft.user
+    end
+    requires_login(:edit_draft, { :id => draft.id}, success, user.login)
+    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id) unless success
+  end
+  
   def test_edit_draft
-    draft = @draft_coprinus_comatus
-    assert_equal(@katrina, draft.user)
-    requires_login(:edit_draft, { :id => draft.id}, true, @katrina.login)
+    edit_draft_tester(@draft_coprinus_comatus)
   end
 
   def test_edit_draft_admin
-    draft = @draft_coprinus_comatus
-    assert_not_equal(@mary, draft.user)
-    requires_login(:edit_draft, { :id => draft.id}, true, @mary.login)
+    assert(@draft_coprinus_comatus.project.is_admin?(@mary))
+    edit_draft_tester(@draft_coprinus_comatus, @mary)
   end
 
   def test_edit_draft_member
-    draft = @draft_agaricus_campestris
-    assert_not_equal(@katrina, draft.user)
-    requires_login(:edit_draft, { :id => draft.id}, false, @katrina.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
+    assert(@draft_coprinus_comatus.project.is_member?(@katrina))
+    edit_draft_tester(@draft_agaricus_campestris, @katrina, false)
   end
 
   def test_edit_draft_non_member
-    draft = @draft_agaricus_campestris
-    assert_not_equal(@dick, draft.user)
-    requires_login(:edit_draft, { :id => draft.id}, false, @dick.login)
+    assert(!@draft_agaricus_campestris.project.is_member?(@dick))
+    edit_draft_tester(@draft_agaricus_campestris, @dick, false)
+  end
+
+  def edit_draft_post_helper(draft, user=nil, success=true)
+    if user
+      assert_not_equal(user, draft.user)
+    else
+      user = draft.user
+    end
+    gen_desc = "This is a very general description."
+    assert_not_equal(gen_desc, draft.gen_desc)
+    diag_desc = "This is a diagnostic description"
+    assert_not_equal(diag_desc, draft.diag_desc)
+    params = {
+      :id => draft.id,
+      :draft_name => {
+        :gen_desc => gen_desc,
+        :diag_desc => diag_desc
+      }
+    }
+    post_requires_login(:edit_draft, params, false, user.login)
     assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
+    draft = DraftName.find(draft.id) # Reload
+    if success
+      assert_equal(gen_desc, draft.gen_desc)
+      assert_equal(diag_desc, draft.diag_desc)
+    else
+      assert_not_equal(gen_desc, draft.gen_desc)
+      assert_not_equal(diag_desc, draft.diag_desc)
+    end
   end
 
   def test_edit_draft_post
-    draft = @draft_coprinus_comatus
-    assert_equal(@katrina, draft.user)
-    assert_nil(draft.gen_desc)
-    gen_desc = "This is a very general description."
-    params = {
-      :id => draft.id,
-      :draft_name => {
-        :gen_desc => gen_desc
-      }
-    }
-    post_requires_login(:edit_draft, params, false, @katrina.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
-    draft = DraftName.find(draft.id) # Reload
-    assert_equal(gen_desc, draft.gen_desc)
+    edit_draft_post_helper(@draft_coprinus_comatus)
   end
 
   def test_edit_draft_post_admin
-    draft = @draft_coprinus_comatus
-    assert_not_equal(@mary, draft.user)
-    assert_nil(draft.gen_desc)
-    gen_desc = "This is a very general description."
-    params = {
-      :id => draft.id,
-      :draft_name => {
-        :gen_desc => gen_desc
-      }
-    }
-    post_requires_login(:edit_draft, params, false, @mary.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
-    draft = DraftName.find(draft.id) # Reload
-    assert_equal(gen_desc, draft.gen_desc)
+    edit_draft_post_helper(@draft_coprinus_comatus, @mary)
   end
 
   def test_edit_draft_post_member
-    draft = @draft_agaricus_campestris
-    assert_not_equal(@katrina, draft.user)
-    assert_nil(draft.gen_desc)
-    gen_desc = "This is a very general description."
-    params = {
-      :id => draft.id,
-      :draft_name => {
-        :gen_desc => gen_desc
-      }
-    }
-    post_requires_login(:edit_draft, params, false, @katrina.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
-    draft = DraftName.find(draft.id) # Reload
-    assert_not_equal(gen_desc, draft.gen_desc)
+    edit_draft_post_helper(@draft_agaricus_campestris, @katrina, false)
   end
 
   def test_edit_draft_post_non_member
-    draft = @draft_agaricus_campestris
-    assert_not_equal(@dick, draft.user)
-    assert_nil(draft.gen_desc)
-    gen_desc = "This is a very general description."
-    params = {
-      :id => draft.id,
-      :draft_name => {
-        :gen_desc => gen_desc
-      }
-    }
-    post_requires_login(:edit_draft, params, false, @dick.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
-    draft = DraftName.find(draft.id) # Reload
-    assert_not_equal(gen_desc, draft.gen_desc)
+    edit_draft_post_helper(@draft_agaricus_campestris, @dick, false)
   end
+
+  def publish_draft_helper(draft, user=nil, success=true)
+    if user
+      assert_not_equal(draft.user, user)
+    else
+      user = draft.user
+    end
+    draft_gen_desc = draft.gen_desc
+    name_gen_desc = draft.name.gen_desc
+    same_gen_desc = (draft_gen_desc == draft.name.gen_desc)
+    name_id = draft.name_id
+    params = {
+      :id => draft.id
+    }
+    requires_login(:publish_draft, params, false, user.login)
+    name = Name.find(name_id)
+    if success
+      assert_redirected_to(:controller => 'name', :action => 'show_name', :id => name_id)
+      assert_equal(draft_gen_desc, name.gen_desc)
+    else
+      assert_redirected_to(:action => 'show_draft', :id => draft.id)
+      assert_equal(same_gen_desc, draft_gen_desc == draft.name.gen_desc)
+    end
+  end
+  
+  def test_publish_draft
+    publish_draft_helper(@draft_coprinus_comatus)
+  end
+  
+  def test_publish_draft_admin
+    publish_draft_helper(@draft_coprinus_comatus, @mary)
+  end
+  
+  def test_publish_draft_member
+    publish_draft_helper(@draft_agaricus_campestris, @katrina, false)
+  end
+  
+  def test_publish_draft_non_member
+    publish_draft_helper(@draft_agaricus_campestris, @dick, false)
+  end
+
+  def destroy_draft_helper(draft, user=nil, success=true)
+    if user
+      assert_not_equal(draft.user, user)
+    else
+      user = draft.user
+    end
+    assert(draft)
+    total_draft_count = DraftName.find(:all).size
+    params = {
+      :id => draft.id
+    }
+    requires_login(:destroy_draft, params, false, user.login)
+    assert_template('show_project')
+    if success
+      assert_raises(ActiveRecord::RecordNotFound) do
+        draft = DraftName.find(draft.id)
+      end
+      assert_equal(total_draft_count - 1, DraftName.find(:all).size)
+    else
+      assert(DraftName.find(draft.id))
+      assert_equal(total_draft_count, DraftName.find(:all).size)
+    end
+  end
+  
+  def test_destroy_draft
+    destroy_draft_helper(@draft_coprinus_comatus)
+  end
+  
+  def test_destroy_draft_admin
+    destroy_draft_helper(@draft_coprinus_comatus, @mary)
+  end
+  
+  def test_destroy_draft_member
+    destroy_draft_helper(@draft_agaricus_campestris, @katrina, false)
+  end
+  
+  def test_destroy_draft_non_member
+    destroy_draft_helper(@draft_agaricus_campestris, @dick, false)
+  end
+
 end

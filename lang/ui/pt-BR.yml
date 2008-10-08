@@ -1375,7 +1375,7 @@ change_member_status_remove_member_help: >
 change_member_status_show_project: Show Project (Cancel)
 change_member_status_title: Changing User Status of %s for %s
 
-edit_draft_show_draft: Show Draft (Cancel)
+edit_draft_show_draft: Show Draft
 edit_draft_show_project: Show Project
 edit_draft_submit: Save Edits
 edit_draft_title: Editing Draft for
@@ -1394,8 +1394,10 @@ list_projects_add_project: Add Project
 list_projects_title: Projects
 
 show_draft_about: About
+show_draft_destroy_draft: Destroy Draft
 show_draft_edit_draft: Edit Draft
 show_draft_list_projects: List Projects
+show_draft_publish_draft: Publish Draft
 show_draft_show_project: Show Project
 show_draft_title: Draft of %s for %s
 

@@ -12,7 +12,9 @@
 #  ** add_one_member             Add a particular user as a project member (admin only)
 #  ** show_draft                 Show the latest version of a draft (member only)
 #  ** create_or_edit_draft       Create a new draft if none exists then edit it (member only)
-#  ** edit_draft                 Edit an existing draft (draft owner only)
+#  ** edit_draft                 Edit an existing draft (draft owner or admin only)
+#  ** publish_draft              Move draft data to a new version of the given naem (draft owner  or admin only)
+#  ** destroy_draft              Destroy draft (draft owner or admin only)
 
 ################################################################################
 
@@ -157,6 +159,9 @@ class ProjectController < ApplicationController
       title = @project.title
       user_group = @project.user_group
       admin_group = @project.admin_group
+      for d in @project.draft_names
+        d.destroy
+      end
       if @project.destroy
         # project.log("Project destroyed by #{@user.login}: #{title}", false)
         user_group.destroy
@@ -269,7 +274,11 @@ class ProjectController < ApplicationController
   #   @project, @users
   def add_members
     @project = Project.find(params[:id])
-    @users = User.find(:all, :order => "login, name")
+    if verify_user() and @project.is_admin?(@user)
+      @users = User.find(:all, :order => "login, name")
+    else
+      redirect_to(:action => 'show_project', :id => @project.id)
+    end
   end
 
   # Show the given draft if the current user has permission
@@ -366,7 +375,7 @@ class ProjectController < ApplicationController
   #   Outputs: @draft_name
   def edit_draft
     @draft_name = DraftName.find(params[:id])
-    if check_user_id(@draft_name.user_id) or @draft_name.project.is_admin?(@user)
+    if verify_user() and @draft_name.can_edit?(@user)
       if request.method == :post
         if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
           flash_object_errors(@draft_name)
@@ -379,5 +388,46 @@ class ProjectController < ApplicationController
       flash_error("Permission denied: Only the creator of a draft can edit it.")
       redirect_to(:action => 'show_draft', :id => @draft_name.id)
     end
+  end
+  
+  # Publishes the draft back to the originating name
+  # Linked from: show_draft
+  # Inputs:
+  #   params[:id]
+  # Success:
+  #   Redirects to show_name.
+  # Failure:
+  #   Redirects to show_draft.
+  def publish_draft
+    draft = DraftName.find(params[:id])
+    if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
+      name = draft.name
+      for f in Name.all_note_fields:
+        name.send("#{f}=", draft.send(f))
+      end
+      name.save_if_changed(@user, "Name updated by #{@user.login}", Time.now())
+      redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
+    else
+      flash_error("Permission denied: Only the creator of a draft or a project admin can publish a draft")
+      redirect_to(:action => 'show_draft', :id => draft.id)
+    end
+  end
+  
+  # Callback to destroy a draft.
+  # Linked from: show_draft
+  # Redirects to show_project
+  # Inputs: params[:id]
+  # Outputs: @project
+  def destroy_draft
+    draft = DraftName.find(params[:id])
+    if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
+      if draft.destroy
+        flash_notice "Draft destroyed."
+      else
+        flash_error "Failed to destroy draft."
+      end
+    end
+    @project = draft.project
+    render(:action => 'show_project')
   end
 end

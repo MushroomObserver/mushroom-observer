@@ -14,7 +14,11 @@
               url_for(:action => 'list_projects')],
             [:show_draft_show_project.l,
              url_for(:action => 'show_project', :id => project.id)]]
-    if @draft_name.user_id == @user.id
+    if @draft_name.can_edit?(@user)
+      tabs.push([:show_draft_destroy_draft.l,
+                 url_for(:action => 'destroy_draft', :id => @draft_name.id)])
+      tabs.push([:show_draft_publish_draft.l,
+                 url_for(:action => 'publish_draft', :id => @draft_name.id)])
       tabs.push([:show_draft_edit_draft.l,
                  url_for(:action => 'edit_draft', :id => @draft_name.id)])
     end

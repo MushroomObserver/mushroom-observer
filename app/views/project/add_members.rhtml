@@ -16,9 +16,7 @@
     </span>
     <%= link_to(:add_members_change_status.l, :action => :change_member_status,
                 :id => @project.id, :candidate => user.id) %>
-    <% unless @project.user_group.users.member?(user) %>
-      | <%= link_to(:add_members_add_one_member.l, :action => :add_one_member,
-                  :id => @project.id, :candidate => user.id) %>
-    <% end %>
+    <%= link_to(:add_members_add_one_member.l, :action => :add_one_member,
+                :id => @project.id, :candidate => user.id) %>
     <br/>
 <%  end %>
