@@ -1414,6 +1414,7 @@ show_project_admin_group: Admin Group
 show_project_admin_request: Admin Request
 show_project_by: Owned By
 show_project_created: Created
+show_project_drafts: Drafts
 show_project_edit: Edit Project
 show_project_list_projects: List Projects
 show_project_summary: Summary

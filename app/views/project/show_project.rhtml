@@ -19,7 +19,7 @@
 
 <div id="Title"><%= @title %></div>
 
-<table cellpadding="10">
+<table cellpadding="10" width="100%">
   <tr>
     <td valign="top">
       <p><%= "#{:show_project_created.l}: #{@project.created_at.to_formatted_s(:db)}"%></p>
@@ -33,10 +33,11 @@
       <% end %>
     </td>
     <td valign="top">
+      <%= :show_project_drafts.l %>:<br/>
       <% for draft in @project.draft_names %>
-        <%= link_to(textilize_without_paragraph(draft.name.display_name),
+        &nbsp;&nbsp;<%= link_to(textilize_without_paragraph(draft.name.display_name),
                     :action => "show_draft", :id => draft.id) %>
-        (<%= user_link(draft.user) %>)
+        (<%= user_link(draft.user) %>)<br/>
       <% end %>
     </td>
   </tr>

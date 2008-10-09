@@ -26,10 +26,6 @@ Features for EOL Class support:
     Default transition for a non-reviewer and a reviewer
     Reviewer tests for image quality, names and votes
 
-  Provide a classroom interface to track a set of users and limit the visibility of work in progress.  
-    End of September.
-    Mechanism for publishing a draft
-
   Expanded ability to review what a user has contributed.  
     This will allow professors to easily review the contributions made by a student.
     I've included a proposed workflow below.  
