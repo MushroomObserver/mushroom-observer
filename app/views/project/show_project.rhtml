@@ -21,7 +21,7 @@
 
 <table cellpadding="10" width="100%">
   <tr>
-    <td valign="top">
+    <td valign="top" width="50%">
       <p><%= "#{:show_project_created.l}: #{@project.created_at.to_formatted_s(:db)}"%></p>
       <p><%= "#{:show_project_by.l}: #{user_link(@project.user)}" %></p>
       <p><%= "#{:show_project_user_group.l}: #{@project.user_group.name}" %></p>
@@ -32,7 +32,7 @@
         <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>
       <% end %>
     </td>
-    <td valign="top">
+    <td valign="top" width="50%">
       <%= :show_project_drafts.l %>:<br/>
       <% for draft in @project.draft_names %>
         &nbsp;&nbsp;<%= link_to(textilize_without_paragraph(draft.name.display_name),
