@@ -724,7 +724,7 @@ class NameController < ApplicationController
   end
   
   def eol_data
-    @names = Name.find(:all, :conditions => "review_status IN ('unvetted', 'vetted') and ok_for_export = 1", :order => "search_name")
+    names = Name.find(:all, :conditions => "review_status IN ('unvetted', 'vetted') and ok_for_export = 1", :order => "search_name")
     image_data = Name.connection.select_all %(
       SELECT name_id, image_id, observation_id
       FROM names, observations, images_observations, images
@@ -741,6 +741,12 @@ class NameController < ApplicationController
       image_datum = [row['image_id'], row['observation_id']]
       @image_data[name_id] = [] unless @image_data[name_id]
       @image_data[name_id].push(image_datum)
+    end
+    @names = []
+    for n in names
+      if @image_data[n.id] or n.has_any_notes?
+        @names.push(n)
+      end
     end
   end
   
