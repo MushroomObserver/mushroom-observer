@@ -313,6 +313,16 @@ class NameController < ApplicationController
     end
     redirect_to(:action => 'show_name', :id => id)
   end
+
+  def set_export_status
+    id = params[:id]
+    if is_reviewer
+      name = Name.find(id)
+      name.ok_for_export = params[:value]
+      name.save
+    end
+    redirect_to(:action => 'show_name', :id => id)
+  end
   
   def show_past_name
     store_location
@@ -347,8 +357,17 @@ class NameController < ApplicationController
           end
           name.citation = params[:name][:citation]
           name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
+          
+          has_notes = false
           for f in Name.all_note_fields
-            name.send("#{f}=", params[:name][f])
+            note = params[:name][f]
+            has_notes |= (note and (note != ''))
+            name.send("#{f}=", note)
+          end
+          if has_notes
+            name.license_id = params[:name][:license_id]
+          else
+            name.license_id = nil
           end
           for n in names
             if n
@@ -360,6 +379,7 @@ class NameController < ApplicationController
         redirect_to :action => 'show_name', :id => name
       else
         @name = Name.new
+        @licenses = License.current_names_and_ids()
         @name.rank = :Species
         @can_make_changes = true
       end
@@ -382,6 +402,7 @@ class NameController < ApplicationController
   def edit_name
     if verify_user()
       @name = Name.find(params[:id])
+      @licenses = License.current_names_and_ids(@name.license)
 
       # Only allowed to make substantive changes it you own all the references to it.
       # I think checking that the user owns all the namings that use it is correct.
@@ -430,11 +451,16 @@ class NameController < ApplicationController
             end
           end
           @name.set_notes(all_notes)
+          if @name.has_any_notes?
+            @name.license_id = params[:name][:license_id]
+          else
+            @name.license_id = nil
+          end
           raise "Update_name called on a name that doesn't exist." if !@name.id
           if is_reviewer
             @name.reviewer = @user
             @name.last_review = Time.now()
-            @name.review_status = :unvetted
+            # @name.review_status = :unvetted
           else
             @name.reviewer = nil
             @name.review_status = :unreviewed
@@ -697,15 +723,36 @@ class NameController < ApplicationController
     end
   end
   
+  def eol_data
+    @names = Name.find(:all, :conditions => "review_status IN ('unvetted', 'vetted') and ok_for_export = 1", :order => "search_name")
+    image_data = Name.connection.select_all %(
+      SELECT name_id, image_id, observation_id
+      FROM names, observations, images_observations, images
+      WHERE names.id = observations.name_id
+      AND observations.id = images_observations.observation_id
+      AND observations.vote_cache >= 2.4
+      AND images_observations.image_id = images.id
+      AND images.quality in ('medium', 'high')
+      ORDER BY observations.vote_cache
+    )
+    @image_data = {}
+    for row in image_data
+      name_id = row['name_id'].to_i
+      image_datum = [row['image_id'], row['observation_id']]
+      @image_data[name_id] = [] unless @image_data[name_id]
+      @image_data[name_id].push(image_datum)
+    end
+  end
+  
   def eol
     headers["Content-Type"] = "application/xml"
-    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')", :order => "search_name")
+    eol_data()
     render(:action => "eol", :layout => false)
   end
 
   # Show the data getting sent to EOL
   def eol_preview
-    @taxa = Name.find(:all, :conditions => "review_status in ('unvetted', 'vetted')", :order => "search_name")
+    eol_data()
   end
   
 ################################################################################

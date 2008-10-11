@@ -70,6 +70,11 @@
       	    <%= link_to("#{:show_name_previous_version.l}: %d" % @past_name.version,
                 :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
       	<% end %>
+      	<% if @name.ok_for_export %>
+      	  <br/><%= :ok_for_export.l %>
+      	<% else %>
+      	  <br/><%= :no_export.l %>
+      	<% end %>
       	<br/><%= :show_name_content_status.l %>: <%= @name.review_status.l %>
       	<% if @name.reviewer %>
           <span class="HelpNote">
@@ -88,6 +93,15 @@
       	  <br/>&nbsp;&nbsp;<%=
       	    link_to(:inaccurate.l, :action => 'set_review_status', :value => :inaccurate, :id => @name.id)
       	  %>
+      	  <% if @name.ok_for_export %>
+        	  <br/>&nbsp;&nbsp;<%=
+        	    link_to(:no_export.l, :action => 'set_export_status', :value => false, :id => @name.id)
+        	  %>
+        	<% else %>
+        	  <br/>&nbsp;&nbsp;<%=
+        	    link_to(:ok_for_export.l, :action => 'set_export_status', :value => true, :id => @name.id)
+        	  %>
+          <% end %>
       	<% end %>
       </p>
     </td>
@@ -133,6 +147,9 @@
       <br/>
 <%  end
 end %>
+<% if @name.license %>
+  <%= render :partial => "shared/form_#{@name.license.form_name}" %>
+<% end %>
 
 <% if @children != [] %>
     <p><%= rank_as_plural_string(@children[0].rank) %>:</p>

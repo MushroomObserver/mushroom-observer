@@ -11,6 +11,7 @@ class DraftName < ActiveRecord::Base
   belongs_to :user
   belongs_to :project
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
+  belongs_to :license
   
   acts_as_versioned(:class_name => 'PastDraftName', :table_name => 'past_draft_names')
   non_versioned_columns.push('created')
@@ -25,5 +26,16 @@ class DraftName < ActiveRecord::Base
   
   def can_edit?(editor)
     (editor == self.user) or self.project.is_admin?(editor)
+  end
+
+  # Should be identical to Name.has_any_notes?
+  def has_any_notes?()
+    result = false
+    for f in Name.all_note_fields
+      field = self.send(f)
+      result = field && (field != '')
+      break if result
+    end
+    result
   end
 end

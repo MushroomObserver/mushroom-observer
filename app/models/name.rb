@@ -109,10 +109,11 @@ class Name < ActiveRecord::Base
   belongs_to :user
   belongs_to :synonym
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
+  belongs_to :license
 
   acts_as_versioned(:class_name => 'PastName', :table_name => 'past_names')
   non_versioned_columns.push('created', 'synonym_id')
-  ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review')
+  ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review', 'ok_for_export')
   # (note: ignore_if_changed is in app/models/acts_as_versioned_extensions)
 
   # Returns: array of symbols.  Essentially a constant array.
@@ -317,6 +318,7 @@ class Name < ActiveRecord::Base
     result.observation_name = observation_name
     result.search_name = search_name
     result.review_status = :unreviewed
+    result.ok_for_export = true
     result
   end
 
@@ -779,15 +781,7 @@ class Name < ActiveRecord::Base
 ########################################
 
   def reviewed_observations()
-    # For now require that the vote cache be greater than 2.5 and that the naming apply this name
-    # to the given observation is vetted or unvetted (not unreviewed)
-    result = []
-    for obs in Observation.find(:all, :conditions => "name_id = #{self.id}", :order => "vote_cache desc")
-      if [:unvetted, :vetted].member?(obs.review_status())
-        result.push(obs)
-      end
-    end
-    result
+    Observation.find(:all, :conditions => "name_id = #{self.id} and vote_cache >= 2.4")
   end
 
   # Returns a hashtable contain all the notes

@@ -9,7 +9,7 @@ xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
   "xsi:schemaLocation" => "http://www.eol.org/transfer/data/0.1 http://services.eol.org/development/pleary/xml/content4.xsd",
   "xmlns:creativeCommons" => "http://backend.userland.com/creativeCommonsRssModule",
   "xmlns:media" => "http://search.yahoo.com/mrss/") {
-    for taxon in @taxa
+    for taxon in @names
       xml.taxon do
         xml.dc(:identifier, "#{DOMAIN}/name/show_name/#{taxon.id}")
         xml.dc(:source, "#{DOMAIN}/name/show_name/#{taxon.id}")
@@ -31,7 +31,7 @@ xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
               xml.dcterms(:modified, taxon.modified.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
               xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => "en")
               xml.dc(:language, "en")
-              xml.license(taxon.user.license.url)
+              xml.license(taxon.license.url)
               xml.dcterms(:rightsHolder, taxon.user.legal_name)
               xml.audience('General public')
               
@@ -43,22 +43,21 @@ xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
             end
           end
         end
-        for obs in taxon.reviewed_observations
-          for image in obs.images
-            if [:medium, :high].member?(image.quality)
-              xml.dataObject do
-                xml.dc(:identifier, "Image-#{image.id}")
-                xml.dataType("http://purl.org/dc/dcmitype/StillImage")
-                xml.mimeType("image/jpeg")
-                xml.agent(image.user.legal_name, :role => "photographer") # Illustrations need to be identified
-                xml.dcterms(:created, image.created.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
-                xml.license(image.license.url)
-                xml.dcterms(:rightsHolder, image.user.legal_name)
-                xml.audience('General public')
-                xml.dc(:description, image.unique_text_name, "xml:lang" => "en")
-                xml.mediaURL("#{DOMAIN}/image/show_image/#{image.id}")
-                # xml.reviewStatus(image.review_status)
-              end
+        if @image_data[taxon.id]
+          for image_id, observation_id in @image_data[taxon.id]
+            image = Image.find(image_id)
+            xml.dataObject do
+              xml.dc(:identifier, "Image-#{image.id}")
+              xml.dataType("http://purl.org/dc/dcmitype/StillImage")
+              xml.mimeType("image/jpeg")
+              xml.agent(image.user.legal_name, :role => "photographer") # Illustrations need to be identified
+              xml.dcterms(:created, image.created.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
+              xml.license(image.license.url)
+              xml.dcterms(:rightsHolder, image.user.legal_name)
+              xml.audience('General public')
+              xml.dc(:description, image.unique_text_name, "xml:lang" => "en")
+              xml.mediaURL("#{DOMAIN}/image/show_image/#{image.id}")
+              # xml.reviewStatus(image.review_status)
             end
           end
         end

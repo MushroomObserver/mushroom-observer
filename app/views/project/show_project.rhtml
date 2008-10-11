@@ -5,10 +5,13 @@
     tabs = [[:show_project_list_projects.l,
              url_for(:action => 'list_projects')]]
     tabs.push([:show_project_admin_request.l,
-        url_for(:action => 'admin_request', :id => @project.id)])
+               url_for(:action => 'admin_request', :id => @project.id)])
     if check_permission(@project.user_id)
-        tabs.push([:show_project_edit.l,
-                   url_for(:action => 'edit_project', :id => @project.id)])
+      tabs.push([:show_project_destroy.l,
+                 url_for(:action => 'destroy_project', :id => @project.id, 
+                         :confirm => :edit_project_are_you_sure)])
+      tabs.push([:show_project_edit.l,
+                 url_for(:action => 'edit_project', :id => @project.id)])
     end
     if @project.is_admin?(@user)
       tabs.push([:show_project_add_members.l,
@@ -26,7 +29,7 @@
       <p><%= "#{:show_project_by.l}: #{user_link(@project.user)}" %></p>
       <p><%= "#{:show_project_user_group.l}: #{@project.user_group.name}" %></p>
       <p><%= "#{:show_project_admin_group.l}: #{@project.admin_group.name}" %></p>
-      <p><%= "#{:show_project_summary.l}: #{textilize(sanitize(@project.summary))}" %></p>
+      <p><%= "#{:show_project_summary.l}:<br/> #{textilize_without_paragraph(sanitize(@project.summary))}" %></p>
 
       <% if @user and @project.user_group.users.member?(@user) %>
         <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>

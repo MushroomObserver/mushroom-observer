@@ -15,6 +15,8 @@
 class License < ActiveRecord::Base
   has_many :images
   has_many :users
+  has_many :names
+  has_many :draft_names
 
   def self.current_names_and_ids(current_license=nil)
     result = License.find(:all, :conditions => "deprecated = 0").map{|l| [l.display_name, l.id]}

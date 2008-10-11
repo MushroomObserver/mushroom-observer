@@ -114,10 +114,13 @@ class Observation < ActiveRecord::Base
   # It probably makes sense to cache this result at some point.
   def review_status
     naming = Naming.find_by_name_id_and_observation_id(self.name_id, self.id)
-    votes = Vote.find_all_by_naming_id(naming.id)
+    votes = []
+    if naming
+      votes = Vote.find_all_by_naming_id(naming.id)
+    end
     status = :unreviewed
     for v in votes
-      if v.user.in_group('reviewer')
+      if v.user.in_group('reviewers')
         value = v.value
         if value < 0
           status = :inaccurate

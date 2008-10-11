@@ -275,6 +275,8 @@ form_names_author_locked: Name with this author citation is in use.  Make name c
 form_names_citation: Citation
 form_names_citation_help: Citation for the publication of this name.
 form_names_citation_textilize_note: Citations can be formated using the Textile markup system.
+form_names_license: License
+form_names_license_help: Select "license":%s you want to give for the following text
 form_names_notes: Notes
 form_names_notes_help: >
   Please include notes about the validity of this name,
@@ -1264,6 +1266,7 @@ show_project_admin_group: Admin Group
 show_project_admin_request: Admin Request
 show_project_by: Owned By
 show_project_created: Created
+show_project_destroy: Destroy Project
 show_project_drafts: Drafts
 show_project_edit: Edit Project
 show_project_list_projects: List Projects
@@ -1360,6 +1363,9 @@ high_and_next: Excellent & Next
 unvetted: Reviewed
 vetted: Approved
 inaccurate: Inaccurate
+
+no_export: Not for Export
+ok_for_export: OK for Export
 
 # Site stat fields
 images: Images

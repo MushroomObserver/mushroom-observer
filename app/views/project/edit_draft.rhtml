@@ -21,9 +21,15 @@
   </p>
   <br/>
 
+  <p><label for="draft_name_license_id"><%= :form_names_license.l %>:</label><br/>
+      <span class="HelpNote">
+          <%= textilize_without_paragraph(:form_names_license_help.l % "#{DOMAIN}/observer/how_to_use#lic") %>
+      </span><br/>
+  <%= select('draft_name', 'license_id', @licenses) %></p>
+
   <% for f in Name.all_note_fields %>
       <p>
-          <label for="name_notes"><%= "form_names_#{f}".to_sym.l %>:</label>
+          <label for="draft_name_#{f}"><%= "form_names_#{f}".to_sym.l %>:</label>
           <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l %></span><br/>
           <%= text_area 'draft_name', "#{f}", :cols => 80 %>
       </p>

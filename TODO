@@ -27,11 +27,11 @@ Features for EOL Class support:
     Reviewer tests for image quality, names and votes
 
   Expanded ability to review what a user has contributed.  
+    Need to speed up eol_preview and eol
     This will allow professors to easily review the contributions made by a student.
     I've included a proposed workflow below.  
     Early October.
     Need general way to review what's been reviewed
-    Need to speed up eol_preview and eol
     Need to be able to search past_names for vetted data
 
   Implement NameNotes: Mid-October

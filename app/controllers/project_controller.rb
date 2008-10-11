@@ -345,6 +345,11 @@ class ProjectController < ApplicationController
             for f in Name.all_note_fields:
               draft.send("#{f}=", name.send(f))
             end
+            if draft.has_any_notes?
+              draft.license_id = @user.license_id
+            else
+              draft.license_id = nil
+            end
             if draft.save
               redirect_to(:action => 'edit_draft', :id => draft.id)
             else
@@ -375,6 +380,7 @@ class ProjectController < ApplicationController
   #   Outputs: @draft_name
   def edit_draft
     @draft_name = DraftName.find(params[:id])
+    @licenses = License.current_names_and_ids(@draft_name.license)
     if verify_user() and @draft_name.can_edit?(@user)
       if request.method == :post
         if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
@@ -402,6 +408,7 @@ class ProjectController < ApplicationController
     draft = DraftName.find(params[:id])
     if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
       name = draft.name
+      name.license_id = draft.license_id
       for f in Name.all_note_fields:
         name.send("#{f}=", draft.send(f))
       end
