@@ -723,8 +723,9 @@ class NameController < ApplicationController
     end
   end
   
-  def eol_data
-    names = Name.find(:all, :conditions => "review_status IN ('unvetted', 'vetted') and ok_for_export = 1", :order => "search_name")
+  def eol_data(review_status_list)
+    rsl_list = review_status_list.join("', '")
+    names = Name.find(:all, :conditions => "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1", :order => "search_name")
     image_data = Name.connection.select_all %(
       SELECT name_id, image_id, observation_id
       FROM names, observations, images_observations, images
@@ -758,9 +759,16 @@ class NameController < ApplicationController
 
   # Show the data getting sent to EOL
   def eol_preview
-    eol_data()
+    eol_data(['unvetted', 'vetted'])
   end
   
+  # Show the data getting sent to EOL
+  def eol_need_review
+    eol_data(['unreviewed'])
+    @title = :eol_need_review_title.l
+    render(:action => 'eol_preview')
+  end
+
 ################################################################################
 
   # Finds the intended name and if another name matching name exists,

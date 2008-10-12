@@ -195,21 +195,26 @@ email_new_password_login: Login
 email_new_password_title: Email New Password
 
 
+# name/eol_need_review
+eol_need_review_title: EOL Need Review
+
 # name/eol_preview
 eol_preview_title: EOL Preview
 eol_preview_explanation: >
-  <p>This page provides links to or shows the content that is currently scheduled for delivery to the
-  "Encyclopedia of Life":http://eol.org (EOL).  The features related to this effort are still very new and far from polished
+  <p>This page provides links to or shows the content that is either scheduled for delivery to the
+  "Encyclopedia of Life":http://eol.org (EOL) or is ready for review for this purpose.
+  The features related to this effort are still very new and far from polished
   since it has been implemented quickly to meet the immediate needs to develop the fungus related content on
-  the EOL.  The content delivered from Mushroom Observer to the EOL will be credit both as comming from
+  the EOL.  The content delivered from Mushroom Observer to the EOL will be credited both as comming from
   the Mushroom Observer website and the individual content providers.</p>
-  <p>On this page each section represents one taxon.  The descriptive paragraphs for each listed taxon
-  will be sent with the exception of any paragraphs marked 'Notes'.  Both the taxa and the images that
-  are being sent have been at least quickly reviewed by expert members of the Mushroom Observer community.</p>
+  <p>On this page each section represents one taxon.  The descriptive paragraphs for each approved taxon
+  will be sent with the exception of any paragraphs marked 'Notes'.  Before the taxon notes or the images 
+  are sent to EOL the information has to be at least quickly reviewed by expert members of the Mushroom Observer 
+  community.</p>
   <p>The review status of a specific taxon is given on the page for that taxon and can only be set
   by a designated expert.  Images are selected based on the voting history of specific observations and 
   their quality.  Currently only designated experts can set the quality level of an image, but this is expected 
-  to become a open voting process for the entire Mushroom Observer community in the near future.</p>
+  to become an open voting process for the entire Mushroom Observer community in the near future.</p>
   <p>Currently the designated experts are either mycology professors that are teaching classes that are 
   planning to provide data to EOL through the Mushroom
   Observer or individuals in the Mushroom Observer community who have shown dedication to the site
