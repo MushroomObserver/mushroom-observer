@@ -1,0 +1,11 @@
+<% @title = @title || :needed_descriptions_title.l %>
+<div id="Title"><%= @title %></div>
+
+<p>
+  <%= :needed_descriptions_help.l %>
+</p>
+
+<% for datum in @name_data || [] %>
+  <%= link_to(textilize_without_paragraph("#{h(datum['display_name'])} (#{datum['count']} #{:needed_descriptions_observations.l})"),
+              { :action => 'edit_name', :id => datum['id'] }) %><br/>
+<% end %>

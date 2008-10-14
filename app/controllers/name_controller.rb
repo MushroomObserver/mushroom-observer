@@ -105,6 +105,26 @@ class NameController < ApplicationController
     render :action => 'name_index'
   end
 
+  # Just list the names that have observations
+  def needed_descriptions
+    store_location
+    session[:list_members] = nil
+    session[:new_names] = nil
+    session[:checklist_source] = :all_observations
+    @name_data = Name.connection.select_all %(
+      SELECT name_counts.count, names.id, names.display_name
+      FROM names, (SELECT count(*) AS count, name_id
+                   FROM observations group by name_id)
+                  AS name_counts
+      WHERE names.id = name_counts.name_id
+      AND names.rank = 'Species'
+      AND (names.gen_desc is NULL or names.gen_desc = '')
+      AND name_counts.count > 1
+      ORDER BY name_counts.count desc, names.text_name asc
+      LIMIT 100
+    )
+  end
+
   # Searches name, author, notes, and citation.
   # Redirected from: pattern_search (search bar)
   # View: name_index

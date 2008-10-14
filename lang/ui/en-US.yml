@@ -958,6 +958,15 @@ name_change: Change to Name
 name_map_about: About
 name_map_title: Distribution Map for
 
+# name/needed_descriptions
+needed_descriptions_help: >
+  The following species names are the ones that have the most observations, but
+  do not have a general description in the Mushroom Observer.  Adding a general
+  description to these common species would be a big help.
+
+needed_descriptions_observations: observations
+needed_descriptions_title: Top 100 Needed Species Descriptions
+
 # account/no_commercial_email
 no_commercial_welcome: Welcome
 
@@ -1383,3 +1392,4 @@ observations: Observations
 namings: Proposed IDs
 votes: Votes
 users: Members
+observed_taxa: Observed Taxa

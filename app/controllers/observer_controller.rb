@@ -976,6 +976,12 @@ class ObserverController < ApplicationController
     @site_data = SiteData.new.get_site_data
     @observations = Observation.find(:all, :conditions => ["thumb_image_id is not null"],
       :order => "id desc", :limit => 6)
+    result = Observation.connection.select_all %(
+      SELECT count(*) as c FROM (SELECT DISTINCT name_id FROM observations) AS ids
+    )
+    if result.length == 1
+      @observed_taxa_count = result[0]['c']
+    end
   end
 
 #--#############################################################################

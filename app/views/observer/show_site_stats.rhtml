@@ -25,8 +25,17 @@
             <td valign="top" width="50%">
                 <div id="Title"><%= @title %></div>
                 <table cellpadding="5" cellspacing="5" border="0">
+                  <% if @observed_taxa_count %>
+                    <tr>
+                      <td>
+                        <%= :observed_taxa.l %>
+                      </td>
+                      <td>
+                        <%= @observed_taxa_count %>
+                      </td>
+                    </tr>
+                  <% end %>
                     <%
-                    total = 0
                     for field in ALL_FIELDS
                         count = @site_data[field]
                         if count
