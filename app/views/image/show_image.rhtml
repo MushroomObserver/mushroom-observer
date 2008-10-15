@@ -47,19 +47,30 @@
       (<%= "#{:show_image_reviewed_by.l}: #{user_link(@image.reviewer, @image.reviewer.login)}" %>)
     </span>
   <% end %>
-  <% if @is_reviewer %>
+  <% if @is_reviewer
+       is_reviewed = (@image.quality != :unreviewed)
+       if is_reviewed %>
+         <br/><%= link_to('Next', :action => 'next_image',
+                       :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+       <% end %>
     <br/><%= link_to(:low.l, :action => 'set_image_quality', :value => :low,
                      :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-    | <%= link_to(:low_and_next.l, :action => 'set_image_quality', :value => :low, :next => true,
-                  :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <% unless is_reviewed %>
+      | <%= link_to(:low_and_next.l, :action => 'set_image_quality', :value => :low, :next => true,
+                    :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <% end %>
     <br/><%= link_to(:medium.l, :action => 'set_image_quality', :value => :medium,
                      :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-    | <%= link_to(:medium_and_next.l, :action => 'set_image_quality', :value => :medium, :next => true,
-                  :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <% unless is_reviewed %>
+      | <%= link_to(:medium_and_next.l, :action => 'set_image_quality', :value => :medium, :next => true,
+                    :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <% end %>
     <br/><%= link_to(:high.l, :action => 'set_image_quality', :value => :high,
                      :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-    | <%= link_to(:high_and_next.l, :action => 'set_image_quality', :value => :high, :next => true,
-                  :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <% unless is_reviewed %>
+      | <%= link_to(:high_and_next.l, :action => 'set_image_quality', :value => :high, :next => true,
+                    :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+    <% end %>
   <% end %>
 </p>
 
