@@ -1,32 +1,26 @@
-<% javascript_include_auto_complete %>
-<% javascript_include 'element_extensions' %>
-  
-<% @title = 'Create Observation' %>
+<%
+  javascript_include_auto_complete
+  javascript_include 'element_extensions'
+  @title = :create_observation_title.t
+%>
 
-<div id="Title"><%= @title %></div>
-
-<% form_tag({ :action => 'create_observation', :approved_name => @what },
-  { :multipart => true }) do %>
-<br/>
-<center><%= submit_tag('Create') %></center>
-
-<table cellpadding="10">
+<table width="1">
   <tr>
-    <td valign="top">
-      <%= render :partial => 'form_observations', :locals => {
-        :action           => 'create_observation',
-        :logging_optional => false,
-        :include_naming   => true,
-        :include_images   => true,
-        :button_name      => 'Create',
-      } %>
+    <td>
+      <% form_tag({ :action => 'create_observation', :approved_name => @what },
+                  { :multipart => true }) do %>
+        <br/><center><%= submit_tag :app_create.l %></center><br/>
+
+        <%= render(:partial => 'form_observations', :locals => {
+          :action           => 'create_observation',
+          :logging_optional => false,
+          :include_naming   => true,
+          :include_images   => true,
+          :button_name      => 'Create',
+        }) %>
+
+        <br/><center><%= submit_tag :app_create.l %></center>
+      <% end %>
     </td>
   </tr>
 </table>
-
-<center><%= submit_tag('Create') %></center>
-<% end %>
-
-<br/>
-<br/>
-<br/>

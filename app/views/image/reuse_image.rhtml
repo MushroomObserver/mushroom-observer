@@ -1,53 +1,51 @@
-<% @title = 'Reuse Image for ' + h(@observation.unique_text_name) %>
-<%= link_to('Show Observation', :controller => 'observer', :action => 'show_observation', :id => @observation.id) %> | 
-<%= link_to('Edit Observation', :controller => 'observer', :action => 'edit_observation', :id => @observation.id) %>
+<%
+  @title = :image_reuse_title.t(:name => @observation.unique_format_name)
 
-<div id="Title">Reuse Image for <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
+  new_tab_set do
+    add_tab(:app_show_observation.t,
+            :controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    add_tab(:image_reuse_edit.t,
+            :controller => 'observer', :action => 'edit_observation', :id => @observation.id)
+  end
+%>
 
 <% form_tag({:action => 'reuse_image_by_id'}, :multipart => true) do %>
+  <%= hidden_field("observation", "id") %>
 
-<%= hidden_field("observation", "id") %>
-<p>
-  <label for="observation_idstr">Image ID:</label>
-  <%= text_field("observation", "idstr", :size => 8) %>
-  &nbsp;<%= submit_tag("Reuse") %><br/>
-  <span class="HelpNote">
-    Either click on one of the images below, or if you know the image ID, just
-    enter it here and click 'Reuse'.
-  </span><br/>
-  <!-- [I changed this around because I never understood what the "Reuse"
-  button or the text field were for until I read the code. -JPH 20071206] -->
-</p>
+  <p>
+    <label for="observation_idstr"><%= :image_reuse_id.t %>:</label>
+    <%= text_field("observation", "idstr", :size => 8) %>
+    &nbsp;<%= submit_tag(:image_reuse_reuse.l) %>
+  </p>
+  <div class="HelpNote"><%= :image_reuse_id_help.tp %></div><br/>
 
-<%= pagination_numbers(@image_pages) %>
-<table cellspacing="0">
-<%
-	row_count = 0
-	col_count = 0
- 	for image in @images
-   		color = calc_color(row_count, col_count, @layout["alternate_rows"],
-		 				   @layout["alternate_columns"])
-		if col_count == 0 %>
-			<tr>
- 	<% end %>
-	<td align="left" valign="top" class="ListLine<%= color %>">
-		<%= render :partial => 'image_reuse', :object => image, :locals => {
-          :link_args => { :action => 'add_image_to_obs', :id => image.id, :obs_id => @observation.id }
-        } %>
-	</td>
-	<%  if col_count == (@layout["columns"] - 1) %>
-			</tr>
-	<%  end
-		col_count += 1
-		if col_count >= @layout["columns"]
-			col_count = 0
-			row_count += 1
-		end
-	end
-	%>
-</table>
-<%= pagination_numbers(@image_pages) %>
+  <%= pagination_numbers(@image_pages) %>
 
-<%= javascript_tag "document.getElementById('observation_idstr').focus()" %>
+  <table cellspacing="0">
+    <% row_count = 0
+    col_count = 0
+    for image in @images
+      color = calc_color(row_count, col_count, @layout["alternate_rows"],
+                         @layout["alternate_columns"])
+      if col_count == 0 %>
+        <tr>
+      <% end %>
+      <td align="left" valign="top" class="ListLine<%= color %>">
+        <%= render(:partial => 'image_reuse', :object => image, :locals =>
+                   { :link_args => { :action => 'add_image_to_obs', :id => image.id, :obs_id => @observation.id } }) %>
+      </td>
+      <% if col_count == (@layout["columns"] - 1) %>
+        </tr>
+      <% end
+      col_count += 1
+      if col_count >= @layout["columns"]
+        col_count = 0
+        row_count += 1
+      end
+    end %>
+  </table>
 
+  <%= pagination_numbers(@image_pages) %>
+
+  <%= focus_on('observation_idstr') %>
 <% end %>

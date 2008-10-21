@@ -1,16 +1,13 @@
-<% form_tag(:action=> "add_user_to_group") do %>
+<% @title = :add_user_to_group_title.t %>
 
-<div title="Add User to Group" id="adduserform" class="form">
-    <label for="user_name"><%= :add_user_to_group_user.l %>:</label><br/>
-    <input type="text" name="user_name" id="user_name" size="30"/><br/><br/>
+<% form_tag(:action => "add_user_to_group") do %>
 
-    <label for="group_name"><%= :add_user_to_group_group.l %>:</label><br/>
-    <input type="text" name="group_name" id="group_name" size="30"/><br/><br/>
+  <label for="user_name"><%= :add_user_to_group_user.t %>:</label><br/>
+  <input type="text" name="user_name" id="user_name" size="30"/><br/><br/>
 
-    <input type="submit" name="save" value=<%= "\"#{:add_user_to_group_add.l}\"" %> class="primary" />
-	<br/><br/>
+  <label for="group_name"><%= :add_user_to_group_group.t %>:</label><br/>
+  <input type="text" name="group_name" id="group_name" size="30"/><br/><br/>
 
-</div>
+  <input type="submit" name="save" value="<%= :app_add.t %>" class="primary" />
 
 <% end %>
-

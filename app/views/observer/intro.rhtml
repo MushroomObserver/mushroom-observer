@@ -1,13 +1,14 @@
-<% @title = lnbsp(:intro_title) %>
-<div id="Title"><%= @title %></div>
+<% @title = :intro_title.t.nowrap %>
 
-<%= :intro_purpose.l %>
+<%= :intro_purpose.tp %>
 
-<%= textilize(:intro_image_sharing.l % "#{DOMAIN}/observer/how_to_use#lic") %>
+<%= :intro_image_sharing.tp %>
 
-<%= textilize(:intro_source_code.l % ["\"#{SVN_REPOSITORY}\":#{SVN_REPOSITORY}",
-                                      "#{SVN_REPOSITORY}/trunk/TODO"]) %>
+<%= :intro_source_code.tp(
+  :repo => SVN_REPOSITORY,
+  :todo_list => "#{SVN_REPOSITORY}/trunk/TODO"
+) %>
+                                      
+<%= :intro_note.tp %>
 
-<%= :intro_note.l %>
-
-<%= textilize(:intro_talks.l % "#{DOMAIN}/talks/MO-First-Year.html") %>
+<%= :intro_talks.tp %>

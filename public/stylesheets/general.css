@@ -7,6 +7,10 @@ body, p, ol, ul, td {
   margin-right: 0px;
 }
 
+body {
+  margin-bottom: 0px;
+}
+
 pre {
   padding: 10px;
   font-size: 11px;
@@ -109,9 +113,13 @@ div.progressBar div.background {
   width: 0%;
 }
 
-.Notices .Warnings .Errors {
+div.tab_sets {
   margin: 10px;
-  padding: 10px;
+}
+
+.Notices, .Warnings, .Errors {
+  margin: 10px 10px 5px 10px;
+  padding: 0px 5px 0px 5px;
   font-weight: bold;
 }
 
@@ -194,11 +202,11 @@ div.progressBar div.background {
   font-size: x-small;
 }
 
-div.HelpNote {
+div.HelpNoteIndent {
   margin: 5px 10px 5px 10px;
 }
 
-.HelpNote, div.HelpNote p {
+.HelpNote, div.HelpNote p, div.HelpNoteIndent p {
   text-align: left;
   font-size: x-small;
 }
@@ -213,11 +221,11 @@ div.HelpNote {
   font-size: x-small;
 }
 
-#license {
+/* #license {
   padding-top: 3px;
   text-align: center;
   font-size: x-small;
-}
+} */
 
 #Title {
   padding-top: 10px;
@@ -308,6 +316,10 @@ div.form_image p {
   margin: 4px 0px 4px 0px;
 }
 
+img.site_stats_image {
+  margin: 0px 0px 10px 0px;
+}
+
 /* name_lister */
 table.scroller th {
   font-size: 120%;
@@ -333,4 +345,30 @@ div.scroller li {
 }
 div.scroller span.normal {
   font-style: normal;
+}
+
+/* sandbox */
+div.sandbox {
+  border-top: solid #888 2px;
+  border-left: solid #888 2px;
+  border-right: solid #FFF 2px;
+  border-bottom: solid #FFF 2px;
+  background-color: white;
+  color: black;
+}
+div.sandbox a         { background-color: white; color: blue   }
+div.sandbox a:visited { background-color: white; color: red    }
+div.sandbox a:hover   { background-color: white; color: yellow }
+
+/* bulk name editor */
+p.bulk_text {
+  margin: 0em 0em 0em 0em;
+  padding: none;
+}
+p.bulk_pre {
+  margin: 0em 0em 1em 2em;
+  padding: none;
+  white-space: pre;
+  font-family: mono;
+  font-size: 11px;
 }

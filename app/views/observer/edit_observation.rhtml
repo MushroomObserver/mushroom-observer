@@ -1,26 +1,31 @@
-<% javascript_include_auto_complete %>
-<% javascript_include 'element_extensions' %>
-  
-<% @title = 'Create Observation' %>
+<%
+  javascript_include_auto_complete
+  javascript_include 'element_extensions'
+  @title = :edit_observation_title.t(:name => @observation.unique_format_name)
 
-<% @title = 'Editing Observation: ' + h(@observation.unique_text_name) %>
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :observation.l),
+            :action => 'show_observation', :id => @observation.id)
+  end
+%>
 
-<%= link_to('Cancel (Show Observation)', :action => 'show_observation', :id => @observation.id) %>
+<table width="1">
+  <tr>
+    <td>
+      <% form_tag({ :action => 'edit_observation', :id => @observation,
+                  :approved_name => @what }, { :multipart => true }) do %>
+        <br/><center><%= submit_tag :app_save_changes.l %></center><br/>
 
-<div id="Title">Editing Observation: <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
+        <%= render(:partial => 'form_observations', :locals => {
+          :action           => 'edit_observation',
+          :logging_optional => true,
+          :include_naming   => false,
+          :include_images   => true,
+          :button_name      => :app_save_changes.l,
+        }) %>
 
-<% form_tag({ :action => 'edit_observation', :id => @observation,
-   :approved_name => @what }, { :multipart => true }) do %>
-<br/>
-<center><%= submit_tag 'Save Edits' %></center>
-
-<%= render :partial => 'form_observations', :locals => {
-  :action           => 'edit_observation',
-  :logging_optional => true,
-  :include_naming   => false,
-  :include_images   => true,
-  :button_name      => 'Save Edits',
-} %>
-
-<center><%= submit_tag 'Save Edits' %></center>
-<% end %>
+        <br/><center><%= submit_tag :app_save_changes.l %></center>
+      <% end %>
+    </td>
+  </tr>
+</table>

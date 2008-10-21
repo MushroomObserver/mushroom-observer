@@ -1,59 +1,60 @@
 <center><%= @map.div(:width => "800", :height => "480") %></center>
+
 <table width="100%" cellpadding="10">
-    <tr>
-        <td align="center">
-            <table cellpadding="5">
-                <tr>
-                    <td></td>
-                    <td>
-                        <%= "#{:show_location_north.l}: #{location.north}º"%>
-                    </td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>
-                        <%= "#{:show_location_west.l}: #{location.west}º"%>
-                    </td>
-                    <td></td>
-                    <td>
-                        <%= "#{:show_location_east.l}: #{location.east}º"%>
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>
-                        <%= "#{:show_location_south.l}: #{location.south}º"%>
-                    </td>
-                    <td></td>
-                </tr>
-            </table>
-        </td>
-        <td align="center">
-            <table cellpadding="5">
-                <tr><td>
-                    <% if location.high %>
-                        <%= "#{:show_location_high.l}: #{location.high} #{:show_location_meters.l}"%>
-                    <% end %>
-                </td></tr>
-                <tr><td>
-                    <% if location.low %>
-                        <%= "#{:show_location_low.l}: #{location.low} #{:show_location_meters.l}"%>
-                    <% end %>
-                </td></tr>
-            </table>
-        </td>
-    </tr>
+  <tr>
+    <td align="center">
+      <table cellpadding="5">
+        <tr>
+          <td></td>
+          <td>
+              <%= "#{:app_north.t}: #{location.north}º"%>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>
+              <%= "#{:app_west.t}: #{location.west}º"%>
+          </td>
+          <td></td>
+          <td>
+              <%= "#{:app_east.t}: #{location.east}º"%>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+              <%= "#{:app_south.t}: #{location.south}º"%>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+    </td>
+    <td align="center">
+      <table cellpadding="5">
+        <tr><td>
+          <% if location.high %>
+            <%= "#{:app_highest.t}: #{location.high} #{:app_meters.t}"%>
+          <% end %>
+        </td></tr>
+        <tr><td>
+          <% if location.low %>
+            <%= "#{:app_lowest.t}: #{location.low} #{:app_meters.t}"%>
+          <% end %>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
 </table>
 
 <% if location.notes && location.notes != '' %>
-    <p>
-        <%= "#{:show_location_notes.l}: #{textilize(sanitize(location.notes))}"%>
-    </p>
+  <p><%= :app_notes.t %>:</p>
+  <%= sanitize(location.notes).tpl %>
 <% end %>
 
-<p><span class="Date">
-    <%= "#{:show_location_version.l}: #{location.version}" %><br/>
-    <%= "#{:show_location_created.l}: #{location.created}" %><br/>
-    <%= "#{:show_location_modified.l}: #{location.modified} #{:show_location_by.l} #{user_link(location.user)}" %><br/>
-    </span>
+<p>
+  <span class="Date">
+    <%= "#{:app_version.t}: #{location.version}" %><br/>
+    <%= :app_created.t(:type => :location.l, :date => location.created) %><br/>
+    <%= :app_last_modified.t(:date => location.modified, :user => user_link(location.user)) %><br/>
+  </span>
 </p>

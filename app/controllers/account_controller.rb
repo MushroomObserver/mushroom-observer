@@ -2,19 +2,19 @@
 #  Views: ("*" - login required, "R" - root required))
 #     signup
 #     welcome
-#    
+#
 #     verify
 #     reverify
 #     send_verify
-#    
+#
 #     login
 #     logout_user
 #     email_new_password
-#    
+#
 #   * prefs
 #   * profile
 #   * remove_image
-#    
+#
 #     no_feature_email
 #     no_question_email
 #     no_commercial_email
@@ -58,7 +58,7 @@ class AccountController < ApplicationController
         @remember = params['user'] && params['user']['remember_me'] == "1"
         if set_session_user(user)
           logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
-          flash_notice "Login successful."
+          flash_notice :login_success.t
           user.last_login = Time.now
           user.save
           if @remember
@@ -70,7 +70,7 @@ class AccountController < ApplicationController
           redirect_back_or_default(:action => "welcome")
         else
           @login = params['user_login']
-          flash_error "Login unsuccessful."
+          flash_error :login_failed.t
         end
     end
     @hiddens = []
@@ -119,7 +119,7 @@ class AccountController < ApplicationController
           if @new_user.save
             user = User.authenticate(@new_user.login, params['new_user']['password'])
             set_session_user(user)
-            flash_notice "Signup successful.  Verification sent to your email account."
+            flash_notice :signup_success.t
             AccountMailer.deliver_verify(@new_user)
             redirect_back_or_default(:action => "welcome")
           else
@@ -140,14 +140,14 @@ class AccountController < ApplicationController
         @login = params['new_user']['login']
         @new_user = User.find(:first, :conditions => ["login = ?", @login])
         if @new_user.nil?
-          flash_error "Unable to find the user '#{@login}'."
+          flash_error :email_new_password_failed.t(:user => @login)
         else
           password = random_password(10)
           @new_user.change_password(password)
           if @new_user.save
             user = User.authenticate(@new_user.login, params['new_user']['password'])
             set_session_user(user)
-            flash_notice "Password successfully changed.  New password has been sent to your email account."
+            flash_notice :email_new_password_success.t
             AccountMailer.deliver_new_password(@new_user, password)
             @hiddens = []
             render(:action => "login")
@@ -189,7 +189,7 @@ class AccountController < ApplicationController
               @user.change_password(password)
             else
               error = true
-              flash_error "Password and confirmation did not match."
+              flash_error :prefs_password_no_match.t
             end
           end
 
@@ -197,8 +197,8 @@ class AccountController < ApplicationController
           elsif !@user.save
             flash_object_errors(@user)
           else
-            flash_notice "Preferences updated."
-            redirect_back_or_default :action => "welcome"
+            flash_notice :prefs_success.t
+            redirect_back_or_default(:action => "welcome")
           end
       end
     else
@@ -258,10 +258,12 @@ class AccountController < ApplicationController
               flash_object_errors(image)
             elsif !image.save_image
               logger.error("Unable to upload image")
-              flash_error "Invalid image '#{name ? name : "???"}'."
+              flash_error :profile_invalid_image. \
+                t(:name => (name ? "'#{name}'" : '???'))
             else
               @user.image = image
-              flash_notice "Uploaded image #{name ? "'#{name}'" : "##{image.id}"}."
+              flash_notice :profile_uploaded_image. \
+                t(:name => name ? "'#{name}'" : "##{image.id}")
             end
           end
 
@@ -269,13 +271,12 @@ class AccountController < ApplicationController
           elsif !@user.save
             flash_object_errors(@user)
           elsif need_to_create_location
-            flash_notice "You must define this location before we can make it
-              your primary location."
+            flash_notice :profile_must_define.t
             redirect_to(:controller => "location", :action => "create_location",
               :where => @place_name, :set_user => 1)
           else
-            flash_notice "Profile updated."
-            redirect_to(:controller => "observer", :action => "show_user", :id => @user)
+            flash_notice :profile_success.t
+            redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
           end
       end
     else
@@ -319,7 +320,7 @@ class AccountController < ApplicationController
     if @user && @user.image
       @user.image = nil
       @user.save
-      flash_notice "Removed image from your profile."
+      flash_notice :profile_removed_image.t
     end
     redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
   end
@@ -328,7 +329,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.feature_email = false
       if @user.save
-        flash_notice "Automated feature email disabled for #{@user.unique_text_name}."
+        flash_notice :no_feature_success.t(:name => @user.unique_text_name)
       end
     end
   end
@@ -337,7 +338,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.question_email = false
       if @user.save
-        flash_notice "Question email disabled for #{@user.unique_text_name}."
+        flash_notice :no_question_success.t(:name => @user.unique_text_name)
       end
     end
   end
@@ -346,7 +347,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.commercial_email = false
       if @user.save
-        flash_notice "Commercial email inquiries disabled for #{@user.unique_text_name}."
+        flash_notice :no_commercial_success.t(:name => @user.unique_text_name)
       end
     end
   end
@@ -355,7 +356,7 @@ class AccountController < ApplicationController
     if login_check params['id']
       @user.comment_email = false
       if @user.save
-        flash_notice "Comment email notifications disabled for #{@user.unique_text_name}."
+        flash_notice :no_comment_success.t(:name => @user.unique_text_name)
       end
     end
   end
@@ -368,7 +369,7 @@ class AccountController < ApplicationController
 
   def send_verify
     AccountMailer.deliver_verify(get_session_user)
-    flash_notice "Verification sent to your email account."
+    flash_notice :reverify_sent.t
     redirect_back_or_default(:action => "welcome")
   end
 
@@ -384,30 +385,32 @@ class AccountController < ApplicationController
             user_group = UserGroup.find_by_name(group_name)
             if user_group
               if user.user_groups.member?(user_group)
-                flash_warning "#{user_name} is already a member of #{group_name}"
+                flash_warning :add_user_to_group_already. \
+                  t(:user => user_name, :group => group_name)
               else
                 user.user_groups << user_group
                 if user.save
-                  flash_notice "#{user_name} added to #{group_name}"
+                  flash_notice :add_user_to_group_success. \
+                    t(:user => user_name, :group => group_name)
                 end
               end
             else
-              flash_error "Unable to find the group, '#{group_name}'"
+              flash_error :add_user_to_group_no_group.t(:group => group_name)
             end
           else
-            flash_error "Unable to find the user, '#{user_name}'"
+            flash_error :add_user_to_group_no_user.t(:user => user_name)
           end
         when :get
           redirect = false
       end
     else
-      flash_error "Permission denied"
+      flash_error :app_permission_denied.t
     end
     if redirect
       redirect_back_or_default(:controller => 'observer', :action => 'index')
     end
   end
-  
+
   protected
 
   # Make sure the given user is the one that's logged in.  If no one is logged in
@@ -420,7 +423,7 @@ class AccountController < ApplicationController
       if id
         user = User.find(id)
         if user != get_session_user
-          flash_error "Permission denied."
+          flash_error :app_permission_denied.t
           result = false
         end
       else

@@ -1,9 +1,9 @@
 <p>
-  <%= :change_member_status_members.l %><br/>
+  <%= :change_member_status_members.t %><br/>
   <% for u in project.user_group.users %>
     &nbsp;&nbsp;<%= user_link(u) %>
     <% if @project.is_admin?(user) %>
-      | <%= link_to(:change_member_status_change_status.l, :action => :change_member_status,
+      | <%= link_to(:change_member_status_change_status.t, :action => :change_member_status,
                     :id => project.id, :candidate => u.id) %>
     <% end %>
     <br/>
@@ -11,11 +11,11 @@
 </p>
 
 <p>
-  <%= :change_member_status_admins.l %><br/>
+  <%= :change_member_status_admins.t %><br/>
   <% for u in project.admin_group.users %>
     &nbsp;&nbsp;<%= user_link(u) %>
     <% if @project.is_member?(user) %>
-     | <%= link_to(:change_member_status_change_status.l, :action => :change_member_status,
+     | <%= link_to(:change_member_status_change_status.t, :action => :change_member_status,
                    :id => project.id, :candidate => u.id) %>
     <% end %>
     <br/>

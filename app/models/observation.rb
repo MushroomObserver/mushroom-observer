@@ -31,7 +31,7 @@ require 'active_record_extensions'
 #    text_name            Plain text.
 #    format_name          Textilized.
 #    unique_text_name     Same as above, with id added to make unique.
-#    unique_format_name
+#    unique_format_name 
 #
 #    calc_consensus          Calculate and cache the consensus naming/name.
 #    name_been_proposed?(n)  Has someone proposed this name already?
@@ -82,20 +82,16 @@ class Observation < ActiveRecord::Base
   end
 
   # Log change to the observation.  Creates new rss_log if necessary.
-  def log(msg, touch)
-    if self.rss_log.nil?
-      self.rss_log = RssLog.new
-    end
-    self.rss_log.addWithDate(msg, touch)
+  def log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.add_with_date(*args)
   end
 
   # Log change to the observation that's about to be deleted.  Creates new
   # rss_log if necessary.
-  def orphan_log(entry)
-    self.log(entry, false) # Ensures that self.rss_log exists
-    self.rss_log.observation = nil
-    self.rss_log.add(self.text_name, false)
-    self.rss_log.save
+  def orphan_log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.orphan(self.format_name, *args)
   end
 
   # Change modified time to now.
@@ -351,9 +347,9 @@ result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
     self.vote_cache = best_val
     self.save
     if best != old && old
-      self.log("Consensus rejected #{old.observation_name} in favor of #{best.observation_name}", true)
+      self.log(:log_consensus_changed, { :old => old.observation_name, :new => best.observation_name }, true)
     elsif best != old
-      self.log("Consensus established: #{best.observation_name}", true)
+      self.log(:log_consensus_created, { :name => best.observation_name }, true)
     end
 
 return result if debug
@@ -378,7 +374,7 @@ return result if debug
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
-  def unique_format_name
+  def unique_format_name 
     str = self.name.observation_name
     "%s (%s)" % [str, self.id]
   end

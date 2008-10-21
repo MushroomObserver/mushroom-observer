@@ -1,24 +1,28 @@
+<% @title = :signup_title.t %>
+
 <% form_tag(:action=> "signup") do %>
-
-<div title="<%= :signup_title.l %>" id="signupform" class="form">
-  <h3><%= :signup_title.l %></h3>
   
-  <label for="new_user_login"><%= :signup_login.l %>:</label><br/>
+  <label for="new_user_login"><%= :signup_login.t %>:</label><br/>
   <%= text_field "new_user", "login", :size => 30 %><br/><br/>
-  <label for="new_user_password"><%= :signup_choose_password.l %>:</label><br/>
-  <%= password_field "new_user", "password", :size => 30 %><br/><br/>
-  <label for="new_user_password_confirmation"><%= :signup_confirm_password.l %>:</label><br/>
-  <%= password_field "new_user", "password_confirmation", :size => 30 %><br/><br/>
-  <label for="new_user_email"><%= :signup_email_address.l %>:</label><br/>
-  <%= text_field "new_user", "email", :size => 60 %><br/>
-  <span class="HelpNote"><%= :signup_email_help.l %></span><br/><br/>
-  <label for="new_user_name"><%= :signup_name.l %>:</label><br/>
-  <%= text_field "new_user", "name", :size => 60 %><br/><br/>
-  <label for="new_user_name"><%= :signup_preferred_theme.l %>:</label><br/>
-  <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + CSS) %><br/><br/>
-<br/>
-<input type="submit" value="<%= :signup_button.l %>" class="primary" />
 
-<%= javascript_tag "document.getElementById('new_user_login').focus()" %>
+  <label for="new_user_password"><%= :signup_choose_password.t %>:</label><br/>
+  <%= password_field "new_user", "password", :size => 30 %><br/><br/>
+
+  <label for="new_user_password_confirmation"><%= :signup_confirm_password.t %>:</label><br/>
+  <%= password_field "new_user", "password_confirmation", :size => 30 %><br/><br/>
+
+  <label for="new_user_email"><%= :signup_email_address.t %>:</label><br/>
+  <%= text_field "new_user", "email", :size => 60 %><br/>
+  <div class="HelpNote"><%= :signup_email_help.tp %></div><br/><br/>
+
+  <label for="new_user_name"><%= :signup_name.t %>:</label><br/>
+  <%= text_field "new_user", "name", :size => 60 %><br/><br/>
+
+  <label for="new_user_name"><%= :signup_preferred_theme.t %>:</label><br/>
+  <%= select(:new_user, :theme, [[:theme_random.l, "NULL"]] + CSS) %><br/><br/>
+
+  <input type="submit" value="<%= :signup_button.l %>" class="primary" />
+
+  <%= focus_on('new_user_login') %>
 
 <% end %>

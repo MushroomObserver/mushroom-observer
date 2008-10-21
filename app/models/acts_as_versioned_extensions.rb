@@ -11,7 +11,7 @@ module ActiveRecord
         #
         #   object = Object.find(id) or Object.new
         #   object.blah = blah
-        #   object.save_if_changed(user, "#{user.login} changed blah")
+        #   object.save_if_changed(user, :log_name_changed)
         #
         # Pass in the timestamp if you are changing multiple objects and want
         # them all to have the exact same timetstamp.  Defaults to now. 
@@ -20,25 +20,21 @@ module ActiveRecord
         # Check object.errors on false to see if it failed due to errors.
         # Otherwise you can assume there were no changes to save.
         #
-        def save_if_changed(user=nil, log=nil, time=nil)
+        def save_if_changed(user=nil, log_key=nil, log_hash=nil, time=nil, touch=nil)
           result = false
           if self.new_record?
-# print ">>>>>>>> New #{self.class}: ##{self.id} #{self.text_name}\n"
             self.user = user if user
             result = self.save
           elsif self.altered?
-# print ">>>>>>>> Altered #{self.class}: ##{self.id} #{self.text_name}\n"
             self.modified = time || Time.now
             self.user = user if user
             result = self.save
-            self.log(log) if result && log 
+            self.log(log_key, log_hash, touch) if result && log_key
           elsif self.changed?
-# print ">>>>>>>> Changed #{self.class}: ##{self.id} #{self.text_name}\n"
             self.modified = time || Time.now
             result = self.save
           else
             # do nothing
-# print ">>>>>>>> Unchanged #{self.class}: ##{self.id} #{self.text_name}\n"
           end
           return result
         end

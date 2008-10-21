@@ -1,23 +1,22 @@
-<div id="Title"><%= :list_notifications_title.l % @user.legal_name %></div>
-<%=
-    tabs = []
-    tabs.push [:show_user_edit_profile.l, url_for(:controller => "account", :action => "profile")]
-    show_tabs(tabs)
+<%
+  @title ||= :list_notifications_title.t(:user => @user.legal_name)
+
+  new_tab_set do
+    add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
+  end
 %>
 
 <% if @notifications.length > 0 %>
-<table cellpadding="5" cellspacing="0" width="100%">
-  <%
-     odd_or_even = 0
-     for n in @notifications
-       odd_or_even = 1 - odd_or_even
-       (controller, action) = n.link_params
-  %>
-  <tr valign="top" class="ListLine<%= odd_or_even %>">
-    <td width="100%">
-      <%= link_to("<span class=\"ListWhat\">#{textilize_without_paragraph(n.summary)}</span>", n.link_params) %>
-    </td>
-  </tr>
-  <% end %>
-</table>
+  <table cellpadding="5" cellspacing="0" width="100%">
+    <% odd_or_even = 0
+    for n in @notifications
+      odd_or_even = 1 - odd_or_even
+      (controller, action) = n.link_params %>
+      <tr valign="top" class="ListLine<%= odd_or_even %>">
+        <td width="100%">
+          <%= link_to("<span class=\"ListWhat\">#{n.summary.t}</span>", n.link_params) %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
 <% end %>

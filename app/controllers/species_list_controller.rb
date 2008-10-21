@@ -1,5 +1,4 @@
 require 'rtf'
-require 'string_extensions'
 
 ################################################################################
 #
@@ -68,7 +67,7 @@ class SpeciesListController < ApplicationController
     user = User.find(params[:id])
     store_location
     session_setup
-    @title = "Species Lists by #{user.legal_name}"
+    @title = :species_list_list_by_user.l(:user => user.legal_name)
     @species_list_pages, @species_lists = paginate(:species_lists,
       :conditions => "user_id = #{user.id}", :order => "`when` desc, id desc", :per_page => 10)
     render :action => "list_species_lists"
@@ -98,7 +97,6 @@ class SpeciesListController < ApplicationController
   # Inputs:
   #   params[:id] (species_list)
   #   params[:type] (file extension)
-  # Redirects to report.ext (so browser will get the filename right).
   def make_report
     id = params[:id].to_i
     spl = SpeciesList.find(id)
@@ -111,7 +109,7 @@ class SpeciesListController < ApplicationController
     when 'csv'
       render_name_list_as_csv(names)
     else
-      flash_error("We don't support report filetype *.#{params[:type]}.")
+      flash_error(:make_report_not_supported.t(:type => params[:type]))
       redirect_to(:action => "show_species_list", :id => params[:id])
     end
   end
@@ -260,7 +258,7 @@ class SpeciesListController < ApplicationController
       when :name_lister_submit_csv.l
         render_name_list_as_csv(@objs)
       else
-        flash_error("Invalid commit button, \"#{params[:commit]}\".")
+        flash_error(:name_lister_bad_submit.t(:button => params[:commit]))
       end
     end
   end
@@ -342,7 +340,7 @@ class SpeciesListController < ApplicationController
     #
     # Now see if we can successfully create the list...
     if sorter.has_new_synonyms
-      flash_error "Synonyms can only be created from the Bulk Name Edit page."
+      flash_error(:species_list_need_to_use_bulk.t)
       sorter.reset_new_names
     elsif sorter.only_single_names
       if sorter.has_unapproved_deprecated_names
@@ -404,7 +402,7 @@ class SpeciesListController < ApplicationController
         @deprecated_names = sorter.deprecated_name_strs.uniq.sort
         @checklist_names  = {}
         @member_notes     = ''
-        render :action => 'edit_species_list'
+        render(:action => 'edit_species_list')
       end
     end
   end
@@ -416,10 +414,10 @@ class SpeciesListController < ApplicationController
   def destroy_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
-      @species_list.orphan_log('Species list destroyed by ' + @user.login)
+      @species_list.orphan_log(:log_species_list_destroyed, { :user => @user.login })
       @species_list.destroy
-      flash_notice "Species list destroyed."
-      redirect_to :action => 'list_species_lists'
+      flash_notice(:species_list_destroy_success.t)
+      redirect_to(:action => 'list_species_lists')
     else
       redirect_to(:action => 'show_species_list', :id => @species_list)
     end
@@ -432,6 +430,10 @@ class SpeciesListController < ApplicationController
   def manage_species_lists
     if verify_user()
       @observation = Observation.find(params[:id])
+      @all_lists = SpeciesList.find(:all,
+        :conditions => ['user_id = ?', @user.id],
+        :order => "'modified' desc"
+      )
     end
   end
 
@@ -447,10 +449,10 @@ class SpeciesListController < ApplicationController
       observation = Observation.find(params[:observation])
       species_list.modified = Time.now
       species_list.observations.delete(observation)
-      flash_notice "Removed from #{species_list.unique_text_name}."
-      redirect_to(:action => 'manage_species_lists', :id => observation)
+      flash_notice(:species_list_remove_observation_success.t(:name => species_list.unique_format_name))
+      redirect_to(:action => 'manage_species_lists', :id => observation.id)
     else
-      redirect_to(:action => 'show_species_list', :id => species_list)
+      redirect_to(:action => 'show_species_list', :id => species_list.id)
     end
   end
 
@@ -466,8 +468,8 @@ class SpeciesListController < ApplicationController
       observation = Observation.find(params[:observation])
       species_list.modified = Time.now
       species_list.observations << observation
-      flash_notice "Added to #{species_list.unique_text_name}."
-      redirect_to :action => 'manage_species_lists', :id => observation
+      flash_notice(:species_list_add_observation_success.t(:name => species_list.unique_format_name))
+      redirect_to(:action => 'manage_species_lists', :id => observation.id)
     end
   end
 
@@ -520,7 +522,7 @@ class SpeciesListController < ApplicationController
     source_str = source.to_s
     if source.to_s == 'observation_ids'
       # Disabled as part of new prev/next.  Not reimplemented given impending checklist work.
-      flash_warning "Search based checklists are no longer supported."
+      flash_warning(:species_list_calc_checklist_search_disabled.t)
     elsif source.to_s == 'all_observations'
       query = "select distinct n.observation_name, n.id, n.search_name
         from names n, namings g
@@ -577,8 +579,12 @@ class SpeciesListController < ApplicationController
   #   params[:chosen_approved_names]    Names from radio boxes.
   #   params[:checklist_data]           Names from LHS check boxes.
   def construct_observations(species_list, params, type_str, user, sorter)
-    species_list.log("Species list %s by %s" % [type_str, user.login])
-    flash_notice "Species List was successfully #{type_str}."
+    species_list.log("log_species_list_#{type_str}".to_sym, { :user => user.login }, true)
+    if type_str == 'created'
+      flash_notice(:species_list_create_success.t)
+    else
+      flash_notice(:species_list_edit_success.t)
+    end
     #
     # Put together a list of arguments to use when creating new observations.
     sp_args = {

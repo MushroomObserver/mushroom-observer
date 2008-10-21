@@ -1,38 +1,37 @@
-<% @title = 'Species Lists by Title'%>
-<div id="Title"><%= @title %></div>
-<table cellpadding="5" cellspacing="5">
-	<tr class="Data">
-		<td>
-			List Name
-		</td>
-		<td>
-			Size
-		</td>
-		<td>
-			Created
-		</td>
-		<td>
-			Owner
-		</td>
-	</tr>
-	<%
-	  for species_list in @species_lists %>
-		<tr>
-			<td>
-				<%= link_to h(species_list.unique_text_name), :action => 'show_species_list', :id => species_list.id %>
-			</td>
-			<td>
-				<%= species_list.observations.size %>
-			</td>
-			<td>
-				<%= species_list.when %>
-			</td>
-			<td>
-				<%= user_link(species_list.user) %>
-			</td>
-		</tr>
-	<%
-	  end
-	%>
-</table>
+<% @title = :species_list_by_title_title.t %>
 
+<table cellpadding="5" cellspacing="5">
+
+  <tr class="Data">
+    <td>
+      <%= :species_list_by_title_list_name.t %>
+    </td>
+    <td>
+      <%= :species_list_by_title_size.t %>
+    </td>
+    <td>
+      <%= :species_list_by_title_created.t %>
+    </td>
+    <td>
+      <%= :species_list_by_title_owner.t %>
+    </td>
+  </tr>
+
+  <% for species_list in @species_lists %>
+    <tr>
+      <td>
+        <%= link_to(species_list.unique_text_name.t, :action => 'show_species_list', :id => species_list.id) %>
+      </td>
+      <td>
+        <%= species_list.observations.size %>
+      </td>
+      <td>
+        <%= species_list.when %>
+      </td>
+      <td>
+        <%= user_link(species_list.user) %>
+      </td>
+    </tr>
+  <% end %>
+
+</table>

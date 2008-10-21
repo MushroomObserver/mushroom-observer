@@ -1,16 +1,13 @@
-<% @title = 'News' %>
-<div id="Title"><%= @title %></div>
+<% @title = :news_title.t %>
 
-<p>
-This page lists the latest changes to and news about the Mushroom Observer website.
-</p>
+<%= :news_header.tp %>
 
 <h3>Saturday October 11, 2008</h3>
 <ol>
     <li>Added explicit licensing for description text. (Nathan Wilson)</li>
-    <li>Improved speed for <%= link_to(:eol_preview_title.l, :controller => 'name', :action => 'eol_preview') %>. (Nathan Wilson)</li>
+    <li>Improved speed for <%= link_to(:eol_preview_title.t, :controller => 'name', :action => 'eol_preview') %>. (Nathan Wilson)</li>
     <li>Taxa can now be excluded from being exported (e.g., Insecta). (Nathan Wilson)</li>
-    <li>Added <%= link_to(:eol_need_review_title.l, :controller => 'name', :action => 'eol_need_review') %> to easily find candidates to review for export to EOL. (Nathan Wilson)</li>
+    <li>Added <%= link_to(:eol_need_review_title.t, :controller => 'name', :action => 'eol_need_review') %> to easily find candidates to review for export to EOL. (Nathan Wilson)</li>
 </ol>
 
 <h3>Wednesday October 8, 2008</h3>
@@ -21,7 +18,7 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 <h3>Sunday October 5, 2008</h3>
 <ol>
     <li>Added projects and drafts.  See the
-    <%= link_to(:app_how_to_use.l, :controller => 'observer', :action => 'how_to_use', :anchor => 'projects')%>
+    <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use', :anchor => 'projects')%>
     page for details.. (Nathan Wilson)</li>
 </ol>
 
@@ -43,7 +40,7 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 <h3>Sunday September 14, 2008</h3>
 <ol>
     <li>Added review functionality for Names and Images for a designated set of expert users ('reviewers'). (Nathan Wilson)</li>
-    <li>Added <%= link_to(:eol_preview_title.l, :controller => 'name', :action => 'eol_preview') %> page to visually present the information sent out on the EOL Content Feed. (Nathan Wilson)</li>
+    <li>Added <%= link_to(:eol_preview_title.t, :controller => 'name', :action => 'eol_preview') %> page to visually present the information sent out on the EOL Content Feed. (Nathan Wilson)</li>
 </ol>
 
 <h3>Thursday September 11, 2008</h3>
@@ -101,7 +98,7 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 <h3>Friday August 8, 2008</h3>
 <ol>
     <li>Implemented email tracking for species.  See the
-    <%= link_to(:app_how_to_use.l, :controller => 'observer', :action => 'how_to_use', :anchor => 'tracking')%>
+    <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use', :anchor => 'tracking')%>
     page for details. (Nathan Wilson)</li>
 </ol>
 
@@ -138,7 +135,7 @@ This page lists the latest changes to and news about the Mushroom Observer websi
     <li>Namings and votes included in contribution. (Jason Holllinger)</li>
     <li>Votes weighted by contribution (logarithm). (Jason Hollinger)</li>
     <li>Observer's vote weighted higher. (Jason Hollinger)</li>
-    <li>Added the <%= link_to(:app_how_to_help.l, :controller => 'observer', :action => 'how_to_help')%> page and updated <%= link_to(:app_how_to_use.l, :controller => 'observer', :action => 'how_to_use')%>. (Nathan Wilson)</li>
+    <li>Added the <%= link_to(:app_how_to_help.t, :controller => 'observer', :action => 'how_to_help')%> page and updated <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use')%>. (Nathan Wilson)</li>
     <li>Bug fix in displaying observer's opinion. (Jason Hollinger)</li>
 </ol>
 
@@ -214,7 +211,7 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 <h3>Saturday February 9, 2008</h3>
 <ol>
     <li>Released support for formally proposing names for anyone's observation as well as voting on proposed names.
-        See the <%= link_to(:app_how_to_use.l, :controller => 'observer', :action => 'how_to_use')%> page for
+        See the <%= link_to(:app_how_to_use.t, :controller => 'observer', :action => 'how_to_use')%> page for
         details. (Jason Hollinger)
     </li>
     <li>Many other small changes went in as part of the proposed naming/voting work. (Jason Hollinger &amp; Nathan Wilson)</li>
@@ -238,7 +235,7 @@ This page lists the latest changes to and news about the Mushroom Observer websi
 <ol>
     <li><p>At long last, I am very excited to announce a major new feature for the Mushroom Observer website - Google Maps!  The most interesting maps currently supported are Distribution Maps.  Here's an example for 
 <%= link_to("<i>Craterellus cornucopioides</i>", :controller => 'name', :action => 'map', :id => 284) %>.  To get a map for a particular name, you go to the page for a name either from the 
-<%= link_to(:app_index_a_z.l, :controller => 'name', :action => 'observation_index') %> link on the left side of any window or by clicking an 'About ...' link at the top of an observation page.  Once you're on the page for a name, there is a new link near the top called 'Distribution Map' which takes you to the map for that name.</p>
+<%= link_to(:app_index_a_z.t, :controller => 'name', :action => 'observation_index') %> link on the left side of any window or by clicking an 'About ...' link at the top of an observation page.  Once you're on the page for a name, there is a new link near the top called 'Distribution Map' which takes you to the map for that name.</p>
 
 <p>So like pretty much everything on Mushroom Observer, users can add to the Distribution Map for a name.  The easiest way is when you create a new observation, use an already defined location.  The auto-completion for the Where field will list all locations that are currently being used whether they are defined or not.  Right now there are only a few values that are defined, but I'm hoping that will change quickly as users define more locations (see below).  When creating or editing an observation, there is a checkbox labeled 'Is Collection Location'.  By default it is checked.  If you uncheck, then that observation will not get put on the distribution map.  This allows you to record observations of mushrooms in places like mushroom fairs, grocery stores or other places where you may not know where the mushroom was actually collected.</p>
 

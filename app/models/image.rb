@@ -46,7 +46,7 @@ class Image < ActiveRecord::Base
     [:unreviewed, :low, :medium, :high]
   end
   
-  def unique_format_name
+  def unique_format_name 
     obs_names = []
     self.observations.each {|o| obs_names.push(o.format_name)}
     title = obs_names.uniq.sort.join(' & ')
@@ -88,8 +88,8 @@ class Image < ActiveRecord::Base
     result = self.calc_size
     logger.warn("create_resized_images: Calculated size: #{@width}x#{@height}")
     if result
-      self.resize_image(640, 640, self.big_image)
-      self.resize_image(160, 160, self.thumbnail)
+      self.resize_image(640, 640, 50, self.big_image)
+      self.resize_image(160, 160, 75, self.thumbnail)
     end
     return result
   end
@@ -102,7 +102,7 @@ class Image < ActiveRecord::Base
     return self.create_resized_images
   end
 
-  def resize_image(width, height, dest)
+  def resize_image(width, height, quality, dest)
     r1 = width/Float(@width)
     r2 = height/Float(@height)
     if r1 < r2
@@ -113,8 +113,8 @@ class Image < ActiveRecord::Base
     if ratio < 1
       w = ratio*@width
       h = ratio*@height
-      cmd = sprintf("convert -size %dx%d -quality 50 %s -resize %dx%d %s",
-                    w, h, self.original_image, w, h, dest)
+      cmd = sprintf("convert -size %dx%d -quality %d %s -resize %dx%d %s",
+                    w, h, quality, self.original_image, w, h, dest)
     else
       cmd = sprintf("cp %s %s", self.original_image, dest)
     end

@@ -1,53 +1,54 @@
-<%  if @title.nil?
-        if @pattern
-            @title = :list_place_names_pattern_title.l % @pattern
-        else
-            @title = :list_place_names_title.l
-        end
-    end %>
-<div id="Title"><%= @title %></div>
+<%
+  if @title.nil?
+    if @pattern && @pattern != ''
+      @title = :list_place_names_pattern_title.t(:pattern => @pattern)
+    else
+      @title = :list_place_names_title.t
+    end
+  end
 
-<%= link_to(:list_place_names_map.l, :action => :map_locations, :pattern => @pattern) %>
-<% if @pattern %>
-    | <%= link_to(:location_all.l, :action => :list_place_names) %>
-<% end %>
+  new_tab_set do
+    add_tab(:list_place_names_map.t, :action => :map_locations, :pattern => @pattern)
+    if @pattern
+      add_tab(:location_all.t, :action => :list_place_names)
+    end
+  end
+%>
 
 <table cellpadding="5" cellspacing="0" width="100%">
-    <tr valign="top">
-        <td>
-            <div class="SubTitle"><%= :list_place_names_known.l %></div>
-            <table cellpadding="5" cellspacing="0" width="100%">          
-              <%
-                 odd_or_even = 0
-                 for datum in @known_data
-                   odd_or_even = 1 - odd_or_even
-                 %>
-              <tr valign="top" class="ListLine<%= odd_or_even %>">
-                <td width="100%">
-            		<%= location_link(nil, datum["location_id"],  datum["cnt"]) %>
-                </td>
-              </tr>
-              <% end %>
-            </table>
-        </td>
-        <td>
-            <div class="SubTitle"><%= :list_place_names_undef.l %></div>
-            <table cellpadding="5" cellspacing="0" width="100%">          
-              <%
-                 odd_or_even = 0
-                 for datum in @undef_data
-                   odd_or_even = 1 - odd_or_even
-                 %>
-              <tr valign="top" class="ListLine<%= odd_or_even %>">
-                <td width="100%">
-            		<%= location_link(datum["where"], nil,  datum["cnt"]) %>
-            		<%= link_to("Merge", :action => 'list_merge_options', :where => datum["where"]) %>
-                </td>
-              </tr>
-              <% end %>
-            </table>
-        </td>
-    </tr>
-</table>
+  <tr valign="top">
 
-<br/>
+    <td>
+      <div class="SubTitle"><%= :list_place_names_known.t %></div>
+      <table cellpadding="5" cellspacing="0" width="100%">          
+        <% odd_or_even = 0
+        for datum in @known_data
+          odd_or_even = 1 - odd_or_even %>
+          <tr valign="top" class="ListLine<%= odd_or_even %>">
+            <td width="100%">
+      		  <%= location_link(nil, datum["location_id"],  datum["cnt"]) %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+
+    <td>
+      <div class="SubTitle"><%= :list_place_names_undef.t %></div>
+      <table cellpadding="5" cellspacing="0" width="100%">          
+        <% odd_or_even = 0
+        for datum in @undef_data
+          odd_or_even = 1 - odd_or_even %>
+          <tr valign="top" class="ListLine<%= odd_or_even %>">
+            <td width="100%">
+      		  <%= location_link(datum["where"], nil,  datum["cnt"]) %>
+      		  <%= link_to(:list_place_names_merge.t, :action => 'list_merge_options',
+                          :where => datum["where"]) %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+
+  </tr>
+</table>

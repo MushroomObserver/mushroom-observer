@@ -2,105 +2,103 @@
 
 <% if session[:checklist] && (session[:checklist] != []) %>
   <td valign="top">
-    <%= :form_species_lists_species_to_add.l %>:<br/>
+    <%= :form_species_lists_species_to_add.t %>:<br/>
     <% i = 0
        max = 100000
        for (name, id) in session[:checklist]
          i += 1
          break if i > max %>
       <%= check_box("checklist_data", id, { :checked => @checklist_names[id] }, "checked") %>
-      <label for="checklist_names"><%= textilize_without_paragraph(h(name)) %></label>
+      <label for="checklist_names"><%= name.t %></label>
       <br/>
     <% end %>
   </td>
 <% end %>
 
 <td valign="top">
-    <%= render :partial => 'shared/form_list_feedback' %>
+  <%= render(:partial => 'shared/form_list_feedback') %>
 
-    <% if @deprecated_names && (@deprecated_names != []) %>
-      <div style="width:500px">
-        <div class="Errors">
-          <%= :form_species_lists_deprecated.l %>:<br/>
-          <span class="HelpNote"><%= :form_species_lists_deprecated_help.l %></span>
-          <span class="Data">
-            <% for name_str in @deprecated_names
-              approved_names = []
-              for name in Name.find_names(name_str)
-                for approved_name in name.approved_synonyms
-                  approved_names.push(approved_name)
-                end
+  <% if @deprecated_names && (@deprecated_names != []) %>
+    <div style="width:500px">
+      <div class="Errors">
+        <%= :form_species_lists_deprecated.t %>:<br/>
+        <span class="HelpNote"><%= :form_species_lists_deprecated_help.t %></span><br/>
+        <span class="Data">
+          <% for name_str in @deprecated_names
+            approved_names = []
+            for name in Name.find_names(name_str)
+              for approved_name in name.approved_synonyms
+                approved_names.push(approved_name)
               end
-              if approved_name != [] %>
-                <%= h(name_str) %><br/>
-                <% for approved_name in approved_names
-                    id_name_str = name_str.gsub(/\W/, "_") # Spaces not allowed in id values according to XHTML validator %>
-                  &nbsp;&nbsp;<%= radio_button("chosen_approved_names", id_name_str, approved_name.id) %>
-                  <%= textilize_without_paragraph(h(approved_name.display_name)) %><br/>
-                <% end %>
-              <% end %>
-            <% end %>
-          </span>
-        </div>
-      </div>
-    <% end %>
-
-    <% if @multiple_names && (@multiple_names != []) %>
-      <div style="width:500px">
-        <div class="Errors">
-          <%= :form_species_lists_multiple_names.l %>:<br/>
-          <span class="HelpNote"><%= :form_species_lists_multiple_names_help.l %></span>
-          <span class="Data">
-            <% for name_str in @multiple_names %>
+            end
+            if approved_name != [] %>
               <%= h(name_str) %><br/>
-              <% for name in Name.find_names(name_str)
+              <% for approved_name in approved_names
                   id_name_str = name_str.gsub(/\W/, "_") # Spaces not allowed in id values according to XHTML validator %>
-                &nbsp;&nbsp;<%= radio_button("chosen_names", id_name_str, name.id) %>
-                <%= textilize_without_paragraph(h(name.display_name)) %> (<%= name.observations.size %>)<br/>
+                &nbsp;&nbsp;<%= radio_button("chosen_approved_names", id_name_str, approved_name.id) %>
+                <%= approved_name.display_name.t %><br/>
               <% end %>
             <% end %>
-          </span>
-        </div>
+          <% end %>
+        </span>
       </div>
-    <% end %>
+    </div>
+  <% end %>
 
-	<p>
-		<label for="list_members"><%= :form_species_lists_write_in_species.l %>:</label><br/>
-		<%= text_area 'list', 'members', :value => @list_members  %>
-	</p>
+  <% if @multiple_names && (@multiple_names != []) %>
+    <div style="width:500px">
+      <div class="Errors">
+        <%= :form_species_lists_multiple_names.t %>:<br/>
+        <span class="HelpNote"><%= :form_species_lists_multiple_names_help.t %></span>
+        <span class="Data">
+          <% for name_str in @multiple_names %>
+            <%= h(name_str) %><br/>
+            <% for name in Name.find_names(name_str)
+                id_name_str = name_str.gsub(/\W/, "_") # Spaces not allowed in id values according to XHTML validator %>
+              &nbsp;&nbsp;<%= radio_button("chosen_names", id_name_str, name.id) %>
+              <%= name.display_name.t %> (<%= name.observations.size %>)<br/>
+            <% end %>
+          <% end %>
+        </span>
+      </div>
+    </div>
+  <% end %>
 
-	<p>
-		<label for="species_list_when_1i"><%= :form_species_lists_when.l %></label><br/>
-		<%= date_select 'species_list', 'when', :start_year => 1980, :end_year => Time.now.year %>
-	</p>
+  <p>
+  	<label for="list_members"><%= :form_species_lists_write_in_species.t %>:</label><br/>
+  	<%= text_area('list', 'members', :value => @list_members) %>
+  </p>
 
-    <p>
-		<label for="species_list_where"><%= :form_species_lists_where.l %></label><br/>
-        <%= text_field('species_list', 'where', :size => 60) %>
-	</p>
-    <%= turn_into_location_auto_completer('species_list_where') %>
+  <p>
+  	<label for="species_list_when_1i"><%= :app_when.t %></label>:<br/>
+  	<%= date_select('species_list', 'when', :start_year => 1980, :end_year => Time.now.year) %>
+  </p>
 
-	<p>
-		<label for="species_list_title"><%= :form_species_lists_title.l %></label><br/>
-		<%= text_field 'species_list', 'title'  %>
-	</p>
+  <p>
+  	<label for="species_list_where"><%= :app_where.t %>: (<%= :app_required.t %>)</label><br/>
+      <%= text_field('species_list', 'where', :size => 60) %>
+  </p>
+  <%= turn_into_location_auto_completer('species_list_where') %>
 
-	<p>
-		<label for="species_list_notes"><%= :form_species_lists_list_notes.l %></label><br/>
-		<%= text_area 'species_list', 'notes'  %>
-	</p>
-	<%= render :partial => 'shared/textilize_help' %>
+  <p>
+  	<label for="species_list_title"><%= :form_species_lists_title.t %>: (<%= :app_required.t %>)</label><br/>
+  	<%= text_field('species_list', 'title') %>
+  </p>
 
-	<p>
-		<label for="member_notes"><%= :form_species_lists_member_notes.l %></label><br/>
-		<%= text_area 'member', 'notes', :value => @member_notes, :rows => 5  %>
-	</p>
+  <p>
+  	<label for="species_list_notes"><%= :form_species_lists_list_notes.t %></label>:<br/>
+  	<%= text_area('species_list', 'notes') %>
+  </p>
+  <%= render(:partial => 'shared/textilize_help') %><br/>
 
-    <span class="HelpNote"><%= textilize_without_paragraph(:form_species_lists_bulk_help.l % (DOMAIN + "/name/bulk_name_edit")) %></span>
+  <p>
+  	<label for="member_notes"><%= :form_species_lists_member_notes.t %></label>:<br/>
+  	<%= text_area('member', 'notes', :value => @member_notes, :rows => 5) %>
+  </p>
 
-    <!-- javascript needs to be inside the <td></td> block to pass the verifier -->
-    <%= javascript_tag "document.getElementById('list_members').focus()" %>
+  <span class="HelpNote"><%= :form_species_lists_bulk_help.t %></span>
 
+  <%= focus_on('list_members') %>
 </td>
 
 <!--[eoform:species_list]-->

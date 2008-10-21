@@ -73,7 +73,7 @@ class ImageController < ApplicationController
     session_setup
     store_location
     @layout = calc_layout_params
-    @title = "Images by #{user.legal_name}"
+    @title = :images_by_user.t(:user => user.legal_name)
     @obj_pages, @objs = paginate(:images, :order => "`when` desc",
       :conditions => "user_id = #{user.id}", :per_page => @layout["count"])
     render(:action => "list_images")
@@ -101,7 +101,7 @@ class ImageController < ApplicationController
     if image
       redirect_to(:action => 'show_image', :id => id)
     else
-      show_selected_images("Images matching '#{@pattern}'",
+      show_selected_images(:image_search_title.t(:pattern => @pattern),
         field_search(["n.search_name", "i.notes", "i.copyright_holder"], "%#{@pattern.gsub(/[*']/,"%")}%"),
         "n.search_name, `when` desc", :nothing)
     end
@@ -124,6 +124,9 @@ class ImageController < ApplicationController
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
     @image = Image.find(params[:id])
+    @image.num_views += 1
+    @image.last_view = Time.now
+    @image.save
     @is_reviewer = is_reviewer
   end
 
@@ -176,11 +179,11 @@ class ImageController < ApplicationController
       end
     end
     if new_image.nil?
-      flash_warning("No new image found")
+      flash_warning(:image_no_new_image.t)
       new_image = current_image
     end
     state.save if !is_robot?
-    redirect_to :action => 'show_image', :id => new_image, :seq_key => state.id
+    redirect_to(:action => 'show_image', :id => new_image, :seq_key => state.id)
   end
 
   def inc_image(func_name, direction) # direction is 1 or -1 depending on if we're doing next or prev
@@ -226,7 +229,7 @@ class ImageController < ApplicationController
       image.save
     end
     redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image', :id => id,
-               :seq_key => params[:seq_key], :search_seq => params[:search_seq], :obs => params[:obs])
+                :seq_key => params[:seq_key], :search_seq => params[:search_seq], :obs => params[:obs])
   end
   
   # Form for uploading and adding images to an observation.
@@ -244,7 +247,7 @@ class ImageController < ApplicationController
   def add_image
     @observation = Observation.find(params[:id])
     if !check_user_id(@observation.user_id)
-      redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
     elsif request.method == :get
       @image = Image.new
       @image.license = @user.license
@@ -259,7 +262,7 @@ class ImageController < ApplicationController
       process_image(args, params[:upload][:image2])
       process_image(args, params[:upload][:image3])
       process_image(args, params[:upload][:image4])
-      redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
     end
   end
 
@@ -275,12 +278,15 @@ class ImageController < ApplicationController
         flash_object_errors(@image)
       elsif !@image.save_image
         logger.error("Unable to upload image")
-        flash_error "Invalid image '#{name ? name : "???"}'."
+        flash_error :profile_invalid_image. \
+          t(:name => (name ? "'#{name}'" : '???'))
       else
-        @observation.log("Image created by #{@user.login}: #{@image.unique_format_name}", true)
+        @observation.log(:log_image_created, { :user => @user.login,
+          :name => @image.unique_format_name }, true)
         @observation.add_image(@image)
         @observation.save
-        flash_notice "Uploaded image " + (name ? "'#{name}'" : "##{@image.id}") + "."
+        flash_notice :profile_uploaded_image. \
+          t(:name => name ? "'#{name}'" : "##{@image.id}")
       end
     end
   end
@@ -296,7 +302,7 @@ class ImageController < ApplicationController
     @observation = Observation.find(params[:id])
     if verify_user()
       if !check_user_id(@observation.user_id)
-        redirect_to :controller => 'observer', :action => 'show_observation', :id => @observation
+        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
       elsif request.method == :get
         # @image = Image.new
         # @image.copyright_holder = @user.legal_name
@@ -308,8 +314,9 @@ class ImageController < ApplicationController
             if do_it == 'yes'
               image = @observation.remove_image_by_id(image_id)
               if !image.nil?
-                @observation.log("Image removed by #{@user.login}: #{image.unique_format_name}", false)
-                flash_notice "Removed image ##{image_id}."
+                @observation.log(:log_image_removed, { :user => @user.login,
+                  :name => image.unique_format_name }, false)
+                flash_notice :image_remove_success.t(:id => image_id)
               end
             end
           end
@@ -330,7 +337,7 @@ class ImageController < ApplicationController
     @licenses = License.current_names_and_ids(@image.license)
     if verify_user()
       if !check_user_id(@image.user_id)
-        redirect_to :action => 'show_image', :id => @image
+        redirect_to(:action => 'show_image', :id => @image)
       elsif request.method == :post
         @image.attributes = params[:image]
         @image.modified = Time.now
@@ -338,9 +345,10 @@ class ImageController < ApplicationController
           flash_object_errors(@image)
         else
           for o in @image.observations
-            o.log(sprintf('Image, %s, updated by %s', @image.unique_text_name, @user.login), true)
+            o.log(:log_image_updated, { :user => @user.login,
+              :name => @image.unique_format_name }, true)
           end
-          flash_notice "Image was successfully updated."
+          flash_notice :image_edit_success.t
           redirect_to(:action => 'show_image', :id => @image.id)
         end
       end
@@ -358,14 +366,15 @@ class ImageController < ApplicationController
       if !check_user_id(@image.user_id)
         redirect_to(:action => 'show_image', :id => @image.id)
       else
-        image_name = @image.unique_text_name
+        image_name = @image.unique_format_name
         for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
-          observation.log("Image destroyed by #{@user.login}: #{image_name}", false)
+          observation.log(:log_image_destroyed, { :user => @user.login,
+            :name => image_name }, true)
           observation.thumb_image_id = nil
           observation.save
         end
         @image.destroy
-        flash_notice "Image destroyed."
+        flash_notice :image_destroy_success.t
         redirect_to(:action => 'list_images')
       end
     end
@@ -380,20 +389,20 @@ class ImageController < ApplicationController
     @observation = Observation.find(params[:observation_id])
     if verify_user()
       if !check_user_id(@observation.user_id)
-        flash_warning('You do not have permission to remove images from this observation.');
+        flash_warning :image_remove_denied.t
       elsif !@observation.images.include?(@image)
-        flash_warning("This observation doesn't have that image!")
+        flash_warning :image_remove_missing.t
       else
         @observation.images.delete(@image)
-        @observation.log("Image removed: #{@image.unique_text_name}", false)
+        @observation.log(:log_image_removed, { :user => @user.login,
+          :name => @image.unique_format_name }, false)
         if @observation.thumb_image_id == @image.id
           @observation.thumb_image_id = nil
           @observation.save
         end
-        flash_notice('Image removed.')
+        flash_notice :image_remove_success.t(:id => @image.id)
       end
-      redirect_to(:controller => 'observer', :action => 'show_observation',
-        :id => @observation.id)
+      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
     end
   end
 
@@ -430,8 +439,9 @@ class ImageController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:id])
       if !image.nil?
-        @observation.log("Image reused by #{@user.login}: #{image.unique_format_name}", true)
-        flash_notice "Added image ##{image.id}."
+        @observation.log(:log_image_reused, { :user => @user.login,
+          :name => image.unique_format_name }, true)
+        flash_notice :image_reuse_success.t(:id => image.id)
       end
     end
     redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
@@ -448,8 +458,9 @@ class ImageController < ApplicationController
     if check_user_id(@observation.user_id)
       image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
       if !image.nil?
-        @observation.log("Image reused by #{@user.login}: #{image.unique_format_name}", true)
-        flash_notice "Added image ##{image.id}."
+        @observation.log(:log_image_reused, { :user => @user.login,
+          :name => image.unique_format_name }, true)
+        flash_notice :image_reuse_success.t(:id => image.id)
       end
     end
     redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
@@ -468,11 +479,11 @@ class ImageController < ApplicationController
         image = Image.find(params[:id])
         @user.image = image
         @user.save
-        flash_notice "Changed your image to image ##{image.id}."
+        flash_notice :image_changed_your_image.t(:id => image.id)
         redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
         redirected = true
       rescue(e)
-        flash_error "Invalid image id."
+        flash_error :image_reuse_invalid_id.t
       end
     end
     if !redirected
@@ -593,9 +604,9 @@ class ImageController < ApplicationController
         image.resize_image(160, 160, image.thumbnail)
       end
     else
-      flash_error "You must be an admin to access resize_images."
+      flash_error :image_resize_denied.t
     end
-    redirect_to :action => 'list_images'
+    redirect_to(:action => 'list_images')
   end
 
 ################################################################################

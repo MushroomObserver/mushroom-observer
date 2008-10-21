@@ -1,40 +1,39 @@
-<% @title = "Updating Licenses for #{h(@user.login)}" %>
-
-<div id="Title"><%= @title %></div>
+<% @title = :image_updater_title.t(:user => @user.login) %>
 
 <% form_tag(:action => 'license_updater') do %>
-	<center><%= submit_tag 'Update' %></center><br/>
-    <table cellpadding="5" cellspacing="5" border="1">
-    	<tr class="Data">
-    		<td>
-    			Copyright Holder
-    		</td>
-    		<td>
-    			Count
-    		</td>
-    		<td>
-    			Current License
-    		</td>
-    		<td>
-    		    New License
-    		</td>
-    	</tr>
+  <br/><center><%= submit_tag :image_updater_update.l %></center>
 
-    	<% for datum in @data %>
-    	    <tr>
-    	        <td>
-    	            <%= "#{datum['copyright_holder']}" %>
-    	        </td>
-    	        <td>
-    	            <%= "#{datum['license_count']}" %>
-    	        </td>
-    	        <td>
-    	            <%= "#{datum['license_name']}" %>
-    	        </td>
-    	        <td>
-    	            <%= select_tag(datum['select_id'], options_for_select(datum['licenses'], datum['selected']), :name => datum['select_name']) %>
-    	        </td>
-    	    </tr>
-    	<% end %>
-    </table>
+  <table cellpadding="5" cellspacing="5" border="1">
+    <tr class="Data">
+      <td>
+        :image_updater_holder.t
+      </td>
+      <td>
+        :image_updater_count.t
+      </td>
+      <td>
+        :image_updater_current.t
+      </td>
+      <td>
+        :image_updater_new.t
+      </td>
+    </tr>
+
+    <% for datum in @data %>
+      <tr>
+        <td>
+          <%= datum['copyright_holder'].to_s %>
+        </td>
+        <td>
+          <%= datum['license_count'].to_s %>
+        </td>
+        <td>
+          <%= datum['license_name'].to_s %>
+        </td>
+        <td>
+          <%= select_tag(datum['select_id'], options_for_select(datum['licenses'], datum['selected']), :name => datum['select_name']) %>
+        </td>
+      </tr>
+    <% end %>
+  </table>
 <% end %>

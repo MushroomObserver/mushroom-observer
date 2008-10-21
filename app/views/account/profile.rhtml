@@ -1,50 +1,48 @@
-<% javascript_include_auto_complete %>
+<% 
+  javascript_include_auto_complete
+  @title = :profile_title.t
+
+  new_tab_set do
+    add_tab(:bulk_license_link.t,
+            :controller => 'image', :action => 'license_updater')
+    add_tab(:show_user_your_notifications.t,
+            :controller => 'observer', :action => 'list_notifications')
+    add_tab(:prefs_link.t,
+            :controller => 'account', :action => 'prefs')
+  end
+%>
 
 <% form_for(:user, :url => { :action => :profile }, :html => { :multipart => true }) do |form| %>
+  <br/><center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center><br/>
 
-<div title="<%= :profile_title.l %>" id="prefform" class="form">
-  <h3><%= :profile_title.l %></h3>
-
-  <%= 
-    tabs = []
-    tabs.push [:bulk_license_link.l, url_for(:controller => 'image', :action => 'license_updater') ]
-    tabs.push [:show_user_your_notifications.l, url_for(:controller => "observer", :action => "list_notifications")]
-    tabs.push [:prefs_link.l, url_for(:controller => 'account', :action => 'prefs') ]
-    show_tabs tabs
-  %>
-
-  <center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center>
-
-  <p><label for="user_name"><%= :profile_name.l %></label><br/>
+  <p><label for="user_name"><%= :profile_name.t %></label><br/>
   <%= form.text_field("name", :size => 60) %></p>
 
-  <p><label for="user_place_name"><%= :profile_location.l %></label> (33%)<br/>
+  <p><label for="user_place_name"><%= :profile_location.t %></label> (33%)<br/>
   <%= text_field('user', 'place_name', :value => @place_name, :size => 60) %></p>
   <%= turn_into_location_auto_completer("user_place_name") %>
 
-  <p><label for="user_notes"><%= :profile_notes.l %></label> (33%)<br/>
+  <p><label for="user_notes"><%= :profile_notes.t %></label> (33%)<br/>
   <%= form.text_area("notes", :rows => 5, :cols => 60) %></p>
 
   <p><label for="user_upload_image"><%= @user.image_id ?
-    :profile_image_change.l : :profile_image_create.l %></label> (33%)
-    <%= link_to :profile_image_reuse.l, :controller => 'image',
-      :action => 'reuse_image_for_user' %>
-    <%= link_to(:profile_image_remove.l, :action => 'remove_image') \
-      if @user.image %><br/>
+    :profile_image_change.t : :profile_image_create.t %></label> (33%)
+    <%= link_to(:profile_image_reuse.t, :controller => 'image',
+                :action => 'reuse_image_for_user') %>
+    <%= link_to(:profile_image_remove.t, { :action => 'remove_image' },
+                { :confirm => :app_are_you_sure.l }) if @user.image %><br/>
   <%= form.file_field("upload_image") %></p>
-  <p><label for="copyright_holder"><%= :profile_copyright_holder.l %></label><br/>
+
+  <p><label for="copyright_holder"><%= :profile_copyright_holder.t %></label><br/>
   <%= text_field_tag("copyright_holder", @copyright_holder, :size => 40) %>
   <%= select_year(@copyright_year, :field_name => "copyright_year",
-    :start_year => 1980, :end_year => Time.now.year) %></p>
-  <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
-  <span id="help_note">(<%= :profile_copyright_warning.l %>)</span></p>
+                  :start_year => 1980, :end_year => Time.now.year) %></p>
 
-  <p><label for="user_mailing_address"><%= :profile_mailing_address.l %></label><br/>
+  <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
+  <span id="help_note">(<%= :profile_copyright_warning.t %>)</span></p>
+
+  <p><label for="user_mailing_address"><%= :profile_mailing_address.t %></label><br/>
   <%= form.text_area("mailing_address", :rows => 5, :cols => 60) %></p>
 
-<br/>
-<center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center>
-<br/><br/>
-</div>
-
+  <br/><center><input type="submit" value="<%= :profile_button.l %>" class="primary" /></center>
 <% end %>

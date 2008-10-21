@@ -1,14 +1,21 @@
-<% @title = 'Comment on ' + h(@object.unique_text_name) %>
-<%= link_to('Goto Observation', :controller => @object.show_controller,
-  :action => @object.show_action, :id => @object.id) %>
-<% if check_permission(@comment.user_id) %>
-  || <%= link_to('Edit', :action => 'edit_comment', :id => @comment.id) %>
-  | <%= link_to('Destroy', { :action => 'destroy_comment', :id => @comment.id },
-                :confirm => "Are you sure?") %>
-<% end %>
+<%
+  @title = :comment_show_title.t(:name => @object.unique_format_name)
+  object_type = @comment.object_type_localized
 
-<div id="Title">Comment on <%= textilize_without_paragraph(h(@object.unique_format_name)) %></div>
-<p>Created: <%= @comment.created.to_formatted_s(:db) %></p>
-<p>By: <%= user_link(@comment.user) %></p>
-<p>Summary: <%= @comment.summary %></p>
-Comment: <%= textilize(sanitize(@comment.comment)) %>
+  new_tab_set do
+    add_tab(:comment_show_show.t(:type => object_type),
+            :controller => @object.show_controller, :action => @object.show_action, :id => @object.id)
+    if check_permission(@comment.user_id)
+      add_tab(:comment_show_edit.t,
+              :action => 'edit_comment', :id => @comment.id)
+      add_tab(:comment_show_destroy.t,
+              { :action => 'destroy_comment', :id => @comment.id },
+              { :confirm => :app_are_you_sure.l })
+    end 
+  end
+%>
+
+<p><%= :comment_show_created.t %>: <%= @comment.created.to_formatted_s(:db) %></p>
+<p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
+<p><%= :comment_show_summary.t %>: <%= sanitize(@comment.summary).tl %></p>
+<%= sanitize(:comment_show_comment.l + ': ' + @comment.comment).tpl %>

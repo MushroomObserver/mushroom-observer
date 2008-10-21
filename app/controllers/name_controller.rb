@@ -79,7 +79,7 @@ class NameController < ApplicationController
     session[:list_members] = nil
     session[:new_names] = nil
     session[:checklist_source] = :all_names
-    @title = "Name Index"
+    @title = :name_index_name_index.t
     @name_data = Name.connection.select_all %(
       SELECT id, display_name
       FROM names
@@ -94,7 +94,7 @@ class NameController < ApplicationController
     session[:list_members] = nil
     session[:new_names] = nil
     session[:checklist_source] = :all_observations
-    @title = "Observation Index"
+    @title = :name_index_observation_index.t
     @name_data = Name.connection.select_all %(
       SELECT distinct names.id, names.display_name
       FROM names, observations
@@ -102,7 +102,7 @@ class NameController < ApplicationController
       ORDER BY names.text_name asc, author asc
     )
     name_index_helper
-    render :action => 'name_index'
+    render(:action => 'name_index')
   end
 
   # Just list the names that have observations
@@ -136,7 +136,7 @@ class NameController < ApplicationController
     store_location
     @layout = calc_layout_params
     @pattern = session[:pattern] || ''
-    @title = "Names matching '#{@pattern}'"
+    @title = :name_index_matching.t(:pattern => @pattern)
     id = @pattern.to_i
     @name_data = nil
     if @pattern == id.to_s
@@ -161,13 +161,13 @@ class NameController < ApplicationController
     end
     len = @name_data.length
     if len == 1
-      redirect_to :action => 'show_name', :id => @name_data[0]['id']
+      redirect_to(:action => 'show_name', :id => @name_data[0]['id'])
     else
       if len == 0
-        flash_warning "No names matching '#{@pattern}' found."
+        flash_warning(:name_search_none_found.t(:pattern => @pattern))
       end
       name_index_helper
-      render :action => 'name_index'
+      render(:action => 'name_index')
     end
   end
 
@@ -189,6 +189,9 @@ class NameController < ApplicationController
       @past_name = @name.versions.latest
       @past_name = @past_name.previous if @past_name
       @children = @name.children
+      @name.num_views += 1
+      @name.last_view = Time.now
+      @name.save
 
       # In theory much of the following should really be handled by the new search_sequences,
       # but for now if it ain't broke...
@@ -343,7 +346,7 @@ class NameController < ApplicationController
     end
     redirect_to(:action => 'show_name', :id => id)
   end
-  
+
   def show_past_name
     store_location
     @name = Name.find(params[:id].to_i)
@@ -367,17 +370,17 @@ class NameController < ApplicationController
           matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
         end
         if matches.length > 0
-          flash_error "The name #{name_str} already exists."
+          flash_error(:name_create_already_exists.t(:name => name_str))
           name = matches[0]
         else
           names = Name.names_from_string(name_str)
           name = names.last
           if name.nil?
-            raise "Unable to create the name %s." % name_str
+            raise :runtime_unable_to_create_name.t(:name => name_str)
           end
           name.citation = params[:name][:citation]
           name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
-          
+
           has_notes = false
           for f in Name.all_note_fields
             note = params[:name][f]
@@ -396,7 +399,7 @@ class NameController < ApplicationController
             end
           end
         end
-        redirect_to :action => 'show_name', :id => name
+        redirect_to(:action => 'show_name', :id => name)
       else
         @name = Name.new
         @licenses = License.current_names_and_ids()
@@ -416,7 +419,7 @@ class NameController < ApplicationController
     end
     result
   end
-  
+
   # show_name.rhtml -> edit_name.rhtml
   # Updates modified and saves changes
   def edit_name
@@ -458,7 +461,7 @@ class NameController < ApplicationController
               author = old_name.author || ''
             end
           end
-          old_search_name = @name.search_name
+          old_display_name = @name.display_name
           count = 0
           current_time = Time.now
           count += 1
@@ -476,7 +479,7 @@ class NameController < ApplicationController
           else
             @name.license_id = nil
           end
-          raise "Update_name called on a name that doesn't exist." if !@name.id
+          raise :runtime_update_nonexisting_name.t if !@name.id
           if is_reviewer
             @name.reviewer = @user
             @name.last_review = Time.now()
@@ -485,7 +488,7 @@ class NameController < ApplicationController
             @name.reviewer = nil
             @name.review_status = :unreviewed
           end
-          @name.save_if_changed(@user, "Name updated by #{@user.login}", current_time)
+          @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
           if old_name # merge happened
             for o in old_name.observations
               o.name = @name
@@ -498,15 +501,16 @@ class NameController < ApplicationController
               g.save
             end
             if @user.id != 0
-              old_name.log("#{old_search_name} merged with #{@name.search_name}")
+              old_name.log(:log_name_merged, { :this => old_display_name,
+                :that => @name.display_name }, true)
             end
             old_name.destroy
           end
         rescue RuntimeError => err
-          flash_error err.to_s
+          flash_error(err.to_s)
           flash_object_errors(@name)
         else
-          redirect_to :action => 'show_name', :id => @name
+          redirect_to(:action => 'show_name', :id => @name.id)
         end
       end
     end
@@ -532,7 +536,7 @@ class NameController < ApplicationController
         if !sorter.only_single_names
           dump_sorter(sorter)
         elsif !sorter.only_approved_synonyms
-          flash_notice("Please confirm that this is what you intended.")
+          flash_notice :name_change_synonyms_confirm.t
         else
           timestamp = Time.now
           synonym = @name.synonym
@@ -541,7 +545,7 @@ class NameController < ApplicationController
             synonym.created = timestamp
             synonym.save
             @name.synonym = synonym
-            @name.save_if_changed(@user, nil, timestamp)
+            @name.save_if_changed(@user, nil, nil, timestamp, true)
           end
           proposed_synonyms = params[:proposed_synonyms] || {}
           for n in sorter.all_names
@@ -565,7 +569,7 @@ class NameController < ApplicationController
             end
           end
           if success
-            redirect_to :action => 'show_name', :id => @name
+            redirect_to(:action => 'show_name', :id => @name.id)
           else
             flash_object_errors(@name)
             flash_object_errors(@name.synonym)
@@ -593,7 +597,7 @@ class NameController < ApplicationController
       @names            = []
       if request.method == :post
         if @what == ''
-          flash_error "Must choose a preferred name."
+          flash_error :name_deprecate_must_choose.t
         else
           if params[:chosen_name] && params[:chosen_name][:name_id]
             new_names = [Name.find(params[:chosen_name][:name_id])]
@@ -610,13 +614,17 @@ class NameController < ApplicationController
               @name.merge_synonyms(target_name)
               target_name.change_deprecated(false)
               current_time = Time.now
-              target_name.save_if_changed(@user, "Preferred over #{@name.search_name} by #{@user.login}.", current_time)
+              target_name.save_if_changed(@user,
+                :log_name_approved, { :user => @user.login,
+                :other => @name.display_name }, current_time, true)
               @name.change_deprecated(true)
               comment_join = @comment == "" ? "." : ":\n"
               @name.prepend_notes("Deprecated in favor of" +
                 " #{target_name.search_name} by #{@user.login} on " +
                 Time.now.to_formatted_s(:db) + comment_join + @comment)
-              @name.save_if_changed(@user, "Deprecated in favor of #{target_name.search_name} by #{@user.login}.", current_time)
+              @name.save_if_changed(@user,
+                :log_name_deprecated, { :user => @user.login,
+                :other => target_name.display_name }, current_time, true)
               redirect_to(:action => 'show_name', :id => @name.id)
             end
           end
@@ -634,7 +642,9 @@ class NameController < ApplicationController
         if params[:deprecate][:others] == '1'
           for n in @name.approved_synonyms
             n.change_deprecated(true)
-            n.save_if_changed(@user, "Deprecated in favor of #{@name.search_name} by #{@user.login}", now)
+            n.save_if_changed(@user,
+              :log_name_deprecated, { :user => @user.login,
+              :other => @name.search_name }, now, true)
           end
         end
         @name.change_deprecated(false)
@@ -643,8 +653,8 @@ class NameController < ApplicationController
         comment_join = comment == "" ? "." : ":\n"
         @name.prepend_notes("Approved by #{@user.login} on " +
           Time.now.to_formatted_s(:db) + comment_join + comment)
-        @name.save_if_changed(@user, "Approved by #{@user.login}", now)
-        redirect_to :action => 'show_name', :id => @name
+        @name.save_if_changed(@user, :log_approved_by, { :user => @user.login }, now, true)
+        redirect_to(:action => 'show_name', :id => @name.id)
       end
     end
   end
@@ -660,8 +670,8 @@ class NameController < ApplicationController
         sorter = setup_sorter(params, nil, list)
         if sorter.only_single_names
           sorter.create_new_synonyms()
-          flash_notice "All names are now in the database."
-          redirect_to :controller => 'observer', :action => 'list_rss_logs'
+          flash_notice :name_bulk_success.t
+          redirect_to(:controller => 'observer', :action => 'list_rss_logs')
         else
           if sorter.new_name_strs != []
             # This error message is no longer necessary.
@@ -710,39 +720,43 @@ class NameController < ApplicationController
       if request.method == :post
         name = Name.find(name_id)
         case params[:commit]
-        when :email_tracking_enable.l, :email_tracking_update.l
+        when :app_enable.l, :app_update.l
           note_template = params[:notification][:note_template]
           note_template = nil if note_template == ''
           if @notification.nil?
             @notification = Notification.new(:flavor => :name, :user => @user, :obj_id => name_id,
                 :note_template => note_template)
-            flash_notice("Now tracking #{name.text_name}.")          
+            flash_notice(:email_tracking_now_tracking.t(:name => name.display_name))
           else
             @notification.note_template = note_template
-            flash_notice("Updated tracking messages.")          
+            flash_notice(:email_tracking_updated_messages.t)
           end
           @notification.save
-        when :email_tracking_disable.l
+        when :app_disable.l
           @notification.destroy()
-          flash_notice("No longer tracking #{name.text_name}.")
+          flash_notice(:email_tracking_no_longer_tracking.t(:name => name.display_name))
         end
         redirect_to(:action => 'show_name', :id => name_id)
       else
         @name = Name.find(name_id)
         if [:Family, :Order, :Class, :Phylum, :Kingdom, :Group].member?(@name.rank)
-          flash_warning("Enabled only for #{@name.search_name} - Contained taxa not yet support for #{@name.rank}")
+          flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
         end
         if @notification
           @note_template = @notification.note_template
         else
           mailing_address = @user.mailing_address.strip
           mailing_address = '[mailing address for collections]' if '' == mailing_address
-          @note_template = :email_tracking_note_template.l % [@name.text_name, mailing_address, @user.legal_name]
+          @note_template = :email_tracking_note_template.l(
+            :species_name => @name.text_name,
+            :mailing_address => mailing_address,
+            :users_name => @user.legal_name
+          )
         end
       end
     end
   end
-  
+
   def eol_data(review_status_list)
     rsl_list = review_status_list.join("', '")
     names = Name.find(:all, :conditions => "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1", :order => "search_name")
@@ -770,7 +784,7 @@ class NameController < ApplicationController
       end
     end
   end
-  
+
   def eol
     headers["Content-Type"] = "application/xml"
     eol_data()
@@ -781,11 +795,11 @@ class NameController < ApplicationController
   def eol_preview
     eol_data(['unvetted', 'vetted'])
   end
-  
+
   # Show the data getting sent to EOL
   def eol_need_review
     eol_data(['unreviewed'])
-    @title = :eol_need_review_title.l
+    @title = :eol_need_review_title.t
     render(:action => 'eol_preview')
   end
 
@@ -818,7 +832,7 @@ class NameController < ApplicationController
       if other_name.has_any_notes?
         # If other_name's notes are going to get overwritten throw an error
         if !blank_notes(all_notes) && (other_name.all_notes != all_notes)
-          raise "The name, %s, is already in use and %s has notes" % [text_name, other_name.search_name]
+          raise :runtime_name_in_use_with_notes.t(:name => text_name, :other => other_name.display_name)
         end
         result = [other_name, page_name]
       elsif page_name.nil?
@@ -840,9 +854,9 @@ class NameController < ApplicationController
       begin
         count = 0
         name.change_deprecated(true)
-        name.save_if_changed(user, "Name deprecated by #{user.login}.")
+        name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
       rescue RuntimeError => err
-        flash_error err.to_s
+        flash_error(err.to_s)
         return false
       end
     end

@@ -327,4 +327,15 @@ class String
       end
     end
   end
+
+  # Remove html codes from string.  (Used to make sure title is safe for HTML
+  # header field.)
+  def strip_html
+    self.gsub(/<[^>]*>/, '')
+  end
+
+  # Wrap HTML string in a span that prevents long strings from being broken.
+  def nowrap
+    '<span style="white-space: nowrap">' + self + '</span>'
+  end
 end

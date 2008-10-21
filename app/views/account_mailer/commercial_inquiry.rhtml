@@ -12,7 +12,7 @@ website to forward the following commercial inquiry about your image, <u><%=
 @image.unique_text_name %></u>:</p>
 
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-  <%= textilize(sanitize(@commercial_inquiry)) %>
+  <%= sanitize(@commercial_inquiry).tp %>
 </div>
 
 <p>It is entirely up to you whether you want to reply by emailing directly back

@@ -1,13 +1,15 @@
 <!--[form:observation]-->
 
-<label for="observation_when_1i"><%= :form_observations_when.l %>:</label>
+<label for="observation_when_1i"><%= :app_when.t %>:</label>
 <%= date_select('observation', 'when', :start_year => 1980,
-  :end_year => Time.now.year) %><br/><br/>
+                :end_year => Time.now.year) %><br/><br/>
 
-<label for="observation_place_name"><%= :form_observations_where.l %>:</label>
-<%= text_field('observation', 'place_name', :size => 60) %><br/>
+<span style='white-space:nowrap'>
+  <label for="observation_place_name"><%= :app_where.t %>: (<%= :app_required.t %>)</label>
+  <%= text_field('observation', 'place_name', :size => 60) %>
+</span><br/>
 <%= turn_into_location_auto_completer('observation_place_name') %>
-<span class="HelpNote"><%= textilize_without_paragraph(:form_observations_where_help.l) %></span><br/><br/>
+<span class="HelpNote"><%= :form_observations_where_help.t %></span><br/><br/>
 
 <%= if include_naming
   render(:partial => 'form_naming', :locals => {
@@ -18,19 +20,19 @@
 end %>
 
 <%= check_box("observation", "is_collection_location") %>
-<label for="observation_is_collection_location"><%= :form_observations_is_collection_location.l %></label><br/>
-<span class="HelpNote"><%= :form_observations_is_collection_location_help.l %></span><br/><br/>
+<label for="observation_is_collection_location"><%= :form_observations_is_collection_location.t %></label><br/>
+<span class="HelpNote"><%= :form_observations_is_collection_location_help.t %></span><br/><br/>
 
 <%= check_box("observation", "specimen") %>
-<label for="observation_specimen"><%= :form_observations_specimen_available.l %></label><br/>
-<span class="HelpNote"><%= :form_observations_specimen_available_help.l %></span><br/>
+<label for="observation_specimen"><%= :form_observations_specimen_available.t %></label><br/>
+<span class="HelpNote"><%= :form_observations_specimen_available_help.t %></span><br/>
 
 <center><%= submit_tag(button_name) %></center><br/>
 
-<label for="observation_notes"><%= :form_observations_notes.l %>:</label>
-<span class="HelpNote"><%= :form_observations_notes_help.l %></span><br/>
+<label for="observation_notes"><%= :app_notes.t %>:</label>
+<span class="HelpNote"><%= :form_observations_notes_help.t %></span><br/>
 <%= text_area('observation', 'notes', :cols => 80) %><br/>
-<%= render :partial => 'shared/textilize_help' %>
+<%= render(:partial => 'shared/textilize_help') %>
 
 <center><%= submit_tag(button_name) %></center><br/>
 
@@ -49,24 +51,21 @@ end %>
           <td><nobr>
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
             <%= link_to(image_tag("thumb/#{image.id}.jpg", :border => 0),
-              :controller => 'image', :action => 'show_image', :id => image.id) %>
+                        :controller => 'image', :action => 'show_image', :id => image.id) %>
           </nobr></td>
           <td width="10"></td>
           <td>
-            <label for="image_<%= image.id %>_notes"><%= :form_images_notes.l %>:</label>
-            <span class="HelpNote"> <%= :form_images_notes_help.l %></span><br/>
+            <label for="image_<%= image.id %>_notes"><%= :app_notes.t %>:</label>
+            <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
             <%= text_area_tag("image_#{image.id}_notes", image.notes, :cols => 60, :rows => 2) %>
           </td>
           <td width="10"></td>
           <td>
-            <%= link_to('Show Image', :controller => 'image', :action => 'show_image', :id => image.id) %><br/>
-            <%= link_to('Edit Image', :controller => 'image', :action => 'edit_image', :id => image.id) %><br/>
-            <%= link_to('Remove Image', { :controller => 'image', :action => 'remove_image',
-              :image_id => image.id, :observation_id => @observation.id },
-              { :confirm => 'Are you sure you want to remove this image?  ' +
-                'This will only remove this image from this observation.  ' +
-                'If it is attached to other observations, it will remain ' +
-                'attached to them.' }) %><br/>
+            <%= link_to(:app_show_image.t, :controller => 'image', :action => 'show_image', :id => image.id) %><br/>
+            <%= link_to(:form_observations_edit_image.t, :controller => 'image', :action => 'edit_image', :id => image.id) %><br/>
+            <%= link_to(:form_observations_remove_image.t, { :controller => 'image', :action => 'remove_image',
+                        :image_id => image.id, :observation_id => @observation.id },
+                        { :confirm => :form_observations_remove_image_confirm.l }) %><br/>
           </td>
         </tr></table>
       </div>
@@ -74,7 +73,7 @@ end %>
     <br/>
   <% end %>
 
-  <b>Upload Images:</b><br/>
+  <b><%= :form_observations_upload_images.t %>:</b><br/>
 
   <% if can_do_ajax? %>
     <%= javascript_tag %(
@@ -92,11 +91,12 @@ end %>
     <% end %>
   </div>
 
-  <div class='HelpNote'>Use the checkboxes on the left to select the image you
-  would like to use as the thumbnail for this observation.</div>
+  <div class='HelpNote'>
+    <%= :form_observations_upload_help.tp %>
+  </div>
 
   <% if can_do_ajax? %>
-    <%= button_to_function('Upload Another...', 'image_new()', :id => 'new_image_button') %>
+    <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
 
     <%= javascript_tag %(
       var IMAGE_FORM = "#{
@@ -158,9 +158,9 @@ end %>
 <% if logging_optional %>
   <br/>
   <%= check_box('log_change', 'checked', :checked => 'checked') %>
-  <label for="log_change_checked"><%= :form_observations_log_change.l %></label>
+  <label for="log_change_checked"><%= :form_observations_log_change.t %></label>
 <% end %>
 
-<%= javascript_tag "document.getElementById('observation_place_name').focus()" %>
+<%= focus_on('observation_place_name') %>
 
 <!--[eoform:observation]-->

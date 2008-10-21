@@ -1,21 +1,16 @@
-<% @title = 'Commercial Inquiry About ' + h(@image.unique_text_name) %>
-<div id="Title">Commercial Inquiry About <%= textilize_without_paragraph(h(@image.unique_format_name)) %></div>
+<% @title = :commercial_inquiry_title.t(:name => @image.unique_format_name) %>
 
-<% form_tag(:action => 'send_commercial_inquiry', :id => @image) do %>
-
-<table cellpadding="10">
-	<tr>
-		<td valign="top">
-			Enter your commercial inquiry about this image.  When you hit send it will be emailed to 
-			<label for="commercial_inquiry_content"><%= @image.user.legal_name %>.</label><br/>
-			The email will automatically include a link to this image.<br/><br/>
-			<%= text_area 'commercial_inquiry', 'content'  %><br/><br/>
-			<center><%= submit_tag "Send" %></center>
-			<br/>
-		</td>
-		<td>
-			<%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %><br/>
-		</td>
-	</tr>
-</table>
+<% form_tag(:action => 'send_commercial_inquiry', :id => @image.id) do %>
+  <br/><center><%= submit_tag :app_send.l %></center>
+  <table cellpadding="10" width="1">
+    <tr>
+      <td valign="top">
+        <%= :commercial_inquiry_header.tp(:user => @image.user.legal_name) %>
+        <%= text_area('commercial_inquiry', 'content', :cols => 60) %><br/><br/>
+      </td>
+      <td>
+        <%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %>
+      </td>
+    </tr>
+  </table>
 <% end %>

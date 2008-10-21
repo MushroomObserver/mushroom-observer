@@ -13,6 +13,9 @@
 # set of helpers cannot handle the old
 # <tt>javascript_include_tag :defaults</tt> functionality yet.
 #
+# Other helper methods for views:
+#   focus_on('id')      Focuses on a form field -- MUST GO INSIDE FORM!
+#
 ################################################################################
 
 module ApplicationHelper
@@ -53,5 +56,11 @@ module ApplicationHelper
       @javascripts.include?(m)
     end + @javascripts
     return @result.uniq
+  end
+
+  # Insert a javacsript snippet that causes the browser to focus on a given
+  # input field when it loads the page.
+  def focus_on(id)
+    javascript_tag("document.getElementById('#{id}').focus()")
   end
 end

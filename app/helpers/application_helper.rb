@@ -1,32 +1,41 @@
 require_dependency 'javascript'
 require_dependency 'auto_complete'
+require_dependency 'tab_helper'
+require_dependency 'textile_helper'
+require_dependency 'string_extensions'
+require_dependency 'symbol_extensions'
 
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
+
+  # Replace spaces with '&nbsp;'.
   def lnbsp(key)
     key.l.gsub(' ', '&nbsp;')
   end
 
+  # Returns '<span>where (count)</span>'.
   def where_string(where, count)
-    result = h(where)
+    result = sanitize(where).t
     result += " (#{count})" if count
     result = "<span class=\"Data\">#{result}</span>"
   end
 
+  # Returns link to the given location.
   def location_link(where, location_id, count=nil, click=false)
     if location_id
       loc = Location.find(location_id)
       link_string = where_string(loc.display_name, count)
-      link_string += " [Click for map]" if click
+      link_string += " [#{:app_click_for_map.t}]" if click
       result = link_to(link_string, :controller => 'location', :action => 'show_location', :id => location_id)
     else
       link_string = where_string(where, count)
-      link_string += " [Search]" if click
+      link_string += " [#{:app_search.t}]" if click
       result = link_to(link_string, :controller => 'location', :action => 'where_search', :where => where)
     end
     result
   end
 
+  # Returns link to the given user.
   def user_link(user, name=nil)
     begin
       name = h(user.unique_text_name) if name.nil?
@@ -35,9 +44,10 @@ module ApplicationHelper
     end
   end
 
+  # Returns link to the given project.
   def project_link(project, name=nil)
     begin
-      name = h(project.title) if name.nil?
+      name = sanitize(project.title).t if name.nil?
       link_to(name, :controller => 'project', :action => 'show_project', :id => project.id)
     rescue
     end
@@ -78,26 +88,13 @@ module ApplicationHelper
     </div>"
   end
 
+  # Return a hash of parameters required to fix the search/sequence state.
   def calc_search_params
     search_params = {}
     search_params[:search_seq] = @search_seq if @search_seq
     search_params[:seq_key] = @seq_key if @seq_key
     search_params[:obs] = @obs if @obs
     search_params
-  end
-
-  # This is a temporary place-holder used to display the tabs in the upper
-  # left of the page body.  Some day we'd like to do something to make these
-  # more visible.
-  def show_tabs(tabs)
-    tabs.map do |args|
-      str, url = *args
-      if url.is_a?(String) && (url[0..6] == 'http://')
-        "<a href=\"#{url}\" target=\"_new\">#{str}</a>"
-      else
-        link_to(*args)
-      end
-    end.join(' | ')
   end
 
   # Insert letter pagination links.  See ApplicationController#paginate_letters.
@@ -130,11 +127,11 @@ module ApplicationHelper
       page = pages.length if page > pages.length
       if page > 1
         url = reload_with_args(arg => page - 1)
-        str = link_to('&laquo; Prev', url) + ' | ' + str
+        str = link_to('&laquo; ' + :app_prev.t, url) + ' | ' + str
       end
       if page < pages.length
         url = reload_with_args(arg => page + 1)
-        str = str + ' | ' + link_to('Next &raquo;', url)
+        str = str + ' | ' + link_to(:app_next.t + ' &raquo;', url)
       end
       return %(<div class="pagination">#{str}</div>)
     else
@@ -142,46 +139,10 @@ module ApplicationHelper
     end
   end
 
-  # Wrapper on textilize (and +textilize_without_paragraph+) to fix long urls
-  # by turning them into links and abbreviating the text actually shown.
-  def textilize(raw)
-    # This was copied from the Rails helper.  For some reason I can't use alias
-    # to save it and call it within this method.
-    if raw.blank?
-      return ''
-    else
-      str = RedCloth.new(raw, [ :hard_breaks ])
-      str.hard_breaks = true if str.respond_to?('hard_breaks=')
-      str = str.to_html
+  # Get sorted list of locale codes we have translations for.
+  def all_locales
+    Dir.glob('lang/ui/*.yml').sort.map do |file|
+      file.sub(/.*?(\w+-\w+).yml/, '\\1')
     end
-
-    # Remove pre-existing links first, replacing with "<XXXnn>".
-    hrefs = []
-    str.gsub!(/(href=["'][^"']*["']|<img[^>]*>)/) do |href|
-      hrefs.push(href)
-      "<XXX#{hrefs.length - 1}>"
-    end
-
-    # Now turn bare urls into links.
-    str.gsub!(/([a-z]+:\/\/[^\s<>]+)/) do |url|
-      extra = url.sub!(/([^\w\/]+$)/, '') ? $1 : ''
-      if url.length > 30
-        if url.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
-          url2 = $1 + '/...'
-        else
-          url2 = url[0..30] + '...'
-        end
-      else
-        url2 = url
-      end
-      # These are the only things that would really f--- things up.
-      # ... and actually Textile doesn't let these things through, anyway.
-      url = url.gsub(/"/, '%22').gsub(/</, '%3C').gsub(/>/, '%3E')
-      "<a href=\"#{url}\">#{url2}</a>"
-    end
-
-    # Put pre-existing links back in.
-    str.gsub!(/<XXX(\d+)>/) {|n| hrefs[$1.to_i]}
-    return str
   end
 end

@@ -1,12 +1,14 @@
-<% @title = "#{:edit_name_title.l}: #{h(@name.search_name)}" %>
-<%= link_to(:edit_name_cancel.l, :action => 'show_name', :id => @name) %>
+<%
+  @title = :edit_name_title.t(:name => @name.display_name)
 
-<div id="Title"><%= :edit_name_title.l %>: <%= textilize_without_paragraph(h(@name.display_name)) %></div>
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :name.l),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
 
 <% form_tag(:action => 'edit_name', :id => @name) do %>
-<br/>
-<center><%= submit_tag :edit_name_save_edits.l %></center>
+  <br/><center><%= submit_tag :app_save_changes.l %></center><br/>
 
-<%= render :partial => 'form_names' %>
-
+  <%= render(:partial => 'form_names', :locals => { :button => :app_save_changes.l }) %>
 <% end %>

@@ -1,19 +1,16 @@
-<%  if @title.nil?
-        @title = :create_location_title.l
-    end %>
-<div id="Title"><%= @title %></div>
+<%
+  @title ||= :create_location_title.t
 
-<%= link_to(:location_all.l, :action => 'list_place_names') %><br/>
+  new_tab_set do
+    add_tab(:location_all.t, :action => 'list_place_names')
+  end
+%>
 
 <% url_args = { :action => :create_location }
-   url_args[:set_user] = 1 if @set_user
-   form_for :location, :url => url_args do |form| %>
-    <br/>
-    <center><%= submit_tag("Create") %></center>
+url_args[:set_user] = 1 if @set_user
+form_for(:location, :url => url_args) do |form| %>
+  <br/><center><%= submit_tag(:app_create.l) %></center>
 
-    <%= render :partial => 'form_locations', :locals => {
-        :where => @where, :form => form
-        } %>
+  <%= render(:partial => 'form_locations', :locals =>
+             { :where => @where, :form => form }) %>
 <% end %>
-
-<br/>

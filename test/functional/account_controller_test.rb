@@ -157,7 +157,7 @@ class AccountControllerTest < Test::Unit::TestCase
       }
     }
     post_with_dump(:prefs, params)
-    assert_equal("Preferences updated.", flash[:notice])
+    assert_equal("Preferences successfully updated.", flash[:notice])
     # Make sure changes were made.
     user = @rolf .reload
     assert_equal("new_login", user.login)
@@ -198,7 +198,7 @@ class AccountControllerTest < Test::Unit::TestCase
       }
     }
     post_with_dump(:profile, params)
-    assert_equal("Profile updated.", flash[:notice])
+    assert_equal("Profile successfully updated.", flash[:notice])
     # Make sure changes were made.
     user = @rolf.reload
     assert_equal("new_name", user.name)

@@ -1,18 +1,17 @@
-<%  if @title.nil?
-        where = sanitize(@location.display_name)
-        @title = "#{:show_location_title.l}: #{where}"
-    end %>
+<%
+  @title ||= :show_location_title.t(:name => @location.display_name)
 
-<div id="Title"><%= @title %></div>
+  new_tab_set do
+    add_tab(:show_location_observations.t,
+            :controller => "observer", :action => "show_location_observations", :id => @location.id)
+    add_tab(:location_all.t, :action => 'list_place_names')
+    add_tab(:show_location_create.t, :action => 'create_location')
+    add_tab(:show_location_edit.t, :action => 'edit_location', :id => @location.id)
+    if @past_location
+      add_tab(:show_location_older_versions.t,
+              :action => 'show_past_location', :id => @location.id, :version => @past_location.version)
+    end
+  end
+%>
 
-<%= link_to("#{:show_location_observations.l} #{where}", :controller => "observer",
-            :action => "show_location_observations", :id => @location) %><br/>
-<%= link_to(:location_all.l, :action => 'list_place_names') %> |
-<%= link_to(:show_location_edit.l, :action => 'edit_location', :id => @location) %>
-<% if @past_location %>
-    | <%= link_to("#{:show_location_older_versions.l}", :action => 'show_past_location',
-        :id => @location.id, :version => @past_location.version ) %>
-<% end %>
-<br/><br/>
-
-<%= render :partial => 'show_location', :locals => { :location => @location } %>
+<%= render(:partial => 'show_location', :locals => { :location => @location }) %>

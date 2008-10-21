@@ -1,67 +1,65 @@
-<% @title = "Site Statistics" %>
-<%= link_to 'Contributors', :action => 'users_by_contribution' %>
+<%
+  @title = :show_site_stats_title.t
+
+  new_tab_set do
+    add_tab(:app_contributors.t, :action => 'users_by_contribution')
+  end
+%>
 
 <center>
-    <table border="0">
-        <tr align="center">
-            <%
-            obs_length = 0
-            if @observations
-                obs_length = @observations.length
-            end
-            if obs_length > 0
-                %>
-                <td>
-                    <%
-                    for obs in @observations[0,3]
-                        %>
-                        <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id)),
-                                :action => 'show_observation', :id => obs.id) %><br/>
-                    <%
-                    end
-                    %>
-                </td>
-            <% end %>
-            <td valign="top" width="50%">
-                <div id="Title"><%= @title %></div>
-                <table cellpadding="5" cellspacing="5" border="0">
-                  <% if @observed_taxa_count %>
-                    <tr>
-                      <td>
-                        <%= :observed_taxa.l %>
-                      </td>
-                      <td>
-                        <%= @observed_taxa_count %>
-                      </td>
-                    </tr>
-                  <% end %>
-                    <%
-                    for field in ALL_FIELDS
-                        count = @site_data[field]
-                        if count
-                            %>
-                    	    <tr>
-                    		    <td>
-                    		        <%= field.l %>
-                    		    </td>
-                    		    <td>
-                    		        <%= count %>
-                    		    </td>
-                    	    </tr>
-                    	<% end
-                    end %>
-                </table>
-            </td>
-            <%
-            if obs_length > 3
-                %>
-                <td>
-                    <% for obs in @observations[3,3] %>
-                        <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id)),
-                                :action => 'show_observation', :id => obs.id) %><br/>
-                    <% end %>
-                </td>
-            <% end %>
-        </tr>
-    </table>
+  <table border="0">
+    <tr align="center">
+      <% obs_length = 0
+      if @observations
+        obs_length = @observations.length
+      end
+
+      if obs_length > 0 %>
+        <td>
+          <% for obs in @observations[0,3] %>
+            <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id), :class => 'site_stats_image'),
+                        :action => 'show_observation', :id => obs.id) %><br/>
+          <% end %>
+        </td>
+      <% end %>
+
+      <td valign="top" width="50%">
+        <table cellpadding="5" cellspacing="5" border="0">
+          <% if @observed_taxa_count %>
+            <tr>
+              <td>
+                <%= :site_stats_observed_taxa.l %>
+              </td>
+              <td>
+                <%= @observed_taxa_count %>
+              </td>
+            </tr>
+          <% end
+          for field in ALL_FIELDS
+            count = @site_data[field]
+            if count %>
+          	  <tr>
+          	    <td>
+          	      <%= "site_stats_#{field}".to_sym.t %>
+          	    </td>
+          	    <td>
+          	      <%= count %>
+          	    </td>
+          	  </tr>
+          	<% end
+          end %>
+        </table>
+      </td>
+
+      <% if obs_length > 3 %>
+        <td>
+          <% for obs in @observations[3,3] %>
+            <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id), :class => 'site_stats_image'),
+                        :action => 'show_observation', :id => obs.id) %><br/>
+          <% end %>
+        </td>
+      <% end %>
+
+    </tr>
+  </table>
 </center>

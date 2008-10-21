@@ -1,33 +1,30 @@
-<% @title = 'Add an Image for ' + h(@observation.unique_text_name) %>
-<%= link_to('Show Observation', :controller => 'observer', :action => 'show_observation', :id => @observation.id) %> | 
-<%= link_to('Edit Observation', :controller => 'observer', :action => 'edit_observation', :id => @observation.id) %>
+<%
+  @title = :image_add_title.t(:name => @observation.unique_format_name)
 
-<div id="Title">Add an Image for <%= textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :observation.l),
+            :controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    add_tab(:image_add_edit.t,
+            :controller => 'observer', :action => 'edit_observation', :id => @observation.id)
+  end
+%>
 
-<div id="license-notice">
-Please only upload images that you created or which you own the copyright of.<br/>
-By uploading images you are giving us permission to distribute this image to other
-users (<a
-href="http://creativecommons.org/licenses/by-nc-sa/2.5/">legalese</a>).<br/>
-You are also giving us permission to display this image	along side advertisements
-or other fund-raising tools that may be used to support this site.<br/><br/>
-</div>
+<div id="license-notice"><%= :image_add_warning.tp %></div>
 
-<% form_for :image,
-            :url => { :action => :add_image },
-            :html => { :multipart => true } do |form| %>
+<% form_for(:image, :url => { :action => :add_image },
+            :html => { :multipart => true }) do |form| %>
+  <br/><center><%= submit_tag(:image_add_upload.l) %></center><br/>
 
-    <center><%= submit_tag("Upload") %></center>
+  <%= hidden_field("observation", "id") %>
 
-    <%= hidden_field("observation", "id") %>
+  <p>
+    <%= :image_add_image.t %> 1: <%= file_field("upload", "image1") %> (<%= :image_add_default.t %>)<br/>
+    <%= :image_add_image.t %> 2: <%= file_field("upload", "image2") %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 3: <%= file_field("upload", "image3") %> (<%= :image_add_optional.t %>)<br/>
+    <%= :image_add_image.t %> 4: <%= file_field("upload", "image4") %> (<%= :image_add_optional.t %>)<br/>
+  </p><br/>
 
-    <p>
-        Image 1: <%= file_field("upload", "image1") %> (default thumbnail)<br/>
-        Image 2: <%= file_field("upload", "image2") %> (optional)<br/>
-        Image 3: <%= file_field("upload", "image3") %> (optional)<br/>
-        Image 4: <%= file_field("upload", "image4") %> (optional)<br/>
-    </p>
+  <%= render(:partial => 'form_images', :locals => { :form => form, :width => 80 }) %>
 
-    <%= render :partial => 'form_images', :locals => { :form => form, :width => 80 } %>
-
+  <center><%= submit_tag(:image_add_upload.l) %></center>
 <% end %>

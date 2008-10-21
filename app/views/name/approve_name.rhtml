@@ -1,34 +1,32 @@
 <%
-    @title = 'Approving ' + h(@name.text_name)
-%>
-<%= link_to('Cancel (Show Name)', :action => 'show_name', :id => @name.id) %>
+  @title = :name_approve_title.t(@name.display_name)
 
-<div id="Title">
-    Approving <%= textilize_without_paragraph(h(@name.display_name)) %>
-</div>
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :name.l),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
 
 <% form_tag(:action => 'approve_name', :id => @name.id) do %>
-    <center><%= submit_tag 'Approve' %></center>
-    <br/>
-    <% if @approved_names %>
-        <p>
-        <%= check_box('deprecate', 'others', :checked => 'checked') %>
-        <label for="deprecate_others"> Deprecate the following synonyms:</label><br/><br/>
-        <% for n in @approved_names %>
-            <%= textilize_without_paragraph(h(n.display_name)) %><br/>
-        <% end %>
-        </p>
-    <% end %>
-    <p class="HelpNote">
-         If you want to split up a set of synonyms, click 'Approve' or 'Cancel'
-         and then click on the 'Change Synonyms' link.
-    </p>
-	<p><label for="comment_comment">Comments:</label><br/>
-	<%= text_area("comment", "comment", :cols => 80, :rows => 5) %><br/>
-    <span class="HelpNote">
-        Please include any notes about why this name has been approved.<br/>
-        This will be added to the notes for <%= textilize_without_paragraph(h(@name.display_name)) %>.
-    </span></p>
+  <br/><center><%= submit_tag :app_approve.l %></center>
+
+  <% if @approved_names %>
+    <p><%= check_box('deprecate', 'others', :checked => 'checked') %>
+    <label for="deprecate_others"><%= :name_approve_deprecate.t %>:</label><br/><br/>
+    <% for n in @approved_names %>
+      <%= n.display_name.t %><br/>
+    <% end %></p>
+  <% end %>
+  <div class="HelpNote"><%= :name_approve_deprecate_help.tp %></div>
+
+  <p><label for="comment_comment"><%= :name_approve_comments.t %>:</label><br/>
+  <%= text_area("comment", "comment", :cols => 80, :rows => 5) %></p>
+  <div class="HelpNote">
+    <%= :name_approve_comments_help.tp(:name => @name.display_name) %>
+  </div>
+
+  <br/><center><%= submit_tag :app_approve.l %></center>
+
+  <%= focus_on('comment_comment') %>
 <% end %>
 
-<%= javascript_tag "document.getElementById('comment_comment').focus()" %>

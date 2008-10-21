@@ -52,7 +52,7 @@ module ApplicationHelper
         end
       end
       js_args.sub!(/^, /, '')
-      raise ArgumentError, "Must specify url." if !url
+      raise(ArgumentError, "Must specify url.") if !url
       div = %(<div class="#{div_class}" id="#{div_id}"></div>)
       script = javascript_tag \
         %(new #{js_class}('#{id}', '#{div_id}', '#{url}', { #{js_args} }))

@@ -1,15 +1,15 @@
-<%  if @title.nil?
-        @title = :map_locations_title.l % @pattern
-    end %>
+<%
+  @title ||= :map_locations_title.t(:pattern => @pattern)
 
-<div id="Title"><%= @title %></div>
-
-<%= link_to(:location_all.l, :action => 'list_place_names') %><br/>
+  new_tab_set do
+    add_tab(:location_all.t, :action => 'list_place_names')
+  end
+%>
 
 <center>
-    <% if @map %>
-        <%= @map.div(:width => 800, :height => 550) %>
-    <% else %>
-        <%= :map_locations_no_matches.l % @pattern %>.
-    <% end %>
+  <%= if @map
+    @map.div(:width => 800, :height => 550)
+  else
+    :map_locations_no_matches.t(:pattern => @pattern)
+  end %>
 </center>

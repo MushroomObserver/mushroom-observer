@@ -68,9 +68,9 @@ class LocationController < ApplicationController
     end
     where = session[:where]
     if where
-      redirect_to :controller => "observer", :action => "location_search", :where => where
+      redirect_to(:controller => "observer", :action => "location_search", :where => where)
     else
-      redirect_to :action => "list_place_names"
+      redirect_to(:action => "list_place_names")
     end
   end
 
@@ -112,6 +112,7 @@ class LocationController < ApplicationController
     if @pattern && (@pattern != '')
       locations = Location.find(:all, :conditions => "display_name like '%#{clean_sql_pattern(@pattern)}%'")
     else
+      @title = :map_locations_global_map.t
       locations = Location.find(:all)
     end
     @map = nil
@@ -135,7 +136,7 @@ class LocationController < ApplicationController
         # and merges and such...
         @location = Location.find_by_display_name(params[:location][:display_name])
         if @location # location already exists
-          flash_warning "This location already exists."
+          flash_warning :create_location_already_exists.t
           update_observations_by_where(@location, @where)
           if @set_user
             @user.location = @location
@@ -149,7 +150,7 @@ class LocationController < ApplicationController
           @location.user = @user
           @location.version = 0
           if @location.save()
-            flash_notice "Location was successfully added."
+            flash_notice :create_location_success.t
             update_observations_by_where(@location, @where)
             if @set_user
               @user.location = @location
@@ -173,7 +174,7 @@ class LocationController < ApplicationController
         o.location = location
         o.where = nil
         if !o.save
-          flash_error "Failed to merge observation #{o.unique_text_name}."
+          flash_error :create_location_merge_failed.t(:name => o.unique_format_name)
           success = false
         end
       end
@@ -245,7 +246,7 @@ class LocationController < ApplicationController
   def add_to_location
     location = Location.find(params[:location])
     where = params[:where]
-    flash_notice "Successfully merged #{where} with #{location.display_name}." \
+    flash_notice :location_merge_success.t(:this => where, :that => location.display_name) \
       if update_observations_by_where(location, where)
     redirect_to(:action => 'list_place_names')
   end
@@ -261,12 +262,12 @@ class LocationController < ApplicationController
         else
           @location.attributes = params[:location]
           if @location.save_if_changed(@user)
-            flash_notice "Location was successfully updated."
+            flash_notice :edit_location_success.t
             redirect_to(:action => 'show_location', :id => @location.id)
           elsif @location.errors.length > 0
             flash_object_errors @location
           else
-            flash_warning "No update needed."
+            flash_warning :edit_location_no_change.t
             redirect_to(:action => 'show_location', :id => @location.id)
           end
         end
@@ -287,8 +288,7 @@ class LocationController < ApplicationController
       location.destroy
       id = dest.id
     else
-      flash_warning "Because it can be destructive, only the admin can merge existing locations.
-        An email requesting the proposed merge has been sent to the admins."
+      flash_warning :merge_locations_warning.t
       content = "I attempted to merge the locations, #{location.display_name} and #{dest.display_name}."
       AccountMailer.deliver_webmaster_question(@user.email, content)
     end

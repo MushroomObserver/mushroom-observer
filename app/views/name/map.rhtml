@@ -1,16 +1,16 @@
-<%  if @title.nil?
-        what = textilize_without_paragraph(sanitize(@name.display_name))
-        @title = "#{:name_map_title.l} #{sanitize(@name.search_name)}"
-    end %>
+<%
+  @title = :name_map_title.t(:name => @name.display_name)
 
-<div id="Title"><%= "#{:name_map_title.l} #{what}" %></div>
-
-<%= link_to "#{:name_map_about.l} #{what}", :id => @name.id, :action => 'show_name' %><br/>
+  new_tab_set do
+    add_tab(:name_map_about.t(:name => @name.display_name),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
 
 <center>
-    <% if @map %>
-        <%= @map.div(:width => 800, :height => 550) %>
-    <% else %>
-        No observations of <%= what %> have mappable location information.
-    <% end %>
+  <%= if @map
+    @map.div(:width => 800, :height => 550)
+  else
+    :name_map_no_maps.tp(:name => @name.display_name)
+  end %>
 </center>

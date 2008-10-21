@@ -1,84 +1,46 @@
-<style type="text/css"><!--
-  div.sandbox {
-    border-top: solid #888 2px;
-    border-left: solid #888 2px;
-    border-right: solid #FFF 2px;
-    border-bottom: solid #FFF 2px;
-    background-color: white;
-    color: black;"
-  }
-  div.sandbox a { background-color: white; color: blue }
-  div.sandbox a:visited { background-color: white; color: red }
-  div.sandbox a:hover { background-color: white; color: yellow }
---></style>
+<% @title = :sandbox_title.t %>
 
+<table width="1">
+  <tr>
+    <td>
+      <div class="HelpNote"><%= :sandbox_header.tp %></div>
 
-<% @title = "Textile Sandbox" %>
-<div id="Title"><%= @title %></div>
+      <% if !@code.nil? %>
+        <b><%= :sandbox_look_like.t %>:</b><br/>
+        <% if @submit == :sandbox_test.l %>
+          <div class="sandbox"><%= sanitize(@code).tpl %></div><br/>
+        <% else %>
+          <div class="sandbox"><%= h(sanitize(@code).tpl) %></div><br/>
+        <% end %>
+      <% end %>
 
-<span class="HelpNote">This page let's you play with the textile markup language.  Click 'Test' to see what your markup looks like.  You will need to copy the results from this page to where ever you want to use it.</span>
-<table><tr><td>
-  <% if !@code.nil? %>
-    <b>This is what it will look like:</b><br/>
-    <div class="sandbox"><%= textilize(sanitize(@code)) %></div><br/>
-  <% end %>
+      <%= form_tag(:action => "textile_sandbox") %>
+        <% if !@code.nil? %>
+          <center>
+            <%= image_tag("up_arrow.png", :style => "margin-bottom:-6px; margin-right:50px") %>
+            <%= submit_tag :sandbox_test.l %>
+            <span style='margin-left:20px'></span>
+            <%= submit_tag :sandbox_test_codes.l %>
+            <%= image_tag("up_arrow.png", :style => "margin-bottom:-6px; margin-left:50px") %>
+          </center><br/>
+        <% end %>
+        <b><%= :sandbox_enter.t %>:</b><br/>
+        <%= text_area_tag("code", @code, { :cols => 80, :rows => 10 }) %><br/>
+        <% if @code.nil? %>
+          <br/>
+          <center><%= submit_tag :sandbox_test.l %></center>
+        <% end %>
+      </form><br/>
 
-  <%= form_tag :action => "textile_sandbox" %>
-    <% if !@code.nil? %>
-      <center>
-        <%= image_tag "up_arrow.png", :style => "margin-bottom:-6px; margin-right:50px" %>
-        <%= submit_tag "Test" %>
-        <%= image_tag "up_arrow.png", :style => "margin-bottom:-6px; margin-left:50px" %>
-      </center>
-    <% end %>
-    <b>Enter Textile you wish to test here:</b><br/>
-    <%= text_area_tag "code", @code, { :cols => 80, :rows => 10 } %><br/>
-    <% if @code.nil? %>
-      <br/>
-      <center><%= submit_tag "Test" %></center>
-    <% end %>
-  </form>
+      <p><b><%= :sandbox_quick_ref.t %>:</b></p>
+      <div style="font-family:monospace; font-size:11px; white-space:pre"><%= :sandbox_sample.l %></div>
 
-  <b>Quick Reference:</b><br/>
-  <div style="font-family:monospace; font-size:11px; white-space:pre"
->    _itallics_         trademark(tm)  \
-    *boldface*         copyright(c)    | (must follow letters, not punctuation)
-    +underline+        registered(r)  /
-    @monospace@
-    ^superscript^      1.6 &amp;micro;m  ->  1.6 &micro;m
-    ~subscript~        34&amp;deg;17' N  ->  34&deg;17' N
-
-    "External Link":http://google.com
-    !http://random.com/image.jpg!
-
-    Include footnote[1] references after any word[2].
-
-    fn1. And then define the footnote at the bottom.
-
-    fn2. Be sure to leave blank lines around these "xx." directives.
-
-    h1. Header
-
-    bq. Block quote or indent a paragraph.
-
-    * bullet list item 1
-    * bullet list item 2
-
-    # numbered list item 1
-    # numbered list item 2
-
-    |Table|Header|Row|
-    |asif|anyone|would|
-    |ever|use|this!|
-  </div>
-
-  <b>Web References:</b><br/>
-  <div style="margin-left:20px">
-    <%= link_to "Another quick reference and sandbox for testing syntax.",
-      "http://www.textism.com/tools/textile/index.php" %><br/>
-    <%= link_to "More than anyone could ever want to know.",
-      "http://hobix.com/textile/" %><br/>
-    <%= link_to "Homepage of the original author, Dean Allen.",
-      "http://www.textism.com/tools/textile/index.php" %><br/>
-  </div>
-</td></tr></table>
+      <b><%= :sandbox_web_refs.t %>:</b><br/>
+      <div style="margin-left:20px">
+        <%= link_to(:sandbox_link1.t, "http://www.textism.com/tools/textile/index.php") %><br/>
+        <%= link_to(:sandbox_link2.t, "http://hobix.com/textile/") %><br/>
+        <%= link_to(:sandbox_link3.t, "http://www.textism.com/tools/textile/index.php") %><br/>
+      </div>
+    </td>
+  </tr>
+</table>

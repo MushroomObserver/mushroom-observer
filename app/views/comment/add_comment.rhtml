@@ -1,28 +1,28 @@
 <%
-    @title = 'Add Comment to ' + h(@object.unique_text_name)
-    search_params = @comment.object_type == 'Observation' ? calc_search_params() : nil
-%>
-<%= link_to("Cancel (Show #{@comment.object_type.titleize})",
-  :controller => @object.show_controller, :action => @object.show_action,
-  :id => @object.id, :params => search_params) %>
+  search_params = @comment.object_type == 'Observation' ? calc_search_params() : nil
+  object_type = @comment.object_type_localized
 
-<div id="Title">Add Comment to <%= textilize_without_paragraph(h(@object.unique_format_name)) %></div>
+  @title = :comment_add_title.t(:name => @object.unique_format_name)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => object_type),
+            :controller => @object.show_controller, :action => @object.show_action, :id => @object.id, :params => search_params)
+  end
+%>
 
 <% form_tag(:action => 'add_comment', :id => @comment.object_id,
-  :type => @comment.object_type, :params => search_params) do %>
-<center><%= submit_tag "Create" %></center>
+            :type => @comment.object_type, :params => search_params) do %>
+  <br/><center><%= submit_tag :comment_add_create.l %></center>
 
-<%= render :partial => 'form_comments' %>
+  <%= render(:partial => 'form_comments') %>
 
-<br/><hr align="center" width="90%" />
+  <br/><hr align="center" width="90%" />
 
-<%= case @comment.object_type
-  when 'Observation'
-    render(:partial => 'observer/show_observation', :locals => {
-      :observation => @object,
-    })
-  else
-    raise(ArgumentError, "We appear to have forgotten to tell add_comment how to display objects of type \"#{@comment.object_type}\".")
-end %>
+  <%= case @comment.object_type
+    when 'Observation'
+      render(:partial => 'observer/show_observation', :locals => { :observation => @object })
+    else
+      raise(ArgumentError, "We appear to have forgotten to tell add_comment how to display objects of type \"#{@comment.object_type}\".")
+  end %>
 
 <% end %>

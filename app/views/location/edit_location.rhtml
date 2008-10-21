@@ -1,18 +1,14 @@
-<%  if @title.nil?
-        @title = 'Edit Location'
-    end %>
-<div id="Title"><%= @title %></div>
+<%
+  @title ||= :edit_location_title.t
 
-<%= link_to(:location_all.l, :action => 'list_place_names') %><br/>
+  new_tab_set do
+    add_tab(:location_all.t, :action => 'list_place_names')
+    add_tab(:app_cancel.t(:type => :location.l), :action => 'show_location', :id => @location.id)
+  end
+%>
 
-<% form_for :location,
-            :url => { :action => :edit_location } do |form| %>
-    <br/>
-    <center><%= submit_tag("Update") %></center>
+<% form_for(:location, :url => { :action => :edit_location }) do |form| %>
+  <br/><center><%= submit_tag(:app_update.l) %></center>
 
-    <%= render :partial => 'form_locations', :locals => {
-        :where => @where, :form => form
-        } %>
+  <%= render(:partial => 'form_locations', :locals => { :where => @where, :form => form }) %>
 <% end %>
-
-<br/>

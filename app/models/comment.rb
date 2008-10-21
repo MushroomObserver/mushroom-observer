@@ -46,6 +46,15 @@ class Comment < ActiveRecord::Base
     end
   end
 
+  # Same as 'comment.object_type.downcase.to_sym.l' (returns '' if fails for whatever reason).
+  def object_type_localized
+    if self.object_type 
+      self.object_type.downcase.to_sym.l
+    else
+      ''
+    end
+  end
+
   protected
   validates_presence_of :summary, :user
 end

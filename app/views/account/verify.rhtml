@@ -1,4 +1,5 @@
+<% @title = :app_welcome.t(:user => @user.legal_name) %>
+
 <div class="memo">
-    <h3><%= "#{:verify_welcome.l} #{@user.legal_name}" %></h3>
-    <%= textilize(:verify_note.l % DOMAIN) %>
+  <%= :verify_note.tp(:domain => DOMAIN) %>
 </div>

@@ -7,8 +7,12 @@ xml.rss(:version=>"2.0"){
     xml.language(Locale.code.to_s)
     for log in @logs
       xml.item do
-        xml.title(log.title)
-        xml.description(log.notes.gsub("\n", "<br></br>\n")) # ???
+        xml.title(log.text_name)
+        xml.description(
+          log.parse_log.map do |key, args, time|
+            "#{time.strftime("%a %b %d, %Y %H:%M:%S %Z")}: #{key.t(args).strip_html}<br></br>\n"
+          end
+        )
         xml.pubDate(log.modified.rfc2822)
         xml.link(DOMAIN + log.url)
         xml.guid(DOMAIN + log.url, "isPermaLink" => "false")

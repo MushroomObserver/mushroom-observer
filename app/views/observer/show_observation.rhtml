@@ -1,52 +1,43 @@
 <%
-   @title       = :show_observation_title.l + ': ' + h(@observation.unique_text_name)
-   what         = textilize_without_paragraph(h(@observation.format_name))
-   name         = @observation.name
-   questions_ok = @observation.user.question_email
-   search_params = calc_search_params()
-%>
+  @title = :show_observation_title.t(:name => @observation.unique_format_name)
+  name = @observation.name
+  questions_ok = @observation.user.question_email
+  search_params = calc_search_params()
 
-<% if name %>
-  <%= link_to("#{:show_observation_about.l} #{what}", :controller => 'name', :action => 'show_name', :id => name.id)%>
-  | <%= "<a href=\"http://images.google.com/images?q=#{name.text_name}\">#{:show_observation_google_images.l}</a>" %>
-  | <%= link_to(:show_name_distribution_map.l, :controller => 'name', :action => 'map', :id => name.id) %>
-  <% if @has_notifications %>
-    | View Notifications
-  <% end %>
-  <% if @user && [0, 1, 252].include?(@user.id) %>
-    | <%= link_to('Debug Consensus', :action => 'recalc', :id => @observation.id) %>
-  <% end %>
-  <br/>
-<% end %>
+  if name
+    new_tab_set do
+      add_tab(:app_about_name.t(:name => name.display_name), :controller => 'name', :action => 'show_name', :id => name.id)
+      add_tab(:app_google_images.t, 'http://images.google.com/images?q=%s' % name.text_name)
+      add_tab(:show_name_distribution_map.t, :controller => 'name', :action => 'map', :id => name.id)
+      if @has_notifications
+        add_tab(:show_observation_view_notifications.t)
+      end
+      if @user && [0, 1, 252].include?(@user.id)
+        add_tab(:show_observation_debug_consensus.t, :action => 'recalc', :id => @observation.id)
+      end
+    end
+  end
 
-<%= link_to(:show_observation_propose_new_name.l, :controller => 'observer', :action => 'create_naming',
-  :id => @observation.id, :params => search_params) %>
-| <%= link_to(:show_observation_add_comment.l, :controller => 'comment', :action => 'add_comment',
-  :id => @observation.id, :type => 'Observation', :params => search_params) %>
-| <%= link_to(:show_observation_manage_species_lists.l, :controller => 'species_list',
-  :action => 'manage_species_lists', :id => @observation.id) %>
-<% if questions_ok %>
-  | <%= link_to(:show_observation_send_question.l,
-    :controller => 'observer', :action => 'ask_observation_question', :id => @observation.id) %>
-<% end
-%>
-<br/>
+  new_tab_set do
+    add_tab(:show_observation_propose_new_name.t, :controller => 'observer', :action => 'create_naming', :id => @observation.id, :params => search_params)
+    add_tab(:show_observation_add_comment.t, :controller => 'comment', :action => 'add_comment', :id => @observation.id, :type => 'Observation', :params => search_params)
+    add_tab(:show_observation_manage_species_lists.t, :controller => 'species_list', :action => 'manage_species_lists', :id => @observation.id)
+    if questions_ok
+      add_tab(:show_observation_send_question.t, :controller => 'observer', :action => 'ask_observation_question', :id => @observation.id)
+    end
+  end
 
-<%= link_to(:show_observation_previous.l, :action => 'prev_observation',
-  :id => @observation.id, :seq_key => @seq_key, :search_seq => @search_seq) %> |
-<%= link_to(:show_observation_next.l, :action => 'next_observation',
-  :id => @observation.id, :seq_key => @seq_key, :search_seq => @search_seq) %>
-<br/>
+  new_tab_set do
+    add_tab(:app_prev.t, :action => 'prev_observation', :id => @observation.id, :seq_key => @seq_key, :search_seq => @search_seq)
+    add_tab(:app_next.t, :action => 'next_observation', :id => @observation.id, :seq_key => @seq_key, :search_seq => @search_seq)
+  end
 
-<div id="Title"><%= :show_observation_title.l + ': ' +
-  textilize_without_paragraph(h(@observation.unique_format_name)) %></div>
-
-<% if check_permission(@observation.user_id) %>
-  <%= link_to(:show_observation_edit_observation.l, :action => 'edit_observation', :id => @observation.id) %>
-  | <%= link_to(:show_observation_destroy.l, { :action => 'destroy_observation', :id => @observation.id },
-                :confirm => "Are you sure?") %>
-  <br/>
-<% end
+  if check_permission(@observation.user_id)
+    new_tab_set do
+      add_tab(:show_observation_edit_observation.t, :action => 'edit_observation', :id => @observation.id)
+      add_tab(:app_destroy.t, { :action => 'destroy_observation', :id => @observation.id }, { :confirm => :app_are_you_sure.l })
+    end
+  end
 %>
 
 <table width="100%" cellpadding="10">

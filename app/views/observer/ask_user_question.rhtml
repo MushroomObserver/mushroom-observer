@@ -1,13 +1,13 @@
-<% @title = 'Email Message for ' + h(@target.name) %>
-<div id="Title"><%= @title %></div>
+<% @title = :ask_user_question_title.t(:user => @target.legal_name) %>
 
 <% form_tag(:action => 'send_user_question', :id => @target.id) do %>
-<center><%= submit_tag "Send" %></center>
-<br/>
-<label for="email_subject">Subject</label>:<br/>
-<%= text_field 'email', 'subject', :size => 70  %><br/><br/>
-<label for="email_content">Message</label>:<br/>
-<%= text_area 'email', 'content', :cols => 80  %>
-<% end %>
+  <br/><center><%= submit_tag :app_send.l %></center>
 
-<%= javascript_tag "document.getElementById('email_subject').focus()" %>
+  <label for="email_subject"><%= :ask_user_question_subject.t %>:</label><br/>
+  <%= text_field('email', 'subject', :size => 70) %><br/><br/>
+
+  <label for="email_content"><%= :ask_user_question_message.t %>:</label><br/>
+  <%= text_area('email', 'content', :cols => 80) %>
+
+  <%= focus_on('email_subject') %>
+<% end %>

@@ -1,9 +1,5 @@
 <div id="textilize_note">
-	Notes can be formated using the Textile markup system.<br/>
-    __italic__ =&gt; <i>italic</i><br/>
-    **bold** =&gt; <b>bold</b><br/>
-    <%= link_to "More details",
-      { :controller => "observer", :action => "textile_sandbox" },
-      { :target => "_new" } %>
+  <%= :shared_textile_help.l % link_to(:shared_textile_link.t,
+    { :controller => "observer", :action => "textile_sandbox" },
+    { :target => "_new" }) %>
 </div>
-<!--[eoform:observation]-->

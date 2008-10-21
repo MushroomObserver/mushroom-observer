@@ -53,7 +53,7 @@ require 'ftools'
 #     how_to_help
 #     how_to_use
 #     news
-#     textile_sandbox
+#     textile_sandbox (= textile)
 #
 #     color_themes
 #     Agaricus
@@ -137,7 +137,7 @@ class ObserverController < ApplicationController
     if request.env["HTTP_USER_AGENT"].index("BlackBerry")
       raise "This is a BlackBerry!"
     else
-      raise "#{request.env["HTTP_USER_AGENT"]}"
+      raise request.env["HTTP_USER_AGENT"].to_s
     end
   end
 
@@ -154,8 +154,13 @@ class ObserverController < ApplicationController
       @code = nil
     else
       @code = params[:code]
+      @submit = params[:commit]
     end
+    render(:action => :textile_sandbox)
   end
+
+  # I keep forgetting the stupid "_sandbox" thing.
+  alias textile textile_sandbox
 
   # So you can start with a clean slate
   def clear_session
@@ -247,7 +252,7 @@ class ObserverController < ApplicationController
   # Inputs: none
   # Outputs: @observations, @observation_pages, @layout
   def list_observations
-    show_selected_observations("Observations", "", "observations.`when` desc", :all_observations)
+    show_selected_observations(:list_observations_default_title.t, "", "observations.`when` desc", :all_observations)
   end
 
   # Displays matrix of all observations, alphabetically.
@@ -255,7 +260,7 @@ class ObserverController < ApplicationController
   # View: list_observations
   # Outputs: @observations, @observation_pages, @layout
   def observations_by_name
-    show_selected_observations("Observations", "",
+    show_selected_observations(:list_observations_default_title.t, "",
       "names.search_name asc, observations.`when` desc", :all_observations)
   end
 
@@ -266,7 +271,7 @@ class ObserverController < ApplicationController
   # Outputs: @observations, @observation_pages, @layout
   def show_user_observations
     user = User.find(params[:id])
-    show_selected_observations("Observations by %s" % user.legal_name,
+    show_selected_observations(:list_observations_by_user.t(:user => user.legal_name),
       "observations.user_id = %s" % user.id,
       "observations.modified desc, observations.`when` desc")
   end
@@ -293,7 +298,7 @@ class ObserverController < ApplicationController
     if obs
       redirect_to(:action => "show_observation", :id => id)
     else
-      show_selected_observations("Observations matching '#{@pattern}'",
+      show_selected_observations(:list_observations_matching.t(:pattern => @pattern),
         field_search(["names.search_name", "observations.where",
           "observations.notes", "locations.display_name"], "%#{@pattern.gsub(/[*']/,"%")}%"),
         "names.search_name asc, observations.`when` desc")
@@ -307,10 +312,10 @@ class ObserverController < ApplicationController
   # Outputs: @observations, @observation_pages, @layout
   def show_location_observations
     loc = Location.find(params[:id])
-    show_selected_observations("Observations from %s" % loc.display_name,
+    show_selected_observations(:list_observations_from_location.t(:location => loc.display_name),
       "observations.location_id = %s" % loc.id,
       "names.search_name, observations.`when` desc", :nothing,
-      [[:location_show_map.l, {:controller => 'location', :action => 'show_location', :id => loc.id}]])
+      [[:app_show_map.l, {:controller => 'location', :action => 'show_location', :id => loc.id}]])
   end
 
   # Display matrix of observations whose location matches a string.
@@ -323,7 +328,8 @@ class ObserverController < ApplicationController
     # and some of the search monkeys picked up on it.
     pattern = session[:where] || session[:pattern] || ""
     sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-    show_selected_observations("Observations from '#{pattern}'", "observations.where like '#{sql_pattern}'",
+    show_selected_observations(:list_observations_from_where.t(:where => pattern),
+      "observations.where like '#{sql_pattern}'",
       "names.search_name asc, observations.`when` desc", :nothing,
       [[:location_define.l, {:controller => 'location', :action => 'create_location', :where => pattern}],
        [:location_merge.l, {:controller => 'location', :action => 'list_merge_options', :where => pattern}],
@@ -387,6 +393,9 @@ class ObserverController < ApplicationController
     pass_seq_params()
     @seq_key = seq_key
     @observation = Observation.find(params[:id])
+    @observation.num_views += 1
+    @observation.last_view = Time.now
+    @observation.save
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
     @confidence_menu = translate_menu(Vote.confidence_menu)
@@ -405,7 +414,7 @@ class ObserverController < ApplicationController
               naming = Naming.find(naming_id)
               value = params[:vote][naming_id][:value].to_i
               if naming.change_vote(@user, value) && !flashed
-                flash_notice "Successfully changed vote."
+                flash_notice(:show_observation_success.t)
                 flashed = true
               end
             end
@@ -526,8 +535,8 @@ class ObserverController < ApplicationController
         # If everything checks out save observation.
         if success &&
           (success = save_observation(@observation))
-          flash_notice 'Observation was successfully created.'
-          @observation.log("Observation created by #{@user.login}.", true)
+          flash_notice(:create_observation_success.t)
+          @observation.log(:log_observation_created, { :user => @user.login }, true)
         end
 
         # Once observation is saved we can save everything else.
@@ -601,8 +610,8 @@ class ObserverController < ApplicationController
         if success && @observation.changed?
           @observation.modified = Time.now
           if success = save_observation(@observation)
-            flash_notice 'Observation was successfully updated.'
-            @observation.log("Observation updated by #{@user.login}.",
+            flash_notice(:edit_observation_success.t)
+            @observation.log(:log_observation_updated, { :user => @user.login },
               (params[:log_change] ? (params[:log_change][:checked] == '1') : false))
           end
         end
@@ -628,18 +637,18 @@ class ObserverController < ApplicationController
     if verify_user()
       @observation = Observation.find(params[:id])
       if !check_user_id(@observation.user_id)
-        flash_error 'You do not own this observation.'
+        flash_error(:destroy_observation_denied.t)
         redirect_to(:action => 'show_observation', :id => @observation.id)
       else
         for spl in @observation.species_lists
-          spl.log(sprintf('Observation, %s, destroyed by %s',
-            @observation.unique_text_name, @user.login))
+          spl.log(:log_observation_destroyed2, { :user => @user.login,
+            :name => @observation.unique_format_name }, false)
         end
-        @observation.orphan_log("Observation destroyed by #{@user.login}")
+        @observation.orphan_log(:log_observation_destroyed, { :user => @user.login })
         @observation.namings.clear # (takes votes with it)
         @observation.comments.clear
         @observation.destroy
-        flash_notice 'Successfully destroyed observation.'
+        flash_notice(:destroy_observation_success.t)
         redirect_to(:action => 'list_observations')
       end
     end
@@ -692,8 +701,7 @@ class ObserverController < ApplicationController
         success = false if !@name
 
         if success && @observation.name_been_proposed?(@name)
-          flash_warning 'Someone has already proposed that name.  If you would
-            like to comment on it, try posting a comment instead.'
+          flash_warning(:create_naming_already_proposed.t)
           success = false
         end
 
@@ -708,7 +716,8 @@ class ObserverController < ApplicationController
           create_naming_reasons(@naming, params[:reason])
           @observation.reload
           @naming.change_vote(@user, @vote.value)
-          @observation.log("Naming created by #{@user.login}: #{@naming.format_name}", true)
+          @observation.log(:log_naming_created, { :user => @user.login,
+            :name => @naming.format_name }, true)
 
           # Check for notifications.
           if has_unshown_notifications(@user, :naming)
@@ -772,8 +781,7 @@ class ObserverController < ApplicationController
         success = false if !@name
 
         if success && @naming.name != @name && @observation.name_been_proposed?(@name)
-          flash_warning 'Someone has already proposed that name.  If you would
-            like to comment on it, try posting a comment instead.'
+          flash_warning(:edit_naming_someone_else.t)
           success = false
         end
 
@@ -796,7 +804,8 @@ class ObserverController < ApplicationController
             create_naming_reasons(@naming, params[:reason])
             @observation.reload
             @naming.change_vote(@user, @vote.value)
-            @observation.log("Naming created by #{@user.login}: #{@naming.format_name}", true)
+            @observation.log(:log_naming_created, { :user => @user.login,
+              :name => @naming.format_name }, true)
             flash_warning 'Sorry, someone else has given this a positive vote,
               so we had to create a new Naming to accomodate your changes.'
           end
@@ -855,19 +864,18 @@ class ObserverController < ApplicationController
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
     if !check_user_id(@naming.user_id)
-      flash_error 'You do not own that naming.'
+      flash_error(:destroy_naming_denied.t)
       redirect_to(:action => 'show_observation', :id => @observation.id)
     elsif !@naming.deletable?
-      flash_warning 'Sorry, someone else has given this their strongest
-        positive vote.  You are free to propose alternate names,
-        but we can no longer let you delete this name.'
+      flash_warning(:destroy_naming_someone_else.t)
       redirect_to(:action => 'show_observation', :id => @observation.id)
     else
-      @naming.observation.log("Naming deleted by #{@user.login}: #{@naming.format_name}", true)
+      @naming.observation.log(:log_naming_destroyed, { :user => @user.login,
+        :name => @naming.format_name }, true)
       @naming.votes.clear
       @naming.destroy
       @observation.calc_consensus
-      flash_notice 'Successfully destroyed naming.'
+      flash_notice(:destroy_naming_success.t)
       redirect_to(:action => 'show_observation', :id => @observation.id)
     end
   end
@@ -878,12 +886,12 @@ class ObserverController < ApplicationController
     id = params[:id]
     begin
       @observation = Observation.find(id)
-      flash_notice "old_name: #{@observation.name.text_name}"
+      flash_notice(:observer_recalc_old_name.t(:name => @observation.name.format_name))
       text = @observation.calc_consensus(true)
       flash_notice text if !text.nil? && text != ''
-      flash_notice "new_name: #{@observation.name.text_name}"
-    rescue
-      flash_error 'Caught exception.'
+      flash_notice(:observer_recalc_new_name.t(:name => @observation.name.format_name))
+    rescue(err)
+      flash_error(:observer_recalc_caught_error.t(:error => err))
     end
     # render(:text => '', :layout => true)
     redirect_to(:action => 'show_observation', :id => id)
@@ -929,7 +937,7 @@ class ObserverController < ApplicationController
   def refresh_vote_cache
     # Naming.refresh_vote_cache
     Observation.refresh_vote_cache
-    flash_notice "Refreshed vote caches."
+    flash_notice(:refresh_vote_cache.t)
     redirect_to(:action => 'index')
   end
 
@@ -966,16 +974,43 @@ class ObserverController < ApplicationController
     id = params[:id]
     @show_user = User.find(id)
     @user_data = SiteData.new.get_user_data(id)
-    @observations = Observation.find(:all, :conditions => ["user_id = ? and thumb_image_id is not null", id],
-      :order => "id desc", :limit => 6)
+
+    # This grabs the six latest observations whose thumbnails are high-quality,
+    # falling back on medium or low-quality images if 6 high-quality images
+    # can't be found.
+    @observations = Observation.find(:all,
+      :include => :thumb_image,
+      :conditions => ["observations.user_id = ? and observations.thumb_image_id is not null", id],
+      :order => "IF(images.quality = 'high', 3, IF(images.quality = 'medium', 2, IF(images.quality = 'low', 1, 0))) DESC, observations.id DESC",
+      :limit => 6)
   end
 
   # show_site_stats.rhtml
   def show_site_stats
     store_location
     @site_data = SiteData.new.get_site_data
-    @observations = Observation.find(:all, :conditions => ["thumb_image_id is not null"],
-      :order => "id desc", :limit => 6)
+
+    # # This grabs the six latest observations that have high-quality images.
+    # ids = Observation.connection.select_values(%(
+    #   SELECT DISTINCT observations.id
+    #   FROM observations
+    #   LEFT OUTER JOIN images_observations
+    #     ON images_observations.observation_id = observations.id
+    #   LEFT OUTER JOIN images
+    #     ON images_observations.image_id = images.id
+    #   WHERE images.quality = 'high'
+    #   ORDER BY observations.id DESC
+    #   LIMIT 6
+    # ))
+    # @observations = Observation.find(:all, :conditions => ['id in [?]', ids],
+    #   :order => "observations.id desc")
+
+    # This grabs the six latest observations whose *thumbnails* are high-quality.
+    @observations = Observation.find(:all,
+      :include => :thumb_image,
+      :conditions => ["thumb_image_id is not null AND images.quality = 'high'"],
+      :order => "observations.id desc", :limit => 6)
+
     result = Observation.connection.select_all %(
       SELECT count(*) as c FROM (SELECT DISTINCT name_id FROM observations) AS ids
     )
@@ -1006,16 +1041,16 @@ class ObserverController < ApplicationController
     if request.method == :get
       @email = @user.email if @user
     elsif @email.nil? or @email.strip == '' or @email.index('@').nil?
-      flash_error "You must provide a valid return address."
+      flash_error (:ask_webmaster_need_address.t)
       @email_error = true
     elsif /http:/ =~ @content or /<[\/a-zA-Z]+>/ =~ @content
-      flash_error "To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup."
+      flash_error(:ask_webmaster_antispam.t)
     elsif @content.nil? or @content.strip == ''
-      flash_error "Missing question or content."
+      flash_error(:ask_webmaster_need_content.t)
     else
       AccountMailer.deliver_webmaster_question(@email, @content)
-      flash_notice "Delivered question or comment."
-      redirect_back_or_default :action => "list_rss_logs"
+      flash_notice(:ask_webmaster_success.t)
+      redirect_back_or_default(:action => "list_rss_logs")
     end
   end
 
@@ -1025,6 +1060,7 @@ class ObserverController < ApplicationController
     if check_permission(0)
       @users = User.find(:all, :conditions => "feature_email=1 and verified is not null")
     else
+      flash_error(:app_permission_denied.t)
       redirect_to(:action => 'list_observations')
     end
   end
@@ -1037,17 +1073,17 @@ class ObserverController < ApplicationController
           FeatureEmail.create_email(user, params['feature_email']['content'])
         end
       end
-      flash_notice "Delivered feature mail."
+      flash_notice(:send_feature_email_success.t)
       redirect_to(:action => 'users_by_name')
     else
-      flash_error "Only the admin can send feature mail."
+      flash_error(:send_feature_email_denied.t)
       redirect_to(:action => "list_rss_logs")
     end
   end
 
   def email_question(user, target_page, target_obj)
     if !user.question_email
-      flash_error "Permission denied"
+      flash_error(:app_permission_denied.t)
       redirect_to(:action => target_page, :id => target_obj.id)
     end
   end
@@ -1063,7 +1099,7 @@ class ObserverController < ApplicationController
     subject = params[:email][:subject]
     content = params[:email][:content]
     AccountMailer.deliver_user_question(sender, target, subject, content)
-    flash_notice "Delivered email."
+    flash_notice(:ask_user_question_success.t)
     redirect_to(:action => 'show_user', :id => target.id)
   end
 
@@ -1077,14 +1113,14 @@ class ObserverController < ApplicationController
     observation = Observation.find(params[:id])
     question = params[:question][:content]
     AccountMailer.deliver_observation_question(sender, observation, question)
-    flash_notice "Delivered question."
+    flash_notice(:ask_observation_question_success.t)
     redirect_to(:action => 'show_observation', :id => observation.id)
   end
 
   def commercial_inquiry
     @image = Image.find(params[:id])
     if !@image.user.commercial_email
-      flash_error "Permission denied."
+      flash_error(:app_permission_denied.t)
       redirect_to(:action => 'show_image', :id => @image.id)
     end
   end
@@ -1094,7 +1130,7 @@ class ObserverController < ApplicationController
     image = Image.find(params[:id])
     commercial_inquiry = params[:commercial_inquiry][:content]
     AccountMailer.deliver_commercial_inquiry(sender, image, commercial_inquiry)
-    flash_notice "Delivered commercial inquiry."
+    flash_notice(:commercial_inquiry_success.t)
     redirect_to(:action => 'show_image', :id => image.id)
   end
 
@@ -1249,7 +1285,7 @@ class ObserverController < ApplicationController
   def save_observation(observation)
     success = true
     if !observation.save
-      flash_error "Couldn't save observation."
+      flash_error(:observer_controller_no_save_observation.t)
       flash_object_errors(observation)
       success = false
     end
@@ -1272,9 +1308,9 @@ class ObserverController < ApplicationController
   def save_naming(naming)
     success = true
     if naming.save
-      flash_notice 'Naming was successfully created.'
+      flash_notice(:observer_controller_naming_created.t)
     else
-      flash_warning "Couldn't save naming."
+      flash_warning(:observer_controller_no_save_naming.t)
       flash_object_warnings(naming)
       success = false
     end
@@ -1292,8 +1328,9 @@ class ObserverController < ApplicationController
     end
 
     # (Might be changes to reasons, though, so we better log it anyway.)
-    flash_notice 'Naming was successfully updated.'
-    naming.observation.log("Naming changed by #{@user.login}: #{naming.format_name}", log)
+    flash_notice(:observer_controller_naming_updated.t)
+    naming.observation.log(:log_naming_updated, { :user => @user.login,
+      :name => naming.format_name }, log)
 
     return true
   end
@@ -1399,11 +1436,11 @@ class ObserverController < ApplicationController
           image.user = @user
           if !image.save || !image.save_image
             logger.error('Unable to upload image')
-            flash_error("Had problems uploading image '#{name ? name : '???'}'.")
+            flash_notice(:observer_controller_no_upload_image.t(:name => (name ? "'#{name}'" : "##{image.id}")))
             bad_images.push(image)
             flash_object_errors(image)
           else
-            flash_notice("Uploaded image " + (name ? "'#{name}'" : "##{image.id}") + '.')
+            flash_notice(:observer_controller_image_uploaded.t(:name => (name ? "'#{name}'" : "##{image.id}")))
             good_images.push(image)
             if observation.thumb_image_id == -i
               observation.thumb_image_id = image.id
@@ -1436,7 +1473,7 @@ class ObserverController < ApplicationController
         image.notes = notes
         image.modified = Time.now
         image.save
-        flash_notice("Updated notes on image ##{image.id}.")
+        flash_notice(:observer_controller_image_updated_notes.t(:id => image.id))
       end
     end
 
@@ -1449,7 +1486,8 @@ class ObserverController < ApplicationController
     if images && images.length > 0
       for image in images
         if !observation.images.include?(image)
-          observation.log("Image created by #{@user.login}: #{image.unique_format_name}", true)
+          observation.log(:log_image_created, { :user => @user.login,
+            :name => image.unique_format_name }, true)
           observation.add_image(image)
         end
       end

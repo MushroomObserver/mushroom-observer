@@ -1,25 +1,20 @@
 <%
-  @title = 'New Notifications for ' + textilize_without_paragraph(h(@user.legal_name))
+  @title = :show_notifications_title.t(:user => @user.legal_name)
+
   if @observation
-%>
-<%=
-    link_to('Show Observation', :controller => 'observer',
-            :action => 'show_observation', :id => @observation.id)
-%>
-<%
+    new_tab_set do
+      add_tab(:app_show_observation.t,
+              :controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    end
   end
 %>
 
-<div id="Title"><%= @title %></div>
-<%
-    odd_or_even = 0
-    for notification, naming in @data
-        odd_or_even = 1 - odd_or_even %>
-        <p>
-            <div class="ListLine<%= odd_or_even %>" style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-                <%= textilize(notification.calc_note(@user, naming.observation)) %>
-            </div>
-        </p>
-<%
-    end
-%>
+<% odd_or_even = 0
+for notification, naming in @data
+  odd_or_even = 1 - odd_or_even %>
+  <p>
+    <div class="ListLine<%= odd_or_even %>" style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+      <%= notification.calc_note(@user, naming.observation).tp %>
+    </div>
+  </p>
+<% end %>

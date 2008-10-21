@@ -1,42 +1,45 @@
-<% @title = :how_title.l %>
-<div id="Title"><%= @title %></div>
+<% @title = :how_title.t %>
 
-<p>
-    <%= :how_intro.l %>
-</p>
-<h2><%= :how_common_tasks.l %>:</h2>
+<%= :how_intro.tp %>
+
+<h2><%= :how_common_tasks.t %>:</h2>
+
 <ol>
-    <li><%= :how_keeping_up.l %></li>
-    <li id="searching"><%= :how_searching.l %></li>
-    <li><%= :how_unknown_help.l %></li>
-    <li><%= :how_adding_observations.l %></li>
-    <li><%= :how_proposing_names.l %></li>    
-    <li id="voting"><%= :how_voting.l % [@min_pos_vote, @min_neg_vote, :vote_no_opinion.l, @maximum_vote] %></li>
-    <li><%= :how_adding_comments.l %></li>
-    <li id="tracking"><%= :how_tracking_species.l %></li>
-    <li id="describing_species"><%= textilize(:how_describing_species.l % "#{DOMAIN}/name/observation_index") %></li>
-    <li id="projects"><%= textilize(:how_projects.l % "#{DOMAIN}/project/list_projects") %></li>
-    <li id="maps"><%= textilize(:how_maps.l % [
-        "#{DOMAIN}/name/map/284",
-        "#{DOMAIN}/location/show_location/4",
-        "#{DOMAIN}/location/map_locations",
-        "#{DOMAIN}/location/list_place_names"
-        ]) %></li>
-    <li><%= :how_creating_species_lists.l %></li>
+  <li id="keeping_up"            ><%= :how_keeping_up.tp          %></li>
+  <li id="searching"             ><%= :how_searching.tp           %></li>
+  <li id="unknown_help"          ><%= :how_unknown_help.tp        %></li>
+  <li id="adding_observations"   ><%= :how_adding_observations.tp %></li>
+  <li id="proposing_names"       ><%= :how_proposing_names.tp     %></li>    
+  <li id="voting"                ><%= :how_voting.tp(
+    :min_pos_vote => @min_pos_vote,
+    :min_neg_vote => @min_neg_vote,
+    :max_vote     => @maximum_vote,
+    :no_opinion   => :vote_no_opinion.l
+  ) %></li>
+  <li id="adding_comments"       ><%= :how_adding_comments.tp     %></li>
+  <li id="tracking_species"      ><%= :how_tracking_species.tp    %></li>
+  <li id="describing_species"    ><%= :how_describing_species.tp  %></li>
+  <li id="projects"              ><%= :how_projects.tp            %></li>
+  <li id="maps"                  ><%= :how_maps.tp                %></li>
+  <li id="creating_species_lists"><%= :how_creating_species_lists.tp %></li>
 </ol>
 
-<h2><%= :how_glossary.l %>:</h2>
+<h2><%= :how_glossary.t %>:</h2>
+
 <ol>
-    <li id="comment"><%= :how_comment.l %></li>
-    <li id="image">
-        <%= textilize(:how_image.l % "#{DOMAIN}/observer/ask_webmaster_question") %>
-    </li>
-    <li id="lic"><%= :how_license.l %></li>
-    <li id="loc"><%= :how_location.l %></li>
-    <li id="name"><%= :how_name.l %></li>
-    <li id="observation"><%= :how_observation.l %></li>
-    <li id="proposed_name"><%= :how_proposed_name.l %></li>
-    <li id="species_list"><%= :how_species_list.l %></li>
-    <li id="user"><%= :how_user.l %></li>
-    <li id="vote"><%= :how_vote.l % [@min_pos_vote, @min_neg_vote, @maximum_vote] %></li>
+  <li id="comment"      ><%= :how_comment.tp       %></li>
+  <li id="image"        ><%= :how_image.tp         %></li>
+  <li id="license"      ><%= :how_license.tp       %></li>
+  <li id="location"     ><%= :how_location.tp      %></li>
+  <li id="name"         ><%= :how_name.tp          %></li>
+  <li id="observation"  ><%= :how_observation.tp   %></li>
+  <li id="proposed_name"><%= :how_proposed_name.tp %></li>
+  <li id="species_list" ><%= :how_species_list.tp  %></li>
+  <li id="user"         ><%= :how_user.tp          %></li>
+  <li id="vote"         ><%= :how_vote.tp(
+    :min_pos_vote => @min_pos_vote,
+    :min_neg_vote => @min_neg_vote,
+    :max_vote     => @maximum_vote,
+    :no_opinion   => :vote_no_opinion.l
+  ) %></li>
 </ol>

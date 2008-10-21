@@ -231,7 +231,7 @@ def assert_form_action(url_opts, message = nil)
     found = {}
     @response.body.split("<form action").each do |str|
       if str =~ /^="([^"]*)" [^>]*method="post"/
-        url2 = URI.unescape($1)
+        url2 = URI.unescape($1).gsub('&amp;', '&')
         if url == url2
           found_it = true
           break
@@ -242,9 +242,9 @@ def assert_form_action(url_opts, message = nil)
     if found_it
       assert_block("") { true } # to count the assertion
     elsif found.keys
-      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join(">, <"))) { false}
+      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join(">, <"))) { false }
     else
-      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false}
+      assert_block(build_message(message, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
     end
   end
 end

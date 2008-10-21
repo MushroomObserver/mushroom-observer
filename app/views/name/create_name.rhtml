@@ -1,11 +1,7 @@
-<% @title = 'Create Name' %>
+<% @title = :name_create_title.t %>
 
-<div id="Title"><%= @title %></div>
+<% form_tag(:action => 'create_name', :id => @name.id) do %>
+  <br/><center><%= submit_tag :name_create_submit.l %></center><br/>
 
-<% form_tag(:action => 'create_name', :id => @name) do %>
-<br/>
-<center><%= submit_tag 'Save Name' %></center>
-
-<%= render :partial => 'form_names' %>
-
+  <%= render(:partial => 'form_names', :locals => { :button => :name_create_submit.l }) %>
 <% end %>

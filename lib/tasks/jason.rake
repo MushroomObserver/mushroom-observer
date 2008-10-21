@@ -1,16 +1,8 @@
 namespace :jason do
-  desc "Test rake environment."
-  task(:test => :environment) do
-    print "Success!\n"
-  end
 
-  desc "Test textile."
-  task(:test_textile => :environment) do
-    include ActionView::Helpers::TextHelper # (for textilize)
-    include ApplicationHelper
-    str = '<img href="http://blah.com/blah.jpg"> !http://blah.com/foo.jpg!'
-    print textilize(str).to_s
-  end
+  # ----------------------------
+  #  Character encoding.
+  # ----------------------------
 
   desc "Check for non-ISO-8859-1 characters in name authors."
   task(:check_for_special_characters => :environment) do
@@ -32,6 +24,12 @@ namespace :jason do
     fh.puts(out)
     fh.close
   end
+
+################################################################################
+
+  # ----------------------------
+  #  Redcloth.
+  # ----------------------------
 
   desc "Dump out all notes for obs, names, spls, comments to test RedCloth."
   task(:dump_notes => :environment) do
@@ -79,13 +77,15 @@ namespace :jason do
     print "Done!\n"
   end
 
+################################################################################
+
   desc "Get list of browser ID strings from apache logs."
   task(:apache_browser_ids) do
     require 'vendor/plugins/browser_status/lib/browser_status'
     include BrowserStatus
     ids = {}
     totals = {}
-    for file in Dir.glob('../../../logs/access_log-2008-09-11-*').sort
+    for file in Dir.glob('../../../logs/access_log-*').sort
       File.open(file) do |fh|
         fh.each_line do |line|
           if match = line.match(/(\S+) \S+ \S+ \[([^\]]*)\] "([^"]*)" (\d+) (\d+) "([^"]*)" "([^"]*)"/)
@@ -107,5 +107,137 @@ namespace :jason do
     print totals.keys.sort.
       map {|str| "#{str} #{totals[str]}\n"}.
       join('')
+  end
+
+################################################################################
+
+  # ----------------------------
+  #  Translations.
+  # ----------------------------
+
+  task(:get_localization_strings_used) do
+    strings = {}
+    for file in (
+      Dir.glob('app/views/*/*.r*').sort +
+      Dir.glob('app/controllers/*.rb').sort +
+      Dir.glob('app/helpers/*.rb').sort +
+      Dir.glob('app/models/*.rb').sort
+    ) do
+      File.open(file) do |fh|
+        fh.each_line do |line|
+          line.gsub(/:(\w+)\.(l|t|t_nop)($|\W)/) do
+            strings[$1] = true
+          end
+        end
+      end
+    end
+    @need_strings = strings
+  end
+
+  task(:get_localization_strings_available) do
+    strings = {}
+    File.open("lang/ui/#{ENV['LOCALE']}.yml") do |fh|
+      fh.each_line do |line|
+        if line.match(/^(\w+):/)
+          strings[$1] = true
+        end
+      end
+    end
+    @have_strings = strings
+  end
+
+  desc "Print full list of localization strings used in the code."
+  task(:print_localization_strings_used =>
+    :get_localization_strings_used) do
+    print @need_strings.keys.sort.join("\n") + "\n"
+  end
+
+  desc "Print full list of localization strings in a given localization file (use LOCALE=en-US, for example)."
+  task(:print_localization_strings_available =>
+    :get_localization_strings_available) do
+    print @have_strings.keys.sort.join("\n") + "\n"
+  end
+
+  desc "Check to make sure all localization strings that are used are available (select language using LOCALE=en-US, for example)."
+  task(:check_localizations => [
+    :get_localization_strings_used,
+    :get_localization_strings_available
+  ]) do
+    print @need_strings.keys.select {|key|
+      !@have_strings.has_key?(key)
+    }.sort.join("\n") + "\n"
+  end
+
+################################################################################
+
+  # ----------------------------
+  #  Esslinger's checklist.
+  # ----------------------------
+
+  desc "Upload names from Esslinger's checklist."
+  task(:upload_esslinger => :environment) do
+    user = User.find(252) # jason
+
+    # This is stolen from construct_approved_names in app_controller.
+    File.open('names/names.txt') do |fh|
+      fh.each_line do |name|
+        name = name.strip!.squeeze(' ')
+        if name.match(/^([A-Z])/)
+          print $1
+
+          name_parse = NameParse.new(name)
+          results = Name.names_from_string(name_parse.search_name)
+          if results.last.nil?
+            print "\nError: #{name_parse.name}\n"
+          else
+            n = results.last
+            n.rank  = name_parse.rank    if name_parse.rank
+            n.notes = name_parse.comment if !n.id && name_parse.comment
+            for n in results
+              if n
+                n.change_deprecated(false)
+                n.save_if_changed(user, "Approved by jason, based on Esslinger's checklist.")
+              end
+            end
+          end
+
+          if name_parse.has_synonym
+            results = Name.names_from_string(name_parse.synonym_search_name)
+            if results.last.nil?
+              print "\nError: = #{name_parse.synonym}\n"
+            else
+              n = results.last
+              n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
+              n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
+              n.change_deprecated(true)
+              n.save_if_changed(user, "Deprecated by jason, based on Esslinger's checklist")
+              for n in results[0..-2]
+                n.save_if_changed(user, nil)
+              end
+            end
+          end
+
+        end
+      end
+    end
+  end
+
+################################################################################
+
+  desc "Convert __Names__ in notes throughout to links."
+  task(:rebuild_links => :environment) do
+    include ApplicationHelper
+    str = "This looks a lot like _Agaricus_, like _A. campestris_ or _X. elegans_.\n"
+    print str
+    print str = check_other_links(check_name_links(str))
+    print textilize(str)
+  end
+
+################################################################################
+
+  desc "test"
+  task(:test => :environment) do
+    include ApplicationHelper
+    print '!image 12345!'.tl, "\n"
   end
 end

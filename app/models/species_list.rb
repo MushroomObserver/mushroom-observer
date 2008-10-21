@@ -16,6 +16,7 @@ require 'active_record_extensions'
 #    orphan_log(entry)     Tell RssLog we're about to be deleted.
 #
 #    unique_text_name      Return title with id appended to make it unique.
+#    unique_format_name    (same thing, to be consistent with name, image, etc.)
 #
 #    construct_observation(name, args)  Create and add Observation to list.
 #    update_names(chosen_names)         Update Names in list based on "chosen_names" radio boxes.
@@ -54,18 +55,15 @@ class SpeciesList < ActiveRecord::Base
   end
 
   # Add message to RssLog.
-  def log(msg)
-    if self.rss_log.nil?
-      self.rss_log = RssLog.new
-    end
-    self.rss_log.addWithDate(msg, true)
+  def log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.add_with_date(*args)
   end
 
   # Inform RssLog we're about to be deleted.
-  def orphan_log(entry)
-    self.log(entry) # Ensures that self.rss_log exists
-    self.rss_log.species_list = nil
-    self.rss_log.add(self.unique_text_name, false)
+  def orphan_log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.orphan(self.unique_format_name, *args)
   end
 
   # Get list of Name objects, sorted by text_name.
@@ -158,6 +156,7 @@ class SpeciesList < ActiveRecord::Base
       sprintf("Species List %d", self.id)
     end
   end
+  alias :unique_format_name :unique_text_name
 
   # Create and add a minimal Observation (with associated Naming and optional
   # Vote objects), and add it to the SpeciesList.

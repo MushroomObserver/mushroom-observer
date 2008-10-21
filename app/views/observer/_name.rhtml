@@ -1,20 +1,18 @@
 <table cellpadding="10">
-	<tr>
-		<td align="center" valign="middle" width="160"><%= :name_change.l %>:
-		</td>
-		    <% if vertical_layout %>
-	</tr>
-	<tr>
-		<td align="center" valign="middle">
-			<% else %>
-		<td valign="middle">
-			<% end %>
-	<%=
-		link_to(sprintf('<span class="ListName">%s</span><br/>',
-				textilize_without_paragraph(h(name.display_name))),
-			:controller => 'name', :action => 'show_name', :id => name.id)
-	%>
-	<span class="ListWho"><br/>by <%= user_link(name.user) %></span>
-		</td>
-	</tr>
+  <tr>
+    <td align="center" valign="middle" width="160">
+      <%= :name_change.t %>:
+    </td>
+<% if vertical_layout %>
+  </tr>
+  <tr>
+    <td align="center" valign="middle">
+<% else %>
+    <td valign="middle">
+<% end %>
+      <%= link_to(sprintf('<span class="ListName">%s</span><br/>', name.display_name.t),
+                  :controller => 'name', :action => 'show_name', :id => name.id) %>
+      <span class="ListWho"><br/><%= :rss_name_by.t(:user => user_link(name.user)) %></span>
+    </td>
+  </tr>
 </table>

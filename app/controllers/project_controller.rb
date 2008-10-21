@@ -74,13 +74,13 @@ class ProjectController < ApplicationController
         admin_name = "#{title}.admin"
         admin_group = UserGroup.find_by_name(admin_name)
         if title.nil? || title == ""
-          flash_error("Projects must have a title")
+          flash_error(:add_project_need_title.t)
         elsif project
-          flash_error("Project named '#{project.title}' already exists")
+          flash_error(:add_project_already_exists.t(:title => project.title))
         elsif user_group
-          flash_error("Unable to create project because a user group named '#{title}' already exists")
+          flash_error(:add_project_group_exists.t(:group => title))
         elsif admin_group
-          flash_error("Unable to create project because a user group named '#{admin_name}' already exists")          
+          flash_error(:add_project_group_exists.t(:group => admin_name))
         else
           user_group = UserGroup.new()
           user_group.name = title
@@ -96,7 +96,7 @@ class ProjectController < ApplicationController
             @project.admin_group = admin_group
             if @project.save
               # @project.log("Project added by #{@user.login}: #{@project.title}", true)
-              flash_notice "Project was successfully added."
+              flash_notice(:add_project_success.t)
               redirect_to(:action => :show_project, :id => @project.id)
             else
               flash_object_errors(@project)
@@ -130,16 +130,16 @@ class ProjectController < ApplicationController
       @title = title
       @summary = params[:project][:summary]
       if title.nil? || title == ""
-        flash_error("Projects must have a title")
+        flash_error(:add_project_need_title.t)
       else
         title_project = Project.find_by_title(title)
         if title_project and (title_project != @project)
-          flash_error("The project ''#{title}' already exists.  Please choose a different title.")
+          flash_error(:add_project_already_exists.t(:title => title))
         elsif !@project.update_attributes(params[:project]) || !@project.save
           flash_object_errors(@project)
         else
           # @project.log("Project updated by #{@user.login}: #{@project.summary}", false)
-          flash_notice "Project was successfully updated."
+          flash_notice(:edit_project_success.t)
           redirect_to(:action => 'show_project', :id => @project.id)
         end
       end
@@ -166,14 +166,14 @@ class ProjectController < ApplicationController
         # project.log("Project destroyed by #{@user.login}: #{title}", false)
         user_group.destroy
         admin_group.destroy
-        flash_notice "Project destroyed."
+        flash_notice(:destroy_project_success.t)
       else
-        flash_error "Failed to destroy project."
+        flash_error(:destroy_project_failed.t)
       end
       redirect_to(:action => :list_projects)
     end
   end
-  
+
   # Form to compose email for the admins
   # Linked from: show_project
   # Inputs:
@@ -199,10 +199,10 @@ class ProjectController < ApplicationController
     subject = params[:email][:subject]
     content = params[:email][:content]
     AccountMailer.deliver_admin_request(sender, project, subject, content)
-    flash_notice "Delivered email."
+    flash_notice(:admin_request_success.t)
     redirect_to(:action => 'show_project', :id => project.id)
   end
-  
+
   # TODO: Changes should get logged
   def set_status(user, group, add)
     if add
@@ -212,7 +212,7 @@ class ProjectController < ApplicationController
     end
     group.save
   end
-  
+
   # Form to adjust permissions for a user with respect to a project
   # Linked from: show_project, add_users, admin_request email
   # Inputs:
@@ -243,11 +243,11 @@ class ProjectController < ApplicationController
         redirect_to(:action => 'show_project', :id => @project.id)
       end
     else
-      flash_error("Only the admins for a project can change member permissions.")
+      flash_error(:change_member_status_denied.t)
       redirect_to(:action => 'show_project', :id => @project.id)
     end
   end
-  
+
   # Action for adding just one member
   # Linked from: add_members
   # Inputs:
@@ -261,11 +261,11 @@ class ProjectController < ApplicationController
       @candidate = User.find(params[:candidate])
       set_status(@candidate, @project.user_group, true)
     else
-      flash_error("Permission denied.  Only admins for a project can add new members.")
+      flash_error(:add_members_denied.t)
     end
     redirect_to(:action => 'add_members', :id => @project.id)
   end
-  
+
   # View that lists all users with links to add each as a member
   # Linked from: show_project (for admins only)
   # Inputs:
@@ -298,14 +298,14 @@ class ProjectController < ApplicationController
     if @draft_name
       project = @draft_name.project
       unless verify_user() and project.is_member?(@user)
-        flash_error("Permission denied.  Only project members can view drafts in progress.")
+        flash_error(:show_draft_denied.t)
         redirect_to(:action => 'show_project', :id => project.id)
       end
     else
       redirect_to(:action => 'list_projects')
     end
   end
-  
+
   # Look for any drafts of the given name.
   # If none exists create one and start editing.
   # If one exists and it is assocated with this project and user, then start editing.
@@ -333,7 +333,7 @@ class ProjectController < ApplicationController
           if draft.project_id == project.id and project.is_admin?(@user)
             redirect_to(:action => 'edit_draft', :id => draft.id)
           else
-            flash_error("Permission denied. A draft already exists for the name, #{name.text_name}, in the project, #{project.title}, and multiple drafts for the same name are not yet supported.")
+            flash_error(:create_draft_multiple.t(:name => name.display_name, :title => project.title))
             redirect_to(:action => 'show_draft', :id => draft.id)
           end
         else
@@ -353,17 +353,18 @@ class ProjectController < ApplicationController
             if draft.save
               redirect_to(:action => 'edit_draft', :id => draft.id)
             else
-              flash_error("Unable to create new draft")
+              flash_error(:create_draft_failed.t)
               redirect_to(:action => 'show_project', :project => project.id)
             end
           else
-            flash_error("You do not have permission to create a draft for the project #{project.title}")
+            flash_error(:create_draft_create_denied.t(:title => project.title))
             redirect_to(:action => 'show_project', :id => project.id)
           end
         end
       end
     else
-      flash_error("Bad arguments: project => #{params[:project]}, name => #{params[:name]} for create_or_edit_draft")
+      flash_error(:create_draft_bad_args.t(:project => params[:project],
+                                           :name => params[:name]))
       redirect_to(:action => 'list_projects')
     end
   end
@@ -386,16 +387,16 @@ class ProjectController < ApplicationController
         if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
           flash_object_errors(@draft_name)
         else
-          flash_notice "Draft was successfully updated."
+          flash_notice(:create_draft_updated.t)
           redirect_to(:action => 'show_draft', :id => @draft_name.id)
         end
       end
     else
-      flash_error("Permission denied: Only the creator of a draft can edit it.")
+      flash_error(:create_draft_edit_denied.t)
       redirect_to(:action => 'show_draft', :id => @draft_name.id)
     end
   end
-  
+
   # Publishes the draft back to the originating name
   # Linked from: show_draft
   # Inputs:
@@ -412,14 +413,14 @@ class ProjectController < ApplicationController
       for f in Name.all_note_fields:
         name.send("#{f}=", draft.send(f))
       end
-      name.save_if_changed(@user, "Name updated by #{@user.login}", Time.now())
+      name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
       redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
     else
-      flash_error("Permission denied: Only the creator of a draft or a project admin can publish a draft")
+      flash_error(:publish_draft_denied.t)
       redirect_to(:action => 'show_draft', :id => draft.id)
     end
   end
-  
+
   # Callback to destroy a draft.
   # Linked from: show_draft
   # Redirects to show_project
@@ -429,9 +430,9 @@ class ProjectController < ApplicationController
     draft = DraftName.find(params[:id])
     if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
       if draft.destroy
-        flash_notice "Draft destroyed."
+        flash_notice(:destroy_draft_success.t)
       else
-        flash_error "Failed to destroy draft."
+        flash_error(:destroy_draft_failed.t)
       end
     end
     @project = draft.project

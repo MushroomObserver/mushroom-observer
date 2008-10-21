@@ -24,8 +24,8 @@ require_dependency 'acts_as_versioned_extensions'
 #  Name Formats:
 #    text_name           Plain text: "Xxx yyy"         "Xxx"             "Fungi"
 #    search_name         Plain text: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
-#    display_name        Textilized: "Xxx yyy Author"  "Xxx Author"      "Kingdom of Fungi"
-#    observation_name    Textilized: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
+#    display_name        in Textile: "Xxx yyy Author"  "Xxx Author"      "Kingdom of Fungi"
+#    observation_name    in Textile: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
 #
 #  Regexps: (in "English")
 #    ABOVE_SPECIES_PAT   <Xxx>
@@ -112,9 +112,22 @@ class Name < ActiveRecord::Base
   belongs_to :license
 
   acts_as_versioned(:class_name => 'PastName', :table_name => 'past_names')
-  non_versioned_columns.push('created', 'synonym_id')
+  non_versioned_columns.push('created', 'synonym_id', 'num_views', 'last_view')
   ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review', 'ok_for_export')
   # (note: ignore_if_changed is in app/models/acts_as_versioned_extensions)
+
+  ABOVE_SPECIES_PAT = /^\s* ("?[A-Z][a-zë\-]+"?) \s*$/x
+  SP_PAT            = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ (sp\.?|species) \s*$/x
+  SPECIES_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ ([a-zë\-\"]+) \s*$/x
+  SUBSPECIES_PAT    = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+)    \s+ (?:subspecies|subsp|ssp|s)\.? \s+ ([a-zë\-\"]+) \s*$/x
+  VARIETY_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)?)    \s+ (?:variety|var|v)\.? \s+ ([a-zë\-\"]+) \s*$/x
+  FORM_PAT          = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)? (?: \s+ (?:variety|var|v)\.? \s+ [a-zë\-\"]+)?) \s+ (?:forma|form|f)\.? \s+ ([a-zë\-\"]+) \s*$/x
+  AUTHOR_PAT        = /^\s* ("?[A-Z][a-zë\-\s\.\"]+?[a-zë\"](?:\s+sp\.)?) \s+ (("?[^a-z"]|auct\.|van\sd[a-z]+\s[A-Z]).*) $/x   # (may have trailing space)
+  SENSU_PAT         = /^\s* ("?[A-Z].*) \s+ (sens[u\.]\s+\S.*\S) \s*$/x
+  GROUP_PAT         = /^\s* ("?[A-Z].*) \s+ (group|gr|gp)\.?     \s*$/x
+  COMMENT_PAT       = /^\s* ([^\[\]]*)  \s+ \[(.*)\] \s*$/x
+
+########################################
 
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_review_statuses()
@@ -136,45 +149,52 @@ class Name < ActiveRecord::Base
 
   # Creates RSS log as necessary.
   # Returns: nothing.
-  def log(msg)
-    if self.rss_log.nil?
-      self.rss_log = RssLog.new
-    end
-    self.rss_log.addWithDate(msg, true)
+  def log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.add_with_date(*args)
   end
 
   # Creates RSS log as necessary.
   # Returns: nothing.
-  def orphan_log(entry)
-    self.log(entry) # Ensures that self.rss_log exists
-    self.rss_log.species_list = nil
-    self.rss_log.add(self.search_name, false)
+  def orphan_log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.orphan(self.display_name, *args)
   end
 
 ########################################
 
-  # Patterns
-  ABOVE_SPECIES_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s*$/
-  SP_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+(sp\.?|species)\s*$/
-  SPECIES_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s*$/
-  SUBSPECIES_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s+(subspecies|subsp|ssp|s)\.?\s+([a-z\-"]+)\s*$/
-  VARIETY_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s+(variety|var|v)\.?\s+([a-z\-"]+)\s*$/
-  FORM_PAT = /^\s*("?[A-Z][a-z\-]+"?)\s+([a-z\-"]+)\s+(forma|form|f)\.?\s+([a-z\-"]+)\s*$/
-  AUTHOR_PAT = /^\s*("?[A-Z][a-z\-\s\."]+[a-z"](?: sp\.)?)\s+(([^a-z"]|auct\.).*)$/ # May have trailing \s
-  SENSU_PAT = /^\s*("?[A-Z].*)\s+(sensu\s+\S+)\s*$/
-  GROUP_PAT = /^\s*("?[A-Z].*)\s+(group|gr|gp)\.?\s*$/
-
-########################################
+  RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom]
+  RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
+  RANKS_ABOVE_SPECIES = [:Genus] + RANKS_ABOVE_GENUS
+  RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species]
+  ALL_RANKS =  RANKS_BELOW_GENUS + RANKS_ABOVE_SPECIES + [:Group]
 
   # Returns: array of symbols, from :Form to :Kingdom, then :Group.
-  def self.all_ranks()
-    [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
-  end
+  def self.all_ranks; ALL_RANKS; end
+
+  # Returns: array of symbols, from :Family to :Kingdom.
+  def self.ranks_above_genus; RANKS_ABOVE_GENUS; end
+
+  # Returns: array of symbols, from :Form to :Species.
+  def self.ranks_below_genus; RANKS_BELOW_GENUS; end
 
   # Returns: array of symbols, from :Genus to :Kingdom.
-  def self.ranks_above_species()
-    [:Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
-  end
+  def self.ranks_above_species; RANKS_ABOVE_SPECIES; end
+
+  # Returns: array of symbols, from :Form to :Subspecies.
+  def self.ranks_below_species; RANKS_BELOW_SPECIES; end
+
+  # Is this name a family or higher?
+  def above_genus?; RANKS_ABOVE_GENUS.include?(self.rank); end
+
+  # Is this name a species or lower?
+  def below_genus?; RANKS_BELOW_GENUS.include?(self.rank); end
+
+  # Is this name a genus or higher?
+  def above_species?; RANKS_ABOVE_SPECIES.include?(self.rank); end
+
+  # Is this name a subspecies or lower?
+  def below_species?; RANKS_BELOW_SPECIES.include?(self.rank); end
 
   # Returns: array of strings: "Unknown", "unknown", and "".
   def self.names_for_unknown()
@@ -287,21 +307,6 @@ class Name < ActiveRecord::Base
                    :observation_name => format_string("#{text_name} sp.", deprecated),
                    :search_name => text_name + ' sp.')
   end
-
-#   [This isn't used by anyone.  -JPH 20071125]
-#   def self.find_name(rank, text_name)
-#     conditions = ''
-#     if rank
-#       conditions = "rank = '%s'" % rank
-#     end
-#     if text_name
-#       if conditions
-#         conditions += ' and '
-#       end
-#       conditions += "text_name = '%s'" % text_name
-#     end
-#     Name.find(:all, :conditions => conditions)
-#   end
 
   # Create name given all the various name formats, etc.
   # Used only by make_name().
@@ -431,10 +436,10 @@ class Name < ActiveRecord::Base
 ########################################
 
   # Parse a string, return the following array:
-  #  0: text_name         "Xx yy v. zz"         "Xx yy"         "Xx"
-  #  1: display_name      "Xx yy v. zz Author"  "Xx yy Author"  "Xx sp. Author"
-  #  2: observation_name  "Xx yy v. zz Author"  "Xx yy Author"  "Xx Author"
-  #  3; search_name       "Xx yy v. zz Author"  "Xx yy Author"  "Xx sp. Author"
+  #  0: text_name         "Xx yy var. zz"         "Xx yy"         "Xx"
+  #  1: display_name      "Xx yy var. zz Author"  "Xx yy Author"  "Xx sp. Author"
+  #  2: observation_name  "Xx yy var. zz Author"  "Xx yy Author"  "Xx Author"
+  #  3; search_name       "Xx yy var. zz Author"  "Xx yy Author"  "Xx sp. Author"
   #  4: parent_name
   #  5: rank              :Variety              :Species        :Genus
   #  6: author            "Author"              "Author"        "Author"
@@ -494,8 +499,13 @@ class Name < ActiveRecord::Base
     results = nil
     match = ABOVE_SPECIES_PAT.match(in_str)
     if match
-      search_name = "%s sp." % match[1]
-      results = [match[1], format_string(match[1], deprecated), format_string(search_name, deprecated), search_name, nil]
+      results = [
+        match[1].gsub('ë', 'e'),
+        format_string(match[1], deprecated),
+        format_string(match[1] + ' sp.', deprecated),
+        match[1].gsub('ë', 'e') + ' sp.',
+        nil
+      ]
     end
     results
   end
@@ -505,50 +515,86 @@ class Name < ActiveRecord::Base
     results = nil
     match = SP_PAT.match(in_str)
     if match
-      search_name = "#{match[1]} sp."
-      results = [match[1], format_string(match[1], deprecated), format_string(search_name, deprecated), search_name, nil]
+      results = [
+        match[1].gsub('ë', 'e'),
+        format_string(match[1], deprecated),
+        format_string(match[1] + ' sp.', deprecated),
+        match[1].gsub('ë', 'e') + ' sp.',
+        nil
+      ]
     end
     results
   end
 
-  # <Genus> <species> but reject <Genus> section
+  # <Genus> <species> (but reject <Genus> section -- unsupported right now)
   def self.parse_species(in_str, deprecated=false)
     results = nil
     match = SPECIES_PAT.match(in_str)
     if match and (match[2] != 'section')
-      text_name = "#{match[1]} #{match[2]}"
-      display_name = format_string(text_name, deprecated)
-      results = [text_name, display_name, display_name, text_name, match[1]]
-    end
-    results
-  end
-
-  def self.parse_below_species(pat, in_str, term, deprecated)
-    results = nil
-    match = pat.match(in_str)
-    if match
-      sp_name = "#{match[1]} #{match[2]}"
-      sub_name = match[4]
-      text_name = "#{sp_name} #{term} #{sub_name}"
-      display_name = "#{format_string(sp_name, deprecated)} #{term} #{format_string(sub_name, deprecated)}"
-      results = [text_name, display_name, display_name, text_name, sp_name]
+      name = match[1] + ' ' + match[2]
+      results = [
+        name.gsub('ë', 'e'),
+        format_string(name, deprecated),
+        format_string(name, deprecated),
+        name.gsub('ë', 'e'),
+        match[1]
+      ]
     end
     results
   end
 
   # <Genus> <species> subsp. <subspecies>
   def self.parse_subspecies(in_str, deprecated=false)
-    parse_below_species(SUBSPECIES_PAT, in_str, 'subsp.', deprecated)
+    results = nil
+    match = SUBSPECIES_PAT.match(in_str)
+    if match
+      parent = match[1]
+      child  = match[2]
+      results = parse_species(parent, deprecated)
+      results[0] += ' subsp. ' + child.gsub('ë', 'e')
+      results[1] += ' subsp. ' + format_string(child, deprecated)
+      results[2] += ' subsp. ' + format_string(child, deprecated)
+      results[3] += ' subsp. ' + child.gsub('ë', 'e')
+      results[4] = parent
+    end
+    results
   end
 
-  # <Genus> <species> var. <subspecies>
+  # <Genus> <species> [subsp. <subspecies>] var. <variety>
   def self.parse_variety(in_str, deprecated=false)
-    parse_below_species(VARIETY_PAT, in_str, 'var.', deprecated)
+    results = nil
+    match = VARIETY_PAT.match(in_str)
+    if match
+      parent = match[1]
+      child  = match[2]
+      results = parse_subspecies(parent, deprecated) ||
+                parse_species(parent, deprecated)
+      results[0] += ' var. ' + child.gsub('ë', 'e')
+      results[1] += ' var. ' + format_string(child, deprecated)
+      results[2] += ' var. ' + format_string(child, deprecated)
+      results[3] += ' var. ' + child.gsub('ë', 'e')
+      results[4] = parent
+    end
+    results
   end
 
-  # <Genus> <species> f. <subspecies>
+  # <Genus> <species> [subsp. <subspecies] [var. <subspecies>] f. <form>
   def self.parse_form(in_str, deprecated=false)
-    parse_below_species(FORM_PAT, in_str, 'f.', deprecated)
+    results = nil
+    match = FORM_PAT.match(in_str)
+    if match
+      parent = match[1]
+      child  = match[2]
+      results = parse_variety(parent, deprecated) ||
+                parse_subspecies(parent, deprecated) ||
+                parse_species(parent, deprecated)
+      results[0] += ' f. ' + child.gsub('ë', 'e')
+      results[1] += ' f. ' + format_string(child, deprecated)
+      results[2] += ' f. ' + format_string(child, deprecated)
+      results[3] += ' f. ' + child.gsub('ë', 'e')
+      results[4] = parent
+    end
+    results
   end
 
   # <Taxon> group
@@ -587,10 +633,10 @@ class Name < ActiveRecord::Base
     elsif :Group == rank
       results = parse_group(in_str, in_deprecated)
     elsif
-      raise "Unrecognized rank, %s." % rank
+      raise :runtime_unrecognized_rank.t(:rank => rank)
     end
     if results.nil?
-      raise "%s is invalid for the rank %s." % [in_str, rank]
+      raise :runtime_invalid_for_rank.t(:rank => rank, :name => name)
     end
     results
   end
@@ -655,7 +701,7 @@ class Name < ActiveRecord::Base
     if (parent_name and Name.find(:all, :conditions => "text_name = '%s'" % parent_name) == [])
       names = Name.names_from_string(parent_name)
       if names.last.nil?
-        raise "Unable to create the name %s." % parent_name
+        raise :runtime_unable_to_create_name.t(:name => parent_name)
       else
         for n in names
           n.user_id = self.user_id
@@ -682,7 +728,7 @@ class Name < ActiveRecord::Base
     result = true
     match = /^[Uu]nknown|\sspecies$|\ssp.?\s*$|\ssensu\s/.match(in_str)
     if match
-      raise "%s is an invalid name." % in_str
+      raise :runtime_invalid_name.t(:name => in_str)
     end
   end
 
@@ -696,7 +742,7 @@ class Name < ActiveRecord::Base
     end
     for m in matches
       if m.id != self.id
-        raise "The name, %s, is already in use." % text_name
+        raise :runtime_name_already_used.t(:name => text_name)
       end
     end
   end

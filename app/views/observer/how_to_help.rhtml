@@ -1,29 +1,21 @@
-<% @title = :how_help_title.l %>
-<div id="Title"><%= @title %></div>
+<% @title = :how_help_title.t %>
 
-<p>
-    <%= textilize(:how_help_intro.l % "#{DOMAIN}/observer/ask_webmaster_question") %>
-</p>
+<%= :how_help_intro.tp %>
 
-<ol class="Name">
-    <li>
-        <%= :how_help_contributors.l %>:
-        <span class="regular"><%= textilize_without_paragraph(:how_help_contributors_exp.l % ["#{DOMAIN}/observer/how_to_use#describing_species", "#{DOMAIN}/observer/how_to_use#maps"]) %></span>
-    </li>
-    <li>
-        <%= :how_help_designers.l %>:
-        <span class="regular"><%= :how_help_designers_exp.l %></span>
-    </li>
-    <li>
-        <%= :how_help_developers.l %>:
-        <span class="regular"><%= textilize_without_paragraph(:how_help_developers_exp.l % "#{SVN_REPOSITORY}/trunk/TODO") %></span>
-    </li>
-    <li>
-        <%= :how_help_translators.l %>:
-        <span class="regular"><%= :how_help_translators_exp.l %></span>
-    </li>
-    <li>
-        <%= :how_help_business_planning.l %>:
-        <span class="regular"><%= :how_help_business_planning_exp.l %></span>
-    </li>
+<ol type="none">
+  <li>
+    <%= :how_help_contributors.tp %>
+  </li>
+  <li>
+    <%= :how_help_designers.tp %>
+  </li>
+  <li>
+    <%= :how_help_developers.tp(:todo_list => "#{SVN_REPOSITORY}/trunk/TODO") %>
+  </li>
+  <li>
+    <%= :how_help_translators.tp %>
+  </li>
+  <li>
+    <%= :how_help_business_planning.tp %>
+  </li>
 </ol>

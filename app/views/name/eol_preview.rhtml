@@ -1,33 +1,19 @@
-<%
-@title = @title || :eol_preview_title.l
-odd_or_even = 0
-%>
-<div id="Title"><%= @title %></div>
-<%= textilize(:eol_preview_explanation.l) %>
-<%
+<% @title ||= :eol_preview_title.t %>
+
+<%= :eol_preview_explanation.tp %>
+
+<% odd_or_even = 0
 for name in @names
-  odd_or_even = 1 - odd_or_even
-%>
+  odd_or_even = 1 - odd_or_even %>
   <div class="ListLine<%= odd_or_even %>" style="padding-top:10px; padding-bottom:10px;">
     <p>
-<%=
-    link_to(textilize_without_paragraph(name.display_name), :controller => "name", :action => "show_name",
-            :id => name.id)
-%>
+      <%= link_to(name.display_name.t, :controller => "name", :action => "show_name", :id => name.id) %>
     </p>
-<%
-    if @image_data[name.id]
-      for image_id, observation_id in @image_data[name.id]
-%>
-<%=
-        link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-                :controller => 'observer', :action => 'show_observation', :id => observation_id)
-%>
-<%
-      end
-    end
-%>
+    <% if @image_data[name.id]
+      for image_id, observation_id in @image_data[name.id] %>
+        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
+                    :controller => 'observer', :action => 'show_observation', :id => observation_id) %>
+      <% end
+    end %>
   </div>
-<%
-end
-%>
+<% end %>

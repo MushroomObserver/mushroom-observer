@@ -1,46 +1,56 @@
-<% name         = observation.name
-   lists        = observation.species_lists 
-   questions_ok = observation.user.question_email %>
+<%
+  name         = observation.name
+  lists        = observation.species_lists
+  questions_ok = observation.user.question_email
+%>
 
 <p>
-<% if name 
-  approved_synonyms, deprecated_synonyms = name.sort_synonyms
-   if approved_synonyms != []
-       links = approved_synonyms.map{|n| link_to(textilize_without_paragraph(h(n.display_name)),
-            :controller => 'name', :action => "show_name", :id => n)} %>
-    <% if name.deprecated %>
-      <%= links.length > 1 ? :show_observation_preferred_names.l : :show_observation_preferred_name.l %>:
-    <% else %>
-      <%= links.length > 1 ? :show_observation_alternative_names.l : :show_observation_alternative_name.l %>:
+  <% if name
+    approved_synonyms, deprecated_synonyms = name.sort_synonyms
+    if approved_synonyms != []
+      links = approved_synonyms.map do |n|
+        link_to(n.display_name.t, :controller => 'name', :action => "show_name", :id => n)
+      end %>
+      <% if name.deprecated %>
+        <%= links.length > 1 ? :show_observation_preferred_names.t : :show_observation_preferred_name.t %>:
+      <% else %>
+        <%= links.length > 1 ? :show_observation_alternative_names.t : :show_observation_alternative_name.t %>:
+      <% end %>
+      <span class="Data"><%= links.join(', ') %></span><br/>
     <% end %>
-    <span class="Data"><%= links.join(', ') %></span><br/>
-<% end
-end %>
+  <% end %>
 
-<%= :show_observation_when.l %>: <span class="Data"><%= observation.when %></span><br/>
-<% if observation.is_collection_location %>
-  <%= :show_observation_collection_location.l %>:
-<% else %>
-  <%= :show_observation_seen_at.l %>:
-<% end %>
-<%= location_link(observation.place_name, observation.location_id, nil, true) %><br/>
-<%= :show_observation_who.l %>: <span class="Data">
-  <%= user_link(observation.user) %>
-</span><br/>
-<span class="Data"><% if observation.specimen %>
-  <%= :show_observation_specimen_available.l %>
-<% else %>
-  <%= :show_observation_specimen_not_available.l %>
-<% end %></span></p>
+  <%= :app_when.t %>: <span class="Data"><%= observation.when %></span><br/>
+  <% if observation.is_collection_location %>
+    <%= :show_observation_collection_location.t %>:
+  <% else %>
+    <%= :show_observation_seen_at.t %>:
+  <% end %>
+  <%= location_link(observation.place_name, observation.location_id, nil, true) %><br/>
+
+  <%= :app_who.t %>: <span class="Data">
+    <%= user_link(observation.user) %>
+  </span><br/>
+
+  <span class="Data">
+    <% if observation.specimen %>
+      <%= :show_observation_specimen_available.t %>
+    <% else %>
+      <%= :show_observation_specimen_not_available.t %>
+    <% end %>
+  </span>
+</p>
 
 <% if lists.length > 0 %>
-  <p><%= :show_observation_species_lists.l %>:<br/>
+  <p><%= :show_observation_species_lists.t %>:<br/>
     <% for l in lists %>
-      <%= link_to l.unique_text_name, :controller => 'species_list', :action => 'show_species_list', :id => l %><br/>
+      <%= link_to(l.unique_text_name, :controller => 'species_list', :action => 'show_species_list', :id => l.id) %><br/>
     <% end %>
   </p>
 <% end %>
 
-<% if observation.notes.to_s != "" %>
-  <%= textilize("#{:show_observation_notes.l}: " + sanitize(observation.notes.to_s)) %>
+<% if observation.notes.to_s != ""
+  String.register_name(observation.namings.map {|n| n.name})
+  String.register_name(observation.name) %>
+  <%= sanitize(:app_notes.l + ': ' + observation.notes.to_s).tpl %>
 <% end %>

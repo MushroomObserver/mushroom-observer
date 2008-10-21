@@ -1,12 +1,15 @@
-<% if @title != 'Observation Index' %>
-    <%= link_to('Observation Index', :action => 'observation_index')%> |
-<% end %>
-<% if @title != 'Name Index' %>
-    <%= link_to('Name Index', :action => 'name_index')%> |
-<% end %>
-<%= link_to('Bulk Name Edit', :action => 'bulk_name_edit') %>
-| <%= link_to('Add Name', :action => 'create_name') %><br/>
-<div id="Title"><%= @title %></div>
+<%
+  new_tab_set do
+    if @title != :name_index_observation_index.t
+      add_tab(:name_index_observation_index.t, :action => 'observation_index')
+    end
+    if @title != :name_index_name_index.t
+      add_tab(:name_index_name_index.t, :action => 'name_index')
+    end
+    add_tab(:name_index_bulk_edit.t, :action => 'bulk_name_edit')
+    add_tab(:name_index_add_name.t, :action => 'create_name')
+  end
+%>
 
 <div class="pagination"><%= pagination_letters(@letters) %></div>
 <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
@@ -23,11 +26,9 @@
       end
     end
   %>
-  <%= link_to(textilize_without_paragraph(h(datum['display_name'])),
-              { :action => 'show_name', :id => datum['id'] }) %><br/>
+  <%= link_to(datum['display_name'].t, :action => 'show_name', :id => datum['id']) %><br/>
 <% end %>
 
 <br/>
 <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
 <div class="pagination"><%= pagination_letters(@letters) %></div>
-

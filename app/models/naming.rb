@@ -13,7 +13,7 @@
 #    text_name               Plain text.  (uses name.search_name)
 #    format_name             Textilized.  (uses name.observation_name)
 #    unique_text_name        Same as above, with id added to make unique.
-#    unique_format_name
+#    unique_format_name 
 #
 #  Voting and preferences:
 #    vote_sum                Straight sum of votes for this naming.
@@ -78,7 +78,7 @@ class Naming < ActiveRecord::Base
     self.name.observation_name
   end
 
-  def unique_format_name
+  def unique_format_name 
     str = self.name.observation_name
     "%s (%s)" % [str, self.id]
   end

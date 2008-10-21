@@ -1,20 +1,33 @@
 <% if @observation.images.length > 0 %>
-  Images:<br/>
+  <%= :app_images.t %>:<br/>
 <% end %>
 
 <% if check_permission(@observation.user_id) %>
-  <%= link_to "Add Images", :controller => 'image', :action => 'add_image', :id => @observation %><br/>
-  <%= link_to "Reuse Image", :controller => 'image', :action => 'reuse_image', :id => @observation %><br/>
+  <%= link_to(:show_observation_add_images.t, :controller => 'image', :action => 'add_image', :id => @observation.id) %><br/>
+  <%= link_to(:show_observation_reuse_image.t, :controller => 'image', :action => 'reuse_image', :id => @observation.id) %><br/>
   <% if @observation.images.length > 0 %>
-    <%= link_to "Remove Images", :controller => 'image', :action => 'remove_images', :id => @observation %><br/>
+    <%= link_to(:show_observation_remove_images.t, :controller => 'image', :action => 'remove_images', :id => @observation.id) %><br/>
   <% end %>
 <% end %>
 <br/>
 
 <center>
-<% for image in @observation.images %>
-  <p><%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
-    textilize_without_paragraph(h(image.unique_format_name)),
-    :controller => 'image', :action => 'show_image', :id => image.id, :params => search_params) %></p>
-<% end %>
+  <% done = {}
+  for image in [@observation.thumb_image] + @observation.images
+    if image && !done[image.id]
+      done[image.id] = true %>
+      <p>
+        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
+                      image.unique_format_name.t,
+                    :controller => 'image', :action => 'show_image', :id => image.id, :params => search_params) %><br/>
+        <% if image.notes && image.notes != '' %>
+          <small>
+            <%= str = image.notes[0..40].tl
+            str += '...' if image.notes.length > 41
+            str %>
+          </small>
+        <% end %>
+      </p>
+    <% end %>
+  <% end %>
 </center>

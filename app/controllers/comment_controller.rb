@@ -25,9 +25,8 @@ class CommentController < ApplicationController
   def list_comments
     store_location
     session_setup
-    @title = "Comments"
-    @comment_pages, @comments = paginate(:comments,
-       :order => "created desc", :per_page => 10)
+    @title = :list_comments.t
+    @comment_pages, @comments = paginate(:comments, :order => "created desc", :per_page => 10)
   end
 
   # Shows comments for a given user, most recent first.
@@ -39,7 +38,7 @@ class CommentController < ApplicationController
     session_setup
     store_location
     for_user = User.find(params[:id])  # (don't use @user since that means something else everywhere else in code)
-    @title = "Comments for %s" % for_user.legal_name
+    @title = :list_comments_for_user.t(:user => for_user.legal_name)
 
     # Get list of comments for objects that this user owns.
     observation_comment_ids = Comment.connection.select_values %(
@@ -72,7 +71,7 @@ class CommentController < ApplicationController
     session_setup
     store_location
     by_user = User.find(params[:id]) # (don't use @user since that means something else throughout the code)
-    @title = "Comments by %s" % by_user.legal_name
+    @title = :list_comments_by_user.t(:user => by_user.legal_name)
     @comment_pages, @comments = paginate(:comments,
       :order => "created desc", :conditions => "user_id = %s" % by_user.id,
       :per_page => 10)
@@ -114,9 +113,10 @@ class CommentController < ApplicationController
         @comment.user = @user
         @comment.object = @object
         if @comment.save
-          @object.log("Comment added by #{@user.login}: #{@comment.summary}", true) \
+          @object.log(:log_comment_added, { :user => @user.login,
+            :summary => @comment.summary }, true) \
             if @object.respond_to?(:log)
-          flash_notice "Comment was successfully added."
+          flash_notice :form_comments_create_success.t
           params = @comment.object_type == 'Observation' ? calc_search_params() : nil
           redirect_to(:controller => @object.show_controller,
             :action => @object.show_action, :id => @object.id,
@@ -148,9 +148,10 @@ class CommentController < ApplicationController
       if !@comment.update_attributes(params[:comment]) || !@comment.save
         flash_object_errors(@comment)
       else
-        @object.log("Comment updated by #{@user.login}: #{@comment.summary}", false) \
+        @object.log(:log_comment_updated, { :user => @user.login,
+          :summary => @comment.summary }, false) \
           if @object.respond_to?(:log)
-        flash_notice "Comment was successfully updated."
+        flash_notice :form_comments_edit_success.t
         redirect_to(:action => 'show_comment', :id => @comment.id)
       end
     end
@@ -169,14 +170,15 @@ class CommentController < ApplicationController
       object = @comment.object
       summary = @comment.summary
       if @comment.destroy
-        object.log("Comment destroyed by #{@user.login}: #{summary}", false) \
+        object.log(:log_comment_destroyed, { :user => @user.login,
+          :summary => summary }, false) \
           if @object.respond_to?(:log)
-        flash_notice "Comment destroyed."
+        flash_notice :form_comments_destroy_success.t
       else
-        flash_error "Failed to destroy comment."
+        flash_error :form_comments_destroy_failed.t
       end
       redirect_to(:controller => object.show_controller,
-        :action => object.show_action, :id => object.id)
+                  :action => object.show_action, :id => object.id)
     end
   end
 end

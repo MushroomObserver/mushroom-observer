@@ -117,11 +117,11 @@ class ImageControllerTest < Test::Unit::TestCase
     get_with_dump :image_search
     assert_response :success
     assert_template 'list_images'
-    assert_equal "Images matching 'Notes'", @controller.instance_variable_get('@title')
+    assert_equal 'Images Matching &#8216;Notes&#8217;', @controller.instance_variable_get('@title')
     get_with_dump :image_search, { :page => 2 }
     assert_response :success
     assert_template 'list_images'
-    assert_equal "Images matching 'Notes'", @controller.instance_variable_get('@title')
+    assert_equal 'Images Matching &#8216;Notes&#8217;', @controller.instance_variable_get('@title')
   end
 
   def test_image_search_next
@@ -246,8 +246,9 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "image", :action => "show_image")
     assert_equal(10, @rolf.reload.contribution)
     obs = Observation.find(obs.id)
-    pat = "^.*: Image, %s, updated by %s\n" % [image.unique_text_name, obs.user.login]
-    assert_equal(0, obs.rss_log.notes =~ Regexp.new(pat.gsub(/\(/,'\(').gsub(/\)/,'\)')))
+    assert(obs.rss_log.notes.include?('log_image_updated'))
+    assert(obs.rss_log.notes.include?("user=#{obs.user.login}"))
+    assert(obs.rss_log.notes.include?("name=#{RssLog.escape(image.unique_format_name)}"))
   end
 
   def test_remove_images

@@ -153,11 +153,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :observation_search
     assert_response :success
     assert_template 'list_observations'
-    assert_equal "Observations matching '12'", @controller.instance_variable_get('@title')
+    assert_equal "Observations matching &#8216;12&#8217;", @controller.instance_variable_get('@title')
     get_with_dump :observation_search, { :page => 2 }
     assert_response :success
     assert_template 'list_observations'
-    assert_equal "Observations matching '12'", @controller.instance_variable_get('@title')
+    assert_equal "Observations matching &#8216;12&#8217;", @controller.instance_variable_get('@title')
   end
 
   # Created in response to a bug seen in the wild
@@ -203,12 +203,12 @@ class ObserverControllerTest < Test::Unit::TestCase
 
     flash[:notice] = nil
     post :ask_webmaster_question, "user" => {"email" => "forgot@content"}, "question" => {"content" => ""}
-    assert_equal("Missing question or content.", flash[:test_notice])
+    assert_equal("Missing question or comment.", flash[:test_notice])
     assert_response :success
 
     flash[:notice] = nil
     post :ask_webmaster_question, "user" => {"email" => "spam@spam.spam"}, "question" => {"content" => "Buy <a href='http://junk'>Me!</a>"}
-    assert_equal("To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.", flash[:test_notice])
+    assert_equal("To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.".t, flash[:test_notice])
     assert_response :success
   end
 
@@ -216,14 +216,18 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :show_observation, :id => @coprinus_comatus_obs.id
     assert_response :success
     assert_template 'show_observation'
-    assert_form_action :action => 'show_observation'
+    obs = @coprinus_comatus_obs.id
+    seq = SequenceState.find(:all).last.id
+    assert_form_action(:action => 'show_observation', :id => obs, :obs => obs, :seq_key => seq)
   end
 
   def test_show_observation_no_naming
     get_with_dump :show_observation, :id => @unknown_with_no_naming.id
     assert_response :success
     assert_template 'show_observation'
-    assert_form_action :action => 'show_observation'
+    obs = @unknown_with_no_naming.id
+    seq = SequenceState.find(:all).last.id
+    assert_form_action(:action => 'show_observation', :id => obs, :obs => obs, :seq_key => seq)
   end
 
   # Test a naming owned by the observer but the observer has 'No Opinion'.

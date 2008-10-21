@@ -1,20 +1,19 @@
-<% @title = 'Log for ' + h(@rss_log.title) %>
+<% @title = :show_rss_log_title.t(:title => @rss_log.format_name) %>
 
-<div id="Title"><%= @title %></div>
-<pre>
-<%= textilize_without_paragraph(h(@rss_log.notes)) %></pre>
-<% observation = @rss_log.observation
-   if observation %>
-	<%= link_to("Show Observation", :action => 'show_observation', :id => observation.id) %>
-<% else
-	 species_list = @rss_log.species_list 
-	 if species_list %>
-		<%= link_to "Show Species List", :controller => 'species_list',
-            :action => 'show_species_list', :id => species_list %>
-  <% else
-       name = @rss_log.name
-       if name %>
-          <%= link_to "Show Name", :controller => 'name', :action => 'show_name', :id => name %>
-    <% end
-     end
-   end %>
+<table>
+  <% for key, args, time in @rss_log.parse_log %>
+    <tr>
+      <td><%= time.strftime("%a %b %d, %Y %H:%M:%S %Z") %></td>
+      <td width="10"></td>
+      <td><%= key.t(args) %></td>
+    </tr>
+  <% end %>
+</table>
+
+<%= if observation = @rss_log.observation
+  link_to(:app_show_observation.t, :action => 'show_observation', :id => observation.id)
+elsif species_list = @rss_log.species_list
+  link_to(:app_show_species_list.t, :controller => 'species_list', :action => 'show_species_list', :id => species_list.id)
+elsif name = @rss_log.name
+  link_to(:app_show_name.t, :controller => 'name', :action => 'show_name', :id => name.id)
+end %>

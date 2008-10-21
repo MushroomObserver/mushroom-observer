@@ -1,31 +1,37 @@
 <%
-    @title = 'Image: ' + h(@image.unique_text_name)
-    search_params = calc_search_params()
-%>
-<%= link_to 'Show Normal Size', :action => 'show_image', :id => @image, :params => search_params %>
-<% commercial_inquiries_ok = @image.user.commercial_email
-   if commercial_inquiries_ok %>
-	| <%= link_to 'Send Commercial Inquiry About Image',
-        :controller => 'observer', :action => 'commercial_inquiry', :id => @image %>
-<% end %>
-<% if check_permission(@image.user_id) %>
-	|| <%= link_to 'Edit Image', :action => 'edit_image', :id => @image %>
-	| <%= link_to 'Destroy', { :action => 'destroy_image', :id => @image },
-                  :confirm => "Are you sure?" %>
-<% end %>
+  @title = :image_show_title.t(:name => @image.unique_format_name)
+  search_params = calc_search_params()
+  commercial_inquiries_ok = @image.user.commercial_email
 
-<div id="Title"><%= 'Image: ' + textilize_without_paragraph(h(@image.unique_format_name)) %></div>
-<div id="copyright">Copyright &copy;
-	<% if commercial_inquiries_ok %>
-	  <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),
-	      :controller => 'observer', :action => 'commercial_inquiry', :id => @image) %>
-	<% else %>
-	  <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %>
-	<% end %>
+  new_tab_set do
+    add_tab(:image_show_normal_size.t,
+            :action => 'show_image', :id => @image.id, :params => search_params)
+    if commercial_inquiries_ok
+      add_tab(:image_show_inquiry.t, :controller => 'observer',
+              :action => 'commercial_inquiry', :id => @image.id)
+    end
+    if check_permission(@image.user_id)
+      add_tab(:image_show_edit.t,
+              :action => 'edit_image', :id => @image.id)
+      add_tab(:image_show_destroy.t,
+              { :action => 'destroy_image', :id => @image.id },
+              { :confirm => :app_are_you_sure.l })
+    end
+  end
+%>
+
+<div id="copyright">
+  <%= :image_show_copyright.t %> &copy;
+  <% if commercial_inquiries_ok %>
+    <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),
+                :controller => 'observer', :action => 'commercial_inquiry', :id => @image.id) %>
+  <% else %>
+    <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %>
+  <% end %>
 </div>
 
 <div about="orig/#{@image.id}.jpg">
-    <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
-                :action => 'show_image', :id => @image.id, :params => search_params) %>
-    <%= render :partial => "shared/form_#{@image.license.form_name}" %>
+  <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
+              :action => 'show_image', :id => @image.id, :params => search_params) %>
+  <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
 </div>

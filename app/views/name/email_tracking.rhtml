@@ -1,25 +1,26 @@
 <%
-    display_name = textilize_without_paragraph(h(@name.display_name))
-    @title = :email_tracking_title.l + " " + display_name
+  @title = :email_tracking_title.t(:name => @name.display_name)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :name.l),
+            :action => 'show_name', :id => @name.id)
+  end
 %>
 
-<%= link_to(:email_tracking_cancel.l, :action => 'show_name', :id => @name) %>
-<div id="Title"><%= @title %></div>
-<p>
-<%= :email_tracking_help.l % link_to(:email_tracking_your_profile.l, :controller => "account", :action => "profile") %>
-</p>
-<% form_tag(:action => 'email_tracking', :id => @name) do %>
-    <p>
-        <%= if @notification
-                "#{submit_tag(:email_tracking_update.l)} #{submit_tag(:email_tracking_disable.l)}"
-            else
-                submit_tag(:email_tracking_enable.l)
-            end
-        %>
-    </p>
-    <label for="notification_note_template"><%= :email_tracking_note.l %></label>:<br/>
-    <span class="HelpNote"><%= :email_tracking_note_help.l %></span><br/>
-    <%= text_area 'notification', 'note_template', :cols => 80, :value => @note_template  %><br/>
-<% end %>
+<%= :email_tracking_help.tp %>
 
-<%= javascript_tag "document.getElementById('notification_note_template').focus()" %>
+<% form_tag(:action => 'email_tracking', :id => @name.id) do %>
+  <br/><center>
+    <%= if @notification
+      submit_tag(:app_update.t) + ' ' + submit_tag(:app_disable.t)
+    else
+      submit_tag(:app_enable.t)
+    end %>
+  </center>
+
+  <label for="notification_note_template"><%= :email_tracking_note.t %></label>:<br/>
+  <span class="HelpNote"><%= :email_tracking_note_help.t %></span><br/>
+  <%= text_area('notification', 'note_template', :cols => 80, :value => @note_template) %><br/>
+
+  <%= focus_on('notification_note_template') %>
+<% end %>

@@ -2,7 +2,7 @@
 #  This file is included in every controller.  Mostly it is made up of methods
 #  and filters in the ApplicationController class which are made available to
 #  all controllers.  But there are also several random class extensions thrown
-#  in here for lack of more appropriate place to do so. 
+#  in here for lack of more appropriate place to do so.
 #
 ################################################################################
 
@@ -129,9 +129,9 @@ end
 class ApplicationController < ActionController::Base
   include LoginSystem
 
-  around_filter :set_locale
   before_filter :browser_status
   before_filter :autologin
+  around_filter :set_locale
 
   before_filter(:disable_link_prefetching, :only => [
     # account_controller methods
@@ -179,7 +179,7 @@ class ApplicationController < ActionController::Base
 
   # Store user in session (ID only).
   def set_session_user(user)
-    session[:user_id] = user ? user.id : nil 
+    session[:user_id] = user ? user.id : nil
     return user
   end
 
@@ -208,14 +208,14 @@ class ApplicationController < ActionController::Base
     end
     result
   end
-  
+
   def make_table_row(list)
     result = list.map {|x| "<td>#{x}</td>"}
     result = "<tr>#{result.join}</tr>"
   end
 
   def map_loc(map, loc) # , icon)
-    info = ("<span class=\"gmap\"><a href=\"/location/show_location/#{loc.id}\">#{loc.display_name}</a><table>" +
+    info = ("<span class=\"gmap\"><a href=\"/location/show_location/#{loc.id}\">#{loc.display_name.t}</a><table>" +
       make_table_row(['',loc.north,'']) +
       make_table_row([loc.west, '', loc.east]) +
       make_table_row(['', loc.south, '']) + "</table></span>")
@@ -285,8 +285,8 @@ class ApplicationController < ActionController::Base
   # they are merely wrappers masquerading as objects.  If your query incudes
   # multiple tables, all the values selected get crammed into the list of
   # attributes for +model+.  For example, if you are paginating observations
-  # and including the user and name: 
-  # 
+  # and including the user and name:
+  #
   #   [pages, objs] = paginate_by_sql(Observation, %(
   #     SELECT o.*, u.login, n.search_name, n.deprecated
   #     FROM observations o, users u, names, n
@@ -327,6 +327,7 @@ class ApplicationController < ActionController::Base
   # Returns Paginator object (which will draw the page number links)
   # and the subset of the array that the user is currently viewing.
   def paginate_array(list, per_page, page=nil)
+    list ||= []
     page = params['page'] ? params['page'] : 1 if page.nil?
     page = page.to_i
     pages = Paginator.new self, list.length, per_page, page
@@ -357,46 +358,47 @@ class ApplicationController < ActionController::Base
   # will not supply the 'letter' parameter correctly.  Thus you need to use
   # this pagination_numbers() wrapper if you want to have both paginators.
   def paginate_letters(list, length=50, args={})
-    # Don't draw links if too short.
-    list = [] if !list
-    return [nil, list] if list.length == 0
+    obj = nil
 
-    obj = PaginationLetters.new
-    obj.letters = letters = {}
-    obj.used    = used    = {}
-    obj.arg     = arg     = args[:arg] || 'letter'
-    obj.letter  = letter  = params[arg]
+    if list && list.length > 0
+      obj = PaginationLetters.new
+      obj.letters = letters = {}
+      obj.used    = used    = {}
+      obj.arg     = arg     = args[:arg] || 'letter'
+      obj.letter  = letter  = params[arg]
 
-    # Gather map of items to their first letter, as well as a hash of letters
-    # that are used.
-    for item in list
-      if block_given?
-        l = yield(item)
-        l ||= "_"
-        l = l[0,1].upcase
-        l = "_" if !l.match(/^[A-Z]$/)
-      elsif item.to_s.match(/([a-z])/i)
-        l= $~[1].upcase
-      else
-        l= "_"
+      # Gather map of items to their first letter, as well as a hash of letters
+      # that are used.
+      for item in list
+        if block_given?
+          l = yield(item)
+          l ||= "_"
+          l = l[0,1].upcase
+          l = "_" if !l.match(/^[A-Z]$/)
+        elsif item.to_s.match(/([a-z])/i)
+          l= $~[1].upcase
+        else
+          l= "_"
+        end
+        letters[item] = l
+        used[l] = true
       end
-      letters[item] = l
-      used[l] = true
-    end
-    return [nil, list] if used.keys.length <= 1
 
-    # If user has clicked on a letter, remove all items:
-    # 1) above that letter (Douglas's preference)
-    # 2) above and below that letter (Darvin's preference)  <---
-    if letter && letter.match(/^([A-Z])/)
-      letter = $~[1]
-      list = list.select do |item|
-        # letters[item] >= letter
-        letters[item] == letter
+      if used.keys.length > 1
+        # If user has clicked on a letter, remove all items:
+        # 1) above that letter (Douglas's preference)
+        # 2) above and below that letter (Darvin's preference)  <---
+        if letter && letter.match(/^([A-Z])/)
+          letter = $~[1]
+          list = list.select do |item|
+            # letters[item] >= letter
+            letters[item] == letter
+          end
+          obj.letter = letter
+        else
+          obj.letter = nil
+        end
       end
-      obj.letter = letter
-    else
-      obj.letter = nil
     end
 
     return [obj, list]
@@ -470,11 +472,13 @@ class ApplicationController < ActionController::Base
       # missing an id).
       names = Name.names_from_string(output_what)
       if names.last.nil?
-        flash_error "Unable to create the name '#{output_what}'."
+        flash_error :app_no_create_name.t(:name => output_what)
       else
         now = Time.now
         for n in names
-          n.save_if_changed(user, "Updated by #{user.login}.", now) if n
+          if n
+            n.save_if_changed(user, :log_updated_by, { :user => user.login }, now, true)
+          end
         end
       end
       result = names.last
@@ -485,7 +489,7 @@ class ApplicationController < ActionController::Base
   def check_user_id(user_id)
     result = check_permission(user_id)
     unless result
-      flash_error "Permission denied."
+      flash_error :app_permission_denied.t
     end
     result
   end
@@ -499,7 +503,7 @@ class ApplicationController < ActionController::Base
   def verify_user()
     result = false
     if get_session_user.verified.nil?
-      redirect_to :controller => 'account', :action=> 'reverify', :id => get_session_user.id
+      redirect_to(:controller => 'account', :action=> 'reverify', :id => get_session_user.id)
     else
       result = true
     end
@@ -628,7 +632,7 @@ class ApplicationController < ActionController::Base
       # Create name object for this name (and any parents, such as genus).
       names = Name.names_from_string(name_parse.search_name)
       if names.last.nil?
-        flash_error "Unable to create the name '#{name_parse.name}'."
+        flash_error :app_no_create_name.t(:name => name_parse.name)
       else # (this only happens if above genus, in which case names.length == 1)
         names.last.rank = name_parse.rank if name_parse.rank
         # only save comment if name didn't exist
@@ -637,22 +641,20 @@ class ApplicationController < ActionController::Base
         save_names(names, user, deprecate)
       end
     end
-    # This will happen if the user did the "Valid name = Deprecated synonym"
-    # syntax, AND the deprecated synonym doesn't currently exist, AND was
-    # approved.
+    # Do the same thing for synonym (found the Approved = Synonym syntax).
     if name_parse.has_synonym && approved_names.member?(name_parse.synonym_search_name)
       synonym_names = []
       # Create the deprecated synonym.
       synonym_names = Name.names_from_string(name_parse.synonym_search_name)
       if synonym_names.last.nil?
-        flash_error "Unable to create the synonym '#{name_parse.synonym}'.\n"
+        flash_error :app_no_create_name.t(:name => name_parse.synonym)
       else
         synonym_name = synonym_names.last
         synonym_name.rank = name_parse.synonym_rank if name_parse.synonym_rank
         # only save comment if name didn't exist
         synonym_name.notes = name_parse.synonym_comment if !synonym_name.id && name_parse.synonym_comment
         synonym_name.change_deprecated(true)
-        synonym_name.save_if_changed(user, "Deprecated by #{user.login}")
+        synonym_name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
         save_names(synonym_names[0..-2], user, nil) # Don't change higher taxa
       end
     end
@@ -664,18 +666,18 @@ class ApplicationController < ActionController::Base
   #   user          needed in case have to create or deprecate any names
   #   deprecate     create them deprecated to start with
   def save_names(names, user, deprecate)
-    msg = nil
+    log = nil
     unless deprecate.nil?
       if deprecate
-        msg = "Deprecated by #{user.login}"
+        log = :log_deprecated_by
       else
-        msg = "Approved by #{user.login}"
+        log = :log_approved_by
       end
     end
     for n in names
       if n # Could be nil if parent is ambiguous with respect to the author
         n.change_deprecated(deprecate) unless deprecate.nil? or n.id
-        n.save_if_changed(user, msg)
+        n.save_if_changed(user, log, { :user => user.login }, Time.now, true)
       end
     end
   end
@@ -716,12 +718,19 @@ class ApplicationController < ActionController::Base
     @current_path = request.env['PATH_INFO']
     @request_method = request.env['REQUEST_METHOD']
 
-    # Try to get the locale from the parameters, from the session, and then from the navigator
+    # Try to get the locale from:
+    #   1) parameters (user overrides everything)
+    #   2) user prefs (whatever user chose earlier)
+    #   3) session (whatever we used last time)
+    #   4) navigator (provides default)
     if params[:user_locale]
-      logger.debug "[globalite] #{params[:user_locale][:code]} locale passed"
-      Locale.code = params[:user_locale][:code] #get_matching_ui_locale(params[:user_locale][:code]) #|| session[:locale] || get_valid_lang_from_accept_header || Globalite.default_language
+      logger.debug "[globalite] #{params[:user_locale]} locale passed"
+      Locale.code = params[:user_locale]
       # Store the locale in the session
       session[:locale] = Locale.code
+    elsif @user && @user.locale && @user.locale != ''
+      logger.debug "[globalite] loading locale: #{@user.locale} from @user"
+      Locale.code = @user.locale
     elsif session[:locale]
       logger.debug "[globalite] loading locale: #{session[:locale]} from session"
       Locale.code = session[:locale]
@@ -735,14 +744,21 @@ class ApplicationController < ActionController::Base
     end
 
     # Add a last gasp default if the selected locale doesn't match any of our
-    # existing translations.
-    if :app_title.l == '__localization_missing__'
+    # existing translations.  (All translation YML files have :en_US defined.)
+    if :en_US.l != 'English'
       logger.warn("No translation exists for: #{Locale.code}")
       Locale.code = "en-US"
     end
 
+    # Update user preference.
+    if @user && @user.locale != Locale.code
+      @user.locale = Locale.code
+      @user.save
+    end
+
     # Locale.code = "en-US"
     logger.debug "[globalite] Locale set to #{Locale.code}"
+
     # render the page
     yield
 
@@ -759,9 +775,9 @@ class ApplicationController < ActionController::Base
     # Example HTTP_ACCEPT_LANGUAGE: "en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3"
     wl = {}
     accept_langs.each {|accept_lang|
-        if (accept_lang + ';q=1') =~ /^(.+?);q=([^;]+).*/
-            wl[($2.to_f rescue -1.0)]= $1
-        end
+      if (accept_lang + ';q=1') =~ /^(.+?);q=([^;]+).*/
+        wl[($2.to_f rescue -1.0)]= $1
+      end
     }
     logger.debug "[globalite] client accepted locales: #{wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }.to_sentence}"
     sorted_langs = wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }

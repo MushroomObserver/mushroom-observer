@@ -24,7 +24,7 @@ class Synonym < ActiveRecord::Base
       name.synonym = self
       touch = true
       if not name.save
-        raise "Unable to transfer %s" % name.display_name
+        raise :runtime_unable_to_transfer_name.t(:name => name.display_name)
       end
       self.modified = Time.now
       if old_synonym_id

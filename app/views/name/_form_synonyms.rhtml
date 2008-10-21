@@ -1,4 +1,5 @@
 <!--[form:observation]-->
+
 <table cellpadding="10">
   <tr>
     <td valign="top">
@@ -7,16 +8,15 @@
       names = []
       if synonym
         names = synonym.names %>
-        <%= :form_synonyms_current_synonyms.l %>:<br/>
-        <span class="HelpNote"><%= :form_synonyms_current_synonyms_help.l %></span>
+        <%= :form_synonyms_current_synonyms.t %>:<br/>
+        <span class="HelpNote"><%= :form_synonyms_current_synonyms_help.t %></span>
         <span class="Data">
           <% for n in names %>
             <% if n != @name %>
               <br/>
               <%= check_box("existing_synonyms", n.id, { :checked => "checked" }, "checked") %>
               <%= "<label for=\"existing_synonyms_#{n.id}\">" %>
-                <%= link_to(textilize_without_paragraph(h(n.display_name)),
-                            :action => 'show_name', :id => n) %>
+                <%= link_to(n.display_name.t, :action => 'show_name', :id => n.id) %>
               </label>
             <% end %>
           <% end %>
@@ -27,16 +27,15 @@
         <% if synonym %>
           <br/><hr/><br/>
         <% end %>
-        <%= :form_synonyms_proposed_synonyms.l %>:<br/>
-        <span class="HelpNote"><%= :form_synonyms_proposed_synonyms_help.l %></span>
+        <%= :form_synonyms_proposed_synonyms.t %>:<br/>
+        <span class="HelpNote"><%= :form_synonyms_proposed_synonyms_help.t %></span>
         <span class="Data">
           <% for name in @synonym_names %>
             <% if not names.member?(name) %>
               <br/>
               <%= check_box("proposed_synonyms", name.id, { :checked => "checked" }, "checked") %>
               <%= "<label for=\"proposed_synonyms_#{name.id}\">" %>
-                <%= link_to(textilize_without_paragraph(h(name.display_name)),
-                            :action => 'show_name', :id => name) %>
+                <%= link_to(name.display_name.t, :action => 'show_name', :id => name.id) %>
               </label>
             <% end %>
           <% end %>
@@ -48,30 +47,31 @@
       <% if @new_names && (@new_names != []) %>
         <div style="width:500px">
           <div class="Errors">
-            <%= :form_synonyms_missing_names.l %><br/>
+            <%= :form_synonyms_missing_names.t %><br/>
             <span class="Data">
               <% for n in @new_names %>
                 &nbsp;&nbsp;<%= h(n) %><br/>
               <% end %>
             </span>
-            <span class="HelpNote"><%= :form_synonyms_missing_names_help.l %></span>
+            <span class="HelpNote"><%= :form_synonyms_missing_names_help.t %></span>
           </div>
         </div>
       <% end %>
 
       <p>
         <%= check_box("deprecate", "all", { :checked => @deprecate_all }, "checked") %>
-        <label for="deprecate_all"><%= :form_synonyms_deprecate_synonyms.l %></label><br/>
-        <span class="HelpNote"><%= :form_synonyms_deprecate_synonyms_help.l %></span>
+        <label for="deprecate_all"><%= :form_synonyms_deprecate_synonyms.t %></label><br/>
+        <span class="HelpNote"><%= :form_synonyms_deprecate_synonyms_help.t %></span>
       </p>
 
       <p>
-        <label for="synonym_members"><%= :form_synonyms_names.l %>:</label>
-        <span class="HelpNote"><%= :form_synonyms_names_help.l % textilize_without_paragraph(h(@name.display_name)) %>
+        <label for="synonym_members"><%= :form_synonyms_names.t %>:</label>
+        <span class="HelpNote"><%= :form_synonyms_names_help.t(:name => @name.display_name) %>
         </span><br/>
-        <%= text_area 'synonym', 'members', :value => @list_members  %>
+        <%= text_area('synonym', 'members', :value => @list_members) %>
       </p>
     </td>
   </tr>
 </table>
+
 <!--[eoform:observation]-->

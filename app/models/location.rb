@@ -1,6 +1,5 @@
-require 'active_record_extensions'
-require 'acts_as_versioned_extensions'
-require 'string_extensions'
+require_dependency 'active_record_extensions'
+require_dependency 'acts_as_versioned_extensions'
 
 ################################################################################
 #

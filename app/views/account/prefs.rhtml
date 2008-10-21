@@ -1,73 +1,83 @@
+<% 
+  @title = :prefs_title.t
+
+  new_tab_set do
+    add_tab(:bulk_license_link.t,
+            :controller => 'image', :action => 'license_updater')
+    add_tab(:profile_link.t,
+            :controller => 'account', :action => 'profile')
+  end
+%>
+
 <% form_for(:user, :url => { :action => :prefs }) do |form| %>
+  <br/><center><input type="submit" value="<%= :app_save_changes.l %>" class="primary" /></center>
 
-<div title="<%= :prefs_title.l %>" id="prefform" class="form">
-  <h3><%= :prefs_title.l %></h3>
-
-  <%= 
-    tabs = []
-    tabs.push [ :bulk_license_link.l, url_for(:controller => 'image', :action => 'license_updater') ]
-    tabs.push [ :profile_link.l, url_for(:controller => 'account', :action => 'profile') ]
-    show_tabs tabs
-  %>
-
-  <center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
-
-  <p><label for="user_login"><%= :prefs_login.l %></label><br/>
+  <p><label for="user_login"><%= :prefs_login.t %></label>:<br/>
   <%= form.text_field("login", :size => 60) %></p>
-  <p><label for="user_email"><%= :prefs_email.l %></label><br/>
+
+  <p><label for="user_email"><%= :prefs_email.t %></label>:<br/>
   <%= form.text_field("email", :size => 60) %></p>
-  <p><label for="user_password"><%= :prefs_password_new.l %></label><br/>
+
+  <p><label for="user_password"><%= :prefs_password_new.t %></label>:<br/>
   <%= form.password_field("password", :value => '', :size => 30) %></p>
-  <p><label for="user_password_confirmation"><%= :prefs_password_confirm.l %></label><br/>
+
+  <p><label for="user_password_confirmation"><%= :prefs_password_confirm.t %></label>:<br/>
   <%= form.password_field("password_confirmation", :size => 30) %></p>
 
-  <table cellpadding="0" cellspacing="0" style="margin-top:2em">
+  <table cellpadding="0" cellspacing="0" style="margin-top:1em">
     <tr>
-        <td>
-            <label for="user_theme"><b><%= :prefs_theme.l %>:</b></label><br/>
-            <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %>
-        </td>
-        <td width="20">
-        </td>
-        <td>
-            <label for="user_license_id"><b><%= :prefs_license.l %>:</b></label>
-              <span id="help_note">
-                  (<%= textilize_without_paragraph(:prefs_license_note.l % "#{DOMAIN}/observer/how_to_user#lic") %>)
-              </span><br/>
-            <%= form.select(:license_id, @licenses) %>
-        </td>
+      <td>
+        <label for="user_theme"><b><%= :prefs_theme.t %>:</b></label><br/>
+        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %>
+      </td>
+
+      <td width="20">
+      </td>
+
+      <td>
+        <label for="user_license_id"><b><%= :prefs_license.t %>:</b></label>
+          <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
+        <%= form.select(:license_id, @licenses) %>
+      </td>
+
+      <td width="20">
+      </td>
+
+      <td>
+        <label for="user_locale"><b><%= :prefs_locale.t %>:</b></label><br/>
+        <% locales = all_locales.map { |x| [x.sub('-','_').to_sym.t, x] } %>
+        <%= form.select(:locale, locales) %>
+      </td>
     <tr>
   <table><br/>
 
-  <p style="margin-top:2em"><b><%= :prefs_layout_title.l %>:</b><br/>
+  <b><%= :prefs_layout_title.t %>:</b><br/>
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>
-  <label for="user_rows"><%= :prefs_rows_by.l %></label>
+  <label for="user_rows"><%= :prefs_rows_by.t %></label>
   <%= form.select(:columns, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) %>
-  <label for="user_columns"><%= :prefs_columns.l %></label><br/>
+  <label for="user_columns"><%= :prefs_columns.t %></label><br/>
+
   <%= form.check_box("alternate_rows") %>
-  <label for="user_alternate_rows"><%= :prefs_alt_row_colors.l %></label><br/>
+  <label for="user_alternate_rows"><%= :prefs_alt_row_colors.t %></label><br/>
   <%= form.check_box("alternate_columns") %>
-  <label for="user_alternate_columns"><%= :prefs_alt_col_colors.l %></label><br/>
+  <label for="user_alternate_columns"><%= :prefs_alt_col_colors.t %></label><br/>
   <%= form.check_box("vertical_layout") %>
-  <label for="user_vertical_layout"><%= :prefs_text_below_images.l %></label></p>
+  <label for="user_vertical_layout"><%= :prefs_text_below_images.t %></label><br/><br/>
 
-  <p style="margin-top:2em"><b><%= :prefs_email_prefs.l %>:</b></p>
+  <b><%= :prefs_email_prefs.t %>:</b><br/>
   <%= form.check_box("feature_email") %>
-  <label for="user_feature_email"><%= :prefs_email_features.l %></label><br/>
+  <label for="user_feature_email"><%= :prefs_email_features.t %></label><br/>
   <%= form.check_box("comment_email") %>
-  <label for="user_comment_email"><%= :prefs_email_comments.l %></label><br/>
+  <label for="user_comment_email"><%= :prefs_email_comments.t %></label><br/>
   <%= form.check_box("commercial_email") %>
-  <label for="user_commercial_email"><%= :prefs_email_commercial.l %></label><br/>
+  <label for="user_commercial_email"><%= :prefs_email_commercial.t %></label><br/>
   <%= form.check_box("question_email") %>
-  <label for="user_question_email"><%= :prefs_email_questions.l %></label><br/>
+  <label for="user_question_email"><%= :prefs_email_questions.t %></label><br/>
   <%= form.check_box("html_email") %>
-  <label for="user_html_email"><%= :prefs_email_html.l %></label>
-  <p style="margin:0px 20px 0px 20px"><span id="help_note">
-    <%= :prefs_email_note.l %></span></p>
+  <label for="user_html_email"><%= :prefs_email_html.t %></label><br/>
+  <div class="HelpNoteIndent">
+    <%= :prefs_email_note.tp %>
+  </div>
 
-<br/>
-<center><input type="submit" value="<%= :prefs_button.l %>" class="primary" /></center>
-<br/><br/>
-</div>
-
+  <br/><center><input type="submit" value="<%= :app_save_changes.l %>" class="primary" /></center>
 <% end %>

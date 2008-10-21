@@ -1,131 +1,109 @@
 <%
-    @title = 'Name: ' + h(@name.text_name)
-%>
+  @title = :show_name_title.t(:name => @name.display_name)
 
-<% # Google Images | Distribution Map %>
-<%= 
-    tabs = []
-    tabs.push [:show_name_google_images.l, 
-               "http://images.google.com/images?q=#{@name.text_name}"]
+  # Google Images | Distribution Map | Email Tracking
+  new_tab_set do
+    add_tab(:app_google_images.t, "http://images.google.com/images?q=#{@name.text_name}")
     if @data != []
-        tabs.push [:show_name_distribution_map.l,
-                   url_for(:action => 'map', :id => @name.id) ]
+      add_tab(:show_name_distribution_map.t, :action => 'map', :id => @name.id)
     end
-    tabs.push [:show_name_email_tracking.l,
-                url_for(:action => 'email_tracking', :id => @name.id)]
-    show_tabs tabs
-%>
-<br/>
+    add_tab(:show_name_email_tracking.t, :action => 'email_tracking', :id => @name.id)
+  end
 
-<% # Edit Name | Bulk Name Edit | Add Name | Change Synonyms | Approve/Deprecate %>
-<%=
-    tabs = [[:show_name_edit_name.l,
-             url_for(:action => 'edit_name', :id => @name.id)],
-            [:show_name_bulk_name_edit.l,
-             url_for(:action => 'bulk_name_edit')],
-            [:show_name_add_name.l,
-             url_for(:action => 'create_name')],
-            [:show_name_change_synonyms.l,
-             url_for(:action => 'change_synonyms', :id => @name.id)]]
+  # Edit Name | Bulk Name Edit | Add Name | Change Synonyms | Approve/Deprecate
+  new_tab_set do
+    add_tab(:show_name_edit_name.t, :action => 'edit_name', :id => @name.id)
+    add_tab(:show_name_bulk_name_edit.t, :action => 'bulk_name_edit')
+    add_tab(:show_name_add_name.t, :action => 'create_name')
+    add_tab(:show_name_change_synonyms.t, :action => 'change_synonyms', :id => @name.id)
     if @name.deprecated
-        tabs.push([:show_name_approve.l,
-                   url_for(:action => 'approve_name', :id => @name.id)])
+      add_tab(:app_approve.t, :action => 'approve_name', :id => @name.id)
     else
-        tabs.push([:show_name_deprecate.l,
-                   url_for(:action => 'deprecate_name', :id => @name.id)])
+      add_tab(:app_deprecate.t, :action => 'deprecate_name', :id => @name.id)
     end
-    show_tabs tabs
+  end
 %>
 
-<div id="Title"><%= 'About: ' + textilize_without_paragraph(h(@name.display_name)) %></div>
 <table cellpadding="5" width="100%">
   <tr>
     <td valiagn="top" width="50%">
       <p>
-      	<%= :show_name_rank.l %>: <%= rank_as_string(@name.rank) %><br/>
-      	<%= :show_name_status.l %>:
-      	  <%= @name.status == "Valid" ? :show_name_valid.l : :show_name_deprecated.l %><br/>
-      	<%= :show_name_name.l %>: <%= @name.text_name %><br/>
-      	<%= :show_name_author.l %>: <%= @name.author %><br/>
-      	<%= :show_name_citation.l %>: <%= textilize_without_paragraph(sanitize(@name.citation || '')) %><br/>
-      	<%
-      	approved_synonyms, deprecated_synonyms = @name.sort_synonyms
-      	if approved_synonyms != []
-      	    links = approved_synonyms.map{|n|
-      	      link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n.id)
-      	    }
-              %>
-              <%= @name.deprecated ? :show_name_preferred_synonyms.l : :show_name_synonyms.l %>: <%= links.join(', ') %><br/>
-      	<%
-      	end
-          if deprecated_synonyms != []
-              links = deprecated_synonyms.map{|n|
-                link_to(textilize_without_paragraph(h(n.display_name)), :action => "show_name", :id => n.id)
-              }
-              %>
-              <%= :show_name_deprecated_synonyms.l %>: <%= links.join(', ') %><br/>
-          <% end %>
-      	<%= :show_name_version.l %>: <%= @name.version %><br/>
-      	<% if @past_name %>
-      	    <%= link_to("#{:show_name_previous_version.l}: %d" % @past_name.version,
-                :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
-      	<% end %>
-      	<% if @name.ok_for_export %>
-      	  <br/><%= :ok_for_export.l %>
-      	<% else %>
-      	  <br/><%= :no_export.l %>
-      	<% end %>
-      	<br/><%= :show_name_content_status.l %>: <%= @name.review_status.l %>
-      	<% if @name.reviewer %>
-          <span class="HelpNote">
-            <br/>&nbsp;&nbsp;(<%=
-              "#{:show_name_latest_review.l}: #{@name.last_review ? @name.last_review.strftime("%Y-%m-%d") : 'Unknown'} by #{user_link(@name.reviewer, @name.reviewer.login)}"
-            %>)
-          </span>
+        <%= :app_rank.t %>: <%= rank_as_string(@name.rank) %><br/>
+        <%= :app_name_status.t %>: <%= @name.status == "Valid" ? :app_accepted.t : :app_deprecated.t %><br/>
+        <%= :app_name.t %>: <%= h(@name.text_name) %><br/>
+        <%= :app_author.t %>: <%= sanitize(@name.author.to_s).t %><br/>
+        <%= :app_citation.t %>: <%= sanitize(@name.citation.to_s).t %><br/>
+
+        <% approved_synonyms, deprecated_synonyms = @name.sort_synonyms
+        if approved_synonyms != []
+          links = approved_synonyms.map do |n|
+            link_to(n.display_name.t, :action => "show_name", :id => n.id)
+          end %>
+          <%= @name.deprecated ? :show_name_preferred_synonyms.t : :show_name_synonyms.t %>: <%= links.join(', ') %><br/>
+        <% end
+        if deprecated_synonyms != []
+          links = deprecated_synonyms.map do |n|
+            link_to(n.display_name.t, :action => "show_name", :id => n.id)
+          end %>
+          <%= :show_name_deprecated_synonyms.t %>: <%= links.join(', ') %><br/>
         <% end %>
-      	<% if @is_reviewer %>
-      	  <br/>&nbsp;&nbsp;<%=
-      	    link_to(:unvetted.l, :action => 'set_review_status', :value => :unvetted, :id => @name.id)
-      	  %>
-      	  <br/>&nbsp;&nbsp;<%=
-      	    link_to(:vetted.l, :action => 'set_review_status', :value => :vetted, :id => @name.id)
-      	  %>
-      	  <br/>&nbsp;&nbsp;<%=
-      	    link_to(:inaccurate.l, :action => 'set_review_status', :value => :inaccurate, :id => @name.id)
-      	  %>
-      	  <% if @name.ok_for_export %>
-        	  <br/>&nbsp;&nbsp;<%=
-        	    link_to(:no_export.l, :action => 'set_export_status', :value => false, :id => @name.id)
-        	  %>
-        	<% else %>
-        	  <br/>&nbsp;&nbsp;<%=
-        	    link_to(:ok_for_export.l, :action => 'set_export_status', :value => true, :id => @name.id)
-        	  %>
+
+        <%= :app_version.t %>: <%= @name.version %><br/>
+        <% if @past_name %>
+          <%= link_to("#{:show_name_previous_version.t}: %d" % @past_name.version,
+                      :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
+        <% end %><br/>
+
+        <% if @name.ok_for_export %>
+          <%= :ok_for_export.t %>
+        <% else %>
+          <%= :no_export.t %>
+        <% end %><br/>
+
+        <%= :show_name_content_status.t %>: <%= @name.review_status.t %><br/>
+        <% if @name.reviewer %>
+          <span class="HelpNote">
+            &nbsp;&nbsp;(<%= :show_name_latest_review.t(
+              :date => @name.last_review ? @name.last_review.strftime("%Y-%m-%d") : :app_unknown.t,
+              :user => user_link(@name.reviewer, @name.reviewer.login)
+            ) %>)
+          </span><br/>
+        <% end %>
+        <% if @is_reviewer %>
+          &nbsp;&nbsp;<%= link_to(:unvetted.t,   :action => 'set_review_status', :value => :unvetted,   :id => @name.id) %><br/>
+          &nbsp;&nbsp;<%= link_to(:vetted.t,     :action => 'set_review_status', :value => :vetted,     :id => @name.id) %><br/>
+          &nbsp;&nbsp;<%= link_to(:inaccurate.t, :action => 'set_review_status', :value => :inaccurate, :id => @name.id) %><br/>
+          <% if @name.ok_for_export %>
+            &nbsp;&nbsp;<%= link_to(:no_export.t, :action => 'set_export_status', :value => false, :id => @name.id) %><br/>
+          <% else %>
+            &nbsp;&nbsp;<%= link_to(:ok_for_export.t, :action => 'set_export_status', :value => true, :id => @name.id) %><br/>
           <% end %>
-      	<% end %>
+        <% end %>
       </p>
     </td>
+
     <td valign="top" width="50%">
       <p>
         <% if @existing_drafts or @user_projects %>
           <span class='HelpNote'>
-            <%= :show_name_draft_help.l %><br/>
+            <%= :show_name_draft_help.t %><br/>
           </span>
         <% end %>
         <% if @existing_drafts %>
-          <%= :show_name_existing_drafts.l %><br/>
+          <%= :show_name_existing_drafts.t %><br/>
           <% for draft in @existing_drafts %>
-            &nbsp;&nbsp;<%= link_to(draft.project.title, :controller => :project, :action => 'show_draft',
+            &nbsp;&nbsp;<%= link_to(draft.project.title.t, :controller => :project, :action => 'show_draft',
                                     :id => draft.id) %>
             (<%= user_link(draft.user) %>)<br/>
           <% end %>
         <% end %>
       </p>
+
       <p>
         <% if @user_projects %>
-          <%= :show_name_create_draft.l %><br/>
+          <%= :show_name_create_draft.t %><br/>
           <% for project in @user_projects %>
-            &nbsp;&nbsp;<%= link_to(project.title, :controller => :project, :action => 'create_or_edit_draft',
+            &nbsp;&nbsp;<%= link_to(project.title.t, :controller => :project, :action => 'create_or_edit_draft',
                                     :project => project.id, :name => @name.id) %><br/>
           <% end %>
         <% end %>
@@ -134,36 +112,33 @@
   </tr>
 </table>
 
-<%
-  odd_or_even = 0
-  for f in Name.all_note_fields
-    value = @name.send(f).to_s
-    if value != ''
-      odd_or_even = 1 - odd_or_even %>
-      <%= "form_names_#{f}".to_sym.l %>:
-      <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-          <%= textilize(sanitize(value)) %>
-      </div>
-      <br/>
-<%  end
-end %>
+<% odd_or_even = 0
+for f in Name.all_note_fields
+  value = @name.send(f).to_s
+  if value != ''
+    odd_or_even = 1 - odd_or_even %>
+    <%= "form_names_#{f}".to_sym.t %>:
+    <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+      <%= sanitize(value).tpl %>
+    </div><br/>
+  <% end %>
+<% end %>
 <% if @name.license %>
-  <%= render :partial => "shared/form_#{@name.license.form_name}" %>
+  <%= render(:partial => "shared/form_#{@name.license.form_name}") %>
 <% end %>
 
 <% if @children != [] %>
-    <p><%= rank_as_plural_string(@children[0].rank) %>:</p>
-    <p>
-        <% i = 0
-           max = 25
-           for child in @children
-            i += 1
-            break if i > max %>
-            <%= link_to(textilize_without_paragraph(h(child.display_name)),
-                :action => 'show_name', :id => child.id) %><br/>
-        <% end %>
-        <%= "And #{@children.length - i + 1} more...<br/>" if i > max %>
-    </p>
+  <p><%= rank_as_plural_string(@children[0].rank) %>:</p>
+  <p>
+    <% i = 0
+    max = 25
+    for child in @children
+      i += 1
+      break if i > max %>
+      <%= link_to(child.display_name.t, :action => 'show_name', :id => child.id) %><br/>
+    <% end %>
+    <%= :app_and_num_more.t(:num => @children.length - i + 1) + '<br/>' if i > max %>
+  </p>
 <% end %>
 
 <%
@@ -174,23 +149,22 @@ num_sects = 0
 for sect in ["consensus", "synonym", "other"]
 
   if sect == "consensus"
-    head  = :show_name_observations.l + ":"   # Header string to display above group.
+    head  = :show_name_observations.t + ":"   # Header string to display above group.
     data  = @consensus_data                   # Data returned by sql query.
     page  = @consensus_page                   # Page number.
     pages = @consensus_pages                  # Pagination object.
     arg   = :consensus_page                   # Parameter used in pagination.
   elsif sect == "synonym"
-    head  = :show_name_synonym_observations.l + ":"
+    head  = :show_name_synonym_observations.t + ":"
     data  = @synonym_data
     page  = @synonym_page
     pages = @synonym_pages
     arg   = :synonym_page
   else
-    head  = :show_name_other_observations.l + ":<br/>" +
-            "<span class='HelpNote'>" +
-              (:show_name_other_observations_notes.l %
-                textilize_without_paragraph(h(@name.display_name)))
-            "</span>"
+    head  = :show_name_other_observations.t + ":<br/>" +
+      "<span class='HelpNote'>" +
+        :show_name_other_observations_notes.t(:name => @name.display_name)
+      "</span>"
     data  = @other_data
     page  = @other_page
     pages = @other_pages
@@ -209,7 +183,7 @@ for sect in ["consensus", "synonym", "other"]
     args.delete arg
     link_args = {}
     link_args[:search_seq] = @search_seqs[sect] if @search_seqs[sect]
-    
+
     # Add line break between groups.
     if num_sects > 0 %>
       <br/><hr></hr>
@@ -235,21 +209,23 @@ for sect in ["consensus", "synonym", "other"]
             image_id = datum["thumb_image_id"]
             if image_id
               link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-                :controller => 'observer', :action => 'show_observation', :id => id,
-                :params => link_args)
+                      :controller => 'observer', :action => 'show_observation', :id => id,
+                      :params => link_args)
             end
             %><br/>
           </td>
           <td width="100%" valign="middle">
-            <span class="ListName"><%= link_to(textilize_without_paragraph(h(datum["observation_name"] + " (#{id})")),
-              :controller => 'observer', :action => 'show_observation', :id => id,
-              :params => link_args) %></span><br/>
+            <span class="ListName">
+              <%= link_to(datum["observation_name"].t + " (#{id})",
+                          :controller => 'observer', :action => 'show_observation', :id => id,
+                          :params => link_args) %>
+            </span><br/>
             <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>:
             <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
             Observation made: <%= datum["when"]%><br/>
             Community confidence:
               <%= v = datum["vote_cache"]
-                v.nil? || v == "" ? "no votes" : (v.to_f*100/3).round.to_s + "%" %>
+                v.nil? || v == "" ? :app_no_votes.t : (v.to_f*100/3).round.to_s + "%" %>
           </td>
         </tr>
       <% end %>
@@ -259,13 +235,15 @@ for sect in ["consensus", "synonym", "other"]
   <% end %>
 <% end %>
 
-<p><span class="Date">
-  <%= :show_name_name_created.l %>: <%= @name.created %><br/>
-  <%= :show_name_last_modified.l %>: <%= @name.modified %> by <%= user_link(@name.user) %><br/>
-  <% rss_log = @name.rss_log
-     if rss_log %>
-  	<%= link_to :show_name_show_log.l, :controller => 'observer', :action => 'show_rss_log', :id => rss_log.id %>
-  <% end %>
+<p>
+  <span class="Date">
+    <%= :app_created.t(:type => :app_name.l, :date => @name.created) %><br/>
+    <%= :app_last_modified.t(:user => user_link(@name.user), :date => @name.modified) %><br/>
+    <%= :app_viewed.t(:date => @name.last_view, :num => @name.num_views) %><br/>
+    <% rss_log = @name.rss_log
+       if rss_log %>
+        <%= link_to(:app_show_log.t, :controller => 'observer',
+                    :action => 'show_rss_log', :id => rss_log.id) %>
+    <% end %>
   </span>
 </p>
-

@@ -1,38 +1,32 @@
 <%
-  @title = "#{:edit_draft_title.l} #{@draft_name.name.text_name}"
-  display_title = "#{:edit_draft_title.l} #{textilize_without_paragraph(@draft_name.name.display_name)}"
+  @title = :edit_draft_title.t(:name => @draft_name.name.display_name)
+
+  # Show Project | Show Draft (Cancel)
+  new_tab_set do
+    add_tab(:app_show_project.t, :action => 'show_project', :id => @draft_name.project_id)
+    add_tab(:app_cancel.t(:type => :draft.l), :action => 'show_draft', :id => @draft_name.id)
+  end
 %>
 
-<% # Show Project | Show Draft (Cancel) %>
-<%=
-    tabs = [[:edit_draft_show_project.l,
-             url_for(:action => 'show_project', :id => @draft_name.project_id)],
-            [:edit_draft_show_draft.l,
-             url_for(:action => 'show_draft', :id => @draft_name.id)]]
-    show_tabs tabs
-%>
-
-<div id="Title"><%= display_title %></div>
 <% form_tag(:action => 'edit_draft', :id => @draft_name.id) do %>
-  <center><%= submit_tag :edit_draft_submit.l %></center>
+  <br/><center><%= submit_tag :app_save_changes.l %></center>
   
-  <p>
-      <%= render :partial => 'shared/textilize_help' %>
-  </p>
+  <p><%= render(:partial => 'shared/textilize_help') %></p>
   <br/>
 
-  <p><label for="draft_name_license_id"><%= :form_names_license.l %>:</label><br/>
-      <span class="HelpNote">
-          <%= textilize_without_paragraph(:form_names_license_help.l % "#{DOMAIN}/observer/how_to_use#lic") %>
-      </span><br/>
+  <p><label for="draft_name_license_id"><%= :form_names_license.t %>:</label>
+    <span class="HelpNote">
+      <%= :form_names_license_help.t %>
+    </span><br/>
   <%= select('draft_name', 'license_id', @licenses) %></p>
 
   <% for f in Name.all_note_fields %>
-      <p>
-          <label for="draft_name_#{f}"><%= "form_names_#{f}".to_sym.l %>:</label>
-          <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l %></span><br/>
-          <%= text_area 'draft_name', "#{f}", :cols => 80 %>
-      </p>
+    <p>
+      <label for="draft_name_#{f}"><%= "form_names_#{f}".to_sym.t %>:</label>
+      <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.t %></span><br/>
+      <%= text_area('draft_name', "#{f}", :cols => 80) %>
+    </p>
+    <center><%= submit_tag :app_save_changes.l %></center>
   <% end %>
 
 <% end %>
