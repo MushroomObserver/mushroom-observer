@@ -31,15 +31,6 @@ class Location < ActiveRecord::Base
   non_versioned_columns.push('created', 'search_name')
   ignore_if_changed('modified', 'user_id')
 
-  attr_display_names({
-    :high  => "high elevation",
-    :low   => "low elevation",
-    :north => "north edge",
-    :south => "south edge",
-    :east  => "east edge",
-    :west  => "west edge",
-  })
-
   def before_save
     self.set_search_name
   end
@@ -72,20 +63,38 @@ class Location < ActiveRecord::Base
   end
 
   protected
-  def validate
-    errors.add(:north, "Latitude should be at most 90.") if north.nil? || (north > 90)
-    errors.add(:south, "Latitude should be at least -90.") if south.nil? || (south < -90)
-    if north && south && (north < south)
-      errors.add(:north, "North latitude should be greater than south latitude.")
+
+  def validate # :nodoc:
+    if !self.north || (self.north > 90) 
+      errors.add(:north, :validate_location_north_too_high.t)
+    end
+    if !self.south || (self.south < -90)
+      errors.add(:south, :validate_location_south_too_low.t)
+    end
+    if self.north && self.south && (self.north < self.south)
+      errors.add(:north, :validate_location_north_less_than_south.t)
     end
 
-    errors.add(:west, "Longitude should be between -180 and 180.") if west.nil? || (west < -180) || (180 < west)
-    errors.add(:east, "Longitude should be between -180 and 180.") if east.nil? || (east < -180) || (180 < east)
+    if !self.east || (self.east < -180) || (180 < self.east)
+      errors.add(:east, :validate_location_east_out_of_bounds.t)
+    end
+    if !self.west || (self.west < -180) || (180 < self.west)
+      errors.add(:west, :validate_location_west_out_of_bounds.t)
+    end
 
-    errors.add(:high, "High altitude should be at least equal to the lowest altitude.") \
-      if high && low && (high < low)
+    if self.high && self.low && (self.high < self.low)
+      errors.add(:high, :validate_location_high_less_than_low.t)
+    end
+
+    if !self.user
+      errors.add(:user, :validate_location_user_missing.t)
+    end
+
+    if self.display_name.to_s.length > 200
+      errors.add(:display_name, :validate_location_display_name_too_long.t)
+    end
+    if self.search_name.to_s.length > 200
+      errors.add(:search_name, :validate_location_search_name_too_long.t)
+    end
   end
-
-  validates_presence_of :user, :version
-  # validates_numericality_of :north, :south, :west, :east, :high, :low, :version
 end

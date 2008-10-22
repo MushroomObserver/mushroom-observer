@@ -42,10 +42,6 @@ class SpeciesList < ActiveRecord::Base
   has_one :rss_log
   attr_accessor :data
 
-  attr_display_names({
-    :where => "location"
-  })
-
   def add_obs_callback(o) # :nodoc:
     SiteData.update_contribution(:create, self, :species_list_entries, 1)
   end
@@ -224,6 +220,23 @@ class SpeciesList < ActiveRecord::Base
     return false
   end
 
-  validates_presence_of :title
-  validates_presence_of :where
+  protected
+
+  def validate # :nodoc:
+    if self.title.to_s.blank?
+      errors.add(:title, :validate_species_list_title_missing.t)
+    elsif self.title.length > 100
+      errors.add(:title, :validate_species_list_title_too_long.t)
+    end
+
+    if self.where.to_s.blank?
+      errors.add(:where, :validate_species_list_where_missing.t)
+    elsif self.where.length > 100
+      errors.add(:where, :validate_species_list_where_too_long.t)
+    end
+
+    if !self.user
+      errors.add(:user, :validate_species_list_user_missing.t)
+    end
+  end
 end

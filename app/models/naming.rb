@@ -248,5 +248,17 @@ class Naming < ActiveRecord::Base
     self.observation.name == self.name
   end
 
-  validates_presence_of :name, :observation, :user
+  protected
+
+  def validate # :nodoc:
+    if !self.observation
+      errors.add(:observation, :validate_naming_observation_missing.t)
+    end
+    if !self.name
+      errors.add(:name, :validate_naming_name_missing.t)
+    end
+    if !self.user
+      errors.add(:user, :validate_naming_user_missing.t)
+    end
+  end
 end

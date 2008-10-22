@@ -10,6 +10,7 @@ class ObservationTest < Test::Unit::TestCase
   def setup
     @cc_obs = Observation.new
     @cc_obs.user = @mary
+    @cc_obs.when = Time.now
     @cc_obs.where = "Glendale, California"
     @cc_obs.notes = "New"
     @cc_nam = Naming.new
@@ -24,8 +25,8 @@ class ObservationTest < Test::Unit::TestCase
     assert_kind_of Observation, @cc_obs
     assert_kind_of Naming, namings(:minimal_unknown_naming)
     assert_kind_of Naming, @cc_nam
-    assert @cc_obs.save, @detailed_unknown.errors.full_messages.join("; ")
-    assert @cc_nam.save, @detailed_unknown_naming.errors.full_messages.join("; ")
+    assert @cc_obs.save, @cc_obs.errors.full_messages.join("; ")
+    assert @cc_nam.save, @cc_nam.errors.full_messages.join("; ")
   end
 
   def test_update
@@ -41,11 +42,13 @@ class ObservationTest < Test::Unit::TestCase
   
   def test_validate
     @cc_obs.user = nil
+    @cc_obs.when = nil
     @cc_obs.where = nil
     assert !@cc_obs.save
-    assert_equal 2, @cc_obs.errors.count
-    assert_equal "can't be blank", @cc_obs.errors.on(:user)
-    assert_equal "can't be blank", @cc_obs.errors.on(:where)
+    assert_equal 3, @cc_obs.errors.count
+    assert_equal :validate_observation_user_missing.t, @cc_obs.errors.on(:user)
+    assert_equal :validate_observation_when_missing.t, @cc_obs.errors.on(:when)
+    assert_equal :validate_observation_where_missing.t, @cc_obs.errors.on(:where)
   end
 
   def test_destroy

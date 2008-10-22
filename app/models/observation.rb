@@ -68,11 +68,6 @@ class Observation < ActiveRecord::Base
   belongs_to :location
   belongs_to :user
 
-  attr_display_names({
-    :when  => "date",
-    :where => "location"
-  })
-
   def add_spl_callback(o) # :nodoc:
     SiteData.update_contribution(:create, self, :species_list_entries, 1)
   end
@@ -469,7 +464,7 @@ return result if debug
     id = id_field.to_i
     img = Image.find(:id => id)
     unless img
-      errors.add(:notes, "unable to find a corresponding image")
+      errors.add(:thumb_image_id, :validate_observation_thumb_image_id_invalid.t)
     end
   end
 
@@ -503,8 +498,17 @@ return result if debug
   protected
 
   def validate # :nodoc:
-    errors.add(:where, "can't be blank") if (where.nil? || where == '') && location_id.nil?
-  end
+    if !self.when
+      errors.add(:when, :validate_observation_when_missing.t)
+    end
+    if !self.user
+      errors.add(:user, :validate_observation_user_missing.t)
+    end
 
-  validates_presence_of :user
+    if self.where.to_s.blank? && !location_id
+      errors.add(:where, :validate_observation_where_missing.t)
+    elsif self.where.to_s.length > 100
+      errors.add(:where, :validate_observation_where_too_long.t)
+    end
+  end
 end

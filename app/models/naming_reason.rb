@@ -36,10 +36,6 @@ require 'active_record_extensions'
 class NamingReason < ActiveRecord::Base
   belongs_to :naming
 
-  attr_display_names({
-    "reason" => "type"
-  })
-
   # Outside key is the integer stored in database as "reason".
   # Inside hash describes the given reason.
   REASONS = {
@@ -89,7 +85,15 @@ class NamingReason < ActiveRecord::Base
     self.notes.nil? ? false : true
   end
 
-  validates_presence_of :naming, :reason
-  validates_inclusion_of :reason, :in => REASONS.keys,
-    :message => "is not recognized"
+  protected
+
+  def validate # :nodoc:
+    if !self.naming
+      errors.add(:naming, :validate_naming_reason_naming_missing.t)
+    end
+
+    if !REASONS.keys.include?(self.reason)
+      errors.add(:reason, :validate_naming_reason_reason_invalid.t)
+    end
+  end
 end

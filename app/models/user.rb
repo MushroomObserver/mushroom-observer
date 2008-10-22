@@ -82,6 +82,9 @@ class User < ActiveRecord::Base
   # Used to let user enter location by name in prefs form.
   attr_accessor :place_name
 
+  # Used to let user enter password confirmation when signing up or changing password.
+  attr_accessor :password_confirmation
+
   def self.authenticate(login, pass)
     find(:first, :conditions => ["login = ? AND password = ?", login, sha1(pass)])
   end
@@ -171,10 +174,42 @@ class User < ActiveRecord::Base
     write_attribute("password", self.class.sha1(password))
   end
 
-  validates_length_of :login, :within => 3..40
-  validates_length_of :password, :within => 5..40
-  validates_presence_of :login, :password, :email
-  validates_presence_of :password_confirmation, :on => :create
-  validates_uniqueness_of :login
-  validates_confirmation_of :password, :on => :create
+  protected
+
+  def validate # :nodoc:
+    if self.login.to_s.blank?
+      errors.add(:login, :validate_user_login_missing.t)
+    elsif self.login.length < 3 or self.login.length > 40
+      errors.add(:login, :validate_user_login_too_long.t)
+    elsif (other = User.find_by_login(self.login)) && (other.id != self.id)
+      errors.add(:login, :validate_user_login_taken.t)
+    end
+
+    if self.password.to_s.blank?
+      errors.add(:password, :validate_user_password_missing.t)
+    elsif self.password.length < 5 or password.length > 40
+      errors.add(:password, :validate_user_password_too_long.t)
+    end
+
+    if self.email.to_s.blank?
+      errors.add(:email, :validate_user_email_missing.t)
+    elsif self.email.length > 80
+      errors.add(:email, :validate_user_email_too_long.t)
+    end
+
+    if self.theme.to_s.length > 40
+      errors.add(:theme, :validate_user_theme_too_long.t)
+    end
+    if self.name.to_s.length > 80
+      errors.add(:name, :validate_user_name_too_long.t)
+    end
+  end
+
+  def validate_on_create # :nodoc:
+    if self.password_confirmation.to_s.blank?
+      errors.add(:password, :validate_user_password_confirmation_missing.t)
+    elsif self.password != self.password_confirmation
+      errors.add(:password, :validate_user_password_no_match.t)
+    end
+  end
 end

@@ -5,7 +5,8 @@
 #
 # Note on syntax: This is standard YAML, with minimal post-processing.
 #   1) \n is turned into a newline
-#   2) [arg] is filled in with arguments passed in to the localize method:
+#   2) << and >> are interpreted as angle-quotes
+#   3) [arg] is filled in with arguments passed in to the localize method:
 #
 #    :app_about_name.l(:name => 'Agaricus')
 #
@@ -15,9 +16,9 @@
 #    :app_title.tp    Calls textilize on it (which wraps it in <p>...</p>).
 #
 # The order of keys and the comments in the English file are preserved.  When
-# you run 'rake jason:clean_translations', it will rewrite the non-English
-# translations to match the English file, and fill in missing keys, telling you
-# how many are missing in each file.
+# you run 'rake lang:clean' it will rewrite the non-English translations to
+# match the English file, and fill in missing keys, telling you how many are
+# missing in each file. 
 #
 # The way to tell which keys were inserted from the English is to search for
 # colons followed by *two* spaces, instead of one.  If you decide to follow
@@ -133,6 +134,7 @@ app_south: South
 app_species_list: Species Lists
 app_summary: Summary
 app_title: Mushroom Observer
+app_translators_credit: ''
 app_unknown: Unknown
 app_update: Update
 app_users: Users
@@ -291,6 +293,71 @@ log_species_list_created: Species list created by [user].
 log_species_list_destroyed: Species list destroyed by [user].
 log_species_list_updated: Species list updated by [user].
 log_updated_by: Updated by [user].
+
+# active-record automatic validation error messages
+validate_comment_object_type_too_long: Object_type must be less than 30 characters long.
+validate_comment_summary_missing: Please summarize your comment -- this will be displayed on the main index page.
+validate_comment_summary_too_long: Summary must be less than 100 characters long.
+validate_comment_user_missing: Missing user.
+validate_image_content_type_images_only: You can only upload images.
+validate_image_content_type_too_long: Content_type must be less than 100 characters long.
+validate_image_copyright_holder_too_long: Copyright holder's name must be less than 100 characters long.
+validate_image_title_too_long: Title must be less than 100 characters long.
+validate_image_user_missing: Missing user.
+validate_image_when_missing: Missing date.
+validate_location_display_name_too_long: Display_name must be less than 200 characters long.
+validate_location_east_out_of_bounds: Longitude should be between -180 and 180.
+validate_location_high_less_than_low: High altitude should be at least equal to the lowest altitude.
+validate_location_north_too_high: Latitude should be at most 90.
+validate_location_north_less_than_south: North latitude should be greater than south latitude.
+validate_location_search_name_too_long: Search_name must be less than 200 characters long.
+validate_location_south_too_low: Latitude should be at least -90.
+validate_location_user_missing: Missing user.
+validate_location_west_out_of_bounds: Longitude should be between -180 and 180.
+validate_name_author_too_long: Author must be less than 100 characters long.
+validate_name_citation_too_long: Citation must be less than 100 characters long.
+validate_name_display_name_too_long: Display_name must be less than 100 characters long.
+validate_name_observation_name_too_long: Observation_name must be less than 100 characters long.
+validate_name_search_name_too_long: Search_name must be less than 100 characters long.
+validate_name_text_name_too_long: Text_name must be less than 100 characters long.
+validate_name_user_missing: Missing user.
+validate_naming_name_missing: Missing name.
+validate_naming_observation_missing: Missing observation.
+validate_naming_reason_naming_missing: Missing naming.
+validate_naming_reason_reason_invalid: Invalid reason code.
+validate_naming_user_missing: Missing user.
+validate_notification_user_missing: Missing user.
+validate_observation_thumb_image_id_invalid: Unable to find a corresponding image for thumbnail.
+validate_observation_user_missing: Missing user.
+validate_observation_when_missing: Missing observation date.
+validate_observation_where_missing: Please tell us where it was seen or collected.
+validate_observation_where_too_long: Location must be less than 100 characters long.
+validate_project_admin_group_missing: Missing admin group.
+validate_project_title_missing: Please give this project a title.
+validate_project_title_too_long: Title must be less than 100 characters long.
+validate_project_user_group_missing: Missing user group.
+validate_project_user_missing: Missing user.
+validate_species_list_title_missing: Please enter a title.
+validate_species_list_title_too_long: Title must be less than 100 characters long.
+validate_species_list_user_missing: Missing user.
+validate_species_list_where_missing: Please enter a location.
+validate_species_list_where_too_long: Location must be less than 100 characters long.
+validate_user_email_missing: Please give us a valid email address wo we can verify your account.
+validate_user_email_too_long: Email address must be less than 80 characters long.
+validate_user_login_missing: Please choose a login name.
+validate_user_login_taken: Sorry, that login name is already taken.
+validate_user_login_too_long: Login name must be 3 to 40 characters long.
+validate_user_name_too_long: Full name must be less than 80 characters long.
+validate_user_password_confirmation_missing: Please enter your password twice to verify.
+validate_user_password_missing: Please choose a password.
+validate_user_password_no_match: Password doesn't match confirmation.
+validate_user_password_too_long: Password must be 5 to 40 characters long.
+validate_user_theme_too_long: Theme name must be less than 40 characters long.
+validate_vote_naming_missing: Missing naming.
+validate_vote_user_missing: Missing user.
+validate_vote_value_missing: Please choose your confidence level.
+validate_vote_value_not_integer: Vote value is not a number.
+validate_vote_value_out_of_bounds: Vote value is out of range.
 
 ################################################################################
 
@@ -1728,6 +1795,30 @@ theme_amanita: _Amanita_ Theme
 theme_cantharellaceae: _Cantharellaceae_ Theme
 theme_hygrocybe: _Hygrocybe_ Theme
 theme_random: Random
+
+
+# observer/translators_note
+translators_note: >
+  Please help us make this website available around the world!  We have finally
+  translated the site into Spanish, and two friends have started working on
+  Portuguese (think of all those cool Brazillian fungi we're missing out on!).
+  However we can still use all the help we can get.  We need help proof-reading
+  the Spanish -- after all I don't actually speak the language.  And now that
+  we've worked out all the kinks, we'd love to see some more languages.
+
+  It's very easy.  There is somewhere around 1600 lines or 11000 words of text
+  on this site at the moment, but don't let that scare you.  We've organized it
+  so someone with limited time can concentrate on just the first few sections,
+  and get the most commonly-used text done first.  Then as time and energy
+  permits, they or someone else can continue working down the list until one
+  day it is all finished.  Please feel free to pick up a copy of the
+  "translation files":[repo] and start plugging away in any language you wish.
+  Then just "pop us an email":/observer/ask_webmaster_question when you finish
+  doing what you can, and we'll tell you how to submit your work.  You will
+  receive prominant credit for your contribution, in addition, of course, to
+  our undying gratitude.
+
+translators_note_title: Translator's Note
 
 
 # observer/users_by_contribution

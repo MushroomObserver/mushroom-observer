@@ -133,6 +133,7 @@ app_south: Sud
 app_species_list: Listas de Especies
 app_summary: Resumen
 app_title: Mushroom Observer
+app_translators_credit: Traducido al español por _user Jason Hollinger_
 app_unknown: Desconocido
 app_update: Actualizar
 app_users: Usuarios
@@ -291,6 +292,71 @@ log_species_list_created: Lista de especies creado por [user].
 log_species_list_destroyed: Lista de especies borrado por [user].
 log_species_list_updated: Lista de especies realizado por [user].
 log_updated_by: Realizado por [user].
+
+# active-record automatic validation error messages
+validate_comment_object_type_too_long: Object_type debe ser inferior a 30 caracteres de largo.
+validate_comment_summary_missing: Por favor, escribir un resume de su comentario.  Esto se mostrará en la página principal.
+validate_comment_summary_too_long: El resumen debe ser inferior a 100 caracteres de largo.
+validate_comment_user_missing: Falta el usuario.
+validate_image_content_type_images_only: Sólo puede cargar imágenes.
+validate_image_content_type_too_long: Content_type debe ser inferior a 100 caracteres de largo.
+validate_image_copyright_holder_too_long: El nombre de titular de los derechos de autor debe ser inferior a 100 caracteres de largo.
+validate_image_title_too_long: El título debe ser inferior a 100 caracteres de largo.
+validate_image_user_missing: Falta el usuario.
+validate_image_when_missing: Falta la fecha.
+validate_location_display_name_too_long: Display_name debe ser inferior a 200 caracteres de largo.
+validate_location_east_out_of_bounds: La longitud debe ser entre -180 y 180.
+validate_location_high_less_than_low: La altura máxima no puede ser inferior al altura mínima.
+validate_location_north_too_high: La latitud no puede ser más de 90.
+validate_location_north_less_than_south: El borde del norte debe ser mayor que el borde del sur.
+validate_location_search_name_too_long: Search_name debe inferior a 200 caracteres de largo.
+validate_location_south_too_low: La latitud no puede ser inferior a -90.
+validate_location_user_missing: Falta el usuario.
+validate_location_west_out_of_bounds: La longitud debe ser entre -180 y 180.
+validate_name_author_too_long: El autor debe ser inferior a 100 caracteres de largo.
+validate_name_citation_too_long: La cita debe ser inferior a 100 caracteres de largo.
+validate_name_display_name_too_long: Display_name debe ser inferior a 100 caracteres de largo.
+validate_name_observation_name_too_long: Observation_name debe ser inferior a 100 caracteres de largo.
+validate_name_search_name_too_long: Search_name debe ser inferior de 100 caracteres de largo.
+validate_name_text_name_too_long: Text_name debe ser inferior a 100 caracteres de largo.
+validate_name_user_missing: Falta el usuario.
+validate_naming_name_missing: Falta el nombre.
+validate_naming_observation_missing: Falta la observación.
+validate_naming_reason_naming_missing: Falta el nombre propuesto.
+validate_naming_reason_reason_invalid: El código de razón no es válida.
+validate_naming_user_missing: Falta el usuario.
+validate_notification_user_missing: Falta el usuario.
+validate_observation_thumb_image_id_invalid: No se puede encontrar una imagen correspondiente para la miniatura.
+validate_observation_user_missing: Falta el usuario.
+validate_observation_when_missing: Falta la fecha de la observación.
+validate_observation_where_missing: Por favor, escriba la ubicación que es visto o recogido.
+validate_observation_where_too_long: La ubicación debe ser inferior a 100 caracteres de largo.
+validate_project_admin_group_missing: Falta el grupo de admin.
+validate_project_title_missing: Por favor, dar a este proyecto un título.
+validate_project_title_too_long: El título debe ser inferior a 100 caracteres de largo.
+validate_project_user_group_missing: Falta el grupo de usuario.
+validate_project_user_missing: Falta el usuario.
+validate_species_list_title_missing: Por favor, dar a esta lista de especies un título.
+validate_species_list_title_too_long: El título debe ser inferior a 100 caracteres de largo.
+validate_species_list_user_missing: Falta el usuario.
+validate_species_list_where_missing: Por favor, escribir una ubicación.
+validate_species_list_where_too_long: La ubicación debe ser inferior a 100 caracteres de largo.
+validate_user_email_missing: Por favor, darnos una dirección de e-mail válida para que podamos verificar su cuenta.
+validate_user_email_too_long: La dirección de e-mail debe ser inferior a 80 caracteres de largo.
+validate_user_login_missing: Por favor, elija un nombre de usuario.
+validate_user_login_taken: Lo sentimos, ese nombre de usuario ya está tomada.
+validate_user_login_too_long: El nombre de usuario debe ser de 3 a 40 caracteres de largo.
+validate_user_name_too_long: El nombre completo debe ser inferior a 80 caracteres de largo.
+validate_user_password_confirmation_missing: Por favor, escriba su contraseña dos veces para verificarla.
+validate_user_password_missing: Por favor, elija una contraseña.
+validate_user_password_no_match: La contraseña no coincide con la confirmación.
+validate_user_password_too_long: La contraseña debe ser de 5 a 40 caracteres de largo.
+validate_user_theme_too_long: El nobre de tema debe ser inferior a 40 caracteres de largo.
+validate_vote_naming_missing: Falta el nombre propuesto.
+validate_vote_user_missing: Falta el usuario.
+validate_vote_value_missing: Por favor, elija su nivel de confianza.
+validate_vote_value_not_integer: Valor de la votación no es un número valido.
+validate_vote_value_out_of_bounds: Valor de la votación está fuera de alcance.
 
 ################################################################################
 
@@ -1806,6 +1872,33 @@ theme_amanita: _Amanita_ Tema
 theme_cantharellaceae: _Cantearellaceae_ Tema
 theme_hygrocybe: _Hygrocybe_ Tema
 theme_random: Aleatorio
+
+
+# observer/translators_note
+translators_note: >
+  Por favor ayúdenos a hacer de este sitio web disponible en todo el mundo!
+  Hemos traducido finalmente el sitio en español, y dos amigos han empezado a
+  trabajar en portugués.  (¡Creo de todos los hongos frescos Brazillian que
+  estamos perdiendo!)  Sin embargo todavía podemos utilizar toda la ayuda que
+  podamos conseguir.  Necesitamos ayudar a la prueba de leer la traducción al
+  español -- después de todo lo que en realidad no habla español.  Y ahora que
+  hemos trabajado en todos los errores, nos encantaría ver algunos más idiomas. 
+  \n\n
+  Es muy fácil.  Hay alrededor de 1.600 líneas o 11.000 palabras de texto en
+  este sitio por el momento, pero no dejes que te asustan.  Hemos organizado a
+  fin de que alguien con tiempo limitado puede concentrarse sólo en las
+  primeras secciones, y obtener el más comúnmente utilizado texto hecho en
+  primer lugar.  Luego con el tiempo y la energía lo permite, él o alguien más
+  pueda seguir trabajando por la lista hasta que un día es todos los acabados.
+  Por favor, siéntase libre para recoger una copia de "los archivos de
+  traducción":[repo] y empezar a traducir en cualquier idioma que desee.  A
+  continuación, "enviarnos un correo
+  electrónico":/observer/ask_webmaster_question cuando termine haciendo lo que
+  puede, y vamos a decirle cómo presentar su trabajo.  Usted recibirá crédito
+  destacado por su contribución, además, por supuesto, a nuestra eterna
+  gratitud. 
+
+translators_note_title: Nota del Traductor 
 
 
 # observer/users_by_contribution

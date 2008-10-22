@@ -32,4 +32,12 @@ class Notification < ActiveRecord::Base
     end
     result
   end
+
+  protected
+
+  def validate # :nodoc:
+    if !self.user
+      errors.add(:user, :validate_notification_user_missing.t)
+    end
+  end
 end

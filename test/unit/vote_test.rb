@@ -42,9 +42,9 @@ class VoteTest < Test::Unit::TestCase
     vote = Vote.new()
     assert !vote.save
     assert_equal 3, vote.errors.count
-    assert_equal "can't be blank", vote.errors.on(:naming)
-    assert_equal "can't be blank", vote.errors.on(:user)
-    assert_equal "Must choose confidence level.", vote.errors.on(:value)
+    assert_equal :validate_vote_naming_missing.t, vote.errors.on(:naming)
+    assert_equal :validate_vote_user_missing.t, vote.errors.on(:user)
+    assert_equal :validate_vote_value_missing.t, vote.errors.on(:value)
     vote = Vote.new(
         :naming => @coprinus_comatus_naming,
         :user   => @rolf,
@@ -52,7 +52,7 @@ class VoteTest < Test::Unit::TestCase
     )
     assert !vote.save
     assert_equal 1, vote.errors.count
-    assert_equal "is not a number", vote.errors.on(:value)
+    assert_equal :validate_vote_value_not_integer.t, vote.errors.on(:value)
     vote = Vote.new(
         :naming => @coprinus_comatus_naming,
         :user   => @rolf,
@@ -60,7 +60,7 @@ class VoteTest < Test::Unit::TestCase
     )
     assert !vote.save
     assert_equal 1, vote.errors.count
-    assert_equal "out of range", vote.errors.on(:value)
+    assert_equal :validate_vote_value_out_of_bounds.t, vote.errors.on(:value)
   end
 
   # Destroy one.

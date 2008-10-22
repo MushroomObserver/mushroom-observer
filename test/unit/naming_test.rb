@@ -45,9 +45,9 @@ class NamingTest < Test::Unit::TestCase
     naming = Naming.new()
     assert !naming.save
     assert_equal 3, naming.errors.count
-    assert_equal "can't be blank", naming.errors.on(:name)
-    assert_equal "can't be blank", naming.errors.on(:observation)
-    assert_equal "can't be blank", naming.errors.on(:user)
+    assert_equal :validate_naming_name_missing.t, naming.errors.on(:name)
+    assert_equal :validate_naming_observation_missing.t, naming.errors.on(:observation)
+    assert_equal :validate_naming_user_missing.t, naming.errors.on(:user)
   end
 
   # Destroy one.

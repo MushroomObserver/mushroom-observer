@@ -268,6 +268,12 @@ div.HelpNoteIndent {
   border: 1px solid;
 }
 
+#translators_credit {
+}
+#translators_credit p {
+  font-size: 80%;
+}
+
 div.auto_complete {
   background-color:#fff;
   border:1px solid #888;

@@ -48,7 +48,7 @@ class Comment < ActiveRecord::Base
 
   # Same as 'comment.object_type.downcase.to_sym.l' (returns '' if fails for whatever reason).
   def object_type_localized
-    if self.object_type 
+    if self.object_type
       self.object_type.downcase.to_sym.l
     else
       ''
@@ -56,5 +56,20 @@ class Comment < ActiveRecord::Base
   end
 
   protected
-  validates_presence_of :summary, :user
+
+  def validate # :nodoc:
+    if !self.user
+      errors.add(:user, :validate_comment_user_missing.t)
+    end
+
+    if self.summary.to_s.blank?
+      errors.add(:summary, :validate_comment_summary_missing.t)
+    elsif self.summary.length > 100
+      errors.add(:summary, :validate_comment_summary_too_long.t)
+    end
+
+    if self.object_type.to_s.length > 30
+      errors.add(:object_type, :validate_comment_object_type_too_long.t)
+    end
+  end
 end

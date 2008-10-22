@@ -30,16 +30,16 @@ class NamingReasonTest < Test::Unit::TestCase
   def test_validate
     nr = NamingReason.new()
     assert !nr.save
-    assert_equal 3, nr.errors.count
-    assert_equal "can't be blank", nr.errors.on(:naming)
-    assert_equal ["can't be blank", "is not recognized"], nr.errors.on(:reason).sort
+    assert_equal 2, nr.errors.count
+    assert_equal :validate_naming_reason_naming_missing.t, nr.errors.on(:naming)
+    assert_equal :validate_naming_reason_reason_invalid.t, nr.errors.on(:reason)
     nr = NamingReason.new(
         :naming => @coprinus_comatus_naming,
         :reason => 999
     )
     assert !nr.save
     assert_equal 1, nr.errors.count
-    assert_equal "is not recognized", nr.errors.on(:reason)
+    assert_equal :validate_naming_reason_reason_invalid.t, nr.errors.on(:reason)
   end
 
   # Destroy one.

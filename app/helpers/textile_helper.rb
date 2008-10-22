@@ -191,15 +191,15 @@ protected
           str = id
           obj = case type
             when 'name':
-              Name.find_by_search_name(id) ||
-              Name.find_by_text_name(id)
+              Name.find_by_search_name(str) ||
+              Name.find_by_text_name(str)
 
             when 'user':
-              User.find_by_login(id) ||
-              User.find_by_legal_name(id)
+              User.find_by_login(str) ||
+              User.find_by_name(str)
 
             when 'location':
-              pattern = id.downcase.gsub(/\W+/, '%')
+              pattern = str.downcase.gsub(/\W+/, '%')
               ids = Location.connection.select_values %(
                 SELECT id FROM locations
                 WHERE LOWER(locations.search_name) LIKE '%#{pattern}%'

@@ -879,4 +879,32 @@ class Name < ActiveRecord::Base
       self.notes = str
     end
   end
+
+  protected
+
+  def validate # :nodoc:
+    if !self.user
+      errors.add(:user, :validate_name_user_missing.t)
+    end
+
+    if self.text_name.to_s.length > 100
+      errors.add(:text_name, :validate_name_text_name_too_long.t)
+    end
+    if self.display_name.to_s.length > 200
+      errors.add(:display_name, :validate_name_display_name_too_long.t)
+    end
+    if self.observation_name.to_s.length > 200
+      errors.add(:observation_name, :validate_name_observation_name_too_long.t)
+    end
+    if self.search_name.to_s.length > 200
+      errors.add(:search_name, :validate_name_search_name_too_long.t)
+    end
+
+    if self.author.to_s.length > 100
+      errors.add(:author, :validate_name_author_too_long.t)
+    end
+    if self.citation.to_s.length > 200
+      errors.add(:citation, :validate_name_citation_too_long.t)
+    end
+  end
 end

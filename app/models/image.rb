@@ -184,9 +184,27 @@ class Image < ActiveRecord::Base
     name.gsub(/[^\w._-]/, '')
   end
 
-  validates_format_of :content_type, :with => /^image/,
-           :message => "You can only upload images."
+  protected
 
-  validates_presence_of :user
+  def validate # :nodoc:
+    if !self.user
+      errors.add(:user, :validate_image_user_missing.t)
+    end
+    if !self.when
+      errors.add(:when, :validate_image_when_missing.t)
+    end
 
+    if !self.content_type.to_s.match(/^image/)
+      errors.add(:content_type, :validate_image_content_type_images_only.t)
+    elsif self.content_type.to_s.length > 100
+      errors.add(:content_type, :validate_image_content_type_too_long.t)
+    end
+
+    if self.title.to_s.length > 100
+      errors.add(:title, :validate_image_title_too_long.t)
+    end
+    if self.copyright_holder.to_s.length > 100
+      errors.add(:copyright_holder, :validate_image_copyright_holder_too_long.t)
+    end
+  end
 end

@@ -119,14 +119,20 @@ class Vote < ActiveRecord::Base
     return last_pair[0]
   end
 
-  validates_presence_of :naming, :user
-  validates_each :value do |record, attr, value|
-    if value.nil?
-      record.errors.add(attr, "Must choose confidence level.") 
-    elsif record.value_before_type_cast.to_s !~ /^[+-]?\d+(\.\d+)?$/
-      record.errors.add(attr, "is not a number") 
-    elsif value < MINIMUM_VOTE || value > MAXIMUM_VOTE
-      record.errors.add(attr, "out of range") 
+  def validate # :nodoc:
+    if !self.naming
+      errors.add(:naming, :validate_vote_naming_missing.t)
+    end
+    if !self.user
+      errors.add(:user, :validate_vote_user_missing.t)
+    end
+
+    if self.value.nil?
+      errors.add(:value, :validate_vote_value_missing.t)
+    elsif self.value_before_type_cast.to_s !~ /^[+-]?\d+(\.\d+)?$/
+      errors.add(:value, :validate_vote_value_not_integer.t)
+    elsif self.value < MINIMUM_VOTE || self.value > MAXIMUM_VOTE
+      errors.add(:value, :validate_vote_value_out_of_bounds.t)
     end
   end
 end

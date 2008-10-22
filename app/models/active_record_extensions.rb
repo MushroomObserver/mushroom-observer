@@ -6,7 +6,6 @@
 #    before_destroy   Callback to update SiteData before objects are destroyed.
 #
 #    obj.formatted_errors   Gather errors for a given instance.
-#    attr_display_names     Override method names in error messages.
 #
 ################################################################################
 
@@ -36,34 +35,12 @@ module ActiveRecord
         if msg.match(/^[A-Z]/)
           out << msg
         else
-          name = self.class.get_attr_display_names[attr.to_s].to_s
-          if name.nil? || name == ""
-            name = attr.to_s.gsub(/_/, " ")
-          end
+          name = attr.to_s.gsub(/_/, " ")
           obj = self.class.to_s.gsub(/_/, " ")
           out << "#{obj} #{name} #{msg}."
         end
       }
       return out
-    end
-
-    # Override attribute names in error and warning messages.
-    #   attr_display_names({
-    #     :attribute => "display name",
-    #     :attribute => "display name",
-    #     ...
-    #   })
-    def self.attr_display_names(hash)
-      class_eval(<<-EOS)
-        def self.get_attr_display_names
-          { #{ hash.keys.map { |k| "'#{k.to_s}'=>'#{hash[k].to_s}'" }.join(",") } }
-        end
-      EOS
-    end
-
-    # Don't override anything by default.
-    def self.get_attr_display_names
-      {}
     end
 
     # Return the name of the controller (as a simple lowercase string)
