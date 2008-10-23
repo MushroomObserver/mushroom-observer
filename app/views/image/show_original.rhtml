@@ -30,7 +30,7 @@
   <% end %>
 </div>
 
-<div about="orig/#{@image.id}.jpg">
+<div>
   <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
               :action => 'show_image', :id => @image.id, :params => search_params) %>
   <%= render(:partial => "shared/form_#{@image.license.form_name}") %>

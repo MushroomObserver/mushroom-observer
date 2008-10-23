@@ -6,6 +6,12 @@
             :controller => 'image', :action => 'license_updater')
     add_tab(:profile_link.t,
             :controller => 'account', :action => 'profile')
+    add_tab(:turn_javascript_nil_title.t,
+            :controller => 'observer', :action => 'turn_javascript_nil') if session[:js_override] != nil
+    add_tab(:turn_javascript_on_title.t,
+            :controller => 'observer', :action => 'turn_javascript_on') if !@js
+    add_tab(:turn_javascript_off_title.t,
+            :controller => 'observer', :action => 'turn_javascript_off') if @js
   end
 %>
 
@@ -48,8 +54,8 @@
         <% locales = all_locales.map { |x| [x.sub('-','_').to_sym.t, x] } %>
         <%= form.select(:locale, locales) %>
       </td>
-    <tr>
-  <table><br/>
+    </tr>
+  </table><br/>
 
   <b><%= :prefs_layout_title.t %>:</b><br/>
   <%= form.select(:rows, [1, 2, 3, 4, 5, 10, 20, 50]) %>

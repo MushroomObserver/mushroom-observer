@@ -117,11 +117,11 @@ class ImageControllerTest < Test::Unit::TestCase
     get_with_dump :image_search
     assert_response :success
     assert_template 'list_images'
-    assert_equal 'Images Matching &#8216;Notes&#8217;', @controller.instance_variable_get('@title')
+    assert_equal :image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title')
     get_with_dump :image_search, { :page => 2 }
     assert_response :success
     assert_template 'list_images'
-    assert_equal 'Images Matching &#8216;Notes&#8217;', @controller.instance_variable_get('@title')
+    assert_equal :image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title')
   end
 
   def test_image_search_next
@@ -261,7 +261,7 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_resize_images
     requires_login :resize_images, {}, false
-    assert_equal("You must be an admin to access resize_images.", flash[:notice])
+    assert_equal(:image_resize_denied.t, flash[:notice])
     assert_redirected_to(:controller => "image", :action => "list_images")
     # How should real image files be handled?
   end

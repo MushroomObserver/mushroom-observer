@@ -48,11 +48,11 @@ end %>
     <% for image in @good_images %>
       <div class="form_image">
         <table><tr>
-          <td><nobr>
+          <td style="white-space:nowrap">
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
             <%= link_to(image_tag("thumb/#{image.id}.jpg", :border => 0),
                         :controller => 'image', :action => 'show_image', :id => image.id) %>
-          </nobr></td>
+          </td>
           <td width="10"></td>
           <td>
             <label for="image_<%= image.id %>_notes"><%= :app_notes.t %>:</label>
@@ -99,21 +99,25 @@ end %>
     <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
 
     <%= javascript_tag %(
+      var x = String.fromCharCode(60);
+      var y = String.fromCharCode(93);
+
       var IMAGE_FORM = "#{
         i = @images.length - 1
         str = render(:partial => 'form_image', :locals => { :index => i })
-        str.gsub!("image_#{i}_", 'image_<XXX>_')
-        str.gsub!("image_id_#{i}", 'image_id_<XXX>')
-        str.gsub!("(#{i})", '(<XXX>)')
-        str.gsub!("[#{i}]", '[<XXX>]')
-        str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-<XXX>"')
+        str.gsub!("image_#{i}_", 'image_XXX_')
+        str.gsub!("image_id_#{i}", 'image_id_XXX')
+        str.gsub!("(#{i})", '(XXX)')
+        str.gsub!("[#{i}]", '[XXX]')
+        str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
         str.sub!("checked=\"checked\" ", '')
         str = escape_javascript(str)
-        str.gsub('</script>', '</"+"script>')
+        str.gsub('<', '"+x+"')
+        str.gsub(']', '"+y+"')
       }";
 
       function image_new() {
-        var form = IMAGE_FORM.replace(/<XXX>/g, NEXT_IMAGE_INDEX++);
+        var form = IMAGE_FORM.replace(/XXX/g, NEXT_IMAGE_INDEX++);
         Insertion.Bottom('image_forms', form);
         Element.ensureVisible($('new_image_button'));
         if (NEXT_IMAGE_INDEX == 5)

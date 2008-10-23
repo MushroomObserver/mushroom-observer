@@ -18,7 +18,7 @@
 # The order of keys and the comments in the English file are preserved.  When
 # you run 'rake lang:clean' it will rewrite the non-English translations to
 # match the English file, and fill in missing keys, telling you how many are
-# missing in each file. 
+# missing in each file.
 #
 # The way to tell which keys were inserted from the English is to search for
 # colons followed by *two* spaces, instead of one.  If you decide to follow
@@ -83,26 +83,31 @@ app_languages: Languages
 app_last_modified: 'Last Modified: [date] by [user]'
 app_latest: Latest
 app_latest_changes: Changes by Users
-app_less_button: &laquo; Less
+app_less_button: << Less
 app_list_projects: List Projects
 app_locations_find: Locations
 app_login: Login
 app_logout: Logout
 app_lowest: Lowest altitude
+app_many_times: '[num] times'
 app_meters: meters
-app_more_button: More &raquo;
+app_more_button: More >>
 app_name: Name
 app_name_status: Status
 app_names_find: Names
 app_newest_images: Images
 app_news: Features and Fixes
 app_next: Next
+app_no_ajax: Your Browser is Out of Date
 app_no_create_name: Unable to create the name '[name]'.
+app_no_javascript: Javascript is Disabled
+app_no_session: You Have Cookies Disabled
 app_no_votes: no votes
 app_north: North
 app_notes: Notes
 app_observations_find: Observations
 app_observations_left: Observations
+app_one_time: once
 app_optional: optional
 app_permission_denied: Permission denied.
 app_powered_by: Powered by
@@ -139,7 +144,7 @@ app_unknown: Unknown
 app_update: Update
 app_users: Users
 app_version: Version
-app_viewed: 'Viewed: [num] times, Last Viewed: [date]'
+app_viewed: 'Viewed: [times], last viewed: [date]'
 app_welcome: Welcome, [user]
 app_west: West
 app_what: What
@@ -527,7 +532,7 @@ commercial_inquiry_header: >
   image.
 
 commercial_inquiry_success: Delivered commercial inquiry.
-commercial_inquiry_title: Commercial Inquiry About <name>
+commercial_inquiry_title: Commercial Inquiry About [name]
 
 
 # project/create_or_edit_draft
@@ -1287,6 +1292,42 @@ news_header: >
 news_title: News
 
 
+# observer/no_ajax
+no_ajax_body: >
+  It looks like your browser is out of date.  You still have access to all of
+  the capabilities of this site, however unless you upgrade your browser we
+  will not be able to make use of some very useful javascript features that
+  modern browsers support.  This includes dynamic forms, auto-completion of
+  scientific names and locations, the new version of the species list creator,
+  and more.
+
+no_ajax_browsers: >
+  Browsers that we recommend (and test the site on regularly) are:
+  \n\n
+  * Firefox 1.0 or higher
+  \n\n
+  * Internet Explorer 5.5 or higher
+  \n\n
+  * Netscape 7.0 or higher
+  \n\n
+  * Safari 1.2 or higher
+  \n\n
+  * Opera (we know 8.0 works)
+  \n\n
+  * Chrome
+  \n\n
+  If you know that your browser supports AJAX but it's not listed here,
+  please "send us an e-mail":/observer/ask_webmaster_question.
+
+no_ajax_dont_care: >
+  If you don't care and you're tired of seeing the "Your Browser is Out of
+  Date" tab at the top of every page, "please click
+  here":/observer/turn_javascript_off.  (Login and go to preferences to
+  re-enable auto-detection.)
+
+no_ajax_title: Your Browser is Out of Date
+
+
 # account/no_comment_email
 no_comment_note: >
   You will no longer receive email notifications when other users of the
@@ -1316,6 +1357,55 @@ no_features_note: >
 no_feature_success: Automated feature email disabled for [name].
 
 
+# observer/no_javascript
+no_javascript_body: >
+  It looks like you have javascript disabled on your browser.  You will still
+  have access to all of the capabilities of this site, however unless you
+  enable javascript we will not be able to make use of some very useful
+  features that modern browsers support.  This includes dynamic forms,
+  auto-completion of scientific names and locations, the new version of the
+  species list creator, and more.
+  \n\n
+  If you would like to turn Javascript on, but aren't sure how, try looking it
+  up on google with this search: "How do I enable JavaScript in my
+  browser?":http://www.google.com/search?hl=en&q=How+do+I+enable+Javascript+in+my+browser%3F&btnG=Google+Search
+
+no_javascript_dont_care: >
+  If you *do* have javascript enabled, but our auto-detection algorithm is
+  failing to detect it correctly, "please click
+  here":/observer/turn_javascript_on.  If you don't care and you're tired of
+  seeing the "Javascript Disabled" tab at the top of every page, "please click
+  here":/observer/turn_javascript_off. (Login and go to preferences to
+  re-enable auto-detection.)
+
+no_javascript_title: You Have Javascript Disabled
+
+
+# observer/no_session
+no_session_body: >
+  It looks like your browser is refusing cookies.  Without cookies, our site
+  has no way of remembering who you are from one page to the next.  This means
+  that you will not be able to create an account and login, and therefore you
+  will not be able to create observations, upload images, make comments, and
+  much more.  You will still be able to view everything that the general public
+  has access to, but you will just be an observer, you will not be able to
+  participate actively.
+  \n\n
+  All we will do is store a big long number on your computer.  Next time you go
+  to our site, we will look up that number and use it to keep track of who you
+  are.  (We get multiple requests every second from around the world -- without
+  this ID we wouldn't stand a chance of keeping everyone straight!)  This ID is
+  encrypted and keeps no sensitive information in it.
+  \n\n
+  If you would like to turn cookies on, but aren't sure how, try looking it up
+  on google with this search: "How do I enable cookies in my
+  browser?":http://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search
+  Note that most browsers will let you enable cookies for individual sites,
+  allowing you to protect your privacy everywhere else.  For example, in
+  Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions.
+
+no_session_title: You Have Cookies Disabled
+
 
 # account/no_question_email
 no_questions_note: >
@@ -1329,6 +1419,7 @@ no_question_success: Question email disabled for [name].
 
 # shared/_observation_list
 observation_made: Observation made
+observation_made_confidence: Community confidence
 
 
 # observer_controller
@@ -1470,7 +1561,7 @@ sandbox_sample: >
   !http://random.com/image.jpg!\n
   \n
   Internal links:\n
-  _name 543_, _Amanita lanei_, or _A. lanei_\n
+  _name 371, _Amanita ocreata_, or _A. ocreata_\n
   _location 382_, _location Mt. Wilson_\n
   _user 252_, _user jason_\n
   _observation 12345_\n
@@ -1512,9 +1603,7 @@ send_feature_email_denied: Only the admin can send feature mail.
 # shared/_textile_help
 shared_textile_help: >
   Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/>
-  _Amanita lanei_, _A. lanei_ ---> <u><b><i>Amanita lanei</i></b></u> (linked to name description)<br/>
-  _location Mt. Williamson_ ---> <u>Mt. Williamson</u> (linked to map of the location)<br/>
-  _observation 12345_ ---> <u>observation 12345</u> (linked to the observation)<br/>
+  _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/>
   __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
 shared_textile_link: More details here.
@@ -1819,6 +1908,21 @@ translators_note: >
   our undying gratitude.
 
 translators_note_title: Translator's Note
+
+
+# observer/turn_javascript_nil
+turn_javascript_nil_body: We will resume auto-detection of the state of javascript.
+turn_javascript_nil_title: Auto-Detect Javascript
+
+
+# observer/turn_javascript_off
+turn_javascript_off_body: We will now ignore javascript.
+turn_javascript_off_title: Turn Javascript Off
+
+
+# observer/turn_javascript_on
+turn_javascript_on_body: We will now assume javascript is on.
+turn_javascript_on_title: Turn Javascript On
 
 
 # observer/users_by_contribution

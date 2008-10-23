@@ -54,6 +54,13 @@ require 'ftools'
 #     how_to_use
 #     news
 #     textile_sandbox (= textile)
+#     translators_note
+#
+#     no_ajax
+#     no_javascript
+#     no_session
+#     turn_javascript_on
+#     turn_javascript_off
 #
 #     color_themes
 #     Agaricus
@@ -90,6 +97,9 @@ class ObserverController < ApplicationController
     :location_search,
     :news,
     :next_observation,
+    :no_ajax,
+    :no_javascript,
+    :no_session,
     :observation_search,
     :observations_by_name,
     :pattern_search,
@@ -105,6 +115,9 @@ class ObserverController < ApplicationController
     :show_votes,
     :textile_sandbox,
     :throw_error,
+    :translators_note,
+    :turn_javascript_off,
+    :turn_javascript_on,
     :users_by_contribution
   ])
 
@@ -161,6 +174,21 @@ class ObserverController < ApplicationController
 
   # I keep forgetting the stupid "_sandbox" thing.
   alias textile textile_sandbox
+
+  # Force javascript on.
+  def turn_javascript_on
+    session[:js_override] = :on
+  end
+
+  # Force javascript off.
+  def turn_javascript_off
+    session[:js_override] = :off
+  end
+
+  # Enable auto-detection.
+  def turn_javascript_nil
+    session[:js_override] = nil
+  end
 
   # So you can start with a clean slate
   def clear_session

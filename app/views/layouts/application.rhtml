@@ -7,6 +7,8 @@
   <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
   <%= "<link rel=\"SHORTCUT ICON\" href=\"#{DOMAIN}/images/favicon.ico\" />"%>
 
+  <%= check_if_user_turned_javascript_on %>
+
   <%=
     css = nil
     if CSS.member?(controller.action_name)
@@ -30,15 +32,13 @@
 
 </head>
 <body>
-  <%= report_browser_status %>
-
   <div id="columns" style="height:100%">
-    <table cellpadding="0" cellspacing="0" border="0" height="100%">
+    <table cellpadding="0" cellspacing="0" border="0" style="height:100%">
       <tr>
 
         <td valign="top">
-          <table class="LeftSide" cellpadding="10" height="100%" style='white-space:nowrap'>
-            <tr height="1">
+          <table class="LeftSide" cellpadding="10" style='height:100%; white-space:nowrap'>
+            <tr style="height:1px">
               <td id="banner">
                 <%= @page_title || :app_banner.t %>
               </td>
@@ -108,7 +108,7 @@
                 <br/>
 
                 <div id="color_note">
-                  <%= link_to(:app_colors_from.tp(:theme => css), :controller => 'observer', :action => 'color_themes') %><br/><br/>
+                  <%= link_to(:app_colors_from.t(:theme => css), :controller => 'observer', :action => 'color_themes') %><br/><br/>
                   <%= :app_powered_by.t %>:<br/>
                   <a href='http://www.rubyonrails.org'>Ruby&nbsp;on&nbsp;Rails</a><br/>
                   <%= :app_preferred_browser.t %>:<br/>
@@ -149,7 +149,14 @@
               <% flash_clear %>
             <% end %>
 
-            <% if @tab_sets %>
+            <% if !session_working? || !can_do_ajax? && session[:js_override] != :off
+              new_tab_set do
+                add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if !session_working?
+                add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if !javascript_enabled?
+                add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if javascript_enabled? && !can_do_ajax?
+              end
+            end
+            if @tab_sets %>
               <div class='tab_sets'>
                 <% for set in @tab_sets %>
                   <%= set.map {|tab| render_tab(*tab)}.join(' | ') %><br/>

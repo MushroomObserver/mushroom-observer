@@ -24,32 +24,34 @@
   <div class="pagination"><%= pagination_letters(@letters) %></div>
   <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
 
-  <table cellpadding="5" cellspacing="0" width="100%">
-    <% odd_or_even = 0
-    for observation in @observation_list
-      odd_or_even = 1 - odd_or_even %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
-        <td width="110" align="center" valign="middle">
-          <%= image = observation.thumb_image
-          if image
-            link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
-                    :controller => 'observer', :action => 'show_observation', :id => observation.id,
-                    :params => search_params)
-          end %><br/>
-        </td>
-        <td width="100%" valign="middle">
-          <span class="ListName">
-            <%= link_to(observation.unique_format_name.t,
-                        :controller => 'observer', :action => 'show_observation', :id => observation.id,
-                        :params => search_params) %>
-          </span><br/>
-          <span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span>:
-          <span class="ListWho"><%= user_link(observation.user) %></span>:
-          <span class="ListWhen"><%= observation.when %></span>
-        </td>
-      </tr>
-    <% end %>
-  </table>
+  <% if @observation_list && @observation_list.length > 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% odd_or_even = 0
+      for observation in @observation_list
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td width="110" align="center" valign="middle">
+            <%= image = observation.thumb_image
+            if image
+              link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
+                      :controller => 'observer', :action => 'show_observation', :id => observation.id,
+                      :params => search_params)
+            end %><br/>
+          </td>
+          <td width="100%" valign="middle">
+            <span class="ListName">
+              <%= link_to(observation.unique_format_name.t,
+                          :controller => 'observer', :action => 'show_observation', :id => observation.id,
+                          :params => search_params) %>
+            </span><br/>
+            <span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span>:
+            <span class="ListWho"><%= user_link(observation.user) %></span>:
+            <span class="ListWhen"><%= observation.when %></span>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
 
   <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
   <div class="pagination"><%= pagination_letters(@letters) %></div>

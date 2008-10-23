@@ -781,24 +781,24 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     }
 
     @request.session[:user_id] = 1
-    post(:name_lister, params.merge({ :commit => 'Create Species List' }))
+    post(:name_lister, params.merge({ :commit => :name_lister_submit_spl.l }))
     ids = @controller.instance_variable_get('@objs').map {|n| n.id}
     assert_equal([6, 2, 1, 14], ids)
     assert_response(:success)
     assert_template('create_species_list')
 
     @request.session[:user_id] = nil
-    post(:name_lister, params.merge({ :commit => 'Save as Plain Text' }))
+    post(:name_lister, params.merge({ :commit => :name_lister_submit_txt.l }))
     assert_response_equal_file('test/fixtures/reports/test2.txt')
 
     @request.session[:user_id] = nil
-    post(:name_lister, params.merge({ :commit => 'Save as Rich Text' }))
+    post(:name_lister, params.merge({ :commit => :name_lister_submit_rtf.l }))
     assert_response_equal_file('test/fixtures/reports/test2.rtf') do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end
 
     @request.session[:user_id] = nil
-    post(:name_lister, params.merge({ :commit => 'Save as Spreadsheet' }))
+    post(:name_lister, params.merge({ :commit => :name_lister_submit_csv.l }))
     assert_response_equal_file('test/fixtures/reports/test2.csv')
   end
 

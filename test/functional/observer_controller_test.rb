@@ -54,8 +54,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'list_rss_logs'
     # Test this fancy new link assertion.
-    assert_link_in_html 'Introduction', :action => 'intro'
-    assert_link_in_html 'Create Account', :controller => 'account', :action => 'signup'
+    assert_link_in_html :app_intro.t, :action => 'intro'
+    assert_link_in_html :app_create_account.t, :controller => 'account', :action => 'signup'
   end
 
   def test_ask_webmaster_question
@@ -138,13 +138,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :pattern_search, {:commit => nil, :search => {:pattern => "12"}}
     assert_redirected_to(:controller => "observer", :action => "observation_search")
     assert_equal("12", @request.session[:pattern])
-    get_with_dump :pattern_search, {:commit => 'Images', :search => {:pattern => "34"}}
+    get_with_dump :pattern_search, {:commit => :app_images_find.l, :search => {:pattern => "34"}}
     assert_redirected_to(:controller => "image", :action => "image_search")
     assert_equal("34", @request.session[:pattern])
-    get_with_dump :pattern_search, {:commit => 'Names', :search => {:pattern => "56"}}
+    get_with_dump :pattern_search, {:commit => :app_names_find.l, :search => {:pattern => "56"}}
     assert_redirected_to(:controller => "name", :action => "name_search")
     assert_equal("56", @request.session[:pattern])
-    get_with_dump :pattern_search, {:commit => 'Locations', :search => {:pattern => "78"}}
+    get_with_dump :pattern_search, {:commit => :app_locations_find.l, :search => {:pattern => "78"}}
     assert_redirected_to(:controller => "location", :action => "list_place_names", :pattern => "78")
   end
 
@@ -153,11 +153,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump :observation_search
     assert_response :success
     assert_template 'list_observations'
-    assert_equal "Observations matching &#8216;12&#8217;", @controller.instance_variable_get('@title')
+    assert_equal :list_observations_matching.t(:pattern => '12'), @controller.instance_variable_get('@title')
     get_with_dump :observation_search, { :page => 2 }
     assert_response :success
     assert_template 'list_observations'
-    assert_equal "Observations matching &#8216;12&#8217;", @controller.instance_variable_get('@title')
+    assert_equal :list_observations_matching.t(:pattern => '12'), @controller.instance_variable_get('@title')
   end
 
   # Created in response to a bug seen in the wild
@@ -193,22 +193,22 @@ class ObserverControllerTest < Test::Unit::TestCase
 
     flash[:notice] = nil
     post :ask_webmaster_question, "user" => {"email" => ""}, "question" => {"content" => "Some content"}
-    assert_equal("You must provide a valid return address.", flash[:test_notice])
+    assert_equal(:ask_webmaster_need_address.t, flash[:test_notice])
     assert_response :success
 
     flash[:notice] = nil
     post :ask_webmaster_question, "user" => {"email" => "spammer"}, "question" => {"content" => "Some content"}
-    assert_equal("You must provide a valid return address.", flash[:test_notice])
+    assert_equal(:ask_webmaster_need_address.t, flash[:test_notice])
     assert_response :success
 
     flash[:notice] = nil
     post :ask_webmaster_question, "user" => {"email" => "forgot@content"}, "question" => {"content" => ""}
-    assert_equal("Missing question or comment.", flash[:test_notice])
+    assert_equal(:ask_webmaster_need_content.t, flash[:test_notice])
     assert_response :success
 
     flash[:notice] = nil
     post :ask_webmaster_question, "user" => {"email" => "spam@spam.spam"}, "question" => {"content" => "Buy <a href='http://junk'>Me!</a>"}
-    assert_equal("To cut down on robot spam, questions from unregistered users cannot contain 'http:' or HTML markup.".t, flash[:test_notice])
+    assert_equal(:ask_webmaster_antispam.t, flash[:test_notice])
     assert_response :success
   end
 
@@ -361,7 +361,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     session[:user_id] = user.id
     get(page, params) # Expect redirect
     assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    assert_equal("Only the admin can send feature mail.", flash[:notice])
+    assert_equal(:send_feature_email_denied.t, flash[:notice])
     user.id = 0 # Make user the admin
     session[:user_id] = user.id
     get(page, params) # Expect redirect
@@ -377,7 +377,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     requires_login :send_observation_question, params, false
-    assert_equal("Delivered question.", flash[:notice])
+    assert_equal(:ask_observation_question_success.t, flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "show_observation")
   end
 
@@ -391,7 +391,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       }
     }
     requires_login :send_user_question, params, false
-    assert_equal("Delivered email.", flash[:notice])
+    assert_equal(:ask_user_question_success.t, flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "show_user")
   end
 

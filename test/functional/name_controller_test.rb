@@ -51,7 +51,7 @@ class NameControllerTest < Test::Unit::TestCase
     get_with_dump :name_search
     assert_response :success
     assert_template 'name_index'
-    assert_equal "Names Matching &#8216;56&#8217;", @controller.instance_variable_get('@title')
+    assert_equal :name_index_matching.t(:pattern => '56'), @controller.instance_variable_get('@title')
     # There is no second page of these!
     # get_with_dump :name_search, { :page => 2 }
     # assert_response :success

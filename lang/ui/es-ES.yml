@@ -5,7 +5,8 @@
 #
 # Note on syntax: This is standard YAML, with minimal post-processing.
 #   1) \n is turned into a newline
-#   2) [arg] is filled in with arguments passed in to the localize method:
+#   2) << and >> are interpreted as angle-quotes
+#   3) [arg] is filled in with arguments passed in to the localize method:
 #
 #    :app_about_name.l(:name => 'Agaricus')
 #
@@ -15,9 +16,9 @@
 #    :app_title.tp    Calls textilize on it (which wraps it in <p>...</p>).
 #
 # The order of keys and the comments in the English file are preserved.  When
-# you run 'rake jason:clean_translations', it will rewrite the non-English
-# translations to match the English file, and fill in missing keys, telling you
-# how many are missing in each file.
+# you run 'rake lang:clean' it will rewrite the non-English translations to
+# match the English file, and fill in missing keys, telling you how many are
+# missing in each file.
 #
 # The way to tell which keys were inserted from the English is to search for
 # colons followed by *two* spaces, instead of one.  If you decide to follow
@@ -88,6 +89,7 @@ app_locations_find: Ubicaciones
 app_login: Iniciar Sesión
 app_logout: Cerrar Sesión
 app_lowest: Más baja altitud
+app_many_times: '[num] veces'
 app_meters: metros
 app_more_button: Más >>
 app_name: Nombre
@@ -96,12 +98,16 @@ app_names_find: Nombres
 app_newest_images: Imágenes
 app_news: Características y Cambios
 app_next: Siguiente
+app_no_ajax: Su Navegador No Está Actualizado
 app_no_create_name: No se ha podido crear el nombre <<[name]>>.
+app_no_javascript: Javascript está Deshabilitado
+app_no_session: Usted Ha Deshabilitado las Cookies
 app_no_votes: No votos
 app_north: Norte
 app_notes: Notas
 app_observations_find: Observaciones
 app_observations_left: Observaciones
+app_one_time: una vez
 app_optional: opcional
 app_permission_denied: Permiso denegado.
 app_powered_by: Hecho con
@@ -138,7 +144,7 @@ app_unknown: Desconocido
 app_update: Actualizar
 app_users: Usuarios
 app_version: Version
-app_viewed: 'Visto: [num] veces, Última Visto: [date]'
+app_viewed: 'Visto: [times], última visto: [date]'
 app_welcome: Bienvenido, [user]
 app_west: Oeste
 app_what: Cuál
@@ -534,7 +540,7 @@ commercial_inquiry_header: >
   vínculo a esta imagen.
 
 commercial_inquiry_success: La investigación comercial se ha enviado.
-commercial_inquiry_title: Investigación Comercial sobre <name>
+commercial_inquiry_title: Investigación Comercial sobre [name]
 
 
 # project/create_or_edit_draft
@@ -915,8 +921,8 @@ form_projects_title: Título
 
 # observer/_form_species_list
 form_species_lists_bulk_help: >
-  La creación a granel de nombre se ha trasladado a la página <<"Editor de
-  Nombre a Granel":/name/bulk_name_edit>>.
+  La creación a granel de nombre se ha trasladado a la página "Editor de
+  Nombre a Granel":/name/bulk_name_edit.
 
 form_species_lists_deprecated: Los siguientes nombres no son válidos
 form_species_lists_deprecated_help: >
@@ -934,9 +940,7 @@ form_species_lists_multiple_names_help: >
 
 form_species_lists_species_to_add: Seleccionar Especies que Agregar.
 form_species_lists_title: Título (requerido)
-form_species_lists_write_in_species:
-  Escribir Especies: (un nombre por línea)
-
+form_species_lists_write_in_species: 'Escribir Especies: (un nombre por línea)'
 
 # observer/_form_synonyms
 form_synonyms_current_synonyms: Actuales Sinónimos
@@ -1323,6 +1327,43 @@ news_header: >
 news_title: Novedades
 
 
+# observer/no_ajax
+no_ajax_body: >
+  Parece que su navegador no está actualizado.  Usted todavía tiene acceso a
+  todas las capacidades de este sitio, sin embargo a menos que usted actualice
+  su navegador no vamos a ser capaces de hacer uso de algunas características
+  de javascript muy útil que los navegadores modernos de apoyo.  Esto incluye
+  las formas dinámicas, auto-finalización de los nombres científicos y las
+  ubicaciones, la nueva versión del creador de las listas de especies, y mucho
+  más.
+
+no_ajax_browsers: >
+  Los navegadores recomendados: (Probamos el sitio en estos regularmente.)
+  \n\n
+  * Firefox 1.0 o superior
+  \n\n
+  * Internet Explorer 5.5 o superior
+  \n\n
+  * Netscape 7.0 o superior
+  \n\n
+  * Safari 1.2 o superior
+  \n\n
+  * Opera (sabemos que 8.0 funciona)
+  \n\n
+  * Chrome
+  \n\n
+  Si sabe que su navegador es compatible con AJAX, pero no es así aquí, por
+  favor, "envíenos un e-mail":/observer/ask_webmaster_question.
+
+no_ajax_dont_care: >
+  Si no le importa y que estás cansado de ver la pestaña <<Su Navegador No Está
+  Actualizado>> en la parte superior de cada página, por favor, "haga clic
+  aquí":/observer/turn_javascript_off.  (Acceda e ir a su preferencias para
+  volver a habilitar la detección automática.)
+
+no_ajax_title: Su Navegador No Está Actualizado
+
+
 # account/no_comment_email
 no_comment_note: >
   Ya no recibirá notificaciones por e-mail cuando otros usuarios del Mushroom
@@ -1363,6 +1404,58 @@ no_feature_success: >
 
 
 
+# observer/no_javascript
+no_javascript_body: >
+  Parece que javascript está deshabilitado en su navegador.  Usted todavía
+  tiene acceso a todas las capacidades de este sitio, sin embargo a menos que
+  usted habilitar el javascript no vamos a ser capaces de hacer uso de algunas
+  características de javascript muy útil que los navegadores modernos de apoyo.
+  Esto incluye las formas dinámicas, auto-finalización de los nombres
+  científicos y las ubicaciones, la nueva versión del creador de las listas de
+  especies, y mucho más.
+  \n\n
+  Si desea havilitar javascript, pero no está seguro de cómo, que intenta
+  buscar en google con esta búsqueda: "¿Cómo puedo habilitar JavaScript en mi
+  navegador?":http://www.google.com/search?hl=es&q=¿Cómo+puedo+habilitar+JavaScript+en+mi+navegador%3F&btnG=Google+Search
+
+no_javascript_dont_care: >
+  Si ha javascript habilitado, pero nuestro algoritmo de auto-detección está
+  incurriendo en omisiones en detectarlo correctamente, por favor, "haga clic
+  aquí":/observer/turn_javascript_on.  Si no le importa y que estás cansado de
+  ver la pestaña <<Javascript está Deshabilitado>> en la parte superior de cada
+  página, por favor, "haga clic aquí":/observer/turn_javascript_off.  (Acceda e
+  ir a su preferencias para volver a habilitar la detección automática.)
+
+no_javascript_title: Javascript Está Deshabilitado en Su Navegador
+
+
+# observer/no_session
+no_session_body: >
+  Parece que tu navegador se niega el uso de cookies.  Sin cookies, nuestro
+  sitio no tiene ninguna manera de recordar quién eres de una página a la
+  siguiente.  Esto significa que usted no será capaz de crear una cuenta, y por
+  lo tanto, usted no será capaz de crear las observaciones, subir imágenes,
+  hacer comentarios, y mucho más.  Usted todavía podrá ver todo lo que el
+  público en general tiene acceso a, pero usted acaba de ser un observador,
+  usted no será capaz de participar activamente.
+  \n\n
+  Todos vamos a hacer es almacenar un gran número en su computadora.  La
+  próxima vez que vaya a nuestro sitio, vamos a buscar ese número y utilizarlo
+  para realizar un seguimiento de quién eres.  (Recibimos múltiples peticiones
+  cada segundo de todo el mundo - sin que este ID no hay una oportunidad de
+  mantener recto todo el mundo!)  Este ID es encriptada y no guarda información
+  sensible en ella.
+  \n\n
+  Si desea habilitar las cookies, pero no está seguro de cómo, que intenta
+  buscar en google con esta búsqueda: "¿Cómo puedo habilitar las cookies en mi
+  navegador?":http://www.google.com/search?hl=es&q=¿Cómo+puedo+habilitar+las+cookies+en+mi+navegador%3F&btnG=Google+Search
+  Tenga en cuenta que la mayoria de los navegadores le permitirá habilitar las
+  cookies de sitios individuales, lo que le permite proteger su privacidad en
+  todas partes otros.  Por ejemplo, en Firefox, ir a Editar -> Preferencias ->
+  la pestaña Privicidad -> Excepciones.
+
+no_session_title: Cookies Estan Deshabilitados
+
 
 # account/no_question_email
 no_questions_note: >
@@ -1377,16 +1470,17 @@ no_question_success: Preguntas por e-mail se ha inhabilitado para [name].
 
 # shared/_observation_list
 observation_made: Se observó
+observation_made_confidence: La confianza de la comunidad
 
 
 # observer_controller
 observer_controller_image_updated_notes: Las notas para imagen #[id] se ha realizado.
-observer_controller_image_uploaded: La imagen <<[name]>> se ha subido.
+observer_controller_image_uploaded: La imagen [name] se ha subido.
 observer_controller_naming_created: El nombre propuesto se ha creado con éxito.
 observer_controller_naming_updated: El nombre propuesto se ha realizado con éxito.
 observer_controller_no_save_naming: No se ha podido guardar el nombre propuesto.
 observer_controller_no_save_observation: No se ha podido guardar el observación.
-observer_controller_no_upload_image: No se ha podido subir la imagen <<[name]>>.
+observer_controller_no_upload_image: No se ha podido subir la imagen [name].
 
 
 # account/prefs
@@ -1532,7 +1626,7 @@ sandbox_sample: >
   !http://aleatorio.com/imagen.jpg!\n
   \n
   Vinculos interior:\n
-  _name 543_, _Amanita lanei_, or _A. lanei_\n
+  _name 543_, _Amanita ocreata_, or _A. ocreata_\n
   _location 382_, _location Mt. Wilson_\n
   _user 252_, _user jason_\n
   _observation 12345_\n
@@ -1574,9 +1668,7 @@ send_feature_email_denied: Sólo el admin puede enviar e-mail de característica
 # shared/_textile_help
 shared_textile_help: >
   Las notas pueden ser formateado con el sistema de marcas Textile.<br/>
-  _Amanita lanei_, _A. lanei_ ---> <u><b><i>Amanita lanei</i></b></u> (vinculada a descripción de nombre)<br/>
-  _location Mt. Williamson_ ---> <u>Mt. Williamson</u> (vinculada a mapa de la ubicación)<br/>
-  _observation 12345_ ---> <u>observation 12345</u> (vinculada a la observación)<br/>
+  _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (vinculada a descripción de nombre)<br/>
   __cursiva__, **negrita** ---> <i>cursiva</i>, <b>negrita</b><br/>
 
 shared_textile_link: Más detalles aquí.
@@ -1600,7 +1692,7 @@ show_image_reviewed_by: Revisado por
 # location/show_location
 show_location_create: Crear Nueva Ubicación
 show_location_edit: Editar
-show_location_observations: Observaciones en [name]
+show_location_observations: Observaciones en Esta Ubicación
 show_location_older_versions: Versiones Anteriores
 show_location_title: 'Ubicación: [name]'
 
@@ -1652,7 +1744,7 @@ show_namings_consensus_help: >
   Para cada uno de los nombres mencionados anteriormente, seleccionar su
   opinión de qué tan bien ese nombre se aplica a esta observación.  Elegir
   <<Proponer Nuevo Nombre>> si desea sugerir otra opción.  Ver la
-  página "<<Cómo Usar>>":/observer/how_to_use#voting para más
+  página "Cómo Usar":/observer/how_to_use#voting para más
   detalles sobre cómo los votos se computarán.
 
 show_namings_eye_help: Elección del Observador
@@ -1882,7 +1974,7 @@ translators_note: >
   estamos perdiendo!)  Sin embargo todavía podemos utilizar toda la ayuda que
   podamos conseguir.  Necesitamos ayudar a la prueba de leer la traducción al
   español -- después de todo lo que en realidad no habla español.  Y ahora que
-  hemos trabajado en todos los errores, nos encantaría ver algunos más idiomas. 
+  hemos trabajado en todos los errores, nos encantaría ver algunos más idiomas.
   \n\n
   Es muy fácil.  Hay alrededor de 1.600 líneas o 11.000 palabras de texto en
   este sitio por el momento, pero no dejes que te asustan.  Hemos organizado a
@@ -1896,9 +1988,24 @@ translators_note: >
   electrónico":/observer/ask_webmaster_question cuando termine haciendo lo que
   puede, y vamos a decirle cómo presentar su trabajo.  Usted recibirá crédito
   destacado por su contribución, además, por supuesto, a nuestra eterna
-  gratitud. 
+  gratitud.
 
-translators_note_title: Nota del Traductor 
+translators_note_title: Nota del Traductor
+
+
+# observer/turn_javascript_nil
+turn_javascript_nil_body: Vamos a reanudar la detección automática del estado de javascript.
+turn_javascript_nil_title: Auto-Detectar Javascript
+
+
+# observer/turn_javascript_off
+turn_javascript_off_body: Ahora vamos a hacer caso omiso de javascript.
+turn_javascript_off_title: Deshabilitar Javascript
+
+
+# observer/turn_javascript_on
+turn_javascript_on_body: A partir de ahora asumiremos javascript está habilitado.
+turn_javascript_on_title: Habilitar Javascript
 
 
 # observer/users_by_contribution

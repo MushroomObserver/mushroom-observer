@@ -68,7 +68,14 @@ class String
 
     # Remove pre-existing links first, replacing with "<XXXnn>".
     hrefs = []
-    str.gsub!(/(href=["'][^"']*["']|<img[^>]*>)/) do |href|
+    str.gsub!(/(<a[^>]*>.*?<\/a>|<img[^>]*>)/) do |href|
+      if do_object_links
+        href = href.gsub(/
+          x\{ ([A-Z]+) (?:\s+ (\d+))? (?:\s+ ([^\{\}]+?))? \s*\}x
+        /x) do
+          $3 || ('%s #%d' % [$1.downcase.capitalize, $2 || 0] )
+        end
+      end
       hrefs.push(href)
       "<XXX#{hrefs.length - 1}>"
     end
@@ -98,7 +105,7 @@ class String
       /x) do |orig|
         if url = SHOW_OBJECT_URLS[$1.downcase]
           type  = $1
-          id    = $2
+          id    = $2 || 0
           label = $3 || ('%s #%d' % [type.downcase.capitalize, id])
           "<a href=\"#{url}\">%s</a>" % [id, label]
         else
@@ -149,7 +156,7 @@ protected
 
       # Expand abbreviated genus.
       str2 = str1.sub(/^([A-Z])\.? /) do |x|
-        (n = @@textile_name_lookup[$1]) ? n.text_name.sub(/ .*/, ' ') : x
+        (n = @@textile_name_lookup[$1]) ? n.text_name.sub(/ .*/, '') + ' ' : x
       end
 
       # Look up name.

@@ -141,7 +141,7 @@ module ApplicationHelper
 
   # Get sorted list of locale codes we have translations for.
   def all_locales
-    Dir.glob('lang/ui/*.yml').sort.map do |file|
+    Dir.glob(RAILS_ROOT + '/lang/ui/*.yml').sort.map do |file|
       file.sub(/.*?(\w+-\w+).yml/, '\\1')
     end
   end

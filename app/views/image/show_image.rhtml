@@ -38,7 +38,7 @@
   <tr>
     <td align="center">
 
-      <div about="640/#{@image.id}.jpg">
+      <div>
         <%= link_to(image_tag("640/#{@image.id}.jpg"), :action => 'show_original',
                     :id => @image.id, :params => search_params) %><br/>
         <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
@@ -113,6 +113,7 @@
   <span class="Date">
     <%= :image_show_created.t %>: <%= @image.created %><br/>
     <%= :image_show_modified.t %>: <%= @image.modified %><br/>
-    <%= :app_viewed.t(:date => @image.last_view, :num => @image.num_views) %><br/>
+    <%= :app_viewed.t(:date => @image.last_view,
+                      :times => @image.num_views == 1 ? :app_one_time.l : :app_many_times.l(:num => @image.num_views)) %><br/>
   </span>
 </p>

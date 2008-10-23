@@ -4,18 +4,18 @@
 
 <div id="image_<%= index %>_box" class="form_image">
 
-  <p><nobr>
+  <p style="white-space:nowrap">
   <%= radio_button('observation', 'thumb_image_id', -index) %>
   <%= file_field('image', 'image', :index => index) %>
   <% if @js %>
     <span style="left-width:10px">&nbsp;</span>
     <%= button_to_function(:app_more_button.t, "image_on(#{index})",
                            { :id => "image_#{index}_more" }) %>
-    <%= button_to_function(:app_more_button.t, "image_off(#{index})",
+    <%= button_to_function(:app_less_button.t, "image_off(#{index})",
                            { :id => "image_#{index}_less", :style => 'display:none' }) %>
     <%= javascript_tag("Element.hide('image_#{index}_less')") %>
   <% end %>
-  </nobr></p>
+  </p>
 
   <div id="image_<%= index %>_div" style="line-height:100%<%= '; display:none' if @js %>">
     <p><label for="image_<%= index %>_copyright_holder"><%= :form_images_copyright_holder.t %>:</label>

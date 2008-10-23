@@ -238,6 +238,7 @@ namespace :jason do
   desc "test"
   task(:test => :environment) do
     include ApplicationHelper
-    print '!image 12345!'.tl, "\n"
+    str = %(available "from Ret' __Amanita__ site:":http://pluto.njcc.com.)
+    print str.tl, "\n"
   end
 end

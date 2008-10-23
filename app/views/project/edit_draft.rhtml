@@ -11,8 +11,7 @@
 <% form_tag(:action => 'edit_draft', :id => @draft_name.id) do %>
   <br/><center><%= submit_tag :app_save_changes.l %></center>
   
-  <p><%= render(:partial => 'shared/textilize_help') %></p>
-  <br/>
+  <%= render(:partial => 'shared/textilize_help') %><br/>
 
   <p><label for="draft_name_license_id"><%= :form_names_license.t %>:</label>
     <span class="HelpNote">
@@ -22,7 +21,7 @@
 
   <% for f in Name.all_note_fields %>
     <p>
-      <label for="draft_name_#{f}"><%= "form_names_#{f}".to_sym.t %>:</label>
+      <label for="draft_name_<%= f %>"><%= "form_names_#{f}".to_sym.t %>:</label>
       <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.t %></span><br/>
       <%= text_area('draft_name', "#{f}", :cols => 80) %>
     </p>

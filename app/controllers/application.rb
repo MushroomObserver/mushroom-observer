@@ -139,7 +139,12 @@ class ApplicationController < ActionController::Base
 
     # observer_controller methods
     :destroy_observation, :destroy_image,
-    :destroy_comment, :destroy_species_list, :upload_image])
+    :destroy_comment, :destroy_species_list, :upload_image,
+  ])
+
+  def test_filter
+    render :text => 'This is a test.'
+  end
 
   # Filter that should run before everything else.  Checks for auto-login cookie.
   def autologin
@@ -723,7 +728,9 @@ class ApplicationController < ActionController::Base
     #   2) user prefs (whatever user chose earlier)
     #   3) session (whatever we used last time)
     #   4) navigator (provides default)
-    if params[:user_locale]
+    if RAILS_ENV == 'test'
+      Locale.code = ENV['LANG'] || 'en-US'
+    elsif params[:user_locale]
       logger.debug "[globalite] #{params[:user_locale]} locale passed"
       Locale.code = params[:user_locale]
       # Store the locale in the session

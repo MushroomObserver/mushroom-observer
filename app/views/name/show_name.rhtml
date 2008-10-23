@@ -26,7 +26,7 @@
 
 <table cellpadding="5" width="100%">
   <tr>
-    <td valiagn="top" width="50%">
+    <td valign="top" width="50%">
       <p>
         <%= :app_rank.t %>: <%= rank_as_string(@name.rank) %><br/>
         <%= :app_name_status.t %>: <%= @name.status == "Valid" ? :app_accepted.t : :app_deprecated.t %><br/>
@@ -222,8 +222,8 @@ for sect in ["consensus", "synonym", "other"]
             </span><br/>
             <span class="ListWhere"><%= location_link(datum["where"], datum["location_id"]) %></span>:
             <span class="ListWho"><%= user_link(datum["user_id"], "#{datum['name']} (#{datum['login']})") %></span><br/>
-            Observation made: <%= datum["when"]%><br/>
-            Community confidence:
+            <%= :observation_made.t %>: <%= datum["when"]%><br/>
+            <%= :observation_made_confidence.t %>:
               <%= v = datum["vote_cache"]
                 v.nil? || v == "" ? :app_no_votes.t : (v.to_f*100/3).round.to_s + "%" %>
           </td>
@@ -239,7 +239,8 @@ for sect in ["consensus", "synonym", "other"]
   <span class="Date">
     <%= :app_created.t(:type => :app_name.l, :date => @name.created) %><br/>
     <%= :app_last_modified.t(:user => user_link(@name.user), :date => @name.modified) %><br/>
-    <%= :app_viewed.t(:date => @name.last_view, :num => @name.num_views) %><br/>
+    <%= :app_viewed.t(:date => @name.last_view,
+                      :times => @name.num_views == 1 ? :app_one_time.l : :app_many_times.l(:num => @name.num_views)) %><br/>
     <% rss_log = @name.rss_log
        if rss_log %>
         <%= link_to(:app_show_log.t, :controller => 'observer',
