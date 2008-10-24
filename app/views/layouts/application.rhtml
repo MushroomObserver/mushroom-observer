@@ -98,7 +98,7 @@
 
                 <%= :app_languages.t %>:<br/>
                 <% for locale in all_locales %>
-                  &nbsp;&nbsp;<%= link_to(locale.sub('-','_').to_sym.t, reload_with_args(:user_locale => locale)) %><br/>
+                  &nbsp;&nbsp;<%= link_to(locale.sub('-','_').to_sym.t, h(reload_with_args(:user_locale => locale))) %><br/>
                 <% end %>
                 <br/>
 

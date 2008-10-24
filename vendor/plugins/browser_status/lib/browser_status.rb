@@ -247,15 +247,17 @@ module BrowserStatus
     # print "@ua              = [#{@ua             }]\n"
     # print "@ua_version      = [#{@ua_version     }]\n"
     # print "HTTP_USER_AGENT  = [#{ua              }]\n"
+    # print "params           = [#{params.inspect  }]\n"
     # print "========================================\n"
 
     # If we've never seen this user before, serve a tiny page that redirects
     # immediately to tell us the state of javascript, and lets us determine
-    # whether session and cookies are woring correctly immediately.
-    if session_new
+    # whether session and cookies are woring correctly immediately.  (The
+    # _new thing prevents infinite loops, just in case.)
+    if session_new && params[:_new] != 'true'
       render(:text => FIRST_PAGE % [
-        reload_with_args(:_js => 'on'),
-        reload_with_args(:_js => 'off'),
+        reload_with_args(:_js => 'on',  :_new => 'true'),
+        reload_with_args(:_js => 'off', :_new => 'true'),
       ])
     end
   end
@@ -377,7 +379,7 @@ module BrowserStatus
     # Put it back together.
     return addr if args.keys == []
     return addr + '?' + args.keys.sort.map \
-        {|k| CGI.escape(k) + '=' + (args[k] || "")}.join(CGI.escape('&'))
+        {|k| CGI.escape(k) + '=' + (args[k] || "")}.join('&')
   end
 
   # Parse the user_agent string from apache.  This does not catch everything.

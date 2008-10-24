@@ -126,11 +126,11 @@ module ApplicationHelper
       page = 1 if page < 1
       page = pages.length if page > pages.length
       if page > 1
-        url = reload_with_args(arg => page - 1)
+        url = h(reload_with_args(arg => page - 1))
         str = link_to('&laquo; ' + :app_prev.t, url) + ' | ' + str
       end
       if page < pages.length
-        url = reload_with_args(arg => page + 1)
+        url = h(reload_with_args(arg => page + 1))
         str = str + ' | ' + link_to(:app_next.t + ' &raquo;', url)
       end
       return %(<div class="pagination">#{str}</div>)
