@@ -549,7 +549,7 @@ create_draft_failed: Unable to create new draft.
 create_draft_updated: Draft was successfully updated.
 create_draft_multiple: >
   Permission denied.  A draft already exists for the name '[name]' in the
-  project 'title' and multiple drafts for the same name are not yet supported.
+  project '[title]' and multiple drafts for the same name are not yet supported.
 
 
 # location/create_location

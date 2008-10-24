@@ -284,7 +284,7 @@ log_image_reused0: Imagen agregado.
 log_image_updated0: Imagen realizado.
 log_name_approved: Aprobado por [user] sobre [other].
 log_name_deprecated: Desaprobado por [user] en favor de [other].
-log_name_merged: Se fusionó [this] en [that].
+log_name_merged: Nombre fusionó con [name].
 log_name_updated: Nombre realizado por [user].
 log_naming_created: 'Nombre propuesto creado por [user]: [name]'
 log_naming_destroyed: 'Nombre propuesto borrado por [user]: [name]'
@@ -557,8 +557,8 @@ create_draft_failed: No se ha podido crear un nuevo borrador.
 create_draft_updated: El borrador se ha creado con éxito.
 create_draft_multiple: >
   Permiso denegado: un borrador ya existe para el nombre <<[name]>> en el
-  proyecto [title] y múltiples borradores para el mismo nombre todavía no es
-  possible.
+  proyecto <<[title]>> y múltiples borradores para el mismo nombre todavía no
+  es possible.
 
 
 # location/create_location
@@ -844,7 +844,7 @@ form_naming_confidence_help: >
   ¿Cómo se confía?  Por favor, justificar cómo llegó a su decisión en las
   siguientes casillas, también.
 
-form_naming_deprecated: El nombre <<[name]&ranquo; no es aceptado.
+form_naming_deprecated: El nombre <<[name]>> no es aceptado.
 form_naming_deprecated_help: >
   Elegir un nombre aceptado o hacer clic en <<[button]>> para
   utilizar <<[name]>>.
@@ -1827,7 +1827,7 @@ show_votes_weight: Peso
 
 # location/show_past_location
 show_past_location_other_versions: Otros Versiones
-show_past_location_title: Ubicación
+show_past_location_title: 'Version [num]: [name]'
 
 
 # project/show_project
@@ -2600,9 +2600,9 @@ how_help_designers: >
 how_help_developers: >
   h2. 3. Desarrolladores
   \n\n
-  p(normal).  Tenemos un montón de ideas para mejorar el sitio.  El marco, Ruby
-  on Rails, es realmente fácil de aprender y estamos más que encantados de
-  enseñar a cualquier persona que quiera ayudar.
+  p(normal).  Tenemos "un montón de ideas":[todo_list] para mejorar el sitio.
+  El marco, Ruby on Rails, es realmente fácil de aprender y estamos más que
+  encantados de enseñar a cualquier persona que quiera ayudar. 
 
 how_help_translators: >
   h2. 4. Traductores

@@ -76,6 +76,7 @@ require 'ftools'
 #     recalc
 #   * refresh_vote_cache
 #   * clear_session
+#     w3c_tests
 #
 #  Helpers:
 #    show_selected_observations(title, conditions, order, source=:nothing, links=nil)
@@ -118,7 +119,8 @@ class ObserverController < ApplicationController
     :translators_note,
     :turn_javascript_off,
     :turn_javascript_on,
-    :users_by_contribution
+    :users_by_contribution,
+    :w3c_tests,
   ])
 
   # Default page.  Just displays latest happenings.
@@ -188,6 +190,12 @@ class ObserverController < ApplicationController
   # Enable auto-detection.
   def turn_javascript_nil
     session[:js_override] = nil
+  end
+
+  # Simple list of all the files in public/html that are linked to the W3C
+  # validator to make testing easy.
+  def w3c_tests
+    render(:layout => false)
   end
 
   # So you can start with a clean slate

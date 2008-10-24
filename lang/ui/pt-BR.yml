@@ -51,7 +51,7 @@ app_cancel:  Cancel (Show [type])
 app_citation:  Citation
 app_click_for_map:  Click for map
 app_close:  Close
-app_colors_from: Cores do(a) %s
+app_colors_from: Cores do(a) [theme]
 app_comments: Comentários
 app_comments_for_you: Comentários para mim
 app_contributors: Contribuidores
@@ -371,7 +371,7 @@ add_members_change_status:  Change Status
 add_members_denied:  >
   Permission denied: only admins for a project can add new members.
 
-add_members_title:  Add Users to
+add_members_title:  Add Users to [title]
 
 
 # project/add_project
@@ -401,7 +401,7 @@ admin_request_message:  Message
 admin_request_show_user:  Show details on sender
 admin_request_subject:  Subject
 admin_request_success:  Delivered email.
-admin_request_title:  Admin Request for
+admin_request_title:  Admin Request for [title]
 
 
 # observer/ask_observation_question
@@ -477,7 +477,7 @@ change_member_status_remove_member_help:  >
 change_member_status_denied:  >
   Only the admins for a project can change member permissions.
 
-change_member_status_title:  Changing User Status of %s for %s
+change_member_status_title:  Changing User Status of [name] for [title]
 
 
 # observer/color_themes
@@ -548,7 +548,7 @@ create_draft_failed:  Unable to create new draft.
 create_draft_updated:  Draft was successfully updated.
 create_draft_multiple:  >
   Permission denied.  A draft already exists for the name '[name]' in the
-  project 'title' and multiple drafts for the same name are not yet supported.
+  project '[title]' and multiple drafts for the same name are not yet supported.
 
 
 # location/create_location
@@ -597,7 +597,7 @@ destroy_project_success:  Project destroyed.
 
 
 # project/edit_draft
-edit_draft_title:  Editing Draft for
+edit_draft_title:  'Editing Draft for: [name]'
 
 
 # location/edit_location
@@ -626,7 +626,7 @@ edit_observation_title:  'Edit Observation: [name]'
 # project/edit_project
 edit_project_destroy:  Destroy Project
 edit_project_success:  Project was successfully updated.
-edit_project_title:  Editing Project
+edit_project_title:  'Editing Project: [title]'
 
 
 # account/email_new_password
@@ -1602,8 +1602,8 @@ send_feature_email_denied:  Only the admin can send feature mail.
 # shared/_textile_help
 shared_textile_help:  >
   Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/>
-  _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/>
-  __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
+  _Amanita ocreata_, _A. ocreata_ ---> <u>*<i>Amanita ocreata</i>*</u> (linked to name description)<br/>
+  __italic__, **bold** ---> <i>italic</i>, *bold*<br/>
 
 shared_textile_link:  More details here.
 
@@ -1616,7 +1616,7 @@ show_draft_destroy_draft:  Destroy Draft
 show_draft_edit_draft:  Edit Draft
 show_draft_publish_draft:  Publish Draft
 show_draft_show_project:  Show Project
-show_draft_title:  Draft of %s for %s
+show_draft_title:  Draft of [name] for [title]
 
 
 # image/show_image
@@ -1626,7 +1626,7 @@ show_image_reviewed_by:  Reviewed by
 # location/show_location
 show_location_create:  Create New Location
 show_location_edit:  Edit
-show_location_observations:  Observations at [name]
+show_location_observations:  Observations at this location
 show_location_older_versions:  Older Versions
 show_location_title:  'Location: [name]'
 
@@ -1764,7 +1764,7 @@ show_project_destroy:  Destroy Project
 show_project_drafts:  Drafts
 show_project_edit:  Edit Project
 show_project_summary:  Summary
-show_project_title:  Project
+show_project_title:  'Project: [title]'
 
 show_project_user_group:  User Group
 
@@ -1983,7 +1983,7 @@ welcome_note:  >
 # observer/intro
 intro_title: Introdução
 intro_purpose: >
-  <p><b>Propósito:</b> O propósito deste site é registrar observações de
+  *Propósito:* O propósito deste site é registrar observações de
   cogumelos, ajudar pessoas a identificar cogumelos que lhes são familiar e
   expandir a comunidade de exploração científica de cogumelos (micologia).
   Alguns perguntam o que é considerado cogumelo. Este site tem uma visão bem
@@ -1993,7 +1993,7 @@ intro_purpose: >
   torne uma fonte valiosa de conhecimento tanto para micologistas amadores
   como para profissionais. Eu gosto de pensar nele como um guia vivo de
   cogumelos ou como um jornal colaborativo sobre cogumelos.
-  </p><p>
+  \n\n
   Para os iniciantes na micologia, existe um grande montante de pesquisas
   básicas que precisam ser feitas. As estimativas são de que menos de 5% das
   espécies de fungos do planeta são conhecidos pela ciência. Enquanto as coisas
@@ -2006,44 +2006,42 @@ intro_purpose: >
   corrente literatura sobre cogumelos. Por favor, não se sinta intimidado pela
   encurvatura ciêntifica do site. Todos são bem-vindos a compartilhar suas
   próprias observações, colocar suas fotos e a fazer comentários nas
-  observações de outras pessoas.</p>
+  observações de outras pessoas.
 
 intro_image_sharing: >
-  <p><b>Compartilhando Imagens:</b> Este site segue os mesmos princípios
+  *Compartilhando Imagens:* Este site segue os mesmos princípios
   cooperativos iniciados pela "Free Software Foundation":http://fsf.org,
   futuramente expressados pelo "Open Source software movement":http://opensource.org,
   e expandidos para outros esforços criativos pela "Creative Commons":http://creativecommons.org.
   Conseqüentemente todas as imagens estão disponíveis em uma das licenças
   Creative Commons.  Isso quer dizer que quando alguém coloca suas imagens no
   site, eles estão dando aos outros permissão explícita e perpétua para usar
-  essas imagens sob certas "condições":%s.  Este tipo de
-  permissão é muito importante para certos tipos de pesquisa. Isto permite que
-  futuros pesquisadores possam usar livremente essas informações para expandir
-  o conhecimento sobre cogumelos.  Além disso, aumenta a probabilidade de que
-  essas informações continuem disponíveis num futuro distante.
-  </p><p>
+  essas imagens sob certas "condições":/observer/how_to_use#licens.  Este tipo
+  de permissão é muito importante para certos tipos de pesquisa. Isto permite
+  que futuros pesquisadores possam usar livremente essas informações para
+  expandir o conhecimento sobre cogumelos.  Além disso, aumenta a probabilidade
+  de que essas informações continuem disponíveis num futuro distante.
+  \n\n
   Se você coloca uma de suas imagens, não quer dizer que você está abrindo mão de seu
   direito autoral ou da sua possibilidade de fazer dinheiro com as imagens.
   Dependendo da licença que você escolher, você pode continuar exigindo que
   qualquer um que quiser usar essas imagens para fins comerciais, entre em
   contato com o mantenedor dos direitos autorais e trabalhe em uma condição de
   uso. Este site inclui alguns atalhos especiais nas páginas de imagens para
-  ajudar a criar esses relacionamentos.</p>
+  ajudar a criar esses relacionamentos.
 
 intro_source_code: >
-  <p><b>Código Fonte:</b> O código fonte desse site está disponível em:
-  %s e está licenciado nos termos da
+  *Código Fonte:* O código fonte desse site está disponível em:
+  "[repo]":[repo] e está licenciado nos termos da
   "Open Source MIT License":http://www.opensource.org/licenses/mit-license.php.
-  Contribuições são bem-vindas.  Aqui você encontra a lista de "recursos planejados":%s.
+  Contribuições são bem-vindas.  Aqui você encontra a lista de "recursos planejados":[todo_list].
   Sugestões e comentários são bem-vindos.  Se você quiser contribuir, por
-  favor envie uma mensagem para:</p><p><b>nathan at collectivesource.com</b>
-  </p><p>
-  e assim poderemos coordenar nossos esforços.</p>
+  favor envie uma mensagem para: *nathan at collectivesource.com* e assim
+  poderemos coordenar nossos esforços.
 
 intro_note: >
-  <p>Nota: Os administradores desse site se reservam o direito de remover
+  Nota: Os administradores desse site se reservam o direito de remover
   qualquer material que julguem inapropriado ou fora do propósito desse site.
-  </p>
 
 intro_talks:  >
   *Talks:*
