@@ -250,13 +250,13 @@ site_stats_users: Members
 
 # vote descriptions
 vote_no_opinion: No Opinion
-vote_confidence_100: Definitely
+vote_confidence_100: I'd Call It That
 vote_confidence_80: Promising
 vote_confidence_60: Could Be
 vote_confidence_40: Doubtful
 vote_confidence_20: Not Likely
 vote_confidence_0: As If!
-vote_agreement_100: Definitely
+vote_agreement_100: I'd Call It That
 vote_agreement_80: Promising
 vote_agreement_60: Could Be
 vote_agreement_40: Doubtful
