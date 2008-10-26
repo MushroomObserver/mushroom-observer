@@ -18,7 +18,7 @@
 ################################################################################
 
 ORIG = File.dirname(__FILE__) + '/../public/images/orig'
-DONE = File.dirname(__FILE__) + '/../public/images/resize.log'
+DONE = File.dirname(__FILE__) + '/../log/resize_image.log'
 
 limit = ARGV[0].to_i
 limit = 5 if limit == 0
