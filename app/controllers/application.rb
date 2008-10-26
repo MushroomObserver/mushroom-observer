@@ -281,6 +281,15 @@ class ApplicationController < ActionController::Base
     result
   end
 
+  # Update view stats for name, image, observation, etc.
+  def update_view_stats(object)
+    if !is_robot?
+      object.num_views += 1
+      object.last_view = Time.now
+      object.save
+    end
+  end
+
 ################################################################################
 
   # Paginate a list which is implicitly created using the given SQL query.

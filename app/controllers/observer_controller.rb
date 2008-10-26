@@ -429,9 +429,7 @@ class ObserverController < ApplicationController
     pass_seq_params()
     @seq_key = seq_key
     @observation = Observation.find(params[:id])
-    @observation.num_views += 1
-    @observation.last_view = Time.now
-    @observation.save
+    update_view_stats(@observation)
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
     @confidence_menu = translate_menu(Vote.confidence_menu)

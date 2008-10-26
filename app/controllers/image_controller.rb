@@ -124,9 +124,7 @@ class ImageController < ApplicationController
     # <div about=filename.jpg> tag.  What's that for??
     @invalid = true
     @image = Image.find(params[:id])
-    @image.num_views += 1
-    @image.last_view = Time.now
-    @image.save
+    update_view_stats(@image)
     @is_reviewer = is_reviewer
   end
 
