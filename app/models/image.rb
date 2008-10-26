@@ -46,6 +46,7 @@ class Image < ActiveRecord::Base
     [:unreviewed, :low, :medium, :high]
   end
   
+  # Create Textile title for image from observations, appending image id to guarantee uniqueness.
   def unique_format_name 
     obs_names = []
     self.observations.each {|o| obs_names.push(o.format_name)}
@@ -57,6 +58,7 @@ class Image < ActiveRecord::Base
     end
   end
 
+  # Create plain-text title for image from observations, appending image id to guarantee uniqueness.
   def unique_text_name
     obs_names = []
     self.observations.each {|o| obs_names.push(o.text_name)}
@@ -68,11 +70,10 @@ class Image < ActiveRecord::Base
     end
   end
 
+  # Read image into internal buffer and set content_type.
   def image=(image_field)
     self.content_type = image_field.content_type.chomp
     @img = image_field.read
-    @width = false
-    @height = false
     @img_dir = IMG_DIR
   end
 
@@ -84,16 +85,13 @@ class Image < ActiveRecord::Base
     end
   end
 
+  # Convert original into 640x640 and 160x160 images.
   def create_resized_images
-    result = self.calc_size
-    logger.warn("create_resized_images: Calculated size: #{@width}x#{@height}")
-    if result
-      self.resize_image(640, 640, 50, self.big_image)
-      self.resize_image(160, 160, 75, self.thumbnail)
-    end
-    return result
+    self.resize_image(640, 640, 70, self.original_image, self.big_image)
+    self.resize_image(160, 160, 90, self.big_image, self.thumbnail)
   end
 
+  # Store internal buffer in original file.
   # Can't include this in image= because self.id isn't set until first save
   def save_image
     file = File.new(self.original_image, 'w')
@@ -102,59 +100,32 @@ class Image < ActiveRecord::Base
     return self.create_resized_images
   end
 
-  def resize_image(width, height, quality, dest)
-    r1 = width/Float(@width)
-    r2 = height/Float(@height)
-    if r1 < r2
-      ratio = r1
-    else
-      ratio = r2
+  # Resize +src+ image and save as +dest+, stripping headers.
+  def resize_image(width, height, quality, src, dest)
+    if File.exists?(src)
+      cmd = sprintf("convert -thumbnail '%dx%d>' -quality %d %s %s",
+                     width, height, quality, src, dest)
+      system cmd
+      logger.warn(cmd)
     end
-    if ratio < 1
-      w = ratio*@width
-      h = ratio*@height
-      cmd = sprintf("convert -size %dx%d -quality %d %s -resize %dx%d %s",
-                    w, h, quality, self.original_image, w, h, dest)
-    else
-      cmd = sprintf("cp %s %s", self.original_image, dest)
-    end
-    system cmd
-    logger.warn(cmd)
   end
 
+  # Return file name of original image.
   def original_image
     sprintf("%s/orig/%d.jpg", self.img_dir, self.id)
   end
 
+  # Return file name of 640x640 image.
   def big_image
     sprintf("%s/640/%d.jpg", self.img_dir, self.id)
   end
 
+  # Return file name of thumbnail image.
   def thumbnail
     sprintf("%s/thumb/%d.jpg", self.img_dir, self.id)
   end
 
-  IDENTIFY_PAT = /^\S+ \w+ (\d+)x(\d+)/
-
-  def calc_size
-    result = true
-    unless @width
-      image_data = `identify #{self.original_image}`
-      if image_data
-        match = IDENTIFY_PAT.match(image_data)
-        if match
-          @width = match[1].to_i
-          @height = match[2].to_i
-        end
-      end
-    end
-    unless @width
-      logger.warn("Unable to extract image size from #{self.original_image}")
-      result = false
-    end
-    result
-  end
-
+  # Read thumbnail into a buffer and return it.
   def get_thumbnail
     file = File.new(self.thumbnail, 'r')
     result = file.read
@@ -162,6 +133,7 @@ class Image < ActiveRecord::Base
     result
   end
 
+  # Read original image into a buffer and return it. (!!)
   def get_original
     file = File.new(self.original_image, 'r')
     result = file.read
@@ -169,16 +141,17 @@ class Image < ActiveRecord::Base
     result
   end
 
+  # Read 640x640 image into a buffer and return it.
   def get_image
     unless @img
       file = File.new(self.big_image, 'r')
       @img = file.read
-      self.calc_size
       file.close
     end
     @img
   end
 
+  # Take filename, remove path and extension, then remove weird characters.
   def base_part_of(file_name)
     name = File.basename(file_name)
     name.gsub(/[^\w._-]/, '')
