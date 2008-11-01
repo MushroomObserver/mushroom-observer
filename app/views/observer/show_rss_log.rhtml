@@ -1,13 +1,15 @@
 <% @title = :show_rss_log_title.t(:title => @rss_log.format_name) %>
 
 <table>
-  <% for key, args, time in @rss_log.parse_log %>
-    <tr>
-      <td><%= time.strftime("%a %b %d, %Y %H:%M:%S %Z") %></td>
-      <td width="10"></td>
-      <td><%= key.t(args) %></td>
-    </tr>
-  <% end %>
+  <% for key, args, time in @rss_log.parse_log
+    if key != :log_orphan %>
+      <tr>
+        <td><%= time.strftime("%a %b %d, %Y %H:%M:%S %Z") %></td>
+        <td width="10"></td>
+        <td><%= key.t(args) %></td>
+      </tr>
+    <% end
+  end %>
 </table>
 
 <%= if observation = @rss_log.observation

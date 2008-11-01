@@ -49,7 +49,8 @@ class RssLog < ActiveRecord::Base
 
   # Add entry to top of notes and save.  Changes +modified+ if +t+ is true.
   # Pass in a localization key and a hash of arguments it requires.
-  def add(key, args={}, t=false)
+  def add(key, args=nil, t=false)
+    args ||= {}
     entry = RssLog.escape(key)
     entry += '(' + args.keys.sort_by {|x| x.to_s}.map do |k|
       RssLog.escape(k) + '=' + RssLog.escape(args[k])
@@ -162,8 +163,9 @@ class RssLog < ActiveRecord::Base
 
       # First entry of orphan log is title.
       if first && !self.object
-        key  = :log_orphan
-        args = { :title => RssLog.unescape(key) }
+        key   = :log_orphan
+        args  = { :title => RssLog.unescape(key) }
+        first = false
 
       # This is the "new" syntax: "key(arg=val,arg=val)"
       elsif str.match(/^([\w\%]+)\(([\w\%\=\,]*)\)$/)
