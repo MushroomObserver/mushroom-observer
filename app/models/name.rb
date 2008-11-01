@@ -64,6 +64,10 @@ require_dependency 'acts_as_versioned_extensions'
 #    Name.make_species           (not used by anyone)
 #    Name.make_genus             (not used by anyone)
 #    Name.find_name              (not used by anyone)
+#    ancestors                   Return array of taxa that contain this one.
+#                                (only works for subgeneric taxa)
+#    parents                     Return array of parent name objects.
+#                                (only works for species and below)
 #    children                    Return array of child name objects.
 #                                (only works for genera and species)
 #
@@ -417,8 +421,9 @@ class Name < ActiveRecord::Base
     result
   end
 
-  # Currently just parses the text name to find Genus and possible Species.  Ultimately
-  # this should get high level clades, but I don't have a good source for that data yet.
+  # Currently just parses the text name to find Genus and possible Species.
+  # Ultimately this should get high level clades, but I don't have a good
+  # source for that data yet. 
   def ancestors
     result = []
     if [:Form, :Variety, :Subspecies, :Species].member?(self.rank)
@@ -429,6 +434,19 @@ class Name < ActiveRecord::Base
         result += Name.find(:all, :conditions => "text_name like '#{tokens[0]} #{tokens[1]}' and rank = 'species'",
         :order => "text_name asc")
       end
+    end
+    result
+  end
+
+  # This one is similar, however it just returns a list of all taxa in the
+  # rank above that contain this name.  Again, it only works for species or
+  # lower for now.  It *can* return multiple names, if there are multiple
+  # genera, for example, with the same name but different authors.
+  def parents
+    result = []
+    if self.text_name.match(' ')
+      name = self.text_name.sub(/( \S+\.)? \S+$/, '')
+      result = Name.find(:all, :conditions => ['text_name = ?', name])
     end
     result
   end

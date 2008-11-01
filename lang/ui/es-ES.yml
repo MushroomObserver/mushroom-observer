@@ -47,6 +47,7 @@ app_approved: Aprobado
 app_are_you_sure: ¿Estás seguro?
 app_author: Autor
 app_banner: Mushroom<br/>Observer
+app_by:  By
 app_cancel: Cancelar (Mostrar [type])
 app_citation: Cita
 app_click_for_map: Hacer clic para mapa
@@ -60,6 +61,7 @@ app_create_account: Registrarse
 app_create_list: Crear Lista
 app_create_observation: Crear Observación
 app_created: '[type] Creado: [date]'
+app_created_bare:  Created
 app_current_user: Su Cuenta
 app_deprecate: Desaprobar
 app_deprecated: Desaprobado
@@ -637,6 +639,19 @@ edit_observation_title: 'Editar Observación: [name]'
 edit_project_destroy: Borrar Proyecto
 edit_project_success: El proyecto se ha realizado con éxito.
 edit_project_title: 'Editar Proyecto: [title]'
+
+
+# account_mailer model
+email_comment_subject:  Comment about [name]
+email_commercial_inquiry_subject:  Commercial Inquiry about [name]
+email_denied_subject:  '[MO] User Creation Blocked'
+email_features_subject:  New Mushroom Observer Features
+email_naming_for_observer_subject:  Mushroom Observer Research Request
+email_naming_for_tracker_subject:  Mushroom Observer Naming Notification
+email_new_password_subject:  New Password for Mushroom Observer Account
+email_observation_question_subject:  Question about [name]
+email_verify_subject:  Email Verification for Mushroom Observer
+email_webmaster_question_subject:  '[MO] Question from [user]'
 
 
 # account/email_new_password
@@ -2602,7 +2617,7 @@ how_help_developers: >
   \n\n
   p(normal).  Tenemos "un montón de ideas":[todo_list] para mejorar el sitio.
   El marco, Ruby on Rails, es realmente fácil de aprender y estamos más que
-  encantados de enseñar a cualquier persona que quiera ayudar. 
+  encantados de enseñar a cualquier persona que quiera ayudar.
 
 how_help_translators: >
   h2. 4. Traductores

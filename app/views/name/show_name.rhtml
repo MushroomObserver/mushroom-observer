@@ -51,7 +51,12 @@
         <%= :app_version.t %>: <%= @name.version %><br/>
         <% if @past_name %>
           <%= link_to("#{:show_name_previous_version.t}: %d" % @past_name.version,
-                      :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %>
+                      :action => 'show_past_name', :id => @name.id, :version => @past_name.version) %><br/>
+        <% end %>
+
+        <% for parent in @parents %>
+          <%= rank_as_string(@parents[0].rank) %>: 
+            <%= link_to(parent.display_name.t, :action => 'show_name', :id => parent.id) %><br/>
         <% end %><br/>
 
         <% if @name.ok_for_export %>

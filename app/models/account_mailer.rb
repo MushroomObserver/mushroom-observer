@@ -31,25 +31,27 @@ class AccountMailer < ActionMailer::Base
   EXTRA_BCC_EMAIL_ADDRESSES = "nathan@collectivesource.com"
   EXCEPTION_RECIPIENTS      = %w{webmaster@mushroomobserver.org}
 
+  DEFAULT_LOCALE = 'en-US'
+
   def comment(sender, receiver, object, comment)
     @user                = receiver
+    Locale.code          = @user.locale || DEFAULT_LOCALE
     @body["sender"]      = sender
     @body["user"]        = @user
     @body["object"]      = @object = object
     @body["comment"]     = comment
-    @subject             = 'Comment about ' + object.unique_text_name
-    if sender
-      @headers['Reply-To'] = sender.email
-    end
+    @subject             = :email_comment_subject.l(:name => object.unique_text_name)
+    @headers['Reply-To'] = sender.email if sender
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
-    @content_type        = @user.html_email ? "text/html" : "text/plain"
+    @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
   def commercial_inquiry(sender, image, commercial_inquiry)
     @user                = image.user
-    @subject             = 'Commercial Inquiry about ' + image.unique_text_name
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_commercial_inquiry_subject.l(:name => image.unique_text_name)
     @body["sender"]      = sender
     @body["image"]       = image
     @body["commercial_inquiry"] = commercial_inquiry
@@ -63,7 +65,8 @@ class AccountMailer < ActionMailer::Base
 
   def email_features(user, features)
     @user             = user
-    @subject          = 'New Mushroom Observer Features'
+    Locale.code       = @user.locale || DEFAULT_LOCALE
+    @subject          = :email_features_subject.l
     @body["user"]     = @user
     @body["features"] = features
     @recipients       = @user.email
@@ -74,7 +77,8 @@ class AccountMailer < ActionMailer::Base
 
   def naming_for_observer(observer, naming, notification)
     @user                 = observer
-    @subject              = 'Mushroom Observer Research Request'
+    Locale.code           = @user.locale || DEFAULT_LOCALE
+    @subject              = :email_naming_for_observer_subject.l
     @body["user"]         = @user
     @body["naming"]       = naming
     @body["notification"] = notification
@@ -86,7 +90,8 @@ class AccountMailer < ActionMailer::Base
 
   def naming_for_tracker(tracker, naming)
     @user             = tracker
-    @subject          = 'Mushroom Observer Naming Notification'
+    Locale.code       = @user.locale || DEFAULT_LOCALE
+    @subject          = :email_naming_for_tracker_subject.l
     @body["user"]     = @user
     @body["naming"]   = naming
     @recipients       = @user.email
@@ -94,10 +99,11 @@ class AccountMailer < ActionMailer::Base
     @from             = NEWS_EMAIL_ADDRESS
     @content_type     = @user.html_email ? "text/html" : "text/plain"
   end
-  
+
   def new_password(user, password)
     @user             = user
-    @subject          = 'New Password for Mushroom Observer Account'
+    Locale.code       = @user.locale || DEFAULT_LOCALE
+    @subject          = :email_new_password_subject.l
     @body["password"] = password
     @body["user"]     = @user
     @recipients       = @user.email
@@ -108,7 +114,8 @@ class AccountMailer < ActionMailer::Base
 
   def observation_question(sender, observation, question)
     @user                = observation.user
-    @subject             = 'Question about ' + observation.unique_text_name
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_observation_question_subject.l(:name => observation.unique_text_name)
     @body["sender"]      = sender
     @body["observation"] = observation
     @body["question"]    = question
@@ -122,6 +129,7 @@ class AccountMailer < ActionMailer::Base
 
   def user_question(sender, user, subject, content)
     @user                = user
+    Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = subject
     @body["sender"]      = sender
     @body["content"]     = content
@@ -134,11 +142,14 @@ class AccountMailer < ActionMailer::Base
   end
 
   def admin_request(sender, project, subject, message)
+    users = project.admin_group.users
+    locales = users.map {|u| u.locale}.uniq.select {|c| c}
+    Locale.code = locales.first if locales != []
     @subject             = subject
     @body["sender"]      = sender
     @body["message"]     = message
     @body["project"]     = project
-    @recipients          = project.admin_group.users.map() {|a| a.email }
+    @recipients          = users.map() {|u| u.email }
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender.email
@@ -146,7 +157,9 @@ class AccountMailer < ActionMailer::Base
   end
 
   def verify(user)
-    @subject      = 'Email Verification for Mushroom Observer'
+    @user         = user
+    Locale.code   = @user.locale || DEFAULT_LOCALE
+    @subject      = :email_verify_subject.l
     @body["user"] = user
     @recipients   = user.email
     @bcc          = EXTRA_BCC_EMAIL_ADDRESSES
@@ -155,7 +168,8 @@ class AccountMailer < ActionMailer::Base
   end
 
   def webmaster_question(sender, question)
-    @subject          = '[MO] Question from ' + sender
+    Locale.code       = DEFAULT_LOCALE
+    @subject          = :email_webmaster_question_subject.l(:user => sender)
     @body["question"] = question
     @recipients       = WEBMASTER_EMAIL_ADDRESS
     @bcc	          = EXTRA_BCC_EMAIL_ADDRESSES
@@ -163,7 +177,8 @@ class AccountMailer < ActionMailer::Base
   end
 
   def denied(user_params)
-    @subject             = '[MO] User Creation Blocked'
+    Locale.code          = DEFAULT_LOCALE
+    @subject             = :email_denied_subject.l
     @body["user_params"] = user_params
     @recipients          = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = ACCOUNTS_EMAIL_ADDRESS

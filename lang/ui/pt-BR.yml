@@ -47,6 +47,7 @@ app_approved:  Approved
 app_are_you_sure:  Are you sure?
 app_author:  Author
 app_banner: Observação<br/>de<br/>Cogumelo
+app_by:  By
 app_cancel:  Cancel (Show [type])
 app_citation:  Citation
 app_click_for_map:  Click for map
@@ -60,6 +61,7 @@ app_create_account: Novo Usuário
 app_create_list: Criar Lista
 app_create_observation: Criar Observação
 app_created:  '[type] Created: [date]'
+app_created_bare:  Created
 app_current_user: Usuário Atual
 app_deprecate:  Deprecate
 app_deprecated:  Deprecated
@@ -627,6 +629,19 @@ edit_observation_title:  'Edit Observation: [name]'
 edit_project_destroy:  Destroy Project
 edit_project_success:  Project was successfully updated.
 edit_project_title:  'Editing Project: [title]'
+
+
+# account_mailer model
+email_comment_subject:  Comment about [name]
+email_commercial_inquiry_subject:  Commercial Inquiry about [name]
+email_denied_subject:  '[MO] User Creation Blocked'
+email_features_subject:  New Mushroom Observer Features
+email_naming_for_observer_subject:  Mushroom Observer Research Request
+email_naming_for_tracker_subject:  Mushroom Observer Naming Notification
+email_new_password_subject:  New Password for Mushroom Observer Account
+email_observation_question_subject:  Question about [name]
+email_verify_subject:  Email Verification for Mushroom Observer
+email_webmaster_question_subject:  '[MO] Question from [user]'
 
 
 # account/email_new_password

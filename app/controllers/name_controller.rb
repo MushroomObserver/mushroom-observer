@@ -189,6 +189,7 @@ class NameController < ApplicationController
       @past_name = @name.versions.latest
       @past_name = @past_name.previous if @past_name
       @children = @name.children
+      @parents = @name.parents
       update_view_stats(@name)
 
       # In theory much of the following should really be handled by the new search_sequences,
