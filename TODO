@@ -10,11 +10,6 @@ ge/show_image.rhtml:
     ActionView::TemplateError (undefined method `observation_name' for nil:NilClass) on line #20 of observer/_observation.rhtml:
     Rendering /home/19334/containers/rails/mo/public/500.html (500 Internal Server Error)
     Can't reproduce.
-    
-  Avoid generating 'Genus sp' as species.
-
-  Caused by name.review_status being NULL:
-    Name problem with A. virginiensis (species vanished!)
 
 Features for EOL Class support:
   
@@ -174,6 +169,11 @@ Add fields for who found the mushroom and who provided the id.
 Updating an author citation currently requires visiting each observation and adding the new name.  Seems like there should be a simpler way.
 
 Hypholoma aurantiacum recognizes that it is deprecated, but doesn't suggest a valid synonym.
+
+Possible usability issue:
+  Users sometimes 'Email <user>' when they should .
+  Might want to duplicate "Send Observer a Question"
+  Add note on the "send user an email" saying that emails regarding specific observations are better sent from the observation's page using either "send user an email" or simply "add comment" might also be useful.
 
 -----
 
