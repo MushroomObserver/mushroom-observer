@@ -30,7 +30,9 @@
 # bunch of insert-mode commands, such as:
 #     ^Ra = á (vowels)  ^R! = ¡
 #     ^Rn = ñ           ^R? = ¿
-#  OaáeéiíoóuúnñAÁEÉIÍOÓUÚNÑ!¡?¿0lI:map! la lak"add@a@q0"qDddk@q
+#  OaáeéiíoóuúnñAÁEÉIÍOÓUÚNÑ!¡?¿
+0lI:map! la la
+k"add@a@q0"qDddk@q
 #
 # Here's a good Spanish website for reference: http://www.asturnatura.com
 
@@ -1909,7 +1911,7 @@ translators_note: >
   However we can still use all the help we can get.  We need help proof-reading
   the Spanish -- after all I don't actually speak the language.  And now that
   we've worked out all the kinks, we'd love to see some more languages.
-
+  \n\n
   It's very easy.  There is somewhere around 1600 lines or 11000 words of text
   on this site at the moment, but don't let that scare you.  We've organized it
   so someone with limited time can concentrate on just the first few sections,
