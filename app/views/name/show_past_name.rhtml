@@ -1,7 +1,7 @@
-<% @title = :show_name_past_title.t(
-  :version => @past_name.version,
-  :name => @past_name.display_name
-) %>
+<%
+  @title = :show_name_past_title.t(:version => @past_name.version, :name => @past_name.display_name)
+  String.register_name(@past_name)
+%>
 
 <table cellpadding="10">
   <tr>

@@ -179,7 +179,7 @@ namespace :jason do
     user = User.find(252) # jason
 
     # This is stolen from construct_approved_names in app_controller.
-    File.open('names/names.txt') do |fh|
+    File.open('esslinger.txt') do |fh|
       fh.each_line do |name|
         name = name.strip!.squeeze(' ')
         if name.match(/^([A-Z])/)

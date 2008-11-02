@@ -1,5 +1,6 @@
 <%
   @title = :show_name_title.t(:name => @name.display_name)
+  String.register_name(@name)
 
   # Google Images | Distribution Map | Email Tracking
   new_tab_set do
