@@ -356,14 +356,18 @@ class ProjectControllerTest < ActionController::TestCase
     else
       user = draft.user
     end
-    page = page || "edit_draft"
     count = DraftName.find(:all).size
     params = {
       :project => project.id,
       :name => name.id
     }
     requires_login(:create_or_edit_draft, params, false, user.login)
-    assert_redirected_to(:controller => "project", :action => page, :id => draft.id)
+    if page
+      assert_redirected_to(:controller => "project", :action => page, :id => draft.id)
+    else
+      assert_response :success
+      assert_template 'edit_draft'
+    end
     assert_equal(count, DraftName.find(:all).size)
   end
 
@@ -390,7 +394,9 @@ class ProjectControllerTest < ActionController::TestCase
       :name => @conocybe_filaris.id
     }
     requires_login(:create_or_edit_draft, params, false, @katrina.login)
-    assert_redirected_to(:controller => "project", :action => "edit_draft")
+    assert_response :success
+    assert_template 'edit_draft'
+    # assert_redirected_to(:controller => "project", :action => "edit_draft")
     assert_equal(count + 1, DraftName.find(:all).size)
   end
 

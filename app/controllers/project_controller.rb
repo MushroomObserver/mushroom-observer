@@ -226,25 +226,27 @@ class ProjectController < ApplicationController
   #   Outputs: @project, @candidate
   def change_member_status
     @project = Project.find(params[:id])
-    if verify_user() and @project.is_admin?(@user)
-      @candidate = User.find(params[:candidate])
-      user_group = @project.user_group
-      admin_group = @project.admin_group
-      if request.method == :post
-        admin = member = false
-        case params[:commit]
-        when :change_member_status_make_admin.l
-          admin = member = true
-        when :change_member_status_make_member.l
-          member = true
+    if verify_user()
+      if @project.is_admin?(@user)
+        @candidate = User.find(params[:candidate])
+        user_group = @project.user_group
+        admin_group = @project.admin_group
+        if request.method == :post
+          admin = member = false
+          case params[:commit]
+          when :change_member_status_make_admin.l
+            admin = member = true
+          when :change_member_status_make_member.l
+            member = true
+          end
+          set_status(@candidate, admin_group, admin)
+          set_status(@candidate, user_group, member)
+          redirect_to(:action => 'show_project', :id => @project.id)
         end
-        set_status(@candidate, admin_group, admin)
-        set_status(@candidate, user_group, member)
+      else
+        flash_error(:change_member_status_denied.t)
         redirect_to(:action => 'show_project', :id => @project.id)
       end
-    else
-      flash_error(:change_member_status_denied.t)
-      redirect_to(:action => 'show_project', :id => @project.id)
     end
   end
 
@@ -257,13 +259,15 @@ class ProjectController < ApplicationController
   #   Redirects to add_members.
   def add_one_member
     @project = Project.find(params[:id])
-    if verify_user() and @project.is_admin?(@user)
-      @candidate = User.find(params[:candidate])
-      set_status(@candidate, @project.user_group, true)
-    else
-      flash_error(:add_members_denied.t)
+    if verify_user()
+      if @project.is_admin?(@user)
+        @candidate = User.find(params[:candidate])
+        set_status(@candidate, @project.user_group, true)
+      else
+        flash_error(:add_members_denied.t)
+      end
+      redirect_to(:action => 'add_members', :id => @project.id)
     end
-    redirect_to(:action => 'add_members', :id => @project.id)
   end
 
   # View that lists all users with links to add each as a member
@@ -274,10 +278,12 @@ class ProjectController < ApplicationController
   #   @project, @users
   def add_members
     @project = Project.find(params[:id])
-    if verify_user() and @project.is_admin?(@user)
-      @users = User.find(:all, :order => "login, name")
-    else
-      redirect_to(:action => 'show_project', :id => @project.id)
+    if verify_user()
+      if @project.is_admin?(@user)
+        @users = User.find(:all, :order => "login, name")
+      else
+        redirect_to(:action => 'show_project', :id => @project.id)
+      end
     end
   end
 
@@ -297,9 +303,11 @@ class ProjectController < ApplicationController
     @draft_name = DraftName.find(params[:id])
     if @draft_name
       project = @draft_name.project
-      unless verify_user() and project.is_member?(@user)
-        flash_error(:show_draft_denied.t)
-        redirect_to(:action => 'show_project', :id => project.id)
+      if verify_user()
+        unless project.is_member?(@user)
+          flash_error(:show_draft_denied.t)
+          redirect_to(:action => 'show_project', :id => project.id)
+        end
       end
     else
       redirect_to(:action => 'list_projects')
@@ -323,49 +331,61 @@ class ProjectController < ApplicationController
   def create_or_edit_draft
     project = Project.find(params[:project])
     name = Name.find(params[:name])
-    if project and name
-      draft = DraftName.find(:first, :conditions => ["name_id = ? and project_id = ? and user_id = ?", name.id, project.id, @user.id])
-      if draft
-        redirect_to(:action => 'edit_draft', :id => draft.id)
-      else
-        draft = DraftName.find(:first, :conditions => ["name_id = ?", name.id])
+    alt_page = nil # Meaning go to edit_draft
+    if verify_user()
+      if project and name
+        draft = DraftName.find(:first, :conditions => ["name_id = ? and project_id = ? and user_id = ?", name.id, project.id, @user.id])
         if draft
-          if draft.project_id == project.id and project.is_admin?(@user)
-            redirect_to(:action => 'edit_draft', :id => draft.id)
-          else
-            flash_error(:create_draft_multiple.t(:name => name.display_name, :title => project.title))
-            redirect_to(:action => 'show_draft', :id => draft.id)
+          if not draft.can_edit?(@user)
+            alt_page = 'show_draft'
           end
         else
-          if project.is_member?(@user)
-            draft = DraftName.new({
-              :user_id => @user.id,
-              :project_id => project.id,
-              :name_id => name.id})
-            for f in Name.all_note_fields:
-              draft.send("#{f}=", name.send(f))
-            end
-            if draft.has_any_notes?
-              draft.license_id = @user.license_id
-            else
-              draft.license_id = nil
-            end
-            if draft.save
-              redirect_to(:action => 'edit_draft', :id => draft.id)
-            else
-              flash_error(:create_draft_failed.t)
-              redirect_to(:action => 'show_project', :project => project.id)
+          draft = DraftName.find(:first, :conditions => ["name_id = ?", name.id])
+          if draft
+            unless draft.project_id == project.id and project.is_admin?(@user)
+              flash_error(:create_draft_multiple.t(:name => name.display_name, :title => project.title))
+              alt_page = 'show_draft'
             end
           else
-            flash_error(:create_draft_create_denied.t(:title => project.title))
-            redirect_to(:action => 'show_project', :id => project.id)
+            if project.is_member?(@user)
+              draft = DraftName.new({
+                :user_id => @user.id,
+                :project_id => project.id,
+                :name_id => name.id})
+              for f in Name.all_note_fields:
+                draft.send("#{f}=", name.send(f))
+              end
+              if draft.has_any_notes?
+                draft.license_id = @user.license_id
+              else
+                draft.license_id = nil
+              end
+              unless draft.save
+                flash_error(:create_draft_failed.t)
+                draft = nil
+              end
+            else
+              flash_error(:create_draft_create_denied.t(:title => project.title))
+              draft = nil
+            end
           end
         end
+        if draft
+          if alt_page
+            redirect_to(:action => 'show_draft', :id => draft.id)
+          else
+            @draft_name = draft
+            @licenses = License.current_names_and_ids(draft.license)
+            render(:action => 'edit_draft')
+          end
+        else
+          redirect_to(:action => 'show_project', :id => project.id)
+        end
+      else
+        flash_error(:create_draft_bad_args.t(:project => params[:project],
+                                             :name => params[:name]))
+        redirect_to(:action => 'list_projects')
       end
-    else
-      flash_error(:create_draft_bad_args.t(:project => params[:project],
-                                           :name => params[:name]))
-      redirect_to(:action => 'list_projects')
     end
   end
 
@@ -382,18 +402,20 @@ class ProjectController < ApplicationController
   def edit_draft
     @draft_name = DraftName.find(params[:id])
     @licenses = License.current_names_and_ids(@draft_name.license)
-    if verify_user() and @draft_name.can_edit?(@user)
-      if request.method == :post
-        if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
-          flash_object_errors(@draft_name)
-        else
-          flash_notice(:create_draft_updated.t)
-          redirect_to(:action => 'show_draft', :id => @draft_name.id)
+    if verify_user()
+      if @draft_name.can_edit?(@user)
+        if request.method == :post
+          if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
+            flash_object_errors(@draft_name)
+          else
+            flash_notice(:create_draft_updated.t)
+            redirect_to(:action => 'show_draft', :id => @draft_name.id)
+          end
         end
+      else
+        flash_error(:create_draft_edit_denied.t)
+        redirect_to(:action => 'show_draft', :id => @draft_name.id)
       end
-    else
-      flash_error(:create_draft_edit_denied.t)
-      redirect_to(:action => 'show_draft', :id => @draft_name.id)
     end
   end
 
