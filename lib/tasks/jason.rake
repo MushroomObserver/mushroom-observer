@@ -189,6 +189,7 @@ namespace :jason do
           results = Name.names_from_string(name_parse.search_name)
           if results.last.nil?
             print "\nError: #{name_parse.name}\n"
+            name = nil
           else
             n = results.last
             n.rank  = name_parse.rank    if name_parse.rank
@@ -199,6 +200,7 @@ namespace :jason do
                 n.save_if_changed(user, "Approved by jason, based on Esslinger's checklist.")
               end
             end
+            name = n
           end
 
           if name_parse.has_synonym
@@ -214,6 +216,9 @@ namespace :jason do
               for n in results[0..-2]
                 n.save_if_changed(user, nil)
               end
+
+              # Oops, forgot to actually synonymize names!
+              name.merge_synonyms(n) if name and n
             end
           end
 

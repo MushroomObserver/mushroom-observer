@@ -25,15 +25,6 @@
 # this convention, remove the extra space from each entry you translate.  This
 # way we can easily find the ones that still need to be translated.
 #
-# Here are some vim macros to do Spanish accents.  Copy the line below
-# (starting with 'O') into register 'q' and run it with '@q' -- it will map a
-# bunch of insert-mode commands, such as:
-#     ^Ra = á (vowels)  ^R! = ¡
-#     ^Rn = ñ           ^R? = ¿
-#  OaáeéiíoóuúnñAÁEÉIÍOÓUÚNÑ!¡?¿
-0lI:map! la la
-k"add@a@q0"qDddk@q
-#
 # Here's a good Spanish website for reference: http://www.asturnatura.com
 
 # generic stuff and application layout
