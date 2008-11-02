@@ -103,7 +103,8 @@
             %></td>
           </tr>
 
-          <% if naming.naming_reasons.length > 0 %>
+          <% String.register_name(naming.name)
+          if naming.naming_reasons.length > 0 %>
             <tr>
               <td colspan="<%= cols %>">
                 <% for reason in naming.naming_reasons %>
