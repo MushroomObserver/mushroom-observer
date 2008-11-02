@@ -191,7 +191,7 @@ namespace :jason do
             print "\nError: #{name_parse.name}\n"
             name = nil
           else
-            n = results.last
+            name = n = results.last
             n.rank  = name_parse.rank    if name_parse.rank
             n.notes = name_parse.comment if !n.id && name_parse.comment
             for n in results
@@ -200,7 +200,6 @@ namespace :jason do
                 n.save_if_changed(user, "Approved by jason, based on Esslinger's checklist.")
               end
             end
-            name = n
           end
 
           if name_parse.has_synonym
@@ -208,7 +207,7 @@ namespace :jason do
             if results.last.nil?
               print "\nError: = #{name_parse.synonym}\n"
             else
-              n = results.last
+              synonym = n = results.last
               n.rank  = name_parse.synonym_rank    if name_parse.synonym_rank
               n.notes = name_parse.synonym_comment if !n.id && name_parse.synonym_comment
               n.change_deprecated(true)
@@ -218,7 +217,7 @@ namespace :jason do
               end
 
               # Oops, forgot to actually synonymize names!
-              name.merge_synonyms(n) if name and n
+              name.merge_synonyms(synonym) if name and synonym
             end
           end
 
