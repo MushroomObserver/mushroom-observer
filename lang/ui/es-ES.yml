@@ -1801,7 +1801,7 @@ show_observation_send_question: Enviar pregunta al observador.
 show_observation_species_lists: Listas de Especies
 show_observation_specimen_available: Especímen de herbario disponible
 show_observation_specimen_not_available: No especímen de herbario
-show_observation_success: Su vota se ha cabiado con éxito.
+show_observation_success: Su vota se ha cambiado con éxito.
 show_observation_title: 'Observación: [name]'
 show_observation_view_notifications: Ver Notificaciones
 

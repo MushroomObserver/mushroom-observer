@@ -30,19 +30,12 @@
 
       <% rss = observation.rss_log
       if rss && rss.notes
-        any_interesting_notes = false
         logs = rss.parse_log
-        for key, args, time in logs
-          if key != :log_observation_created &&
-             !key.to_s.match(/^log_image/)
-            any_interesting_notes = true
-            break
-          end
-        end
-        if any_interesting_notes %>
+        if logs.first[2] > observation.created + 10.seconds %>
           <span>
             <%= key, args, time = logs.first
             if match = key.to_s.match(/^(log_image_created|reused|removed|destroyed)/)
+              # This will remove redundant user and image title stuff.
               "#{key}0".to_sym.t(args)
             else
               key.t(args)
