@@ -182,6 +182,7 @@ class AccountController < ApplicationController
           @user.alternate_columns = params['user']['alternate_columns']
           @user.vertical_layout = params['user']['vertical_layout']
           @user.license_id = params['user']['license_id'].to_i
+          @user.locale = params['user']['locale'].to_s
 
           password = params['user']['password']
           if password
