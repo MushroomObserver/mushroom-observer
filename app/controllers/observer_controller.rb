@@ -920,10 +920,10 @@ class ObserverController < ApplicationController
     id = params[:id]
     begin
       @observation = Observation.find(id)
-      flash_notice(:observer_recalc_old_name.t(:name => @observation.name.format_name))
+      flash_notice(:observer_recalc_old_name.t(:name => @observation.name.display_name))
       text = @observation.calc_consensus(true)
       flash_notice text if !text.nil? && text != ''
-      flash_notice(:observer_recalc_new_name.t(:name => @observation.name.format_name))
+      flash_notice(:observer_recalc_new_name.t(:name => @observation.name.display_name))
     rescue => err
       flash_error(:observer_recalc_caught_error.t(:error => err))
     end
