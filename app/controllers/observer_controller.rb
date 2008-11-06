@@ -924,7 +924,7 @@ class ObserverController < ApplicationController
       text = @observation.calc_consensus(true)
       flash_notice text if !text.nil? && text != ''
       flash_notice(:observer_recalc_new_name.t(:name => @observation.name.format_name))
-    rescue(err)
+    rescue => err
       flash_error(:observer_recalc_caught_error.t(:error => err))
     end
     # render(:text => '', :layout => true)

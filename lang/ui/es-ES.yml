@@ -1491,6 +1491,12 @@ observer_controller_no_save_observation: No se ha podido guardar el observación
 observer_controller_no_upload_image: No se ha podido subir la imagen [name].
 
 
+# observer/recalc
+observer_recalc_caught_error:  'Caught error: [error]'
+observer_recalc_new_name:  'New name: [name]'
+observer_recalc_old_name:  'Old name: [name]'
+
+
 # account/prefs
 prefs_alt_col_colors: Alternar los colores de las columnas.
 prefs_alt_row_colors: Alternar los colores de las filas.
