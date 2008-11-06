@@ -307,6 +307,19 @@ class NameTest < Test::Unit::TestCase
     )
   end
 
+  def test_name_parse_20
+    do_name_parse_test(
+      'Boletus  rex-veris Arora & Simonini',
+      'Boletus rex-veris',
+      '**__Boletus rex-veris__** Arora & Simonini',
+      '**__Boletus rex-veris__** Arora & Simonini',
+      'Boletus rex-veris Arora & Simonini',
+      'Boletus',
+      :Species,
+      'Arora & Simonini'
+    )
+  end
+
   # def dump_list_of_names(list)
   #   for n in list do
   #     print "id=#{n.id}, text_name='#{n.text_name}', author='#{n.author}'\n"
