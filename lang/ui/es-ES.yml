@@ -150,6 +150,7 @@ app_your_observations: Sus Observaciones
 app_your_summary: Su Resumen
 
 # available languages
+de_DE: Deutsch
 en_US: English
 es_ES: Español
 pt_BR: Português
@@ -1492,9 +1493,9 @@ observer_controller_no_upload_image: No se ha podido subir la imagen [name].
 
 
 # observer/recalc
-observer_recalc_caught_error:  'Caught error: [error]'
-observer_recalc_new_name:  'New name: [name]'
-observer_recalc_old_name:  'Old name: [name]'
+observer_recalc_old_name: 'Nombre viejo: [name]'
+observer_recalc_new_name: 'Nombre nuevo: [name]'
+observer_recalc_caught_error: 'Atrapados excepción: [error]'
 
 
 # account/prefs
@@ -1573,12 +1574,6 @@ profile_uploaded_image: Imagen <<[name]>> se ha subido.
 publish_draft_denied: >
   Permiso denegado: sólo el creador de un borrador o un admin de proyecto puede
   publicar un borrador.
-
-
-# observer/recalc
-recalc_old_name: 'Nombre viejo: [name]'
-recalc_new_name: 'Nombre nuevo: [name]'
-recalc_caught_error: 'Atrapados excepción: [error]'
 
 
 # observer/refresh_vote_cache

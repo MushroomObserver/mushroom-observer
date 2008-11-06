@@ -1,0 +1,2547 @@
+# [This comment was supplied by globalite... what does it mean??]
+# If the locale isn't a full locale such as fr-FR or if the rails localization
+# doesn't exist, you should define the locale_name key for globalite to display
+# the UI locales properly.
+#
+# Note on syntax: This is standard YAML, with minimal post-processing.
+#   1) \n is turned into a newline
+#   2) << and >> are interpreted as angle-quotes
+#   3) [arg] is filled in with arguments passed in to the localize method:
+#
+#    :app_about_name.l(:name => 'Agaricus')
+#
+# There are three methods to retrieve the strings in these files:
+#    :app_title.l     Retrieves string unchanged.
+#    :app_title.t     Calls textilize_without_paragraph on it.
+#    :app_title.tp    Calls textilize on it (which wraps it in <p>...</p>).
+#
+# The order of keys and the comments in the English file are preserved.  When
+# you run 'rake lang:clean' it will rewrite the non-English translations to
+# match the English file, and fill in missing keys, telling you how many are
+# missing in each file.
+#
+# The way to tell which keys were inserted from the English is to search for
+# colons followed by *two* spaces, instead of one.  If you decide to follow
+# this convention, remove the extra space from each entry you translate.  This
+# way we can easily find the ones that still need to be translated.
+#
+# Here's a good Spanish website for reference: http://www.asturnatura.com
+
+# generic stuff and application layout
+app_about_name: Über [name]
+app_accepted: Angenommen
+app_account: Konto
+app_add: Hinzufügen
+app_add_to_group: Zur Gruppe hinzufügen
+app_admin: Admin
+app_and_num_more: Und weitere [num]...
+app_approve: Bestätigen
+app_approved: Bestätigt
+app_are_you_sure: Bist du sicher?
+app_author: Autor
+app_banner: Mushroom<br/>Observer
+app_by: Von
+app_cancel: Abbrechen ([type] anzeigen)
+app_citation: Referenz
+app_click_for_map: 'Landkarte: hier klicken'
+app_close: Schließen
+app_colors_from: Farben von [theme]
+app_comments: Kommentare
+app_comments_for_you: Kommentare für dich
+app_contributors: Mitwirkende
+app_create: Erstellen
+app_create_account: Konto eröffnen
+app_create_list: Neue Liste anlegen
+app_create_observation: Neuen Fund eingeben
+app_created: '[type] erstellt am: [date]'
+app_created_bare: Erstellt
+app_current_user: Eingeloggter Nutzer
+app_deprecate: Als veraltet markieren
+app_deprecated: Veraltet
+app_destroy: Löschen
+app_disable: Deaktivieren
+app_east: Osten
+app_edit: Ändern
+app_email_all_users: An alle Nutzer emailen
+app_enable: Aktivieren
+app_find: Suchen
+app_google_images: Google Bilder
+app_highest: Höchste Erhebung
+app_how_to_help: So kannst du mithelfen
+app_how_to_use: Bedienungsanleitung
+app_images: Bilder
+app_images_find: Bilder
+app_index_a_z: Index A->Z
+app_intro: Einleitung
+app_join_mailing_list: Email-Rundbrief abonnieren
+app_languages: Sprachen
+app_last_modified: 'Zuletzt geändert von [user] am [date]'
+app_latest: Neueste
+app_latest_changes: Änderungen von Nutzern
+app_less_button: << Weniger
+app_list_projects: Projekte anzeigen
+app_locations_find: Fundorte
+app_login: Login
+app_logout: Logout
+app_lowest: Niedrigste Tiefe
+app_many_times: '[num]-mal'
+app_meters: Meter
+app_more_button: Mehr >>
+app_name: Name
+app_name_status: Status
+app_names_find: Namen
+app_newest_images: Bilder
+app_news: Neues und Verbesserungen
+app_next: Weiter
+app_no_ajax: Dein Browser ist veraltet
+app_no_create_name: Kann den Namen '[name]' nicht erstellen.
+app_no_javascript: Javascript ist ausgeschaltet
+app_no_session: Dein Browser nimmt einen Cookie nicht an
+app_no_votes: keine Stimmen
+app_north: Norden
+app_notes: Anmerkungen
+app_observations_find: Funde
+app_observations_left: Funde
+app_one_time: einmal
+app_optional: wahlfrei
+app_permission_denied: Nicht erlaubt.
+app_powered_by: Hergestellt mit
+app_preferences: Einstellungen
+app_preferred_browser: Lieblings-Browser
+app_prev: Zurück
+app_rank: Rang
+app_remove: Löschen
+app_required: obligatorisch
+app_rss: Mushroom Observer RSS
+app_save: Speichern
+app_save_changes: Änderungen Speichern
+app_search: Suchen
+app_send: Schicken
+app_send_a_comment: Einen Kommentar schicken
+app_show_image: Bild anzeigen
+app_show_log: Logbuch anzeigen
+app_show_map: Karte anzeigen
+app_show_name: Namen anzeigen
+app_show_observation: Fund anzeigen
+app_show_project: Projekt anzeigen
+app_show_species_list: Artenliste anzeigen
+app_site_stats: Website-Statistik
+app_sort_by_date_obs: Nach Datum sortieren
+app_sort_by_date_spl: Nach Datum sortieren
+app_sort_by_name: Nach Namen sortieren
+app_sort_by_title: Nach Titeln sortieren
+app_south: Süden
+app_species_list: Artenliste
+app_summary: Zusammenfassung
+app_title: Mushroom Observer
+app_translators_credit: 'Deutsche Fassung von Christian Asseburg'
+app_unknown: Unbekannt
+app_update: Update
+app_users: Nutzer
+app_version: Version
+app_viewed: '[times]-mal aufgerufen, zuletzt am: [date]'
+app_welcome: Guten Tag, [user]
+app_west: Westen
+app_what: Was
+app_when: Wann
+app_where: Wo
+app_who: Wer
+app_your_observations: Deine Funde
+app_your_summary: Deine Zusammenfassung
+
+# available languages
+de_DE: Deutsch
+en_US: English
+es_ES: Español
+pt_BR: Português
+
+# image quality values
+unreviewed: Nicht begutachtet
+low: Schlecht
+medium: Gut
+high: Ausgezeichnet
+low_and_next: Schlecht & Weiter
+medium_and_next: Gut & Weiter
+high_and_next: Ausgezeichnet & Weiter
+
+# name vetting values
+unvetted: Nicht begutachtet
+vetted: Bestätigt
+inaccurate: Ungenau
+no_export: Nicht exportieren
+ok_for_export: Kann exportiert werden
+
+# object titles
+comment: Kommentar
+comments: Kommentare
+draft: Entwurf
+drafts: Entwürfe
+image: Bild
+images: Bilder
+location: Fundort
+locations: Fundorte
+name: Name
+names: Namen
+naming: Vorgeschlagener ID
+namings: Vorgeschlagene IDs
+observation: Fund
+observations: Funde
+past_location: Ortswechsel
+past_locations: Ortswechsel
+past_name: Namensänderung
+past_names: Namensänderungen
+project: Projekt
+projects: Projekte
+species_list: Artenliste
+species_lists: Artenlisten
+user: Nutzer
+users: Nutzer
+vote: Stimme
+votes: Stimmen
+
+# naming reasons, used in observer/_form_naming and _show_namings
+naming_reason_label_1: Mit nacktem Auge bestimmt
+naming_reason_label_2: Anhand von Büchern bestimmt
+naming_reason_label_3: Anhand von mikroskopischen Beobachtungen
+naming_reason_label_4: Anhand von chemischen Beobachtungen
+
+# taxonomic ranks, used in observer/_form_names
+rank_class: Klasse
+rank_family: Familie
+rank_form: Form
+rank_genus: Gattung
+rank_group: Gruppe
+rank_kingdom: Reich
+rank_order: Ordnung
+rank_phylum: Abteilung
+rank_species: Art
+rank_subspecies: Unterart
+rank_variety: Varietät
+rank_plural_class: Klassen
+rank_plural_family: Familien
+rank_plural_form: Formen
+rank_plural_genus: Gattungen
+rank_plural_group: Gruppen
+rank_plural_kingdom: Reiche
+rank_plural_order: Ordnungen
+rank_plural_phylum: Abteilungen
+rank_plural_species: Arten
+rank_plural_subspecies: Unterarten
+rank_plural_variety: Varietäten
+
+# site statistics field names
+site_stats_images: Bilder
+site_stats_names: Beschreibungen
+site_stats_past_names: Änderungen von Beschreibungen
+site_stats_locations: Fundorte
+site_stats_past_locations: Fundort-Änderungen
+site_stats_species_lists: Artenlisten
+site_stats_species_list_entries: Artenlisten-Einträge
+site_stats_comments: Kommentare
+site_stats_observations: Funde
+site_stats_observed_taxa: Gefundene Taxa
+site_stats_namings: Vorgeschlagene IDs
+site_stats_votes: Stimmen
+site_stats_users: Nutzer
+
+# vote descriptions
+vote_no_opinion: Keine Meinung
+vote_confidence_100: So würd ich's nennen
+vote_confidence_80: Sehr wahrscheinlich
+vote_confidence_60: Möglich
+vote_confidence_40: Eher nicht
+vote_confidence_20: Unwahrscheinlich
+vote_confidence_0: Keinesfalls
+vote_agreement_100: So würd ich's nennen
+vote_agreement_80: Sehr wahrscheinlich
+vote_agreement_60: Möglich
+vote_agreement_40: Eher nicht
+vote_agreement_20: Unwahrscheinlich
+vote_agreement_0: Keinesfalls
+
+# rss logs
+log_ancient: '[string]'
+log_approved_by: Zugelassen von [user].
+log_comment_added: 'Kommentar von [user]: [summary]'
+log_comment_destroyed: 'Kommentar gelöscht von [user]: [summary]'
+log_comment_updated: 'Kommentar geändert von [user]: [summary]'
+log_consensus_reached: 'Mehrheitlich gewählt: [name]'
+log_consensus_changed: Mehrheitlich [old] abgelehnt und [new] gewählt.
+log_deprecated_by: Als veraltet markiert von [user].
+log_image_created: 'Bild erstellt von [user]: [name]'
+log_image_destroyed: 'Bild gelöscht von [user]: [name]'
+log_image_removed: 'Bild entfernt von [user]: [name]'
+log_image_reused: 'Bild weiterverwertet von [user]: [name]'
+log_image_updated: 'Bild verändert von [user]: [name]'
+log_image_created0: Bild hinzugefügt.
+log_image_destroyed0: Bild gelöscht.
+log_image_removed0: Bild entfernt.
+log_image_reused0: Bild hinzugefügt.
+log_image_updated0: Bild verändert.
+log_name_approved: '[user] fand [other] weniger gut.'
+log_name_deprecated: '[user] fand [other] besser.'
+log_name_merged: Name mit [name] verbunden.
+log_name_updated: Name von [user] verändert.
+log_naming_created: 'Name von [user] erzeugt: [name]'
+log_naming_destroyed: 'Name von [user] gelöscht: [name]'
+log_naming_updated: 'Name von [user] verändert: [name]'
+log_observation_created: Fund eingegeben von [user].
+log_observation_destroyed: Fund gelöscht von [user].
+log_observation_destroyed2: 'Fund gelöscht von [user]: [name]'
+log_observation_updated: Fund von [user] verändert.
+log_orphan: '[title]'
+log_species_list_created: Artenliste erzeugt von [user].
+log_species_list_destroyed: Artenliste gelöscht von [user].
+log_species_list_updated: Species list updated by [user].
+log_updated_by: Verbessert von [user].
+
+# active-record automatic validation error messages
+validate_comment_object_type_too_long: Object_type muss kürzer als 30 Buchstaben sein.
+validate_comment_summary_missing: Bitte eine Zusammenfassung eingeben, diese wird auf der Übersicht gezeigt.
+validate_comment_summary_too_long: Die Zusammenfassung muss kürzer sein als 100 Buchstaben.
+validate_comment_user_missing: Nutzer fehlt.
+validate_image_content_type_images_only: Du kannst nur Bilder hochladen.
+validate_image_content_type_too_long: Content_type muss kürzer als 100 Buchstaben sein.
+validate_image_copyright_holder_too_long: Der Name des Copyright-Inhabers muss kürzer sein als 100 Buchstaben.
+validate_image_title_too_long: Die Überschrift muss kürzer sein als 100 Buchstaben.
+validate_image_user_missing: Nutzer fehlt.
+validate_image_when_missing: Datum fehlt.
+validate_location_display_name_too_long: Display_name muss kürzer als 200 Buchstaben sein.
+validate_location_east_out_of_bounds: Der Längengrad Ost muss zwischen -180 und 180 sein.
+validate_location_high_less_than_low: Die höchste Erhebung muss mindestens so hoch sein wie der tiefste Punkt.
+validate_location_north_too_high: Der Breitengrad Nord kann nicht höher sein als 90.
+validate_location_north_less_than_south: Der Breitengrad Nord muss größer sein als Breitengrad Süd.
+validate_location_search_name_too_long: Search_name muss kürzer sein als 200 Buchstaben.
+validate_location_south_too_low: Der Breitengrad Süd muss mindestens -90 sein.
+validate_location_user_missing: Nutzer fehlt.
+validate_location_west_out_of_bounds: Der Längengrad West muss zwischen -180 und 180 sein.
+validate_name_author_too_long: Der Autor muss kürzer sein als 100 Buchstaben.
+validate_name_citation_too_long: Die Referenz kann höchstens 100 Buchstaben lang sein.
+validate_name_display_name_too_long: Display_name muss kürzer sein als 100 Buchstaben.
+validate_name_observation_name_too_long: Observation_name müss kürzer sein als 100 Buchstaben.
+validate_name_search_name_too_long: Search_name muss kürzer sein als 100 Buchstaben.
+validate_name_text_name_too_long: Text_name muss kürzer sein als 100 Buchstaben.
+validate_name_user_missing: Nutzer fehlt.
+validate_naming_name_missing: Name fehlt.
+validate_naming_observation_missing: Fund fehlt.
+validate_naming_reason_naming_missing: Benennung fehlt.
+validate_naming_reason_reason_invalid: Ungültiger Ursachen-Code.
+validate_naming_user_missing: Nutzer fehlt.
+validate_notification_user_missing: Nutzer fehlt.
+validate_observation_thumb_image_id_invalid: Kann kein Bild finden das zu der Vorschau gehört.
+validate_observation_user_missing: Nutzer fehlt.
+validate_observation_when_missing: Funddatum fehlt.
+validate_observation_where_missing: Bitte gib an, wo dies gesehen oder gefunden wurde.
+validate_observation_where_too_long: Fundort darf höchstens 100 Buchstaben lang sein.
+validate_project_admin_group_missing: Admin-Gruppe fehlt.
+validate_project_title_missing: Bitte gib diesem Projekt einen Namen.
+validate_project_title_too_long: Der Name darf höchstens 100 Buchstaben lang sein.
+validate_project_user_group_missing: Nutzer-Gruppe fehlt.
+validate_project_user_missing: Nutzer fehlt.
+validate_species_list_title_missing: Bitte gib einen Namen ein.
+validate_species_list_title_too_long: Der Name darf höchstens 100 Buchstaben lang sein.
+validate_species_list_user_missing: Nutzer fehlt.
+validate_species_list_where_missing: Bitte gib den Fundort ein.
+validate_species_list_where_too_long: Der Fundort darf höchstens 100 Buchstaben lang sein.
+validate_user_email_missing: Bitte gib eine gültige Email-Adresse an, damit wir das Konto überprüfen können.
+validate_user_email_too_long: Die Email-Adresse muss kürzer als 80 Buchstaben sein.
+validate_user_login_missing: Bitte wähl einen Login-Namen.
+validate_user_login_taken: Es tut uns leid, diesen Login-Namen benutzt schon jemand anders.
+validate_user_login_too_long: Der Login-Name muss zwischen 3 und 40 Buchstaben lang sein.
+validate_user_name_too_long: Der richtige Name darf höchstens 100 Buchstaben lang sein.
+validate_user_password_confirmation_missing: Bitte gib zur Sicherheit das Passwort zweimal ein.
+validate_user_password_missing: Bitte denk dir ein Passwort aus.
+validate_user_password_no_match: Die beiden Passwörter sind verschieden.
+validate_user_password_too_long: Das Passwort muss zwischen 5 und 40 Buchstaben lang sein.
+validate_user_theme_too_long: Der Muster-Name muss kürzer sein als 40 Buchstaben.
+validate_vote_naming_missing: Benennung fehlt.
+validate_vote_user_missing: Nutzer fehlt.
+validate_vote_value_missing: Bitte gib an wie sicher du dir bist.
+validate_vote_value_not_integer: Auswahl ist keine Zahl.
+validate_vote_value_out_of_bounds: Auswahl ist außerhalb des erlaubten Bereichs.
+
+################################################################################
+
+# project/add_members
+add_members_change_status: Status ändern
+add_members_denied: >
+  Verboten: Nur die Admins eines Projekts können neue Mitglieder hinzufügen.
+
+add_members_title: Nutzer zu [title] hinzufügen
+
+
+# project/add_project
+add_project_already_exists: Es gibt schon ein Projekt, das '[title]' heißt.
+add_project_group_exists: >
+  Das Projekt konnte nicht erstellt werden, weil es die Gruppe '[group]' schon gibt.
+
+add_project_need_title: Projekte müssen einen Namen haben.
+add_project_success: Das Projekt ist erstellt worden.
+add_project_title: Neues Projekt erstellen
+
+
+# account/add_user_to_group
+add_user_to_group_already: '[user] ist schon in [group].'
+add_user_to_group_group: Gruppen-Name
+add_user_to_group_no_group: Kann die Gruppe '[group]' nicht finden.
+add_user_to_group_no_user: Kann den Nutzer '[user]' nicht finden.
+add_user_to_group_success: '[user] zu [group] hinzugefügt.'
+add_user_to_group_title: Nutzer zu Gruppe hinzufügen
+add_user_to_group_user: Nutzer-Name
+
+
+# admin_request email
+admin_request_change_member_status: Status des Nutzers ändern
+admin_request_handy_links: Vielleicht helfen dir diese nützlichen Links weiter.
+admin_request_message: Nachricht
+admin_request_show_user: Angaben zum Absender anzeigen
+admin_request_subject: Thema
+admin_request_success: Email geschickt.
+admin_request_title: Admin-Anfrage zu [title]
+
+
+# observer/ask_observation_question
+ask_observation_question_label: >
+  Gib deine Frage unten ein.  Wenn du "Schicken" klickst, wird sie an [user]
+  geschickt. Die Email enthält automatisch einen Link zu diesem Fund und deine
+  Email-Adresse.
+
+ask_observation_question_success: Frage geschickt.
+ask_observation_question_title: Frage zu [name]
+
+
+# observer/ask_user_question
+ask_user_question_message: Nachricht
+ask_user_question_subject: Thema
+ask_user_question_success: Email geschickt
+ask_user_question_title: Email-Nachricht an [user]
+
+
+# observer/ask_webmaster_question
+ask_webmaster_antispam: >
+  Um spam-bots das Leben schwer zu machen, dürfen Fragen von nicht-registrierten
+  Anwendern weder 'http:' noch HTML-Markup enthalten.
+
+ask_webmaster_need_address: Du musst eine gültige Rück-Adresse angeben.
+ask_webmaster_need_content: Frage oder Kommentar fehlt.
+ask_webmaster_note: >
+  Danke für dein Interesse an der Mushroom Observer Webseite. Diese Webseite wurde
+  Mitte 2006 eröffnet. Derzeit bin ich der Hauptentwickler (aber nicht mehr
+  der einzige!). Ich freue mich über Fragen zu dieser Webseite und Anregungen,
+  wie man sie verbessern könnte. Was ich plane zu verbessern, kannst du online
+  einsehen:[todo_list], daraus ist auch ein grober Zeitplan ersichtlich. Aber
+  diese Liste kann sich jederzeit ändern, besonders wenn wir einen Fehler finden
+  oder wenn jemand etwas wirklich Tolles vorschlägt.
+  \n\n
+  Nathan Wilson\n
+  Mushroom Observer Webmaster
+
+ask_webmaster_question: Frage oder Anregung
+ask_webmaster_success: Frage oder Anregung verschickt.
+ask_webmaster_title: Frage oder Anregung schicken
+ask_webmaster_your_email: Deine Email-Adresse
+
+
+# observer/license_updater
+bulk_license_link: Bulk License Updater
+
+
+# project/change_member_status
+change_member_status_admins: Derzeitige Projekt-Admins
+change_member_status_change_status: Status ändern
+change_member_status_edit: Projekt bearbeiten
+change_member_status_make_admin: Zum Admin machen
+change_member_status_make_admin_help: >
+  Admin machen - Dann kann der Nutzer Admin-Aufgaben übernehmen. Sie oder er
+  kann Nutzer entfernen, anderen Nutzern die Admin-Aufgaben erlauben oder
+  verbieten sowie vorgeschlagene Namen für dieses Projekt ändern. Der Nutzer
+  wird auch Mitarbeiter an diesem Projekt, wenn sie oder er es noch nicht ist.
+
+change_member_status_make_member: Zu gewöhnlichem Mitarbeiter machen
+change_member_status_make_member_help: >
+  Zu gewöhnlichem Mitarbeiter machen - Dann ist der Nutzer Mitarbeiter an diesem
+  Projekt, aber nicht in der Gruppe der Admins. Der Nutzer kann anschließend
+  vorgeschlagene Namen für dieses Projekt sehen und eingeben. Sie oder er ist
+  dann der einzige nicht-Admin-Nutzer, der einen eigenen Entwurf ändern kann.
+
+change_member_status_members: Derzeitige Projekt-Mitarbeiter
+change_member_status_remove_member: Mitarbeiter entfernen
+change_member_status_remove_member_help: >
+  Mitarbeiter entfernen - Löscht alle Mitarbeiter und Admin-Rechte für ein Projekt.
+  Der Nutzer kann keine weiteren Namen für dieses Projekt ansehen oder vorschlagen.
+  Er oder sie kann keine weiteren Admin-Aufgaben ausüben.
+
+change_member_status_denied: >
+  Nur die Admins eines Projekts können die Rechte der Mitarbeiter bestimmen.
+
+change_member_status_title: Für [name] wird der Mitarbeiter-Status im Projekt [title] geändert
+
+
+# observer/color_themes
+color_themes_text: >
+  **Hintergrundidee:** Die Mushroom Observer Webseite lässt dich auswählen
+  zwischen einigen Farb-Schemata, die auf verschiedenen Pilzgruppen basieren.
+  Standardmäßig wird jede Seite in zufällig gewählten Farben angezeigt. Aber
+  wenn du auf der Einstellungen-Seite ein Farb-Schema auswählst, siehst du
+  alle Seiten in diesen Farben.
+  \n\n
+  Die Idee, Pilze für die Farbschema zu verwenden, kommt von der Tradition,
+  mit Pilzen Stoffe zu färben. Jede Farbe in einem Farbschema kommt ursprünglich
+  aus einem Bild, das auf dieser Webseite zu dieser Pilzgruppe abgerufen werden
+  kann. Die Farben sollen das Typische der Gruppe ausdrücken. Manchmal
+  sind die Farben allerdings verändert worden, um ausgeglichenere, typischere
+  Farben zu erzeugen.
+  \n\n
+  Die nachfolgenden Links beschreiben die zur Auswahl stehenden Schemata, inklusive
+  der Bilder, aus denen die Farben herstammen:
+
+color_themes_title: Farbschemata
+
+
+# comment/add_comment
+comment_add_create: Erstellen
+comment_add_title: Zu [name] einen Kommentar hinzufügen
+
+
+# comment/edit_comment
+comment_edit_title: Du bearbeitest einen Kommentar zu [name]
+
+
+# comment/list_comments
+comment_list_deleted: objekt gelöscht
+
+
+# comment/show_comment
+comment_show_by: Von
+comment_show_comment: Kommentar
+comment_show_created: Erstellt
+comment_show_destroy: Löschen
+comment_show_edit: Bearbeiten
+comment_show_show: '[type] aufrufen'
+comment_show_summary: Zusammenfassung
+comment_show_title: Kommentar zu [name]
+
+
+# observer/commercial_inquiry
+commercial_inquiry_header: >
+  Gib deine gewerbliche Anfrage zu diesem Bild ein. Wenn du auf Schicken klickst,
+  wird sie an [user] geschickt. In der Email ist automatisch ein Link zu diesem
+  Bild enthalten.
+
+commercial_inquiry_success: Gewerbliche Anfrage geschickt.
+commercial_inquiry_title: Gewerbliche Anfrage zu [name]
+
+
+# project/create_or_edit_draft
+create_draft_bad_args: >
+  Fehlerhafte Argumente an create_or_edit_draft: Projekt => [project], Name => [name]
+
+create_draft_create_denied: >
+  Du darfst keine Vorschläge abgeben im Projekt [title].
+
+create_draft_edit_denied: >
+  Verboten: Nur der, der den Vorschlag gemacht hat, kann ihn verändern.
+
+create_draft_failed: Kann neuen Vorschlag nicht erstellen.
+create_draft_updated: Vorschlag wurde verändert.
+create_draft_multiple: >
+  Verboten. Im Projekt '[title]' gibt es schon einen Vorschlag mit dem
+  Namen '[name]', und derselbe Name kann noch nicht doppelt vorgeschlagen werden.
+
+
+# location/create_location
+create_location_already_exists: Diesen Fundort gibt es schon.
+create_location_merge_failed: Konnte Fund [name] nicht kombinieren.
+create_location_success: Fundort ist definiert worden.
+create_location_title: Fundort definieren
+
+
+# observer/create_naming
+create_naming_already_proposed: >
+  Jemand hat diesen Namen schon vorgeschlagen. Wenn du darüber auch etwas
+  schreiben möchtest, schreib doch einen Kommentar.
+
+create_naming_title: Name vorgeschlagen für Fund #[id]
+
+
+# observer/create_observation
+create_observation_success: Der Fund ist eingegeben worden.
+create_observation_title: Fund eingeben
+
+
+# draft/destroy_draft
+destroy_draft_failed: Entwurf konnte nicht gelöscht werden.
+destroy_draft_success: Entwurf gelöscht.
+
+
+# observer/destroy_naming
+destroy_naming_denied: Dieser Name gehört dir nicht.
+destroy_naming_someone_else: >
+  Entschuldigung, jemand ist sich sicher, dass dies der richtige Name ist.
+  Du kannst gern weitere Namen vorschlagen, aber du kannst diesen Namen
+  nicht mehr löschen.
+
+destroy_naming_success: Name gelöscht.
+
+
+# observer/destroy_observation
+destroy_observation_denied: Dies ist nicht dein Fund.
+destroy_observation_success: Fund gelöscht.
+
+
+# project/destroy_project
+destroy_project_failed: Projekt konnte nicht gelöscht werden.
+destroy_project_success: Projekt gelöscht.
+
+
+# project/edit_draft
+edit_draft_title: Bearbeite Entwurf für [name]
+
+
+# location/edit_location
+edit_location_title: Fundort bearbeiten
+edit_location_success: Fundort wurde geändert.
+edit_location_no_change: Keine Änderung nötig.
+
+
+# name/edit_name
+edit_name_title: Ändere Beschreibung von [name]
+
+
+# observer/edit_naming
+edit_naming_someone_else: >
+  Entschuldigung, jemand anders fand diesen Namen ganz gut, deshalb haben wir
+  einen neuen Namensvorschlag erstellt, um deinen Änderungen entgegenzukommen.
+
+edit_naming_title: Bearbeite Namen für Fund #[id]
+
+
+# observer/edit_observation
+edit_observation_success: Fund wurde geändert.
+edit_observation_title: 'Bearbeite Fund: [name]'
+
+
+# project/edit_project
+edit_project_destroy: Projekt löschen
+edit_project_success: Projekt ist geändert worden
+edit_project_title: 'Bearbeite Projekt: [title]'
+
+
+# account_mailer model
+email_comment_subject: Kommentar zu [name]
+email_commercial_inquiry_subject: Gewerbliche Anfrage zu [name]
+email_denied_subject: '[MO] Nutzer-Registrierung abgelehnt'
+email_features_subject: Neue Mushroom-Observer-Funktionalitäten
+email_naming_for_observer_subject: Mushroom-Observer-Forschungsanfrage
+email_naming_for_tracker_subject: Mushroom-Observer-Nachricht über Namensänderung
+email_new_password_subject: Neues Passwort für ein Mushroom-Observer-Konto
+email_observation_question_subject: Frage zu [name]
+email_verify_subject: Email-Überprüfung für Mushroom Observer
+email_webmaster_question_subject: '[MO] Frage von [user]'
+
+
+# account/email_new_password
+email_new_password_failed: Kann Nutzer '[user]' nicht finden.
+email_new_password_login: Login
+email_new_password_success: >
+  Das Passwort wurde geändert. Du erhältst eine Email mit dem neuen Passwort.
+
+email_new_password_title: Email ein neues Passwort
+
+
+# name/email_tracking
+email_tracking_enabled_only_for: >
+  Nur für [name] aktiviert -- Unter-Taxa werden für [rank] noch nicht unterstützt.
+
+email_tracking_help: >
+  Wenn du diesen Namen beobachtest, erhältst du jedesmal eine Email, wenn jemand
+  diesen Namen mit einem Fund verbindet. Jede dieser Emails enthält einen Link
+  auf diese Seite. Du kannst deine Postanschrift für Sammlungen in den "Einstellungen"
+  angeben:/account/profile.
+
+email_tracking_no_longer_tracking: Beobachte [name] nicht mehr.
+email_tracking_note: Vorlage für die Benachrichtigung an den Finder
+email_tracking_note_help: >
+  Gib hier eine Nachrichten-Vorlage an, die zur Grundlage für Emails und
+  Anzeigen dient, wenn dieser Name mit einem Fund verknüpft wird. Wenn du
+  hier nichts eingibst, erhält der Nutzer keine Nachricht.
+
+email_tracking_note_template: >
+  Hallo :observer,
+  \n\n
+  Ich forsche derzeit über [species_name].
+  \n\n
+  Wenn möglich, trockne eins der Exemplare des Pilzes, den du in :observation
+  beschrieben hast, und schicke es an:
+  \n\n
+  [mailing_address]
+  \n\n
+  Vielen Dank,
+  \n\n
+  [users_name]
+
+email_tracking_now_tracking: Beobachte jetzt [name].
+email_tracking_title: Email Beobachtungen von [name]
+email_tracking_updated_messages: Beobachtungs-Benachrichtigung geändert.
+
+
+# name/eol_need_review
+eol_need_review_title: EOL muss durchesehen werden
+
+
+# name/eol_preview
+eol_preview_title: EOL Preview
+eol_preview_explanation: >
+  Diese Seite stellt Links bereit zu "Encyclopedia of Life":http://eol.org (EOL)
+  oder zeigt Inhalte an, die bald dorthin übergeben werden sollen. Die
+  entsprechenden Funktionalitäten sind noch sehr frisch und nicht gerade
+  fertig, da sie schnell entwickelt wurden, damit EOL etwas über Pilze
+  und ähnliches enthält. Für Inhalte, die EOL von Mushroom Observer erhält,
+  werden sowohl Mushroom Observer als auch die Namen der entsprechenden
+  Nutzer angegeben.
+  \n\n
+  Auf dieser Seite entspricht jedem Abschnitt ein Taxon. Die beschreibenden
+  Absätze für jedes angegebene Taxon werden übermittelt, außer solche Absätze,
+  die als 'Notes' markiert sind.  Sowohl die Taxa als auch die dazugehörigen
+  Bilder sind wenigstens oberflächlich von einem Experten der Mushroom Observer
+  Community überprüft worden.
+  \n\n
+  Der Review-Status für jedes Taxon wird auf der Seite für dieses Taxon angezeigt
+  und kann nur von einem ausgewählten Experten bestimmt werden. Bilder werden
+  nach Stimmenabgabe und Qualität gewählt. Derzeit können nur spezifisch dazu
+  bestimmte Experten die Qualität von Bildern bewerten, aber bald soll diese
+  Aufgabe auch mittels offener Stimmenabgabe von der gesamten Mushroom Observer
+  Community übernommen werden.
+  \n\n
+  Im Moment sind die ausgewählten Experten entweder Mykologie-Professoren, deren
+  Unterrichtsklassen via die Mushroom Observer Webseite dem EOL Daten zukommen
+  lassen wollen, oder einzelne Mushroom Observer Nutzer, die sich für diese Webseite
+  engagiert haben und ein hohes Ansehen genießen als Pilzexperten oder im Pilze-Bestimmen.
+  All diese Aspekte der Datenübermittlung an EOL werden noch überarbeitet und können
+  sich ändern, also schicke gern Fragen oder Anregungen, bitte an den Webmaster von
+  Mushroom Observer.
+  \n\n
+  Wenn du teilhaben willst an dieser tollen Gelegenheit, dann kannst du am meisten
+  mithelfen indem du dir ein Taxon aussuchst, das dich interessiert,
+  und anfängst die Beschreibungen für dieses Taxon zu ergänzen.
+
+
+# observer/_form_comments
+form_comments_comment: Kommentar
+form_comments_create_success: Der Kommentar ist eingegeben worden.
+form_comments_destroy_failed: Konnte den Kommentar nicht löschen.
+form_comments_destroy_success: Der Kommentar ist gelöscht worden.
+form_comments_edit_success: Der Kommentar ist geändert worden.
+form_comments_summary: Zusammenfassung
+
+
+# observer/_form_images
+form_images_copyright_holder: Copyright-Inhaber
+form_images_license: Lizenz
+form_images_license_help: >
+  Siehe "Lizenz":/observer/how_to_use#license für dieses Bild
+
+form_images_notes_help: Bemerkungen, die dieses Bild betreffen.
+form_images_select_license: Wähl eine "Lizenz":/observer/how_to_use#license
+form_images_when_help: Datum, an dem dieses Bild gemacht oder gezeichnet wurde.
+form_images_when_taken: Wann wurde es abgebildet
+
+
+# observer/_form_list_feedback
+form_list_feedback_missing_names: Die folgenden Namen wurden nicht gefunden.
+form_list_feedback_missing_names_help: >
+  Klick 'Speichern' um diese Namen zu erstellen. Wenn du per Hand einige
+  dieser Namen korrigieren möchtest, mach dies hier unten und klick dann
+  'Speichern', um die Liste noch einmal zu überprüfen. Wenn die Namen aus einer
+  hochgeladenen Artenliste kommen, erstell eine korrekte Datei und wähl sie
+  zum Hochladen aus.
+
+
+# location/_form_location
+form_locations_help: >
+  Gib einen eindeutigen Namen für diesen Fundort ein, der auch
+  internationell Sinn macht. Zum Beispiel:\n
+  "Mitrula Marsh", Yuba Co., California, USA\n
+  Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
+
+form_locations_lat_long_finders: >
+  Diese latitude-longitude Suchmaschinen helfen dir dabei, die Koordinaten zu bestimmen.
+
+form_locations_lat_long_help: Alle Angaben sollten in Dezimalgraden gemacht werden.
+form_locations_notes_help: >
+  Notier hier, was diesen Fundort kennzeichnet. Zum Bespiel Vegetationstype,
+  dominierende Pflanzen, jährliche Niederschlagsmenge, Entfernung zum Wasser,
+  Bodenmaterial, etc.
+
+
+# observer/_form_name
+form_names_author_help: >
+  Die Autorenreferenz im ICBN-Standardformat.\n
+  Z.B., "(Singer) Jenkins".
+
+form_names_author_locked: >
+  Namen mit dieser Autorenreferenz werden benutzt. Du musst den Namen
+  in jedem Fund ändern.
+
+form_names_citation_help: Referenz zur Veröffentlichung dieses Namens
+form_names_citation_textilize_note: >
+  Du kannst die Referenzen mit Hilfe des Textile Markup Systems formatieren.
+
+form_names_diag_desc: Beschreibung der Kennzeichen
+form_names_diag_desc_help: >
+  Gib an, was dieses Taxon von nah verwandten Taxa unterscheidet.
+
+form_names_distribution: Verteilung
+form_names_distribution_help: >
+  Wo, geografisch, hat man dieses Taxon schon entdeckt und wo erwartet
+  man es zu finden?
+
+form_names_gen_desc: Allgemeine Beschreibung
+form_names_gen_desc_help: >
+  Gib eine allgemeine Beschreibung für dieses Taxon.
+
+form_names_habitat: Habitat
+form_names_habitat_help: >
+  In welchen Habitats hat man dieses Taxon schon entdeckt?
+
+form_names_license: Lizenz
+form_names_license_help: >
+  Klicke "Lizenz":/observer/how_to_use#license für den nachfolgenden Text.
+
+form_names_look_alikes: Leicht zu verwechseln
+form_names_look_alikes_help: >
+  Welche anderen Taxa sehen diesem ähnlich?
+
+form_names_notes: Anmerkungen
+form_names_notes_help: >
+  Bitte ergänze hier Anmerkungen über die Gültigkeit dieses Namens, Beispiele
+  für falsche Anwendungen des Namens, oder (wenn vorhanden) korrektere
+  Namen für diesen Namen.
+
+form_names_text_name: Wissenschaftlicher Name
+form_names_text_name_help: >
+  Version dieses Namens ohne Formatierung und ohne Autoren-Info.\n
+  Z.B., "Amanita muscaria var. flavivolvata".
+
+form_names_text_name_locked: >
+  Den Namen gibt es schon. Ändere Namen in jedem Fund.
+
+form_names_uses: Anwendungen
+form_names_uses_help: >
+  Wozu haben Menschen dieses Taxon verwandt?
+
+
+# observer/_form_naming
+form_naming_confidence: Sicherheit
+form_naming_confidence_help: >
+  Wie sicher bist du dir bei dieser Bestimmung? Bitte gib in den folgenden
+  Kästchen an, was dir bei dieser Benennung geholfen hat.
+
+form_naming_deprecated: Der Name '[name]' ist veraltet.
+form_naming_deprecated_help: Wähle einen gültigen Namen oder klicke auf '[button]', um den Namen '[name]' zu verwenden.
+form_naming_multiple_names: >
+  Mehrere Namen entsprechen '[name]'.  Wähl den aus, den du meintest.
+
+form_naming_multiple_names_help: >
+  Die Zahl hinter dem Namen gibt an, wie viele Funde derzeit diesem Namen
+  zugeordnet sind.
+
+form_naming_name_help: >
+  Der wissenschaftliche Name muss angegeben werden, aber du brauchst den
+  Autoren nicht anzugeben. Wenn es mehrere passende Namen gibt, wählst du
+  auf der nachfolgenden Seite aus, welchen du meintest. Wenn der Name noch
+  nicht in der Datenbank erfasst ist, kannst du im Anschluss den Namen in
+  die Datenbank übernehmen oder ggf. Tippfehler korrigieren.
+
+form_naming_name_help_create: >
+  Wie du diesen Fund benennen würdest. Wenn du nicht weißt, was das hier ist,
+  dann lass dieses Feld einfach leer. Wenn du später einen besseren Namen
+  findest, kannst du ihn später immer noch vorschlagen.
+
+form_naming_not_recognized: Der Name '[name]' ist unbekannt.
+form_naming_not_recognized_help: >
+  Klicke auf '[button]', um diesen Namen neu anzulegen, oder korrigiere
+  ggf. Tippfehler unten.
+
+form_naming_valid_synonyms: Gültige Synonyme sind
+
+
+# observer/_form_observations
+form_observations_edit_image: Bild bearbeiten
+form_observations_is_collection_location: Wurde dort gefunden
+form_observations_is_collection_location_help: >
+  Häkchen setzen, wenn der Pilz am Fundort wächst. Nicht abhaken, wenn du
+  den Pilz am Fundort bloß gesehen hast (z.B. Pilz-Messen, Supermarkt,
+  ein Auslagetisch bei einer Pilzwanderung, wo man den Fundort nicht kennt).
+
+form_observations_log_change: Logbuch der Änderungen
+form_observations_notes_help: >
+  Bitte beschreib, wieso du den angegebenen Namen ausgesucht hast, sowie
+  ungewöhnliche Kennzeichen oder solche Beobachtungen, die man dem Bild nicht
+  entnehmen kann, wie Pflanzen in der Umgebung, ein besonderer Geruch oder
+  Geschmack.
+
+form_observations_remove_image: Bild entfernen
+form_observations_remove_image_confirm: >
+  Willst du das Bild wirklich entfernen? Du entfernst damit bloß das Bild von
+  diesem Fund. Wenn dasselbe Bild auch bei anderen Funden gezeigt wird, bleibt
+  es dort noch zu sehen.
+
+form_observations_specimen_available: Ich habe ein Herbarium-Exemplar
+form_observations_specimen_available_help: >
+  Abhaken, wenn du ein getrocknetes Exemplar hast, das man weiter untersuchen
+  könnte. Dies kann zum Beispiel einer privaten Herbarium-Sammlung angehören
+  oder in einem offiziellen Herbarium hinterlegt. Bitte gib in den Notizen an,
+  wo dieses Exemplar anzufinden ist.
+
+form_observations_upload_another: Noch eins hochladen...
+form_observations_upload_help: >
+  Such mit den Knöpfen links aus, welches Bild als Vorschau für diesen Fund
+  gezeigt wird.
+
+form_observations_upload_images: Bilder hochladen
+form_observations_where_help: >
+  Wo der Fund gemacht worden ist. Du solltest auch mindestens Landkreis, Bundesland
+  und Land angeben, Beispiele:\n
+  Albion, Mendocino Co., California, USA\n
+  Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
+
+
+# project/_form_projects
+form_projects_title: Titel
+
+
+# observer/_form_species_list
+form_species_lists_bulk_help: >
+  Viele Namen auf einmal erzeugen ist jetzt auf der Seite "Viele Namen auf einmal":/name/bulk_name_edit.
+
+form_species_lists_deprecated: Die nachstehenden Namen sind veraltet
+form_species_lists_deprecated_help: >
+  Wähl die Namen aus, die du anwenden möchtest. Wenn du einen Namen anwenden
+  möchtest, den du eingetippt hast, dann wähl keins der vorgeschlagenen Synonyme.
+
+form_species_lists_list_notes: Notizen zur Artenliste
+form_species_lists_member_notes: Notizen für jeden neuen Mitarbeiter
+form_species_lists_multiple_names: >
+  Mehrere Namen passen zu jedem der folgenden Einträge
+
+form_species_lists_multiple_names_help: >
+  Wähl jeweils den Namen, der gemeint war. Die Zahl hinter jedem Namen gibt
+  an, wie viele Funde derzeit mit diesem Namen verknüpft sind.
+
+form_species_lists_species_to_add: Art wählen, die hinzugefügt werden soll
+form_species_lists_title: Titel
+form_species_lists_write_in_species: >
+  Arten eingeben: (einen Namen pro Zeile)
+
+
+# observer/_form_synonyms
+form_synonyms_current_synonyms: Derzeitige Synonyme
+form_synonyms_current_synonyms_help: >
+  Die Einträge, die keinen Haken haben, werden in Zukunft nicht mehr als
+  Synonyme dieses Namens behandelt, aber sie sind weiterhin synonym miteinander.
+
+form_synonyms_deprecate_synonyms: Synonyme als veraltet markieren
+form_synonyms_deprecate_synonyms_help: >
+  Wenn dies abgehakt ist, werden alle angegebenen Synonyme als veraltete Namen
+  markiert. Sonst werden die Synonyme so belassen wie sie sind, und wenn neue
+  Namen erzeugt werden, werden diese nicht als veraltet markiert.
+
+form_synonyms_missing_names: Die folgenden Namen sind nicht gefunden worden.
+form_synonyms_missing_names_help: >
+  Klicke 'Hinzufügen' um diese Namen zu erstellen. Wenn du die Namen verbessern
+  möchtest, mach das unten und clicke auf 'Hinzufügen' um die Liste noch einmal
+  zu überprüfen.
+
+form_synonyms_names: Namen
+form_synonyms_names_help: Namen auflisten, die laut dir als Synonyme mit [name] gelten sollen.
+form_synonyms_proposed_synonyms: Vorgeschlagene Synonyme
+form_synonyms_proposed_synonyms_help: >
+  Nicht abgehakte Einträge werden in Zukunft nicht mehr als Synonym mit diesem Namen
+  gelten, aber untereinander behalten sie ihre bestehenden Verknüpfungen.
+
+
+# image/add_image
+image_add_default: Standard-Vorschaubild
+image_add_edit: Fund bearbeiten
+image_add_image: Bild
+image_add_optional: optional
+image_add_title: Für [name] ein Bild hochladen
+image_add_upload: Hochladen
+image_add_warning: >
+  Bitte lade nur solche Bilder hoch, die du selbst erzeugt hast und deren
+  Copyright dir gehört. Dadurch dass du diese Bilder hochlädst, gibst du uns
+  das Recht sie an andere Nutzer weiterzuverbreiten
+  ("Kleingedrucktes":http://creativecommons.org/licenses/by-nc-sa/2.5/).
+  Du gibst uns auch das Recht, diese Bilder in der Nähe von Werbung zu zeigen
+  oder neben anderen Hilfsmitteln, die wir eventuell anwenden werden, um Gelder für den
+  Betrieb dieser Webseite zu sammeln.
+
+
+# image_controller
+image_by_title: Bilder nach Titeln sortiert
+image_by_user: Bilder von [user]
+image_list_title: Bilder
+image_no_new_image: Keine neuen Bilder gefunden.
+
+
+# image/reuse_image_for_user
+image_changed_your_image: 'Als Bild wird nun Bild #[id] benutzt.'
+
+
+# image/destroy_image
+image_destroy_success: Das Bild ist gelöscht worden.
+
+
+# image/edit_image
+image_edit_success: Das Bild ist geändert worden.
+image_edit_title: 'Du bearbeitest Bild: [name]'
+
+
+# image/remove_images
+image_remove_edit: Fund bearbeiten
+image_remove_denied: Du darfst die Bilder nicht von diesem Fund entfernen.
+image_remove_missing: Das Bild gehört nicht zu diesem Fund!
+image_remove_remove: Entfernen
+image_remove_success: Das Bild #[id] wurde entfernt.
+image_remove_title: Bilder von [name] entfernen
+
+
+# image/resize_images
+image_resize_denied: Du musst Admin sein, um resize_images zu benutzen.
+
+
+# image/reuse_images
+image_reuse_edit: Fund bearbeiten
+image_reuse_id: Bild-ID
+image_reuse_id_help: >
+  Klick entweder auf eins der Bilder unten, oder wenn du die Bild-ID weißt dann
+  kannst du sie hier eingeben und auf 'Recycle' drücken.
+
+image_reuse_invalid_id: Ungültige Bild-ID.
+image_reuse_reuse: Recycle
+image_reuse_success: Bild #[id] ist angefügt worden.
+image_reuse_title: Bild für [name] recyclen.
+
+
+# image/image_search
+image_search_title: Bilder, die zu '[pattern]' passen
+
+
+# image/show_image
+image_show_comments: '[num] Kommentar(e)'
+image_show_copyright: Copyright
+image_show_created: Bild erzeugt
+image_show_destroy: Löschen
+image_show_edit: Bild bearbeiten
+image_show_full_size: Großbild zeigen
+image_show_modified: Zuletzt geändert
+image_show_normal_size: Normalgröße zeigen
+image_show_notes: Bemerkungen
+image_show_observations: Funde
+image_show_quality: Qualität
+image_show_inquiry: Gewerbliche Anfrage nach diesem Bild schicken
+image_show_title: 'Bild: [name]'
+image_show_when: Wann
+
+
+# image/license_updater
+image_updater_count: Anzahl
+image_updater_current: Gegenwärtige Lizenz
+image_updater_holder: Copyright-Inhaber
+image_updater_new: Neue Lizenz
+image_updater_title: Ändere Lizenzen für [user]
+image_updater_update: Ändern
+
+
+# comment/list_comments
+list_comments: Kommentare
+list_comments_by_user: Kommentare von [user]
+list_comments_for_user: Kommentare für [user]
+
+
+# location/list_merge_options
+list_merge_are_you_sure: Kombinieren?  Es gibt kein Undo!
+list_merge_options_near_matches: Nahegelegene Fundorte
+list_merge_options_others: Andere vorhandene Fundorte
+list_merge_options_title: Optionen zum Kombinieren von [where]
+
+
+# observer/list_notifications
+list_notifications_title: Email-Benachrichtigungen für [user]
+
+
+# observer/list_observations
+list_observations_default_title: Funde
+list_observations_from_location: Funde in [location]
+list_observations_from_where: Funde aus '[where]'
+list_observations_by_user: Funde von [user]
+list_observations_matching: Funde, die zu '[pattern]' passen
+
+
+# location/list_place_names
+list_place_names_known: Bekannte Fundorte (alfabetisch)
+list_place_names_map: Karte der Fundorte
+list_place_names_merge: Kombinieren
+list_place_names_pattern_title: Fundorte, die zu '[pattern]' passen
+list_place_names_title: Alle Fundorte
+list_place_names_undef: Fundorte ohne Kartenposition (nach Häufigkeit)
+
+
+# project/list_projects
+list_projects_add_project: Projekt starten
+list_projects_title: Projekte
+
+
+# application_helper
+location_all: Alle Fundorte
+location_define: Diesen Fundort definieren
+location_merge: Mit einem bekannten Fundort kombinieren
+
+
+# location/add_to_location
+location_merge_success: '[this] und [that] sind nun kombiniert.'
+
+
+# account/login
+login_failed: Login fehlgeschlagen.
+login_forgot_password: >
+  Ich habe mein Passwort vergessen.  "Email neues Passwort.":/account/email_new_password
+
+login_having_problems: >
+  Wenn du nicht einloggen kannst, schicke "Email an Webmaster":/observer/ask_webmaster_question.
+
+login_login: Login
+login_no_account: >
+  Ich habe kein Konto. "Neues Konto erstellen.":/account/signup
+
+login_password: Passwort
+login_please_login: Bitte einloggen
+login_remember_me: Automatisch einloggen.
+login_success: Login erfolgreich.
+login_user: Nutzer-Name
+
+
+# account/logout
+logout_note: >
+  Jetzt bist du aus Mushroom Observer ausgeloggt. Du kannst jetzt
+  nichts mehr bearbeiten.
+
+logout_title: Logout
+
+
+# species_list/make_report
+make_report_not_supported: Report-Dateien des Typs *.[type] werden nicht unterstützt.
+
+
+# location/map_locations
+map_locations_no_matches: Keine Fundorte passen zu '[pattern]'.
+map_locations_title: Fundorte, die zu '[pattern]' passen
+map_locations_global_map: Weltkarte mit allen Fundorten
+
+
+# location/merge_locations
+merge_locations_warning: >
+  Da dabei Daten verloren gehen können, darf nur der Admin bestehende Fundorte
+  kombinieren. Der Admin bekommt jetzt eine Email, in der ihm vorgeschlagen wird,
+  diese Fundorte zu kombinieren.
+
+
+# name/approve_name
+name_approve_comments: Kommentare
+name_approve_comments_help: >
+  Bitte gib an warum dieser Name akzeptiert worden ist..\n
+  Dies wird auf den Bemerkungen zu [name] vermerkt.
+
+name_approve_deprecate: Markier die folgenden Synonyme als veraltet
+name_approve_deprecate_help: >
+  Wenn du eine Gruppe von Synonymen spalten willst, klick auf 'Bestätigen' oder
+  'Abbrechen' und dann auf den Link 'Synonyme ändern'.
+
+name_approve_title: Bestätige [name]
+
+
+# name/bulk_name_edit
+name_bulk_help: >
+  Jede Zeile entspricht einer Gruppe von Änderungen.
+  \n\n
+  p(bulk_text). Um sicherzugehen dass ein Name in der Datenbank ist, schreib einfach den Namen. Z.B.
+  \n\n
+  p(bulk_pre). Agaricus bisporus
+  \n\n
+  p(bulk_text). Um sicherzustellen dass es einen Namen in Kombination mit einem bestimmten Autoren gibt,
+  schreib den Namen und dahinter den Autoren. Z.B.
+  \n\n
+  p(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát
+  \n\n
+  p(bulk_text). Um über der Ebene Art einen Taxon-Namen einzugeben, schreib den
+  Rang und danach den Namen, z.B.
+  \n\n
+  p(bulk_pre). Ordnung Agaricales
+  \n\n
+  p(bulk_text). Um aus einem Namen ein veraltetes Synonym zu machen, schreib
+  den Namen und danach den veralteten Namen, z.B.
+  \n\n
+  p(bulk_pre). Agaricus bisporus (J.E. Lange) Pilát = Agaricus hortensis (Cke.)
+  Imai
+  \n\n
+  Die Änderungen gelten kumulativ, das letzte Beispiel allein würde also
+  zur Folge haben dass es **__@Agaricus bisporus@__** @(J.E. Lange) Pilát@ und __@Agaricus
+  hortensis@__ @(Cke.) Imai@ gibt, und __@A. hortensis@__ wird ein veraltetes
+  Synononym für **__@A. bisporus@__**.  Wenn es einen Namen ohne Autor gibt und
+  du gibst einen Autoren an, dann wird der befindliche Name verändert.
+  Ansonsten, wenn es den Namen schon gibt, aber der angegebene Autor ist nicht
+  derselbe wie in der Datenbank, dann wird ein neuer Name erstellt.
+  \n\n
+  p(bulk_text). Du kannst optional einen einzeiligen Kommentar anfügen, indem
+  du ihn hinter entweder den gültigen oder den veralteten Namen stellst, in
+  eckige Klammern eingeschlossen. Dieser Kommentar wird beim Erstellen der Namens
+  in den Bemerkungen abgespeichert.
+  \n\n
+  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm. [Trivialname: Violetter Rötelritterling]
+
+name_bulk_label: Namensänderungen
+name_bulk_success: Jetzt sind alle Namen in der Datenbank.
+name_bulk_title: Viele Namen auf einmal ändern
+
+
+# _name
+name_change: Änderung am Namen
+
+
+# name/change_synonyms
+name_change_synonyms_submit: Änderungen schicken
+name_change_synonyms_title: Synonyme für [name]
+name_change_synonyms_confirm: Bitte bestätige, dass du es so meintest.
+
+
+# name/create_name
+name_create_submit: Namen speichern
+name_create_title: Namen erstellen
+name_create_already_exists: Den Namen [name] gibt es schon.
+
+
+# name/deprecate_name
+name_deprecate_comments: Kommentare
+name_deprecate_comments_help: >
+  Bitte gib an warum dieser Name nun als veraltet gilt.\n
+  Dies wird unter den Bemerkungen zu [name] abgespeichert.
+
+name_deprecate_must_choose: Bitte wähl den akzeptierten Namen aus.
+name_deprecate_preferred: Akzeptierter Name
+name_deprecate_preferred_help: >
+  Wähl den akzeptierten Namen aus. Eine Autorenreferenz wird empfohlen, aber nicht verlangt.
+
+name_deprecate_submit: Schicken
+name_deprecate_title: Markiere [name] als veraltet
+
+
+# name/name_index (and other actions using same view)
+name_index_add_name: Namen erstellen
+name_index_bulk_edit: Viele Namen auf einmal bearbeiten
+name_index_matching: Namen, die zu '[pattern]' passen
+name_index_name_index: Namensregister
+name_index_observation_index: Funde-Index
+
+
+# species_list/name_lister
+name_lister_bad_browser: Diese Seite funktioniert auf deinem Browser nicht, tut mir leid!
+name_lister_bad_submit: Ungültiger Aktionsknopf '[button]'.
+name_lister_charset: Seiten-Kodierung
+name_lister_charset_help: (Ändere dies wenn die Autorennamen unleserlich erscheinen.)
+name_lister_classic: Generator für die klassische Artenliste
+name_lister_genera: Gattungen
+name_lister_help: >
+  *Liste erstellen:* Klicke auf eine Gattung in der ersten Spalte, um
+  eine Liste der Arten in dieser Gattunge zu sehen. Wähl beliebige
+  Gruppen aus und drücke die Eingabetaste oder Doppelklick, um die
+  Arten deiner Liste hinzuzufügen. Anerkannte Namen sind fettgedruckt;
+  hinter veraltete Namen stehen eine oder mehrere Alternativen. Du
+  kannst beliebige auswählen. Um einen Namen von der Liste zu entfernen,
+  wählst du ihn in der dritten Spalte aus und drückst die Löschtaste
+  oder Doppelklick. (Du kannst auch mit den Pfeilen navigieren oder
+  Teile eines Namens eintippen, um innerhalb einer Spalte zu suchen.)
+  \n\n
+  *Liste speichern:* Wenn du fertig bist, klicke einen der Knöpfe am Seitenende.
+  "Artenliste erstellen" zeigt dir das alte Listen-Formular, wo du Datum,
+  Fundort, Notizen usw. eingeben kannst, danach speicherst du die Liste.
+  \n\n
+  *Berichte:* Der Bericht in Textformat enthält eine einfache Liste ohne
+  Formatierungen. Du kannst das Rich Text Format anwenden, um die Liste nach
+  Microsoft Word zu importieren, inklusive Autoren und intakter Formatierungen.
+  Tabelle erzeugt eine CSV-Datei, mit Namen, Autoren, Referenzen und anerkannten
+  Spalten. Die Trivialnamen sind bislang nicht enthalten. Berichte sollten automatisch
+  in ihren eigenen Tabs oder Fenstern geöffnet werden; falls nicht, dann kannst du
+  in dem Dateimenü deines Browsers den Befehl Speichern Unter verwenden.
+
+name_lister_names: Gewählt
+name_lister_no_js: Diese Seite funktioniert nicht, wenn Javascript ausgeschaltet ist.
+name_lister_species: Art
+name_lister_submit_csv: Als Tabelle speichern
+name_lister_submit_rtf: Als Rich Text speichern
+name_lister_submit_spl: Artenliste erstellen
+name_lister_submit_txt: Als Textformat speichern
+name_lister_title: Namenslisten-Generator
+
+
+# name/map
+name_map_about: Über [name]
+name_map_no_maps: Keine der Funde von [name] sind mit kartografischen Angaben verknüpft.
+name_map_title: Ausdehnungskarte für [name]
+
+
+# name/name_search
+name_search_none_found: Keine Namen gefunden, die zu '[pattern]' passen.
+
+
+# name/needed_descriptions
+needed_descriptions_help: >
+  Die folgenden Artennamen haben die meisten Funde in Mushroom Observer, aber
+  noch keine allgemeine Beschreibung. Es wäre eine große Hilfe, wenn du für
+  diese häufigen Arten allgemeine Beschreibungen erstellen könntest.
+
+needed_descriptions_observations: Funde
+needed_descriptions_title: Top 100 fehlende Artenbeschreibungen
+
+
+# observer/news
+news_header: >
+  Hier werden die neuesten Änderungen und Neuigkeiten über die
+  Mushroom Observer Webseite aufgeführt.
+
+news_title: Neuigkeiten
+
+
+# observer/no_ajax
+no_ajax_body: >
+  Dein Browser kommt uns veraltet vor. Du kannst trotzdem alle Funktionalitäten
+  dieser Webseite benutzen, aber wenn du weiterhin diesen veralteten Browser
+  benutzt dann stehen dir einige sehr nützliche Javascript-Funktionen nicht
+  zur Verfügung, die in modernen Browsern verfügbar sind. Dazu gehören dynamische
+  Formulare, Auto-Vervollständigung von wissenschaftlichen Namen und Fundorten,
+  die neue Version des Artenlisten-Generators und andere.
+
+no_ajax_browsers: >
+  Browser, die wir empfehlen (und regelmäßig testen):
+  \n\n
+  * Firefox 1.0 oder neuer
+  \n\n
+  * Internet Explorer 5.5 oder neuer
+  \n\n
+  * Netscape 7.0 oder neuer
+  \n\n
+  * Safari 1.2 oder neuer
+  \n\n
+  * Opera (wir wissen dass es mit 8.0 funktioniert)
+  \n\n
+  * Chrome
+  \n\n
+  Wenn du denkst, dass dein Browser AJAX anwenden kann aber hier nicht
+  genannt ist, dann "schick uns eine Email":/observer/ask_webmaster_question.
+
+no_ajax_dont_care: >
+  Wenn es dir egal ist und du die Mitteilung "Dein Browser ist veraltet"
+  am oberen Rand jeder Seite nicht mehr sehen möchtest,
+  "klicke bitte hier":/observer/turn_javascript_off.  (Login und ändere die
+  Einstellungen, um diesen Test wieder zu aktivieren.)
+
+no_ajax_title: Dein Browser ist veraltet.
+
+
+# account/no_comment_email
+no_comment_note: >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website post comments about your observations.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_comment_success: Comment email notifications disabled for [name].
+
+
+# account/no_commercial_email
+no_commercial_note: >
+  Other users of the Mushroom Observer website can no longer send you
+  commercial inquiries about your images.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_commercial_success: Commercial email inquiries disabled for [name].
+
+
+# account/no_feature_email
+no_features_note: >
+  Automated email about new features have been disabled for your account.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_feature_success: Automated feature email disabled for [name].
+
+
+# observer/no_javascript
+no_javascript_body: >
+  Anscheinend hast du Javascript in deinem Browser ausgeschaltet. Du kannst
+  trotzdem alle Teile dieser Website abrufen, allerdings stehen
+  dir so einige der sehr nützlichen Funktionalitäten nicht zur Verfügung,
+  die man mit einem modernen Browser verwenden kann. Dazu gehören dynamische
+  Formulare, Auto-Vervollständigung von wissenschaftlichen Namen und Fundorten,
+  die neue Version des Artenlisten-Generators und einige weitere.
+  \n\n
+  Wenn du Javascript aktivieren willst, aber nicht weißt wie, probier doch
+  eine Suche auf google, z.B. "Wie aktiviere ich Javascript in meinem
+  Browser?":http://www.google.com/search?hl=en&q=Wie+aktiviere+ich+Javascript+in+meinem+Browser%3F&btnG=Google+Search
+
+no_javascript_dont_care: >
+  Wenn du *doch* Javascript aktiviert hast, aber unser Erkennungsmechanismus
+  erkennt es nicht richtig, "klick bitte hier":/observer/turn_javascript_on.
+  Wenn es dir egal ist und du die Meldung "Javascript deaktiviert" am oberen
+  Seitenrand nicht mehr sehen möchtest, "klick bitte hier":/observer/turn_javascript_off.
+  (Nach dem Login kannst du auf der Seite Einstellungen den Erkennungsmechanismus
+  wieder einschalten.)
+
+no_javascript_title: Dein Javascript ist ausgeschaltet.
+
+
+# observer/no_session
+no_session_body: >
+  Es scheint, als nähme dein Browser keine Cookies an. Ohne Cookies kann
+  unsere Webseite sich von einer Seite zur nächsten nicht merken, wer du bist.
+  Daher kannst du dann weder ein Konto eröffnen noch dich einloggen, also
+  auch keine Funde eingeben, Bilder hochladen, andere Funde kommentieren usw.
+  Du kannst zwar weiterhin alles sehen, das öffentlich zugänglich ist, aber
+  bloß als Beobachter, du kannst so nicht aktiv teilnehmen.
+  \n\n
+  Wir speichern einfach nur eine große lange Zahl auf deinem Computer ab. Wenn
+  du das nächste Mal unsere Webseite besuchst, schlagen wir diese Nummer nach und
+  erkennen, wer du bist. (Pro Sekunde haben wir mehrere Seitenabrufe von der
+  ganzen Welt -- ohne diese ID könnten wir all diese Nutzer einfach nicht
+  auseinanderhalten!) Diese ID-Nummer ist verschlüsselt und enthält keine
+  persönlichen Informationen.
+  \n\n
+  Wenn du Cookies aktivieren möchtest, aber weißt nicht genau wie, such
+  doch mal mit google: "Wie aktiviere ich Cookies in meinem
+  Browser?":http://www.google.com/search?hl=en&q=Wie+aktiviere+ich+Cookies+in+meinem+Browser%3F&btnG=Google+Search
+  Übrigens ist es mit den meisten Browsern möglich, Cookies nur für bestimmte
+  Webseiten zu akzeptieren, so kannst du deine Privatsphäre auf anderen
+  Webseiten schützen. In Firefox zum Beispiel ist diese Einstellung
+  under Bearbeiten -> Einstellungen -> Datenschutz -> Ausnahmen.
+
+no_session_title: Du hast Cookies ausgeschaltet.
+
+
+# account/no_question_email
+no_questions_note: >
+  Andere Anwender können dir nun keine weiteren Fragen über deine
+  Funde schicken.
+  \n\n
+  Login und öffne die Einstellungen, um diese Funktion wieder zu
+  aktivieren.
+
+no_question_success: Nachfragen Email ausgeschaltet für [name].
+
+
+# shared/_observation_list
+observation_made: Fund gemacht
+observation_made_confidence: Community-Gewissheit
+
+
+# observer_controller
+observer_controller_image_updated_notes: Kommentar auf Bild #[id] geändert.
+observer_controller_image_uploaded: Bild [name] hochgeladen.
+observer_controller_naming_created: Name ist erstellt worden.
+observer_controller_naming_updated: Name ist geändert worden.
+observer_controller_no_save_naming: Konnte Namen nicht speichern.
+observer_controller_no_save_observation: Konnte Fund nicht speichern.
+observer_controller_no_upload_image: Beim Hochladen von [name] gab es Probleme.
+
+
+# observer/recalc
+observer_recalc_old_name: 'old_name: [name]'
+observer_recalc_new_name: 'new_name: [name]'
+observer_recalc_caught_error: 'Unerwartet angehalten: [error]'
+
+
+# account/prefs
+prefs_alt_col_colors: Spalten abwechselnd einfärben.
+prefs_alt_row_colors: Reihen abwechselnd einfärben.
+prefs_columns: Spalten
+prefs_email: Email-Adresse
+prefs_email_comments: Bitte schickt mir eine Email, wenn andere Nutzer meine Funde kommentieren.
+prefs_email_commercial: Bitte schickt mir eine Email, wenn jemand eins meiner Bilder gewerblich verwenden möchte.
+prefs_email_features: Bitte schickt mir eine Email, wenn Updates oder neue Funktionalitäten vorhanden sind.
+prefs_email_html: Meine Emails dürfen HTML enthalten.
+prefs_email_note: >
+  Keine dieser Email-Einstellungen hat zur Folge, dass deine Email-Adresse auf
+  dieser Webseite irgendwo angezeigt wird, und wenn jemand dich kontaktieren
+  möchte, kann diese Person auch nicht einfach so deine Email herausfinden.
+  Du bekommst eine Email von mushroomobserver.org, in der die Kontaktadresse
+  der Person enthalten ist, die dich kontaktieren möchte. Es ist dann dir
+  selbst überlassen, den Kontakt aufzunehmen oder nicht.
+
+prefs_email_prefs: Email-Einstellungen
+prefs_email_questions: Bitte gib anderen die Möglichkeit, mir über meine Funde Fragen zu stellen
+prefs_layout_title: Layout der Listenseiten
+prefs_license: Lizenz
+prefs_license_note: Standard-"Lizenz":/observer/how_to_use#license gilt für neue Bilder
+prefs_locale: Sprache
+prefs_link: Einstellungen ändern
+prefs_login: Login
+prefs_password_confirm: Neues Passwort wiederholen
+prefs_password_new: Neues Passwort
+prefs_password_no_match: Die beiden Passwörter sind verschieden.
+prefs_rows_by: Reihen x
+prefs_success: Die Einstellungen wurden übernommen.
+prefs_text_below_images: Schreib den Text unter die Bilder.
+prefs_theme: Lieblings-Farbschema
+prefs_title: Einstellungen ändern
+
+
+# account/profile
+profile_button: Profil speichern
+profile_copyright_holder: Copyright-Halter und Lizenz zu diesem Bild
+profile_copyright_warning: Bitte lade nur solche Bilder hoch, deren Copyright dir gehört oder die du selbst gemacht hast
+profile_image_change: Neues Foto hochladen
+profile_image_create: Foto hochladen
+profile_image_remove: (Foto entfernen.)
+profile_image_reuse: (Ein anderes Foto recyclen.)
+profile_invalid_image: Ungültiges Bild [name].
+profile_link: Profil bearbeiten
+profile_location: Standard-Fundort
+profile_mailing_address: Postanschrift für Sammlungen
+profile_must_define: >
+  Du musst erst diesen Fundort definieren, dann können wir ihn als Standard-Fundort registrieren.
+
+profile_name: Name
+profile_notes: Über dich
+profile_removed_image: Bild vom Profil löschen.
+profile_success: Das Profil ist geändert worden.
+profile_title: Profil ändern
+profile_uploaded_image: Bild [name] hochgeladen.
+
+
+# draft/publish_draft
+publish_draft_denied: >
+  Verboten: Nur ein Admin oder der, der den Entwurf erstellt hat, kann ihn
+  veröffentlichen.
+
+
+# observer/refresh_vote_cache
+refresh_vote_cache: Cache der Stimmenabgabe geupdatet.
+
+
+# account/reverify
+reverify_link: Noch einmal überprüfen
+reverify_note: >
+  [user], dein Konto ist noch nicht überprüft worden.
+  \n\n
+  Schau nach, ob die Verifizierungs-URL in deiner Email-Inbox angekommen ist,
+  oder klicke unten, um diese Email noch einmal an dich zu versenden.
+
+reverify_sent: Überprüfung abgeschickt an Email-Adresse.
+reverify_welcome: Konto noch einmal überprüfen
+
+
+# observer/rss
+rss_description: Liste der Änderungen bei Mushroom Observer, während sie passieren
+rss_log_of_deleted_item: Platzhalter eines \ngelöschten\nEintrags
+rss_log_title: Logbuch der neuen Änderungen
+rss_name_by: von [user]
+rss_title: Mushroom Observer
+
+
+# runtime errors
+runtime_invalid_for_rank: Der Name '[name]' ist ungültig im Rang '[rank]'.
+runtime_invalid_name: Der Name '[name]' ist ungültig.
+runtime_name_already_used: Den Namen '[name]' gibt es schon.
+runtime_name_in_use_with_notes: Der Name '[name]' wird schon verwendet und [other] hat Bemerkungen.
+runtime_unable_to_create_name: Kann den Namen '[name]' nicht erstellen.
+runtime_unable_to_transfer_name: Kann nicht von [name] zu anderen Synonymen übertragen.
+runtime_unrecognized_rank: Rang '[rank]' nicht erkannt.
+runtime_update_nonexisting_name: Update_name wurde auf einen Namen angewandt, den es nicht gibt.
+
+
+# observer/textile
+sandbox_enter: Gib hier das Textile ein, das du ausprobieren möchtest
+sandbox_header: >
+  Mit Hilfe dieser Seite kannst du mit der Textile Markup Sprache herumspielen.
+  Klicke 'Ausprobieren', um zu sehen, wie dein Markup aussieht. Du musst die
+  Ergebnisse dieser Seite dorhin kopieren, wo sie eingesetzt werden sollen.
+
+sandbox_link1: Noch eine Schnellreferenz und ein Sandkasten, um Syntax auszuprobieren.
+sandbox_link2: Mehr als je jemand wissen müsste.
+sandbox_link3: Homepage des Original-Autoren, Dean Allen.
+sandbox_look_like: So wird es aussehen
+sandbox_quick_ref: Schnellreferenz
+sandbox_sample: >
+  __kursiv__        Warenzeichen(tm)  \\n
+  **fett**       Copyright(c)    | (muss nach einem Buchstaben kommen, nicht nach Satzzeichen)\n
+  +unterstrichen+        eingetragen(r)  /\n
+  @Monospace@\n
+  ^hochgestellt^      1.6 &amp;micro;m  ->  1.6 &micro;m\n
+  ~tiefgestellt~        34&amp;deg;17' N  ->  34&deg;17' N\n
+  \n
+  "Externer Link":http://google.com\n
+  !http://random.com/image.jpg!\n
+  \n
+  Interne Links:\n
+  _name 371, _Amanita ocreata_, oder _A. ocreata_\n
+  _location 382_, _location Mt. Wilson_\n
+  _user 252_, _user jason_\n
+  _observation 12345_\n
+  _image 12345_ or !image 12345!\n
+  _comment 12345_\n
+  \n
+  Fußnotenzeichen[1] können nach beliebigen Wörtern auftreten[2].\n
+  \n
+  fn1. Und dann musst du die Fußnoten unten angeben.\n
+  \n
+  fn2. Um solche Anweisungen "xx." herum musst du leere Zeilen haben.\n
+  \n
+  h1. Überschrift\n
+  \n
+  bq. Zitat-Absatz oder eingerückt.\n
+  \n
+  * Stichpunkt-Liste, Eintrag 1\n
+  * Stichpunkt-Liste, Eintrag 2\n
+  \n
+  # Nummerierte Liste, Eintrag 1\n
+  # Nummerierte Liste, Eintrag 2\n
+  \n
+  Tabellen sind nützlich, um Arten zu vergleichen:\n
+  | Art 1 | Wert 1.1 | Wert 1.2 |\n
+  | Art 2 | Wert 2.1 | Wert 2.2 |\n
+  | Art 3 | Wert 3.1 | Wert 3.2 |\n
+
+sandbox_test: Ausprobieren
+sandbox_test_codes: HTML anzeigen
+sandbox_title: Textile-Sandkasten
+sandbox_web_refs: Web-Referenzen
+
+
+# observer/send_feature_email
+send_feature_email_success: Funktionalitäten-Email abgeschickt.
+send_feature_email_denied: Nur ein Admin kann eine Funktionalitäten-Email versenden.
+
+
+# shared/_textile_help
+shared_textile_help: >
+  Kommentare können mit Hilfe des <a href="/observer/textile" target="_new">Textile Markup Systems</a> formatiert werden.<br/>
+  _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (verknüpft mit der Beschreibung des Namens)<br/>
+  __kursiv__, **fett** ---> <i>kursiv</i>, <b>fett</b><br/>
+
+shared_textile_link: Weitere Informationen hier.
+
+
+# project/show_draft
+show_draft_denied: >
+  Verboten: Nur Projekt-Mitarbeiter können die gegenwärtigen Entwürfe lesen.
+
+show_draft_destroy_draft: Entwurf löschen
+show_draft_edit_draft: Entwurf bearbeiten
+show_draft_publish_draft: Entwurf veröffentlichen
+show_draft_show_project: Projekt anzeigen
+show_draft_title: Entwurf von [name] für [title]
+
+
+# image/show_image
+show_image_reviewed_by: Begutachtet durch
+
+
+# location/show_location
+show_location_create: Neuen Fundort anlegen
+show_location_edit: Fundort bearbeiten
+show_location_observations: Funde an diesem Ort
+show_location_older_versions: Ältere Versionen
+show_location_title: 'Fundort: [name]'
+
+
+
+# name/show_name
+show_name_add_name: Namen hinzufügen
+show_name_bulk_name_edit: Viele Namen auf einmal bearbeiten
+show_name_change_synonyms: Synonyme ändern
+show_name_content_status: Status des Inhalts
+show_name_create_draft: Neuen Entwurf erstellen für
+show_name_deprecated_synonyms: Veraltete Synonyme (veraltetes Synonym)
+show_name_distribution_map: Verbreitungskarte
+show_name_draft_help: >
+  Entwürfe sind neue Versionen der Beschreibungsfelder für einen Namen, an denen
+  innerhalb eines Projekts gearbeitet wird. Nur Mitarbeiter des Projekts können
+  diese Entwürfe einsehen. Nur der Eigentümer des Entwurfs kann ihn bearbeiten.
+  Du kannst als Mitglied eines Projekts für die Beschreibungsfelders eines jeden
+  Namens neue Entwürfe anlegen.
+
+show_name_edit_name: Beschreibung bearbeiten
+show_name_email_tracking: Bei Änderungen per Email benachrichtigen
+show_name_existing_drafts: Bestehende Entwürfe
+show_name_latest_review: >
+  Zuletzt bearbeitet: am [date] von [user]
+
+show_name_notes_and_comments: Notizen und Kommentare
+show_name_observations: Funde
+show_name_other_observations: Ähnliche Funde
+show_name_other_observations_notes: >
+  (Jemand hat [name] für diese Funde vorgeschlagen, aber die Mehrheitsmeinung
+  weicht weiterhin hiervon ab. Der Grad der Gewissheit gilt für  __diesen__ Namen, und nicht
+  für die Mehrheitsmeinung.)
+
+show_name_other_versions: Andere Versionen
+show_name_past_title: 'Version [version]: [name]'
+
+show_name_preferred_synonyms: Bevorzugte Synonyme
+show_name_previous_version: Vorige Version
+show_name_synonym_observations: Funde unter Synonymen
+show_name_synonyms: Synonym(e)
+show_name_title: 'Name: [name]'
+
+
+
+# observer/_show_namings
+show_namings_cast: Stimme abgeben
+show_namings_community_favorite: Dies ist die Mehrheitsmeinung.
+show_namings_consensus: Community-Meinung
+show_namings_consensus_help: >
+  Für jeden der obenstehenden Namen wählst du aus, wie gut deiner Meinung nach
+  der Name zu diesem Fund passt. Du kannst 'einen anderen Namen vorschlagen',
+  wenn du einen besseren Vorschlag hast. Siehe auch "Wie man diese Seite benutzt":/observer/how_to_use#voting
+  über weitere Details darüber, wie die Stimmen gezählt werden.
+
+show_namings_eye_help: Dies meint der Finder
+show_namings_eyes_help: Mehrheitsmeinung
+show_namings_lose_changes: Du musst auf 'Stimmen abgeben' klicken, um Änderungen abzuspeichern.
+show_namings_no_names_yet: Bislang gibt es keinen Namensvorschlag.
+show_namings_no_votes: keine Stimmen
+show_namings_please_login: >
+  Bitte logge dich ein, um eigene Namen vorzuschlagen und über die Vorschläge abzustimmen.
+
+show_namings_propose_new_name: Einen anderen Namen vorschlagen
+show_namings_proposed_name: Vorgeschlagener Name
+show_namings_proposed_names: Vorgeschlagene Namen
+show_namings_update_votes: Stimmen abgeben
+show_namings_user: Nutzer
+show_namings_your_vote: Deine Stimme
+
+
+# observer/show_notifications
+show_notifications_title: Neue Mitteilungen für [user]
+
+
+# observer/show_observation
+show_observation_add_comment: Kommentar abgeben
+show_observation_add_images: Bilder hinzufügen
+show_observation_alternative_name: Alternativer Name
+show_observation_alternative_names: Alternative Namen
+show_observation_collection_location: Wächst auch dort
+show_observation_comment_created: Erstellt
+show_observation_comment_created_by: von
+show_observation_debug_consensus: Fehlersuche Mehrheitsmeinung
+show_observation_edit_observation: Fund bearbeiten
+show_observation_manage_species_lists: Artenlisten verwalten
+show_observation_observation_created: Fund erstellt
+show_observation_preferred_name: Lieblingsname
+show_observation_preferred_names: Lieblingsnamen
+show_observation_propose_new_name: Einen anderen Namen vorschlagen
+show_observation_remove_images: Bilder entfernen
+show_observation_reuse_image: Bild recyclen
+show_observation_seen_at: Gesehen bei
+show_observation_send_question: Finder eine Frage stellen
+show_observation_species_lists: Artenlisten
+show_observation_specimen_available: Es gibt ein Herbarium-Exemplar
+show_observation_specimen_not_available: Kein Herbarium-Exemplar
+show_observation_success: Deine Stimmen sind gezählt worden.
+show_observation_title: 'Fund: [name]'
+show_observation_view_notifications: Mitteilungen anzeigen
+
+
+# observer/show_rss_log
+show_rss_log_title: Logbuch für [title]
+
+
+# observer/show_site_stats
+show_site_stats_title: Webseiten-Statistik
+
+
+# observer/_show_votes
+show_votes_average: Durchschnitt
+show_votes_descript: >
+  Stimmen der Nutzer werden bewertet entsprechend deren Beitrag zur Webseite
+  (log<span style='font-size:50%'>10</span> Beitrag).
+  Außerdem hat der Nutzer, der den Fund einträgt, eine Zusatzstimme.
+
+show_votes_score: Punktzahl
+show_votes_title: Stimmen für [name] anzeigen
+show_votes_total: Gesamtpunktzahl<br/>Summe(Punkte * Gewichtung) /<br/>(Gesamtgewichtung + 1)
+show_votes_users: Nutzer
+show_votes_vote: Stimme
+show_votes_weight: Gewichtung
+
+
+# location/show_past_location
+show_past_location_other_versions: Andere Versionen
+show_past_location_title: 'Version [num]: [name]'
+
+
+# project/show_project
+show_project_add_members: Mitarbeiter hinzufügen
+show_project_admin_group: Admin-Gruppe
+show_project_admin_request: Admin-Anfrage
+show_project_by: Gehört
+show_project_created: Erstellt
+show_project_destroy: Projekt löschen
+show_project_drafts: Entwürfe
+show_project_edit: Projekt bearbeiten
+show_project_summary: Zusammenfassung
+show_project_title: 'Projekt: [title]'
+
+show_project_user_group: Nutzergruppe
+
+
+# observer/show_user
+show_user_comments_for: Kommentare für [name]
+show_user_comments_for_you: Kommentare für dich
+show_user_contributors: Mitwirkende
+show_user_edit_profile: Profil bearbeiten
+show_user_email_to: Email [name]
+show_user_mailing_address: Postanschrift für Sammlungen
+show_user_observations_by: Funde von [name]
+show_user_primary_location: Hauptfundort
+show_user_title: Übersicht über die Beiträge von [user]
+show_user_total: Gesamt
+show_user_your_notifications: Deine Email-Benachrichtigungen
+show_user_your_observations: Deine Funde
+
+
+# account/signup
+signup_success: Anmeldung erfolgreich.  Überprüfungs-Email in deiner Inbox.
+signup_button: Anmeldung
+signup_choose_password: Passwort wählen
+signup_confirm_password: Passwort nochmal eingeben
+signup_email_address: Email-Adresse
+signup_email_help: >
+  Du brauchst eine gültige Email-Adresse, damit wir dein Konto überprüfen können. Dies hilft uns dabei,
+  Spammer nicht auf diese Webseite zu lassen. Wenn du den Link in der Überprüfungs-Email angeklickt hast,
+  kannst du deine Email-Adresse ändern oder den Eintrag ganz löschen, siehe Seite Einstellungen. Wir
+  passen auf, dass wir deine Email-Adresse nie auf einer Webseite anzeigen, auf die Dritte zugreifen können.
+  Wir werden deine Email-Adresse nicht verkaufen. Wir teilen deine Email-Adresse anderen nur dann mit, wenn
+  du es selbst aktiv verursachst (z.B. wenn du einem anderen Nutzer eine Nachricht schickst, dann sieht sie
+  oder er deine Email-Adresse). Außerdem erhältst du standardmäßig Mitteilungen über Neuigkeiten auf dieser
+  Webseite und Benachrichtigungen über Inhalte, die du auf dieser Seite bereitstellst. Du kannst aber angeben,
+  diese Benachrichtigungen nicht erhalten zu wollen, siehe Einstellungen.
+
+signup_login: Gewünschter Login-Name
+signup_name: Name (optional)
+signup_preferred_theme: Lieblings-Farbschema (optional)
+signup_random: Zufällig
+signup_title: Konto-Anmeldung
+
+
+# species_list/add_observation_to_species_list
+species_list_add_observation_success: Fund zu [name] hinzugefügt.
+
+
+# species_list/calc_checklist
+species_list_calc_checklist_search_disabled: >
+  Checklisten, die auf Suchergebnissen basieren, werden nicht mehr unterstützt.
+
+
+# species_list/create_species_list
+species_list_create_success: Die Artenliste ist erstellt worden.
+species_list_create_title: Artenliste erstellen
+
+
+# species_list/destroy_species_list
+species_list_destroy_success: Die Artenliste wurde gelöscht.
+
+
+# species_list/edit_species_list
+species_list_edit_success: Die Artenliste ist geändert worden.
+species_list_edit_title: 'Bearbeite Artenliste: [name]'
+
+
+# species_list/list_species_lists
+species_list_list_by_user: Artenlisten von [user]
+species_list_list_title: Artenlisten
+
+
+# species_list/manage_species_lists
+species_list_manage_belongs_to: Dieser Fund gehört
+species_list_manage_doesnt_contain: Listen die dir gehören und diesen Fund nicht enthalten
+species_list_manage_title: Artenlisten für [name] verwalten
+
+
+# species_list/process_species_list
+species_list_need_to_use_bulk: >
+  Synonyme können nur via die Viele-Namen-auf-einmal-ändern-Seite definiert werden.
+
+
+# species_list/remove_observation_from_species_list
+species_list_remove_observation_success: Fund von [name] entfernt.
+
+
+# species_list/show_species_list
+species_list_show_edit: Artenliste bearbeiten
+species_list_show_members: Mitarbeiter
+species_list_show_save_as_txt: Als Nur-Text speichern
+species_list_show_save_as_rtf: Als Rich-Text speichern
+species_list_show_save_as_csv: Als Tabelle speichern
+species_list_show_title: 'Artenliste: [name]'
+
+
+# species_list/species_lists_by_title
+species_list_by_title_created: Erstellt
+species_list_by_title_list_name: Listen-Name
+species_list_by_title_owner: Besitzer
+species_list_by_title_size: Größe
+species_list_by_title_title: Artenlisten nach Namen sortiert
+
+
+# species_list/upload_species_list
+species_list_upload_help: >
+  Eine Artenliste ist entweder eine einfache Textdatei mit einem Namen
+  pro Zeile oder das 'Listen-'Format aus dem Artennamen-Auflistungsprogramm.
+
+species_list_upload_label: Artenliste hochladen
+species_list_upload_title: Artenliste hochladen
+
+
+# observer/<Theme>
+theme_agaricus: _Agaricus_ Schema
+theme_amanita: _Amanita_ Schema
+theme_cantharellaceae: _Cantharellaceae_ Schema
+theme_hygrocybe: _Hygrocybe_ Schema
+theme_random: Zufällig
+
+
+# observer/translators_note
+translators_note: >
+  Bitte hilf uns, diese Webseite der ganzen Welt zur Verfügung zu stellen! Wir haben
+  endlich diese Webseite auf Spanisch übersetzt, und zwei Freunde arbeiten derzeit
+  an der portugiesischen Version (stell dir bloß all die coolen brasilianischen
+  Pilze vor, die gerade an uns vorbeigehen!). Aber wir können alle Hilfe gebrauchen.
+  Wir brauchen jemanden, der das Spanische korrekturliest -- ich kann nämlich kein
+  Spanisch. Und wo wir erst einmal damit angefangen haben, wollen wir natürlich noch
+  mehr Sprachen anbieten können.
+  \n\n
+  Es ist alles sehr einfach. Auf dieser Webseite sind derzeit etwa 1600 Zeilen Text
+  oder 11.000 Wörter, aber lass dich nicht abschrecken. Es ist so organisiert, dass
+  jemand mit wenig Zeit mit den wichtigsten Abschnitten anfangen kann, dann ist
+  schonmal der Text fertig, der am häufigsten angezeigt wird. Danach kann dieselbe
+  Person oder jemand anders den Rest der Liste weiter abarbeiten, je nach Zeit und Lust,
+  irgendwann ist dann alles fertig. Du kannst dir eine der "Sprachdateien":[repo]
+  hier herunterladen und mit irgendeiner neuen Sprache beginnen. Dann
+  "schick uns einfach eine Email":/observer/ask_webmaster_question wenn du soweit gekommen
+  bist wie du schaffst, und wir erklären dir, wie du uns deine Arbeit schicken kannst.
+  Dein Name wird als Dank für deine Mitarbeit deutlich erkennbar gemacht und außerdem
+  werden wir dir sehr dankbar sein.
+
+translators_note_title: Anmerkung der Übersetzung
+
+
+# observer/turn_javascript_nil
+turn_javascript_nil_body: Jetzt erkennen wir wieder automatisch, ob Javascript an oder aus ist.
+turn_javascript_nil_title: Javascript automatisch erkennen
+
+
+# observer/turn_javascript_off
+turn_javascript_off_body: Jetzt ignorieren wir Javascript.
+turn_javascript_off_title: Javascript ausschalten.
+
+
+# observer/turn_javascript_on
+turn_javascript_on_body: Wir gehen jetzt davon aus, dass Javascript aktiviert ist.
+turn_javascript_on_title: Javascript anschalten
+
+
+# observer/users_by_contribution
+users_by_contribution_title: Liste der Mitwirkenden
+users_by_contribution_1: >
+  Die Reihenfolge basiert auf einer automatischen Schätzung, wieviel jede Person
+  zu dieser Webseite beigetragen hat. Mit dieser Liste wollen wir erkennbar machen,
+  wer wie viel zu dieser Webseite beiträgt, und uns für die Mithilfe der MushroomObserver.org Community bedanken.
+  \n\n
+  Die derzeit gültige Formel ist eine gewichtete Summe der einzelnen Beiträge.
+  Die Gewichtungen sind im Moment:
+
+users_by_contribution_2: >
+  Ein Fund von einer Art, die es vorher noch nicht auf der Webseite gab, und
+  3 Bilder dazu würden also so viele Punkte ergeben:
+
+users_by_contribution_2a: Bilder
+users_by_contribution_2b: Name
+users_by_contribution_2c: Fund
+users_by_contribution_2d: Vorgeschlagener ID
+users_by_contribution_2e: Stimmenabgabe ID
+users_by_contribution_2f: Punkte
+users_by_contribution_3: >
+  Diese Gewichtungen und die Methode der Bewertung überhaupt werden sich
+  wahrscheinlich mit der Zeit weiterentwickeln, je nachdem was wir von der Community
+  für Feedback erhalten hierzu.
+
+
+# observer/users_by_name
+users_by_name_created: Erstellt
+users_by_name_groups: Gruppen
+users_by_name_id: ID
+users_by_name_last_login: Zuletzt eingeloggt
+users_by_name_login: Login
+users_by_name_name: Name
+users_by_name_theme: Farbschema
+users_by_name_title: Nutzer nach Namen sortiert
+users_by_name_verified: Überprüft
+
+
+# account/verify
+verify_note: >
+  Dein Konto ist überprüft worden...
+  \n\n
+  Jetzt solltest du bei "MushroomObserver.org":[domain] neue Funde eingeben, Bilder hochladen, Namen verbessern,
+  neue Fundorte beschreiben, Kommentare abgeben, Namen vorschlagen und über
+  Namen abstimmen können.
+  \n\n
+  Danke, dass du mitmachst!
+
+
+# account/welcome
+welcome_logout_link: Ausloggen
+welcome_no_user_note: Wenn du kein Spammer bist, teil uns bitte mit, dass dies hier ein Fehler ist!
+welcome_no_user_title: In dieser Sitzung ist kein User definiert
+welcome_note: >
+  Du bist nun im System eingeloggt...
+
+################################################################################
+
+# observer/intro
+intro_title: Einleitung
+intro_purpose: >
+  *Zweck:* Der Zweck dieser Seite ist es, Pilzfunde zu sammeln und Leuten
+  dabei zu helfen Pilze zu bestimmen die sie nicht kennen. So tragen wir dazu
+  bei, dass sich mehr Menschen für die wissenschaftliche Forschung an Pilzen
+  (Mykologie) interessieren. Manch einer will wissen, was wir zu den Pilzen zählen.
+  Auf dieser Webseite gehen wir das Thema ziemlich breit an. Wir haben zwar
+  hauptsächlich an große fleischige Pilze gedacht, aber wir freuen uns auch über andere
+  Fungi wie Flechten, Rostpilze, Schimmel und pilzähnliche Organismen wie
+  Schleimpilze. Ich hoffe letztendlich, dass sich diese Webseite zu einer nützlichen
+  Informationsquelle entwickelt, sowohl für Amateure als auch für
+  Mykologen von Beruf. Ich stelle es mir am liebsten vor als ein sich weiterentwickelndes
+  Bestimmungsbuch für Pilze oder ein Gemeinschafts-Logbuch von Pilzfunden.
+  \n\n
+  Für die unter euch, die noch nicht so viel über Mykologie wissen, es gibt noch
+  viel Unerforschtes, auch in den Grundlagen. Manche schätzen dass weniger als 5% aller
+  Fungi der Welt bisher wissenschaftlich erfasst sind. Bei den großen fleischigen
+  Pilzen sieht es zwar etwas besser aus, aber es passiert immer noch recht oft, dass man
+  einen Pilz findet, der nicht wirklich genau zu den Beschreibungen in den Büchern passt
+  oder der einfach nicht alle Merkmale einer bekannten Pilzart erfüllt. Ziel dieser Webseite
+  ist es, diese Lücke zu füllen, indem wir hier ein Forum bereitstellen, wo wir unsere Funde
+  miteinander besprechen können und mit Referenzen zu bestehender Literatur verankern.
+  Lasst euch bitte nicht vom wissenschaftlichen Flair dieser Webseite abschrecken. Jeder von euch
+  ist herzlich willkommen, mitzumachen, eigene Funde einzutragen, Bilder hochzuladen und die
+  Funde Anderer zu kommentieren.
+
+intro_image_sharing: >
+  *Rechte an Bildern:* Diese Webseite unterstützt die Idee des kooperativen Weitergebens,
+  die von der "Free Software Foundation (Stiftung für Freie Software)":http://fsf.org,
+  auch bekannt als "Open Source Software-Bewegung":http://opensource.org, und ausgedehnt
+  auf andere schöpferische Bereiche durch "Creative Commons":http://creativecommons.org.
+  Dementsprechend stellen wir alle Bilder bereit zu den Bedingungen von einer der
+  Creative-Commons-Lizenzen. Kurz gefasst bedeutet dies, dass du Dritten ausdrücklich
+  und zeitlich unbegrenzt erlaubst, die Bilder weiterzuverwenden, die du auf diese Webseite hochlädst, zu
+  bestimmten "Bedingungen":/observer/how_to_use#license. Diese Art von Rechten ist
+  für die Grundlagenforschung sehr wichtig. So können Forscher diese Informationen ohne
+  Einschränkung nutzen und auf die Erkenntnisse Anderer aufbauen. Man erhöht dadurch auch die
+  Wahrscheinlichkeit, dass die Daten auch in der fernen Zukunft noch abrufbar sein werden.
+  \n\n
+  Wenn du deine Bilder hochlädst, so bedeutet dies keinesfalls, dass du dein Copyright an den
+  Bildern abgibst, und du hast weiterhin alle Rechte, mit deinen Bildern Geld zu verdienen. Außerdem
+  hast du die Wahl zwischen verschiedenen Arten von Lizenzen, zum Beispiel kannst du angeben, dass
+  jeder, der eins deiner Bilder gewerblich nutzen möchte, zuerst Kontakt mit dir als Copyright-Halter
+  aufnehmen und dann Bedingungen für den gewerblichen Einsatz des Bildes mit dir aushandeln muss.
+  Überall wo Bilder auf dieser Seite gezeigt werden, befinden sich auch spezielle Links, die dabei
+  helfen sollen, entsprechende Kontakt aufzubauen.
+
+intro_source_code: >
+  *Quellcode:* Der Quellcode dieser Webseite kann unter "[repo]":[repo] abgerufen werden,
+  unter der "Open Source MIT Lizenz":http://www.opensource.org/licenses/mit-license.php.
+  Beiträge zum Quellcode sind erwünscht. Hier eine Liste der "geplanten Erweiterungen":[todo_list].
+  Wir freuen uns über alle Kommentare und Anregungen. Wenn du beitragen willst, schicke bitte eine
+  Email an *nathan at collectivesource.com*, damit wir unsere Energien bündeln können.
+
+intro_note: >
+  *Anmerkung:* Die Administratoren dieser Webseite behalten sich das Recht vor,
+  Inhalte von der Seite zu entfernen, die sie für unanständig oder den Zwecken dieser Webseite nicht zugutekommend
+  halten.
+
+intro_talks: >
+  *Präsentationen:*
+  \n\n
+  "Mushroom Observer: Das erste Jahr":/talks/MO-First-Year.html
+
+################################################################################
+
+# observer/how_to_use
+how_adding_comments: >
+  *Kommentare schreiben* - Wenn du einen "Fund":#observation ansiehst, klickst du auf den Link
+  'Kommentar abgeben' oben auf der Seite.  Wenn du in dem Moment nicht als "Nutzer":#user,
+  loggst du dich auf der folgenden Login-Seite ein. Als eingeloggter Nutzer kannst du auf einem
+  Formular eine Zusammenfassung und den Kommentar als Text eingeben. In dem Kommentarfeld sind
+  einige Formatierungen möglich. Dies wird kurz unterhalb des Kommentarfeldes erklärt, zusammen
+  mit einem Link zu detaillierteren Anleitungen. Du kannst auch mittels Standard-HTML Links in
+  das Kommentarfeld eingeben. Der HTML-Code wird automatisch gereinigt, um Sicherheitsprobleme
+  wie das Laden externer Skripte zu verhindern, also schreib kein kompliziertes HTML.
+
+how_adding_observations: >
+  *Funde, die du identifiziert hast, eingeben* - Folg derselben Anleitung wie in
+  "Hilfe beim Identifizieren von etwas Unbekanntem":#unknown_help, nur dass
+  du in das 'Was'-Feld den Artennamen eingibst. Wir empfehlen, auch anzugeben
+  was dich zu dieser Identifikation überzeugt hat. Um dies leichter zu machen,
+  haben wir ein paar Kästchen vorbereitet (z.B. 'Mit nacktem Auge erkannt',
+  'Aufgrund von mikroskopischen Merkmalen'), aber wir würden uns freuen,
+  wenn du in den entsprechenden Textfeldern mehr dazu schreibst (z.B. die Bücher
+  angeben, die du konsultiert hast, oder etwa 'Ich habe die DNA sequenziert und
+  mit Einträgen in GenBank verglichen'). Community-Mitglieder schreiben häufig
+  "Kommentare":#comment, wenn sie Fragen haben zur Identifikation dieser Art oder
+  was diesen Fund von einer anderen Art unterscheidet, oder um dir einen anderen
+  "Namen":#name vorzuschlagen.
+
+how_comment: >
+  *Kommentare* - Ein Kommentar eines Nutzers zu einem bestimmten Fund. Kommentare
+  sind der beste Weg, einen "Fund":#observation und die damit verbundenen
+  "Bilder":#image zu besprechen. Jeder Kommentar gehört einem bestimmten "Nutzer":#user.
+  Ein Kommentar kann nur von dieser Person geändert oder gelöscht werden (oder von
+  einem Webseiten-Admin). Du kannst alle Kommentare, die zu deinen Funden gemacht
+  wurden, auf einmal ansehen, indem du auf 'Kommentare für dich' auf dem
+  Menü links klickst.
+
+how_common_tasks: Häufige Aktionen
+how_creating_species_lists: >
+  *Artenlisten erstellen* - Wähle 'Liste erstellen' aus dem Menü links an.
+  Füll die angezeigten Felder aus. In das Feld 'Art' solltest du jeder Art
+  auf einer eigenen Textzeile einen "Namen":#name geben. Wenn du fertig bist und
+  die "Artenliste":#species_list erstellst, wird jede Zeile einzeln überprüft und
+  jede Art wird in der Datenbank nachgeschlagen. Wenn es den entsprechenden
+  "Namen":#name noch nicht gibt, wirst du gefragt ob du die unbekannten Namen
+  in die Datenbank übernehmen möchtest.  So kannst du Tippfehler korrigieren und
+  außerdem schnell alle fehlenden Namen in die Datenbank eintragen.
+  Jeder Name im Feld 'Art' oder solche, die aus einer Datei geladen werden, resultieren
+  in einem ganz neuen Fund. Die 'Notizen zur Artenliste' werden nur angezeigt,
+  wenn die gesamte Liste angezeigt wird. Die 'Notizen für neue Mitarbeiter' werden
+  als 'Anmerkungen' in das entsprechende Feld mit jedem neu erstellten "Fund":#observation
+  eingegeben.
+  \n\n
+  Wenn du aus einer Gruppe von bestehenden "Funden":#observation eine neue Liste
+  erstellen möchtest, musst du erst eine leere Artenliste erstellen. Dann öffnest
+  du jeden der Funde, die zu der Liste gehören sollen, und wählst 'Artenlisten verwalten'.
+  So kannst du diesen Fund in beliebige deiner Artenlisten übernehmen.
+  \n\n
+  Wenn du erst eine Artenliste ansiehst und dann eine neue erstellst oder eine andere
+  Liste bearbeitest, wird dir automatisch eine Checkliste angezeigt, auf der du die
+  Arten der ersten Liste auswählen kannst, die du in die zweite Liste übernehmen möchtest.
+
+how_describing_species: >
+  *Arten beschreiben* - Wähle "Index A->Z":/name/observation_index auf dem Menü links und
+  such einen Namen aus oder folge einem der dort gezeigten Links "Über &lt;name&gt;...".
+  Lies dir die Beschreibungen durch, die es dort schon über diesen Namen gibt. Wenn du
+  mehr über diese Art weißt und es zu dem Eintrag ergänzen möchtest, klicke auf
+  'Beschreibung bearbeiten' und ergänze deine Informationen. Du solltest Referenzen angeben,
+  zum Beispiel Pilzbestimmungsbücher oder wissenschaftliche Artikel. Kurze Zitate
+  aus den Referenzquellen sind erlaubt, aber bevor du allzu viel Text abschreibst, solltest
+  du den Original-Verfasser um Erlaubnis hierzu bitten.
+
+how_glossary: Glossar der Konzepte
+how_image: >
+  *Bild* - Ein Foto oder eine Zeichnung von einer oder mehreren Pilzarten.
+  Bilder sind verknüpft mit mindestens einem "Fund":#observation.  Jedes Bild
+  gehört einem bestimmten "Nutzer":#user, der auch der Copyright-Halter sein kann.
+  Nur dieser Eigentümer oder ein Webseiten-Admin kann ein Bild löschen oder die
+  dazugehörige Beschreibung bearbeiten. Alle Bilder dieser Webseite müssen zu den
+  Bedingungen einer der "Creative Commons Lizenzen":http://creativecommons.org bereitgestellt
+  werden. Wenn du das Copyright oder die Lizenz an einem bestimmten Bild anfechten möchtest.
+  schicke eine Email an den "Webmaster":/observer/ask_webmaster_question.
+
+how_intro: >
+  Auf dieser Seite findest du Kurzbeschreibungen davon, wie diese Webseite am besten
+  angewendet werden kann, sowie eine Übersicht über die Grundkonzepte, aus denen diese Webseite besteht.
+
+how_keeping_up: >
+  *Auf dem Laufenden bleiben* - Die Standardseite für MushroomObserver.org ist das
+  'Logbuch der Änderungen', du kannst es auch über den Link 'Neueste Änderungen' links auf dem
+  Bildschirm aufrufen. Dort kannst du sehen, was sich kürzlich auf dieser Webseite
+  geändert hat.  Dort findest du neue "Funde":#observation und
+  "Artenlisten":#species_list und ebenso die relevanten Änderungen zu bestehenden. Neue
+  "Bilder":#image oder "Kommentare":#comment gelten gleichfalls als wichtige, die Funde betreffende Änderungen.
+  Auch Änderungen an "Namen":#name werden aufgeführt. Mit Hilfe der Zahlen am oberen und unteren Seitenrand
+  kannst du auch länger zurückliegende Änderungen aufrufen. Funde und Namen, die als Nebeneffekt
+  von anderen Änderungen entstanden sind, werden nicht einzeln erwähnt.
+  \n\n
+  Außerdem können die neuesten Änderungen in einem "RSS
+  feed":http://en.wikipedia.org/wiki/Rss_feed verfolgt werden, den diese Webseite bereitstellt.
+
+how_license: >
+  *Lizenz* - Bilder auf der Mushroom-Observer-Webseite werden ausdrücklich
+  lizensiert.  Derzeit kann man wählen zwischen der "Lizenz 'Creative Commons Namensnennung, Weitergabe
+  unter gleichen Bedingungen'":http://creativecommons.org/licenses/by-sa/3.0/ und der
+  "Lizenz 'Creative Commons Namensnennung, Nicht-Kommerziell, Weitergabe unter gleichen
+  Bedingungen'":http://creativecommons.org/licenses/by-nc-sa/3.0/. Der Hauptunterschied ist,
+  ob das Bild auch in einem möglicherweise gewerblichen Kontext benutzt werden darf.
+  Eine der Auswirkungen der Nicht-Gewerblichen Lizenz ist, dass das Bild nicht auf
+  der "Wikipedia-Webseite":http://wikipedia.org verwendet werden kann. Für jedes Bild
+  kann die Lizenz individuell ausgewählt werden. Die lockere, Wikipedia-kompatible Lizenz
+  ist für neue Nutzer als Standard eingestellt. Du kannst die nicht-gewerbliche Lizenz
+  als Standard für deine neuen Bilder setzen, indem du dies auf der Seite Einstellungen angibst
+  und auf 'Speichern' drückst.
+
+how_location: >
+  *Fundort* - Ein Ort irgendwo auf der Erde. Definierte Fundorte verknüpfen einen Namen
+  mit äußeren Nord- und Süd-Breitengraden sowie West- und Ost-Längengraden verbinden.
+  Zu einem definierten Fundort können auch die höchste Erhebung und die tiefste Senke angegeben
+  werden, dazu evtl. Bemerkungen. Undefinierte Fundorte haben nur einen Namen und keine
+  geografischen Koordinaten. Ein Fundort wird nicht als zu einem Nutzer zugehörig betrachtet. Jeder
+  "Nutzer":#user kann jeden Fundort ändern oder definieren, aber all solche Änderungen
+  werden dem Nutzer zugeordnet und von der Community begutachtet. Um bei diesem Begutachtungs-Prozess
+  zur Hilfe zu stehen, werden alle älteren Versionen von Fundorten archiviert.
+
+how_maps: >
+  *Mit Landkarten arbeiten* - Derzeit gibt es auf Mushroom Observer drei Typen von
+  Landkarten: Verbreitungskarten (z.B. "Verbreitung von **__Craterellus
+  cornucopioides__**":/name/map/284), Fundort-Karten (z.B.,
+  "Salt Point State Park":/location/show_location/4) und die "Weltkarte":/location/map_locations.
+  \n\n
+  Um eine Verbreitungskarte für einen bestimmten "Namen":#name zu erstellen, rufst
+  du die Seite über diesen Namen auf (z.B. schreibst du den Namen in das Suchfeld und klickst auf
+  'Name'), dann klickst du den Link 'Verbreitungskarte' im oberen Bereich der Seite.
+  \n\n
+  "Nutzer":#user können zur Verbreitungskarte eines Namens beitragen. Am leichtesten geht dies,
+  indem du einen neuen "Fund":#observation einträgst und einen schon bestehenden
+  Fundort eingibst. Die Auto-Vervollständigung im Feld 'Wo' zeigt alle Fundorte an, die
+  es derzeit gibt, sowohl die definierten als auch die undefinierten..
+  \n\n
+  Du kannst auch ausdrücklich anmerken, dass ein gewisser Fund nicht auf der
+  dazugehörigen Verbreitungskarte angezeigt werden soll. So kannst du Funde eingeben,
+  bei denen du nicht sicher bist, dass der Fund auch an diesem Ort gemacht wurde, zum
+  Beispiel Pilz-Sammeltische, Supermärkte oder ähnliches. Dazu findest du auf der Seite,
+  auf der du einen neuen Fund einträgst, ein Häkchenfeld 'Wächst auch dort'. Dies ist
+  standardmäßig abgehakt. Wenn du das Häkchen entfernst, dann erscheint dieser Fund nicht
+  auf der Verbreitungskarte.
+  \n\n
+  Wenn du einen Fund aufrufst und der Fundort ist definiert worden, erscheint ein Link
+  'Landkarte hier klicken'. Für undefinierte Fundorte steht stattdessen 'Suchen'. Wenn du
+  auf den Link nach einem undefinierten Fundort klickst, wird eine Suche ausgeführt und
+  dir werden alle Funde angezeigt, die im Feld 'Wo' mit diesem undefinierten Ort assoziiert sind.
+  Auf der Folgeseite findest du oben einen Link 'Diesen Fundort definieren' oder
+  'Mit einem definierten Fundort kombinieren'.
+  \n\n
+  Wenn du auf 'Diesen Fundort definieren' klickst, kommst du auf eine Seite, wo du
+  diesen Fundort erstellen kannst. Als erstes solltest du den Namen des Fundortes begutachten.
+  Auf jeden Fall sollte der Name mit dem Land aufhören. In den USA solltest du außerdem
+  den Namen des Bundesstaates angeben und den Landkreis. Abkürzungen sind nicht erwünscht,
+  außer 'Co.' für County. Ein akzeptabler Name ist zum Beispiel
+  **Salt Point State Park, Sonoma Co., California, USA**, wohingegen
+  **Salt Point, CA** ungenau und deshalb unerwünscht ist.
+  \n\n
+  Für andere Länder kann ich nichts Konkretes vorschlagen, aber entsprechende Standards
+  werden sich sicher von selbst entwickeln. (Ich empfehle, dem Muster 'Ort, Landkreis, Land' zu folgen,
+  also zum Beispiel **Büsenbachtal, Landkreis Harburg, Deutschland**, Anm. d. Ü.)
+  \n\n
+  Derzeit sind Fundorte als Rechtecke definiert, die den Fundort komplett umgrenzen.
+  Dass wir ein Gebiet definieren und nicht einfach eine einzelne GPS-Position, hängt damit
+  zusammen, dass wir niemanden zwingen wollen, seine heimlichen 'Flecken' zu verraten, aber
+  trotzdem zumindest bis auf Landkreisebene genau sein wollen.
+  Um einen Fundort zu definieren, gibst du die extremen Nord- und Süd-Breitengrade ein und
+  die extremen Ost- und West-Längengrade. Um diese Werte zu bestimmen, kannst du den Links
+  zu Ortssuchseiten folgen, die ungefähr in der Mitte der Seite Fundort-Bearbeiten angezeigt
+  werden. Diese öffnen in einem neuen Fenster oder Tab. Dort kannst du nach dem Fundort suchen
+  oder dich mit Hilfe der Karte herantasten und dann die Koordinaten ablesen.
+  \n\n
+  Du kannst zusätzlich zur Position auch die extremen Höhen und Tiefen eines Fundorts angeben
+  und den Fundort in der Bemerkung beschreiben. Die Höhen und Tiefen sollen in Metern eingeben werden
+  (und nicht in Fuß). Wenn du alles ausgefüllt hast, drückst du auf 'Erstellen', um diesen Fundort
+  zu definieren. Das System prüft, ob die Angaben logische Fehler enthalten und dass es einen
+  Fundort mit diesem Namen bislang noch nicht gibt. Du kannst einen bestehenden Fundort bearbeiten,
+  indem du erst die zu diesem Fundort gehörige Seite öffnest und dann auf 'Bearbeiten' klickst.
+  Jeder kann Fundorte bearbeiten, aber ältere Versionen werden archiviert, damit wir leicht die
+  alten Eingaben wiederherstellen können, wenn jemand etwas Falsches eingibt.
+  \n\n
+  Du kannst alle derzeit verwendeten Fundorte auflisten über den Link
+  "Alle Fundorte":/location/list_place_names auf jeder der Fundort-Seiten.
+  Dort findest du sowohl die definierten (links, alfabetisch) und die
+  undefinierten Fundorte (rechts, geordnet nach der Anzahl der dort
+  registrierten Funde). Ein sehr nützlicher Dienst, den du dieser Webseite erweisen
+  könntest, ist, für die weit verbreiteten undefinierten Fundorte (Liste rechts oben)
+  die Positionen zu bestimmen. Manchmal hat derselbe Ort mehrere Namen erhalten
+  (z.B. 'Point Reyes National Seashore' und 'Pt Reyes Park').
+  Du kannst einen undefinierten Fundort mit einem bestehenden vereinen, indem du
+  den Link 'Kombinieren' neben dem undefinierten Fundort klickst. Dies ruft eine Schnellsuche
+  auf nach ähnlich klingenden Namen und zeigt dir die wahrscheinlichsten Treffer in einer Liste an,
+  sowie alle übrigen Fundorte in einer zweiten Liste, falls die Schnellsuche nicht genau genug war.
+  Wenn du hier auf einen der Fundorte klickst, werden die beiden Fundorte kombiniert.
+  \n\n
+  Theoretisch könnte denselber Fundort mehr als einmal definiert werden (wohl
+  von verschiedenen Nutzern). Wenn dies geschieht, kannst du vorschlagen, diese
+  Fundorte zusammenzulegen, dazu schreibst du in das Feld 'Wo' den Namen des
+  anderen Fundorts. Dadurch ändert sich nicht sofort etwas, aber der Webseiten-Admin
+  erhält eine Meldung darüber. Definierte Fundorte können nicht einfach so
+  kombiniert werden, da gespeicherte Daten dabei verloren gehen könnten.
+
+how_name: >
+  *Name* - Ein Name für eine Gruppe von Pilzen. Gewöhnlich ist dies der Artenname,
+  aber es können auch andere Taxa verwendet werden (Gattung, Familie, Varietät usw.).
+  Namen können sich auch auf Gruppen beziehen, die wissenschaftlich nicht anerkannt
+  sind, wie etwa umgangssprachliche Namen oder Funktionsgruppen wie
+  Gasteromyces. Ein Name gehört *nicht* zu einem bestimmten "Nutzer":#user.
+  Jeder Nutzer kann jeden Namen ändern, aber all solche Änderungen sind mit dem
+  jeweiligen Nutzer verknüpft und werden von der Community begutachtet. Da es bei diesem
+  Überarbeitungsprozess hilfreich sein kann, alte Versionen nachzuschlagen, werden alle
+  Änderungen archiviert. Im Namen können die Autoren angegeben werden. Dies sollte
+  allerdings nur für wissenschaftliche Namen gelten, und in diesem Fall dem Standard folgen,
+  dass man den Autoren angibt, die als erste korrekt diesen Namen veröffentlicht hat.
+  Bei Namen auf Artenebene oder niedriger kann der Name neben diesem Autoren auch
+  die Referenz zu dem Autoren enthalten, der die Art in die gegenwärtig geltende
+  Gattung übertragen hat, z.B. (Singer) Jenkins.
+
+how_observation: >
+  *Fund* - Eine Aufzeichnung einer einzelnen Pilzart an einem bestimmten
+  "Fundort":#location zum angegebenen Zeitpunkt, gefunden von einem bestimmten
+  "Nutzer":#user. Üblicherweise ist ein Fund mit einem oder mehreren
+  "Namen":#name verknüpft und dazu mit einigen "Bildern":#image, "Kommentaren":#comment
+  und "Artenlisten":#species_list. Ein Fund gehört einem bestimmten Nutzer. Nur der
+  jeweilige Besitzer oder ein Webseiten-Admin kann einen Fund ändern oder löschen.
+
+how_projects: >
+  *Projekte* - Projekte sind eine Möglichkeit, dass eine Gruppe "Nutzer":#user
+  zusammenarbeitet, um ein Werk zu schaffen, dass sie solange der Öffentlichkeit
+  vorenthalten wollen, bis es zum Veröffentlichen bereit ist. Ursprünglich
+  gedacht war diese Funktion für Uni-Kurse, um während der Kursdauer ein
+  kontrollierteres Umfeld bereitzustellen. Projekte sollen die Arbeit von
+  Gruppen erleichtern, die an wissenschaftlichen Artikeln oder ähnlichen gemeinsamen
+  Anstrengungen arbeiten.
+  \n\n
+  Jeder kann eine neues Projekt schaffen, dazu klickst du auf
+  "Projekte auflisten":/project/list_projects im Menü links und dann auf
+  'Projekt erstellen'. Die Person, die ein neues Projekt anlegt, ist immer
+  einer der Mitarbeiter und auch ein Administrator des Projekts. Ein Administrator
+  kann neue Mitarbeiter in das Projekt aufnehmen, siehe Link 'Mitarbeiter hinzufügen'
+  am oberen Rand der Seite 'Projekt anzeigen'. Administratoren können auch andere
+  Projektmitarbeiter zu Administratoren des Projekts küren, siehe Link 'Status ändern'
+  auf den Seiten 'Projekt anzeigen' oder 'Mitarbeiter hinzufügen'. Jeder Nutzer kann den
+  Administratoren eines Projekts Mitteilungen schicken. Diese Mitteilungen werden per Email an
+  die Administratoren geschickt und enthalten einen Link, um den Status dieses Nutzers zu ändern.
+  \n\n
+  Derzeit ist der Hauptzweck von Projekten die Erstellung von Entwürfen für die
+  Beschreibungen von Pilz-Arten. Du kannst selbst einen neuen Entwurf erstellen, indem
+  du zur derzeitigen Beschreibung einer Art gehst und auf das entsprechende Projekt klickst unter
+  'Neuen Entwurf erstellen für'. Du musst allerdings Mitarbeiter in diesem Projekt sein,
+  um einen Beschreibungs-Entwurf für dieses Projekt zu schreiben. Wenn du einen
+  Entwurf fertiggestellt hast, kannst du auf der Seite "Entwurf zeigen" den "Entwurf veröffentlichen".
+  Um einen Entwurf von einem Projekt zu entfernen, musst du auf "Entwurf löschen" klicken. Derzeit
+  (Okt. 2008) kann es für jede Art nur einen Entwurf geben. Diese Begrenzung wird
+  wahrscheinlich Ende Okt. 2008 aufgehoben.
+
+how_proposed_name: >
+  *Vorgeschlagener Name* - Ein "Name":#name, der für einen bestimmten "Fund":#observation
+  "vorgeschlagen":#proposing_names worden ist. Community-Mitglieder können für jeden Fund beliebig
+  viele Namen vorschlagen. Die Namen eines jeden Mitglieds werden gleich behandelt. Die Mehrheitsmeinung
+  ergibt sich durch den Prozess der "Stimmabgabe":#voting.
+  Jeder Namensvorschlag für einen Fund gehört jeweils einem "Nutzer":#user.
+  Aber nicht einmal der Nutzer, der den Vorschlag gemacht hat, kann immer
+  einen Namen ändern oder löschen, wenn andere Nutzer schon für oder gegen diesen Namen
+  "gestimmt":#vote haben. Du kannst jedoch jederzeit weitere Namen vorschlagen. Zum Glück gibt es keine
+  Strafe für das Vorschlagen falscher Namen!
+
+how_proposing_names: >
+  *Namen vorschlagen* - Mitglieder der Community können von jetzt an direkt
+  neue "Namen":#name für jeden beliebigen "Fund":#observation vorschlagen.
+  Klicke auf einen Fund (z.B. vom Logbuch der Änderungen her) und blättre nach unten,
+  unter die Bemerkungen zum Fund. Dort sollte eine Liste der "vorgeschlagenen Namen":#proposed_name
+  sein, in einem dünnen schwarzen Rechteck. Die meisten Funde haben sicher schon mindestens
+  einen Namensvorschlag (den der Finder selbst gemacht hat). Von hier aus kannst du entweder
+  auf 'neuen Namen vorschlagen' klicken oder  "abstimmen über":#voting befindliche Namen.
+  Vorher musst du dich allerdings einloggen.
+  \n\n
+  Wenn du auf einen 'neuen Namen vorschlagen' klickst, siehst du ein Formular,
+  es ähnelt stark dem, auf dem man neue Funde einträgt. Neben dem Namen musst du
+  auch einen Grad der Gewissheit angeben. Dies zusammen ist deine "Stimme":#vote,
+  und du kannst sie jederzeit ändern auf der Seite Fund anzeigen, so oft du willst.
+  Genau wie beim Eintragen von Funden raten wir dringend, auch Gründe anzugeben, wieso
+  du diesen Namen gewählt hast für diesen Fund (statt eines anderen Namens). Wenn du
+  fertig bist, klickst du auf 'Erstellen'. Du kannst anschließend Tippfehler korrigieren
+  oder einen gültigen Namen auswählen, falls du eine veraltete Version eingegeben hast.
+  \n\n
+  Im allgemeinen sollten Nutzer keinen Namen vorschlagen, den schon jemand anders
+  vorgeschlagen hat. Man könnte dies aber manchmal wollen, zum Beispiel um andere
+  Gründe anzugeben, die zu derselben Schlussfolgerung führten. Für solche Anmerkungen sollst
+  du aber stattdessen die Diskussionsmöglichkeit anwenden, indem du einen "Kommentar":#comment
+  abgibst.
+
+how_searching: >
+  *Suchen* - Es gibt zwei interessante Wege, auf dieser Webseite nach Informationen
+  zu suchen. Am einfachsten ist es, in das Suchfeld oben auf der Seite einen Suchbegriff
+  einzugeben und einen der Knöpfe neben dem Suchfeld zu drücken. Dann erhältst du eine Liste
+  aller "Funde":#observation, "Bilder":#image,
+  "Namen":#name oder "Fundorte":#location, die Felder enthalten, die auf diesen Suchbegriff
+  passen.
+  \n\n
+  Du kannst auch alle Namen durchblättern, die derzeit in der Datenbank erfasst sind. Dazu
+  klickst du auf den Link 'Namensregister' im Menü links. Du kannst inzwischen für jeden
+  Fund "mehrere Namen vorschlagen":#proposing_names. Wenn du also durch das Namensregister blätterst,
+  siehst du alle Funde, für die dieser Name vorgeschlagen worden ist. Allerdings führt, als Beispiel,
+  die Gattung **__Agaricus__** nur solche Funde an, die zu der Gattung gehören, aber keiner
+  Art zugeordnet worden sind. Du findest unter der Gattung also nicht alle Funde, die von
+  allen beliebigen Arten innerhalb dieser Gattung gemacht worden sind. Wenn zwei Namen
+  jedoch als synonym gelten, kannst du alle  entsprechenden Funde durch die eine oder die andere
+  Namensseite abrufen. Wenn du das Suchfeld benutzt und zum Beispiel 'Agaricus' eingibst,
+  erhältst du eine Liste aller Namen, die den Suchbegriff enthalten, also siehst du alle
+  Funde, die innerhalb dieser Gattung liegen.
+
+how_species_list: >
+  *Artenliste* - Eine Liste von "Funden":#observation (nicht "Names":#name).
+  Enthält Datum, "Fundort":#location und einen Titel für die Liste. Jede Artenliste
+  gehört einem bestimmten "Nutzer":#user.  Nur dieser Nutzer oder ein Webseiten-Admin
+  kann die Artenliste ändern oder löschen. Es gibt keine strengen Regeln, wie man
+  Artenlisten benutzen soll. Dies ist ein Bereich, der sich bestimmt in der Zukunft
+  weiterentwickeln wird, wenn der Community klarer wird, was mit dieser Funktion
+  alles möglich ist.
+
+how_title: Anleitung zu Mushroom Observer
+how_tracking_species: >
+  *Eine bestimmte Gattung oder Art per Email beobachten* - Mit Mushroom Observer
+  kannst du angeben, dass du jedesmal eine Email erhalten möchtest, wenn ein
+  bestimmter "Name":#name einem "Fund":#observation zugeordnet wird. Wenn dieser Name
+  eine Gattung oder Art ist, erhältst du außerdem eine Email, wenn eine Art oder Unterart
+  gefunden wird. Um dies für einen bestimmten Namen zu aktivieren, gehst du auf die Seite
+  für diesen Namen (siehe "Suchen":#searching) und klickst auf 'Email-Beobachtung'.
+  Standardmäßig erhält auch die Person, die einen solchen Fund eingibt, eine Email,
+  dass dich dieser Fund interessiert. Wenn du keine Anweisungen eingibst, dann erhält der Finder
+  keine Email. Wenn der Finder beim Erstellen des Eintrags diesen Namen eingibt, dann
+  wird ihm oder ihr deine Anweisung sofort auf der Webseite angezeigt. Du kannst deinen
+  Wunsch nach Beobachtung für jeden Namen ändern oder abschalten, indem du wieder auf die
+  Seite für diesen Namen gehst und noch einmal 'Email-Beobachtung' anklickst, dort wählst
+  du dann den Knopf 'Abschalten'.
+
+how_unknown_help: >
+  *Hilfe beim Bestimmten eines unbekannten Pilzes* - Um Hilfe beim Bestimmen
+  eines unbekannten Pilzes zu erhalten, musst du ein "Nutzerkonto":#user haben.
+  Du kannst leicht eins einrichten, indem du links auf 'Konto anlegen' klickst. Siehe
+  den Abschnitt unten über Nutzer für weitere Einzelheiten.
+  \n\n
+  Wenn du eingeloggt bist, trage einen neuen "Fund":#observation ein, indem du auf
+  'Fund eintragen' im Menü links klickst. Schreib so viele Angaben wie möglich in
+  das angezeigte Formular. Du kannst das Feld für 'Was'  leer lassen oder 'Unbekannt'
+  eintragen oder, wenn du glaubst die Familie oder die Gattung zu kennen, schreibst du
+  den entsprechenden "Namen":#name, gefolgt von 'sp.', z.B., 'Russula sp.'.
+  Im Feld 'Bemerkungen' kannst du weitere Angaben machen zu Habitat, Geruch, Geschmack und
+  anderes, das man auf den Bildern nicht erkennen kann. Wenn du zufrieden bist mit deinen
+  Einträgen, schickst du das Formular ab, indem du auf 'Erstellen' klickst.
+  \n\n
+  Nun solltest du eine Seite sehen, die dieselben Angaben anzeigt, die du eben eingegeben
+  hast. Wenn du aber einen Namen eingegeben hast, den es in der Datenbank noch nicht gibt,
+  wirst du gefragt, ob du diesen Namen in die Datenbank übernehmen möchtest. Hier kannst
+  du auch Tippfehler korrigieren. Wenn du einen als veraltet markierten Namen eingegeben
+  hast, kannst du hier eins der bevorzugten Synonyme auswählen.
+  \n\n
+  Wenn du den neuen Fund erstellt hast, kannst du "Bilder":#image
+  dazu hochladen, mit Hilfe des Links 'Bild hinzufügen' rechts im Fenster. Es ist sehr wichtig,
+  dass du entweder selbst das Bild gemacht hast oder dass die Person, die das Bild gemacht hat,
+  dir ausdrücklich das Recht dazu gibt, das Bild auf diese Webseite hochzuladen. Wenn du das Bild
+  nicht selbst gemacht hast, schreib bitte in das Feld 'Copyright-Halter' die Angaben
+  zum rechtmäßigen Inhaber. Du kannst auf dieser Seite auch die "Lizenz":#license
+  auswählen, unter der du das Bild veröffentlichen möchtest.
+  \n\n
+  Wenn du Funde als Unbekannt einträgst, wird die Community im allgemeinen
+  innerhalb von 24 Stunden "einen oder mehrere Namen vorschlagen":#proposing_names.
+  Wenn dich irgendwelche dieser Namen überzeugen, solltest du schnell auf die
+  Seite über diesen Fund zurückkehren und selbst über die Namen "abstimmen":#vote.
+  Lies auch gern die Diskussion über "Abstimmen":#voting weiter unten.
+  Community-Mitglieder können dir auch über die "Kommentarfunktion":#comment
+  Rückmeldungen schicken. Für jedes  "Konto":#user ist es voreingestellt,
+  dass solche Kommentare dir auch per Email zugesandt werden. Wenn jemand dich bittet,
+  zum Fund weitere Details zu ergänzen, wird es als besser angesehen, dass du
+  den Fund 'bearbeitest' und die Details in das Feld 'Bemerkungen' eingibst,
+  anstatt einfach noch einen Kommentar zu schreiben.
+
+how_user: >
+  *Nutzer* - Ein Nutzerkonto bei MushroomObserver.org wird von jemandem erstellt.
+  Du musst eine gültige Email-Adresse angeben, wenn du das erste Mal ein Konto erstellst.
+  Dies schützt das System vor automatisierten Programmen, die Unsinns-Konten eröffnen.
+  Außerdem erlaubt es anderen Nutzern, dich kontaktieren zu können. Deine Email-Adresse wird
+  jedoch nie angezeigt, außer wenn du einem anderen Nutzer eine Mitteilung schickst, und in
+  diesem Fall wird deine Email-Adresse nur diesem einen Nutzer gezeigt. Wenn du Bedenken
+  darüber hast, dass deine Email-Adresse in der Datenbank von MushroomObserver.org
+  gespeichert ist, dann kannst du nach erfolgreichter Überprüfung des Kontos auf die
+  Seite Einstellungen gehen und deine Adresse dort löschen.
+
+how_vote: >
+  *Abstimmen* - Die Stimme eines "Nutzers":#user zu einem  "vorgeschlagenen Namen":#proposed_name
+  für einen bestimmten "Fund":#observation. Drückt einen Grad von Gewissheit oder Zustimmung bezüglich
+  dieses Namens aus, und die Hälfte der Möglichkeiten ("[min_pos_vote]" und darüber)
+  gelten als positiv und die andere Hälfte ("[min_neg_vote]" und darunter) als negativ.
+  Stimmen gehören dem entsprechenden Nutzer und können nur von diesem geändert oder gelöscht werden, oder
+  von einem Webseiten-Admin.
+
+how_voting: >
+  *Über vorgeschlagene Namen abstimmen* - Klicke auf einen "Fund":#observation, z.B.
+  im Logbuch der Änderungen, und blättre zum Rechteck mit den vorgeschlagenen Namen.
+  Du musst eingeloggt sein, sonst kannst du deine "Stimmen":#vote weder sehen noch ändern.
+  Wenn du eingeloggt bist, solltest du neben jedem "vorgeschlagenen Namen":#proposed_name
+  Klappmenüs sehen. Deine Stimme drückt aus, wie sicher du dir bist und wie sehr du
+  zustimmst, dass der jeweilige Name zu diesem Fund passt. Alles über "[min_neg_vote]"
+  gilt als Zustimmung, alles unter "[min_pos_vote]" als negativ.
+  Wähle  "[no_opinion]", um deine Stimme ganz zurückzunehmen.
+  Wenn du all die Stimmen zu deiner Zufriedenheit geändert hast, musst du auf 'Stimmen abgeben'
+  drücken, um deine Stimmen zu registrieren. Keine Sorge, wenn du dies vergisst und
+  versuchst, die Seite zu verlassen, kommt ein Hinweis (solange du Javascript nicht
+  ausgeschaltet hast).
+  \n\n
+  Die Stimmen für jeden Namen werden zusammengezählt und durch die Anzahl der Stimmen
+  für diesen Namen + 1 geteilt. Namen mit mehr abgegebenen Stimmen werden dadurch bevorzugt,
+  also gib deine Stimme früh und oft ab! Der Name mit der höchsten Punktzahl siegt,
+  und dieser Name wird standardmäßig überall auf der Webseite für diesen Fund angezeigt.
+  Wenn mehrere synonyme Namen für einen Fund vorgeschlagen werden, werden die entsprechenden
+  Stimmen gemeinsam gewertet, dabei zählt für jeden Nutzer die stärkste Stimme innerhalb dieser
+  Synonymgruppe. Wenn am Ende diese Synonymgruppe gewinnt, wird der gegenwärtig akzeptierte
+  Name als Community-Mehrheitsmeinung angezeigt. Wenn die Wissenschaft immer noch darüber
+  uneins ist, welcher Name für ein gewisses Taxon gelten soll, dann werden die Stimmen so
+  gut wie möglich verwendet um zwischen mehreren gültigen Namen zu entscheiden.
+
+################################################################################
+
+# observer/how_to_help
+how_help_title: Wie du mithelfen kannst, Mushroom Observer zu verbessern
+how_help_intro: >
+  Diese Seite listet eine Reihe von Fertigkeiten auf, die wir wirklich gut
+  gebrauchen könnten. Wenn du mitmachen möchtest, "schick einfach eine Email":/observer/ask_webmaster_question
+  und sag Bescheid, was du tun kannst.
+
+how_help_contributors: >
+  h2. 1. Mitwirkende
+  \n\n
+  p(normal).  Neben dem Hinzufügen von Bildern und Beschreibungen von
+  Pilzen, die du gesehen hast, kannst du dieser Seite einen großen
+  Dienst erweisen, indem du "Arten beschreibst":/observer/how_to_use#describing_species
+  oder "Fundorte definierst":/observer/how_to_use#maps.
+
+how_help_designers: >
+  h2. 2. Designer
+  \n\n
+  p(normal).  Die Webseite ist ziemlich spartanisch und jemand mit künstlerischem
+  Talent könnte mit Icons und Farbschemata sicher viel mehr daraus machen.
+
+how_help_developers: >
+  h2. 3. Entwickler
+  \n\n
+  p(normal).  Wir haben noch "viel geplant":[todo_list], wie wir diese
+  Webseite verbessern können.  Der Programmier-Rahmen, Ruby on Rails,
+  ist sehr leicht zu lernen, und wir sind gern bereit, jemanden anzulernen,
+  der sich hierfür interessiert.
+
+how_help_translators: >
+  h2. 4. Übersetzer
+  \n\n
+  p(normal). Die Webseite ist dafür eingestellt, in vielen Sprachen zu funktionieren. Wir
+  brauchen bloß noch Übersetzer.
+
+how_help_business_planning: >
+  h2. 5. Geschäftsideen
+  \n\n
+  p(normal).  Bislang ist Mushroom Observer ein reines Freiwilligen-Projekt. Wir suchen
+  allerdings nach Möglichkeiten, diese Webseite finanziell unabhängig zu machen. Dies
+  könnte sowohl als gemeinnütziges oder als Teil eines größeren gewerblichen Projekts
+  erfolgen.
+

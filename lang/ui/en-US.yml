@@ -150,6 +150,7 @@ app_your_observations: Your Observations
 app_your_summary: Your Summary
 
 # available languages
+de_DE: Deutsch
 en_US: English
 es_ES: Español
 pt_BR: Português
@@ -1441,9 +1442,9 @@ observer_controller_no_upload_image: Had problems uploading image [name].
 
 
 # observer/recalc
-observer_recalc_caught_error: 'Caught error: [error]'
-observer_recalc_new_name: 'New name: [name]'
-observer_recalc_old_name: 'Old name: [name]'
+observer_recalc_old_name: 'old_name: [name]'
+observer_recalc_new_name: 'new_name: [name]'
+observer_recalc_caught_error: 'Caught exception: [error]'
 
 
 # account/prefs
@@ -1508,12 +1509,6 @@ profile_uploaded_image: Uploaded image [name].
 publish_draft_denied: >
   Permission denied: Only the creator of a draft or a project admin can publish
   a draft.
-
-
-# observer/recalc
-recalc_old_name: 'old_name: [name]'
-recalc_new_name: 'new_name: [name]'
-recalc_caught_error: 'Caught exception: [error]'
 
 
 # observer/refresh_vote_cache
