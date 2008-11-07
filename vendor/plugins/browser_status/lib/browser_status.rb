@@ -293,12 +293,13 @@ module BrowserStatus
   # need to be refined...
   def can_do_ajax?
     @js && (
-      @ua == :ie       && @ua_version >= 5.5 ||
-      @ua == :firefox  && @ua_version >= 1.0 ||
-      @ua == :safari   && @ua_version >= 1.2 ||
-      @ua == :opera    && @ua_version >= 0.0 ||
-      @ua == :chrome   && @ua_version >= 0.0 ||
-      @ua == :netscape && @ua_version >= 7.0
+      @ua == :ie        && @ua_version >= 5.5 ||
+      @ua == :firefox   && @ua_version >= 1.0 ||
+      @ua == :iceweasel && @ua_version >= 1.0 ||
+      @ua == :safari    && @ua_version >= 1.2 ||
+      @ua == :opera     && @ua_version >= 0.0 ||
+      @ua == :chrome    && @ua_version >= 0.0 ||
+      @ua == :netscape  && @ua_version >= 7.0
     )
   end
 
@@ -309,7 +310,7 @@ module BrowserStatus
 
   # Check if browser's rendering engine is Gecko or Gecko-like (e.g. Safari).
   def is_like_gecko?
-    [:firefox, :netscape, :safari, :chrome, :gecko].include? @ua
+    [:firefox, :iceweasel, :netscape, :safari, :chrome, :gecko].include? @ua
   end
 
   # Check if browser's rendering engine is IE-compatible (i.e. IE or Opera).
