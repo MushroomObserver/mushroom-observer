@@ -760,7 +760,7 @@ class NameController < ApplicationController
     rsl_list = review_status_list.join("', '")
     names = Name.find(:all, :conditions => "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1", :order => "search_name")
     image_data = Name.connection.select_all %(
-      SELECT name_id, image_id, observation_id
+      SELECT name_id, image_id, observation_id, images.user_id, images.license_id
       FROM names, observations, images_observations, images
       WHERE names.id = observations.name_id
       AND observations.id = images_observations.observation_id
@@ -770,23 +770,39 @@ class NameController < ApplicationController
       ORDER BY observations.vote_cache
     )
     @image_data = {}
+    @users = {}
+    @licenses = {}
     for row in image_data
       name_id = row['name_id'].to_i
       image_datum = [row['image_id'], row['observation_id']]
       @image_data[name_id] = [] unless @image_data[name_id]
       @image_data[name_id].push(image_datum)
+      user_id = row['user_id'].to_i
+      unless @users[user_id]
+        @users[user_id] = User.find(user_id).legal_name
+      end
+      license_id = row['license_id'].to_i
+      unless @licenses[license_id]
+        @licenses[license_id] = License.find(license_id).url
+      end
     end
     @names = []
     for n in names
       if @image_data[n.id] or n.has_any_notes?
         @names.push(n)
+        unless @users[n.user_id]
+          @users[n.user_id] = n.user.legal_name
+        end
+        unless n.license_id.nil? or @licenses[n.license_id]
+          @licenses[n.license_id] = n.license.url
+        end
       end
     end
   end
 
   def eol
     headers["Content-Type"] = "application/xml"
-    eol_data()
+    eol_data(['unvetted', 'vetted'])
     render(:action => "eol", :layout => false)
   end
 
