@@ -398,6 +398,7 @@ module BrowserStatus
     return [:safari,   $1.to_f] if ua.match(/Version\/(\d+(\.\d+)?).*Safari/)
     return [:safari,   2.0    ] if ua.match(/Safari/)
     return [:firefox,  $1.to_f] if ua.match(/Firefox\/(\d+\.\d+)/)
+    return [:iceweasel,$1.to_f] if ua.match(/Iceweasel\/(\d+\.\d+)/)
     return [:netscape, $1.to_f] if ua.match(/Netscape\/(\d+\.\d+)/)
     return [:gecko,    $1.to_f] if ua.match(/Gecko\/(\d{8})/)
     return [:mozilla,  $1.to_f] if ua.match(/Mozilla\/(\d+\.\d+)/)
