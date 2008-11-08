@@ -233,7 +233,7 @@ high_and_next: Excelente y Siguiente
 # name vetting values
 unvetted: Revisado
 vetted: Aprobado
-inaccurate: Inexacta
+inaccurate: Inexacta/Incompleto
 no_export: No Para Exportación
 ok_for_export: Listo Para Exportación
 

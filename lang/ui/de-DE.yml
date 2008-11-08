@@ -230,7 +230,7 @@ high_and_next: Ausgezeichnet & Weiter
 # name vetting values
 unvetted: Nicht begutachtet
 vetted: Bestätigt
-inaccurate: Ungenau
+inaccurate: Ungenau/Unvollständig
 no_export: Nicht exportieren
 ok_for_export: Kann exportiert werden
 
@@ -1390,13 +1390,13 @@ no_browser_body:  >
   won't work if we guess wrong (like voting on observation names), we have to
   assume the worst.  However this means that a number of useful features are
   not available, like dynamic forms, auto-completion of scientific names and
-  locations, the new version of the species list creator, and more. 
+  locations, the new version of the species list creator, and more.
   \n\n
   If you would like to override this decision, "click here to turn javascript
   on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't
   Recognize Your Browser" tab at the top of every page, please "click here to
   turn javascript off":/observer/turn_javascript_off.  (Login and go to
-  preferences to re-enable auto-detection.) 
+  preferences to re-enable auto-detection.)
 
 no_browser_title:  We Don't Recognize Your Browser
 
