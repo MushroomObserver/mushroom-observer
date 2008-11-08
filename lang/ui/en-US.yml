@@ -1,33 +1,41 @@
-# [This comment was supplied by globalite... what does it mean??]
-# If the locale isn't a full locale such as fr-FR or if the rails localization
-# doesn't exist, you should define the locale_name key for globalite to display
-# the UI locales properly.
-#
-# Note on syntax: This is standard YAML, with minimal post-processing.
-#   1) \n is turned into a newline
-#   2) << and >> are interpreted as angle-quotes
-#   3) [arg] is filled in with arguments passed in to the localize method:
-#
-#    :app_about_name.l(:name => 'Agaricus')
-#
-# There are three methods to retrieve the strings in these files:
-#    :app_title.l     Retrieves string unchanged.
-#    :app_title.t     Calls textilize_without_paragraph on it.
-#    :app_title.tp    Calls textilize on it (which wraps it in <p>...</p>).
-#
-# The order of keys and the comments in the English file are preserved.  When
-# you run 'rake lang:clean' it will rewrite the non-English translations to
-# match the English file, and fill in missing keys, telling you how many are
-# missing in each file.
-#
-# The way to tell which keys were inserted from the English is to search for
-# colons followed by *two* spaces, instead of one.  If you decide to follow
-# this convention, remove the extra space from each entry you translate.  This
-# way we can easily find the ones that still need to be translated.
-#
-# Here's a good Spanish website for reference: http://www.asturnatura.com
+# Please see README in this same directory for notes on syntax and general
+# guidelines on how to translate text.
 
-# generic stuff and application layout
+# List of available languages. (Do not translate these.)
+de_DE: Deutsch
+en_US: English
+es_ES: Español
+pt_BR: Português
+
+# Object titles. (Try to keep these consistent throughout.)
+comment: Comment
+comments: Comments
+draft: Draft
+drafts: Drafts
+image: Image
+images: Images
+location: Location
+locations: Locations
+name: Name
+names: Names
+naming: Proposed ID
+namings: Proposed IDs
+observation: Observation
+observations: Observations
+past_location: Location Change
+past_locations: Location Changes
+past_name: Name Change
+past_names: Name Changes
+project: Project
+projects: Projects
+species_list: Species List
+species_lists: Species Lists
+user: User
+users: Users
+vote: Vote
+votes: Votes
+
+# Generic stuff and application layout.
 app_about_name: About [name]
 app_accepted: Accepted
 app_account: Account
@@ -149,12 +157,6 @@ app_who: Who
 app_your_observations: Your Observations
 app_your_summary: Your Summary
 
-# available languages
-de_DE: Deutsch
-en_US: English
-es_ES: Español
-pt_BR: Português
-
 # image quality values
 unreviewed: Unreviewed
 low: Low
@@ -170,34 +172,6 @@ vetted: Approved
 inaccurate: Inaccurate
 no_export: Not for Export
 ok_for_export: OK for Export
-
-# object titles
-comment: Comment
-comments: Comments
-draft: Draft
-drafts: Drafts
-image: Image
-images: Images
-location: Location
-locations: Locations
-name: Name
-names: Names
-naming: Proposed ID
-namings: Proposed IDs
-observation: Observation
-observations: Observations
-past_location: Location Change
-past_locations: Location Changes
-past_name: Name Change
-past_names: Name Changes
-project: Project
-projects: Projects
-species_list: Species List
-species_lists: Species Lists
-user: User
-users: Users
-vote: Vote
-votes: Votes
 
 # naming reasons, used in observer/_form_naming and _show_namings
 naming_reason_label_1: Recognized by sight

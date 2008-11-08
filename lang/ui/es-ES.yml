@@ -1,33 +1,46 @@
-# [This comment was supplied by globalite... what does it mean??]
-# If the locale isn't a full locale such as fr-FR or if the rails localization
-# doesn't exist, you should define the locale_name key for globalite to display
-# the UI locales properly.
-#
-# Note on syntax: This is standard YAML, with minimal post-processing.
-#   1) \n is turned into a newline
-#   2) << and >> are interpreted as angle-quotes
-#   3) [arg] is filled in with arguments passed in to the localize method:
-#
-#    :app_about_name.l(:name => 'Agaricus')
-#
-# There are three methods to retrieve the strings in these files:
-#    :app_title.l     Retrieves string unchanged.
-#    :app_title.t     Calls textilize_without_paragraph on it.
-#    :app_title.tp    Calls textilize on it (which wraps it in <p>...</p>).
-#
-# The order of keys and the comments in the English file are preserved.  When
-# you run 'rake lang:clean' it will rewrite the non-English translations to
-# match the English file, and fill in missing keys, telling you how many are
-# missing in each file.
-#
-# The way to tell which keys were inserted from the English is to search for
-# colons followed by *two* spaces, instead of one.  If you decide to follow
-# this convention, remove the extra space from each entry you translate.  This
-# way we can easily find the ones that still need to be translated.
-#
 # Here's a good Spanish website for reference: http://www.asturnatura.com
+# Accented characters: ÁÉÍÓÚÑ áéíóúñ ¡¿
 
-# generic stuff and application layout
+# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----
+
+# Please see README in this same directory for notes on syntax and general
+# guidelines on how to translate text.
+
+# List of available languages. (Do not translate these.)
+de_DE: Deutsch
+en_US: English
+es_ES: Español
+pt_BR: Português
+
+# Object titles. (Try to keep these consistent throughout.)
+comment: Comentario
+comments: Comentarios
+draft: Borrador
+drafts: Borradores
+image: Imagen
+images: Imágenes
+location: Ubicación
+locations: Ubicaciones
+name: Nombre
+names: Nombres
+naming: ID Propuesta
+namings: IDs Propuestas
+observation: Observación
+observations: Observaciones
+past_location: Cambio de Ubicación
+past_locations: Cambios de Ubicaciones
+past_name: Cambio de Nombre
+past_names: Cambios de Nombres
+project: Proyecto
+projects: Proyectos
+species_list: Lista de Especies
+species_lists: Listas de Especies
+user: Usuario
+users: Usuarios
+vote: Voto
+votes: Votos
+
+# Generic stuff and application layout.
 app_about_name: Acerca [name]
 app_accepted: Aceptado
 app_account: Cuenta
@@ -40,7 +53,7 @@ app_approved: Aprobado
 app_are_you_sure: ¿Estás seguro?
 app_author: Autor
 app_banner: Mushroom<br/>Observer
-app_by:  By
+app_by: Por
 app_cancel: Cancelar (Mostrar [type])
 app_citation: Cita
 app_click_for_map: Hacer clic para mapa
@@ -54,7 +67,7 @@ app_create_account: Registrarse
 app_create_list: Crear Lista
 app_create_observation: Crear Observación
 app_created: '[type] Creado: [date]'
-app_created_bare:  Created
+app_created_bare: Creado
 app_current_user: Su Cuenta
 app_deprecate: Desaprobar
 app_deprecated: Desaprobado
@@ -149,12 +162,6 @@ app_who: Quién
 app_your_observations: Sus Observaciones
 app_your_summary: Su Resumen
 
-# available languages
-de_DE: Deutsch
-en_US: English
-es_ES: Español
-pt_BR: Português
-
 # image quality values
 unreviewed: No revisado
 low: Bajo
@@ -170,34 +177,6 @@ vetted: Aprobado
 inaccurate: Inexacta
 no_export: No Para Exportación
 ok_for_export: Listo Para Exportación
-
-# object titles
-comment: Comentario
-comments: Comentarios
-draft: Borrador
-drafts: Borradores
-image: Imagen
-images: Imágenes
-location: Ubicación
-locations: Ubicaciones
-name: Nombre
-names: Nombres
-naming: ID Propuesta
-namings: IDs Propuestas
-observation: Observación
-observations: Observaciones
-past_location: Cambio de Ubicación
-past_locations: Cambios de Ubicaciones
-past_name: Cambio de Nombre
-past_names: Cambios de Nombres
-project: Proyecto
-projects: Proyectos
-species_list: Lista de Especies
-species_lists: Listas de Especies
-user: Usuario
-users: Usuarios
-vote: Voto
-votes: Votos
 
 # naming reasons, used in observer/_form_naming and _show_namings
 naming_reason_label_1: Reconocido en la vista

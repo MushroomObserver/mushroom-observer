@@ -1,21 +1,34 @@
+
+OVERVIEW
+
 This directory contains all the text used by Mushroom Observer.
  
+  de-DE.yml   German.
   en-US.yml   English.
   es-ES.yml   Spanish. (how_to_use page unfinished)
   pt-BR.yml   Brazillian Portuguese. (much unfinished)
 
-To start translating into a new language, pick any of these files, and start
-translating.  There are comments at the top of each file that explain the
-format.  A little.  For the most part, just try to keep the formatting the
-same, but there are a few things you need to know:
+(All are in UTF-8, the standard linux character encoding.)
 
-  [brackets]    These are special -- do not translate these!!  (see below)
-  \n\n          Force the extra blank line Textile requires between paragraphs.
-  <<hola>>      Double angle-brackets get translated into angle-quotes.
+To start translating the site into a new language, you can start with any of
+these files.  See the guidelines and notes on syntax below for help.
 
-There are a few points of syntax that are important.  We will correct these
-ourselves, but it would still help if you knew the rules.  The basic structure
-is simply a list of "keys" and "values":
+--------------------------------------------------------------------------------
+
+GUIDELINES
+
+Please do not feel constrained by the original English.  If you can reword it
+or otherwise express it better in your native language, please do so. 
+
+We've tried to strike a compromise between formal and informal, sort of
+symbolic of the role MushroomObserver plays between he professional and amateur
+community. 
+
+--------------------------------------------------------------------------------
+
+SYNTAX
+
+The basic structure of the files is simply a list of "keys" and "values": 
 
   key: value
   key: >
@@ -34,7 +47,7 @@ enclose your value with single or double-quotes:
 
 3) Most (but not all) values will be "Textilized", allowing you to include
 formatting and links and such as you normally would when entering notes on the
-site.  But note that internal links like _Agaricus_ will not, in general, work.
+site.  But note that internal links like _Agaricus_ will *not* work.
 
   key: This is __really__ cool!
   key: You can use "Textile":/observer/textile mark-up in these files.
@@ -53,4 +66,59 @@ if it is followed by more than one it has not.
 
   key: translated
   key:  untranslated
+
+6) There are a few special characters that aren't standard YAML syntax:
+
+  <<hola>>      Double angle-brackets get translated into angle-quotes.
+  \n\n          Force the extra blank line Textile requires between paragraphs.
+
+7) Note that only the comments (lines starting with "#") at the very top of the
+file will be kept; everything below is generated automatically from the English
+template. 
+
+--------------------------------------------------------------------------------
+
+MAINTENANCE
+
+All of the translations are updated using the English version as the template
+using a rake task:
+
+  rake lang:clean
+
+The order of keys and the comments in the English file are preserved.  It
+revises all the non-English translations to match the English file, fills in
+missing keys, moves unrecognized keys to the bottom, and tells you how many are
+missing in each file.  (Comments at the top of the non-English files are left
+intact.)
+
+Right now, the way to tell which keys were inserted from the English is to
+search for colons followed by *two* spaces, instead of one.  If you decide to
+follow this convention, remove the extra space from each entry you translate.
+This way we can easily find the ones that still need to be translated. 
+
+In the future we plan to insert comments before all the lines that need
+translation, or for which the English has changed and might need updating.
+
+--------------------------------------------------------------------------------
+
+RUBY API
+
+The core code is in vendors/plugins/globalite, but all access from MO goes
+through a set of Symbol methods in helpers/symbol_extensions.rb:
+
+   :app_title.l     Retrieves string unchanged.
+   :app_title.t     Calls textilize_without_paragraph on it.
+   :app_title.tp    Calls textilize on it.
+   :app_title.tl    Same as .t but also processes internal links.
+   :app_title.tpl   Same as .tp but also processes internal links.
+
+These methods, of course, can be called from anywhere, not just views.  They
+also all take an optional hash of arguments:
+
+   :app_about_name.l(:name => 'Agaricus')
+
+Use String.register_name(name) to initialize the look-up table for abbreviated
+name links.  For example, "_A. campestris_" requires that it sees Agaricus
+somewhere before.  Either you need to process a string with "_Agaricus_" in
+it before doing "_A. campestris_", or you need to register Agaricus first.
 

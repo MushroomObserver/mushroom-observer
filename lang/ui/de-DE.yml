@@ -1,33 +1,43 @@
-# [This comment was supplied by globalite... what does it mean??]
-# If the locale isn't a full locale such as fr-FR or if the rails localization
-# doesn't exist, you should define the locale_name key for globalite to display
-# the UI locales properly.
-#
-# Note on syntax: This is standard YAML, with minimal post-processing.
-#   1) \n is turned into a newline
-#   2) << and >> are interpreted as angle-quotes
-#   3) [arg] is filled in with arguments passed in to the localize method:
-#
-#    :app_about_name.l(:name => 'Agaricus')
-#
-# There are three methods to retrieve the strings in these files:
-#    :app_title.l     Retrieves string unchanged.
-#    :app_title.t     Calls textilize_without_paragraph on it.
-#    :app_title.tp    Calls textilize on it (which wraps it in <p>...</p>).
-#
-# The order of keys and the comments in the English file are preserved.  When
-# you run 'rake lang:clean' it will rewrite the non-English translations to
-# match the English file, and fill in missing keys, telling you how many are
-# missing in each file.
-#
-# The way to tell which keys were inserted from the English is to search for
-# colons followed by *two* spaces, instead of one.  If you decide to follow
-# this convention, remove the extra space from each entry you translate.  This
-# way we can easily find the ones that still need to be translated.
-#
-# Here's a good Spanish website for reference: http://www.asturnatura.com
+# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----
 
-# generic stuff and application layout
+# Please see README in this same directory for notes on syntax and general
+# guidelines on how to translate text.
+
+# List of available languages. (Do not translate these.)
+de_DE: Deutsch
+en_US: English
+es_ES: Español
+pt_BR: Português
+
+# Object titles. (Try to keep these consistent throughout.)
+comment: Kommentar
+comments: Kommentare
+draft: Entwurf
+drafts: Entwürfe
+image: Bild
+images: Bilder
+location: Fundort
+locations: Fundorte
+name: Name
+names: Namen
+naming: Vorgeschlagener ID
+namings: Vorgeschlagene IDs
+observation: Fund
+observations: Funde
+past_location: Ortswechsel
+past_locations: Ortswechsel
+past_name: Namensänderung
+past_names: Namensänderungen
+project: Projekt
+projects: Projekte
+species_list: Artenliste
+species_lists: Artenlisten
+user: Nutzer
+users: Nutzer
+vote: Stimme
+votes: Stimmen
+
+# Generic stuff and application layout.
 app_about_name: Über [name]
 app_accepted: Angenommen
 app_account: Konto
@@ -134,7 +144,7 @@ app_south: Süden
 app_species_list: Artenliste
 app_summary: Zusammenfassung
 app_title: Mushroom Observer
-app_translators_credit: 'Deutsche Fassung von Christian Asseburg'
+app_translators_credit: 'Deutsche Fassung von "Christian Asseburg":/observer/show_user/748.'
 app_unknown: Unbekannt
 app_update: Update
 app_users: Nutzer
@@ -148,12 +158,6 @@ app_where: Wo
 app_who: Wer
 app_your_observations: Deine Funde
 app_your_summary: Deine Zusammenfassung
-
-# available languages
-de_DE: Deutsch
-en_US: English
-es_ES: Español
-pt_BR: Português
 
 # image quality values
 unreviewed: Nicht begutachtet
@@ -170,34 +174,6 @@ vetted: Bestätigt
 inaccurate: Ungenau
 no_export: Nicht exportieren
 ok_for_export: Kann exportiert werden
-
-# object titles
-comment: Kommentar
-comments: Kommentare
-draft: Entwurf
-drafts: Entwürfe
-image: Bild
-images: Bilder
-location: Fundort
-locations: Fundorte
-name: Name
-names: Namen
-naming: Vorgeschlagener ID
-namings: Vorgeschlagene IDs
-observation: Fund
-observations: Funde
-past_location: Ortswechsel
-past_locations: Ortswechsel
-past_name: Namensänderung
-past_names: Namensänderungen
-project: Projekt
-projects: Projekte
-species_list: Artenliste
-species_lists: Artenlisten
-user: Nutzer
-users: Nutzer
-vote: Stimme
-votes: Stimmen
 
 # naming reasons, used in observer/_form_naming and _show_namings
 naming_reason_label_1: Mit nacktem Auge bestimmt

@@ -17,12 +17,18 @@ namespace :lang do
       if filename != english
 
         # Get a hash mapping keys to translations.
+        comments_at_top = ''
         strings = {}
         dups = {}
         File.open(filename) do |fh|
           key = nil
+          at_top = true
           fh.each_line do |line|
-            if line.match(/^(\w+):/)
+            if line.match(/^#\s*----/)
+              at_top = false
+            elsif at_top
+              comments_at_top += line
+            elsif line.match(/^(\w+):/)
               key = $1
               # Keep list of keys that are used more than once.
               dups[key] = true if strings[key]
@@ -47,46 +53,39 @@ namespace :lang do
 
         # Create new file by copying the English template and replacing all the
         # string values with their corresponding translations.
+        result = comments_at_top
+        result.sub!(/\n+\Z/, "\n\n")
+        result += "# ----- COMMENTS BELOW THIS WILL BE DESTROYED -----\n\n"
         blanks = 0
-        result = ''
         missing = {}
         keys_in_english = {}
         for line in template
-# print "> [#{line.sub(/\n\Z/,'')}]"
           # Comment: assume this ends previous value.
           if line.match(/^#/)
-# print " -> comment\n"
-# print "()\n" * blanks if blanks > 0
             result += "\n" * blanks if blanks > 0
-# print "(#{line.sub(/\n\Z/,'')})\n"
             result += line
             blanks = 0
             doing_missing = false
           # Blank line: hold on to these until we know what to do with them.
           elsif !line.match(/\S/)
             blanks += 1
-# print " -> blank(#{blanks})\n"
           # New key: if recognized insert translation, else copy English one.
           elsif line.match(/^(\w+):/)
             key = $1
-# print " -> key(#{key})\n"
             # (check for duplicates in English translation, too)
             if keys_in_english[key]
               print "Duplicate key in English: #{key}\n" if !dups_in_english[key]
               dups_in_english[key] = true
             end
             keys_in_english[key] = true
-# print "()\n" * blanks if blanks > 0
             result += "\n" * blanks if blanks > 0
             if strings[key]
               # (preserve number of spaces after colon for ones that exist)
-# print "found: (#{strings[key].sub(/\n\Z/,'')})\n"
               result += strings[key]
               strings.delete(key)
               doing_missing = false
             else
               # (use two spaces after colon for missing translations)
-# print "missing: (#{line.sub(/:\s*/, ':  ').sub(/\n\Z/,'')})\n"
               result += line.sub(/:\s*/, ':  ')
               missing[key] = true
               doing_missing = true
@@ -94,14 +93,10 @@ namespace :lang do
             blanks = 0
           # All other lines must be "folded lines" from "key: >" constructs.
           elsif doing_missing
-# print " -> missing\n"
-# print "missing: ()\n" * blanks if blanks > 0
             result += "\n" * blanks if blanks > 0
-# print "missing: (#{line.sub(/\n\Z/,'')})\n"
             result += line
             blanks = 0
           else
-# print " -> ignore\n"
             # (this has the effect of suppressing the extra blank line after
             # multi-line values, which is already in result if translation
             # needed it)
