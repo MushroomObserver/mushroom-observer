@@ -1570,7 +1570,7 @@ class ObserverController < ApplicationController
     names      = nil
     valid_name = nil
 
-    if !what.to_s.strip.empty? && !Name.names_for_unknown.member?(what.strip)
+    if !what.to_s.strip.empty? && !Name.names_for_unknown.member?(what.strip.downcase)
       success = false
 
       ignore_approved_name = false

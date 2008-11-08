@@ -1870,7 +1870,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_nil(notification)
     params = {
       :id => name.id,
-      :commit => 'Enable',
+      :commit => :app_enable.t,
       :notification => {
         :note_template => ""
       }
@@ -1891,7 +1891,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_nil(notification)
     params = {
       :id => name.id,
-      :commit => 'Enable',
+      :commit => :app_enable.t,
       :notification => {
         :note_template => 'A note about :observation from :observer'
       }
@@ -1934,7 +1934,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert(notification)
     params = {
       :id => name.id,
-      :commit => "Disable",
+      :commit => :app_disable.t,
       :notification => {
         :note_template => 'A note about :observation from :observer'
       }

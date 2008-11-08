@@ -88,7 +88,7 @@
                   &nbsp;&nbsp;<%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %>
                   <% if @user.id == 0 %>
                     <br/><br/>
-                    Admin:<br/>
+                    <%= :app_admin.t %>:<br/>
                     &nbsp;&nbsp;<%= link_to(:app_users.t, :controller => 'observer', :action => 'users_by_name') %><br/>
                     &nbsp;&nbsp;<%= link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %><br/>
                     &nbsp;&nbsp;<%= link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %><br/>

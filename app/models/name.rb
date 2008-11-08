@@ -202,7 +202,7 @@ class Name < ActiveRecord::Base
 
   # Returns: array of strings: "Unknown", "unknown", and "".
   def self.names_for_unknown()
-    ['Unknown', 'unknown', '']
+    ['unknown', :app_unknown.l.downcase, '']
   end
 
   # Returns: "unknown" Name instance.
@@ -240,7 +240,7 @@ class Name < ActiveRecord::Base
     end
 
     name = in_str.strip
-    if names_for_unknown.member? name
+    if names_for_unknown.member? name.to_s.downcase
       name = "Fungi"
     end
     deprecated_condition = ''
@@ -366,7 +366,7 @@ class Name < ActiveRecord::Base
   #   existing names which could potentially have changes such as author)
   def self.names_from_string(in_str)
     result = []
-    if names_for_unknown.member? in_str
+    if names_for_unknown.member? in_str.to_s.downcase
       result.push Name.unknown
     else
       str = in_str.gsub(" near ", " ")

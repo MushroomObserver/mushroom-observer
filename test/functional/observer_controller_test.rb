@@ -422,7 +422,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   end
 
   # Test constructing observations in various ways (with minimal namings).
-  def test_construct_observation_generic(params, observation_count, naming_count, name_count, page=nil)
+  def generic_construct_observation(params, observation_count, naming_count, name_count, page=nil)
     o_count = Observation.find(:all).length
     g_count = Naming.find(:all).length
     n_count = Name.find(:all).length
@@ -443,9 +443,9 @@ class ObserverControllerTest < Test::Unit::TestCase
     else
       assert_response(:success)
     end
-    assert((o_count + observation_count) == Observation.find(:all).length)
-    assert((g_count + naming_count) == Naming.find(:all).length)
-    assert((n_count + name_count) == Name.find(:all).length)
+    assert_equal((o_count + observation_count), Observation.find(:all).length)
+    assert_equal((g_count + naming_count), Naming.find(:all).length)
+    assert_equal((n_count + name_count), Name.find(:all).length)
     assert_equal(10+observation_count+2*naming_count+10*name_count, @rolf.reload.contribution)
     if observation_count == 1
       assert_not_equal(0, @controller.instance_variable_get('@observation').thumb_image_id)
@@ -455,7 +455,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_simple
     # Test a simple observation creation with an approved unique name
     where = "test_construct_observation_simple"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :observation => { :where => where, :thumb_image_id => '0' },
       :name => { :name => "Coprinus comatus" }
     }, 1,1,0)
@@ -472,7 +472,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_unknown
     # Test a simple observation creation of an unknown
     where = "test_construct_observation_unknown"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :observation => { :where => where },
       :name => { :name => "Unknown" }
     }, 1,0,0)
@@ -483,7 +483,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_construct_observation_new_name
     # Test an observation creation with a new name
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => "New name" }
     }, 0,0,0)
   end
@@ -491,7 +491,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_approved_new_name
     # Test an observation creation with an approved new name
     new_name = "Argus arg-arg"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name
     }, 1,1,2)
@@ -500,7 +500,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_approved_section
     # Test an observation creation with an approved section (should fail)
     new_name = "Argus section Argus"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name
     }, 0,0,0)
@@ -509,7 +509,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_approved_junk
     # Test an observation creation with an approved junk name
     new_name = "This is a bunch of junk"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name
     }, 0,0,0)
@@ -517,14 +517,14 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_construct_observation_multiple_match
     # Test an observation creation with multiple matches
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => "Amanita baccata" }
     }, 0,0,0)
   end
 
   def test_construct_observation_chosen_multiple_match
     # Test an observation creation with one of the multiple matches chosen
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => "Amanita baccata" },
       :chosen_name => { :name_id => @amanita_baccata_arora.id }
     }, 1,1,0)
@@ -532,7 +532,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_construct_observation_deprecated_multiple_match
     # Test an observation creation with one of the multiple matches chosen
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => @pluteus_petasatus_deprecated.text_name }
     }, 1,1,0)
     nam = assigns(:naming)
@@ -541,7 +541,7 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_construct_observation_deprecated
     # Test an observation creation with a deprecated name
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => "Lactarius subalpinus" }
     }, 0,0,0)
   end
@@ -549,7 +549,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_chosen_deprecated
     # Test an observation creation with a deprecated name, but a chosen approved alternative
     new_name = "Lactarius subalpinus"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name,
       :chosen_name => { :name_id => @lactarius_alpinus.id }
@@ -561,7 +561,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_approved_deprecated
     # Test an observation creation with a deprecated name that has been approved
     new_name = "Lactarius subalpinus"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name,
       :chosen_name => { }
@@ -573,7 +573,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_construct_observation_approved_new_species
     # Test an observation creation with an approved new name
     new_name = "Agaricus novus"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name
     }, 1,1,1)
@@ -589,7 +589,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(2, notifications.length)
 
     where = "test_construct_observation_simple"
-    test_construct_observation_generic({
+    generic_construct_observation({
       :observation => { :where => where },
       :name => { :name => name.text_name }
     }, 1,1,0, 'show_notifications')
@@ -610,7 +610,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   #   assert_nil(name.author)
   #   author = 'Desjardin'
   #   new_name = "#{name.text_name} #{author}"
-  #   test_construct_observation_generic({
+  #   generic_construct_observation({
   #     :name => { :name => new_name },
   #     :approved_name => new_name
   #   }, 1,1,1)

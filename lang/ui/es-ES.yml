@@ -6,12 +6,6 @@
 # Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
 
-# List of available languages. (Do not translate these.)
-de_DE: Deutsch
-en_US: English
-es_ES: Español
-pt_BR: Português
-
 # Object titles. (Try to keep these consistent throughout.)
 comment: Comentario
 comments: Comentarios
@@ -40,97 +34,129 @@ users: Usuarios
 vote: Voto
 votes: Votos
 
-# Generic stuff and application layout.
-app_about_name: Acerca [name]
-app_accepted: Aceptado
-app_account: Cuenta
-app_add: Agregar
-app_add_to_group: Agregar al Grupo
-app_admin: Admin
-app_and_num_more: Y [num] más...
-app_approve: Aprobar
-app_approved: Aprobado
-app_are_you_sure: ¿Estás seguro?
-app_author: Autor
+################################################################################
+
+# This stuff is used in the application layout template for every page.
+
+# This goes in the title bar of the browser.  You don't need to translate this,
+# it's up to you.
+app_title: Mushroom Observer
+
+# This goes in the left-hand column.  The "<br/>" forces a line-break.
 app_banner: Mushroom<br/>Observer
-app_by: Por
-app_cancel: Cancelar (Mostrar [type])
-app_citation: Cita
-app_click_for_map: Hacer clic para mapa
-app_close: Cerrar
-app_colors_from: Colores según [theme]
-app_comments: Comentarios
-app_comments_for_you: Comentarios para Usted
-app_contributors: Contribuidores
-app_create: Crear
-app_create_account: Registrarse
-app_create_list: Crear Lista
-app_create_observation: Crear Observación
-app_created: '[type] Creado: [date]'
-app_created_bare: Creado
-app_current_user: Su Cuenta
-app_deprecate: Desaprobar
-app_deprecated: Desaprobado
-app_destroy: Borrar
-app_disable: Inhabilitar
-app_east: Este
-app_edit: Editar
-app_email_all_users: Enviar a Todos Usuarios
-app_enable: Habilitar
-app_find: Buscar
-app_google_images: Google Imágenes
-app_highest: Mayor altitud
-app_how_to_help: Cómo Ayudar
-app_how_to_use: Cómo Usar
-app_images: Imágenes
-app_images_find: Imágenes
-app_index_a_z: Índice A->Z
+
 app_intro: Introducción
-app_join_mailing_list: Suscribir a Lista de Correo
-app_languages: Idiomas
-app_last_modified: 'Última Modificación: [date] para [user]'
+app_how_to_use: Cómo Usar
+app_how_to_help: Cómo Ayudar
+app_send_a_comment: Enviar Comentario
+
+app_index_a_z: Índice A->Z
+app_list_projects: Lista de Proyectos
+
 app_latest: Últimas
 app_latest_changes: Cambios de los Usuarios
-app_less_button: << Menos
-app_list_projects: Lista de Proyectos
-app_locations_find: Ubicaciones
-app_login: Iniciar Sesión
-app_logout: Cerrar Sesión
-app_lowest: Más baja altitud
-app_many_times: '[num] veces'
-app_meters: metros
-app_more_button: Más >>
-app_name: Nombre
-app_name_status: Estatus
-app_names_find: Nombres
 app_newest_images: Imágenes
+app_comments: Comentarios
 app_news: Características y Cambios
-app_next: Siguiente
+
+app_observations_left: Observaciones
+app_create_observation: Crear Observación
+app_sort_by_date_obs: Ordenar por Fecha
+
+app_species_list: Listas de Especies
+app_create_list: Crear Lista
+app_sort_by_date_spl: Ordenar por Fecha
+app_sort_by_title: Ordenar por Título
+
+app_account: Cuenta
+app_login: Iniciar Sesión
+app_create_account: Registrarse
+
+app_current_user: Su Cuenta
+app_comments_for_you: Comentarios para Usted
+app_your_observations: Sus Observaciones
+app_your_summary: Su Resumen
+app_preferences: Preferencias
+app_join_mailing_list: Suscribir a Lista de Correo
+app_logout: Cerrar Sesión
+
+app_admin: Admin
+app_users: Usuarios
+app_email_all_users: Enviar a Todos Usuarios
+app_add_to_group: Agregar al Grupo
+
+app_languages: Idiomas
+# (do not translate these)
+de_DE: Deutsch
+en_US: English
+es_ES: Español
+pt_BR: Português
+
+app_contributors: Contribuidores
+app_site_stats: Stats del Sitio
+
+app_colors_from: Colores según [theme]
+app_powered_by: Hecho con
+app_preferred_browser: Preferencia navegador
+
+app_find: Buscar
+app_observations_find: Observaciones
+app_names_find: Nombres
+app_images_find: Imágenes
+app_locations_find: Ubicaciones
+
+# This shows up at the bottom of every page.  We recommend something like:
+# "Translated into English by _user Your Name Here_"
+app_translators_credit: Traducido al español por _user Jason Hollinger_
+
+################################################################################
+
+# Generic stuff used throughout the site.
+
+# These don't need context or explanation.
+app_and_num_more: Y [num] más...
+app_are_you_sure: ¿Estás seguro?
+app_click_for_map: Hacer clic para mapa
+app_google_images: Google Imágenes
 app_no_ajax: Su Navegador No Está Actualizado
 app_no_create_name: No se ha podido crear el nombre <<[name]>>.
 app_no_javascript: Javascript está Deshabilitado
 app_no_session: Usted Ha Deshabilitado las Cookies
-app_no_votes: No votos
-app_north: Norte
-app_notes: Notas
-app_observations_find: Observaciones
-app_observations_left: Observaciones
-app_one_time: una vez
-app_optional: opcional
 app_permission_denied: Permiso denegado.
-app_powered_by: Hecho con
-app_preferences: Preferencias
-app_preferred_browser: Preferencia navegador
-app_prev: Anterior
-app_rank: Rango
-app_remove: Eliminar
-app_required: requerido
 app_rss: Mushroom Observer RSS
+app_sort_by_name: Ordenar por Nombre
+app_welcome: Bienvenido, [user]
+
+# These describe a taxon.  (Not sure what the difference between accepted and
+# approved is.  Should probably be made more consistent?)
+app_approve: Aprobar
+app_approved: Aprobado
+app_accepted: Aceptado
+app_deprecate: Desaprobar
+app_deprecated: Desaprobado
+app_name: Nombre
+app_rank: Rango
+app_author: Autor
+app_citation: Cita
+app_unknown: Desconocido
+
+# Button labels.
+app_add: Agregar
+app_close: Cerrar
+app_create: Crear
+app_destroy: Borrar
+app_disable: Inhabilitar
+app_edit: Editar
+app_enable: Habilitar
+app_less_button: << Menos
+app_more_button: Más >>
+app_next: Siguiente
+app_prev: Anterior
+app_remove: Eliminar
 app_save: Guardar
-app_save_changes: Guardar Cambios
 app_search: Buscar
 app_send: Enviar
-app_send_a_comment: Enviar Comentario
+app_save_changes: Guardar Cambios
 app_show_image: Mostrar Imagen
 app_show_log: Mostrar Registro
 app_show_map: Mostrar Mapa
@@ -138,29 +164,61 @@ app_show_name: Mostrar Nombre
 app_show_observation: Mostrar Observación
 app_show_project: Mostrar Proyecto
 app_show_species_list: Mostrar Lista de Especies
-app_site_stats: Stats del Sitio
-app_sort_by_date_obs: Ordenar por Fecha
-app_sort_by_date_spl: Ordenar por Fecha
-app_sort_by_name: Ordenar por Nombre
-app_sort_by_title: Ordenar por Título
-app_south: Sud
-app_species_list: Listas de Especies
-app_summary: Resumen
-app_title: Mushroom Observer
-app_translators_credit: Traducido al español por _user Jason Hollinger_
-app_unknown: Desconocido
 app_update: Actualizar
-app_users: Usuarios
-app_version: Version
+
+# Footers: "Created: [date]", "By: [user]", "Observation Created: 2008-11-03",
+# and so on.
+app_created: '[type] Creado: [date]'
+app_created_bare: Creado
+app_by: Por
+app_last_modified: 'Última Modificación: [date] para [user]'
 app_viewed: 'Visto: [times], última visto: [date]'
-app_welcome: Bienvenido, [user]
+app_one_time: una vez
+app_many_times: '[num] veces'
+
+# Location stuff.
+app_north: Norte
+app_south: Sud
+app_east: Este
 app_west: Oeste
+app_highest: Mayor altitud
+app_lowest: Más baja altitud
+app_meters: metros
+
+# These are labels of form fields, e.g. "What did you observer?", "When did you
+# observer it?", "Where...", etc.
 app_what: Cuál
 app_when: Cuándo
 app_where: Donde
 app_who: Quién
-app_your_observations: Sus Observaciones
-app_your_summary: Su Resumen
+
+# Used to indicate form fields that are required or optional.
+app_optional: opcional
+app_required: requerido
+
+# Link to show_name page for a taxon.
+app_about_name: Acerca [name]
+
+# Common link at the top of forms; it cancels the form and goes to the "show"
+# page of the object [type].
+app_cancel: Cancelar (Mostrar [type])
+
+# Summary of a comment.
+app_summary: Resumen
+
+# Version of a name, location, draft, etc.
+app_version: Version
+
+# Export status of an object, e.g. a name or image.
+app_name_status: Estatus
+
+# Label on "notes" text area of observation, location, etc.
+app_notes: Notas
+
+# Used in place of confidence level if there are no votes yet.
+app_no_votes: No votos
+
+################################################################################
 
 # image quality values
 unreviewed: No revisado

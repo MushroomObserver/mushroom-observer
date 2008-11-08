@@ -1,12 +1,6 @@
 # Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
 
-# List of available languages. (Do not translate these.)
-de_DE: Deutsch
-en_US: English
-es_ES: Español
-pt_BR: Português
-
 # Object titles. (Try to keep these consistent throughout.)
 comment: Comment
 comments: Comments
@@ -35,97 +29,129 @@ users: Users
 vote: Vote
 votes: Votes
 
-# Generic stuff and application layout.
-app_about_name: About [name]
-app_accepted: Accepted
-app_account: Account
-app_add: Add
-app_add_to_group: Add to Group
-app_admin: Admin
-app_and_num_more: And [num] more...
-app_approve: Approve
-app_approved: Approved
-app_are_you_sure: Are you sure?
-app_author: Author
+################################################################################
+
+# This stuff is used in the application layout template for every page.
+
+# This goes in the title bar of the browser.  You don't need to translate this,
+# it's up to you.
+app_title: Mushroom Observer
+
+# This goes in the left-hand column.  The "<br/>" forces a line-break.
 app_banner: Mushroom<br/>Observer
-app_by: By
-app_cancel: Cancel (Show [type])
-app_citation: Citation
-app_click_for_map: Click for map
-app_close: Close
-app_colors_from: Colors from [theme]
-app_comments: Comments
-app_comments_for_you: Comments for You
-app_contributors: Contributors
-app_create: Create
-app_create_account: Create Account
-app_create_list: Create List
-app_create_observation: Create Observation
-app_created: '[type] Created: [date]'
-app_created_bare: Created
-app_current_user: Current user
-app_deprecate: Deprecate
-app_deprecated: Deprecated
-app_destroy: Destroy
-app_disable: Disable
-app_east: East
-app_edit: Edit
-app_email_all_users: Email All Users
-app_enable: Enable
-app_find: Find
-app_google_images: Google Images
-app_highest: Highest altitude
-app_how_to_help: How To Help
-app_how_to_use: How To Use
-app_images: Images
-app_images_find: Images
-app_index_a_z: Index A->Z
+
 app_intro: Introduction
-app_join_mailing_list: Join Mailing List
-app_languages: Languages
-app_last_modified: 'Last Modified: [date] by [user]'
+app_how_to_use: How To Use
+app_how_to_help: How To Help
+app_send_a_comment: Send a Comment
+
+app_index_a_z: Index A->Z
+app_list_projects: List Projects
+
 app_latest: Latest
 app_latest_changes: Changes by Users
-app_less_button: << Less
-app_list_projects: List Projects
-app_locations_find: Locations
-app_login: Login
-app_logout: Logout
-app_lowest: Lowest altitude
-app_many_times: '[num] times'
-app_meters: meters
-app_more_button: More >>
-app_name: Name
-app_name_status: Status
-app_names_find: Names
 app_newest_images: Images
+app_comments: Comments
 app_news: Features and Fixes
-app_next: Next
+
+app_observations_left: Observations
+app_create_observation: Create Observation
+app_sort_by_date_obs: Sort by Date
+
+app_species_list: Species Lists
+app_create_list: Create List
+app_sort_by_date_spl: Sort by Date
+app_sort_by_title: Sort by Title
+
+app_account: Account
+app_login: Login
+app_create_account: Create Account
+
+app_current_user: Current user
+app_comments_for_you: Comments for You
+app_your_observations: Your Observations
+app_your_summary: Your Summary
+app_preferences: Preferences
+app_join_mailing_list: Join Mailing List
+app_logout: Logout
+
+app_admin: Admin
+app_users: Users
+app_email_all_users: Email All Users
+app_add_to_group: Add to Group
+
+app_languages: Languages
+# (do not translate these)
+de_DE: Deutsch
+en_US: English
+es_ES: Español
+pt_BR: Português
+
+app_contributors: Contributors
+app_site_stats: Site Stats
+
+app_colors_from: Colors from [theme]
+app_powered_by: Powered by
+app_preferred_browser: Preferred browser
+
+app_find: Find
+app_observations_find: Observations
+app_names_find: Names
+app_images_find: Images
+app_locations_find: Locations
+
+# This shows up at the bottom of every page.  We recommend something like:
+# "Translated into English by _user Your Name Here_"
+app_translators_credit: ''
+
+################################################################################
+
+# Generic stuff used throughout the site.
+
+# These don't need context or explanation.
+app_and_num_more: And [num] more...
+app_are_you_sure: Are you sure?
+app_click_for_map: Click for map
+app_google_images: Google Images
 app_no_ajax: Your Browser is Out of Date
 app_no_create_name: Unable to create the name '[name]'.
 app_no_javascript: Javascript is Disabled
 app_no_session: You Have Cookies Disabled
-app_no_votes: no votes
-app_north: North
-app_notes: Notes
-app_observations_find: Observations
-app_observations_left: Observations
-app_one_time: once
-app_optional: optional
 app_permission_denied: Permission denied.
-app_powered_by: Powered by
-app_preferences: Preferences
-app_preferred_browser: Preferred browser
-app_prev: Prev
-app_rank: Rank
-app_remove: Remove
-app_required: required
 app_rss: Mushroom Observer RSS
+app_sort_by_name: Sort by Name
+app_welcome: Welcome, [user]
+
+# These describe a taxon.  (Not sure what the difference between accepted and
+# approved is.  Should probably be made more consistent?)
+app_approve: Approve
+app_approved: Approved
+app_accepted: Accepted
+app_deprecate: Deprecate
+app_deprecated: Deprecated
+app_name: Name
+app_rank: Rank
+app_author: Author
+app_citation: Citation
+app_unknown: Unknown
+
+# Button labels.
+app_add: Add
+app_close: Close
+app_create: Create
+app_destroy: Destroy
+app_disable: Disable
+app_edit: Edit
+app_enable: Enable
+app_less_button: << Less
+app_more_button: More >>
+app_next: Next
+app_prev: Prev
+app_remove: Remove
 app_save: Save
-app_save_changes: Save Edits
 app_search: Search
 app_send: Send
-app_send_a_comment: Send a Comment
+app_save_changes: Save Edits
 app_show_image: Show Image
 app_show_log: Show Log
 app_show_map: Show Map
@@ -133,29 +159,61 @@ app_show_name: Show Name
 app_show_observation: Show Observation
 app_show_project: Show Project
 app_show_species_list: Show Species List
-app_site_stats: Site Stats
-app_sort_by_date_obs: Sort by Date
-app_sort_by_date_spl: Sort by Date
-app_sort_by_name: Sort by Name
-app_sort_by_title: Sort by Title
-app_south: South
-app_species_list: Species Lists
-app_summary: Summary
-app_title: Mushroom Observer
-app_translators_credit: ''
-app_unknown: Unknown
 app_update: Update
-app_users: Users
-app_version: Version
+
+# Footers: "Created: [date]", "By: [user]", "Observation Created: 2008-11-03",
+# and so on.
+app_created: '[type] Created: [date]'
+app_created_bare: Created
+app_by: By
+app_last_modified: 'Last Modified: [date] by [user]'
 app_viewed: 'Viewed: [times], last viewed: [date]'
-app_welcome: Welcome, [user]
+app_one_time: once
+app_many_times: '[num] times'
+
+# Location stuff.
+app_north: North
+app_south: South
+app_east: East
 app_west: West
+app_highest: Highest altitude
+app_lowest: Lowest altitude
+app_meters: meters
+
+# These are labels of form fields, e.g. "What did you observer?", "When did you
+# observer it?", "Where...", etc.
 app_what: What
 app_when: When
 app_where: Where
 app_who: Who
-app_your_observations: Your Observations
-app_your_summary: Your Summary
+
+# Used to indicate form fields that are required or optional.
+app_optional: optional
+app_required: required
+
+# Link to show_name page for a taxon.
+app_about_name: About [name]
+
+# Common link at the top of forms; it cancels the form and goes to the "show"
+# page of the object [type].
+app_cancel: Cancel (Show [type])
+
+# Summary of a comment.
+app_summary: Summary
+
+# Version of a name, location, draft, etc.
+app_version: Version
+
+# Export status of an object, e.g. a name or image.
+app_name_status: Status
+
+# Label on "notes" text area of observation, location, etc.
+app_notes: Notes
+
+# Used in place of confidence level if there are no votes yet.
+app_no_votes: no votes
+
+################################################################################
 
 # image quality values
 unreviewed: Unreviewed
