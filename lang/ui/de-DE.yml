@@ -116,6 +116,7 @@ app_are_you_sure: Bist du sicher?
 app_click_for_map: 'Landkarte: hier klicken'
 app_google_images: Google Bilder
 app_no_ajax: Dein Browser ist veraltet
+app_no_browser:  We Don't Recognize Your Browser
 app_no_create_name: Kann den Namen '[name]' nicht erstellen.
 app_no_javascript: Javascript ist ausgeschaltet
 app_no_session: Dein Browser nimmt einen Cookie nicht an
@@ -1382,6 +1383,24 @@ no_ajax_dont_care: >
 no_ajax_title: Dein Browser ist veraltet.
 
 
+# observer/no_browser
+no_browser_body:  >
+  We have not seen your browser before.  This means we don't know if it
+  supports the full capabilities of this site.  Since there are pages that
+  won't work if we guess wrong (like voting on observation names), we have to
+  assume the worst.  However this means that a number of useful features are
+  not available, like dynamic forms, auto-completion of scientific names and
+  locations, the new version of the species list creator, and more. 
+  \n\n
+  If you would like to override this decision, "click here to turn javascript
+  on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't
+  Recognize Your Browser" tab at the top of every page, please "click here to
+  turn javascript off":/observer/turn_javascript_off.  (Login and go to
+  preferences to re-enable auto-detection.) 
+
+no_browser_title:  We Don't Recognize Your Browser
+
+
 # account/no_comment_email
 no_comment_note: >
   You will no longer receive email notifications when other users of the
@@ -1947,25 +1966,19 @@ theme_random: Zufällig
 
 # observer/translators_note
 translators_note: >
-  Bitte hilf uns, diese Webseite der ganzen Welt zur Verfügung zu stellen! Wir haben
-  endlich diese Webseite auf Spanisch übersetzt, und zwei Freunde arbeiten derzeit
-  an der portugiesischen Version (stell dir bloß all die coolen brasilianischen
-  Pilze vor, die gerade an uns vorbeigehen!). Aber wir können alle Hilfe gebrauchen.
-  Wir brauchen jemanden, der das Spanische korrekturliest -- ich kann nämlich kein
-  Spanisch. Und wo wir erst einmal damit angefangen haben, wollen wir natürlich noch
-  mehr Sprachen anbieten können.
-  \n\n
-  Es ist alles sehr einfach. Auf dieser Webseite sind derzeit etwa 1600 Zeilen Text
-  oder 11.000 Wörter, aber lass dich nicht abschrecken. Es ist so organisiert, dass
-  jemand mit wenig Zeit mit den wichtigsten Abschnitten anfangen kann, dann ist
-  schonmal der Text fertig, der am häufigsten angezeigt wird. Danach kann dieselbe
-  Person oder jemand anders den Rest der Liste weiter abarbeiten, je nach Zeit und Lust,
-  irgendwann ist dann alles fertig. Du kannst dir eine der "Sprachdateien":[repo]
-  hier herunterladen und mit irgendeiner neuen Sprache beginnen. Dann
-  "schick uns einfach eine Email":/observer/ask_webmaster_question wenn du soweit gekommen
-  bist wie du schaffst, und wir erklären dir, wie du uns deine Arbeit schicken kannst.
-  Dein Name wird als Dank für deine Mitarbeit deutlich erkennbar gemacht und außerdem
-  werden wir dir sehr dankbar sein.
+  Bitte hilf uns, diese Webseite der ganzen Welt zur Verfügung zu stellen!  Es
+  ist alles einfach.  Auf dieser Webseite sind derzeit etwa 1600 Zeilen Text
+  oder 11.000 Wörter, aber lass dich nicht abschrecken.  Es ist so organisiert,
+  dass jemand mit wenig Zeit mit den wichtigsten Abschnitten anfangen kann,
+  dann ist schonmal der Text fertig, der am häufigsten angezeigt wird.  Danach
+  kann dieselbe Person oder jemand anders den Rest der Liste weiter abarbeiten,
+  je nach Zeit und Lust, irgendwann ist dann alles fertig.  Du kannst dir eine
+  der "Sprachdateien":[repo] hier herunterladen und mit irgendeiner neuen
+  Sprache beginnen.  Dann "schick uns einfach eine
+  Email":/observer/ask_webmaster_question wenn du soweit gekommen bist wie du
+  schaffst, und wir erklären dir, wie du uns deine Arbeit schicken kannst.
+  Dein Name wird als Dank für deine Mitarbeit deutlich erkennbar gemacht und
+  außerdem werden wir dir sehr dankbar sein.
 
 translators_note_title: Anmerkung der Übersetzung
 

@@ -149,11 +149,16 @@
               <% flash_clear %>
             <% end %>
 
-            <% if !session_working? || !can_do_ajax? && session[:js_override] != :off
+            <% no_session = !session_working?
+            no_javascript = !javascript_enabled? && session[:js_override] != :off
+            no_ajax       = can_do_ajax? == false && javascript_enabled? && session[:js_override] != :on
+            no_browser    = can_do_ajax? == nil   && javascript_enabled? && session[:js_override] != :on
+            if no_session || no_javascript || no_ajax || no_browser
               new_tab_set do
-                add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if !session_working?
-                add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if !javascript_enabled?
-                add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if javascript_enabled? && !can_do_ajax?
+                add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if no_session
+                add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if no_javascript
+                add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
+                add_tab(:app_no_browser.t,    :controller => 'observer', :action => 'no_browser')    if no_browser
               end
             end
             if @tab_sets %>

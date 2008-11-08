@@ -119,6 +119,7 @@ app_are_you_sure: ¿Estás seguro?
 app_click_for_map: Hacer clic para mapa
 app_google_images: Google Imágenes
 app_no_ajax: Su Navegador No Está Actualizado
+app_no_browser: Su Navegador No Se Conoce
 app_no_create_name: No se ha podido crear el nombre <<[name]>>.
 app_no_javascript: Javascript está Deshabilitado
 app_no_session: Usted Ha Deshabilitado las Cookies
@@ -1410,6 +1411,27 @@ no_ajax_dont_care: >
 no_ajax_title: Su Navegador No Está Actualizado
 
 
+# observer/no_browser
+no_browser_body: >
+  No hemos visto antes de su navegador.  Esto significa que no sabemos si se
+  apoya la plena capacidad de este sitio.  Puesto que hay páginas que no
+  funcionará si adivinar incorrectamente (tales como la observación de la
+  votación sobre los nombres), tenemos que asumir lo peor.  Sin embargo, esto
+  significa que varias características útiles no están disponibles, como las
+  formas dinámicas, auto-finalización de los nombres científicos y las
+  ubicaciones, la nueva versión del creador de las listas de especies, y mucho
+  más.
+  \n\n
+  Si desea anular esta decisión, "haga clic aquí para habilitar
+  javascript":/observer/turn_javascript_on.  Si no le importa y que estás
+  cansado de ver la pestaña <<Su Navegador No Se Conoce>> en la parte superior
+  de cada página, por favor, "haga clic aquí para deshabilitar
+  javacsript":/observer/turn_javascript_off.  (Acceda e ir a su preferencias
+  para volver a habilitar la detección automática.)
+
+no_browser_title: Su Navegador No Se Conoce
+
+
 # account/no_comment_email
 no_comment_note: >
   Ya no recibirá notificaciones por e-mail cuando otros usuarios del Mushroom
@@ -2014,27 +2036,19 @@ theme_random: Aleatorio
 
 # observer/translators_note
 translators_note: >
-  Por favor ayúdenos a hacer de este sitio web disponible en todo el mundo!
-  Hemos traducido finalmente el sitio en español, y dos amigos han empezado a
-  trabajar en portugués.  (¡Creo de todos los hongos frescos Brazillian que
-  estamos perdiendo!)  Sin embargo todavía podemos utilizar toda la ayuda que
-  podamos conseguir.  Necesitamos ayudar a la prueba de leer la traducción al
-  español -- después de todo lo que en realidad no habla español.  Y ahora que
-  hemos trabajado en todos los errores, nos encantaría ver algunos más idiomas.
-  \n\n
-  Es muy fácil.  Hay alrededor de 1.600 líneas o 11.000 palabras de texto en
-  este sitio por el momento, pero no dejes que te asustan.  Hemos organizado a
-  fin de que alguien con tiempo limitado puede concentrarse sólo en las
-  primeras secciones, y obtener el más comúnmente utilizado texto hecho en
-  primer lugar.  Luego con el tiempo y la energía lo permite, él o alguien más
-  pueda seguir trabajando por la lista hasta que un día es todos los acabados.
-  Por favor, siéntase libre para recoger una copia de "los archivos de
-  traducción":[repo] y empezar a traducir en cualquier idioma que desee.  A
-  continuación, "enviarnos un correo
-  electrónico":/observer/ask_webmaster_question cuando termine haciendo lo que
-  puede, y vamos a decirle cómo presentar su trabajo.  Usted recibirá crédito
-  destacado por su contribución, además, por supuesto, a nuestra eterna
-  gratitud.
+  Por favor, ayúdenos a hacer de este sitio web disponible en todo el mundo! Es
+  fácil.  Hay alrededor de 1.600 líneas o 11.000 palabras de texto en este
+  sitio por el momento, pero no dejes que te asustan.  Hemos organizado a fin
+  de que alguien con tiempo limitado puede concentrarse sólo en las primeras
+  secciones, y obtener el más comúnmente utilizado texto hecho en primer lugar.
+  Luego con el tiempo y la energía lo permite, él o alguien más pueda seguir
+  trabajando por la lista hasta que un día es todos los acabados.  Por favor,
+  siéntase libre para recoger una copia de "los archivos de traducción":[repo]
+  y empezar a traducir en cualquier idioma que desee.  A continuación,
+  "enviarnos un correo electrónico":/observer/ask_webmaster_question cuando
+  termine haciendo lo que puede, y vamos a decirle cómo presentar su trabajo.
+  Usted recibirá crédito destacado por su contribución, además, por supuesto, a
+  nuestra eterna gratitud.
 
 translators_note_title: Nota del Traductor
 

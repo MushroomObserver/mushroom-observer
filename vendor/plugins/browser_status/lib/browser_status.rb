@@ -290,17 +290,23 @@ module BrowserStatus
 
   # Check to make sure browser can handle AJAX.  This doubles as a "will
   # prototype and scriptaculous work?" test, I believe.  The criteria clearly
-  # need to be refined...
+  # need to be refined... Returns:
+  #   true   Browser is known to support AJAX.
+  #   false  Browser is known NOT to support AJAX.
+  #   nil    Browser is unknown or it is not known whether it supports AJAX.
   def can_do_ajax?
-    @js && (
-      @ua == :ie        && @ua_version >= 5.5 ||
-      @ua == :firefox   && @ua_version >= 1.0 ||
-      @ua == :iceweasel && @ua_version >= 1.0 ||
-      @ua == :safari    && @ua_version >= 1.2 ||
-      @ua == :opera     && @ua_version >= 0.0 ||
-      @ua == :chrome    && @ua_version >= 0.0 ||
-      @ua == :netscape  && @ua_version >= 7.0
-    )
+    return true  if session[:js_override] == :on
+    return false if !@js
+    case @ua
+      when :ie:        @ua_version >= 5.5
+      when :firefox:   @ua_version >= 1.0
+      when :iceweasel: @ua_version >= 1.0
+      when :safari:    @ua_version >= 1.2
+      when :opera:     @ua_version >= 0.0
+      when :chrome:    @ua_version >= 0.0
+      when :netscape:  @ua_version >= 7.0
+      else             nil
+    end
   end
 
   # Check if the request came from a robot.

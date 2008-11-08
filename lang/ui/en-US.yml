@@ -114,6 +114,7 @@ app_are_you_sure: Are you sure?
 app_click_for_map: Click for map
 app_google_images: Google Images
 app_no_ajax: Your Browser is Out of Date
+app_no_browser: We Don't Recognize Your Browser
 app_no_create_name: Unable to create the name '[name]'.
 app_no_javascript: Javascript is Disabled
 app_no_session: You Have Cookies Disabled
@@ -1345,7 +1346,7 @@ no_ajax_body: >
 no_ajax_browsers: >
   Browsers that we recommend (and test the site on regularly) are:
   \n\n
-  * Firefox 1.0 or higher
+  * Firefox / Iceweasel 1.0 or higher
   \n\n
   * Internet Explorer 5.5 or higher
   \n\n
@@ -1367,6 +1368,24 @@ no_ajax_dont_care: >
   re-enable auto-detection.)
 
 no_ajax_title: Your Browser is Out of Date
+
+
+# observer/no_browser
+no_browser_body: >
+  We have not seen your browser before.  This means we don't know if it
+  supports the full capabilities of this site.  Since there are pages that
+  won't work if we guess wrong (like voting on observation names), we have to
+  assume the worst.  However this means that a number of useful features are
+  not available, like dynamic forms, auto-completion of scientific names and
+  locations, the new version of the species list creator, and more. 
+  \n\n
+  If you would like to override this decision, "click here to turn javascript
+  on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't
+  Recognize Your Browser" tab at the top of every page, please "click here to
+  turn javascript off":/observer/turn_javascript_off.  (Login and go to
+  preferences to re-enable auto-detection.) 
+
+no_browser_title: We Don't Recognize Your Browser
 
 
 # account/no_comment_email
@@ -1929,24 +1948,18 @@ theme_random: Random
 
 # observer/translators_note
 translators_note: >
-  Please help us make this website available around the world!  We have finally
-  translated the site into Spanish, and two friends have started working on
-  Portuguese (think of all those cool Brazillian fungi we're missing out on!).
-  However we can still use all the help we can get.  We need help proof-reading
-  the Spanish -- after all I don't actually speak the language.  And now that
-  we've worked out all the kinks, we'd love to see some more languages.
-  \n\n
-  It's very easy.  There is somewhere around 1600 lines or 11000 words of text
-  on this site at the moment, but don't let that scare you.  We've organized it
-  so someone with limited time can concentrate on just the first few sections,
-  and get the most commonly-used text done first.  Then as time and energy
-  permits, they or someone else can continue working down the list until one
-  day it is all finished.  Please feel free to pick up a copy of the
-  "translation files":[repo] and start plugging away in any language you wish.
-  Then just "pop us an email":/observer/ask_webmaster_question when you finish
-  doing what you can, and we'll tell you how to submit your work.  You will
-  receive prominant credit for your contribution, in addition, of course, to
-  our undying gratitude.
+  Please help us make this website available around the world!  It's easy.
+  There is somewhere around 1600 lines or 11000 words of text on this site at
+  the moment, but don't let that scare you.  We've organized it so someone with
+  limited time can concentrate on just the first few sections, and get the most
+  commonly-used text done first.  Then as time and energy permits, they or
+  someone else can continue working down the list until one day it is all
+  finished.  Please feel free to pick up a copy of the "translation
+  files":[repo] and start plugging away in any language you wish.  Then just
+  "pop us an email":/observer/ask_webmaster_question when you finish doing what
+  you can, and we'll tell you how to submit your work.  You will receive
+  prominant credit for your contribution, in addition to, of course, our
+  undying gratitude.
 
 translators_note_title: Translator's Note
 

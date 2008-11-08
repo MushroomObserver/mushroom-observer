@@ -57,6 +57,7 @@ require 'ftools'
 #     translators_note
 #
 #     no_ajax
+#     no_browser
 #     no_javascript
 #     no_session
 #     turn_javascript_on
@@ -99,6 +100,7 @@ class ObserverController < ApplicationController
     :news,
     :next_observation,
     :no_ajax,
+    :no_browser,
     :no_javascript,
     :no_session,
     :observation_search,
@@ -180,11 +182,13 @@ class ObserverController < ApplicationController
   # Force javascript on.
   def turn_javascript_on
     session[:js_override] = :on
+    @js = true
   end
 
   # Force javascript off.
   def turn_javascript_off
     session[:js_override] = :off
+    @js = false
   end
 
   # Enable auto-detection.
