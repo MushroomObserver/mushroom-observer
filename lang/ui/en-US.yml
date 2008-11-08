@@ -228,7 +228,7 @@ high_and_next: Excellent & Next
 # name vetting values
 unvetted: Reviewed
 vetted: Approved
-inaccurate: Inaccurate
+inaccurate: Inaccurate/Incomplete
 no_export: Not for Export
 ok_for_export: OK for Export
 
