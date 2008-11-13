@@ -164,11 +164,15 @@ More next/prev stuff:
         Add next/prev_name?
         Potential interactions between sequences if URLs are copied and pasted
 
+Field based search mechanism (advanced search) (40)
+
 Add fields for who found the mushroom and who provided the id.
 
 Updating an author citation currently requires visiting each observation and adding the new name.  Seems like there should be a simpler way.
 
 Hypholoma aurantiacum recognizes that it is deprecated, but doesn't suggest a valid synonym.
+
+Add support for OpenID (32)
 
 Possible usability issue:
   Users sometimes 'Email <user>' when they should .
@@ -334,10 +338,6 @@ Machine identification (160)
     Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
 
 Mycology club affiliations (useful for searching) (4)
-
-Add support for OpenID (32)
-
-Field based search mechanism (advanced search) (40)
 
 General discussion blog that is searchable (32)
 

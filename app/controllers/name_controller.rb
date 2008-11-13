@@ -113,13 +113,15 @@ class NameController < ApplicationController
     session[:checklist_source] = :all_observations
     @name_data = Name.connection.select_all %(
       SELECT name_counts.count, names.id, names.display_name
-      FROM names, (SELECT count(*) AS count, name_id
+      FROM names left outer join draft_names on names.id = draft_names.name_id,
+         (SELECT count(*) AS count, name_id
                    FROM observations group by name_id)
                   AS name_counts
       WHERE names.id = name_counts.name_id
       AND names.rank = 'Species'
       AND (names.gen_desc is NULL or names.gen_desc = '')
       AND name_counts.count > 1
+      AND draft_names.name_id is NULL
       ORDER BY name_counts.count desc, names.text_name asc
       LIMIT 100
     )
@@ -305,13 +307,15 @@ class NameController < ApplicationController
         for d in @consensus_data + @synonym_data + @other_data
           d["observation_name"] = Observation.find(d["id"].to_i).format_name
         end
-        for group in @user.user_groups
-          project = group.project
-          if project
-            projects.push(project)
+        if @name.draft_names.length == 0
+          for group in @user.user_groups
+            project = group.project
+            if project
+              projects.push(project)
+            end
           end
+          projects.sort! {|x,y| x.title <=> y.title }
         end
-        projects.sort! {|x,y| x.title <=> y.title }
       end
       @user_projects = projects unless projects == []
 

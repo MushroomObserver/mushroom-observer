@@ -109,6 +109,7 @@ require_dependency 'acts_as_versioned_extensions'
 class Name < ActiveRecord::Base
   has_many :observations
   has_many :namings
+  has_many :draft_names
   has_one :rss_log
   belongs_to :user
   belongs_to :synonym
