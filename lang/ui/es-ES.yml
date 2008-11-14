@@ -1551,12 +1551,6 @@ observer_controller_no_save_observation: No se ha podido guardar el observación
 observer_controller_no_upload_image: No se ha podido subir la imagen [name].
 
 
-# observer/recalc
-observer_recalc_old_name: 'Nombre viejo: [name]'
-observer_recalc_new_name: 'Nombre nuevo: [name]'
-observer_recalc_caught_error: 'Atrapados excepción: [error]'
-
-
 # account/prefs
 prefs_alt_col_colors: Alternar los colores de las columnas.
 prefs_alt_row_colors: Alternar los colores de las filas.
@@ -2678,3 +2672,27 @@ how_help_business_planning: >
   viable, ya sea como una sin fines de lucro o como parte de un concepto más
   amplio de fines de lucro esfuerzo.
 
+################################################################################
+
+# These are admin pages, they don't need to be translated.
+
+# observer/recalc
+observer_recalc_old_name: 'Nombre viejo: [name]'
+observer_recalc_new_name: 'Nombre nuevo: [name]'
+observer_recalc_caught_error: 'Atrapados excepción: [error]'
+
+# observer/change_user_bonuses
+change_user_bonuses:  Award Bonus
+change_user_bonuses_help:  >
+
+  List one bonus per line, each specifiying a number of points and reason, like
+  this:
+  \n\n
+  10000 German translations\n
+  50000 Expert in hypogeous fungi\n
+  \n\n
+  These will appear on the show_user page below the usual contribution scores.
+  Keep the reasons short or it might mess up the formatting of the table on
+  that page.
+
+change_user_bonuses_title:  Contribution Bonuses for [user]

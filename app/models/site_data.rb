@@ -191,6 +191,11 @@ private
     # Now fix any user contribution caches that have the incorrect number.
     for user in users
       contribution = calc_metric(@user_data[user.id])
+      if bonuses = user.bonuses
+        for points, reason in bonuses
+          contribution += points
+        end
+      end
       if user.contribution != contribution
         user.contribution = contribution
         user.save

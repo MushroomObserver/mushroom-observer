@@ -29,6 +29,7 @@ require 'ftools'
 #     observations_by_name
 #     show_user_observations
 #     show_location_observations
+#   R change_user_bonuses
 #
 #     pattern_search
 #     observation_search
@@ -1054,6 +1055,64 @@ class ObserverController < ApplicationController
     )
     if result.length == 1
       @observed_taxa_count = result[0]['c']
+    end
+  end
+
+  # Admin util linked from show_user page that lets admin add or change bonuses for a given user.
+  def change_user_bonuses
+    @user2 = User.find(params[:id])
+    if check_permission(0)
+      if request.method != :post
+
+        # Reformat bonuses as string for editing, one entry per line.
+        @val = ''
+        if @user2.bonuses
+          @val = @user2.bonuses.map { |points, reason|
+            sprintf('%-6d %s', points, reason.gsub(/\s+/, ' '))
+          }.join("\n")
+        end
+
+      else
+        # Parse new set of values.
+        @val = params[:val]
+        line_num = 0
+        errors = false
+        result = []
+        for line in @val.split("\n")
+          line_num += 1
+          if match = line.match(/^\s*(\d+)\s*(\S.*\S)\s*$/)
+            result.push([match[1].to_i, match[2].to_s])
+          else
+            flash_error("Syntax error on line #{line_num}.")
+            errors = true
+          end
+        end
+
+        # Success: update user's contribution.
+        if !errors
+          contrib = @user2.contribution.to_i
+
+          # Subtract old bonuses.
+          if @user2.bonuses
+            for points, reason in @user2.bonuses
+              contrib -= points
+            end
+          end
+
+          # Add new bonuses
+          for points, reason in result
+            contrib += points
+          end
+
+          # Update database.
+          @user2.bonuses = result
+          @user2.contribution = contrib
+          @user2.save
+          redirect_to(:action => 'show_user', :id => @user2.id)
+        end
+      end
+    else
+      redirect_to(:action => 'show_user', :id => @user2.id)
     end
   end
 

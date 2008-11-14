@@ -79,6 +79,10 @@ class User < ActiveRecord::Base
   belongs_to :image         # mug shot
   belongs_to :location      # primary location
 
+  # This causes the data structure in user.bonuses to be serialized automatically
+  # with YAML and stored in the database as a plain old text string.
+  serialize :bonuses
+
   # Used to let user enter location by name in prefs form.
   attr_accessor :place_name
 

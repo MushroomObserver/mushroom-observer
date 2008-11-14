@@ -23,6 +23,9 @@
       add_tab(:show_user_comments_for.t(:name => name), :controller => "comment", :action => "show_comments_for_user", :id => id)
       add_tab(:show_user_email_to.t(:name => name), :controller => "observer", :action => "ask_user_question", :id => id)
     end
+    if @user && @user.id == 0
+      add_tab(:change_user_bonuses.t, :controller => "observer", :action => "change_user_bonuses", :id => @show_user.id)
+    end
   end
 %>
 
@@ -88,6 +91,16 @@ end %>
               </tr>
             <% end %>
           <% end
+          if @show_user.bonuses
+            for points, reason in @show_user.bonuses
+              total += points.to_i %>
+              <tr>
+                <td colspan="2"><%= reason.to_s.tl %></td>
+                <td>=</td>
+                <td align="right"><%= points.to_i %></td>
+              </tr>
+            <% end
+          end
           if total > 0 %>
             <tr>
               <td colspan="4">
