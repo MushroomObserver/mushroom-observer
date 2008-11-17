@@ -1001,6 +1001,18 @@ class ObserverController < ApplicationController
     end
   end
 
+  # server_status.rhtml
+  # Restricted to the admin user
+  # Reports on the health of the system
+  def server_status
+    if check_permission(0)
+      @cache_size = browser_status_cache_size
+      @textile_name_size = String.textile_name_size
+    else
+      redirect_to(:action => 'list_observations')
+    end
+  end
+    
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new

@@ -262,6 +262,11 @@ module BrowserStatus
     end
   end
 
+  # Return the number of entries in our_session_cache
+  def browser_status_cache_size
+    @@our_session_cache.size
+  end
+  
   # Have we seen this browser before?  Short-hand for <tt>@session_working == nil</tt>
   def session_new?
     @session_working == nil

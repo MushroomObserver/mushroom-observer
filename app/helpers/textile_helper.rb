@@ -139,6 +139,11 @@ class String
     end
   end
 
+  def self.textile_name_size
+    @@textile_name_lookup ||= {}
+    @@textile_name_lookup.size
+  end
+  
 protected
 
   # Convert __Names__ to links in a textile string.
