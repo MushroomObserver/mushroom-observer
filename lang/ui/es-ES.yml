@@ -2697,6 +2697,8 @@ change_user_bonuses_help:  >
 
 change_user_bonuses_title:  Contribution Bonuses for [user]
 
-system_status_title: Server Status
 system_status_browser_status_size: Browser status cache size
+system_status_clear_caches: Clear Caches
+system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
+system_status_title: Server Status

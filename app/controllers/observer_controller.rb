@@ -1006,6 +1006,15 @@ class ObserverController < ApplicationController
   # Reports on the health of the system
   def server_status
     if check_permission(0)
+      case params[:commit]
+      when :system_status_gc.l
+        ObjectSpace.garbage_collect
+        flash_notice("Collected garbage")
+      when :system_status_clear_caches.l
+        clear_browser_status_cache
+        String.clear_textile_cache
+        flash_notice("Cleared caches")
+      end
       @cache_size = browser_status_cache_size
       @textile_name_size = String.textile_name_size
     else

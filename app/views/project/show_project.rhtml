@@ -30,12 +30,14 @@
         <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>
       <% end %>
     </td>
-    <td valign="top" width="50%">
-      <%= :show_project_drafts.t %>:<br/>
-      <% for draft in @project.draft_names %>
-        &nbsp;&nbsp;<%= link_to(draft.name.display_name.t, :action => "show_draft", :id => draft.id) %>
-        (<%= user_link(draft.user) %>)<br/>
-      <% end %>
-    </td>
+    <% if @draft_data %>
+      <td valign="top" width="50%">
+        <%= :show_project_drafts.t %>:<br/>
+        <% for datum in @draft_data %>
+          &nbsp;&nbsp;<%= link_to(datum['display_name'].t, :action => "show_draft", :id => datum['id']) %>
+          (<%= user_link(User.find(datum['user_id'])) %>)<br/>
+        <% end %>
+      </td>
+    <% end %>
   </tr>
 </table>

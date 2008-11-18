@@ -50,6 +50,13 @@ class ProjectController < ApplicationController
     @project = Project.find(params[:id])
     @is_member = @project.is_member?(@user)
     @is_admin = @project.is_admin?(@user)
+    @draft_data = Project.connection.select_all %(
+    SELECT names.display_name, draft_names.id, draft_names.user_id
+    FROM names, draft_names
+    WHERE draft_names.name_id = names.id
+    AND draft_names.project_id = #{params[:id]}
+    ORDER BY names.search_name
+    )
   end
 
   # Form to create a project.

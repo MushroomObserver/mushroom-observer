@@ -144,6 +144,10 @@ class String
     @@textile_name_lookup.size
   end
   
+  def self.clear_textile_cache
+    @@textile_name_lookup = {}
+  end
+  
 protected
 
   # Convert __Names__ to links in a textile string.
