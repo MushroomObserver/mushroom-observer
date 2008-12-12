@@ -1,3 +1,8 @@
+Add support for numbers in provisional names, e.g., Amanita "s1".  Then update Amanita "sone"
+
+Should there be 'sensu' names for each field guide?
+Organize a way to add edibility info
+
 Bug fixes:
   September 21, 2008 12:45:36 PM PDT
     ActiveRecord::StatementInvalid (Mysql::Error: Unknown table 'g' in where clause: 

@@ -443,6 +443,7 @@ class ProjectController < ApplicationController
         name.send("#{f}=", draft.send(f))
       end
       name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
+      name.update_review_status(:vetted, @user)
       redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
     else
       flash_error(:publish_draft_denied.t)

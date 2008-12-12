@@ -1034,8 +1034,8 @@ image_add_warning: >
 
 
 # image_controller
-image_by_title: Imágenes por Título
-image_by_user: Imágenes por [user]
+images_by_title: Imágenes por Título
+images_by_user: Imágenes por [user]
 image_list_title: Imágenes
 image_no_new_image: No más imágenes.
 

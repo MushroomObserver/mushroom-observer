@@ -91,6 +91,7 @@ require_dependency 'acts_as_versioned_extensions'
 #    Name.replace_author         (used by change_author)
 #    check_for_repeats           (used by change_text_name)
 #    common_errors               (used by change_text_name)
+#    update_review_status        Updates the review_status and related fields.
 #
 #  Synonyms:
 #    approved_synonyms
@@ -102,6 +103,7 @@ require_dependency 'acts_as_versioned_extensions'
 #    has_notes?                  Does this name have any notes?
 #    status                      Is this name deprecated?
 #    prepend_notes               Add notes at the top of the existing notes.
+#    
 #    Name.format_string          (used all over this file)
 #
 ################################################################################
@@ -766,6 +768,23 @@ class Name < ActiveRecord::Base
     end
   end
 
+  # Update the review status, but only reviewers can set the
+  # value to anything other than :unreviewed.
+  def update_review_status(value, user)
+    if not user.in_group('reviewers')
+      value = :unreviewed
+      user_id = nil
+    else
+      user_id = user.id
+    end
+    past_name = self.versions.latest
+    past_name.review_status = self.review_status = value
+    past_name.reviewer_id = self.reviewer_id = user_id
+    past_name.last_review = self.last_review = Time.now()
+    self.save
+    past_name.save
+  end
+
 ########################################
 
   # Get list of synonyms that aren't deprecated (including potentially itself).
@@ -898,7 +917,7 @@ class Name < ActiveRecord::Base
       self.notes = str
     end
   end
-
+  
   protected
 
   def validate # :nodoc:

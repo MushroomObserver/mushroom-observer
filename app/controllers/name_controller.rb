@@ -329,13 +329,7 @@ class NameController < ApplicationController
   def set_review_status
     id = params[:id]
     if is_reviewer
-      name = Name.find(id)
-      past_name = name.versions.latest
-      past_name.review_status = name.review_status = params[:value]
-      past_name.reviewer_id = name.reviewer_id = session[:user_id]
-      past_name.last_review = name.last_review = Time.now()
-      name.save
-      past_name.save
+      Name.find(id).update_review_status(params[:value], @user)
     end
     redirect_to(:action => 'show_name', :id => id)
   end

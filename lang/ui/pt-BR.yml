@@ -1005,8 +1005,8 @@ image_add_warning:  >
 
 
 # image_controller
-image_by_title:  Images by Title
-image_by_user:  Images by [user]
+images_by_title:  Images by Title
+images_by_user:  Images by [user]
 image_list_title:  Images
 image_no_new_image:  No new image found.
 

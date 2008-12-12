@@ -1014,8 +1014,8 @@ image_add_warning: >
 
 
 # image_controller
-image_by_title: Bilder nach Titeln sortiert
-image_by_user: Bilder von [user]
+images_by_title: Bilder nach Titeln sortiert
+images_by_user: Bilder von [user]
 image_list_title: Bilder
 image_no_new_image: Keine neuen Bilder gefunden.
 

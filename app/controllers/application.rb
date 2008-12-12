@@ -132,6 +132,7 @@ class ApplicationController < ActionController::Base
   before_filter :browser_status
   before_filter :autologin
   around_filter :set_locale
+  after_filter :extra_gc
 
   before_filter(:disable_link_prefetching, :only => [
     # account_controller methods
@@ -781,7 +782,15 @@ class ApplicationController < ActionController::Base
     # reset the locale to its default value
     Locale.reset!
   end
-
+  
+  def count_objects
+    ObjectSpace.each_object do |o| end
+  end
+  
+  def extra_gc
+    ObjectSpace.garbage_collect
+  end
+  
   # Get a sorted array of the navigator languages
   def get_sorted_langs_from_accept_header
     accept_langs = (request.env['HTTP_ACCEPT_LANGUAGE'] || "en-us,en;q=0.5").split(/,/) rescue nil

@@ -1,5 +1,84 @@
 # Be sure to restart your web server when you modify this file.
 
+class MemoryProfiler
+  DEFAULTS = {:delay => 10, :string_debug => false}
+
+  def self.start(opt={})
+    opt = DEFAULTS.dup.merge(opt)
+        
+    Thread.new do
+      prev = Hash.new(0)
+      curr = Hash.new(0)
+      curr_strings = []
+      delta = Hash.new(0)
+
+      file = File.open('log/memory_profiler.log','w')
+      string_file = File.open('log/memory_profiler_strings.log', 'w')
+
+      no_change = false
+      need_dump = false
+      
+      loop do
+        begin
+          GC.start
+          curr.clear
+
+          curr_strings = [] if opt[:string_debug]
+
+          ObjectSpace.each_object do |o|
+            curr[o.class] += 1 #Marshal.dump(o).size rescue 1
+            if opt[:string_debug] and o.class == String
+              curr_strings.push o
+            end
+          end
+
+          if opt[:string_debug]
+            if need_dump and no_change
+              string_file.puts "@@@@ #{Time.now} @@@@\n"
+              curr_strings.sort.each do |s|
+                string_file.puts s
+              end
+              string_file.flush
+              need_dump = false
+              no_change = false
+              file.puts "* dumped strings *\n" if opt[:string_debug]
+              file.flush
+            end
+            curr_strings.clear
+          end
+
+          delta.clear
+          (curr.keys + delta.keys).uniq.each do |k,v|
+            delta[k] = curr[k]-prev[k]
+          end
+
+          no_change = true
+          file.puts "Top 20"
+          delta.sort_by { |k,v| -v.abs }[0..19].sort_by { |k,v| -v}.each do |k,v|
+            if v != 0
+              file.printf "%+5d: %s (%d)\n", v, k.name, curr[k]
+              no_change = false
+              need_dump = true
+            end
+          end
+          file.puts "no_change: #{no_change}, need_dump: #{need_dump}"
+          file.flush
+
+          delta.clear
+          prev.clear
+          prev.update curr
+          GC.start
+        rescue Exception => err
+          STDERR.puts "** memory_profiler error: #{err}"
+        end
+        sleep opt[:delay]
+      end
+    end
+  end
+end
+
+# MemoryProfiler.start(:string_debug => true)
+
 # Uncomment below to force Rails into production mode when 
 # you don't control web/app server and can't set it the proper way
 # ENV['RAILS_ENV'] ||= 'production'
