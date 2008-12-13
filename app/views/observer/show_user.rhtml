@@ -15,12 +15,12 @@
     add_tab(:show_user_contributors.t, :controller => 'observer', :action => 'users_by_contribution')
     if @show_user == @user
       add_tab(:show_user_your_observations.t, links['observations'])
-      add_tab(:show_user_comments_for_you.t, :controller => "comment", :action => "show_comments_for_user", :id => id)
+      add_tab(:show_user_comments_for_you.t, links['comments'])
       add_tab(:show_user_your_notifications.t, :controller => "observer", :action => "list_notifications")
       add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
     else
-      add_tab(:show_user_observations_by.t(:name => name), 'observations')
-      add_tab(:show_user_comments_for.t(:name => name), :controller => "comment", :action => "show_comments_for_user", :id => id)
+      add_tab(:show_user_observations_by.t(:name => name), links['observations'])
+      add_tab(:show_user_comments_for.t(:name => name), links['comments'])
       add_tab(:show_user_email_to.t(:name => name), :controller => "observer", :action => "ask_user_question", :id => id)
     end
     if @user && @user.id == 0
