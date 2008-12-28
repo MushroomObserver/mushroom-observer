@@ -456,7 +456,7 @@ class Name < ActiveRecord::Base
     result
   end
 
-  def tmp_before_save
+  def before_save
     if self.gen_desc && self.gen_desc != '' && self.authors == []
       self.authors.push(self.user)
     end
