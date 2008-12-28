@@ -1,25 +1,4 @@
 Description author and institution
-- Name has a list of description authors (authors [and admin] can admin authors): authors_names
-- Name has a list of description editors (editors are automated): editors_names
-- Set initial author when General Description is first provided (email to reviewers)
-- Request authorship (goes to reviewers and authors)
-- name/change_author_status
-- Change authorship (authors & reviewers)
-- Seems odd for an existing author to see: 'Request Authorship Credit'.  Kind of want a review_authors page.
-- Calculate author as part of migration
-- Cleanup references to admin as editor
-- Publish draft should email reviewers and existing authors
-Release:
-  - rake test
-  - snapshot database and images
-  - code to convert potential admin editor listings
-  - test migration
-  - confirm that EOL gets authors right
-  - updated news.rhtml
-  rollout
-    migrate db
-    run 'rake db:update_authors'
-    update Name.before_save
   translation email
   
 Make extra_gc depend on config
