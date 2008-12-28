@@ -75,6 +75,20 @@ class AccountMailer < ActionMailer::Base
     @content_type     = @user.html_email ? "text/html" : "text/plain"
   end
 
+  def publish_name(publisher, receiver, name)
+    @user                 = receiver
+    @name                 = name
+    Locale.code           = @user.locale || DEFAULT_LOCALE
+    @subject              = :email_publish_name_subject.l
+    @body["publisher"]    = publisher
+    @body["user"]         = receiver
+    @body["name"]         = name
+    @recipients           = receiver.email
+    @bcc                  = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                 = NEWS_EMAIL_ADDRESS
+    @content_type         = @user.html_email ? "text/html" : "text/plain"
+  end
+
   def naming_for_observer(observer, naming, notification)
     @user                 = observer
     Locale.code           = @user.locale || DEFAULT_LOCALE
@@ -149,6 +163,21 @@ class AccountMailer < ActionMailer::Base
     @body["sender"]      = sender
     @body["message"]     = message
     @body["project"]     = project
+    @recipients          = users.map() {|u| u.email }
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = sender.email
+    @content_type        = "text/plain"
+  end
+
+  def author_request(sender, name, subject, message)
+    users = name.authors + UserGroup.find_by_name('reviewers').users
+    locales = users.map {|u| u.locale}.uniq.select {|c| c}
+    Locale.code = locales.first if locales != []
+    @subject             = subject
+    @body["sender"]      = sender
+    @body["message"]     = message
+    @body["name"]        = name
     @recipients          = users.map() {|u| u.email }
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS

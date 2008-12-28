@@ -109,6 +109,8 @@ require_dependency 'acts_as_versioned_extensions'
 ################################################################################
 
 class Name < ActiveRecord::Base
+  has_and_belongs_to_many :authors, :class_name => "User", :join_table => "authors_names"
+  has_and_belongs_to_many :editors, :class_name => "User", :join_table => "editors_names"
   has_many :observations
   has_many :namings
   has_many :draft_names
@@ -454,6 +456,12 @@ class Name < ActiveRecord::Base
     result
   end
 
+  def tmp_before_save
+    if self.gen_desc && self.gen_desc != '' && self.authors == []
+      self.authors.push(self.user)
+    end
+  end
+  
 ########################################
 
   # Parse a string, return the following array:

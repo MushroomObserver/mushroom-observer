@@ -58,32 +58,6 @@
         <% for parent in @parents %>
           <%= rank_as_string(@parents[0].rank) %>: 
             <%= link_to(parent.display_name.t, :action => 'show_name', :id => parent.id) %><br/>
-        <% end %><br/>
-
-        <% if @name.ok_for_export %>
-          <%= :ok_for_export.t %>
-        <% else %>
-          <%= :no_export.t %>
-        <% end %><br/>
-
-        <%= :show_name_content_status.t %>: <%= @name.review_status.t %><br/>
-        <% if @name.reviewer %>
-          <span class="HelpNote">
-            &nbsp;&nbsp;(<%= :show_name_latest_review.t(
-              :date => @name.last_review ? @name.last_review.strftime("%Y-%m-%d") : :app_unknown.t,
-              :user => user_link(@name.reviewer, @name.reviewer.login)
-            ) %>)
-          </span><br/>
-        <% end %>
-        <% if @is_reviewer %>
-          &nbsp;&nbsp;<%= link_to(:unvetted.t,   :action => 'set_review_status', :value => :unvetted,   :id => @name.id) %><br/>
-          &nbsp;&nbsp;<%= link_to(:vetted.t,     :action => 'set_review_status', :value => :vetted,     :id => @name.id) %><br/>
-          &nbsp;&nbsp;<%= link_to(:inaccurate.t, :action => 'set_review_status', :value => :inaccurate, :id => @name.id) %><br/>
-          <% if @name.ok_for_export %>
-            &nbsp;&nbsp;<%= link_to(:no_export.t, :action => 'set_export_status', :value => false, :id => @name.id) %><br/>
-          <% else %>
-            &nbsp;&nbsp;<%= link_to(:ok_for_export.t, :action => 'set_export_status', :value => true, :id => @name.id) %><br/>
-          <% end %>
         <% end %>
       </p>
     </td>
@@ -117,23 +91,72 @@
     </td>
   </tr>
 </table>
-
-<% odd_or_even = 0
-for f in Name.all_note_fields
-  value = @name.send(f).to_s
-  if value != ''
-    odd_or_even = 1 - odd_or_even %>
-    <%= "form_names_#{f}".to_sym.t %>:
-    <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-      <%= sanitize(value).tpl %>
-    </div><br/>
+<% if @name.has_any_notes? %>
+  <hr/>
+  <% unless @name.ok_for_export %>
+    <%= :no_export.t %><br/>
   <% end %>
-<% end %>
-<% if @name.license %>
-  <%= render(:partial => "shared/form_#{@name.license.form_name}") %>
+
+  <%= :show_name_content_status.t %>: <%= @name.review_status.t %><br/>
+  <% if @name.reviewer %>
+    <span class="HelpNote">
+      &nbsp;&nbsp;(<%= :show_name_latest_review.t(
+        :date => @name.last_review ? @name.last_review.strftime("%Y-%m-%d") : :app_unknown.t,
+        :user => user_link(@name.reviewer, @name.reviewer.login)
+      ) %>)
+    </span><br/>
+  <% end %>
+  <br/>
+  <% if @is_reviewer %>
+    &nbsp;&nbsp;<%= link_to(:unvetted.t, :action => 'set_review_status',
+                            :value => :unvetted, :id => @name.id) %><br/>
+    &nbsp;&nbsp;<%= link_to(:vetted.t, :action => 'set_review_status',
+                            :value => :vetted, :id => @name.id) %><br/>
+    &nbsp;&nbsp;<%= link_to(:inaccurate.t, :action => 'set_review_status',
+                            :value => :inaccurate, :id => @name.id) %><br/>
+    <% if @name.ok_for_export %>
+      &nbsp;&nbsp;<%= link_to(:no_export.t, :action => 'set_export_status',
+                              :value => false, :id => @name.id) %><br/>
+    <% else %>
+      &nbsp;&nbsp;<%= link_to(:ok_for_export.t, :action => 'set_export_status',
+                              :value => true, :id => @name.id) %><br/>
+    <% end
+    end
+    odd_or_even = 0
+    for f in Name.all_note_fields
+      value = @name.send(f).to_s
+      if value != ''
+        odd_or_even = 1 - odd_or_even %>
+        <%= "form_names_#{f}".to_sym.t %>:
+        <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+          <%= sanitize(value).tpl %>
+        </div><br/>
+      <% end %>
+    <% end %>
+    <center>
+      <p>
+        <%= user_list(:show_name_description_author.t, @name.authors) %>
+        <%
+          is_author = @name.authors.member?(@user)
+          if @name.authors != [] %>
+          <% unless is_author %>
+            <%= link_to(:show_name_author_request.t, :action => 'author_request', :id => @name.id) %>&nbsp;
+          <% end %>
+        <% end %>
+        <% if (@name.authors == []) or is_author or @is_reviewer %>
+          &nbsp;<%= link_to(:review_authors_review_authors.t, :action => 'review_authors', :id => @name.id )%>
+        <% end %>
+        <br/>
+        <%= user_list(:show_name_description_editor.t, @name.editors) %>
+      </p>
+      <% if @name.license %>
+        <%= render(:partial => "shared/form_#{@name.license.form_name}") %>
+      <% end %>
+    </center>
 <% end %>
 
 <% if @children != [] %>
+  <hr/>
   <p><%= rank_as_plural_string(@children[0].rank) %>:</p>
   <p>
     <% i = 0
@@ -190,10 +213,9 @@ for sect in ["consensus", "synonym", "other"]
     link_args = {}
     link_args[:search_seq] = @search_seqs[sect] if @search_seqs[sect]
 
-    # Add line break between groups.
-    if num_sects > 0 %>
-      <br/><hr></hr>
-    <% end
+    %>
+    <br/><hr/>
+    <%
     num_sects += 1
 
     # Wow this is ugly, but I can't find an option to pass to pagination_numbers

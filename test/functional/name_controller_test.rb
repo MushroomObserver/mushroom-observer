@@ -235,6 +235,31 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(@rolf, name.user)
   end
 
+  # Test to see if add a new general description sets the description author list
+  # to the current user.
+  def test_edit_name_add_gen_desc
+    name = @conocybe_filaris
+    assert_equal([], name.authors)
+    assert_nil(name.gen_desc)
+    past_names = name.versions.size
+    assert(0 == name.version)
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => name.text_name,
+        :author => "(Fr.) Kühner",
+        :rank => :Species,
+        :citation => "__Le Genera Galera__, 139. 1935.",
+        :gen_desc => "A general description"
+      }
+    }
+    params[:name] = empty_notes.merge(params[:name])
+    post_requires_login(:edit_name, params, false)
+    name.reload
+    assert(name.gen_desc)
+    assert_equal(name.authors, [name.user])
+  end
+
   # Test name changes in various ways.
   def test_edit_name_deprecated
     name = @lactarius_alpigenes
@@ -1972,5 +1997,24 @@ class NameControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "name", :action => "show_name")
     name = Name.find(name.id) # Reload
     assert_equal(:unreviewed, name.review_status)
+  end
+
+  def test_send_author_request
+    params = {
+      :id => @coprinus_comatus.id,
+      :email => {
+        :subject => "Author request subject",
+        :message => "Message for authors"
+      }
+    }
+    requires_login :send_author_request, params, false
+    assert_equal(:request_success.t, flash[:notice])
+    assert_redirected_to(:action => "show_name", :id => @coprinus_comatus.id)
+  end
+
+  def test_author_request
+    id = @coprinus_comatus.id
+    requires_login(:author_request, {:id => id})
+    assert_form_action(:action => 'send_author_request', :id => id)
   end
 end

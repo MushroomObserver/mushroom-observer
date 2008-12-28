@@ -132,7 +132,7 @@ class ApplicationController < ActionController::Base
   before_filter :browser_status
   before_filter :autologin
   around_filter :set_locale
-  after_filter :extra_gc
+  # after_filter :extra_gc
 
   before_filter(:disable_link_prefetching, :only => [
     # account_controller methods

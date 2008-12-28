@@ -754,6 +754,71 @@ class NameController < ApplicationController
     end
   end
 
+  # Form to compose email for the authors/reviewers
+  # Linked from: show_name
+  # Inputs:
+  #   params[:id]
+  # Outputs: @name
+  def author_request
+    @name = Name.find(params[:id])
+  end
+
+  # Sends email to the authors/reviewers
+  # Linked from: author_request
+  # Inputs:
+  #   params[:id]
+  #   params[:email][:subject]
+  #   params[:email][:content]
+  # Success:
+  #   Redirects to show_name.
+  #
+  # TODO: Use queued_email mechanism
+  def send_author_request
+    sender = @user
+    name = Name.find(params[:id])
+    subject = params[:email][:subject]
+    content = params[:email][:content]
+    AccountMailer.deliver_author_request(sender, name, subject, content)
+    flash_notice(:request_success.t)
+    redirect_to(:action => 'show_name', :id => name.id)
+  end
+
+  # Form to adjust permissions for a user with respect to a project
+  # Linked from: show_name, author_request email
+  # Inputs:
+  #   params[:id]
+  #   params[:candidate]
+  #   params[:commit]
+  # Success:
+  #   Redirects to review_authors.
+  # Failure:
+  #   Renders show_name.
+  #   Outputs: @name, @authors, @users
+  def review_authors
+    @name = Name.find(params[:id])
+    if verify_user()
+      @authors = @name.authors
+      if @authors.member?(@user) or @user.in_group('reviewers')
+        @users = User.find(:all, :order => "login, name")
+        new_author = params[:add] ?  User.find(params[:add]) : nil
+        if new_author and not @name.authors.member?(new_author)
+          @name.authors.push(new_author)
+          flash_notice("Added #{new_author.legal_name}")
+          # Should send email as well
+        end
+        old_author = params[:remove] ? User.find(params[:remove]) : nil
+        if old_author
+          @name.authors.delete(old_author)
+          flash_notice("Removed #{old_author.legal_name}")
+          # Should send email as well
+        end
+      else
+        flash_error(:review_authors_denied.t)
+        redirect_to(:action => 'show_name', :id => @name.id)
+      end
+    end
+  end
+
   def eol_data(review_status_list)
     rsl_list = review_status_list.join("', '")
     names = Name.find(:all, :conditions => "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1", :order => "search_name")
@@ -785,12 +850,21 @@ class NameController < ApplicationController
       end
     end
     @names = []
+    @authors = {} # Maps name.id -> lists of user.ids
+    @authors.default = []
     for n in names
       if @image_data[n.id] or n.has_any_notes?
         @names.push(n)
-        unless @users[n.user_id]
-          @users[n.user_id] = n.user.legal_name
+        author_data = Name.connection.select_all("SELECT user_id FROM authors_names WHERE name_id = #{n.id}")
+        authors = author_data.map {|d| d['user_id']}
+        authors = [n.user_id] if authors == []
+        @authors[n.id] = authors
+        for author in authors
+          unless @users[author]
+            @users[author] = User.find(author).legal_name
+          end
         end
+        @authors[n.id] = (authors.map {|id| @users[id]}).join(', ')
         unless n.license_id.nil? or @licenses[n.license_id]
           @licenses[n.license_id] = n.license.url
         end

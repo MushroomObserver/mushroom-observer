@@ -57,7 +57,7 @@ namespace :cache do
   desc "Add reviewers"
   task(:add_reviewers => :environment) do
     group = UserGroup.find_by_name('reviewers')
-    for login in ['Anne Pringle', 'Marie', 'tbarbaro']
+    for login in [] # Should be a list of logins for users you want to add to reviewers list
       user = User.find_by_login(login)
       unless user.user_groups.member?(group)
         user.user_groups << group
@@ -66,6 +66,48 @@ namespace :cache do
       else
         print "#{login} is already in the reviewers group\n"
       end
+    end
+  end
+  
+  desc "Update authors and editors"
+  task(:update_authors => :environment) do
+    Name.connection.update %(
+      UPDATE names
+      SET user_id = 1
+      WHERE user_id = 0
+    )
+
+    Name.connection.update %(
+      UPDATE past_names
+      SET user_id = 1
+      WHERE user_id = 0
+    )
+
+    users = {}
+    for n in Name.find(:all)
+      user_ids = []
+      author_id = nil
+      last_version = 0
+      for v in n.versions
+        if last_version > v.version
+          print "Expected version numbers to be strictly increasing\n"
+          print "#{n.search_name}: #{last_version} > #{v.version}\n"
+        end
+        last_version = v.version
+        id = v.user_id
+        users[id] = User.find(v.user_id) unless users.keys().member?(id)
+        user_ids.push(id) unless user_ids.member?(id)
+        unless v.gen_desc.nil? or v.gen_desc == '' or author_id
+          author_id = v.user_id
+        end
+      end
+      for id in user_ids
+        n.editors.push(users[id])
+      end
+      if author_id
+        n.authors.push(users[author_id])
+      end
+      n.save
     end
   end
   

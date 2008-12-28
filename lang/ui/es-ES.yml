@@ -269,6 +269,7 @@ rank_plural_variety: Variedades
 
 # site statistics field names
 site_stats_images: Imágenes
+site_stats_listed_taxa: Listed Taxa
 site_stats_names: Descripciones
 site_stats_past_names: Cambios de Descripciones
 site_stats_locations: Ubicaciones
@@ -429,14 +430,16 @@ add_user_to_group_title: Agregar Usuario a Grupo
 add_user_to_group_user: Nombre de Usuario
 
 
-# admin_request email
+# admin_request/author_request emails
 admin_request_change_member_status: Cambiar Estado de Usuario
-admin_request_handy_links: Aquí hay algunos vínculos que pueden ser útiles
-admin_request_message: Mensaje
-admin_request_show_user: Mostrar detalles del remitente
-admin_request_subject: Asunto
-admin_request_success: El e-mail se ha enviado.
 admin_request_title: Solicitud Admin para [title]
+author_request_add_author: Make Sender an Author
+author_request_title: Authorship Request for [title]
+request_handy_links: Aquí hay algunos vínculos que pueden ser útiles
+request_message: Mensaje
+request_show_user: Mostrar detalles del remitente
+request_subject: Asunto
+request_success: El e-mail se ha enviado.
 
 
 # observer/ask_observation_question
@@ -487,6 +490,23 @@ ask_webmaster_your_email: Su dirección e-mail
 
 # observer/license_updater
 bulk_license_link: Actualización de Licencia a Granel
+
+
+# project/review_authors
+review_authors_add_author:  Add
+review_authors_authors:  Current Description Authors
+review_authors_denied:  >
+  Only existing authors and reviewers can change the description authors.
+
+review_authors_note:  >
+  This page changes the recorded author(s) of a taxon description on the
+  Mushroom Observer website.  This is in no direct way related to the original
+  publishing author of the taxon.
+
+review_authors_review_authors:  Review Authors
+review_authors_other_users:  Other Users
+review_authors_remove_author:  Remove
+review_authors_title:  Reviewing Author(s) for [name]
 
 
 # project/change_member_status
@@ -1762,11 +1782,14 @@ show_location_title: 'Ubicación: [name]'
 
 # name/show_name
 show_name_add_name: Agregar Nombre
+show_name_author_request:  Request Authorship Credit
 show_name_bulk_name_edit: Editor de Nombre a Granel
 show_name_change_synonyms: Cambiar Sinónimos
 show_name_content_status: Estatus de Contenidos
 show_name_create_draft: Crear Nuevo Borrador para
 show_name_deprecated_synonyms: Sinónimo(s) Desaprobados
+show_name_description_author:  Description author
+show_name_description_editor:  Description editor
 show_name_distribution_map: Mapa de Distribución
 show_name_draft_help: >
   Borradores son nuevas versiones de las descripciones de un nombre que se está
@@ -1913,6 +1936,7 @@ show_user_comments_for_you: Comentarios por Usted
 show_user_contributors: Contribuidores
 show_user_edit_profile: Editar Perfil
 show_user_email_to: Enviar E-mail a [name]
+show_user_joined:  Joined Mushroom Observer
 show_user_mailing_address: Dirección Postal para las Colecciones
 show_user_observations_by: Observaciones por [name]
 show_user_primary_location: Ubicación Principal

@@ -24,6 +24,8 @@
 #   Are search_params needed for project pages?
 #   Version drafts
 
+require 'set'
+
 class ProjectController < ApplicationController
   before_filter :login_required, :except => [
     :list_projects,
@@ -444,6 +446,13 @@ class ProjectController < ApplicationController
       end
       name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
       name.update_review_status(:vetted, @user)
+      user_set = Set.new(name.authors)
+      user_set.merge(UserGroup.find_by_name('reviewers').users)
+      for recipient in user_set
+        if recipient
+          PublishEmail.create_email(@user, recipient, name)
+        end
+      end
       redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
     else
       flash_error(:publish_draft_denied.t)

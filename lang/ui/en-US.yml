@@ -264,7 +264,8 @@ rank_plural_variety: Varieties
 
 # site statistics field names
 site_stats_images: Images
-site_stats_names: Descriptions
+site_stats_listed_taxa: Listed Taxa
+site_stats_names: Taxa
 site_stats_past_names: Description Changes
 site_stats_locations: Locations
 site_stats_past_locations: Location Changes
@@ -423,14 +424,16 @@ add_user_to_group_title: Add User to Group
 add_user_to_group_user: User name
 
 
-# admin_request email
+# admin_request/author_request emails
 admin_request_change_member_status: Change User's Status
-admin_request_handy_links: Here are some handy links that you may find useful
-admin_request_message: Message
-admin_request_show_user: Show details on sender
-admin_request_subject: Subject
-admin_request_success: Delivered email.
 admin_request_title: Admin Request for [title]
+author_request_add_author: Make Sender an Author
+author_request_title: Authorship Request for [title]
+request_handy_links: Here are some handy links that you may find useful
+request_message: Message
+request_show_user: Show details on sender
+request_subject: Subject
+request_success: Delivered email.
 
 
 # observer/ask_observation_question
@@ -477,6 +480,23 @@ ask_webmaster_your_email: Your email address
 
 # observer/license_updater
 bulk_license_link: Bulk License Updater
+
+
+# project/review_authors
+review_authors_add_author: Add
+review_authors_authors: Current Description Authors
+review_authors_denied: >
+  Only existing authors and reviewers can change the description authors.
+
+review_authors_note: >
+  This page changes the recorded author(s) of a taxon description on the
+  Mushroom Observer website.  This is in no direct way related to the original
+  publishing author of the taxon.
+
+review_authors_review_authors: Review Authors
+review_authors_other_users: Other Users
+review_authors_remove_author: Remove
+review_authors_title: Reviewing Author(s) for [name]
 
 
 # project/change_member_status
@@ -1689,11 +1709,14 @@ show_location_title: 'Location: [name]'
 
 # name/show_name
 show_name_add_name: Add Name
+show_name_author_request: Request Authorship Credit
 show_name_bulk_name_edit: Bulk Name Edit
 show_name_change_synonyms: Change Synonyms
-show_name_content_status: Content status
+show_name_content_status: Description status
 show_name_create_draft: Create New Draft for
 show_name_deprecated_synonyms: Deprecated Synonym(s)
+show_name_description_author: Description author
+show_name_description_editor: Description editor
 show_name_distribution_map: Distribution Map
 show_name_draft_help: >
   Drafts are new versions of the description fields for a name being worked on
@@ -1832,6 +1855,7 @@ show_user_comments_for_you: Comments for You
 show_user_contributors: Contributors
 show_user_edit_profile: Edit Profile
 show_user_email_to: Email [name]
+show_user_joined: Joined Mushroom Observer
 show_user_mailing_address: Mailing Address for Collections
 show_user_observations_by: Observations by [name]
 show_user_primary_location: Primary Location

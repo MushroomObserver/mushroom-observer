@@ -34,6 +34,7 @@
           :controller => "image", :action => "show_image", :id => @show_user.image_id)
 end %>
 
+<b><%= :show_user_joined.t %>:</b> <%= @show_user.verified %><br/>
 <% if @show_user.location %>
   <b><%= :show_user_primary_location.t %>:</b> <%= location_link(nil, @show_user.location.id) %><br/>
 <% end %>

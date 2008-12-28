@@ -266,6 +266,7 @@ rank_plural_variety: Varietäten
 
 # site statistics field names
 site_stats_images: Bilder
+site_stats_listed_taxa: Listed Taxa
 site_stats_names: Beschreibungen
 site_stats_past_names: Änderungen von Beschreibungen
 site_stats_locations: Fundorte
@@ -425,14 +426,16 @@ add_user_to_group_title: Nutzer zu Gruppe hinzufügen
 add_user_to_group_user: Nutzer-Name
 
 
-# admin_request email
+# admin_request/author_request emails
 admin_request_change_member_status: Status des Nutzers ändern
-admin_request_handy_links: Vielleicht helfen dir diese nützlichen Links weiter.
-admin_request_message: Nachricht
-admin_request_show_user: Angaben zum Absender anzeigen
-admin_request_subject: Thema
-admin_request_success: Email geschickt.
 admin_request_title: Admin-Anfrage zu [title]
+author_request_add_author: Make Sender an Author
+author_request_title: Authorship Request for [title]
+request_handy_links: Vielleicht helfen dir diese nützlichen Links weiter.
+request_message: Nachricht
+request_show_user: Angaben zum Absender anzeigen
+request_subject: Thema
+request_success: Email geschickt.
 
 
 # observer/ask_observation_question
@@ -479,6 +482,23 @@ ask_webmaster_your_email: Deine Email-Adresse
 
 # observer/license_updater
 bulk_license_link: Bulk License Updater
+
+
+# project/review_authors
+review_authors_add_author:  Add
+review_authors_authors:  Current Description Authors
+review_authors_denied:  >
+  Only existing authors and reviewers can change the description authors.
+
+review_authors_note:  >
+  This page changes the recorded author(s) of a taxon description on the
+  Mushroom Observer website.  This is in no direct way related to the original
+  publishing author of the taxon.
+
+review_authors_review_authors:  Review Authors
+review_authors_other_users:  Other Users
+review_authors_remove_author:  Remove
+review_authors_title:  Reviewing Author(s) for [name]
 
 
 # project/change_member_status
@@ -1704,11 +1724,14 @@ show_location_title: 'Fundort: [name]'
 
 # name/show_name
 show_name_add_name: Namen hinzufügen
+show_name_author_request:  Request Authorship Credit
 show_name_bulk_name_edit: Viele Namen auf einmal bearbeiten
 show_name_change_synonyms: Synonyme ändern
 show_name_content_status: Status des Inhalts
 show_name_create_draft: Neuen Entwurf erstellen für
 show_name_deprecated_synonyms: Veraltete Synonyme (veraltetes Synonym)
+show_name_description_author:  Description author
+show_name_description_editor:  Description editor
 show_name_distribution_map: Verbreitungskarte
 show_name_draft_help: >
   Entwürfe sind neue Versionen der Beschreibungsfelder für einen Namen, an denen
@@ -1848,6 +1871,7 @@ show_user_comments_for_you: Kommentare für dich
 show_user_contributors: Mitwirkende
 show_user_edit_profile: Profil bearbeiten
 show_user_email_to: Email [name]
+show_user_joined:  Joined Mushroom Observer
 show_user_mailing_address: Postanschrift für Sammlungen
 show_user_observations_by: Funde von [name]
 show_user_primary_location: Hauptfundort

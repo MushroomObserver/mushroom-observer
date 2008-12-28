@@ -51,6 +51,10 @@ class AccountMailerTest < Test::Unit::TestCase
       AccountMailer.create_admin_request(@katrina, @eol_project,
         'Please do something or other', 'and this is why...').encoded)
 
+    assert_string_equal_file("#{FIXTURES_PATH}/author_request",
+      AccountMailer.create_author_request(@katrina, @coprinus_comatus,
+        'Please do something or other', 'and this is why...').encoded)
+
     assert_string_equal_file("#{FIXTURES_PATH}/observation_question",
       AccountMailer.create_observation_question(@rolf, @detailed_unknown,
         'Where did you find it?').encoded)
@@ -67,5 +71,8 @@ class AccountMailerTest < Test::Unit::TestCase
 
     assert_string_equal_file("#{FIXTURES_PATH}/naming_for_tracker",
       AccountMailer.create_naming_for_tracker(@mary, @agaricus_campestris_naming).encoded)
+
+    assert_string_equal_file("#{FIXTURES_PATH}/publish_name",
+      AccountMailer.create_publish_name(@mary, @rolf, @agaricus_campestris).encoded)
   end
 end

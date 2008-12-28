@@ -74,6 +74,8 @@ class User < ActiveRecord::Base
   has_many :projects
   
   has_and_belongs_to_many :user_groups
+  has_and_belongs_to_many :authored_names, :class_name => "Name", :join_table => "authors_names"
+  has_and_belongs_to_many :edited_names, :class_name => "Name", :join_table => "editors_names"
   
   belongs_to :license       # user's default license
   belongs_to :image         # mug shot

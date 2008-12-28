@@ -13,6 +13,6 @@ and this is why...
 Here are some handy links that you may find useful
 
 Show details on sender: http://localhost:3000/observer/show_user/5
-Change User's Status: http://localhost:3000/project/change_user_status/1?user=5
+Change User's Status: http://localhost:3000/project/change_user_status/1?candidate=5
 
 If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org

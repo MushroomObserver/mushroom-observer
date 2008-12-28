@@ -43,7 +43,18 @@ module ApplicationHelper
     rescue
     end
   end
-
+  
+  def user_list(title, users)
+    result = ''
+    count = users.length
+    if count > 0
+      result = (count > 1 ? title.pluralize : title) + ": "
+      result += users.map {|u| user_link(u, u.legal_name)}.join(', ')
+      result += "<br/>"
+    end
+    result
+  end
+  
   # Returns link to the given project.
   def project_link(project, name=nil)
     begin

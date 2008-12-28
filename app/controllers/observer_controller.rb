@@ -1077,6 +1077,8 @@ class ObserverController < ApplicationController
     if result.length == 1
       @observed_taxa_count = result[0]['c']
     end
+    
+    @listed_taxa = Name.find(:all).size()
   end
 
   # Admin util linked from show_user page that lets admin add or change bonuses for a given user.
