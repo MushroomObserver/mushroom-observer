@@ -1,0 +1,10 @@
+<%= @message %>
+
+--------------------------------------------------
+
+<%= :request_handy_links.l %>
+
+<%= :request_show_user.l %>: <%= "#{DOMAIN}/observer/show_user/#{@sender.id}" %>
+<%= :author_request_add_author.l %>: <%= "#{DOMAIN}/name/review_authors/#{@name.id}?add=#{@sender.id}" %>
+
+If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org

@@ -1,0 +1,18 @@
+From: news@mushroomobserver.org
+Reply-To: katrina@collectivesource.com
+To: rolf@collectivesource.com
+Bcc: nathan@collectivesource.com
+Subject: Please do something or other
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+and this is why...
+
+--------------------------------------------------
+
+Here are some handy links that you may find useful
+
+Show details on sender: http://localhost:3000/observer/show_user/5
+Make Sender an Author: http://localhost:3000/name/review_authors/2?add=5
+
+If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org

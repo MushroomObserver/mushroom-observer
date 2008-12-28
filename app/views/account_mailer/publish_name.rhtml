@@ -1,0 +1,30 @@
+<%
+    if @user.html_email
+%>
+<html>
+<head>
+  <title>Mushroom Observer: Name Publication</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+
+    <p>
+      A description of the name, <a href="<%= "#{DOMAIN}/name/show_name/#{@name.id}" %>"><%= @name.display_name.t %></a>,
+      has been published on the Mushroom Observer website.  You are receiving this email since you are listed as either
+      an author for this taxon or as a reviewer on the site.
+    </p>
+    <p>
+    Publisher: <a href="<%= "#{DOMAIN}/observer/observer/show_user/#{@publisher.id}" %>"><%= @publisher.legal_name %></a>
+    </p>
+  </div>
+
+</body>
+</html>
+<% else ##################################################################### %>
+A description of the name, <%= @name.text_name %>, has been published on the
+Mushroom Observer website.  You are receiving this email since you are listed
+as either an author for this taxon or as a reviewer on the site.
+
+Observer: <%= @publisher.legal_name %> (<%= "#{DOMAIN}/observer/observer/show_user/#{@publisher.id}" %>)
+Name: <%= @name.search_name %> (<%= "#{DOMAIN}/observer/name/show_name/#{@name.id}" %>)
+<% end %>
