@@ -416,7 +416,7 @@ class NameController < ApplicationController
     end
     result
   end
-
+  
   # show_name.rhtml -> edit_name.rhtml
   # Updates modified and saves changes
   def edit_name
@@ -444,6 +444,9 @@ class NameController < ApplicationController
         author = (params[:name][:author] || '').strip
         begin
           all_notes = {}
+          logger.warn("Before parse: #{params[:name][:classification]}")
+          params[:name][:classification] = Name.validate_classification(params[:name][:rank], params[:name][:classification])
+          logger.warn("After parse: #{params[:name][:classification]}")
           for f in Name.all_note_fields
             all_notes[f] = params[:name][f]
           end
@@ -476,7 +479,7 @@ class NameController < ApplicationController
           else
             @name.license_id = nil
           end
-          raise :runtime_update_nonexisting_name.t if !@name.id
+          raise user_update_nonexisting_name.t if !@name.id
           if is_reviewer
             @name.reviewer = @user
             @name.last_review = Time.now()
@@ -506,6 +509,7 @@ class NameController < ApplicationController
         rescue RuntimeError => err
           flash_error(err.to_s)
           flash_object_errors(@name)
+          @name.attributes = params[:name]
         else
           redirect_to(:action => 'show_name', :id => @name.id)
         end

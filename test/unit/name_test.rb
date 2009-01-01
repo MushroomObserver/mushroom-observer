@@ -320,6 +320,131 @@ class NameTest < Test::Unit::TestCase
     )
   end
 
+  def do_parse_classification_test(text, expected)
+    begin
+      parse = Name.parse_classification(text)
+      assert_equal(expected, parse)
+    rescue RuntimeError => err
+      raise err if expected
+    end
+  end
+
+  def test_parse_classification_1
+    do_parse_classification_test("Kingdom: Fungi", [[:Kingdom, "Fungi"]])
+  end
+
+  def test_parse_classification_2
+    do_parse_classification_test(%(Kingdom: Fungi\r
+      Phylum: Basidiomycota\r
+      Class: Basidiomycetes\r
+      Order: Agaricales\r
+      Family: Amanitaceae\r
+      Genus: Amanita),
+      [[:Kingdom, "Fungi"],
+       [:Phylum, "Basidiomycota"],
+       [:Class, "Basidiomycetes"],
+       [:Order, "Agaricales"],
+       [:Family, "Amanitaceae"],
+       [:Genus, "Amanita"]
+      ])
+  end
+
+  def test_parse_classification_3
+    do_parse_classification_test(%(Kingdom: Fungi\r
+      \r
+      Genus: Amanita),
+      [[:Kingdom, "Fungi"],
+       [:Genus, "Amanita"]
+      ])
+  end
+
+  def test_parse_classification_4
+    do_parse_classification_test(%(Kingdom: _Fungi_\r
+      Genus: _Amanita_),
+      [[:Kingdom, "Fungi"],
+       [:Genus, "Amanita"]
+      ])
+  end
+
+  def test_parse_classification_5
+    do_parse_classification_test("Queendom: Fungi", [[:Queendom, "Fungi"]])
+  end
+
+  def test_parse_classification_6
+    do_parse_classification_test("Junk text", false)
+  end
+
+  def test_parse_classification_7
+    do_parse_classification_test(%(Kingdom: Fungi\r
+      Junk text\r
+      Genus: Amanita), false)
+  end
+
+  def do_validate_classification_test(rank, text, expected)
+    begin
+      result = Name.validate_classification(rank, text)
+      assert_equal(expected, result)
+    rescue RuntimeError => err
+      raise err if expected
+    end
+  end
+
+  def test_validate_classification_1
+    do_validate_classification_test(:Species, "Kingdom: Fungi", "Kingdom: _Fungi_")
+  end
+
+  def test_validate_classification_2
+    do_validate_classification_test(:Species, %(Kingdom: Fungi\r
+      Phylum: Basidiomycota\r
+      Class: Basidiomycetes\r
+      Order: Agaricales\r
+      Family: Amanitaceae\r
+      Genus: Amanita),
+      "Kingdom: _Fungi_\r\nPhylum: _Basidiomycota_\r\nClass: _Basidiomycetes_\r\n" +
+      "Order: _Agaricales_\r\nFamily: _Amanitaceae_\r\nGenus: _Amanita_")
+  end
+
+  def test_validate_classification_3
+    do_validate_classification_test(:Species, %(Kingdom: Fungi\r
+      \r
+      Genus: Amanita),
+      "Kingdom: _Fungi_\r\nGenus: _Amanita_")
+  end
+
+  def test_validate_classification_4
+    do_validate_classification_test(:Species, %(Kingdom: _Fungi_\r
+      Genus: _Amanita_),
+      "Kingdom: _Fungi_\r\nGenus: _Amanita_")
+  end
+
+  def test_validate_classification_5
+    do_validate_classification_test(:Species, "Queendom: Fungi", false)
+  end
+
+  def test_validate_classification_6
+    do_validate_classification_test(:Species, "Junk text", false)
+  end
+
+  def test_validate_classification_7
+    do_validate_classification_test(:Genus, "Species: calyptroderma", false)
+  end
+
+  def test_validate_classification_8
+    do_validate_classification_test(:Species, "Genus: Amanita", "Genus: _Amanita_")
+  end
+
+  def test_validate_classification_9
+    do_validate_classification_test(:Queendom, "Genus: Amanita", false)
+  end
+
+  def test_validate_classification_10
+    do_validate_classification_test(:Species, "", "")
+  end
+
+  def test_validate_classification_11
+    do_validate_classification_test(:Species, nil, nil)
+  end
+
   # def dump_list_of_names(list)
   #   for n in list do
   #     print "id=#{n.id}, text_name='#{n.text_name}', author='#{n.author}'\n"

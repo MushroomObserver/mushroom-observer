@@ -44,7 +44,7 @@
 <% for f in Name.all_note_fields %>
   <p>
     <label for="name_notes"><%= "form_names_#{f}".to_sym.t %>:</label>
-    <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.t %></span><br/>
+    <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l %></span><br/>
     <%= text_area('name', "#{f}", :cols => 80) %>
   </p>
   <center><%= submit_tag button %></center>

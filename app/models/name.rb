@@ -145,6 +145,7 @@ class Name < ActiveRecord::Base
 
   # Returns: array of symbols.  Essentially a constant array.
   def self.min_eol_note_fields()
+    # These fields all get handled the same way when they go to EOL
     [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
   end
 
@@ -153,7 +154,10 @@ class Name < ActiveRecord::Base
   end
 
   def self.all_note_fields()
-    eol_note_fields.push(:notes)
+    # :classification behaves very differently for EOL output
+    # :notes get ignored.
+    # Order is important for ui layout
+    [:classification] + eol_note_fields + [:notes]
   end
 
   # Creates RSS log as necessary.
@@ -215,6 +219,51 @@ class Name < ActiveRecord::Base
     Name.find(:first, :conditions => ['text_name = ?', 'Fungi'])
   end
 
+  def self.validate_classification(rank, text)
+    # Input: rank is expect to be a valid rank.
+    #        text is expect to meet the requirements of parse_classification.
+    # Output: Standardized classification string.  <name>s are automatically surrounded by underscores.
+    # Throws a runtime error if any of the ranks in text are unknown or less than or equal to rank.
+    result = text
+    if text
+      parsed_names = []
+      rank_index = Name.all_ranks.index(rank.to_sym)
+      raise :runtime_user_bad_rank.t(:rank => rank) if rank_index.nil?
+      for (line_rank, line_name) in parse_classification(text)
+        line_rank_index = Name.all_ranks.index(line_rank)
+        raise :runtime_user_bad_rank.t(:rank => line_rank) if line_rank_index.nil?
+        raise :runtime_invalid_rank.t(:line_rank => line_rank, :rank => rank) if line_rank_index <= rank_index
+        parsed_names.push("#{line_rank}: _#{line_name}_")
+      end
+      if parsed_names != []
+        result = parsed_names.join("\r\n")
+      end
+    end
+    result
+  end
+
+  def self.parse_classification(text)
+    # Input: Text is expected to be multiple lines with each line of the form:
+    #        <rank>: <name>
+    #   <name> can be surrounded by underscores.  Extra whitespace is ignored.
+    # Output: List of [rank, name]
+    # Throws a runtime error if lines don't match.
+    results = []
+    if text
+      for line in text.split("\r\n")
+        match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
+        if match
+          line_rank = match[1].downcase.capitalize.to_sym
+          line_name = match[2]
+          results.push([line_rank, line_name])
+        elsif line.strip() != ''
+          raise :runtime_invalid_classification.t(:text => line)
+        end
+      end
+    end
+    return results
+  end
+  
   # Textilize a string: itallicize at least, and boldify it unless deprecated.
   # Returns: an adulterated copy of the string.
   # This is used throughout this file and nowhere else.

@@ -842,6 +842,12 @@ form_names_citation_help: Referenz zur Veröffentlichung dieses Namens
 form_names_citation_textilize_note: >
   Du kannst die Referenzen mit Hilfe des Textile Markup Systems formatieren.
 
+form_names_classification:  Taxonomic classification
+form_names_classification_help:  >
+  Each line should be of the form 'Rank: name'.  A given rank must
+  only appear once and it must higher than the rank of the description. E.g.,<br/>
+  Family: _Amanitaceae_
+
 form_names_diag_desc: Beschreibung der Kennzeichen
 form_names_diag_desc_help: >
   Gib an, was dieses Taxon von nah verwandten Taxa unterscheidet.
@@ -1624,6 +1630,9 @@ runtime_unable_to_create_name: Kann den Namen '[name]' nicht erstellen.
 runtime_unable_to_transfer_name: Kann nicht von [name] zu anderen Synonymen übertragen.
 runtime_unrecognized_rank: Rang '[rank]' nicht erkannt.
 runtime_update_nonexisting_name: Update_name wurde auf einen Namen angewandt, den es nicht gibt.
+runtime_user_bad_rank:  Unrecognized rank '[rank]'
+runtime_invalid_rank:  The rank [line_rank] is the same as or below [rank]
+runtime_invalid_classification:  Unable to parse '[text]'
 
 
 # observer/textile

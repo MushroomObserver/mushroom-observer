@@ -13,7 +13,9 @@ xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
       xml.taxon do
         xml.dc(:identifier, "#{DOMAIN}/name/show_name/#{taxon.id}")
         xml.dc(:source, "#{DOMAIN}/name/show_name/#{taxon.id}")
-        xml.dwc(:Kingdom, "Fungi")
+        for (rank, name) in Name.parse_classification(taxon.classification)
+          xml.dwc(rank, name)
+        end
         xml.dwc(:ScientificName, taxon.search_name)
         xml.dcterms(:modified, taxon.modified.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
         citation = taxon.citation
