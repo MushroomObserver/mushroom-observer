@@ -743,6 +743,12 @@ eol_need_review_title: EOL Need Review
 
 
 # name/eol_preview
+eol_preview_name_count: >
+  Descriptions ready for EOL: [count]
+
+eol_preview_image_count: >
+  Images ready for EOL: [count]
+
 eol_preview_title: EOL Preview
 eol_preview_explanation: >
   This page provides links to or shows the content that is currently scheduled
@@ -841,8 +847,8 @@ form_names_classification: Taxonomic classification
 form_names_classification_help: >
   Each line should be of the form 'Rank: name'.  A given rank must
   only appear once and it must higher than the rank of the description. E.g.,<br/>
-  Family: _Amanitaceae_
-  
+  Family: _Pluteaceae_
+
 form_names_diag_desc: Diagnostic Description
 form_names_diag_desc_help: >
   Describe what distinguishes this taxon from closely related taxa.
