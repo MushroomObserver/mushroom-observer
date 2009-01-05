@@ -870,7 +870,7 @@ form_names_classification:  Taxonomic classification
 form_names_classification_help:  >
   Each line should be of the form 'Rank: name'.  A given rank must
   only appear once and it must higher than the rank of the description. E.g.,<br/>
-  Family: _Amanitaceae_
+  Family: _Pluteaceae_
 
 form_names_diag_desc: Descripción Diagnóstica
 form_names_diag_desc_help: >

@@ -827,7 +827,7 @@ class NameController < ApplicationController
     rsl_list = review_status_list.join("', '")
     names = Name.find(:all, :conditions => "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1", :order => "search_name")
     image_data = Name.connection.select_all %(
-      SELECT name_id, image_id, observation_id, images.user_id, images.license_id
+      SELECT name_id, image_id, observation_id, images.user_id, images.license_id, images.created
       FROM names, observations, images_observations, images
       WHERE names.id = observations.name_id
       AND observations.id = images_observations.observation_id
@@ -841,7 +841,7 @@ class NameController < ApplicationController
     @licenses = {}
     for row in image_data
       name_id = row['name_id'].to_i
-      image_datum = [row['image_id'], row['observation_id']]
+      image_datum = [row['image_id'], row['observation_id'], row['user_id'], row['license_id'], row['created']]
       @image_data[name_id] = [] unless @image_data[name_id]
       @image_data[name_id].push(image_datum)
       user_id = row['user_id'].to_i

@@ -46,19 +46,18 @@ xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
           end
         end
         if @image_data[taxon.id]
-          for image_id, observation_id in @image_data[taxon.id]
-            image = Image.find(image_id)
+          for image_id, observation_id, user_id, license_id, created in @image_data[taxon.id]
             xml.dataObject do
-              xml.dc(:identifier, "Image-#{image.id}")
+              xml.dc(:identifier, "Image-#{image_id}")
               xml.dataType("http://purl.org/dc/dcmitype/StillImage")
               xml.mimeType("image/jpeg")
-              xml.agent(@users[image.user_id], :role => "photographer") # Illustrations need to be identified
-              xml.dcterms(:created, image.created.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
-              xml.license(@licenses[image.license_id])
-              xml.dcterms(:rightsHolder, @users[image.user_id])
+              xml.agent(@users[user_id], :role => "photographer") # Illustrations need to be identified
+              xml.dcterms(:created, Time.parse(created).utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
+              xml.license(@licenses[license_id])
+              xml.dcterms(:rightsHolder, @users[user_id])
               xml.audience('General public')
               xml.dc(:description, taxon.search_name, "xml:lang" => "en")
-              xml.mediaURL("#{DOMAIN}/images/640/#{image.id}.jpg")
+              xml.mediaURL("#{DOMAIN}/images/640/#{image_id}.jpg")
               # xml.reviewStatus(image.review_status)
             end
           end
