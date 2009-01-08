@@ -821,7 +821,7 @@ class NameController < ApplicationController
     end
   end
 
-  def eol_data(review_status_list, last_name=None)
+  def eol_data(review_status_list, last_name=nil)
     rsl_list = review_status_list.join("', '")
     conditions = "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1"
     conditions += " and text_name > '#{last_name}'" if last_name
