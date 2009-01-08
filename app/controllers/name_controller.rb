@@ -444,9 +444,7 @@ class NameController < ApplicationController
         author = (params[:name][:author] || '').strip
         begin
           all_notes = {}
-          logger.warn("Before parse: #{params[:name][:classification]}")
           params[:name][:classification] = Name.validate_classification(params[:name][:rank], params[:name][:classification])
-          logger.warn("After parse: #{params[:name][:classification]}")
           for f in Name.all_note_fields
             all_notes[f] = params[:name][f]
           end
@@ -823,9 +821,12 @@ class NameController < ApplicationController
     end
   end
 
-  def eol_data(review_status_list)
+  def eol_data(review_status_list, last_name=None)
     rsl_list = review_status_list.join("', '")
-    names = Name.find(:all, :conditions => "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1", :order => "search_name")
+    conditions = "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1"
+    conditions += " and text_name > '#{last_name}'" if last_name
+    names = Name.find(:all, :conditions => conditions, :order => "search_name")
+    
     image_data = Name.connection.select_all %(
       SELECT name_id, image_id, observation_id, images.user_id, images.license_id, images.created
       FROM names, observations, images_observations, images
@@ -845,13 +846,9 @@ class NameController < ApplicationController
       @image_data[name_id] = [] unless @image_data[name_id]
       @image_data[name_id].push(image_datum)
       user_id = row['user_id'].to_i
-      unless @users[user_id]
-        @users[user_id] = User.find(user_id).legal_name
-      end
+      @users[user_id] = User.find(user_id).legal_name unless @users[user_id]
       license_id = row['license_id'].to_i
-      unless @licenses[license_id]
-        @licenses[license_id] = License.find(license_id).url
-      end
+      @licenses[license_id] = License.find(license_id).url unless @licenses[license_id]
     end
     @names = []
     @authors = {} # Maps name.id -> lists of user.ids
@@ -864,11 +861,12 @@ class NameController < ApplicationController
         authors = [n.user_id] if authors == []
         @authors[n.id] = authors
         for author in authors
-          unless @users[author]
-            @users[author] = User.find(author).legal_name
+          author_id = author.to_i
+          unless @users[author_id]
+            @users[author_id] = User.find(author_id).legal_name
           end
         end
-        @authors[n.id] = (authors.map {|id| @users[id]}).join(', ')
+        @authors[n.id] = (authors.map {|id| @users[id.to_i]}).join(', ')
         unless n.license_id.nil? or @licenses[n.license_id]
           @licenses[n.license_id] = n.license.url
         end
@@ -878,7 +876,9 @@ class NameController < ApplicationController
 
   def eol
     headers["Content-Type"] = "application/xml"
-    eol_data(['unvetted', 'vetted'])
+    @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
+    @start = Time.now()
+    eol_data(['unvetted', 'vetted'], params[:last_name])
     render(:action => "eol", :layout => false)
   end
 
