@@ -1,5 +1,5 @@
 <%
-  @title = :name_approve_title.t(@name.display_name)
+  @title = :name_approve_title.t(:name => @name.display_name)
 
   new_tab_set do
     add_tab(:app_cancel.t(:type => :name.l),
