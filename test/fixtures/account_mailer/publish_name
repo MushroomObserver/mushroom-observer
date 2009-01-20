@@ -1,7 +1,7 @@
 From: news@mushroomobserver.org
 To: rolf@collectivesource.com
 Bcc: nathan@collectivesource.com
-Subject: [:email_publish_name_subject]
+Subject: [MO] Name Published
 Mime-Version: 1.0
 Content-Type: text/html; charset=utf-8
 
@@ -19,7 +19,7 @@ Content-Type: text/html; charset=utf-8
       an author for this taxon or as a reviewer on the site.
     </p>
     <p>
-    Publisher: <a href="http://localhost:3000/observer/observer/show_user/2">Mary Newbie</a>
+    Publisher: <a href="http://localhost:3000/observer/show_user/2">Mary Newbie</a>
     </p>
   </div>
 
