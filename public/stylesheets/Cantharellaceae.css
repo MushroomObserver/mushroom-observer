@@ -52,6 +52,10 @@ li.selected { background-color: #f6ae4a ! important }
       color: #c18346; /* tubaeformis */
 }
 
+.ListLine0 a:hover {
+     color: #10110b;
+}
+
 /* Colors for odd lines */
 .ListLine1 {
       background-color: #4f4337; color: #e5bb67; /* cornucopioides & tubaeformis */
@@ -64,4 +68,8 @@ li.selected { background-color: #f6ae4a ! important }
 
 .ListLine1 a:visited {
       color: #9b9690; /* cornucopioides */
+}
+
+.ListLine1 a:hover {
+     color: #10110b;
 }

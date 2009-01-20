@@ -22,11 +22,13 @@ Disallow: /location/add_to_location/
 Disallow: /location/auto_complete_location/
 Disallow: /location/create_location/
 Disallow: /location/edit_location/
+Disallow: /location/list_merge_options
 Disallow: /location/list_merge_options/
 Disallow: /location/map_locations
 Disallow: /location/map_locations/
 Disallow: /location/where_search/
 Disallow: /name/approve_name/
+Disallow: /name/author_request/
 Disallow: /name/auto_complete_name
 Disallow: /name/bulk_name_edit/
 Disallow: /name/change_synonyms/
@@ -37,6 +39,7 @@ Disallow: /name/email_tracking/
 Disallow: /name/eol
 Disallow: /name/eol_preview
 Disallow: /name/name_search/
+Disallow: /name/review_authors/
 Disallow: /observer/add_comment/
 Disallow: /observer/approve_name/
 Disallow: /observer/ask_observation_question/
@@ -45,7 +48,7 @@ Disallow: /observer/ask_webmaster_question
 Disallow: /observer/change_synonyms/
 Disallow: /observer/commercial_inquiry/
 Disallow: /observer/create_naming/
-Disallow: /observer/create_observation/
+Disallow: /observer/create_observation
 Disallow: /observer/create_species_list/
 Disallow: /observer/deprecate_name/
 Disallow: /observer/destroy_naming/
@@ -55,6 +58,7 @@ Disallow: /observer/edit_naming/
 Disallow: /observer/edit_observation/
 Disallow: /observer/email_features
 Disallow: /observer/license_updater/
+Disallow: /observer/list_images/
 Disallow: /observer/location_search
 Disallow: /observer/location_search/
 Disallow: /observer/manage_species_lists/
@@ -66,8 +70,13 @@ Disallow: /observer/observations_by_name/
 Disallow: /observer/pattern_search/
 Disallow: /observer/prev_observation/
 Disallow: /observer/recalc/
+Disallow: /observer/show_image/
+Disallow: /observer/show_name/
+Disallow: /observer/show_past_name/
+Disallow: /observer/show_species_list/
 Disallow: /observer/textile_sandbox
 Disallow: /observer/users_by_name/
+Disallow: /project/show_draft/
 Disallow: /species_list/add_observation_to_species_list/
 Disallow: /species_list/create_species_list/
 Disallow: /species_list/edit_species_list/

@@ -37,7 +37,7 @@
         <%= entry.id %>
       </td>
       <td>
-        <%= entry.user.login %>
+        <%= entry.user ? entry.user.login : '' %>
       </td>
       <td>
         <%= entry.created_at %>

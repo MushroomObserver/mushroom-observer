@@ -28,6 +28,14 @@ li.selected { background-color: #eccf95 ! important }
     background-color: #bc9d89; /* semotus */
 }
 
+#banner a {
+    color: #3b2821; /* cupreobrunneus */
+}
+
+#banner a:visited {
+    color: #3b2821; /* cupreobrunneus */
+}
+
 
 /* Colors for the left hand panel */
 .LeftSide {

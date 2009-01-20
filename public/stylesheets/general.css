@@ -87,6 +87,10 @@ pre {
   text-align: center;
 }
 
+#banner a {
+  text-decoration: none;
+}
+
 #columns {
 }
 

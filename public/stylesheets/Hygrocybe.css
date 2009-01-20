@@ -20,6 +20,14 @@ li.selected { background-color: #f19c05 ! important }
     background-color: #cc382a; /* punica cap-light */
 }
 
+#banner a {
+    color: #37372f; /* conica stain */
+}
+
+#banner a:visited {
+    color: #37372f; /* conica stain */
+}
+
 
 /* Colors for the left hand panel */
 .LeftSide {
@@ -52,6 +60,10 @@ li.selected { background-color: #f19c05 ! important }
       color: #e7bc3c; /* punicea light-stipe */
 }
 
+.ListLine0 a:hover {
+      color: #37372f; /* conica stain */
+}
+
 /* Colors for odd lines */
 .ListLine1 {
       background-color: #ffbf01; /* conica cap-yellow */
@@ -64,4 +76,8 @@ li.selected { background-color: #f19c05 ! important }
 
 .ListLine1 a:visited {
       color: #dd6226; /* conica cap-orange */
+}
+
+.ListLine1 a:hover {
+      color: #37372f; /* conica stain */
 }

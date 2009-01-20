@@ -1,3 +1,7 @@
+order allow,deny
+deny from 78.37.44.195
+allow from all
+
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /

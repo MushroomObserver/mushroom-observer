@@ -14,7 +14,7 @@
       an author for this taxon or as a reviewer on the site.
     </p>
     <p>
-    Publisher: <a href="<%= "#{DOMAIN}/observer/observer/show_user/#{@publisher.id}" %>"><%= @publisher.legal_name %></a>
+    Publisher: <a href="<%= "#{DOMAIN}/observer/show_user/#{@publisher.id}" %>"><%= @publisher.legal_name %></a>
     </p>
   </div>
 
@@ -25,6 +25,6 @@ A description of the name, <%= @name.text_name %>, has been published on the
 Mushroom Observer website.  You are receiving this email since you are listed
 as either an author for this taxon or as a reviewer on the site.
 
-Observer: <%= @publisher.legal_name %> (<%= "#{DOMAIN}/observer/observer/show_user/#{@publisher.id}" %>)
-Name: <%= @name.search_name %> (<%= "#{DOMAIN}/observer/name/show_name/#{@name.id}" %>)
+Observer: <%= @publisher.legal_name %> (<%= "#{DOMAIN}/observer/show_user/#{@publisher.id}" %>)
+Name: <%= @name.search_name %> (<%= "#{DOMAIN}/name/show_name/#{@name.id}" %>)
 <% end %>

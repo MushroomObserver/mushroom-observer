@@ -136,7 +136,7 @@ class RssLog < ActiveRecord::Base
     elsif species_list = self.species_list
       result = sprintf("/observer/show_species_list/%d?time=%d", species_list.id, self.modified.tv_sec)
     elsif name = self.name
-      result = sprintf("/observer/show_name/%d?time=%d", name.id, self.modified.tv_sec)
+      result = sprintf("/name/show_name/%d?time=%d", name.id, self.modified.tv_sec)
     else
       result = sprintf("/observer/show_rss_log/%d?time=%d", self.id, self.modified.tv_sec)
     end
