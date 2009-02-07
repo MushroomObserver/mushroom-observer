@@ -186,6 +186,7 @@ class NameController < ApplicationController
     @layout = calc_layout_params
     query = calc_advanced_search_query("SELECT DISTINCT names.id, names.display_name FROM observations",
       Set.new(['names']), params)
+    query += " ORDER BY names.text_name asc, names.author asc"
     show_name_data(:advanced_search_title.l, Name.connection.select_all(query), :advanced_search_none_found.t)
   end
 
