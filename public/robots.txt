@@ -7,6 +7,7 @@ Disallow: /comment/destroy_comment/
 Disallow: /comment/edit_comment/
 Disallow: /image/add_image/
 Disallow: /image/add_image_to_obs/
+Disallow: /image/advanced_obj_search
 Disallow: /image/destroy_image/
 Disallow: /image/edit_image/
 Disallow: /image/image_search/
@@ -27,6 +28,7 @@ Disallow: /location/list_merge_options/
 Disallow: /location/map_locations
 Disallow: /location/map_locations/
 Disallow: /location/where_search/
+Disallow: /name/advanced_obj_search
 Disallow: /name/approve_name/
 Disallow: /name/author_request/
 Disallow: /name/auto_complete_name
@@ -41,6 +43,9 @@ Disallow: /name/eol_preview
 Disallow: /name/name_search/
 Disallow: /name/review_authors/
 Disallow: /observer/add_comment/
+Disallow: /observer/advanced_obj_search
+Disallow: /observer/advanced_search
+Disallow: /observer/advanced_search_results
 Disallow: /observer/approve_name/
 Disallow: /observer/ask_observation_question/
 Disallow: /observer/ask_user_question/

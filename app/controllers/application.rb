@@ -873,9 +873,9 @@ class ApplicationController < ActionController::Base
     session[:checklist_source] = search_state.source
     session_setup
     case obj_type
-    when :observations
+    when :observations, :advanced_observations
       type = Observation
-    when :images
+    when :images, :advanced_images
       type = Image
     end
     session[:observation] = nil
@@ -914,5 +914,45 @@ class ApplicationController < ActionController::Base
     search_params[:seq_key] = @seq_key if @seq_key
     search_params[:obs] = @obs if @obs
     search_params
+  end
+  
+  def calc_condition(pat, fields, tables, conditions, table_set)
+    if pat.nil?
+      pat = ''
+    end
+    pat = pat.strip()
+    if pat != ''
+      clean_pat = pat.gsub(/[*']/,"%")
+      new_conditions = fields.map {|f| "#{f} like '%#{clean_pat}%'"}
+      conditions.push("(#{new_conditions.join(' or ')})")
+      for t in tables
+        table_set.add(t)
+      end
+    end
+  end
+
+  def calc_advanced_search_query(query, table_set, params)
+    conditions = []
+    if params['search']
+      calc_condition(params['search']['name'], ['names.search_name'], ['names'], conditions, table_set)
+      calc_condition(params['search']['observer'], ['users.login', 'users.name'], ['users'], conditions, table_set)
+      calc_condition(params['search']['location'], ['locations.search_name', 'observations.where'],
+        ['locations'], conditions, table_set)
+      calc_condition(params['search']['content'], ['observations.notes', 'comments.summary', 'comments.comment'],
+        ['comments'], conditions, table_set)
+    end
+    join_conditions = {
+      'users' => 'observations.user_id = users.id',
+      'comments' => 'comments.object_id = observations.id',
+      'locations' => 'locations.id = observations.location_id',
+      'names' => 'observations.name_id = names.id',
+      'images' => 'images.id = images_observations.image_id',
+      'images_observations' => 'observations.id = images_observations.observation_id'
+    }
+    for table in table_set
+      query += ", #{table}"
+      conditions.push(join_conditions[table])
+    end
+    query += ' WHERE ' + conditions.join(' AND ') if conditions != []
   end
 end

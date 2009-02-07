@@ -44,7 +44,10 @@ class SearchState < ActiveRecord::Base
       :other_observations,
       :observations,
       :images,
-      :rss_logs
+      :rss_logs,
+      :advanced_observations,
+      :advanced_images,
+      :advanced_names
     ]
   end
 
@@ -123,6 +126,7 @@ class SearchState < ActiveRecord::Base
   def query()
     result = nil
     order = self.order
+    conditions = self.conditions
     case self.query_type
     when :species_list_observations
       result = %(
@@ -160,6 +164,18 @@ class SearchState < ActiveRecord::Base
         from names, observations
         left outer join locations on observations.location_id = locations.id
         where observations.name_id = names.id"
+    when :advanced_observations, :advanced_images, :advanced_names
+      result = conditions
+      conditions = nil
+    when :adv_obs_comments
+      result = %(
+        SELECT observations.*, names.search_name
+        FROM observations, names, locations, users, comments
+        WHERE observations.name_id = names.id
+        AND observations.location_id = locations.id
+        AND observations.user_id = users.id
+        AND comments.object_id = observations.id
+        AND comments.object_type = 'Observation')
     when :images
       result = "select distinct i.*
         from images i, images_observations io, observations o, names n
@@ -172,7 +188,7 @@ class SearchState < ActiveRecord::Base
       raise(ArgumentError, "Missing or invalid query type: \"#{self.query_type}\"")
     end
     order = order || "modified desc"
-    result += " and (#{self.conditions})" if self.conditions
+    result += " and (#{conditions})" if conditions
     result + " order by #{order}"
   end
 

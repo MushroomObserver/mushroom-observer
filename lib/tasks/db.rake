@@ -37,6 +37,17 @@ namespace :cache do
     ActiveRecord::Migration.remove_column :queued_emails, :flavor_tmp
   end
   
+  desc "Reset the search_states query_type enum"
+  task(:refresh_search_states => :environment) do
+    print "Refreshing query_type enum for search_states...\n"
+    ActiveRecord::Migration.add_column :search_states, :query_type_tmp, :enum, :limit => SearchState.all_query_types
+    SearchState.connection.update("update search_states set query_type_tmp=query_type+0")
+    ActiveRecord::Migration.remove_column :search_states, :query_type
+    ActiveRecord::Migration.add_column :search_states, :query_type, :enum, :limit => SearchState.all_query_types
+    SearchState.connection.update("update search_states set query_type=query_type_tmp")
+    ActiveRecord::Migration.remove_column :search_states, :query_type_tmp
+  end
+  
   desc "Reset the name review_status enum"
   task(:refresh_name_review_status => :environment) do
     print "Refreshing review_status enum for names and past_names...\n"

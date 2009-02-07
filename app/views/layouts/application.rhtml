@@ -136,6 +136,7 @@
               <%= submit_tag :app_images_find.l %>
               <%= submit_tag :app_names_find.l %>
               <%= submit_tag :app_locations_find.l %>
+              <%= link_to(:app_advanced_search.l, :controller => 'observer', :action => 'advanced_search') %>
               <% if @start %>
                 Start: <%= Time.now.to_f - @start.to_f %>
                 <% @start = nil %>

@@ -9,6 +9,7 @@
 # Object titles. (Try to keep these consistent throughout.)
 comment: Comentario
 comments: Comentarios
+description:  Description
 draft: Borrador
 drafts: Borradores
 image: Imagen
@@ -99,6 +100,7 @@ app_colors_from: Colores según [theme]
 app_powered_by: Hecho con
 app_preferred_browser: Preferencia navegador
 
+app_advanced_search:  Advanced Search
 app_find: Buscar
 app_observations_find: Observaciones
 app_names_find: Nombres
@@ -138,6 +140,7 @@ app_deprecated: Desaprobado
 app_name: Nombre
 app_rank: Rango
 app_author: Autor
+app_observer:  Observer
 app_citation: Cita
 app_unknown: Desconocido
 
@@ -429,6 +432,26 @@ add_user_to_group_success: '[user] se ha agregado a [group].'
 add_user_to_group_title: Agregar Usuario a Grupo
 add_user_to_group_user: Nombre de Usuario
 
+
+# observer/advanced_search
+advanced_search_caveat:  >
+  Advanced search was added in February, 2009 to Mushroom Observer.  There are
+  a lot of directions this feature could go.  I have intentionally kept it
+  somewhat limited since I am concerned that it may have performance issues that
+  result in timeouts.  Please send 
+  "email to the webmaster":/observer/ask_webmaster_question if you experience
+  timeouts or if there are particular types of searches you would like to have
+  added.
+
+advanced_search_content:  Content
+advanced_search_content_help:  Text contained in observation notes or comments
+advanced_search_location_help:  Where was the mushroom found
+advanced_search_name_help:  Name of the mushroom
+advanced_search_none_found:  No matches found
+advanced_search_observer_help:  Who observed the mushroom
+advanced_search_result_type:  Result Type
+advanced_search_result_type_help:  Do you want observations, images or names/descriptions?
+advanced_search_title:  Advanced Search
 
 # admin_request/author_request emails
 admin_request_change_member_status: Cambiar Estado de Usuario

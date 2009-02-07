@@ -1,5 +1,6 @@
 require 'find'
 require 'ftools'
+require 'set'
 
 ################################################################################
 #
@@ -88,43 +89,48 @@ require 'ftools'
 ################################################################################
 
 class ObserverController < ApplicationController
-  before_filter :login_required, :except => (CSS + [
-    :ask_webmaster_question,
-    :color_themes,
-    :how_to_help,
-    :how_to_use,
-    :index,
-    :intro,
-    :list_observations,
-    :list_rss_logs,
-    :location_search,
-    :news,
-    :next_observation,
-    :no_ajax,
-    :no_browser,
-    :no_javascript,
-    :no_session,
-    :observation_search,
-    :observations_by_name,
-    :pattern_search,
-    :prev_observation,
-    :recalc,
-    :rss,
-    :show_location_observations,
-    :show_observation,
-    :show_rss_log,
-    :show_site_stats,
-    :show_user,
-    :show_user_observations,
-    :show_votes,
-    :textile_sandbox,
-    :throw_error,
-    :translators_note,
-    :turn_javascript_off,
-    :turn_javascript_on,
-    :users_by_contribution,
-    :w3c_tests,
-  ])
+  before_filter :login_required, :except => (CSS +
+    [
+      :advanced_obj_search,
+      :advanced_search,
+      :advanced_search_results,
+      :ask_webmaster_question,
+      :color_themes,
+      :how_to_help,
+      :how_to_use,
+      :index,
+      :intro,
+      :list_observations,
+      :list_rss_logs,
+      :location_search,
+      :news,
+      :next_observation,
+      :no_ajax,
+      :no_browser,
+      :no_javascript,
+      :no_session,
+      :observation_search,
+      :observations_by_name,
+      :pattern_search,
+      :prev_observation,
+      :recalc,
+      :rss,
+      :show_location_observations,
+      :show_observation,
+      :show_rss_log,
+      :show_site_stats,
+      :show_user,
+      :show_user_observations,
+      :show_votes,
+      :textile_sandbox,
+      :throw_error,
+      :translators_note,
+      :turn_javascript_off,
+      :turn_javascript_on,
+      :users_by_contribution,
+      :w3c_tests,
+    ]
+  )
 
   # Default page.  Just displays latest happenings.
   # View: list_rss_logs
@@ -237,16 +243,40 @@ class ObserverController < ApplicationController
     end
     case session[:search_type]
     when :app_images_find.l
-      redirect_to(:controller => 'image', :action => 'image_search')
+      redirect_to(:controller => 'image', :action => 'image_search', :pattern => pattern)
     when :app_names_find.l
-      redirect_to(:controller => 'name', :action => 'name_search')
+      redirect_to(:controller => 'name', :action => 'name_search', :pattern => pattern)
     when :app_locations_find.l
       redirect_to(:controller => 'location', :action => 'list_place_names', :pattern => pattern)
     else
-      redirect_to(:controller => 'observer', :action => 'observation_search')
+      redirect_to(:controller => 'observer', :action => 'observation_search', :pattern => pattern)
     end
   end
 
+  def advanced_search
+    pass_seq_params
+  end
+  
+  def advanced_search_results
+    case params['search']['type']
+    when :observation.l
+      controller = 'observer'
+    when :image.l
+      controller = 'image'
+    when :description.l
+      controller = 'name'
+    end
+    redirect_to(:controller => controller, :action => 'advanced_obj_search',
+      :search => params['search'].reject{|k,v| v.nil? or v == ''}) # 
+  end
+  
+  def advanced_obj_search
+    @layout = calc_layout_params
+    query = calc_advanced_search_query("SELECT DISTINCT observations.*, names.search_name FROM observations",
+      Set.new(['names']), params)
+    show_selected_objs(:advanced_search_title.l, query, nil, :nothing, :advanced_observations, 'list_observations', nil)
+  end
+  
 #--#############################################################################
 #
 #  Observation support.
@@ -322,12 +352,12 @@ class ObserverController < ApplicationController
   # Redirected from: pattern_search
   # View: list_observations
   # Inputs:
-  #   session[:pattern]
+  #   params[:pattern]
   # Outputs: @observations, @observation_pages, @layout
   def observation_search
     store_location
     @layout = calc_layout_params
-    @pattern = session[:pattern] || ''
+    @pattern = params[:pattern] || session[:pattern] || ''
     id = @pattern.to_i
     obs = nil
     if @pattern == id.to_s

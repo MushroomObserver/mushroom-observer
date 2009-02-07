@@ -32,6 +32,7 @@
 
 class NameController < ApplicationController
   before_filter :login_required, :except => [
+    :advanced_obj_search,
     :auto_complete_name,
     :eol,
     :eol_preview,
@@ -136,41 +137,56 @@ class NameController < ApplicationController
   # Multiple matches: sets @name_data and renders name_index.
   def name_search
     store_location
-    @layout = calc_layout_params
-    @pattern = session[:pattern] || ''
-    @title = :name_index_matching.t(:pattern => @pattern)
-    id = @pattern.to_i
-    @name_data = nil
-    if @pattern == id.to_s
+    pattern = params[:pattern] || session[:pattern] || ''
+    title = :name_index_matching.t(:pattern => pattern)
+    id = pattern.to_i
+    name_data = nil
+    if pattern == id.to_s
       begin
         name = Name.find(id)
         if name
-          @name_data = [{'id' => id, 'display_name' => name.display_name}]
+          name_data = [{'id' => id, 'display_name' => name.display_name}]
         end
       rescue ActiveRecord::RecordNotFound
       end
     end
-    if @name_data.nil?
-      sql_pattern = "%#{@pattern.gsub(/[*']/,"%")}%"
+    if name_data.nil?
+      sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
       conditions = field_search(["search_name", "citation"] + Name.all_note_fields, sql_pattern)
       session[:checklist_source] = :nothing
-      @name_data = Name.connection.select_all %(
+      name_data = Name.connection.select_all %(
         SELECT distinct id, display_name
         FROM names
         WHERE #{conditions}
         ORDER BY text_name asc, author asc
       )
     end
-    len = @name_data.length
+    @pattern = pattern
+    show_name_data(title, name_data, :name_search_none_found.t(:pattern => pattern))
+  end
+  
+  def show_name_data(title, name_data, error)
+    store_location
+    @layout = calc_layout_params
+    @title = title
+    @name_data = name_data
+    len = name_data.length
     if len == 1
-      redirect_to(:action => 'show_name', :id => @name_data[0]['id'])
+      redirect_to(:action => 'show_name', :id => name_data[0]['id'])
     else
       if len == 0
-        flash_warning(:name_search_none_found.t(:pattern => @pattern))
+        flash_warning(error)
       end
       name_index_helper
       render(:action => 'name_index')
     end
+  end
+  
+  def advanced_obj_search
+    @layout = calc_layout_params
+    query = calc_advanced_search_query("SELECT DISTINCT names.id, names.display_name FROM observations",
+      Set.new(['names']), params)
+    show_name_data(:advanced_search_title.l, Name.connection.select_all(query), :advanced_search_none_found.t)
   end
 
   # AJAX request used for autocompletion of "what" field in deprecate_name.

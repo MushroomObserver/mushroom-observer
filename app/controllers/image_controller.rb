@@ -42,6 +42,7 @@
 
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
+    :advanced_obj_search,
     :list_images,
     :images_by_user,
     :image_search,
@@ -89,7 +90,7 @@ class ImageController < ApplicationController
   def image_search
     store_location
     @layout = calc_layout_params
-    @pattern = session[:pattern] || ''
+    @pattern = params[:pattern] || session[:pattern] || ''
     id = @pattern.to_i
     image = nil
     if @pattern == id.to_s
@@ -105,6 +106,13 @@ class ImageController < ApplicationController
         field_search(["n.search_name", "i.notes", "i.copyright_holder"], "%#{@pattern.gsub(/[*']/,"%")}%"),
         "n.search_name, `when` desc", :nothing)
     end
+  end
+
+  def advanced_obj_search
+    @layout = calc_layout_params
+    query = calc_advanced_search_query("SELECT DISTINCT images.* FROM observations",
+      Set.new(['images', 'images_observations']), params)
+    show_selected_objs("Advanced Search", query, nil, :nothing, :advanced_images, 'list_images', nil)
   end
 
   def show_selected_images(title, conditions, order, source)
