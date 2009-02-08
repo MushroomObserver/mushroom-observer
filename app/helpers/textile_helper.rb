@@ -27,6 +27,8 @@ class String
       'observation' => '/%d',
     }
   end
+  
+  URL_TRUNCATION_LENGTH = 60
 
   # Wrapper on string.textilize that returns only the body of the first
   # paragraph of the result.
@@ -83,11 +85,12 @@ class String
     # Now turn bare urls into links.
     str.gsub!(/([a-z]+:\/\/[^\s<>]+)/) do |url|
       extra = url.sub!(/([^\w\/]+$)/, '') ? $1 : ''
-      if url.length > 30
+      url2 = ''
+      if url.length > URL_TRUNCATION_LENGTH and not url.starts_with?(DOMAIN)
         if url.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
           url2 = $1 + '/...'
         else
-          url2 = url[0..30] + '...'
+          url2 = url[0..URL_TRUNCATION_LENGTH] + '...'
         end
       else
         url2 = url
