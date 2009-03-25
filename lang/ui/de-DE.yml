@@ -774,10 +774,10 @@ eol_need_review_title: EOL muss durchesehen werden
 
 # name/eol_preview
 eol_preview_name_count:  >
-  [count] Beschreibung(en) bereit für EOL
+  [count] Beschreibung(en)
 
 eol_preview_image_count:  >
-  [count] Bild(er) bereit für EOL
+  [count] Bild(er)
 
 eol_preview_title: EOL Preview
 eol_preview_explanation: >

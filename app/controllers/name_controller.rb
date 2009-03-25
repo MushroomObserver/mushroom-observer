@@ -904,7 +904,7 @@ class NameController < ApplicationController
     eol_data(['unvetted', 'vetted'])
   end
 
-  # Show the data getting sent to EOL
+  # Show the data not getting sent to EOL
   def eol_need_review
     eol_data(['unreviewed'])
     @title = :eol_need_review_title.t

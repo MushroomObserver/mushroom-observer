@@ -768,10 +768,10 @@ eol_need_review_title: EOL Need Review
 
 # name/eol_preview
 eol_preview_name_count: >
-  Descriptions ready for EOL: [count]
+  [count] description(s)
 
 eol_preview_image_count: >
-  Images ready for EOL: [count]
+  [count] image(s)
 
 eol_preview_title: EOL Preview
 eol_preview_explanation: >

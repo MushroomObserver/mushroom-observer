@@ -784,11 +784,11 @@ eol_need_review_title: EOL Necesidad de Revisión
 
 
 # name/eol_preview
-eol_preview_name_count:  >
-  Descriptions ready for EOL: [count]
+eol_preview_name_count: >
+  [count] description(s)
 
-eol_preview_image_count:  >
-  Images ready for EOL: [count]
+eol_preview_image_count: >
+  [count] image(s)
 
 eol_preview_title: Vista Previa para EOL
 eol_preview_explanation: >

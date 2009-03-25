@@ -1,10 +1,21 @@
-Install disk for Darvin
+cron for eol.xml
+cron for performance monitoring
+
+Tests for Advanced Search
+
+When deleting a name you get:
+Log of
+Deleted
+Item
+Thu Feb 12 22:52:09 -0800 2009: Thu Feb 12 22:52:09 -0800 2009:log_name_updated(user=nathan)
+
 EOL Stats
+  descriptions with gen. desc. and photos that aren't reviewed or approved
+  
 
 Make extra_gc depend on config
 Author changes should email authors and reviewers
 Edits should go to authors
-Add institution to user?
 Adjust scoring based on authorship and editorship rather than raw version count
 
 Added email:
@@ -18,18 +29,13 @@ Add support for numbers in provisional names, e.g., Amanita "s1".  Then update A
 Should there be 'sensu' names for each field guide?
 Organize a way to add edibility info
 
-Bug fixes:
-  September 21, 2008 12:45:36 PM PDT
-    ActiveRecord::StatementInvalid (Mysql::Error: Unknown table 'g' in where clause: 
+Need to review recent log for errors
 
-  September 20, 2008 7:55:41 PM PDT
-    ActionView::TemplateError (undefined method `year' for nil:NilClass) on line #24 of ima
-ge/show_image.rhtml:
+Advanced search ideas:
+  Store the result of a search as a regular species list
+  Create 'smart' species lists that are based on a stored advanced search.
 
-  September 20, 2008 10:05:29 PM PDT
-    ActionView::TemplateError (undefined method `observation_name' for nil:NilClass) on line #20 of observer/_observation.rhtml:
-    Rendering /home/19334/containers/rails/mo/public/500.html (500 Internal Server Error)
-    Can't reproduce.
+Figure out a way to support authors with leading lower case (e.g., van Tiegham)
 
 Features for EOL Class support:
   

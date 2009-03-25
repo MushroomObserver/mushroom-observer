@@ -49,7 +49,8 @@ class ImageController < ApplicationController
     :show_image,
     :show_original,
     :next_image,
-    :prev_image
+    :prev_image,
+    :test_upload_speed
   ]
 
   # Display matrix of images, most recent first.
@@ -550,6 +551,32 @@ class ImageController < ApplicationController
     end
   end
 
+################################################################################
+
+  def test_upload_speed
+    logger.warn(params)
+    image_stream = params[:file]
+    data = image_stream.read
+    original = TEST_IMG_DIR + "/orig/upload_speed_test.jpg"
+    big = TEST_IMG_DIR + "/640/upload_speed_test.jpg"
+    thumbnail = TEST_IMG_DIR + "/thumb/upload_speed_test.jpg"
+    file = File.new(original, 'w')
+    file.print(data)
+    file.close
+    self.resize_image(640, 640, 70, original, big)
+    self.resize_image(160, 160, 90, big, thumbnail)
+  end
+
+  # Resize +src+ image and save as +dest+, stripping headers.
+  def resize_image(width, height, quality, src, dest)
+    if File.exists?(src)
+      cmd = sprintf("convert -thumbnail '%dx%d>' -quality %d %s %s",
+                     width, height, quality, src, dest)
+      system cmd
+      logger.warn(cmd)
+    end
+  end
+  
 ################################################################################
 
   def test_process_image(user, upload, count, size)

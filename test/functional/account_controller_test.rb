@@ -195,6 +195,7 @@ class AccountControllerTest < Test::Unit::TestCase
         :name       => "new_name",
         :notes      => "new_notes",
         :place_name => "Burbank, Los Angeles Co., California, USA",
+        :mailing_address => ""
       }
     }
     post_with_dump(:profile, params)
@@ -221,6 +222,7 @@ class AccountControllerTest < Test::Unit::TestCase
         :upload_image => file,
         :name         => @rolf.name,
         :mailing_address => @rolf.mailing_address,
+        :notes        => ""
       },
       :date => { :copyright_year => "2003" },
       :upload => { :license_id => @ccnc25.id },
