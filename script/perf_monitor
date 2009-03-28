@@ -1,27 +1,39 @@
-#!/bin/csh
+#!/usr/bin/env python
 
-set SITE=http://mushroomobserver.org
-# set SITE=http://localhost:3000
+import time, os, sys
 
-set IMG=../../test/fixtures/images/perf.jpg
-set OUTPUTDIR=../log
-set DIRNAME=$OUTPUTDIR/`date "+%Y-%m-%d-%H-%M"`
+(cmd, site, imgPath, logPath) = sys.argv
 
-echo $DIRNAME
-mkdir -p $DIRNAME
-cd $DIRNAME
-mkdir -p observer image
+timeFormat = '%Y-%m-%d.%H:%M:%S'
+logDir = logPath + '/' + time.strftime(timeFormat)
 
-echo $IMG
-ls -l $IMG
-echo -n `date "+%Y-%m-%d %H:%M:%S"`:image/test_upload_speed: >> ../perf.log
-/usr/bin/time curl -F "file=@$IMG" $SITE'/image/test_upload_speed?_js=on&_new=true' -o image/test_upload_speed.html -s -i >>& ../perf.log
+os.makedirs(logDir + '/observer')
+os.makedirs(logDir + '/image')
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`:observer/list_rss_logs: >> ../perf.log
-/usr/bin/time curl $SITE'/observer/list_rss_logs?_js=off&_new=true' -o observer/list_rss_logs.html -s -i >>& ../perf.log
+logFile = open(logPath + '/perf.log', 'a')
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`:observer/show_observation: >> ../perf.log
-/usr/bin/time curl $SITE'/observer/show_observation/6247?_js=off&_new=true' -o observer/show_observation.html -s -i >>& ../perf.log
+def runCurl(page, arg=None, img=None):
+  logFile.write("%s:%s: " % (time.strftime(timeFormat), page))
+  cmd = "curl"
+  if img:
+    if os.path.isfile(img):
+      cmd += ' -F "file=@%s"' % img
+    else:
+      print "Unable to find the image file: %s" % img
+      logFile.write("ERROR\n")
+      return
+  url = "http://%s/%s" % (site, page)
+  if arg:
+    url += "/%s" % arg
+  url += "\?_js=on\&_new=true"
+  cmd += " %s -o %s/%s -s -i" % (url, logDir, page)
+  start = time.time()
+  os.system(cmd)
+  logFile.write("%s\n" % (time.time() - start))
 
-echo -n `date "+%Y-%m-%d %H:%M:%S"`:image/show_image: >> ../perf.log
-/usr/bin/time curl $SITE'/image/show_image/2815?_js=off&_new=true' -o image/show_image.html -s -i >>& ../perf.log
+runCurl('observer/list_rss_logs')
+runCurl('image/show_image', 35165)
+runCurl('observer/show_observation', 17430)
+runCurl('image/test_upload_speed', img=imgPath)
+
+logFile.close()
