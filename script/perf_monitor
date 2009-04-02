@@ -4,7 +4,7 @@ import time, os, sys
 
 (cmd, site, imgPath, logPath) = sys.argv
 
-timeFormat = '%Y-%m-%d.%H:%M:%S'
+timeFormat = '%Y-%m-%d.%H.%M.%S'
 logDir = logPath + '/' + time.strftime(timeFormat)
 
 os.makedirs(logDir + '/observer')
@@ -13,7 +13,7 @@ os.makedirs(logDir + '/image')
 logFile = open(logPath + '/perf.log', 'a')
 
 def runCurl(page, arg=None, img=None):
-  logFile.write("%s:%s: " % (time.strftime(timeFormat), page))
+  logFile.write("%s:%s: " % (page, time.strftime(timeFormat)))
   cmd = "curl"
   if img:
     if os.path.isfile(img):
