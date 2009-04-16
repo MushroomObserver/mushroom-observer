@@ -1,0 +1,322 @@
+This is how I installed MO on slicehost on a clean Fedora Core 10
+slice.  Start to finish this should only take an hour or two.
+
+-Jason
+
+################################################################################
+
+# Basic installation.
+root> yum update
+root> yum install tcsh mlocate gcc make vim lynx telnet monit
+root> yum install ImageMagick subversion httpd mysql-devel mysql-server
+root> yum install ruby ruby-devel rubygem-mongrel (rubygem-rails)
+root> gem install rake mongrel_cluster RedCloth mysql --no-ri --no-rdoc
+
+# We need to be sure to get the right version of rails.
+root> gem install rails --version 2.1.1 --no-ri --no-rdoc
+
+# When mysql fails to build...
+root> cd /usr/lib/ruby/gems/1.8/gems/mysql*
+root> ruby extconf.rb --with-mysql-config=/usr/bin/mysql_config
+root> make install
+
+# Add user "mo" which will run MO production server.
+root> useradd mo
+
+# Don't allow people to login directly as mo.
+root> vi /etc/shadow
+    (set password of mo to *)
+
+# Allow members of group "mo" ability to "sudo su mo".
+root> visudo
+    (add "%mo ALL = NOPASSWD: /bin/su mo" to end)
+
+# Add users.
+root> useradd -G mo -s /bin/tcsh xxx
+root> useradd -G mo -s /bin/tcsh yyy
+root> passwd xxx
+root> passwd yyy
+
+# Allow tcp through firewall.
+root> iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    (or run system-config-firewall-tui)
+
+# Test apache (ignore the warning message for now):
+root> service httpd start
+    (point your external browser at http://174.143.24.209/)
+
+# Setup apache properly.
+root> vi /etc/httpd/conf/httpd.conf
+    (see below)
+root> chkconfig --level 345 httpd on
+    (restart it later after mongrel and rails configured)
+
+# Install MO.
+root> mkdir /var/web
+root> mkdir /var/web/mo
+root> chown mo /var/web/mo
+root> chgrp mo /var/web/mo
+root> su mo
+mo> cd /var/web/mo
+mo> svn checkout http://svn.collectivesource.com/mushroom_sightings/trunk /var/web/mo
+
+# Setup mongrel cluster.
+mo> exit
+root> cd /var/web/mo
+root> mongrel_rails cluster::configure -e production -p 3000 -a 127.0.0.1 -N 2 -c /var/web/mo
+root> chmod +x /usr/lib/ruby/gems/1.8/gems/mongrel_cluster-1.0.5/resources/mongrel_cluster
+root> ln -s /usr/lib/ruby/gems/1.8/gems/mongrel_cluster-1.0.5/resources/mongrel_cluster /etc/init.d/mongrel_cluster
+root> mkdir /etc/mongrel_cluster
+root> ln -s /var/web/mo/config/mongrel_cluster.yml /etc/mongrel_cluster/mo.yml
+root> chkconfig --level 345 mongrel_cluster on
+root> vi /var/web/mo/config/mongrel_cluster.yml
+    (see below)
+
+# Tweak environment.
+root> su mo
+mo> cp config/environment.yml{-template,}
+mo> vi config/environment.yml
+    (set image home to /var/web/mo/public/images)
+    (set rails version)
+mo> vi config/environments/development.rb
+    (remove ruby-debug include at bottom)
+mo> mkdir public/images/thumb
+mo> mkdir public/images/640
+mo> mkdir public/images/orig
+
+# Create database for testing.
+mo> mysql -u root
+mysql> delete from mysql.user where user != 'root' or host != 'localhost';
+mysql> grant all privileges on *.* to 'mo'@'localhost' identified by 'password' with grant option;
+mysql> set password for 'root'@'localhost' = password('xxx');
+mysql> set password for 'mo'@'localhost' = password('xxx');
+mysql> flush privileges;
+mysql> quit;
+mo> mysql -u mo -p
+mysql> create database observer_production;
+mysql> create database observer_development;
+mysql> create database observer_test;
+mysql> quit;
+
+# Configure MO database.
+mo> cp config/database.yml{-template,}
+mo> vi config/database.yml
+    (set database names, usernames, passwords, socket)
+    (have production point to real database at gridserver)
+    (have test and development point to local database -- see above)
+
+# Populate database (from snapshot).
+mo> mysql -u mo -p observer_development -e 'source dump.yyyymmdd.sql'
+mo> rake db:migrate
+    (this is the first time you actually run rails, lots of potential
+    bugs might show up here having to do with environment, rails version
+    mismatch, etc., not necessarily having anything to do with database)
+
+# Test server real quick.
+mo> script/server
+    (you can test it with "lynx localhost:3000" in another login)
+    (control-C out to stop it)
+
+# You can also run the tests now if you want.
+mo> rake test |& tee test.log
+
+# Place server into development mode.
+mo> exit
+root> vi /etc/httpd/conf/httpd.conf
+    (change RAILS_ENV from production to development)
+root> vi /var/web/mo/config/mongrel_cluster.yml
+    (change environment from production to development)
+
+# Start server and test.
+root> service mongrel_cluster start
+root> service httpd restart
+    (point your external browser at http://174.143.24.209/)
+
+# Install process monitor.
+root> vi /etc/monit.d/web
+    (see below)
+root> chkconfig --level 345 monit on
+root> service monit start
+
+# Install mailserver.
+root> yum install postfix mutt
+root> vi /etc/postfix/main.cf
+    myhostname = mail.mushroomobserver.org
+    mydomain = mushroomobserver.org
+    myorigin = $mydomain
+    inet_interfaces = $myhostname, localhost
+    mydestination = $myhostname, localhost.$mydomain, localhost,
+            mail.$mydomain, www.$mydomain, ftp.$mydomain, $mydomain
+    (I just stick these at the end and comment out the defaults)
+root> vi /etc/aliases
+    mailer-daemon:  root
+    postmaster:     root
+    root:           xxx,yyy
+    xxx:            xxx@xxx.com
+    yyy:            yyy@yyy.com
+# If DNS doesn't point here yet, need to override the IP address:
+root> vi /etc/hosts
+    174.143.24.209  mail.mushroomobserver.org mushroomobserver.org
+root> newaliases
+root> service postfix start
+root> chkconfig --level 345 postfix on
+
+# Configure email setting for rails.
+root> vi /var/web/mo/config/environment.rb
+    ActionMailer::Base.smtp_settings = {
+        :address => "mail.mushroomobserver.org",
+        :domain => "mushroomobserver.org",
+        :port => 25
+        # I haven't figured out security yet.
+        # :authentication => :login,
+        # :user_name => "<username>",
+        # :password => "<password>"
+    }
+root> service monit restart
+    (there should be a way to tell the monit daemon to refresh
+    its rules without restarting it...)
+
+# Test email.
+jason> vi /home/jason/.muttrc
+    set from="jason@mushroomobserver.org"
+    set use_from=yes
+    set envelope_from=yes
+    set editor=vi
+jason> echo "This is a test." | mutt -s test pellaea@gmail.com
+    (note yahoo "deferred" the test email, citing some problem
+    with reply-to address?, but gmail accepts it)
+
+# # Place server into production mode.
+# root> vi /etc/httpd/conf/httpd.conf
+#     (change RAILS_ENV back)
+# root> vi /var/web/mo/config/mongrel_cluster.yml
+#     (change environment back)
+# 
+# # Restart server and done.
+# root> service mongrel_cluster restart
+# root> service httpd restart
+
+################################################################################
+
+# Adding new users:
+root> useradd -G mo -s /bin/tcsh rookie
+root> passwd rookie
+
+# Adding another server instance:
+root> vi /etc/httpd/conf/httpd.conf
+    (search for BalancerMember.*3000 and add another line)
+root> vi /var/web/mo/config/mongrel_cluster.yml
+    (increment the number of "servers:" near bottom)
+root> vi /etc/monit.conf
+    (duplicate the mo1 section, changing "mo1" to "moN" and "3000" to "300N-1")
+root> service monit stop
+root> service httpd stop
+root> service mongrel_cluster restart
+root> service httpd start
+root> service monit start
+    (may be able to simply restart httpd and monit...)
+
+################################################################################
+
+# /var/web/mo/config/mongrel_cluster.yml
+---
+cwd: /var/web/mo
+pid_file: tmp/pids/mongrel.pid
+log_file: log/mongrel.log
+user: mo
+group: mo
+port: "3000"
+environment: production
+address: 127.0.0.1
+servers: 2
+docroot: public
+
+################################################################################
+
+# /etc/httpd/conf/httpd.conf
+ServerName agaricus
+ServerTokens Prod
+
+NameVirtualHost *:80
+<VirtualHost *:80>
+    ServerName    mushroomobserver.org
+    ServerAlias   mushroomobserver.org *.mushroomobserver.org
+    ServerAdmin   nathan@mushroomobserver.org
+    DocumentRoot  "/var/web/mo"
+    ErrorLog      logs/mo-error_log
+    CustomLog     logs/mo-access_log combined
+    SetEnv        RAILS_ENV      production
+
+    <Directory /var/web/mo>
+        Options FollowSymLinks
+        AllowOverride limit
+        Order allow,deny
+        Allow from all
+    </Directory>
+
+    ProxyPass /images      !
+    ProxyPass /stylesheets !
+    ProxyPass /javascripts !
+    ProxyPass /robots.txt  !
+    ProxyPass /favicon.ico !
+    ProxyPass / balancer://mo_cluster/
+    ProxyPreserveHost on
+
+    <Proxy balancer://mo_cluster>
+        BalancerMember http://127.0.0.1:3000
+        BalancerMember http://127.0.0.1:3001
+    </Proxy>
+
+    RewriteEngine on
+    RewriteRule ^/$ /index.html [QSA]
+    # Rewrite to check for Rails cached page
+    RewriteRule ^([^.]+)$ $1.html [QSA]
+    # Redirect all non-static requests to cluster
+    RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
+    RewriteRule ^/(.*)$ balancer://mo_cluster%{REQUEST_URI} [P,QSA,L]
+
+    AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css text/javascript application/xml application/xhtml+
+    BrowserMatch ^Mozilla/4 gzip-only-text/html
+    BrowserMatch ^Mozilla/4.0[678] no-gzip
+    BrowserMatch bMSIE !no-gzip !gzip-only-text/html
+</VirtualHost>
+
+################################################################################
+
+# /etc/monit.conf
+set mailserver localhost
+set mail-format { from: monitor@mushroomobserver.org }
+set alert root@mushroomobserver.org
+
+check system mushroomobserver.org
+  if memory usage > 90% then alert
+  if cpu usage (user) > 90% then alert
+
+check process apache
+  with pidfile "/var/run/httpd.pid"
+  start program = "/etc/init.d/httpd start"
+  stop program = "/etc/init.d/httpd stop"
+  if cpu usage > 95% for 5 cycles then restart
+  if totalmem > 100.0 Mb then alert
+  if children > 100 for 5 cycles then stop
+  if 10 restarts within 10 cycles then timeout
+  if failed port 80 protocol http then restart
+
+check process mo1
+  with pidfile /var/web/mo/tmp/pids/mongrel.3000.pid
+  start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3000"
+  stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3000"
+  if cpu > 80% for 5 cycles then restart
+  if totalmem > 115.0 MB for 2 cycles then restart
+  if 20 restarts within 20 cycles then timeout
+  group mo
+
+check process mo2
+  with pidfile /var/web/mo/tmp/pids/mongrel.3001.pid
+  start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3001"
+  stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3001"
+  if cpu > 80% for 5 cycles then restart
+  if totalmem > 115.0 MB for 2 cycles then restart
+  if 20 restarts within 20 cycles then timeout
+  group mo
+
