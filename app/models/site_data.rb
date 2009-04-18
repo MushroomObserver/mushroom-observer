@@ -1,7 +1,8 @@
 
 ALL_FIELDS = [
+  :authors_names,
+  :editors_names,
   :images,
-  :past_names,
   :past_locations,
   :species_lists,
   :species_list_entries,
@@ -13,8 +14,9 @@ ALL_FIELDS = [
 ]
 
 FIELD_WEIGHTS = {
+  :authors_names => 100,
+  :editors_names => 10,
   :images => 10,
-  :past_names => 10,
   :past_locations => 5,
   :species_lists => 5,
   :species_list_entries => 1,
@@ -78,7 +80,7 @@ class SiteData
   def self.update_contribution(mode, obj, field=nil, num=1)
     field = obj.class.to_s.sub(/.*::/,'').tableize.to_sym if !field
     weight = FIELD_WEIGHTS[field]
-# print ">>>> #{mode} #{field} #{weight} #{num} (##{obj.id}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''})"
+# print ">>>> #{mode} #{field} #{weight} #{num} (##{obj.id}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''})\n"
     if weight && weight > 0 &&
        obj.respond_to?('user_id') && (user = User.find_by_id(obj.user_id))
       user.contribution = 0 if !user.contribution
@@ -165,26 +167,21 @@ private
       if !table
         load_field_counts(field) if field != :users
       else
-        # This exception only occurs for species list entries for the moment.
-        query = ""
-        if @user_id
-          query = %(
-            SELECT count(*) as c, user_id
-            FROM species_lists s, observations_species_lists os
-            WHERE s.id=os.species_list_id and user_id = #{@user_id}
-            GROUP BY user_id
-            ORDER BY c desc
-          )
-        else
-          query = %(
-            SELECT count(*) as c, user_id
-            FROM species_lists s, observations_species_lists os
-            WHERE s.id=os.species_list_id and user_id > 0
-            GROUP BY user_id
-            ORDER BY c desc
-          )
+        conditions = @user_id ? "user_id = #{@user_id}" : "user_id > 0"
+        case field
+        when :species_list_entries:
+          # This exception only occurs for species list entries for the moment.
+          table = "species_lists s, observations_species_lists os"
+          conditions += " and s.id=os.species_list_id"
         end
-        load_field_counts(:species_list_entries, query)
+        query = %(
+          SELECT count(*) as c, user_id
+          FROM #{table}
+          WHERE #{conditions}
+          GROUP BY user_id
+          ORDER BY c DESC
+        )
+        load_field_counts(field, query)
       end
     end
 
@@ -205,14 +202,9 @@ private
 
   def load_field_counts(field, query=nil)
     result = []
-    conditions = ""
-    if @user_id
-      conditions = "user_id = %s" % @user_id
-    else
-      conditions = "user_id > 0"
-    end
     if query.nil?
-      query = "select count(*) as c, user_id from %s where %s group by user_id" % [field, conditions]
+      conditions = @user_id ? "user_id = #{@user_id}" : "user_id > 0"
+      query = "SELECT count(*) AS c, user_id FROM %s WHERE %s GROUP BY user_id" % [field, conditions]
     end
     data = User.connection.select_all(query)
     for d in data

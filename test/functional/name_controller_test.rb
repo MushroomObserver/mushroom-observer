@@ -46,6 +46,18 @@ class NameControllerTest < Test::Unit::TestCase
     assert_template 'show_past_name'
   end
 
+  def test_names_by_author
+    get_with_dump :names_by_author, :id => 1
+    assert_response :success
+    assert_template 'name_index'
+  end
+
+  def test_names_by_editor
+    get_with_dump :names_by_editor, :id => 1
+    assert_response :success
+    assert_template 'name_index'
+  end
+
   def test_name_search
     @request.session[:pattern] = "56"
     get_with_dump :name_search
@@ -58,7 +70,7 @@ class NameControllerTest < Test::Unit::TestCase
     # assert_template 'name_index'
     # assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
   end
-
+  
   def test_edit_name
     name = @coprinus_comatus
     params = { "id" => name.id.to_s }
@@ -181,7 +193,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(count, Name.find(:all).length)
   end
 
-  def test_create_name_author_conflict
+  def test_create_name_become_author
     text_name = "Macrocybe crassa"
     name = Name.find_by_text_name(text_name)
     assert_nil(name)
@@ -190,13 +202,14 @@ class NameControllerTest < Test::Unit::TestCase
         :text_name => text_name,
         :author => "",
         :rank => :Species,
-        :citation => ""
+        :citation => "",
+        :gen_desc => "The Crass Macrocybe"
       }
     }
-    params[:name].merge!(empty_notes)
+    params[:name] = empty_notes.merge(params[:name])
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_equal(20, @rolf.reload.contribution)
+    assert_equal(110, @rolf.reload.contribution)
     name = Name.find_by_text_name(text_name)
     assert(name)
     assert_equal(text_name, name.text_name)
@@ -243,6 +256,7 @@ class NameControllerTest < Test::Unit::TestCase
     assert_nil(name.gen_desc)
     past_names = name.versions.size
     assert(0 == name.version)
+    old_contrib = name.user.contribution
     params = {
       :id => name.id,
       :name => {
@@ -256,6 +270,7 @@ class NameControllerTest < Test::Unit::TestCase
     params[:name] = empty_notes.merge(params[:name])
     post_requires_login(:edit_name, params, false)
     name.reload
+    assert_equal(100 + 10 + old_contrib, name.user.reload.contribution)
     assert(name.gen_desc)
     assert_equal(name.authors, [name.user])
   end

@@ -268,6 +268,8 @@ rank_plural_subspecies: Unterarten
 rank_plural_variety: Varietäten
 
 # site statistics field names
+site_stats_authors_names:  Authored Descriptions
+site_stats_editors_names:  Edited Descriptions
 site_stats_images: Bilder
 site_stats_listed_taxa: Aufgeführte Taxa
 site_stats_names: Beschreibungen
@@ -450,6 +452,7 @@ advanced_search_observer_help:  Wer den Pilz gefunden hat
 advanced_search_result_type:  Anzeige der Ergebnisse
 advanced_search_result_type_help:  Möchtest du Funde, Bilder oder
   Namen/Beschreibungen?
+
 advanced_search_title:  Erweiterte Suche
 
 # admin_request/author_request emails
@@ -1389,6 +1392,18 @@ name_map_title: Ausdehnungskarte für [name]
 # name/name_search
 name_search_none_found: Keine Namen gefunden, die zu '[pattern]' passen.
 
+
+# name/names_by_author
+names_by_author_error:  >
+  [name] hasn't written any descriptions
+
+names_by_author_title:  Descriptions Written by [name]
+
+# name/names_by_editor
+names_by_editor_error:  >
+  [name] hasn't edited any descriptions
+
+names_by_editor_title:  Descriptions Edited by [name]
 
 # name/needed_descriptions
 needed_descriptions_help: >

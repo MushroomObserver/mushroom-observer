@@ -1,4 +1,5 @@
 require_dependency 'acts_as_versioned_extensions'
+require 'site_data'
 
 ################################################################################
 #
@@ -122,7 +123,7 @@ class Name < ActiveRecord::Base
 
   acts_as_versioned(:class_name => 'PastName', :table_name => 'past_names')
   non_versioned_columns.push('created', 'synonym_id', 'num_views', 'last_view')
-  ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review', 'ok_for_export')
+  ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review', 'ok_for_export', 'editors')
   # (note: ignore_if_changed is in app/models/acts_as_versioned_extensions)
 
   ABOVE_SPECIES_PAT = /^\s* ("?[A-Z][a-zë\-]+"?) \s*$/x
@@ -507,7 +508,25 @@ class Name < ActiveRecord::Base
 
   def before_save
     if self.gen_desc && self.gen_desc != '' && self.authors == []
-      self.authors.push(self.user)
+      user = self.user
+      self.authors.push(user)
+      user.reload.contribution
+      user.contribution += FIELD_WEIGHTS[:authors_names]
+      if self.editors.member?(user)
+        self.editors.delete(user)
+        user.contribution -= FIELD_WEIGHTS[:editors_names]
+      end
+      user.save
+    end
+  end
+  
+  def add_editor(user)
+    if not self.authors.member?(user) and not self.editors.member?(user):
+      user.reload.contribution
+      self.editors.push(user)
+      self.save
+      user.contribution += FIELD_WEIGHTS[:editors_names]
+      user.save
     end
   end
   
@@ -784,6 +803,7 @@ class Name < ActiveRecord::Base
         for n in names
           n.user_id = self.user_id
           n.save
+          n.add_editor(self.user)
         end
       end
     end

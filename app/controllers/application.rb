@@ -492,7 +492,9 @@ class ApplicationController < ActionController::Base
         now = Time.now
         for n in names
           if n
-            n.save_if_changed(user, :log_updated_by, { :user => user.login }, now, true)
+            if n.save_if_changed(user, :log_updated_by, { :user => user.login }, now, true)
+              n.add_editor(user)
+            end
           end
         end
       end
@@ -669,7 +671,9 @@ class ApplicationController < ActionController::Base
         # only save comment if name didn't exist
         synonym_name.notes = name_parse.synonym_comment if !synonym_name.id && name_parse.synonym_comment
         synonym_name.change_deprecated(true)
-        synonym_name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
+        if synonym_name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
+          synonym_name.add_editor(user)
+        end
         save_names(synonym_names[0..-2], user, nil) # Don't change higher taxa
       end
     end
@@ -692,7 +696,9 @@ class ApplicationController < ActionController::Base
     for n in names
       if n # Could be nil if parent is ambiguous with respect to the author
         n.change_deprecated(deprecate) unless deprecate.nil? or n.id
-        n.save_if_changed(user, log, { :user => user.login }, Time.now, true)
+        if n.save_if_changed(user, log, { :user => user.login }, Time.now, true)
+          n.add_editor(user)
+        end
       end
     end
   end

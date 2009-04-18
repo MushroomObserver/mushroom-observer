@@ -1,5 +1,16 @@
+slicehost:
+email (postfix)
+  clearing out the slice again
+some more performance testing
+scaling options and the memory issue.
+database
+
+Editor deployment:
+  after the usual update
+  rake cache:update_authors
+  rake cache:refresh_contributions
+
 cron for eol.xml
-cron for performance monitoring
 
 Tests for Advanced Search
 
@@ -146,27 +157,34 @@ Email queuing:
   Add option for not received your own email
 
 Improve deployment process:
-  Dump server db
-  Start image tar on server
+  On server:
+    cd db; ./dump
+    # Note number printed out above
+    cd ../public/images
+    ./bundle <number>
+  On local machine:
+    cd db; ./getdb
+    # move checkpoint to appropriate raw name
+    # update db and dump clean version
+    cd ../public/images
+    ./getimages
+    # Follow instructions
 Migrate local database back to current production version
-  Upload db
   Modify news and how to.
-  Upload images
-  cksum image tarball
+  cksum image tarballs
   Review code
   Do local migration
-  Dump local db
   Run tests
   Checkin changes
   Move log
   Checkout code.
   Shutdown server.
-  Run migration.
-  rake cache:refresh_name_review_status
+  Run any migrations.
+  Run any migration rake tasks.
   Startup server.
+  Run any transition rake tasks.
   Test server.
 
-Make image tarball creation automatic
 Create a backup directory that can be swapped with the current directory.  Logs and images should by shared through symlinks.
 
 New user options:

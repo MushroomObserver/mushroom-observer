@@ -39,6 +39,8 @@ class NameController < ApplicationController
     :map,
     :name_index,
     :name_search,
+    :names_by_author,
+    :names_by_editor,
     :observation_index,
     :show_name,
     :show_past_name
@@ -163,6 +165,31 @@ class NameController < ApplicationController
     end
     @pattern = pattern
     show_name_data(title, name_data, :name_search_none_found.t(:pattern => pattern))
+  end
+  
+  def names_by_author
+    names_by(:author, :names_by_author_title, :names_by_author_error)
+  end
+  
+  def names_by_editor
+    names_by(:editor, :names_by_editor_title, :names_by_editor_error)
+  end
+  
+  def names_by(role, title, error)
+    user = User.find(params[:id])
+    if user
+      name_data = Name.connection.select_all %(
+        SELECT distinct names.id, names.display_name
+        FROM names, #{role}s_names
+        WHERE names.id = #{role}s_names.name_id
+        AND #{role}s_names.user_id = #{user.id}
+        ORDER BY names.text_name asc, names.author asc
+      )
+      user_name = user.legal_name
+      show_name_data(title.t(:name => user_name), name_data, error.t(:name => user_name))
+    else
+      redirect_to(:name_index)
+    end
   end
   
   def show_name_data(title, name_data, error)
@@ -410,6 +437,7 @@ class NameController < ApplicationController
             if n
               n.user_id = @user.id
               n.save
+              n.add_editor(@user)
             end
           end
         end
@@ -495,15 +523,16 @@ class NameController < ApplicationController
             @name.license_id = nil
           end
           raise user_update_nonexisting_name.t if !@name.id
-          if is_reviewer
-            @name.reviewer = @user
-            @name.last_review = Time.now()
-            # @name.review_status = :unvetted
-          else
-            @name.reviewer = nil
-            @name.review_status = :unreviewed
+          if @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
+            if is_reviewer
+              @name.reviewer = @user
+              @name.last_review = Time.now()
+            else
+              @name.reviewer = nil
+              @name.review_status = :unreviewed
+            end
+            @name.add_editor(@user)
           end
-          @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
           if old_name # merge happened
             for o in old_name.observations
               o.name = @name
@@ -561,7 +590,9 @@ class NameController < ApplicationController
             synonym.created = timestamp
             synonym.save
             @name.synonym = synonym
-            @name.save_if_changed(@user, nil, nil, timestamp, true)
+            if @name.save_if_changed(@user, nil, nil, timestamp, true)
+              @name.add_editor(@user)
+            end
           end
           proposed_synonyms = params[:proposed_synonyms] || {}
           for n in sorter.all_names
@@ -630,17 +661,21 @@ class NameController < ApplicationController
               @name.merge_synonyms(target_name)
               target_name.change_deprecated(false)
               current_time = Time.now
-              target_name.save_if_changed(@user,
+              if target_name.save_if_changed(@user,
                 :log_name_approved, { :user => @user.login,
                 :other => @name.display_name }, current_time, true)
+                target_name.add_editor(@user)
+              end
               @name.change_deprecated(true)
               comment_join = @comment == "" ? "." : ":\n"
               @name.prepend_notes("Deprecated in favor of" +
                 " #{target_name.search_name} by #{@user.login} on " +
                 Time.now.to_formatted_s(:db) + comment_join + @comment)
-              @name.save_if_changed(@user,
+              if @name.save_if_changed(@user,
                 :log_name_deprecated, { :user => @user.login,
                 :other => target_name.display_name }, current_time, true)
+                @name.add_editor(@user)
+              end
               redirect_to(:action => 'show_name', :id => @name.id)
             end
           end
@@ -658,9 +693,11 @@ class NameController < ApplicationController
         if params[:deprecate][:others] == '1'
           for n in @name.approved_synonyms
             n.change_deprecated(true)
-            n.save_if_changed(@user,
+            if n.save_if_changed(@user,
               :log_name_deprecated, { :user => @user.login,
               :other => @name.search_name }, now, true)
+              n.add_editor(@user)
+            end
           end
         end
         @name.change_deprecated(false)
@@ -669,7 +706,9 @@ class NameController < ApplicationController
         comment_join = comment == "" ? "." : ":\n"
         @name.prepend_notes("Approved by #{@user.login} on " +
           Time.now.to_formatted_s(:db) + comment_join + comment)
-        @name.save_if_changed(@user, :log_approved_by, { :user => @user.login }, now, true)
+        if @name.save_if_changed(@user, :log_approved_by, { :user => @user.login }, now, true)
+          @name.add_editor(@user)
+        end
         redirect_to(:action => 'show_name', :id => @name.id)
       end
     end
@@ -962,7 +1001,9 @@ class NameController < ApplicationController
       begin
         count = 0
         name.change_deprecated(true)
-        name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
+        if name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
+          name.add_editor(@user)
+        end
       rescue RuntimeError => err
         flash_error(err.to_s)
         return false

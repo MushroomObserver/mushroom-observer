@@ -444,7 +444,9 @@ class ProjectController < ApplicationController
       for f in Name.all_note_fields:
         name.send("#{f}=", draft.send(f))
       end
-      name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
+      if name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
+        name.add_editor(@user)
+      end
       name.update_review_status(:vetted, @user)
       user_set = Set.new(name.authors)
       user_set.merge(UserGroup.find_by_name('reviewers').users)

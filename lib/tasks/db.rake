@@ -112,12 +112,22 @@ namespace :cache do
           author_id = v.user_id
         end
       end
+      authors = Set.new()
+      if n.gen_desc and n.gen_desc != ''
+        if n.authors # If there are already authors then make sure they are a set
+          authors.merge(n.authors)
+        else
+          if author_id
+            authors.add(users[author_id])
+          end
+        end
+      end
+      n.authors = authors.entries
+      editors = Set.new(n.editors) # Make sure the editors are a set
       for id in user_ids
-        n.editors.push(users[id])
+        editors.add(users[id])
       end
-      if author_id
-        n.authors.push(users[author_id])
-      end
+      n.editors = (editors - authors).entries
       n.save
     end
   end

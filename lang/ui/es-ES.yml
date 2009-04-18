@@ -271,6 +271,8 @@ rank_plural_subspecies: Subespecies
 rank_plural_variety: Variedades
 
 # site statistics field names
+site_stats_authors_names:  Authored Descriptions
+site_stats_editors_names:  Edited Descriptions
 site_stats_images: Imágenes
 site_stats_listed_taxa: Listed Taxa
 site_stats_names: Descripciones
@@ -438,7 +440,7 @@ advanced_search_caveat:  >
   Advanced search was added in February, 2009 to Mushroom Observer.  There are
   a lot of directions this feature could go.  I have intentionally kept it
   somewhat limited since I am concerned that it may have performance issues that
-  result in timeouts.  Please send 
+  result in timeouts.  Please send
   "email to the webmaster":/observer/ask_webmaster_question if you experience
   timeouts or if there are particular types of searches you would like to have
   added.
@@ -1411,6 +1413,18 @@ name_search_none_found: >
   No se ha podido encontrar cualquier nombre que coincide con <<[pattern]>>.
 
 
+
+# name/names_by_author
+names_by_author_error:  >
+  [name] hasn't written any descriptions
+
+names_by_author_title:  Descriptions Written by [name]
+
+# name/names_by_editor
+names_by_editor_error:  >
+  [name] hasn't edited any descriptions
+
+names_by_editor_title:  Descriptions Edited by [name]
 
 # name/needed_descriptions
 needed_descriptions_help: >
