@@ -1,5 +1,5 @@
 This is how I installed MO on slicehost on a clean Fedora Core 10
-slice.  Start to finish this should only take an hour or two.
+512Mb slice.  Start to finish this should only take an hour or two?
 
 -Jason
 
@@ -7,8 +7,8 @@ slice.  Start to finish this should only take an hour or two.
 
 # Basic installation.
 root> yum update
-root> yum install tcsh mlocate gcc make vim lynx telnet monit
-root> yum install ImageMagick subversion httpd mysql-devel mysql-server
+root> yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
+root> yum install ImageMagick subversion httpd mysql-devel mysql-server monit
 root> yum install ruby ruby-devel rubygem-mongrel (rubygem-rails)
 root> gem install rake mongrel_cluster RedCloth mysql --no-ri --no-rdoc
 
@@ -51,6 +51,10 @@ root> vi /etc/httpd/conf/httpd.conf
 root> chkconfig --level 345 httpd on
     (restart it later after mongrel and rails configured)
 
+# Tell mysql to start up on boot.
+root> chkconfig --level 345 mysqld on
+root> service mysqld start
+
 # Install MO.
 root> mkdir /var/web
 root> mkdir /var/web/mo
@@ -76,8 +80,9 @@ root> vi /var/web/mo/config/mongrel_cluster.yml
 root> su mo
 mo> cp config/environment.yml{-template,}
 mo> vi config/environment.yml
-    (set image home to /var/web/mo/public/images)
     (set rails version)
+    (set rails root)
+    (set image home to /var/web/mo/public/images)
 mo> vi config/environments/development.rb
     (remove ruby-debug include at bottom)
 mo> mkdir public/images/thumb
@@ -101,12 +106,11 @@ mysql> quit;
 # Configure MO database.
 mo> cp config/database.yml{-template,}
 mo> vi config/database.yml
-    (set database names, usernames, passwords, socket)
-    (have production point to real database at gridserver)
-    (have test and development point to local database -- see above)
+    (set database names, usernames, passwords, sockets)
 
 # Populate database (from snapshot).
-mo> mysql -u mo -p observer_development -e 'source dump.yyyymmdd.sql'
+mo> mysql -u mo -p observer_development -e 'source dump.sql'
+mo> mysql -u mo -p observer_production -e 'source dump.sql'
 mo> rake db:migrate
     (this is the first time you actually run rails, lots of potential
     bugs might show up here having to do with environment, rails version
@@ -133,7 +137,7 @@ root> service httpd restart
     (point your external browser at http://174.143.24.209/)
 
 # Install process monitor.
-root> vi /etc/monit.d/web
+root> vi /etc/monit.d/mo
     (see below)
 root> chkconfig --level 345 monit on
 root> service monit start
@@ -186,21 +190,21 @@ jason> echo "This is a test." | mutt -s test pellaea@gmail.com
     (note yahoo "deferred" the test email, citing some problem
     with reply-to address?, but gmail accepts it)
 
-# # Place server into production mode.
-# root> vi /etc/httpd/conf/httpd.conf
-#     (change RAILS_ENV back)
-# root> vi /var/web/mo/config/mongrel_cluster.yml
-#     (change environment back)
-# 
-# # Restart server and done.
-# root> service mongrel_cluster restart
-# root> service httpd restart
+# Place server into production mode.
+root> vi /etc/httpd/conf/httpd.conf
+    (change RAILS_ENV back)
+root> vi /var/web/mo/config/mongrel_cluster.yml
+    (change environment back)
+
+# Restart server and done.
+root> service mongrel_cluster restart
+root> service httpd restart
 
 ################################################################################
 
 # Adding new users:
-root> useradd -G mo -s /bin/tcsh rookie
-root> passwd rookie
+root> useradd -G mo -s /bin/tcsh xxx
+root> passwd xxx
 
 # Adding another server instance:
 root> vi /etc/httpd/conf/httpd.conf
@@ -228,7 +232,7 @@ group: mo
 port: "3000"
 environment: production
 address: 127.0.0.1
-servers: 2
+servers: 3
 docroot: public
 
 ################################################################################
@@ -265,12 +269,21 @@ NameVirtualHost *:80
     <Proxy balancer://mo_cluster>
         BalancerMember http://127.0.0.1:3000
         BalancerMember http://127.0.0.1:3001
+        BalancerMember http://127.0.0.1:3002
     </Proxy>
 
     RewriteEngine on
     RewriteRule ^/$ /index.html [QSA]
+
+    # Direct image downloads and uploads to mediatemple server.
+    # RewriteRule ^/images/(.*)$                    http://64.13.236.182/images/$1          [QSA]
+    # RewriteRule ^/image/(add|destroy|test)_(.*)$  http://64.13.236.182/image/$1_$2        [QSA]
+    # RewriteRule ^/observer/(create|edit)_obs(.*)$ http://64.13.236.182/observer/$1_obs$2  [QSA]
+    # RewriteRule ^/account/profile(.*)$            http://64.13.236.182/observer/profile$2 [QSA]
+
     # Rewrite to check for Rails cached page
     RewriteRule ^([^.]+)$ $1.html [QSA]
+
     # Redirect all non-static requests to cluster
     RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
     RewriteRule ^/(.*)$ balancer://mo_cluster%{REQUEST_URI} [P,QSA,L]
@@ -283,7 +296,7 @@ NameVirtualHost *:80
 
 ################################################################################
 
-# /etc/monit.conf
+# /etc/monit.d/mo
 set mailserver localhost
 set mail-format { from: monitor@mushroomobserver.org }
 set alert root@mushroomobserver.org
@@ -291,23 +304,14 @@ set alert root@mushroomobserver.org
 check system mushroomobserver.org
   if memory usage > 90% then alert
   if cpu usage (user) > 90% then alert
-
-check process apache
-  with pidfile "/var/run/httpd.pid"
-  start program = "/etc/init.d/httpd start"
-  stop program = "/etc/init.d/httpd stop"
-  if cpu usage > 95% for 5 cycles then restart
-  if totalmem > 100.0 Mb then alert
-  if children > 100 for 5 cycles then stop
-  if 10 restarts within 10 cycles then timeout
-  if failed port 80 protocol http then restart
+  group mo
 
 check process mo1
   with pidfile /var/web/mo/tmp/pids/mongrel.3000.pid
   start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3000"
   stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3000"
   if cpu > 80% for 5 cycles then restart
-  if totalmem > 115.0 MB for 2 cycles then restart
+  if totalmem > 115.0 MB for 5 cycles then restart
   if 20 restarts within 20 cycles then timeout
   group mo
 
@@ -316,7 +320,16 @@ check process mo2
   start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3001"
   stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3001"
   if cpu > 80% for 5 cycles then restart
-  if totalmem > 115.0 MB for 2 cycles then restart
+  if totalmem > 115.0 MB for 5 cycles then restart
+  if 20 restarts within 20 cycles then timeout
+  group mo
+
+check process mo3
+  with pidfile /var/web/mo/tmp/pids/mongrel.3002.pid
+  start program = "/usr/bin/mongrel_rails cluster::start -C /etc/mongrel_cluster/mo.yml --clean --only 3002"
+  stop program  = "/usr/bin/mongrel_rails cluster::stop -C /etc/mongrel_cluster/mo.yml --only 3002"
+  if cpu > 80% for 5 cycles then restart
+  if totalmem > 115.0 MB for 5 cycles then restart
   if 20 restarts within 20 cycles then timeout
   group mo
 
