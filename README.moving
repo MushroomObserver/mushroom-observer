@@ -101,13 +101,12 @@ mo> cd public/images
 mo> mkdir thumb 640 orig
 
 # Get Images.
-mo> scp xxx:mo/public/images/thumb.tar
-mo> tar xf thumb.tar
-mo> scp mushroomobserver.org:mo/public/images/640.tar
-mo> tar xf 640.tar
-# We haven't figured out how to get the originals over yet since they are
-# around 30G...
-mo> cd ../..
+# These tars should be done with wget like the orig files
+mo> scp xxx:mo/public/images/640-thumb.tar .
+mo> tar xf 640-thumb.tar
+mo> scp xxx:mo/public/images/orig.wget .
+mo> chmod +x orig.wget
+mo> ./orig.wget
 
 # Create database for testing.
 mo> mysql -u root
