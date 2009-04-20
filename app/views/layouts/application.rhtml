@@ -11,15 +11,21 @@
 
   <%=
     css = nil
-    if CSS.member?(controller.action_name)
-      css = controller.action_name
+    if @user and @user.id == 0
+      css = 'Admin'
+    elsif is_robot?
+      css = 'Agaricus'
     else
-      unless @user.nil?
-        css = @user.theme
+      if CSS.member?(controller.action_name)
+        css = controller.action_name
+      else
+        unless @user.nil?
+          css = @user.theme
+        end
       end
-    end
-    unless CSS.member?(css)
-      css = CSS[rand(CSS.length)]
+      unless CSS.member?(css)
+        css = CSS[rand(CSS.length)]
+      end
     end
     stylesheet_link_tag 'general', css
   %>
@@ -32,6 +38,11 @@
 
 </head>
 <body>
+  <% if @user and @user.id == 0 %>
+    <div class="Admin">
+      DANGER: You are in administrator mode. Proceed with caution.
+    </div>
+  <% end %>
   <center>
     We have been experiencing an increased number of Proxy Errors recently.<br/>
     We are working on moving the website to a new hosting service.<br/>

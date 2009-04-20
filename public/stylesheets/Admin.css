@@ -1,0 +1,18 @@
+/* Global default colors */
+body {
+    background-color: #ff0000; /* campestris */
+    color: #000000; /* cupreobrunneus */
+}
+
+.Admin {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+/* Colors for the left hand panel */
+.LeftSide {
+    background-color: #ffff00; /* augustus */
+}
