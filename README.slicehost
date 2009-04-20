@@ -1,18 +1,30 @@
-This is how I installed MO on slicehost on a clean Fedora Core 10
-512Mb slice.  Start to finish this should only take an hour or two?
+This contains notes on how the MushroomObserver website was setup on the slicehost
+servers and should help anyone wanting to move the site to another server at some
+point in the future.
 
--Jason
+The target slicehost configuration is a clean Fedora Core 10 512Mb slice.
+
+Estimated time: An hour or two
 
 ################################################################################
 
 # Basic installation.
+# When running yum respond 'y' to all questions.
 root> yum update
 root> yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
 root> yum install ImageMagick subversion httpd mysql-devel mysql-server monit
-root> yum install ruby ruby-devel rubygem-mongrel (rubygem-rails)
+root> yum install ruby ruby-devel rubygem-mongrel
+
+# Check that this installs the currently supported version of rails 2.1.1.
+# This can be done with: gem list
+# If not see below...
+root> yum install rubygem-rails
+
 root> gem install rake mongrel_cluster RedCloth mysql --no-ri --no-rdoc
+# This is expected fail.  See below...
 
 # We need to be sure to get the right version of rails.
+# Only run this if yum didn't get the right version.
 root> gem install rails --version 2.1.1 --no-ri --no-rdoc
 
 # When mysql fails to build...
@@ -25,7 +37,7 @@ root> useradd mo
 
 # Don't allow people to login directly as mo.
 root> vi /etc/shadow
-    (set password of mo to *)
+    (replace mo:!!:... with mo:*:...)
 
 # Allow members of group "mo" ability to "sudo su mo".
 root> visudo
@@ -39,7 +51,8 @@ root> passwd yyy
 
 # Allow tcp through firewall.
 root> iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-    (or run system-config-firewall-tui)
+root> system-config-firewall-tui
+  (enable WWW (HTTP))
 
 # Test apache (ignore the warning message for now):
 root> service httpd start
@@ -47,7 +60,7 @@ root> service httpd start
 
 # Setup apache properly.
 root> vi /etc/httpd/conf/httpd.conf
-    (see below)
+    (add the content given below)
 root> chkconfig --level 345 httpd on
     (restart it later after mongrel and rails configured)
 
@@ -56,13 +69,17 @@ root> chkconfig --level 345 mysqld on
 root> service mysqld start
 
 # Install MO.
-root> mkdir /var/web
-root> mkdir /var/web/mo
+root> mkdir -p /var/web/mo
 root> chown mo /var/web/mo
 root> chgrp mo /var/web/mo
 root> su mo
 mo> cd /var/web/mo
 mo> svn checkout http://svn.collectivesource.com/mushroom_sightings/trunk /var/web/mo
+
+# Get Database.
+mo> mkdir sql
+mo> cd sql
+mo> scp xxx:mo/db/checkpoint dump.sql
 
 # Setup mongrel cluster.
 mo> exit
@@ -78,16 +95,19 @@ root> vi /var/web/mo/config/mongrel_cluster.yml
 
 # Tweak environment.
 root> su mo
-mo> cp config/environment.yml{-template,}
-mo> vi config/environment.yml
-    (set rails version)
-    (set rails root)
-    (set image home to /var/web/mo/public/images)
 mo> vi config/environments/development.rb
     (remove ruby-debug include at bottom)
-mo> mkdir public/images/thumb
-mo> mkdir public/images/640
-mo> mkdir public/images/orig
+mo> cd public/images
+mo> mkdir thumb 640 orig
+
+# Get Images.
+mo> scp xxx:mo/public/images/thumb.tar
+mo> tar xf thumb.tar
+mo> scp mushroomobserver.org:mo/public/images/640.tar
+mo> tar xf 640.tar
+# We haven't figured out how to get the originals over yet since they are
+# around 30G...
+mo> cd ../..
 
 # Create database for testing.
 mo> mysql -u root
@@ -109,8 +129,8 @@ mo> vi config/database.yml
     (set database names, usernames, passwords, sockets)
 
 # Populate database (from snapshot).
-mo> mysql -u mo -p observer_development -e 'source dump.sql'
-mo> mysql -u mo -p observer_production -e 'source dump.sql'
+mo> mysql -u mo -p observer_development -e 'source sql/dump.sql'
+mo> mysql -u mo -p observer_production -e 'source sql/dump.sql'
 mo> rake db:migrate
     (this is the first time you actually run rails, lots of potential
     bugs might show up here having to do with environment, rails version
@@ -222,21 +242,6 @@ root> service monit start
 
 ################################################################################
 
-# /var/web/mo/config/mongrel_cluster.yml
----
-cwd: /var/web/mo
-pid_file: tmp/pids/mongrel.pid
-log_file: log/mongrel.log
-user: mo
-group: mo
-port: "3000"
-environment: production
-address: 127.0.0.1
-servers: 3
-docroot: public
-
-################################################################################
-
 # /etc/httpd/conf/httpd.conf
 ServerName agaricus
 ServerTokens Prod
@@ -293,6 +298,21 @@ NameVirtualHost *:80
     BrowserMatch ^Mozilla/4.0[678] no-gzip
     BrowserMatch bMSIE !no-gzip !gzip-only-text/html
 </VirtualHost>
+
+################################################################################
+
+# /var/web/mo/config/mongrel_cluster.yml
+---
+cwd: /var/web/mo
+pid_file: tmp/pids/mongrel.pid
+log_file: log/mongrel.log
+user: mo
+group: mo
+port: "3000"
+environment: production
+address: 127.0.0.1
+servers: 3
+docroot: public
 
 ################################################################################
 

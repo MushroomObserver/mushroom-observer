@@ -1,7 +1,9 @@
 # SENSITIVE INFORMATION: This file should not be checked into subversion
 
 # RAILS_GEM_VERSION = '1.2.4'
-RAILS_GEM_VERSION = '2.1.0'
+RAILS_GEM_VERSION = '2.1.1'
+
+RAILS_ROOT = "#{File.dirname(__FILE__)}/.." unless defined?(RAILS_ROOT)
 
 unless defined?(IMG_DIR)
   IMG_DIR = File.join(RAILS_ROOT, 'public', 'images')
