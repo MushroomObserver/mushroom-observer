@@ -36,4 +36,7 @@ QUEUE_EMAIL = true
 EMAIL_PER_MINUTE = 25
 QUEUE_DELAY = 5.seconds
 
-require 'ruby-debug'
+# Enable this only on the production server.  It tells the image uploader to
+# write images to the image server at images.mushroomobserver.org.
+IMAGE_TRANSFER = false
+

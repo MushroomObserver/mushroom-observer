@@ -30,3 +30,9 @@ TESTING = true
 QUEUE_EMAIL = false
 EMAIL_PER_MINUTE = 25
 QUEUE_DELAY = 5.seconds
+
+# Enable this only on the production server.  It tells the image uploader to
+# write images to the image server at images.mushroomobserver.org.
+IMAGE_TRANSFER = false
+# IMAGE_TRANSFER = true
+# IMAGE_SERVER = "blah@blah.com:images"

@@ -97,16 +97,25 @@ root> vi /var/web/mo/config/mongrel_cluster.yml
 root> su mo
 mo> vi config/environments/development.rb
     (remove ruby-debug include at bottom)
-mo> cd public/images
-mo> mkdir thumb 640 orig
+mo> vi config/environments/production.rb
+    (enable IMAGE_TRANSFER -- tells production server to copy uploaded images
+    over to the image server via ssh)
+
+# Setup password-less ssh to image server.
+mo> ssh-keygen -t rsa
+  (just press return three times, tell it to overwrite id_rsa.pub if it asks)
+mo> ssh-copy-id -i ~/.ssh/id_rsa.pub xxx@images.mushroomobserver.org
+  (enter password)
+mo> ssh xxx@images.mushroomobserver.org
+  (just a test to make sure it doesn't ask for password, then quit)
 
 # Get Images.
-# These tars should be done with wget like the orig files
-mo> scp xxx:mo/public/images/640-thumb.tar .
-mo> tar xf 640-thumb.tar
-mo> scp xxx:mo/public/images/orig.wget .
-mo> chmod +x orig.wget
-mo> ./orig.wget
+mo> cd public/images
+mo> mkdir thumb 640 orig
+mo> cd thumb
+mo> ssh -f xxx@images \(cd images.mushroomobserver.org/thumb\; ls \*.jpg \> x\; tar -T x cf -\) | tar xf -
+mo> cd ../640
+mo> ssh -f xxx@images \(cd images.mushroomobserver.org/640\; ls \*.jpg \> x\; tar -T x cf -\) | tar xf -
 
 # Create database for testing.
 mo> mysql -u root
@@ -279,11 +288,11 @@ NameVirtualHost *:80
     RewriteEngine on
     RewriteRule ^/$ /index.html [QSA]
 
-    # Direct image downloads and uploads to mediatemple server.
-    # RewriteRule ^/images/(.*)$                    http://64.13.236.182/images/$1          [QSA]
-    # RewriteRule ^/image/(add|destroy|test)_(.*)$  http://64.13.236.182/image/$1_$2        [QSA]
-    # RewriteRule ^/observer/(create|edit)_obs(.*)$ http://64.13.236.182/observer/$1_obs$2  [QSA]
-    # RewriteRule ^/account/profile(.*)$            http://64.13.236.182/observer/profile$2 [QSA]
+    # Redirect *all* image requests to image server.
+    # RewriteRule ^/images/(.*)$ http://images.mushroomobserver.org/$1 [QSA]
+
+    # Redirect only originals to image server.
+    RewriteRule ^/images/orig/(.*)$ http://images.mushroomobserver.org/orig/$1 [QSA]
 
     # Rewrite to check for Rails cached page
     RewriteRule ^([^.]+)$ $1.html [QSA]

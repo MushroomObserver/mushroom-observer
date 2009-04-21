@@ -87,8 +87,12 @@ class Image < ActiveRecord::Base
 
   # Convert original into 640x640 and 160x160 images.
   def create_resized_images
-    self.resize_image(640, 640, 70, self.original_image, self.big_image)
-    self.resize_image(160, 160, 90, self.big_image, self.thumbnail)
+    result = true
+    result = self.resize_image(640, 640, 70, self.original_image, self.big_image)
+    if result
+      result = self.resize_image(160, 160, 90, self.big_image, self.thumbnail)
+    end
+    return result
   end
 
   # Store internal buffer in original file.
@@ -97,16 +101,34 @@ class Image < ActiveRecord::Base
     file = File.new(self.original_image, 'w')
     file.print(@img)
     file.close
+    self.transfer_image(self.original_image)
     return self.create_resized_images
   end
 
   # Resize +src+ image and save as +dest+, stripping headers.
   def resize_image(width, height, quality, src, dest)
-    if File.exists?(src)
-      cmd = sprintf("convert -thumbnail '%dx%d>' -quality %d %s %s",
-                     width, height, quality, src, dest)
-      system cmd
-      logger.warn(cmd)
+    result = false
+    cmd = sprintf("convert -thumbnail '%dx%d>' -quality %d %s %s",
+                   width, height, quality, src, dest)
+    if File.exists?(src) and system(cmd)
+      logger.warn(cmd + ' -- success')
+      self.transfer_image(dest)
+      return true
+    else
+      logger.warn(cmd + ' -- failed')
+    end
+    return result
+  end
+
+  # Transfer new image to the image server.
+  def transfer_image(src)
+    if IMAGE_TRANSFER and File.exists?(src)
+      if src.match(/\w+\/\d+\.jpg$/)
+        dest = $&
+        cmd = "scp %s %s/%s" % [src, IMAGE_SERVER, dest]
+        system cmd
+        logger.warn(cmd)
+      end
     end
   end
 
