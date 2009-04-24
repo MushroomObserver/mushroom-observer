@@ -15,6 +15,10 @@ root> yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
 root> yum install ImageMagick subversion httpd mysql-devel mysql-server monit
 root> yum install ruby ruby-devel rubygem-mongrel
 
+# Setup clock to PDT (actually did this at the end so it might have to happen later)
+root> cp /etc/localtime /etc/localtime-orig
+root> cp /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+
 # Check that this installs the currently supported version of rails 2.1.1.
 # This can be done with: gem list
 # If not see below...
