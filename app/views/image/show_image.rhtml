@@ -30,7 +30,7 @@
 %>
 
 <div id="copyright">
-  <%= :image_show_copyright.t %> &copy;<%= @image.when.year %>
+  <%= :image_show_copyright.t %> &copy;<%= @image.when and @image.when.year %>
   <%= user_link(@image.user, @image.copyright_holder) %>
 </div>
 
