@@ -125,9 +125,11 @@ class AccountController < ApplicationController
           else
             flash_object_errors(@new_user)
           end
-        # else
-          # AccountMailer.deliver_denied(params['new_user'])
-          # redirect_back_or_default(:action => "welcome")
+        else
+          if theme != ''
+            AccountMailer.deliver_denied(params['new_user'])
+          end
+          redirect_back_or_default(:action => "welcome")
         end
     end
   end

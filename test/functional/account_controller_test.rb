@@ -71,7 +71,8 @@ class AccountControllerTest < Test::Unit::TestCase
                               "email" => "spam@spam.spam", "mailing_address" => "", "theme" => "", "notes" => "" }
     assert(!@response.has_session_object?("user"))
 
-    assert_equal("http://localhost/bogus/location", @response.redirect_url)
+    # Disabled denied email in above case...
+    # assert_equal("http://localhost/bogus/location", @response.redirect_url)
 
     post :signup, "new_user" => { "login" => "spammer", "password" => "spammer", "password_confirmation" => "spammer",
                               "email" => "spam@spam.spam", "mailing_address" => "", "theme" => "spammer", "notes" => "" }
