@@ -1,6 +1,6 @@
-This contains notes on how the MushroomObserver website was setup on the slicehost
-servers and should help anyone wanting to move the site to another server at some
-point in the future.
+This contains notes on how the MushroomObserver website was setup on the
+slicehost servers and should help anyone wanting to move the site to another
+server at some point in the future. 
 
 The target slicehost configuration is a clean Fedora Core 10 512Mb slice.
 
@@ -221,6 +221,10 @@ jason> vi /home/jason/.muttrc
 jason> echo "This is a test." | mutt -s test pellaea@gmail.com
     (note yahoo "deferred" the test email, citing some problem
     with reply-to address?, but gmail accepts it)
+    (make sure /etc/nsswitch.conf has "hosts: files dns" in it
+    so that it looks at /etc/hosts before looking up ip on dns)
+    (note also that /etc/hosts is cached via nscd, try
+    "service nscd reload")
 
 # Place server into production mode.
 root> vi /etc/httpd/conf/httpd.conf
@@ -234,6 +238,49 @@ root> service httpd restart
 
 ################################################################################
 
+# Specific notes on making the official transition.
+1) Do not remove the subdomain on the old host before DNS propogates!
+2) Don't forget to generate a new gmaps api key.
+3) Set IMAGE_SERVER to use the explicit IP address until DNS propogates.
+4) Nslookup is failing on the new host(??)
+
+# Order if moving database:
+1) Shut down old and new servers.
+2) Dump database and copy over to new database.
+3) Copy images over to new server and new images server as necessary.
+4) Change NS records at registrar to point to new server.
+5) Add all DNS records at new server (see below).
+6) Test email, ssh to images server, ...
+7) Start new server.
+8) Add redirection code to old server (see below).
+9) Start old server.
+
+# Order if just moving server:
+1) Start new server
+2) Copy images over.
+3) Change NS records at registrar to point to new server.
+4) Add all DNS records at new server (see below).
+5) Add redirection code to old server (see below).
+6) Restart old server.
+7) Copy over any last-minute images.
+
+# DNS records:
+A blah.com. IP1
+A www       IP1
+A mail      IP1
+A images    IP2
+A lists     IP3
+MX blah.com. mail.blah.com. (aux=0)
+NS blah.com. ns1.webhost.com.
+NS blah.com. ns2.webhost.com.
+NS blah.com. ns3.webhost.com.
+
+IP1 = IP of new server
+IP2 = IP of image server (208.113.185.204 on dreamhost)
+IP3 = IP of list server (66.33.216.120 on dreamhost)
+
+################################################################################
+
 # Adding new users:
 root> useradd -G mo -s /bin/tcsh xxx
 root> passwd xxx
@@ -243,7 +290,7 @@ root> vi /etc/httpd/conf/httpd.conf
     (search for BalancerMember.*3000 and add another line)
 root> vi /var/web/mo/config/mongrel_cluster.yml
     (increment the number of "servers:" near bottom)
-root> vi /etc/monit.conf
+root> vi /etc/monit.d/mo
     (duplicate the mo1 section, changing "mo1" to "moN" and "3000" to "300N-1")
 root> service monit stop
 root> service httpd stop

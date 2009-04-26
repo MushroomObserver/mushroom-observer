@@ -101,8 +101,12 @@ class Image < ActiveRecord::Base
     file = File.new(self.original_image, 'w')
     file.print(@img)
     file.close
-    self.transfer_image(self.original_image)
-    return self.create_resized_images
+    delete_original = self.transfer_image(self.original_image)
+    result = self.create_resized_images
+    if delete_original && IMAGE_TRANSFER
+      # File.delete(self.original_image)
+    end
+    return result
   end
 
   # Resize +src+ image and save as +dest+, stripping headers.
@@ -110,10 +114,9 @@ class Image < ActiveRecord::Base
     result = false
     cmd = sprintf("convert -thumbnail '%dx%d>' -quality %d %s %s",
                    width, height, quality, src, dest)
-    if File.exists?(src) and system(cmd)
+    if File.exists?(src) and result = system(cmd)
       logger.warn(cmd + ' -- success')
       self.transfer_image(dest)
-      return true
     else
       logger.warn(cmd + ' -- failed')
     end
@@ -122,14 +125,20 @@ class Image < ActiveRecord::Base
 
   # Transfer new image to the image server.
   def transfer_image(src)
+    result = false
     if IMAGE_TRANSFER and File.exists?(src)
       if src.match(/\w+\/\d+\.jpg$/)
         dest = $&
         cmd = "scp %s %s/%s" % [src, IMAGE_SERVER, dest]
-        system cmd
-        logger.warn(cmd)
+        result = system cmd
+        if result
+          logger.warn(cmd + ' -- success')
+        else
+          logger.warn(cmd + ' -- failed')
+        end
       end
     end
+    return result
   end
 
   # Return file name of original image.

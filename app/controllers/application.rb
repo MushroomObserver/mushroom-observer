@@ -132,7 +132,9 @@ class ApplicationController < ActionController::Base
   before_filter :browser_status
   before_filter :autologin
   around_filter :set_locale
+  # before_filter :extra_gc
   # after_filter :extra_gc
+  after_filter :log_memory_usage
 
   before_filter(:disable_link_prefetching, :only => [
     # account_controller methods
@@ -795,6 +797,20 @@ class ApplicationController < ActionController::Base
   
   def extra_gc
     ObjectSpace.garbage_collect
+  end
+
+  def log_memory_usage
+    sd = sc = pd = pc = 0
+    File.new("/proc/#{$$}/smaps").each_line do |line|
+      if line.match(/\d+/)
+        val = $&.to_i
+        line.match(/^Shared_Dirty/)  ? (sd += val) :
+        line.match(/^Shared_Clean/)  ? (sc += val) :
+        line.match(/^Private_Dirty/) ? (pd += val) :
+        line.match(/^Private_Clean/) ? (pc += val) : 1
+      end
+    end
+    logger.warn "Memory Usage: sd=%d, sc=%d, pd=%d, pc=%d\n" % [sd, sc, pd, pc]
   end
   
   # Get a sorted array of the navigator languages
