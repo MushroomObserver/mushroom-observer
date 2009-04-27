@@ -810,7 +810,9 @@ class ApplicationController < ActionController::Base
         line.match(/^Private_Clean/) ? (pc += val) : 1
       end
     end
-    logger.warn "Memory Usage: sd=%d, sc=%d, pd=%d, pc=%d\n" % [sd, sc, pd, pc]
+    uid = session[:user_id].to_i
+    logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
+        [pd, pc, sd, sc, $$, uid, request.request_uri]
   end
   
   # Get a sorted array of the navigator languages
