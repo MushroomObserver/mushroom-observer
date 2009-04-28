@@ -19,6 +19,7 @@ Disallow: /image/reuse_image/
 Disallow: /image/reuse_image_by_id/
 Disallow: /image/reuse_image_for_user/
 Disallow: /image/set_image_quality/
+Disallow: /image/show_original/
 Disallow: /location/add_to_location/
 Disallow: /location/auto_complete_location/
 Disallow: /location/create_location/
@@ -40,6 +41,7 @@ Disallow: /name/edit_name/
 Disallow: /name/email_tracking/
 Disallow: /name/eol
 Disallow: /name/eol_preview
+Disallow: /name/name_index/
 Disallow: /name/name_search/
 Disallow: /name/review_authors/
 Disallow: /observer/add_comment/
@@ -78,6 +80,7 @@ Disallow: /observer/recalc/
 Disallow: /observer/show_image/
 Disallow: /observer/show_name/
 Disallow: /observer/show_past_name/
+Disallow: /observer/show_site_stats
 Disallow: /observer/show_species_list/
 Disallow: /observer/textile_sandbox
 Disallow: /observer/users_by_name/
@@ -87,4 +90,6 @@ Disallow: /species_list/create_species_list/
 Disallow: /species_list/edit_species_list/
 Disallow: /species_list/make_report/
 Disallow: /species_list/manage_species_lists/
+Disallow: /species_list/name_lister
+Disallow: /species_list/species_list_by_title
 Disallow: /species_list/upload_species_list/
