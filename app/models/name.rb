@@ -506,6 +506,17 @@ class Name < ActiveRecord::Base
     result
   end
 
+  def note_status()
+    fieldCount = sizeCount = 0
+    for (k, v) in self.all_notes()
+      if v and v.strip != ''
+        fieldCount += 1
+        sizeCount += v.length
+      end
+    end
+    [fieldCount, sizeCount]
+  end
+    
   def before_save
     if self.gen_desc && self.gen_desc != '' && self.authors == []
       user = self.user

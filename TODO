@@ -1,10 +1,3 @@
-slicehost:
-email (postfix)
-  clearing out the slice again
-some more performance testing
-scaling options and the memory issue.
-database
-
 Editor deployment:
   after the usual update
   rake cache:update_authors

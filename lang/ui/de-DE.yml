@@ -509,6 +509,10 @@ ask_webmaster_title: Frage oder Anregung schicken
 ask_webmaster_your_email: Deine Email-Adresse
 
 
+# name/authored_names
+authored_names_title:  Names with Authors
+authored_names_error:  No names have authors
+
 # observer/license_updater
 bulk_license_link: Bulk License Updater
 

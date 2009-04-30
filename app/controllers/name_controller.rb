@@ -167,6 +167,32 @@ class NameController < ApplicationController
     show_name_data(title, name_data, :name_search_none_found.t(:pattern => pattern))
   end
   
+  def authored_names
+    base_data = Name.connection.select_all %(
+      SELECT distinct names.id, names.display_name, users.login
+      FROM names, authors_names, users
+      WHERE names.id = authors_names.name_id
+      AND authors_names.user_id = users.id
+      ORDER BY names.text_name asc, names.author asc
+    )
+    last_name_id = users = name = nil
+    name_data = []
+    for row in base_data:
+      if last_name_id != row['id']
+        last_row = row.clone
+        name_data.push(last_row)
+        last_name_id = row['id']
+        users = [row['login']]
+        name = Name.find(last_name_id)
+        field_count, size_count = name.note_status()
+      else
+        users.push(row['login'])
+      end
+      last_row['display_name'] = "#{row['display_name']} (#{users.join(', ')} #{field_count}/#{size_count})"
+    end
+    show_name_data(:authored_names_title.t, name_data, :authored_names_error.t)
+  end
+    
   def names_by_author
     names_by(:author, :names_by_author_title, :names_by_author_error)
   end
@@ -185,6 +211,9 @@ class NameController < ApplicationController
         AND #{role}s_names.user_id = #{user.id}
         ORDER BY names.text_name asc, names.author asc
       )
+      for row in name_data:
+        row['display_name'] = "#{row['display_name']} [#{user.login}]"
+      end
       user_name = user.legal_name
       show_name_data(title.t(:name => user_name), name_data, error.t(:name => user_name))
     else
