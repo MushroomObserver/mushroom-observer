@@ -70,7 +70,7 @@ class NameControllerTest < Test::Unit::TestCase
     # assert_template 'name_index'
     # assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
   end
-  
+
   def test_edit_name
     name = @coprinus_comatus
     params = { "id" => name.id.to_s }

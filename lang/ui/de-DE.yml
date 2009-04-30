@@ -1681,6 +1681,7 @@ runtime_invalid_name: Der Name '[name]' ist ungültig.
 runtime_name_already_used: Den Namen '[name]' gibt es schon.
 runtime_name_in_use_with_notes: Der Name '[name]' wird schon verwendet und [other] hat Bemerkungen.
 runtime_unable_to_create_name: Kann den Namen '[name]' nicht erstellen.
+runtime_unable_to_save_changes:  Unable to save changes.
 runtime_unable_to_transfer_name: Kann nicht von [name] zu anderen Synonymen übertragen.
 runtime_unrecognized_rank: Rang '[rank]' nicht erkannt.
 runtime_update_nonexisting_name: Update_name wurde auf einen Namen angewandt, den es nicht gibt.

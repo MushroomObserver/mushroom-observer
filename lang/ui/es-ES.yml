@@ -1733,6 +1733,7 @@ runtime_invalid_name: El nombre <<[name]>> no es válido.
 runtime_name_already_used: El nombre <<[name]>> ya existe.
 runtime_name_in_use_with_notes: El nombre <<[name]>> ya está en uso y <<[other]>> ha notas.
 runtime_unable_to_create_name: No se ha podido crear el nombre <<[name]>>.
+runtime_unable_to_save_changes:  Unable to save changes.
 runtime_unable_to_transfer_name: No se ha podido transferir [name] a otro sinónimo.
 runtime_unrecognized_rank: El rango <<[rank]>> no es conocido.
 runtime_update_nonexisting_name: Update_name fue llamado con un nombre que no existe.

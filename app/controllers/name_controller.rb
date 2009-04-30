@@ -561,6 +561,8 @@ class NameController < ApplicationController
               @name.review_status = :unreviewed
             end
             @name.add_editor(@user)
+          elsif @name.errors.length > 0
+            raise :runtime_unable_to_save_changes.t
           end
           if old_name # merge happened
             for o in old_name.observations
@@ -580,7 +582,7 @@ class NameController < ApplicationController
             old_name.destroy
           end
         rescue RuntimeError => err
-          flash_error(err.to_s)
+          flash_error(err.to_s) if !err.nil?
           flash_object_errors(@name)
           @name.attributes = params[:name]
         else
