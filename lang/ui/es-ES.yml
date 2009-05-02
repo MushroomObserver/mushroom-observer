@@ -360,7 +360,6 @@ validate_location_south_too_low: La latitud no puede ser inferior a -90.
 validate_location_user_missing: Falta el usuario.
 validate_location_west_out_of_bounds: La longitud debe ser entre -180 y 180.
 validate_name_author_too_long: El autor debe ser inferior a 100 caracteres de largo.
-validate_name_citation_too_long: La cita debe ser inferior a 100 caracteres de largo.
 validate_name_display_name_too_long: Display_name debe ser inferior a 100 caracteres de largo.
 validate_name_observation_name_too_long: Observation_name debe ser inferior a 100 caracteres de largo.
 validate_name_search_name_too_long: Search_name debe ser inferior de 100 caracteres de largo.

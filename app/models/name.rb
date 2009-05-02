@@ -1029,8 +1029,5 @@ class Name < ActiveRecord::Base
     if self.author.to_s.length > 100
       errors.add(:author, :validate_name_author_too_long.t)
     end
-    if self.citation.to_s.length > 200
-      errors.add(:citation, :validate_name_citation_too_long.t)
-    end
   end
 end

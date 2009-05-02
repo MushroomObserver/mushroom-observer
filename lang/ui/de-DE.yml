@@ -357,7 +357,6 @@ validate_location_south_too_low: Der Breitengrad Süd muss mindestens -90 sein.
 validate_location_user_missing: Nutzer fehlt.
 validate_location_west_out_of_bounds: Der Längengrad West muss zwischen -180 und 180 sein.
 validate_name_author_too_long: Der Autor muss kürzer sein als 100 Buchstaben.
-validate_name_citation_too_long: Die Referenz kann höchstens 100 Buchstaben lang sein.
 validate_name_display_name_too_long: Display_name muss kürzer sein als 100 Buchstaben.
 validate_name_observation_name_too_long: Observation_name müss kürzer sein als 100 Buchstaben.
 validate_name_search_name_too_long: Search_name muss kürzer sein als 100 Buchstaben.
