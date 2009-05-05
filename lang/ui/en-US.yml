@@ -247,6 +247,7 @@ rank_family: Family
 rank_form: Form
 rank_genus: Genus
 rank_group: Group
+rank_domain: Domain
 rank_kingdom: Kingdom
 rank_order: Order
 rank_phylum: Phylum
