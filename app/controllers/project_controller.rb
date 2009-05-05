@@ -414,11 +414,18 @@ class ProjectController < ApplicationController
     if verify_user()
       if @draft_name.can_edit?(@user)
         if request.method == :post
-          if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
+          begin
+            params[:draft_name][:classification] = Name.validate_classification(@draft_name.name.rank, params[:draft_name][:classification])
+            if !@draft_name.update_attributes(params[:draft_name]) || !@draft_name.save
+              flash_object_errors(@draft_name)
+            else
+              flash_notice(:create_draft_updated.t)
+              redirect_to(:action => 'show_draft', :id => @draft_name.id)
+            end
+          rescue RuntimeError => err
+            flash_error(err.to_s) if !err.nil?
             flash_object_errors(@draft_name)
-          else
-            flash_notice(:create_draft_updated.t)
-            redirect_to(:action => 'show_draft', :id => @draft_name.id)
+            @draft_name.attributes = params[:draft_name]
           end
         end
       else
@@ -439,23 +446,30 @@ class ProjectController < ApplicationController
   def publish_draft
     draft = DraftName.find(params[:id])
     if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
-      name = draft.name
-      name.license_id = draft.license_id
-      for f in Name.all_note_fields:
-        name.send("#{f}=", draft.send(f))
-      end
-      if name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
-        name.add_editor(@user)
-      end
-      name.update_review_status(:vetted, @user)
-      user_set = Set.new(name.authors)
-      user_set.merge(UserGroup.find_by_name('reviewers').users)
-      for recipient in user_set
-        if recipient
-          PublishEmail.create_email(@user, recipient, name)
+      begin
+        draft.classification = Name.validate_classification(draft.name.rank, draft.classification)
+        name = draft.name
+        name.license_id = draft.license_id
+        for f in Name.all_note_fields:
+          name.send("#{f}=", draft.send(f))
         end
+        if name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, Time.now, true)
+          name.add_editor(@user)
+        end
+        name.update_review_status(:vetted, @user)
+        user_set = Set.new(name.authors)
+        user_set.merge(UserGroup.find_by_name('reviewers').users)
+        for recipient in user_set
+          if recipient
+            PublishEmail.create_email(@user, recipient, name)
+          end
+        end
+        redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
+      rescue RuntimeError => err
+        flash_error(err.to_s) if !err.nil?
+        flash_object_errors(draft)
+        redirect_to(:action => 'edit_draft', :id => draft.id)
       end
-      redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
     else
       flash_error(:publish_draft_denied.t)
       redirect_to(:action => 'show_draft', :id => draft.id)

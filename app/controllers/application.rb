@@ -134,7 +134,7 @@ class ApplicationController < ActionController::Base
   around_filter :set_locale
   # before_filter :extra_gc
   # after_filter :extra_gc
-  after_filter :log_memory_usage
+  # after_filter :log_memory_usage
 
   before_filter(:disable_link_prefetching, :only => [
     # account_controller methods

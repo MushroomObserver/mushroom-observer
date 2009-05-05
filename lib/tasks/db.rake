@@ -37,6 +37,17 @@ namespace :cache do
     ActiveRecord::Migration.remove_column :queued_emails, :flavor_tmp
   end
   
+  desc "Reset the ranks"
+  task(:refresh_ranks => :environment) do
+    print "Refreshing the list of ranks...\n"
+    ActiveRecord::Migration.add_column :names, :rank_tmp, :enum, :limit => Name.all_ranks
+    Name.connection.update("update names set rank_tmp=rank+0")
+    ActiveRecord::Migration.remove_column :names, :rank
+    ActiveRecord::Migration.add_column :names, :rank, :enum, :limit => Name.all_ranks
+    Name.connection.update("update names set rank=rank_tmp")
+    ActiveRecord::Migration.remove_column :names, :rank_tmp
+  end
+  
   desc "Reset the search_states query_type enum"
   task(:refresh_search_states => :environment) do
     print "Refreshing query_type enum for search_states...\n"

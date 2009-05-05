@@ -440,7 +440,7 @@ class ProjectControllerTest < ActionController::TestCase
     edit_draft_tester(@draft_agaricus_campestris, @dick, false)
   end
 
-  def edit_draft_post_helper(draft, user=nil, success=true)
+  def edit_draft_post_helper(draft, user=nil, success=true, classification="")
     if user
       assert_not_equal(user, draft.user)
     else
@@ -454,18 +454,26 @@ class ProjectControllerTest < ActionController::TestCase
       :id => draft.id,
       :draft_name => {
         :gen_desc => gen_desc,
-        :diag_desc => diag_desc
+        :diag_desc => diag_desc,
+        :classification => classification
       }
     }
     post_requires_login(:edit_draft, params, false, user.login)
-    assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
+    if success or classification == ""
+      assert_redirected_to(:controller => "project", :action => "show_draft", :id => draft.id)
+    else
+      assert_response :success
+      assert_template 'edit_draft'
+    end
     draft = DraftName.find(draft.id) # Reload
     if success
       assert_equal(gen_desc, draft.gen_desc)
       assert_equal(diag_desc, draft.diag_desc)
+      assert_equal(classification, draft.classification)
     else
       assert_not_equal(gen_desc, draft.gen_desc)
       assert_not_equal(diag_desc, draft.diag_desc)
+      assert_not_equal(classification, draft.classification)
     end
   end
 
@@ -485,7 +493,11 @@ class ProjectControllerTest < ActionController::TestCase
     edit_draft_post_helper(@draft_agaricus_campestris, @dick, false)
   end
 
-  def publish_draft_helper(draft, user=nil, success=true)
+  def test_edit_draft_post_bad_classification
+    edit_draft_post_helper(@draft_coprinus_comatus, nil, false, "**Domain**: Eukarya")
+  end
+
+  def publish_draft_helper(draft, user=nil, success=true, action='show_draft')
     if user
       assert_not_equal(draft.user, user)
     else
@@ -504,7 +516,7 @@ class ProjectControllerTest < ActionController::TestCase
       assert_redirected_to(:controller => 'name', :action => 'show_name', :id => name_id)
       assert_equal(draft_gen_desc, name.gen_desc)
     else
-      assert_redirected_to(:action => 'show_draft', :id => draft.id)
+      assert_redirected_to(:action => action, :id => draft.id)
       assert_equal(same_gen_desc, draft_gen_desc == draft.name.gen_desc)
     end
   end
@@ -523,6 +535,10 @@ class ProjectControllerTest < ActionController::TestCase
   
   def test_publish_draft_non_member
     publish_draft_helper(@draft_agaricus_campestris, @dick, false)
+  end
+
+  def test_publish_draft_bad_classification
+    publish_draft_helper(@draft_lactarius_alpinus, nil, false, 'edit_draft')
   end
 
   def destroy_draft_helper(draft, user=nil, success=true)

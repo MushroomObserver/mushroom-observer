@@ -177,7 +177,7 @@ class Name < ActiveRecord::Base
 
 ########################################
 
-  RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom]
+  RANKS_ABOVE_GENUS   = [:Family, :Order, :Class, :Phylum, :Kingdom, :Domain]
   RANKS_BELOW_SPECIES = [:Form, :Variety, :Subspecies]
   RANKS_ABOVE_SPECIES = [:Genus] + RANKS_ABOVE_GENUS
   RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species]

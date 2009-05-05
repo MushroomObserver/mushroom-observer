@@ -33,3 +33,15 @@ draft_boletus_edulis:
   review_status: unreviewed
   created_at: 2008-10-05 16:19:45
   updated_at: 2008-10-05 16:19:45
+
+# A draft of Lactarius alpinus with a bad classification field
+draft_lactarius_alpinus:
+  id: 4
+  user_id: 5
+  project_id: 1
+  name_id: 13
+  version: 0
+  review_status: unreviewed
+  created_at: 2009-05-04 16:19:45
+  updated_at: 2009-05-04 19:56:25
+  classification: "**Domain**: Eukarya"
