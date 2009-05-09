@@ -33,6 +33,7 @@
 class NameController < ApplicationController
   before_filter :login_required, :except => [
     :advanced_obj_search,
+    :authored_names,
     :auto_complete_name,
     :eol,
     :eol_preview,

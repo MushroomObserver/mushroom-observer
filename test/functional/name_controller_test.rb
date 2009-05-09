@@ -34,6 +34,12 @@ class NameControllerTest < Test::Unit::TestCase
     assert_template 'name_index'
   end
 
+  def test_authored_names
+    get_with_dump :authored_names
+    assert_response :success
+    assert_template 'name_index'
+  end
+
   def test_show_name
     get_with_dump :show_name, :id => 1
     assert_response :success

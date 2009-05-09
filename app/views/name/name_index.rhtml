@@ -17,9 +17,6 @@
 <%
   last_letter = nil
   odd_or_even = 0 
-  if @name_subset[0].member?('extra')
-    has_extra = true
-  end
 %>
 <table cellpadding="5" cellspacing="0" width="100%">
 <% for datum in @name_subset || []
@@ -36,7 +33,7 @@
   %>
   <tr class="ListLine<%= odd_or_even %>"><td>
   <%= link_to(datum['display_name'].t, :action => 'show_name', :id => datum['id']) %><br/>
-  <% if has_extra %>
+  <% if datum.member?('extra') %>
     </td><td><%= datum['extra'] %>
   <% end %>
   </td></tr>
