@@ -169,7 +169,7 @@ class NameController < ApplicationController
   
   def authored_names
     base_data = Name.connection.select_all %(
-      SELECT distinct names.id, names.display_name, users.login
+      SELECT distinct names.id, names.display_name, users.login, names.review_status
       FROM names, authors_names, users
       WHERE names.id = authors_names.name_id
       AND authors_names.user_id = users.id
@@ -188,7 +188,8 @@ class NameController < ApplicationController
       else
         users.push(row['login'])
       end
-      last_row['display_name'] = "#{row['display_name']} (#{users.join(', ')} #{field_count}/#{size_count})"
+      last_row['extra'] = "#{users.join(', ')}</td><td>#{field_count}/#{size_count}</td><td>#{last_row['review_status'].to_sym.t}"
+      # last_row['display_name'] = "#{row['display_name']} (#{users.join(', ')} )"
     end
     show_name_data(:authored_names_title.t, name_data, :authored_names_error.t)
   end
