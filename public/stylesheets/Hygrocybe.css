@@ -11,7 +11,7 @@ a:visited { color: #eb9020; } /* psittacina cap-orange */
 a:hover { background-color: #f2d686; } /* psittacina gill-color */
 
 img { border-color: #37372f; } /* conica stain */
-img:hover { border-color: #f2d686; } /* psittacina gill-color */
+a img:hover { border-color: #f2d686; } /* psittacina gill-color */
 
 li.selected { background-color: #f19c05 ! important }
 

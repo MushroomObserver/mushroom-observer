@@ -14,7 +14,7 @@ a:visited { color: #fff8c6; } /* muscaria yellow */
 a:hover { background-color: #cc2616; } /* muscaria red */
 
 img { border-color: #bfc0bb; } /* pachycolea */
-img:hover { border-color: #cc2616; } /* muscaria red */
+a img:hover { border-color: #cc2616; } /* muscaria red */
 
 li.selected { background-color: #dd9d5f ! important }
 

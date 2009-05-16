@@ -20,7 +20,7 @@ a:hover {
 }
 
 img { border-color: #3b2821; } /* cupreobrunneus */
-img:hover { border-color: #743931; } /* brasiliensis */
+a img:hover { border-color: #743931; } /* brasiliensis */
 
 li.selected { background-color: #eccf95 ! important }
 
