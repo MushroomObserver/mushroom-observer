@@ -2,67 +2,99 @@
   type = @comment.object_type
   title = type.titleize
   small_title = title.downcase
-  if @user.html_email %>
+
+  # Tricky bit of logic to determine what kind of email is being sent here.  If
+  # sending comment to owner of object it is not a "response to their comment"
+  # -- it is a "comment on their object".  Otherwise if the recipient has also
+  # commented on the same object, then it is being sent because it is a
+  # response to their comment.  We do not care about the recipient's interest
+  # in the object: call it a response it if is a response so long as they are
+  # not the owner.  Note, we need to be careful of order of causality: because
+  # of queuing, things could get out of order.  For example: A comments, B
+  # comments, then A's comment is sent to B.  It is important that B had not
+  # yet commented at the time A commented.  This means B is being sent A's
+  # comment not because it was a response, but because B is interested in the
+  # object being commented on.  Is all this clear?  Sure isn't to me...
+  # This is all important because we need to give the user the correct link
+  # at the bottom of the email to turn off these sorts of emails.  Turning off
+  # comment_response_email will not prevent owner from getting them; turning
+  # off comment_email will not prevent non-owner from getting them.  Interest
+  # confuses the whole issue, of course, since it overrides these two prefs.
+  is_owner = (@user == @comment.object.user)
+  recipients_comments = Comment.find_all_by_object_type_and_object_id_and_user_id(@comment.object_type, @comment.object_id, @user.id)
+  comments_before_this_comment = recipients_comments.select {|c| c.created < @comment.created}
+  is_response = (!is_owner && comments_before_this_comment.length > 0)
+
+  intro = "The following comment was posted on the Mushroom Observer website"
+  intro += " in response to your comment" if is_response
+  intro += " regarding the #{small_title} <u>#{@object.unique_format_name}</u>:"
+
+  fields = ""
+  fields += "*Created:* #{@comment.created.to_formatted_s(:db)}\n"
+  fields += "*By:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
+  fields += "*Summary:* #{@comment.summary.to_s}\n"
+  fields += "*Comment:*\n" if @comment.comment
+
+  # Only give the owner of the object being commented on access to the email
+  # address of the user who commented on it.
+  handy_links = is_owner ?
+    "You may respond directly to #{@comment.user.legal_name} by replying to this email, or by sending mail to #{@comment.user.email}." :
+    "Please do not reply to this email.  Click on the link below to respond to the comment via your own public comment."
+  handy_links += "  Here are some links you may find useful:"
+
+  links = []
+  links.push(["Show this #{small_title}",
+    "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"])
+  links.push(["Post a comment in response",
+    "#{DOMAIN}/comment/add_comment?id=#{@comment.object_id}&type=#{@comment.object_type}"])
+  links.push(["I'm not interested in this #{small_title}",
+    "#{DOMAIN}/interest/no_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}"])
+  links.push(["Stop sending me these notifications",
+    "#{DOMAIN}/account/no_comment#{is_response ? '_response' : ''}_email/#{@user.id}"])
+  links.push(["Change your account preferences",
+    "#{DOMAIN}/account/prefs/#{@user.id}"])
+  links.push(["Latest changes at Mushroom Observer",
+    DOMAIN])
+
+  report_abuse = "If you feel the person who wrote this comment is abusing this service please forward this entire message to: webmaster@mushroomobserver.org"
+
+if @user.html_email ######################################################### %>
 <html>
 <head>
   <title>Mushroom Observer: Comment about <%= title %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
-
-<p>The following comment was posted on the Mushroom Observer website regarding
-the <%= small_title %> <u><%= @object.unique_text_name %></u>:</p>
-
-<p><b>Created:</b> <%= @comment.created.to_formatted_s(:db) %><br/>
-<% if @sender %><b>By:</b> <%= @sender.legal_name %> (<%= @sender.email %>)<br/><% end %>
-<b>Summary:</b> <%= @comment.summary %><br/>
-<b>Comment:</b></p>
-
+<%= intro.tp %>
+<%= fields.tp %>
 <% if @comment.comment %>
   <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
     <%= sanitize(@comment.comment).tp %>
   </div>
 <% end %>
-
-<p>It is entirely up to you if you wish to respond to this user directly.&nbsp;
-Here are some handy links you may find useful:</p>
-
+<%= handy_links.tp %>
 <ul type=none>
-  <li>Show this <%= small_title %>:
-    <%= url = "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"
-    link_to(url, url) %></li>
-  <li>Stop receiving notifications:
-    <%= url = "#{DOMAIN}/account/no_comment_email/#{@user.id}"
-    link_to(url, url) %></li>
-  <li>Change your account preferences:
-    <%= url = "#{DOMAIN}/account/prefs/#{@user.id}"
-    link_to(url, url) %></li>
-  <li>Latest changes at Mushroom Observer:
-    <%= url = DOMAIN
-    link_to(url, url) %></li>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
 </ul>
-
+<%= report_abuse.tp %>
 <br/>
 </body>
 </html>
 <% else ##################################################################### %>
-The following comment was posted on the Mushroom Observer website regarding the <%= small_title %> <%= @object.unique_text_name %>:
+<%= intro.tp.html_to_ascii %>
 
-Created: <%= @comment.created.to_formatted_s(:db) %>
-<% if @sender %>By: <%= @sender.legal_name %> (<%= @sender.email %>)<% end %>
-Summary: <%= @comment.summary %>
-<%= title %>: <%= sprintf("%s/%s/%s/%d", DOMAIN, @object.show_controller, @object.show_action, @object.id) %>
-Comment:
+<%= fields.tp.html_to_ascii %>
 
-<%= @comment.comment %>
-
+<%= @comment.comment ? @comment.comment.tp.html_to_ascii + "\n" : "" %>
 --------------------------------------------------
 
-It is entirely up to you if you wish to respond to this user directly.  Here are some handy links you may find useful:
+<%= handy_links.tp.html_to_ascii %>
 
-Show this <%= small_title %>: <%= "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}" %>
-Stop receiving notifications: <%= "#{DOMAIN}/account/no_comment_email/#{@user.id}" %>
-Change your account preferences: <%= "#{DOMAIN}/account/prefs/#{@user.id}" %>
-Latest changes at Mushroom Observer: <%= DOMAIN %>
-
-If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org
-<% end %>
+<%= result = ''
+  for label, url in links
+    result += "#{label}: #{url}\n"
+  end
+  result %>
+<%= report_abuse.tp.html_to_ascii %>
+<% end ###################################################################### %>

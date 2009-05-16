@@ -3,12 +3,18 @@
 #  these related classes:
 #
 #  * CommentEmail
+#  * NameProposalEmail
+#  * ConsensusChangeEmail
+#  * NameChangeEmail
 #  * FeatureEmail
 #  * QueuedEmail
 #
 #  Public methods:
 #    email_features(...)          Mass-mailing about new features.
 #    comment(...)                 Notify user of comment on their object.
+#    name_proposal(...)           Notify user of name proposal for their obs.
+#    consensus_change(...)        Notify user of name change of their obs.
+#    name_change(...)             Notify user of change in name description.
 #    commercial_inquiry(...)      User asking user about an image.
 #    observation_question(...)    User asking user about an observation.
 #    user_question(...)           User asking user about anything else.
@@ -33,15 +39,66 @@ class AccountMailer < ActionMailer::Base
 
   DEFAULT_LOCALE = 'en-US'
 
+  # Note: privacy policy is currently that a user's email address is only
+  # revealed to people they explicitly send questions to, or to the owner
+  # of the observation they comment on.  NOT to third parties who are simply
+  # interested in or who have also commented on the same observation.
+
   def comment(sender, receiver, object, comment)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @body["sender"]      = sender
     @body["user"]        = @user
-    @body["object"]      = @object = object
+    @body["object"]      = object
     @body["comment"]     = comment
     @subject             = :email_comment_subject.l(:name => object.unique_text_name)
-    @headers['Reply-To'] = sender.email if sender
+    @headers['Reply-To'] = sender.email if sender && receiver == object.user
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                = NEWS_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? 'text/html' : 'text/plain'
+  end
+
+  def name_proposal(sender, receiver, naming, observation)
+    @user                = receiver
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @body["user"]        = @user
+    @body["naming"]      = naming
+    @body["observation"] = observation
+    @subject             = :email_name_proposal_subject.l(:name => naming.text_name, :id => observation.id)
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                = NEWS_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? 'text/html' : 'text/plain'
+  end
+
+  def consensus_change(sender, receiver, observation, old_name, new_name)
+    @user                = receiver
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @body["user"]        = @user
+    @body["observation"] = observation
+    @body["old_name"]    = old_name
+    @body["new_name"]    = new_name
+    @subject             = :email_consensus_change_subject.l(:id => observation.id,
+                                :old => old_name ? old_name.search_name : 'none',
+                                :new => new_name ? new_name.search_name : 'none')
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                = NEWS_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? 'text/html' : 'text/plain'
+  end
+
+  def name_change(sender, receiver, time, name, old_version, new_version, review_status)
+    @user                = receiver
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @body["user"]        = @user
+    @body["sender"]      = sender
+    @body["time"]        = time
+    @body["name"]        = name
+    @body["old_name"]    = old_name = name.versions.find_by_version(old_version)
+    @body["new_name"]    = new_name = name.versions.find_by_version(new_version)
+    @body["review_status"] = review_status
+    @subject             = :email_name_change_subject.l(:name => old_name.search_name)
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS

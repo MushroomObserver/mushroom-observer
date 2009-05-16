@@ -1,0 +1,36 @@
+<%= pagination_numbers(@interest_pages) if @interest_pages.length > 0 %>
+
+<% if @interests.length > 0 %>
+  <table cellpadding="5" cellspacing="0" width="100%">
+    <% odd_or_even = 0
+    for interest in @interests
+      if obj = interest.object
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td>
+            <%= link_to(sprintf('<span class="ListWhat">%s</span>', obj.unique_format_name.t),
+                        :controller => obj.show_controller,
+                        :action => obj.show_action, :id => obj.id) %>:
+          <td>
+            <% if interest.state %>
+              <%= :list_interests_now_on.t %> |
+              <%= link_to(:list_interests_turn_off.t, :controller => 'interest',
+                          :action => set_interest, :type => interest.object_type,
+                          :id => interest.object_id, :state => -1) %> |
+            <% else %>
+              <%= :list_interests_now_off.t %> |
+              <%= link_to(:list_interests_turn_on.t, :controller => 'interest',
+                          :action => set_interest, :type => interest.object_type,
+                          :id => interest.object_id, :state => 1) %> |
+            <% end %>
+            <%= link_to(:list_interests_delete.t, :controller => 'interest',
+                        :action => set_interest, :type => interest.object_type,
+                        :id => interest.object_id, :state => 0) %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </table>
+<% end %>
+
+<%= pagination_numbers(@interest_pages) if @interest_pages.length > 0 %>

@@ -8,9 +8,10 @@ body { background-color: #fae8b8; /* californicus */ color: #10110b; /* cornucop
 
 a { color: #ff6524; } /* cinnabarinus light-cap */
 a:visited { color: #c12900; } /* cinnabarinus dark-cap */
-a:hover { background-color:#f6ae4a; } /* californicus cap */
+a:hover { background-color: #f6ae4a; } /* californicus cap */
 
 img { border-color: #10110b; } /* cornucopioides dark-hymenium */
+img:hover { border-color: #f6ae4a; } /* californicus cap */
 
 li.selected { background-color: #f6ae4a ! important }
 

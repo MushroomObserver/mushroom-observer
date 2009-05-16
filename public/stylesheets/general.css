@@ -121,6 +121,25 @@ div.tab_sets {
   margin: 10px;
 }
 
+div.right_tabs {
+  float: right;
+  margin: 10px;
+}
+
+div.right_tabs div a:hover {
+  background: none;
+}
+
+div.right_tabs img {
+  margin: 2px;
+  border-width: 0px;
+}
+
+div.right_tabs img:hover {
+  margin: 0px;
+  border-width: 2px;
+}
+
 .Notices, .Warnings, .Errors {
   margin: 10px 10px 5px 10px;
   padding: 0px 5px 0px 5px;

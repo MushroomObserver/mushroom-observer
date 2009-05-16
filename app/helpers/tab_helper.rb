@@ -34,4 +34,11 @@ module ApplicationHelper
       link_to(label, *url_args)
     end
   end
+
+  # Add tab to float off to the right of the main tabs.  There is only one set
+  # of these, arranged vertically.
+  def add_right_tab(html)
+    @right_tabs ||= []
+    @right_tabs.push(html)
+  end
 end

@@ -1,10 +1,14 @@
-<% if !@observation.comments.empty? %>
-  <p>
+<p>
+  <% if @observation.comments.empty? %>
+    <%= :show_observation_no_comments_yet.t %>&nbsp;&nbsp;
+  <% else %>
     <%= :app_comments.t %>:&nbsp;&nbsp;
-    <%= link_to(:show_observation_add_comment.t, :controller => 'comment', :action => 'add_comment',
-                :id => @observation.id, :type => 'Observation') %>
-  </p>
+  <% end %>
+  <%= link_to(:show_observation_add_comment.t, :controller => 'comment', :action => 'add_comment',
+              :id => @observation.id, :type => 'Observation') %>
+</p>
 
+<% if !@observation.comments.empty? %>
   <% odd_or_even = 0 %>
   <% for comment in @observation.comments.sort {|x,y| y.created <=> x.created } %>
     <% odd_or_even = 1 - odd_or_even %>

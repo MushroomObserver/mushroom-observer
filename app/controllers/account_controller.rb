@@ -19,6 +19,10 @@
 #     no_question_email
 #     no_commercial_email
 #     no_comment_email
+#     no_comment_response_email
+#     no_name_proposal_email
+#     no_consensus_change_email
+#     no_name_change_email
 #
 #  Admin Tools:
 #   R delete
@@ -45,7 +49,11 @@ class AccountController < ApplicationController
     :no_feature_email,
     :no_question_email,
     :no_commercial_email,
-    :no_comment_email
+    :no_comment_email,
+    :no_comment_response_email,
+    :no_name_proposal_email,
+    :no_consensus_change_email,
+    :no_name_change_email
   ]
 
   def login
@@ -54,7 +62,10 @@ class AccountController < ApplicationController
         @login = ""
         @remember = true
       when :post
-        user = User.authenticate(params['user_login'], params['user_password'])
+        login = params['user_login']
+        password = params['user_password']
+        user = User.authenticate(login, password)
+        user = User.authenticate(login, password.strip) if !user
         @remember = params['user'] && params['user']['remember_me'] == "1"
         if set_session_user(user)
           logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
@@ -176,6 +187,10 @@ class AccountController < ApplicationController
           @user.feature_email = params['user']['feature_email']
           @user.comment_email = params['user']['comment_email']
           @user.commercial_email = params['user']['commercial_email']
+          @user.comment_response_email = params['user']['comment_response_email']
+          @user.name_proposal_email = params['user']['name_proposal_email']
+          @user.consensus_change_email = params['user']['consensus_change_email']
+          @user.name_change_email = params['user']['name_change_email']
           @user.question_email = params['user']['question_email']
           @user.change_theme(params['user']['theme'])
           @user.change_rows(params['user']['rows'])
@@ -360,6 +375,42 @@ class AccountController < ApplicationController
       @user.comment_email = false
       if @user.save
         flash_notice :no_comment_success.t(:name => @user.unique_text_name)
+      end
+    end
+  end
+
+  def no_comment_response_email
+    if login_check params['id']
+      @user.comment_response_email = false
+      if @user.save
+        flash_notice :no_comment_response_success.t(:name => @user.unique_text_name)
+      end
+    end
+  end
+
+  def no_name_proposal_email
+    if login_check params['id']
+      @user.name_proposal_email = false
+      if @user.save
+        flash_notice :no_name_proposal_success.t(:name => @user.unique_text_name)
+      end
+    end
+  end
+
+  def no_consensus_change_email
+    if login_check params['id']
+      @user.consensus_change_email = false
+      if @user.save
+        flash_notice :no_consensus_change_success.t(:name => @user.unique_text_name)
+      end
+    end
+  end
+
+  def no_name_change_email
+    if login_check params['id']
+      @user.name_change_email = false
+      if @user.save
+        flash_notice :no_name_change_success.t(:name => @user.unique_text_name)
       end
     end
   end

@@ -1,6 +1,6 @@
 namespace :lang do
 
-  desc "Resort translations according to English one, filling in missing ones, and moving extras to the end."
+  desc "Re-sort translations according to English one, filling in missing ones, and moving extras to the end."
   task(:clean) do
 
     # Use English translations as the template.  Will write the other languages
@@ -20,6 +20,7 @@ namespace :lang do
         comments_at_top = ''
         strings = {}
         dups = {}
+        undone = {}
         File.open(filename) do |fh|
           key = nil
           at_top = true
@@ -28,8 +29,10 @@ namespace :lang do
               at_top = false
             elsif at_top
               comments_at_top += line
-            elsif line.match(/^(\w+):/)
+            elsif line.match(/^(\w+):(\s+)/)
               key = $1
+              # Keep track of things that haven't been translated yet.
+              undone[key] = true if $2.length > 1
               # Keep list of keys that are used more than once.
               dups[key] = true if strings[key]
               strings[key] = line
@@ -41,7 +44,7 @@ namespace :lang do
           end
         end
 
-        # Clean up translations: remove trailing whitespace.
+        # Clean up translations: remove excess trailing whitespace.
         strings.keys.each do |key|
           lines = strings[key]
           lines.gsub!(/[^\S\n]+\n/, "\n")
@@ -79,8 +82,8 @@ namespace :lang do
             end
             keys_in_english[key] = true
             result += "\n" * blanks if blanks > 0
-            if strings[key]
-              # (preserve number of spaces after colon for ones that exist)
+            # Only keep translations, throw away ones not translated yet.
+            if strings[key] && !undone[key]
               result += strings[key]
               strings.delete(key)
               doing_missing = false
@@ -89,6 +92,11 @@ namespace :lang do
               result += line.sub(/:\s*/, ':  ')
               missing[key] = true
               doing_missing = true
+              # (Untranslated keys will still be in strings. Remove them or
+              # they will get written again at the bottom as an "unneeded"
+              # translation.  Better make sure your translations have that
+              # second space removed or this will clobber them!!!)
+              strings.delete(key) if strings.has_key?(key)
             end
             blanks = 0
           # All other lines must be "folded lines" from "key: >" constructs.

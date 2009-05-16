@@ -265,8 +265,10 @@ class NameController < ApplicationController
       @name = Name.find(name_id)
       @past_name = @name.versions.latest
       @past_name = @past_name.previous if @past_name
-      @children = @name.children
+      @children_data = @name.children
       @parents = @name.parents
+      @interest = nil
+      @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Name', @name.id) if @user
       update_view_stats(@name)
 
       # In theory much of the following should really be handled by the new search_sequences,
@@ -354,20 +356,25 @@ class NameController < ApplicationController
       # Gather full list of IDs for the prev/next buttons to cycle through.
       session_setup
 
-      # Paginate the two sections independently.
+      # Paginate the sections independently.
       per_page = 12
+      @children_page = params['children_page']
+      @children_page = 1 if !@children_page
       @consensus_page = params['consensus_page']
       @consensus_page = 1 if !@consensus_page
       @synonym_page = params['synonym_page']
       @synonym_page = 1 if !@synonym_page
       @other_page = params['other_page']
       @other_page = 1 if !@other_page
+      @children_pages, @children_data =
+        paginate_array(@children_data, per_page*2, @children_page)
       @consensus_pages, @consensus_data =
         paginate_array(@consensus_data, per_page, @consensus_page)
       @synonym_pages, @synonym_data =
         paginate_array(@synonym_data, per_page, @synonym_page)
       @other_pages, @other_data =
         paginate_array(@other_data, per_page, @other_page)
+      @children_data = [] if !@children_data
       @consensus_data = [] if !@consensus_data
       @synonym_data = [] if !@synonym_data
       @other_data = [] if !@other_data
@@ -554,14 +561,16 @@ class NameController < ApplicationController
             @name.license_id = nil
           end
           raise user_update_nonexisting_name.t if !@name.id
+          # These changes will get saved only if save_if_changed happens.
+          # Thus substantive changes by non-reviewers revert status to unreviewed.
+          if is_reviewer
+            @name.reviewer = @user
+            @name.last_review = Time.now()
+          else
+            @name.reviewer = nil
+            @name.review_status = :unreviewed
+          end
           if @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
-            if is_reviewer
-              @name.reviewer = @user
-              @name.last_review = Time.now()
-            else
-              @name.reviewer = nil
-              @name.review_status = :unreviewed
-            end
             @name.add_editor(@user)
           elsif @name.errors.length > 0
             raise :runtime_unable_to_save_changes.t

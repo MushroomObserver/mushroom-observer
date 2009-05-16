@@ -6,7 +6,7 @@
 # Object titles. (Try to keep these consistent throughout.)
 comment: Kommentar
 comments: Kommentare
-description:  Beschreibung
+description: Beschreibung
 draft: Entwurf
 drafts: Entwürfe
 image: Bild
@@ -73,6 +73,7 @@ app_create_account: Konto eröffnen
 app_current_user: Eingeloggter Nutzer
 app_comments_for_you: Kommentare für dich
 app_your_observations: Deine Funde
+app_your_interests:  Your Interests
 app_your_summary: Deine Zusammenfassung
 app_preferences: Einstellungen
 app_join_mailing_list: Email-Rundbrief abonnieren
@@ -97,7 +98,7 @@ app_colors_from: Farben von [theme]
 app_powered_by: Hergestellt mit
 app_preferred_browser: Lieblings-Browser
 
-app_advanced_search:  Erweiterte Suche
+app_advanced_search: Erweiterte Suche
 app_find: Suchen
 app_observations_find: Funde
 app_names_find: Namen
@@ -137,7 +138,7 @@ app_deprecated: Veraltet
 app_name: Name
 app_rank: Rang
 app_author: Autor
-app_observer:  Nutzer
+app_observer: Nutzer
 app_citation: Referenz
 app_unknown: Unbekannt
 
@@ -348,11 +349,13 @@ validate_image_copyright_holder_too_long: Der Name des Copyright-Inhabers muss k
 validate_image_title_too_long: Die Überschrift muss kürzer sein als 100 Buchstaben.
 validate_image_user_missing: Nutzer fehlt.
 validate_image_when_missing: Datum fehlt.
+validate_interest_object_type_too_long:  Object_type must be less than 30 characters long.
+validate_interest_user_missing:  Missing user.
 validate_location_display_name_too_long: Display_name muss kürzer als 200 Buchstaben sein.
 validate_location_east_out_of_bounds: Der Längengrad Ost muss zwischen -180 und 180 sein.
 validate_location_high_less_than_low: Die höchste Erhebung muss mindestens so hoch sein wie der tiefste Punkt.
-validate_location_north_too_high: Der Breitengrad Nord kann nicht höher sein als 90.
 validate_location_north_less_than_south: Der Breitengrad Nord muss größer sein als Breitengrad Süd.
+validate_location_north_too_high: Der Breitengrad Nord kann nicht höher sein als 90.
 validate_location_search_name_too_long: Search_name muss kürzer sein als 200 Buchstaben.
 validate_location_south_too_low: Der Breitengrad Süd muss mindestens -90 sein.
 validate_location_user_missing: Nutzer fehlt.
@@ -432,7 +435,7 @@ add_user_to_group_user: Nutzer-Name
 
 
 # observer/advanced_search
-advanced_search_caveat:  >
+advanced_search_caveat: >
   Die erweiterte Suche wurde im Februar 2009 für Mushroom Observer
   ermöglicht. Diese Funktion könnte in verschiedene Richtungen
   verfeinert werden. Ich habe sie aber absichtlich recht
@@ -443,17 +446,15 @@ advanced_search_caveat:  >
   Arten von Suchvorgängen, die du gern zusätzlich zu den bestehenden
   für diese Seite ausführen möchtest.
 
-advanced_search_content:  Inhalt
-advanced_search_content_help:  Text in Fundnotizen oder Kommentaren
-advanced_search_location_help:  Wo der Pilz gefunden wurde
-advanced_search_name_help:  Name des Pilzes
-advanced_search_none_found:  Keine passenden Informationen gefunden
-advanced_search_observer_help:  Wer den Pilz gefunden hat
-advanced_search_result_type:  Anzeige der Ergebnisse
-advanced_search_result_type_help:  Möchtest du Funde, Bilder oder
-  Namen/Beschreibungen?
-
-advanced_search_title:  Erweiterte Suche
+advanced_search_content: Inhalt
+advanced_search_content_help: Text in Fundnotizen oder Kommentaren
+advanced_search_location_help: Wo der Pilz gefunden wurde
+advanced_search_name_help: Name des Pilzes
+advanced_search_none_found: Keine passenden Informationen gefunden
+advanced_search_observer_help: Wer den Pilz gefunden hat
+advanced_search_result_type: Anzeige der Ergebnisse
+advanced_search_result_type_help: Möchtest du Funde, Bilder oder Namen/Beschreibungen?
+advanced_search_title: Erweiterte Suche
 
 # admin_request/author_request emails
 admin_request_change_member_status: Status des Nutzers ändern
@@ -518,21 +519,21 @@ bulk_license_link: Bulk License Updater
 
 
 # project/review_authors
-review_authors_add_author:  Hinzufügen
-review_authors_authors:  Derzeitige Autoren der Beschreibung
-review_authors_denied:  >
+review_authors_add_author: Hinzufügen
+review_authors_authors: Derzeitige Autoren der Beschreibung
+review_authors_denied: >
   Nur derzeitige Autoren und Rezensenten können die Autoren festlegen.
 
-review_authors_note:  >
+review_authors_note: >
   Diese Seite legt den Autor oder die Autoren fest, die auf der Mushroom
   Observer Webseite als Autoren für die Beschreibung eines Taxons
   angegeben werden. Dies hat keinen Bezug zum ursprünglichen Autor,
   der das Taxon veröffentlicht hat.
 
-review_authors_review_authors:  Autoren bearbeiten
-review_authors_other_users:  Andere Nutzer
-review_authors_remove_author:  Entfernen
-review_authors_title:  Autor(en) für [name] bearbeiten
+review_authors_review_authors: Autoren bearbeiten
+review_authors_other_users: Andere Nutzer
+review_authors_remove_author: Entfernen
+review_authors_title: Autor(en) für [name] bearbeiten
 
 
 # project/change_member_status
@@ -719,13 +720,16 @@ edit_project_title: 'Bearbeite Projekt: [title]'
 # account_mailer model
 email_comment_subject: Kommentar zu [name]
 email_commercial_inquiry_subject: Gewerbliche Anfrage zu [name]
+email_consensus_change_subject:  Consensus rejected [old] in favor of [new]
 email_denied_subject: '[MO] Nutzer-Registrierung abgelehnt'
 email_features_subject: Neue Mushroom-Observer-Funktionalitäten
 email_naming_for_observer_subject: Mushroom-Observer-Forschungsanfrage
 email_naming_for_tracker_subject: Mushroom-Observer-Nachricht über Namensänderung
+email_name_change_subject:  Someone Had Made Changes to [name]
+email_name_proposal_subject:  Observation #[id] may be [name]
 email_new_password_subject: Neues Passwort für ein Mushroom-Observer-Konto
 email_observation_question_subject: Frage zu [name]
-email_publish_name_subject:  '[MO] Namen veröffentlicht'
+email_publish_name_subject: '[MO] Namen veröffentlicht'
 email_verify_subject: Email-Überprüfung für Mushroom Observer
 email_webmaster_question_subject: '[MO] Frage von [user]'
 
@@ -780,10 +784,10 @@ eol_need_review_title: EOL muss durchesehen werden
 
 
 # name/eol_preview
-eol_preview_name_count:  >
+eol_preview_name_count: >
   [count] Beschreibung(en)
 
-eol_preview_image_count:  >
+eol_preview_image_count: >
   [count] Bild(er)
 
 eol_preview_title: EOL Preview
@@ -883,8 +887,8 @@ form_names_citation_help: Referenz zur Veröffentlichung dieses Namens
 form_names_citation_textilize_note: >
   Du kannst die Referenzen mit Hilfe des Textile Markup Systems formatieren.
 
-form_names_classification:  Taxonomische Einteilung
-form_names_classification_help:  >
+form_names_classification: Taxonomische Einteilung
+form_names_classification_help: >
   Jede Zeile muss der Form 'Rang: Name' entsprechen. Jeder angegebene
   Rang darf nur einmal auftreten und muss höher sein als der Rang der
   Beschreibung. Z.B.<br/>
@@ -1161,6 +1165,15 @@ image_updater_update: Ändern
 list_comments: Kommentare
 list_comments_by_user: Kommentare von [user]
 list_comments_for_user: Kommentare für [user]
+
+
+# interest/list_interests
+list_interests_title:  Objects You Are Watching or Ignoring
+list_interests_now_on:  Watching
+list_interests_now_off:  Ignoring
+list_interests_turn_on:  Change to Watch
+list_interests_turn_off:  Change to Ignore
+list_interests_delete:  Delete
 
 
 # location/list_merge_options
@@ -1470,44 +1483,75 @@ no_browser_body:  >
   won't work if we guess wrong (like voting on observation names), we have to
   assume the worst.  However this means that a number of useful features are
   not available, like dynamic forms, auto-completion of scientific names and
-  locations, the new version of the species list creator, and more.
+  locations, the new version of the species list creator, and more. 
   \n\n
   If you would like to override this decision, "click here to turn javascript
   on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't
   Recognize Your Browser" tab at the top of every page, please "click here to
   turn javascript off":/observer/turn_javascript_off.  (Login and go to
-  preferences to re-enable auto-detection.)
+  preferences to re-enable auto-detection.) 
 
 no_browser_title:  We Don't Recognize Your Browser
 
 
 # account/no_comment_email
-no_comment_note: >
+no_comment_note:  >
   You will no longer receive email notifications when other users of the
   Mushroom Observer website post comments about your observations.
   \n\n
   Login and go to the Preferences page to re-enable this feature.
 
-no_comment_success: Comment email notifications disabled for [name].
+some_emails_may_already_be_queued:  >
+  Note: For the next few minutes you may continue to receive emails that have
+  already been queued.
+
+no_comment_success:  Comment email notifications disabled for [name].
+
+
+# account/no_comment_response_email
+no_comment_response_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website post comments about observations that you have
+  commented on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_comment_response_success:  Comment response email notifications disabled for [name].
 
 
 # account/no_commercial_email
-no_commercial_note: >
+no_commercial_note:  >
   Other users of the Mushroom Observer website can no longer send you
   commercial inquiries about your images.
   \n\n
   Login and go to the Preferences page to re-enable this feature.
 
-no_commercial_success: Commercial email inquiries disabled for [name].
+no_commercial_success:  Commercial email inquiries disabled for [name].
+
+
+# account/no_consensus_change_email
+no_consensus_change_note:  >
+  You will no longer receive email notifications when the names of your
+  observations change.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_consensus_change_success:  Name change email notifications disabled for [name].
 
 
 # account/no_feature_email
-no_features_note: >
+no_features_note:  >
   Automated email about new features have been disabled for your account.
   \n\n
   Login and go to the Preferences page to re-enable this feature.
 
-no_feature_success: Automated feature email disabled for [name].
+no_feature_success:  Automated feature email disabled for [name].
+
+
+# interest/no_interest
+no_interest_bad_object:  Object [type] #[id] doesn't exist.
+no_interest_success:  Will now ignore all activity on [name].
+no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, then reload this page.
 
 
 # observer/no_javascript
@@ -1532,6 +1576,26 @@ no_javascript_dont_care: >
   wieder einschalten.)
 
 no_javascript_title: Dein Javascript ist ausgeschaltet.
+
+
+# account/no_name_change_email
+no_name_change_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the names you are author on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_change_success:  Name change email notifications disabled for [name].
+
+
+# account/no_name_proposal_email
+no_name_proposal_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website propose names for your observations.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_proposal_success:  Name proposal email notifications disabled for [name].
 
 
 # observer/no_session
@@ -1593,9 +1657,13 @@ prefs_alt_row_colors: Reihen abwechselnd einfärben.
 prefs_columns: Spalten
 prefs_email: Email-Adresse
 prefs_email_comments: Bitte schickt mir eine Email, wenn andere Nutzer meine Funde kommentieren.
+prefs_email_comment_responses:  Please send me email notifications when other users post responses to my comments.
 prefs_email_commercial: Bitte schickt mir eine Email, wenn jemand eins meiner Bilder gewerblich verwenden möchte.
+prefs_email_consensus_change:  Please send me email notifications when community consensus changes the name of my observations.
 prefs_email_features: Bitte schickt mir eine Email, wenn Updates oder neue Funktionalitäten vorhanden sind.
 prefs_email_html: Meine Emails dürfen HTML enthalten.
+prefs_email_name_change:  Please send me email notifications when other users make changes to names I'm author on.
+prefs_email_name_proposal:  Please send me email notifications when other users propose names for my observations.
 prefs_email_note: >
   Keine dieser Email-Einstellungen hat zur Folge, dass deine Email-Adresse auf
   dieser Webseite irgendwo angezeigt wird, und wenn jemand dich kontaktieren
@@ -1685,9 +1753,9 @@ runtime_unable_to_save_changes:  Unable to save changes.
 runtime_unable_to_transfer_name: Kann nicht von [name] zu anderen Synonymen übertragen.
 runtime_unrecognized_rank: Rang '[rank]' nicht erkannt.
 runtime_update_nonexisting_name: Update_name wurde auf einen Namen angewandt, den es nicht gibt.
-runtime_user_bad_rank:  Der Rang '[rank]' wurde nicht erkannt
-runtime_invalid_rank:  Der Rang [line_rank] entspricht dem Rang [rank] oder ist niedriger
-runtime_invalid_classification:  Kann '[text]' nicht interpretieren
+runtime_user_bad_rank: Der Rang '[rank]' wurde nicht erkannt
+runtime_invalid_rank: Der Rang [line_rank] entspricht dem Rang [rank] oder ist niedriger
+runtime_invalid_classification: Kann '[text]' nicht interpretieren
 
 
 # observer/textile
@@ -1753,6 +1821,17 @@ send_feature_email_success: Funktionalitäten-Email abgeschickt.
 send_feature_email_denied: Nur ein Admin kann eine Funktionalitäten-Email versenden.
 
 
+# interest/set_interest
+set_interest_already_deleted:  You have expressed no interest in [name].
+set_interest_already_off:  You have already told us to ignore [name].
+set_interest_already_on:  You have already told us to watch [name].
+set_interest_failure:  Could not change your interest state in [name].  Please try again or report this to the webaster.
+set_interest_success_was_off:  Cancelled your ban on emails about [name].
+set_interest_success_was_on:  Cancelled your request for emails about [name].
+set_interest_success_off:  We will now ignore any activity in [name].
+set_interest_success_on:  You will now be notified of any activity in [name].
+
+
 # shared/_textile_help
 shared_textile_help: >
   Kommentare können mit Hilfe des <a href="/observer/textile" target="_new">Textile Markup Systems</a> formatiert werden.<br/>
@@ -1788,14 +1867,14 @@ show_location_title: 'Fundort: [name]'
 
 # name/show_name
 show_name_add_name: Namen hinzufügen
-show_name_author_request:  Punkte für Autorschaft verlangen
+show_name_author_request: Punkte für Autorschaft verlangen
 show_name_bulk_name_edit: Viele Namen auf einmal bearbeiten
 show_name_change_synonyms: Synonyme ändern
 show_name_content_status: Status des Inhalts
 show_name_create_draft: Neuen Entwurf erstellen für
 show_name_deprecated_synonyms: Veraltete Synonyme (veraltetes Synonym)
-show_name_description_author:  Autor der Beschreibung
-show_name_description_editor:  Rezensent der Beschreibung
+show_name_description_author: Autor der Beschreibung
+show_name_description_editor: Rezensent der Beschreibung
 show_name_distribution_map: Verbreitungskarte
 show_name_draft_help: >
   Entwürfe sind neue Versionen der Beschreibungsfelder für einen Namen, an denen
@@ -1807,6 +1886,12 @@ show_name_draft_help: >
 show_name_edit_name: Beschreibung bearbeiten
 show_name_email_tracking: Bei Änderungen per Email benachrichtigen
 show_name_existing_drafts: Bestehende Entwürfe
+show_name_interest_ignore_help:  Click here if you want to stop getting any emails about this name.
+show_name_interest_ignoring:  You have told us never to email you about changes in this name.  Click on this icon to cancel.
+show_name_interest_on:  Watch
+show_name_interest_off:  Ignore
+show_name_interest_watch_help:  Click here if you want us to send you email whenever there is a change in this name.
+show_name_interest_watching:  You have told us to email you about changes in this name.  Click on this icon to cancel.
 show_name_latest_review: >
   Zuletzt bearbeitet: am [date] von [user]
 
@@ -1869,7 +1954,14 @@ show_observation_comment_created: Erstellt
 show_observation_comment_created_by: von
 show_observation_debug_consensus: Fehlersuche Mehrheitsmeinung
 show_observation_edit_observation: Fund bearbeiten
+show_observation_interest_ignore_help:  Click here if you want to stop getting any emails about this observation.
+show_observation_interest_ignoring:  You have told us never to email you about activity in this observation.  Click on this icon to cancel.
+show_observation_interest_on:  Watch
+show_observation_interest_off:  Ignore
+show_observation_interest_watch_help:  Click here if you want us to send you email whenever there is activity on this observation.
+show_observation_interest_watching:  You have told us to email you about activity in this observation.  Click on this icon to cancel.
 show_observation_manage_species_lists: Artenlisten verwalten
+show_observation_no_comments_yet:  No one has commented yet.
 show_observation_observation_created: Fund erstellt
 show_observation_preferred_name: Lieblingsname
 show_observation_preferred_names: Lieblingsnamen
@@ -1935,7 +2027,7 @@ show_user_comments_for_you: Kommentare für dich
 show_user_contributors: Mitwirkende
 show_user_edit_profile: Profil bearbeiten
 show_user_email_to: Email [name]
-show_user_joined:  Ist Mushroom Observer beigetreten
+show_user_joined: Ist Mushroom Observer beigetreten
 show_user_mailing_address: Postanschrift für Sammlungen
 show_user_observations_by: Funde von [name]
 show_user_primary_location: Hauptfundort
@@ -2681,11 +2773,11 @@ how_help_business_planning: >
 # observer/recalc
 observer_recalc_old_name: 'old_name: [name]'
 observer_recalc_new_name: 'new_name: [name]'
-observer_recalc_caught_error: 'Unerwartet angehalten: [error]'
+observer_recalc_caught_error: 'Caught exception: [error]'
 
 # observer/change_user_bonuses
-change_user_bonuses:  Award Bonus
-change_user_bonuses_help:  >
+change_user_bonuses: Award Bonus
+change_user_bonuses_help: >
 
   List one bonus per line, each specifiying a number of points and reason, like
   this:
@@ -2697,7 +2789,7 @@ change_user_bonuses_help:  >
   Keep the reasons short or it might mess up the formatting of the table on
   that page.
 
-change_user_bonuses_title:  Contribution Bonuses for [user]
+change_user_bonuses_title: Contribution Bonuses for [user]
 
 system_status_browser_status_size: Browser status cache size
 system_status_clear_caches: Clear Caches

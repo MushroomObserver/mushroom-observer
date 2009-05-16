@@ -31,7 +31,7 @@ require 'active_record_extensions'
 #    text_name            Plain text.
 #    format_name          Textilized.
 #    unique_text_name     Same as above, with id added to make unique.
-#    unique_format_name 
+#    unique_format_name
 #
 #    calc_consensus          Calculate and cache the consensus naming/name.
 #    name_been_proposed?(n)  Has someone proposed this name already?
@@ -127,16 +127,16 @@ class Observation < ActiveRecord::Base
     end
     status
   end
-    
+
   # Get the community consensus on what the name should be.  It just adds up
   # the votes weighted by user contribution, and picks the winner.  To break a
   # tie it takes the one with the most votes (again weighted by contribution).
   # Failing that it takes the oldest one.  Note, it lumps all synonyms together
   # when deciding the winning "taxon", using votes for the separate synonyms
-  # only when there are multiple "accepted" names for the winning taxon. 
+  # only when there are multiple "accepted" names for the winning taxon.
   #
   # Returns Naming instance or nil.  Refreshes vote_cache as a side-effect.
-  def calc_consensus(debug=false)
+  def calc_consensus(current_user=nil, debug=false)
     self.reload
 result = "" if debug
 
@@ -145,7 +145,7 @@ result = "" if debug
     # single observation, and even worse perhaps, one can even propose the very
     # same name multiple times.  Thus a user can potentially vote for a given
     # *name* (not naming) multiple times.  Likewise, of course, for synonyms.
-    # I choose the strongest vote in such cases. 
+    # I choose the strongest vote in such cases.
     name_votes  = {}  # Records the strongest vote for a given name for a given user.
     taxon_votes = {}  # Records the strongest vote for any names in a group of synonyms for a given user.
     name_ages   = {}  # Records the oldest date that a name was proposed.
@@ -158,7 +158,7 @@ result = "" if debug
       sum_val = 0
       sum_wgt = 0
       # Go through all the votes for this naming.  Should be zero or one per
-      # user. 
+      # user.
       for vote in naming.votes
         user_id = vote.user_id
         val = vote.value
@@ -168,14 +168,14 @@ result = "" if debug
         end
         # It may be possible in the future for us to weight some "special"
         # users zero, who knows...  (It can cause a division by zero below if
-        # we ignore zero weights.) 
+        # we ignore zero weights.)
         if wgt > 0
           # Calculate score for naming.vote_cache.
           sum_val += val * wgt
           sum_wgt += wgt
           # Record best vote for this user for this name.  This will be used
           # later to determine which name wins in the case of the winning taxon
-          # (see below) having multiple accepted names. 
+          # (see below) having multiple accepted names.
           name_votes[name_id] = {} if !name_votes[name_id]
           if !name_votes[name_id][user_id] ||
               name_votes[name_id][user_id][0] < val
@@ -184,7 +184,7 @@ result = "" if debug
           # Record best vote for this user for this group of synonyms.  (Since
           # not all taxa have synonyms, I've got to create a "fake" id that
           # uses the synonym id if it exists, else uses the name id, but still
-          # keeps them separate.) 
+          # keeps them separate.)
           taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
           taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
           taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
@@ -204,7 +204,7 @@ result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id
     end
 
     # Now that we've weeded out potential duplicate votes, we can combine them
-    # safely. 
+    # safely.
     votes = {}
     for taxon_id in taxon_votes.keys
       vote = votes[taxon_id] = [0, 0]
@@ -220,7 +220,7 @@ result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt
 
     # Now we can determine the winner among the set of synonym-groups.  (Nathan
     # calls these synonym-groups "taxa", because it better uniquely represents
-    # the underlying mushroom taxon, while it might have multiple names.) 
+    # the underlying mushroom taxon, while it might have multiple names.)
     best_val = nil
     best_wgt = nil
     best_age = nil
@@ -244,12 +244,12 @@ result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
 result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>" if debug
 
     # Reverse our kludge that mashed names-without-synonyms and synonym-groups
-    # together.  In the end we just want a name. 
+    # together.  In the end we just want a name.
     if best_id
       match = /^(.)(\d+)/.match(best_id)
       # Synonym id: go through namings and pick first one that belongs to this
       # synonym group.  Any will do for our purposes, because we will convert
-      # it to the currently accepted name below. 
+      # it to the currently accepted name below.
       if match[1] == "s"
         for naming in self.namings
           if naming.name.synonym_id.to_s == match[2]
@@ -264,7 +264,7 @@ result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age
 result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
 
     # Now deal with synonymy properly.  If there is a single accepted name,
-    # great, otherwise we need to somehow disambiguate. 
+    # great, otherwise we need to somehow disambiguate.
     if best && best.synonym
       names = best.approved_synonyms
       names = best.synonym.names if names.length == 0
@@ -274,7 +274,7 @@ result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
 result += "Multiple approved synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
 
         # First combine votes for each name; exactly analagous to what we did
-        # with taxa above. 
+        # with taxa above.
         votes = {}
         for name_id in name_votes.keys
           vote = votes[name_id] = [0, 0]
@@ -295,7 +295,7 @@ result += "vote: name_id=#{name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<
         # for the taxon, both are considered "accepted" until the scientific
         # community rules definitively.  Now we have two possible names
         # winning, but no votes on either!  If you have a problem with the one
-        # I chose, then vote on the damned thing, already! :) 
+        # I chose, then vote on the damned thing, already! :)
         best_val2 = nil
         best_wgt2 = nil
         best_age2 = nil
@@ -331,20 +331,49 @@ result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>" if debug
     # any votes associated with its naming.  Therefore this should only ever
     # happen when there is a single naming, so there is nothing arbitray in
     # using first.  (I think it can also happen if zero-weighted users are
-    # voting.) 
+    # voting.)
     best = self.namings.first.name if !best && self.namings && self.namings.length > 0
     best = Name.unknown if !best
 result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
 
-    # Make changes permanent and log them.
+    # Make changes permanent.
     old = self.name
     self.name = best
     self.vote_cache = best_val
     self.save
-    if best != old && old
-      self.log(:log_consensus_changed, { :old => old.observation_name, :new => best.observation_name }, true)
-    elsif best != old
-      self.log(:log_consensus_created, { :name => best.observation_name }, true)
+
+    # Log change if actually is a change.
+    if best != old
+      if old
+        self.log(:log_consensus_changed, { :old => old.observation_name, :new => best.observation_name }, true)
+      else
+        self.log(:log_consensus_created, { :name => best.observation_name }, true)
+      end
+
+      # Change can trigger emails.
+      owner  = self.user
+      sender = current_user
+      recipients = []
+
+      # Tell owner of observation if they want.
+      recipients.push(owner) if owner && owner.consensus_change_email
+
+      # Send to people who have registered interest.
+      # Also remove everyone who has explicitly said they are NOT interested.
+      for interest in Interest.find_all_by_object(self)
+        if interest.state
+          recipients.push(interest.user)
+        else
+          recipients.delete(interest.user)
+        end
+      end
+
+      # Send notification to all except the person who triggered the change.
+      for recipient in recipients.uniq
+        if recipient && recipient != sender
+          ConsensusChangeEmail.create_email(sender, recipient, self, old, best)
+        end
+      end
     end
 
 return result if debug
@@ -369,7 +398,7 @@ return result if debug
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
-  def unique_format_name 
+  def unique_format_name
     str = self.name.observation_name
     "%s (%s)" % [str, self.id]
   end
@@ -470,7 +499,7 @@ return result if debug
 
   # Abstraction over self.where and self.location.display_name.  Returns
   # location name as a string, preferring "location" over "where" where both
-  # exist. 
+  # exist.
   def place_name()
     if self.location
       self.location.display_name

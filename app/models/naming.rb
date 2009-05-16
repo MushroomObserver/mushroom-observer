@@ -13,7 +13,7 @@
 #    text_name               Plain text.  (uses name.search_name)
 #    format_name             Textilized.  (uses name.observation_name)
 #    unique_text_name        Same as above, with id added to make unique.
-#    unique_format_name 
+#    unique_format_name
 #
 #  Voting and preferences:
 #    vote_sum                Straight sum of votes for this naming.
@@ -36,9 +36,12 @@ class Naming < ActiveRecord::Base
   belongs_to :user
   has_many   :naming_reasons,    :dependent => :destroy
   has_many   :votes,             :dependent => :destroy
-  
+
+  # Creating or changing a naming can trigger all sorts of emails.
   def create_emails(current_name_id=nil)
     if self.name_id != current_name_id
+
+      # Send email to people interested in this name.
       @initial_name_id = self.name_id
       taxa = self.name.ancestors
       taxa.push(self.name)
@@ -47,38 +50,65 @@ class Naming < ActiveRecord::Base
           NamingEmail.create_email(n, self)
         end
       end
+
+      # Send email to people interested in this observation.
+      if observation = self.observation
+        owner  = observation.user
+        sender = self.user
+        recipients = []
+
+        # Send notification to owner if they want.
+        recipients.push(owner) if owner && owner.name_proposal_email
+
+        # Send to people who have registered interest.
+        # Also remove everyone who has explicitly said they are NOT interested.
+        for interest in Interest.find_all_by_object(observation)
+          if interest.state
+            recipients.push(interest.user)
+          else
+            recipients.delete(interest.user)
+          end
+        end
+
+        # Send to everyone (except the person who created the naming!)
+        for recipient in recipients.uniq
+          if recipient && recipient != sender
+            NameProposalEmail.create_email(sender, recipient, observation, self)
+          end
+        end
+      end
     end
   end
-      
+
   def after_create
     super
     create_emails()
   end
-  
+
   # Detect name changes in namings
   def after_initialize
     @initial_name_id = self.name_id
   end
-  
+
   def after_update
     create_emails(@initial_name_id)
   end
-  
+
   # Various name formats.
   def text_name
     self.name.search_name
   end
-  
+
   def unique_text_name
     str = self.name.search_name
     "%s (%s)" % [str, self.id]
   end
-  
+
   def format_name
     self.name.observation_name
   end
 
-  def unique_format_name 
+  def unique_format_name
     str = self.name.observation_name
     "%s (%s)" % [str, self.id]
   end
@@ -169,7 +199,7 @@ class Naming < ActiveRecord::Base
             v.modified = now
             v.value    = v80
             v.save
-          end  
+          end
         end
       end
       # Now create/change vote.
@@ -185,7 +215,7 @@ class Naming < ActiveRecord::Base
       vote.save
     end
     # Update consensus.
-    self.observation.calc_consensus
+    self.observation.calc_consensus(user)
     return true
   end
 
@@ -241,7 +271,7 @@ class Naming < ActiveRecord::Base
   end
 
   # If the community consensus clearly derives from a single naming, then this
-  # will return true for that naming.  It returns false for everything else. 
+  # will return true for that naming.  It returns false for everything else.
   # See observation.consensus_naming for a more accurate method that takes
   # synonymy into account.
   def is_consensus?

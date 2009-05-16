@@ -1,5 +1,5 @@
 require_dependency 'acts_as_versioned_extensions'
-require 'site_data'
+require_dependency 'site_data'
 
 ################################################################################
 #
@@ -126,6 +126,8 @@ class Name < ActiveRecord::Base
   ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review', 'ok_for_export', 'editors')
   # (note: ignore_if_changed is in app/models/acts_as_versioned_extensions)
 
+  after_save :notify_authors
+
   ABOVE_SPECIES_PAT = /^\s* ("?[A-Z][a-zë\-]+"?) \s*$/x
   SP_PAT            = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ (sp\.?|species) \s*$/x
   SPECIES_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?) \s+ ([a-zë\-\"]+) \s*$/x
@@ -218,6 +220,14 @@ class Name < ActiveRecord::Base
   # Returns: "unknown" Name instance.
   def self.unknown
     Name.find(:first, :conditions => ['text_name = ?', 'Fungi'])
+  end
+
+  # These are required in order to conform to the standards needed by Interest and Comment.
+  def unique_text_name
+    "#{self.text_name} (#{self.id})"
+  end
+  def unique_format_name
+    "#{self.display_name} (#{self.id})"
   end
 
   def self.validate_classification(rank, text)
@@ -857,17 +867,25 @@ class Name < ActiveRecord::Base
   end
 
   # Update the review status, but only reviewers can set the
-  # value to anything other than :unreviewed.
+  # value to anything other than :unreviewed.  (This can only
+  # happen when non-reviewer publishes a draft.)
   def update_review_status(value, user)
     if not user.in_group('reviewers')
       value = :unreviewed
-      user_id = nil
+      self.user = nil
+      # This communicates who made the change to notify_authors.
+      # This is the *only* place user ever gets set to nil.  If
+      # any other changes are made to this name user will get
+      # set then (e.g. by save_if_changed() or this method).
+      # So notify_authors should never see both @user_making_changes
+      # and self.user nil at the same time.  I think... -JPH
+      @user_making_change = user
     else
-      user_id = user.id
+      self.user = user
     end
     past_name = self.versions.latest
     past_name.review_status = self.review_status = value
-    past_name.reviewer_id = self.reviewer_id = user_id
+    past_name.reviewer_id = self.reviewer_id = self.user_id
     past_name.last_review = self.last_review = Time.now()
     self.save
     past_name.save
@@ -945,6 +963,45 @@ class Name < ActiveRecord::Base
       else # Both have synonyms so merge
         for n in name.synonym.names
           self.synonym.transfer(n)
+        end
+      end
+    end
+  end
+
+########################################
+
+  # Call this after saving potential changes to a Name.  It will determine
+  # if the changes are important enough to notify the authors, and do so.
+  def notify_authors
+
+    # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
+    # It only returns true if *important* changes have been made.  Even though
+    # changing review status doesn't cause a new version to be created, I want
+    # to notify authors of that change. 
+    if altered? || review_status_changed?
+      sender = self.user || @user_making_change
+      recipients = []
+      # print "#{self.search_name} changed by #{sender ? sender.login : 'no one'}.\n"
+
+      # Tell authors of the change.
+      for user in self.authors
+        recipients.push(user) if user.name_change_email
+      end
+
+      # Send to people who have registered interest.
+      # Also remove everyone who has explicitly said they are NOT interested.
+      for interest in Interest.find_all_by_object(self)
+        if interest.state
+          recipients.push(interest.user)
+        else
+          recipients.delete(interest.user)
+        end
+      end
+
+      # Send notification to all except the person who triggered the change.
+      for recipient in recipients.uniq
+        if recipient && recipient != sender
+          NameChangeEmail.create_email(sender, recipient, self, review_status_changed?)
         end
       end
     end

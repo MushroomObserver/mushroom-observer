@@ -76,6 +76,7 @@ app_create_account: Registrarse
 app_current_user: Su Cuenta
 app_comments_for_you: Comentarios para Usted
 app_your_observations: Sus Observaciones
+app_your_interests:  Your Interests
 app_your_summary: Su Resumen
 app_preferences: Preferencias
 app_join_mailing_list: Suscribir a Lista de Correo
@@ -351,11 +352,13 @@ validate_image_copyright_holder_too_long: El nombre de titular de los derechos d
 validate_image_title_too_long: El título debe ser inferior a 100 caracteres de largo.
 validate_image_user_missing: Falta el usuario.
 validate_image_when_missing: Falta la fecha.
+validate_interest_object_type_too_long:  Object_type must be less than 30 characters long.
+validate_interest_user_missing:  Missing user.
 validate_location_display_name_too_long: Display_name debe ser inferior a 200 caracteres de largo.
 validate_location_east_out_of_bounds: La longitud debe ser entre -180 y 180.
 validate_location_high_less_than_low: La altura máxima no puede ser inferior al altura mínima.
-validate_location_north_too_high: La latitud no puede ser más de 90.
 validate_location_north_less_than_south: El borde del norte debe ser mayor que el borde del sur.
+validate_location_north_too_high: La latitud no puede ser más de 90.
 validate_location_search_name_too_long: Search_name debe inferior a 200 caracteres de largo.
 validate_location_south_too_low: La latitud no puede ser inferior a -90.
 validate_location_user_missing: Falta el usuario.
@@ -440,7 +443,7 @@ advanced_search_caveat:  >
   Advanced search was added in February, 2009 to Mushroom Observer.  There are
   a lot of directions this feature could go.  I have intentionally kept it
   somewhat limited since I am concerned that it may have performance issues that
-  result in timeouts.  Please send
+  result in timeouts.  Please send 
   "email to the webmaster":/observer/ask_webmaster_question if you experience
   timeouts or if there are particular types of searches you would like to have
   added.
@@ -725,10 +728,13 @@ edit_project_title: 'Editar Proyecto: [title]'
 # account_mailer model
 email_comment_subject:  Comment about [name]
 email_commercial_inquiry_subject:  Commercial Inquiry about [name]
+email_consensus_change_subject:  Consensus rejected [old] in favor of [new]
 email_denied_subject:  '[MO] User Creation Blocked'
 email_features_subject:  New Mushroom Observer Features
 email_naming_for_observer_subject:  Mushroom Observer Research Request
 email_naming_for_tracker_subject:  Mushroom Observer Naming Notification
+email_name_change_subject:  Someone Had Made Changes to [name]
+email_name_proposal_subject:  Observation #[id] may be [name]
 email_new_password_subject:  New Password for Mushroom Observer Account
 email_observation_question_subject:  Question about [name]
 email_publish_name_subject:  '[MO] Name Published'
@@ -1179,6 +1185,15 @@ list_comments_by_user: Comentarios por [user]
 list_comments_for_user: Comentarios para [user]
 
 
+# interest/list_interests
+list_interests_title:  Objects You Are Watching or Ignoring
+list_interests_now_on:  Watching
+list_interests_now_off:  Ignoring
+list_interests_turn_on:  Change to Watch
+list_interests_turn_off:  Change to Ignore
+list_interests_delete:  Delete
+
+
 # location/list_merge_options
 list_merge_are_you_sure: >
   ¿Estás seguro de que quiere hacer la fusión?  Esto no se puede deshacer.
@@ -1514,9 +1529,24 @@ no_comment_note: >
   Entrar y ir a la página <<Preferencias>> para volver a habilitar
   esta característica.
 
+some_emails_may_already_be_queued:  >
+  Note: For the next few minutes you may continue to receive emails that have
+  already been queued.
+
 no_comment_success: >
   Notificaciones de comentarios por e-mail se ha inhabilitado para [name].
 
+
+
+# account/no_comment_response_email
+no_comment_response_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website post comments about observations that you have
+  commented on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_comment_response_success:  Comment response email notifications disabled for [name].
 
 
 # account/no_commercial_email
@@ -1533,6 +1563,16 @@ no_commercial_success: >
 
 
 
+# account/no_consensus_change_email
+no_consensus_change_note:  >
+  You will no longer receive email notifications when the names of your
+  observations change.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_consensus_change_success:  Name change email notifications disabled for [name].
+
+
 # account/no_feature_email
 no_features_note: >
   Ya no recibirá notificaciones por e-mail sobre nuevas características.
@@ -1544,6 +1584,12 @@ no_feature_success: >
   Notificaciones de nuevas características por e-mail se ha inhabilitado para
   [name].
 
+
+
+# interest/no_interest
+no_interest_bad_object:  Object [type] #[id] doesn't exist.
+no_interest_success:  Will now ignore all activity on [name].
+no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, then reload this page.
 
 
 # observer/no_javascript
@@ -1569,6 +1615,26 @@ no_javascript_dont_care: >
   ir a su preferencias para volver a habilitar la detección automática.)
 
 no_javascript_title: Javascript Está Deshabilitado en Su Navegador
+
+
+# account/no_name_change_email
+no_name_change_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the names you are author on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_change_success:  Name change email notifications disabled for [name].
+
+
+# account/no_name_proposal_email
+no_name_proposal_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website propose names for your observations.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_proposal_success:  Name proposal email notifications disabled for [name].
 
 
 # observer/no_session
@@ -1634,15 +1700,19 @@ prefs_email_comments: >
   Por favor, enviarme notificaciones por e-mail cuando otros usuarios
   agregen comentarios sobre mis observaciones.
 
+prefs_email_comment_responses:  Please send me email notifications when other users post responses to my comments.
 prefs_email_commercial: >
   Por favor, enviarme notificaciones por e-mail si otros usuarios están
   interesados en el uso de una de mis imágenes para fines comerciales.
 
+prefs_email_consensus_change:  Please send me email notifications when community consensus changes the name of my observations.
 prefs_email_features: >
   Por favor, enviarme notificaciones por e-mail cuando las nuevas
   características salen.
 
 prefs_email_html: Está bien usar HTML en mis mensajes e-mail.
+prefs_email_name_change:  Please send me email notifications when other users make changes to names I'm author on.
+prefs_email_name_proposal:  Please send me email notifications when other users propose names for my observations.
 prefs_email_note: >
   Nota: Ninguna de estas características e-mail hará que su dirección e-mail se
   visualiza en una página web, o permitirá a nadie para obtener su dirección
@@ -1805,6 +1875,17 @@ send_feature_email_success: E-mail de características se ha enviado.
 send_feature_email_denied: Sólo el admin puede enviar e-mail de características.
 
 
+# interest/set_interest
+set_interest_already_deleted:  You have expressed no interest in [name].
+set_interest_already_off:  You have already told us to ignore [name].
+set_interest_already_on:  You have already told us to watch [name].
+set_interest_failure:  Could not change your interest state in [name].  Please try again or report this to the webaster.
+set_interest_success_was_off:  Cancelled your ban on emails about [name].
+set_interest_success_was_on:  Cancelled your request for emails about [name].
+set_interest_success_off:  We will now ignore any activity in [name].
+set_interest_success_on:  You will now be notified of any activity in [name].
+
+
 # shared/_textile_help
 shared_textile_help: >
   Las notas pueden ser formateado con el sistema de marcas Textile.<br/>
@@ -1859,6 +1940,12 @@ show_name_draft_help: >
 show_name_edit_name: Editar Descripción
 show_name_email_tracking: Correo Seguimiento
 show_name_existing_drafts: Borradores Existentes
+show_name_interest_ignore_help:  Click here if you want to stop getting any emails about this name.
+show_name_interest_ignoring:  You have told us never to email you about changes in this name.  Click on this icon to cancel.
+show_name_interest_on:  Watch
+show_name_interest_off:  Ignore
+show_name_interest_watch_help:  Click here if you want us to send you email whenever there is a change in this name.
+show_name_interest_watching:  You have told us to email you about changes in this name.  Click on this icon to cancel.
 show_name_latest_review: 'Última Revisión: [date] para [user]'
 show_name_notes_and_comments: Notas y Comentarios
 show_name_observations: Observaciones
@@ -1924,7 +2011,14 @@ show_observation_comment_created: Creado
 show_observation_comment_created_by: por
 show_observation_debug_consensus: Depurar Consenso
 show_observation_edit_observation: Editar Observación
+show_observation_interest_ignore_help:  Click here if you want to stop getting any emails about this observation.
+show_observation_interest_ignoring:  You have told us never to email you about activity in this observation.  Click on this icon to cancel.
+show_observation_interest_on:  Watch
+show_observation_interest_off:  Ignore
+show_observation_interest_watch_help:  Click here if you want us to send you email whenever there is activity on this observation.
+show_observation_interest_watching:  You have told us to email you about activity in this observation.  Click on this icon to cancel.
 show_observation_manage_species_lists: Gestionar listas de especies.
+show_observation_no_comments_yet:  No one has commented yet.
 show_observation_observation_created: Observación creado
 show_observation_preferred_name: Nombre Preferido
 show_observation_preferred_names: Nombres Preferidos
@@ -2368,7 +2462,7 @@ how_keeping_up:  >
   'Activity Log', it is also accessible through the 'Latest Changes' link on
   the left side of the screen.  This page lets you know what the most recent
   changes to the site are.  It lists new "Observations":#observation and
-  "Species Lists"#species_list as well as significant changes to any already
+  "Species Lists":#species_list as well as significant changes to any already
   existing ones.  Additions of "Images":#image or "Comments":#comment are
   considered significant changes to the relevant Observations.  Changes to
   "Names":#name are also listed.  The numbers at the top and bottom of the page
@@ -2759,13 +2853,13 @@ how_help_business_planning: >
 # These are admin pages, they don't need to be translated.
 
 # observer/recalc
-observer_recalc_old_name: 'Nombre viejo: [name]'
-observer_recalc_new_name: 'Nombre nuevo: [name]'
-observer_recalc_caught_error: 'Atrapados excepción: [error]'
+observer_recalc_old_name: 'old_name: [name]'
+observer_recalc_new_name: 'new_name: [name]'
+observer_recalc_caught_error: 'Caught exception: [error]'
 
 # observer/change_user_bonuses
-change_user_bonuses:  Award Bonus
-change_user_bonuses_help:  >
+change_user_bonuses: Award Bonus
+change_user_bonuses_help: >
 
   List one bonus per line, each specifiying a number of points and reason, like
   this:
@@ -2777,7 +2871,7 @@ change_user_bonuses_help:  >
   Keep the reasons short or it might mess up the formatting of the table on
   that page.
 
-change_user_bonuses_title:  Contribution Bonuses for [user]
+change_user_bonuses_title: Contribution Bonuses for [user]
 
 system_status_browser_status_size: Browser status cache size
 system_status_clear_caches: Clear Caches

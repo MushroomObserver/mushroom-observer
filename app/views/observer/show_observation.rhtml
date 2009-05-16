@@ -4,6 +4,29 @@
   questions_ok = @observation.user.question_email
   search_params = calc_search_params()
 
+  if @user
+    if @interest
+      alt = @interest.state ? :show_observation_interest_watching.l : :show_observation_interest_ignoring.l
+      add_right_tab('<div>' + tag('acronym', { :title => alt }, true) +
+                    link_to(image_tag(@interest.state ? 'watch2.png' : 'ignore2.png',
+                                      :alt => alt, :width => '50px', :height => '50px'),
+                            :controller => 'interest', :action => 'set_interest',
+                            :id => @observation.id, :type => 'Observation', :state => 0) +
+                    '</acronym></div>')
+    else
+      add_right_tab(tag('acronym', { :title => :show_observation_interest_watch_help.l }, true) +
+                    link_to(:show_observation_interest_on.t,
+                            :controller => 'interest', :action => 'set_interest',
+                            :id => @observation.id, :type => 'Observation', :state => 1) +
+                    '</acronym>')
+      add_right_tab(tag('acronym', { :title => :show_observation_interest_ignore_help.l }, true) +
+                    link_to(:show_observation_interest_off.t,
+                            :controller => 'interest', :action => 'set_interest',
+                            :id => @observation.id, :type => 'Observation', :state => -1) +
+                    '</acronym>')
+    end
+  end
+  
   if name
     new_tab_set do
       add_tab(:app_about_name.t(:name => name.display_name), :controller => 'name', :action => 'show_name', :id => name.id)

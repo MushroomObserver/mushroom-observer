@@ -72,15 +72,23 @@
 
   <b><%= :prefs_email_prefs.t %>:</b><br/>
   <%= form.check_box("feature_email") %>
-  <label for="user_feature_email"><%= :prefs_email_features.t %></label><br/>
+    <label for="user_feature_email"><%= :prefs_email_features.t %></label><br/>
+  <%= form.check_box("name_change_email") %>
+    <label for="user_name_change_email"><%= :prefs_email_name_change.t %></label><br/>
   <%= form.check_box("comment_email") %>
-  <label for="user_comment_email"><%= :prefs_email_comments.t %></label><br/>
+    <label for="user_comment_email"><%= :prefs_email_comments.t %></label><br/>
+  <%= form.check_box("comment_response_email") %>
+    <label for="user_comment_response_email"><%= :prefs_email_comment_responses.t %></label><br/>
+  <%= form.check_box("name_proposal_email") %>
+    <label for="user_name_proposal_email"><%= :prefs_email_name_proposal.t %></label><br/>
+  <%= form.check_box("consensus_change_email") %>
+    <label for="user_consensus_change_email"><%= :prefs_email_consensus_change.t %></label><br/>
   <%= form.check_box("commercial_email") %>
-  <label for="user_commercial_email"><%= :prefs_email_commercial.t %></label><br/>
+    <label for="user_commercial_email"><%= :prefs_email_commercial.t %></label><br/>
   <%= form.check_box("question_email") %>
-  <label for="user_question_email"><%= :prefs_email_questions.t %></label><br/>
+    <label for="user_question_email"><%= :prefs_email_questions.t %></label><br/>
   <%= form.check_box("html_email") %>
-  <label for="user_html_email"><%= :prefs_email_html.t %></label><br/>
+    <label for="user_html_email"><%= :prefs_email_html.t %></label><br/>
   <div class="HelpNoteIndent">
     <%= :prefs_email_note.tp %>
   </div>

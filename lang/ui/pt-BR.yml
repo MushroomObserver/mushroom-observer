@@ -73,6 +73,7 @@ app_create_account: Novo Usuário
 app_current_user: Usuário Atual
 app_comments_for_you: Comentários para mim
 app_your_observations: Minhas Observações
+app_your_interests:  Your Interests
 app_your_summary: Meu Resumo
 app_preferences: Preferências
 app_join_mailing_list: Lista de Discussão
@@ -149,15 +150,15 @@ app_destroy:  Destroy
 app_disable:  Disable
 app_edit:  Edit
 app_enable:  Enable
-app_less_button:  &laquo; Less
-app_more_button:  More &raquo;
+app_less_button:  << Less
+app_more_button:  More >>
 app_next:  Next
 app_prev:  Prev
 app_remove:  Remove
 app_save:  Save
 app_search:  Search
 app_send:  Send
-app_save_changes:  Save Changes
+app_save_changes:  Save Edits
 app_show_image:  Show Image
 app_show_log:  Show Log
 app_show_map:  Show Map
@@ -273,7 +274,7 @@ site_stats_authors_names:  Authored Descriptions
 site_stats_editors_names:  Edited Descriptions
 site_stats_images:  Images
 site_stats_listed_taxa: Listed Taxa
-site_stats_names:  Descriptions
+site_stats_names:  Taxa
 site_stats_past_names:  Description Changes
 site_stats_locations:  Locations
 site_stats_past_locations:  Location Changes
@@ -288,13 +289,13 @@ site_stats_users:  Members
 
 # vote descriptions
 vote_no_opinion:  No Opinion
-vote_confidence_100:  Definitely
+vote_confidence_100:  I'd Call It That
 vote_confidence_80:  Promising
 vote_confidence_60:  Could Be
 vote_confidence_40:  Doubtful
 vote_confidence_20:  Not Likely
 vote_confidence_0:  As If!
-vote_agreement_100:  Definitely
+vote_agreement_100:  I'd Call It That
 vote_agreement_80:  Promising
 vote_agreement_60:  Could Be
 vote_agreement_40:  Doubtful
@@ -338,30 +339,32 @@ log_species_list_updated:  Species list updated by [user].
 log_updated_by:  Updated by [user].
 
 # active-record automatic validation error messages
-validate_comment_object_type_too_long:  Object type string must be less than 30 characters long.
+validate_comment_object_type_too_long:  Object_type must be less than 30 characters long.
 validate_comment_summary_missing:  Please summarize your comment -- this will be displayed on the main index page.
 validate_comment_summary_too_long:  Summary must be less than 100 characters long.
 validate_comment_user_missing:  Missing user.
 validate_image_content_type_images_only:  You can only upload images.
-validate_image_content_type_too_long:  Content type string must be less than 100 characters long.
+validate_image_content_type_too_long:  Content_type must be less than 100 characters long.
 validate_image_copyright_holder_too_long:  Copyright holder's name must be less than 100 characters long.
 validate_image_title_too_long:  Title must be less than 100 characters long.
 validate_image_user_missing:  Missing user.
 validate_image_when_missing:  Missing date.
-validate_location_display_name_too_long:  Display name must be less than 200 characters long.
+validate_interest_object_type_too_long:  Object_type must be less than 30 characters long.
+validate_interest_user_missing:  Missing user.
+validate_location_display_name_too_long:  Display_name must be less than 200 characters long.
 validate_location_east_out_of_bounds:  Longitude should be between -180 and 180.
 validate_location_high_less_than_low:  High altitude should be at least equal to the lowest altitude.
-validate_location_north_too_high:  Latitude should be at most 90.
 validate_location_north_less_than_south:  North latitude should be greater than south latitude.
-validate_location_search_name_too_long:  Search name must be less than 200 characters long.
+validate_location_north_too_high:  Latitude should be at most 90.
+validate_location_search_name_too_long:  Search_name must be less than 200 characters long.
 validate_location_south_too_low:  Latitude should be at least -90.
 validate_location_user_missing:  Missing user.
 validate_location_west_out_of_bounds:  Longitude should be between -180 and 180.
 validate_name_author_too_long:  Author must be less than 100 characters long.
-validate_name_display_name_too_long:  Display name must be less than 100 characters long.
-validate_name_observation_name_too_long:  Observation name must be less than 100 characters long.
-validate_name_search_name_too_long:  Search name must be less than 100 characters long.
-validate_name_text_name_too_long:  Text name must be less than 100 characters long.
+validate_name_display_name_too_long:  Display_name must be less than 100 characters long.
+validate_name_observation_name_too_long:  Observation_name must be less than 100 characters long.
+validate_name_search_name_too_long:  Search_name must be less than 100 characters long.
+validate_name_text_name_too_long:  Text_name must be less than 100 characters long.
 validate_name_user_missing:  Missing user.
 validate_naming_name_missing:  Missing name.
 validate_naming_observation_missing:  Missing observation.
@@ -390,7 +393,7 @@ validate_user_login_missing:  Please choose a login name.
 validate_user_login_taken:  Sorry, that login name is already taken.
 validate_user_login_too_long:  Login name must be 3 to 40 characters long.
 validate_user_name_too_long:  Full name must be less than 80 characters long.
-validate_user_password_confirmation_missing:  Please re-type your password to verify.
+validate_user_password_confirmation_missing:  Please enter your password twice to verify.
 validate_user_password_missing:  Please choose a password.
 validate_user_password_no_match:  Password doesn't match confirmation.
 validate_user_password_too_long:  Password must be 5 to 40 characters long.
@@ -436,7 +439,7 @@ advanced_search_caveat:  >
   Advanced search was added in February, 2009 to Mushroom Observer.  There are
   a lot of directions this feature could go.  I have intentionally kept it
   somewhat limited since I am concerned that it may have performance issues that
-  result in timeouts.  Please send
+  result in timeouts.  Please send 
   "email to the webmaster":/observer/ask_webmaster_question if you experience
   timeouts or if there are particular types of searches you would like to have
   added.
@@ -536,23 +539,24 @@ change_member_status_change_status:  Change Status
 change_member_status_edit:  Edit Project
 change_member_status_make_admin:  Make Admin
 change_member_status_make_admin_help:  >
-  Make Admin - Allows user to perform admin functions.<br/>
-  They will be able to add or remove members, change the ability for other
-  members to perform admin functions, and edit any draft names for this project.
-  User is also made a member of the project if they are not already.
+  Make Admin - Allows user to perform admin functions.  They will be able to
+  add or remove members, change the ability for other members to perform admin
+  functions, and edit any draft names for this project.  User is also made a
+  member of the project if they are not already.
 
 change_member_status_make_member:  Make Regular Member
 change_member_status_make_member_help:  >
-  Make Regular Member - Ensures that user is a member of the project, but not in the admin group.<br/>
-  Afterwords the user will be able to view and create draft names for this project.
-  They will be the only non-admin members able to edit their drafts.
+  Make Regular Member - Ensures that user is a member of the project, but not
+  in the admin group. Afterwords the user will be able to view and create
+  draft names for this project.  They will be the only non-admin members able
+  to edit their drafts.
 
 change_member_status_members:  Current Project Members
 change_member_status_remove_member:  Remove Member
 change_member_status_remove_member_help:  >
-  Remove Member - Removes all member and admin priviledges for a project.<br/>
-  User will no longer be able view or create draft names for this project.
-  They will not be able to perform any admin functions.
+  Remove Member - Removes all member and admin priviledges for a project.  User
+  will no longer be able view or create draft names for this project.  They
+  will not be able to perform any admin functions.
 
 change_member_status_denied:  >
   Only the admins for a project can change member permissions.
@@ -677,7 +681,7 @@ destroy_project_success:  Project destroyed.
 
 
 # project/edit_draft
-edit_draft_title:  'Editing Draft for: [name]'
+edit_draft_title:  Editing Draft for [name]
 
 
 # location/edit_location
@@ -712,10 +716,13 @@ edit_project_title:  'Editing Project: [title]'
 # account_mailer model
 email_comment_subject:  Comment about [name]
 email_commercial_inquiry_subject:  Commercial Inquiry about [name]
+email_consensus_change_subject:  Consensus rejected [old] in favor of [new]
 email_denied_subject:  '[MO] User Creation Blocked'
 email_features_subject:  New Mushroom Observer Features
 email_naming_for_observer_subject:  Mushroom Observer Research Request
 email_naming_for_tracker_subject:  Mushroom Observer Naming Notification
+email_name_change_subject:  Someone Had Made Changes to [name]
+email_name_proposal_subject:  Observation #[id] may be [name]
 email_new_password_subject:  New Password for Mushroom Observer Account
 email_observation_question_subject:  Question about [name]
 email_publish_name_subject:  '[MO] Name Published'
@@ -775,10 +782,10 @@ eol_need_review_title:  EOL Need Review
 
 # name/eol_preview
 eol_preview_name_count:  >
-  Descriptions ready for EOL: [count]
+  [count] description(s)
 
 eol_preview_image_count:  >
-  Images ready for EOL: [count]
+  [count] image(s)
 
 eol_preview_title:  EOL Preview
 eol_preview_explanation:  >
@@ -1023,7 +1030,7 @@ form_species_lists_multiple_names_help:  >
 form_species_lists_species_to_add:  Select Species to Add
 form_species_lists_title:  Title
 form_species_lists_write_in_species:  >
-  Write In Species (enter a name on each line)
+  Write In Species: (enter a name on each line)
 
 
 # observer/_form_synonyms
@@ -1074,7 +1081,7 @@ image_no_new_image:  No new image found.
 
 
 # image/reuse_image_for_user
-image_changed_your_image:  Changed your image to image #[id].
+image_changed_your_image:  'Changed your image to image #[id].'
 
 
 # image/destroy_image
@@ -1083,7 +1090,7 @@ image_destroy_success:  Image destroyed successfully.
 
 # image/edit_image
 image_edit_success:  Image was successfully updated.
-image_edit_title:  Editing Image [name]
+image_edit_title:  'Editing Image: [name]'
 
 
 # image/remove_images
@@ -1129,7 +1136,7 @@ image_show_notes:  Notes
 image_show_observations:  Observations
 image_show_quality:  Quality
 image_show_inquiry:  Send Commercial Inquiry About Image
-image_show_title:  Image [name]
+image_show_title:  'Image: [name]'
 image_show_when:  When
 
 
@@ -1146,6 +1153,15 @@ image_updater_update:  Update
 list_comments:  Comments
 list_comments_by_user:  Comments by [user]
 list_comments_for_user:  Comments for [user]
+
+
+# interest/list_interests
+list_interests_title:  Objects You Are Watching or Ignoring
+list_interests_now_on:  Watching
+list_interests_now_off:  Ignoring
+list_interests_turn_on:  Change to Watch
+list_interests_turn_off:  Change to Ignore
+list_interests_delete:  Delete
 
 
 # location/list_merge_options
@@ -1421,7 +1437,7 @@ no_ajax_body:  >
 no_ajax_browsers:  >
   Browsers that we recommend (and test the site on regularly) are:
   \n\n
-  * Firefox 1.0 or higher
+  * Firefox / Iceweasel 1.0 or higher
   \n\n
   * Internet Explorer 5.5 or higher
   \n\n
@@ -1452,13 +1468,13 @@ no_browser_body:  >
   won't work if we guess wrong (like voting on observation names), we have to
   assume the worst.  However this means that a number of useful features are
   not available, like dynamic forms, auto-completion of scientific names and
-  locations, the new version of the species list creator, and more.
+  locations, the new version of the species list creator, and more. 
   \n\n
   If you would like to override this decision, "click here to turn javascript
   on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't
   Recognize Your Browser" tab at the top of every page, please "click here to
   turn javascript off":/observer/turn_javascript_off.  (Login and go to
-  preferences to re-enable auto-detection.)
+  preferences to re-enable auto-detection.) 
 
 no_browser_title:  We Don't Recognize Your Browser
 
@@ -1470,7 +1486,22 @@ no_comment_note:  >
   \n\n
   Login and go to the Preferences page to re-enable this feature.
 
+some_emails_may_already_be_queued:  >
+  Note: For the next few minutes you may continue to receive emails that have
+  already been queued.
+
 no_comment_success:  Comment email notifications disabled for [name].
+
+
+# account/no_comment_response_email
+no_comment_response_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website post comments about observations that you have
+  commented on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_comment_response_success:  Comment response email notifications disabled for [name].
 
 
 # account/no_commercial_email
@@ -1483,6 +1514,16 @@ no_commercial_note:  >
 no_commercial_success:  Commercial email inquiries disabled for [name].
 
 
+# account/no_consensus_change_email
+no_consensus_change_note:  >
+  You will no longer receive email notifications when the names of your
+  observations change.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_consensus_change_success:  Name change email notifications disabled for [name].
+
+
 # account/no_feature_email
 no_features_note:  >
   Automated email about new features have been disabled for your account.
@@ -1490,6 +1531,12 @@ no_features_note:  >
   Login and go to the Preferences page to re-enable this feature.
 
 no_feature_success:  Automated feature email disabled for [name].
+
+
+# interest/no_interest
+no_interest_bad_object:  Object [type] #[id] doesn't exist.
+no_interest_success:  Will now ignore all activity on [name].
+no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, then reload this page.
 
 
 # observer/no_javascript
@@ -1514,6 +1561,26 @@ no_javascript_dont_care:  >
   re-enable auto-detection.)
 
 no_javascript_title:  You Have Javascript Disabled
+
+
+# account/no_name_change_email
+no_name_change_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the names you are author on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_change_success:  Name change email notifications disabled for [name].
+
+
+# account/no_name_proposal_email
+no_name_proposal_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website propose names for your observations.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_proposal_success:  Name proposal email notifications disabled for [name].
 
 
 # observer/no_session
@@ -1573,9 +1640,13 @@ prefs_alt_row_colors:  Alternate row colors.
 prefs_columns:  columns
 prefs_email:  Email address
 prefs_email_comments:  Please send me email notifications when other users post comments about my observations.
+prefs_email_comment_responses:  Please send me email notifications when other users post responses to my comments.
 prefs_email_commercial:  Please send me email if someone is interested in using an image of mine for commercial purposes.
+prefs_email_consensus_change:  Please send me email notifications when community consensus changes the name of my observations.
 prefs_email_features:  Please send me email updates when new features come out.
 prefs_email_html:  It's okay to use HTML in my emails.
+prefs_email_name_change:  Please send me email notifications when other users make changes to names I'm author on.
+prefs_email_name_proposal:  Please send me email notifications when other users propose names for my observations.
 prefs_email_note:  >
   Note that none of these email features will cause your email address to be
   displayed on a webpage or allow the person who wants to contact you to obtain
@@ -1587,8 +1658,8 @@ prefs_email_note:  >
 prefs_email_prefs:  Email preferences
 prefs_email_questions:  Please allow others to email me questions about my observations.
 prefs_layout_title:  List page layout
-prefs_license:  Default license
-prefs_license_note:  Select default "license":/observer/how_to_use#license you want for new images
+prefs_license:  License
+prefs_license_note:  Default "license":/observer/how_to_use#license you want for new images
 prefs_locale:  Language
 prefs_link:  Edit Preferences
 prefs_login:  Login
@@ -1733,11 +1804,22 @@ send_feature_email_success:  Delivered feature mail.
 send_feature_email_denied:  Only the admin can send feature mail.
 
 
+# interest/set_interest
+set_interest_already_deleted:  You have expressed no interest in [name].
+set_interest_already_off:  You have already told us to ignore [name].
+set_interest_already_on:  You have already told us to watch [name].
+set_interest_failure:  Could not change your interest state in [name].  Please try again or report this to the webaster.
+set_interest_success_was_off:  Cancelled your ban on emails about [name].
+set_interest_success_was_on:  Cancelled your request for emails about [name].
+set_interest_success_off:  We will now ignore any activity in [name].
+set_interest_success_on:  You will now be notified of any activity in [name].
+
+
 # shared/_textile_help
 shared_textile_help:  >
   Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/>
-  _Amanita ocreata_, _A. ocreata_ ---> <u>*<i>Amanita ocreata</i>*</u> (linked to name description)<br/>
-  __italic__, **bold** ---> <i>italic</i>, *bold*<br/>
+  _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/>
+  __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
 shared_textile_link:  More details here.
 
@@ -1759,8 +1841,8 @@ show_image_reviewed_by:  Reviewed by
 
 # location/show_location
 show_location_create:  Create New Location
-show_location_edit:  Edit
-show_location_observations:  Observations at this location
+show_location_edit:  Edit Location
+show_location_observations:  Observations at this Location
 show_location_older_versions:  Older Versions
 show_location_title:  'Location: [name]'
 
@@ -1771,7 +1853,7 @@ show_name_add_name:  Add Name
 show_name_author_request:  Request Authorship Credit
 show_name_bulk_name_edit:  Bulk Name Edit
 show_name_change_synonyms:  Change Synonyms
-show_name_content_status:  Content status
+show_name_content_status:  Description status
 show_name_create_draft:  Create New Draft for
 show_name_deprecated_synonyms:  Deprecated Synonym(s)
 show_name_description_author:  Description author
@@ -1786,7 +1868,15 @@ show_name_draft_help:  >
 show_name_edit_name:  Edit Description
 show_name_email_tracking:  Email Tracking
 show_name_existing_drafts:  Existing Drafts
-show_name_latest_review:  'Latest review: [date] by [user]'
+show_name_interest_ignore_help:  Click here if you want to stop getting any emails about this name.
+show_name_interest_ignoring:  You have told us never to email you about changes in this name.  Click on this icon to cancel.
+show_name_interest_on:  Watch
+show_name_interest_off:  Ignore
+show_name_interest_watch_help:  Click here if you want us to send you email whenever there is a change in this name.
+show_name_interest_watching:  You have told us to email you about changes in this name.  Click on this icon to cancel.
+show_name_latest_review:  >
+  Latest review: [date] by [user]
+
 show_name_notes_and_comments:  Notes and Comments
 show_name_observations:  Observations
 show_name_other_observations:  Similar Observations
@@ -1846,7 +1936,14 @@ show_observation_comment_created:  Created
 show_observation_comment_created_by:  By
 show_observation_debug_consensus:  Debug Consensus
 show_observation_edit_observation:  Edit Observation
+show_observation_interest_ignore_help:  Click here if you want to stop getting any emails about this observation.
+show_observation_interest_ignoring:  You have told us never to email you about activity in this observation.  Click on this icon to cancel.
+show_observation_interest_on:  Watch
+show_observation_interest_off:  Ignore
+show_observation_interest_watch_help:  Click here if you want us to send you email whenever there is activity on this observation.
+show_observation_interest_watching:  You have told us to email you about activity in this observation.  Click on this icon to cancel.
 show_observation_manage_species_lists:  Manage Species Lists
+show_observation_no_comments_yet:  No one has commented yet.
 show_observation_observation_created:  Observation created
 show_observation_preferred_name:  Preferred Name
 show_observation_preferred_names:  Preferred Names
@@ -1859,7 +1956,7 @@ show_observation_species_lists:  Species Lists
 show_observation_specimen_available:  Herbarium specimen available
 show_observation_specimen_not_available:  No herbarium specimen
 show_observation_success:  Successfully changed vote.
-show_observation_title:  Observation [name]
+show_observation_title:  'Observation: [name]'
 show_observation_view_notifications:  View Notifications
 
 
@@ -2014,10 +2111,10 @@ species_list_upload_title:  Upload Species List
 
 
 # observer/<Theme>
-theme_agaricus:  **__Agaricus__** Theme
-theme_amanita:  **__Amanita** Theme
-theme_cantharellaceae:  Cantharellaceae Theme
-theme_hygrocybe:  **__Hygrobcybe** Theme
+theme_agaricus:  _Agaricus_ Theme
+theme_amanita:  _Amanita_ Theme
+theme_cantharellaceae:  _Cantharellaceae_ Theme
+theme_hygrocybe:  _Hygrocybe_ Theme
 theme_random:  Random
 
 
@@ -2033,7 +2130,7 @@ translators_note:  >
   files":[repo] and start plugging away in any language you wish.  Then just
   "pop us an email":/observer/ask_webmaster_question when you finish doing what
   you can, and we'll tell you how to submit your work.  You will receive
-  prominant credit for your contribution, in addition, of course, to our
+  prominant credit for your contribution, in addition to, of course, our
   undying gratitude.
 
 translators_note_title:  Translator's Note
@@ -2271,7 +2368,7 @@ how_keeping_up:  >
   'Activity Log', it is also accessible through the 'Latest Changes' link on
   the left side of the screen.  This page lets you know what the most recent
   changes to the site are.  It lists new "Observations":#observation and
-  "Species Lists"#species_list as well as significant changes to any already
+  "Species Lists":#species_list as well as significant changes to any already
   existing ones.  Additions of "Images":#image or "Comments":#comment are
   considered significant changes to the relevant Observations.  Changes to
   "Names":#name are also listed.  The numbers at the top and bottom of the page
@@ -2645,7 +2742,7 @@ how_help_developers:  >
 how_help_translators:  >
   h2. 4. Translators
   \n\n
-  The site is set up to support foreign languages.  All we need is
+  p(normal). The site is set up to support foreign languages.  All we need is
   someone to do the translations.
 
 how_help_business_planning:  >
@@ -2660,13 +2757,13 @@ how_help_business_planning:  >
 # These are admin pages, they don't need to be translated.
 
 # observer/recalc
-observer_recalc_old_name:  'Old name: [name]'
-observer_recalc_new_name:  'New name: [name]'
-observer_recalc_caught_error:  'Caught error: [error]'
+observer_recalc_old_name: 'old_name: [name]'
+observer_recalc_new_name: 'new_name: [name]'
+observer_recalc_caught_error: 'Caught exception: [error]'
 
 # observer/change_user_bonuses
-change_user_bonuses:  Award Bonus
-change_user_bonuses_help:  >
+change_user_bonuses: Award Bonus
+change_user_bonuses_help: >
 
   List one bonus per line, each specifiying a number of points and reason, like
   this:
@@ -2678,7 +2775,7 @@ change_user_bonuses_help:  >
   Keep the reasons short or it might mess up the formatting of the table on
   that page.
 
-change_user_bonuses_title:  Contribution Bonuses for [user]
+change_user_bonuses_title: Contribution Bonuses for [user]
 
 system_status_browser_status_size: Browser status cache size
 system_status_clear_caches: Clear Caches

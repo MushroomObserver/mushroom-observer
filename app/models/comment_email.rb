@@ -18,12 +18,10 @@ class CommentEmail < QueuedEmail
       qed_email.queued = Time.now()
       qed_email.save()
     else
-      if receiver.comment_email
-        qed_email = CommentEmail.new()
-        qed_email.setup(sender, receiver, :comment)
-        qed_email.add_integer(:comment, comment.id)
-        qed_email.finish()
-      end
+      qed_email = CommentEmail.new()
+      qed_email.setup(sender, receiver, :comment)
+      qed_email.add_integer(:comment, comment.id)
+      qed_email.finish()
     end
     qed_email
   end
@@ -32,17 +30,15 @@ class CommentEmail < QueuedEmail
   # method for QueuedEmails that come out of the database to work.  See queued_emails.rb
   # for more details.
   def self.deliver_email(email)
-    observation = nil
     comment = nil
     (comment_id,) = email.get_integers([:comment])
     comment = Comment.find(comment_id) if comment_id
-    if comment
-      object = comment.object
-      if email.to_user.comment_email # Make sure it hasn't changed
-        AccountMailer.deliver_comment(email.user, email.to_user, object, comment)
-      end
+    if !comment
+      print "No comment found for email ##{self.id}.\n"
+    elsif email.user == email.to_user
+      print "Skipping email with same sender and recipient: #{email.user.email}\n"
     else
-      print "No comment found (#{self.id})\n"
+      AccountMailer.deliver_comment(email.user, email.to_user, comment.object, comment)
     end
   end
 end

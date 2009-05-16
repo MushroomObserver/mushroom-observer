@@ -7,7 +7,7 @@ class QueuedEmail < ActiveRecord::Base
   
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_flavors()
-    [:comment, :feature, :naming, :publish]
+    [:comment, :feature, :naming, :publish, :name_proposal, :consensus_change, :name_change]
   end
 
   # Like initialize, but ensures that the objects is saved
@@ -35,18 +35,8 @@ class QueuedEmail < ActiveRecord::Base
   # subclasses would have to be changed (no save or adding values that do
   # saves as a side effect).
   def deliver_email
-    case self.flavor
-    when :comment
-      CommentEmail.deliver_email(self)
-    when :feature
-      FeatureEmail.deliver_email(self)
-    when :naming
-      NamingEmail.deliver_email(self)
-    when :publish
-      PublishEmail.deliver_email(self)
-    else
-      raise NotImplementedError
-    end
+    class_name = self.flavor.to_s.camelize + "Email"
+    class_name.constantize.deliver_email(self)
   end
   
   # Print out all the info about a QueuedEmail

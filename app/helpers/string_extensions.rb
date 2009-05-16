@@ -307,6 +307,31 @@ if !defined? UTF_TO_ASCII
   }
 end
 
+# Plain-text alternatives to the HTML special characters RedCloth uses.
+if !defined? HTML_SPECIAL_CHAR_EQUIVALENTS
+  HTML_SPECIAL_CHAR_EQUIVALENTS = {
+    'amp'   => '&',
+    'gt'    => '>',
+    'lt'    => '<',
+    'quot'  => '"',
+    '#39'   => "'",
+    '#169'  => '(c)',
+    '#174'  => '(r)',
+    '#215'  => 'x',
+    '#8211' => '-',
+    '#8212' => '--',
+    '#8216' => "'",
+    '#8217' => "'",
+    '#8220' => '"',
+    '#8221' => '"',
+    '#8230' => '...',
+    '#8242' => "'",
+    '#8243' => '"',
+    '#8482' => '(tm)',
+    '#8594' => '->',
+  }
+end
+
 class String
   # Convert string (assumed to be in UTF-8) to plain ASCII.
   def to_ascii
@@ -328,10 +353,17 @@ class String
     end
   end
 
-  # Remove html codes from string.  (Used to make sure title is safe for HTML
-  # header field.)
+  # Remove html codes from string.  Used to make sure title is safe for HTML
+  # header field.
   def strip_html
     self.gsub(/<[^>]*>/, '')
+  end
+
+  # Attempt to turn HTML into plain text.  Remove all <blah> tags, and convert
+  # &blah; codes into ASCII equivalents.  Line breaks may still be a problem,
+  # but this seems to work pretty well on the output of RedCloth at least.
+  def html_to_ascii
+    self.gsub(/<[^>]*>/, '').gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
   end
 
   # Wrap HTML string in a span that prevents long strings from being broken.

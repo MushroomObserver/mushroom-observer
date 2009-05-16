@@ -2,6 +2,36 @@
   @title = :show_name_title.t(:name => @name.display_name)
   String.register_name(@name)
 
+  # These are tacked on to the pagination links' urls.
+  args = {}
+  args[:children_page]  = @children_page      if @children_data != []
+  args[:consensus_page] = @consensus_page     if @consensus_data != []
+  args[:synonym_page]   = @synonym_page       if @synonym_data != []
+  args[:other_page]     = @other_page         if @other_data != []
+
+  if @user
+    if @interest
+      alt = @interest.state ? :show_name_interest_watching.l : :show_name_interest_ignoring.l
+      add_right_tab('<div>' + tag('acronym', { :title => alt }, true) +
+                    link_to(image_tag(@interest.state ? 'watch2.png' : 'ignore2.png',
+                                      :alt => alt, :width => '50px', :height => '50px'),
+                            :controller => 'interest', :action => 'set_interest',
+                            :id => @name.id, :type => 'Name', :state => 0) +
+                    '</acronym></div>')
+    else
+      add_right_tab(tag('acronym', { :title => :show_name_interest_watch_help.l }, true) +
+                    link_to(:show_name_interest_on.t,
+                            :controller => 'interest', :action => 'set_interest',
+                            :id => @name.id, :type => 'Name', :state => 1) +
+                    '</acronym>')
+      add_right_tab(tag('acronym', { :title => :show_name_interest_ignore_help.l }, true) +
+                    link_to(:show_name_interest_off.t,
+                            :controller => 'interest', :action => 'set_interest',
+                            :id => @name.id, :type => 'Name', :state => -1) +
+                    '</acronym>')
+    end
+  end
+
   # Google Images | Distribution Map | Email Tracking
   new_tab_set do
     add_tab(:app_google_images.t, "http://images.google.com/images?q=#{@name.text_name}")
@@ -56,7 +86,7 @@
         <% end %>
 
         <% for parent in @parents %>
-          <%= rank_as_string(@parents[0].rank) %>: 
+          <%= rank_as_string(@parents[0].rank) %>:
             <%= link_to(parent.display_name.t, :action => 'show_name', :id => parent.id) %><br/>
         <% end %>
       </p>
@@ -155,19 +185,22 @@
     </center>
 <% end %>
 
-<% if @children != [] %>
+<% if @children_data.length > 0 %>
   <hr/>
-  <p><%= rank_as_plural_string(@children[0].rank) %>:</p>
+  <p><%= rank_as_plural_string(@children_data[0].rank) %>:</p>
+  <% if @children_pages.length > 1
+    args2 = args.clone
+    args2.delete(:children_page) %>
+    <div class="pagination"><%= pagination_numbers(@children_pages, nil, :name => :children_page, :params => args2) %></div>
+  <% end %>
   <p>
-    <% i = 0
-    max = 25
-    for child in @children
-      i += 1
-      break if i > max %>
+    <% for child in @children_data %>
       <%= link_to(child.display_name.t, :action => 'show_name', :id => child.id) %><br/>
     <% end %>
-    <%= :app_and_num_more.t(:num => @children.length - i + 1) + '<br/>' if i > max %>
   </p>
+  <% if @children_pages.length > 1 %>
+    <div class="pagination"><%= pagination_numbers(@children_pages, nil, :name => :children_page, :params => args2) %></div>
+  <% end %>
 <% end %>
 
 <%
@@ -203,13 +236,12 @@ for sect in ["consensus", "synonym", "other"]
   # Skip completely if group is empty.
   if data && data.length > 0
 
-    # These are tacked on to the pagination links' urls.
-    args = {}
-    args[:consensus_page] = @consensus_page if @consensus_data != []
-    args[:synonym_page] = @synonym_page     if @synonym_data != []
-    args[:other_page] = @other_page         if @other_data != []
-    args[:search_seq] = @search_seqs[sect]  if @search_seqs[sect]
-    args.delete arg
+    # Remove this section's page from args!
+    args2 = args.clone
+    args2.delete(arg)
+    args2[:search_seq] = @search_seqs[sect] if @search_seqs[sect]  # (huh??)
+
+    # These are tacked on to observation links.
     link_args = {}
     link_args[:search_seq] = @search_seqs[sect] if @search_seqs[sect]
 
@@ -220,7 +252,7 @@ for sect in ["consensus", "synonym", "other"]
 
     # Wow this is ugly, but I can't find an option to pass to pagination_numbers
     # to have it tack the "#section" thing on the end of the urls for me.
-    plinks = pagination_numbers(pages, nil, :name => arg, :params => args).to_s
+    plinks = pagination_numbers(pages, nil, :name => arg, :params => args2).to_s
     plinks.gsub!(/<a href="([^<>]*)">/, '<a href="\1#' + sect + '">')
     %>
 

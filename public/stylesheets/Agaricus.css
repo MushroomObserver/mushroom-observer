@@ -16,10 +16,11 @@ a { color: #a06463; } /* brasiliensis */
 a:visited { color: #3b2821; }  /* cupreobrunneus */
 a:hover {
     color: #743931; /* brasiliensis */
-    background-color:#f6f0f2;  /* campestris */
+    background-color: #f6f0f2;  /* campestris */
 }
 
 img { border-color: #3b2821; } /* cupreobrunneus */
+img:hover { border-color: #743931; } /* brasiliensis */
 
 li.selected { background-color: #eccf95 ! important }
 

@@ -1,0 +1,61 @@
+<%
+  intro = "Consensus changed for observation ##{@observation.id}:"
+
+  fields = ""
+  if @old_name
+    fields += "*Old Name:* " + link_to(@old_name.display_name, "#{DOMAIN}/name/show_name/#{@old_name.id}") + "\n"
+  else
+    fields += "*Old Name:* none\n"
+  end
+  if @new_name
+    fields += "*New Name:* " + link_to(@new_name.display_name, "#{DOMAIN}/name/show_name/#{@new_name.id}") + "\n"
+  else
+    fields += "*New Name:* none\n"
+  end
+
+  handy_links = "Here are some links you may find useful:"
+
+  links = []
+  links.push(["Show this observation",
+    "#{DOMAIN}/#{@observation.id}"])
+  links.push(["Post comment on this observation",
+    "#{DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
+  links.push(["I'm not interested in this observation",
+    "#{DOMAIN}/interest/no_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}"])
+  links.push(["Stop sending me these notifications",
+    "#{DOMAIN}/account/no_consensus_change_email/#{@user.id}"])
+  links.push(["Change your account preferences",
+    "#{DOMAIN}/account/prefs/#{@user.id}"])
+  links.push(["Latest changes at Mushroom Observer",
+    DOMAIN])
+
+if @user.html_email ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: Consensus Changed for Observation #<%= @observation.id %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= fields.tp %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= fields.tp.html_to_ascii %>
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label}: #{url}\n"
+  end
+  result %>
+<% end ###################################################################### %>

@@ -28,7 +28,7 @@ class String
     }
   end
   
-  URL_TRUNCATION_LENGTH = 60
+  URL_TRUNCATION_LENGTH = 60 if !defined? URL_TRUNCATION_LENGTH
 
   # Wrapper on string.textilize that returns only the body of the first
   # paragraph of the result.
@@ -258,7 +258,7 @@ protected
   # Convert !image 12345! in a textile string.
   def check_our_images!
     self.gsub!(/!image (\d+)!/) do
-      "!/images/thumb/#{$1}.jpg!"
+      '"!/images/thumb/%d.jpg!":/image/show_image/%d' % [$1, $1]
     end
   end
 end

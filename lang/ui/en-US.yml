@@ -71,6 +71,7 @@ app_create_account: Create Account
 app_current_user: Current user
 app_comments_for_you: Comments for You
 app_your_observations: Your Observations
+app_your_interests: Your Interests
 app_your_summary: Your Summary
 app_preferences: Preferences
 app_join_mailing_list: Join Mailing List
@@ -346,11 +347,13 @@ validate_image_copyright_holder_too_long: Copyright holder's name must be less t
 validate_image_title_too_long: Title must be less than 100 characters long.
 validate_image_user_missing: Missing user.
 validate_image_when_missing: Missing date.
+validate_interest_object_type_too_long: Object_type must be less than 30 characters long.
+validate_interest_user_missing: Missing user.
 validate_location_display_name_too_long: Display_name must be less than 200 characters long.
 validate_location_east_out_of_bounds: Longitude should be between -180 and 180.
 validate_location_high_less_than_low: High altitude should be at least equal to the lowest altitude.
-validate_location_north_too_high: Latitude should be at most 90.
 validate_location_north_less_than_south: North latitude should be greater than south latitude.
+validate_location_north_too_high: Latitude should be at most 90.
 validate_location_search_name_too_long: Search_name must be less than 200 characters long.
 validate_location_south_too_low: Latitude should be at least -90.
 validate_location_user_missing: Missing user.
@@ -711,10 +714,13 @@ edit_project_title: 'Editing Project: [title]'
 # account_mailer model
 email_comment_subject: Comment about [name]
 email_commercial_inquiry_subject: Commercial Inquiry about [name]
+email_consensus_change_subject: Consensus rejected [old] in favor of [new]
 email_denied_subject: '[MO] User Creation Blocked'
 email_features_subject: New Mushroom Observer Features
 email_naming_for_observer_subject: Mushroom Observer Research Request
 email_naming_for_tracker_subject: Mushroom Observer Naming Notification
+email_name_change_subject: '[name] has been changed'
+email_name_proposal_subject: 'Observation #[id] may be [name]'
 email_new_password_subject: New Password for Mushroom Observer Account
 email_observation_question_subject: Question about [name]
 email_publish_name_subject: '[MO] Name Published'
@@ -1147,6 +1153,15 @@ list_comments_by_user: Comments by [user]
 list_comments_for_user: Comments for [user]
 
 
+# interest/list_interests
+list_interests_title: Objects You Are Watching or Ignoring
+list_interests_now_on: Watching
+list_interests_now_off: Ignoring
+list_interests_turn_on: Change to Watch
+list_interests_turn_off: Change to Ignore
+list_interests_delete: Delete
+
+
 # location/list_merge_options
 list_merge_are_you_sure: Do merge?  This cannot be undone.
 list_merge_options_near_matches: Near Matches
@@ -1469,7 +1484,22 @@ no_comment_note: >
   \n\n
   Login and go to the Preferences page to re-enable this feature.
 
+some_emails_may_already_be_queued: >
+  Note: For the next few minutes you may continue to receive emails that have
+  already been queued.
+
 no_comment_success: Comment email notifications disabled for [name].
+
+
+# account/no_comment_response_email
+no_comment_response_note: >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website post comments about observations that you have
+  commented on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_comment_response_success: Comment response email notifications disabled for [name].
 
 
 # account/no_commercial_email
@@ -1482,6 +1512,16 @@ no_commercial_note: >
 no_commercial_success: Commercial email inquiries disabled for [name].
 
 
+# account/no_consensus_change_email
+no_consensus_change_note: >
+  You will no longer receive email notifications when the names of your
+  observations change.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_consensus_change_success: Name change email notifications disabled for [name].
+
+
 # account/no_feature_email
 no_features_note: >
   Automated email about new features have been disabled for your account.
@@ -1489,6 +1529,12 @@ no_features_note: >
   Login and go to the Preferences page to re-enable this feature.
 
 no_feature_success: Automated feature email disabled for [name].
+
+
+# interest/no_interest
+no_interest_bad_object: Object [type] #[id] doesn't exist.
+no_interest_success: Will now ignore all activity on [name].
+no_interest_user_mismatch: Another user is logged on at this machine.  Please log them off, log back in as you, and try again.
 
 
 # observer/no_javascript
@@ -1513,6 +1559,26 @@ no_javascript_dont_care: >
   re-enable auto-detection.)
 
 no_javascript_title: You Have Javascript Disabled
+
+
+# account/no_name_change_email
+no_name_change_note: >
+  You will no longer receive email notifications when other users make changes
+  to the names you are author on.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_change_success: Name change email notifications disabled for [name].
+
+
+# account/no_name_proposal_email
+no_name_proposal_note: >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website propose names for your observations.
+  \n\n
+  Login and go to the Preferences page to re-enable this feature.
+
+no_name_proposal_success: Name proposal email notifications disabled for [name].
 
 
 # observer/no_session
@@ -1572,9 +1638,13 @@ prefs_alt_row_colors: Alternate row colors.
 prefs_columns: columns
 prefs_email: Email address
 prefs_email_comments: Please send me email notifications when other users post comments about my observations.
+prefs_email_comment_responses: Please send me email notifications when other users post responses to my comments.
 prefs_email_commercial: Please send me email if someone is interested in using an image of mine for commercial purposes.
+prefs_email_consensus_change: Please send me email notifications when community consensus changes the name of my observations.
 prefs_email_features: Please send me email updates when new features come out.
 prefs_email_html: It's okay to use HTML in my emails.
+prefs_email_name_change: Please send me email notifications when other users make changes to names I'm author on.
+prefs_email_name_proposal: Please send me email notifications when other users propose names for my observations.
 prefs_email_note: >
   Note that none of these email features will cause your email address to be
   displayed on a webpage or allow the person who wants to contact you to obtain
@@ -1732,6 +1802,17 @@ send_feature_email_success: Delivered feature mail.
 send_feature_email_denied: Only the admin can send feature mail.
 
 
+# interest/set_interest
+set_interest_already_deleted: You have expressed no interest in [name].
+set_interest_already_off: You have already told us to ignore [name].
+set_interest_already_on: You have already told us to watch [name].
+set_interest_failure: Could not change your interest state in [name].  Please try again or report this to the webaster.
+set_interest_success_was_off: Cancelled your ban on emails about [name].
+set_interest_success_was_on: Cancelled your request for emails about [name].
+set_interest_success_off: We will now ignore any activity in [name].
+set_interest_success_on: You will now be notified of any activity in [name].
+
+
 # shared/_textile_help
 shared_textile_help: >
   Notes can be formatted using the <a href="/observer/textile" target="_new">Textile markup system</a>.<br/>
@@ -1785,6 +1866,12 @@ show_name_draft_help: >
 show_name_edit_name: Edit Description
 show_name_email_tracking: Email Tracking
 show_name_existing_drafts: Existing Drafts
+show_name_interest_ignore_help: Click here if you want to stop getting any emails about this name.
+show_name_interest_ignoring: You have told us never to email you about changes in this name.  Click on this icon to cancel.
+show_name_interest_on: Watch
+show_name_interest_off: Ignore
+show_name_interest_watch_help: Click here if you want us to send you email whenever there is a change in this name.
+show_name_interest_watching: You have told us to email you about changes in this name.  Click on this icon to cancel.
 show_name_latest_review: >
   Latest review: [date] by [user]
 
@@ -1847,7 +1934,14 @@ show_observation_comment_created: Created
 show_observation_comment_created_by: By
 show_observation_debug_consensus: Debug Consensus
 show_observation_edit_observation: Edit Observation
+show_observation_interest_ignore_help: Click here if you want to stop getting any emails about this observation.
+show_observation_interest_ignoring: You have told us never to email you about activity in this observation.  Click on this icon to cancel.
+show_observation_interest_on: Watch
+show_observation_interest_off: Ignore
+show_observation_interest_watch_help: Click here if you want us to send you email whenever there is activity on this observation.
+show_observation_interest_watching: You have told us to email you about activity in this observation.  Click on this icon to cancel.
 show_observation_manage_species_lists: Manage Species Lists
+show_observation_no_comments_yet: No one has commented yet.
 show_observation_observation_created: Observation created
 show_observation_preferred_name: Preferred Name
 show_observation_preferred_names: Preferred Names

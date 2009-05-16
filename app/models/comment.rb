@@ -10,7 +10,8 @@
 #  eventually belong to arbitrary objects via a polymorphic association.
 #
 #  Public Methods:
-#    Comment.find_object(type, id)    Look up object referred to by type/id.
+#    Comment.find_object(type, id)       Look up object referred to by type/id.
+#    Comment.find_all_by_object(object)  Look up comments on an object.
 #
 #  Callbacks:
 #    after_save    Automatically sends email to observation's owner.
@@ -22,15 +23,38 @@ class Comment < ActiveRecord::Base
   belongs_to :object, :polymorphic => true
   belongs_to :user
 
+  # Posting a comment can trigger all sorts of emails.
   def after_save
-    if self.object_type == 'Observation'
-      observation = self.object
-      sender      = self.user
+    if self.object && self.object_type == 'Observation'
+      object = self.object
+      owner  = object.user
+      sender = self.user
+      recipients = []
+
+      # Send to owner if they want.
+      recipients.push(owner) if owner && owner.comment_email
 
       # 'nathan' should get handled by a notification, but for now it's hardcoded
-      recipients  = [User.find(observation.user_id), User.find_by_login('nathan')]
-      for recipient in recipients
-        if recipient && recipient.comment_email
+      recipients.push(User.find_by_login('nathan'))
+
+      # Send to other people who have commented on this same object if they want.
+      for other_comment in Comment.find_all_by_object(object)
+        recipients.push(other_comment.user)
+      end
+
+      # Send to people who have registered interest.
+      # Also remove everyone who has explicitly said they are NOT interested.
+      for interest in Interest.find_all_by_object(object)
+        if interest.state
+          recipients.push(interest.user)
+        else
+          recipients.delete(interest.user)
+        end
+      end
+
+      # Send comment to everyone (except the person who wrote the comment!)
+      for recipient in recipients.uniq
+        if recipient && recipient != sender
           CommentEmail.find_or_create_email(sender, recipient, self)
         end
       end
@@ -44,6 +68,13 @@ class Comment < ActiveRecord::Base
     rescue NameError
       raise(ArgumentError, "Invalid object type, \"#{type}\".")
     end
+  end
+
+  # Look up all comments for a given object.
+  def self.find_all_by_object(object)
+    type = object.class.to_s
+    id = object.id
+    self.find_all_by_object_type_and_object_id(type, id)
   end
 
   # Same as 'comment.object_type.downcase.to_sym.l' (returns '' if fails for whatever reason).

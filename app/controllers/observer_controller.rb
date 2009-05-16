@@ -464,6 +464,8 @@ class ObserverController < ApplicationController
     pass_seq_params()
     @seq_key = seq_key
     @observation = Observation.find(params[:id])
+    @interest = nil
+    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Observation', @observation.id) if @user
     update_view_stats(@observation)
     session[:observation] = params[:id].to_i
     session[:image_ids] = nil
@@ -910,7 +912,7 @@ class ObserverController < ApplicationController
             end
             if need_to_calc_consensus
               @observation.reload
-              @observation.calc_consensus
+              @observation.calc_consensus(@user)
             end
           end
         end
@@ -943,7 +945,7 @@ class ObserverController < ApplicationController
         :name => @naming.format_name }, true)
       @naming.votes.clear
       @naming.destroy
-      @observation.calc_consensus
+      @observation.calc_consensus(@user)
       flash_notice(:destroy_naming_success.t)
       redirect_to(:action => 'show_observation', :id => @observation.id)
     end
@@ -956,7 +958,7 @@ class ObserverController < ApplicationController
     begin
       @observation = Observation.find(id)
       flash_notice(:observer_recalc_old_name.t(:name => @observation.name.display_name))
-      text = @observation.calc_consensus(true)
+      text = @observation.calc_consensus(@user, true)
       flash_notice text if !text.nil? && text != ''
       flash_notice(:observer_recalc_new_name.t(:name => @observation.name.display_name))
     rescue => err
