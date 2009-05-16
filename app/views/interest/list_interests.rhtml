@@ -15,16 +15,16 @@
             <% if interest.state %>
               <%= :list_interests_now_on.t %> |
               <%= link_to(:list_interests_turn_off.t, :controller => 'interest',
-                          :action => set_interest, :type => interest.object_type,
+                          :action => 'set_interest', :type => interest.object_type,
                           :id => interest.object_id, :state => -1) %> |
             <% else %>
               <%= :list_interests_now_off.t %> |
               <%= link_to(:list_interests_turn_on.t, :controller => 'interest',
-                          :action => set_interest, :type => interest.object_type,
+                          :action => 'set_interest', :type => interest.object_type,
                           :id => interest.object_id, :state => 1) %> |
             <% end %>
             <%= link_to(:list_interests_delete.t, :controller => 'interest',
-                        :action => set_interest, :type => interest.object_type,
+                        :action => 'set_interest', :type => interest.object_type,
                         :id => interest.object_id, :state => 0) %>
           </td>
         </tr>
