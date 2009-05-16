@@ -12,6 +12,8 @@
   else
     fields += "*New Name:* none\n"
   end
+  fields += "*Time:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*By:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   handy_links = "Here are some links you may find useful:"
 

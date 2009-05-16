@@ -1,0 +1,67 @@
+From: news@mushroomobserver.org
+To: mary@collectivesource.com
+Bcc: nathan@collectivesource.com
+Subject: Petigera has been changed
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+There were change(s) made to Petigera (40):
+
+Time: 2009-01-02 01:01:01
+By: Tricky Dick (dick)
+
+Name was changed to: Peltigera
+Author was changed to: (Old) New Auth.
+Citation was changed to: Ye Auld Manual of Lichenes, 1800.
+Rank was changed to: Genus
+License was changed to: Creative Commons Non-commercial v3.0
+Status was changed to: vetted
+Name was accepted.
+
+Taxonomic classification was changed to:
+--------------------------------------------------
+Kingdom: Fungi
+Phylum: Ascomycota
+Class: Euascomycetes
+Order: Lecanorales
+Family: Peltigeraceae
+--------------------------------------------------
+
+General Description was changed to:
+--------------------------------------------------
+Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines.
+--------------------------------------------------
+
+Diagnostic Description was changed to:
+--------------------------------------------------
+Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose.
+--------------------------------------------------
+
+Distribution was changed to:
+--------------------------------------------------
+Cosmopolitan.
+--------------------------------------------------
+
+Habitat was changed to:
+--------------------------------------------------
+Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs.
+--------------------------------------------------
+
+Look Alikes was changed to:
+--------------------------------------------------
+Other felt lichens such as Lobaria, Pseudocyphellaria, Sticta and Nephroma look superficially similar but never have well-developed veins or rhizines underneath.
+--------------------------------------------------
+
+Uses was changed to:
+--------------------------------------------------
+Good for making birds nests... if you're a bird.
+--------------------------------------------------
+
+Here are some links you may find useful:
+
+Show this name: http://localhost:3000/name/show_name/40
+I'm not interested in this name: http://localhost:3000/interest/no_interest?id=40&type=Name&user=2
+Stop sending me these notifications: http://localhost:3000/account/no_name_change_email/2
+Change your account preferences: http://localhost:3000/account/prefs/2
+Latest changes at Mushroom Observer: http://localhost:3000
+

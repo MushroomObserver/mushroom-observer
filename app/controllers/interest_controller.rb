@@ -15,6 +15,7 @@ class InterestController < ApplicationController
   # Inputs: params[:page]
   # Outputs: @interests, @interest_pages
   def list_interests
+    store_location
     @title = :list_interests_title.t
     @interests = Interest.find_all_by_user_id(@user.id)
     @interest_pages, @interests = paginate_array(@interests, 50)

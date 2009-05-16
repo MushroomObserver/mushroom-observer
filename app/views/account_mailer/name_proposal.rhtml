@@ -1,5 +1,5 @@
 <%
-  intro = "A name was proposed for observation #{@observation.id}:"
+  intro = "A name was proposed for observation ##{@observation.id}:"
 
   fields = ""
   fields += "*Name:* #{@naming.format_name}\n"
@@ -9,7 +9,7 @@
     if reason.notes.nil? || reason.notes == ""
       fields += "*#{reason.label.to_sym.t}*\n"
     else
-      fields += "*#{reason.label.to_sym.t}*: #{reason.notes.to_s}\n"
+      fields += "*#{reason.label.to_sym.t}:* #{reason.notes.to_s}\n"
     end
   end
 

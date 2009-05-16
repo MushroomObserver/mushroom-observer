@@ -33,7 +33,7 @@ class ConsensusChangeEmail < QueuedEmail
     elsif email.user == email.to_user
       print "Skipping email with same sender and recipient: #{email.user.email}\n"
     else
-      AccountMailer.deliver_consensus_change(email.user, email.to_user, observation, old_name, new_name)
+      AccountMailer.deliver_consensus_change(email.user, email.to_user, observation, old_name, new_name, email.queued)
     end
   end
 end

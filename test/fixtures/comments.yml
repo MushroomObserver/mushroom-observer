@@ -7,3 +7,12 @@ minimal_comment:
   comment: Wow!  That's really cool
   object_type: Observation
   object_id: 1
+
+another_comment:
+  id: 2
+  created: 2006-03-02 21:16:00
+  user_id: 4
+  summary: Let's _try_ a more "complicated" comment.
+  comment: "With _Agaricus campestris_ links and *boldface* and\n4x4 other weird(tm) !image 2! stuff.\n\nJust to test html_to_ascii...  -A&P"
+  object_type: Observation
+  object_id: 1

@@ -269,7 +269,7 @@ def assert_string_equal_file(file, str)
     File.open(file + '.old', 'w') {|fh| fh.write(body1)}
     File.open(file + '.new', 'w') {|fh| fh.write(body2)}
     diffs = `diff #{file}.old #{file}.new`
-    raise "Files #{file}.old and #{file}.new differ:\n" + diffs
+    assert(false, "Files #{file}.old and #{file}.new differ:\n" + diffs)
   else
     # Clean out old files from previous failure.
     File.delete(file + '.old') if File.exists?(file + '.old')

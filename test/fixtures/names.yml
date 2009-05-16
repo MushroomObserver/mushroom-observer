@@ -578,3 +578,29 @@ boletus_edulis:
   observation_name: **__Boletus edulis__** Bull.
   search_name: Boletus edulis Bull.
   review_status: unreviewed
+
+peltigera:
+  id: 40
+  created: 2009-01-01 01:01:01
+  modified: 2009-01-02 01:01:01
+  user_id: 4
+  version: 2
+  rank: Genus
+  text_name: Peltigera
+  author: (Old) New Auth.
+  citation: Ye Auld Manual of Lichenes, 1800.
+  display_name: **__Peltigera__** (Old) New Auth.
+  observation_name: **__Peltigera__** (Old) New Auth.
+  search_name: Peltigera (Old) New Auth.
+  reviewer_id: 1
+  review_status: vetted
+  ok_for_export: 1
+  last_review: 2009-01-02 02:01:01
+  license_id: 2
+  classification: "Kingdom: _Fungi_\nPhylum: _Ascomycota_\nClass: _Euascomycetes_\nOrder: _Lecanorales_\nFamily: _Peltigeraceae_"
+  gen_desc: "Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines."
+  diag_desc: "Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose."
+  distribution: Cosmopolitan.
+  habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
+  look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
+  uses: "Good for making birds nests... if you're a bird."

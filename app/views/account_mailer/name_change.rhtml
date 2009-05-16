@@ -12,7 +12,7 @@
   one_liners += "*Rank was changed to:* #{@new_name.rank}\n"            if @new_name.rank       != @old_name.rank
   begin; license = License.find(@new_name.license_id); rescue; end
   one_liners += "*License was changed to:* #{license.display_name}\n"   if @new_name.license_id != @old_name.license_id && license
-  one_liners += "*Status was changed to:* #{review_status}\n"           if !@review_status.nil?
+  one_liners += "*Status was changed to:* #{@review_status}\n"          if !@review_status.nil?
   one_liners += "*Name was deprecated.*\n"                              if @new_name.deprecated && !@old_name.deprecated
   one_liners += "*Name was accepted.*\n"                                if !@new_name.deprecated && @old_name.deprecated
 
@@ -40,7 +40,7 @@
 if @user.html_email ######################################################### %>
 <html>
 <head>
-<title>Mushroom Observer: #{@old_name.display_name.t} Was Changed</title>
+<title>Mushroom Observer: <%= @old_name.display_name.t.strip_html %> Was Changed</title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
@@ -70,7 +70,7 @@ if @user.html_email ######################################################### %>
 <% for var, val in many_liners %>
 <%= var %> was changed to:
 --------------------------------------------------
-<%= val %>
+<%= val.tp.html_to_ascii %>
 --------------------------------------------------
 <% end %>
 <%= handy_links.tp.html_to_ascii %>

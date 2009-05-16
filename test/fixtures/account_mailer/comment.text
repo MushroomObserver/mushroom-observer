@@ -1,0 +1,29 @@
+From: news@mushroomobserver.org
+Reply-To: rolf@collectivesource.com
+To: mary@collectivesource.com
+Bcc: nathan@collectivesource.com
+Subject: Comment about Fungi sp. (1)
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+The following comment was posted on the Mushroom Observer website regarding your observation Fungi sp. (1):
+
+Created: 2006-03-02 21:14:00
+By: Rolf Singer (rolf)
+Summary: A comment on minimal unknown
+Comment:
+
+Wow!  That's really cool
+
+--------------------------------------------------
+
+You may respond directly to Rolf Singer by replying to this email, or by sending mail to rolf@collectivesource.com.  Here are some links you may find useful:
+
+Show this observation: http://localhost:3000/observer/show_observation/1
+Post a comment in response: http://localhost:3000/comment/add_comment?id=1&type=Observation
+I'm not interested in this observation: http://localhost:3000/interest/no_interest?id=1&type=Observation&user=2
+Stop sending me these notifications: http://localhost:3000/account/no_comment_email/2
+Change your account preferences: http://localhost:3000/account/prefs/2
+Latest changes at Mushroom Observer: http://localhost:3000
+
+If you feel the person who wrote this comment is abusing this service please forward this entire message to: webmaster@mushroomobserver.org

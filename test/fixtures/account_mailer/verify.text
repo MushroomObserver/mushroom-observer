@@ -1,0 +1,13 @@
+From: accounts@mushroomobserver.org
+To: mary@collectivesource.com
+Bcc: nathan@collectivesource.com
+Subject: Email Verification for Mushroom Observer
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hello mary
+
+Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
+
+http://localhost:3000/account/verify/2
+

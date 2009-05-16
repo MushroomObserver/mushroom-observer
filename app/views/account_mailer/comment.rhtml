@@ -24,10 +24,16 @@
   recipients_comments = Comment.find_all_by_object_type_and_object_id_and_user_id(@comment.object_type, @comment.object_id, @user.id)
   comments_before_this_comment = recipients_comments.select {|c| c.created < @comment.created}
   is_response = (!is_owner && comments_before_this_comment.length > 0)
+  # print "is_owner = #{is_owner}\n"
+  # print "rec_coms = #{recipients_comments.length}\n"
+  # print "coms_bef = #{comments_before_this_comment.length}\n"
+  # print "response = #{is_response}\n"
 
   intro = "The following comment was posted on the Mushroom Observer website"
   intro += " in response to your comment" if is_response
-  intro += " regarding the #{small_title} <u>#{@object.unique_format_name}</u>:"
+  intro += " regarding"
+  intro += is_owner ? " your" : " the"
+  intro += " #{small_title} <u>#{@object.unique_format_name}</u>:"
 
   fields = ""
   fields += "*Created:* #{@comment.created.to_formatted_s(:db)}\n"
@@ -61,7 +67,7 @@
 if @user.html_email ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: Comment about <%= title %></title>
+  <title>Mushroom Observer: Comment about <%= title.strip_html %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>

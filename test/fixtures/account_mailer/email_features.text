@@ -1,0 +1,17 @@
+From: news@mushroomobserver.org
+To: rolf@collectivesource.com
+Bcc: nathan@collectivesource.com
+Subject: New Mushroom Observer Features
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+The following new features have been released at the Mushroom Observer website (http://localhost:3000):
+
+A feature
+
+Here are some handy links you may find useful:
+
+Stop notifications of new features: http://localhost:3000/account/no_feature_email/1
+Change your account preferences: http://localhost:3000/account/prefs/1
+Latest changes at Mushroom Observer: http://localhost:3000
+

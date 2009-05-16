@@ -72,16 +72,18 @@ class AccountMailer < ActionMailer::Base
     @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
-  def consensus_change(sender, receiver, observation, old_name, new_name)
+  def consensus_change(sender, receiver, observation, old_name, new_name, time)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
+    @body["sender"]      = sender
     @body["user"]        = @user
     @body["observation"] = observation
     @body["old_name"]    = old_name
     @body["new_name"]    = new_name
+    @body["time"]        = time
     @subject             = :email_consensus_change_subject.l(:id => observation.id,
-                                :old => old_name ? old_name.search_name : 'none',
-                                :new => new_name ? new_name.search_name : 'none')
+                                :old => (old_name ? old_name.search_name : 'none'),
+                                :new => (new_name ? new_name.search_name : 'none'))
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
@@ -156,7 +158,8 @@ class AccountMailer < ActionMailer::Base
     @recipients           = @user.email
     @bcc                  = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                 = NEWS_EMAIL_ADDRESS
-    @content_type         = @user.html_email ? "text/html" : "text/plain"
+    # @content_type         = @user.html_email ? "text/html" : "text/plain"
+    @content_type         = "text/plain"
   end
 
   def naming_for_tracker(tracker, naming)

@@ -6,3 +6,13 @@ cc_macro_reason:
   reason:       1
   notes:        "Isn't it obvious?"
 
+cc_other_reason_1:
+  id:           2
+  naming_id:    9
+  reason:       1
+
+cc_other_reason_2:
+  id:           3
+  naming_id:    9
+  reason:       2
+  notes:        "I asked *Uncle Herb*"

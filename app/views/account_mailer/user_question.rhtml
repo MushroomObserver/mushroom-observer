@@ -1,7 +1,7 @@
 <% if @user.html_email %>
 <html>
 <head>
-  <title>Email from Mushroom Observer User <%= @sender.legal_name %></title>
+  <title>Email from Mushroom Observer User <%= @sender.legal_name.strip_html %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 
