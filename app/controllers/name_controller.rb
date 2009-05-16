@@ -408,6 +408,7 @@ class NameController < ApplicationController
     # logger.warn("show_name took %s\n" % elapsed_time)
   end
 
+  # Callback to let reviewers change the review status of a Name from the show_name page.
   def set_review_status
     id = params[:id]
     if is_reviewer
@@ -416,6 +417,7 @@ class NameController < ApplicationController
     redirect_to(:action => 'show_name', :id => id)
   end
 
+  # Callback to let reviewers change the export status of a Name from the show_name page.
   def set_export_status
     id = params[:id]
     if is_reviewer
@@ -523,59 +525,93 @@ class NameController < ApplicationController
       end
 
       if request.method == :post
-        text_name = (params[:name][:text_name] || '').strip
-        author = (params[:name][:author] || '').strip
         begin
+          text_name = (params[:name][:text_name] || '').strip
+          author = (params[:name][:author] || '').strip
+
+          # Grab all the notes sections: general description, look-alikes, etc.
           all_notes = {}
           params[:name][:classification] = Name.validate_classification(params[:name][:rank], params[:name][:classification])
           for f in Name.all_note_fields
             all_notes[f] = params[:name][f]
           end
+
+          # It is possible to change a Name's name if no one is using it yet
+          # (or the user owns all uses of it).  This tells us which Name we're
+          # actually going to change (@name), and if we need to merge and
+          # remove a "duplicate" (old_name). 
           (@name, old_name) = find_target_names(params[:id], text_name, author, all_notes)
           if text_name == ''
             text_name = @name.text_name
           end
-          # Don't allow author to be cleared by using any author you can find...
+
+          # Don't allow author to be cleared if we can find an author in either
+          # of the pre-existing matching names.
           if author == ''
             author = @name.author || ''
             if author == '' && old_name
               author = old_name.author || ''
             end
           end
+
+          # Save changes to name.  (Keep old name for log message if we are
+          # merging old_name into @name.)  Note: alt_ids is not used.
           old_display_name = @name.display_name
-          count = 0
-          current_time = Time.now
-          count += 1
           alt_ids = @name.change_text_name(text_name, author, params[:name][:rank])
+
+          # Save changes to citation.
           @name.citation = params[:name][:citation]
+
+          # Prevent user from erasing all the notes.  This also has the effect of
+          # merging notes from the old "duplicate" Name if it has any notes.  (As
+          # I understand find_target_names, this should never occur.)
           if blank_notes(all_notes) && old_name # no new notes given and merge happened
             all_notes = @name.all_notes
             if blank_notes(all_notes)
               all_notes = old_name.all_notes # try old_name's notes
             end
           end
+
+          # Save changes to notes.
           @name.set_notes(all_notes)
+
+          # Save change to license_id.
+          # (Clear out license_id if there are no notes.)
           if @name.has_any_notes?
             @name.license_id = params[:name][:license_id]
           else
             @name.license_id = nil
           end
+
+          # Errr... when would this ever happen?
           raise user_update_nonexisting_name.t if !@name.id
-          # These changes will get saved only if save_if_changed happens.
-          # Thus substantive changes by non-reviewers revert status to unreviewed.
-          if is_reviewer
-            @name.reviewer = @user
-            @name.last_review = Time.now()
-          else
-            @name.reviewer = nil
-            @name.review_status = :unreviewed
-          end
+
+          # This saves changes, and returns true if a new version was created.
+          current_time = Time.now
           if @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
+
+            if is_reviewer
+              # If substantive changes are made by a reviewer, call this act a "review", even
+              # though they haven't actually changed the review status.  (That's handled by a
+              # different action, set_review_status.)
+              @name.reviewer = @user
+              @name.last_review = Time.now()
+            else
+              # If substantive changes are made by a non-reviewer, revert status to unreviewed.
+              @name.reviewer = nil
+              @name.review_status = :unreviewed
+            end
+            @name.save
+
+            # In either case add user on as an "editor".
             @name.add_editor(@user)
+
           elsif @name.errors.length > 0
             raise :runtime_unable_to_save_changes.t
           end
-          if old_name # merge happened
+
+          # Merge and remove "duplicate" Name.
+          if old_name
             for o in old_name.observations
               o.name = @name
               o.modified = current_time
@@ -592,11 +628,15 @@ class NameController < ApplicationController
             end
             old_name.destroy
           end
+
         rescue RuntimeError => err
+          # Anything causing changes not to get saved ends up here.
           flash_error(err.to_s) if !err.nil?
           flash_object_errors(@name)
           @name.attributes = params[:name]
+
         else
+          # If no errors occurred, changes must've been made successfully.
           redirect_to(:action => 'show_name', :id => @name.id)
         end
       end
@@ -994,15 +1034,21 @@ class NameController < ApplicationController
 
 ################################################################################
 
-  # Finds the intended name and if another name matching name exists,
+  # Finds the intended name and if another matching name exists,
   # then ensure it is mergable.  Returns [target_name, other_name]
+  # It is expected that changes be made to target_name, and that
+  # other_name gets deleted after the merge(?)
   def find_target_names(id_str, text_name, author, all_notes)
+
+    # Look up name we're changing first (by id).
     page_name = nil
     id = nil
     if id_str
       id = id_str.to_i
       page_name = Name.find(id)
     end
+
+    # Look for other Names that match the new name.  (Take first if several.)
     other_name = nil
     matches = []
     if author != ''
@@ -1016,20 +1062,27 @@ class NameController < ApplicationController
         break
       end
     end
-    result = [page_name, other_name] # Default
-    if other_name # Is there a reason to prefer other_name?
+
+    # Return Name we're changing and matching Name.
+    result = [page_name, other_name]
+
+    # If there is a matching Name, which do we actually want to change?
+    if other_name
       if other_name.has_any_notes?
-        # If other_name's notes are going to get overwritten throw an error
+        # If both Names have notes we don't know how to merge, so throw an error.
         if !blank_notes(all_notes) && (other_name.all_notes != all_notes)
           raise :runtime_name_in_use_with_notes.t(:name => text_name, :other => other_name.display_name)
         end
+        # Only the *other* name has notes -- make changes to that one instead.
         result = [other_name, page_name]
       elsif page_name.nil?
+        # If we're trying to create a new Name but find a matching one already exists, return that Name.
         result = [other_name, page_name]
       elsif !page_name.has_any_notes?
         # Neither has notes, so we need another criterion
         if page_name.deprecated and !other_name.deprecated # Prefer valid names
           result = [other_name, page_name]
+        # If both are deprecated, take the one with longer history of changes.
         elsif (other_name.deprecated == page_name.deprecated) and (other_name.version >= page_name.version)
           result = [other_name, page_name]
         end
