@@ -150,11 +150,15 @@ class AccountControllerTest < Test::Unit::TestCase
         :alternate_rows    => "",
         :alternate_columns => "",
         :vertical_layout   => "",
-        :feature_email     => "",
+        :feature_email     => "1",
         :comment_email     => "",
-        :commercial_email  => "",
+        :comment_response_email => "1",
+        :name_proposal_email    => "",
+        :consensus_change_email => "1",
+        :name_change_email      => "",
+        :commercial_email  => "1",
         :question_email    => "",
-        :html_email        => "",
+        :html_email        => "1",
       }
     }
     post_with_dump(:prefs, params)
@@ -170,11 +174,15 @@ class AccountControllerTest < Test::Unit::TestCase
     assert_equal(false, user.alternate_rows)
     assert_equal(false, user.alternate_columns)
     assert_equal(false, user.vertical_layout)
-    assert_equal(false, user.feature_email)
+    assert_equal(true,  user.feature_email)
     assert_equal(false, user.comment_email)
-    assert_equal(false, user.commercial_email)
+    assert_equal(true,  user.comment_response_email)
+    assert_equal(false, user.name_proposal_email)
+    assert_equal(true,  user.consensus_change_email)
+    assert_equal(false, user.name_change_email)
+    assert_equal(true,  user.commercial_email)
     assert_equal(false, user.question_email)
-    assert_equal(false, user.html_email)
+    assert_equal(true,  user.html_email)
   end
 
   def test_edit_prefs_login_already_exists

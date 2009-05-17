@@ -122,6 +122,15 @@ class String
       hrefs[$1.to_i].to_s.gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
     end
 
+    # Apparently RedCloth strips out newlines after <br /> on Mac?...  (This
+    # makes sure all <br /> are followed by a newline.  The zero-width negative
+    # look-ahead assertion allows me to do all of them in one gsub, otherwise
+    # the first match of "<br /><br />" would include the "<" from the second
+    # "<br />", so it would potentially only fix every other one.) 
+    if TESTING
+      str.gsub!(/<br \/>(?!\n)/, "<br />\n")
+    end
+
     return str
   end
 
