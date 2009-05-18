@@ -10,6 +10,12 @@ class QueuedEmail < ActiveRecord::Base
     [:comment, :feature, :naming, :publish, :name_proposal, :consensus_change, :name_change]
   end
 
+  # This lets me turn queuing on in unit tests.
+  @@queue = false
+  def self.queue_emails(state)
+    @@queue = state
+  end
+
   # Like initialize, but ensures that the objects is saved
   # and is ready to have parameters added.
   def setup(sender, receiver, flavor)
@@ -20,12 +26,6 @@ class QueuedEmail < ActiveRecord::Base
     self.save()
   end
 
-  # This lets me turn queuing on in unit tests.
-  @@queue = false
-  def self.queue_emails(state)
-    @@queue = state
-  end
-
   # Centralized place to hang code after all the parameters are set.
   # For now it makes sure the email is sent if queuing is disabled.
   def finish
@@ -34,15 +34,27 @@ class QueuedEmail < ActiveRecord::Base
     end
   end
 
-  # Have to use cheesy dispatch since the object returned from the database
-  # can only be a QueuedEmail.  Might be able to solve this in a better way
-  # if there is some clever way that a constructor for a class could return
-  # a subclass of that class.  Note that the initialize functions for the
-  # subclasses would have to be changed (no save or adding values that do
-  # saves as a side effect).
+  # The different types of email should be handled by separate classes
+  def send_email
+    result = nil
+    begin
+      result = self.deliver_email
+    rescue
+      print "Unable to send queued email:\n"
+      self.dump()
+      # Failing to send email should not throw an error in production
+      raise unless ENV['RAILS_ENV'] == 'production'
+    end
+    result
+  end
+
+  # This instantiates an instance of the specific email type, then
+  # tells it to deliver the mail.
   def deliver_email
     class_name = self.flavor.to_s.camelize + "Email"
-    class_name.constantize.new(self.attributes).deliver_email
+    email = class_name.constantize.new(self)
+    email.deliver_email
+    return email
   end
 
   # Print out all the info about a QueuedEmail
@@ -57,21 +69,6 @@ class QueuedEmail < ActiveRecord::Base
     if self.queued_email_note
       print "\tNote: #{self.queued_email_note.value}\n"
     end
-  end
-
-  # The different types of email should be handled by separate classes
-  def send_email
-    result = false
-    begin
-      self.deliver_email
-      result = true
-    rescue
-      print "Unable to send queued email:\n"
-      self.dump()
-      # Failing to send email should not throw an error in production
-      raise unless ENV['RAILS_ENV'] == 'production'
-    end
-    result
   end
 
   # ----------------------------
@@ -92,9 +89,9 @@ class QueuedEmail < ActiveRecord::Base
     end
   end
 
-  def get_note(key)
+  def get_note
     begin
-      self.queued_email_notes.first.value
+      self.queued_email_note.value
     rescue
     end
   end

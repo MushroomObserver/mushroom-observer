@@ -285,21 +285,20 @@ end
 #     :comment => @comment_on_minmal_unknown.id
 #   })
 def assert_email(n, args)
-  clean_backtrace do
-    email = QueuedEmail.find(:first, :offset => n)
-    for arg in args.keys
-      case arg
-      when :flavor
-        assert_equal(args[arg], email.flavor, "Flavor is wrong")
-      when :from
-        assert_equal(args[arg].id, email.user_id, "Sender is wrong")
-      when :to
-        assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
-      when :note
-        assert_equal(args[arg], email.get_note, "Value of note is wrong")
-      else
-        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
-      end
+  email = QueuedEmail.find(:first, :offset => n)
+  assert(email)
+  for arg in args.keys
+    case arg
+    when :flavor
+      assert_equal(args[arg], email.flavor, "Flavor is wrong")
+    when :from
+      assert_equal(args[arg].id, email.user_id, "Sender is wrong")
+    when :to
+      assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
+    when :note
+      assert_equal(args[arg], email.get_note, "Value of note is wrong")
+    else
+      assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
     end
   end
 end
