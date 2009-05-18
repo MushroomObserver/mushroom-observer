@@ -203,7 +203,7 @@ def assert_link_in_html(label, url_opts, message = nil)
       atag = str[str.rindex("<a ")..-1]  
       if !atag.include?("</a>")
         if atag =~ /^<a href="([^"]*)"/
-          url2 = URI.unescape($1)
+          url2 = URI.unescape($1).html_to_ascii
           if url == url2
             found_it = true
             break
@@ -274,5 +274,32 @@ def assert_string_equal_file(file, str)
     # Clean out old files from previous failure.
     File.delete(file + '.old') if File.exists?(file + '.old')
     File.delete(file + '.new') if File.exists?(file + '.new')
+  end
+end
+
+# Test whether the n-1st queued email matches.  For example:
+#   assert_email(0, {
+#     :flavor  => 'comment',
+#     :from    => @mary,
+#     :to      => @rolf,
+#     :comment => @comment_on_minmal_unknown.id
+#   })
+def assert_email(n, args)
+  clean_backtrace do
+    email = QueuedEmail.find(:first, :offset => n)
+    for arg in args.keys
+      case arg
+      when :flavor
+        assert_equal(args[arg], email.flavor, "Flavor is wrong")
+      when :from
+        assert_equal(args[arg].id, email.user_id, "Sender is wrong")
+      when :to
+        assert_equal(args[arg].id, email.to_user_id, "Recipient is wrong")
+      when :note
+        assert_equal(args[arg], email.get_note, "Value of note is wrong")
+      else
+        assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
+      end
+    end
   end
 end

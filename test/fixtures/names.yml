@@ -590,14 +590,14 @@ peltigera:
   author: (Old) New Auth.
   citation: Ye Auld Manual of Lichenes, 1800.
   display_name: **__Peltigera__** (Old) New Auth.
-  observation_name: **__Peltigera__** (Old) New Auth.
-  search_name: Peltigera (Old) New Auth.
+  observation_name: **__Peltigera sp.__** (Old) New Auth.
+  search_name: Peltigera sp. (Old) New Auth.
   reviewer_id: 1
   review_status: vetted
   ok_for_export: 1
   last_review: 2009-01-02 02:01:01
   license_id: 2
-  classification: "Kingdom: _Fungi_\nPhylum: _Ascomycota_\nClass: _Euascomycetes_\nOrder: _Lecanorales_\nFamily: _Peltigeraceae_"
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Euascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
   gen_desc: "Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines."
   diag_desc: "Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose."
   distribution: Cosmopolitan.

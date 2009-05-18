@@ -1794,4 +1794,44 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal([], img.observations)
     assert([img.id], @controller.instance_variable_get('@good_images').map {|i| i.id})
   end
+
+  # ----------------------------
+  #  Interest.
+  # ----------------------------
+
+  def test_interest_in_show_observation
+    # No interest in this observation yet.
+    @request.session[:user_id] = @rolf.id
+    get(:show_observation, { :id => @minimal_unknown.id })
+    assert_response :success
+    assert_link_in_html(:show_observation_interest_on.t, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Observation', :id => @minimal_unknown.id, :state => 1
+    })
+    assert_link_in_html(:show_observation_interest_off.t, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Observation', :id => @minimal_unknown.id, :state => -1
+    })
+
+    # Turn interest on and make sure there is an icon linked to delete it.
+    Interest.new(:object => @minimal_unknown, :user => @rolf, :state => true).save
+    @request.session[:user_id] = @rolf.id
+    get(:show_observation, { :id => @minimal_unknown.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Observation', :id => @minimal_unknown.id, :state => 0
+    })
+
+    # Destroy that interest, create new one with interest off.
+    Interest.find_all_by_user_id(@rolf.id).last.destroy
+    Interest.new(:object => @minimal_unknown, :user => @rolf, :state => false).save
+    @request.session[:user_id] = @rolf.id
+    get(:show_observation, { :id => @minimal_unknown.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Observation', :id => @minimal_unknown.id, :state => 0
+    })
+  end
 end

@@ -6,7 +6,7 @@
 # in code things should be fine. 
 class PublishEmail < QueuedEmail
   def self.create_email(publisher, receiver, name)
-    result = QueuedEmail.new()
+    result = PublishEmail.new()
     result.setup(publisher, receiver, :publish)
     result.save()
     result.add_integer(:name, name.id)
@@ -17,18 +17,18 @@ class PublishEmail < QueuedEmail
   # While this looks like it could be an instance method, it has to be a class
   # method for QueuedEmails that come out of the database to work.  See queued_emails.rb
   # for more details.
-  def self.deliver_email(email)
+  def deliver_email
     name = nil
-    name_id = email.get_integers([:name])[0]
+    name_id = get_integers([:name])[0]
     name = Name.find(name_id) if name_id
     if name
-      if email.user != email.to_user
-        AccountMailer.deliver_publish_name(email.user, email.to_user, name)
+      if user != to_user
+        AccountMailer.deliver_publish_name(user, to_user, name)
       else
-        print "Skipping email with same sender and recipient, #{email.user.email}\n"
+        print "Skipping email with same sender and recipient, #{user.email}\n" if !TESTING
       end
     else
-      print "No name found (#{email.id})\n"
+      print "No name found (#{self.id})\n"
     end
   end
 end

@@ -66,7 +66,8 @@ class Comment < ActiveRecord::Base
     begin
       type.classify.constantize.find_by_id(id.to_i)
     rescue NameError
-      raise(ArgumentError, "Invalid object type, \"#{type}\".")
+      nil
+      # raise(ArgumentError, "Invalid object type, \"#{type}\".")
     end
   end
 

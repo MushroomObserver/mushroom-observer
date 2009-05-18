@@ -9,8 +9,8 @@ class NameProposalEmail < QueuedEmail
     result = NameProposalEmail.new()
     result.setup(sender, recipient, :name_proposal)
     result.save()
-    result.add_integer(:naming, naming.id)
-    result.add_integer(:observation, observation.id)
+    result.naming = naming
+    result.observation = observation
     result.finish()
     result
   end
@@ -18,20 +18,45 @@ class NameProposalEmail < QueuedEmail
   # While this looks like it could be an instance method, it has to be a class
   # method for QueuedEmails that come out of the database to work.  See queued_emails.rb
   # for more details.
-  def self.deliver_email(email)
-    naming = nil
-    observation = nil
-    (naming_id, observation_id) = email.get_integers([:naming, :observation])
-    naming = Naming.find(naming_id) if naming_id
-    observation = Observation.find(observation_id) if observation_id
+  def deliver_email
     if !naming
-      print "No naming found for email ##{email.id}.\n"
+      print "No naming found for email ##{self.id}.\n"
     elsif !observation
-      print "No observation found for email ##{email.id}.\n"
-    elsif email.user == email.to_user
-      print "Skipping email with same sender and recipient: #{email.user.email}\n"
+      print "No observation found for email ##{self.id}.\n"
+    elsif user == to_user
+      print "Skipping email with same sender and recipient: #{user.email}\n" if !TESTING
     else
-      AccountMailer.deliver_name_proposal(email.user, email.to_user, naming, observation)
+      AccountMailer.deliver_name_proposal(user, to_user, naming, observation)
     end
+  end
+
+  # ----------------------------
+  #  Accessors
+  # ----------------------------
+
+  def naming=(naming)
+    @naming = naming
+    self.add_integer(:naming, naming.id);
+  end
+
+  def observation=(observation)
+    @observation = observation
+    self.add_integer(:observation, observation.id);
+  end
+
+  def naming
+    begin
+      @naming ||= Naming.find(self.get_integer(:naming))
+    rescue
+    end
+    @naming
+  end
+
+  def observation
+    begin
+      @observation ||= Observation.find(self.get_integer(:observation))
+    rescue
+    end
+    @observation
   end
 end

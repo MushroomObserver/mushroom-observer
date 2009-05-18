@@ -327,6 +327,40 @@ class NameControllerTest < Test::Unit::TestCase
     assert(name_owner == name.user)
   end
 
+  # If non-reviewer makes significant change, should reset status.
+  def test_edit_name_cause_review_status_reset
+    name = @peltigera
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => name.text_name,
+        :author => name.author,
+        :rank => :Genus,
+        :citation => name.citation,
+        :license_id => name.license_id
+      }
+    }
+    params[:name].merge!(name.all_notes)
+
+    # Non-reviewer making no change.
+    @request.session[:user_id] = @mary.id
+    post(:edit_name, params)
+    assert_equal(:vetted, @peltigera.reload.review_status)
+
+    # Non-reviewer making change.
+    params[:name][:citation] = "Blah blah blah."
+    @request.session[:user_id] = @mary.id
+    post(:edit_name, params)
+    assert_equal(:unreviewed, @peltigera.reload.review_status)
+
+    # Set it back to vetted, and have reviewer make a change.
+    @peltigera.update_review_status(:vetted, @rolf)
+    params[:name][:citation] = "Whatever."
+    @request.session[:user_id] = @rolf.id
+    post(:edit_name, params)
+    assert_equal(:vetted, @peltigera.reload.review_status)
+  end
+
   def test_edit_name_simple_merge
     misspelt_name = @agaricus_campestrus
     correct_name = @agaricus_campestris
@@ -2037,5 +2071,45 @@ class NameControllerTest < Test::Unit::TestCase
     id = @coprinus_comatus.id
     requires_login(:author_request, {:id => id})
     assert_form_action(:action => 'send_author_request', :id => id)
+  end
+
+  # ----------------------------
+  #  Interest.
+  # ----------------------------
+
+  def test_interest_in_show_name
+    # No interest in this name yet.
+    @request.session[:user_id] = @rolf.id
+    get(:show_name, { :id => @peltigera.id })
+    assert_response :success
+    assert_link_in_html(:show_name_interest_on.t, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Name', :id => @peltigera.id, :state => 1
+    })
+    assert_link_in_html(:show_name_interest_off.t, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Name', :id => @peltigera.id, :state => -1
+    })
+
+    # Turn interest on and make sure there is an icon linked to delete it.
+    Interest.new(:object => @peltigera, :user => @rolf, :state => true).save
+    @request.session[:user_id] = @rolf.id
+    get(:show_name, { :id => @peltigera.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Name', :id => @peltigera.id, :state => 0
+    })
+
+    # Destroy that interest, create new one with interest off.
+    Interest.find_all_by_user_id(@rolf.id).last.destroy
+    Interest.new(:object => @peltigera, :user => @rolf, :state => false).save
+    @request.session[:user_id] = @rolf.id
+    get(:show_name, { :id => @peltigera.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Name', :id => @peltigera.id, :state => 0
+    })
   end
 end

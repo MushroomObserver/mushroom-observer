@@ -104,7 +104,7 @@ require_dependency 'site_data'
 #    has_notes?                  Does this name have any notes?
 #    status                      Is this name deprecated?
 #    prepend_notes               Add notes at the top of the existing notes.
-#    
+#
 #    Name.format_string          (used all over this file)
 #
 ################################################################################
@@ -126,6 +126,7 @@ class Name < ActiveRecord::Base
   ignore_if_changed('modified', 'user_id', 'review_status', 'reviewer_id', 'last_review', 'ok_for_export', 'editors')
   # (note: ignore_if_changed is in app/models/acts_as_versioned_extensions)
 
+  before_save :check_add_author
   after_save :notify_authors
 
   ABOVE_SPECIES_PAT = /^\s* ("?[A-Z][a-zë\-]+"?) \s*$/x
@@ -261,7 +262,7 @@ class Name < ActiveRecord::Base
     # Throws a runtime error if lines don't match.
     results = []
     if text
-      for line in text.split("\r\n")
+      for line in text.split(/\r?\n/)
         match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
         if match
           line_rank = match[1].downcase.capitalize.to_sym
@@ -274,7 +275,7 @@ class Name < ActiveRecord::Base
     end
     return results
   end
-  
+
   # Textilize a string: itallicize at least, and boldify it unless deprecated.
   # Returns: an adulterated copy of the string.
   # This is used throughout this file and nowhere else.
@@ -488,7 +489,7 @@ class Name < ActiveRecord::Base
 
   # Currently just parses the text name to find Genus and possible Species.
   # Ultimately this should get high level clades, but I don't have a good
-  # source for that data yet. 
+  # source for that data yet.
   def ancestors
     result = []
     if [:Form, :Variety, :Subspecies, :Species].member?(self.rank)
@@ -526,10 +527,15 @@ class Name < ActiveRecord::Base
     end
     [fieldCount, sizeCount]
   end
-    
-  def before_save
+
+  def check_add_author
     if self.gen_desc && self.gen_desc != '' && self.authors == []
-      user = self.user
+      add_author(self.user)
+    end
+  end
+
+  def add_author(user)
+    if not self.authors.member?(user)
       self.authors.push(user)
       user.reload.contribution
       user.contribution += FIELD_WEIGHTS[:authors_names]
@@ -540,7 +546,7 @@ class Name < ActiveRecord::Base
       user.save
     end
   end
-  
+
   def add_editor(user)
     if not self.authors.member?(user) and not self.editors.member?(user):
       user.reload.contribution
@@ -550,7 +556,7 @@ class Name < ActiveRecord::Base
       user.save
     end
   end
-  
+
 ########################################
 
   # Parse a string, return the following array:
@@ -869,10 +875,10 @@ class Name < ActiveRecord::Base
   # Update the review status, but only reviewers can set the
   # value to anything other than :unreviewed.  (This can only
   # happen when non-reviewer publishes a draft.)
-  def update_review_status(value, user)
+  def update_review_status(value, user, time=Time.now)
     if not user.in_group('reviewers')
       value = :unreviewed
-      self.user = nil
+      reviewer_id = nil
       # This communicates who made the change to notify_authors.
       # This is the *only* place user ever gets set to nil.  If
       # any other changes are made to this name user will get
@@ -882,12 +888,14 @@ class Name < ActiveRecord::Base
       @user_making_change = user
     else
       self.user = user
+      reviewer_id = user.id
     end
     past_name = self.versions.latest
     past_name.review_status = self.review_status = value
-    past_name.reviewer_id = self.reviewer_id = self.user_id
-    past_name.last_review = self.last_review = Time.now()
+    past_name.reviewer_id = self.reviewer_id = reviewer_id
+    past_name.last_review = self.last_review = time
     self.save
+    raise "update_review_status failed: [#{self.dump_errors}]" if self.errors.length > 0
     past_name.save
   end
 
@@ -977,7 +985,7 @@ class Name < ActiveRecord::Base
     # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
     # It only returns true if *important* changes have been made.  Even though
     # changing review status doesn't cause a new version to be created, I want
-    # to notify authors of that change. 
+    # to notify authors of that change.
     if altered? || review_status_changed?
       sender = self.user || @user_making_change
       recipients = []
@@ -1062,7 +1070,7 @@ class Name < ActiveRecord::Base
       self.notes = str
     end
   end
-  
+
   protected
 
   def validate # :nodoc:

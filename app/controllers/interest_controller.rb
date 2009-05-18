@@ -30,10 +30,9 @@ class InterestController < ApplicationController
     type = params[:type].to_s
     oid = params[:id].to_i
     uid = params[:user].to_i
-    interest = Interest.find_by_object_type_and_object_id_and_user_id(type, oid, uid)
     if @user.id != uid
       flash_error(:no_interest_user_mismatch.l)
-    elsif interest
+    elsif interest = Interest.find_by_object_type_and_object_id_and_user_id(type, oid, uid)
       interest.state = false
       interest.save
       flash_notice(:no_interest_success.l(:name => interest.object.unique_text_name))

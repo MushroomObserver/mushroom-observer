@@ -10,7 +10,7 @@ class NamingEmail < QueuedEmail
     observer = naming.observation.user
     result = nil
     if sender != observer
-      result = QueuedEmail.new()
+      result = NamingEmail.new()
       result.setup(sender, observer, :naming)
       result.save()
       result.add_integer(:naming, naming.id)
@@ -23,23 +23,23 @@ class NamingEmail < QueuedEmail
   # While this looks like it could be an instance method, it has to be a class
   # method for QueuedEmails that come out of the database to work.  See queued_emails.rb
   # for more details.
-  def self.deliver_email(email)
+  def deliver_email
     naming = nil
     notification = nil
-    (naming_id, notification_id) = email.get_integers([:naming, :notification])
+    (naming_id, notification_id) = get_integers([:naming, :notification])
     naming = Naming.find(naming_id) if naming_id
     notification = Notification.find(notification_id) if notification_id
     if naming
-      if email.user != email.to_user
-        AccountMailer.deliver_naming_for_tracker(email.user, naming)
+      if user != to_user
+        AccountMailer.deliver_naming_for_tracker(user, naming)
         if notification && notification.note_template
-          AccountMailer.deliver_naming_for_observer(email.to_user, naming, notification)
+          AccountMailer.deliver_naming_for_observer(to_user, naming, notification)
         end
       else
-        print "Skipping email with same sender and recipient, #{email.user.email}\n"
+        print "Skipping email with same sender and recipient, #{user.email}\n" if !TESTING
       end
     else
-      print "No naming found (#{email.id})\n"
+      print "No naming found (#{self.id})\n"
     end
   end
 end

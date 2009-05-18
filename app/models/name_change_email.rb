@@ -9,17 +9,10 @@ class NameChangeEmail < QueuedEmail
     result = NameChangeEmail.new()
     result.setup(sender, recipient, :name_change)
     result.save()
-
-    # Save review status as integer: -1 = no change, 0 to n = index in list of allowable values.
-    review_status = -1
-    if review_status_changed
-      review_status = Name.all_review_statuses.index(name.review_status) || -1
-    end
-
-    result.add_integer(:name, name.id)
-    result.add_integer(:new_version, name.version)
-    result.add_integer(:old_version, name.altered? ? name.version - 1 : name.version)
-    result.add_integer(:review_status, review_status)
+    result.name = name
+    result.new_version = name.version
+    result.old_version = (name.altered? ? name.version - 1 : name.version)
+    result.review_status = review_status_changed ? name.review_status : :no_change
     result.finish()
     result
   end
@@ -27,19 +20,58 @@ class NameChangeEmail < QueuedEmail
   # While this looks like it could be an instance method, it has to be a class
   # method for QueuedEmails that come out of the database to work.  See queued_emails.rb
   # for more details.
-  def self.deliver_email(email)
-    name = nil
-    (name_id, old_version, new_version, review_status) =
-      email.get_integers([:name, :old_version, :new_version, :review_status])
-    name = Name.find(name_id) if name_id
-    review_status = review_status < 0 ? nil : Name.all_review_statuses[review_status]
+  def deliver_email
     if !name
-      print "No name found for email ##{email.id}.\n"
-    elsif email.user == email.to_user
-      print "Skipping email with same sender and recipient: #{email.user.email}\n"
+      print "No name found for email ##{self.id}.\n"
+    elsif user == to_user
+      print "Skipping email with same sender and recipient: #{user.email}\n" if !TESTING
     else
-      AccountMailer.deliver_name_change(email.user, email.to_user, email.queued,
-                                        name, old_version, new_version, review_status)
+      AccountMailer.deliver_name_change(user, to_user, queued, name,
+                                        old_version, new_version, review_status)
     end
+  end
+
+  # ----------------------------
+  #  Accessors
+  # ----------------------------
+
+  def name=(name)
+    @name = name
+    self.add_integer(:name, name.id);
+  end
+
+  def old_version=(version)
+    @old_version = version
+    self.add_integer(:old_version, version)
+  end
+
+  def new_version=(version)
+    @new_version = version
+    self.add_integer(:new_version, version)
+  end
+
+  def review_status=(status)
+    @review_status = status
+    self.add_string(:review_status, status)
+  end
+
+  def name
+    begin
+      @name ||= Name.find(self.get_integer(:name))
+    rescue
+    end
+    @name
+  end
+
+  def old_version
+    @old_version ||= self.get_integer(:old_version)
+  end
+
+  def new_version
+    @new_version ||= self.get_integer(:new_version)
+  end
+
+  def review_status
+    @review_status ||= self.get_string(:review_status).to_sym
   end
 end

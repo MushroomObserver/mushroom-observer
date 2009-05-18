@@ -12,7 +12,7 @@
   one_liners += "*Rank was changed to:* #{@new_name.rank}\n"            if @new_name.rank       != @old_name.rank
   begin; license = License.find(@new_name.license_id); rescue; end
   one_liners += "*License was changed to:* #{license.display_name}\n"   if @new_name.license_id != @old_name.license_id && license
-  one_liners += "*Status was changed to:* #{@review_status}\n"          if !@review_status.nil?
+  one_liners += "*Status was changed to:* #{@review_status}\n"          if @review_status       != :no_change
   one_liners += "*Name was deprecated.*\n"                              if @new_name.deprecated && !@old_name.deprecated
   one_liners += "*Name was accepted.*\n"                                if !@new_name.deprecated && @old_name.deprecated
 

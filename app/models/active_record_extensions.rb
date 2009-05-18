@@ -29,6 +29,9 @@ module ActiveRecord
     # "is missing" becomes "Object attribute is missing." Errors are created
     # via validates (magically) or by explicit calls to
     #   obj.errors.add(:attr, "message").
+    def dump_errors
+      self.formatted_errors.join("; ")
+    end
     def formatted_errors
       out = []
       self.errors.each { |attr, msg|
@@ -52,7 +55,7 @@ module ActiveRecord
         when 'Observation', 'Naming', 'Vote', 'User'
           return 'observer'
         when 'Name', 'SpeciesList', 'Location'
-          return type
+          return self.class.to_s.underscore
         else
           raise(ArgumentError, "Invalid object type, \"#{self.class.to_s.underscore}\".")
       end

@@ -526,6 +526,7 @@ class NameController < ApplicationController
 
       if request.method == :post
         begin
+          current_time = Time.now
           text_name = (params[:name][:text_name] || '').strip
           author = (params[:name][:author] || '').strip
 
@@ -586,26 +587,24 @@ class NameController < ApplicationController
           # Errr... when would this ever happen?
           raise user_update_nonexisting_name.t if !@name.id
 
-          # This saves changes, and returns true if a new version was created.
-          current_time = Time.now
-          if @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
-
+          # If substantive changes are made by a reviewer, call this act a
+          # "review", even though they haven't actually changed the review
+          # status.  (That's handled by a different action,
+          # set_review_status.)  If substantive changes are made by a
+          # non-reviewer, revert status to unreviewed.
+          if @name.save_version?
             if is_reviewer
-              # If substantive changes are made by a reviewer, call this act a "review", even
-              # though they haven't actually changed the review status.  (That's handled by a
-              # different action, set_review_status.)
-              @name.reviewer = @user
-              @name.last_review = Time.now()
+              @name.reviewer_id = @user.id
+              @name.last_review = current_time
             else
-              # If substantive changes are made by a non-reviewer, revert status to unreviewed.
-              @name.reviewer = nil
+              @name.reviewer_id   = nil
               @name.review_status = :unreviewed
             end
-            @name.save
+          end
 
-            # In either case add user on as an "editor".
+          # This saves changes, and returns true if a new version was created.
+          if @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
             @name.add_editor(@user)
-
           elsif @name.errors.length > 0
             raise :runtime_unable_to_save_changes.t
           end

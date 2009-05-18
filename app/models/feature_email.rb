@@ -6,7 +6,7 @@
 # in code things should be fine. 
 class FeatureEmail < QueuedEmail
   def self.create_email(receiver, note)
-    result = QueuedEmail.new()
+    result = FeatureEmail.new()
     result.setup(nil, receiver, :feature)
     result.save()
     result.set_note(note)
@@ -17,14 +17,14 @@ class FeatureEmail < QueuedEmail
   # While this looks like it could be an instance method, it has to be a class
   # method for QueuedEmails that come out of the database to work.  See queued_emails.rb
   # for more details.
-  def self.deliver_email(email)
-    note = email.queued_email_note.value
+  def deliver_email
+    note = queued_email_note.value
     if note
-      if email.to_user.feature_email # Make sure it hasn't changed
-        AccountMailer.deliver_email_features(email.to_user, note)
+      if to_user.feature_email # Make sure it hasn't changed
+        AccountMailer.deliver_email_features(to_user, note)
       end
     else
-      print "No note found (#{email.id})\n"
+      print "No note found (#{self.id})\n"
     end
   end
 end
