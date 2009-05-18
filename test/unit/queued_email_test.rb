@@ -121,6 +121,63 @@ class QueuedEmailTest < Test::Unit::TestCase
     assert_equal(@rolf, email.to_user)
   end
 
+  def test_observation_change_email
+    QueuedEmail.queue_emails(true)
+    ObservationChangeEmail.change_observation(@rolf, @mary, @coprinus_comatus_obs)
+    assert_email(0, {
+      :flavor => :observation_change,
+      :from => @rolf,
+      :to => @mary,
+      :observation => @coprinus_comatus_obs.id,
+      :note => ''
+    })
+    email = QueuedEmail.find(:first).deliver_email
+    assert(email)
+    assert_equal(:observation_change, email.flavor)
+    assert_equal(@rolf, email.user)
+    assert_equal(@mary, email.to_user)
+    assert_equal(@coprinus_comatus_obs, email.observation)
+    assert_equal('', email.note)
+  end
+
+  def test_observation_destroy
+    QueuedEmail.queue_emails(true)
+    ObservationChangeEmail.destroy_observation(@rolf, @mary, @coprinus_comatus_obs)
+    assert_email(0, {
+      :flavor => :observation_change,
+      :from => @rolf,
+      :to => @mary,
+      :observation => 0,
+      :note => @coprinus_comatus_obs.unique_format_name
+    })
+    email = QueuedEmail.find(:first).deliver_email
+    assert(email)
+    assert_equal(:observation_change, email.flavor)
+    assert_equal(@rolf, email.user)
+    assert_equal(@mary, email.to_user)
+    assert_equal(nil, email.observation)
+    assert_equal(@coprinus_comatus_obs.unique_format_name, email.note)
+  end
+
+  def test_observation_add_image_email
+    QueuedEmail.queue_emails(true)
+    ObservationChangeEmail.change_images(@rolf, @mary, @coprinus_comatus_obs, :added_image)
+    assert_email(0, {
+      :flavor => :observation_change,
+      :from => @rolf,
+      :to => @mary,
+      :observation => @coprinus_comatus_obs.id,
+      :note => 'added_image'
+    })
+    email = QueuedEmail.find(:first).deliver_email
+    assert(email)
+    assert_equal(:observation_change, email.flavor)
+    assert_equal(@rolf, email.user)
+    assert_equal(@mary, email.to_user)
+    assert_equal(@coprinus_comatus_obs, email.observation)
+    assert_equal('added_image', email.note)
+  end
+
   def test_publish_email
     QueuedEmail.queue_emails(true)
     PublishEmail.create_email(@rolf, @mary, @peltigera)

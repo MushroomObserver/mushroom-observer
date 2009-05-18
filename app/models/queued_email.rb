@@ -110,7 +110,16 @@ class QueuedEmail < ActiveRecord::Base
 
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_flavors()
-    [:comment, :feature, :naming, :publish, :name_proposal, :consensus_change, :name_change]
+    [
+      :comment,
+      :consensus_change,
+      :feature,
+      :observation_change,
+      :name_change,
+      :name_proposal,
+      :naming,
+      :publish
+    ]
   end
 
   # This lets me turn queuing on in unit tests.
@@ -179,24 +188,23 @@ class QueuedEmail < ActiveRecord::Base
   # ----------------------------
 
   def get_integer(key)
-    begin
-      self.queued_email_integers.select {|qi| qi.key == key.to_s}.first.value
-    rescue
-    end
+    int = QueuedEmailInteger.find_by_queued_email_id_and_key(self.id, key.to_s)
+    int ? int.value : nil
   end
 
   def get_string(key)
-    begin
-      self.queued_email_strings.select {|qs| qs.key == key.to_s}.first.value
-    rescue
-    end
+    str = QueuedEmailString.find_by_queued_email_id_and_key(self.id, key.to_s)
+    str ? str.value : nil
   end
 
   def get_note
-    begin
-      self.queued_email_note.value
-    rescue
-    end
+    note = self.queued_email_note
+    note ? note.value : nil
+  end
+
+  def get_note_list
+    note = self.queued_email_note
+    note ? note.value.to_s.split(',') : nil
   end
 
   def get_integers(keys, return_dict=false)
@@ -236,28 +244,53 @@ class QueuedEmail < ActiveRecord::Base
   # --------------------------------------
 
   def add_integer(key, value)
-    result = QueuedEmailInteger.new()
-    result.queued_email = self
-    result.key = key.to_s
-    result.value = value
-    result.save()
-    result
+    int = QueuedEmailInteger.find_by_queued_email_id_and_key(self.id, key.to_s)
+    if !int
+      int = QueuedEmailInteger.new()
+      int.queued_email_id = self.id
+      int.key = key.to_s
+    end
+    int.value = value.to_i
+    int.save
+    return int
   end
 
   def add_string(key, value)
-    result = QueuedEmailString.new()
-    result.queued_email = self
-    result.key = key.to_s
-    result.value = value
-    result.save()
-    result
+    str = QueuedEmailString.find_by_queued_email_id_and_key(self.id, key.to_s)
+    if !str
+      str = QueuedEmailString.new()
+      str.queued_email_id = self.id
+      str.key = key.to_s
+    end
+    str.value = value.to_s
+    str.save
+    return str
   end
 
   def set_note(value)
-    result = QueuedEmailNote.new()
-    result.queued_email = self
-    result.value = value
-    result.save()
-    result
+    note = self.queued_email_note
+    if !note
+      note = QueuedEmailNote.new()
+      note.queued_email_id = self.id
+    end
+    note.value = value
+    note.save
+    self.queued_email_note = note
+  end
+
+  def add_to_note_list(values)
+    note = self.queued_email_note
+    if !note
+      note = QueuedEmailNote.new()
+      note.queued_email_id = self.id
+    end
+    old_val = note.value.to_s
+    list = old_val.split(',') + values
+    new_val = list.uniq.join(',')
+    if note.new_record? || old_val != new_val
+      note.value = new_val
+      note.save
+    end
+    self.queued_email_note = note
   end
 end

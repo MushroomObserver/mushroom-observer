@@ -130,6 +130,27 @@ class AccountMailerTest < Test::Unit::TestCase
   end
 
   def test_email_14
+    # The umlaut in Mull. is making it do weird encoding on the subject line.
+    @coprinus_comatus_obs.name.search_name = @coprinus_comatus.search_name.to_ascii
+    @coprinus_comatus_obs.name.display_name = @coprinus_comatus.display_name.to_ascii
+    assert_string_equal_file("#{FIXTURES_PATH}/observation_change.html",
+      AccountMailer.create_observation_change(@dick, @mary, @coprinus_comatus_obs,
+        'date,location,specimen,is_collection_location,notes,thumb_image_id,added_image,removed_image',
+        @coprinus_comatus_obs.created).encoded)
+    assert_string_equal_file("#{FIXTURES_PATH}/observation_destroy.html",
+      AccountMailer.create_observation_change(@dick, @mary, nil,
+        '**__Coprinus comatus__** L. (123)', @coprinus_comatus_obs.created).encoded)
+    @mary.html_email = false
+    assert_string_equal_file("#{FIXTURES_PATH}/observation_change.text",
+      AccountMailer.create_observation_change(@dick, @mary, @coprinus_comatus_obs,
+        'date,location,specimen,is_collection_location,notes,thumb_image_id,added_image,removed_image',
+        @coprinus_comatus_obs.created).encoded)
+    assert_string_equal_file("#{FIXTURES_PATH}/observation_destroy.text",
+      AccountMailer.create_observation_change(@dick, @mary, nil,
+        '**__Coprinus comatus__** L. (123)', @coprinus_comatus_obs.created).encoded)
+  end
+
+  def test_email_15
     assert_string_equal_file("#{FIXTURES_PATH}/observation_question.html",
       AccountMailer.create_observation_question(@rolf, @detailed_unknown,
         'Where did you find it?').encoded)
@@ -139,7 +160,7 @@ class AccountMailerTest < Test::Unit::TestCase
         'Where did you find it?').encoded)
   end
 
-  def test_email_15
+  def test_email_16
     assert_string_equal_file("#{FIXTURES_PATH}/publish_name.html",
       AccountMailer.create_publish_name(@mary, @rolf, @agaricus_campestris).encoded)
     @rolf.html_email = false
@@ -147,7 +168,7 @@ class AccountMailerTest < Test::Unit::TestCase
       AccountMailer.create_publish_name(@mary, @rolf, @agaricus_campestris).encoded)
   end
 
-  def test_email_16
+  def test_email_17
     assert_string_equal_file("#{FIXTURES_PATH}/user_question.html",
       AccountMailer.create_user_question(@rolf, @mary, 'Interesting idea',
         'Shall we discuss it in email?').encoded)
@@ -157,7 +178,7 @@ class AccountMailerTest < Test::Unit::TestCase
         'Shall we discuss it in email?').encoded)
   end
 
-  def test_email_17
+  def test_email_18
     assert_string_equal_file("#{FIXTURES_PATH}/verify.html",
       AccountMailer.create_verify(@mary).encoded)
     @mary.html_email = false
@@ -165,7 +186,7 @@ class AccountMailerTest < Test::Unit::TestCase
       AccountMailer.create_verify(@mary).encoded)
   end
 
-  def test_email_18
+  def test_email_19
     assert_string_equal_file("#{FIXTURES_PATH}/webmaster_question.text",
       AccountMailer.create_webmaster_question(@mary.email, 'A question').encoded)
   end

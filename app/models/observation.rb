@@ -68,6 +68,10 @@ class Observation < ActiveRecord::Base
   belongs_to :location
   belongs_to :user
 
+  before_destroy :save_id_before_destroy
+  after_destroy  :notify_interested_users_after_destroy
+  after_save     :notify_interested_users_after_change
+
   def add_spl_callback(o) # :nodoc:
     SiteData.update_contribution(:create, self, :species_list_entries, 1)
   end
@@ -444,6 +448,7 @@ return result if debug
       self.thumb_image = img
       self.save
     end
+    notify_interested_users(:added_image)
   end
 
   # Finds image by id then calls add_image().
@@ -478,6 +483,7 @@ return result if debug
           end
           self.save
         end
+        notify_interested_users(:removed_image)
       end
     end
     img
@@ -519,6 +525,58 @@ return result if debug
   def self.refresh_vote_cache
     for o in Observation.find(:all)
       o.calc_consensus
+    end
+  end
+
+  # Need this below...
+  def save_id_before_destroy
+    @old_id = self.id
+  end
+
+  # -------------------------------
+  #  Notifications due to change.
+  # -------------------------------
+
+  def notify_interested_users_after_change
+    if !self.id ||
+       self.when_changed? ||
+       self.where_changed? ||
+       self.location_id_changed? ||
+       self.notes_changed? ||
+       self.specimen_changed? ||
+       self.is_collection_location_changed? ||
+       self.thumb_image_id_changed?
+      notify_interested_users(:change)
+    end
+  end
+
+  def notify_interested_users_after_destroy
+    notify_interested_users(:destroy)
+  end
+
+  def notify_interested_users(action)
+    # Change can trigger emails.
+    sender = self.user
+    recipients = []
+
+    # Send to people who have registered interest.
+    for interest in Interest.find_all_by_object(self)
+      if interest.state
+        recipients.push(interest.user)
+      end
+    end
+
+    # Send notification to all except the person who triggered the change.
+    for recipient in recipients.uniq
+      if recipient && recipient != sender
+        if action == :destroy
+          ObservationChangeEmail.destroy_observation(sender, recipient, self)
+        elsif action == :change
+          ObservationChangeEmail.change_observation(sender, recipient, self)
+        else
+          ObservationChangeEmail.change_images(sender, recipient, self, action)
+        end
+      end
     end
   end
 

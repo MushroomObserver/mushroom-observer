@@ -1,0 +1,93 @@
+<%
+  intro = @observation ?
+    "Observation changed, #{@observation.unique_format_name}" :
+    "Observation destroyed, #{@note}"
+
+  fields = ""
+  fields += "*Time:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*By:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+
+  changes = ""
+  if @observation and @note
+    for field in @note.split(',')
+      case field
+        when 'date'
+          changes += "*Changed date:* #{@observation.when.to_formatted_s(:db)}\n"
+        when 'location'
+          changes += "*Changed location:* #{@observation.place_name}\n"
+        when 'notes'
+          notes_changed = true
+        when 'specimen'
+          changes += "*Specimen is now available.*\n"       if @observation.specimen
+          changes += "*Specimen is no longer available.*\n" if !@observation.specimen
+        when 'is_collection_location'
+          changes += "*Location _is_ where specimen was growing.*\n"     if @observation.is_collection_location
+          changes += "*Location _is not_ where specimen was growing.*\n" if !@observation.is_collection_location
+        when 'thumb_image_id'
+          changes += "*Changed thumbnail.*\n"
+        when 'added_image'
+          changes += "*Added image(s).*\n"
+        when 'removed_image'
+          changes += "*Removed image(s).*\n"
+      end
+    end
+  end
+  changes += "*Changed notes:*\n" if notes_changed
+
+  handy_links = @observation ?
+    "You were sent this email notification because you expressed interest in this observation.  Use the link below to stop watching this observation." :
+    "You were sent this email notification because you had expressed interest in this observation."
+
+  links = []
+  if @observation
+    links.push(["Show this observation",
+      "#{DOMAIN}/#{@observation.id}"])
+    links.push(["Post comment on this observation",
+      "#{DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
+    links.push(["I'm not interested in this observation",
+      "#{DOMAIN}/interest/no_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}"])
+  end
+  links.push(["Latest changes at Mushroom Observer",
+    DOMAIN])
+
+if @user.html_email ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= intro.t.strip_html %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= fields.tp %>
+<%= changes.tp %>
+<% if notes_changed %>
+  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+    <%= sanitize(@observation.notes).tp %>
+  </div>
+<% end %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= fields.tp.html_to_ascii %>
+
+<%= changes.tp.html_to_ascii %>
+
+<% if notes_changed %><%= @observation.notes.tp.html_to_ascii + "\n" %>
+--------------------------------------------------
+<% end %>
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label}: #{url}\n"
+  end
+  result %>
+<% end ###################################################################### %>

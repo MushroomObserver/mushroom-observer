@@ -722,6 +722,8 @@ email_naming_for_tracker_subject: Mushroom Observer Naming Notification
 email_name_change_subject: '[name] has been changed'
 email_name_proposal_subject: 'Observation #[id] may be [name]'
 email_new_password_subject: New Password for Mushroom Observer Account
+email_observation_change_subject: Observation changed, [name]
+email_observation_destroy_subject: Observation destroyed, [name]
 email_observation_question_subject: Question about [name]
 email_publish_name_subject: '[MO] Name Published'
 email_verify_subject: Email Verification for Mushroom Observer

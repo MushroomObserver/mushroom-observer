@@ -4,18 +4,19 @@
 #  email-related classes and subclasses are related.
 #
 #  Public methods:
-#    email_features(...)          Mass-mailing about new features.
 #    comment(...)                 Notify user of comment on their object.
-#    name_proposal(...)           Notify user of name proposal for their obs.
-#    consensus_change(...)        Notify user of name change of their obs.
-#    name_change(...)             Notify user of change in name description.
 #    commercial_inquiry(...)      User asking user about an image.
+#    consensus_change(...)        Notify user of name change of their obs.
+#    denied(...)                  Email sent to Nathan when sign-up is denied.
+#    email_features(...)          Mass-mailing about new features.
+#    name_change(...)             Notify user of change in name description.
+#    name_proposal(...)           Notify user of name proposal for their obs.
+#    new_password(...)            User forgot their password.
+#    observation_change(...)      Notify user of change in observation.
 #    observation_question(...)    User asking user about an observation.
 #    user_question(...)           User asking user about anything else.
-#    webmaster_question(...)      User asking webmaster a question.
-#    new_password(...)            User forgot their password.
 #    verify(...)                  Email sent to verify user's email.
-#    denied(...)                  Email sent to Nathan when sign-up is denied.
+#    webmaster_question(...)      User asking webmaster a question.
 #
 #  Private methods:
 #    perform_delivery_file(mail)  Used if delivery_method is configured as :file.
@@ -78,6 +79,22 @@ class AccountMailer < ActionMailer::Base
     @subject             = :email_consensus_change_subject.l(:id => observation.id,
                                 :old => (old_name ? old_name.search_name : 'none'),
                                 :new => (new_name ? new_name.search_name : 'none'))
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                = NEWS_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? 'text/html' : 'text/plain'
+  end
+
+  def observation_change(sender, receiver, observation, note, time)
+    @user                = receiver
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @body["sender"]      = sender
+    @body["user"]        = @user
+    @body["observation"] = observation
+    @body["note"]        = note
+    @body["time"]        = time
+    @subject             = observation ? :email_observation_change_subject.l(:name => observation.unique_text_name) :
+                                         :email_observation_destroy_subject.l(:name => note).t.html_to_ascii
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS

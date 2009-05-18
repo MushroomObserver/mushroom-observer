@@ -1222,7 +1222,7 @@ class ObserverController < ApplicationController
       users = User.find(:all, :conditions => "feature_email=1 and verified is not null")
       for user in users
         if user.feature_email
-          FeatureEmail.create_email(user, params['feature_email']['content'])
+          FeatureEmail.create_email(user, params[:feature_email][:content])
         end
       end
       flash_notice(:send_feature_email_success.t)

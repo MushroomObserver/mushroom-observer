@@ -721,9 +721,11 @@ email_denied_subject:  '[MO] User Creation Blocked'
 email_features_subject:  New Mushroom Observer Features
 email_naming_for_observer_subject:  Mushroom Observer Research Request
 email_naming_for_tracker_subject:  Mushroom Observer Naming Notification
-email_name_change_subject:  Someone Had Made Changes to [name]
-email_name_proposal_subject:  Observation #[id] may be [name]
+email_name_change_subject:  '[name] has been changed'
+email_name_proposal_subject:  'Observation #[id] may be [name]'
 email_new_password_subject:  New Password for Mushroom Observer Account
+email_observation_change_subject:  Observation changed, [name]
+email_observation_destroy_subject:  Observation destroyed, [name]
 email_observation_question_subject:  Question about [name]
 email_publish_name_subject:  '[MO] Name Published'
 email_verify_subject:  Email Verification for Mushroom Observer
@@ -1536,7 +1538,7 @@ no_feature_success:  Automated feature email disabled for [name].
 # interest/no_interest
 no_interest_bad_object:  Object [type] #[id] doesn't exist.
 no_interest_success:  Will now ignore all activity on [name].
-no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, then reload this page.
+no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, and try again.
 
 
 # observer/no_javascript
