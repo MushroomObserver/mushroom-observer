@@ -1,4 +1,4 @@
-class PublishEmail < QueuedEmailSubclass
+class PublishEmail < BaseEmail
   attr_accessor :name
 
   def initialize(email)

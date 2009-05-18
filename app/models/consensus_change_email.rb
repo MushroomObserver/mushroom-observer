@@ -1,4 +1,4 @@
-class ConsensusChangeEmail < QueuedEmailSubclass
+class ConsensusChangeEmail < BaseEmail
   attr_accessor :observation
   attr_accessor :old_name
   attr_accessor :new_name

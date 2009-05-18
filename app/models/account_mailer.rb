@@ -1,13 +1,7 @@
 #
-#  Subclass of ActionMailer::Base.  It is used to send *all* email.  See also
-#  these related classes:
-#
-#  * CommentEmail
-#  * NameProposalEmail
-#  * ConsensusChangeEmail
-#  * NameChangeEmail
-#  * FeatureEmail
-#  * QueuedEmail
+#  Subclass of ActionMailer::Base.  It is used to send all email.  See also
+#  QueuedEmail for more information about how queuing works and how all the
+#  email-related classes and subclasses are related.
 #
 #  Public methods:
 #    email_features(...)          Mass-mailing about new features.

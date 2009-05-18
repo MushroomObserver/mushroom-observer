@@ -1,3 +1,106 @@
+################################################################################
+#
+#  Model to describe a single email.  There are several related classes in a
+#  somewhat complicated relationship, so I'm going to describe them all here.
+#
+#    QueuedEmail              Central database record; one of these per email.
+#   
+#                             Each email can have arbitrary associated data:
+#    QueuedEmailInteger         zero or more integers
+#    QueuedEmailString          zero or more fixed-length strings
+#    QueuedEmailNote            zero or one arbitrary-length strings
+#   
+#    CommentEmail             These classes own a QueuedEmail record; they know
+#    FeatureEmail             which data are required for their email type, how
+#    NameChangeEmail          to store it, retreive it, and how to deliver the
+#    etc.                     actual mail (via AccountMailer).
+#   
+#    BaseEmail                Base class for XxxxEmail classes.  Defines the
+#                             has-a relationship between the XxxxEmail and
+#                             QueuedEmail classes.
+#   
+#    AccountMailer            This is the "class" that actually sends email.
+#                             It is never instantiated or anything, so it's
+#                             really just a collection of subroutines.  (Class
+#                             methods to be more precies.)
+#
+# ----------------------------------------------------------------------------
+#
+#  The typical execution flow would be:
+#
+#    1. User takes some action that triggers an email (e.g. posting a comment)
+#    2. The controller involved will queue the appropriate email with:
+#   
+#         CommentEmail.create(from, to, comment)
+#   
+#    3. This class method creates a QueuedEmail record, and attaches any data
+#       it needs (in this case just one integer for the Comment ID).
+#    4. That's it for a while. The record (and data) describing the email sit
+#       in the database until a cronjob deems it time to finally send it.
+#    5. (In the meantime some email records might actually be updated, e.g. if
+#       a user quickly turns around and edits their comment.)
+#    6. The cronjob runs:
+#   
+#         rake email:send
+#   
+#       which in turn looks up QueuedEmail records and delivers them once
+#       they've been around long enough.  It does this with:
+#    
+#         queued_email.send_email()
+#   
+#    7. QueuedEmail immediately instantiates the appropriate subclass of
+#       BaseEmail and calls:
+#   
+#         comment_email.deliver_email()
+#   
+#    8. CommentEmail grabs all the attached data it needs (often done in the
+#       constructor, actually), and calls the appropriate AccountMailer method:
+#   
+#         AccountMailer.comment(from, to, observation, comment)
+#   
+#    9. AccountMailer renders the email message and dispatches it to postfix
+#       or whichever mailserver is responsible for delivering email.
+#
+# ----------------------------------------------------------------------------
+#
+#  QueuedEmail's basic properties are:
+#
+#    1. has a flavor (:comment, :feature, :name_change, etc.)
+#    2. has a sender (called "user")
+#    3. has a receiver (called "to_user")
+#    4. has a time (called "queued" -- when it was last modified)
+#    5. has zero or more queued_email_integers
+#    6. has zero or more queued_email_strings
+#    7. has zero or one queued_email_note
+#
+#  Class Methods:
+#
+#    QE.all_flavors                 List of allowable flavors.
+#    QE.queue_emails(true)          Turn queuing on in test suite.
+#
+#  Instance Methods:
+#
+#    qe.setup(from, to, flavor)     Initialize and save.
+#    qe.finish                      Does nothing.
+#    qe.send_email                  Calls send_email, catching errors.
+#    qe.deliver_email               Calls XxxxEmail.new().deliver_email().
+#    qe.dump                        Dumps all info about email to a string.
+#
+#    qe.add_integer(key, val)       Add one integer.
+#    qe.add_string(key, val)        Add one fixed-length string.
+#    qe.set_note(value)             Create arbitrary-length string.
+#
+#    qe.get_integer(key)            Retrieve one integer.
+#    qe.get_string(key)             Retrieve one fixed-length string.
+#    qe.get_note                    Retrieve the arbitrary-length string.
+#
+#    qe.get_integers(keys)          Get integers for given array of keys.
+#    qe.get_integers(keys, true)    Same but returns hash instead of array.
+#    qe.get_strings(keys)           Get strings for given array of keys.
+#    qe.get_strings(keys, true)     Same but but returns hash instead of array.
+#
+################################################################################
+
 class QueuedEmail < ActiveRecord::Base
   has_many :queued_email_integers,      :dependent => :destroy
   has_many :queued_email_strings,       :dependent => :destroy

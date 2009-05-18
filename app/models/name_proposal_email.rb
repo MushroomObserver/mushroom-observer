@@ -1,4 +1,4 @@
-class NameProposalEmail < QueuedEmailSubclass
+class NameProposalEmail < BaseEmail
   attr_accessor :naming
   attr_accessor :observation
 

@@ -1,4 +1,4 @@
-class NameChangeEmail < QueuedEmailSubclass
+class NameChangeEmail < BaseEmail
   attr_accessor :name
   attr_accessor :old_version
   attr_accessor :new_version

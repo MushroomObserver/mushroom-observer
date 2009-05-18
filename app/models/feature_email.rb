@@ -1,4 +1,4 @@
-class FeatureEmail < QueuedEmailSubclass
+class FeatureEmail < BaseEmail
   attr_accessor :note
 
   def initialize(email)

@@ -1,4 +1,4 @@
-class NamingEmail < QueuedEmailSubclass
+class NamingEmail < BaseEmail
   attr_accessor :naming
   attr_accessor :notification
 

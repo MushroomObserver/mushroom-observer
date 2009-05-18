@@ -1,4 +1,4 @@
-class CommentEmail < QueuedEmailSubclass
+class CommentEmail < BaseEmail
   attr_accessor :comment
 
   def initialize(email)
