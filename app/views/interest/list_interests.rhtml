@@ -8,7 +8,8 @@
         odd_or_even = 1 - odd_or_even %>
         <tr valign="top" class="ListLine<%= odd_or_even %>">
           <td>
-            <%= link_to(sprintf('<span class="ListWhat">%s</span>', obj.unique_format_name.t),
+            <%= link_to(sprintf('<span class="ListWhat">%s: %s</span>',
+                                obj.class.to_s.underscore.to_sym.l, obj.unique_format_name.t),
                         :controller => obj.show_controller,
                         :action => obj.show_action, :id => obj.id) %>:
           <td>

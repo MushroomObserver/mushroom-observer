@@ -21,7 +21,7 @@ class InterestController < ApplicationController
     @interest_pages, @interests = paginate_array(@interests, 50)
   end
 
-  # Callback to express lack of interest in something.
+  # Email callback to express lack of interest in something.
   # Linked from: email
   # Redirects to main index.
   # Inputs: params[:type], params[:id], params[:user]
@@ -51,7 +51,7 @@ class InterestController < ApplicationController
 
   # Callback to change interest state in an object.
   # Linked from: show_<object>
-  # Redirects to show_<object>
+  # Redirects back (falls back on show_<object>)
   # Inputs: params[:type], params[:id], params[:state]
   # Outputs: none
   def set_interest

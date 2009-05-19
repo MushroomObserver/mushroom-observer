@@ -872,9 +872,12 @@ class Name < ActiveRecord::Base
     end
   end
 
-  # Update the review status, but only reviewers can set the
-  # value to anything other than :unreviewed.  (This can only
-  # happen when non-reviewer publishes a draft.)
+  # Update the review status, but only reviewers can set the value to anything
+  # other than :unreviewed.  (This can only happen when non-reviewer publishes
+  # a draft -- that is, the only way for this method to be called by a
+  # non-reviewer is if a non-reviewer publishes a draft -- the review status
+  # can get reset back to :unreviewed by edit_name in name_controller if a
+  # non-reviewer makes any substantive change to the Name.) 
   def update_review_status(value, user, time=Time.now)
     if not user.in_group('reviewers')
       value = :unreviewed

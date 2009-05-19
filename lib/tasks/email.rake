@@ -16,11 +16,11 @@ namespace :email do
       if e.queued + QUEUE_DELAY < now # Has it been queued (and unchanged) for QUEUE_DELAY or more
         if e.send_email
           count += 1
+          if count >= EMAIL_PER_MINUTE
+            break
+          end
         end
-        e.destroy
-        if count >= EMAIL_PER_MINUTE
-          break
-        end
+        e.destroy # Tried to send it, but it failed
       end
     end
   end
