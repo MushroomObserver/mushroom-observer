@@ -1,8 +1,7 @@
 #
 #  Views: ("*" - login required)
 #   * list_interests    Show objects user has expressed interest in.
-#   * no_interest       Callback from email to express lack of interest.
-#   * set_interest      Callback from show_<object> to change interest state.
+#   * set_interest      Callback to change interest state.
 #
 ################################################################################
 
@@ -21,48 +20,23 @@ class InterestController < ApplicationController
     @interest_pages, @interests = paginate_array(@interests, 50)
   end
 
-  # Email callback to express lack of interest in something.
-  # Linked from: email
-  # Redirects to main index.
-  # Inputs: params[:type], params[:id], params[:user]
-  # Outputs: none
-  def no_interest
-    type = params[:type].to_s
-    oid = params[:id].to_i
-    uid = params[:user].to_i
-    if @user.id != uid
-      flash_error(:no_interest_user_mismatch.l)
-    elsif interest = Interest.find_by_object_type_and_object_id_and_user_id(type, oid, uid)
-      interest.state = false
-      interest.save
-      flash_notice(:no_interest_success.l(:name => interest.object.unique_text_name))
-    elsif object = Comment.find_object(type, oid)
-      interest = Interest.new
-      interest.object = object
-      interest.user = @user
-      interest.state = false
-      interest.save
-      flash_notice(:no_interest_success.l(:name => object.unique_text_name))
-    else
-      flash_error(:no_interest_bad_object.l(:type => type, :id => oid))
-    end
-    redirect_to(:controller => 'observer', :action => 'index')
-  end
-
   # Callback to change interest state in an object.
-  # Linked from: show_<object>
+  # Linked from: show_<object> and emails
   # Redirects back (falls back on show_<object>)
-  # Inputs: params[:type], params[:id], params[:state]
+  # Inputs: params[:type], params[:id], params[:state], params[:user]
   # Outputs: none
   def set_interest
     type  = params[:type].to_s
-    id    = params[:id].to_i
+    oid   = params[:id].to_i
     state = params[:state].to_i
-    object = Comment.find_object(type, id)
+    uid   = params[:user]
+    object = Comment.find_object(type, oid)
     if @user
-      interest = Interest.find_by_object_type_and_object_id_and_user_id(type, id, @user.id)
-      if !object
-        flash_error(:no_interest_bad_object.l(:type => type, :id => id))
+      interest = Interest.find_by_object_type_and_object_id_and_user_id(type, oid, @user.id)
+      if uid && @user.id != uid.to_i
+        flash_error(:set_interest_user_mismatch.l)
+      elsif !object
+        flash_error(:set_interest_bad_object.l(:type => type, :id => oid))
       else
         if !interest && state != 0
           interest = Interest.new
@@ -96,6 +70,6 @@ class InterestController < ApplicationController
       end
     end
     redirect_back_or_default(:controller => object.show_controller,
-                             :action => object.show_action, :id => id)
+                             :action => object.show_action, :id => oid)
   end
 end

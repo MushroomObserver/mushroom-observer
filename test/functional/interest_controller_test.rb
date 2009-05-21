@@ -23,39 +23,14 @@ class InterestControllerTest < Test::Unit::TestCase
     assert_template 'list_interests'
   end
 
-  # Test email callback.
-  def test_no_interest
-    # Fail: Try to change another user's interest.
-    @request.session[:user_id] = 1
-    get(:no_interest, { :type => 'Observation', :id => 1, :user => 2 })
-    assert_equal(2, flash[:notice_level])
-    flash[:notice_level] = nil
-
-    # Fail: Try to set interest in nonexistent object.
-    @request.session[:user_id] = 1
-    get(:no_interest, { :type => 'Observation', :id => 100, :user => 1 })
-    assert_equal(2, flash[:notice_level])
-    flash[:notice_level] = nil
-
-    # Fail: Try to set interest in nonexistent object.
-    @request.session[:user_id] = 1
-    get(:no_interest, { :type => 'Bogus', :id => 1, :user => 1 })
-    assert_equal(2, flash[:notice_level])
-    flash[:notice_level] = nil
-
-    # Succeed: Set interest in existing object.
-    @request.session[:user_id] = @rolf.id
-    get(:no_interest, { :type => 'Observation', :id => @minimal_unknown.id, :user => @rolf.id })
-    assert_equal(nil, flash[:notice_level])
-
-    rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
-    assert_equal(1, rolfs_interests.length)
-    assert_equal(@minimal_unknown, rolfs_interests.first.object)
-    assert_equal(false, rolfs_interests.first.state)
-  end
-
-  # Test callback from show_observation / show_name.
+  # Test callback.
   def test_set_interest
+    # Fail: Try to change another user's interest.
+    @request.session[:user_id] = @rolf.id
+    get(:set_interest, { :type => 'Observation', :id => 1, :user => @mary.id })
+    assert_equal(2, flash[:notice_level])
+    flash[:notice_level] = nil
+
     # Fail: Try to change interest in non-existing object.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, { :type => 'Observation', :id => 100, :state => 1 })

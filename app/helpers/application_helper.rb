@@ -12,6 +12,12 @@ module ApplicationHelper
   def lnbsp(key)
     key.l.gsub(' ', '&nbsp;')
   end
+  
+  # Simple helper to wrap an html object in <acronym> tag which has the effect
+  # of giving it context help (mouse-over popup) in most modern browsers.
+  def add_context_help(object, help)
+    tag('acronym', { :title => help }, true) + object + '</acronym>'
+  end
 
   # Returns '<span>where (count)</span>'.
   def where_string(where, count)

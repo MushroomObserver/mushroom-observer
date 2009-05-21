@@ -60,7 +60,7 @@ Good for making birds nests... if you're a bird.
 Here are some links you may find useful:
 
 Show this name: http://localhost:3000/name/show_name/40
-I'm not interested in this name: http://localhost:3000/interest/no_interest?id=40&type=Name&user=2
+I'm not interested in this name: http://localhost:3000/interest/set_interest?id=40&type=Name&user=2
 Stop sending me these notifications: http://localhost:3000/account/no_name_change_email/2
 Change your account preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000

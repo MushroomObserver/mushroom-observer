@@ -2082,11 +2082,11 @@ class NameControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = @rolf.id
     get(:show_name, { :id => @peltigera.id })
     assert_response :success
-    assert_link_in_html(:show_name_interest_on.t, {
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => @peltigera.id, :state => 1
     })
-    assert_link_in_html(:show_name_interest_off.t, {
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => @peltigera.id, :state => -1
     })
@@ -2096,9 +2096,13 @@ class NameControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = @rolf.id
     get(:show_name, { :id => @peltigera.id })
     assert_response :success
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => @peltigera.id, :state => 0
+    })
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Name', :id => @peltigera.id, :state => -1
     })
 
     # Destroy that interest, create new one with interest off.
@@ -2107,9 +2111,13 @@ class NameControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = @rolf.id
     get(:show_name, { :id => @peltigera.id })
     assert_response :success
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => @peltigera.id, :state => 0
+    })
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Name', :id => @peltigera.id, :state => 1
     })
   end
 end

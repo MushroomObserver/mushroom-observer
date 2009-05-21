@@ -130,16 +130,6 @@ div.right_tabs div a:hover {
   background: none;
 }
 
-div.right_tabs img {
-  margin: 2px;
-  border-width: 0px;
-}
-
-div.right_tabs img:hover {
-  margin: 0px;
-  border-width: 2px;
-}
-
 .Notices, .Warnings, .Errors {
   margin: 10px 10px 5px 10px;
   padding: 0px 5px 0px 5px;
@@ -295,6 +285,18 @@ div.HelpNoteIndent {
 }
 #translators_credit p {
   font-size: 80%;
+}
+
+img.interest_big {
+  border: none;
+}
+img.interest_small {
+  margin: 2px;
+  border-width: 0px;
+}
+img.interest_small:hover {
+  margin: 0px;
+  border-width: 2px;
 }
 
 div.auto_complete {

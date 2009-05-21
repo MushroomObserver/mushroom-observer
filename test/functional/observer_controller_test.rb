@@ -1804,11 +1804,11 @@ class ObserverControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = @rolf.id
     get(:show_observation, { :id => @minimal_unknown.id })
     assert_response :success
-    assert_link_in_html(:show_observation_interest_on.t, {
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>[\w\s]*/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Observation', :id => @minimal_unknown.id, :state => 1
     })
-    assert_link_in_html(:show_observation_interest_off.t, {
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>[\w\s]*/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Observation', :id => @minimal_unknown.id, :state => -1
     })
@@ -1818,9 +1818,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = @rolf.id
     get(:show_observation, { :id => @minimal_unknown.id })
     assert_response :success
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Observation', :id => @minimal_unknown.id, :state => 0
+    })
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Observation', :id => @minimal_unknown.id, :state => -1
     })
 
     # Destroy that interest, create new one with interest off.
@@ -1829,9 +1833,13 @@ class ObserverControllerTest < Test::Unit::TestCase
     @request.session[:user_id] = @rolf.id
     get(:show_observation, { :id => @minimal_unknown.id })
     assert_response :success
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
       :controller => 'interest', :action => 'set_interest',
       :type => 'Observation', :id => @minimal_unknown.id, :state => 0
+    })
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Observation', :id => @minimal_unknown.id, :state => 1
     })
   end
 end

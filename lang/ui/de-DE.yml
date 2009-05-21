@@ -1163,6 +1163,16 @@ image_updater_title: Ändere Lizenzen für [user]
 image_updater_update: Ändern
 
 
+# interest-related controls in name/show_name, observation/show_observation, etc.
+interest_watch:  Watch
+interest_ignore:  Ignore
+interest_watch_help:  Click here if you want us to send you email whenever there is a change in this [object].
+interest_ignore_help:  Click here if you want to stop getting any emails about this [object].
+interest_default_help:  Click here if you want to go back to the default -- having your account preferences to determine whether you get email about this [object].
+interest_watching:  You have told us to email you about changes in this [object].  Click on one of the small icons below to change.
+interest_ignoring:  You have told us never to email you about changes in this [object].  Click on one of the small icons below to change.
+
+
 # comment/list_comments
 list_comments: Kommentare
 list_comments_by_user: Kommentare von [user]
@@ -1485,13 +1495,13 @@ no_browser_body:  >
   won't work if we guess wrong (like voting on observation names), we have to
   assume the worst.  However this means that a number of useful features are
   not available, like dynamic forms, auto-completion of scientific names and
-  locations, the new version of the species list creator, and more. 
+  locations, the new version of the species list creator, and more.
   \n\n
   If you would like to override this decision, "click here to turn javascript
   on":/observer/turn_javascript_on.  If you are tired of seeing the "We Don't
   Recognize Your Browser" tab at the top of every page, please "click here to
   turn javascript off":/observer/turn_javascript_off.  (Login and go to
-  preferences to re-enable auto-detection.) 
+  preferences to re-enable auto-detection.)
 
 no_browser_title:  We Don't Recognize Your Browser
 
@@ -1548,12 +1558,6 @@ no_features_note:  >
   Login and go to the Preferences page to re-enable this feature.
 
 no_feature_success:  Automated feature email disabled for [name].
-
-
-# interest/no_interest
-no_interest_bad_object:  Object [type] #[id] doesn't exist.
-no_interest_success:  Will now ignore all activity on [name].
-no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, and try again.
 
 
 # observer/no_javascript
@@ -1827,11 +1831,13 @@ send_feature_email_denied: Nur ein Admin kann eine Funktionalitäten-Email verse
 set_interest_already_deleted:  You have expressed no interest in [name].
 set_interest_already_off:  You have already told us to ignore [name].
 set_interest_already_on:  You have already told us to watch [name].
+set_interest_bad_object:  Object [type] #[id] doesn't exist.
 set_interest_failure:  Could not change your interest state in [name].  Please try again or report this to the webaster.
 set_interest_success_was_off:  Cancelled your ban on emails about [name].
 set_interest_success_was_on:  Cancelled your request for emails about [name].
-set_interest_success_off:  We will now ignore any activity in [name].
-set_interest_success_on:  You will now be notified of any activity in [name].
+set_interest_success_off:  We will now ignore any changes in [name].
+set_interest_success_on:  You will now be notified of any changes in [name].
+set_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, and try again.
 
 
 # shared/_textile_help
@@ -1888,12 +1894,6 @@ show_name_draft_help: >
 show_name_edit_name: Beschreibung bearbeiten
 show_name_email_tracking: Bei Änderungen per Email benachrichtigen
 show_name_existing_drafts: Bestehende Entwürfe
-show_name_interest_ignore_help:  Click here if you want to stop getting any emails about this name.
-show_name_interest_ignoring:  You have told us never to email you about changes in this name.  Click on this icon to cancel.
-show_name_interest_on:  Watch
-show_name_interest_off:  Ignore
-show_name_interest_watch_help:  Click here if you want us to send you email whenever there is a change in this name.
-show_name_interest_watching:  You have told us to email you about changes in this name.  Click on this icon to cancel.
 show_name_latest_review: >
   Zuletzt bearbeitet: am [date] von [user]
 
@@ -1956,12 +1956,6 @@ show_observation_comment_created: Erstellt
 show_observation_comment_created_by: von
 show_observation_debug_consensus: Fehlersuche Mehrheitsmeinung
 show_observation_edit_observation: Fund bearbeiten
-show_observation_interest_ignore_help:  Click here if you want to stop getting any emails about this observation.
-show_observation_interest_ignoring:  You have told us never to email you about activity in this observation.  Click on this icon to cancel.
-show_observation_interest_on:  Watch
-show_observation_interest_off:  Ignore
-show_observation_interest_watch_help:  Click here if you want us to send you email whenever there is activity on this observation.
-show_observation_interest_watching:  You have told us to email you about activity in this observation.  Click on this icon to cancel.
 show_observation_manage_species_lists: Artenlisten verwalten
 show_observation_no_comments_yet:  No one has commented yet.
 show_observation_observation_created: Fund erstellt

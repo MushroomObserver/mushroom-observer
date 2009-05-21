@@ -443,7 +443,7 @@ advanced_search_caveat:  >
   Advanced search was added in February, 2009 to Mushroom Observer.  There are
   a lot of directions this feature could go.  I have intentionally kept it
   somewhat limited since I am concerned that it may have performance issues that
-  result in timeouts.  Please send 
+  result in timeouts.  Please send
   "email to the webmaster":/observer/ask_webmaster_question if you experience
   timeouts or if there are particular types of searches you would like to have
   added.
@@ -1181,6 +1181,16 @@ image_updater_title: Actualizar Licencias para [user]
 image_updater_update: Actualizar
 
 
+# interest-related controls in name/show_name, observation/show_observation, etc.
+interest_watch:  Watch
+interest_ignore:  Ignore
+interest_watch_help:  Click here if you want us to send you email whenever there is a change in this [object].
+interest_ignore_help:  Click here if you want to stop getting any emails about this [object].
+interest_default_help:  Click here if you want to go back to the default -- having your account preferences to determine whether you get email about this [object].
+interest_watching:  You have told us to email you about changes in this [object].  Click on one of the small icons below to change.
+interest_ignoring:  You have told us never to email you about changes in this [object].  Click on one of the small icons below to change.
+
+
 # comment/list_comments
 list_comments: Comentarios
 list_comments_by_user: Comentarios por [user]
@@ -1588,12 +1598,6 @@ no_feature_success: >
 
 
 
-# interest/no_interest
-no_interest_bad_object:  Object [type] #[id] doesn't exist.
-no_interest_success:  Will now ignore all activity on [name].
-no_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, and try again.
-
-
 # observer/no_javascript
 no_javascript_body: >
   Parece que javascript está deshabilitado en su navegador.  Usted todavía
@@ -1881,11 +1885,13 @@ send_feature_email_denied: Sólo el admin puede enviar e-mail de característica
 set_interest_already_deleted:  You have expressed no interest in [name].
 set_interest_already_off:  You have already told us to ignore [name].
 set_interest_already_on:  You have already told us to watch [name].
+set_interest_bad_object:  Object [type] #[id] doesn't exist.
 set_interest_failure:  Could not change your interest state in [name].  Please try again or report this to the webaster.
 set_interest_success_was_off:  Cancelled your ban on emails about [name].
 set_interest_success_was_on:  Cancelled your request for emails about [name].
-set_interest_success_off:  We will now ignore any activity in [name].
-set_interest_success_on:  You will now be notified of any activity in [name].
+set_interest_success_off:  We will now ignore any changes in [name].
+set_interest_success_on:  You will now be notified of any changes in [name].
+set_interest_user_mismatch:  Another user is logged on at this machine.  Please log them off, log back in as you, and try again.
 
 
 # shared/_textile_help
@@ -1942,12 +1948,6 @@ show_name_draft_help: >
 show_name_edit_name: Editar Descripción
 show_name_email_tracking: Correo Seguimiento
 show_name_existing_drafts: Borradores Existentes
-show_name_interest_ignore_help:  Click here if you want to stop getting any emails about this name.
-show_name_interest_ignoring:  You have told us never to email you about changes in this name.  Click on this icon to cancel.
-show_name_interest_on:  Watch
-show_name_interest_off:  Ignore
-show_name_interest_watch_help:  Click here if you want us to send you email whenever there is a change in this name.
-show_name_interest_watching:  You have told us to email you about changes in this name.  Click on this icon to cancel.
 show_name_latest_review: 'Última Revisión: [date] para [user]'
 show_name_notes_and_comments: Notas y Comentarios
 show_name_observations: Observaciones
@@ -2013,12 +2013,6 @@ show_observation_comment_created: Creado
 show_observation_comment_created_by: por
 show_observation_debug_consensus: Depurar Consenso
 show_observation_edit_observation: Editar Observación
-show_observation_interest_ignore_help:  Click here if you want to stop getting any emails about this observation.
-show_observation_interest_ignoring:  You have told us never to email you about activity in this observation.  Click on this icon to cancel.
-show_observation_interest_on:  Watch
-show_observation_interest_off:  Ignore
-show_observation_interest_watch_help:  Click here if you want us to send you email whenever there is activity on this observation.
-show_observation_interest_watching:  You have told us to email you about activity in this observation.  Click on this icon to cancel.
 show_observation_manage_species_lists: Gestionar listas de especies.
 show_observation_no_comments_yet:  No one has commented yet.
 show_observation_observation_created: Observación creado

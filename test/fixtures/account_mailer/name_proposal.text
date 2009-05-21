@@ -17,7 +17,7 @@ Here are some links you may find useful:
 
 Show this observation: http://localhost:3000/3
 Post comment on this observation: http://localhost:3000/comment/add_comment?id=3&type=Observation
-I'm not interested in this observation: http://localhost:3000/interest/no_interest?id=3&type=Observation&user=1
+I'm not interested in this observation: http://localhost:3000/interest/set_interest?id=3&type=Observation&user=1
 Stop sending me these notifications: http://localhost:3000/account/no_name_proposal_email/1
 Change your account preferences: http://localhost:3000/account/prefs/1
 Latest changes at Mushroom Observer: http://localhost:3000

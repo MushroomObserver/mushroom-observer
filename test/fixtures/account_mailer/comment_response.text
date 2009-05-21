@@ -22,7 +22,7 @@ Please do not reply to this email.  Click on the link below to respond to the co
 
 Show this observation: http://localhost:3000/observer/show_observation/1
 Post a comment in response: http://localhost:3000/comment/add_comment?id=1&type=Observation
-I'm not interested in this observation: http://localhost:3000/interest/no_interest?id=1&type=Observation&user=1
+I'm not interested in this observation: http://localhost:3000/interest/set_interest?id=1&type=Observation&user=1
 Stop sending me these notifications: http://localhost:3000/account/no_comment_response_email/1
 Change your account preferences: http://localhost:3000/account/prefs/1
 Latest changes at Mushroom Observer: http://localhost:3000

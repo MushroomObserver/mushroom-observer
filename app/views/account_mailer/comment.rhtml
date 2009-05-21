@@ -54,7 +54,7 @@
   links.push(["Post a comment in response",
     "#{DOMAIN}/comment/add_comment?id=#{@comment.object_id}&type=#{@comment.object_type}"])
   links.push(["I'm not interested in this #{small_title}",
-    "#{DOMAIN}/interest/no_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}"])
+    "#{DOMAIN}/interest/set_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}"])
   links.push(["Stop sending me these notifications",
     "#{DOMAIN}/account/no_comment#{is_response ? '_response' : ''}_email/#{@user.id}"])
   links.push(["Change your account preferences",

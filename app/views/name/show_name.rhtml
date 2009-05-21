@@ -10,25 +10,42 @@
   args[:other_page]     = @other_page         if @other_data != []
 
   if @user
-    if @interest
-      alt = @interest.state ? :show_name_interest_watching.l : :show_name_interest_ignoring.l
-      add_right_tab('<div>' + tag('acronym', { :title => alt }, true) +
-                    link_to(image_tag(@interest.state ? 'watch2.png' : 'ignore2.png',
-                                      :alt => alt, :width => '50px', :height => '50px'),
-                            :controller => 'interest', :action => 'set_interest',
-                            :id => @name.id, :type => 'Name', :state => 0) +
-                    '</acronym></div>')
+    if !@interest
+      alt1 = :interest_watch_help.l(:object => :name.l)
+      alt2 = :interest_ignore_help.l(:object => :name.l)
+      img1 = image_tag('watch3.png',  :alt => alt1, :width => '23px', :height => '23px', :class => 'interest_small')
+      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
+      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 1)
+      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => -1)
+      img1 = add_context_help(img1, alt1)
+      img2 = add_context_help(img2, alt2)
+      add_right_tab("<div>#{img1} #{img2}</div>")
+    elsif @interest.state
+      alt1 = :interest_watching.l(:object => :name.l)
+      alt2 = :interest_default_help.l(:object => :name.l)
+      alt3 = :interest_ignore_help.l(:object => :name.l)
+      img1 = image_tag('watch2.png',    :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
+      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
+      img3 = image_tag('ignore3.png',   :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
+      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 0)
+      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => -1)
+      img1 = add_context_help(img1, alt1)
+      img2 = add_context_help(img2, alt2)
+      img3 = add_context_help(img3, alt3)
+      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
     else
-      add_right_tab(tag('acronym', { :title => :show_name_interest_watch_help.l }, true) +
-                    link_to(:show_name_interest_on.t,
-                            :controller => 'interest', :action => 'set_interest',
-                            :id => @name.id, :type => 'Name', :state => 1) +
-                    '</acronym>')
-      add_right_tab(tag('acronym', { :title => :show_name_interest_ignore_help.l }, true) +
-                    link_to(:show_name_interest_off.t,
-                            :controller => 'interest', :action => 'set_interest',
-                            :id => @name.id, :type => 'Name', :state => -1) +
-                    '</acronym>')
+      alt1 = :interest_ignoring.l(:object => :name.l)
+      alt2 = :interest_watch_help.l(:object => :name.l)
+      alt3 = :interest_default_help.l(:object => :name.l)
+      img1 = image_tag('ignore2.png',   :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
+      img2 = image_tag('watch3.png',    :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
+      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
+      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 1)
+      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 0)
+      img1 = add_context_help(img1, alt1)
+      img2 = add_context_help(img2, alt2)
+      img3 = add_context_help(img3, alt3)
+      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
     end
   end
 

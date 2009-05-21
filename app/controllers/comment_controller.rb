@@ -172,7 +172,7 @@ class CommentController < ApplicationController
       if @comment.destroy
         object.log(:log_comment_destroyed, { :user => @user.login,
           :summary => summary }, false) \
-          if @object.respond_to?(:log)
+          if object.respond_to?(:log)
         flash_notice :form_comments_destroy_success.t
       else
         flash_error :form_comments_destroy_failed.t
