@@ -1,3 +1,5 @@
+Quit trying to send a QueuedEmail after some number of tries.
+
 cron for eol.xml
 
 Tests for Advanced Search
