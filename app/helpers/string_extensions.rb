@@ -363,7 +363,14 @@ class String
   # &blah; codes into ASCII equivalents.  Line breaks may still be a problem,
   # but this seems to work pretty well on the output of RedCloth at least.
   def html_to_ascii
-    self.gsub(/<[^>]*>/, '').gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
+    self.gsub(/\n+/, ' ').              # remove all newlines first
+         gsub(/<br *\/> */, "\n").      # put one after every line break
+         gsub(/<\/p> */, "\n\n").       # put two between paragraphs
+         gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
+         gsub(/\n+\Z/, '').             # remove superfluous newlines at end
+         gsub(/<[^>]*>/, '').           # remove all <tags>
+         gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
+                                        # convert &xxx; and &#nnn; to ascii
   end
 
   # Wrap HTML string in a span that prevents long strings from being broken.

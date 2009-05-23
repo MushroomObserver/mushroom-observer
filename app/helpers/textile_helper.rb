@@ -27,7 +27,7 @@ class String
       'observation' => '/%d',
     }
   end
-  
+
   URL_TRUNCATION_LENGTH = 60 if !defined? URL_TRUNCATION_LENGTH
 
   # Wrapper on string.textilize that returns only the body of the first
@@ -122,15 +122,6 @@ class String
       hrefs[$1.to_i].to_s.gsub(/ x\{ ([^\{\}]*) \}x /x, '\\1')
     end
 
-    # Apparently RedCloth strips out newlines after <br /> on Mac?...  (This
-    # makes sure all <br /> are followed by a newline.  The zero-width negative
-    # look-ahead assertion allows me to do all of them in one gsub, otherwise
-    # the first match of "<br /><br />" would include the "<" from the second
-    # "<br />", so it would potentially only fix every other one.) 
-    if TESTING
-      str.gsub!(/<br \/>(?!\n)/, "<br />\n")
-    end
-
     return str
   end
 
@@ -155,11 +146,11 @@ class String
     @@textile_name_lookup ||= {}
     @@textile_name_lookup.size
   end
-  
+
   def self.clear_textile_cache
     @@textile_name_lookup = {}
   end
-  
+
 protected
 
   # Convert __Names__ to links in a textile string.
@@ -170,7 +161,7 @@ protected
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     self.gsub!(/
-      (?:\**_+) ( "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\.) ) (?:_+\**)
+      (?:^|\W) (?:\**_+) ( "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\.) ) (?:_+\**) (?!\w)
     /x) do |orig|
       # Remove any formatting.
       str1 = ($1 || $2).gsub(/[_*]/, '')
@@ -208,23 +199,27 @@ protected
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
     self.gsub!(/
-      (?:_+) ([a-z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+)
+      (?:^|\W) (?:_+) ([a-z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
     /x) do |orig|
+      type   = $1
+      id     = $2
+      str    = nil
+      obj    = nil
+      result = orig
       begin
-        type = $1
-        id   = $2
-        str  = nil
-
+        # Look up id if given name instead, e.g. _user jason_
         if id && id.match(/\D/)
           str = id
-          obj = case type
+          case type
             when 'name':
-              Name.find_by_search_name(str) ||
-              Name.find_by_text_name(str)
+              obj = Name.find_by_search_name(str) ||
+                    Name.find_by_text_name(str)
+              id = obj.id if obj
 
             when 'user':
-              User.find_by_login(str) ||
-              User.find_by_name(str)
+              obj = User.find_by_login(str) ||
+                    User.find_by_name(str)
+              id = obj.id if obj
 
             when 'location':
               pattern = str.downcase.gsub(/\W+/, '%')
@@ -233,34 +228,49 @@ protected
                 WHERE LOWER(locations.search_name) LIKE '%#{pattern}%'
               )
               id = ids.first if ids.length == 1
-              nil
-          end
-          id = obj.id if obj
-        end
-
-        if id && !str
-          str = begin
-            case type
-              when 'name':
-                name = Name.find(id)
-                name.display_name.sub(name.author, '')
-
-              when 'user':
-                User.find(id).login
-
-              when 'project':
-                Project.find(id).title
-            end
           end
         end
 
-        result = type.upcase
-        result += ' ' + id.to_s if id
-        result += ' ' + str.gsub('{','&123;').gsub('}','&125;') if str
-        'x{' + result + ' }x'
+        # Look up object and create label for it.
+        case type
+          when 'comment':
+            obj ||= Comment.find(id)
+            
+          when 'image':
+            obj ||= Image.find(id)
+
+          when 'location':
+            obj ||= Location.find(id)
+
+          when 'name':
+            obj ||= Name.find(id)
+            str ||= obj.display_name.sub(name.author, '')
+
+          when 'observation':
+            obj ||= Observation.find(id)
+
+          when 'project':
+            obj ||= Project.find(id)
+            str ||= obj.title
+
+          when 'species_list':
+            obj ||= SpeciesList.find(id)
+
+          when 'user':
+            obj ||= User.find(id)
+            str ||= obj.login
+        end
+
+        # Only create link for approved objects that actually exist.
+        if obj
+          result = type.upcase
+          result += ' ' + id.to_s
+          result += ' ' + str.gsub('{','&#123;').gsub('}','&#125;') if str
+          result = 'x{' + result + ' }x'
+        end
       rescue
-        orig
       end
+      result
     end
   end
 

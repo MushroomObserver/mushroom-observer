@@ -252,28 +252,41 @@ end
 # Assert that a response body is same as contents of a given file.
 # Pass in a block to use as a filter on both contents of response and file.
 def assert_response_equal_file(file, &block)
-  assert_string_equal_file(file, @response.body.clone, &block)
+  assert_string_equal_file(@response.body.clone, file, &block)
 end
 
 # Assert that a string is same as contents of a given file.
 # Pass in a block to use as a filter on both contents of response and file.
-def assert_string_equal_file(file, str)
-  body1 = File.open(file) {|fh| fh.read}
-  body2 = str
-  if block_given?
-    body1 = yield(body1)
-    body2 = yield(body2)
+def assert_string_equal_file(str, *files)
+  result = false
+  msg    = nil
+
+  # Check string against each file, looking for at least one that matches.
+  body1  = str
+  body1  = yield(body1) if block_given?
+  for file in files
+    body2 = File.open(file) {|fh| fh.read}
+    body2 = yield(body2) if block_given?
+    if body1 == body2
+      # Stop soon as we find one that matches.
+      result = true
+      break
+    elsif !msg
+      # Write out expected (old) and received (new) files for debugging purposes.
+      File.open(file + '.old', 'w') {|fh| fh.write(body2)}
+      File.open(file + '.new', 'w') {|fh| fh.write(body1)}
+      msg = "File #{file} wrong:\n" + `diff #{file}.old #{file}.new`
+      File.delete(file + '.old') if File.exists?(file + '.old')
+    end
   end
-  if body1 != body2
-    # Write out expected (old) and received (new) files for debugging purposes.
-    File.open(file + '.old', 'w') {|fh| fh.write(body1)}
-    File.open(file + '.new', 'w') {|fh| fh.write(body2)}
-    diffs = `diff #{file}.old #{file}.new`
-    assert(false, "Files #{file}.old and #{file}.new differ:\n" + diffs)
+  
+  if result
+    # Clean out old files from previous failure(s).
+    for file in files
+      File.delete(file + '.new') if File.exists?(file + '.new')
+    end
   else
-    # Clean out old files from previous failure.
-    File.delete(file + '.old') if File.exists?(file + '.old')
-    File.delete(file + '.new') if File.exists?(file + '.new')
+    assert(false, msg)
   end
 end
 

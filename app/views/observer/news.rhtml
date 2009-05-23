@@ -2,6 +2,44 @@
 
 <%= :news_header.tp %>
 
+<h3>Friday May 22, 2009</h3>
+<ol>
+    <li>Added a number of new types of email notification, complementing the
+    exist "Email Alerts" and comment notifications:</li>
+    <li>a.  Authors of name descriptions will get notifications if anyone else
+    makes changes to the descriptions they wrote.</li>
+    <li>b.  Observers will now also get notified whenever someone proposes a
+    name for their observation.</li>
+    <li>c.  People who have commented on an observation will now get sent
+    subsequent comments to the same observation -- i.e. people will get sent
+    "responses" to their comments.</li>
+    <li>Users can now "watch" specific observations.  This would tell MO to
+    send you emails whenever anything happens to that observation: change to
+    notes, addition of images, comments, name proposals, etc.  Look for the
+    cutesy little eye-balls in the upper right corner of the observation.  The
+    one with eyes open tells MO to "watch" the observation.  The one with eyes
+    screwed shut tells MO to do just the opposite -- do <i>not</i> send you
+    emails of any sort, even if you created or commented on that
+    observation.</li>
+    <li>Users can now "watch" names, too, using the same mechanism.  (Again,
+    look for the eye-balls in the upper right on the "About Name..." pages.)
+    This is meant to complement, not replace, the existing "Email Alerts".
+    Email Alerts are sent out whenever someone <i>observes</i> a given name; it
+    is intended primarily for use by professionals doing research on a taxon or
+    group of taxa.  Watching a name, on the other hand, tells MO to send you
+    emails when someone changes the <i>general description</i> of a name; it is
+    intended as a casual means for curious users to keep updated on the latest
+    research in a given species or genus.</li>
+    <li>If you use these new "watch" and "ignore" features a lot, you can see
+    a list of all the objects you are watching or ignoring by clicking on the
+    "Your Interests" link under your login name in the left-hand panel on every
+    page.  We'll add your Email Alerts to this list, soon, too, so that they are all
+    available in the same place.</li>
+    <li>The show_name pages now displays all children taxa (currently only works
+    for genera and below), paginating the list if it is too long instead of
+    truncating it.</li>
+</ol>
+
 <h3>Friday May 8, 2009</h3>
 <ol>
     <li>Added <%= link_to(:authored_names_title.l, :controller => 'name', :action => 'authored_names') %> page. (Nathan Wilson)</li>
@@ -307,8 +345,8 @@
 
 <h3>Thursday January 3, 2008</h3>
 <ol>
-    <li><p>At long last, I am very excited to announce a major new feature for the Mushroom Observer website - Google Maps!  The most interesting maps currently supported are Distribution Maps.  Here's an example for 
-<%= link_to("<i>Craterellus cornucopioides</i>", :controller => 'name', :action => 'map', :id => 284) %>.  To get a map for a particular name, you go to the page for a name either from the 
+    <li><p>At long last, I am very excited to announce a major new feature for the Mushroom Observer website - Google Maps!  The most interesting maps currently supported are Distribution Maps.  Here's an example for
+<%= link_to("<i>Craterellus cornucopioides</i>", :controller => 'name', :action => 'map', :id => 284) %>.  To get a map for a particular name, you go to the page for a name either from the
 <%= link_to(:app_index_a_z.t, :controller => 'name', :action => 'observation_index') %> link on the left side of any window or by clicking an 'About ...' link at the top of an observation page.  Once you're on the page for a name, there is a new link near the top called 'Distribution Map' which takes you to the map for that name.</p>
 
 <p>So like pretty much everything on Mushroom Observer, users can add to the Distribution Map for a name.  The easiest way is when you create a new observation, use an already defined location.  The auto-completion for the Where field will list all locations that are currently being used whether they are defined or not.  Right now there are only a few values that are defined, but I'm hoping that will change quickly as users define more locations (see below).  When creating or editing an observation, there is a checkbox labeled 'Is Collection Location'.  By default it is checked.  If you uncheck, then that observation will not get put on the distribution map.  This allows you to record observations of mushrooms in places like mushroom fairs, grocery stores or other places where you may not know where the mushroom was actually collected.</p>
@@ -436,13 +474,13 @@
         be the default.  Finally for power users, there is a new page available off the Preferences page, the
         <%= link_to('Bulk License Updater', :action => 'license_updater') %>, which groups your images based
         on license and copyright holder and allows you to update each group in one go.</p></li>
-        
+
     <li><p>Image search now includes the copyright holder field in the search.</p></li>
-	  
+
     <li><p>Updated the <%= link_to('Introduction', :controller => 'observer', :action => 'intro') %> and
     <%= link_to('How to Use', :controller => 'observer', :action => 'how_to_use') %> pages to reflect many
     of the recent changes.</p></li>
-	  
+
 </ol>
 
 <h3>Saturday September 1, 2007</h3>
