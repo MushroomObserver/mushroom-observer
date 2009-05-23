@@ -34,22 +34,35 @@ namespace :jason do
   desc "Dump out all notes for obs, names, spls, comments to test RedCloth."
   task(:dump_notes => :environment) do
     notes = []
-    print "Getting observation notes...\n"
-    notes += Observation.connection.select_values  'SELECT DISTINCT notes         FROM observations   WHERE LENGTH(notes) > 0'
-    print "Getting naming reasons...\n"
-    notes += NamingReason.connection.select_values 'SELECT DISTINCT notes         FROM naming_reasons WHERE LENGTH(notes) > 0'
-    print "Getting name notes...\n"
-    notes += Name.connection.select_values         'SELECT DISTINCT notes         FROM names          WHERE LENGTH(notes) > 0'
-    print "Getting image notes...\n"
-    notes += Image.connection.select_values        'SELECT DISTINCT notes         FROM images         WHERE LENGTH(notes) > 0'
-    print "Getting species list notes...\n"
-    notes += SpeciesList.connection.select_values  'SELECT DISTINCT notes         FROM species_lists  WHERE LENGTH(notes) > 0'
-    print "Getting location notes...\n"
-    notes += Location.connection.select_values     'SELECT DISTINCT notes         FROM locations      WHERE LENGTH(notes) > 0'
-    print "Getting notification templates...\n"
-    notes += Notification.connection.select_values 'SELECT DISTINCT note_template FROM notifications  WHERE LENGTH(note_template) > 0'
-    print "Getting comments...\n"
-    notes += Comment.connection.select_values      'SELECT DISTINCT comment       FROM comments       WHERE LENGTH(comment) > 0'
+    for table in [
+      'comments',
+      'draft_names',
+      'images',
+      'licenses',
+      'locations',
+      'names',
+      'naming_reasons',
+      'namings',
+      'notifications',
+      'observations',
+      'projects',
+      'species_lists',
+      'users',
+      'votes',
+    ]
+      File.open('db/schema.rb', 'r') do |fh|
+        table2 = nil
+        fh.each_line do |line|
+          if line.match(/^ +create_table +"(\w+)"/)
+            table2 = $1
+          elsif table == table2 && line.match(/^ +t.text +"(\w+)"/)
+            column = $1
+            print "Getting #{table} #{column}...\n"
+            notes += Name.connection.select_values "SELECT DISTINCT #{column} FROM #{table}"
+          end
+        end
+      end
+    end
     print "Writing notes.yml...\n"
     File.open('notes.yml', 'w') do |fh|
       fh.write notes.uniq.to_yaml
@@ -63,9 +76,9 @@ namespace :jason do
     include ApplicationHelper
     notes = YAML::load(File.open('notes.yml'))
     print "Textilizing #{notes.length} strings...\n"
-    notes.map! do |str|
+    notes = notes.select {|x| !x.nil? && x.length > 0}.map do |str|
       begin
-        textilize(str).to_s
+        str.t
       rescue => e
         'Crashed: ' + e.to_s + "\n" + str
       end
