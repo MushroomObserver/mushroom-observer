@@ -78,7 +78,7 @@ namespace :jason do
     print "Textilizing #{notes.length} strings...\n"
     notes = notes.select {|x| !x.nil? && x.length > 0}.map do |str|
       begin
-        str.t
+        str.tpl
       rescue => e
         'Crashed: ' + e.to_s + "\n" + str
       end

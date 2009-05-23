@@ -161,10 +161,12 @@ protected
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     self.gsub!(/
-      (?:^|\W) (?:\**_+) ( "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\.) ) (?:_+\**) (?!\w)
+      (^|\W) (?:\**_+) ( "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\.) ) (?:_+\**) (?=(?:s|ish|like)?(?:\W|’|\Z))
     /x) do |orig|
+      prefix = $1
+
       # Remove any formatting.
-      str1 = ($1 || $2).gsub(/[_*]/, '')
+      str1 = ($2 || $3).gsub(/[_*]/, '')
 
       # Expand abbreviated genus.
       str2 = str1.sub(/^([A-Z])\.? /) do |x|
@@ -189,7 +191,7 @@ protected
         str3 = name.display_name
         str3 = str3.sub(/([A-Z])[a-zë\-]*/, '\\1.') if str1 != str2
         str3 = str3.sub(name.author, '').strip if name.author && !str1.include?(name.author)
-        'x{NAME %d %s }x' % [name.id, str3]
+        prefix + 'x{NAME %d %s }x' % [name.id, str3]
       else
         orig
       end
@@ -199,10 +201,11 @@ protected
   # Convert _object name_ and _object id_ in a textile string.
   def check_other_links!
     self.gsub!(/
-      (?:^|\W) (?:_+) ([a-z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
+      (^|\W) (?:_+) ([a-z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
     /x) do |orig|
-      type   = $1
-      id     = $2
+      prefix = $1
+      type   = $2
+      id     = $3
       str    = nil
       obj    = nil
       result = orig
@@ -266,7 +269,7 @@ protected
           result = type.upcase
           result += ' ' + id.to_s
           result += ' ' + str.gsub('{','&#123;').gsub('}','&#125;') if str
-          result = 'x{' + result + ' }x'
+          result = prefix + 'x{' + result + ' }x'
         end
       rescue
       end
