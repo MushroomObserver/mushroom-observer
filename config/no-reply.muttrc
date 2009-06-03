@@ -1,0 +1,6 @@
+ignore *
+unignore From: To: Cc: Subject: Date:
+
+set from="no-reply@mushroomobserver.org"
+set use_from=yes
+set envelope_from=yes

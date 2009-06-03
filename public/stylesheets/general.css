@@ -287,6 +287,10 @@ div.HelpNoteIndent {
   font-size: 80%;
 }
 
+table.with_lines td {
+  padding: 2px 5px 2px 5px;
+}
+
 img.interest_big {
   border: none;
 }
@@ -390,6 +394,8 @@ div.sandbox {
 div.sandbox a         { background-color: white; color: blue   }
 div.sandbox a:visited { background-color: white; color: red    }
 div.sandbox a:hover   { background-color: white; color: yellow }
+div.sandbox table.with_lines    { background: black; }
+div.sandbox table.with_lines td { background: white; }
 
 /* bulk name editor */
 p.bulk_text {

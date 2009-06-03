@@ -122,6 +122,7 @@ class ObserverController < ApplicationController
       :show_user,
       :show_user_observations,
       :show_votes,
+      :textile,
       :textile_sandbox,
       :throw_error,
       :translators_note,

@@ -252,6 +252,18 @@ namespace :jason do
 
 ################################################################################
 
+  desc 'Dump and flush mysqld stats.'
+  task(:global_status => :environment) do
+    for hash in Comment.connection.select_all('show global status')
+      key = hash['Variable_name']
+      val = hash['Value']
+      printf "%-40.40s %s\n", key, val
+    end
+    Comment.connection.execute('flush status')
+  end
+
+################################################################################
+
   desc "test"
   task(:test => :environment) do
     include ApplicationHelper

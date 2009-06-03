@@ -26,6 +26,7 @@
 class AccountMailer < ActionMailer::Base
 
   NEWS_EMAIL_ADDRESS        = "news@mushroomobserver.org"
+  NOREPLY_EMAIL_ADDRESS     = "no-reply@mushroomobserver.org"
   ACCOUNTS_EMAIL_ADDRESS    = "accounts@mushroomobserver.org"
   ERROR_EMAIL_ADDRESS       = "errors@mushroomobserver.org"
   WEBMASTER_EMAIL_ADDRESS   = "webmaster@mushroomobserver.org"
@@ -47,10 +48,10 @@ class AccountMailer < ActionMailer::Base
     @body["object"]      = object
     @body["comment"]     = comment
     @subject             = :email_comment_subject.l(:name => object.unique_text_name)
-    @headers['Reply-To'] = sender.email if sender && receiver == object.user
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = (sender && receiver == object.user) ? sender.email : NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
@@ -64,6 +65,7 @@ class AccountMailer < ActionMailer::Base
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
@@ -82,6 +84,7 @@ class AccountMailer < ActionMailer::Base
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
@@ -98,6 +101,7 @@ class AccountMailer < ActionMailer::Base
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
@@ -115,6 +119,7 @@ class AccountMailer < ActionMailer::Base
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.html_email ? 'text/html' : 'text/plain'
   end
 
@@ -134,15 +139,16 @@ class AccountMailer < ActionMailer::Base
   end
 
   def email_features(user, features)
-    @user             = user
-    Locale.code       = @user.locale || DEFAULT_LOCALE
-    @subject          = :email_features_subject.l
-    @body["user"]     = @user
-    @body["features"] = features
-    @recipients       = @user.email
-    @bcc              = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
-    @from             = NEWS_EMAIL_ADDRESS
-    @content_type     = @user.html_email ? "text/html" : "text/plain"
+    @user                = user
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_features_subject.l
+    @body["user"]        = @user
+    @body["features"]    = features
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? "text/html" : "text/plain"
   end
 
   def publish_name(publisher, receiver, name)
@@ -156,10 +162,12 @@ class AccountMailer < ActionMailer::Base
     @recipients           = receiver.email
     @bcc                  = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
     @from                 = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To']  = NOREPLY_EMAIL_ADDRESS
     @content_type         = @user.html_email ? "text/html" : "text/plain"
   end
 
   def naming_for_observer(observer, naming, notification)
+    sender                = notification.user
     @user                 = observer
     Locale.code           = @user.locale || DEFAULT_LOCALE
     @subject              = :email_naming_for_observer_subject.l
@@ -168,33 +176,36 @@ class AccountMailer < ActionMailer::Base
     @body["notification"] = notification
     @recipients           = @user.email
     @bcc                  = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
-    @from                 = NEWS_EMAIL_ADDRESS
-    # @content_type         = @user.html_email ? "text/html" : "text/plain"
+    @from                 = sender ? sender.email : NEWS_EMAIL_ADDRESS
+    @headers['Reply-To']  = sender ? sender.email : NOREPLY_EMAIL_ADDRESS
+    # @content_type       = @user.html_email ? "text/html" : "text/plain"
     @content_type         = "text/plain"
   end
 
   def naming_for_tracker(tracker, naming)
-    @user             = tracker
-    Locale.code       = @user.locale || DEFAULT_LOCALE
-    @subject          = :email_naming_for_tracker_subject.l
-    @body["user"]     = @user
-    @body["naming"]   = naming
-    @recipients       = @user.email
-    @bcc              = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
-    @from             = NEWS_EMAIL_ADDRESS
-    @content_type     = @user.html_email ? "text/html" : "text/plain"
+    @user                = tracker
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_naming_for_tracker_subject.l
+    @body["user"]        = @user
+    @body["naming"]      = naming
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES unless QUEUE_EMAIL
+    @from                = NEWS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? "text/html" : "text/plain"
   end
 
   def new_password(user, password)
-    @user             = user
-    Locale.code       = @user.locale || DEFAULT_LOCALE
-    @subject          = :email_new_password_subject.l
-    @body["password"] = password
-    @body["user"]     = @user
-    @recipients       = @user.email
-    @bcc              = EXTRA_BCC_EMAIL_ADDRESSES
-    @from             = ACCOUNTS_EMAIL_ADDRESS
-    @content_type     = @user.html_email ? "text/html" : "text/plain"
+    @user                = user
+    Locale.code          = @user.locale || DEFAULT_LOCALE
+    @subject             = :email_new_password_subject.l
+    @body["password"]    = password
+    @body["user"]        = @user
+    @recipients          = @user.email
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
+    @from                = ACCOUNTS_EMAIL_ADDRESS
+    @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
+    @content_type        = @user.html_email ? "text/html" : "text/plain"
   end
 
   def observation_question(sender, observation, question)

@@ -197,6 +197,16 @@ root> newaliases
 root> service postfix start
 root> chkconfig --level 345 postfix on
 
+# Configure no-reply to bounce correctly.
+root> useradd no-reply
+root> cp /var/web/mo/script/autoreply          /usr/bin/autoreply
+root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
+root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
+root> cp /var/web/mo/config/no-reply.forward   /home/no-reply/.forward
+root> chown no-reply:no-reply /home/no-reply/.[maf]*
+root> chmod 644 /home/no-reply/.[maf]*
+root> chmod 755 /usr/bin/autoreply
+
 # Configure email setting for rails.
 root> vi /var/web/mo/config/environment.rb
     ActionMailer::Base.smtp_settings = {

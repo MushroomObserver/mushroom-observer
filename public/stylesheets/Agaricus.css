@@ -12,6 +12,9 @@ body {
     color: #3b2821; /* cupreobrunneus */
 }
 
+table.with_lines    { background: #3b2821; } /* cupreobrunneus */
+table.with_lines td { background: #f6f0f2; } /* campestris */
+
 a { color: #a06463; } /* brasiliensis */
 a:visited { color: #3b2821; }  /* cupreobrunneus */
 a:hover {
@@ -53,6 +56,9 @@ li.selected { background-color: #eccf95 ! important }
       background-color: #d4a833; /* xanthodermus */
 }
 
+.ListLine0 table.with_lines    { background: #3b2821; } /* cupreobrunneus */
+.ListLine0 table.with_lines td { background: #d4a833; } /* xanthodermus */
+
 .ListLine0 a {
       color: #b4725f; /* lilaceps */
 }
@@ -66,6 +72,9 @@ li.selected { background-color: #eccf95 ! important }
 .ListLine1 {
       background-color: #b4725f; /* lilaceps */
 }
+
+.ListLine1 table.with_lines    { background: #3b2821; } /* cupreobrunneus */
+.ListLine1 table.with_lines td { background: #b4725f; } /* lilaceps */
 
 .ListLine1 a {
       color: #d4a833; /* xanthodermus */
