@@ -1,20 +1,20 @@
 xml.instruct! :xml, :version => "1.0" 
-xml.response("xmlns" => "http://www.eol.org/transfer/data/0.1",
+xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
   "xmlns:xsd" => "http://www.w3.org/2001/XMLSchema",
   "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
   "xmlns:dcterms" => "http://purl.org/dc/terms/",
   "xmlns:geo" => "http://www.w3.org/2003/01/geo/wgs84_pos#",
   "xmlns:dwc" => "http://rs.tdwg.org/dwc/dwcore/",
   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-  "xsi:schemaLocation" => "http://www.eol.org/transfer/data/0.1 http://services.eol.org/development/pleary/xml/content4.xsd",
-  "xmlns:creativeCommons" => "http://backend.userland.com/creativeCommonsRssModule",
-  "xmlns:media" => "http://search.yahoo.com/mrss/") {
+  "xsi:schemaLocation" => "http://www.eol.org/transfer/content/0.2 http://services.eol.org/schema/content_0_2.xsd") {
     for taxon in @names
       xml.taxon do
         xml.dc(:identifier, "#{DOMAIN}/name/show_name/#{taxon.id}")
         xml.dc(:source, "#{DOMAIN}/name/show_name/#{taxon.id}")
         for (rank, name) in Name.parse_classification(taxon.classification)
-          xml.dwc(rank, name)
+          if Name.eol_ranks.member?(rank):
+            xml.dwc(rank, name)
+          end
         end
         xml.dwc(:ScientificName, taxon.search_name)
         xml.dcterms(:modified, taxon.modified.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))

@@ -185,22 +185,26 @@ class Name < ActiveRecord::Base
   RANKS_ABOVE_SPECIES = [:Genus] + RANKS_ABOVE_GENUS
   RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species]
   ALL_RANKS =  RANKS_BELOW_GENUS + RANKS_ABOVE_SPECIES + [:Group]
+  EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
 
-  # Returns: array of symbols, from :Form to :Kingdom, then :Group.
+  # Returns: array of symbols, from :Form to :Domain, then :Group.
   def self.all_ranks; ALL_RANKS; end
 
-  # Returns: array of symbols, from :Family to :Kingdom.
+  # Returns: array of symbols, from :Family to :Domain.
   def self.ranks_above_genus; RANKS_ABOVE_GENUS; end
 
   # Returns: array of symbols, from :Form to :Species.
   def self.ranks_below_genus; RANKS_BELOW_GENUS; end
 
-  # Returns: array of symbols, from :Genus to :Kingdom.
+  # Returns: array of symbols, from :Genus to :Domain.
   def self.ranks_above_species; RANKS_ABOVE_SPECIES; end
 
   # Returns: array of symbols, from :Form to :Subspecies.
   def self.ranks_below_species; RANKS_BELOW_SPECIES; end
 
+  # Returns: array of symbols, from :Form to :Kingdom.
+  def self.eol_ranks; EOL_RANKS; end
+  
   # Is this name a family or higher?
   def above_genus?; RANKS_ABOVE_GENUS.include?(self.rank); end
 
