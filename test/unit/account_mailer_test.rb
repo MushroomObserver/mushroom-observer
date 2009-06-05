@@ -46,7 +46,8 @@ class AccountMailerTest < Test::Unit::TestCase
                                     "#{FIXTURES_PATH}/comment_response.html.mac")
     @rolf.html_email = false
     email = AccountMailer.create_comment(@dick, @rolf, @minimal_unknown, @another_comment).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/comment_response.text")
+    assert_string_equal_file(email, "#{FIXTURES_PATH}/comment_response.text",
+                                    "#{FIXTURES_PATH}/comment_response.text.mac")
   end
 
   def test_email_4
@@ -145,7 +146,8 @@ class AccountMailerTest < Test::Unit::TestCase
                                     "#{FIXTURES_PATH}/observation_change.html.mac")
     email = AccountMailer.create_observation_change(@dick, @mary, nil,
       '**__Coprinus comatus__** L. (123)', @coprinus_comatus_obs.created).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_destroy.html")
+    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_destroy.html",
+                                    "#{FIXTURES_PATH}/observation_destroy.html.mac")
     @mary.html_email = false
     email = AccountMailer.create_observation_change(@dick, @mary, @coprinus_comatus_obs,
       'date,location,specimen,is_collection_location,notes,thumb_image_id,added_image,removed_image',
