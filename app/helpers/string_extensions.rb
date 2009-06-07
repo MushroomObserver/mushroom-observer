@@ -311,9 +311,13 @@ end
 if !defined? HTML_SPECIAL_CHAR_EQUIVALENTS
   HTML_SPECIAL_CHAR_EQUIVALENTS = {
     'amp'   => '&',
+    '#38'   => '&',
     'gt'    => '>',
+    '#62'   => '>',
     'lt'    => '<',
+    '#60'   => '<',
     'quot'  => '"',
+    '#34'   => '"',
     '#39'   => "'",
     '#169'  => '(c)',
     '#174'  => '(r)',
@@ -329,6 +333,7 @@ if !defined? HTML_SPECIAL_CHAR_EQUIVALENTS
     '#8243' => '"',
     '#8482' => '(tm)',
     '#8594' => '->',
+    'nbsp'  => ' ',
   }
 end
 
@@ -363,12 +368,16 @@ class String
   # &blah; codes into ASCII equivalents.  Line breaks may still be a problem,
   # but this seems to work pretty well on the output of RedCloth at least.
   def html_to_ascii
-    self.gsub(/\n+/, ' ').              # remove all newlines first
+    self.gsub(/\s*\n\s*/, ' ').         # remove all newlines first
          gsub(/<br *\/> */, "\n").      # put one after every line break
+         gsub(/<\/li> */, "\n").        # put one after every list item
+         gsub(/<\/tr> */, "\n").        # put one after every table row
          gsub(/<\/p> */, "\n\n").       # put two between paragraphs
+         gsub(/<\/td> */, "\t").        # put tabs between table columns
          gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
          gsub(/\n+\Z/, '').             # remove superfluous newlines at end
          gsub(/<[^>]*>/, '').           # remove all <tags>
+         gsub(/^ +|[ \t]+$/, '').       # remove leading/trailing space on each line
          gsub(/&(#\d+|[a-zA-Z]+);/) { HTML_SPECIAL_CHAR_EQUIVALENTS[$1].to_s }
                                         # convert &xxx; and &#nnn; to ascii
   end

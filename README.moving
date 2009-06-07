@@ -117,9 +117,9 @@ mo> ssh xxx@images.mushroomobserver.org
 mo> cd public/images
 mo> mkdir thumb 640 orig
 mo> cd thumb
-mo> ssh -f xxx@images \(cd images.mushroomobserver.org/thumb\; ls \*.jpg \> x\; tar -T x cf -\) | tar xf -
+mo> ssh -f xxx@images \(cd images.mushroomobserver.org/thumb\; ls \*.jpg \> x\; tar -T x -cf -\) | tar -xf -
 mo> cd ../640
-mo> ssh -f xxx@images \(cd images.mushroomobserver.org/640\; ls \*.jpg \> x\; tar -T x cf -\) | tar xf -
+mo> ssh -f xxx@images \(cd images.mushroomobserver.org/640\; ls \*.jpg \> x\; tar -T x -cf -\) | tar -xf -
 
 # Create database for testing.
 mo> mysql -u root

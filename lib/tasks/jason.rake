@@ -267,8 +267,7 @@ namespace :jason do
   desc "test"
   task(:test => :environment) do
     include ApplicationHelper
-    print "".blank? ? "yes\n" : "no\n"
-    str = %(available "from Ret' __Amanita__ site:":http://pluto.njcc.com.)
-    print str.tl, "\n"
+    str = %(blah blah blah)
+    print str.html_to_ascii
   end
 end
