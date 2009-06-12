@@ -482,14 +482,16 @@ def update_local_files(files, path)
       file1 = "#{path}/thumb/#{file}"
       file2 = "#{path}/640/#{file}"
       file3 = "#{path}/orig/#{file}"
-      if File.exists?(file1) && (size = File.size(file1).to_i) != 0
-        files["thumb/#{file}"] = size
-      end
-      if File.exists?(file2) && (size = File.size(file2).to_i) != 0
-        files["640/#{file}"] = size
-      end
-      if File.exists?(file3) && (size = File.size(file3).to_i) != 0
-        files["orig/#{file}"] = size
+      # Wait for all three images, otherwise the daemon might wake up after
+      # the original has been uploaded but before the smaller sizes have been
+      # created.  That would result in the smaller sizes being missed until
+      # the nightly job finally caught the error.
+      if File.exists?(file1) && (size1 = File.size(file1).to_i) != 0
+         File.exists?(file2) && (size2 = File.size(file2).to_i) != 0
+         File.exists?(file3) && (size3 = File.size(file3).to_i) != 0
+        files["thumb/#{file}"] = size1
+        files["640/#{file}"]   = size2
+        files["orig/#{file}"]  = size3
       end
     end
   end
