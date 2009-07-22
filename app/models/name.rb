@@ -186,9 +186,13 @@ class Name < ActiveRecord::Base
   RANKS_BELOW_GENUS   = RANKS_BELOW_SPECIES + [:Species]
   ALL_RANKS =  RANKS_BELOW_GENUS + RANKS_ABOVE_SPECIES + [:Group]
   EOL_RANKS = [:Form, :Variety, :Subspecies, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom]
+  ALT_RANKS = {:Division => :Phylum}
 
   # Returns: array of symbols, from :Form to :Domain, then :Group.
   def self.all_ranks; ALL_RANKS; end
+
+  # Returns: dictionary mapping alternative names to standard names (e.g., Division -> Phylum).
+  def self.alt_ranks; ALT_RANKS; end
 
   # Returns: array of symbols, from :Family to :Domain.
   def self.ranks_above_genus; RANKS_ABOVE_GENUS; end
@@ -270,6 +274,10 @@ class Name < ActiveRecord::Base
         match = line.match(/^\s*([a-zA-Z]+):\s*_*([a-zA-Z]+)_*\s*$/)
         if match
           line_rank = match[1].downcase.capitalize.to_sym
+          alt_rank = Name.alt_ranks[line_rank]
+          if alt_rank
+            line_rank = alt_rank
+          end
           line_name = match[2]
           results.push([line_rank, line_name])
         elsif line.strip() != ''

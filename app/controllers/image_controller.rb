@@ -125,13 +125,10 @@ class ImageController < ApplicationController
   # Show the 640x640 (max size) version of image.
   # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
-  # Outputs: @image, @invalid
+  # Outputs: @image
   def show_image
     store_location
     pass_seq_params()
-    # This marks this page as invalid XHTML.  Has something to do with a
-    # <div about=filename.jpg> tag.  What's that for??
-    @invalid = true
     @image = Image.find(params[:id])
     update_view_stats(@image)
     @is_reviewer = is_reviewer
@@ -140,13 +137,10 @@ class ImageController < ApplicationController
   # Show the original size image.
   # Linked from: show_image
   # Inputs: params[:id] (image)
-  # Outputs: @image, @invalid
+  # Outputs: @image
   def show_original
     store_location
     pass_seq_params()
-    # This marks this page as invalid XHTML.  Has something to do with a
-    # <div about=filename.jpg> tag.  What's that for??
-    @invalid = true
     @image = Image.find(params[:id])
   end
 

@@ -11,35 +11,37 @@
   end
 %>
 
-<div class="pagination"><%= pagination_letters(@letters) %></div>
-<div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
+<% if @name_subset and @name_subset != [] %>
+  <div class="pagination"><%= pagination_letters(@letters) %></div>
+  <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
 
-<%
-  last_letter = nil
-  odd_or_even = 0 
-%>
-<table cellpadding="5" cellspacing="0" width="100%">
-<% for datum in @name_subset || []
-  odd_or_even = 1 - odd_or_even %>
-  <%=
-    if datum['first_letter'] != last_letter
-      last_letter = datum['first_letter']
-      if last_letter != 'A'
-        "<br/>"
-      else
-        ""
-      end
-    end
+  <%
+    last_letter = nil
+    odd_or_even = 0 
   %>
-  <tr class="ListLine<%= odd_or_even %>"><td>
-  <%= link_to(datum['display_name'].t, :action => 'show_name', :id => datum['id']) %><br/>
-  <% if datum.member?('extra') %>
-    </td><td><%= datum['extra'] %>
+  <table cellpadding="5" cellspacing="0" width="100%">
+  <% for datum in @name_subset || []
+    odd_or_even = 1 - odd_or_even %>
+    <%=
+      if datum['first_letter'] != last_letter
+        last_letter = datum['first_letter']
+        if last_letter != 'A'
+          "<br/>"
+        else
+          ""
+        end
+      end
+    %>
+    <tr class="ListLine<%= odd_or_even %>"><td>
+    <%= link_to(datum['display_name'].t, :action => 'show_name', :id => datum['id']) %><br/>
+    <% if datum.member?('extra') %>
+      </td><td><%= datum['extra'] %>
+    <% end %>
+    </td></tr>
   <% end %>
-  </td></tr>
-<% end %>
-</table>
+  </table>
 
-<br/>
-<div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
-<div class="pagination"><%= pagination_letters(@letters) %></div>
+  <br/>
+  <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
+  <div class="pagination"><%= pagination_letters(@letters) %></div>
+<% end %>

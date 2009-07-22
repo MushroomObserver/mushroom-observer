@@ -222,6 +222,46 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(@rolf, name.user)
   end
 
+  def test_create_name_bad_taxonomic_classification
+    text_name = "Amanita pantherina"
+    name = Name.find_by_text_name(text_name)
+    assert_nil(name)
+    params = {
+      :name => {
+        :text_name => text_name,
+        :rank => :Species,
+        :classification => "Clade: Basidiomycetes"
+      }
+    }
+    params[:name] = empty_notes.merge(params[:name])
+
+    post_requires_login(:create_name, params, false)
+    
+    # Should fail and no name should get created
+    assert_nil(Name.find_by_text_name(text_name))
+    assert_form_action(:action => 'create_name')
+  end
+
+  def test_create_name_alt_rank
+    text_name = "Amanita pantherina"
+    name = Name.find_by_text_name(text_name)
+    assert_nil(name)
+    params = {
+      :name => {
+        :text_name => text_name,
+        :rank => :Species,
+        :classification => "Division: Basidiomycetes"
+      }
+    }
+    params[:name] = empty_notes.merge(params[:name])
+    
+    post_requires_login(:create_name, params, false)
+    assert_redirected_to(:controller => "name", :action => "show_name")
+    name = Name.find_by_text_name(text_name)
+    assert(name)
+    assert_equal('Phylum: _Basidiomycetes_', name.classification)
+  end
+
   # ----------------------------
   #  Edit name.
   # ----------------------------

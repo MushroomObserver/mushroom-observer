@@ -126,6 +126,7 @@ class NameController < ApplicationController
       AND (names.gen_desc is NULL or names.gen_desc = '')
       AND name_counts.count > 1
       AND draft_names.name_id is NULL
+      AND current_timestamp - modified > #{1.week.to_i}
       ORDER BY name_counts.count desc, names.text_name asc
       LIMIT 100
     )
@@ -440,48 +441,62 @@ class NameController < ApplicationController
   def create_name
     if verify_user()
       if request.method == :post
-        text_name = (params[:name][:text_name] || '').strip
-        author = (params[:name][:author] || '').strip
-        name_str = text_name
-        matches = nil
-        if author != ''
-          matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
-          name_str += " #{author}"
-        else
-          matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
-        end
-        if matches.length > 0
-          flash_error(:name_create_already_exists.t(:name => name_str))
-          name = matches[0]
-        else
-          names = Name.names_from_string(name_str)
-          name = names.last
-          if name.nil?
-            raise :runtime_unable_to_create_name.t(:name => name_str)
-          end
-          name.citation = params[:name][:citation]
-          name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
-
-          has_notes = false
-          for f in Name.all_note_fields
-            note = params[:name][f]
-            has_notes |= (note and (note != ''))
-            name.send("#{f}=", note)
-          end
-          if has_notes
-            name.license_id = params[:name][:license_id]
+        begin
+          text_name = (params[:name][:text_name] || '').strip
+          author = (params[:name][:author] || '').strip
+          name_str = text_name
+          params[:name][:classification] = Name.validate_classification(params[:name][:rank], params[:name][:classification])
+          matches = nil
+          if author != ''
+            matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
+            name_str += " #{author}"
           else
-            name.license_id = nil
+            matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
           end
-          for n in names
-            if n
-              n.user_id = @user.id
-              n.save
-              n.add_editor(@user)
+          if matches.length > 0
+            flash_error(:name_create_already_exists.t(:name => name_str))
+            name = matches[0]
+          else
+            names = Name.names_from_string(name_str)
+            name = names.last
+            if name.nil?
+              raise :runtime_unable_to_create_name.t(:name => name_str)
+            end
+            name.citation = params[:name][:citation]
+            name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
+
+            has_notes = false
+            for f in Name.all_note_fields
+              note = params[:name][f]
+              has_notes |= (note and (note != ''))
+              name.send("#{f}=", note)
+            end
+            if has_notes
+              name.license_id = params[:name][:license_id]
+            else
+              name.license_id = nil
+            end
+            for n in names
+              if n
+                n.user_id = @user.id
+                n.save
+                n.add_editor(@user)
+              end
             end
           end
+        rescue RuntimeError => err
+          # Anything causing changes not to get saved ends up here.
+          @name = Name.new
+          flash_error(err.to_s) if !err.nil?
+          flash_object_errors(@name)
+          @name.attributes = params[:name]
+          @licenses = License.current_names_and_ids()
+          @can_make_changes = true
+
+        else
+          # If no errors occurred, changes must've been made successfully.
+          redirect_to(:action => 'show_name', :id => name)
         end
-        redirect_to(:action => 'show_name', :id => name)
       else
         @name = Name.new
         @licenses = License.current_names_and_ids()

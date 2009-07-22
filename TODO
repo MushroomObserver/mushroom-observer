@@ -1,6 +1,18 @@
-Quit trying to send a QueuedEmail after some number of tries.
+How to handle wikipedia references
+References for descriptions
+Resolve taxonomic classification section
+How should locations be handled?
+  Should be based on actual observations
+Locations should use a location translator
+Need a distance query
 
-cron for eol.xml
+Description effort:
+  100 descriptions with the most observations that haven't been modified in a week and don't have a general description and have no drafts
+  # descriptions with the most observations that haven't been modified in ? [and don't have a general description] [and have no drafts]
+  Rate by quality
+  Need to review drafts
+
+Quit trying to send a QueuedEmail after some number of tries.
 
 Tests for Advanced Search
 
@@ -10,14 +22,9 @@ Deleted
 Item
 Thu Feb 12 22:52:09 -0800 2009: Thu Feb 12 22:52:09 -0800 2009:log_name_updated(user=nathan)
 
-EOL Stats
-  descriptions with gen. desc. and photos that aren't reviewed or approved
-  
-
 Make extra_gc depend on config
 Author changes should email authors and reviewers
 Edits should go to authors
-Adjust scoring based on authorship and editorship rather than raw version count
 
 Added email:
   Name edits go to authors
