@@ -137,7 +137,7 @@ end
 def check_for_mismatches(file_lists, cronjob=false)
   servers = file_lists.keys.sort
 
-  # Get union files on all servers.
+  # Get union of files on all servers.
   files = {}
   for server in servers
     for file in file_lists[server].keys
@@ -150,18 +150,21 @@ def check_for_mismatches(file_lists, cronjob=false)
     size = nil
     any_different = false
     any_missing   = false
-    for server in servers
-      size2 = file_lists[server][file]
-      any_different = true if size && size2 && size != size2
-      any_missing = true   if !size2
-      size = size2         if !size
-    end
 
-    # Remove originals if they exist and are correct on all remote servers.
-    if cronjob && !any_different && !any_missing && file[0,4] == 'orig'
-      File.delete("#{@@local_path}/#{file}")
-      verbose("deleting #{file}")
-      log("Deleting #{file}\n")
+    if file != 'date'
+      for server in servers
+        size2 = file_lists[server][file]
+        any_different = true if size && size2 && size != size2
+        any_missing = true   if !size2
+        size = size2         if !size
+      end
+
+      # Remove originals if they exist and are correct on all remote servers.
+      if cronjob && !any_different && !any_missing && file[0,4] == 'orig'
+        File.delete("#{@@local_path}/#{file}")
+        verbose("deleting #{file}")
+        log("Deleting #{file}\n")
+      end
     end
 
     any_different
@@ -219,6 +222,7 @@ def daemon(delay)
 
   while true
     # Look for any new files.
+    update_file_cache(local_files, 'local')
     update_local_files(local_files, @@local_path)
 
     # Attempt to transfer any files not on any of the remote servers.
@@ -226,6 +230,7 @@ def daemon(delay)
     for server in OFFICIAL_SERVERS
       status = server_status[server]
       if status.okay_to_upload?
+        update_file_cache(remote_files[server], server)
         for file in local_files.keys - remote_files[server].keys
           log("Transferring #{file} to #{server}\n")
           if transfer_file(file, @@local_path, server)
@@ -439,6 +444,7 @@ end
 # path, just 'thumb/1234.jpg') and whose values are file sizes.
 def list_local_files(path)
   files = {}
+  files['date'] = Time.now
   for type in ['thumb', '640', 'orig']
     cmd = "ls -l #{path}/#{type}"
     verbose cmd
@@ -464,6 +470,7 @@ def list_remote_files(server)
     path = '.'
   end
   files = {}
+  files['date'] = Time.now
   cmd = "ssh #{url} ls -l #{path}/{thumb,640,orig}"
   verbose cmd
   open("|#{cmd}") do |dir|
@@ -527,6 +534,7 @@ def get_cached_file_list(server)
         files[file] = size
       end
     end
+    files['date'] = File.mtime(file)
   end
   return files
 end
@@ -539,6 +547,7 @@ def write_cached_file_list(server, files)
       fh.puts("#{file} #{size}\n")
     end
   end
+  files['date'] = Time.now
 end
 
 # Add a file that was just transferred.
@@ -546,6 +555,23 @@ def add_file_to_cached_file_list(server, file, size)
   verbose "adding '#{file} #{size}' to #{@@local_path}/#{server}.files"
   open("#{@@local_path}/#{server}.files", 'a') do |fh|
     fh.puts("#{file} #{size}\n")
+  end
+end
+
+# Check if cached directory for the given server has been refreshed.  (This
+# is used by the daemon which is running continuously.  It checks each cycle
+# to see if the nightly --clean job has run, and refreshes its internal cache
+# accordingly when it has.  This will theoretically catch those rare cases
+# where it *looks* like a transfer has worked, but for some reason hasn't.)
+# Returns nothing; changes file list in place as necessary.
+def update_file_cache(files, server)
+  file = "#{@@local_path}/#{server}.files"
+  if File.mtime(file) > files['date']
+    log("Daemon refreshing #{server} listing")
+    new_files = get_cached_file_list(server)
+    if new_files
+      files.replace(new_files)
+    end
   end
 end
 
