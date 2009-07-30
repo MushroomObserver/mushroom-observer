@@ -698,7 +698,7 @@ case get_next_arg
   when '-d', '--start'
     delay = (is_next_arg_value? ? get_next_arg : DAEMON_DELAY).to_i
     any_args_left?
-    if start_daemon(delay)
+    if is_daemon_running? || start_daemon(delay)
       exit 0
     else
       puts "Failed to start daemon.\n"
