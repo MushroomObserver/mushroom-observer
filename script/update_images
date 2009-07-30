@@ -252,15 +252,15 @@ end
 #  Command-line utility mode.
 # -----------------------------
 
-def sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig)
+def sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, use_cache)
   local_files = {}     # local_files['orig/1234.jpg'] = 123456 (bytes)
   remote_files = {}    # remote_files['orig/1234.jpg'] = 123456
 
   # Get initial list of files locally and on remote server.
   puts "Getting local listing...\n"
-  local_files = list_local_files(local)
+  local_files = use_cache ? get_cached_file_list(local) : list_local_files(local)
   puts "Getting remote listing...\n"
-  remote_files = list_remote_files(remote)
+  remote_files = use_cache ? get_cached_file_list(remote) : list_remote_files(remote)
   check_for_mismatches('local' => local_files, 'remote' => remote_files)
 
   # Upload files missing on remote server.
@@ -764,6 +764,8 @@ case get_next_arg
     do_orig  = true if get_flag('-O') || get_flag('--orig')
     do_thumb = do_640 = do_orig = true unless do_thumb || do_640 || do_orig
 
+    use_cache = true if get_flag('--use_cache')
+
     any_args_left?
 
     # Try to find local image directory
@@ -799,7 +801,7 @@ case get_next_arg
       Dir.mkdir("#{local}/orig\n")
     end
 
-    sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig)
+    sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, use_cache)
     exit 0
 
 ################################################################################
@@ -834,6 +836,7 @@ OPTIONS
     -T --thumb             Only update thumbnails.
     -N --640               Only update normal-size images.
     -O --orig              Only update originals.
+       --use_cache         Just use cached file list (don't refresh).
 
 DESCRIPTION
   This program is used to keep image servers in sync.  The primary mode is to
