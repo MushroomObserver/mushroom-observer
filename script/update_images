@@ -258,9 +258,19 @@ def sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, u
 
   # Get initial list of files locally and on remote server.
   puts "Getting local listing...\n"
-  local_files = use_cache ? get_cached_file_list(local) : list_local_files(local)
+  if use_cache
+    local_files = get_cached_file_list('local')
+  else
+    local_files = list_local_files(local)
+    write_cached_file_list('local', local_files)
+  end
   puts "Getting remote listing...\n"
-  remote_files = use_cache ? get_cached_file_list(remote) : list_remote_files(remote)
+  if use_cache
+    remote_files = get_cached_file_list(remote)
+  else
+    remote_files = list_remote_files(remote)
+    write_cached_file_list(remote, remote_files)
+  end
   check_for_mismatches('local' => local_files, 'remote' => remote_files)
 
   # Upload files missing on remote server.
