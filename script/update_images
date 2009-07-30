@@ -524,17 +524,17 @@ end
 # +server+ parameter is either 'local' or an alias for an remote image server.
 def get_cached_file_list(server)
   files = nil
-  file = "#{@@local_path}/#{server}.files"
-  if File.exists?(file)
+  cache_file = "#{@@local_path}/#{server}.files"
+  if File.exists?(cache_file)
     files = {}
     verbose "reading #{@@local_path}/#{server}.files"
-    open(file) do |fh|
+    open(cache_file) do |fh|
       fh.each_line do |line|
         file, size = line.chomp.split
         files[file] = size
       end
     end
-    files['date'] = File.mtime(file)
+    files['date'] = File.mtime(cache_file)
   end
   return files
 end
@@ -566,7 +566,7 @@ end
 # Returns nothing; changes file list in place as necessary.
 def update_file_cache(files, server)
   file = "#{@@local_path}/#{server}.files"
-  if File.mtime(file) > files['date']
+  if File.exists?(file) && File.mtime(file) > files['date']
     log("Daemon refreshing #{server} listing")
     new_files = get_cached_file_list(server)
     if new_files
