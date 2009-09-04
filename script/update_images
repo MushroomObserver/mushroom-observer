@@ -22,6 +22,7 @@ RETRIES = 5
 
 # Default root path for Rails.
 ROOT = '/var/web/mo'
+# ROOT = '/home/jason/public_html/mo_trunk'
 
 # Where pid of daemon is stored by default.
 PID_FILE = 'tmp/pids/update_images.pid'
@@ -495,7 +496,6 @@ end
 def update_local_files(files, path)
   Dir.foreach("#{path}/orig") do |file|
     if file.match(/^\d+\.jpg$/) && !files.has_key?("orig/#{file}")
-      log "Found new image #{file}\n"
       file1 = "#{path}/thumb/#{file}"
       file2 = "#{path}/640/#{file}"
       file3 = "#{path}/orig/#{file}"
@@ -509,6 +509,7 @@ def update_local_files(files, path)
         files["thumb/#{file}"] = size1
         files["640/#{file}"]   = size2
         files["orig/#{file}"]  = size3
+        log "Found new image #{file}\n"
       end
     end
   end
@@ -531,7 +532,7 @@ def get_cached_file_list(server)
     open(cache_file) do |fh|
       fh.each_line do |line|
         file, size = line.chomp.split
-        files[file] = size
+        files[file] = size.to_i
       end
     end
     files['date'] = File.mtime(cache_file)
