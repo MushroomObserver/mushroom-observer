@@ -37,7 +37,7 @@ EMAIL_PER_MINUTE = 25
 QUEUE_DELAY = 5.seconds
 
 # File where the list of most commonly used names lives.
-NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.txt"
+NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.development"
 
 # Limit size of image uploads (ImageMagick bogs down on large images).
 IMAGE_UPLOAD_MAX_SIZE = 20000000

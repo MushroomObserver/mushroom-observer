@@ -32,9 +32,14 @@ class AccountMailerTest < Test::Unit::TestCase
 
   # At the moment at least Redcloth produces slightly different output on Nathan's
   # laptop than on Jason's.  I've gotten it down to just these <br>'s.  It's easiest
-  # to convert everything to Nathan's format.
+  # to convert everything to Nathan's format.  (Arg, and some extraneous blank
+  # lines and leading whitespace -- I'll remove them all from both, so there.)
   def fix_mac_vs_pc!(email)
     email.gsub!(/<br \/>\n/, '<br/>')
+    email.gsub!(/&#38;/, '&amp;')
+    email.gsub!(/ &#8212;/, '&#8212;')
+    email.gsub!(/^ +/, '')
+    email.gsub!(/[\n\r]+/, "\n")
   end
 
   def test_email_1
@@ -121,7 +126,8 @@ class AccountMailerTest < Test::Unit::TestCase
     assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.html")
     @mary.email_html = false
     email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 1, 2, @peltigera.review_status).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.text")
+    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.text.pc",
+                                    "#{FIXTURES_PATH}/name_change.text.mac")
   end
 
   def test_email_10
