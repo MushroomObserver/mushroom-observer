@@ -1,10 +1,12 @@
 <%
-  intro = "A name was proposed for observation ##{@observation.id}:"
+  watching = @user.watching?(@observation)
+
+  intro = :email_name_proposal_intro.l(:id => @observation.id)
 
   fields = ""
-  fields += "*Name:* #{@naming.format_name}\n"
-  fields += "*Time:* #{@naming.created.to_formatted_s(:db)}\n"
-  fields += "*By:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
+  fields += "*#{:name.l}:* #{@naming.format_name}\n"
+  fields += "*#{:app_time.l}:* #{@naming.created.to_formatted_s(:db)}\n"
+  fields += "*#{:app_by.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
   for reason in @naming.naming_reasons
     if reason.notes.nil? || reason.notes == ""
       fields += "*#{reason.label.to_sym.t}*\n"
@@ -13,26 +15,24 @@
     end
   end
 
-  handy_links = "Here are some links you may find useful:"
+  handy_links = :email_handy_links
 
   links = []
-  links.push(["Show this observation",
+  links.push([:email_links_show_object.l(:type => :observation.l),
     "#{DOMAIN}/#{@observation.id}"])
-  links.push(["Post comment on this observation",
-    "#{DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
-  links.push(["I'm not interested in this observation",
+  links.push([:email_links_not_interested.l(:type => :observation.l),
     "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}"])
-  links.push(["Stop sending me these notifications",
-    "#{DOMAIN}/account/no_name_proposal_email/#{@user.id}"])
-  links.push(["Change your account preferences",
+  links.push([:email_links_stop_sending.l,
+    "#{DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
+  links.push([:email_links_change_prefs.l,
     "#{DOMAIN}/account/prefs/#{@user.id}"])
-  links.push(["Latest changes at Mushroom Observer",
+  links.push([:email_links_latest_changes.l,
     DOMAIN])
 
-if @user.html_email ######################################################### %>
+if @user.email_html ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: Name proposed for Observation #<%= @observation.id %></title>
+  <title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>

@@ -7,7 +7,7 @@
 #
 #  The only object this works for right now is Observation: users expressing
 #  interest in an observation will be notified whenever someone comments on
-#  it, proposes a new name, or the consensus name changes. 
+#  it, proposes a new name, or the consensus name changes.
 #
 #  The basic properties of an "interest" object are:
 #
@@ -26,6 +26,7 @@
 #    interest.user          User who is expressing interest.
 #    interest.object        Object user is interested in.
 #    interest.state         True = interested, false = not interested.
+#    interest.summary       "Watching observation Amanita velosa"
 #
 #    Interest.find_all_by_object(object)   Look up all interest in an object.
 #
@@ -36,11 +37,17 @@ class Interest < ActiveRecord::Base
   belongs_to :object, :polymorphic => true
   belongs_to :user
 
-  # Look up all comments for a given object.
+  # Look up all interest in a given object.
   def self.find_all_by_object(object)
-    type = object.class.to_s
-    id = object.id
-    self.find_all_by_object_type_and_object_id(type, id)
+    self.find(:all, :conditions => ['object_type = ? and object_id = ?', object.class.to_s, object.id], :include => 'user')
+  end
+
+  # To be compatible with Notification: returns string summarizing the object,
+  # e.g., "Watching observation Amanita virosa".
+  def summary
+    (self.state ? :app_watching.l : :app_ignoring.l) + ' ' +
+    self.object_type.underscore.to_sym.l + ' ' +
+    (self.object ? self.object.unique_format_name.t : '--')
   end
 
   protected

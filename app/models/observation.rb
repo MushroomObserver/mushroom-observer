@@ -360,7 +360,7 @@ result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
       recipients = []
 
       # Tell owner of observation if they want.
-      recipients.push(owner) if owner && owner.consensus_change_email
+      recipients.push(owner) if owner && owner.email_observations_consensus
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
@@ -373,10 +373,8 @@ result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
       end
 
       # Send notification to all except the person who triggered the change.
-      for recipient in recipients.uniq
-        if recipient && recipient != sender
-          ConsensusChangeEmail.create_email(sender, recipient, self, old, best)
-        end
+      for recipient in recipients.uniq - [sender]
+        ConsensusChangeEmail.create_email(sender, recipient, self, old, best)
       end
     end
 

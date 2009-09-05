@@ -11,6 +11,8 @@ draft:  Draft
 drafts:  Drafts
 image:  Image
 images:  Images
+license:  Licence
+licenses:  Licences
 location:  Location
 locations:  Locations
 name:  Name
@@ -135,10 +137,14 @@ app_approved:  Approved
 app_accepted:  Accepted
 app_deprecate:  Deprecate
 app_deprecated:  Deprecated
+app_misspelled:  Misspelled
+app_not_misspelled:  Spelled correctly
+app_correct_spelling:  Correct spelling
 app_name:  Name
 app_rank:  Rank
 app_author:  Author
 app_observer:  Observer
+app_identifier:  Identifier
 app_citation:  Citation
 app_unknown:  Unknown
 
@@ -175,6 +181,8 @@ app_created_bare:  Created
 app_by:  By
 app_last_modified:  'Last Modified: [date] by [user]'
 app_viewed:  'Viewed: [times], last viewed: [date]'
+app_date:  Date
+app_time:  Time
 app_one_time:  once
 app_many_times:  '[num] times'
 
@@ -183,6 +191,10 @@ app_north:  North
 app_south:  South
 app_east:  East
 app_west:  West
+app_north_edge:  North edge
+app_south_edge:  South edge
+app_east_edge:  East edge
+app_west_edge:  West edge
 app_highest:  Highest altitude
 app_lowest:  Lowest altitude
 app_meters:  meters
@@ -219,6 +231,10 @@ app_notes:  Notes
 
 # Used in place of confidence level if there are no votes yet.
 app_no_votes:  no votes
+
+# Interest states.
+app_watching:  Watching
+app_ignoring:  Ignoring
 
 ################################################################################
 
@@ -346,6 +362,8 @@ validate_comment_user_missing:  Missing user.
 validate_image_content_type_images_only:  You can only upload images.
 validate_image_content_type_too_long:  Content_type must be less than 100 characters long.
 validate_image_copyright_holder_too_long:  Copyright holder's name must be less than 100 characters long.
+validate_image_file_too_big:  We can't handle images that big.  Please reduce it to less than [max] before uploading.
+validate_image_file_missing:  Had problems uploading image.
 validate_image_title_too_long:  Title must be less than 100 characters long.
 validate_image_user_missing:  Missing user.
 validate_image_when_missing:  Missing date.
@@ -454,16 +472,16 @@ advanced_search_result_type:  Result Type
 advanced_search_result_type_help:  Do you want observations, images or names/descriptions?
 advanced_search_title:  Advanced Search
 
+
 # admin_request/author_request emails
-admin_request_change_member_status: Change User's Status
-admin_request_title: Admin Request for [title]
-author_request_add_author: Make Sender an Author
-author_request_title: Authorship Request for [title]
-request_handy_links: Here are some handy links that you may find useful
-request_message: Message
-request_show_user: Show details on sender
-request_subject: Subject
-request_success: Delivered email.
+admin_request_change_member_status:  Change user's status
+admin_request_title:  Admin Request for [title]
+author_request_add_author:  Make sender an author
+author_request_title:  Authorship Request for [title]
+request_message:  Message
+request_show_user:  Show details on sender
+request_subject:  Subject
+request_success:  Delivered email.
 
 
 # observer/ask_observation_question
@@ -647,7 +665,7 @@ create_naming_already_proposed:  >
   Someone has already proposed that name.  If you would like to comment on it,
   try posting a comment instead.
 
-create_naming_title:  Create Naming for Observation #[id]
+create_naming_title:  'Create Naming for Observation #[id]'
 
 
 # observer/create_observation
@@ -699,7 +717,7 @@ edit_naming_someone_else:  >
   Sorry, someone else has given this a positive vote, so we had to create a new
   Naming to accomodate your changes.
 
-edit_naming_title:  Edit Naming for Observation #[id]
+edit_naming_title:  'Edit Naming for Observation #[id]'
 
 
 # observer/edit_observation
@@ -713,23 +731,172 @@ edit_project_success:  Project was successfully updated.
 edit_project_title:  'Editing Project: [title]'
 
 
-# account_mailer model
+# account_mailer email
 email_comment_subject:  Comment about [name]
 email_commercial_inquiry_subject:  Commercial Inquiry about [name]
-email_consensus_change_subject:  Consensus rejected [old] in favor of [new]
-email_denied_subject:  '[MO] User Creation Blocked'
+email_consensus_change_subject:  Consensus Rejected [old] in Favor of [new]
+email_denied_subject:  User Creation Blocked
 email_features_subject:  New Mushroom Observer Features
-email_naming_for_observer_subject:  Mushroom Observer Research Request
-email_naming_for_tracker_subject:  Mushroom Observer Naming Notification
-email_name_change_subject:  '[name] has been changed'
+email_location_change_subject:  '[name] Has Been Changed'
+email_naming_for_observer_subject:  Research Request
+email_naming_for_tracker_subject:  Naming Notification
+email_name_change_subject:  '[name] Has Been Changed'
 email_name_proposal_subject:  'Observation #[id] may be [name]'
-email_new_password_subject:  New Password for Mushroom Observer Account
-email_observation_change_subject:  Observation changed, [name]
-email_observation_destroy_subject:  Observation destroyed, [name]
+email_new_password_subject:  New Password
+email_observation_change_subject:  Observation Changed, [name]
+email_observation_destroy_subject:  Observation Destroyed, [name]
 email_observation_question_subject:  Question about [name]
-email_publish_name_subject:  '[MO] Name Published'
-email_verify_subject:  Email Verification for Mushroom Observer
-email_webmaster_question_subject:  '[MO] Question from [user]'
+email_publish_name_subject:  Name Published
+email_verify_subject:  Email Verification
+email_webmaster_question_subject:  Question from [user]
+
+email_field_added_images:  Added image(s)
+email_field_changed_thumbnail:  Changed thumbnail
+email_field_collection_location:  Specimen _was_ collected at this location
+email_field_collection_not_location:  Specimen _was not_ collected at this location
+email_field_is_now:  changed to
+email_field_new_name:  New Name
+email_field_no_specimen_available:  Specimen is no longer available
+email_field_old_name:  Old Name
+email_field_published:  Published by
+email_field_removed_images:  Removed image(s)
+email_field_specimen_available:  Specimen is now available
+email_field_image_count:  Image count
+
+email_links_change_prefs:  Change your preferences
+email_links_disable_tracking:  Disable tracking for this [type]
+email_links_email_publisher:  Send email to the publisher
+email_links_latest_changes:  Latest changes at Mushroom Observer
+email_links_not_interested:  I'm not interested in this [type]
+email_links_post_comment:  Post a comment
+email_links_show_object:  Show this [type]
+email_links_show_user:  Show user's profile
+email_links_show_observer:  Show observer's profile
+email_links_show_identifier:  Show identifier's profile
+email_links_stop_sending:  Stop sending me email like this
+email_links_your_interests:  Review your notifications
+
+email_can_respond:  >
+  It is entirely up to you whether you want to reply to [name] ([email]) by
+  replying directly to this email.
+
+email_handy_links:  'Here are some handy links:'
+email_no_respond:  Please do not reply to this email!
+email_report_abuse:  >
+  If you feel this user is abusing this service please forward this entire
+  email message to: webmaster@mushroomobserver.org
+
+email_respond_via_comment:  >
+  Use the link below to respond via your own public comment.
+
+email_admin_request_intro:  >
+  h2. *Admin Request*
+  \n\n
+  [user] ([email]) asked the Mushroom Observer website to forward the
+  following request to you regarding [project]:
+
+email_author_request_intro:  >
+  h2. *Author Request*
+  \n\n
+  [user] ([email]) asked the Mushroom Observer website to forward the
+  following request to you regarding [object]:
+
+email_comment_intro_other:  >
+  h2. *Comment on [type]*
+  \n\n
+  The following comment was posted on the Mushroom Observer website
+  regarding the [type] <u>[name]</u>:
+
+email_comment_intro_response:  >
+  h2. *Comment Response*
+  \n\n
+  The following comment was posted on the Mushroom Observer website in response
+  to your comment regarding the [type] <u>[name]</u>:
+
+email_comment_intro_to_owner:  >
+  h2. *Comment on Your [type]*
+  \n\n
+  The following comment was posted on the Mushroom Observer website
+  regarding your [type] <u>[name]</u>:
+
+email_commercial_intro:  >
+  h2. *Commercial Inquiry*
+  \n\n
+  [user] ([email]) asked the Mushroom Observer website to forward the
+  following commercial inquiry to you about your image [image]:
+
+email_consensus_change_intro:  >
+  h2. *Consensus Change*
+  \n\n
+  Consensus has changed for observation #[id]:
+
+email_features_intro:  >
+  h2. *New Features*
+  \n\n
+  The following new features have been released at the Mushroom Observer website:
+
+email_name_proposal_intro:  >
+  h2. *Name Proposal*
+  \n\n
+  A name was proposed for observation #[id]:
+
+email_naming_for_observer_intro:  >
+  h2. *Research Request*
+  \n\n
+  [user] ([email]) asked the Mushroom Observer website to forward the
+  following message to you about your [type] <u>[name]</u>:
+
+email_naming_for_tracker_intro:  >
+  h2. *Tracking Alert*
+  \n\n
+  An [obs] on the Mushroom Observer website has been given the name [name],
+  which you are currently tracking.  You can contact either the observer or the
+  identifier by going to the appropriate link below and clicking the email link
+  near the top of the page.
+
+email_new_password_intro:  >
+  h2. *New Password*
+  \n\n
+  Your new Mushroom Observer password is:
+
+email_new_password_what_now:  >
+  Once you have logged in, you should change your password to something easier
+  to remember by going to the 'Preferences' page.
+
+email_object_change_intro:  >
+  h2. *[type] was Changed*
+  \n\n
+  There were change(s) made to the [type] <u>[name]</u>:
+
+email_observation_destroyed_intro:  >
+  h2. *Observation Destroyed*
+
+email_observation_question_intro:  >
+  h2. *Question from Another User*
+  \n\n
+  [user] ([email]) asked the Mushroom Observer website to forward the
+  following question to you about your Observation <u>[name]</u>:
+
+email_publish_name_intro:  >
+  h2. *Draft of Name Description Has Been Published*
+  \n\n
+  A description of a name has been published on the Mushroom Observer website.
+  You are receiving this email since you are listed as either an author for
+  this taxon or as a reviewer on the site. 
+
+email_user_question_intro:  >
+  h2. *Question from Another User*
+  \n\n
+  [user] ([email]) asked the Mushroom Observer website to forward the
+  following email to you:
+
+email_verify_intro:  >
+  h2. *Hello [user]*
+  \n\n
+  Please click on the following link to verify that you received this email and
+  activate your Mushroom Observer account:
+  \n\n
+  [link]
 
 
 # account/email_new_password
@@ -848,10 +1015,10 @@ form_images_when_taken:  When Was It Taken
 # observer/_form_list_feedback
 form_list_feedback_missing_names:  The following names could not be found.
 form_list_feedback_missing_names_help:  >
-  Click 'Save' to create these names.  If you want to correct any you entered
-  by hand, do so in the area below and click 'Save' to re-evaluate the list.
-  If the names came from an uploaded species list, create a correct file and
-  select it for upload.
+  Click 'Save'/'Update' to create these names.  If you want to correct any you
+  entered by hand, do so in the area below and click 'Save' to re-evaluate the
+  list.  If the names came from an uploaded species list, create a correct file
+  and select it for upload.
 
 
 # location/_form_location
@@ -915,6 +1082,11 @@ form_names_look_alikes:  Look Alikes
 form_names_look_alikes_help:  >
   What other taxa look similar to this one?
 
+form_names_misspelling:  This name is misspelled.
+form_names_misspelling_bad:  The alternate spelling you entered is not recognized.
+form_names_misspelling_many:  There are several possible spellings, please enter correct one by hand.
+form_names_misspelling_none:  If this is a misspelling, please deprecate it.
+form_names_misspelling_it_should_be:  It should be
 form_names_notes:  Notes
 form_names_notes_help:  >
   Please include notes about the validity of this name, common misuses of the
@@ -1100,7 +1272,7 @@ image_remove_edit:  Edit Observation
 image_remove_denied:  You do not have permission to remove images from this observation.
 image_remove_missing:  This observation doesn't have that image!
 image_remove_remove:  Remove
-image_remove_success:  Removed image #[id] successfully.
+image_remove_success:  'Removed image #[id] successfully.'
 image_remove_title:  Remove Images from [name]
 
 
@@ -1117,7 +1289,7 @@ image_reuse_id_help:  >
 
 image_reuse_invalid_id:  Invalid image id.
 image_reuse_reuse:  Reuse
-image_reuse_success:  Added image #[id] successfully.
+image_reuse_success:  'Added image #[id] successfully.'
 image_reuse_title:  Reuse Image for [name]
 
 
@@ -1168,12 +1340,9 @@ list_comments_for_user:  Comments for [user]
 
 
 # interest/list_interests
-list_interests_title:  Objects You Are Watching or Ignoring
-list_interests_now_on:  Watching
-list_interests_now_off:  Ignoring
+list_interests_title:  Your Notification Requests
 list_interests_turn_on:  Change to Watch
 list_interests_turn_off:  Change to Ignore
-list_interests_delete:  Delete
 
 
 # location/list_merge_options
@@ -1491,58 +1660,87 @@ no_browser_body:  >
 no_browser_title:  We Don't Recognize Your Browser
 
 
-# account/no_comment_email
-no_comment_note:  >
-  You will no longer receive email notifications when other users of the
-  Mushroom Observer website post comments about your observations.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
-
-some_emails_may_already_be_queued:  >
+# account/no_email_xxx
+no_email_how_to_reenable:  Go to your Preferences page to re-enable this feature.
+no_email_some_maybe_queued:  >
   Note: For the next few minutes you may continue to receive emails that have
   already been queued.
 
-no_comment_success:  Comment email notifications disabled for [name].
-
-
-# account/no_comment_response_email
-no_comment_response_note:  >
+no_email_comments_owner_note:  >
   You will no longer receive email notifications when other users of the
-  Mushroom Observer website post comments about observations that you have
-  commented on.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
+  Mushroom Observer website post Comments about your Observations, Names, etc.
 
-no_comment_response_success:  Comment response email notifications disabled for [name].
+no_email_comments_response_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website post responses to your Comments.
 
+no_email_comments_all_note:  >
+  You will no longer receive email notifications of all Comments.
 
-# account/no_commercial_email
-no_commercial_note:  >
+no_email_observations_consensus_note:  >
+  You will no longer receive email notifications when the names of your
+  Observations change.
+
+no_email_observations_naming_note:  >
+  You will no longer receive email notifications when other users of the
+  Mushroom Observer website propose names for your Observations.
+
+no_email_observations_all_note:  >
+  You will no longer receive email notifications whenenver Observations change.
+
+no_email_names_author_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the Names you are author on.
+
+no_email_names_editor_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the Names you have edited.
+
+no_email_names_reviewer_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the Names you have reviewed.
+
+no_email_names_all_note:  >
+  You will no longer receive email notifications about all Name changes.
+
+no_email_locations_author_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the Locations you are author on.
+
+no_email_locations_editor_note:  >
+  You will no longer receive email notifications when other users make changes
+  to the Locations you have edited.
+
+no_email_locations_all_note:  >
+  You will no longer receive email notifications about all Location changes.
+
+no_email_general_feature_note:  >
+  Automated email about new features has been disabled for your account.
+
+no_email_general_commercial_note:  >
   Other users of the Mushroom Observer website can no longer send you
   commercial inquiries about your images.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
 
-no_commercial_success:  Commercial email inquiries disabled for [name].
+no_email_general_question_note:  >
+  Other users of the Mushroom Observer website can no longer send you questions
+  about your observations.
 
-
-# account/no_consensus_change_email
-no_consensus_change_note:  >
-  You will no longer receive email notifications when the names of your
-  observations change.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
-
-no_consensus_change_success:  Name change email notifications disabled for [name].
-
-
-# account/no_feature_email
-no_features_note:  >
-  Automated email about new features have been disabled for your account.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
-
-no_feature_success:  Automated feature email disabled for [name].
+no_email_comments_owner_success:  Comment notifications disabled for [name].
+no_email_comments_response_success:  Comment response notifications disabled for [name].
+no_email_comments_all_success:  Comment notifications disabled for [name].
+no_email_observations_consensus_success:  Consensus change notifications disabled for [name].
+no_email_observations_naming_success:  Name proposal notifications disabled for [name].
+no_email_observations_all_success:  Observation notifications disabled for [name].
+no_email_names_author_success:  Name change notifications disabled for [name].
+no_email_names_editor_success:  Name change notifications disabled for [name].
+no_email_names_reviewer_success:  Name change notifications disabled for [name].
+no_email_names_all_success:  Name change notifications disabled for [name].
+no_email_locations_author_success:  Location change notifications disabled for [name].
+no_email_locations_editor_success:  Location change notifications disabled for [name].
+no_email_locations_all_success:  Location change notifications disabled for [name].
+no_email_general_feature_success:  Automated feature email disabled for [name].
+no_email_general_commercial_success:  Commercial inquiries disabled for [name].
+no_email_general_question_success:  Question email disabled for [name].
 
 
 # observer/no_javascript
@@ -1567,26 +1765,6 @@ no_javascript_dont_care:  >
   re-enable auto-detection.)
 
 no_javascript_title:  You Have Javascript Disabled
-
-
-# account/no_name_change_email
-no_name_change_note:  >
-  You will no longer receive email notifications when other users make changes
-  to the names you are author on.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
-
-no_name_change_success:  Name change email notifications disabled for [name].
-
-
-# account/no_name_proposal_email
-no_name_proposal_note:  >
-  You will no longer receive email notifications when other users of the
-  Mushroom Observer website propose names for your observations.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
-
-no_name_proposal_success:  Name proposal email notifications disabled for [name].
 
 
 # observer/no_session
@@ -1615,23 +1793,13 @@ no_session_body:  >
 no_session_title:  You Have Cookies Disabled
 
 
-# account/no_question_email
-no_questions_note:  >
-  Other users of the Mushroom Observer website can no longer send you questions
-  about your observations.
-  \n\n
-  Login and go to the Preferences page to re-enable this feature.
-
-no_question_success:  Question email disabled for [name].
-
-
 # shared/_observation_list
 observation_made:  Observation made
 observation_made_confidence:  Community confidence
 
 
 # observer_controller
-observer_controller_image_updated_notes:  Updated notes on image #[id].
+observer_controller_image_updated_notes:  'Updated notes on image #[id].'
 observer_controller_image_uploaded:  Uploaded image [name].
 observer_controller_naming_created:  Naming was successfully created.
 observer_controller_naming_updated:  Naming was successfully updated.
@@ -1645,14 +1813,27 @@ prefs_alt_col_colors:  Alternate column colors.
 prefs_alt_row_colors:  Alternate row colors.
 prefs_columns:  columns
 prefs_email:  Email address
-prefs_email_comments:  Please send me email notifications when other users post comments about my observations.
-prefs_email_comment_responses:  Please send me email notifications when other users post responses to my comments.
-prefs_email_commercial:  Please send me email if someone is interested in using an image of mine for commercial purposes.
-prefs_email_consensus_change:  Please send me email notifications when community consensus changes the name of my observations.
-prefs_email_features:  Please send me email updates when new features come out.
+prefs_email_comments:  Comment Email
+prefs_email_comments_all:  anyone comments on anything.
+prefs_email_comments_owner:  someone comments on my observations, names, etc.
+prefs_email_comments_response:  someone posts responses to my comments.
+prefs_email_digest_daily:  Send me summary at the end of the day.
+prefs_email_digest_immediate:  Notify me of events as they happen.
+prefs_email_digest_weekly:  Send me summary at the end of the week.
+prefs_email_general:  General Email
+prefs_email_general_commercial:  someone is interested in using an image of mine for commercial purposes.
+prefs_email_general_features:  new features come out.
+prefs_email_general_questions:  someone wants to send me a question about my observations, etc.
 prefs_email_html:  It's okay to use HTML in my emails.
-prefs_email_name_change:  Please send me email notifications when other users make changes to names I'm author on.
-prefs_email_name_proposal:  Please send me email notifications when other users propose names for my observations.
+prefs_email_locations:  Location Email
+prefs_email_locations_all:  anyone changes any location.
+prefs_email_locations_author:  someone changes a location I'm author on.
+prefs_email_locations_editor:  someone changes a location I've edited.
+prefs_email_names:  Name Email
+prefs_email_names_all:  anyone changes any name.
+prefs_email_names_author:  someone changes a name I'm author on.
+prefs_email_names_editor:  someone changes a name I've edited.
+prefs_email_names_reviewer:  someone changes a name I've reviewed.
 prefs_email_note:  >
   Note that none of these email features will cause your email address to be
   displayed on a webpage or allow the person who wants to contact you to obtain
@@ -1661,13 +1842,17 @@ prefs_email_note:  >
   who wants to contact you.  It will be entirely up to you if you want to
   respond to them.
 
+prefs_email_observations:  Observation Email
+prefs_email_observations_all:  anything happens to any observation.
+prefs_email_observations_consensus:  consensus name changes for one of my observations.
+prefs_email_observations_naming:  someone propose a name for one of my observations.
+prefs_email_please_notify:  Please notify me when...
 prefs_email_prefs:  Email preferences
-prefs_email_questions:  Please allow others to email me questions about my observations.
 prefs_layout_title:  List page layout
 prefs_license:  License
 prefs_license_note:  Default "license":/observer/how_to_use#license you want for new images
-prefs_locale:  Language
 prefs_link:  Edit Preferences
+prefs_locale:  Language
 prefs_login:  Login
 prefs_password_confirm:  Confirm new password
 prefs_password_new:  New password
@@ -1814,7 +1999,7 @@ send_feature_email_denied:  Only the admin can send feature mail.
 set_interest_already_deleted:  You have expressed no interest in [name].
 set_interest_already_off:  You have already told us to ignore [name].
 set_interest_already_on:  You have already told us to watch [name].
-set_interest_bad_object:  Object [type] #[id] doesn't exist.
+set_interest_bad_object:  "Object [type] #[id] doesn't exist."
 set_interest_failure:  Could not change your interest state in [name].  Please try again or report this to the webaster.
 set_interest_success_was_off:  Cancelled your ban on emails about [name].
 set_interest_success_was_on:  Cancelled your request for emails about [name].
@@ -2778,3 +2963,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

@@ -1,35 +1,17 @@
 <%
-    verify_link = "#{DOMAIN}/account/verify/#{@user.id}"
-    if @user.html_email
-%>
+  url = "#{DOMAIN}/account/verify/#{@user.id}"
+  intro = :email_verify_intro.l(:user => @user.login, :link => link_to(url, url))
+
+if @user.email_html ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: Welcome</title>
+  <title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
-
-<h2><b>Hello <%= @user.login %></b></h2>
-
-<p>Please click on this link, <a href="<%= verify_link %>"><%= verify_link
-%></a>, to verify that you received this email and activate your Mushroom
-Observer account.&nbsp; Here are some handy links you might find useful:</p> 
-
-<ul type=none>
-  <li>Change your account preferences:
-    <%= url = "#{DOMAIN}/account/prefs/#{@user.id}"
-    link_to(url, url) %></li>
-  <li>Latest changes at Mushroom Observer:
-    <%= url = DOMAIN
-    link_to(url, url) %></li>
-</ul>
-
+<%= intro.tp %>
 <br/>
 </body>
 </html>
 <% else ##################################################################### %>
-Hello <%= @user.login %>
-
-Please go to the following URL to verify that you received this email and activate your Mushroom Observer account:
-
-<%= verify_link %>
-<% end %>
+<%= intro.tp.html_to_ascii %>
+<% end ###################################################################### %>

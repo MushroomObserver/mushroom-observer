@@ -1698,14 +1698,19 @@ class ObserverControllerTest < Test::Unit::TestCase
     now   = 1.week.ago
 
     FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
-    file = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
-    file.content_type = 'image/jpeg'
+    file1 = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
+    file1.content_type = 'image/jpeg'
+    file2 = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
+    file2.content_type = 'image/jpeg'
+    file3 = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
+    file3.content_type = 'image/jpeg'
 
     new_image_1 = Image.new({
       :copyright_holder => 'holder_1',
       :when => time1,
       :notes => 'notes_1',
       :user_id => 1,
+      :image => file1,
       :content_type => 'image/jpeg',
       :created => now,
       :modified => now,
@@ -1717,6 +1722,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :when => time2,
       :notes => 'notes_2',
       :user_id => 2,
+      :image => file2,
       :content_type => 'image/jpeg',
       :created => now,
       :modified => now,
@@ -1732,7 +1738,7 @@ class ObserverControllerTest < Test::Unit::TestCase
         :notes => 'blah',
       },
       :image => { '0' => {
-        :image => file,
+        :image => file3,
         :copyright_holder => 'holder_3',
         :when => time3,
         :notes => 'notes_3'
@@ -1742,8 +1748,8 @@ class ObserverControllerTest < Test::Unit::TestCase
       "image_#{new_image_1.id}_notes" => 'notes_1',
       "image_#{new_image_2.id}_notes" => 'notes_2_new',
     })
+    # print flash.to_s, "\n"
     assert_response(302) # redirected = created observation successfully
-    # print flash[:notice], "\n"
 
     obs = Observation.find_by_where('zzyzx')
     assert_equal(1, obs.user_id)

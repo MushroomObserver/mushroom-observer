@@ -1,5 +1,70 @@
-<%= @notification.user.legal_name %> has requested the Mushroom Observer website send you the following message:
+<%
+  case @notification.flavor
+  when :name
+    obj  = @naming.observation
+    type = :observation
+  else
+    obj  = @notification.object
+    type = obj.class.to_s.underscore.to_sym
+  end
 
-<%= @notification.calc_note(@user, @naming.observation) %>
+  intro = :email_naming_for_observer_intro.l(
+    :user  => @notification.user.legal_name,
+    :email => @notification.user.email,
+    :type  => type.l,
+    :name  => obj.unique_format_name
+  )
 
-If you believe this service has been misused, please forward this entire message to: webmaster@mushroomobserver.org.
+  message = @notification.calc_note(
+    :user => @user,
+    :naming => @naming
+  )
+
+  handy_links = :email_can_respond.l(
+    :name  => @notification.user.legal_name,
+    :email => @notification.user.email
+  )
+  handy_links += ' ' + :email_handy_links.l
+
+  links = []
+  links.push([:email_links_show_object.l(:type => type.l),
+    "#{DOMAIN}/#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
+  links.push([:email_links_latest_changes.l,
+    DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <%= sanitize(message).tp %>
+</div>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<%= :email_report_abuse.tp %>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= message.tp.html_to_ascii %>
+
+--------------------------------------------------
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label.t.html_to_ascii}: #{url}\n"
+  end
+  result %>
+<%= :email_report_abuse.tp.html_to_ascii %>
+<% end ###################################################################### %>

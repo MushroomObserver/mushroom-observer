@@ -6,22 +6,52 @@ class Notification < ActiveRecord::Base
     [:name, :observation, :user, :all_comments]
   end
 
-  def calc_note(user, obs)
-    if self.note_template
-      self.note_template.gsub(':observer', user.login).gsub(':observation', "#{DOMAIN}/#{obs.id}")
+  # Create body of the email notification we're about to send.
+  def calc_note(args)
+    if template = self.note_template
+      case self.flavor
+      when :name
+        user   = args[:user]
+        naming = args[:naming]
+        raise "Missing 'user' argument for #{self.flavor} notification."   if !user
+        raise "Missing 'naming' argument for #{self.flavor} notification." if !naming
+        template.gsub(':observer', user.login).
+                 gsub(':observation', "#{DOMAIN}/#{naming.observation_id}").
+                 gsub(':mailing_address', user.mailing_address).
+                 gsub(':location', naming.observation.place_name).
+                 gsub(':name', naming.format_name)
+      end
     end
   end
-  
+
+  # Return principle object involved, e.g., the Name if notifying observers
+  # of taxa you're doing research on.
+  def object
+    result = nil
+    if @object
+      result = @object
+    else
+      case self.flavor
+      when :name
+        result = Name.find(self.obj_id)
+      end
+      @object = result
+    end
+    result
+  end
+
+  # Return a string summarizing what this notification is about.
   def summary()
     result = "Unrecognized notification flavor"
     case self.flavor
     when :name
-      name = Name.find(self.obj_id)
-      result = "Tracking name: #{name.display_name}" if name
+      result = "Tracking name: #{self.object ? self.object.display_name : '?'}"
     end
     result
   end
-  
+
+  # Returns hash of options for use in link_to() call to link to edit action:
+  #   link_to("edit", notification.link_params)
   def link_params()
     result = {}
     case self.flavor

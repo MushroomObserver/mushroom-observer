@@ -369,10 +369,11 @@ class String
   # but this seems to work pretty well on the output of RedCloth at least.
   def html_to_ascii
     self.gsub(/\s*\n\s*/, ' ').         # remove all newlines first
-         gsub(/<br *\/> */, "\n").      # put one after every line break
-         gsub(/<\/li> */, "\n").        # put one after every list item
-         gsub(/<\/tr> */, "\n").        # put one after every table row
-         gsub(/<\/p> */, "\n\n").       # put two between paragraphs
+         gsub(/<\/?div[^>]*>/, '').     # divs are messing things up, too
+         gsub(/<br *\/> */, "\n").      # put \n after every line break
+         gsub(/<\/li> */, "\n").        # put \n after every list item
+         gsub(/<\/tr> */, "\n").        # put \n after every table row
+         gsub(/<\/(p|h\d)> */, "\n\n"). # put two \n between paragraphs
          gsub(/<\/td> */, "\t").        # put tabs between table columns
          gsub(/[ \t]+(\n|$)/, '\\1').   # remove superfluous trailing whitespace
          gsub(/\n+\Z/, '').             # remove superfluous newlines at end

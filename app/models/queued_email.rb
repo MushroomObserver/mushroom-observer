@@ -115,6 +115,7 @@ class QueuedEmail < ActiveRecord::Base
       :consensus_change,
       :feature,
       :observation_change,
+      :location_change,
       :name_change,
       :name_proposal,
       :naming,

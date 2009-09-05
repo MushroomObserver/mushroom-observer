@@ -13,3 +13,18 @@ albion_0:
   south: 39.2
   high: 100.0
   low: 0.0
+
+albion_1:
+  id: 2
+  location_id: 1
+  modified: 2007-12-27 06:41:20
+  user_id: 1
+  version: 1
+  display_name: Albion, Mendocino Co., California, USA
+  north: 39.32
+  west: -123.82
+  east: -123.74
+  south: 39.21
+  high: 100.0
+  low: 0.0
+  notes: Here are some new notes to play with.

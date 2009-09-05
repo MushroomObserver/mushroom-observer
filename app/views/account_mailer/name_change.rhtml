@@ -1,20 +1,34 @@
 <%
-  intro = "There were change(s) made to #{@old_name.display_name} (#{@name.id}):"
+  watching = @user.watching?(@new_name)
+  email_type = @new_name.authors.member?(@user) ? 'author'   :
+               @new_name.editors.member?(@user) ? 'editor'   :
+               @new_name.reviewer == @user      ? 'reviewer' : 'all'
+  is_now = :email_field_is_now.l
+
+  intro = :email_object_change_intro.l(
+    :type => :name.l,
+    :name => "#{@old_name.display_name} (#{@new_name.id})"
+  )
 
   fields = ""
-  fields += "*Time:* #{@time.to_formatted_s(:db)}\n"
-  fields += "*By:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+
+  new_spell = @new_name.correct_spelling ? @new_name.correct_spelling.display_name : '--' 
+  license   = @new_name.license
 
   one_liners = ''
-  one_liners += "*Name was changed to:* #{@new_name.text_name}\n"       if @new_name.text_name  != @old_name.text_name
-  one_liners += "*Author was changed to:* #{@new_name.author}\n"        if @new_name.author     != @old_name.author
-  one_liners += "*Citation was changed to:* #{@new_name.citation}\n"    if @new_name.citation   != @old_name.citation
-  one_liners += "*Rank was changed to:* #{@new_name.rank}\n"            if @new_name.rank       != @old_name.rank
-  begin; license = License.find(@new_name.license_id); rescue; end
-  one_liners += "*License was changed to:* #{license.display_name}\n"   if @new_name.license_id != @old_name.license_id && license
-  one_liners += "*Status was changed to:* #{@review_status}\n"          if @review_status       != :no_change
-  one_liners += "*Name was deprecated.*\n"                              if @new_name.deprecated && !@old_name.deprecated
-  one_liners += "*Name was accepted.*\n"                                if !@new_name.deprecated && @old_name.deprecated
+  one_liners += "*#{:app_name.l} #{is_now}:* #{@new_name.text_name}\n"          if @new_name.text_name  != @old_name.text_name
+  one_liners += "*#{:app_author.l} #{is_now}:* #{@new_name.author}\n"           if @new_name.author     != @old_name.author
+  one_liners += "*#{:app_citation.l} #{is_now}:* #{@new_name.citation}\n"       if @new_name.citation   != @old_name.citation
+  one_liners += "*#{:app_rank.l} #{is_now}:* #{@new_name.rank}\n"               if @new_name.rank       != @old_name.rank
+  one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"          if @new_name.license_id != @old_name.license_id && license
+  one_liners += "*#{:app_name_status.l} #{is_now}:* #{@review_status}\n"        if @review_status       != :no_change
+  one_liners += "*#{:name.l} #{is_now}:* #{:app_deprecated.l}\n"                if @new_name.deprecated && !@old_name.deprecated
+  one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_accepted.l}\n"       if !@new_name.deprecated && @old_name.deprecated
+  one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_misspelled.l}\n"     if @new_name.misspelling && !@old_name.misspelling
+  one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_not_misspelled.l}\n" if !@new_name.misspelling && @old_name.misspelling
+  one_liners += "*#{:app_correct_spelling.l} #{is_now}:* #{new_spell}\n"        if @new_name.correct_spelling_id != !@old_name.correct_spelling_id
 
   many_liners = []
   for field in Name.all_note_fields
@@ -23,31 +37,31 @@
     many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
   end
 
-  handy_links = "Here are some links you may find useful:"
+  handy_links = :email_handy_links
 
   links = []
-  links.push(["Show this name",
-    "#{DOMAIN}/name/show_name/#{@name.id}"])
-  links.push(["I'm not interested in this name",
-    "#{DOMAIN}/interest/set_interest?id=#{@name.id}&type=Name&user=#{@user.id}"])
-  links.push(["Stop sending me these notifications",
-    "#{DOMAIN}/account/no_name_change_email/#{@user.id}"])
-  links.push(["Change your account preferences",
+  links.push([:email_links_show_object.l(:type => :name.l),
+    "#{DOMAIN}/name/show_name/#{@new_name.id}"])
+  links.push([:email_links_not_interested.l(:type => :name.l),
+    "#{DOMAIN}/interest/set_interest?id=#{@new_name.id}&type=Name&user=#{@user.id}"])
+  links.push([:email_links_stop_sending.l,
+    "#{DOMAIN}/account/no_email_names_#{email_type}/#{@user.id}"])
+  links.push([:email_links_change_prefs.l,
     "#{DOMAIN}/account/prefs/#{@user.id}"])
-  links.push(["Latest changes at Mushroom Observer",
+  links.push([:email_links_latest_changes.l,
     DOMAIN])
 
-if @user.html_email ######################################################### %>
+if @user.email_html ######################################################### %>
 <html>
 <head>
-<title>Mushroom Observer: <%= @old_name.display_name.t.strip_html %> Was Changed</title>
+<title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
 <%= fields.tp %>
 <%= one_liners.tp if one_liners != '' %>
 <% for var, val in many_liners %>
-  <%= "*#{var} was changed to:*".tp %>
+  <%= "*#{var} #{is_now}:*".tp %>
   <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
     <%= sanitize(val).tp %>
   </div>
@@ -68,7 +82,7 @@ if @user.html_email ######################################################### %>
 
 <%= one_liners.tp.html_to_ascii if one_liners != '' %>
 <% for var, val in many_liners %>
-<%= var %> was changed to:
+<%= var + ' ' + is_now %>:
 --------------------------------------------------
 <%= val.tp.html_to_ascii %>
 --------------------------------------------------

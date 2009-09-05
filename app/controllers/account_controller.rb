@@ -15,14 +15,7 @@
 #   * profile
 #   * remove_image
 #
-#     no_feature_email
-#     no_question_email
-#     no_commercial_email
-#     no_comment_email
-#     no_comment_response_email
-#     no_name_proposal_email
-#     no_consensus_change_email
-#     no_name_change_email
+#   * no_email_xxx      Callbacks from email to turn off various types of email.
 #
 #  Admin Tools:
 #   R delete
@@ -45,15 +38,7 @@ class AccountController < ApplicationController
     :send_verify,
     :login,
     :logout_user,
-    :email_new_password,
-    :no_feature_email,
-    :no_question_email,
-    :no_commercial_email,
-    :no_comment_email,
-    :no_comment_response_email,
-    :no_name_proposal_email,
-    :no_consensus_change_email,
-    :no_name_change_email
+    :email_new_password
   ]
 
   def login
@@ -123,8 +108,8 @@ class AccountController < ApplicationController
           @new_user = User.new(params['new_user'])
           @new_user.created = Time.now
           @new_user.last_login = @new_user.created
-          @new_user.change_rows(5)
-          @new_user.change_columns(3)
+          @new_user.rows = 5
+          @new_user.columns = 3
           @new_user.mailing_address = ''
           @new_user.notes = ''
           if @new_user.save
@@ -181,25 +166,35 @@ class AccountController < ApplicationController
         when :post
           error = false
 
-          @user.login = params['user']['login']
-          @user.change_email(params['user']['email'])
-          @user.html_email = params['user']['html_email']
-          @user.feature_email = params['user']['feature_email']
-          @user.comment_email = params['user']['comment_email']
-          @user.commercial_email = params['user']['commercial_email']
-          @user.comment_response_email = params['user']['comment_response_email']
-          @user.name_proposal_email = params['user']['name_proposal_email']
-          @user.consensus_change_email = params['user']['consensus_change_email']
-          @user.name_change_email = params['user']['name_change_email']
-          @user.question_email = params['user']['question_email']
-          @user.change_theme(params['user']['theme'])
-          @user.change_rows(params['user']['rows'])
-          @user.change_columns(params['user']['columns'])
-          @user.alternate_rows = params['user']['alternate_rows']
+          @user.login             = params['user']['login']
+          @user.email             = params['user']['email']
+          @user.theme             = params['user']['theme']
+          @user.locale            = params['user']['locale'].to_s
+          @user.license_id        = params['user']['license_id'].to_i
+          @user.rows              = params['user']['rows']
+          @user.columns           = params['user']['columns']
+          @user.alternate_rows    = params['user']['alternate_rows']
           @user.alternate_columns = params['user']['alternate_columns']
-          @user.vertical_layout = params['user']['vertical_layout']
-          @user.license_id = params['user']['license_id'].to_i
-          @user.locale = params['user']['locale'].to_s
+          @user.vertical_layout   = params['user']['vertical_layout']
+
+          @user.email_comments_owner         = params['user']['email_comments_owner']
+          @user.email_comments_response      = params['user']['email_comments_response']
+          @user.email_comments_all           = params['user']['email_comments_all']
+          @user.email_observations_consensus = params['user']['email_observations_consensus']
+          @user.email_observations_naming    = params['user']['email_observations_naming']
+          @user.email_observations_all       = params['user']['email_observations_all']
+          @user.email_names_author           = params['user']['email_names_author']
+          @user.email_names_editor           = params['user']['email_names_editor']
+          @user.email_names_reviewer         = params['user']['email_names_reviewer']
+          @user.email_names_all              = params['user']['email_names_all']
+          @user.email_locations_author       = params['user']['email_locations_author']
+          @user.email_locations_editor       = params['user']['email_locations_editor']
+          @user.email_locations_all          = params['user']['email_locations_all']
+          @user.email_general_feature        = params['user']['email_general_feature']
+          @user.email_general_commercial     = params['user']['email_general_commercial']
+          @user.email_general_question       = params['user']['email_general_question']
+          @user.email_digest                 = params['user']['email_digest']
+          @user.email_html                   = params['user']['email_html']
 
           password = params['user']['password']
           if password
@@ -343,75 +338,51 @@ class AccountController < ApplicationController
     redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
   end
 
-  def no_feature_email
-    if login_check params['id']
-      @user.feature_email = false
-      if @user.save
-        flash_notice :no_feature_success.t(:name => @user.unique_text_name)
-      end
-    end
-  end
+  def no_email_comments_owner;          no_email('comments_owner');          end
+  def no_email_comments_response;       no_email('comments_response');       end
+  def no_email_comments_all;            no_email('comments_all');            end
+  def no_email_observations_consensus;  no_email('observations_consensus');  end
+  def no_email_observations_naming;     no_email('observations_naming');     end
+  def no_email_observations_all;        no_email('observations_all');        end
+  def no_email_names_author;            no_email('names_author');            end
+  def no_email_names_editor;            no_email('names_editor');            end
+  def no_email_names_reviewer;          no_email('names_reviewer');          end
+  def no_email_names_all;               no_email('names_all');               end
+  def no_email_locations_author;        no_email('locations_author');        end
+  def no_email_locations_editor;        no_email('locations_editor');        end
+  def no_email_locations_all;           no_email('locations_all');           end
+  def no_email_general_feature;         no_email('general_feature');         end
+  def no_email_general_commercial;      no_email('general_commercial');      end
+  def no_email_general_question;        no_email('general_question');        end
 
-  def no_question_email
-    if login_check params['id']
-      @user.question_email = false
-      if @user.save
-        flash_notice :no_question_success.t(:name => @user.unique_text_name)
-      end
-    end
-  end
+  # These are the old email flags, renamed in favor of more consistent ones.
+  alias_method :no_comment_email,          :no_email_comments_owner
+  alias_method :no_comment_response_email, :no_email_comments_response
+  alias_method :no_commercial_email,       :no_email_general_commercial
+  alias_method :no_consensus_change_email, :no_email_observations_consensus
+  alias_method :no_feature_email,          :no_email_general_feature
+  alias_method :no_name_change_email,      :no_email_names_author
+  alias_method :no_name_proposal_email,    :no_email_observations_naming
+  alias_method :no_question_email,         :no_email_general_question
 
-  def no_commercial_email
+  def no_email(type)
     if login_check params['id']
-      @user.commercial_email = false
+      method  = "email_#{type}="
+      prefix  = "no_email_#{type}"
+      success = "#{prefix}_success".to_sym
+      @note   = "#{prefix}_note".to_sym
+      @user.send(method, false)
       if @user.save
-        flash_notice :no_commercial_success.t(:name => @user.unique_text_name)
+        flash_notice(:success.t(:name => @user.unique_text_name))
+        render(:action => no_email)
+      else
+        # Probably should write a better error message here...
+        flash_error('Sorry, something went wrong...')
+        redirect_to(:controller => :observer, :action => :list_rss_logs)
       end
-    end
-  end
-
-  def no_comment_email
-    if login_check params['id']
-      @user.comment_email = false
-      if @user.save
-        flash_notice :no_comment_success.t(:name => @user.unique_text_name)
-      end
-    end
-  end
-
-  def no_comment_response_email
-    if login_check params['id']
-      @user.comment_response_email = false
-      if @user.save
-        flash_notice :no_comment_response_success.t(:name => @user.unique_text_name)
-      end
-    end
-  end
-
-  def no_name_proposal_email
-    if login_check params['id']
-      @user.name_proposal_email = false
-      if @user.save
-        flash_notice :no_name_proposal_success.t(:name => @user.unique_text_name)
-      end
-    end
-  end
-
-  def no_consensus_change_email
-    if login_check params['id']
-      @user.consensus_change_email = false
-      if @user.save
-        flash_notice :no_consensus_change_success.t(:name => @user.unique_text_name)
-      end
-    end
-  end
-
-  def no_name_change_email
-    if login_check params['id']
-      @user.name_change_email = false
-      if @user.save
-        flash_notice :no_name_change_success.t(:name => @user.unique_text_name)
-      end
+    else
+      flash_error(:app_permission_denied.t)
+      redirect_to(:controller => :observer, :action => :list_rss_logs)
     end
   end
 

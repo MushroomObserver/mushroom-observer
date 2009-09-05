@@ -9,6 +9,12 @@ require_dependency 'site_data'
 #  single sense -- that is, a unique combination of genus, species, and author.
 #  (Name also embraces infraspecies and extrageneric taxa as well.)
 #
+#  Misspellings: As an intermediate solution, misspelled names should be
+#  synonymized with the correct name, and the id of the correct name placed in
+#  correct_spelling_id.  This has three results: the misspelled name is removed
+#  from auto-completion lists and name-lister; show_name will include this in
+#  the "real" list of observations instead of the "synonym" list.
+#
 #  The Name object's basic properties are:
 #
 #  1. has a name (several different formats, see below)
@@ -19,14 +25,20 @@ require_dependency 'site_data'
 #  6. can be deprecated (separate from synonymy)
 #  7. has synonyms (i.e. can be one of a group of Name's owned by a Synonym)
 #  8. belongs to a User (who created it originally)
-#  9. has a history -- version number and asscociated PastLocation's
-#  10. has an RssLog
+#  9. has zero or more authors (who have made significant contributions)
+#  10. has zero or more editors (who have made relatively minor edits)
+#  11. has a history -- version number and asscociated PastLocation's
+#  12. has an RssLog
+#  13. can have a correct spelling
 #
 #  Name Formats:
 #    text_name           Plain text: "Xxx yyy"         "Xxx"             "Fungi"
 #    search_name         Plain text: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
 #    display_name        in Textile: "Xxx yyy Author"  "Xxx Author"      "Kingdom of Fungi"
 #    observation_name    in Textile: "Xxx yyy Author"  "Xxx sp. Author"  "Fungi sp."
+#    format_name         (same as display_name)
+#    unique_text_name    (text_name with id)
+#    unique_format_name  (display_name with id)
 #
 #  Regexps: (in "English")
 #    ABOVE_SPECIES_PAT   <Xxx>
@@ -99,13 +111,23 @@ require_dependency 'site_data'
 #    sort_synonyms
 #    clear_synonym
 #    merge_synonyms
+#    is_misspelling?             Is this name a misspelling?
+#    correct_spelling            Link to the correctly-spelled Name (or nil).
+#
+#  Authors/Editors:
+#    add_author(user)            Make given user an "author".
+#    add_editor(user)            Make given user an "editor".
+#    remove_author(user)         Demote given user to "editor".
+#    check_add_author            Callback to check if user should become author.
 #
 #  Random Helpers and Others:
 #    has_notes?                  Does this name have any notes?
 #    status                      Is this name deprecated?
 #    prepend_notes               Add notes at the top of the existing notes.
+#    notify_authors              Callback used to notify people of changes.
 #
 #    Name.format_string          (used all over this file)
+#    Name.primer(user)           Get list of common names to prime auto-completer.
 #
 ################################################################################
 
@@ -120,6 +142,7 @@ class Name < ActiveRecord::Base
   belongs_to :synonym
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
   belongs_to :license
+  belongs_to :correct_spelling, :class_name => "Name", :foreign_key => "correct_spelling_id"
 
   acts_as_versioned(:class_name => 'PastName', :table_name => 'past_names')
   non_versioned_columns.push('created', 'synonym_id', 'num_views', 'last_view')
@@ -135,7 +158,7 @@ class Name < ActiveRecord::Base
   SUBSPECIES_PAT    = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+)    \s+ (?:subspecies|subsp|ssp|s)\.? \s+ ([a-zë\-\"]+) \s*$/x
   VARIETY_PAT       = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)?)    \s+ (?:variety|var|v)\.? \s+ ([a-zë\-\"]+) \s*$/x
   FORM_PAT          = /^\s* ("?[A-Z][a-zë\-]+"?  \s+  [a-zë\-\"]+ (?: \s+ (?:subspecies|subsp|ssp|s)\.? \s+ [a-zë\-\"]+)? (?: \s+ (?:variety|var|v)\.? \s+ [a-zë\-\"]+)?) \s+ (?:forma|form|f)\.? \s+ ([a-zë\-\"]+) \s*$/x
-  AUTHOR_PAT        = /^\s* ("?[A-Z][a-zë\-\s\.\"]+?[a-zë\"](?:\s+sp\.)?) \s+ (("?[^a-z"\s]|auct\.|van\sd[a-z]+\s[A-Z]).*) $/x   # (may have trailing space)
+  AUTHOR_PAT        = /^\s* ("?[A-Z][a-zë\-\s\.\"]+?[a-zë\"](?:\s+sp\.)?) \s+ (("?[^a-z"\s]|in\s?ed\.?|auct\.?|van\sd[a-z]+\s[A-Z]).*) $/x   # (may have trailing space)
   SENSU_PAT         = /^\s* ("?[A-Z].*) \s+ (sens[u\.]\s+\S.*\S) \s*$/x
   GROUP_PAT         = /^\s* ("?[A-Z].*) \s+ (group|gr|gp)\.?     \s*$/x
   COMMENT_PAT       = /^\s* ([^\[\]]*)  \s+ \[(.*)\] \s*$/x
@@ -208,7 +231,7 @@ class Name < ActiveRecord::Base
 
   # Returns: array of symbols, from :Form to :Kingdom.
   def self.eol_ranks; EOL_RANKS; end
-  
+
   # Is this name a family or higher?
   def above_genus?; RANKS_ABOVE_GENUS.include?(self.rank); end
 
@@ -232,12 +255,12 @@ class Name < ActiveRecord::Base
   end
 
   # These are required in order to conform to the standards needed by Interest and Comment.
-  def unique_text_name
-    "#{self.text_name} (#{self.id})"
-  end
-  def unique_format_name
-    "#{self.display_name} (#{self.id})"
-  end
+  def format_name;        self.display_name;                   end
+  def unique_text_name;   "#{self.text_name} (#{self.id})";    end
+  def unique_format_name; "#{self.display_name} (#{self.id})"; end
+
+  # Wrapper just in case we change how misspellings are dealt with completely later.
+  def is_misspelling?; self.misspelling; end
 
   def self.validate_classification(rank, text)
     # Input: rank is expect to be a valid rank.
@@ -309,6 +332,9 @@ class Name < ActiveRecord::Base
   # Returns: array of Name instances.
   def self.find_names(in_str, rank=nil, deprecated=false)
 
+    # Add dot to "var" and "ssp".
+    in_str.sub!(/ (var|ssp) /, ' \\1. ')
+
     # This removes the "sp" or "sp." in "Lactarius sp" and "Lactarius sp Author".
     in_str = in_str.strip
     if m = SP_PAT.match(in_str)
@@ -318,7 +344,7 @@ class Name < ActiveRecord::Base
     end
 
     name = in_str.strip
-    if names_for_unknown.member? name.to_s.downcase
+    if names_for_unknown.member?(name.to_s.downcase)
       name = "Fungi"
     end
     deprecated_condition = ''
@@ -410,7 +436,7 @@ class Name < ActiveRecord::Base
   end
 
   # Lookup a name, creating it as necessary.  Requires rank, text_name,
-  # and display name, at least, supplying defaults for search_name and
+  # at least, supplying defaults for search_name, display_name, and
   # observation_name, and leaving author blank by default. Requires an
   # exact match of both name and author.
   # Returns:
@@ -546,6 +572,7 @@ class Name < ActiveRecord::Base
     end
   end
 
+  # Add a user on as an "author".
   def add_author(user)
     if not self.authors.member?(user)
       self.authors.push(user)
@@ -559,11 +586,28 @@ class Name < ActiveRecord::Base
     end
   end
 
+  # Demote a user to "editor".
+  def remove_author(user)
+    if self.authors.member?(user)
+      self.authors.delete(user)
+      user.reload.contribution
+      user.contribution -= FIELD_WEIGHTS[:authors_names]
+      if not self.editors.member?(user) && !Name.connection.select_values(%(
+          SELECT id FROM past_names WHERE name_id = #{self.id} AND user_id = #{user.id}
+        )).empty?
+        self.editors.add(user)
+        user.contribution += FIELD_WEIGHTS[:editors_names]
+      end
+      user.save
+    end
+  end
+
+  # Add a user on as an "editor".
   def add_editor(user)
     if not self.authors.member?(user) and not self.editors.member?(user):
-      user.reload.contribution
       self.editors.push(user)
       self.save
+      user.reload.contribution
       user.contribution += FIELD_WEIGHTS[:editors_names]
       user.save
     end
@@ -889,7 +933,7 @@ class Name < ActiveRecord::Base
   # a draft -- that is, the only way for this method to be called by a
   # non-reviewer is if a non-reviewer publishes a draft -- the review status
   # can get reset back to :unreviewed by edit_name in name_controller if a
-  # non-reviewer makes any substantive change to the Name.) 
+  # non-reviewer makes any substantive change to the Name.)
   def update_review_status(value, user, time=Time.now)
     if not user.in_group('reviewers')
       value = :unreviewed
@@ -905,13 +949,19 @@ class Name < ActiveRecord::Base
       self.user = user
       reviewer_id = user.id
     end
-    past_name = self.versions.latest
-    past_name.review_status = self.review_status = value
-    past_name.reviewer_id = self.reviewer_id = reviewer_id
-    past_name.last_review = self.last_review = time
-    self.save
-    raise "update_review_status failed: [#{self.dump_errors}]" if self.errors.length > 0
-    past_name.save
+    self.review_status = value
+    self.reviewer_id = reviewer_id
+    self.last_review = time
+    if !self.altered? # (don't save if there are substantive changes pending)
+      self.save
+      raise "update_review_status failed: [#{self.dump_errors}]" if self.errors.length > 0
+    end
+    if past_name = self.versions.latest
+      past_name.review_status = value
+      past_name.reviewer_id = reviewer_id
+      past_name.last_review = time
+      past_name.save
+    end
   end
 
 ########################################
@@ -999,16 +1049,30 @@ class Name < ActiveRecord::Base
 
     # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
     # It only returns true if *important* changes have been made.  Even though
-    # changing review status doesn't cause a new version to be created, I want
-    # to notify authors of that change.
+    # changing review_status doesn't cause a new version to be created, I want
+    # to notify authors of that change.  (review_status_changed? is an implicit
+    # method created by ActiveRecord)
     if altered? || review_status_changed?
-      sender = self.user || @user_making_change
+      sender = self.user || @user_making_change # (see notes in update_review_status)
       recipients = []
       # print "#{self.search_name} changed by #{sender ? sender.login : 'no one'}.\n"
 
       # Tell authors of the change.
       for user in self.authors
-        recipients.push(user) if user.name_change_email
+        recipients.push(user) if user.email_names_author
+      end
+
+      # Tell editors of the change.
+      for user in self.editors
+        recipients.push(user) if user.email_names_editor
+      end
+
+      # Tell reviewer of the change.
+      recipients.push(self.reviewer) if self.reviewer && self.reviewer.email_names_reviewer
+
+      # Tell masochists who want to know about all name changes.
+      for user in User.find_all_by_email_names_all(true)
+        recipients.push(user)
       end
 
       # Send to people who have registered interest.
@@ -1022,15 +1086,41 @@ class Name < ActiveRecord::Base
       end
 
       # Send notification to all except the person who triggered the change.
-      for recipient in recipients.uniq
-        if recipient && recipient != sender
-          NameChangeEmail.create_email(sender, recipient, self, review_status_changed?)
-        end
+      for recipient in recipients.uniq - [sender]
+        NameChangeEmail.create_email(sender, recipient, self, review_status_changed?)
       end
     end
   end
 
 ########################################
+
+  # Get list of common names to prime auto-completer.  Since this is an
+  # expensive query (well, okay it only takes a tenth of a second but this
+  # could change...), it gets cached periodically (daily?) in a plain old
+  # file somewhere.  (User is not used.)
+  def self.primer(user=nil)
+    result = []
+    if !File.exists?(NAME_PRIMER_CACHE_FILE) ||
+       File.mtime(NAME_PRIMER_CACHE_FILE) < Time.now - 1.day
+
+      # Get list of names sorted by how many times they've been used, then
+      # re-sort by name.
+      result = self.connection.select_values(%(
+        SELECT names.text_name, COUNT(*) AS n
+        FROM namings
+        LEFT OUTER JOIN names ON names.id = namings.name_id
+        WHERE misspelling = false
+        GROUP BY names.text_name
+        ORDER BY n DESC
+        LIMIT 1000
+      )).uniq.sort
+
+      open(NAME_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
+    else
+      result = open(NAME_PRIMER_CACHE_FILE).readlines.map(&:chomp)
+    end
+    return result
+  end
 
   def reviewed_observations()
     Observation.find(:all, :conditions => "name_id = #{self.id} and vote_cache >= 2.4")

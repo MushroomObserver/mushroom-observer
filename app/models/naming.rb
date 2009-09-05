@@ -58,7 +58,7 @@ class Naming < ActiveRecord::Base
         recipients = []
 
         # Send notification to owner if they want.
-        recipients.push(owner) if owner && owner.name_proposal_email
+        recipients.push(owner) if owner && owner.email_observations_naming
 
         # Send to people who have registered interest.
         # Also remove everyone who has explicitly said they are NOT interested.
@@ -71,10 +71,8 @@ class Naming < ActiveRecord::Base
         end
 
         # Send to everyone (except the person who created the naming!)
-        for recipient in recipients.uniq
-          if recipient && recipient != sender
-            NameProposalEmail.create_email(sender, recipient, observation, self)
-          end
+        for recipient in recipients.uniq - [sender]
+          NameProposalEmail.create_email(sender, recipient, observation, self)
         end
       end
     end

@@ -1,7 +1,6 @@
 <%
   type = @comment.object_type
-  title = type.titleize
-  small_title = title.downcase
+  type_str = type.downcase.to_sym.l
 
   # Tricky bit of logic to determine what kind of email is being sent here.  If
   # sending comment to owner of object it is not a "response to their comment"
@@ -17,9 +16,10 @@
   # object being commented on.  Is all this clear?  Sure isn't to me...
   # This is all important because we need to give the user the correct link
   # at the bottom of the email to turn off these sorts of emails.  Turning off
-  # comment_response_email will not prevent owner from getting them; turning
-  # off comment_email will not prevent non-owner from getting them.  Interest
-  # confuses the whole issue, of course, since it overrides these two prefs.
+  # email_comments_response will not prevent owner from getting them; turning
+  # off email_comments_owner will not prevent non-owner from getting them.
+  # Interest confuses the whole issue, of course, since it overrides these
+  # two prefs.
   is_owner = (@user == @comment.object.user)
   recipients_comments = Comment.find_all_by_object_type_and_object_id_and_user_id(@comment.object_type, @comment.object_id, @user.id)
   comments_before_this_comment = recipients_comments.select {|c| c.created < @comment.created}
@@ -29,45 +29,46 @@
   # print "coms_bef = #{comments_before_this_comment.length}\n"
   # print "response = #{is_response}\n"
 
-  intro = "The following comment was posted on the Mushroom Observer website"
-  intro += " in response to your comment" if is_response
-  intro += " regarding"
-  intro += is_owner ? " your" : " the"
-  intro += " #{small_title} <u>#{@object.unique_format_name}</u>:"
+  watching = @user.watching?(@object)
+  email_type = is_response ? 'response' :
+               is_owner    ? 'owner'    : 'all'
+
+  intro = is_owner ?    :email_comment_intro_to_owner :
+          is_response ? :email_comment_intro_response :
+                        :email_comment_intro_other
+  intro = intro.l(:type => type_str, :name => @object.unique_format_name)
 
   fields = ""
-  fields += "*Created:* #{@comment.created.to_formatted_s(:db)}\n"
-  fields += "*By:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
-  fields += "*Summary:* #{@comment.summary.to_s}\n"
-  fields += "*Comment:*\n" if @comment.comment
+  fields += "*#{:app_created_bare.l}:* #{@comment.created.to_formatted_s(:db)}\n"
+  fields += "*#{:app_by.l}:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
+  fields += "*#{:app_summary.l}:* #{@comment.summary.to_s}\n"
+  fields += "*#{:comment.l}:*\n" if @comment.comment
 
   # Only give the owner of the object being commented on access to the email
   # address of the user who commented on it.
   handy_links = is_owner ?
-    "You may respond directly to #{@comment.user.legal_name} by replying to this email, or by sending mail to #{@comment.user.email}." :
-    "Please do not reply to this email.  Click on the link below to respond to the comment via your own public comment."
-  handy_links += "  Here are some links you may find useful:"
+    :email_can_respond.l(:name => @comment.user.legal_name, :email => @comment.user.email) :
+    "*#{:email_no_respond.l}* #{:email_respond_via_comment.l}"
+  handy_links += ' ' + :email_handy_links.l
 
   links = []
-  links.push(["Show this #{small_title}",
+  links.push([:email_links_show_object.l(:type => type_str),
     "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"])
-  links.push(["Post a comment in response",
+  links.push([:email_links_post_comment.l,
     "#{DOMAIN}/comment/add_comment?id=#{@comment.object_id}&type=#{@comment.object_type}"])
-  links.push(["I'm not interested in this #{small_title}",
+  links.push([:email_links_not_interested.l(:type => type_str),
     "#{DOMAIN}/interest/set_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}"])
-  links.push(["Stop sending me these notifications",
-    "#{DOMAIN}/account/no_comment#{is_response ? '_response' : ''}_email/#{@user.id}"])
-  links.push(["Change your account preferences",
+  links.push([:email_links_stop_sending.l,
+    "#{DOMAIN}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
+  links.push([:email_links_change_prefs.l,
     "#{DOMAIN}/account/prefs/#{@user.id}"])
-  links.push(["Latest changes at Mushroom Observer",
+  links.push([:email_links_latest_changes.l,
     DOMAIN])
 
-  report_abuse = "If you feel the person who wrote this comment is abusing this service please forward this entire message to: webmaster@mushroomobserver.org"
-
-if @user.html_email ######################################################### %>
+if @user.email_html ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: Comment about <%= title.strip_html %></title>
+  <title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
@@ -83,7 +84,7 @@ if @user.html_email ######################################################### %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
-<%= report_abuse.tp %>
+<%= :email_report_abuse.tp %>
 <br/>
 </body>
 </html>
@@ -102,5 +103,5 @@ if @user.html_email ######################################################### %>
     result += "#{label}: #{url}\n"
   end
   result %>
-<%= report_abuse.tp.html_to_ascii %>
+<%= :email_report_abuse.tp.html_to_ascii %>
 <% end ###################################################################### %>

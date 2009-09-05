@@ -13,6 +13,7 @@ albion:
   south: 39.21
   high: 100.0
   low: 0.0
+  notes: Here are some new notes to play with.
 
 burbank:
   id: 2

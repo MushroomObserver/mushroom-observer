@@ -207,7 +207,9 @@ class ProjectController < ApplicationController
     project = Project.find(params[:id])
     subject = params[:email][:subject]
     content = params[:email][:content]
-    AccountMailer.deliver_admin_request(sender, project, subject, content)
+    for receiver in project.admin_group.users
+      AccountMailer.deliver_admin_request(sender, receiver, project, subject, content)
+    end
     flash_notice(:admin_request_success.t)
     redirect_to(:action => 'show_project', :id => project.id)
   end

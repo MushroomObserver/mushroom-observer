@@ -1,17 +1,20 @@
 #
 #  Views: ("*" - login required, "R" - root required)
-#     name_index         Alphabetical list of all names, used or otherwise.
-#     observation_index  Alphabetical list of names people have seen.
+#     name_index          Alphabetical list of all names, used or otherwise.
+#     observation_index   Alphabetical list of names people have seen.
 #     name_search
-#     show_name          Show info about name.
-#     show_past_name     Show past versions of name info.
-#   * create_name        Create new name.
-#   * edit_name          Edit name info.
-#   * change_synonyms    Change list of synonyms for a name.
-#   * deprecate_name     Deprecate name in favor of another.
-#   * approve_name       Flag given name as "accepted" (others could be, too).
-#   * bulk_name_edit     Create/synonymize/deprecate a list of names.
-#     map                Show distribution map.
+#     show_name           Show info about name.
+#     show_past_name      Show past versions of name info.
+#   * create_name         Create new name.
+#   * edit_name           Edit name info.
+#   * change_synonyms     Change list of synonyms for a name.
+#   * deprecate_name      Deprecate name in favor of another.
+#   * approve_name        Flag given name as "accepted" (others could be, too).
+#   * bulk_name_edit      Create/synonymize/deprecate a list of names.
+#     map                 Show distribution map.
+#   * review_authors      Let authors/reviewers add/remove authors.
+#   * author_request      Let non-authors request authorship credit.
+#   * send_author_request (post method of author_request)
 #
 #  AJAX:
 #     auto_complete_name
@@ -57,6 +60,7 @@ class NameController < ApplicationController
       @items = Name.connection.select_values %(
         SELECT text_name FROM names
         WHERE LOWER(text_name) LIKE '#{letter}%'
+        AND misspelling = false
         ORDER BY text_name ASC
       )
     else
@@ -87,6 +91,7 @@ class NameController < ApplicationController
     @name_data = Name.connection.select_all %(
       SELECT id, display_name
       FROM names
+      WHERE misspelling = false
       ORDER BY text_name asc, author asc
     )
     name_index_helper
@@ -161,7 +166,7 @@ class NameController < ApplicationController
       name_data = Name.connection.select_all %(
         SELECT distinct id, display_name
         FROM names
-        WHERE #{conditions}
+        WHERE #{conditions} AND misspelling = false
         ORDER BY text_name asc, author asc
       )
     end
@@ -212,6 +217,7 @@ class NameController < ApplicationController
         FROM names, #{role}s_names
         WHERE names.id = #{role}s_names.name_id
         AND #{role}s_names.user_id = #{user.id}
+        AND misspelling = false
         ORDER BY names.text_name asc, names.author asc
       )
       for row in name_data:
@@ -599,22 +605,67 @@ class NameController < ApplicationController
             @name.license_id = nil
           end
 
+          # Let user call this a misspelling.  Look up the correct name
+          # via synonyms.  There can be multiple accepted names, in which
+          # case look for the one that shares the most letters(!)  If none
+          # are close, notify user and ask them to be explicit.
+          @misspelling = (params[:name][:misspelling].to_s != '')
+          @correct_spelling = params[:name][:correct_spelling]
+
+          # Look up correct spelling if given explicitly.
+          if @correct_spelling
+            @name.misspelling = @misspelling = true
+            name2 = Name.find_by_search_name(@correct_spelling) 
+            name2 ||= Name.find_by_text_name(@correct_spelling) 
+            if name2
+              @name.correct_spelling = name2
+            else
+              flash_error(:form_names_misspelling_bad.t)
+            end
+
+          # Try to guess if not given explicitly.
+          elsif @misspelling && !@name.correct_spelling
+            @name.misspelling = true
+            synonyms = @name.approved_synonyms
+            if synonyms.length == 0
+              flash_error(:form_names_misspelling_none.t)
+            elsif synonyms.length == 1
+              @name.correct_spelling = synonyms.first
+            elsif synonyms.length > 1
+              candidates = []
+              for synonym in synonyms
+                # Count letters in one but not the other and vice versa.
+                val  = 0
+                copy = synonym.text_name
+                @name.text_name.each_char do |c|
+                  if i = copy.index(c)
+                    copy[i] = ''
+                  else
+                    val += 1
+                  end
+                end
+                val += copy.length
+                candidates.push(synonym) if val < 3
+              end
+              if candidates.length == 1
+                @name.correct_spelling = candidates.first
+              else
+                flash_error(:form_names_misspelling_many.t)
+                logger.warn("misspelling: couldn't decide on correct spelling for name ##{@name.id} [#{@name.search_name}]\n")
+                logger.warn("synonyms: [" + synonyms.map(&:search_name).join("], [") + "]\n")
+              end
+            end
+          end
+
           # Errr... when would this ever happen?
           raise user_update_nonexisting_name.t if !@name.id
 
           # If substantive changes are made by a reviewer, call this act a
           # "review", even though they haven't actually changed the review
-          # status.  (That's handled by a different action,
-          # set_review_status.)  If substantive changes are made by a
-          # non-reviewer, revert status to unreviewed.
+          # status.  If substantive changes are made by a non-reviewer,
+          # this will revert status to unreviewed.
           if @name.save_version?
-            if is_reviewer
-              @name.reviewer_id = @user.id
-              @name.last_review = current_time
-            else
-              @name.reviewer_id   = nil
-              @name.review_status = :unreviewed
-            end
+            @name.update_review_status(@name.review_status, @user, current_time)
           end
 
           # This saves changes, and returns true if a new version was created.
@@ -762,6 +813,11 @@ class NameController < ApplicationController
                 :other => @name.display_name }, current_time, true)
                 target_name.add_editor(@user)
               end
+              # If we haven't entered a correct spelling for this name yet,
+              # assume this new accepted synonym is it.
+              if @name.is_misspelling? && !@name.correct_spelling
+                @name.correct_spelling = target_name
+              end
               @name.change_deprecated(true)
               comment_join = @comment == "" ? "." : ":\n"
               @name.prepend_notes("Deprecated in favor of" +
@@ -897,7 +953,7 @@ class NameController < ApplicationController
           @note_template = @notification.note_template
         else
           mailing_address = @user.mailing_address.strip
-          mailing_address = '[mailing address for collections]' if '' == mailing_address
+          mailing_address = ':mailing_address' if mailing_address == ''
           @note_template = :email_tracking_note_template.l(
             :species_name => @name.text_name,
             :mailing_address => mailing_address,
@@ -932,7 +988,9 @@ class NameController < ApplicationController
     name = Name.find(params[:id])
     subject = params[:email][:subject]
     content = params[:email][:content]
-    AccountMailer.deliver_author_request(sender, name, subject, content)
+    for receiver in name.authors + UserGroup.find_by_name('reviewers').users
+      AccountMailer.deliver_author_request(sender, receiver, name, subject, content)
+    end
     flash_notice(:request_success.t)
     redirect_to(:action => 'show_name', :id => name.id)
   end
@@ -941,10 +999,10 @@ class NameController < ApplicationController
   # Linked from: show_name, author_request email
   # Inputs:
   #   params[:id]
-  #   params[:candidate]
-  #   params[:commit]
+  #   params[:add]
+  #   params[:remove]
   # Success:
-  #   Redirects to review_authors.
+  #   Redraws itself.
   # Failure:
   #   Renders show_name.
   #   Outputs: @name, @authors, @users
@@ -956,13 +1014,13 @@ class NameController < ApplicationController
         @users = User.find(:all, :order => "login, name")
         new_author = params[:add] ?  User.find(params[:add]) : nil
         if new_author and not @name.authors.member?(new_author)
-          @name.authors.push(new_author)
+          @name.add_author(new_author)
           flash_notice("Added #{new_author.legal_name}")
           # Should send email as well
         end
         old_author = params[:remove] ? User.find(params[:remove]) : nil
         if old_author
-          @name.authors.delete(old_author)
+          @name.remove_author(old_author)
           flash_notice("Removed #{old_author.legal_name}")
           # Should send email as well
         end

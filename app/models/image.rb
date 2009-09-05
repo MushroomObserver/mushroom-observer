@@ -63,25 +63,26 @@ class Image < ActiveRecord::Base
     obs_names = []
     self.observations.each {|o| obs_names.push(o.text_name)}
     title = obs_names.uniq.sort.join(' & ')
-    if title
-      sprintf("%s (%d)", title, self.id)
+    if obs_names.empty?
+      sprintf("%s #%d", :image.l, self.id)
     else
-      sprintf("Image %d", self.id)
+      sprintf("%s (%d)", title, self.id)
     end
   end
 
   # Read image into internal buffer and set content_type.
-  def image=(image_field)
-    self.content_type = image_field.content_type.chomp
-    @img = image_field.read
+  def image=(file)
+    self.content_type = file.content_type.chomp
     @img_dir = IMG_DIR
-  end
-
-  def check_test(obs)
-    if obs.id == 1
-      { :checked => 'checked' }
+    if NEW_IMAGE_THINGY
+      # (file is an ActionController::UploadedTempfile, which has
+      # the method "original_filename", and inherits from Tempfile, which
+      # has the methods "size", "path", "delete", etc. and inherits in turn
+      # from File...)
+      @img = file
+      @img = :too_big if @img.size > IMAGE_UPLOAD_MAX_SIZE
     else
-      { :checked => '' }
+      @img = file.read
     end
   end
 
@@ -96,16 +97,27 @@ class Image < ActiveRecord::Base
   end
 
   # Store internal buffer in original file.
-  # Can't include this in image= because self.id isn't set until first save
+  # Can't include this in image= because self.id isn't set until first save.
   def save_image
-    file = File.new(self.original_image, 'w')
-    file.print(@img)
-    file.close
-    delete_original = self.transfer_image(self.original_image)
-    result = self.create_resized_images
-    if delete_original && IMAGE_TRANSFER
-      # File.delete(self.original_image)
+    result = false
+    if NEW_IMAGE_THINGY
+      if @img
+        begin
+          raise(SystemCallError, "Don't move my test images!!") if TESTING
+          result = true if File.rename(@img.path, self.original_image)
+        rescue SystemCallError
+          result = true if system('cp', @img.path, self.original_image)
+        rescue => err
+          result = false
+        end
+      end
+    else
+      file = File.new(self.original_image, 'w')
+      file.print(@img)
+      file.close
+      result = true
     end
+    result = self.create_resized_images if result
     return result
   end
 
@@ -116,27 +128,8 @@ class Image < ActiveRecord::Base
                    width, height, quality, src, dest)
     if File.exists?(src) and result = system(cmd)
       logger.warn(cmd + ' -- success')
-      self.transfer_image(dest)
     else
       logger.warn(cmd + ' -- failed')
-    end
-    return result
-  end
-
-  # Transfer new image to the image server.
-  def transfer_image(src)
-    result = false
-    if IMAGE_TRANSFER and File.exists?(src)
-      if src.match(/\w+\/\d+\.jpg$/)
-        dest = $&
-        cmd = "scp %s %s/%s" % [src, IMAGE_SERVER, dest]
-        result = system cmd
-        if result
-          logger.warn(cmd + ' -- success')
-        else
-          logger.warn(cmd + ' -- failed')
-        end
-      end
     end
     return result
   end
@@ -172,16 +165,6 @@ class Image < ActiveRecord::Base
     result
   end
 
-  # Read 640x640 image into a buffer and return it.
-  def get_image
-    unless @img
-      file = File.new(self.big_image, 'r')
-      @img = file.read
-      file.close
-    end
-    @img
-  end
-
   # Take filename, remove path and extension, then remove weird characters.
   def base_part_of(file_name)
     name = File.basename(file_name)
@@ -202,6 +185,12 @@ class Image < ActiveRecord::Base
       errors.add(:content_type, :validate_image_content_type_images_only.t)
     elsif self.content_type.to_s.length > 100
       errors.add(:content_type, :validate_image_content_type_too_long.t)
+    end
+
+    if @img == :missing
+      errors.add(:image, :validate_image_file_missing.t)
+    elsif @img == :too_big
+      errors.add(:image, :validate_image_file_too_big.t(:max => IMAGE_UPLOAD_MAX_SIZE.to_s.sub(/\d{6}$/, 'Mb')))
     end
 
     if self.title.to_s.length > 100

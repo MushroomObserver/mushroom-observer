@@ -18,7 +18,7 @@ class FeatureEmail < BaseEmail
   def deliver_email
     if !note
       raise "No note found for email ##{email.id}"
-    elsif to_user.feature_email # Make sure it hasn't changed
+    elsif to_user.email_general_feature # Make sure it hasn't changed
       AccountMailer.deliver_email_features(to_user, note)
     end
   end

@@ -2,11 +2,13 @@ From: news@mushroomobserver.org
 Reply-To: rolf@collectivesource.com
 To: mary@collectivesource.com
 Bcc: nathan@collectivesource.com
-Subject: Comment about Fungi sp. (1)
+Subject: [MO] Comment about Fungi sp. (1)
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 
-The following comment was posted on the Mushroom Observer website regarding your observation Fungi sp. (1):
+Comment on Your Observation
+
+The following comment was posted on the Mushroom Observer website regarding your Observation Fungi sp. (1):
 
 Created: 2006-03-02 21:14:00
 By: Rolf Singer (rolf)
@@ -17,13 +19,14 @@ Wow!  That's really cool
 
 --------------------------------------------------
 
-You may respond directly to Rolf Singer by replying to this email, or by sending mail to rolf@collectivesource.com.  Here are some links you may find useful:
+It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
+Here are some handy links:
 
-Show this observation: http://localhost:3000/observer/show_observation/1
-Post a comment in response: http://localhost:3000/comment/add_comment?id=1&type=Observation
-I'm not interested in this observation: http://localhost:3000/interest/set_interest?id=1&type=Observation&user=2
-Stop sending me these notifications: http://localhost:3000/account/no_comment_email/2
-Change your account preferences: http://localhost:3000/account/prefs/2
+Show this Observation: http://localhost:3000/observer/show_observation/1
+Post a comment: http://localhost:3000/comment/add_comment?id=1&type=Observation
+I'm not interested in this Observation: http://localhost:3000/interest/set_interest?id=1&type=Observation&user=2
+Stop sending me email like this: http://localhost:3000/account/no_email_comments_owner/2
+Change your preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000
 
-If you feel the person who wrote this comment is abusing this service please forward this entire message to: webmaster@mushroomobserver.org
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

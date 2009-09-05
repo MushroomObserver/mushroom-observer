@@ -287,7 +287,7 @@ div.HelpNoteIndent {
   font-size: 80%;
 }
 
-table.with_lines td {
+div.textile table td {
   padding: 2px 5px 2px 5px;
 }
 
@@ -394,17 +394,17 @@ div.sandbox {
 div.sandbox a         { background-color: white; color: blue   }
 div.sandbox a:visited { background-color: white; color: red    }
 div.sandbox a:hover   { background-color: white; color: yellow }
-div.sandbox table.with_lines    { background: black; }
-div.sandbox table.with_lines td { background: white; }
+div.sandbox table     { background: black; }
+div.sandbox table td  { background: white; }
 
 /* bulk name editor */
 p.bulk_text {
   margin: 0em 0em 0em 0em;
-  padding: none;
+  padding: 0;
 }
 p.bulk_pre {
   margin: 0em 0em 1em 2em;
-  padding: none;
+  padding: 0;
   white-space: pre;
   font-family: mono;
   font-size: 11px;

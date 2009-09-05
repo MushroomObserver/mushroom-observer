@@ -16,6 +16,7 @@ var CachedAutocompleter = Class.create(base, {
     this.loading   = false;
     this.letter    = null;
     this.cache     = [];
+    this.primer    = this.options.primer || [];
 
     // Install onChange callback as a method.  (I have it call this whenever
     // the user clicks or presses tab/return, or when they leave the field.)
@@ -136,22 +137,27 @@ var CachedAutocompleter = Class.create(base, {
   // per line.  (Letter request is prepended as the first character, just in
   // case the matches don't necessarily start with the requested letter.)
   onComplete: function(request) {
-    var list = this.cache = [];
+    var list = [];
     var str = request.responseText;
     var x;
 
     // First, extract request letter this is the results for.
-    this.cacheLetter = str.charAt(0).toLowerCase();
+    var letter = str.charAt(0).toLowerCase();
     str = str.substr(1);
 
     // Now extract results, one line at a time.
     while ((x = str.indexOf("\n")) >= 0) {
-      list.push(str.substr(0, x));
+      if (x > 0)
+        list.push(str.substr(0, x));
       str = str.substr(x+1);
     }
 
-    // Now we can finally draw dropdown correctly.
+    // Try to drop new cache in place "atomically".
+    this.cache = list;
+    this.cacheLetter = letter;
     this.loading = false;
+
+    // Now we can finally draw dropdown correctly.
     if (list.length > 0)
       this.getUpdatedChoices();
   },
@@ -164,6 +170,7 @@ var CachedAutocompleter = Class.create(base, {
   getUpdatedChoices: function() {
     var part = this.element.value;
     var results = [];
+    var strings;
 
     // Get first letter.
     var letter = part;
@@ -180,28 +187,33 @@ var CachedAutocompleter = Class.create(base, {
           this.startIndicator();
           this.options.parameters = 'letter=' + letter;
           new Ajax.Request(this.url, this.options);
-          return;
         }
-      } else if (this.loading) {
-        return;
       }
 
       var part2 = part.toLowerCase();
       var part3 = ' ' + part2;
       var plen = part.length;
-      var space = part.indexOf(' ') > 0;
       var more_detail = false;
       var do_words = this.options.wordMatch;
 
-      // Get list of matches.
-      for (var i=0; i<this.cache.length; i++) {
-        var str = this.cache[i].toLowerCase();
-        if (str.substr(0,plen) == part2) {
-          if (str.length > plen)
-            more_detail = true;
-          results.push(i);
-        } else if (do_words && str.indexOf(part3) >= 0) {
-          results.push(i);
+      // Get list of matches.  Search cache from AJAX request first, since
+      // that is theoretically guaranteed to be correct (if it's there).
+      // If that fails, then try the primer list that comes with the page.
+      for (var i=0; i<2; i++) {
+        var list = i == 0 ? this.cache : this.primer;
+        for (var j=0; j<list.length; j++) {
+          var str = list[j].toLowerCase();
+          if (str.substr(0,plen) == part2) {
+            if (str.length > plen)
+              more_detail = true;
+            results.push(j);
+          } else if (do_words && str.indexOf(part3) >= 0) {
+            results.push(j);
+          }
+        }
+        if (results.length > 0) {
+          strings = list;
+          break;
         }
       }
 
@@ -210,22 +222,20 @@ var CachedAutocompleter = Class.create(base, {
       if (this.options.collapse && more_detail) {
         if (results.length > 1) {
           // Suppress genus if only one matches, display only species now.
-          if (this.cache[results[0]].toLowerCase() == part.toLowerCase())
-            results.shift();
+          // if (strings[results[0]].toLowerCase() == part.toLowerCase())
+          //   results.shift();
 
           // Suppress species when still choosing among multiple genera.
-          else {
-            var genera = 0;
+          var genera = 0;
+          for (var i=0; i<results.length; i++)
+            if (strings[results[i]].substr(plen).indexOf(' ') < 0)
+              genera++;
+          if (genera > 1) {
+            new_results = [];
             for (var i=0; i<results.length; i++)
-              if (this.cache[results[i]].substr(plen).indexOf(' ') < 0)
-                genera++;
-            if (genera > 1) {
-              new_results = [];
-              for (var i=0; i<results.length; i++)
-                if (this.cache[results[i]].substr(plen).indexOf(' ') < 0)
-                  new_results.push(results[i]);
-              results = new_results;
-            }
+              if (strings[results[i]].substr(plen).indexOf(' ') < 0)
+                new_results.push(results[i]);
+            results = new_results;
           }
         }
       }
@@ -233,7 +243,7 @@ var CachedAutocompleter = Class.create(base, {
 
     // Abort if there is only one result and it is an exact match.
     if (results.length == 1 &&
-      this.cache[results[0]].toLowerCase() == part.toLowerCase())
+      strings[results[0]].toLowerCase() == part.toLowerCase())
       results = [];
 
     // Make list scrollable if there are lots of items.
@@ -248,8 +258,12 @@ var CachedAutocompleter = Class.create(base, {
     // Turn list of choices into an HTML itemized list.
     var html = "";
     for (var i=0; i<results.length; i++)
-      html += "<li><nobr>" + this.cache[results[i]] + "</nobr></li>\n";
+      html += "<li><nobr>" + strings[results[i]] + "</nobr></li>\n";
     html = "<ul>\n" + html + "</ul>\n";
     this.updateChoices(html);
+
+    // Occasionally gets stuck with opacity turned down, presumably from some
+    // random event interrupting Effect.Appear()?  This seems to fix it...
+    this.update.setOpacity(1.0);
   }
 });

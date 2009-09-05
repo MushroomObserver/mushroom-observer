@@ -572,15 +572,28 @@ class ObserverController < ApplicationController
 
       # Create empty instances first time through.
       if request.method != :post
-        @observation = Observation.new
-        @naming      = Naming.new
-        @vote        = Vote.new
-        @what        = '' # can't be nil else rails tries to call @name.name
-        @names       = nil
-        @valid_names = nil
-        @reason      = init_naming_reasons()
-        @images      = []
-        @good_images = []
+        @observation     = Observation.new
+        @naming          = Naming.new
+        @vote            = Vote.new
+        @what            = '' # can't be nil else rails tries to call @name.name
+        @names           = nil
+        @valid_names     = nil
+        @reason          = init_naming_reasons()
+        @images          = []
+        @good_images     = []
+        @location_primer = Location.primer(@user)
+        @name_primer     = Name.primer(@user)
+
+        # Grab defaults for date and location from last observation the user
+        # edited if it was less than an hour ago.
+        last_observation = Observation.find(:first,
+          :conditions => ['user_id = ?', @user.id], 
+          :order => 'modified DESC')
+        if last_observation && last_observation.modified > Time.now - 1.hour
+          @observation.when     = last_observation.when
+          @observation.where    = last_observation.where
+          @observation.location = last_observation.location
+        end
 
       else
         # Create everything roughly first.
@@ -630,9 +643,11 @@ class ObserverController < ApplicationController
 
         # If anything failed reload the form.
         else
-          @reason = init_naming_reasons(params[:reason])
-          @images = @bad_images
-          @new_image.when = @observation.when
+          @reason          = init_naming_reasons(params[:reason])
+          @images          = @bad_images
+          @new_image.when  = @observation.when
+          @location_primer = Location.primer(@user)
+          @name_primer     = Name.primer(@user)
         end
       end
     end
@@ -1211,7 +1226,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def email_features
     if check_permission(0)
-      @users = User.find(:all, :conditions => "feature_email=1 and verified is not null")
+      @users = User.find(:all, :conditions => "email_general_feature=1 and verified is not null")
     else
       flash_error(:app_permission_denied.t)
       redirect_to(:action => 'list_observations')
@@ -1220,9 +1235,9 @@ class ObserverController < ApplicationController
 
   def send_feature_email
     if check_permission(0)
-      users = User.find(:all, :conditions => "feature_email=1 and verified is not null")
+      users = User.find(:all, :conditions => "email_general_feature=1 and verified is not null")
       for user in users
-        if user.feature_email
+        if user.email_general_feature
           FeatureEmail.create_email(user, params[:feature_email][:content])
         end
       end
@@ -1235,7 +1250,7 @@ class ObserverController < ApplicationController
   end
 
   def email_question(user, target_page, target_obj)
-    if !user.question_email
+    if !user.email_general_question
       flash_error(:app_permission_denied.t)
       redirect_to(:action => target_page, :id => target_obj.id)
     end
@@ -1272,7 +1287,7 @@ class ObserverController < ApplicationController
 
   def commercial_inquiry
     @image = Image.find(params[:id])
-    if !@image.user.commercial_email
+    if !@image.user.email_general_commercial
       flash_error(:app_permission_denied.t)
       redirect_to(:action => 'show_image', :id => @image.id)
     end
@@ -1580,7 +1595,7 @@ class ObserverController < ApplicationController
       i = 0
       while args2 = args[i.to_s]
         if (upload = args2[:image]) && upload != ''
-          name = upload.full_original_filename if upload.respond_to? :full_original_filename
+          name = upload.full_original_filename if upload.respond_to?(:full_original_filename)
           image = Image.new(args2)
           image.created = Time.now
           image.modified = image.created
@@ -1625,8 +1640,11 @@ class ObserverController < ApplicationController
       if image.notes != notes
         image.notes = notes
         image.modified = Time.now
-        image.save
-        flash_notice(:observer_controller_image_updated_notes.t(:id => image.id))
+        if !image.save
+          flash_object_errors(image)
+        else
+          flash_notice(:observer_controller_image_updated_notes.t(:id => image.id))
+        end
       end
     end
 

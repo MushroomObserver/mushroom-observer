@@ -150,39 +150,57 @@ class AccountControllerTest < Test::Unit::TestCase
         :alternate_rows    => "",
         :alternate_columns => "",
         :vertical_layout   => "",
-        :feature_email     => "1",
-        :comment_email     => "",
-        :comment_response_email => "1",
-        :name_proposal_email    => "",
-        :consensus_change_email => "1",
-        :name_change_email      => "",
-        :commercial_email  => "1",
-        :question_email    => "",
-        :html_email        => "1",
+        :email_comments_owner         => "1",
+        :email_comments_response      => "1",
+        :email_comments_all           => "",
+        :email_observations_consensus => "1",
+        :email_observations_naming    => "1",
+        :email_observations_all       => "",
+        :email_names_author           => "1",
+        :email_names_editor           => "",
+        :email_names_reviewer         => "1",
+        :email_names_all              => "",
+        :email_locations_author       => "1",
+        :email_locations_editor       => "",
+        :email_locations_all          => "",
+        :email_general_feature        => "1",
+        :email_general_commercial     => "1",
+        :email_general_question       => "1",
+        :email_digest                 => "immediately",
+        :email_html                   => "1",
       }
     }
     post_with_dump(:prefs, params)
     assert_equal(:prefs_success.t, flash[:notice])
     # Make sure changes were made.
     user = @rolf .reload
-    assert_equal("new_login", user.login)
-    assert_equal("new_email", user.email)
-    assert_equal("Agaricus", user.theme)
-    assert_equal(@ccnc25, user.license)
-    assert_equal(10, user.rows)
-    assert_equal(10, user.columns)
-    assert_equal(false, user.alternate_rows)
-    assert_equal(false, user.alternate_columns)
-    assert_equal(false, user.vertical_layout)
-    assert_equal(true,  user.feature_email)
-    assert_equal(false, user.comment_email)
-    assert_equal(true,  user.comment_response_email)
-    assert_equal(false, user.name_proposal_email)
-    assert_equal(true,  user.consensus_change_email)
-    assert_equal(false, user.name_change_email)
-    assert_equal(true,  user.commercial_email)
-    assert_equal(false, user.question_email)
-    assert_equal(true,  user.html_email)
+    assert_equal("new_login",  user.login)
+    assert_equal("new_email",  user.email)
+    assert_equal("Agaricus",   user.theme)
+    assert_equal(@ccnc25,      user.license)
+    assert_equal(10,           user.rows)
+    assert_equal(10,           user.columns)
+    assert_equal(false,        user.alternate_rows)
+    assert_equal(false,        user.alternate_columns)
+    assert_equal(false,        user.vertical_layout)
+    assert_equal(true,         user.email_comments_owner)
+    assert_equal(true,         user.email_comments_response)
+    assert_equal(false,        user.email_comments_all)
+    assert_equal(true,         user.email_observations_consensus)
+    assert_equal(true,         user.email_observations_naming)
+    assert_equal(false,        user.email_observations_all)
+    assert_equal(true,         user.email_names_author)
+    assert_equal(false,        user.email_names_editor)
+    assert_equal(true,         user.email_names_reviewer)
+    assert_equal(false,        user.email_names_all)
+    assert_equal(true,         user.email_locations_author)
+    assert_equal(false,        user.email_locations_editor)
+    assert_equal(false,        user.email_locations_all)
+    assert_equal(true,         user.email_general_feature)
+    assert_equal(true,         user.email_general_commercial)
+    assert_equal(true,         user.email_general_question)
+    assert_equal(:immediately, user.email_digest)
+    assert_equal(true,         user.email_html)
   end
 
   def test_edit_prefs_login_already_exists

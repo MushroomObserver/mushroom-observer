@@ -10,6 +10,9 @@
 #   * list_merge_options
 #   * add_to_location
 #   * edit_location
+#   * review_authors            Let authors/reviewers add/remove authors.
+#   * author_request            Let non-authors request authorship credit.
+#   * send_author_request       (post method of author_request)
 #   R merge_locations(location, dest)
 #
 #  AJAX:
@@ -38,7 +41,7 @@ class LocationController < ApplicationController
   def auto_complete_location
     letter = params[:letter] || ''
     if letter.length > 0
-      @items = Observation.connection.select_values %(
+      @items = Location.connection.select_values %(
         SELECT DISTINCT IF(observations.location_id > 0, locations.display_name, observations.where) AS x
         FROM observations
         LEFT OUTER JOIN locations ON locations.id = observations.location_id
@@ -150,6 +153,7 @@ class LocationController < ApplicationController
           @location.user = @user
           @location.version = 0
           if @location.save()
+            @location.add_editor(@user)
             flash_notice :create_location_success.t
             update_observations_by_where(@location, @where)
             if @set_user
@@ -262,6 +266,7 @@ class LocationController < ApplicationController
         else
           @location.attributes = params[:location]
           if @location.save_if_changed(@user)
+            @location.add_editor(@user)
             flash_notice :edit_location_success.t
             redirect_to(:action => 'show_location', :id => @location.id)
           elsif @location.errors.length > 0
@@ -289,9 +294,76 @@ class LocationController < ApplicationController
       id = dest.id
     else
       flash_warning :merge_locations_warning.t
-      content = "I attempted to merge the locations, #{location.display_name} and #{dest.display_name}."
+      content = "User attempted to merge the locations, #{location.display_name} and #{dest.display_name}."
       AccountMailer.deliver_webmaster_question(@user.email, content)
     end
     redirect_to(:action => 'show_location', :id => id)
+  end
+
+  # Form to allow authors to add/remove other users as author.
+  # Linked from: show_location, author_request email
+  # Inputs:
+  #   params[:id]
+  #   params[:add]
+  #   params[:remove]
+  # Success:
+  #   Redraws itself.
+  # Failure:
+  #   Renders show_location.
+  #   Outputs: @location, @authors, @users
+  def review_authors
+    @location = Location.find(params[:id])
+    if verify_user()
+      @authors = @location.authors
+      if @authors.member?(@user) or @user.in_group('reviewers')
+        @users = User.find(:all, :order => "login, name")
+        new_author = params[:add] ?  User.find(params[:add]) : nil
+        if new_author and not @location.authors.member?(new_author)
+          @location.add_author(new_author)
+          flash_notice("Added #{new_author.legal_name}")
+          # Should send email as well
+        end
+        old_author = params[:remove] ? User.find(params[:remove]) : nil
+        if old_author
+          @location.remove_author(old_author)
+          flash_notice("Removed #{old_author.legal_name}")
+          # Should send email as well
+        end
+      else
+        flash_error(:review_authors_denied.t)
+        redirect_to(:action => 'show_location', :id => @location.id)
+      end
+    end
+  end
+
+  # Form to compose email for the authors/reviewers
+  # Linked from: show_location
+  # Inputs:
+  #   params[:id]
+  # Outputs: @location
+  def author_request
+    @location = Location.find(params[:id])
+  end
+
+  # Sends email to the authors/reviewers
+  # Linked from: author_request
+  # Inputs:
+  #   params[:id]
+  #   params[:email][:subject]
+  #   params[:email][:content]
+  # Success:
+  #   Redirects to show_location.
+  #
+  # TODO: Use queued_email mechanism
+  def send_author_request
+    sender = @user
+    location = Location.find(params[:id])
+    subject = params[:email][:subject]
+    content = params[:email][:content]
+    for receiver in location.authors + UserGroup.find_by_name('reviewers').users
+      AccountMailer.deliver_author_request(sender, receiver, location, subject, content)
+    end
+    flash_notice(:request_success.t)
+    redirect_to(:action => 'show_location', :id => location.id)
   end
 end

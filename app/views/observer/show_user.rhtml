@@ -18,8 +18,9 @@
     if @show_user == @user
       add_tab(:show_user_your_observations.t, links['observations'])
       add_tab(:show_user_comments_for_you.t, links['comments'])
-      add_tab(:show_user_your_notifications.t, :controller => "observer", :action => "list_notifications")
+      add_tab(:show_user_your_notifications.t, :controller => "interest", :action => "list_interests")
       add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
+      add_tab(:app_preferences.t, :controller => "account", :action => "prefs")
     else
       add_tab(:show_user_observations_by.t(:name => name), links['observations'])
       add_tab(:show_user_comments_for.t(:name => name), links['comments'])

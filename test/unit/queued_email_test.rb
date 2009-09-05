@@ -7,6 +7,8 @@ class QueuedEmailTest < Test::Unit::TestCase
   fixtures :namings
   fixtures :names
   fixtures :past_names
+  fixtures :locations
+  fixtures :past_locations
   fixtures :notifications
 
   def test_comment_email
@@ -60,6 +62,27 @@ class QueuedEmailTest < Test::Unit::TestCase
     assert_equal(:feature, email.flavor)
     assert_equal(nil, email.user)
     assert_equal(@mary, email.to_user)
+  end
+
+  def test_location_change_email
+    QueuedEmail.queue_emails(true)
+    LocationChangeEmail.create_email(@rolf, @mary, @albion)
+    assert_email(0, {
+      :flavor => :location_change,
+      :from => @rolf,
+      :to => @mary,
+      :location => @albion.id,
+      :old_version => @albion.version,
+      :new_version => @albion.version,
+    })
+    email = QueuedEmail.find(:first).deliver_email
+    assert(email)
+    assert_equal(:location_change, email.flavor)
+    assert_equal(@rolf, email.user)
+    assert_equal(@mary, email.to_user)
+    assert_equal(@albion, email.location)
+    assert_equal(@albion.version, email.old_version)
+    assert_equal(@albion.version, email.new_version)
   end
 
   def test_name_change_email

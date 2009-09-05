@@ -2001,7 +2001,7 @@ class NameControllerTest < Test::Unit::TestCase
     notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
-    assert_nil(notification.calc_note(@rolf, @coprinus_comatus_obs))
+    assert_nil(notification.calc_note(:user => @rolf, :naming => @coprinus_comatus_naming))
   end
 
   def test_email_tracking_enable_with_note
@@ -2022,7 +2022,7 @@ class NameControllerTest < Test::Unit::TestCase
     notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(@mary, @coprinus_comatus_obs))
+    assert(notification.calc_note(:user => @mary, :naming => @coprinus_comatus_naming))
   end
 
   def test_email_tracking_update_add_note
@@ -2044,7 +2044,7 @@ class NameControllerTest < Test::Unit::TestCase
     notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(@rolf, @coprinus_comatus_obs))
+    assert(notification.calc_note(:user => @rolf, :naming => @coprinus_comatus_naming))
   end
 
   def test_email_tracking_disable

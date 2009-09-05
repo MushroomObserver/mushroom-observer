@@ -31,8 +31,11 @@ QUEUE_EMAIL = false
 EMAIL_PER_MINUTE = 25
 QUEUE_DELAY = 5.seconds
 
-# Enable this only on the production server.  It tells the image uploader to
-# write images to the image server at images.mushroomobserver.org.
-IMAGE_TRANSFER = false
-# IMAGE_TRANSFER = true
-# IMAGE_SERVER = "blah@blah.com:images"
+# File where the list of most commonly used names lives.
+NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.txt"
+
+# Limit size of image uploads (ImageMagick bogs down on large images).
+IMAGE_UPLOAD_MAX_SIZE = 20000000
+
+# Temporary switch to let us quickly back out changes to how image uploads are processed.
+NEW_IMAGE_THINGY = true

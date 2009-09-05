@@ -89,7 +89,7 @@ class ObservationTest < Test::Unit::TestCase
   #  Test email notification heuristics.
   # --------------------------------------
 
-  def test_email_notification_modified_by_owner_and_no_interest
+  def test_email_notification_1
     # There might be notifications left-over from other tests.
     Notification.find(:all).map {|n| n.destroy}
     Interest.find(:all).map {|n| n.destroy}
@@ -98,10 +98,14 @@ class ObservationTest < Test::Unit::TestCase
     emails = QueuedEmail.find(:all).length
 
     # Make sure Rolf has requested emails.
-    @rolf.comment_email = true
-    @rolf.name_proposal_email = true
-    @rolf.consensus_change_email = true
+    @rolf.email_comments_owner = true
+    @rolf.email_comments_response = true
+    @rolf.email_observations_naming = true
+    @rolf.email_observations_consensus = true
     @rolf.save
+
+    # Make sure observation name starts as Coprinus comatus.
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
 
     # Observation owner is not notified if comment added by themselves.
     # (Rolf owns @coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
@@ -123,6 +127,8 @@ class ObservationTest < Test::Unit::TestCase
       :vote_cache  => 0
     )).save
     assert_equal(emails, QueuedEmail.find(:all).length)
+    @coprinus_comatus_obs.reload
+    assert_equal(@coprinus_comatus, @coprinus_comatus_obs.name)
 
     # Observation owner is not notified if consensus changed by themselves.
     Vote.new(
@@ -134,58 +140,56 @@ class ObservationTest < Test::Unit::TestCase
       :value       => 3
     ).save
     @coprinus_comatus_obs.calc_consensus(@rolf)
+    @coprinus_comatus_obs.reload
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
     assert_equal(emails, QueuedEmail.find(:all).length)
-  end
 
-  def test_email_notification_modified_by_someone_else_and_no_interest_but_prefs_turned_off
-    # There might be notifications left-over from other tests.
-    Notification.find(:all).map {|n| n.destroy}
-    Interest.find(:all).map {|n| n.destroy}
-
-    QueuedEmail.queue_emails(true)
-    emails = QueuedEmail.find(:all).length
-
-    # Make sure Rolf has requested no emails.
-    @rolf.comment_email = false
-    @rolf.name_proposal_email = false
-    @rolf.consensus_change_email = false
+    # Make Rolf opt out of all emails.
+    @rolf.email_comments_owner = false
+    @rolf.email_comments_response = false
+    @rolf.email_observations_naming = false
+    @rolf.email_observations_consensus = false
     @rolf.save
 
-    # Observation owner would be notified if comment added by someone else.
-    # (Rolf owns @coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
+    # Rolf should not be notified of anything here, either...
     (new_comment = Comment.new(
       :created => Time.now,
-      :user    => @mary,
-      :summary => 'This is Mary...',
+      :user    => @dick,
+      :summary => 'This is Dick...',
       :object  => @coprinus_comatus_obs
     )).save
     assert_equal(emails, QueuedEmail.find(:all).length)
 
-    # Observation owner would be notified if naming added by someone else.
     (new_naming = Naming.new(
       :created     => Time.now,
       :modified    => Time.now,
       :observation => @coprinus_comatus_obs,
-      :name        => @agaricus_campestris,
-      :user        => @mary,
+      :name        => @peltigera,
+      :user        => @dick,
       :vote_cache  => 0
     )).save
     assert_equal(emails, QueuedEmail.find(:all).length)
+    @coprinus_comatus_obs.reload
+    assert_equal(@agaricus_campestris, @coprinus_comatus_obs.name)
 
-    # Observation owner would be notified if consensus changed by someone else.
+    # Make sure this changes consensus...
+    @dick.contribution = 100000000000
+    @dick.save
     Vote.new(
       :created     => Time.now,
       :modified    => Time.now,
       :observation => @coprinus_comatus_obs,
       :naming      => new_naming,
-      :user        => @mary,
+      :user        => @dick,
       :value       => 3
     ).save
-    @coprinus_comatus_obs.calc_consensus(@mary)
+    @coprinus_comatus_obs.calc_consensus(@dick)
+    @coprinus_comatus_obs.reload
+    assert_equal(@peltigera, @coprinus_comatus_obs.name)
     assert_equal(emails, QueuedEmail.find(:all).length)
   end
 
-  def test_email_notification_modified_by_someone_else_and_no_interest
+  def test_email_notification_2
     # There might be notifications left-over from other tests.
     Notification.find(:all).map {|n| n.destroy}
     Interest.find(:all).map {|n| n.destroy}
@@ -193,18 +197,17 @@ class ObservationTest < Test::Unit::TestCase
     QueuedEmail.queue_emails(true)
     emails = QueuedEmail.find(:all).length
 
-    # Make sure Rolf has requested emails (will turn on one at a time to be
+    # Make sure Rolf has requested no emails (will turn on one at a time to be
     # sure the right pref affects the right notification).
-    @rolf.comment_email = false
-    @rolf.name_proposal_email = false
-    @rolf.consensus_change_email = false
+    @rolf.email_comments_owner = false
+    @rolf.email_comments_response = false
+    @rolf.email_observations_naming = false
+    @rolf.email_observations_consensus = false
     @rolf.save
 
     # Observation owner is notified if comment added by someone else.
     # (Rolf owns @coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
-    @rolf.comment_email = true
-    @rolf.name_proposal_email = false
-    @rolf.consensus_change_email = false
+    @rolf.email_comments_owner = true
     @rolf.save
     (new_comment = Comment.new(
       :created => Time.now,
@@ -213,11 +216,16 @@ class ObservationTest < Test::Unit::TestCase
       :object  => @coprinus_comatus_obs
     )).save
     assert_equal(emails + 1, QueuedEmail.find(:all).length)
+    assert_email(emails, {
+      :flavor      => :comment,
+      :from        => @mary,
+      :to          => @rolf,
+      :comment     => new_comment.id
+    })
 
     # Observation owner is notified if naming added by someone else.
-    @rolf.comment_email = false
-    @rolf.name_proposal_email = true
-    @rolf.consensus_change_email = false
+    @rolf.email_comments_owner = false
+    @rolf.email_observations_naming = true
     @rolf.save
     @coprinus_comatus_obs.user.reload
     (new_naming = Naming.new(
@@ -229,26 +237,6 @@ class ObservationTest < Test::Unit::TestCase
       :vote_cache  => 0
     )).save
     assert_equal(emails + 2, QueuedEmail.find(:all).length)
-
-    # Observation owner is notified if consensus changed by someone else.
-    @rolf.comment_email = false
-    @rolf.name_proposal_email = false
-    @rolf.consensus_change_email = true
-    @rolf.save
-    # (Actually, Mary already gave this her highest possible vote,
-    # so think of this as Mary changing Rolf's vote. :)
-    @coprinus_comatus_other_naming_rolf_vote.value = 3
-    @coprinus_comatus_other_naming_rolf_vote.save
-    @coprinus_comatus_obs.calc_consensus(@mary)
-    assert_equal(emails + 3, QueuedEmail.find(:all).length)
-
-    # Make sure emails were as expected.
-    assert_email(emails, {
-      :flavor      => :comment,
-      :from        => @mary,
-      :to          => @rolf,
-      :comment     => new_comment.id
-    })
     assert_email(emails + 1, {
       :flavor      => :name_proposal,
       :from        => @mary,
@@ -256,6 +244,17 @@ class ObservationTest < Test::Unit::TestCase
       :observation => @coprinus_comatus_obs.id,
       :naming      => new_naming.id
     })
+
+    # Observation owner is notified if consensus changed by someone else.
+    @rolf.email_observations_naming = false
+    @rolf.email_observations_consensus = true
+    @rolf.save
+    # (Actually, Mary already gave this her highest possible vote,
+    # so think of this as Mary changing Rolf's vote. :)
+    @coprinus_comatus_other_naming_rolf_vote.value = 3
+    @coprinus_comatus_other_naming_rolf_vote.save
+    @coprinus_comatus_obs.calc_consensus(@mary)
+    assert_equal(emails + 3, QueuedEmail.find(:all).length)
     assert_email(emails + 2, {
       :flavor      => :consensus_change,
       :from        => @mary,
@@ -264,9 +263,26 @@ class ObservationTest < Test::Unit::TestCase
       :old_name    => @coprinus_comatus.id,
       :new_name    => @agaricus_campestris.id
     })
+
+    # Make sure Mary gets notified if Rolf responds to her comment.
+    @mary.email_comments_response = true
+    @mary.save
+    (new_comment = Comment.new(
+      :created => Time.now,
+      :user    => @rolf,
+      :summary => 'This is Rolf...',
+      :object  => @coprinus_comatus_obs
+    )).save
+    assert_equal(emails + 4, QueuedEmail.find(:all).length)
+    assert_email(emails + 3, {
+      :flavor      => :comment,
+      :from        => @rolf,
+      :to          => @mary,
+      :comment     => new_comment.id
+    })
   end
 
-  def test_email_notification_modified_by_someone_else_and_interest
+  def test_email_notification_3
     # There might be objects left-over from other tests.
     Notification.find(:all).map {|n| n.destroy}
     Interest.find(:all).map {|n| n.destroy}
@@ -275,15 +291,17 @@ class ObservationTest < Test::Unit::TestCase
     emails = QueuedEmail.find(:all).length
 
     # Make sure Rolf has requested emails.
-    @rolf.comment_email = true
-    @rolf.name_proposal_email = true
-    @rolf.consensus_change_email = true
+    @rolf.email_comments_owner = true
+    @rolf.email_comments_response = true
+    @rolf.email_observations_naming = true
+    @rolf.email_observations_consensus = true
     @rolf.save
 
     # Make sure Dick has requested no emails.
-    @dick.comment_email = false
-    @dick.name_proposal_email = false
-    @dick.consensus_change_email = false
+    @dick.email_comments_owner = false
+    @dick.email_comments_response = false
+    @dick.email_observations_naming = false
+    @dick.email_observations_consensus = false
     @dick.save
 
     # Make Rolf ignore his own observation (will override prefs).
@@ -309,6 +327,12 @@ class ObservationTest < Test::Unit::TestCase
       :object  => @coprinus_comatus_obs
     )).save
     assert_equal(emails + 1, QueuedEmail.find(:all).length)
+    assert_email(emails, {
+      :flavor      => :comment,
+      :from        => @mary,
+      :to          => @dick,
+      :comment     => new_comment.id
+    })
 
     # Watcher is notified if naming added.
     (new_naming = Naming.new(
@@ -320,6 +344,13 @@ class ObservationTest < Test::Unit::TestCase
       :vote_cache  => 0
     )).save
     assert_equal(emails + 2, QueuedEmail.find(:all).length)
+    assert_email(emails + 1, {
+      :flavor      => :name_proposal,
+      :from        => @mary,
+      :to          => @dick,
+      :observation => @coprinus_comatus_obs.id,
+      :naming      => new_naming.id
+    })
 
     # Watcher is notified if consensus changed.
     # (Actually, Mary already gave this her highest possible vote,
@@ -328,6 +359,14 @@ class ObservationTest < Test::Unit::TestCase
     @coprinus_comatus_other_naming_rolf_vote.save
     @coprinus_comatus_obs.calc_consensus(@mary)
     assert_equal(emails + 3, QueuedEmail.find(:all).length)
+    assert_email(emails + 2, {
+       :flavor      => :consensus_change,
+       :from        => @mary,
+       :to          => @dick,
+       :observation => @coprinus_comatus_obs.id,
+       :old_name    => @coprinus_comatus.id,
+       :new_name    => @agaricus_campestris.id
+    })
 
     # Watcher is also notified of changes in the observation.
     @coprinus_comatus_obs.notes = 'I have new information on this observation.'
@@ -344,29 +383,6 @@ class ObservationTest < Test::Unit::TestCase
     assert_equal(emails + 4, QueuedEmail.find(:all).length)
     @coprinus_comatus_obs.remove_image_by_id(@connected_coprinus_comatus_image.id)
     assert_equal(emails + 4, QueuedEmail.find(:all).length)
-
-    # Make sure emails were as expected.
-    assert_email(emails, {
-      :flavor      => :comment,
-      :from        => @mary,
-      :to          => @dick,
-      :comment     => new_comment.id
-    })
-    assert_email(emails + 1, {
-      :flavor      => :name_proposal,
-      :from        => @mary,
-      :to          => @dick,
-      :observation => @coprinus_comatus_obs.id,
-      :naming      => new_naming.id
-    })
-    assert_email(emails + 2, {
-       :flavor      => :consensus_change,
-       :from        => @mary,
-       :to          => @dick,
-       :observation => @coprinus_comatus_obs.id,
-       :old_name    => @coprinus_comatus.id,
-       :new_name    => @agaricus_campestris.id
-    })
     assert_email(emails + 3, {
       :flavor      => :observation_change,
       :from        => @rolf,
@@ -376,7 +392,7 @@ class ObservationTest < Test::Unit::TestCase
     })
   end
 
-  def test_email_notification_by_observation_change
+  def test_email_notification_4
     # There might be notifications left-over from other tests.
     Notification.find(:all).map {|n| n.destroy}
     Interest.find(:all).map {|n| n.destroy}
@@ -407,27 +423,9 @@ class ObservationTest < Test::Unit::TestCase
     marys_interest.save
     @coprinus_comatus_obs.notes = 'I have new information on this observation.'
     @coprinus_comatus_obs.save
-    assert_equal(emails + 1, QueuedEmail.find(:all).length)
     marys_interest.state = false
     marys_interest.save
-
-    # Add image to observation.
-    dicks_interest.state = true
-    dicks_interest.save
-    @coprinus_comatus_obs.add_image_by_id(@disconnected_coprinus_comatus_image.id)
-    assert_equal(emails + 2, QueuedEmail.find(:all).length)
-    dicks_interest.state = false
-    dicks_interest.save
-
-    # Destroy observation.
-    katrinas_interest.state = true
-    katrinas_interest.save
-    @coprinus_comatus_obs.destroy
-    assert_equal(emails + 3, QueuedEmail.find(:all).length)
-    katrinas_interest.state = false
-    katrinas_interest.save
-
-    # Make sure emails were as expected.
+    assert_equal(emails + 1, QueuedEmail.find(:all).length)
     assert_email(emails, {
       :flavor      => :observation_change,
       :from        => @rolf,
@@ -435,6 +433,14 @@ class ObservationTest < Test::Unit::TestCase
       :observation => @coprinus_comatus_obs.id,
       :note        => 'notes'
     })
+
+    # Add image to observation.
+    dicks_interest.state = true
+    dicks_interest.save
+    @coprinus_comatus_obs.add_image_by_id(@disconnected_coprinus_comatus_image.id)
+    dicks_interest.state = false
+    dicks_interest.save
+    assert_equal(emails + 2, QueuedEmail.find(:all).length)
     assert_email(emails + 1, {
       :flavor      => :observation_change,
       :from        => @rolf,
@@ -442,6 +448,14 @@ class ObservationTest < Test::Unit::TestCase
       :observation => @coprinus_comatus_obs.id,
       :note        => 'thumb_image_id,added_image'
     })
+
+    # Destroy observation.
+    katrinas_interest.state = true
+    katrinas_interest.save
+    @coprinus_comatus_obs.destroy
+    katrinas_interest.state = false
+    katrinas_interest.save
+    assert_equal(emails + 3, QueuedEmail.find(:all).length)
     assert_email(emails + 2, {
       :flavor      => :observation_change,
       :from        => @rolf,

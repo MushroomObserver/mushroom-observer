@@ -127,8 +127,8 @@ class String
 
   def t; textilize_without_paragraph(false); end
   def tl; textilize_without_paragraph(true); end
-  def tp; textilize(false); end
-  def tpl; textilize(true); end
+  def tp; '<div class="textile">' + textilize(false) + '</div>'; end
+  def tpl; '<div class="textile">' + textilize(true) + '</div>'; end
 
   # Register one or more name objects so that subsequent textile strings can
   # refer to them by abbreviation.
@@ -138,6 +138,9 @@ class String
         @@textile_name_lookup ||= {}
         name.text_name.match(/([A-Z])/)
         @@textile_name_lookup[$1] = name
+        @@textile_last_species    = name if name.rank == :Species
+        @@textile_last_subspecies = name if name.rank == :Subspecies
+        @@textile_last_variety    = name if name.rank == :Variety
       end
     end
   end
@@ -161,16 +164,50 @@ protected
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     self.gsub!(/
-      (^|\W) (?:\**_+) ( "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\.) ) (?:_+\**) (?=(?:s|ish|like)?(?:\W|’|\Z))
+      (^|\W) (?:\**_+)
+        ( (?: "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\. ) |
+          (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"? ) )
+        ( \s+ (?: "?[^a-z"\s_] | in\s?ed\.? | auct\.? | van\sd[a-z]+\s[A-Z] | s[\.\s] | sensu\s ) [^_]* )?
+      (?:_+\**) (?=(?:s|ish|like)?(?:\W|’|\Z))
     /x) do |orig|
-      prefix = $1
+      prefix = $1.to_s
+      name   = $2.to_s
+      author = $3.to_s
 
       # Remove any formatting.
-      str1 = ($2 || $3).gsub(/[_*]/, '')
+      str1 = (name + author).gsub(/[_*]/, '')
 
-      # Expand abbreviated genus.
-      str2 = str1.sub(/^([A-Z])\.? /) do |x|
+      # Expand abbreviated genus (but only if followed by species epithet!).
+      str2 = str1.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
         (n = @@textile_name_lookup[$1]) ? n.text_name.sub(/ .*/, '') + ' ' : x
+      end
+
+      # Expand bare variety, etc.  For example, after using Amanita muscaria:
+      #   _var alba_  -->  Amanita muscaria var. alba
+      # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
+      if str2.sub!(/^(subsp|ssp)\.? +/, '')
+        str2 = @@textile_last_species    ? @@textile_last_species.text_name  + ' subsp. ' + str2 : ''
+      elsif str2.sub!(/^(var|v)\.? +/, '')
+        str2 = @@textile_last_subspecies ? @@textile_last_subspecies.text_name + ' var. ' + str2 :
+               @@textile_last_species    ? @@textile_last_species.text_name    + ' var. ' + str2 : ''
+      elsif str2.sub!(/^(forma?|f)\.? +/, '')
+        str2 = @@textile_last_variety    ? @@textile_last_variety.text_name    + ' f. ' + str2 :
+               @@textile_last_subspecies ? @@textile_last_subspecies.text_name + ' f. ' + str2 :
+               @@textile_last_species    ? @@textile_last_species.text_name    + ' f. ' + str2 : ''
+      end
+
+      # Allow a number of author-like syntaxes that aren't normally allowed.
+      # Remove them and match the rest.  Examples:
+      #   _Laccaria cf. laccata_      -->  <a>**__Laccaria__**</a> __cf. laccata__
+      #   _Peltigera aphthosa group_  -->  <a>**__Peltigera aphthosa__**</a> __group__
+      #   _Parmelia s. lat._          -->  <a>**__Parmelia__**</a> __s. lat.__
+      postfix = ''
+      if str2.sub!(/ cf\.? (.*)/, '')
+        postfix = ' cf. __%s__' % $1
+      elsif str2.sub!(/ group$/, '')
+        postfix = ' group'
+      elsif str2.sub!(/ (s|sensu)\.? ?(l|lato|s|str|stricto)\.?$/, '')
+        postfix = $2[0,1] == 's' ? ' s. str.' : ' s. lato'
       end
 
       # Look up name.
@@ -180,18 +217,39 @@ protected
                Name.find_by_text_name(parse[0])
       end
 
-      # Update which genus this first letter would mean in an abbrev.
-      if name && !name.above_genus?
-        name.text_name.match(/([A-Z])/)
-        @@textile_name_lookup[$1] = name
-      end
+      if name &&
+        # Allowing arbitrary authors on Genera and higher makes it impossible to
+        # distinguish between publication titles and taxa, e.g., "Lichen Flora
+        # of the Greater Sonoran Region".  I'm sure it can still break with species
+        # but it should be very infrequent (I don't see it in current tests). -JPH
+        (author == '' || name.below_genus?)
 
-      # Attempt to impose the correct formatting.
-      if name
-        str3 = name.display_name
-        str3 = str3.sub(/([A-Z])[a-zë\-]*/, '\\1.') if str1 != str2
-        str3 = str3.sub(name.author, '').strip if name.author && !str1.include?(name.author)
-        prefix + 'x{NAME %d %s }x' % [name.id, str3]
+        # Update which genus this first letter would mean in an abbrev.
+        if !name.above_genus?
+          name.text_name.match(/([A-Z])/)
+          @@textile_name_lookup[$1] = name
+          @@textile_last_species    = name if name.rank == :Species
+          @@textile_last_subspecies = name if name.rank == :Subspecies
+          @@textile_last_variety    = name if name.rank == :Variety
+        end
+
+        # Allow "sensu Authors" that aren't in database.  Example:
+        #   _S. riparia sensu A.H.Smith_  -->  <a>**__S. riparia__**</a> __sensu A.H.Smith__
+        if !name.author.to_s.match(/sensu/) && str2.sub!(/ (sensu .*)/ ,'')
+          postfix = ' ' + $1 + postfix
+        end
+
+        # Format name starting with bare text_name (no "sp." or author).
+        label = '__%s__' % name.text_name
+        label = '**%s**' % label if !name.deprecated
+        label.sub!(/([A-Z])[a-zë\-]*/, '\\1.') if str1.match(/^[A-Z]\.? /)
+        label.gsub!(/ (var|subsp|f)\. /, '__ \\1. __')
+
+        # Strip off all but author (and "sp.") from user's string.
+        author = str2.split
+        author = author[name.text_name.split.length .. author.length-1]
+        author = author.empty? ? '' : ' ' + author.join(' ')
+        prefix + 'x{NAME %d %s%s }x%s' % [name.id, label, author, postfix]
       else
         orig
       end

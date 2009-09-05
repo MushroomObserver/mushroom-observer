@@ -1,57 +1,59 @@
-<% if @user.html_email %>
+<%
+  intro = :email_commercial_intro.l(
+    :user  => @sender.legal_name,
+    :email => @sender.email,
+    :image => @image.unique_text_name
+  )
+
+  handy_links = :email_can_respond.l(
+    :name  => @sender.legal_name,
+    :email => @sender.email
+  )
+  handy_links += ' ' + :email_handy_links.l
+
+  links = []
+  links.push([:email_links_show_object.l(:type => :image.l),
+    "#{DOMAIN}/image/show_image/#{@image.id}"])
+  links.push([:email_links_stop_sending.l,
+    "#{DOMAIN}/account/no_email_general_commercial/#{@user.id}"])
+  links.push([:email_links_change_prefs.l,
+    "#{DOMAIN}/account/prefs/#{@user.id}"])
+  links.push([:email_links_latest_changes.l,
+    DOMAIN])
+
+if @user.email_html ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: Commercial Inquiry</title>
+  <title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
-
-<h2><b>Commercial Inquiry</b></h2>
-
-<p><%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer
-website to forward the following commercial inquiry about your image, <u><%=
-@image.unique_text_name %></u>:</p>
-
+<%= intro.tp %>
 <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-  <%= sanitize(@commercial_inquiry).tp %>
+  <%= sanitize(@message).tp %>
 </div>
-
-<p>It is entirely up to you whether you want to reply by emailing directly back
-to them.&nbsp; Here are some handy links you may find useful:</p>
-
+<%= handy_links.tp %>
 <ul type=none>
-  <li>Show this image:
-    <%= url = "#{DOMAIN}/image/show_image/#{@image.id}"
-    link_to(url, url) %></li>
-  <li>Stop receiving commercial inquiries:
-    <%= url = "#{DOMAIN}/account/no_commercial_email/#{@user.id}"
-    link_to(url, url) %></li>
-  <li>Change your account preferences:
-    <%= url = "#{DOMAIN}/account/prefs/#{@user.id}"
-    link_to(url, url) %></li>
-  <li>Latest changes at Mushroom Observer:
-    <%= url = DOMAIN
-    link_to(url, url) %></li>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
 </ul>
-
-<p>If you feel the sender of this mail is abusing this service please forward
-this entire message to: webmaster@mushroomobserver.org</p>
-
+<%= :email_report_abuse.tp %>
 <br/>
 </body>
 </html>
 <% else ##################################################################### %>
-<%= @sender.legal_name %> (<%= @sender.email %>) asked the Mushroom Observer website to forward the following commercial inquiry about your image, <%= @image.unique_text_name %> (<%= sprintf "%s/image/show_image/%d", DOMAIN, @image.id %>):
+<%= intro.tp.html_to_ascii %>
 
-<%= @commercial_inquiry %>
+<%= @message.tp.html_to_ascii %>
 
 --------------------------------------------------
 
-It is entirely up to you whether you want to reply by emailing directly back to them.  Here are some handy links you may find useful:
+<%= handy_links.tp.html_to_ascii %>
 
-Show this image: <%= "#{DOMAIN}/image/show_image/#{@image.id}" %>
-Stop receiving commercial inquiries: <%= "#{DOMAIN}/account/no_commercial_email/#{@user.id}" %>
-Change your account preferences: <%= "#{DOMAIN}/account/prefs/#{@user.id}" %>
-Latest changes at Mushroom Observer: <%= DOMAIN %>
-
-If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org
-<% end %>
+<%= result = ''
+  for label, url in links
+    result += "#{label.t.html_to_ascii}: #{url}\n"
+  end
+  result %>
+<%= :email_report_abuse.tp.html_to_ascii %>
+<% end ###################################################################### %>

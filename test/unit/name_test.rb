@@ -460,34 +460,121 @@ class NameTest < Test::Unit::TestCase
   # --------------------------------------
 
   def test_email_notification
-    QueuedEmail.queue_emails(true)
-    emails = QueuedEmail.find(:all).length
+    @rolf.email_names_author   = true;
+    @rolf.email_names_editor   = true;
+    @rolf.email_names_reviewer = true;
+    @rolf.email_names_all      = false;
+    @rolf.save
+
+    @mary.email_names_author   = true;
+    @mary.email_names_editor   = false;
+    @mary.email_names_reviewer = false;
+    @mary.email_names_all      = false;
+    @mary.save
+
+    @dick.email_names_author   = false;
+    @dick.email_names_editor   = false;
+    @dick.email_names_reviewer = false;
+    @dick.email_names_all      = false;
+    @dick.save
+
+    @katrina.email_names_author   = true;
+    @katrina.email_names_editor   = true;
+    @katrina.email_names_reviewer = true;
+    @katrina.email_names_all      = true;
+    @katrina.save
+
+    # Start with no reviewer.
+    @peltigera.gen_desc = ''
+    @peltigera.review_status = :unreviewed;
+    @peltigera.reviewer = nil;
+    @peltigera.save
+    @peltigera.reload
     version = @peltigera.version
 
-    # No authors on @peltigera yet.
+    QueuedEmail.queue_emails(true)
+    emails = QueuedEmail.find(:all).length
     assert_equal(0, @peltigera.authors.length)
-    @peltigera.gen_desc = ''
-    @peltigera.save_if_changed(@rolf, :log_name_updated, { :user => 'rolf' }, Time.now, true)
+    assert_equal(0, @peltigera.editors.length)
+    assert_equal(nil, @peltigera.reviewer)
+
+    # email types:  author  editor  review  all     interest
+    # 1 Rolf:       x       x       x       .       .
+    # 2 Mary:       x       .       .       .       .
+    # 3 Dick:       .       .       .       .       .
+    # 4 Katrina:    x       x       x       x       .
+    # Authors: --        editors: --         reviewer: -- (unreviewed)
+    # Rolf changes citation: notify Katrina (all), Rolf becomes editor.
+    @peltigera.citation = ''
+    @peltigera.save_if_changed(@rolf, :log_name_updated, { :user => 'rolf' }, Time.now, true) and @peltigera.add_editor(@rolf)
     assert_equal(version + 1, @peltigera.version)
     assert_equal(0, @peltigera.authors.length)
-    assert_equal(emails, QueuedEmail.find(:all).length)
-
-    # Now have mary become author.  (Still no emails.)
-    @peltigera.gen_desc = "Mary wrote this."
-    @peltigera.save_if_changed(@mary, :log_name_updated, { :user => 'mary' }, Time.now, true)
-    assert_equal(version + 2, @peltigera.version)
-    assert_equal(1, @peltigera.authors.length)
-    assert_equal(@mary, @peltigera.authors.first)
-    assert_equal(emails, QueuedEmail.find(:all).length)
-
-    # Now when rolf changes the citation mary should get notified.
-    @peltigera.citation = "Something more new."
-    @peltigera.save_if_changed(@rolf, :log_name_updated, { :user => 'rolf' }, Time.now, true)
-    assert_equal(version + 3, @peltigera.version)
+    assert_equal(1, @peltigera.editors.length)
+    assert_equal(nil, @peltigera.reviewer)
+    assert_equal(@rolf, @peltigera.editors.first)
     assert_equal(emails + 1, QueuedEmail.find(:all).length)
     assert_email(emails, {
         :flavor        => :name_change,
         :from          => @rolf,
+        :to            => @katrina,
+        :name          => @peltigera.id,
+        :old_version   => @peltigera.version-1,
+        :new_version   => @peltigera.version,
+        :review_status => 'no_change',
+    })
+
+    # Katrina wisely reconsiders requesting notifications of all name changes.
+    @katrina.email_names_all = false;
+    @katrina.save
+
+    # email types:  author  editor  review  all     interest
+    # 1 Rolf:       x       x       x       .       .
+    # 2 Mary:       x       .       .       .       .
+    # 3 Dick:       .       .       .       .       .
+    # 4 Katrina:    x       x       x       .       .
+    # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
+    # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
+    @peltigera.gen_desc = "Mary wrote this."
+    @peltigera.save_if_changed(@mary, :log_name_updated, { :user => 'mary' }, Time.now, true) && @peltigera.add_editor(@mary)
+    assert_equal(version + 2, @peltigera.version)
+    assert_equal(1, @peltigera.authors.length)
+    assert_equal(1, @peltigera.editors.length)
+    assert_equal(nil, @peltigera.reviewer)
+    assert_equal(@mary, @peltigera.authors.first)
+    assert_equal(@rolf, @peltigera.editors.first)
+    assert_equal(emails + 2, QueuedEmail.find(:all).length)
+    assert_email(emails + 1, {
+        :flavor        => :name_change,
+        :from          => @mary,
+        :to            => @rolf,
+        :name          => @peltigera.id,
+        :old_version   => @peltigera.version-1,
+        :new_version   => @peltigera.version,
+        :review_status => 'no_change',
+    })
+
+    # Rolf doesn't want to be notified if people change names he's edited.
+    @peltigera.editors.first.email_names_editor = false
+
+    # email types:  author  editor  review  all     interest
+    # 1 Rolf:       x       .       x       .       .
+    # 2 Mary:       x       .       .       .       .
+    # 3 Dick:       .       .       .       .       .
+    # 4 Katrina:    x       x       x       .       .
+    # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
+    # Dick changes citation: notify Mary (author); Dick becomes editor.
+    @peltigera.citation = "Something more new."
+    @peltigera.save_if_changed(@dick, :log_name_updated, { :user => 'dick' }, Time.now, true) && @peltigera.add_editor(@dick)
+    assert_equal(version + 3, @peltigera.version)
+    assert_equal(1, @peltigera.authors.length)
+    assert_equal(2, @peltigera.editors.length)
+    assert_equal(nil, @peltigera.reviewer)
+    assert_equal(@mary, @peltigera.authors.first)
+    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    assert_equal(emails + 3, QueuedEmail.find(:all).length)
+    assert_email(emails + 2, {
+        :flavor        => :name_change,
+        :from          => @dick,
         :to            => @mary,
         :name          => @peltigera.id,
         :old_version   => @peltigera.version-1,
@@ -495,18 +582,26 @@ class NameTest < Test::Unit::TestCase
         :review_status => 'no_change',
     })
 
-    # Have mary express disinterest in it, dick express interest, and add katrina
-    # as another author, THEN have rolf tweak the review status.
-    Interest.new(:object => @peltigera, :user => @mary, :state => false).save
-    Interest.new(:object => @peltigera, :user => @dick, :state => true).save
+    # Mary opts out of author emails, add Katrina as new author.
+    @peltigera.authors.first.email_names_author = false
     @peltigera.add_author(@katrina)
+
+    # email types:  author  editor  review  all     interest
+    # 1 Rolf:       x       .       x       .       .
+    # 2 Mary:       .       .       .       .       .
+    # 3 Dick:       .       .       .       .       .
+    # 4 Katrina:    x       x       x       .       .
+    # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
+    # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     @peltigera.update_review_status(:inaccurate, @rolf)
     assert_equal(version + 3, @peltigera.version)
     assert_equal(2, @peltigera.authors.length)
-    assert_equal(@mary, @peltigera.authors.first)
-    assert_equal(@katrina, @peltigera.authors.last)
-    assert_equal(emails + 3, QueuedEmail.find(:all).length)
-    assert_email(emails + 1, {
+    assert_equal(2, @peltigera.editors.length)
+    assert_equal(@rolf, @peltigera.reviewer)
+    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    assert_equal(emails + 4, QueuedEmail.find(:all).length)
+    assert_email(emails + 3, {
         :flavor        => :name_change,
         :from          => @rolf,
         :to            => @katrina,
@@ -515,14 +610,64 @@ class NameTest < Test::Unit::TestCase
         :new_version   => @peltigera.version,
         :review_status => 'inaccurate',
     })
-    assert_email(emails + 2, {
+
+    # Have Katrina express disinterest.
+    Interest.new(:object => @peltigera, :user => @katrina, :state => false).save
+
+    # email types:  author  editor  review  all     interest
+    # 1 Rolf:       x       .       x       .       .
+    # 2 Mary:       .       .       .       .       .
+    # 3 Dick:       .       .       .       .       .
+    # 4 Katrina:    x       x       x       .       no
+    # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
+    # Dick changes look-alikes: notify Rolf (reviewer), clear review status
+    @peltigera.look_alikes = "Dick added this -- it's suspect"
+    @peltigera.update_review_status(:inaccurate, @dick) # (normally done by name controller in edit_name)
+    @peltigera.save_if_changed(@dick, :log_name_updated, { :user => 'dick' }, Time.now, true) && @peltigera.add_editor(@dick)
+    assert_equal(version + 4, @peltigera.version)
+    assert_equal(2, @peltigera.authors.length)
+    assert_equal(2, @peltigera.editors.length)
+    assert_equal(@rolf, @peltigera.reviewer)
+    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    assert_equal(emails + 5, QueuedEmail.find(:all).length)
+    assert_email(emails + 4, {
+        :flavor        => :name_change,
+        :from          => @dick,
+        :to            => @rolf,
+        :name          => @peltigera.id,
+        :old_version   => @peltigera.version-1,
+        :new_version   => @peltigera.version,
+        :review_status => 'unreviewed',
+    })
+
+    # Mary expresses interest.
+    Interest.new(:object => @peltigera, :user => @mary, :state => true).save
+
+    # email types:  author  editor  review  all     interest
+    # 1 Rolf:       x       .       x       .       .
+    # 2 Mary:       .       .       .       .       yes
+    # 3 Dick:       .       .       .       .       .
+    # 4 Katrina:    x       x       x       .       no
+    # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
+    # Rolf changes 'uses': notify Mary (interest).
+    @peltigera.uses = "Rolf added this."
+    @peltigera.save_if_changed(@rolf, :log_name_updated, { :user => 'rolf' }, Time.now, true) && @peltigera.add_editor(@rolf)
+    assert_equal(version + 5, @peltigera.version)
+    assert_equal(2, @peltigera.authors.length)
+    assert_equal(2, @peltigera.editors.length)
+    assert_equal(@rolf, @peltigera.reviewer)
+    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    assert_equal(emails + 6, QueuedEmail.find(:all).length)
+    assert_email(emails + 5, {
         :flavor        => :name_change,
         :from          => @rolf,
-        :to            => @dick,
+        :to            => @mary,
         :name          => @peltigera.id,
-        :old_version   => @peltigera.version,
+        :old_version   => @peltigera.version-1,
         :new_version   => @peltigera.version,
-        :review_status => 'inaccurate',
+        :review_status => 'no_change',
     })
   end
 end

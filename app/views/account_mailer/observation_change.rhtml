@@ -1,59 +1,60 @@
 <%
+  is_now = :email_field_is_now.l
+
   intro = @observation ?
-    "Observation changed, #{@observation.unique_format_name}" :
-    "Observation destroyed, #{@note}"
+    :email_object_change_intro.l(:type => :observation.l, :name => @observation.unique_format_name) :
+    :email_observation_destroyed_intro.l
 
   fields = ""
-  fields += "*Time:* #{@time.to_formatted_s(:db)}\n"
-  fields += "*By:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+  fields += "*#{:observation.l}:* #{@note}\n" if !@observation
+  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   changes = ""
   if @observation and @note
     for field in @note.split(',')
       case field
         when 'date'
-          changes += "*Changed date:* #{@observation.when.to_formatted_s(:db)}\n"
+          changes += "*#{:app_date.l} #{is_now}:* #{@observation.when.to_formatted_s(:db)}\n"
         when 'location'
-          changes += "*Changed location:* #{@observation.place_name}\n"
+          changes += "*#{:location.l} #{is_now}:* #{@observation.place_name}\n"
         when 'notes'
           notes_changed = true
         when 'specimen'
-          changes += "*Specimen is now available.*\n"       if @observation.specimen
-          changes += "*Specimen is no longer available.*\n" if !@observation.specimen
+          changes += "*#{:email_field_specimen_available.l}.*\n"    if @observation.specimen
+          changes += "*#{:email_field_no_specimen_available.l}.*\n" if !@observation.specimen
         when 'is_collection_location'
-          changes += "*Location _is_ where specimen was growing.*\n"     if @observation.is_collection_location
-          changes += "*Location _is not_ where specimen was growing.*\n" if !@observation.is_collection_location
+          changes += "*#{:email_field_collection_location.l}.*\n"     if @observation.is_collection_location
+          changes += "*#{:email_field_collection_not_location.l}.*\n" if !@observation.is_collection_location
         when 'thumb_image_id'
-          changes += "*Changed thumbnail.*\n"
+          changes += "*#{:email_field_changed_thumbnail.l}.*\n"
         when 'added_image'
-          changes += "*Added image(s).*\n"
+          changes += "*#{:email_field_added_images.l}.*\n"
         when 'removed_image'
-          changes += "*Removed image(s).*\n"
+          changes += "*#{:email_field_removed_images.l}.*\n"
       end
     end
   end
-  changes += "*Changed notes:*\n" if notes_changed
+  changes += "*#{:app_notes.l} #{is_now}:*\n" if notes_changed
 
-  handy_links = @observation ?
-    "You were sent this email notification because you expressed interest in this observation.  Use the link below to stop watching this observation." :
-    "You were sent this email notification because you had expressed interest in this observation."
+  handy_links = :email_handy_links
 
   links = []
   if @observation
-    links.push(["Show this observation",
+    links.push([:email_links_show_object.l(:type => :observation.l),
       "#{DOMAIN}/#{@observation.id}"])
-    links.push(["Post comment on this observation",
+    links.push([:email_links_post_comment.l,
       "#{DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
-    links.push(["I'm not interested in this observation",
+    links.push([:email_links_not_interested.l(:type => :observation.l),
       "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}"])
   end
-  links.push(["Latest changes at Mushroom Observer",
+  links.push([:email_links_latest_changes.l,
     DOMAIN])
 
-if @user.html_email ######################################################### %>
+if @user.email_html ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: <%= intro.t.strip_html %></title>
+  <title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
@@ -77,12 +78,12 @@ if @user.html_email ######################################################### %>
 <%= intro.tp.html_to_ascii %>
 
 <%= fields.tp.html_to_ascii %>
-
+<% if @observation %>
 <%= changes.tp.html_to_ascii %>
 
 <% if notes_changed %><%= @observation.notes.tp.html_to_ascii + "\n" %>
 --------------------------------------------------
-<% end %>
+<% end %><% end %>
 <%= handy_links.tp.html_to_ascii %>
 
 <%= result = ''

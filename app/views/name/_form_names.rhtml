@@ -31,6 +31,18 @@
 <%= text_field('name', 'citation', :size => 80) %><br/>
 <div class="HelpNote"><%= :form_names_citation_textilize_note.tp %></div>
 
+<% if @name.id %>
+  <%= check_box('name', 'misspelling',
+                :value => @misspelling.nil? ? @name.is_misspelling? : @misspelling) %>
+  <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+  <% if @name.is_misspelling? || @misspelling %>
+    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+    <%= text_field('name', 'correct_spelling', :size => 60,
+                   :value => @correct_spelling ? @correct_spelling : @name.correct_spelling ? @name.correct_spelling.search_name : '') %><br/>
+  <% end %>
+  <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
+<% end %>
+
 <p><label for="name_license_id"><%= :form_names_license.t %>:</label><br/>
   <span class="HelpNote">
     <%= :form_names_license_help.t %>

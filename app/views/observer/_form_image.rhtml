@@ -8,7 +8,7 @@
   <%= radio_button('observation', 'thumb_image_id', -index) %>
   <%= file_field('image', 'image', :index => index) %>
   <% if @js %>
-    <span style="left-width:10px">&nbsp;</span>
+    <span style="margin-left:10px">&nbsp;</span>
     <%= button_to_function(:app_more_button.t, "image_on(#{index})",
                            { :id => "image_#{index}_more" }) %>
     <%= button_to_function(:app_less_button.t, "image_off(#{index})",

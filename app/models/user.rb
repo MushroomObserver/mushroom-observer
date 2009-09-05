@@ -10,6 +10,8 @@ require 'digest/sha1'
 #  4. can own a whole bunch of things (e.g. Observation's, Name's, Vote's, etc.)
 #  5. has profile (e.g. name, location, notes, mugshot)
 #  6. has preferences (e.g. theme, layout, etc.)
+#  7. can be a member of various user groups
+#  8. can be an author or editor on Name's or Observation's
 #
 #  Login is handled by lib/login_system.rb, a third-party package that we've
 #  modified slightly.  It is enforced by adding <tt>before_filter
@@ -24,7 +26,7 @@ require 'digest/sha1'
 #  summary page, just in case the callbacks ever fail.
 #
 #  It looks like there might be something funky to do with QueuedEmail, as
-#  well, but I haven't looked at that code at all yet. 
+#  well, but I haven't looked at that code at all yet.
 #
 #  Public:
 #    User.authenticate(login, pass)  Verify username/password.
@@ -40,6 +42,8 @@ require 'digest/sha1'
 #    legal_name()                    Return "First Last".
 #    find_theme                      Return preferred theme.
 #    remember_me?                    Does user want us to automatically log them in via cookie?
+#    watching?(object)               Is user watching an object?
+#    ignoring?(object)               Is user watching an object?
 #
 #  Protected:
 #    User.sha1(string)               Encrypt a string and return it.
@@ -57,6 +61,7 @@ require 'digest/sha1'
 
 class User < ActiveRecord::Base
   has_many :comments
+  has_many :interests
   has_many :images
   has_many :observations
   has_many :species_lists
@@ -72,11 +77,13 @@ class User < ActiveRecord::Base
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
   has_many :reviewed_names, :class_name => "Name", :foreign_key => "reviewer_id"
   has_many :projects
-  
+
   has_and_belongs_to_many :user_groups
   has_and_belongs_to_many :authored_names, :class_name => "Name", :join_table => "authors_names"
   has_and_belongs_to_many :edited_names, :class_name => "Name", :join_table => "editors_names"
-  
+  has_and_belongs_to_many :authored_locations, :class_name => "Location", :join_table => "authors_locations"
+  has_and_belongs_to_many :edited_locations, :class_name => "Location", :join_table => "editors_locations"
+
   belongs_to :license       # user's default license
   belongs_to :image         # mug shot
   belongs_to :location      # primary location
@@ -99,26 +106,6 @@ class User < ActiveRecord::Base
     if pass != ''
       update_attribute "password", self.class.sha1(pass)
     end
-  end
-
-  def change_email(email)
-    self.email = email
-  end
-
-  def change_name(name)
-    self.name = name
-  end
-
-  def change_theme(theme)
-    self.theme = theme
-  end
-
-  def change_rows(rows)
-    self.rows = rows
-  end
-
-  def change_columns(columns)
-    self.columns = columns
   end
 
   def unique_text_name()
@@ -151,7 +138,7 @@ class User < ActiveRecord::Base
     end
     result * 100 / max
   end
-  
+
   def in_group(group_name)
     result = false
     for g in self.user_groups
@@ -162,11 +149,19 @@ class User < ActiveRecord::Base
     end
     return result
   end
-  
+
   def remember_me?
     self.remember_me
   end
-  
+
+  def watching?(object)
+    !interests.select {|i| i.state && i.object == object}.empty?
+  end
+
+  def ignoring?(object)
+    !interests.select {|i| !i.state && i.object == object}.empty?
+  end
+
   protected
 
   def self.sha1(pass)

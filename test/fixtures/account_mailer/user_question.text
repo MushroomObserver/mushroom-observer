@@ -2,9 +2,11 @@ From: news@mushroomobserver.org
 Reply-To: rolf@collectivesource.com
 To: mary@collectivesource.com
 Bcc: nathan@collectivesource.com
-Subject: Interesting idea
+Subject: [MO] Interesting idea
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
+
+Question from Another User
 
 Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following email to you:
 
@@ -12,12 +14,12 @@ Shall we discuss it in email?
 
 --------------------------------------------------
 
-It is entirely up to you whether you want to reply by emailing directly back to them.  Here are some handy links you may find useful:
+It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
+Here are some handy links:
 
-Show this user: http://localhost:3000/observer/show_user/1
-Stop receiving inquiries: http://localhost:3000/account/no_question_email/2
-Change your account preferences: http://localhost:3000/account/prefs/2
+Show this User: http://localhost:3000/observer/show_user/1
+Stop sending me email like this: http://localhost:3000/account/no_email_general_question/2
+Change your preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000
 
-If you feel the sender of this mail is abusing this service please forward this entire message to: webmaster@mushroomobserver.org
-
+If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org

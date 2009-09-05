@@ -1,7 +1,7 @@
 <%
   @title = :image_show_title.t(:name => @image.unique_format_name)
   search_params = calc_search_params()
-  commercial_inquiries_ok = @image.user.commercial_email
+  commercial_inquiries_ok = @image.user.email_general_commercial
 
   new_tab_set do
     add_tab(:image_show_normal_size.t,

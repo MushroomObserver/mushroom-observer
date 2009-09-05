@@ -1,5 +1,6 @@
 require File.dirname(__FILE__) + '/../test_helper'
 require 'location_controller'
+require 'site_data'
 
 # Re-raise errors caught by the controller.
 class LocationController; def rescue_action(e) raise e end; end
@@ -78,7 +79,7 @@ class LocationControllerTest < Test::Unit::TestCase
     post_requires_login(:create_location, params, false)
     assert_redirected_to(:controller => "location", :action => "show_location")
     assert_equal(count + 1, Location.find(:all).length)
-    assert_equal(15, @rolf.reload.contribution)
+    assert_equal(20, @rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
   end
@@ -191,7 +192,7 @@ class LocationControllerTest < Test::Unit::TestCase
     params[:id] = loc.id
     post_requires_login(:edit_location, params, false)
     assert_redirected_to(:controller => "location", :action => "show_location")
-    assert_equal(15, @rolf.reload.contribution)
+    assert_equal(20, @rolf.reload.contribution)
 
     # Should have created a PastLocation
     assert_equal(count + 1, Location::PastLocation.find(:all).length)

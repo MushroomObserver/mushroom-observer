@@ -320,6 +320,7 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_equal(20, @rolf.reload.contribution)
     obs = Observation.find(obs.id)
     assert(obs.images.size == (img_count + 1))
+    assert_equal(:profile_uploaded_image.t(:name => "##{obs.images.last.id}"), flash[:notice])
   end
 
   # This is what would happen when user first opens form.

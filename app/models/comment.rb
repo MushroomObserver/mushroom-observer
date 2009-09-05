@@ -32,13 +32,17 @@ class Comment < ActiveRecord::Base
       recipients = []
 
       # Send to owner if they want.
-      recipients.push(owner) if owner && owner.comment_email
+      recipients.push(owner) if owner && owner.email_comments_owner
 
-      # 'nathan' should get handled by a notification, but for now it's hardcoded
-      recipients.push(User.find_by_login('nathan'))
+      # Send to masochists who want to see all comments.
+      for user in User.find_all_by_email_comments_all(true)
+        recipients.push(user)
+      end
 
       # Send to other people who have commented on this same object if they want.
-      for other_comment in Comment.find_all_by_object(object)
+      for other_comment in Comment.find(:all, :conditions =>
+          ['comments.object_type = ? AND comments.object_id = ? AND users.email_comments_response = TRUE',
+          object.class.to_s, object.id], :include => 'user')
         recipients.push(other_comment.user)
       end
 
@@ -53,10 +57,8 @@ class Comment < ActiveRecord::Base
       end
 
       # Send comment to everyone (except the person who wrote the comment!)
-      for recipient in recipients.uniq
-        if recipient && recipient != sender
-          CommentEmail.find_or_create_email(sender, recipient, self)
-        end
+      for recipient in recipients.uniq - [sender]
+        CommentEmail.find_or_create_email(sender, recipient, self)
       end
     end
   end
@@ -73,9 +75,9 @@ class Comment < ActiveRecord::Base
 
   # Look up all comments for a given object.
   def self.find_all_by_object(object)
-    type = object.class.to_s
-    id = object.id
-    self.find_all_by_object_type_and_object_id(type, id)
+    # (Usually need to query something from the associated users, too, so include users here.)
+    self.find(:all, :conditions => ['object_type = ? and object_id = ?', object.class.to_s, object.id],
+      :include => 'user')
   end
 
   # Same as 'comment.object_type.downcase.to_sym.l' (returns '' if fails for whatever reason).

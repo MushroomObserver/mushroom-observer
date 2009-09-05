@@ -1,30 +1,50 @@
 <%
-    if @user.html_email
-%>
+  name_url = "#{DOMAIN}/name/show_name/#{@name.id}"
+  user_url = "#{DOMAIN}/observer/show_user/#{@publisher.id}"
+
+  intro = :email_publish_name_intro.l
+
+  fields = ""
+  fields += "*#{:name.l}:* #{@name.display_name}\n"
+  fields += "*#{:email_field_published.l}:* #{@publisher.legal_name} (#{@publisher.login})\n"
+
+  handy_links = :email_handy_links
+
+  links = []
+  links.push([:email_links_show_object.l(:type => :name.l),
+    name_url])
+  links.push([:email_links_email_publisher.l,
+    user_url])
+  links.push([:email_links_latest_changes.l,
+    DOMAIN])
+
+if @user.email_html ######################################################### %>
 <html>
 <head>
-  <title>Mushroom Observer: Name Publication</title>
+  <title>Mushroom Observer: <%= @subject %></title>
 </head>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
-  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
-
-    <p>
-      A description of the name, <a href="<%= "#{DOMAIN}/name/show_name/#{@name.id}" %>"><%= @name.display_name.t %></a>,
-      has been published on the Mushroom Observer website.  You are receiving this email since you are listed as either
-      an author for this taxon or as a reviewer on the site.
-    </p>
-    <p>
-    Publisher: <a href="<%= "#{DOMAIN}/observer/show_user/#{@publisher.id}" %>"><%= @publisher.legal_name %></a>
-    </p>
-  </div>
-
+<%= intro.tp %>
+<%= fields.tp %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
 </body>
 </html>
 <% else ##################################################################### %>
-A description of the name, <%= @name.text_name %>, has been published on the
-Mushroom Observer website.  You are receiving this email since you are listed
-as either an author for this taxon or as a reviewer on the site.
+<%= intro.tp.html_to_ascii %>
 
-Observer: <%= @publisher.legal_name %> (<%= "#{DOMAIN}/observer/show_user/#{@publisher.id}" %>)
-Name: <%= @name.search_name %> (<%= "#{DOMAIN}/name/show_name/#{@name.id}" %>)
-<% end %>
+<%= fields.tp.html_to_ascii %>
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label.t.html_to_ascii}: #{url}\n"
+  end
+  result %>
+<% end ###################################################################### %>

@@ -1,40 +1,43 @@
+if !defined?(ALL_FIELDS)
+  ALL_FIELDS = [
+    :authors_names,
+    :editors_names,
+    :images,
+    :authors_locations,
+    :editors_locations,
+    :species_lists,
+    :species_list_entries,
+    :comments,
+    :observations,
+    :namings,
+    :votes,
+    :users
+  ]
 
-ALL_FIELDS = [
-  :authors_names,
-  :editors_names,
-  :images,
-  :past_locations,
-  :species_lists,
-  :species_list_entries,
-  :comments,
-  :observations,
-  :namings,
-  :votes,
-  :users
-]
+  FIELD_WEIGHTS = {
+    :authors_names => 100,
+    :editors_names => 10,
+    :images => 10,
+    :authors_locations => 10,
+    :editors_locations => 5,
+    :species_lists => 5,
+    :species_list_entries => 1,
+    :comments => 1,
+    :observations => 1,
+    :namings => 1,
+    :votes => 1,
+    :users => 0
+  }
 
-FIELD_WEIGHTS = {
-  :authors_names => 100,
-  :editors_names => 10,
-  :images => 10,
-  :past_locations => 5,
-  :species_lists => 5,
-  :species_list_entries => 1,
-  :comments => 1,
-  :observations => 1,
-  :namings => 1,
-  :votes => 1,
-  :users => 0
-}
+  # Default is field.to_s.  This is the table it queries to get the number of objects.
+  FIELD_TABLES = {
+    :species_list_entries => "observations_species_lists",
+  }
 
-# Default is field.to_s.  This is the table it queries to get the number of objects.
-FIELD_TABLES = {
-  :species_list_entries => "observations_species_lists",
-}
-
-FIELD_CONDITIONS = {
-  :users => "verified is not null"
-}
+  FIELD_CONDITIONS = {
+    :users => "verified is not null"
+  }
+end
 
 ################################################################################
 #

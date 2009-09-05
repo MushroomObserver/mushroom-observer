@@ -1,7 +1,7 @@
 <%
   @title = :show_observation_title.t(:name => @observation.unique_format_name)
   name = @observation.name
-  questions_ok = @observation.user.question_email
+  questions_ok = @observation.user.email_general_question
   search_params = calc_search_params()
 
   if @user

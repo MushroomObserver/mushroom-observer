@@ -1,13 +1,13 @@
-conica { stain: #37372f; cap-red: #a31404; cap-orange: #dd6226; cap-yellow: #ffbf01; gill-margin: #ffda84;} /* image 371 */
-miniata { gill-margin: #ebc97f; cap-red: #a10200; cap-orange: #c83e00; cap-yellow: #f19c05; } /* image 369 */
-psittacina { cap-green: #405536; cap-orange: #eb9020; cap-middle: #a38a3f; gill-color: #f2d686;  } /* image 368 */
-punicea { cap-dark: #bb2900; cap-light: #cc382a; dark-stipe: #e7bc3c; light-stipe: #e9e3af; } /* image 366 */
+/* conica { stain: #37372f; cap-red: #a31404; cap-orange: #dd6226; cap-yellow: #ffbf01; gill-margin: #ffda84;} /* image 371 */
+/* miniata { gill-margin: #ebc97f; cap-red: #a10200; cap-orange: #c83e00; cap-yellow: #f19c05; } /* image 369 */
+/* psittacina { cap-green: #405536; cap-orange: #eb9020; cap-middle: #a38a3f; gill-color: #f2d686;  } /* image 368 */
+/* punicea { cap-dark: #bb2900; cap-light: #cc382a; dark-stipe: #e7bc3c; light-stipe: #e9e3af; } /* image 366 */
 
 /* Global default colors */
 body { background-color: #e9e3af; /* punicea light-stipe */ color: #37372f; /* conica stain */ }
 
-table.with_lines    { background: #37372f; } /* conica stain */
-table.with_lines td { background: #e9e3af; } /* punicea light-stipe */
+div.textile table    { background: #37372f; } /* conica stain */
+div.textile table td { background: #e9e3af; } /* punicea light-stipe */
 
 a { color: #405536; } /* psittacina cap-green */
 a:visited { color: #eb9020; } /* psittacina cap-orange */
@@ -55,8 +55,8 @@ li.selected { background-color: #f19c05 ! important }
       background-color: #cc382a; /* punicea cap-light */
 }
 
-.ListLine0 table.with_lines    { background: #37372f; } /* conica stain */
-.ListLine0 table.with_lines td { background: #cc382a; } /* punicea cap-light */
+.ListLine0 div.textile table    { background: #37372f; } /* conica stain */
+.ListLine0 div.textile table td { background: #cc382a; } /* punicea cap-light */
 
 .ListLine0 a {
       color: #e9e3af; /* punicea dark-stipe */
@@ -75,8 +75,8 @@ li.selected { background-color: #f19c05 ! important }
       background-color: #ffbf01; /* conica cap-yellow */
 }
 
-.ListLine1 table.with_lines    { background: #37372f; } /* conica stain */
-.ListLine1 table.with_lines td { background: #ffbf01; } /* conica cap-yellow */
+.ListLine1 div.textile table    { background: #37372f; } /* conica stain */
+.ListLine1 div.textile table td { background: #ffbf01; } /* conica cap-yellow */
 
 .ListLine1 a {
       color: #a31404; /* conica cap-red */

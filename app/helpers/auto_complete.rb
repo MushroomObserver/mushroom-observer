@@ -37,12 +37,14 @@ module ApplicationHelper
       div_class = "auto_complete"
       js_class  = "CachedAutocompleter"
       js_args   = ""
+      primer    = nil
       opts.each_pair do |key, val|
         case key
         when :div_id:    div_id    = val
         when :div_class: div_class = val
         when :url:       url       = val
         when :js_class:  js_class  = val
+        when :primer:    primer    = val
         else
           if !key.to_s.match(/^on/) && 
              !val.to_s.match(/^(\d+(\.\d+)?|true|false|null)$/)
@@ -50,6 +52,11 @@ module ApplicationHelper
           end
           js_args += ", #{key}: #{val}"
         end
+      end
+      if primer && !primer.empty?
+        js_args += ', primer: [' + primer.map do |val|
+          "'" + escape_javascript(val) + "'"
+        end.join(',') + ']'
       end
       js_args.sub!(/^, /, '')
       raise(ArgumentError, "Must specify url.") if !url

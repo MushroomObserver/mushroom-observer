@@ -6,6 +6,9 @@ require 'test_help'
 # a "content_type" field added to it.
 class FilePlus < File
   attr_accessor :content_type
+  def size
+    File.size(path)
+  end
 end
 
 class Test::Unit::TestCase
@@ -119,6 +122,8 @@ def requires_login(page, params={}, stay_on_page=true, user='rolf', password='te
   user = User.authenticate(user, password)
   assert(user)
   session[:user_id] = user.id
+  flash[:notice] = nil
+  flash[:notice_level] = 0
   get_with_dump(page, params)
   if stay_on_page
     assert_response :success
@@ -132,6 +137,8 @@ def post_requires_login(page, params={}, stay_on_page=true, user='rolf', passwor
   user = User.authenticate(user, password)
   assert(user)
   session[:user_id] = user.id
+  flash[:notice] = nil
+  flash[:notice_level] = 0
   post_with_dump(page, params)
   if stay_on_page
     assert_response :success
@@ -157,6 +164,8 @@ def requires_user(page, alt_page, params={}, stay_on_page=true, username='rolf',
   end
 
   login username, password
+  flash[:notice] = nil
+  flash[:notice_level] = 0
   get_with_dump(page, params)
   if stay_on_page
     assert_response :success
@@ -182,6 +191,8 @@ def post_requires_user(page, alt_page, params={}, stay_on_page=true, username='r
   end
 
   login username, password
+  flash[:notice] = nil
+  flash[:notice_level] = 0
   post_with_dump(page, params)
   if stay_on_page
     assert_response :success
