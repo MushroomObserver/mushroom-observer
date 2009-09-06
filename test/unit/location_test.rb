@@ -37,13 +37,13 @@ class LocationTest < Test::Unit::TestCase
     # 2 Mary:       x       .       .       .
     # 3 Dick:       x       .       x       .
     # Authors: --   editors: --
-    # Rolf changes notes: notify Dick (all); Rolf becomes editor.
+    # Rolf changes notes: notify Dick (all); Rolf becomes author.
     @albion.notes = ''
     @albion.save_if_changed(@rolf) and @albion.add_editor(@rolf)
     assert_equal(version + 1, @albion.version)
-    assert_equal(0, @albion.authors.length)
-    assert_equal(1, @albion.editors.length)
-    assert_equal(@rolf, @albion.editors.first)
+    assert_equal(1, @albion.authors.length)
+    assert_equal(0, @albion.editors.length)
+    assert_equal(@rolf, @albion.authors.first)
     assert_equal(emails + 1, QueuedEmail.find(:all).length)
     assert_email(emails, {
         :flavor      => :location_change,
@@ -61,6 +61,14 @@ class LocationTest < Test::Unit::TestCase
     @dick.save
     @mary.email_locations_all = true
     @mary.save
+
+    # Demote Rolf, because he wasn't supposed to become author yet.
+    # (We've changed criteria for authorship so that Rolf was able to
+    # become author even though he hadn't written anything.)
+    @albion.remove_author(@rolf)
+    assert_equal(0, @albion.authors.length)
+    assert_equal(1, @albion.editors.length)
+    assert_equal(@rolf, @albion.editors.first)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       .       .       .

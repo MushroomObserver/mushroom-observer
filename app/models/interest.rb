@@ -26,7 +26,7 @@
 #    interest.user          User who is expressing interest.
 #    interest.object        Object user is interested in.
 #    interest.state         True = interested, false = not interested.
-#    interest.summary       "Watching observation Amanita velosa"
+#    interest.summary       "Watching Observation: **__Amanita velosa__**"
 #
 #    Interest.find_all_by_object(object)   Look up all interest in an object.
 #
@@ -46,8 +46,8 @@ class Interest < ActiveRecord::Base
   # e.g., "Watching observation Amanita virosa".
   def summary
     (self.state ? :app_watching.l : :app_ignoring.l) + ' ' +
-    self.object_type.underscore.to_sym.l + ' ' +
-    (self.object ? self.object.unique_format_name.t : '--')
+    self.object_type.underscore.to_sym.l + ': ' +
+    (self.object ? self.object.unique_format_name : '--')
   end
 
   protected

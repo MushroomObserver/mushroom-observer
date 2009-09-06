@@ -45,7 +45,7 @@ class Notification < ActiveRecord::Base
     result = "Unrecognized notification flavor"
     case self.flavor
     when :name
-      result = "Tracking name: #{self.object ? self.object.display_name : '?'}"
+      result = "#{:app_tracking.l} #{:name.l}: #{self.object ? self.object.display_name : '?'}"
     end
     result
   end

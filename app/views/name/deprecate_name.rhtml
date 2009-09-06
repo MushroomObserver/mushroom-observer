@@ -47,6 +47,9 @@
   </div>
   <%= turn_into_name_auto_completer('proposed_name') %>
 
+  <p><%= check_box('is', 'misspelling', :value => false) %>
+  <label for="misspelling"><%= :form_names_misspelling.t %></label></p>
+
   <p><label for="comment_comment"><%= :name_deprecate_comments.t %>:</label><br/>
   <%= text_area("comment", "comment", :cols => 80, :rows => 5, :value => @comment) %></p>
   <div class="HelpNote">

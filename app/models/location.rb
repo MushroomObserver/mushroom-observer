@@ -1,5 +1,6 @@
 require_dependency 'active_record_extensions'
 require_dependency 'acts_as_versioned_extensions'
+require_dependency 'site_data'
 
 ################################################################################
 #
@@ -91,7 +92,7 @@ class Location < ActiveRecord::Base
 
   # Used to decide initially which locations should have authors.
   def check_add_author
-    if self.notes && self.notes != '' && self.authors == []
+    if north && south && east && west && self.authors == []
       add_author(self.user)
     end
   end
@@ -119,7 +120,7 @@ class Location < ActiveRecord::Base
       if not self.editors.member?(user) && !Location.connection.select_values(%(
           SELECT id FROM past_locations WHERE location_id = #{self.id} AND user_id = #{user.id}
         )).empty?
-        self.editors.add(user)
+        self.editors.push(user)
         user.contribution += FIELD_WEIGHTS[:editors_locations]
       end
       user.save

@@ -32,15 +32,20 @@
 <div class="HelpNote"><%= :form_names_citation_textilize_note.tp %></div>
 
 <% if @name.id %>
-  <%= check_box('name', 'misspelling',
-                :value => @misspelling.nil? ? @name.is_misspelling? : @misspelling) %>
-  <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
   <% if @name.is_misspelling? || @misspelling %>
+    <%= check_box('name', 'misspelling', :checked => true) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
     <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
     <%= text_field('name', 'correct_spelling', :size => 60,
                    :value => @correct_spelling ? @correct_spelling : @name.correct_spelling ? @name.correct_spelling.search_name : '') %><br/>
+    <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
+    <%= turn_into_name_auto_completer('name_correct_spelling', :primer => @name_primer) %>
+    <% javascript_include_auto_complete %>
+  <% else %>
+    <%= check_box('name', 'misspelling', :checked => false) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <div class="HelpNote"><%= :form_names_misspelling_note_first.tp %></div>
   <% end %>
-  <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
 <% end %>
 
 <p><label for="name_license_id"><%= :form_names_license.t %>:</label><br/>
@@ -55,9 +60,9 @@
 
 <% for f in Name.all_note_fields %>
   <p>
-    <label for="name_notes"><%= "form_names_#{f}".to_sym.t %>:</label>
+    <label for="name_<%= f %>"><%= "form_names_#{f}".to_sym.t %>:</label>
     <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l %></span><br/>
-    <%= text_area('name', "#{f}", :cols => 80) %>
+    <%= text_area('name', f, :cols => 80) %>
   </p>
   <center><%= submit_tag button %></center>
 <% end %>

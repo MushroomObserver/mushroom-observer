@@ -595,7 +595,7 @@ class Name < ActiveRecord::Base
       if not self.editors.member?(user) && !Name.connection.select_values(%(
           SELECT id FROM past_names WHERE name_id = #{self.id} AND user_id = #{user.id}
         )).empty?
-        self.editors.add(user)
+        self.editors.push(user)
         user.contribution += FIELD_WEIGHTS[:editors_names]
       end
       user.save

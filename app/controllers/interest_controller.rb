@@ -17,8 +17,8 @@ class InterestController < ApplicationController
     store_location
     @title = :list_interests_title.t
     notifications = Notification.find_all_by_user_id(@user.id).sort do |a,b|
-      result = a.flavor <=> b.flavor
-      result = a.summary <=> b.summary if result == 0
+      result = a.flavor.to_s <=> b.flavor.to_s
+      result = a.summary.to_s <=> b.summary.to_s if result == 0
       result
     end
     interests = Interest.find_all_by_user_id(@user.id).sort do |a,b|

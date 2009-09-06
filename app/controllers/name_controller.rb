@@ -526,9 +526,14 @@ class NameController < ApplicationController
   # show_name.rhtml -> edit_name.rhtml
   # Updates modified and saves changes
   def edit_name
+    any_errors = false
     if verify_user()
       @name = Name.find(params[:id])
       @licenses = License.current_names_and_ids(@name.license)
+      @misspelling = false
+      if @name.is_misspelling? || (params[:name] && params[:name][:misspelling] == '1')
+        @name_primer = Name.primer(@user)
+      end
 
       # Only allowed to make substantive changes it you own all the references to it.
       # I think checking that the user owns all the namings that use it is correct.
@@ -609,51 +614,79 @@ class NameController < ApplicationController
           # via synonyms.  There can be multiple accepted names, in which
           # case look for the one that shares the most letters(!)  If none
           # are close, notify user and ask them to be explicit.
-          @misspelling = (params[:name][:misspelling].to_s != '')
+          @misspelling = (params[:name][:misspelling].to_s == '1')
           @correct_spelling = params[:name][:correct_spelling]
+          if !@misspelling
+            @name.misspelling = false
+            @name.correct_spelling = nil
+          else
+            name2 = nil
 
-          # Look up correct spelling if given explicitly.
-          if @correct_spelling
-            @name.misspelling = @misspelling = true
-            name2 = Name.find_by_search_name(@correct_spelling) 
-            name2 ||= Name.find_by_text_name(@correct_spelling) 
-            if name2
-              @name.correct_spelling = name2
-            else
-              flash_error(:form_names_misspelling_bad.t)
+            # Look up correct spelling if given explicitly.
+            if @correct_spelling.to_s != ''
+              @name.misspelling = true
+              name2 = Name.find_by_search_name(@correct_spelling) 
+              name2 ||= Name.find_by_text_name(@correct_spelling) 
+              if !name2
+                flash_error(:form_names_misspelling_bad.t)
+              elsif name2.id == @name.id
+                flash_error(:form_names_misspelling_same.t)
+                name2 = nil
+              end
+
+            # Try to guess if not given explicitly.
+            elsif !@name.correct_spelling
+              @name.misspelling = true
+              synonyms = @name.synonym ? @name.synonym.names - [@name] : []
+              if synonyms.length == 0
+                flash_error(:form_names_misspelling_no_synonyms.t)
+              else
+                candidates = []
+                approved_candidates = []
+                for synonym in synonyms
+                  # Count letters in one but not the other and vice versa.
+                  val  = 0
+                  copy = synonym.text_name
+                  @name.text_name.each_char do |c|
+                    if i = copy.index(c)
+                      copy[i] = ''
+                    else
+                      val += 1
+                    end
+                  end
+                  val += copy.length
+                  candidates.push(synonym)          if val < 3
+                  approved_candidates.push(synonym) if val < 3 && !synonym.deprecated
+                end
+                if candidates.length == 0
+                  flash_error(:form_names_misspelling_no_matches.t)
+                elsif approved_candidates.length == 1
+                  name2 = approved_candidates.first
+                elsif candidates.length == 1
+                  name2 = candidates.first
+                else
+                  flash_error(:form_names_misspelling_many_matches.t)
+                end
+              end
             end
 
-          # Try to guess if not given explicitly.
-          elsif @misspelling && !@name.correct_spelling
-            @name.misspelling = true
-            synonyms = @name.approved_synonyms
-            if synonyms.length == 0
-              flash_error(:form_names_misspelling_none.t)
-            elsif synonyms.length == 1
-              @name.correct_spelling = synonyms.first
-            elsif synonyms.length > 1
-              candidates = []
-              for synonym in synonyms
-                # Count letters in one but not the other and vice versa.
-                val  = 0
-                copy = synonym.text_name
-                @name.text_name.each_char do |c|
-                  if i = copy.index(c)
-                    copy[i] = ''
-                  else
-                    val += 1
-                  end
-                end
-                val += copy.length
-                candidates.push(synonym) if val < 3
+            # Make sure correct spelling is a synonym, and not itself misspelled.
+            if name2
+              @name.misspelling = true
+              @name.correct_spelling = name2
+              @name.merge_synonyms(name2)
+              @name.change_deprecated(true)
+              name2.misspelling = false
+              name2.correct_spelling = nil
+              if name2.save_if_changed(@user,
+                :log_name_unmisspelled, { :user => @user.login,
+                :other => @name.display_name }, Time.now, true)
+                name2.add_editor(@user)
               end
-              if candidates.length == 1
-                @name.correct_spelling = candidates.first
-              else
-                flash_error(:form_names_misspelling_many.t)
-                logger.warn("misspelling: couldn't decide on correct spelling for name ##{@name.id} [#{@name.search_name}]\n")
-                logger.warn("synonyms: [" + synonyms.map(&:search_name).join("], [") + "]\n")
-              end
+            else
+              @name.misspelling = false
+              @name.correct_spelling = nil
+              any_errors = true
             end
           end
 
@@ -702,7 +735,7 @@ class NameController < ApplicationController
 
         else
           # If no errors occurred, changes must've been made successfully.
-          redirect_to(:action => 'show_name', :id => @name.id)
+          redirect_to(:action => 'show_name', :id => @name.id) if !any_errors
         end
       end
     end
@@ -807,18 +840,19 @@ class NameController < ApplicationController
             if new_names.length == 1
               @name.merge_synonyms(target_name)
               target_name.change_deprecated(false)
+              target_name.misspelling = false
+              target_name.correct_spelling = nil
               current_time = Time.now
               if target_name.save_if_changed(@user,
                 :log_name_approved, { :user => @user.login,
                 :other => @name.display_name }, current_time, true)
                 target_name.add_editor(@user)
               end
-              # If we haven't entered a correct spelling for this name yet,
-              # assume this new accepted synonym is it.
-              if @name.is_misspelling? && !@name.correct_spelling
+              @name.change_deprecated(true)
+              if params[:is] && params[:is][:misspelling] == '1'
+                @name.misspelling = true
                 @name.correct_spelling = target_name
               end
-              @name.change_deprecated(true)
               comment_join = @comment == "" ? "." : ":\n"
               @name.prepend_notes("Deprecated in favor of" +
                 " #{target_name.search_name} by #{@user.login} on " +
@@ -830,7 +864,7 @@ class NameController < ApplicationController
               end
               redirect_to(:action => 'show_name', :id => @name.id)
             end
-          end
+end
         end
       end
     end
@@ -853,6 +887,8 @@ class NameController < ApplicationController
           end
         end
         @name.change_deprecated(false)
+        @name.misspelling = false
+        @name.correct_spelling = nil
         comment = (params[:comment] && params[:comment][:comment] ?
            params[:comment][:comment] : "").strip
         comment_join = comment == "" ? "." : ":\n"

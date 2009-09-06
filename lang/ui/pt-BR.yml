@@ -235,6 +235,7 @@ app_no_votes:  no votes
 # Interest states.
 app_watching:  Watching
 app_ignoring:  Ignoring
+app_tracking:  Tracking
 
 ################################################################################
 
@@ -1084,9 +1085,20 @@ form_names_look_alikes_help:  >
 
 form_names_misspelling:  This name is misspelled.
 form_names_misspelling_bad:  The alternate spelling you entered is not recognized.
-form_names_misspelling_many:  There are several possible spellings, please enter correct one by hand.
-form_names_misspelling_none:  If this is a misspelling, please deprecate it.
+form_names_misspelling_many_matches:  There are several possible spellings, please enter correct spelling by hand.
+form_names_misspelling_no_matches:  None of the synonyms looks right, please enter correct spelling by hand.
+form_names_misspelling_no_synonyms:  Can't find any synonyms, please enter correct spelling by hand.
+form_names_misspelling_same:  Correct spelling and incorrect spelling are the same!
 form_names_misspelling_it_should_be:  It should be
+form_names_misspelling_note_first:  >
+  Check this box if you think this name is a misspelling.  If we can't figure
+  out what the correct spelling is, you'll have a chance to tell us later.
+  *NOTE:* Please do not use this to deprecate correctly-spelled synonyms. 
+
+form_names_misspelling_note:  >
+  Please enter the correct spelling for this name. *NOTE:* Please do not use
+  this to deprecate correctly-spelled synonyms. 
+
 form_names_notes:  Notes
 form_names_notes_help:  >
   Please include notes about the validity of this name, common misuses of the
@@ -2061,9 +2073,9 @@ show_name_draft_help:  >
 show_name_edit_name:  Edit Description
 show_name_email_tracking:  Email Tracking
 show_name_existing_drafts:  Existing Drafts
-show_name_latest_review:  >
-  Latest review: [date] by [user]
-
+show_name_latest_review:  'Latest review: [date] by [user]'
+show_name_misspelling:  This name is misspelled.
+show_name_misspelling_correct:  Correct Spelling
 show_name_notes_and_comments:  Notes and Comments
 show_name_observations:  Observations
 show_name_other_observations:  Similar Observations

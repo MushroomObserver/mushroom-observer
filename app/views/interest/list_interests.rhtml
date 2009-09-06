@@ -8,7 +8,7 @@
       odd_or_even = 1 - odd_or_even %>
       <tr valign="top" class="ListLine<%= odd_or_even %>">
         <td>
-          <span class='ListWhat'><%= item.summary %></span>
+          <span class='ListWhat'><%= item.summary.t %></span>
         </td>
         <td>
           <% if item.is_a?(Notification) %>
