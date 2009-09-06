@@ -374,7 +374,7 @@ class AccountController < ApplicationController
       @user.send(method, false)
       if @user.save
         flash_notice(:success.t(:name => @user.unique_text_name))
-        render(:action => no_email)
+        render(:action => type)
       else
         # Probably should write a better error message here...
         flash_error('Sorry, something went wrong...')

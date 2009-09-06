@@ -163,7 +163,7 @@ private
     # Fill in table by performing one query for each object being counted.
     @user_data = {}
     for user in users
-      @user_data[user.id] = { :name => user.legal_name, :id => user.id }
+      @user_data[user.id] = { :name => user.unique_text_name, :id => user.id }
     end
     for field in ALL_FIELDS
       table = FIELD_TABLES[field]
