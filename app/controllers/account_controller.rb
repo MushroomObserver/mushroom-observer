@@ -193,7 +193,7 @@ class AccountController < ApplicationController
           @user.email_general_feature        = params['user']['email_general_feature']
           @user.email_general_commercial     = params['user']['email_general_commercial']
           @user.email_general_question       = params['user']['email_general_question']
-          @user.email_digest                 = params['user']['email_digest']
+          @user.email_digest                 = params['user']['email_digest'] || :immediately
           @user.email_html                   = params['user']['email_html']
 
           password = params['user']['password']
