@@ -863,6 +863,10 @@ class Name < ActiveRecord::Base
     end
     self.display_name = dname
     self.observation_name = oname
+    if !value
+      self.misspelling = false
+      self.correct_spelling = nil
+    end
     self.deprecated = value
   end
 

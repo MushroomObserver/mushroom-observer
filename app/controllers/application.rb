@@ -299,7 +299,7 @@ class ApplicationController < ActionController::Base
   # Returns a list of "pages" and objects themselves.
   #
   # *NOTE*: The objects returned are NOT actually proper object instances --
-  # they are merely wrappers masquerading as objects.  If your query incudes
+  # they are merely wrappers masquerading as objects.  If your query includes
   # multiple tables, all the values selected get crammed into the list of
   # attributes for +model+.  For example, if you are paginating observations
   # and including the user and name:

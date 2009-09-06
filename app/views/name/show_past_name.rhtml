@@ -9,7 +9,8 @@
     <td valign="top">
       <p>
         <%= :app_rank.t %>: <%= @past_name.rank %><br/>
-        <%= :app_name_status.t %>: <%= @past_name.status %><br/>
+        <%= :app_name_status.t %>: <%= @past_name.status %>
+          <%= '(' + :app_misspelled.t + ')' if @past_name.misspelling %><br/>
         <%= :app_name.t %>: <%= h(@past_name.text_name) %><br/>
         <%= :app_author.t %>: <%= sanitize(@past_name.author.to_s).t %><br/>
         <%= :app_citation.t %>: <%= sanitize(@past_name.citation.to_s).t %><br/>

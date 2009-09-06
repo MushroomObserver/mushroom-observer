@@ -217,7 +217,6 @@ class NameController < ApplicationController
         FROM names, #{role}s_names
         WHERE names.id = #{role}s_names.name_id
         AND #{role}s_names.user_id = #{user.id}
-        AND misspelling = false
         ORDER BY names.text_name asc, names.author asc
       )
       for row in name_data:
@@ -840,8 +839,6 @@ class NameController < ApplicationController
             if new_names.length == 1
               @name.merge_synonyms(target_name)
               target_name.change_deprecated(false)
-              target_name.misspelling = false
-              target_name.correct_spelling = nil
               current_time = Time.now
               if target_name.save_if_changed(@user,
                 :log_name_approved, { :user => @user.login,
@@ -887,8 +884,6 @@ end
           end
         end
         @name.change_deprecated(false)
-        @name.misspelling = false
-        @name.correct_spelling = nil
         comment = (params[:comment] && params[:comment][:comment] ?
            params[:comment][:comment] : "").strip
         comment_join = comment == "" ? "." : ":\n"

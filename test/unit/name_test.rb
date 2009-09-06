@@ -2,6 +2,7 @@ require File.dirname(__FILE__) + '/../test_helper'
 
 class NameTest < Test::Unit::TestCase
   fixtures :names
+  fixtures :namings
   fixtures :past_names
   fixtures :users
   fixtures :user_groups
@@ -669,5 +670,29 @@ class NameTest < Test::Unit::TestCase
         :new_version   => @peltigera.version,
         :review_status => 'no_change',
     })
+  end
+
+  def test_misspelling
+    # Make sure deprecating a name doesn't clear misspelling stuff.
+    @petigera.change_deprecated(true)
+    assert(@petigera.is_misspelling?)
+    assert_equal(@peltigera, @petigera.correct_spelling)
+
+    # Make sure approving a name clears misspelling stuff.
+    @petigera.change_deprecated(false)
+    assert(!@petigera.is_misspelling?)
+    assert_nil(@petigera.correct_spelling)
+
+    # Coprinus comatus should normally end up in name primer.
+    File.delete(NAME_PRIMER_CACHE_FILE)
+    assert(!Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
+
+    # Mark it as misspelled and see that it gets removed from the primer list.
+    @coprinus_comatus.misspelling = true
+    @coprinus_comatus.correct_spelling = @agaricus_campestris
+    @coprinus_comatus.change_deprecated(true)
+    @coprinus_comatus.save
+    File.delete(NAME_PRIMER_CACHE_FILE)
+    assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end
 end
