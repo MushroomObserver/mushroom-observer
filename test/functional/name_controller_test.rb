@@ -115,6 +115,51 @@ class NameControllerTest < Test::Unit::TestCase
     assert_form_action :action => 'approve_name'
   end
 
+  def test_review_authors
+    # Make sure it lets reviewers get to page.
+    requires_login(:review_authors, { :id => 1 })
+    assert_response(:success)
+    assert_template('review_authors')
+    logout
+
+    # Remove Rolf from reviewers group.
+    @reviewers.users.delete(@rolf)
+    @rolf.reload
+    assert(!@rolf.in_group('reviewers'))
+
+    # Make sure it fails to let unauthorized users see page.
+    requires_login(:review_authors, { :id => 1 }, false)
+    assert_redirected_to(:action => :show_name, :id => 1)
+    logout
+
+    # Make Rolf an author.
+    @fungi.add_author(@rolf)
+    @fungi.save
+    @fungi.reload
+    assert_equal([@rolf.login], @fungi.authors.map(&:login).sort)
+
+    # Rolf should be able to do it again now.
+    requires_login(:review_authors, :id => 1)
+    assert_response(:success)
+    assert_template('review_authors')
+    logout
+
+    # Rolf giveth with one hand...
+    post_requires_login(:review_authors, { :id => 1, :add => @mary.id })
+    assert_response(:success)
+    assert_template('review_authors')
+    @fungi.reload
+    assert_equal([@mary.login, @rolf.login], @fungi.authors.map(&:login).sort)
+    logout
+
+    # ...and taketh with the other.
+    post_requires_login(:review_authors, { :id => 1, :remove => @mary.id })
+    assert_response(:success)
+    assert_template('review_authors')
+    @fungi.reload
+    assert_equal([@rolf.login], @fungi.authors.map(&:login).sort)
+  end
+
   # ----------------------------
   #  Maps
   # ----------------------------
@@ -2133,7 +2178,6 @@ class NameControllerTest < Test::Unit::TestCase
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(:object => @peltigera, :user => @rolf, :state => true).save
-    @request.session[:user_id] = @rolf.id
     get(:show_name, { :id => @peltigera.id })
     assert_response :success
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
@@ -2148,7 +2192,6 @@ class NameControllerTest < Test::Unit::TestCase
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
     Interest.new(:object => @peltigera, :user => @rolf, :state => false).save
-    @request.session[:user_id] = @rolf.id
     get(:show_name, { :id => @peltigera.id })
     assert_response :success
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {

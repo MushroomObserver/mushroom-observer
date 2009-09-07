@@ -50,6 +50,7 @@ class Location < ActiveRecord::Base
   has_and_belongs_to_many :authors, :class_name => "User", :join_table => "authors_locations"
   has_and_belongs_to_many :editors, :class_name => "User", :join_table => "editors_locations"
   belongs_to :user
+  belongs_to :license
   has_many :observations
 
   acts_as_versioned(:class_name => 'PastLocation', :table_name => 'past_locations')

@@ -264,4 +264,32 @@ class AccountControllerTest < Test::Unit::TestCase
     assert_equal(2003, @rolf.image.when.year)
     assert_equal(@ccnc25, @rolf.image.license)
   end
+
+  def no_email_hooks_helper(type)
+    post_requires_login("no_email_#{type}".to_sym, { :id => @rolf.id }, false)
+    assert_response(:success)
+    assert_template('no_email')
+    @rolf.reload
+    assert(!@rolf.send("email_#{type}"))
+    logout
+  end
+
+  def test_no_email_hooks
+    no_email_hooks_helper(:comments_owner)
+    no_email_hooks_helper(:comments_response)
+    no_email_hooks_helper(:comments_all)
+    no_email_hooks_helper(:observations_consensus)
+    no_email_hooks_helper(:observations_naming)
+    no_email_hooks_helper(:observations_all)
+    no_email_hooks_helper(:names_author)
+    no_email_hooks_helper(:names_editor)
+    no_email_hooks_helper(:names_reviewer)
+    no_email_hooks_helper(:names_all)
+    no_email_hooks_helper(:locations_author)
+    no_email_hooks_helper(:locations_editor)
+    no_email_hooks_helper(:locations_all)
+    no_email_hooks_helper(:general_feature)
+    no_email_hooks_helper(:general_commercial)
+    no_email_hooks_helper(:general_question)
+  end
 end

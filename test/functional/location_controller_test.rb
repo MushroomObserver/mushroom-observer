@@ -48,6 +48,46 @@ class LocationControllerTest < Test::Unit::TestCase
     assert_template 'list_place_names'
   end
 
+  def test_author_request
+    requires_login(:author_request, :id => 1)
+    assert_response :success
+    assert_template 'author_request'
+  end
+
+  def test_review_authors
+    # Make sure it fails to let unauthorized users see page.
+    requires_login(:review_authors, { :id => 1 }, false)
+    assert_redirected_to(:action => :show_location, :id => 1)
+    logout
+
+    # Make Rolf an author.
+    @albion.add_author(@rolf)
+    @albion.save
+    @albion.reload
+    assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
+
+    # Rolf should be able to do it now.
+    requires_login(:review_authors, :id => 1)
+    assert_response(:success)
+    assert_template('review_authors')
+    logout
+
+    # Rolf giveth with one hand...
+    post_requires_login(:review_authors, { :id => 1, :add => @mary.id })
+    assert_response(:success)
+    assert_template('review_authors')
+    @albion.reload
+    assert_equal([@mary.login, @rolf.login], @albion.authors.map(&:login).sort)
+    logout
+
+    # ...and taketh with the other.
+    post_requires_login(:review_authors, { :id => 1, :remove => @mary.id })
+    assert_response(:success)
+    assert_template('review_authors')
+    @albion.reload
+    assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
+  end
+
   def test_create_location
     requires_login :create_location
     assert_form_action :action => 'create_location'
@@ -318,5 +358,51 @@ class LocationControllerTest < Test::Unit::TestCase
     get_with_dump :map_locations, :pattern => 'California'
     assert_response :success
     assert_template 'map_locations'
+  end
+
+  # ----------------------------
+  #  Interest.
+  # ----------------------------
+
+  def test_interest_in_show_location
+    # No interest in this location yet.
+    @request.session[:user_id] = @rolf.id
+    get(:show_location, { :id => @albion.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Location', :id => @albion.id, :state => 1
+    })
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Location', :id => @albion.id, :state => -1
+    })
+
+    # Turn interest on and make sure there is an icon linked to delete it.
+    Interest.new(:object => @albion, :user => @rolf, :state => true).save
+    get(:show_location, { :id => @albion.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Location', :id => @albion.id, :state => 0
+    })
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Location', :id => @albion.id, :state => -1
+    })
+
+    # Destroy that interest, create new one with interest off.
+    Interest.find_all_by_user_id(@rolf.id).last.destroy
+    Interest.new(:object => @albion, :user => @rolf, :state => false).save
+    get(:show_location, { :id => @albion.id })
+    assert_response :success
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Location', :id => @albion.id, :state => 0
+    })
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :controller => 'interest', :action => 'set_interest',
+      :type => 'Location', :id => @albion.id, :state => 1
+    })
   end
 end

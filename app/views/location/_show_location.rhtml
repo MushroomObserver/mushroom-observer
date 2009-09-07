@@ -67,9 +67,9 @@
     <br/>
     <%= user_list(:show_name_description_editor.t, @location.editors) %>
   </p>
-<% #  <% if @location.license %>
-<% #    <%= render(:partial => "shared/form_#{@location.license.form_name}") %>
-<% #  <% end %>
+  <% if @location.license %>
+    <%= render(:partial => "shared/form_#{@location.license.form_name}") %>
+  <% end %>
 </center>
 
 <p>

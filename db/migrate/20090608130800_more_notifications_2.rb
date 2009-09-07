@@ -5,6 +5,9 @@ class MoreNotifications2 < ActiveRecord::Migration
     add_column :past_names, "misspelling",         :boolean, :default => false, :null => false
     add_column :past_names, "correct_spelling_id", :integer, :default => nil, :null => true
 
+    add_column :locations, "license_id", :integer
+    add_column :past_locations, "license_id", :integer
+
     add_column :users, "email_comments_owner",         :boolean, :default => true, :null => false
     add_column :users, "email_comments_response",      :boolean, :default => true, :null => false
     add_column :users, "email_comments_all",           :boolean, :default => false, :null => false
@@ -71,6 +74,20 @@ class MoreNotifications2 < ActiveRecord::Migration
     add_column :queued_emails, :flavor, :enum, :limit => QueuedEmail.all_flavors
     QueuedEmail.connection.update("update queued_emails set flavor=flavor_tmp")
     remove_column :queued_emails, :flavor_tmp
+
+    # Location 363 was the first one using acts_as_versioned, and thus the
+    # first one without a version 0.
+    data = Location.connection.select_rows %(
+      SELECT user_id, location_id
+      FROM past_locations
+      WHERE (version = 0 AND location_id < 363) OR (version = 1 AND location_id > 362)
+      ORDER BY location_id ASC
+    )
+
+    Location.connection.insert %(
+      INSERT INTO authors_locations (user_id, location_id)
+      VALUES #{data.map {|l| '(' + l[0] + ',' + l[1] + ')'}.join(', ')}
+    )
   end
 
   def self.down
@@ -78,6 +95,8 @@ class MoreNotifications2 < ActiveRecord::Migration
     remove_column :names,      "correct_spelling_id"
     remove_column :past_names, "misspelling"
     remove_column :past_names, "correct_spelling_id"
+
+    remove_column :locations, "license_id"
 
     add_column :users, "comment_email",          :boolean, :default => true, :null => false
     add_column :users, "comment_response_email", :boolean, :default => true, :null => false
