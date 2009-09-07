@@ -221,6 +221,8 @@ root> vi /var/web/mo/config/environment.rb
 root> service monit restart
     (there should be a way to tell the monit daemon to refresh
     its rules without restarting it...)
+root> vi /home/mo/.muttrc
+    set from="no-reply@mushroomobserver.org"
 
 # Test email.
 jason> vi /home/jason/.muttrc
