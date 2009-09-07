@@ -1002,7 +1002,6 @@ form_comments_summary: Summary
 
 # observer/_form_images
 form_images_copyright_holder: Copyright Holder
-form_images_license: License
 form_images_license_help: >
   Select "license":/observer/how_to_use#license you want to give for this image
 
@@ -1032,6 +1031,10 @@ form_locations_lat_long_finders: >
   Here are some lat/long finders to help you find this location
 
 form_locations_lat_long_help: All values should be in decimal degrees.
+form_locations_license_help: >
+  Select "license":/observer/how_to_use#license you want to give for the
+  above text.
+
 form_locations_notes_help: >
   Enter notes that are specific to this particular location.  For example,
   habitat type, dominate plants, annual rainfall, nearby water, soil type, etc.
@@ -1073,7 +1076,6 @@ form_names_habitat: Habitat
 form_names_habitat_help: >
   What habitats has taxon has been found in?
 
-form_names_license: License
 form_names_license_help: >
   Select "license":/observer/how_to_use#license you want to give for the
   following text.
@@ -1672,7 +1674,7 @@ no_browser_title: We Don't Recognize Your Browser
 
 
 # account/no_email
-no_email_how_to_reenable: Go to your Preferences page to re-enable this feature.
+no_email_how_to_reenable: Go to your "Preferences":/account/prefs page to re-enable this feature.
 no_email_some_maybe_queued: >
   Note: For the next few minutes you may continue to receive emails that have
   already been queued.
@@ -1860,7 +1862,6 @@ prefs_email_observations_naming: someone propose a name for one of my observatio
 prefs_email_please_notify: Please notify me when...
 prefs_email_prefs: Email preferences
 prefs_layout_title: List page layout
-prefs_license: License
 prefs_license_note: Default "license":/observer/how_to_use#license you want for new images
 prefs_link: Edit Preferences
 prefs_locale: Language
@@ -2580,8 +2581,8 @@ how_license: >
   that your Image cannot be used on "Wikipedia":http://wikipedia.org.  The
   license can be set on a per Image basis.  The looser, Wikipedia compatible
   license is the default for new Users.  However, you can select the
-  non-commercial license to be your default by selecting it on your Preferences
-  page and clicking 'Save'.
+  non-commercial license to be your default by selecting it on your
+  "Preferences":/account/prefs page and clicking 'Save'.
 
 how_location: >
   *Location* - A place in the world.  Defined Locations associate a location
@@ -2864,8 +2865,8 @@ how_user: >
   However, your email address will never be revealed unless you request an
   email be sent to another User and then only to that User.  If you are
   concerned about having your email address in the MushroomObserver.org
-  database, once you have verified your account, you can go to the Preferences
-  page and remove your address.
+  database, once you have verified your account, you can go to the
+  "Preferences":/account/prefs page and remove your address.
 
 how_vote: >
   *Vote* - One "User's":#user Vote on a "Proposed Name":#proposed_name for a

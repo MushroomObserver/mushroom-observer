@@ -130,6 +130,7 @@ class LocationController < ApplicationController
     store_location
     @where = params[:where]
     @set_user = (params[:set_user] == "1")
+    @licenses = License.current_names_and_ids()
     if verify_user()
       if request.method == :get
         @location = Location.new
@@ -260,6 +261,7 @@ class LocationController < ApplicationController
   def edit_location
     store_location
     @location = Location.find(params[:id])
+    @licenses = License.current_names_and_ids()
     if verify_user()
       if request.method == :post
         matching_name = Location.find_by_display_name(params[:location][:display_name])

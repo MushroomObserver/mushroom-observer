@@ -10,6 +10,7 @@ class LocationControllerTest < Test::Unit::TestCase
   fixtures :past_locations
   fixtures :users
   fixtures :observations
+  fixtures :licenses
 
   def setup
     @controller = LocationController.new
@@ -122,6 +123,8 @@ class LocationControllerTest < Test::Unit::TestCase
     assert_equal(20, @rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
+    loc = Location.find_by_display_name(display_name)
+    assert_equal([@rolf.login], loc.authors.map(&:login).sort)
   end
 
   def location_error(page, params)
@@ -163,28 +166,28 @@ class LocationControllerTest < Test::Unit::TestCase
   end
 
   # Test for west < -180
-  def test_construct_location_south_error
+  def test_construct_location_west_error_1
     params = barton_flats_params
     params[:location][:west] = -200
     construct_location_error(params)
   end
 
   # Test for west > 180
-  def test_construct_location_south_error
+  def test_construct_location_west_error_2
     params = barton_flats_params
     params[:location][:west] = 200
     construct_location_error(params)
   end
 
   # Test for east < -180
-  def test_construct_location_south_error
+  def test_construct_location_east_error_1
     params = barton_flats_params
     params[:location][:east] = -200
     construct_location_error(params)
   end
 
   # Test for east > 180
-  def test_construct_location_south_error
+  def test_construct_location_east_error_2
     params = barton_flats_params
     params[:location][:east] = 200
     construct_location_error(params)
@@ -226,13 +229,14 @@ class LocationControllerTest < Test::Unit::TestCase
 
     # Turn Albion into Barton Flats
     loc = @albion
+    loc.add_author(@mary)
     old_north = loc.north
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
     params[:id] = loc.id
     post_requires_login(:edit_location, params, false)
     assert_redirected_to(:controller => "location", :action => "show_location")
-    assert_equal(20, @rolf.reload.contribution)
+    assert_equal(15, @rolf.reload.contribution)
 
     # Should have created a PastLocation
     assert_equal(count + 1, Location::PastLocation.find(:all).length)
@@ -252,6 +256,8 @@ class LocationControllerTest < Test::Unit::TestCase
       end
     end
     assert(key_count > 0) # Make sure something was compared
+
+    assert_equal([@mary.login], loc.authors.map(&:login).sort)
   end
 
 

@@ -75,4 +75,13 @@
 </p>
 <%= render(:partial => 'shared/textilize_help') %>
 
+<% if !@location.id || @location.authors.member?(@user) %>
+  <br/>
+  <p><label for="location_license_id"><%= :license.t %>:</label><br/>
+    <span class="HelpNote">
+      <%= :form_locations_license_help.t %>
+    </span><br/>
+  <%= select('location', 'license_id', @licenses) %></p>
+<% end %>
+
 <!--[eoform:location]-->

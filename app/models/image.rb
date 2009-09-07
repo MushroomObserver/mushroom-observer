@@ -46,7 +46,8 @@ class Image < ActiveRecord::Base
     [:unreviewed, :low, :medium, :high]
   end
   
-  # Create Textile title for image from observations, appending image id to guarantee uniqueness.
+  # Create Textile title for image from observations, appending image id to
+  # guarantee uniqueness. 
   def unique_format_name 
     obs_names = []
     self.observations.each {|o| obs_names.push(o.format_name)}
@@ -58,7 +59,8 @@ class Image < ActiveRecord::Base
     end
   end
 
-  # Create plain-text title for image from observations, appending image id to guarantee uniqueness.
+  # Create plain-text title for image from observations, appending image id to
+  # guarantee uniqueness. 
   def unique_text_name
     obs_names = []
     self.observations.each {|o| obs_names.push(o.text_name)}
@@ -70,7 +72,9 @@ class Image < ActiveRecord::Base
     end
   end
 
-  # Read image into internal buffer and set content_type.
+  # Check uploaded file and make note of its temporary location.  Apache waits
+  # for all uploads to arrive before passing the request off to Rails.  It
+  # stores them in /tmp somewhere until Rails is done with them. 
   def image=(file)
     self.content_type = file.content_type.chomp
     @img_dir = IMG_DIR
@@ -86,17 +90,7 @@ class Image < ActiveRecord::Base
     end
   end
 
-  # Convert original into 640x640 and 160x160 images.
-  def create_resized_images
-    result = true
-    result = self.resize_image(640, 640, 70, self.original_image, self.big_image)
-    if result
-      result = self.resize_image(160, 160, 90, self.big_image, self.thumbnail)
-    end
-    return result
-  end
-
-  # Store internal buffer in original file.
+  # Move uploaded file into place and initiate resizing and transfers.
   # Can't include this in image= because self.id isn't set until first save.
   def save_image
     result = false
@@ -110,14 +104,29 @@ class Image < ActiveRecord::Base
         rescue => err
           result = false
         end
+        result = system("script/process_image #{self.id}&") if result
       end
     else
       file = File.new(self.original_image, 'w')
       file.print(@img)
       file.close
-      result = true
+      result = self.create_resized_images
+      result = self.transfer_images if result
     end
-    result = self.create_resized_images if result
+    return result
+  end
+
+###############################################################################
+###### These are going away as soon as NEW_IMAGE_THINGY is tested live. #######
+###############################################################################
+
+  # Convert original into 640x640 and 160x160 images.
+  def create_resized_images
+    result = true
+    result = self.resize_image(640, 640, 70, self.original_image, self.big_image)
+    if result
+      result = self.resize_image(160, 160, 90, self.big_image, self.thumbnail)
+    end
     return result
   end
 
@@ -133,6 +142,33 @@ class Image < ActiveRecord::Base
     end
     return result
   end
+
+  # Copy images over to dreamhost via scp.
+  def transfer_images
+    self.transfer_image(self.original_image)
+    self.transfer_image(self.big_image)
+    self.transfer_image(self.thumbnail)
+  end
+
+  # Transfer new image to the image server.
+  def transfer_image(src)
+    result = false
+    if IMAGE_TRANSFER and File.exists?(src)
+      if src.match(/\w+\/\d+\.jpg$/)
+        dest = $&
+        cmd = "scp %s %s/%s" % [src, IMAGE_SERVER, dest]
+        result = system cmd
+        if result
+          logger.warn(cmd + ' -- success')
+        else
+          logger.warn(cmd + ' -- failed')
+        end
+      end
+    end
+    return result
+  end
+
+################################################################################
 
   # Return file name of original image.
   def original_image

@@ -921,8 +921,8 @@ email_tracking_enabled_only_for: >
 email_tracking_help: >
   Wenn du diesen Namen beobachtest, erhältst du jedesmal eine Email, wenn jemand
   diesen Namen mit einem Fund verbindet. Jede dieser Emails enthält einen Link
-  auf diese Seite. Du kannst deine Postanschrift für Sammlungen in den "Einstellungen"
-  angeben:/account/profile.
+  auf diese Seite. Du kannst deine Postanschrift für Sammlungen in den
+  "Einstellungen":/account/profile angeben.
 
 email_tracking_no_longer_tracking: Beobachte [name] nicht mehr.
 email_tracking_note: Vorlage für die Benachrichtigung an den Finder
@@ -1008,7 +1008,6 @@ form_comments_summary: Zusammenfassung
 
 # observer/_form_images
 form_images_copyright_holder: Copyright-Inhaber
-form_images_license: Lizenz
 form_images_license_help: >
   Siehe "Lizenz":/observer/how_to_use#license für dieses Bild
 
@@ -1039,6 +1038,9 @@ form_locations_lat_long_finders: >
   Diese latitude-longitude Suchmaschinen helfen dir dabei, die Koordinaten zu bestimmen.
 
 form_locations_lat_long_help: Alle Angaben sollten in Dezimalgraden gemacht werden.
+form_locations_license_help:  >
+  Klicke "Lizenz":/observer/how_to_use#license für den (above) Text.
+
 form_locations_notes_help: >
   Notier hier, was diesen Fundort kennzeichnet. Zum Bespiel Vegetationstype,
   dominierende Pflanzen, jährliche Niederschlagsmenge, Entfernung zum Wasser,
@@ -1082,7 +1084,6 @@ form_names_habitat: Habitat
 form_names_habitat_help: >
   In welchen Habitats hat man dieses Taxon schon entdeckt?
 
-form_names_license: Lizenz
 form_names_license_help: >
   Klicke "Lizenz":/observer/how_to_use#license für den nachfolgenden Text.
 
@@ -1689,7 +1690,7 @@ no_browser_title:  We Don't Recognize Your Browser
 
 
 # account/no_email_xxx
-no_email_how_to_reenable:  Go to your Preferences page to re-enable this feature.
+no_email_how_to_reenable:  Go to your "Preferences":/account/prefs page to re-enable this feature.
 no_email_some_maybe_queued:  >
   Note: For the next few minutes you may continue to receive emails that have
   already been queued.
@@ -1878,7 +1879,6 @@ prefs_email_observations_naming:  someone propose a name for one of my observati
 prefs_email_please_notify: Bitte schickt mir eine Email, wenn...
 prefs_email_prefs: Email-Einstellungen
 prefs_layout_title: Layout der Listenseiten
-prefs_license: Lizenz
 prefs_license_note: Standard-"Lizenz":/observer/how_to_use#license gilt für neue Bilder
 prefs_link: Einstellungen ändern
 prefs_locale: Sprache
@@ -2599,8 +2599,8 @@ how_license: >
   der "Wikipedia-Webseite":http://wikipedia.org verwendet werden kann. Für jedes Bild
   kann die Lizenz individuell ausgewählt werden. Die lockere, Wikipedia-kompatible Lizenz
   ist für neue Nutzer als Standard eingestellt. Du kannst die nicht-gewerbliche Lizenz
-  als Standard für deine neuen Bilder setzen, indem du dies auf der Seite Einstellungen angibst
-  und auf 'Speichern' drückst.
+  als Standard für deine neuen Bilder setzen, indem du dies auf der Seite
+  "Einstellungen":/account/prefs angibst und auf 'Speichern' drückst.
 
 how_location: >
   *Fundort* - Ein Ort irgendwo auf der Erde. Definierte Fundorte verknüpfen einen Namen
@@ -2879,7 +2879,7 @@ how_user: >
   diesem Fall wird deine Email-Adresse nur diesem einen Nutzer gezeigt. Wenn du Bedenken
   darüber hast, dass deine Email-Adresse in der Datenbank von MushroomObserver.org
   gespeichert ist, dann kannst du nach erfolgreichter Überprüfung des Kontos auf die
-  Seite Einstellungen gehen und deine Adresse dort löschen.
+  Seite "Einstellungen":/account/prefs gehen und deine Adresse dort löschen.
 
 how_vote: >
   *Abstimmen* - Die Stimme eines "Nutzers":#user zu einem  "vorgeschlagenen Namen":#proposed_name
