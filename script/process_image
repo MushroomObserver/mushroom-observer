@@ -65,7 +65,7 @@ fi
 # --------------------------------------------------
 
 function run() {
-    echo "`pwd`>" $* >> $log
+    echo "`date`>" $* >> $log
     if !($* >> $log 2>&1); then
         errors=1
         echo '**** FAILED ****' >> $log
