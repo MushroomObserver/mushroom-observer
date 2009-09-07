@@ -14,13 +14,29 @@ namespace :email do
     for e in QueuedEmail.find(:all)
       now = Time.now()
       if e.queued + QUEUE_DELAY < now # Has it been queued (and unchanged) for QUEUE_DELAY or more
+
+        # Sent successfully.
         if e.send_email
+          e.destroy
           count += 1
           if count >= EMAIL_PER_MINUTE
             break
           end
+
+        # After a few tries give up and delete it.
+        elsif e.num_attempts >= EMAIL_NUM_ATTEMPTS - 1
+          File.open(EMAIL_LOG, 'a') do |fh|
+            fh.puts('Failed to send email #%d at %s' % [e.id, now])
+            fh.puts(e.dump)
+          end
+          e.destroy
+
+        # Schedule next attempt for 5 minutes later.
+        else
+          e.queued = now
+          e.num_attempts += 1
+          e.save
         end
-        e.destroy # Tried to send it, but it failed
       end
     end
   end

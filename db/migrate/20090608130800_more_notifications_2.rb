@@ -8,6 +8,8 @@ class MoreNotifications2 < ActiveRecord::Migration
     add_column :locations, "license_id", :integer
     add_column :past_locations, "license_id", :integer
 
+    add_column :queued_emails, "num_attempts", :integer
+
     add_column :users, "email_comments_owner",         :boolean, :default => true, :null => false
     add_column :users, "email_comments_response",      :boolean, :default => true, :null => false
     add_column :users, "email_comments_all",           :boolean, :default => false, :null => false
@@ -97,6 +99,9 @@ class MoreNotifications2 < ActiveRecord::Migration
     remove_column :past_names, "correct_spelling_id"
 
     remove_column :locations, "license_id"
+    remove_column :past_locations, "license_id"
+
+    removecolumn :queued_emails, "num_attempts"
 
     add_column :users, "comment_email",          :boolean, :default => true, :null => false
     add_column :users, "comment_response_email", :boolean, :default => true, :null => false

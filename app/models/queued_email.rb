@@ -154,7 +154,7 @@ class QueuedEmail < ActiveRecord::Base
       result = self.deliver_email
     rescue
       print "Unable to send queued email:\n"
-      self.dump()
+      print self.dump
       # Failing to send email should not throw an error in production
       raise unless ENV['RAILS_ENV'] == 'production'
     end
@@ -170,18 +170,20 @@ class QueuedEmail < ActiveRecord::Base
     return email
   end
 
-  # Print out all the info about a QueuedEmail
+  # Dump out all the info about a QueuedEmail to a string.
   def dump
-    print "#{self.id}: from => #{self.user and self.user.login}, to => #{self.to_user.login}, flavor => #{self.flavor}, queued => #{self.queued}\n"
+    result = ''
+    result += "#{self.id}: from => #{self.user and self.user.login}, to => #{self.to_user.login}, flavor => #{self.flavor}, queued => #{self.queued}\n"
     for i in self.queued_email_integers
-      print "\t#{i.key.to_s} => #{i.value}\n"
+      result += "\t#{i.key.to_s} => #{i.value}\n"
     end
     for i in self.queued_email_strings
-      print "\t#{i.key.to_s} => #{i.value}\n"
+      result += "\t#{i.key.to_s} => #{i.value}\n"
     end
     if self.queued_email_note
-      print "\tNote: #{self.queued_email_note.value}\n"
+      result += "\tNote: #{self.queued_email_note.value}\n"
     end
+    result
   end
 
   # ----------------------------

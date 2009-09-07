@@ -29,6 +29,8 @@ TESTING = true
 # for running email:send.
 QUEUE_EMAIL = false
 EMAIL_PER_MINUTE = 25
+EMAIL_NUM_ATTEMPTS = 3
+EMAIL_LOG = RAILS_ROOT + '/log/email_error.log'
 QUEUE_DELAY = 5.seconds
 
 # File where the list of most commonly used names lives.

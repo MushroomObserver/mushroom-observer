@@ -32,8 +32,10 @@ TESTING = false
 # Queued email only gets delivered if you have run the rake
 # task email:send.  script/send_email is a cron script
 # for running email:send.
-QUEUE_EMAIL = false
+QUEUE_EMAIL = true
 EMAIL_PER_MINUTE = 25
+EMAIL_NUM_ATTEMPTS = 3
+EMAIL_LOG = RAILS_ROOT + '/log/email_error.log'
 QUEUE_DELAY = 5.seconds
 
 # File where the list of most commonly used names lives.
