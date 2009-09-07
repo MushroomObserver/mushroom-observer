@@ -8,14 +8,23 @@ images=public/images
 orig=$images/orig/$id.jpg
 big=$images/640/$id.jpg
 thumb=$images/thumb/$id.jpg
-icon=$images/place_holder.jpg
+
+big_icon=$images/place_holder_640.jpg
+thumb_icon=$images/place_holder_thumb.jpg
 
 log=log/process_images.$$
+log2=log/process_images.log
 email=webmaster@mushroomobserver.org
 
 path=(. /bin /usr/bin /usr/local/bin)
 
 errors=0
+
+if [[ $RAILS_ENV == 'production' ]]; then
+    production=1
+else
+    production=0
+fi
 
 # ----------------------------
 #  Help message.
@@ -41,10 +50,11 @@ if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 	    the webmaster if there are any errors.
 	
 	FILES:
-	    webmaster email     $email
-	    image server        $server
-	    place-holder image  $icon
-	    temporary log       $log
+	    webmaster       $email
+	    image server    $server
+	    place-holders   $big_icon
+	                    $thumb_icon
+	    error log       $log2
 
 	EOH
 fi
@@ -60,7 +70,6 @@ function run() {
         errors=1
         echo '**** FAILED ****' >> $log
     fi
-    echo >> $log
 }
 
 # -----------------------------------------------
@@ -68,8 +77,8 @@ function run() {
 #  until smaller images are done.
 # -----------------------------------------------
 
-run ln -s $icon $thumb
-run ln -s $icon $big
+run cp $thumb_icon $thumb
+run cp $big_icon $big
 
 # ----------------------------
 #  Resize images.
@@ -85,18 +94,23 @@ run convert -thumbnail '640x640>' -quality 70 $orig $big
 #  Transfer images.
 # ----------------------------
 
-# Wait for other transfers to finish first.
-while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
+# Careful!  Don't do this in test mode!
+if (( $production )); then
 
-run scp $orig $server/orig/$id.jpg
-run scp $big $server/640/$id.jpg
-run scp $thumb $server/thumb/$id.jpg
+  # Wait for other transfers to finish first.
+  while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
+
+  run scp $orig $server/orig/$id.jpg
+  run scp $big $server/640/$id.jpg
+  run scp $thumb $server/thumb/$id.jpg
+fi
 
 # ------------------------------
 #  Report errors to webmaster.
 # ------------------------------
 
-if (( $errors )); then
+cat $log >> $log2
+if (( $errors && $production )); then
     mutt -s '[MO] process_image' $email < $log
 fi
 rm -f $log

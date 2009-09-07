@@ -1282,6 +1282,8 @@ image_no_new_image: Keine neuen Bilder gefunden.
 
 # image/reuse_image_for_user
 image_changed_your_image: 'Als Bild wird nun Bild #[id] benutzt.'
+image_reuse_all_users:  Include other users' images.
+image_reuse_just_yours:  Only show your images.
 
 
 # image/destroy_image

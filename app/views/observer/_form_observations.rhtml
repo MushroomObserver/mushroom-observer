@@ -59,6 +59,9 @@ end %>
             <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
             <%= text_area_tag("image_#{image.id}_notes", image.notes, :cols => 60, :rows => 2) %>
           </td>
+<% # These controls are dangerous because they cause you to lose any
+   # changes made in the form.  They should be re-cast as ajax requests.
+   if false %>
           <td width="10"></td>
           <td>
             <%= link_to(:app_show_image.t, :controller => 'image', :action => 'show_image', :id => image.id) %><br/>
@@ -67,6 +70,7 @@ end %>
                         :image_id => image.id, :observation_id => @observation.id },
                         { :confirm => :form_observations_remove_image_confirm.l }) %><br/>
           </td>
+<% end %>
         </tr></table>
       </div>
     <% end %>

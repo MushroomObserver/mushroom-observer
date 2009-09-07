@@ -471,13 +471,12 @@ return result if debug
     if id != 0
       img = Image.find(id)
       if img
-        img.observations.delete(self)
         self.images.delete(img)
         if self.thumb_image_id == id.to_i
           if self.images != []
             self.thumb_image = self.images[0]
           else
-            self.thumb_image_id = nil
+            self.thumb_image = nil
           end
           self.save
         end

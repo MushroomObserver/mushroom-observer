@@ -17,7 +17,12 @@
     <%= text_field("observation", "idstr", :size => 8) %>
     &nbsp;<%= submit_tag(:image_reuse_reuse.l) %>
   </p>
-  <div class="HelpNote"><%= :image_reuse_id_help.tp %></div><br/>
+  <div class="HelpNote"><%= :image_reuse_id_help.tp %></div>
+
+  <p><big>
+    <%= link_to(@all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t,
+                :all_users => @all_users ? 0 : 1) %>
+  </big></p><br/>
 
   <%= pagination_numbers(@image_pages) %>
 

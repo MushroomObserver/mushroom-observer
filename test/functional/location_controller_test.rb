@@ -11,6 +11,8 @@ class LocationControllerTest < Test::Unit::TestCase
   fixtures :users
   fixtures :observations
   fixtures :licenses
+  fixtures :user_groups
+  fixtures :user_groups_users
 
   def setup
     @controller = LocationController.new
@@ -56,10 +58,19 @@ class LocationControllerTest < Test::Unit::TestCase
   end
 
   def test_review_authors
+    # Make sure it lets reviewers get to page.
+    requires_login(:review_authors, { :id => 1 })
+    assert_response(:success)
+    assert_template('review_authors')
+
+    # Remove Rolf from reviewers group.
+    @reviewers.users.delete(@rolf)
+    @rolf.reload
+    assert(!@rolf.in_group('reviewers'))
+
     # Make sure it fails to let unauthorized users see page.
-    requires_login(:review_authors, { :id => 1 }, false)
+    get(:review_authors, :id => 1)
     assert_redirected_to(:action => :show_location, :id => 1)
-    logout
 
     # Make Rolf an author.
     @albion.add_author(@rolf)
@@ -68,21 +79,19 @@ class LocationControllerTest < Test::Unit::TestCase
     assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
 
     # Rolf should be able to do it now.
-    requires_login(:review_authors, :id => 1)
+    get(:review_authors, :id => 1)
     assert_response(:success)
     assert_template('review_authors')
-    logout
 
     # Rolf giveth with one hand...
-    post_requires_login(:review_authors, { :id => 1, :add => @mary.id })
+    post(:review_authors, :id => 1, :add => @mary.id)
     assert_response(:success)
     assert_template('review_authors')
     @albion.reload
     assert_equal([@mary.login, @rolf.login], @albion.authors.map(&:login).sort)
-    logout
 
     # ...and taketh with the other.
-    post_requires_login(:review_authors, { :id => 1, :remove => @mary.id })
+    post(:review_authors, :id => 1, :remove => @mary.id)
     assert_response(:success)
     assert_template('review_authors')
     @albion.reload

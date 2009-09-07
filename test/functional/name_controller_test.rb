@@ -120,7 +120,6 @@ class NameControllerTest < Test::Unit::TestCase
     requires_login(:review_authors, { :id => 1 })
     assert_response(:success)
     assert_template('review_authors')
-    logout
 
     # Remove Rolf from reviewers group.
     @reviewers.users.delete(@rolf)
@@ -128,9 +127,8 @@ class NameControllerTest < Test::Unit::TestCase
     assert(!@rolf.in_group('reviewers'))
 
     # Make sure it fails to let unauthorized users see page.
-    requires_login(:review_authors, { :id => 1 }, false)
+    get(:review_authors, :id => 1)
     assert_redirected_to(:action => :show_name, :id => 1)
-    logout
 
     # Make Rolf an author.
     @fungi.add_author(@rolf)
@@ -139,21 +137,19 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal([@rolf.login], @fungi.authors.map(&:login).sort)
 
     # Rolf should be able to do it again now.
-    requires_login(:review_authors, :id => 1)
+    get(:review_authors, :id => 1)
     assert_response(:success)
     assert_template('review_authors')
-    logout
 
     # Rolf giveth with one hand...
-    post_requires_login(:review_authors, { :id => 1, :add => @mary.id })
+    post(:review_authors, :id => 1, :add => @mary.id)
     assert_response(:success)
     assert_template('review_authors')
     @fungi.reload
     assert_equal([@mary.login, @rolf.login], @fungi.authors.map(&:login).sort)
-    logout
 
     # ...and taketh with the other.
-    post_requires_login(:review_authors, { :id => 1, :remove => @mary.id })
+    post(:review_authors, :id => 1, :remove => @mary.id)
     assert_response(:success)
     assert_template('review_authors')
     @fungi.reload
@@ -281,7 +277,7 @@ class NameControllerTest < Test::Unit::TestCase
     params[:name] = empty_notes.merge(params[:name])
 
     post_requires_login(:create_name, params, false)
-    
+
     # Should fail and no name should get created
     assert_nil(Name.find_by_text_name(text_name))
     assert_form_action(:action => 'create_name')
@@ -299,7 +295,7 @@ class NameControllerTest < Test::Unit::TestCase
       }
     }
     params[:name] = empty_notes.merge(params[:name])
-    
+
     post_requires_login(:create_name, params, false)
     assert_redirected_to(:controller => "name", :action => "show_name")
     name = Name.find_by_text_name(text_name)

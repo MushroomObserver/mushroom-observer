@@ -15,6 +15,7 @@ detailed_unknown:
   location_id: 2
   name_id:   1
   specimen:  1
+  thumb_image_id: 1
   notes:     Found in a strange place
 
 coprinus_comatus_obs:

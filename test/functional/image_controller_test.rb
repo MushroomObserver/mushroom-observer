@@ -191,19 +191,35 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_delete_images
     obs = @detailed_unknown
-    image = @turned_over
-    assert(obs.images.member?(image))
+    keep = @turned_over
+    remove = @in_situ
+    assert(obs.images.member?(keep))
+    assert(obs.images.member?(remove))
+    assert_equal(remove.id, obs.thumb_image_id)
+
     selected = {}
-    for i in obs.images
-      selected[i.id.to_s] = "no"
-    end
-    selected[image.id.to_s] = "yes"
+    selected[keep.id.to_s] = "no"
+    selected[remove.id.to_s] = "yes"
     params = {"id"=>obs.id.to_s, "selected"=>selected}
     post_requires_login(:remove_images, params, false, "mary")
     assert_redirected_to(:controller => "observer", :action => "show_observation")
     assert_equal(10, @mary.reload.contribution)
-    obs2 = Observation.find(obs.id) # Need to reload observation to pick up changes
-    assert(!obs2.images.member?(image))
+
+    obs = Observation.find(obs.id)
+    assert(obs.images.member?(keep))
+    assert(!obs.images.member?(remove))
+    assert_equal(keep.id, obs.thumb_image_id)
+
+    selected = {}
+    selected[keep.id.to_s] = "yes"
+    params = {"id"=>obs.id.to_s, "selected"=>selected}
+    post(:remove_images, params)
+    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_equal(10, @mary.reload.contribution)
+
+    obs = Observation.find(obs.id)
+    assert(!obs.images.member?(keep))
+    assert_equal(nil, obs.thumb_image_id)
   end
 
   def test_destroy_image

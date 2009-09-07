@@ -62,7 +62,7 @@ class ImageController < ApplicationController
     session_setup
     store_location
     @layout = calc_layout_params
-    @obj_pages, @objs = paginate(:images, :order => "`when` desc", :per_page => @layout["count"])
+    @obj_pages, @objs = paginate(:images, :order => "modified desc", :per_page => @layout["count"])
   end
 
   # Display list of images by a given user.
@@ -76,7 +76,7 @@ class ImageController < ApplicationController
     store_location
     @layout = calc_layout_params
     @title = :images_by_user.t(:user => user.legal_name)
-    @obj_pages, @objs = paginate(:images, :order => "`when` desc",
+    @obj_pages, @objs = paginate(:images, :order => "modified desc",
       :conditions => "user_id = #{user.id}", :per_page => @layout["count"])
     render(:action => "list_images")
   end
@@ -415,15 +415,19 @@ class ImageController < ApplicationController
   # (See also add_image_to_obs and reuse_image_by_id.)
   def reuse_image
     @observation = Observation.find(params[:id])
+    @layout = calc_layout_params
     if verify_user()
       if !check_user_id(@observation.user_id)
         redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-      else
-        # @image = Image.new
-        # @image.copyright_holder = @user.legal_name
-        @layout = calc_layout_params
+      elsif params[:all_users] == '1'
+        @all_users = true
         @image_pages, @images = paginate(:images,
-                                         :order => "`when` desc",
+                                         :order => "modified desc",
+                                         :per_page => @layout["count"])
+      else
+        @image_pages, @images = paginate(:images,
+                                         :conditions => ['user_id = ?', @user.id],
+                                         :order => "modified desc",
                                          :per_page => @layout["count"])
       end
     end
@@ -489,9 +493,17 @@ class ImageController < ApplicationController
     end
     if !redirected
       @layout = calc_layout_params
-      @image_pages, @images = paginate(:images,
-                                       :order => "`when` desc",
-                                       :per_page => @layout["count"])
+      if params[:all_users] == '1'
+        @all_users = true
+        @image_pages, @images = paginate(:images,
+                                         :order => "modified desc",
+                                         :per_page => @layout["count"])
+      else
+        @image_pages, @images = paginate(:images,
+                                         :conditions => ['user_id = ?', @user.id],
+                                         :order => "modified desc",
+                                         :per_page => @layout["count"])
+      end
     end
   end
 
