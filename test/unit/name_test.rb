@@ -8,6 +8,10 @@ class NameTest < Test::Unit::TestCase
   fixtures :user_groups
   fixtures :user_groups_users
 
+  # ----------------------------
+  #  Test name parsing.
+  # ----------------------------
+
   # Create new subspecies Coprinus comatus v. bogus and make sure it doesn't
   # create a duplicate species if one already exists.
   # Saw this bug 20080114 -JPH
@@ -325,6 +329,10 @@ class NameTest < Test::Unit::TestCase
     )
   end
 
+  # -----------------------------
+  #  Test classification.
+  # -----------------------------
+
   def do_parse_classification_test(text, expected)
     begin
       parse = Name.parse_classification(text)
@@ -455,6 +463,142 @@ class NameTest < Test::Unit::TestCase
   #     print "id=#{n.id}, text_name='#{n.text_name}', author='#{n.author}'\n"
   #   end
   # end
+
+  # ------------------------------
+  #  Test ancestors and parents.
+  # ------------------------------
+
+  def assert_name_list_equal(expect, got)
+    assert_equal(expect.map(&:search_name), got.map(&:search_name))
+  end
+
+  def create_test_name(string, force_rank=nil)
+    (text_name, display_name, observation_name, search_name, parent_name, rank, author) = Name.parse_name(string)
+    name = Name.create_name(force_rank || rank, text_name, author, display_name, observation_name, search_name)
+    name.user = @rolf
+    if !name.save
+      print "Error saving name \"#{string}\": [#{name.dump_errors}]\n"
+      assert(nil)
+    end
+    return name
+  end
+
+  def test_ancestors_1
+    assert_name_list_equal([@agaricus], @agaricus_campestris.ancestors)
+    assert_name_list_equal([@agaricus], @agaricus_campestris.parents)
+    assert_name_list_equal([], @agaricus_campestris.children)
+    assert_name_list_equal([], @agaricus.ancestors)
+    assert_name_list_equal([], @agaricus.parents)
+    assert_name_list_equal([
+      @agaricus_campestras,
+      @agaricus_campestris,
+      @agaricus_campestros,
+      @agaricus_campestrus
+    ], @agaricus.children)
+  end
+
+  def test_ancestors_2
+    # (use Petigera instead of Peltigera because it has no classification string)
+    p = @petigera
+    assert_name_list_equal([], p.ancestors)
+    assert_name_list_equal([], p.children)
+
+    pc   = create_test_name('Petigera canina (L.) Willd.')
+    pcr  = create_test_name('Petigera canina var. rufescens (Weiss) Mudd')
+    pcri = create_test_name('Petigera canina var. rufescens f. innovans (Körber) J. W. Thomson')
+    pcs  = create_test_name('Petigera canina var. spuria (Ach.) Schaerer')
+
+    pa   = create_test_name('Petigera aphthosa (L.) Willd.')
+    pac  = create_test_name('Petigera aphthosa f. complicata (Th. Fr.) Zahlbr.')
+    pav  = create_test_name('Petigera aphthosa var. variolosa A. Massal.')
+
+    pp   = create_test_name('Petigera polydactylon (Necker) Hoffm')
+    pp2  = create_test_name('Petigera polydactylon (Bogus) Author')
+    pph  = create_test_name('Petigera polydactylon var. hymenina (Ach.) Flotow')
+    ppn  = create_test_name('Petigera polydactylon var. neopolydactyla Gyelnik')
+
+    assert_name_list_equal([pa, pc, pp, pp2], p.children)
+    assert_name_list_equal([pcr, pcri, pcs], pc.children)
+    # assert_name_list_equal([pcri], pcr.children) # (doesn't work on infraspecific taxa yet)
+    assert_name_list_equal([pac, pav], pa.children)
+    assert_name_list_equal([pph, ppn], pp.children)
+
+    assert_name_list_equal([p], pc.ancestors)
+    assert_name_list_equal([pc, p], pcr.ancestors)
+    assert_name_list_equal([pcr, pc, p], pcri.ancestors)
+    assert_name_list_equal([pc, p], pcs.ancestors)
+    assert_name_list_equal([p], pa.ancestors)
+    assert_name_list_equal([pa, p], pac.ancestors)
+    assert_name_list_equal([pa, p], pav.ancestors)
+    assert_name_list_equal([p], pp.ancestors)
+    assert_name_list_equal([p], pp2.ancestors)
+    assert_name_list_equal([pp2, pp, p], pph.ancestors)
+    assert_name_list_equal([pp2, pp, p], ppn.ancestors)
+
+    assert_name_list_equal([p], pc.parents)
+    assert_name_list_equal([pc], pcr.parents)
+    assert_name_list_equal([pcr], pcri.parents)
+    assert_name_list_equal([pc], pcs.parents)
+    assert_name_list_equal([p], pa.parents)
+    assert_name_list_equal([pa], pac.parents)
+    assert_name_list_equal([pa], pav.parents)
+    assert_name_list_equal([p], pp.parents)
+    assert_name_list_equal([pp2, pp], pph.parents)
+    assert_name_list_equal([pp2, pp], ppn.parents)
+
+    pp2.change_deprecated(true)
+    pp2.save
+
+    assert_name_list_equal([pa, pc, pp, pp2], p.children)
+    assert_name_list_equal([pp, p], pph.ancestors)
+    assert_name_list_equal([pp, p], ppn.ancestors)
+    assert_name_list_equal([pp], pph.parents)
+    assert_name_list_equal([pp], ppn.parents)
+
+    pp.change_deprecated(true)
+    pp.save
+
+    assert_name_list_equal([pa, pc, pp, pp2], p.children)
+    assert_name_list_equal([pp2, pp, p], pph.ancestors)
+    assert_name_list_equal([pp2, pp, p], ppn.ancestors)
+    assert_name_list_equal([pp2, pp], pph.parents)
+    assert_name_list_equal([pp2, pp], ppn.parents)
+  end
+
+  def test_ancestors_3
+    kng = @fungi
+    phy = create_test_name('Ascomycota', :Phylum)
+    cls = create_test_name('Ascomycetes', :Class)
+    ord = create_test_name('Lecanorales', :Order)
+    fam = create_test_name('Peltigeraceae', :Family)
+    gen = @peltigera
+    spc = create_test_name('Peltigera canina (L.) Willd.')
+    ssp = create_test_name('Peltigera canina ssp. bogus (Bugs) Bunny')
+    var = create_test_name('Peltigera canina ssp. bogus var. rufescens (Weiss) Mudd')
+    frm = create_test_name('Peltigera canina ssp. bogus var. rufescens f. innovans (Körber) J. W. Thomson')
+
+    assert_name_list_equal([], kng.ancestors)
+    assert_name_list_equal([], phy.ancestors)
+    assert_name_list_equal([], cls.ancestors)
+    assert_name_list_equal([], ord.ancestors)
+    assert_name_list_equal([], fam.ancestors)
+    assert_name_list_equal([fam, ord, cls, phy, kng], gen.ancestors)
+    assert_name_list_equal([gen, fam, ord, cls, phy, kng], spc.ancestors)
+    assert_name_list_equal([spc, gen, fam, ord, cls, phy, kng], ssp.ancestors)
+    assert_name_list_equal([ssp, spc, gen, fam, ord, cls, phy, kng], var.ancestors)
+    assert_name_list_equal([var, ssp, spc, gen, fam, ord, cls, phy, kng], frm.ancestors)
+
+    assert_name_list_equal([], kng.children)
+    assert_name_list_equal([], phy.children)
+    assert_name_list_equal([], cls.children)
+    assert_name_list_equal([], ord.children)
+    assert_name_list_equal([], fam.children)
+    assert_name_list_equal([spc], gen.children)
+    assert_name_list_equal([ssp, var, frm], spc.children)
+    # assert_name_list_equal([var, frm], ssp.children) # (doesn't work on infraspecific taxa yet)
+    # assert_name_list_equal([frm], var.children)      # (doesn't work on infraspecific taxa yet)
+    # assert_name_list_equal([], frm.children)         # (doesn't work on infraspecific taxa yet)
+  end
 
   # --------------------------------------
   #  Test email notification heuristics.

@@ -9,45 +9,7 @@
   args[:synonym_page]   = @synonym_page       if @synonym_data != []
   args[:other_page]     = @other_page         if @other_data != []
 
-  if @user
-    if !@interest
-      alt1 = :interest_watch_help.l(:object => :name.l)
-      alt2 = :interest_ignore_help.l(:object => :name.l)
-      img1 = image_tag('watch3.png',  :alt => alt1, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 1)
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      add_right_tab("<div>#{img1} #{img2}</div>")
-    elsif @interest.state
-      alt1 = :interest_watching.l(:object => :name.l)
-      alt2 = :interest_default_help.l(:object => :name.l)
-      alt3 = :interest_ignore_help.l(:object => :name.l)
-      img1 = image_tag('watch2.png',    :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('ignore3.png',   :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 0)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    else
-      alt1 = :interest_ignoring.l(:object => :name.l)
-      alt2 = :interest_watch_help.l(:object => :name.l)
-      alt3 = :interest_default_help.l(:object => :name.l)
-      img1 = image_tag('ignore2.png',   :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('watch3.png',    :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 1)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => @name.id, :type => 'Name', :state => 0)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    end
-  end
+  draw_interest_icons(@name, @interest) if @user
 
   # Google Images | Distribution Map | Email Tracking
   new_tab_set do
@@ -161,7 +123,6 @@
       ) %>)
     </span><br/>
   <% end %>
-  <br/>
 
   <% if @is_reviewer %>
     &nbsp;&nbsp;<%= link_to(:unvetted.t, :action => 'set_review_status',
@@ -178,6 +139,7 @@
                               :value => true, :id => @name.id) %><br/>
     <% end %>
   <% end %>
+  <br/>
 
   <% odd_or_even = 0
   for f in Name.all_note_fields

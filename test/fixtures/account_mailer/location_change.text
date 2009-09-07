@@ -26,7 +26,7 @@ Here are some new notes to play with.
 Here are some handy links:
 
 Show this Location: http://localhost:3000/location/show_location/1
-I'm not interested in this Location: http://localhost:3000/interest/set_interest?id=1&type=Location&user=2
+I'm not interested in this Location: http://localhost:3000/interest/set_interest?id=1&type=Location&user=2&state=-1
 Stop sending me email like this: http://localhost:3000/account/no_email_locations_editor/2
 Change your preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000

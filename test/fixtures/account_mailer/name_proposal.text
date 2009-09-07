@@ -19,7 +19,7 @@ Used references: I asked Uncle Herb
 Here are some handy links:
 
 Show this Observation: http://localhost:3000/3
-I'm not interested in this Observation: http://localhost:3000/interest/set_interest?id=3&type=Observation&user=1
+I'm not interested in this Observation: http://localhost:3000/interest/set_interest?id=3&type=Observation&user=1&state=-1
 Stop sending me email like this: http://localhost:3000/account/no_email_observations_naming/1
 Change your preferences: http://localhost:3000/account/prefs/1
 Latest changes at Mushroom Observer: http://localhost:3000

@@ -77,12 +77,9 @@ require_dependency 'site_data'
 #    Name.make_species           (not used by anyone)
 #    Name.make_genus             (not used by anyone)
 #    Name.find_name              (not used by anyone)
-#    ancestors                   Return array of taxa that contain this one.
-#                                (only works for subgeneric taxa)
-#    parents                     Return array of parent name objects.
-#                                (only works for species and below)
-#    children                    Return array of child name objects.
-#                                (only works for genera and species)
+#    ancestors                   Array of ancestors, starting with parents.
+#    parents                     Array of immediate parents.
+#    children                    Array of immediate children (only works for genera and species).
 #
 #  Parsing Methods:              (These are only used within this file.)
 #    Name.parse_name             Parse arbitrary taxon, return parts.
@@ -417,7 +414,7 @@ class Name < ActiveRecord::Base
   end
 
   # Create name given all the various name formats, etc.
-  # Used only by make_name().
+  # Used only by make_name().  (And create_test_name() in unit test.)
   # Returns: Name instance, NOT SAVED!
   def self.create_name(rank, text_name, author, display_name, observation_name, search_name)
     result = Name.new
@@ -512,6 +509,10 @@ class Name < ActiveRecord::Base
     result
   end
 
+  # Returns a list of taxa directly under this one.  It only works on genera
+  # and species at the moment; in the former it returns all species in the
+  # given genus, approved or not; in the latter it returns all intraspecific
+  # taxa, mixing subspecies, varieties and forms, approved or otherwise.
   def children
     result = []
     if self.rank == :Genus
@@ -525,32 +526,94 @@ class Name < ActiveRecord::Base
     result
   end
 
-  # Currently just parses the text name to find Genus and possible Species.
-  # Ultimately this should get high level clades, but I don't have a good
-  # source for that data yet.
+  # Returns a list of this taxon's ancestors, starting with its immediate
+  # parent, running back to Fungi.  It gets suprageneric taxa from the
+  # classification string (if it exists), and it gets genus, species,
+  # subspecies and variety by directly parsing the name.
   def ancestors
     result = []
-    if [:Form, :Variety, :Subspecies, :Species].member?(self.rank)
-      tokens = self.text_name.split(' ')
-      result = Name.find(:all, :conditions => "text_name like '#{tokens[0]}' and rank = 'genus'",
-        :order => "text_name asc")
-      if self.rank != :Species
-        result += Name.find(:all, :conditions => "text_name like '#{tokens[0]} #{tokens[1]}' and rank = 'species'",
-        :order => "text_name asc")
+    done_rank = {}
+    tokens = self.text_name.split(' ')
+
+    # Get as much as we can from user-provided classification string.
+    if self.classification
+      for (rank, name) in Name.parse_classification(self.classification)
+        result += Name.find_names(name, rank)
+        done_rank[rank] = true
       end
     end
-    result
+
+    # Grab all approved genera if one not explicitly listed in classification.
+    if !done_rank[:Genus] && [:Form, :Variety, :Subspecies, :Species].member?(self.rank)
+      names = Name.find(:all, :conditions => "text_name like '#{tokens[0]}' and rank = 'genus'",
+                        :order => "deprecated asc, text_name asc")
+      if names.first && !names.first.deprecated
+        result += names.select {|n| !n.deprecated}
+      else
+        result += names
+      end
+
+      # Grab higher parents from genus's classification string if it has it.
+      if !self.classification
+        xxx = result.select {|n| n.classification}
+        if !xxx.empty?
+          result2 = []
+          for (rank, name) in Name.parse_classification(xxx.first.classification)
+            result2 += Name.find_names(name, rank)
+            done_rank[rank] = true
+          end
+         result = result2 + result
+        end
+      end
+    end
+
+    # Grab all approved species if one not explicitly listed in classification.
+    if !done_rank[:Species] && [:Form, :Variety, :Subspecies].member?(self.rank)
+      names = Name.find(:all, :conditions => "text_name like '#{tokens[0]} #{tokens[1]}' and rank = 'species'",
+                        :order => "deprecated asc, text_name asc")
+      if names.first && !names.first.deprecated
+        result += names.select {|n| !n.deprecated}
+      else
+        result += names
+      end
+    end
+
+    # Grab all approved subspecies if one not explicitly listed in classification.
+    if !done_rank[:Subspecies] && [:Form, :Variety].member?(self.rank) && tokens[2] == 'subsp.'
+      names = Name.find(:all, :conditions => "text_name like '#{tokens[0]} #{tokens[1]} subsp. #{tokens[3]}' and rank = 'subspecies'",
+                        :order => "deprecated asc, text_name asc")
+      if names.first && !names.first.deprecated
+        result += names.select {|n| !n.deprecated}
+      else
+        result += names
+      end
+    end
+
+    # Grab all approved varieties if one not explicitly listed in classification.
+    if !done_rank[:Variety] && self.rank == :Form && tokens[-4] == 'var.'
+      tokens.pop  # (last two tokens have to be "f." and form epithet)
+      tokens.pop
+      names = Name.find(:all, :conditions => "text_name like '#{tokens.join(' ')}' and rank = 'variety'",
+                        :order => "deprecated asc, text_name asc")
+      if names.first && !names.first.deprecated
+        result += names.select {|n| !n.deprecated}
+      else
+        result += names
+      end
+    end
+
+    result.reverse
   end
 
-  # This one is similar, however it just returns a list of all taxa in the
-  # rank above that contain this name.  Again, it only works for species or
-  # lower for now.  It *can* return multiple names, if there are multiple
-  # genera, for example, with the same name but different authors.
+  # This one is similar, however it just returns a list of all taxa in the rank
+  # above that contain this name.  It *can* return multiple names, if there are
+  # multiple genera, for example, with the same name but different authors.  If
+  # any parent is approved, then it only returns approved names.
   def parents
-    result = []
-    if self.text_name.match(' ')
-      name = self.text_name.sub(/( \S+\.)? \S+$/, '')
-      result = Name.find(:all, :conditions => ['text_name = ?', name])
+    result = self.ancestors
+    if !result.empty?
+      rank = result.first.rank
+      result = result.select {|n| n.rank == rank}
     end
     result
   end

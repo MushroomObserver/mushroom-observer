@@ -208,6 +208,8 @@ class LocationController < ApplicationController
     @past_location = @past_location.previous if @past_location
     @map = make_map([@location])
     @header = "#{GMap.header}\n#{finish_map(@map)}"
+    @interest = nil
+    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Location', @location.id) if @user
   end
 
   # If separator is in where, then look for Locations that match up to but not including the separator.

@@ -19,6 +19,14 @@ require_dependency 'site_data'
 #  Class Methods:
 #    Location.primer(user)  Get list of user's latest observation to prime auto-completer.
 #
+#  Names:
+#    display_name           Name of location, textile formatting okay.
+#    search_name            Name of location with punctuation and small words removed.
+#    text_name              Plain-text version of name.
+#    unique_text_name       Same, with id tacked on.
+#    format_name            Alias for display_name (for compatibility with other objects).
+#    unique_format_name     Same, with id tacked on.
+#
 #  Lat/Long Methods:
 #    north_west             [north, west]
 #    north_east             [north, east]
@@ -71,6 +79,11 @@ class Location < ActiveRecord::Base
   def center
     [(self.north + self.south)/2, (self.west + self.east)/2]
   end
+
+  def text_name; self.display_name.t.html_to_ascii; end
+  def format_name; self.display_name; end
+  def unique_text_name; "#{self.text_name} (#{self.id.to_s})"; end
+  def unique_format_name; "#{self.format_name} (#{self.id.to_s})"; end
 
   def self.primer(user)
     self.connection.select_values(%(

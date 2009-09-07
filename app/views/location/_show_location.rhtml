@@ -49,25 +49,28 @@
 <% if location.notes && location.notes != '' %>
   <p><%= :app_notes.t %>:</p>
   <%= sanitize(location.notes).tpl %>
-
-  <center>
-    <p>
-      <%= user_list(:show_name_description_author.t, @location.authors) %>
-      <%
-        is_author = @location.authors.member?(@user)
-        if @location.authors != [] %>
-        <% unless is_author %>
-          <%= link_to(:show_name_author_request.t, :action => 'author_request', :id => @location.id) %>&nbsp;
-        <% end %>
-      <% end %>
-      <% if (@location.authors == []) or is_author or @is_reviewer %>
-        &nbsp;<%= link_to(:review_authors_review_authors.t, :action => 'review_authors', :id => @location.id )%>
-      <% end %>
-      <br/>
-      <%= user_list(:show_name_description_editor.t, @location.editors) %>
-    </p>
-  </center>
 <% end %>
+
+<center>
+  <p>
+    <%= user_list(:show_name_description_author.t, @location.authors) %>
+    <%
+      is_author = @location.authors.member?(@user)
+      if @location.authors != [] %>
+      <% unless is_author %>
+        <%= link_to(:show_name_author_request.t, :action => 'author_request', :id => @location.id) %>&nbsp;
+      <% end %>
+    <% end %>
+    <% if (@location.authors == []) or is_author or @is_reviewer %>
+      &nbsp;<%= link_to(:review_authors_review_authors.t, :action => 'review_authors', :id => @location.id )%>
+    <% end %>
+    <br/>
+    <%= user_list(:show_name_description_editor.t, @location.editors) %>
+  </p>
+<% #  <% if @location.license %>
+<% #    <%= render(:partial => "shared/form_#{@location.license.form_name}") %>
+<% #  <% end %>
+</center>
 
 <p>
   <span class="Date">

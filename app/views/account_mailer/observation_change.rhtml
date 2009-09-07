@@ -46,7 +46,7 @@
     links.push([:email_links_post_comment.l,
       "#{DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
     links.push([:email_links_not_interested.l(:type => :observation.l),
-      "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}"])
+      "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   end
   links.push([:email_links_latest_changes.l,
     DOMAIN])

@@ -32,7 +32,7 @@ TESTING = false
 # Queued email only gets delivered if you have run the rake
 # task email:send.  script/send_email is a cron script
 # for running email:send.
-QUEUE_EMAIL = true
+QUEUE_EMAIL = false
 EMAIL_PER_MINUTE = 25
 QUEUE_DELAY = 5.seconds
 

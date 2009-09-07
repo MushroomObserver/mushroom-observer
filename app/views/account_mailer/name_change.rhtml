@@ -43,7 +43,7 @@
   links.push([:email_links_show_object.l(:type => :name.l),
     "#{DOMAIN}/name/show_name/#{@new_name.id}"])
   links.push([:email_links_not_interested.l(:type => :name.l),
-    "#{DOMAIN}/interest/set_interest?id=#{@new_name.id}&type=Name&user=#{@user.id}"])
+    "#{DOMAIN}/interest/set_interest?id=#{@new_name.id}&type=Name&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
     "#{DOMAIN}/account/no_email_names_#{email_type}/#{@user.id}"])
   links.push([:email_links_change_prefs.l,

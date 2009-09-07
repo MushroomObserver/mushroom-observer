@@ -12,6 +12,8 @@
               :action => 'show_past_location', :id => @location.id, :version => @past_location.version)
     end
   end
+
+  draw_interest_icons(@location, @interest) if @user
 %>
 
 <%= render(:partial => 'show_location', :locals => { :location => @location }) %>

@@ -21,7 +21,7 @@
   links.push([:email_links_show_object.l(:type => :observation.l),
     "#{DOMAIN}/#{@observation.id}"])
   links.push([:email_links_not_interested.l(:type => :observation.l),
-    "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}"])
+    "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
     "#{DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.l,

@@ -162,4 +162,47 @@ module ApplicationHelper
       file.sub(/.*?(\w+-\w+).yml/, '\\1')
     end
   end
+
+  # Draw the cutesy eye icons in the upper right side of screen.
+  def draw_interest_icons(object, interest)
+    type  = object.class.to_s.underscore.to_sym
+    type2 = object.class.to_s
+    if !@interest
+      alt1 = :interest_watch_help.l(:object => type.l)
+      alt2 = :interest_ignore_help.l(:object => type.l)
+      img1 = image_tag('watch3.png',  :alt => alt1, :width => '23px', :height => '23px', :class => 'interest_small')
+      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
+      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
+      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
+      img1 = add_context_help(img1, alt1)
+      img2 = add_context_help(img2, alt2)
+      add_right_tab("<div>#{img1} #{img2}</div>")
+    elsif @interest.state
+      alt1 = :interest_watching.l(:object => type.l)
+      alt2 = :interest_default_help.l(:object => type.l)
+      alt3 = :interest_ignore_help.l(:object => type.l)
+      img1 = image_tag('watch2.png',    :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
+      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
+      img3 = image_tag('ignore3.png',   :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
+      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
+      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
+      img1 = add_context_help(img1, alt1)
+      img2 = add_context_help(img2, alt2)
+      img3 = add_context_help(img3, alt3)
+      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
+    else
+      alt1 = :interest_ignoring.l(:object => type.l)
+      alt2 = :interest_watch_help.l(:object => type.l)
+      alt3 = :interest_default_help.l(:object => type.l)
+      img1 = image_tag('ignore2.png',   :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
+      img2 = image_tag('watch3.png',    :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
+      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
+      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
+      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
+      img1 = add_context_help(img1, alt1)
+      img2 = add_context_help(img2, alt2)
+      img3 = add_context_help(img3, alt3)
+      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
+    end
+  end
 end

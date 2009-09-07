@@ -166,6 +166,7 @@ app_search:  Search
 app_send:  Send
 app_save_changes:  Save Edits
 app_show_image:  Show Image
+app_show_location:  Show Location
 app_show_log:  Show Log
 app_show_map:  Show Map
 app_show_name:  Show Name

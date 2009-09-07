@@ -193,7 +193,7 @@ class AccountController < ApplicationController
           @user.email_general_feature        = params['user']['email_general_feature']
           @user.email_general_commercial     = params['user']['email_general_commercial']
           @user.email_general_question       = params['user']['email_general_question']
-          @user.email_digest                 = params['user']['email_digest'] || :immediately
+          # @user.email_digest                 = params['user']['email_digest']
           @user.email_html                   = params['user']['email_html']
 
           password = params['user']['password']
@@ -373,8 +373,8 @@ class AccountController < ApplicationController
       @note   = "#{prefix}_note".to_sym
       @user.send(method, false)
       if @user.save
-        flash_notice(:success.t(:name => @user.unique_text_name))
-        render(:action => type)
+        flash_notice(success.t(:name => @user.unique_text_name))
+        render(:action => :no_email)
       else
         # Probably should write a better error message here...
         flash_error('Sorry, something went wrong...')
