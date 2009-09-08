@@ -1,6 +1,12 @@
 <%
   @title = :show_name_past_title.t(:version => @past_name.version, :name => @past_name.display_name)
   String.register_name(@past_name)
+
+  correct_spelling = nil
+  if @past_name.misspelling
+    # Old correct spellings could have gotten merged with something else and no longer exist.
+    begin; correct_spelling = Name.find(@past_name.correct_spelling_id); rescue; end
+  end
 %>
 
 <table cellpadding="10">
@@ -10,10 +16,16 @@
       <p>
         <%= :app_rank.t %>: <%= @past_name.rank %><br/>
         <%= :app_name_status.t %>: <%= @past_name.status %>
-          <%= '(' + :app_misspelled.t + ')' if @past_name.misspelling %><br/>
+          <% if @past_name.misspelling %>
+            (<%= :app_misspelled.t %>)
+          <% end %><br/>
         <%= :app_name.t %>: <%= h(@past_name.text_name) %><br/>
         <%= :app_author.t %>: <%= sanitize(@past_name.author.to_s).t %><br/>
         <%= :app_citation.t %>: <%= sanitize(@past_name.citation.to_s).t %><br/>
+        <% if correct_spelling %>
+          <%= :show_name_misspelling_correct.t %>:
+            <%= link_to(correct_spelling.display_name.t, :action => :show_name, :id => correct_spelling.id) %><br/>
+        <% end %>
         <%= :show_name_content_status.t %>: <%= @past_name.review_status.t %><br/>
         <% if @past_name.reviewer %>
           <span class="HelpNote">

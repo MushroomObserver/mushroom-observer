@@ -12,8 +12,8 @@ thumb=$images/thumb/$id.jpg
 big_icon=$images/place_holder_640.jpg
 thumb_icon=$images/place_holder_thumb.jpg
 
-log=log/process_images.$$
-log2=log/process_images.log
+log=log/process_image.$$
+log2=log/process_image.log
 email=webmaster@mushroomobserver.org
 
 path=(. /bin /usr/bin /usr/local/bin)

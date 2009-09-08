@@ -60,13 +60,23 @@ class Naming < ActiveRecord::Base
         # Send notification to owner if they want.
         recipients.push(owner) if owner && owner.email_observations_naming
 
-        # Send to people who have registered interest.
+        # Send to people who have registered interest in this observation.
         # Also remove everyone who has explicitly said they are NOT interested.
         for interest in Interest.find_all_by_object(observation)
           if interest.state
             recipients.push(interest.user)
           else
             recipients.delete(interest.user)
+          end
+        end
+
+        # Also send to people who have registered positive interest in this name.
+        # (Don't want *disinterest* in name overriding interest in the observation, say.)
+        for taxon in taxa
+          for interest in Interest.find_all_by_object(taxon)
+            if interest.state
+              recipients.push(interest.user)
+            end
           end
         end
 

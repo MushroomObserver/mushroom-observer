@@ -1,8 +1,5 @@
 development.log
-development.log.1
-fastcgi.crash.log
-fcgi.socket-0
-lighttpd.access.log
-lighttpd.error.log
+email_error.log
 production.log
+process_image.log
 test.log

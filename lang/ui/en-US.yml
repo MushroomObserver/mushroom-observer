@@ -286,6 +286,8 @@ rank_plural_subspecies: Subspecies
 rank_plural_variety: Varieties
 
 # site statistics field names
+site_stats_authors_locations: Authored Locations
+site_stats_editors_locations: Edited Locations
 site_stats_authors_names: Authored Descriptions
 site_stats_editors_names: Edited Descriptions
 site_stats_images: Images

@@ -38,21 +38,22 @@
   <tr>
     <td valign="top" width="50%">
       <p>
+        <% approved_synonyms, deprecated_synonyms = @name.sort_synonyms %>
+
         <%= :app_rank.t %>: <%= rank_as_string(@name.rank) %><br/>
-        <%= :app_name_status.t %>: <%= @name.status == "Valid" ? :app_accepted.t : :app_deprecated.t %><br/>
+        <%= :app_name_status.t %>: <%= @name.status == "Valid" ? :app_accepted.t : :app_deprecated.t %>
+          <% if @name.is_misspelling? %>
+            (<%= :app_misspelled.t %>)
+          <% end %><br/>
         <%= :app_name.t %>: <%= h(@name.text_name) %><br/>
         <%= :app_author.t %>: <%= sanitize(@name.author.to_s).t %><br/>
         <%= :app_citation.t %>: <%= sanitize(@name.citation.to_s).t %><br/>
 
-        <% if @name.is_misspelling? %>
-          <%= :show_name_misspelling.t %><br/>
+        <% if @name.is_misspelling? && approved_synonyms != [@name.correct_spelling] %>
           <%= :show_name_misspelling_correct.t %>:
-            <%= link_to(@name.correct_spelling.display_name.t,
-              :action => "show_name", :id => @name.correct_spelling_id) %><br/>
+            <%= link_to(@name.correct_spelling.display_name.t, :action => :show_name, :id => @name.correct_spelling_id) %><br/>
         <% end %>
-
-        <% approved_synonyms, deprecated_synonyms = @name.sort_synonyms
-        if approved_synonyms != []
+        <% if approved_synonyms != []
           links = approved_synonyms.map do |n|
             link_to(n.display_name.t, :action => "show_name", :id => n.id)
           end %>

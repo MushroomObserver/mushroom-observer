@@ -177,14 +177,15 @@ class SpeciesListController < ApplicationController
     @genera = Name.connection.select_all %(
       SELECT text_name as n, deprecated as d
       FROM names
-      WHERE rank = 'Genus'
+      WHERE rank = 'Genus' AND misspelling = 0
       ORDER BY text_name
     )
 
     @species = Name.connection.select_all %(
       SELECT text_name as n, author as a, deprecated as d, synonym_id as s
       FROM names
-      WHERE rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form'
+      WHERE (rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form')
+            AND misspelling = 0
       ORDER BY text_name
     )
 
@@ -526,11 +527,12 @@ class SpeciesListController < ApplicationController
     elsif source.to_s == 'all_observations'
       query = "select distinct n.observation_name, n.id, n.search_name
         from names n, namings g
-        where n.id = g.name_id
+        where n.id = g.name_id and misspelling = 0
         order by n.search_name"
     elsif source.to_s == 'all_names'
       query = "select distinct observation_name, id, search_name
         from names
+        where misspelling = 0
         order by search_name"
     elsif source.to_s == 'nothing'
       # This used to be nil. -JPH 20071130
