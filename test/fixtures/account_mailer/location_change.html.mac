@@ -21,7 +21,7 @@ Content-Type: text/html; charset=utf-8
 <div class="textile"><p>Here are some handy links:</p></div>
 <ul type=none>
 <li>Show this Location: <a href="http://localhost:3000/location/show_location/1">http://localhost:3000/location/show_location/1</a></li>
-<li>I'm not interested in this Location: <a href="http://localhost:3000/interest/set_interest?id=1&type=Location&user=2">http://localhost:3000/interest/set_interest?id=1&type=Location&user=2</a></li>
+<li>I'm not interested in this Location: <a href="http://localhost:3000/interest/set_interest?id=1&type=Location&user=2&state=-1">http://localhost:3000/interest/set_interest?id=1&type=Location&user=2&state=-1</a></li>
 <li>Stop sending me email like this: <a href="http://localhost:3000/account/no_email_locations_editor/2">http://localhost:3000/account/no_email_locations_editor/2</a></li>
 <li>Change your preferences: <a href="http://localhost:3000/account/prefs/2">http://localhost:3000/account/prefs/2</a></li>
 <li>Latest changes at Mushroom Observer: <a href="http://localhost:3000">http://localhost:3000</a></li>

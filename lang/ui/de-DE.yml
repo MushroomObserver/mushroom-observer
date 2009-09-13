@@ -236,7 +236,7 @@ app_no_votes: keine Stimmen
 # Interest states.
 app_watching:  Watching
 app_ignoring:  Ignoring
-app_tracking: Beobachtungen 
+app_tracking: Beobachtungen
 
 ################################################################################
 
@@ -890,7 +890,7 @@ email_publish_name_intro:  >
   \n\n
   A description of a name has been published on the Mushroom Observer website.
   You are receiving this email since you are listed as either an author for
-  this taxon or as a reviewer on the site.
+  this taxon or as a reviewer on the site. 
 
 email_user_question_intro:  >
   h2. *Question from Another User*
@@ -1041,7 +1041,8 @@ form_locations_lat_long_finders: >
 
 form_locations_lat_long_help: Alle Angaben sollten in Dezimalgraden gemacht werden.
 form_locations_license_help:  >
-  Klicke "Lizenz":/observer/how_to_use#license für den (above) Text.
+  Select "license":/observer/how_to_use#license you want to give for the
+  above text.
 
 form_locations_notes_help: >
   Notier hier, was diesen Fundort kennzeichnet. Zum Bespiel Vegetationstype,
@@ -1114,6 +1115,11 @@ form_names_notes_help: >
   Bitte ergänze hier Anmerkungen über die Gültigkeit dieses Namens, Beispiele
   für falsche Anwendungen des Namens, oder (wenn vorhanden) korrektere
   Namen für diesen Namen.
+
+form_names_refs:  References
+form_names_refs_help:  >
+  Each line is considered a separate reference, but no other formating is
+  enforced.
 
 form_names_text_name: Wissenschaftlicher Name
 form_names_text_name_help: >
@@ -1693,7 +1699,7 @@ no_browser_body:  >
 no_browser_title:  We Don't Recognize Your Browser
 
 
-# account/no_email_xxx
+# account/no_email
 no_email_how_to_reenable:  Go to your "Preferences":/account/prefs page to re-enable this feature.
 no_email_some_maybe_queued:  >
   Note: For the next few minutes you may continue to receive emails that have
@@ -2993,4 +2999,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

@@ -1107,6 +1107,11 @@ form_names_notes_help: >
   Please include notes about the validity of this name, common misuses of the
   name, and more appropriate names to be used when applicable.
 
+form_names_refs: References
+form_names_refs_help: >
+  Each line is considered a separate reference, but no other formating is
+  enforced.
+
 form_names_text_name: Scientific Name
 form_names_text_name_help: >
   Unformatted version of the name without any author info.\n

@@ -1,23 +1,26 @@
 Code review:
+  [:site_stats_authors_locations] missing
   name_primer.txt has weird stuff in it
-  http://localhost:3000/account/no_comment_email/1 failing with 'Template is missing: Missing template account/comments_owner.html.erb...'
-  *NEW* Saw [:success] in green message box after going to 'http://localhost:3000/interest/list_interests' from 'prefs' page. Unable to reproduce.
-  [:app_show_location] missing on http://localhost:3000/location/review_authors/372
-  non-privileged users becoming authors for existing locations
-  becoming an author after creating a location
-  unable to test location_change email
-  jason reporting double login
-
+  
+  *FIXED* unable to test location_change email
   *FIXED* try to add author to location 'NameError in LocationController#review_authors: uninitialized constant Location::FIELD_WEIGHTS'
   *FIXED* email_digest causing crash on prefs
   *FIXED* [:form_names_misspelling_note] missing
   *FIXED* 'Your Email Alerts' crashes with 'NoMethodError in InterestController#list_interests'
   *FIXED* email unit tests failing on mac
   *FIXED* [:prefs_email_observations_consenus] missing
+  *FIXED* http://localhost:3000/account/no_comment_email/1 failing with 'Template is missing: Missing template account/comments_owner.html.erb...'
+  *FIXED* [:app_show_location] missing on http://localhost:3000/location/review_authors/372
+  *FIXED* non-privileged users becoming authors for existing locations
+  *FIXED* becoming an author after creating a location
+  *UNABLE TO REPRODUCE* Saw [:success] in green message box after going to 'http://localhost:3000/interest/list_interests' from 'prefs' page.
+  *UNABLE TO REPRODUCE* jason reporting double login
   *WAIT* email checkboxes should gray out when overridden by another checkbox
   *WAIT* should have uber masochist setting where the user gets buried under every email possible
 
 Bug with Add Name not checking name parse.
+
+Add 'Locations' link on show_user that goes to a list of that user's authored locations.
 
 How to handle wikipedia references
 References for descriptions

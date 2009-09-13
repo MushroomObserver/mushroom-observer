@@ -1130,6 +1130,11 @@ form_names_notes_help: >
   Por favor, incluir notas acerca de la validez de este nombre, mal uso comúne
   del nombre, y nombres más apropriado, cuando corresponda.
 
+form_names_refs:  References
+form_names_refs_help:  >
+  Each line is considered a separate reference, but no other formating is
+  enforced.
+
 form_names_text_name: Nombre Científico
 form_names_text_name_help: >
   Nombre sin formato y sin autoridad, e.g. <<Amanita muscaria var.
@@ -1721,7 +1726,7 @@ no_browser_body: >
 no_browser_title: Su Navegador No Se Conoce
 
 
-# account/no_email_xxx
+# account/no_email
 no_email_how_to_reenable: >
   Entrar y ir a la página "<<Preferencias>>":/account/prefs para volver a
   habilitar esta característica.
@@ -1788,7 +1793,6 @@ no_email_general_commercial_note: >
 no_email_general_question_note: >
   Otros usuarios del Mushroom Observer ya no será capaz de enviarle
   preguntas sobre sus observaciones.
-
 
 no_email_comments_owner_success: Notificaciones de comentarios se ha inhabilitado para [name].
 no_email_comments_response_success:  Comment response notifications disabled for [name].
@@ -2622,7 +2626,7 @@ how_describing_species:  >
   anything else about this species you want included, click 'Edit Description'
   and add your notes.  You are encouraged to cite references including field
   guides and scientific papers.  Short quotes from references are fine, but
-  please don't make extensive quotes without checking with the permission of
+  please don't make extensive quotes without the permission of
   the original author.
 
 how_glossary:  Concepts Glossary
@@ -3062,4 +3066,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

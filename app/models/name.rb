@@ -178,10 +178,10 @@ class Name < ActiveRecord::Base
   end
 
   def self.all_note_fields()
-    # :classification behaves very differently for EOL output
+    # :classification and :references behave differently for EOL output
     # :notes get ignored.
     # Order is important for ui layout
-    [:classification] + eol_note_fields + [:notes]
+    [:classification] + eol_note_fields + [:refs, :notes]
   end
 
   # Creates RSS log as necessary.

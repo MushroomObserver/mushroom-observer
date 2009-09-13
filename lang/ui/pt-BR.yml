@@ -11,8 +11,8 @@ draft:  Draft
 drafts:  Drafts
 image:  Image
 images:  Images
-license:  Licence
-licenses:  Licences
+license:  License
+licenses:  Licenses
 location:  Location
 locations:  Locations
 name:  Name
@@ -1109,6 +1109,11 @@ form_names_notes_help:  >
   Please include notes about the validity of this name, common misuses of the
   name, and more appropriate names to be used when applicable.
 
+form_names_refs:  References
+form_names_refs_help:  >
+  Each line is considered a separate reference, but no other formating is
+  enforced.
+
 form_names_text_name:  Scientific Name
 form_names_text_name_help:  >
   Unformatted version of the name without any author info.\n
@@ -1679,7 +1684,7 @@ no_browser_body:  >
 no_browser_title:  We Don't Recognize Your Browser
 
 
-# account/no_email_xxx
+# account/no_email
 no_email_how_to_reenable:  Go to your "Preferences":/account/prefs page to re-enable this feature.
 no_email_some_maybe_queued:  >
   Note: For the next few minutes you may continue to receive emails that have
@@ -2543,7 +2548,7 @@ how_describing_species:  >
   anything else about this species you want included, click 'Edit Description'
   and add your notes.  You are encouraged to cite references including field
   guides and scientific papers.  Short quotes from references are fine, but
-  please don't make extensive quotes without checking with the permission of
+  please don't make extensive quotes without the permission of
   the original author.
 
 how_glossary:  Concepts Glossary
@@ -2981,4 +2986,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-
