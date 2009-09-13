@@ -86,6 +86,7 @@ class Image < ActiveRecord::Base
       @img = file
       @img = :too_big if @img.size > IMAGE_UPLOAD_MAX_SIZE
     else
+print "111111111111111> Got here.\n"
       @img = file.read
     end
   end
@@ -107,11 +108,14 @@ class Image < ActiveRecord::Base
         result = system("script/process_image #{self.id}&") if result
       end
     else
+print "222222222222222> Got here.\n"
       file = File.new(self.original_image, 'w')
       file.print(@img)
       file.close
       result = self.create_resized_images
+print "333333333333333> #{result}\n"
       result = self.transfer_images if result
+print "444444444444444> #{result}\n"
     end
     return result
   end
@@ -153,7 +157,9 @@ class Image < ActiveRecord::Base
   # Transfer new image to the image server.
   def transfer_image(src)
     result = false
-    if IMAGE_TRANSFER and File.exists?(src)
+    if !IMAGE_TRANSFER
+      result = true
+    elsif File.exists?(src)
       if src.match(/\w+\/\d+\.jpg$/)
         dest = $&
         cmd = "scp %s %s/%s" % [src, IMAGE_SERVER, dest]
