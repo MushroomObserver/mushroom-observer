@@ -53,7 +53,7 @@
 
 <center>
   <p>
-    <%= user_list(:show_name_description_author.t, @location.authors) %>
+    <%= user_list(:show_location_author.t, @location.authors) %>
     <%
       is_author = @location.authors.member?(@user)
       if @location.authors != [] %>

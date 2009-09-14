@@ -2072,6 +2072,7 @@ show_image_reviewed_by: Begutachtet durch
 
 
 # location/show_location
+show_location_author:  Location author
 show_location_create: Neuen Fundort anlegen
 show_location_edit: Fundort bearbeiten
 show_location_observations: Funde an diesem Ort
