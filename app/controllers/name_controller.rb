@@ -821,6 +821,7 @@ class NameController < ApplicationController
       @synonym_names    = []
       @deprecate_all    = "checked"
       @names            = []
+      @misspelling      = params[:is] && params[:is][:misspelling] == '1'
       if request.method == :post
         if @what == ''
           flash_error :name_deprecate_must_choose.t
@@ -846,7 +847,7 @@ class NameController < ApplicationController
                 target_name.add_editor(@user)
               end
               @name.change_deprecated(true)
-              if params[:is] && params[:is][:misspelling] == '1'
+              if @misspelling
                 @name.misspelling = true
                 @name.correct_spelling = target_name
               end
