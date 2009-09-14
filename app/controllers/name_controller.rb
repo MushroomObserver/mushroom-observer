@@ -654,8 +654,8 @@ class NameController < ApplicationController
                     end
                   end
                   val += copy.length
-                  candidates.push(synonym)          if val < 4
-                  approved_candidates.push(synonym) if val < 4 && !synonym.deprecated
+                  candidates.push(synonym)          if val < 5
+                  approved_candidates.push(synonym) if val < 5 && !synonym.deprecated
                 end
                 if candidates.length == 0
                   flash_error(:form_names_misspelling_no_matches.t)

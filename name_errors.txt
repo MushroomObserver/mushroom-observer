@@ -1,58 +1,5 @@
 ﻿Club
 
-Cortinarius callistea
-Cortinarius callisteus
-Cortinarius olivaceopicta
-Cortinarius olivaceopictus
-Cortinarius punicea
-Cortinarius puniceus
-Cortinarius semisanguineus (Fr.) Gill.
-Cortinarius semisanguinius
-Cortinarius violacea
-Cortinarius violaceus (L.) Gray
-Craterellus fallax A.H. Sm.
-Craterellus fallax Smith
-Crepidotus epibryus (Fr.) Quel.
-Crepidotus epidryas
-Crucibulum laeve (Huds.: Relh) Kambly
-Crucibulum levis
-Cudoniella clavis
-Cudoniella clavus (Alb. & Schwein.) Dennis
-Cyptotrama asperata
-Cyptotrama asprata (Berk.) Redhead & Ginns
-Cyptotrama chrysopepla
-Cyptotrama chrysopeplum (Berk. & M.A. Curtis) Singer
-Daedaleopsis
-Daedaleopsis confragosa
-Daedalopsis
-Daedalopsis confragosa
-Dermocybe aureifolia
-Dermocybe aureifolius
-Dermocybe californica
-Dermocybe californicus
-Dermocybe cinnabarina
-Dermocybe cinnabarinus
-Dermocybe cinnamomeo-lutea
-Dermocybe cinnamomeo-luteus
-Dermocybe cinnamomeolutea
-Dermocybe croceofolia
-Dermocybe croceofolius
-Dermocybe phoenicea (Vent.) M.M. Moser
-Dermocybe phoeniceus
-Dermocybe sanguinea (Wulfen) Gray
-Dermocybe sanguineus
-Dermocybe semisanguinea
-Dermocybe semisanguineus
-Dermocybe uliginosa
-Dermocybe uliginosus
-Entoloma bloxamii (Berk.) Sacc.
-Entoloma bloxami (Berk.) Sacc.
-Entoloma grayanum (Peck) Sacc.
-Entoloma greyanum
-Exidia recisa (Ditmar) Fr.
-Exidia recissa
-Fistulina hepatica (Schaeff.) With.
-Fistulina hepatica Schaeff.: Fr.
 Galerina hynorum
 Galerina hypnorum
 Galerina tibicystis
