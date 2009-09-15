@@ -86,7 +86,6 @@ class Image < ActiveRecord::Base
       @img = file
       @img = :too_big if @img.size > IMAGE_UPLOAD_MAX_SIZE
     else
-print "111111111111111> Got here.\n"
       @img = file.read
     end
   end
@@ -99,7 +98,8 @@ print "111111111111111> Got here.\n"
       if @img
         begin
           raise(SystemCallError, "Don't move my test images!!") if TESTING
-          result = true if File.rename(@img.path, self.original_image)
+          result = true  if File.rename(@img.path, self.original_image) and
+                            File.chmod(0644, self.original_image) == 1
         rescue SystemCallError
           result = true if system('cp', @img.path, self.original_image)
         rescue => err
@@ -108,14 +108,11 @@ print "111111111111111> Got here.\n"
         result = system("script/process_image #{self.id}&") if result
       end
     else
-print "222222222222222> Got here.\n"
       file = File.new(self.original_image, 'w')
       file.print(@img)
       file.close
       result = self.create_resized_images
-print "333333333333333> #{result}\n"
       result = self.transfer_images if result
-print "444444444444444> #{result}\n"
     end
     return result
   end
