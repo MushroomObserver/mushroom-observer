@@ -975,6 +975,8 @@ class ApplicationController < ActionController::Base
     }
     table_order = 
     tables = []
+    # Put locations, users and names first if we're using them so STRAIGHT_JOIN has some small tables to
+    # chew on first
     for t in ['locations', 'users', 'names']
       if table_set.member?(t)
         tables.push(t)
