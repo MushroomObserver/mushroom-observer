@@ -59,7 +59,7 @@ class AccountMailer < ActionMailer::Base
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender.email
-    @content_type        = "text/plain"
+    @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
@@ -76,7 +76,7 @@ class AccountMailer < ActionMailer::Base
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender.email
-    @content_type        = "text/plain"
+    @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
@@ -231,8 +231,7 @@ class AccountMailer < ActionMailer::Base
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = sender ? sender.email : NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender ? sender.email : NOREPLY_EMAIL_ADDRESS
-    # @content_type      = @user.email_html ? "text/html" : "text/plain"
-    @content_type        = "text/plain"
+    @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
@@ -332,7 +331,7 @@ class AccountMailer < ActionMailer::Base
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
     @headers['Reply-To'] = sender.email
-    @content_type        = user.email_html ? "text/html" : "text/plain"
+    @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
@@ -345,7 +344,7 @@ class AccountMailer < ActionMailer::Base
     @recipients          = user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = ACCOUNTS_EMAIL_ADDRESS
-    @content_type        = user.email_html ? "text/html" : "text/plain"
+    @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
