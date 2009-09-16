@@ -958,10 +958,10 @@ class ApplicationController < ActionController::Base
   def calc_advanced_search_query(query, table_set, params)
     conditions = []
     if params['search']
-      calc_condition(params['search']['name'], ['names.search_name'], ['names'], conditions, table_set)
-      calc_condition(params['search']['observer'], ['users.login', 'users.name'], ['users'], conditions, table_set)
       calc_condition(params['search']['location'], ['locations.search_name', 'observations.where'],
         ['locations'], conditions, table_set)
+      calc_condition(params['search']['observer'], ['users.login', 'users.name'], ['users'], conditions, table_set)
+      calc_condition(params['search']['name'], ['names.search_name'], ['names'], conditions, table_set)
       calc_condition(params['search']['content'], ['observations.notes', 'comments.summary', 'comments.comment'],
         ['comments'], conditions, table_set)
     end
@@ -973,9 +973,23 @@ class ApplicationController < ActionController::Base
       'images' => 'images.id = images_observations.image_id',
       'images_observations' => 'observations.id = images_observations.observation_id'
     }
-    for table in table_set
-      query += ", #{table}"
-      conditions.push(join_conditions[table])
+    table_order = 
+    tables = []
+    for t in ['locations', 'users', 'names']
+      if table_set.member?(t)
+        tables.push(t)
+      end
+    end
+    for t in table_set
+      if not tables.member?(t)
+        tables.push(t)
+      end
+    end
+    query += " " + tables.join(', ')
+    for table in tables
+      if join_conditions[table]
+        conditions.push(join_conditions[table])
+      end
     end
     query += ' WHERE ' + conditions.join(' AND ') if conditions != []
   end

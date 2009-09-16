@@ -134,6 +134,44 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_template 'list_observations'
   end
 
+  # Created in response to a performance problem seen in the wild
+  def test_advanced_search(type, controller)
+    get_with_dump(:advanced_search_results, {
+      "search"=>{
+        "name"=>"Don't know",
+        "observer"=>"myself",
+        "type"=>type, "content"=>"Long pink stem and small pink cap",
+        "location"=>"Eastern Oklahoma"
+      }, "commit"=>"Search"})
+    assert_redirected_to(:controller => controller, :action => "advanced_obj_search")
+  end
+
+  # Created in response to a performance problem seen in the wild
+  def test_advanced_image_search
+    test_advanced_search("Image", "image")
+  end
+    
+  def test_advanced_observation_search
+    test_advanced_search("Observation", "observer")
+  end
+    
+  def test_advanced_name_search
+    test_advanced_search("Description", "name")
+  end
+  
+  # Spread to image_controller and name_controller
+  def test_advanced_obj_search
+    get_with_dump(:advanced_obj_search, {
+      "search"=>{
+        "name"=>"Don't know",
+        "observer"=>"myself",
+        "content"=>"Long pink stem and small pink cap",
+        "location"=>"Eastern Oklahoma"
+      }, "commit"=>"Search"})
+      assert_response :success
+      assert_template 'list_observations'
+  end
+  
   def test_pattern_search
     get_with_dump :pattern_search, {:commit => nil, :search => {:pattern => "12"}}
     assert_redirected_to(:controller => "observer", :action => "observation_search")
