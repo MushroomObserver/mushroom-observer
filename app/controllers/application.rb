@@ -722,6 +722,11 @@ class ApplicationController < ActionController::Base
     result
   end
 
+  # Give unit tests access to calc_condition.
+  def test_calc_condition(*args)
+    calc_condition(*args)
+  end
+
 ################################################################################
 
   private
@@ -946,9 +951,51 @@ class ApplicationController < ActionController::Base
     end
     pat = pat.strip.squeeze(' ')
     if pat != ''
-      clean_pat = pat.gsub(/[*']/,"%")
-      new_conditions = fields.map {|f| "#{f} like '%#{clean_pat}%'"}
-      conditions.push("(#{new_conditions.join(' or ')})")
+
+      # Give search string for notes google-like syntax:
+      #   word1 word2     -->  has both word1 and word2
+      #   word1 OR word2  -->  has either word1 or word2
+      #   "word1 word2"   -->  has word1 followed immediately by word2
+      #   -word1          -->  doesn't have word1
+      # Note, to conform to google, "OR" must be greedy, thus:
+      #   word1 word2 OR word3 word4
+      # is interpreted as:
+      #   has word1 and (either word2 or word3) and word4
+      if fields.first.match(/note|summary|comment/)
+        pat2 = pat
+        and_pats = []
+# print "\nStart: [#{pat2}]\n"
+        while pat2.sub!(/^(-?("[^"]*"|[^ ]+)( OR -?("[^"]*"|[^ ]+))*) ?/, '')
+          pat3 = $1
+# print " 1: [#{pat3}] [#{pat2}]\n"
+          or_pats = []
+          while pat3.sub!(/^(-)?"([^"]*)"( OR )?/, '') or
+                pat3.sub!(/^(-)?([^ ]+)( OR )?/, '')
+            do_not = $1 == '-' ? 'not ' : ''
+            pat4 = $2
+# print "  2: #{do_not}[#{pat4}] [#{pat3}]\n"
+            clean_pat = pat4.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
+            or_pats += fields.map {|f| "#{f} #{do_not}like '%#{clean_pat}%'"}
+# print "  ors: [" + or_pats.join("], [") + "]\n"
+          end
+          and_pats.push(or_pats.length > 1 ? '(' + or_pats.join(' or ') + ')' : or_pats.first)
+# print " ands: [" + and_pats.join("], [") + "]\n"
+        end
+        conditions.push(and_pats.length > 1 ? '(' + and_pats.join(' and ') + ')' : and_pats.first)
+
+      # User name, location name, mushroom name, etc. are much simpler.
+      #   aaa bbb             -->  name is "...aaa bbb..."
+      #   aaa bbb OR ccc ddd  -->  name is either "...aaa bbb..." or "...ccc ddd..."
+      else
+        or_pats = []
+        for pat2 in pat.split(' OR ')
+          clean_pat = pat2.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
+          or_pats += fields.map {|f| "#{f} like '%#{clean_pat}%'"}
+        end
+        conditions.push(or_pats.length > 1 ? '(' + or_pats.join(' or ') + ')' : or_pats.first)
+      end
+
+      # Make sure all the tables used are in the list of tables to join.
       for t in tables
         table_set.add(t)
       end
