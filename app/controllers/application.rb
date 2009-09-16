@@ -944,7 +944,7 @@ class ApplicationController < ActionController::Base
     if pat.nil?
       pat = ''
     end
-    pat = pat.strip()
+    pat = pat.strip.squeeze(' ')
     if pat != ''
       clean_pat = pat.gsub(/[*']/,"%")
       new_conditions = fields.map {|f| "#{f} like '%#{clean_pat}%'"}
@@ -968,6 +968,8 @@ class ApplicationController < ActionController::Base
     join_conditions = {
       'users' => 'observations.user_id = users.id',
       'comments' => 'comments.object_id = observations.id',
+        # Add this once can comment on non-observations:
+        # '... and comments.object_type = "Observation"'
       'locations' => 'locations.id = observations.location_id',
       'names' => 'observations.name_id = names.id',
       'images' => 'images.id = images_observations.image_id',

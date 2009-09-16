@@ -457,7 +457,7 @@ add_user_to_group_user: Nutzer-Name
 
 
 # observer/advanced_search
-advanced_search_caveat: >
+advanced_search_caveat:  >
   Die erweiterte Suche wurde im Februar 2009 für Mushroom Observer
   ermöglicht. Diese Funktion könnte in verschiedene Richtungen
   verfeinert werden. Ich habe sie aber absichtlich recht
@@ -467,6 +467,14 @@ advanced_search_caveat: >
   du Zeitüberschreitungen erlebst oder mit Wünschen über bestimmte
   Arten von Suchvorgängen, die du gern zusätzlich zu den bestehenden
   für diese Seite ausführen möchtest.
+  \n\n
+  Hints: It's okay to leave some of the fields blank, e.g., if you leave
+  'Observer' blank, it will return results by all users.  It matches all the
+  given words in the order given.  For example, if you enter 'yellow viscid'
+  for 'Content', it will only match observations with 'yellow' appearing
+  immediately before 'viscid'.  Use a star (*) to separate the two words:
+  'yellow*viscid'.  (However, note that it will still only match observations
+  in which 'yellow' appears before 'viscid'.) 
 
 advanced_search_content: Inhalt
 advanced_search_content_help: Text in Fundnotizen oder Kommentaren
