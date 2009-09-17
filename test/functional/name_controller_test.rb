@@ -77,6 +77,18 @@ class NameControllerTest < Test::Unit::TestCase
     # assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
   end
 
+  def test_advanced_obj_search
+    get_with_dump(:advanced_obj_search, {
+      "search"=>{
+        "name"=>"Don't know",
+        "observer"=>"myself",
+        "content"=>"Long pink stem and small pink cap",
+        "location"=>"Eastern Oklahoma"
+      }, "commit"=>"Search"})
+      assert_response :success
+      assert_template 'name_index'
+  end
+
   def test_edit_name
     name = @coprinus_comatus
     params = { "id" => name.id.to_s }

@@ -106,11 +106,14 @@ class ApplicationControllerTest < Test::Unit::TestCase
 
     assert_google_search('aaa', "o.notes like '%aaa%'")
     assert_google_search('aaa bbb', "(o.notes like '%aaa%' and o.notes like '%bbb%')")
+    assert_google_search('aaa  bbb', "(o.notes like '%aaa%' and o.notes like '%bbb%')")
+
     assert_google_search('aaa or bbb', "(o.notes like '%aaa%' and o.notes like '%or%' and o.notes like '%bbb%')")
     assert_google_search('aaa OR bbb', "(o.notes like '%aaa%' or o.notes like '%bbb%')")
     assert_google_search('aaa*bbb', "o.notes like '%aaa%bbb%'")
     assert_google_search('-aaa', "o.notes not like '%aaa%'")
     assert_google_search('"aaa bbb"', "o.notes like '%aaa bbb%'")
+    assert_google_search('"aaa  bbb"', "o.notes like '%aaa  bbb%'")
     assert_google_search('-"aaa bbb"', "o.notes not like '%aaa bbb%'")
     assert_google_search('-"aaa*bbb"', "o.notes not like '%aaa%bbb%'")
     assert_google_search('-', "o.notes like '%-%'")

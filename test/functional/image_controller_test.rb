@@ -137,6 +137,18 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_redirected_to(:controller => "image", :action => "show_image")
   end
 
+  def test_advanced_obj_search
+    get_with_dump(:advanced_obj_search, {
+      "search"=>{
+        "name"=>"Don't know",
+        "observer"=>"myself",
+        "content"=>"Long pink stem and small pink cap",
+        "location"=>"Eastern Oklahoma"
+      }, "commit"=>"Search"})
+      assert_response :success
+      assert_template 'list_images'
+  end
+
   def test_add_image
     requires_login :add_image, {:id => @coprinus_comatus_obs.id}
     assert_form_action :action => 'add_image'

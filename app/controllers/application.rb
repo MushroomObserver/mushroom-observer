@@ -949,7 +949,7 @@ class ApplicationController < ActionController::Base
     if pat.nil?
       pat = ''
     end
-    pat = pat.strip.squeeze(' ')
+    pat = pat.strip.squeeze(' ') if pat.index('"').nil?
     if pat != ''
 
       # Give search string for notes google-like syntax:
