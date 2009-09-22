@@ -1012,6 +1012,9 @@ class ApplicationController < ActionController::Base
       calc_condition(params['search']['content'], ['observations.notes', 'comments.summary', 'comments.comment'],
         ['comments'], conditions, table_set)
     end
+    if conditions.size == 0
+      raise :advanced_search_at_least_one.t
+    end
     join_conditions = {
       'users' => 'observations.user_id = users.id',
       'comments' => 'comments.object_id = observations.id',
@@ -1026,7 +1029,7 @@ class ApplicationController < ActionController::Base
     tables = []
     # Put locations, users and names first if we're using them so STRAIGHT_JOIN has some small tables to
     # chew on first
-    for t in ['locations', 'users', 'names']
+    for t in ['locations', 'users', 'names', 'comments', 'observations', 'images_observations', 'images']
       if table_set.member?(t)
         tables.push(t)
       end

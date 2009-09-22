@@ -457,6 +457,7 @@ add_user_to_group_user:  User name
 
 
 # observer/advanced_search
+advanced_search_at_least_one:  Please provide at least one search parameter
 advanced_search_caveat:  >
   Advanced search was added in February, 2009 to Mushroom Observer.  There are
   a lot of directions this feature could go.  I have intentionally kept it

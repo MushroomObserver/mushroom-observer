@@ -110,10 +110,15 @@ class ImageController < ApplicationController
   end
 
   def advanced_obj_search
-    @layout = calc_layout_params
-    query = calc_advanced_search_query("SELECT STRAIGHT_JOIN DISTINCT images.* FROM",
-      Set.new(['observations', 'images', 'images_observations']), params)
-    show_selected_objs("Advanced Search", query, nil, :nothing, :advanced_images, 'list_images', nil)
+    begin
+      @layout = calc_layout_params
+      query = calc_advanced_search_query("SELECT STRAIGHT_JOIN DISTINCT images.* FROM",
+        Set.new(['observations', 'images_observations', 'images']), params)
+      show_selected_objs("Advanced Search", query, nil, :nothing, :advanced_images, 'list_images', nil)
+    rescue => err
+      flash_error(err)
+      redirect_to(:controller => 'observer', :action => 'advanced_search')
+    end
   end
 
   def show_selected_images(title, conditions, order, source)

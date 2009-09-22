@@ -247,11 +247,16 @@ class NameController < ApplicationController
   end
   
   def advanced_obj_search
-    @layout = calc_layout_params
-    query = calc_advanced_search_query("SELECT DISTINCT names.id, names.display_name FROM",
-      Set.new(['names', 'observations']), params)
-    query += " ORDER BY names.text_name asc, names.author asc"
-    show_name_data(:advanced_search_title.l, Name.connection.select_all(query), :advanced_search_none_found.t)
+    begin
+      @layout = calc_layout_params
+      query = calc_advanced_search_query("SELECT DISTINCT names.id, names.display_name FROM",
+        Set.new(['names', 'observations']), params)
+      query += " ORDER BY names.text_name asc, names.author asc"
+      show_name_data(:advanced_search_title.l, Name.connection.select_all(query), :advanced_search_none_found.t)
+    rescue => err
+      flash_error(err)
+      redirect_to(:controller => 'observer', :action => 'advanced_search')
+    end
   end
 
   # AJAX request used for autocompletion of "what" field in deprecate_name.

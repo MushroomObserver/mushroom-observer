@@ -272,10 +272,15 @@ class ObserverController < ApplicationController
   end
   
   def advanced_obj_search
-    @layout = calc_layout_params
-    query = calc_advanced_search_query("SELECT DISTINCT observations.*, names.search_name FROM",
-      Set.new(['names', 'observations']), params)
-    show_selected_objs(:advanced_search_title.l, query, nil, :nothing, :advanced_observations, 'list_observations', nil)
+    begin
+      @layout = calc_layout_params
+      query = calc_advanced_search_query("SELECT DISTINCT observations.*, names.search_name FROM",
+        Set.new(['names', 'observations']), params)
+      show_selected_objs(:advanced_search_title.l, query, nil, :nothing, :advanced_observations, 'list_observations', nil)
+    rescue => err
+      flash_error(err)
+      redirect_to(:controller => 'observer', :action => 'advanced_search')
+    end
   end
   
 #--#############################################################################

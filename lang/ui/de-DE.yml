@@ -457,16 +457,14 @@ add_user_to_group_user: Nutzer-Name
 
 
 # observer/advanced_search
+advanced_search_at_least_one:  Please provide at least one search parameter
 advanced_search_caveat:  >
-  Die erweiterte Suche wurde im Februar 2009 für Mushroom Observer
-  ermöglicht. Diese Funktion könnte in verschiedene Richtungen
-  verfeinert werden. Ich habe sie aber absichtlich recht
-  beschränkt belassen, da ich fürchte, es könnte sonst zu
-  Überlastungen und Zeitüberschreitungen kommen. Bitte schick eine
-  "Email an den Webmaster":/observer/ask_webmaster_question, falls
-  du Zeitüberschreitungen erlebst oder mit Wünschen über bestimmte
-  Arten von Suchvorgängen, die du gern zusätzlich zu den bestehenden
-  für diese Seite ausführen möchtest.
+  Advanced search was added in February, 2009 to Mushroom Observer.  There are
+  a lot of directions this feature could go.  I have intentionally kept it
+  somewhat limited since I am concerned that it may have performance issues
+  that result in timeouts.  Please send "email to the
+  webmaster":/observer/ask_webmaster_question if you experience timeouts or if
+  there are particular types of searches you would like to have added. 
   \n\n
   Hints: It's okay to leave some of the fields blank, e.g., if you leave
   'Observer' blank, it will return results by all users.  It matches all the
