@@ -24,7 +24,7 @@ namespace :email do
           end
 
         # After a few tries give up and delete it.
-        elsif e.num_attempts >= EMAIL_NUM_ATTEMPTS - 1
+        elsif e.num_attempts and (e.num_attempts >= EMAIL_NUM_ATTEMPTS - 1)
           File.open(EMAIL_LOG, 'a') do |fh|
             fh.puts('Failed to send email #%d at %s' % [e.id, now])
             fh.puts(e.dump)
@@ -34,7 +34,11 @@ namespace :email do
         # Schedule next attempt for 5 minutes later.
         else
           e.queued = now
-          e.num_attempts += 1
+          if e.num_attempts
+            e.num_attempts += 1
+          else
+            e.num_attempts = 1
+          end
           e.save
         end
       end
