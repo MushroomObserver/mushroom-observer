@@ -20,7 +20,7 @@ namespace :email do
           e.destroy
           count += 1
           if count >= EMAIL_PER_MINUTE
-            break
+            # break
           end
 
         # After a few tries give up and delete it.
