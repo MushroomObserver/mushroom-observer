@@ -133,6 +133,10 @@ class ObserverController < ApplicationController
     ]
   )
 
+  def post_not_working
+    @oldurl = params[:url]
+  end
+
   # Default page.  Just displays latest happenings.
   # View: list_rss_logs
   # Inputs: none

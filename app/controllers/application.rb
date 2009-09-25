@@ -151,6 +151,10 @@ class ApplicationController < ActionController::Base
 
   # Filter that should run before everything else.  Checks for auto-login cookie.
   def autologin
+
+      # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
+      # return false
+
     if @user = get_session_user
       # Do nothing if already logged in: if user asked us to remember him the
       # cookie will already be there, if not then we want to leave it out.

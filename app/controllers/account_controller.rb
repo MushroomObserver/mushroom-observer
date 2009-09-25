@@ -122,7 +122,7 @@ class AccountController < ApplicationController
             flash_object_errors(@new_user)
           end
         else
-          if theme != ''
+          if theme.strip != ''
             AccountMailer.deliver_denied(params['new_user'])
           end
           redirect_back_or_default(:action => "welcome")
