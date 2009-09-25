@@ -5,7 +5,7 @@
   @title = :advanced_search_title.t
 %>
 
-<span class="HelpNote"><%= :advanced_search_caveat.t %></span><br/>
+<div class="HelpNote"><%= :advanced_search_caveat.tp %></div>
 <% form_tag(:action => 'advanced_search_results', :params => search_params) do %>
   <br/><center><%= submit_tag :app_search.l %></center><br/>
 
@@ -27,7 +27,8 @@
   
   <label for="search_content"><%= :advanced_search_content.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_content_help.t %></span><br/>
-  <%= text_field('search', 'content', :size => 70) %><br/><br/>
+  <%= text_field('search', 'content', :size => 70) %><br/>
+  <span class="HelpNote"><%= :advanced_search_content_notes.t %></span><br/><br/>
 
   <br/><center><%= submit_tag :app_search.l %></center>
 <% end %>

@@ -467,15 +467,22 @@ advanced_search_caveat:  >
   there are particular types of searches you would like to have added. 
   \n\n
   Hints: It's okay to leave some of the fields blank, e.g., if you leave
-  'Observer' blank, it will return results by all users.  It matches all the
-  given words in the order given.  For example, if you enter 'yellow viscid'
-  for 'Content', it will only match observations with 'yellow' appearing
-  immediately before 'viscid'.  Use a star (*) to separate the two words:
-  'yellow*viscid'.  (However, note that it will still only match observations
-  in which 'yellow' appears before 'viscid'.) 
+  'Observer' blank, it will return results by all users.  
+  It matches the exact string given.  Use "OR" (all caps) to tell it to match
+  one of several possible strings, e.g. "Xanthoria OR Xanthomendoza".  Use a
+  star as a wildcard, e.g. "Wells Gray*Canada" will match "Wells Gray, Canada",
+  "Wells Gray Park, Canada", and "Wells Gray Provincial Park, Canada".  (See
+  notes under 'Content', too.)
 
 advanced_search_content: Inhalt
 advanced_search_content_help: Text in Fundnotizen oder Kommentaren
+advanced_search_content_notes:  >
+  Content search supports full Google syntax, including "OR", double quotes, and negation:\n
+  aaa bbb -> contains "aaa" and "bbb" in any order\n
+  "aaa bbb" -> contains "aaa" followed immediately by "bbb"\n
+  aaa OR bbb -> contains either "aaa" or "bbb"\n
+  -aaa -bbb -> reject anything that contains "aaa" or "bbb"\n
+
 advanced_search_location_help: Wo der Pilz gefunden wurde
 advanced_search_name_help: Name des Pilzes
 advanced_search_none_found: Keine passenden Informationen gefunden

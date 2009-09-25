@@ -428,7 +428,7 @@ class ObserverControllerTest < Test::Unit::TestCase
         :content => "Email content"
       }
     }
-    requires_login :send_user_question, params, false
+    requires_login(:send_user_question, params, false)
     assert_equal(:ask_user_question_success.t, flash[:notice])
     assert_redirected_to(:controller => "observer", :action => "show_user")
   end
@@ -447,6 +447,23 @@ class ObserverControllerTest < Test::Unit::TestCase
     get_with_dump(page)
     assert_response :success
     assert_template page.to_s
+  end
+
+  def test_show_notifications
+    # First, create a naming notification email, making sure it has a template,
+    # and making sure the person requesting the notifcation is not the same
+    # person who created the underlying observation (otherwise nothing happens).
+    @coprinus_comatus_notification.user = @mary
+    @coprinus_comatus_notification.note_template = 'blah!'
+    assert(@coprinus_comatus_notification.save)
+    QueuedEmail.queue_emails(true)
+    NamingEmail.create_email(@coprinus_comatus_notification, @coprinus_comatus_other_naming)
+
+    # Now we can be sure show_notifications is supposed to actually show a
+    # non-empty list, and thus that this test is meaningful.
+    requires_login(:show_notifications, {:id => @coprinus_comatus_obs}, false)
+    assert_response(:success)
+    assert_template('show_notifications')
   end
 
   # ------------------------------
