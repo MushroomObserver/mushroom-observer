@@ -186,7 +186,7 @@ class AccountMailer < ActionMailer::Base
     new_name             = name; name.revert_to(new_version)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_name_change_subject.l(:name => old_name.search_name)
+    @subject             = :email_name_change_subject.l(:name => (old_name ? old_name.search_name : new_name.search_name))
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
