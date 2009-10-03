@@ -184,9 +184,12 @@ class AccountMailer < ActionMailer::Base
   def name_change(sender, receiver, time, name, old_version, new_version, review_status)
     old_name             = name.versions.find_by_version(old_version)
     new_name             = name; name.revert_to(new_version)
+    if old_name.nil?
+      old_name = new_name
+    end
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_name_change_subject.l(:name => (old_name ? old_name.search_name : new_name.search_name))
+    @subject             = :email_name_change_subject.l(:name => old_name.search_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
