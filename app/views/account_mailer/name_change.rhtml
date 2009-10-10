@@ -5,36 +5,43 @@
                @new_name.reviewer == @user      ? 'reviewer' : 'all'
   is_now = :email_field_is_now.l
 
-  intro = :email_object_change_intro.l(
-    :type => :name.l,
-    :name => "#{@old_name.display_name} (#{@new_name.id})"
-  )
-
   fields = ""
   fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
   fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
-  new_spell = @new_name.correct_spelling ? @new_name.correct_spelling.display_name : '--' 
-  license   = @new_name.license
-
   one_liners = ''
-  one_liners += "*#{:app_name.l} #{is_now}:* #{@new_name.text_name}\n"          if @new_name.text_name  != @old_name.text_name
-  one_liners += "*#{:app_author.l} #{is_now}:* #{@new_name.author}\n"           if @new_name.author     != @old_name.author
-  one_liners += "*#{:app_citation.l} #{is_now}:* #{@new_name.citation}\n"       if @new_name.citation   != @old_name.citation
-  one_liners += "*#{:app_rank.l} #{is_now}:* #{@new_name.rank}\n"               if @new_name.rank       != @old_name.rank
-  one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"          if @new_name.license_id != @old_name.license_id && license
-  one_liners += "*#{:app_name_status.l} #{is_now}:* #{@review_status}\n"        if @review_status       != :no_change
-  one_liners += "*#{:name.l} #{is_now}:* #{:app_deprecated.l}\n"                if @new_name.deprecated && !@old_name.deprecated
-  one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_accepted.l}\n"       if !@new_name.deprecated && @old_name.deprecated
-  one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_misspelled.l}\n"     if @new_name.misspelling && !@old_name.misspelling
-  one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_not_misspelled.l}\n" if !@new_name.misspelling && @old_name.misspelling
-  one_liners += "*#{:app_correct_spelling.l} #{is_now}:* #{new_spell}\n"        if @new_name.correct_spelling_id != !@old_name.correct_spelling_id
-
   many_liners = []
-  for field in Name.all_note_fields
-    old_val = @old_name.send(field)
-    new_val = @new_name.send(field)
-    many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+  if @old_name
+    intro = :email_object_change_intro.l(
+      :type => :name.l,
+      :name => "#{@old_name.display_name} (#{@new_name.id})"
+    )
+
+    new_spell = @new_name.correct_spelling ? @new_name.correct_spelling.display_name : '--' 
+    license   = @new_name.license
+
+    one_liners += "*#{:app_name.l} #{is_now}:* #{@new_name.text_name}\n"          if @new_name.text_name  != @old_name.text_name
+    one_liners += "*#{:app_author.l} #{is_now}:* #{@new_name.author}\n"           if @new_name.author     != @old_name.author
+    one_liners += "*#{:app_citation.l} #{is_now}:* #{@new_name.citation}\n"       if @new_name.citation   != @old_name.citation
+    one_liners += "*#{:app_rank.l} #{is_now}:* #{@new_name.rank}\n"               if @new_name.rank       != @old_name.rank
+    one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"          if @new_name.license_id != @old_name.license_id && license
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{@review_status}\n"        if @review_status       != :no_change
+    one_liners += "*#{:name.l} #{is_now}:* #{:app_deprecated.l}\n"                if @new_name.deprecated && !@old_name.deprecated
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_accepted.l}\n"       if !@new_name.deprecated && @old_name.deprecated
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_misspelled.l}\n"     if @new_name.misspelling && !@old_name.misspelling
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_not_misspelled.l}\n" if !@new_name.misspelling && @old_name.misspelling
+    one_liners += "*#{:app_correct_spelling.l} #{is_now}:* #{new_spell} (#{@new_name.correct_spelling_id}, #{@old_name.correct_spelling_id})\n"        if @new_name.correct_spelling_id != @old_name.correct_spelling_id
+
+    for field in Name.all_note_fields
+      old_val = @old_name.send(field)
+      new_val = @new_name.send(field)
+      many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+    end
+  else
+    intro = :email_object_new_intro.l(
+      :type => :name.l,
+      :name => "#{@new_name.display_name} (#{@new_name.id})"
+    )
   end
 
   handy_links = :email_handy_links

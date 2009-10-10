@@ -124,6 +124,11 @@ class AccountMailerTest < Test::Unit::TestCase
     email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 1, 2, @peltigera.review_status).encoded
     fix_mac_vs_pc!(email)
     assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.html", "#{FIXTURES_PATH}/name_change.html.mac")
+
+    # Test for bug that occurred in the wild
+    email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 0, 1, @peltigera.review_status).encoded
+    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change2.html")
+
     @mary.email_html = false
     email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 1, 2, @peltigera.review_status).encoded
     assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.text.pc",

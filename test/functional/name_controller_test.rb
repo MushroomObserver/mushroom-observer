@@ -295,6 +295,25 @@ class NameControllerTest < Test::Unit::TestCase
     assert_form_action(:action => 'create_name')
   end
 
+  def test_create_name_bad_name
+    text_name = "Amanita Pantherina"
+    name = Name.find_by_text_name(text_name)
+    assert_nil(name)
+    params = {
+      :name => {
+        :text_name => text_name,
+        :rank => :Species
+      }
+    }
+    params[:name].merge!(empty_notes)
+
+    post_requires_login(:create_name, params, false)
+
+    # Should fail and no name should get created
+    assert_nil(Name.find_by_text_name(text_name))
+    assert_form_action(:action => 'create_name')
+  end
+
   def test_create_name_alt_rank
     text_name = "Amanita pantherina"
     name = Name.find_by_text_name(text_name)

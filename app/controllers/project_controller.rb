@@ -52,6 +52,16 @@ class ProjectController < ApplicationController
     @project = Project.find(params[:id])
     @is_member = @project.is_member?(@user)
     @is_admin = @project.is_admin?(@user)
+    @name_count = Project.connection.select_all(%(
+    SELECT count(*) AS c FROM (SELECT DISTINCT names.id
+    FROM names, users, user_groups_users, authors_names
+    WHERE review_status IN ('vetted', 'unvetted')
+    AND users.id = authors_names.user_id
+    AND authors_names.name_id = names.id
+    AND user_groups_users.user_group_id = #{@project.user_group.id}
+    AND user_groups_users.user_id = users.id
+    AND users.id != 1
+    ) AS ctable))[0]['c']
     @draft_data = Project.connection.select_all %(
     SELECT names.display_name, draft_names.id, draft_names.user_id
     FROM names, draft_names
@@ -210,7 +220,7 @@ class ProjectController < ApplicationController
     for receiver in project.admin_group.users
       AccountMailer.deliver_admin_request(sender, receiver, project, subject, content)
     end
-    flash_notice(:admin_request_success.t)
+    flash_notice(:admin_request_success.t(:title => project.title))
     redirect_to(:action => 'show_project', :id => project.id)
   end
 

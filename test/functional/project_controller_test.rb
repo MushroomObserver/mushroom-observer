@@ -182,7 +182,7 @@ class ProjectControllerTest < ActionController::TestCase
       }
     }
     requires_login :send_admin_request, params, false
-    assert_equal(:admin_request_success.t, flash[:notice])
+    assert_equal(:admin_request_success.t(:title => @eol_project.title), flash[:notice])
     assert_redirected_to(:action => "show_project", :id => @eol_project.id)
   end
 

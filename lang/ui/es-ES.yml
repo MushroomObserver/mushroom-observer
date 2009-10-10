@@ -498,6 +498,7 @@ advanced_search_title:  Advanced Search
 
 # admin_request/author_request emails
 admin_request_change_member_status: Cambiar estado de usuario
+admin_request_success:  Successfully sent admin request for [title]
 admin_request_title: Solicitud Admin para [title]
 author_request_add_author:  Make sender an author
 author_request_title:  Authorship Request for [title]
@@ -898,6 +899,11 @@ email_object_change_intro:  >
   h2. *[type] was Changed*
   \n\n
   There were change(s) made to the [type] <u>[name]</u>:
+
+email_object_new_intro:  >
+  h2. *[type] was Created*
+  \n\n
+  The [type] <u>[name]</u> was created.
 
 email_observation_destroyed_intro:  >
   h2. *Observation Destroyed*
@@ -2280,6 +2286,7 @@ show_project_created: Creado
 show_project_destroy: Borrar Proyecto
 show_project_drafts: Borradores
 show_project_edit: Editar Proyecto
+show_project_published:  Reviewed Published Names
 show_project_summary: Resumen
 show_project_title: 'Proyecto: [title]'
 

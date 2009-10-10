@@ -176,7 +176,7 @@ class Name < ActiveRecord::Base
   def self.eol_note_fields()
     min_eol_note_fields
   end
-
+  
   def self.all_note_fields()
     # :classification and :references behave differently for EOL output
     # :notes get ignored.
@@ -950,10 +950,12 @@ class Name < ActiveRecord::Base
       if names.last.nil?
         raise :runtime_unable_to_create_name.t(:name => parent_name)
       else
-        for n in names
-          n.user_id = self.user_id
-          n.save
-          n.add_editor(self.user)
+        if self.user
+          for n in names
+            n.user_id = self.user_id
+            n.save
+            n.add_editor(self.user)
+          end
         end
       end
     end
@@ -1242,7 +1244,7 @@ class Name < ActiveRecord::Base
       self.notes = str
     end
   end
-
+  
   protected
 
   def validate # :nodoc:

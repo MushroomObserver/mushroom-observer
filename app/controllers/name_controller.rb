@@ -474,6 +474,7 @@ class NameController < ApplicationController
             end
             name.citation = params[:name][:citation]
             name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
+            name.change_text_name(text_name, author, params[:name][:rank]) # Validates parse
 
             has_notes = false
             for f in Name.all_note_fields

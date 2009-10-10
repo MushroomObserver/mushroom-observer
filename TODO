@@ -1,24 +1,57 @@
-Code review:
-  [:site_stats_authors_locations] missing
-  name_primer.txt has weird stuff in it
-  
-  *FIXED* unable to test location_change email
-  *FIXED* try to add author to location 'NameError in LocationController#review_authors: uninitialized constant Location::FIELD_WEIGHTS'
-  *FIXED* email_digest causing crash on prefs
-  *FIXED* [:form_names_misspelling_note] missing
-  *FIXED* 'Your Email Alerts' crashes with 'NoMethodError in InterestController#list_interests'
-  *FIXED* email unit tests failing on mac
-  *FIXED* [:prefs_email_observations_consenus] missing
-  *FIXED* http://localhost:3000/account/no_comment_email/1 failing with 'Template is missing: Missing template account/comments_owner.html.erb...'
-  *FIXED* [:app_show_location] missing on http://localhost:3000/location/review_authors/372
-  *FIXED* non-privileged users becoming authors for existing locations
-  *FIXED* becoming an author after creating a location
-  *UNABLE TO REPRODUCE* Saw [:success] in green message box after going to 'http://localhost:3000/interest/list_interests' from 'prefs' page.
-  *UNABLE TO REPRODUCE* jason reporting double login
-  *WAIT* email checkboxes should gray out when overridden by another checkbox
-  *WAIT* should have uber masochist setting where the user gets buried under every email possible
+- Create a new class called Description
+- create_table "descriptions", :force => true do |t|
+- Need past_descriptions
 
-Bug with Add Name not checking name parse.
+- Each description will have it's own set of authors and editors
+  Need authors_descriptions and descriptions_editors
+
+- A Name can have many Descriptions
+
+- Create Descriptions based on Names fields
+
+? Figure out preferred Description
+
+Populate show_name with preferred Descriptions with options to see other descriptions
+  Need to figure out author_request, review_authors
+Replace the 'fields' in Names except for 'Classification' which remains with the Name.
+  Hmmm, should more than one Classification be supported?  [Wait for now]
+  How does this interact with DraftNames?
+
+Permissions:
+  Authors and admins can always edit
+  Authors can choose to allow only authors to edit, authors and editors, or everyone
+  Authors can add editors
+
+Any Description can be copied and then edited.  Source is recorded.
+
+create_table "description_fields", :force => true do |t|
+  t.enum   "type", # :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :users, :notes, :references
+  t.string "title", # Optional override for "type"
+  t.text "content"
+end
+
+Generalizing reviews:
+  Projects can have default authors?
+
+By default any user can give a Description a review status [Incorrect, Incomplete, Good, Excellent]
+
+Add tags
+
+Is reviewers group still needed? Professors can edit?
+
+Can a description be part of more than one group?
+
+How is group determined?
+The visibility of a Description can be restricted to a particular UserGroup
+Descriptions can be marked 'Never Export' by an author
+
+Admin - Do anything
+??? - Can see, edit and review any description they oversee
+Group - Can see
+
+Each class creates 
+
+-------------
 
 Add 'Locations' link on show_user that goes to a list of that user's authored locations.
 
