@@ -1764,18 +1764,11 @@ class ObserverController < ApplicationController
         # the same set of approved names.  Pain in the butt, but otherwise can
         # get stuck choosing between Helvella infula Fr. and H. infula Schaeff.
         # without anyone mentioning that both are deprecated by Gyromitra infula.
-        valid_names = names.first.approved_synonyms.sort
+        valid_set = Set.new()
         for n in names
-          if n.approved_synonyms.sort != valid_names
-            # If they have different sets of approved names (will this ever
-            # actually happen outside my twisted imagination??!) then first have
-            # the user choose among the deprecated names, THEN hopefully we'll
-            # notice that their choice is deprecated and provide them with the
-            # option of switching to one of the approved names.
-            valid_names = []
-            break
-          end
+          valid_set.merge(n.approved_synonyms)
         end
+        valid_names = valid_set.sort { |x,y| x.search_name <=> y.search_name }
       end
     end
 
