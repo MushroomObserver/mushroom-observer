@@ -540,6 +540,33 @@ class NameControllerTest < Test::Unit::TestCase
     assert_equal(past_names, correct_name.versions.size)
   end
 
+def test_edit_name_misspelling_merge
+  misspelt_name = @suilus
+  wrong_author_name = @suillus_by_white
+  correct_name = @suillus
+  assert_equal(misspelt_name.correct_spelling, wrong_author_name)
+  spelling_id = misspelt_name.correct_spelling_id
+  correct_author = correct_name.author
+  assert_not_equal(wrong_author_name.author, correct_author)
+  params = {
+    :id => wrong_author_name.id,
+    :name => {
+      :text_name => wrong_author_name.text_name,
+      :author => correct_name.author,
+      :rank => correct_name.rank
+    }
+  }
+  params[:name].merge!(empty_notes)
+  post_requires_login(:edit_name, params, false, @dick.login)
+  assert_redirected_to(:controller => "name", :action => "show_name")
+  assert_raises(ActiveRecord::RecordNotFound) do
+    wrong_author_name = Name.find(wrong_author_name.id)
+  end
+  misspelt_name = Name.find(misspelt_name.id)
+  assert_not_equal(spelling_id, misspelt_name.correct_spelling_id)
+  assert_equal(misspelt_name.correct_spelling, correct_name)
+end
+
   # Test that merged names end up as not deprecated if the
   # correct name is not deprecated.
   def test_edit_name_deprecated_merge

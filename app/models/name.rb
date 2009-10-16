@@ -134,6 +134,7 @@ class Name < ActiveRecord::Base
   has_many :observations
   has_many :namings
   has_many :draft_names
+  has_many :misspellings, :class_name => "Name", :foreign_key => "correct_spelling_id"
   has_one :rss_log
   belongs_to :user
   belongs_to :synonym

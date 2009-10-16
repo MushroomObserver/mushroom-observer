@@ -725,6 +725,10 @@ class NameController < ApplicationController
               g.modified = current_time
               g.save
             end
+            for m in old_name.misspellings
+              m.correct_spelling = @name
+              m.save
+            end
             if @user.id != 0
               old_name.log(:log_name_merged, { :this => old_display_name,
                 :that => @name.display_name }, true)

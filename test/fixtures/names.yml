@@ -620,3 +620,49 @@ petigera:
   misspelling: true
   correct_spelling_id: 40
   deprecated: true
+
+suillus:
+  id: 42
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Suillus
+  author: Gray
+  display_name: **__Suillus__** Gray
+  observation_name: **__Suillus sp.__** Gray
+  search_name: Suillus sp. Gray
+  review_status: unreviewed
+  gen_desc: A __Suillus__ by any other name would smell as sweet...
+
+suillus_by_white:
+  id: 43
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Suillus
+  author: E.B. White
+  display_name: **__Suillus__** E.B. White
+  observation_name: **__Suillus sp.__** E.B. White
+  search_name: Suillus sp. E.B. White
+  review_status: unreviewed
+
+suilus:
+  id: 44
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Suilus
+  author: E.B. White
+  display_name: **__Suilus__** E.B. White
+  observation_name: **__Suilus sp.__** E.B. White
+  search_name: Suilus sp. E.B. White
+  review_status: unreviewed
+  misspelling: true
+  correct_spelling_id: 43
+  deprecated: true
