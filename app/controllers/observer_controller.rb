@@ -261,7 +261,7 @@ class ObserverController < ApplicationController
   def advanced_search
     pass_seq_params
   end
-  
+
   def advanced_search_results
     case params['search']['type']
     when :observation.l
@@ -272,9 +272,9 @@ class ObserverController < ApplicationController
       controller = 'name'
     end
     redirect_to(:controller => controller, :action => 'advanced_obj_search',
-      :search => params['search'].reject{|k,v| v.nil? or v == ''}) # 
+      :search => params['search'].reject{|k,v| v.nil? or v == ''}) #
   end
-  
+
   def advanced_obj_search
     begin
       @layout = calc_layout_params
@@ -286,7 +286,12 @@ class ObserverController < ApplicationController
       redirect_to(:controller => 'observer', :action => 'advanced_search')
     end
   end
-  
+
+  # Kass's XML database backend
+  def backend
+    render(:layout => false)
+  end
+
 #--#############################################################################
 #
 #  Observation support.
@@ -596,7 +601,7 @@ class ObserverController < ApplicationController
         # Grab defaults for date and location from last observation the user
         # edited if it was less than an hour ago.
         last_observation = Observation.find(:first,
-          :conditions => ['user_id = ?', @user.id], 
+          :conditions => ['user_id = ?', @user.id],
           :order => 'modified DESC')
         if last_observation && last_observation.modified > Time.now - 1.hour
           @observation.when     = last_observation.when
@@ -1078,7 +1083,7 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'list_observations')
     end
   end
-    
+
   # users_by_contribution.rhtml
   def users_by_contribution
     SiteData.new
@@ -1134,7 +1139,7 @@ class ObserverController < ApplicationController
     if result.length == 1
       @observed_taxa_count = result[0]['c']
     end
-    
+
     @listed_taxa = Name.find(:all).size()
   end
 
