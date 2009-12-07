@@ -22,8 +22,8 @@
                     :controller => 'image', :action => 'show_image', :id => image.id, :params => search_params) %><br/>
         <% if image.notes && image.notes != '' %>
           <small>
-            <%= str = image.notes[0..40].tl
-            str += '...' if image.notes.length > 41
+            <%= str = image.notes[0..300].tl
+            str += '...' if image.notes.length > 301
             str %>
           </small>
         <% end %>
