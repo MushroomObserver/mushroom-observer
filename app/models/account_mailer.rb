@@ -36,7 +36,7 @@ class AccountMailer < ActionMailer::Base
   ACCOUNTS_EMAIL_ADDRESS    = "accounts@mushroomobserver.org"
   ERROR_EMAIL_ADDRESS       = "errors@mushroomobserver.org"
   WEBMASTER_EMAIL_ADDRESS   = "webmaster@mushroomobserver.org"
-  EXTRA_BCC_EMAIL_ADDRESSES = "nathan@collectivesource.com"
+  EXTRA_BCC_EMAIL_ADDRESSES = "mo@collectivesource.com"
   EXCEPTION_RECIPIENTS      = %w{webmaster@mushroomobserver.org}
 
   DEFAULT_LOCALE = 'en-US'
