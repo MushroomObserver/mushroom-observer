@@ -1,0 +1,33 @@
+# Locals:
+#   :location           Location instance.
+#   :details            Boolean: include details?
+
+xml.location do
+  xml.id   @location.id
+  xml.name @location.display_name
+
+  xml.elevation_maximum '%d' % @location.high
+  xml.elevation_minimum '%d' % @location.low
+  xml.elevation_units   'meters'
+
+  xml.latitude_south  '%.4f' % @location.south
+  xml.latitude_north  '%.4f' % @location.north
+  xml.latitude_center '%.4f' % ((@location.north + @location.south) / 2)
+  xml.latitude_units  'degrees east'
+
+  xml.longitude_east   '%.4f' % @location.east
+  xml.longitude_west   '%.4f' % @location.west
+  xml.longitude_center '%.4f' % ((@location.east  + @location.west)  / 2)
+  xml.longitude_units  'degrees north'
+
+  if details
+    xml.created  @location.created
+    xml.modified @location.modified
+    xml.notes    @location.notes
+
+    # authors
+    # editors
+    # observations
+    # ...
+  end
+end

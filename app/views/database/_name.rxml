@@ -1,0 +1,36 @@
+# Locals:
+#   :name               Name instance.
+#   :details            Boolean: include details?
+#   :classification     Boolean: include ancestors?
+
+xml.name do
+  xml.id         @name.id
+  xml.name       @name.text_name
+  xml.author     @name.author
+  xml.citation   @name.citation
+  xml.rank       @name.rank
+  xml.valid      @name.valid ? 'true' : 'false'
+  xml.synonym_id @name.synonym_id
+
+  if classification
+    xml.classification do
+      for parent in @name.ancestors
+        render(:partial => :name, :locals => {
+          :name => parent,
+          :details => false,
+          :classification => false,
+        })
+      end
+    end
+  end
+
+  if details
+    xml.created  @name.created
+    xml.modified @name.modified
+
+    # authors
+    # editors
+    # descriptions
+    # ...
+  end
+end

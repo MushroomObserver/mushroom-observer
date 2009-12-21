@@ -1,0 +1,3 @@
+end_time = Time.now
+total_time = end_time - @start_time
+xml.script_run_time total_time

@@ -1,0 +1,3 @@
+xml.script_version  "1.0"
+xml.script_date     "2009-12-21"
+xml.script_run_date (@start_time = Time.now)

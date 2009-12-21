@@ -1,0 +1,23 @@
+xml.instruct!(:xml, :version => "1.0")
+xml.mushroomobserver do
+  render(:partial => :header)
+
+  if @observations.length > 0
+    xml.observations do
+      for obs in @observations
+        xml.observation do
+          render(:partial => :observation, :locals => {
+            :observation => obs,
+            :classification => true,
+            :location => true,
+            :proposed_names => true,
+            :images => true,
+           })
+        end
+      end
+    end
+  end
+
+  render(:partial => :errors)
+  render(:partial => :footer)
+end

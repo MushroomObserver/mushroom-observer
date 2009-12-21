@@ -1,0 +1,84 @@
+# Locals:
+#   :observation        Observation instance.
+#   :details            Include details?
+#   :images             Include images?
+#   :comments           Include comments?
+
+xml.observation do
+  xml.id       @observation.id
+  xml.date     @observation.when
+  xml.notes    @observation.notes
+
+  if @observation.location
+    render(:partial => :location, :locals => {
+      :location => @observation.location,
+      :details => false,
+    })
+  else
+    xml.location do
+      xml.name @observation.where
+    end
+  end
+
+  xml.consensus_name do
+    render(:partial => :name, :locals => {
+      :name => @observation.name,
+      :details => false,
+      :classification => details,
+    })
+  end
+
+  if details
+    xml.created  @observation.created
+    xml.modified @observation.modified
+
+    render(:partial => :user, :locals => {
+      :user => @observation.user,
+      :details => false,
+    })
+
+    xml.proposed_names do
+      xml.number = @observation.namings.length
+      for naming in @observation.namings
+        xml.proposed_name do
+          xml.id       naming.id
+          xml.user_id  naming.user_id
+          xml.created  naming.created
+          xml.modified naming.modified
+          xml.vote     naming.vote_cache
+          render(:partial => :name, :locals => {
+            :name => naming.name,
+            :details => false,
+            :classification => false,
+          })
+        end
+      end
+    end
+  end
+
+  if images
+    xml.images do
+      xml.number = @observation.images.length
+      for image in @observation.images
+        render(:partial => :image, :locals => {
+          :image => image,
+          :details => true,
+          :files => true,
+          :observations => false,
+        })
+      end
+    end
+  end
+
+  if comments
+    xml.comments do
+      xml.number = @observation.comments.length
+      for comment in @observation.comments
+        render(:partial => :comment, :locals => {
+          :comment => comment,
+          :ref => false,
+        })
+      end
+    end
+  end
+end

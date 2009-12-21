@@ -1,0 +1,29 @@
+# Locals:
+#   :user               User instance.
+#   :details            Boolean: include details?
+
+xml.user do
+  xml.id    @user.id
+  xml.name  @user.name
+  xml.login @user.login
+
+  if details
+    xml.created       @user.created
+    xml.contribution  @user.contribution
+    xml.notes         @user.notes
+
+    if @user.image
+      render(:partial => :image, :locals => {
+        :image => @user.image,
+        :details => false,
+      })
+    end
+
+    # observations
+    # images
+    # comments
+    # names
+    # locations
+    # etc.
+  end
+end

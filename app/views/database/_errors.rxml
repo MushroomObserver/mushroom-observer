@@ -1,0 +1,25 @@
+if @errors.length > 0
+  xml.errors do
+    xml.number errors.length
+    i = 1
+    for error in errors
+      xml.error do
+
+        if match = error.to_s.match(/^(\d+)( *- *)?(.*)/)
+          code = match[1].to_i
+          text = match[3]
+        else
+          code = 999
+          text = error.to_s
+        end
+
+        xml.id     i
+        xml.code   code
+        xml.text   text
+        xml.fatal  code < 200 ? 'true' : 'false'
+
+        i += 1
+      end
+    end
+  end
+end

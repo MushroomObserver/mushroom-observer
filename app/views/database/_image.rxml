@@ -1,0 +1,58 @@
+# Locals:
+#   :image              Image instance.
+#   :details            Boolean: include details?
+#   :files              Boolean: include image files/urls?
+#   :observations       Boolean: include observations?
+
+xml.image do
+  xml.id   @image.id
+  xml.date @image.when
+
+  if details
+    xml.created          @image.created
+    xml.modified         @image.modified
+    xml.notes            @image.notes
+    xml.license          @image.license.display_name
+    xml.license_url      @image.license.url
+    xml.copyright_holder @image.copyright_holder
+
+    render(:partial => :user, :locals => {
+      :user => @image.user,
+      :details => false,
+    })
+  end
+
+  if observations
+    xml.observations do
+      for obs in @image.observations
+        render(:partial => :observation, :locals => {
+          :observation => obs,
+          :details => false,
+        })
+      end
+    end
+  end
+
+  if files
+    xml.file_original do
+      xml.file do
+        xml.url          @image.original_image_url
+        xml.content_type @image.content_type
+      end
+    end
+
+    xml.file_normal do
+      xml.file do
+        xml.url          @image.big_image_url
+        xml.content_type @image.content_type
+      end
+    end
+
+    xml.file_thumbnail do
+      xml.file do
+        xml.url          @image.thumbnail_image_url
+        xml.content_type @image.content_type
+      end
+    end
+  end
+end

@@ -1,0 +1,24 @@
+# Locals:
+#   :comment            Comment instance.
+#   :details            Boolean: include details?
+#   :object             Boolean: include ref'd object?
+
+xml.comment do
+  xml.id      @comment.id
+  xml.created @comment.created
+  xml.summary @comment.summary
+  xml.content @comment.comment
+
+  render(:partial => :user, :locals => {
+    :user => @comment.user,
+    :details => false,
+  })
+
+  if object
+    type = @comment.object_type.to_s.camelize
+    render(:partial => type, :locals => {
+      type => @comment.object,
+      details => false,
+    })
+  end
+end
