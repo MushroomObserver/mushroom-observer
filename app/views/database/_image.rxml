@@ -2,7 +2,7 @@
 #   :image              Image instance.
 #   :details            Boolean: include details?
 #   :files              Boolean: include image files/urls?
-#   :observations       Boolean: include observations?
+#   :refs               Boolean: include observations?
 
 xml.image do
   xml.id   @image.id
@@ -12,9 +12,11 @@ xml.image do
     xml.created          @image.created
     xml.modified         @image.modified
     xml.notes            @image.notes
-    xml.license          @image.license.display_name
-    xml.license_url      @image.license.url
     xml.copyright_holder @image.copyright_holder
+
+    render(:partial => :license, :locals => {
+      :license => @image.license,
+    })
 
     render(:partial => :user, :locals => {
       :user => @image.user,
@@ -22,8 +24,9 @@ xml.image do
     })
   end
 
-  if observations
+  if refs
     xml.observations do
+      xml.number @image.observations.length
       for obs in @image.observations
         render(:partial => :observation, :locals => {
           :observation => obs,

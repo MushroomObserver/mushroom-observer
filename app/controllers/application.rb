@@ -146,14 +146,14 @@ class ApplicationController < ActionController::Base
   ])
 
   def test_filter
-    render :text => 'This is a test.'
+    render(:text => 'This is a test.')
   end
 
   # Filter that should run before everything else.  Checks for auto-login cookie.
   def autologin
 
-      # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
-      # return false
+    # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
+    # return false
 
     if @user = get_session_user
       # Do nothing if already logged in: if user asked us to remember him the
@@ -162,8 +162,9 @@ class ApplicationController < ActionController::Base
 
     # Log in if cookie is valid, and autologin is enabled.
     elsif (cookie = cookies[:mo_user])  &&
-          (split = cookie.split("_")) &&
-          (user = User.find(:first, :conditions => ['id = ? and password = ?', split[0], split[1]]))
+          (split = cookie.split(" ")) &&
+          (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
+          (split[1] == user.auth_code)
       @user = set_session_user(user)
 
       # Reset cookie to push expiry forward.  This way it will continue to
@@ -180,7 +181,7 @@ class ApplicationController < ActionController::Base
   # Store and remove auto-login cookie.
   def set_autologin_cookie(user)
     cookies[:mo_user] = {
-      :value => "#{user.id}_#{user.password}",
+      :value => "#{user.id} #{user.auth_code}",
       :expires => 1.month.from_now
     }
   end

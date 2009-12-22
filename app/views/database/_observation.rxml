@@ -1,13 +1,12 @@
 # Locals:
 #   :observation        Observation instance.
 #   :details            Include details?
-#   :images             Include images?
-#   :comments           Include comments?
+#   :refs               Include images and comments?
 
 xml.observation do
-  xml.id       @observation.id
-  xml.date     @observation.when
-  xml.notes    @observation.notes
+  xml.id    @observation.id
+  xml.date  @observation.when
+  xml.notes @observation.notes
 
   if @observation.location
     render(:partial => :location, :locals => {
@@ -24,7 +23,7 @@ xml.observation do
     render(:partial => :name, :locals => {
       :name => @observation.name,
       :details => false,
-      :classification => details,
+      :refs => details,
     })
   end
 
@@ -49,14 +48,13 @@ xml.observation do
           render(:partial => :name, :locals => {
             :name => naming.name,
             :details => false,
-            :classification => false,
           })
         end
       end
     end
   end
 
-  if images
+  if refs
     xml.images do
       xml.number = @observation.images.length
       for image in @observation.images
@@ -64,19 +62,17 @@ xml.observation do
           :image => image,
           :details => true,
           :files => true,
-          :observations => false,
+          :refs => false,
         })
       end
     end
-  end
 
-  if comments
     xml.comments do
       xml.number = @observation.comments.length
       for comment in @observation.comments
         render(:partial => :comment, :locals => {
           :comment => comment,
-          :ref => false,
+          :details => false,
         })
       end
     end

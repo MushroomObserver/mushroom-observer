@@ -1,0 +1,5 @@
+xml.license do
+  xml.id    license.id
+  xml.type  license.display_name
+  xml.url   license.url
+end

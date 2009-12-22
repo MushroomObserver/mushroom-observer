@@ -1,7 +1,7 @@
 # Locals:
 #   :comment            Comment instance.
 #   :details            Boolean: include details?
-#   :object             Boolean: include ref'd object?
+#   :refs               Boolean: include ref'd object?
 
 xml.comment do
   xml.id      @comment.id
@@ -14,11 +14,11 @@ xml.comment do
     :details => false,
   })
 
-  if object
-    type = @comment.object_type.to_s.camelize
+  if refs
+    type = @comment.object_type.to_s.camelize.to_sym
     render(:partial => type, :locals => {
       type => @comment.object,
-      details => false,
+      :details => false,
     })
   end
 end

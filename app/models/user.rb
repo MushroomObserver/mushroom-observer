@@ -30,6 +30,7 @@ require 'digest/sha1'
 #
 #  Public:
 #    User.authenticate(login, pass)  Verify username/password.
+#    auth_code                       Code used to verify autologin cookie and POSTs in database API.
 #
 #    change_password(string)         Set the appropriate attributes.
 #    change_email(string)            Except for change_password() these are all
@@ -102,6 +103,11 @@ class User < ActiveRecord::Base
     find(:first, :conditions => ["login = ? AND password = ?", login, sha1(pass)])
   end
 
+  # Code used to authenticate via cookie or XML request.
+  def auth_code
+    protected_auth_code
+  end
+
   def change_password(pass)
     if pass != ''
       update_attribute "password", self.class.sha1(pass)
@@ -167,6 +173,10 @@ class User < ActiveRecord::Base
   def self.sha1(pass)
     # Digest::SHA1.hexdigest("change-me--#{pass}--")
     Digest::SHA1.hexdigest("something__#{pass}__")
+  end
+
+  def protected_auth_code
+    Digest::SHA1.hexdigest("SdFgJwLeR#{self.password}WeRtWeRkTj")
   end
 
   before_create :crypt_password

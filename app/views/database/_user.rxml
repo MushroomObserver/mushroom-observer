@@ -8,22 +8,24 @@ xml.user do
   xml.login @user.login
 
   if details
-    xml.created       @user.created
-    xml.contribution  @user.contribution
-    xml.notes         @user.notes
+    xml.created      @user.created
+    xml.notes        @user.notes
+    xml.contribution @user.contribution
+
+    if @user.location
+      render(:partial => :location, :locals => {
+        :location => @user.location,
+        :details => false,
+      })
+    end
 
     if @user.image
       render(:partial => :image, :locals => {
         :image => @user.image,
         :details => false,
+        :files => true,
+        :refs => false,
       })
     end
-
-    # observations
-    # images
-    # comments
-    # names
-    # locations
-    # etc.
   end
 end

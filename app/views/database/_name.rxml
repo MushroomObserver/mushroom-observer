@@ -1,28 +1,15 @@
 # Locals:
 #   :name               Name instance.
 #   :details            Boolean: include details?
-#   :classification     Boolean: include ancestors?
+#   :refs               Boolean: include synonyms and ancestors?
 
 xml.name do
   xml.id         @name.id
-  xml.name       @name.text_name
+  xml.value      @name.text_name
   xml.author     @name.author
   xml.citation   @name.citation
   xml.rank       @name.rank
   xml.valid      @name.valid ? 'true' : 'false'
-  xml.synonym_id @name.synonym_id
-
-  if classification
-    xml.classification do
-      for parent in @name.ancestors
-        render(:partial => :name, :locals => {
-          :name => parent,
-          :details => false,
-          :classification => false,
-        })
-      end
-    end
-  end
 
   if details
     xml.created  @name.created
@@ -32,5 +19,30 @@ xml.name do
     # editors
     # descriptions
     # ...
+  end
+
+  if refs && @name.synonym
+    xml.synonyms do
+      xml.number @name.synonym.names.length
+      for synonym in @name.synonym.names - [@name]
+        render(:partial => :name, :locals => {
+          :name => synonym,
+          :details => false,
+        })
+      end
+    end
+  end
+
+  if refs && @name.classification.to_s != ''
+    xml.classification do
+      ancestors = @name.ancestors
+      xml.number ancestors.length
+      for parent in ancestors
+        render(:partial => :name, :locals => {
+          :name => parent,
+          :details => false,
+        })
+      end
+    end
   end
 end
