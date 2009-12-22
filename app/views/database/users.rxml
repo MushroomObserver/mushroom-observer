@@ -1,0 +1,11 @@
+if @objects.length > 0
+  xml.users do
+    xml.number @objects.length
+    for user in @objects
+      render_xml_partial(xml, :user, :locals => {
+        :user => user,
+        :details => true,
+      })
+    end
+  end
+end

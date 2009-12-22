@@ -1,0 +1,11 @@
+if @objects.length > 0
+  xml.locations do
+    xml.number @objects.length
+    for loc in @objects
+      render_xml_partial(xml, :location, :locals => {
+        :location => loc,
+        :details => true,
+      })
+    end
+  end
+end

@@ -189,12 +189,12 @@ class Image < ActiveRecord::Base
   end
 
   # Return URL for original image.
-  def original_image_url
+  def original_url
     sprintf("http://images.mushroomobserver.org/orig/%d.jpg", self.id)
   end
 
   # Return URL for 640x640 image.
-  def big_image_url
+  def big_url
     sprintf("http://images.mushroomobserver.org/640/%d.jpg", self.id)
   end
 

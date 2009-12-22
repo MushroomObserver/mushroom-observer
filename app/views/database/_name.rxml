@@ -3,17 +3,20 @@
 #   :details            Boolean: include details?
 #   :refs               Boolean: include synonyms and ancestors?
 
+details ||= false
+refs    ||= false
+
 xml.name do
-  xml.id         @name.id
-  xml.value      @name.text_name
-  xml.author     @name.author
-  xml.citation   @name.citation
-  xml.rank       @name.rank
-  xml.valid      @name.valid ? 'true' : 'false'
+  xml.id         name.id
+  xml.value      name.text_name
+  xml.author     name.author
+  xml.citation   name.citation
+  xml.rank       name.rank.to_s
+  xml.deprecated name.deprecated ? 'true' : 'false'
 
   if details
-    xml.created  @name.created
-    xml.modified @name.modified
+    xml.created  xml_time(name.created)
+    xml.modified xml_time(name.modified)
 
     # authors
     # editors
@@ -21,11 +24,11 @@ xml.name do
     # ...
   end
 
-  if refs && @name.synonym
+  if refs && name.synonym
     xml.synonyms do
-      xml.number @name.synonym.names.length
-      for synonym in @name.synonym.names - [@name]
-        render(:partial => :name, :locals => {
+      xml.number name.synonym.names.length - 1
+      for synonym in name.synonym.names - [name]
+        render_xml_partial(xml, :name, :locals => {
           :name => synonym,
           :details => false,
         })
@@ -33,12 +36,12 @@ xml.name do
     end
   end
 
-  if refs && @name.classification.to_s != ''
+  if refs && name.classification.to_s != ''
     xml.classification do
-      ancestors = @name.ancestors
+      ancestors = name.ancestors
       xml.number ancestors.length
       for parent in ancestors
-        render(:partial => :name, :locals => {
+        render_xml_partial(xml, :name, :locals => {
           :name => parent,
           :details => false,
         })

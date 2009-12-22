@@ -1,0 +1,12 @@
+if @objects.length > 0
+  xml.names do
+    xml.number @objects.length
+    for name in @objects
+      render_xml_partial(xml, :name, :locals => {
+        :name => name,
+        :details => true,
+        :refs => true,
+      })
+    end
+  end
+end

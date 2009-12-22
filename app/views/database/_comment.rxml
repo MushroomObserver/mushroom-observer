@@ -3,22 +3,27 @@
 #   :details            Boolean: include details?
 #   :refs               Boolean: include ref'd object?
 
-xml.comment do
-  xml.id      @comment.id
-  xml.created @comment.created
-  xml.summary @comment.summary
-  xml.content @comment.comment
+details ||= false
+refs    ||= false
 
-  render(:partial => :user, :locals => {
-    :user => @comment.user,
+xml.comment do
+  xml.id      comment.id
+  xml.created xml_time(comment.created)
+  xml.summary comment.summary
+  xml.content comment.comment
+
+  render_xml_partial(xml, :user, :locals => {
+    :user => comment.user,
     :details => false,
   })
 
   if refs
-    type = @comment.object_type.to_s.camelize.to_sym
-    render(:partial => type, :locals => {
-      type => @comment.object,
-      :details => false,
-    })
+    xml.object do
+      type = comment.object_type.to_s.underscore.to_sym
+      render_xml_partial(xml, type, :locals => {
+        type => comment.object,
+        :details => false,
+      })
+    end
   end
 end

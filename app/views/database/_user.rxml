@@ -2,26 +2,28 @@
 #   :user               User instance.
 #   :details            Boolean: include details?
 
+details ||= false
+
 xml.user do
-  xml.id    @user.id
-  xml.name  @user.name
-  xml.login @user.login
+  xml.id    user.id
+  xml.name  user.name
+  xml.login user.login
 
   if details
-    xml.created      @user.created
-    xml.notes        @user.notes
-    xml.contribution @user.contribution
+    xml.created      xml_time(user.created)
+    xml.notes        user.notes
+    xml.contribution user.contribution
 
-    if @user.location
-      render(:partial => :location, :locals => {
-        :location => @user.location,
+    if user.location
+      render_xml_partial(xml, :location, :locals => {
+        :location => user.location,
         :details => false,
       })
     end
 
-    if @user.image
-      render(:partial => :image, :locals => {
-        :image => @user.image,
+    if user.image
+      render_xml_partial(xml, :image, :locals => {
+        :image => user.image,
         :details => false,
         :files => true,
         :refs => false,

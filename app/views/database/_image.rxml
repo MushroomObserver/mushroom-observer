@@ -1,34 +1,38 @@
 # Locals:
 #   :image              Image instance.
 #   :details            Boolean: include details?
-#   :files              Boolean: include image files/urls?
 #   :refs               Boolean: include observations?
+#   :files              Boolean: include image files/urls?
+
+details ||= false
+refs    ||= false
+files   ||= false
 
 xml.image do
-  xml.id   @image.id
-  xml.date @image.when
+  xml.id   image.id
+  xml.date xml_date(image.when)
 
   if details
-    xml.created          @image.created
-    xml.modified         @image.modified
-    xml.notes            @image.notes
-    xml.copyright_holder @image.copyright_holder
+    xml.created          xml_time(image.created)
+    xml.modified         xml_time(image.modified)
+    xml.notes            image.notes
+    xml.copyright_holder image.copyright_holder
 
-    render(:partial => :license, :locals => {
-      :license => @image.license,
+    render_xml_partial(xml, :license, :locals => {
+      :license => image.license,
     })
 
-    render(:partial => :user, :locals => {
-      :user => @image.user,
+    render_xml_partial(xml, :user, :locals => {
+      :user => image.user,
       :details => false,
     })
   end
 
   if refs
     xml.observations do
-      xml.number @image.observations.length
-      for obs in @image.observations
-        render(:partial => :observation, :locals => {
+      xml.number image.observations.length
+      for obs in image.observations
+        render_xml_partial(xml, :observation, :locals => {
           :observation => obs,
           :details => false,
         })
@@ -37,25 +41,17 @@ xml.image do
   end
 
   if files
-    xml.file_original do
-      xml.file do
-        xml.url          @image.original_image_url
-        xml.content_type @image.content_type
-      end
+    xml.original_file do
+      xml.url          image.original_url
+      xml.content_type image.content_type
     end
-
-    xml.file_normal do
-      xml.file do
-        xml.url          @image.big_image_url
-        xml.content_type @image.content_type
-      end
+    xml.normal_file do
+      xml.url          image.big_url
+      xml.content_type image.content_type
     end
-
-    xml.file_thumbnail do
-      xml.file do
-        xml.url          @image.thumbnail_image_url
-        xml.content_type @image.content_type
-      end
+    xml.thumbnail_file do
+      xml.url          image.thumbnail_url
+      xml.content_type image.content_type
     end
   end
 end

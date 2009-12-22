@@ -1,12 +1,14 @@
 ################################################################################
 #
-#  This controller handles XML interface.
+#  This controller handles the XML database interface.
 #
 #  Views:
-#    observations       Get and post observations.
-#    images             Get and post images.
-#    names              Get and post name descriptions.
-#    locations          Get and post location descriptions.
+#    comments
+#    images
+#    locations
+#    names
+#    observations
+#    users
 #
 #  Helpers:
 #    authenticate               Check user's authentication.
@@ -17,54 +19,49 @@
 #
 ################################################################################
 
-class MoApiException < Exception
-  attr_accessor :code, :msg, :fatal
-
-  def title
-    case code
-    when 101 ; 'bad request type'
-    when 102 ; 'bad request syntax'
-    when 201 ; 'object not found'
-    when 301 ; 'authentication failed'
-    when 501 ; 'internal error'
-    else       'unknown error'
-    end
-  end
-end
-
 class DatabaseController < ApplicationController
-  def observations
+
+  def comments;     general_query(:comment);     end
+  def images;       general_query(:image);       end
+  def locations;    general_query(:location);    end
+  def names;        general_query(:name);        end
+  def observations; general_query(:observation); end
+  def users;        general_query(:user);        end
+
+  def general_query(type)
     @start_time = Time.now
-    @observations = []
     @errors = []
+    @objects = []
+
+    # Converts :species_list to the class SpeciesList.
+    model = type.to_s.camelize.constantize
+
     begin
       case request.method
       when :get
+
+        # Request-by-ID.
         if ids = parse_id_param
-          @observations = Observation.find_all(:conditions => "id IN (#{ids.join(',')})")
-          for id in ids - @observations.map {|o| o.id}
-            @errors << error(201, "Observation not found: '#{id}'")
+          @objects = model.find(:all, :conditions => "id IN (#{ids.join(',')})")
+          for id in ids - @objects.map {|o| o.id}
+            @errors << error(201, "#{type.to_s.capitalize} not found: '#{id}'")
           end
           error_if_any_other_params
+
+        # General query.
         else
           raise error(101, 'Only request-by-ID available at the moment.')
-          # user      = get_param(:user)
-          # date      = get_param(:datetime)
-          # location  = get_param(:location)
-          # name      = get_param(:name)
-          # notes     = get_param(:notes)
-          # image_id  = get_param(:image_id)
-          # has_image = get_param(:has_image)
-          # has_specimen = get_param(:has_specimen)
-          # is_collection_location = get_param(:is_collection_location)
-          # query = build_query(...)
-          # @observations = ...
-          # paginate(@observations)
-          # error_if_any_other_params
+          send("get_#{type}")
+          paginate(@objects)
+          error_if_any_other_params
         end
-      when :post
-        raise error(101, 'POST methods not available yet.')
-        # authenticate
+
+      # Post new object.
+      when :post :
+        raise error(101, "POST method not available for #{type}.") if !respond_to?("post_#{type}")
+        authenticate
+        send("post_#{type}")
+
       else
         raise error(101, "Invalid request method; valid values: 'GET' and 'POST'")
       end
@@ -73,7 +70,57 @@ class DatabaseController < ApplicationController
       e.fatal = true
       @errors << e
     end
+
+    begin
+      render(:layout => 'database')
+    rescue => e
+      e = error(501, e.to_s) if !e.is_a?(MoApiException)
+      e.fatal = true
+      @errors << e
+      render(:text => '', :layout => 'database')
+    end
   end
+
+################################################################################
+
+  def get_observation
+    # user      = get_param(:user)
+    # date      = get_param(:datetime)
+    # location  = get_param(:location)
+    # name      = get_param(:name)
+    # notes     = get_param(:notes)
+    # image_id  = get_param(:image_id)
+    # has_image = get_param(:has_image)
+    # has_specimen = get_param(:has_specimen)
+    # is_collection_location = get_param(:is_collection_location)
+    # query = build_query(...)
+    # @objects = ...
+  end
+
+  def get_image
+  end
+
+  def get_name
+  end
+
+  def get_location
+  end
+
+  def get_user
+  end
+
+  def get_comment
+  end
+
+################################################################################
+
+  def post_observation
+  end
+
+  def post_image
+  end
+
+################################################################################
 
   # Check user's authentication.
   def authenticate
@@ -117,6 +164,7 @@ class DatabaseController < ApplicationController
           if a < 1 || a > 1e9
             raise error(102, "ID out of range: '#{a}'")
           else
+            result ||= []
             result << a
           end
         elsif x.match(/^(\d+)-(\d+)$/)
@@ -128,6 +176,7 @@ class DatabaseController < ApplicationController
           elsif b - a > 1e3
             raise error(102, "ID range too large: '#{a}-#{b}' (max is 1000)")
           else
+            result ||= []
             result += (a..b).to_a
           end
         else
@@ -140,6 +189,8 @@ class DatabaseController < ApplicationController
 
   # Raise errors for all unused parameters.
   def error_if_any_other_params
+    @used['controller'] = true
+    @used['action'] = true
     for key in params.keys
       if !@used[key.to_s]
         @errors << error(102, "Unrecognized argument: '#{key}' (ignored)")
@@ -161,8 +212,8 @@ class DatabaseController < ApplicationController
 
   def error(code, msg, fatal=false)
     MoApiException.new(
-      :code => code,
-      :msg => msg,
+      :code  => code,
+      :msg   => msg,
       :fatal => fatal
     )
   end
