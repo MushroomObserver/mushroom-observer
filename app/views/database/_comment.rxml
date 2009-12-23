@@ -9,8 +9,8 @@ refs    ||= false
 xml.comment do
   xml.id      comment.id
   xml.created xml_time(comment.created)
-  xml.summary comment.summary
-  xml.content comment.comment
+  xml.summary comment.summary.t
+  xml.content comment.comment.tp
 
   render_xml_partial(xml, :user, :locals => {
     :user => comment.user,

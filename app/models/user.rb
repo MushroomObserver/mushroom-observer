@@ -100,7 +100,8 @@ class User < ActiveRecord::Base
   attr_accessor :password_confirmation
 
   def self.authenticate(login, pass)
-    find(:first, :conditions => ["login = ? AND password = ?", login, sha1(pass)])
+    find(:first, :conditions => [ "(login = ? OR name = ? OR email = ?) AND password = ?",
+                                  login, login, login, sha1(pass) ])
   end
 
   # Code used to authenticate via cookie or XML request.

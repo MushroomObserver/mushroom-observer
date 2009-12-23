@@ -136,16 +136,15 @@ class AccountController < ApplicationController
         @new_user = User.new
       when :post
         @login = params['new_user']['login']
-        @new_user = User.find(:first, :conditions => ["login = ?", @login])
+        @new_user = User.find(:first, :conditions => [ "login = ? OR name = ? OR email = ?",
+                                                       @login, @login, @login ])
         if @new_user.nil?
           flash_error :email_new_password_failed.t(:user => @login)
         else
           password = random_password(10)
           @new_user.change_password(password)
           if @new_user.save
-            user = User.authenticate(@new_user.login, params['new_user']['password'])
-            set_session_user(user)
-            flash_notice :email_new_password_success.t
+            flash_notice :email_new_password_success.t(:email => @new_user.email)
             AccountMailer.deliver_new_password(@new_user, password)
             @hiddens = []
             render(:action => "login")

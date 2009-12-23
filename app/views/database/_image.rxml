@@ -15,7 +15,7 @@ xml.image do
   if details
     xml.created          xml_time(image.created)
     xml.modified         xml_time(image.modified)
-    xml.notes            image.notes
+    xml.notes            image.notes.tp
     xml.copyright_holder image.copyright_holder
 
     render_xml_partial(xml, :license, :locals => {

@@ -8,7 +8,7 @@ module DatabaseHelper
   end
 end
 
-class MoApiException < Exception
+class MoApiException < StandardError
   attr_accessor :code, :msg, :fatal
 
   def initialize(args={})

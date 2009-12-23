@@ -929,7 +929,7 @@ email_new_password_failed:  Unable to find the user '[user]'.
 email_new_password_login:  Login
 email_new_password_success:  >
   Password successfully changed.  New password has been sent to your email
-  account.
+  account ([email]).
 
 email_new_password_title:  Email New Password
 
@@ -1450,7 +1450,7 @@ login_password:  Password
 login_please_login:  Please login
 login_remember_me:  Remember me at this computer.
 login_success:  Login successful.
-login_user:  User name
+login_user:  User name or Email address
 
 
 # account/logout

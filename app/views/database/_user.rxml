@@ -11,7 +11,7 @@ xml.user do
 
   if details
     xml.created      xml_time(user.created)
-    xml.notes        user.notes
+    xml.notes        user.notes.tp
     xml.contribution user.contribution
 
     if user.location

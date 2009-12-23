@@ -25,7 +25,7 @@ xml.location do
   if details
     xml.created  xml_time(location.created)
     xml.modified xml_time(location.modified)
-    xml.notes    location.notes
+    xml.notes    location.notes.tp
 
     # authors
     # editors

@@ -9,7 +9,7 @@ refs    ||= false
 xml.observation do
   xml.id    observation.id
   xml.date  xml_date(observation.when)
-  xml.notes observation.notes
+  xml.notes observation.notes.tp
 
   if observation.location
     render_xml_partial(xml, :location, :locals => {
@@ -33,6 +33,8 @@ xml.observation do
   if details
     xml.created  xml_time(observation.created)
     xml.modified xml_time(observation.modified)
+    xml.specimen_available observation.specimen ? 'true' : 'false'
+    xml.is_collection_location observation.is_collection_location ? 'true' : 'false'
 
     render_xml_partial(xml, :user, :locals => {
       :user => observation.user,

@@ -941,7 +941,7 @@ email_new_password_failed: No se ha podido encontrar el usuario <<[user]>>.
 email_new_password_login: Nombre de Usuario
 email_new_password_success: >
   Su contraseña se ha cambiado con éxito.  La nueva contraseña se ha enviado a
-  su dirección de correo electrónico.
+  su dirección de correo electrónico ([email]).
 
 email_new_password_title: Enviar Nueva Contraseña por E-mail
 
@@ -1482,7 +1482,7 @@ login_password: Contraseña
 login_please_login: Por Favor Iniciar Sesión
 login_remember_me: Recordarme en este equipo.
 login_success: Su sesión se ha iniciado con éxito.
-login_user: Nombre de Usuario
+login_user: Nombre de Usuario o Dirección de E-mail
 
 
 # account/logout

@@ -1,12 +1,13 @@
-if @objects.length > 0
-  xml.comments do
-    xml.number @objects.length
-    for comment in @objects
-      render_xml_partial(xml, :comment, :locals => {
-        :comment => comment,
-        :details => true,
-        :refs => true,
-      })
-    end
+xml.query @query
+xml.number @number
+xml.pages @pages
+xml.comments do
+  xml.number @objects.length
+  for comment in @objects
+    render_xml_partial(xml, :comment, :locals => {
+      :comment => comment,
+      :details => true,
+      :refs => false,
+    })
   end
 end

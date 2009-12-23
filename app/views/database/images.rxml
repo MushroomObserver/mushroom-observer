@@ -1,13 +1,14 @@
-if @objects.length > 0
-  xml.images do
-    xml.number @objects.length
-    for image in @objects
-      render_xml_partial(xml, :image, :locals => {
-        :image => image,
-        :details => true,
-        :refs => true,
-        :files => true,
-      })
-    end
+xml.query @query
+xml.number @number
+xml.pages @pages
+xml.images do
+  xml.number @objects.length
+  for image in @objects
+    render_xml_partial(xml, :image, :locals => {
+      :image => image,
+      :details => true,
+      :refs => false,
+      :files => true,
+    })
   end
 end

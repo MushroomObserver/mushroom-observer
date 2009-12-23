@@ -38,14 +38,26 @@ xml.name do
 
   if refs && name.classification.to_s != ''
     xml.classification do
-      ancestors = name.ancestors
-      xml.number ancestors.length
-      for parent in ancestors
-        render_xml_partial(xml, :name, :locals => {
-          :name => parent,
-          :details => false,
-        })
+
+      # This is less complete but doesn't require any additional queries.
+      parse = Name.parse_classification(name.classification)
+      xml.number parse.length
+      for rank, name in parse
+        xml.name do
+          xml.rank rank.to_s
+          xml.name name
+        end
       end
+
+      # This requires extra database queries.
+      # ancestors = name.ancestors
+      # xml.number ancestors.length
+      # for parent in ancestors
+      #   render_xml_partial(xml, :name, :locals => {
+      #     :name => parent,
+      #     :details => false,
+      #   })
+      # end
     end
   end
 end
