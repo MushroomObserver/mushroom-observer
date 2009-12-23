@@ -930,8 +930,7 @@ email_verify_intro:  >
 email_new_password_failed: Kann Nutzer '[user]' nicht finden.
 email_new_password_login: Login
 email_new_password_success: >
-  Das Passwort wurde geändert. Du erhältst eine Email mit dem neuen Passwort
-  ([email]).
+  Das Passwort wurde geändert. Du erhältst eine Email mit dem neuen Passwort.
 
 email_new_password_title: Email ein neues Passwort
 

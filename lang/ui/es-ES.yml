@@ -941,7 +941,7 @@ email_new_password_failed: No se ha podido encontrar el usuario <<[user]>>.
 email_new_password_login: Nombre de Usuario
 email_new_password_success: >
   Su contraseña se ha cambiado con éxito.  La nueva contraseña se ha enviado a
-  su dirección de correo electrónico ([email]).
+  su dirección de correo electrónico.
 
 email_new_password_title: Enviar Nueva Contraseña por E-mail
 

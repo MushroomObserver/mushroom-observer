@@ -927,7 +927,7 @@ email_new_password_failed: Unable to find the user '[user]'.
 email_new_password_login: Login
 email_new_password_success: >
   Password successfully changed.  New password has been sent to your email
-  account ([email]).
+  account.
 
 email_new_password_title: Email New Password
 
