@@ -1,8 +1,4 @@
-xml.query @query
-xml.number @number
-xml.pages @pages
-xml.users do
-  xml.number @objects.length
+xml.results(:number => @objects.length) do
   for user in @objects
     render_xml_partial(xml, :user, :locals => {
       :user => user,

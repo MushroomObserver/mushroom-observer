@@ -1,0 +1,355 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="response">
+    <xs:complexType>
+      <xs:all>
+        <!-- These elements are always present. -->
+        <xs:element name="script_version"  type="xs:decimal"  minOccurs="1" maxOccurs="1"/>
+        <xs:element name="script_date"     type="xs:date"     minOccurs="1" maxOccurs="1"/>
+        <xs:element name="script_run_date" type="xs:datetime" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="script_run_time" type="xs:time"     minOccurs="1" maxOccurs="1"/>
+
+        <!-- These are optional; they are present only if there were no fatal
+        errors. -->
+        <xs:element name="query"       type="xs:string"             minOccurs="0" maxOccurs="1"/>
+        <xs:element name="num_records" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="num_pages"   type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="1"/>
+
+        <!-- This list should always be present, but may be empty. -->
+        <xs:element name="results" type="list_of_objects" minOccurs="1" maxOccurs="1"/>
+
+        <!-- This list should only be present if there were errors. -->
+        <xs:element name="errors" minOccurs="0" maxOccurs="1">
+          <xs:complexContent>
+            <xs:extension base="list_type">
+              <xs:sequence>
+                <xs:element name="error" type="error_type" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:element>
+
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- ------------------------------------------------------------------- -->
+
+  <xs:complexType name="comment_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="created" type="xs:datetime" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="summary" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="content" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="user" type="user_type" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="object" type="single_object" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="image_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="date" type="xs:date" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="notes" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="copyright_holder" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="license" type="license_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="observations" type="list_of_observations" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="original_file" type="file_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="normal_file" type="file_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="thumbnail_file" type="file_type" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="license_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="url" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="location_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="elevation_maximum" type="xs:integer" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="elevation_minimum" type="xs:integer" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="elevation_units" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="latitude_south" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="latitude_north" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="latitude_center" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="latitude_units" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="longitude_east" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="longitude_west" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="longitude_center" type="xs:decimal" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="longitude_units" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="notes" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="name_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="author" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="citation" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="rank" type="rank_type" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="deprecated" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="synonyms" type="list_of_names" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="classification" type="list_of_names" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="observation_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="date" type="xs:date" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="notes" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="location" type="location_type" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="consensus_name" type="name_type" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="specimen_available" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="is_collection_location" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="proposed_names" type="list_of_proposed_names" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="images" type="list_of_images" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="comments" type="list_of_comments" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="proposed_name_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="user" type="user_type" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="vote" type="xs:decimal" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="name" type="name_type" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="user_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="login" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="notes" type="xs:string" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="contribution" type="xs:integer" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="location" type="location_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="image" type="image_type" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- This object describes a file, defined by a URL and content type. -->
+  <xs:complexType name="file_type">
+    <xs:sequence>
+      <xs:element name="url" type="xs:string"/>
+      <xs:element name="content_type" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Each request can result in one or more errors, but only ever one fatal
+  error.  These include things like request syntax errors, authentication
+  problems, internal errors, etc. -->
+  <xs:complexType name="error_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <!-- Error code (see enumeration at end of this file). -->
+          <xs:element name="code" type="xs:error_code_type"/>
+          <!-- Generic description of error type. -->
+          <xs:element name="text" type="xs:string"/>
+          <!-- Detailed description of error. -->
+          <xs:element name="details" type="xs:string"/>
+          <!-- Fatal means it wasn't able to process the query.  Nonfatal means
+          it was able to do at least some of the query. -->
+          <xs:element name="fatal" type="xs:boolean"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- ------------------------------------------------------------------- -->
+
+  <!-- List of comments. -->
+  <xs:complexType name="list_of_comments">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="comment" type="comment_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- List of images. -->
+  <xs:complexType name="list_of_images">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="image" type="image_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- List of names. -->
+  <xs:complexType name="list_of_names">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="name" type="name_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- List of observations. -->
+  <xs:complexType name="list_of_observations">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="observation" type="observation_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- List of proposed_names. -->
+  <xs:complexType name="list_of_proposed_names">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="proposed_name" type="proposed_name_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- List of users. -->
+  <xs:complexType name="list_of_users">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- ------------------------------------------------------------------- -->
+
+  <!-- Single arbitrary object. -->
+  <xs:complexType name="single_object">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:choice>
+          <xs:element name="comment"     type="comment_type"    />
+          <xs:element name="image"       type="image_type"      />
+          <xs:element name="license"     type="license_type"    />
+          <xs:element name="location"    type="location_type"   />
+          <xs:element name="name"        type="name_type"       />
+          <xs:element name="observation" type="observation_type"/>
+          <xs:element name="user"        type="user_type"       />
+        </xs:choice>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Arbitrary list of objects. -->
+  <xs:complexType name="list_of_objects">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:all>
+          <xs:element name="comment"     type="comment_type"     minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="image"       type="image_type"       minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="license"     type="license_type"     minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="location"    type="location_type"    minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="name"        type="name_type"        minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="observation" type="observation_type" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="user"        type="user_type"        minOccurs="0" maxOccurs="unbounded"/>
+        </xs:all>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Lists of objects all take these two attributes. -->
+  <xs:complexType name="list_type">
+    <xs:attribute name="number" type="xs:nonNegativeInteger" use="required"/>
+  </xs:complexType>
+
+  <!-- Objects all take this attribute.  (It is not required at the moment
+  because name classification doesn't have id info stored in it yet.) -->
+  <xs:complexType name="object_type">
+    <xs:attribute name="id" type="xs:nonNegativeInteger"/>
+  </xs:complexType>
+
+  <!-- Acceptable error codes. -->
+  <xs:simpleType value="error_code_type">
+    <xs:restriction base="xs:nonNegativeInteger">
+      <!-- Bad request method. -->
+      <xs:enumeration value="101"/>
+      <!-- Bad request syntax. -->
+      <xs:enumeration value="102"/>
+      <!-- Object no found. -->
+      <xs:enumeration value="201"/>
+      <!-- Authentication failed. -->
+      <xs:enumeration value="301"/>
+      <!-- Internal error. -->
+      <xs:enumeration value="501"/>
+    </xs:restriction>
+  </xs:simpleType
+
+  <!-- Acceptable taxonomic ranks. -->
+  <xs:simpleType value="rank_type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Domain"/>
+      <xs:enumeration value="Kingdom"/>
+      <xs:enumeration value="Phylum"/>
+      <xs:enumeration value="Class"/>
+      <xs:enumeration value="Order"/>
+      <xs:enumeration value="Family"/>
+      <xs:enumeration value="Genus"/>
+      <xs:enumeration value="Species"/>
+      <xs:enumeration value="Subspecies"/>
+      <xs:enumeration value="Variety"/>
+      <xs:enumeration value="Form"/>
+      <xs:enumeration value="Group"/>
+    </xs:restriction>
+  </xs:simpleType
+
+</xs:schema>

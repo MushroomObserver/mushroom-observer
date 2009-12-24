@@ -1,8 +1,4 @@
-xml.query @query
-xml.number @number
-xml.pages @pages
-xml.comments do
-  xml.number @objects.length
+xml.results(:number => @objects.length) do
   for comment in @objects
     render_xml_partial(xml, :comment, :locals => {
       :comment => comment,

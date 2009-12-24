@@ -8,13 +8,12 @@ details ||= false
 refs    ||= false
 files   ||= false
 
-xml.image do
-  xml.id   image.id
+xml.image(:id => image.id) do
   xml.date xml_date(image.when)
 
   if details
-    xml.created          xml_time(image.created)
-    xml.modified         xml_time(image.modified)
+    xml.created          xml_datetime(image.created)
+    xml.modified         xml_datetime(image.modified)
     xml.notes            image.notes.tp
     xml.copyright_holder image.copyright_holder
 
@@ -29,8 +28,7 @@ xml.image do
   end
 
   if refs
-    xml.observations do
-      xml.number image.observations.length
+    xml.observations(:number => image.observations.length) do
       for obs in image.observations
         render_xml_partial(xml, :observation, :locals => {
           :observation => obs,

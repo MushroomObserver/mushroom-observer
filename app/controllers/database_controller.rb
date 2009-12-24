@@ -363,7 +363,7 @@ class DatabaseController < ApplicationController
         y = Date.parse(x)
         result << build_sql(["#{column} = ?", y])
       else
-        raise error(102, "invalid #{arg}: '#{x}' (expect 'YYYYMMDD')")
+        raise error(102, "invalid #{arg}: '#{x}' (expect 'YYYY-MM-DD')")
       end
     end
     return result

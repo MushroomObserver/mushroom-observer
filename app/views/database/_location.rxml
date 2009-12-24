@@ -4,8 +4,7 @@
 
 details ||= false
 
-xml.location do
-  xml.id   location.id
+xml.location(:id => location.id) do
   xml.name location.display_name
 
   xml.elevation_maximum '%d' % location.high
@@ -23,8 +22,8 @@ xml.location do
   xml.longitude_units  'degrees north'
 
   if details
-    xml.created  xml_time(location.created)
-    xml.modified xml_time(location.modified)
+    xml.created  xml_datetime(location.created)
+    xml.modified xml_datetime(location.modified)
     xml.notes    location.notes.tp
 
     # authors

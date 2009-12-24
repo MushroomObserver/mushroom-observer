@@ -1,6 +1,7 @@
 module DatabaseHelper
-  def xml_date(x); !x ? nil : x.strftime('%Y-%m-%d');          end
-  def xml_time(x); !x ? nil : x.strftime('%Y-%m-%d %H:%M:%S'); end
+  def xml_date(x);     !x ? nil : x.strftime('%Y-%m-%d');          end
+  def xml_time(x);     !x ? nil : x.strftime('%H:%M:%S');          end
+  def xml_datetime(x); !x ? nil : x.strftime('%Y-%m-%d %H:%M:%S'); end
 
   def render_xml_partial(xml, partial, args={})
     args[:partial] = partial.to_s
@@ -19,7 +20,7 @@ class MoApiException < StandardError
 
   def title
     case code
-    when 101 ; 'bad request type'
+    when 101 ; 'bad request method'
     when 102 ; 'bad request syntax'
     when 201 ; 'object not found'
     when 301 ; 'authentication failed'

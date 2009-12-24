@@ -1,8 +1,4 @@
-xml.query @query
-xml.number @number
-xml.pages @pages
-xml.images do
-  xml.number @objects.length
+xml.results(:number => @objects.length) do
   for image in @objects
     render_xml_partial(xml, :image, :locals => {
       :image => image,

@@ -4,13 +4,12 @@
 
 details ||= false
 
-xml.user do
-  xml.id    user.id
+xml.user(:id => user.id) do
   xml.name  user.name
   xml.login user.login
 
   if details
-    xml.created      xml_time(user.created)
+    xml.created      xml_datetime(user.created)
     xml.notes        user.notes.tp
     xml.contribution user.contribution
 

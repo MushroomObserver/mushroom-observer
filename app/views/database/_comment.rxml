@@ -6,9 +6,8 @@
 details ||= false
 refs    ||= false
 
-xml.comment do
-  xml.id      comment.id
-  xml.created xml_time(comment.created)
+xml.comment(:id => comment.id) do
+  xml.created xml_datetime(comment.created)
   xml.summary comment.summary.t
   xml.content comment.comment.tp
 

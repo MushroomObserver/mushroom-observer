@@ -6,8 +6,7 @@
 details ||= false
 refs    ||= false
 
-xml.observation do
-  xml.id    observation.id
+xml.observation(:id => observation.id) do
   xml.date  xml_date(observation.when)
   xml.notes observation.notes.tp
 
@@ -31,8 +30,8 @@ xml.observation do
   end
 
   if details
-    xml.created  xml_time(observation.created)
-    xml.modified xml_time(observation.modified)
+    xml.created  xml_datetime(observation.created)
+    xml.modified xml_datetime(observation.modified)
     xml.specimen_available observation.specimen ? 'true' : 'false'
     xml.is_collection_location observation.is_collection_location ? 'true' : 'false'
 
@@ -41,14 +40,12 @@ xml.observation do
       :details => false,
     })
 
-    xml.proposed_names do
-      xml.number observation.namings.length
+    xml.proposed_names(:number => observation.namings.length) do
       for naming in observation.namings
-        xml.proposed_name do
-          xml.id       naming.id
-          xml.user_id  naming.user_id
-          xml.created  xml_time(naming.created)
-          xml.modified xml_time(naming.modified)
+        xml.proposed_name(:id => naming.id) do
+          xml.user(:id => naming.user_id)
+          xml.created  xml_datetime(naming.created)
+          xml.modified xml_datetime(naming.modified)
           xml.vote     naming.vote_cache
           render_xml_partial(xml, :name, :locals => {
             :name => naming.name,
@@ -60,8 +57,7 @@ xml.observation do
   end
 
   if refs
-    xml.images do
-      xml.number observation.images.length
+    xml.images(:number => observation.images.length) do
       for image in observation.images
         render_xml_partial(xml, :image, :locals => {
           :image => image,
@@ -72,8 +68,7 @@ xml.observation do
       end
     end
 
-    xml.comments do
-      xml.number observation.comments.length
+    xml.comments(:number => observation.comments.length) do
       for comment in observation.comments
         render_xml_partial(xml, :comment, :locals => {
           :comment => comment,

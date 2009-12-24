@@ -6,17 +6,16 @@
 details ||= false
 refs    ||= false
 
-xml.name do
-  xml.id         name.id
-  xml.value      name.text_name
+xml.name(:id => name.id) do
+  xml.name       name.text_name
   xml.author     name.author
   xml.citation   name.citation
   xml.rank       name.rank.to_s
   xml.deprecated name.deprecated ? 'true' : 'false'
 
   if details
-    xml.created  xml_time(name.created)
-    xml.modified xml_time(name.modified)
+    xml.created  xml_datetime(name.created)
+    xml.modified xml_datetime(name.modified)
 
     # authors
     # editors
@@ -25,8 +24,7 @@ xml.name do
   end
 
   if refs && name.synonym
-    xml.synonyms do
-      xml.number name.synonym.names.length - 1
+    xml.synonyms(:number => name.synonym.names.length - 1) do
       for synonym in name.synonym.names - [name]
         render_xml_partial(xml, :name, :locals => {
           :name => synonym,
@@ -37,27 +35,27 @@ xml.name do
   end
 
   if refs && name.classification.to_s != ''
-    xml.classification do
 
-      # This is less complete but doesn't require any additional queries.
-      parse = Name.parse_classification(name.classification)
-      xml.number parse.length
+    # This is less complete but doesn't require any additional queries.
+    parse = Name.parse_classification(name.classification)
+    xml.classification(:number => parse.length) do
       for rank, name in parse
         xml.name do
           xml.rank rank.to_s
           xml.name name
         end
       end
-
-      # This requires extra database queries.
-      # ancestors = name.ancestors
-      # xml.number ancestors.length
-      # for parent in ancestors
-      #   render_xml_partial(xml, :name, :locals => {
-      #     :name => parent,
-      #     :details => false,
-      #   })
-      # end
     end
+
+    # This requires extra database queries.
+    # ancestors = name.ancestors
+    # xml.classification(:number => ancestors.length) do
+    #   for parent in ancestors
+    #     render_xml_partial(xml, :name, :locals => {
+    #       :name => parent,
+    #       :details => false,
+    #     })
+    #   end
+    # end
   end
 end

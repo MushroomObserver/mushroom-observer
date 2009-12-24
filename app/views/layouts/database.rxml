@@ -1,18 +1,22 @@
-xml.instruct!(:xml, :version => "1.0")
-xml.mushroomobserver do
-  xml.script_version  "1.0"
-  xml.script_date     "2009-12-21"
+xml.instruct!(:xml, :version => '1.0')
+xml.response(:xmlns => 'http://mushroomobserver.org/schema.xsd') do
+  xml.script_version  '1.0'
+  xml.script_date     '2009-12-21'
   xml.script_run_date xml_date(@start_time)
+
+  if @query
+    xml.query       @query
+    xml.num_records @number
+    xml.num_pages   @pages
+  end
 
   xml.target! << @content_for_layout
 
   if @errors.length > 0
-    xml.errors do
-      xml.number @errors.length
+    xml.errors(:number => @errors.length) do
       i = 1
       for error in @errors
-        xml.error do
-          xml.id      i
+        xml.error(:id => 1) do
           xml.code    error.code
           xml.text    error.title
           xml.details error.msg
