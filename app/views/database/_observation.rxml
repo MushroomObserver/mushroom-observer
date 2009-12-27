@@ -17,7 +17,7 @@ xml.observation(:id => observation.id) do
     })
   else
     xml.location do
-      xml.name observation.where
+      xml.title observation.where
     end
   end
 

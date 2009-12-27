@@ -49,7 +49,7 @@ class DatabaseController < ApplicationController
       when :get
         raise error(101, "GET method not available for #{type}.") if !respond_to?("get_#{type}")
         conds, tables, joins, max_num_per_page = send("get_#{type}")
-        page = parse_page
+        @page = parse_page
         num_per_page = parse_num_per_page(max_num_per_page)
         error_if_any_other_params
 
@@ -57,7 +57,7 @@ class DatabaseController < ApplicationController
         tables = "FROM #{tables.join(', ')}"
         conds  = "WHERE #{conds.join(' AND ')}"
         conds  = '' if conds == 'WHERE '
-        limit  = "LIMIT #{(page-1)*num_per_page}, #{num_per_page}"
+        limit  = "LIMIT #{(@page-1)*num_per_page}, #{num_per_page}"
         count_query = "SELECT COUNT(DISTINCT #{table}.id) #{tables} #{conds}"
         @query = "SELECT DISTINCT #{table}.id #{tables} #{conds} #{limit}"
         @number = model.connection.select_value(count_query).to_i
@@ -70,9 +70,33 @@ class DatabaseController < ApplicationController
 
       # Post new object.
       when :post :
-        raise error(101, "POST method not available for #{type}.") if !respond_to?("post_#{type}")
+        raise error(101, "POST method not yet available for #{type}s.") if !respond_to?("post_#{type}")
         authenticate
         send("post_#{type}")
+
+      # Update existing object.
+      when :put :
+        raise error(101, "PUT method not yet available for #{type}s.") if !respond_to?("put_#{type}")
+        authenticate
+        conds = parse_id(:id, :id)
+        raise error(201, "must specify id(s)") if !conds
+        query = "SELECT DISTINCT id FROM #{table} WHERE #{conds}"
+        ids = model.connection.select_values(query)
+        make_sure_found_all_objects(ids, type)
+        @objects = model.all(:conditions => ['id in (?)', ids])
+        send("put_#{type}", ids)
+
+      # Delete object.
+      when :delete :
+        raise error(101, "DELETE method not yet available for #{type}s.") if !respond_to?("delete_#{type}")
+        authenticate
+        conds = parse_id(:id, :id)
+        raise error(201, "must specify id(s)") if !conds
+        query = "SELECT DISTINCT id FROM #{table} WHERE #{conds}"
+        ids = model.connection.select_values(query)
+        make_sure_found_all_objects(ids, type)
+        @objects = model.all(:conditions => ['id in (?)', ids])
+        send("delete_#{type}", ids)
 
       else
         raise error(101, "invalid request method: '#{request.method}' (expect 'GET' or 'POST'")
@@ -240,6 +264,8 @@ class DatabaseController < ApplicationController
       @used[name.to_s] = true
       result = params[name]
     end
+    # Save this for error checking later (see make_sure_found_all_objects).
+    @ids_param = result if name == :id
     return result
   end
 
@@ -250,6 +276,27 @@ class DatabaseController < ApplicationController
     for key in params.keys
       if !@used[key.to_s]
         @errors << error(102, "unrecognized argument: '#{key}' (ignored)")
+      end
+    end
+  end
+
+  # Check that objects were found for all the given ids.  (It uses the "global"
+  # @ids_param to get a list of all the requested ids.  It expects every id
+  # listed individually to exist, and at least one id inside each range.)
+  def make_sure_found_all_objects(ids, type)
+    if @ids_param
+      for x in @ids_param.split(',')
+        if x.match(/^\d+$/)
+          if !ids.include?(x.to_i)
+            @errors << error(201, "#{type} ##{a} not found")
+          end
+        elsif x.match(/^(\d+)-(\d+)$/)
+          a, b = $1.to_i, $2.to_i
+          a, b = b, a if a > b
+          if !ids.any? {|x| x >= a || x <= b}
+            @errors << error(201, "no #{type} found between ##{a} and ##{b}")
+          end
+        end
       end
     end
   end

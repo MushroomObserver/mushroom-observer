@@ -5,8 +5,8 @@
 details ||= false
 
 xml.user(:id => user.id) do
-  xml.name  user.name
-  xml.login user.login
+  xml.legal_name user.name
+  xml.login      user.login
 
   if details
     xml.created      xml_datetime(user.created)

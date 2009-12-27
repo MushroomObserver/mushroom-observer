@@ -7,7 +7,7 @@ details ||= false
 refs    ||= false
 
 xml.name(:id => name.id) do
-  xml.name       name.text_name
+  xml.text_name  name.text_name
   xml.author     name.author
   xml.citation   name.citation
   xml.rank       name.rank.to_s
@@ -42,7 +42,7 @@ xml.name(:id => name.id) do
       for rank, name in parse
         xml.name do
           xml.rank rank.to_s
-          xml.name name
+          xml.text_name name
         end
       end
     end

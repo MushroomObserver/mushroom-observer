@@ -15,6 +15,7 @@
         <xs:element name="query"       type="xs:string"             minOccurs="0" maxOccurs="1"/>
         <xs:element name="num_records" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="1"/>
         <xs:element name="num_pages"   type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="page"        type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="1"/>
 
         <!-- This list should always be present, but may be empty. -->
         <xs:element name="results" type="list_of_objects" minOccurs="1" maxOccurs="1"/>
@@ -85,7 +86,7 @@
     <xs:complexContent>
       <xs:extension base="object_type">
         <xs:sequence>
-          <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="title" type="xs:string" minOccurs="1" maxOccurs="1"/>
           <xs:element name="elevation_maximum" type="xs:integer" minOccurs="0" maxOccurs="1"/>
           <xs:element name="elevation_minimum" type="xs:integer" minOccurs="0" maxOccurs="1"/>
           <xs:element name="elevation_units" type="xs:string" minOccurs="0" maxOccurs="1"/>
@@ -109,7 +110,7 @@
     <xs:complexContent>
       <xs:extension base="object_type">
         <xs:sequence>
-          <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="text_name" type="xs:string" minOccurs="1" maxOccurs="1"/>
           <xs:element name="author" type="xs:string" minOccurs="1" maxOccurs="1"/>
           <xs:element name="citation" type="xs:string" minOccurs="1" maxOccurs="1"/>
           <xs:element name="rank" type="rank_type" minOccurs="1" maxOccurs="1"/>
@@ -162,7 +163,7 @@
     <xs:complexContent>
       <xs:extension base="object_type">
         <xs:sequence>
-          <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="legal_name" type="xs:string" minOccurs="1" maxOccurs="1"/>
           <xs:element name="login" type="xs:string" minOccurs="1" maxOccurs="1"/>
           <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
           <xs:element name="notes" type="xs:string" minOccurs="0" maxOccurs="1"/>

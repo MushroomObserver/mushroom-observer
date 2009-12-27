@@ -8,6 +8,7 @@ xml.response(:xmlns => 'http://mushroomobserver.org/schema.xsd') do
     xml.query       @query
     xml.num_records @number
     xml.num_pages   @pages
+    xml.page        @page
   end
 
   xml.target! << @content_for_layout

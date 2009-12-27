@@ -5,7 +5,7 @@
 details ||= false
 
 xml.location(:id => location.id) do
-  xml.name location.display_name
+  xml.title location.display_name
 
   xml.elevation_maximum '%d' % location.high
   xml.elevation_minimum '%d' % location.low
