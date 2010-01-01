@@ -40,16 +40,13 @@ xml.observation(:id => observation.id) do
       :details => false,
     })
 
-    xml.proposed_names(:number => observation.namings.length) do
+    xml.namings(:number => observation.namings.length) do
       for naming in observation.namings
         xml.proposed_name(:id => naming.id) do
-          xml.user(:id => naming.user_id)
-          xml.created  xml_datetime(naming.created)
-          xml.modified xml_datetime(naming.modified)
-          xml.vote     naming.vote_cache
-          render_xml_partial(xml, :name, :locals => {
-            :name => naming.name,
+          render_xml_partial(xml, :naming, :locals => {
+            :naming => naming,
             :details => false,
+            :refs => false,
           })
         end
       end

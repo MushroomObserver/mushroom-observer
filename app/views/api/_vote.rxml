@@ -1,0 +1,21 @@
+# Locals:
+#   :vote               Vote instance.
+#   :details            Include details?
+
+details ||= false
+
+xml.vote(:id => vote.id) do
+  xml.value vote.value
+
+  if details
+    xml.created  xml_datetime(vote.created)
+    xml.modified xml_datetime(vote.modified)
+    xml.naming(:id => vote.naming_id)
+    xml.observation(:id => vote.observation_id)
+
+    render_xml_partial(xml, :user, :locals => {
+      :user => vote.user,
+      :details => false,
+    })
+  end
+end

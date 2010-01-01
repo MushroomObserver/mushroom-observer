@@ -1,0 +1,9 @@
+xml.results(:number => @objects.length) do
+  for naming in @objects
+    render_xml_partial(xml, :naming, :locals => {
+      :naming => naming,
+      :details => true,
+      :refs => true,
+    })
+  end
+end
