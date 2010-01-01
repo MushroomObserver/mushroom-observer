@@ -124,6 +124,31 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="naming_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="vote" type="xs:decimal" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="name" type="name_type" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="reason" minOccurs="0" maxOccurs="unbounded">
+            <xs:simpleType>
+              <xs:simpleContent>
+                <xs:extension base="xs:string">
+                  <xs:attribute name="type" type="xs:string" use="required"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:simpleType>
+          </xs:element>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="observation" type="observation_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="votes" type="list_of_votes" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="observation_type">
     <xs:complexContent>
       <xs:extension base="object_type">
@@ -137,23 +162,9 @@
           <xs:element name="specimen_available" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
           <xs:element name="is_collection_location" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
           <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="1"/>
-          <xs:element name="proposed_names" type="list_of_proposed_names" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="namings" type="list_of_namings" minOccurs="0" maxOccurs="1"/>
           <xs:element name="images" type="list_of_images" minOccurs="0" maxOccurs="1"/>
           <xs:element name="comments" type="list_of_comments" minOccurs="0" maxOccurs="1"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="proposed_name_type">
-    <xs:complexContent>
-      <xs:extension base="object_type">
-        <xs:sequence>
-          <xs:element name="user" type="user_type" minOccurs="1" maxOccurs="1"/>
-          <xs:element name="created" type="xs:datetime" minOccurs="1" maxOccurs="1"/>
-          <xs:element name="modified" type="xs:datetime" minOccurs="1" maxOccurs="1"/>
-          <xs:element name="vote" type="xs:decimal" minOccurs="1" maxOccurs="1"/>
-          <xs:element name="name" type="name_type" minOccurs="1" maxOccurs="1"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -170,6 +181,21 @@
           <xs:element name="contribution" type="xs:integer" minOccurs="0" maxOccurs="1"/>
           <xs:element name="location" type="location_type" minOccurs="0" maxOccurs="1"/>
           <xs:element name="image" type="image_type" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="vote_type">
+    <xs:complexContent>
+      <xs:extension base="object_type">
+        <xs:sequence>
+          <xs:element name="value" type="xs:decimal" minOccurs="1" maxOccurs="1"/>
+          <xs:element name="created" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="modified" type="xs:datetime" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="naming" type="naming_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="observation" type="observation_type" minOccurs="0" maxOccurs="1"/>
+          <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -239,6 +265,17 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <!-- List of namings. -->
+  <xs:complexType name="list_of_namings">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="naming" type="naming_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <!-- List of observations. -->
   <xs:complexType name="list_of_observations">
     <xs:complexContent>
@@ -250,23 +287,23 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <!-- List of proposed_names. -->
-  <xs:complexType name="list_of_proposed_names">
-    <xs:complexContent>
-      <xs:extension base="list_type">
-        <xs:sequence>
-          <xs:element name="proposed_name" type="proposed_name_type" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
   <!-- List of users. -->
   <xs:complexType name="list_of_users">
     <xs:complexContent>
       <xs:extension base="list_type">
         <xs:sequence>
           <xs:element name="user" type="user_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- List of votes. -->
+  <xs:complexType name="list_of_votes">
+    <xs:complexContent>
+      <xs:extension base="list_type">
+        <xs:sequence>
+          <xs:element name="vote" type="vote_type" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -284,8 +321,10 @@
           <xs:element name="license"     type="license_type"    />
           <xs:element name="location"    type="location_type"   />
           <xs:element name="name"        type="name_type"       />
+          <xs:element name="naming"      type="naming_type"     />
           <xs:element name="observation" type="observation_type"/>
           <xs:element name="user"        type="user_type"       />
+          <xs:element name="vote"        type="vote_type"       />
         </xs:choice>
       </xs:extension>
     </xs:complexContent>
@@ -301,8 +340,10 @@
           <xs:element name="license"     type="license_type"     minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="location"    type="location_type"    minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="name"        type="name_type"        minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="naming"      type="naming_type"      minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="observation" type="observation_type" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="user"        type="user_type"        minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="vote"        type="vote_type"        minOccurs="0" maxOccurs="unbounded"/>
         </xs:all>
       </xs:extension>
     </xs:complexContent>
@@ -326,10 +367,18 @@
       <xs:enumeration value="101"/>
       <!-- Bad request syntax. -->
       <xs:enumeration value="102"/>
-      <!-- Object no found. -->
+      <!-- Object not found. -->
       <xs:enumeration value="201"/>
+      <!-- Failed to create object. -->
+      <xs:enumeration value="202"/>
+      <!-- Failed to update object. -->
+      <xs:enumeration value="203"/>
+      <!-- Failed to destroy object. -->
+      <xs:enumeration value="204"/>
       <!-- Authentication failed. -->
       <xs:enumeration value="301"/>
+      <!-- Perission denied. -->
+      <xs:enumeration value="302"/>
       <!-- Internal error. -->
       <xs:enumeration value="501"/>
     </xs:restriction>

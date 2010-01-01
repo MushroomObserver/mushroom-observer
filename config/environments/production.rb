@@ -37,5 +37,3 @@ NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.production"
 # Limit size of image uploads (ImageMagick bogs down on large images).
 IMAGE_UPLOAD_MAX_SIZE = 20000000
 
-# Temporary switch to let us quickly back out changes to how image uploads are processed.
-NEW_IMAGE_THINGY = true

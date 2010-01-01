@@ -712,6 +712,7 @@ destroy_draft_success: El borrador se ha borrado.
 
 # observer/destroy_naming
 destroy_naming_denied: No es el propietario de ese nombre propuesto.
+destroy_naming_failed: No se ha podido barrar el nombre propuesto(?)
 destroy_naming_someone_else: >
 
   Lo sientimos, alguien más lo ha dado su mayor voto positivo.  Usted es
@@ -722,6 +723,7 @@ destroy_naming_success: El nombre propuesto se ha borrado con éxito.
 
 # observer/destroy_observation
 destroy_observation_denied: No es el propietario de ese observación.
+destroy_observation_failed: No se ha podido barrar el observación.
 destroy_observation_success: Observación se ha borrado con éxito.
 
 
@@ -1333,6 +1335,7 @@ image_reuse_just_yours:  Only show your images.
 
 # image/destroy_image
 image_destroy_success: La imagen se ha borrado con éxito.
+image_destroy_failed: No se ha podido borrar la imagen.
 
 
 # image/edit_image

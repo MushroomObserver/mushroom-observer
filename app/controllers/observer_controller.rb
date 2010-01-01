@@ -740,15 +740,10 @@ class ObserverController < ApplicationController
       if !check_user_id(@observation.user_id)
         flash_error(:destroy_observation_denied.t)
         redirect_to(:action => 'show_observation', :id => @observation.id)
+      elsif !@observation.destroy_with_log(@user)
+        flash_error(:destroy_observation_failed.t)
+        redirect_to(:action => 'show_observation', :id => @observation.id)
       else
-        for spl in @observation.species_lists
-          spl.log(:log_observation_destroyed2, { :user => @user.login,
-            :name => @observation.unique_format_name }, false)
-        end
-        @observation.orphan_log(:log_observation_destroyed, { :user => @user.login })
-        @observation.namings.clear # (takes votes with it)
-        @observation.comments.clear
-        @observation.destroy
         flash_notice(:destroy_observation_success.t)
         redirect_to(:action => 'list_observations')
       end
@@ -966,19 +961,14 @@ class ObserverController < ApplicationController
     @observation = @naming.observation
     if !check_user_id(@naming.user_id)
       flash_error(:destroy_naming_denied.t)
-      redirect_to(:action => 'show_observation', :id => @observation.id)
     elsif !@naming.deletable?
       flash_warning(:destroy_naming_someone_else.t)
-      redirect_to(:action => 'show_observation', :id => @observation.id)
+    elsif !@naming.destroy_with_log(@user)
+      flash_error(:destroy_naming_failed.t)
     else
-      @naming.observation.log(:log_naming_destroyed, { :user => @user.login,
-        :name => @naming.format_name }, true)
-      @naming.votes.clear
-      @naming.destroy
-      @observation.calc_consensus(@user)
       flash_notice(:destroy_naming_success.t)
-      redirect_to(:action => 'show_observation', :id => @observation.id)
     end
+    redirect_to(:action => 'show_observation', :id => @observation.id)
   end
 
   # I'm tired of tweaking show_observation to call calc_consensus for debugging.

@@ -167,12 +167,7 @@ class CommentController < ApplicationController
     if !check_user_id(@comment.user_id)
       render(:action => 'show_comment')
     else
-      object = @comment.object
-      summary = @comment.summary
-      if @comment.destroy
-        object.log(:log_comment_destroyed, { :user => @user.login,
-          :summary => summary }, false) \
-          if object.respond_to?(:log)
+      if @comment.destroy_with_log(@user)
         flash_notice :form_comments_destroy_success.t
       else
         flash_error :form_comments_destroy_failed.t

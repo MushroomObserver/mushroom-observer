@@ -39,13 +39,17 @@ require 'active_record_extensions'
 #    O.refresh_vote_cache    Refresh cache across all observations.
 #
 #  Image stuff:
-#    add_image(img)         Add img to obv.
-#    add_image_by_id(id)    Add img to obv.
-#    remove_image_by_id(id) Remove img from obv.
+#    add_image(img)               Add img to obv. (doesn't save)
+#    add_image_by_id(id)          Add img to obv. (doesn't save)
+#    add_image_with_log(img,user) Add an image and log it. (saves it)
+#    remove_image_by_id(id)       Remove img from obv.
 #
 #  Location/Where ambiguity:
 #    place_name             Get location name or where, whichever exists.
 #    place_name=            Set where if cannot find location by that name.
+#
+#  Other:
+#    destroy_with_log(user) Destroy obs and log it everywhere necessary.
 #
 #  Callbacks:
 #    add_spl_callback(o)    Updates SiteData when obs is added to species list.
@@ -528,6 +532,24 @@ return result if debug
   # Need this below...
   def save_id_before_destroy
     @old_id = self.id
+  end
+
+  # Destroy observation and log it in observation's and species lists' logs.
+  def destroy_with_log(user)
+    for spl in self.species_lists
+      spl.log(:log_observation_destroyed2, { :user => user.login,
+        :name => self.unique_format_name }, false)
+    end
+    self.orphan_log(:log_observation_destroyed, { :user => user.login })
+    return self.destroy
+  end
+
+  # Add an image and log it.
+  def add_image_with_log(image, user)
+    self.log(:log_image_created, { :user => user.login,
+      :name => image.unique_format_name }, true)
+    self.add_image(image)
+    return self.save
   end
 
   # -------------------------------

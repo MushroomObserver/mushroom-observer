@@ -12,6 +12,7 @@
 #  Public Methods:
 #    Comment.find_object(type, id)       Look up object referred to by type/id.
 #    Comment.find_all_by_object(object)  Look up comments on an object.
+#    destroy_with_log(user)              Destroy and log it in object's log.
 #
 #  Callbacks:
 #    after_save    Automatically sends email to observation's owner.
@@ -87,6 +88,20 @@ class Comment < ActiveRecord::Base
     else
       ''
     end
+  end
+
+  # Destroy comment and log its destruction in the log for the object.
+  def destroy_with_log(user)
+    result = false
+    summary = comment.summary
+    object = comment.object
+    if self.destroy
+      object.log(:log_comment_destroyed, { :user => user.login,
+        :summary => summary }, false) \
+        if object && object.respond_to?(:log)
+      result = true
+    end
+    return result
   end
 
   protected

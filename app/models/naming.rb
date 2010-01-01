@@ -27,6 +27,7 @@
 #    is_consensus?           Is this the community consensus?
 #    editable?               Has anyone voted (positively) on this naming?
 #    deletable?              Has anyone made this naming their favorite?
+#    destroy_with_log(user)  Destroy and log it on the observation's log.
 #
 ################################################################################
 
@@ -284,6 +285,16 @@ class Naming < ActiveRecord::Base
   # synonymy into account.
   def is_consensus?
     self.observation.name == self.name
+  end
+
+  # Destroy a naming and log it on the observation's log.
+  def destroy_with_log(user)
+    obs = self.observation
+    obs.log(:log_naming_destroyed, { :user => user.login,
+     :name => self.format_name }, true)
+    result = self.destroy
+    obs.calc_consensus(user)
+    return result
   end
 
   protected

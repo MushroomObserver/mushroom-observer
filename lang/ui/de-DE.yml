@@ -702,6 +702,7 @@ destroy_draft_success: Entwurf gelöscht.
 
 # observer/destroy_naming
 destroy_naming_denied: Dieser Name gehört dir nicht.
+destroy_naming_failed:  Dieser Name konnte nicht gelöscht werden(?)
 destroy_naming_someone_else: >
   Entschuldigung, jemand ist sich sicher, dass dies der richtige Name ist.
   Du kannst gern weitere Namen vorschlagen, aber du kannst diesen Namen
@@ -712,6 +713,7 @@ destroy_naming_success: Name gelöscht.
 
 # observer/destroy_observation
 destroy_observation_denied: Dies ist nicht dein Fund.
+destroy_observation_failed:  Fund konnte nicht gelöscht werden(?)
 destroy_observation_success: Fund gelöscht.
 
 
@@ -1315,6 +1317,7 @@ image_reuse_just_yours:  Only show your images.
 
 # image/destroy_image
 image_destroy_success: Das Bild ist gelöscht worden.
+image_destroy_failed:  Konnte Bild nicht gelöscht.
 
 
 # image/edit_image

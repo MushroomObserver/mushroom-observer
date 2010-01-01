@@ -78,100 +78,45 @@ class Image < ActiveRecord::Base
   def image=(file)
     self.content_type = file.content_type.chomp
     @img_dir = IMG_DIR
-    if NEW_IMAGE_THINGY
-      # (file is an ActionController::UploadedTempfile, which has
-      # the method "original_filename", and inherits from Tempfile, which
-      # has the methods "size", "path", "delete", etc. and inherits in turn
-      # from File...)
-      @img = file
-      @img = :too_big if @img.size > IMAGE_UPLOAD_MAX_SIZE
-    else
-      @img = file.read
-    end
+    # (file is an ActionController::UploadedTempfile, which has
+    # the method "original_filename", and inherits from Tempfile, which
+    # has the methods "size", "path", "delete", etc. and inherits in turn
+    # from File...)
+    @img = file
+    @img = :too_big if @img.size > IMAGE_UPLOAD_MAX_SIZE
   end
 
   # Move uploaded file into place and initiate resizing and transfers.
   # Can't include this in image= because self.id isn't set until first save.
   def save_image
     result = false
-    if NEW_IMAGE_THINGY
-      if @img
-        begin
-          raise(SystemCallError, "Don't move my test images!!") if TESTING
-          result = true  if File.rename(@img.path, self.original_image) and
-                            File.chmod(0644, self.original_image) == 1
-        rescue SystemCallError
-          result = true if system('cp', @img.path, self.original_image)
-        rescue => err
-          result = false
-        end
-        result = system("script/process_image #{self.id}&") if result
+    if @img
+      begin
+        raise(SystemCallError, "Don't move my test images!!") if TESTING
+        result = true  if File.rename(@img.path, self.original_image) and
+                          File.chmod(0644, self.original_image) == 1
+      rescue SystemCallError
+        result = true if system('cp', @img.path, self.original_image)
+      rescue => err
+        result = false
       end
-    else
-      file = File.new(self.original_image, 'w')
-      file.print(@img)
-      file.close
-      result = self.create_resized_images
-      result = self.transfer_images if result
+      result = system("script/process_image #{self.id}&") if result
     end
     return result
   end
 
-###############################################################################
-###### These are going away as soon as NEW_IMAGE_THINGY is tested live. #######
-###############################################################################
-
-  # Convert original into 640x640 and 160x160 images.
-  def create_resized_images
-    result = true
-    result = self.resize_image(640, 640, 70, self.original_image, self.big_image)
-    if result
-      result = self.resize_image(160, 160, 90, self.big_image, self.thumbnail)
+  # Destroy image and log destruction on all objects using it.  (Also change
+  # thumbnails to another image whenever necessary.)
+  def destroy_with_log(user)
+    image_name = self.unique_format_name
+    for obs in Observation.find_by_thumb_image_id(self.id, :include => :images)
+      obs.log(:log_image_destroyed, { :user => @user.login,
+        :name => image_name }, true)
+      obs.thumb_image = (obs.images - self).first
+      obs.save
     end
-    return result
+    return self.destroy
   end
-
-  # Resize +src+ image and save as +dest+, stripping headers.
-  def resize_image(width, height, quality, src, dest)
-    result = false
-    cmd = sprintf("convert -thumbnail '%dx%d>' -quality %d %s %s",
-                   width, height, quality, src, dest)
-    if File.exists?(src) and result = system(cmd)
-      logger.warn(cmd + ' -- success')
-    else
-      logger.warn(cmd + ' -- failed')
-    end
-    return result
-  end
-
-  # Copy images over to dreamhost via scp.
-  def transfer_images
-    self.transfer_image(self.original_image)
-    self.transfer_image(self.big_image)
-    self.transfer_image(self.thumbnail)
-  end
-
-  # Transfer new image to the image server.
-  def transfer_image(src)
-    result = false
-    if !IMAGE_TRANSFER
-      result = true
-    elsif File.exists?(src)
-      if src.match(/\w+\/\d+\.jpg$/)
-        dest = $&
-        cmd = "scp %s %s/%s" % [src, IMAGE_SERVER, dest]
-        result = system cmd
-        if result
-          logger.warn(cmd + ' -- success')
-        else
-          logger.warn(cmd + ' -- failed')
-        end
-      end
-    end
-    return result
-  end
-
-################################################################################
 
   # Return file name of original image.
   def original_image

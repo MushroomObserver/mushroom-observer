@@ -1,11 +1,11 @@
 require File.dirname(__FILE__) + '/../test_helper'
-require 'database_controller'
+require 'api_controller'
 
-class DatabaseControllerTest < Test::Unit::TestCase
+class ApiControllerTest < Test::Unit::TestCase
   fixtures :all
 
   def setup
-    @controller = DatabaseController.new
+    @controller = ApiController.new
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
   end

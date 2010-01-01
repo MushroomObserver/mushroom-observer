@@ -287,10 +287,7 @@ class ImageController < ApplicationController
         flash_error :profile_invalid_image. \
           t(:name => (name ? "'#{name}'" : '???'))
       else
-        @observation.log(:log_image_created, { :user => @user.login,
-          :name => @image.unique_format_name }, true)
-        @observation.add_image(@image)
-        @observation.save
+        @observation.add_image_with_log(@image, @user)
         flash_notice :profile_uploaded_image. \
           t(:name => name ? "'#{name}'" : "##{@image.id}")
       end
@@ -371,15 +368,10 @@ class ImageController < ApplicationController
     if verify_user()
       if !check_user_id(@image.user_id)
         redirect_to(:action => 'show_image', :id => @image.id)
+      elsif @image.destroy_with_log(@user)
+        flash_error :image_destroy_failed.t
+        redirect_to(:action => 'show_image', :id => @image.id)
       else
-        image_name = @image.unique_format_name
-        for observation in Observation.find(:all, :conditions => sprintf("thumb_image_id = '%s'", @image.id))
-          observation.log(:log_image_destroyed, { :user => @user.login,
-            :name => image_name }, true)
-          observation.thumb_image_id = nil
-          observation.save
-        end
-        @image.destroy
         flash_notice :image_destroy_success.t
         redirect_to(:action => 'list_images')
       end

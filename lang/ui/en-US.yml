@@ -698,6 +698,7 @@ destroy_draft_success: Draft destroyed.
 
 # observer/destroy_naming
 destroy_naming_denied: You do not own that naming.
+destroy_naming_failed: Failed to destroy naming(?)
 destroy_naming_someone_else: >
   Sorry, someone else has given this their strongest positive vote.  You are
   free to propose alternate names, but we can no longer let you delete this
@@ -708,6 +709,7 @@ destroy_naming_success: Successfully destroyed naming.
 
 # observer/destroy_observation
 destroy_observation_denied: You do not own this observation.
+destroy_observation_failed: Failed to destroy observation(?)
 destroy_observation_success: Successfully destroyed observation.
 
 
@@ -1303,6 +1305,7 @@ image_reuse_just_yours: Only show your images.
 
 # image/destroy_image
 image_destroy_success: Image destroyed successfully.
+image_destroy_failed: Failed to destroy image.
 
 
 # image/edit_image
