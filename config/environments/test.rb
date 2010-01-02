@@ -21,6 +21,7 @@ config.action_mailer.delivery_method = :test
 IMG_DIR = File.join(RAILS_ROOT, 'public', 'test_images')
 
 DOMAIN = 'http://localhost:3000'
+IMAGE_DOMAIN = 'http://localhost:3000/images'
 
 TESTING = true
 

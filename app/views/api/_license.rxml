@@ -1,4 +1,6 @@
-xml.license(:id => license.id) do
+xml.license(
+  :id => license.id,
+  :url => license.url
+) do
   xml.type  license.display_name
-  xml.url   license.url
 end

@@ -11,7 +11,7 @@ class ApiControllerTest < Test::Unit::TestCase
   end
 
   def test_simple
-    get(:observations, :id => 1)
+    get(:observations, :id => 2)
     print "\n----------------------------------------\n"
     print @response.body
     print "\n----------------------------------------\n"

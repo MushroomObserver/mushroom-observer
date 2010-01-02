@@ -220,6 +220,12 @@ class SpeciesList < ActiveRecord::Base
     return false
   end
 
+  # Destroy list and log it.
+  def destroy(user)
+    self.orphan_log(:log_species_list_destroyed, { :user => user.login })
+    return super()
+  end
+
   protected
 
   def validate # :nodoc:

@@ -6,9 +6,12 @@
 details ||= false
 refs    ||= false
 
-xml.observation(:id => observation.id) do
+xml.observation(
+  :id => observation.id,
+  :url => "#{DOMAIN}/observer/show_observation/#{observation.id}"
+) do
   xml.date  xml_date(observation.when)
-  xml.notes observation.notes.tp
+  xml.notes observation.notes.to_s.tpl_nodiv
 
   if observation.location
     render_xml_partial(xml, :location, :locals => {
@@ -42,13 +45,11 @@ xml.observation(:id => observation.id) do
 
     xml.namings(:number => observation.namings.length) do
       for naming in observation.namings
-        xml.proposed_name(:id => naming.id) do
-          render_xml_partial(xml, :naming, :locals => {
-            :naming => naming,
-            :details => false,
-            :refs => false,
-          })
-        end
+        render_xml_partial(xml, :naming, :locals => {
+          :naming => naming,
+          :details => false,
+          :refs => false,
+        })
       end
     end
   end

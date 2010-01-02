@@ -16,19 +16,21 @@ end
 ################################################################################
 
 class String
-  if !defined? SHOW_OBJECT_URLS
-    SHOW_OBJECT_URLS = {
-      'name' => '/name/show_name/%d',
-      'user' => '/observer/show_user/%d',
-      'image' => '/image/show_image/%d',
-      'comment' => '/comment/show_comment/%d',
-      'project' => '/project/show_project/%d',
-      'location' => '/location/show_location/%d',
-      'observation' => '/%d',
+  if !defined?(URI_ESCAPE)
+    URL_TRUNCATION_LENGTH = 60
+
+    URI_ESCAPE = {
+      ' '  => '%20',
+      '"'  => '%22',
+      '?'  => '%3F',
+      '='  => '%3D',
+      '&'  => '%26',
+      '%'  => '%61',
+      '<'  => '%3C',
+      '>'  => '%3E',
+      '\\' => '%5C',
     }
   end
-
-  URL_TRUNCATION_LENGTH = 60 if !defined? URL_TRUNCATION_LENGTH
 
   # Wrapper on string.textilize that returns only the body of the first
   # paragraph of the result.
@@ -95,27 +97,24 @@ class String
       else
         url2 = url
       end
-      # These are the only things that would really f--- things up.
-      # ... and actually Textile doesn't let these things through, anyway.
-      url = url.gsub(/"/, '%22').gsub(/</, '%3C').gsub(/>/, '%3E')
+      url.gsub!(/([ "%<>\\])/) {URI_ESCAPE[$1]}
       "<a href=\"#{url}\">#{url2}</a>"
     end
 
     # Convert _object_ tags into proper links.
     if do_object_links
       str.gsub!(/
-        x\{ ([A-Z]+) (?:\s+ (\d+))? (?:\s+ ([^\{\}]+?))? \s*\}x
+        x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
       /x) do |orig|
-        if url = SHOW_OBJECT_URLS[$1.downcase]
-          type  = $1
-          id    = $2 || 0
-          label = $3 || ('%s #%d' % [type.downcase.capitalize, id])
-          "<a href=\"#{url}\">%s</a>" % [id, label]
-        else
-          orig
-        end
+        type, label, id = $1, $2, $3
+        id.gsub!(/([ "%?=&<>\\])/) {URI_ESCAPE[$1]}
+        url = "#{DOMAIN}/observer/lookup_#{type.downcase}/#{id}"
+        "<a href=\"#{url}\">#{label}</a>"
       end
     end
+
+    # Make sure all links are fully-qualified.
+    str.gsub!(/href="\//, "href=\"#{DOMAIN}/")
 
     # Put pre-existing links back in (removing the _object_ tag wrappers).
     str.gsub!(/<XXX(\d+)>/) do
@@ -129,6 +128,8 @@ class String
   def tl; textilize_without_paragraph(true); end
   def tp; '<div class="textile">' + textilize(false) + '</div>'; end
   def tpl; '<div class="textile">' + textilize(true) + '</div>'; end
+  def tp_nodiv; textilize(false); end
+  def tpl_nodiv; textilize(true); end
 
   # Register one or more name objects so that subsequent textile strings can
   # refer to them by abbreviation.
@@ -170,6 +171,7 @@ protected
         ( \s+ (?: "?[^a-z"\s_] | in\s?ed\.? | auct\.? | van\sd[a-z]+\s[A-Z] | s[\.\s] | sensu\s ) [^_]* )?
       (?:_+\**) (?=(?:s|ish|like)?(?:\W|’|\Z))
     /x) do |orig|
+      result = orig
       prefix = $1.to_s
       name   = $2.to_s
       author = $3.to_s
@@ -179,21 +181,21 @@ protected
 
       # Expand abbreviated genus (but only if followed by species epithet!).
       str2 = str1.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
-        (n = @@textile_name_lookup[$1]) ? n.text_name.sub(/ .*/, '') + ' ' : x
+        (n = @@textile_name_lookup[$1]) ? n + ' ' : x
       end
 
       # Expand bare variety, etc.  For example, after using Amanita muscaria:
       #   _var alba_  -->  Amanita muscaria var. alba
       # (This is not perfect: if subspecies and varieties are mixed it can mess up.)
       if str2.sub!(/^(subsp|ssp)\.? +/, '')
-        str2 = @@textile_last_species    ? @@textile_last_species.text_name  + ' subsp. ' + str2 : ''
+        str2 = @@textile_last_species    ? @@textile_last_species  + ' subsp. ' + str2 : ''
       elsif str2.sub!(/^(var|v)\.? +/, '')
-        str2 = @@textile_last_subspecies ? @@textile_last_subspecies.text_name + ' var. ' + str2 :
-               @@textile_last_species    ? @@textile_last_species.text_name    + ' var. ' + str2 : ''
+        str2 = @@textile_last_subspecies ? @@textile_last_subspecies + ' var. ' + str2 :
+               @@textile_last_species    ? @@textile_last_species    + ' var. ' + str2 : ''
       elsif str2.sub!(/^(forma?|f)\.? +/, '')
-        str2 = @@textile_last_variety    ? @@textile_last_variety.text_name    + ' f. ' + str2 :
-               @@textile_last_subspecies ? @@textile_last_subspecies.text_name + ' f. ' + str2 :
-               @@textile_last_species    ? @@textile_last_species.text_name    + ' f. ' + str2 : ''
+        str2 = @@textile_last_variety    ? @@textile_last_variety    + ' f. ' + str2 :
+               @@textile_last_subspecies ? @@textile_last_subspecies + ' f. ' + str2 :
+               @@textile_last_species    ? @@textile_last_species    + ' f. ' + str2 : ''
       end
 
       # Allow a number of author-like syntaxes that aren't normally allowed.
@@ -210,49 +212,47 @@ protected
         postfix = $2[0,1] == 's' ? ' s. str.' : ' s. lato'
       end
 
-      # Look up name.
-      name = nil
-      if parse = Name.parse_name(str2)
-        name = Name.find_by_search_name(parse[3]) ||
-               Name.find_by_text_name(parse[0])
+      # Allow "sensu Authors" that aren't in database.  Example:
+      #   _S. riparia sensu A.H.Smith_  -->  <a>**__S. riparia__**</a> __sensu A.H.Smith__
+      if !author.match(/sensu/) && str2.sub!(/ (sensu .*)/ ,'')
+        postfix = ' ' + $1 + postfix
       end
 
-      if name &&
+      # Make sure the rest parses normally.
+      if (parse = Name.parse_name(str2)) &&
         # Allowing arbitrary authors on Genera and higher makes it impossible to
         # distinguish between publication titles and taxa, e.g., "Lichen Flora
         # of the Greater Sonoran Region".  I'm sure it can still break with species
         # but it should be very infrequent (I don't see it in current tests). -JPH
-        (author == '' || name.below_genus?)
+        (author == '' || parse[5] != :Genus)
 
         # Update which genus this first letter would mean in an abbrev.
-        if !name.above_genus?
-          name.text_name.match(/([A-Z])/)
-          @@textile_name_lookup[$1] = name
-          @@textile_last_species    = name if name.rank == :Species
-          @@textile_last_subspecies = name if name.rank == :Subspecies
-          @@textile_last_variety    = name if name.rank == :Variety
+        if parse[0].match(/([A-Z])/)
+          @@textile_name_lookup[$1] = parse[0] if parse[5] == :Genus
+          @@textile_last_species    = parse[0] if parse[5] == :Species
+          @@textile_last_subspecies = parse[0] if parse[5] == :Subspecies
+          @@textile_last_variety    = parse[0] if parse[5] == :Variety
         end
 
-        # Allow "sensu Authors" that aren't in database.  Example:
-        #   _S. riparia sensu A.H.Smith_  -->  <a>**__S. riparia__**</a> __sensu A.H.Smith__
-        if !name.author.to_s.match(/sensu/) && str2.sub!(/ (sensu .*)/ ,'')
-          postfix = ' ' + $1 + postfix
-        end
+        # # Format name starting with bare text_name (no "sp." or author).
+        # label = '__%s__' % parse[0]
+        #
+        # # Re-abbreviate genus if started that way.
+        # label.sub!(/([A-Z])[a-zë\-]*/, '\\1.') if str1.match(/^[A-Z]\.? /)
+        #
+        # # De-itallicize "var.", "ssp.", etc.
+        # label.gsub!(/ (var|subsp|f)\. /, '__ \\1. __')
+        #
+        # # Tack author on to end (if any).
+        # label += ' ' + parse[6] if parse[6].to_s != ''
 
-        # Format name starting with bare text_name (no "sp." or author).
-        label = '__%s__' % name.text_name
-        label = '**%s**' % label if !name.deprecated
-        label.sub!(/([A-Z])[a-zë\-]*/, '\\1.') if str1.match(/^[A-Z]\.? /)
-        label.gsub!(/ (var|subsp|f)\. /, '__ \\1. __')
+        # Hmmm... better not to reformat what the user entered at all.
+        label = "__#{str1}__"
 
-        # Strip off all but author (and "sp.") from user's string.
-        author = str2.split
-        author = author[name.text_name.split.length .. author.length-1]
-        author = author.empty? ? '' : ' ' + author.join(' ')
-        prefix + 'x{NAME %d %s%s }x%s' % [name.id, label, author, postfix]
-      else
-        orig
+        # Put it all together.
+        result = "#{prefix}x{NAME #{label} }{ #{str2} }x#{postfix}"
       end
+      result
     end
   end
 
@@ -261,75 +261,18 @@ protected
     self.gsub!(/
       (^|\W) (?:_+) ([a-z]+) \s+ ([^_\s](?:[^_\n]+[^_\s])?) (?:_+) (?!\w)
     /x) do |orig|
-      prefix = $1
-      type   = $2
-      id     = $3
-      str    = nil
-      obj    = nil
       result = orig
-      begin
-        # Look up id if given name instead, e.g. _user jason_
-        if id && id.match(/\D/)
-          str = id
-          case type
-            when 'name':
-              obj = Name.find_by_search_name(str) ||
-                    Name.find_by_text_name(str)
-              id = obj.id if obj
-
-            when 'user':
-              obj = User.find_by_login(str) ||
-                    User.find_by_name(str)
-              id = obj.id if obj
-
-            when 'location':
-              pattern = str.downcase.gsub(/\W+/, '%')
-              ids = Location.connection.select_values %(
-                SELECT id FROM locations
-                WHERE LOWER(locations.search_name) LIKE '%#{pattern}%'
-              )
-              id = ids.first if ids.length == 1
-          end
-        end
-
-        # Look up object and create label for it.
-        case type
-          when 'comment':
-            obj ||= Comment.find(id)
-            
-          when 'image':
-            obj ||= Image.find(id)
-
-          when 'location':
-            obj ||= Location.find(id)
-
-          when 'name':
-            obj ||= Name.find(id)
-            str ||= obj.display_name.sub(name.author, '')
-
-          when 'observation':
-            obj ||= Observation.find(id)
-
-          when 'project':
-            obj ||= Project.find(id)
-            str ||= obj.title
-
-          when 'species_list':
-            obj ||= SpeciesList.find(id)
-
-          when 'user':
-            obj ||= User.find(id)
-            str ||= obj.login
-        end
-
-        # Only create link for approved objects that actually exist.
-        if obj
-          result = type.upcase
-          result += ' ' + id.to_s
-          result += ' ' + str.gsub('{','&#123;').gsub('}','&#125;') if str
-          result = prefix + 'x{' + result + ' }x'
-        end
-      rescue
+      prefix, type, id = $1, $2, $3
+      if ['comment',
+          'image',
+          'location',
+          'name',
+          'observation',
+          'project',
+          'species_list',
+          'user'
+         ].include?(type.downcase)
+        result = "#{prefix}x{#{type.upcase} __#{type} #{id}__ }{ #{id} }x"
       end
       result
     end
@@ -338,7 +281,8 @@ protected
   # Convert !image 12345! in a textile string.
   def check_our_images!
     self.gsub!(/!image (\d+)!/) do
-      '"!/images/thumb/%d.jpg!":/image/show_image/%d' % [$1, $1]
+      '"!%s/thumb/%d.jpg!":%s/image/show_image/%d' %
+        [IMAGE_DOMAIN, $1, DOMAIN, $1]
     end
   end
 end

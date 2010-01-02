@@ -6,10 +6,13 @@
 details ||= false
 refs    ||= false
 
-xml.comment(:id => comment.id) do
+xml.comment(
+  :id => comment.id,
+  :url => "#{DOMAIN}/comment/show_comment/#{comment.id}"
+) do
   xml.created xml_datetime(comment.created)
-  xml.summary comment.summary.t
-  xml.content comment.comment.tp
+  xml.summary comment.summary.to_s.tl
+  xml.content comment.comment.to_s.tpl_nodiv
 
   render_xml_partial(xml, :user, :locals => {
     :user => comment.user,

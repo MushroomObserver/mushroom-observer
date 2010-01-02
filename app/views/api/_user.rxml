@@ -4,13 +4,16 @@
 
 details ||= false
 
-xml.user(:id => user.id) do
+xml.user(
+  :id => user.id,
+  :url => "#{DOMAIN}/observer/show_user/#{user.id}"
+) do
   xml.legal_name user.name
   xml.login      user.login
 
   if details
     xml.created      xml_datetime(user.created)
-    xml.notes        user.notes.tp
+    xml.notes        user.notes.to_s.tpl_nodiv
     xml.contribution user.contribution
 
     if user.location

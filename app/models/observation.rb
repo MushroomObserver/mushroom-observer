@@ -48,9 +48,6 @@ require 'active_record_extensions'
 #    place_name             Get location name or where, whichever exists.
 #    place_name=            Set where if cannot find location by that name.
 #
-#  Other:
-#    destroy_with_log(user) Destroy obs and log it everywhere necessary.
-#
 #  Callbacks:
 #    add_spl_callback(o)    Updates SiteData when obs is added to species list.
 #    remove_spl_callback(o) Updates SiteData when obs is removed from species list.
@@ -65,8 +62,8 @@ class Observation < ActiveRecord::Base
   has_and_belongs_to_many :species_lists,
     :after_add => :add_spl_callback, :before_remove => :remove_spl_callback
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
-  has_many :comments, :dependent => :destroy, :as => :object
-  has_many :namings,  :dependent => :destroy
+  has_many :comments, :as => :object
+  has_many :namings  
   has_one :rss_log
   belongs_to :name      # (used to cache consensus name)
   belongs_to :location
@@ -535,13 +532,19 @@ return result if debug
   end
 
   # Destroy observation and log it in observation's and species lists' logs.
-  def destroy_with_log(user)
+  def destroy(user)
     for spl in self.species_lists
       spl.log(:log_observation_destroyed2, { :user => user.login,
         :name => self.unique_format_name }, false)
     end
+    for naming in self.namings
+      naming.destroy(user, false) # (false tells it not to recalc consensus)
+    end
+    for comment in self.comments
+      comment.destroy(user)
+    end
     self.orphan_log(:log_observation_destroyed, { :user => user.login })
-    return self.destroy
+    return super()
   end
 
   # Add an image and log it.

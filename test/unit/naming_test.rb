@@ -54,7 +54,7 @@ class NamingTest < Test::Unit::TestCase
   def test_destroy
     assert_equal @coprinus_comatus, @coprinus_comatus_obs.name  
     id = @coprinus_comatus_naming.id
-    @coprinus_comatus_naming.destroy
+    @coprinus_comatus_naming.destroy(@rolf)
     @coprinus_comatus_obs.reload
     @coprinus_comatus_obs.calc_consensus
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(id) }

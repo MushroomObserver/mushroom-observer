@@ -6,7 +6,9 @@
 details ||= false
 refs    ||= false
 
-xml.naming(:id => naming.id) do
+xml.naming(
+  :id => naming.id
+) do
   xml.vote naming.vote_cache
 
   render_xml_partial(xml, :name, :locals => {

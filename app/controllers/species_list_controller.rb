@@ -415,8 +415,7 @@ class SpeciesListController < ApplicationController
   def destroy_species_list
     @species_list = SpeciesList.find(params[:id])
     if check_user_id(@species_list.user_id)
-      @species_list.orphan_log(:log_species_list_destroyed, { :user => @user.login })
-      @species_list.destroy
+      @species_list.destroy(@user)
       flash_notice(:species_list_destroy_success.t)
       redirect_to(:action => 'list_species_lists')
     else

@@ -4,7 +4,9 @@
 
 details ||= false
 
-xml.vote(:id => vote.id) do
+xml.vote(
+  :id => vote.id
+) do
   xml.value vote.value
 
   if details

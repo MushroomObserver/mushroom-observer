@@ -76,7 +76,6 @@
       <xs:extension base="object_type">
         <xs:sequence>
           <xs:element name="type" type="xs:string" minOccurs="1" maxOccurs="1"/>
-          <xs:element name="url" type="xs:string" minOccurs="1" maxOccurs="1"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -354,10 +353,14 @@
     <xs:attribute name="number" type="xs:nonNegativeInteger" use="required"/>
   </xs:complexType>
 
-  <!-- Objects all take this attribute.  (It is not required at the moment
-  because name classification doesn't have id info stored in it yet.) -->
+  <!-- Objects all take these attributes.  ID is the unique record identifier
+  used as the primary key in the database.  The URL is the address of a page
+  that shows this object in human-readable form (not always available).  (NOTE:
+  ID is not required at the moment because name classification doesn't have id
+  info stored in it yet.) --> 
   <xs:complexType name="object_type">
     <xs:attribute name="id" type="xs:nonNegativeInteger"/>
+    <xs:attribute name="url" type="xs:string"/>
   </xs:complexType>
 
   <!-- Acceptable error codes. -->

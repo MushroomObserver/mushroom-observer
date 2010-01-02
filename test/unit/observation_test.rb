@@ -14,6 +14,7 @@ class ObservationTest < Test::Unit::TestCase
     @cc_obs.when = Time.now
     @cc_obs.where = "Glendale, California"
     @cc_obs.notes = "New"
+    @cc_obs.name = @fungi
     @cc_nam = Naming.new
     @cc_nam.user = @mary
     @cc_nam.name = @fungi
@@ -55,7 +56,7 @@ class ObservationTest < Test::Unit::TestCase
   def test_destroy
     @cc_obs.save
     @cc_nam.save
-    @cc_obs.destroy
+    @cc_obs.destroy(@rolf)
     assert_raise(ActiveRecord::RecordNotFound) { Observation.find(@cc_obs.id) }
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(@cc_nam.id) }
   end
@@ -452,7 +453,7 @@ class ObservationTest < Test::Unit::TestCase
     # Destroy observation.
     katrinas_interest.state = true
     katrinas_interest.save
-    @coprinus_comatus_obs.destroy
+    @coprinus_comatus_obs.destroy(@rolf)
     katrinas_interest.state = false
     katrinas_interest.save
     assert_equal(emails + 3, QueuedEmail.find(:all).length)

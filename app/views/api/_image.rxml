@@ -8,13 +8,16 @@ details ||= false
 refs    ||= false
 files   ||= false
 
-xml.image(:id => image.id) do
+xml.image(
+  :id => image.id,
+  :url => "#{DOMAIN}/image/show_image/#{image.id}"
+) do
   xml.date xml_date(image.when)
 
   if details
     xml.created          xml_datetime(image.created)
     xml.modified         xml_datetime(image.modified)
-    xml.notes            image.notes.tp
+    xml.notes            image.notes.to_s.tpl_nodiv
     xml.copyright_holder image.copyright_holder
 
     render_xml_partial(xml, :license, :locals => {

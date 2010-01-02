@@ -129,10 +129,10 @@ class ApiController < ApplicationController
 
         # Allow GET to paginate.
         if method == :get
-          page = parse_page
+          @page = parse_page
           num_per_page = parse_num_per_page(max_num_per_page)
         else
-          page = nil
+          @page = nil
           num_per_page = nil
         end
 
@@ -157,7 +157,7 @@ class ApiController < ApplicationController
         tables = "FROM #{tables.join(', ')}"
         conds  = "WHERE #{conds.join(' AND ')}"
         conds  = '' if conds == 'WHERE '
-        limit  = page ? "LIMIT #{(@page-1)*num_per_page}, #{num_per_page}" : ''
+        limit  = @page ? "LIMIT #{(@page-1)*num_per_page}, #{num_per_page}" : ''
         count_query = "SELECT COUNT(DISTINCT #{table}.id) #{tables} #{conds}"
         @query = "SELECT DISTINCT #{table}.id #{tables} #{conds} #{limit}"
 
@@ -167,13 +167,13 @@ class ApiController < ApplicationController
           @pages = (@number.to_f / num_per_page).ceil
         end
 
-        # Lookup ids first using our SQL query.
+        # Lookup ids using our SQL query.
         ids = model.connection.select_values(@query)
         make_sure_found_all_objects(ids, type)
 
         # Now let ActiveRecord load full objects (with eager-loading for GET).
         if method == :get
-          @objects = model.all(:include => joins, :conditions => ['id in (?)', ids])
+          @objects = model.all(:conditions => ['id in (?)', ids], :include => joins)
         else
           @objects = model.all(:conditions => ['id in (?)', ids])
         end
@@ -189,15 +189,9 @@ class ApiController < ApplicationController
                 @errors << error(203, "failed to update #{type} ##{id}:\n#{x.formatted_errors}")
               end
             rescue => e
-              if !e.is_a?(MoApiException)
-                s = e.to_s
-                s += "\n" + e.backtrace.join("\n") if !s.match(/\n.*\n.*\n/)
-                e = error(203, "error occurred while updating #{type} ##{id}: #{s}")
-              end
-              @errors << e
+              @errors << convert_error(e, 203, "error occurred while updating #{type} ##{id}")
             end
           end
-          @objects = []
 
         # Delete matching objects... carefully.
         elsif method == :delete
@@ -210,43 +204,31 @@ class ApiController < ApplicationController
                 @errors << error(204, "failed to destroy #{type} ##{id}:\n#{x.formatted_errors}")
               end
             rescue => e
-              if !e.is_a?(MoApiException)
-                s = e.to_s
-                s += "\n" + e.backtrace.join("\n") if !s.match(/\n.*\n.*\n/)
-                e = error(204, "error occurred while destroying #{type} ##{id}: #{s}")
-              end
-              @errors << e
+              @errors << convert_error(e, 204, "error occurred while destroying #{type} ##{id}")
             end
           end
-          @objects = []
         end
 
       else
         raise error(101, "invalid request method: '#{request.method}' (expect 'GET' or 'POST'")
       end
     rescue => e
-      if !e.is_a?(MoApiException)
-        s = e.to_s
-        s += "\n" + e.backtrace.join("\n") if !s.match(/\n.*\n.*\n/)
-        e = error(501, s, true)
-      else
-        e.fatal = true
-      end
+      e = convert_error(e, 501, nil, true)
+      e.fatal = true
       @errors << e
     end
 
     begin
-      render(:layout => 'api')
-    rescue => e
-      if !e.is_a?(MoApiException)
-        s = e.to_s
-        s += "\n" + e.backtrace.join("\n") if !s.match(/\n.*\n.*\n/)
-        e = error(501, s, true)
+      if [:get, :post].include?(request.method)
+        render(:layout => 'api')
       else
-        e.fatal = true
+        render(:layout => 'api', :text => '')
       end
+    rescue => e
+      e = convert_error(e, 501, nil, true)
+      e.fatal = true
       @errors << e
-      render(:text => '', :layout => 'api')
+      render(:layout => 'api', :text => '')
     end
   end
 
@@ -304,8 +286,15 @@ class ApiController < ApplicationController
     tables = []
     joins = []
 
+    conds += parse_id_or_name(:user, 'locations.user_id', 'users.login', 'users.name')
+
     @something_besides_ids = true if !conds.empty?
     conds += parse_id(:id, 'locations.id')
+
+    if uses_table?(conds, 'users')
+      tables << :users
+      conds << 'users.id = locations.user_id'
+    end
 
     return [conds, tables, joins, 1000]
   end
@@ -388,6 +377,8 @@ class ApiController < ApplicationController
     conds = []
     tables = []
     joins = [:location, :image]
+
+    conds += parse_search(:name, 'users.login', 'users.name')
 
     @something_besides_ids = true if !conds.empty?
     conds += parse_id(:id, 'users.id')
@@ -536,18 +527,18 @@ class ApiController < ApplicationController
 ################################################################################
 
   def delete_comment(comment)
-    return comment.destroy_with_log(@user)
+    return comment.destroy(@user)
   end
 
   def delete_image(image)
-    return image.destroy_with_log(@user)
+    return image.destroy(@user)
   end
 
   def delete_naming(naming)
     result = false
     if !naming.deletable?
       @errors << error(204, "not allowed to delete naming ##{naming.id} from observation ##{naming.observation_id}")
-    elsif !naming.destroy_with_log(@user)
+    elsif !naming.destroy(@user)
       @errors << error(204, "failed to delete naming ##{naming.id} from observation ##{naming.observation_id}")
     else
       result = true
@@ -556,7 +547,7 @@ class ApiController < ApplicationController
   end
 
   def delete_observation(observation)
-    return observation.destroy_with_log(@user)
+    return observation.destroy(@user)
   end
 
   def delete_vote(vote)
@@ -853,12 +844,25 @@ class ApiController < ApplicationController
     return result
   end
 
+  # Create an MoApiException.
   def error(code, msg, fatal=false)
     MoApiException.new(
       :code  => code,
       :msg   => msg,
       :fatal => fatal
     )
+  end
+
+  # Make sure the given exception is an MoApiException.  If not, wrap it in an
+  # MoApiException so that all errors are of the same type. 
+  def convert_error(e, code, msg, *args)
+    if !e.is_a?(MoApiException)
+      s = e.to_s
+      s += "\n" + e.backtrace.join("\n") if !s.match(/\n.*\n.*\n/)
+      s = "#{msg}: #{s}" if msg
+      e = error(code, s, *args)
+    end
+    return e
   end
 
   # Pull parameter out of request if given.
@@ -895,13 +899,13 @@ class ApiController < ApplicationController
     if @ids_param && !@something_besides_ids
       for x in @ids_param.split(',')
         if x.match(/^\d+$/)
-          if !ids.include?(x.to_i)
-            @errors << error(201, "#{type} ##{a} not found")
+          if !ids.include?(x.to_s) && !ids.include?(x.to_i)
+            @errors << error(201, "#{type} ##{x} not found")
           end
         elsif x.match(/^(\d+)-(\d+)$/)
           a, b = $1.to_i, $2.to_i
           a, b = b, a if a > b
-          if !ids.any? {|x| x >= a || x <= b}
+          if !ids.any? {|x| x.to_i >= a || x.to_i <= b}
             @errors << error(201, "no #{type} found between ##{a} and ##{b}")
           end
         end
@@ -957,6 +961,19 @@ class ApiController < ApplicationController
         result = x.to_i
       else
         raise error(102, "#{arg} must be an integer")
+      end
+    end
+    return result
+  end
+
+  # Parse and validate an integer.
+  def parse_set_float(arg)
+    result = nil
+    if x = parse_param(arg)
+      if x.match(/^-?(\d*\.\d+|\d+)$/)
+        result = x.to_f
+      else
+        raise error(102, "#{arg} must be a floating-point")
       end
     end
     return result
@@ -1032,6 +1049,20 @@ class ApiController < ApplicationController
         else
           raise error(102, "#{arg} must be comma-separated list of integer ids")
         end
+      end
+    end
+    return result
+  end
+
+  # Parse and validate a rank (enumerated string).
+  def parse_set_rank(arg)
+    result = nil
+    if x = parse_param(arg)
+      ranks = Name.all_ranks.map {|x| x.to_s.downcase}
+      if ranks.include?(x)
+        result = x.capitalize
+      else
+        raise error(102, "#{arg} must be one of: (#{ranks.join(', ')})")
       end
     end
     return result
@@ -1132,7 +1163,7 @@ class ApiController < ApplicationController
   #   string
   def parse_search(arg, *columns)
     result = []
-    if x = parse_param(:notes)
+    if x = parse_param(arg)
       for col in columns
         result << build_sql(["#{col} LIKE ?", "%#{x}%"])
       end

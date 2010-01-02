@@ -36,6 +36,15 @@ require 'set'
 #     observation_search
 #     location_search
 #
+#     lookup_comment
+#     lookup_image
+#     lookup_location
+#     lookup_name
+#     lookup_observation
+#     lookup_project
+#     lookup_species_list
+#     lookup_user
+#
 #   R users_by_name
 #     users_by_contribution
 #     show_user
@@ -82,6 +91,7 @@ require 'set'
 #     w3c_tests
 #
 #  Helpers:
+#    lookup_general(model, controller, action)
 #    show_selected_observations(title, conditions, order, source=:nothing, links=nil)
 #    email_question(user, target_page, target_obj)
 #    rewrite_url(obj, old_method, new_method)
@@ -103,6 +113,14 @@ class ObserverController < ApplicationController
       :list_observations,
       :list_rss_logs,
       :location_search,
+      :lookup_comment,
+      :lookup_image,
+      :lookup_location,
+      :lookup_name,
+      :lookup_observation,
+      :lookup_project,
+      :lookup_species_list,
+      :lookup_user,
       :news,
       :next_observation,
       :no_ajax,
@@ -287,9 +305,47 @@ class ObserverController < ApplicationController
     end
   end
 
-  # Kass's XML database backend
-  def backend
-    render(:layout => false)
+  def lookup_comment;      lookup_general(Comment,     'comment',      'show_comment');      end
+  def lookup_image;        lookup_general(Image,       'image',        'show_image');        end
+  def lookup_location;     lookup_general(Location,    'location',     'show_location');     end
+  def lookup_name;         lookup_general(Name,        'name',         'show_name');         end
+  def lookup_observation;  lookup_general(Observation, 'observer',     'show_observation');  end
+  def lookup_project;      lookup_general(Project,     'project',      'show_project');      end
+  def lookup_species_list; lookup_general(SpeciesList, 'species_list', 'show_species_list'); end
+  def lookup_user;         lookup_general(User,        'observer',     'show_user');         end
+
+  def lookup_general(model, controller, action)
+    obj = nil
+    id = params[:id].to_s
+    begin
+      if id.match(/^\d+$/)
+        obj = model.find(id)
+      else
+        case model.to_s
+          when 'Name'
+            if parse = Name.parse_name(id)
+              obj = Name.find_by_search_name(parse[3]) ||
+                    Name.find_by_text_name(parse[0])
+            end
+          when 'Location'
+            pattern = id.downcase.gsub(/\W+/, '%')
+            ids = Location.connection.select_values %(
+              SELECT id FROM locations
+              WHERE LOWER(locations.search_name) LIKE '%#{pattern}%'
+            )
+            obj = Location.find(ids.first) if ids.length == 1
+          when 'User'
+            obj = User.find_by_login(id) ||
+                  User.find_by_name(id)
+        end
+      end
+    rescue
+    end
+    if obj
+      redirect_to(:controller => controller, :action => action, :id => obj.id)
+    else
+      raise "Couldn't find any #{model} matching #{id}!"
+    end
   end
 
 #--#############################################################################
@@ -740,7 +796,7 @@ class ObserverController < ApplicationController
       if !check_user_id(@observation.user_id)
         flash_error(:destroy_observation_denied.t)
         redirect_to(:action => 'show_observation', :id => @observation.id)
-      elsif !@observation.destroy_with_log(@user)
+      elsif !@observation.destroy(@user)
         flash_error(:destroy_observation_failed.t)
         redirect_to(:action => 'show_observation', :id => @observation.id)
       else
@@ -963,7 +1019,7 @@ class ObserverController < ApplicationController
       flash_error(:destroy_naming_denied.t)
     elsif !@naming.deletable?
       flash_warning(:destroy_naming_someone_else.t)
-    elsif !@naming.destroy_with_log(@user)
+    elsif !@naming.destroy(@user)
       flash_error(:destroy_naming_failed.t)
     else
       flash_notice(:destroy_naming_success.t)

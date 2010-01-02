@@ -1,5 +1,5 @@
 xml.instruct!(:xml, :version => '1.0')
-xml.response(:xmlns => 'http://mushroomobserver.org/schema.xsd') do
+xml.response(:xmlns => "#{DOMAIN}/schema.xsd") do
   xml.script_version  '1.0'
   xml.script_date     '2009-12-21'
   xml.script_run_date xml_date(@start_time)
@@ -17,13 +17,13 @@ xml.response(:xmlns => 'http://mushroomobserver.org/schema.xsd') do
     xml.errors(:number => @errors.length) do
       i = 1
       for error in @errors
-        xml.error(:id => 1) do
+        xml.error(:id => i) do
           xml.code    error.code
           xml.text    error.title
           xml.details error.msg
           xml.fatal   error.fatal ? 'true' : 'false'
-          i += 1
         end
+        i += 1
       end
     end
   end

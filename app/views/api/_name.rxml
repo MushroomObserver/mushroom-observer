@@ -6,11 +6,14 @@
 details ||= false
 refs    ||= false
 
-xml.name(:id => name.id) do
+xml.name(
+  :id => name.id,
+  :url => "#{DOMAIN}/name/show_name/#{name.id}"
+) do
   xml.text_name  name.text_name
   xml.author     name.author
   xml.citation   name.citation
-  xml.rank       name.rank.to_s
+  xml.rank       name.rank.to_s.downcase
   xml.deprecated name.deprecated ? 'true' : 'false'
 
   if details

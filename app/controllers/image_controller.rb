@@ -368,7 +368,7 @@ class ImageController < ApplicationController
     if verify_user()
       if !check_user_id(@image.user_id)
         redirect_to(:action => 'show_image', :id => @image.id)
-      elsif @image.destroy_with_log(@user)
+      elsif !@image.destroy(@user)
         flash_error :image_destroy_failed.t
         redirect_to(:action => 'show_image', :id => @image.id)
       else

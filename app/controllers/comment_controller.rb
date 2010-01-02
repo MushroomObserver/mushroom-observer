@@ -164,10 +164,11 @@ class CommentController < ApplicationController
   # Outputs: none
   def destroy_comment
     @comment = Comment.find(params[:id])
+    object = @comment.object
     if !check_user_id(@comment.user_id)
       render(:action => 'show_comment')
     else
-      if @comment.destroy_with_log(@user)
+      if @comment.destroy(@user)
         flash_notice :form_comments_destroy_success.t
       else
         flash_error :form_comments_destroy_failed.t

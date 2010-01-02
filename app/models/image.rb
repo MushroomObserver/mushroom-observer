@@ -107,15 +107,15 @@ class Image < ActiveRecord::Base
 
   # Destroy image and log destruction on all objects using it.  (Also change
   # thumbnails to another image whenever necessary.)
-  def destroy_with_log(user)
+  def destroy(user)
     image_name = self.unique_format_name
-    for obs in Observation.find_by_thumb_image_id(self.id, :include => :images)
-      obs.log(:log_image_destroyed, { :user => @user.login,
+    for obs in Observation.find_all_by_thumb_image_id(self.id, :include => :images)
+      obs.log(:log_image_destroyed, { :user => user.login,
         :name => image_name }, true)
       obs.thumb_image = (obs.images - self).first
       obs.save
     end
-    return self.destroy
+    return super()
   end
 
   # Return file name of original image.
@@ -135,17 +135,17 @@ class Image < ActiveRecord::Base
 
   # Return URL for original image.
   def original_url
-    sprintf("http://images.mushroomobserver.org/orig/%d.jpg", self.id)
+    sprintf("%s/orig/%d.jpg", IMAGE_DOMAIN, self.id)
   end
 
   # Return URL for 640x640 image.
   def big_url
-    sprintf("http://images.mushroomobserver.org/640/%d.jpg", self.id)
+    sprintf("%s/640/%d.jpg", IMAGE_DOMAIN, self.id)
   end
 
   # Return URL for thumbnail image.
   def thumbnail_url
-    sprintf("http://images.mushroomobserver.org/thumb/%d.jpg", self.id)
+    sprintf("%s/thumb/%d.jpg", IMAGE_DOMAIN, self.id)
   end
 
   # Read thumbnail into a buffer and return it.

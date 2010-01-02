@@ -26,6 +26,7 @@ config.action_mailer.raise_delivery_errors = false
 config.action_mailer.delivery_method = :file
 
 DOMAIN = 'http://localhost:3000'
+IMAGE_DOMAIN = 'http://localhost:3000/images'
 
 TESTING = false
 
