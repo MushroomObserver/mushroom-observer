@@ -117,7 +117,9 @@ class ApiController < ApplicationController
       when :post :
         raise error(101, "POST method not yet available for #{type}s.") if !respond_to?("post_#{type}")
         @user = authenticate
-        @objects << x if x = send("post_#{type}")
+        if result = send("post_#{type}")
+          @objects << result
+        end
 
       # Lookup, update or delete existing objects.
       when :get, :put, :delete
@@ -563,13 +565,12 @@ class ApiController < ApplicationController
 ################################################################################
 
   def post_comment
-    summary = '.'
-    content = ''
-    object  = nil
-
     summary = parse_set_string(:summary, 100)
     content = parse_set_string(:content)
     object  = parse_set_object(:observation, Observation)
+
+    summary ||= '.'
+    content ||= ''
 
     raise error(102, 'missing content') if !content
     raise error(102, 'missing object')  if !object
@@ -588,54 +589,70 @@ class ApiController < ApplicationController
     return comment
   end
 
-  # def post_image
-  #   now              = Time.now
-  #   url              = nil
-  #   date             = nil
-  #   notes            = ''
-  #   copyright_holder = @user.legal_name
-  #   license          = @user.license
-  #   observation      = nil
-  #
-  #   url              = parse_set_string(:url)
-  #   date             = parse_set_date(:date)
-  #   notes            = parse_set_string(:notes)
-  #   copyright_holder = parse_set_string(:copyright_holder, 100)
-  #   license          = parse_set_object(:license, License)
-  #   observation      = parse_set_object(:observation, Observation)
-  #
-  #   date ||= observation.when if observation
-  #   raise error(102, 'missing url')  if !url
-  #   raise error(102, 'missing date') if !date
-  #
-  #   file = TODO
-  #
-  #   image = Image.new(
-  #     :created          => now,
-  #     :modified         => now,
-  #     :user             => @user,
-  #     :when             => date,
-  #     :notes            => notes,
-  #     :copyright_holder => copyright_holder,
-  #     :license          => license,
-  #     :image            => file
-  #   )
-  #   raise error(202, image.formatted_errors) if !image.save
-  #   observation.add_image_with_log(image, @user) if observation
-  #   return image
-  # end
+  def post_image
+    temp = nil
+
+    now              = Time.now
+    url              = parse_set_string(:url)
+    file             = parse_set_string(:file)
+    date             = parse_set_date(:date)
+    notes            = parse_set_string(:notes)
+    copyright_holder = parse_set_string(:copyright_holder, 100)
+    license          = parse_set_object(:license, License)
+    observation      = parse_set_object(:observation, Observation)
+
+    date             ||= observation.when if observation
+    notes            ||= ''
+    copyright_holder ||= @user.legal_name
+    license          ||= @user.license
+
+    raise error(102, 'missing date') if !date
+    raise error(102, 'cannot use both url and file') if url && file
+    raise error(102, 'only jason can use file') if file && @user.login != 'jason'
+    raise error(102, 'expected file to be "name.jpg"') if file && !file.match(/^[\w\.\-]+\.jpg$/)
+
+    if url
+      temp, header   = load_from_url(url)
+      io             = File.open(temp, 'r')
+      content_length = header['Content-Length']
+      content_type   = header['Content-Type']
+      content_md5    = header['Content-MD5']
+    elsif file
+      file           = "/home/jason/images/#{file}"
+      io             = File.open(file, 'r')
+      content_length = File.size(file)
+      content_type   = 'image/jpeg'
+    else
+      io             = request.body
+      content_length = request.content_length
+      content_type   = request.content_type
+      content_md5    = request.headers['Content-MD5']
+    end
+
+    image = Image.new(
+      :created          => now,
+      :modified         => now,
+      :user             => @user,
+      :when             => date,
+      :notes            => notes,
+      :copyright_holder => copyright_holder,
+      :license          => license,
+      :image            => io,
+      :content_length   => content_length,
+      :content_type     => content_type,
+      :content_md5      => content_md5
+    )
+    raise error(202, image.formatted_errors) if !image.save || !image.save_image
+    observation.add_image_with_log(image, @user) if observation
+    return image
+
+  ensure
+    # Make sure the temp file is deleted.
+    File.delete(temp) if temp
+  end
 
   def post_location
     now   = Time.now
-    name  = nil
-    notes = ''
-    north = nil
-    south = nil
-    east  = nil
-    west  = nil
-    high  = nil
-    low   = nil
-
     name  = parse_set_string(:name, 200)
     notes = parse_set_string(:notes)
     north = parse_set_float(:north)
@@ -644,6 +661,8 @@ class ApiController < ApplicationController
     west  = parse_set_float(:west)
     high  = parse_set_float(:high)
     low   = parse_set_float(:low)
+
+    notes ||= ''
 
     raise error(102, 'missing name')  if !name
     raise error(102, 'missing north') if !north
@@ -671,18 +690,12 @@ class ApiController < ApplicationController
   end
 
   def post_name
-    rank       = nil
-    name_str   = nil
-    author     = nil
-    citation   = nil
-    deprecated = false
-    notes      = {}
-
     rank       = parse_set_rank(:rank)
     name_str   = parse_set_string(:name, 100)
     author     = parse_set_string(:author, 100)
     citation   = parse_set_string(:citation)
     deprecated = parse_set_boolean(:deprecated)
+    notes      = {}
     for f in Name.all_note_fields
       notes[f] = parse_set_string(f)
     end
@@ -729,14 +742,6 @@ class ApiController < ApplicationController
 
   def post_naming
     now         = Time.now
-    name        = nil
-    observation = nil
-    vote        = nil
-    by_sight    = nil
-    used_refs   = nil
-    microscopic = nil
-    chemical    = nil
-
     name        = parse_set_object(:name, Name)
     observation = parse_set_object(:observation, Observation)
     vote        = parse_set_vote(:vote)
@@ -775,14 +780,7 @@ class ApiController < ApplicationController
   end
 
   def post_observation
-    date                   = now = Time.now
-    location               = @user.location
-    specimen               = false
-    is_collection_location = true
-    notes                  = ''
-    thumbnail              = nil
-    images                 = []
-
+    now                    = Time.now
     date                   = parse_set_date(:date)
     location               = parse_set_object(:location, Location)
     specimen               = parse_set_boolean(:specimen)
@@ -790,6 +788,11 @@ class ApiController < ApplicationController
     notes                  = parse_set_string(:notes)
     thumbnail              = parse_set_object(:thumbnail, Image)
     images                 = parse_set_objects(:images, Image)
+
+    date                   ||= now
+    location               ||= @user.location
+    is_collection_location ||= true
+    notes                  ||= ''
 
     raise error(102, 'missing location') if !location
 
@@ -811,9 +814,6 @@ class ApiController < ApplicationController
   end
 
   def post_vote
-    naming = nil
-    vote   = nil
-
     naming = parse_set_object(:naming, Naming)
     value  = parse_set_vote(:value)
 
@@ -833,13 +833,13 @@ class ApiController < ApplicationController
     auth_code = parse_param(:auth_code)
     begin
       user = User.find(auth_id.to_i)
-      if user.auth_code == auth_code
-        result = user
-      else
-        raise error(301, "invalid auth_code: '#{auth_code}'")
-      end
     rescue
       raise error(301, "invalid auth_id: '#{auth_id}'")
+    end
+    if user.auth_code == auth_code
+      result = user
+    else
+      raise error(301, "invalid auth_code: '#{auth_code}'")
     end
     return result
   end
@@ -854,7 +854,7 @@ class ApiController < ApplicationController
   end
 
   # Make sure the given exception is an MoApiException.  If not, wrap it in an
-  # MoApiException so that all errors are of the same type. 
+  # MoApiException so that all errors are of the same type.
   def convert_error(e, code, msg, *args)
     if !e.is_a?(MoApiException)
       s = e.to_s
@@ -996,7 +996,7 @@ class ApiController < ApplicationController
   def parse_set_string(arg, length=nil)
     result = nil
     if x = parse_param(arg)
-      if length && x.length <= length
+      if !length || x.length <= length
         result = x
       else
         raise error(102, "#{arg} must be #{length} characters or less")
@@ -1187,6 +1187,27 @@ class ApiController < ApplicationController
   # method in ActiveRecord.
   def build_sql(*args)
     ActiveRecord::Base.sanitize_sql_array_public(*args)
+  end
+
+  # Download a file via HTTP given a URL.  Save it chunk-wise into a temp file,
+  # return the name of the file, along with pertinent header information.
+  def load_from_url(url)
+    tempfile = "#{RAILS_ROOT}/tmp/api_upload.#{$$}"
+    header = {}
+    uri = URI.parse(url)
+    File.open(tempfile, 'w') do |fh|
+      Net::HTTP.new(uri.host, uri.port).start do |http|
+        http.request_get(uri.request_uri) do |response|
+          response.read_body do |chunk|
+            fh.write(chunk)
+          end
+          header['Content-Length'] = response['Content-Length'].to_i
+          header['Content-Type']   = response['Content-Type']
+          header['Content-MD5']    = response['Content-MD5']
+        end
+      end
+    end
+    return [tempfile, header]
   end
 end
 

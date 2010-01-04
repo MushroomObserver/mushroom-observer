@@ -16,16 +16,19 @@ class SearchStateTest < Test::Unit::TestCase
   end
 
   def test_cleanup
-    s11 = SearchState.new(:access_count => 0, :timestamp => 1.minute.ago)
-    s12 = SearchState.new(:access_count => 0, :timestamp => 1.hour.ago + 1.minute)
-    s13 = SearchState.new(:access_count => 0, :timestamp => 1.hour.ago - 1.minute)
-    s14 = SearchState.new(:access_count => 0, :timestamp => 1.day.ago + 1.minute)
-    s15 = SearchState.new(:access_count => 0, :timestamp => 1.day.ago - 1.minute)
-    s21 = SearchState.new(:access_count => 1, :timestamp => 1.minute.ago)
-    s22 = SearchState.new(:access_count => 1, :timestamp => 1.hour.ago + 1.minute)
-    s23 = SearchState.new(:access_count => 1, :timestamp => 1.hour.ago - 1.minute)
-    s24 = SearchState.new(:access_count => 1, :timestamp => 1.day.ago + 1.minute)
-    s25 = SearchState.new(:access_count => 1, :timestamp => 1.day.ago - 1.minute)
+    # This avoids any possible difference in time zone between mysql and you.
+    now = DateTime.parse(SearchState.connection.select_value("SELECT NOW()"))
+
+    s11 = SearchState.new(:access_count => 0, :timestamp => now - 1.minute)
+    s12 = SearchState.new(:access_count => 0, :timestamp => now - 1.hour + 1.minute)
+    s13 = SearchState.new(:access_count => 0, :timestamp => now - 1.hour - 1.minute)
+    s14 = SearchState.new(:access_count => 0, :timestamp => now - 1.day + 1.minute)
+    s15 = SearchState.new(:access_count => 0, :timestamp => now - 1.day - 1.minute)
+    s21 = SearchState.new(:access_count => 1, :timestamp => now - 1.minute)
+    s22 = SearchState.new(:access_count => 1, :timestamp => now - 1.hour + 1.minute)
+    s23 = SearchState.new(:access_count => 1, :timestamp => now - 1.hour - 1.minute)
+    s24 = SearchState.new(:access_count => 1, :timestamp => now - 1.day + 1.minute)
+    s25 = SearchState.new(:access_count => 1, :timestamp => now - 1.day - 1.minute)
 
     s11.save
     s12.save

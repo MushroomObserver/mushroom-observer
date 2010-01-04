@@ -176,17 +176,22 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_update_licenses
     example_image = @agaricus_campestris_image
-    user_id = example_image.user_id
+    user_id          = example_image.user_id
+    copyright_holder = example_image.copyright_holder
+
     target_license = example_image.license
-    new_license = @ccwiki30
+    new_license    = @ccwiki30
     assert_not_equal(target_license, new_license)
-    target_count = Image.find_all_by_user_id_and_license_id(user_id, target_license.id).length
+
+    target_count = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
+    new_count    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
     assert(target_count > 0)
-    new_count = Image.find_all_by_user_id_and_license_id(user_id, new_license.id).length
+    assert(new_count == 0)
+
     params = {
       :updates => {
         target_license.id.to_s => {
-          example_image.copyright_holder => new_license.id.to_s
+          copyright_holder => new_license.id.to_s
         }
       }
     }
@@ -194,9 +199,10 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_response :success
     assert_template 'license_updater'
     assert_equal(10, @rolf.reload.contribution)
-    target_count_after = Image.find_all_by_user_id_and_license_id(user_id, target_license.id).length
+
+    target_count_after = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
+    new_count_after    = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, new_license.id, copyright_holder).length
     assert(target_count_after < target_count)
-    new_count_after = Image.find_all_by_user_id_and_license_id(user_id, new_license.id).length
     assert(new_count_after > new_count)
     assert_equal(target_count_after + new_count_after, target_count + new_count)
   end
@@ -257,9 +263,10 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_update_image
     image = @agaricus_campestris_image
-    obs = image.observations[0]
+    obs = image.observations.first
     assert(obs)
     assert(obs.rss_log.nil?)
+
     params = {
       "id" => image.id,
       "image" => {
@@ -270,10 +277,12 @@ class ImageControllerTest < Test::Unit::TestCase
         "notes" => ""
       }
     }
-    post_requires_login :edit_image, params, false
+    post_requires_login(:edit_image, params, false)
     assert_redirected_to(:controller => "image", :action => "show_image")
     assert_equal(10, @rolf.reload.contribution)
+
     obs = Observation.find(obs.id)
+    assert(obs.rss_log)
     assert(obs.rss_log.notes.include?('log_image_updated'))
     assert(obs.rss_log.notes.include?("user=#{obs.user.login}"))
     assert(obs.rss_log.notes.include?("name=#{RssLog.escape(image.unique_format_name)}"))

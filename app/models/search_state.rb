@@ -197,13 +197,13 @@ class SearchState < ActiveRecord::Base
   def self.cleanup
     self.connection.delete %(
       DELETE FROM search_states
-      WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) AND
-            (timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY) OR access_count = 0)
+      WHERE access_count = 0 AND timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) OR
+            access_count > 0 AND timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY)
     )
     self.connection.delete %(
       DELETE FROM sequence_states
-      WHERE timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) AND
-            (timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY) OR access_count = 0)
+      WHERE access_count = 0 AND timestamp < DATE_SUB(NOW(), INTERVAL 1 HOUR) OR
+            access_count > 0 AND timestamp < DATE_SUB(NOW(), INTERVAL 1 DAY)
     )
   end
 end

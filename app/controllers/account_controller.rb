@@ -272,6 +272,7 @@ class AccountController < ApplicationController
               logger.error("Unable to upload image")
               flash_error :profile_invalid_image. \
                 t(:name => (name ? "'#{name}'" : '???'))
+              flash_object_errors(image)
             else
               @user.image = image
               flash_notice :profile_uploaded_image. \

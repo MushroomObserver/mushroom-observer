@@ -286,6 +286,7 @@ class ImageController < ApplicationController
         logger.error("Unable to upload image")
         flash_error :profile_invalid_image. \
           t(:name => (name ? "'#{name}'" : '???'))
+        flash_object_errors(@image)
       else
         @observation.add_image_with_log(@image, @user)
         flash_notice :profile_uploaded_image. \
@@ -529,10 +530,11 @@ class ImageController < ApplicationController
           for copyright_holder, new_id in value
             new_id = new_id.to_i
             if current_id != new_id
-              for image in Image.find_all_by_copyright_holder_and_license_id(copyright_holder, current_id)
-                image.license_id = new_id
-                image.save
-              end
+              Image.connection.update %(
+                UPDATE images SET license_id = #{new_id}
+                WHERE copyright_holder = "#{copyright_holder.gsub('"','\\"')}"
+                  AND license_id = #{current_id} AND user_id = #{@user.id}
+              )
             end
           end
         end

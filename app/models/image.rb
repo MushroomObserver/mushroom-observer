@@ -39,16 +39,16 @@ class Image < ActiveRecord::Base
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
-  attr_accessor :img_dir
+  attr_accessor :img_dir, :content_length, :content_md5
 
   # Returns: array of symbols.  Essentially a constant array.
   def self.all_qualities()
     [:unreviewed, :low, :medium, :high]
   end
-  
+
   # Create Textile title for image from observations, appending image id to
-  # guarantee uniqueness. 
-  def unique_format_name 
+  # guarantee uniqueness.
+  def unique_format_name
     obs_names = []
     self.observations.each {|o| obs_names.push(o.format_name)}
     title = obs_names.uniq.sort.join(' & ')
@@ -60,7 +60,7 @@ class Image < ActiveRecord::Base
   end
 
   # Create plain-text title for image from observations, appending image id to
-  # guarantee uniqueness. 
+  # guarantee uniqueness.
   def unique_text_name
     obs_names = []
     self.observations.each {|o| obs_names.push(o.text_name)}
@@ -72,18 +72,43 @@ class Image < ActiveRecord::Base
     end
   end
 
-  # Check uploaded file and make note of its temporary location.  Apache waits
+  # Check uploaded file and make note of its temporary location.  It can take
+  # a variety of argument types.  All must provide a few capabilities:
+  #   image = file
+  #   file.content_type
+  #   file.content_length or size
+  #
+  # Apache waits
   # for all uploads to arrive before passing the request off to Rails.  It
-  # stores them in /tmp somewhere until Rails is done with them. 
+  # stores them in /tmp somewhere until Rails is done with them.
+  # (file is an ActionController::UploadedTempfile, which has
+  # the method "original_filename", and inherits from Tempfile, which
+  # has the methods "size", "path", "delete", etc. and inherits in turn
+  # from File...)
   def image=(file)
-    self.content_type = file.content_type.chomp
-    @img_dir = IMG_DIR
-    # (file is an ActionController::UploadedTempfile, which has
-    # the method "original_filename", and inherits from Tempfile, which
-    # has the methods "size", "path", "delete", etc. and inherits in turn
-    # from File...)
     @img = file
-    @img = :too_big if @img.size > IMAGE_UPLOAD_MAX_SIZE
+
+    # This is the default.  Doing it this way allows us to override the default
+    # while testing.
+    self.img_dir = IMG_DIR
+
+    # Try to determine the file size.
+    if @img.respond_to?(:content_length)
+      self.content_length = @img.content_length
+    elsif @img.respond_to?(:size)
+      self.content_length = @img.size
+    else
+      # require caller to set it explicitly
+    end
+
+    # Try to determine the file type.
+    if @img.respond_to?(:content_type)
+      self.content_type = file.content_type.chomp
+    else
+      # require caller to set it explicitly
+    end
+
+    return @img
   end
 
   # Move uploaded file into place and initiate resizing and transfers.
@@ -91,16 +116,57 @@ class Image < ActiveRecord::Base
   def save_image
     result = false
     if @img
-      begin
-        raise(SystemCallError, "Don't move my test images!!") if TESTING
-        result = true  if File.rename(@img.path, self.original_image) and
-                          File.chmod(0644, self.original_image) == 1
-      rescue SystemCallError
-        result = true if system('cp', @img.path, self.original_image)
-      rescue => err
+
+      # Image is stored in a local file.  This is what Apache does with them.
+      if @img.is_a?(ActionController::UploadedTempfile)
+        begin
+          raise(SystemCallError, "Don't move my test images!!") if TESTING
+          result = true if File.rename(@img.path, original_image) and
+                           File.chmod(0644, original_image) == 1
+        rescue SystemCallError
+          result = true if system('cp', @img.path, original_image)
+        rescue => e
+          errors.add(:image, e.to_s)
+          result = false
+        end
+
+      # Image is supplied in a input stream.  This can happen in a variety of
+      # cases, including during testing, and also when the image comes in as
+      # the body of a request.
+      elsif @img.is_a?(IO) || @img.is_a?(StringIO)
+        begin
+          File.open(original_image, 'w') do |fh|
+            FileUtils.copy_stream(@img, fh)
+          end
+          result = true
+        rescue => e
+          errors.add(:image, e.to_s)
+          result = false
+        end
+
+      # Raise an error for all other cases.
+      else
+        errors.add(:image, "Unexpected internal I/O type: #{@img.class}")
         result = false
       end
-      result = system("script/process_image #{self.id}&") if result
+
+      if result
+        # Check MD5 sum if supplied with image.
+        if content_md5 && !(
+           (sum = File.read("| md5sum #{original_image}")) &&
+           (sum.split.first == content_md5)
+        )
+          errors.add(:image, "md5 sum doesn't match\ngot:    #{sum.split.first}\nexpect: #{content_md5}]")
+          result = false
+        end
+
+#         # If we successfully received the raw image, spawn process to resize it
+#         # and transfer it to image server.
+#         if !system("script/process_image #{self.id}&")
+#           errors.add(:image, 'Something went wrong when spawning process_image...')
+#           result = false
+#         end
+      end
     end
     return result
   end
@@ -186,9 +252,7 @@ class Image < ActiveRecord::Base
       errors.add(:content_type, :validate_image_content_type_too_long.t)
     end
 
-    if @img == :missing
-      errors.add(:image, :validate_image_file_missing.t)
-    elsif @img == :too_big
+    if content_length.to_i > IMAGE_UPLOAD_MAX_SIZE
       errors.add(:image, :validate_image_file_too_big.t(:max => IMAGE_UPLOAD_MAX_SIZE.to_s.sub(/\d{6}$/, 'Mb')))
     end
 
