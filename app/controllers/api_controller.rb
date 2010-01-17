@@ -36,16 +36,12 @@
 #  described below.
 #
 #  The "get_xxx" methods are responsible for parsing the "search" parameters
-#  and returning enough information to create a SQL query:
+#  and returning enough information to create a SQL query.  For example,
 #
-#    conditions,
-#    tables,
-#    joins,
-#    max_num_per_page =
-#      get_observation()
+#    get_observation() returns [conditions, tables, joins, max_num_per_page]
 #
 #  The "put_xxx" methods are responsible for parsing the "set" parameters and
-#  returning a hash that will be passed into object.write_attributes:
+#  returning a hash that will be passed into object.write_attributes. 
 #
 #    assigns =
 #      put_observation()
