@@ -1,0 +1,20 @@
+<%
+  @title = :show_notifications_title.t(:user => @user.legal_name)
+
+  if @observation
+    new_tab_set do
+      add_tab(:app_show_observation.t,
+              :controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    end
+  end
+%>
+
+<% odd_or_even = 0
+for notification, naming in @data
+  odd_or_even = 1 - odd_or_even %>
+  <p>
+    <div class="ListLine<%= odd_or_even %>" style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
+      <%= notification.calc_note(:user => @user, :naming => naming).tp %>
+    </div>
+  </p>
+<% end %>

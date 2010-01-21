@@ -1,0 +1,143 @@
+<%
+  @title = :show_user_title.t(:user => @user_data[:name])
+
+  id   = @user_data[:id]
+  name = @user_data[:name]
+
+  links = {
+    'images'        => url_for(:controller => 'image', :action => 'images_by_user', :id => id),
+    'species_lists' => url_for(:controller => 'species_list', :action => 'species_lists_by_user', :id => id),
+    'comments'      => url_for(:controller => 'comment', :action => 'show_comments_by_user', :id => id),
+    'observations'  => url_for(:controller => 'observer', :action => 'show_user_observations', :id => id),
+    'authors_names' => url_for(:controller => 'name', :action => 'names_by_author', :id => id),
+    'editors_names' => url_for(:controller => 'name', :action => 'names_by_editor', :id => id)
+  }
+
+  new_tab_set do
+    add_tab(:show_user_contributors.t, :controller => 'observer', :action => 'users_by_contribution')
+    if @show_user == @user
+      add_tab(:show_user_your_observations.t, links['observations'])
+      add_tab(:show_user_comments_for_you.t, links['comments'])
+      add_tab(:show_user_your_notifications.t, :controller => "interest", :action => "list_interests")
+      add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
+      add_tab(:app_preferences.t, :controller => "account", :action => "prefs")
+    else
+      add_tab(:show_user_observations_by.t(:name => name), links['observations'])
+      add_tab(:show_user_comments_for.t(:name => name), links['comments'])
+      add_tab(:show_user_email_to.t(:name => name), :controller => "observer", :action => "ask_user_question", :id => id)
+    end
+  end
+
+  if is_in_admin_mode?
+    new_tab_set do
+      add_tab(:change_user_bonuses.t, :controller => "observer", :action => "change_user_bonuses", :id => @show_user.id)
+      add_tab(:user_alert_create_alert.t, :controller => "account", :action => "create_alert", :id => @show_user.id)
+    end
+  end
+%>
+
+<%= if @show_user.image
+  link_to(image_tag(sprintf("thumb/%d.jpg", @show_user.image_id), :border => 0, :style => "float:right"),
+          :controller => "image", :action => "show_image", :id => @show_user.image_id)
+end %>
+
+<b><%= :show_user_joined.t %>:</b> <%= @show_user.verified %><br/>
+<% if @show_user.location %>
+  <b><%= :show_user_primary_location.t %>:</b> <%= location_link(nil, @show_user.location.id) %><br/>
+<% end %>
+<% if @show_user.mailing_address != '' %>
+  <b><%= :show_user_mailing_address.t %>:</b> <%= @show_user.mailing_address %><br/>
+<% end %>
+<% if !@show_user.notes.empty? %>
+  <br/>
+<% end %>
+<%= if !@show_user.notes.empty?
+  sanitize(@show_user.notes).tpl
+end %>
+
+<center>
+  <table border="0" width="100%" style="clear:right; padding:10px">
+    <tr align="center">
+      <% obs_length = 0
+      if @observations
+        obs_length = @observations.length
+      end
+
+      if obs_length > 3 %>
+        <td align="center">
+          <% for obs in @observations[3,3] %>
+            <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id), :class => 'site_stats_image'),
+                        :action => 'show_observation', :id => obs.id) %><br/>
+          <% end %>
+        </td>
+      <% end %>
+
+      <td valign="top" width="50%">
+        <table cellpadding="5" cellspacing="5" border="0">
+          <% total = 0
+          for field in SiteData::ALL_FIELDS
+            count = @user_data[field]
+            if count %>
+              <tr>
+                <td>
+                  <%= str = "site_stats_#{field}".to_sym.t
+                  if url = links[field.to_s]
+                    link_to(str, url)
+                  else
+                    str
+                  end %>
+                </td>
+                <td>
+                  <%= count %>*<%= SiteData::FIELD_WEIGHTS[field]%>
+                </td>
+                <td>=</td>
+                <td align="right">
+                  <% weight = count*SiteData::FIELD_WEIGHTS[field]
+                  total += weight %>
+                  <%= weight %>
+                </td>
+              </tr>
+            <% end %>
+          <% end
+          if @show_user.bonuses
+            for points, reason in @show_user.bonuses
+              total += points.to_i %>
+              <tr>
+                <td colspan="2"><%= reason.to_s.tl %></td>
+                <td>=</td>
+                <td align="right"><%= points.to_i %></td>
+              </tr>
+            <% end
+          end
+          if total > 0 %>
+            <tr>
+              <td colspan="4">
+                <hr/>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <%= :show_user_total.t %>
+              </td>
+              <td></td>
+              <td>=</td>
+              <td align="right">
+                <%= total %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      </td>
+
+      <% if obs_length > 0 %>
+        <td align="center">
+          <% for obs in @observations[0,3] %>
+            <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id), :class => 'site_stats_image'),
+                        :action => 'show_observation', :id => obs.id) %><br/>
+          <% end %>
+        </td>
+      <% end %>
+
+    </tr>
+  </table>
+</center>

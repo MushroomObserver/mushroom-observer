@@ -1,0 +1,13 @@
+xml.results(:number => @objects.length) do
+  for object in @objects
+    if @detail == :none
+      xml.name(:id => object.id)
+    else
+      render_xml_partial(xml, :name, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+        :refs   => @detail == :high,
+      })
+    end
+  end
+end

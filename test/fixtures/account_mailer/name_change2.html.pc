@@ -1,0 +1,26 @@
+From: news@mushroomobserver.org
+Reply-To: no-reply@mushroomobserver.org
+To: mary@collectivesource.com
+Bcc: mo@collectivesource.com
+Subject: [MO] Petigera Has Been Changed
+Mime-Version: 1.0
+Content-Type: text/html; charset=utf-8
+<html>
+<head>
+<title>Mushroom Observer: Petigera Has Been Changed</title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<div class="textile"><h2><strong>Name was Created</strong></h2>
+<p>The Name <u><i>Petigera</i> (40)</u> was created.</p></div>
+<div class="textile"><p><strong>Time:</strong> 2009-01-02 01:01:01<br/><strong>By:</strong> Tricky Dick (dick)</p></div>
+<div class="textile"><p>Here are some handy links:</p></div>
+<ul type=none>
+<li>Show this Name: <a href="http://localhost:3000/name/show_name/40">http://localhost:3000/name/show_name/40</a></li>
+<li>I'm not interested in this Name: <a href="http://localhost:3000/interest/set_interest?id=40&type=Name&user=2&state=-1">http://localhost:3000/interest/set_interest?id=40&type=Name&user=2&state=-1</a></li>
+<li>Stop sending me email like this: <a href="http://localhost:3000/account/no_email_names_all/2">http://localhost:3000/account/no_email_names_all/2</a></li>
+<li>Change your preferences: <a href="http://localhost:3000/account/prefs/2">http://localhost:3000/account/prefs/2</a></li>
+<li>Latest changes at Mushroom Observer: <a href="http://localhost:3000">http://localhost:3000</a></li>
+</ul>
+<br/>
+</body>
+</html>

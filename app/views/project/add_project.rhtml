@@ -1,0 +1,12 @@
+<%
+  @title ||= :add_project_title.t
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :project.l), :action => :list_projects)
+  end
+%>
+
+<% form_tag(:action => 'add_project') do %>
+  <br/><center><%= submit_tag :app_create.l %></center><br/>
+  <%= render(:partial => 'form_projects') %>
+<% end %>

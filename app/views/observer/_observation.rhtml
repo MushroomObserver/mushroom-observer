@@ -1,0 +1,49 @@
+<table cellpadding="10" width="100%">
+  <tr>
+    <td align="center" valign="middle" width="160">
+      <%= image = observation.thumb_image
+        if image
+          link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
+                  :action => 'show_observation', :id => observation.id, :params => search_params)
+        end
+      %>
+    </td>
+<% if vertical_layout %>
+  </tr>
+  <tr>
+    <td align="center" valign="middle">
+<% else %>
+    <td valign="middle">
+<% end %>
+
+      <span class="ListName">
+        <%= link_to(observation.unique_format_name.t, :action => 'show_observation',
+                    :id => observation.id, :params => search_params) %>
+      </span><br/>
+
+      <span class="ListWhere">
+        <%= location_link(observation.where, observation.location_id) %>
+      </span><br/>
+
+      <span class="ListWhen"><%= observation.when %>:</span>
+      <span class="ListWho"><%= user_link(observation.user) %></span><br/>
+
+      <% rss = observation.rss_log
+      if rss && rss.notes
+        logs = rss.parse_log
+        if logs.first[2] > observation.created + 10.seconds %>
+          <span>
+            <%= key, args, time = logs.first
+            if match = key.to_s.match(/^(log_image_created|reused|removed|destroyed)/)
+              # This will remove redundant user and image title stuff.
+              "#{key}0".to_sym.t(args)
+            else
+              key.t(args)
+            end %>
+          </span>
+        <% end %>
+      <% end %>
+
+    </td>
+  </tr>
+</table>

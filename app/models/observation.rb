@@ -1,0 +1,768 @@
+#
+#  = Observation Model
+#
+#  An Observation is a mushroom seen at a certain Location and time, as
+#  recorded by a User.  This is at the core of the site.  It can have any
+#  number of Image's, Naming's, Comment's, Interest's.
+#
+#  == Voting
+#
+#  Voting is still in a state of flux.  At the moment User's create Naming's
+#  and other User's Vote on them.  We combine the Vote's for each Naming, cache
+#  the Vote for each Naming in the Naming.  However no Naming necessarily wins
+#  -- instead Vote's are tallied for each Synonym (see calc_consensus for full
+#  details).  Thus the accepted Name of the winning Synonym is cached in the
+#  Observation along with its winning Vote score.
+#
+#  == Location
+#
+#  An Observation can belong to either a defined Location (+location+, a
+#  Location instance) or an undefined one (+where+, just a String), and even
+#  occasionally both (see below).  To make this a little easier, you can refer
+#  to +place_name+ instead, which returns the name of whichever is present.
+#
+#  *NOTE*: We were clearly having trouble making up our mind whether or not to
+#  set +where+ when +location+ was present.  The only safe heuristic is to use
+#  +location+ if it's present, then fall back on +where+ -- +where+ may or may
+#  not be set (or even accurate?) if +location+ is present.
+#
+#  *NOTE*: If a mushroom is seen at a mushroom fair or an herbarium, we don't
+#  necessarily know where the mushroom actually grew.  In this case, we enter
+#  the mushroom fair / herbarium as the +place_name+ and set the special flag
+#  +is_collection_location+ to false.
+#
+#  == Attributes
+#
+#  id::                     Locally unique numerical id, starting at 1.
+#  sync_id::                Globally unique alphanumeric id, used to sync with remote servers.
+#  created::                Date/time it was first created.
+#  modified::               Date/time it was last modified.
+#  user_id::                User that created it.
+#  when::                   Date it was seen.
+#  where::                  Where it was seen (just a String).
+#  location::               Where it was seen (Location).
+#  is_collection_location:: Is this where it was growing?
+#  name::                   Consenus Name (never deprecated, never nil).
+#  vote_cache::             Cache Vote score for the winning Name.
+#  thumb_image::            Image to use as thumbnail (if any).
+#  specimen::               Does User have a specimen available?
+#  notes::                  Arbitrary extra notes supplied by User.
+#  num_views::              Number of times it has been viewed.
+#  last_view::              Last time it was viewed.
+#  ==== "Fake" attributes
+#  idstr::                  Used by <tt>observer/reuse_image.rhtml</tt>.
+#  place_name::             Wrapper on top of +where+ and +location+.
+#
+#  == Class methods
+#
+#  refresh_vote_cache::     Refresh cache for all Observation's.
+#
+#  == Instance methods
+#
+#  comments::               List of Comment's attached to this Observation.
+#  interests::              List of Interest's attached to this Observation.
+#  species_lists::          List of SpeciesList's that contain this Observation.
+#  rss_log::                RssLog attached to this Observation.
+#  log::                    Add message to RssLog (creating it if necessary).
+#  orphan_log::             Same as log except Observation is about to go away.
+#  notify_users::           Send emails to User's interested in this Observation.
+#  ==== Namings
+#  name::                   Conensus Name instance. (never nil)
+#  text_name::              Plain text.
+#  format_name::            Textilized.
+#  unique_text_name::       Plain text, with id added to make unique.
+#  unique_format_name::     Textilized, with id added to make unique.
+#  namings::                List of Naming's proposed for this Observation.
+#  name_been_proposed?::    Has someone proposed this Name already?
+#  consensus_naming::       Guess which Naming is responsible for consensus.
+#  review_status::          Decide what the review status is for this Observation.
+#  calc_consensus::         Calculate and cache the consensus naming/name.
+#  ==== Images
+#  images::                 List of Image's attached to this Observation.
+#  add_image::              Attach an Image.
+#  add_image_by_id::        Attach an Image by id.
+#  add_image_with_log::     Attach an Image and log it.
+#  remove_image::           Remove an Image.
+#  remove_image_by_id::     Remove an Image by id.
+#
+#  == Callbacks
+#
+#  notify_users_after_change::  After save: call notify_users (if important).
+#  log_destruction::            Before destroy: log destruction.
+#  notify_users_after_destroy:: After destroy: call notify_users.
+#  destroy_dependents::         After destroy: destroy Naming's.
+#  add_spl_callback::           After add: update contribution.
+#  remove_spl_callback::        After remove: update contribution.
+#
+################################################################################
+
+class Observation < ActiveRecord::MO
+  belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
+  belongs_to :name      # (used to cache consensus name)
+  belongs_to :location
+  belongs_to :user
+
+  has_one  :rss_log
+  has_many :comments,  :as => :object, :dependent => :destroy
+  has_many :interests, :as => :object, :dependent => :destroy
+
+  # DO NOT use :dependent => :destroy -- this causes it to recalc the
+  # consensus several times and send bogus emails!!
+  has_many :namings
+
+  has_and_belongs_to_many :images, :order => "id"
+  has_and_belongs_to_many :species_lists, :after_add => :add_spl_callback,
+                                          :before_remove => :remove_spl_callback
+
+  after_save     :notify_users_after_change
+  before_destroy :log_destruction
+  after_destroy  :notify_users_after_destroy
+  after_destroy  :destroy_dependents
+
+  # Log change to the observation.  Creates new RssLog if necessary.
+  #
+  #    # Log that it was changed by @user, and "touch" the log so it appears
+  #    # at the top of the RSS feed.
+  #    obs.log(:log_observation_updated)
+  #
+  def log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.add_with_date(*args)
+  end
+
+  # Log change to the observation that's about to be deleted.  Creates new
+  # rss_log if necessary.  Note, there is no reason to use this outside of
+  # the callback +log_destruction+, right?
+  #
+  #   # Log destruction of the Observation (can be destroyed already I think).
+  #   orphan_log(:log_observation_destroyed, { :user => @user.login })
+  #
+  def orphan_log(*args)
+    self.rss_log ||= RssLog.new
+    self.rss_log.orphan(self.format_name, *args)
+  end
+
+  # Always returns empty string.  (Used by
+  # <tt>observer/reuse_image.rhtml</tt>.)
+  def idstr
+    ''
+  end
+
+  # Adds error if couldn't find image with the given id.  (Used by
+  # <tt>observer/reuse_image.rhtml</tt>.)
+  def idstr=(id_field)
+    id = id_field.to_i
+    img = Image.find(:id => id)
+    unless img
+      errors.add(:thumb_image_id, :validate_observation_thumb_image_id_invalid.t)
+    end
+  end
+
+  # Abstraction over +where+ and +location.display_name+.  Returns Location
+  # name as a string, preferring +location+ over +where+ wherever both exist.
+  def place_name
+    if location
+      location.display_name
+    else
+      self.where
+    end
+  end
+
+  # Set both +where+ and +location+.  If given Location doesn't exist, it sets
+  # +location+ to nil.
+  def place_name=(where)
+    self.where = where
+    self.location = Location.find_by_display_name(where)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Namings
+  #
+  ##############################################################################
+
+  # Name in plain text, never nil.
+  def text_name
+    name.search_name
+  end
+
+  # Name in plain text with id to make it unique, never nil.
+  def unique_text_name
+    str = name.search_name
+    "%s (%s)" % [str, id]
+  end
+
+  # Textile-marked-up name, never nil.
+  def format_name
+    name.observation_name
+  end
+
+  # Textile-marked-up name with id to make it unique, never nil.
+  def unique_format_name
+    str = name.observation_name
+    "%s (%s)" % [str, id]
+  end
+
+  ##############################################################################
+
+  # Has anyone proposed a given Name yet for this observation?
+  def name_been_proposed?(name)
+    namings.select {|n| n.name == name}.length > 0
+  end
+
+  # Try to guess which Naming is responsible for the consensus.  This will
+  # always return a Naming, no matter how ambiguous, unless there are no
+  # namings.
+  def consensus_naming
+    result = nil
+
+    # First, get the Naming(s) for this Name, if any exists.
+    matches = namings.select {|n| n.name_id == name_id}
+
+    # If not, it means that a deprecated Synonym won.  Look up all Namings
+    # for Synonyms of the consensus Name.
+    if matches == [] && name && name.synonym
+      synonyms = name.synonym.names
+      matches = namings.select {|n| synonyms.include? n.name}
+    end
+
+    # Only one match -- easy!
+    if matches.length == 1
+      result = matches.first
+
+    # More than one match: take the one with the highest vote.
+    elsif best_naming = matches.first
+      best_value = matches.first.vote_cache
+      for naming in matches
+        if naming.vote_cache > best_value
+          best_naming = naming
+          best_value  = naming.vote_cache
+        end
+      end
+      result = best_naming
+    end
+
+    return result
+  end
+
+  # Return the review status based on the Vote's on the consensus Name by
+  # current reviewers.  Possible return values:
+  #
+  # unreviewed:: No reviewers have voted for the consensus.
+  # inaccurate:: Some reviewer doubts the consensus (vote.value < 0).
+  # unvetted::   Some reviewer is not completely confident in this naming (vote.value < Vote#maximum_vote).
+  # vetted::     All reviewers that have voted on the current consensus fully support this name (vote.value = Vote#maximum_vote).
+  #
+  # *NOTE*: It probably makes sense to cache this result at some point.
+  #
+  # *NOTE*: This checks all Vote's for Synonym Naming's, taking each reviewer's
+  # highest Vote (if they voted for multiple Synonym's).
+  #
+  def review_status
+
+    # Get list of Name ids we care about.
+    name_ids = [name_id]
+    if name.synonym_id
+      name_ids = Name.connection.select_values %(
+        SELECT `id` FROM `names` WHERE `synonym_id` = '#{synonym_id}'
+      )
+    end
+
+    # Get list of User ids for reviewers.
+    group = UserGroup.find_by_name('reviewers')
+    user_ids = User.connection.select_values %(
+      SELECT `user_id` FROM `user_groups_users`
+      WHERE `user_group_id` = #{group.id}
+    )
+
+    # Get all the reviewers' Vote's for these Name's.
+    # Order of conditions makes no difference: query times are around 0.05 sec.
+    data = Vote.connection.select_rows %(
+      SELECT vote.user_id, vote.value
+      FROM `votes`, `namings`
+      WHERE votes.observation_id = #{id} AND
+            votes.naming_id = namings.id AND
+            namings.name_id IN (#{name_ids.map(&:to_s).uniq.join(',')}) AND
+            votes.user_id IN (#{user_ids.map(&:to_s).uniq.join(',')})
+    )
+
+    # Get highest vote for each User.
+    votes = {}
+    for user_id, value in data
+      value = value.to_f
+      if votes[user_id]
+        votes[user_id] = value if votes[user_id] < value
+      else
+        votes[user_id] = value
+      end
+    end
+
+    # Apply heuristics to determine review status.
+    status = :unreviewed
+    v100 = Vote.maximum_vote.to_f
+    for value in votes.values
+      if value < 0
+        status = :inaccurate
+        break
+      elsif status != :inaccurate
+        if value != v100
+          status = :unvetted
+        elsif status == :unreviewed
+          status = :vetted
+        end
+      end
+    end
+
+    return status
+  end
+
+  # Admin tool that refreshes the vote cache for all observations with a vote.
+  def self.refresh_vote_cache
+    for o in Observation.find(:all)
+      o.calc_consensus
+    end
+  end
+
+  ##############################################################################
+
+  # Get the community consensus on what the name should be.  It just adds up
+  # the votes weighted by user contribution, and picks the winner.  To break a
+  # tie it takes the one with the most votes (again weighted by contribution).
+  # Failing that it takes the oldest one.  Note, it lumps all synonyms together
+  # when deciding the winning "taxon", using votes for the separate synonyms
+  # only when there are multiple "accepted" names for the winning taxon.
+  #
+  # Returns Naming instance or nil.  Refreshes vote_cache as a side-effect.
+  def calc_consensus(current_user=nil, debug=false)
+    reload
+result = "" if debug
+
+    # Gather votes for names and synonyms.  Note that this is trickier than one
+    # would expect since it is possible to propose several synonyms for a
+    # single observation, and even worse perhaps, one can even propose the very
+    # same name multiple times.  Thus a user can potentially vote for a given
+    # *name* (not naming) multiple times.  Likewise, of course, for synonyms.
+    # I choose the strongest vote in such cases.
+    name_votes  = {}  # Records the strongest vote for a given name for a given user.
+    taxon_votes = {}  # Records the strongest vote for any names in a group of synonyms for a given user.
+    name_ages   = {}  # Records the oldest date that a name was proposed.
+    taxon_ages  = {}  # Records the oldest date that a taxon was proposed.
+    user_wgts   = {}  # Caches user rankings.
+    for naming in namings
+      naming_id = naming.id
+      name_id = naming.name_id
+      name_ages[name_id] = naming.created if !name_ages[name_id] || naming.created < name_ages[name_id]
+      sum_val = 0
+      sum_wgt = 0
+      # Go through all the votes for this naming.  Should be zero or one per
+      # user.
+      for vote in naming.votes
+        user_id = vote.user_id
+        val = vote.value
+        wgt = user_wgts[user_id]
+        if wgt.nil?
+          wgt = user_wgts[user_id] = vote.user_weight
+        end
+        # It may be possible in the future for us to weight some "special"
+        # users zero, who knows...  (It can cause a division by zero below if
+        # we ignore zero weights.)
+        if wgt > 0
+          # Calculate score for naming.vote_cache.
+          sum_val += val * wgt
+          sum_wgt += wgt
+          # Record best vote for this user for this name.  This will be used
+          # later to determine which name wins in the case of the winning taxon
+          # (see below) having multiple accepted names.
+          name_votes[name_id] = {} if !name_votes[name_id]
+          if !name_votes[name_id][user_id] ||
+              name_votes[name_id][user_id][0] < val
+            name_votes[name_id][user_id] = [val, wgt]
+          end
+          # Record best vote for this user for this group of synonyms.  (Since
+          # not all taxa have synonyms, I've got to create a "fake" id that
+          # uses the synonym id if it exists, else uses the name id, but still
+          # keeps them separate.)
+          taxon_id = naming.name.synonym ? "s" + naming.name.synonym_id.to_s : "n" + name_id.to_s
+          taxon_ages[taxon_id] = naming.created if !taxon_ages[taxon_id] || naming.created < taxon_ages[taxon_id]
+          taxon_votes[taxon_id] = {} if !taxon_votes[taxon_id]
+result += "raw vote: taxon_id=#{taxon_id}, name_id=#{name_id}, user_id=#{user_id}, val=#{val}<br/>" if debug
+          if !taxon_votes[taxon_id][user_id] ||
+              taxon_votes[taxon_id][user_id][0] < val
+            taxon_votes[taxon_id][user_id] = [val, wgt]
+          end
+        end
+      end
+      # Note: this is used by consensus_naming(), not this method.
+      value = sum_wgt > 0 ? sum_val.to_f / (sum_wgt + 1.0) : 0.0
+      if naming.vote_cache != value
+        naming.vote_cache = value
+        naming.save
+      end
+    end
+
+    # Now that we've weeded out potential duplicate votes, we can combine them
+    # safely.
+    votes = {}
+    for taxon_id in taxon_votes.keys
+      vote = votes[taxon_id] = [0, 0]
+      for user_id in taxon_votes[taxon_id].keys
+        user_vote = taxon_votes[taxon_id][user_id]
+        val = user_vote[0]
+        wgt = user_vote[1]
+        vote[0] += val * wgt
+        vote[1] += wgt
+result += "vote: taxon_id=#{taxon_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
+      end
+    end
+
+    # Now we can determine the winner among the set of synonym-groups.  (Nathan
+    # calls these synonym-groups "taxa", because it better uniquely represents
+    # the underlying mushroom taxon, while it might have multiple names.)
+    best_val = nil
+    best_wgt = nil
+    best_age = nil
+    best_id  = nil
+    for taxon_id in votes.keys
+      wgt = votes[taxon_id][1]
+      val = votes[taxon_id][0].to_f / (wgt + 1.0)
+      age = taxon_ages[taxon_id]
+result += "#{taxon_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
+      if best_val.nil? ||
+         val > best_val || val == best_val && (
+         wgt > best_wgt || wgt == best_wgt && (
+         age < best_age
+        ))
+        best_val = val
+        best_wgt = wgt
+        best_age = age
+        best_id  = taxon_id
+      end
+    end
+result += "best: id=#{best_id}, val=#{best_val}, wgt=#{best_wgt}, age=#{best_age}<br/>" if debug
+
+    # Reverse our kludge that mashed names-without-synonyms and synonym-groups
+    # together.  In the end we just want a name.
+    if best_id
+      match = /^(.)(\d+)/.match(best_id)
+      # Synonym id: go through namings and pick first one that belongs to this
+      # synonym group.  Any will do for our purposes, because we will convert
+      # it to the currently accepted name below.
+      if match[1] == "s"
+        for naming in namings
+          if naming.name.synonym_id.to_s == match[2]
+            best = naming.name
+            break
+          end
+        end
+      else
+        best = Name.find(match[2].to_i)
+      end
+    end
+result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
+
+    # Now deal with synonymy properly.  If there is a single accepted name,
+    # great, otherwise we need to somehow disambiguate.
+    if best && best.synonym
+      names = best.approved_synonyms
+      names = best.synonym.names if names.length == 0
+      if names.length == 1
+        best = names.first
+      elsif names.length > 1
+result += "Multiple approved synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
+
+        # First combine votes for each name; exactly analagous to what we did
+        # with taxa above.
+        votes = {}
+        for name_id in name_votes.keys
+          vote = votes[name_id] = [0, 0]
+          for user_id in name_votes[name_id].keys
+            user_vote = name_votes[name_id][user_id]
+            val = user_vote[0]
+            wgt = user_vote[1]
+            vote[0] += val * wgt
+            vote[1] += wgt
+result += "vote: name_id=#{self.name_id}, user_id=#{user_id}, val=#{val}, wgt=#{wgt}<br/>" if debug
+          end
+        end
+
+        # Now pick the winner among the ambiguous names.  If none are voted on,
+        # just pick the first one (I grow weary of these games).  This latter
+        # is all too real of a possibility: users may vigorously debate
+        # deprecated names, then at some later date two *new* names are created
+        # for the taxon, both are considered "accepted" until the scientific
+        # community rules definitively.  Now we have two possible names
+        # winning, but no votes on either!  If you have a problem with the one
+        # I chose, then vote on the damned thing, already! :)
+        best_val2 = nil
+        best_wgt2 = nil
+        best_age2 = nil
+        best_id2  = nil
+        for name in names
+          name_id = name.id
+          vote = votes[name_id]
+          if vote
+            wgt = vote[1]
+            val = vote[0].to_f / (wgt + 1.0)
+            age = name_ages[name_id]
+result += "#{self.name_id}: val=#{val} wgt=#{wgt} age=#{age}<br/>" if debug
+            if best_val2.nil? ||
+               val > best_val2 || val == best_val2 && (
+               wgt > best_wgt2 || wgt == best_wgt2 && (
+               age < best_age2
+              ))
+              best_val2 = val
+              best_wgt2 = wgt
+              best_age2 = age
+              best_id2  = name_id
+            end
+          end
+        end
+result += "best: id=#{best_id2}, val=#{best_val2}, wgt=#{best_wgt2}, age=#{best_age2}<br/>" if debug
+        best = best_id2 ? Name.find(best_id2) : names.first
+      end
+    end
+result += "unsynonymize: best=#{best ? best.text_name : "nil"}<br/>" if debug
+
+    # This should only occur for observations created by
+    # species_list.construct_observation(), which doesn't necessarily create
+    # any votes associated with its naming.  Therefore this should only ever
+    # happen when there is a single naming, so there is nothing arbitray in
+    # using first.  (I think it can also happen if zero-weighted users are
+    # voting.)
+    best = namings.first.name if !best && namings && namings.length > 0
+    best = Name.unknown if !best
+result += "fallback: best=#{best ? best.text_name : 'nil'}" if debug
+
+    # Make changes permanent.
+    old = self.name
+    self.name = best
+    self.vote_cache = best_val
+    self.save
+
+    # Log change if actually is a change.
+    if best != old
+      if old
+        log(:log_consensus_changed, :old => old.observation_name,
+                                    :new => best.observation_name)
+      else
+        log(:log_consensus_created, :name => best.observation_name)
+      end
+
+      # Change can trigger emails.
+      owner  = self.user
+      sender = current_user
+      recipients = []
+
+      # Tell owner of observation if they want.
+      recipients.push(owner) if owner && owner.email_observations_consensus
+
+      # Send to people who have registered interest.
+      # Also remove everyone who has explicitly said they are NOT interested.
+      for interest in interests
+        if interest.state
+          recipients.push(interest.user)
+        else
+          recipients.delete(interest.user)
+        end
+      end
+
+      # Send notification to all except the person who triggered the change.
+      for recipient in recipients.uniq - [sender]
+        if recipient.created_here
+          QueuedEmail::ConsensusChange.create_email(sender, recipient, self, old, best)
+        end
+      end
+    end
+
+return result if debug
+  end
+
+  ################################################################################
+  #
+  #  :section: Images
+  #
+  ################################################################################
+
+  # Add Image to this Observation, making it the thumbnail if none set already.
+  # Saves changes.  Returns Image.
+  def add_image(img)
+    if !images.include?(img)
+      images << img
+      args = {
+        :id        => self,
+        :add_image => img,
+      }
+      unless thumb_image
+        self.thumb_image = img
+        self.save
+        args[:set_thumb_image] = img
+      end
+      Transaction.put_observation(args)
+      notify_users(:added_image)
+    end
+    return img
+  end
+
+  # Removes an Image from this Observation.  If it's the thumbnail, changes
+  # thumbnail to next available Image.  Saves change to thumbnail, might save
+  # change to Image.  Returns Image.
+  def remove_image(img)
+    if images.include?(img)
+      images.delete(img)
+      args = {
+        :id        => self,
+        :del_image => img
+      }
+      if thumb_image_id == img.id
+        if images != []
+          self.thumb_image = img2 = images.first
+          args[:set_thumb_image] = img2
+        else
+          self.thumb_image = nil
+          args[:set_thumb_image] = 0
+        end
+        self.save
+      end
+      Transaction.put_observation(args)
+      notify_users(:removed_image)
+    end
+    return img
+  end
+
+  # Finds Image by id then calls add_image.  Saves changes.  Returns Image.
+  def add_image_by_id(id)
+    add_image(Image.find(id))
+  end
+
+  # Finds Image by id then calls remove_image.  Saves changes.  Returns Image.
+  def remove_image_by_id(id)
+    remove_image(Image.find(id))
+  end
+
+  # Calls add_image and logs it.  Returns Image.
+  def add_image_with_log(image, user)
+    log(:log_image_created, :name => image.unique_format_name)
+    return add_image(image)
+  end
+
+  ################################################################################
+  #
+  #  :section: Callbacks
+  #
+  ################################################################################
+
+  # Callback that updates a User's contribution after adding an Observation to
+  # a SpeciesList.
+  def add_spl_callback(o)
+    SiteData.update_contribution(:create, self, :species_list_entries, 1)
+  end
+
+  # Callback that updates a User's contribution after removing an Observation
+  # from a SpeciesList.
+  def remove_spl_callback(o)
+    SiteData.update_contribution(:destroy, self, :species_list_entries, 1)
+  end
+
+  # Callback that logs an Observation's destruction it its own and any
+  # SpeciesList's logs.
+  def log_destruction
+    if user = User.current
+      for spl in species_lists
+        spl.log(:log_observation_destroyed2, :name => unique_format_name,
+                :touch => false)
+      end
+      orphan_log(:log_observation_destroyed, { :user => user.login })
+    end
+
+    # Save these so we can remove them after destroying the Observation.
+    @old_namings = namings
+  end
+
+  # Callback that destroys an Observation's Naming's (carefully) after the
+  # Observation is destroyed.
+  def destroy_dependents
+    for naming in @old_namings
+      naming.observation = nil # (tells it not to recalc consensus)
+      naming.destroy
+    end
+  end
+
+  # Callback that sends email notifications after save.
+  def notify_users_after_change
+    if !id ||
+       when_changed? ||
+       where_changed? ||
+       location_id_changed? ||
+       notes_changed? ||
+       specimen_changed? ||
+       is_collection_location_changed? ||
+       thumb_image_id_changed?
+      notify_users(:change)
+    end
+  end
+
+  # Callback that sends email notifications after destroy.
+  def notify_users_after_destroy
+    notify_users(:destroy)
+  end
+
+  # Send email notifications upon change to Observation.  Several actions are
+  # possible:
+  #
+  # added_image::   Image was added.
+  # removed_image:: Image was removed.
+  # change::        Other changes (e.g. to notes).
+  # destroy::       Observation destroyed.
+  #
+  #   obs.images << Image.create
+  #   obs.notify_users(:added_image)
+  #
+  def notify_users(action)
+    sender = user
+    recipients = []
+
+    # Send to people who have registered interest.
+    for interest in interests
+      if interest.state
+        recipients.push(interest.user)
+      end
+    end
+
+    # Tell masochists who want to know about all observation changes.
+    for user in User.find_all_by_email_observations_all(true)
+      recipients.push(user)
+    end
+
+    # Send notification to all except the person who triggered the change.
+    for recipient in recipients.uniq
+      if recipient && recipient != sender
+        if action == :destroy
+          QueuedEmail::ObservationChange.destroy_observation(sender, recipient, self)
+        elsif action == :change
+          QueuedEmail::ObservationChange.change_observation(sender, recipient, self)
+        else
+          QueuedEmail::ObservationChange.change_images(sender, recipient, self, action)
+        end
+      end
+    end
+  end
+
+################################################################################
+
+protected
+
+  def validate # :nodoc:
+    if !self.when
+      errors.add(:when, :validate_observation_when_missing.t)
+    end
+    if !self.user && !User.current
+      errors.add(:user, :validate_observation_user_missing.t)
+    end
+
+    if self.where.to_s.blank? && !location_id
+      errors.add(:where, :validate_observation_where_missing.t)
+    elsif self.where.to_s.length > 100
+      errors.add(:where, :validate_observation_where_too_long.t)
+    end
+  end
+end

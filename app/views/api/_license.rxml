@@ -1,0 +1,9 @@
+# Locals:
+#   :object             License instance.
+
+xml.license(
+  :id  => object.id,
+  :url => object.url
+) do
+  xml.type object.display_name
+end

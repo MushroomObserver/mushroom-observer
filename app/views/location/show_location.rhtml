@@ -1,0 +1,19 @@
+<%
+  @title ||= :show_location_title.t(:name => @location.display_name)
+
+  new_tab_set do
+    add_tab(:show_location_observations.t,
+            :controller => "observer", :action => "show_location_observations", :id => @location.id)
+    add_tab(:location_all.t, :action => 'list_place_names')
+    add_tab(:show_location_create.t, :action => 'create_location')
+    add_tab(:show_location_edit.t, :action => 'edit_location', :id => @location.id)
+    if @past_location
+      add_tab(:show_location_older_versions.t,
+              :action => 'show_past_location', :id => @location.id, :version => @past_location.version)
+    end
+  end
+
+  draw_interest_icons(@location, @interest) if @user
+%>
+
+<%= render(:partial => 'show_location', :locals => { :location => @location }) %>

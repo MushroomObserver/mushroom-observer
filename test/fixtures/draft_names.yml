@@ -1,0 +1,47 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
+draft_coprinus_comatus:
+  id: 1
+  user_id: 5
+  project_id: 1
+  name_id: 2
+  version: 0
+  review_status: unreviewed
+  gen_desc: This is a general description of __C. comatus__.
+  created: 2008-10-05 12:31:10
+  modified: 2008-10-05 12:31:12
+
+# A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
+draft_agaricus_campestris:
+  id: 2
+  user_id: 2
+  project_id: 1
+  name_id: 3
+  version: 0
+  review_status: unreviewed
+  created: 2008-10-05 12:37:33
+  modified: 2008-10-05 12:37:35
+
+# A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
+draft_boletus_edulis:
+  id: 3
+  user_id: 4
+  project_id: 2
+  name_id: 39
+  version: 0
+  review_status: unreviewed
+  created: 2008-10-05 16:19:45
+  modified: 2008-10-05 16:19:45
+
+# A draft of Lactarius alpinus with a bad classification field
+draft_lactarius_alpinus:
+  id: 4
+  user_id: 5
+  project_id: 1
+  name_id: 13
+  version: 0
+  review_status: unreviewed
+  created: 2009-05-04 16:19:45
+  modified: 2009-05-04 19:56:25
+  classification: "**Domain**: Eukarya"

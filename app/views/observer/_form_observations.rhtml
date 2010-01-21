@@ -1,0 +1,174 @@
+<!--[form:observation]-->
+
+<label for="observation_when_1i"><%= :app_when.t %>:</label>
+<%= date_select('observation', 'when', :start_year => 1980,
+                :end_year => Time.now.year) %><br/><br/>
+
+<span style='white-space:nowrap'>
+  <label for="observation_place_name"><%= :app_where.t %>: (<%= :app_required.t %>)</label>
+  <%= text_field('observation', 'place_name', :size => 60) %>
+</span><br/>
+<%= turn_into_location_auto_completer('observation_place_name', :primer => @location_primer) %>
+<span class="HelpNote"><%= :form_observations_where_help.t %></span><br/><br/>
+
+<%= if include_naming
+  render(:partial => 'form_naming', :locals => {
+    :action       => action,
+    :button_name  => button_name,
+    :show_reasons => false,
+  }) + "<br/>"
+end %>
+
+<%= check_box("observation", "is_collection_location") %>
+<label for="observation_is_collection_location"><%= :form_observations_is_collection_location.t %></label><br/>
+<span class="HelpNote"><%= :form_observations_is_collection_location_help.t %></span><br/><br/>
+
+<%= check_box("observation", "specimen") %>
+<label for="observation_specimen"><%= :form_observations_specimen_available.t %></label><br/>
+<span class="HelpNote"><%= :form_observations_specimen_available_help.t %></span><br/>
+
+<center><%= submit_tag(button_name) %></center><br/>
+
+<label for="observation_notes"><%= :app_notes.t %>:</label>
+<span class="HelpNote"><%= :form_observations_notes_help.t %></span><br/>
+<%= text_area('observation', 'notes', :cols => 80) %><br/>
+<%= render(:partial => 'shared/textilize_help') %>
+
+<center><%= submit_tag(button_name) %></center><br/>
+
+<% ############################### Image Forms ############################## %>
+
+<% if include_images %>
+  <table><tr><td>
+  <%# table wrapper gets browsers to collapse the divs to fit the forms %>
+  <% @observation.thumb_image_id ||= 0 %>
+
+  <% if @good_images != [] %>
+    <b>Images:</b><br/>
+    <% for image in @good_images %>
+      <div class="form_image">
+        <table><tr>
+          <td style="white-space:nowrap">
+            <%= radio_button('observation', 'thumb_image_id', image.id) %>
+            <%= link_to(image_tag("thumb/#{image.id}.jpg", :border => 0),
+                        :controller => 'image', :action => 'show_image', :id => image.id) %>
+          </td>
+          <td width="10"></td>
+          <td>
+            <label for="image_<%= image.id %>_notes"><%= :app_notes.t %>:</label>
+            <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
+            <%= text_area_tag("image_#{image.id}_notes", image.notes, :cols => 60, :rows => 2) %>
+          </td>
+<% # These controls are dangerous because they cause you to lose any
+   # changes made in the form.  They should be re-cast as ajax requests.
+   if false %>
+          <td width="10"></td>
+          <td>
+            <%= link_to(:app_show_image.t, :controller => 'image', :action => 'show_image', :id => image.id) %><br/>
+            <%= link_to(:form_observations_edit_image.t, :controller => 'image', :action => 'edit_image', :id => image.id) %><br/>
+            <%= link_to(:form_observations_remove_image.t, { :controller => 'image', :action => 'remove_image',
+                        :image_id => image.id, :observation_id => @observation.id },
+                        { :confirm => :form_observations_remove_image_confirm.l }) %><br/>
+          </td>
+<% end %>
+        </tr></table>
+      </div>
+    <% end %>
+    <br/>
+  <% end %>
+
+  <b><%= :form_observations_upload_images.t %>:</b><br/>
+
+  <% if can_do_ajax? %>
+    <%= javascript_tag %(
+      var NEXT_IMAGE_INDEX = #{@images.length+1};
+      var CHANGED_DATES = [];
+    ) %>
+  <% end %>
+
+  <div id="image_forms">
+    <% i = 0 %>
+    <% @images.push(@new_image) %>
+    <% while i < @images.length %>
+      <%= render(:partial => 'form_image', :locals => { :index => i }) %>
+      <% i += 1 %>
+    <% end %>
+  </div>
+
+  <div class='HelpNote'>
+    <%= :form_observations_upload_help.tp %>
+  </div>
+
+  <% if can_do_ajax? %>
+    <%= button_to_function(:form_observations_upload_another.t, 'image_new()', :id => 'new_image_button') %>
+
+    <%= javascript_tag %(
+      var x = String.fromCharCode(60);
+      var y = String.fromCharCode(93);
+
+      var IMAGE_FORM = "#{
+        i = @images.length - 1
+        str = render(:partial => 'form_image', :locals => { :index => i })
+        str.gsub!("image_#{i}_", 'image_XXX_')
+        str.gsub!("image_id_#{i}", 'image_id_XXX')
+        str.gsub!("(#{i})", '(XXX)')
+        str.gsub!("[#{i}]", '[XXX]')
+        str.sub!("type=\"radio\" value=\"#{i}\"", 'type="radio" value="-XXX"')
+        str.sub!("checked=\"checked\" ", '')
+        str = escape_javascript(str)
+        str.gsub('<', '"+x+"')
+        str.gsub(']', '"+y+"')
+      }";
+
+      function image_new() {
+        var form = IMAGE_FORM.replace(/XXX/g, NEXT_IMAGE_INDEX++);
+        Insertion.Bottom('image_forms', form);
+        Element.ensureVisible($('new_image_button'));
+        if (NEXT_IMAGE_INDEX == 5)
+          alert("Be careful uploading too many images at once.  Sometimes" +
+            " browsers will timeout and cause you to lose everything. " +
+            " I'd recommend doing no more than four or five at a time. ");
+        return false;
+      }
+
+      function image_on(i) {
+        Element.show('image_'+i+'_div');
+        Element.show('image_'+i+'_less');
+        Element.hide('image_'+i+'_more');
+        var div = $('image_'+i+'_box');
+        div.style.border = '1px solid #888';
+        Element.ensureVisible(div);
+        if (!CHANGED_DATES[i]) {
+          $('image_'+i+'_when_1i').value = $('observation_when_1i').value;
+          $('image_'+i+'_when_2i').value = $('observation_when_2i').value;
+          $('image_'+i+'_when_3i').value = $('observation_when_3i').value;
+        }
+        return false;
+      }
+
+      function image_off(i) {
+        Element.show('image_'+i+'_more');
+        Element.hide('image_'+i+'_div');
+        Element.hide('image_'+i+'_less');
+        $('image_'+i+'_box').style.border = '0';
+        return false;
+      }
+    ) %>
+  <% end %>
+
+  <%= hidden_field_tag("good_images", @good_images.map {|o| o.id}.join(" ")) %>
+
+  </td></tr></table>
+<% end %>
+
+<% ########################################################################## %>
+
+<% if logging_optional %>
+  <br/>
+  <%= check_box('log_change', 'checked', :checked => 'checked') %>
+  <label for="log_change_checked"><%= :form_observations_log_change.t %></label>
+<% end %>
+
+<%= focus_on('observation_place_name') %>
+
+<!--[eoform:observation]-->

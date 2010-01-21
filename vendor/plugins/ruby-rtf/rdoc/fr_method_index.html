@@ -1,0 +1,163 @@
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!--
+
+    Methods
+
+  -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Methods</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="rdoc-style.css" type="text/css" />
+  <base target="docwin" />
+</head>
+<body>
+<div id="index">
+  <h1 class="section-bar">Methods</h1>
+  <div id="index-entries">
+    <a href="classes/RTF/ColourTable.html#M000032"><< (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000048"><< (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/FontTable.html#M000023"><< (RTF::FontTable)</a><br />
+    <a href="classes/RTF/Font.html#M000099">== (RTF::Font)</a><br />
+    <a href="classes/RTF/Colour.html#M000008">== (RTF::Colour)</a><br />
+    <a href="classes/RTF/FontTable.html#M000019">[] (RTF::FontTable)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000096">[] (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000028">[] (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000026">add (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/FontTable.html#M000017">add (RTF::FontTable)</a><br />
+    <a href="classes/RTF/TextNode.html#M000108">append (RTF::TextNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000053">apply (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000060">background (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/Document.html#M000124">body_height (RTF::Document)</a><br />
+    <a href="classes/RTF/DocumentStyle.html#M000005">body_height (RTF::DocumentStyle)</a><br />
+    <a href="classes/RTF/DocumentStyle.html#M000004">body_width (RTF::DocumentStyle)</a><br />
+    <a href="classes/RTF/Document.html#M000123">body_width (RTF::Document)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000054">bold (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000129">border_width= (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000069">border_width= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableRowNode.html#M000086">border_width= (RTF::TableRowNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000075">border_widths (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000078">bottom_border_width (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000072">bottom_border_width= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000064">color (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000061">colour (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000135">column_shading_color (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000131">column_shading_colour (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000128">columns (RTF::TableNode)</a><br />
+    <a href="classes/RTF/Information.html#M000012">created= (RTF::Information)</a><br />
+    <a href="classes/RTF/Document.html#M000114">default_font (RTF::Document)</a><br />
+    <a href="classes/RTF/Document.html#M000119">default_font= (RTF::Document)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000027">each (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000094">each (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/FontTable.html#M000018">each (RTF::FontTable)</a><br />
+    <a href="classes/RTF/RTFError.html#M000112">fire (RTF::RTFError)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000092">first (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000058">font (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/Document.html#M000118">footer (RTF::Document)</a><br />
+    <a href="classes/RTF/Document.html#M000116">footer= (RTF::Document)</a><br />
+    <a href="classes/RTF/FooterNode.html#M000066">footnote (RTF::FooterNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000052">footnote (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/HeaderNode.html#M000106">footnote (RTF::HeaderNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000059">foreground (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/Document.html#M000117">header (RTF::Document)</a><br />
+    <a href="classes/RTF/Document.html#M000115">header= (RTF::Document)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000029">index (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/FontTable.html#M000020">index (RTF::FontTable)</a><br />
+    <a href="classes/RTF/TextNode.html#M000109">insert (RTF::TextNode)</a><br />
+    <a href="classes/RTF/Style.html#M000043">is_character_style? (RTF::Style)</a><br />
+    <a href="classes/RTF/CharacterStyle.html#M000103">is_character_style? (RTF::CharacterStyle)</a><br />
+    <a href="classes/RTF/Style.html#M000045">is_document_style? (RTF::Style)</a><br />
+    <a href="classes/RTF/DocumentStyle.html#M000002">is_document_style? (RTF::DocumentStyle)</a><br />
+    <a href="classes/RTF/ParagraphStyle.html#M000039">is_paragraph_style? (RTF::ParagraphStyle)</a><br />
+    <a href="classes/RTF/Style.html#M000044">is_paragraph_style? (RTF::Style)</a><br />
+    <a href="classes/RTF/Node.html#M000036">is_root? (RTF::Node)</a><br />
+    <a href="classes/RTF/Style.html#M000046">is_table_style? (RTF::Style)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000055">italic (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000093">last (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000079">left_border_width (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000073">left_border_width= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableRowNode.html#M000085">length (RTF::TableRowNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000051">line_break (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/DocumentStyle.html#M000001">new (RTF::DocumentStyle)</a><br />
+    <a href="classes/RTF/FooterNode.html#M000065">new (RTF::FooterNode)</a><br />
+    <a href="classes/RTF/CharacterStyle.html#M000102">new (RTF::CharacterStyle)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000067">new (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/HeaderNode.html#M000105">new (RTF::HeaderNode)</a><br />
+    <a href="classes/RTF/Paper.html#M000006">new (RTF::Paper)</a><br />
+    <a href="classes/RTF/TextNode.html#M000107">new (RTF::TextNode)</a><br />
+    <a href="classes/RTF/Node.html#M000033">new (RTF::Node)</a><br />
+    <a href="classes/RTF/Colour.html#M000007">new (RTF::Colour)</a><br />
+    <a href="classes/RTF/Font.html#M000098">new (RTF::Font)</a><br />
+    <a href="classes/RTF/RTFError.html#M000111">new (RTF::RTFError)</a><br />
+    <a href="classes/RTF/TableNode.html#M000126">new (RTF::TableNode)</a><br />
+    <a href="classes/RTF/Information.html#M000011">new (RTF::Information)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000024">new (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000047">new (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/ParagraphStyle.html#M000038">new (RTF::ParagraphStyle)</a><br />
+    <a href="classes/RTF/Document.html#M000113">new (RTF::Document)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000090">new (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/FontTable.html#M000015">new (RTF::FontTable)</a><br />
+    <a href="classes/RTF/TableRowNode.html#M000084">new (RTF::TableRowNode)</a><br />
+    <a href="classes/RTF/Node.html#M000035">next_node (RTF::Node)</a><br />
+    <a href="classes/RTF/Document.html#M000122">page_break (RTF::Document)</a><br />
+    <a href="classes/RTF/Document.html#M000120">paper (RTF::Document)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000050">paragraph (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000080">paragraph (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/Document.html#M000121">parent= (RTF::Document)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000081">parent= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableRowNode.html#M000087">parent= (RTF::TableRowNode)</a><br />
+    <a href="classes/RTF/Style.html#M000041">prefix (RTF::Style)</a><br />
+    <a href="classes/RTF/CharacterStyle.html#M000104">prefix (RTF::CharacterStyle)</a><br />
+    <a href="classes/RTF/ParagraphStyle.html#M000040">prefix (RTF::ParagraphStyle)</a><br />
+    <a href="classes/RTF/DocumentStyle.html#M000003">prefix (RTF::DocumentStyle)</a><br />
+    <a href="classes/RTF/Node.html#M000034">previous_node (RTF::Node)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000077">right_border_width (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000071">right_border_width= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/Node.html#M000037">root (RTF::Node)</a><br />
+    <a href="classes/RTF/TableNode.html#M000136">row_shading_color (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000130">row_shading_colour (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000127">rows (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000137">shading_color (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableNode.html#M000132">shading_colour (RTF::TableNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000074">shading_colour= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableRowNode.html#M000088">shading_colour= (RTF::TableRowNode)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000025">size (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000095">size (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/FontTable.html#M000016">size (RTF::FontTable)</a><br />
+    <a href="classes/RTF/TableNode.html#M000133">store (RTF::TableNode)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000091">store (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000068">style= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/Style.html#M000042">suffix (RTF::Style)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000057">superscript (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000062">table (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000082">table (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableRowNode.html#M000089">to_rtf (RTF::TableRowNode)</a><br />
+    <a href="classes/RTF/Information.html#M000014">to_rtf (RTF::Information)</a><br />
+    <a href="classes/RTF/TableNode.html#M000134">to_rtf (RTF::TableNode)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000031">to_rtf (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/FontTable.html#M000022">to_rtf (RTF::FontTable)</a><br />
+    <a href="classes/RTF/ContainerNode.html#M000097">to_rtf (RTF::ContainerNode)</a><br />
+    <a href="classes/RTF/Font.html#M000101">to_rtf (RTF::Font)</a><br />
+    <a href="classes/RTF/Colour.html#M000010">to_rtf (RTF::Colour)</a><br />
+    <a href="classes/RTF/Document.html#M000125">to_rtf (RTF::Document)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000049">to_rtf (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/TextNode.html#M000110">to_rtf (RTF::TextNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000083">to_rtf (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/Information.html#M000013">to_s (RTF::Information)</a><br />
+    <a href="classes/RTF/FontTable.html#M000021">to_s (RTF::FontTable)</a><br />
+    <a href="classes/RTF/Colour.html#M000009">to_s (RTF::Colour)</a><br />
+    <a href="classes/RTF/Font.html#M000100">to_s (RTF::Font)</a><br />
+    <a href="classes/RTF/ColourTable.html#M000030">to_s (RTF::ColourTable)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000076">top_border_width (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/TableCellNode.html#M000070">top_border_width= (RTF::TableCellNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000056">underline (RTF::CommandNode)</a><br />
+    <a href="classes/RTF/CommandNode.html#M000063">write (RTF::CommandNode)</a><br />
+  </div>
+</div>
+</body>
+</html>

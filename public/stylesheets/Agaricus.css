@@ -1,0 +1,87 @@
+/*
+campestris { cap-color: #f6f0f2; }
+cupreobrunneus { gill-color: #3b2821; }
+brasiliensis { gill-color: #a06463; dark-gill: #743931; }
+semotus { cap-color: #bc9d89; }
+augustus { cap-color: #eccf95; }
+xanthodermus { stain-color: #d4a833; }
+lilaceps { stain-color: #b4725f; }
+*/
+
+/* Global default colors */
+body {
+    background-color: #f6f0f2; /* campestris */
+    color: #3b2821; /* cupreobrunneus */
+}
+
+div.textile table    { background: #3b2821; } /* cupreobrunneus */
+div.textile table td { background: #f6f0f2; } /* campestris */
+
+a { color: #a06463; } /* brasiliensis */
+a:visited { color: #3b2821; }  /* cupreobrunneus */
+a:hover {
+    color: #743931; /* brasiliensis */
+    background-color: #f6f0f2;  /* campestris */
+}
+
+img { border-color: #3b2821; } /* cupreobrunneus */
+a img:hover { border-color: #743931; } /* brasiliensis */
+
+li.selected { background-color: #eccf95 ! important }
+
+/* Banner colors */
+#banner {
+    background-color: #bc9d89; /* semotus */
+}
+
+#banner a {
+    color: #3b2821; /* cupreobrunneus */
+}
+
+#banner a:visited {
+    color: #3b2821; /* cupreobrunneus */
+}
+
+
+/* Colors for the left hand panel */
+.LeftSide {
+    background-color: #eccf95; /* augustus */
+}
+
+.LeftSide a {
+    color: #a06463; /* brasiliensis */
+}
+
+
+/* Colors for even lines */
+.ListLine0 {
+      background-color: #d4a833; /* xanthodermus */
+}
+
+.ListLine0 div.textile table    { background: #3b2821; } /* cupreobrunneus */
+.ListLine0 div.textile table table td { background: #d4a833; } /* xanthodermus */
+
+.ListLine0 a {
+      color: #b4725f; /* lilaceps */
+}
+
+.ListLine0 a:visited {
+      color: #3b2821; /* cupreobrunneus */
+}
+
+
+/* Colors for odd lines */
+.ListLine1 {
+      background-color: #b4725f; /* lilaceps */
+}
+
+.ListLine1 div.textile table    { background: #3b2821; } /* cupreobrunneus */
+.ListLine1 div.textile table td { background: #b4725f; } /* lilaceps */
+
+.ListLine1 a {
+      color: #d4a833; /* xanthodermus */
+}
+
+.ListLine1 a:visited {
+      color: #3b2821; /* cupreobrunneus */
+}

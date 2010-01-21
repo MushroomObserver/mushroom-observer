@@ -1,0 +1,475 @@
+- Create a new class called Description
+- create_table "descriptions", :force => true do |t|
+- Need past_descriptions
+
+- Each description will have it's own set of authors and editors
+  Need authors_descriptions and descriptions_editors
+
+- A Name can have many Descriptions
+
+- Create Descriptions based on Names fields
+
+? Figure out preferred Description
+
+Populate show_name with preferred Descriptions with options to see other descriptions
+  Need to figure out author_request, review_authors
+Replace the 'fields' in Names except for 'Classification' which remains with the Name.
+  Hmmm, should more than one Classification be supported?  [Wait for now]
+  How does this interact with DraftNames?
+
+Permissions:
+  Authors and admins can always edit
+  Authors can choose to allow only authors to edit, authors and editors, or everyone
+  Authors can add editors
+
+Any Description can be copied and then edited.  Source is recorded.
+
+create_table "description_fields", :force => true do |t|
+  t.enum   "type", # :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :users, :notes, :references
+  t.string "title", # Optional override for "type"
+  t.text "content"
+end
+
+Generalizing reviews:
+  Projects can have default authors?
+
+By default any user can give a Description a review status [Incorrect, Incomplete, Good, Excellent]
+
+Add tags
+
+Is reviewers group still needed? Professors can edit?
+
+Can a description be part of more than one group?
+
+How is group determined?
+The visibility of a Description can be restricted to a particular UserGroup
+Descriptions can be marked 'Never Export' by an author
+
+Admin - Do anything
+??? - Can see, edit and review any description they oversee
+Group - Can see
+
+Each class creates 
+
+-------------
+
+Add 'Locations' link on show_user that goes to a list of that user's authored locations.
+
+How to handle wikipedia references
+References for descriptions
+Resolve taxonomic classification section
+How should locations be handled?
+  Should be based on actual observations
+Locations should use a location translator
+Need a distance query
+
+Description effort:
+  100 descriptions with the most observations that haven't been modified in a week and don't have a general description and have no drafts
+  # descriptions with the most observations that haven't been modified in ? [and don't have a general description] [and have no drafts]
+  Rate by quality
+  Need to review drafts
+
+Quit trying to send a QueuedEmail after some number of tries.
+
+Tests for Advanced Search
+
+When deleting a name you get:
+Log of
+Deleted
+Item
+Thu Feb 12 22:52:09 -0800 2009: Thu Feb 12 22:52:09 -0800 2009:log_name_updated(user=nathan)
+
+Make extra_gc depend on config
+Author changes should email authors and reviewers
+Edits should go to authors
+
+Added email:
+  Name edits go to authors
+  Namings go to observer
+
+Faster review - pages that need review, next needing vote, next unreviewed image
+
+Add support for numbers in provisional names, e.g., Amanita "s1".  Then update Amanita "sone"
+
+Should there be 'sensu' names for each field guide?
+Organize a way to add edibility info
+
+Need to review recent log for errors
+
+Advanced search ideas:
+  Store the result of a search as a regular species list
+  Create 'smart' species lists that are based on a stored advanced search.
+
+Figure out a way to support authors with leading lower case (e.g., van Tiegham)
+
+Features for EOL Class support:
+  
+  Missing Tests:
+    show_notifications shouldn't show empty notifications
+    add_user_to_group
+    Site Stats for observation with no images
+    Approve existing name and verify both Name and PastName
+    Default transition for a non-reviewer and a reviewer
+    Reviewer tests for image quality, names and votes
+
+  Expanded ability to review what a user has contributed.  
+    This will allow professors to easily review the contributions made by a student.
+    I've included a proposed workflow below.  
+    Early October.
+    Need general way to review what's been reviewed
+    Need to be able to search past_names for vetted data
+
+  Implement NameNotes: Mid-October
+    Comments on NameNotes.  Comments on Names?
+    
+    Add license management for NameNotes
+    
+    6) Allow users to create new field categories.
+
+    7) Allow individual fields to be versioned.
+
+    8) Differentiate between author and editor.
+
+    9) Support multiple authors and editors.  
+    Only an author can add an author.  
+    Anyone can be an editor.
+
+    10) Mark notes by language and readership level (Novice, General, Expert).  
+    Allow users to set a preferred language and preferred readership level.
+    Items 6-10 are likely to be released together around the end of October.
+
+    11) Allow vetters to nominate new vetters.  
+    Might include more specificity for vetters based on taxa and/or geographic area.
+    Delivery TBD.
+
+    12) Provide a voting scheme for notes and images.  
+    Delivery TBD.
+
+Herbarium status gets __localization_missing__ in email for observation by forestwander ided by debbie
+Notifications for reviewers
+Interface for managing user groups
+Review process should focus on unreviewed material
+Should be a way to find observations that have no opinion
+Reviews should have date stamps and people associated with them
+Pages to list most valuable incomplete name pages
+
+Features for Open Naturalists:
+Common Names
+Events
+Different language files
+Show EOL pages (preferably components)
+Field Guides
+Theme cleanup
+Move MO-First-Year stuff somewhere else.
+  Suggests database driven document support
+
+Release each of the following as they get completed:
+
+Need to track down user 167 and observation 3035
+
+Darvin's problem with 'Backwards'
+
+List taxa with notifications
+
+Naming parsing issues:  Foo Bar, Foo  bar, foo bar (last one only if the name doesn't already exist)
+
+Upgrade to Rails 2.1
+User vetting
+  set of taxa
+  by invitation or application?
+  need some sort of human verification
+  request vetting of a particular observation
+many taxa per user
+
+World expert
+Local expert
+Knowledgeable
+Learning [Has herbarium, has microscope...]
+Newbie - Default
+
+Rod: Summarize species list changes
+Tom Volk:
+  Wants to have students make observations as part of course.
+  Encourages idea of rating observations and images
+
+Email queuing:
+  Focus on notification
+    genus notifications:
+      tests for higher taxa
+    email to self should be a user preference
+    User Summary should have a list of that User's notification with ability to Delete or Edit (to change the alert): observer/show_notifications
+    Notifications:
+      Name contained in a higher taxon gets applied: name_id, user, note
+      Every comment (user preference?): user
+      Particular observation [comments namings, consensus change] (observer gets this by default): observation_id, user
+      User creates comment, observation or naming: user_id, user
+      id, user_id, flavor, obj_id, note
+  Move over other email
+  Optionally add other commentators & all comment receivers [control in user prefs]
+    Should lurkers on particular observations be supported?
+  clean up script/send_email
+  Add option for not received your own email
+
+Improve deployment process:
+  On server:
+    cd db; ./dump
+    # Note number printed out above
+    cd ../public/images
+    ./bundle <number>
+  On local machine:
+    cd db; ./getdb
+    # move checkpoint to appropriate raw name
+    # update db and dump clean version
+    cd ../public/images
+    ./getimages
+    # Follow instructions
+Migrate local database back to current production version
+  Modify news and how to.
+  cksum image tarballs
+  Review code
+  Do local migration
+  Run tests
+  Checkin changes
+  Move log
+  Checkout code.
+  Shutdown server.
+  Run any migrations.
+  Run any migration rake tasks.
+  Startup server.
+  Run any transition rake tasks.
+  Test server.
+
+Create a backup directory that can be swapped with the current directory.  Logs and images should by shared through symlinks.
+
+New user options:
+  Send me a copy of my own comments
+  Send me comments on observations I've commented on
+
+Bugs:
+May be fixed: Reported by Darvin on July 6, 2008:
+  To recreate:
+  http://mushroomobserver.org/image/show_image/6882?search_seq=846&obs=4337&seq_key=297
+  Look at the photo FULL SIZE, go back to medium size then hit NEXT
+Noticed July 14, 2008:
+  Search for Panaeolus, select the Genus, select observation 8363, click on an image (15529),
+    click 'Next' -> "File not found"
+
+Research Media RSS for use with PicLens
+
+More next/prev stuff:
+        sort by modified, created, when, name, location, observer, mod year (time of year)
+        Add next/prev_location
+        Add next/prev_name?
+        Potential interactions between sequences if URLs are copied and pasted
+
+Field based search mechanism (advanced search) (40)
+
+Add fields for who found the mushroom and who provided the id.
+
+Updating an author citation currently requires visiting each observation and adding the new name.  Seems like there should be a simpler way.
+
+Hypholoma aurantiacum recognizes that it is deprecated, but doesn't suggest a valid synonym.
+
+Add support for OpenID (32)
+
+Possible usability issue:
+  Users sometimes 'Email <user>' when they should .
+  Might want to duplicate "Send Observer a Question"
+  Add note on the "send user an email" saying that emails regarding specific observations are better sent from the observation's page using either "send user an email" or simply "add comment" might also be useful.
+
+-----
+
+Potentially interesting features for improving amateur/professional communication:
+
+% Notifications
+    Email queuing (32)
+    Users could register interest in a particular species, genus or user and get email when one shows up.
+    Add RSS feeds for searches, names, higher level taxa (16)
+    Add more events to the feed (Locations, Votes, New Users), but add filters for the main page.
+      E.g., Observations, Observations with Images, Species Lists, Locations, Votes, Consensus Changing Votes etc.
+      The filters would be controllable in the user preferences and would default to "Observations with Images" (24)
+    Let collector know if someone has asked for collections (call for specimens) (8)
+
+% Advice on creating collections (4)
+
+% Projects - Create a pages for describing proposed research projects.  Projects will have a public page
+    and a private page.  Each will have a principle investigator (PI) who controls who can see the private page.
+    The project pages will have an associated Species List (of Observations relevant to the project) and an
+    associated Checklist (of Names relevant to the project).  In addition there will be a set of documents
+    associated with the project that can be marked as either public or private.  Only people approved by the
+    PI are allowed to see the private documents, but anyone can see the public ones as well as the list of
+    Observations and Names. (40)
+
+% Higher-level taxa (Agaricus is part of Agaricales, etc.)
+      View members and membership
+      Page of all members and below?
+      Should Macrolepiota include Chlorophyllum rachodes?
+      Add rank relationships from Name
+
+%? Owned descriptions (32)
+    Right now anyone can edit any part of any description for a Name.  It would be nice if there was a community
+    description and a set of owned descriptions.
+  
+%? Common name support. (40)
+
+%? Hierarchical locations (40)
+
+--------
+
+Theme editor (Jason has an almost complete prototype) (40?)
+    More color themes: Boletus, Coprinus (very black and white)
+
+Data to incorporate:
+    Rod's A.c. locations (4)
+    Mike Davis Russulas (8)
+    Ian Gibson Descriptions (MatchMaker) (16)
+    MykoWeb interface (40)
+    MushroomHobby interface (24)
+    Locations (on going)
+    Descriptions (on going)
+
+Image improvements:
+  Make it easier to add and see image notes.  Image notes should be visible on show_observation page.  Maybe with a link to add a note. (16)
+  Image rating for 'Pictorial', 'Scientific', 'Just Because' (40)
+  textarea under or beside each file in the upload page, so you can add notes to individual photos. (8)
+
+Improve caching and Javascript awareness
+
+Organize user preferences into logical groups (8)
+  
+Featured Mushroom pages (8)
+
+Checklists - Lists of Names that have a Title and Purpose/notes, but no associated Observations. (40)
+    Can be used to create species lists, or simply displayed and copied for publication somewhere else.
+    Use to create observations
+    Dynamic checklists based on location or user or the result of a search
+    
+    Feedback from Doug Smith on species lists:
+    Mostly the feature I need to be able to make 20-100 observations
+    all with the same location and date info., based on an existing
+    species list that I have.
+
+    One thing is that after that to apply photos to the list there
+    is a lot of check back and forth, and that takes awhile.  And
+    click back to the list can be troublesome, for some of these
+    lists have almost 600 observations now, and getting that many
+    observations onto the one page with thumbs takes awhile to 
+    download.  Which adds a good few seconds to each clicking back
+    and forth.
+    
+    Need to think about mergeable lists for the Name List Generator.
+
+Sort by date (mod year) (16)
+      Sort order pulldown.  Sort by time mod year.
+
+References (40)
+
+show_name revamp (40)
+    Name notes on the observation pages
+
+interactive map for edit_location and create_location (24)
+
+map search results (16)
+
+map species list (16)
+
+altitude as ft or meters? (8)
+
+Constrain fixed sets like country, state and county to valid values (24)
+
+Clicking on an undefined location should take logged in users to the definition page (4?)
+
+Smarter string matching for location merging (16)
+
+Map size based on window size (4)
+
+Count at each location (4)
+
+Different marker colors:
+  synonym, your own observation, specimens with herbarium material
+ 
+Shape information from Darwin Core (40)
+
+Photos of location (16)
+
+Habitat descriptions (8)
+
+Should collections have individual lat/longs? (8)
+
+Events (40)
+
+Search engine that catches spelling errors. (8)
+
+Translate .rhtml templates for account and observer (on hold waiting for translations) (40)
+
+Add language preference to user preferences (8)
+
+Figure out how to correctly translate emails (account_mailer/*.rhtml) (4)
+
+Herbarium records - Provide a standard way to describe herbarium collections. (40)
+
+Mobile phone support (40)
+    - Figure out how to tell the difference
+    Look up on web for mobile support functions
+    Mobilize layout:
+        MO & Title on one line.
+        Push around the divs
+        Create a single link at the top for to go to the left-hand panel with the search buttons
+        Remove pagination links from the top of the page
+    Ability to receive observations through email
+
+High-bandwith support - 1024x768 suggested rather than 640x640 max. (should include image cleanup) (16)
+  Check for duplicate images, check for referenced images
+  Provide download link for images in non-standard formats (e.g., TIF)
+
+Name tagging (40)
+    Some obvious tags: rare, uncommon, common, edible, choice, inedible, toxic, deadly, medicinal, hallucinogenic
+    Some less obvious tags: 'slime mold', 'hypogeous'...
+    Planning on both simple tags (<name> is <tag>) and full RDF support (<name> has <predicate> <value>):
+      E.g. "Boletus edulis" is "choice" and "Boletus edulis" has "edibility" of "choice"
+      Learning Calais: 5ddq5zt5rx8gu3ysekebzwar
+
+Use RDF to make tags and descriptions machine readable (40)
+    Could be used to enable identification
+
+Machine identification (160)
+    Need to check out Symbiota: http://seinet.asu.edu/seinet/symbiota/index.php
+
+Mycology club affiliations (useful for searching) (4)
+
+General discussion blog that is searchable (32)
+
+Local client that can only add (160)
+
+'More images'/'Less images' toggle (8)
+  this would change the grid layout to rows with all the thumbs displayed
+  
+Show all images when looking at a Name page (Darvin) (4)
+
+name_search - Added mark to give count of observations and images. (2)
+
+Display content from other sites (e.g., mykoweb links page) (16)
+
+Rename 'Features and Fixes' to include Date and version (4?)
+
+Synonym features (8)
+  Automated way to apply synonyms to your own observations (with review)
+
+Admin stuff: (4?)
+    Webpages for accessing the logs
+
+Top ten pages of Names, Images, Observations (40)
+    Names: Best Edibles, Most Toxic, Hallucinogenic, Easiest to Learn, Easiest to Confuse ...
+    Images: Pictorial, Scientific, Humor, ...
+    Observations: Biggest, Smallest, Off season, Surprising
+    Ideally users should be able to create new top ten pages and the top ten pages themselves should get ranked somehow
+
+User score bonus/discount (4?)
+
+Page for Unknowns (16)
+
+Name comments rather than just notes? (32)
+
+Images in comments (8)
+
+Add user.login and what got changed to show_past_name (16)

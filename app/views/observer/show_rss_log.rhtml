@@ -1,0 +1,23 @@
+<% @title = :show_rss_log_title.t(:title => @rss_log.unique_format_name) %>
+
+<% if @rss_log.notes %>
+  <table>
+    <% for key, args, time in @rss_log.parse_log
+      if key != :log_orphan %>
+        <tr>
+          <td><%= time.strftime("%a %b %d, %Y %H:%M:%S %Z") %></td>
+          <td width="10"></td>
+          <td><%= key.t(args) %></td>
+        </tr>
+      <% end
+    end %>
+  </table>
+<% end %>
+
+<%= if observation = @rss_log.observation
+  link_to(:app_show_observation.t, :action => 'show_observation', :id => observation.id)
+elsif species_list = @rss_log.species_list
+  link_to(:app_show_species_list.t, :controller => 'species_list', :action => 'show_species_list', :id => species_list.id)
+elsif name = @rss_log.name
+  link_to(:app_show_name.t, :controller => 'name', :action => 'show_name', :id => name.id)
+end %>

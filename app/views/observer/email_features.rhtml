@@ -1,0 +1,13 @@
+<% @title = 'Email Features' %>
+
+<p>Sending to <%= @users.length %> users.</p>
+
+<% form_tag(:action => 'send_feature_email') do %>
+  <center><%= submit_tag("Send") %></center><br/>
+
+  <label for="feature_email_content">Feature Email</label><br/>
+  <%= text_area('feature_email', 'content', :cols => 80) %><br/><br/>
+  <p>
+    Users: <%= (@users.map { |u| u.login }).join(', ') %>
+  </p>
+<% end %>

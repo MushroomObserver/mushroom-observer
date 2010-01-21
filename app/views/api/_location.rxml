@@ -1,0 +1,37 @@
+# Locals:
+#   :object             Location instance.
+#   :detail             Boolean: include details?
+
+detail ||= false
+
+xml.location(
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/location/show_location/#{object.id}"
+) do
+  xml.title object.display_name
+
+  xml.elevation_maximum '%d' % object.high
+  xml.elevation_minimum '%d' % object.low
+  xml.elevation_units   'meters'
+
+  xml.latitude_south  '%.4f' % object.south
+  xml.latitude_north  '%.4f' % object.north
+  xml.latitude_center '%.4f' % ((object.north + object.south) / 2)
+  xml.latitude_units  'degrees north'
+
+  xml.longitude_east   '%.4f' % object.east
+  xml.longitude_west   '%.4f' % object.west
+  xml.longitude_center '%.4f' % ((object.east  + object.west)  / 2)
+  xml.longitude_units  'degrees east'
+
+  if detail
+    xml.created  xml_datetime(object.created)
+    xml.modified xml_datetime(object.modified)
+    xml.notes    object.notes.to_s.tpl_nodiv
+
+    # authors
+    # editors
+    # observations
+    # ...
+  end
+end

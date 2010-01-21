@@ -1,0 +1,27 @@
+<!--[form:image]-->
+
+<p><label for="image_copyright_holder"><%= :form_images_copyright_holder.t %>:</label><br/>
+<%= form.text_field('copyright_holder') %></p>
+
+<p><label for="image_when_1i"><%= :app_when.t %>:</label>
+  <span class="HelpNote">
+    <%= :form_images_when_help.t %>
+  </span><br/>
+<%= date_select(:image, :when, :start_year => 1980, :end_year => Time.now.year) %></p>
+
+<p><label for="image_license_id"><%= :license.t %>:</label>
+  <span class="HelpNote">
+    <%= :form_images_license_help.t %>
+  </span><br/>
+<%= form.select(:license_id, @licenses) %></p>
+
+<p><label for="image_notes"><%= :app_notes.t %>:</label>
+  <span class="HelpNote">
+    <%= :form_images_notes_help.t %>
+  </span><br/>
+<%= form.text_area('notes', "cols" => width) %></p>
+<%= render(:partial => 'shared/textilize_help') %>
+
+<%= focus_on('image_notes') %>
+
+<!--[eoform:image]-->

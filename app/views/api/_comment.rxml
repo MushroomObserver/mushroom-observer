@@ -1,0 +1,31 @@
+# Locals:
+#   :object             Comment instance.
+#   :detail             Boolean: include details?
+#   :refs               Boolean: include ref'd object?
+
+detail ||= false
+refs   ||= false
+
+xml.comment(
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/comment/show_comment/#{object.id}"
+) do
+  xml.created xml_datetime(object.created)
+  xml.summary object.summary.to_s.tl
+  xml.content object.comment.to_s.tpl_nodiv
+
+  render_xml_partial(xml, :user, :locals => {
+    :object => object.user,
+    :detail => false,
+  })
+
+  if refs
+    xml.object do
+      type = object.object_type.to_s.underscore.to_sym
+      render_xml_partial(xml, type, :locals => {
+        :object => object.object,
+        :detail => false,
+      })
+    end
+  end
+end

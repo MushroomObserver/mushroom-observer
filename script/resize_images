@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/resize_images [number_of_images]
+#
+#  DESCRIPTION::
+#
+#  This is intended to run once a minute from the crontab.  It goes through all
+#  of the original images and re-creates the 640x640 and 160x160 images.  Pass
+#  in the number to do (defaults to 5 images at a time).  It sleeps for two
+#  seconds between each image.  It writes out a log of the images it's done,
+#  and reads this back in each time it runs so it knows where it left off.  It
+#  processes the images in completely random order until they are all done, in
+#  which case it does nothing.  Look at the log to get a list of images that
+#  failed -- they are marked with leading "#" marks. 
+#
+################################################################################
+
+ORIG = File.dirname(__FILE__) + '/../public/images/orig'
+DONE = File.dirname(__FILE__) + '/../log/resize_image.log'
+
+limit = ARGV[0].to_i
+limit = 5 if limit == 0
+
+if !File.exists?(DONE)
+  File.open(DONE, "w") do |file|
+  end
+end
+
+done = {}
+File.open(DONE) do |file|
+  file.each_line do |line|
+    done[line.strip.sub(/^#/, '')] = true
+  end
+end
+
+num = 0
+Dir.foreach(ORIG) do |file|
+  if file.match(/(\d+)\.jpg/) && !done[id = $1]
+    file = "#{ORIG}/#{file}"
+    file2 = file.sub('orig', '640')
+    file3 = file.sub('orig', 'thumb')
+    if system "convert -thumbnail '640x640>' -quality 70 #{file} #{file2}" and
+       system "convert -thumbnail '160x160>' -quality 90 #{file} #{file3}"
+      File.open(DONE, 'a') do |log|
+        log.puts id
+      end
+    else
+      File.open(DONE, 'a') do |log|
+        log.puts '#' + id.to_s
+      end
+    end
+    num += 1
+    break if num >= limit
+    sleep 2
+  end
+end
+
+exit 0

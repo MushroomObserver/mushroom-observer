@@ -1,0 +1,18 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+macrolepiota_rachodes_synonym:
+  id: 1
+  sync_id: 1xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+
+chlorophyllum_rachodes_synonym:
+  id: 2
+  sync_id: 2xx1
+  created: 2007-05-04 05:59:00
+  modified: 2007-05-04 06:00:00
+
+lactarius_alpinus_synonym:
+  id: 3
+  sync_id: 3xx1
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10

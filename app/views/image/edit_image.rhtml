@@ -1,0 +1,25 @@
+<%
+  @title = :image_edit_title.t(:name => @image.unique_format_name)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :image.l),
+            :action => 'show_image', :id => @image.id)
+  end
+%>
+
+<% form_for(:image, :url => { :action => :edit_image, :id => @image }) do |form| %>
+  <br/><center><%= submit_tag :app_save_changes.l %></center>
+
+  <table cellpadding="10">
+    <tr>
+      <td valign="top">
+        <%= render(:partial => 'form_images', :locals => { :form => form, :width => 30 }) %>
+      </td>
+      <td align="center">
+        <%= image_tag(sprintf("640/%d.jpg", @image.id), :border => 0) %>
+      </td>
+    </tr>
+  </table>
+
+  <center><%= submit_tag :app_save_changes.l %></center>
+<% end %>

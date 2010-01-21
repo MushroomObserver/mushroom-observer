@@ -1,0 +1,41 @@
+<% @title ||= :list_merge_options_title.t(:where => @where) %>
+
+<table cellpadding="5" cellspacing="0" width="100%">
+  <tr valign="top">
+
+    <% if @matches %>
+      <td>
+        <div class="SubTitle"><%= :list_merge_options_near_matches.t %></div>
+        <table cellpadding="5" cellspacing="0" width="100%">
+          <% odd_or_even = 0
+          for l in @matches
+            odd_or_even = 1 - odd_or_even %>
+            <tr valign="top" class="ListLine<%= odd_or_even %>">
+              <td width="100%" class="Data">
+                <%= link_to(l.display_name.t, {:action => 'add_to_location', :where => @where, :location => l},
+                            :confirm => :list_merge_are_you_sure.l) %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      </td>
+    <% end %>
+
+    <td>
+      <div class="SubTitle"><%= :list_merge_options_others.t %></div>
+      <table cellpadding="5" cellspacing="0" width="100%">
+        <% odd_or_even = 0
+        for l in @others
+          odd_or_even = 1 - odd_or_even %>
+          <tr valign="top" class="ListLine<%= odd_or_even %>">
+            <td width="100%" class="Data">
+              <%= link_to(l.display_name.t, {:action => 'add_to_location', :where => @where, :location => l},
+                          :confirm => :list_merge_are_you_sure.l) %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </td>
+
+  </tr>
+</table>

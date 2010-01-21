@@ -1,0 +1,118 @@
+#!/bin/sh
+
+id=$1
+
+server=velosa@images.mushroomobserver.org:images.mushroomobserver.org
+images=public/images
+
+orig=$images/orig/$id.jpg
+big=$images/640/$id.jpg
+thumb=$images/thumb/$id.jpg
+
+big_icon=$images/place_holder_640.jpg
+thumb_icon=$images/place_holder_thumb.jpg
+
+log=log/process_image.$$
+log2=log/process_image.log
+email=webmaster@mushroomobserver.org
+
+path=(. /bin /usr/bin /usr/local/bin)
+
+errors=0
+
+if [[ $RAILS_ENV == 'production' ]]; then
+    production=1
+else
+    production=0
+fi
+
+# ----------------------------
+#  Help message.
+# ----------------------------
+
+if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
+
+	USAGE:
+	    script/process_image <id>
+
+	DESCRIPTION:
+	    This is used by the webserver to resize and transfer uploaded
+	    images to the image server.  It is intended to run
+	    asynchronously.  One of these jobs is spwaned for each image
+	    uploaded.  Each process first creates temporary soft links to a
+	    place-holder image so that the user sees at least something while
+	    waiting for the images to be processed.  Then it runs convert
+	    (from ImageMagick suite) to downsize the image, first checking
+	    that no one else is running convert.  If another process is
+	    running convert, it sleeps a few seconds and tries again.  After
+	    images are resized, it transfers them to the image server using
+	    scp, again waiting for other scp jobs to finish first.  It emails
+	    the webmaster if there are any errors.
+	
+	FILES:
+	    webmaster       $email
+	    image server    $server
+	    place-holders   $big_icon
+	                    $thumb_icon
+	    error log       $log2
+
+	EOH
+fi
+
+# --------------------------------------------------
+#  Run a command, logging both command and result.
+#  Sets errors to true if anything fails.
+# --------------------------------------------------
+
+function run() {
+    echo "`date`>" $* >> $log
+    if !($* >> $log 2>&1); then
+        errors=1
+        echo '**** FAILED ****' >> $log
+    fi
+}
+
+# -----------------------------------------------
+#  Create links to stock image as place-holders
+#  until smaller images are done.
+# -----------------------------------------------
+
+run cp $thumb_icon $thumb
+run cp $big_icon $big
+
+# ----------------------------
+#  Resize images.
+# ----------------------------
+
+# Wait for other conversions to finish first.
+while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
+
+run convert -thumbnail '160x160>' -quality 90 $orig $thumb
+run convert -thumbnail '640x640>' -quality 70 $orig $big
+
+# ----------------------------
+#  Transfer images.
+# ----------------------------
+
+# Careful!  Don't do this in test mode!
+if (( $production )); then
+
+  # Wait for other transfers to finish first.
+  while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
+
+  run scp $orig $server/orig/$id.jpg
+  run scp $big $server/640/$id.jpg
+  run scp $thumb $server/thumb/$id.jpg
+fi
+
+# ------------------------------
+#  Report errors to webmaster.
+# ------------------------------
+
+cat $log >> $log2
+if (( $errors && $production )); then
+    mutt -s '[MO] process_image' $email < $log
+fi
+rm -f $log
+
+exit $errors

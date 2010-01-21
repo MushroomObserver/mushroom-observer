@@ -1,0 +1,104 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+minimal_unknown:
+  id:        1
+  sync_id:   1xx1
+  when:      2006-05-11
+  user_id:   2
+  location_id: 2
+  name_id:   1
+
+detailed_unknown:
+  id:        2
+  sync_id:   2xx1
+  created:   2006-05-12 17:20:00
+  modified:  2006-05-12 17:21:00
+  when:      2006-05-11
+  user_id:   2
+  location_id: 2
+  name_id:   1
+  specimen:  1
+  thumb_image_id: 1
+  notes:     Found in a strange place
+
+coprinus_comatus_obs:
+  id:        3
+  sync_id:   3xx1
+  created:   2007-02-27 20:20:00
+  modified:  2007-02-27 20:21:00
+  when:      2007-02-27
+  user_id:   1
+  name_id:   2
+  where:     Glendale, California
+  specimen:  0
+  notes:     Second fruiting in bark chips
+  vote_cache: 1
+
+agaricus_campestris_obs:
+  id:        4
+  sync_id:   4xx1
+  created:   2007-03-19 20:20:00
+  modified:  2007-03-19 20:21:00
+  when:      2007-03-19
+  user_id:   1
+  location_id: 2
+  name_id:   3
+  specimen:  0
+  notes:     From the lawn next door
+
+agaricus_campestrus_obs:
+  id:        5
+  sync_id:   5xx1
+  created:   2007-06-23 20:00:00
+  modified:  2007-06-23 20:00:00
+  when:      2007-06-23
+  user_id:   1
+  location_id: 2
+  name_id:   19
+  specimen:  0
+  notes:     From somewhere else
+
+agaricus_campestras_obs:
+  id:        6
+  sync_id:   6xx1
+  created:   2007-06-24 12:00:00
+  modified:  2007-06-24 12:00:00
+  when:      2007-06-24
+  user_id:   1
+  location_id: 2
+  name_id:   20
+  specimen:  0
+  notes:     From somewhere else
+
+agaricus_campestros_obs:
+  id:        7
+  sync_id:   7xx1
+  created:   2007-06-24 12:00:00
+  modified:  2007-06-24 12:00:00
+  when:      2007-06-24
+  user_id:   1
+  location_id: 2
+  name_id:   21
+  specimen:  0
+  notes:     From somewhere else
+
+strobilurus_diminutivus_obs:
+  id:        8
+  sync_id:   8xx1
+  created:   2007-07-20 20:54:45
+  modified:  2007-07-20 20:54:45
+  when:      2007-07-20
+  user_id:   1
+  name_id:   24
+  where:     Pipi Valley, Sierra Mountains, CA
+  specimen:  0
+  notes:     From somewhere else
+  vote_cache: 0
+
+unknown_with_no_naming:
+  id:        9
+  sync_id:   9xx1
+  when:      2008-09-23
+  user_id:   2
+  where:     Who knows where
+  name_id:   1
+

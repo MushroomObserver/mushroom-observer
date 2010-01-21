@@ -1,0 +1,45 @@
+<%
+  @title ||= :list_observations_default_title.t
+  search_params = calc_search_params()
+
+  if @links
+    new_tab_set do
+      for link in @links
+        add_tab(*link)
+      end
+    end
+  end
+%>
+
+<%= pagination_numbers(@obj_pages, nil, :params => search_params) %>
+
+<% if @objs.length > 0 %>
+  <table cellspacing="0" width="100%">
+    <% row_count = 0
+    col_count = 0
+    for observation in @objs
+      color = calc_color(row_count, col_count, @layout["alternate_rows"],
+                         @layout["alternate_columns"])
+      if col_count == 0 %>
+        <tr>
+      <% end %>
+      <td align="left" valign="top" class="ListLine<%= color %>">
+         <%= render(:partial => 'observation', :object => observation, :locals =>
+                    { :vertical_layout => @layout["vertical_layout"], :search_params => search_params }) %>
+      </td>
+      <% if col_count == (@layout["columns"] - 1) %>
+        </tr>
+      <% end
+      col_count += 1
+      if col_count >= @layout["columns"]
+        col_count = 0
+        row_count += 1
+      end
+    end
+    if col_count != 0 %>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
+
+<%= pagination_numbers(@obj_pages, nil, :params => search_params) %>

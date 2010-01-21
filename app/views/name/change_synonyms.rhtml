@@ -1,0 +1,17 @@
+<%
+  @title = :name_change_synonyms_title.t(:name => @name.display_name)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :name.l),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
+
+<% form_tag(:action => 'change_synonyms', :id => @name.id, :approved_names => @new_names,
+            :approved_synonyms => @synonym_name_ids) do %>
+  <center><%= submit_tag :name_change_synonyms_submit.l %></center><br/>
+
+  <%= render(:partial => 'form_synonyms') %>
+
+  <%= focus_on('synonym_members') %>
+<% end %>

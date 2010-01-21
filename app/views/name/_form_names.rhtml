@@ -1,0 +1,72 @@
+<!--[form:name]-->
+<!-- rank, text_name, author, notes -->
+
+<label for="name_rank"><%= :app_rank.t %>:</label>
+<%= select('name', 'rank',
+           [[:rank_form.l, :Form], [:rank_variety.l, :Variety], [:rank_subspecies.l, :Subspecies],
+            [:rank_species.l, :Species], [:rank_genus.l, :Genus], [:rank_family.l, :Family],
+            [:rank_order.l, :Order], [:rank_class.l, :Class], [:rank_phylum.l, :Phylum],
+            [:rank_kingdom.l, :Kingdom], [:rank_domain.l, :Domain], [:rank_group.l, :Group]]) %><br/><br/>
+
+<label for="name_text_name"><%= :form_names_text_name.t %>:</label>
+<% if @can_make_changes %>
+  <%= text_field('name', 'text_name') %><br/>
+  <div class="HelpNote"><%= :form_names_text_name_help.tp %></div>
+<% else %>
+  <%= @name.text_name %><br/>
+  <div class="HelpNote"><%= :form_names_text_name_locked.tp %></div>
+<% end %>
+
+<label for="name_author"><%= :app_author.t %>:</label>
+<% if @can_make_changes or @name.author.nil? or (@name.author == '') %>
+  <%= text_field('name', 'author') %><br/>
+  <div class="HelpNote"><%= :form_names_author_help.tp %></div>
+<% else %>
+  <%= h(@name.author) %><br/>
+  <div class="HelpNote"><%= :form_names_author_locked.tp %></div>
+<% end %>
+
+<label for="name_citation"><%= :app_citation.t %>:</label>
+<span class="HelpNote"><%= :form_names_citation_help.t %></span><br/>
+<%= text_field('name', 'citation', :size => 80) %><br/>
+<div class="HelpNote"><%= :form_names_citation_textilize_note.tp %></div>
+
+<% if @name.id %>
+  <% if @name.is_misspelling? || @misspelling %>
+    <%= check_box('name', 'misspelling', :checked => true) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+    <%= text_field('name', 'correct_spelling', :size => 60,
+                   :value => @correct_spelling ? @correct_spelling : @name.correct_spelling ? @name.correct_spelling.search_name : '') %><br/>
+    <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
+    <%= turn_into_name_auto_completer('name_correct_spelling', :primer => @name_primer) %>
+    <% javascript_include_auto_complete %>
+  <% else %>
+    <%= check_box('name', 'misspelling', :checked => false) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <div class="HelpNote"><%= :form_names_misspelling_note_first.tp %></div>
+  <% end %>
+<% end %>
+
+<p><label for="name_license_id"><%= :license.t %>:</label><br/>
+  <span class="HelpNote">
+    <%= :form_names_license_help.t %>
+  </span><br/>
+<%= select('name', 'license_id', @licenses) %></p>
+
+<center><%= submit_tag button %></center>
+
+<%= render(:partial => 'shared/textilize_help') %><br/>
+
+<% for f in Name.all_note_fields %>
+  <p>
+    <label for="name_<%= f %>"><%= "form_names_#{f}".to_sym.t %>:</label>
+    <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l %></span><br/>
+    <%= text_area('name', f, :cols => 80) %>
+  </p>
+  <center><%= submit_tag button %></center>
+<% end %>
+
+<%= focus_on('name_text_name') %>
+
+<!--[eoform:name]-->

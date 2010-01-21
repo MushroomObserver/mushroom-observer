@@ -1,0 +1,9 @@
+<% @title = :color_themes_title.t %>
+
+<%= :color_themes_text.tp %>
+
+<p>
+  <% for name in CSS %>
+    &nbsp;&nbsp;<%= link_to(name, :action => name) %><br/>
+  <% end %>
+</p>

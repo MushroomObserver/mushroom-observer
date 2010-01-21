@@ -1,0 +1,44 @@
+<%
+  @title ||= :show_project_title.t(:title => @project.title)
+
+  # List Projects | Edit Project
+  new_tab_set do
+    add_tab(:app_list_projects.t, :action => 'list_projects')
+    add_tab(:show_project_admin_request.t, :action => 'admin_request', :id => @project.id)
+    if check_permission(@project.user_id)
+      add_tab(:show_project_destroy.t,
+              { :action => 'destroy_project', :id => @project.id },
+              { :confirm => :app_are_you_sure.l })
+      add_tab(:show_project_edit.t, :action => 'edit_project', :id => @project.id)
+    end
+    if @project.is_admin?(@user)
+      add_tab(:show_project_add_members.t, :action => 'add_members', :id => @project.id)
+    end
+  end
+%>
+
+<table cellpadding="10" width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <p><%= "#{:show_project_created.t}: #{@project.created.to_formatted_s(:db)}"%></p>
+      <p><%= "#{:show_project_published.t}: #{@name_count}"%></p>
+      <p><%= "#{:show_project_by.t}: #{user_link(@project.user)}" %></p>
+      <p><%= "#{:show_project_user_group.t}: #{@project.user_group.name.t}" %></p>
+      <p><%= "#{:show_project_admin_group.t}: #{@project.admin_group.name.t}" %></p>
+      <%= sanitize(:show_project_summary.l + ': ' + @project.summary.to_s).tpl %>
+
+      <% if @user and @project.user_group.users.member?(@user) %>
+        <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>
+      <% end %>
+    </td>
+    <% if @draft_data %>
+      <td valign="top" width="50%">
+        <%= :show_project_drafts.t %>:<br/>
+        <% for datum in @draft_data %>
+          &nbsp;&nbsp;<%= link_to(datum['display_name'].t, :action => "show_draft", :id => datum['id']) %>
+          (<%= user_link(User.find(datum['user_id'])) %>)<br/>
+        <% end %>
+      </td>
+    <% end %>
+  </tr>
+</table>

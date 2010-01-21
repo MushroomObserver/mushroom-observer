@@ -1,0 +1,7 @@
+<% @title = :name_create_title.t %>
+
+<% form_tag(:action => 'create_name', :id => @name.id) do %>
+  <br/><center><%= submit_tag :name_create_submit.l %></center><br/>
+
+  <%= render(:partial => 'form_names', :locals => { :button => :name_create_submit.l }) %>
+<% end %>

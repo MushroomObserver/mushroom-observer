@@ -1,0 +1,78 @@
+# Locals:
+#   :object             Observation instance.
+#   :detail             Include details?
+#   :refs               Include images and comments?
+
+detail ||= false
+refs   ||= false
+
+xml.observation(
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/observer/show_observation/#{object.id}"
+) do
+  xml.date  xml_date(object.when)
+  xml.notes object.notes.to_s.tpl_nodiv
+
+  if object.location
+    render_xml_partial(xml, :location, :locals => {
+      :object => object.location,
+      :detail => false,
+    })
+  else
+    xml.location do
+      xml.title object.where
+    end
+  end
+
+  xml.consensus_name do
+    render_xml_partial(xml, :name, :locals => {
+      :object => object.name,
+      :detail => false,
+      :refs   => detail,
+    })
+  end
+
+  if detail
+    xml.created  xml_datetime(object.created)
+    xml.modified xml_datetime(object.modified)
+    xml.specimen_available object.specimen ? 'true' : 'false'
+    xml.is_collection_location object.is_collection_location ? 'true' : 'false'
+
+    render_xml_partial(xml, :user, :locals => {
+      :object => object.user,
+      :detail => false,
+    })
+
+    xml.namings(:number => object.namings.length) do
+      for naming in object.namings
+        render_xml_partial(xml, :naming, :locals => {
+          :object => naming,
+          :detail => false,
+          :refs    => false,
+        })
+      end
+    end
+  end
+
+  if refs
+    xml.images(:number => object.images.length) do
+      for image in object.images
+        render_xml_partial(xml, :image, :locals => {
+          :object => image,
+          :detail => true,
+          :files  => true,
+          :refs   => false,
+        })
+      end
+    end
+
+    xml.comments(:number => object.comments.length) do
+      for comment in object.comments
+        render_xml_partial(xml, :comment, :locals => {
+          :object => comment,
+          :detail => false,
+        })
+      end
+    end
+  end
+end

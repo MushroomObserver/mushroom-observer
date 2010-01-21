@@ -1,0 +1,23 @@
+<% @title ||= :eol_preview_title.t %>
+
+<%= :eol_preview_explanation.tp %>
+
+<p>
+  <%= :eol_preview_name_count.t :count => @names.length %><br/>
+  <%= :eol_preview_image_count.t :count => @image_data.length %>
+</p>
+<% odd_or_even = 0
+for name in @names
+  odd_or_even = 1 - odd_or_even %>
+  <div class="ListLine<%= odd_or_even %>" style="padding-top:10px; padding-bottom:10px;">
+    <p>
+      <%= link_to(name.display_name.t, :controller => "name", :action => "show_name", :id => name.id) %>
+    </p>
+    <% if @image_data[name.id]
+      for image_id, observation_id in @image_data[name.id] %>
+        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
+                    :controller => 'observer', :action => 'show_observation', :id => observation_id) %>
+      <% end
+    end %>
+  </div>
+<% end %>

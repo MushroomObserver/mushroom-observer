@@ -1,0 +1,37 @@
+<%
+  @title = :image_show_title.t(:name => @image.unique_format_name)
+  search_params = calc_search_params()
+  commercial_inquiries_ok = @image.user.email_general_commercial
+
+  new_tab_set do
+    add_tab(:image_show_normal_size.t,
+            :action => 'show_image', :id => @image.id, :params => search_params)
+    if commercial_inquiries_ok
+      add_tab(:image_show_inquiry.t, :controller => 'observer',
+              :action => 'commercial_inquiry', :id => @image.id)
+    end
+    if check_permission(@image.user_id)
+      add_tab(:image_show_edit.t,
+              :action => 'edit_image', :id => @image.id)
+      add_tab(:image_show_destroy.t,
+              { :action => 'destroy_image', :id => @image.id },
+              { :confirm => :app_are_you_sure.l })
+    end
+  end
+%>
+
+<div id="copyright">
+  <%= :image_show_copyright.t %> &copy;
+  <% if commercial_inquiries_ok %>
+    <%= link_to(sprintf("%s %s", @image.when.year, @image.copyright_holder),
+                :controller => 'observer', :action => 'commercial_inquiry', :id => @image.id) %>
+  <% else %>
+    <%= sprintf("%s %s", @image.when.year, @image.user.legal_name) %>
+  <% end %>
+</div>
+
+<div>
+  <%= link_to(image_tag(sprintf("orig/%d.jpg", @image.id)),
+              :action => 'show_image', :id => @image.id, :params => search_params) %>
+  <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
+</div>

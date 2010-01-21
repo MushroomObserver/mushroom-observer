@@ -1,0 +1,69 @@
+<%
+  observation_url = "#{HTTP_DOMAIN}/#{@observation.id}"
+  name_url        = "#{HTTP_DOMAIN}/name/show_name/#{@naming.name_id}"
+  observer_url    = "#{HTTP_DOMAIN}/observer/observer/show_user/#{@observation.user_id}"
+  identifier_url  = "#{HTTP_DOMAIN}/observer/observer/show_user/#{@naming.user_id}"
+
+  intro = :email_naming_for_tracker_intro.l(
+    :obs  => link_to(:observation.l, observation_url),
+    :name => link_to(@naming.format_name, name_url)
+  )
+
+  fields = ""
+  fields += "*#{:app_observer.l}:* #{link_to(@observation.user.legal_name, observer_url)}\n"
+  fields += "*#{:app_identifier.l}:* #{link_to(@naming.user.legal_name, identifier_url)}\n"
+  if @observation.specimen
+    fields += "*#{:show_observation_specimen_available.l}*\n"
+  else
+    fields += "*#{:show_observation_specimen_not_available.l}*\n"
+  end
+  fields += "*#{:email_field_image_count.l}:* #{@observation.images.length}\n"
+
+  handy_links = :email_handy_links
+
+  links = []
+  links.push([:email_links_show_object.l(:type => :observation.l),
+    observation_url])
+  links.push([:email_links_show_observer.l,
+    observer_url])
+  links.push([:email_links_show_identifier.l,
+    identifier_url]) if @observation.user_id != @naming.user_id
+  links.push([:email_links_disable_tracking.l(:type => :name.l),
+    "#{HTTP_DOMAIN}/name/email_tracking/#{@naming.name_id}"])
+  links.push([:email_links_your_interests.l,
+    "#{HTTP_DOMAIN}/interest/list_interests"])
+  links.push([:email_links_latest_changes.l,
+    HTTP_DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= fields.tp %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= fields.tp.html_to_ascii %>
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label}: #{url}\n"
+  end
+  result %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<% end ###################################################################### %>

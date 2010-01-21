@@ -1,0 +1,56 @@
+<% @title = :system_status_title.t %>
+
+<% form_tag(:controller => 'observer', :action => 'server_status') do %>
+  <%= submit_tag :system_status_gc.l %>
+  <%= submit_tag :system_status_clear_caches.l %>
+<% end %>
+
+<p>
+  <%= "#{:system_status_browser_status_size.l}: #{@cache_size}" %>
+</p>
+<p>
+  <%= "#{:system_status_textile_name_size.l}: #{@textile_name_size}" %>
+</p>
+
+<%=
+  object_count = 0
+  number = 0
+  length = 0
+  numbers = {}
+  lengths = {}
+  largest = ""
+
+  ObjectSpace.each_object do |o|
+    object_count += 1
+    if o.class == String
+      number += 1
+      length += o.length
+      bin = o.length == 0 ? 0 : (Math.log(o.length)/Math.log(10)).round
+      if !numbers[bin]
+        numbers[bin] = 0
+        lengths[bin] = 0
+      end
+      numbers[bin] += 1
+      lengths[bin] += o.length
+      largest = o if o.length > largest.length
+    end
+  end
+
+  str = "Object count: #{object_count}"
+  str += "<table>\n"
+  numbers.keys.sort.each do |bin|
+    str += " <tr>\n"
+    str += "  <td>#{bin}</td>\n"
+    str += "  <td>#{numbers[bin]}</td>\n"
+    str += "  <td>#{lengths[bin]}</td>\n"
+    str += " </tr>\n"
+  end
+  str += " <tr>\n"
+  str += "  <td>Total</td>\n"
+  str += "  <td>#{number}</td>\n"
+  str += "  <td>#{length}</td>\n"
+  str += " </tr>\n"
+  str += "</table>\n"
+  str += "<br/>\n"
+  str += "Largest: [#{largest.length}]<br/>\n"
+%>

@@ -1,0 +1,46 @@
+<%
+  intro = :email_features_intro
+  handy_links = :email_handy_links
+
+  links = []
+  links.push([:email_links_stop_sending.l,
+    "#{HTTP_DOMAIN}/account/no_email_general_feature/#{@user.id}"])
+  links.push([:email_links_change_prefs.l,
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+  links.push([:email_links_latest_changes.l,
+    HTTP_DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <%= sanitize(@features).tp %>
+</div>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= @features.tp.html_to_ascii %>
+
+--------------------------------------------------
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label.t.html_to_ascii}: #{url}\n"
+  end
+  result %>
+<% end ###################################################################### %>

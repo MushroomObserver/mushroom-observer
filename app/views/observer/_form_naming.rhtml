@@ -1,0 +1,91 @@
+<!--[form:naming]-->
+
+<%# Section for handling deprecated, new and multiple names on naming creation and edit pages %>
+<% if @what && @what != '' %>
+  <% if @valid_names %>
+    <div class="Errors">
+      <span class="Data"><%= :form_naming_deprecated.t(:name => @what) %></span><br/>
+      <% if @valid_names.length > 0 %>
+        <span class="HelpNote"><%= :form_naming_deprecated_help.t(:button => button_name, :name => @what) %></span><br/>
+        <span class="Data"><%= :form_naming_valid_synonyms.t %>:<br/>
+          <% for n in @valid_names %>
+            &nbsp;&nbsp;<%= radio_button('chosen_name', 'name_id', n.id) %>
+            <%= n.display_name.t %><br/>
+          <% end %>
+        </span>
+      <% else %>
+        <span class="HelpNote"><%= :form_naming_not_recognized_help.t(:button => button_name) %></span><br/>
+      <% end %>
+    </div>
+  <% elsif @names && @names.length == 0 %>
+    <div class="Errors">
+      <span class="Data"><%= :form_naming_not_recognized.t(:name => @what) %></span><br/>
+      <span class="HelpNote"><%= :form_naming_not_recognized_help.t(:button => button_name) %></span><br/>
+    </div>
+  <% elsif @names && @names.length > 1 %>
+    <div class="Errors">
+      <span class="Data"><%= :form_naming_multiple_names.t(:name => @what) %>:<br/>
+        <% for n in @names %>
+          &nbsp;&nbsp;<%= radio_button('chosen_name', 'name_id', n.id) %>
+          <%= n.display_name.t %>
+            (<%= n.observations.size %>)<br/>
+        <% end %>
+      </span>
+      <span class="HelpNote"><%= :form_naming_multiple_names_help.t %></span><br/>
+    </div>
+  <% end %>
+<% end %>
+
+<%# -------------------- Name Autocompleter -------------------- %>
+
+<div style="white-space:nowrap">
+  <label for="name_name"><%= :app_what.t %>:</label>
+  <%= text_field('name', 'name', :value => @what) %>
+  <span style="margin-left:20px">&nbsp;</span>
+  <label for="vote_value"><%= :form_naming_confidence.t %>:</label>
+  <%= select('vote', 'value', @confidence_menu, { :include_blank =>
+             action == 'edit_naming' ? false : true }) %>
+</div><br/>
+<% if !show_reasons %>
+  <span class="HelpNote"><%= :form_naming_name_help_create.t %></span>
+<% end %>
+<span class="HelpNote"><%= :form_naming_name_help.t %></span><br/>
+<%= turn_into_name_auto_completer('name_name', :primer => @name_primer,
+  :onChange => %( function(v) { if (v && v != "") Element.show('reasons_div') } )) %>
+ 
+<%# -------------------- Naming Reasons -------------------- %>
+
+<%=
+  html = "<br/>"
+  for r in @reason.values.sort {|a,b| a.order <=> b.order}
+    i        = r.reason
+    label    = r.label.t
+    check    = !r.notes.nil?
+    notes    = r.notes.nil? ? '' : r.notes
+    default  = r.default?
+    onclick  = "Element.toggle('reason_#{i}_div'); setTimeout(function() { if ($('reason_#{i}_check').checked) $('reason_#{i}_notes').focus() }, 0.25)"
+    checkbox = check_box('reason', 'check', { :index => i, :checked => check,
+                         :onclick => can_do_ajax? ? onclick : 1})
+    label    = "<label for='reason_#{i}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
+    textarea = text_area('reason', 'notes', { :index => i, :cols => 80, :rows => 1, :value => notes })
+    textarea += "<br/>"
+    if can_do_ajax?
+      textarea = "<div id='reason_#{i}_div'>#{textarea}</div>"
+      if !check
+        textarea += javascript_tag("Element.hide('reason_#{i}_div')")
+      end
+    end
+    html += checkbox + label + textarea
+  end
+  if can_do_ajax? && !show_reasons && @what.to_s == ""
+    html = "<div id='reasons_div'>#{html}</div>"
+    html += javascript_tag("Element.hide('reasons_div')");
+  end
+  html
+%>
+
+<%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
+
+<%= focus_on('name_name') %>
+
+<!--[eoform:naming]-->

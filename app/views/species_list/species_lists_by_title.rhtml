@@ -1,0 +1,37 @@
+<% @title = :species_list_by_title_title.t %>
+
+<table cellpadding="5" cellspacing="5">
+
+  <tr class="Data">
+    <td>
+      <%= :species_list_by_title_list_name.t %>
+    </td>
+    <td>
+      <%= :species_list_by_title_size.t %>
+    </td>
+    <td>
+      <%= :species_list_by_title_created.t %>
+    </td>
+    <td>
+      <%= :species_list_by_title_owner.t %>
+    </td>
+  </tr>
+
+  <% for species_list in @species_lists %>
+    <tr>
+      <td>
+        <%= link_to(species_list.unique_text_name.t, :action => 'show_species_list', :id => species_list.id) %>
+      </td>
+      <td>
+        <%= species_list.observations.size %>
+      </td>
+      <td>
+        <%= species_list.when %>
+      </td>
+      <td>
+        <%= user_link(species_list.user) %>
+      </td>
+    </tr>
+  <% end %>
+
+</table>

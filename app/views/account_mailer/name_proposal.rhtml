@@ -1,0 +1,61 @@
+<%
+  watching = @user.watching?(@observation)
+
+  intro = :email_name_proposal_intro.l(:id => @observation.id)
+
+  fields = ""
+  fields += "*#{:name.l}:* #{@naming.format_name}\n"
+  fields += "*#{:app_time.l}:* #{@naming.created.to_formatted_s(:db)}\n"
+  fields += "*#{:app_by.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
+  for reason in @naming.naming_reasons
+    if reason.notes.nil? || reason.notes == ""
+      fields += "*#{reason.label.to_sym.t}*\n"
+    else
+      fields += "*#{reason.label.to_sym.t}:* #{reason.notes.to_s}\n"
+    end
+  end
+
+  handy_links = :email_handy_links
+
+  links = []
+  links.push([:email_links_show_object.l(:type => :observation.l),
+    "#{HTTP_DOMAIN}/#{@observation.id}"])
+  links.push([:email_links_not_interested.l(:type => :observation.l),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+  links.push([:email_links_stop_sending.l,
+    "#{HTTP_DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
+  links.push([:email_links_change_prefs.l,
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+  links.push([:email_links_latest_changes.l,
+    HTTP_DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= fields.tp %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= fields.tp.html_to_ascii %>
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label}: #{url}\n"
+  end
+  result %>
+<% end ###################################################################### %>

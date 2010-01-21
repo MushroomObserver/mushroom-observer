@@ -1,0 +1,17 @@
+body {
+  background-color: #DD00DD;
+  color: #000000;
+}
+.LeftSide {
+  background-color: #FFFF00;
+}
+
+.Admin {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  padding: 7px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+

@@ -1,0 +1,6 @@
+<% @title = :app_welcome.t(:user => @user.legal_name) %>
+
+<div class="memo">
+  <%= :reverify_note.tp(:user => @user.login) %>
+  <%= link_to(:reverify_link.t, :action => "send_verify") %>  
+</div>

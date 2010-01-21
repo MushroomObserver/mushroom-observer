@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/makexml
+#
+#  DESCRIPTION::
+#
+#  Uses wget to get pieces of the EOL xml data and then puts the pieces together. 
+#  This is to work around 20 second time limit for getting pages from MediaTemple.
+#
+#  TODO: setup tmp directory for files, compare stitch result with current eol.xml
+#  move stitch to current eol.xml (public/eol.xml), figure out how to get public/eol.xml
+#  to load correctly as xml into the browser.
+#
+################################################################################
+
+TIME_LIMIT = 10
+URL = "http://mushroomobserver.org/name/eol?max_secs=%s"
+
+def get_last_name(filename)
+  result = nil
+  pat = /<dwc:ScientificName>([A-Z][a-z ]+[a-z])/
+  File.open(filename) do |file|
+    file.each_line do |line|
+      match = pat.match(line)
+      if match:
+        result = match[1]
+      end
+    end
+  end
+  return result
+end
+
+# Prime the pump both to get around Jason's JavaScript detector
+# and to get the SQL caches loaded
+cmd = "wget -O /dev/null '#{URL % 0}'"
+system cmd
+
+last_name = false
+count = 0
+files = []
+until last_name.nil?
+  url = URL % TIME_LIMIT
+  url += "&last_name=#{last_name}" if last_name
+  filename = "eol.#{count}"
+  files.push(filename)
+  cmd = "wget -O #{filename} '#{url}'"
+  system cmd
+  count += 1
+  last_name = get_last_name(filename)
+  print last_name
+end
+header = true
+prev_line = false
+outfile = File.open('eol.xml', 'w')
+for filename in files
+  File.open(filename) do |file|
+    line_count = 0
+    prev_line = false
+    file.each_line do |line|
+      if prev_line and (header or line_count > 2)
+        outfile.write(prev_line)
+      end
+      prev_line = line
+      line_count += 1
+    end
+    header = false
+  end
+end
+outfile.write(prev_line)
+outfile.close()

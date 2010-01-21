@@ -1,0 +1,6 @@
+Standards:
+
+Use textilize() on notes.
+Don't use anything on fields of fixed types like dates
+Use textilize_without_paragraph h(str) on arbitrary, formatted but size limited strings like Observation.unique_format_name.
+Use h(str) on arbitrary, unformatted but size limited strings like Observation.unique_text_name.

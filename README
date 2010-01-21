@@ -1,0 +1,441 @@
+
+= MushroomObserver
+
+I'll let Nathan introduce his website.  Instead I will just give an overview of
+the code for prospective developers.
+
+
+
+
+== Installation
+
+Everything you need to get a local copy of MO running on your computer is kept
+in a subversion repository at collectivesource.com.  It is world-readable, so
+just checkout a copy, and give it a shot.  (The latest stable release is in
+"trunk".  See link below.)
+
+I'm pretty sure you must be running a Unix-type O/S, Linux and MacOSX have been
+tested, but I know Rails and Mysql and everything else MO needs is available in
+Windows, so feel free to be the first to try it out!  Nathan has written up excellent
+notes describing how he's installed it on Ubuntu 6.10, Edgy Eft (see below).
+
+You'll at very least need to install ruby, rails and mysql.  Fortunately
+these are all very popular so it's easy to find pre-built binaries for most
+operating systems.  I was hopeless at system administration when I started,
+and I had no trouble getting it up and running in an hour or two.
+
+For more information:
+
+MO Source:: http://svn.collectivesource.com/mushroom_sightings/
+Nathan's Notes:: link:files/README_INSTALL.html
+Subversion Manual:: http://svnbook.red-bean.com/
+
+
+
+
+== Ruby on Rails
+
+MO is written using Ruby on Rails, or simply Rails.  This is just a set of
+three heavily interrelated Ruby packages: ActionController, ActionView, and
+ActiveRecord.  The basic architecture is model, view, controller -- that is,
+the webserver receives a request, passes it to the appropriate controller,
+which decides what actions to take and gathers whatever data is needed (from
+the "models"), then renders the result via HTML templates (the "views").
+
+Documentation is automatically generated using rdoc.  Basically, it just
+grabs comments before classes, modules, and methods and creates a little
+webpage.  Just run <tt>rake rdoc</tt> and point your browser at
+<tt>file://#{RAILS_ROOT}/rdoc/index.html</tt>.
+
+Rails can be extended by installing plugins.  We've only used a few, but it's
+worth mentioning.  Just google "rails plugins" (or browse a directory, see
+below), find a plugin you like, the run:
+
+  script/plugin install http://svn.domain.com/path/to/plugin
+
+Rails applications run in one of three different modes: development, production
+and test.  Each has its own entirely separate database (named appropriately
++observer_development+, +observer_production+ and +observer_test+).  Otherwise
+it doesn't *really* matter which you use, but there are subtle differences: 
+
+development
+  Automatically reloads any code that has been changed.  (Only modules that
+  have been required using +require_dependency+.)  Doesn't cache data the same
+  way as the production server does.
+
+production
+  Need to restart the server whenever you change any code.  Some things are
+  cached differently than in development, so if you see different behavior on
+  the production server, start here: you might just need to reload an object.
+
+test
+  Used by unit tests.  All changes are thrown away between each test.  And
+  probably a host of other technical things.
+
+For more information:
+
+Ruby Documentation:: http://www.ruby-doc.org/core/
+Ruby Quick Ref:: http://www.zenspider.com/Languages/Ruby/QuickRef.html
+Rails Documentation:: http://api.rubyonrails.org/
+Rdoc Documentation:: http://rdoc.sourceforge.net/doc/index.html
+Rails Plugin Wiki:: http://wiki.rubyonrails.org/rails/pages/Plugins
+Rails Plugin Directory:: http://agilewebdevelopment.com/plugins
+MVC Architecture:: http://en.wikipedia.org/wiki/Model-view-controller
+
+
+
+
+== Database
+
+MO uses MySQL.  The current schema is <tt>db/schema.rb</tt>.  All modifications
+of the structure, such as adding tables or changing existing columns, are
+handled using the handy migrations in <tt>db/migrate</tt>.
+
+  rake db:migrate                   # Create or update database.
+  rake db:migrate VERSION=0nn       # Rollback to pervious version.
+
+Access is all done via subclasses of ActiveRecord::Base.  Look for observations
+in the class Observation, user/account settings in User, taxonomy in Name and
+Synonym, and so on.  These are all found in <tt>app/models</tt>.  Here are the
+major ones:
+
+User::              Users: name, email, password, prefs, etc.
+Observation::       Observations: where, when, what, notes.
+Name::              Scientific name bundled with notes, citation, etc.
+Location::          Locations: lat/long/elev, notes, etc.
+Image::             Images: mostly mushrooms, but also mugshots or anything else.
+Comment::           Comments: attached to an Observation now, later will attach to other things, too.
+SpeciesList::       Set of Observations (*_not_* Names).
+
+These are used in naming and voting on observations:
+
+Naming::            Proposed Name for a given Observation.
+NamingReason::      Reasons for proposing a name: appearance, literature, etc.
+Vote::              Votes on a given Naming for a given Observation.
+
+Emails use several:
+
+QueuedEmail::        I haven't looked at this code yet.
+QueuedEmailInteger:: ??
+QueuedEmailNote::    ??
+QueuedEmailString::  ??
+CommentEmail::       Subclass of QueuedEmail, for comments.
+FeatureEmail::       Subclass of QueuedEmail, for site-wide emails.
+
+And a few other random database classes:
+
+Synonym::           Group of synonymized Name's.
+PastName::          Old versions of Name's.
+PastLocation::      Old versions of Location's.
+License::           Types of licenses available for Image's to use.
+RssLog::            Used to report changes via RSS feed.
+
+The following non-database-related classes are also found in
+<tt>app/models</tt>:
+
+AccountMailer::     Used to actually send an email
+NameParse::         Used by Name to parse scientific names.
+NameSorter::        Used by Name to... I don't remember.
+SearchState::       Used to keep track of search queries.
+SequenceState::     Used to keep track of prev/next position.
+SiteData::          Used to calculate number of objects people have created.
+
+For those who prefer a graphical representation: (Arrow denotes "belongs to".)
+(Dotted line represents proposal to let users comment on objects other than
+observations.)
+
+    User
+     ^
+     |--- Image --> License       < - - - - - -
+     |                                          |
+     |
+     |--- Location                < - - - - - - |
+     |       ^
+     |       '-- PastLocations                  |
+     |
+     |                                          |
+     |   Synonym -------------.
+     |      ^                 |                 |
+     |--- Names --------------|   < - - - - - -
+     |      ^                 |                 |
+     |      '-- PastNames     |--> RssLog
+     |                        |                 |
+     |                        |
+     |--- SpeciesList --------|   < - - - - - - |
+     |         ^              |
+     |--- Observations -------'   <-------------|
+     |         ^                                |
+     |----- Namings --> Name                 Comment --> User
+     |         ^
+     |         |-- NamingReasons
+     |------ Votes
+     |
+     |
+     '--- QueuedEmail
+              ^
+              |-- QueuedEmailIntegers
+              |-- QueuedEmailNotes
+              `-- QueuedEmailStrings
+
+For more information:
+
+ActiveRecord Docs:: http://api.rubyonrails.org/files/vendor/rails/activerecord/README.html
+Migration Docs:: http://api.rubyonrails.org/classes/ActiveRecord/Migration.html
+Migration Cheatsheet:: http://garrettsnider.backpackit.com/pub/367902
+
+
+
+
+== Controllers
+
+There are only a few controllers (in <tt>app/controllers</tt>), roughly one for
+each of the major data types:
+
+ObserverController::    Deals with observations, namings, votes, and everything else.
+AccountController::     Deals with user account stuff.
+NameController::        Deals with names.
+LocationController::    Deals with locations.
+ImageController::       Deals with images.
+CommentController::     Deals with comments.
+SpeciesListController:: Deals with species lists.
+
+These controllers are just subclasses of ActionController.  Actions are just
+instance methods.  These correspond directly to the URL of the request:
+
+  http://mushroomobserver.org/controller/action
+
+Note that the default controller is "observer", the default action is "show",
+and the "id" parameter is shortened to a bare integer:
+
+  http://mo.org/42                      Show observation #42.
+  http://mo.org/image/123               Show image #123.
+  http://mo.org/observer/show_user/3    Show summary for user #3.
+
+Controller methods -- that is, actions -- have access to quite a number of
+helpers and data.  Here are just a few, see ActionController for more:
+
+<tt>session['user']</tt>:: Session: hash of data that follows the user around from request to request.
+<tt>cookies[:mo_user]</tt>:: It is trivial to read or write cookies on the user's browser.
+<tt>request.method</tt>:: You have access to the full CGI request object.
+<tt>flash[:notice]</tt>:: Temporary storage: this hash persists only until the next request.
+<tt>@user</tt>:: If user is logged in this will be their User object.
+<tt>@js</tt>:: True if javascript is enabled on the user's browser.
+<tt>@ua[:ie7]</tt>:: Quick way to tell what browser the user is running.
+
+Controller methods are very deeply interconnected with views.  I've never quite
+understood the underlying mechanics, but views have access to all the
+controller's instance variables (e.g. <tt>@user</tt> and any others you set in
+the action).  This is how actions pass information to the view for rendering as
+HTML.
+
+By default a template of the same name as the action is rendered
+(<tt>app/views/#{controller}/#{action}.rhtml</tt>), however this can be
+overridden in a number of ways.  This can get quite complicated, and you must
+be careful not to accidentally attempt to render two templates.  Example:
+
+  class ExampleController << ActionController
+
+    # This causes autologin() to be run before every action.
+    before_filter :autologin
+
+    def my_action
+      case params[:mode]
+
+      # Mode not set: Render "my_action.rhtml" implicitly.
+      when ""
+        @choices = %w(show index)
+
+      # Show mode: Lookup object and render "show.rhtml".
+      # Note that it does NOT call the show() method!!
+      when "show"
+        @object = Model.find(params[:id])
+        render :action => "show"
+
+      # Index mode: Get list of all objects and render "index.rhtml".
+      # Note that it does NOT call the index() method!!
+      when "index"
+        @objects = Model.find(:all)
+        render :action => "index"
+
+      # Error: Redirect browser to another action.
+      # Note, no templates will be rendered at all.
+      else
+        redirect_to :action => "error"
+      end
+    end
+  end
+
+For more information:
+
+ActionPack Docs:: http://api.rubyonrails.org/files/vendor/rails/actionpack/README.html
+ActionController Docs:: http://api.rubyonrails.org/classes/ActionController/Base.html
+
+
+
+== Views
+
+Views, unlike models and controllers, are not classes, or strictly speaking
+even ruby code at all.  They are templates in which you may (and frequently
+will) embed Ruby code.  All the views are found in:
+
+  app/views/#{controller}/#{action}.rhtml
+
+Some templates that are shared between controllers can be stored in:
+
+  app/views/shared
+
+And "partial" views (see <tt>render :partial</tt>) are prefixed with an
+underscore:
+
+  app/views/#{controller}/_#{partial}.rhtml
+
+Syntax is all HTML with two new mark-ups:
+
+  <% ruby code that is evaluated but doesn't affect output %>
+  <%= ruby expression whose (string) value is inserted into the output %>
+
+An example makes it plentifully clear:
+
+  <h1>Observation #<%= @observation.id %></h1>
+
+  <% if @user == @observation.user %>
+    <a href="/observer/edit/<%= @observation.id %>">Edit Observations</a>
+  <% end %>
+
+  Name: <%= @observation.name %><br/>
+  Date: <%= @observation.when %><br/>
+  Where: <%= @observation.where %><br/>
+  Notes: <%= @observation.notes %><br/>
+
+Couldn't be easier.  All views are automatically wrapped in a "layout"
+template which is itself another +rhtml+ template:
+
+  app/views/layout/application.rhtml
+
+You have access to hundreds of amazing helper methods in these view templates,
+from simple tag helpers like image_tag() and link_to() to complicated things
+like text_field_with_autocomplete() and paginate().  And, as mentioned in the
+section on controllers, you have access to a number of things from the
+controller.  You can also "publish" controller methods for use in view by
+using the +helper_method+ directive:
+
+  class SomeController
+    helper_method :my_helper
+    def my_helper(args)
+      ...
+    end
+  end
+
+I still to this day have no idea what the actual class context ruby code in
+these templates is run under.  It has something to do with ERb and (obviously)
+ActionView, but it also has access to ActionController instance variables and
+some (but not most) ActionController methods.  If you really want to fry your
+brain, check out the contorted hoops you must jump through to write a helper
+that takes a block (as in <tt><% form(:action) do %>...<% end %></tt>).
+
+For more information:
+
+ActionPack Docs:: http://api.rubyonrails.org/files/vendor/rails/actionpack/README.html
+ActionView Docs:: http://api.rubyonrails.org/classes/ActionView/Base.html
+
+
+
+
+== Helpers
+
+There are a number of helper files scattered about that magically appear in
+various contexts.  I found this extremely confusing at first (actually I still
+do, but don't tell anyone).
+
+app/helpers/application_helper.rb
+  This is magically loaded and made available to all view templates.
+
+app/helpers/#{controller}_helper.rb
+  This is magically loaded and made available to all view templates rendered
+  by a given controller.
+
+app/controllers/application.rb
+  This is magically loaded and made available to all controllers.
+
+(Technically, only the first two are really "helpers" in the "view helper"
+sense, but they all function the same, just for different customers.)
+
+The only tricky part really is making sure you include your methods in the
+correct modules or classes, and know when and how often initialization is
+performed.
+
+For more information:
+
+Understanding Helpers:: http://wiki.rubyonrails.org/rails/pages/UnderstandingHelpers
+
+
+
+
+== Testing
+
+Nathan has been very diligent writing unit tests for everything.  Just tun
+<tt>rake test</tt> and go get something to eat.  There are several files and
+directories involved, so it's worth an overview:
+
+test/unit/#{model}_test.rb:: Model tests.
+test/functional/#{controller}_controller_test.rb:: Controller tests.
+test/test_helper.rb:: Handy helpers mostly used by functional tests.
+test/fixtures/#{model}.yml:: These define sample objects for use in the tests.
+
+You can tell it to run only a single test script like this:
+
+  rake test TEST=test/functional/observer_controller_test.rb
+
+Actually, that command runs your test twice for some reason, this works better:
+
+  ruby -Ilib:test test/functional/observer_controller_test.rb
+
+(That will save you *a lot* of time!)
+
+For more information:  (I can't find any good documentation of this.)
+
+Cheatsheet:: http://nubyonrails.com/articles/ruby-rails-test-rails-cheat-sheet
+Longwinded Intro:: http://www.nullislove.com/2007/11/10/testing-in-rails-introduction/
+
+
+
+
+== Standards
+
+There are a number of standards the code conforms to.  I'll just list a few
+that I can think of off the top of my head:
+
+* RedCloth
+
+This simple mark-up is used throughout the site, e.g. in user-supplied notes,
+in scientific names, and in "internationalization" strings (see below).
+
+* sanitize or html_escape
+
+All user-supplied text should be run through +sanitize+ or +html_escape+ to
+strip out any potentially harmful HTML.  (Note +h+ is an alias for
++html_escape+.)
+
+* internationalization
+
+Slowly but surely we are abstractifying all text on the site.  Going forward
+it's very easy: instead of printing a string, print <tt>:some_tag.l</tt>
+instead and insert that string into <tt>lang/ui/*.yml</tt>.
+
+* no Model.method() calls in views!
+
+This is a violation of the MVC architecture.  Ask Nathan about it.  Or check
+out the link under the *Ruby on Rails* section near the top of this document.
+
+* rdoc
+
+Try to remember to comment your code in such a way that *rdoc* can understand
+it.  There is a huge amount of work to do to comment old code, but going
+forward it would be nice if we started to do this.  Wouldn't it?
+
+* unit tests
+
+Write tests for every bug you fix!  Better yet, write tests for every new
+feature you add.  Some people suggest testing new code in *test* before even
+trying it out on the website.  Okay, maybe you can go too far...
+

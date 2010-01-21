@@ -1,0 +1,38 @@
+<%
+  @title ||= :review_authors_title.t(
+    :name => @name.display_name
+  )
+
+  # Show Name
+  new_tab_set do
+    add_tab(:app_show_name.t, :action => 'show_name', :id => @name.id)
+  end
+%>
+
+<p>
+  <%= :review_authors_note.t %>
+</p>
+
+<p>
+  <%= :review_authors_authors.t %><br/>
+  <% for u in @authors %>
+    &nbsp;&nbsp;<%= user_link(u) %>
+    | <%= link_to(:review_authors_remove_author.t,
+                  {:action => :review_authors, :id => @name.id, :remove => u.id},
+                  {:confirm => :app_are_you_sure.l}) %>
+    <br/>
+  <% end %>
+</p>
+
+<p>
+  <%= :review_authors_other_users.t %><br/>
+  <%
+    for u in @users
+      unless @authors.member?(u) %>
+        &nbsp;&nbsp;<%= user_link(u) %>
+        | <%= link_to(:review_authors_add_author.t, :action => :review_authors,
+                      :id => @name.id, :add => u.id) %>
+        <br/>
+      <% end %>
+  <% end %>
+</p>

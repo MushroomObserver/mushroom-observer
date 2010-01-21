@@ -1,0 +1,222 @@
+Copyright (c) 2006 Nathan Wilson
+
+March 20, 2006 - Installed Ruby and mysql
+March 27 - Started going through blog demo
+March 28 - Started using CocoaMySQL.  Finished blog demo.
+March 29 - Downloaded Agile Web Development with Rails (DAWDR)
+March 30 -  Showed blog demo to Renee.
+April 5, 6, 7, 8, 9, 11 - Started following along with DAWDR, but with observer in mind
+April 12 - Screwed up and tried to recover from backup, ended up
+      starting over and copying stuff in as needed.
+April 13 - Worked on uploading images
+April 15, 16, 19 - more work on images
+April 19 - Figured out how to run shell commands (identify) and how to use regular
+      expressions objects.
+April 20 - Started this diary.  Work on images.
+April 21 - Got image resizing working.
+April 22 - Moved Dbpict test logic over to Image and got it working.
+April 25 - Cleaned up list_images
+April 26 - Art class.  Got show/edit_image to show image and changed background color.
+  Fixed image resizing.  Cleaned up show_image.
+April 30 - 
+May 1 - 
+May 2 - Added join tables
+May 3 - Art class.  Worked on checkboxes for selecting images.
+May 6 - Decided to not use checkboxes for selecting, but rather to think of images as
+  connected to particular observations.  Added thumbnails to show/edit_observation.
+May 8 - Add observation list to show_image.
+May 10 - Art class
+
+
+May 11 - When I got home from art class, I worked for a while trying
+to get some radio buttons working.  Went to bed with no answer.
+Played more with this morning, still no joy.  Asked for a friends help
+this morning at work.  He didn't know, but in the process of talking
+through the example I had found on the web, a new possibility occurred
+to me.  Finally cracked it tonight.  I have enough stuff working now
+that it is ready to go up on the web for some initially testing.  I
+have cleaned out all the test data and want to do one more pass
+through it all to make sure everything is working and to fix any
+outstanding wonkiness.  Things are looking good for getting it online
+sometime this weekend.
+
+
+Fri May 12 - I finished the review pass.  The whole thing looks a lot
+better and much more consistent.  I was playing around with the colors
+and had the idea of setting all the colors based on actual colors from
+some of my photos.  Sort of the digital equivalent of mushroom dyeing
+:-).  I'm not going to worry about tweaking the colors for the version
+I'm planning on setting up this week, but I really like the idea for
+the actual release of the site.
+
+I also figured out how to cleanly purge the database and setup an
+automated testing framework.  Next I'm going to figure out how to get
+a bunch of data loaded into the database and then I'll work on putting
+up the site.
+
+
+Sun May 14 - Didn't feel very well this weekend.  Between that and
+Mother's day I only made a little bit more progress.  Started setting
+up some stuff on and for my web server.  Figured out some of what I
+need to load a whole bunch of data I have into the system
+automatically.
+
+
+Tues May 16 - Got SVN repository setup on DreamHost.
+
+
+Weds May 17 - We'll I finally felt well enough last night to work on stuff
+again.  I got something up and running on my webserver, but it still
+has one annoying problem that makes it essentially unusable (unable to
+load CSS file) :-(.  I've been scouring the net for a solution.  I've
+started exchanging email with another person who is using the same
+system on the same hosting service, but so far that hasn't borne any
+fruit.  It looks like I'm going to have to debug this one the hard
+way.  Also talked to Gavin Doughtie at work.  Still haven't figured out
+what's going on.
+
+In art class I created agaricus.css with the idea of having color themes
+based on different mushroom groups.
+
+
+Thurs May 18 - Fixed CSS problem by tweaking the .htaccess.
+Got source into SVN.
+
+Fri May 19 - Finally uploaded the first real image to the alpha internet website.
+Worked on getting svn configured reasonably.
+SVN log entries:
+Symlink approach to dev/prod distinction
+Ignoring log files.
+Added agaricus.css.
+Added development logs to log/.svnignore.
+Change image directory lookup to be handled in config/environments.
+Fixed the production image path.
+Switched save image button to Do It.
+Switched to Agaricus color scheme as the default.
+
+
+Sat May 20
+SVN log entries:
+Separated out themed color CSS stuff from rest of CSS.
+Moved to observer in preference to sightings.  Add more stuff to TODO.
+Added copyright.
+Added link to original image.
+Move image to the left on show image page and got rid of redundant fields.
+Got load_image_directory working as a hack to quickly load my images.
+Tweaked left hand links.
+Removed color on flash notices.
+Added 'Colors provided by ...' note.
+Moved page specific links to just under the banner.
+Updated database definition files.
+Tweak CSS files.
+
+
+Sun May 21 - Got a big set of data uploaded: 710 photos and 557
+observations.  Set out a message to CA Fungi and some mycologists to
+get their feedback.  Polled people for their preference between
+mushroomobserver.org, mushroomsightings.org and mushroomobservers.org.
+Added creative commons links and notice.
+
+
+Mon May 22 - Got some great feedback from Darvin.  Added created and
+modifed fields to the Image class.  Added some more images.  Had a
+snaffu with the production database and ended up having to reload the
+data and recreate the changes Darvin suggested.  Got the stats page
+working with more .htaccess magic.
+
+
+Tue May 23 - Added Observations by Name and Images by Title.
+
+
+Wed May 24 - Adjusted navigation around add image to make it more
+intuitive.  Started working on comments for observations.  Reversed
+sense of herbarium indicator in list observations page.
+
+
+Fri May 26 - Deployed comments for observations
+
+
+Sat May 27 - Worked on getting locations and notes recorded for some of
+the bulk created observations.  Create intro.rhtml.  Added LICENSE and
+put some copyrights and license references into the source.
+
+Mon May 28 - Got textilize working and did a general string handling cleanup pass.
+
+Tues May 29 - Added reuse_image
+
+Fri June 2 - Merged add_image and reuse_image into manage_images and added
+section section.
+
+Wed July 5 - Finished first pass at users (been working on this on and off over the last month)
+Users - Adding observations, adding comments and editing should only be done
+        by known users.
+  cleanup logout page (links to pages that don't require login)
+  cleanup login page (links to pages that don't require login)
+  create account
+  email address
+  user chosen color theme
+  preference page
+  Add user foreign key for observations and images
+  user page changes:
+  Control:
+    Controller functions
+    Don't render non-permitted links
+  Admin user
+  Add created and last login dates to users
+
+  Moved 'Show' -> Title and image on list page.
+
+  Cleaned up image destroy so it gets rid of extra thumb references
+
+
+Mon July 10 - Updated external DB and website.  Added password change option.
+
+Tues July 11 - Added list_comments page.
+
+Weds July 12 - Used migration to add species_lists and observations_species_lists.  Also removed extra user related rows from images and observations.  Implemented new_species_list.
+
+Thurs July 13 - show_species_list.  Hyper links in the notes of species_list members to the species_list.  Used under windows at work to confirm that it works reasonably well.
+
+Fri July 14 - Made reference to species_list on show_observation derived from actual link rather than getting added to observation when created.  Implemented remove_observation_from_species_list, list_species_list and destroy_species_list.
+
+Sun July 16 - species_list_by_title, edit_species_list, manage_species_lists
+
+Tues July 18 - Started next/previous
+
+Weds July 19 - Got next/previous working for observations.  Started to add documentation about textilize and provided hints for adjusting species lists.
+
+Fri July 21 - Finished up textilize reference.  Sped up interaction by going directly to images rather than going through separate methods.  Registered mushroomobserver.org and got the site running under that name.
+
+Sat July 22 - Added users_by_name page.  Added references to Ruby on Rails and FireFox.  Briefly tested with Safari and Internet Explorer.
+
+Sun Aug 6 - Finished annotating my images with locations and id notes.
+
+Wed Aug 9 - Wrote up Hygrocybe.rhtml.  Added link back to the observation for Manage Species Lists.  Added method for extending a species list with another list.  Added delete to Show * pages.  Set it up so Manage Images goes to show_observation.  Avoids a redraw problem.
+Checked in the following list of changes:
+  Added ability to extend a species list from edit_species_list
+  Added Cantharellaceae and Hygrocybe themes
+  manage_images now goes to show_observation
+  Fixed next/prev behavior
+  Added Destroy option to show pages
+  Link back to observation from manage_species_lists
+  Added list size to species_lists_by_title and put it in a table
+
+Sat Aug 12 - Added verification email for new accounts.  Checked in changes and updated external site.  Ran into a bug during deployment.  Site is now ready to be more widely advertised.
+
+Sun Aug 13 - Change Next/Prev links at the bottom of list_* pages to pagination_links at the top and bottom.
+
+Mon Aug 14 - Added New Account link to Login page.
+
+Wed Aug 16 - Tweaked the titles so they are more distinct and include the unique name when appropriate.  Motivated by Google getting the 'show_observation' pages mixed up.  Added password resetting process.
+
+Thurs Aug 17 - Started work on RSS feed.
+
+Mon Aug 21 - Ready to release RSS feed.
+
+Mon Aug 28 - Implemented email for new features, questions and commercial inquiries.  Includes user preferences for disabling each of these.  Added copyright_holder field including automated column population.
+
+Thurs Aug 31 - Started adding observation_logs, but realized that species list events wouldn't work.  Switched to rss_logs.
+
+Fri Sep 1 - Finished testing rss_logs.
+
+Sat Sep 9 - Adjusted RSS log URL to go to object.  Got show_log working for RSS items whose object has been deleted.

@@ -1,0 +1,36 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+reviewers:
+  id: 1
+  sync_id: 1xx1
+  name: reviewers
+  created: 2008-09-24 21:38:50
+  modified: 2008-09-24 21:38:50
+
+eol_users:
+  id: 2
+  sync_id: 2xx1
+  name: EOL Project
+  created: 2008-09-24 21:38:30
+  modified: 2008-09-24 21:38:30
+
+eol_admins:
+  id: 3
+  sync_id: 3xx1
+  name: EOL Project.admin
+  created: 2008-09-24 21:38:50
+  modified: 2008-09-24 21:38:50
+
+bolete_users:
+  id: 4
+  sync_id: 4xx1
+  name: Bolete Project
+  created: 2008-09-25 07:14:50
+  modified: 2008-09-25 07:14:55
+
+bolete_admins:
+  id: 5
+  sync_id: 5xx1
+  name: Bolete Project.admin
+  created: 2008-09-25 07:14:50
+  modified: 2008-09-25 07:14:55

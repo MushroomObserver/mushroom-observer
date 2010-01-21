@@ -1,0 +1,15 @@
+<% if @new_names && (@new_names != []) %>
+  <div style="width:500px">
+    <div class="Errors">
+      <%= :form_list_feedback_missing_names.t %><br/>
+      <span class="HelpNote">
+        <%= :form_list_feedback_missing_names_help.t %>
+      </span>
+      <span class="Data">
+        <% for n in @new_names %>
+        <br/>&nbsp;&nbsp;<%= h(n) %>
+        <% end %>
+      </span>
+    </div>
+  </div>
+<% end %>

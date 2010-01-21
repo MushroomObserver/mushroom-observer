@@ -1,0 +1,53 @@
+<%
+  intro = :email_admin_request_intro.l(
+    :user => @sender.legal_name,
+    :email => @sender.email,
+    :project => @project.title
+  )
+
+  handy_links = :email_handy_links
+
+  links = []
+  links.push([:admin_request_change_member_status.l,
+    "#{HTTP_DOMAIN}/project/change_user_status/#{@project.id}?candidate=#{@sender.id}"])
+  links.push([:email_links_show_user.l,
+    "#{HTTP_DOMAIN}/observer/show_user/#{@sender.id}"])
+  links.push([:email_links_latest_changes.l,
+    HTTP_DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <%= sanitize(@message).tp %>
+</div>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= @message.tp.html_to_ascii %>
+
+--------------------------------------------------
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label.t.html_to_ascii}: #{url}\n"
+  end
+  result %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<% end ###################################################################### %>

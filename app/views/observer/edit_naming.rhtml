@@ -1,0 +1,35 @@
+<%
+  javascript_include_auto_complete
+  @title = :edit_naming_title.t(:id => @observation.id)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :observation.l),
+            :action => 'show_observation', :id => @observation.id)
+  end
+%>
+
+<% form_tag(:action => 'edit_naming', :id => @naming.id, :approved_name => @what) do %>
+  <br/><center><%= submit_tag :app_save_changes.l %></center>
+
+  <table width="100%" cellpadding="10">
+    <tr>
+      <td width="75%" valign="top">
+        <%= render(:partial => 'show_observation', :locals => {
+          :observation => @observation,
+        }) %>
+        <%= render(:partial => 'form_naming', :locals => {
+          :action       => 'edit_naming',
+          :button_name  => :app_save_changes.l,
+          :show_reasons => true,
+        }) %>
+      </td>
+      <td width="25%" valign="top">
+        <%= render(:partial => 'show_images', :locals => {
+          :search_params => calc_search_params()
+        }) %>
+      </td>
+    </tr>
+  </table>
+  
+  <center><%= submit_tag :app_save_changes.l %></center>
+<% end %>

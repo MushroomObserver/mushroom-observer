@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+
+my $user = $ENV{'USER'};
+my $sender = $ENV{'SENDER'};
+my $message = `cat /home/$user/.autoreply`;
+$message =~ s/^Subject: ([^\n]*)\n+//;
+my $subject = $1;
+
+my $original;
+while (<>) {
+    last if !/\S/;
+}
+while (<>) {
+    $original .= $_;
+}
+
+my $tempfile = "/tmp/autoreply.$$";
+open(my $mail, ">$tempfile");
+print $mail $message;
+print $mail "\n";
+print $mail "-" x 80, "\n";
+print $mail "\n";
+print $mail $original;
+close($mail);
+
+# open(my $log, ">/home/$user/.autoreply.log");
+# print $log "/usr/bin/mutt -s '$subject' $sender\n";
+# print $log `cat $tempfile`;
+# close($log);
+
+system("/usr/bin/mutt -s '$subject' $sender < $tempfile");
+unlink($tempfile);
+
+exit 0;

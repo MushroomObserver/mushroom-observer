@@ -1,0 +1,48 @@
+# Locals:
+#   :object             Naming instance.
+#   :detail             Include details?
+#   :refs               Include observation and votes?
+
+detail ||= false
+refs   ||= false
+
+xml.naming(
+  :id => object.id
+) do
+  xml.vote object.vote_cache
+
+  render_xml_partial(xml, :name, :locals => {
+    :object => object.name,
+    :detail => false,
+  })
+
+  for reason in object.naming_reasons
+    xml.reason({:type => reason.reason}, reason.notes) 
+  end
+
+  if detail
+    xml.created  xml_datetime(object.created)
+    xml.modified xml_datetime(object.modified)
+
+    render_xml_partial(xml, :user, :locals => {
+      :object => object.user,
+      :detail => false,
+    })
+  end
+
+  if refs
+    render_xml_partial(xml, :observation, :locals => {
+      :object => object.observation,
+      :detail => detail,
+    })
+
+    xml.votes(:number => object.votes.length) do
+      for vote in object.votes
+        render_xml_partial(xml, :vote, :locals => {
+          :object => vote,
+          :detail => detail,
+        })
+      end
+    end
+  end
+end

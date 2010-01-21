@@ -1,0 +1,16 @@
+<%
+  @title = :name_map_title.t(:name => @name.display_name)
+
+  new_tab_set do
+    add_tab(:name_map_about.t(:name => @name.display_name),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
+
+<center>
+  <%= if @map
+    @map.div(:width => 800, :height => 550)
+  else
+    :name_map_no_maps.tp(:name => @name.display_name)
+  end %>
+</center>

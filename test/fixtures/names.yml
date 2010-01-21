@@ -1,0 +1,710 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+fungi:
+  id: 1
+  sync_id: 1xx1
+  created: 2007-02-26 17:20:00
+  modified: 2007-02-26 17:20:00
+  user_id: 1
+  version: 0
+  rank: Kingdom
+  text_name: Fungi
+  display_name: **__Fungi__**
+  observation_name: **__Fungi sp.__**
+  search_name: Fungi sp.
+  review_status: unreviewed
+
+coprinus_comatus:
+  id: 2
+  sync_id: 2xx1
+  created: 2007-02-27 20:47:00
+  modified: 2007-02-27 20:48:00
+  user_id: 1
+  version: 1
+  rank: Species
+  text_name: Coprinus comatus
+  author: (O.F. Müll.) Pers.
+  display_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
+  observation_name: **__Coprinus comatus__** (O.F. Müll.) Pers.
+  search_name: Coprinus comatus (O.F. Müll.) Pers.
+  review_status: unreviewed
+
+agaricus_campestris:
+  id: 3
+  sync_id: 3xx1
+  created: 2007-03-19 17:20:00
+  modified: 2007-03-19 17:20:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestris
+  author: L.
+  display_name: **__Agaricus campestris__** L.
+  observation_name: **__Agaricus campestris__** L.
+  search_name: Agaricus campestris L.
+  review_status: unreviewed
+
+conocybe_filaris:
+  id: 4
+  sync_id: 4xx1
+  created: 2007-03-28 15:50:00
+  modified: 2007-03-19 15:51:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Conocybe filaris
+  author: 
+  display_name: **__Conocybe filaris__**
+  observation_name: **__Conocybe filaris__**
+  search_name: Conocybe filaris
+  review_status: unreviewed
+
+amanita_baccata_arora:
+  id: 5
+  sync_id: 5xx1
+  created: 2007-04-08 08:53:20
+  modified: 2007-04-09 08:53:30
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Amanita baccata
+  author: sensu Arora
+  display_name: **__Amanita baccata__** sensu Arora
+  observation_name: **__Amanita baccata__** sensu Arora
+  search_name: Amanita baccata sensu Arora
+  review_status: unreviewed
+
+amanita_baccata_borealis:
+  id: 6
+  sync_id: 6xx1
+  created: 2007-04-08 08:54:20
+  modified: 2007-04-09 08:54:30
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Amanita baccata
+  author: sensu Borealis
+  display_name: **__Amanita baccata__** sensu Borealis
+  observation_name: **__Amanita baccata__** sensu Borealis
+  search_name: Amanita baccata sensu Borealis
+  review_status: unreviewed
+
+# No Taxon 1
+lepiota_rachodes:
+  id: 7
+  sync_id: 7xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lepiota rachodes
+  author: Vittad.
+  display_name: **__Lepiota rachodes__** Vittad.
+  observation_name: **__Lepiota rachodes__** Vittad.
+  search_name: Lepiota rachodes Vittad.
+  review_status: unreviewed
+
+# No Taxon 2
+lepiota_rhacodes:
+  id: 8
+  sync_id: 8xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lepiota rhacodes
+  author: Vittad.
+  display_name: **__Lepiota rhacodes__** Vittad.
+  observation_name: **__Lepiota rhacodes__** Vittad.
+  search_name: Lepiota rhacodes Vittad.
+  review_status: unreviewed
+
+# Taxon 1, Name 1
+macrolepiota_rachodes:
+  id: 9
+  sync_id: 9xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Macrolepiota rachodes
+  author: (Vittad.) Singer
+  display_name: **__Macrolepiota rachodes__** (Vittad.) Singer
+  observation_name: **__Macrolepiota rachodes__** (Vittad.) Singer
+  search_name: Macrolepiota rachodes (Vittad.) Singer
+  synonym_id: 1
+  review_status: unreviewed
+
+# Taxon 1, Name 2
+macrolepiota_rhacodes:
+  id: 10
+  sync_id: 10xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 2
+  version: 0
+  rank: Species
+  text_name: Macrolepiota rhacodes
+  author: (Vittad.) Singer
+  display_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
+  observation_name: **__Macrolepiota rhacodes__** (Vittad.) Singer
+  search_name: Macrolepiota rhacodes (Vittad.) Singer
+  synonym_id: 1
+  review_status: unreviewed
+
+# Taxon 2, Name 1
+chlorophyllum_rachodes:
+  id: 11
+  sync_id: 11xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Chlorophyllum rachodes
+  author: (Vittad.) Vellinga
+  display_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
+  observation_name: **__Chlorophyllum rachodes__** (Vittad.) Vellinga
+  search_name: Chlorophyllum rachodes (Vittad.) Vellinga
+  synonym_id: 2
+  review_status: unreviewed
+
+# Taxon 2, Name 2
+chlorophyllum_rhacodes:
+  id: 12
+  sync_id: 12xx1
+  created: 2007-04-30 21:34:00
+  modified: 2007-04-30 21:34:00
+  user_id: 2
+  version: 0
+  rank: Species
+  text_name: Chlorophyllum rhacodes
+  author: (Vittad.) Vellinga
+  display_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
+  observation_name: **__Chlorophyllum rhacodes__** (Vittad.) Vellinga
+  search_name: Chlorophyllum rhacodes (Vittad.) Vellinga
+  synonym_id: 2
+  review_status: unreviewed
+
+# Taxon 3, Name 1
+lactarius_alpinus:
+  id: 13
+  sync_id: 13xx1
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius alpinus
+  author: Peck
+  display_name: **__Lactarius alpinus__** Peck
+  observation_name: **__Lactarius alpinus__** Peck
+  search_name: Lactarius alpinus Peck
+  synonym_id: 3
+  review_status: unreviewed
+
+# Taxon 3, Name 2
+lactarius_alpigenes:
+  id: 14
+  sync_id: 14xx1
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius alpigenes
+  author: Kühn.
+  display_name: __Lactarius alpigenes__ Kühn.
+  observation_name: __Lactarius alpigenes__ Kühn.
+  search_name: Lactarius alpigenes Kühn.
+  synonym_id: 3
+  deprecated: 1
+  review_status: unreviewed
+
+# Taxon 3, Name 3
+lactarius_kuehneri:
+  id: 15
+  sync_id: 15xx1
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius kuehneri
+  author: Joss.
+  display_name: __Lactarius kuehneri__ Joss.
+  observation_name: __Lactarius kuehneri__ Joss.
+  search_name: Lactarius kuehneri Joss.
+  synonym_id: 3
+  deprecated: 1
+  review_status: unreviewed
+
+# Taxon 3, Name 4
+lactarius_subalpinus:
+  id: 16
+  sync_id: 16xx1
+  created: 2007-05-28 15:14:00
+  modified: 2007-04-30 15:14:10
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lactarius subalpinus
+  author: Kühn.
+  display_name: __Lactarius subalpinus__ Kühn.
+  observation_name: __Lactarius subalpinus__ Kühn.
+  search_name: Lactarius subalpinus Kühn.
+  synonym_id: 3
+  deprecated: 1
+  review_status: unreviewed
+
+# Deprecated genus
+psalliota:
+  id: 17
+  sync_id: 17xx1
+  created: 2007-06-09 08:06:28
+  modified: 2007-06-09 08:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Psalliota
+  display_name: **__Psalliota__**
+  observation_name: **__Psalliota sp.__**
+  search_name: Psalliota sp.
+  review_status: unreviewed
+
+# Valid genus
+agaricus:
+  id: 18
+  sync_id: 18xx1
+  created: 2007-06-09 08:06:28
+  modified: 2007-06-09 08:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Agaricus
+  display_name: **__Agaricus__**
+  observation_name: **__Agaricus sp.__**
+  search_name: Agaricus sp.
+  review_status: unreviewed
+
+# Misspelt name for testing merging
+agaricus_campestrus:
+  id: 19
+  sync_id: 19xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestrus
+  author: L.
+  display_name: **__Agaricus campestrus__** L.
+  observation_name: **__Agaricus campestrus__** L.
+  search_name: Agaricus campestrus L.
+  review_status: unreviewed
+
+# Name with notes (not mergeable)
+agaricus_campestras:
+  id: 20
+  sync_id: 20xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestras
+  author: L.
+  display_name: **__Agaricus campestras__** L.
+  observation_name: **__Agaricus campestras__** L.
+  search_name: Agaricus campestras L.
+  notes: This is should prevent me for merging
+  review_status: unreviewed
+
+# Another name with notes (not mergeable)
+agaricus_campestros:
+  id: 21
+  sync_id: 21xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Agaricus campestros
+  author: L.
+  display_name: **__Agaricus campestros__** L.
+  observation_name: **__Agaricus campestros__** L.
+  search_name: Agaricus campestros L.
+  notes: Need two to get an error
+  review_status: unreviewed
+
+# For testing merges with existings versions
+coprinellus_micaceus:
+  id: 22
+  sync_id: 22xx1
+  created: 2007-06-24 12:45:55
+  modified: 2007-06-24 12:45:55
+  user_id: 1
+  version: 1
+  rank: Species
+  text_name: Coprinellus micaceus
+  author: (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  display_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  observation_name: **__Coprinellus micaceus__** (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  search_name: Coprinellus micaceus (Bull.) Vilgalys, Hopple & Jacq. Johnson
+  review_status: unreviewed
+
+# For testing merges with existing versions
+coprinellus_micaceus_no_author:
+  id: 23
+  sync_id: 23xx1
+  created: 2007-06-24 12:45:55
+  modified: 2007-06-24 12:45:55
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Coprinellus micaceus
+  author: ""
+  display_name: **__Coprinellus micaceus__**
+  observation_name: **__Coprinellus micaceus__**
+  search_name: Coprinellus micaceus
+  review_status: unreviewed
+
+# For testing when the author is added to a name that has an observation
+strobilurus_diminutivus_no_author:
+  id: 24
+  sync_id: 24xx1
+  created: 2007-07-20 20:54:45
+  modified: 2007-07-20 20:54:45
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Strobilurus diminutivus
+  display_name: **__Strobilurus diminutivus__**
+  observation_name: **__Strobilurus diminutivus__**
+  search_name: Strobilurus diminutivus
+  review_status: unreviewed
+
+# For testing when there are both an approved and deprecated name with the same text name
+pluteus_petasatus_approved:
+  id: 25
+  sync_id: 25xx1
+  created: 2007-07-20 20:54:45
+  modified: 2007-07-20 20:54:45
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Pluteus petasatus
+  author: (Fr.) Gillet
+  display_name: **__Pluteus petasatus__** (Fr.) Gillet
+  observation_name: **__Pluteus petasatus__** (Fr.) Gillet
+  search_name: Pluteus petasatus (Fr.) Gillet
+  review_status: unreviewed
+
+# For testing the where the author is added when a name has an observation
+pluteus_petasatus_deprecated:
+  id: 26
+  sync_id: 26xx1
+  created: 2007-07-20 21:12:45
+  modified: 2007-07-20 21:12:45
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Pluteus petasatus
+  author: (Fries) Gillet
+  display_name: __Pluteus petasatus__ (Fries) Gillet
+  observation_name: __Pluteus petasatus__ (Fries) Gillet
+  search_name: Pluteus petasatus (Fries) Gillet
+  deprecated: 1
+  review_status: unreviewed
+
+# Valid genus
+lepiota:
+  id: 27
+  sync_id: 27xx1
+  created: 2007-07-30 08:06:28
+  modified: 2007-07-30 08:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Lepiota
+  display_name: **__Lepiota__**
+  observation_name: **__Lepiota sp.__**
+  search_name: Lepiota sp.
+  review_status: unreviewed
+
+# Valid genus
+chlorophyllum:
+  id: 28
+  sync_id: 28xx1
+  created: 2007-07-30 22:06:28
+  modified: 2007-07-30 22:06:40
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Chlorophyllum
+  display_name: **__Chlorophyllum__**
+  observation_name: **__Chlorophyllum sp.__**
+  search_name: Chlorophyllum sp.
+  review_status: unreviewed
+
+# Two fake names with non-alphanumerics for severe stress-testing species lists.
+bugs_bunny_one:
+  id: 29
+  sync_id: 29xx1
+  created: 2008-01-31 01:01:01
+  modified: 2008-01-31 01:01:01
+  user_id: 1
+  version: 0
+  rank: Species
+  author: One
+  text_name: Warnerbros bugs-bunny
+  display_name: **__Warnerbros bugs-bunny__** One
+  observation_name: **__Warnerbros bugs-bunny__** One
+  search_name: Warnerbros bugs-bunny One
+  review_status: unreviewed
+
+bugs_bunny_two:
+  id: 30
+  sync_id: 30xx1
+  created: 2008-01-31 01:01:01
+  modified: 2008-01-31 01:01:01
+  user_id: 1
+  version: 0
+  rank: Species
+  author: Two
+  text_name: Warnerbros bugs-bunny
+  display_name: **__Warnerbros bugs-bunny__** Two
+  observation_name: **__Warnerbros bugs-bunny__** Two
+  search_name: Warnerbros bugs-bunny Two
+  review_status: unreviewed
+
+russula_brevipes_no_author:
+  id: 31
+  sync_id: 31xx1
+  created: 2008-03-10 22:31:25
+  modified: 2008-03-10 22:31:27
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula brevipes
+  display_name: **__Russula brevipes__**
+  observation_name: **__Russula brevipes__**
+  search_name: Russula brevipes
+  review_status: unreviewed
+
+russula_brevipes_author_notes:
+  id: 32
+  sync_id: 32xx1
+  created: 2008-03-10 22:33:00
+  modified: 2008-03-10 22:33:05
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula brevipes
+  author: Peck
+  display_name: **__Russula brevipes__** Peck
+  observation_name: **__Russula brevipes__** Peck
+  search_name: Russula brevipes Peck
+  notes: Here are some notes
+  review_status: unreviewed
+
+russula_cremoricolor_no_author_notes:
+  id: 33
+  sync_id: 33xx1
+  created: 2008-03-12 20:53:08
+  modified: 2008-03-12 20:53:18
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula cremoricolor
+  display_name: **__Russula cremoricolor__**
+  observation_name: **__Russula cremoricolor__**
+  search_name: Russula cremoricolor
+  notes: Here are some notes
+  review_status: unreviewed
+
+russula_cremoricolor_author_notes:
+  id: 34
+  sync_id: 34xx1
+  created: 2008-03-12 20:53:36
+  modified: 2008-03-12 20:53:40
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Russula cremoricolor
+  author: Earle
+  display_name: **__Russula cremoricolor__** Earle
+  observation_name: **__Russula cremoricolor__** Earle
+  search_name: Russula cremoricolor Earle
+  notes: Some different notes
+  review_status: unreviewed
+
+lentinellus_ursinus_author1:
+  id: 35
+  sync_id: 35xx1
+  created: 2008-03-19 08:35:30
+  modified: 2008-03-19 08:35:37
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lentinellus ursinus
+  author: Kühner
+  display_name: **__Lentinellus ursinus__** Kühner
+  observation_name: **__Lentinellus ursinus__** Kühner
+  search_name: Lentinellus ursinus Kühner
+  review_status: unreviewed
+
+lentinellus_ursinus_author2:
+  id: 36
+  sync_id: 36xx1
+  created: 2008-03-19 08:35:30
+  modified: 2008-03-19 08:35:37
+  user_id: 1
+  version: 0
+  rank: Species
+  text_name: Lentinellus ursinus
+  author: Kuhner
+  display_name: **__Lentinellus ursinus__** Kuhner
+  observation_name: **__Lentinellus ursinus__** Kuhner
+  search_name: Lentinellus ursinus Kuhner
+  review_status: unreviewed
+
+# Genus with correct author
+macrocybe_pegler:
+  id: 37
+  sync_id: 37xx1
+  created: 2008-09-05 22:30:00
+  modified: 2008-09-05 22:30:00
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Macrocybe
+  author: (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  display_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  observation_name: **__Macrocybe__** (H.E. Bigelow & Kimbr.) Pegler, Lodge & Nakasone
+  search_name: Macrocybe sp.
+  review_status: unreviewed
+
+# Genus with incorrect author
+macrocybe_titans:
+  id: 38
+  sync_id: 38xx1
+  created: 2008-09-05 22:30:00
+  modified: 2008-09-05 22:30:00
+  user_id: 1
+  version: 0
+  rank: Genus
+  text_name: Macrocybe
+  author: Titans
+  display_name: **__Macrocybe__** Titans
+  observation_name: **__Macrocybe__** Titans
+  search_name: Macrocybe sp.
+  review_status: unreviewed
+
+boletus_edulis:
+  id: 39
+  sync_id: 39xx1
+  created: 2008-10-05 16:16:50
+  modified: 2008-10-05 16:17:08
+  user_id: 4
+  version: 1
+  rank: Species
+  text_name: Boletus edulis
+  author: Bull.
+  display_name: **__Boletus edulis__** Bull.
+  observation_name: **__Boletus edulis__** Bull.
+  search_name: Boletus edulis Bull.
+  review_status: unreviewed
+
+peltigera:
+  id: 40
+  sync_id: 40xx1
+  created: 2009-01-01 01:01:01
+  modified: 2009-01-02 01:01:01
+  user_id: 4
+  version: 2
+  rank: Genus
+  text_name: Peltigera
+  author: (Old) New Auth.
+  citation: Ye Auld Manual of Lichenes, 1800.
+  display_name: **__Peltigera__** (Old) New Auth.
+  observation_name: **__Peltigera sp.__** (Old) New Auth.
+  search_name: Peltigera sp. (Old) New Auth.
+  reviewer_id: 1
+  review_status: vetted
+  ok_for_export: 1
+  last_review: 2009-01-02 02:01:01
+  license_id: 2
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
+  gen_desc: "Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines."
+  diag_desc: "Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose."
+  distribution: Cosmopolitan.
+  habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
+  look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
+  uses: "Good for making birds nests... if you're a bird."
+
+petigera:
+  id: 41
+  sync_id: 41xx1
+  created: 2009-01-01 01:01:01
+  modified: 2009-01-02 01:01:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Petigera
+  display_name: __Petigera__
+  observation_name: __Petigera sp.__
+  search_name: Petigera sp.
+  review_status: unreviewed
+  correct_spelling_id: 40
+  deprecated: true
+
+suillus:
+  id: 42
+  sync_id: 42xx1
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Suillus
+  author: Gray
+  display_name: **__Suillus__** Gray
+  observation_name: **__Suillus sp.__** Gray
+  search_name: Suillus sp. Gray
+  review_status: unreviewed
+  gen_desc: A __Suillus__ by any other name would smell as sweet...
+
+suillus_by_white:
+  id: 43
+  sync_id: 43xx1
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Suillus
+  author: E.B. White
+  display_name: **__Suillus__** E.B. White
+  observation_name: **__Suillus sp.__** E.B. White
+  search_name: Suillus sp. E.B. White
+  review_status: unreviewed
+
+suilus:
+  id: 44
+  sync_id: 44xx1
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  rank: Genus
+  text_name: Suilus
+  author: E.B. White
+  display_name: **__Suilus__** E.B. White
+  observation_name: **__Suilus sp.__** E.B. White
+  search_name: Suilus sp. E.B. White
+  review_status: unreviewed
+  correct_spelling_id: 43
+  deprecated: true

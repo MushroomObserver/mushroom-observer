@@ -1,0 +1,31 @@
+<%
+  @title = :edit_draft_title.t(:name => @draft_name.name.display_name)
+
+  # Show Project | Show Draft (Cancel)
+  new_tab_set do
+    add_tab(:app_show_project.t, :action => 'show_project', :id => @draft_name.project_id)
+    add_tab(:app_cancel.t(:type => :draft.l), :action => 'show_draft', :id => @draft_name.id)
+  end
+%>
+
+<% form_tag(:action => 'edit_draft', :id => @draft_name.id) do %>
+  <br/><center><%= submit_tag :app_save_changes.l %></center>
+  
+  <%= render(:partial => 'shared/textilize_help') %><br/>
+
+  <p><label for="draft_name_license_id"><%= :license.t %>:</label>
+    <span class="HelpNote">
+      <%= :form_names_license_help.t %>
+    </span><br/>
+  <%= select('draft_name', 'license_id', @licenses) %></p>
+
+  <% for f in Name.all_note_fields %>
+    <p>
+      <label for="draft_name_<%= f %>"><%= "form_names_#{f}".to_sym.t %>:</label>
+      <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.t %></span><br/>
+      <%= text_area('draft_name', "#{f}", :cols => 80) %>
+    </p>
+    <center><%= submit_tag :app_save_changes.l %></center>
+  <% end %>
+
+<% end %>

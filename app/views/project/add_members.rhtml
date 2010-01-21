@@ -1,0 +1,25 @@
+<%
+  @title = :add_members_title.t(:title => @project.title)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :project.l), :action => 'show_project', :id => @project.id)
+  end
+%>
+
+<% for user in @users
+  name = user.name
+  if name and name.strip != ""
+    name = " (#{name})"
+  else
+    name = ""
+  end %>
+
+  <span class="Data">
+    <%= user_link(user, "#{user.login}#{name}") %>:
+  </span>
+  <%= link_to(:add_members_change_status.t, :action => :change_member_status,
+              :id => @project.id, :candidate => user.id) %>
+  <%= link_to(:app_add.t, :action => :add_one_member,
+              :id => @project.id, :candidate => user.id) %>
+  <br/>
+<% end %>

@@ -1,0 +1,104 @@
+<%
+  watching = @user.watching?(@new_name)
+  email_type = @new_name.authors.member?(@user) ? 'author'   :
+               @new_name.editors.member?(@user) ? 'editor'   :
+               @new_name.reviewer == @user      ? 'reviewer' : 'all'
+  is_now = :email_field_is_now.l
+
+  fields = ""
+  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+
+  one_liners = ''
+  many_liners = []
+  if @old_name
+    intro = :email_object_change_intro.l(
+      :type => :name.l,
+      :name => "#{@old_name.display_name} (#{@new_name.id})"
+    )
+
+    new_spell = @new_name.correct_spelling ? @new_name.correct_spelling.display_name : '--' 
+    license   = @new_name.license
+
+    one_liners += "*#{:app_name.l} #{is_now}:* #{@new_name.text_name}\n"          if @new_name.text_name  != @old_name.text_name
+    one_liners += "*#{:app_author.l} #{is_now}:* #{@new_name.author}\n"           if @new_name.author     != @old_name.author
+    one_liners += "*#{:app_citation.l} #{is_now}:* #{@new_name.citation}\n"       if @new_name.citation   != @old_name.citation
+    one_liners += "*#{:app_rank.l} #{is_now}:* #{@new_name.rank}\n"               if @new_name.rank       != @old_name.rank
+    one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"          if @new_name.license_id != @old_name.license_id && license
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{@review_status}\n"        if @review_status       != :no_change
+    one_liners += "*#{:name.l} #{is_now}:* #{:app_deprecated.l}\n"                if @new_name.deprecated && !@old_name.deprecated
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_accepted.l}\n"       if !@new_name.deprecated && @old_name.deprecated
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_misspelled.l}\n"     if !@new_name.correct_spelling_id && !!@old_name.correct_spelling_id
+    one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_not_misspelled.l}\n" if !!@new_name.correct_spelling_id && !@old_name.correct_spelling_id
+    one_liners += "*#{:app_correct_spelling.l} #{is_now}:* #{new_spell} (#{@new_name.correct_spelling_id}, #{@old_name.correct_spelling_id})\n" if @new_name.correct_spelling_id != @old_name.correct_spelling_id
+
+    for field in Name.all_note_fields
+      old_val = @old_name.send(field)
+      new_val = @new_name.send(field)
+      many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+    end
+  else
+    intro = :email_object_new_intro.l(
+      :type => :name.l,
+      :name => "#{@new_name.display_name} (#{@new_name.id})"
+    )
+  end
+
+  handy_links = :email_handy_links
+
+  links = []
+  links.push([:email_links_show_object.l(:type => :name.l),
+    "#{HTTP_DOMAIN}/name/show_name/#{@new_name.id}"])
+  links.push([:email_links_not_interested.l(:type => :name.l),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_name.id}&type=Name&user=#{@user.id}&state=-1"])
+  links.push([:email_links_stop_sending.l,
+    "#{HTTP_DOMAIN}/account/no_email_names_#{email_type}/#{@user.id}"])
+  links.push([:email_links_change_prefs.l,
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+  links.push([:email_links_latest_changes.l,
+    HTTP_DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+<title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<%= fields.tp %>
+<%= one_liners.tp if one_liners != '' %>
+<% for var, val in many_liners %>
+  <%= "*#{var} #{is_now}:*".tp %>
+  <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+    <%= sanitize(val).tp %>
+  </div>
+<% end %>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= fields.tp.html_to_ascii %>
+
+<%= one_liners.tp.html_to_ascii if one_liners != '' %>
+<% for var, val in many_liners %>
+<%= var + ' ' + is_now %>:
+--------------------------------------------------
+<%= val.tp.html_to_ascii %>
+--------------------------------------------------
+<% end %>
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label}: #{url}\n"
+  end
+  result %>
+<% end ###################################################################### %>

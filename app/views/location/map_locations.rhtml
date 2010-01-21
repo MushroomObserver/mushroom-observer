@@ -1,0 +1,15 @@
+<%
+  @title ||= :map_locations_title.t(:pattern => @pattern)
+
+  new_tab_set do
+    add_tab(:location_all.t, :action => 'list_place_names')
+  end
+%>
+
+<center>
+  <%= if @map
+    @map.div(:width => 800, :height => 550)
+  else
+    :map_locations_no_matches.t(:pattern => @pattern)
+  end %>
+</center>

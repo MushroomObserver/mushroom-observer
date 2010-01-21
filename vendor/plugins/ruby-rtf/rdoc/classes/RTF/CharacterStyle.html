@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: RTF::CharacterStyle</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">RTF::CharacterStyle</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../../files/lib/rtf/style_rb.html">
+                lib/rtf/style.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                <a href="Style.html">
+                Style
+               </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This class represents a character style for an <a
+href="../RTF.html">RTF</a> document.
+</p>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000103">is_character_style?</a>&nbsp;&nbsp;
+      <a href="#M000102">new</a>&nbsp;&nbsp;
+      <a href="#M000104">prefix</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+    <div id="aliases-list">
+      <h3 class="section-bar">External Aliases</h3>
+
+      <div class="name-list">
+                        <table summary="aliases">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">capitalise</td>
+          <td>-&gt;</td>
+          <td class="context-item-value">capitalize</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">capitalise=</td>
+          <td>-&gt;</td>
+          <td class="context-item-value">capitalize=</td>
+        </tr>
+                        </table>
+      </div>
+    </div>
+
+
+    <div id="attribute-list">
+      <h3 class="section-bar">Attributes</h3>
+
+      <div class="name-list">
+        <table>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">background</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">background</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">bold</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">bold</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">capitalise</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">capitalise</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">flow</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">flow</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">font</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">font</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">font_size</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">font_size</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">foreground</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">foreground</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">hidden</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">hidden</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">italic</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">italic</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">strike</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">strike</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">subscript</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">subscript</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">superscript</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">superscript</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">underline</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">underline</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000102" class="method-detail">
+        <a name="M000102"></a>
+
+        <div class="method-heading">
+          <a href="#M000102" class="method-signature">
+          <span class="method-name">new</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This is the constructor for the <a
+href="CharacterStyle.html">CharacterStyle</a> class.
+</p>
+<h4>Exceptions</h4>
+<table>
+<tr><td valign="top"><a href="RTFError.html">RTFError</a>:</td><td>Generate if the parent style specified is not an instance of the <a
+href="CharacterStyle.html">CharacterStyle</a> class.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000102-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000102-source">
+<pre>
+    <span class="ruby-comment cmt"># File lib/rtf/style.rb, line 83</span>
+83:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>
+84:          <span class="ruby-ivar">@bold</span>        = <span class="ruby-keyword kw">false</span>
+85:          <span class="ruby-ivar">@italic</span>      = <span class="ruby-keyword kw">false</span>
+86:          <span class="ruby-ivar">@underline</span>   = <span class="ruby-keyword kw">false</span>
+87:          <span class="ruby-ivar">@superscript</span> = <span class="ruby-keyword kw">false</span>
+88:          <span class="ruby-ivar">@capitalise</span>  = <span class="ruby-keyword kw">false</span>
+89:          <span class="ruby-ivar">@strike</span>      = <span class="ruby-keyword kw">false</span>
+90:          <span class="ruby-ivar">@subscript</span>   = <span class="ruby-keyword kw">false</span>
+91:          <span class="ruby-ivar">@hidden</span>      = <span class="ruby-keyword kw">false</span>
+92:          <span class="ruby-ivar">@foreground</span>  = <span class="ruby-keyword kw">nil</span>
+93:          <span class="ruby-ivar">@background</span>  = <span class="ruby-keyword kw">nil</span>
+94:          <span class="ruby-ivar">@font</span>        = <span class="ruby-keyword kw">nil</span>
+95:          <span class="ruby-ivar">@font_size</span>   = <span class="ruby-keyword kw">nil</span>
+96:          <span class="ruby-ivar">@flow</span>        = <span class="ruby-constant">LEFT_TO_RIGHT</span>
+97:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000103" class="method-detail">
+        <a name="M000103"></a>
+
+        <div class="method-heading">
+          <a href="#M000103" class="method-signature">
+          <span class="method-name">is_character_style?</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method overrides the <a
+href="CharacterStyle.html#M000103">is_character_style?</a> method inherited
+from the <a href="Style.html">Style</a> class to always return true.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000103-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000103-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/style.rb, line 101</span>
+101:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">is_character_style?</span>
+102:          <span class="ruby-keyword kw">true</span>
+103:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000104" class="method-detail">
+        <a name="M000104"></a>
+
+        <div class="method-heading">
+          <a href="#M000104" class="method-signature">
+          <span class="method-name">prefix</span><span class="method-args">(fonts, colours)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method generates a string containing the <a
+href="CharacterStyle.html#M000104">prefix</a> associated with a style
+object.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">fonts:</td><td>A reference to a <a href="FontTable.html">FontTable</a> containing any
+fonts used by the style (may be nil if no fonts used).
+
+</td></tr>
+<tr><td valign="top">colours:</td><td>A reference to a <a href="ColourTable.html">ColourTable</a> containing any
+colours used by the style (may be nil if no colours used).
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000104-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000104-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/style.rb, line 113</span>
+113:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">prefix</span>(<span class="ruby-identifier">fonts</span>, <span class="ruby-identifier">colours</span>)
+114:          <span class="ruby-identifier">text</span> = <span class="ruby-constant">StringIO</span>.<span class="ruby-identifier">new</span>
+115: 
+116:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\b'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@bold</span>
+117:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\i'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@italic</span>
+118:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\ul'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@underline</span>
+119:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\super'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@superscript</span>
+120:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\ccaps'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@capitalise</span>
+121:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\strike'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@strike</span>
+122:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\sub'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@subscript</span>
+123:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\v'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@hidden</span>
+124:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;\\cf#{colours.index(@foreground)}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@foreground</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+125:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;\\cb#{colours.index(@background)}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@background</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+126:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;\\f#{fonts.index(@font)}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@font</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+127:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;\\fs#{@font_size.to_i}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@font_size</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+128:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">'\rtlch'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@flow</span> <span class="ruby-operator">==</span> <span class="ruby-constant">RIGHT_TO_LEFT</span>
+129: 
+130:          <span class="ruby-identifier">text</span>.<span class="ruby-identifier">string</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">text</span>.<span class="ruby-identifier">string</span> <span class="ruby-operator">:</span> <span class="ruby-keyword kw">nil</span>
+131:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

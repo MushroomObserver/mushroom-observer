@@ -1,0 +1,7 @@
+<% @title = :images_by_title.t %>
+
+<% for image in @images %>
+  <%= link_to(sprintf("%s %s %s", image.unique_format_name.t,
+                      image.when, h(image.user.unique_text_name)),
+              :action => 'show_image', :id => image.id) %><br/>
+<% end %>

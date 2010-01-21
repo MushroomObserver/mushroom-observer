@@ -1,0 +1,24 @@
+<% @title = :user_alert_show_title.t(:user => @user.legal_name) %>
+
+<% form_tag(:action => "show_alert") do %>
+
+  <div class="memo">
+    <%= @user.alert_message.tp(
+      :email      => @user.email,
+      :login      => @user.login,
+      :last_login => @user.last_login,
+      :time       => @user.alert_created,
+      :notes      => @user.alert_notes
+    ) %>
+  </div>
+
+  <input type="hidden" id="back" name="back" value="<%=escape_once(@back)%>" />
+
+  <br/><br/>
+  <input type="submit" name="commit" value="<%= :user_alert_okay.l %>" class="primary" />
+  &nbsp;&nbsp;<%= :user_alert_okay_help.t %>
+
+  <br/><br/>
+  <input type="submit" name="commit" value="<%= :user_alert_later.l %>" class="primary" />
+  &nbsp;&nbsp;<%= :user_alert_later_help.t %>
+<% end %>

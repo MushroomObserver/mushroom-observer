@@ -1,0 +1,14 @@
+<%
+  @title = :edit_name_title.t(:name => @name.display_name)
+
+  new_tab_set do
+    add_tab(:app_cancel.t(:type => :name.l),
+            :action => 'show_name', :id => @name.id)
+  end
+%>
+
+<% form_tag(:action => 'edit_name', :id => @name) do %>
+  <br/><center><%= submit_tag :app_save_changes.l %></center><br/>
+
+  <%= render(:partial => 'form_names', :locals => { :button => :app_save_changes.l }) %>
+<% end %>

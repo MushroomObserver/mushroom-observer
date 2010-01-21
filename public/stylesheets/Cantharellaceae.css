@@ -1,0 +1,83 @@
+/* californicus { cap: #f6ae4a; stipe: #fae8b8;} /* image 557 */
+/* cinnabarinus { dark-cap: #c12900; light-cap: #ff6524; dark-stem: #6d1900; } /* image 551 */
+/* tubaeformis { dark-cap: #603b29; light-cap: #925c20; hymenium: #c2914c; bright-stipe: #ffb230; dark-stipe: #4b2e0c; light-stipe: #e5bb67;  } /* image 462 */
+/* cornucopioides { dark-hymenium: #10110b; light-hymenium: #9b9690; dark-cap: #4f4337; light-cap: #826c57; bright-margin: #e6c987; } /* image 465 */
+
+/* Global default colors */
+body { background-color: #fae8b8; /* californicus */ color: #10110b; /* cornucopioides dark-hymenium */ }
+
+div.textile table    { background: #10110b; } /* cornucopioides dark-hymenium */
+div.textile table td { background: #fae8b8; } /* californicus */
+
+a { color: #ff6524; } /* cinnabarinus light-cap */
+a:visited { color: #c12900; } /* cinnabarinus dark-cap */
+a:hover { background-color: #f6ae4a; } /* californicus cap */
+
+img { border-color: #10110b; } /* cornucopioides dark-hymenium */
+a img:hover { border-color: #f6ae4a; } /* californicus cap */
+
+li.selected { background-color: #f6ae4a ! important }
+
+
+/* Banner colors */
+#banner {
+    background-color: #f6ae4a; /* californicus cap */
+}
+
+
+/* Colors for the left hand panel */
+.LeftSide {
+    background-color: #f6ae4a; /* californicus cap */
+}
+
+.LeftSide a {
+    color: #c12900; /* cinnabarinus dark-cop */
+}
+
+.LeftSide a:visited {
+    color: #6d1900; /* cinnabarinus dark stem */
+}
+
+.LeftSide a:hover {
+    background-color: #fae8b8; /* californicus */
+}
+
+/* Colors for even lines */
+.ListLine0 {
+      background-color: #603b29; color: #c2914c; /* tubaeformis */
+}
+
+.ListLine0 div.textile table    { background: #c2914c; } /* tubaeformis */
+.ListLine0 div.textile table td { background: #603b29; } /* tubaeformis */
+
+.ListLine0 a {
+      color: #e5bb67; /* tubaeformis */
+}
+
+.ListLine0 a:visited {
+      color: #c18346; /* tubaeformis */
+}
+
+.ListLine0 a:hover {
+     color: #10110b;
+}
+
+/* Colors for odd lines */
+.ListLine1 {
+      background-color: #4f4337; color: #e5bb67; /* cornucopioides & tubaeformis */
+}
+
+.ListLine1 div.textile table    { background: #e5bb67; } /* tubaeformis */
+.ListLine1 div.textile table td { background: #4f4337; } /* cornucopioides */
+
+.ListLine1 a {
+      color: #e6c987; /* cornucopioides */
+}
+
+.ListLine1 a:visited {
+      color: #9b9690; /* cornucopioides */
+}
+
+.ListLine1 a:hover {
+     color: #10110b;
+}

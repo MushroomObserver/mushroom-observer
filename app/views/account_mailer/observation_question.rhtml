@@ -1,0 +1,59 @@
+<%
+  intro = :email_observation_question_intro.l(
+    :user  => @sender.legal_name,
+    :email => @sender.email,
+    :name  => @observation.unique_text_name
+  )
+
+  handy_links = :email_can_respond.l(
+    :name  => @sender.legal_name,
+    :email => @sender.email
+  )
+  handy_links += ' ' + :email_handy_links.l
+
+  links = []
+  links.push([:email_links_show_object.l(:type => :observation.l),
+    "#{HTTP_DOMAIN}/#{@observation.id}"])
+  links.push([:email_links_stop_sending.l,
+    "#{HTTP_DOMAIN}/account/no_email_general_question/#{@user.id}"])
+  links.push([:email_links_change_prefs.l,
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
+  links.push([:email_links_latest_changes.l,
+    HTTP_DOMAIN])
+
+if @user.email_html ######################################################### %>
+<html>
+<head>
+  <title>Mushroom Observer: <%= @subject %></title>
+</head>
+<body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
+<%= intro.tp %>
+<div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
+  <%= sanitize(@message).tp %>
+</div>
+<%= handy_links.tp %>
+<ul type=none>
+  <% for label, url in links %>
+    <li><%= label %>: <%= link_to(url, url) %></li>
+  <% end %>
+</ul>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
+<br/>
+</body>
+</html>
+<% else ##################################################################### %>
+<%= intro.tp.html_to_ascii %>
+
+<%= @message.tp.html_to_ascii %>
+
+--------------------------------------------------
+
+<%= handy_links.tp.html_to_ascii %>
+
+<%= result = ''
+  for label, url in links
+    result += "#{label.t.html_to_ascii}: #{url}\n"
+  end
+  result %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<% end ###################################################################### %>

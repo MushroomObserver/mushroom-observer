@@ -1,0 +1,7 @@
+<html><head></head><body>
+  <% for file in Dir.glob(RAILS_ROOT + '/public/html/*.html').sort
+    name = file.gsub(/.*\//, '')
+    url  = "#{HTTP_DOMAIN}/html/" + name %>
+    <a href="http://validator.w3.org/check?uri=<%= url %>"><%= h(name) %></a><br/>
+  <% end %>
+</body></html>

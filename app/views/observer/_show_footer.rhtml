@@ -1,0 +1,11 @@
+<p>
+  <span class="Date">
+    <%= :app_created.t(:type => :observation.l, :date => @observation.created) %><br/>
+    <%= :app_last_modified.t(:date => @observation.modified, :user => user_link(@observation.user)) %><br/>
+    <%= :app_viewed.t(:date => @observation.last_view,
+                      :times => @observation.num_views == 1 ? :app_one_time.l : :app_many_times.l(:num => @observation.num_views)) %><br/>
+    <% if rss_log = @observation.rss_log %>
+      <%= link_to(:app_show_log.t, :action => 'show_rss_log', :id => rss_log.id) %>
+    <% end %>
+  </span>
+</p>

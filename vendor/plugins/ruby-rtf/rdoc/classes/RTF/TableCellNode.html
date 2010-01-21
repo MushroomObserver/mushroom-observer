@@ -1,0 +1,873 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: RTF::TableCellNode</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">RTF::TableCellNode</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../../files/lib/rtf/node_rb.html">
+                lib/rtf/node.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                <a href="CommandNode.html">
+                CommandNode
+               </a>
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This class represents a cell within an <a href="../RTF.html">RTF</a> <a
+href="TableCellNode.html#M000082">table</a>. The <a
+href="TableCellNode.html">TableCellNode</a> is a specialised command node
+that is forbidden from creating tables or having its parent changed.
+</p>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000069">border_width=</a>&nbsp;&nbsp;
+      <a href="#M000075">border_widths</a>&nbsp;&nbsp;
+      <a href="#M000078">bottom_border_width</a>&nbsp;&nbsp;
+      <a href="#M000072">bottom_border_width=</a>&nbsp;&nbsp;
+      <a href="#M000079">left_border_width</a>&nbsp;&nbsp;
+      <a href="#M000073">left_border_width=</a>&nbsp;&nbsp;
+      <a href="#M000067">new</a>&nbsp;&nbsp;
+      <a href="#M000080">paragraph</a>&nbsp;&nbsp;
+      <a href="#M000081">parent=</a>&nbsp;&nbsp;
+      <a href="#M000077">right_border_width</a>&nbsp;&nbsp;
+      <a href="#M000071">right_border_width=</a>&nbsp;&nbsp;
+      <a href="#M000074">shading_colour=</a>&nbsp;&nbsp;
+      <a href="#M000068">style=</a>&nbsp;&nbsp;
+      <a href="#M000082">table</a>&nbsp;&nbsp;
+      <a href="#M000083">to_rtf</a>&nbsp;&nbsp;
+      <a href="#M000076">top_border_width</a>&nbsp;&nbsp;
+      <a href="#M000070">top_border_width=</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+    <div id="constants-list">
+      <h3 class="section-bar">Constants</h3>
+
+      <div class="name-list">
+        <table summary="Constants">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DEFAULT_WIDTH</td>
+          <td>=</td>
+          <td class="context-item-value">300</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+A definition for the default width for the cell.
+
+</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+    <div id="attribute-list">
+      <h3 class="section-bar">Attributes</h3>
+
+      <div class="name-list">
+        <table>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">shading_colour</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">style</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">style</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">width</td>
+          <td class="context-item-value">&nbsp;[W]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute mutator.
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">width</td>
+          <td class="context-item-value">&nbsp;[R]&nbsp;</td>
+          <td class="context-item-desc">
+Attribute accessor.
+
+</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000067" class="method-detail">
+        <a name="M000067"></a>
+
+        <div class="method-heading">
+          <a href="#M000067" class="method-signature">
+          <span class="method-name">new</span><span class="method-args">(row, width=DEFAULT_WIDTH, style=nil, top=nil, right=nil, bottom=nil, left=nil)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This is the constructor for the <a
+href="TableCellNode.html">TableCellNode</a> class.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">row:</td><td>The row that the cell belongs to.
+
+</td></tr>
+<tr><td valign="top">width:</td><td>The width to be assigned to the cell. This defaults to
+TableCellNode::DEFAULT_WIDTH.
+
+</td></tr>
+<tr><td valign="top">style:</td><td>The style that is applied to the cell. This must be a <a
+href="ParagraphStyle.html">ParagraphStyle</a> class. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">top:</td><td>The border width for the cells top border. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">right:</td><td>The border width for the cells right hand border. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">bottom:</td><td>The border width for the cells bottom border. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">left:</td><td>The border width for the cells left hand border. Defaults to nil.
+
+</td></tr>
+</table>
+<h4>Exceptions</h4>
+<table>
+<tr><td valign="top"><a href="RTFError.html">RTFError</a>:</td><td>Generated whenever an invalid style setting is specified.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000067-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000067-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 759</span>
+759:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">row</span>, <span class="ruby-identifier">width</span>=<span class="ruby-constant">DEFAULT_WIDTH</span>, <span class="ruby-identifier">style</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">top</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">right</span>=<span class="ruby-keyword kw">nil</span>,
+760:                      <span class="ruby-identifier">bottom</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">left</span>=<span class="ruby-keyword kw">nil</span>)
+761:          <span class="ruby-keyword kw">super</span>(<span class="ruby-identifier">row</span>, <span class="ruby-keyword kw">nil</span>)
+762:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">style</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">style</span>.<span class="ruby-identifier">is_paragraph_style?</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">false</span>
+763:             <span class="ruby-constant">RTFError</span>.<span class="ruby-identifier">fire</span>(<span class="ruby-value str">&quot;Non-paragraph style specified for TableCellNode &quot;</span>\
+764:                           <span class="ruby-value str">&quot;constructor.&quot;</span>)
+765:          <span class="ruby-keyword kw">end</span>
+766: 
+767:          <span class="ruby-ivar">@width</span>          = (<span class="ruby-identifier">width</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">width</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">width</span> <span class="ruby-operator">:</span> <span class="ruby-constant">DEFAULT_WIDTH</span>
+768:          <span class="ruby-ivar">@borders</span>        = [(<span class="ruby-identifier">top</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">top</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">top</span> <span class="ruby-operator">:</span> <span class="ruby-keyword kw">nil</span>,
+769:                             (<span class="ruby-identifier">right</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">right</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">right</span> <span class="ruby-operator">:</span> <span class="ruby-keyword kw">nil</span>,
+770:                             (<span class="ruby-identifier">bottom</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">bottom</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">bottom</span> <span class="ruby-operator">:</span> <span class="ruby-keyword kw">nil</span>,
+771:                             (<span class="ruby-identifier">left</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">left</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">left</span> <span class="ruby-operator">:</span> <span class="ruby-keyword kw">nil</span>]
+772:          <span class="ruby-ivar">@shading_colour</span> = <span class="ruby-keyword kw">nil</span>
+773:          <span class="ruby-ivar">@style</span>          = <span class="ruby-identifier">style</span>
+774:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000069" class="method-detail">
+        <a name="M000069"></a>
+
+        <div class="method-heading">
+          <a href="#M000069" class="method-signature">
+          <span class="method-name">border_width=</span><span class="method-args">(width)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a width, in twips, for the borders on all sides of the
+cell. Negative widths will be ignored and a width of zero will switch the
+border off.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">width:</td><td>The setting for the width of the border.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000069-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000069-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 799</span>
+799:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">border_width=</span>(<span class="ruby-identifier">width</span>)
+800:          <span class="ruby-identifier">size</span> = <span class="ruby-identifier">width</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">width</span>
+801:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+802:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">0</span>] = <span class="ruby-ivar">@borders</span>[<span class="ruby-value">1</span>] = <span class="ruby-ivar">@borders</span>[<span class="ruby-value">2</span>] = <span class="ruby-ivar">@borders</span>[<span class="ruby-value">3</span>] = <span class="ruby-identifier">size</span>.<span class="ruby-identifier">to_i</span>
+803:          <span class="ruby-keyword kw">else</span>
+804:             <span class="ruby-ivar">@borders</span> = [<span class="ruby-keyword kw">nil</span>, <span class="ruby-keyword kw">nil</span>, <span class="ruby-keyword kw">nil</span>, <span class="ruby-keyword kw">nil</span>]
+805:          <span class="ruby-keyword kw">end</span>
+806:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000075" class="method-detail">
+        <a name="M000075"></a>
+
+        <div class="method-heading">
+          <a href="#M000075" class="method-signature">
+          <span class="method-name">border_widths</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method retrieves an array with the cell border width settings. The
+values are inserted in top, right, bottom, left order.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000075-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000075-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 877</span>
+877:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">border_widths</span>
+878:          <span class="ruby-identifier">widths</span> = []
+879:          <span class="ruby-ivar">@borders</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">entry</span><span class="ruby-operator">|</span> <span class="ruby-identifier">widths</span>.<span class="ruby-identifier">push</span>(<span class="ruby-identifier">entry</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">entry</span>)}
+880:          <span class="ruby-identifier">widths</span>
+881:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000078" class="method-detail">
+        <a name="M000078"></a>
+
+        <div class="method-heading">
+          <a href="#M000078" class="method-signature">
+          <span class="method-name">bottom_border_width</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method fetches the width for bottom border of a cell.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000078-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000078-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 894</span>
+894:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">bottom_border_width</span>
+895:          <span class="ruby-ivar">@borders</span>[<span class="ruby-value">2</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@borders</span>[<span class="ruby-value">2</span>]
+896:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000072" class="method-detail">
+        <a name="M000072"></a>
+
+        <div class="method-heading">
+          <a href="#M000072" class="method-signature">
+          <span class="method-name">bottom_border_width=</span><span class="method-args">(width)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a border width to the bottom side of a <a
+href="TableCellNode.html#M000082">table</a> cell. Negative values are
+ignored and a value of 0 switches the border off.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">width:</td><td>The <a href="TableCellNode.html#M000067">new</a> border width setting.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000072-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000072-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 841</span>
+841:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">bottom_border_width=</span>(<span class="ruby-identifier">width</span>)
+842:          <span class="ruby-identifier">size</span> = <span class="ruby-identifier">width</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">width</span>
+843:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+844:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">2</span>] = <span class="ruby-identifier">size</span>.<span class="ruby-identifier">to_i</span>
+845:          <span class="ruby-keyword kw">else</span>
+846:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">2</span>] = <span class="ruby-keyword kw">nil</span>
+847:          <span class="ruby-keyword kw">end</span>
+848:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000079" class="method-detail">
+        <a name="M000079"></a>
+
+        <div class="method-heading">
+          <a href="#M000079" class="method-signature">
+          <span class="method-name">left_border_width</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method fetches the width for left border of a cell.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000079-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000079-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 899</span>
+899:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">left_border_width</span>
+900:          <span class="ruby-ivar">@borders</span>[<span class="ruby-value">3</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@borders</span>[<span class="ruby-value">3</span>]
+901:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000073" class="method-detail">
+        <a name="M000073"></a>
+
+        <div class="method-heading">
+          <a href="#M000073" class="method-signature">
+          <span class="method-name">left_border_width=</span><span class="method-args">(width)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a border width to the left side of a <a
+href="TableCellNode.html#M000082">table</a> cell. Negative values are
+ignored and a value of 0 switches the border off.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">width:</td><td>The <a href="TableCellNode.html#M000067">new</a> border width setting.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000073-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000073-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 855</span>
+855:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">left_border_width=</span>(<span class="ruby-identifier">width</span>)
+856:          <span class="ruby-identifier">size</span> = <span class="ruby-identifier">width</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">width</span>
+857:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+858:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">3</span>] = <span class="ruby-identifier">size</span>.<span class="ruby-identifier">to_i</span>
+859:          <span class="ruby-keyword kw">else</span>
+860:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">3</span>] = <span class="ruby-keyword kw">nil</span>
+861:          <span class="ruby-keyword kw">end</span>
+862:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000080" class="method-detail">
+        <a name="M000080"></a>
+
+        <div class="method-heading">
+          <a href="#M000080" class="method-signature">
+          <span class="method-name">paragraph</span><span class="method-args">(justification=CommandNode::LEFT_JUSTIFY, before=nil, after=nil, left=nil, right=nil, first=nil)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method overloads the <a
+href="TableCellNode.html#M000080">paragraph</a> method inherited from the
+ComamndNode class to forbid the creation of paragraphs.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">justification:</td><td>The justification to be applied to the <a
+href="TableCellNode.html#M000080">paragraph</a>.
+
+</td></tr>
+<tr><td valign="top">before:</td><td>The amount of space, in twips, to be inserted before the <a
+href="TableCellNode.html#M000080">paragraph</a>. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">after:</td><td>The amount of space, in twips, to be inserted after the <a
+href="TableCellNode.html#M000080">paragraph</a>. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">left:</td><td>The amount of indentation to place on the left of the <a
+href="TableCellNode.html#M000080">paragraph</a>. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">right:</td><td>The amount of indentation to place on the right of the <a
+href="TableCellNode.html#M000080">paragraph</a>. Defaults to nil.
+
+</td></tr>
+<tr><td valign="top">first:</td><td>The amount of indentation to place on the left of the first line in the <a
+href="TableCellNode.html#M000080">paragraph</a>. Defaults to nil.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000080-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000080-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 918</span>
+918:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">paragraph</span>(<span class="ruby-identifier">justification</span>=<span class="ruby-constant">CommandNode</span><span class="ruby-operator">::</span><span class="ruby-constant">LEFT_JUSTIFY</span>, <span class="ruby-identifier">before</span>=<span class="ruby-keyword kw">nil</span>,
+919:                     <span class="ruby-identifier">after</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">left</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">right</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">first</span>=<span class="ruby-keyword kw">nil</span>)
+920:          <span class="ruby-constant">RTFError</span>.<span class="ruby-identifier">fire</span>(<span class="ruby-value str">&quot;TableCellNode#paragraph() called. Table cells cannot &quot;</span>\
+921:                        <span class="ruby-value str">&quot;contain paragraphs.&quot;</span>)
+922:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000081" class="method-detail">
+        <a name="M000081"></a>
+
+        <div class="method-heading">
+          <a href="#M000081" class="method-signature">
+          <span class="method-name">parent=</span><span class="method-args">(parent)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method overloads the <a href="TableCellNode.html#M000081">parent=</a>
+method inherited from the <a href="Node.html">Node</a> class to forbid the
+alteration of the cells parent.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">parent:</td><td>A reference to the <a href="TableCellNode.html#M000067">new</a> node
+parent.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000081-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000081-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 929</span>
+929:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">parent=</span>(<span class="ruby-identifier">parent</span>)
+930:          <span class="ruby-constant">RTFError</span>.<span class="ruby-identifier">fire</span>(<span class="ruby-value str">&quot;Table cell nodes cannot have their parent changed.&quot;</span>)
+931:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000077" class="method-detail">
+        <a name="M000077"></a>
+
+        <div class="method-heading">
+          <a href="#M000077" class="method-signature">
+          <span class="method-name">right_border_width</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method fetches the width for right border of a cell.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000077-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000077-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 889</span>
+889:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">right_border_width</span>
+890:          <span class="ruby-ivar">@borders</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@borders</span>[<span class="ruby-value">1</span>]
+891:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000071" class="method-detail">
+        <a name="M000071"></a>
+
+        <div class="method-heading">
+          <a href="#M000071" class="method-signature">
+          <span class="method-name">right_border_width=</span><span class="method-args">(width)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a border width to the right side of a <a
+href="TableCellNode.html#M000082">table</a> cell. Negative values are
+ignored and a value of 0 switches the border off.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">width:</td><td>The <a href="TableCellNode.html#M000067">new</a> border width setting.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000071-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000071-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 827</span>
+827:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">right_border_width=</span>(<span class="ruby-identifier">width</span>)
+828:          <span class="ruby-identifier">size</span> = <span class="ruby-identifier">width</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">width</span>
+829:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+830:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">1</span>] = <span class="ruby-identifier">size</span>.<span class="ruby-identifier">to_i</span>
+831:          <span class="ruby-keyword kw">else</span>
+832:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">1</span>] = <span class="ruby-keyword kw">nil</span>
+833:          <span class="ruby-keyword kw">end</span>
+834:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000074" class="method-detail">
+        <a name="M000074"></a>
+
+        <div class="method-heading">
+          <a href="#M000074" class="method-signature">
+          <span class="method-name">shading_colour=</span><span class="method-args">(colour)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method alters the shading colour associated with a <a
+href="TableCellNode.html">TableCellNode</a> object.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">colour:</td><td>A reference to the <a href="Colour.html">Colour</a> object to use in
+shading the cell. Assign nil to clear cell shading.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000074-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000074-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 870</span>
+870:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">shading_colour=</span>(<span class="ruby-identifier">colour</span>)
+871:          <span class="ruby-identifier">root</span>.<span class="ruby-identifier">colours</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">colour</span>
+872:          <span class="ruby-ivar">@shading_colour</span> = <span class="ruby-identifier">colour</span>
+873:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000068" class="method-detail">
+        <a name="M000068"></a>
+
+        <div class="method-heading">
+          <a href="#M000068" class="method-signature">
+          <span class="method-name">style=</span><span class="method-args">(style)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Attribute mutator.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">style:</td><td>A reference to the style object to be applied to the cell. Must be an
+instance of the <a href="ParagraphStyle.html">ParagraphStyle</a> class. Set
+to nil to clear style settings.
+
+</td></tr>
+</table>
+<h4>Exceptions</h4>
+<table>
+<tr><td valign="top"><a href="RTFError.html">RTFError</a>:</td><td>Generated whenever an invalid style setting is specified.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000068-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000068-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 785</span>
+785:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">style=</span>(<span class="ruby-identifier">style</span>)
+786:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">style</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">style</span>.<span class="ruby-identifier">is_paragraph_style?</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">false</span>
+787:             <span class="ruby-constant">RTFError</span>.<span class="ruby-identifier">fire</span>(<span class="ruby-value str">&quot;Non-paragraph style specified for TableCellNode &quot;</span>\
+788:                           <span class="ruby-value str">&quot;constructor.&quot;</span>)
+789:          <span class="ruby-keyword kw">end</span>
+790:          <span class="ruby-ivar">@style</span> = <span class="ruby-identifier">style</span>
+791:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000082" class="method-detail">
+        <a name="M000082"></a>
+
+        <div class="method-heading">
+          <a href="#M000082" class="method-signature">
+          <span class="method-name">table</span><span class="method-args">(rows, columns, *widths)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method overrides the <a href="TableCellNode.html#M000082">table</a>
+method inherited from <a href="CommandNode.html">CommandNode</a> to forbid
+its use in <a href="TableCellNode.html#M000082">table</a> cells.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">rows:</td><td>The number of rows for the <a href="TableCellNode.html#M000082">table</a>.
+
+</td></tr>
+<tr><td valign="top">columns:</td><td>The number of columns for the <a
+href="TableCellNode.html#M000082">table</a>.
+
+</td></tr>
+<tr><td valign="top">*widths:</td><td>One or more integers representing the widths for the <a
+href="TableCellNode.html#M000082">table</a> columns.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000082-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000082-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 941</span>
+941:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">table</span>(<span class="ruby-identifier">rows</span>, <span class="ruby-identifier">columns</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">widths</span>)
+942:          <span class="ruby-constant">RTFError</span>.<span class="ruby-identifier">fire</span>(<span class="ruby-value str">&quot;TableCellNode#table() called. Nested tables not allowed.&quot;</span>)
+943:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000083" class="method-detail">
+        <a name="M000083"></a>
+
+        <div class="method-heading">
+          <a href="#M000083" class="method-signature">
+          <span class="method-name">to_rtf</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method generates the <a href="../RTF.html">RTF</a> document text for a
+<a href="TableCellNode.html">TableCellNode</a> object.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000083-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000083-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 946</span>
+946:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">to_rtf</span>
+947:          <span class="ruby-identifier">text</span>      = <span class="ruby-constant">StringIO</span>.<span class="ruby-identifier">new</span>
+948:          <span class="ruby-identifier">separator</span> = <span class="ruby-identifier">split?</span> <span class="ruby-value">? </span><span class="ruby-value str">&quot;\n&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot; &quot;</span>
+949:          <span class="ruby-identifier">line</span>      = (<span class="ruby-identifier">separator</span> <span class="ruby-operator">==</span> <span class="ruby-value str">&quot; &quot;</span>)
+950: 
+951:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">&quot;\\pard\\intbl&quot;</span>
+952:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-ivar">@style</span>.<span class="ruby-identifier">prefix</span>(<span class="ruby-keyword kw">nil</span>, <span class="ruby-keyword kw">nil</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@style</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword kw">nil</span>
+953:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">separator</span>
+954:          <span class="ruby-keyword kw">self</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">entry</span><span class="ruby-operator">|</span>
+955:             <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">&quot;\n&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">line</span>
+956:             <span class="ruby-identifier">line</span> = <span class="ruby-keyword kw">true</span>
+957:             <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">entry</span>.<span class="ruby-identifier">to_rtf</span>
+958:          <span class="ruby-keyword kw">end</span>
+959:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> (<span class="ruby-identifier">split?</span> <span class="ruby-value">? </span><span class="ruby-value str">&quot;\n&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot; &quot;</span>)
+960:          <span class="ruby-identifier">text</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">&quot;\\cell&quot;</span>
+961: 
+962:          <span class="ruby-identifier">text</span>.<span class="ruby-identifier">string</span>
+963:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000076" class="method-detail">
+        <a name="M000076"></a>
+
+        <div class="method-heading">
+          <a href="#M000076" class="method-signature">
+          <span class="method-name">top_border_width</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method fetches the width for top border of a cell.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000076-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000076-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 884</span>
+884:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">top_border_width</span>
+885:          <span class="ruby-ivar">@borders</span>[<span class="ruby-value">0</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@borders</span>[<span class="ruby-value">0</span>]
+886:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000070" class="method-detail">
+        <a name="M000070"></a>
+
+        <div class="method-heading">
+          <a href="#M000070" class="method-signature">
+          <span class="method-name">top_border_width=</span><span class="method-args">(width)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This method assigns a border width to the top side of a <a
+href="TableCellNode.html#M000082">table</a> cell. Negative values are
+ignored and a value of 0 switches the border off.
+</p>
+<h4>Parameters</h4>
+<table>
+<tr><td valign="top">width:</td><td>The <a href="TableCellNode.html#M000067">new</a> border width setting.
+
+</td></tr>
+</table>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000070-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000070-source">
+<pre>
+     <span class="ruby-comment cmt"># File lib/rtf/node.rb, line 813</span>
+813:       <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">top_border_width=</span>(<span class="ruby-identifier">width</span>)
+814:          <span class="ruby-identifier">size</span> = <span class="ruby-identifier">width</span> <span class="ruby-operator">==</span> <span class="ruby-keyword kw">nil</span> <span class="ruby-operator">?</span> <span class="ruby-value">0</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">width</span>
+815:          <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+816:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">0</span>] = <span class="ruby-identifier">size</span>.<span class="ruby-identifier">to_i</span>
+817:          <span class="ruby-keyword kw">else</span>
+818:             <span class="ruby-ivar">@borders</span>[<span class="ruby-value">0</span>] = <span class="ruby-keyword kw">nil</span>
+819:          <span class="ruby-keyword kw">end</span>
+820:       <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

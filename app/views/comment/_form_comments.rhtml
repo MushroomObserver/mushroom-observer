@@ -1,0 +1,12 @@
+<!--[form:comment]-->
+
+<label for="comment_summary"><%= :form_comments_summary.t %></label>:<br/>
+<%= text_field("comment", "summary", :size => 80) %><br/><br/>
+
+<label for="comment_comment"><%= :form_comments_comment.t %></label>:<br/>
+<%= text_area("comment", "comment", :cols => 80, :rows => 5) %><br/>
+<%= render(:partial => 'shared/textilize_help') %>
+
+<%= focus_on('comment_summary') %>
+
+<!--[eoform:comment]-->
