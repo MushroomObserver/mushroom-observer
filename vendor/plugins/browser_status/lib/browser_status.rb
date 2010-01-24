@@ -154,7 +154,7 @@ module BrowserStatus
   end
 
   # For backwards compatibility.
-  alias :report_browser_status :check_if_user_turned_javascript_on
+  alias report_browser_status check_if_user_turned_javascript_on
 
   # This is designed to be run as a before_filter at the top of
   # application_controller, before anthing else is run.  It sets several
@@ -169,7 +169,7 @@ module BrowserStatus
       @js              = TEST_JS
       @ua              = TEST_UA
       @ua_version      = TEST_UA_VERSION
-      return
+      return true
     end
 
     ua = request.env['HTTP_USER_AGENT']
@@ -259,7 +259,24 @@ module BrowserStatus
         reload_with_args(:_js => 'on',  :_new => 'true'),
         reload_with_args(:_js => 'off', :_new => 'true'),
       ])
+    else
+      return true
     end
+  end
+
+  # Get user agent directly without relying on +browser_status+ filter.
+  # Returns the type:
+  #
+  #   case user_agent
+  #   when :ie
+  #     ...
+  #   when :robot
+  #     ...
+  #   end
+  #   
+  def user_agent
+    @ua, @ua_version = parse_user_agent(request.env['HTTP_USER_AGENT'])
+    return @ua
   end
 
   # Return the number of entries in our_session_cache

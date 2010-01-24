@@ -1,12 +1,7 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class NameParseTest < Test::Unit::TestCase
   fixtures :names
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_default
     name_parse = NameParse.new('Foo bar')

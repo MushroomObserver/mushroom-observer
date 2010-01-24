@@ -1,4 +1,3 @@
-################################################################################
 #
 #  = QueuedEmail
 #
@@ -261,7 +260,7 @@ class QueuedEmail < ActiveRecord::MO
   # -------------------------------------
 
   # Get integer for the given key.
-  # +key+:: name of integer to get
+  # key:: name of integer to get
   #
   #   object_id = email.get_integer('object')
   #
@@ -277,9 +276,9 @@ class QueuedEmail < ActiveRecord::MO
   end
 
   # Look-up an object corresponding to a given integer (id).
-  # +key+::       name of integer to get
-  # +model+::     class of model to look for id in
-  # +allow_nil+:: is nil/zero id acceptible? (if not will raise RecordNotFound)
+  # key::       name of integer to get
+  # model::     class of model to look for id in
+  # allow_nil:: is nil/zero id acceptible? (if not will raise RecordNotFound)
   #
   #   comment = email.get_object('comment', Comment, :nil_okay)
   #
@@ -295,7 +294,7 @@ class QueuedEmail < ActiveRecord::MO
   end
 
   # Get string for the given key.
-  # +key+:: name of string to get
+  # key:: name of string to get
   #
   #   user_name = email.get_string('user')
   #

@@ -1,9 +1,3 @@
-require_dependency 'javascript_helper'
-require_dependency 'auto_complete_helper'
-require_dependency 'tab_helper'
-require_dependency 'textile_helper'
-
-################################################################################
 #
 #  = Application Helpers
 #
@@ -11,6 +5,9 @@ require_dependency 'textile_helper'
 #
 #  lnbsp::                 Replace ' ' with '&nbsp;'.
 #  add_context_help::      Wrap string in '<acronym>' tag.
+#  make_table::            Create table from list of Arrays.
+#  add_header::            Add random string to '<head>' section.
+#  calc_color::            Calculate background color in alternating list.
 #  ---
 #  where_string::          Wrap location name in '<span>' tag.
 #  location_link::         Wrap location name in link to show/search it.
@@ -35,8 +32,14 @@ require_dependency 'textile_helper'
 ################################################################################
 
 module ApplicationHelper
+  require_dependency 'auto_complete_helper'
+  require_dependency 'javascript_helper'
+  require_dependency 'map_helper'
+  require_dependency 'tab_helper'
+  require_dependency 'textile_helper'
   include Autocomplete
   include Javascript
+  include Map
   include Tabs
   include Textile
 
@@ -53,6 +56,67 @@ module ApplicationHelper
   #   <%= add_context_help(link, "Click here to do something.") %>
   def add_context_help(object, help)
     tag('acronym', { :title => help }, true) + object + '</acronym>'
+  end
+
+  # Create a table out of a list of Arrays.
+  #
+  #   make_table( [1,2], [3,4] )
+  #
+  # Produces:
+  #
+  #   <table>
+  #     <tr>
+  #       <td>1</td>
+  #       <td>2</td>
+  #     </tr>
+  #     <tr>
+  #       <td>3</td>
+  #       <td>4</td>
+  #     </tr>
+  #   </table>
+  #
+  def make_table(*rows)
+    '<table>' + rows.map do |row|
+      '<tr>' + row.map do |cell|
+        '<td>' + h(cell) + '</td>'
+      end.join + '</tr>'
+    end.join + '</table>'
+  end
+
+  # Add something to the header from within view.  This can be called as many
+  # times as necessary -- the application layout will mash them all together
+  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
+  #
+  #   <%
+  #     add_header(GMap.header)       # adds GMap general header
+  #     gmap = make_map(@locations)
+  #     add_header(finish_map(gmap))  # adds map-specific header
+  #   %>
+  #
+  def add_header(str)
+    @header ||= ''
+    @header += str
+  end
+
+  # Decide what the color should be for a list item.  Returns 0 or 1.
+  # row::       row number
+  # col::       column number
+  # alt_rows::  from layout_params['alternate_rows']
+  # alt_cols::  from layout_params['alternate_columns']
+  #
+  # (See also ApplicationController#calc_layout_params.)
+  #
+  def calc_color(row, col, alt_rows, alt_cols)
+    color = 0
+    if alt_rows
+      color = row % 2
+    end
+    if alt_cols
+      if (col % 2) == 1
+        color = 1 - color
+      end
+    end
+    color
   end
 
   # Wrap location name in span: "<span>where (count)</span>"
@@ -173,28 +237,29 @@ module ApplicationHelper
   #   <%= end_boxify %>
   #
   # Notice levels are:
+  # 0:: notice (green)
+  # 1:: warning (yellow)
+  # 2:: error (red)
   #
-  #   0  =>  notice (green)
-  #   1  =>  warning (yellow)
-  #   2  =>  error (red)
-  #
-  # *NOTE*: the &block thing doesn't work, despite apparently being indentical
-  # to the way form_tag does it.  Beats me. [Really?? -JPH 20100113]
-  #
-  def boxify(lvl, msg=nil, &block)
-    type = "Notices"  if lvl == 0 || !lvl
+  def boxify(lvl=0, msg=nil, &block)
+    type = "Notices"
     type = "Warnings" if lvl == 1
     type = "Errors"   if lvl == 2
     msg = capture(&block) if block_given?
     if msg
-      "<div style='width:500px'>
+      msg = "<div style='width:500px'>
         <table class='#{type}'><tr><td>
           #{msg}
         </td></tr></table>
       </div>"
     else
-      "<div style='width:500px'>
+      msg = "<div style='width:500px'>
         <table class='#{type}'><tr><td>"
+    end
+    if block_given?
+      concat(msg, block.binding)
+    else
+      msg
     end
   end
 

@@ -39,7 +39,7 @@
   intro = intro.l(:type => type_str, :name => @object.unique_format_name)
 
   fields = ""
-  fields += "*#{:app_created_bare.l}:* #{@comment.created.to_formatted_s(:db)}\n"
+  fields += "*#{:app_created_bare.l}:* #{@comment.created.email_time}\n"
   fields += "*#{:app_by.l}:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
   fields += "*#{:app_summary.l}:* #{@comment.summary.to_s}\n"
   fields += "*#{:comment.l}:*\n" if @comment.comment

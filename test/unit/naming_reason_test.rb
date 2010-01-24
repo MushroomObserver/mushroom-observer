@@ -1,13 +1,8 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class NamingReasonTest < Test::Unit::TestCase
   fixtures :namings
   fixtures :naming_reasons
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   # Create one.
   def test_create

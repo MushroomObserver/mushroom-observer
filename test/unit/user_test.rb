@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class UserTest < Test::Unit::TestCase
   fixtures :users
@@ -7,11 +7,6 @@ class UserTest < Test::Unit::TestCase
   fixtures :namings
   fixtures :observations
   fixtures :images_observations
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_auth
     assert_equal @rolf, User.authenticate("rolf", "testpassword")

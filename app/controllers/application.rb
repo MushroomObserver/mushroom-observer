@@ -1,555 +1,238 @@
-require 'extensions'
-require 'login_system'
-
-################################################################################
 #
-#  Filters added to this controller will be run for all controllers in the
-#  application.  Likewise, all methods here will be available for all
-#  controllers.
+#  = Application Controller Base Class
 #
-#    paginate_by_sql(model, ...)  Same as paginate, but works on lower level.
-#    paginate_array(list, per)    Just paginate pre-existing array.
+#  This is the base class for all the application's controllers.  It contains
+#  all the important application-wide filters and lots of helper methods.
+#  Anything that appears here is available to every controller and view.
 #
-#    field_search(fields, pat)    Creates sql query: any of a list of fields like a pattern?
-#    query_ids(query)             Gets list of ids given sql query.
-#    clean_sql_pattern(pattern)
+#  == Filters
 #
-#    map_loc(map, loc)            Overlay one location square on map.
-#    make_map(locs)               Create and draw map.
-#    finish_map(map)
+#  browser_status::     Auto-detect browser capabilities (plugin).
+#  autologin::          Determine which if any User is logged in.
+#  set_locale::         Determine which language is requested.
+#  check_user_alert::   Check if User has an alert to be displayed.
 #
-#    make_table_row(list)         Turn list into "<tr><td>x</td>...</tr>".
-#    calc_color(r1,c1, r2,c2)     Calculate background color in alternating list.
-#    calc_layout_params           Gather user-pref stats for drawing matrix-list.
+#  == Methods
+#  *NOTE*: Methods in parentheses are "private" helpers; you are encouraged to
+#  use the public ones instead.
 #
-#    check_permission(user_id)    Make sure current user is a given user.
-#    check_user_id(user_id)       Same, but flashes "denied" message, too.
-#    is_in_admin_mode?            Make sure user is in admin mode.
+#  ==== User authentication
+#  autologin::              (filter: determine which user is logged in)
+#  check_permission::       Make sure current User is the right one.
+#  check_permission!::      Same, but flashes "denied" message, too.
+#  is_reviewer?::           Is the current User a reviewer?
+#  is_in_admin_mode?::      Is the current User in admin mode?
+#  has_unshown_notifications?::
+#                           Are there pending Notification's of a given type?
+#  check_user_alert::       (filter: redirect to show_alert if has alert)
+#  set_autologin_cookie::   (set autologin cookie)
+#  clear_autologin_cookie:: (clear autologin cookie)
+#  set_session_user::       (store user in session -- id only)
+#  get_session_user::       (retrieve user from session)
 #
-#    flash_clear                  Clear error messages.
-#    flash_notice(str)            Add a success message.
-#    flash_warning(str)           Add a warning message.
-#    flash_error(str)             Add an error message.
-#    flash_object_notices(obj)    Add all errors for a given instance (as notices).
-#    flash_object_warnings(obj)   Add all errors for a given instance (as warnings).
-#    flash_object_errors(obj)     Add all errors for a given instance.
+#  ==== Internationalization
+#  all_locales::            Array of available locales for which we have translations.
+#  translate_menu::         Translate keys in select-menu's options.
+#  set_locale::             (filter: determine which locale is requested)
+#  get_sorted_locales_from_request_header::
+#                           (parse locale preferences from request header)
+#  get_valid_locale_from_request_header::
+#                           (choose locale that best matches request header)
 #
-#    setup_sorter(...)            Sets up a NameSorter object. (???)
-#    construct_approved_names(...) Makes sure a list of names exists.
-#    construct_approved_name(...) (helper)
-#    save_names(...)              (helper)
-#    create_needed_names(...)     Processes a single name entered by user.
+#  ==== Error handling
+#  flash_notices?::         Are there any errors pending?
+#  flash_get_notices::      Get list of errors.
+#  flash_notice_level::     Get current notice level.
+#  flash_clear::            Clear error messages.
+#  flash_notice::           Add a success message.
+#  flash_warning::          Add a warning message.
+#  flash_error::            Add an error message.
+#  flash_object_errors::    Add all errors for a given instance.
 #
-#    translate_menu(menu)         Translate keys in select-menu's options.
+#  ==== Name validation
+#  setup_sorter::             Sets up a NameSorter object.
+#  create_needed_names::      Creates the given name if it's been approved.
+#  construct_approved_names:: Creates a list of names if they've been approved.
+#  construct_approved_name::  (helper)
+#  save_names::               (helper)
+#  save_name::                (helper)
 #
-#    autologin                    Before filter that logs user in automatically.
-#    set_autologin_cookie(user)   Set autologin cookie.
-#    clear_autologin_cookie       Clear autologin cookie.
-#    set_session_user(user)       Store user in session (ID only).
-#    get_session_user             Retrieve user from session.
+#  ==== Searching
+#  show_selected_objs::     .
+#  query_ids::              Gets list of ids given SQL query.
+#  field_search::           Creates sql that means "any fields like a pattern?"
+#  clean_sql_pattern::      .
+#  session_setup            Clears out some session data.
+#  pass_seq_params::        .
+#  calc_search::            .
+#  calc_search_params::     .
+#  create_search::          .
+#  test_calc_condition::    .
+#  calc_condition::         .
+#  calc_advanced_search_query:: .
 #
-#  Private methods:
+#  ==== Pagination
+#  paginate_by_sql::        Paginate the results of a given SQL query.
+#  paginate_array::         Paginate an Array of objects.
+#  paginate_letters::       Paginate an Array by letter.
 #
-#    disable_link_prefetching     Prevents browser from prefetching destroy methods.
+#  ==== Memory usage
+#  log_memory_usage::       (filter: logs memory use stats from <tt>/proc/$$/smaps</tt>)
+#  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
+#  count_objects::          (does... nothing??!!... for every Object that currently exists)
 #
-#    set_locale                   Internationalization stuff.
-#    get_sorted_langs_from_accept_header
-#    get_valid_lang_from_accept_header
-#    standardize_locale(locale)
-#    get_matching_ui_locale(locale)
-#
-#    pass_seq_params()
-#    calc_search(type, conditions, order)
-#    calc_search_params
-#
-#    show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
-#    session_setup
+#  ==== Other stuff
+#  disable_link_prefetching:: Filter: prevents prefetching of destroy methods.
+#  update_view_stats::      Called after each show_object request.
+#  calc_layout_params::     Gather User's list layout preferences.
 #
 ################################################################################
 
 class ApplicationController < ActionController::Base
+  require 'extensions'
+  require 'login_system'
   include LoginSystem
 
   before_filter :browser_status
   before_filter :autologin
+  before_filter :set_locale
   before_filter :check_user_alert
-  around_filter :set_locale
   # before_filter :extra_gc
-  # after_filter :extra_gc
-  # after_filter :log_memory_usage
+  # after_filter  :extra_gc
+  # after_filter  :log_memory_usage
 
-  before_filter(:disable_link_prefetching, :only => [
-    # account_controller methods
-    :logout_user, :delete, :signup,
+  ##############################################################################
+  #
+  #  :section: User authentication
+  #
+  ##############################################################################
 
-    # observer_controller methods
-    :destroy_observation, :destroy_image,
-    :destroy_comment, :destroy_species_list, :upload_image,
-  ])
-
-  def test_filter
-    render(:text => 'This is a test.')
-  end
-
-  # Check if the user has an alert.
-  def check_user_alert
-    if @user && @user.alert && @user.alert_next_showing < Time.now && !session[:showing_alert]
-      session[:showing_alert] = true
-      redirect_to(:controller => 'account', :action => 'show_alert')
-    end
-  end
-
-  # Filter that should run before everything else.  Establishes whether a user
+  # Filter that should run before everything else.  Establishes whether a User
   # is logged in or not.
   #
-  # Stores the currently logged-in user in the "globals" <tt>@user</tt> and
-  # <tt>User.current</tt>.  (The former is visible to all controller instances
-  # and views; the latter is visible to the entire website application.)
+  # Stores the currently logged-in User in the "globals" <tt>@user</tt> and
+  # <tt>User.current</tt>, as well as the session.  (The first is visible to
+  # all controller instances and views; the second is visible to the entire
+  # website application.)
   #
-  # It first checks if the user is already logged in, i.e. is stored in the
-  # session.  If not, it checks for an autologin cookie on the user's browser,
+  # It first checks if the User is already logged in, i.e. is stored in the
+  # session.  If not, it checks for an autologin cookie on the User's browser,
   # and logs them in automatically if so.
   #
-  # In both cases, it verifies that the user actually exists and is verified.
-  # If not, the "user" is immediately logged out and the autologin cookie is
+  # In both cases, it makes sure the User actually exists and is verified.  If
+  # not, the "user" is immediately logged out and the autologin cookie is
   # destroyed.
+  #
   def autologin
-
     # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
     # return false
 
-    if (user = get_session_user) &&
-       (user.verified)
+    # Guilty until proven innocent...
+    @user = nil
+    User.current = nil
+
+    # Disable everything to do with cookies for API controller.
+    if controller_name != 'api'
+
       # Do nothing if already logged in: if user asked us to remember him the
       # cookie will already be there, if not then we want to leave it out.
-      @user = user
-      @user.reload
+      if (user = get_session_user) &&
+         (user.verified)
+        @user = user
+        @user.reload
 
-    # Log in if cookie is valid, and autologin is enabled.
-    elsif (cookie = cookies[:mo_user])  &&
-          (split = cookie.split(" ")) &&
-          (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
-          (split[1] == user.auth_code) &&
-          (user.verified)
-      @user = set_session_user(user)
+      # Log in if cookie is valid, and autologin is enabled.
+      elsif (cookie = cookies[:mo_user])  &&
+            (split = cookie.split(" ")) &&
+            (user = User.find(:first, :conditions => ['id = ?', split[0]])) &&
+            (split[1] == user.auth_code) &&
+            (user.verified)
+        @user = set_session_user(user)
 
-      # Reset cookie to push expiry forward.  This way it will continue to
-      # remember the user until they are inactive for over a month.  (Else
-      # they'd have to login every month, no matter how often they login.)
-      set_autologin_cookie(user)
+        # Reset cookie to push expiry forward.  This way it will continue to
+        # remember the user until they are inactive for over a month.  (Else
+        # they'd have to login every month, no matter how often they login.)
+        set_autologin_cookie(user)
 
-    # Delete invalid cookies.
-    else
-      clear_autologin_cookie
-      set_session_user(nil)
+      # Delete invalid cookies.
+      else
+        clear_autologin_cookie
+        set_session_user(nil)
+      end
+
+      # Make currently logged-in user available to everyone.
+      User.current = @user
     end
 
-    # Make currently logged-in user available to everyone.
-    User.current = @user
-
-    # Tell rails to continue to process.
+    # Tell Rails to continue to process.
     return true
   end
 
-  # Store and remove auto-login cookie.
-  def set_autologin_cookie(user)
-    cookies[:mo_user] = {
-      :value => "#{user.id} #{user.auth_code}",
-      :expires => 1.month.from_now
-    }
-  end
+  # ----------------------------
+  #  "Public" methods.
+  # ----------------------------
 
-  def clear_autologin_cookie
-    cookies.delete :mo_user
+  # Is the current User the correct User (or is admin mode on)?  Returns true
+  # or false.  (*NOTE*: this is available to views.)
+  #
+  #   <% if check_permission(@object.user)
+  #     link_to('Destroy', :action => :destroy_object)
+  #   end %>
+  #
+  def check_permission(user)
+    id = user.is_a?(ActiveRecord::Base) ? user.id : user.to_i rescue 0
+    @user && (@user.id.to_i == id || is_in_admin_mode?) rescue false
   end
+  helper_method :check_permission
 
-  # Store user in session (ID only).
-  def set_session_user(user)
-    session[:user_id] = user ? user.id : nil
-    return user
-  end
-
-  # Retrieve currently logged in user from session, if any.  Returns User
-  # object or nil.  (Does not check verified status or anything.)
-  def get_session_user
-    result = nil
-    if id = session[:user_id]
-      result = User.find(id)
+  # Is the current User the correct User (or is admin mode on)?  Returns true
+  # or false.  Flashes a "denied" error message if false.
+  #
+  #   def destroy_thing
+  #     @thing = Thing.find(params[:id])
+  #     if check_permission!(@thing.user)
+  #       @thing.destroy
+  #       flash_notice "Success!"
+  #     end
+  #     redirect_to(:action => :show_thing)
+  #   end
+  #
+  def check_permission!(user)
+    unless result = check_permission(user)
+      flash_error :app_permission_denied.t
     end
     result
   end
+  alias check_user_id check_permission!
 
-  # Return true if and only if the current user is a reviewer
-  def is_reviewer
+  # Is the current User a reviewer?  Returns true or false.  (*NOTE*: this is
+  # available to views.)
+  def is_reviewer?
     result = false
     if @user
       result = @user.in_group('reviewers')
     end
     result
   end
+  alias is_reviewer is_reviewer?
+  helper_method :is_reviewer
+  helper_method :is_reviewer?
 
-  # Get sorted list of locale codes we have translations for.
-  def all_locales
-    Dir.glob(RAILS_ROOT + '/lang/ui/*.yml').sort.map do |file|
-      file.sub(/.*?(\w+-\w+).yml/, '\\1')
-    end
-  end
-  helper_method :all_locales
-
-  def make_table_row(list)
-    result = list.map {|x| "<td>#{x}</td>"}
-    result = "<tr>#{result.join}</tr>"
-  end
-
-  def map_loc(map, loc) # , icon)
-    info = ("<span class=\"gmap\"><a href=\"/location/show_location/#{loc.id}\">#{loc.display_name.t}</a><table>" +
-      make_table_row(['',loc.north,'']) +
-      make_table_row([loc.west, '', loc.east]) +
-      make_table_row(['', loc.south, '']) + "</table></span>")
-    pline = GPolyline.new([[loc.north, loc.west],[loc.north, loc.east],
-      [loc.south, loc.east], [loc.south, loc.west], [loc.north, loc.west]],"#00ff88",3,1.0)
-    map.overlay_init(GMarker.new(loc.center(),
-      :title => loc.display_name, :info_window => info)) # , :icon => icon))
-    map.overlay_init(pline)
-  end
-
-  def make_map(locs)
-    result = GMap.new("map_div")
-    result.control_init(:large_map => true,:map_type => true)
-
-    # Started playing with icons and the following got something to show up, but I decide
-    # not to pursue it further right now.
-    # result.icon_global_init( GIcon.new( :image => "/images/blue-dot.png", :icon_size => GSize.new( 24,38 ), :icon_anchor => GPoint.new(12,38), :info_window_anchor => GPoint.new(9,2) ), "blue_dot")
-    # blue_dot = Variable.new("blue_dot")
-
-    if respond_to?( "start_lat" ) && respond_to?( "start_long" )
-        map.center_zoom_init( [start_lat, start_long], Constants::GM_ZOOM )
-        map.overlay_init( GMarker.new( [start_lat, start_long], { :icon => icon_start, :title => name + " start", :info_window => "start" } ) )
-    end
-
-    result.center_zoom_on_points_init(*((locs.map {|l| l.south_west}) + (locs.map {|l| l.north_east})))
-    for l in locs
-      # map_loc(result, l, blue_dot)
-      map_loc(result, l)
-    end
-    result
-  end
-
-  def finish_map(map)
-    result = map.to_html(:no_script_tag => 1)
-    "<script type=\"text/javascript\"><!--\n" + result + "--></script>"
-  end
-
-  def clean_sql_pattern(pattern)
-    pattern.gsub(/[*']/,"%")
-  end
-
-  # Creates sql query: any of a list of fields like a pattern?
-  def field_search(fields, sql_pattern)
-    (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
-  end
-
-  # Ultimately running large queries like this and storing the info in the session
-  # may become unwieldy.  Storing the query and selecting chunks will scale better.
-  def query_ids(query)
-    result = []
-    data = Observation.connection.select_all(query)
-    for d in data
-      id = d['id']
-      if id
-        result.push(id.to_i)
-      end
-    end
-    result
-  end
-
-  # Update view stats for name, image, observation, etc.
-  def update_view_stats(object)
-    if object && !is_robot?
-      now = Time.now
-      object.num_views = 0 if !object.num_views
-      object.num_views += 1
-      object.last_view = now
-      object.save
-      Transaction.create(
-        :method => :view,
-        :action => object.class.to_s.underscore,
-        :id     => object
-      )
-    end
-  end
-
-################################################################################
-
-  # Paginate a list which is implicitly created using the given SQL query.
-  # Returns a list of "pages" and objects themselves.
-  #
-  # By default, it wraps the SQL command to get a count of the number of
-  # records available before doing pagination.  (See
-  # ActiveRecord::MO#count_by_sql_wrapping_select_query.)  This can be
-  # overridden.
-  #
-  #   SELECT COUNT(*) FROM (sql) AS my_table
-  #
-  # Valid options are:
-  #
-  #   :count => 123                      Pass in number of results explicitly.
-  #   :count => "SELECT COUNT(*)..."     Tell it how to count results.
-  #   :page  => params[:page]
-  #
-  # *NOTE*: The objects returned are NOT actually proper object instances --
-  # they are merely wrappers masquerading as objects.  If your query includes
-  # multiple tables, all the values selected get crammed into the list of
-  # attributes for +model+.  For example, if you are paginating observations
-  # and including the user and name:
-  #
-  #   [pages, objs] = paginate_by_sql(Observation, %(
-  #     SELECT o.*, u.login, n.search_name, n.deprecated
-  #     FROM observations o, users u, names, n
-  #     WHERE u.id = o.user_id AND n.id = o.name_id AND etc.
-  #   ), 50)
-  #
-  #   for obj in objs
-  #     obj.when            These observation attributes are as expected.
-  #     obj.what
-  #     obj.where
-  #     obj.notes
-  #     obj.login           This attribute comes from users.
-  #     obj.search_name     These attributes come from names.
-  #     obj.deprecated
-  #   end
-  #
-  # Yikes!  Not exactly what I'd call Principle of Least Surprise...
-  # See ActiveRecord::Base#find_by_sql for more information.
-  def paginate_by_sql(model, sql, per_page, options={})
-
-    # Count total number of records first.
-    if !options[:count]
-      total = model.count_by_sql_wrapping_select_query(sql)
-    elsif options[:count].is_a?(Integer)
-      total = options[:count]
-    else
-      total = model.count_by_sql(options[:count])
-    end
-
-    # Get page number.
-    page = options[:page] || params[:page]
-
-    # Do pagination.
-    pages = Paginator.new(self, total, per_page, page)
-    objects = model.find_by_sql_with_limit(sql, pages.current.to_sql[1], per_page)
-    return [pages, objects]
-  end
-
-  # Paginate a plain old list of stuff that you've already populated.
-  # Returns Paginator object (which will draw the page number links)
-  # and the subset of the array that the user is currently viewing.
-  def paginate_array(list, per_page, page=nil)
-    list ||= []
-    page = params['page'] ? params['page'] : 1 if page.nil?
-    page = page.to_i
-    pages = Paginator.new self, list.length, per_page, page
-    return [pages, list[(page-1)*per_page, per_page]]
-  end
-
-  # Initialize PaginationLetters object.  Takes list of arbitrary items.
-  # By default it takes first letter of <tt>item.to_s</tt>, but you can override
-  # this by supplying a block.  Takes an optional hash of arguments:
-  #   :arg    Name of argument in params to use.  (default is 'letter')
-  #
-  #   def action
-  #     # Create list of objects.
-  #     list = Model.find(...)
-  #     # Initialize letter paginator.
-  #     letters, list = paginate_letters(list, length) {|i| i.title[0,1]}
-  #     # Initialize standard page-number paginator.
-  #     numbers, list = paginate_array(list, length)
-  #   end
-  #
-  #   view.rhtml:
-  #     <%# Insert pagination links for letters. %>
-  #     <div><%= pagination_letters(letters) %></div>
-  #     <%# Insert pagination links for numbers. %>
-  #     <div><%= pagination_numbers(numbers, letters) %></div>
-  #
-  # Note, pagination_links() does not know about this letter paginator, so it
-  # will not supply the 'letter' parameter correctly.  Thus you need to use
-  # this pagination_numbers() wrapper if you want to have both paginators.
-  def paginate_letters(list, length=50, args={})
-    obj = nil
-
-    if list && list.length > 0
-      obj = PaginationLetters.new
-      obj.letters = letters = {}
-      obj.used    = used    = {}
-      obj.arg     = arg     = args[:arg] || 'letter'
-      obj.letter  = letter  = params[arg]
-
-      # Gather map of items to their first letter, as well as a hash of letters
-      # that are used.
-      for item in list
-        if block_given?
-          l = yield(item)
-          l ||= "_"
-          l = l[0,1].upcase
-          l = "_" if !l.match(/^[A-Z]$/)
-        elsif item.to_s.match(/([a-z])/i)
-          l= $~[1].upcase
-        else
-          l= "_"
-        end
-        letters[item] = l
-        used[l] = true
-      end
-
-      if used.keys.length > 1
-        # If user has clicked on a letter, remove all items:
-        # 1) above that letter (Douglas's preference)
-        # 2) above and below that letter (Darvin's preference)  <---
-        if letter && letter.match(/^([A-Z])/)
-          letter = $~[1]
-          list = list.select do |item|
-            # letters[item] >= letter
-            letters[item] == letter
-          end
-          obj.letter = letter
-        else
-          obj.letter = nil
-        end
-      end
-    end
-
-    return [obj, list]
-  end
-
-  # Simple class to handle pagination by letter.
-  class PaginationLetters
-    # Maps items to letters.
-    attr_accessor :letters
-
-    # Hash of letters that we have items for.
-    attr_accessor :used
-
-    # Argument in params to use.
-    attr_accessor :arg
-
-    # Current letter.
-    attr_accessor :letter
-  end
-
-################################################################################
-
-  def calc_color(row, col, alt_rows, alt_cols)
-    color = 0
-    if alt_rows
-      color = row % 2
-    end
-    if alt_cols
-      if (col % 2) == 1
-        color = 1 - color
-      end
-    end
-    color
-  end
-  helper_method :calc_color
-
-  def calc_layout_params
-    result = {}
-    result["rows"]              = 5
-    result["columns"]           = 3
-    result["alternate_rows"]    = true
-    result["alternate_columns"] = true
-    result["vertical_layout"]   = true
-    if @user
-      result["rows"]              = @user.rows    if @user.rows
-      result["columns"]           = @user.columns if @user.columns
-      result["alternate_rows"]    = @user.alternate_rows
-      result["alternate_columns"] = @user.alternate_columns
-      result["vertical_layout"]   = @user.vertical_layout
-    end
-    result["count"] = result["rows"] * result["columns"]
-    result
-  end
-
-  # Make sure a given user is logged in (or admin mode is on).  Returns true
-  # if so.  (Flashes and error message if not.)
-  def check_user_id(user_id)
-    unless result = check_permission(user_id)
-      flash_error :app_permission_denied.t
-    end
-    result
-  end
-
-  # Make sure a given user is logged in (or admin mode is on).  Returns true
-  # if so.  (Note: this is available to views.)
-  def check_permission(user_id)
-    @user && (@user.id.to_i == user_id.to_i || is_in_admin_mode?)
-  end
-  helper_method :check_permission
-
-  # Make sure user is in admin mode.  Returns true if so.  (Note: this is
-  # available to views.)
+  # Is the current User in admin mode?  Returns true or false.  (*NOTE*: this
+  # is available to views.)
   def is_in_admin_mode?
     @user && @user.admin && session[:admin]
   end
   helper_method :is_in_admin_mode?
 
-  # Clear error/warning messages -- needed by post methods to clear old
-  # messages out of the queue.  (Used by app layout.)
-  def flash_clear
-    flash[:test_notice] = flash[:notice] if TESTING
-    flash[:notice] = nil
-    flash[:notice_level] = 0
-  end
-  helper_method :flash_clear
-
-  # Append an error/warning message to flash[:notice].
-  def flash_notice(str)
-    flash[:notice] += "<br/>" if flash[:notice]
-    flash[:notice] = "" if !flash[:notice]
-    flash[:notice] += str
-  end
-
-  def flash_warning(str)
-    flash_notice(str)
-    flash[:notice_level] = 1 if !flash[:notice_level] || flash[:notice_level] < 1
-  end
-
-  def flash_error(str)
-    flash_notice(str)
-    flash[:notice_level] = 2 if !flash[:notice_level] || flash[:notice_level] < 2
-  end
-
-  # Display errors for the given object (if there are any).
-  def flash_object_notices(obj)
-    if obj && obj.errors && obj.errors.length > 0
-      flash_notice obj.formatted_errors.join("<br/>")
-    end
-  end
-
-  def flash_object_warnings(obj)
-    if obj && obj.errors && obj.errors.length > 0
-      flash_warning obj.formatted_errors.join("<br/>")
-    end
-  end
-
-  def flash_object_errors(obj)
-    if obj && obj.errors && obj.errors.length > 0
-      flash_error obj.formatted_errors.join("<br/>")
-    end
-  end
-
-  def translate_menu(menu)
-    result = []
-    for k,v in menu
-      result << [ k.l, v ]
-    end
-    return result
-  end
-
-  # Helper function for determining if there are notifications for the given
-  # user and type.
-  def has_unshown_notifications(user, flavor=:naming)
+  # Are there are any QueuedEmail's of the given flavor for the given User?
+  # Returns true or false.
+  #
+  # This only applies to emails that are associated with Notification's for
+  # which there is a note_template.  (Only one type now: Notification's with
+  # flavor :name, which corresponds to QueuedEmail's with flavor :naming.)
+  #
+  def has_unshown_notifications?(user, flavor=:naming)
     result = false
     for q in QueuedEmail.find_all_by_flavor_and_to_user_id(flavor, user.id)
       ints = q.get_integers(["shown", "notification"], true)
@@ -564,12 +247,345 @@ class ApplicationController < ActionController::Base
     result
   end
 
-  # Give unit tests access to calc_condition.
-  def test_calc_condition(*args)
-    calc_condition(*args)
+  # ----------------------------
+  #  "Private" methods.
+  # ----------------------------
+
+  # Before filter: check if the current User has an alert.  If so, it redirects
+  # to <tt>/account/show_alert</tt>.  Returns true.
+  def check_user_alert
+    if @user && @user.alert && @user.alert_next_showing < Time.now &&
+       # Careful not to start infinite redirect-loop!
+       action_name != 'show_alert'
+      redirect_to(:controller => :account, :action => :show_alert)
+    end
+    return true
   end
 
-################################################################################
+  # Create/update the auto-login cookie.
+  def set_autologin_cookie(user)
+    cookies[:mo_user] = {
+      :value => "#{user.id} #{user.auth_code}",
+      :expires => 1.month.from_now
+    }
+  end
+
+  # Destroy the auto-login cookie.
+  def clear_autologin_cookie
+    cookies.delete :mo_user
+  end
+
+  # Store User in session (id only).
+  def set_session_user(user)
+    session[:user_id] = user ? user.id : nil
+    return user
+  end
+
+  # Retrieve the User from session.  Returns User object or nil.  (Does not
+  # check verified status or anything.)
+  def get_session_user
+    result = nil
+    if id = session[:user_id]
+      result = User.find(id) rescue nil
+    end
+    result
+  end
+
+  ##############################################################################
+  #
+  #  :section: Internationalization
+  #
+  ##############################################################################
+
+  # Get sorted list of locale codes (String's) that we have translations for.
+  def all_locales
+    Dir.glob(RAILS_ROOT + '/lang/ui/*.yml').sort.map do |file|
+      file.sub(/.*?(\w+-\w+).yml/, '\\1')
+    end
+  end
+  helper_method :all_locales
+
+  # Translate the given pulldown menu.  Accepts and returns the same structure
+  # the select menu helper takes:
+  #
+  #   <%
+  #     menu = [
+  #       [ :label1, value1 ],
+  #       [ :label2, value2 ],
+  #       ...
+  #     ]
+  #     select('object', 'field', translate_menu(menu), options => ...)
+  #   %>
+  #
+  # (Just calls +l+ on each label.)  (*NOTE*: this is available to views.)
+  #
+  def translate_menu(menu)
+    result = []
+    for k,v in menu
+      result << [ k.l, v ]
+    end
+    return result
+  end
+  helper_method :translate_menu
+
+  # Before filter: Decide which locale to use for this request.  Sets the
+  # Globalite default.  Tries to get the locale from:
+  #
+  # 1. parameters (user clicked on language in bottom left)
+  # 2. user prefs (user edited their preferences)
+  # 3. session (whatever we used last time)
+  # 4. navigator (provides default)
+  # 5. server (DEFAULT_LOCALE)
+  #
+  def set_locale
+    if params[:user_locale]
+      logger.debug "[globalite] loading locale: #{params[:user_locale]} from params"
+      Locale.code = params[:user_locale]
+      session[:locale] = Locale.code
+    elsif @user && @user.locale && @user.locale != ''
+      logger.debug "[globalite] loading locale: #{@user.locale} from @user"
+      Locale.code = @user.locale
+      session[:locale] = Locale.code
+    elsif session[:locale]
+      logger.debug "[globalite] loading locale: #{session[:locale]} from session"
+      Locale.code = session[:locale]
+    elsif locale = get_valid_locale_from_request_header
+      logger.debug "[globalite] loading locale: #{locale} from request header"
+      Locale.code = locale
+    else
+      Locale.code = DEFAULT_LOCALE
+    end
+
+    # One last sanity check.  (All translation YML files should have :en_US
+    # defined.)
+    if :en_US.l != 'English'
+      logger.warn("No translation exists for: #{Locale.code}")
+      Locale.code = DEFAULT_LOCALE
+    end
+
+    # Update user preference.
+    if @user && @user.locale.to_s != Locale.code.to_s
+      @user.locale = Locale.code.to_s
+      @user.save
+      Transaction.put_user(
+        :id         => @user,
+        :set_locale => Locale.code.to_s
+      )
+    end
+
+    logger.debug "[globalite] Locale set to #{Locale.code}"
+
+    # Tell Rails to continue to process request.
+    return true
+  end
+
+  # Return Array of the browser's requested locales (HTTP_ACCEPT_LANGUAGE).
+  # Example syntax:
+  #
+  #   en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3
+  #
+  def get_sorted_locales_from_request_header
+    result = []
+    if accepted_locales = request.env['HTTP_ACCEPT_LANGUAGE']
+
+      # Extract locales and weights, creating map from locale to weight.
+      locale_weights = {}
+      accepted_locales.split(',').each do |term|
+        if (term + ';q=1') =~ /^(.+?);q=([^;]+)/
+          locale_weights[$1] = ($2.to_f rescue -1.0)
+        end
+      end
+
+      # Now sort by decreasing weights.
+      result = locale_weights.sort {|a,b| b[1] <=> a[1]}.map {|a| a[0]}
+    end
+
+    logger.debug "[globalite] client accepted locales: #{result.to_sentence}"
+    return result
+  end
+
+  # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
+  # Returns a String, or <tt>nil</tt> if no valid match found.
+  def get_valid_locale_from_request_header
+    match = nil
+
+    # Get list of available locales.
+    available_locales = Globalite.ui_locales.values.map(&:to_s).sort
+
+    # Get list of languages browser requested, sorted in the order it prefers
+    # them.  (And convert them to standardized format: 'en' or 'en-US'.)
+    requested_locales = get_sorted_locales_from_request_header.map do |locale|
+      if locale.match(/^(\w\w)-(\w+)$/)
+        locale = "#{$1.downcase}-#{$2.upcase}"
+      else
+        locale = locale.downcase
+      end
+    end
+
+    # Look for matches.
+    fallback = nil
+    requested_locales.each do |locale|
+      logger.debug "[globalite] trying to match locale: #{locale}"
+
+      # What is the "preferred" dialect for this language?  Default is 'xx-XX'.
+      locale2 = { 'en' => 'en-US' }[locale[0,2]] ||
+                "#{locale[0,2]}-#{locale[0,2].upcase}"
+
+      # User requested "xx-YY" and we have it.
+      if available_locales.include?(locale)
+        match = locale
+        logger.debug "[globalite] exact match: #{match}"
+
+      # Check for "preferred" dialect 'xx-XX' first.
+      elsif available_locales.include?(locale2)
+        if locale.length > 2
+          # User requestsed "xx-YY", we have "xx-XX".
+          fallback ||= locale2
+        else
+          # User requested "xx", we have "xx-XX".
+          match = locale2
+          logger.debug "[globalite] default language-match: #{match}"
+        end
+
+      # Now we try for any other 'xx-YY'.
+      else
+        available_locales.each do |locale2|
+          if locale2[0,2] == locale[0,2]
+            if locale.length > 2
+              # User requestsed "xx-YY", we have "xx-ZZ".
+              fallback ||= locale2
+            else
+              # User requested "xx", we have "xx-YY".
+              match = locale2
+              logger.debug "[globalite] other language-match: #{match}"
+            end
+          end
+        end
+      end
+
+      break if match
+    end
+
+    # Fallback can be set if the user requested only exact locales.  If none
+    # of their exact locales worked, we give them default language-matches (in
+    # the same order) instead.  Example:
+    #
+    #   request  = en-AU,pt-PT
+    #   match    = --                   (no matches)
+    #   fallback = en-US                (but "en" would have matched)
+    #
+    # We have neither en-AU nor pt-PT, but we do have en-US and pt-BR.  We give
+    # them en-US because en-XX comes before pt-XX in their request.  Normally
+    # they would request something like this instead, of course:
+    #
+    #   request = en-AU,en,pt-PT,pt
+    #   match   = en-US                 (both "en" and "pt" match)
+    #
+    match || fallback
+  end
+
+  ##############################################################################
+  #
+  #  :section: Error handling
+  #
+  #  This is somewhat non-intuitive, so it's worth describing exactly what
+  #  happens.  There are two fundamentally different cases:
+  #
+  #  1. Request is rendered successfully (200).
+  #
+  #  Errors that occur while processing the action are added to
+  #  <tt>session[:notice]</tt>.  They are rendered in the layout, then cleared.
+  #  If they weren't cleared, they would carry through to the next action (via
+  #  +flash+ mechanism) and get rendered twice (or more!).
+  #
+  #  2. Request is redirected (302).
+  #
+  #  Errors that occur while processing the action are added to
+  #  <tt>session[:notice]</tt> as before.  Browser is redirected.  This may
+  #  happen multiple times before an action finally renders a template.  Once
+  #  this finally happens, all the errors that have accumulated in
+  #  <tt>session[:notice]</tt> are displayed, then cleared. 
+  #
+  #  *NOTE*: I just noticed that we've been incorrectly using the +flash+
+  #  mechanism for this all along.  This can fail if you flash an error,
+  #  redirect, then redirect again without rendering any additional error.
+  #  If you don't change a flash field it automatically gets cleared.
+  #
+  ##############################################################################
+
+  # Are there any errors pending?  Returns true or false.
+  def flash_notices?
+    !session[:notice].nil?
+  end
+  helper_method :flash_notices?
+
+  # Get a copy of the errors.  Return as String.
+  def flash_get_notices
+    session[:notice].to_s[1..-1]
+  end
+  helper_method :flash_get_notices
+
+  # Get current notice level. (0 = notice, 1 = warning, 2 = error)
+  def flash_notice_level
+    level = session[:notice].to_s[0,1]
+    level == '' ? nil : level.to_i
+  end
+  helper_method :flash_notice_level
+
+  # Clear error/warning messages. *NOTE*: This is done automatically by the
+  # application layout (app/views/layouts/application.rhtml) every time it
+  # renders the latest error messages.
+  def flash_clear
+    if TESTING
+      flash[:rendered_notice] = session[:notice]
+    end
+    session[:notice] = nil
+  end
+  helper_method :flash_clear
+
+  # Report an informational message that will be displayed (in green) at the
+  # top of the next page the User sees. 
+  def flash_notice(str)
+    session[:notice] += '<br/>' if session[:notice]
+    session[:notice] ||= '0'
+    session[:notice] += str
+  end
+
+  # Report a warning message that will be displayed (in yellow) at the top of
+  # the next page the User sees. 
+  def flash_warning(str)
+    flash_notice(str)
+    session[:notice][0,1] = '1' if session[:notice][0,1] == '0'
+  end
+
+  # Report an error message that will be displayed (in red) at the top of the
+  # next page the User sees. 
+  def flash_error(str)
+    flash_notice(str)
+    session[:notice][0,1] = '2' if session[:notice][0,1] != '2'
+  end
+
+  # Report the errors for a given ActiveRecord::Base instance.  These will be
+  # displayed (in red) at the top of the next page the User sees. 
+  #
+  #   if object.save
+  #     flash_notice "Yay!"
+  #   else
+  #     flash_error "Failed to save changes."
+  #     flash_object_error(object)
+  #   end
+  #
+  def flash_object_errors(obj)
+    if obj && obj.errors && obj.errors.length > 0
+      flash_error obj.formatted_errors.join("<br/>")
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Name validation
+  #
+  ##############################################################################
 
   # This is called by +create_name_helper+ (used by +create_observation+,
   # +create_naming+, and +edit_naming+) and +deprecate_name+.  It creates a new
@@ -590,7 +606,7 @@ class ApplicationController < ActionController::Base
       # This returns an array of Names: genus, species, then variety (if
       # applicable).  New names are created for any that don't exist... but
       # they need to be saved if they are new (just check if any is missing
-      # an id). 
+      # an id).
       names = Name.names_from_string(output_what)
       if names.last.nil?
         flash_error :app_no_create_name.t(:name => output_what)
@@ -621,7 +637,7 @@ class ApplicationController < ActionController::Base
     # but I haven't constructed a lot of examples.  If it makes more sense for
     # multiples to take precedence over valid names, then swap the next two
     # lines.  If they need to be more carefully considered, then the lists may
-    # need to get merged in the display. 
+    # need to get merged in the display.
     sorter.add_chosen_names(params[:chosen_names]) # hash
     sorter.add_chosen_names(params[:chosen_approved_names]) # hash
 
@@ -635,7 +651,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Goes through list of names entered by user and creates (and saves) any that
-  # are not in the database (but only if user has approved them). 
+  # are not in the database (but only if user has approved them).
   #
   # Used by: bulk_name_editor, change_synonyms, create/edit_species_list
   #
@@ -778,171 +794,34 @@ class ApplicationController < ActionController::Base
     end
   end
 
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Searching
+  #
+  ##############################################################################
 
-  private
-
-  def disable_link_prefetching
-    if request.env["HTTP_X_MOZ"] == "prefetch"
-      logger.debug "prefetch detected: sending 403 Forbidden"
-      render_nothing "403 Forbidden"
-      return false
-    end
+  def clean_sql_pattern(pattern)
+    pattern.gsub(/[*']/,"%")
   end
 
-  # Set the locale from the parameters, the session, or the navigator
-  # If none of these works, the Globalite default locale is set (en-*)
-  def set_locale
-    # Get the current path and request method (useful in the layout for changing the language)
-    @current_path = request.env['PATH_INFO']
-    @request_method = request.env['REQUEST_METHOD']
-
-    # Try to get the locale from:
-    #   1) parameters (user overrides everything)
-    #   2) user prefs (whatever user chose earlier)
-    #   3) session (whatever we used last time)
-    #   4) navigator (provides default)
-    if RAILS_ENV == 'test'
-      Locale.code = ENV['LANG'] || 'en-US'
-    elsif params[:user_locale]
-      logger.debug "[globalite] #{params[:user_locale]} locale passed"
-      Locale.code = params[:user_locale]
-      # Store the locale in the session
-      session[:locale] = Locale.code
-    elsif @user && @user.locale && @user.locale != ''
-      logger.debug "[globalite] loading locale: #{@user.locale} from @user"
-      Locale.code = @user.locale
-    elsif session[:locale]
-      logger.debug "[globalite] loading locale: #{session[:locale]} from session"
-      Locale.code = session[:locale]
-    else
-      # Changed code from Globalite sample app since Locale.code= didn't like 'pt-br'
-      # but did like 'pt-BR'.  standardize_locale was added to take a locale spec
-      # and enforce this standard.
-      locale = standardize_locale(get_valid_lang_from_accept_header)
-      logger.debug "[globalite] found a valid http header locale: #{locale}"
-      Locale.code = locale
-    end
-
-    # Add a last gasp default if the selected locale doesn't match any of our
-    # existing translations.  (All translation YML files have :en_US defined.)
-    if :en_US.l != 'English'
-      logger.warn("No translation exists for: #{Locale.code}")
-      Locale.code = "en-US"
-    end
-
-    # Update user preference.
-    if @user && @user.locale != Locale.code
-      @user.locale = Locale.code
-      @user.save
-      Transaction.put_user(
-        :id         => @user,
-        :set_locale => Locale.code
-      )
-    end
-
-    # Locale.code = "en-US"
-    logger.debug "[globalite] Locale set to #{Locale.code}"
-
-    # render the page
-    yield
-
-    # reset the locale to its default value
-    Locale.reset!
+  # Creates sql query: any of a list of fields like a pattern?
+  def field_search(fields, sql_pattern)
+    (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
   end
 
-  def count_objects
-    ObjectSpace.each_object do |o| end
-  end
-
-  def extra_gc
-    ObjectSpace.garbage_collect
-  end
-
-  def log_memory_usage
-    sd = sc = pd = pc = 0
-    File.new("/proc/#{$$}/smaps").each_line do |line|
-      if line.match(/\d+/)
-        val = $&.to_i
-        line.match(/^Shared_Dirty/)  ? (sd += val) :
-        line.match(/^Shared_Clean/)  ? (sc += val) :
-        line.match(/^Private_Dirty/) ? (pd += val) :
-        line.match(/^Private_Clean/) ? (pc += val) : 1
+  # Ultimately running large queries like this and storing the info in the session
+  # may become unwieldy.  Storing the query and selecting chunks will scale better.
+  def query_ids(query)
+    result = []
+    data = Observation.connection.select_all(query)
+    for d in data
+      id = d['id']
+      if id
+        result.push(id.to_i)
       end
     end
-    uid = session[:user_id].to_i
-    logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
-        [pd, pc, sd, sc, $$, uid, request.request_uri]
-  end
-
-  # Get a sorted array of the navigator languages
-  def get_sorted_langs_from_accept_header
-    accept_langs = (request.env['HTTP_ACCEPT_LANGUAGE'] || "en-us,en;q=0.5").split(/,/) rescue nil
-    return nil unless accept_langs
-
-    # Extract langs and sort by weight
-    # Example HTTP_ACCEPT_LANGUAGE: "en-au,en-gb;q=0.8,en;q=0.5,ja;q=0.3"
-    wl = {}
-    accept_langs.each {|accept_lang|
-      if (accept_lang + ';q=1') =~ /^(.+?);q=([^;]+).*/
-        wl[($2.to_f rescue -1.0)]= $1
-      end
-    }
-    logger.debug "[globalite] client accepted locales: #{wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }.to_sentence}"
-    sorted_langs = wl.sort{|a,b| b[0] <=> a[0] }.map{|a| a[1] }
-  end
-
-  # Returns a valid language that best suits the HTTP_ACCEPT_LANGUAGE request header.
-  # If no valid language can be deduced, then <tt>nil</tt> is returned.
-  def get_valid_lang_from_accept_header
-    # Get the sorted navigator languages and find the first one that matches our available languages
-    get_sorted_langs_from_accept_header.detect{|l| get_matching_ui_locale(l) }
-  end
-
-  # standardize_locale was added to take a locale spec and enforce the standard that
-  # the lang be lower case and the country be upper case.  The Globalite Locale.code=
-  # method seems to expect this standard, but Firefox uses all lower case.
-  def standardize_locale(locale)
-    lang = locale[0,2].downcase
-    country = '*'
-    if locale[3,5]
-      country = locale[3,5].upcase
-    end
-    result = "#{lang}-#{country}".to_sym
-    logger.debug "[globalite] trying to match #{result}"
     result
   end
-
-  # Returns the UI locale that best matches with the parameter
-  # or nil if not found
-  def get_matching_ui_locale(locale)
-    lang = locale[0,2].downcase
-    if locale[3,5]
-      country = locale[3,5].upcase
-      logger.debug "[globalite] trying to match locale: #{lang}-#{country}"
-      locale_code = "#{lang}-#{country}".to_sym
-    else
-      logger.debug "[globalite] trying to match #{lang}-*"
-      locale_code = "#{lang}-*".to_sym
-    end
-
-    # Check with exact matching
-    if Globalite.ui_locales.values.include?(locale)
-      logger.debug "[globalite] Globalite does include #{locale}"
-      locale_code
-    end
-
-    # Check on the language only
-    Globalite.ui_locales.values.each do |value|
-      value.to_s =~ /#{lang}-*/ ? value : nil
-    end
-  end
-
-  ################################################################################
-  #
-  #  Search stuff.
-  #
-  ################################################################################
 
   # If provided, link should be the arguments for link_to as a list of lists,
   # e.g. [[:action => 'blah'], [:action => 'blah']]
@@ -1009,6 +888,11 @@ class ApplicationController < ActionController::Base
     search_params[:seq_key] = @seq_key if @seq_key
     search_params[:obs] = @obs if @obs
     search_params
+  end
+
+  # Give unit tests access to calc_condition.
+  def test_calc_condition(*args)
+    calc_condition(*args)
   end
 
   def calc_condition(pat, fields, tables, conditions, table_set)
@@ -1116,5 +1000,340 @@ class ApplicationController < ActionController::Base
       end
     end
     query += ' WHERE ' + conditions.join(' AND ') if conditions != []
+  end
+
+  ##############################################################################
+  #
+  #  :section: Pagination
+  #
+  #  Pagination refers to breaking up an array of results into chunks, and
+  #  letting the user choose which chunk to see via a magic parameter (usually
+  #  called, predictably, "page").  There are several ways to do it:
+  #
+  #  * Lowest level method:
+  #
+  #      # In controller:
+  #      objects      = Model.all(:conditions => ...)
+  #      total_num    = objects.length
+  #      num_per_page = 20
+  #      page         = params[:page]
+  #      first_index  = (page-1) * num_per_page
+  #
+  #      @pages = Paginator.new(controller, total_num, num_per_page, page)
+  #      @subset = objects[first_index, num_per_page]
+  #
+  #      # In view this renders page number links:
+  #      <%= pagination_links(@pages) %>
+  #
+  #  * Perhaps the easiest method:
+  #
+  #      # This is uses params[:page] by default.
+  #      objects = Model.all(:conditions => ...)
+  #      @pages, @subset = paginate_array(objects, 20)
+  #
+  #  * Slightly different way of doing the same thing:
+  #
+  #      # (This only instantiates the objects on one page.)
+  #      query = %( SELECT blah FROM blah WHERE blah )
+  #      @pages, @subset = paginate_by_sql(Observation, query, 20)
+  #
+  #  * You can paginate two lists simultaneously:
+  #
+  #      @page1 = params[:page1]
+  #      @page2 = params[:page2]
+  #      @pages1, @subset1 = paginate_array(objects1, @page1)
+  #      @pages2, @subset2 = paginate_array(objects2, @page2)
+  #      <%= pagination_links(@pages1, :name => 'page1', :params => {:page2 => @page2}) %>
+  #      <%= pagination_links(@pages2, :name => 'page2', :params => {:page1 => @page1}) %>
+  #
+  #  * And you can do both letters and numbers:
+  #
+  #      @letters, @subset = paginate_letters(objects, 20, &:display_name)
+  #      @numbers, @subset = paginate_array(@subset, 20)
+  #      <%= pagination_letters(@letters) %>
+  #      <%= pagination_numbers(@numbers, @letters) %>
+  #
+  #  * A more efficient way of dealing with large datasets:
+  #
+  #      # This is very efficient, no overhead involved, minimal data x-fer.
+  #      ids = Model.connection.select_values %(
+  #        SELECT id FROM blah, blah, blah
+  #        WHERE lots of conditions AND cetera
+  #      )
+  #
+  #      @pages, ids = paginate_array(ids, 20)
+  #
+  #      # Now only instantiate what you need.  Eager-loading can help quite
+  #      # dramatically, as well.  (Note the trick checking for empty ids!!)
+  #      @objects = Model.all(
+  #        :conditions => ['id IN (?)', ids.empty? ? [0] : ids])
+  #        :include => [:eager, :load => :stuff]
+  #      )
+  #
+  #  (The very, very best would involve a variant of +paginate_by_sql+ that
+  #  does <tt>Model.connection.select_values</tt> instead of the bizarre
+  #  <tt>Model.find_by_sql</tt> and <tt>Model.count_by_sql</tt>.  But no one
+  #  has written this yet...)
+  #
+  #  *SEE* *ALSO*: ActionController::Pagination (a plugin) and the pagination
+  #  view-helpers in application_helper[link:files/application_helper.html].
+  #
+  ##############################################################################
+
+  # Paginate a list which is implicitly created using the given SQL query.
+  # Returns a Paginator instance and an Array of selected pseudo-instances (see
+  # notes below).
+  #
+  # By default, it wraps the SQL command to get a count of the number of
+  # records available before doing pagination, but this can be overridden.
+  # (See ActiveRecord::MO#count_by_sql_wrapping_select_query.)
+  #
+  #   SELECT COUNT(*) FROM (sql) AS my_table
+  #
+  # Valid options are:
+  #
+  #   :count => 123                      Pass in number of results explicitly.
+  #   :count => "SELECT COUNT(*)..."     Tell it how to count results.
+  #   :page  => params[:page]
+  #
+  # *NOTE*: The objects returned are NOT actually proper object instances --
+  # they are the correct class, but the attributes are set to whatever your
+  # query returns.  If your query includes multiple tables, all the values
+  # selected get crammed into the list of attributes for +model+.  For example,
+  # if you are paginating observations and including the user and name:
+  #
+  #   pages, objs = paginate_by_sql(Observation, %(
+  #     SELECT o.*, u.login, n.search_name, n.deprecated
+  #     FROM observations o, users u, names, n
+  #     WHERE u.id = o.user_id AND n.id = o.name_id AND etc.
+  #   ), 50)
+  #
+  #   for obj in objs
+  #     obj.when            These observation attributes are as expected.
+  #     obj.what
+  #     obj.where
+  #     obj.notes
+  #     obj.login           This attribute comes from users.
+  #     obj.search_name     These attributes come from names.
+  #     obj.deprecated
+  #   end
+  #
+  # (See ActiveRecord::Base#find_by_sql for more information.)
+  #
+  def paginate_by_sql(model, sql, per_page, options={})
+
+    # Count total number of records first.
+    if !options[:count]
+      total = model.count_by_sql_wrapping_select_query(sql)
+    elsif options[:count].is_a?(Integer)
+      total = options[:count]
+    else
+      total = model.count_by_sql(options[:count])
+    end
+
+    # Get page number.
+    page = options[:page] || params[:page]
+
+    # Do pagination.
+    pages = Paginator.new(self, total, per_page, page)
+    objects = model.find_by_sql_with_limit(sql, pages.current.to_sql[1], per_page)
+    return [pages, objects]
+  end
+
+  # Paginate a plain old list of stuff that you've already populated.  Returns
+  # Paginator instance and the selected subset of the given Array.
+  #
+  #   # In controller:
+  #   objects = Model.all_by_blah_and_blah
+  #   @paginator, @subset = paginate_array(objects, 30)
+  #
+  #   # In view:
+  #   <%= pagination_links(@paginator) %>
+  #   <% for object in @subset %>
+  #     <%= render object %>
+  #   <% end %>
+  #
+  def paginate_array(list, per_page, page=nil)
+    list ||= []
+    page = params['page'] ? params['page'] : 1 if page.nil?
+    page = page.to_i
+    pages = Paginator.new(self, list.length, per_page, page)
+    return [pages, list[(page-1)*per_page, per_page]]
+  end
+
+  # Initialize PaginationLetters object.  Takes list of arbitrary items.  By
+  # default it takes first letter of <tt>item.to_s</tt>, but you can override
+  # this by supplying a block.  Takes an optional hash of arguments:
+  #
+  # arg::    Name of parameter to use.  (default is 'letter')
+  #
+  # This is very similar to the other paginator:
+  #
+  #   # In controller:
+  #   names = Name.find_all_by_blah_and_blah
+  #   @letters, @subset = paginate_letters(names, 50, &:search_name)
+  #   @numbers, @subset = paginate_array(@subset, 50)
+  #
+  #   # In view:
+  #   <%= pagination_letters(@letters) %>
+  #   <%= pagination_numbers(@numbers, @letters) %>
+  #
+  # Note, you can use +pagination_links+, too:
+  #
+  #   <%= pagination_links(@numbers, :params => {@letters.arg => @letters.letter}) %>
+  #
+  def paginate_letters(list, length=50, args={})
+    obj = nil
+
+    if list && list.length > 0
+      obj = PaginationLetters.new
+      obj.letters = letters = {}
+      obj.used    = used    = {}
+      obj.arg     = arg     = args[:arg] || 'letter'
+      obj.letter  = letter  = params[arg]
+
+      # Gather map of items to their first letter, as well as a hash of letters
+      # that are used.
+      for item in list
+        if block_given?
+          l = yield(item).to_s
+        else
+          l = item.to_s
+        end
+        l = l.match(/([a-z])/i) ? $1.upcase : '_'
+        letters[item] = l
+        used[l] = true
+      end
+
+      if used.keys.length > 1
+        # If user has clicked on a letter, remove all items:
+        # 1) above that letter (Douglas's preference)
+        # 2) above and below that letter (Darvin's preference)  <---
+        if letter && letter.match(/^([A-Z])/)
+          letter = $~[1]
+          list = list.select do |item|
+            # letters[item] >= letter
+            letters[item] == letter
+          end
+          obj.letter = letter
+        else
+          obj.letter = nil
+        end
+      end
+    end
+
+    return [obj, list]
+  end
+
+  # Simple class to handle pagination by letter.  See +paginate_letters+ and
+  # +pagination_letters+ for more information.
+  class PaginationLetters
+    # Hash: maps items to letters.
+    attr_accessor :letters
+
+    # Hash: letters that we have items for.
+    attr_accessor :used
+
+    # Name of parameter to use.
+    attr_accessor :arg
+
+    # Current letter.
+    attr_accessor :letter
+  end
+
+  ##############################################################################
+  #
+  #  :section: Memory usage.
+  #
+  ##############################################################################
+
+  def count_objects
+    ObjectSpace.each_object do |o| end
+  end
+
+  def extra_gc
+    ObjectSpace.garbage_collect
+  end
+
+  def log_memory_usage
+    sd = sc = pd = pc = 0
+    File.new("/proc/#{$$}/smaps").each_line do |line|
+      if line.match(/\d+/)
+        val = $&.to_i
+        line.match(/^Shared_Dirty/)  ? (sd += val) :
+        line.match(/^Shared_Clean/)  ? (sc += val) :
+        line.match(/^Private_Dirty/) ? (pd += val) :
+        line.match(/^Private_Clean/) ? (pc += val) : 1
+      end
+    end
+    uid = session[:user_id].to_i
+    logger.warn "Memory Usage: pd=%d, pc=%d, sd=%d, sc=%d (pid=%d, uid=%d, uri=%s)\n" % \
+        [pd, pc, sd, sc, $$, uid, request.request_uri]
+  end
+
+  ################################################################################
+  #
+  #  :section: Other stuff
+  #
+  ################################################################################
+
+  # Before filter: disable link prefetching.
+  #
+  # This, I'm inferring, is when an over-achieving browser actively goes out
+  # prefetching all the pages linked to from the current page so that the user
+  # doesn't have to wait as long when they click on one.  The problem is, if
+  # the browser pre-fetches something like +destroy_comment+, it could
+  # potentially delete or otherwise harm things unintentionally. 
+  #
+  # The old policy was to disable this feature for a few obviously dangerous
+  # actions.  I've changed it now to only _enable_ it for common (and safe)
+  # actions like show_observation, post_comment, etc.  Each controller is now
+  # responsible for explicitly listing the actions which accept it.
+  # -JPH 20100123
+  #
+  def disable_link_prefetching
+    if request.env["HTTP_X_MOZ"] == "prefetch"
+      logger.debug "prefetch detected: sending 403 Forbidden"
+      render_nothing "403 Forbidden"
+      return false
+    end
+  end
+
+  # Tell an object that someone has looked at it (unless a robot made the
+  # request). 
+  def update_view_stats(object)
+    if object.respond_to?(:update_view_stats) && !is_robot?
+      object.update_view_stats
+    end
+  end
+
+  # Get User's list layout preferences, providing defaults as necessary.
+  # Returns a hash of options.  (Uses the current user from +@user+.)
+  #
+  #   opts = calc_layout_params
+  #
+  #   opts["rows"]              # Number of rows to display.
+  #   opts["columns"]           # Number of columns to display.
+  #   opts["alternate_rows"]    # Alternate colors for rows.
+  #   opts["alternate_columns"] # Alternate colors for columns.
+  #   opts["vertical_layout"]   # Stick text below thumbnail?
+  #   opts["count"]             # Total number of items = rows * columns.
+  #
+  def calc_layout_params
+    result = {}
+    result["rows"]              = 5
+    result["columns"]           = 3
+    result["alternate_rows"]    = true
+    result["alternate_columns"] = true
+    result["vertical_layout"]   = true
+    if @user
+      result["rows"]              = @user.rows    if @user.rows
+      result["columns"]           = @user.columns if @user.columns
+      result["alternate_rows"]    = @user.alternate_rows
+      result["alternate_columns"] = @user.alternate_columns
+      result["vertical_layout"]   = @user.vertical_layout
+    end
+    result["count"] = result["rows"] * result["columns"]
+    result
   end
 end

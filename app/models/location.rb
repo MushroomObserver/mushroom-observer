@@ -101,6 +101,7 @@ class Location < ActiveRecord::MO
     'search_name'
   )
 
+  before_save :update_user_if_save_version
   before_save :set_search_name
   after_save  :check_add_author
   after_save  :notify_authors
@@ -243,7 +244,9 @@ class Location < ActiveRecord::MO
 
   # Callback that updates +search_name+ before saving a record.  See +clean_name+.
   def set_search_name
-    self.search_name = self.class.clean_name(display_name)
+    if new_record? || display_name_changed?
+      self.search_name = self.class.clean_name(display_name)
+    end
   end
 
   # Callback that updates editors and/or authors after a User makes a change.

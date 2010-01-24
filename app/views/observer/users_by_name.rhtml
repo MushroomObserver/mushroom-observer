@@ -37,7 +37,7 @@
         <%= user.user_groups.map { |g| h(g.name) }.join(',') %>
       </td>
       <td>
-        <%= user.last_login %>
+        <%= user.last_login.web_time rescue '--' %>
       </td>
       <td>
         <%= user.id %>
@@ -52,7 +52,7 @@
         <%= h(user.theme) %>
       </td>
       <td>
-        <%= user.created %>
+        <%= user.created.web_time rescue '--' %>
       </td>
     </tr>
   <% end %>

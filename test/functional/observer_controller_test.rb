@@ -1,8 +1,6 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'observer_controller'
-require 'fileutils'
+require File.dirname(__FILE__) + '/../boot'
 
-class ObserverControllerTest < Test::Unit::TestCase
+class ObserverControllerTest < ControllerTestCase
   fixtures :images
   fixtures :images_observations
   fixtures :licenses
@@ -13,12 +11,6 @@ class ObserverControllerTest < Test::Unit::TestCase
   fixtures :observations
   fixtures :users
   fixtures :votes
-
-  def setup
-    @controller = ObserverController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
 
   # Test constructing observations in various ways (with minimal namings).
   def generic_construct_observation(params, o_num, g_num, n_num)
@@ -65,60 +57,60 @@ class ObserverControllerTest < Test::Unit::TestCase
     local_fixtures :rss_logs
 
     get_with_dump(:index)
-    assert_response(:list_rss_logs)
+    assert_response('list_rss_logs')
     assert_link_in_html(:app_intro.t, :action => 'intro')
     assert_link_in_html(:app_create_account.t, :controller => 'account',
                         :action => 'signup')
 
     get_with_dump(:ask_webmaster_question)
-    assert_response(:ask_webmaster_question)
+    assert_response('ask_webmaster_question')
     assert_form_action(:action => 'ask_webmaster_question')
 
     get_with_dump(:color_themes)
-    assert_response(:color_themes)
+    assert_response('color_themes')
     for theme in CSS
       get_with_dump(theme)
       assert_response(theme)
     end
 
     get_with_dump(:how_to_help)
-    assert_response(:how_to_help)
+    assert_response('how_to_help')
 
     get_with_dump(:how_to_use)
-    assert_response(:how_to_use)
+    assert_response('how_to_use')
 
     get_with_dump(:intro)
-    assert_response(:intro)
+    assert_response('intro')
 
     get_with_dump(:list_observations)
-    assert_response(:list_observations)
+    assert_response('list_observations')
 
     get_with_dump(:list_rss_logs)
-    assert_response(:list_rss_logs)
+    assert_response('list_rss_logs')
 
     get_with_dump(:news)
-    assert_response(:news)
+    assert_response('news')
 
     get_with_dump(:observations_by_name)
-    assert_response(:list_observations)
+    assert_response('list_observations')
 
     get_with_dump(:rss)
-    assert_response(:rss)
+    assert_response('rss')
 
     get_with_dump(:show_rss_log, :id => 1)
-    assert_response(:show_rss_log)
+    assert_response('show_rss_log')
 
     get_with_dump(:users_by_contribution)
-    assert_response(:users_by_contribution)
+    assert_response('users_by_contribution')
 
     get_with_dump(:show_user, :id => 1)
-    assert_response(:show_user)
+    assert_response('show_user')
 
     get_with_dump(:show_site_stats)
-    assert_response(:show_site_stats)
+    assert_response('show_site_stats')
 
     get_with_dump(:show_user_observations, :id => 1)
-    assert_response(:list_observations)
+    assert_response('list_observations')
 
     get_with_dump(:login)
     assert_response(:controller => "account", :action => "login")
@@ -140,7 +132,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   # Created in response to a performance problem seen in the wild
   def test_advanced_searches
     for (type, action, response) in [
-      [ nil,           :advanced_obj_search,     :list_observations                ],
+      [ nil,           :advanced_obj_search,     'list_observations'               ],
       [ "Image",       :advanced_search_results, [:image,    :advanced_obj_search] ],
       [ "Observation", :advanced_search_results, [:observer, :advanced_obj_search] ],
       [ "Description", :advanced_search_results, [:name,     :advanced_obj_search] ],
@@ -184,12 +176,12 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_observation_search
     @request.session[:pattern] = "12"
     get_with_dump(:observation_search)
-    assert_response(:list_observations)
+    assert_response('list_observations')
     assert_equal(:list_observations_matching.t(:pattern => '12'),
                  @controller.instance_variable_get('@title'))
 
     get_with_dump(:observation_search, :page => 2)
-    assert_response(:list_observations)
+    assert_response('list_observations')
     assert_equal(:list_observations_matching.t(:pattern => '12'),
                  @controller.instance_variable_get('@title'))
   end
@@ -199,14 +191,14 @@ class ObserverControllerTest < Test::Unit::TestCase
     @request.session[:where] = "Burbank"
     params = { :page => 2 }
     get_with_dump(:location_search, params)
-    assert_response(:list_observations)
+    assert_response('list_observations')
   end
 
   # Created in response to a bug seen in the wild
   def test_where_search_pattern
     params = { :pattern => "Burbank" }
     get_with_dump(:location_search, params)
-    assert_response(:list_observations)
+    assert_response('list_observations')
   end
 
   def test_send_webmaster_question
@@ -217,42 +209,38 @@ class ObserverControllerTest < Test::Unit::TestCase
     post(:ask_webmaster_question, params)
     assert_response(:controller => "observer", :action => "list_rss_logs")
 
-    flash[:notice] = nil
     params[:user][:email] = ''
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_equal(:ask_webmaster_need_address.t, flash[:notice])
+    assert_flash(:ask_webmaster_need_address.t)
 
-    flash[:notice] = nil
     params[:user][:email] = 'spammer'
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_equal(:ask_webmaster_need_address.t, flash[:notice])
+    assert_flash(:ask_webmaster_need_address.t)
 
-    flash[:notice] = nil
     params[:user][:email] = 'bogus@email.com'
     params[:question][:content] = ''
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_equal(:ask_webmaster_need_content.t, flash[:notice])
+    assert_flash(:ask_webmaster_need_content.t)
 
-    flash[:notice] = nil
     params[:question][:content] = "Buy <a href='http://junk'>Me!</a>"
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_equal(:ask_webmaster_antispam.t, flash[:notice])
+    assert_flash(:ask_webmaster_antispam.t)
   end
 
   def test_show_observation
     get_with_dump(:show_observation, :id => @coprinus_comatus_obs.id)
-    assert_response(:show_observation)
+    assert_response('show_observation')
     obs = @coprinus_comatus_obs.id
     seq = SequenceState.last.id
     assert_form_action(:action => 'show_observation', :id => obs, :obs => obs,
                        :seq_key => seq)
 
     get_with_dump(:show_observation, :id => @unknown_with_no_naming.id)
-    assert_response(:show_observation)
+    assert_response('show_observation')
     obs = @unknown_with_no_naming.id
     seq = SequenceState.last.id
     assert_form_action(:action => 'show_observation', :id => obs, :obs => obs,
@@ -264,7 +252,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     user = login('rolf')
     assert_equal(@strobilurus_diminutivus_obs.user, user)
     get_with_dump(:show_observation, :id => @strobilurus_diminutivus_obs.id)
-    assert_response(:show_observation)
+    assert_response('show_observation')
   end
 
   def test_show_user_no_id
@@ -301,8 +289,8 @@ class ObserverControllerTest < Test::Unit::TestCase
 
   def test_some_admin_pages
     for (page, response, params) in [
-      [ :users_by_name,      :users_by_name,   {} ],
-      [ :email_features,     :email_features,  {} ],
+      [ :users_by_name,      'users_by_name',  {} ],
+      [ :email_features,     'email_features', {} ],
       [ :send_feature_email, [:users_by_name], {:feature_email => {:content => 'test'}} ],
     ]
       logout
@@ -312,7 +300,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       login('rolf')
       get(page, params)
       assert_response(:action => "list_rss_logs")
-      assert('', flash[:notice].to_s.match(/denied/))
+      assert_flash(/denied|only.*admin/i)
 
       make_admin('rolf')
       get_with_dump(page, params)
@@ -340,7 +328,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     requires_login(:send_observation_question, params)
     assert_response(:action => :show_observation)
-    assert_equal(:ask_observation_question_success.t, flash[:notice])
+    assert_flash(:ask_observation_question_success.t)
 
     user = @mary
     params = {
@@ -352,7 +340,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     }
     requires_login(:send_user_question, params)
     assert_response(:action => :show_user)
-    assert_equal(:ask_user_question_success.t, flash[:notice])
+    assert_flash(:ask_user_question_success.t)
   end
 
   def test_show_notifications
@@ -370,7 +358,7 @@ class ObserverControllerTest < Test::Unit::TestCase
     # Now we can be sure show_notifications is supposed to actually show a
     # non-empty list, and thus that this test is meaningful.
     requires_login(:show_notifications, :id => @coprinus_comatus_obs)
-    assert_response(:show_notifications)
+    assert_response('show_notifications')
   end
 
   # ------------------------------
@@ -819,7 +807,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :name => { :name => new_name }
     }
     post(:edit_naming, params)
-    assert_response(:edit_naming)
+    assert_response('edit_naming')
     assert_equal(10, @rolf.reload.contribution)
     obs = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
@@ -857,7 +845,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :name => { :name => new_name }
     }
     post(:edit_naming, params)
-    assert_response(:edit_naming)
+    assert_response('edit_naming')
     assert_equal(10, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
@@ -895,7 +883,7 @@ class ObserverControllerTest < Test::Unit::TestCase
       :name => { :name => new_name }
     }
     post(:edit_naming, params)
-    assert_response(:edit_naming)
+    assert_response('edit_naming')
     assert_equal(10, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_not_equal(new_name, nam.text_name)
@@ -1319,7 +1307,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal(3, @coprinus_comatus_other_naming.votes.length)
 
     # Make sure observation is changed correctly.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(@coprinus_comatus.search_name, @coprinus_comatus_obs.name.search_name,
+      "Cache for 3: #{@coprinus_comatus_naming.vote_cache}, 9: #{@coprinus_comatus_other_naming.vote_cache}")
   end
 
   # Rolf can destroy his naming if Mary deletes her vote on it.
@@ -1520,7 +1509,7 @@ class ObserverControllerTest < Test::Unit::TestCase
   def test_show_votes
     # First just make sure the page displays.
     get_with_dump(:show_votes, :id => @coprinus_comatus_naming.id)
-    assert_response(:show_votes)
+    assert_response('show_votes')
 
     # Now try to make somewhat sure the content is right.
     table = @coprinus_comatus_naming.calc_vote_table
@@ -1660,8 +1649,8 @@ class ObserverControllerTest < Test::Unit::TestCase
     assert_equal('notes_1',     imgs[0].notes)
     assert_equal('notes_2_new', imgs[1].notes)
     assert_equal('notes_3',     imgs[2].notes)
-    assert(imgs[0].modified < 1.day.ago)
-    assert(imgs[1].modified > 1.day.ago)
+    assert(imgs[0].modified > 1.minute.ago)
+    assert(imgs[1].modified > 1.minute.ago)
   end
 
   def test_image_upload_when_create_fails

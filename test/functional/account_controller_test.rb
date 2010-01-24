@@ -1,24 +1,10 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'account_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class AccountControllerTest < Test::Unit::TestCase
+class AccountControllerTest < ControllerTestCase
   fixtures :users
 
   def setup
-    @controller = AccountController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
     @request.host = "localhost"
-  end
-
-  def no_email_hooks_helper(type)
-    requires_user("no_email_#{type}".to_sym, [ :observer, :list_rss_logs ],
-                  :id => @rolf.id)
-    assert_response(:success)
-    assert_template('no_email')
-    @rolf.reload
-    assert(!@rolf.send("email_#{type}"))
-    logout
   end
 
 ################################################################################
@@ -203,7 +189,7 @@ class AccountControllerTest < Test::Unit::TestCase
       }
     }
     post_with_dump(:prefs, params)
-    assert_equal(:prefs_success.t, flash[:notice])
+    assert_flash(:prefs_success.t)
 
     # Make sure changes were made.
     user = @rolf .reload
@@ -263,7 +249,7 @@ class AccountControllerTest < Test::Unit::TestCase
       }
     }
     post_with_dump(:profile, params)
-    assert_equal(:profile_success.t, flash[:notice])
+    assert_flash(:profile_success.t)
 
     # Make sure changes were made.
     user = @rolf.reload
@@ -311,21 +297,86 @@ class AccountControllerTest < Test::Unit::TestCase
   end
 
   def test_no_email_hooks
-    no_email_hooks_helper(:comments_owner)
-    no_email_hooks_helper(:comments_response)
-    no_email_hooks_helper(:comments_all)
-    no_email_hooks_helper(:observations_consensus)
-    no_email_hooks_helper(:observations_naming)
-    no_email_hooks_helper(:observations_all)
-    no_email_hooks_helper(:names_author)
-    no_email_hooks_helper(:names_editor)
-    no_email_hooks_helper(:names_reviewer)
-    no_email_hooks_helper(:names_all)
-    no_email_hooks_helper(:locations_author)
-    no_email_hooks_helper(:locations_editor)
-    no_email_hooks_helper(:locations_all)
-    no_email_hooks_helper(:general_feature)
-    no_email_hooks_helper(:general_commercial)
-    no_email_hooks_helper(:general_question)
+    for type in [
+      :comments_owner,
+      :comments_response,
+      :comments_all,
+      :observations_consensus,
+      :observations_naming,
+      :observations_all,
+      :names_author,
+      :names_editor,
+      :names_reviewer,
+      :names_all,
+      :locations_author,
+      :locations_editor,
+      :locations_all,
+      :general_feature,
+      :general_commercial,
+      :general_question,
+    ]
+      assert_request(
+        :action        => "no_email_#{type}",
+        :params        => { :id => @rolf.id },
+        :require_login => true,
+        :require_user  => :index,
+        :result        => 'no_email'
+      )
+      assert(!@rolf.reload.send("email_#{type}"))
+    end
+  end
+
+  def test_flash_errors
+    # First make sure app is working correctly in "live" mode.
+    get(:test_flash)
+    assert_flash(nil)
+    flash[:rendered_notice] = nil
+
+    get_without_clearing_flash(:test_flash, :error => 'error one')
+    assert_flash('error one')
+    flash[:rendered_notice] = nil
+
+    get_without_clearing_flash(:test_flash, :error => 'error two')
+    assert_flash('error two')
+    flash[:rendered_notice] = nil
+
+    get_without_clearing_flash(:test_flash, :error => 'error three', :redirect => 1)
+    assert_flash('error three')
+    flash[:rendered_notice] = nil
+
+    get_without_clearing_flash(:test_flash, :error => 'error four', :redirect => 1)
+    assert_flash('error three<br/>error four')
+    flash[:rendered_notice] = nil
+
+    get_without_clearing_flash(:test_flash, :error => 'error five')
+    assert_flash('error three<br/>error four<br/>error five')
+    flash[:rendered_notice] = nil
+
+    get_without_clearing_flash(:test_flash, :redirect => 1, :error => 'dont lose me!')
+    get_without_clearing_flash(:test_flash, :redirect => 1)
+    get_without_clearing_flash(:test_flash)
+    assert_flash('dont lose me!')
+
+    # Now make sure our test suite is clearing out the flash automatically
+    # between requests like it should. 
+    get(:test_flash, :error => 'tweedle')
+    assert_flash('tweedle')
+
+    get(:test_flash, :error => 'dee')
+    assert_flash('dee')
+
+    get(:test_flash, :error => 'dum', :redirect => 1)
+    assert_flash('dum')
+
+    get(:test_flash, :error => 'jabber', :redirect => 1)
+    assert_flash('jabber')
+
+    get(:test_flash, :error => 'wocky')
+    get(:test_flash)
+    assert_flash(nil)
+
+    get(:test_flash, :error => 'and others', :redirect => 1)
+    get(:test_flash, :redirect => 1)
+    assert_flash(nil)
   end
 end

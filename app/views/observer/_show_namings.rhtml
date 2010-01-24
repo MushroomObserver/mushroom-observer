@@ -41,7 +41,7 @@
           <th></th>
         </tr>
 
-        <% for naming in @observation.namings.sort_by {|n| n.created} %>
+        <% for naming in @observation.namings.sort_by(&:created) %>
           <tr>
             <td>
               <div style='white-space:nowrap'>

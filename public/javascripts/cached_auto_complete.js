@@ -185,8 +185,7 @@ var CachedAutocompleter = Class.create(base, {
         if (this.cache == null || this.cacheLetter != letter) {
           this.loading = true;
           this.startIndicator();
-          this.options.parameters = 'letter=' + letter;
-          new Ajax.Request(this.url, this.options);
+          new Ajax.Request(this.url + '/' + letter, this.options);
         }
       }
 

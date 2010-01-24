@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class ObservationTest < Test::Unit::TestCase
   fixtures :observations
@@ -22,10 +22,7 @@ class ObservationTest < Test::Unit::TestCase
     @cc_nam.observation = @cc_obs
   end
 
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
+################################################################################
 
   # Add an observation to the database
   def test_create
@@ -47,7 +44,6 @@ class ObservationTest < Test::Unit::TestCase
   end
 
   # Test setting a name using a string
-
   def test_validate
     @cc_obs.user = nil
     @cc_obs.when = nil

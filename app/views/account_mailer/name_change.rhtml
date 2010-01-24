@@ -6,7 +6,7 @@
   is_now = :email_field_is_now.l
 
   fields = ""
-  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*#{:app_time.l}:* #{@time.email_time}\n"
   fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   one_liners = ''

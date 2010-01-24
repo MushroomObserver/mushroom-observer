@@ -17,8 +17,8 @@ xml.name(
   xml.deprecated object.deprecated ? 'true' : 'false'
 
   if detail
-    xml.created  xml_datetime(object.created)
-    xml.modified xml_datetime(object.modified)
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
 
     # authors
     # editors

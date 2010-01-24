@@ -111,7 +111,8 @@ class Transaction < ActiveRecord::MO
   #   method, args = Transaction.xmlrpc_reader.parse(query)
   #
   def self.xmlrpc_reader
-    @@xmlrpc_reader ||= XMLRPC::Config.DEFAULT_PARSER.new
+    @@xmlrpc_reader ||= XMLRPC::XMLParser::REXMLStreamParser.new
+    # @@xmlrpc_reader ||= XMLRPC::Config.DEFAULT_PARSER.new
   end
 
   # Get default XML-RPC parser.
@@ -151,7 +152,7 @@ class Transaction < ActiveRecord::MO
   # assumes it is being created for the first time now, and uses the new
   # record's id as the basis for the sync_id.  If +id+ _is_ present, it assumes
   # it was already created remotely, and uses _that_ as the sync_id for the new
-  # record. 
+  # record.
   def self.create(args)
     xact = new(args)
     xact.create_query
@@ -195,25 +196,56 @@ class Transaction < ActiveRecord::MO
 ################################################################################
 
 # These should be protected but you can't call protected instance methods from
-# a class method even if it's the same class(!) 
+# a class method even if it's the same class(!)
 # protected
 
   # Extract method, action, args from XML-RPC query string.
   def parse_query
-    method, args = self.class.xmlrpc_reader.parse(query)
+    method, args = self.class.xmlrpc_reader.parseMethodCall(query)
+    args = args[0]
+    if !args.is_a?(Hash)
+      raise "Invalid transaction query; expect a single hash of arguments."
+    end
+    args = Args.new(args)
     args[:method] = method
+# print "PARSE QUERY: [#{args.inspect}]\n"
     self.args = args
-    return args
+  end
+
+  # Trivial subclass of Hash that forces all keys to String.  This helps
+  # avoid the whole obnoxious "is it a Symbol or String" fiasco, just like
+  # the CGI params object does.  It returns keys as Symbols, but internally
+  # everything is done as String.
+  class Args
+    def initialize(x); @hash = x; end
+    def [](k); @hash[k.to_s]; end
+    def []=(k,v); @hash[k.to_s] = v; end
+    def keys; @hash.keys.map(&:to_sym); end
+    def has_key?(k); @hash.has_key?(k.to_s); end
+    alias key? has_key?
+    alias include? has_key?
+    def delete(k); @hash.delete(k.to_s); end
+    def inspect; @hash.inspect; end
   end
 
   # Create XML-RPC string from method, action, args.
   def create_query
-    args   = self.args.dup
+
+    # XML-RPC requires method be listed separately; we mash it in with
+    # everything else.
+    args = self.args.dup
     method = args[:method]
     args.delete(:method)
+
+    # Just make absolutely sure we don't accidentally save authentication.
     args.delete(:auth_id)   if args.has_key?(:auth_id)
     args.delete(:auth_code) if args.has_key?(:auth_code)
+
+    # This validates ids and converts ActiveRecords to sync_ids.
     convert_ids(args)
+
+    # Create the actual XML-RPC query.
+# print "CREATE QUERY: [#{method.inspect}, #{args.inspect}]\n"
     self.query = Transaction.xmlrpc_writer.methodCall(method, args)
   end
 
@@ -239,18 +271,21 @@ private
           raise "Missing sync_id for :#{key} = #{val.class} ##{val.id || 'nil'}"
         end
 
+      # Let ActiveSupport::TimeWithZone take care of timezones, etc.
+      elsif val.is_a?(Time)
+        args[key] = val.in_time_zone
+
       # Allow only these types of values.  We could in theory allow nils,
       # Bignums, Arrays, Hashes and Structs, but we have no need of these.
       # Nils, in particular, are problematic in my opinion, since there is no
-      # way to distinguish nil from "" when values are passed as strings. 
+      # way to distinguish nil from "" when values are passed as strings.
       elsif !val.is_a?(TrueClass)  &&
             !val.is_a?(FalseClass) &&
             !val.is_a?(Fixnum) &&
             !val.is_a?(Float)  &&
             !val.is_a?(String) &&
             !val.is_a?(Symbol) &&
-            !val.is_a?(Date)   &&
-            !val.is_a?(Time)
+            !val.is_a?(Date)
         raise "Invalid value for :#{key} = #{val.class}: #{val}"
       end
     end

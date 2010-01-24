@@ -15,20 +15,30 @@
 #  ** edit_draft                 Edit an existing draft (draft owner or admin only)
 #  ** publish_draft              Move draft data to a new version of the given naem (draft owner  or admin only)
 #  ** destroy_draft              Destroy draft (draft owner or admin only)
-
-################################################################################
-
-# TODO:
+#
+#  TODO:
 #   Add comments?
 #   Projects should be able to log stuff
 #   Are search_params needed for project pages?
-
-require 'set'
+#
+################################################################################
 
 class ProjectController < ApplicationController
+  require 'set'
+
   before_filter :login_required, :except => [
     :list_projects,
-    :show_project
+    :show_project,
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :admin_request,
+    :change_member_status,
+    :create_or_edit_draft,
+    :edit_draft,
+    :edit_project,
+    :show_draft,
+    :show_project,
   ]
 
   # Show list of latest projects.
@@ -155,7 +165,7 @@ class ProjectController < ApplicationController
   #   Outputs: @project
   def edit_project
     @project = Project.find(params[:id])
-    if !check_user_id(@project.user_id)
+    if !check_permission!(@project.user_id)
       redirect_to(:action => 'show_project', :id => @project.id)
     elsif request.method == :post
       @title = params[:project][:title].to_s
@@ -188,7 +198,7 @@ class ProjectController < ApplicationController
   # Outputs: none
   def destroy_project
     @project = Project.find(params[:id])
-    if !check_user_id(@project.user_id)
+    if !check_permission!(@project.user_id)
       redirect_to(:action => 'show_project')
     else
       title = @project.title
@@ -474,7 +484,7 @@ class ProjectController < ApplicationController
   #   Redirects to show_draft.
   def publish_draft
     draft = DraftName.find(params[:id])
-    if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
+    if check_permission!(draft.user_id) or draft.project.is_admin?(@user)
       begin
         draft.classification = Name.validate_classification(draft.name.rank, draft.classification)
         name = draft.name
@@ -517,7 +527,7 @@ class ProjectController < ApplicationController
   # Outputs: @project
   def destroy_draft
     draft = DraftName.find(params[:id])
-    if check_user_id(draft.user_id) or draft.project.is_admin?(@user)
+    if check_permission!(draft.user_id) or draft.project.is_admin?(@user)
       if draft.destroy
         # Transaction.delete_something?(TODO)
         flash_notice(:destroy_draft_success.t)

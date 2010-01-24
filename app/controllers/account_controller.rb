@@ -18,12 +18,12 @@
 #  Admin Tools:
 #   R turn_admin_on
 #   R turn_admin_off
-#   R delete
+#   R destroy_user
 #   R add_user_to_group
 #   R create_alert
 #
 #  Test Views:
-#     test_verify
+#     test_flash
 #
 #  Helpers:
 #    hide_params(obj, out, prefix)
@@ -32,45 +32,55 @@
 
 class AccountController < ApplicationController
   before_filter :login_required, :except => [
-    :signup,
-    :welcome,
-    :verify,
-    :reverify,
-    :send_verify,
+    :email_new_password,
     :login,
     :logout_user,
-    :email_new_password
+    :reverify,
+    :show_alert,
+    :send_verify,
+    :signup,
+    :test_flash,
+    :verify,
+    :welcome,
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :login,
+    :signup,
+    :prefs,
+    :profile,
+    :show_alert,
+    :create_alert,
   ]
 
   def login
-    case request.method
-      when :get
-        @login = ""
-        @remember = true
-      when :post
-        login = params['user_login']
-        password = params['user_password']
-        @user = User.authenticate(login, password)
-        @user = User.authenticate(login, password.strip) if !@user
-        @remember = params['user'] && params['user']['remember_me'] == "1"
-        if set_session_user(@user)
-          logger.warn("%s, %s, %s" % [@user.login, params['user_login'], params['user_password']])
-          flash_notice :login_success.t
-          @user.last_login = now = Time.now
-          @user.modified   = now
-          @user.save
-          Transaction.login_user(:id => @user)
-          if @remember
-            set_autologin_cookie(@user)
-          else
-            clear_autologin_cookie
-          end
-          flash[:params] = params
-          redirect_back_or_default(:action => "welcome")
+    if request.method != :post
+      @login = ""
+      @remember = true
+    else
+      login = params['user_login']
+      password = params['user_password']
+      @user = User.authenticate(login, password)
+      @user = User.authenticate(login, password.strip) if !@user
+      @remember = params['user'] && params['user']['remember_me'] == "1"
+      if set_session_user(@user)
+        logger.warn("%s, %s, %s" % [@user.login, params['user_login'], params['user_password']])
+        flash_notice :login_success.t
+        @user.last_login = now = Time.now
+        @user.modified   = now
+        @user.save
+        Transaction.login_user(:id => @user)
+        if @remember
+          set_autologin_cookie(@user)
         else
-          @login = params['user_login']
-          flash_error :login_failed.t
+          clear_autologin_cookie
         end
+        flash[:params] = params
+        redirect_back_or_default(:action => "welcome")
+      else
+        @login = params['user_login']
+        flash_error :login_failed.t
+      end
     end
     @hiddens = []
     if flash[:params]
@@ -344,7 +354,7 @@ class AccountController < ApplicationController
     end
   end
 
-  def delete
+  def destroy_user
     if is_in_admin_mode?
       id = params['id']
       if id.to_s != ''
@@ -448,7 +458,7 @@ class AccountController < ApplicationController
   alias_method :no_question_email,         :no_email_general_question
 
   def no_email(type)
-    if check_user_id(params[:id])
+    if check_permission!(params[:id])
       method  = "email_#{type}="
       prefix  = "no_email_#{type}"
       success = "#{prefix}_success".to_sym
@@ -489,20 +499,20 @@ class AccountController < ApplicationController
     if @user && @user.admin && !is_in_admin_mode?
       session[:admin] = true
     end
-    redirect_back_or_default(:action => "welcome")
+    redirect_back_or_default(:action => :welcome)
   end
 
   def turn_admin_off
     session[:admin] = nil
-    redirect_back_or_default(:action => "welcome")
+    redirect_back_or_default(:action => :welcome)
   end
 
   def show_alert
     if !@user
-      redirect_back_or_default(:action => "welcome")
+      redirect_back_or_default(:action => :welcome)
     elsif !@user.alert || !@user.alert_type
       flash_warning :user_alert_missing.t
-      redirect_back_or_default(:action => "welcome")
+      redirect_back_or_default(:action => :welcome)
     elsif request.method == :get
       @back = session['return-to']
       # render alert
@@ -514,7 +524,6 @@ class AccountController < ApplicationController
         @user.alert_next_showing = Time.now + 1.day
         @user.save
       end
-      session[:showing_alert] = nil
       if params[:back].to_s != ''
         redirect_to params[:back]
       else
@@ -590,6 +599,22 @@ class AccountController < ApplicationController
     end
     if redirect
       redirect_back_or_default(:controller => 'observer', :action => 'index')
+    end
+  end
+
+  # This is used to test the flash error mechanism in the unit tests.
+  def test_flash
+    notice   = params[:notice]
+    warning  = params[:warning]
+    error    = params[:error]
+    redirect = params[:redirect]
+    flash_notice(notice)   if notice
+    flash_warning(warning) if warning
+    flash_error(error)     if error
+    if redirect
+      redirect_to(redirect)
+    else
+      render(:text => '', :layout => true)
     end
   end
 end

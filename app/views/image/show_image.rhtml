@@ -90,7 +90,7 @@
       </p>
 
       <p>
-        <%= :image_show_when.t %>: <span class="Data"><%= @image.when %></span>
+        <%= :image_show_when.t %>: <span class="Data"><%= @image.when.web_date %></span>
       </p>
 
       <p>
@@ -122,9 +122,9 @@
 
 <p>
   <span class="Date">
-    <%= :image_show_created.t %>: <%= @image.created %><br/>
-    <%= :image_show_modified.t %>: <%= @image.modified %><br/>
-    <%= :app_viewed.t(:date => @image.last_view,
+    <%= :image_show_created.t %>: <%= @image.created.web_time %><br/>
+    <%= :image_show_modified.t %>: <%= @image.modified.web_time %><br/>
+    <%= :app_viewed.t(:date => @image.last_view.web_time,
                       :times => @image.num_views == 1 ? :app_one_time.l : :app_many_times.l(:num => @image.num_views)) %><br/>
   </span>
 </p>

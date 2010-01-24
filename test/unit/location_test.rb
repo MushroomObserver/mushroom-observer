@@ -1,14 +1,9 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class LocationTest < Test::Unit::TestCase
   fixtures :locations
   fixtures :past_locations
   fixtures :users
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   # --------------------------------------
   #  Test email notification heuristics.

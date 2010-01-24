@@ -6,7 +6,7 @@
 #
 #  *NOTE*: This file is version-controlled, so any changes you make here will
 #  propogate to all the other servers around the world.  If you need to
-#  override any of these values locally, please do so here, instead: 
+#  override any of these values locally, please do so here, instead:
 #
 #    config/consts-site.rb
 #
@@ -28,6 +28,18 @@ SERVER_CODE = 'XX'                                       if !defined? SERVER_COD
 
 # Default locale when nothing sets it explicitly.
 DEFAULT_LOCALE = 'en-US'                                 if !defined? DEFAULT_LOCALE
+
+# Date/time formats for website UI.
+WEB_DATE_FORMAT = '%Y-%m-%d'                             if !defined? WEB_DATE_FORMAT
+WEB_TIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z (%z)'            if !defined? WEB_TIME_FORMAT
+
+# Date/time formats for API XML responses.
+API_DATE_FORMAT = '%Y-%m-%d'                             if !defined? API_DATE_FORMAT
+API_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'                    if !defined? API_TIME_FORMAT
+
+# Date/time formats for emails.
+EMAIL_DATE_FORMAT = '%Y-%m-%d'                           if !defined? EMAIL_DATE_FORMAT
+EMAIL_TIME_FORMAT = '%Y-%m-%d %H:%M:%S %Z (%z)'          if !defined? EMAIL_TIME_FORMAT
 
 # Queued email only gets delivered if you have run the rake task email:send.
 # script/send_email is a cron script for running email:send.  (Delay is in

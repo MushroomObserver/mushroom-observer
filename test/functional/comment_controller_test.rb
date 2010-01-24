@@ -1,39 +1,30 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'comment_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class CommentControllerTest < Test::Unit::TestCase
+class CommentControllerTest < ControllerTestCase
   fixtures :comments
   fixtures :locations
   fixtures :names
   fixtures :observations
   fixtures :users
 
-  def setup
-    @controller = CommentController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
-
-################################################################################
-
   def test_list_comments
     get_with_dump(:list_comments)
-    assert_response(:list_comments)
+    assert_response('list_comments')
   end
 
   def test_show_comment
     get_with_dump(:show_comment, :id => 1)
-    assert_response(:show_comment)
+    assert_response('show_comment')
   end
 
   def test_show_comments_for_user
     get_with_dump(:show_comments_for_user, :id => 1)
-    assert_response(:list_comments)
+    assert_response('list_comments')
   end
 
   def test_show_comments_by_user
     get_with_dump(:show_comments_by_user, :id => @rolf.id)
-    assert_response(:list_comments)
+    assert_response('list_comments')
   end
 
   def test_add_comment

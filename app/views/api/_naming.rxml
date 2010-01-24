@@ -21,8 +21,8 @@ xml.naming(
   end
 
   if detail
-    xml.created  xml_datetime(object.created)
-    xml.modified xml_datetime(object.modified)
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
 
     render_xml_partial(xml, :user, :locals => {
       :object => object.user,

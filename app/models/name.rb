@@ -170,6 +170,7 @@
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
+#  synonym_ids:              List of all synonyms, including this Name, just ids.
 #  sort_synonyms::           List of approved then deprecated synonyms.
 #  approved_synonyms::       List of approved synonyms.
 #  clear_synonym::           Remove this Name from its Synonym.
@@ -273,8 +274,9 @@ class Name < ActiveRecord::MO
     'last_view'
   )
 
-  after_save :check_add_author
-  after_save :notify_authors
+  before_save :update_user_if_save_version
+  after_save  :check_add_author
+  after_save  :notify_authors
 
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
@@ -751,6 +753,19 @@ class Name < ActiveRecord::MO
   # Returns an Array of all Synonym Name's, including itself and misspellings.
   def synonyms
     synonym ? synonym.names : [self]
+  end
+
+  # Returns an Array of ids of all the synyonms of this name, including itself
+  # and any misspellings.  It does so with a single efficient query, bypassing
+  # all of ActiveRecord's overhead.
+  def synonym_ids
+    if synonym_id
+      Name.connection.select_values %(
+        SELECT id FROM names WHERE synonym_id = #{synonym_id}
+      )
+    else
+      [id]
+    end
   end
 
   # Returns an Array of all _approved_ Synonym Name's, potentially including
@@ -1657,10 +1672,10 @@ class Name < ActiveRecord::MO
     self.last_review   = Time.now
 
     # Save unless there are substantive changes pending.
-    if !self.altered?
-      self.save
-      if self.errors.length > 0
-        raise "update_review_status failed: [#{self.dump_errors}]"
+    if !save_version?
+      save_without_updating_modified
+      if errors.length > 0
+        raise "update_review_status failed: [#{dump_errors}]"
       end
     end
   end

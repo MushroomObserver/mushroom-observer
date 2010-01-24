@@ -1,19 +1,10 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'interest_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class InterestControllerTest < Test::Unit::TestCase
+class InterestControllerTest < ControllerTestCase
   fixtures :interests
   fixtures :observations
   fixtures :names
   fixtures :users
-
-  def setup
-    @controller = InterestController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
-
-################################################################################
 
   # Test list feature from left-hand column.
   def test_list_interests
@@ -21,7 +12,7 @@ class InterestControllerTest < Test::Unit::TestCase
     Interest.create(:object => @minimal_unknown, :user => @rolf, :state => true)
     Interest.create(:object => @agaricus_campestris, :user => @rolf, :state => true)
     get_with_dump(:list_interests)
-    assert_response(:list_interests)
+    assert_response('list_interests')
   end
 
   # Test callback.
@@ -29,26 +20,22 @@ class InterestControllerTest < Test::Unit::TestCase
     # Fail: Try to change another user's interest.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Observation', :id => 1, :user => @mary.id)
-    assert_equal(2, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(2)
 
     # Fail: Try to change interest in non-existing object.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Observation', :id => 100, :state => 1)
-    assert_equal(2, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(2)
 
     # Fail: Try to change interest in non-existing object.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Bogus', :id => 1, :state => 1)
-    assert_equal(2, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(2)
 
     # Succeed: Turn interest on in @minimal_unknown.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Observation', :id => @minimal_unknown.id, :state => 1)
-    assert_equal(nil, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(0)
     
     # Make sure rolf now has one Interest: interested in @minimal_unknown.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
@@ -59,8 +46,7 @@ class InterestControllerTest < Test::Unit::TestCase
     # Succeed: Turn same interest off.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Observation', :id => @minimal_unknown.id, :state => -1)
-    assert_equal(nil, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(0)
 
     # Make sure rolf now has one Interest: NOT interested in @minimal_unknown.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
@@ -71,8 +57,7 @@ class InterestControllerTest < Test::Unit::TestCase
     # Succeed: Turn another interest off from no interest.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Name', :id => @peltigera.id, :state => -1)
-    assert_equal(nil, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(0)
 
     # Make sure rolf now has two Interests.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
@@ -85,15 +70,13 @@ class InterestControllerTest < Test::Unit::TestCase
     # Succeed: Delete interest in existing object that rolf hasn't expressed interest in yet.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Observation', :id => @detailed_unknown.id, :state => 0)
-    assert_equal(nil, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(0)
     assert_equal(2, Interest.find_all_by_user_id(@rolf.id).length)
 
     # Succeed: Delete first interest now.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Observation', :id => @minimal_unknown.id, :state => 0)
-    assert_equal(nil, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(0)
 
     # Make sure rolf now has one Interest: NOT interested in @peltigera.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
@@ -104,8 +87,7 @@ class InterestControllerTest < Test::Unit::TestCase
     # Succeed: Delete last interest.
     @request.session[:user_id] = @rolf.id
     get(:set_interest, :type => 'Name', :id => @peltigera.id, :state => 0)
-    assert_equal(nil, flash[:notice_level])
-    flash[:notice_level] = nil
+    assert_flash(0)
     assert_equal(0, Interest.find_all_by_user_id(@rolf.id).length)
   end
 end

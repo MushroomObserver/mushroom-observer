@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class SiteDataTest < Test::Unit::TestCase
   fixtures :add_image_test_logs
@@ -19,11 +19,6 @@ class SiteDataTest < Test::Unit::TestCase
   fixtures :synonyms
   fixtures :users
   fixtures :votes
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_create
     obj = SiteData.new

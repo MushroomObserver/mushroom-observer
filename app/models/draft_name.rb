@@ -34,6 +34,8 @@ class DraftName < ActiveRecord::MO
     'last_review'
   )
 
+  before_save :update_user_if_save_version
+
   def self.create_from_name(project_id, name_id)
     result = DraftName.new()
     result.project_id = project_id

@@ -19,7 +19,7 @@
           <%= link_to(sprintf('<span class="ListWhat">%s</span>', project.title.t),
                       :action => 'show_project', :id => project.id) %>:
           <br/>
-          <span class="ListWhen"><%= project.created %></span>:
+          <span class="ListWhen"><%= project.created.web_time %></span>:
           <span class="ListWho"><%= user_link(project.user) %></span><br/>
         </td>
       </tr>

@@ -1,16 +1,12 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'name_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class NameControllerTest < Test::Unit::TestCase
+class NameControllerTest < ControllerTestCase
   fixtures :names
   fixtures :namings
   fixtures :synonyms
   fixtures :users
 
   def setup
-    @controller = NameController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
     @reviewers  = UserGroup.create(:name => 'reviewers')
     @rolf.user_groups << @reviewers
     @reviewers.reload
@@ -28,13 +24,13 @@ class NameControllerTest < Test::Unit::TestCase
 
   def test_name_index
     get_with_dump(:name_index)
-    assert_response(:name_index)
+    assert_response('name_index')
   end
 
   def test_observation_index
     local_fixtures :observations
     get_with_dump(:observation_index)
-    assert_response(:name_index)
+    assert_response('name_index')
   end
 
   def test_authored_names
@@ -49,13 +45,13 @@ class NameControllerTest < Test::Unit::TestCase
     local_fixtures :authors_names
     local_fixtures :editors_names
     get_with_dump(:show_name, :id => 2)
-    assert_response(:show_name)
+    assert_response('show_name')
   end
 
   def test_show_past_name
     local_fixtures :past_names
     get_with_dump(:show_past_name, :id => 2)
-    assert_response(:show_past_name)
+    assert_response('show_past_name')
   end
 
   def test_names_by_author
@@ -73,7 +69,7 @@ class NameControllerTest < Test::Unit::TestCase
   def test_name_search
     @request.session[:pattern] = "56"
     get_with_dump(:name_search)
-    assert_response(:name_index)
+    assert_response('name_index')
     assert_equal(:name_index_matching.t(:pattern => '56'),
                  @controller.instance_variable_get('@title'))
   end
@@ -89,7 +85,7 @@ class NameControllerTest < Test::Unit::TestCase
       },
       :commit => "Search"
     )
-    assert_response(:name_index)
+    assert_response('name_index')
   end
 
   def test_edit_name
@@ -137,7 +133,7 @@ class NameControllerTest < Test::Unit::TestCase
 
     # Make sure it lets reviewers get to page.
     requires_login(:review_authors, :id => 1)
-    assert_response(:review_authors)
+    assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
     @reviewers.users.delete(@rolf)
@@ -153,17 +149,17 @@ class NameControllerTest < Test::Unit::TestCase
 
     # Rolf should be able to do it again now.
     get(:review_authors, :id => 1)
-    assert_response(:review_authors)
+    assert_response('review_authors')
 
     # Rolf giveth with one hand...
     post(:review_authors, :id => 1, :add => @mary.id)
-    assert_response(:review_authors)
+    assert_response('review_authors')
     assert_equal([@mary.login, @rolf.login],
                  @fungi.reload.authors.map(&:login).sort)
 
     # ...and taketh with the other.
     post(:review_authors, :id => 1, :remove => @mary.id)
-    assert_response(:review_authors)
+    assert_response('review_authors')
     assert_equal([@rolf.login], @fungi.reload.authors.map(&:login).sort)
   end
 
@@ -176,7 +172,7 @@ class NameControllerTest < Test::Unit::TestCase
     local_fixtures :observations
     local_fixtures :locations
     get_with_dump(:map, :id => @agaricus_campestris.id)
-    assert_response(:map)
+    assert_response('map')
   end
 
   # test_map_no_loc - name with Observations that don't have Locations
@@ -184,7 +180,7 @@ class NameControllerTest < Test::Unit::TestCase
     local_fixtures :observations
     local_fixtures :locations
     get_with_dump(:map, :id => @coprinus_comatus.id)
-    assert_response(:map)
+    assert_response('map')
   end
 
   # test_map_no_obs - name with no Observations
@@ -192,7 +188,7 @@ class NameControllerTest < Test::Unit::TestCase
     local_fixtures :observations
     local_fixtures :locations
     get_with_dump(:map, :id => @conocybe_filaris.id)
-    assert_response(:map)
+    assert_response('map')
   end
 
   # ----------------------------
@@ -283,7 +279,7 @@ class NameControllerTest < Test::Unit::TestCase
 
     login('rolf')
     post(:create_name, params)
-    assert_response(:create_name)
+    assert_response('create_name')
 
     # Should fail and no name should get created
     assert_nil(Name.find_by_text_name(text_name))
@@ -304,7 +300,7 @@ class NameControllerTest < Test::Unit::TestCase
 
     login('rolf')
     post(:create_name, params)
-    assert_response(:create_name)
+    assert_response('create_name')
 
     # Should fail and no name should get created
     assert_nil(Name.find_by_text_name(text_name))
@@ -811,7 +807,7 @@ class NameControllerTest < Test::Unit::TestCase
     params[:name].merge!(all_notes)
     login('rolf')
     post(:edit_name, params)
-    assert_response(:edit_name)
+    assert_response('edit_name')
     assert(misspelt_name.reload)
     assert(correct_name.reload)
     assert_equal(0, correct_name.version)
@@ -843,7 +839,7 @@ class NameControllerTest < Test::Unit::TestCase
     params[:name].merge!(all_notes)
     login('rolf')
     post(:edit_name, params)
-    assert_response(:edit_name)
+    assert_response('edit_name')
     assert(misspelt_name.reload)
     assert(correct_name.reload)
   end
@@ -976,7 +972,7 @@ class NameControllerTest < Test::Unit::TestCase
       :list => { :members => "#{new_name_str} = #{new_synonym_str}"},
     }
     post_requires_login(:bulk_name_edit, params)
-    assert_response(:bulk_name_edit)
+    assert_response('bulk_name_edit')
     assert_nil(Name.find_by_text_name(new_name_str))
     assert_nil(Name.find_by_text_name(new_synonym_str))
     assert_equal(10, @rolf.reload.contribution)
@@ -1206,7 +1202,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:change_synonyms)
+    assert_response('change_synonyms')
 
     assert_nil(selected_name.reload.synonym)
     assert(!selected_name.deprecated)
@@ -1444,7 +1440,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:change_synonyms)
+    assert_response('change_synonyms')
 
     assert(!add_name.reload.deprecated)
     assert_equal(add_version, add_name.version)
@@ -1564,7 +1560,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:change_synonyms, params)
-    assert_response(:change_synonyms)
+    assert_response('change_synonyms')
 
     assert(!add_name.reload.deprecated)
     assert_not_nil(add_synonym = add_name.synonym)
@@ -1861,7 +1857,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:deprecate_name, params)
-    assert_response(:deprecate_name)
+    assert_response('deprecate_name')
     # Fail since name can't be disambiguated
 
     assert(!old_name.reload.deprecated)
@@ -1924,7 +1920,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:deprecate_name, params)
-    assert_response(:deprecate_name)
+    assert_response('deprecate_name')
     # Fail since new name is not approved
 
     assert(!old_name.reload.deprecated)
@@ -2031,7 +2027,7 @@ class NameControllerTest < Test::Unit::TestCase
     name = @coprinus_comatus
     params = { :id => name.id.to_s }
     requires_login(:email_tracking, params)
-    assert_response(:email_tracking)
+    assert_response('email_tracking')
     assert_form_action(:action => 'email_tracking')
   end
 
@@ -2187,7 +2183,7 @@ class NameControllerTest < Test::Unit::TestCase
     }
     requires_login(:send_author_request, params)
     assert_response(:action => "show_name", :id => @coprinus_comatus.id)
-    assert_equal(:request_success.t, flash[:notice])
+    assert_flash(:request_success.t)
   end
 
   def test_author_request

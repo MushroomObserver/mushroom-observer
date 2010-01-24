@@ -12,7 +12,7 @@ xml.user(
   xml.login      object.login
 
   if detail
-    xml.created      xml_datetime(object.created)
+    xml.created      object.created.api_time
     xml.notes        object.notes.to_s.tpl_nodiv
     xml.contribution object.contribution
 

@@ -14,7 +14,7 @@
   else
     fields += "*#{:email_field_new_name.l}:* --\n"
   end
-  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*#{:app_time.l}:* #{@time.email_time}\n"
   fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   handy_links = :email_handy_links

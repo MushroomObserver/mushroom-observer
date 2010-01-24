@@ -2,6 +2,8 @@
 minimal_unknown:
   id:        1
   sync_id:   1xx1
+  created:   2005-05-12 17:20:00
+  modified:  2005-05-12 17:21:00
   when:      2006-05-11
   user_id:   2
   location_id: 2

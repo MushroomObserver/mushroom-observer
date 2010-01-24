@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class QueuedEmailTest < Test::Unit::TestCase
   fixtures :users
@@ -10,11 +10,6 @@ class QueuedEmailTest < Test::Unit::TestCase
   fixtures :locations
   fixtures :past_locations
   fixtures :notifications
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_comment_email
     QueuedEmail::Comment.find_or_create_email(@rolf, @mary, @minimal_comment)

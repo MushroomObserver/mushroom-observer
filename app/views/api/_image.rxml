@@ -15,8 +15,8 @@ xml.image(
   xml.date xml_date(object.when)
 
   if detail
-    xml.created          xml_datetime(object.created)
-    xml.modified         xml_datetime(object.modified)
+    xml.created          object.created.api_time
+    xml.modified         object.modified.api_time
     xml.notes            object.notes.to_s.tpl_nodiv
     xml.copyright_holder object.copyright_holder
 

@@ -10,8 +10,8 @@ xml.vote(
   xml.value object.value
 
   if detail
-    xml.created  xml_datetime(object.created)
-    xml.modified xml_datetime(object.modified)
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
     xml.naming(:id => object.naming_id)
     xml.observation(:id => object.observation_id)
 

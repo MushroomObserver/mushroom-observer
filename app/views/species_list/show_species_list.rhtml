@@ -13,7 +13,7 @@
   end
 %>
 
-<p><%= :app_when.t %>: <span class="Data"><%= @species_list.when %></span></p>
+<p><%= :app_when.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
 <p><%= :app_where.t %>: <span class="Data"><%= sanitize(@species_list.where).t %></span></p>
 <p><%= :app_who.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
 <p><%= :app_notes.t %>:</p>
@@ -46,7 +46,7 @@
             </span><br/>
             <span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span>:
             <span class="ListWho"><%= user_link(observation.user) %></span>:
-            <span class="ListWhen"><%= observation.when %></span>
+            <span class="ListWhen"><%= observation.when.web_date %></span>
           </td>
         </tr>
       <% end %>

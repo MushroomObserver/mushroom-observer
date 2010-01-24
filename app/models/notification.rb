@@ -41,8 +41,8 @@ class Notification < ActiveRecord::MO
   # different set of arguments:
   #
   # [name]
-  #   +user+::      Owner of Observation.
-  #   +naming+::    Naming that triggered this email.
+  #   user::      Owner of Observation.
+  #   naming::    Naming that triggered this email.
   #
   def calc_note(args)
     if template = self.note_template

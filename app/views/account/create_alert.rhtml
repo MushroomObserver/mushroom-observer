@@ -4,9 +4,9 @@
 
   <% if @user2.alert_created %>
     <label for="user2_created"><%= :user_alert_created.t %>:</label>
-    <%= @user2.alert_created %><br/>
+    <%= @user2.alert_created.web_time %><br/>
     <label for="user2_next_showing"><%= :user_alert_next_showing.t %>:</label>
-    <%= @user2.alert_next_showing %><br/>
+    <%= @user2.alert_next_showing.web_time %><br/>
     <label for="user2_user"><%= :user_alert_user.t %>:</label>
     <%= @user2.alert_user.login %><br/><br/>
   <% end %>

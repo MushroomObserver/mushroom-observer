@@ -1,8 +1,3 @@
-require 'find'
-require 'ftools'
-require 'set'
-
-################################################################################
 #
 #  Views: ("*" - login required; "R" - root only)
 #     index
@@ -99,57 +94,72 @@ require 'set'
 ################################################################################
 
 class ObserverController < ApplicationController
-  before_filter :login_required, :except => (CSS +
-    [
-      :advanced_obj_search,
-      :advanced_search,
-      :advanced_search_results,
-      :ask_webmaster_question,
-      :color_themes,
-      :how_to_help,
-      :how_to_use,
-      :index,
-      :intro,
-      :list_observations,
-      :list_rss_logs,
-      :location_search,
-      :lookup_comment,
-      :lookup_image,
-      :lookup_location,
-      :lookup_name,
-      :lookup_observation,
-      :lookup_project,
-      :lookup_species_list,
-      :lookup_user,
-      :news,
-      :next_observation,
-      :no_ajax,
-      :no_browser,
-      :no_javascript,
-      :no_session,
-      :observation_search,
-      :observations_by_name,
-      :pattern_search,
-      :prev_observation,
-      :recalc,
-      :rss,
-      :show_location_observations,
-      :show_observation,
-      :show_rss_log,
-      :show_site_stats,
-      :show_user,
-      :show_user_observations,
-      :show_votes,
-      :textile,
-      :textile_sandbox,
-      :throw_error,
-      :translators_note,
-      :turn_javascript_off,
-      :turn_javascript_on,
-      :users_by_contribution,
-      :w3c_tests,
-    ]
-  )
+  require 'find'
+  require 'ftools'
+  require 'set'
+
+  before_filter :login_required, :except => CSS + [
+    :advanced_obj_search,
+    :advanced_search,
+    :advanced_search_results,
+    :ask_webmaster_question,
+    :color_themes,
+    :how_to_help,
+    :how_to_use,
+    :index,
+    :intro,
+    :list_observations,
+    :list_rss_logs,
+    :location_search,
+    :lookup_comment,
+    :lookup_image,
+    :lookup_location,
+    :lookup_name,
+    :lookup_observation,
+    :lookup_project,
+    :lookup_species_list,
+    :lookup_user,
+    :news,
+    :next_observation,
+    :no_ajax,
+    :no_browser,
+    :no_javascript,
+    :no_session,
+    :observation_search,
+    :observations_by_name,
+    :pattern_search,
+    :prev_observation,
+    :rss,
+    :show_location_observations,
+    :show_observation,
+    :show_rss_log,
+    :show_site_stats,
+    :show_user,
+    :show_user_observations,
+    :show_votes,
+    :textile,
+    :textile_sandbox,
+    :throw_error,
+    :throw_mobile_error,
+    :translators_note,
+    :turn_javascript_nil,
+    :turn_javascript_off,
+    :turn_javascript_on,
+    :users_by_contribution,
+    :w3c_tests,
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :create_naming,
+    :create_observation,
+    :edit_naming,
+    :edit_observation,
+    :next_observation,
+    :prev_observation,
+    :show_observation,
+    :show_user,
+    :show_votes,
+  ]
 
   # Default page.  Just displays latest happenings.
   # View: list_rss_logs
@@ -172,7 +182,7 @@ class ObserverController < ApplicationController
 
   # Another test method.  Repurpose as needed.
   def throw_error
-    raise "Something bad happened"
+    raise "Something bad happened."
   end
 
   # Used for initial investigation of specialized mobile support
@@ -184,11 +194,43 @@ class ObserverController < ApplicationController
     end
   end
 
-  # Linked from the left hand column.
+  # Intro to site.
+  def intro
+  end
+
+  # Recent features.
+  def news
+  end
+
+  # Help page.
   def how_to_use
     @min_pos_vote = Vote.agreement(Vote.min_pos_vote).l
     @min_neg_vote = Vote.agreement(Vote.min_neg_vote).l
     @maximum_vote = Vote.agreement(Vote.maximum_vote).l
+  end
+
+  # Show a few ways in which users can help.
+  def how_to_help
+  end
+
+  # Show info on color themes.
+  def color_themes
+  end
+
+  # Explanation of why not having AJAX is bad.
+  def no_ajax
+  end
+
+  # Explanation of why it's important that we recognize the user's browser.
+  def no_browser
+  end
+
+  # Explanation of why having javascript disabled is bad.
+  def no_javascript
+  end
+
+  # Explanation of why having cookies disabled is bad.
+  def no_session
   end
 
   # Simple form letting us test our implementation of Textile.
@@ -707,7 +749,7 @@ class ObserverController < ApplicationController
         attach_good_images(@observation, @good_images)
 
         # Check for notifications.
-        if has_unshown_notifications(@user, :naming)
+        if has_unshown_notifications?(@user, :naming)
           redirect_to(:action => 'show_notifications', :id => @observation.id)
         else
           redirect_to(:action => 'show_observation', :id => @observation.id)
@@ -746,7 +788,7 @@ class ObserverController < ApplicationController
     @new_image = init_image(@observation.when)
 
     # Make sure user owns this observation!
-    if !check_user_id(@observation.user_id)
+    if !check_permission!(@observation.user_id)
       redirect_to(:action => 'show_observation', :id => @observation.id)
 
     # Initialize form.
@@ -791,7 +833,7 @@ class ObserverController < ApplicationController
   # Redirects to list_observations.
   def destroy_observation
     @observation = Observation.find(params[:id])
-    if !check_user_id(@observation.user_id)
+    if !check_permission!(@observation.user_id)
       flash_error(:destroy_observation_denied.t)
       redirect_to(:action => 'show_observation', :id => @observation.id)
     elsif !@observation.destroy
@@ -868,7 +910,7 @@ class ObserverController < ApplicationController
         @observation.log(:log_naming_created, :name => @naming.format_name)
 
         # Check for notifications.
-        if has_unshown_notifications(@user, :naming)
+        if has_unshown_notifications?(@user, :naming)
           redirect_to(:action => 'show_notifications', :id => @observation.id)
         else
           redirect_to(:action => 'show_observation', :id => @observation.id, :params => calc_search_params)
@@ -907,7 +949,7 @@ class ObserverController < ApplicationController
     @confidence_menu = translate_menu(Vote.confidence_menu)
 
     # Make sure user owns this naming!
-    if !check_user_id(@naming.user_id)
+    if !check_permission!(@naming.user_id)
       redirect_to(:action => 'show_observation', :id => @observation.id, :params => calc_search_params)
 
     # Initialize form.
@@ -1007,7 +1049,7 @@ class ObserverController < ApplicationController
   def destroy_naming
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
-    if !check_user_id(@naming.user_id)
+    if !check_permission!(@naming.user_id)
       flash_error(:destroy_naming_denied.t)
     elsif !@naming.deletable?
       flash_warning(:destroy_naming_someone_else.t)
@@ -1577,8 +1619,8 @@ class ObserverController < ApplicationController
       Transaction.create(args)
       flash_notice(:observer_controller_naming_created.t)
     else
-      flash_warning(:observer_controller_no_save_naming.t)
-      flash_object_warnings(naming)
+      flash_error(:observer_controller_no_save_naming.t)
+      flash_object_errors(naming)
       success = false
     end
     return success

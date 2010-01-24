@@ -1,16 +1,8 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'location_controller'
-require 'site_data'
+require File.dirname(__FILE__) + '/../boot'
 
-class LocationControllerTest < Test::Unit::TestCase
+class LocationControllerTest < ControllerTestCase
   fixtures :locations
   fixtures :users
-
-  def setup
-    @controller = LocationController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
 
   # Init params based on existing location.
   def update_params_from_loc(loc)
@@ -51,7 +43,7 @@ class LocationControllerTest < Test::Unit::TestCase
     loc_count = Location.all.length
     past_loc_count = Location::PastLocation.all.length
     post_requires_login(page, params)
-    assert_response(page)
+    assert_response(page.to_s)
     assert_equal(loc_count, Location.all.length)
     assert_equal(past_loc_count, Location::PastLocation.all.length)
   end
@@ -80,22 +72,22 @@ class LocationControllerTest < Test::Unit::TestCase
 
   def test_show_location
     get_with_dump(:show_location, :id => 1)
-    assert_response(:show_location)
+    assert_response('show_location')
   end
 
   def test_show_past_location
     get_with_dump(:show_past_location, :id => 1)
-    assert_response(:show_past_location)
+    assert_response('show_past_location')
   end
 
   def test_list_place_names
     get_with_dump(:list_place_names)
-    assert_response(:list_place_names)
+    assert_response('list_place_names')
   end
 
   def test_author_request
     requires_login(:author_request, :id => 1)
-    assert_response(:author_request)
+    assert_response('author_request')
   end
 
   def test_review_authors
@@ -107,7 +99,7 @@ class LocationControllerTest < Test::Unit::TestCase
     assert(!@mary.in_group('reviewers'))
     assert(@rolf.in_group('reviewers'))
     requires_user(:review_authors, :show_location, :id => 1)
-    assert_response(:review_authors)
+    assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
     group.users.delete(@rolf)
@@ -126,17 +118,17 @@ class LocationControllerTest < Test::Unit::TestCase
 
     # Rolf should be able to do it now.
     get(:review_authors, :id => 1)
-    assert_response(:review_authors)
+    assert_response('review_authors')
 
     # Rolf giveth with one hand...
     post(:review_authors, :id => 1, :add => @mary.id)
-    assert_response(:review_authors)
+    assert_response('review_authors')
     @albion.reload
     assert_equal([@mary.login, @rolf.login], @albion.authors.map(&:login).sort)
 
     # ...and taketh with the other.
     post(:review_authors, :id => 1, :remove => @mary.id)
-    assert_response(:review_authors)
+    assert_response('review_authors')
     @albion.reload
     assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
   end
@@ -332,15 +324,15 @@ class LocationControllerTest < Test::Unit::TestCase
   def test_map_locations
     # test_map_locations - map everything
     get_with_dump(:map_locations)
-    assert_response(:map_locations)
+    assert_response('map_locations')
 
     # test_map_locations_empty - map nothing
     get_with_dump(:map_locations, :pattern => 'Never Never Land')
-    assert_response(:map_locations)
+    assert_response('map_locations')
 
     # test_map_locations_some - map something
     get_with_dump(:map_locations, :pattern => 'California')
-    assert_response(:map_locations)
+    assert_response('map_locations')
   end
 
   # ----------------------------
@@ -351,7 +343,7 @@ class LocationControllerTest < Test::Unit::TestCase
     # No interest in this location yet.
     @request.session[:user_id] = @rolf.id
     get(:show_location, :id => @albion.id)
-    assert_response(:show_location)
+    assert_response('show_location')
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => @albion.id, :state => 1
@@ -364,7 +356,7 @@ class LocationControllerTest < Test::Unit::TestCase
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.new(:object => @albion, :user => @rolf, :state => true).save
     get(:show_location, :id => @albion.id)
-    assert_response(:show_location)
+    assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => @albion.id, :state => 0
@@ -378,7 +370,7 @@ class LocationControllerTest < Test::Unit::TestCase
     Interest.find_all_by_user_id(@rolf.id).last.destroy
     Interest.new(:object => @albion, :user => @rolf, :state => false).save
     get(:show_location, :id => @albion.id)
-    assert_response(:show_location)
+    assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
       :type => 'Location', :id => @albion.id, :state => 0

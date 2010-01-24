@@ -9,6 +9,9 @@ class InterestController < ApplicationController
   before_filter :login_required, :except => [
   ]
 
+  before_filter :disable_link_prefetching, :except => [
+  ]
+
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
   # Inputs: params[:page]

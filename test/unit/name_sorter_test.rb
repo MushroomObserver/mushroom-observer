@@ -1,12 +1,7 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class NameSorterTest < Test::Unit::TestCase
   fixtures :names
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_add_name_default
     name_sorter = NameSorter.new

@@ -45,9 +45,21 @@ class NameController < ApplicationController
     :name_search,
     :names_by_author,
     :names_by_editor,
+    :needed_descriptions,
     :observation_index,
     :show_name,
-    :show_past_name
+    :show_past_name,
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :approve_name,
+    :bulk_name_edit,
+    :change_synonyms,
+    :create_name,
+    :deprecate_name,
+    :edit_name,
+    :show_name,
+    :show_past_name,
   ]
 
   # Process AJAX request for autocompletion of mushroom name.  It reads the
@@ -76,8 +88,7 @@ class NameController < ApplicationController
   def name_index_helper
     @letter = params[:letter]
     @page = params[:page]
-    @letters, @name_subset = paginate_letters(@name_data, 100) \
-      {|d| d['display_name'].match(/([a-z])/i) ? $~[1] : nil}
+    @letters, @name_subset = paginate_letters(@name_data, 100) {|n| n['display_name']}
     @pages, @name_subset = paginate_array(@name_subset, @letter.to_s.empty? ? 100: 1e6)
   end
 
@@ -257,14 +268,6 @@ class NameController < ApplicationController
       flash_error(err)
       redirect_to(:controller => 'observer', :action => 'advanced_search')
     end
-  end
-
-  # AJAX request used for autocompletion of "what" field in deprecate_name.
-  # View: none
-  # Inputs: params[:proposed][:name]
-  # Outputs: none
-  def auto_complete_for_proposed_name
-    auto_complete_name(:proposed, :name)
   end
 
   # show_name.rhtml
@@ -897,26 +900,19 @@ class NameController < ApplicationController
   def map
     name_id = params[:id]
     @name = Name.find(name_id)
-    locs = name_locs(name_id)
-    @synonym_data = []
-    synonym = @name.synonym
-    if synonym
-      for n in synonym.names
-        if n != @name
-          syn_locs = name_locs(n.id)
-          for l in syn_locs
-            unless locs.member?(l)
-              locs.push(l)
-            end
-          end
-        end
-      end
-    end
-    @map = nil
-    @header = nil
-    if locs.length > 0
-      @map = make_map(locs)
-      @header = "#{GMap.header}\n#{finish_map(@map)}"
+    name_ids = @name.synonym_ids
+    name_ids = [0] if name_ids.empty?
+    location_ids = Name.connection.select_values %(
+      SELECT l.id FROM locations l, observations o
+      WHERE o.location_id = l.id
+        AND o.name_id IN (#{name_ids.map(&:to_s).join(',')})
+        AND o.is_collection_location IS TRUE
+        AND !(o.vote_cache < 0)
+    )
+    if location_ids.empty?
+      @locations = []
+    else
+      @locations = Location.all(:conditions => ['id IN (?)', location_ids])
     end
   end
 
@@ -1294,14 +1290,5 @@ class NameController < ApplicationController
     end
 
     return result
-  end
-
-  def name_locs(name_id)
-    Location.find(:all, {
-      :include => :observations,
-      :conditions => ["observations.name_id = ? and
-        observations.is_collection_location = true and
-        (observations.vote_cache >= 0 or observations.vote_cache is NULL)", name_id]
-    })
   end
 end

@@ -160,12 +160,14 @@
               <% end %>
             <% end %>
 
-            <% if flash[:notice] %>
-              <%= boxify(flash[:notice_level]) %>
-                <%= flash[:notice] %>
-              <%= end_boxify %>
-              <% flash_clear unless TESTING %>
-            <% end %>
+            <% 
+              if flash_notices?
+                boxify(flash_notice_level) do %>
+                  <%= flash_get_notices %>
+                <% end
+              end
+              flash_clear
+            %>
 
             <% no_session = !session_working?
             no_javascript = !javascript_enabled? && session[:js_override] != :off

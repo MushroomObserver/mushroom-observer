@@ -4,11 +4,17 @@
   new_tab_set do
     add_tab(:location_all.t, :action => 'list_place_names')
   end
+
+  if !@locations.empty?
+    gmap = make_map(@locations)
+    add_header(GMap.header)
+    add_header(finish_map(gmap))
+  end
 %>
 
 <center>
-  <%= if @map
-    @map.div(:width => 800, :height => 550)
+  <%= if gmap
+    gmap.div(:width => 800, :height => 550)
   else
     :map_locations_no_matches.t(:pattern => @pattern)
   end %>

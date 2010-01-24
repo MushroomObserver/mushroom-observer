@@ -7,7 +7,7 @@
 
   fields = ""
   fields += "*#{:observation.l}:* #{@note}\n" if !@observation
-  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
+  fields += "*#{:app_time.l}:* #{@time.email_time}\n"
   fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   changes = ""
@@ -15,7 +15,7 @@
     for field in @note.split(',')
       case field
         when 'date'
-          changes += "*#{:app_date.l} #{is_now}:* #{@observation.when.to_formatted_s(:db)}\n"
+          changes += "*#{:app_date.l} #{is_now}:* #{@observation.when.email_date}\n"
         when 'location'
           changes += "*#{:location.l} #{is_now}:* #{@observation.place_name}\n"
         when 'notes'

@@ -90,9 +90,10 @@ require File.join(File.dirname(__FILE__), 'consts')
 
 Rails::Initializer.run do |config|
 
-  # Add our class extensions (e.g., String and Symbol extensions) to the
-  # include path.
+  # Add our local classes and modules (e.g., Textile and LoginSystem) and class
+  # extensions (e.g., String and Symbol extensions) to the include path. 
   config.load_paths += %W(
+    #{RAILS_ROOT}/app/classes
     #{RAILS_ROOT}/app/extensions
   )
 
@@ -110,8 +111,9 @@ Rails::Initializer.run do |config|
   # create the caching directory and make it readable to the application) .
   # config.action_controller.fragment_cache_store = :file_store, "#{RAILS_ROOT}/cache"
 
-  # Make Active Record use UTC-base instead of local time.
-  config.active_record.default_timezone = :utc
+  # Make Active Record use UTC instead of local time.  This is critical if we
+  # want to sync up remote servers.
+  config.time_zone = ENV['TZ']
 
   # This instructs ActionView how to mark form fields which have an error.
   # I just change the CSS class to "has_error", which gives it a red border.

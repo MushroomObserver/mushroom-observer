@@ -148,6 +148,7 @@
 #  == Class methods
 #
 #  current::            Report the User that is currently logged in.
+#  current_id::         Report the User (id) that is currently logged in.
 #  all_alert_types::    List of accepted alert types.
 #  authenticate::       Verify login + password.
 #
@@ -273,9 +274,6 @@ class User < ActiveRecord::MO
   # go through +change_password+.)
   before_create :crypt_password
 
-  # Don't update +modified+ when we update +last_login+ or +last_active+.
-  unimportant_fields :last_login, :last_active
-
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings. 
   serialize :bonuses
@@ -296,6 +294,15 @@ class User < ActiveRecord::MO
   def self.current
     @@user = nil if !defined?(@@user)
     return @@user
+  end
+
+  # Report which User is currently logged in. Returns id, or +nil+ if none.
+  #
+  #   user_id = User.current_id
+  #
+  def self.current_id
+    @@user = nil if !defined?(@@user)
+    return @@user && @@user.id
   end
 
   # Tell User model which User is currently logged in (if any).  This is used

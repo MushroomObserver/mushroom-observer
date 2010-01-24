@@ -3,5 +3,6 @@ MY_TODO
 doc
 log
 tmp
+local
 *.log
 ?

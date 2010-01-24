@@ -461,10 +461,10 @@ class API
 #  all the information necessary to create a SQL query.  In particular, they
 #  must each return four things:
 #
-#  +conditions+::   List of SQL fragments that form the "WHERE" clause.
-#  +tables+::       List of tables used in +conditions+.
-#  +joins+::        List of tables to :include when instantiating results (if eager-loading).
-#  +max_page_len+:: Maximum number of objects per page user is allowed to request.
+#  conditions::   List of SQL fragments that form the "WHERE" clause.
+#  tables::       List of tables used in +conditions+.
+#  joins::        List of tables to :include when instantiating results (if eager-loading).
+#  max_page_len:: Maximum number of objects per page user is allowed to request.
 #
 #  Parsing is all done using several helper methods.  Here are some:
 #

@@ -10,15 +10,19 @@
 #                       Add limit to a SQL query, then pass it to find_by_sql.
 #  count_by_sql_wrapping_select_query::
 #                       Wrap a normal SQL query in a count query, then pass it to count_by_sql.
-#  unimportant_fields:: Tell us which fields to ignore when deciding when to update +modified+ and +user+.
 #
 #  == Instance Methods
 #
+#  before_create::      Callback to fill in defaults for 'created' and 'user'.
 #  before_save::        Callback to update 'modified' when record changes.
 #  after_create::       Callback to update SiteData and sync_id.
 #  before_destroy::     Callback to update SiteData and save id.
 #  id_was::             Returns id from before destroy.
-#  important_changes?:: Like +changed?+ but it only checks "important" fields.
+#  update_view_stats::  Updates the +num_views+ and +last_view+ fields.
+#  update_user_before_save_version::
+#                       Callback to update 'user' when versioned record changes.
+#  save_without_updating_modified::
+#                       Allow certain updates to occur without updating 'modified'.
 #  ---
 #  dump_errors::        Returns errors in one big printable string.
 #  formatted_errors::   Returns errors as an array of printable strings.
@@ -96,22 +100,35 @@ module ActiveRecord
       count_by_sql("select count(*) from (#{sql}) as my_table")
     end
 
-    # Handy callback that updates 'modified' and 'user_id' whenever the record
-    # changes.  (It also fills in 'created' the first time through, just in
-    # case we forgot to do so in the controller.)
+    # Handy callback that fills in 'created' and 'user' for new records.
+    def before_create
+      self.created ||= Time.now        if respond_to?('created=')
+      self.user_id ||= User.current_id if respond_to?('user_id=')
+    end
+
+    # Handy callback that updates 'modified' whenever a record changes.
     def before_save
-      if new_record? || important_changes?
-        now = Time.now
-        if respond_to?('created=')
-          self.created ||= now
-        end
-        if respond_to?('modified=') && !modified_changed?
-          self.modified = now
-        end
-        if User.current && respond_to?('user=') && !user_id_changed?
-          self.user = User.current
-        end
+      if @without_updating_modified
+        @without_updating_modified = nil
+      else
+        self.modified = Time.now if respond_to?('modified=')
       end
+    end
+
+    # Allow certain updates to happen without updating 'modified'.
+    def save_without_updating_modified
+      @without_updating_modified = true
+      save
+    end
+
+    # Handy callback that updates 'user_id' whenever a versioned record
+    # changes non-trivially.
+    #
+    #   acts_as_versioned
+    #   before_save :update_user_if_save_version
+    #
+    def update_user_if_save_version
+      self.user = User.current if save_version?
     end
 
     # This is called every time an object is created.
@@ -145,52 +162,45 @@ module ActiveRecord
     # Return id from before destroy.
     def id_was; @id_was; end
 
-    # Dump out error messages for a given instance in a single string.  Useful
-    # for debugging:
-    #
-    #   puts user.dump_errors if TESTING
-    def dump_errors
-      self.formatted_errors.join("; ")
-    end
-
-    # List of columns that aren't important enough to cause the +modified+
-    # and +user+ fields to be updated.
-    UNIMPORTANT_FIELDS = [
-      :review_status,
-      :reviewer_id,
-      :last_review,
-      :quality,
-      :num_views,
-      :last_viewed,
-      :last_viewer_id,
-    ]
-
-    # This fancy accessor is class-inheritable.  You can set it in any subclass
-    # by saying: (the "self" is important!!)
-    #
-    #   self.extra_unimportant_fields = [...]
-    #
-    # This will override the default here without unintentionally changing the
-    # default for all other subclasses.  Very handy.
-    #
-    superclass_delegating_accessor :extra_unimportant_fields
-    self.extra_unimportant_fields = []
-
-    # "Macro" that lets subclasses add columns to the list of columns that
-    # shouldn't cause +modified+ and +user+ to be updated on change.  By
-    # default it ignores the view and review stats.
-    #
-    #   # This is included at the top of the User model:
-    #   unimportant_fields :last_login, :last_active
-    #
-    def self.unimportant_fields(*args)
-      self.extra_unimportant_fields = args
-    end
-
     # Have any "important" fields been changed?  Used to determine when to
     # update +modified+ and +user+ fields.
     def important_changes?
       !(changed - UNIMPORTANT_FIELDS - extra_unimportant_fields).empty?
+    end
+
+    # This is called whenever a user requests the show_object page for an
+    # object.  It updates the +num_views+ and +last_view+ fields.
+    #
+    #   def show_observation
+    #     @observation = Observation.find(params[:id])
+    #     @observation.update_view_stats
+    #   end
+    #
+    # *NOTE*: these do not cause the +modified+ or +user_id+ fields to be
+    # updated, because the before_save callback above ignores these (and
+    # several other) fields.
+    #
+    def update_view_stats
+      if respond_to?('num_views=') ||
+         respond_to?('last_view=')
+        self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
+        self.last_view = Time.now             if respond_to?('last_view=')
+        self.save_without_updating_modified
+        Transaction.create(
+          :method => :view,
+          :action => self.class.to_s.underscore,
+          :id     => self
+        )
+      end
+    end
+
+    # Dump out error messages for a given instance in a single string.  Useful
+    # for debugging:
+    #
+    #   puts user.dump_errors if TESTING
+    #
+    def dump_errors
+      self.formatted_errors.join("; ")
     end
 
     # This collects all the error messages for a given instance, and returns

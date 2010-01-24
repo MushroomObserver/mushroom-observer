@@ -1,6 +1,3 @@
-require 'rtf'
-
-################################################################################
 #
 #  Views: ("*" - login required)
 #     list_species_lists                     List of lists by date.
@@ -38,13 +35,22 @@ require 'rtf'
 ################################################################################
 
 class SpeciesListController < ApplicationController
+  require 'rtf'
+
   before_filter :login_required, :except => [
     :list_species_lists,
+    :make_report,
+    :name_lister,
     :show_species_list,
     :species_lists_by_title,
     :species_lists_by_user,
-    :make_report,
-    :name_lister
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :create_species_list,
+    :edit_species_list,
+    :manage_species_lists,
+    :show_species_list,
   ]
 
   # Display list of all species_lists, sorted by date.
@@ -54,9 +60,8 @@ class SpeciesListController < ApplicationController
   def list_species_lists
     store_location
     session_setup
-    @species_list_pages, @species_lists = paginate(:species_lists,
-                                                   :order => "`when` desc, id desc",
-                                                   :per_page => 10)
+    @species_list_pages, @species_lists =
+        paginate(:species_lists, :order => "`when` desc, id desc", :per_page => 10)
   end
 
   # Display list of user's species_lists, sorted by date.
@@ -277,7 +282,7 @@ class SpeciesListController < ApplicationController
   #   session[:checklist]
   def edit_species_list
     @species_list = SpeciesList.find(params[:id])
-    if !check_user_id(@species_list.user_id)
+    if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
     elsif request.method == :get
       @checklist_names  = {}
@@ -352,7 +357,7 @@ class SpeciesListController < ApplicationController
     # Okay, at this point we've apparently validated the new list of names.
     # Save the OTHER changes to the species list, then let this other method
     # (construct_observations) update the members.  This always succeeds, so
-    # we can redirect to show_species_list. 
+    # we can redirect to show_species_list.
     else
       if !@species_list.save
         flash_object_errors(@species_list)
@@ -376,10 +381,10 @@ class SpeciesListController < ApplicationController
             Transaction.put_species_list(args)
           end
         end
-   
+
         construct_observations(@species_list, params, type_str, @user, sorter)
 
-        if has_unshown_notifications(@user, :naming)
+        if has_unshown_notifications?(@user, :naming)
           redirect_to(:controller => 'observer', :action => 'show_notifications')
         else
           redirect_to(:action => 'show_species_list', :id => @species_list)
@@ -407,7 +412,7 @@ class SpeciesListController < ApplicationController
   # Post: goes to edit_species_list
   def upload_species_list
     @species_list = SpeciesList.find(params[:id])
-    if !check_user_id(@species_list.user_id)
+    if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
     elsif request.method == :get
       @observation_list = sort_species_list_observations(@species_list, @user)
@@ -432,7 +437,7 @@ class SpeciesListController < ApplicationController
   # Redirects to list_species_lists.
   def destroy_species_list
     @species_list = SpeciesList.find(params[:id])
-    if check_user_id(@species_list.user_id)
+    if check_permission!(@species_list.user_id)
       @species_list.destroy
       Transaction.delete_species_list(:id => @species_list)
       flash_notice(:species_list_destroy_success.t)
@@ -462,7 +467,7 @@ class SpeciesListController < ApplicationController
   # Redirects back to manage_species_lists.
   def remove_observation_from_species_list
     species_list = SpeciesList.find(params[:species_list])
-    if check_user_id(species_list.user_id)
+    if check_permission!(species_list.user_id)
       observation = Observation.find(params[:observation])
       if species_list.observations.include?(observation)
         species_list.observations.delete(observation)
@@ -486,7 +491,7 @@ class SpeciesListController < ApplicationController
   # Redirects back to manage_species_lists.
   def add_observation_to_species_list
     species_list = SpeciesList.find(params[:species_list])
-    if check_user_id(species_list.user_id)
+    if check_permission!(species_list.user_id)
       observation = Observation.find(params[:observation])
       if !species_list.observations.include?(observation)
         species_list.observations << observation

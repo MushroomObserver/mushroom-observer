@@ -32,6 +32,7 @@
     new_tab_set do
       add_tab(:change_user_bonuses.t, :controller => "observer", :action => "change_user_bonuses", :id => @show_user.id)
       add_tab(:user_alert_create_alert.t, :controller => "account", :action => "create_alert", :id => @show_user.id)
+      add_tab(:app_destroy.t, :controller => "account", :action => "destroy_user", :id => @show_user.id)
     end
   end
 %>

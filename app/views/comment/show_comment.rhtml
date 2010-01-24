@@ -15,7 +15,7 @@
   end
 %>
 
-<p><%= :comment_show_created.t %>: <%= @comment.created.to_formatted_s(:db) %></p>
+<p><%= :comment_show_created.t %>: <%= @comment.created.web_time %></p>
 <p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
 <p><%= :comment_show_summary.t %>: <%= sanitize(@comment.summary).tl %></p>
 <%= sanitize(:comment_show_comment.l + ': ' + @comment.comment).tpl %>

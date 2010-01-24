@@ -5,7 +5,7 @@
 
   fields = ""
   fields += "*#{:name.l}:* #{@naming.format_name}\n"
-  fields += "*#{:app_time.l}:* #{@naming.created.to_formatted_s(:db)}\n"
+  fields += "*#{:app_time.l}:* #{@naming.created.email_time}\n"
   fields += "*#{:app_by.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
   for reason in @naming.naming_reasons
     if reason.notes.nil? || reason.notes == ""

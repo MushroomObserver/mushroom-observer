@@ -1,14 +1,9 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class SequenceStateTest < Test::Unit::TestCase
   fixtures :observations
   fixtures :names
   fixtures :users
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_basic
     state = SequenceState.lookup({:id => 3}, :observations)

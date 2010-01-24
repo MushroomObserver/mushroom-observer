@@ -1,7 +1,6 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'image_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class ImageControllerTest < Test::Unit::TestCase
+class ImageControllerTest < ControllerTestCase
   fixtures :images
   fixtures :images_observations
   fixtures :licenses
@@ -9,22 +8,14 @@ class ImageControllerTest < Test::Unit::TestCase
   fixtures :observations
   fixtures :users
 
-  def setup
-    @controller = ImageController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
-
-################################################################################
-
   def test_list_images
     get_with_dump(:list_images)
-    assert_response(:list_images)
+    assert_response('list_images')
   end
 
   def test_images_by_user
     get_with_dump(:images_by_user, :id => @rolf.id)
-    assert_response(:list_images)
+    assert_response('list_images')
   end
 
   def test_next_image
@@ -92,28 +83,28 @@ class ImageControllerTest < Test::Unit::TestCase
 
   def test_show_image
     get_with_dump(:show_image, :id => 1)
-    assert_response(:show_image)
+    assert_response('show_image')
   end
 
   def test_show_original
     get_with_dump(:show_original, :id => 1)
-    assert_response(:show_original)
+    assert_response('show_original')
   end
 
   def test_image_search
     @request.session[:pattern] = "Notes"
     get_with_dump(:image_search)
-    assert_response(:list_images)
+    assert_response('list_images')
     assert_equal(:image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title'))
     get_with_dump :image_search, { :page => 2 }
-    assert_response(:list_images)
+    assert_response('list_images')
     assert_equal(:image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title'))
   end
 
   def test_image_search_next
     @request.session[:pattern] = "Notes"
     get_with_dump(:image_search)
-    assert_response(:list_images)
+    assert_response('list_images')
   end
 
   def test_image_search_by_number
@@ -132,7 +123,7 @@ class ImageControllerTest < Test::Unit::TestCase
       },
       :commit => "Search"
     )
-    assert_response(:list_images)
+    assert_response('list_images')
   end
 
   def test_add_image
@@ -181,7 +172,7 @@ class ImageControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:license_updater, params)
-    assert_response(:license_updater)
+    assert_response('license_updater')
     assert_equal(10, @rolf.reload.contribution)
 
     target_count_after = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
@@ -283,7 +274,7 @@ class ImageControllerTest < Test::Unit::TestCase
   def test_resize_images
     requires_login(:resize_images)
     assert_response(:action => :list_images)
-    assert_equal(:image_resize_denied.t, flash[:notice])
+    assert_flash(:image_resize_denied.t)
     # How should real image files be handled?
   end
 
@@ -343,13 +334,13 @@ class ImageControllerTest < Test::Unit::TestCase
     assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(20, @rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
-    assert_equal(:profile_uploaded_image.t(:name => "##{obs.images.last.id}"), flash[:notice])
+    assert_flash(:profile_uploaded_image.t(:name => "##{obs.images.last.id}"))
   end
 
   # This is what would happen when user first opens form.
   def test_reuse_image_for_user
     requires_login(:reuse_image_for_user)
-    assert_response(:reuse_image_for_user)
+    assert_response('reuse_image_for_user')
     assert_form_action(:action => 'reuse_image_for_user')
   end
 

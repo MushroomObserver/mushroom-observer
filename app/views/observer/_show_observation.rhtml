@@ -20,7 +20,7 @@
     <% end %>
   <% end %>
 
-  <%= :app_when.t %>: <span class="Data"><%= observation.when %></span><br/>
+  <%= :app_when.t %>: <span class="Data"><%= observation.when.web_date %></span><br/>
   <% if observation.is_collection_location %>
     <%= :show_observation_collection_location.t %>:
   <% else %>

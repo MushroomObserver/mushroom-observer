@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class NamingTest < Test::Unit::TestCase
   fixtures :observations
@@ -6,11 +6,6 @@ class NamingTest < Test::Unit::TestCase
   fixtures :names
   fixtures :namings
   fixtures :votes
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   # Propose a naming for an observation.
   def test_create

@@ -1,12 +1,7 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class LicenseTest < Test::Unit::TestCase
   fixtures :licenses
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_current_names_and_ids
     names_and_ids = License.current_names_and_ids()

@@ -1,5 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'extensions'
+require File.dirname(__FILE__) + '/../boot'
 
 class NameTest < Test::Unit::TestCase
   fixtures :names
@@ -9,21 +8,15 @@ class NameTest < Test::Unit::TestCase
   fixtures :user_groups
   fixtures :user_groups_users
 
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
-
   def create_test_name(string, force_rank=nil)
+    User.current = @rolf
     (text_name, display_name, observation_name, search_name, parent_name, rank, author) = Name.parse_name(string)
     name = Name.create_name(force_rank || rank, text_name, author, display_name, observation_name, search_name)
-    name.user = @rolf
-    if !name.save
-      print "Error saving name \"#{string}\": [#{name.dump_errors}]\n"
-      assert(nil)
-    end
+    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
     return name
   end
+
+################################################################################
 
   # ----------------------------
   #  Test name parsing.
@@ -686,7 +679,9 @@ class NameTest < Test::Unit::TestCase
     @peltigera.gen_desc = ''
     @peltigera.review_status = :unreviewed;
     @peltigera.reviewer = nil;
-    @peltigera.save
+    Name.without_revision do
+      @peltigera.save
+    end
     @peltigera.authors.clear
     @peltigera.editors.clear
     @peltigera.reload
@@ -891,6 +886,8 @@ class NameTest < Test::Unit::TestCase
   end
 
   def test_misspelling
+    User.current = @rolf
+
     # Make sure deprecating a name doesn't clear misspelling stuff.
     @petigera.change_deprecated(true)
     assert(@petigera.is_misspelling?)

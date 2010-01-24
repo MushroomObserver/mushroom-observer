@@ -10,7 +10,7 @@ xml.comment(
   :id  => object.id,
   :url => "#{HTTP_DOMAIN}/comment/show_comment/#{object.id}"
 ) do
-  xml.created xml_datetime(object.created)
+  xml.created object.created.api_time
   xml.summary object.summary.to_s.tl
   xml.content object.comment.to_s.tpl_nodiv
 

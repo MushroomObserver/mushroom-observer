@@ -12,7 +12,7 @@ Content-Type: text/html; charset=utf-8
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <div class="textile"><h2><strong>Name was Created</strong></h2>
 	<p>The Name <u><i>Petigera</i> (40)</u> was created.</p></div>
-<div class="textile"><p><strong>Time:</strong> 2009-01-02 01:01:01<br/><strong>By:</strong> Tricky Dick (dick)</p></div>
+<div class="textile"><p><strong>Time:</strong> 2009-01-01 20:01:01 <span class="caps">EST</span> (-0500)<br/><strong>By:</strong> Tricky Dick (dick)</p></div>
 <div class="textile"><p>Here are some handy links:</p></div>
 <ul type=none>
 <li>Show this Name: <a href="http://localhost:3000/name/show_name/40">http://localhost:3000/name/show_name/40</a></li>

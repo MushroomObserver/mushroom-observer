@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 require 'account_mailer'
 
 class AccountMailerTest < Test::Unit::TestCase
@@ -30,11 +30,6 @@ class AccountMailerTest < Test::Unit::TestCase
     @expected.mime_version = '1.0'
   end
 
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
-
   # At the moment at least Redcloth produces slightly different output on
   # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a
   # common form so that we don't need to continue to tweak two separate copies
@@ -46,6 +41,8 @@ class AccountMailerTest < Test::Unit::TestCase
     email.gsub!(/^ +/, '')
     email.gsub!(/[\n\r]+/, "\n")
   end
+
+################################################################################
 
   def test_email_1
     email = AccountMailer.create_admin_request(@katrina, @rolf,
@@ -192,6 +189,7 @@ class AccountMailerTest < Test::Unit::TestCase
     email = AccountMailer.create_observation_change(@dick, @mary, nil,
       '**__Coprinus comatus__** L. (123)', @coprinus_comatus_obs.created).encoded
     fix_mac_vs_pc!(email)
+
     assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_destroy.html")
     @mary.email_html = false
     email = AccountMailer.create_observation_change(@dick, @mary, @coprinus_comatus_obs,

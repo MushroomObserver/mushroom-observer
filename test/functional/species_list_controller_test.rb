@@ -1,19 +1,12 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'species_list_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class SpeciesListControllerTest < Test::Unit::TestCase
+class SpeciesListControllerTest < ControllerTestCase
   fixtures :locations
   fixtures :names
   fixtures :observations
   fixtures :observations_species_lists
   fixtures :species_lists
   fixtures :users
-
-  def setup
-    @controller = SpeciesListController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
 
   def spl_params(spl)
     params = {
@@ -36,22 +29,22 @@ class SpeciesListControllerTest < Test::Unit::TestCase
 
   def test_list_species_lists
     get_with_dump(:list_species_lists)
-    assert_response(:list_species_lists)
+    assert_response('list_species_lists')
   end
 
   def test_show_species_list
     get_with_dump(:show_species_list, :id => 1)
-    assert_response(:show_species_list)
+    assert_response('show_species_list')
   end
 
   def test_species_lists_by_title
     get_with_dump(:species_lists_by_title)
-    assert_response(:species_lists_by_title)
+    assert_response('species_lists_by_title')
   end
 
   def test_species_lists_by_user
     get_with_dump(:species_lists_by_user, :id => @rolf.id)
-    assert_response(:list_species_lists)
+    assert_response('list_species_lists')
   end
 
   def test_destroy_species_list
@@ -213,7 +206,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:create_species_list, params)
-    assert_response(:create_species_list)
+    assert_response('create_species_list')
     assert_equal(10, @rolf.reload.contribution)
     assert(!synonym_name.reload.deprecated)
     assert_nil(synonym_name.synonym)
@@ -239,7 +232,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:create_species_list, params)
-    assert_response(:create_species_list)
+    assert_response('create_species_list')
     assert_equal(10, @rolf.reload.contribution)
     assert_nil(Name.find_by_text_name(new_name_str))
     assert_nil(SpeciesList.find_by_title(list_title))
@@ -390,7 +383,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     }
     login('rolf')
     post(:create_species_list, params)
-    assert_response(:create_species_list)
+    assert_response('create_species_list')
     assert_equal(10, @rolf.reload.contribution)
     assert_equal("Warnerbros bugs-bunny",
                  @controller.instance_variable_get('@list_members'))
@@ -429,7 +422,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params = { :id => spl.id.to_s }
     assert_equal('rolf', spl.user.login)
     requires_user(:edit_species_list, :show_species_list, params)
-    assert_response(:edit_species_list)
+    assert_response('edit_species_list')
     assert_form_action(:action => 'edit_species_list')
   end
 
@@ -505,7 +498,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:list][:members] = "New name"
     login(spl.user.login)
     post(:edit_species_list, params)
-    assert_response(:edit_species_list)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
   end
@@ -533,7 +526,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:list][:members] = name.text_name
     login(spl.user.login)
     post(:edit_species_list, params)
-    assert_response(:edit_species_list)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
     assert(!spl.name_included(name))
@@ -564,7 +557,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:list][:members] = name.text_name
     login(spl.user.login)
     post(:edit_species_list, params)
-    assert_response(:edit_species_list)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
     assert(!spl.name_included(name))
@@ -610,7 +603,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     params[:checklist_data][name.id.to_s] = "checked"
     login(spl.user.login)
     post(:edit_species_list, params)
-    assert_response(:edit_species_list)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
     assert_equal(sp_count, spl.reload.observations.size)
     assert(!spl.name_included(name))
@@ -701,7 +694,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       }
     }
     post_requires_login(:upload_species_list, params)
-    assert_response(:edit_species_list)
+    assert_response('edit_species_list')
     assert_equal(10, @rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
     assert_equal(list_data, @controller.instance_variable_get('@list_members'))
@@ -714,8 +707,8 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   def test_make_report
     now = Time.now
 
+    User.current = @rolf
     tapinella = Name.create(
-      :user_id => 1,
       :author => '(Batsch) Šutara',
       :text_name => 'Tapinella atrotomentosa',
       :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
@@ -769,7 +762,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     post(:name_lister, params.merge(:commit => :name_lister_submit_spl.l))
     ids = @controller.instance_variable_get('@objs').map {|n| n.id}
     assert_equal([6, 2, 1, 14], ids)
-    assert_response(:create_species_list)
+    assert_response('create_species_list')
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_txt.l))

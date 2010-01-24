@@ -74,8 +74,8 @@
       <% end %>
       <p>
         <span class="Date">
-          <%= :app_created.t(:type => :app_name.l, :date => @past_name.created) %><br/>
-          <%= :app_last_modified.t(:date => @past_name.created, :user => user_link(@past_name.user)) %><br/>
+          <%= :app_created.t(:type => :app_name.l, :date => @past_name.created.web_time) %><br/>
+          <%= :app_last_modified.t(:date => @past_name.created.web_time, :user => user_link(@past_name.user)) %><br/>
         </span>
       </p>
     </td>

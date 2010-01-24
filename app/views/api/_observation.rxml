@@ -33,8 +33,8 @@ xml.observation(
   end
 
   if detail
-    xml.created  xml_datetime(object.created)
-    xml.modified xml_datetime(object.modified)
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
     xml.specimen_available object.specimen ? 'true' : 'false'
     xml.is_collection_location object.is_collection_location ? 'true' : 'false'
 

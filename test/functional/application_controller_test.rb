@@ -1,10 +1,6 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'application'
+require File.dirname(__FILE__) + '/../boot'
 
-class ApplicationControllerTest < Test::Unit::TestCase
-  def setup
-    @controller = ApplicationController.new
-  end
+class ApplicationControllerTest < ControllerTestCase
 
   def assert_user_search(pat, expect)
     result = []

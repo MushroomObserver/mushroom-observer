@@ -43,14 +43,26 @@
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
     :advanced_obj_search,
-    :list_images,
-    :images_by_user,
     :image_search,
-    :show_image,
-    :show_original,
+    :images_by_user,
+    :list_images,
     :next_image,
     :prev_image,
-    :test_upload_speed
+    :show_image,
+    :show_original,
+    :test_upload_speed,
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :add_image,
+    :edit_image,
+    :next_image,
+    :prev_image,
+    :remove_image,
+    :remove_images,
+    :reuse_image,
+    :reuse_image_for_user,
+    :show_image,
   ]
 
   # Display matrix of images, most recent first.
@@ -237,7 +249,7 @@ class ImageController < ApplicationController
     redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image', :id => id,
                 :seq_key => params[:seq_key], :search_seq => params[:search_seq], :obs => params[:obs])
   end
-  
+
   # Form for uploading and adding images to an observation.
   # Linked from: show_observation, reuse_image, and
   #   create/edit_naming (via _show_images partial)
@@ -252,7 +264,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def add_image
     @observation = Observation.find(params[:id])
-    if !check_user_id(@observation.user_id)
+    if !check_permission!(@observation.user_id)
       redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
     elsif request.method == :get
       @image = Image.new
@@ -312,7 +324,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def remove_images
     @observation = Observation.find(params[:id])
-    if !check_user_id(@observation.user_id)
+    if !check_permission!(@observation.user_id)
       redirect_to(:controller => 'observer', :action => 'show_observation',
                   :id => @observation.id)
     elsif request.method == :get
@@ -345,7 +357,7 @@ class ImageController < ApplicationController
   def edit_image
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
-    if !check_user_id(@image.user_id)
+    if !check_permission!(@image.user_id)
       redirect_to(:action => 'show_image', :id => @image)
     elsif request.method == :post
       if !@image.update_attributes(params[:image])
@@ -376,7 +388,7 @@ class ImageController < ApplicationController
   # Redirects to list_images.
   def destroy_image
     @image = Image.find(params[:id])
-    if !check_user_id(@image.user_id)
+    if !check_permission!(@image.user_id)
       redirect_to(:action => 'show_image', :id => @image.id)
     elsif !@image.destroy
       flash_error :image_destroy_failed.t
@@ -395,7 +407,7 @@ class ImageController < ApplicationController
   def remove_image
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
-    if !check_user_id(@observation.user_id)
+    if !check_permission!(@observation.user_id)
       flash_warning :image_remove_denied.t
     elsif !@observation.images.include?(@image)
       flash_warning :image_remove_missing.t
@@ -425,7 +437,7 @@ class ImageController < ApplicationController
   def reuse_image
     @observation = Observation.find(params[:id])
     @layout = calc_layout_params
-    if !check_user_id(@observation.user_id)
+    if !check_permission!(@observation.user_id)
       redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
     elsif params[:all_users] == '1'
       @all_users = true
@@ -448,7 +460,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def add_image_to_obs
     @observation = Observation.find(params[:obs_id])
-    if check_user_id(@observation.user_id)
+    if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:id])
         @observation.log(:log_image_reused, :name => image.unique_format_name)
         flash_notice :image_reuse_success.t(:id => image.id)
@@ -465,7 +477,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def reuse_image_by_id
     @observation = Observation.find(params[:observation][:id])
-    if check_user_id(@observation.user_id)
+    if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
         @observation.log(:log_image_reused, :name => image.unique_format_name)
         flash_notice :image_reuse_success.t(:id => image.id)
@@ -598,7 +610,7 @@ class ImageController < ApplicationController
       logger.warn(cmd)
     end
   end
-  
+
 ################################################################################
 
   def test_process_image(user, upload, count, size)

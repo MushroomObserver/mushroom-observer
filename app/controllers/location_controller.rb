@@ -25,12 +25,20 @@
 
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
+    :auto_complete_location,
     :list_place_names,
     :map_locations,
     :show_location,
     :show_past_location,
     :where_search,
-    :auto_complete_location
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :author_request,
+    :create_location,
+    :edit_location,
+    :show_location,
+    :show_past_location,
   ]
 
   # Process AJAX request for autocompletion of location fields.  It reads the
@@ -111,18 +119,13 @@ class LocationController < ApplicationController
 
   def map_locations
     @pattern = params[:pattern]
-    locations = []
+    @locations = []
     if @pattern && (@pattern != '')
-      locations = Location.find(:all, :conditions => "display_name like '%#{clean_sql_pattern(@pattern)}%'")
+      @locations = Location.all(:conditions =>
+                        "display_name like '%#{clean_sql_pattern(@pattern)}%'")
     else
       @title = :map_locations_global_map.t
-      locations = Location.find(:all)
-    end
-    @map = nil
-    @header = nil
-    if locations.length > 0
-      @map = make_map(locations)
-      @header = "#{GMap.header}\n#{finish_map(@map)}"
+      @locations = Location.all
     end
   end
 
@@ -213,8 +216,6 @@ class LocationController < ApplicationController
     @past_location = Location.find(params[:id].to_i) # clone or dclone?
     @past_location.revert_to(params[:version].to_i)
     @other_versions = @location.versions.reverse
-    @map = make_map([@past_location])
-    @header = "#{GMap.header}\n#{finish_map(@map)}"
   end
 
   def show_location
@@ -227,8 +228,6 @@ class LocationController < ApplicationController
     # @data = Location.connection.select_all(query % params[:id])
     @past_location = @location.versions.latest
     @past_location = @past_location.previous if @past_location
-    @map = make_map([@location])
-    @header = "#{GMap.header}\n#{finish_map(@map)}"
     @interest = nil
     @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Location', @location.id) if @user
   end

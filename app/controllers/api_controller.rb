@@ -1,68 +1,47 @@
-################################################################################
 #
 #  This controller handles the XML interface.
 #
-<<<<<<< .mine
-=======
-#  All request types use a single URL for each object class.  Thus, searching
-#  for, updating, destroying, and creating observations use:
-#
-#    GET    http://mo.org/api/observations       Search for observations.
-#    PUT    http://mo.org/api/observations       Modify observations.
-#    DELETE http://mo.org/api/observations       Destroy observations.
-#    POST   http://mo.org/api/observations       Create a new observation.
-#
-#  GET, PUT and DELETE requests all take the same "search" parameters, e.g.:
-#
-#    GET http://mo.org/api/observations/12345
-#    GET http://mo.org/api/observations?user=jason
-#    GET http://mo.org/api/observations?date=20090101-20100101
-#
-#  GET requests return information about matching objects.  DELETE requests
-#  attempt to destroy all matching objects.  PUT requests allow users to make
-#  one or more changes to all matching objects.  Changes are specified with
-#  "set" parameters, e.g.:
-#
-#    PUT http://mo.org/api/observations/12345?set_date=20090731
-#    PUT http://mo.org/api/observations?user=jason&date=20091201&set_specimen=true
-#
-#  (The former changes the date on observation #12345; the latter informs MO
-#  that specimens are available for all of Jason's observations on 20091201.)
-#
-#  POST requests attempt to create a new object and return the same information
-#  a GET request of that single id would return (or an error message).
-#
-#  Only certain request types are allowed for certain objects.  This is
-#  determined by the presence of methods called "get_user", "delete_name",
-#  "put_observation", "post_comment", etc.  The calling syntax for each is
-#  described below.
-#
-#  The "get_xxx" methods are responsible for parsing the "search" parameters
-#  and returning enough information to create a SQL query.  For example,
-#
-#    get_observation() returns [conditions, tables, joins, max_num_per_page]
-#
-#  The "put_xxx" methods are responsible for parsing the "set" parameters and
-#  returning a hash that will be passed into object.write_attributes. 
-#
-#    assigns =
-#      put_observation()
-#
-#  The "delete_xxx" methods do nothing.  They are never called; it's only
-#  important that they *exist*.
-#
-#  The "post_xxx" methods parse the necessary arguments, create the object,
-#  and return the resulting object.  They raise errors if anything goes wrong.
-#
->>>>>>> .r713
 #  Views:
 #    xml_rpc        Entry point for XML-RPC requests.
 #    <table>        Entry point for REST requests.
+#    ajax           Entry point for AJAX requests.
+#    test           Test action that just renders "test".
 #
 ################################################################################
 
 class ApiController < ApplicationController
 
+  # Disable all filters except set_locale.
+  skip_filter   :browser_status
+  skip_filter   :check_user_alert
+  skip_filter   :autologin
+  skip_filter   :extra_gc
+
+  before_filter :disable_link_prefetching
+  before_filter { User.current = nil }
+
+  # Used for testing.
+  def test
+    render(:text => 'test', :layout => false)
+  end
+
+  # ----------------------------
+  #  XML-RPC
+  # ----------------------------
+
+  # Standard entry point for XML-RPC requests.
+  def xml_rpc
+    xact = Transaction.new(:query => request.content)
+    xact.args[:_safe] = false
+    api = xact.process
+    render_results(api)
+  end
+
+  # ----------------------------
+  #  REST
+  # ----------------------------
+
+  # Standard entry point for REST requests.
   def comments;      rest_query(:comment);      end
   def images;        rest_query(:image);        end
   def interests;     rest_query(:interest);     end
@@ -78,15 +57,6 @@ class ApiController < ApplicationController
   def user_groups;   rest_query(:user_group);   end
   def users;         rest_query(:user);         end
   def votes;         rest_query(:vote);         end
-
-  def xml_rpc
-    xact = Transaction.new(:query => request.content)
-    xact.args[:_safe] = false
-    api = xact.process
-    render_results(api)
-  end
-
-protected
 
   def rest_query(type)
     @start_time = Time.now
@@ -126,5 +96,87 @@ protected
       @errors << api.convert_error(e, 501, nil, true)
       render(:layout => 'api', :text => '')
     end
+  end
+
+  # ----------------------------
+  #  AJAX
+  # ----------------------------
+
+  # Standard entry point for AJAX requests.  AJAX requests are routed here from
+  # URLs that look like this:
+  #
+  #   http://domain.org/ajax/method
+  #   http://domain.org/ajax/method/id
+  #   http://domain.org/ajax/method/type/id
+  #
+  # Syntax of successful responses vary depending on the method.
+  #
+  # Errors are status 500, with the response body being the error message.
+  # Semantics of the error possible messages varies depending on the method.
+  #
+  def ajax
+    begin
+      send("ajax_#{params[:method]}")
+    rescue => e
+      render(:text => e.to_s, :layout => false, :status => 500)
+    end
+  end
+
+  # Process AJAX request for auto-completion of species name.
+  # type::   Type of strings we're auto-completing.
+  # letter:: First letter user typed in.
+  #
+  # Valid types are:
+  # name::     Returns Name#text_name starting with the given letter.
+  # location:: Returns Observation#where or Location#display_name with a word
+  #            starting with the given letter.
+  #
+  # Examples:
+  #
+  #   /ajax/auto_complete/name/A
+  #   /ajax/auto_complete/location/w
+  #
+  def ajax_auto_complete
+    type  = params[:type].to_s
+    instr = params[:id].to_s
+    letter = ' '
+    @items = []
+    if instr.match(/^(\w)/)
+      letter = $1
+
+      # It reads the first letter of the field, and returns all the names
+      # beginning with it.
+      if type == 'name'
+        @items = Name.connection.select_values %(
+          SELECT text_name FROM names
+          WHERE LOWER(text_name) LIKE '#{letter}%'
+          AND correct_spelling_id IS NULL
+          ORDER BY text_name ASC
+        )
+
+      # It reads the first letter of the field, and returns all the locations
+      # (or "where" strings) with words beginning with that letter.
+      elsif type == 'location'
+        @items = Location.connection.select_values %(
+          SELECT DISTINCT IF(o.location_id > 0, l.display_name, o.where) AS x
+          FROM observations o
+          LEFT OUTER JOIN locations l ON l.id = o.location_id
+          WHERE (
+            LOWER(o.where) LIKE '#{letter}%' OR
+            LOWER(o.where) LIKE '% #{letter}%' OR
+            LOWER(l.search_name) LIKE '#{letter}%' OR
+            LOWER(l.search_name) LIKE '% #{letter}%'
+          )
+          ORDER BY x ASC
+        )
+
+      end
+    end
+
+    # Result is the letter requested followed by results, one per line.  (It
+    # truncates any results that have newlines in them -- that's an error.)
+    render(:layout => false, :inline => letter + %(
+      <%= @items.uniq.map {|n| h(n.gsub(/[\r\n].*/,'')) + "\n"}.join('') %>
+    ))
   end
 end

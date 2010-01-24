@@ -11,7 +11,7 @@ Content-Type: text/html; charset=utf-8
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <div class="textile"><h2><strong>Consensus Change</strong></h2>
 	<p>Consensus has changed for observation #3:</p></div>
-<div class="textile"><p><strong>Old Name:</strong> <a href="http://localhost:3000/name/show_name/3"><b><i>Agaricus campestris</i></b> L.</a><br/><strong>New Name:</strong> <a href="http://localhost:3000/name/show_name/2"><b><i>Coprinus comatus</i></b> (O.F. Müll.) Pers.</a><br/><strong>Time:</strong> 2007-02-27 20:20:00<br/><strong>By:</strong> Tricky Dick (dick)</p></div>
+<div class="textile"><p><strong>Old Name:</strong> <a href="http://localhost:3000/name/show_name/3"><b><i>Agaricus campestris</i></b> L.</a><br/><strong>New Name:</strong> <a href="http://localhost:3000/name/show_name/2"><b><i>Coprinus comatus</i></b> (O.F. Müll.) Pers.</a><br/><strong>Time:</strong> 2007-02-27 15:20:00 <span class="caps">EST</span> (-0500)<br/><strong>By:</strong> Tricky Dick (dick)</p></div>
 <div class="textile"><p>Here are some handy links:</p></div>
 <ul type=none>
 <li>Show this Observation: <a href="http://localhost:3000/3">http://localhost:3000/3</a></li>

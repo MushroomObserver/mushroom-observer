@@ -25,7 +25,7 @@
         <%= location_link(observation.where, observation.location_id) %>
       </span><br/>
 
-      <span class="ListWhen"><%= observation.when %>:</span>
+      <span class="ListWhen"><%= observation.when.web_date %>:</span>
       <span class="ListWho"><%= user_link(observation.user) %></span><br/>
 
       <% rss = observation.rss_log

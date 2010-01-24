@@ -1,18 +1,12 @@
-require 'test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
-class ProjectControllerTest < ActionController::TestCase
+class ProjectControllerTest < ControllerTestCase
   fixtures :projects
   fixtures :users
   fixtures :user_groups
   fixtures :user_groups_users
   fixtures :draft_names
   fixtures :names
-
-  def setup
-    @controller = ProjectController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-  end
 
   def add_project_helper(title, summary)
     params = {
@@ -82,7 +76,7 @@ class ProjectControllerTest < ActionController::TestCase
     if page
       assert_response(:action => page, :id => draft.id)
     else
-      assert_response(:edit_draft)
+      assert_response('edit_draft')
     end
     assert_equal(count, DraftName.all.size)
   end
@@ -95,7 +89,7 @@ class ProjectControllerTest < ActionController::TestCase
     end
     requires_login(:edit_draft, { :id => draft.id }, user.login)
     if success
-      assert_response(:edit_draft)
+      assert_response('edit_draft')
     else
       assert_response(:action => "show_draft", :id => draft.id)
     end
@@ -123,7 +117,7 @@ class ProjectControllerTest < ActionController::TestCase
     if success or classification == ""
       assert_response(:action => "show_draft", :id => draft.id)
     else
-      assert_response(:edit_draft)
+      assert_response('edit_draft')
     end
     draft.reload
     if success
@@ -173,7 +167,7 @@ class ProjectControllerTest < ActionController::TestCase
       :id => draft.id
     }
     requires_login(:destroy_draft, params, user.login)
-    assert_response(:show_project)
+    assert_response('show_project')
     if success
       assert_raises(ActiveRecord::RecordNotFound) do
         draft = DraftName.find(draft.id)
@@ -193,12 +187,12 @@ class ProjectControllerTest < ActionController::TestCase
 
   def test_show_project
     get_with_dump(:show_project, :id => 1)
-    assert_response(:show_project)
+    assert_response('show_project')
   end
 
   def test_list_projects
     get_with_dump(:list_projects)
-    assert_response(:list_projects)
+    assert_response('list_projects')
   end
 
   def test_add_project
@@ -323,7 +317,7 @@ class ProjectControllerTest < ActionController::TestCase
     }
     requires_login(:send_admin_request, params)
     assert_response(:action => "show_project", :id => @eol_project.id)
-    assert_equal(:admin_request_success.t(:title => @eol_project.title), flash[:notice])
+    assert_flash(:admin_request_success.t(:title => @eol_project.title))
   end
 
   def test_admin_request
@@ -450,7 +444,7 @@ class ProjectControllerTest < ActionController::TestCase
   def test_show_draft
     draft = @draft_coprinus_comatus
     requires_login(:show_draft, { :id => draft.id }, draft.user.login)
-    assert_response(:show_draft)
+    assert_response('show_draft')
   end
 
   # Ensure that an admin can see a draft they don't own
@@ -458,7 +452,7 @@ class ProjectControllerTest < ActionController::TestCase
     draft = @draft_coprinus_comatus
     assert_not_equal(draft.user, @mary)
     requires_login(:show_draft, { :id => draft.id }, @mary.login)
-    assert_response(:show_draft)
+    assert_response('show_draft')
   end
 
   # Ensure that an member can see a draft they don't own
@@ -466,7 +460,7 @@ class ProjectControllerTest < ActionController::TestCase
     draft = @draft_agaricus_campestris
     assert_not_equal(draft.user, @katrina)
     requires_login(:show_draft, { :id => draft.id }, @katrina.login)
-    assert_response(:show_draft)
+    assert_response('show_draft')
   end
 
   # Ensure that a non-member cannot see a draft
@@ -500,7 +494,7 @@ class ProjectControllerTest < ActionController::TestCase
       :name => @conocybe_filaris.id
     }
     requires_login(:create_or_edit_draft, params, @katrina.login)
-    assert_response(:edit_draft)
+    assert_response('edit_draft')
     assert_equal(count + 1, DraftName.all.size)
   end
 

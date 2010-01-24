@@ -1,10 +1,6 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class SearchStateTest < Test::Unit::TestCase
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def assert_state_exists(id)
     assert(!id.nil? && SearchState.find(id))
@@ -13,6 +9,8 @@ class SearchStateTest < Test::Unit::TestCase
   def assert_state_not_exists(id)
     assert_nil(SearchState.safe_find(id))
   end
+
+################################################################################
 
   def test_cleanup
     # This avoids any possible difference in time zone between mysql and you.

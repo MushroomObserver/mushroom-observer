@@ -1,15 +1,10 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
 class InterestTest < Test::Unit::TestCase
   fixtures :interests
   fixtures :names
   fixtures :observations
   fixtures :users
-
-  def teardown
-    clear_unused_fixtures
-    User.current = nil
-  end
 
   def test_setting_and_getting
     Interest.new(

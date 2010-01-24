@@ -13,9 +13,15 @@
 class CommentController < ApplicationController
   before_filter :login_required, :except => [
     :list_comments,
-    :show_comments_for_user,
+    :show_comment,
     :show_comments_by_user,
-    :show_comment
+    :show_comments_for_user,
+  ]
+
+  before_filter :disable_link_prefetching, :except => [
+    :add_comment,
+    :edit_comment,
+    :show_comment,
   ]
 
   # Show list of latest comments.
@@ -148,7 +154,7 @@ class CommentController < ApplicationController
   def edit_comment
     @comment = Comment.find(params[:id])
     @object = @comment.object if @comment
-    if !check_user_id(@comment.user_id)
+    if !check_permission!(@comment.user_id)
       redirect_to(:action => 'show_comment')
     elsif request.method == :post
       @comment.attributes = params[:comment]
@@ -180,7 +186,7 @@ class CommentController < ApplicationController
   def destroy_comment
     @comment = Comment.find(params[:id])
     @object = @comment.object
-    if !check_user_id(@comment.user_id)
+    if !check_permission!(@comment.user_id)
       redirect_to(:action => 'show_comment')
     else
       if @comment.destroy

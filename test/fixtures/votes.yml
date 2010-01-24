@@ -9,6 +9,7 @@ coprinus_comatus_owner_vote:
   user_id:   1
   naming_id: 3
   value:     2
+  observation_id: 3
 
 # Mary is not so much.
 coprinus_comatus_other_vote:
@@ -19,6 +20,7 @@ coprinus_comatus_other_vote:
   user_id:   2
   naming_id: 3
   value:     1
+  observation_id: 3
 
 # Rolf hates Mary's naming.
 coprinus_comatus_other_naming_rolf_vote:
@@ -29,6 +31,7 @@ coprinus_comatus_other_naming_rolf_vote:
   user_id:   1
   naming_id: 9
   value:     -3
+  observation_id: 3
 
 # Mary's absolutely positive, though.
 coprinus_comatus_other_naming_mary_vote:
@@ -39,6 +42,7 @@ coprinus_comatus_other_naming_mary_vote:
   user_id:   2
   naming_id: 9
   value:     3
+  observation_id: 3
 
 # Rolf has no opinion about his own naming.
 strobilurus_diminutivus_no_opinion_vote:
@@ -49,3 +53,5 @@ strobilurus_diminutivus_no_opinion_vote:
   user_id:   1
   naming_id: 8
   value:     0
+  observation_id: 8
+

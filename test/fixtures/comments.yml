@@ -1,4 +1,5 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
 minimal_comment:
   id: 1
   sync_id: 1xx1
@@ -18,3 +19,13 @@ another_comment:
   comment: "With _Agaricus campestris_ links and *boldface* and\n4x4 other weird(tm) !image 2! stuff.\n\nJust to test html_to_ascii...  -A&P"
   object_type: Observation
   object_id: 1
+
+detailed_unknown_comment:
+  id: 3
+  sync_id: 3xx1
+  created: 2007-03-02 21:16:00
+  user_id: 2
+  summary: Let's give detailed_unknown a little of everything.
+  comment: ''
+  object_type: Observation
+  object_id: 2

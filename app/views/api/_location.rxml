@@ -25,8 +25,8 @@ xml.location(
   xml.longitude_units  'degrees east'
 
   if detail
-    xml.created  xml_datetime(object.created)
-    xml.modified xml_datetime(object.modified)
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
     xml.notes    object.notes.to_s.tpl_nodiv
 
     # authors
