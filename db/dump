@@ -1,4 +1,6 @@
 #!/bin/bash
 
-mysqldump -h msdb.collectivesource.com -u msdb -p ms_development > checkpoint
+ls ../public/images/thumb | sort -n | tail -1
+mysqldump -u root -pXnT8uBXC observer_production > checkpoint
+ls ../public/images/thumb | sort -n | tail -1
 
