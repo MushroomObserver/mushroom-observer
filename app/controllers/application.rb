@@ -131,7 +131,7 @@ class ApplicationController < ActionController::Base
 
   before_filter :browser_status
   before_filter :autologin
-  around_filter :set_locale
+  before_filter :set_locale
   # before_filter :extra_gc
   # after_filter :extra_gc
   # after_filter :log_memory_usage
@@ -756,27 +756,29 @@ class ApplicationController < ActionController::Base
     #   2) user prefs (whatever user chose earlier)
     #   3) session (whatever we used last time)
     #   4) navigator (provides default)
-    if RAILS_ENV == 'test'
-      Locale.code = ENV['LANG'] || 'en-US'
+    locale = if RAILS_ENV == 'test'
+      ENV['LANG'] || 'en-US'
     elsif params[:user_locale]
       logger.debug "[globalite] #{params[:user_locale]} locale passed"
-      Locale.code = params[:user_locale]
-      # Store the locale in the session
-      session[:locale] = Locale.code
+      params[:user_locale]
     elsif @user && @user.locale && @user.locale != ''
       logger.debug "[globalite] loading locale: #{@user.locale} from @user"
-      Locale.code = @user.locale
+      @user.locale
     elsif session[:locale]
       logger.debug "[globalite] loading locale: #{session[:locale]} from session"
-      Locale.code = session[:locale]
+      session[:locale]
     else
       # Changed code from Globalite sample app since Locale.code= didn't like 'pt-br'
       # but did like 'pt-BR'.  standardize_locale was added to take a locale spec
       # and enforce this standard.
-      locale = standardize_locale(get_valid_lang_from_accept_header)
-      logger.debug "[globalite] found a valid http header locale: #{locale}"
+      get_valid_lang_from_accept_header
+    end
+
+    locale = standardize_locale(locale)
+    if Locale.code.to_s != locale.to_s
       Locale.code = locale
     end
+    session[:locale] = locale.to_s
 
     # Add a last gasp default if the selected locale doesn't match any of our
     # existing translations.  (All translation YML files have :en_US defined.)
@@ -786,19 +788,13 @@ class ApplicationController < ActionController::Base
     end
 
     # Update user preference.
-    if @user && @user.locale != Locale.code
-      @user.locale = Locale.code
+    if @user && @user.locale.to_s != Locale.code.to_s
+      @user.locale = Locale.code.to_s
       @user.save
     end
 
     # Locale.code = "en-US"
     logger.debug "[globalite] Locale set to #{Locale.code}"
-
-    # render the page
-    yield
-
-    # reset the locale to its default value
-    Locale.reset!
   end
   
   def count_objects
