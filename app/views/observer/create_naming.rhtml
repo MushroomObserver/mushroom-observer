@@ -1,16 +1,16 @@
 <%
   javascript_include_auto_complete
   @title = :create_naming_title.t(:id => @observation.id)
-  search_params = calc_search_params()
 
   new_tab_set do
     add_tab(:app_cancel.t(:type => :observation.l),
-            :action => 'show_observation', :id => @observation.id, :params => search_params)
+            :action => 'show_observation', :id => @observation.id,
+            :params => query_params)
   end
 %>
 
 <% form_tag(:action => 'create_naming', :id => @observation.id,
-            :approved_name => @what, :params => search_params) do %>
+            :approved_name => @what, :params => query_params) do %>
   <br/><center><%= submit_tag :app_create.l %></center>
 
   <table width="100%" cellpadding="10">
@@ -21,15 +21,15 @@
         }) %>
         <%= render(:partial => 'form_naming', :locals => {
           :action       => 'create_naming',
-          :button_name  => 'Create',
+          :button_name  => :app_create.l,
           :show_reasons => true,
         }) %>
       </td>
       <td width="25%" valign="top">
-        <%= render(:partial => 'show_images', :locals => {
-          :search_params => search_params
-        }) %>
+        <%= render(:partial => 'show_images') %>
       </td>
     </tr>
   </table>
+  
+  <center><%= submit_tag :app_create.l %></center>
 <% end %>

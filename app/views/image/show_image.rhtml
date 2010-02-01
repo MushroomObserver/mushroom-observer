@@ -1,6 +1,5 @@
 <%
   @title = :image_show_title.t(:name => @image.unique_format_name)
-  search_params = calc_search_params()
   commercial_inquiries_ok = @image.user.email_general_commercial
 
   for obs in @image.observations
@@ -13,19 +12,22 @@
   end
 
   new_tab_set do
-    add_tab(:image_show_full_size.t,
-            :action => 'show_original', :id => @image.id, :params => search_params)
+    add_tab(:image_show_full_size.t, :action => 'show_original',
+            :id => @image.id, :params => query_params)
     if commercial_inquiries_ok
-	  add_tab(:image_show_inquiry.t,
-              :controller => 'observer', :action => 'commercial_inquiry', :id => @image.id)
+	  add_tab(:image_show_inquiry.t, :controller => 'observer',
+            :action => 'commercial_inquiry', :id => @image.id,
+            :params => query_params)
     end
   end
 
   new_tab_set do
-    add_tab(:app_prev.t,
-            :action => 'prev_image', :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs)
-    add_tab(:app_next.t,
-            :action => 'next_image', :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs)
+    add_tab(:app_prev.t, :action => 'prev_image', :id => @image.id,
+            :params => query_params)
+    add_tab(:app_index.t, :action => 'list_images',
+            :params => query_params)
+    add_tab(:app_next.t, :action => 'next_image', :id => @image.id,
+            :params => query_params)
   end
 %>
 
@@ -39,8 +41,9 @@
     <td align="center">
 
       <div>
-        <%= link_to(image_tag("640/#{@image.id}.jpg"), :action => 'show_original',
-                    :id => @image.id, :params => search_params) %><br/>
+        <%= link_to(image_tag("640/#{@image.id}.jpg"),
+                    :action => 'show_original', :id => @image.id,
+                    :params => query_params) %><br/>
         <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
       </div>
 
@@ -49,48 +52,55 @@
 
       <% if check_permission(@image.user_id) %>
         <p>
-          <%= link_to(:image_show_edit.t, :action => 'edit_image', :id => @image.id) %> |
-          <%= link_to(:image_show_destroy.t, { :action => 'destroy_image', :id => @image.id },
+          <%= link_to(:image_show_edit.t, :action => 'edit_image',
+                      :id => @image.id, :params => query_params) %> |
+          <%= link_to(:image_show_destroy.t, { :action => 'destroy_image',
+                      :id => @image.id, :params => query_params },
                       { :confirm => :app_are_you_sure.l }) %>
         </p>
       <% end %>
 
       <p>
-        <%= :image_show_quality.t %>: <span class="Data"><%= @image.quality.to_sym.t %></span>
+        <%= :image_show_quality.t %>:
+          <span class="Data"><%= @image.quality.to_sym.t %></span>
         <% if @image.reviewer %>
           <span class="HelpNote">
             (<%= "#{:show_image_reviewed_by.t}: #{user_link(@image.reviewer, @image.reviewer.login)}" %>)
           </span>
         <% end %><br/>
-        <% if @is_reviewer
-             is_reviewed = (@image.quality != :unreviewed)
-             if is_reviewed %>
-               <br/><%= link_to(:app_next.l, :action => 'next_image',
-                               :id => @image, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-             <% end %>
-          <br/><%= link_to(:low.t, :action => 'set_image_quality', :value => :low,
-                      :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-          <% unless is_reviewed %>
-            | <%= link_to(:low_and_next.t, :action => 'set_image_quality', :value => :low, :next => true,
-                          :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+        <% if @is_reviewer %>
+          <br/>
+          <% if is_reviewed = (@image.quality != :unreviewed) %>
+            <%= link_to(:app_next.l, :action => 'next_image',
+                        :id => @image.id, :params => query_params) %><br/>
           <% end %>
-          <br/> <%= link_to(:medium.t, :action => 'set_image_quality', :value => :medium,
-                            :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+          <%= link_to(:low.t, :action => 'set_image_quality', :value => :low,
+                      :id => @image.id, :params => query_params) %>
           <% unless is_reviewed %>
-            | <%= link_to(:medium_and_next.t, :action => 'set_image_quality', :value => :medium, :next => true,
-                          :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
-          <% end %>
-          <br/> <%= link_to(:high.t, :action => 'set_image_quality', :value => :high,
-                            :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+            | <%= link_to(:low_and_next.t, :action => 'set_image_quality',
+                          :value => :low, :next => true, :id => @image.id,
+                          :params => query_params) %>
+          <% end %><br/>
+          <%= link_to(:medium.t, :action => 'set_image_quality', :value => :medium,
+                      :id => @image.id, :params => query_params) %>
           <% unless is_reviewed %>
-            | <%= link_to(:high_and_next.t, :action => 'set_image_quality', :value => :high, :next => true,
-                          :id => @image.id, :seq_key => @seq_key, :search_seq => @search_seq, :obs => @obs) %>
+            | <%= link_to(:medium_and_next.t, :action => 'set_image_quality',
+                          :value => :medium, :next => true, :id => @image.id,
+                          :params => query_params) %>
+          <% end %><br/>
+          <%= link_to(:high.t, :action => 'set_image_quality', :value => :high,
+                      :id => @image.id, :params => query_params) %>
+          <% unless is_reviewed %>
+            | <%= link_to(:high_and_next.t, :action => 'set_image_quality',
+                          :value => :high, :next => true, :id => @image.id,
+                          :params => query_params) %>
           <% end %>
         <% end %>
       </p>
 
       <p>
-        <%= :image_show_when.t %>: <span class="Data"><%= @image.when.web_date %></span>
+        <%= :image_show_when.t %>:
+          <span class="Data"><%= @image.when.web_date %></span>
       </p>
 
       <p>
@@ -107,8 +117,9 @@
             text += :image_show_comments.t(:num => len)
           end
           text += '</span>' %>
-          <%= link_to(text, :controller => 'observer', :action => 'show_observation',
-                      :id => observation.id, :params => search_params) %>
+          <%= link_to(text, :controller => 'observer',
+                      :action => 'show_observation', :id => observation.id,
+                      :params => query_params) %>
         <% end %>
       </p>
 
@@ -125,6 +136,7 @@
     <%= :image_show_created.t %>: <%= @image.created.web_time %><br/>
     <%= :image_show_modified.t %>: <%= @image.modified.web_time %><br/>
     <%= :app_viewed.t(:date => @image.last_view.web_time,
-                      :times => @image.num_views == 1 ? :app_one_time.l : :app_many_times.l(:num => @image.num_views)) %><br/>
+                      :times => @image.num_views == 1 ? :app_one_time.l :
+                        :app_many_times.l(:num => @image.num_views)) %><br/>
   </span>
 </p>

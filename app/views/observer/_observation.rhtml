@@ -3,8 +3,9 @@
     <td align="center" valign="middle" width="160">
       <%= image = observation.thumb_image
         if image
-          link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
-                  :action => 'show_observation', :id => observation.id, :params => search_params)
+          link_to(image_tag("thumb/%d.jpg" % observation.thumb_image_id, :border => 0),
+                  :action => 'show_observation', :id => observation.id,
+                  :params => query_params)
         end
       %>
     </td>
@@ -17,8 +18,9 @@
 <% end %>
 
       <span class="ListName">
-        <%= link_to(observation.unique_format_name.t, :action => 'show_observation',
-                    :id => observation.id, :params => search_params) %>
+        <%= link_to(observation.unique_format_name.t,
+                    :action => 'show_observation', :id => observation.id,
+                    :params => query_params) %>
       </span><br/>
 
       <span class="ListWhere">

@@ -14,12 +14,12 @@
                 :all_users => @all_users ? 0 : 1) %>
   </big></p><br/>
 
-  <%= pagination_numbers(@image_pages) %>
+  <%= pagination_numbers(@pages) %>
 
   <table cellspacing="0">
     <% row_count = 0
     col_count = 0
-    for image in @images
+    for image in @objects
       color = calc_color(row_count, col_count, @layout["alternate_rows"],
                          @layout["alternate_columns"])
       if col_count == 0 %>
@@ -40,7 +40,7 @@
     end %>
   </table>
 
-  <%= pagination_numbers(@image_pages) %>
+  <%= pagination_numbers(@pages) %>
 
   <%= focus_on('id') %>
 <% end %>

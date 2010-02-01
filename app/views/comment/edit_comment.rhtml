@@ -2,12 +2,13 @@
   @title = :comment_edit_title.t(:name => @object.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :comment.l),
-            :action => 'show_comment', :id => @comment.id)
+    add_tab(:app_cancel.t(:type => :comment.l), :action => 'show_comment',
+            :id => @comment.id, :params => query_params)
   end
 %>
 
-<% form_tag(:action => 'edit_comment', :id => @comment.id) do %>
+<% form_tag(:action => 'edit_comment', :id => @comment.id,
+            :params => query_params) do %>
   <br/><center><%= submit_tag :app_save_changes.l %></center>
 
   <%= render(:partial => 'form_comments') %>
@@ -16,7 +17,8 @@
 
   <%= case @comment.object_type
     when 'Observation'
-      render(:partial => 'observer/show_observation', :locals => { :observation => @object })
+      render(:partial => 'observer/show_observation',
+             :locals => { :observation => @object })
     else
       raise(ArgumentError, "We appear to have forgotten to tell add_comment how to display objects of type \"#{@comment.object_type}\".")
   end %>

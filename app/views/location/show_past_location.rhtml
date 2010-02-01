@@ -9,13 +9,16 @@
 <% for v in @other_versions %>
   <%= if v.version == @location.version
     link_to("#{v.version}: #{v.display_name.t}",
-            :action => 'show_location', :id => @location.id)
+            :action => 'show_location', :id => @location.id,
+            :params => query_params)
   elsif v.version == @past_location.version
     "#{v.version}: #{v.display_name.t}"
   else
     link_to("#{v.version}: #{v.display_name.t}",
-            :action => 'show_past_location', :id => @location.id, :version => v.version)
+            :action => 'show_past_location', :id => @location.id,
+            :version => v.version, :params => query_params)
   end %><br/>
 <% end %><br/>
 
-<%= render(:partial => 'show_location', :locals => { :location => @past_location }) %>
+<%= render(:partial => 'show_location',
+           :locals => { :location => @past_location }) %>

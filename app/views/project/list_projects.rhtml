@@ -7,12 +7,12 @@
   end
 %>
 
-<%= pagination_numbers(@project_pages) %>
+<%= pagination_numbers(@pages) %>
 
-<% if @projects.length > 0 %>
+<% if @objects.length > 0 %>
   <table cellpadding="5" cellspacing="0" width="100%">
     <% odd_or_even = 0
-    for project in @projects
+    for project in @objects
       odd_or_even = 1 - odd_or_even %>
       <tr valign="top" class="ListLine<%= odd_or_even %>">
         <td width="100%">
@@ -27,4 +27,4 @@
   </table>
 <% end %>
 
-<%= pagination_numbers(@project_pages) %><br/>
+<%= pagination_numbers(@pages) %><br/>

@@ -29,20 +29,13 @@
 #
 #  Helpers:
 #    process_image(args, upload)
-#    calc_image_ids(obs)
-#    next_id(id, id_list)
-#    prev_id(id, id_list)
-#    next_image_list(observation_id, id_list)
-#    prev_image_list(observation_id, id_list)
 #    show_selected_images(title, conditions, order, source)
-#    inc_image_from_obs_search(state, inc_func, direction)
-#    inc_image(func_name, direction)
 #
 ################################################################################
 
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
-    :advanced_obj_search,
+    :advanced_search,
     :image_search,
     :images_by_user,
     :list_images,
@@ -65,90 +58,90 @@ class ImageController < ApplicationController
     :show_image,
   ]
 
+  ##############################################################################
+  #
+  #  :section: Searches and Indexes
+  #
+  ##############################################################################
+
   # Display matrix of images, most recent first.
-  # Linked from: left-hand panel
-  # Inputs: none
-  # Outputs: @objs, @obj_pages, @layout
   def list_images
-    session[:checklist_source] = :nothing
-    session_setup
-    store_location
-    @layout = calc_layout_params
-    @obj_pages, @objs = paginate(:images, :order => "modified desc", :per_page => @layout["count"])
+    query = find_or_create_query(:Image, :all, :by => :created)
+    @title = :image_list_title.t
+    show_selected_images(query)
   end
 
-  # Display list of images by a given user.
-  # Linked from observer/show_user
-  # Inputs: params[:id] (user)
-  # Outputs: @images
+  # Display matrix of images by a given user.
   def images_by_user
     user = User.find(params[:id])
-    session[:checklist_source] = :nothing
-    session_setup
-    store_location
-    @layout = calc_layout_params
+    query = create_query(:Image, :by_user, :user => user)
     @title = :images_by_user.t(:user => user.legal_name)
-    @obj_pages, @objs = paginate(:images, :order => "modified desc",
-      :conditions => "user_id = #{user.id}", :per_page => @layout["count"])
-    render(:action => "list_images")
+    show_selected_images(query)
   end
 
-  # Searches image notes, copyright, and consensus name (including author)
-  # for all observations it's associated with.
-  # Redirected from: pattern_search (search bar)
-  # Inputs:
-  #   session[:pattern]
-  # Outputs:
-  #   Renders list_images.
+  # Display matrix of images whose notes, names, etc. match a string pattern.
   def image_search
-    store_location
-    @layout = calc_layout_params
-    @pattern = params[:pattern] || session[:pattern] || ''
-    id = @pattern.to_i
-    image = nil
-    if @pattern == id.to_s
-      begin
-        image = Image.find(id)
-      rescue ActiveRecord::RecordNotFound
-      end
-    end
-    if image
-      redirect_to(:action => 'show_image', :id => id)
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (image = Image.safe_find(pattern))
+      redirect_to(:action => 'show_image', :id => image.id)
     else
-      show_selected_images(:image_search_title.t(:pattern => @pattern),
-        field_search(["names.search_name", "images.notes", "images.copyright_holder"], "%#{@pattern.gsub(/[*']/,"%")}%"),
-        "names.search_name, `when` desc", :nothing)
+      query = create_query(:Image, :pattern, :pattern => pattern)
+      @title = :image_search_title.t(:pattern => pattern)
+      show_selected_images(query)
     end
   end
 
-  def advanced_obj_search
+  # Displays matrix of advanced search results.
+  def advanced_search
     begin
-      @layout = calc_layout_params
-      query = calc_advanced_search_query("SELECT STRAIGHT_JOIN DISTINCT images.* FROM",
-        Set.new(['observations', 'images_observations', 'images']), params)
-      show_selected_objs("Advanced Search", query, nil, :nothing, :advanced_images, 'list_images', nil)
+      query = find_query(:Image)
+      @title = :app_advanced_search.t
+      show_selected_images(query)
     rescue => err
       flash_error(err)
+      flash_error(err.backtrace.join("<br/>"))
       redirect_to(:controller => 'observer', :action => 'advanced_search')
     end
   end
 
-  def show_selected_images(title, conditions, order, source)
-    # If provided, link should be the arguments for link_to as a list of lists,
-    # e.g. [[:action => 'blah'], [:action => 'blah']]
-    show_selected_objs(title, conditions, order, source, :images, 'list_images')
+  # Show selected search results as a matrix with 'list_images' template.
+  def show_selected_images(query)
+    store_query(query)
+    show_index_of_objects(query, :action => 'list_images', :matrix => true)
   end
 
-  # Show the 640x640 (max size) version of image.
+  ##############################################################################
+  #
+  #  :section: Show Images
+  #
+  ##############################################################################
+
+  # Show the 640x640 ("normal" size) version of image.
   # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
   # Outputs: @image
   def show_image
     store_location
-    pass_seq_params()
     @image = Image.find(params[:id])
     update_view_stats(@image)
     @is_reviewer = is_reviewer
+
+    # Wait until here to create this search query to save server resources.
+    # Otherwise we'd be creating a new search query for images for every single
+    # show_observation request.  We know we came from an observation-type page
+    # because that's the only time the 'obs' param will be set (with obs id).
+    obs = params[:obs]
+    if obs.to_s != '' &&
+       # The outer search on observation won't be saved for robots, so no sense
+       # in bothering with any of this.
+       !is_robot?
+      obs_query = find_or_create_query(:Observation)
+      obs_query.this = obs
+      img_query = create_query(:Image, :inside_observation,
+                                       :outer => obs_query)
+      set_query_params(img_query)
+    end
   end
 
   # Show the original size image.
@@ -157,85 +150,20 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_original
     store_location
-    pass_seq_params()
+    pass_query_params
     @image = Image.find(params[:id])
   end
 
-  def inc_image_from_obs_search(state, inc_func, direction)
-    current_image_id = params[:id].to_i
-    current_image = Image.find(current_image_id)
-    new_image = nil
-    current_observation_id = state.current_id
-    current_observation = Observation.find(current_observation_id)
-    if current_image && current_observation
-      images = current_observation.images
-      index = (direction == 1) ? images.rindex(current_image) : images.index(current_image)
-      if index
-        index += direction
-        if 0 <= index && index < images.length # Have to check explicitly since foo[-1] is the not nil
-          new_image = images[index]
-        end
-      end
-      if new_image.nil?
-        inc_func.call
-        count = Observation.count
-        while current_observation_id != state.current_id
-          current_observation_id = state.current_id
-          current_observation = Observation.find(current_observation_id)
-          if current_observation
-            if direction == -1
-              new_image = current_observation.images[-1] # Start from the last image
-            else
-              new_image = current_observation.images[0]
-            end
-            count -= 1
-            if new_image.nil? and count > 0
-              inc_func.call()
-            end
-          end
-        end
-      end
-    end
-    if new_image.nil?
-      flash_warning(:image_no_new_image.t)
-      new_image = current_image
-    end
-    state.save if !is_robot?
-    redirect_to(:action => 'show_image', :id => new_image, :seq_key => state.id)
-  end
-
-  def inc_image(func_name, direction) # direction is 1 or -1 depending on if we're doing next or prev
-    state = SequenceState.lookup(params, :images, logger)
-    inc_func = state.method(func_name)
-    pass_seq_params()
-    case state.query_type
-    when :images
-      inc_func.call()
-      state.save if !is_robot?
-      id = state.current_id
-      if id
-        redirect_to(:action => 'show_image', :id => id, :seq_key => state.id)
-      else
-        redirect_to(:controller => 'observer', :action => 'list_rss_logs')
-      end
-    when :observations
-      # Need to walk through images for current observation, then walk through the remaining observations
-      inc_image_from_obs_search(state, inc_func, direction)
-    when :rss_logs
-      inc_image_from_obs_search(state, inc_func, direction)
-    when :name_observations
-      inc_image_from_obs_search(state, inc_func, direction)
-    else
-      redirect_to(:controller => 'observer', :action => 'list_rss_logs')
-    end
-  end
-
+  # Go to next observation: redirects to show_image.
   def next_image
-    inc_image("next", 1)
+    image = Image.find(params[:id])
+    redirect_to_next_object(:next, image)
   end
 
+  # Go to previous observation: redirects to show_image.
   def prev_image
-    inc_image("prev", -1)
+    image = Image.find(params[:id])
+    redirect_to_next_object(:prev, image)
   end
 
   def set_image_quality
@@ -243,11 +171,11 @@ class ImageController < ApplicationController
     if is_reviewer
       image = Image.find(id)
       image.quality = params[:value]
-      image.reviewer_id = session[:user_id]
+      image.reviewer_id = @user.id
       image.save
     end
     redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image', :id => id,
-                :seq_key => params[:seq_key], :search_seq => params[:search_seq], :obs => params[:obs])
+                :params => query_params)
   end
 
   # Form for uploading and adding images to an observation.
@@ -263,10 +191,12 @@ class ImageController < ApplicationController
   #   @licenses     (options for license select menu)
   # Redirects to show_observation.
   def add_image
+    pass_query_params
     @observation = Observation.find(params[:id])
     if !check_permission!(@observation.user_id)
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-    elsif request.method == :get
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
+    elsif request.method != :post
       @image = Image.new
       @image.license = @user.license
       @image.copyright_holder = @user.legal_name
@@ -280,7 +210,8 @@ class ImageController < ApplicationController
       process_image(args, params[:upload][:image2])
       process_image(args, params[:upload][:image3])
       process_image(args, params[:upload][:image4])
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
     end
   end
 
@@ -309,8 +240,8 @@ class ImageController < ApplicationController
           :license          => @image.license
         )
         @observation.add_image_with_log(@image, @user)
-        flash_notice :profile_uploaded_image. \
-          t(:name => name ? "'#{name}'" : "##{@image.id}")
+        flash_notice :profile_uploaded_image.
+                          t(:name => name ? "'#{name}'" : "##{@image.id}")
       end
     end
   end
@@ -323,11 +254,12 @@ class ImageController < ApplicationController
   # Outputs: @observation
   # Redirects to show_observation.
   def remove_images
+    pass_query_params
     @observation = Observation.find(params[:id])
     if !check_permission!(@observation.user_id)
       redirect_to(:controller => 'observer', :action => 'show_observation',
-                  :id => @observation.id)
-    elsif request.method == :get
+                  :id => @observation.id, :params => query_params)
+    elsif request.method != :post
       # @image = Image.new
       # @image.copyright_holder = @user.legal_name
     else
@@ -344,7 +276,8 @@ class ImageController < ApplicationController
           end
         end
       end
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
     end
   end
 
@@ -355,10 +288,12 @@ class ImageController < ApplicationController
   #   params[:comment][:comment]
   # Outputs: @image, @licenses
   def edit_image
+    pass_query_params
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
     if !check_permission!(@image.user_id)
-      redirect_to(:action => 'show_image', :id => @image)
+      redirect_to(:action => 'show_image', :id => @image,
+                  :params => query_params)
     elsif request.method == :post
       if !@image.update_attributes(params[:image])
         args = {}
@@ -376,27 +311,43 @@ class ImageController < ApplicationController
           o.log(:log_image_updated, :name => @image.unique_format_name)
         end
         flash_notice :image_edit_success.t
-        redirect_to(:action => 'show_image', :id => @image.id)
+        redirect_to(:action => 'show_image', :id => @image.id,
+                    :params => query_params)
       end
     end
   end
 
   # Callback to destroy an image.
-  # Should this be allowed?  How do we cleanup corresponding observations?
   # Linked from: show_image/original
   # Inputs: params[:id] (image)
   # Redirects to list_images.
   def destroy_image
+
+    # All of this just to decide where to redirect after deleting image.
     @image = Image.find(params[:id])
+    next_state = nil
+    if this_state = find_query(:Image)
+      set_query_params(this_state)
+      this_state.this = @image
+      next_state = this_state.next
+    end
+
     if !check_permission!(@image.user_id)
-      redirect_to(:action => 'show_image', :id => @image.id)
+      redirect_to(:action => 'show_image', :id => @image.id,
+                  :params => query_params)
     elsif !@image.destroy
       flash_error :image_destroy_failed.t
-      redirect_to(:action => 'show_image', :id => @image.id)
+      redirect_to(:action => 'show_image', :id => @image.id,
+                  :params => query_params)
     else
       Transaction.delete_image(:id => @image)
       flash_notice :image_destroy_success.t
-      redirect_to(:action => 'list_images')
+      if next_state
+        redirect_to(:action => 'show_image', :id => next_state.this_id,
+                    :params => set_query_params(next_state))
+      else
+        redirect_to(:action => 'list_images')
+      end
     end
   end
 
@@ -405,6 +356,7 @@ class ImageController < ApplicationController
   # Inputs: params[:image_id], params[:observation_id]
   # Redirects to show_observation.
   def remove_image
+    pass_query_params
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
     if !check_permission!(@observation.user_id)
@@ -425,7 +377,8 @@ class ImageController < ApplicationController
       )
       flash_notice :image_remove_success.t(:id => @image.id)
     end
-    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    redirect_to(:controller => 'observer', :action => 'show_observation',
+                :id => @observation.id, :params => query_params)
   end
 
   # Browse through matrix of recent images to let a user reuse an image
@@ -435,20 +388,22 @@ class ImageController < ApplicationController
   # Outputs: @images, @image_pages, @observation, @layout
   # (See also add_image_to_obs and reuse_image_by_id.)
   def reuse_image
+    pass_query_params
     @observation = Observation.find(params[:id])
     @layout = calc_layout_params
     if !check_permission!(@observation.user_id)
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
     elsif params[:all_users] == '1'
       @all_users = true
-      @image_pages, @images = paginate(:images,
-                                       :order => "modified desc",
-                                       :per_page => @layout["count"])
+      query = create_query(:Image, :all, :by => :modified)
+      @pages = paginate_numbers(:page, @layout['count'])
+      @objects = query.paginate(@pages)
     else
-      @image_pages, @images = paginate(:images,
-                                       :conditions => ['user_id = ?', @user.id],
-                                       :order => "modified desc",
-                                       :per_page => @layout["count"])
+      query = create_query(:Image, :by_user, :user => @user)
+      query.order = 'users.modified DESC'
+      @pages = paginate_numbers(:page, @layout['count'])
+      @objects = query.paginate(@pages)
     end
   end
 
@@ -459,6 +414,7 @@ class ImageController < ApplicationController
   #   params[:obs_id]   (observation)
   # Redirects to show_observation.
   def add_image_to_obs
+    pass_query_params
     @observation = Observation.find(params[:obs_id])
     if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:id])
@@ -466,7 +422,8 @@ class ImageController < ApplicationController
         flash_notice :image_reuse_success.t(:id => image.id)
       end
     end
-    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    redirect_to(:controller => 'observer', :action => 'show_observation',
+                :id => @observation.id, :params => query_params)
   end
 
   # Second post method for reuse_image: user has entered an image id in the
@@ -476,6 +433,7 @@ class ImageController < ApplicationController
   #   params[:observation][:idstr]  (image)
   # Redirects to show_observation.
   def reuse_image_by_id
+    pass_query_params
     @observation = Observation.find(params[:observation][:id])
     if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
@@ -483,7 +441,8 @@ class ImageController < ApplicationController
         flash_notice :image_reuse_success.t(:id => image.id)
       end
     end
-    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    redirect_to(:controller => 'observer', :action => 'show_observation',
+                :id => @observation.id, :params => query_params)
   end
 
   # Browse through matrix of recent images to let a user reuse an image
@@ -506,7 +465,8 @@ class ImageController < ApplicationController
           )
         end
         flash_notice :image_changed_your_image.t(:id => image.id)
-        redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
+        redirect_to(:controller => "observer", :action => "show_user",
+                    :id => @user.id)
         redirected = true
       rescue(e)
         flash_error :image_reuse_invalid_id.t
@@ -516,14 +476,14 @@ class ImageController < ApplicationController
       @layout = calc_layout_params
       if params[:all_users] == '1'
         @all_users = true
-        @image_pages, @images = paginate(:images,
-                                         :order => "modified desc",
-                                         :per_page => @layout["count"])
+        query = create_query(:Image, :all, :by => :modified)
+        @pages = paginate_numbers(:page, @layout['count'])
+        @objects = query.paginate(@pages)
       else
-        @image_pages, @images = paginate(:images,
-                                         :conditions => ['user_id = ?', @user.id],
-                                         :order => "modified desc",
-                                         :per_page => @layout["count"])
+        query = create_query(:Image, :by_user, :user => @user)
+        query.order = 'users.modified DESC'
+        @pages = paginate_numbers(:page, @layout['count'])
+        @objects = query.paginate(@pages)
       end
     end
   end
@@ -668,107 +628,5 @@ class ImageController < ApplicationController
       flash_error :image_resize_denied.t
     end
     redirect_to(:action => 'list_images')
-  end
-
-################################################################################
-
-  helper_method :next_id
-  def next_id(id, id_list)
-    result = id
-    if id_list.length > 0
-      result = id_list[0]
-      index = id_list.index(id)
-      if index
-        index = index + 1
-        if index < id_list.length
-          result = id_list[index]
-        end
-      end
-    end
-    result
-  end
-
-  helper_method :next_image_list
-  def next_image_list(observation_id, id_list)
-    image_list = []
-    current_id = observation_id
-    if id_list.length > 0
-      index = id_list.index(observation_id)
-      if index.nil?
-        index = id_list.length - 1
-        observation_id = id_list[index]
-      end
-      current_id = observation_id
-      while image_list == []
-        current_id = next_id(current_id, id_list)
-        if current_id == observation_id
-          break
-        end
-        images = Observation.find(current_id).images
-        image_list = []
-        for i in images
-          image_list.push(i.id)
-        end
-      end
-    end
-    [image_list, current_id]
-  end
-
-  helper_method :prev_id
-  def prev_id(id, id_list)
-    result = id
-    if id_list.length > 0
-      result = id_list[-1]
-      index = id_list.index(id)
-      if index
-        index = index - 1
-        if index >= 0
-          result = id_list[index]
-        end
-      end
-    end
-    result
-  end
-
-  helper_method :prev_image_list
-  def prev_image_list(observation_id, id_list)
-    image_list = []
-    current_id = observation_id
-    if id_list.length > 0
-      index = id_list.index(observation_id)
-      if index.nil?
-        index = 0
-        observation_id = id_list[index]
-      end
-      current_id = observation_id
-      while image_list == []
-        current_id = prev_id(current_id, id_list)
-        if current_id == observation_id
-          break
-        end
-        images = Observation.find(current_id).images
-        image_list = []
-        for i in images
-          image_list.push(i.id)
-        end
-      end
-    end
-    [image_list, current_id]
-  end
-
-  helper_method :calc_image_ids
-  def calc_image_ids(obs)
-    result = nil
-    if obs
-      result = []
-      for ob_id in obs:
-        img_ids = Observation.connection.select_all("select image_id
-          from images_observations where observation_id=" + ob_id.to_s)
-        for h in img_ids
-          result.push(h['image_id'].to_i)
-        end
-      end
-    end
-    result
   end
 end

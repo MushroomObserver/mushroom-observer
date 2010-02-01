@@ -9,7 +9,8 @@
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
     if approved_synonyms != []
       links = approved_synonyms.map do |n|
-        link_to(n.display_name.t, :controller => 'name', :action => "show_name", :id => n)
+        link_to(n.display_name.t, :controller => 'name',
+                :action => "show_name", :id => n)
       end %>
       <% if name.deprecated %>
         <%= links.length > 1 ? :show_observation_preferred_names.t : :show_observation_preferred_name.t %>:
@@ -44,7 +45,8 @@
 <% if lists.length > 0 %>
   <p><%= :show_observation_species_lists.t %>:<br/>
     <% for l in lists %>
-      <%= link_to(l.unique_text_name, :controller => 'species_list', :action => 'show_species_list', :id => l.id) %><br/>
+      <%= link_to(l.unique_text_name, :controller => 'species_list',
+                  :action => 'show_species_list', :id => l.id) %><br/>
     <% end %>
   </p>
 <% end %>

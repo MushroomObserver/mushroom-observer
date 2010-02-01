@@ -1,6 +1,7 @@
 <% @title = :author_request_title.t(:title => @name.display_name) %>
 
-<% form_tag(:action => 'send_author_request', :id => @name.id) do %>
+<% form_tag(:action => 'author_request', :id => @name.id,
+            :params => query_params) do %>
   <br/><center><%= submit_tag :app_send.l %></center><br/>
 
   <label for="email_subject"><%= :request_subject.t %></label>:<br/>

@@ -1,11 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class CommentControllerTest < ControllerTestCase
-  fixtures :comments
-  fixtures :locations
-  fixtures :names
-  fixtures :observations
-  fixtures :users
 
   def test_list_comments
     get_with_dump(:list_comments)
@@ -33,7 +28,7 @@ class CommentControllerTest < ControllerTestCase
   end
 
   def test_edit_comment
-    comment = @minimal_comment
+    comment = comments(:minimal_comment)
     params = { "id" => comment.id.to_s }
     assert_equal("rolf", comment.user.login)
     requires_user(:edit_comment, :show_comment, params)
@@ -41,7 +36,7 @@ class CommentControllerTest < ControllerTestCase
   end
 
   def test_destroy_comment
-    comment = @minimal_comment
+    comment = comments(:minimal_comment)
     obs = comment.object
     assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
@@ -55,7 +50,7 @@ class CommentControllerTest < ControllerTestCase
 
   def test_save_comment
     assert_equal(10, @rolf.contribution)
-    obs = @minimal_unknown
+    obs = observations(:minimal_unknown)
     comment_count = obs.comments.size
     params = {
       :id => obs.id,
@@ -78,7 +73,7 @@ class CommentControllerTest < ControllerTestCase
   # Reproduces problem with a spontaneous logout between
   # add_comment and save_comment.
   def test_save_comment_indirect_params
-    obs = @minimal_unknown
+    obs = observations(:minimal_unknown)
     comment_count = obs.comments.size
     comment_params = {
       :id => obs.id,
@@ -94,9 +89,7 @@ class CommentControllerTest < ControllerTestCase
 
     # Have to do login explicitly to manage the session object correctly.
     # Will have to test hidden inputs, etc. in account controller tester.
-    user = User.authenticate('rolf', 'testpassword')
-    assert(user)
-    session[:user_id] = user.id
+    login('rolf')
     post(:add_comment, {})
     assert_response(:controller => "observer", :action => "show_observation")
     obs.reload
@@ -106,7 +99,7 @@ class CommentControllerTest < ControllerTestCase
   end
 
   def test_update_comment
-    comment = @minimal_comment
+    comment = comments(:minimal_comment)
     params = {
       :id => comment.id,
       :comment => {

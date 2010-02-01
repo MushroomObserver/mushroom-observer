@@ -11,7 +11,8 @@
     <td valign="middle">
 <% end %>
       <%= link_to(sprintf('<span class="ListName">%s</span><br/>', name.display_name.t),
-                  :controller => 'name', :action => 'show_name', :id => name.id) %>
+                  :controller => 'name', :action => 'show_name', :id => name.id,
+                  :params => query_params) %>
       <span class="ListWho"><br/><%= :rss_name_by.t(:user => user_link(name.user)) %></span>
     </td>
   </tr>

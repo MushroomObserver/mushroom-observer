@@ -34,6 +34,7 @@
 #  all_locales::            Array of available locales for which we have translations.
 #  translate_menu::         Translate keys in select-menu's options.
 #  set_locale::             (filter: determine which locale is requested)
+#  standardize_locale::
 #  get_sorted_locales_from_request_header::
 #                           (parse locale preferences from request header)
 #  get_valid_locale_from_request_header::
@@ -58,23 +59,27 @@
 #  save_name::                (helper)
 #
 #  ==== Searching
-#  show_selected_objs::     .
+#  store_query::            Stores Query in session for use by create_species_list.
+#  set_query_params::       Make +query_params+ refer to a given Query.
+#  pass_query_params::      Tell +query_params+ to pass the Query through this action.
+#  query_params::           Get parameters to add to link_to, redirect_to, etc.
+#  find_query::             Find a given Query or return nil.
+#  find_or_create_query::   Find appropriate Query or create as necessary.
+#  create_query::           Create a new Query from scratch.
+#  redirect_to_next_object:: Find next object from a Query and redirect to its show page.
+#  show_index_of_objects::  Show paginated set of Query results as a list.
+#
+#  ==== Other search-like stuff
 #  query_ids::              Gets list of ids given SQL query.
 #  field_search::           Creates sql that means "any fields like a pattern?"
 #  clean_sql_pattern::      .
-#  session_setup            Clears out some session data.
-#  pass_seq_params::        .
-#  calc_search::            .
-#  calc_search_params::     .
-#  create_search::          .
 #  test_calc_condition::    .
 #  calc_condition::         .
 #  calc_advanced_search_query:: .
 #
 #  ==== Pagination
-#  paginate_by_sql::        Paginate the results of a given SQL query.
-#  paginate_array::         Paginate an Array of objects.
 #  paginate_letters::       Paginate an Array by letter.
+#  paginate_numbers::       Paginate an Array normally.
 #
 #  ==== Memory usage
 #  log_memory_usage::       (filter: logs memory use stats from <tt>/proc/$$/smaps</tt>)
@@ -338,22 +343,29 @@ class ApplicationController < ActionController::Base
   # 5. server (DEFAULT_LOCALE)
   #
   def set_locale
-    if params[:user_locale]
+    code = if params[:user_locale]
       logger.debug "[globalite] loading locale: #{params[:user_locale]} from params"
-      Locale.code = params[:user_locale]
-      session[:locale] = Locale.code
+      params[:user_locale]
     elsif @user && @user.locale && @user.locale != ''
       logger.debug "[globalite] loading locale: #{@user.locale} from @user"
-      Locale.code = @user.locale
-      session[:locale] = Locale.code
+      @user.locale
     elsif session[:locale]
       logger.debug "[globalite] loading locale: #{session[:locale]} from session"
-      Locale.code = session[:locale]
+      session[:locale]
     elsif locale = get_valid_locale_from_request_header
       logger.debug "[globalite] loading locale: #{locale} from request header"
-      Locale.code = locale
+      locale
     else
-      Locale.code = DEFAULT_LOCALE
+      DEFAULT_LOCALE
+    end
+
+    # Only change the Locale code if it needs changing.  There is about a 0.14
+    # second performance hit every time we change it... even if we're only
+    # changing it to what it already is!!
+    code = standardize_locale(code)
+    if Locale.code.to_s != code
+      Locale.code = code
+      session[:locale] = code
     end
 
     # One last sanity check.  (All translation YML files should have :en_US
@@ -484,6 +496,27 @@ class ApplicationController < ActionController::Base
     match || fallback
   end
 
+  # Standardize locale code to the format Globalite uses: 'xx-YY'.  Returns a
+  # String or raises a RuntimeError if it's invalid.  (*NOTE*: Globalite's
+  # +Locale.code+ is a symbol!)
+  #
+  #   en_us  ->  en-US
+  #   en-us  ->  en-US
+  #   en_US  ->  en-US
+  #   en-US  ->  en-US
+  #   en     ->  (error)
+  #   en-*   ->  (error)
+  #   e-US   ->  (error)
+  #   eng-US ->  (error)
+  #
+  def standardize_locale(code)
+    if code.to_s.match(/^([a-z][a-z])[_\-](\w+)/i)
+      $1.downcase + '-' + $2.upcase
+    else
+      raise "Invalid locale: '#{code}'"
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Error handling
@@ -504,7 +537,7 @@ class ApplicationController < ActionController::Base
   #  <tt>session[:notice]</tt> as before.  Browser is redirected.  This may
   #  happen multiple times before an action finally renders a template.  Once
   #  this finally happens, all the errors that have accumulated in
-  #  <tt>session[:notice]</tt> are displayed, then cleared. 
+  #  <tt>session[:notice]</tt> are displayed, then cleared.
   #
   #  *NOTE*: I just noticed that we've been incorrectly using the +flash+
   #  mechanism for this all along.  This can fail if you flash an error,
@@ -544,29 +577,32 @@ class ApplicationController < ActionController::Base
   helper_method :flash_clear
 
   # Report an informational message that will be displayed (in green) at the
-  # top of the next page the User sees. 
+  # top of the next page the User sees.
   def flash_notice(str)
     session[:notice] += '<br/>' if session[:notice]
     session[:notice] ||= '0'
     session[:notice] += str
   end
+  helper_method :flash_notice
 
   # Report a warning message that will be displayed (in yellow) at the top of
-  # the next page the User sees. 
+  # the next page the User sees.
   def flash_warning(str)
     flash_notice(str)
     session[:notice][0,1] = '1' if session[:notice][0,1] == '0'
   end
+  helper_method :flash_warning
 
   # Report an error message that will be displayed (in red) at the top of the
-  # next page the User sees. 
+  # next page the User sees.
   def flash_error(str)
     flash_notice(str)
     session[:notice][0,1] = '2' if session[:notice][0,1] != '2'
   end
+  helper_method :flash_error
 
   # Report the errors for a given ActiveRecord::Base instance.  These will be
-  # displayed (in red) at the top of the next page the User sees. 
+  # displayed (in red) at the top of the next page the User sees.
   #
   #   if object.save
   #     flash_notice "Yay!"
@@ -798,6 +834,266 @@ class ApplicationController < ActionController::Base
   #
   #  :section: Searching
   #
+  #  == Overview
+  #
+  #  The general idea is that the user executes a search or requests an index,
+  #  then clicks on a result.  This takes the user to a show_object page.  This
+  #  page "knows" about the search or index via one or more search parameters
+  #  passed around in the URL.
+  #
+  #  While going through the results via the "prev" and "next" buttons, the
+  #  user may want to divert temporarily to add a comment or propose a name or
+  #  something.  These actions are responsible for keeping track of these
+  #  search parameters, and eventually passing them back to the show_object
+  #  page.
+  #
+  #  See Query for more detail.
+  #
+  #  == Typical usage
+  #
+  #    def rss_logs
+  #      # Create Query so we can get list of observations to display.
+  #      @query = create_query(:observations_by_rss_log)
+  #      @pages, @observations = @query.paginate(page, num_per_page)
+  #      set_query_params(@query)
+  #
+  #      # Results in the view must pass "query_params" to show_observation.
+  #      #
+  #      #   for observation in @observations
+  #      #     link_to(observation.name,
+  #      #       :action => 'show_observation',
+  #      #       :id     => observation.id,
+  #      #       :params => query_params
+  #      #     )
+  #      #   end
+  #    end
+  #
+  #    def show_observation
+  #      @observation = Observation.find(params[:id])
+  #
+  #      # Need to get a copy of the Query so we can do next/prev links.
+  #      @query = find_or_create_query(:observations_by_rss_log)
+  #      set_query(@query)
+  #
+  #      # All links in the view must include "query_params", so that the
+  #      # query state will be passed on to the next actions.
+  #      #
+  #      #   link_to('prev/next',
+  #      #     :action => 'show_observation',
+  #      #     :id     => @query.prev/next_id,
+  #      #     :params => query_params
+  #      #   )
+  #      #   link_to('post comment',
+  #      #     :controller => 'comment',
+  #      #     :action     => 'create_comment',
+  #      #     :id         => @observation.id,
+  #      #     :params => query_params
+  #      #   )
+  #    end
+  #
+  #    def post_comment
+  #      @observation = Observation.find(params[:id])
+  #
+  #      # We don't actually need the Query, just pass it through.
+  #      pass_query_params
+  #
+  #      if request.method == :get
+  #        # The form_tag and "cancel" link must include "query_params".
+  #        #
+  #        #   form_tag(
+  #        #     :action => 'post_comment',
+  #        #     :id     => @observation.id,
+  #        #     :params => query_params
+  #        #   )
+  #        #   link_to('cancel',
+  #        #     :action => 'show_observation',
+  #        #     :id     => @observation.id,
+  #        #     :params => query_params
+  #        #   )
+  #
+  #      elsif request.method == :post
+  #        # Lastly, this, too, must include "query_params".
+  #        redirect_to(
+  #          :action => :show_observation,
+  #          :id     => @observation.id,
+  #          :params => query_params
+  #        )
+  #      end
+  #    end
+  #
+  ##############################################################################
+
+  # This stores the latest search/index used for use by create_species_list.
+  # (Stores the Query id in <tt>session[:checklist_source]</tt>.)
+  def store_query(query=nil)
+    id = query && query.id
+    session[:checklist_source] = id if session[:checklist_source] != id
+  end
+
+  # Return query parameter(s) necessary to pass query information along to
+  # another action. *NOTE*: This method is available to views. 
+  def query_params(query=nil)
+    if query
+      {:q => query.id.alphabetize}
+    else
+      @query_params || {}
+    end
+  end
+  helper_method :query_params
+
+  # Get query parameter(s) from request params.
+  def pass_query_params
+    @query_params = {}
+    @query_params[:q] = params[:q] if params[:q].to_s != ''
+    @query_params
+  end
+
+  # Set query parameter(s) for a given query (or clear them if nil).
+  def set_query_params(query=nil)
+    @query_params = {}
+    @query_params[:q] = query.id.alphabetize if query
+    @query_params
+  end
+
+  # Lookup an appropriate Query or create a default one if necessary.
+  def find_or_create_query(model, flavor=:default, args={})
+    model = model.to_s
+    result = find_query(model, false)
+    result ||= create_query(model, flavor, args)
+    if result && !is_robot?
+      result.access_count += 1
+      result.save
+    end
+    return result
+  end
+
+  # Lookup the given Query, returning nil if it no longer exists.
+  def find_query(model, update=!is_robot?)
+    model = model.to_s
+    result = nil
+    if params[:q].to_s != ''
+      if query = Query.safe_find(params[:q].dealphabetize)
+        if query.model_string == model
+          result = query
+        elsif query2 = query.coerce(model)
+          result = query2
+        elsif (query = query.outer) and
+              (query.model_string == model)
+          result = query
+        elsif query2 = query.coerce(model)
+          result = query2
+        end
+        if update && result
+          result.access_count += 1
+          result.save
+        end
+      end
+    end
+    return result
+  end
+
+  # Create a new Query of the given flavor for the given model.  Pass it
+  # in all the args you would to Query#new. *NOTE*: Not all flavors are
+  # capable of supplying defaults for every argument.
+  def create_query(model, flavor=:default, args={})
+    result = Query.lookup(model, flavor, args)
+    result.save if !is_robot?
+    return result
+  end
+
+  # This is the common code for all the 'prev/next_object' actions.  Pass in
+  # the current object and direction (:prev or :next), and it looks up the
+  # query, grabs the next object, and redirects to the appropriate
+  # 'show_object' action.
+  #
+  #   def next_image
+  #     image = Image.find(params[:id])
+  #     redirect_to_next_object(:next, image)
+  #   end
+  #
+  def redirect_to_next_object(method, object)
+    query = find_or_create_query(object.class, :default)
+    query.this = object
+    if new_query = query.send(method)
+      query = new_query
+    else
+      types = object.class.table_name.to_sym
+      flash_error(:app_no_more_search_objects.t(:types => types.t))
+    end
+    redirect_to(:controller => object.show_controller,
+                :action => object.show_action, :id => query.this_id,
+                :params => query_params(query))
+  end
+
+  # Render an index or set of search results as a list or matrix. Arguments:
+  # query::     Query instance describing search/index.
+  # args::      Hash of options.
+  #
+  # Options include these:
+  # action::        Template used to render results.
+  # matrix::        Displaying results as matrix?
+  # letters::       Paginating by letter?
+  # letter_arg::    Param used to store letter for pagination.
+  # number_arg::    Param used to store page number for pagination.
+  # num_per_page::  Number of results per page.
+  #
+  def show_index_of_objects(query, args={})
+    letter_arg   = args[:letter_arg]   || :letter
+    number_arg   = args[:number_arg]   || :page
+    num_per_page = args[:num_per_page] || 50
+
+    # Tell site to come back here on +redirect_back_or_default+.
+    store_location
+
+    # Clear out old query from session.  (Don't do it if caller just finished
+    # storing *this* query in there, though!!)
+    if session[:checklist_source] != query.id
+      store_query
+    end
+
+    # Pass this query on when clicking on results.
+    set_query_params(query)
+
+    # Get user prefs for displaying results as a matrix.
+    if args[:matrix]
+      @layout = calc_layout_params
+      num_per_page = @layout['count']
+    end
+
+    # If only one result (before pagination), redirect to 'show' action.
+    if query.num_results == 1
+      object = query.results.first
+      redirect_to(:action => object.show_action, :id => object.id,
+                  :params => query_params)
+
+    # Otherwise paginate results.
+    else
+      if field = args[:letters]
+        @pages   = paginate_letters(letter_arg, number_arg, num_per_page)
+        @objects = query.paginate(@pages, field)
+      else
+        @pages   = paginate_numbers(number_arg, num_per_page)
+        @objects = query.paginate(@pages)
+      end
+  
+      # Give the caller the opportunity to add extra columns to index.
+      if block_given?
+        @extra_data = @objects.inject({}) do |data,object|
+          row = yield(object)
+          row = [row] if !row.is_a?(Array)
+          data[object.id] = row
+          data
+        end
+      end
+
+      render(:action => args[:action])
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Other search-like stuff
+  #
   ##############################################################################
 
   def clean_sql_pattern(pattern)
@@ -821,73 +1117,6 @@ class ApplicationController < ActionController::Base
       end
     end
     result
-  end
-
-  # If provided, link should be the arguments for link_to as a list of lists,
-  # e.g. [[:action => 'blah'], [:action => 'blah']]
-  def show_selected_objs(title, conditions, order, source, obj_type, dest, links=nil)
-    search_state = SearchState.lookup(params, obj_type, logger)
-    unless search_state.setup?
-      search_state.setup(title, conditions, order, source)
-    end
-    search_state.save if !is_robot?
-
-    store_location
-    @layout = calc_layout_params
-    @links = links
-    @title = search_state.title
-    @search_seq = search_state.id
-    query = search_state.query
-    session[:checklist_source] = search_state.source
-    session_setup
-    case obj_type
-    when :observations, :advanced_observations
-      type = Observation
-    when :images, :advanced_images
-      type = Image
-    end
-    session[:observation] = nil
-
-    @obj_pages, @objs = paginate_by_sql(type, query, @layout["count"])
-    render(:action => dest) # 'list_observations'
-  end
-
-  def session_setup
-    session[:observation_ids] = nil if session[:observation_ids]
-    session[:observation] = nil if session[:observation]
-    session[:image_ids] = nil if session[:image_ids]
-  end
-
-  # Unfortunately the conditions are currently raw SQL that require knowledge
-  # of the queries in SearchState.query...
-  def calc_search(type, conditions, order)
-    search = SearchState.lookup(params, type)
-    if not search.setup?
-      search.setup(nil, conditions, order, :nothing)
-    end
-    search.save if !is_robot?
-    return search
-  end
-
-  def create_search(type, conditions, order)
-    search = SearchState.lookup({}, type)
-    search.setup(nil, conditions, order)
-    search.save if !is_robot?
-    return search
-  end
-
-  def pass_seq_params()
-    @seq_key = params[:seq_key]
-    @search_seq = params[:search_seq]
-    @obs = params[:obs]
-  end
-
-  def calc_search_params
-    search_params = {}
-    search_params[:search_seq] = @search_seq if @search_seq
-    search_params[:seq_key] = @seq_key if @seq_key
-    search_params[:obs] = @obs if @obs
-    search_params
   end
 
   # Give unit tests access to calc_condition.
@@ -1006,239 +1235,50 @@ class ApplicationController < ActionController::Base
   #
   #  :section: Pagination
   #
-  #  Pagination refers to breaking up an array of results into chunks, and
-  #  letting the user choose which chunk to see via a magic parameter (usually
-  #  called, predictably, "page").  There are several ways to do it:
-  #
-  #  * Lowest level method:
-  #
-  #      # In controller:
-  #      objects      = Model.all(:conditions => ...)
-  #      total_num    = objects.length
-  #      num_per_page = 20
-  #      page         = params[:page]
-  #      first_index  = (page-1) * num_per_page
-  #
-  #      @pages = Paginator.new(controller, total_num, num_per_page, page)
-  #      @subset = objects[first_index, num_per_page]
-  #
-  #      # In view this renders page number links:
-  #      <%= pagination_links(@pages) %>
-  #
-  #  * Perhaps the easiest method:
-  #
-  #      # This is uses params[:page] by default.
-  #      objects = Model.all(:conditions => ...)
-  #      @pages, @subset = paginate_array(objects, 20)
-  #
-  #  * Slightly different way of doing the same thing:
-  #
-  #      # (This only instantiates the objects on one page.)
-  #      query = %( SELECT blah FROM blah WHERE blah )
-  #      @pages, @subset = paginate_by_sql(Observation, query, 20)
-  #
-  #  * You can paginate two lists simultaneously:
-  #
-  #      @page1 = params[:page1]
-  #      @page2 = params[:page2]
-  #      @pages1, @subset1 = paginate_array(objects1, @page1)
-  #      @pages2, @subset2 = paginate_array(objects2, @page2)
-  #      <%= pagination_links(@pages1, :name => 'page1', :params => {:page2 => @page2}) %>
-  #      <%= pagination_links(@pages2, :name => 'page2', :params => {:page1 => @page1}) %>
-  #
-  #  * And you can do both letters and numbers:
-  #
-  #      @letters, @subset = paginate_letters(objects, 20, &:display_name)
-  #      @numbers, @subset = paginate_array(@subset, 20)
-  #      <%= pagination_letters(@letters) %>
-  #      <%= pagination_numbers(@numbers, @letters) %>
-  #
-  #  * A more efficient way of dealing with large datasets:
-  #
-  #      # This is very efficient, no overhead involved, minimal data x-fer.
-  #      ids = Model.connection.select_values %(
-  #        SELECT id FROM blah, blah, blah
-  #        WHERE lots of conditions AND cetera
-  #      )
-  #
-  #      @pages, ids = paginate_array(ids, 20)
-  #
-  #      # Now only instantiate what you need.  Eager-loading can help quite
-  #      # dramatically, as well.  (Note the trick checking for empty ids!!)
-  #      @objects = Model.all(
-  #        :conditions => ['id IN (?)', ids.empty? ? [0] : ids])
-  #        :include => [:eager, :load => :stuff]
-  #      )
-  #
-  #  (The very, very best would involve a variant of +paginate_by_sql+ that
-  #  does <tt>Model.connection.select_values</tt> instead of the bizarre
-  #  <tt>Model.find_by_sql</tt> and <tt>Model.count_by_sql</tt>.  But no one
-  #  has written this yet...)
-  #
-  #  *SEE* *ALSO*: ActionController::Pagination (a plugin) and the pagination
-  #  view-helpers in application_helper[link:files/application_helper.html].
-  #
   ##############################################################################
 
-  # Paginate a list which is implicitly created using the given SQL query.
-  # Returns a Paginator instance and an Array of selected pseudo-instances (see
-  # notes below).
-  #
-  # By default, it wraps the SQL command to get a count of the number of
-  # records available before doing pagination, but this can be overridden.
-  # (See ActiveRecord::MO#count_by_sql_wrapping_select_query.)
-  #
-  #   SELECT COUNT(*) FROM (sql) AS my_table
-  #
-  # Valid options are:
-  #
-  #   :count => 123                      Pass in number of results explicitly.
-  #   :count => "SELECT COUNT(*)..."     Tell it how to count results.
-  #   :page  => params[:page]
-  #
-  # *NOTE*: The objects returned are NOT actually proper object instances --
-  # they are the correct class, but the attributes are set to whatever your
-  # query returns.  If your query includes multiple tables, all the values
-  # selected get crammed into the list of attributes for +model+.  For example,
-  # if you are paginating observations and including the user and name:
-  #
-  #   pages, objs = paginate_by_sql(Observation, %(
-  #     SELECT o.*, u.login, n.search_name, n.deprecated
-  #     FROM observations o, users u, names, n
-  #     WHERE u.id = o.user_id AND n.id = o.name_id AND etc.
-  #   ), 50)
-  #
-  #   for obj in objs
-  #     obj.when            These observation attributes are as expected.
-  #     obj.what
-  #     obj.where
-  #     obj.notes
-  #     obj.login           This attribute comes from users.
-  #     obj.search_name     These attributes come from names.
-  #     obj.deprecated
-  #   end
-  #
-  # (See ActiveRecord::Base#find_by_sql for more information.)
-  #
-  def paginate_by_sql(model, sql, per_page, options={})
-
-    # Count total number of records first.
-    if !options[:count]
-      total = model.count_by_sql_wrapping_select_query(sql)
-    elsif options[:count].is_a?(Integer)
-      total = options[:count]
-    else
-      total = model.count_by_sql(options[:count])
-    end
-
-    # Get page number.
-    page = options[:page] || params[:page]
-
-    # Do pagination.
-    pages = Paginator.new(self, total, per_page, page)
-    objects = model.find_by_sql_with_limit(sql, pages.current.to_sql[1], per_page)
-    return [pages, objects]
-  end
-
-  # Paginate a plain old list of stuff that you've already populated.  Returns
-  # Paginator instance and the selected subset of the given Array.
-  #
-  #   # In controller:
-  #   objects = Model.all_by_blah_and_blah
-  #   @paginator, @subset = paginate_array(objects, 30)
-  #
-  #   # In view:
-  #   <%= pagination_links(@paginator) %>
-  #   <% for object in @subset %>
-  #     <%= render object %>
-  #   <% end %>
-  #
-  def paginate_array(list, per_page, page=nil)
-    list ||= []
-    page = params['page'] ? params['page'] : 1 if page.nil?
-    page = page.to_i
-    pages = Paginator.new(self, list.length, per_page, page)
-    return [pages, list[(page-1)*per_page, per_page]]
-  end
-
-  # Initialize PaginationLetters object.  Takes list of arbitrary items.  By
-  # default it takes first letter of <tt>item.to_s</tt>, but you can override
-  # this by supplying a block.  Takes an optional hash of arguments:
-  #
+  # Initialize Paginator object.  This now does very little thanks to the new
+  # Query model.
   # arg::    Name of parameter to use.  (default is 'letter')
   #
-  # This is very similar to the other paginator:
-  #
   #   # In controller:
-  #   names = Name.find_all_by_blah_and_blah
-  #   @letters, @subset = paginate_letters(names, 50, &:search_name)
-  #   @numbers, @subset = paginate_array(@subset, 50)
+  #   query  = create_query(:Name, :by_user, :user => params[:id])
+  #   @pages = paginate_letters(:letter, :page, 50)
+  #   @names = query.paginate(@pages, 'names.observation_name')
   #
   #   # In view:
-  #   <%= pagination_letters(@letters) %>
-  #   <%= pagination_numbers(@numbers, @letters) %>
+  #   <%= pagination_letters(@pages) %>
+  #   <%= pagination_numbers(@pages) %>
   #
-  # Note, you can use +pagination_links+, too:
-  #
-  #   <%= pagination_links(@numbers, :params => {@letters.arg => @letters.letter}) %>
-  #
-  def paginate_letters(list, length=50, args={})
-    obj = nil
-
-    if list && list.length > 0
-      obj = PaginationLetters.new
-      obj.letters = letters = {}
-      obj.used    = used    = {}
-      obj.arg     = arg     = args[:arg] || 'letter'
-      obj.letter  = letter  = params[arg]
-
-      # Gather map of items to their first letter, as well as a hash of letters
-      # that are used.
-      for item in list
-        if block_given?
-          l = yield(item).to_s
-        else
-          l = item.to_s
-        end
-        l = l.match(/([a-z])/i) ? $1.upcase : '_'
-        letters[item] = l
-        used[l] = true
-      end
-
-      if used.keys.length > 1
-        # If user has clicked on a letter, remove all items:
-        # 1) above that letter (Douglas's preference)
-        # 2) above and below that letter (Darvin's preference)  <---
-        if letter && letter.match(/^([A-Z])/)
-          letter = $~[1]
-          list = list.select do |item|
-            # letters[item] >= letter
-            letters[item] == letter
-          end
-          obj.letter = letter
-        else
-          obj.letter = nil
-        end
-      end
-    end
-
-    return [obj, list]
+  def paginate_letters(letter_arg=:letter, number_arg=:page, num_per_page=50)
+    MOPaginator.new(
+      :letter_arg   => letter_arg,
+      :number_arg   => number_arg,
+      :letter       => (params[letter_arg].to_s.match(/^([A-Z])$/i) ? $1.upcase : nil),
+      :number       => (params[number_arg].to_s.to_i rescue 1),
+      :num_per_page => num_per_page
+    )
   end
 
-  # Simple class to handle pagination by letter.  See +paginate_letters+ and
-  # +pagination_letters+ for more information.
-  class PaginationLetters
-    # Hash: maps items to letters.
-    attr_accessor :letters
-
-    # Hash: letters that we have items for.
-    attr_accessor :used
-
-    # Name of parameter to use.
-    attr_accessor :arg
-
-    # Current letter.
-    attr_accessor :letter
+  # Initialize Paginator object.  This now does very little thanks to
+  # the new Query model.
+  # arg::           Name of parameter to use.  (default is 'page')
+  # num_per_page::  Number of results per page.  (default is 50)
+  #
+  #   # In controller:
+  #   query    = create_query(:Name, :by_user, :user => params[:id])
+  #   @numbers = paginate_numbers(:page, 50)
+  #   @names   = query.paginate(@numbers)
+  #
+  #   # In view:
+  #   <%= pagination_numbers(@numbers) %>
+  #
+  def paginate_numbers(arg=:page, num_per_page=50)
+    MOPaginator.new(
+      :number_arg   => arg,
+      :number       => (params[arg].to_s.to_i rescue 1),
+      :num_per_page => num_per_page
+    )
   end
 
   ##############################################################################
@@ -1283,7 +1323,7 @@ class ApplicationController < ActionController::Base
   # prefetching all the pages linked to from the current page so that the user
   # doesn't have to wait as long when they click on one.  The problem is, if
   # the browser pre-fetches something like +destroy_comment+, it could
-  # potentially delete or otherwise harm things unintentionally. 
+  # potentially delete or otherwise harm things unintentionally.
   #
   # The old policy was to disable this feature for a few obviously dangerous
   # actions.  I've changed it now to only _enable_ it for common (and safe)
@@ -1300,7 +1340,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Tell an object that someone has looked at it (unless a robot made the
-  # request). 
+  # request).
   def update_view_stats(object)
     if object.respond_to?(:update_view_stats) && !is_robot?
       object.update_view_stats

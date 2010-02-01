@@ -96,7 +96,7 @@
 #
 ################################################################################
 
-class Observation < ActiveRecord::MO
+class Observation < AbstractModel
   belongs_to :thumb_image, :class_name => "Image", :foreign_key => "thumb_image_id"
   belongs_to :name      # (used to cache consensus name)
   belongs_to :location

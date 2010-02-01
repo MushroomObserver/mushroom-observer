@@ -129,6 +129,7 @@ app_no_ajax: Su Navegador No Está Actualizado
 app_no_browser: Su Navegador No Se Conoce
 app_no_create_name: No se ha podido crear el nombre <<[name]>>.
 app_no_javascript: Javascript está Deshabilitado
+app_no_more_search_objects:  There are no more [types].
 app_no_session: Usted Ha Deshabilitado las Cookies
 app_permission_denied: Permiso denegado.
 app_rss: Mushroom Observer RSS
@@ -163,6 +164,7 @@ app_destroy: Borrar
 app_disable: Inhabilitar
 app_edit: Editar
 app_enable: Habilitar
+app_index: Índice
 app_less_button: << Menos
 app_more_button: Más >>
 app_next: Siguiente
@@ -1472,6 +1474,10 @@ location_merge: Fusionar con una Ubicación Definida
 location_merge_success: Se fusionó [this] con [that] con éxito.
 
 
+# location/list_location
+location_index_title: Índice de Ubicaciones
+
+
 # account/login
 login_failed: No se ha podido iniciar sesión.
 login_forgot_password: >
@@ -1611,6 +1617,7 @@ name_index_bulk_edit: Editor de Nombre a Granel
 name_index_matching: Nombres Coincidentes <<[pattern]>>
 name_index_name_index: Índice de Nombres
 name_index_observation_index: Índice de Observaciones
+name_index_no_matches: No nombres coincidentes.
 
 
 # species_list/name_lister
@@ -1684,7 +1691,6 @@ needed_descriptions_help: >
   observaciones, pero no tienen una descripción general en Mushroom Observer.
   Adición de una descripción general de estas especies sería de gran ayuda.
 
-needed_descriptions_observations: observaciones
 needed_descriptions_title: Los 100 Primeros Especies que Necesitan Descripciones
 
 
@@ -2390,11 +2396,18 @@ species_list_remove_observation_success: La observación se ha eliminado de [nam
 
 
 # species_list/show_species_list
+species_list_show_clone_list:  Clone Species List
+species_list_show_clone_list_help:  Create a new species list using this one as the template.
 species_list_show_edit: Editar Listas de Especies
 species_list_show_members: Miembros
 species_list_show_save_as_txt: Guardar como Texto sin Formato
 species_list_show_save_as_rtf: Guardar como Texto Enriquecido
 species_list_show_save_as_csv: Guardar como Hoja de Cálculo
+species_list_show_set_source:  Save for Later
+species_list_show_set_source_help:  >
+  Save this species list for the next time you create or edit a species list.
+  It will display a list of the species in this list for you to choose from.
+
 species_list_show_title: 'Lista de Especies: [name]'
 
 

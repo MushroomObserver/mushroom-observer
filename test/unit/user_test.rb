@@ -1,12 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class UserTest < Test::Unit::TestCase
-  fixtures :users
-  fixtures :images
-  fixtures :names
-  fixtures :namings
-  fixtures :observations
-  fixtures :images_observations
 
   def test_auth
     assert_equal @rolf, User.authenticate("rolf", "testpassword")

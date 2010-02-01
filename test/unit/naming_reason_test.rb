@@ -1,14 +1,12 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class NamingReasonTest < Test::Unit::TestCase
-  fixtures :namings
-  fixtures :naming_reasons
 
   # Create one.
   def test_create
-    assert_kind_of Naming, @coprinus_comatus_naming
+    assert_kind_of Naming, namings(:coprinus_comatus_naming)
     nr = NamingReason.new(
-        :naming => @coprinus_comatus_naming,
+        :naming => namings(:coprinus_comatus_naming),
         :reason => 2,
         :notes  => "Arora"
     )
@@ -17,13 +15,13 @@ class NamingReasonTest < Test::Unit::TestCase
 
   # Change an existing one.
   def test_update
-    assert_kind_of Naming, @coprinus_comatus_naming
-    assert_kind_of NamingReason, @cc_macro_reason
-    @cc_macro_reason.notes = "No way!"
-    assert @cc_macro_reason.save
-    assert @cc_macro_reason.errors.full_messages.join("; ")
-    @cc_macro_reason.reload
-    assert_equal "No way!", @cc_macro_reason.notes
+    assert_kind_of Naming, namings(:coprinus_comatus_naming)
+    assert_kind_of NamingReason, naming_reasons(:cc_macro_reason)
+    naming_reasons(:cc_macro_reason).notes = "No way!"
+    assert naming_reasons(:cc_macro_reason).save
+    assert naming_reasons(:cc_macro_reason).errors.full_messages.join("; ")
+    naming_reasons(:cc_macro_reason).reload
+    assert_equal "No way!", naming_reasons(:cc_macro_reason).notes
   end
 
   # Make sure it fails if we screw up.
@@ -34,7 +32,7 @@ class NamingReasonTest < Test::Unit::TestCase
     assert_equal :validate_naming_reason_naming_missing.t, nr.errors.on(:naming)
     assert_equal :validate_naming_reason_reason_invalid.t, nr.errors.on(:reason)
     nr = NamingReason.new(
-        :naming => @coprinus_comatus_naming,
+        :naming => namings(:coprinus_comatus_naming),
         :reason => 999
     )
     assert !nr.save
@@ -44,8 +42,8 @@ class NamingReasonTest < Test::Unit::TestCase
 
   # Destroy one.
   def test_destroy
-    id = @cc_macro_reason.id
-    @cc_macro_reason.destroy
+    id = naming_reasons(:cc_macro_reason).id
+    naming_reasons(:cc_macro_reason).destroy
     assert_raise(ActiveRecord::RecordNotFound) { NamingReason.find(id) }
   end
 end

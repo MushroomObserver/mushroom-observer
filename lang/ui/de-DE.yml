@@ -126,6 +126,7 @@ app_no_ajax: Dein Browser ist veraltet
 app_no_browser:  We Don't Recognize Your Browser
 app_no_create_name: Kann den Namen '[name]' nicht erstellen.
 app_no_javascript: Javascript ist ausgeschaltet
+app_no_more_search_objects:  There are no more [types].
 app_no_session: Dein Browser nimmt einen Cookie nicht an
 app_permission_denied: Nicht erlaubt.
 app_rss: Mushroom Observer RSS
@@ -160,6 +161,7 @@ app_destroy: Löschen
 app_disable: Deaktivieren
 app_edit: Ändern
 app_enable: Aktivieren
+app_index: Index
 app_less_button: << Weniger
 app_more_button: Mehr >>
 app_next: Weiter
@@ -1450,6 +1452,10 @@ location_merge: Mit einem bekannten Fundort kombinieren
 location_merge_success: '[this] und [that] sind nun kombiniert.'
 
 
+# location/list_location
+location_index_title: Fundorte-Index
+
+
 # account/login
 login_failed: Login fehlgeschlagen.
 login_forgot_password: >
@@ -1589,6 +1595,7 @@ name_index_bulk_edit: Viele Namen auf einmal bearbeiten
 name_index_matching: Namen, die zu '[pattern]' passen
 name_index_name_index: Namensregister
 name_index_observation_index: Funde-Index
+name_index_no_matches:  No matching names.
 
 
 # species_list/name_lister
@@ -1659,7 +1666,6 @@ needed_descriptions_help: >
   noch keine allgemeine Beschreibung. Es wäre eine große Hilfe, wenn du für
   diese häufigen Arten allgemeine Beschreibungen erstellen könntest.
 
-needed_descriptions_observations: Funde
 needed_descriptions_title: Top 100 fehlende Artenbeschreibungen
 
 
@@ -2338,11 +2344,18 @@ species_list_remove_observation_success: Fund von [name] entfernt.
 
 
 # species_list/show_species_list
+species_list_show_clone_list:  Clone Species List
+species_list_show_clone_list_help:  Create a new species list using this one as the template.
 species_list_show_edit: Artenliste bearbeiten
 species_list_show_members: Mitarbeiter
 species_list_show_save_as_txt: Als Nur-Text speichern
 species_list_show_save_as_rtf: Als Rich-Text speichern
 species_list_show_save_as_csv: Als Tabelle speichern
+species_list_show_set_source:  Save for Later
+species_list_show_set_source_help:  >
+  Save this species list for the next time you create or edit a species list.
+  It will display a list of the species in this list for you to choose from.
+
 species_list_show_title: 'Artenliste: [name]'
 
 

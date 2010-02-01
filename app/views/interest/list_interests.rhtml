@@ -1,9 +1,9 @@
-<%= pagination_numbers(@item_pages) if @item_pages.length > 0 %>
+<%= pagination_numbers(@pages) if @pages.length > 0 %>
 
-<% if @items.length > 0 %>
+<% if @objects.length > 0 %>
   <table cellpadding="5" cellspacing="0" width="100%">
     <% odd_or_even = 0
-    for item in @items
+    for item in @objects
       obj = item.object
       odd_or_even = 1 - odd_or_even %>
       <tr valign="top" class="ListLine<%= odd_or_even %>">
@@ -40,4 +40,4 @@
   </table>
 <% end %>
 
-<%= pagination_numbers(@item_pages) if @item_pages.length > 0 %>
+<%= pagination_numbers(@pages) if @pages.length > 0 %>

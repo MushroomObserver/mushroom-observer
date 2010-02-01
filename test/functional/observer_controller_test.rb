@@ -1,16 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class ObserverControllerTest < ControllerTestCase
-  fixtures :images
-  fixtures :images_observations
-  fixtures :licenses
-  fixtures :locations
-  fixtures :names
-  fixtures :naming_reasons
-  fixtures :namings
-  fixtures :observations
-  fixtures :users
-  fixtures :votes
 
   # Test constructing observations in various ways (with minimal namings).
   def generic_construct_observation(params, o_num, g_num, n_num)
@@ -54,7 +44,6 @@ class ObserverControllerTest < ControllerTestCase
   # ----------------------------
 
   def test_page_loads
-    local_fixtures :rss_logs
 
     get_with_dump(:index)
     assert_response('list_rss_logs')
@@ -109,7 +98,7 @@ class ObserverControllerTest < ControllerTestCase
     get_with_dump(:show_site_stats)
     assert_response('show_site_stats')
 
-    get_with_dump(:show_user_observations, :id => 1)
+    get_with_dump(:observations_by_user, :id => 1)
     assert_response('list_observations')
 
     get_with_dump(:login)
@@ -118,69 +107,72 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_prev_and_next_observation
     # Uses default observation query
-    get_with_dump(:next_observation, :id => 2)
-    id = SequenceState.last.id
-    assert_redirected_to(:action => "show_observation", :id => 1,
-                         :search_seq => nil, :seq_key => id)
+    get(:next_observation, :id => 4)
+    assert_response(:action => "show_observation", :id => 3,
+                    :params => @controller.query_params(Query.last))
 
-    get_with_dump(:prev_observation, :id => 2)
-    id = SequenceState.last.id
-    assert_redirected_to(:action => "show_observation", :id => 3,
-                         :search_seq => nil, :seq_key => id)
+    get(:prev_observation, :id => 4)
+    assert_response(:action => "show_observation", :id => 5,
+                    :params => @controller.query_params(Query.last))
   end
 
-  # Created in response to a performance problem seen in the wild
-  def test_advanced_searches
-    for (type, action, response) in [
-      [ nil,           :advanced_obj_search,     'list_observations'               ],
-      [ "Image",       :advanced_search_results, [:image,    :advanced_obj_search] ],
-      [ "Observation", :advanced_search_results, [:observer, :advanced_obj_search] ],
-      [ "Description", :advanced_search_results, [:name,     :advanced_obj_search] ],
-    ]
-      get_with_dump(action,
+  def test_advanced_search_form
+    for model in [ Name, Image, Observation ]
+      post('advanced_search_form',
         :search => {
           :name => "Don't know",
-          :observer => "myself",
-          :type => type,
+          :user => "myself",
+          :type => (model == Name ? 'Description' : model.name),
           :content => "Long pink stem and small pink cap",
           :location => "Eastern Oklahoma"
         },
         :commit => "Search"
       )
-      assert_response(response)
+      assert_response(:controller => model.show_controller,
+                      :action => 'advanced_search')
     end
   end
 
+  def test_advanced_search
+    query = Query.lookup_and_save(:Observation, :advanced,
+      :name => "Don't know",
+      :user => "myself",
+      :content => "Long pink stem and small pink cap",
+      :location => "Eastern Oklahoma"
+    )
+    get(:advanced_search, @controller.query_params(query))
+    assert_response('list_observations')
+  end
+
   def test_pattern_search
-    params = {:commit => nil, :search => {:pattern => "12"}}
+    params = {:commit => nil, :search => {:pattern => '12'}}
     get_with_dump(:pattern_search, params)
-    assert_response(:controller => "observer", :action => "observation_search")
-    assert_equal("12", @request.session[:pattern])
+    assert_response(:controller => 'observer', :action => 'observation_search',
+                    :pattern => '12')
 
-    params = {:commit => :app_images_find.l, :search => {:pattern => "34"}}
+    params = {:commit => :app_images_find.l, :search => {:pattern => '34'}}
     get_with_dump(:pattern_search, params)
-    assert_response(:controller => "image", :action => "image_search")
-    assert_equal("34", @request.session[:pattern])
+    assert_response(:controller => 'image', :action => 'image_search',
+                    :pattern => '34')
 
-    params = {:commit => :app_names_find.l, :search => {:pattern => "56"}}
+    params = {:commit => :app_names_find.l, :search => {:pattern => '56'}}
     get_with_dump(:pattern_search, params)
-    assert_response(:controller => "name", :action => "name_search")
-    assert_equal("56", @request.session[:pattern])
+    assert_response(:controller => 'name', :action => 'name_search',
+                    :pattern => '56')
 
-    params = {:commit => :app_locations_find.l, :search => {:pattern => "78"}}
+    params = {:commit => :app_locations_find.l, :search => {:pattern => '78'}}
     get_with_dump(:pattern_search, params)
-    assert_response(:controller => "location", :action => "list_place_names",
-                    :pattern => "78")
+    assert_response(:controller => 'location', :action => 'location_search',
+                    :pattern => '78')
   end
 
   def test_observation_search
-    @request.session[:pattern] = "12"
-    get_with_dump(:observation_search)
+    get_with_dump(:observation_search, :pattern => '12')
     assert_response('list_observations')
     assert_equal(:list_observations_matching.t(:pattern => '12'),
                  @controller.instance_variable_get('@title'))
 
-    get_with_dump(:observation_search, :page => 2)
+    get_with_dump(:observation_search, :pattern => '12', :page => 2)
     assert_response('list_observations')
     assert_equal(:list_observations_matching.t(:pattern => '12'),
                  @controller.instance_variable_get('@title'))
@@ -188,16 +180,15 @@ class ObserverControllerTest < ControllerTestCase
 
   # Created in response to a bug seen in the wild
   def test_where_search_next_page
-    @request.session[:where] = "Burbank"
-    params = { :page => 2 }
-    get_with_dump(:location_search, params)
+    params = { :where => 'Burbank', :page => 2 }
+    get_with_dump(:observations_at_where, params)
     assert_response('list_observations')
   end
 
   # Created in response to a bug seen in the wild
   def test_where_search_pattern
-    params = { :pattern => "Burbank" }
-    get_with_dump(:location_search, params)
+    params = { :where => "Burbank" }
+    get_with_dump(:observations_at_where, params)
     assert_response('list_observations')
   end
 
@@ -232,26 +223,24 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_show_observation
-    get_with_dump(:show_observation, :id => @coprinus_comatus_obs.id)
+    obs_id = observations(:coprinus_comatus_obs).id
+    get_with_dump(:show_observation, :id => obs_id)
     assert_response('show_observation')
-    obs = @coprinus_comatus_obs.id
-    seq = SequenceState.last.id
-    assert_form_action(:action => 'show_observation', :id => obs, :obs => obs,
-                       :seq_key => seq)
+    assert_form_action(:action => 'show_observation', :id => obs_id)
 
-    get_with_dump(:show_observation, :id => @unknown_with_no_naming.id)
+    obs_id = observations(:unknown_with_no_naming).id
+    get(:show_observation, :id => obs_id)
     assert_response('show_observation')
-    obs = @unknown_with_no_naming.id
-    seq = SequenceState.last.id
-    assert_form_action(:action => 'show_observation', :id => obs, :obs => obs,
-                       :seq_key => seq)
+    assert_form_action(:action => 'show_observation', :id => obs_id)
 
     # Test a naming owned by the observer but the observer has 'No Opinion'.
     # This is a regression test for a bug in _show_namings.rhtml
     # Ensure that rolf owns @obs_with_no_opinion.
     user = login('rolf')
-    assert_equal(@strobilurus_diminutivus_obs.user, user)
-    get_with_dump(:show_observation, :id => @strobilurus_diminutivus_obs.id)
+    
+    obs = observations(:strobilurus_diminutivus_obs)
+    assert_equal(obs.user, user)
+    get(:show_observation, :id => obs.id)
     assert_response('show_observation')
   end
 
@@ -262,21 +251,21 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_ask_questions
-    id = @coprinus_comatus_obs.id
+    id = observations(:coprinus_comatus_obs).id
     requires_login(:ask_observation_question, :id => id)
-    assert_form_action(:action => 'send_observation_question', :id => id)
+    assert_form_action(:action => 'ask_observation_question', :id => id)
 
     id = @mary.id
     requires_login(:ask_user_question, :id => id)
-    assert_form_action(:action => 'send_user_question', :id => id)
+    assert_form_action(:action => 'ask_user_question', :id => id)
 
-    id = @in_situ.id
+    id = images(:in_situ).id
     requires_login(:commercial_inquiry, :id => id)
-    assert_form_action(:action => 'send_commercial_inquiry', :id => id)
+    assert_form_action(:action => 'commercial_inquiry', :id => id)
   end
 
   def test_destroy_observation
-    assert(obs = @minimal_unknown)
+    assert(obs = observations(:minimal_unknown))
     id = obs.id
     params = { :id => id.to_s }
     assert_equal("mary", obs.user.login)
@@ -289,9 +278,8 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_some_admin_pages
     for (page, response, params) in [
-      [ :users_by_name,      'users_by_name',  {} ],
-      [ :email_features,     'email_features', {} ],
-      [ :send_feature_email, [:users_by_name], {:feature_email => {:content => 'test'}} ],
+      [ :users_by_name,  'users_by_name',  {} ],
+      [ :email_features, 'email_features', {} ],
     ]
       logout
       get(page, params)
@@ -308,25 +296,43 @@ class ObserverControllerTest < ControllerTestCase
     end
   end
 
+  def test_some_admin_pages
+    page = :email_features
+    params = {:feature_email => {:content => 'test'}}
+
+    logout
+    post(page, params)
+    assert_response(:controller => "account", :action => "login")
+
+    login('rolf')
+    post(page, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert_flash(/denied|only.*admin/i)
+
+    make_admin('rolf')
+    post_with_dump(page, params)
+    assert_response(:controller => "observer", :action => :users_by_name)
+  end
+
   def test_send_emails
-    image = @commercial_inquiry_image
+    image = images(:commercial_inquiry_image)
     params = {
       :id => image.id,
       :commercial_inquiry => {
         :content => "Testing commercial_inquiry"
       }
     }
-    requires_login(:send_commercial_inquiry, params)
+    post_requires_login(:commercial_inquiry, params)
     assert_response(:controller => :image, :action => :show_image)
 
-    obs = @minimal_unknown
+    obs = observations(:minimal_unknown)
     params = {
       :id => obs.id,
       :question => {
         :content => "Testing question"
       }
     }
-    requires_login(:send_observation_question, params)
+    post_requires_login(:ask_observation_question, params)
     assert_response(:action => :show_observation)
     assert_flash(:ask_observation_question_success.t)
 
@@ -338,26 +344,26 @@ class ObserverControllerTest < ControllerTestCase
         :content => "Email content"
       }
     }
-    requires_login(:send_user_question, params)
+    post_requires_login(:ask_user_question, params)
     assert_response(:action => :show_user)
     assert_flash(:ask_user_question_success.t)
   end
 
   def test_show_notifications
-    local_fixtures :notifications
 
     # First, create a naming notification email, making sure it has a template,
     # and making sure the person requesting the notifcation is not the same
     # person who created the underlying observation (otherwise nothing happens).
-    @coprinus_comatus_notification.user = @mary
-    @coprinus_comatus_notification.note_template = 'blah!'
-    assert(@coprinus_comatus_notification.save)
+    note = notifications(:coprinus_comatus_notification)
+    note.user = @mary
+    note.note_template = 'blah!'
+    assert(note.save)
     QueuedEmail.queue_emails(true)
-    QueuedEmail::Naming.create_email(@coprinus_comatus_notification, @coprinus_comatus_other_naming)
+    QueuedEmail::Naming.create_email(note, namings(:coprinus_comatus_other_naming))
 
     # Now we can be sure show_notifications is supposed to actually show a
     # non-empty list, and thus that this test is meaningful.
-    requires_login(:show_notifications, :id => @coprinus_comatus_obs)
+    requires_login(:show_notifications, :id => observations(:coprinus_comatus_obs))
     assert_response('show_notifications')
   end
 
@@ -372,7 +378,6 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_construct_observation
-    local_fixtures :notifications
 
     # Test a simple observation creation with an approved unique name
     where = "test_construct_observation_simple"
@@ -383,7 +388,7 @@ class ObserverControllerTest < ControllerTestCase
     obs = assigns(:observation)
     nam = assigns(:naming)
     assert_equal(where, obs.where)
-    assert_equal(@coprinus_comatus.id, nam.name_id)
+    assert_equal(names(:coprinus_comatus).id, nam.name_id)
     assert_equal("2.03659", "%.5f" % obs.vote_cache)
     assert_not_nil(obs.rss_log)
     # This was getting set to zero instead of nil if no images were uploaded
@@ -434,15 +439,15 @@ class ObserverControllerTest < ControllerTestCase
     # Test an observation creation with one of the multiple matches chosen
     generic_construct_observation({
       :name => { :name => "Amanita baccata" },
-      :chosen_name => { :name_id => @amanita_baccata_arora.id }
+      :chosen_name => { :name_id => names(:amanita_baccata_arora).id }
     }, 1,1,0)
 
     # Test an observation creation with one of the multiple matches chosen
     generic_construct_observation({
-      :name => { :name => @pluteus_petasatus_deprecated.text_name }
+      :name => { :name => names(:pluteus_petasatus_deprecated).text_name }
     }, 1,1,0)
     nam = assigns(:naming)
-    assert_equal(@pluteus_petasatus_approved.id, nam.name_id)
+    assert_equal(names(:pluteus_petasatus_approved).id, nam.name_id)
 
     # Test an observation creation with a deprecated name
     generic_construct_observation({
@@ -454,10 +459,10 @@ class ObserverControllerTest < ControllerTestCase
     generic_construct_observation({
       :name => { :name => new_name },
       :approved_name => new_name,
-      :chosen_name => { :name_id => @lactarius_alpinus.id }
+      :chosen_name => { :name_id => names(:lactarius_alpinus).id }
     }, 1,1,0)
     nam = assigns(:naming)
-    assert(nam.name, @lactarius_alpinus)
+    assert(nam.name, names(:lactarius_alpinus))
 
     # Test an observation creation with a deprecated name that has been approved
     new_name = "Lactarius subalpinus"
@@ -467,7 +472,7 @@ class ObserverControllerTest < ControllerTestCase
       :chosen_name => { }
     }, 1,1,0)
     nam = assigns(:naming)
-    assert_equal(nam.name, @lactarius_subalpinus)
+    assert_equal(nam.name, names(:lactarius_subalpinus))
 
     # Test an observation creation with an approved new name
     new_name = "Agaricus novus"
@@ -481,7 +486,7 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(new_name, name.text_name)
 
     count_before = QueuedEmail.all.length
-    name = @agaricus_campestris
+    name = names(:agaricus_campestris)
     notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)
     assert_equal(2, notifications.length)
 
@@ -515,117 +520,119 @@ class ObserverControllerTest < ControllerTestCase
     }
 
     # Can we create observation with existing genus?
+    agaricus = names(:agaricus)
     params[:name][:name] = 'Agaricus'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp.'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
 
     # Can we create observation with genus and add author?
     params[:name][:name] = 'Agaricus Author'
     params[:approved_name] = 'Agaricus Author'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
-    assert_equal('Agaricus sp. Author', @agaricus.reload.search_name)
-    @agaricus.author = nil
-    @agaricus.search_name = 'Agaricus sp.'
-    @agaricus.save
+    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
+    agaricus.author = nil
+    agaricus.search_name = 'Agaricus sp.'
+    agaricus.save
 
     params[:name][:name] = 'Agaricus sp Author'
     params[:approved_name] = 'Agaricus sp Author'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
-    assert_equal('Agaricus sp. Author', @agaricus.reload.search_name)
-    @agaricus.author = nil
-    @agaricus.search_name = 'Agaricus sp.'
-    @agaricus.save
+    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
+    agaricus.author = nil
+    agaricus.search_name = 'Agaricus sp.'
+    agaricus.save
 
     params[:name][:name] = 'Agaricus sp. Author'
     params[:approved_name] = 'Agaricus sp. Author'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
-    assert_equal('Agaricus sp. Author', @agaricus.reload.search_name)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
+    assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
 
     # Can we create observation with genus specifying author?
     params[:name][:name] = 'Agaricus Author'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp Author'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp. Author'
     params[:approved_name] = nil
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@agaricus.id, assigns(:observation).name_id)
+    assert_equal(agaricus.id, assigns(:observation).name_id)
 
     # Can we create observation with deprecated genus?
+    psalliota = names(:psalliota)
     params[:name][:name] = 'Psalliota'
     params[:approved_name] = 'Psalliota'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Psalliota sp'
     params[:approved_name] = 'Psalliota sp'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Psalliota sp.'
     params[:approved_name] = 'Psalliota sp.'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@psalliota.id, assigns(:observation).name_id)
+    assert_equal(psalliota.id, assigns(:observation).name_id)
 
     # Can we create observation with deprecated genus, adding author?
     params[:name][:name] = 'Psalliota Author'
     params[:approved_name] = 'Psalliota Author'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@psalliota.id, assigns(:observation).name_id)
-    assert_equal('Psalliota sp. Author', @psalliota.reload.search_name)
-    @psalliota.author = nil
-    @psalliota.search_name = 'Psalliota sp.'
-    @psalliota.save
+    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
+    psalliota.author = nil
+    psalliota.search_name = 'Psalliota sp.'
+    psalliota.save
 
     params[:name][:name] = 'Psalliota sp Author'
     params[:approved_name] = 'Psalliota sp Author'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@psalliota.id, assigns(:observation).name_id)
-    assert_equal('Psalliota sp. Author', @psalliota.reload.search_name)
-    @psalliota.author = nil
-    @psalliota.search_name = 'Psalliota sp.'
-    @psalliota.save
+    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
+    psalliota.author = nil
+    psalliota.search_name = 'Psalliota sp.'
+    psalliota.save
 
     params[:name][:name] = 'Psalliota sp. Author'
     params[:approved_name] = 'Psalliota sp. Author'
     post(:create_observation, params)
     assert_response(:action => "show_observation")
-    assert_equal(@psalliota.id, assigns(:observation).name_id)
-    assert_equal('Psalliota sp. Author', @psalliota.reload.search_name)
+    assert_equal(psalliota.id, assigns(:observation).name_id)
+    assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
 
     # Can we create new quoted genus?
     params[:name][:name] = '"One"'
@@ -709,7 +716,7 @@ class ObserverControllerTest < ControllerTestCase
   # (Sorry, these used to all be edit/update_observation, now they're
   # confused because of the naming stuff.)
   def test_edit_observation
-    obs = @coprinus_comatus_obs
+    obs = observations(:coprinus_comatus_obs)
     assert_equal("rolf", obs.user.login)
     params = { :id => obs.id.to_s }
     requires_user(:edit_observation, ["observer", "show_observation"], params)
@@ -717,8 +724,7 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_update_observation
-    local_fixtures :rss_logs
-    obs = @detailed_unknown
+    obs = observations(:detailed_unknown)
     modified = obs.rss_log.modified
     new_where = "test_update_observation"
     new_notes = "blather blather blather"
@@ -750,8 +756,7 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_update_observation_no_logging
-    local_fixtures :rss_logs
-    obs = @detailed_unknown
+    obs = observations(:detailed_unknown)
     modified = obs.rss_log.modified
     where = "test_update_observation_no_logging"
     params = {
@@ -779,7 +784,7 @@ class ObserverControllerTest < ControllerTestCase
 
   # Now test the naming part of it.
   def test_create_naming_get
-    obs = @coprinus_comatus_obs
+    obs = observations(:coprinus_comatus_obs)
     params = {
       :id => obs.id.to_s
     }
@@ -789,7 +794,7 @@ class ObserverControllerTest < ControllerTestCase
 
   # Now test the naming part of it.
   def test_edit_naming_get
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     params = {
       :id => nam.id.to_s
     }
@@ -799,7 +804,7 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_new_name
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Easter bunny"
     params = {
@@ -816,7 +821,7 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_approved_new_name
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Easter bunny"
     params = {
@@ -837,7 +842,7 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_multiple_match
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Amanita baccata"
     params = {
@@ -854,13 +859,13 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_chosen_multiple_match
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Amanita baccata"
     params = {
       :id => nam.id.to_s,
       :name => { :name => new_name },
-      :chosen_name => { :name_id => @amanita_baccata_arora.id },
+      :chosen_name => { :name_id => names(:amanita_baccata_arora).id },
       :vote => { :value => 1 }
     }
     post(:edit_naming, params)
@@ -875,7 +880,7 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_deprecated
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     old_name = nam.text_name
     new_name = "Lactarius subalpinus"
     params = {
@@ -892,10 +897,10 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_chosen_deprecated
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     start_name = nam.name
     new_name = "Lactarius subalpinus"
-    chosen_name = @lactarius_alpinus
+    chosen_name = names(:lactarius_alpinus)
     params = {
       :id => nam.id.to_s,
       :name => { :name => new_name },
@@ -914,9 +919,9 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_update_observation_accepted_deprecated
     login('rolf')
-    nam = @coprinus_comatus_naming
+    nam = namings(:coprinus_comatus_naming)
     start_name = nam.name
-    new_text_name = @lactarius_subalpinus.text_name
+    new_text_name = names(:lactarius_subalpinus).text_name
     params = {
       :id => nam.id.to_s,
       :name => { :name => new_text_name },
@@ -947,19 +952,19 @@ class ObserverControllerTest < ControllerTestCase
     nr_count = NamingReason.all.length
 
     # Make a few assertions up front to make sure fixtures are as expected.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
-    assert(@coprinus_comatus_naming.user_voted?(@rolf))
-    assert(@coprinus_comatus_naming.user_voted?(@mary))
-    assert(!@coprinus_comatus_naming.user_voted?(@dick))
-    assert(@coprinus_comatus_other_naming.user_voted?(@rolf))
-    assert(@coprinus_comatus_other_naming.user_voted?(@mary))
-    assert(!@coprinus_comatus_other_naming.user_voted?(@dick))
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert(namings(:coprinus_comatus_naming).user_voted?(@rolf))
+    assert(namings(:coprinus_comatus_naming).user_voted?(@mary))
+    assert(!namings(:coprinus_comatus_naming).user_voted?(@dick))
+    assert(namings(:coprinus_comatus_other_naming).user_voted?(@rolf))
+    assert(namings(:coprinus_comatus_other_naming).user_voted?(@mary))
+    assert(!namings(:coprinus_comatus_other_naming).user_voted?(@dick))
 
-    # Rolf, the owner of @coprinus_comatus_obs, already has a naming, which
+    # Rolf, the owner of observations(:coprinus_comatus_obs), already has a naming, which
     # he's 80% sure of.  Create a new one (the genus Agaricus) that he's 100%
     # sure of.  (Mary also has a naming with two votes.)
     params = {
-      :id => @coprinus_comatus_obs.id,
+      :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => "Agaricus" },
       :vote => { :value => "3" },
       :reason => {
@@ -984,19 +989,19 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(12, @rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
+    observations(:coprinus_comatus_obs).reload
 
     # Get new objects.
     naming = Naming.last
     vote = Vote.last
 
     # Make sure observation was updated and referenced correctly.
-    assert_equal(3, @coprinus_comatus_obs.namings.length)
-    assert_equal(@agaricus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(3, observations(:coprinus_comatus_obs).namings.length)
+    assert_equal(names(:agaricus).id, observations(:coprinus_comatus_obs).name_id)
 
     # Make sure naming was created correctly and referenced.
-    assert_equal(@coprinus_comatus_obs, naming.observation)
-    assert_equal(@agaricus.id, naming.name_id)
+    assert_equal(observations(:coprinus_comatus_obs), naming.observation)
+    assert_equal(names(:agaricus).id, naming.name_id)
     assert_equal(@rolf, naming.user)
     assert_equal(3, naming.naming_reasons.length)
     assert_equal(1, naming.votes.length)
@@ -1036,7 +1041,7 @@ class ObserverControllerTest < ControllerTestCase
   def test_propose_uncertain_naming
     g_count = Naming.all.length
     params = {
-      :id => @coprinus_comatus_obs.id,
+      :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => "Agaricus" },
       :vote => { :value => "-1" },
     }
@@ -1046,17 +1051,17 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(12, @rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
 
     # Get new objects.
     naming = Naming.last
 
     # Make sure observation was updated right.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
 
     # Sure, check the votes, too, while we're at it.
-    assert_equal(3, @coprinus_comatus_naming.vote_sum) # 2+1 = 3
+    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum) # 2+1 = 3
   end
 
   # Now see what happens when a third party proposes a name, and it wins.
@@ -1069,7 +1074,7 @@ class ObserverControllerTest < ControllerTestCase
 
     # Dick proposes "Conocybe filaris" out of the blue.
     params = {
-      :id => @coprinus_comatus_obs.id,
+      :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => "Conocybe filaris" },
       :vote => { :value => "3" },
     }
@@ -1087,20 +1092,20 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(nr_count + 1, NamingReason.all.length)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Check votes.
-    assert_equal(3, @coprinus_comatus_naming.vote_sum)
-    assert_equal(0, @coprinus_comatus_other_naming.vote_sum)
+    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
     assert_equal(3, naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_naming.votes.length)
-    assert_equal(2, @coprinus_comatus_other_naming.votes.length)
+    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
     assert_equal(1, naming.votes.length)
 
     # Make sure observation was updated right.
-    assert_equal(@conocybe_filaris.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:conocybe_filaris).id, observations(:coprinus_comatus_obs).name_id)
   end
 
   # Test a bug in name resolution: was failing to recognize that
@@ -1108,19 +1113,19 @@ class ObserverControllerTest < ControllerTestCase
   # was already in the database.
   def test_create_naming_with_author_when_name_without_author_already_exists
     params = {
-      :id => @coprinus_comatus_obs.id,
+      :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => "Conocybe filaris (With) Author" },
       :vote => { :value => "3" },
     }
     login("dick")
     post(:create_naming, params)
-    assert_response(:action => "show_observation", :id => @coprinus_comatus_obs.id)
+    assert_response(:action => "show_observation", :id => observations(:coprinus_comatus_obs).id)
     # Dick is being added as an editor on Conocybe filaris.
     assert_equal(22, @dick.reload.contribution)
     naming = Naming.last
     assert_equal("Conocybe filaris", naming.name.text_name)
     assert_equal("(With) Author", naming.name.author)
-    assert_equal(@conocybe_filaris.id, naming.name_id)
+    assert_equal(names(:conocybe_filaris).id, naming.name_id)
   end
 
   # Test a bug in name resolution: was failing to recognize that
@@ -1128,7 +1133,7 @@ class ObserverControllerTest < ControllerTestCase
   # was already in the database.
   def test_create_naming_fill_in_author
     params = {
-      :id => @coprinus_comatus_obs.id,
+      :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => 'Agaricus campestris' },
     }
     login("dick")
@@ -1143,7 +1148,7 @@ class ObserverControllerTest < ControllerTestCase
   def test_create_name_with_quotes
     name = 'Foo "bar" Author'
     params = {
-      :id => @coprinus_comatus_obs.id,
+      :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => name },
       :approved_name => name
     }
@@ -1168,39 +1173,39 @@ class ObserverControllerTest < ControllerTestCase
     login('dick')
     post(:cast_vote, :vote => {
       :value     => "3",
-      :naming_id => @coprinus_comatus_other_naming.id
+      :naming_id => namings(:coprinus_comatus_other_naming).id
     })
     assert_equal(11, @dick.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Check votes.
-    assert_equal(3, @coprinus_comatus_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_naming.votes.length)
-    assert_equal(3, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(3, @coprinus_comatus_other_naming.votes.length)
+    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(3, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(3, namings(:coprinus_comatus_other_naming).votes.length)
 
     # Make sure observation was updated right.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
 
     # If Dick votes on the other as well, then his first vote should
     # get demoted and his preference should change.
     # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
-    @coprinus_comatus_naming.change_vote(@dick, 3)
+    namings(:coprinus_comatus_naming).change_vote(@dick, 3)
     assert_equal(12, @dick.reload.contribution)
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
-    assert_equal(3, @coprinus_comatus_naming.users_vote(@dick).value)
-    assert_equal(6, @coprinus_comatus_naming.vote_sum)
-    assert_equal(3, @coprinus_comatus_naming.votes.length)
-    assert_equal(2, @coprinus_comatus_other_naming.users_vote(@dick).value)
-    assert_equal(2, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(3, @coprinus_comatus_other_naming.votes.length)
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
+    assert_equal(3, namings(:coprinus_comatus_naming).users_vote(@dick).value)
+    assert_equal(6, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(3, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).users_vote(@dick).value)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(3, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
   end
 
   # Now have Rolf change his vote on his own naming. (no change in prefs)
@@ -1209,21 +1214,21 @@ class ObserverControllerTest < ControllerTestCase
     login('rolf')
     post(:cast_vote, :vote => {
       :value     => "2",
-      :naming_id => @coprinus_comatus_naming.id
+      :naming_id => namings(:coprinus_comatus_naming).id
     })
     assert_equal(10, @rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Make sure observation was updated right.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
 
     # Check vote.
-    assert_equal(3, @coprinus_comatus_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_naming.votes.length)
+    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
   end
 
   # Now have Rolf increase his vote for Mary's. (changes consensus)
@@ -1232,22 +1237,22 @@ class ObserverControllerTest < ControllerTestCase
     login('rolf')
     post(:cast_vote, :vote => {
       :value     => "3",
-      :naming_id => @coprinus_comatus_other_naming.id
+      :naming_id => namings(:coprinus_comatus_other_naming).id
     })
     assert_equal(10, @rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Make sure observation was updated right.
-    assert_equal(@agaricus_campestris.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:agaricus_campestris).id, observations(:coprinus_comatus_obs).name_id)
 
     # Check vote.
-    @coprinus_comatus_other_naming.reload
-    assert_equal(6, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_other_naming.votes.length)
+    namings(:coprinus_comatus_other_naming).reload
+    assert_equal(6, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
   end
 
   # Now have Rolf increase his vote for Mary's insufficiently. (no change)
@@ -1257,22 +1262,22 @@ class ObserverControllerTest < ControllerTestCase
     login('rolf')
     post(:cast_vote, :vote => {
       :value     => "-1",
-      :naming_id => @coprinus_comatus_other_naming.id
+      :naming_id => namings(:coprinus_comatus_other_naming).id
     })
     assert_equal(10, @rolf.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Make sure observation was updated right.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
 
     # Check vote.
-    assert_equal(3, @coprinus_comatus_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_other_naming.votes.length)
+    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
   end
 
   # Now, have Mary delete her vote against Rolf's naming.  This NO LONGER has the effect
@@ -1284,51 +1289,51 @@ class ObserverControllerTest < ControllerTestCase
   # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75, 3 still keeps it in this voting algorithm, arg.
   def test_cast_vote_mary
     login('dick')
-    @coprinus_comatus_other_naming.change_vote(@dick, 3)
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    namings(:coprinus_comatus_other_naming).change_vote(@dick, 3)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
     assert_equal(11, @dick.reload.contribution)
 
     login('mary')
     post(:cast_vote, :vote => {
       :value     => Vote.delete_vote,
-      :naming_id => @coprinus_comatus_naming.id
+      :naming_id => namings(:coprinus_comatus_naming).id
     })
     assert_equal(9, @mary.reload.contribution)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Check votes.
-    assert_equal(2, @coprinus_comatus_naming.vote_sum)
-    assert_equal(1, @coprinus_comatus_naming.votes.length)
-    assert_equal(3, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(3, @coprinus_comatus_other_naming.votes.length)
+    assert_equal(2, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(1, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(3, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(3, namings(:coprinus_comatus_other_naming).votes.length)
 
     # Make sure observation is changed correctly.
-    assert_equal(@coprinus_comatus.search_name, @coprinus_comatus_obs.name.search_name,
-      "Cache for 3: #{@coprinus_comatus_naming.vote_cache}, 9: #{@coprinus_comatus_other_naming.vote_cache}")
+    assert_equal(names(:coprinus_comatus).search_name, observations(:coprinus_comatus_obs).name.search_name,
+      "Cache for 3: #{namings(:coprinus_comatus_naming).vote_cache}, 9: #{namings(:coprinus_comatus_other_naming).vote_cache}")
   end
 
   # Rolf can destroy his naming if Mary deletes her vote on it.
   def test_rolf_destroy_rolfs_naming
     # First delete Mary's vote for it.
     login('mary')
-    @coprinus_comatus_naming.change_vote(@mary, Vote.delete_vote)
+    namings(:coprinus_comatus_naming).change_vote(@mary, Vote.delete_vote)
     assert_equal(9, @mary.reload.contribution)
 
-    old_naming_id = @coprinus_comatus_naming.id
-    old_vote1_id = @coprinus_comatus_owner_vote.id
-    old_vote2_id = @coprinus_comatus_other_vote.id
-    old_naming_reason_id = @cc_macro_reason.id
+    old_naming_id = namings(:coprinus_comatus_naming).id
+    old_vote1_id = votes(:coprinus_comatus_owner_vote).id
+    old_vote2_id = votes(:coprinus_comatus_other_vote).id rescue nil
+    old_naming_reason_id = naming_reasons(:cc_macro_reason).id
 
     login('rolf')
-    get(:destroy_naming, :id => @coprinus_comatus_naming.id)
+    get(:destroy_naming, :id => namings(:coprinus_comatus_naming).id)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_other_naming.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_other_naming).reload
 
     # Make sure naming and associated vote and reason were actually destroyed.
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1345,28 +1350,28 @@ class ObserverControllerTest < ControllerTestCase
     end
 
     # Make sure observation was updated right.
-    assert_equal(@agaricus_campestris.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:agaricus_campestris).id, observations(:coprinus_comatus_obs).name_id)
 
     # Check votes. (should be no change)
-    assert_equal(0, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_other_naming.votes.length)
+    assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
   end
 
   # Make sure Rolf can't destroy his naming if Dick prefers it.
   def test_rolf_destroy_rolfs_naming_when_dick_prefers_it
-    old_naming_id = @coprinus_comatus_naming.id
-    old_vote1_id = @coprinus_comatus_owner_vote.id
-    old_vote2_id = @coprinus_comatus_other_vote.id
-    old_naming_reason_id = @cc_macro_reason.id
+    old_naming_id = namings(:coprinus_comatus_naming).id
+    old_vote1_id = votes(:coprinus_comatus_owner_vote).id
+    old_vote2_id = votes(:coprinus_comatus_other_vote).id
+    old_naming_reason_id = naming_reasons(:cc_macro_reason).id
 
     # Make Dick prefer it.
     login('dick')
-    @coprinus_comatus_naming.change_vote(@dick, 3)
+    namings(:coprinus_comatus_naming).change_vote(@dick, 3)
     assert_equal(11, @dick.reload.contribution)
 
     # Have Rolf try to destroy it.
     login('rolf')
-    get(:destroy_naming, :id => @coprinus_comatus_naming.id)
+    get(:destroy_naming, :id => namings(:coprinus_comatus_naming).id)
 
     # Make sure naming and associated vote and reason are still there.
     assert(Naming.find(old_naming_id))
@@ -1375,13 +1380,13 @@ class ObserverControllerTest < ControllerTestCase
     assert(NamingReason.find(old_naming_reason_id))
 
     # Make sure observation is unchanged.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
 
     # Check votes are unchanged.
-    assert_equal(6, @coprinus_comatus_naming.vote_sum)
-    assert_equal(3, @coprinus_comatus_naming.votes.length)
-    assert_equal(0, @coprinus_comatus_other_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_other_naming.votes.length)
+    assert_equal(6, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(3, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
   end
 
   # Rolf makes changes to vote and reasons of his naming.  Shouldn't matter
@@ -1396,8 +1401,8 @@ class ObserverControllerTest < ControllerTestCase
     # Rolf makes superficial changes to his naming.
     login('rolf')
     post(:edit_naming,
-      :id => @coprinus_comatus_naming.id,
-      :name => { :name => @coprinus_comatus.search_name },
+      :id => namings(:coprinus_comatus_naming).id,
+      :name => { :name => names(:coprinus_comatus).search_name },
       :vote => { :value => "3" },
       :reason => {
         "1" => { :check => "1", :notes => "Change to macro notes." },
@@ -1416,22 +1421,22 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(nr_count + 2, NamingReason.all.length)
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_owner_vote.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    votes(:coprinus_comatus_owner_vote).reload
 
     # Make sure observation is unchanged.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
 
     # Check votes.
-    assert_equal(4, @coprinus_comatus_naming.vote_sum) # 2+1 -> 3+1
-    assert_equal(2, @coprinus_comatus_naming.votes.length)
+    assert_equal(4, namings(:coprinus_comatus_naming).vote_sum) # 2+1 -> 3+1
+    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
 
     # Check new reasons.
-    assert_equal(3, @coprinus_comatus_naming.naming_reasons.length)
-    nr1 = @coprinus_comatus_naming.naming_reasons[0]
-    nr2 = @coprinus_comatus_naming.naming_reasons[1]
-    nr3 = @coprinus_comatus_naming.naming_reasons[2]
+    assert_equal(3, namings(:coprinus_comatus_naming).naming_reasons.length)
+    nr1 = namings(:coprinus_comatus_naming).naming_reasons[0]
+    nr2 = namings(:coprinus_comatus_naming).naming_reasons[1]
+    nr3 = namings(:coprinus_comatus_naming).naming_reasons[2]
     assert_equal(1, nr1.reason)
     assert_equal(2, nr2.reason)
     assert_equal(3, nr3.reason)
@@ -1452,7 +1457,7 @@ class ObserverControllerTest < ControllerTestCase
     # Now, Rolf makes name change to his naming (leave rest the same).
     login('rolf')
     post(:edit_naming,
-      :id => @coprinus_comatus_naming.id,
+      :id => namings(:coprinus_comatus_naming).id,
       :name => { :name => "Conocybe filaris" },
       :vote => { :value => "2" },
       :reason => {
@@ -1477,28 +1482,28 @@ class ObserverControllerTest < ControllerTestCase
     nr = NamingReason.last
 
     # Make sure everything I need is reloaded.
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_owner_vote.reload
+    observations(:coprinus_comatus_obs).reload
+    namings(:coprinus_comatus_naming).reload
+    votes(:coprinus_comatus_owner_vote).reload
 
     # Make sure observation is unchanged.
-    assert_equal(@conocybe_filaris.id, @coprinus_comatus_obs.name_id)
+    assert_equal(names(:conocybe_filaris).id, observations(:coprinus_comatus_obs).name_id)
 
     # Make sure old naming is unchanged.
-    assert_equal(@coprinus_comatus.id, @coprinus_comatus_naming.name_id)
-    assert_equal(1, @coprinus_comatus_naming.naming_reasons.length)
-    assert_equal(@cc_macro_reason, @coprinus_comatus_naming.naming_reasons.first)
-    assert_equal(3, @coprinus_comatus_naming.vote_sum)
-    assert_equal(2, @coprinus_comatus_naming.votes.length)
+    assert_equal(names(:coprinus_comatus).id, namings(:coprinus_comatus_naming).name_id)
+    assert_equal(1, namings(:coprinus_comatus_naming).naming_reasons.length)
+    assert_equal(naming_reasons(:cc_macro_reason), namings(:coprinus_comatus_naming).naming_reasons.first)
+    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
+    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
 
     # Check new naming.
-    assert_equal(@coprinus_comatus_obs, naming.observation)
-    assert_equal(@conocybe_filaris.id, naming.name_id)
+    assert_equal(observations(:coprinus_comatus_obs), naming.observation)
+    assert_equal(names(:conocybe_filaris).id, naming.name_id)
     assert_equal(@rolf, naming.user)
     assert_equal(1, naming.naming_reasons.length)
     assert_equal(nr, naming.naming_reasons.first)
-    assert_equal(@cc_macro_reason.reason, nr.reason)
-    assert_equal(@cc_macro_reason.notes, nr.notes)
+    assert_equal(naming_reasons(:cc_macro_reason).reason, nr.reason)
+    assert_equal(naming_reasons(:cc_macro_reason).notes, nr.notes)
     assert_equal(2, naming.vote_sum)
     assert_equal(1, naming.votes.length)
     assert_equal(vote, naming.votes.first)
@@ -1508,13 +1513,13 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_show_votes
     # First just make sure the page displays.
-    get_with_dump(:show_votes, :id => @coprinus_comatus_naming.id)
+    get_with_dump(:show_votes, :id => namings(:coprinus_comatus_naming).id)
     assert_response('show_votes')
 
     # Now try to make somewhat sure the content is right.
-    table = @coprinus_comatus_naming.calc_vote_table
-    str1 = Vote.agreement(@coprinus_comatus_owner_vote.value)
-    str2 = Vote.agreement(@coprinus_comatus_other_vote.value)
+    table = namings(:coprinus_comatus_naming).calc_vote_table
+    str1 = Vote.agreement(votes(:coprinus_comatus_owner_vote).value)
+    str2 = Vote.agreement(votes(:coprinus_comatus_other_vote).value)
     for str in table.keys
       if str == str1 && str1 == str2
         assert_equal(2, table[str][:num])
@@ -1538,7 +1543,7 @@ class ObserverControllerTest < ControllerTestCase
     # If javascript isn't enabled, then checkbox isn't required.
     post(:create_observation,
       :observation => { :where => 'where', :when => Time.now },
-      :name => { :name => @coprinus_comatus.text_name },
+      :name => { :name => names(:coprinus_comatus).text_name },
       :vote => { :value => 3 },
       :reason => {
         "1" => { :check => '0', :notes => ''    },
@@ -1555,7 +1560,7 @@ class ObserverControllerTest < ControllerTestCase
     # If javascript IS enabled, then checkbox IS required.
     post(:create_observation,
       :observation => { :where => 'where', :when => Time.now },
-      :name => { :name => @coprinus_comatus.text_name },
+      :name => { :name => names(:coprinus_comatus).text_name },
       :vote => { :value => 3 },
       :reason => {
         "1" => { :check => '0', :notes => ''    },
@@ -1688,44 +1693,45 @@ class ObserverControllerTest < ControllerTestCase
 
   def test_interest_in_show_observation
     login('rolf')
+    minimal_unknown = observations(:minimal_unknown)
 
     # No interest in this observation yet.
-    get(:show_observation, :id => @minimal_unknown.id)
+    get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>[\w\s]*/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Observation', :id => @minimal_unknown.id, :state => 1
+      :type => 'Observation', :id => minimal_unknown.id, :state => 1
     )
     assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>[\w\s]*/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Observation', :id => @minimal_unknown.id, :state => -1
+      :type => 'Observation', :id => minimal_unknown.id, :state => -1
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.create(:object => @minimal_unknown, :user => @rolf, :state => true)
-    get(:show_observation, :id => @minimal_unknown.id)
+    Interest.create(:object => minimal_unknown, :user => @rolf, :state => true)
+    get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Observation', :id => @minimal_unknown.id, :state => 0
+      :type => 'Observation', :id => minimal_unknown.id, :state => 0
     )
     assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Observation', :id => @minimal_unknown.id, :state => -1
+      :type => 'Observation', :id => minimal_unknown.id, :state => -1
     )
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.create(:object => @minimal_unknown, :user => @rolf, :state => false)
-    get(:show_observation, :id => @minimal_unknown.id)
+    Interest.create(:object => minimal_unknown, :user => @rolf, :state => false)
+    get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Observation', :id => @minimal_unknown.id, :state => 0
+      :type => 'Observation', :id => minimal_unknown.id, :state => 0
     )
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Observation', :id => @minimal_unknown.id, :state => 1
+      :type => 'Observation', :id => minimal_unknown.id, :state => 1
     )
   end
 end

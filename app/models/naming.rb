@@ -52,7 +52,7 @@
 #
 ################################################################################
 
-class Naming < ActiveRecord::MO
+class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
   belongs_to :user

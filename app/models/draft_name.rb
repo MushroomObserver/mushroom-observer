@@ -3,7 +3,7 @@
 #
 ################################################################################
 
-class DraftName < ActiveRecord::MO
+class DraftName < AbstractModel
   belongs_to :name
   belongs_to :user
   belongs_to :project

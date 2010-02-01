@@ -1,16 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class NameControllerTest < ControllerTestCase
-  fixtures :names
-  fixtures :namings
-  fixtures :synonyms
-  fixtures :users
-
-  def setup
-    @reviewers  = UserGroup.create(:name => 'reviewers')
-    @rolf.user_groups << @reviewers
-    @reviewers.reload
-  end
 
   def empty_notes
     result = {}
@@ -24,72 +14,59 @@ class NameControllerTest < ControllerTestCase
 
   def test_name_index
     get_with_dump(:name_index)
-    assert_response('name_index')
+    assert_response('list_names')
   end
 
   def test_observation_index
-    local_fixtures :observations
     get_with_dump(:observation_index)
-    assert_response('name_index')
+    assert_response('list_names')
   end
 
   def test_authored_names
-    local_fixtures :authors_names
     get_with_dump(:authored_names)
     assert_response(:action => :show_name, :id => 2)
   end
 
   def test_show_name
-    local_fixtures :observations
-    local_fixtures :past_names
-    local_fixtures :authors_names
-    local_fixtures :editors_names
     get_with_dump(:show_name, :id => 2)
     assert_response('show_name')
   end
 
   def test_show_past_name
-    local_fixtures :past_names
     get_with_dump(:show_past_name, :id => 2)
     assert_response('show_past_name')
   end
 
   def test_names_by_author
-    local_fixtures :authors_names
     get_with_dump(:names_by_author, :id => 1)
     assert_response(:action => :show_name, :id => 2)
   end
 
   def test_names_by_editor
-    local_fixtures :editors_names
     get_with_dump(:names_by_editor, :id => 1)
     assert_response(:action => :show_name, :id => 2)
   end
 
   def test_name_search
-    @request.session[:pattern] = "56"
-    get_with_dump(:name_search)
-    assert_response('name_index')
+    get_with_dump(:name_search, :pattern => '56')
+    assert_response('list_names')
     assert_equal(:name_index_matching.t(:pattern => '56'),
                  @controller.instance_variable_get('@title'))
   end
 
-  def test_advanced_obj_search
-    local_fixtures :observations
-    get_with_dump(:advanced_obj_search,
-      :search => {
-        :name => "Don't know",
-        :observer => "myself",
-        :content => "Long pink stem and small pink cap",
-        :location => "Eastern Oklahoma"
-      },
-      :commit => "Search"
+  def test_advanced_search
+    query = Query.lookup_and_save(:Name, :advanced,
+      :name => "Don't know",
+      :user => "myself",
+      :content => "Long pink stem and small pink cap",
+      :location => "Eastern Oklahoma"
     )
-    assert_response('name_index')
+    get(:advanced_search, @controller.query_params(query))
+    assert_response('list_names')
   end
 
   def test_edit_name
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     params = { "id" => name.id.to_s }
     requires_login(:edit_name, params)
     assert_form_action(:action => 'edit_name')
@@ -106,37 +83,35 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_change_synonyms
-    local_fixtures :synonyms
-    name = @chlorophyllum_rachodes
+    name = names(:chlorophyllum_rachodes)
     params = { :id => name.id }
     requires_login(:change_synonyms, params)
     assert_form_action(:action => 'change_synonyms', :approved_synonyms => [])
   end
 
   def test_deprecate_name
-    name = @chlorophyllum_rachodes
+    name = names(:chlorophyllum_rachodes)
     params = { :id => name.id }
     requires_login(:deprecate_name, params)
     assert_form_action(:action => 'deprecate_name', :approved_name => '')
   end
 
   def test_approve_name
-    name = @lactarius_alpigenes
+    name = names(:lactarius_alpigenes)
     params = { :id => name.id }
     requires_login(:approve_name, params)
     assert_form_action(:action => 'approve_name')
   end
 
   def test_review_authors
-    local_fixtures :authors_names
-    local_fixtures :editors_names
+    fungi = names(:fungi)
 
     # Make sure it lets reviewers get to page.
     requires_login(:review_authors, :id => 1)
     assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
-    @reviewers.users.delete(@rolf)
+    user_groups(:reviewers).users.delete(@rolf)
     assert(!@rolf.reload.in_group('reviewers'))
 
     # Make sure it fails to let unauthorized users see page.
@@ -144,8 +119,8 @@ class NameControllerTest < ControllerTestCase
     assert_response(:action => :show_name, :id => 1)
 
     # Make Rolf an author.
-    @fungi.add_author(@rolf)
-    assert_equal([@rolf.login], @fungi.reload.authors.map(&:login).sort)
+    fungi.add_author(@rolf)
+    assert_equal([@rolf.login], fungi.reload.authors.map(&:login).sort)
 
     # Rolf should be able to do it again now.
     get(:review_authors, :id => 1)
@@ -155,12 +130,12 @@ class NameControllerTest < ControllerTestCase
     post(:review_authors, :id => 1, :add => @mary.id)
     assert_response('review_authors')
     assert_equal([@mary.login, @rolf.login],
-                 @fungi.reload.authors.map(&:login).sort)
+                 fungi.reload.authors.map(&:login).sort)
 
     # ...and taketh with the other.
     post(:review_authors, :id => 1, :remove => @mary.id)
     assert_response('review_authors')
-    assert_equal([@rolf.login], @fungi.reload.authors.map(&:login).sort)
+    assert_equal([@rolf.login], fungi.reload.authors.map(&:login).sort)
   end
 
   # ----------------------------
@@ -169,25 +144,19 @@ class NameControllerTest < ControllerTestCase
 
   # test_map - name with Observations that have Locations
   def test_map
-    local_fixtures :observations
-    local_fixtures :locations
-    get_with_dump(:map, :id => @agaricus_campestris.id)
+    get_with_dump(:map, :id => names(:agaricus_campestris).id)
     assert_response('map')
   end
 
   # test_map_no_loc - name with Observations that don't have Locations
   def test_map_no_loc
-    local_fixtures :observations
-    local_fixtures :locations
-    get_with_dump(:map, :id => @coprinus_comatus.id)
+    get_with_dump(:map, :id => names(:coprinus_comatus).id)
     assert_response('map')
   end
 
   # test_map_no_obs - name with no Observations
   def test_map_no_obs
-    local_fixtures :observations
-    local_fixtures :locations
-    get_with_dump(:map, :id => @conocybe_filaris.id)
+    get_with_dump(:map, :id => names(:conocybe_filaris).id)
     assert_response('map')
   end
 
@@ -220,7 +189,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_create_name_existing
-    name = @conocybe_filaris
+    name = names(:conocybe_filaris)
     text_name = name.text_name
     count = Name.all.length
     params = {
@@ -237,7 +206,7 @@ class NameControllerTest < ControllerTestCase
     assert_response(:action => :show_name)
     assert_equal(10, @rolf.reload.contribution)
     name = Name.find_by_text_name(text_name)
-    assert_equal(@conocybe_filaris, name)
+    assert_equal(names(:conocybe_filaris), name)
     assert_equal(count, Name.all.length)
   end
 
@@ -331,7 +300,7 @@ class NameControllerTest < ControllerTestCase
   # ----------------------------
 
   def test_edit_name_post
-    name = @conocybe_filaris
+    name = names(:conocybe_filaris)
     assert_equal("Conocybe filaris", name.text_name)
     assert_nil(name.author)
     past_names = name.versions.size
@@ -360,7 +329,7 @@ class NameControllerTest < ControllerTestCase
   # Test to see if add a new general description sets the description author
   # list to the current user.
   def test_edit_name_add_gen_desc
-    name = @conocybe_filaris
+    name = names(:conocybe_filaris)
     assert_equal([], name.authors)
     assert_nil(name.gen_desc)
     past_names = name.versions.size
@@ -387,7 +356,7 @@ class NameControllerTest < ControllerTestCase
 
   # Test name changes in various ways.
   def test_edit_name_deprecated
-    name = @lactarius_alpigenes
+    name = names(:lactarius_alpigenes)
     assert(name.deprecated)
     params = {
       :id => name.id,
@@ -408,7 +377,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_different_user
-    name = @macrolepiota_rhacodes
+    name = names(:macrolepiota_rhacodes)
     name_owner = name.user
     user = "rolf"
     # Make sure it's not owned by the default user
@@ -437,7 +406,7 @@ class NameControllerTest < ControllerTestCase
 
   # If non-reviewer makes significant change, should reset status.
   def test_edit_name_cause_review_status_reset
-    name = @peltigera
+    name = peltigera = names(:peltigera)
     params = {
       :id => name.id,
       :name => {
@@ -454,29 +423,28 @@ class NameControllerTest < ControllerTestCase
     @request.session[:user_id] = @mary.id
     post(:edit_name, params)
     assert_response(:action => :show_name)
-    assert_equal(:vetted, @peltigera.reload.review_status)
+    assert_equal(:vetted, peltigera.reload.review_status)
 
     # Non-reviewer making change.
     params[:name][:citation] = "Blah blah blah."
     @request.session[:user_id] = @mary.id
     post(:edit_name, params)
     assert_response(:action => :show_name)
-    assert_equal(:unreviewed, @peltigera.reload.review_status)
+    assert_equal(:unreviewed, peltigera.reload.review_status)
 
     # Set it back to vetted, and have reviewer make a change.
     User.current = @rolf
-    @peltigera.update_review_status(:vetted)
+    peltigera.update_review_status(:vetted)
     params[:name][:citation] = "Whatever."
     @request.session[:user_id] = @rolf.id
     post(:edit_name, params)
     assert_response(:action => :show_name)
-    assert_equal(:vetted, @peltigera.reload.review_status)
+    assert_equal(:vetted, peltigera.reload.review_status)
   end
 
   def test_edit_name_simple_merge
-    local_fixtures :observations
-    misspelt_name = @agaricus_campestrus
-    correct_name = @agaricus_campestris
+    misspelt_name = agaricus_campestrus = names(:agaricus_campestrus)
+    correct_name  = agaricus_campestris = names(:agaricus_campestris)
     assert_not_equal(misspelt_name, correct_name)
     past_names = correct_name.versions.size
     assert_equal(0, correct_name.version)
@@ -487,7 +455,7 @@ class NameControllerTest < ControllerTestCase
     params = {
       :id => misspelt_name.id,
       :name => {
-        :text_name => @agaricus_campestris.text_name,
+        :text_name => agaricus_campestris.text_name,
         :author => "",
         :rank => :Species
       }
@@ -503,14 +471,13 @@ class NameControllerTest < ControllerTestCase
     assert_equal(0, correct_name.version)
     assert_equal(past_names, correct_name.versions.size)
     assert_equal(3, correct_name.namings.size)
-    assert_equal(@agaricus_campestris, misspelt_obs.reload.name)
-    assert_equal(@agaricus_campestris, correct_obs.reload.name)
+    assert_equal(agaricus_campestris, misspelt_obs.reload.name)
+    assert_equal(agaricus_campestris, correct_obs.reload.name)
   end
 
   def test_edit_name_author_merge
-    local_fixtures :observations
-    misspelt_name = @amanita_baccata_borealis
-    correct_name = @amanita_baccata_arora
+    misspelt_name = names(:amanita_baccata_borealis)
+    correct_name  = names(:amanita_baccata_arora)
     assert_not_equal(misspelt_name, correct_name)
     assert_equal(misspelt_name.text_name, correct_name.text_name)
     correct_author = correct_name.author
@@ -539,10 +506,9 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_misspelling_merge
-    local_fixtures :observations
-    misspelt_name = @suilus
-    wrong_author_name = @suillus_by_white
-    correct_name = @suillus
+    misspelt_name = names(:suilus)
+    wrong_author_name = names(:suillus_by_white)
+    correct_name = names(:suillus)
     assert_equal(misspelt_name.correct_spelling, wrong_author_name)
     spelling_id = misspelt_name.correct_spelling_id
     correct_author = correct_name.author
@@ -569,10 +535,9 @@ class NameControllerTest < ControllerTestCase
   # Test that merged names end up as not deprecated if the
   # correct name is not deprecated.
   def test_edit_name_deprecated_merge
-    local_fixtures :observations
-    misspelt_name = @lactarius_alpigenes
+    misspelt_name = names(:lactarius_alpigenes)
     assert(misspelt_name.deprecated)
-    correct_name = @lactarius_alpinus
+    correct_name = names(:lactarius_alpinus)
     assert(!correct_name.deprecated)
     assert_not_equal(misspelt_name, correct_name)
     assert_not_equal(misspelt_name.text_name, correct_name.text_name)
@@ -605,10 +570,9 @@ class NameControllerTest < ControllerTestCase
   # Test that merged names end up as not deprecated even if the
   # correct name is deprecated but the misspelt name is not deprecated
   def test_edit_name_deprecated2_merge
-    local_fixtures :observations
-    misspelt_name = @lactarius_alpinus
+    misspelt_name = names(:lactarius_alpinus)
     assert(!misspelt_name.deprecated)
-    correct_name = @lactarius_alpigenes
+    correct_name = names(:lactarius_alpigenes)
     assert(correct_name.deprecated)
     assert_not_equal(misspelt_name, correct_name)
     assert_not_equal(misspelt_name.text_name, correct_name.text_name)
@@ -642,9 +606,8 @@ class NameControllerTest < ControllerTestCase
 
   # Test merge two names where the matching_name has notes.
   def test_edit_name_merge_matching_notes
-    local_fixtures :observations
-    target_name = @russula_brevipes_no_author
-    matching_name = @russula_brevipes_author_notes
+    target_name = names(:russula_brevipes_no_author)
+    matching_name = names(:russula_brevipes_author_notes)
     assert_not_equal(target_name, matching_name)
     assert_equal(target_name.text_name, matching_name.text_name)
     assert_nil(target_name.author)
@@ -674,9 +637,8 @@ class NameControllerTest < ControllerTestCase
 
   # Test merge two names that both start with notes, but the notes are cleared in the input.
   def test_edit_name_merge_both_notes
-    local_fixtures :observations
-    target_name = @russula_cremoricolor_no_author_notes
-    matching_name = @russula_cremoricolor_author_notes
+    target_name = names(:russula_cremoricolor_no_author_notes)
+    matching_name = names(:russula_cremoricolor_author_notes)
     assert_not_equal(target_name, matching_name)
     assert_equal(target_name.text_name, matching_name.text_name)
     assert_nil(target_name.author)
@@ -707,9 +669,8 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_misspelt_unmergeable
-    local_fixtures :observations
-    misspelt_name = @agaricus_campestras
-    correct_name = @agaricus_campestris
+    misspelt_name = names(:agaricus_campestras)
+    correct_name = names(:agaricus_campestris)
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
     assert_not_equal(misspelt_name, correct_name)
@@ -740,14 +701,13 @@ class NameControllerTest < ControllerTestCase
     assert_equal(1, misspelt_name.version)
     assert_equal(past_names+1, misspelt_name.versions.size)
     assert_equal(3, misspelt_name.namings.size)
-    assert_equal(@agaricus_campestras, misspelt_obs.reload.name)
-    assert_equal(@agaricus_campestras, correct_obs.reload.name)
+    assert_equal(names(:agaricus_campestras), misspelt_obs.reload.name)
+    assert_equal(names(:agaricus_campestras), correct_obs.reload.name)
   end
 
   def test_edit_name_correct_unmergeable
-    local_fixtures :observations
-    misspelt_name = @agaricus_campestrus
-    correct_name = @agaricus_campestras
+    misspelt_name = names(:agaricus_campestrus)
+    correct_name = names(:agaricus_campestras)
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
     correct_notes = correct_name.notes
@@ -777,14 +737,13 @@ class NameControllerTest < ControllerTestCase
     assert_equal(0, correct_name.version)
     assert_equal(past_names, correct_name.versions.size)
     assert_equal(2, correct_name.namings.size)
-    assert_equal(@agaricus_campestras, misspelt_obs.reload.name)
-    assert_equal(@agaricus_campestras, correct_obs.reload.name)
+    assert_equal(names(:agaricus_campestras), misspelt_obs.reload.name)
+    assert_equal(names(:agaricus_campestras), correct_obs.reload.name)
   end
 
   def test_edit_name_neither_mergeable
-    local_fixtures :observations
-    misspelt_name = @agaricus_campestros
-    correct_name = @agaricus_campestras
+    misspelt_name = names(:agaricus_campestros)
+    correct_name = names(:agaricus_campestras)
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
     assert_not_equal(misspelt_name, correct_name)
@@ -818,9 +777,8 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_correct_unmergable_with_notes # Should 'fail'
-    local_fixtures :observations
-    misspelt_name = @russula_brevipes_no_author # Shouldn't have notes
-    correct_name = @russula_brevipes_author_notes # Should have notes
+    misspelt_name = names(:russula_brevipes_no_author) # Shouldn't have notes
+    correct_name = names(:russula_brevipes_author_notes) # Should have notes
     correct_text_name = correct_name.text_name
     correct_author = correct_name.author
     assert_not_equal(misspelt_name, correct_name)
@@ -845,10 +803,8 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_page_version_merge
-    local_fixtures :past_names
-    local_fixtures :observations
-    page_name = @coprinellus_micaceus
-    other_name = @coprinellus_micaceus_no_author
+    page_name = names(:coprinellus_micaceus)
+    other_name = names(:coprinellus_micaceus_no_author)
     assert(page_name.version > other_name.version)
     assert_not_equal(page_name, other_name)
     assert_equal(page_name.text_name, other_name.text_name)
@@ -875,10 +831,8 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_other_version_merge
-    local_fixtures :past_names
-    local_fixtures :observations
-    page_name = @coprinellus_micaceus_no_author
-    other_name = @coprinellus_micaceus
+    page_name = names(:coprinellus_micaceus_no_author)
+    other_name = names(:coprinellus_micaceus)
     assert(page_name.version < other_name.version)
     assert_not_equal(page_name, other_name)
     assert_equal(page_name.text_name, other_name.text_name)
@@ -905,7 +859,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_edit_name_add_author
-    name = @strobilurus_diminutivus_no_author
+    name = names(:strobilurus_diminutivus_no_author)
     old_text_name = name.text_name
     new_author = 'Desjardin'
     assert(name.namings.length > 0)
@@ -928,8 +882,8 @@ class NameControllerTest < ControllerTestCase
 
   # Test merge of name with notes with name without notes
   def test_edit_name_notes
-    target_name = @russula_brevipes_no_author
-    matching_name = @russula_brevipes_author_notes
+    target_name = names(:russula_brevipes_no_author)
+    matching_name = names(:russula_brevipes_author_notes)
     assert_not_equal(target_name, matching_name)
     assert_equal(target_name.text_name, matching_name.text_name)
     assert_nil(target_name.author)
@@ -1005,8 +959,8 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_update_bulk_names_ee_synonym
-    approved_name = @chlorophyllum_rachodes
-    synonym_name = @macrolepiota_rachodes
+    approved_name = names(:chlorophyllum_rachodes)
+    synonym_name = names(:macrolepiota_rachodes)
     assert_not_equal(approved_name.synonym, synonym_name.synonym)
     assert(!synonym_name.deprecated)
     params = {
@@ -1022,9 +976,9 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_update_bulk_names_eee_synonym
-    approved_name = @lepiota_rachodes
-    synonym_name  = @lepiota_rhacodes
-    synonym_name2 = @chlorophyllum_rachodes
+    approved_name = names(:lepiota_rachodes)
+    synonym_name  = names(:lepiota_rhacodes)
+    synonym_name2 = names(:chlorophyllum_rachodes)
     assert_nil(approved_name.synonym)
     assert_nil(synonym_name.synonym)
     assert_not_nil(synonym_name2.synonym)
@@ -1049,7 +1003,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_update_bulk_names_en_synonym
-    approved_name = @chlorophyllum_rachodes
+    approved_name = names(:chlorophyllum_rachodes)
     target_synonym = approved_name.synonym
     assert(target_synonym)
     new_synonym_str = "New name Wilson"
@@ -1073,7 +1027,7 @@ class NameControllerTest < ControllerTestCase
   def test_update_bulk_names_ne_synonym
     new_name_str = "New name Wilson"
     assert_nil(Name.find_by_search_name(new_name_str))
-    synonym_name = @macrolepiota_rachodes
+    synonym_name = names(:macrolepiota_rachodes)
     assert(!synonym_name.deprecated)
     target_synonym = synonym_name.synonym
     assert(target_synonym)
@@ -1096,8 +1050,8 @@ class NameControllerTest < ControllerTestCase
   # Test a bug fix for the case of adding a subtaxon when the parent taxon is duplicated due to
   # different authors.
   def test_update_bulk_names_approved_for_dup_parents
-    parent1 = @lentinellus_ursinus_author1
-    parent2 = @lentinellus_ursinus_author2
+    parent1 = names(:lentinellus_ursinus_author1)
+    parent2 = names(:lentinellus_ursinus_author2)
     assert_not_equal(parent1, parent2)
     assert_equal(parent1.text_name, parent2.text_name)
     assert_not_equal(parent1.author, parent2.author)
@@ -1119,13 +1073,13 @@ class NameControllerTest < ControllerTestCase
 
   # combine two Names that have no Synonym
   def test_transfer_synonyms_1_1
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
     selected_past_name_count = selected_name.versions.length
     selected_version = selected_name.version
 
-    add_name = @lepiota_rhacodes
+    add_name = names(:lepiota_rhacodes)
     assert(!add_name.deprecated)
     assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
     assert_nil(add_name.synonym)
@@ -1154,17 +1108,17 @@ class NameControllerTest < ControllerTestCase
     assert_equal(add_synonym, selected_synonym)
     assert_equal(2, add_synonym.names.size)
 
-    assert(!@lepiota.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
   end
 
   # combine two Names that have no Synonym and no deprecation
   def test_transfer_synonyms_1_1_nd
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
     selected_version = selected_name.version
 
-    add_name = @lepiota_rhacodes
+    add_name = names(:lepiota_rhacodes)
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
     add_version = add_name.version
@@ -1191,7 +1145,7 @@ class NameControllerTest < ControllerTestCase
 
   # add new name string to Name with no Synonym but not approved
   def test_transfer_synonyms_1_0_na
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
 
@@ -1210,7 +1164,7 @@ class NameControllerTest < ControllerTestCase
 
   # add new name string to Name with no Synonym but approved
   def test_transfer_synonyms_1_0_a
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1236,12 +1190,12 @@ class NameControllerTest < ControllerTestCase
       end
     end
 
-    assert(!@lepiota.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
   end
 
   # add new name string to Name with no Synonym but approved
   def test_transfer_synonyms_1_00_a
-    page_name = @lepiota_rachodes
+    page_name = names(:lepiota_rachodes)
     assert(!page_name.deprecated)
     assert_nil(page_name.synonym)
 
@@ -1272,17 +1226,17 @@ class NameControllerTest < ControllerTestCase
       end
     end
 
-    assert(!@lepiota.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym
   def test_transfer_synonyms_n_1
-    add_name = @lepiota_rachodes
+    add_name = names(:lepiota_rachodes)
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
     add_version = add_name.version
 
-    selected_name = @chlorophyllum_rachodes
+    selected_name = names(:chlorophyllum_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1301,7 +1255,7 @@ class NameControllerTest < ControllerTestCase
     assert(add_name.reload.deprecated)
     assert_not_nil(add_synonym = add_name.synonym)
     assert_equal(add_version+1, add_name.version)
-    assert(!@lepiota.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
 
     assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
@@ -1309,17 +1263,17 @@ class NameControllerTest < ControllerTestCase
     assert_equal(add_synonym, selected_synonym)
     assert_equal(start_size + 1, add_synonym.names.size)
 
-    assert(!@chlorophyllum.reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym wih the alternates checked
   def test_transfer_synonyms_n_1_c
-    add_name = @lepiota_rachodes
+    add_name = names(:lepiota_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     assert_nil(add_name.synonym)
 
-    selected_name = @chlorophyllum_rachodes
+    selected_name = names(:chlorophyllum_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1360,18 +1314,18 @@ class NameControllerTest < ControllerTestCase
     assert(!split_name.reload.deprecated)
     assert_equal(add_synonym, split_synonym = split_name.synonym)
 
-    assert(!@lepiota.reload.deprecated)
-    assert(!@chlorophyllum.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym wih the alternates not checked
   def test_transfer_synonyms_n_1_nc
-    add_name = @lepiota_rachodes
+    add_name = names(:lepiota_rachodes)
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
     add_version = add_name.version
 
-    selected_name = @chlorophyllum_rachodes
+    selected_name = names(:chlorophyllum_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1415,20 +1369,20 @@ class NameControllerTest < ControllerTestCase
     assert_equal(split_version, split_name.version)
     assert_nil(split_name.synonym)
 
-    assert(!@lepiota.reload.deprecated)
-    assert(!@chlorophyllum.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with no approved synonyms
   def test_transfer_synonyms_1_n_ns
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
 
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1453,20 +1407,20 @@ class NameControllerTest < ControllerTestCase
     assert_nil(selected_synonym)
 
     assert_equal(start_size, add_synonym.names.size)
-    assert(!@lepiota.reload.deprecated)
-    assert(!@chlorophyllum.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with all approved synonyms
   def test_transfer_synonyms_1_n_s
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
 
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1494,20 +1448,20 @@ class NameControllerTest < ControllerTestCase
     assert_equal(add_synonym, selected_synonym)
 
     assert_equal(start_size+1, add_synonym.names.size)
-    assert(!@lepiota.reload.deprecated)
-    assert(!@chlorophyllum.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with all approved synonyms
   def test_transfer_synonyms_1_n_l
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
 
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1534,19 +1488,19 @@ class NameControllerTest < ControllerTestCase
     assert_equal(add_synonym, selected_synonym)
 
     assert_equal(start_size+1, add_synonym.names.size)
-    assert(!@lepiota.reload.deprecated)
-    assert(!@chlorophyllum.reload.deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # combine two Names that each have Synonyms with no chosen names
   def test_transfer_synonyms_n_n_ns
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
 
-    selected_name = @macrolepiota_rachodes
+    selected_name = names(:macrolepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -1574,14 +1528,14 @@ class NameControllerTest < ControllerTestCase
 
   # combine two Names that each have Synonyms with all chosen names
   def test_transfer_synonyms_n_n_s
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
 
-    selected_name = @macrolepiota_rachodes
+    selected_name = names(:macrolepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1615,14 +1569,14 @@ class NameControllerTest < ControllerTestCase
 
   # combine two Names that each have Synonyms with all names listed
   def test_transfer_synonyms_n_n_l
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
 
-    selected_name = @macrolepiota_rachodes
+    selected_name = names(:macrolepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1653,7 +1607,7 @@ class NameControllerTest < ControllerTestCase
 
   # split off a single name from a name with multiple synonyms
   def test_transfer_synonyms_split_3_1
-    selected_name = @lactarius_alpinus
+    selected_name = names(:lactarius_alpinus)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_id = selected_name.id
@@ -1702,7 +1656,7 @@ class NameControllerTest < ControllerTestCase
 
   # split 4 synonymized names into two sets of synonyms with two members each
   def test_transfer_synonyms_split_2_2
-    selected_name = @lactarius_alpinus
+    selected_name = names(:lactarius_alpinus)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_id = selected_name.id
@@ -1753,7 +1707,7 @@ class NameControllerTest < ControllerTestCase
 
   # take four synonymized names and separate off one
   def test_transfer_synonyms_split_1_3
-    selected_name = @lactarius_alpinus
+    selected_name = names(:lactarius_alpinus)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_id = selected_name.id
@@ -1799,14 +1753,14 @@ class NameControllerTest < ControllerTestCase
 
   # deprecate an existing unique name with another existing name
   def test_do_deprecation
-    old_name = @lepiota_rachodes
+    old_name = names(:lepiota_rachodes)
     assert(!old_name.deprecated)
     assert_nil(old_name.synonym)
     old_past_name_count = old_name.versions.length
     old_version = old_name.version
     old_notes = old_name.notes
 
-    new_name = @chlorophyllum_rachodes
+    new_name = names(:chlorophyllum_rachodes)
     assert(!new_name.deprecated)
     assert_not_nil(new_name.synonym)
     new_synonym_length = new_name.synonym.names.size
@@ -1840,12 +1794,12 @@ class NameControllerTest < ControllerTestCase
 
   # deprecate an existing unique name with an ambiguous name
   def test_do_deprecation_ambiguous
-    old_name = @lepiota_rachodes
+    old_name = names(:lepiota_rachodes)
     assert(!old_name.deprecated)
     assert_nil(old_name.synonym)
     old_past_name_count = old_name.versions.length
 
-    new_name = @amanita_baccata_arora # Ambiguous text name
+    new_name = names(:amanita_baccata_arora) # Ambiguous text name
     assert(!new_name.deprecated)
     assert_nil(new_name.synonym)
     new_past_name_count = new_name.versions.length
@@ -1871,12 +1825,12 @@ class NameControllerTest < ControllerTestCase
 
   # deprecate an existing unique name with an ambiguous name, but using :chosen_name to disambiguate
   def test_do_deprecation_chosen
-    old_name = @lepiota_rachodes
+    old_name = names(:lepiota_rachodes)
     assert(!old_name.deprecated)
     assert_nil(old_name.synonym)
     old_past_name_count = old_name.versions.length
 
-    new_name = @amanita_baccata_arora # Ambiguous text name
+    new_name = names(:amanita_baccata_arora) # Ambiguous text name
     assert(!new_name.deprecated)
     assert_nil(new_name.synonym)
     new_synonym_length = 0
@@ -1906,7 +1860,7 @@ class NameControllerTest < ControllerTestCase
 
   # deprecate an existing unique name with an ambiguous name
   def test_do_deprecation_new_name
-    old_name = @lepiota_rachodes
+    old_name = names(:lepiota_rachodes)
     assert(!old_name.deprecated)
     assert_nil(old_name.synonym)
     old_past_name_count = old_name.versions.length
@@ -1930,7 +1884,7 @@ class NameControllerTest < ControllerTestCase
 
   # deprecate an existing unique name with an ambiguous name, but using :chosen_name to disambiguate
   def test_do_deprecation_approved_new_name
-    old_name = @lepiota_rachodes
+    old_name = names(:lepiota_rachodes)
     assert(!old_name.deprecated)
     assert_nil(old_name.synonym)
     old_past_name_count = old_name.versions.length
@@ -1965,7 +1919,7 @@ class NameControllerTest < ControllerTestCase
 
   # approve a deprecated name
   def test_do_approval_default
-    old_name = @lactarius_alpigenes
+    old_name = names(:lactarius_alpigenes)
     assert(old_name.deprecated)
     assert(old_name.synonym)
     old_past_name_count = old_name.versions.length
@@ -1994,7 +1948,7 @@ class NameControllerTest < ControllerTestCase
 
   # approve a deprecated name, but don't deprecate the synonyms
   def test_do_approval_no_deprecate
-    old_name = @lactarius_alpigenes
+    old_name = names(:lactarius_alpigenes)
     assert(old_name.deprecated)
     assert(old_name.synonym)
     old_past_name_count = old_name.versions.length
@@ -2023,8 +1977,7 @@ class NameControllerTest < ControllerTestCase
   # ----------------------------
 
   def test_email_tracking
-    local_fixtures :notifications
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     params = { :id => name.id.to_s }
     requires_login(:email_tracking, params)
     assert_response('email_tracking')
@@ -2032,9 +1985,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_email_tracking_enable_no_note
-    local_fixtures :observations
-    local_fixtures :notifications
-    name = @conocybe_filaris
+    name = names(:conocybe_filaris)
     count_before = Notification.all.length
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2055,13 +2006,11 @@ class NameControllerTest < ControllerTestCase
     assert(notification)
     assert_nil(notification.note_template)
     assert_nil(notification.calc_note(:user => @rolf,
-                                      :naming => @coprinus_comatus_naming))
+                                      :naming => namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_enable_with_note
-    local_fixtures :observations
-    local_fixtures :notifications
-    name = @conocybe_filaris
+    name = names(:conocybe_filaris)
     count_before = Notification.all.length
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2084,13 +2033,11 @@ class NameControllerTest < ControllerTestCase
     assert(notification)
     assert(notification.note_template)
     assert(notification.calc_note(:user => @mary,
-                                  :naming => @coprinus_comatus_naming))
+                                  :naming => namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_update_add_note
-    local_fixtures :observations
-    local_fixtures :notifications
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     count_before = Notification.all.length
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2114,13 +2061,11 @@ class NameControllerTest < ControllerTestCase
     assert(notification)
     assert(notification.note_template)
     assert(notification.calc_note(:user => @rolf,
-                                  :naming => @coprinus_comatus_naming))
+                                  :naming => namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_disable
-    local_fixtures :observations
-    local_fixtures :notifications
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     count_before = Notification.all.length
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2148,7 +2093,7 @@ class NameControllerTest < ControllerTestCase
   # ----------------------------
 
   def test_set_review_status_reviewer
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     assert_equal(:unreviewed, name.review_status)
     assert(@rolf.in_group('reviewers'))
     params = {
@@ -2161,7 +2106,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_set_review_status_non_reviewer
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     assert_equal(:unreviewed, name.review_status)
     assert(!@mary.in_group('reviewers'))
     params = {
@@ -2175,21 +2120,21 @@ class NameControllerTest < ControllerTestCase
 
   def test_send_author_request
     params = {
-      :id => @coprinus_comatus.id,
+      :id => names(:coprinus_comatus).id,
       :email => {
         :subject => "Author request subject",
         :message => "Message for authors"
       }
     }
-    requires_login(:send_author_request, params)
-    assert_response(:action => "show_name", :id => @coprinus_comatus.id)
+    post_requires_login(:author_request, params)
+    assert_response(:action => "show_name", :id => names(:coprinus_comatus).id)
     assert_flash(:request_success.t)
   end
 
   def test_author_request
-    id = @coprinus_comatus.id
+    id = names(:coprinus_comatus).id
     requires_login(:author_request, :id => id)
-    assert_form_action(:action => 'send_author_request', :id => id)
+    assert_form_action(:action => 'author_request', :id => id)
   end
 
   # ----------------------------
@@ -2197,45 +2142,46 @@ class NameControllerTest < ControllerTestCase
   # ----------------------------
 
   def test_interest_in_show_name
+    peltigera = names(:peltigera)
     login('rolf')
 
     # No interest in this name yet.
-    get(:show_name, :id => @peltigera.id)
+    get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 1
+      :type => 'Name', :id => peltigera.id, :state => 1
     )
     assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => -1
+      :type => 'Name', :id => peltigera.id, :state => -1
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.create(:object => @peltigera, :user => @rolf, :state => true)
-    get(:show_name, :id => @peltigera.id)
+    Interest.create(:object => peltigera, :user => @rolf, :state => true)
+    get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 0
+      :type => 'Name', :id => peltigera.id, :state => 0
     )
     assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => -1
+      :type => 'Name', :id => peltigera.id, :state => -1
     )
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.create(:object => @peltigera, :user => @rolf, :state => false)
-    get(:show_name, :id => @peltigera.id)
+    Interest.create(:object => peltigera, :user => @rolf, :state => false)
+    get(:show_name, :id => peltigera.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 0
+      :type => 'Name', :id => peltigera.id, :state => 0
     )
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 1
+      :type => 'Name', :id => peltigera.id, :state => 1
     )
   end
 end

@@ -338,7 +338,7 @@ class ControllerTestCase < ActionController::TestCase
       if found_it
         assert_block("") { true } # to count the assertion
       elsif found.keys
-        assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join(">, <"))) { false }
+        assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but only found these: <?>.", url, found.keys.sort.join('>, <'))) { false }
       else
         assert_block(build_message(msg, "Expected HTML to contain form that posts to <?>, but found nothing at all.", url)) { false }
       end
@@ -485,7 +485,7 @@ class ControllerTestCase < ActionController::TestCase
             assert_redirected_to(arg, msg)
           elsif arg.is_a?(String)
             controller = @controller.controller_name
-            msg += "Expected it to render <#{controller}/#{arg}.rhtml>" + got
+            msg += "Expected it to render <#{controller}/#{arg}>" + got
             super(:success, msg)
             assert_template(arg.to_s, msg)
           elsif arg == :index

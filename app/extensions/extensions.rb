@@ -4,8 +4,9 @@
 # explicitly, too.  (Although, I believe ApplicationController is always
 # loaded, no matter what you need(?)...) 
 
-require 'active_record_extensions'
 require 'enumerable_extensions'
+require 'fixnum_extensions'
+require 'hash_extensions'
 require 'string_extensions'
 require 'symbol_extensions'
 require 'time_extensions'

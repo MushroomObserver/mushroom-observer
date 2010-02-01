@@ -136,7 +136,7 @@
 #
 ################################################################################
 
-class Image < ActiveRecord::MO
+class Image < AbstractModel
   has_and_belongs_to_many :observations
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
   belongs_to :user

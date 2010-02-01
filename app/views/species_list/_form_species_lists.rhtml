@@ -1,14 +1,11 @@
 <!--[form:species_list]-->
 
-<% if session[:checklist] && (session[:checklist] != []) %>
+<% if @checklist && @checklist != [] %>
   <td valign="top">
     <%= :form_species_lists_species_to_add.t %>:<br/>
     <% i = 0
-       max = 100000
-       for (name, id) in session[:checklist]
-         i += 1
-         break if i > max %>
-      <%= check_box("checklist_data", id, { :checked => @checklist_names[id] }, "checked") %>
+    for (name, id) in @checklist.sort_by(&:first) %>
+      <%= check_box("checklist_data", id, { :checked => @checklist_names[id] }) %>
       <label for="checklist_names"><%= name.t %></label>
       <br/>
     <% end %>

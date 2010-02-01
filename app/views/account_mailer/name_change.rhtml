@@ -32,7 +32,7 @@
     one_liners += "*#{:app_name_status.l} #{is_now}:* #{:app_not_misspelled.l}\n" if !!@new_name.correct_spelling_id && !@old_name.correct_spelling_id
     one_liners += "*#{:app_correct_spelling.l} #{is_now}:* #{new_spell} (#{@new_name.correct_spelling_id}, #{@old_name.correct_spelling_id})\n" if @new_name.correct_spelling_id != @old_name.correct_spelling_id
 
-    for field in Name.all_note_fields
+    for field in [:classification] + Name.all_note_fields
       old_val = @old_name.send(field)
       new_val = @new_name.send(field)
       many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val

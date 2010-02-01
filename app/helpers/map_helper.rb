@@ -38,7 +38,7 @@ module ApplicationHelper::Map
 
   # Create a map of a given Array of Location's.  It creates the map, centers
   # and zooms it, then draws all the locations on it.  Returns a GMap instance.
-  def make_map(locs)
+  def make_map(locs, query_params={})
     gmap = GMap.new("map_div")
     gmap.control_init(:large_map => true, :map_type => true)
 
@@ -71,8 +71,8 @@ module ApplicationHelper::Map
 
     # Map locations.
     for l in locs
-      # map_loc(gmap, l, blue_dot)
-      map_loc(gmap, l)
+      # map_loc(gmap, l, query_params, blue_dot)
+      map_loc(gmap, l, query_params)
     end
 
     gmap
@@ -84,9 +84,10 @@ module ApplicationHelper::Map
   end
 
   # Draw a single Location on the given GMap.
-  def map_loc(map, loc) # , icon)
+  def map_loc(map, loc, query_params={}) # , icon)
     link = link_to(loc.display_name.t, :controller => :location,
-                   :action => :show_location, :id => loc.id)
+                   :action => :show_location, :id => loc.id,
+                   :params => query_params)
     table = make_table(
       ['', loc.north, ''],
       [loc.west, '', loc.east],

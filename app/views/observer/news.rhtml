@@ -420,7 +420,7 @@
 
 <p>In addition to the position of the location, you can also provide a maximum and minimum altitude along with some notes.  Note that the altitudes should be in meters not feet.  Once you have filled out the form, click 'Create' to define the location.  It does a bit of sanity checking to make sure that the values are reasonable and that the name of the location is unique.  An existing location can be edited by going to the page for that location and clicking 'Edit'.  Anyone can change the information for a location, but the previous version of the information is kept as a reference to allow easy recovery if someone puts in the wrong information.</p>
 
-<p>A <%= link_to('list of all locations', :controller => 'location', :action => 'list_place_names') %> in the system is available.  You can reach it by clicking the 'All Locations' link from any of the location related pages.  This page lists both the defined locations (on the left, sorted alphabetically) and the undefined locations (on the right, sorted by the number of observations associated with that location).  My hope is that people will start clicking on the undefined locations and defining them starting with the ones that are in the most widespread use.</p>
+<p>A <%= link_to('list of all locations', :controller => 'location', :action => 'list_locations') %> in the system is available.  You can reach it by clicking the 'All Locations' link from any of the location related pages.  This page lists both the defined locations (on the left, sorted alphabetically) and the undefined locations (on the right, sorted by the number of observations associated with that location).  My hope is that people will start clicking on the undefined locations and defining them starting with the ones that are in the most widespread use.</p>
 
 <p>Next to each undefined location is a 'Merge' link as well.  This allows you to handle the case where the same location has been given but in different forms (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park').  When you click a 'Merge' link it will do a quick search for any likely candidates and present those in one list and all the remaining locations in another in case it guessed wrong.  Clicking on any of those location links will perform the merge.</p>
 
@@ -715,7 +715,7 @@
     rank, a text name an author and notes.</li>
     <li>A show_name page shows this information as well as a list of all
     observations that use that Name.  The show_pages can be accessed from
-    each show_observation page as well as the name_index page that is
+    each show_observation page as well as the all_names page that is
     available in the left-side panel.</li>
     <li>Names can be edited on the edit_name pages that are accessible from
     the show_name pages.  Anyone is allowed to edit any name, but

@@ -92,7 +92,7 @@
                   <%= :app_current_user.t %>:<br/>
                   &nbsp;&nbsp;<%= h(@user.login) %><br/>
                   &nbsp;&nbsp;<%= link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_your_observations.t, :controller => 'observer', :action => 'show_user_observations', :id => @user.id) %><br/>
+                  &nbsp;&nbsp;<%= link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %><br/>
                   &nbsp;&nbsp;<%= link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %><br/>
                   &nbsp;&nbsp;<%= link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %><br/>
                   &nbsp;&nbsp;<%= link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
@@ -153,7 +153,8 @@
               <%= submit_tag :app_images_find.l %>
               <%= submit_tag :app_names_find.l %>
               <%= submit_tag :app_locations_find.l %>
-              <%= link_to(:app_advanced_search.l, :controller => 'observer', :action => 'advanced_search') %>
+              <%= link_to(:app_advanced_search.l, :controller => 'observer',
+                          :action => 'advanced_search_form') %>
               <% if @start %>
                 Start: <%= Time.now.to_f - @start.to_f %>
                 <% @start = nil %>

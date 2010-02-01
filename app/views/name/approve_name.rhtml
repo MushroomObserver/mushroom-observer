@@ -11,7 +11,7 @@
   <br/><center><%= submit_tag :app_approve.l %></center>
 
   <% if @approved_names %>
-    <p><%= check_box('deprecate', 'others', :checked => 'checked') %>
+    <p><%= check_box('deprecate', 'others', :checked => '1') %>
     <label for="deprecate_others"><%= :name_approve_deprecate.t %>:</label><br/><br/>
     <% for n in @approved_names %>
       <%= n.display_name.t %><br/>

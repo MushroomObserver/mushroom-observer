@@ -7,11 +7,8 @@
 #
 #  == Test unit helpers
 #  clean_our_backtrace::        Make asserts appear to fail in the test unit.
-#  all_tables::                 Get an Array of all database tables.
-#  clear_unused_fixtures::      Clear all tables we aren't using fixtures for.
-#  local_fixtures::             Load fixture(s) for a single test.
 #  application_setup::          Universal setup: sets locale.
-#  application_teardown::       Universal teardown: removes images and local fixtures.
+#  application_teardown::       Universal teardown: removes images.
 #
 #  == General Assertions
 #  assert_list_equal::          Compare two lists by mapping and sorting elements.
@@ -32,6 +29,7 @@
 ################################################################################
 
 class Test::Unit::TestCase
+  fixtures :all
 
   # Register standard setup and teardown hooks.
   setup    :application_setup
@@ -49,14 +47,14 @@ class Test::Unit::TestCase
   # in MySQL.  Turn off transactional fixtures in this case; however, if you
   # don't care one way or the other, switching from MyISAM to InnoDB tables
   # is recommended.
-  use_transactional_fixtures = true
+  self.use_transactional_fixtures = true
 
   # Instantiated fixtures are slow, but give you @david where otherwise you
   # would need people(:david).  If you don't want to migrate your existing
   # test cases which use the @david style and don't mind the speed hit (each
   # instantiated fixtures translates to a database query per test method),
   # then set this back to true.
-  use_instantiated_fixtures  = true
+  self.use_instantiated_fixtures = false
 
   # Tell the damned tester not to run test methods in a random order!!!
   # Makes debugging complex interactions absolutely impossible.
@@ -81,48 +79,13 @@ class Test::Unit::TestCase
     raise
   end
 
-  # Get a list of all database tables.
-  def all_tables
-    if !defined?(@@all_tables)
-      @@all_tables = User.connection.select_values('SHOW TABLES') -
-                     ['migration_schemas']
-    end
-    @@all_tables
-  end
-
-  # Delete everything in the tables whose fixtures we haven't bothered to
-  # include.  This lets us get away with only included fixtures that are
-  # absolutely necessary, speeding up tests dramatically (?)
-  def clear_unused_fixtures
-    for table in all_tables - fixture_table_names.map(&:to_s)
-      User.connection.execute("DELETE FROM `#{table}`")
-    end
-  end
-
-  # Include fixtures for a single test.
-  #
-  #   def test_blah
-  #     local_fixtures :past_locations
-  #     ...
-  #   end
-  #
-  def local_fixtures(*tables)
-    for table in tables
-      self.class.try_to_load_dependency table.to_s.singularize
-    end
-    fixtures = Fixtures.create_fixtures(fixture_path, tables)
-    fixtures = [fixtures] if fixtures.instance_of?(Fixtures)
-    for fixture in fixtures
-      Fixtures.instantiate_fixtures(self, fixture.table_name, fixture, true)
-    end
-  end
-
   # Standard setup to run before every test.
   def application_setup
     # print "RUNNING #{name}\n"
-    Locale.code = 'en-US'
+    Locale.code = :'en-US' if Locale.code != :'en-US'
     Time.zone = 'America/New_York'
     User.current = nil
+    @rolf, @mary, @junk, @dick, @katrina = User.all
   end
 
   # Standard teardown to run after every test.
@@ -130,7 +93,6 @@ class Test::Unit::TestCase
     if File.exists?(IMG_DIR)
       FileUtils.rm_rf(IMG_DIR)
     end
-    clear_unused_fixtures
   end
 
   ##############################################################################

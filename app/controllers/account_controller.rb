@@ -227,7 +227,7 @@ class AccountController < ApplicationController
             val = case type
               when :str  ; val.to_s
               when :int  ; val.to_i
-              when :bool ; (val == '1' || val == 'checked')
+              when :bool ; val == '1'
             end
             if @user.send(arg) != val
               @user.send("#{arg}=", val)

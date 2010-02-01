@@ -45,7 +45,7 @@
   <div class="HelpNote">
     <%= :name_deprecate_preferred_help.tp %>
   </div>
-  <%= turn_into_name_auto_completer('proposed_name') %>
+  <%= turn_into_name_auto_completer('proposed_name', :primer => @name_primer) %>
 
   <p><%= check_box('is', 'misspelling', :value => @misspelling) %>
   <label for="misspelling"><%= :form_names_misspelling.t %></label></p>

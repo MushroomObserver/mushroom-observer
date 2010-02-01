@@ -30,9 +30,11 @@ class CommentController < ApplicationController
   # Outputs: @comments, @comment_pages
   def list_comments
     store_location
-    session_setup
+    store_query
     @title = :list_comments.t
-    @comment_pages, @comments = paginate(:comments, :order => "created desc", :per_page => 10)
+    query = find_or_create_query(:Comment, :all, :by => :created)
+    @pages = paginate_numbers(:page, 10)
+    @objects = query.paginate(@pages)
   end
 
   # Shows comments for a given user, most recent first.
@@ -41,30 +43,13 @@ class CommentController < ApplicationController
   # Inputs: params[:id] (user)
   # Outputs: @comments, @comment_pages
   def show_comments_for_user
-    session_setup
     store_location
-    for_user = User.find(params[:id])  # (don't use @user since that means something else everywhere else in code)
+    store_query
+    for_user = User.find(params[:id])
     @title = :list_comments_for_user.t(:user => for_user.legal_name)
-
-    # Get list of comments for objects that this user owns.
-    observation_comment_ids = Comment.connection.select_values %(
-      SELECT comments.id FROM comments
-      LEFT OUTER JOIN observations ON object_id = observations.id AND object_type = "Observation"
-      WHERE observations.user_id = #{for_user.id}
-    )
-    # (get other object types' comments here)
-
-    # Get list of comment ids, sorted with most recently updated first.
-    all_comment_ids = (
-      observation_comment_ids
-      # + name_comment_ids
-      # + etc.
-    ).uniq.sort_by {|x| -(x.to_i)}
-
-    # Paginate list and load selected comments and the objects they refer to.
-    @comment_pages, all_comment_ids = paginate_array(all_comment_ids, 10)
-    @comments = Comment.find(:all, :include => :object,
-      :conditions => ['id in (?)', all_comment_ids], :order => 'id desc')
+    query = create_query(:Comment, :for_user, :user => for_user)
+    @pages = paginate_numbers(:page, 10)
+    @objects = query.paginate(@pages)
     render(:action => 'list_comments')
   end
 
@@ -74,13 +59,13 @@ class CommentController < ApplicationController
   # Inputs: params[:id] (user)
   # Outputs: @comments, @comment_pages
   def show_comments_by_user
-    session_setup
     store_location
-    by_user = User.find(params[:id]) # (don't use @user since that means something else throughout the code)
+    store_query
+    by_user = User.find(params[:id])
     @title = :list_comments_by_user.t(:user => by_user.legal_name)
-    @comment_pages, @comments = paginate(:comments,
-      :order => "created desc", :conditions => "user_id = %s" % by_user.id,
-      :per_page => 10)
+    query = create_query(:Comment, :by_user, :user => by_user)
+    @pages = paginate_numbers(:page, 10)
+    @objects = query.paginate(@pages)
     render(:action => 'list_comments')
   end
 
@@ -107,7 +92,7 @@ class CommentController < ApplicationController
   #   Renders add_comment again.
   #   Outputs: @comment, @object
   def add_comment
-    pass_seq_params()
+    pass_query_params
     @object = Comment.find_object(params[:type], params[:id])
     if request.method == :get
       @comment = Comment.new
@@ -130,7 +115,7 @@ class CommentController < ApplicationController
           @object.log(:log_comment_added, :summary => @comment.summary)
         end
         flash_notice :form_comments_create_success.t
-        params = @comment.object_type == 'Observation' ? calc_search_params() : nil
+        params = @comment.object_type == 'Observation' ? query_params : nil
         redirect_to(:controller => @object.show_controller,
           :action => @object.show_action, :id => @object.id,
           :params => params)

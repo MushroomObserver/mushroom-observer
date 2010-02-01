@@ -1,10 +1,10 @@
 <% @title ||= :species_list_list_title.t %>
 
-<%= pagination_numbers(@species_list_pages) %>
+<%= pagination_numbers(@pages) %>
 
 <table cellpadding="5" cellspacing="0" width="100%">
   <% odd_or_even = 0
-  for species_list in @species_lists
+  for species_list in @objects
     odd_or_even = 1 - odd_or_even %>
     <tr valign="top" class="ListLine<%= odd_or_even %>">
       <td width="100%" valign="middle">
@@ -18,4 +18,4 @@
   <% end %>
 </table>
 
-<%= pagination_numbers(@species_list_pages) %>
+<%= pagination_numbers(@pages) %>

@@ -45,7 +45,7 @@
 #
 ################################################################################
 
-class NamingReason < ActiveRecord::MO
+class NamingReason < AbstractModel
   belongs_to :naming
 
   # Outside key is the integer stored in database as "reason".

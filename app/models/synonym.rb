@@ -28,7 +28,7 @@
 #
 ################################################################################
 
-class Synonym < ActiveRecord::MO
+class Synonym < AbstractModel
   has_many(:names, :order => "search_name")
 
   # Add Name to this Synonym, but don't transfer that Name's synonyms.  Delete

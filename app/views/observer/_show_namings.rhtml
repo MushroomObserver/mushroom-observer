@@ -9,7 +9,8 @@
   popups = []
 %>
 
-<% form_tag(:action => 'show_observation', :id => @observation, :params => search_params) do %>
+<% form_tag(:action => 'show_observation', :id => @observation,
+            :params => query_params) do %>
   <p>
     <% if any_names %>
       <%= :show_namings_proposed_names.t %>:
@@ -17,7 +18,7 @@
       <%= :show_namings_no_names_yet.t %>
     <% end %>&nbsp;
     <%= link_to(:show_namings_propose_new_name.t, :action => 'create_naming',
-                :id => @observation, :params => search_params) %>
+                :id => @observation, :params => query_params) %>
     <% if logged_in && any_names && can_do_ajax? %>
       &nbsp;<%= submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") %>
     <% end %>
@@ -46,13 +47,16 @@
             <td>
               <div style='white-space:nowrap'>
                 <%= link_to(sanitize(naming.format_name).t,
-                            :controller => 'name', :action => 'show_name', :id => naming.name) %>
+                            :controller => 'name', :action => 'show_name',
+                            :id => naming.name, :params => query_params) %>
               </div>
               <% if check_permission(naming.user_id) %>
                 <div style='white-space:nowrap'>
-                  (<%= link_to(:app_edit.t, :action => 'edit_naming', :id => naming) %>
+                  (<%= link_to(:app_edit.t, :action => 'edit_naming',
+                               :id => naming, :params => query_params) %>
                   | <%= link_to(:app_destroy.t, { :action => 'destroy_naming',
-                                :id => naming.id }, :confirm => :app_are_you_sure.l) %>)
+                                :id => naming.id, :params => query_params },
+                                { :confirm => :app_are_you_sure.l }) %>)
                 </div>
               <% end %>
             </td>
@@ -71,7 +75,8 @@
               else
                 html += can_do_ajax? ?
                   link_to_function(h(txt), "show_votes(#{naming.id})") :
-                  link_to(h(txt), :action => 'show_votes', :id => naming.id)
+                  link_to(h(txt), :action => 'show_votes', :id => naming.id,
+                          :params => query_params)
                 popups << naming
               end
               if nvotes != 0

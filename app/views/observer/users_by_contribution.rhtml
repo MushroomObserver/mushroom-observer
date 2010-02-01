@@ -30,7 +30,7 @@
                 end %>
               </td>
               <td>
-                <%= link_to(:observations.t, :action => "show_user_observations", :id => user.id) %>
+                <%= link_to(:observations.t, :action => "observations_by_user", :id => user.id) %>
               </td>
               <td>
                 <%= user_link(user.id, user.contribution) %>

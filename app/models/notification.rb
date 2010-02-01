@@ -29,7 +29,7 @@
 #
 ################################################################################
 
-class Notification < ActiveRecord::MO
+class Notification < AbstractModel
   belongs_to :user
 
   # List of all available flavors (Symbol's).

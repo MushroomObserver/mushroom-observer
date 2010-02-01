@@ -80,7 +80,7 @@
 #
 ################################################################################
 
-class RssLog < ActiveRecord::MO
+class RssLog < AbstractModel
   belongs_to :observation
   belongs_to :species_list
   belongs_to :name

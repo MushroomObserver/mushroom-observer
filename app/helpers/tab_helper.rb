@@ -49,13 +49,17 @@ module ApplicationHelper::Tabs
   end
 
   # Render a tab in HTML.  Used in: app/views/layouts/application.rb
-  def render_tab(label, *url_args)
-    if url_args.empty?
+  def render_tab(label, link_args=nil, html_args={})
+    if !link_args
       label
-    elsif url_args[0].is_a?(String) && (url_args[0][0..6] == 'http://')
-      "<a href=\"#{url_args[0]}\" target=\"_new\">#{label}</a>"
+    elsif link_args.is_a?(String) && (link_args[0..6] == 'http://')
+      "<a href=\"#{link_args}\" target=\"_new\">#{label}</a>"
+    elsif html_args.has_key?(:help)
+      help = help_args[:help]
+      html_args = html_args.dup.delete(:help)
+      add_context_help(link_to(label, link_args, html_args), help)
     else
-      link_to(label, *url_args)
+      link_to(label, link_args, html_args)
     end
   end
 

@@ -1,12 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class NameTest < Test::Unit::TestCase
-  fixtures :names
-  fixtures :namings
-  fixtures :past_names
-  fixtures :users
-  fixtures :user_groups
-  fixtures :user_groups_users
 
   def create_test_name(string, force_rank=nil)
     User.current = @rolf
@@ -479,22 +473,22 @@ class NameTest < Test::Unit::TestCase
   # ------------------------------
 
   def test_ancestors_1
-    assert_name_list_equal([@agaricus], @agaricus_campestris.all_parents)
-    assert_name_list_equal([@agaricus], @agaricus_campestris.parents)
-    assert_name_list_equal([], @agaricus_campestris.children)
-    assert_name_list_equal([], @agaricus.all_parents)
-    assert_name_list_equal([], @agaricus.parents)
+    assert_name_list_equal([names(:agaricus)], names(:agaricus_campestris).all_parents)
+    assert_name_list_equal([names(:agaricus)], names(:agaricus_campestris).parents)
+    assert_name_list_equal([], names(:agaricus_campestris).children)
+    assert_name_list_equal([], names(:agaricus).all_parents)
+    assert_name_list_equal([], names(:agaricus).parents)
     assert_name_list_equal([
-      @agaricus_campestras,
-      @agaricus_campestris,
-      @agaricus_campestros,
-      @agaricus_campestrus
-    ], @agaricus.children)
+      names(:agaricus_campestras),
+      names(:agaricus_campestris),
+      names(:agaricus_campestros),
+      names(:agaricus_campestrus)
+    ], names(:agaricus).children)
   end
 
   def test_ancestors_2
     # (use Petigera instead of Peltigera because it has no classification string)
-    p = @petigera
+    p = names(:petigera)
     assert_name_list_equal([], p.all_parents)
     assert_name_list_equal([], p.children)
 
@@ -589,12 +583,12 @@ class NameTest < Test::Unit::TestCase
   end
 
   def test_ancestors_3
-    kng = @fungi
+    kng = names(:fungi)
     phy = create_test_name('Ascomycota', :Phylum)
     cls = create_test_name('Ascomycetes', :Class)
     ord = create_test_name('Lecanorales', :Order)
     fam = create_test_name('Peltigeraceae', :Family)
-    gen = @peltigera
+    gen = names(:peltigera)
     spc = create_test_name('Peltigera canina (L.) Willd.')
     ssp = create_test_name('Peltigera canina ssp. bogus (Bugs) Bunny')
     var = create_test_name('Peltigera canina ssp. bogus var. rufescens (Weiss) Mudd')
@@ -650,48 +644,48 @@ class NameTest < Test::Unit::TestCase
   # --------------------------------------
 
   def test_email_notification
-    @rolf.email_names_author   = true;
-    @rolf.email_names_editor   = true;
-    @rolf.email_names_reviewer = true;
-    @rolf.email_names_all      = false;
+    @rolf.email_names_author   = true
+    @rolf.email_names_editor   = true
+    @rolf.email_names_reviewer = true
+    @rolf.email_names_all      = false
     @rolf.save
 
-    @mary.email_names_author   = true;
-    @mary.email_names_editor   = false;
-    @mary.email_names_reviewer = false;
-    @mary.email_names_all      = false;
+    @mary.email_names_author   = true
+    @mary.email_names_editor   = false
+    @mary.email_names_reviewer = false
+    @mary.email_names_all      = false
     @mary.save
 
-    @dick.email_names_author   = false;
-    @dick.email_names_editor   = false;
-    @dick.email_names_reviewer = false;
-    @dick.email_names_all      = false;
+    @dick.email_names_author   = false
+    @dick.email_names_editor   = false
+    @dick.email_names_reviewer = false
+    @dick.email_names_all      = false
     @dick.save
 
-    @katrina.email_names_author   = true;
-    @katrina.email_names_editor   = true;
-    @katrina.email_names_reviewer = true;
-    @katrina.email_names_all      = true;
+    @katrina.email_names_author   = true
+    @katrina.email_names_editor   = true
+    @katrina.email_names_reviewer = true
+    @katrina.email_names_all      = true
     @katrina.save
 
     # Start with no reviewers, editors or authors.
     User.current = nil
-    @peltigera.gen_desc = ''
-    @peltigera.review_status = :unreviewed;
-    @peltigera.reviewer = nil;
+    names(:peltigera).gen_desc = ''
+    names(:peltigera).review_status = :unreviewed;
+    names(:peltigera).reviewer = nil;
     Name.without_revision do
-      @peltigera.save
+      names(:peltigera).save
     end
-    @peltigera.authors.clear
-    @peltigera.editors.clear
-    @peltigera.reload
-    version = @peltigera.version
+    names(:peltigera).authors.clear
+    names(:peltigera).editors.clear
+    names(:peltigera).reload
+    version = names(:peltigera).version
     QueuedEmail.queue_emails(true)
     QueuedEmail.all.map(&:destroy)
 
-    assert_equal(0, @peltigera.authors.length)
-    assert_equal(0, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer_id)
+    assert_equal(0, names(:peltigera).authors.length)
+    assert_equal(0, names(:peltigera).editors.length)
+    assert_equal(nil, names(:peltigera).reviewer_id)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       x       x       .       .
@@ -701,22 +695,22 @@ class NameTest < Test::Unit::TestCase
     # Authors: --        editors: --         reviewer: -- (unreviewed)
     # Rolf changes citation: notify Katrina (all), Rolf becomes editor.
     User.current = @rolf
-    @peltigera.reload
-    @peltigera.citation = ''
-    @peltigera.save
-    assert_equal(version + 1, @peltigera.version)
-    assert_equal(0, @peltigera.authors.length)
-    assert_equal(1, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer_id)
-    assert_equal(@rolf, @peltigera.editors.first)
+    names(:peltigera).reload
+    names(:peltigera).citation = ''
+    names(:peltigera).save
+    assert_equal(version + 1, names(:peltigera).version)
+    assert_equal(0, names(:peltigera).authors.length)
+    assert_equal(1, names(:peltigera).editors.length)
+    assert_equal(nil, names(:peltigera).reviewer_id)
+    assert_equal(@rolf, names(:peltigera).editors.first)
     assert_equal(1, QueuedEmail.all.length)
     assert_email(0,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
       :to            => @katrina,
-      :name          => @peltigera.id,
-      :old_version   => @peltigera.version-1,
-      :new_version   => @peltigera.version,
+      :name          => names(:peltigera).id,
+      :old_version   => names(:peltigera).version-1,
+      :new_version   => names(:peltigera).version,
       :review_status => 'no_change'
     )
 
@@ -732,23 +726,23 @@ class NameTest < Test::Unit::TestCase
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
     User.current = @mary
-    @peltigera.reload
-    @peltigera.gen_desc = "Mary wrote this."
-    @peltigera.save
-    assert_equal(version + 2, @peltigera.version)
-    assert_equal(1, @peltigera.authors.length)
-    assert_equal(1, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer_id)
-    assert_equal(@mary, @peltigera.authors.first)
-    assert_equal(@rolf, @peltigera.editors.first)
+    names(:peltigera).reload
+    names(:peltigera).gen_desc = "Mary wrote this."
+    names(:peltigera).save
+    assert_equal(version + 2, names(:peltigera).version)
+    assert_equal(1, names(:peltigera).authors.length)
+    assert_equal(1, names(:peltigera).editors.length)
+    assert_equal(nil, names(:peltigera).reviewer_id)
+    assert_equal(@mary, names(:peltigera).authors.first)
+    assert_equal(@rolf, names(:peltigera).editors.first)
     assert_equal(2, QueuedEmail.all.length)
     assert_email(1,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @mary,
       :to            => @rolf,
-      :name          => @peltigera.id,
-      :old_version   => @peltigera.version-1,
-      :new_version   => @peltigera.version,
+      :name          => names(:peltigera).id,
+      :old_version   => names(:peltigera).version-1,
+      :new_version   => names(:peltigera).version,
       :review_status => 'no_change'
     )
 
@@ -764,28 +758,28 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
     # Dick changes citation: notify Mary (author); Dick becomes editor.
     User.current = @dick
-    @peltigera.reload
-    @peltigera.citation = "Something more new."
-    @peltigera.save
-    assert_equal(version + 3, @peltigera.version)
-    assert_equal(1, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer_id)
-    assert_equal(@mary, @peltigera.authors.first)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    names(:peltigera).reload
+    names(:peltigera).citation = "Something more new."
+    names(:peltigera).save
+    assert_equal(version + 3, names(:peltigera).version)
+    assert_equal(1, names(:peltigera).authors.length)
+    assert_equal(2, names(:peltigera).editors.length)
+    assert_equal(nil, names(:peltigera).reviewer_id)
+    assert_equal(@mary, names(:peltigera).authors.first)
+    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
     assert_equal(3, QueuedEmail.all.length)
     assert_email(2,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @dick,
       :to            => @mary,
-      :name          => @peltigera.id,
-      :old_version   => @peltigera.version-1,
-      :new_version   => @peltigera.version,
+      :name          => names(:peltigera).id,
+      :old_version   => names(:peltigera).version-1,
+      :new_version   => names(:peltigera).version,
       :review_status => 'no_change'
     )
 
     # Mary opts out of author emails, add Katrina as new author.
-    @peltigera.add_author(@katrina)
+    names(:peltigera).add_author(@katrina)
     @mary.email_names_author = false
     @mary.save
 
@@ -797,27 +791,27 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = @rolf
-    @peltigera.reload
-    @peltigera.update_review_status(:inaccurate)
-    assert_equal(version + 3, @peltigera.version)
-    assert_equal(2, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(@rolf.id, @peltigera.reviewer_id)
-    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    names(:peltigera).reload
+    names(:peltigera).update_review_status(:inaccurate)
+    assert_equal(version + 3, names(:peltigera).version)
+    assert_equal(2, names(:peltigera).authors.length)
+    assert_equal(2, names(:peltigera).editors.length)
+    assert_equal(@rolf.id, names(:peltigera).reviewer_id)
+    assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
     assert_equal(4, QueuedEmail.all.length)
     assert_email(3,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
       :to            => @katrina,
-      :name          => @peltigera.id,
-      :old_version   => @peltigera.version,
-      :new_version   => @peltigera.version,
+      :name          => names(:peltigera).id,
+      :old_version   => names(:peltigera).version,
+      :new_version   => names(:peltigera).version,
       :review_status => 'inaccurate'
     )
 
     # Have Katrina express disinterest.
-    Interest.create(:object => @peltigera, :user => @katrina, :state => false)
+    Interest.create(:object => names(:peltigera), :user => @katrina, :state => false)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -827,34 +821,34 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
     User.current = @dick
-    @peltigera.reload
-    @peltigera.look_alikes = "Dick added this -- it's suspect"
+    names(:peltigera).reload
+    names(:peltigera).look_alikes = "Dick added this -- it's suspect"
     # (This is exactly what is normally done by name controller in edit_name.
     # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
     # The point is to update the review date if Dick *were*, or reset the
     # status to unreviewed in the present case that he *isn't*.)
-    @peltigera.update_review_status(:inaccurate)
-    @peltigera.save
-    assert_equal(version + 4, @peltigera.version)
-    assert_equal(2, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(:unreviewed, @peltigera.review_status)
-    assert_equal(nil, @peltigera.reviewer_id)
-    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    names(:peltigera).update_review_status(:inaccurate)
+    names(:peltigera).save
+    assert_equal(version + 4, names(:peltigera).version)
+    assert_equal(2, names(:peltigera).authors.length)
+    assert_equal(2, names(:peltigera).editors.length)
+    assert_equal(:unreviewed, names(:peltigera).review_status)
+    assert_equal(nil, names(:peltigera).reviewer_id)
+    assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
     assert_equal(5, QueuedEmail.all.length)
     assert_email(4,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @dick,
       :to            => @rolf,
-      :name          => @peltigera.id,
-      :old_version   => @peltigera.version-1,
-      :new_version   => @peltigera.version,
+      :name          => names(:peltigera).id,
+      :old_version   => names(:peltigera).version-1,
+      :new_version   => names(:peltigera).version,
       :review_status => 'unreviewed'
     )
 
     # Mary expresses interest.
-    Interest.create(:object => @peltigera, :user => @mary, :state => true)
+    Interest.create(:object => names(:peltigera), :user => @mary, :state => true)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -864,23 +858,23 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes 'uses': notify Mary (interest).
     User.current = @rolf
-    @peltigera.reload
-    @peltigera.uses = "Rolf added this."
-    @peltigera.save
-    assert_equal(version + 5, @peltigera.version)
-    assert_equal(2, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer_id)
-    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
+    names(:peltigera).reload
+    names(:peltigera).uses = "Rolf added this."
+    names(:peltigera).save
+    assert_equal(version + 5, names(:peltigera).version)
+    assert_equal(2, names(:peltigera).authors.length)
+    assert_equal(2, names(:peltigera).editors.length)
+    assert_equal(nil, names(:peltigera).reviewer_id)
+    assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
     assert_equal(6, QueuedEmail.all.length)
     assert_email(5,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
       :to            => @mary,
-      :name          => @peltigera.id,
-      :old_version   => @peltigera.version-1,
-      :new_version   => @peltigera.version,
+      :name          => names(:peltigera).id,
+      :old_version   => names(:peltigera).version-1,
+      :new_version   => names(:peltigera).version,
       :review_status => 'no_change'
     )
   end
@@ -889,24 +883,40 @@ class NameTest < Test::Unit::TestCase
     User.current = @rolf
 
     # Make sure deprecating a name doesn't clear misspelling stuff.
-    @petigera.change_deprecated(true)
-    assert(@petigera.is_misspelling?)
-    assert_equal(@peltigera, @petigera.correct_spelling)
+    names(:petigera).change_deprecated(true)
+    assert(names(:petigera).is_misspelling?)
+    assert_equal(names(:peltigera), names(:petigera).correct_spelling)
 
     # Make sure approving a name clears misspelling stuff.
-    @petigera.change_deprecated(false)
-    assert(!@petigera.is_misspelling?)
-    assert_nil(@petigera.correct_spelling)
+    names(:petigera).change_deprecated(false)
+    assert(!names(:petigera).is_misspelling?)
+    assert_nil(names(:petigera).correct_spelling)
 
     # Coprinus comatus should normally end up in name primer.
-    File.delete(NAME_PRIMER_CACHE_FILE)
+    File.delete(NAME_PRIMER_CACHE_FILE) if File.exists?(NAME_PRIMER_CACHE_FILE)
     assert(!Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
 
     # Mark it as misspelled and see that it gets removed from the primer list.
-    @coprinus_comatus.correct_spelling = @agaricus_campestris
-    @coprinus_comatus.change_deprecated(true)
-    @coprinus_comatus.save
+    names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
+    names(:coprinus_comatus).change_deprecated(true)
+    names(:coprinus_comatus).save
     File.delete(NAME_PRIMER_CACHE_FILE)
     assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end
+
+#   @@time = 0
+#   for i in 1..30
+#     eval <<-"end_test"
+#       def test_#{i}
+#         start = Time.now
+#         do_test
+#         @@time += Time.now - start
+#         puts @@time.to_s
+#       end
+#     end_test
+#   end
+# 
+#   def do_test
+#     assert(true)
+#   end
 end

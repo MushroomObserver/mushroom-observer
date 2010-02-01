@@ -1,7 +1,7 @@
 #
 #  Views: ("*" - login required, "R" - root required))
-#     where_search
-#     list_place_names
+#     location_search
+#     list_locations
 #     map_locations
 #   * create_location
 #   * update_observations_by_where(location, where)
@@ -12,7 +12,6 @@
 #   * edit_location
 #   * review_authors            Let authors/reviewers add/remove authors.
 #   * author_request            Let non-authors request authorship credit.
-#   * send_author_request       (post method of author_request)
 #   R merge_locations(location, dest)
 #
 #  AJAX:
@@ -26,11 +25,11 @@
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
     :auto_complete_location,
-    :list_place_names,
+    :list_locations,
+    :location_search,
     :map_locations,
     :show_location,
     :show_past_location,
-    :where_search,
   ]
 
   before_filter :disable_link_prefetching, :except => [
@@ -41,93 +40,117 @@ class LocationController < ApplicationController
     :show_past_location,
   ]
 
-  # Process AJAX request for autocompletion of location fields.  It reads the
-  # first letter of the field, and returns all the locations (or "wheres")
-  # with words beginning with that letter.
-  # Inputs: params[:letter]
-  # Outputs: renders sorted list of names, one per line, in plain text
-  def auto_complete_location
-    letter = params[:letter] || ''
-    if letter.length > 0
-      @items = Location.connection.select_values %(
-        SELECT DISTINCT IF(observations.location_id > 0, locations.display_name, observations.where) AS x
-        FROM observations
-        LEFT OUTER JOIN locations ON locations.id = observations.location_id
-        WHERE (
-          LOWER(observations.where) LIKE '#{letter}%' OR
-          LOWER(observations.where) LIKE '% #{letter}%' OR
-          LOWER(locations.search_name) LIKE '#{letter}%' OR
-          LOWER(locations.search_name) LIKE '% #{letter}%'
-        )
-        ORDER BY x ASC
-      )
-    else
-      letter = ' '
-      @items = []
-    end
-    render(:inline => letter + '<%= @items.map {|n| h(n) + "\n"}.join("") %>')
+  ##############################################################################
+  #
+  #  :section: Searches and Indexes
+  #
+  ##############################################################################
+
+  # Displays a list of all locations.
+  def list_locations
+    query = find_or_create_query(:Location, :all, :by => :name)
+    @title = :location_index_title.t
+    show_selected_locations(query)
   end
 
-  # Either displays matrix of observations at a location alphabetically
-  # if a location is given, else lists all location names.
-  # Redirects to: location_search (observer), or list_place_names (here)
-  # Inputs: params[:id] (location id)
-  def where_search
-    where = params[:where]
-    if where
-      session[:where] = where
-    end
-    where = session[:where]
-    if where
-      redirect_to(:controller => "observer", :action => "location_search", :where => where)
-    else
-      redirect_to(:action => "list_place_names")
-    end
+  # Displays a list of locations matching a given string.
+  def location_search
+    @pattern = params[:pattern].to_s
+    query = create_query(:Location, :pattern, :pattern => @pattern)
+    @title = :location_index_title.t
+    show_selected_locations(query)
   end
 
-  def list_place_names
-    known_condition = ''
-    undef_condition = ''
-    @pattern = params[:pattern] || ''
-    id = @pattern.to_i
-    loc = nil
-    if @pattern == id.to_s
-      begin
-        loc = Location.find(id)
-      rescue ActiveRecord::RecordNotFound
-      end
-    end
-    if loc
-      redirect_to(:controller => 'location', :action => 'show_location', :id => loc)
+  # Show selected search results as a list with 'list_locations' template.
+  def show_selected_locations(query)
+    store_location
+    store_query
+    set_query_params(query)
+
+    @known_pages = paginate_numbers(:page, 50)
+    @known_data  = query.paginate(@known_pages)
+
+    # Try to turn this into a query on observations.where instead.
+    query.include << :observations
+    sql = query.query(
+      :select => 'DISTINCT observations.`where`, COUNT(1) AS cnt',
+      :order  => 'cnt DESC'
+    )
+    sql.gsub!(/locations.(display|search)_name/, 'observations.`where`')
+    sql += " GROUP BY observations.`where`"
+
+    @undef_pages = paginate_numbers(:page2, 50)
+    @undef_data = Location.connection.select_all(sql) rescue []
+    @undef_pages.num_total = @undef_data.length
+    @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
+
+    # If only one result (before pagination), redirect to show_location.
+    if (@known_pages.num_total == 1) and
+       (@undef_pages.num_total == 0) and
+       (object = @known_data.first)
+      redirect_to(:action => 'show_location', :id => object.id)
+
+    # Otherwise paginate results.
     else
-      if @pattern
-        sql_pattern = clean_sql_pattern(@pattern)
-        known_condition = "and l.display_name like '%#{sql_pattern}%'"
-        undef_condition = "and o.where like '%#{sql_pattern}%'"
-        logger.info("  ***  list_place_names: #{known_condition}, #{undef_condition}")
-      end
-      known_query = "select o.location_id, l.display_name, count(1) as cnt
-        from observations o, locations l where o.location_id = l.id #{known_condition}
-        group by o.location_id, l.display_name order by l.display_name"
-      @known_data = Observation.connection.select_all(known_query)
-      undef_query = "select o.where, count(1) as cnt
-        from observations o where o.location_id is NULL #{undef_condition}
-        group by o.where order by cnt desc"
-      @undef_data = Observation.connection.select_all(undef_query)
+      render(:action => 'list_locations')
     end
   end
 
+  # Map results of a search or index.
   def map_locations
-    @pattern = params[:pattern]
-    @locations = []
-    if @pattern && (@pattern != '')
-      @locations = Location.all(:conditions =>
-                        "display_name like '%#{clean_sql_pattern(@pattern)}%'")
-    else
+    @pattern = params[:pattern].to_s
+    if @pattern == ''
       @title = :map_locations_global_map.t
-      @locations = Location.all
+      query = find_or_create_query(:Location, :all, :by => :name)
+    else
+      @title = :map_locations_title.t(:pattern => @pattern)
+      query = find_or_create_query(:Location, :pattern, :pattern => @pattern)
     end
+    @locations = query.results
   end
+
+  ##############################################################################
+  #
+  #  :section: Show Location
+  #
+  ##############################################################################
+
+  def show_location
+    store_location
+    pass_query_params
+    @location = Location.find(params[:id])
+    @past_location = @location.versions.latest
+    @past_location = @past_location.previous if @past_location
+    @interest = nil
+    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Location', @location.id) if @user
+  end
+
+  def show_past_location
+    store_location
+    pass_query_params
+    @location = Location.find(params[:id])
+    @past_location = Location.find(params[:id].to_i)
+    @past_location.revert_to(params[:version].to_i)
+    @other_versions = @location.versions.reverse
+  end
+
+  # Go to next location: redirects to show_location.
+  def next_location
+    location = Location.find(params[:id])
+    redirect_to_next_object(:next, location)
+  end
+
+  # Go to previous location: redirects to show_location.
+  def prev_location
+    location = Location.find(params[:id])
+    redirect_to_next_object(:prev, location)
+  end
+
+  ##############################################################################
+  #
+  #  Create/Edit Location
+  #
+  ##############################################################################
 
   def create_location
     store_location
@@ -188,96 +211,6 @@ class LocationController < ApplicationController
     end
   end
 
-  def update_observations_by_where(location, where)
-    return false if !where
-    success = true
-    observations = Observation.find_all_by_where(where)
-    for o in observations
-      unless o.location_id
-        o.location = location
-        o.where = nil
-        if o.save
-          Transaction.put_observation(
-            :id           => o,
-            :set_location => location
-          )
-        else
-          flash_error :create_location_merge_failed.t(:name => o.unique_format_name)
-          success = false
-        end
-      end
-    end
-    return success
-  end
-
-  def show_past_location
-    store_location
-    @location = Location.find(params[:id])
-    @past_location = Location.find(params[:id].to_i) # clone or dclone?
-    @past_location.revert_to(params[:version].to_i)
-    @other_versions = @location.versions.reverse
-  end
-
-  def show_location
-    store_location
-    id = params[:id]
-    @location = Location.find(id)
-    # query = "select o.id, o.when, o.modified, o.when, o.thumb_image_id, o.where, o.location_id," +
-    #         " u.name, u.login, n.observation_name from observations o, users u, names n" +
-    #         " where o.location_id = %s and o.user_id = u.id and n.id = o.name_id order by n.text_name, o.when desc"
-    # @data = Location.connection.select_all(query % params[:id])
-    @past_location = @location.versions.latest
-    @past_location = @past_location.previous if @past_location
-    @interest = nil
-    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Location', @location.id) if @user
-  end
-
-  # If separator is in where, then look for Locations that match up to but not including the separator.
-  # If such locations are found, then return those followed by all the rest of the locations.
-  # If no such locations are found, then return nil.
-  def sorted_locs(where, separator=nil)
-    result = nil
-    substring = where
-    if separator
-      pos = where.index(separator)
-      if pos
-        substring = where[0..(pos-separator.length)]
-      else
-        substring = nil
-      end
-    end
-    if substring
-      substring_pat = substring + '%'
-      matches = Location.find(:all, :conditions => ["display_name like ?", substring_pat], :order => "display_name")
-      if matches.length > 0
-        others = Location.find(:all, :conditions => ["display_name not like ?", substring_pat], :order => "display_name")
-        result = [matches, others]
-      end
-    end
-    result
-  end
-
-  def list_merge_options
-    store_location
-    @where = params[:where]
-
-    # Look for matches up to the first comma and put them first.
-    # If none found, look for matches up to the first space and put them first.
-    # If still none found, then just give the whole set ordered by display_name
-    @matches, @others = (sorted_locs(@where) || sorted_locs(@where, ',') ||
-      sorted_locs(@where, ' ') || [nil, Location.find(:all, :order => "display_name")])
-  end
-
-  # Adds the observations assoicated with obs.where set to params[:where] into the given location
-  def add_to_location
-    location = Location.find(params[:location])
-    where = params[:where]
-    if update_observations_by_where(location, where)
-      flash_notice :location_merge_success.t(:this => where, :that => location.display_name)
-    end
-    redirect_to(:action => 'list_place_names')
-  end
-
   def edit_location
     store_location
     @location = Location.find(params[:id])
@@ -315,6 +248,58 @@ class LocationController < ApplicationController
     end
   end
 
+  ##############################################################################
+  #
+  #  :section: Merging Locations
+  #
+  ##############################################################################
+
+  def list_merge_options
+    store_location
+    @where = params[:where]
+
+    # Look for matches up to the first comma and put them first.
+    # If none found, look for matches up to the first space and put them first.
+    # If still none found, then just give the whole set ordered by display_name
+    @matches, @others = (sorted_locs(@where) || sorted_locs(@where, ',') ||
+      sorted_locs(@where, ' ') || [nil, Location.find(:all, :order => "display_name")])
+  end
+
+  # If separator is in where, then look for Locations that match up to but not including the separator.
+  # If such locations are found, then return those followed by all the rest of the locations.
+  # If no such locations are found, then return nil.
+  def sorted_locs(where, separator=nil)
+    result = nil
+    substring = where
+    if separator
+      pos = where.index(separator)
+      if pos
+        substring = where[0..(pos-separator.length)]
+      else
+        substring = nil
+      end
+    end
+    if substring
+      substring_pat = substring + '%'
+      matches = Location.find(:all, :conditions => ["display_name like ?", substring_pat], :order => "display_name")
+      if matches.length > 0
+        others = Location.find(:all, :conditions => ["display_name not like ?", substring_pat], :order => "display_name")
+        result = [matches, others]
+      end
+    end
+    result
+  end
+
+  # Adds the observations assoicated with obs.where set to params[:where] into the given location
+  def add_to_location
+    location = Location.find(params[:location])
+    where = params[:where]
+    if update_observations_by_where(location, where)
+      flash_notice :location_merge_success.t(:this => where, :that => location.display_name)
+    end
+    redirect_to(:action => 'list_locations')
+  end
+
   def merge_locations(location, dest)
     id = location.id
     if is_in_admin_mode?
@@ -339,6 +324,34 @@ class LocationController < ApplicationController
     end
     redirect_to(:action => 'show_location', :id => id)
   end
+
+  def update_observations_by_where(location, where)
+    return false if !where
+    success = true
+    observations = Observation.find_all_by_where(where)
+    for o in observations
+      unless o.location_id
+        o.location = location
+        o.where = nil
+        if o.save
+          Transaction.put_observation(
+            :id           => o,
+            :set_location => location
+          )
+        else
+          flash_error :create_location_merge_failed.t(:name => o.unique_format_name)
+          success = false
+        end
+      end
+    end
+    return success
+  end
+
+  ##############################################################################
+  #
+  #  :section: Reviewing and Authors
+  #
+  ##############################################################################
 
   # Form to allow authors to add/remove other users as author.
   # Linked from: show_location, author_request email
@@ -387,34 +400,19 @@ class LocationController < ApplicationController
     end
   end
 
-  # Form to compose email for the authors/reviewers
-  # Linked from: show_location
-  # Inputs:
-  #   params[:id]
-  # Outputs: @location
+  # Form accessible from show_location to let users request authorship credit
+  # on a Location. TODO: Use queued_email mechanism.
   def author_request
     @location = Location.find(params[:id])
-  end
-
-  # Sends email to the authors/reviewers
-  # Linked from: author_request
-  # Inputs:
-  #   params[:id]
-  #   params[:email][:subject]
-  #   params[:email][:content]
-  # Success:
-  #   Redirects to show_location.
-  #
-  # TODO: Use queued_email mechanism
-  def send_author_request
-    sender = @user
-    location = Location.find(params[:id])
-    subject = params[:email][:subject]
-    content = params[:email][:content]
-    for receiver in location.authors + UserGroup.find_by_name('reviewers').users
-      AccountMailer.deliver_author_request(sender, receiver, location, subject, content)
+    if request.method == :post
+      subject = params[:email][:subject]
+      content = params[:email][:content]
+      for receiver in location.authors + UserGroup.find_by_name('reviewers').users
+        AccountMailer.deliver_author_request(@user, receiver, location, subject, content)
+      end
+      flash_notice(:request_success.t)
+      redirect_to(:action => 'show_location', :id => location.id,
+                  :params => query_params)
     end
-    flash_notice(:request_success.t)
-    redirect_to(:action => 'show_location', :id => location.id)
   end
 end

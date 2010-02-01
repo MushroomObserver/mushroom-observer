@@ -30,8 +30,10 @@ class InterestController < ApplicationController
                (b.object ? b.object.text_name : '') if result == 0
       result
     end
-    @items = notifications + interests
-    @item_pages, @items = paginate_array(@items, 50)
+    @objects = notifications + interests
+    @pages = paginate_numbers(:page, 50)
+    @pages.num_total = @objects.length
+    @objects = @objects[@pages.from..@pages.to]
   end
 
   # Callback to change interest state in an object.
@@ -40,6 +42,7 @@ class InterestController < ApplicationController
   # Inputs: params[:type], params[:id], params[:state], params[:user]
   # Outputs: none
   def set_interest
+    pass_query_params
     type   = params[:type].to_s
     oid    = params[:id].to_i
     state  = params[:state].to_i
@@ -96,9 +99,11 @@ class InterestController < ApplicationController
     end
     if object
       redirect_back_or_default(:controller => object.show_controller,
-                               :action => object.show_action, :id => oid)
+                               :action => object.show_action, :id => oid,
+                               :params => query_params)
     else
-      redirect_back_or_default(:controller => 'interest', :action => 'list_interests')
+      redirect_back_or_default(:controller => 'interest',
+                               :action => 'list_interests')
     end
   end
 end

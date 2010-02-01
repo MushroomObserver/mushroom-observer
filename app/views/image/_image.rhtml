@@ -2,7 +2,7 @@
   <tr>
     <td align="center" valign="middle" width="160">
       <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0),
-                  :action => 'show_image', :id => image.id, :params => search_params) %>
+                  :action => 'show_image', :id => image.id, :params => query_params) %>
     </td>
 <% if vertical_layout %>
   </tr>
@@ -13,7 +13,7 @@
 <% end %>
       <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span>',
                           image.when, image.unique_format_name.t),
-                  :action => 'show_image', :id => image.id, :params => search_params) %><br/>
+                  :action => 'show_image', :id => image.id, :params => query_params) %><br/>
       <span class="ListWho"><%= image.user ? h(image.user.unique_text_name) : "#{image.id}" %></span>
     </td>
   </tr>

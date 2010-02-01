@@ -1,21 +1,16 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class NamingTest < Test::Unit::TestCase
-  fixtures :observations
-  fixtures :users
-  fixtures :names
-  fixtures :namings
-  fixtures :votes
 
   # Propose a naming for an observation.
   def test_create
-    assert_kind_of Observation, @coprinus_comatus_obs
+    assert_kind_of Observation, observations(:coprinus_comatus_obs)
     now = Time.now
     naming = Naming.new(
         :created        => now,
         :modified       => now,
-        :observation_id => @coprinus_comatus_obs.id,
-        :name_id        => @agaricus_campestris.id,
+        :observation_id => observations(:coprinus_comatus_obs).id,
+        :name_id        => names(:agaricus_campestris).id,
         :user_id        => @mary.id
     )
     assert naming.save, naming.errors.full_messages.join("; ")
@@ -23,21 +18,21 @@ class NamingTest < Test::Unit::TestCase
 
   # Change an existing one.
   def test_update
-    assert_kind_of Observation, @coprinus_comatus_obs
-    assert_kind_of Naming, @coprinus_comatus_naming
-    assert_kind_of Name, @coprinus_comatus
-    assert_kind_of Name, @agaricus_campestris
-    assert_equal @coprinus_comatus, @coprinus_comatus_naming.name
-    assert_equal @coprinus_comatus, @coprinus_comatus_obs.name
-    @coprinus_comatus_naming.modified = Time.now
-    @coprinus_comatus_naming.name = @agaricus_campestris
-    assert @coprinus_comatus_naming.save
-    assert @coprinus_comatus_naming.errors.full_messages.join("; ")
-    @coprinus_comatus_naming.reload
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_obs.calc_consensus
-    assert_equal @agaricus_campestris, @coprinus_comatus_naming.name
-    assert_equal @agaricus_campestris, @coprinus_comatus_obs.name
+    assert_kind_of Observation, observations(:coprinus_comatus_obs)
+    assert_kind_of Naming, namings(:coprinus_comatus_naming)
+    assert_kind_of Name, names(:coprinus_comatus)
+    assert_kind_of Name, names(:agaricus_campestris)
+    assert_equal names(:coprinus_comatus), namings(:coprinus_comatus_naming).name
+    assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
+    namings(:coprinus_comatus_naming).modified = Time.now
+    namings(:coprinus_comatus_naming).name = names(:agaricus_campestris)
+    assert namings(:coprinus_comatus_naming).save
+    assert namings(:coprinus_comatus_naming).errors.full_messages.join("; ")
+    namings(:coprinus_comatus_naming).reload
+    observations(:coprinus_comatus_obs).reload
+    observations(:coprinus_comatus_obs).calc_consensus
+    assert_equal names(:agaricus_campestris), namings(:coprinus_comatus_naming).name
+    assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
   end
 
   # Make sure it fails if we screw up.
@@ -52,13 +47,13 @@ class NamingTest < Test::Unit::TestCase
 
   # Destroy one.
   def test_destroy
-    assert_equal @coprinus_comatus, @coprinus_comatus_obs.name
-    id = @coprinus_comatus_naming.id
+    assert_equal names(:coprinus_comatus), observations(:coprinus_comatus_obs).name
+    id = namings(:coprinus_comatus_naming).id
     User.current = @rolf
-    @coprinus_comatus_naming.destroy
-    @coprinus_comatus_obs.reload
-    @coprinus_comatus_obs.calc_consensus
+    namings(:coprinus_comatus_naming).destroy
+    observations(:coprinus_comatus_obs).reload
+    observations(:coprinus_comatus_obs).calc_consensus
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(id) }
-    assert_equal @agaricus_campestris, @coprinus_comatus_obs.name
+    assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
   end
 end

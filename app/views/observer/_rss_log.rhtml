@@ -1,7 +1,8 @@
 <table cellpadding="10">
   <tr>
     <td align="center" valign="middle" width="160">
-      <%= link_to(:rss_log_of_deleted_item.t, :action => 'show_rss_log', :id => rss_log.id) %>
+      <%= link_to(:rss_log_of_deleted_item.t, :action => 'show_rss_log',
+                  :id => rss_log.id, :params => query_params) %>
     </td>
 <% if vertical_layout %>
   </tr>
@@ -12,7 +13,8 @@
 <% end %>
       <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListName">%s</span><br/>',
                           rss_log.modified, rss_log.unique_format_name.t),
-                  :action => 'show_rss_log', :id => rss_log.id) %>
+                  :action => 'show_rss_log', :id => rss_log.id,
+                  :params => query_params) %>
     </td>
   </tr>
 </table>

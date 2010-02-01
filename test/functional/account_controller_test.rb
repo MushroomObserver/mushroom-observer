@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class AccountControllerTest < ControllerTestCase
-  fixtures :users
 
   def setup
     @request.host = "localhost"
@@ -192,11 +191,11 @@ class AccountControllerTest < ControllerTestCase
     assert_flash(:prefs_success.t)
 
     # Make sure changes were made.
-    user = @rolf .reload
+    user = @rolf.reload
     assert_equal("new_login",  user.login)
     assert_equal("new_email",  user.email)
     assert_equal("Agaricus",   user.theme)
-    assert_equal(@ccnc25,      user.license)
+    assert_equal(licenses(:ccnc25),      user.license)
     assert_equal(10,           user.rows)
     assert_equal(10,           user.columns)
     assert_equal(false,        user.alternate_rows)
@@ -233,8 +232,6 @@ class AccountControllerTest < ControllerTestCase
   end
 
   def test_edit_profile
-    local_fixtures :licenses
-    local_fixtures :locations
 
     # First make sure it can serve the form to start with.
     requires_login(:profile)
@@ -255,18 +252,17 @@ class AccountControllerTest < ControllerTestCase
     user = @rolf.reload
     assert_equal("new_name", user.name)
     assert_equal("new_notes", user.notes)
-    assert_equal(@burbank, user.location)
+    assert_equal(locations(:burbank), user.location)
   end
 
   # Test uploading mugshot for user profile.
   def test_add_mugshot
-    local_fixtures :licenses
 
     # Create image directory and populate with test images.
     FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
 
     # Open file we want to upload.
-    file = FilePlus.new("test/fixtures/images/sticky.jpg")
+    file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/sticky.jpg")
     file.content_type = 'image/jpeg'
 
     # It should create a new image: this is the current number of images.
@@ -282,7 +278,7 @@ class AccountControllerTest < ControllerTestCase
         :mailing_address => @rolf.mailing_address,
       },
       :copyright_holder => 'Someone Else',
-      :upload => { :license_id => @ccnc25.id },
+      :upload => { :license_id => licenses(:ccnc25).id },
       :date => { :copyright_year => "2003" },
     }
     post_requires_login(:profile, params)
@@ -293,7 +289,7 @@ class AccountControllerTest < ControllerTestCase
     assert_equal(Image.last.id, @rolf.image_id)
     assert_equal("Someone Else", @rolf.image.copyright_holder)
     assert_equal(2003, @rolf.image.when.year)
-    assert_equal(@ccnc25, @rolf.image.license)
+    assert_equal(licenses(:ccnc25), @rolf.image.license)
   end
 
   def test_no_email_hooks

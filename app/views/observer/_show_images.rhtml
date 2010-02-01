@@ -3,10 +3,16 @@
 <% end %>
 
 <% if check_permission(@observation.user_id) %>
-  <%= link_to(:show_observation_add_images.t, :controller => 'image', :action => 'add_image', :id => @observation.id) %><br/>
-  <%= link_to(:show_observation_reuse_image.t, :controller => 'image', :action => 'reuse_image', :id => @observation.id) %><br/>
+  <%= link_to(:show_observation_add_images.t, :controller => 'image',
+              :action => 'add_image', :id => @observation.id,
+              :params => query_params) %><br/>
+  <%= link_to(:show_observation_reuse_image.t, :controller => 'image',
+              :action => 'reuse_image', :id => @observation.id,
+              :params => query_params) %><br/>
   <% if @observation.images.length > 0 %>
-    <%= link_to(:show_observation_remove_images.t, :controller => 'image', :action => 'remove_images', :id => @observation.id) %><br/>
+    <%= link_to(:show_observation_remove_images.t, :controller => 'image',
+                :action => 'remove_images', :id => @observation.id,
+                :params => query_params) %><br/>
   <% end %>
 <% end %>
 <br/>
@@ -19,7 +25,9 @@
       <p>
         <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
                       image.unique_format_name.t,
-                    :controller => 'image', :action => 'show_image', :id => image.id, :params => search_params) %><br/>
+                    :controller => 'image', :action => 'show_image',
+                    :id => image.id, :obs => @observation.id,
+                    :params => query_params) %><br/>
         <% if image.notes && image.notes != '' %>
           <small>
             <%= str = image.notes[0..300].tl

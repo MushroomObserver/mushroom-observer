@@ -180,7 +180,7 @@ class NameSorter
   def check_for_deprecated_checklist(checklist)
     if checklist
       for key, value in checklist
-        if value == 'checked'
+        if value == '1'
           check_for_deprecated_name(Name.find(key.to_i))
         end
       end

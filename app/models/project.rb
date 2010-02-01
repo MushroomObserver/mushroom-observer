@@ -35,7 +35,7 @@
 #
 ################################################################################
 
-class Project < ActiveRecord::MO
+class Project < AbstractModel
   belongs_to :user
   belongs_to :user_group
   belongs_to :admin_group, :class_name => "UserGroup", :foreign_key => "admin_group_id"

@@ -1,9 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class LocationTest < Test::Unit::TestCase
-  fixtures :locations
-  fixtures :past_locations
-  fixtures :users
 
   # --------------------------------------
   #  Test email notification heuristics.
@@ -12,7 +9,7 @@ class LocationTest < Test::Unit::TestCase
   def test_email_notification
     QueuedEmail.queue_emails(true)
     QueuedEmail.all.map(&:destroy)
-    version = @albion.version
+    version = locations(:albion).version
 
     @rolf.email_locations_author = true
     @rolf.email_locations_editor = false
@@ -29,8 +26,8 @@ class LocationTest < Test::Unit::TestCase
     @dick.email_locations_all    = true
     @dick.save
 
-    assert_equal(0, @albion.authors.length)
-    assert_equal(0, @albion.editors.length)
+    assert_equal(0, locations(:albion).authors.length)
+    assert_equal(0, locations(:albion).editors.length)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       .       .       .
@@ -39,21 +36,21 @@ class LocationTest < Test::Unit::TestCase
     # Authors: --   editors: --
     # Rolf changes notes: notify Dick (all); Rolf becomes author.
     User.current = @rolf
-    @albion.reload
-    @albion.notes = ''
-    @albion.save
-    assert_equal(version + 1, @albion.version)
-    assert_equal(1, @albion.authors.length)
-    assert_equal(0, @albion.editors.length)
-    assert_equal(@rolf, @albion.authors.first)
+    locations(:albion).reload
+    locations(:albion).notes = ''
+    locations(:albion).save
+    assert_equal(version + 1, locations(:albion).version)
+    assert_equal(1, locations(:albion).authors.length)
+    assert_equal(0, locations(:albion).editors.length)
+    assert_equal(@rolf, locations(:albion).authors.first)
     assert_equal(1, QueuedEmail.all.length)
     assert_email(0,
       :flavor      => 'QueuedEmail::LocationChange',
       :from        => @rolf,
       :to          => @dick,
-      :location    => @albion.id,
-      :old_version => @albion.version-1,
-      :new_version => @albion.version
+      :location    => locations(:albion).id,
+      :old_version => locations(:albion).version-1,
+      :new_version => locations(:albion).version
     )
 
     # Dick wisely reconsiders getting emails for every location change.
@@ -67,10 +64,10 @@ class LocationTest < Test::Unit::TestCase
     # Demote Rolf, because he wasn't supposed to become author yet.
     # (We've changed criteria for authorship so that Rolf was able to
     # become author even though he hadn't written anything.)
-    @albion.remove_author(@rolf)
-    assert_equal(0, @albion.authors.length)
-    assert_equal(1, @albion.editors.length)
-    assert_equal(@rolf, @albion.editors.first)
+    locations(:albion).remove_author(@rolf)
+    assert_equal(0, locations(:albion).authors.length)
+    assert_equal(1, locations(:albion).editors.length)
+    assert_equal(@rolf, locations(:albion).editors.first)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       .       .       .
@@ -79,14 +76,14 @@ class LocationTest < Test::Unit::TestCase
     # Authors: --   editors: Rolf
     # Mary writes notes: no emails; Mary becomes author.
     User.current = @mary
-    @albion.reload
-    @albion.notes = "Mary wrote this."
-    @albion.save
-    assert_equal(version + 2, @albion.version)
-    assert_equal(1, @albion.authors.length)
-    assert_equal(1, @albion.editors.length)
-    assert_equal(@mary, @albion.authors.first)
-    assert_equal(@rolf, @albion.editors.first)
+    locations(:albion).reload
+    locations(:albion).notes = "Mary wrote this."
+    locations(:albion).save
+    assert_equal(version + 2, locations(:albion).version)
+    assert_equal(1, locations(:albion).authors.length)
+    assert_equal(1, locations(:albion).editors.length)
+    assert_equal(@mary, locations(:albion).authors.first)
+    assert_equal(@rolf, locations(:albion).editors.first)
     assert_equal(1, QueuedEmail.all.length)
 
     # Have Mary opt back out.
@@ -100,22 +97,22 @@ class LocationTest < Test::Unit::TestCase
     # Authors: Mary   editors: Rolf
     # Now when Rolf changes the notes Mary should get notified.
     User.current = @rolf
-    @albion.reload
-    @albion.notes = "Rolf changed it to this."
-    @albion.save
-    assert_equal(1, @albion.authors.length)
-    assert_equal(1, @albion.editors.length)
-    assert_equal(@mary, @albion.authors.first)
-    assert_equal(@rolf, @albion.editors.first)
-    assert_equal(version + 3, @albion.version)
+    locations(:albion).reload
+    locations(:albion).notes = "Rolf changed it to this."
+    locations(:albion).save
+    assert_equal(1, locations(:albion).authors.length)
+    assert_equal(1, locations(:albion).editors.length)
+    assert_equal(@mary, locations(:albion).authors.first)
+    assert_equal(@rolf, locations(:albion).editors.first)
+    assert_equal(version + 3, locations(:albion).version)
     assert_equal(2, QueuedEmail.all.length)
     assert_email(1,
       :flavor      => 'QueuedEmail::LocationChange',
       :from        => @rolf,
       :to          => @mary,
-      :location    => @albion.id,
-      :old_version => @albion.version-1,
-      :new_version => @albion.version
+      :location    => locations(:albion).id,
+      :old_version => locations(:albion).version-1,
+      :new_version => locations(:albion).version
     )
 
     # Have Mary opt out of author-notifications to make sure that's why she
@@ -131,14 +128,14 @@ class LocationTest < Test::Unit::TestCase
     # Have Dick change it to make sure rolf doesn't get an email as he is just
     # an editor and he has opted out of such notifications.
     User.current = @dick
-    @albion.reload
-    @albion.notes = "Dick changed it now."
-    @albion.save
-    assert_equal(version + 4, @albion.version)
-    assert_equal(1, @albion.authors.length)
-    assert_equal(2, @albion.editors.length)
-    assert_equal(@mary, @albion.authors.first)
-    assert_equal([@rolf.id, @dick.id], @albion.editors.map(&:id).sort)
+    locations(:albion).reload
+    locations(:albion).notes = "Dick changed it now."
+    locations(:albion).save
+    assert_equal(version + 4, locations(:albion).version)
+    assert_equal(1, locations(:albion).authors.length)
+    assert_equal(2, locations(:albion).editors.length)
+    assert_equal(@mary, locations(:albion).authors.first)
+    assert_equal([@rolf.id, @dick.id], locations(:albion).editors.map(&:id).sort)
     assert_equal(2, QueuedEmail.all.length)
 
     # Have everyone request editor-notifications and have Dick change it again.
@@ -157,29 +154,29 @@ class LocationTest < Test::Unit::TestCase
     # 3 Dick:       x       x       .       .
     # Authors: Mary   editors: Rolf, Dick
     User.current = @dick
-    @albion.reload
-    @albion.notes = "Dick changed it again."
-    @albion.save
-    assert_equal(version + 5, @albion.version)
-    assert_equal(1, @albion.authors.length)
-    assert_equal(2, @albion.editors.length)
-    assert_equal(@mary, @albion.authors.first)
-    assert_equal([@rolf.id, @dick.id], @albion.editors.map(&:id).sort)
+    locations(:albion).reload
+    locations(:albion).notes = "Dick changed it again."
+    locations(:albion).save
+    assert_equal(version + 5, locations(:albion).version)
+    assert_equal(1, locations(:albion).authors.length)
+    assert_equal(2, locations(:albion).editors.length)
+    assert_equal(@mary, locations(:albion).authors.first)
+    assert_equal([@rolf.id, @dick.id], locations(:albion).editors.map(&:id).sort)
     assert_equal(3, QueuedEmail.all.length)
     assert_email(2,
       :flavor      => 'QueuedEmail::LocationChange',
       :from        => @dick,
       :to          => @rolf,
-      :location    => @albion.id,
-      :old_version => @albion.version-1,
-      :new_version => @albion.version
+      :location    => locations(:albion).id,
+      :old_version => locations(:albion).version-1,
+      :new_version => locations(:albion).version
     )
 
     # Have Mary and Dick express interest, Rolf express disinterest, 
     # then have Dick change it again.  Mary should get an email.
-    Interest.create(:object => @albion, :user => @rolf, :state => false)
-    Interest.create(:object => @albion, :user => @mary, :state => true)
-    Interest.create(:object => @albion, :user => @dick, :state => true)
+    Interest.create(:object => locations(:albion), :user => @rolf, :state => false)
+    Interest.create(:object => locations(:albion), :user => @mary, :state => true)
+    Interest.create(:object => locations(:albion), :user => @dick, :state => true)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       x       .       no
@@ -187,22 +184,22 @@ class LocationTest < Test::Unit::TestCase
     # 3 Dick:       x       x       .       yes
     # Authors: Mary   editors: Rolf, Dick
     User.current = @dick
-    @albion.reload
-    @albion.notes = "Dick changed it yet again."
-    @albion.save
-    assert_equal(version + 6, @albion.version)
-    assert_equal(1, @albion.authors.length)
-    assert_equal(2, @albion.editors.length)
-    assert_equal(@mary, @albion.authors.first)
-    assert_equal([@rolf.id, @dick.id], @albion.editors.map(&:id).sort)
+    locations(:albion).reload
+    locations(:albion).notes = "Dick changed it yet again."
+    locations(:albion).save
+    assert_equal(version + 6, locations(:albion).version)
+    assert_equal(1, locations(:albion).authors.length)
+    assert_equal(2, locations(:albion).editors.length)
+    assert_equal(@mary, locations(:albion).authors.first)
+    assert_equal([@rolf.id, @dick.id], locations(:albion).editors.map(&:id).sort)
     assert_equal(4, QueuedEmail.all.length)
     assert_email(3,
       :flavor        => 'QueuedEmail::LocationChange',
       :from          => @dick,
       :to            => @mary,
-      :location      => @albion.id,
-      :old_version   => @albion.version-1,
-      :new_version   => @albion.version
+      :location      => locations(:albion).id,
+      :old_version   => locations(:albion).version-1,
+      :new_version   => locations(:albion).version
     )
   end
 end

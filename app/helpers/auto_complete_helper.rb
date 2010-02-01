@@ -26,6 +26,7 @@
 #  turn_into_auto_completer::          Turn text field into auto-completer.
 #  turn_into_location_auto_completer:: Turn into location auto-completer.
 #  turn_into_name_auto_completer::     Turn into name auto-completer.
+#  turn_into_user_auto_completer::     Turn into user-name auto-completer.
 #  javascript_include_auto_complete::  Include javascript libs for auto-completion.
 #
 ################################################################################
@@ -99,6 +100,18 @@ module ApplicationHelper::Autocomplete
       :indicator     => 'indicator',
       :frequency     => 0.1,
       :collapse      => true,
+      :js_class      => 'CachedAutocompleter',
+      :inherit_width => (@ua == :ie ? 1 : 0),
+    }.merge(opts))
+  end
+
+  # Make text_field auto-complete for user name/login.
+  def turn_into_user_auto_completer(id, opts={})
+    turn_into_auto_completer(id, {
+      :url           => '/ajax/auto_complete/user',
+      :indicator     => 'indicator',
+      :frequency     => 0.1,
+      :wordMatch     => true,
       :js_class      => 'CachedAutocompleter',
       :inherit_width => (@ua == :ie ? 1 : 0),
     }.merge(opts))

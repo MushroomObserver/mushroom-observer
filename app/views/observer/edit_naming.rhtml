@@ -4,11 +4,13 @@
 
   new_tab_set do
     add_tab(:app_cancel.t(:type => :observation.l),
-            :action => 'show_observation', :id => @observation.id)
+            :action => 'show_observation', :id => @observation.id,
+            :params => query_params)
   end
 %>
 
-<% form_tag(:action => 'edit_naming', :id => @naming.id, :approved_name => @what) do %>
+<% form_tag(:action => 'edit_naming', :id => @naming.id,
+            :approved_name => @what, :params => query_params) do %>
   <br/><center><%= submit_tag :app_save_changes.l %></center>
 
   <table width="100%" cellpadding="10">
@@ -24,9 +26,7 @@
         }) %>
       </td>
       <td width="25%" valign="top">
-        <%= render(:partial => 'show_images', :locals => {
-          :search_params => calc_search_params()
-        }) %>
+        <%= render(:partial => 'show_images') %>
       </td>
     </tr>
   </table>

@@ -38,7 +38,7 @@
 #
 ################################################################################
 
-class License < ActiveRecord::MO
+class License < AbstractModel
   has_many :images
   has_many :users
   has_many :names

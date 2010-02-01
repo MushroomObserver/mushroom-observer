@@ -1,8 +1,6 @@
 <%
-  @title ||= :map_locations_title.t(:pattern => @pattern)
-
   new_tab_set do
-    add_tab(:location_all.t, :action => 'list_place_names')
+    add_tab(:location_all.t, :action => 'list_locations')
   end
 
   if !@locations.empty?

@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class ApiControllerTest < ControllerTestCase
-  fixtures :users
 
   def test_filters
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,pt;q=0.5"
@@ -10,15 +9,18 @@ class ApiControllerTest < ControllerTestCase
     assert_nil(User.current)
     assert_equal(:'pt-BR', Locale.code)
     assert_equal({}, cookies)
-    assert_equal({'flash'=>{}}, session.data)
+    assert_equal({'locale'=>'pt-BR','flash'=>{}}, session.data)
+    session.data.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,xx-xx;q=0.5"
     get(:test)
     assert_equal(:'pt-BR', Locale.code)
+    session.data.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,en;q=0.5"
     get(:test)
     assert_equal(:'en-US', Locale.code)
+    session.data.delete('locale')
 
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "en-xx,en;q=0.5"
     get(:test)
@@ -27,7 +29,6 @@ class ApiControllerTest < ControllerTestCase
 
 #   # Basic comment request.
 #   def test_get_comments
-#     local_fixtures :comments
 # 
 #     get(:comments, :detail => :high)
 #     @doc = REXML::Document.new(@response.body)
@@ -63,32 +64,26 @@ class ApiControllerTest < ControllerTestCase
 #   end
 # 
 #   def test_get_images
-#     local_fixtures :images
 #     get(:images, :detail => :high)
 #   end
 # 
 #   def test_get_licenses
-#     local_fixtures :licenses
 #     get(:licenses, :detail => :high)
 #   end
 # 
 #   def test_get_locations
-#     local_fixtures :locations
 #     get(:locations, :detail => :high)
 #   end
 # 
 #   def test_get_names
-#     local_fixtures :names
 #     get(:names, :detail => :high)
 #   end
 # 
 #   def test_get_namings
-#     local_fixtures :namings
 #     get(:namings, :detail => :high)
 #   end
 # 
 #   def test_get_observations
-#     local_fixtures :observations
 #     get(:observations, :detail => :high)
 #   end
 # 
@@ -97,7 +92,6 @@ class ApiControllerTest < ControllerTestCase
 #   end
 # 
 #   def test_get_votes
-#     local_fixtures :votes
 #     get(:votes, :detail => :high)
 #   end
 # 

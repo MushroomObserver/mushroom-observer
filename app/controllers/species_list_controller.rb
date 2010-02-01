@@ -15,8 +15,7 @@
 #   * remove_observation_from_species_list   (post method)
 #
 #  Helpers:
-#    calc_checklist(id)                   Get list of names for LHS of _species_list_form.
-#    sort_species_list_observations(...)  Get list of observations for show_species_list.
+#    calc_checklist(query)                Get list of names for LHS of _species_list_form.
 #    get_list_of_deprecated_names(spl)    Get list of names from list that are deprecated.
 #    process_species_list(...)            Create/update species list using form data.
 #    construct_observations(...)          Create observations for new names added to list.
@@ -59,9 +58,10 @@ class SpeciesListController < ApplicationController
   # Outputs: @species_lists, @species_list_pages
   def list_species_lists
     store_location
-    session_setup
-    @species_list_pages, @species_lists =
-        paginate(:species_lists, :order => "`when` desc, id desc", :per_page => 10)
+    store_query
+    query = find_or_create_query(:SpeciesList, :all, :by => :date)
+    @pages = paginate_numbers(:page, 10)
+    @objects = query.paginate(@pages)
   end
 
   # Display list of user's species_lists, sorted by date.
@@ -71,11 +71,24 @@ class SpeciesListController < ApplicationController
   def species_lists_by_user
     user = User.find(params[:id])
     store_location
-    session_setup
+    store_query
     @title = :species_list_list_by_user.l(:user => user.legal_name)
-    @species_list_pages, @species_lists = paginate(:species_lists,
-      :conditions => "user_id = #{user.id}", :order => "`when` desc, id desc", :per_page => 10)
-    render :action => "list_species_lists"
+    query = create_query(:SpeciesList, :by_user, :user => user)
+    @pages = paginate_numbers(:page, 10)
+    @objects = query.paginate(@pages)
+    render(:action => "list_species_lists")
+  end
+
+  # Display list of all species_lists, sorted by title.
+  # Linked from: left-hand panel
+  # Inputs: none
+  # Outputs: @species_lists
+  def species_lists_by_title
+    store_location
+    store_query
+    query = create_query(:SpeciesList, :all, :by => :title)
+    @pages = paginate_numbers(:page, 100)
+    @objects = query.paginate(@pages)
   end
 
   # Linked from: list_species_lists, show_observation, create/edit_species_list, etc. etc.
@@ -85,62 +98,13 @@ class SpeciesListController < ApplicationController
   # the usage for show_observation.
   def show_species_list
     store_location
-    id = params[:id]
-    @search_seq = calc_search(:species_list_observations, "s.id = %s" % id, "n.search_name").id
-    @species_list = SpeciesList.find(id)
-    session[:species_list] = @species_list
-    if session[:checklist_source] != id
-      session[:prev_checklist_source] = session[:checklist_source]
-      session[:checklist_source] = id
-    end
-    @observation_list = sort_species_list_observations(@species_list, @user)
-    @letters, @observation_list = paginate_letters(@observation_list, 100) {|o| o.text_name[0,1]}
-    @pages,   @observation_list = paginate_array(@observation_list, params[:letter].to_s.empty? ? 100 : 1e6)
-  end
-
-  # Linked from: show_species_list
-  # Inputs:
-  #   params[:id] (species_list)
-  #   params[:type] (file extension)
-  def make_report
-    id = params[:id].to_i
-    spl = SpeciesList.find(id)
-    names = spl ? spl.names : []
-    case params[:type]
-    when 'txt'
-      render_name_list_as_txt(names)
-    when 'rtf'
-      render_name_list_as_rtf(names)
-    when 'csv'
-      render_name_list_as_csv(names)
-    else
-      flash_error(:make_report_not_supported.t(:type => params[:type]))
-      redirect_to(:action => "show_species_list", :id => params[:id])
-    end
-  end
-
-  # Sort observations in species_list and return list of observation objects.
-  # Needed by everyone using the show_species_list view.
-  def sort_species_list_observations(spl, user)
-    if spl.observations.length > 0
-      return spl.observations.sort do |x,y|
-        (x.name.text_name <=> y.name.text_name) || # obs.name should never be nil
-        (x.when <=> y.when) ||
-        (x.id <=> y.id)
-      end
-    else
-      return nil
-    end
-  end
-
-  # Display list of all species_lists, sorted by title.
-  # Linked from: left-hand panel
-  # Inputs: none
-  # Outputs: @species_lists
-  def species_lists_by_title
-    session_setup
-    store_location
-    @species_lists = SpeciesList.find(:all, :order => "title asc, `when` desc")
+    store_query
+    @species_list = SpeciesList.find(params[:id])
+    query = create_query(:Observation, :in_species_list, :by => :name,
+                         :species_list => @species_list)
+    store_query(query) if params[:set_source].to_s != ''
+    @pages = paginate_letters(:letter, :page, 100)
+    @objects = query.paginate(@pages, 'names.text_name')
   end
 
   # Form for creating a new species list.
@@ -154,116 +118,29 @@ class SpeciesListController < ApplicationController
   #   @multiple_names
   #   @deprecated_names
   #   @member_notes
-  #   session[:checklist]
+  #   session[:checklist_source]
   def create_species_list
     @species_list = SpeciesList.new
-    if request.method == :get
+    if request.method != :post
       @checklist_names  = {}
       @list_members     = nil
       @new_names        = nil
       @multiple_names   = nil
       @deprecated_names = nil
       @member_notes     = nil
-      calc_checklist(nil)
+      if (params[:clone].to_s != '') and
+         (clone = SpeciesList.safe_find(params[:clone]))
+        query = create_query(:Observation, :in_species_list,
+                             :species_list => clone)
+        @checklist = calc_checklist(query)
+        @species_list.when  = clone.when
+        @species_list.where = clone.where
+        @species_list.title = clone.title
+      else
+        @checklist = calc_checklist
+      end
     else
       process_species_list('created')
-    end
-  end
-
-  # Specialized form for creating a new species list, at Darvin's request.
-  # Linked from: create_species_list
-  # Inputs:
-  #  params[:results]
-  # Outputs:
-  #  @names
-  def name_lister
-    @genera = Name.connection.select_all %(
-      SELECT text_name as n, deprecated as d
-      FROM names
-      WHERE rank = 'Genus' AND correct_spelling_id IS NULL
-      ORDER BY text_name
-    )
-
-    @species = Name.connection.select_all %(
-      SELECT text_name as n, author as a, deprecated as d, synonym_id as s
-      FROM names
-      WHERE (rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form')
-            AND correct_spelling_id IS NULL
-      ORDER BY text_name
-    )
-
-    # Place "*" after all accepted genera.
-    @genera = @genera.map do |rec|
-      n, d = rec.values_at('n', 'd')
-      d.to_i == 1 ? n : n + '*'
-    end
-
-    # How many times is each name used?
-    occurs = {}
-    for rec in @species
-      n = rec['n']
-      occurs[n] ||= 0
-      occurs[n] += 1
-    end
-
-    # Build map from synonym_id to list of valid names.
-    valid = {}
-    for rec in @species
-      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      need_author = occurs[n] > 1
-      n += '|' + a if a.to_s != '' && need_author
-      if s.to_i > 0 && d.to_i != 1
-        l = valid[s] ||= []
-        l.push(n) if !l.include?(n)
-      end
-    end
-
-    # Now insert valid synonyms after each deprecated name.  Stick a "*" after
-    # all accepted names (including, of course, the accepted synonyms).
-    # Include author after names, using a "|" to help make it easy for
-    # javascript to parse it correctly.
-    @species = @species.map do |rec|
-      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      need_author = occurs[n] > 1
-      n += '|' + a if a.to_s != '' && need_author
-      n += '*' if d.to_i != 1
-      d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
-    end.flatten
-
-    # Names are passed in as string, one name per line.
-    @names = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
-
-    if request.method == :post
-      @objs = @names.map do |str|
-        str.sub!(/\*$/, '')
-        name, author = str.split('|')
-        if author
-          Name.find_by_text_name_and_author(name, author)
-        else
-          Name.find_by_text_name(name)
-        end
-      end.select {|n| !n.nil?}
-
-      case params[:commit]
-      when :name_lister_submit_spl.l
-        @checklist_names  = {}
-        @list_members     = params[:results].gsub('|',' ').gsub('*','')
-        @new_names        = nil
-        @multiple_names   = nil
-        @deprecated_names = nil
-        @member_notes     = nil
-        session[:checklist_source] = :nothing
-        calc_checklist(nil)
-        render(:action => 'create_species_list')
-      when :name_lister_submit_txt.l
-        render_name_list_as_txt(@objs)
-      when :name_lister_submit_rtf.l
-        render_name_list_as_rtf(@objs)
-      when :name_lister_submit_csv.l
-        render_name_list_as_csv(@objs)
-      else
-        flash_error(:name_lister_bad_submit.t(:button => params[:commit]))
-      end
     end
   end
 
@@ -279,128 +156,21 @@ class SpeciesListController < ApplicationController
   #   @multiple_names
   #   @deprecated_names
   #   @member_notes
-  #   session[:checklist]
+  #   session[:checklist_source]
   def edit_species_list
     @species_list = SpeciesList.find(params[:id])
     if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
-    elsif request.method == :get
+    elsif request.method != :post
       @checklist_names  = {}
       @list_members     = nil
       @new_names        = nil
       @multiple_names   = nil
       @member_notes     = nil
       @deprecated_names = get_list_of_deprecated_names(@species_list)
-      calc_checklist(params[:id])
+      @checklist        = calc_checklist
     else
       process_species_list('updated')
-    end
-  end
-
-  # Post method for create/edit_species_list.  Creates/changes the
-  # species_list object, doing highly sophisticated validation and stuff
-  # on the list of names.  Uses construct_observations() to create the actual
-  # observations, which in turn uses species_list.construct_observation().
-  # Inputs:
-  #   type_str                  (used for diagnostic in construct_observations)
-  #   @user, @species_list
-  #   params[:species_list][:when]
-  #   params[:species_list][:where]
-  #   params[:species_list][:title]
-  #   params[:species_list][:notes]
-  #   params[:member][:notes]
-  #   params[:list][:members]               String that user typed in in big text area on right side (squozen and stripped).
-  #   params[:approved_names]               List of new names from prev post.
-  #   params[:approved_deprecated_names]    List of deprecated names from prev post.
-  #   params[:chosen_names][name]           Radio boxes disambiguating multiple names
-  #   params[:chosen_approved_names][name]  Radio boxes allowing user to choose preferred names for deprecated ones.
-  #     (Both the last two radio boxes are hashes with:
-  #       key: ambiguous name as typed with nonalphas changed to underscores,
-  #       val: id of name user has chosen (via radio boxes in feedback)
-  #   params[:checklist_data][...]          Radio boxes on left side: hash from name id to "checked".
-  #   params[:checklist_names][name_id]     (Used by view to give a name to each id in checklist_data hash.)
-  # Success: redirects to show_species_list
-  # Failure: redirects back to create_edit_species_list.
-  def process_species_list(type_str)
-    redirected = false
-    args = params[:species_list]
-
-    # Update the timestamps/user/when/where/title/notes fields.
-    now = Time.now
-    @species_list.created    = now if type_str == "created"
-    @species_list.modified   = now
-    @species_list.user       = @user
-    @species_list.attributes = args
-
-    # This just makes sure all the names (that have been approved) exist.
-    list = params[:list][:members].gsub('_', ' ').strip_squeeze
-    construct_approved_names(list, params[:approved_names])
-
-    # Sets up a NameSorter object.  Does NOT affect species_list.
-    sorter = setup_sorter(params, @species_list, list)
-
-    # Now let's see all the ways in which NameSorter can fail...
-    # Does list have "Name one = Name two" type lines?
-    if sorter.has_new_synonyms
-      flash_error(:species_list_need_to_use_bulk.t)
-      sorter.reset_new_names
-    # Are there any unrecognized names?
-    elsif sorter.new_name_strs != []
-      flash_error "Unrecognized names given: '#{sorter.new_name_strs.map(&:to_s).join("', '")}'" if TESTING
-    # Are there any ambiguous names?
-    elsif !sorter.only_single_names
-      flash_error "Ambiguous names given: '#{sorter.multiple_line_strs.map(&:to_s).join("', '")}'" if TESTING
-    # Are there and deprecated names that haven't been approved?
-    elsif sorter.has_unapproved_deprecated_names
-      flash_error("Found deprecated names.") if TESTING
-
-    # Okay, at this point we've apparently validated the new list of names.
-    # Save the OTHER changes to the species list, then let this other method
-    # (construct_observations) update the members.  This always succeeds, so
-    # we can redirect to show_species_list.
-    else
-      if !@species_list.save
-        flash_object_errors(@species_list)
-      else
-        if type_str == 'created'
-          Transaction.post_species_list(
-            :id       => @species_list,
-            :date     => @species_list.when,
-            :location => @species_list.where,
-            :title    => @species_list.title,
-            :notes    => @species_list.notes
-          )
-        else
-          args = {}
-          args[:date]     = @species_list.when  if @species_list.when_changed?
-          args[:location] = @species_list.where if @species_list.where_changed?
-          args[:title]    = @species_list.title if @species_list.title_changed?
-          args[:notes]    = @species_list.notes if @species_list.notes_changed?
-          if !args.empty?
-            args[:id] = @species_list
-            Transaction.put_species_list(args)
-          end
-        end
-
-        construct_observations(@species_list, params, type_str, @user, sorter)
-
-        if has_unshown_notifications?(@user, :naming)
-          redirect_to(:controller => 'observer', :action => 'show_notifications')
-        else
-          redirect_to(:action => 'show_species_list', :id => @species_list)
-        end
-        redirected = true
-      end
-    end
-
-    # Failed to create due to synonyms, unrecognized names, etc.
-    if !redirected
-      @list_members     = sorter.all_line_strs.join("\r\n")
-      @new_names        = sorter.new_name_strs.uniq.sort # --> "approved_names"
-      @multiple_names   = sorter.multiple_line_strs.uniq.sort
-      @deprecated_names = sorter.deprecated_name_strs.uniq.sort
-      @checklist_names  = params[:checklist_data] || {}
-      @member_notes     = params[:member] ? params[:member][:notes] : ""
     end
   end
 
@@ -415,7 +185,9 @@ class SpeciesListController < ApplicationController
     if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
     elsif request.method == :get
-      @observation_list = sort_species_list_observations(@species_list, @user)
+      query = create_query(:Observation, :in_species_list, :by => :name,
+                           :species_list => @species_list)
+      @observation_list = query.results
     else
       file_data = params[:species_list][:file]
       @species_list.file = file_data
@@ -505,83 +277,378 @@ class SpeciesListController < ApplicationController
     end
   end
 
-################################################################################
+  ################################################################################
+  #
+  #  :section: Name Lister
+  #
+  ################################################################################
 
-  # This appears to be called only by create/edit_species_list.
-  # In the former case (create) it is called with nil, which tells it to use
-  #   session[:checklist_source] (see below for possible values)
-  # In the latter case (edit) it is called with species_list_id.  Now if
-  #   session[:checklist_source] happens to be the same, and as far as I can
-  #   tell this is always going to be the case, since edit_species_list is
-  #   accessible only through show_species_list, which in turn sets
-  #   session[:checklist_source] to species_list_id, then it uses
-  #   session[:prev_checklist_source], which is set by show_species_list
-  #   to be whatever the checklist_source was before show_species_list was
-  #   called, unless it was already species_list_id, in which case it leaves
-  #   it alone.  Other places session[:checklist_source] is set are:
-  #     list_rss_logs           :all_observations
-  #     list_observations       :all_observations
-  #     observation_index       :all_observations
-  #     observations_by_name    :all_observations
-  #     observation_search      :observation_ids (results of search)
-  #     show_user_observations  :observation_ids (that user's observations)
-  #     list_images             :nothing
-  #     image_search            :nothing
-  #     name_index              :all_names
-  #     show_name               :observation_ids (that name)
-  #     name_search             :observation_ids (that name)
-  #                             :nothing         (if multiple matches)
-  #   You got all that?
-  # Okay, then assuming you get this far, source's values can be:
-  #   :nothing              nothing
-  #   :observation_ids      session[:observation_ids]
-  #   :all_observations     all names used by observations
-  #   :all_names            all names
-  #   species_list_id       all names in species list (consensus only)
-  #   [For clarity, I converted 0 to :observation_ids, and nil to :nothing. -JPH 20071130]
-  # The end result of all this is simply to store an array of these names in
-  #   session[:checklist] where the values are [observation_name, name_id]
-  #   And this, in turn, is only used by _form_species_lists.rhtml.  (It is
-  #   used to create a list of names with check-boxes beside them that you can
-  #   add to the species list.)
-  def calc_checklist(id)
-    source = session[:checklist_source]
-    list = []
-    query = nil
-    if source == id
-      source = session[:prev_checklist_source] || source
+  # Specialized form for creating a new species list, at Darvin's request.
+  # Linked from: create_species_list
+  # Inputs:
+  #  params[:results]
+  # Outputs:
+  #  @names
+  def name_lister
+    @genera = Name.connection.select_all %(
+      SELECT text_name as n, deprecated as d
+      FROM names
+      WHERE rank = 'Genus' AND correct_spelling_id IS NULL
+      ORDER BY text_name
+    )
+
+    @species = Name.connection.select_all %(
+      SELECT text_name as n, author as a, deprecated as d, synonym_id as s
+      FROM names
+      WHERE (rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form')
+            AND correct_spelling_id IS NULL
+      ORDER BY text_name
+    )
+
+    # Place "*" after all accepted genera.
+    @genera = @genera.map do |rec|
+      n, d = rec.values_at('n', 'd')
+      d.to_i == 1 ? n : n + '*'
     end
-    source_str = source.to_s
-    if source.to_s == 'observation_ids'
-      # Disabled as part of new prev/next.  Not reimplemented given impending checklist work.
-      flash_warning(:species_list_calc_checklist_search_disabled.t)
-    elsif source.to_s == 'all_observations'
-      query = "select distinct n.observation_name, n.id, n.search_name
-        from names n, namings g
-        where n.id = g.name_id and correct_spelling_id IS NULL
-        order by n.search_name"
-    elsif source.to_s == 'all_names'
-      query = "select distinct observation_name, id, search_name
-        from names
-        where correct_spelling_id IS NULL
-        order by search_name"
-    elsif source.to_s == 'nothing'
-      # This used to be nil. -JPH 20071130
-    else # All that's left is species_list_id (i.e. integer)
-      # Used to list everything, but that's too slow
-      query = "select distinct n.observation_name, n.id, n.search_name
-        from names n, observations o, observations_species_lists os
-        where os.species_list_id = %s and os.observation_id = o.id
-          and n.id = o.name_id
-        order by n.search_name" % source.to_i
+
+    # How many times is each name used?
+    occurs = {}
+    for rec in @species
+      n = rec['n']
+      occurs[n] ||= 0
+      occurs[n] += 1
     end
-    if query
-      data = Observation.connection.select_all(query)
-      for d in data
-        list.push([d['observation_name'], d['id']])
+
+    # Build map from synonym_id to list of valid names.
+    valid = {}
+    for rec in @species
+      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+      need_author = occurs[n] > 1
+      n += '|' + a if a.to_s != '' && need_author
+      if s.to_i > 0 && d.to_i != 1
+        l = valid[s] ||= []
+        l.push(n) if !l.include?(n)
       end
     end
-    # session[:checklist] = list
+
+    # Now insert valid synonyms after each deprecated name.  Stick a "*" after
+    # all accepted names (including, of course, the accepted synonyms).
+    # Include author after names, using a "|" to help make it easy for
+    # javascript to parse it correctly.
+    @species = @species.map do |rec|
+      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+      need_author = occurs[n] > 1
+      n += '|' + a if a.to_s != '' && need_author
+      n += '*' if d.to_i != 1
+      d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
+    end.flatten
+
+    # Names are passed in as string, one name per line.
+    @names = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
+
+    if request.method == :post
+      @objs = @names.map do |str|
+        str.sub!(/\*$/, '')
+        name, author = str.split('|')
+        if author
+          Name.find_by_text_name_and_author(name, author)
+        else
+          Name.find_by_text_name(name)
+        end
+      end.select {|n| !n.nil?}
+
+      case params[:commit]
+      when :name_lister_submit_spl.l
+        @checklist_names  = {}
+        @list_members     = params[:results].gsub('|',' ').gsub('*','')
+        @new_names        = nil
+        @multiple_names   = nil
+        @deprecated_names = nil
+        @member_notes     = nil
+        store_query
+        calc_checklist
+        render(:action => 'create_species_list')
+      when :name_lister_submit_txt.l
+        render_name_list_as_txt(@objs)
+      when :name_lister_submit_rtf.l
+        render_name_list_as_rtf(@objs)
+      when :name_lister_submit_csv.l
+        render_name_list_as_csv(@objs)
+      else
+        flash_error(:name_lister_bad_submit.t(:button => params[:commit]))
+      end
+    end
+  end
+
+  # Linked from: show_species_list
+  # Inputs:
+  #   params[:id] (species_list)
+  #   params[:type] (file extension)
+  def make_report
+    id = params[:id].to_i
+    spl = SpeciesList.find(id)
+    names = spl ? spl.names : []
+    case params[:type]
+    when 'txt'
+      render_name_list_as_txt(names)
+    when 'rtf'
+      render_name_list_as_rtf(names)
+    when 'csv'
+      render_name_list_as_csv(names)
+    else
+      flash_error(:make_report_not_supported.t(:type => params[:type]))
+      redirect_to(:action => "show_species_list", :id => params[:id])
+    end
+  end
+
+  # Exception thrown if try to render a report in a charset we don't handle.
+  class UnsupportedCharsetError < ArgumentError
+  end
+
+  # Display list of names as plain text.
+  def render_name_list_as_txt(names, charset=nil)
+    charset ||= 'UTF-8'
+    charset = charset.upcase
+    raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1', 'UTF-8'].include?(charset)
+    str = names.map do |name|
+      if true && name.author.to_s != ''
+        name.text_name + ' ' + name.author
+      else
+        name.text_name
+      end
+    end.join("\r\n")
+    str = case charset
+      when 'ASCII': str.to_ascii
+      when 'UTF-8': "\xEF\xBB\xBF" + str
+      else str.iconv(charset)
+    end
+    send_data(str,
+      :type => "text/plain; charset=#{charset}",
+      :disposition => 'attachment; filename="report.txt"'
+    )
+  end
+
+  # Display list of names as csv file.
+  def render_name_list_as_csv(names, charset=nil)
+    charset ||= 'ISO-8859-1'
+    charset = charset.upcase
+    raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1'].include?(charset)
+    str = FasterCSV.generate do |csv|
+      csv << ['name', 'author', 'citation', 'valid']
+      names.each do |name|
+        csv << [name.text_name, name.author, name.citation,
+          name.deprecated ? '' : '1'].map {|v| v == '' ? nil : v}
+      end
+    end
+    str = case charset
+      when 'UTF-8': str
+      when 'ASCII': str.to_ascii
+      else str.iconv(charset)
+    end
+    send_data(str,
+      :type => "text/csv; charset=#{charset}; header=present",
+      :disposition => 'attachment; filename="report.csv"'
+    )
+  end
+
+  # Display list of names as rich text.
+  def render_name_list_as_rtf(names)
+    doc = RTF::Document.new(RTF::Font::SWISS)
+    for name in names
+      rank      = name.rank
+      text_name = name.text_name
+      author    = name.author
+      if name.deprecated
+        node = doc
+      else
+        node = doc.bold
+      end
+      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
+        node = node.italic
+      end
+      node << text_name
+      doc << " " + author if author && author != ""
+      doc.line_break
+    end
+    send_data(doc.to_rtf,
+      :type => 'text/rtf; charset=ISO-8859-1',
+      :disposition => 'attachment; filename="report.rtf"'
+    )
+  end
+
+  ################################################################################
+  #
+  #  :section: Helpers
+  #
+  ################################################################################
+
+  # Post method for create/edit_species_list.  Creates/changes the
+  # species_list object, doing highly sophisticated validation and stuff
+  # on the list of names.  Uses construct_observations() to create the actual
+  # observations, which in turn uses species_list.construct_observation().
+  # Inputs:
+  #   type_str                  (used for diagnostic in construct_observations)
+  #   @user, @species_list
+  #   params[:species_list][:when]
+  #   params[:species_list][:where]
+  #   params[:species_list][:title]
+  #   params[:species_list][:notes]
+  #   params[:member][:notes]
+  #   params[:list][:members]               String that user typed in in big text area on right side (squozen and stripped).
+  #   params[:approved_names]               List of new names from prev post.
+  #   params[:approved_deprecated_names]    List of deprecated names from prev post.
+  #   params[:chosen_names][name]           Radio boxes disambiguating multiple names
+  #   params[:chosen_approved_names][name]  Radio boxes allowing user to choose preferred names for deprecated ones.
+  #     (Both the last two radio boxes are hashes with:
+  #       key: ambiguous name as typed with nonalphas changed to underscores,
+  #       val: id of name user has chosen (via radio boxes in feedback)
+  #   params[:checklist_data][...]          Radio boxes on left side: hash from name id to "1".
+  #   params[:checklist_names][name_id]     (Used by view to give a name to each id in checklist_data hash.)
+  # Success: redirects to show_species_list
+  # Failure: redirects back to create_edit_species_list.
+  def process_species_list(type_str)
+    redirected = false
+    args = params[:species_list]
+
+    # Update the timestamps/user/when/where/title/notes fields.
+    now = Time.now
+    @species_list.created    = now if type_str == "created"
+    @species_list.modified   = now
+    @species_list.user       = @user
+    @species_list.attributes = args
+
+    # This just makes sure all the names (that have been approved) exist.
+    list = params[:list][:members].gsub('_', ' ').strip_squeeze
+    construct_approved_names(list, params[:approved_names])
+
+    # Sets up a NameSorter object.  Does NOT affect species_list.
+    sorter = setup_sorter(params, @species_list, list)
+
+    # Now let's see all the ways in which NameSorter can fail...
+    # Does list have "Name one = Name two" type lines?
+    if sorter.has_new_synonyms
+      flash_error(:species_list_need_to_use_bulk.t)
+      sorter.reset_new_names
+    # Are there any unrecognized names?
+    elsif sorter.new_name_strs != []
+      flash_error "Unrecognized names given: '#{sorter.new_name_strs.map(&:to_s).join("', '")}'" if TESTING
+    # Are there any ambiguous names?
+    elsif !sorter.only_single_names
+      flash_error "Ambiguous names given: '#{sorter.multiple_line_strs.map(&:to_s).join("', '")}'" if TESTING
+    # Are there and deprecated names that haven't been approved?
+    elsif sorter.has_unapproved_deprecated_names
+      flash_error("Found deprecated names.") if TESTING
+
+    # Okay, at this point we've apparently validated the new list of names.
+    # Save the OTHER changes to the species list, then let this other method
+    # (construct_observations) update the members.  This always succeeds, so
+    # we can redirect to show_species_list.
+    else
+      if !@species_list.save
+        flash_object_errors(@species_list)
+      else
+        if type_str == 'created'
+          Transaction.post_species_list(
+            :id       => @species_list,
+            :date     => @species_list.when,
+            :location => @species_list.where,
+            :title    => @species_list.title,
+            :notes    => @species_list.notes
+          )
+        else
+          args = {}
+          args[:date]     = @species_list.when  if @species_list.when_changed?
+          args[:location] = @species_list.where if @species_list.where_changed?
+          args[:title]    = @species_list.title if @species_list.title_changed?
+          args[:notes]    = @species_list.notes if @species_list.notes_changed?
+          if !args.empty?
+            args[:id] = @species_list
+            Transaction.put_species_list(args)
+          end
+        end
+
+        construct_observations(@species_list, params, type_str, @user, sorter)
+
+        if has_unshown_notifications?(@user, :naming)
+          redirect_to(:controller => 'observer', :action => 'show_notifications')
+        else
+          redirect_to(:action => 'show_species_list', :id => @species_list)
+        end
+        redirected = true
+      end
+    end
+
+    # Failed to create due to synonyms, unrecognized names, etc.
+    if !redirected
+      @list_members     = sorter.all_line_strs.join("\r\n")
+      @new_names        = sorter.new_name_strs.uniq.sort # --> "approved_names"
+      @multiple_names   = sorter.multiple_line_strs.uniq.sort
+      @deprecated_names = sorter.deprecated_name_strs.uniq.sort
+      @checklist_names  = params[:checklist_data] || {}
+      @member_notes     = params[:member] ? params[:member][:notes] : ""
+    end
+  end
+
+  # This is called only by create/edit_species_list.
+  #
+  # In the former case (create) it is called with nil, which tells it to use
+  # session[:checklist_source], which is a Query id.
+  #
+  # In the latter case (edit) it is called with nil the first time through
+  # (with the same results as above), and it's called with species_list.id
+  # subsequent times (in which case it uses the existing contents of the
+  # species list instead).
+  #
+  # The end result is simply to store an Array of these names in @checklist,
+  # where the values are [observation_name, name_id].  This Array is used by
+  # _form_species_lists.rhtml to create a list of names with check-boxes beside
+  # them that you can add to the species list.)
+  #
+  def calc_checklist(query=nil)
+    @checklist = []
+    if query or
+       (query_id = session[:checklist_source]) and
+       (query = Query.safe_find(query_id))
+      @checklist = case query.model_symbol
+
+      when :Name
+        query.select_rows(
+          :select => 'DISTINCT names.observation_name, names.id',
+          :limit  => 1000
+        )
+
+      when :Observation
+        query.select_rows(
+          :select  => 'DISTINCT names.observation_name, names.id',
+          :include => :names,
+          :limit   => 1000
+        )
+
+      when :Image
+        query.select_rows(
+          :select  => 'DISTINCT names.observation_name, names.id',
+          :include => {:images_observations => {:observations => :names}},
+          :limit   => 1000
+        )
+
+      when :Location
+        query.select_rows(
+          :select  => 'DISTINCT names.observation_name, names.id',
+          :include => {:observations => :names},
+          :limit   => 1000
+        )
+
+      when :RssLog
+        query.select_rows(
+          :select  => 'DISTINCT names.observation_name, names.id',
+          :include => {:observations => :names},
+          :where   => 'rss_logs.observation_id > 0',
+          :limit   => 1000
+        )
+
+      else []
+      end
+    end
   end
 
   # Get list of names from species_list that are deprecated.
@@ -664,7 +731,7 @@ class SpeciesListController < ApplicationController
     sp_args[:when] = spl.when
     if params[:checklist_data]
       for key, value in params[:checklist_data]
-        if value == "checked"
+        if value == "1"
           name = find_chosen_name(key.to_i, params[:chosen_approved_names])
           sp_args2 = sp_args.dup.merge(:what => name)
           spl.construct_observation(sp_args2)
@@ -685,84 +752,5 @@ class SpeciesListController < ApplicationController
       end
     end
     name
-  end
-
-################################################################################
-
-  private
-
-  # Exception thrown if try to render a report in a charset we don't handle.
-  class UnsupportedCharsetError < ArgumentError
-  end
-
-  # Display list of names as plain text.
-  def render_name_list_as_txt(names, charset=nil)
-    charset ||= 'UTF-8'
-    charset = charset.upcase
-    raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1', 'UTF-8'].include?(charset)
-    str = names.map do |name|
-      if true && name.author.to_s != ''
-        name.text_name + ' ' + name.author
-      else
-        name.text_name
-      end
-    end.join("\r\n")
-    str = case charset
-      when 'ASCII': str.to_ascii
-      when 'UTF-8': "\xEF\xBB\xBF" + str
-      else str.iconv(charset)
-    end
-    send_data(str,
-      :type => "text/plain; charset=#{charset}",
-      :disposition => 'attachment; filename="report.txt"'
-    )
-  end
-
-  # Display list of names as csv file.
-  def render_name_list_as_csv(names, charset=nil)
-    charset ||= 'ISO-8859-1'
-    charset = charset.upcase
-    raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1'].include?(charset)
-    str = FasterCSV.generate do |csv|
-      csv << ['name', 'author', 'citation', 'valid']
-      names.each do |name|
-        csv << [name.text_name, name.author, name.citation,
-          name.deprecated ? '' : '1'].map {|v| v == '' ? nil : v}
-      end
-    end
-    str = case charset
-      when 'UTF-8': str
-      when 'ASCII': str.to_ascii
-      else str.iconv(charset)
-    end
-    send_data(str,
-      :type => "text/csv; charset=#{charset}; header=present",
-      :disposition => 'attachment; filename="report.csv"'
-    )
-  end
-
-  # Display list of names as rich text.
-  def render_name_list_as_rtf(names)
-    doc = RTF::Document.new(RTF::Font::SWISS)
-    for name in names
-      rank      = name.rank
-      text_name = name.text_name
-      author    = name.author
-      if name.deprecated
-        node = doc
-      else
-        node = doc.bold
-      end
-      if [:Genus, :Species, :Subspecies, :Variety, :Form].include?(rank)
-        node = node.italic
-      end
-      node << text_name
-      doc << " " + author if author && author != ""
-      doc.line_break
-    end
-    send_data(doc.to_rtf,
-      :type => 'text/rtf; charset=ISO-8859-1',
-      :disposition => 'attachment; filename="report.rtf"'
-    )
   end
 end

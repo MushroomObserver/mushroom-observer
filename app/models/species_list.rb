@@ -67,7 +67,7 @@
 #
 ################################################################################
 
-class SpeciesList < ActiveRecord::MO
+class SpeciesList < AbstractModel
   belongs_to :user
   has_one :rss_log
 

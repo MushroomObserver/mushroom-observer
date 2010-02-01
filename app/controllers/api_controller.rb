@@ -77,6 +77,8 @@ class ApiController < ApplicationController
   end
 
   def render_results(api)
+    headers['Content-Type'] = 'application/xml'
+
     @objects = api.objects
     @errors  = api.errors
     @user    = api.user
@@ -86,6 +88,7 @@ class ApiController < ApplicationController
     @page    = api.page
     @pages   = api.pages
     @version = api.version
+
     begin
       if [:get, :post].include?(request.method)
         render(:layout => 'api')
@@ -152,6 +155,18 @@ class ApiController < ApplicationController
           WHERE LOWER(text_name) LIKE '#{letter}%'
           AND correct_spelling_id IS NULL
           ORDER BY text_name ASC
+        )
+
+      # It reads the first letter of the field, and returns all the names
+      # beginning with it.
+      elsif type == 'user'
+        @items = User.connection.select_values %(
+          SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+          FROM users
+          WHERE login LIKE '#{letter}%'
+             OR name LIKE '#{letter}%'
+             OR name LIKE '% #{letter}%'
+          ORDER BY login ASC
         )
 
       # It reads the first letter of the field, and returns all the locations

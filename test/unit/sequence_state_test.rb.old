@@ -1,9 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class SequenceStateTest < Test::Unit::TestCase
-  fixtures :observations
-  fixtures :names
-  fixtures :users
 
   def test_basic
     state = SequenceState.lookup({:id => 3}, :observations)

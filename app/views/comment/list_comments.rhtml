@@ -1,9 +1,9 @@
-<%= pagination_numbers(@comment_pages) %>
+<%= pagination_numbers(@pages) %>
 
-<% if @comments.length > 0 %>
+<% if @objects.length > 0 %>
   <table cellpadding="5" cellspacing="0" width="100%">
     <% odd_or_even = 0
-    for comment in @comments
+    for comment in @objects
       odd_or_even = 1 - odd_or_even
       object = comment.object %>
       <tr valign="top" class="ListLine<%= odd_or_even %>">
@@ -27,4 +27,4 @@
   </table>
 <% end %>
 
-<%= pagination_numbers(@comment_pages) %><br/>
+<%= pagination_numbers(@pages) %><br/>

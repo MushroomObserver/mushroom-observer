@@ -1,12 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class ProjectControllerTest < ControllerTestCase
-  fixtures :projects
-  fixtures :users
-  fixtures :user_groups
-  fixtures :user_groups_users
-  fixtures :draft_names
-  fixtures :names
 
   def add_project_helper(title, summary)
     params = {
@@ -46,19 +40,19 @@ class ProjectControllerTest < ControllerTestCase
   end
 
   def change_member_status_helper(changer, target_user, commit, admin_before, user_before, admin_after, user_after)
-    project = @eol_project
-    assert_equal(admin_before, target_user.in_group(@eol_project.admin_group.name))
-    assert_equal(user_before, target_user.in_group(@eol_project.user_group.name))
+    eol_project = projects(:eol_project)
+    assert_equal(admin_before, target_user.in_group(eol_project.admin_group.name))
+    assert_equal(user_before, target_user.in_group(eol_project.user_group.name))
     params = {
-      :id => project.id,
+      :id => eol_project.id,
       :candidate => target_user.id,
       :commit => commit.l
     }
     post_requires_login(:change_member_status, params, changer.login)
-    assert_response(:action => 'show_project', :id => project.id)
+    assert_response(:action => 'show_project', :id => eol_project.id)
     target_user = User.find(target_user.id)
-    assert_equal(admin_after, target_user.in_group(@eol_project.admin_group.name))
-    assert_equal(user_after, target_user.in_group(@eol_project.user_group.name))
+    assert_equal(admin_after, target_user.in_group(eol_project.admin_group.name))
+    assert_equal(user_after, target_user.in_group(eol_project.user_group.name))
   end
 
   def create_or_edit_draft_tester(draft, project, name, user=nil, page=nil)
@@ -182,7 +176,7 @@ class ProjectControllerTest < ControllerTestCase
 ################################################################################
 
   def test_add_project_existing
-    add_project_helper(@eol_project.title, "The Entoloma On Line Project")
+    add_project_helper(projects(:eol_project).title, "The Entoloma On Line Project")
   end
 
   def test_show_project
@@ -239,7 +233,7 @@ class ProjectControllerTest < ControllerTestCase
   end
 
   def test_edit_project
-    project = @eol_project
+    project = projects(:eol_project)
     params = { "id" => project.id.to_s }
     requires_user(:edit_project, :show_project, params)
     assert_form_action(:action => 'edit_project')
@@ -266,15 +260,15 @@ class ProjectControllerTest < ControllerTestCase
   end
 
   def test_edit_project_empty_name
-    edit_project_helper('', @eol_project)
+    edit_project_helper('', projects(:eol_project))
   end
 
   def test_edit_project_existing
-    edit_project_helper(@bolete_project.title, @eol_project)
+    edit_project_helper(projects(:bolete_project).title, projects(:eol_project))
   end
 
   def test_destroy_project
-    project = @bolete_project
+    project = projects(:bolete_project)
     assert(project)
     user_group = project.user_group
     assert(user_group)
@@ -299,35 +293,37 @@ class ProjectControllerTest < ControllerTestCase
   end
 
   def test_destroy_project_other
-    destroy_project_helper(@bolete_project, @rolf)
+    destroy_project_helper(projects(:bolete_project), @rolf)
   end
 
   def test_destroy_project_member
-    assert(@eol_project.is_member?(@katrina))
-    destroy_project_helper(@eol_project, @katrina)
+    eol_project = projects(:eol_project)
+    assert(eol_project.is_member?(@katrina))
+    destroy_project_helper(eol_project, @katrina)
   end
 
   def test_send_admin_request
+    eol_project = projects(:eol_project)
     params = {
-      :id => @eol_project.id,
+      :id => eol_project.id,
       :email => {
         :subject => "Admin request subject",
         :message => "Message for admins"
       }
     }
     requires_login(:send_admin_request, params)
-    assert_response(:action => "show_project", :id => @eol_project.id)
-    assert_flash(:admin_request_success.t(:title => @eol_project.title))
+    assert_response(:action => "show_project", :id => eol_project.id)
+    assert_flash(:admin_request_success.t(:title => eol_project.title))
   end
 
   def test_admin_request
-    id = @eol_project.id
+    id = projects(:eol_project).id
     requires_login(:admin_request, :id => id)
     assert_form_action(:action => 'send_admin_request', :id => id)
   end
 
   def test_change_member_status
-    project = @eol_project
+    project = projects(:eol_project)
     params = {
       :id => project.id,
       :candidate => @mary.id
@@ -399,57 +395,57 @@ class ProjectControllerTest < ControllerTestCase
 
 
   def test_add_one_member_admin
-    project = @eol_project
+    eol_project = projects(:eol_project)
     target_user = @dick
-    assert_equal(false, target_user.in_group(@eol_project.admin_group.name))
-    assert_equal(false, target_user.in_group(@eol_project.user_group.name))
+    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
+    assert_equal(false, target_user.in_group(eol_project.user_group.name))
     params = {
-      :id => project.id,
+      :id => eol_project.id,
       :candidate => target_user.id
     }
     post_requires_login(:add_one_member, params, @mary.login)
-    assert_response(:action => 'add_members', :id => project.id)
+    assert_response(:action => 'add_members', :id => eol_project.id)
     target_user = User.find(target_user.id)
-    assert_equal(false, target_user.in_group(@eol_project.admin_group.name))
-    assert_equal(true, target_user.in_group(@eol_project.user_group.name))
+    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
+    assert_equal(true, target_user.in_group(eol_project.user_group.name))
   end
 
   def test_add_one_member_member
-    project = @eol_project
+    eol_project = projects(:eol_project)
     target_user = @dick
-    assert_equal(false, target_user.in_group(@eol_project.admin_group.name))
-    assert_equal(false, target_user.in_group(@eol_project.user_group.name))
+    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
+    assert_equal(false, target_user.in_group(eol_project.user_group.name))
     params = {
-      :id => project.id,
+      :id => eol_project.id,
       :candidate => target_user.id
     }
     post_requires_login(:add_one_member, params, @katrina.login)
-    assert_response(:action => 'add_members', :id => project.id)
+    assert_response(:action => 'add_members', :id => eol_project.id)
     target_user = User.find(target_user.id)
-    assert_equal(false, target_user.in_group(@eol_project.admin_group.name))
-    assert_equal(false, target_user.in_group(@eol_project.user_group.name))
+    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
+    assert_equal(false, target_user.in_group(eol_project.user_group.name))
   end
 
   def test_add_members
-    requires_login(:add_members, :id => @eol_project.id)
+    requires_login(:add_members, :id => projects(:eol_project).id)
   end
 
   def test_add_members_non_admin
-    project_id = @eol_project.id
+    project_id = projects(:eol_project).id
     requires_login(:add_members, { :id => project_id }, @katrina.login)
     assert_response(:action => 'show_project', :id => project_id)
   end
 
   # Ensure that draft owner can see a draft they own
   def test_show_draft
-    draft = @draft_coprinus_comatus
+    draft = draft_names(:draft_coprinus_comatus)
     requires_login(:show_draft, { :id => draft.id }, draft.user.login)
     assert_response('show_draft')
   end
 
   # Ensure that an admin can see a draft they don't own
   def test_show_draft_admin
-    draft = @draft_coprinus_comatus
+    draft = draft_names(:draft_coprinus_comatus)
     assert_not_equal(draft.user, @mary)
     requires_login(:show_draft, { :id => draft.id }, @mary.login)
     assert_response('show_draft')
@@ -457,7 +453,7 @@ class ProjectControllerTest < ControllerTestCase
 
   # Ensure that an member can see a draft they don't own
   def test_show_draft_member
-    draft = @draft_agaricus_campestris
+    draft = draft_names(:draft_agaricus_campestris)
     assert_not_equal(draft.user, @katrina)
     requires_login(:show_draft, { :id => draft.id }, @katrina.login)
     assert_response('show_draft')
@@ -465,33 +461,37 @@ class ProjectControllerTest < ControllerTestCase
 
   # Ensure that a non-member cannot see a draft
   def test_show_draft_non_member
-    draft = @draft_agaricus_campestris
+    draft = draft_names(:draft_agaricus_campestris)
     assert(!draft.project.is_member?(@dick))
     requires_login(:show_draft, { :id => draft.id }, @dick.login)
     assert_response(:action => "show_project")
   end
 
   def test_create_or_edit_draft_owner
-    create_or_edit_draft_tester(@draft_coprinus_comatus, @eol_project, @coprinus_comatus)
+    create_or_edit_draft_tester(draft_names(:draft_coprinus_comatus),
+        projects(:eol_project), names(:coprinus_comatus))
   end
 
   def test_create_or_edit_draft_admin
-    create_or_edit_draft_tester(@draft_coprinus_comatus, @eol_project, @coprinus_comatus, @mary)
+    create_or_edit_draft_tester(draft_names(:draft_coprinus_comatus),
+        projects(:eol_project), names(:coprinus_comatus), @mary)
   end
 
   def test_create_or_edit_draft_not_owner
-    create_or_edit_draft_tester(@draft_agaricus_campestris, @eol_project, @agaricus_campestris, @katrina, "show_draft")
+    create_or_edit_draft_tester(draft_names(:draft_agaricus_campestris),
+        projects(:eol_project), names(:agaricus_campestris), @katrina, "show_draft")
   end
 
   def test_create_or_edit_draft_not_project
-    create_or_edit_draft_tester(@draft_boletus_edulis, @eol_project, @boletus_edulis, @katrina, "show_draft")
+    create_or_edit_draft_tester(draft_names(:draft_boletus_edulis),
+        projects(:eol_project), names(:boletus_edulis), @katrina, "show_draft")
   end
 
   def test_create_or_edit_draft_new_draft
     count = DraftName.all.size
     params = {
-      :project => @eol_project.id,
-      :name => @conocybe_filaris.id
+      :project => projects(:eol_project).id,
+      :name => names(:conocybe_filaris).id
     }
     requires_login(:create_or_edit_draft, params, @katrina.login)
     assert_response('edit_draft')
@@ -501,86 +501,86 @@ class ProjectControllerTest < ControllerTestCase
   def test_create_or_edit_draft_no_draft_not_member
     count = DraftName.all.size
     params = {
-      :project => @eol_project.id,
-      :name => @conocybe_filaris.id
+      :project => projects(:eol_project).id,
+      :name => names(:conocybe_filaris).id
     }
     requires_login(:create_or_edit_draft, params, @dick.login)
-    assert_response(:action => "show_project", :id => @eol_project.id)
+    assert_response(:action => "show_project", :id => projects(:eol_project).id)
     assert_equal(count, DraftName.all.size)
   end
 
   def test_edit_draft
-    edit_draft_tester(@draft_coprinus_comatus)
+    edit_draft_tester(draft_names(:draft_coprinus_comatus))
   end
 
   def test_edit_draft_admin
-    assert(@draft_coprinus_comatus.project.is_admin?(@mary))
-    edit_draft_tester(@draft_coprinus_comatus, @mary)
+    assert(draft_names(:draft_coprinus_comatus).project.is_admin?(@mary))
+    edit_draft_tester(draft_names(:draft_coprinus_comatus), @mary)
   end
 
   def test_edit_draft_member
-    assert(@draft_coprinus_comatus.project.is_member?(@katrina))
-    edit_draft_tester(@draft_agaricus_campestris, @katrina, false)
+    assert(draft_names(:draft_coprinus_comatus).project.is_member?(@katrina))
+    edit_draft_tester(draft_names(:draft_agaricus_campestris), @katrina, false)
   end
 
   def test_edit_draft_non_member
-    assert(!@draft_agaricus_campestris.project.is_member?(@dick))
-    edit_draft_tester(@draft_agaricus_campestris, @dick, false)
+    assert(!draft_names(:draft_agaricus_campestris).project.is_member?(@dick))
+    edit_draft_tester(draft_names(:draft_agaricus_campestris), @dick, false)
   end
 
   def test_edit_draft_post
-    edit_draft_post_helper(@draft_coprinus_comatus)
+    edit_draft_post_helper(draft_names(:draft_coprinus_comatus))
   end
 
   def test_edit_draft_post_admin
-    edit_draft_post_helper(@draft_coprinus_comatus, @mary)
+    edit_draft_post_helper(draft_names(:draft_coprinus_comatus), @mary)
   end
 
   def test_edit_draft_post_member
-    edit_draft_post_helper(@draft_agaricus_campestris, @katrina, false)
+    edit_draft_post_helper(draft_names(:draft_agaricus_campestris), @katrina, false)
   end
 
   def test_edit_draft_post_non_member
-    edit_draft_post_helper(@draft_agaricus_campestris, @dick, false)
+    edit_draft_post_helper(draft_names(:draft_agaricus_campestris), @dick, false)
   end
 
   def test_edit_draft_post_bad_classification
-    edit_draft_post_helper(@draft_coprinus_comatus, nil, false, "**Domain**: Eukarya")
+    edit_draft_post_helper(draft_names(:draft_coprinus_comatus), nil, false, "**Domain**: Eukarya")
   end
 
   def test_publish_draft
-    publish_draft_helper(@draft_coprinus_comatus)
+    publish_draft_helper(draft_names(:draft_coprinus_comatus))
   end
 
   def test_publish_draft_admin
-    publish_draft_helper(@draft_coprinus_comatus, @mary)
+    publish_draft_helper(draft_names(:draft_coprinus_comatus), @mary)
   end
 
   def test_publish_draft_member
-    publish_draft_helper(@draft_agaricus_campestris, @katrina, false)
+    publish_draft_helper(draft_names(:draft_agaricus_campestris), @katrina, false)
   end
 
   def test_publish_draft_non_member
-    publish_draft_helper(@draft_agaricus_campestris, @dick, false)
+    publish_draft_helper(draft_names(:draft_agaricus_campestris), @dick, false)
   end
 
   def test_publish_draft_bad_classification
-    publish_draft_helper(@draft_lactarius_alpinus, nil, false, 'edit_draft')
+    publish_draft_helper(draft_names(:draft_lactarius_alpinus), nil, false, 'edit_draft')
   end
 
   def test_destroy_draft
-    destroy_draft_helper(@draft_coprinus_comatus)
+    destroy_draft_helper(draft_names(:draft_coprinus_comatus))
   end
 
   def test_destroy_draft_admin
-    destroy_draft_helper(@draft_coprinus_comatus, @mary)
+    destroy_draft_helper(draft_names(:draft_coprinus_comatus), @mary)
   end
 
   def test_destroy_draft_member
-    destroy_draft_helper(@draft_agaricus_campestris, @katrina, false)
+    destroy_draft_helper(draft_names(:draft_agaricus_campestris), @katrina, false)
   end
 
   def test_destroy_draft_non_member
-    destroy_draft_helper(@draft_agaricus_campestris, @dick, false)
+    destroy_draft_helper(draft_names(:draft_agaricus_campestris), @dick, false)
   end
 end

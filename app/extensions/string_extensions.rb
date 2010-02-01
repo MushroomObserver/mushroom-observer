@@ -19,6 +19,7 @@
 #  nowrap::         Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::  Strip and squeeze whitespace.
 #  rand_char::      Pick a single random character from the string.
+#  dealphabetize::  Reverse Fixnum#alphabetize.
 #
 ################################################################################
 
@@ -446,6 +447,7 @@ class String
   #
   def self.random(len, chars='abcdefghijklmnopqrstuvwxyz0123456789')
     result = ''
+    chars = chars.to_s
     for n in (0..len)
       result += chars.rand_char
     end
@@ -457,6 +459,31 @@ class String
   #   char = "jabberwocky".rand_char
   #
   def rand_char
-    sprintf("%c", self[Kernel.rand(length)])
+    self[Kernel.rand(length),1]
+  end
+
+  # Reverse Fixnum#alphabetize.
+  #
+  #   string = integer.alphabetize
+  #   integer = string.dealphabetize
+  #   #   0         -> 0
+  #   #   42        -> g
+  #   #   123456789 -> 8M0kX
+  #
+  #   hex = decimal.alphabetize('0123456789ABCDEF')
+  #   decimal = hex.dealphabetize('0123456789ABCDEF')
+  #   #   0         -> 0
+  #   #   42        -> 2A
+  #   #   123456789 -> 75BCD15
+  #
+  def dealphabetize(alphabet="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
+    str      = self.to_s
+    alphabet = alphabet.to_s
+    len      = alphabet.length
+    str.split('').inject(0) do |num, char|
+      i = alphabet.index(char)
+      raise "Character not in alphabet: '#{char}'" if i.nil?
+      num = num * len + i
+    end
   end
 end

@@ -1,8 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class LocationControllerTest < ControllerTestCase
-  fixtures :locations
-  fixtures :users
 
   # Init params based on existing location.
   def update_params_from_loc(loc)
@@ -60,16 +58,6 @@ class LocationControllerTest < ControllerTestCase
 
 ################################################################################
 
-  def test_where_search
-    get_with_dump(:where_search)
-    assert_response(:action => "list_place_names")
-  end
-
-  def test_where_search_for_something
-    get_with_dump(:where_search, :where => 'Burbank')
-    assert_response(:controller => "observer", :action => "location_search")
-  end
-
   def test_show_location
     get_with_dump(:show_location, :id => 1)
     assert_response('show_location')
@@ -80,9 +68,9 @@ class LocationControllerTest < ControllerTestCase
     assert_response('show_past_location')
   end
 
-  def test_list_place_names
-    get_with_dump(:list_place_names)
-    assert_response('list_place_names')
+  def test_list_locations
+    get_with_dump(:list_locations)
+    assert_response('list_locations')
   end
 
   def test_author_request
@@ -91,10 +79,6 @@ class LocationControllerTest < ControllerTestCase
   end
 
   def test_review_authors
-    group = UserGroup.create(:name => 'reviewers')
-    group.users << @rolf
-    @rolf.reload
-
     # Make sure it lets Rolf and only Rolf see this page.
     assert(!@mary.in_group('reviewers'))
     assert(@rolf.in_group('reviewers'))
@@ -102,7 +86,7 @@ class LocationControllerTest < ControllerTestCase
     assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
-    group.users.delete(@rolf)
+    user_groups(:reviewers).users.delete(@rolf)
     @rolf.reload
     assert(!@rolf.in_group('reviewers'))
 
@@ -111,10 +95,11 @@ class LocationControllerTest < ControllerTestCase
     assert_response(:action => :show_location, :id => 1)
 
     # Make Rolf an author.
-    @albion.add_author(@rolf)
-    @albion.save
-    @albion.reload
-    assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
+    albion = locations(:albion)
+    albion.add_author(@rolf)
+    albion.save
+    albion.reload
+    assert_equal([@rolf.login], albion.authors.map(&:login).sort)
 
     # Rolf should be able to do it now.
     get(:review_authors, :id => 1)
@@ -123,14 +108,14 @@ class LocationControllerTest < ControllerTestCase
     # Rolf giveth with one hand...
     post(:review_authors, :id => 1, :add => @mary.id)
     assert_response('review_authors')
-    @albion.reload
-    assert_equal([@mary.login, @rolf.login], @albion.authors.map(&:login).sort)
+    albion.reload
+    assert_equal([@mary.login, @rolf.login], albion.authors.map(&:login).sort)
 
     # ...and taketh with the other.
     post(:review_authors, :id => 1, :remove => @mary.id)
     assert_response('review_authors')
-    @albion.reload
-    assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
+    albion.reload
+    assert_equal([@rolf.login], albion.authors.map(&:login).sort)
   end
 
   def test_create_location
@@ -200,20 +185,18 @@ class LocationControllerTest < ControllerTestCase
   end
 
   def test_edit_location
-    loc = @albion
+    loc = locations(:albion)
     params = { "id" => loc.id.to_s }
     requires_login(:edit_location, params)
     assert_form_action(:action => 'edit_location')
   end
 
   def test_update_location
-    local_fixtures :past_locations
-
     count = Location::PastLocation.find(:all).length
     assert_equal(10, @rolf.reload.contribution)
 
     # Turn Albion into Barton Flats
-    loc = @albion
+    loc = locations(:albion)
     loc.add_author(@mary)
     old_north = loc.north
     old_params = update_params_from_loc(loc)
@@ -247,14 +230,14 @@ class LocationControllerTest < ControllerTestCase
 
   # Test update for north > 90.
   def test_update_location_errors
-    params = update_params_from_loc(@albion)
+    params = update_params_from_loc(locations(:albion))
     params[:location][:north] = 100
     update_location_error(params)
   end
 
   def test_update_location_user_merge
-    to_go = @burbank
-    to_stay = @albion
+    to_go = locations(:burbank)
+    to_stay = locations(:albion)
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
     loc_count = Location.all.length
@@ -267,8 +250,8 @@ class LocationControllerTest < ControllerTestCase
   end
 
   def test_update_location_admin_merge
-    to_go = @albion
-    to_stay = @burbank
+    to_go = locations(:albion)
+    to_stay = locations(:burbank)
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
 
@@ -285,17 +268,18 @@ class LocationControllerTest < ControllerTestCase
   end
 
   def test_list_merge_options
-    # Full match with @albion
-    requires_login(:list_merge_options, :where => @albion.display_name)
-    assert_equal([@albion], assigns(:matches))
+    albion = locations(:albion)
+    # Full match with albion
+    requires_login(:list_merge_options, :where => albion.display_name)
+    assert_equal([albion], assigns(:matches))
 
-    # Should match against @albion.
+    # Should match against albion.
     requires_login(:list_merge_options, :where => 'Albion, CA')
-    assert_equal([@albion], assigns(:matches))
+    assert_equal([albion], assigns(:matches))
 
-    # Should match against @albion.
+    # Should match against albion.
     requires_login(:list_merge_options, :where => 'Albion Field Station, CA')
-    assert_equal([@albion], assigns(:matches))
+    assert_equal([albion], assigns(:matches))
 
     # Shouldn't match anything.
     requires_login(:list_merge_options, :where => 'Somewhere out there')
@@ -304,6 +288,7 @@ class LocationControllerTest < ControllerTestCase
 
   def test_add_to_location
     User.current = @rolf
+    albion = locations(:albion)
     obs = Observation.create(
       :when  => Time.now,
       :where => (where = 'undefined location'),
@@ -313,12 +298,12 @@ class LocationControllerTest < ControllerTestCase
     where = obs.where
     params = {
       :where    => where,
-      :location => @albion.id
+      :location => albion.id
     }
     requires_login(:add_to_location, params)
-    assert_response(:action => :list_place_names)
+    assert_response(:action => :list_locations)
     assert_not_nil(obs.reload.location)
-    assert_equal(@albion, obs.location)
+    assert_equal(albion, obs.location)
   end
 
   def test_map_locations
@@ -341,43 +326,44 @@ class LocationControllerTest < ControllerTestCase
 
   def test_interest_in_show_location
     # No interest in this location yet.
-    @request.session[:user_id] = @rolf.id
-    get(:show_location, :id => @albion.id)
+    albion = locations(:albion)
+    login('rolf')
+    get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 1
+      :type => 'Location', :id => albion.id, :state => 1
     )
     assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => -1
+      :type => 'Location', :id => albion.id, :state => -1
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.new(:object => @albion, :user => @rolf, :state => true).save
-    get(:show_location, :id => @albion.id)
+    Interest.new(:object => albion, :user => @rolf, :state => true).save
+    get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 0
+      :type => 'Location', :id => albion.id, :state => 0
     )
     assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => -1
+      :type => 'Location', :id => albion.id, :state => -1
     )
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.new(:object => @albion, :user => @rolf, :state => false).save
-    get(:show_location, :id => @albion.id)
+    Interest.new(:object => albion, :user => @rolf, :state => false).save
+    get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 0
+      :type => 'Location', :id => albion.id, :state => 0
     )
     assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 1
+      :type => 'Location', :id => albion.id, :state => 1
     )
   end
 end

@@ -51,7 +51,9 @@ end %>
           <td style="white-space:nowrap">
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
             <%= link_to(image_tag("thumb/#{image.id}.jpg", :border => 0),
-                        :controller => 'image', :action => 'show_image', :id => image.id) %>
+                        :controller => 'image', :action => 'show_image',
+                        :id => image.id, :obs => @observation.id,
+                        :params => query_params) %>
           </td>
           <td width="10"></td>
           <td>
@@ -64,10 +66,16 @@ end %>
    if false %>
           <td width="10"></td>
           <td>
-            <%= link_to(:app_show_image.t, :controller => 'image', :action => 'show_image', :id => image.id) %><br/>
-            <%= link_to(:form_observations_edit_image.t, :controller => 'image', :action => 'edit_image', :id => image.id) %><br/>
-            <%= link_to(:form_observations_remove_image.t, { :controller => 'image', :action => 'remove_image',
-                        :image_id => image.id, :observation_id => @observation.id },
+            <%= link_to(:app_show_image.t, :controller => 'image',
+                        :action => 'show_image', :id => image.id,
+                        :obs => @observation.id, :params => query_params) %><br/>
+            <%= link_to(:form_observations_edit_image.t,
+                        :controller => 'image', :action => 'edit_image',
+                        :id => image.id, :params => query_params) %><br/>
+            <%= link_to(:form_observations_remove_image.t,
+                        { :controller => 'image', :action => 'remove_image',
+                        :observation_id => @observation.id,
+                        :image_id => image.id, :params => query_params  },
                         { :confirm => :form_observations_remove_image_confirm.l }) %><br/>
           </td>
 <% end %>
@@ -165,7 +173,7 @@ end %>
 
 <% if logging_optional %>
   <br/>
-  <%= check_box('log_change', 'checked', :checked => 'checked') %>
+  <%= check_box('log_change', 'checked', :checked => '1') %>
   <label for="log_change_checked"><%= :form_observations_log_change.t %></label>
 <% end %>
 

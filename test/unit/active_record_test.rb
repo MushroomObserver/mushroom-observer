@@ -1,7 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class ActiveRecordTest < Test::Unit::TestCase
-  fixtures :users
 
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg='')
@@ -24,7 +23,6 @@ class ActiveRecordTest < Test::Unit::TestCase
 ################################################################################
 
   def test_time_zone
-    local_fixtures :observations
 
     now = Time.now
     obs = Observation.create(
@@ -59,14 +57,6 @@ class ActiveRecordTest < Test::Unit::TestCase
   end
 
   def test_update_view_stats
-    local_fixtures :comments
-    local_fixtures :images
-    local_fixtures :images_observations
-    local_fixtures :interests
-    local_fixtures :locations
-    local_fixtures :names
-    local_fixtures :namings
-    local_fixtures :observations
 
     User.current = @rolf
     obs      = Observation.find(2)
@@ -87,9 +77,9 @@ class ActiveRecordTest < Test::Unit::TestCase
     naming_attrs   = naming.attributes.dup
     user_attrs     = user.attributes.dup
 
-    assert_equal(0, Name::PastName.all.length)
-    assert_equal(0, Location::PastLocation.all.length)
-    assert_equal(0, Transaction.all.length)
+    num_past_names     = Name::PastName.all.length
+    num_past_locations = Location::PastLocation.all.length
+    num_transactions   = Transaction.all.length
 
     for attrs, obj in [
       [ obs_attrs,      obs      ],
@@ -106,9 +96,9 @@ class ActiveRecordTest < Test::Unit::TestCase
                                  "#{obj.class}#update_view_stats screwed up: ")
     end
 
-    assert_equal(0, Name::PastName.all.length)
-    assert_equal(0, Location::PastLocation.all.length)
-    assert_equal(3, Transaction.all.length)
+    assert_equal(num_past_names     + 0, Name::PastName.all.length)
+    assert_equal(num_past_locations + 0, Location::PastLocation.all.length)
+    assert_equal(num_transactions   + 3, Transaction.all.length)
 
     t1, t2, t3 = Transaction.all
     assert_equal('view',        t1.method)

@@ -19,7 +19,7 @@
 #  TODO:
 #   Add comments?
 #   Projects should be able to log stuff
-#   Are search_params needed for project pages?
+#   Are query_params needed for project pages?
 #
 ################################################################################
 
@@ -47,9 +47,10 @@ class ProjectController < ApplicationController
   # Outputs: @projects, @project_pages
   def list_projects
     store_location
-    session_setup
-    @project_pages, @projects = paginate(:projects,
-       :order => "title", :per_page => 10)
+    store_query
+    query = find_or_create_query(:Project, :all, :by => :title)
+    @pages = paginate_numbers(:page, 10)
+    @objects = query.paginate(@pages)
   end
 
   # Display project by itself.

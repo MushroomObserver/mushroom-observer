@@ -41,7 +41,7 @@
 #
 ################################################################################
 
-class Interest < ActiveRecord::MO
+class Interest < AbstractModel
   belongs_to :object, :polymorphic => true
   belongs_to :user
 

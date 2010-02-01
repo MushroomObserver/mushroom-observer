@@ -5,7 +5,8 @@
 
   new_tab_set do
     add_tab(:app_cancel.t(:type => :observation.l),
-            :action => 'show_observation', :id => @observation.id)
+            :action => 'show_observation', :id => @observation.id,
+            :params => query_params)
   end
 %>
 
@@ -13,7 +14,8 @@
   <tr>
     <td>
       <% form_tag({ :action => 'edit_observation', :id => @observation,
-                  :approved_name => @what }, { :multipart => true }) do %>
+                  :approved_name => @what, :params => query_params },
+                  { :multipart => true }) do %>
         <br/><center><%= submit_tag :app_save_changes.l %></center><br/>
 
         <%= render(:partial => 'form_observations', :locals => {

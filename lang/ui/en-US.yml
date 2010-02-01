@@ -124,6 +124,7 @@ app_no_ajax: Your Browser is Out of Date
 app_no_browser: We Don't Recognize Your Browser
 app_no_create_name: Unable to create the name '[name]'.
 app_no_javascript: Javascript is Disabled
+app_no_more_search_objects: There are no more [types].
 app_no_session: You Have Cookies Disabled
 app_permission_denied: Permission denied.
 app_rss: Mushroom Observer RSS
@@ -158,6 +159,7 @@ app_destroy: Destroy
 app_disable: Disable
 app_edit: Edit
 app_enable: Enable
+app_index: Index
 app_less_button: << Less
 app_more_button: More >>
 app_next: Next
@@ -1438,6 +1440,10 @@ location_merge: Merge With A Defined Location
 location_merge_success: Successfully merged [this] with [that].
 
 
+# location/list_location
+location_index_title: Location Index
+
+
 # account/login
 login_failed: Login unsuccessful.
 login_forgot_password: >
@@ -1576,6 +1582,7 @@ name_index_bulk_edit: Bulk Name Editor
 name_index_matching: Names Matching '[pattern]'
 name_index_name_index: Name Index
 name_index_observation_index: Observation Index
+name_index_no_matches: No matching names.
 
 
 # species_list/name_lister
@@ -1644,7 +1651,6 @@ needed_descriptions_help: >
   do not have a general description in the Mushroom Observer.  Adding a general
   description to these common species would be a big help.
 
-needed_descriptions_observations: observations
 needed_descriptions_title: Top 100 Needed Species Descriptions
 
 
@@ -2319,11 +2325,18 @@ species_list_remove_observation_success: Removed observation from [name].
 
 
 # species_list/show_species_list
+species_list_show_clone_list: Clone Species List
+species_list_show_clone_list_help: Create a new species list using this one as the template.
 species_list_show_edit: Edit Species List
 species_list_show_members: Members
 species_list_show_save_as_txt: Save as Plain Text
 species_list_show_save_as_rtf: Save as Rich Text
 species_list_show_save_as_csv: Save as Spreadsheet
+species_list_show_set_source: Save for Later
+species_list_show_set_source_help: >
+  Save this species list for the next time you create or edit a species list.
+  It will display a list of the species in this list for you to choose from.
+
 species_list_show_title: 'Species List: [name]'
 
 

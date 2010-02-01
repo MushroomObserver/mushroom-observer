@@ -111,7 +111,7 @@
 #
 ################################################################################
 
-class QueuedEmail < ActiveRecord::MO
+class QueuedEmail < AbstractModel
   has_many :queued_email_integers, :dependent => :destroy
   has_many :queued_email_strings,  :dependent => :destroy
   has_one  :queued_email_note,     :dependent => :destroy

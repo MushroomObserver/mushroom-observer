@@ -70,7 +70,7 @@
 #
 ################################################################################
 
-class Location < ActiveRecord::MO
+class Location < AbstractModel
   belongs_to :license
   belongs_to :user
 
@@ -175,15 +175,21 @@ class Location < ActiveRecord::MO
     return str.strip.downcase
   end
 
-  # Look at the most recent Observation's a User has posted.  Return a list of
-  # the last 100 place names used in those Observation's (either Location names
-  # or "where" strings).  This list is used to prime Location auto-completers.
-  def self.primer(user)
+  # Look at the most recent Observation's the current User has posted.  Return
+  # a list of the last 100 place names used in those Observation's (either
+  # Location names or "where" strings).  This list is used to prime Location
+  # auto-completers. 
+  #
+  def self.primer
+    where = ''
+    if User.current
+      where = "WHERE observations.user_id = #{User.current_id}"
+    end
     self.connection.select_values(%(
       SELECT DISTINCT IF(observations.location_id > 0, locations.display_name, observations.where) AS x
       FROM observations
       LEFT OUTER JOIN locations ON locations.id = observations.location_id
-      WHERE observations.user_id = #{user.id}
+      #{where}
       ORDER BY observations.modified DESC
       LIMIT 100
     )).sort

@@ -1,5 +1,7 @@
 <% @title = :species_list_by_title_title.t %>
 
+<%= pagination_numbers(@pages) %>
+
 <table cellpadding="5" cellspacing="5">
 
   <tr class="Data">
@@ -17,7 +19,7 @@
     </td>
   </tr>
 
-  <% for species_list in @species_lists %>
+  <% for species_list in @objects %>
     <tr>
       <td>
         <%= link_to(species_list.unique_text_name.t, :action => 'show_species_list', :id => species_list.id) %>
@@ -35,3 +37,5 @@
   <% end %>
 
 </table>
+
+<%= pagination_numbers(@pages) %>

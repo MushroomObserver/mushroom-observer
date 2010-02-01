@@ -1,12 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
 class SpeciesListControllerTest < ControllerTestCase
-  fixtures :locations
-  fixtures :names
-  fixtures :observations
-  fixtures :observations_species_lists
-  fixtures :species_lists
-  fixtures :users
 
   def spl_params(spl)
     params = {
@@ -48,7 +42,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_destroy_species_list
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     assert(spl)
     id = spl.id
     params = { :id => id.to_s }
@@ -61,14 +55,14 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_manage_species_lists
-    obs = @coprinus_comatus_obs
+    obs = observations(:coprinus_comatus_obs)
     params = { :id => obs.id.to_s }
     requires_login(:manage_species_lists, params)
   end
 
   def test_add_observation_to_species_list
-    sp = @first_species_list
-    obs = @coprinus_comatus_obs
+    sp = species_lists(:first_species_list)
+    obs = observations(:coprinus_comatus_obs)
     assert(!sp.observations.member?(obs))
     params = { :species_list => sp.id, :observation => obs.id }
     requires_login(:add_observation_to_species_list, params)
@@ -77,8 +71,8 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_remove_observation_from_species_list
-    spl = @unknown_species_list
-    obs = @minimal_unknown
+    spl = species_lists(:unknown_species_list)
+    obs = observations(:minimal_unknown)
     assert(spl.observations.member?(obs))
     params = { :species_list => spl.id, :observation => obs.id }
     owner = spl.user.login
@@ -109,7 +103,7 @@ class SpeciesListControllerTest < ControllerTestCase
   def test_construct_species_list
     list_title = "List Title"
     params = {
-      :list => { :members => @coprinus_comatus.text_name },
+      :list => { :members => names(:coprinus_comatus).text_name },
       :member => { :notes => "" },
       :species_list => {
         :where => "Burbank, California",
@@ -125,13 +119,14 @@ class SpeciesListControllerTest < ControllerTestCase
     assert_equal(18, @rolf.reload.contribution)
     spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    assert(spl.name_included(@coprinus_comatus))
+    assert(spl.name_included(names(:coprinus_comatus)))
   end
 
   def test_construct_species_list_existing_genus
+    agaricus = names(:agaricus)
     list_title = "List Title"
     params = {
-      :list => { :members => "#{@agaricus.rank} #{@agaricus.text_name}" },
+      :list => { :members => "#{agaricus.rank} #{agaricus.text_name}" },
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
@@ -149,7 +144,7 @@ class SpeciesListControllerTest < ControllerTestCase
     assert_equal(18, @rolf.reload.contribution)
     spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    assert(spl.name_included(@agaricus))
+    assert(spl.name_included(agaricus))
   end
 
   def test_construct_species_list_new_family
@@ -187,8 +182,8 @@ class SpeciesListControllerTest < ControllerTestCase
   # <name> = <name> shouldn't work in construct_species_list
   def test_construct_species_list_synonym
     list_title = "List Title"
-    name = @macrolepiota_rachodes
-    synonym_name = @lepiota_rachodes
+    name = names(:macrolepiota_rachodes)
+    synonym_name = names(:lepiota_rachodes)
     assert(!synonym_name.deprecated)
     assert_nil(synonym_name.synonym)
     params = {
@@ -316,20 +311,20 @@ class SpeciesListControllerTest < ControllerTestCase
   #   Lactarius alpinus
   #   (but *NOT* L. alpingenes)
   def test_construct_species_list_extravaganza
-    deprecated_name = @lactarius_subalpinus
+    deprecated_name = names(:lactarius_subalpinus)
     list_members = [deprecated_name.text_name]
-    multiple_name = @amanita_baccata_arora
+    multiple_name = names(:amanita_baccata_arora)
     list_members.push(multiple_name.text_name)
     new_name_str = "New name"
     list_members.push(new_name_str)
     assert_nil(Name.find_by_text_name(new_name_str))
 
     checklist_data = {}
-    current_checklist_name = @agaricus_campestris
-    checklist_data[current_checklist_name.id.to_s] = "checked"
-    deprecated_checklist_name = @lactarius_alpigenes
-    approved_name = @lactarius_alpinus
-    checklist_data[deprecated_checklist_name.id.to_s] = "checked"
+    current_checklist_name = names(:agaricus_campestris)
+    checklist_data[current_checklist_name.id.to_s] = '1'
+    deprecated_checklist_name = names(:lactarius_alpigenes)
+    approved_name = names(:lactarius_alpinus)
+    checklist_data[deprecated_checklist_name.id.to_s] = '1'
 
     list_title = "List Title"
     params = {
@@ -404,13 +399,13 @@ class SpeciesListControllerTest < ControllerTestCase
         "when(3i)" => "31",
         :notes => ""
       },
-      :chosen_names => { "Warnerbros_bugs_bunny" => @bugs_bunny_two.id },
+      :chosen_names => { "Warnerbros_bugs_bunny" => names(:bugs_bunny_two).id },
     }
     post(:create_species_list, params)
     assert_response(:action => "show_species_list")
     assert_equal(18, @rolf.reload.contribution)
     spl = SpeciesList.last
-    assert(spl.name_included(@bugs_bunny_two))
+    assert(spl.name_included(names(:bugs_bunny_two)))
   end
 
   # -----------------------------------------------
@@ -418,7 +413,7 @@ class SpeciesListControllerTest < ControllerTestCase
   # -----------------------------------------------
 
   def test_edit_species_list
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     params = { :id => spl.id.to_s }
     assert_equal('rolf', spl.user.login)
     requires_user(:edit_species_list, :show_species_list, params)
@@ -427,7 +422,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_nochange
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     post_requires_user(:edit_species_list, :show_species_list, params,
@@ -438,7 +433,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_text_add_multiple
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
@@ -457,7 +452,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_text_add
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus"
@@ -482,7 +477,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_text_notifications
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
@@ -492,7 +487,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_new_name
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "New name"
@@ -504,7 +499,7 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_approved_new_name
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "New name"
@@ -518,9 +513,9 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_multiple_match
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @amanita_baccata_arora
+    name = names(:amanita_baccata_arora)
     assert(!spl.name_included(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
@@ -533,9 +528,9 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_chosen_multiple_match
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @amanita_baccata_arora
+    name = names(:amanita_baccata_arora)
     assert(!spl.name_included(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
@@ -549,9 +544,9 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_deprecated
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
@@ -564,9 +559,9 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_approved_deprecated
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
@@ -580,12 +575,12 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_checklist_add
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_alpinus
+    name = names(:lactarius_alpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
+    params[:checklist_data][name.id.to_s] = '1'
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
@@ -595,12 +590,12 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_deprecated_checklist
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
+    params[:checklist_data][name.id.to_s] = '1'
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response('edit_species_list')
@@ -610,12 +605,12 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_approved_deprecated_checklist
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
+    params[:checklist_data][name.id.to_s] = '1'
     params[:approved_deprecated_names] = [name.search_name]
     login(spl.user.login)
     post(:edit_species_list, params)
@@ -626,13 +621,13 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_approved_renamed_deprecated_checklist
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
-    approved_name = @lactarius_alpinus
+    name = names(:lactarius_subalpinus)
+    approved_name = names(:lactarius_alpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
+    params[:checklist_data][name.id.to_s] = '1'
     params[:approved_deprecated_names] = [name.search_name]
     params[:chosen_approved_names] =
                 { name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
@@ -646,10 +641,10 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_update_species_list_approved_rename
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
-    approved_name = @lactarius_alpinus
+    name = names(:lactarius_subalpinus)
+    approved_name = names(:lactarius_alpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
     assert(!spl.name_included(approved_name))
@@ -671,7 +666,7 @@ class SpeciesListControllerTest < ControllerTestCase
   # ----------------------------
 
   def test_upload_species_list
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     params = {
       :id => spl.id
     }
@@ -682,7 +677,7 @@ class SpeciesListControllerTest < ControllerTestCase
   def test_read_species_list
     # TODO: Test read_species_list with a file larger than 13K to see if it
     # gets a TempFile or a StringIO.
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
     list_data = "Agaricus bisporus\r\nBoletus rubripes\r\nAmanita phalloides"
     file = StringIOPlus.new(list_data)
@@ -717,7 +712,7 @@ class SpeciesListControllerTest < ControllerTestCase
       :review_status => :unreviewed
     )
 
-    list = @first_species_list
+    list = species_lists(:first_species_list)
     args = {
       :where    => 'limbo',
       :when     => now,
@@ -727,21 +722,22 @@ class SpeciesListControllerTest < ControllerTestCase
       :specimen => false,
     }
     list.construct_observation(args.merge(:what => tapinella))
-    list.construct_observation(args.merge(:what => @fungi))
-    list.construct_observation(args.merge(:what => @coprinus_comatus))
-    list.construct_observation(args.merge(:what => @lactarius_alpigenes))
+    list.construct_observation(args.merge(:what => names(:fungi)))
+    list.construct_observation(args.merge(:what => names(:coprinus_comatus)))
+    list.construct_observation(args.merge(:what => names(:lactarius_alpigenes)))
     list.save # just in case
 
     get(:make_report, :id => list.id, :type => 'txt')
-    assert_response_equal_file('test/fixtures/reports/test.txt')
+    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    assert_response_equal_file("#{path}/test.txt")
 
     get(:make_report, :id => list.id, :type => 'rtf')
-    assert_response_equal_file('test/fixtures/reports/test.rtf') do |x|
+    assert_response_equal_file("#{path}/test.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end
 
     get(:make_report, :id => list.id, :type => 'csv')
-    assert_response_equal_file('test/fixtures/reports/test.csv')
+    assert_response_equal_file("#{path}/test.csv")
   end
 
   def test_name_lister
@@ -766,17 +762,19 @@ class SpeciesListControllerTest < ControllerTestCase
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_txt.l))
-    assert_response_equal_file('test/fixtures/reports/test2.txt')
+    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    assert_response_equal_file("#{path}/test2.txt")
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_rtf.l))
-    assert_response_equal_file('test/fixtures/reports/test2.rtf') do |x|
+    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    assert_response_equal_file("#{path}/test2.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end
 
     @request.session[:user_id] = nil
     post(:name_lister, params.merge(:commit => :name_lister_submit_csv.l))
-    assert_response_equal_file('test/fixtures/reports/test2.csv')
+    assert_response_equal_file("#{path}/test2.csv")
   end
 
   def test_name_resolution

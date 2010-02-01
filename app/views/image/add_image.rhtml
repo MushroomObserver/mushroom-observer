@@ -2,17 +2,19 @@
   @title = :image_add_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :observation.l),
-            :controller => 'observer', :action => 'show_observation', :id => @observation.id)
-    add_tab(:image_add_edit.t,
-            :controller => 'observer', :action => 'edit_observation', :id => @observation.id)
+    add_tab(:app_cancel.t(:type => :observation.l), :controller => 'observer',
+            :action => 'show_observation', :id => @observation.id,
+            :params => query_params)
+    add_tab(:image_add_edit.t, :controller => 'observer',
+            :action => 'edit_observation', :id => @observation.id,
+            :params => query_params)
   end
 %>
 
 <div id="license-notice"><%= :image_add_warning.tp %></div>
 
-<% form_for(:image, :url => { :action => :add_image },
-            :html => { :multipart => true }) do |form| %>
+<% form_for(:image, :url => { :action => :add_image, :id => @observation.id,
+            :params => query_params }, :html => { :multipart => true }) do |form| %>
   <br/><center><%= submit_tag(:image_add_upload.l) %></center><br/>
 
   <%= hidden_field("observation", "id") %>
@@ -24,7 +26,8 @@
     <%= :image_add_image.t %> 4: <%= file_field("upload", "image4") %> (<%= :image_add_optional.t %>)<br/>
   </p><br/>
 
-  <%= render(:partial => 'form_images', :locals => { :form => form, :width => 80 }) %>
+  <%= render(:partial => 'form_images',
+             :locals => { :form => form, :width => 80 }) %>
 
   <center><%= submit_tag(:image_add_upload.l) %></center>
 <% end %>

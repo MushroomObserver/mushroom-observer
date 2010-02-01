@@ -2,14 +2,17 @@
   @title = :image_remove_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_show_observation.t,
-            :controller => 'observer', :action => 'show_observation', :id => @observation.id)
-    add_tab(:image_remove_edit.t,
-            :controller => 'observer', :action => 'edit_observation', :id => @observation.id)
+    add_tab(:app_show_observation.t, :controller => 'observer',
+            :action => 'show_observation', :id => @observation.id,
+            :params => query_params)
+    add_tab(:image_remove_edit.t, :controller => 'observer',
+            :action => 'edit_observation', :id => @observation.id,
+            :params => query_params)
   end
 %>
 
-<% form_tag({:action => 'remove_images'}, :multipart => true) do %>
+<% form_tag({ :action => 'remove_images', :id => @observation.id,
+            :params => query_params }, :multipart => true) do %>
   <br/><center><%= submit_tag(:image_remove_remove.l) %></center><br/>
 
   <%= hidden_field("observation", "id") %>
@@ -24,7 +27,8 @@
           <p>
             <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
                           '<br/>' + image.unique_format_name.t,
-                        :action => 'show_image', :id => image.id) %>
+                        :action => 'show_image', :id => image.id,
+                        :params => query_params) %>
           </p>
         </td>
       </tr>

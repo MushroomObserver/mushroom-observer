@@ -52,7 +52,7 @@
 #
 ################################################################################
 
-class Vote < ActiveRecord::MO
+class Vote < AbstractModel
   belongs_to :user
   belongs_to :naming
   belongs_to :observation

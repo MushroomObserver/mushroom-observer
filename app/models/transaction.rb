@@ -54,7 +54,7 @@
 #
 ################################################################################
 
-class Transaction < ActiveRecord::MO
+class Transaction < AbstractModel
   require 'xmlrpc/client'
 
   # Cache query's args.

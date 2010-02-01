@@ -4,12 +4,15 @@
 
   new_tab_set do
     add_tab(:comment_show_show.t(:type => object_type),
-            :controller => @object.show_controller, :action => @object.show_action, :id => @object.id)
+            :controller => @object.show_controller,
+            :action => @object.show_action, :id => @object.id,
+            :params => query_params)
     if check_permission(@comment.user_id)
       add_tab(:comment_show_edit.t,
-              :action => 'edit_comment', :id => @comment.id)
-      add_tab(:comment_show_destroy.t,
-              { :action => 'destroy_comment', :id => @comment.id },
+              :action => 'edit_comment', :id => @comment.id,
+              :params => query_params)
+      add_tab(:comment_show_destroy.t, { :action => 'destroy_comment',
+              :id => @comment.id, :params => query_params },
               { :confirm => :app_are_you_sure.l })
     end 
   end

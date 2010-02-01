@@ -175,14 +175,18 @@
 #  approved_synonyms::       List of approved synonyms.
 #  clear_synonym::           Remove this Name from its Synonym.
 #  merge_synonyms::          Merge Synonym's of this and another Name.
+#  merge_names::             Merge old name into this one and remove old one.
+#
+#  ==== Misspellings
+#  is_misspelling?::         Is this name a misspelling?
+#  correct_spelling::        Link to the correctly-spelled Name (or nil).
+#  misspellings::            Names that call this their "correct spelling".
+#  guess_correct_spelling::  Guess what the correct spelling should be.
 #
 #  ==== Status
 #  deprecated::              Is this name deprecated?
 #  status::                  Returns "Deprecated" or "Valid".
 #  change_deprecated::       Changes deprecation status.
-#  is_misspelling?::         Is this name a misspelling?
-#  correct_spelling::        Link to the correctly-spelled Name (or nil).
-#  misspellings::            Names that call this their "correct spelling".
 #  update_review_status::    Updates the review_status and related fields.
 #  reviewed_observations::   (not used by anyone)
 #
@@ -190,7 +194,7 @@
 #  has_notes?::              Does it have +notes+ field?
 #  has_any_notes?::          Does it have any description fields?
 #  all_notes::               Return description fields as hash.
-#  set_notes::               Set description fields via hash.
+#  set_all_notes::           Set description fields via hash.
 #  note_status::             Status of description fields.
 #  prepend_notes::           Add notes at the top of the existing notes.
 #
@@ -220,7 +224,7 @@
 #
 ################################################################################
 
-class Name < ActiveRecord::MO
+class Name < AbstractModel
   belongs_to :correct_spelling, :class_name => "Name", :foreign_key => "correct_spelling_id"
   belongs_to :license
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
@@ -626,7 +630,7 @@ class Name < ActiveRecord::MO
 
       # Remove subchildren if not getting all children.  This is trickier than
       # I originally expected because we want the children of G. species to
-      # include the first two of these, but not the last: 
+      # include the first two of these, but not the last:
       #   G. species var. variety            YES!!
       #   G. species f. form                 YES!!
       #   G. species var. variety f. form    NO!!
@@ -745,11 +749,6 @@ class Name < ActiveRecord::MO
     deprecated ? :app_deprecated.l : :app_accepted.l
   end
 
-  # Is this Name misspelled?
-  def is_misspelling?
-    !!correct_spelling_id
-  end
-
   # Returns an Array of all Synonym Name's, including itself and misspellings.
   def synonyms
     synonym ? synonym.names : [self]
@@ -859,6 +858,107 @@ class Name < ActiveRecord::MO
         self.synonym.transfer(n)
       end
     end
+  end
+
+  ################################################################################
+  #
+  #  :section: Misspellings
+  #
+  ################################################################################
+
+  # Is this Name misspelled?
+  def is_misspelling?
+    !!correct_spelling_id
+  end
+
+  # Attempt to guess the correct name via synonyms.  There can be multiple
+  # accepted names, in which case look for the one that shares the most
+  # letters(!)  If none are close, notify user (raises RuntimeError) and ask
+  # them to be explicit.  Returns a Name instance or nil.  (Used only by
+  # /name/edit_name.)
+  def guess_correct_spelling
+    result = nil
+    self.misspelling = true
+    synonyms = synonym ? synonym.names - [self] : []
+    if synonyms.length == 0
+      raise :form_names_misspelling_no_synonyms.t
+    else
+      candidates = []
+      approved_candidates = []
+      for synonym in synonyms
+        # Count letters in one but not the other and vice versa.
+        val  = 0
+        copy = synonym.text_name
+        self.text_name.each_char do |c|
+          if i = copy.index(c)
+            copy[i] = ''
+          else
+            val += 1
+          end
+        end
+        val += copy.length
+        candidates.push(synonym)          if val < 5
+        approved_candidates.push(synonym) if val < 5 && !synonym.deprecated
+      end
+      if candidates.length == 0
+        raise :form_names_misspelling_no_matches.t
+      elsif approved_candidates.length == 1
+        result = approved_candidates.first
+      elsif candidates.length == 1
+        result = candidates.first
+      else
+        raise :form_names_misspelling_many_matches.t
+      end
+    end
+    return result
+  end
+
+  # Merge all the stuff that refers to +old_name+ into +selself+.  No changes
+  # are made to +self+; +old_name+ is destroyed; all the things that referred
+  # to +old_name+ are updated and saved.
+  def merge_names(old_name)
+
+    # Move all observations over to the new name.
+    for o in old_name.observations
+      o.name = self
+      o.save
+      Transaction.put_observation(
+        :id   => o,
+        :name => self
+      )
+    end
+
+    # Move all namings over to the new name.
+    for g in old_name.namings
+      g.name = self
+      g.save
+      Transaction.put_naming(
+        :id   => g,
+        :name => self
+      )
+    end
+
+    # Move all misspellings over to the new name.
+    for m in old_name.misspellings
+      m.correct_spelling = self
+      m.save
+      Transaction.put_name(
+        :id               => m,
+        :correct_spelling => self
+      )
+    end
+
+    # [Why was this only in admin mode?? -JPH 20090127]
+    old_name.log(:log_name_merged, :this => old_name.display_name,
+                 :that => self.display_name)
+
+    # TODO -- what about:
+    #   authors_names
+    #   editors_names
+    #   interests
+    #   notifications
+    #   rss_logs
+    old_name.destroy
   end
 
   ##############################################################################
@@ -1509,7 +1609,7 @@ class Name < ActiveRecord::MO
   ################################################################################
 
   EOL_NOTE_FIELDS = [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
-  ALL_NOTE_FIELDS = [:classification] + EOL_NOTE_FIELDS + [:refs, :notes]
+  ALL_NOTE_FIELDS = EOL_NOTE_FIELDS + [:refs, :notes]
 
   # Returns an Array of all the descriptive text fields that don't require any
   # special processing when they go to EOL.  Fields are all Symbol's.
@@ -1518,11 +1618,10 @@ class Name < ActiveRecord::MO
     EOL_NOTE_FIELDS
   end
 
-  # Returns an Array of all the descriptive text fields, including
-  # :classification for now.  Fields are all Symbol's.
+  # Returns an Array of all the descriptive text fields (Symbol's).
   #
-  # *NOTE*: :classification and :references behave differently for EOL output.
-  # :notes get ignored altogether.  Order is important for UI layout.
+  # *NOTE*: :references behave differently for EOL output and :notes get
+  # ignored altogether.  Order is important for UI layout.
   #
   def self.all_note_fields
     ALL_NOTE_FIELDS
@@ -1539,7 +1638,7 @@ class Name < ActiveRecord::MO
   end
 
   # Returns a Hash containing all the descriptive text fields.  (See also the
-  # counterpary writer-method +set_notes+.)
+  # counterpart writer-method +all_notes=+.)
   def all_notes
     result = {}
     for f in ALL_NOTE_FIELDS
@@ -1552,9 +1651,9 @@ class Name < ActiveRecord::MO
   #
   #   hash = name.all_notes
   #   hash[:look_alikes] = "new value"
-  #   name.set_notes(hash)
+  #   name.all_notes = hash
   #
-  def set_notes(notes)
+  def all_notes=(notes)
     for f in ALL_NOTE_FIELDS
       self.send("#{f}=", notes[f])
     end
@@ -1710,7 +1809,7 @@ class Name < ActiveRecord::MO
   ################################################################################
 
   # Callback that updates editors and/or authors after a User makes a change.
-  # 
+  #
   # If the Name has no author and they just entered something in the +gen_desc+
   # field, they get promoted to author by default.
   #
@@ -1783,10 +1882,9 @@ class Name < ActiveRecord::MO
   #
   # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
   # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (NAME_PRIMER_CACHE_FILE).  (User is not used, but we
-  # might change out mind some day.)
+  # in a plain old file (NAME_PRIMER_CACHE_FILE).
   #
-  def self.primer(user=nil)
+  def self.primer
     result = []
     if !File.exists?(NAME_PRIMER_CACHE_FILE) ||
        File.mtime(NAME_PRIMER_CACHE_FILE) < Time.now - 1.day

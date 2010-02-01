@@ -22,8 +22,6 @@
 #  boxify::                Wrap HTML in colored-outline box.
 #  end_boxify::            End boxify box.
 #  ---
-#  calc_search_params::    Link params needed to fix search state.
-#  ---
 #  pagination_letters::    Render the set of letters for pagination.
 #  pagination_numbers::    Render nearby page numbers for pagination.
 #  ---
@@ -122,15 +120,17 @@ module ApplicationHelper
   # Wrap location name in span: "<span>where (count)</span>"
   #
   #   Where: <%= where_string(obs.place_name) %>
+  #
   def where_string(where, count=nil)
     result = sanitize(where).t
     result += " (#{count})" if count
     result = "<span class=\"Data\">#{result}</span>"
   end
 
-  # Wrap location name in link to show_location / where_search.
+  # Wrap location name in link to show_location / observations_at_where.
   #
   #   Where: <%= location_link(obs.where, obs.location_id) %>
+  #
   def location_link(where, location_id, count=nil, click=false)
     if location_id
       loc = Location.find(location_id)
@@ -140,7 +140,7 @@ module ApplicationHelper
     else
       link_string = where_string(where, count)
       link_string += " [#{:app_search.t}]" if click
-      result = link_to(link_string, :controller => 'location', :action => 'where_search', :where => where)
+      result = link_to(link_string, :controller => 'observer', :action => 'observations_at_where', :where => where)
     end
     result
   end
@@ -148,6 +148,7 @@ module ApplicationHelper
   # Wrap name in link to show_name.
   #
   #   Parent: <%= name_link(name.parent) %>
+  #
   def name_link(name, str=nil)
     begin
       str ||= name.display_name.t
@@ -269,48 +270,27 @@ module ApplicationHelper
     </div>"
   end
 
-  # Return a hash of parameters required to fix the search/sequence state.
-  # Uses three "global" variables that must be set in the controller:
-  #
-  #   @search_seq   SearchState instance(?)
-  #   @seq_key      SequenceState instance(?)
-  #   @obs          Observation instance.
-  #
-  #   Consensus Name: <%= link_to(
-  #     :controller => 'name',
-  #     :action     => 'show_name',
-  #     :id         => @obs.name_id,
-  #     :params     => calc_search_params
-  #   ) %>
-  #
-  def calc_search_params
-    search_params = {}
-    search_params[:search_seq] = @search_seq if @search_seq
-    search_params[:seq_key] = @seq_key if @seq_key
-    search_params[:obs] = @obs if @obs
-    search_params
-  end
-
-  # Insert letter pagination links.  For more information see
-  # ApplicationController#paginate_letters.
+  # Insert letterer pagination links.
   #
   #   # In controller:
   #   def action
-  #     @names = Name.find(...)
-  #     @letters, @subset = paginate_letters(@names, len)
-  #     @pages, @subset   = paginate_array(@subset, len)
+  #     query = create_query(:Name)
+  #     @pages = paginate_letters(:letter, :page, 50)
+  #     @names = query.paginate(@pages, 'names.text_name')
   #   end
   #
   #   # In view:
-  #   <div class="pagination"><%= pagination_letters(@letters) %></div>
-  #   <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
+  #   <%= pagination_letters(@pages) %>
+  #   <%= pagination_numbers(@pages) %>
   #
-  def pagination_letters(letters, args={})
-    if letters
-      params = (args[:params] || {}).clone
+  def pagination_letters(pages, args={})
+    if pages && pages.letter_arg
+      params = args[:params] || {}
       str = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
-        params[letters.arg] = letter
-        letters.used[letter] ? link_to(letter, params) : letter
+        params[pages.letter_arg] = letter
+        if !pages.used_letters || pages.used_letters[letter]
+          link_to(letter, params)
+        end
       end.join(' ')
       return %(<div class="pagination">#{str}</div>)
     else
@@ -318,32 +298,70 @@ module ApplicationHelper
     end
   end
 
-  # Wrapper on ActionView::Helpers#pagination_links designed to work with
-  # pagination_letters.  (Just needs to add a parameter to the pagination
-  # links, that's all.)  (See +pagination_letters+ a>bove.)
-  def pagination_numbers(pages, letters=nil, args={})
-    if letters
-      args[:params] ||= {}
-      args[:params][letters.arg] = letters.letter
-    end
-    str = pagination_links(pages, args)
-    if !str.to_s.empty?
-      arg = args[:name] || :page
-      page = params[arg].to_i
-      page = 1 if page < 1
-      page = pages.length if page > pages.length
-      if page > 1
-        url = h(reload_with_args(arg => page - 1))
-        str = link_to('&laquo; ' + :app_prev.t, url) + ' | ' + str
+  # Insert numbered pagination links.  I've thrown out the Rails plugin
+  # pagination_letters because it is no longer giving us enough to be worth it.
+  # (See also pagination_letters above.)
+  #
+  #   # In controller:
+  #   def action
+  #     query = create_query(:Name)
+  #     @pages = paginate_numbers(:page, 50)
+  #     @names = query.paginate(@pages)
+  #   end
+  #
+  #   # In view: (it is wrapped in 'pagination' div already)
+  #   <%= pagination_numbers(@pages) %>
+  #
+  def pagination_numbers(pages, args={})
+    result = ''
+    if pages && pages.num_pages > 1
+      params = args[:params] ||= {}
+      if pages.letter_arg && pages.letter
+        params[pages.letter_arg] = pages.letter
       end
-      if page < pages.length
-        url = h(reload_with_args(arg => page + 1))
-        str = str + ' | ' + link_to(:app_next.t + ' &raquo;', url)
+      
+      num  = pages.num_pages
+      arg  = pages.number_arg
+      this = pages.number
+      this = 1 if this < 1
+      this = num if this > num
+      size = args[:window_size] || 5
+      from = this - size
+      to   = this + size
+      
+      result = []
+      pstr = "&laquo; #{:app_prev.t}"
+      nstr = "#{:app_next.t} &raquo;"
+      result << pagination_link(pstr, this-1, arg, args) if this > 1
+      result << '|'                                      if this > 1
+      result << pagination_link(1, 1, arg, args)         if from > 1
+      result << '...'                                    if from > 2
+      for n in from..to
+        if n == this
+          result << n
+        elsif n > 0 && n <= num
+          result << pagination_link(n, n, arg, args)
+        end
       end
-      return %(<div class="pagination">#{str}</div>)
-    else
-      return ''
+      result << '...'                                    if to < num - 1
+      result << pagination_link(num, num, arg, args)     if to < num
+      result << '|'                                      if this < num
+      result << pagination_link(nstr, this+1, arg, args) if this < num
+      
+      result = %(<div class="pagination">#{result.join(' ')}</div>)
     end
+  end
+
+  # Render a single pagination link for paginate_numbers above.
+  def pagination_link(label, page, arg, args)
+    params = args[:params] || {}
+    params[arg] = page
+    url = h(reload_with_args(params))
+    if args[:anchor]
+      url.sub!(/#.*/, '')
+      url += '#' + args[:anchor]
+    end
+    link_to(label, url)
   end
 
   # Draw the cutesy eye icons in the upper right side of screen.  It does it

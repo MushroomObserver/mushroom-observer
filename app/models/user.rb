@@ -239,7 +239,7 @@
 #
 ################################################################################
 
-class User < ActiveRecord::MO
+class User < AbstractModel
   require 'digest/sha1'
 
   has_many :comments
@@ -443,6 +443,31 @@ class User < ActiveRecord::MO
     if bonuses
       bonuses.inject(0) {|sum, pair| sum + pair[0]}
     end
+  end
+
+  # Get list of user to prime auto-completer.  Returns a simple Array of up to
+  # 1000 (by contribution or created within the last month) login String's
+  # (with full name in parens). 
+  def self.primer
+    result = []
+    if !File.exists?(USER_PRIMER_CACHE_FILE) ||
+       File.mtime(USER_PRIMER_CACHE_FILE) < Time.now - 1.day
+
+      # Get list of users sorted first by when they last logged in (if recent),
+      # then by cotribution.
+      result = self.connection.select_values(%(
+        SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+        FROM users
+        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH, last_login, NULL) DESC,
+                 contribution DESC
+        LIMIT 1000
+      )).uniq.sort
+
+      open(USER_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
+    else
+      result = open(USER_PRIMER_CACHE_FILE).readlines.map(&:chomp)
+    end
+    return result
   end
 
   #-----------------------------
