@@ -36,6 +36,7 @@
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
     :advanced_search,
+    :all_images,
     :image_search,
     :images_by_user,
     :list_images,
@@ -64,10 +65,15 @@ class ImageController < ApplicationController
   #
   ##############################################################################
 
-  # Display matrix of images, most recent first.
+  # Display matrix of selected images, based on current Query.
   def list_images
     query = find_or_create_query(:Image, :all, :by => :created)
-    @title = :image_list_title.t
+    show_selected_images(query, :id => params[:id])
+  end
+
+  # Display matrix of images, most recent first.
+  def all_images
+    query = create_query(:Image, :all, :by => :created)
     show_selected_images(query)
   end
 
@@ -75,7 +81,6 @@ class ImageController < ApplicationController
   def images_by_user
     user = User.find(params[:id])
     query = create_query(:Image, :by_user, :user => user)
-    @title = :images_by_user.t(:user => user.legal_name)
     show_selected_images(query)
   end
 
@@ -87,7 +92,6 @@ class ImageController < ApplicationController
       redirect_to(:action => 'show_image', :id => image.id)
     else
       query = create_query(:Image, :pattern, :pattern => pattern)
-      @title = :image_search_title.t(:pattern => pattern)
       show_selected_images(query)
     end
   end
@@ -96,7 +100,6 @@ class ImageController < ApplicationController
   def advanced_search
     begin
       query = find_query(:Image)
-      @title = :app_advanced_search.t
       show_selected_images(query)
     rescue => err
       flash_error(err)
@@ -106,9 +109,10 @@ class ImageController < ApplicationController
   end
 
   # Show selected search results as a matrix with 'list_images' template.
-  def show_selected_images(query)
+  def show_selected_images(query, args={})
     store_query(query)
-    show_index_of_objects(query, :action => 'list_images', :matrix => true)
+    args = { :action => 'list_images', :matrix => true }.merge(args)
+    show_index_of_objects(query, args)
   end
 
   ##############################################################################
@@ -126,6 +130,7 @@ class ImageController < ApplicationController
     @image = Image.find(params[:id])
     update_view_stats(@image)
     @is_reviewer = is_reviewer
+    pass_query_params
 
     # Wait until here to create this search query to save server resources.
     # Otherwise we'd be creating a new search query for images for every single
@@ -139,7 +144,7 @@ class ImageController < ApplicationController
       obs_query = find_or_create_query(:Observation)
       obs_query.this = obs
       img_query = create_query(:Image, :inside_observation,
-                                       :outer => obs_query)
+                               :observation => obs, :outer => obs_query)
       set_query_params(img_query)
     end
   end
@@ -154,13 +159,13 @@ class ImageController < ApplicationController
     @image = Image.find(params[:id])
   end
 
-  # Go to next observation: redirects to show_image.
+  # Go to next image: redirects to show_image.
   def next_image
     image = Image.find(params[:id])
     redirect_to_next_object(:next, image)
   end
 
-  # Go to previous observation: redirects to show_image.
+  # Go to previous image: redirects to show_image.
   def prev_image
     image = Image.find(params[:id])
     redirect_to_next_object(:prev, image)

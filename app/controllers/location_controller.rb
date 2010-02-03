@@ -24,10 +24,12 @@
 
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
-    :auto_complete_location,
+    :all_locations,
     :list_locations,
     :location_search,
     :map_locations,
+    :next_location,
+    :prev_location,
     :show_location,
     :show_past_location,
   ]
@@ -46,28 +48,35 @@ class LocationController < ApplicationController
   #
   ##############################################################################
 
-  # Displays a list of all locations.
+  # Displays a list of selected locations, based on current Query.
   def list_locations
     query = find_or_create_query(:Location, :all, :by => :name)
-    @title = :location_index_title.t
+    show_selected_locations(query, :id => params[:id])
+  end
+
+  # Displays a list of all locations.
+  def list_locations
+    query = create_query(:Location, :all, :by => :name)
     show_selected_locations(query)
   end
 
   # Displays a list of locations matching a given string.
   def location_search
-    @pattern = params[:pattern].to_s
-    query = create_query(:Location, :pattern, :pattern => @pattern)
-    @title = :location_index_title.t
+    query = create_query(:Location, :pattern, :pattern => params[:pattern].to_s)
     show_selected_locations(query)
   end
 
   # Show selected search results as a list with 'list_locations' template.
-  def show_selected_locations(query)
+  def show_selected_locations(query, args={})
     store_location
     store_query
     set_query_params(query)
 
     @known_pages = paginate_numbers(:page, 50)
+    if (args[:id].to_s != '') and
+       (params[@known_pages.number_arg].to_s == '')
+      @known_pages.show_index(query.index(args[:id]))
+    end
     @known_data  = query.paginate(@known_pages)
 
     # Try to turn this into a query on observations.where instead.
@@ -98,14 +107,8 @@ class LocationController < ApplicationController
 
   # Map results of a search or index.
   def map_locations
-    @pattern = params[:pattern].to_s
-    if @pattern == ''
-      @title = :map_locations_global_map.t
-      query = find_or_create_query(:Location, :all, :by => :name)
-    else
-      @title = :map_locations_title.t(:pattern => @pattern)
-      query = find_or_create_query(:Location, :pattern, :pattern => @pattern)
-    end
+    @title = :map_locations_global_map.t
+    query = find_or_create_query(:Location, :all)
     @locations = query.results
   end
 

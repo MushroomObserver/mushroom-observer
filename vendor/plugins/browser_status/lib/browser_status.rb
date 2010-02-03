@@ -368,8 +368,10 @@ module BrowserStatus
     add_args_to_url(request.request_uri, new_args)
   end
 
-  # Take an arbitrary URL and change the parameters.  Returns new URL.
-  # Should even handle the fancy "/object/id" case.
+  # Take an arbitrary URL and change the parameters.  Returns new URL.  Should
+  # even handle the fancy "/object/id" case.  (Note: use +nil+ to mean delete
+  # -- i.e. <tt>add_args_to_url(url, :old_arg => nil)</tt> deletes the
+  # parameter named +old_arg+ from +url+.) 
   #
   #   url = url_for(:action => "blah", ...)
   #   new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)

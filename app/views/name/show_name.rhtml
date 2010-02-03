@@ -39,7 +39,7 @@
   new_tab_set do
     add_tab(:app_prev.t, :action => 'prev_name', :id => @name.id,
             :params => query_params)
-    add_tab(:app_index.t, :action => 'name_index',
+    add_tab(:app_index.t, :action => 'list_names', :id => @name.id,
             :params => query_params)
     add_tab(:app_next.t, :action => 'next_name', :id => @name.id,
             :params => query_params)
@@ -209,15 +209,22 @@
 
 <% if @children_data && @children_data.length > 0 %>
   <hr/>
-  <p><%= rank_as_plural_string(@children_data[0].rank) %>:</p>
-  <%= pagination_numbers(@children_pages) %>
+  <p>
+    <a id="children"></a>
+    <%= rank_as_plural_string(@children_data[0].rank) %>:
+    <%= if @children_data.length < @children_query.num_results
+      link_to("(#{:app_show_all.t})", :action => 'list_names',
+              :params => query_params(@children_query))
+    end %>
+  </p>
+  <%= pagination_numbers(@children_pages, :anchor => 'children') %>
   <p>
     <% for child in @children_data %>
-      <%= link_to(child.display_name.t, :action => 'show_name',
-                  :id => child.id, :params => query_params) %><br/>
+      <%= link_to(child.display_name.t, :action => 'show_name', :id => child.id,
+                  :params => query_params(@children_query)) %><br/>
     <% end %>
   </p>
-  <%= pagination_numbers(@children_pages) %>
+  <%= pagination_numbers(@children_pages, :anchor => 'children') %>
 <% end %>
 
 <%
@@ -252,7 +259,14 @@ for sect in ['consensus', 'synonym', 'other']
   if data && data.length > 0
     num_sects += 1 %>
     <br/><hr/>
-    <p><a id="<%=sect%>"></a><%= head %></p>
+    <p>
+      <a id="<%=sect%>"></a>
+      <%= head %>
+      <%= if data.length < query.num_results
+        link_to("(#{:app_show_all.t})", :controller => 'observer',
+                :action => 'list_observations', :params => query_params(query))
+      end %>
+    </p>
     <%= pagination_numbers(pages, :anchor => sect) %>
     <table cellpadding="5" cellspacing="0">
       <% odd_or_even = 0

@@ -759,9 +759,9 @@ class Name < AbstractModel
   # all of ActiveRecord's overhead.
   def synonym_ids
     if synonym_id
-      Name.connection.select_values %(
+      Name.connection.select_values(%(
         SELECT id FROM names WHERE synonym_id = #{synonym_id}
-      )
+      )).map(&:id)
     else
       [id]
     end

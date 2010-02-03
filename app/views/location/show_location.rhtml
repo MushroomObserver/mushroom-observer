@@ -17,6 +17,15 @@
     end
   end
 
+  new_tab_set do
+    add_tab(:app_prev.t, :action => 'prev_location', :id => @location.id,
+            :params => query_params)
+    add_tab(:app_index.t, :action => 'list_locations', :id => @location.id,
+            :params => query_params)
+    add_tab(:app_next.t, :action => 'next_location', :id => @location.id,
+            :params => query_params)
+  end
+
   draw_interest_icons(@location, @interest) if @user
 %>
 

@@ -27,6 +27,7 @@ class ProjectController < ApplicationController
   require 'set'
 
   before_filter :login_required, :except => [
+    :all_projects,
     :list_projects,
     :show_project,
   ]
@@ -41,16 +42,22 @@ class ProjectController < ApplicationController
     :show_project,
   ]
 
-  # Show list of latest projects.
-  # Linked from: left-hand panel
-  # Inputs: params[:page]
-  # Outputs: @projects, @project_pages
+  # Show list of selected projects, based on current Query.
   def list_projects
-    store_location
-    store_query
     query = find_or_create_query(:Project, :all, :by => :title)
-    @pages = paginate_numbers(:page, 10)
-    @objects = query.paginate(@pages)
+    show_selected_projects(query)
+  end
+
+  # Show list of latest projects.  (Linked from left panel.)
+  def all_projects
+    query = create_query(:Project, :all, :by => :title)
+    show_selected_projects(query)
+  end
+
+  # Show selected list of projects.
+  def show_selected_projects(query)
+    show_index_of_objects(query, :action => :list_projects,
+                          :num_per_page => 10)
   end
 
   # Display project by itself.

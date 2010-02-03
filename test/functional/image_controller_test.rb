@@ -47,6 +47,7 @@ class ImageControllerTest < ControllerTestCase
     assert(new_inner = inner.next)
     assert_not_equal(inner, new_inner)
     assert_equal(6, new_inner.this_id)
+    save_query = Query.last
     assert(new_new_inner = new_inner.next)
     assert_not_equal(new_inner, new_new_inner)
     assert_equal(5, new_new_inner.this_id)
@@ -58,7 +59,7 @@ class ImageControllerTest < ControllerTestCase
     }.flatten
     get(:next_image, params)
     assert_response(:action => "show_image", :id => 6,
-                    :params => @controller.query_params(Query.last))
+                    :params => @controller.query_params(save_query))
   end
 
   # Test next_image in the context of a search
@@ -143,10 +144,12 @@ class ImageControllerTest < ControllerTestCase
   def test_image_search
     get_with_dump(:image_search, :pattern => 'Notes')
     assert_response('list_images')
-    assert_equal(:image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title'))
+    assert_equal(:query_title_pattern.t(:types => 'Images', :pattern => 'Notes'),
+                 @controller.instance_variable_get('@title'))
     get_with_dump(:image_search, :pattern => 'Notes', :page => 2)
     assert_response('list_images')
-    assert_equal(:image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title'))
+    assert_equal(:query_title_pattern.t(:types => 'Images', :pattern => 'Notes'),
+                 @controller.instance_variable_get('@title'))
   end
 
   def test_image_search_next

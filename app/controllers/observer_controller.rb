@@ -22,12 +22,11 @@
 #     list_notifications
 #
 #     list_observations
+#     all_observations
 #     observations_by_name
 #     observations_by_user
 #     observations_at_location
 #     observations_at_where
-#   R change_user_bonuses
-#
 #     pattern_search
 #     observation_search
 #     location_search
@@ -41,6 +40,7 @@
 #     lookup_species_list
 #     lookup_user
 #
+#   R change_user_bonuses
 #   R users_by_name
 #     users_by_contribution
 #     show_user
@@ -99,6 +99,7 @@ class ObserverController < ApplicationController
   before_filter :login_required, :except => CSS + [
     :advanced_search,
     :advanced_search_form,
+    :all_observations,
     :ask_webmaster_question,
     :color_themes,
     :how_to_help,
@@ -394,17 +395,21 @@ class ObserverController < ApplicationController
     end
   end
 
-  # Displays matrix of all Observation's, sorted by date.
+  # Displays matrix of selected Observations (based on current Query).
   def list_observations
     query = find_or_create_query(:Observation, :all, :by => :date)
-    @title = :list_observations_default_title.t
+    show_selected_observations(query, :id => params[:id])
+  end
+
+  # Displays matrix of all Observation's, sorted by date.
+  def all_observations
+    query = create_query(:Observation, :all, :by => :date)
     show_selected_observations(query)
   end
 
   # Displays matrix of all Observation's, alphabetically.
   def observations_by_name
     query = create_query(:Observation, :all, :by => :name)
-    @title = :list_observations_default_title.t
     show_selected_observations(query)
   end
 
@@ -412,7 +417,6 @@ class ObserverController < ApplicationController
   def observations_by_user
     user = User.find(params[:id])
     query = create_query(:Observation, :by_user, :user => user)
-    @title = :list_observations_by_user.t(:user => user.legal_name)
     show_selected_observations(query)
   end
 
@@ -420,7 +424,6 @@ class ObserverController < ApplicationController
   def observations_at_location
     location = Location.find(params[:id])
     query = create_query(:Observation, :at_location, :location => location)
-    @title = :list_observations_from_location.t(:location => loc.display_name)
     @links = [
       [ :app_show_map.l, { :controller => 'location', :action => 'show_location', :id => location.id } ],
     ]
@@ -431,7 +434,6 @@ class ObserverController < ApplicationController
   def observations_at_where
     where = params[:where].to_s
     query = create_query(:Observation, :at_where, :location => where)
-    @title = :list_observations_from_where.t(:where => where)
     @links = [
       [ :location_define.l, { :controller => 'location', :action => 'create_location', :where => where } ],
       [ :location_merge.l, { :controller => 'location', :action => 'list_merge_options', :where => where } ],
@@ -443,12 +445,11 @@ class ObserverController < ApplicationController
   # Display matrix of Observation's whose notes, etc. match a string pattern.
   def observation_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
+    if pattern.match(/^\d+$/) and
        (observation = Observation.safe_find(pattern))
       redirect_to(:action => 'show_observation', :id => observation.id)
     else
       query = create_query(:Observation, :pattern, :pattern => pattern)
-      @title = :list_observations_matching.t(:pattern => pattern)
       show_selected_observations(query)
     end
   end
@@ -457,7 +458,6 @@ class ObserverController < ApplicationController
   def advanced_search
     begin
       query = find_query(:Observation)
-      @title = :advanced_search_title.t
       show_selected_observations(query)
     rescue => err
       flash_error(err)
@@ -466,9 +466,10 @@ class ObserverController < ApplicationController
   end
 
   # Show selected search results as a matrix with 'list_observations' template.
-  def show_selected_observations(query)
+  def show_selected_observations(query, args={})
     store_query(query)
-    show_index_of_objects(query, :action => 'list_observations')
+    args = { :action => 'list_observations', :matrix => true }.merge(args)
+    show_index_of_objects(query, args)
   end
 
   ##############################################################################
@@ -1375,7 +1376,7 @@ class ObserverController < ApplicationController
 
   # This is the main site index.  Nice how it's buried way down here, huh?
   def list_rss_logs
-    query = find_or_create_query(:RssLog)
+    query = create_query(:RssLog)
     store_query(query)
     show_index_of_objects(query, :action => 'list_rss_logs', :matrix => true)
   end

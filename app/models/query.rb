@@ -10,10 +10,10 @@ class Query < AbstractQuery
   # Parameters required for each flavor.
   self.required_params = {
     :advanced => {
-      :name? => :string,
+      :name?     => :string,
       :location? => :string,
-      :user? => :string,
-      :content? => :string
+      :user?     => :string,
+      :content?  => :string
     },
     :at_location => {
       :location => Location,
@@ -38,18 +38,19 @@ class Query < AbstractQuery
       :user => User,
     },
     :in_set => {
-      :ids => [AbstractModel],
+      :ids    => [AbstractModel],
+      :title? => :string,
     },
     :in_species_list => {
       :species_list => SpeciesList,
     },
     :inside_observation => {
       :observation => Observation,
-      :outer => Query,
+      :outer       => Query,
     },
     :of_name => {
-      :name => Name,
-      :synonyms? => {:string => [:no, :all, :exclusive]},
+      :name          => Name,
+      :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
     },
     :parents => {
@@ -59,8 +60,8 @@ class Query < AbstractQuery
       :pattern => :string,
     },
     :with_observations_of_name => {
-      :name => Name,
-      :synonyms? => {:string => [:no, :all, :exclusive]},
+      :name          => Name,
+      :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
     },
   }
@@ -275,7 +276,7 @@ class Query < AbstractQuery
   end
 
   # All Name queries get to control inclusion of misspellings.  (The default is
-  # to ignore misspellings.) 
+  # to ignore misspellings.)
   def extra_parameters
     if model_symbol == :Name
       {:misspellings? => {:string => [:yes, :no, :only]}}
@@ -288,20 +289,24 @@ class Query < AbstractQuery
   # cases; returns +nil+ in all other cases.
   def coerce(new_model)
     result = nil
-    new_model = new_model.to_s.to_sym
+    old_model  = self.model_symbol
+    old_flavor = self.flavor
+    new_model  = new_model.to_s.to_sym
+
+    # Let super class handle trivial cases.
+    if result = super
 
     # Going from list_rss_logs to showing observation, name, or species list.
-    if model  == :RssLog and
-       flavor == :all    and
-       (result = self.class.lookup(new_model, :by_rss_log, params) rescue nil)
+    elsif old_model  == :RssLog and
+          old_flavor == :all
+      result = self.class.lookup(new_model, :by_rss_log, params) # rescue nil
 
     # Going from mapping the observations of a name to showing the observations.
-    elsif model     == :Location    and
-          new_model == :Observation and
-          flavor    == :with_observations_of_name and
-          (result = self.class.lookup(new_model, :of_name, params) rescue nil)
+    elsif old_model  == :Location    and
+          new_model  == :Observation and
+          old_flavor == :with_observations_of_name
+      result = self.class.lookup(new_model, :of_name, params) rescue nil
     else
-      result = super
     end
     return result
   end
@@ -312,7 +317,7 @@ class Query < AbstractQuery
   #
   ##############################################################################
 
-  def initialize_extra
+  def extra_initialization
     # Give all Name queries control over inclusion of misspellings.
     if model_symbol == :Name
       case params[:misspellings] || :no
@@ -343,7 +348,9 @@ class Query < AbstractQuery
     when 'name'
       if model == Observation
         self.include << :names
-        "names.search_name ASC"
+        "names.text_name ASC, names.author ASC"
+      elsif model == Name
+        "names.text_name ASC, names.author ASC"
       elsif model.column_names.include?('search_name')
         "#{table}.search_name ASC"
       elsif model.column_names.include?('name')
@@ -356,11 +363,85 @@ class Query < AbstractQuery
     end
   end
 
+  # (These are used by :query_title_all_by for :all queries.)
+  BY_TAGS = {
+    :date  => :app_date,
+    :name  => :app_name,
+    :title => :app_object_title,
+  }
+
+  # ----------------------------
+  #  Titles.
+  # ----------------------------
+
+  # Holds the title, as a localization with args.  The default is
+  # <tt>:query_title_{model}_{flavor}</tt>, passing in +params+ as args. 
+  #
+  #   self.title_args = {
+  #     :tag => :app_advanced_search,
+  #     :pattern => clean_pattern,
+  #   }
+  #
+  attr_accessor :title_args
+
+  # Put together a localized title for this query.  (Intended for use as title
+  # of the results index page.)
+  def title
+    initialize_query if !initialized?
+    tag = title_args[:tag]
+    tag.t(title_args)
+  end
+
+  # Give query a default title before passing off to standard initializer.
+  def initialize_query
+    self.title_args = params.merge(
+      :tag   => "query_title_#{flavor}".to_sym,
+      :type  => model_string.underscore.to_sym.t,
+      :types => model_string.underscore.pluralize.to_sym.t
+    )
+    super
+  end
+
+  # Used to let user specify the title of a "custom" query, such as +in_set+.
+  # The value should be in one of these forms:
+  #
+  #   ":needed_descriptions"
+  #   ":observations_by_user(:user=#{user.login})"
+  #   ":advanced_search(:type=:observation)"
+  #   ":title_tag(:arg1=val1,:arg2=val2,:arg3=val3)"
+  #
+  # (Can't handle values with "=" or "," in them yet.)
+  #
+  def customize_title(arg)
+    if arg
+      tag, args = arg.match(/^:?(\w+)(?:\((.*)\))/)
+      args = args.split(',').inject({}) do |args, pair|
+        key, val = pair.split('=')
+        key.sub!(/^:/, '')
+        val = val.to_sym.t if val.sub!(/^:/,'')
+        args[key.to_sym] = val
+        args
+      end
+      args[:tag] = tag.to_sym
+      self.title_args = args
+    end
+  end
+
   # --------------------------------------------
   #  Queries that essentially have no filters.
   # --------------------------------------------
 
   def initialize_all
+    if (by = params[:by]) and
+       (by = BY_TAGS[by.to_sym])
+      title_args[:tag]   = :query_title_all_by
+      title_args[:order] = by.t
+    end
+  end
+
+  def initialize_in_set(*args)
+    customize_title(params[:title])
+    super
   end
 
   def initialize_by_rss_log
@@ -370,12 +451,12 @@ class Query < AbstractQuery
 
   def initialize_with_authors
     self.include << :authors_names
-    self.order = 'names.search_name ASC'
+    self.order = 'names.text_name ASC, names.author ASC'
   end
 
   def initialize_with_observations
     self.include << :observations
-    self.order = 'names.search_name ASC'
+    self.order = 'names.text_name ASC, names.author ASC'
   end
 
   # ----------------------------
@@ -383,6 +464,7 @@ class Query < AbstractQuery
   # ----------------------------
 
   def initialize_by_user
+    title_args[:user] = User.find(params[:user]).legal_name rescue ':app_unknown'
     table = model.table_name
     if model.column_names.include?('user_id')
       self.where << "#{table}.user_id = '#{params[:user]}'"
@@ -402,6 +484,7 @@ class Query < AbstractQuery
   end
 
   def initialize_for_user
+    title_args[:user] = User.find(params[:user]).legal_name rescue ':app_unknown'
     self.include << :observations
     self.where << "observations.user_id = '#{params[:user]}'"
     self.order = 'comments.created DESC'
@@ -412,14 +495,15 @@ class Query < AbstractQuery
   end
 
   def initialize_by_editor
+    title_args[:user] = User.find(params[:user]).legal_name rescue ':app_unknown'
     case model_symbol
     when :Name, :Location
       glue_table = "#{flavor}s_#{model_string}s".downcase
       glue_table = glue_table[3..-1]
       self.include << glue_table.to_sym
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
-      if model_symbol == :Name
-        self.order = "names.search_name ASC"
+      if model == Name
+        self.order = "names.text_name ASC, names.author ASC"
       else
         self.order = "locations.search_name ASC"
       end
@@ -433,23 +517,26 @@ class Query < AbstractQuery
   # -----------------------------------
 
   def initialize_at_location
+    title_args[:location] = Location.find(params[:location]).display_name rescue ':app_unknown'
     self.include << :names
     self.where   << "observations.location_id = '#{params[:location]}'"
-    self.order   =  'names.search_name ASC, observations.`when` DESC'
+    self.order   =  'names.text_name ASC, names.author ASC, observations.`when` DESC'
   end
 
   def initialize_at_where
+    title_args[:where] = params[:where]
     pattern = "%#{params[:location].gsub(/[*']/,"%")}%"
     self.include << :names
     self.where   << "observations.where LIKE '#{pattern}'"
-    self.order   =  'names.search_name ASC, observations.`when` DESC'
+    self.order   =  'names.text_name ASC, names.author ASC, observations.`when` DESC'
   end
 
   def initialize_in_species_list
+    title_args[:species_list] = SpeciesList.find(params[:species_list]).format_name rescue ':app_unknown'
     self.include << :names
     self.include << :observations_species_lists
     self.where   << "observations_species_lists.species_list_id = '#{params[:species_list_id]}'"
-    self.order   =  'names.search_name ASC, observations.`when` DESC'
+    self.order   =  'names.text_name ASC, names.author ASC, observations.`when` DESC'
   end
 
   # ----------------------------------
@@ -458,6 +545,7 @@ class Query < AbstractQuery
 
   def initialize_with_observations_of_name
     initialize_of_name
+    title_args[:tag] = title_args[:tag].to_s.sub('title', 'title_with_observations').to_sym
   end
 
   def initialize_of_name
@@ -465,6 +553,11 @@ class Query < AbstractQuery
 
     synonyms     = params[:synonyms]     || :no
     nonconsensus = params[:nonconsensus] || :no
+
+    title_args[:tag] = :query_title_of_name
+    title_args[:tag] = :query_title_of_name_synonym   if synonyms != :no
+    title_args[:tag] = :query_title_of_name_consensus if nonconsensus != :no
+    title_args[:name] = name.display_name
 
     if synonyms == :no
       name_ids = [name.id] + name.misspelling_ids
@@ -515,19 +608,21 @@ class Query < AbstractQuery
 
   def initialize_children
     name = Name.find(params[:name])
+    title_args[:name] = name.display_name
     all = params[:all] || false
     name_ids = name.children(all).map(&:id).map(&:to_s).join(',')
     name_ids = 0 if name_ids == ''
     self.where << "names.id IN (#{name_ids})"
-    self.order = "names.search_name ASC"
+    self.order = "names.text_name ASC, names.author ASC"
   end
 
   def initialize_parents
     name = Name.find(params[:name])
+    title_args[:name] = name.display_name
     name_ids = name.parents(all).map(&:id).map(&:to_s).join(',')
     name_ids = 0 if name_ids == ''
     self.where << "names.id IN (#{name_ids})"
-    self.order = "names.search_name ASC"
+    self.order = "names.text_name ASC, names.author ASC"
   end
 
   # ----------------------------
@@ -536,6 +631,7 @@ class Query < AbstractQuery
 
   def initialize_pattern
     pattern = params[:pattern].to_s.strip_squeeze
+    title_args[:pattern] = pattern
     case model_symbol
 
     when :Observation
@@ -545,7 +641,7 @@ class Query < AbstractQuery
       full = full_google_search(pattern, 'observations.notes',
                                 'comments.summary', 'comments.comment')
       self.where << "(#{soft} OR #{full})"
-      self.order  = 'names.search_name ASC, observations.`when` DESC'
+      self.order  = 'names.text_name ASC, names.author ASC, observations.`when` DESC'
 
     when :Image
       self.include << {:images_observations => {:observations => :names}}
@@ -553,19 +649,19 @@ class Query < AbstractQuery
                                 'images.copyright_holder')
       full = full_google_search(pattern, 'images.notes')
       self.where << "(#{soft} OR #{full})"
-      self.order  = "names.search_name ASC, images.`when` DESC"
+      self.order  = "names.text_name ASC, names.author ASC, images.`when` DESC"
 
     when :Name
       soft = soft_google_search(pattern, 'names.search_name')
       full = full_google_search(pattern, 'names.citation',
                                 *(Name.all_note_fields.map {|x| "names.#{x}"}))
       self.where << "(#{soft} OR #{full})"
-      self.order = "names.search_name ASC"
+      self.order = "names.text_name ASC, names.author ASC"
 
     when :Location
       self.where += full_google_search(pattern, 'locations.search_name',
                                 'locations.display_name', 'locations.notes')
-      self.order = "locations.display_name ASC"
+      self.order = "locations.search_name ASC"
 
     else
       raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
@@ -617,30 +713,19 @@ class Query < AbstractQuery
   # ----------------------------
 
   def initialize_inside_observation
-    self.include << :images_observations
-    self.where << "images_observations.observation_id = '#{params[:observation]}'"
-    self.order = 'images.created ASC'
+    obs = Observation.find(params[:observation])
+    title_args[:observation] = obs.unique_format_name
+
+    ids = []
+    ids << obs.thumb_image_id if obs.thumb_image_id
+    ids += obs.image_ids - [obs.thumb_image_id]
+    initialize_in_set(ids)
+
     self.outer_id = params[:outer]
-  end
 
-  def outer_tweak(outer)
-    case [model_symbol, flavor]
-    when [:Image, :inside_observation]
+    # Tell it to skip observations with no images!
+    self.tweak_outer_query = lambda do |outer|
       (outer.params[:include] ||= []) << :images_observations
-    end
-  end
-
-  def outer_this_id
-    case [model_symbol, flavor]
-    when [:Image, :inside_observation]
-      params[:observation]
-    end
-  end
-
-  def outer_setup(new_outer, new_params)
-    case [model_symbol, flavor]
-    when [:Image, :inside_observation]
-      new_params[:observation] = new_outer.this_id
     end
   end
 end

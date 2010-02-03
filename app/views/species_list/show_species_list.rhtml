@@ -3,12 +3,12 @@
 
   new_tab_set do
     if @user
-      add_tab(:species_list_clone_list.t, { :action => 'create_species_list',
-              :clone => @species_list.id },
-              { :help => :show_species_list_clone_list_help.l })
-      add_tab(:species_list_set_source.t, { :action => 'show_species_list',
+      add_tab(:species_list_show_clone_list.t,
+              { :action => 'create_species_list', :clone => @species_list.id },
+              { :help => :show_species_list_show_clone_list_help.l })
+      add_tab(:species_list_show_set_source.t, { :action => 'show_species_list',
               :id => @species_list.id, :set_source => 1 },
-              { :help => :show_species_list_set_source_help.l })
+              { :help => :show_species_list_show_set_source_help.l })
     end
     if check_permission(@species_list.user_id)
       add_tab(:species_list_show_edit.t, :action => 'edit_species_list',
@@ -23,6 +23,15 @@
     add_tab(:species_list_show_save_as_csv.t, :action => 'make_report',
             :id => @species_list.id, :type => 'csv')
   end
+
+  new_tab_set do
+    add_tab(:app_prev.t, :action => 'prev_species_list', :id => @species_list.id,
+            :params => query_params)
+    add_tab(:app_index.t, :action => 'list_species_lists', :id => @species_list.id,
+            :params => query_params)
+    add_tab(:app_next.t, :action => 'next_species_list', :id => @species_list.id,
+            :params => query_params)
+  end
 %>
 
 <p><%= :app_when.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
@@ -31,9 +40,9 @@
 <p><%= :app_notes.t %>:</p>
 <%= sanitize(@species_list.notes.to_s).tpl %>
 
-<%= :species_list_show_members.t %>:<br/>
-<% if @objects %>
-  <%= pagination_letters(@oages) %>
+<% if @pages && @pages.length > 0 %>
+  <%= :species_list_show_members.t %>:<br/>
+  <%= pagination_letters(@pages) %>
   <%= pagination_numbers(@pages) %>
 
   <% if @objects && @objects.length > 0 %>
@@ -67,6 +76,8 @@
 
   <%= pagination_numbers(@pages) %>
   <%= pagination_letters(@pages) %>
+<% else %>
+  <%= :species_list_show_no_members.tp %>
 <% end %>
 <br/>
 

@@ -227,6 +227,7 @@
 #  cleanup::            Do garbage collection on old or unused Query's.
 #
 #  ==Instance Methods
+#  initialized?::       Has this query been initialized?
 #  coerce::             Coerce a query for one model into a query for another.
 #  clone::              Clone an instance for tweaking.
 #
@@ -250,13 +251,14 @@
 #  num_results::        Number of results the query returns.
 #  results::            Array of all results, instantiated.
 #  result_ids::         Array of all results, just ids.
+#  index::              Index of a given id or object in the results.
 #  paginate::           Array of subset of results, instantiated.
 #  paginate_ids::       Array of subset of results, just ids.
 #
 #  ==== Outer queries
 #  outer::              Outer Query (if nested).
 #  has_outer?::         Is this Query nested?
-#  outer_this_id::      Outer Query's current id.
+#  get_outer_this_id::  Get outer Query's current id.
 #  outer_first::        Call +first+ on outer Query.
 #  outer_prev::         Call +prev+ on outer Query.
 #  outer_next::         Call +next+ on outer Query.
@@ -386,23 +388,115 @@ class AbstractQuery < ActiveRecord::Base
   #
   def extra_parameters; nil; end
 
-  # Override this method in your subcass.
-  def initialize_extra; end
+  # This gives the subclass opportunity to make extra global initializations
+  # *after* flavor-specific initializations.  The following three global
+  # initializations cannot be overridden:
+  #
+  # +include+:: Joins to additional table(s).
+  # +where+::   Adds extra condition(s) to WHERE condition.
+  # +order+::   Overrides ORDER BY clause.
+  #
+  def extra_initialization; end
 
-  # Override this method in your subcass.
+  # Returns the default sort order for the query.  This should be recognized
+  # by the <tt>:by => :order</tt> parameter, as handled by +initialize_order+
+  # "callback".  The "default" default is 'id'.  (It should always return a
+  # String, not a Symbol!)
+  #
+  #   def default_order
+  #     case flavor
+  #     when :contribution
+  #       'user_login'
+  #     else
+  #       'modified'
+  #     end
+  #   end
+  #
   def default_order; 'id'; end
 
-  # Override this method in your subcass.
+  # This is where you define what the various <tt>:by => :order</tt> sort
+  # orders mean.  Several trivial orders are defined by default, but can be
+  # overridden in this method:
+  #
+  # * 'modified', 'created', 'date' -- sorts by the column of the same name,
+  #   in descending order.
+  #
+  # * 'name', 'title', 'login' -- sorts by the column of the same name, in
+  #   ascending order.
+  #
+  # * 'id' -- sorts by object id, in ascending order.
+  #
+  # *NOTE*: The <tt>params[:order]</tt> value is a String, not a Symbol!
+  #
+  # Example:
+  #
+  #   def initialize_order(by)
+  #     table = model.table_name
+  #     case by
+  #     when 'user_login'
+  #       self.include << :user
+  #       "users.login ASC'
+  #     end
+  #   end
+  #
   def initialize_order(by); nil; end
 
-  # Overrider this method in your subcass.
-  def outer_tweak(outer); end
+  # This gives inner queries the ability to tweak the outer query.  For
+  # example, this is a handy way to tell the outer query to skip outer results
+  # that result in empty inner queries.
+  #
+  # This instance variabl is a Proc, initialized in the flavor-specific
+  # initializer: 
+  #
+  #   def initialize_inside_user
+  #     ...
+  #     self.tweak_outer_query = lambda do |outer|
+  #       # This tells the outer query only to include users that have images
+  #       # (i.e. have entries in the "images_users" many-to-many glue table).
+  #       (outer.params[:include] ||= []) << :images_users
+  #     end
+  #   end
+  #
+  attr_accessor :tweak_outer_query
 
-  # Overrider this method in your subcass.
-  def outer_this_id; raise("missing method"); end
+  # Each inner query corresponds to a single result of the outer query.  This
+  # lets the inner query tell the corresponding +this_id+ of the outer
+  # query.  By default, it gets it from a parameter of the same name as the
+  # outer's model (e.g., <tt>params[:user]</tt> for inner queries nested inside
+  # :User queries).
+  #
+  # This instance variable is a Proc, initialized in the flavor-specific
+  # initializer.  For example, the default would look like this: 
+  #
+  #   def initialize_inside_user
+  #     ...
+  #     self.outer_this_id = lambda do |inner|
+  #       inner.params[:user]
+  #     end
+  #   end
+  #
+  attr_accessor :outer_this_id
 
-  # Overrider this method in your subcass.
-  def outer_setup(new_outer, new_params); raise("missing method"); end
+  # This tells us how to create a new inner query based on another result of
+  # the same outer query.  This is called, for example, when using the sequence
+  # operators on an inner query.  When it runs out of results for the inner
+  # query, it goes to the next result in the outer query, and creates a new
+  # inner query corresponding to it.  By default, it just stores the outer
+  # result (<tt>outer.this_id</tt>) in a parameter with the same name as the
+  # outer query's model (e.g., <tt>params[:user] = outer.this_id</tt> for inner
+  # queries nested inside :User queries).
+  #
+  # This instance variable is a Proc, initialized in the flavor-specific
+  # initializer.  For example, the default would look like this: 
+  #
+  #   def initialize_inside_user
+  #     ...
+  #     self.setup_new_inner_query = lambda do |new_params, new_outer|
+  #       new_params[:user] = new_outer.this_id
+  #     end
+  #   end
+  #
+  attr_accessor :setup_new_inner_query
 
   ##############################################################################
   #
@@ -757,7 +851,12 @@ class AbstractQuery < ActiveRecord::Base
   #
   ##############################################################################
 
+  def initialized?
+    !!@initialized
+  end
+
   def initialize_query
+    @initialized = true
     table = model.table_name
 
     # By default, no conditions, ordering, etc.
@@ -773,7 +872,7 @@ class AbstractQuery < ActiveRecord::Base
 
     # Give subclass opportunity to make extra initializations before the final
     # customization / overriding below.
-    initialize_extra
+    extra_initialization
 
     # Give all queries ability to override / customize.
     self.include += params[:include] if params[:include]
@@ -821,10 +920,10 @@ class AbstractQuery < ActiveRecord::Base
   def initialize_all; end
 
   # Create fake query given the results.
-  def initialize_in_set
+  def initialize_in_set(set=params[:ids])
     table = model.table_name
-    set = params[:ids].map(&:to_s).join(',')
-    set = 0 if set == ''
+    set = set.map(&:to_s).join(',')
+    set = '0' if set == ''
     self.where << "#{table}.id IN (#{set})"
     self.order << "FIND_IN_SET(#{table}.id,'#{set}') ASC"
 
@@ -844,7 +943,7 @@ class AbstractQuery < ActiveRecord::Base
   #   has word1 and (either word2 or word3) and word4
   def full_google_search(pat, *fields)
     results = []
-    if pat2 = pat
+    if pat and (pat2 = pat.clone)
       and_pats = []
       while pat2.sub!(/^(-?("[^"]*"|[^ ]+)( OR -?("[^"]*"|[^ ]+))*) ?/, '')
         pat3 = $1
@@ -904,8 +1003,7 @@ class AbstractQuery < ActiveRecord::Base
   # Build query, allowing the caller to override/augment the standard
   # parameters.
   def query(args={})
-    initialize_query if !@initialized
-    @initialized = true
+    initialize_query if !initialized?
 
     our_select   = args[:select] || "DISTINCT #{model.table_name}.id"
     our_include  = include
@@ -1084,53 +1182,67 @@ class AbstractQuery < ActiveRecord::Base
     @result_ids = list
   end
 
+  # Get index of a given record / id in the results.
+  def index(arg)
+    if arg.is_a?(ActiveRecord::Base)
+      result_ids.index(arg.id)
+    else
+      result_ids.index(arg.to_s.to_i)
+    end
+  end
+
   # Returns a subset of the results.
   def paginate(paginator, letter_field=nil)
+    if letter_field
+      paginator.used_letters = select_values(:select => "DISTINCT LEFT(#{letter_field},1)")
+    end
 
     # Filter by letter, then paginate.
     if letter = paginator.letter
-      letter_conditions = ["#{letter_field} LIKE '#{letter}%'"]
-      from, to = paginator.from, paginator.to
+      letter_conditions = ["LEFT(#{letter_field},1) = '#{letter}'"]
       paginator.num_total = select_count(:where => letter_conditions)
-      find_by_sql(:where => letter_conditions, :limit => "#{from}, #{to}")
+      from, to, num = paginator.from, paginator.to, paginator.num_per_page
+      find_by_sql(:where => letter_conditions, :limit => "#{from}, #{num}")
 
     # Normal pagination.
     else
       paginator.num_total = num_results
-      from, to = paginator.from, paginator.to
+      from, to, num = paginator.from, paginator.to, paginator.num_per_page
       if @results
         @results[from..to]
       elsif @result_ids
         ids = @result_ids[from..to]
-        map = model.all(:conditions => ['id IN (?)', ids]).
-              inject({}) {|map,obj| map[obj.id] = obj; map}
-        @result_ids.map {|id| map[id]}
+        model.all(:conditions => ['id IN (?)', ids]).
+              sort_by {|obj| ids.index(obj.id.to_i)}
       else
-        find_by_sql(:limit => "#{from}, #{to}")
+        find_by_sql(:limit => "#{from}, #{num}")
       end
     end
   end
 
   # Returns a subset of the results.
   def paginate_ids(paginator, letter_field=nil)
+    if letter_field
+      paginator.used_letters = select_values(:select => "DISTINCT LEFT(#{letter_field},1)")
+    end
 
     # Filter by letter, then paginate.
     if letter = paginator.letter
-      letter_conditions = ["#{letter_field} LIKE '#{letter}%'"]
+      letter_conditions = ["LEFT(#{letter_field},1) = '#{letter}'"]
       paginator.num_total = select_count(:where => letter_conditions)
-      from, to = paginator.from, paginator.to
-      select_values(:where => letter_conditions, :limit => "#{from}, #{to}").map(&:to_i)
+      from, to, num = paginator.from, paginator.to, paginator.num_per_page
+      select_values(:where => letter_conditions, :limit => "#{from}, #{num}").map(&:to_i)
 
     # Normal pagination.
     else
       paginator.num_total = num_results
-      from, to = paginator.from, paginator.to
+      from, to, num = paginator.from, paginator.to, paginator.num_per_page
       if @results
         @results[from..to].map(&:id)
       elsif @result_ids
         @result_ids[from..to]
       else
-        select_values(:limit => "#{from}, #{to}").map(&:to_i)
+        select_values(:limit => "#{from}, #{num}").map(&:to_i)
       end
     end
   end
@@ -1145,7 +1257,7 @@ class AbstractQuery < ActiveRecord::Base
   def this=(arg)
     if arg.is_a?(model)
       @this = arg
-    elsif arg.is_a?(Fiargnum)
+    elsif arg.is_a?(Fixnum)
       @this = model.find(arg)
     elsif arg.is_a?(String) and
           (arg.to_i > 0 rescue false)
@@ -1263,7 +1375,9 @@ class AbstractQuery < ActiveRecord::Base
     @outer ||= begin
       if outer_id
         outer = self.class.find(outer_id)
-        outer_tweak(outer)
+        if tweak_outer_query
+          tweak_outer_query.call(outer)
+        end
         outer
       else
         nil
@@ -1271,11 +1385,26 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
+  # Each inner query corresponds to a single result of the outer query.  This
+  # method is called on the inner query, returning the +this_id+ of the outer
+  # query for that result.
+  def get_outer_this_id
+    if outer_this_id
+      outer_this_id.call(self)
+    else
+      params[outer.model_string.underscore.to_sym]
+    end
+  end
+
   # Create a new copy of this query corresponding to the new outer query.
   def new_inner(new_outer)
     new_params = params.merge(:outer => new_outer.id)
-    outer_setup(new_outer, new_params)
-    self.class.create(model, flavor, new_params)
+    if setup_new_inner_query
+      setup_new_inner_query.call(new_params, new_outer)
+    else
+      new_params[new_outer.model_string.underscore.to_sym] = new_outer.this_id
+    end
+    self.class.lookup_and_save(model, flavor, new_params)
   end
 
   # Create a new copy of this query if the outer query changed, otherwise
@@ -1292,25 +1421,25 @@ class AbstractQuery < ActiveRecord::Base
 
   # Move outer query to first place.
   def outer_first
-    outer.this_id = outer_this_id
+    outer.this_id = get_outer_this_id
     new_inner_if_necessary(outer.first)
   end
 
   # Move outer query to previous place.
   def outer_prev
-    outer.this_id = outer_this_id
+    outer.this_id = get_outer_this_id
     new_inner_if_necessary(outer.prev)
   end
 
   # Move outer query to next place.
   def outer_next
-    outer.this_id = outer_this_id
+    outer.this_id = get_outer_this_id
     new_inner_if_necessary(outer.next)
   end
 
   # Move outer query to last place.
   def outer_last
-    outer.this_id = outer_this_id
+    outer.this_id = get_outer_this_id
     new_inner_if_necessary(outer.last)
   end
 end

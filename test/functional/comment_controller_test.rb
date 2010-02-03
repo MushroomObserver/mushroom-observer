@@ -19,7 +19,8 @@ class CommentControllerTest < ControllerTestCase
 
   def test_show_comments_by_user
     get_with_dump(:show_comments_by_user, :id => @rolf.id)
-    assert_response('list_comments')
+    assert_response(:action => 'show_comment', :id => 1,
+                    :params => @controller.query_params(Query.last))
   end
 
   def test_add_comment

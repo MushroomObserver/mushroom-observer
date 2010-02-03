@@ -37,9 +37,12 @@ class SpeciesListController < ApplicationController
   require 'rtf'
 
   before_filter :login_required, :except => [
+    :all_species_lists,
     :list_species_lists,
     :make_report,
     :name_lister,
+    :next_species_list,
+    :prev_species_list,
     :show_species_list,
     :species_lists_by_title,
     :species_lists_by_user,
@@ -52,44 +55,51 @@ class SpeciesListController < ApplicationController
     :show_species_list,
   ]
 
-  # Display list of all species_lists, sorted by date.
-  # Linked from: left-hand panel
-  # Inputs: none
-  # Outputs: @species_lists, @species_list_pages
+  ##############################################################################
+  #
+  #  :section: Searches and Indexes
+  #
+  ##############################################################################
+
+  # Display list of selected species_lists, based on current Query.  (Linked
+  # from show_species_list, next to "prev" and "next".)
   def list_species_lists
-    store_location
-    store_query
     query = find_or_create_query(:SpeciesList, :all, :by => :date)
-    @pages = paginate_numbers(:page, 10)
-    @objects = query.paginate(@pages)
+    show_selected_species_lists(query, :id => params[:id])
   end
 
-  # Display list of user's species_lists, sorted by date.
-  # Linked from: left-hand panel
-  # Inputs: params[:id] (user)
-  # Outputs: @title, @species_lists, @species_list_pages
+  # Display list of all species_lists, sorted by date.  (Linked from left
+  # panel.)
+  def all_species_lists
+    query = create_query(:SpeciesList, :all, :by => :date)
+    show_selected_species_lists(query)
+  end
+
+  # Display list of user's species_lists, sorted by date.  (Linked from left
+  # panel.)
   def species_lists_by_user
-    user = User.find(params[:id])
-    store_location
-    store_query
-    @title = :species_list_list_by_user.l(:user => user.legal_name)
-    query = create_query(:SpeciesList, :by_user, :user => user)
-    @pages = paginate_numbers(:page, 10)
-    @objects = query.paginate(@pages)
-    render(:action => "list_species_lists")
+    query = create_query(:SpeciesList, :by_user, :user => params[:id])
+    show_selected_species_lists(query)
   end
 
-  # Display list of all species_lists, sorted by title.
-  # Linked from: left-hand panel
-  # Inputs: none
-  # Outputs: @species_lists
+  # Display list of all species_lists, sorted by title.  (Linked from left
+  # panel.)
   def species_lists_by_title
-    store_location
-    store_query
     query = create_query(:SpeciesList, :all, :by => :title)
-    @pages = paginate_numbers(:page, 100)
-    @objects = query.paginate(@pages)
+    show_selected_species_lists(query)
   end
+
+  # Show selected list of species_lists.
+  def show_selected_species_lists(query, args={})
+    args = { :action => :list_species_lists, :num_per_page => 10 }.merge(args)
+    show_index_of_objects(query, args)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Show and Edit Species Lists
+  #
+  ##############################################################################
 
   # Linked from: list_species_lists, show_observation, create/edit_species_list, etc. etc.
   # Inputs: params[:id] (species_list)
@@ -105,6 +115,18 @@ class SpeciesListController < ApplicationController
     store_query(query) if params[:set_source].to_s != ''
     @pages = paginate_letters(:letter, :page, 100)
     @objects = query.paginate(@pages, 'names.text_name')
+  end
+
+  # Go to next species_list: redirects to show_species_list.
+  def next_species_list
+    species_list = SpeciesList.find(params[:id])
+    redirect_to_next_object(:next, species_list)
+  end
+
+  # Go to previous species_list: redirects to show_species_list.
+  def prev_species_list
+    species_list = SpeciesList.find(params[:id])
+    redirect_to_next_object(:prev, species_list)
   end
 
   # Form for creating a new species list.

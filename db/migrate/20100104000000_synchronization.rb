@@ -292,7 +292,6 @@ drop_table :queries
     create_table 'queries', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
       t.column 'modified',     :datetime
       t.column 'access_count', :integer
-      t.column 'user_id',      :integer
       t.column 'model',        :enum, :limit => Query.all_models
       t.column 'flavor',       :enum, :limit => Query.all_flavors
       t.column 'params',       :text

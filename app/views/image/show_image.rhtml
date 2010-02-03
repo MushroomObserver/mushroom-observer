@@ -24,7 +24,7 @@
   new_tab_set do
     add_tab(:app_prev.t, :action => 'prev_image', :id => @image.id,
             :params => query_params)
-    add_tab(:app_index.t, :action => 'list_images',
+    add_tab(:app_index.t, :action => 'list_images', :id => @image.id,
             :params => query_params)
     add_tab(:app_next.t, :action => 'next_image', :id => @image.id,
             :params => query_params)

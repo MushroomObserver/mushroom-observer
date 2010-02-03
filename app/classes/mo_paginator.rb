@@ -14,12 +14,18 @@ class MOPaginator
   attr_accessor :number        # Current page number.
   attr_accessor :num_per_page  # Number of results per page.
   attr_accessor :num_total     # Total number of results.
-  attr_accessor :used_letters  # Hash of letters that have results.
+  attr_accessor :used_letters  # List of letters that have results.
 
   alias page_arg number_arg
   alias page number
   alias length num_total
   alias length= num_total=
+
+  # Set page number so that it shows the given result (given by index, with
+  # zero being the first result).
+  def show_index(index)
+    self.number = (index.to_f / num_per_page).floor + 1
+  end
 
   # Let user supply number of results, but validate it so we know where
   # errors came from that would inevitably otherwise occur later on.

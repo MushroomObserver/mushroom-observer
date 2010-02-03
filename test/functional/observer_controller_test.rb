@@ -74,6 +74,10 @@ class ObserverControllerTest < ControllerTestCase
     get_with_dump(:list_observations)
     assert_response('list_observations')
 
+    # Test again, this time specifying page number via an observation id.
+    get(:list_observations, :id => 4)
+    assert_response('list_observations')
+
     get_with_dump(:list_rss_logs)
     assert_response('list_rss_logs')
 
@@ -169,12 +173,12 @@ class ObserverControllerTest < ControllerTestCase
   def test_observation_search
     get_with_dump(:observation_search, :pattern => '12')
     assert_response('list_observations')
-    assert_equal(:list_observations_matching.t(:pattern => '12'),
+    assert_equal(:query_title_pattern.t(:types => 'Observations', :pattern => '12'),
                  @controller.instance_variable_get('@title'))
 
     get_with_dump(:observation_search, :pattern => '12', :page => 2)
     assert_response('list_observations')
-    assert_equal(:list_observations_matching.t(:pattern => '12'),
+    assert_equal(:query_title_pattern.t(:types => 'Observations', :pattern => '12'),
                  @controller.instance_variable_get('@title'))
   end
 
@@ -223,13 +227,29 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_show_observation
+    # Test it on obs with no namings first.
+    obs_id = observations(:unknown_with_no_naming).id
+    get_with_dump(:show_observation, :id => obs_id)
+    assert_response('show_observation')
+    assert_form_action(:action => 'show_observation', :id => obs_id)
+
+    # Test it on obs with two namings (Rolf's and Mary's), but no one logged in.
     obs_id = observations(:coprinus_comatus_obs).id
     get_with_dump(:show_observation, :id => obs_id)
     assert_response('show_observation')
     assert_form_action(:action => 'show_observation', :id => obs_id)
 
-    obs_id = observations(:unknown_with_no_naming).id
-    get(:show_observation, :id => obs_id)
+    # Test it on obs with two namings, with owner logged in.
+    login('rolf')
+    obs_id = observations(:coprinus_comatus_obs).id
+    get_with_dump(:show_observation, :id => obs_id)
+    assert_response('show_observation')
+    assert_form_action(:action => 'show_observation', :id => obs_id)
+
+    # Test it on obs with two namings, with non-owner logged in.
+    login('mary')
+    obs_id = observations(:coprinus_comatus_obs).id
+    get_with_dump(:show_observation, :id => obs_id)
     assert_response('show_observation')
     assert_form_action(:action => 'show_observation', :id => obs_id)
 
@@ -237,7 +257,6 @@ class ObserverControllerTest < ControllerTestCase
     # This is a regression test for a bug in _show_namings.rhtml
     # Ensure that rolf owns @obs_with_no_opinion.
     user = login('rolf')
-    
     obs = observations(:strobilurus_diminutivus_obs)
     assert_equal(obs.user, user)
     get(:show_observation, :id => obs.id)

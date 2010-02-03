@@ -1,6 +1,6 @@
 #
 #  Views: ("*" - login required, "R" - root required)
-#     name_index          List of results of index/search.
+#     list_names          List of results of index/search.
 #     all_names           Alphabetical list of all names, used or otherwise.
 #     observation_index   Alphabetical list of names people have seen.
 #     name_search         Seach for string in name, notes, etc.
@@ -38,7 +38,7 @@ class NameController < ApplicationController
     :eol,
     :eol_preview,
     :map,
-    :name_index,
+    :list_names,
     :name_search,
     :names_by_author,
     :names_by_editor,
@@ -68,29 +68,25 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Display list of names in last index/search query.
-  def name_index
+  def list_names
     query = find_or_create_query(:Name, :all, :by => :name)
-    @title = :name_index_name_index.t
-    show_selected_names(query)
+    show_selected_names(query, :id => params[:id])
   end
 
   # Display list of all (correctly-spelled) names in the database.
   def all_names
     query = create_query(:Name, :all, :by => :name)
-    @title = :name_index_name_index.t
     show_selected_names(query)
   end
 
   # Display list of names that have observations.
   def observation_index
     query = create_query(:Name, :with_observations)
-    @title = :name_index_observation_index.t
     show_selected_names(query)
   end
 
   # Display list of names that have authors.
   def authored_names
-    @title = :authored_names_title.t
     query = create_query(:Name, :with_authors)
     show_selected_names(query) do |name|
       # Add some extra fields to the index.
@@ -103,7 +99,6 @@ class NameController < ApplicationController
   # Display list of names that a given user is author on.
   def names_by_author
     user = User.find(params[:id])
-    @title = :names_by_author_title.t(:name => user.legal_name)
     @error = :names_by_author_error.t(:name => user.legal_name)
     query = create_query(:Name, :by_author, :user => user)
     show_selected_names(query)
@@ -112,7 +107,6 @@ class NameController < ApplicationController
   # Display list of names that a given user is editor on.
   def names_by_editor
     user = User.find(params[:id])
-    @title = :names_by_editor_title.t(:name => user.legal_name)
     @error = :names_by_editor_error.t(:name => user.legal_name)
     query = create_query(:Name, :by_editor, :user => user)
     show_selected_names(query)
@@ -134,10 +128,10 @@ class NameController < ApplicationController
       ORDER BY name_counts.count DESC, names.search_name ASC
       LIMIT 100
     )
-    @title = :needed_descriptions_title.t
-    @help  = :needed_descriptions_help
-    query = create_query(:Name, :in_set, :ids => data.map(&:first))
-    show_selected_names(query, 100) do |name|
+    @help = :needed_descriptions_help
+    query = create_query(:Name, :in_set, :ids => data.map(&:first),
+                         :title => ":needed_descriptions_title")
+    show_selected_names(query, :num_per_page => 100) do |name|
       # Add number of observations (parenthetically).
       row = data.select {|id,count| id == name.id}.first
       row ? "(#{count} #{:observations.t})" : ''
@@ -147,12 +141,11 @@ class NameController < ApplicationController
   # Display list of names that match a string.
   def name_search
     pattern = params[:pattern].to_s
-    if pattern.match(/^\d+$/) &&
-       name = Name.safe_find(pattern)
+    if pattern.match(/^\d+$/) and
+       (name = Name.safe_find(pattern))
       redirect_to(:action => 'show_name', :id => name.id)
     else
       query = create_query(:Name, :pattern, :pattern => pattern)
-      @title = :name_index_matching.t(:pattern => pattern)
       show_selected_names(query)
     end
   end
@@ -161,7 +154,6 @@ class NameController < ApplicationController
   def advanced_search
     begin
       query = find_query(:Name)
-      @title = :advanced_search_title.t
       show_selected_names(query)
     rescue => err
       flash_error(err)
@@ -170,13 +162,11 @@ class NameController < ApplicationController
   end
 
   # Show selected search results as a list with 'list_names' template.
-  def show_selected_names(query, num_per_page=50)
+  def show_selected_names(query, args={})
     store_query(query)
-    show_index_of_objects(query,
-      :action => 'list_names',
-      :letters => 'names.text_name',
-      :num_per_page => num_per_page
-    )
+    args = { :action => 'list_names', :letters => 'names.text_name',
+             :num_per_page => 50 }.merge(args)
+    show_index_of_objects(query, args)
   end
 
   ################################################################################
@@ -277,7 +267,7 @@ class NameController < ApplicationController
     @other_versions = @name.versions.reverse
   end
 
-  # Go to next observation: redirects to show_observation.
+  # Go to next name: redirects to show_name.
   def next_name
     name = Name.find(params[:id])
     redirect_to_next_object(:next, name)

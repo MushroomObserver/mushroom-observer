@@ -977,11 +977,12 @@ class ApplicationController < ActionController::Base
           result = query
         elsif query2 = query.coerce(model)
           result = query2
-        elsif (query = query.outer) and
-              (query.model_string == model)
-          result = query
-        elsif query2 = query.coerce(model)
-          result = query2
+        elsif query = query.outer
+          if query.model_string == model
+            result = query
+          elsif query2 = query.coerce(model)
+            result = query2
+          end
         end
         if update && result
           result.access_count += 1
@@ -1054,6 +1055,9 @@ class ApplicationController < ActionController::Base
     # Pass this query on when clicking on results.
     set_query_params(query)
 
+    # Supply a default title.
+    @title ||= query.title
+
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1069,10 +1073,19 @@ class ApplicationController < ActionController::Base
     # Otherwise paginate results.
     else
       if field = args[:letters]
-        @pages   = paginate_letters(letter_arg, number_arg, num_per_page)
+        @pages = paginate_letters(letter_arg, number_arg, num_per_page)
+        if (args[:id].to_s != '') and
+           (params[@pages.letter_arg].to_s == '') and
+           (params[@pages.number_arg].to_s == '')
+          @pages.show_index(query.index(args[:id]))
+        end
         @objects = query.paginate(@pages, field)
       else
-        @pages   = paginate_numbers(number_arg, num_per_page)
+        @pages = paginate_numbers(number_arg, num_per_page)
+        if (args[:id].to_s != '') and
+           (params[@pages.number_arg].to_s == '')
+          @pages.show_index(query.index(args[:id]))
+        end
         @objects = query.paginate(@pages)
       end
   

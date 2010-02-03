@@ -9,7 +9,8 @@
       <tr valign="top" class="ListLine<%= odd_or_even %>">
         <td width="100%">
           <%= link_to(sprintf('<span class="ListWhat">%s</span>', comment.summary.t),
-                      :action => 'show_comment', :id => comment.id) %>:
+                      :action => 'show_comment', :id => comment.id,
+                      :params => query_params) %>:
           <% if object %>
             <%= link_to(sprintf('<span class="ListWhat">%s</span>',
                                 object.unique_format_name.t),

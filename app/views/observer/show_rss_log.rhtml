@@ -5,7 +5,7 @@
     <% for key, args, time in @rss_log.parse_log
       if key != :log_orphan %>
         <tr>
-          <td><%= time.strftime("%a %b %d, %Y %H:%M:%S %Z") %></td>
+          <td style="white-space:nowrap"><%= time.web_time %></td>
           <td width="10"></td>
           <td><%= key.t(args) %></td>
         </tr>

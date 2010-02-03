@@ -50,7 +50,7 @@ class NameControllerTest < ControllerTestCase
   def test_name_search
     get_with_dump(:name_search, :pattern => '56')
     assert_response('list_names')
-    assert_equal(:name_index_matching.t(:pattern => '56'),
+    assert_equal(:query_title_pattern.t(:types => 'Names', :pattern => '56'),
                  @controller.instance_variable_get('@title'))
   end
 

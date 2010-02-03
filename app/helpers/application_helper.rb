@@ -21,11 +21,6 @@
 #  ---
 #  boxify::                Wrap HTML in colored-outline box.
 #  end_boxify::            End boxify box.
-#  ---
-#  pagination_letters::    Render the set of letters for pagination.
-#  pagination_numbers::    Render nearby page numbers for pagination.
-#  ---
-#  draw_interest_icons::   Draw the three cutesy eye icons.
 #
 ################################################################################
 
@@ -33,11 +28,14 @@ module ApplicationHelper
   require_dependency 'auto_complete_helper'
   require_dependency 'javascript_helper'
   require_dependency 'map_helper'
+  require_dependency 'paginator_helper'
   require_dependency 'tab_helper'
   require_dependency 'textile_helper'
-  include Autocomplete
+
+  include AutoComplete
   include Javascript
   include Map
+  include Paginator
   include Tabs
   include Textile
 
@@ -268,164 +266,5 @@ module ApplicationHelper
   def end_boxify
     "  </td></tr></table>
     </div>"
-  end
-
-  # Insert letterer pagination links.
-  #
-  #   # In controller:
-  #   def action
-  #     query = create_query(:Name)
-  #     @pages = paginate_letters(:letter, :page, 50)
-  #     @names = query.paginate(@pages, 'names.text_name')
-  #   end
-  #
-  #   # In view:
-  #   <%= pagination_letters(@pages) %>
-  #   <%= pagination_numbers(@pages) %>
-  #
-  def pagination_letters(pages, args={})
-    if pages && pages.letter_arg
-      params = args[:params] || {}
-      str = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
-        params[pages.letter_arg] = letter
-        if !pages.used_letters || pages.used_letters[letter]
-          link_to(letter, params)
-        end
-      end.join(' ')
-      return %(<div class="pagination">#{str}</div>)
-    else
-      return ''
-    end
-  end
-
-  # Insert numbered pagination links.  I've thrown out the Rails plugin
-  # pagination_letters because it is no longer giving us enough to be worth it.
-  # (See also pagination_letters above.)
-  #
-  #   # In controller:
-  #   def action
-  #     query = create_query(:Name)
-  #     @pages = paginate_numbers(:page, 50)
-  #     @names = query.paginate(@pages)
-  #   end
-  #
-  #   # In view: (it is wrapped in 'pagination' div already)
-  #   <%= pagination_numbers(@pages) %>
-  #
-  def pagination_numbers(pages, args={})
-    result = ''
-    if pages && pages.num_pages > 1
-      params = args[:params] ||= {}
-      if pages.letter_arg && pages.letter
-        params[pages.letter_arg] = pages.letter
-      end
-      
-      num  = pages.num_pages
-      arg  = pages.number_arg
-      this = pages.number
-      this = 1 if this < 1
-      this = num if this > num
-      size = args[:window_size] || 5
-      from = this - size
-      to   = this + size
-      
-      result = []
-      pstr = "&laquo; #{:app_prev.t}"
-      nstr = "#{:app_next.t} &raquo;"
-      result << pagination_link(pstr, this-1, arg, args) if this > 1
-      result << '|'                                      if this > 1
-      result << pagination_link(1, 1, arg, args)         if from > 1
-      result << '...'                                    if from > 2
-      for n in from..to
-        if n == this
-          result << n
-        elsif n > 0 && n <= num
-          result << pagination_link(n, n, arg, args)
-        end
-      end
-      result << '...'                                    if to < num - 1
-      result << pagination_link(num, num, arg, args)     if to < num
-      result << '|'                                      if this < num
-      result << pagination_link(nstr, this+1, arg, args) if this < num
-      
-      result = %(<div class="pagination">#{result.join(' ')}</div>)
-    end
-  end
-
-  # Render a single pagination link for paginate_numbers above.
-  def pagination_link(label, page, arg, args)
-    params = args[:params] || {}
-    params[arg] = page
-    url = h(reload_with_args(params))
-    if args[:anchor]
-      url.sub!(/#.*/, '')
-      url += '#' + args[:anchor]
-    end
-    link_to(label, url)
-  end
-
-  # Draw the cutesy eye icons in the upper right side of screen.  It does it
-  # by creating a "right" tab set.  Thus this must be called in the header of
-  # the view and must not actually be rendered.  Typical usage would be:
-  #
-  #   # At top of view:
-  #   <%
-  #     # Specify the page's title.
-  #     @title = "Page Title"
-  #
-  #     # Define set of linked text tabs for top-left.
-  #     new_tab_set do
-  #       add_tab("Tab Label One", :link => args, ...)
-  #       add_tab("Tab Label Two", :link => args, ...)
-  #       ...
-  #     end
-  #
-  #     # Draw interest icons in the top-right.
-  #     draw_interest_icons(@observation, @interest) if @user
-  #   %>
-  #
-  # This will cause the set of three icons to be rendered floating in the
-  # top-right corner of the content portion of the page.
-  #
-  def draw_interest_icons(object, interest)
-    type  = object.class.to_s.underscore.to_sym
-    type2 = object.class.to_s
-    if !@interest
-      alt1 = :interest_watch_help.l(:object => type.l)
-      alt2 = :interest_ignore_help.l(:object => type.l)
-      img1 = image_tag('watch3.png',  :alt => alt1, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      add_right_tab("<div>#{img1} #{img2}</div>")
-    elsif @interest.state
-      alt1 = :interest_watching.l(:object => type.l)
-      alt2 = :interest_default_help.l(:object => type.l)
-      alt3 = :interest_ignore_help.l(:object => type.l)
-      img1 = image_tag('watch2.png',    :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('ignore3.png',   :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    else
-      alt1 = :interest_ignoring.l(:object => type.l)
-      alt2 = :interest_watch_help.l(:object => type.l)
-      alt3 = :interest_default_help.l(:object => type.l)
-      img1 = image_tag('ignore2.png',   :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('watch3.png',    :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    end
   end
 end

@@ -27,13 +27,23 @@ class SpeciesListControllerTest < ControllerTestCase
   end
 
   def test_show_species_list
+    # Show empty list with no one logged in.
     get_with_dump(:show_species_list, :id => 1)
+    assert_response('show_species_list')
+
+    # Show same list with non-owner logged in.
+    login('mary')
+    get_with_dump(:show_species_list, :id => 1)
+    assert_response('show_species_list')
+
+    # Show non-empty list with owner logged in.
+    get_with_dump(:show_species_list, :id => 3)
     assert_response('show_species_list')
   end
 
   def test_species_lists_by_title
     get_with_dump(:species_lists_by_title)
-    assert_response('species_lists_by_title')
+    assert_response('list_species_lists')
   end
 
   def test_species_lists_by_user

@@ -13,6 +13,8 @@
 class CommentController < ApplicationController
   before_filter :login_required, :except => [
     :list_comments,
+    :next_comment,
+    :prev_comment,
     :show_comment,
     :show_comments_by_user,
     :show_comments_for_user,
@@ -24,50 +26,50 @@ class CommentController < ApplicationController
     :show_comment,
   ]
 
-  # Show list of latest comments.
-  # Linked from: left-hand panel
-  # Inputs: params[:page]
-  # Outputs: @comments, @comment_pages
+  ##############################################################################
+  #
+  #  :section: Searches and Indexes
+  #
+  ##############################################################################
+
+  # Show selected list of comments, based on current Query.  (Linked from
+  # show_comment, next to "prev" and "next"... or will be.)
   def list_comments
-    store_location
-    store_query
-    @title = :list_comments.t
     query = find_or_create_query(:Comment, :all, :by => :created)
-    @pages = paginate_numbers(:page, 10)
-    @objects = query.paginate(@pages)
+    show_selected_comments(query, :id => params[:id])
   end
 
-  # Shows comments for a given user, most recent first.
-  # Linked from: left panel
-  # View: list_comments
-  # Inputs: params[:id] (user)
-  # Outputs: @comments, @comment_pages
+  # Show list of latest comments. (Linked from left panel.)
+  def all_comments
+    query = create_query(:Comment, :all, :by => :created)
+    show_selected_comments(query)
+  end
+
+  # Shows comments for a given user, most recent first.  (Linked from left
+  # panel.) 
   def show_comments_for_user
-    store_location
-    store_query
-    for_user = User.find(params[:id])
-    @title = :list_comments_for_user.t(:user => for_user.legal_name)
-    query = create_query(:Comment, :for_user, :user => for_user)
-    @pages = paginate_numbers(:page, 10)
-    @objects = query.paginate(@pages)
-    render(:action => 'list_comments')
+    query = create_query(:Comment, :for_user, :user => params[:id])
+    show_selected_comments(query)
   end
 
-  # Shows comments for a given user, most recent first.
-  # Linked from: left panel
-  # View: list_comments
-  # Inputs: params[:id] (user)
-  # Outputs: @comments, @comment_pages
+  # Shows comments for a given user, most recent first.  (Linked from left
+  # panel.)
   def show_comments_by_user
-    store_location
-    store_query
-    by_user = User.find(params[:id])
-    @title = :list_comments_by_user.t(:user => by_user.legal_name)
-    query = create_query(:Comment, :by_user, :user => by_user)
-    @pages = paginate_numbers(:page, 10)
-    @objects = query.paginate(@pages)
-    render(:action => 'list_comments')
+    query = create_query(:Comment, :by_user, :user => params[:id])
+    show_selected_comments(query)
   end
+
+  # Show selected list of comments.
+  def show_selected_comments(query, args={})
+    args = { :action => :list_comments, :num_per_page => 24 }.merge(args)
+    show_index_of_objects(query, args)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Show and Post Comments
+  #
+  ##############################################################################
 
   # Display comment by itself.
   # Linked from: show_observation, list_comments
@@ -75,8 +77,21 @@ class CommentController < ApplicationController
   # Outputs: @comment, @object
   def show_comment
     store_location
+    pass_query_params
     @comment = Comment.find(params[:id])
     @object = @comment.object
+  end
+
+  # Go to next comment: redirects to show_comment.
+  def next_comment
+    comment = Comment.find(params[:id])
+    redirect_to_next_object(:next, comment)
+  end
+
+  # Go to previous comment: redirects to show_comment.
+  def prev_comment
+    comment = Comment.find(params[:id])
+    redirect_to_next_object(:prev, comment)
   end
 
   # Form to create comment for an object.

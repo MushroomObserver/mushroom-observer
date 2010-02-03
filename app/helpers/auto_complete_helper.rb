@@ -31,7 +31,7 @@
 #
 ################################################################################
 
-module ApplicationHelper::Autocomplete
+module ApplicationHelper::AutoComplete
 
   # Turn a text_field into an auto-completer.
   # id::   id of text_field

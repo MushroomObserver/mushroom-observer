@@ -30,7 +30,7 @@ projects: Projekte
 species_list: Artenliste
 species_lists: Artenlisten
 user: Nutzer
-users: Nutzer
+users: Nutzern
 vote: Stimme
 votes: Stimmen
 
@@ -128,6 +128,7 @@ app_no_create_name: Kann den Namen '[name]' nicht erstellen.
 app_no_javascript: Javascript ist ausgeschaltet
 app_no_more_search_objects:  There are no more [types].
 app_no_session: Dein Browser nimmt einen Cookie nicht an
+app_object_title: Titel
 app_permission_denied: Nicht erlaubt.
 app_rss: Mushroom Observer RSS
 app_sort_by_name: Nach Namen sortieren
@@ -171,6 +172,7 @@ app_save: Speichern
 app_search: Suchen
 app_send: Schicken
 app_save_changes: Änderungen Speichern
+app_show_all:  Alle anzeigen
 app_show_image: Bild anzeigen
 app_show_location: Fundort anzeigen
 app_show_log: Logbuch anzeigen
@@ -432,6 +434,38 @@ validate_vote_value_missing: Bitte gib an wie sicher du dir bist.
 validate_vote_value_not_integer: Auswahl ist keine Zahl.
 validate_vote_value_out_of_bounds: Auswahl ist außerhalb des erlaubten Bereichs.
 
+# Query titles. Notes on [args]:
+#
+# [type] is type of object being indexed / searched for (singular)
+# [types] is the same, but plural (both are available for all titles)
+# [order] is sort order (singular), e.g., "Name" or "Date"
+# [name], [location], [where], [pattern], etc. are un-translatable strings
+#
+query_title_advanced: "Erweiterte Suche"
+query_title_all: "[type]-Index"
+query_title_all_by: "[types] nach [order] sortiert"
+query_title_at_location: "[types] aus [location]"
+query_title_at_where: "[types] aus '[where]'"
+query_title_by_author:  "[types] Authored by [user]"
+query_title_by_editor:  "[types] Edited by [user]"
+query_title_by_rss_log: "[types] in Logbuch der neuen Änderungen"
+query_title_by_user: "[types] von [user]"
+query_title_children:  "Lower Taxa under [name]"
+query_title_for_user: "[types] für [user]"
+query_title_in_set:  "Selected [types]"
+query_title_in_species_list: "[types] von [species_list]"
+query_title_inside_observation: "[types] für [observation]"
+query_title_of_name: "[types] von [name]"
+query_title_of_name_synonym: "[types] von Synonyme von [name]"
+query_title_of_name_nonconsensus:  "[types] That Might Be [name]"
+query_title_parents:  "Higher Taxa containing [name]"
+query_title_pattern: "[types], die zu '[pattern]' passen"
+query_title_with_authors:  "[types] with Authors"
+query_title_with_observations:  "[types] with Observations"
+query_title_with_observations_of_name:  "[types] with Observations of [name]"
+query_title_with_observations_of_name_synonym:  "[types] with Observations of Synonyms of [name]"
+query_title_with_observations_of_name_nonconsensus:  "[types] with Observations That Might Be [name]"
+
 ################################################################################
 
 # project/add_members
@@ -551,10 +585,6 @@ ask_webmaster_success: Frage oder Anregung verschickt.
 ask_webmaster_title: Frage oder Anregung schicken
 ask_webmaster_your_email: Deine Email-Adresse
 
-
-# name/authored_names
-authored_names_title:  Names with Authors
-authored_names_error:  No names have authors
 
 # observer/license_updater
 bulk_license_link:  Bulk License Updater
@@ -708,7 +738,7 @@ destroy_draft_success: Entwurf gelöscht.
 
 # observer/destroy_naming
 destroy_naming_denied: Dieser Name gehört dir nicht.
-destroy_naming_failed:  Dieser Name konnte nicht gelöscht werden(?)
+destroy_naming_failed:  Failed to destroy naming(?)
 destroy_naming_someone_else: >
   Entschuldigung, jemand ist sich sicher, dass dies der richtige Name ist.
   Du kannst gern weitere Namen vorschlagen, aber du kannst diesen Namen
@@ -719,7 +749,7 @@ destroy_naming_success: Name gelöscht.
 
 # observer/destroy_observation
 destroy_observation_denied: Dies ist nicht dein Fund.
-destroy_observation_failed:  Fund konnte nicht gelöscht werden(?)
+destroy_observation_failed:  Failed to destroy observation(?)
 destroy_observation_success: Fund gelöscht.
 
 
@@ -1308,13 +1338,6 @@ image_add_warning: >
   Betrieb dieser Webseite zu sammeln.
 
 
-# image_controller
-images_by_title: Bilder nach Titeln sortiert
-images_by_user: Bilder von [user]
-image_list_title: Bilder
-image_no_new_image: Keine neuen Bilder gefunden.
-
-
 # image/reuse_image_for_user
 image_changed_your_image: 'Als Bild wird nun Bild #[id] benutzt.'
 image_reuse_all_users:  Include other users' images.
@@ -1323,7 +1346,7 @@ image_reuse_just_yours:  Only show your images.
 
 # image/destroy_image
 image_destroy_success: Das Bild ist gelöscht worden.
-image_destroy_failed:  Konnte Bild nicht gelöscht.
+image_destroy_failed:  Failed to destroy image.
 
 
 # image/edit_image
@@ -1355,10 +1378,6 @@ image_reuse_invalid_id: Ungültige Bild-ID.
 image_reuse_reuse: Recycle
 image_reuse_success: 'Bild #[id] ist angefügt worden.'
 image_reuse_title: Bild für [name] recyclen.
-
-
-# image/image_search
-image_search_title: Bilder, die zu '[pattern]' passen
 
 
 # image/show_image
@@ -1397,12 +1416,6 @@ interest_watching:  You have told us to email you about changes in this [object]
 interest_ignoring:  You have told us never to email you about changes in this [object].  Click on one of the small icons below to change.
 
 
-# comment/list_comments
-list_comments: Kommentare
-list_comments_by_user: Kommentare von [user]
-list_comments_for_user: Kommentare für [user]
-
-
 # interest/list_interests
 list_interests_title:  Your Notification Requests
 list_interests_turn_on:  Change to Watch
@@ -1420,26 +1433,15 @@ list_merge_options_title: Optionen zum Kombinieren von [where]
 list_notifications_title: Email-Benachrichtigungen für [user]
 
 
-# observer/list_observations
-list_observations_default_title: Funde
-list_observations_from_location: Funde in [location]
-list_observations_from_where: Funde aus '[where]'
-list_observations_by_user: Funde von [user]
-list_observations_matching: Funde, die zu '[pattern]' passen
-
-
 # location/list_place_names
 list_place_names_known: Bekannte Fundorte (alfabetisch)
 list_place_names_map: Karte der Fundorte
 list_place_names_merge: Kombinieren
-list_place_names_pattern_title: Fundorte, die zu '[pattern]' passen
-list_place_names_title: Alle Fundorte
 list_place_names_undef: Fundorte ohne Kartenposition (nach Häufigkeit)
 
 
 # project/list_projects
 list_projects_add_project: Projekt starten
-list_projects_title: Projekte
 
 
 # application_helper
@@ -1450,10 +1452,6 @@ location_merge: Mit einem bekannten Fundort kombinieren
 
 # location/add_to_location
 location_merge_success: '[this] und [that] sind nun kombiniert.'
-
-
-# location/list_location
-location_index_title: Fundorte-Index
 
 
 # account/login
@@ -1592,9 +1590,6 @@ name_deprecate_title: Markiere [name] als veraltet
 # name/name_index (and other actions using same view)
 name_index_add_name: Namen erstellen
 name_index_bulk_edit: Viele Namen auf einmal bearbeiten
-name_index_matching: Namen, die zu '[pattern]' passen
-name_index_name_index: Namensregister
-name_index_observation_index: Funde-Index
 name_index_no_matches:  No matching names.
 
 
@@ -1652,13 +1647,11 @@ name_search_none_found: Keine Namen gefunden, die zu '[pattern]' passen.
 names_by_author_error:  >
   [name] hasn't written any descriptions
 
-names_by_author_title:  Descriptions Written by [name]
 
 # name/names_by_editor
 names_by_editor_error:  >
   [name] hasn't edited any descriptions
 
-names_by_editor_title:  Descriptions Edited by [name]
 
 # name/needed_descriptions
 needed_descriptions_help: >
@@ -2323,11 +2316,6 @@ species_list_edit_success: Die Artenliste ist geändert worden.
 species_list_edit_title: 'Bearbeite Artenliste: [name]'
 
 
-# species_list/list_species_lists
-species_list_list_by_user: Artenlisten von [user]
-species_list_list_title: Artenlisten
-
-
 # species_list/manage_species_lists
 species_list_manage_belongs_to: Dieser Fund gehört
 species_list_manage_doesnt_contain: Listen die dir gehören und diesen Fund nicht enthalten
@@ -2348,6 +2336,7 @@ species_list_show_clone_list:  Clone Species List
 species_list_show_clone_list_help:  Create a new species list using this one as the template.
 species_list_show_edit: Artenliste bearbeiten
 species_list_show_members: Mitarbeiter
+species_list_show_no_members:  This list contains no observations.
 species_list_show_save_as_txt: Als Nur-Text speichern
 species_list_show_save_as_rtf: Als Rich-Text speichern
 species_list_show_save_as_csv: Als Tabelle speichern
@@ -2484,7 +2473,6 @@ users_by_name_last_login: Zuletzt eingeloggt
 users_by_name_login: Login
 users_by_name_name: Name
 users_by_name_theme: Farbschema
-users_by_name_title: Nutzer nach Namen sortiert
 users_by_name_verified: Überprüft
 
 
@@ -3074,3 +3062,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

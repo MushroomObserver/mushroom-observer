@@ -131,6 +131,7 @@ app_no_create_name: No se ha podido crear el nombre <<[name]>>.
 app_no_javascript: Javascript está Deshabilitado
 app_no_more_search_objects:  There are no more [types].
 app_no_session: Usted Ha Deshabilitado las Cookies
+app_object_title: Título
 app_permission_denied: Permiso denegado.
 app_rss: Mushroom Observer RSS
 app_sort_by_name: Ordenar por Nombre
@@ -174,6 +175,7 @@ app_save: Guardar
 app_search: Buscar
 app_send: Enviar
 app_save_changes: Guardar Cambios
+app_show_all: Mostrar Todos
 app_show_image: Mostrar Imagen
 app_show_location: Mostrar Ubicación
 app_show_log: Mostrar Registro
@@ -435,6 +437,38 @@ validate_vote_value_missing: Por favor, elija su nivel de confianza.
 validate_vote_value_not_integer: Valor de la votación no es un número valido.
 validate_vote_value_out_of_bounds: Valor de la votación está fuera de alcance.
 
+# Query titles. Notes on [args]:
+#
+# [type] is type of object being indexed / searched for (singular)
+# [types] is the same, but plural (both are available for all titles)
+# [order] is sort order (singular), e.g., "Name" or "Date"
+# [name], [location], [where], [pattern], etc. are un-translatable strings
+#
+query_title_advanced:  "Advanced Search"
+query_title_all: "Índice de [types]"
+query_title_all_by: "[types] por [order]"
+query_title_at_location: "[types] de [location]"
+query_title_at_where: "[types] de '[where]'"
+query_title_by_author:  "[types] Authored by [user]"
+query_title_by_editor:  "[types] Edited by [user]"
+query_title_by_rss_log: "[types] en Registro de Actividad"
+query_title_by_user: "[types] por [user]"
+query_title_children:  "Lower Taxa under [name]"
+query_title_for_user: "[types] para [user]"
+query_title_in_set:  "Selected [types]"
+query_title_in_species_list: "[types] en [species_list]"
+query_title_inside_observation: "[types] de [observation]"
+query_title_of_name: "[types] de [name]"
+query_title_of_name_synonym: "[types] de Sinónimos de [name]"
+query_title_of_name_nonconsensus:  "[types] That Might Be [name]"
+query_title_parents:  "Higher Taxa containing [name]"
+query_title_pattern: "[types] Coincidentes '[pattern]'"
+query_title_with_authors: "[types] con Autores"
+query_title_with_observations: "[types] con Observaciones"
+query_title_with_observations_of_name: "[types] con Observaciones de [name]"
+query_title_with_observations_of_name_synonym: "[types] con Observaciones de Sinónimos de [name]"
+query_title_with_observations_of_name_nonconsensus:  "[types] with Observations That Might Be [name]"
+
 ################################################################################
 
 # project/add_members
@@ -559,10 +593,6 @@ ask_webmaster_success: Pregunta o comentario se ha enviado.
 ask_webmaster_title: Enviar Pregunta o Comentario
 ask_webmaster_your_email: Su dirección e-mail
 
-
-# name/authored_names
-authored_names_title:  Names with Authors
-authored_names_error:  No names have authors
 
 # observer/license_updater
 bulk_license_link: Actualización de Licencia a Granel
@@ -1326,13 +1356,6 @@ image_add_warning: >
   sitio.
 
 
-# image_controller
-images_by_title: Imágenes por Título
-images_by_user: Imágenes por [user]
-image_list_title: Imágenes
-image_no_new_image: No más imágenes.
-
-
 # image/reuse_image_for_user
 image_changed_your_image: 'Su imagen se ha cambiado a imagen #[id].'
 image_reuse_all_users:  Include other users' images.
@@ -1377,10 +1400,6 @@ image_reuse_success: 'La imagen #[id] se ha agregado con éxito.'
 image_reuse_title: Reutilizar Imagen para [name]
 
 
-# image/image_search
-image_search_title: Imágenes Coincidentes <<[pattern]>>
-
-
 # image/show_image
 image_show_comments: '[num] comentario(s)'
 image_show_copyright: Copyright
@@ -1417,12 +1436,6 @@ interest_watching:  You have told us to email you about changes in this [object]
 interest_ignoring:  You have told us never to email you about changes in this [object].  Click on one of the small icons below to change.
 
 
-# comment/list_comments
-list_comments: Comentarios
-list_comments_by_user: Comentarios por [user]
-list_comments_for_user: Comentarios para [user]
-
-
 # interest/list_interests
 list_interests_title:  Your Notification Requests
 list_interests_turn_on:  Change to Watch
@@ -1442,26 +1455,15 @@ list_merge_options_title: Ubicaciones para Fusionarse con [where]
 list_notifications_title: E-mail Alertas para [user]
 
 
-# observer/list_observations
-list_observations_default_title: Observaciones
-list_observations_from_location: Observaciones de [location]
-list_observations_from_where: Observaciones de '[where]'
-list_observations_by_user: Observaciones por [user]
-list_observations_matching: Observaciones Coincidentes '[pattern]'
-
-
 # location/list_place_names
 list_place_names_known: Ubicaciones Conocidas (alfabético)
 list_place_names_map: Trazar un Mapa de las Ubicaciones
 list_place_names_merge: Combinar
-list_place_names_pattern_title: Ubicaciones en Correspondencia con <<[pattern]>>
-list_place_names_title: Todos las Ubicaciones
 list_place_names_undef: Ubicaciones Indefinidas (por frecuencia)
 
 
 # project/list_projects
 list_projects_add_project: Agregar Proyecto
-list_projects_title: Proyectos
 
 
 # application_helper
@@ -1472,10 +1474,6 @@ location_merge: Fusionar con una Ubicación Definida
 
 # location/add_to_location
 location_merge_success: Se fusionó [this] con [that] con éxito.
-
-
-# location/list_location
-location_index_title: Índice de Ubicaciones
 
 
 # account/login
@@ -1614,9 +1612,6 @@ name_deprecate_title: Desaprobar [name]
 # name/name_index (and other actions using same view)
 name_index_add_name: Agregar Nombre
 name_index_bulk_edit: Editor de Nombre a Granel
-name_index_matching: Nombres Coincidentes <<[pattern]>>
-name_index_name_index: Índice de Nombres
-name_index_observation_index: Índice de Observaciones
 name_index_no_matches: No nombres coincidentes.
 
 
@@ -1677,13 +1672,11 @@ name_search_none_found: >
 names_by_author_error:  >
   [name] hasn't written any descriptions
 
-names_by_author_title:  Descriptions Written by [name]
 
 # name/names_by_editor
 names_by_editor_error:  >
   [name] hasn't edited any descriptions
 
-names_by_editor_title:  Descriptions Edited by [name]
 
 # name/needed_descriptions
 needed_descriptions_help: >
@@ -2375,11 +2368,6 @@ species_list_edit_success: La lista de especies se ha realizado con éxito.
 species_list_edit_title: 'Editar Lista de Especies: [name]'
 
 
-# species_list/list_species_lists
-species_list_list_by_user: Listas de Especies por [user]
-species_list_list_title: Listas de Especies
-
-
 # species_list/manage_species_lists
 species_list_manage_belongs_to: Esta observación pertenece a
 species_list_manage_doesnt_contain: Sus listas que no incluyen esta observatión
@@ -2400,6 +2388,7 @@ species_list_show_clone_list:  Clone Species List
 species_list_show_clone_list_help:  Create a new species list using this one as the template.
 species_list_show_edit: Editar Listas de Especies
 species_list_show_members: Miembros
+species_list_show_no_members: Esta lista no tiene observaciones.
 species_list_show_save_as_txt: Guardar como Texto sin Formato
 species_list_show_save_as_rtf: Guardar como Texto Enriquecido
 species_list_show_save_as_csv: Guardar como Hoja de Cálculo
@@ -2538,7 +2527,6 @@ users_by_name_last_login: Última Sesión
 users_by_name_login: Nombre de Usuario
 users_by_name_name: Nombre Completo
 users_by_name_theme: Tema
-users_by_name_title: Usuarios por Nombre
 users_by_name_verified: Verificado
 
 
@@ -3143,3 +3131,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+
