@@ -4,6 +4,9 @@
   new_tab_set do
     add_tab(:name_map_about.t(:name => @name.display_name),
             :action => 'show_name', :id => @name.id, :params => query_params)
+    add_tab(:app_show_objects.t(:types => :locations.t),
+            :controller => 'location', :action => 'list_locations',
+            :params => query_params(@query))
   end
 
   if !@locations.empty?

@@ -18,7 +18,7 @@
         <table><tr><td width="100%">
 
           <p>
-            <%= :show_observation_comment_created.t %>: <span class="Data"><%= comment.created.to_formatted_s(:db) %></span><br/>
+            <%= :show_observation_comment_created.t %>: <span class="Data"><%= comment.created.web_time %></span><br/>
             <%= :show_observation_comment_created_by.t %>: <%= user_link(comment.user) %>
             <% if check_permission(comment.user_id) %>
               (<%= link_to(:app_edit.t, :controller => 'comment',
@@ -37,7 +37,7 @@
           <% user = comment.user
           if user.image_id %>
             </td><td>
-            <%= link_to(image_tag("thumb/%d.jpg" % user.image.id, :border => 0),
+            <%= link_to(image_tag("thumb/%d.jpg" % user.image_id, :border => 0),
                         :controller => "image", :action => "show_image",
                         :id => user.image_id, :params => query_params) %>
           <% end %>

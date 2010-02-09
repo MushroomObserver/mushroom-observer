@@ -1,7 +1,10 @@
 #
 #  Views: ("*" - login required, "**" - special permission required)
+#     index_project              Projects in current query.
 #     list_projects              Project alphabetically.
 #     show_project               Show a single project.
+#     prev_project               Show previous project in index.
+#     next_project               Show next project in index.
 #   * add_project                Create a project.
 #   * edit_project               Edit a project.
 #   * destroy_project            Destroy project.
@@ -27,8 +30,10 @@ class ProjectController < ApplicationController
   require 'set'
 
   before_filter :login_required, :except => [
-    :all_projects,
+    :index_project,
     :list_projects,
+    :next_project,
+    :prev_project,
     :show_project,
   ]
 
@@ -43,21 +48,29 @@ class ProjectController < ApplicationController
   ]
 
   # Show list of selected projects, based on current Query.
-  def list_projects
-    query = find_or_create_query(:Project, :all, :by => :title)
-    show_selected_projects(query)
+  def index_project
+    query = find_or_create_query(:Project, :all, :by => params[:by] || :title)
+    query.params[:by] = params[:by] if params[:by]
+    show_selected_projects(query, :id => params[:id])
   end
 
   # Show list of latest projects.  (Linked from left panel.)
-  def all_projects
+  def list_projects
     query = create_query(:Project, :all, :by => :title)
     show_selected_projects(query)
   end
 
   # Show selected list of projects.
   def show_selected_projects(query)
+    @links ||= []
+
+    # Add some alternate sorting criteria.
+    # args[:sorting_links] = [
+    #   ['name', :name.t], 
+    # ]
+
     show_index_of_objects(query, :action => :list_projects,
-                          :num_per_page => 10)
+                          :letters => 'projects.title', :num_per_page => 10)
   end
 
   # Display project by itself.
@@ -66,6 +79,7 @@ class ProjectController < ApplicationController
   # Outputs: @project
   def show_project
     store_location
+    pass_query_params
     @project = Project.find(params[:id])
     @is_member = @project.is_member?(@user)
     @is_admin = @project.is_admin?(@user)
@@ -90,6 +104,16 @@ class ProjectController < ApplicationController
         AND draft_names.project_id = #{params[:id]}
       ORDER BY names.search_name
     )
+  end
+
+  # Go to next project: redirects to show_project.
+  def next_project
+    redirect_to_next_object(:next, Project, params[:id])
+  end
+
+  # Go to previous project: redirects to show_project.
+  def prev_project
+    redirect_to_next_object(:prev, Project, params[:id])
   end
 
   # Form to create a project.

@@ -18,7 +18,7 @@ class AccountControllerTest < ControllerTestCase
 
   def test_signup
     @request.session['return-to'] = "http://localhost/bogus/location"
-    num_users = User.all.length
+    num_users = User.count
     post(:signup, "new_user" => {
       "login"    => "newbob",
       "password" => "newpassword",
@@ -28,7 +28,7 @@ class AccountControllerTest < ControllerTestCase
       "theme"    => "NULL"
     })
     assert_equal("http://localhost/bogus/location", @response.redirect_url)
-    assert_equal(num_users+1, User.all.length)
+    assert_equal(num_users+1, User.count)
     user = User.last
     assert_equal('newbob', user.login)
     assert_equal('needs a name!', user.name)
@@ -266,7 +266,7 @@ class AccountControllerTest < ControllerTestCase
     file.content_type = 'image/jpeg'
 
     # It should create a new image: this is the current number of images.
-    num_images = Image.all.length
+    num_images = Image.count
 
     # Post form.
     params = {
@@ -285,7 +285,7 @@ class AccountControllerTest < ControllerTestCase
     assert_response(:controller => :observer, :action => :show_user, :id => 1)
 
     @rolf.reload
-    assert_equal(num_images+1, Image.all.length)
+    assert_equal(num_images+1, Image.count)
     assert_equal(Image.last.id, @rolf.image_id)
     assert_equal("Someone Else", @rolf.image.copyright_holder)
     assert_equal(2003, @rolf.image.when.year)

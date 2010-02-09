@@ -19,18 +19,22 @@
 
 <center>
   <% done = {}
-  for image in [@observation.thumb_image] + @observation.images
+  # This sort puts the thumbnail first.  We can't use thumb_image, because we
+  # haven't eager-loaded it; we *have* eager-loaded all the other images.
+  for image in @observation.images.
+                 sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id}
     if image && !done[image.id]
       done[image.id] = true %>
       <p>
-        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
-                      image.unique_format_name.t,
+        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
+                      "<br/>#{:image.t} ##{image.id}",
                     :controller => 'image', :action => 'show_image',
                     :id => image.id, :obs => @observation.id,
                     :params => query_params) %><br/>
-        <% if image.notes && image.notes != '' %>
+        <% if image.notes.to_s != '' %>
           <small>
-            <%= str = image.notes[0..300].tl
+            <%= # This is really ugly; could break up formatting unit.
+            str = image.notes[0..300].tl
             str += '...' if image.notes.length > 301
             str %>
           </small>

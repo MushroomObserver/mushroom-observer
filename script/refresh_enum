@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+require File.dirname(__FILE__) + '/../config/boot'
+require File.dirname(__FILE__) + '/../config/environment'
+
+status = 0
+done_anything = false
+
+if ARGV.length == 0
+  $stderr.puts "Missing arguments.  Use '--help' for help message."
+  status = 1
+end
+
+for arg in ARGV
+  case arg.to_s
+  when '-h', '--help'
+    puts <<-EOH
+
+SYNOPSIS
+  refresh_enum [-h] <table> [<table> ...]
+
+DESCRIPTION
+  Refreshes the enumerated column(s) from one or more listed tables.
+
+TABLES
+  queries     models and flavors
+  (more to come)
+
+    EOH
+  when 'query', 'queries'
+    ActiveRecord::Migration.change_column(:queries, :model, :enum, :limit => Query.all_models)
+    ActiveRecord::Migration.change_column(:queries, :flavor, :enum, :limit => Query.all_flavors)
+    done_anything = true
+  else
+    $stderr.puts "Unsupported or invalid table: '#{arg}'"
+    status = 1
+  end
+end
+
+if done_anything
+  require 'active_record/schema_dumper'
+  File.open("#{RAILS_ROOT}/db/schema.rb", "w") do |file|
+    ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
+  end
+end
+
+exit status

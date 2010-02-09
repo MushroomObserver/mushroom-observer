@@ -39,7 +39,7 @@
   new_tab_set do
     add_tab(:app_prev.t, :action => 'prev_name', :id => @name.id,
             :params => query_params)
-    add_tab(:app_index.t, :action => 'list_names', :id => @name.id,
+    add_tab(:app_index.t, :action => 'index_name', :id => @name.id,
             :params => query_params)
     add_tab(:app_next.t, :action => 'next_name', :id => @name.id,
             :params => query_params)
@@ -84,10 +84,10 @@
         <% end %>
 
         <%= :app_version.t %>: <%= @name.version %><br/>
-        <% if @past_name %>
-          <%= link_to("#{:show_name_previous_version.t}: %d" % @past_name.version,
+        <% if @previous_version.to_s != '' %>
+          <%= link_to("#{:show_name_previous_version.t}: %d" % @previous_version,
                       :action => 'show_past_name', :id => @name.id,
-                      :version => @past_name.version,
+                      :version => @previous_version,
                       :params => query_params) %><br/>
         <% end %>
 
@@ -217,14 +217,14 @@
               :params => query_params(@children_query))
     end %>
   </p>
-  <%= pagination_numbers(@children_pages, :anchor => 'children') %>
-  <p>
-    <% for child in @children_data %>
-      <%= link_to(child.display_name.t, :action => 'show_name', :id => child.id,
-                  :params => query_params(@children_query)) %><br/>
-    <% end %>
-  </p>
-  <%= pagination_numbers(@children_pages, :anchor => 'children') %>
+  <% paginate_block(@children_pages, :anchor => 'children') do %>
+    <p>
+      <% for child in @children_data %>
+        <%= link_to(child.display_name.t, :action => 'show_name', :id => child.id,
+                    :params => query_params(@children_query)) %><br/>
+      <% end %>
+    </p>
+  <% end %>
 <% end %>
 
 <%
@@ -264,48 +264,48 @@ for sect in ['consensus', 'synonym', 'other']
       <%= head %>
       <%= if data.length < query.num_results
         link_to("(#{:app_show_all.t})", :controller => 'observer',
-                :action => 'list_observations', :params => query_params(query))
+                :action => 'index_observation', :params => query_params(query))
       end %>
     </p>
-    <%= pagination_numbers(pages, :anchor => sect) %>
-    <table cellpadding="5" cellspacing="0">
-      <% odd_or_even = 0
-      for obs in data
-        odd_or_even = 1 - odd_or_even %>
-        <tr valign="top" class="ListLine<%= odd_or_even %>">
-          <td width="110" align="center" valign="middle">
-            <%= if image_id = obs.thumb_image_id
-              link_to(image_tag("thumb/#{image_id}.jpg", :border => 0),
-                      :controller => 'observer', :action => 'show_observation',
-                      :id => obs.id, :params => query_params(query))
-            end %>
-          </td>
-          <td width="100%" valign="middle">
-            <span class="ListName">
-              <%= link_to(obs.name.observation_name.t + " (#{obs.id})",
-                          :controller => 'observer',
-                          :action => 'show_observation', :id => obs.id,
-                          :params => query_params(query)) %>
-            </span><br/>
-            <span class="ListWhere">
-              <%= location_link(obs.where, obs.location_id) %>
-            </span>:
-            <span class="ListWho">
-              <%= user_link(obs.user_id, "#{obs.user.name} (#{obs.user.login})") %>
-            </span><br/>
-            <%= :observation_made.t %>: <%= obs.when.web_date %><br/>
-            <%= :observation_made_confidence.t %>:
-              <%= v = obs.vote_cache
-              if v.nil? || v == ''
-                :app_no_votes.t
-              else
-                (v.to_f*100/3).round.to_s + "%"
+    <% paginate_block(pages, :anchor => sect) do %>
+      <table cellpadding="5" cellspacing="0">
+        <% odd_or_even = 0
+        for obs in data
+          odd_or_even = 1 - odd_or_even %>
+          <tr valign="top" class="ListLine<%= odd_or_even %>">
+            <td width="110" align="center" valign="middle">
+              <%= if image_id = obs.thumb_image_id
+                link_to(image_tag("thumb/#{image_id}.jpg", :border => 0),
+                        :controller => 'observer', :action => 'show_observation',
+                        :id => obs.id, :params => query_params(query))
               end %>
-          </td>
-        </tr>
-      <% end %>
-    </table>
-    <%= pagination_numbers(pages, :anchor => sect) %>
+            </td>
+            <td width="100%" valign="middle">
+              <span class="ListName">
+                <%= link_to(obs.name.observation_name.t + " (#{obs.id})",
+                            :controller => 'observer',
+                            :action => 'show_observation', :id => obs.id,
+                            :params => query_params(query)) %>
+              </span><br/>
+              <span class="ListWhere">
+                <%= location_link(obs.where, obs.location) %>
+              </span>:
+              <span class="ListWho">
+                <%= user_link(obs.user_id, "#{obs.user.name} (#{obs.user.login})") %>
+              </span><br/>
+              <%= :observation_made.t %>: <%= obs.when.web_date %><br/>
+              <%= :observation_made_confidence.t %>:
+                <%= v = obs.vote_cache
+                if v.nil? || v == ''
+                  :app_no_votes.t
+                else
+                  (v.to_f*100/3).round.to_s + "%"
+                end %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    <% end %>
   <% end %>
 <% end %>
 
@@ -318,9 +318,9 @@ for sect in ['consensus', 'synonym', 'other']
     <%= :app_viewed.t(:date => @name.last_view.web_time,
                       :times => @name.num_views == 1 ? :app_one_time.l :
                         :app_many_times.l(:num => @name.num_views)) %><br/>
-    <% if rss_log = @name.rss_log %>
-      <%= link_to(:app_show_log.t, :controller => 'observer',
-                  :action => 'show_rss_log', :id => rss_log.id) %>
+    <% if @name.rss_log_id %>
+      <%= link_to(:app_show_object.t(:type => :log.t), :controller => 'observer',
+                  :action => 'show_rss_log', :id => @name.rss_log_id) %>
     <% end %>
   </span>
 </p>

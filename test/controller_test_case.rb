@@ -5,6 +5,7 @@
 #  useful helpers and assertions that apply only to controller tests.
 #
 #  == Request helpers
+#  reget::                      Resets request and calls +get+.
 #  login::                      Login a user.
 #  logout::                     Logout current user.
 #  make_admin::                 Make current user an admin and turn on admin mode.
@@ -15,18 +16,23 @@
 #  post_requires_login::        Send POST, login required.
 #  post_requires_user::         Send POST, certain user must be logged in.
 #  html_dump::                  Dump response body to file for W3C validation.
-#  extract_error_from_body::    Extract error and stacktrace from 500 response body.
 #  get_without_clearing_flash::  Wrapper: calls +get+ without clearing flash errors.
 #  post_without_clearing_flash:: Wrapper: calls +post+ without clearing flash errors.
 #
+#  == HTML Helpers
+#  get_last_flash::             Retrieve the current list of errors or last set rendered.
+#  url_for::                    Get URL for +link_to+ style Hash of args.
+#  extract_links::              Get Array of show_object links on page.
+#  extract_error_from_body::    Extract error and stacktrace from 500 response body.
+#
 #  == HTML Assertions
 #  assert_link_in_html::        A given link exists.
+#  assert_no_link_in_html::     A given link does not exist.
 #  assert_form_action::         A form posting to a given action exists.
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
 #  assert_response::            Check that last request resulted in a given redirect / render.
 #  assert_flash::               Assert that an error was rendered or is pending.
-#  get_last_flash::             Retrieve the current list of errors or last set rendered.
 #
 ################################################################################
 
@@ -58,6 +64,12 @@ class ControllerTestCase < ActionController::TestCase
       session[:notice] = nil
     end
     super
+  end
+
+  # Second "get" won't update request_uri, so we must reset the request.
+  def reget(*args)
+    @request = @request.class.new
+    get(*args)
   end
 
   # Call +get+ without clearing the flash (which we do by default).
@@ -257,6 +269,130 @@ class ControllerTestCase < ActionController::TestCase
     end
   end
 
+  ##############################################################################
+  #
+  #  :section: HTML Helpers
+  #
+  ##############################################################################
+
+  # Get the errors rendered in the last request, or current set of errors if
+  # redirected.
+  def get_last_flash
+    flash[:rendered_notice] || session[:notice]
+  end
+
+  # Return URL for +link_to+ style Hash of parameters.
+  def url_for(args={})
+    # By default expect relative links.  Allow caller to override by
+    # explicitly setting :only_path => false.
+    args[:only_path] = true if !args.has_key?(:only_path)
+    URI.unescape(@controller.url_for(args))
+  end
+
+  # Extract links from the HTML response body that match any of a number of
+  # conditions, and return them as an Array of objects with these properties.
+  # url::        Full url of the link.
+  # controller:: Controller part of url (if relative).
+  # action::     Action part of url (if relative).
+  # id::         ID part of the url (if present).
+  # anchor::     Anchor part of the url (if present).
+  # label::      Text of link as displayed in browser.
+  #
+  # Conditions can be any of these properties.  Accepts a String/Symbol,
+  # Regexp, or +nil+.  All require full match, except +label+, which can be
+  # wrapped in HTML tags and/or white-space.
+  #
+  #   # Make sure a link called "Some Text" exists and has the correct url.
+  #   link = extract_links(:label => /Some Text/).first
+  #   expect = url_for(:action => 'show_name', :id => 123)
+  #   assert_equal(expect, link.url)
+  #
+  #   # Check links in list_names index.
+  #   ids = extract_links(:action => 'show_name').map(&:id)
+  #   assert_equal([1, 2, 3], ids)
+  #
+  #   # You can use it as an iterator, too.
+  #   links = extract_links do |link|
+  #     break if link.label =~ /Stop Here/
+  #   end
+  #
+  def extract_links(args={})
+    result = []
+    # Allow caller to specify URL condition as Hash of args as for +link_to_.
+    if args[:url].is_a?(Hash)
+      args[:url] = url_for(args[:url])
+    end
+
+    # Iterate over all links, in order.
+    html = @response.body
+    while html.match(/<a href="([^"]+)"[^<>]*>(.*?)<\/a>/)
+      html, url, label = $', $1, $2
+      url = URI.unescape(url).html_to_ascii
+
+      # Parse URL.
+      if url.match(/^\/(\w+)\/(\w+)\/(\d+)/)
+        controller, action, id = $1, $2, $3.to_i
+      elsif url.match(/^\/(\w+)\/(\w+)/)
+        controller, action, id = $1, $2, nil
+      else
+        controller, action, id = nil, nil, nil
+      end
+      if url.match(/#(.*)$/)
+        anchor = $1
+      else
+        anchor = nil
+      end
+
+      # Make sure it matches any conditions passed in.
+      passed = true
+      for arg, val in [
+        [:url, url],
+        [:controller, controller],
+        [:action, action],
+        [:id, id],
+        [:anchor, anchor],
+      ]
+        if args.has_key?(arg) and
+           not case (val2 = args[arg])
+           when NilClass
+             val.nil?
+           when Regexp
+             val.to_s.match(val2)
+           when String, Symbol
+             val.to_s == val2.to_s
+           end
+          passed = false
+          break
+        end
+      end
+
+      # Allow label to be embedded in HTML tags, with some whitespace, but
+      # require it to be the first text inside the <a> tag.
+      if passed and args[:label] and
+         !label.match(/^(\s*<\w+[^\\<>]+>)*\s*#{args[:label]}(\s*<\/\w+[^<>]+>)*\s*$/)
+        passed = false
+      end
+
+      # Return all the links that pass.
+      if passed
+        link = Wrapper.new(
+          :label      => label,
+          :url        => url,
+          :controller => controller,
+          :action     => action,
+          :id         => id,
+          :anchor     => anchor
+        )
+
+        # Let caller do custom filter.
+        if !block_given? or yield(link)
+          result << link
+        end
+      end
+    end
+    return result
+  end
+
   # Extract error message and backtrace from Rails's 500 response.  This should
   # be obsolete now that all the test controllers re-raise exceptions.  But
   # just in case, here it is...
@@ -285,32 +421,33 @@ class ControllerTestCase < ActionController::TestCase
   #
   ##############################################################################
 
+  # Assert the LACK of existence of a given link in the response body, and
+  # check that it points to the right place.
+  def assert_no_link_in_html(label, msg=nil)
+    clean_our_backtrace do
+      extract_links(:label => label) do |link|
+        assert_block(build_message(msg, "Expected HTML *not* to contain link called <?>.", label)) {false}
+      end
+      assert_block('') { true } # to count the assertion
+    end
+  end
+
   # Assert the existence of a given link in the response body, and check
   # that it points to the right place.
   def assert_link_in_html(label, url_opts, msg=nil)
     clean_our_backtrace do
-      url_opts[:only_path] = true if url_opts[:only_path].nil?
-      url = URI.unescape(@controller.url_for(url_opts))
-      # Find each occurrance of "label", then make sure it is inside a link...
-      # i.e. that there is no </a> between it and the previous <a href="blah"> tag.
+      url = url_for(url_opts)
       found_it = false
-      @response.body.gsub('&nbsp;',' ').split(label).each do |str|
-        # Find the last <a> tag in the string preceding the label.
-        atag = str[str.rindex("<a ")..-1]
-        if !atag.include?("</a>")
-          if atag =~ /^<a href="([^"]*)"/
-            url2 = URI.unescape($1).html_to_ascii
-            if url == url2
-              found_it = true
-              break
-            else
-              assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, url2)) {false}
-            end
-          end
+      extract_links(:label => label) do |link|
+        if link.url != url
+          assert_block(build_message(msg, "Expected <?> link to point to <?>, instead it points to <?>", label, url, url2)) {false}
+        else
+          found_it = true
+          break
         end
       end
       if found_it
-        assert_block("") { true } # to count the assertion
+        assert_block('') { true } # to count the assertion
       else
         assert_block(build_message(msg, "Expected HTML to contain link called <?>.", label)) {false}
       end
@@ -524,11 +661,5 @@ class ControllerTestCase < ActionController::TestCase
         assert_equal(expect, got, msg + "Got the wrong flash error(s).")
       end
     end
-  end
-
-  # Get the errors rendered in the last request, or current set of errors if
-  # redirected.
-  def get_last_flash
-    flash[:rendered_notice] || session[:notice]
   end
 end

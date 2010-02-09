@@ -1,5 +1,6 @@
 #
 #  Views: ("*" - login required, "R" - root required))
+#     index_image         Display matrix of images for current query.
 #     list_images         Display matrix of images, sorted by date.
 #     images_by_user      Display list of images by a given user.
 #     image_search        Search for matching images.
@@ -36,9 +37,9 @@
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
     :advanced_search,
-    :all_images,
     :image_search,
     :images_by_user,
+    :index_image,
     :list_images,
     :next_image,
     :prev_image,
@@ -66,13 +67,14 @@ class ImageController < ApplicationController
   ##############################################################################
 
   # Display matrix of selected images, based on current Query.
-  def list_images
-    query = find_or_create_query(:Image, :all, :by => :created)
+  def index_image
+    query = find_or_create_query(:Image, :all, :by => params[:by] || :created)
+    query.params[:by] = params[:by] if params[:by]
     show_selected_images(query, :id => params[:id])
   end
 
   # Display matrix of images, most recent first.
-  def all_images
+  def list_images
     query = create_query(:Image, :all, :by => :created)
     show_selected_images(query)
   end
@@ -111,7 +113,37 @@ class ImageController < ApplicationController
   # Show selected search results as a matrix with 'list_images' template.
   def show_selected_images(query, args={})
     store_query(query)
-    args = { :action => 'list_images', :matrix => true }.merge(args)
+    @links ||= []
+
+    # I can't figure out why ActiveRecord is not eager-loading all the names.
+    # When I do an explicit test (load the first 100 images) it eager-loads
+    # about 90%, but for some reason misses 10%, and always the same 10%, but
+    # apparently with no rhyme or reason. -JPH 20100204
+    args = { :action => 'list_images', :matrix => true,
+             :include => [:user, {:observations => :name}] }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name', :name.t], 
+      ['date', :app_date.t],
+      ['user', :user.t],
+    ]
+
+    # Add "show observations" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Observation)
+      @links << [:app_show_objects.t(:types => :observations.t), {
+                  :controller => 'observer', 
+                  :action => 'index_observation',
+                  :params => query_params(query),
+                }]
+    end
+
+    # Paginate by letter as well as page if names are included in query.
+    if query.uses_table?(:names)
+      args[:letters] = 'names.text_name'
+    end
+
     show_index_of_objects(query, args)
   end
 
@@ -127,7 +159,8 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image
     store_location
-    @image = Image.find(params[:id])
+    @image = Image.find(params[:id],
+                        :include => [:user, {:observations => :name}])
     update_view_stats(@image)
     @is_reviewer = is_reviewer
     pass_query_params
@@ -161,14 +194,12 @@ class ImageController < ApplicationController
 
   # Go to next image: redirects to show_image.
   def next_image
-    image = Image.find(params[:id])
-    redirect_to_next_object(:next, image)
+    redirect_to_next_object(:next, Image, params[:id])
   end
 
   # Go to previous image: redirects to show_image.
   def prev_image
-    image = Image.find(params[:id])
-    redirect_to_next_object(:prev, image)
+    redirect_to_next_object(:prev, Image, params[:id])
   end
 
   def set_image_quality
@@ -260,7 +291,7 @@ class ImageController < ApplicationController
   # Redirects to show_observation.
   def remove_images
     pass_query_params
-    @observation = Observation.find(params[:id])
+    @observation = Observation.find(params[:id], :include => :images)
     if !check_permission!(@observation.user_id)
       redirect_to(:controller => 'observer', :action => 'show_observation',
                   :id => @observation.id, :params => query_params)
@@ -403,12 +434,14 @@ class ImageController < ApplicationController
       @all_users = true
       query = create_query(:Image, :all, :by => :modified)
       @pages = paginate_numbers(:page, @layout['count'])
-      @objects = query.paginate(@pages)
+      @objects = query.paginate(@pages,
+                                :include => [:user, {:observations => :name}])
     else
       query = create_query(:Image, :by_user, :user => @user)
       query.order = 'users.modified DESC'
       @pages = paginate_numbers(:page, @layout['count'])
-      @objects = query.paginate(@pages)
+      @objects = query.paginate(@pages,
+                                :include => [:user, {:observations => :name}])
     end
   end
 
@@ -483,12 +516,14 @@ class ImageController < ApplicationController
         @all_users = true
         query = create_query(:Image, :all, :by => :modified)
         @pages = paginate_numbers(:page, @layout['count'])
-        @objects = query.paginate(@pages)
+        @objects = query.paginate(@pages,
+                                :include => [:user, {:observations => :name}])
       else
         query = create_query(:Image, :by_user, :user => @user)
         query.order = 'users.modified DESC'
         @pages = paginate_numbers(:page, @layout['count'])
-        @objects = query.paginate(@pages)
+        @objects = query.paginate(@pages,
+                                :include => [:user, {:observations => :name}])
       end
     end
   end

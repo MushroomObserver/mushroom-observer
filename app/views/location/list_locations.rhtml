@@ -3,6 +3,11 @@
     add_tab(:list_place_names_map.t, :action => :map_locations,
             :params => query_params)
     add_tab(:location_all.t, :action => :list_locations)
+    if @links
+      for link in @links
+        add_tab(*link)
+      end
+    end
   end
 %>
 
@@ -11,41 +16,41 @@
 
     <td>
       <div class="SubTitle"><%= :list_place_names_known.t %></div>
-      <%= pagination_numbers(@known_pages) %>
-      <table cellpadding="5" cellspacing="0" width="100%">          
-        <% odd_or_even = 0
-        for location in @known_data
-          odd_or_even = 1 - odd_or_even %>
-          <tr valign="top" class="ListLine<%= odd_or_even %>">
-            <td width="100%">
-              <%= link_to(location.display_name.t, :action => 'show_location',
-                          :id => location.id, :params => query_params) %>
-            </td>
-          </tr>
-        <% end %>
-      </table>
-      <%= pagination_numbers(@known_pages) %>
-    </td>
-
-    <% if @undef_pages.num_total > 0 %>
-      <td>
-        <div class="SubTitle"><%= :list_place_names_undef.t %></div>
-        <%= pagination_numbers(@undef_pages) %>
+      <% paginate_block(@known_pages) do %>
         <table cellpadding="5" cellspacing="0" width="100%">          
           <% odd_or_even = 0
-          for datum in @undef_data
+          for location in @known_data
             odd_or_even = 1 - odd_or_even %>
             <tr valign="top" class="ListLine<%= odd_or_even %>">
               <td width="100%">
-        		  <%= location_link(datum["where"], nil, datum["cnt"]) %>
-              <%= link_to(:list_place_names_merge.t,
-                          :action => 'list_merge_options',
-                          :where => datum["where"]) %>
+                <%= link_to(location.display_name.t, :action => 'show_location',
+                            :id => location.id, :params => query_params) %>
               </td>
             </tr>
           <% end %>
         </table>
-        <%= pagination_numbers(@undef_pages) %>
+      <% end %>
+    </td>
+
+    <% if @undef_pages && @undef_pages.num_total > 0 %>
+      <td>
+        <div class="SubTitle"><%= :list_place_names_undef.t %></div>
+        <% paginate_block(@undef_pages) do %>
+          <table cellpadding="5" cellspacing="0" width="100%">          
+            <% odd_or_even = 0
+            for datum in @undef_data
+              odd_or_even = 1 - odd_or_even %>
+              <tr valign="top" class="ListLine<%= odd_or_even %>">
+                <td width="100%">
+                <%= location_link(datum["where"], nil, datum["cnt"]) %>
+                <%= link_to(:list_place_names_merge.t,
+                            :action => 'list_merge_options',
+                            :where => datum["where"]) %>
+                </td>
+              </tr>
+            <% end %>
+          </table>
+        <% end %>
       </td>
     <% end %>
 

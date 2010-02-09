@@ -56,4 +56,117 @@ class NamingTest < Test::Unit::TestCase
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(id) }
     assert_equal names(:agaricus_campestris), observations(:coprinus_comatus_obs).name
   end
+
+  def test_basic_reasons
+    assert_equal(nil, namings(:minimal_unknown_naming).reasons)
+
+    assert_equal({ 1 => "Isn't it obvious?" },
+                 namings(:coprinus_comatus_naming).reasons)
+
+    assert_equal({ 1 => "", 2 => "I asked *Uncle Herb*" },
+                 namings(:coprinus_comatus_other_naming).reasons)
+  end
+
+  def test_get_reasons
+    nrs = namings(:minimal_unknown_naming).get_reasons
+    assert_nil(nrs[0].notes)
+    assert_nil(nrs[1].notes)
+    assert_nil(nrs[2].notes)
+    assert_nil(nrs[3].notes)
+
+    nrs = namings(:coprinus_comatus_naming).get_reasons
+    assert_equal("Isn't it obvious?", nrs[0].notes)
+    assert_nil(nrs[1].notes)
+    assert_nil(nrs[2].notes)
+    assert_nil(nrs[3].notes)
+
+    nrs = namings(:coprinus_comatus_other_naming).get_reasons
+    assert_equal("", nrs[0].notes)
+    assert_equal("I asked *Uncle Herb*", nrs[1].notes)
+    assert_nil(nrs[2].notes)
+    assert_nil(nrs[3].notes)
+  end
+
+  def test_get_reasons_hash
+    nrs = namings(:minimal_unknown_naming).get_reasons_hash
+    assert_nil(nrs[1].notes)
+    assert_nil(nrs[2].notes)
+    assert_nil(nrs[3].notes)
+    assert_nil(nrs[4].notes)
+
+    nrs = namings(:coprinus_comatus_naming).get_reasons_hash
+    assert_equal("Isn't it obvious?", nrs[1].notes)
+    assert_nil(nrs[2].notes)
+    assert_nil(nrs[3].notes)
+    assert_nil(nrs[4].notes)
+
+    nrs = namings(:coprinus_comatus_other_naming).get_reasons_hash
+    assert_equal("", nrs[1].notes)
+    assert_equal("I asked *Uncle Herb*", nrs[2].notes)
+    assert_nil(nrs[3].notes)
+    assert_nil(nrs[4].notes)
+  end
+
+  def test_set_reasons
+    naming = namings(:coprinus_comatus_other_naming)
+    hash = {
+      2 => nil,
+      4 => "Well, how about \"this\"!!",
+    }
+    naming.set_reasons(hash)
+
+    hash[2] = hash[2].to_s
+    assert_equal(hash, naming.reasons)
+
+    nrs = naming.get_reasons
+    assert_nil(nrs[0].notes)
+    assert_equal('', nrs[1].notes)
+    assert_nil(nrs[2].notes)
+    assert_equal("Well, how about \"this\"!!", nrs[3].notes)
+
+    assert_equal(hash, naming.reasons)
+  end
+
+  def test_enforce_default_reasons
+    naming = namings(:coprinus_comatus_other_naming)
+    naming.set_reasons({})
+    assert_equal({}, naming.reasons)
+    naming.save!
+
+    naming.reload
+    assert_equal({1=>''}, naming.reasons)
+  end
+
+  def test_reason_order
+    naming = Naming.first
+    assert_equal(Naming::Reason.all_reasons, naming.get_reasons.map(&:num))
+    assert_equal(Naming::Reason.all_reasons, naming.get_reasons.sort_by(&:order).map(&:num))
+  end
+
+  def test_reason_labels
+    naming = Naming.first
+    nrs = naming.get_reasons
+    assert_equal("Recognized by sight", nrs.first.label.l)
+    assert_equal("Based on chemical features", nrs.last.label.l)
+  end  
+
+  def test_other_reason_methods
+    naming = namings(:coprinus_comatus_other_naming)
+    nrs = naming.get_reasons_hash
+
+    assert(nrs[1].used?)
+    assert(nrs[2].used?)
+    assert(!nrs[3].used?)
+    assert(!nrs[4].used?)
+
+    assert_equal('', nrs[1].notes)
+    assert_equal("I asked *Uncle Herb*", nrs[2].notes)
+    assert_equal(nil, nrs[3].notes)
+    assert_equal(nil, nrs[4].notes)
+
+    nrs[3].notes = 'test'
+    nrs[2].notes = nil
+    nrs[1].delete
+    assert_equal({2=>'', 3=>'test'}, naming.reasons)
+  end
 end

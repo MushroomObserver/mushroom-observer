@@ -120,5 +120,4 @@ class NameParse
     end
     result
   end
-
 end

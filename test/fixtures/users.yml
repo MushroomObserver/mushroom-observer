@@ -11,6 +11,7 @@ rolf:
   verified: 2006-03-02 21:14:00
   contribution: 10
   created_here: true
+  locale: en-US
 
 # Mary has no images
 mary:
@@ -23,6 +24,7 @@ mary:
   verified: 2006-03-02 21:14:00
   contribution: 10
   created_here: true
+  locale: en-US
 
 # Junk gets denied
 junk:
@@ -34,6 +36,7 @@ junk:
   email: junk@collectivesource.com
   contribution: 10
   created_here: true
+  locale: en-US
 
 # Need third for testing votes
 dick:
@@ -46,6 +49,7 @@ dick:
   verified: 2006-03-02 21:14:00
   contribution: 10
   created_here: true
+  locale: en-US
 
 # Need third for testing votes
 katrina:

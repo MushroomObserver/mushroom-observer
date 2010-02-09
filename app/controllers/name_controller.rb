@@ -1,11 +1,13 @@
 #
 #  Views: ("*" - login required, "R" - root required)
-#     list_names          List of results of index/search.
-#     all_names           Alphabetical list of all names, used or otherwise.
+#     index_name          List of results of index/search.
+#     list_names          Alphabetical list of all names, used or otherwise.
 #     observation_index   Alphabetical list of names people have seen.
 #     name_search         Seach for string in name, notes, etc.
 #     show_name           Show info about name.
 #     show_past_name      Show past versions of name info.
+#     prev_name           Show previous name in index.
+#     next_name           Show next name in index.
 #   * create_name         Create new name.
 #   * edit_name           Edit name info.
 #   * change_synonyms     Change list of synonyms for a name.
@@ -32,11 +34,11 @@
 class NameController < ApplicationController
   before_filter :login_required, :except => [
     :advanced_search,
-    :all_names,
     :authored_names,
     :auto_complete_name,
     :eol,
     :eol_preview,
+    :index_name,
     :map,
     :list_names,
     :name_search,
@@ -48,6 +50,7 @@ class NameController < ApplicationController
     :prev_name,
     :show_name,
     :show_past_name,
+    :test_index,
   ]
 
   before_filter :disable_link_prefetching, :except => [
@@ -68,13 +71,14 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Display list of names in last index/search query.
-  def list_names
-    query = find_or_create_query(:Name, :all, :by => :name)
+  def index_name
+    query = find_or_create_query(:Name, :all, :by => params[:by] || :name)
+    query.params[:by] = params[:by] if params[:by]
     show_selected_names(query, :id => params[:id])
   end
 
   # Display list of all (correctly-spelled) names in the database.
-  def all_names
+  def list_names
     query = create_query(:Name, :all, :by => :name)
     show_selected_names(query)
   end
@@ -161,11 +165,37 @@ class NameController < ApplicationController
     end
   end
 
+  # Used to test pagination.
+  def test_index
+    query = find_query(:Name) or raise "Missing query: #{params[:q]}"
+    if params[:test_anchor]
+      @test_pagination_args = {:anchor => params[:test_anchor]}
+    end
+    show_selected_names(query, :num_per_page => params[:num_per_page].to_i)
+  end
+
   # Show selected search results as a list with 'list_names' template.
   def show_selected_names(query, args={})
     store_query(query)
+    @links ||= []
     args = { :action => 'list_names', :letters => 'names.text_name',
              :num_per_page => 50 }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name', :name.t], 
+    ]
+
+    # Add "show observations" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Observation)
+      @links << [:app_show_objects.t(:types => :observations.t), {
+                  :controller => 'observer', 
+                  :action => 'index_observation',
+                  :params => query_params(query),
+                }]
+    end
+
     show_index_of_objects(query, args)
   end
 
@@ -183,33 +213,47 @@ class NameController < ApplicationController
     pass_query_params
     store_location
     store_query
-    @name = Name.find(params[:id])
+# logger.warn('START ----------------------------------------------'); time=Time.now
+    @name = Name.find(params[:id], :include => [ :authors, :editors, :license,
+                                                 :reviewer, :user ])
+# logger.warn('LOAD_NAME ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     update_view_stats(@name)
-    @past_name = @name.versions.latest
-    @past_name = @past_name.previous if @past_name
+# logger.warn('VIEW_STATS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    @previous_version = Name.connection.select_value %(
+      SELECT version FROM past_names WHERE name_id = #{@name.id}
+      ORDER BY version DESC LIMIT 1, 1
+    )
+# logger.warn('VERSIONS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @parents = @name.parents
 
     # Is @user a reviewer?
+# logger.warn('PARENTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @is_reviewer = is_reviewer
 
     # Is @user "interested" in this name?
+# logger.warn('IS_REVIEWER ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @interest = nil
     @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id,
                             'Name', @name.id) if @user
 
     # Get list of drafts for this name.
+# logger.warn('INTERESTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @existing_drafts = DraftName.find_all_by_name_id(@name.id,
                             :include => :project, :order => "projects.title")
     @existing_drafts = nil if @existing_drafts == []
 
     # Get list of projects user is part of.
+# logger.warn('DRAFTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @user_projects = nil
     if @user and !@existing_drafts
-      @user_projects = @user.user_groups.map(&:project).reject(&:nil?).sort_by(&:title)
+      groups = @user.user_groups.map(&:id)
+      @user_projects = Project.all(:order => 'title ASC',
+                              :conditions => ['user_group_id IN (?)', groups])
       @user_projects = nil if @user_projects == []
     end
 
     # Create query for immediate children.
+# logger.warn('PROJECTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @children_query = create_query(:Name, :children, :name => @name)
 
     # Create search queries for observation lists.
@@ -225,10 +269,16 @@ class NameController < ApplicationController
     @synonym_pages   = paginate_numbers(:synonym_page, 12)
     @other_pages     = paginate_numbers(:other_page, 12)
 
+# logger.warn('CREATE_QUERIES ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    args = { :include => [:name, :location, :user] }
     @children_data  = @children_query.paginate(@children_pages)
-    @consensus_data = @consensus_query.paginate(@consensus_pages)
-    @synonym_data   = @synonym_query.paginate(@synonym_pages)
-    @other_data     = @other_query.paginate(@other_pages)
+# logger.warn('CHILDREN ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    @consensus_data = @consensus_query.paginate(@consensus_pages, args)
+# logger.warn('CONSENSUS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    @synonym_data   = @synonym_query.paginate(@synonym_pages, args)
+# logger.warn('SYNONYMS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    @other_data     = @other_query.paginate(@other_pages, args)
+# logger.warn('NONCONSENSUS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
 
     # end
     # logger.warn("show_name took %s\n" % elapsed_time)
@@ -269,14 +319,12 @@ class NameController < ApplicationController
 
   # Go to next name: redirects to show_name.
   def next_name
-    name = Name.find(params[:id])
-    redirect_to_next_object(:next, name)
+    redirect_to_next_object(:next, Name, params[:id])
   end
 
   # Go to previous name: redirects to show_name.
   def prev_name
-    name = Name.find(params[:id])
-    redirect_to_next_object(:prev, name)
+    redirect_to_next_object(:prev, Name, params[:id])
   end
 
   ##############################################################################
@@ -683,22 +731,18 @@ class NameController < ApplicationController
         flash_notice :name_change_synonyms_confirm.t
       else
         now = Time.now
-        synonym = @name.synonym
 
         # Create synonym and add this name to it if this name not already
         # associated with a synonym.
-        if !synonym
-          synonym = Synonym.new
-          synonym.created = now
-          synonym.save
-          @name.synonym = synonym
+        if !@name.synonym_id
+          @name.synonym = Synonym.create
           @name.save
           Transaction.post_synonym(
-            :id => synonym
+            :id => @name.synonym
           )
           Transaction.put_name(
             :id          => @name,
-            :set_synonym => synonym
+            :set_synonym => @name.synonym
           )
         end
 
@@ -712,11 +756,11 @@ class NameController < ApplicationController
           # Synonymize all names that have been checked, or that don't have
           # checkboxes.
           if proposed_synonyms[n.id.to_s] != '0'
-            if n.synonym_id != synonym.id
-              synonym.transfer(n)
+            if n.synonym_id != @name.synonym_id
+              @name.transfer_synonym(n)
               Transaction.put_name(
                 :id          => n,
-                :set_synonym => synonym
+                :set_synonym => @name.synonym
               )
             end
           end
@@ -727,14 +771,10 @@ class NameController < ApplicationController
         # there are multiple unchecked names -- that is, it splits this
         # synonym into two synonyms, with checked names staying in this one,
         # and unchecked names moving to the new one.
-        check_for_new_synonym(@name, synonym.names, params[:existing_synonyms] || {})
-
-        # We're done modifying the synonym now.
-        synonym.modified = now
-        synonym.save
-        success = true
+        check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
 
         # Deprecate everything if that check-box has been marked.
+        success = true
         if deprecate
           for n in sorter.all_names
             if !deprecate_synonym(n)
@@ -762,7 +802,7 @@ class NameController < ApplicationController
   end
 
   # Form accessible from show_name that lets the user deprecate a name in favor
-  # of another name. 
+  # of another name.
   def deprecate_name
     pass_query_params
 
@@ -899,11 +939,18 @@ class NameController < ApplicationController
     end
     len = new_synonym_members.length
     if len > 1
-      new_synonym = Synonym.new
-      new_synonym.created = Time.now
-      new_synonym.save
+      name = new_synonym_members.shift
+      name.synonym = new_synonym = Synonym.create
+      name.save
+      Transaction.post_synonym(
+        :id => new_synonym
+      )
+      Transaction.put_name(
+        :id          => name,
+        :set_synonym => new_synonym
+      )
       for n in new_synonym_members
-        new_synonym.transfer(n)
+        name.transfer_synonym(n)
         Transaction.put_name(
           :id          => n,
           :set_synonym => new_synonym
@@ -1043,14 +1090,19 @@ class NameController < ApplicationController
 
   # Utility accessible from a number of name pages (e.g. indexes and
   # show_name?) that lets you enter a whole list of names, together with
-  # synonymy, and create them all in one blow. 
+  # synonymy, and create them all in one blow.
   def bulk_name_edit
     @list_members = nil
     @new_names    = nil
     if request.method == :post
       list = params[:list][:members].strip_squeeze
       construct_approved_names(list, params[:approved_names])
-      sorter = setup_sorter(params, nil, list)
+      sorter = NameSorter.new
+      sorter.add_chosen_names(params[:chosen_multiple_names]) # hash on id
+      sorter.add_chosen_names(params[:chosen_approved_names]) # hash on id
+      sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
+      sorter.check_for_deprecated_checklist(params[:checklist_data])
+      sorter.sort_names(list)
       if sorter.only_single_names
         sorter.create_new_synonyms()
         flash_notice :name_bulk_success.t

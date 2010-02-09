@@ -7,8 +7,14 @@
   end
 %>
 
-<% form_tag(:action => 'create_species_list', :approved_names => @new_names,
-            :approved_deprecated_names => @deprecated_names) do %>
+<% args = {}
+  if @new_names.to_s != ''
+    args[:approved_names] = @new_names
+  end
+  if @deprecated_names && @deprecated_names != []
+    args[:approved_deprecated_names] = @deprecated_names.map(&:id)
+  end
+  form_tag(:action => 'create_species_list', :params => args) do %>
   <br/><center><%= submit_tag :app_create.l %></center>
 
   <table cellpadding="10">

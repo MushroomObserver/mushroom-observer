@@ -117,21 +117,22 @@ class SiteData
   # This is called every time any object (not just one we care about) is
   # created or destroyed.  Figure out what kind of object from the class name,
   # and then update the owner's contribution as appropriate.
-  def self.update_contribution(mode, obj, field=nil, num=1)
+  def self.update_contribution(mode, obj, field=nil, user=nil, num=1)
     field ||= obj.class.to_s.tableize.to_sym
     weight = FIELD_WEIGHTS[field]
     if weight && weight > 0 &&
        obj.respond_to?('user_id') &&
-       (user = User.current)
+       (user ||= obj.user)
       user.contribution ||= 0
       if mode == :create || mode == :add
         user.contribution += weight * num
       elsif mode == :destroy || mode == :remove
         user.contribution -= weight * num
       end
-# print ">>>> #{mode} #{field} #{weight} #{num} (##{obj.id || 'x'}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''}) -> #{user.login}=#{user.contribution}\n"
       user.save
-# else print ">>>> #{mode} #{field} (##{obj.id || 'x'}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''})\n"
+# puts ">>>> #{mode} #{field} #{weight} #{num} (##{obj.id || 'x'}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''}) -> #{user.login}=#{user.contribution}"
+# else puts ">>>> #{mode} #{field} (##{obj.id || 'x'}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''})"
+# puts obj.args.inspect if obj.is_a?(Transaction)
     end
   end
 

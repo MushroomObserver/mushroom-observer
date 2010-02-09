@@ -40,14 +40,7 @@
 #
 #  comments::           Comments about this Location. (not used yet)
 #  interests::          Interests in this Location.
-#
-#  ==== Authors/editor methods
 #  observations::       Observations at this Location.
-#  editors::            List of User's who have changed this Location.
-#  authors::            List of User's who have made "significant" changes.
-#  add_editor::         Make given User an "author".
-#  add_author::         Make given User an "editor".
-#  remove_author::      Demote given User to "editor".
 #
 #  ==== Lat/long methods
 #  north_west::         [north, west]
@@ -65,13 +58,13 @@
 #  == Callbacks
 #
 #  set_search_name::    Before save: update search_name.
-#  check_add_author::   After save: add owner as author.
 #  notify_authors::     After save: send email notification.
 #
 ################################################################################
 
 class Location < AbstractModel
   belongs_to :license
+  belongs_to :rss_log
   belongs_to :user
 
   has_many :comments,  :as => :object, :dependent => :destroy
@@ -98,17 +91,22 @@ class Location < AbstractModel
   non_versioned_columns.push(
     'sync_id',
     'created',
+    'rss_log_id',
     'search_name'
   )
 
   before_save :update_user_if_save_version
   before_save :set_search_name
-  after_save  :check_add_author
   after_save  :notify_authors
 
-  # ----------------------------
+  # Automatically log standard events.
+  self.autolog_events = [:created!, :updated!, :destroyed]
+
+  ##############################################################################
+  #
   #  :section: Lat/Long Stuff
-  # ----------------------------
+  #
+  ##############################################################################
 
   # Return [north, west].
   def north_west
@@ -135,9 +133,11 @@ class Location < AbstractModel
     [(self.north + self.south)/2, (self.west + self.east)/2]
   end
 
-  # ----------------------------
+  ##############################################################################
+  #
   #  :section: Name Stuff
-  # ----------------------------
+  #
+  ##############################################################################
 
   # Plain text version of +display_name+.
   def text_name
@@ -178,7 +178,7 @@ class Location < AbstractModel
   # Look at the most recent Observation's the current User has posted.  Return
   # a list of the last 100 place names used in those Observation's (either
   # Location names or "where" strings).  This list is used to prime Location
-  # auto-completers. 
+  # auto-completers.
   #
   def self.primer
     where = ''
@@ -195,76 +195,16 @@ class Location < AbstractModel
     )).sort
   end
 
-  # --------------------------------
-  #  :section: Authors and Editors
-  # --------------------------------
-
-  # Add a User on as an "author".  Updates User contribution.
+  ##############################################################################
   #
-  #   location.add_author(@user)
-  #
-  def add_author(user)
-    if not self.authors.member?(user)
-      self.authors.push(user)
-      SiteData.update_contribution(:add, self, :authors_locations)
-      if self.editors.member?(user)
-        self.editors.delete(user)
-        SiteData.update_contribution(:remove, self, :editors_locations)
-      end
-    end
-  end
-
-  # Demote a User to "author".  Updates User contribution.
-  #
-  #   location.remove_author(@user)
-  #
-  def remove_author(user)
-    if self.authors.member?(user)
-      self.authors.delete(user)
-      SiteData.update_contribution(:remove, self, :authors_locations)
-      # Add user as editor if (1) user isn't already an editor, and (2) the
-      # user has made a change (i.e. owns at least one past_location).
-      if not self.editors.member?(user) && !Location.connection.select_values(%(
-          SELECT id FROM past_locations WHERE location_id = #{self.id} AND user_id = #{user.id}
-        )).empty?
-        self.editors.push(user)
-        SiteData.update_contribution(:add, self, :editors_locations)
-      end
-    end
-  end
-
-  # Add a User on as an "editor".  Updates User contribution.
-  #
-  #   location.add_editor(@user)
-  #
-  def add_editor(user)
-    if not self.authors.member?(user) and not self.editors.member?(user):
-      self.editors.push(user)
-      SiteData.update_contribution(:add, self, :editors_locations)
-    end
-  end
-
-  # ----------------------------
   #  :section: Callbacks
-  # ----------------------------
+  #
+  ##############################################################################
 
   # Callback that updates +search_name+ before saving a record.  See +clean_name+.
   def set_search_name
     if new_record? || display_name_changed?
       self.search_name = self.class.clean_name(display_name)
-    end
-  end
-
-  # Callback that updates editors and/or authors after a User makes a change.
-  #
-  # If the Location has no author, they get promoted to author by default.
-  # In all cases make sure the User is added on as an editor.
-  #
-  def check_add_author
-    if authors.empty?
-      add_author(user)
-    else
-      add_editor(user)
     end
   end
 

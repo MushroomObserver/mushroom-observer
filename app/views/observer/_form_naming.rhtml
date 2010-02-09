@@ -57,22 +57,22 @@
 
 <%=
   html = "<br/>"
-  for r in @reason.values.sort {|a,b| a.order <=> b.order}
-    i        = r.reason
+  for r in @reason.values.sort_by(&:order)
+    num      = r.num
     label    = r.label.t
-    check    = !r.notes.nil?
-    notes    = r.notes.nil? ? '' : r.notes
+    check    = r.used?
+    notes    = r.notes.to_s
     default  = r.default?
-    onclick  = "Element.toggle('reason_#{i}_div'); setTimeout(function() { if ($('reason_#{i}_check').checked) $('reason_#{i}_notes').focus() }, 0.25)"
-    checkbox = check_box('reason', 'check', { :index => i, :checked => check,
+    onclick  = "Element.toggle('reason_#{num}_div'); setTimeout(function() { if ($('reason_#{num}_check').checked) $('reason_#{num}_notes').focus() }, 0.25)"
+    checkbox = check_box('reason', 'check', { :index => num, :checked => check,
                          :onclick => can_do_ajax? ? onclick : 1})
-    label    = "<label for='reason_#{i}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
-    textarea = text_area('reason', 'notes', { :index => i, :cols => 80, :rows => 1, :value => notes })
+    label    = "<label for='reason_#{num}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
+    textarea = text_area('reason', 'notes', { :index => num, :cols => 80, :rows => 1, :value => notes })
     textarea += "<br/>"
     if can_do_ajax?
-      textarea = "<div id='reason_#{i}_div'>#{textarea}</div>"
+      textarea = "<div id='reason_#{num}_div'>#{textarea}</div>"
       if !check
-        textarea += javascript_tag("Element.hide('reason_#{i}_div')")
+        textarea += javascript_tag("Element.hide('reason_#{num}_div')")
       end
     end
     html += checkbox + label + textarea

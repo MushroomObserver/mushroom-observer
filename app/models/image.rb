@@ -162,13 +162,11 @@ class Image < AbstractModel
   #   "Agaricus campestris L. & Agaricus californicus Peck. (3)"
   #
   def unique_text_name
-    obs_names = []
-    self.observations.each {|o| obs_names.push(o.text_name)}
-    title = obs_names.uniq.sort.join(' & ')
-    if obs_names.empty?
-      sprintf("%s #%d", :image.l, self.id)
+    title = observations.map(&:text_name).uniq.sort.join(' & ')
+    if title == ''
+      sprintf("%s #%d", :image.l, id)
     else
-      sprintf("%s (%d)", title, self.id)
+      sprintf("%s (%d)", title, id)
     end
   end
 
@@ -180,13 +178,11 @@ class Image < AbstractModel
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    obs_names = []
-    self.observations.each {|o| obs_names.push(o.format_name)}
-    title = obs_names.uniq.sort.join(' & ')
-    if obs_names.empty?
-      sprintf("%s #%d", :image.l, self.id)
+    title = observations.map(&:format_name).uniq.sort.join(' & ')
+    if title == ''
+      sprintf("%s #%d", :image.l, id)
     else
-      sprintf("%s (%d)", title, self.id)
+      sprintf("%s (%d)", title, id)
     end
   end
 

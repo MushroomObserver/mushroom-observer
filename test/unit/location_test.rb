@@ -43,7 +43,7 @@ class LocationTest < Test::Unit::TestCase
     assert_equal(1, locations(:albion).authors.length)
     assert_equal(0, locations(:albion).editors.length)
     assert_equal(@rolf, locations(:albion).authors.first)
-    assert_equal(1, QueuedEmail.all.length)
+    assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor      => 'QueuedEmail::LocationChange',
       :from        => @rolf,
@@ -84,7 +84,7 @@ class LocationTest < Test::Unit::TestCase
     assert_equal(1, locations(:albion).editors.length)
     assert_equal(@mary, locations(:albion).authors.first)
     assert_equal(@rolf, locations(:albion).editors.first)
-    assert_equal(1, QueuedEmail.all.length)
+    assert_equal(1, QueuedEmail.count)
 
     # Have Mary opt back out.
     @mary.email_locations_all = false
@@ -105,7 +105,7 @@ class LocationTest < Test::Unit::TestCase
     assert_equal(@mary, locations(:albion).authors.first)
     assert_equal(@rolf, locations(:albion).editors.first)
     assert_equal(version + 3, locations(:albion).version)
-    assert_equal(2, QueuedEmail.all.length)
+    assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor      => 'QueuedEmail::LocationChange',
       :from        => @rolf,
@@ -136,7 +136,7 @@ class LocationTest < Test::Unit::TestCase
     assert_equal(2, locations(:albion).editors.length)
     assert_equal(@mary, locations(:albion).authors.first)
     assert_equal([@rolf.id, @dick.id], locations(:albion).editors.map(&:id).sort)
-    assert_equal(2, QueuedEmail.all.length)
+    assert_equal(2, QueuedEmail.count)
 
     # Have everyone request editor-notifications and have Dick change it again.
     # Only Rolf should get notified since Mary is an author, not an editor, and
@@ -162,7 +162,7 @@ class LocationTest < Test::Unit::TestCase
     assert_equal(2, locations(:albion).editors.length)
     assert_equal(@mary, locations(:albion).authors.first)
     assert_equal([@rolf.id, @dick.id], locations(:albion).editors.map(&:id).sort)
-    assert_equal(3, QueuedEmail.all.length)
+    assert_equal(3, QueuedEmail.count)
     assert_email(2,
       :flavor      => 'QueuedEmail::LocationChange',
       :from        => @dick,
@@ -192,7 +192,7 @@ class LocationTest < Test::Unit::TestCase
     assert_equal(2, locations(:albion).editors.length)
     assert_equal(@mary, locations(:albion).authors.first)
     assert_equal([@rolf.id, @dick.id], locations(:albion).editors.map(&:id).sort)
-    assert_equal(4, QueuedEmail.all.length)
+    assert_equal(4, QueuedEmail.count)
     assert_email(3,
       :flavor        => 'QueuedEmail::LocationChange',
       :from          => @dick,

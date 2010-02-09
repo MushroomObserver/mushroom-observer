@@ -46,9 +46,9 @@
 #  You may further tweak a query after it's been created:
 #
 #    query = Query.lookup(:Observation)
-#    query.include << :names
-#    query.where   << 'names.correct_spelling_id IS NULL'
-#    query.order   =  'names.search_name ASC'
+#    query.join  << :names
+#    query.where << 'names.correct_spelling_id IS NULL'
+#    query.order =  'names.search_name ASC'
 #
 #  Now you may execute it in various ways:
 #
@@ -89,7 +89,7 @@
 #    # Or if you want to paginate by letter first, then page number:
 #    query = create_query(:Name)
 #    @pages = paginate_letters
-#    @names = query.paginate(@pages, 'names.search_name')
+#    @names = query.paginate(@pages, :letter_field => 'names.search_name')
 #
 #  == Sequence Operators
 #
@@ -217,9 +217,11 @@
 #
 #  ==== Local attributes
 #  this::               Current location in query (for sequence operators).
-#  include::            Tree of tables used in query.
+#  join::               Tree of tables used in query.
+#  tables::             Extra tables which have been joined explicitly.
 #  where::              List of WHERE clauses in query.
-#  order::              ORDER clause in query.
+#  group::              GROUP BY clause in query.
+#  order::              ORDER BY clause in query.
 #
 #  == Class Methods
 #  lookup::             Lookup a Query, creating it if necessary (unsaved)
@@ -229,7 +231,7 @@
 #  ==Instance Methods
 #  initialized?::       Has this query been initialized?
 #  coerce::             Coerce a query for one model into a query for another.
-#  clone::              Clone an instance for tweaking.
+#  is_coercable?::      Check if +coerce+ will work (but don't actually do it).
 #
 #  ==== Sequence operators
 #  first::              Go to first result.
@@ -248,12 +250,15 @@
 #  select_one::         Call model.connection.select_one.
 #  select_all::         Call model.connection.select_all.
 #  find_by_sql::        Call model.find_by_sql.
+#  tables_used::        Array of tables used in query (Symbol's).
+#  uses_table?::        Does the query use this table?
 #  num_results::        Number of results the query returns.
 #  results::            Array of all results, instantiated.
 #  result_ids::         Array of all results, just ids.
 #  index::              Index of a given id or object in the results.
 #  paginate::           Array of subset of results, instantiated.
 #  paginate_ids::       Array of subset of results, just ids.
+#  clear_cache::        Clear results cache.
 #
 #  ==== Outer queries
 #  outer::              Outer Query (if nested).
@@ -267,15 +272,22 @@
 #  new_inner_if_necessary::
 #                       Create new inner Query if the outer Query has changed.
 #
-#  == Instance Variables
+#  == Internal Variables
 #
+#  ==== Class Variables
+#  @@last_cleanup::     Time: last time database was cleaned up.
+#  @@default_required_params:: Default required parameters declarations.
+#
+#  ==== Instance Variables
 #  @initialized::       Boolean: has +initialize_query+ been called yet?
 #  @model_class::       Class: associated model.
-#  @this::              Instance of +@model_class+: current place in results.
-#  @save_this::         Saved copy of @this for +reset+.
-#  @results::           Array of instances of +@model_class+: all results.
-#  @result_ids::        Array of Fixnum: all results (ids).
-#  @num_results::       Fixnum: total number of results available.
+#  @this_id::           Fixnum: current place in results.
+#  @save_this_id::      Fixnum: saved copy of +@this_id+ for +reset+.
+#  @result_ids::        Array of Fixnum: all results.
+#  @results::           Hash: maps ids to instantiated records.
+#  @outer::             AbstractQuery: cached copy of outer query (nested
+#                       queries only).
+#  @params_cache::      Hash: where instances passed in via params are cached.
 #
 ################################################################################
 
@@ -285,8 +297,12 @@ class AbstractQuery < ActiveRecord::Base
   # Parameters are kept in a Hash, possibly with Arrays as values.
   serialize :params, Hash
 
-  # This is where +data+ is extracted to.
-  attr_accessor :include, :where, :order
+  # Low-level description of SQL query.
+  attr_accessor :join, :tables, :where, :group, :order
+
+  # Prevent SQL statements from getting absurdly large.  Any "id IN (...)"
+  # conditions are limited to this number of values.
+  MAX_ARRAY = 1000
 
   ##############################################################################
   #
@@ -392,9 +408,9 @@ class AbstractQuery < ActiveRecord::Base
   # *after* flavor-specific initializations.  The following three global
   # initializations cannot be overridden:
   #
-  # +include+:: Joins to additional table(s).
-  # +where+::   Adds extra condition(s) to WHERE condition.
-  # +order+::   Overrides ORDER BY clause.
+  # +join+::  Joins to additional table(s).
+  # +where+:: Adds extra condition(s) to WHERE condition.
+  # +order+:: Overrides ORDER BY clause.
   #
   def extra_initialization; end
 
@@ -434,7 +450,7 @@ class AbstractQuery < ActiveRecord::Base
   #     table = model.table_name
   #     case by
   #     when 'user_login'
-  #       self.include << :user
+  #       self.join << :user
   #       "users.login ASC'
   #     end
   #   end
@@ -446,14 +462,14 @@ class AbstractQuery < ActiveRecord::Base
   # that result in empty inner queries.
   #
   # This instance variabl is a Proc, initialized in the flavor-specific
-  # initializer: 
+  # initializer:
   #
   #   def initialize_inside_user
   #     ...
   #     self.tweak_outer_query = lambda do |outer|
   #       # This tells the outer query only to include users that have images
   #       # (i.e. have entries in the "images_users" many-to-many glue table).
-  #       (outer.params[:include] ||= []) << :images_users
+  #       (outer.params[:join] ||= []) << :images_users
   #     end
   #   end
   #
@@ -466,7 +482,7 @@ class AbstractQuery < ActiveRecord::Base
   # :User queries).
   #
   # This instance variable is a Proc, initialized in the flavor-specific
-  # initializer.  For example, the default would look like this: 
+  # initializer.  For example, the default would look like this:
   #
   #   def initialize_inside_user
   #     ...
@@ -487,7 +503,7 @@ class AbstractQuery < ActiveRecord::Base
   # queries nested inside :User queries).
   #
   # This instance variable is a Proc, initialized in the flavor-specific
-  # initializer.  For example, the default would look like this: 
+  # initializer.  For example, the default would look like this:
   #
   #   def initialize_inside_user
   #     ...
@@ -543,11 +559,11 @@ class AbstractQuery < ActiveRecord::Base
     allowed_model_flavors.values.flatten.uniq.sort_by(&:to_s)
   end
 
-  ############################################################################
+  ##############################################################################
   #
   #  :section: Construction
   #
-  ############################################################################
+  ##############################################################################
 
   # Look up record with given ID, returning nil if it no longer exists.
   def self.safe_find(id)
@@ -561,13 +577,8 @@ class AbstractQuery < ActiveRecord::Base
   # Instantiate and save a new query.
   def self.lookup_and_save(*args)
     query = lookup(*args)
-    query.save
+    query.save!
     query
-  end
-
-  # Create clone of this query (unsaved).
-  def clone
-    self.class.new(attributes)
   end
 
   # Instantiate new query for a given model and flavor.
@@ -618,8 +629,8 @@ class AbstractQuery < ActiveRecord::Base
     query.validate_params
 
     # See if such a query already exists and use it instead.
-    params = YAML::dump(query.params)
-    if other = find_by_model_and_flavor_and_params(model, flavor, params)
+    str = YAML::dump(query.params)
+    if other = find_by_model_and_flavor_and_params(model, flavor, str)
       query = other
     end
 
@@ -636,7 +647,7 @@ class AbstractQuery < ActiveRecord::Base
   def self.cleanup
     connection.delete %(
       DELETE FROM #{table_name}
-      WHERE access_count = 0 AND modified < DATE_SUB(NOW(), INTERVAL 1 HOUR) OR
+      WHERE access_count = 0 AND modified < DATE_SUB(NOW(), INTERVAL 6 HOUR) OR
             access_count > 0 AND modified < DATE_SUB(NOW(), INTERVAL 1 DAY)
     )
   end
@@ -650,17 +661,21 @@ class AbstractQuery < ActiveRecord::Base
   # Attempt to coerce a query for one model into a related query for another
   # model.  This is currently only defined for a very few specific cases.  I
   # have no idea how to generalize it.  Returns a new Query in rare successful
-  # cases; returns +nil+ in all other cases.
-  def coerce(new_model)
-    result = nil
-    new_model = new_model.to_s.to_sym
+  # cases; returns +nil+ in all other cases.  *NOTE*: It does not save the
+  # new query if it has to create a new one!
+  def coerce(new_model, just_test=false)
 
-    # Trivial case -- model's not actually different!
-    if model == new_model
-      result = self
+    # Just handle the trivial case -- model's not actually different!
+    if model_string == new_model.to_s
+      self
+    else
+      nil
     end
+  end
 
-    return result
+  # Can this query be coerced into a query for another type of object?
+  def is_coercable?(new_model)
+    !!coerce(new_model, :just_test)
   end
 
   ##############################################################################
@@ -684,10 +699,12 @@ class AbstractQuery < ActiveRecord::Base
     # Let's add our own universal declarations that let the caller customize
     # any query. (But allow subclass to redeclare for some flavors.)
     merge_requirements(reqs,
-      :include? => [:string],
-      :where?   => [:string],
-      :order?   => :string,
-      :by?      => :string
+      :join?   => [:string],
+      :tables? => [:string],
+      :where?  => [:string],
+      :group?  => :string,
+      :order?  => :string,
+      :by?     => :string
     )
 
     # Validate all expected parameters one at a time.
@@ -743,7 +760,7 @@ class AbstractQuery < ActiveRecord::Base
   # Validate an Array of values.
   def array_validate(arg, val, type)
     if val.is_a?(Array)
-      val.map do |val2|
+      val[0,MAX_ARRAY].map do |val2|
         scalar_validate(arg, val2, type)
       end
     else
@@ -836,6 +853,10 @@ class AbstractQuery < ActiveRecord::Base
       if !val.id
         raise("Value for :#{arg} is an unsaved #{type} instance.")
       end
+      # Cache the instance for later use, in case we both instantiate and
+      # execute query in the same action.
+      @params_cache ||= {}
+      @params_cache[arg] = val
       val.id
     elsif val.is_a?(Fixnum) or
           val.is_a?(String) && val.match(/^[1-9]\d*$/)
@@ -845,24 +866,36 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
+  # Check if we already have an instance corresponding to this parameter,
+  # otherwise look it up via ActiveRecord.
+  def find_cached_parameter_instance(model, arg)
+    @params_cache ||= {}
+    @params_cache[arg] ||= model.find(params[arg])
+  end
+
   ##############################################################################
   #
   #  :section: Building Queries
   #
   ##############################################################################
 
+  # Has the SQL query been initialized?
   def initialized?
     !!@initialized
   end
 
+  # Initialize the SQL query.  (This is called automatically by any methods
+  # that require it, e.g. +query+, +results+, +select_values+.)
   def initialize_query
     @initialized = true
     table = model.table_name
 
     # By default, no conditions, ordering, etc.
-    self.include = []
-    self.where   = []
-    self.order   = ''
+    self.join   = []
+    self.tables = []
+    self.where  = []
+    self.group  = ''
+    self.order  = ''
 
     # Setup query for the given flavor.
     send("initialize_#{flavor}")
@@ -875,9 +908,11 @@ class AbstractQuery < ActiveRecord::Base
     extra_initialization
 
     # Give all queries ability to override / customize.
-    self.include += params[:include] if params[:include]
-    self.where   += params[:where]   if params[:where]
-    self.order    = params[:order]   if params[:order]
+    self.join   += params[:join]   if params[:join]
+    self.tables += params[:tables] if params[:tables]
+    self.where  += params[:where]  if params[:where]
+    self.group   = params[:group]  if params[:group]
+    self.order   = params[:order]  if params[:order]
   end
 
   # Do mechanics of the :by => :type sorting mechanism.
@@ -889,7 +924,7 @@ class AbstractQuery < ActiveRecord::Base
       by ||= default_order
 
       # Allow any of these to be reversed.
-      reverse = !!by.sub!(/^reverse_$/, '')
+      reverse = !!by.sub!(/^reverse_/, '')
 
       # Let subclass decide how to order things.
       result = initialize_order(by)
@@ -920,79 +955,186 @@ class AbstractQuery < ActiveRecord::Base
   def initialize_all; end
 
   # Create fake query given the results.
-  def initialize_in_set(set=params[:ids])
+  def initialize_in_set(ids=params[:ids])
     table = model.table_name
-    set = set.map(&:to_s).join(',')
-    set = '0' if set == ''
+    set = clean_id_set(ids)
     self.where << "#{table}.id IN (#{set})"
-    self.order << "FIND_IN_SET(#{table}.id,'#{set}') ASC"
+    self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
 
     # Hey, check it out, we can populate the results cache immediately!
-    @result_ids  = set.split(',').map(&:to_i)
-    @num_results = @result_ids.length
+    @result_ids = ids
+  end
+
+  ##############################################################################
+  #
+  #  :section: Initialization Helpers
+  #
+  ##############################################################################
+
+  # Put together a list of ids for use in a "id IN (1,2,...)" condition.
+  #
+  #   set = clean_id_set(name.children)
+  #   self.where << "names.id IN (#{set})"
+  #
+  def clean_id_set(ids)
+    result = ids.map(&:to_i).uniq[0,MAX_ARRAY].map(&:to_s).join(',')
+    result = '0' if result == ''
+    return result
+  end
+
+  # Clean a pattern for use in LIKE condition.  Takes and returns a String.
+  def clean_pattern(pattern)
+    pattern.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
+  end
+
+  # Combine args into single parenthesized condition by anding them together.
+  def and_clause(*args)
+    if args.length > 1
+      '(' + args.join(' AND ') + ')'
+    else
+      args.first
+    end
+  end
+
+  # Combine args into single parenthesized condition by oring them together.
+  def or_clause(*args)
+    if args.length > 1
+      '(' + args.join(' OR ') + ')'
+    else
+      args.first
+    end
   end
 
   # Give search string for notes google-like syntax:
-  #   word1 word2     -->  has both word1 and word2
-  #   word1 OR word2  -->  has either word1 or word2
-  #   "word1 word2"   -->  has word1 followed immediately by word2
-  #   -word1          -->  doesn't have word1
+  #   word1 word2     -->  any has both word1 and word2
+  #   word1 OR word2  -->  any has either word1 or word2
+  #   "word1 word2"   -->  any has word1 followed immediately by word2
+  #   -word1          -->  none has word1
+  #
   # Note, to conform to google, "OR" must be greedy, thus:
   #   word1 word2 OR word3 word4
   # is interpreted as:
-  #   has word1 and (either word2 or word3) and word4
-  def full_google_search(pat, *fields)
-    results = []
-    if pat and (pat2 = pat.clone)
-      and_pats = []
-      while pat2.sub!(/^(-?("[^"]*"|[^ ]+)( OR -?("[^"]*"|[^ ]+))*) ?/, '')
-        pat3 = $1
-        or_pats = []
-        while pat3.sub!(/^(-)?"([^"]*)"( OR )?/, '') or
-              pat3.sub!(/^(-)?([^ ]+)( OR )?/, '')
-          do_not = $1 == '-' ? 'NOT ' : ''
-          pat4 = $2
-          clean_pat = pat4.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
-          or_pats += fields.map {|f| "#{f} #{do_not}LIKE '%#{clean_pat}%'"}
-        end
-        if or_pats.length > 1
-          and_pats << '(' + or_pats.join(' or ') + ')'
-        elsif or_pats.length > 0
-          and_pats << or_pats.first
+  #   any has (word1 and (either word2 or word3) and word4)
+  #
+  # Note, the following are not allowed:
+  #   -word1 OR word2
+  #   -word1 OR -word2
+  #
+  # The result is an Array of positive asserions and an Array of negative
+  # assertions.  Each positive assertion is one or more strings.  One of the
+  # fields being searched must contain at least one of these strings out of
+  # each assertion.  (Different fields may be used for different assertions.)
+  # Each negative assertion is a single string.  None of the fields being
+  # searched may contain any of the negative assertions.
+  #
+  #   search = google_parse(search_string)
+  #   search.goods = [
+  #     [ "str1", "or str2", ... ],
+  #     [ "str3", "or str3", ... ],
+  #     ...
+  #   ]
+  #   search.bads = [ "str1", "str2", ... ]
+  #
+  # Example result for "agaricus OR amanita -amanitarita":
+  #
+  #   search.goods = [ [ "agaricus", "amanita" ] ]
+  #   search.bads  = [ "amanitarita" ]
+  #
+  def google_parse(str)
+    goods = []
+    bads  = []
+    if (str = str.to_s.strip) != ''
+      str.gsub!(/\s+/, ' ')
+      # Pull off "and" clauses one at a time from the beginning of the string.
+      while true
+        if str.sub!(/^-"([^""]+)"( |$)/, '') or
+           str.sub!(/^-(\S+)( |$)/, '')
+          bads << $1
+        elsif str.sub!(/^(("[^""]+"|\S+)( OR ("[^""]+"|\S+))*)( |$)/, '')
+          str2 = $1
+          or_strs = []
+          while str2.sub!(/^"([^""]+)"( OR |$)/, '') or
+                str2.sub!(/^(\S+)( OR |$)/, '')
+            or_strs << $1
+          end
+          goods << or_strs
+        else
+          raise("Invalid search string syntax at: '#{str}'") if str != ''
+          break
         end
       end
-      if and_pats.length > 2
-        results << '(' + and_pats.join(' and ') + ')'
-      elsif and_pats.length > 0
-        results << and_pats.first
+    end
+    GoogleSearch.new(
+      :goods => goods,
+      :bads  => bads
+    )
+  end
+
+  # Execute google-style search.  Pass in the GoogleSearch from +google_parse+,
+  # an Array of fields to search, and any other query parameters, such as
+  # +join+ table(s) or extra +where+ condition(s).  It returns a list of ids.
+  def google_execute(search, args={})
+    fields = args[:fields]
+    args[:where] ||= []
+    args[:where] = [args[:where]] if args[:where].is_a?(String)
+
+    # Easiest case, only searching one field.
+    if fields.length == 1
+      args[:where] << google_conditions(search, fields.first)
+      select_values(args).map(&:to_i)
+  
+    else
+      # If searching multiple fields, concat them all together into one string.
+      concat = 'CONCAT(' + fields.map do |field|
+        "IF(#{field} IS NULL,'',#{field})"
+      end.join(',') + ')'
+  
+      # Intermediate case, searching multiple fields, but only one condition.
+      if search.goods.flatten.length + search.bads.length <= 1
+        args[:where] << google_conditions(search, concat)
+        select_values(args).map(&:to_i)
+
+      # General case, searching multiple fields with multiple conditions.
+      # Create a subquery that concats all the search fields together, then
+      # apply all our conditions to that monster string.
+      else
+        args[:select] = "#{model.table_name}.id AS id, #{concat} AS str"
+        subquery = query(args)
+        model.connection.select_values(%(
+          SELECT DISTINCT tmp.id FROM (#{subquery}) AS tmp
+          WHERE #{google_conditions(search, 'tmp.str')}
+        )).map(&:to_i)
       end
     end
   end
 
-  # User name, location name, mushroom name, etc. are much simpler.
-  #   aaa bbb             -->  name is "...aaa bbb..."
-  #   aaa bbb OR ccc ddd  -->  name is either "...aaa bbb..." or "...ccc ddd..."
-  def soft_google_search(pat, *fields)
-    results = []
-    if pat
-      or_pats = []
-      for pat2 in pat.split(' OR ')
-        clean_pat = pat2.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
-        or_pats += fields.map {|f| "#{f} LIKE '%#{clean_pat}%'"}
-      end
-      if or_pats.length > 1
-        results << '(' + or_pats.join(' or ') + ')'
-      elsif or_pats.length > 0
-        results << or_pats.first
-      end
+  # Put together a bunch of SQL conditions that describe a given search.
+  def google_conditions(search, field)
+    goods = search.goods
+    bads  = search.bads
+    ands = []
+    ands += goods.map do |good|
+      or_clause(*good.map {|str| "#{field} LIKE '%#{clean_pattern(str)}%'"})
+    end
+    ands += bads.map {|bad| "#{field} NOT LIKE '%#{clean_pattern(bad)}%'"}
+    ands.join(' AND ')
+  end
+
+  # Simple class to hold the results of +google_parse+.  It just has two
+  # attributes, +goods+ and +bads+.
+  class GoogleSearch
+    attr_accessor :goods, :bads
+    def initialize(args={})
+      self.goods = args[:goods]
+      self.bads = args[:bads]
     end
   end
 
-  ############################################################################
+  ##############################################################################
   #
   #  :section: Build SQL Query
   #
-  ############################################################################
+  ##############################################################################
 
   # Build query for <tt>model.find_by_sql</tt> -- i.e. one that returns all
   # fields from the table in question, instead just the id.
@@ -1005,23 +1147,38 @@ class AbstractQuery < ActiveRecord::Base
   def query(args={})
     initialize_query if !initialized?
 
-    our_select   = args[:select] || "DISTINCT #{model.table_name}.id"
-    our_include  = include
-    our_include += args[:include] if args[:include]
-    our_from     = calc_from_clause(our_include)
-    our_where    = where
-    our_where   += args[:where] if args[:where]
-    our_where   += calc_join_conditions(our_include)
-    our_where    = calc_where_clause(our_where)
-    our_order    = args[:order] || order
-    our_order    = reverse_order(order) if our_order == :reverse
-    our_limit    = args[:limit]
+    our_select  = args[:select] || "DISTINCT #{model.table_name}.id"
+    our_join    = self.join.dup
+    our_join   += args[:join] if args[:join].is_a?(Array)
+    our_join   << args[:join] if args[:join].is_a?(Hash)
+    our_join   << args[:join] if args[:join].is_a?(Symbol)
+    our_tables  = self.tables.dup
+    our_tables += args[:tables] if args[:tables].is_a?(Array)
+    our_tables << args[:tables] if args[:tables].is_a?(Symbol)
+    our_from    = calc_from_clause(our_join, our_tables)
+    our_where   = self.where.dup
+    our_where  += args[:where] if args[:where].is_a?(Array)
+    our_where  << args[:where] if args[:where].is_a?(String)
+    our_where  += calc_join_conditions(model.table_name, our_join)
+    our_where   = calc_where_clause(our_where)
+    our_group   = args[:group] || self.group
+    our_order   = args[:order] || self.order
+    our_order   = reverse_order(self.order) if our_order == :reverse
+    our_limit   = args[:limit]
+
+    # Tack id at end of order to disambiguate the order.
+    # (I despise programs that render random results!)
+    if (our_order.to_s != '') and
+       !our_order.match(/.id( |$)/)
+      our_order += ", #{model.table_name}.id DESC"
+    end
 
     sql = %(
       SELECT #{our_select}
       FROM #{our_from}
     )
     sql += "  WHERE #{our_where}\n"    if our_where.to_s != ''
+    sql += "  GROUP BY #{our_group}\n" if our_group.to_s != ''
     sql += "  ORDER BY #{our_order}\n" if our_order.to_s != ''
     sql += "  LIMIT #{our_limit}\n"    if our_limit.to_s != ''
 
@@ -1030,28 +1187,42 @@ class AbstractQuery < ActiveRecord::Base
 
   # Format list of conditions for WHERE clause.
   def calc_where_clause(our_where=where)
-    our_where.uniq.map {|x| "(#{x})"}.join(' AND ')
+    ands = our_where.uniq.map do |x|
+      # Make half-assed attempt to cut down on proliferating parens...
+      if x.match(/^\(.*\)$/) or !x.match(/ or /i)
+        x
+      else
+        '(' + x + ')'
+      end
+    end
+    ands.join(' AND ')
   end
 
-  # Extract and format list of tables names from include tree for FROM clause.
-  def calc_from_clause(our_include=include)
-    flatten_include([model.table_name] + our_include).
-      uniq.
+  # Extract and format list of tables names from join tree for FROM clause.
+  def calc_from_clause(our_join=join, our_tables=tables)
+    tables = table_list(our_join, our_tables).
       sort_by {|x| table_order.index(x.to_s.to_sym) or raise("Don't know the table '#{x}'.")}.
       map {|x| "`#{x}`"}.
       join(', ')
   end
 
-  # Flatten include "tree" into a simple Array of Strings.
-  def flatten_include(arg)
+  # Extract a complete list of tables being used by this query.  (Combines
+  # this table (+model.table_name+) with tables from +join+ with custom-joined
+  # tables from +tables+.)
+  def table_list(our_join=join, our_tables=tables)
+    flatten_join([model.table_name] + our_join + our_tables).uniq
+  end
+
+  # Flatten join "tree" into a simple Array of Strings.
+  def flatten_join(arg)
     result = []
     if arg.is_a?(Hash)
       for key, val in arg
         result << key.to_s.sub(/\..*/, '')
-        result += flatten_include(val)
+        result += flatten_join(val)
       end
     elsif arg.is_a?(Array)
-      result += arg.map {|x| flatten_include(x)}.flatten
+      result += arg.map {|x| flatten_join(x)}.flatten
     else
       result << arg.to_s.sub(/\..*/, '')
     end
@@ -1059,26 +1230,32 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Figure out which additional conditions we need to connect all the joined
-  # tables.
-  def calc_join_conditions(arg=include, from=model.table_name)
+  # tables.  Note, +to+ can be an Array and/or tree-like Hash of dependencies.
+  # (I believe it is identical to how :include is done in ActiveRecord#find.)
+  def calc_join_conditions(from, to)
     result = []
-    if arg.is_a?(Hash)
-      for key, val in arg
+    from = from.to_s
+    if to.is_a?(Hash)
+      for key, val in to
         result += calc_join_condition(from, key.to_s)
-        result += calc_join_conditions(val, key.to_s)
+        result += calc_join_conditions(key.to_s, val)
       end
-    elsif arg.is_a?(Array)
-      result += arg.map {|x| calc_join_conditions(x, from)}.flatten
+    elsif to.is_a?(Array)
+      result += to.map {|x| calc_join_conditions(from, x)}.flatten
     else
-      result += calc_join_condition(from, arg.to_s)
+      result += calc_join_condition(from, to.to_s)
     end
     return result
   end
 
   # Create SQL condition to join two tables.
   def calc_join_condition(from, to)
+    # Check for direct join first, e.g., if joining from observatons to
+    # rss_logs, use "observations.rss_log_id = rss_logs.id".
     if col = (join_conditions[from.to_sym] && join_conditions[from.to_sym][to.to_sym])
       to = to.sub(/\..*/, '')
+    # Now look for reverse join.  (In the above example, and this was how it
+    # used to be, it would be "observations.id = rss_logs.observation_id".)
     elsif col = (join_conditions[to.to_sym] && join_conditions[to.to_sym][from.to_sym])
       to = to.sub(/\..*/, '')
       from, to = to, from
@@ -1100,11 +1277,11 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
-  ################################################################################
+  ##############################################################################
   #
-  #  :section: Execute Queries
+  #  :section: Low-Level Queries
   #
-  ################################################################################
+  ##############################################################################
 
   # Execute query after wrapping select clause in COUNT().
   def select_count(args={})
@@ -1143,42 +1320,53 @@ class AbstractQuery < ActiveRecord::Base
     model.find_by_sql(query_all(args))
   end
 
-  # Number of results the query returns.
-  def num_results
-    @num_results ||= select_count
+  ##############################################################################
+  #
+  #  :section: High-Level Queries
+  #
+  ##############################################################################
+
+  # Return an Array of tables used in this query (Symbol's).
+  def tables_used
+    initialize_query if !initialized?
+    table_list.map(&:to_s).sort.map(&:to_sym)
   end
 
-  # Array of all results, instantiated.
-  def results
-    @results ||= find_by_sql
-    @num_results = @results.length
-    return @results
+  # Does this query use a given table?  (Takes String or Symbol.)
+  def uses_table?(table)
+    initialize_query if !initialized?
+    table_list.map(&:to_s).include?(table.to_s)
+  end
+
+  # Number of results the query returns.
+  def num_results
+    result_ids.length
   end
 
   # Array of all results, just ids.
   def result_ids
-    if !@result_ids
-      if @results
-        @result_ids = @results.map(&:id)
-      else
-        @result_ids = select_values(query).map(&:to_i)
-        @num_results = @result_ids.length
-      end
-    end
-    return @result_ids
+    @result_ids ||= select_values.map(&:to_i)
+  end
+
+  # Array of all results, instantiated.
+  def results(*args)
+    instantiate(result_ids, *args)
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
   # better all be valid instances of +model+ -- no error checking is done!!
   def results=(list)
-    @num_results = list.length
-    @results = list
+    @result_ids = list.map(&:id)
+    @results = list.inject({}) do |map,obj|
+      map[obj.id] ||= obj
+      map
+    end
+    return list
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
-  # better all be valid integer ids -- no error checking is done!!
+  # better all be valid Fixnum ids -- no error checking is done!!
   def result_ids=(list)
-    @num_results = list.length
     @result_ids = list
   end
 
@@ -1191,110 +1379,113 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
-  # Returns a subset of the results.
-  def paginate(paginator, letter_field=nil)
-    if letter_field
+  # Returns a subset of the results (as ids).  Optional arguments:
+  # +letter_field+:: Field in query to use for pagination-by-letter.  Pulls
+  #                  the first letter from this field, even if not a letter!
+  def paginate_ids(paginator, args={})
+    expect_args(:paginate_ids, args, :letter_field)
+
+    # Get list of letters used in results.
+    if letter_field = args[:letter_field]
       paginator.used_letters = select_values(:select => "DISTINCT LEFT(#{letter_field},1)")
     end
 
-    # Filter by letter, then paginate.
+    # Filter by letter.
     if letter = paginator.letter
-      letter_conditions = ["LEFT(#{letter_field},1) = '#{letter}'"]
-      paginator.num_total = select_count(:where => letter_conditions)
-      from, to, num = paginator.from, paginator.to, paginator.num_per_page
-      find_by_sql(:where => letter_conditions, :limit => "#{from}, #{num}")
-
-    # Normal pagination.
-    else
-      paginator.num_total = num_results
-      from, to, num = paginator.from, paginator.to, paginator.num_per_page
-      if @results
-        @results[from..to]
-      elsif @result_ids
-        ids = @result_ids[from..to]
-        model.all(:conditions => ['id IN (?)', ids]).
-              sort_by {|obj| ids.index(obj.id.to_i)}
-      else
-        find_by_sql(:limit => "#{from}, #{num}")
-      end
+      self.where << "LEFT(#{letter_field},1) = '#{letter}'"
+      @result_ids = nil
     end
+
+    # Paginate remaining results.
+    paginator.num_total = num_results
+    from, to = paginator.from, paginator.to
+    result_ids[from..to] || []
   end
 
-  # Returns a subset of the results.
-  def paginate_ids(paginator, letter_field=nil)
-    if letter_field
-      paginator.used_letters = select_values(:select => "DISTINCT LEFT(#{letter_field},1)")
-    end
-
-    # Filter by letter, then paginate.
-    if letter = paginator.letter
-      letter_conditions = ["LEFT(#{letter_field},1) = '#{letter}'"]
-      paginator.num_total = select_count(:where => letter_conditions)
-      from, to, num = paginator.from, paginator.to, paginator.num_per_page
-      select_values(:where => letter_conditions, :limit => "#{from}, #{num}").map(&:to_i)
-
-    # Normal pagination.
-    else
-      paginator.num_total = num_results
-      from, to, num = paginator.from, paginator.to, paginator.num_per_page
-      if @results
-        @results[from..to].map(&:id)
-      elsif @result_ids
-        @result_ids[from..to]
-      else
-        select_values(:limit => "#{from}, #{num}").map(&:to_i)
-      end
-    end
+  # Returns a subset of the results (as ActiveRecord instances).
+  def paginate(paginator, args={})
+    args1, args2 = split_args(args, :letter_field)
+    instantiate(paginate_ids(paginator, args1), args2)
   end
 
-  ############################################################################
+  # Instantiate a set of records given as an Array of ids.  Returns a list of
+  # ActiveRecord instances in the same order as given.  Optional arguments:
+  # +include+:: Tables to eager load (see argument of same name in
+  #             ActiveRecord::Base#find for syntax).
+  def instantiate(ids, args={})
+    expect_args(:instantiate, args, :include)
+    @results ||= {}
+    ids.map!(&:to_i)
+    needed = (ids - @results.keys).uniq
+    if !needed.empty?
+      set = clean_id_set(needed)
+      args2 = {}
+      args2[:conditions] = "#{model.table_name}.id IN (#{set})"
+      args2[:include] = args[:include] if args[:include]
+      model.all(args2).each do |obj|
+        @results[obj.id] = obj
+      end
+    end
+    ids.map {|id| @results[id]}
+  end
+
+  # Clear out the results cache.  Useful if you need to reload results with
+  # more eager loading, or if you need to repaginate something with letters.
+  def clear_cache
+    @results = nil
+    @result_ids = nil
+  end
+
+  ##############################################################################
   #
   #  :section: Sequence Operators
   #
-  ############################################################################
+  ##############################################################################
 
-  # Set current place in results; takes instance or id (String or Fixnum).
-  def this=(arg)
-    if arg.is_a?(model)
-      @this = arg
-    elsif arg.is_a?(Fixnum)
-      @this = model.find(arg)
-    elsif arg.is_a?(String) and
-          (arg.to_i > 0 rescue false)
-      @this = model.find(arg)
-    else
-      raise("Invalid argument: '#{arg.class}: #{arg}'")
-    end
-    @save_this = @this
+  # Return current place in results, as an id.  (Returns nil if not set yet.)
+  def this_id
+    @this_id
   end
 
   # Set current place in results; takes id (String or Fixnum).
   def this_id=(id)
-    @save_this = @this = model.find(id)
-  end
-
-  # Return current place in results, instantiated.
-  def this
-    @this
-  end
-
-  # Return current place in results, as an id.  (Returns nil if not set yet.)
-  def this_id
-    @this && @this.id
+    @save_this_id = @this_id = id.to_s.to_i
   end
 
   # Reset current place in results to the place last given in a "this=" call.
   def reset
-    @this = @save_this
+    @this_id = @save_this_id
+  end
+
+  # Return current place in results, instantiated.  (Returns nil if not set
+  # yet.)
+  def this(*args)
+    @this_id ? instantiate([@this_id], *args).first : nil
+  end
+
+  # Set current place in results; takes instance or id (String or Fixnum).
+  def this=(arg)
+    if arg.is_a?(model)
+      @results ||= {}
+      @results[arg.id] = arg
+      self.this_id = arg.id
+    else
+      self.this_id = arg
+    end
+    return arg
   end
 
   # Move to first place.
   def first(skip_outer=false)
     new_self = self
     new_self = outer_first if !skip_outer && has_outer?
-    id = select_value(:limit => '1').to_i
+    id = new_self.select_value(:limit => '1').to_i
     if id > 0
-      new_self.this_id = id
+      if new_self == self
+        @this_id = id
+      else
+        new_self.this_id = id
+      end
     else
       new_self = nil
     end
@@ -1309,7 +1500,11 @@ class AbstractQuery < ActiveRecord::Base
     if !index
       new_self = nil
     elsif index > 0
-      new_self.this_id = result_ids[index - 1]
+      if new_self == self
+        @this_id = result_ids[index - 1]
+      else
+        new_self.this_id = result_ids[index - 1]
+      end
     elsif has_outer?
       while new_self = new_self.outer_prev
         if new_new_self = new_self.last(:skip_outer)
@@ -1331,7 +1526,11 @@ class AbstractQuery < ActiveRecord::Base
     if !index
       new_self = nil
     elsif index < result_ids.length - 1
-      new_self.this_id = result_ids[index + 1]
+      if new_self == self
+        @this_id = result_ids[index + 1]
+      else
+        new_self.this_id = result_ids[index + 1]
+      end
     elsif has_outer?
       while new_self = new_self.outer_next
         if new_new_self = new_self.first(:skip_outer)
@@ -1351,18 +1550,22 @@ class AbstractQuery < ActiveRecord::Base
     new_self = outer_last if !skip_outer && has_outer?
     id = new_self.select_value(:order => :reverse, :limit => '1').to_i
     if id > 0
-      new_self.this_id = id
+      if new_self == self
+        @this_id = id
+      else
+        new_self.this_id = id
+      end
     else
       new_self = nil
     end
     return new_self
   end
 
-  ############################################################################
+  ##############################################################################
   #
-  #  :section: Outer Queries
+  #  :section: Nested Queries
   #
-  ############################################################################
+  ##############################################################################
 
   # Is this query nested in an outer query?
   def has_outer?
@@ -1412,7 +1615,7 @@ class AbstractQuery < ActiveRecord::Base
   def new_inner_if_necessary(new_outer)
     if !new_outer
       nil
-    elsif new_outer.this_id == outer_this_id
+    elsif new_outer.this_id == get_outer_this_id
       self
     else
       new_inner(new_outer)
@@ -1441,5 +1644,34 @@ class AbstractQuery < ActiveRecord::Base
   def outer_last
     outer.this_id = get_outer_this_id
     new_inner_if_necessary(outer.last)
+  end
+
+  ##############################################################################
+  #
+  #  :stopdoc: Other Stuff
+  #
+  ##############################################################################
+
+  # Raise an error if caller passed any unexpected arguments.
+  def expect_args(method, args={}, *expect) # :nodoc:
+    extra_args = args.keys - expect
+    if !extra_args.empty?
+      raise "Unexpected arguments to Query##{method}: #{extra_args.inspect}"
+    end
+  end
+
+  # Split up a Hash of arguments, putting all the ones in the given list in
+  # the first of two Hash's, and all the rest in the other.  Returns two Hash's.
+  def split_args(args={}, *keys_in_first) # :nodoc:
+    args1 = {}
+    args2 = {}
+    args.each do |key, val|
+      if keys_in_first.include?(key)
+        args1[key] = val
+      else
+        args2[key] = val
+      end
+    end
+    return [args1, args2]
   end
 end

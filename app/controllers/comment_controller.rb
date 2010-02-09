@@ -1,9 +1,12 @@
 #
 #  Views: ("*" - login required)
+#     index_comment              List comments in current query.
 #     list_comments              List latest comments.
 #     show_comments_for_user     Show a comments *for* a user.
 #     show_comments_by_user      Show a comments *by* a user.
 #     show_comment               Show a single comment.
+#     prev_comment               Show a previous comment in index.
+#     next_comment               Show a next comment in index.
 #   * add_comment                Create a comment.
 #   * edit_comment               Edit a comment.
 #   * destroy_comment            Destroy comment.
@@ -12,6 +15,7 @@
 
 class CommentController < ApplicationController
   before_filter :login_required, :except => [
+    :index_comment,
     :list_comments,
     :next_comment,
     :prev_comment,
@@ -34,13 +38,14 @@ class CommentController < ApplicationController
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def list_comments
-    query = find_or_create_query(:Comment, :all, :by => :created)
+  def index_comment
+    query = find_or_create_query(:Comment, :all, :by => params[:by] || :created)
+    query.params[:by] = params[:by] if params[:by]
     show_selected_comments(query, :id => params[:id])
   end
 
   # Show list of latest comments. (Linked from left panel.)
-  def all_comments
+  def list_comments
     query = create_query(:Comment, :all, :by => :created)
     show_selected_comments(query)
   end
@@ -61,7 +66,18 @@ class CommentController < ApplicationController
 
   # Show selected list of comments.
   def show_selected_comments(query, args={})
-    args = { :action => :list_comments, :num_per_page => 24 }.merge(args)
+
+    # (Eager-loading of names might fail when comments start to apply to
+    # objects other than observations.)
+    args = { :action => :list_comments, :num_per_page => 24,
+             :include => [:user, {:object => :name}] }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['date', :app_date.t], 
+      ['user', :user.t],
+    ]
+
     show_index_of_objects(query, args)
   end
 
@@ -78,20 +94,19 @@ class CommentController < ApplicationController
   def show_comment
     store_location
     pass_query_params
-    @comment = Comment.find(params[:id])
+    @comment = Comment.find(params[:id],
+                            :include => [:user, {:object => :name}])
     @object = @comment.object
   end
 
   # Go to next comment: redirects to show_comment.
   def next_comment
-    comment = Comment.find(params[:id])
-    redirect_to_next_object(:next, comment)
+    redirect_to_next_object(:next, Comment, params[:id])
   end
 
   # Go to previous comment: redirects to show_comment.
   def prev_comment
-    comment = Comment.find(params[:id])
-    redirect_to_next_object(:prev, comment)
+    redirect_to_next_object(:prev, Comment, params[:id])
   end
 
   # Form to create comment for an object.

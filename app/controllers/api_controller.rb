@@ -10,6 +10,7 @@
 ################################################################################
 
 class ApiController < ApplicationController
+  require 'xmlrpc/client'
 
   # Disable all filters except set_locale.
   skip_filter   :browser_status
@@ -31,10 +32,25 @@ class ApiController < ApplicationController
 
   # Standard entry point for XML-RPC requests.
   def xml_rpc
-    xact = Transaction.new(:query => request.content)
-    xact.args[:_safe] = false
-    api = xact.process
-    render_results(api)
+    begin
+      @@xmlrpc_reader ||= XMLRPC::XMLParser::REXMLStreamParser.new
+      method, args = @@xmlrpc_reader.parseMethodCall(request.content)
+      if (args.length != 1) or
+         !args[0].is_a?(Hash)
+        raise "Invalid request; expecting a single hash of named parameters."
+      end
+      args = args.first
+      args[:method] = method
+      args[:_safe] = false
+      xact = Transaction.new(args)
+      xact.validate_args
+      api = xact.execute
+      render_results(api)
+    rescue => e
+      api = API.new
+      @errors = api.convert_error(e, 501, nil, true) 
+      render_results(api)
+    end
   end
 
   # ----------------------------

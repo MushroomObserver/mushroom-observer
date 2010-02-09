@@ -4,7 +4,7 @@
       <%= link_to(:rss_log_of_deleted_item.t, :action => 'show_rss_log',
                   :id => rss_log.id, :params => query_params) %>
     </td>
-<% if vertical_layout %>
+<% if @layout['vertical_layout'] %>
   </tr>
   <tr>
     <td align="center" valign="middle">

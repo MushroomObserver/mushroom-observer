@@ -5,6 +5,7 @@
 comment: Comment
 comments: Comments
 description: Description
+descriptions: Descriptions
 draft: Draft
 drafts: Drafts
 image: Image
@@ -13,6 +14,10 @@ license: License
 licenses: Licenses
 location: Location
 locations: Locations
+log: Log
+logs: Logs
+map: Map
+maps: Maps
 name: Name
 names: Names
 naming: Proposed ID
@@ -25,6 +30,8 @@ past_name: Name Change
 past_names: Name Changes
 project: Project
 projects: Projects
+rss_log: Activity Log
+rss_logs: Activity Logs
 species_list: Species List
 species_lists: Species Lists
 user: User
@@ -60,6 +67,7 @@ app_news: Features and Fixes
 app_observations_left: Observations
 app_create_observation: Create Observation
 app_sort_by_date_obs: Sort by Date
+app_sort_by: Sort by [order]
 
 app_species_list: Species Lists
 app_create_list: Create List
@@ -126,6 +134,9 @@ app_no_create_name: Unable to create the name '[name]'.
 app_no_javascript: Javascript is Disabled
 app_no_more_search_objects: There are no more [types].
 app_no_session: You Have Cookies Disabled
+app_object_no_match: "Can't find [type] matching '[match]'."
+app_object_not_found: "Can't find [type] #[id]."
+app_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
 app_object_title: Title
 app_permission_denied: Permission denied.
 app_rss: Mushroom Observer RSS
@@ -163,22 +174,16 @@ app_enable: Enable
 app_index: Index
 app_less_button: << Less
 app_more_button: More >>
-app_next: Next
-app_prev: Prev
+app_next: Next >>
+app_prev: << Prev
 app_remove: Remove
 app_save: Save
 app_search: Search
 app_send: Send
 app_save_changes: Save Edits
 app_show_all: Show All
-app_show_image: Show Image
-app_show_location: Show Location
-app_show_log: Show Log
-app_show_map: Show Map
-app_show_name: Show Name
-app_show_observation: Show Observation
-app_show_project: Show Project
-app_show_species_list: Show Species List
+app_show_object: Show [type]
+app_show_objects: Show [types]
 app_update: Update
 
 # Footers: "Created: [date]", "By: [user]", "Observation Created: 2008-11-03",
@@ -354,6 +359,9 @@ log_name_updated: Name updated by [user].
 log_naming_created: 'Naming created by [user]: [name]'
 log_naming_destroyed: 'Naming destroyed by [user]: [name]'
 log_naming_updated: 'Naming updated by [user]: [name]'
+log_object_created: '[type] created by [user].'
+log_object_destroyed: '[type] destroyed by [user].'
+log_object_updated: '[type] updated by [user].'
 log_observation_created: Observation created by [user].
 log_observation_destroyed: Observation destroyed by [user].
 log_observation_destroyed2: 'Observation destroyed by [user]: [name]'
@@ -400,6 +408,7 @@ validate_naming_reason_naming_missing: Missing naming.
 validate_naming_reason_reason_invalid: Invalid reason code.
 validate_naming_user_missing: Missing user.
 validate_notification_user_missing: Missing user.
+validate_observation_future_time: Time travel is not allowed, pick a date from the past.
 validate_observation_thumb_image_id_invalid: Unable to find a corresponding image for thumbnail.
 validate_observation_user_missing: Missing user.
 validate_observation_when_missing: Missing observation date.
@@ -460,6 +469,11 @@ query_title_parents: "Higher Taxa containing [name]"
 query_title_pattern: "[types] Matching '[pattern]'"
 query_title_with_authors: "[types] with Authors"
 query_title_with_observations: "[types] with Observations"
+query_title_with_observations_at_location: "[types] with Observations from [location]"
+query_title_with_observations_at_where: "[types] with Observations from '[where]'"
+query_title_with_observations_by_user: "[types] with Observations by [user]"
+query_title_with_observations_in_set: "[types] with [observations]"
+query_title_with_observations_in_species_list: "[types] with Observations in [species_list]"
 query_title_with_observations_of_name: "[types] with Observations of [name]"
 query_title_with_observations_of_name_synonym: "[types] with Observations of Synonyms of [name]"
 query_title_with_observations_of_name_nonconsensus: "[types] with Observations That Might Be [name]"
@@ -1422,7 +1436,7 @@ list_notifications_title: Email Alerts for [user]
 
 
 # location/list_place_names
-list_place_names_known: Known Locations (alphabetical)
+list_place_names_known: Known Locations
 list_place_names_map: Map Locations
 list_place_names_merge: Merge
 list_place_names_undef: Undefined Locations (by frequency)
@@ -1476,7 +1490,7 @@ make_report_not_supported: We don't support report filetype *.[type].
 
 # location/map_locations
 map_locations_no_matches: No locations matching '[pattern]'.
-map_locations_title: Map of Locations Matching '[pattern]'
+map_locations_title: Map of [locations]
 map_locations_global_map: Global Map of All Locations
 
 

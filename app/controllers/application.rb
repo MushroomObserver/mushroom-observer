@@ -51,7 +51,6 @@
 #  flash_object_errors::    Add all errors for a given instance.
 #
 #  ==== Name validation
-#  setup_sorter::             Sets up a NameSorter object.
 #  create_needed_names::      Creates the given name if it's been approved.
 #  construct_approved_names:: Creates a list of names if they've been approved.
 #  construct_approved_name::  (helper)
@@ -68,6 +67,8 @@
 #  create_query::           Create a new Query from scratch.
 #  redirect_to_next_object:: Find next object from a Query and redirect to its show page.
 #  show_index_of_objects::  Show paginated set of Query results as a list.
+#  find_or_goto_index::     Look up object by id, displaying error and redirecting on failure.
+#  goto_index::             Redirect to a reasonable fallback (index) page in case of error.
 #
 #  ==== Other search-like stuff
 #  query_ids::              Gets list of ids given SQL query.
@@ -98,7 +99,7 @@ class ApplicationController < ActionController::Base
   require 'login_system'
   include LoginSystem
 
-  before_filter :browser_status
+#   before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
   before_filter :check_user_alert
@@ -131,6 +132,15 @@ class ApplicationController < ActionController::Base
   def autologin
     # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
     # return false
+
+# For testing: eliminate need for session.  Remember to turn on browser_status
+# filter and check_if_user_turned_javascript_on in layout.
+if !TESTING
+@user = User.find(252)
+User.current = @user
+set_session_user(@user)
+return true
+end
 
     # Guilty until proven innocent...
     @user = nil
@@ -656,36 +666,6 @@ class ApplicationController < ActionController::Base
     result
   end
 
-  # Sets up a NameSorter object.
-  # Used by: bulk_name_editor, create/edit_species_list
-  # Inputs:
-  #   species_list                        ?
-  #   list                                ?
-  #   params[:chosen_names]               ?
-  #   params[:chosen_approved_names]      ?
-  #   params[:approved_deprecated_names]  ?
-  #   params[:checklist_data]             ?
-  # Returns: NameSorter object
-  def setup_sorter(params, species_list, list)
-    sorter = NameSorter.new
-
-    # Seems like valid selections should take precedence over multiple names,
-    # but I haven't constructed a lot of examples.  If it makes more sense for
-    # multiples to take precedence over valid names, then swap the next two
-    # lines.  If they need to be more carefully considered, then the lists may
-    # need to get merged in the display.
-    sorter.add_chosen_names(params[:chosen_names]) # hash
-    sorter.add_chosen_names(params[:chosen_approved_names]) # hash
-
-    sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
-    sorter.check_for_deprecated_checklist(params[:checklist_data])
-    if species_list
-      sorter.check_for_deprecated_names(species_list.observations.map {|o| o.name})
-    end
-    sorter.sort_names(list)
-    sorter
-  end
-
   # Goes through list of names entered by user and creates (and saves) any that
   # are not in the database (but only if user has approved them).
   #
@@ -853,13 +833,14 @@ class ApplicationController < ActionController::Base
   #
   #    def rss_logs
   #      # Create Query so we can get list of observations to display.
-  #      @query = create_query(:observations_by_rss_log)
-  #      @pages, @observations = @query.paginate(page, num_per_page)
-  #      set_query_params(@query)
+  #      query = create_query(:observations_by_rss_log)
+  #      @pages = paginate_numbers(:page, 50)
+  #      @objects = query.paginate(@pages)
+  #      set_query_params(query) # (redundant)
   #
   #      # Results in the view must pass "query_params" to show_observation.
   #      #
-  #      #   for observation in @observations
+  #      #   for observation in @objects
   #      #     link_to(observation.name,
   #      #       :action => 'show_observation',
   #      #       :id     => observation.id,
@@ -872,8 +853,8 @@ class ApplicationController < ActionController::Base
   #      @observation = Observation.find(params[:id])
   #
   #      # Need to get a copy of the Query so we can do next/prev links.
-  #      @query = find_or_create_query(:observations_by_rss_log)
-  #      set_query(@query)
+  #      query = find_or_create_query(:observations_by_rss_log)
+  #      set_query_params(query) # (redundant)
   #
   #      # All links in the view must include "query_params", so that the
   #      # query state will be passed on to the next actions.
@@ -931,7 +912,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Return query parameter(s) necessary to pass query information along to
-  # another action. *NOTE*: This method is available to views. 
+  # another action. *NOTE*: This method is available to views.
   def query_params(query=nil)
     if query
       {:q => query.id.alphabetize}
@@ -955,7 +936,12 @@ class ApplicationController < ActionController::Base
     @query_params
   end
 
-  # Lookup an appropriate Query or create a default one if necessary.
+  # Lookup an appropriate Query or create a default one if necessary.  At the
+  # moment it will only use a pre-existing query if it was passed in via
+  # query_params.  I was getting highly non-intuitive behavior by falling back
+  # on the latest query of the right flavor or just model, even if I required
+  # that it be a Query this user created (which was useless if the user wasn't
+  # logged in, anyway.)
   def find_or_create_query(model, flavor=:default, args={})
     model = model.to_s
     result = find_query(model, false)
@@ -973,10 +959,13 @@ class ApplicationController < ActionController::Base
     result = nil
     if params[:q].to_s != ''
       if query = Query.safe_find(params[:q].dealphabetize)
+        # This is right kind of query.
         if query.model_string == model
           result = query
+        # If not, try coercing it.
         elsif query2 = query.coerce(model)
           result = query2
+        # If that fails, try the outer query coercing if necessary.
         elsif query = query.outer
           if query.model_string == model
             result = query
@@ -1008,22 +997,72 @@ class ApplicationController < ActionController::Base
   # 'show_object' action.
   #
   #   def next_image
-  #     image = Image.find(params[:id])
-  #     redirect_to_next_object(:next, image)
+  #     redirect_to_next_object(:next, Image, params[:id])
   #   end
   #
-  def redirect_to_next_object(method, object)
-    query = find_or_create_query(object.class, :default)
-    query.this = object
-    if new_query = query.send(method)
-      query = new_query
-    else
-      types = object.class.table_name.to_sym
-      flash_error(:app_no_more_search_objects.t(:types => types.t))
+  def redirect_to_next_object(method, model, id)
+    if object = find_or_goto_index(model, id)
+
+      # Special exception for prev/next in RssLog query: If go to "next" in
+      # show_observation, for example, inside an RssLog query, go to the next
+      # object, even if it's not an observation.
+      if params[:q] and
+         (query = Query.safe_find(params[:q].dealphabetize)) and
+         (query.model_symbol == :RssLog) and
+         (rss_log = object.rss_log rescue nil) and
+         query.index(rss_log) and
+         (query.this = object.rss_log) and
+         (new_query = query.send(method)) and
+         (rss_log = new_query.this)
+        query  = new_query
+        object = rss_log.object || rss_log
+        id = object.id
+
+      # Normal case: attempt to coerce the current query into an appropriate
+      # type, and go from there.  This handles all the exceptional cases:
+      # 1) query not coercable (creates a new default one)
+      # 2) current object missing from results of the current query
+      # 3) no more objects being left in the query in the given direction
+      else
+        query = find_or_create_query(object.class, :default)
+        query.this = object
+        if !query.index(object)
+          type = object.class.name.underscore.to_sym.t
+          types = object.class.table_name.to_sym.t
+          flash_error(:app_object_not_in_index.t(:id => object.id,
+                      :type => type, :types => types))
+        elsif new_query = query.send(method)
+          query = new_query
+          id = query.this_id
+        else
+          type = object.class.name.underscore.to_sym.t
+          types = object.class.table_name.to_sym.t
+          flash_error(:app_no_more_search_objects.t(:type => type,
+                      :types => types))
+        end
+      end
+
+      # Redirect to the show_object page appropriate for the new object.
+      redirect_to(:controller => object.show_controller,
+                  :action => object.show_action, :id => id,
+                  :params => query_params(query))
     end
-    redirect_to(:controller => object.show_controller,
-                :action => object.show_action, :id => query.this_id,
-                :params => query_params(query))
+  end
+
+  # Create sorting links for index pages, "graying-out" the current order.
+  def add_sorting_links(query, links)
+    results = []
+    for by, label in links
+      if query.params[:by] == by.to_s
+        results << :app_sort_by.t(:order => label)
+      else
+        results << [:app_sort_by.t(:order => label),
+                   { :controller => query.model.show_controller,
+                   :action => query.model.index_action,
+                   :by => by, :params => query_params }]
+      end
+    end
+    return results
   end
 
   # Render an index or set of search results as a list or matrix. Arguments:
@@ -1031,17 +1070,20 @@ class ApplicationController < ActionController::Base
   # args::      Hash of options.
   #
   # Options include these:
+  # id::            Warp to page that includes object with this id.
   # action::        Template used to render results.
   # matrix::        Displaying results as matrix?
   # letters::       Paginating by letter?
   # letter_arg::    Param used to store letter for pagination.
   # number_arg::    Param used to store page number for pagination.
   # num_per_page::  Number of results per page.
+  # sorting_links:: Array of pairs: ["by" String, label String]
   #
   def show_index_of_objects(query, args={})
     letter_arg   = args[:letter_arg]   || :letter
     number_arg   = args[:number_arg]   || :page
     num_per_page = args[:num_per_page] || 50
+    include      = args[:include]      || nil
 
     # Tell site to come back here on +redirect_back_or_default+.
     store_location
@@ -1058,6 +1100,10 @@ class ApplicationController < ActionController::Base
     # Supply a default title.
     @title ||= query.title
 
+    # Add magic links for sorting.
+    @links ||= []
+    @links += add_sorting_links(query, args[:sorting_links] || [])
+
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]
       @layout = calc_layout_params
@@ -1066,8 +1112,9 @@ class ApplicationController < ActionController::Base
 
     # If only one result (before pagination), redirect to 'show' action.
     if query.num_results == 1
-      object = query.results.first
-      redirect_to(:action => object.show_action, :id => object.id,
+      redirect_to(:controller => query.model.show_controller,
+                  :action => query.model.show_action,
+                  :id => query.result_ids.first,
                   :params => query_params)
 
     # Otherwise paginate results.
@@ -1079,16 +1126,17 @@ class ApplicationController < ActionController::Base
            (params[@pages.number_arg].to_s == '')
           @pages.show_index(query.index(args[:id]))
         end
-        @objects = query.paginate(@pages, field)
+        @objects = query.paginate(@pages, :include => include,
+                                  :letter_field => field)
       else
         @pages = paginate_numbers(number_arg, num_per_page)
         if (args[:id].to_s != '') and
            (params[@pages.number_arg].to_s == '')
           @pages.show_index(query.index(args[:id]))
         end
-        @objects = query.paginate(@pages)
+        @objects = query.paginate(@pages, :include => include)
       end
-  
+
       # Give the caller the opportunity to add extra columns to index.
       if block_given?
         @extra_data = @objects.inject({}) do |data,object|
@@ -1101,6 +1149,47 @@ class ApplicationController < ActionController::Base
 
       render(:action => args[:action])
     end
+  end
+
+  # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
+  # appropriate index if it no longer exists. 
+  def find_or_goto_index(model, id, redirect=nil)
+    result = model.safe_find(id)
+    if !result
+      type = object.class.name.underscore.to_sym.t
+      types = object.class.table_name.to_sym.t
+      flash_error(:app_object_not_found.t(:id => id,
+                  :type => type, :types => types))
+      goto_index(redirect)
+    end
+    return result
+  end
+
+  # Redirects to an appropriate fallback index in case of unrecoverable error.
+  # Most such errors are dealt with on a case-by-case basis in the controllers,
+  # however a few generic actions don't necessarily know where to send users
+  # when things go south.  This makes a good stab at guessing, at least. 
+  def goto_index(redirect=nil)
+    pass_query_params
+    redirect = redirect.name.underscore if redirect.is_a?(Class)
+    model = case (redirect || controller.name)
+      when 'account'      ; RssLog
+      when 'comment'      ; Comment
+      when 'image'        ; Image
+      when 'location'     ; Location
+      when 'name'         ; Name
+      when 'naming'       ; Observation
+      when 'observation'  ; Observation
+      when 'observer'     ; RssLog
+      when 'project'      ; Project
+      when 'rss_log'      ; RssLog
+      when 'species_list' ; SpeciesList
+      when 'user'         ; RssLog
+      when 'vote'         ; Observation
+    end
+    raise "Not sure where to go from #{redirect || controller.name}." if !model
+    redirect_to(:controller => model.show_controller,
+                :action => model.index_action, :params => query_params)
   end
 
   ##############################################################################
@@ -1257,7 +1346,7 @@ class ApplicationController < ActionController::Base
   #   # In controller:
   #   query  = create_query(:Name, :by_user, :user => params[:id])
   #   @pages = paginate_letters(:letter, :page, 50)
-  #   @names = query.paginate(@pages, 'names.observation_name')
+  #   @names = query.paginate(@pages, :letter_field => 'names.observation_name')
   #
   #   # In view:
   #   <%= pagination_letters(@pages) %>

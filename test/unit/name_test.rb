@@ -703,7 +703,7 @@ class NameTest < Test::Unit::TestCase
     assert_equal(1, names(:peltigera).editors.length)
     assert_equal(nil, names(:peltigera).reviewer_id)
     assert_equal(@rolf, names(:peltigera).editors.first)
-    assert_equal(1, QueuedEmail.all.length)
+    assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
@@ -735,7 +735,7 @@ class NameTest < Test::Unit::TestCase
     assert_equal(nil, names(:peltigera).reviewer_id)
     assert_equal(@mary, names(:peltigera).authors.first)
     assert_equal(@rolf, names(:peltigera).editors.first)
-    assert_equal(2, QueuedEmail.all.length)
+    assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @mary,
@@ -767,7 +767,7 @@ class NameTest < Test::Unit::TestCase
     assert_equal(nil, names(:peltigera).reviewer_id)
     assert_equal(@mary, names(:peltigera).authors.first)
     assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
-    assert_equal(3, QueuedEmail.all.length)
+    assert_equal(3, QueuedEmail.count)
     assert_email(2,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @dick,
@@ -799,7 +799,7 @@ class NameTest < Test::Unit::TestCase
     assert_equal(@rolf.id, names(:peltigera).reviewer_id)
     assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
     assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
-    assert_equal(4, QueuedEmail.all.length)
+    assert_equal(4, QueuedEmail.count)
     assert_email(3,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
@@ -836,7 +836,7 @@ class NameTest < Test::Unit::TestCase
     assert_equal(nil, names(:peltigera).reviewer_id)
     assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
     assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
-    assert_equal(5, QueuedEmail.all.length)
+    assert_equal(5, QueuedEmail.count)
     assert_email(4,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @dick,
@@ -867,7 +867,7 @@ class NameTest < Test::Unit::TestCase
     assert_equal(nil, names(:peltigera).reviewer_id)
     assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
     assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
-    assert_equal(6, QueuedEmail.all.length)
+    assert_equal(6, QueuedEmail.count)
     assert_email(5,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,

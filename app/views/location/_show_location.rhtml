@@ -86,5 +86,9 @@
     <%= :app_created.t(:type => :location.l, :date => location.created.web_time) %><br/>
     <%= :app_last_modified.t(:date => location.modified.web_time,
                              :user => user_link(location.user)) %><br/>
+    <% if location.rss_log_id %>
+      <%= link_to(:app_show_object.t(:type => :log.t), :action => 'show_rss_log',
+                  :id => location.rss_log_id, :params => query_params) %>
+    <% end %>
   </span>
 </p>

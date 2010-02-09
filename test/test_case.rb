@@ -17,6 +17,7 @@
 #  assert_name_list_equal::     Compare two lists of Name's.
 #  assert_string_equal_file::   A string is same as contents of a file.
 #  assert_email::               Check the properties of a QueuedEmail.
+#  assert_save::                Assert ActiveRecord save succeeds.
 #
 #  == XML Assertions
 #  assert_xml_exists::          An element exists.
@@ -62,6 +63,22 @@ class Test::Unit::TestCase
     :not_random!
   end
 
+  # Handy (if silly) class used to wrap a structure so that its members are
+  # available as methods.  Useful to make structs masquerade as objects for
+  # testing purposes.  (BlankSlate is in the "builder" vendor package in
+  # ActiveSupport -- it defines a superclass with *no* methods at all.)
+  class Wrapper < BlankSlate
+    def initialize(attributes={}); @attributes = attributes; end
+    def inspect; @attributes.inspect.sub(/^\{/, '<Wrapper: ').sub(/\}$/, '>'); end
+    def method_missing(name, *args)
+      if name.to_s.match(/^(\w+)=$/)
+        @attributes[$1.to_sym] = args[0]
+      else
+        @attributes[name.to_s.to_sym]
+      end
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Test unit helpers
@@ -74,8 +91,9 @@ class Test::Unit::TestCase
   def clean_our_backtrace(&block)
     yield
   rescue Test::Unit::AssertionFailedError => error
-    framework_path = Regexp.new(File.expand_path("#{File.dirname(__FILE__)}/test_helper"))
-    error.backtrace.reject! { |line| File.expand_path(line) =~ framework_path }
+    helper_path = File.expand_path(File.dirname(__FILE__))
+    regexp = Regexp.new(helper_path + '/\w+\.rb')
+    error.backtrace.reject! { |line| File.expand_path(line) =~ regexp }
     raise
   end
 
@@ -213,6 +231,19 @@ class Test::Unit::TestCase
         else
           assert_equal(args[arg], email.get_integer(arg) || email.get_string(arg), "Value of #{arg} is wrong")
         end
+      end
+    end
+  end
+
+  # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.
+  def assert_save(obj, msg=nil)
+    clean_our_backtrace do
+      if obj.save
+        assert(true)
+      else
+        msg2 = obj.errors.full_messages.join("; ")
+        msg2 = msg + "\n" + msg2 if msg
+        assert(false, msg2)
       end
     end
   end

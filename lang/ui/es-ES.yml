@@ -9,7 +9,8 @@
 # Object titles. (Try to keep these consistent throughout.)
 comment: Comentario
 comments: Comentarios
-description:  Description
+description: Descripción
+descriptions: Descripciones
 draft: Borrador
 drafts: Borradores
 image: Imagen
@@ -18,6 +19,10 @@ license: Licencia
 licenses: Licencias
 location: Ubicación
 locations: Ubicaciones
+log: Registro
+logs: Registros
+map: Mapa
+maps: Mapas
 name: Nombre
 names: Nombres
 naming: ID Propuesta
@@ -30,6 +35,8 @@ past_name: Cambio de Nombre
 past_names: Cambios de Nombres
 project: Proyecto
 projects: Proyectos
+rss_log: Registro de Actividad
+rss_logs: Registros de Actividad
 species_list: Lista de Especies
 species_lists: Listas de Especies
 user: Usuario
@@ -65,6 +72,7 @@ app_news: Características y Cambios
 app_observations_left: Observaciones
 app_create_observation: Crear Observación
 app_sort_by_date_obs: Ordenar por Fecha
+app_sort_by: Ordenar por [order]
 
 app_species_list: Listas de Especies
 app_create_list: Crear Lista
@@ -129,8 +137,11 @@ app_no_ajax: Su Navegador No Está Actualizado
 app_no_browser: Su Navegador No Se Conoce
 app_no_create_name: No se ha podido crear el nombre <<[name]>>.
 app_no_javascript: Javascript está Deshabilitado
-app_no_more_search_objects:  There are no more [types].
+app_no_more_search_objects: No hay más [types].
 app_no_session: Usted Ha Deshabilitado las Cookies
+app_object_no_match: "No se puede encontrar [type] en correspondencia con <<[match]>>."
+app_object_not_found: "No se puede encontrar [type] #[id]."
+app_object_not_in_index: "No se puede encontrar [type] #[id] en la índice o la búsqueda actual."
 app_object_title: Título
 app_permission_denied: Permiso denegado.
 app_rss: Mushroom Observer RSS
@@ -168,22 +179,16 @@ app_enable: Habilitar
 app_index: Índice
 app_less_button: << Menos
 app_more_button: Más >>
-app_next: Siguiente
-app_prev: Anterior
+app_next: Siguiente >>
+app_prev: << Anterior
 app_remove: Eliminar
 app_save: Guardar
 app_search: Buscar
 app_send: Enviar
 app_save_changes: Guardar Cambios
 app_show_all: Mostrar Todos
-app_show_image: Mostrar Imagen
-app_show_location: Mostrar Ubicación
-app_show_log: Mostrar Registro
-app_show_map: Mostrar Mapa
-app_show_name: Mostrar Nombre
-app_show_observation: Mostrar Observación
-app_show_project: Mostrar Proyecto
-app_show_species_list: Mostrar Lista de Especies
+app_show_object: Mostrar [type]
+app_show_objects: Mostrar [types]
 app_update: Actualizar
 
 # Footers: "Created: [date]", "By: [user]", "Observation Created: 2008-11-03",
@@ -301,8 +306,8 @@ rank_plural_variety: Variedades
 # site statistics field names
 site_stats_authors_locations:  Authored Locations
 site_stats_editors_locations:  Edited Locations
-site_stats_authors_names:  Authored Descriptions
-site_stats_editors_names:  Edited Descriptions
+site_stats_authors_names:  Authored Descripciones
+site_stats_editors_names:  Edited Descripciones
 site_stats_images: Imágenes
 site_stats_listed_taxa: Listed Taxa
 site_stats_names: Descripciones
@@ -359,6 +364,9 @@ log_name_updated: Nombre realizado por [user].
 log_naming_created: 'Nombre propuesto creado por [user]: [name]'
 log_naming_destroyed: 'Nombre propuesto borrado por [user]: [name]'
 log_naming_updated: 'Nombre propuesto realizado por [user]: [name]'
+log_object_created: '[type] creado por [user].'
+log_object_destroyed: '[type] borrado por [user].'
+log_object_updated: '[type] realizado por [user].'
 log_observation_created: Observación creado por [user].
 log_observation_destroyed: Observación borrado por [user].
 log_observation_destroyed2: 'Observación borrado por [user]: [name]'
@@ -405,6 +413,7 @@ validate_naming_reason_naming_missing: Falta el nombre propuesto.
 validate_naming_reason_reason_invalid: El código de razón no es válida.
 validate_naming_user_missing: Falta el usuario.
 validate_notification_user_missing: Falta el usuario.
+validate_observation_future_time:  Time travel is not allowed, pick a date from the past.
 validate_observation_thumb_image_id_invalid: No se puede encontrar una imagen correspondiente para la miniatura.
 validate_observation_user_missing: Falta el usuario.
 validate_observation_when_missing: Falta la fecha de la observación.
@@ -448,7 +457,7 @@ query_title_advanced:  "Advanced Search"
 query_title_all: "Índice de [types]"
 query_title_all_by: "[types] por [order]"
 query_title_at_location: "[types] de [location]"
-query_title_at_where: "[types] de '[where]'"
+query_title_at_where: "[types] de <<[where]>>"
 query_title_by_author:  "[types] Authored by [user]"
 query_title_by_editor:  "[types] Edited by [user]"
 query_title_by_rss_log: "[types] en Registro de Actividad"
@@ -462,9 +471,14 @@ query_title_of_name: "[types] de [name]"
 query_title_of_name_synonym: "[types] de Sinónimos de [name]"
 query_title_of_name_nonconsensus:  "[types] That Might Be [name]"
 query_title_parents:  "Higher Taxa containing [name]"
-query_title_pattern: "[types] Coincidentes '[pattern]'"
+query_title_pattern: "[types] Coincidentes <<[pattern]>>"
 query_title_with_authors: "[types] con Autores"
 query_title_with_observations: "[types] con Observaciones"
+query_title_with_observations_at_location:  "[types] con Observaciones de [location]"
+query_title_with_observations_at_where:  "[types] con Observaciones de <<[where]>>"
+query_title_with_observations_by_user: "[types] con Observaciones por [user]"
+query_title_with_observations_in_set: "[types] con [observations]"
+query_title_with_observations_in_species_list: "[types] con Observaciones en [species_list]"
 query_title_with_observations_of_name: "[types] con Observaciones de [name]"
 query_title_with_observations_of_name_synonym: "[types] con Observaciones de Sinónimos de [name]"
 query_title_with_observations_of_name_nonconsensus:  "[types] with Observations That Might Be [name]"
@@ -599,8 +613,8 @@ bulk_license_link: Actualización de Licencia a Granel
 
 
 # project/review_authors
-review_authors_add_author:  Add
-review_authors_authors:  Current Description Authors
+review_authors_add_author: Agregar
+review_authors_authors: Autores de Descripciones Actuales"
 review_authors_denied:  >
   Only existing authors and reviewers can change the description authors.
 
@@ -611,7 +625,7 @@ review_authors_note:  >
 
 review_authors_review_authors:  Review Authors
 review_authors_other_users:  Other Users
-review_authors_remove_author:  Remove
+review_authors_remove_author: Eliminar
 review_authors_title:  Reviewing Author(s) for [name]
 
 
@@ -1456,7 +1470,7 @@ list_notifications_title: E-mail Alertas para [user]
 
 
 # location/list_place_names
-list_place_names_known: Ubicaciones Conocidas (alfabético)
+list_place_names_known: Ubicaciones Conocidas
 list_place_names_map: Trazar un Mapa de las Ubicaciones
 list_place_names_merge: Combinar
 list_place_names_undef: Ubicaciones Indefinidas (por frecuencia)
@@ -1507,7 +1521,7 @@ make_report_not_supported: El tipo de archivo <<*.[type]>> no es compatible.
 
 # location/map_locations
 map_locations_no_matches: No hay ubicaciones en correspondencia con <<[pattern]>>.
-map_locations_title: Ubicaciones en correspondencia con <<[pattern]>>
+map_locations_title: Mapa de [locations]
 map_locations_global_map: Mapa Global de Todos las Ubicaciones
 
 
@@ -2031,10 +2045,10 @@ runtime_unable_to_save_changes:  Unable to save changes.
 runtime_unable_to_transfer_name: No se ha podido transferir [name] a otro sinónimo.
 runtime_unrecognized_rank: El rango <<[rank]>> no es conocido.
 runtime_update_nonexisting_name: Update_name fue llamado con un nombre que no existe.
-runtime_user_bad_rank:  Unrecognized rank '[rank]'
+runtime_user_bad_rank:  Unrecognized rank <<[rank]>>
 runtime_invalid_rank:  The rank [line_rank] is the same as or below [rank]
-runtime_invalid_classification:  Unable to parse '[text]'
-runtime_duplicate_rank:  The rank '[rank]' appears twice.
+runtime_invalid_classification:  Unable to parse <<[text]>>
+runtime_duplicate_rank:  The rank <<[rank]>> appears twice.
 
 
 # observer/textile
@@ -3131,4 +3145,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

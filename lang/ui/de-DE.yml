@@ -7,6 +7,7 @@
 comment: Kommentar
 comments: Kommentare
 description: Beschreibung
+descriptions: Beschreibungen
 draft: Entwurf
 drafts: Entwürfe
 image: Bild
@@ -15,6 +16,10 @@ license: Lizenz
 licenses: Lizenzen
 location: Fundort
 locations: Fundorte
+log: Logbuch
+logs: Logbuchen
+map: Karte
+maps: Karten
 name: Name
 names: Namen
 naming: Vorgeschlagener ID
@@ -27,6 +32,8 @@ past_name: Namensänderung
 past_names: Namensänderungen
 project: Projekt
 projects: Projekte
+rss_log: Logbuch der neuen Änderungen
+rss_logs: Logbuchen der neuen Änderungen
 species_list: Artenliste
 species_lists: Artenlisten
 user: Nutzer
@@ -62,6 +69,7 @@ app_news: Neues und Verbesserungen
 app_observations_left: Funde
 app_create_observation: Neuen Fund eingeben
 app_sort_by_date_obs: Nach Datum sortieren
+app_sort_by: Nach [order] sortieren
 
 app_species_list: Artenliste
 app_create_list: Neue Liste anlegen
@@ -128,6 +136,9 @@ app_no_create_name: Kann den Namen '[name]' nicht erstellen.
 app_no_javascript: Javascript ist ausgeschaltet
 app_no_more_search_objects:  There are no more [types].
 app_no_session: Dein Browser nimmt einen Cookie nicht an
+app_object_no_match:  "Can't find [type] matching '[match]'."
+app_object_not_found:  "Can't find [type] #[id]."
+app_object_not_in_index:  "Can't find [type] #[id] in the results of the current search or index."
 app_object_title: Titel
 app_permission_denied: Nicht erlaubt.
 app_rss: Mushroom Observer RSS
@@ -165,22 +176,16 @@ app_enable: Aktivieren
 app_index: Index
 app_less_button: << Weniger
 app_more_button: Mehr >>
-app_next: Weiter
-app_prev: Zurück
+app_next: Weiter >>
+app_prev: << Zurück
 app_remove: Löschen
 app_save: Speichern
 app_search: Suchen
 app_send: Schicken
 app_save_changes: Änderungen Speichern
-app_show_all:  Alle anzeigen
-app_show_image: Bild anzeigen
-app_show_location: Fundort anzeigen
-app_show_log: Logbuch anzeigen
-app_show_map: Karte anzeigen
-app_show_name: Namen anzeigen
-app_show_observation: Fund anzeigen
-app_show_project: Projekt anzeigen
-app_show_species_list: Artenliste anzeigen
+app_show_all:  Show All
+app_show_object: "[type] anzeigen"
+app_show_objects: "[types] anzeigen"
 app_update: Update
 
 # Footers: "Created: [date]", "By: [user]", "Observation Created: 2008-11-03",
@@ -356,6 +361,9 @@ log_name_updated: Name von [user] verändert.
 log_naming_created: 'Name von [user] erzeugt: [name]'
 log_naming_destroyed: 'Name von [user] gelöscht: [name]'
 log_naming_updated: 'Name von [user] verändert: [name]'
+log_object_created: '[type] eingegeben von [user].'
+log_object_destroyed: '[type] gelöscht von [user].'
+log_object_updated: '[type] von [user] verändert.'
 log_observation_created: Fund eingegeben von [user].
 log_observation_destroyed: Fund gelöscht von [user].
 log_observation_destroyed2: 'Fund gelöscht von [user]: [name]'
@@ -402,6 +410,7 @@ validate_naming_reason_naming_missing: Benennung fehlt.
 validate_naming_reason_reason_invalid: Ungültiger Ursachen-Code.
 validate_naming_user_missing: Nutzer fehlt.
 validate_notification_user_missing: Nutzer fehlt.
+validate_observation_future_time:  Time travel is not allowed, pick a date from the past.
 validate_observation_thumb_image_id_invalid: Kann kein Bild finden das zu der Vorschau gehört.
 validate_observation_user_missing: Nutzer fehlt.
 validate_observation_when_missing: Funddatum fehlt.
@@ -462,6 +471,11 @@ query_title_parents:  "Higher Taxa containing [name]"
 query_title_pattern: "[types], die zu '[pattern]' passen"
 query_title_with_authors:  "[types] with Authors"
 query_title_with_observations:  "[types] with Observations"
+query_title_with_observations_at_location:  "[types] with Observations from [location]"
+query_title_with_observations_at_where:  "[types] with Observations from '[where]'"
+query_title_with_observations_by_user: "[types] with Observations by [user]"
+query_title_with_observations_in_set:  "[types] with [observations]"
+query_title_with_observations_in_species_list:  "[types] with Observations in [species_list]"
 query_title_with_observations_of_name:  "[types] with Observations of [name]"
 query_title_with_observations_of_name_synonym:  "[types] with Observations of Synonyms of [name]"
 query_title_with_observations_of_name_nonconsensus:  "[types] with Observations That Might Be [name]"
@@ -1434,7 +1448,7 @@ list_notifications_title: Email-Benachrichtigungen für [user]
 
 
 # location/list_place_names
-list_place_names_known: Bekannte Fundorte (alfabetisch)
+list_place_names_known: Bekannte Fundorte
 list_place_names_map: Karte der Fundorte
 list_place_names_merge: Kombinieren
 list_place_names_undef: Fundorte ohne Kartenposition (nach Häufigkeit)
@@ -1487,7 +1501,7 @@ make_report_not_supported: Report-Dateien des Typs *.[type] werden nicht unterst
 
 # location/map_locations
 map_locations_no_matches: Keine Fundorte passen zu '[pattern]'.
-map_locations_title: Fundorte, die zu '[pattern]' passen
+map_locations_title: Landkarte mit [locations]
 map_locations_global_map: Weltkarte mit allen Fundorten
 
 
@@ -3062,4 +3076,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

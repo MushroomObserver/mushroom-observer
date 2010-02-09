@@ -43,6 +43,7 @@ mitrula_marsh:
   west: -120.687
   east: -120.487
   south: 39.5184
+  rss_log_id: 4
 
 salt_point:
   id: 4

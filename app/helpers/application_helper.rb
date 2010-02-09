@@ -127,14 +127,14 @@ module ApplicationHelper
 
   # Wrap location name in link to show_location / observations_at_where.
   #
-  #   Where: <%= location_link(obs.where, obs.location_id) %>
+  #   Where: <%= location_link(obs.where, obs.location) %>
   #
-  def location_link(where, location_id, count=nil, click=false)
-    if location_id
-      loc = Location.find(location_id)
-      link_string = where_string(loc.display_name, count)
+  def location_link(where, location, count=nil, click=false)
+    if location
+      location = Location.find(location) if !location.is_a?(AbstractModel)
+      link_string = where_string(location.display_name, count)
       link_string += " [#{:app_click_for_map.t}]" if click
-      result = link_to(link_string, :controller => 'location', :action => 'show_location', :id => location_id)
+      result = link_to(link_string, :controller => 'location', :action => 'show_location', :id => location.id)
     else
       link_string = where_string(where, count)
       link_string += " [#{:app_search.t}]" if click

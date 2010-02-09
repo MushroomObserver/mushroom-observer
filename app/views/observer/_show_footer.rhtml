@@ -7,9 +7,9 @@
     <%= :app_viewed.t(:date => (@observation.last_view.web_time rescue '--'),
                       :times => @observation.num_views == 1 ? :app_one_time.l :
                         :app_many_times.l(:num => @observation.num_views)) %><br/>
-    <% if rss_log = @observation.rss_log %>
-      <%= link_to(:app_show_log.t, :action => 'show_rss_log',
-                  :id => rss_log.id, :params => query_params) %>
+    <% if @observation.rss_log_id %>
+      <%= link_to(:app_show_object.t(:type => :log.t), :action => 'show_rss_log',
+                  :id => @observation.rss_log_id, :params => query_params) %>
     <% end %>
   </span>
 </p>

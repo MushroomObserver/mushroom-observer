@@ -176,11 +176,15 @@
 #  clear_synonym::           Remove this Name from its Synonym.
 #  merge_synonyms::          Merge Synonym's of this and another Name.
 #  merge_names::             Merge old name into this one and remove old one.
+#  transfer_synonym::        Transfer a Name from another Synonym into this Name's Synonym.
+#  other_authors::           List of names that differ only in author.
+#  other_author_ids::        List of names that differ only in author, just ids.
 #
 #  ==== Misspellings
 #  is_misspelling?::         Is this name a misspelling?
 #  correct_spelling::        Link to the correctly-spelled Name (or nil).
 #  misspellings::            Names that call this their "correct spelling".
+#  misspelling_ids::         Names that call this their "correct spelling", just ids.
 #  guess_correct_spelling::  Guess what the correct spelling should be.
 #
 #  ==== Status
@@ -198,18 +202,6 @@
 #  note_status::             Status of description fields.
 #  prepend_notes::           Add notes at the top of the existing notes.
 #
-#  ===== Editors
-#  editors::                 User's that have edited this Name.
-#  authors::                 User's that have made "significant" contributions.
-#  add_editor::              Make given user an "editor".
-#  add_author::              Make given user an "author".
-#  remove_author::           Demote given user to "editor".
-#
-#  ==== RSS log
-#  rss_log::                 Access to the RssLog.
-#  log::                     Add message to RssLog (creating if necessary).
-#  orphan_log::              Add message to RssLog before destroying it.
-#
 #  ==== Attachments
 #  comments::                Comments about this Name. (not used yet)
 #  descriptions::            Attached descriptions.
@@ -219,7 +211,6 @@
 #
 #  == Callbacks
 #
-#  check_add_author::        After save: check if User should become author.
 #  notify_authors::          After save: notify interested User's of changes.
 #
 ################################################################################
@@ -228,14 +219,13 @@ class Name < AbstractModel
   belongs_to :correct_spelling, :class_name => "Name", :foreign_key => "correct_spelling_id"
   belongs_to :license
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
+  belongs_to :rss_log
   belongs_to :synonym
   belongs_to :user
 
-  has_one  :rss_log
   has_many :draft_names
   has_many :comments,  :as => :object, :dependent => :destroy
   has_many :interests, :as => :object, :dependent => :destroy
-  has_many :misspellings, :class_name => "Name", :foreign_key => "correct_spelling_id"
   has_many :namings
   has_many :observations
 
@@ -269,6 +259,7 @@ class Name < AbstractModel
   non_versioned_columns.push(
     'sync_id',
     'created',
+    'rss_log_id',
     'synonym_id',
     'review_status',
     'last_review',
@@ -279,11 +270,13 @@ class Name < AbstractModel
   )
 
   before_save :update_user_if_save_version
-  after_save  :check_add_author
   after_save  :notify_authors
 
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
+
+  # Automatically (but silently) log creation and destruction.
+  self.autolog_events = [:destroyed]
 
   ################################################################################
   #
@@ -749,21 +742,36 @@ class Name < AbstractModel
     deprecated ? :app_deprecated.l : :app_accepted.l
   end
 
-  # Returns an Array of all Synonym Name's, including itself and misspellings.
-  def synonyms
-    synonym ? synonym.names : [self]
+  # Same as synonyms, but returns ids.
+  def synonym_ids
+    @synonym_ids ||= begin
+      if @synonyms
+        @synonyms.map(&:id)
+      elsif synonym_id
+        Name.connection.select_values(%(
+          SELECT id FROM names WHERE synonym_id = #{synonym_id}
+        )).map(&:to_i)
+      else
+        [id]
+      end
+    end
   end
 
-  # Returns an Array of ids of all the synyonms of this name, including itself
-  # and any misspellings.  It does so with a single efficient query, bypassing
-  # all of ActiveRecord's overhead.
-  def synonym_ids
-    if synonym_id
-      Name.connection.select_values(%(
-        SELECT id FROM names WHERE synonym_id = #{synonym_id}
-      )).map(&:id)
-    else
-      [id]
+  # Returns an Array of all synonym Name's, including itself and misspellings.
+  def synonyms
+    @synonyms ||= begin
+      if @synonym_ids
+        # Slightly faster since id is primary index.
+        Name.all(:conditions => ['id IN (?)', @synonym_ids])
+      elsif synonym_id
+        # Takes on average 0.050 seconds.
+        Name.all(:conditions => "synonym_id = #{synonym_id}")
+
+        # Involves instantiating a Synonym, something which should never happen.
+        # synonym ? synonym.names : [self]
+      else
+        [self]
+      end
     end
   end
 
@@ -785,6 +793,31 @@ class Name < AbstractModel
   	[accepted_synonyms, deprecated_synonyms]
   end
 
+  # Same as +other_authors+, but returns ids.
+  def other_author_ids
+    @other_author_ids ||= begin
+      if @other_authors
+        @other_authors.map(&:id)
+      else
+        Name.connection.select_values(%(
+          SELECT id FROM names WHERE text_name = '#{text_name}'
+        )).map(&:to_i)
+      end
+    end
+  end
+
+  # Returns an Array of Name's, including itself, which differ only in author.
+  def other_authors
+    @other_authors ||= begin
+      if @other_author_ids
+        # Slightly faster since id is primary index.
+        Name.all(:conditions => ['id IN (?)', @other_author_ids])
+      else
+        Name.all(:conditions => ['text_name = ?', text_name])
+      end
+    end
+  end
+
   # Removes this Name from its old Synonym.  It destroys the Synonym if there's
   # only one Name left in it afterword.  Returns nothing.  Any changes are
   # saved.
@@ -804,16 +837,20 @@ class Name < AbstractModel
   #   after 3:  2, 3
   #
   def clear_synonym
-    if self.synonym
-      names = self.synonym.names
-      if names.length <= 2 # Get rid of the synonym
+    if synonym_id
+      names = synonyms
+
+      # Get rid of the synonym if only one going to be left in it.
+      if names.length <= 2
+        synonym.destroy
         for n in names
-          n.synonym = nil
+          n.synonym_id = nil
           n.save
         end
-        self.synonym.destroy
-      else # Just clear this name
-        self.synonym = nil
+
+      # Otherwise, just dettach this name.
+      else
+        self.synonym_id = nil
         self.save
       end
     end
@@ -837,26 +874,49 @@ class Name < AbstractModel
   #
   def merge_synonyms(name)
 
-    # No existing synonyms -- create one.
-    if !self.synonym && !name.synonym
-      self.synonym = Synonym.create
-      self.save
-      self.synonym.transfer(name)
+    # Other name has no synonyms, just transfer it over.
+    if !name.synonym_id
+      self.transfer_synonym(name)
 
-    # Only name has a synonym.
-    elsif !self.synonym && name.synonym
-      name.synonym.transfer(self)
-
-    # Only self has a synonym.
-    elsif self.synonym && !name.synonym
-      self.synonym.transfer(name)
+    # *This* name has no synonyms, transfer us over to it.
+    elsif !self.synonym_id
+      name.transfer_synonym(self)
 
     # Both have synonyms -- merge them.
     # (Make sure they aren't already synonymized!)
-    elsif !self.synonym.names.include?(name)
-      for n in name.synonym.names
-        self.synonym.transfer(n)
+    elsif self.synonym_id != name.synonym_id
+      for n in name.synonyms
+        self.transfer_synonym(n)
       end
+    end
+  end
+
+  # Add Name to this Name's Synonym, but don't transfer that Name's synonyms.
+  # Delete the other Name's old Synonym if there aren't any Name's in it
+  # anymore.  Everything is saved.  (*NOTE*: Creates a new Synonym for this
+  # Name if it doesn't already have one.)
+  #
+  #   correct_name.transfer_synonym(incorrect_name)
+  #
+  def transfer_synonym(name)
+    # Make sure this name is attached to a synonym, creating one if necessary.
+    if !self.synonym_id
+      self.synonym = Synonym.create
+      self.save
+    end
+
+    # Only transfer it over if it's not already a synonym!
+    if self.synonym_id != name.synonym_id
+
+      # Destroy old synonym if only one name left in it.
+      if name.synonym and
+         (name.synonym_ids.length <= 2)
+        name.synonym.destroy
+      end
+
+      # Attach name to our synonym.
+      name.synonym_id = self.synonym_id
+      name.save
     end
   end
 
@@ -869,6 +929,31 @@ class Name < AbstractModel
   # Is this Name misspelled?
   def is_misspelling?
     !!correct_spelling_id
+  end
+
+  # Same as +misspellings+, but returns ids.
+  def misspelling_ids
+    @misspelling_ids ||= begin
+      if @misspellings
+        @misspellings.map(&:id)
+      else
+        Name.connection.select_values(%(
+          SELECT id FROM names WHERE correct_spelling_id = '#{id}'
+        )).map(&:to_i)
+      end
+    end
+  end
+
+  # Array of Name's which are considered to be incorrect spellings of this one.
+  def misspellings
+    @misspellings ||= begin
+      if @misspelling_ids
+        # Slightly faster since id is primary index.
+        Name.all(:conditions => ['id IN (?)', @misspelling_ids])
+      else
+        Name.all(:conditions => "correct_spelling_id = #{id}")
+      end
+    end
   end
 
   # Attempt to guess the correct name via synonyms.  There can be multiple
@@ -940,24 +1025,23 @@ class Name < AbstractModel
 
     # Move all misspellings over to the new name.
     for m in old_name.misspellings
-      m.correct_spelling = self
-      m.save
-      Transaction.put_name(
-        :id               => m,
-        :correct_spelling => self
-      )
+      if m != self
+        m.correct_spelling = self
+        m.save
+        Transaction.put_name(
+          :id               => m,
+          :correct_spelling => self
+        )
+      end
     end
 
     # [Why was this only in admin mode?? -JPH 20090127]
     old_name.log(:log_name_merged, :this => old_name.display_name,
                  :that => self.display_name)
 
-    # TODO -- what about:
-    #   authors_names
-    #   editors_names
-    #   interests
-    #   notifications
-    #   rss_logs
+    # TODO -- what about notifications
+
+    # Okay, now it's safe to destroy the name.
     old_name.destroy
   end
 
@@ -1691,49 +1775,6 @@ class Name < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Editors
-  #
-  ##############################################################################
-
-  # Add a User on as an "author".  Saves User if changed.  Returns nothing.
-  def add_author(user)
-    if not authors.member?(user)
-      authors.push(user)
-      SiteData.update_contribution(:add, self, :authors_names)
-      if editors.member?(user)
-        editors.delete(user)
-        SiteData.update_contribution(:remove, self, :editors_names)
-      end
-    end
-  end
-
-  # Demote a User to "editor".  Saves User if changed.  Returns nothing.
-  def remove_author(user)
-    if authors.member?(user)
-      authors.delete(user)
-      SiteData.update_contribution(:remove, self, :authors_names)
-      if not editors.member?(user) and
-         # Make sure user has actually made at least one change.
-         not Name.connection.select_values(%(
-          SELECT id FROM past_names
-          WHERE name_id = #{id} AND user_id = #{user.id}
-        )).empty?
-        editors.push(user)
-        SiteData.update_contribution(:add, self, :editors_names)
-      end
-    end
-  end
-
-  # Add a user on as an "editor".
-  def add_editor(user)
-    if not authors.member?(user) and not editors.member?(user)
-      editors.push(user)
-      SiteData.update_contribution(:add, self, :editors_names)
-    end
-  end
-
-  ##############################################################################
-  #
   #  :section: Reviewing
   #
   ##############################################################################
@@ -1784,43 +1825,16 @@ class Name < AbstractModel
     Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
   end
 
-  ##############################################################################
-  #
-  #  :section: RSS Log
-  #
-  ##############################################################################
-
-  # Add message to RssLog, creating one if necessary.
-  def log(*args)
-    self.rss_log ||= RssLog.new
-    self.rss_log.add_with_date(*args)
-  end
-
-  # Add message to RssLog if you're about to destroy this Name.
-  def orphan_log(*args)
-    self.rss_log ||= RssLog.new
-    self.rss_log.orphan(self.display_name, *args)
-  end
-
   ################################################################################
   #
   #  :section: Callbacks
   #
   ################################################################################
 
-  # Callback that updates editors and/or authors after a User makes a change.
-  #
-  # If the Name has no author and they just entered something in the +gen_desc+
-  # field, they get promoted to author by default.
-  #
-  # In all cases make sure the user is added on as an editor.
-  #
-  def check_add_author
-    if gen_desc.to_s.strip != '' && authors.empty?
-      add_author(user)
-    else
-      add_editor(user)
-    end
+  # Is this Name worthy of having an author?  This boils down to whether or not
+  # the user has entered anything in the +gen_desc+ field.
+  def author_worthy?
+    gen_desc.to_s.strip_squeeze != ''
   end
 
   # This is called after saving potential changes to a Name.  It will determine

@@ -21,6 +21,7 @@ detailed_unknown:
   specimen:  1
   thumb_image_id: 1
   notes:     Found in a strange place
+  rss_log_id: 1
 
 coprinus_comatus_obs:
   id:        3

@@ -7,6 +7,7 @@
 require 'enumerable_extensions'
 require 'fixnum_extensions'
 require 'hash_extensions'
+require 'object_extensions'
 require 'string_extensions'
 require 'symbol_extensions'
 require 'time_extensions'

@@ -3,8 +3,9 @@
 
   if @observation
     new_tab_set do
-      add_tab(:app_show_observation.t,
-              :controller => 'observer', :action => 'show_observation', :id => @observation.id)
+      add_tab(:app_show_object.t(:type => :observation.t),
+              :controller => 'observer', :action => 'show_observation',
+              :id => @observation.id)
     end
   end
 %>

@@ -5,7 +5,8 @@
 
   # Show Name
   new_tab_set do
-    add_tab(:app_show_name.t, :action => 'show_name', :id => @name.id)
+    add_tab(:app_show_object.t(:type => :name.t), :action => 'show_name',
+            :id => @name.id)
   end
 %>
 

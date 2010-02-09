@@ -3,7 +3,7 @@
   javascript_include 'element_extensions'
   javascript_include 'vote_popup'
 
-  logged_in = !@user.nil? && !@user.verified.nil? && @user.verified
+  logged_in = !@user.nil? && @user.verified
   consensus = @observation.consensus_naming
   any_names = @observation.namings && @observation.namings.length > 0
   popups = []
@@ -103,25 +103,25 @@
 
             <td width="20">&nbsp;</td>
             <td nowrap="nowrap"><%=
-              (naming.is_owners_favorite? ? image_tag("eye3.png") : "") +
+              (@observation.is_owners_favorite?(naming) ? image_tag("eye3.png") : "") +
               (naming == consensus ? image_tag("eyes3.png") : "")
             %></td>
           </tr>
 
-          <% Textile.register_name(naming.name)
-          if naming.naming_reasons.length > 0 %>
-            <tr>
-              <td colspan="<%= cols %>">
-                <% for reason in naming.naming_reasons %>
-                  <% if reason.notes.nil? || reason.notes == "" %>
+          <% Textile.register_name(naming.name) %>
+          <tr>
+            <td colspan="<%= cols %>">
+              <% for reason in naming.get_reasons %>
+                <% if reason.used? %>
+                  <% if reason.notes == '' %>
                     <%= reason.label.t %>
                   <% else %>
-                    <%= sanitize(reason.label.l + ": " + reason.notes.to_s).tl %>
+                    <%= sanitize(reason.label.l + ": " + reason.notes).tl %>
                   <% end %><br/>
                 <% end %>
-              </td>
-            </tr>
-          <% end %>
+              <% end %>
+            </td>
+          </tr>
         <% end %>
       </table>
     </div>

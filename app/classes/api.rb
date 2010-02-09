@@ -206,7 +206,7 @@
 #  == Undocumented Arguments
 #
 #  There are a few subtle ways in which requests via +api_controller.rb+ differ
-#  from requests via Transaction logging and remote server synchronization. 
+#  from requests via Transaction logging and remote server synchronization.
 #  Certain "unsafe" operations must be allowed for the latter that we don't
 #  want random User's to have access to.
 #
@@ -218,7 +218,6 @@
 ################################################################################
 
 class API
-  # :section: Public interface.
 
   # Copy of the Hash of args you passed in.
   attr_accessor :args
@@ -257,13 +256,19 @@ class API
   def self.version; API_VERSION; end
   def version; API_VERSION; end
 
+  ##############################################################################
+  #
+  #  :section: Public interface.
+  #
+  ##############################################################################
+
   # Set up a new query.
   #
   #   api = API.new(:method => :get, :action => :user, :id => 252)
   #   api.process
   #   user = api.objects.first
   #
-  def initialize(args)
+  def initialize(args={})
     @args = args
   end
 
@@ -453,37 +458,35 @@ class API
     return [@objects, @errors]
   end
 
-################################################################################
-#
-#  :section: GET Methods
-#
-#  These are responsible for parsing the "search" parameters and returning
-#  all the information necessary to create a SQL query.  In particular, they
-#  must each return four things:
-#
-#  conditions::   List of SQL fragments that form the "WHERE" clause.
-#  tables::       List of tables used in +conditions+.
-#  joins::        List of tables to :include when instantiating results (if eager-loading).
-#  max_page_len:: Maximum number of objects per page user is allowed to request.
-#
-#  Parsing is all done using several helper methods.  Here are some:
-#
-#  sql_id::           One or more ids or sync_ids.
-#  sql_date::         One or more dates or date ranges.
-#  sql_search::       Search pattern (only one allowed).
-#
-#  All of these return SQL fragments that encode the given condition(s).
-#
-#  Another handy method is:
-#
-#  uses_table?::    Does an SQL string use a given table?
-#
-#  This can be used to determine which additional tables need to be joined to
-#  in order to execute the given SQL query.
-#
-################################################################################
-
-protected
+  ##############################################################################
+  #
+  #  :section: GET Methods
+  #
+  #  These are responsible for parsing the "search" parameters and returning
+  #  all the information necessary to create a SQL query.  In particular, they
+  #  must each return four things:
+  #
+  #  conditions::   List of SQL fragments that form the "WHERE" clause.
+  #  tables::       List of tables used in +conditions+.
+  #  joins::        List of tables to :include when instantiating results (if eager-loading).
+  #  max_page_len:: Maximum number of objects per page user is allowed to request.
+  #
+  #  Parsing is all done using several helper methods.  Here are some:
+  #
+  #  sql_id::           One or more ids or sync_ids.
+  #  sql_date::         One or more dates or date ranges.
+  #  sql_search::       Search pattern (only one allowed).
+  #
+  #  All of these return SQL fragments that encode the given condition(s).
+  #
+  #  Another handy method is:
+  #
+  #  uses_table?::    Does an SQL string use a given table?
+  #
+  #  This can be used to determine which additional tables need to be joined to
+  #  in order to execute the given SQL query.
+  #
+  ##############################################################################
 
   def get_comment
     conds = []
@@ -564,7 +567,7 @@ protected
   def get_naming
     conds = []
     tables = []
-    joins = [:user, :observation, :name, :naming_reasons, :votes]
+    joins = [:user, :observation, :name, :votes]
 
     conds += sql_id(:observation, 'namings.observation_id')
     conds += sql_id_or_name(:user, 'namings.user_id', 'users.login', 'users.name')
@@ -648,56 +651,57 @@ protected
     return [conds, tables, joins, 10000]
   end
 
-################################################################################
-#
-#  :section: PUT Methods
-#
-#  These are responsible for parsing all the "set" parameters and returning a
-#  hash that will be passed into <tt>object.write_attributes(args)</tt>.  If
-#  write_attributes is not sufficiently flexible, method may elect to return a
-#  lambda proc instead, which will perform the update once the objects are
-#  ready.
-#
-#    # Comments are simple: you can change summary and content, and that's it.
-#    def put_comment
-#      return {
-#       :summary => params[:set_summary],
-#       :content => params[:set_content],
-#      }
-#    end
-#
-#    # Votes are changed using a different method.
-#    def put_vote
-#      new_value = params[:set_value]
-#      lambda do |vote|
-#        old_value = vote.value
-#        if new_value == old_value
-#          # Return "trivial" success if no change.
-#          return true
-#        else
-#          # Returns true if successful.  Note that @user refers to the user
-#          # (authenticated) making this change.
-#          return vote.naming.change_vote(@user, val)
-#        end
-#      end
-#    end
-#
-#  These methods all rely heavily on a large set of very useful helpers that
-#  parse and validate the "set_blah" parameters.  Here are several:
-#
-#  parse_boolean::    Parse boolean.
-#  parse_integer::    Parse integer.
-#  parse_float::      Parse floating point.
-#  parse_string::     Parse string (with optional max length).
-#  parse_date::       Parse date.
-#  parse_object::     Parse object (by id or sync_id).
-#  parse_vote::       Parse confidence level.
-#  parse_rank::       Parse name rank ('Genus', 'Species', etc.).
-#
-#  These raise appropriate 102 errors in case of invalid values.  They return
-#  appropriately cast value if valid, or nil if the parameter wasn't specified.
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: PUT Methods
+  #
+  #  These are responsible for parsing all the "set" parameters and returning a
+  #  hash that will be passed into <tt>object.write_attributes(args)</tt>.  If
+  #  write_attributes is not sufficiently flexible, method may elect to return
+  #  a lambda proc instead, which will perform the update once the objects are
+  #  ready.
+  #
+  #    # Comments are simple: you can change summary and content, and that's it.
+  #    def put_comment
+  #      return {
+  #       :summary => params[:set_summary],
+  #       :content => params[:set_content],
+  #      }
+  #    end
+  #
+  #    # Votes are changed using a different method.
+  #    def put_vote
+  #      new_value = params[:set_value]
+  #      lambda do |vote|
+  #        old_value = vote.value
+  #        if new_value == old_value
+  #          # Return "trivial" success if no change.
+  #          return true
+  #        else
+  #          # Returns true if successful.  Note that @user refers to the user
+  #          # (authenticated) making this change.
+  #          return vote.naming.change_vote(@user, val)
+  #        end
+  #      end
+  #    end
+  #
+  #  These methods all rely heavily on a large set of very useful helpers that
+  #  parse and validate the "set_blah" parameters.  Here are several:
+  #
+  #  parse_boolean::    Parse boolean.
+  #  parse_integer::    Parse integer.
+  #  parse_float::      Parse floating point.
+  #  parse_string::     Parse string (with optional max length).
+  #  parse_date::       Parse date.
+  #  parse_object::     Parse object (by id or sync_id).
+  #  parse_vote::       Parse confidence level.
+  #  parse_rank::       Parse name rank ('Genus', 'Species', etc.).
+  #
+  #  These raise appropriate 102 errors in case of invalid values.  They return
+  #  appropriately cast value if valid, or nil if the parameter wasn't
+  #  specified.
+  #
+  ##############################################################################
 
   def put_comment
     sets = {}
@@ -725,11 +729,12 @@ protected
 
   def put_naming
     sets = {}
-    sets[:name]        = x if x = parse_object(:set_name, Name)
-    sets[:by_sight]    = x if x = parse_string(:set_by_sight)
-    sets[:used_refs]   = x if x = parse_string(:set_used_refs)
-    sets[:microscopic] = x if x = parse_string(:set_microscopic)
-    sets[:chemical]    = x if x = parse_string(:set_chemical)
+    sets[:name] = x if x = parse_object(:set_name, Name)
+    for num in Naming::Reason.all_reasons
+      if x = parse_string("set_reason_#{num}".to_sym)
+        sets["reason_#{num}".to_sym] = x
+      end
+    end
 
     # Changing name and/or reasons is non-trivial.
     if !sets.empty?
@@ -755,31 +760,12 @@ protected
         end
 
         # Update reasons.
-        nrs = naming.naming_reasons
-        i = 1
-        for x in [:by_sight, :used_refs, :microscopic, :chemical]
-          v = vals[x]
-          need_to_create = true
-          for nr in nrs
-            if nr.reason == i
-              if v == 'delete'
-                # Destroy reason.
-                nr.destroy
-              else
-                # Change existing reason.
-                nr.notes = v
-                nr.save
-              end
-              need_to_create = false
-              break
-            end
+        for reason in naming.get_reasons
+          if val = vals["reason_#{reason.num}".to_sym]
+            reason.notes = val
+          else
+            reason.delete
           end
-          if need_to_create
-            # Create new reason.
-            nr = NamingReason.new(:naming => naming, :reason => i, :notes => v)
-            nr.save
-          end
-          i += 1
         end
       end
     end
@@ -824,29 +810,29 @@ protected
     return sets
   end
 
-################################################################################
-#
-#  :section: DELETE Methods
-#
-#  These are responsible for deleting a single object each.  Most will simply
-#  call destroy and be done with it, others require more work:
-#
-#    # Comments are simple, just destroy.
-#    def delete_comment(comment)
-#      return comment.destroy
-#    end
-#
-#    # Namings, on the other hand, are not always deletable.
-#    def delete_naming(naming)
-#      if !naming.deletable?
-#        @errors << error(204, "not allowed to delete naming")
-#        return false
-#      else
-#        return naming.destroy
-#      end
-#    end
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: DELETE Methods
+  #
+  #  These are responsible for deleting a single object each.  Most will simply
+  #  call destroy and be done with it, others require more work:
+  #
+  #    # Comments are simple, just destroy.
+  #    def delete_comment(comment)
+  #      return comment.destroy
+  #    end
+  #
+  #    # Namings, on the other hand, are not always deletable.
+  #    def delete_naming(naming)
+  #      if !naming.deletable?
+  #        @errors << error(204, "not allowed to delete naming")
+  #        return false
+  #      else
+  #        return naming.destroy
+  #      end
+  #    end
+  #
+  ##############################################################################
 
   def delete_comment(comment)
     return comment.destroy(@user)
@@ -882,37 +868,38 @@ protected
     return result
   end
 
-################################################################################
-#
-#  :section: POST Methods
-#
-#  These are responsible for parsing all the parameters necessary to create a
-#  single new object.  If successful, they return the new object, otherwise
-#  they return nil.
-#
-#  Several "global" instance variables can be useful:
-#
-#  <tt>@user</tt>::       User posting the new object.
-#  <tt>@time</tt>::       Time request was _submitted_ (if not now).
-#  <tt>@args[:http_request_body]</tt>::
-#                          This is where an image comes in from HTTP post.
-#
-#  These methods all rely heavily on a large set of very useful helpers that
-#  parse and validate the "set_blah" parameters.  Here are several:
-#
-#  parse_boolean::    Parse boolean.
-#  parse_integer::    Parse integer.
-#  parse_float::      Parse floating point.
-#  parse_string::     Parse string (with optional max length).
-#  parse_date::       Parse date.
-#  parse_object::     Parse object (by id or sync_id).
-#  parse_vote::       Parse confidence level.
-#  parse_rank::       Parse name rank ('Genus', 'Species', etc.).
-#
-#  These raise appropriate 102 errors in case of invalid values.  They return
-#  appropriately cast value if valid, or nil if the parameter wasn't specified.
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: POST Methods
+  #
+  #  These are responsible for parsing all the parameters necessary to create a
+  #  single new object.  If successful, they return the new object, otherwise
+  #  they return nil.
+  #
+  #  Several "global" instance variables can be useful:
+  #
+  #  <tt>@user</tt>::       User posting the new object.
+  #  <tt>@time</tt>::       Time request was _submitted_ (if not now).
+  #  <tt>@args[:http_request_body]</tt>::
+  #                          This is where an image comes in from HTTP post.
+  #
+  #  These methods all rely heavily on a large set of very useful helpers that
+  #  parse and validate the "set_blah" parameters.  Here are several:
+  #
+  #  parse_boolean::    Parse boolean.
+  #  parse_integer::    Parse integer.
+  #  parse_float::      Parse floating point.
+  #  parse_string::     Parse string (with optional max length).
+  #  parse_date::       Parse date.
+  #  parse_object::     Parse object (by id or sync_id).
+  #  parse_vote::       Parse confidence level.
+  #  parse_rank::       Parse name rank ('Genus', 'Species', etc.).
+  #
+  #  These raise appropriate 102 errors in case of invalid values.  They return
+  #  appropriately cast value if valid, or nil if the parameter wasn't
+  #  specified.
+  #
+  ##############################################################################
 
   def post_comment
     now     = Time.now
@@ -1101,10 +1088,10 @@ protected
     name           = parse_object(:name, Name)
     observation    = parse_object(:observation, Observation)
     vote           = parse_vote(:vote)
-    by_sight       = parse_string(:by_sight)
-    used_refs      = parse_string(:used_refs)
-    microscopic    = parse_string(:microscopic)
-    chemical       = parse_string(:chemical)
+    reasons = {}
+    for num in Naming::Reason.all_reasons
+      reasons[num] = parse_string("reason_#{num}")
+    end
 
     raise error(102, 'missing name')        if !name
     raise error(102, 'missing observation') if !observation
@@ -1115,22 +1102,13 @@ protected
       :modified    => now,
       :observation => observation,
       :name        => name,
-      :user        => @user
+      :user        => @user,
+      :set_reasons => reasons
     )
     raise error(202, naming.formatted_errors) if !naming.save
 
     # Attach vote.
-    naming.change_vote(@user, vote)
-
-    # Attach reasons.
-    i = 1
-    for x in [by_sight, used_refs, microscopic, chemical]
-      if x
-        nr = NamingReason.new(:naming => naming, :reason => i, :notes => x)
-        nr.save
-      end
-      i += 1
-    end
+    naming.observation.change_vote(naming, vote)
 
     return naming
   end
@@ -1181,17 +1159,17 @@ protected
     return Vote.find_by_user_and_naming(@user, naming)
   end
 
-################################################################################
-#
-#  :section: Other Request Methods
-#
-#  A couple non-HTTP-like request methods are also allowed for XML-RPC:
-#
-#  login_user::   Update user record after login.
-#  logout_user::  Update user record after logout.
-#  view_object::  Update view stats whenever someone does a "show_object".
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Other Request Methods
+  #
+  #  A couple non-HTTP-like request methods are also allowed for XML-RPC:
+  #
+  #  login_user::   Update user record after login.
+  #  logout_user::  Update user record after logout.
+  #  view_object::  Update view stats whenever someone does a "show_object".
+  #
+  ##############################################################################
 
   # This is used whenever a user logs in.
   def login_user
@@ -1209,11 +1187,11 @@ protected
     # Errr... do nothing?
   end
 
-################################################################################
-#
-#  :section: Parsers
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Parsers
+  #
+  ##############################################################################
 
 private
 
@@ -1417,11 +1395,11 @@ private
     parse_enum(arg, Name.all_ranks)
   end
 
-################################################################################
-#
-#  :section: SQL Builders
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: SQL Builders
+  #
+  ##############################################################################
 
 private
 
@@ -1566,11 +1544,11 @@ private
     ActiveRecord::Base.sanitize_sql_array_public(*args)
   end
 
-################################################################################
-#
-#  :section: Other Stuff
-#
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Other Stuff
+  #
+  ##############################################################################
 
 public
 

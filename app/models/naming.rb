@@ -15,16 +15,13 @@
 #  observation::            Observation it is attached to.
 #  name::                   Name it refers to.
 #  vote_cache::             Weighted sum of votes for this Naming, cached.
+#  reasons::                Serialized Hash containing reasons.
 #
 #  == Class methods
 #
 #  None.
 #
 #  == Instance methods
-#
-#  naming_reasons::         List of NamingReasons attached to this object.
-#  editable?::              Has anyone voted (positively) on this naming?
-#  deletable?::             Has anyone made this Naming their favorite?
 #
 #  ==== Formatting
 #  text_name::              Plain text.  (uses name.search_name)
@@ -38,17 +35,17 @@
 #  vote_percent::           Convert cached Vote score to a percentage.
 #  user_voted?::            Has a given User voted on this Naming?
 #  users_vote::             Get a given User's Vote on this Naming.
+#  is_users_favorite?::     Is this Naming the given User's favorite?
+#  editable?::              Can owner change this Naming's Name?
+#  deletable?::             Can owner delete this Naming?
 #  calc_vote_table::        (Used by show_votes.rhtml.)
-#  change_vote::            Change a User's Vote for this Naming.
-#  is_owners_favorite?::    Is this (one of) the owner's favorite(s)?
-#  is_users_favorite?::     Is this (one of) a given User's favorite(s)?
-#  is_consensus?::          Is this the community consensus?
 #
 #  == Callbacks
 #
 #  did_name_change?::       Check if name changed before saving.
 #  create_emails::          Notify users of changes after saving.
 #  log_destruction::        Log destruction after destroying it.
+#  enforce_default_reasons:: Make sure default reasons are set in if none given.
 #
 ################################################################################
 
@@ -56,16 +53,45 @@ class Naming < AbstractModel
   belongs_to :observation
   belongs_to :name
   belongs_to :user
-  has_many   :naming_reasons, :dependent => :destroy
-  has_many   :votes,          :dependent => :destroy
+  has_many   :votes, :dependent => :destroy
+
+  serialize :reasons
 
   before_save   :did_name_change?
+  before_save   :enforce_default_reasons
   after_save    :create_emails
   after_destroy :log_destruction
 
+  # Return name in plain text.
+  def text_name
+    name ? name.search_name : ''
+  end
+
+  # Return name in plain text (with id tacked on to make unique).
+  def unique_text_name
+    "%s (%s)" % [text_name, id]
+  end
+
+  # Return name in Textile format.
+  def format_name
+    name ? name.observation_name : ''
+  end
+
+  # Return name in Textile format (with id tacked on to make unique).
+  def unique_format_name
+    "%s (%s)" % [format_name, id]
+  end
+
+  ##############################################################################
+  #
+  #  :section: Callbacks
+  #
+  ##############################################################################
+
   # Detect name changes in namings
   def did_name_change?
-    @name_changed = self.name_id_changed?
+    @name_changed = name_id_changed?
+    return true
   end
 
   # Send email notifications after creating or changing the Name.
@@ -127,7 +153,7 @@ class Naming < AbstractModel
   # Log destruction of Naming and recalculate Observation's consensus after
   # destroy.  (If you're about to destroy the observation, too, then be sure to
   # clear naming.observation -- otherwise it will recalculate the consensus for
-  # each deleted naming, and send a bunch of bogus emails.) 
+  # each deleted naming, and send a bunch of bogus emails.)
   def log_destruction
     if (user = User.current) &&
        (obs = observation)
@@ -136,31 +162,17 @@ class Naming < AbstractModel
     end
   end
 
-  # Return name in plain text.
-  def text_name
-    name ? name.search_name : ''
-  end
-
-  # Return name in plain text (with id tacked on to make unique).
-  def unique_text_name
-    "%s (%s)" % [text_name, id]
-  end
-
-  # Return name in Textile format.
-  def format_name
-    name ? name.observation_name : ''
-  end
-
-  # Return name in Textile format (with id tacked on to make unique).
-  def unique_format_name
-    "%s (%s)" % [format_name, id]
-  end
+  ##############################################################################
+  #
+  #  :section: Voting
+  #
+  ##############################################################################
 
   # Straight sum of vote values.
   # (Just used by functional tests right now.)
   def vote_sum
-    sum = 0
-    for v in self.votes
+    sum = 0.0
+    for v in votes
       sum += v.value
     end
     return sum
@@ -168,30 +180,70 @@ class Naming < AbstractModel
 
   # Convert vote_cache to a percentage.
   def vote_percent
-    v = self.vote_cache
-    return 0.0 if v.to_s == ''
-    return v * 100 / 3
+    Vote.percent(vote_cache)
   end
 
   # Has a given User voted for this naming?
   def user_voted?(user)
-    result = false
-    if user
-      result = votes.find(:first, :conditions => ['user_id = ?', user.id])
-    end
-    return result ? true : false
+    !!users_vote(user)
   end
 
   # Retrieve a given User's vote for this naming.
   def users_vote(user)
     result = nil
-    if user
-      result = votes.find(:first, :conditions => ['user_id = ?', user.id])
+    for v in votes
+      if (v.user_id == user.id)
+        result = v
+        break
+      end
     end
     return result
   end
 
-  # Create a table the number of User's who cast each level of Vote. 
+  # Is this Naming the given User's favorite Naming for this Observation?
+  def is_users_favorite?(user)
+    result = false
+    for v in votes
+      if (v.user_id == user.id) and
+         (v.favorite)
+        result = true
+      end
+    end
+    return result
+  end
+
+  # Has anyone voted (positively) on this?  We don't want people changing
+  # the name for namings that the community has voted on.  Returns true if no
+  # one has.
+  def editable?
+    result = true
+    for v in votes
+      if (v.user_id != user_id) and
+         (v.value > 0)
+        result = false
+        break
+      end
+    end
+    return result
+  end
+
+  # Has anyone given this their strongest (positive) vote?  We don't want
+  # people destroying namings that someone else likes best.  Returns true if no
+  # one has.
+  def deletable?
+    result = true
+    for v in votes
+      if (v.user_id != user_id) and
+         (v.value > 0) and
+         (v.favorite)
+        result = false
+        break
+      end
+    end
+    return result
+  end
+
+  # Create a table the number of User's who cast each level of Vote.
   # (This refreshes the vote_cache while it's at it.)
   #
   #   table = naming.calc_vote_table
@@ -210,7 +262,7 @@ class Naming < AbstractModel
     for str, val in Vote.agreement_menu
       table[str] = {
         :num   => 0,
-        :wgt   => 0,
+        :wgt   => 0.0,
         :value => val,
         :users => [],
       }
@@ -238,141 +290,143 @@ class Naming < AbstractModel
     return table
   end
 
-  # Change User's Vote for this naming.  Automatically recalculates the
-  # consensus for the Observation in question if anything is changed.  Returns
-  # true if something was changed. 
+  ##############################################################################
+  #
+  #  :section: Reasons
+  #
+  ##############################################################################
 
-  def change_vote(user, value)
-    result = false
+  # Array of all reason "types", in the order they should be presented in UI.
+  ALL_REASONS = [1, 2, 3, 4]
 
-    now  = Time.now
-    vdel = Vote.delete_vote
-    v80  = Vote.next_best_vote
-    vote = votes.find(:first, :conditions => ['user_id = ?', user.id])
+  # These reasons will be used by default (with empty notes) if no reasons given.
+  DEFAULT_REASONS = [1]
 
-    # Negative value means destroy vote.
-    if value == vdel
-      if vote
-        vote.destroy
-        result = true
-      end
+  # Localization tags for reason labels.
+  REASON_LABELS = [
+    :naming_reason_label_1,  # "Recognized by sight"
+    :naming_reason_label_2,  # "Used references"
+    :naming_reason_label_3,  # "Based on microscopical features"
+    :naming_reason_label_4,  # "Based on chemical features"
+  ]
 
-    # Otherwise create new vote or modify existing vote.
-    elsif !vote || vote.value != value
-      result = true
-
-      # First downgrade any existing 100% votes (if casting a 100% vote).
-      if value > v80
-        for n in observation.namings
-          v = n.users_vote(user)
-          if v && v.value > v80
-            v.modified = now
-            v.value    = v80
-            v.save
-            Transaction.put_vote(
-              :id        => v,
-              :set_value => v80
-            )
-          end
-        end
-      end
-
-      # Create vote if none exists.
-      if !vote
-        vote = Vote.new
-        vote.created     = now
-        vote.modified    = now
-        vote.user        = user
-        vote.observation = observation
-        vote.naming      = self
-        vote.value       = value
-        vote.save
-        Transaction.post_vote(
-          :id     => vote,
-          :naming => self,
-          :value  => value
-        )
-
-      # Change vote if it exists.
-      else
-        vote.modified = now
-        vote.value    = value
-        vote.save
-        Transaction.put_vote(
-          :id        => vote,
-          :set_value => value
-        )
-      end
+  # Return reasons as Array of Reason instances.  Changes to these instances
+  # will make appropriate changes to the Naming. 
+  def get_reasons
+    self.reasons ||= {}
+    ALL_REASONS.map do |num|
+      Reason.new(reasons, num)
     end
+  end
 
-    # Update consensus if anything changed.
-    observation.calc_consensus(user) if result
-
+  # Return reasons as Hash of Reason instances.  Changes to these instances
+  # will make appropriate changes to the Naming. 
+  def get_reasons_hash
+    result = {}
+    for reason in get_reasons
+      result[reason.num] = reason
+    end
     return result
   end
 
-  # Has anyone voted (positively) on this?  We don't want people changing
-  # the name for namings that the community has voted on.  Returns true if no
-  # one has.
-  def editable?
-    for v in votes
-      return false if v.user_id != user_id and v.value > 0
+  # Update reasons given Hash of notes values.
+  def set_reasons(hash)
+    for reason in get_reasons
+      if hash.has_key?(reason.num)
+        reason.notes = hash[reason.num].to_s
+      else
+        reason.delete
+      end
     end
+  end
+
+  # Callback used on +before_save+ to enforce certain minimum reasons are used.
+  def enforce_default_reasons
+    self.reasons ||= {}
+    if reasons.keys.empty?
+      for num in DEFAULT_REASONS
+        reasons[num] = ''
+      end
+    end
+
+    # Might as well make it nil if empty.
+    self.reasons = nil if reasons == {}
     return true
   end
 
-  # Has anyone given this their strongest (positive) vote?  We don't want
-  # people destroying namings that someone else likes best.  Returns true if no
-  # one has. 
-  def deletable?
-    result = true
-    for v in votes
-      if v.user_id != user_id and v.value > 0
-        if is_users_favorite?(v.user)
-          result = false
-          break
-        end
-      end
+  # = Wrapper on Naming reasons.
+  #
+  # Each reason in a Naming instance is wrapped in one of these objects.  It
+  # facilitates access to those reasons' information, and it allows callers to
+  # make changes to the Naming safely.
+  #
+  # == Attributes
+  # num::           Type of reason (Fixnum from 1 to N).
+  # notes::         Notes associated with reason (String), or +nil+ if not used.
+  #                 *NOTE*: This is writable; changes will be saved with Naming.
+  #
+  # == Class Methods
+  #
+  # all_reasons::   Array of all reason types, in display order.
+  #
+  # == Instance Methods
+  #
+  # label::         Localization label.
+  # order::         Index of this reason in sorted list of reasons.
+  # default?::      Will this be set by default if no reasons given?
+  # used?::         Is this reason being used by the Naming?
+  # delete::        Remove this reason from the Naming.
+  #
+  class Reason
+    attr_accessor :num
+
+    # Return an Array of all reason types, in order they should be displayed.
+    def self.all_reasons
+      ALL_REASONS
     end
-    return result
-  end
 
-  # Returns true if this naming has received the highest positive vote
-  # from the owner of the corresponding observation.  Note, multiple namings
-  # can return true for a given observation.
-  def is_owners_favorite?
-    is_users_favorite?(observation.user)
-  end
-
-  # Returns true if this naming has received the highest positive vote
-  # from the given user (among namings for the corresponding observation).
-  # Note, multiple namings can return true for a given user and observation.
-  def is_users_favorite?(user)
-    result = false
-    if obs = observation
-      max = 0
-      votes = Vote.find_all_by_observation_id_and_user_id(obs.id, user.id)
-      for vote in votes
-        max = vote.value if vote.value > 0 && vote.value > max
-      end
-      if max > 0
-        for vote in votes
-          if vote.naming == self && vote.value == max
-            result = true
-            break
-          end
-        end
-      end
+    # Initialize Reason.
+    def initialize(reasons, num)
+      @reasons = reasons
+      @num     = num
     end
-    return result
-  end
 
-  # If the community consensus clearly derives from a single Naming, then this
-  # will return true for that Naming.  It returns false for everything else.
-  # See observation#consensus_naming for a more accurate method that takes
-  # synonymy into account.
-  def is_consensus?
-    observation.name == name
+    # Get localization string for this reason.  For example:
+    #   reason.label.l  -->  "Recognized by sight"
+    def label
+      REASON_LABELS[@num-1]
+    end
+
+    # Return order for sorting:
+    #   reasons.sort_by(&:order)
+    def order
+      @num
+    end
+
+    # Is this Reason to be set by default if none given by user?
+    def default?
+      DEFAULT_REASONS.include?(@num)
+    end
+
+    # Is this Reason being used by the parent Naming?
+    def used?
+      @reasons.has_key?(@num)
+    end
+
+    # Get notes, or +nil+ if Reason not used.
+    def notes
+      @reasons[@num]
+    end
+
+    # Set notes, and mark this Reason as "used".
+    def notes=(val)
+      @reasons[@num] = val.to_s
+    end
+
+    # Mark this Reason as "unused".
+    def delete
+      @reasons.delete(@num)
+    end
   end
 
 ################################################################################

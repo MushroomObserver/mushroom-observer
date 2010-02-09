@@ -12,7 +12,7 @@
 #  attributes with no set meaning: +when+, +where+, +title+, +notes+.  The User
 #  can choose any value for any of these.  The only ones that has any use are
 #  +when+ and +where+, which are used as the defaults for new Observation's
-#  created specifically for this SpeciesList. 
+#  created specifically for this SpeciesList.
 #
 #  *NOTE*: Observation's may belong to more than one SpeciesList.  Also note
 #  that Observation's created by a SpeciesList are fairly minimal: they are all
@@ -46,10 +46,6 @@
 #  unique_text_name::      (same thing, with id tacked on to make unique)
 #  unique_format_name::    (same thing, with id tacked on to make unique)
 #  ---
-#  rss_log::               Access to RssLog attached to this list.
-#  log::                   Add message to the RssLog.
-#  orphan_log::            Tell the RssLog we're about to be deleted.
-#  ---
 #  observations::          List of Observation's attached to it.
 #  names::                 Get sorted list of Names used by its Observation's.
 #  name_included::         Does this list include the given Name?
@@ -68,31 +64,25 @@
 ################################################################################
 
 class SpeciesList < AbstractModel
+  belongs_to :rss_log
   belongs_to :user
-  has_one :rss_log
 
   has_and_belongs_to_many :observations, :after_add => :add_obs_callback,
                                          :before_remove => :remove_obs_callback
 
-  after_destroy :log_destruction
-
   attr_accessor :data
+
+  # Automatically (but silently) log destruction.
+  self.autolog_events = [:destroyed]
 
   # Callback that updates User contribution when adding Observation's.
   def add_obs_callback(o)
-    SiteData.update_contribution(:create, self, :species_list_entries, 1)
+    SiteData.update_contribution(:create, self, :species_list_entries)
   end
 
   # Callback that updates User contribution when removing Observation's.
   def remove_obs_callback(o)
-    SiteData.update_contribution(:destroy, self, :species_list_entries, 1)
-  end
-
-  # Callback that logs destruction.
-  def log_destruction
-    if user = User.current
-      self.orphan_log(:log_species_list_destroyed, { :user => user.login })
-    end
+    SiteData.update_contribution(:destroy, self, :species_list_entries)
   end
 
   # Return title in plain text for debugging.
@@ -120,33 +110,43 @@ class SpeciesList < AbstractModel
     unique_format_name.t.html_to_ascii
   end
 
-  # Add message to RssLog.
-  #
-  #   spl.log(:log_species_list_created)
-  #
-  def log(*args)
-    self.rss_log ||= RssLog.new
-    self.rss_log.add_with_date(*args)
-  end
-
-  # Inform RssLog we're about to be deleted.
-  #
-  #   self.orphan_log(:log_species_list_destroyed, {:user => @user.login})
-  #
-  def orphan_log(*args)
-    self.rss_log ||= RssLog.new
-    self.rss_log.orphan(self.unique_format_name, *args)
-  end
-
   # Get list of Names, sorted by text_name, for this list's Observation's.
   def names
-    # Takes 0.11 seconds on Sebastopol Observations.
-    ids = self.observations.map(&:name_id).uniq
-    Name.find(:all, :conditions => ['id IN (?)', ids], :order => 'text_name ASC')
+    # Takes 0.07 seconds on Sebastopol Observations.
+    # (Methods that call this don't need the description, review status, etc.)
+    Name.find_by_sql %(
+      SELECT DISTINCT n.id, n.rank, n.deprecated, n.text_name, n.search_name,
+             n.author, n.observation_name, n.display_name, n.synonym_id,
+             n.correct_spelling_id, n.citation
+      FROM names n, observations o, observations_species_lists os
+      WHERE n.id = o.name_id
+        AND os.observation_id = o.id
+        AND os.species_list_id = #{id}
+      ORDER BY n.text_name ASC, n.author ASC
+    )
 
-    # Takes 0.41 seconds on Sebastopol Observations.
+    # Takes 0.10 seconds on Sebastopol Observations.
+    # Name.find_by_sql %(
+    #   SELECT DISTINCT n.*
+    #   FROM names n, observations o, observations_species_lists os
+    #   WHERE n.id = o.name_id
+    #     AND os.observation_id = o.id
+    #     AND os.species_list_id = #{id}
+    #   ORDER BY n.text_name ASC, n.author ASC
+    # )
+
+    # Takes 0.25 seconds on Sebastopol Observations.
+    # ids = observations.map(&:name_id).uniq
+    # Name.find(:all, :conditions => ['id IN (?)', ids], :order => 'text_name ASC')
+
+    # Takes 0.71 seconds on Sebastopol Observations.
     # self.observations.map {|o| o.name_id}.
     #   uniq.map {|id| Name.find(id)}.sort_by {|n| n.text_name}
+
+    # Takes 1.00 seconds on Sebastopol Observations.
+    # Name.all(:conditions => ['observations_species_lists.species_list_id = ?', id],
+    #          :include => {:observations => :species_lists},
+    #          :order => 'names.text_name ASC, names.author ASC')
   end
 
   # Tests to see if the species list includes an Observation with the given

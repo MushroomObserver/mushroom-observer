@@ -100,8 +100,12 @@
   new_tab_set do
     add_tab(:app_prev.t, :action => 'prev_observation', :id => @observation.id,
             :params => query_params)
-    add_tab(:app_index.t, :action => 'list_observations', :id => @observation.id,
+    add_tab(:app_index.t, :action => 'index_observation', :id => @observation.id,
             :params => query_params)
+    if @mappable
+      add_tab(:map.t, :controller => 'location', :action => 'map_locations',
+              :params => query_params)
+    end
     add_tab(:app_next.t, :action => 'next_observation', :id => @observation.id,
             :params => query_params)
   end

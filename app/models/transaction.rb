@@ -9,7 +9,7 @@
 #  == Attributes
 #
 #  modified::           Date/time it was logged.
-#  query::              XML-RPC query.
+#  query::              Stringified query.
 #
 #  == Class Methods
 #
@@ -17,8 +17,6 @@
 #  all_actions::        List of allowable actions.
 #  <method>_<action>::  Create a GET/PUT/POST/DELETE request.
 #  create::             Create an arbitrary request.
-#  xmlrpc_reader::      Get default XML-RPC parser.
-#  xmlrpc_writer::      Get default XML-RPC writer.
 #
 #  == Instance Methods
 #
@@ -55,7 +53,6 @@
 ################################################################################
 
 class Transaction < AbstractModel
-  require 'xmlrpc/client'
 
   # Cache query's args.
   attr_accessor :args
@@ -106,23 +103,6 @@ class Transaction < AbstractModel
     ]
   end
 
-  # Get default XML-RPC parser.
-  #
-  #   method, args = Transaction.xmlrpc_reader.parse(query)
-  #
-  def self.xmlrpc_reader
-    @@xmlrpc_reader ||= XMLRPC::XMLParser::REXMLStreamParser.new
-    # @@xmlrpc_reader ||= XMLRPC::Config.DEFAULT_PARSER.new
-  end
-
-  # Get default XML-RPC parser.
-  #
-  #   query_str = Transaction.xmlrpc_writer.methodCall(method, args)
-  #
-  def self.xmlrpc_writer
-    @@xmlrpc_writer ||= XMLRPC::Create.new
-  end
-
   # Create new transaction.
   #
   #   xact = Transaction.new(args)
@@ -130,10 +110,11 @@ class Transaction < AbstractModel
   #   xact.execute
   #   xact.save
   #
-  def initialize(args={})
-    self.args = args
-    args[:_user] ||= User.current if User.current
-    args[:_time] ||= Time.now
+  def initialize(args=nil)
+    if self.args = args
+      args[:_user] ||= User.current if User.current
+      args[:_time] ||= Time.now
+    end
     super()
   end
 
@@ -181,7 +162,7 @@ class Transaction < AbstractModel
     end
   end
 
-  # Execute the given transaction.  Parses the XML-RPC query string if necessary.
+  # Execute the given transaction.  Parses the query string if necessary.
   #
   #   # Rerun last transaction logged.
   #   Transaction.last.execute
@@ -190,76 +171,41 @@ class Transaction < AbstractModel
   #   Transaction.get_user(:login => 'fred').execute
   #
   def execute
+    parse_query if !args
     API.execute(args)
   end
 
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Parsing and Encoding
+  #
+  ##############################################################################
 
-# These should be protected but you can't call protected instance methods from
-# a class method even if it's the same class(!)
-# protected
-
-  # Extract method, action, args from XML-RPC query string.
+  # Extract from String.
   def parse_query
-    method, args = self.class.xmlrpc_reader.parseMethodCall(query)
-    args = args[0]
-    if !args.is_a?(Hash)
-      raise "Invalid transaction query; expect a single hash of arguments."
-    end
-    args = Args.new(args)
-    args[:method] = method
-# print "PARSE QUERY: [#{args.inspect}]\n"
-    self.args = args
+    self.args = deconstruct_query(query)
   end
 
-  # Trivial subclass of Hash that forces all keys to String.  This helps
-  # avoid the whole obnoxious "is it a Symbol or String" fiasco, just like
-  # the CGI params object does.  It returns keys as Symbols, but internally
-  # everything is done as String.
-  class Args
-    def initialize(x); @hash = x; end
-    def [](k); @hash[k.to_s]; end
-    def []=(k,v); @hash[k.to_s] = v; end
-    def keys; @hash.keys.map(&:to_sym); end
-    def has_key?(k); @hash.has_key?(k.to_s); end
-    alias key? has_key?
-    alias include? has_key?
-    def delete(k); @hash.delete(k.to_s); end
-    def inspect; @hash.inspect; end
-  end
-
-  # Create XML-RPC string from method, action, args.
+  # Mash into String.
   def create_query
-
-    # XML-RPC requires method be listed separately; we mash it in with
-    # everything else.
-    args = self.args.dup
-    method = args[:method]
-    args.delete(:method)
-
     # Just make absolutely sure we don't accidentally save authentication.
     args.delete(:auth_id)   if args.has_key?(:auth_id)
     args.delete(:auth_code) if args.has_key?(:auth_code)
 
     # This validates ids and converts ActiveRecords to sync_ids.
-    convert_ids(args)
+    validate_args(args)
 
-    # Create the actual XML-RPC query.
-# print "CREATE QUERY: [#{method.inspect}, #{args.inspect}]\n"
-    self.query = Transaction.xmlrpc_writer.methodCall(method, args)
+    # This turns the request into a String.
+    self.query = construct_query(args)
   end
 
-################################################################################
-
-private
-
-  # Convert all ActiveRecord instances in args to sync_ids.
-  def convert_ids(args)
+  # Validate arguments and convert all ActiveRecord instances into sync_ids.
+  def validate_args(args)
     args.each do |key, val|
 
       # Key need only respond to 'to_s', but I'm more strict.
-      if !key.is_a?(Symbol) &&
-         !key.is_a?(String)
+      if (!key.is_a?(Symbol) and !key.is_a?(String)) or
+         key.to_s.match(/\W/)
         raise "Invalid argument #{key.class}: #{key}"
       end
 
@@ -271,23 +217,66 @@ private
           raise "Missing sync_id for :#{key} = #{val.class} ##{val.id || 'nil'}"
         end
 
-      # Let ActiveSupport::TimeWithZone take care of timezones, etc.
+      # Let ActiveSupport::TimeWithZone take care of timezones.
       elsif val.is_a?(Time)
         args[key] = val.in_time_zone
 
-      # Allow only these types of values.  We could in theory allow nils,
-      # Bignums, Arrays, Hashes and Structs, but we have no need of these.
-      # Nils, in particular, are problematic in my opinion, since there is no
-      # way to distinguish nil from "" when values are passed as strings.
-      elsif !val.is_a?(TrueClass)  &&
+      # Allow only these types of values.
+      elsif !val.is_a?(NilClass)   &&
+            !val.is_a?(TrueClass)  &&
             !val.is_a?(FalseClass) &&
-            !val.is_a?(Fixnum) &&
-            !val.is_a?(Float)  &&
             !val.is_a?(String) &&
             !val.is_a?(Symbol) &&
-            !val.is_a?(Date)
+            !val.is_a?(Fixnum) &&
+            !val.is_a?(Float)  &&
+            !val.is_a?(Date)   &&
+            !val.is_a?(Time)
         raise "Invalid value for :#{key} = #{val.class}: #{val}"
       end
     end
+  end
+
+  # Convert request into a String.  (Inverse of +deconstruct_query+.)
+  # (NOTE: I originally used XML-RPC, but that is hideously inefficient.)
+  def construct_query(args)
+    args.map do |key, val|
+      key.to_s + ' ' + case val
+      when NilClass   ; 'nil'
+      when TrueClass  ; 'true'
+      when FalseClass ; 'false'
+      when String     ; '"' + val.gsub(/[\\\r\n]/) {|x| x == '\\' ? '\\\\' : x == "\n" ? '\\n' : ''}
+      when Symbol     ; ':' + val.to_s
+      when Fixnum     ; val.to_s
+      when Float      ; val.to_s
+      when Date       ; val.to_s
+      when Time       ; val.utc.strftime('%Y-%m-%d %H:%M:%S')
+      else
+        raise "Invalid type in construct_query: #{val.inspect}"
+      end
+    end.join("\n")
+  end
+
+  # Parse request from String.  (Inverse of +construct_query+.)
+  def deconstruct_query(query)
+    args = {}
+    query.split("\n").each do |line|
+      line.match(' ')
+      args[$`.to_sym] = case (val = $')
+      when 'nil'      ; nil
+      when 'true'     ; true
+      when 'false'    ; false
+      when /^"/       ; $'.gsub(/\\\\|\\n/) {|x| x == '\\n' ? "\n" : '\\'}
+      when /^:/       ; $'.to_sym
+      when /^-?\d+$/  ; val.to_i
+      when /^-?\d+\./ ; val.to_f
+      when /^\d\d\d\d-\d\d-\d\d$/
+                        Date.parse(val)
+      when /^(\d\d\d\d)-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d)$/
+                        Time.utc($1, $2, $3, $4, $5, $6)
+      else
+        raise "Invalid value in deconstruct_query: #{val.inspect}"
+      end
+    end
+    return args
   end
 end

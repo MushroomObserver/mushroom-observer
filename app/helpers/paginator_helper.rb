@@ -8,20 +8,38 @@
 #
 #  == Methods
 #
-#  pagination_letters::    Render the set of letters for pagination.
-#  pagination_numbers::    Render nearby page numbers for pagination.
-#  pagination_link::
+#  paginate_block::       Wrap block in appropriate pagination links.
+#  pagination_letters::   Render the set of letters for pagination.
+#  pagination_numbers::   Render nearby page numbers for pagination.
+#  pagination_link::      Render a single link in above methods.
 #
 ################################################################################
 
 module ApplicationHelper::Paginator
+
+  # Wrap a block in pagination links.  Includes letters if appropriate.
+  #
+  #   <% paginate_block(@pages) do %>
+  #     <% for object in @objects %>
+  #       <% object_link(object) %><br/>
+  #     <% end %>
+  #   <% end %>
+  #
+  def paginate_block(pages, args={}, &block)
+    letters = pagination_letters(pages, args).to_s
+    numbers = pagination_numbers(pages, args).to_s
+    body = capture(&block).to_s
+    str = letters + numbers + body + numbers + letters
+    concat(str, block.binding)
+  end
+
   # Insert letterer pagination links.
   #
   #   # In controller:
   #   def action
   #     query = create_query(:Name)
   #     @pages = paginate_letters(:letter, :page, 50)
-  #     @names = query.paginate(@pages, 'names.text_name')
+  #     @names = query.paginate(@pages, :letter_field => 'names.text_name')
   #   end
   #
   #   # In view:
@@ -33,13 +51,12 @@ module ApplicationHelper::Paginator
        pages.letter_arg and
        (pages.letter || pages.num_total > pages.num_per_page) and
        (!pages.used_letters or pages.used_letters.length > 1)
-      params = args[:params] || {}
-      params[pages.number_arg] = nil
+      args = args.dup
+      args[:params] = (args[:params] || {}).dup
+      args[:params][pages.number_arg] = nil
       str = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
-        params[pages.letter_arg] = letter
         if !pages.used_letters || pages.used_letters.include?(letter)
-          url = h(reload_with_args(params))
-          link_to(letter, url)
+          pagination_link(letter, letter, pages.letter_arg, args)
         else
           letter
         end
@@ -82,8 +99,8 @@ module ApplicationHelper::Paginator
       to   = this + size
       
       result = []
-      pstr = "&laquo; #{:app_prev.t}"
-      nstr = "#{:app_next.t} &raquo;"
+      pstr = :app_prev.t
+      nstr = :app_next.t
       result << pagination_link(pstr, this-1, arg, args) if this > 1
       result << '|'                                      if this > 1
       result << pagination_link(1, 1, arg, args)         if from > 1

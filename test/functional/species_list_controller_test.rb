@@ -351,12 +351,12 @@ class SpeciesListControllerTest < ControllerTestCase
       },
     }
     params[:approved_names] = [new_name_str]
-    params[:chosen_names] =
-        { multiple_name.text_name.gsub(/\W/,"_") => multiple_name.id.to_s }
-    params[:approved_deprecated_names] =
-        [deprecated_name.text_name, deprecated_checklist_name.search_name]
+    params[:chosen_multiple_names] =
+        { multiple_name.id.to_s => multiple_name.id.to_s }
     params[:chosen_approved_names] =
-        { deprecated_checklist_name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
+        { deprecated_checklist_name.id.to_s => approved_name.id.to_s }
+    params[:approved_deprecated_names] =
+        [deprecated_name.id.to_s, deprecated_checklist_name.id.to_s]
 
     login('rolf')
     post(:create_species_list, params)
@@ -393,7 +393,7 @@ class SpeciesListControllerTest < ControllerTestCase
     assert_equal("Warnerbros bugs-bunny",
                  @controller.instance_variable_get('@list_members'))
     assert_equal([], @controller.instance_variable_get('@new_names'))
-    assert_equal(["Warnerbros bugs-bunny"],
+    assert_equal([names(:bugs_bunny_one)],
                  @controller.instance_variable_get('@multiple_names'))
     assert_equal([], @controller.instance_variable_get('@deprecated_names'))
 
@@ -409,7 +409,7 @@ class SpeciesListControllerTest < ControllerTestCase
         "when(3i)" => "31",
         :notes => ""
       },
-      :chosen_names => { "Warnerbros_bugs_bunny" => names(:bugs_bunny_two).id },
+      :chosen_multiple_names => { names(:bugs_bunny_one).id.to_s => names(:bugs_bunny_two).id },
     }
     post(:create_species_list, params)
     assert_response(:action => "show_species_list")
@@ -544,7 +544,7 @@ class SpeciesListControllerTest < ControllerTestCase
     assert(!spl.name_included(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
-    params[:chosen_names] = {name.text_name.gsub(/\W/,"_") => name.id}
+    params[:chosen_multiple_names] = {name.id.to_s => name.id.to_s}
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
@@ -575,7 +575,7 @@ class SpeciesListControllerTest < ControllerTestCase
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
-    params[:approved_deprecated_names] = [name.text_name]
+    params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
@@ -621,7 +621,7 @@ class SpeciesListControllerTest < ControllerTestCase
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = '1'
-    params[:approved_deprecated_names] = [name.search_name]
+    params[:approved_deprecated_names] = [name.id.to_s]
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
@@ -638,9 +638,9 @@ class SpeciesListControllerTest < ControllerTestCase
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:checklist_data][name.id.to_s] = '1'
-    params[:approved_deprecated_names] = [name.search_name]
+    params[:approved_deprecated_names] = [name.id.to_s]
     params[:chosen_approved_names] =
-                { name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
+                { name.id.to_s => approved_name.id.to_s }
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
@@ -659,9 +659,9 @@ class SpeciesListControllerTest < ControllerTestCase
     assert(!spl.name_included(name))
     assert(!spl.name_included(approved_name))
     params[:list][:members] = name.text_name
-    params[:approved_deprecated_names] = name.text_name
+    params[:approved_deprecated_names] = name.id.to_s
     params[:chosen_approved_names] =
-                { name.text_name.gsub(/\W/,"_") => approved_name.id.to_s }
+                { name.id.to_s => approved_name.id.to_s }
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)

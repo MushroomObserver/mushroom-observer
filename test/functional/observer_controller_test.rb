@@ -4,9 +4,9 @@ class ObserverControllerTest < ControllerTestCase
 
   # Test constructing observations in various ways (with minimal namings).
   def generic_construct_observation(params, o_num, g_num, n_num)
-    o_count = Observation.all.length
-    g_count = Naming.all.length
-    n_count = Name.all.length
+    o_count = Observation.count
+    g_count = Naming.count
+    n_count = Name.count
     score   = @rolf.reload.contribution
 
     params[:observation] = {
@@ -28,9 +28,9 @@ class ObserverControllerTest < ControllerTestCase
       assert_response(:success)
     end
 
-    assert_equal(o_count + o_num, Observation.all.length)
-    assert_equal(g_count + g_num, Naming.all.length)
-    assert_equal(n_count + n_num, Name.all.length)
+    assert_equal(o_count + o_num, Observation.count)
+    assert_equal(g_count + g_num, Naming.count)
+    assert_equal(n_count + n_num, Name.count)
     assert_equal(score + o_num + 2*g_num + 10*n_num, @rolf.reload.contribution)
     if o_num == 1
       assert_not_equal(0, @controller.instance_variable_get('@observation').thumb_image_id)
@@ -118,6 +118,69 @@ class ObserverControllerTest < ControllerTestCase
     get(:prev_observation, :id => 4)
     assert_response(:action => "show_observation", :id => 5,
                     :params => @controller.query_params(Query.last))
+  end
+
+  def test_prev_and_next_observation_with_fancy_query
+    n1 = names(:agaricus_campestras)
+    n2 = names(:agaricus_campestris)
+    n3 = names(:agaricus_campestros)
+    n4 = names(:agaricus_campestrus)
+
+    n2.transfer_synonym(n1)
+    n2.transfer_synonym(n3)
+    n2.transfer_synonym(n4)
+    n1.correct_spelling = n2
+    n1.save_without_updating_modified
+
+    o1 = n1.observations.first
+    o2 = n2.observations.first
+    o3 = n3.observations.first
+    o4 = n4.observations.first
+
+    # When requesting non-synonym observations of n2, it should include n1,
+    # since an observation of n1 was clearly intended to be an observation of
+    # n2. 
+    query = Query.lookup_and_save(:Observation, :of_name, :synonyms => :no,
+                                  :name => n2, :by => :name)
+    assert_equal(2, query.num_results)
+
+    # Likewise, when requesting *synonym* observations, neither n1 nor n2
+    # should be included.
+    query = Query.lookup_and_save(:Observation, :of_name, :synonyms => :exclusive,
+                                  :name => n2, :by => :name)
+    assert_equal(2, query.num_results)
+
+    # But for our prev/next test, lets do the all-inclusive query.
+    query = Query.lookup_and_save(:Observation, :of_name, :synonyms => :all,
+                                  :name => n2, :by => :name)
+    assert_equal(4, query.num_results)
+    qp = @controller.query_params(query)
+
+    get(:next_observation, qp.merge(:id => 1))
+    assert_response(:action => 'show_observation', :id => 1, :params => qp)
+    assert_flash(/can.*t find.*results.*index/i)
+    get(:next_observation, qp.merge(:id => o1.id))
+    assert_response(:action => 'show_observation', :id => o2.id, :params => qp)
+    get(:next_observation, qp.merge(:id => o2.id))
+    assert_response(:action => 'show_observation', :id => o3.id, :params => qp)
+    get(:next_observation, qp.merge(:id => o3.id))
+    assert_response(:action => 'show_observation', :id => o4.id, :params => qp)
+    get(:next_observation, qp.merge(:id => o4.id))
+    assert_response(:action => 'show_observation', :id => o4.id, :params => qp)
+    assert_flash(/no more/i)
+
+    get(:prev_observation, qp.merge(:id => o4.id))
+    assert_response(:action => 'show_observation', :id => o3.id, :params => qp)
+    get(:prev_observation, qp.merge(:id => o3.id))
+    assert_response(:action => 'show_observation', :id => o2.id, :params => qp)
+    get(:prev_observation, qp.merge(:id => o2.id))
+    assert_response(:action => 'show_observation', :id => o1.id, :params => qp)
+    get(:prev_observation, qp.merge(:id => o1.id))
+    assert_response(:action => 'show_observation', :id => o1.id, :params => qp)
+    assert_flash(/no more/i)
+    get(:prev_observation, qp.merge(:id => 1))
+    assert_response(:action => 'show_observation', :id => 1, :params => qp)
+    assert_flash(/can.*t find.*results.*index/i)
   end
 
   def test_advanced_search_form
@@ -227,6 +290,8 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_show_observation
+    assert_equal(0, Query.count)
+
     # Test it on obs with no namings first.
     obs_id = observations(:unknown_with_no_naming).id
     get_with_dump(:show_observation, :id => obs_id)
@@ -261,6 +326,9 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(obs.user, user)
     get(:show_observation, :id => obs.id)
     assert_response('show_observation')
+
+    # Make sure no queries created for show_image links.
+    assert_equal(0, Query.count)
   end
 
   def test_show_user_no_id
@@ -504,7 +572,7 @@ class ObserverControllerTest < ControllerTestCase
     assert(name)
     assert_equal(new_name, name.text_name)
 
-    count_before = QueuedEmail.all.length
+    count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
     notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)
     assert_equal(2, notifications.length)
@@ -520,7 +588,7 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(name.id, nam.name_id) # Make sure it's the right name
     assert_not_nil(obs.rss_log)
 
-    count_after = QueuedEmail.all.length
+    count_after = QueuedEmail.count
     assert_equal(count_before+2, count_after)
   end
 
@@ -964,11 +1032,10 @@ class ObserverControllerTest < ControllerTestCase
 
   # This is the standard case, nothing unusual or stressful here.
   def test_propose_naming
-    o_count = Observation.all.length
-    g_count = Naming.all.length
-    n_count = Name.all.length
-    v_count = Vote.all.length
-    nr_count = NamingReason.all.length
+    o_count = Observation.count
+    g_count = Naming.count
+    n_count = Name.count
+    v_count = Vote.count
 
     # Make a few assertions up front to make sure fixtures are as expected.
     assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
@@ -998,11 +1065,10 @@ class ObserverControllerTest < ControllerTestCase
     assert_response(:redirect)
 
     # Make sure the right number of objects were created.
-    assert_equal(o_count + 0, Observation.all.length)
-    assert_equal(g_count + 1, Naming.all.length)
-    assert_equal(n_count + 0, Name.all.length)
-    assert_equal(v_count + 1, Vote.all.length)
-    assert_equal(nr_count + 3, NamingReason.all.length)
+    assert_equal(o_count + 0, Observation.count)
+    assert_equal(g_count + 1, Naming.count)
+    assert_equal(n_count + 0, Name.count)
+    assert_equal(v_count + 1, Vote.count)
 
     # Make sure contribution is updated correctly.
     assert_equal(12, @rolf.reload.contribution)
@@ -1022,7 +1088,7 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
     assert_equal(names(:agaricus).id, naming.name_id)
     assert_equal(@rolf, naming.user)
-    assert_equal(3, naming.naming_reasons.length)
+    assert_equal(3, naming.get_reasons.select(&:used?).length)
     assert_equal(1, naming.votes.length)
 
     # Make sure vote was created correctly.
@@ -1031,23 +1097,19 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(3, vote.value)
 
     # Make sure reasons were created correctly.
-    nr1 = naming.naming_reasons[0]
-    nr2 = naming.naming_reasons[1]
-    nr3 = naming.naming_reasons[2]
-    nr4 = NamingReason.new
-    assert_equal(naming, nr1.naming)
-    assert_equal(naming, nr2.naming)
-    assert_equal(naming, nr3.naming)
-    assert_equal(1, nr1.reason)
-    assert_equal(2, nr2.reason)
-    assert_equal(3, nr3.reason)
+    nr1, nr2, nr3, nr4 = naming.get_reasons
+    assert_equal(1, nr1.num)
+    assert_equal(2, nr2.num)
+    assert_equal(3, nr3.num)
+    assert_equal(4, nr4.num)
     assert_equal("Looks good to me.", nr1.notes)
     assert_equal("", nr2.notes)
     assert_equal("Spore texture.", nr3.notes)
-    assert(nr1.check)
-    assert(nr2.check)
-    assert(nr3.check)
-    assert(!nr4.check)
+    assert_equal(nil, nr4.notes)
+    assert(nr1.used?)
+    assert(nr2.used?)
+    assert(nr3.used?)
+    assert(!nr4.used?)
 
     # Make sure a few random methods work right, too.
     assert_equal(3, naming.vote_sum)
@@ -1058,7 +1120,7 @@ class ObserverControllerTest < ControllerTestCase
 
   # Now see what happens when rolf's new naming is less confident than old.
   def test_propose_uncertain_naming
-    g_count = Naming.all.length
+    g_count = Naming.count
     params = {
       :id => observations(:coprinus_comatus_obs).id,
       :name => { :name => "Agaricus" },
@@ -1085,11 +1147,10 @@ class ObserverControllerTest < ControllerTestCase
 
   # Now see what happens when a third party proposes a name, and it wins.
   def test_propose_dicks_naming
-    o_count = Observation.all.length
-    g_count = Naming.all.length
-    n_count = Name.all.length
-    v_count = Vote.all.length
-    nr_count = NamingReason.all.length
+    o_count = Observation.count
+    g_count = Naming.count
+    n_count = Name.count
+    v_count = Vote.count
 
     # Dick proposes "Conocybe filaris" out of the blue.
     params = {
@@ -1104,11 +1165,10 @@ class ObserverControllerTest < ControllerTestCase
     naming = Naming.last
 
     # Make sure the right number of objects were created.
-    assert_equal(o_count + 0, Observation.all.length)
-    assert_equal(g_count + 1, Naming.all.length)
-    assert_equal(n_count + 0, Name.all.length)
-    assert_equal(v_count + 1, Vote.all.length)
-    assert_equal(nr_count + 1, NamingReason.all.length)
+    assert_equal(o_count + 0, Observation.count)
+    assert_equal(g_count + 1, Naming.count)
+    assert_equal(n_count + 0, Name.count)
+    assert_equal(v_count + 1, Vote.count)
 
     # Make sure everything I need is reloaded.
     observations(:coprinus_comatus_obs).reload
@@ -1189,114 +1249,97 @@ class ObserverControllerTest < ControllerTestCase
   # Dick now prefers naming 9 (vote 3).
   # Summing, 3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, so 3 gets it.
   def test_cast_vote_dick
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
     login('dick')
-    post(:cast_vote, :vote => {
-      :value     => "3",
-      :naming_id => namings(:coprinus_comatus_other_naming).id
-    })
+    post(:cast_vote, :value => "3", :id => nam2.id)
     assert_equal(11, @dick.reload.contribution)
 
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    namings(:coprinus_comatus_other_naming).reload
-
     # Check votes.
-    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
-    assert_equal(3, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(3, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(3, nam1.reload.vote_sum)
+    assert_equal(2, nam1.votes.length)
+    assert_equal(3, nam2.reload.vote_sum)
+    assert_equal(3, nam2.votes.length)
 
     # Make sure observation was updated right.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
     # If Dick votes on the other as well, then his first vote should
     # get demoted and his preference should change.
     # Summing, 3 gets 2+1+3/4=1.5, 9 gets -3+3+2/4=.5, so 3 keeps it.
-    namings(:coprinus_comatus_naming).change_vote(@dick, 3)
+    obs.change_vote(nam1, 3, @dick)
     assert_equal(12, @dick.reload.contribution)
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    namings(:coprinus_comatus_other_naming).reload
-    assert_equal(3, namings(:coprinus_comatus_naming).users_vote(@dick).value)
-    assert_equal(6, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(3, namings(:coprinus_comatus_naming).votes.length)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).users_vote(@dick).value)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(3, namings(:coprinus_comatus_other_naming).votes.length)
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(3, nam1.reload.users_vote(@dick).value)
+    assert_equal(6, nam1.vote_sum)
+    assert_equal(3, nam1.votes.length)
+    assert_equal(2, nam2.reload.users_vote(@dick).value)
+    assert_equal(2, nam2.vote_sum)
+    assert_equal(3, nam2.votes.length)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
   end
 
   # Now have Rolf change his vote on his own naming. (no change in prefs)
   # Votes: rolf=3->2/-3, mary=1/3, dick=x/x
   def test_cast_vote_rolf_change
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
     login('rolf')
-    post(:cast_vote, :vote => {
-      :value     => "2",
-      :naming_id => namings(:coprinus_comatus_naming).id
-    })
+    post(:cast_vote, :value => "2", :id => nam1.id)
     assert_equal(10, @rolf.reload.contribution)
 
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    namings(:coprinus_comatus_other_naming).reload
-
     # Make sure observation was updated right.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
     # Check vote.
-    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(3, nam1.reload.vote_sum)
+    assert_equal(2, nam1.votes.length)
   end
 
   # Now have Rolf increase his vote for Mary's. (changes consensus)
   # Votes: rolf=2/-3->3, mary=1/3, dick=x/x
   def test_cast_vote_rolf_second_greater
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
     login('rolf')
-    post(:cast_vote, :vote => {
-      :value     => "3",
-      :naming_id => namings(:coprinus_comatus_other_naming).id
-    })
+    post(:cast_vote, :value => "3", :id => nam2.id)
     assert_equal(10, @rolf.reload.contribution)
 
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    namings(:coprinus_comatus_other_naming).reload
-
     # Make sure observation was updated right.
-    assert_equal(names(:agaricus_campestris).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:agaricus_campestris).id, obs.reload.name_id)
 
     # Check vote.
-    namings(:coprinus_comatus_other_naming).reload
-    assert_equal(6, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(6, nam2.reload.vote_sum)
+    assert_equal(2, nam2.votes.length)
   end
 
   # Now have Rolf increase his vote for Mary's insufficiently. (no change)
   # Votes: rolf=2/-3->-1, mary=1/3, dick=x/x
   # Summing, 3 gets 2+1=3, 9 gets -1+3=2, so 3 keeps it.
   def test_cast_vote_rolf_second_lesser
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
     login('rolf')
-    post(:cast_vote, :vote => {
-      :value     => "-1",
-      :naming_id => namings(:coprinus_comatus_other_naming).id
-    })
+    post(:cast_vote,
+      :value => "-1",
+      :id    => nam2.id
+    )
     assert_equal(10, @rolf.reload.contribution)
 
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    namings(:coprinus_comatus_other_naming).reload
-
     # Make sure observation was updated right.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
     # Check vote.
-    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(3, nam1.reload.vote_sum)
+    assert_equal(2, nam2.reload.vote_sum)
+    assert_equal(2, nam2.votes.length)
   end
 
   # Now, have Mary delete her vote against Rolf's naming.  This NO LONGER has the effect
@@ -1307,52 +1350,47 @@ class ObserverControllerTest < ControllerTestCase
   # Summing after Dick votes,   3 gets 2+1/3=1, 9 gets -3+3+3/4=.75, 3 keeps it.
   # Summing after Mary deletes, 3 gets 2/2=1,   9 gets -3+3+3/4=.75, 3 still keeps it in this voting algorithm, arg.
   def test_cast_vote_mary
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
     login('dick')
-    namings(:coprinus_comatus_other_naming).change_vote(@dick, 3)
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    obs.change_vote(nam2, 3, @dick)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
     assert_equal(11, @dick.reload.contribution)
 
     login('mary')
-    post(:cast_vote, :vote => {
-      :value     => Vote.delete_vote,
-      :naming_id => namings(:coprinus_comatus_naming).id
-    })
+    post(:cast_vote, :value => Vote.delete_vote, :id => nam1.id)
     assert_equal(9, @mary.reload.contribution)
 
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    namings(:coprinus_comatus_other_naming).reload
-
     # Check votes.
-    assert_equal(2, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(1, namings(:coprinus_comatus_naming).votes.length)
-    assert_equal(3, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(3, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(2, nam1.reload.vote_sum)
+    assert_equal(1, nam1.votes.length)
+    assert_equal(3, nam2.reload.vote_sum)
+    assert_equal(3, nam2.votes.length)
 
     # Make sure observation is changed correctly.
-    assert_equal(names(:coprinus_comatus).search_name, observations(:coprinus_comatus_obs).name.search_name,
-      "Cache for 3: #{namings(:coprinus_comatus_naming).vote_cache}, 9: #{namings(:coprinus_comatus_other_naming).vote_cache}")
+    assert_equal(names(:coprinus_comatus).search_name, obs.reload.name.search_name,
+      "Cache for 3: #{nam1.vote_cache}, 9: #{nam2.vote_cache}")
   end
 
   # Rolf can destroy his naming if Mary deletes her vote on it.
   def test_rolf_destroy_rolfs_naming
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
     # First delete Mary's vote for it.
     login('mary')
-    namings(:coprinus_comatus_naming).change_vote(@mary, Vote.delete_vote)
+    obs.change_vote(nam1, Vote.delete_vote, @mary)
     assert_equal(9, @mary.reload.contribution)
 
-    old_naming_id = namings(:coprinus_comatus_naming).id
+    old_naming_id = nam1.id
     old_vote1_id = votes(:coprinus_comatus_owner_vote).id
     old_vote2_id = votes(:coprinus_comatus_other_vote).id rescue nil
-    old_naming_reason_id = naming_reasons(:cc_macro_reason).id
 
     login('rolf')
-    get(:destroy_naming, :id => namings(:coprinus_comatus_naming).id)
-
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_other_naming).reload
+    get(:destroy_naming, :id => nam1.id)
 
     # Make sure naming and associated vote and reason were actually destroyed.
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -1364,63 +1402,65 @@ class ObserverControllerTest < ControllerTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       Vote.find(old_vote2_id)
     end
-    assert_raises(ActiveRecord::RecordNotFound) do
-      NamingReason.find(old_naming_reason_id)
-    end
 
     # Make sure observation was updated right.
-    assert_equal(names(:agaricus_campestris).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:agaricus_campestris).id, obs.reload.name_id)
 
     # Check votes. (should be no change)
-    assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(0, nam2.reload.vote_sum)
+    assert_equal(2, nam2.votes.length)
   end
 
   # Make sure Rolf can't destroy his naming if Dick prefers it.
   def test_rolf_destroy_rolfs_naming_when_dick_prefers_it
-    old_naming_id = namings(:coprinus_comatus_naming).id
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
+    old_naming_id = nam1.id
     old_vote1_id = votes(:coprinus_comatus_owner_vote).id
     old_vote2_id = votes(:coprinus_comatus_other_vote).id
-    old_naming_reason_id = naming_reasons(:cc_macro_reason).id
 
     # Make Dick prefer it.
     login('dick')
-    namings(:coprinus_comatus_naming).change_vote(@dick, 3)
+    obs.change_vote(nam1, 3, @dick)
     assert_equal(11, @dick.reload.contribution)
 
     # Have Rolf try to destroy it.
     login('rolf')
-    get(:destroy_naming, :id => namings(:coprinus_comatus_naming).id)
+    get(:destroy_naming, :id => nam1.id)
 
     # Make sure naming and associated vote and reason are still there.
     assert(Naming.find(old_naming_id))
     assert(Vote.find(old_vote1_id))
     assert(Vote.find(old_vote2_id))
-    assert(NamingReason.find(old_naming_reason_id))
 
     # Make sure observation is unchanged.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
     # Check votes are unchanged.
-    assert_equal(6, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(3, namings(:coprinus_comatus_naming).votes.length)
-    assert_equal(0, namings(:coprinus_comatus_other_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_other_naming).votes.length)
+    assert_equal(6, nam1.reload.vote_sum)
+    assert_equal(3, nam1.votes.length)
+    assert_equal(0, nam2.reload.vote_sum)
+    assert_equal(2, nam2.votes.length)
   end
 
   # Rolf makes changes to vote and reasons of his naming.  Shouldn't matter
   # whether Mary has voted on it.
   def test_edit_naming_thats_being_used_just_change_reasons
-    o_count = Observation.all.length
-    g_count = Naming.all.length
-    n_count = Name.all.length
-    v_count = Vote.all.length
-    nr_count = NamingReason.all.length
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
+    o_count = Observation.count
+    g_count = Naming.count
+    n_count = Name.count
+    v_count = Vote.count
 
     # Rolf makes superficial changes to his naming.
     login('rolf')
     post(:edit_naming,
-      :id => namings(:coprinus_comatus_naming).id,
+      :id => nam1.id,
       :name => { :name => names(:coprinus_comatus).search_name },
       :vote => { :value => "3" },
       :reason => {
@@ -1433,50 +1473,47 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(10, @rolf.reload.contribution)
 
     # Make sure the right number of objects were created.
-    assert_equal(o_count + 0, Observation.all.length)
-    assert_equal(g_count + 0, Naming.all.length)
-    assert_equal(n_count + 0, Name.all.length)
-    assert_equal(v_count + 0, Vote.all.length)
-    assert_equal(nr_count + 2, NamingReason.all.length)
-
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    votes(:coprinus_comatus_owner_vote).reload
+    assert_equal(o_count + 0, Observation.count)
+    assert_equal(g_count + 0, Naming.count)
+    assert_equal(n_count + 0, Name.count)
+    assert_equal(v_count + 0, Vote.count)
 
     # Make sure observation is unchanged.
-    assert_equal(names(:coprinus_comatus).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
 
     # Check votes.
-    assert_equal(4, namings(:coprinus_comatus_naming).vote_sum) # 2+1 -> 3+1
-    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(4, nam1.reload.vote_sum) # 2+1 -> 3+1
+    assert_equal(2, nam1.votes.length)
 
     # Check new reasons.
-    assert_equal(3, namings(:coprinus_comatus_naming).naming_reasons.length)
-    nr1 = namings(:coprinus_comatus_naming).naming_reasons[0]
-    nr2 = namings(:coprinus_comatus_naming).naming_reasons[1]
-    nr3 = namings(:coprinus_comatus_naming).naming_reasons[2]
-    assert_equal(1, nr1.reason)
-    assert_equal(2, nr2.reason)
-    assert_equal(3, nr3.reason)
-    assert_equal("Change to macro notes.", nr1.notes)
-    assert_equal("", nr2.notes)
-    assert_equal("Add some micro notes.", nr3.notes)
+    nrs = nam1.get_reasons
+    assert_equal(3, nrs.select(&:used?).length)
+    assert_equal(1, nrs[0].num)
+    assert_equal(2, nrs[1].num)
+    assert_equal(3, nrs[2].num)
+    assert_equal("Change to macro notes.", nrs[0].notes)
+    assert_equal("", nrs[1].notes)
+    assert_equal("Add some micro notes.", nrs[2].notes)
+    assert_nil(nrs[3].notes)
   end
 
   # Rolf makes changes to name of his naming.  Shouldn't be allowed to do this
   # if Mary has voted on it.  Should clone naming, vote, and reasons.
   def test_edit_naming_thats_being_used_change_name
-    o_count = Observation.all.length
-    g_count = Naming.all.length
-    n_count = Name.all.length
-    v_count = Vote.all.length
-    nr_count = NamingReason.all.length
+    obs  = observations(:coprinus_comatus_obs)
+    nam1 = namings(:coprinus_comatus_naming)
+    nam2 = namings(:coprinus_comatus_other_naming)
+
+    o_count = Observation.count
+    g_count = Naming.count
+    n_count = Name.count
+    v_count = Vote.count
 
     # Now, Rolf makes name change to his naming (leave rest the same).
     login('rolf')
+    assert_equal(10, @rolf.contribution)
     post(:edit_naming,
-      :id => namings(:coprinus_comatus_naming).id,
+      :id => nam1.id,
       :name => { :name => "Conocybe filaris" },
       :vote => { :value => "2" },
       :reason => {
@@ -1486,43 +1523,36 @@ class ObserverControllerTest < ControllerTestCase
         "4" => { :check => "0", :notes => "" }
       }
     )
+    assert_response(:redirect) # redirect indicates success
     assert_equal(12, @rolf.reload.contribution)
 
     # Make sure the right number of objects were created.
-    assert_equal(o_count + 0, Observation.all.length)
-    assert_equal(g_count + 1, Naming.all.length)
-    assert_equal(n_count + 0, Name.all.length)
-    assert_equal(v_count + 1, Vote.all.length)
-    assert_equal(nr_count + 1, NamingReason.all.length)
+    assert_equal(o_count + 0, Observation.count)
+    assert_equal(g_count + 1, Naming.count)
+    assert_equal(n_count + 0, Name.count)
+    assert_equal(v_count + 1, Vote.count)
 
     # Get new objects.
     naming = Naming.last
     vote = Vote.last
-    nr = NamingReason.last
-
-    # Make sure everything I need is reloaded.
-    observations(:coprinus_comatus_obs).reload
-    namings(:coprinus_comatus_naming).reload
-    votes(:coprinus_comatus_owner_vote).reload
 
     # Make sure observation is unchanged.
-    assert_equal(names(:conocybe_filaris).id, observations(:coprinus_comatus_obs).name_id)
+    assert_equal(names(:conocybe_filaris).id, obs.reload.name_id)
 
     # Make sure old naming is unchanged.
-    assert_equal(names(:coprinus_comatus).id, namings(:coprinus_comatus_naming).name_id)
-    assert_equal(1, namings(:coprinus_comatus_naming).naming_reasons.length)
-    assert_equal(naming_reasons(:cc_macro_reason), namings(:coprinus_comatus_naming).naming_reasons.first)
-    assert_equal(3, namings(:coprinus_comatus_naming).vote_sum)
-    assert_equal(2, namings(:coprinus_comatus_naming).votes.length)
+    assert_equal(names(:coprinus_comatus).id, nam1.reload.name_id)
+    assert_equal(1, nam1.get_reasons.select(&:used?).length)
+    assert_equal(3, nam1.vote_sum)
+    assert_equal(2, nam1.votes.length)
 
     # Check new naming.
     assert_equal(observations(:coprinus_comatus_obs), naming.observation)
     assert_equal(names(:conocybe_filaris).id, naming.name_id)
     assert_equal(@rolf, naming.user)
-    assert_equal(1, naming.naming_reasons.length)
-    assert_equal(nr, naming.naming_reasons.first)
-    assert_equal(naming_reasons(:cc_macro_reason).reason, nr.reason)
-    assert_equal(naming_reasons(:cc_macro_reason).notes, nr.notes)
+    nrs = naming.get_reasons.select(&:used?)
+    assert_equal(1, nrs.length)
+    assert_equal(1, nrs.first.num)
+    assert_equal("Isn't it obvious?", nrs.first.notes)
     assert_equal(2, naming.vote_sum)
     assert_equal(1, naming.votes.length)
     assert_equal(vote, naming.votes.first)
@@ -1573,7 +1603,7 @@ class ObserverControllerTest < ControllerTestCase
     )
     assert_response(:redirect) # redirected = successfully created
     naming = Naming.find(assigns(:naming).id)
-    reasons = naming.naming_reasons.map(&:reason).sort
+    reasons = naming.get_reasons.select(&:used?).map(&:num).sort
     assert_equal([2,3,4], reasons)
 
     # If javascript IS enabled, then checkbox IS required.
@@ -1591,7 +1621,7 @@ class ObserverControllerTest < ControllerTestCase
     )
     assert_response(:redirect) # redirected = successfully created
     naming = Naming.find(assigns(:naming).id)
-    reasons = naming.naming_reasons.map(&:reason).sort
+    reasons = naming.get_reasons.select(&:used?).map(&:num).sort
     assert_equal([3,4], reasons)
   end
 

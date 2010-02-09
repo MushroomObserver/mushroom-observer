@@ -37,14 +37,14 @@
   end
 %>
 
-<%= if @show_user.image
+<%= if @show_user.image_id
   link_to(image_tag(sprintf("thumb/%d.jpg", @show_user.image_id), :border => 0, :style => "float:right"),
           :controller => "image", :action => "show_image", :id => @show_user.image_id)
 end %>
 
 <b><%= :show_user_joined.t %>:</b> <%= @show_user.verified %><br/>
 <% if @show_user.location %>
-  <b><%= :show_user_primary_location.t %>:</b> <%= location_link(nil, @show_user.location.id) %><br/>
+  <b><%= :show_user_primary_location.t %>:</b> <%= location_link(nil, @show_user.location) %><br/>
 <% end %>
 <% if @show_user.mailing_address != '' %>
   <b><%= :show_user_mailing_address.t %>:</b> <%= @show_user.mailing_address %><br/>

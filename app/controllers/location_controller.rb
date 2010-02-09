@@ -1,12 +1,15 @@
 #
 #  Views: ("*" - login required, "R" - root required))
 #     location_search
+#     index_location
 #     list_locations
 #     map_locations
 #   * create_location
 #   * update_observations_by_where(location, where)
 #     show_past_location
 #     show_location
+#     prev_location             Show previous location in index.
+#     next_location             Show next location in index.
 #   * list_merge_options
 #   * add_to_location
 #   * edit_location
@@ -24,7 +27,7 @@
 
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
-    :all_locations,
+    :index_location,
     :list_locations,
     :location_search,
     :map_locations,
@@ -49,8 +52,9 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def list_locations
-    query = find_or_create_query(:Location, :all, :by => :name)
+  def index_location
+    query = find_or_create_query(:Location, :all, :by => params[:by] || :name)
+    query.params[:by] = params[:by] if params[:by]
     show_selected_locations(query, :id => params[:id])
   end
 
@@ -72,26 +76,78 @@ class LocationController < ApplicationController
     store_query
     set_query_params(query)
 
-    @known_pages = paginate_numbers(:page, 50)
-    if (args[:id].to_s != '') and
-       (params[@known_pages.number_arg].to_s == '')
-      @known_pages.show_index(query.index(args[:id]))
+    # Supply a default title.
+    @title ||= query.title
+
+    # Add some alternate sorting criteria.
+    @links = add_sorting_links(query, [
+      ['name', :name.t], 
+    ])
+
+    # Add "show observations" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Observation)
+      @links << [:app_show_objects.t(:types => :observations.t), {
+                  :controller => 'observer', 
+                  :action => 'index_observation',
+                  :params => query_params(query),
+                }]
     end
-    @known_data  = query.paginate(@known_pages)
 
     # Try to turn this into a query on observations.where instead.
-    query.include << :observations
-    sql = query.query(
-      :select => 'DISTINCT observations.`where`, COUNT(1) AS cnt',
-      :order  => 'cnt DESC'
-    )
-    sql.gsub!(/locations.(display|search)_name/, 'observations.`where`')
-    sql += " GROUP BY observations.`where`"
+    # Yesyesyes, this is a tremendous kludge, but tell me how else to do it?
+    # It is known to work on the following :Location query flavors:
+    #   :all
+    #   :pattern
+    #   :with_observations_of_name
+    begin
+      sql = query.query(
+        :select => 'DISTINCT observations.`where`, COUNT(1) AS cnt',
+        :where  => 'observations.location_id IS NULL',
+        :group  => 'observations.`where`',
+        :order  => 'cnt DESC'
+      )
 
-    @undef_pages = paginate_numbers(:page2, 50)
-    @undef_data = Location.connection.select_all(sql) rescue []
-    @undef_pages.num_total = @undef_data.length
-    @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
+      # Remove condition joining observations to locations (if present).
+      sql.sub!(' AND (observations.location_id = locations.id)', '')
+      # Convert any conditions on 'location name' to 'observation where'.
+      sql.gsub!(/locations.(display|search)_name/, 'observations.`where`')
+      # Remove any non-critical conditions on 'location notes'.
+      sql.gsub!(/ OR locations.notes LIKE '[^']+'/, '')
+      # Remove locations from list of tables.
+      sql.sub!(/(FROM [^A-Z]*)`locations`,?/, '\\1')
+      # Add observations to list of tables (if not already there).
+      sql.sub!(/FROM [^A-Z\n]*/) do |x|
+        x.index('`observations`') ? x : "#{x.sub(/,$/,',')} `observations`"
+      end
+# flash_notice("ORIGINAL = " + query.query.gsub("\n",'<br/>'))
+# flash_notice("TWEAKED  = " + sql.gsub("\n",'<br/>'))
+      # Fail if there is still a condition requiring locations.
+      raise if sql.match('locations.')
+
+      @undef_pages = paginate_letters(:letter2, :page2, 50)
+      @undef_data = Observation.connection.select_all(sql)
+      @undef_pages.used_letters = @under_data.map {|r| r[0][0,1]}.uniq
+      if (letter = params[:letter2].to_s.downcase) != ''
+        @undef_data = @undef_data.select {|r| r[0][0,1].downcase == letter}
+      end
+      @undef_pages.num_total = @undef_data.length
+      @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
+    rescue
+      @undef_pages = nil
+      @undef_data = nil
+    end
+
+    # Now it's okay to paginate this (query.paginate with letters can cause
+    # it to add a condition to the query to select for a letter).
+    @known_pages = paginate_letters(:letter, :page, 50)
+    if (args[:id].to_s != '') and
+       (params[:letter].to_s == '') and
+       (params[:page].to_s == '')
+      @known_pages.show_index(query.index(args[:id]))
+    end
+    @known_data = query.paginate(@known_pages,
+                                 :letter_field => 'locations.search_name')
 
     # If only one result (before pagination), redirect to show_location.
     if (@known_pages.num_total == 1) and
@@ -107,8 +163,9 @@ class LocationController < ApplicationController
 
   # Map results of a search or index.
   def map_locations
-    @title = :map_locations_global_map.t
     query = find_or_create_query(:Location, :all)
+    @title = query.flavor == :all ? :map_locations_global_map.t :
+                             :map_locations_title.t(:locations => query.title)
     @locations = query.results
   end
 
@@ -121,9 +178,11 @@ class LocationController < ApplicationController
   def show_location
     store_location
     pass_query_params
-    @location = Location.find(params[:id])
-    @past_location = @location.versions.latest
-    @past_location = @past_location.previous if @past_location
+    @location = Location.find(params[:id], :include => [:user, :authors, :editors])
+    @previous_version = Location.connection.select_value %(
+      SELECT version FROM past_locations WHERE location_id = #{@location.id}
+      ORDER BY version DESC LIMIT 1, 1
+    )
     @interest = nil
     @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Location', @location.id) if @user
   end
@@ -139,14 +198,12 @@ class LocationController < ApplicationController
 
   # Go to next location: redirects to show_location.
   def next_location
-    location = Location.find(params[:id])
-    redirect_to_next_object(:next, location)
+    redirect_to_next_object(:next, Location, params[:id])
   end
 
   # Go to previous location: redirects to show_location.
   def prev_location
-    location = Location.find(params[:id])
-    redirect_to_next_object(:prev, location)
+    redirect_to_next_object(:prev, Location, params[:id])
   end
 
   ##############################################################################
@@ -259,38 +316,35 @@ class LocationController < ApplicationController
 
   def list_merge_options
     store_location
-    @where = params[:where]
+    @where = params[:where].to_s
 
-    # Look for matches up to the first comma and put them first.
-    # If none found, look for matches up to the first space and put them first.
-    # If still none found, then just give the whole set ordered by display_name
-    @matches, @others = (sorted_locs(@where) || sorted_locs(@where, ',') ||
-      sorted_locs(@where, ' ') || [nil, Location.find(:all, :order => "display_name")])
+    # Split list of all locations into "matches" and "non-matches".  Try
+    # matches in the following order:
+    #   1) all that start with full "where" string
+    #   2) all that start with everything in "where" up to the comma
+    #   3) all that start with the first word in "where"
+    #   4) there just aren't any matches, give up
+    all = Location.all(:order => 'display_name')
+    @matches, @others = (
+      split_out_matches(all, @where) or
+      split_out_matches(all, @where.split(',').first) or
+      split_out_matches(all, @where.split(' ').first) or
+      [nil, all]
+    )
   end
 
-  # If separator is in where, then look for Locations that match up to but not including the separator.
-  # If such locations are found, then return those followed by all the rest of the locations.
-  # If no such locations are found, then return nil.
-  def sorted_locs(where, separator=nil)
-    result = nil
-    substring = where
-    if separator
-      pos = where.index(separator)
-      if pos
-        substring = where[0..(pos-separator.length)]
-      else
-        substring = nil
-      end
+  # Split up +list+ into those that start with +substring+ and those that
+  # don't.  If none match, then return nil.
+  def split_out_matches(list, substring)
+    matches = list.select do |loc|
+      (loc.display_name.to_s[0,substring.length] == substring) or
+      (loc.search_name.to_s[0,substring.length] == substring)
     end
-    if substring
-      substring_pat = substring + '%'
-      matches = Location.find(:all, :conditions => ["display_name like ?", substring_pat], :order => "display_name")
-      if matches.length > 0
-        others = Location.find(:all, :conditions => ["display_name not like ?", substring_pat], :order => "display_name")
-        result = [matches, others]
-      end
+    if matches.empty?
+      nil
+    else
+      [matches, list - matches]
     end
-    result
   end
 
   # Adds the observations assoicated with obs.where set to params[:where] into the given location
@@ -334,7 +388,7 @@ class LocationController < ApplicationController
     observations = Observation.find_all_by_where(where)
     for o in observations
       unless o.location_id
-        o.location = location
+        o.location_id = location.id
         o.where = nil
         if o.save
           Transaction.put_observation(

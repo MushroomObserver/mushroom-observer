@@ -38,12 +38,12 @@ class LocationControllerTest < ControllerTestCase
 
   # Post a change that fails -- make sure no new version created.
   def location_error(page, params)
-    loc_count = Location.all.length
-    past_loc_count = Location::PastLocation.all.length
+    loc_count = Location.count
+    past_loc_count = Location::PastLocation.count
     post_requires_login(page, params)
     assert_response(page.to_s)
-    assert_equal(loc_count, Location.all.length)
-    assert_equal(past_loc_count, Location::PastLocation.all.length)
+    assert_equal(loc_count, Location.count)
+    assert_equal(past_loc_count, Location::PastLocation.count)
   end
 
   # Post "create_location" with errors.
@@ -240,12 +240,12 @@ class LocationControllerTest < ControllerTestCase
     to_stay = locations(:albion)
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
-    loc_count = Location.all.length
-    past_loc_count = Location::PastLocation.all.length
+    loc_count = Location.count
+    past_loc_count = Location::PastLocation.count
     post_requires_login(:edit_location, params)
     assert_response(:action => :show_location)
-    assert_equal(loc_count, Location.all.length)
-    assert_equal(past_loc_count, Location::PastLocation.all.length)
+    assert_equal(loc_count, Location.count)
+    assert_equal(past_loc_count, Location::PastLocation.count)
     assert_equal(10, @rolf.reload.contribution)
   end
 
@@ -255,16 +255,16 @@ class LocationControllerTest < ControllerTestCase
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
 
-    loc_count = Location.all.length
-    past_loc_count = Location::PastLocation.all.length
+    loc_count = Location.count
+    past_loc_count = Location::PastLocation.count
     past_locs_to_go = to_go.versions.length
 
     make_admin('rolf')
     post_with_dump(:edit_location, params)
     assert_response(:action => "show_location")
 
-    assert_equal(loc_count - 1, Location.all.length)
-    assert_equal(past_loc_count - past_locs_to_go, Location::PastLocation.all.length)
+    assert_equal(loc_count - 1, Location.count)
+    assert_equal(past_loc_count - past_locs_to_go, Location::PastLocation.count)
   end
 
   def test_list_merge_options

@@ -1,17 +1,24 @@
 #
 #  = Vote Model
 #
-#  Model describing a single vote for a single Naming.
+#  Model describing a single vote for a single Naming.  Methods for dealing
+#  with Vote's are all moved up to either Naming or Observation, depending on
+#  whether all the information required for the operation is contained within
+#  a single Naming or not.  Vote is responsible for very little except holding
+#  the value.
 #
-#  Very simple.  Right?  Well, I've complicated things by distributing
-#  vote-related functionality over three classes: Observation, Naming, and
-#  Vote.  Important methods in other classes are:
-#
-#  Observation#calc_consensus::      Decide which Name is winner.
+#  Observation#change_vote::         Change a User's Vote for a given Naming.
+#  Observation#calc_consensus::      Decide which Name is winner for an Observation.
+#  Observation#is_owners_favorite?:: Is a given Naming the Observation owner's favorite?
+#  Observation#is_users_favorite?::  Is a given Naming the given User's favorite?
 #  Observation#refresh_vote_cache::  Refresh vote cache for all Observation's.
-#  Naming#change_vote::              Change a User's Vote for a given Naming.
-#  Naming#is_users_favorite?::       Is this Naming the given User's favorite?
-#  Naming#calc_vote_table::          ???
+#
+#  Naming#vote_sum::            Straight sum of Vote's for this Naming (used in tests).
+#  Naming#user_voted?::         Has a given User voted for this Naming?
+#  Naming#users_vote::          Get a given User's Vote for this Naming.
+#  Naming#vote_percent::        Convert score for this Naming into a percentage.
+#  Naming#is_users_favorite?::  Is this Naming the given User's favorite?
+#  Naming#calc_vote_table::     Gather Vote info for this Naming.
 #
 #  == Attributes
 #
@@ -20,9 +27,10 @@
 #  created::            Date/time it was first created.
 #  modified::           Date/time it was last modified.
 #  user::               User that created it.
-#  value::              Value of vote, float, e.g.: 3.0 = 100%, -3.0 = -100%
+#  value::              Value of Vote, a Float: 3.0 = 100%, -3.0 = -100%
 #  naming::             Naming we're voting on.
 #  observation::        Observation the Naming belongs to.
+#  favorite::           Is this the User's favorite Vote for this Observation?
 #
 #  == Class methods
 #
@@ -33,17 +41,19 @@
 #  min_pos_vote::       Value of the least positive vote.
 #  next_best_vote::     Value of the next-to-best vote.
 #  maximum_vote::       Value of the strongest vote.
+#  percent::            Convert value to percentage.
 #
-#  ==== Other
-#  confidence_menu::    Structures needed by the form helper,
-#  agreement_menu::     select(), to create a pulldown menu.
-#  confidence::         Find vote closest in value to the
-#  agreement::          given one.  Returns string.
+#  ==== Vote labels
+#  confidence_menu::    Structure used by form helper +select+ to create pulldown menu.
+#  agreement_menu::     (Same thing, but for non-owner of Naming.)
+#  confidence::         Classify value as confidence level, String.
+#  agreement::          Classify value as level of agreement, String.
 #
 #  == Instance methods
 #
-#  confidence::         Find vote closest in value to the
-#  agreement::          given one.  Returns string.
+#  confidence::         Classify value as confidence level, String.
+#  agreement::          Classify value as level of agreement, String.
+#  percent::            Return value as percentage.
 #  user_weight::        Calculate weight from user's contribution.
 #
 #  == Callbacks
@@ -96,6 +106,20 @@ class Vote < AbstractModel
   # Strongest vote.
   def self.maximum_vote
     MAXIMUM_VOTE
+  end
+
+  # Convert a given Vote value to a percentage.
+  def self.percent(v)
+    if v.to_s == ''
+      0.0
+    else
+      v.to_f * 100 / 3
+    end
+  end
+
+  # Convert Vote's value to a percentage.
+  def percent
+    self.class.percent(value)
   end
 
   # ----------------------------

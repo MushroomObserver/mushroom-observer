@@ -1,24 +1,35 @@
 #
 #  = RSS Log Model
 #
-#  This model handles the RSS feed.  Every object we care about gets one an
-#  RssLog instance to report changes in that object.
+#  This model handles the RSS feed.  Every object we care about gets an RssLog
+#  instance to report changes in that object.  Going forward, every new object
+#  gets assigned one; historically, there are loads of objects without, but we
+#  don't really care, so they stay that way until they are modified. 
 #
-#  Right now there is a separate <tt>#{object}_id</tt> field for each kind
-#  of object that can own an RssLog.  This should probably be changed to a
-#  polymorphic association.  Possible owners are currently:
+#  There is a separate <tt>#{object}_id</tt> field for each kind of object that
+#  can own an RssLog.  I thought it would be cleaner to use a polymorphic
+#  association, however that makes it impossible to eager-load different
+#  associations for the different types of owners.  The resulting performance
+#  hit was significant. 
 #
+#  Possible owners are currently:
+#
+#  * Location
+#  * Name
 #  * Observation
 #  * SpeciesList
-#  * Name
 #
 #  == Usage
+#
+#  AbstractModel provides a standardized interface for all models that handle
+#  RssLog (see the list above).  These are inherited automatically by any model
+#  that contains an "rss_log_id" column.
 #
 #    rss_log = observation.rss_log
 #    rss_log.add("Made some change.")
 #    rss_log.orphan("Deleting observation.")
 #
-#  Note, after an object is deleted, no one will ever be able to change that
+#  *NOTE*: After an object is deleted, no one will ever be able to change that
 #  RssLog again -- i.e. it is orphaned.
 #
 #  == Log Syntax
@@ -41,7 +52,7 @@
 #    20090722075918:log_observation_created(user=douglas)
 #
 #  *NOTE*: All non-alphanumeric characters are escaped via private class
-#  methods +escape+ and +unescape+. 
+#  methods +escape+ and +unescape+.
 #
 #  *NOTE*: Somewhere in 2008/2009 we changed the syntax of the logs so we could
 #  translate them.  We made the deliberate decision _not_ to convert all the
@@ -53,9 +64,10 @@
 #  id::                 Locally unique numerical id, starting at 1.
 #  modified::           Date/time it was last modified.
 #  notes::              Log of changes.
+#  location::           Owning Location (or nil).
+#  name::               Owning Name (or nil).
 #  observation::        Owning Observation (or nil).
 #  species_list::       Owning SpeciesList (or nil).
-#  name::               Owning Name (or nil).
 #
 #  == Class methods
 #
@@ -81,14 +93,15 @@
 ################################################################################
 
 class RssLog < AbstractModel
+  belongs_to :location
+  belongs_to :name
   belongs_to :observation
   belongs_to :species_list
-  belongs_to :name
 
   # Add entry to top of notes and save.  Pass in a localization key and a hash
   # of arguments it requires.  Changes +modified+ unless <tt>args[:touch]</tt>
   # is false.  (Changing +modified+ has the effect of pushing it to the front
-  # of the RSS feed.) 
+  # of the RSS feed.)
   #
   #   name.rss_log.add(:log_name_updated,
   #     :user => user.login,
@@ -102,9 +115,9 @@ class RssLog < AbstractModel
   #   :time  => Time.now        # Timestamp to use.
   #   :save  => true            # Save changes?
   #
-  def add_with_date(key, args={}) 
+  def add_with_date(key, args={})
     args = {
-      :user  => (User.current ? User.current.login : '???'),
+      :user  => (User.current ? User.current.login : :app_unknown.l),
       :touch => true,
       :time  => Time.now,
       :save  => true,
@@ -121,7 +134,7 @@ class RssLog < AbstractModel
 
     self.notes = entry + "\n" + notes.to_s
     self.modified = args[:time] if args[:touch]
-    self.save if args[:save]
+    self.save_without_updating_modified if args[:save]
   end
 
   # Add line with timestamp and +title+ to notes, clear references to
@@ -134,20 +147,28 @@ class RssLog < AbstractModel
     args = args.merge(:save => false)
     add_with_date(key, args)
     self.notes = RssLog.escape(title) + "\n" + self.notes.to_s
+    self.location     = nil
+    self.name         = nil
     self.observation  = nil
     self.species_list = nil
-    self.name         = nil
-    self.save
+    self.save_without_updating_modified
   end
 
   # Returns the associated object, or nil if it's an orphan.
   def object
-    observation || species_list || name
+    location || name || observation || species_list
   end
 
   # Get title from top line of orphaned log.  (Should be the +format_name+.)
   def orphan_title
     RssLog.unescape(notes.to_s.split("\n").first)
+  end
+
+  # Handy for prev/next handler.  Any object that responds to rss_log has an
+  # attached RssLog.  In this case, it *is* the RssLog itself, meaning it is
+  # an orphan log for a deleted object.
+  def rss_log
+    self
   end
 
   # Returns plain text title of the associated object.
@@ -193,29 +214,34 @@ class RssLog < AbstractModel
   # URL.
   def url
     result = ''
-    if observation = self.observation
-      result = sprintf("/observer/show_observation/%d?time=%d", observation.id, self.modified.tv_sec)
-    elsif species_list = self.species_list
-      result = sprintf("/observer/show_species_list/%d?time=%d", species_list.id, self.modified.tv_sec)
-    elsif name = self.name
-      result = sprintf("/name/show_name/%d?time=%d", name.id, self.modified.tv_sec)
+    if location_id
+      result = sprintf("/location/show_location/%d?time=%d", location_id, self.modified.tv_sec)
+    elsif name_id
+      result = sprintf("/name/show_name/%d?time=%d", name_id, self.modified.tv_sec)
+    elsif observation_id
+      result = sprintf("/observer/show_observation/%d?time=%d", observation_id, self.modified.tv_sec)
+    elsif species_list_id
+      result = sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.modified.tv_sec)
     else
-      result = sprintf("/observer/show_rss_log/%d?time=%d", self.id, self.modified.tv_sec)
+      result = sprintf("/observer/show_rss_log/%d?time=%d", id, self.modified.tv_sec)
     end
     result
   end
 
-  # Parse the log, returning a list of triplets, one for each line, newest
-  # first:
+  # Parse the log, returning a list of triplets, one for each line, newest first:
   #
   #   for line in rss_log.parse_log
   #     key, args, time = *line
   #     puts "#{time}: #{key.t(args)}"
   #   end
   #
-  def parse_log
+  # NOTE: This is pretty slow.  It accounts for most of the time it takes to
+  # serve the RSS feed (/observer/rss).  I'm not sure how to improve it...
+  #
+  def parse_log(cutoff_time=nil)
     first = true
-    self.notes.split("\n").map do |str|
+    results = []
+    for str in notes.split("\n")
       key  = nil
       args = {}
       time = Time.gm(2000)
@@ -226,14 +252,17 @@ class RssLog < AbstractModel
         str  = $2
       end
 
+      # Let caller request only recent logs.
+      break if cutoff_time && time < cutoff_time
+
       # First entry of orphan log is title.
-      if first && !self.object
+      if first && !self.object_id
         key   = :log_orphan
         args  = { :title => RssLog.unescape(key) }
         first = false
 
       # This is the "new" syntax: "key(arg=val,arg=val)"
-      elsif str.match(/^([\w\%]+)\(([\w\%\=\,]*)\)$/)
+      elsif str.match(/^([\w\%]+)\((.*)\)$/)
         key = $1
         for keyval in $2.split(',')
           if keyval.match(/=/)
@@ -289,8 +318,9 @@ class RssLog < AbstractModel
         args = { :string => str }
       end
 
-      [key, args, time]
+      results << [key, args, time]
     end
+    return results
   end
 
 ################################################################################
@@ -299,7 +329,7 @@ private
 
   # Protect special characters in string for log encoder/decoder.
   def self.escape(str)
-    str.to_s.gsub(/\W/) { |x| '%%%02X' % x[0] }
+    str.to_s.gsub(/\W/) { '%%%02X' % $&[0] }
   end
 
   # Reverse protection of special characters in string for log encoder/decoder.

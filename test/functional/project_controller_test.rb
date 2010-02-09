@@ -27,7 +27,7 @@ class ProjectControllerTest < ControllerTestCase
 
   def destroy_project_helper(project, changer)
     assert(project)
-    total_draft_count = DraftName.all.size
+    total_draft_count = DraftName.count
     project_draft_count = project.draft_names.size
     assert(project_draft_count > 0)
     params = { :id => project.id.to_s }
@@ -36,7 +36,7 @@ class ProjectControllerTest < ControllerTestCase
     assert(Project.find(project.id))
     assert(UserGroup.find(project.user_group.id))
     assert(UserGroup.find(project.admin_group.id))
-    assert_equal(total_draft_count, DraftName.all.size)
+    assert_equal(total_draft_count, DraftName.count)
   end
 
   def change_member_status_helper(changer, target_user, commit, admin_before, user_before, admin_after, user_after)
@@ -61,7 +61,7 @@ class ProjectControllerTest < ControllerTestCase
     else
       user = draft.user
     end
-    count = DraftName.all.size
+    count = DraftName.count
     params = {
       :project => project.id,
       :name => name.id
@@ -72,7 +72,7 @@ class ProjectControllerTest < ControllerTestCase
     else
       assert_response('edit_draft')
     end
-    assert_equal(count, DraftName.all.size)
+    assert_equal(count, DraftName.count)
   end
 
   def edit_draft_tester(draft, user=nil, success=true)
@@ -156,7 +156,7 @@ class ProjectControllerTest < ControllerTestCase
       user = draft.user
     end
     assert(draft)
-    total_draft_count = DraftName.all.size
+    total_draft_count = DraftName.count
     params = {
       :id => draft.id
     }
@@ -166,10 +166,10 @@ class ProjectControllerTest < ControllerTestCase
       assert_raises(ActiveRecord::RecordNotFound) do
         draft = DraftName.find(draft.id)
       end
-      assert_equal(total_draft_count - 1, DraftName.all.size)
+      assert_equal(total_draft_count - 1, DraftName.count)
     else
       assert(DraftName.find(draft.id))
-      assert_equal(total_draft_count, DraftName.all.size)
+      assert_equal(total_draft_count, DraftName.count)
     end
   end
 
@@ -274,7 +274,7 @@ class ProjectControllerTest < ControllerTestCase
     assert(user_group)
     admin_group = project.admin_group
     assert(admin_group)
-    total_draft_count = DraftName.all.size
+    total_draft_count = DraftName.count
     project_draft_count = project.draft_names.size
     assert(project_draft_count > 0)
     params = { :id => project.id.to_s }
@@ -289,7 +289,7 @@ class ProjectControllerTest < ControllerTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       admin_group = UserGroup.find(admin_group.id)
     end
-    assert_equal(total_draft_count - project_draft_count, DraftName.all.size)
+    assert_equal(total_draft_count - project_draft_count, DraftName.count)
   end
 
   def test_destroy_project_other
@@ -488,25 +488,25 @@ class ProjectControllerTest < ControllerTestCase
   end
 
   def test_create_or_edit_draft_new_draft
-    count = DraftName.all.size
+    count = DraftName.count
     params = {
       :project => projects(:eol_project).id,
       :name => names(:conocybe_filaris).id
     }
     requires_login(:create_or_edit_draft, params, @katrina.login)
     assert_response('edit_draft')
-    assert_equal(count + 1, DraftName.all.size)
+    assert_equal(count + 1, DraftName.count)
   end
 
   def test_create_or_edit_draft_no_draft_not_member
-    count = DraftName.all.size
+    count = DraftName.count
     params = {
       :project => projects(:eol_project).id,
       :name => names(:conocybe_filaris).id
     }
     requires_login(:create_or_edit_draft, params, @dick.login)
     assert_response(:action => "show_project", :id => projects(:eol_project).id)
-    assert_equal(count, DraftName.all.size)
+    assert_equal(count, DraftName.count)
   end
 
   def test_edit_draft

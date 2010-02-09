@@ -8,8 +8,15 @@
   end
 %>
 
-<% form_tag(:action => 'edit_species_list', :id => @species_list.id,
-            :approved_names => @new_names, :approved_deprecated_names => @deprecated_names) do %>
+<% args = {}
+  if @new_names.to_s != ''
+    args[:approved_names] = @new_names
+  end
+  if @deprecated_names && @deprecated_names != []
+    args[:approved_deprecated_names] = @deprecated_names.map(&:id)
+  end
+  form_tag(:action => 'edit_species_list', :id => @species_list.id,
+           :params => args) do %>
   <br/><center><%= submit_tag :app_update.l %></center>
 
   <table cellpadding="10">

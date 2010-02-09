@@ -9,6 +9,7 @@ first_species_list:
   where: Burbank, CA
   title: A Species List
   notes: Got Skunked!
+  rss_log_id: 2
 
 another_species_list:
   id: 2

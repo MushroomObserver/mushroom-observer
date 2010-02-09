@@ -14,6 +14,7 @@ fungi:
   review_status: unreviewed
   citation: ''
   classification: ''
+  rss_log_id: 3
 
 coprinus_comatus:
   id: 2
@@ -674,7 +675,7 @@ macrocybe_titans:
   author: Titans
   display_name: **__Macrocybe__** Titans
   observation_name: **__Macrocybe__** Titans
-  search_name: Macrocybe sp.
+  search_name: Macrocybe sp. Titans
   review_status: unreviewed
   citation: ''
   classification: ''

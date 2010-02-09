@@ -24,6 +24,7 @@ coprinus_comatus_naming:
   name_id:         2
   observation_id:  3
   vote_cache:      1
+  reasons:         "---\n1: Isn't it obvious?\n"
 
 agaricus_campestris_naming:
   id:              4
@@ -79,3 +80,5 @@ coprinus_comatus_other_naming:
   user_id:         2
   name_id:         3
   observation_id:  3
+  reasons:         "---\n1: \"\"\n2: I asked *Uncle Herb*\n"
+

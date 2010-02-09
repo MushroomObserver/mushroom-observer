@@ -7,7 +7,7 @@
   <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
   <%= "<link rel=\"SHORTCUT ICON\" href=\"#{HTTP_DOMAIN}/images/favicon.ico\" />"%>
 
-  <%= check_if_user_turned_javascript_on %>
+  <%= check_if_user_turned_javascript_on if false %>
 
   <%=
     css = nil
@@ -63,24 +63,24 @@
                 <br/>
 
                 <%= link_to(:app_index_a_z.t, :controller => 'name', :action => 'observation_index') %><br/>
-                <%= link_to(:app_list_projects.t, :controller => 'project', :action => 'all_projects') %><br/>
+                <%= link_to(:app_list_projects.t, :controller => 'project', :action => 'list_projects') %><br/>
                 <br/>
 
                 <%= :app_latest.t %>:<br/>
                 &nbsp;&nbsp;<%= link_to(:app_latest_changes.t, :controller => 'observer', :action => 'list_rss_logs') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_newest_images.t, :controller => 'image', :action => 'all_images') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_comments.t, :controller => 'comment', :action => 'all_comments') %><br/>
+                &nbsp;&nbsp;<%= link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %><br/>
+                &nbsp;&nbsp;<%= link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %><br/>
                 &nbsp;&nbsp;<%= link_to(:app_news.t, :controller => 'observer', :action => 'news') %><br/>
                 <br/>
 
                 <%= :app_observations_left.t %>:<br/>
                 &nbsp;&nbsp;<%= link_to(:app_create_observation.t, :controller => 'observer', :action => 'create_observation') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_sort_by_date_obs.t, :controller => 'observer', :action => 'all_observations') %><br/>
+                &nbsp;&nbsp;<%= link_to(:app_sort_by_date_obs.t, :controller => 'observer', :action => 'list_observations') %><br/>
                 <br/>
 
                 <%= :app_species_list.t %>:<br/>
                 &nbsp;&nbsp;<%= link_to(:app_create_list.t, :controller => 'species_list', :action => 'name_lister') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_sort_by_date_spl.t, :controller => 'species_list', :action => 'all_species_lists') %><br/>
+                &nbsp;&nbsp;<%= link_to(:app_sort_by_date_spl.t, :controller => 'species_list', :action => 'list_species_lists') %><br/>
                 &nbsp;&nbsp;<%= link_to(:app_sort_by_title.t, :controller => 'species_list', :action => 'species_lists_by_title') %><br/>
                 <br/>
 

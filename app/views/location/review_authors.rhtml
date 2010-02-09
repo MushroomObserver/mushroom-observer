@@ -5,7 +5,8 @@
 
   # Show Name
   new_tab_set do
-    add_tab(:app_show_location.t, :action => 'show_location', :id => @location.id)
+    add_tab(:app_show_object.t(:type => :location.t),
+            :action => 'show_location', :id => @location.id)
   end
 %>
 
@@ -13,8 +14,8 @@
   <%= :review_authors_authors.t %><br/>
   <% for u in @authors %>
     &nbsp;&nbsp;<%= user_link(u) %>
-    | <%= link_to(:review_authors_remove_author.t,
-                  {:action => :review_authors, :id => @location.id, :remove => u.id},
+    | <%= link_to(:review_authors_remove_author.t, {:action => :review_authors,
+                  :id => @location.id, :remove => u.id},
                   {:confirm => :app_are_you_sure.l}) %>
     <br/>
   <% end %>

@@ -1,9 +1,12 @@
 #
 #  Views: ("*" - login required)
+#     index_species_list                     List of lists in current query.
 #     list_species_lists                     List of lists by date.
 #     species_lists_by_title                 List of lists by title.
 #     species_lists_by_user                  List of lists created by user.
 #     show_species_list                      Display notes/etc. and list of species.
+#     prev_species_list                      Display previous species list in index.
+#     next_species_list                      Display next species list in index.
 #     make_report                            Display contents of species list as report.
 #   * create_species_list                    Create new list.
 #   * name_lister                            Efficient javascripty way to build a list of names.
@@ -16,7 +19,6 @@
 #
 #  Helpers:
 #    calc_checklist(query)                Get list of names for LHS of _species_list_form.
-#    get_list_of_deprecated_names(spl)    Get list of names from list that are deprecated.
 #    process_species_list(...)            Create/update species list using form data.
 #    construct_observations(...)          Create observations for new names added to list.
 #    find_chosen_name(id, alternatives)   (helper)
@@ -37,7 +39,7 @@ class SpeciesListController < ApplicationController
   require 'rtf'
 
   before_filter :login_required, :except => [
-    :all_species_lists,
+    :index_species_lists,
     :list_species_lists,
     :make_report,
     :name_lister,
@@ -63,16 +65,17 @@ class SpeciesListController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.  (Linked
   # from show_species_list, next to "prev" and "next".)
-  def list_species_lists
-    query = find_or_create_query(:SpeciesList, :all, :by => :date)
+  def index_species_list
+    query = find_or_create_query(:SpeciesList, :all, :by => params[:by] || :date)
+    query.params[:by] = params[:by] if params[:by]
     show_selected_species_lists(query, :id => params[:id])
   end
 
   # Display list of all species_lists, sorted by date.  (Linked from left
   # panel.)
-  def all_species_lists
+  def list_species_lists
     query = create_query(:SpeciesList, :all, :by => :date)
-    show_selected_species_lists(query)
+    show_selected_species_lists(query, :id => params[:id], :by => params[:by])
   end
 
   # Display list of user's species_lists, sorted by date.  (Linked from left
@@ -91,7 +94,17 @@ class SpeciesListController < ApplicationController
 
   # Show selected list of species_lists.
   def show_selected_species_lists(query, args={})
-    args = { :action => :list_species_lists, :num_per_page => 10 }.merge(args)
+    @links ||= []
+    args = { :action => :list_species_lists, :num_per_page => 20,
+             :include => :user, :letters => 'species_lists.title' }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['title', :app_object_title.t], 
+      ['date', :app_date.t], 
+      ['user', :user.t], 
+    ]
+
     show_index_of_objects(query, args)
   end
 
@@ -109,24 +122,24 @@ class SpeciesListController < ApplicationController
   def show_species_list
     store_location
     store_query
-    @species_list = SpeciesList.find(params[:id])
+    @species_list = SpeciesList.find(params[:id], :include => :user)
     query = create_query(:Observation, :in_species_list, :by => :name,
                          :species_list => @species_list)
     store_query(query) if params[:set_source].to_s != ''
+    set_query_params(query)
     @pages = paginate_letters(:letter, :page, 100)
-    @objects = query.paginate(@pages, 'names.text_name')
+    @objects = query.paginate(@pages, :letter_field => 'names.text_name',
+                              :include => [:user, :name, :location])
   end
 
   # Go to next species_list: redirects to show_species_list.
   def next_species_list
-    species_list = SpeciesList.find(params[:id])
-    redirect_to_next_object(:next, species_list)
+    redirect_to_next_object(:next, SpeciesList, params[:id])
   end
 
   # Go to previous species_list: redirects to show_species_list.
   def prev_species_list
-    species_list = SpeciesList.find(params[:id])
-    redirect_to_next_object(:prev, species_list)
+    redirect_to_next_object(:prev, SpeciesList, params[:id])
   end
 
   # Form for creating a new species list.
@@ -145,10 +158,10 @@ class SpeciesListController < ApplicationController
     @species_list = SpeciesList.new
     if request.method != :post
       @checklist_names  = {}
+      @new_names        = []
+      @multiple_names   = []
+      @deprecated_names = []
       @list_members     = nil
-      @new_names        = nil
-      @multiple_names   = nil
-      @deprecated_names = nil
       @member_notes     = nil
       if (params[:clone].to_s != '') and
          (clone = SpeciesList.safe_find(params[:clone]))
@@ -186,10 +199,10 @@ class SpeciesListController < ApplicationController
     elsif request.method != :post
       @checklist_names  = {}
       @list_members     = nil
-      @new_names        = nil
-      @multiple_names   = nil
       @member_notes     = nil
-      @deprecated_names = get_list_of_deprecated_names(@species_list)
+      @new_names        = []
+      @multiple_names   = []
+      @deprecated_names = @species_list.names.select(&:deprecated)
       @checklist        = calc_checklist
     else
       process_species_list('updated')
@@ -217,8 +230,8 @@ class SpeciesListController < ApplicationController
       @species_list.process_file_data(sorter)
       @list_members     = sorter.all_line_strs.join("\r\n")
       @new_names        = sorter.new_name_strs.uniq.sort
-      @multiple_names   = sorter.multiple_line_strs.uniq.sort
-      @deprecated_names = sorter.deprecated_name_strs.uniq.sort
+      @multiple_names   = sorter.multiple_names.uniq.sort_by(&:text_name)
+      @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @checklist_names  = {}
       @member_notes     = ''
       render(:action => 'edit_species_list')
@@ -246,11 +259,10 @@ class SpeciesListController < ApplicationController
   # Inputs: params[:id] (observation)
   # Outputs: @observation
   def manage_species_lists
-    @observation = Observation.find(params[:id])
-    @all_lists = SpeciesList.find(:all,
-      :conditions => ['user_id = ?', @user.id],
-      :order => "'modified' desc"
-    )
+    @observation = Observation.find(params[:id], :include => :species_lists)
+    @all_lists = @observation.species_lists.
+                   select {|spl| spl.user_id == @user.id}.
+                   sort_by(&:modified).reverse
   end
 
   # Remove an observation from a species_list.
@@ -260,7 +272,8 @@ class SpeciesListController < ApplicationController
   #   params[:observation]
   # Redirects back to manage_species_lists.
   def remove_observation_from_species_list
-    species_list = SpeciesList.find(params[:species_list])
+    species_list = SpeciesList.find(params[:species_list],
+                                    :include => :observations)
     if check_permission!(species_list.user_id)
       observation = Observation.find(params[:observation])
       if species_list.observations.include?(observation)
@@ -284,7 +297,8 @@ class SpeciesListController < ApplicationController
   #   params[:observation]
   # Redirects back to manage_species_lists.
   def add_observation_to_species_list
-    species_list = SpeciesList.find(params[:species_list])
+    species_list = SpeciesList.find(params[:species_list],
+                                    :include => :observations)
     if check_permission!(species_list.user_id)
       observation = Observation.find(params[:observation])
       if !species_list.observations.include?(observation)
@@ -383,9 +397,9 @@ class SpeciesListController < ApplicationController
       when :name_lister_submit_spl.l
         @checklist_names  = {}
         @list_members     = params[:results].gsub('|',' ').gsub('*','')
-        @new_names        = nil
-        @multiple_names   = nil
-        @deprecated_names = nil
+        @new_names        = []
+        @multiple_names   = []
+        @deprecated_names = []
         @member_notes     = nil
         store_query
         calc_checklist
@@ -407,9 +421,7 @@ class SpeciesListController < ApplicationController
   #   params[:id] (species_list)
   #   params[:type] (file extension)
   def make_report
-    id = params[:id].to_i
-    spl = SpeciesList.find(id)
-    names = spl ? spl.names : []
+    names = SpeciesList.find(params[:id]).names
     case params[:type]
     when 'txt'
       render_name_list_as_txt(names)
@@ -519,8 +531,8 @@ class SpeciesListController < ApplicationController
   #   params[:list][:members]               String that user typed in in big text area on right side (squozen and stripped).
   #   params[:approved_names]               List of new names from prev post.
   #   params[:approved_deprecated_names]    List of deprecated names from prev post.
-  #   params[:chosen_names][name]           Radio boxes disambiguating multiple names
-  #   params[:chosen_approved_names][name]  Radio boxes allowing user to choose preferred names for deprecated ones.
+  #   params[:chosen_multiple_names][name]  Radio boxes allowing user to choose among ambiguous names.
+  #   params[:chosen_approved_names][name]  Radio boxes allowing user to choose accepted names.
   #     (Both the last two radio boxes are hashes with:
   #       key: ambiguous name as typed with nonalphas changed to underscores,
   #       val: id of name user has chosen (via radio boxes in feedback)
@@ -543,29 +555,48 @@ class SpeciesListController < ApplicationController
     list = params[:list][:members].gsub('_', ' ').strip_squeeze
     construct_approved_names(list, params[:approved_names])
 
-    # Sets up a NameSorter object.  Does NOT affect species_list.
-    sorter = setup_sorter(params, @species_list, list)
+    # Initialize NameSorter and give it all the information.
+    sorter = NameSorter.new
+    sorter.add_chosen_names(params[:chosen_multiple_names])
+    sorter.add_chosen_names(params[:chosen_approved_names])
+    sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
+    sorter.check_for_deprecated_checklist(params[:checklist_data])
+    sorter.check_for_deprecated_names(@species_list.names) if @species_list.id
+    sorter.sort_names(list)
 
-    # Now let's see all the ways in which NameSorter can fail...
+    # Now let us count all the ways in which NameSorter can fail...
+    failed = false
+
     # Does list have "Name one = Name two" type lines?
     if sorter.has_new_synonyms
       flash_error(:species_list_need_to_use_bulk.t)
       sorter.reset_new_names
+      failed = true
+    end
+
     # Are there any unrecognized names?
-    elsif sorter.new_name_strs != []
+    if sorter.new_name_strs != []
       flash_error "Unrecognized names given: '#{sorter.new_name_strs.map(&:to_s).join("', '")}'" if TESTING
+      failed = true
+    end
+
     # Are there any ambiguous names?
-    elsif !sorter.only_single_names
+    if !sorter.only_single_names
       flash_error "Ambiguous names given: '#{sorter.multiple_line_strs.map(&:to_s).join("', '")}'" if TESTING
+      failed = true
+    end
+
     # Are there and deprecated names that haven't been approved?
-    elsif sorter.has_unapproved_deprecated_names
-      flash_error("Found deprecated names.") if TESTING
+    if sorter.has_unapproved_deprecated_names
+      flash_error("Found deprecated names: #{sorter.deprecated_names.map(&:display_name).join(', ').t}") if TESTING
+      failed = true
+    end
 
     # Okay, at this point we've apparently validated the new list of names.
     # Save the OTHER changes to the species list, then let this other method
     # (construct_observations) update the members.  This always succeeds, so
     # we can redirect to show_species_list.
-    else
+    if !failed
       if !@species_list.save
         flash_object_errors(@species_list)
       else
@@ -603,9 +634,9 @@ class SpeciesListController < ApplicationController
     # Failed to create due to synonyms, unrecognized names, etc.
     if !redirected
       @list_members     = sorter.all_line_strs.join("\r\n")
-      @new_names        = sorter.new_name_strs.uniq.sort # --> "approved_names"
-      @multiple_names   = sorter.multiple_line_strs.uniq.sort
-      @deprecated_names = sorter.deprecated_name_strs.uniq.sort
+      @new_names        = sorter.new_name_strs.uniq.sort
+      @multiple_names   = sorter.multiple_names.uniq.sort_by(&:text_name)
+      @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @checklist_names  = params[:checklist_data] || {}
       @member_notes     = params[:member] ? params[:member][:notes] : ""
     end
@@ -641,52 +672,36 @@ class SpeciesListController < ApplicationController
 
       when :Observation
         query.select_rows(
-          :select  => 'DISTINCT names.observation_name, names.id',
-          :include => :names,
-          :limit   => 1000
+          :select => 'DISTINCT names.observation_name, names.id',
+          :join   => :names,
+          :limit  => 1000
         )
 
       when :Image
         query.select_rows(
-          :select  => 'DISTINCT names.observation_name, names.id',
-          :include => {:images_observations => {:observations => :names}},
-          :limit   => 1000
+          :select => 'DISTINCT names.observation_name, names.id',
+          :join   => {:images_observations => {:observations => :names}},
+          :limit  => 1000
         )
 
       when :Location
         query.select_rows(
-          :select  => 'DISTINCT names.observation_name, names.id',
-          :include => {:observations => :names},
-          :limit   => 1000
+          :select => 'DISTINCT names.observation_name, names.id',
+          :join   => {:observations => :names},
+          :limit  => 1000
         )
 
       when :RssLog
         query.select_rows(
-          :select  => 'DISTINCT names.observation_name, names.id',
-          :include => {:observations => :names},
-          :where   => 'rss_logs.observation_id > 0',
-          :limit   => 1000
+          :select => 'DISTINCT names.observation_name, names.id',
+          :join   => {:observations => :names},
+          :where  => 'rss_logs.observation_id > 0',
+          :limit  => 1000
         )
 
       else []
       end
     end
-  end
-
-  # Get list of names from species_list that are deprecated.
-  def get_list_of_deprecated_names(spl)
-    result = nil
-    for obs in spl.observations
-      name = obs.name
-      if name.deprecated
-        result = [] if result.nil?
-        unless result.member?(name.search_name) or
-               result.member?(name.text_name)
-          result.push(name.search_name)
-        end
-      end
-    end
-    return result
   end
 
   # This creates abd adds observations for any names not already in the list.
@@ -726,8 +741,7 @@ class SpeciesListController < ApplicationController
       for observation in spl.observations
         for naming in observation.namings
           # (compensate for gsub in _form_species_lists)
-          munged_name = naming.name.search_name.gsub(/\W/, "_")
-          if alt_name_id = chosen_names[munged_name]
+          if alt_name_id = chosen_names[naming.name_id.to_s]
             alt_name = Name.find(alt_name_id)
             naming.name = alt_name
             naming.save
@@ -766,13 +780,11 @@ class SpeciesListController < ApplicationController
   # (alternatives hash comes from params[:chosen_approved_names])
   # Helper for construct_observations.
   def find_chosen_name(id, alternatives)
-    name = Name.find(id)
-    if alternatives
-      alt_id = alternatives[name.search_name.gsub(/\W/, "_")] # Compensate for gsub in _form_species_list.
-      if alt_id
-        name = Name.find(alt_id.to_i)
-      end
+    if alternatives and
+       (alt_id = alternatives[id.to_s])
+      Name.find(alt_id)
+    else
+      Name.find(id)
     end
-    name
   end
 end

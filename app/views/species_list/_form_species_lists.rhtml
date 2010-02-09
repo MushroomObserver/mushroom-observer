@@ -15,25 +15,19 @@
 <td valign="top">
   <%= render(:partial => 'shared/form_list_feedback') %>
 
-  <% if @deprecated_names && (@deprecated_names != []) %>
+  <% if @deprecated_names != [] %>
     <div style="width:500px">
       <div class="Errors">
         <%= :form_species_lists_deprecated.t %>:<br/>
         <span class="HelpNote"><%= :form_species_lists_deprecated_help.t %></span><br/>
         <span class="Data">
-          <% for name_str in @deprecated_names
-            approved_names = []
-            for name in Name.find_names(name_str)
-              for approved_name in name.approved_synonyms
-                approved_names.push(approved_name)
-              end
-            end
-            if approved_name != [] %>
-              <%= h(name_str) %><br/>
-              <% for approved_name in approved_names
-                  id_name_str = name_str.gsub(/\W/, "_") # Spaces not allowed in id values according to XHTML validator %>
-                &nbsp;&nbsp;<%= radio_button("chosen_approved_names", id_name_str, approved_name.id) %>
-                <%= approved_name.display_name.t %><br/>
+          <% for name in @deprecated_names
+            approved_names = name.approved_synonyms %>
+            <%= name.display_name.t %><br/>
+            <% if approved_names != [] %>
+              <% for other_name in approved_names %>
+                &nbsp;&nbsp;<%= radio_button("chosen_approved_names", name.id, other_name.id) %>
+                <%= other_name.display_name.t %><br/>
               <% end %>
             <% end %>
           <% end %>
@@ -42,18 +36,17 @@
     </div>
   <% end %>
 
-  <% if @multiple_names && (@multiple_names != []) %>
+  <% if @multiple_names != [] %>
     <div style="width:500px">
       <div class="Errors">
         <%= :form_species_lists_multiple_names.t %>:<br/>
         <span class="HelpNote"><%= :form_species_lists_multiple_names_help.t %></span>
         <span class="Data">
-          <% for name_str in @multiple_names %>
-            <%= h(name_str) %><br/>
-            <% for name in Name.find_names(name_str)
-                id_name_str = name_str.gsub(/\W/, "_") # Spaces not allowed in id values according to XHTML validator %>
-              &nbsp;&nbsp;<%= radio_button("chosen_names", id_name_str, name.id) %>
-              <%= name.display_name.t %> (<%= name.observations.size %>)<br/>
+          <% for name in @multiple_names %>
+            <%= h(name.text_name) %><br/>
+            <% for other_name in name.other_authors %>
+              &nbsp;&nbsp;<%= radio_button("chosen_multiple_names", name.id, other_name.id) %>
+              <%= other_name.display_name.t %> (<%= other_name.observations.count %>)<br/>
             <% end %>
           <% end %>
         </span>

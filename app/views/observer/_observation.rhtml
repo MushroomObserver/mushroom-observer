@@ -1,15 +1,13 @@
 <table cellpadding="10" width="100%">
   <tr>
     <td align="center" valign="middle" width="160">
-      <%= image = observation.thumb_image
-        if image
-          link_to(image_tag("thumb/%d.jpg" % observation.thumb_image_id, :border => 0),
-                  :action => 'show_observation', :id => observation.id,
-                  :params => query_params)
-        end
-      %>
+      <%= if observation.thumb_image_id
+        link_to(image_tag("thumb/%d.jpg" % observation.thumb_image_id, :border => 0),
+                :action => 'show_observation', :id => observation.id,
+                :params => query_params)
+      end %>
     </td>
-<% if vertical_layout %>
+<% if @layout['vertical_layout'] %>
   </tr>
   <tr>
     <td align="center" valign="middle">
@@ -24,15 +22,14 @@
       </span><br/>
 
       <span class="ListWhere">
-        <%= location_link(observation.where, observation.location_id) %>
+        <%= location_link(observation.where, observation.location) %>
       </span><br/>
 
       <span class="ListWhen"><%= observation.when.web_date %>:</span>
       <span class="ListWho"><%= user_link(observation.user) %></span><br/>
 
-      <% rss = observation.rss_log
-      if rss && rss.notes
-        logs = rss.parse_log
+      <% if rss_log && rss_log.notes
+        logs = rss_log.parse_log
         if logs.first[2] > observation.created + 10.seconds %>
           <span>
             <%= key, args, time = logs.first

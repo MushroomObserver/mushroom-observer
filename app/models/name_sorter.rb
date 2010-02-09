@@ -21,7 +21,7 @@
 #
 #    # After the first pass, if there were names with multiple matches, the user
 #    # may choose which ones they mean.
-#    sorter.add_chosen_names(hash_mapping_name_strings_to_name_ids)
+#    sorter.add_chosen_names(hash_mapping_name_ids_to_name_ids)
 #
 #    # Likewise, after the first pass, the user can tell NameSorter that it's
 #    # okay to use certain deprecated names.
@@ -75,49 +75,59 @@
 #    synonym_name_strs     # Synonyms.
 #
 #    # Lists of Name objects:
-#    all_names             # All recognized names.
-#    single_names          # All unambiguous recognized names, as [Name, Time].
+#    all_names             # All recognized Name's.
+#    single_names          # All unambiguous recognized Name's, as [Name, Time].
+#    deprecated_names      # All deprecated Name's.
+#    multiple_names        # Representatives of sets of ambiguous Name's.
 #
 ################################################################################
 
 class NameSorter
-  attr_reader :all_names
   attr_accessor :approved_deprecated_names
-  attr_accessor :approved_synonym_ids
+  attr_accessor :approved_synonyms
   attr_accessor :chosen_names
-  attr_reader :deprecated_name_strs
+
   attr_reader :has_new_synonyms
   attr_reader :has_unapproved_deprecated_names
+  attr_reader :synonym_data
+  attr_reader :all_names
+
+  attr_reader :deprecated_name_strs
+  attr_reader :deprecated_names
   attr_reader :multiple_line_strs
-  attr_reader :new_line_strs # Each line containing a new name
-  attr_reader :new_name_strs # Each new name
+  attr_reader :multiple_names
   attr_reader :single_line_strs
   attr_reader :single_names
-  attr_reader :synonym_data
+  attr_reader :new_line_strs
+  attr_reader :new_name_strs
+
+  def initialize
+    @approved_deprecated_names = [] # Array of String's
+    @approved_synonyms         = [] # Array of Name's
+    @chosen_names              = {} # Hash mapping Name id to Name id
+
+    @has_new_synonyms                = false
+    @has_unapproved_deprecated_names = false
+    @synonym_data              = [] # Array of [NameParse, [Name, Name, ...]]
+    @all_names                 = [] # Array of Name's
+
+    @deprecated_name_strs      = [] # Array of String's
+    @deprecated_names          = [] # Array of Name's
+    @multiple_line_strs        = [] # Array of String's
+    @multiple_names            = [] # Array of Name's
+    @single_line_strs          = [] # Array of String's
+    @single_names              = [] # Array of [Name, Time]
+    @new_line_strs             = [] # Array of String's      # whole line
+    @new_name_strs             = [] # Array of String's      # just parsed name
+  end
 
   def all_line_strs
     @new_line_strs + @multiple_line_strs + @single_line_strs
   end
 
-  def initialize
-    @all_names = [] # List of Names
-    @approved_deprecated_names = [] # List of strings
-    @approved_synonyms = [] # List of names
-    @chosen_names = {} # name_str -> name_id
-    @deprecated_name_strs = [] # List of strings
-    @has_new_synonyms = false
-    @has_unapproved_deprecated_names = false
-    @multiple_line_strs = [] # List of strings
-    @new_line_strs = [] # List of strings
-    @new_name_strs = [] # List of strings
-    @single_line_strs = [] # List of strings
-    @single_names = [] # List of [Name, Time].  A Timestamp of nil implies now.
-    @synonym_data = [] # List of [NameParse, [Name...]]
-  end
-
   def reset_new_names
-    @new_name_strs = []
     @new_line_strs = []
+    @new_name_strs = []
   end
 
   def only_single_names
@@ -165,7 +175,10 @@ class NameSorter
     if name.deprecated
       str = name_str || name.search_name
       @deprecated_name_strs.push(str)
-      if @approved_deprecated_names.nil? or !@approved_deprecated_names.member?(str)
+      @deprecated_names.push(name)
+      if @approved_deprecated_names.nil? or
+         !@approved_deprecated_names.member?(str) and
+         !@approved_deprecated_names.member?(name.id.to_s)
         @has_unapproved_deprecated_names = true
       end
     end
@@ -199,36 +212,48 @@ class NameSorter
 
     # Need all deprecated names even when another name is chosen
     # in case something else forces a redisplay
-    names = name_parse.find_names()
-# print "add_name: #{names ? names.map {|x| x ? "[#{x.id} #{x.search_name}]" : '[nil]'}.join(', ') : 'nil'}\n"
+    names = name_parse.find_names
     check_for_deprecated_names(names, name_str)
 
+    # Check radio boxes for multiple-names and/or approved-names that have
+    # been selected -- these take priority over all else.
     if @chosen_names
-      chosen_id = @chosen_names[name_str.gsub(/\W/, "_")] # Compensate for gsub in _form_species_lists
-      if chosen_id
-        @single_line_strs.push(line_str) # (name_str)
-        chosen_name = Name.find(chosen_id)
-        names = [chosen_name]
-        @single_names.push([chosen_name, timestamp])
-        @all_names.push(chosen_name)
-        chosen = true
+      for name in names
+        if chosen_id = @chosen_names[name.id.to_s]
+          @single_line_strs.push(line_str) # (name_str)
+          chosen_name = Name.find(chosen_id)
+          names = [chosen_name]
+          @single_names.push([chosen_name, timestamp])
+          @all_names.push(chosen_name)
+          chosen = true
+          break
+        end
       end
     end
+
+    # If no radio boxes checked, all names must match uniquely or we have
+    # problems.  There are three cases:
+    #   1) new names -- no matches
+    #   2) good names -- exactly one match
+    #   3) ambiguous names -- multiple matches
     if not chosen
       @all_names += names
       len = names.length
       if len == 0
-        @new_line_strs.push(line_str) # (name_str)
+        @new_line_strs.push(line_str)
         @new_name_strs.push(name_parse.search_name)
       elsif len == 1
-        @single_line_strs.push(line_str) # (name_str)
-        @single_names.push([names[0], nil])
+        @single_line_strs.push(line_str)
+        @single_names.push([names.first, nil])
       else
-        @multiple_line_strs.push(line_str) # (name_str)
+        @multiple_line_strs.push(line_str)
+        # Add a representative to @multiple_names -- doesn't matter which.
+        @multiple_names.push(names.first)
       end
     end
 
-    if name_parse.has_synonym()
+    # Did user specify a synonym via the "Name = Synonym" syntax?
+    if name_parse.has_synonym
       @has_new_synonyms = true
       if name_parse.find_synonym_names.length == 0
         @new_name_strs.push(name_parse.synonym_search_name)
@@ -258,37 +283,34 @@ class NameSorter
     end
   end
 
-  # Get a full list of all the synonyms of the listed names.  Returns a list
-  # of name strings (not objects).
+  # Get a (mostly) full list of all the synonyms of the listed names, including
+  # the names themselves... except for the names that have no synonyms.
+  # Returns a list of name strings (display_name in particular), not objects. 
   def synonym_name_strs
     result = []
     for name in @all_names
-      synonym = name.synonym
-      if synonym
-        for s in synonym.names
-          result.push(s.display_name)
-        end
+      if name.synonym_id
+        result += name.synonyms.map(&:display_name)
       end
     end
     result
   end
 
-  # This is misnamed.  It gathers a full list of all the names in the list
-  # passed in and all their synonyms.  This is thus the set of all possible
-  # synonyms.  It adds to this the synonyms from the previous pass, just in
-  # case.  It returns a list of Name ids (not objects).  (*NOTE*: This is a
-  # superset of +all_names+.) 
+  # This gathers a full list of all the names in the list passed in and all
+  # their synonyms.  This is thus the set of all possible synonyms.  It adds to
+  # this the synonyms from the previous pass, just in case.  It returns a list
+  # of Name ids (not objects).  (*NOTE*: This is a superset of +all_names+.) 
   def all_synonyms
     result = @approved_synonyms.dup
     for name in @all_names
-      result += name.synonym ? name.synonym.names : [name]
+      result += name.synonyms
     end
     result.uniq
   end
 
   # This takes all the names in the list, gathers all the possible synonyms for
   # them, then makes sure the user has had a chance to choose from among them
-  # all (via @approved_synonym_ids).  This will fail if the user enters a name
+  # all (via @approved_synonyms).  This will fail if the user enters a name
   # with a synonym on the first pass; and it can also fail on subsequent passes
   # if they change the list of names and add a new name with another synonym.
   # The idea is not to force the user to choose any particular synonyms, but

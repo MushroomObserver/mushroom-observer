@@ -3,6 +3,11 @@
 
   new_tab_set do
     add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
+    if @links
+      for link in @links
+        add_tab(*link)
+      end
+    end
   end
 %>
 

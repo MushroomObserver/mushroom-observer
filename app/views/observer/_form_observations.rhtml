@@ -66,9 +66,10 @@ end %>
    if false %>
           <td width="10"></td>
           <td>
-            <%= link_to(:app_show_image.t, :controller => 'image',
-                        :action => 'show_image', :id => image.id,
-                        :obs => @observation.id, :params => query_params) %><br/>
+            <%= link_to(:app_show_object.t(:type => :image.t),
+                        :controller => 'image', :action => 'show_image',
+                        :id => image.id, :obs => @observation.id,
+                        :params => query_params) %><br/>
             <%= link_to(:form_observations_edit_image.t,
                         :controller => 'image', :action => 'edit_image',
                         :id => image.id, :params => query_params) %><br/>

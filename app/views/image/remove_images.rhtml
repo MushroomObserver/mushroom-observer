@@ -2,9 +2,9 @@
   @title = :image_remove_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_show_observation.t, :controller => 'observer',
-            :action => 'show_observation', :id => @observation.id,
-            :params => query_params)
+    add_tab(:app_show_object.t(:type => :observation.t),
+            :controller => 'observer', :action => 'show_observation',
+            :id => @observation.id, :params => query_params)
     add_tab(:image_remove_edit.t, :controller => 'observer',
             :action => 'edit_observation', :id => @observation.id,
             :params => query_params)
@@ -25,8 +25,8 @@
         </td>
         <td align="center">
           <p>
-            <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
-                          '<br/>' + image.unique_format_name.t,
+            <%= link_to(image_tag("thumb/%d.jpg" % image.id) +
+                          "<br/>#{:image.t} ##{image.id}",
                         :action => 'show_image', :id => image.id,
                         :params => query_params) %>
           </p>

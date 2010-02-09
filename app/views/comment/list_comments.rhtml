@@ -1,31 +1,39 @@
-<%= pagination_numbers(@pages) %>
+<%
+  if @links
+    new_tab_set do
+      for link in @links
+        add_tab(*link)
+      end
+    end
+  end
+%>
 
-<% if @objects.length > 0 %>
-  <table cellpadding="5" cellspacing="0" width="100%">
-    <% odd_or_even = 0
-    for comment in @objects
-      odd_or_even = 1 - odd_or_even
-      object = comment.object %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
-        <td width="100%">
-          <%= link_to(sprintf('<span class="ListWhat">%s</span>', comment.summary.t),
-                      :action => 'show_comment', :id => comment.id,
-                      :params => query_params) %>:
-          <% if object %>
-            <%= link_to(sprintf('<span class="ListWhat">%s</span>',
-                                object.unique_format_name.t),
-                        :controller => object.show_controller, :action => object.show_action,
-                        :id => object.id) %>
-          <% else %>
-            (<%= :comment_list_deleted.t %>)
-          <% end %>
-          <br/>
-          <span class="ListWhen"><%= comment.created.web_time %></span>:
-          <span class="ListWho"><%= user_link(comment.user) %></span><br/>
-        </td>
-      </tr>
-    <% end %>
-  </table>
+<% paginate_block(@pages) do %>
+  <% if @objects.length > 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% odd_or_even = 0
+      for comment in @objects
+        odd_or_even = 1 - odd_or_even
+        object = comment.object %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td width="100%">
+            <%= link_to(sprintf('<span class="ListWhat">%s</span>', comment.summary.t),
+                        :action => 'show_comment', :id => comment.id,
+                        :params => query_params) %>:
+            <% if object %>
+              <%= link_to(sprintf('<span class="ListWhat">%s</span>',
+                                  object.unique_format_name.t),
+                          :controller => object.show_controller,
+                          :action => object.show_action, :id => object.id) %>
+            <% else %>
+              (<%= :comment_list_deleted.t %>)
+            <% end %>
+            <br/>
+            <span class="ListWhen"><%= comment.created.web_time %></span>:
+            <span class="ListWho"><%= user_link(comment.user) %></span><br/>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
 <% end %>
-
-<%= pagination_numbers(@pages) %><br/>

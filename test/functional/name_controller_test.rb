@@ -13,7 +13,7 @@ class NameControllerTest < ControllerTestCase
 ################################################################################
 
   def test_name_index
-    get_with_dump(:name_index)
+    get_with_dump(:list_names)
     assert_response('list_names')
   end
 
@@ -28,13 +28,67 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_show_name
+    assert_equal(0, Query.count)
     get_with_dump(:show_name, :id => 2)
     assert_response('show_name')
+    # Creates one for children and all three observations sections.
+    assert_equal(4, Query.count)
+
+    reget(:show_name, :id => 2)
+    assert_response('show_name')
+    # Should re-use all the old queries.
+    assert_equal(4, Query.count)
   end
 
   def test_show_past_name
     get_with_dump(:show_past_name, :id => 2)
     assert_response('show_past_name')
+  end
+
+  def test_next_and_prev
+    names = Name.all(:order => 'text_name, author')
+    name12 = names[12]
+    name13 = names[13]
+    name14 = names[14]
+    get(:next_name, :id => name12.id)
+    q = @controller.query_params(Query.last)
+    assert_response(:action => 'show_name', :id => name13.id, :params => q)
+    get(:next_name, :id => name13.id)
+    assert_response(:action => 'show_name', :id => name14.id, :params => q)
+    get(:prev_name, :id => name14.id)
+    assert_response(:action => 'show_name', :id => name13.id, :params => q)
+    get(:prev_name, :id => name13.id)
+    assert_response(:action => 'show_name', :id => name12.id, :params => q)
+  end
+
+  def test_next_and_prev_
+    query = Query.lookup_and_save(:Name, :pattern, :pattern => 'lactarius')
+    q = @controller.query_params(query)
+
+    name1 = names(:lactarius_alpigenes)
+    name2 = names(:lactarius_alpinus)
+    name3 = names(:lactarius_kuehneri)
+    name4 = names(:lactarius_subalpinus)
+
+    get(:next_name, q.merge(:id => name1.id))
+    assert_response(:action => 'show_name', :id => name2.id, :params => q)
+    get(:next_name, q.merge(:id => name2.id))
+    assert_response(:action => 'show_name', :id => name3.id, :params => q)
+    get(:next_name, q.merge(:id => name3.id))
+    assert_response(:action => 'show_name', :id => name4.id, :params => q)
+    get(:next_name, q.merge(:id => name4.id))
+    assert_response(:action => 'show_name', :id => name4.id, :params => q)
+    assert_flash(/no more/i)
+
+    get(:prev_name, q.merge(:id => name4.id))
+    assert_response(:action => 'show_name', :id => name3.id, :params => q)
+    get(:prev_name, q.merge(:id => name3.id))
+    assert_response(:action => 'show_name', :id => name2.id, :params => q)
+    get(:prev_name, q.merge(:id => name2.id))
+    assert_response(:action => 'show_name', :id => name1.id, :params => q)
+    get(:prev_name, q.merge(:id => name1.id))
+    assert_response(:action => 'show_name', :id => name1.id, :params => q)
+    assert_flash(/no more/i)
   end
 
   def test_names_by_author
@@ -138,6 +192,102 @@ class NameControllerTest < ControllerTestCase
     assert_equal([@rolf.login], fungi.reload.authors.map(&:login).sort)
   end
 
+  # None of our standard tests ever actually renders pagination_links
+  # or pagination_letters.  This tests all the above.
+  def test_pagination
+
+    # Straightforward index of all names, showing first 10.
+    query = Query.lookup_and_save(:Name, :all, :by => :name)
+    query_params = @controller.query_params(query)
+    get(:test_index, { :num_per_page => 10 }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(10, name_links.length)
+    expected = Name.all(:order => 'text_name, author', :limit => 10)
+    assert_equal(expected.map(&:id), name_links.map(&:id))
+    assert_equal(@controller.url_for(:action => 'show_name',
+                 :id => expected.first.id, :params => query_params,
+                 :only_path => true), name_links.first.url)
+    assert_no_link_in_html(1)
+    assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :page => 2)
+    assert_no_link_in_html('Z')
+    assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :letter => 'A')
+
+    # Now go to the second page.
+    reget(:test_index, { :num_per_page => 10, :page => 2 }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(10, name_links.length)
+    expected = Name.all(:order => 'text_name, author', :limit => 10,
+                        :offset => 10)
+    assert_equal(expected.map(&:id), name_links.map(&:id))
+    assert_equal(@controller.url_for(:action => 'show_name',
+                 :id => expected.first.id, :params => query_params,
+                 :only_path => true), name_links.first.url)
+    assert_no_link_in_html(2)
+    assert_link_in_html(1, :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :page => 1)
+    assert_no_link_in_html('Z')
+    assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :letter => 'A')
+
+    # Now try a letter.
+    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
+                       :order => 'text_name, author')
+    reget(:test_index, { :num_per_page => l_names.size,
+               :letter => 'L' }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(l_names.size, name_links.length)
+    assert_equal(l_names.map(&:id), name_links.map(&:id))
+    assert_equal(@controller.url_for(:action => 'show_name',
+                 :id => l_names.first.id, :params => query_params,
+                 :only_path => true), name_links.first.url)
+    assert_no_link_in_html(1)
+    assert_no_link_in_html('Z')
+    assert_link_in_html('A', :action => :test_index,:params => query_params,
+                        :num_per_page => l_names.size, :letter => 'A')
+
+    # Do it again, but make page size exactly one too small.
+    last_name = l_names.pop
+    reget(:test_index, { :num_per_page => l_names.size,
+        :letter => 'L' }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(l_names.size, name_links.length)
+    assert_equal(l_names.map(&:id), name_links.map(&:id))
+    assert_no_link_in_html(1)
+    assert_link_in_html(2, :action => :test_index, :params => query_params,
+                        :num_per_page => l_names.size,
+                        :letter => 'L', :page => 2)
+    assert_no_link_in_html(3)
+
+    # Check second page.
+    reget(:test_index, { :num_per_page => l_names.size, :letter => 'L',
+        :page => 2 }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(1, name_links.length)
+    assert_equal([last_name.id], name_links.map(&:id))
+    assert_no_link_in_html(2)
+    assert_link_in_html(1, :action => :test_index, :params => query_params,
+                        :num_per_page => l_names.size,
+                        :letter => 'L', :page => 1)
+    assert_no_link_in_html(3)
+
+    # Some cleverness is required to get pagination links include anchors.
+    reget(:test_index, { :num_per_page => 10,
+        :test_anchor => 'blah' }.merge(query_params))
+    assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :page => 2,
+                        :test_anchor => 'blah', :anchor => 'blah')
+    assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :letter => 'A',
+                        :test_anchor => 'blah', :anchor => 'blah')
+  end
+
   # ----------------------------
   #  Maps
   # ----------------------------
@@ -191,7 +341,7 @@ class NameControllerTest < ControllerTestCase
   def test_create_name_existing
     name = names(:conocybe_filaris)
     text_name = name.text_name
-    count = Name.all.length
+    count = Name.count
     params = {
       :name => {
         :text_name => text_name,
@@ -207,7 +357,7 @@ class NameControllerTest < ControllerTestCase
     assert_equal(10, @rolf.reload.contribution)
     name = Name.find_by_text_name(text_name)
     assert_equal(names(:conocybe_filaris), name)
-    assert_equal(count, Name.all.length)
+    assert_equal(count, Name.count)
   end
 
   def test_create_name_become_author
@@ -510,7 +660,7 @@ class NameControllerTest < ControllerTestCase
     wrong_author_name = names(:suillus_by_white)
     correct_name = names(:suillus)
     assert_equal(misspelt_name.correct_spelling, wrong_author_name)
-    spelling_id = misspelt_name.correct_spelling_id
+    old_correct_spelling_id = misspelt_name.correct_spelling_id
     correct_author = correct_name.author
     assert_not_equal(wrong_author_name.author, correct_author)
     params = {
@@ -528,7 +678,7 @@ class NameControllerTest < ControllerTestCase
     assert_raises(ActiveRecord::RecordNotFound) do
       wrong_author_name = Name.find(wrong_author_name.id)
     end
-    assert_not_equal(spelling_id, misspelt_name.reload.correct_spelling_id)
+    assert_not_equal(old_correct_spelling_id, misspelt_name.reload.correct_spelling_id)
     assert_equal(misspelt_name.correct_spelling, correct_name)
   end
 
@@ -1986,7 +2136,7 @@ class NameControllerTest < ControllerTestCase
 
   def test_email_tracking_enable_no_note
     name = names(:conocybe_filaris)
-    count_before = Notification.all.length
+    count_before = Notification.count
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
@@ -1999,7 +2149,7 @@ class NameControllerTest < ControllerTestCase
     }
     post_requires_login(:email_tracking, params)
     # This is needed before the next find for some reason
-    count_after = Notification.all.length
+    count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2011,7 +2161,7 @@ class NameControllerTest < ControllerTestCase
 
   def test_email_tracking_enable_with_note
     name = names(:conocybe_filaris)
-    count_before = Notification.all.length
+    count_before = Notification.count
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
@@ -2026,7 +2176,7 @@ class NameControllerTest < ControllerTestCase
     post(:email_tracking, params)
     assert_response(:action => :show_name)
     # This is needed before the next find for some reason
-    count_after = Notification.all.length
+    count_after = Notification.count
     assert_equal(count_before+1, count_after)
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2038,7 +2188,7 @@ class NameControllerTest < ControllerTestCase
 
   def test_email_tracking_update_add_note
     name = names(:coprinus_comatus)
-    count_before = Notification.all.length
+    count_before = Notification.count
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
@@ -2054,7 +2204,7 @@ class NameControllerTest < ControllerTestCase
     post(:email_tracking, params)
     assert_response(:action => :show_name)
     # This is needed before the next find for some reason
-    count_after = Notification.all.length
+    count_after = Notification.count
     assert_equal(count_before, count_after)
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2066,7 +2216,7 @@ class NameControllerTest < ControllerTestCase
 
   def test_email_tracking_disable
     name = names(:coprinus_comatus)
-    count_before = Notification.all.length
+    count_before = Notification.count
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
@@ -2081,7 +2231,7 @@ class NameControllerTest < ControllerTestCase
     post(:email_tracking, params)
     assert_response(:action => :show_name)
     # This is needed before the next find for some reason
-    # count_after = Notification.all.length
+    # count_after = Notification.count
     # assert_equal(count_before - 1, count_after)
     notification = Notification.
                 find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
@@ -2148,11 +2298,11 @@ class NameControllerTest < ControllerTestCase
     # No interest in this name yet.
     get(:show_name, :id => peltigera.id)
     assert_response(:success)
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
+    assert_link_in_html('<img[^>]+watch\d*.png[^>]+>',
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => peltigera.id, :state => 1
     )
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
+    assert_link_in_html('<img[^>]+ignore\d*.png[^>]+>',
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => peltigera.id, :state => -1
     )
