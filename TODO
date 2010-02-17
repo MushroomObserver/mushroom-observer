@@ -1,3 +1,9 @@
+Add page that lists the species that a user has observed with links to the sets of observations.
+
+Update the maps to use the JavaScript that David Shorthouse sent me (provides geocoding and an approach for selecting rectangular areas using jQuery)
+
+Species lists should allow/require confidence settings
+
 - Create a new class called Description
 - create_table "descriptions", :force => true do |t|
 - Need past_descriptions
@@ -82,6 +88,10 @@ Thu Feb 12 22:52:09 -0800 2009: Thu Feb 12 22:52:09 -0800 2009:log_name_updated(
 Make extra_gc depend on config
 Author changes should email authors and reviewers
 Edits should go to authors
+
+- It's really a pity that there is not a quick browse through all validated images of species representatives as a preliminary guide to identification. I find this an urgent need especially taking into consideration the long and fastidious times it takes to go forth and back through the pages. A quick browse as I suggest would immediately lead the user to the species of his(er) interest.
+
+phil@mycorant.com: I am sort of in the preliminary stages of thinking about how to use twitter to develop a real-time geographic data base and collection system for fungal distributions. Any thoughts about or interest in such an idea?
 
 Added email:
   Name edits go to authors
