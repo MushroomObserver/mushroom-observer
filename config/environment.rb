@@ -14,10 +14,11 @@
 #
 #  Make site-specific modifcations in these files:
 #
-#  * config/environments/site.rb
-#  * config/environments/site-production.rb
-#  * config/environments/site-development.rb
-#  * config/environments/site-test.rb
+#  * config/consts-site.rb
+#  * config/environment-site.rb
+#  * config/environments/production-site.rb
+#  * config/environments/development-site.rb
+#  * config/environments/test-site.rb
 #
 #  == Startup Procedure
 #
@@ -35,13 +36,12 @@
 #
 #  [5. config/environment.rb]
 #    Does all the application-supplied configuration, in this order:
-#
-#  1. config/consts-site.rb (optional)
-#  2. config/consts.rb
-#  3. config/environment.rb
-#  4. config/environment-site.rb (optional)
-#  5. config/environments/RAILS_ENV.rb
-#  6. config/environments/RAILS_ENC-site.rb (optional)
+#    1. config/consts-site.rb (optional)
+#    2. config/consts.rb
+#    3. config/environment.rb
+#    4. config/environment-site.rb (optional)
+#    5. config/environments/RAILS_ENV.rb
+#    6. config/environments/RAILS_ENC-site.rb (optional)
 #
 #  == Global Constants
 #
