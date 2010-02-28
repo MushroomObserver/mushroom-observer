@@ -2,13 +2,13 @@
   @title = :name_approve_title.t(:name => @name.display_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :name.l),
+    add_tab(:cancel_and_show.t(:type => :name),
             :action => 'show_name', :id => @name.id)
   end
 %>
 
 <% form_tag(:action => 'approve_name', :id => @name.id) do %>
-  <br/><center><%= submit_tag :app_approve.l %></center>
+  <br/><center><%= submit_tag :APPROVE.l %></center>
 
   <% if @approved_names %>
     <p><%= check_box('deprecate', 'others', :checked => '1') %>
@@ -25,7 +25,7 @@
     <%= :name_approve_comments_help.tp(:name => @name.display_name) %>
   </div>
 
-  <br/><center><%= submit_tag :app_approve.l %></center>
+  <br/><center><%= submit_tag :APPROVE.l %></center>
 
   <%= focus_on('comment_comment') %>
 <% end %>

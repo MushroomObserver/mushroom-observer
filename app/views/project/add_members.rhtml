@@ -2,7 +2,7 @@
   @title = :add_members_title.t(:title => @project.title)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :project.l), :action => 'show_project', :id => @project.id)
+    add_tab(:cancel_and_show.t(:type => :project), :action => 'show_project', :id => @project.id)
   end
 %>
 
@@ -19,7 +19,7 @@
   </span>
   <%= link_to(:add_members_change_status.t, :action => :change_member_status,
               :id => @project.id, :candidate => user.id) %>
-  <%= link_to(:app_add.t, :action => :add_one_member,
+  <%= link_to(:ADD.t, :action => :add_one_member,
               :id => @project.id, :candidate => user.id) %>
   <br/>
 <% end %>

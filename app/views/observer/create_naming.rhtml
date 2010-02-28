@@ -3,7 +3,7 @@
   @title = :create_naming_title.t(:id => @observation.id)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :observation.l),
+    add_tab(:cancel_and_show.t(:type => :observation),
             :action => 'show_observation', :id => @observation.id,
             :params => query_params)
   end
@@ -11,7 +11,7 @@
 
 <% form_tag(:action => 'create_naming', :id => @observation.id,
             :approved_name => @what, :params => query_params) do %>
-  <br/><center><%= submit_tag :app_create.l %></center>
+  <br/><center><%= submit_tag :CREATE.l %></center>
 
   <table width="100%" cellpadding="10">
     <tr>
@@ -21,7 +21,7 @@
         }) %>
         <%= render(:partial => 'form_naming', :locals => {
           :action       => 'create_naming',
-          :button_name  => :app_create.l,
+          :button_name  => :CREATE.l,
           :show_reasons => true,
         }) %>
       </td>
@@ -31,5 +31,5 @@
     </tr>
   </table>
   
-  <center><%= submit_tag :app_create.l %></center>
+  <center><%= submit_tag :CREATE.l %></center>
 <% end %>

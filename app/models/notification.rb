@@ -85,7 +85,7 @@ class Notification < AbstractModel
     result = "Unrecognized notification flavor"
     case self.flavor
     when :name
-      result = "#{:app_tracking.l} #{:name.l}: #{self.object ? self.object.display_name : '?'}"
+      result = "#{:TRACKING.l} #{:name.l}: #{self.object ? self.object.display_name : '?'}"
     end
     result
   end

@@ -2,11 +2,9 @@
   @title = :show_name_title.t(:name => @name.display_name)
   Textile.register_name(@name)
 
-  draw_interest_icons(@name, @interest) if @user
-
   # Google Images | Distribution Map | Email Tracking
   new_tab_set do
-    add_tab(:app_google_images.t,
+    add_tab(:google_images.t,
             "http://images.google.com/images?q=#{@name.text_name}")
     if @data != []
       add_tab(:show_name_distribution_map.t, :action => 'map', :id => @name.id,
@@ -27,46 +25,30 @@
     add_tab(:show_name_change_synonyms.t, :action => 'change_synonyms',
             :id => @name.id, :params => query_params)
     if @name.deprecated
-      add_tab(:app_approve.t, :action => 'approve_name', :id => @name.id,
+      add_tab(:APPROVE.t, :action => 'approve_name', :id => @name.id,
               :params => query_params)
     else
-      add_tab(:app_deprecate.t, :action => 'deprecate_name', :id => @name.id,
+      add_tab(:DEPRECATE.t, :action => 'deprecate_name', :id => @name.id,
               :params => query_params)
     end
   end
 
-  # Prev | Index | Next
-  new_tab_set do
-    add_tab(:app_prev.t, :action => 'prev_name', :id => @name.id,
-            :params => query_params)
-    add_tab(:app_index.t, :action => 'index_name', :id => @name.id,
-            :params => query_params)
-    add_tab(:app_next.t, :action => 'next_name', :id => @name.id,
-            :params => query_params)
-  end
+  draw_prev_next_tabs(@name)
+  draw_interest_icons(@name)
 %>
 
 <table cellpadding="5" width="100%">
   <tr>
+    <%
+    # ----------------------------------------
+    #  Show the basic name information
+    # ----------------------------------------
+    %>
     <td valign="top" width="50%">
       <p>
+        <%= render(:partial => 'name', :object => @name) %>
+
         <% approved_synonyms, deprecated_synonyms = @name.sort_synonyms %>
-
-        <%= :app_rank.t %>: <%= rank_as_string(@name.rank) %><br/>
-        <%= :app_name_status.t %>: <%= @name.status %>
-          <% if @name.is_misspelling? %>
-            (<%= :app_misspelled.t %>)
-          <% end %><br/>
-        <%= :app_name.t %>: <%= h(@name.text_name) %><br/>
-        <%= :app_author.t %>: <%= sanitize(@name.author.to_s).t %><br/>
-        <%= :app_citation.t %>: <%= sanitize(@name.citation.to_s).t %><br/>
-
-        <% if @name.is_misspelling? && approved_synonyms != [@name.correct_spelling] %>
-          <%= :show_name_misspelling_correct.t %>:
-            <%= link_to(@name.correct_spelling.display_name.t,
-                        :action => :show_name, :id => @name.correct_spelling_id,
-                        :params => query_params) %><br/>
-        <% end %>
         <% if approved_synonyms != []
           links = approved_synonyms.map do |n|
             link_to(n.display_name.t, :action => "show_name", :id => n.id,
@@ -83,13 +65,7 @@
           <%= :show_name_deprecated_synonyms.t %>: <%= links.join(', ') %><br/>
         <% end %>
 
-        <%= :app_version.t %>: <%= @name.version %><br/>
-        <% if @previous_version.to_s != '' %>
-          <%= link_to("#{:show_name_previous_version.t}: %d" % @previous_version,
-                      :action => 'show_past_name', :id => @name.id,
-                      :version => @previous_version,
-                      :params => query_params) %><br/>
-        <% end %>
+        <%= show_previous_version(@name) %>
 
         <% for parent in @parents %>
           <%= rank_as_string(@parents[0].rank) %>:
@@ -99,121 +75,39 @@
       </p>
     </td>
 
+    <%
+    # ----------------------------------------
+    #  Show a list of NameDescriptions.
+    # ----------------------------------------
+    %>
     <td valign="top" width="50%">
-      <p>
-        <% if @existing_drafts or @user_projects %>
-          <span class='HelpNote'>
-            <%= :show_name_draft_help.t %><br/>
-          </span>
-        <% end %>
-        <% if @existing_drafts %>
-          <%= :show_name_existing_drafts.t %><br/>
-          <% for draft in @existing_drafts %>
-            &nbsp;&nbsp;
-            <%= link_to(draft.project.title.t, :controller => :project,
-                        :action => 'show_draft', :id => draft.id) %>
-            (<%= user_link(draft.user) %>)<br/>
-          <% end %>
-        <% end %>
-      </p>
-
-      <p>
-        <% if @user_projects %>
-          <%= :show_name_create_draft.t %><br/>
-          <% for project in @user_projects %>
-            &nbsp;&nbsp;
-            <%= link_to(project.title.t, :controller => :project,
-                        :action => 'create_or_edit_draft',
-                        :project => project.id, :name => @name.id) %><br/>
-          <% end %>
-        <% end %>
-      </p>
+      <%= show_alt_descriptions(@name, @projects) %>
     </td>
   </tr>
 </table>
+<hr/><br/>
 
-<% if @name.has_any_notes? %>
-  <hr/>
-  <% unless @name.ok_for_export %>
-    <%= :no_export.t %><br/>
-  <% end %>
-
-  <%= :show_name_content_status.t %>: <%= @name.review_status.t %><br/>
-  <% if @name.reviewer %>
-    <span class="HelpNote">
-      &nbsp;&nbsp;(<%= :show_name_latest_review.t(
-        :date => @name.last_review ? @name.last_review.strftime("%Y-%m-%d") : :app_unknown.t,
-        :user => user_link(@name.reviewer, @name.reviewer.login)
-      ) %>)
-    </span><br/>
-  <% end %>
-
-  <% if @is_reviewer %>
-    &nbsp;&nbsp;<%= link_to(:unvetted.t, :action => 'set_review_status',
-                            :value => :unvetted, :id => @name.id,
-                            :params => query_params) %><br/>
-    &nbsp;&nbsp;<%= link_to(:vetted.t, :action => 'set_review_status',
-                            :value => :vetted, :id => @name.id,
-                            :params => query_params) %><br/>
-    &nbsp;&nbsp;<%= link_to(:inaccurate.t, :action => 'set_review_status',
-                            :value => :inaccurate, :id => @name.id,
-                            :params => query_params) %><br/>
-    <% if @name.ok_for_export %>
-      &nbsp;&nbsp;<%= link_to(:no_export.t, :action => 'set_export_status',
-                              :value => false, :id => @name.id,
-                              :params => query_params) %><br/>
-    <% else %>
-      &nbsp;&nbsp;<%= link_to(:ok_for_export.t, :action => 'set_export_status',
-                              :value => true, :id => @name.id,
-                              :params => query_params) %><br/>
-    <% end %>
-  <% end %>
-  <br/>
-
-  <% odd_or_even = 0
-  for f in Name.all_note_fields
-    value = @name.send(f).to_s
-    if value != ''
-      odd_or_even = 1 - odd_or_even %>
-      <%= "form_names_#{f}".to_sym.t %>:
-      <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-        <%= sanitize(value).tpl %>
-      </div><br/>
-    <% end %>
-  <% end %>
-
-  <center>
-    <p>
-      <%= user_list(:show_name_description_author.t, @name.authors) %>
-      <%
-        is_author = @name.authors.member?(@user)
-        if @name.authors != [] %>
-        <% unless is_author %>
-          <%= link_to(:show_name_author_request.t, :action => 'author_request',
-                      :id => @name.id) %>&nbsp;
-        <% end %>
-      <% end %>
-      <% if (@name.authors == []) or is_author or @is_reviewer %>
-        &nbsp;<%= link_to(:review_authors_review_authors.t,
-                          :action => 'review_authors', :id => @name.id,
-                          :params => query_params)%>
-      <% end %>
-      <br/>
-      <%= user_list(:show_name_description_editor.t, @name.editors) %>
-    </p>
-    <% if @name.license %>
-      <%= render(:partial => "shared/form_#{@name.license.form_name}") %>
-    <% end %>
-  </center>
+<%
+# ----------------------------------------
+#  Show the selected NameDescription.
+# ----------------------------------------
+if @description.has_any_notes? %>
+  <%= show_embedded_description_title(@description, @name) %>
+  <%= render(:partial => 'name_description', :object => @description,
+             :locals => { :review => true }) %>
+  <br/><hr/><br/>
 <% end %>
 
-<% if @children_data && @children_data.length > 0 %>
-  <hr/>
+<%
+# ----------------------------------------
+#  Draw the paginated list of children.
+# ----------------------------------------
+if @children_data && @children_data.length > 0 %>
   <p>
     <a id="children"></a>
-    <%= rank_as_plural_string(@children_data[0].rank) %>:
+    <big><%= rank_as_plural_string(@children_data[0].rank) %></big>:
     <%= if @children_data.length < @children_query.num_results
-      link_to("(#{:app_show_all.t})", :action => 'list_names',
+      link_to("(#{:show_all.t})", :action => 'list_names',
               :params => query_params(@children_query))
     end %>
   </p>
@@ -225,14 +119,15 @@
       <% end %>
     </p>
   <% end %>
+  <br/><hr/><br/>
 <% end %>
 
 <%
-# -----------------------------------------
-#  Draw the three groups of observations.
-# -----------------------------------------
+# ----------------------------------------
+#  Draw the four groups of observations.
+# ----------------------------------------
 num_sects = 0
-for sect in ['consensus', 'synonym', 'other']
+for sect in ['consensus', 'synonym', 'other', 'subtaxa']
   if sect == 'consensus'
     head  = :show_name_observations.t + ':'   # Displayed above group.
     data  = @consensus_data                   # Data returned by sql query.
@@ -243,7 +138,7 @@ for sect in ['consensus', 'synonym', 'other']
     data  = @synonym_data
     pages = @synonym_pages
     query = @synonym_query
-  else
+  elsif sect == 'other'
     head  = %(
       #{:show_name_other_observations.t}:<br/>
       <span class="HelpNote">
@@ -253,17 +148,21 @@ for sect in ['consensus', 'synonym', 'other']
     data  = @other_data
     pages = @other_pages
     query = @other_query
+  elsif sect == 'subtaxa'
+    head  = :show_name_subtaxa_observations.t + ':'
+    data  = @subtaxa_data
+    pages = @subtaxa_pages
+    query = @subtaxa_query
   end
 
   # Skip completely if group is empty.
   if data && data.length > 0
     num_sects += 1 %>
-    <br/><hr/>
     <p>
       <a id="<%=sect%>"></a>
-      <%= head %>
+      <big><%= head %></big>
       <%= if data.length < query.num_results
-        link_to("(#{:app_show_all.t})", :controller => 'observer',
+        link_to("(#{:show_all.t})", :controller => 'observer',
                 :action => 'index_observation', :params => query_params(query))
       end %>
     </p>
@@ -297,7 +196,7 @@ for sect in ['consensus', 'synonym', 'other']
               <%= :observation_made_confidence.t %>:
                 <%= v = obs.vote_cache
                 if v.nil? || v == ''
-                  :app_no_votes.t
+                  :show_name_no_votes.t
                 else
                   (v.to_f*100/3).round.to_s + "%"
                 end %>
@@ -306,21 +205,8 @@ for sect in ['consensus', 'synonym', 'other']
         <% end %>
       </table>
     <% end %>
+    <br/><hr/><br/>
   <% end %>
 <% end %>
 
-<p>
-  <span class="Date">
-    <%= :app_created.t(:type => :app_name.l,
-                       :date => @name.created.web_time) %><br/>
-    <%= :app_last_modified.t(:user => user_link(@name.user),
-                             :date => @name.modified.web_time) %><br/>
-    <%= :app_viewed.t(:date => @name.last_view.web_time,
-                      :times => @name.num_views == 1 ? :app_one_time.l :
-                        :app_many_times.l(:num => @name.num_views)) %><br/>
-    <% if @name.rss_log_id %>
-      <%= link_to(:app_show_object.t(:type => :log.t), :controller => 'observer',
-                  :action => 'show_rss_log', :id => @name.rss_log_id) %>
-    <% end %>
-  </span>
-</p>
+<%= show_object_footer(@name) %>

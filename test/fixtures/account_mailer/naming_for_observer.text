@@ -7,7 +7,7 @@ Content-Type: text/plain; charset=utf-8
 
 Research Request
 
-Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your Observation Agaricus campestris L. (4):
+Mary Newbie (mary@collectivesource.com) asked the Mushroom Observer website to forward the following message to you about your observation Agaricus campestris L. (4):
 
 A note about http://localhost:3000/4 for rolf
 
@@ -16,7 +16,7 @@ A note about http://localhost:3000/4 for rolf
 It is entirely up to you whether you want to reply to Mary Newbie (mary@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this Observation: http://localhost:3000/observer/show_observation/4
+Show this observation: http://localhost:3000/observer/show_observation/4
 Latest changes at Mushroom Observer: http://localhost:3000
 
 If you feel this user is abusing this service please forward this entire email message to: webmaster@localhost

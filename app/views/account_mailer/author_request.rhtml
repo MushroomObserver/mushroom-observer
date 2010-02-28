@@ -1,15 +1,17 @@
 <%
+  type = @object.class.name.underscore
+
   intro = :email_author_request_intro.l(
     :user => @sender.legal_name,
     :email => @sender.email,
-    :object => @object.unique_format_name
+    :object => @object.parent.unique_format_name
   )
 
   handy_links = :email_handy_links
 
   links = []
   links.push([:author_request_add_author.l,
-    "#{HTTP_DOMAIN}/#{@object.show_controller}/review_authors/#{@object.id}?add=#{@sender.id}"])
+    "#{HTTP_DOMAIN}/observer/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
   links.push([:email_links_show_user.l,
     "#{HTTP_DOMAIN}/observer/show_user/#{@sender.id}"])
   links.push([:email_links_latest_changes.l,

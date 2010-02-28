@@ -12,7 +12,7 @@
   handy_links += ' ' + :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation.l),
+  links.push([:email_links_show_object.l(:type => :observation),
     "#{HTTP_DOMAIN}/#{@observation.id}"])
   links.push([:email_links_stop_sending.l,
     "#{HTTP_DOMAIN}/account/no_email_general_question/#{@user.id}"])

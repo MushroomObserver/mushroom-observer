@@ -4,9 +4,9 @@
   intro = :email_name_proposal_intro.l(:id => @observation.id)
 
   fields = ""
-  fields += "*#{:name.l}:* #{@naming.format_name}\n"
-  fields += "*#{:app_time.l}:* #{@naming.created.email_time}\n"
-  fields += "*#{:app_by.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
+  fields += "*#{:Name.l}:* #{@naming.format_name}\n"
+  fields += "*#{:Time.l}:* #{@naming.created.email_time}\n"
+  fields += "*#{:By.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
   for reason in @naming.get_reasons
     if reason.used?
       if reason.notes == ''
@@ -20,9 +20,9 @@
   handy_links = :email_handy_links
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation.l),
+  links.push([:email_links_show_object.l(:type => :observation),
     "#{HTTP_DOMAIN}/#{@observation.id}"])
-  links.push([:email_links_not_interested.l(:type => :observation.l),
+  links.push([:email_links_not_interested.l(:type => :observation),
     "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
     "#{HTTP_DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching

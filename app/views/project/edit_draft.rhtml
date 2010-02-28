@@ -3,15 +3,15 @@
 
   # Show Project | Show Draft (Cancel)
   new_tab_set do
-    add_tab(:app_show_object.t(:type => :project.t), :action => 'show_project',
+    add_tab(:show_object.t(:type => :project), :action => 'show_project',
             :id => @draft_name.project_id)
-    add_tab(:app_cancel.t(:type => :draft.l), :action => 'show_draft',
+    add_tab(:cancel_and_show.t(:type => :draft), :action => 'show_draft',
             :id => @draft_name.id)
   end
 %>
 
 <% form_tag(:action => 'edit_draft', :id => @draft_name.id) do %>
-  <br/><center><%= submit_tag :app_save_changes.l %></center>
+  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
   
   <%= render(:partial => 'shared/textilize_help') %><br/>
 
@@ -27,7 +27,7 @@
       <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.t %></span><br/>
       <%= text_area('draft_name', "#{f}", :cols => 80) %>
     </p>
-    <center><%= submit_tag :app_save_changes.l %></center>
+    <center><%= submit_tag :SAVE_EDITS.l %></center>
   <% end %>
 
 <% end %>

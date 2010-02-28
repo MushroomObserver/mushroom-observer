@@ -54,14 +54,21 @@
 
       <%= :users_by_contribution_2.tp %>
 
+      <%
+        v1 = SiteData::FIELD_WEIGHTS[:images]
+        v2 = SiteData::FIELD_WEIGHTS[:name_descriptions_editors]
+        v3 = SiteData::FIELD_WEIGHTS[:observations]
+        v4 = SiteData::FIELD_WEIGHTS[:namings]
+        v5 = SiteData::FIELD_WEIGHTS[:votes]
+      %>
       <table style="margin-left:20px">
-        <tr><td></td><td>3 * <%= SiteData::FIELD_WEIGHTS[:images] %> &nbsp; </td><td>(<%= :users_by_contribution_2a.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= SiteData::FIELD_WEIGHTS[:editors_names] %></td><td>(<%= :users_by_contribution_2b.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= SiteData::FIELD_WEIGHTS[:observations] %></td><td>(<%= :users_by_contribution_2c.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= SiteData::FIELD_WEIGHTS[:namings] %></td><td>(<%= :users_by_contribution_2d.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= SiteData::FIELD_WEIGHTS[:votes] %></td><td>(<%= :users_by_contribution_2e.t %>)</td></tr>
+        <tr><td></td><td>3 * <%= v1 %> &nbsp; </td><td>(<%= :users_by_contribution_2a.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v2 %></td><td>(<%= :users_by_contribution_2b.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v3 %></td><td>(<%= :users_by_contribution_2c.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v4 %></td><td>(<%= :users_by_contribution_2d.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v5 %></td><td>(<%= :users_by_contribution_2e.t %>)</td></tr>
         <tr><td colspan="3"><hr/></td></tr>
-        <tr><td></td><td colspan="2"><%= 3*SiteData::FIELD_WEIGHTS[:images] + SiteData::FIELD_WEIGHTS[:editors_names] + SiteData::FIELD_WEIGHTS[:observations] + SiteData::FIELD_WEIGHTS[:namings] + SiteData::FIELD_WEIGHTS[:votes] %> <%= :users_by_contribution_2f.t %></td></tr>
+        <tr><td></td><td colspan="2"><%= 3*v1 + v2 + v3 + v4 + v5 %> <%= :users_by_contribution_2f.t %></td></tr>
       </table><br/>
 
       <%= :users_by_contribution_3.tp %>

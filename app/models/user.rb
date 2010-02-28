@@ -162,8 +162,9 @@
 #  change_password::    Change password (on an existing record).
 #  in_group::           Is User in a given UserGroup?
 #  remember_me?::       Does User want us to use the autologin cookie thing?
-#  ignoring?::          Is User ignoring a given object?
+#  interest_in::        Return state of User's interest in a given object.
 #  watching?::          Is User watching a given object?
+#  ignoring?::          Is User ignoring a given object?
 #  sum_bonuses::        Add up all the bonuses User has earned.
 #
 #  ==== Object ownership
@@ -175,7 +176,7 @@
 #  namings::            Naming's they've proposed.
 #  notifications::      Notification's they've requested.
 #  observations::       Observation's they've posted.
-#  projects::           Project's they've created.
+#  projects_created::   Project's they've created.
 #  queued_emails::      QueuedEmail's they're scheduled to receive.
 #  species_lists::      SpeciesList's they've created.
 #  votes::              Vote's they've cast.
@@ -189,6 +190,8 @@
 #  edited_names::       Name's they've edited.
 #  authored_locations:: Location's they've authored.
 #  edited_locations::   Location's they've edited.
+#  projects_admin::     Projects's they're an admin for.
+#  projects_member::    Projects's they're a member of.
 #
 #  ==== Alert methods
 #  alert_user::         Which admin created the alert.
@@ -226,7 +229,7 @@
 #  +admin+ and +created_here+, a flag that is set to true on the server in
 #  which the account was first created.  Here is a summary of attributes that
 #  differ from server to server: (In this example the admin User, Fred, was
-#  created on "us1" server.) 
+#  created on "us1" server.)
 #
 #    Attribute      Local Server    Remote Server
 #    id             1502            1513
@@ -246,25 +249,27 @@ class User < AbstractModel
   has_many :images
   has_many :interests
   has_many :locations
+  has_many :location_descriptions
   has_many :names
+  has_many :name_descriptions
   has_many :namings
   has_many :notifications
   has_many :observations
-  has_many :projects
+  has_many :projects_created, :class_name => "Project"
   has_many :queued_emails
   has_many :species_lists
   has_many :test_add_image_logs
   has_many :votes
 
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
-  has_many :reviewed_names, :class_name => "Name", :foreign_key => "reviewer_id"
+  has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"
   has_many :to_emails, :class_name => "QueuedEmail", :foreign_key => "to_user_id"
 
-  has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup', :join_table => 'user_groups_users'
-  has_and_belongs_to_many :authored_names,     :class_name => 'Name',      :join_table => 'authors_names'
-  has_and_belongs_to_many :edited_names,       :class_name => 'Name',      :join_table => 'editors_names'
-  has_and_belongs_to_many :authored_locations, :class_name => 'Location',  :join_table => 'authors_locations'
-  has_and_belongs_to_many :edited_locations,   :class_name => 'Location',  :join_table => 'editors_locations'
+  has_and_belongs_to_many :user_groups,        :class_name => 'UserGroup',            :join_table => 'user_groups_users'
+  has_and_belongs_to_many :authored_names,     :class_name => 'NameDescription',      :join_table => 'name_descriptions_authors'
+  has_and_belongs_to_many :edited_names,       :class_name => 'NameDescription',      :join_table => 'name_descriptions_editors'
+  has_and_belongs_to_many :authored_locations, :class_name => 'LocationDescription',  :join_table => 'location_descriptions_authors'
+  has_and_belongs_to_many :edited_locations,   :class_name => 'LocationDescription',  :join_table => 'location_descriptions_editors'
 
   belongs_to :image         # mug shot
   belongs_to :license       # user's default license
@@ -273,9 +278,11 @@ class User < AbstractModel
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
+  after_create  {|user| UserGroup.create_user(user)}
+  after_destroy {|user| UserGroup.destroy_user(user)}
 
   # This causes the data structures in these fields to be serialized
-  # automatically with YAML and stored as plain old text strings. 
+  # automatically with YAML and stored as plain old text strings.
   serialize :bonuses
   serialize :alert
 
@@ -306,7 +313,7 @@ class User < AbstractModel
   end
 
   # Tell User model which User is currently logged in (if any).  This is used
-  # by the +autologin+ filter. 
+  # by the +autologin+ filter.
   def self.current=(x)
     @@user = x
   end
@@ -419,12 +426,34 @@ class User < AbstractModel
     self.remember_me
   end
 
+  # Has this user expressed positive or negative interest in a given object?
+  # Returns +:watching+ or +:ignoring+ if so, else +nil+.  Caches result.
+  #
+  #   case user.interest_in(observation)
+  #   when :watching; ...
+  #   when :ignoring; ...
+  #   end
+  #
+  def interest_in(object)
+    @interests ||= {}
+    @interests["#{object.class.name} #{object.id}"] ||= begin
+      state = Interest.connection.select_value %(
+        SELECT state FROM interests
+        WHERE user_id = #{id}
+          AND object_type = '#{object.class.name}'
+          AND object_id = #{object.id}
+        LIMIT 1
+      )
+      state == '1' ? :watching : state == '0' ? :ignoring : nil
+    end
+  end
+
   # Has this user expressed positive interest in a given object?
   #
   #   user.watching?(observation)
   #
   def watching?(object)
-    !interests.select {|i| i.state && i.object == object}.empty?
+    interest_in(object) == :watching
   end
 
   # Has this user expressed negative interest in a given object?
@@ -432,7 +461,7 @@ class User < AbstractModel
   #   user.ignoring?(name)
   #
   def ignoring?(object)
-    !interests.select {|i| !i.state && i.object == object}.empty?
+    interest_in(object) == :ignoring
   end
 
   # Sum up all the bonuses the User has earned.
@@ -445,9 +474,27 @@ class User < AbstractModel
     end
   end
 
-  # Get list of user to prime auto-completer.  Returns a simple Array of up to
+  # Return an Array of Project's that this User is an admin for.
+  def projects_admin
+    Project.find_by_sql %(
+      SELECT projects.* FROM projects, user_groups_users
+      WHERE projects.admin_group_id = user_groups_users.user_group_id
+        AND user_groups_users.user_id = #{id}
+    )
+  end
+
+  # Return an Array of Project's that this User is a member of.
+  def projects_member
+    Project.find_by_sql %(
+      SELECT projects.* FROM projects, user_groups_users
+      WHERE projects.user_group_id = user_groups_users.user_group_id
+        AND user_groups_users.user_id = #{id}
+    )
+  end
+
+  # Get list of users to prime auto-completer.  Returns a simple Array of up to
   # 1000 (by contribution or created within the last month) login String's
-  # (with full name in parens). 
+  # (with full name in parens).
   def self.primer
     result = []
     if !File.exists?(USER_PRIMER_CACHE_FILE) ||
@@ -470,9 +517,11 @@ class User < AbstractModel
     return result
   end
 
-  #-----------------------------
-  #  Alert stuff.
-  #---------------------------++
+  ##############################################################################
+  #
+  #  :section: Alert Stuff
+  #
+  ##############################################################################
 
   # List of all allowed alert types.
   #
@@ -562,8 +611,8 @@ protected
 
   # This is a +before_create+ callback that encrypts the password before saving
   # the new user record.  (Not needed for updates because we use
-  # change_password for that instead.) 
-  def crypt_password
+  # change_password for that instead.)
+  def crypt_password # :nodoc:
     write_attribute("password", self.class.sha1(password))
   end
 

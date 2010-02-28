@@ -1,0 +1,194 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+fungi_admins:
+  name_description_id: 1
+  user_group_id: 1
+
+coprinus_comatus_admins:
+  name_description_id: 2
+  user_group_id: 1
+
+agaricus_campestris_admins:
+  name_description_id: 3
+  user_group_id: 1
+
+conocybe_filaris_admins:
+  name_description_id: 4
+  user_group_id: 1
+
+amanita_baccata_arora_admins:
+  name_description_id: 5
+  user_group_id: 1
+
+amanita_baccata_borealis_admins:
+  name_description_id: 6
+  user_group_id: 1
+
+lepiota_rachodes_admins:
+  name_description_id: 7
+  user_group_id: 1
+
+lepiota_rhacodes_admins:
+  name_description_id: 8
+  user_group_id: 1
+
+macrolepiota_rachodes_admins:
+  name_description_id: 9
+  user_group_id: 1
+
+macrolepiota_rhacodes_admins:
+  name_description_id: 10
+  user_group_id: 1
+
+chlorophyllum_rachodes_admins:
+  name_description_id: 11
+  user_group_id: 1
+
+chlorophyllum_rhacodes_admins:
+  name_description_id: 12
+  user_group_id: 1
+
+lactarius_alpinus_admins:
+  name_description_id: 13
+  user_group_id: 1
+
+lactarius_alpigenes_admins:
+  name_description_id: 14
+  user_group_id: 1
+
+lactarius_kuehneri_admins:
+  name_description_id: 15
+  user_group_id: 1
+
+lactarius_subalpinus_admins:
+  name_description_id: 16
+  user_group_id: 1
+
+psalliota_admins:
+  name_description_id: 17
+  user_group_id: 1
+
+agaricus_admins:
+  name_description_id: 18
+  user_group_id: 1
+
+agaricus_campestrus_admins:
+  name_description_id: 19
+  user_group_id: 1
+
+agaricus_campestras_admins:
+  name_description_id: 20
+  user_group_id: 1
+
+agaricus_campestros_admins:
+  name_description_id: 21
+  user_group_id: 1
+
+coprinellus_micaceus_admins:
+  name_description_id: 22
+  user_group_id: 1
+
+coprinellus_micaceus_no_author_admins:
+  name_description_id: 23
+  user_group_id: 1
+
+strobilurus_diminutivus_no_author_admins:
+  name_description_id: 24
+  user_group_id: 1
+
+pluteus_petasatus_approved_admins:
+  name_description_id: 25
+  user_group_id: 1
+
+pluteus_petasatus_deprecated_admins:
+  name_description_id: 26
+  user_group_id: 1
+
+lepiota_admins:
+  name_description_id: 27
+  user_group_id: 1
+
+chlorophyllum_admins:
+  name_description_id: 28
+  user_group_id: 1
+
+bugs_bunny_one_admins:
+  name_description_id: 29
+  user_group_id: 1
+
+bugs_bunny_two_admins:
+  name_description_id: 30
+  user_group_id: 1
+
+russula_brevipes_no_author_admins:
+  name_description_id: 31
+  user_group_id: 1
+
+russula_brevipes_author_notes_admins:
+  name_description_id: 32
+  user_group_id: 1
+
+russula_cremoricolor_no_author_notes_admins:
+  name_description_id: 33
+  user_group_id: 1
+
+russula_cremoricolor_author_notes_admins:
+  name_description_id: 34
+  user_group_id: 1
+
+lentinellus_ursinus_author1_admins:
+  name_description_id: 35
+  user_group_id: 1
+
+lentinellus_ursinus_author2_admins:
+  name_description_id: 36
+  user_group_id: 1
+
+macrocybe_pegler_admins:
+  name_description_id: 37
+  user_group_id: 1
+
+macrocybe_titans_admins:
+  name_description_id: 38
+  user_group_id: 1
+
+boletus_edulis_admins:
+  name_description_id: 39
+  user_group_id: 1
+
+peltigera_admins:
+  name_description_id: 40
+  user_group_id: 1
+
+petigera_admins:
+  name_description_id: 41
+  user_group_id: 1
+
+suillus_admins:
+  name_description_id: 42
+  user_group_id: 1
+
+suillus_by_white_admins:
+  name_description_id: 43
+  user_group_id: 1
+
+suilus_admins:
+  name_description_id: 44
+  user_group_id: 1
+
+draft_coprinus_comatus_admins:
+  name_description_id: 45
+  user_group_id: 3
+
+draft_agaricus_campestris_admins:
+  name_description_id: 46
+  user_group_id: 3
+
+draft_boletus_edulis_admins:
+  name_description_id: 47
+  user_group_id: 5
+
+draft_lactarius_alpinus_admins:
+  name_description_id: 48
+  user_group_id: 3
+

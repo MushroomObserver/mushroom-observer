@@ -2,14 +2,14 @@
   @title = :comment_edit_title.t(:name => @object.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :comment.l), :action => 'show_comment',
+    add_tab(:cancel_and_show.t(:type => :comment), :action => 'show_comment',
             :id => @comment.id, :params => query_params)
   end
 %>
 
 <% form_tag(:action => 'edit_comment', :id => @comment.id,
             :params => query_params) do %>
-  <br/><center><%= submit_tag :app_save_changes.l %></center>
+  <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
 
   <%= render(:partial => 'form_comments') %>
 

@@ -99,8 +99,8 @@ module ApplicationHelper::Paginator
       to   = this + size
       
       result = []
-      pstr = :app_prev.t
-      nstr = :app_next.t
+      pstr = "« #{:PREV.t}"
+      nstr = "#{:NEXT.t} »"
       result << pagination_link(pstr, this-1, arg, args) if this > 1
       result << '|'                                      if this > 1
       result << pagination_link(1, 1, arg, args)         if from > 1

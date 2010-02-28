@@ -1,38 +1,69 @@
 <%
-  watching = @user.watching?(@new_location)
-  email_type = @new_location.authors.member?(@user) ? 'author' : 'editor'
+  watching = @user.watching?(@new_loc)
   is_now = :email_field_is_now.l
 
+  # Why is this user being notified?  If the base Location changed, then look
+  # at all the LocationDescriptions, else only need to look at the
+  # LocationDescription that actually changed.  If notifiable for multiple
+  # reasons, choose the least restrictive -- i.e. 'all' first, then admin,
+  # editor and lastly author. 
+  email_type = if @user.email_locations_all
+    'all'
+  elsif @user.watching?(@new_loc)
+    'interest'
+  elsif @new_loc.version != @old_loc.version
+    @new_loc.descriptions.any? {|d| d.is_editor?(@user)} ? 'editor' :
+    @new_loc.descriptions.any? {|d| d.is_author?(@user)} ? 'author' :
+    @new_loc.descriptions.any? {|d| d.is_admin?(@user)}  ? 'admin'  : nil
+  else
+    @new_desc.is_editor?(@user) ? 'editor' :
+    @new_desc.is_author?(@user) ? 'author' :
+    @new_desc.is_admin?(@user)  ? 'admin'  : nil
+  end
+
   intro = :email_object_change_intro.l(
-    :type => :location.l,
-    :name => "#{@old_location.display_name} (#{@new_location.id})"
+    :type => :location,
+    :name => "#{@old_loc.display_name} (#{@new_loc.id})"
   )
 
   fields = ""
-  fields += "*#{:app_time.l}:* #{@time.email_time}\n"
-  fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+  fields += "*#{:Time.l}:* #{@time.email_time}\n"
+  fields += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+
+  license = @new_desc.license
 
   one_liners = ''
-  one_liners += "*#{:app_name.l} #{is_now}:* #{@new_location.display_name}\n" if @new_location.display_name != @old_location.display_name
-  one_liners += "*#{:app_north_edge.l} #{is_now}:* #{@new_location.north}\n"  if @new_location.north != @old_location.north
-  one_liners += "*#{:app_south_edge.l} #{is_now}:* #{@new_location.south}\n"  if @new_location.south != @old_location.south
-  one_liners += "*#{:app_east_edge.l} #{is_now}:* #{@new_location.east}\n"    if @new_location.east  != @old_location.east
-  one_liners += "*#{:app_west_edge.l} #{is_now}:* #{@new_location.west}\n"    if @new_location.west  != @old_location.west
-  one_liners += "*#{:app_highest.l} #{is_now}:* #{@new_location.high}\n"      if @new_location.high  != @old_location.high
-  one_liners += "*#{:app_highest.l} #{is_now}:* #{@new_location.low}\n"       if @new_location.low   != @old_location.low
+  one_liners += "*#{:Name.l} #{is_now}:* #{@new_loc.display_name}\n"          if @new_loc.display_name != @old_loc.display_name
+  one_liners += "*#{:email_field_north.l} #{is_now}:* #{@new_loc.north}\n"    if @new_loc.north != @old_loc.north
+  one_liners += "*#{:email_field_south.l} #{is_now}:* #{@new_loc.south}\n"    if @new_loc.south != @old_loc.south
+  one_liners += "*#{:email_field_east.l} #{is_now}:* #{@new_loc.east}\n"      if @new_loc.east  != @old_loc.east
+  one_liners += "*#{:email_field_west.l} #{is_now}:* #{@new_loc.west}\n"      if @new_loc.west  != @old_loc.west
+  one_liners += "*#{:show_location_highest.l} #{is_now}:* #{@new_loc.high}\n" if @new_loc.high  != @old_loc.high
+  one_liners += "*#{:show_location_highest.l} #{is_now}:* #{@new_loc.low}\n"  if @new_loc.low   != @old_loc.low
+  one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"        if @new_desc.license_id != @old_desc.license_id && license
 
   many_liners = []
-  many_liners.push([:app_notes.l, @new_location.notes]) if @new_location.notes != @old_location.notes
+  for field in LocationDescription.all_note_fields
+    old_val = @old_desc.send(field)
+    new_val = @new_desc.send(field)
+    many_liners.push([('form_locations_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+  end
 
   handy_links = :email_handy_links
+  if email_type
+    tag = :"email_object_change_reason_#{email_type}".to_sym
+    handy_links = tag.l(:type => :location) + ' ' + handy_links.l
+  end
 
   links = []
-  links.push([:email_links_show_object.l(:type => :location.l),
-    "#{HTTP_DOMAIN}/location/show_location/#{@new_location.id}"])
-  links.push([:email_links_not_interested.l(:type => :location.l),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_location.id}&type=Location&user=#{@user.id}&state=-1"])
-  links.push([:email_links_stop_sending.l,
-    "#{HTTP_DOMAIN}/account/no_email_locations_#{email_type}/#{@user.id}"]) unless watching
+  links.push([:email_links_show_object.l(:type => :location),
+    "#{HTTP_DOMAIN}/location/show_location/#{@new_loc.id}"])
+  links.push([:email_links_not_interested.l(:type => :location),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@new_loc.id}&type=Location&user=#{@user.id}&state=-1"])
+  if email_type && email_type != 'interest'
+    links.push([:email_links_stop_sending.l,
+      "#{HTTP_DOMAIN}/account/no_email_locations_#{email_type}/#{@user.id}"]) unless watching
+  end
   links.push([:email_links_change_prefs.l,
     "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.l,

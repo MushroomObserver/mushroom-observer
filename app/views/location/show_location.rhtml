@@ -1,33 +1,46 @@
 <%
-  @title ||= :show_location_title.t(:name => @location.display_name)
+  @title = :show_location_title.t(:name => @location.display_name)
 
   new_tab_set do
     add_tab(:show_location_observations.t, :controller => "observer",
             :action => "observations_at_location", :id => @location.id,
             :params => query_params)
-    add_tab(:location_all.t, :action => 'list_locations')
+    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
     add_tab(:show_location_create.t, :action => 'create_location',
             :params => query_params)
     add_tab(:show_location_edit.t, :action => 'edit_location',
             :id => @location.id, :params => query_params)
-    if @previous_version
-      add_tab(:show_location_older_versions.t,
-              :action => 'show_past_location', :id => @location.id,
-              :version => @previous_version)
+    if is_in_admin_mode?
+      add_tab(:show_location_destroy.t, :action => 'destroy_location',
+              :id => @location.id, :params => query_params)
     end
   end
 
-  new_tab_set do
-    add_tab(:app_prev.t, :action => 'prev_location', :id => @location.id,
-            :params => query_params)
-    add_tab(:app_index.t, :action => 'index_location', :id => @location.id,
-            :params => query_params)
-    add_tab(:app_next.t, :action => 'next_location', :id => @location.id,
-            :params => query_params)
-  end
-
-  draw_interest_icons(@location, @interest) if @user
+  draw_prev_next_tabs(@location)
+  draw_interest_icons(@location)
 %>
 
-<%= render(:partial => 'show_location',
-           :locals => { :location => @location }) %>
+<table cellpadding="5" width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <p>
+        <%= show_previous_version(@location) %>
+      </p>
+    </td>
+
+    <td valign="top" width="50%">
+      <%= show_alt_descriptions(@location, @projects) %>
+    </td>
+  </tr>
+</table>
+
+<%= render(:partial => 'location', :object => @location) %>
+
+<% if @description.has_any_notes? %>
+  <hr/>
+  <%= show_embedded_description_title(@description, @location) %>
+  <%= render(:partial => 'location_description', :object => @description) %>
+  <hr/>
+<% end %>
+
+<%= show_object_footer(@location) %>

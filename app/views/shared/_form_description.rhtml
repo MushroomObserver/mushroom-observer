@@ -1,0 +1,81 @@
+<!--[form:description]-->
+
+<% if @description.is_admin?(@user) %>
+  <p>
+    <label for="description_source"><%= :form_description_source.t %>:</label><br/>
+    <%=
+      need_help = false
+      type = @description.source_type
+
+      # When a user creates a new draft, they may choose two source types right
+      # now.  If they choose "source" they need to be able to enter the name of
+      # the source; if they choose "user" they don't get a choice -- it *must*
+      # be their user name.  The javascript callback ensures that "source_name"
+      # is editable only when "source" is chosen.  It also keeps track of the
+      # source name, allowing the user to switch back and forth without losing
+      # the source name if they've already entered it.
+      if @description.new_record? && [:public, :source, :user].include?(type)
+        need_help = true
+        javascript_include('prototype.js')
+        form.select(:source_type, [
+          [:form_description_source_public.l, :public],
+          [:form_description_source_source.l, :source],
+          [:form_description_source_user.l, :user],
+        ], {}, { :onchange => %(
+          e1 = $("description_source_type");
+          e2 = $("description_source_name");
+          if (e1.value == "user") {
+            e2.disabled = true;
+            old_source = e2.value;
+            e2.value = "#{@user.legal_name.gsub(/"/,'\\"')}";
+          } else {
+            e2.disabled = false;
+            e2.value = window.old_source === undefined ? '' : old_source;
+          }
+        ) })
+
+      # In all other cases, the source type is fixed, so diable the pulldown.
+      else
+        form.select(:source_type, [
+          ["form_description_source_#{type}".to_sym.l, type],
+        ], {}, { :disabled => 'disabled' })
+      end
+    %>
+
+    <%=
+      args = { :size => 40 }
+      case type
+      when :public, :source
+        need_help = true
+      when :foreign, :project, :user
+        args[:disabled] = 'disabled'
+      end
+      indent + form.text_field(:source_name, args)
+    %>
+
+    <% if need_help %>
+      <br/><span class="HelpNote"><%= :form_description_source_help.t %></span>
+    <% end %>
+  </p>
+
+  <p>
+    <label for="description_license_id"><%= :License.t %>:</label><br/>
+    <%= form.select(:license_id, @licenses) %><br/>
+    <span class="HelpNote"><%= :form_description_license_help.t %></span><br/>
+  </p>
+
+  <p>
+    <label><%= :form_description_permissions.t %>:</label><br/>
+    <% args = {}
+    if [:public, :foreign].include?(type)
+      args[:disabled] = 'disabled'
+    end %>
+    <%= form.check_box(:public_write, args) %>
+      <label for="description_source"><%= :form_description_public_writable.t %></label><br/>
+    <%= form.check_box(:public, args) %>
+      <label for="description_source"><%= :form_description_public_readable.t %></label><br/>
+    <span class="HelpNote"><%= :form_description_permissions_help.t %></span><br/>
+  </p>
+<% end %>
+
+<!--[eoform:description]-->

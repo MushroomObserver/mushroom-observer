@@ -58,17 +58,24 @@ class AccountController < ApplicationController
       @login = ""
       @remember = true
     else
-      login = params['user_login']
-      password = params['user_password']
-      @user = User.authenticate(login, password)
-      @user = User.authenticate(login, password.strip) if !@user
+      @login = params['user_login']
+      @password = params['user_password']
       @remember = params['user'] && params['user']['remember_me'] == "1"
-      if set_session_user(@user)
-        logger.warn("%s, %s, %s" % [@user.login, params['user_login'], params['user_password']])
-        flash_notice :login_success.t
+      user = User.authenticate(@login, @password)
+      user ||= User.authenticate(@login, @password.strip)
+      if !user
+        flash_error :runtime_login_failed.t
+      elsif !user.verified
+        @unverified_user = user
+        render(:action => 'reverify')
+      else
+        logger.warn("%s, %s, %s" % [user.login, params['user_login'], params['user_password']])
+        flash_notice :runtime_login_success.t
+        @user = user
         @user.last_login = now = Time.now
-        @user.modified   = now
+        @user.modified = now
         @user.save
+        set_session_user(@user)
         Transaction.login_user(:id => @user)
         if @remember
           set_autologin_cookie(@user)
@@ -76,10 +83,7 @@ class AccountController < ApplicationController
           clear_autologin_cookie
         end
         flash[:params] = params
-        redirect_back_or_default(:action => "welcome")
-      else
-        @login = params['user_login']
-        flash_error :login_failed.t
+        redirect_back_or_default(:action => 'welcome')
       end
     end
     @hiddens = []
@@ -134,7 +138,7 @@ class AccountController < ApplicationController
             :email => @new_user.email,
             :login => @new_user.login
           )
-          flash_notice :signup_success.t
+          flash_notice :runtime_signup_success.t
           AccountMailer.deliver_verify(@new_user)
           redirect_back_or_default(:action => "welcome")
         else
@@ -157,12 +161,12 @@ class AccountController < ApplicationController
       @new_user = User.find(:first, :conditions => [ "login = ? OR name = ? OR email = ?",
                                                      @login, @login, @login ])
       if @new_user.nil?
-        flash_error :email_new_password_failed.t(:user => @login)
+        flash_error :runtime_email_new_password_failed.t(:user => @login)
       else
         password = String.random(10)
         @new_user.change_password(password)
         if @new_user.save
-          flash_notice :email_new_password_success.t(:email => @new_user.email)
+          flash_notice :runtime_email_new_password_success.t
           AccountMailer.deliver_new_password(@new_user, password)
           @hiddens = []
           render(:action => "login")
@@ -188,7 +192,7 @@ class AccountController < ApplicationController
             if password == params['user']['password_confirmation']
               @user.change_password(password)
             else
-              @user.errors.add(:password, :prefs_password_no_match.t)
+              @user.errors.add(:password, :runtime_prefs_password_no_match.t)
             end
           end
 
@@ -210,10 +214,12 @@ class AccountController < ApplicationController
             [ :bool, :email_observations_consensus ],
             [ :bool, :email_observations_naming ],
             [ :bool, :email_observations_all ],
+            [ :bool, :email_names_admin ],
             [ :bool, :email_names_author ],
             [ :bool, :email_names_editor ],
             [ :bool, :email_names_reviewer ],
             [ :bool, :email_names_all ],
+            [ :bool, :email_locations_admin ],
             [ :bool, :email_locations_author ],
             [ :bool, :email_locations_editor ],
             [ :bool, :email_locations_all ],
@@ -243,7 +249,7 @@ class AccountController < ApplicationController
 
           if @user.errors.empty? && @user.save
             Transaction.put_user(args)
-            flash_notice :prefs_success.t
+            flash_notice :runtime_prefs_success.t
             redirect_back_or_default(:action => "welcome")
           else
             flash_object_errors(@user)
@@ -310,7 +316,7 @@ class AccountController < ApplicationController
             flash_object_errors(image)
           elsif !image.save_image
             logger.error("Unable to upload image")
-            flash_error :profile_invalid_image.
+            flash_error :runtime_profile_invalid_image.
               t(:name => (name ? "'#{name}'" : '???'))
             flash_object_errors(image)
           else
@@ -323,7 +329,7 @@ class AccountController < ApplicationController
             )
             @user.image = image
             args[:set_image] = image
-            flash_notice :profile_uploaded_image.
+            flash_notice :runtime_profile_uploaded_image.
               t(:name => name ? "'#{name}'" : "##{image.id}")
           end
         end
@@ -337,11 +343,11 @@ class AccountController < ApplicationController
         if @user.save
           Transaction.put_user(args)
           if need_to_create_location
-            flash_notice :profile_must_define.t
+            flash_notice :runtime_profile_must_define.t
             redirect_to(:controller => "location", :action => "create_location",
               :where => @place_name, :set_user => 1)
           else
-            flash_notice :profile_success.t
+            flash_notice :runtime_profile_success.t
             redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
           end
         else
@@ -375,46 +381,59 @@ class AccountController < ApplicationController
     end
   end
 
-  def welcome
-  end
-
-  def reverify
-  end
-
   def verify
     id        = params['id']
     auth_code = params['auth_code']
-    if id &&
-       (user = User.find(id)) &&
-       (auth_code == user.auth_code)
+    user = User.find(id)
 
-      # If not already verified, mark account "verified" and log user in.
-      if user.verified
-        @user = user
-        @user.last_login = now = Time.now
-        @user.verified   = now
-        @user.save
-        set_session_user(@user)
-        Transaction.put_user(
-          :id         => @user,
-          :set_verify => @user.verified
-        )
-
-      # If already logged in, just send to "welcome" page.
-      elsif @user
-        redirect_to(:action => :welcome)
-
-      # Otherwise send to login page, saying "you're already verified, dumb-ass".
-      # (If someone grabs a user's verify email, they could theoretically use
-      # it to log in any time they wanted to.  This makes it a one-time use.)
-      else
-        flash_warning(:reverify_already_verified.t)
-        redirect_to(:action => :login)
-      end
-
-    else
+    # This will happen legitimately whenever a non-verified user tries to
+    # login.  The user just gets redirected here instead of being properly
+    # logged in.  "auth_code" will be missing.
+    if auth_code != user.auth_code
+      @unverified_user = user
       render(:action => "reverify")
+
+    # If already logged in and verified, just send to "welcome" page.
+    elsif @user == user
+      redirect_to(:action => :welcome)
+
+    # If user is already verified, send them back to the login page.  (If
+    # someone grabs a user's verify email, they could theoretically use it to
+    # log in any time they wanted to.  This makes it a one-time use.)
+    elsif user.verified
+      flash_warning(:runtime_reverify_already_verified.t)
+      redirect_to(:action => :login)
+
+    # If not already verified, and the code checks out, then mark account
+    # "verified", log user in, and display the "you're verified" page.
+    else
+      @user = user
+      @user.last_login = now = Time.now
+      @user.verified   = now
+      @user.save
+      set_session_user(@user)
+      Transaction.put_user(
+        :id         => @user,
+        :set_verify => @user.verified
+      )
     end
+  end
+
+  # This is used by the "reverify" page to re-send the verification email.
+  def send_verify
+    user = User.find(params[:id])
+    AccountMailer.deliver_verify(user)
+    flash_notice :runtime_reverify_sent.t
+    redirect_back_or_default(:action => "welcome")
+  end
+
+  # This action is never actually used.  It's template is rendered by verify.
+  def reverify
+    raise "This action should never occur!"
+  end
+
+  # This is the welcome page for new users who just created an account.
+  def welcome
   end
 
   def remove_image
@@ -425,7 +444,7 @@ class AccountController < ApplicationController
         :id        => @user,
         :set_image => 0
       )
-      flash_notice :profile_removed_image.t
+      flash_notice :runtime_profile_removed_image.t
     end
     redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
   end
@@ -436,10 +455,12 @@ class AccountController < ApplicationController
   def no_email_observations_consensus;  no_email('observations_consensus');  end
   def no_email_observations_naming;     no_email('observations_naming');     end
   def no_email_observations_all;        no_email('observations_all');        end
+  def no_email_names_admin;             no_email('names_admin');             end
   def no_email_names_author;            no_email('names_author');            end
   def no_email_names_editor;            no_email('names_editor');            end
   def no_email_names_reviewer;          no_email('names_reviewer');          end
   def no_email_names_all;               no_email('names_all');               end
+  def no_email_locations_admin;         no_email('locations_admin');         end
   def no_email_locations_author;        no_email('locations_author');        end
   def no_email_locations_editor;        no_email('locations_editor');        end
   def no_email_locations_all;           no_email('locations_all');           end
@@ -481,19 +502,6 @@ class AccountController < ApplicationController
       redirect_to(:controller => :observer, :action => :list_rss_logs)
     end
   end
-
-  # Where are these used??  They can never work.  The session user
-  # should never be set if the user isn't already verified!
-  # def test_verify
-  #   email = AccountMailer.create_verify(get_session_user)
-  #   render(:text => "<pre>" + email.encoded + "</pre>")
-  # end
-  #
-  # def send_verify
-  #   AccountMailer.deliver_verify(get_session_user)
-  #   flash_notice :reverify_sent.t
-  #   redirect_back_or_default(:action => "welcome")
-  # end
 
   def turn_admin_on
     if @user && @user.admin && !is_in_admin_mode?
@@ -595,7 +603,7 @@ class AccountController < ApplicationController
         redirect = false
       end
     else
-      flash_error :app_permission_denied.t
+      flash_error :permission_denied.t
     end
     if redirect
       redirect_back_or_default(:controller => 'observer', :action => 'index')

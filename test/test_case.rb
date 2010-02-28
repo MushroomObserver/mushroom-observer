@@ -11,6 +11,9 @@
 #  application_teardown::       Universal teardown: removes images.
 #
 #  == General Assertions
+#  assert_true::                Make sure something is true.
+#  assert_false::               Make sure something is false.
+#  assert_names_equal::         Compare two name instances.
 #  assert_list_equal::          Compare two lists by mapping and sorting elements.
 #  assert_obj_list_equal::      Compare two lists of objects, comparing ids.
 #  assert_user_list_equal::     Compare two lists of User's.
@@ -118,6 +121,23 @@ class Test::Unit::TestCase
   #  :section: General assertions
   #
   ##############################################################################
+
+  # Assert that something is true.
+  def assert_true(got, *msg); assert_equal(true, !!got, *msg); end
+
+  # Assert that something is false.
+  def assert_false(got, *msg); assert_equal(false, !!got, *msg); end
+
+  # Assert that two Name instances are equal.
+  def assert_names_equal(expect, got, *msg)
+    clean_our_backtrace do
+      assert_equal(
+        (expect ? "#{expect.search_name} (#{expect.id})" : "nil"),
+        (got ? "#{got.search_name} (#{got.id})" : "nil"),
+        *msg
+      )
+    end
+  end
 
   # Compare two lists by mapping their elements, then sorting.  By default it
   # just maps their elements to strings.

@@ -21,15 +21,15 @@
             <%= :show_observation_comment_created.t %>: <span class="Data"><%= comment.created.web_time %></span><br/>
             <%= :show_observation_comment_created_by.t %>: <%= user_link(comment.user) %>
             <% if check_permission(comment.user_id) %>
-              (<%= link_to(:app_edit.t, :controller => 'comment',
+              (<%= link_to(:EDIT.t, :controller => 'comment',
                            :action => 'edit_comment', :id => comment.id,
                            :params => query_params) %>
-              | <%= link_to(:app_destroy.t, { :controller => 'comment',
+              | <%= link_to(:DESTROY.t, { :controller => 'comment',
                             :action => 'destroy_comment', :id => comment.id,
                             :params => query_params },
-                            { :confirm => :app_are_you_sure.l }) %>)
+                            { :confirm => :are_you_sure.l }) %>)
             <% end %><br/>
-            <%= :app_summary.t %>: <span class="Data"><%= comment.summary.tl %></span>
+            <%= :SUMMARY.t %>: <span class="Data"><%= comment.summary.tl %></span>
           </p>
 
           <%= sanitize(comment.comment).tpl %>

@@ -52,11 +52,11 @@
               </div>
               <% if check_permission(naming.user_id) %>
                 <div style='white-space:nowrap'>
-                  (<%= link_to(:app_edit.t, :action => 'edit_naming',
+                  (<%= link_to(:EDIT.t, :action => 'edit_naming',
                                :id => naming, :params => query_params) %>
-                  | <%= link_to(:app_destroy.t, { :action => 'destroy_naming',
+                  | <%= link_to(:DESTROY.t, { :action => 'destroy_naming',
                                 :id => naming.id, :params => query_params },
-                                { :confirm => :app_are_you_sure.l }) %>)
+                                { :confirm => :are_you_sure.l }) %>)
                 </div>
               <% end %>
             </td>

@@ -2,12 +2,18 @@
   new_tab_set do
     add_tab(:list_place_names_map.t, :action => :map_locations,
             :params => query_params)
-    add_tab(:location_all.t, :action => :list_locations)
+    add_tab(:all_objects.t(:type => :location), :action => :list_locations)
     if @links
       for link in @links
         add_tab(*link)
       end
     end
+  end
+
+  if (!@known_pages || @known_pages.length == 0) and
+     (!@undef_pages || @undef_pages.length == 0)
+    @error ||= :runtime_no_matches
+    flash_error @error.t
   end
 %>
 

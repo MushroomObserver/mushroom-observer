@@ -6,7 +6,7 @@
 #
 #  == Version
 #
-#  Changes are kept in the "past_locations" table using
+#  Changes are kept in the "locations_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -20,14 +20,12 @@
 #  ---
 #  display_name::  (V) Name, e.g.: "Lacy Park, Los Angeles Co., California, USA"
 #  search_name::   (-) Name, e.g.: "lacy park los angeles co california usa"
-#  notes::         (V) Description.
 #  north::         (V) North edge in degrees north, e.g. 37.8233
 #  south::         (V) South edge in degrees north, e.g. 37.8035
 #  east::          (V) East edge in degrees east, e.g. -122.173
 #  west::          (V) West edge in degrees east, e.g. -122.204
 #  high::          (V) Maximum elevation in meters, e.g. 100
 #  low::           (V) Minimum elevation in meters, e.g. 0
-#  license::       (V) License for description.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -38,7 +36,6 @@
 #
 #  == Instance methods
 #
-#  comments::           Comments about this Location. (not used yet)
 #  interests::          Interests in this Location.
 #  observations::       Observations at this Location.
 #
@@ -55,32 +52,34 @@
 #  unique_text_name::   (same thing, with id tacked on to make unique)
 #  unique_format_name:: (same thing, with id tacked on to make unique)
 #
+#  ==== Attachments
+#  versions::                Old versions.
+#  description::             Main LocationDescription.
+#  descriptions::            Alternate LocationDescription's.
+#  interests::               Interests in this Location.
+#  observations::            Observations using this Location as consensus.
+#
 #  == Callbacks
 #
 #  set_search_name::    Before save: update search_name.
-#  notify_authors::     After save: send email notification.
+#  create_description:: After create: create (empty) official NameDescription.
+#  notify_users::       After save: send email notification.
 #
 ################################################################################
 
 class Location < AbstractModel
-  belongs_to :license
+  belongs_to :description, :class_name => 'LocationDescription' # (main one)
   belongs_to :rss_log
   belongs_to :user
 
-  has_many :comments,  :as => :object, :dependent => :destroy
+  has_many :descriptions, :class_name => 'LocationDescription', :order => 'num_views DESC'
   has_many :interests, :as => :object, :dependent => :destroy
   has_many :observations
 
-  has_and_belongs_to_many :authors, :class_name => "User", :join_table => "authors_locations"
-  has_and_belongs_to_many :editors, :class_name => "User", :join_table => "editors_locations"
-
   acts_as_versioned(
-    :class_name => 'PastLocation',
-    :table_name => 'past_locations',
+    :table_name => 'locations_versions',
     :if_changed => [
-      'license_id',
       'display_name',
-      'notes',
       'north',
       'south',
       'west',
@@ -91,13 +90,16 @@ class Location < AbstractModel
   non_versioned_columns.push(
     'sync_id',
     'created',
+    'num_views',
+    'last_view',
     'rss_log_id',
+    'description_id',
     'search_name'
   )
 
-  before_save :update_user_if_save_version
-  before_save :set_search_name
-  after_save  :notify_authors
+  versioned_class.before_save {|x| x.user_id = User.current_id}
+  before_save  :set_search_name
+  after_update :notify_users
 
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed]
@@ -197,6 +199,78 @@ class Location < AbstractModel
 
   ##############################################################################
   #
+  #  :section: Other Stuff
+  #
+  ##############################################################################
+
+  # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
+  # made to +self+; +old_loc+ is destroyed; all the things that referred to
+  # +old_loc+ are updated and saved. 
+  def merge(old_loc)
+    # Move observations over first.
+    for obs in old_loc.observations
+      obs.location = self
+      obs.save
+      Transaction.put_observation(
+        :id           => obs,
+        :set_location => self
+      )
+    end
+
+    # Update any users who call this location their primary location.
+    for user in User.find_by_location_id(old_loc.id)
+      user.location_id = self.id
+      Transaction.put_user(
+        :id           => user,
+        :set_location => self
+      )
+    end
+
+    # Move over any interest in the old name.
+    for int in Interest.find_all_by_object_type_and_object_id('Location',
+                                                              old_loc.id)
+      int.object = self
+      int.save
+    end
+
+    # Merge the two "main" descriptions if it can.
+    if self.description and old_loc.description and
+       (self.description.source_type == :public) and
+       (old_loc.description.source_type == :public)
+      self.description.merge(old_loc.description)
+    end
+
+    # If this one doesn't have a primary description and the other does,
+    # then make it this one's.
+    if !self.description && old_loc.description
+      self.description = old_loc.description
+    end
+
+    # Move over any remaining descriptions.
+    for desc in old_loc.descriptions
+      xargs = {
+        :id           => desc,
+        :set_location => self,
+      }
+      desc.location_id = self.id
+      desc.save
+      Transaction.put_locaton_description(xargs)
+    end
+
+    # Log the action.
+    old_loc.log(:log_location_merged, :this => old_loc.display_name,
+                 :that => self.display_name)
+
+    # Okay, now it's safe to destroy the name.
+    for ver in old_loc.versions
+      ver.destroy
+    end
+    old_loc.destroy
+    Transaction.delete_location(:id => old_loc)
+  end
+
+  ##############################################################################
+  #
   #  :section: Callbacks
   #
   ##############################################################################
@@ -208,25 +282,35 @@ class Location < AbstractModel
     end
   end
 
-  # Callback after saving potential changes to a Location.  It determines if
-  # the changes are important enough to notify the authors, and do so.
-  def notify_authors
+  # This is called after saving potential changes to a Location.  It will
+  # determine if the changes are important enough to notify people, and do so.
+  def notify_users
 
     # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
     # It only returns true if *important* changes have been made.
     if altered?
-      sender = self.user || @user_making_change
+      sender = User.current
       recipients = []
-      # print "#{self.display_name} changed by #{sender ? sender.login : 'no one'}.\n"
+
+      # Tell admins of the change.
+      for user_list in descriptions.map(&:admins)
+        for user in user_list
+          recipients.push(user) if user.email_locations_admin
+        end
+      end
 
       # Tell authors of the change.
-      for user in self.authors
-        recipients.push(user) if user.email_locations_author
+      for user_list in descriptions.map(&:authors)
+        for user in user_list
+          recipients.push(user) if user.email_locations_author
+        end
       end
 
       # Tell editors of the change.
-      for user in self.editors
-        recipients.push(user) if user.email_locations_editor
+      for user_list in descriptions.map(&:editors)
+        for user in user_list
+          recipients.push(user) if user.email_locations_editor
+        end
       end
 
       # Tell masochists who want to know about all location changes.

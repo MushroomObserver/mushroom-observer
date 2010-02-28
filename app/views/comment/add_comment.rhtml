@@ -4,7 +4,7 @@
   @title = :comment_add_title.t(:name => @object.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => object_type),
+    add_tab(:cancel_and_show.t(:type => object_type),
             :controller => @object.show_controller,
             :action => @object.show_action, :id => @object.id,
             :params => query_params)

@@ -15,9 +15,9 @@
     if check_permission(@species_list.user_id)
       add_tab(:species_list_show_edit.t, :action => 'edit_species_list',
               :id => @species_list.id, :params => query_params)
-      add_tab(:app_destroy.t, { :action => 'destroy_species_list',
+      add_tab(:DESTROY.t, { :action => 'destroy_species_list',
               :id => @species_list.id, :params => query_params },
-              { :confirm => :app_are_you_sure.l })
+              { :confirm => :are_you_sure.l })
     end
     add_tab(:species_list_show_save_as_txt.t, :action => 'make_report',
             :id => @species_list.id, :type => 'txt')
@@ -27,20 +27,13 @@
             :id => @species_list.id, :type => 'csv')
   end
 
-  new_tab_set do
-    add_tab(:app_prev.t, :action => 'prev_species_list', :id => @species_list.id,
-            :params => query_params)
-    add_tab(:app_index.t, :action => 'index_species_list', :id => @species_list.id,
-            :params => query_params)
-    add_tab(:app_next.t, :action => 'next_species_list', :id => @species_list.id,
-            :params => query_params)
-  end
+  draw_prev_next_tabs(@species_list)
 %>
 
-<p><%= :app_when.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
-<p><%= :app_where.t %>: <span class="Data"><%= sanitize(@species_list.where).t %></span></p>
-<p><%= :app_who.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
-<p><%= :app_notes.t %>:</p>
+<p><%= :WHEN.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
+<p><%= :WHERE.t %>: <span class="Data"><%= sanitize(@species_list.where).t %></span></p>
+<p><%= :WHO.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
+<p><%= :NOTES.t %>:</p>
 <%= sanitize(@species_list.notes.to_s).tpl %>
 
 <% if @pages && @pages.length > 0 %>
@@ -79,7 +72,4 @@
 <% end %>
 <br/>
 
-<% if @species_list.rss_log_id %>
-  <%= link_to(:app_show_object.t(:type => :log.t), :controller => 'observer',
-              :action => 'show_rss_log', :id => @species_list.rss_log_id) %>
-<% end %>
+<%= show_object_footer(@species_list) %>

@@ -15,7 +15,7 @@
     args[:approved_deprecated_names] = @deprecated_names.map(&:id)
   end
   form_tag(:action => 'create_species_list', :params => args) do %>
-  <br/><center><%= submit_tag :app_create.l %></center>
+  <br/><center><%= submit_tag :CREATE.l %></center>
 
   <table cellpadding="10">
 	<tr>

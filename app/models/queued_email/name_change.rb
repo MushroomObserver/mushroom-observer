@@ -3,14 +3,18 @@
 #
 #  This email is sent whenever someone changes a Name.  It is sent to:
 #
-#  1. the owner of the Name
+#  1. the admins/authors/editors/reviewers of the Name
 #  2. anyone "interested in" the Name
 #
 #  == Associated data
 #
-#  name::        integer, refers to a Name id
-#  old_version:: integer, version before the change
-#  new_version:: integer, version after the change (may be the same!)
+#  name::                    integer, refers to a Name id
+#  description::             integer, refers to a NameDescription id
+#  old_name_version::        integer, Name version before the change
+#  new_name_version::        integer, Name version after the change (may be the same!)
+#  old_description_version:: integer, NameDescription version before the change
+#  new_description_version:: integer, NameDescription version after the change (may be the same!)
+#  review_status::           string,  'no_change' or new review status
 #
 #  == Class methods
 #
@@ -18,32 +22,57 @@
 #
 #  == Instance methods
 #
-#  name::           Get instance of Name in question.
-#  old_version::    Get version of Name before change.
-#  new_version::    Get version of Name after change (may be the same!)
-#  deliver_email::  Deliver via AccountMailer#deliver_name_change.
+#  name::                    Get instance of Name in question.
+#  description::             Get instance of NameDescription in question.
+#  old_name_version::        Get version of Name before change.
+#  new_name_version::        Get version of Name after change (may be the same!)
+#  old_description_version:: Get version of NameDescription before change.
+#  new_description_version:: Get version of NameDescription after change (may be the same!)
+#  deliver_email::           Deliver via AccountMailer#deliver_name_change.
 #
 ################################################################################
 
 class QueuedEmail::NameChange < QueuedEmail
-  def name;          get_object(:name, ::Name);         end
-  def old_version;   get_integer(:old_version);         end
-  def new_version;   get_integer(:new_version);         end
-  def review_status; get_string(:review_status).to_sym; end
+  def name;                    get_object(:name, ::Name);                   end
+  def description;             get_object(:description, ::NameDescription); end
+  def old_name_version;        get_integer(:old_name_version);              end
+  def new_name_version;        get_integer(:new_name_version);              end
+  def old_description_version; get_integer(:old_description_version);       end
+  def new_description_version; get_integer(:new_description_version);       end
+  def review_status;           get_string(:review_status).to_sym;           end
 
-  def self.create_email(sender, recipient, name, review_status_changed)
+  def self.create_email(sender, recipient, name, desc, review_status_changed)
     result = create(sender, recipient)
-    raise "Missing name!" if !name
-    result.add_integer(:name, name.id)
-    result.add_integer(:new_version, name.version)
-    result.add_integer(:old_version, (name.altered? ? name.version - 1 : name.version))
-    result.add_string(:review_status, review_status_changed ? name.review_status : :no_change)
+    raise "Missing name or description!" if !name && !desc
+    if name
+      result.add_integer(:name, name.id)
+      result.add_integer(:new_name_version, name.version)
+      result.add_integer(:old_name_version, (name.altered? ? name.version - 1 : name.version))
+    else
+      name = desc.name
+      result.add_integer(:name, name.id)
+      result.add_integer(:new_name_version, name.version)
+      result.add_integer(:old_name_version, name.version)
+    end
+    if desc
+      result.add_integer(:description, desc.id)
+      result.add_integer(:new_description_version, desc.version)
+      result.add_integer(:old_description_version, (desc.altered? ? desc.version - 1 : desc.version))
+      result.add_string(:review_status, review_status_changed ? desc.review_status : :no_change)
+    else
+      desc = name.description
+      result.add_integer(:description, desc.id)
+      result.add_integer(:new_description_version, desc.version)
+      result.add_integer(:old_description_version, desc.version)
+      result.add_string(:review_status, :no_change)
+    end
     result.finish
     return result
   end
 
   def deliver_email
-    AccountMailer.deliver_name_change(user, to_user, queued, name,
-                                      old_version, new_version, review_status)
+    AccountMailer.deliver_name_change(user, to_user, queued, name, description,
+      old_name_version, new_name_version, old_description_version,
+      new_description_version, review_status)
   end
 end

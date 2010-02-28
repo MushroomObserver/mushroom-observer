@@ -93,10 +93,8 @@ class Textile < String
     gsub!(/(<a[^>]*>.*?<\/a>|<img[^>]*>)/) do |href|
       if do_object_links
         href = href.gsub(/
-          x\{ ([A-Z]+) (?:\s+ (\d+))? (?:\s+ ([^\{\}]+?))? \s*\}x
-        /x) do
-          $3 || ('%s #%d' % [$1.downcase.capitalize, $2 || 0] )
-        end
+          x\{([A-Z]+) \s+ ([^\{\}]+?) \s+\}\{\s+ ([^\{\}]+?) \s+\}x
+        /x, '\\2')
       end
       hrefs.push(href)
       "<XXX#{hrefs.length - 1}>"

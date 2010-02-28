@@ -84,26 +84,16 @@ class ProjectController < ApplicationController
     @is_member = @project.is_member?(@user)
     @is_admin = @project.is_admin?(@user)
 
-    @name_count = Project.connection.select_value %(
-      SELECT count(*) AS c FROM (
-        SELECT DISTINCT names.id
-        FROM names, users, user_groups_users, authors_names
-        WHERE review_status IN ('vetted', 'unvetted')
-          AND users.id = authors_names.user_id
-          AND authors_names.name_id = names.id
-          AND user_groups_users.user_group_id = #{@project.user_group_id}
-          AND user_groups_users.user_id = users.id
-          AND users.id != 1
-      ) AS ctable
+    @draft_data = Project.connection.select_all %(
+      SELECT n.display_name, nd.id, nd.user_id
+      FROM names n, name_descriptions nd, name_descriptions_admins nda
+      WHERE nda.user_group_id = #{@project.admin_group_id}
+        AND nd.id = nda.name_description_id
+        AND n.id = nd.name_id
+      ORDER BY n.text_name ASC, n.author ASC
     )
 
-    @draft_data = Project.connection.select_all %(
-      SELECT names.display_name, draft_names.id, draft_names.user_id
-      FROM names, draft_names
-      WHERE draft_names.name_id = names.id
-        AND draft_names.project_id = #{params[:id]}
-      ORDER BY names.search_name
-    )
+    @name_data = @draft_data.map {|d| d['display_name']}.uniq.length
   end
 
   # Go to next project: redirects to show_project.
@@ -217,7 +207,7 @@ class ProjectController < ApplicationController
           Transaction.put_project(args)
         end
         # @project.log("Project updated by #{@user.login}: #{@project.summary}", :touch => false)
-        flash_notice(:edit_project_success.t)
+        flash_notice(:runtime_edit_project_success.t(:id => @project.id))
         redirect_to(:action => 'show_project', :id => @project.id)
       end
     end

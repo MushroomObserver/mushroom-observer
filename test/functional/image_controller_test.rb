@@ -23,19 +23,19 @@ class ImageControllerTest < ControllerTestCase
                                   :observation => 2, :by => :id)
 
     # Make sure the outer query is working right first.
-    outer.this_id = 2
+    outer.current_id = 2
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(1, outer.this_id)
-    assert_equal(0, outer.this.images.size)
+    assert_equal(1, outer.current_id)
+    assert_equal(0, outer.current.images.size)
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(4, outer.this_id)
-    assert_equal(1, outer.this.images.size)
+    assert_equal(4, outer.current_id)
+    assert_equal(1, outer.current.images.size)
     new_outer = outer.next
     assert_equal(outer, new_outer)
-    assert_equal(3, outer.this_id)
-    assert_equal(1, outer.this.images.size)
+    assert_equal(3, outer.current_id)
+    assert_equal(1, outer.current.images.size)
     new_outer = outer.next
     assert_equal(nil, new_outer)
 
@@ -43,14 +43,14 @@ class ImageControllerTest < ControllerTestCase
     # images, so goes to next (#4), this has one image (#6).  (Shouldn't
     # care that outer query has changed, inner query remembers where it
     # was when inner query was created.)
-    inner.this_id = 2
+    inner.current_id = 2
     assert(new_inner = inner.next)
     assert_not_equal(inner, new_inner)
-    assert_equal(6, new_inner.this_id)
+    assert_equal(6, new_inner.current_id)
     save_query = Query.last
     assert(new_new_inner = new_inner.next)
     assert_not_equal(new_inner, new_new_inner)
-    assert_equal(5, new_new_inner.this_id)
+    assert_equal(5, new_new_inner.current_id)
     assert_nil(new_new_inner.next)
 
     params = {
@@ -71,10 +71,10 @@ class ImageControllerTest < ControllerTestCase
     assert_equal([6, 5, 4, 3], query.result_ids)
 
     # See what should happen if we look up an Image search and go to next.
-    query.this = image
+    query.current = image
     assert(new_query = query.next)
     assert_equal(query, new_query)
-    assert_equal(4, new_query.this_id)
+    assert_equal(4, new_query.current_id)
 
     # Now do it for real.
     params = {
@@ -97,15 +97,15 @@ class ImageControllerTest < ControllerTestCase
                                   :observation => 4, :by => :id)
 
     # Make sure the outer query is working right first.
-    outer.this_id = 4
+    outer.current_id = 4
     new_outer = outer.prev
     assert_equal(outer, new_outer)
-    assert_equal(1, outer.this_id)
-    assert_equal(0, outer.this.images.size)
+    assert_equal(1, outer.current_id)
+    assert_equal(0, outer.current.images.size)
     new_outer = outer.prev
     assert_equal(outer, new_outer)
-    assert_equal(2, outer.this_id)
-    assert_equal(2, outer.this.images.size)
+    assert_equal(2, outer.current_id)
+    assert_equal(2, outer.current.images.size)
     new_outer = outer.prev
     assert_equal(nil, new_outer)
 
@@ -113,13 +113,13 @@ class ImageControllerTest < ControllerTestCase
     # images, so goes to next (#2), this has two images (#1 and #2).
     # (Shouldn't care that outer query has changed, inner query remembers where
     # it was when inner query was created.)
-    inner.this_id = 6
+    inner.current_id = 6
     assert(new_inner = inner.prev)
     assert_not_equal(inner, new_inner)
-    assert_equal(2, new_inner.this_id)
+    assert_equal(2, new_inner.current_id)
     assert(new_new_inner = new_inner.prev)
     assert_equal(new_inner, new_new_inner)
-    assert_equal(1, new_inner.this_id)
+    assert_equal(1, new_inner.current_id)
     assert_nil(new_inner.prev)
 
     params = {
@@ -321,7 +321,7 @@ class ImageControllerTest < ControllerTestCase
   def test_resize_images
     requires_login(:resize_images)
     assert_response(:action => :list_images)
-    assert_flash(:image_resize_denied.t)
+    assert_flash(:runtime_image_resize_denied.t)
     # How should real image files be handled?
   end
 

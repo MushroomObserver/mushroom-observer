@@ -1,12 +1,12 @@
 <%
   javascript_include_auto_complete
   javascript_include 'element_extensions'
-  @title = :advanced_search_title.t
+  @title = :app_advanced_search.t
 %>
 
 <div class="HelpNote"><%= :advanced_search_caveat.tp %></div>
 <% form_tag(:action => 'advanced_search_form') do %>
-  <br/><center><%= submit_tag :app_search.l %></center><br/>
+  <br/><center><%= submit_tag :SEARCH.l %></center><br/>
 
   <label for="search_type"><%= :advanced_search_result_type.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_result_type_help.t %></span><br/>
@@ -17,7 +17,7 @@
   <%= text_field('search', 'name', :size => 70) %><br/><br/>
   <%= turn_into_name_auto_completer('search_name', :primer => @name_primer) %>
   
-  <label for="search_user"><%= :app_observer.t %>:</label><br/>
+  <label for="search_user"><%= :OBSERVER.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_observer_help.t %></span><br/>
   <%= text_field('search', 'user', :size => 70) %><br/><br/>
   <%= turn_into_user_auto_completer('search_user', :primer => @user_primer) %>
@@ -32,5 +32,5 @@
   <%= text_field('search', 'content', :size => 70) %><br/>
   <span class="HelpNote"><%= :advanced_search_content_notes.t %></span><br/><br/>
 
-  <br/><center><%= submit_tag :app_search.l %></center>
+  <br/><center><%= submit_tag :SEARCH.l %></center>
 <% end %>

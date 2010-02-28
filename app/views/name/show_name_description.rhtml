@@ -1,0 +1,43 @@
+<%
+  @title ||= @description.format_name.t
+
+  new_tab_set do
+    add_tab(:show_object.t(:type => :name), :action => 'show_name',
+            :id => @description.name_id, :params => query_params)
+    add_tab(:show_name_create_description.t,
+            :action => 'create_name_description',
+            :id => @description.name_id, :params => query_params)
+    if @user && @description.is_writer?(@user)
+      add_tab(:show_name_description_edit.t,
+              :action => 'edit_name_description',
+              :id => @description.id, :params => query_params)
+    end
+    if @user && @description.is_admin?(@user) &&
+       (@description.id != @name.description_id)
+      add_tab(:show_name_description_destroy.t,
+              { :action => 'destroy_name_description',
+              :id => @description.id, :params => query_params },
+              { :confirm => :are_you_sure.l })
+    end
+  end
+%>
+
+<table cellpadding="5" width="100%">
+  <tr>
+    <td valign="top" width="50%">
+      <p>
+        <%= show_previous_version(@description) %>
+      </p>
+    </td>
+
+    <td valign="top" width="50%">
+      <%= show_alt_descriptions(@name, @projects) %>
+    </td>
+  </tr>
+</table>
+
+<%= render(:partial => 'name_description', :object => @description,
+           :locals => { :review => true }) %>
+
+<br/>
+<%= show_object_footer(@description) %>

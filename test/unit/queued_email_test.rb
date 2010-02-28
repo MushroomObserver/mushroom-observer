@@ -40,29 +40,37 @@ class QueuedEmailTest < Test::Unit::TestCase
   end
 
   def test_location_change_email
-    QueuedEmail::LocationChange.create_email(@rolf, @mary, locations(:albion))
+    QueuedEmail::LocationChange.create_email(@rolf, @mary, locations(:albion),
+      location_descriptions(:albion_desc))
     assert_email(0,
-      :flavor      => 'QueuedEmail::LocationChange',
-      :from        => @rolf,
-      :to          => @mary,
-      :location    => locations(:albion).id,
-      :old_version => locations(:albion).version,
-      :new_version => locations(:albion).version
+      :flavor                  => 'QueuedEmail::LocationChange',
+      :from                    => @rolf,
+      :to                      => @mary,
+      :location                => locations(:albion).id,
+      :description             => location_descriptions(:albion_desc).id,
+      :old_location_version    => locations(:albion).version,
+      :new_location_version    => locations(:albion).version,
+      :old_description_version => location_descriptions(:albion_desc).version,
+      :new_description_version => location_descriptions(:albion_desc).version
     )
     email = QueuedEmail.first.deliver_email
     assert(email)
   end
 
   def test_name_change_email
-    QueuedEmail::NameChange.create_email(@rolf, @mary, names(:peltigera), true)
+    QueuedEmail::NameChange.create_email(@rolf, @mary, names(:peltigera),
+      name_descriptions(:peltigera_desc), true)
     assert_email(0,
-      :flavor        => 'QueuedEmail::NameChange',
-      :from          => @rolf,
-      :to            => @mary,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version,
-      :new_version   => names(:peltigera).version,
-      :review_status => names(:peltigera).review_status.to_s
+      :flavor                  => 'QueuedEmail::NameChange',
+      :from                    => @rolf,
+      :to                      => @mary,
+      :name                    => names(:peltigera).id,
+      :description             => name_descriptions(:peltigera_desc).id,
+      :old_name_version        => names(:peltigera).version,
+      :new_name_version        => names(:peltigera).version,
+      :old_description_version => name_descriptions(:peltigera_desc).version,
+      :new_description_version => name_descriptions(:peltigera_desc).version,
+      :review_status           => name_descriptions(:peltigera_desc).review_status.to_s
     )
     email = QueuedEmail.first.deliver_email
     assert(email)

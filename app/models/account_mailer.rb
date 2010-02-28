@@ -81,7 +81,7 @@ class AccountMailer < ActionMailer::Base
   # Ask reviewers for authorship credit.
   # sender::    User asking for credit.
   # receiver::  Reviewer/admin user.
-  # object::    Name or Location on which user would like to be author.
+  # object::    NameDescription or LocationDescription on which User would like to be author.
   # subject::   Subject of message (provided by user?).
   # message::   Content of message (provided by user).
   def author_request(sender, receiver, object, subject, message)
@@ -109,7 +109,7 @@ class AccountMailer < ActionMailer::Base
   def comment(sender, receiver, object, comment)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_comment_subject.l(:name => object.unique_text_name)
+    @subject             = :email_subject_comment.l(:name => object.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -130,7 +130,7 @@ class AccountMailer < ActionMailer::Base
   def commercial_inquiry(sender, image, commercial_inquiry)
     @user                = image.user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_commercial_inquiry_subject.l(:name => image.unique_text_name)
+    @subject             = :email_subject_commercial_inquiry.l(:name => image.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -154,7 +154,7 @@ class AccountMailer < ActionMailer::Base
   def consensus_change(sender, receiver, observation, old_name, new_name, time)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_consensus_change_subject.l(:id => observation.id,
+    @subject             = :email_subject_consensus_change.l(:id => observation.id,
                                 :old => (old_name ? old_name.search_name : 'none'),
                                 :new => (new_name ? new_name.search_name : 'none'))
     @body['subject']     = @subject
@@ -176,7 +176,7 @@ class AccountMailer < ActionMailer::Base
   # user_params::   Hash of parameters from form.
   def denied(user_params)
     Locale.code          = DEFAULT_LOCALE
-    @subject             = :email_denied_subject.l
+    @subject             = :email_subject_denied.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['user_params'] = user_params
@@ -192,7 +192,7 @@ class AccountMailer < ActionMailer::Base
   def email_features(user, features)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_features_subject.l
+    @subject             = :email_subject_features.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['features']    = features
@@ -208,21 +208,29 @@ class AccountMailer < ActionMailer::Base
   # sender::        User who changed the Location.
   # receiver::      Owner of the Location (or interested third party).
   # time::          Time the change took place.
-  # location::      Location in question.
-  # old_version::   Version number of the Location _before_ the change.
-  # new_version::   Version number of the Location _after_ the change (may be the same).
-  def location_change(sender, receiver, time, location, old_version, new_version)
-    old_location         = location.versions.find_by_version(old_version)
-    new_location         = location; location.revert_to(new_version)
+  # loc::           Location in question.
+  # desc::          LocationDescription in question.
+  # old_loc_ver::   Version number of the Location _before_ the change.
+  # new_loc_ver::   Version number of the Location _after_ the change (may be the same).
+  # old_desc_ver::  Version number of the LocationDescription _before_ the change.
+  # new_desc_ver::  Version number of the LocationDescription _after_ the change (may be the same).
+  def location_change(sender, receiver, time, loc, desc, old_loc_version,
+                      new_loc_version, old_desc_version, new_desc_version)
+    old_loc              = loc.versions.find_by_version(old_loc_version)
+    new_loc              = loc; loc.revert_to(new_loc_version)
+    old_desc             = desc.versions.find_by_version(old_desc_version)
+    new_desc             = desc; desc.revert_to(new_desc_version)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_location_change_subject.l(:name => old_location.display_name)
+    @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['time']        = time
-    @body['old_location'] = old_location
-    @body['new_location'] = new_location
+    @body['old_loc']     = old_loc
+    @body['new_loc']     = new_loc
+    @body['old_desc']    = old_desc
+    @body['new_desc']    = new_desc
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
@@ -236,22 +244,30 @@ class AccountMailer < ActionMailer::Base
   # receiver::      Owner of the Name (or interested third party).
   # time::          Time the change took place.
   # name::          Name in question.
-  # old_version::   Version number of the Name _before_ the change.
-  # new_version::   Version number of the Name _after_ the change (may be the same).
+  # desc::          NameDescription in question.
+  # old_name_ver::  Version number of the Name _before_ the change.
+  # new_name_ver::  Version number of the Name _after_ the change (may be the same).
+  # old_desc_ver::  Version number of the NameDescription _before_ the change.
+  # new_desc_ver::  Version number of the NameDescription _after_ the change (may be the same).
   # review_status:: Current review status.
-  def name_change(sender, receiver, time, name, old_version, new_version, review_status)
-    old_name             = name.versions.find_by_version(old_version)
-    new_name             = name; name.revert_to(new_version)
+  def name_change(sender, receiver, time, name, desc, old_name_version,
+          new_name_version, old_desc_version, new_desc_version, review_status)
+    old_name             = name.versions.find_by_version(old_name_version)
+    new_name             = name; name.revert_to(new_name_version)
+    old_desc             = desc.versions.find_by_version(old_desc_version)
+    new_desc             = desc; desc.revert_to(new_desc_version)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_name_change_subject.l(:name => (old_name ? old_name.search_name : new_name.search_name))
+    @subject             = :email_subject_name_change.l(:name => (old_name ? old_name.search_name : new_name.search_name))
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['time']        = time
     @body['old_name']    = old_name
     @body['new_name']    = new_name
-    @body['review_status'] = review_status
+    @body['old_desc']    = old_desc
+    @body['new_desc']    = new_desc
+    @body['review_status'] = "review_#{review_status}".to_sym.l
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
@@ -268,7 +284,7 @@ class AccountMailer < ActionMailer::Base
   def name_proposal(sender, receiver, naming, observation)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_name_proposal_subject.l(:name => naming.text_name, :id => observation.id)
+    @subject             = :email_subject_name_proposal.l(:name => naming.text_name, :id => observation.id)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['naming']      = naming
@@ -289,7 +305,7 @@ class AccountMailer < ActionMailer::Base
     sender               = notification.user
     @user                = observer
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_naming_for_observer_subject.l
+    @subject             = :email_subject_naming_for_observer.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['naming']      = naming
@@ -308,7 +324,7 @@ class AccountMailer < ActionMailer::Base
   def naming_for_tracker(tracker, naming)
     @user                = tracker
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_naming_for_tracker_subject.l
+    @subject             = :email_subject_naming_for_tracker.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['observation'] = naming.observation
@@ -327,7 +343,7 @@ class AccountMailer < ActionMailer::Base
   def new_password(user, password)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_new_password_subject.l
+    @subject             = :email_subject_new_password.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['password']    = password
@@ -348,8 +364,8 @@ class AccountMailer < ActionMailer::Base
   def observation_change(sender, receiver, observation, note, time)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = observation ? :email_observation_change_subject.l(:name => observation.unique_text_name) :
-                                         :email_observation_destroy_subject.l(:name => note).t.html_to_ascii
+    @subject             = observation ? :email_subject_observation_change.l(:name => observation.unique_text_name) :
+                                         :email_subject_observation_destroy.l(:name => note).t.html_to_ascii
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -371,7 +387,7 @@ class AccountMailer < ActionMailer::Base
   def observation_question(sender, observation, question)
     @user                = observation.user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_observation_question_subject.l(:name => observation.unique_text_name)
+    @subject             = :email_subject_observation_question.l(:name => observation.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -393,7 +409,7 @@ class AccountMailer < ActionMailer::Base
     @user                = receiver
     @name                = name
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_publish_name_subject.l
+    @subject             = :email_subject_publish_name.l
     @body['subject']     = @subject
     @body['user']        = receiver
     @body['publisher']   = publisher
@@ -432,7 +448,7 @@ class AccountMailer < ActionMailer::Base
   def verify(user)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_verify_subject.l
+    @subject             = :email_subject_verify.l
     @body['subject']     = @subject
     @body['user']        = user
     @recipients          = user.email
@@ -447,7 +463,7 @@ class AccountMailer < ActionMailer::Base
   # question::  Content of the question.
   def webmaster_question(sender, question)
     Locale.code          = DEFAULT_LOCALE
-    @subject             = :email_webmaster_question_subject.l(:user => sender)
+    @subject             = :email_subject_webmaster_question.l(:user => sender)
     @body['question']    = question
     @recipients          = WEBMASTER_EMAIL_ADDRESS
     @bcc	             = EXTRA_BCC_EMAIL_ADDRESSES

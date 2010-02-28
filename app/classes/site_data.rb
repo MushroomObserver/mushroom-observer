@@ -67,11 +67,11 @@ class SiteData
 
   # List of the categories.
   ALL_FIELDS = [
-    :authors_names,
-    :editors_names,
+    :name_descriptions_authors,
+    :name_descriptions_editors,
     :images,
-    :authors_locations,
-    :editors_locations,
+    :location_descriptions_authors,
+    :location_descriptions_editors,
     :species_lists,
     :species_list_entries,
     :comments,
@@ -83,18 +83,18 @@ class SiteData
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
-    :authors_names        => 100,
-    :editors_names        => 10,
-    :images               => 10,
-    :authors_locations    => 10,
-    :editors_locations    => 5,
-    :species_lists        => 5,
-    :species_list_entries => 1,
-    :comments             => 1,
-    :observations         => 1,
-    :namings              => 1,
-    :votes                => 1,
-    :users                => 0
+    :name_descriptions_authors     => 100,
+    :name_descriptions_editors     => 10,
+    :images                        => 10,
+    :location_descriptions_authors => 10,
+    :location_descriptions_editors => 5,
+    :species_lists                 => 5,
+    :species_list_entries          => 1,
+    :comments                      => 1,
+    :observations                  => 1,
+    :namings                       => 1,
+    :votes                         => 1,
+    :users                         => 0
   }
 
   # Table to query to get score for each category.  (Default is same as the
@@ -207,8 +207,8 @@ private
   # Do a query for the number of records in a given category for the entire
   # site.  This is not cached.  Most of these should be inexpensive queries.
   #
-  #   count = get_field_count(:authors_names)
-  #   # SELECT COUNT(*) FROM `authors_names`
+  #   count = get_field_count(:images)
+  #   # SELECT COUNT(*) FROM `images`
   #
   #   count = get_field_count(:users)
   #   # SELECT COUNT(*) FROM `users` WHERE `verified` IS NOT NULL

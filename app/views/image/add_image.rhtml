@@ -2,7 +2,7 @@
   @title = :image_add_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :observation.l), :controller => 'observer',
+    add_tab(:cancel_and_show.t(:type => :observation), :controller => 'observer',
             :action => 'show_observation', :id => @observation.id,
             :params => query_params)
     add_tab(:image_add_edit.t, :controller => 'observer',

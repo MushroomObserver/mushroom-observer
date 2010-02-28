@@ -41,6 +41,9 @@
 #     lookup_species_list
 #     lookup_user
 #
+#   * review_authors      Let authors/reviewers add/remove authors from descriptions.
+#   * author_request      Let non-authors request authorship credit on descriptions.
+#
 #   R change_user_bonuses
 #   R users_by_name
 #     users_by_contribution
@@ -332,8 +335,7 @@ class ObserverController < ApplicationController
     else
       type = object.class.name.underscore.to_sym.t
       types = object.class.table_name.to_sym.t
-      flash_error(:app_object_no_match.t(:match => id,
-                  :type => type, :types => types))
+      flash_error(:runtime_object_no_match.t(:match => id, :type => type))
       goto_index(model)
     end
   end
@@ -440,9 +442,12 @@ class ObserverController < ApplicationController
     where = params[:where].to_s
     query = create_query(:Observation, :at_where, :location => where)
     @links = [
-      [ :location_define.l, { :controller => 'location', :action => 'create_location', :where => where } ],
-      [ :location_merge.l, { :controller => 'location', :action => 'list_merge_options', :where => where } ],
-      [ :location_all.l, { :controller => 'location', :action => 'list_locations' } ],
+      [ :list_observations_location_define.l, { :controller => 'location',
+        :action => 'create_location', :where => where } ],
+      [ :list_observations_location_merge.l, { :controller => 'location',
+        :action => 'list_merge_options', :where => where } ],
+      [ :list_observations_location_all, { :controller => 'location',
+        :action => 'list_locations' } ],
     ]
     show_selected_observations(query)
   end
@@ -472,7 +477,7 @@ class ObserverController < ApplicationController
 
   # Show selected search results as a matrix with 'list_observations' template.
   def show_selected_observations(query, args={})
-    store_query(query)
+    store_query_in_session(query)
     @links ||= []
 
     args = { :action => 'list_observations', :matrix => true,
@@ -480,20 +485,20 @@ class ObserverController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t], 
-      ['date', :app_date.t], 
-      ['user', :user.t], 
+      ['name', :name.t],
+      ['date', :DATE.t],
+      ['user', :user.t],
     ]
 
     # Add "show map" link if this query can be coerced into a location query.
     if query.is_coercable?(:Location)
-      @links << [:app_show_object.t(:type => :map.t), {
-                  :controller => 'location', 
+      @links << [:show_object.t(:type => :map), {
+                  :controller => 'location',
                   :action => 'map_locations',
                   :params => query_params(query),
                 }]
-      @links << [:app_show_objects.t(:types => :locations.t), {
-                  :controller => 'location', 
+      @links << [:show_objects.t(:type => :location), {
+                  :controller => 'location',
                   :action => 'index_location',
                   :params => query_params(query),
                 }]
@@ -501,8 +506,8 @@ class ObserverController < ApplicationController
 
     # Add "show names" link if this query can be coerced into a name query.
     if query.is_coercable?(:Name)
-      @links << [:app_show_objects.t(:types => :names.t), {
-                  :controller => 'name', 
+      @links << [:show_objects.t(:type => :name), {
+                  :controller => 'name',
                   :action => 'index_name',
                   :params => query_params(query),
                 }]
@@ -510,8 +515,8 @@ class ObserverController < ApplicationController
 
     # Add "show images" link if this query can be coerced into an image query.
     if query.is_coercable?(:Image)
-      @links << [:app_show_objects.t(:types => :images.t), {
-                  :controller => 'image', 
+      @links << [:show_objects.t(:type => :image), {
+                  :controller => 'image',
                   :action => 'index_image',
                   :params => query_params(query),
                 }]
@@ -564,11 +569,6 @@ class ObserverController < ApplicationController
     update_view_stats(@observation)
 # logger.warn('VIEW_STATS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
 
-    # Is the current user interested in this observation?
-    @interest = nil
-    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Observation', @observation.id) if @user
-# logger.warn('INTEREST ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-
     # Decide if the current query can be used to create a map.
     query = find_query(:Observation)
     @mappable = query && query.is_coercable?(:Location)
@@ -584,7 +584,7 @@ class ObserverController < ApplicationController
             if (value = params[:vote][naming.id.to_s][:value].to_i rescue nil) and
                @observation.change_vote(naming, value) and
                !flashed
-              flash_notice(:show_observation_success.t)
+              flash_notice(:runtime_show_observation_success.t)
               flashed = true
             end
           end
@@ -652,7 +652,7 @@ class ObserverController < ApplicationController
     @confidence_menu = translate_menu(Vote.confidence_menu)
 
     # Clear search list.
-    store_query
+    clear_query_in_session
 
     # Create empty instances first time through.
     if request.method != :post
@@ -702,7 +702,7 @@ class ObserverController < ApplicationController
       # If everything checks out save observation.
       if success &&
         (success = save_observation(@observation))
-        flash_notice(:create_observation_success.t)
+        flash_notice(:runtime_observation_success.t(:id => @observation.id))
         @observation.log(:log_observation_created)
       end
 
@@ -780,7 +780,7 @@ class ObserverController < ApplicationController
       if success && @observation.changed?
         @observation.modified = Time.now
         if success = save_observation(@observation)
-          flash_notice(:edit_observation_success.t)
+          flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
           touch = (params[:log_change][:checked] == '1' rescue false)
           @observation.log(:log_observation_updated, :touch => touch)
         end
@@ -809,23 +809,23 @@ class ObserverController < ApplicationController
     @observation = Observation.find(params[:id])
     next_state = nil
     if this_state = find_query(:Observation)
-      this_state.this = @observation
+      this_state.current = @observation
       next_state = this_state.next
     end
 
     if !check_permission!(@observation.user_id)
-      flash_error(:destroy_observation_denied.t)
+      flash_error(:runtime_destroy_observation_denied.t(:id => @observation.id))
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params(this_state))
     elsif !@observation.destroy
-      flash_error(:destroy_observation_failed.t)
+      flash_error(:runtime_destroy_observation_failed.t(:id => @observation.id))
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params(this_state))
     else
       Transaction.delete_observation(:id => @observation)
-      flash_notice(:destroy_observation_success.t)
+      flash_notice(:runtime_destroy_observation_success.t(:id => params[:id]))
       if next_state
-        redirect_to(:action => 'show_observation', :id => next_state.this_id,
+        redirect_to(:action => 'show_observation', :id => next_state.current_id,
                     :params => query_params(next_state))
       else
         redirect_to(:action => 'list_observations')
@@ -885,7 +885,7 @@ class ObserverController < ApplicationController
       success = false if !@name
 
       if success && @observation.name_been_proposed?(@name)
-        flash_warning(:create_naming_already_proposed.t)
+        flash_warning(:runtime_create_naming_already_proposed.t)
         success = false
       end
 
@@ -967,7 +967,7 @@ class ObserverController < ApplicationController
 
       if success and (@naming.name != @name) and
          @observation.name_been_proposed?(@name)
-        flash_warning(:edit_naming_someone_else.t)
+        flash_warning(:runtime_edit_naming_someone_else.t)
         success = false
       end
 
@@ -1053,14 +1053,14 @@ class ObserverController < ApplicationController
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
     if !check_permission!(@naming.user_id)
-      flash_error(:destroy_naming_denied.t)
+      flash_error(:runtime_destroy_naming_denied.t(:id => @naming.id))
     elsif !@naming.deletable?
-      flash_warning(:destroy_naming_someone_else.t)
+      flash_warning(:runtime_destroy_naming_someone_else.t)
     elsif !@naming.destroy
-      flash_error(:destroy_naming_failed.t)
+      flash_error(:runtime_destroy_naming_failed.t(:id => @naming.id))
     else
       Transaction.delete_naming(:id => @naming)
-      flash_notice(:destroy_naming_success.t)
+      flash_notice(:runtime_destroy_naming_success.t(:id => params[:id]))
     end
     redirect_to(:action => 'show_observation', :id => @observation.id,
                 :params => query_params)
@@ -1127,6 +1127,70 @@ class ObserverController < ApplicationController
 
   ##############################################################################
   #
+  #  :section: Author Stuff
+  #
+  ##############################################################################
+
+  # Form to compose email for the authors/reviewers.  Linked from show_<object>.
+  # TODO: Use queued_email mechanism.
+  def author_request
+    pass_query_params
+    @object = AbstractModel.find_object(params[:type], params[:id])
+    if request.method == :post
+      subject = params[:email][:subject] rescue ''
+      content = params[:email][:content] rescue ''
+      for receiver in (@object.authors + UserGroup.reviewers.users).uniq
+        AccountMailer.deliver_author_request(@user, receiver, @object, subject, content)
+      end
+      flash_notice(:request_success.t)
+      parent = @object.parent
+      redirect_to(:controller => @object.show_controller,
+                  :action => @object.show_action, :id => @object.id,
+                  :params => query_params)
+    end
+  end
+
+  # Form to adjust permissions for a user with respect to a project.
+  # Linked from: show_(object) and author_request email
+  # Inputs:
+  #   params[:id]
+  #   params[:type]
+  #   params[:add]
+  #   params[:remove]
+  # Success:
+  #   Redraws itself.
+  # Failure:
+  #   Renders show_name.
+  #   Outputs: @name, @authors, @users
+  def review_authors
+    pass_query_params
+    @object = AbstractModel.find_object(params[:type], params[:id])
+    @authors = @object.authors
+    parent = @object.parent
+    if @authors.member?(@user) or @user.in_group('reviewers')
+      @users = User.all(:order => "login, name")
+      new_author = params[:add] ?  User.find(params[:add]) : nil
+      if new_author and not @authors.member?(new_author)
+        @object.add_author(new_author)
+        flash_notice("Added #{new_author.legal_name}")
+        # Should send email as well
+      end
+      old_author = params[:remove] ? User.find(params[:remove]) : nil
+      if old_author and @authors.member?(old_author)
+        @object.remove_author(old_author)
+        flash_notice("Removed #{old_author.legal_name}")
+        # Should send email as well
+      end
+    else
+      flash_error(:review_authors_denied.t)
+      redirect_to(:controller => parent.show_controller,
+                  :action => parent.show_action, :id => parent.id,
+                  :params => query_params)
+    end
+  end
+
+  ##############################################################################
+  #
   #  :section: Notifications
   #
   ##############################################################################
@@ -1172,7 +1236,7 @@ class ObserverController < ApplicationController
     if is_in_admin_mode?
       @users = User.all(:order => "last_login desc", :include => :user_groups)
     else
-      flash_error(:app_permission_denied.t)
+      flash_error(:permission_denied.t)
       redirect_to(:action => 'list_rss_logs')
     end
   end
@@ -1338,7 +1402,7 @@ class ObserverController < ApplicationController
   # Restricted to the admin user
   def email_features
     if !is_in_admin_mode?
-      flash_error(:app_permission_denied.t)
+      flash_error(:permission_denied.t)
       redirect_to(:action => 'list_rss_logs')
     else
       @users = User.all(:conditions => "email_general_feature=1 and verified is not null")
@@ -1359,15 +1423,15 @@ class ObserverController < ApplicationController
     if request.method != :post
       @email = @user.email if @user
     elsif @email.nil? or @email.strip == '' or @email.index('@').nil?
-      flash_error (:ask_webmaster_need_address.t)
+      flash_error (:runtime_ask_webmaster_need_address.t)
       @email_error = true
     elsif /http:/ =~ @content or /<[\/a-zA-Z]+>/ =~ @content
-      flash_error(:ask_webmaster_antispam.t)
+      flash_error(:runtime_ask_webmaster_antispam.t)
     elsif @content.nil? or @content.strip == ''
-      flash_error(:ask_webmaster_need_content.t)
+      flash_error(:runtime_ask_webmaster_need_content.t)
     else
       AccountMailer.deliver_webmaster_question(@email, @content)
-      flash_notice(:ask_webmaster_success.t)
+      flash_notice(:runtime_ask_webmaster_success.t)
       redirect_to(:action => "list_rss_logs")
     end
   end
@@ -1379,7 +1443,7 @@ class ObserverController < ApplicationController
       subject = params[:email][:subject]
       content = params[:email][:content]
       AccountMailer.deliver_user_question(@user, @target, subject, content)
-      flash_notice(:ask_user_question_success.t)
+      flash_notice(:runtime_ask_user_question_success.t)
       redirect_to(:action => 'show_user', :id => @target.id)
     end
   end
@@ -1390,7 +1454,7 @@ class ObserverController < ApplicationController
        (request.method == :post)
       question = params[:question][:content]
       AccountMailer.deliver_observation_question(@user, @observation, question)
-      flash_notice(:ask_observation_question_success.t)
+      flash_notice(:runtime_ask_observation_question_success.t)
       redirect_to(:action => 'show_observation', :id => @observation.id,
                   :params => query_params)
     end
@@ -1402,7 +1466,7 @@ class ObserverController < ApplicationController
        (request.method == :post)
       commercial_inquiry = params[:commercial_inquiry][:content]
       AccountMailer.deliver_commercial_inquiry(@user, @image, commercial_inquiry)
-      flash_notice(:commercial_inquiry_success.t)
+      flash_notice(:runtime_commercial_inquiry_success.t)
       redirect_to(:controller => 'image', :action => 'show_image',
                   :id => @image.id, :params => query_params)
     end
@@ -1414,7 +1478,7 @@ class ObserverController < ApplicationController
     if user.send(method)
       result = true
     else
-      flash_error(:app_permission_denied.t)
+      flash_error(:permission_denied.t)
       redirect_to(:controller => target.show_controller,
                   :action => target.show_action, :id => target.id,
                   :params => query_params)
@@ -1443,7 +1507,7 @@ class ObserverController < ApplicationController
 
   # Show selected search results as a matrix with 'list_rss_logs' template.
   def show_selected_rss_logs(query, args={})
-    store_query(query)
+    store_query_in_session(query)
     @links ||= []
     args = {
       :action => 'list_rss_logs',
@@ -1616,7 +1680,7 @@ class ObserverController < ApplicationController
       args[:id] = observation
       Transaction.create(args)
     else
-      flash_error(:observer_controller_no_save_observation.t)
+      flash_error(:runtime_no_save_observation.t)
       flash_object_errors(observation)
       success = false
     end
@@ -1651,9 +1715,9 @@ class ObserverController < ApplicationController
     if naming.save
       args[:id] = naming
       Transaction.create(args)
-      flash_notice(:observer_controller_naming_created.t)
+      flash_notice(:runtime_naming_created.t)
     else
-      flash_error(:observer_controller_no_save_naming.t)
+      flash_error(:runtime_no_save_naming.t)
       flash_object_errors(naming)
       success = false
     end
@@ -1664,7 +1728,7 @@ class ObserverController < ApplicationController
   def update_naming_object(naming, name, log)
     naming.name = name
     naming.save
-    flash_notice(:observer_controller_naming_updated.t)
+    flash_notice(:runtime_naming_updated.t)
     naming.observation.log(:log_naming_updated, :name => naming.format_name,
                            :touch => log)
 
@@ -1763,7 +1827,7 @@ class ObserverController < ApplicationController
             flash_object_errors(image)
           elsif !image.save_image
             logger.error('Unable to upload image')
-            flash_notice(:observer_controller_no_upload_image.t(:name => (name ? "'#{name}'" : "##{image.id}")))
+            flash_notice(:runtime_no_upload_image.t(:name => (name ? "'#{name}'" : "##{image.id}")))
             bad_images.push(image)
             flash_object_errors(image)
           else
@@ -1774,7 +1838,7 @@ class ObserverController < ApplicationController
               :copyright_holder => image.copyright_holder.to_s,
               :license          => image.license || 0
             )
-            flash_notice(:observer_controller_image_uploaded.t(:name => (name ? "'#{name}'" : "##{image.id}")))
+            flash_notice(:runtime_image_uploaded.t(:name => (name ? "'#{name}'" : "##{image.id}")))
             good_images.push(image)
             if observation.thumb_image_id == -i
               observation.thumb_image_id = image.id
@@ -1815,7 +1879,7 @@ class ObserverController < ApplicationController
           flash_object_errors(image)
         else
           Transaction.put_image(args)
-          flash_notice(:observer_controller_image_updated_notes.t(:id => image.id))
+          flash_notice(:runtime_image_updated_notes.t(:id => image.id))
         end
       end
     end

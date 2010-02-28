@@ -30,7 +30,7 @@
     <%= link_to(:profile_image_reuse.t, :controller => 'image',
                 :action => 'reuse_image_for_user') %>
     <%= link_to(:profile_image_remove.t, { :action => 'remove_image' },
-                { :confirm => :app_are_you_sure.l }) if @user.image %><br/>
+                { :confirm => :are_you_sure.l }) if @user.image %><br/>
   <%= form.file_field("upload_image") %></p>
 
   <p><label for="copyright_holder"><%= :profile_copyright_holder.t %></label><br/>

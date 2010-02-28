@@ -117,7 +117,7 @@ class RssLog < AbstractModel
   #
   def add_with_date(key, args={})
     args = {
-      :user  => (User.current ? User.current.login : :app_unknown.l),
+      :user  => (User.current ? User.current.login : :UNKNOWN.l),
       :touch => true,
       :time  => Time.now,
       :save  => true,
@@ -134,7 +134,7 @@ class RssLog < AbstractModel
 
     self.notes = entry + "\n" + notes.to_s
     self.modified = args[:time] if args[:touch]
-    self.save_without_updating_modified if args[:save]
+    self.save_without_our_callbacks if args[:save]
   end
 
   # Add line with timestamp and +title+ to notes, clear references to
@@ -151,7 +151,7 @@ class RssLog < AbstractModel
     self.name         = nil
     self.observation  = nil
     self.species_list = nil
-    self.save_without_updating_modified
+    self.save_without_our_callbacks
   end
 
   # Returns the associated object, or nil if it's an orphan.

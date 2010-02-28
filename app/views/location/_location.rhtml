@@ -1,0 +1,50 @@
+<center>
+  <%=
+    gmap = make_map([location])
+    add_header(GMap.header)
+    add_header(finish_map(gmap))
+    gmap.div(:width => "800", :height => "480")
+  %>
+</center>
+
+<table width="100%" cellpadding="10">
+  <tr>
+    <td align="center">
+      <table cellpadding="5">
+        <tr>
+          <td></td>
+          <td><%= "#{:NORTH.t}: #{location.north}" %>&deg;</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><%= "#{:WEST.t}: #{location.west}" %>&deg;</td>
+          <td></td>
+          <td><%= "#{:EAST.t}: #{location.east}" %>&deg;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><%= "#{:SOUTH.t}: #{location.south}" %>&deg;</td>
+          <td></td>
+        </tr>
+      </table>
+    </td>
+    <td align="center">
+      <table cellpadding="5">
+        <tr>
+          <td>
+            <% if location.high %>
+              <%= "#{:show_location_highest.t}: #{location.high} #{:meters.t}"%>
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <% if location.low %>
+              <%= "#{:show_location_lowest.t}: #{location.low} #{:meters.t}"%>
+            <% end %>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

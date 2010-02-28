@@ -62,139 +62,6 @@ class Synchronization < ActiveRecord::Migration
     remove_column :user_groups,      :created_at
     remove_column :draft_names,      :created_at
 
-#     #---------------------------------------------------------
-#     #  Move name and draft descriptions into separate table.
-#     #---------------------------------------------------------
-#
-#     create_table 'descriptions', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
-#       t.column 'sync_id',        :string,  :limit => 16
-#       t.column 'version',        :integer
-#       t.column 'created',        :datetime
-#       t.column 'modified',       :datetime
-#       t.column 'user_id',        :integer
-#       t.column 'name_id',        :integer
-#
-#       t.column 'num_views',      :integer, :default => 0
-#       t.column 'last_view',      :datetime
-#       t.column 'review_status',  :enum,    :default => :unreviewed, :limit => [:unreviewed, :unvetted, :vetted, :inaccurate]
-#       t.column 'last_review'     :datetime
-#       t.column 'reviewer_id'     :integer
-#       t.column 'ok_for_export',  :boolean, :default => true, :null => false
-#
-#       t.column 'permission',     :enum,   :default => :All, :null => false, :limit => [:All, :Project, :Authors]
-#       t.column 'visibility',     :enum,   :default => :All, :null => false, :limit => [:All, :Project, :Authors]
-#       t.column 'locale',         :string, :default => 'en-US', :limit => 8
-#       t.column 'project_id',     :integer
-#       t.column 'source_id',      :integer
-#       t.column 'license_id',     :integer
-#
-#       t.column 'gen_desc',       :text
-#       t.column 'diag_desc',      :text
-#       t.column 'distribution',   :text
-#       t.column 'habitat',        :text
-#       t.column 'look_alikes',    :text
-#       t.column 'uses',           :text
-#       t.column 'notes',          :text
-#       t.column 'refs',           :text
-#     end
-#
-#     create_table 'past_descriptions', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
-#       t.column 'description_id', :integer
-#       t.column 'version',        :integer
-#       t.column 'modified',       :datetime
-#       t.column 'user_id',        :integer
-#
-#       t.column 'permission',     :enum,   :default => :All, :null => false, :limit => [:All, :Project, :Authors]
-#       t.column 'visibility',     :enum,   :default => :All, :null => false, :limit => [:All, :Project, :Authors]
-#       t.column 'locale',         :string, :default => 'en-US', :limit => 8
-#       t.column 'project_id',     :integer
-#       t.column 'source_id',      :integer
-#       t.column 'license_id',     :integer
-#
-#       t.column 'gen_desc',       :text
-#       t.column 'diag_desc',      :text
-#       t.column 'distribution',   :text
-#       t.column 'habitat',        :text
-#       t.column 'look_alikes',    :text
-#       t.column 'uses',           :text
-#       t.column 'notes',          :text
-#       t.column 'refs',           :text
-#     end
-#
-#     names_cols = [
-#       'id', 'version', 'created', 'modified', 'user_id',
-#       'num_views', 'last_view', 'review_status', 'last_review', 'reviewer_id', 'ok_for_export',
-#       'license_id',
-#       'gen_desc', 'diag_desc', 'distribution', 'habitat', 'look_alikes', 'uses', 'notes', 'refs'
-#     ]
-#
-#     draft_names_cols = [
-#       'name_id', 'version', 'created', 'modified', 'user_id',
-#       'review_status', 'last_review', 'reviewer_id',
-#       'project_id', 'license_id',
-#       'gen_desc', 'diag_desc', 'distribution', 'habitat', 'look_alikes', 'uses', 'notes', 'refs'
-#     ]
-#
-#     past_names_cols = [
-#       'name_id', 'version', 'modified', 'user_id',
-#       'license_id',
-#       'gen_desc', 'diag_desc', 'distribution', 'habitat', 'look_alikes', 'uses', 'notes', 'refs'
-#     ]
-#
-#     past_draft_names_cols = [
-#       'draft_name_id', 'version', 'modified', 'user_id',
-#       'project_id', 'license_id',
-#       'gen_desc', 'diag_desc', 'distribution', 'habitat', 'look_alikes', 'uses', 'notes', 'refs'
-#     ]
-#
-#     num_names = copy_table('names', 'descriptions', 'name_id', names_cols)
-#     copy_table('draft_names', 'descriptions', 'name_id', draft_names_cols)
-#     copy_table('past_names', 'past_descriptions', 'description_id', past_names_cols)
-#     copy_table('past_draft_names', 'past_descriptions', 'description_id', past_draft_names_cols, num_names)
-#
-#     remove_column :names, :license_id
-#     remove_column :names, :gen_desc
-#     remove_column :names, :diag_desc
-#     remove_column :names, :distribution
-#     remove_column :names, :habitat
-#     remove_column :names, :look_alikes
-#     remove_column :names, :uses
-#     remove_column :names, :notes
-#     remove_column :names, :refs
-#
-#     remove_column :past_names, :license_id
-#     remove_column :past_names, :gen_desc
-#     remove_column :past_names, :diag_desc
-#     remove_column :past_names, :distribution
-#     remove_column :past_names, :habitat
-#     remove_column :past_names, :look_alikes
-#     remove_column :past_names, :uses
-#     remove_column :past_names, :notes
-#     remove_column :past_names, :refs
-#
-#     # (These really never should've been versioned to start with.)
-#     remove_column :past_names, :reviewer_id
-#     remove_column :past_names, :last_review
-#     remove_column :past_names, :review_status
-#     remove_column :past_names, :ok_for_export
-#     remove_column :past_locations, :location_id
-#
-#     # No longer need draft names at all!
-#     drop_table :draft_names
-#     drop_table :past_draft_names
-#
-#     # Set the permissions correctly for the erstwhile draft names.
-#     Name.connection.update %(
-#       UPDATE `descriptions`
-#       SET `permission` = 'Authors', `visibility` = 'Project'
-#       WHERE `id` > num_names
-#     )
-#     Name.connection.update %(
-#       UPDATE `past_descriptions`
-#       SET `permission` = 'Authors', `visibility` = 'Project'
-#       WHERE `id` > num_names
-#     )
-
     #-------------------------------------
     #  Add some stuff to the user table.
     #-------------------------------------
@@ -220,17 +87,6 @@ class Synchronization < ActiveRecord::Migration
       t.column 'modified', :datetime
       t.column 'query',    :text
     end
-
-#     #-----------------------------
-#     #  Create tag table. TODO
-#     #-----------------------------
-#
-#     create_table 'rdfs', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
-#       t.column 'modified',  :datetime
-#       t.column 'subject',   :text
-#       t.column 'predicate', :text
-#       t.column 'object',    :text
-#     end
 
     #---------------------------------------
     #  Fix flavors in queued_emails table.
@@ -390,30 +246,6 @@ class Synchronization < ActiveRecord::Migration
   #=================================================
 
   def self.down
-#     raise "Sorry! This and the next migration can't be reversed without great difficulty."
+    # Sorry! This and the next migration can't be reversed without great difficulty.
   end
-
-  #=================================================
-  #  Copy table.
-  #=================================================
-
-  def copy_table(src_table, dest_table, target_id_col, src_cols, id_offset=nil)
-    rows = User.connection.select_rows %(
-      SELECT `#{src_cols.join('`,`')}` FROM #{src_table}
-    )
-    dest_cols = src_cols.dup
-    src_cols[0] = target_id_col
-    User.connection.insert %(
-      INSERT INTO #{dest_table} (`#{dest_cols.join('`,`')}`)
-      VALUES (#{
-        rows.map do |row|
-          row[0] = (row[0].to_i + id_offset).to_s if id_offset
-          row.map do |val|
-            "'" + val.gsub('\\', '\\\\').gsub("'", "''") + "'"
-          end.join(',')
-        end.join('),(')
-      })
-    )
-  end
-
 end

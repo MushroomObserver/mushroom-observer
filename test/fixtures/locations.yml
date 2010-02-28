@@ -2,11 +2,12 @@
 
 albion:
   id: 1
+  description_id: 1
   sync_id: 1xx1
   created: 2007-12-27 06:41:20
   modified: 2007-12-27 06:41:20
   user_id: 1
-  version: 1
+  version: 2
   display_name: Albion, Mendocino Co., California, USA
   north: 39.32
   west: -123.82
@@ -14,15 +15,15 @@ albion:
   south: 39.21
   high: 100.0
   low: 0.0
-  notes: Here are some new notes to play with.
 
 burbank:
   id: 2
+  description_id: 2
   sync_id: 2xx1
   created: 2007-12-27 06:47:00
   modified: 2007-12-27 06:47:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: Burbank, Los Angeles Co., California, USA
   north: 34.22
   west: -118.37
@@ -33,11 +34,12 @@ burbank:
 
 mitrula_marsh:
   id: 3
+  description_id: 3
   sync_id: 3xx1
   created: 2007-12-27 06:47:00
   modified: 2007-12-27 06:47:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: \"Mitrula Marsh\", Sand Lake, Bassetts, Yuba Co., California, USA
   north: 39.7184
   west: -120.687
@@ -47,11 +49,12 @@ mitrula_marsh:
 
 salt_point:
   id: 4
+  description_id: 4
   sync_id: 4xx1
   created: 2007-12-27 06:47:00
   modified: 2007-12-27 06:47:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: Salt Point State Park, Sonoma Co., California, USA
   north: 38.5923
   west: -123.343
@@ -62,11 +65,12 @@ salt_point:
 
 gualala:
   id: 5
+  description_id: 5
   sync_id: 5xx1
   created: 2007-12-27 06:47:00
   modified: 2007-12-27 06:47:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: Gualala, Mendocino Co., California, USA
   north: 38.7868
   west: -123.557
@@ -77,11 +81,12 @@ gualala:
 
 elgin_co:
   id: 6
+  description_id: 6
   sync_id: 6xx1
   created: 2007-12-27 06:47:00
   modified: 2007-12-27 06:47:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: Elgin County, Ontario, Canada
   north: 42.876
   west: -81.8179
@@ -90,11 +95,12 @@ elgin_co:
 
 brett_woods:
   id: 7
+  description_id: 7
   sync_id: 7xx1
   created: 2007-12-27 06:47:00
   modified: 2007-12-27 06:47:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: Brett Woods, Fairfield Co., Connecticut, USA
   north: 41.2125
   west: -73.3295
@@ -103,11 +109,12 @@ brett_woods:
 
 point_reyes:
   id: 8
+  description_id: 8
   sync_id: 8xx1
   created: 2008-01-01 11:50:00
   modified: 2008-01-01 11:50:00
   user_id: 1
-  version: 0
+  version: 1
   display_name: Point Reyes National Seashore, Marin Co., California, USA
   north: 38.2441
   west: -123.0256
@@ -116,11 +123,12 @@ point_reyes:
 
 howarth_park:
   id: 9
+  description_id: 9
   sync_id: 9xx1
   created: 2008-01-01 15:24:18
   modified: 2008-01-01 15:24:18
   user_id: 1
-  version: 0
+  version: 1
   display_name: Howarth Park, Santa Rosa, Sonoma Co., California, USA
   north: 38.4582
   west: -122.6712

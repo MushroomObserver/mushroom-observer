@@ -23,7 +23,7 @@
 #
 #  == Callbacks
 #
-#  notify_users::           Sends notification emails after save.
+#  notify_users::           Sends notification emails after creation.
 #  log_destruction::        Log destruction after destroy.
 #
 #  == Polymorphism
@@ -50,7 +50,7 @@ class Comment < AbstractModel
   belongs_to :object, :polymorphic => true
   belongs_to :user
 
-  after_save    :notify_users
+  after_create  :notify_users
   after_destroy :log_destruction
 
   # Callback that logs destruction after comment is destroyed.
@@ -62,8 +62,8 @@ class Comment < AbstractModel
     end
   end
 
-  # Callback called after creation or update.  Lots of people potentially can
-  # receive an email whenever a Comment is posted:
+  # Callback called after creation.  Lots of people potentially can receive an
+  # email whenever a Comment is posted: 
   #
   # 1. the owner of the object
   # 2. users who already commented on the same object

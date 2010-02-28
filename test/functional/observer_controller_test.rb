@@ -130,7 +130,7 @@ class ObserverControllerTest < ControllerTestCase
     n2.transfer_synonym(n3)
     n2.transfer_synonym(n4)
     n1.correct_spelling = n2
-    n1.save_without_updating_modified
+    n1.save_without_our_callbacks
 
     o1 = n1.observations.first
     o2 = n2.observations.first
@@ -139,7 +139,7 @@ class ObserverControllerTest < ControllerTestCase
 
     # When requesting non-synonym observations of n2, it should include n1,
     # since an observation of n1 was clearly intended to be an observation of
-    # n2. 
+    # n2.
     query = Query.lookup_and_save(:Observation, :of_name, :synonyms => :no,
                                   :name => n2, :by => :name)
     assert_equal(2, query.num_results)
@@ -270,23 +270,23 @@ class ObserverControllerTest < ControllerTestCase
     params[:user][:email] = ''
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_flash(:ask_webmaster_need_address.t)
+    assert_flash(:runtime_ask_webmaster_need_address.t)
 
     params[:user][:email] = 'spammer'
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_flash(:ask_webmaster_need_address.t)
+    assert_flash(:runtime_ask_webmaster_need_address.t)
 
     params[:user][:email] = 'bogus@email.com'
     params[:question][:content] = ''
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_flash(:ask_webmaster_need_content.t)
+    assert_flash(:runtime_ask_webmaster_need_content.t)
 
     params[:question][:content] = "Buy <a href='http://junk'>Me!</a>"
     post(:ask_webmaster_question, params)
     assert_response(:success)
-    assert_flash(:ask_webmaster_antispam.t)
+    assert_flash(:runtime_ask_webmaster_antispam.t)
   end
 
   def test_show_observation
@@ -421,7 +421,7 @@ class ObserverControllerTest < ControllerTestCase
     }
     post_requires_login(:ask_observation_question, params)
     assert_response(:action => :show_observation)
-    assert_flash(:ask_observation_question_success.t)
+    assert_flash(:runtime_ask_observation_question_success.t)
 
     user = @mary
     params = {
@@ -433,7 +433,7 @@ class ObserverControllerTest < ControllerTestCase
     }
     post_requires_login(:ask_user_question, params)
     assert_response(:action => :show_user)
-    assert_flash(:ask_user_question_success.t)
+    assert_flash(:runtime_ask_user_question_success.t)
   end
 
   def test_show_notifications
@@ -452,6 +452,123 @@ class ObserverControllerTest < ControllerTestCase
     # non-empty list, and thus that this test is meaningful.
     requires_login(:show_notifications, :id => observations(:coprinus_comatus_obs))
     assert_response('show_notifications')
+  end
+
+  def test_author_request
+    id = name_descriptions(:coprinus_comatus_desc).id
+    requires_login(:author_request, :id => id, :type => 'name_description')
+    assert_form_action(:action => 'author_request', :id => id,
+                       :type => 'name_description')
+
+    id = location_descriptions(:albion_desc).id
+    requires_login(:author_request, :id => id, :type => 'location_description')
+    assert_form_action(:action => 'author_request', :id => id,
+                       :type => 'location_description')
+
+    params = {
+      :id => name_descriptions(:coprinus_comatus_desc).id,
+      :type => 'name_description',
+      :email => {
+        :subject => "Author request subject",
+        :message => "Message for authors"
+      }
+    }
+    post_requires_login(:author_request, params)
+    assert_response(:controller => 'name', :action => 'show_name_description',
+                    :id => name_descriptions(:coprinus_comatus_desc).id)
+    assert_flash(:request_success.t)
+
+    params = {
+      :id => location_descriptions(:albion_desc).id,
+      :type => 'location_description',
+      :email => {
+        :subject => "Author request subject",
+        :message => "Message for authors"
+      }
+    }
+    post_requires_login(:author_request, params)
+    assert_response(:controller => 'location', :action => 'show_location_description',
+                    :id => location_descriptions(:albion_desc).id)
+    assert_flash(:request_success.t)
+  end
+
+  def test_review_authors_locatios
+    params = { :id => 1, :type => 'LocationDescription' }
+
+    # Make sure it lets Rolf and only Rolf see this page.
+    assert(!@mary.in_group('reviewers'))
+    assert(@rolf.in_group('reviewers'))
+    requires_user(:review_authors, :show_location, params)
+    assert_response('review_authors')
+
+    # Remove Rolf from reviewers group.
+    user_groups(:reviewers).users.delete(@rolf)
+    @rolf.reload
+    assert(!@rolf.in_group('reviewers'))
+
+    # Make sure it fails to let unauthorized users see page.
+    get(:review_authors, params)
+    assert_response(:action => :show_location, :id => 1)
+
+    # Make Rolf an author.
+    albion = location_descriptions(:albion_desc)
+    albion.add_author(@rolf)
+    albion.save
+    albion.reload
+    assert_user_list_equal([@rolf], albion.authors)
+
+    # Rolf should be able to do it now.
+    get(:review_authors, params)
+    assert_response('review_authors')
+
+    # Rolf giveth with one hand...
+    post(:review_authors, params.merge(:add => @mary.id))
+    assert_response('review_authors')
+    albion.reload
+    assert_user_list_equal([@mary, @rolf], albion.authors)
+
+    # ...and taketh with the other.
+    post(:review_authors, params.merge(:remove => @mary.id))
+    assert_response('review_authors')
+    albion.reload
+    assert_user_list_equal([@rolf], albion.authors)
+  end
+
+  def test_review_authors_name
+    name = names(:fungi)
+    desc = name.description
+
+    params = { :id => 1, :type => 'NameDescription' }
+
+    # Make sure it lets reviewers get to page.
+    requires_login(:review_authors, params)
+    assert_response('review_authors')
+
+    # Remove Rolf from reviewers group.
+    user_groups(:reviewers).users.delete(@rolf)
+    assert(!@rolf.reload.in_group('reviewers'))
+
+    # Make sure it fails to let unauthorized users see page.
+    get(:review_authors, params)
+    assert_response(:action => :show_name, :id => 1)
+
+    # Make Rolf an author.
+    desc.add_author(@rolf)
+    assert_user_list_equal([@rolf], desc.reload.authors)
+
+    # Rolf should be able to do it again now.
+    get(:review_authors, params)
+    assert_response('review_authors')
+
+    # Rolf giveth with one hand...
+    post(:review_authors, params.merge(:add => @mary.id))
+    assert_response('review_authors')
+    assert_user_list_equal([@mary, @rolf], desc.reload.authors)
+
+    # ...and taketh with the other.
+    post(:review_authors, params.merge(:remove => @mary.id))
+    assert_response('review_authors')
+    assert_user_list_equal([@rolf], desc.reload.authors)
   end
 
   # ------------------------------
@@ -1199,8 +1316,7 @@ class ObserverControllerTest < ControllerTestCase
     login("dick")
     post(:create_naming, params)
     assert_response(:action => "show_observation", :id => observations(:coprinus_comatus_obs).id)
-    # Dick is being added as an editor on Conocybe filaris.
-    assert_equal(22, @dick.reload.contribution)
+    assert_equal(12, @dick.reload.contribution)
     naming = Naming.last
     assert_equal("Conocybe filaris", naming.name.text_name)
     assert_equal("(With) Author", naming.name.author)
@@ -1632,7 +1748,7 @@ class ObserverControllerTest < ControllerTestCase
     time1 = Time.utc(2001)
     time2 = Time.utc(2002)
     time3 = Time.utc(2003)
-    now   = 1.week.ago
+    week_ago = 1.week.ago
 
     FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
     file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
@@ -1650,8 +1766,8 @@ class ObserverControllerTest < ControllerTestCase
       :user_id => 1,
       :image => file1,
       :content_type => 'image/jpeg',
-      :created => now,
-      :modified => now
+      :created => week_ago,
+      :modified => week_ago
     )
 
     new_image_2 = Image.create(
@@ -1661,8 +1777,8 @@ class ObserverControllerTest < ControllerTestCase
       :user_id => 2,
       :image => file2,
       :content_type => 'image/jpeg',
-      :created => now,
-      :modified => now
+      :created => week_ago,
+      :modified => week_ago
     )
 
     post(:create_observation,
@@ -1703,8 +1819,8 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal('notes_1',     imgs[0].notes)
     assert_equal('notes_2_new', imgs[1].notes)
     assert_equal('notes_3',     imgs[2].notes)
-    assert(imgs[0].modified > 1.minute.ago)
-    assert(imgs[1].modified > 1.minute.ago)
+    assert(imgs[0].modified < 1.minute.ago) # notes not changed
+    assert(imgs[1].modified > 1.minute.ago) # notes changed
   end
 
   def test_image_upload_when_create_fails

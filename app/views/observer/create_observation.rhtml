@@ -9,17 +9,17 @@
     <td>
       <% form_tag({ :action => 'create_observation', :approved_name => @what },
                   { :multipart => true }) do %>
-        <br/><center><%= submit_tag :app_create.l %></center><br/>
+        <br/><center><%= submit_tag :CREATE.l %></center><br/>
 
         <%= render(:partial => 'form_observations', :locals => {
           :action           => 'create_observation',
           :logging_optional => false,
           :include_naming   => true,
           :include_images   => true,
-          :button_name      => :app_create.l,
+          :button_name      => :CREATE.l,
         }) %>
 
-        <br/><center><%= submit_tag :app_create.l %></center>
+        <br/><center><%= submit_tag :CREATE.l %></center>
       <% end %>
     </td>
   </tr>

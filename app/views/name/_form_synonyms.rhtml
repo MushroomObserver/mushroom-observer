@@ -50,7 +50,7 @@
             <%= :form_synonyms_missing_names.t %><br/>
             <span class="Data">
               <% for n in @new_names %>
-                &nbsp;&nbsp;<%= h(n) %><br/>
+                <%= indent + h(n) %><br/>
               <% end %>
             </span>
             <span class="HelpNote"><%= :form_synonyms_missing_names_help.t %></span>

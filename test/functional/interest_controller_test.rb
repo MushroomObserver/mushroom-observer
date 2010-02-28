@@ -24,13 +24,15 @@ class InterestControllerTest < ControllerTestCase
 
     # Fail: Try to change interest in non-existing object.
     login('rolf')
-    get(:set_interest, :type => 'Observation', :id => 100, :state => 1)
-    assert_flash(2)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get(:set_interest, :type => 'Observation', :id => 100, :state => 1)
+    end
 
     # Fail: Try to change interest in non-existing object.
     login('rolf')
-    get(:set_interest, :type => 'Bogus', :id => 1, :state => 1)
-    assert_flash(2)
+    assert_raises(NameError) do
+      get(:set_interest, :type => 'Bogus', :id => 1, :state => 1)
+    end
 
     # Succeed: Turn interest on in minimal_unknown.
     login('rolf')

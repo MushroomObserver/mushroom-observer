@@ -34,7 +34,7 @@ class DraftName < AbstractModel
     'last_review'
   )
 
-  before_save :update_user_if_save_version
+  versioned_class.before_save {|x| x.user_id = User.current_id}
 
   def self.create_from_name(project_id, name_id)
     result = DraftName.new()

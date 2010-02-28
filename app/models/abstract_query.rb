@@ -3,7 +3,7 @@
 #
 #  This model encapsulates a database query that looks up one or more objects
 #  of a given type that match certain conditions in a certain order.  Queries
-#  are dyamically joined with any number of additional tables, are required by
+#  are dyamically joined with any number of additional tables, as required by
 #  sorting and selection conditions.
 #
 #  Queries are specified by a model and flavor.  The model specifies which kind
@@ -19,7 +19,7 @@
 #  later, this query will have been culled by the garbage collector (see
 #  below), so prev and next need to be able to create a default query on the
 #  fly.  In this case it may be :Observation :all (see default_flavors array
-#  below).
+#  below). 
 #
 #  In addition, some queries require additional parameters.  For example,
 #  :Comment :for_user requires a user_id (it retrieves comments posted on a
@@ -68,16 +68,16 @@
 #    names = query.find_by_sql(:where => ...)
 #
 #  Sequence operators let you use the query as a pseudo-iterator:  (Note, these
-#  are somewhat more subtle that shown here, as nested queries may require the
+#  are somewhat more subtle than shown here, as nested queries may require the
 #  creation of new query instances.  See the section on nested queries below.)
 #
 #    query = Query.lookup(:Observation)
-#    query.this = @observation
-#    next  = query.this if query.next
-#    this  = query.this if query.prev
-#    prev  = query.this if query.prev
-#    first = query.this if query.first
-#    last  = query.this if query.last
+#    query.current = @observation
+#    next  = query.current if query.next
+#    this  = query.current if query.prev
+#    prev  = query.current if query.prev
+#    first = query.current if query.first
+#    last  = query.current if query.last
 #
 #  Finally, Query's know how to work with Paginator's:
 #
@@ -101,7 +101,7 @@
 #
 #    # Note that query.next *MAY* return a clone.
 #    if new_query = query.next
-#      puts "Next image is: " + new_query.this_id
+#      puts "Next image is: " + new_query.current_id
 #    else
 #      puts "No more images."
 #    end
@@ -109,14 +109,14 @@
 #    # Must reset otherwise query.prev just goes back to original place.
 #    query.reset
 #    if new_query = query.prev
-#      puts "Previous image is: " + new_query.this_id
+#      puts "Previous image is: " + new_query.current_id
 #    else
 #      puts "No more images."
 #    end
 #
 #    # Note: query.last works the same.
 #    if new_query = query.first
-#      puts "First image is: " + new_query.this_id
+#      puts "First image is: " + new_query.current_id
 #    else
 #      puts "There are no matching images!"
 #    end
@@ -169,9 +169,9 @@
 #            :params => query_params(query))
 #
 #    # And this is how prev and next work:
-#    query = find_or_create_query(:Image, :this => params[:id])
+#    query = find_or_create_query(:Image, :current => params[:id])
 #    if new_query = query.next
-#      redirect_to(:action => 'show_image', :id => new_query.this_id,
+#      redirect_to(:action => 'show_image', :id => new_query.current_id,
 #                  :params => query_params(new_query))
 #    else
 #      flash_error 'No more images!'
@@ -185,12 +185,12 @@
 #
 #  == Caching
 #
-#  It caches results, result_ids and num_results.  If you call results, it will
-#  populate the other two, however, if you only require the count (num_results)
-#  or the ids (result_ids) it will not populate result_ids and results,
-#  respectively.  Note that because of this paginate will only populate
-#  num_results.  TODO -- it should populate the others if there is only one
-#  page of results, though!
+#  It caches results, and result_ids.  Any of results, result_ids, num_results,
+#  or paginate populates result_ids, however results are only instantiated as
+#  necessary.  (I found that requesting all the ids was not significantly
+#  slower than requesting the count, while calling _both_ was nearly twice as
+#  long as just one.  So, there was no reason to optimize the query if you only
+#  want the number of results.) 
 #
 #  The next and prev sequence operators always grab the entire set of
 #  result_ids.  No attempt is made to reduce the query.  TODO - we might be
@@ -210,13 +210,14 @@
 #  flavor::             Type of query (Symbol).
 #  outer::              Outer Query (if nested).
 #  params::             Serialized hash of parameters used to create query.
+#                       (*NOTE*: Use +replace_params+ instead if <tt>params=</tt>.)
 #  user::               User that created.
 #  user_id::            (same, as id)
 #  modified::           Last time it was used.
 #  access_count::       Number of times its been used.
 #
 #  ==== Local attributes
-#  this::               Current location in query (for sequence operators).
+#  current::            Current location in query (for sequence operators).
 #  join::               Tree of tables used in query.
 #  tables::             Extra tables which have been joined explicitly.
 #  where::              List of WHERE clauses in query.
@@ -263,7 +264,7 @@
 #  ==== Outer queries
 #  outer::              Outer Query (if nested).
 #  has_outer?::         Is this Query nested?
-#  get_outer_this_id::  Get outer Query's current id.
+#  get_outer_current_id::  Get outer Query's current id.
 #  outer_first::        Call +first+ on outer Query.
 #  outer_prev::         Call +prev+ on outer Query.
 #  outer_next::         Call +next+ on outer Query.
@@ -279,10 +280,11 @@
 #  @@default_required_params:: Default required parameters declarations.
 #
 #  ==== Instance Variables
+#  @params::            Hash:: cached copy of deserialized parameter hash.
 #  @initialized::       Boolean: has +initialize_query+ been called yet?
 #  @model_class::       Class: associated model.
-#  @this_id::           Fixnum: current place in results.
-#  @save_this_id::      Fixnum: saved copy of +@this_id+ for +reset+.
+#  @current_id::        Fixnum: current place in results.
+#  @save_current_id::   Fixnum: saved copy of +@current_id+ for +reset+.
 #  @result_ids::        Array of Fixnum: all results.
 #  @results::           Hash: maps ids to instantiated records.
 #  @outer::             AbstractQuery: cached copy of outer query (nested
@@ -293,9 +295,6 @@
 
 class AbstractQuery < ActiveRecord::Base
   self.abstract_class = true
-
-  # Parameters are kept in a Hash, possibly with Arrays as values.
-  serialize :params, Hash
 
   # Low-level description of SQL query.
   attr_accessor :join, :tables, :where, :group, :order
@@ -476,7 +475,7 @@ class AbstractQuery < ActiveRecord::Base
   attr_accessor :tweak_outer_query
 
   # Each inner query corresponds to a single result of the outer query.  This
-  # lets the inner query tell the corresponding +this_id+ of the outer
+  # lets the inner query tell the corresponding +current_id+ of the outer
   # query.  By default, it gets it from a parameter of the same name as the
   # outer's model (e.g., <tt>params[:user]</tt> for inner queries nested inside
   # :User queries).
@@ -486,20 +485,20 @@ class AbstractQuery < ActiveRecord::Base
   #
   #   def initialize_inside_user
   #     ...
-  #     self.outer_this_id = lambda do |inner|
+  #     self.outer_current_id = lambda do |inner|
   #       inner.params[:user]
   #     end
   #   end
   #
-  attr_accessor :outer_this_id
+  attr_accessor :outer_current_id
 
   # This tells us how to create a new inner query based on another result of
   # the same outer query.  This is called, for example, when using the sequence
   # operators on an inner query.  When it runs out of results for the inner
   # query, it goes to the next result in the outer query, and creates a new
   # inner query corresponding to it.  By default, it just stores the outer
-  # result (<tt>outer.this_id</tt>) in a parameter with the same name as the
-  # outer query's model (e.g., <tt>params[:user] = outer.this_id</tt> for inner
+  # result (<tt>outer.current_id</tt>) in a parameter with the same name as the
+  # outer query's model (e.g., <tt>params[:user] = outer.current_id</tt> for inner
   # queries nested inside :User queries).
   #
   # This instance variable is a Proc, initialized in the flavor-specific
@@ -508,7 +507,7 @@ class AbstractQuery < ActiveRecord::Base
   #   def initialize_inside_user
   #     ...
   #     self.setup_new_inner_query = lambda do |new_params, new_outer|
-  #       new_params[:user] = new_outer.this_id
+  #       new_params[:user] = new_outer.current_id
   #     end
   #   end
   #
@@ -559,6 +558,91 @@ class AbstractQuery < ActiveRecord::Base
     allowed_model_flavors.values.flatten.uniq.sort_by(&:to_s)
   end
 
+  ################################################################################
+  #
+  #  :section: Parameters
+  #
+  #  I tried to use 'serialize :params, Hash' on this, but YAML randomizes the
+  #  order of the keys of hashes, so lookup was sometimes (randomly) failing.
+  #
+  #  This much-simplified serialization handles the standard scalars (String,
+  #  Symbol, Fixnum, Float, true, false, nil) as well as nested Array's thereof.
+  #
+  ################################################################################
+
+  # Deserialize params hash and cache it.
+  def params
+    @params ||= params_parse_hash(@attributes['params'])
+  end
+
+  # Replace parameters Hash with a new Hash.
+  def replace_params(x)
+    if !x.is_a?(Hash)
+      raise "Params must be a Hash, not a '#{x.class.name}:#{x}'"
+    end
+    @params = x
+  end
+
+  # Serialize params hash before saving it.
+  def before_save
+    # No need to reserialize if we never parsed it to start with.
+    if @params
+      self.params = params_write_hash(@params)
+    end
+  end
+
+  # Parse a Hash out of a String.
+  def params_parse_hash(str)
+    hash = {}
+    str.to_s.split("\n").each do |line|
+      if line.match(/^(\w+) (.*)/)
+        hash[$1.to_sym] = params_parse_val($2)
+      end
+    end
+    return hash
+  end
+
+  # Serialize a Hash.
+  def params_write_hash(hash)
+    hash.keys.sort_by(&:to_s).map do |key|
+      if key.to_s.match(/\W/)
+        raise "Keys of params must be all alphanumeric: '#{key}'"
+      end
+      "#{key} #{params_write_val(@params[key])}"
+    end.join("\n")
+  end
+
+  # Parse a single value from a String.
+  def params_parse_val(val)
+    val.sub!(/^(.)/,'')
+    case $1
+    when '[' ; val.split.map {|v| params_parse_val(v)}
+    when '"' ; val.gsub('%s',' ').gsub('%h','%').gsub('\\n',"\n")
+    when ':' ; val.gsub('%s',' ').gsub('%h','%').gsub('\\n',"\n").to_sym
+    when '#' ; val.to_i
+    when '.' ; val.to_f
+    when '1' ; true
+    when '0' ; false
+    when '-' ; nil
+    else raise "Invalid value in params: '#{$1}#{val}'"
+    end
+  end
+
+  # Write a single value to a String.
+  def params_write_val(val)
+    case val
+    when Array      ; '[' + val.map {|v| params_write_val(v)}.join(" ")
+    when String     ; '"' + val.to_s.gsub('%','%h').gsub(' ','%s').gsub("\n",'\\n')
+    when Symbol     ; ':' + val.to_s.gsub('%','%h').gsub(' ','%s').gsub("\n",'\\n')
+    when Fixnum     ; '#' + val.to_s
+    when Float      ; '.' + val.to_s
+    when TrueClass  ; '1'
+    when FalseClass ; '0'
+    when NilClass   ; '-'
+    else raise "Invalid value in params: '#{val.class.name}:#{val.to_s}'"
+    end
+  end
+
   ##############################################################################
   #
   #  :section: Construction
@@ -607,36 +691,36 @@ class AbstractQuery < ActiveRecord::Base
       raise("Invalid query for #{model} model: '#{flavor}'")
     end
 
-    # Let caller combine lookup and this= in one call.
-    if arg = params[:this] || params[:this_id]
-      params.delete(:this)
-      params.delete(:this_id)
-      set_this = arg
+    # Let caller combine lookup and current= in one call.
+    if arg = params[:current] || params[:current_id]
+      params.delete(:current)
+      params.delete(:current_id)
+      set_current = arg
     end
 
     # Initialize attributes, but don't create query or do anything yet.
     query.attributes = {
       :model        => model,
       :flavor       => flavor,
-      :params       => params,
       :user         => User.current,
       :modified     => Time.now,
       :access_count => 0,
     }
+    query.replace_params(params)
 
     # Make sure all required params exist and are valid; also make sure there
     # aren't any unexpected arguments.
     query.validate_params
 
     # See if such a query already exists and use it instead.
-    str = YAML::dump(query.params)
+    str = query.params_write_hash(query.params)
     if other = find_by_model_and_flavor_and_params(model, flavor, str)
       query = other
     end
 
-    # Okay to set "this" now.
-    if set_this
-      query.this = set_this
+    # Okay to set "current" now.
+    if set_current
+      query.current = set_current
     end
 
     return query
@@ -742,7 +826,7 @@ class AbstractQuery < ActiveRecord::Base
       raise("Unexpected parameter(s) '#{str}' for #{model} :#{flavor} query.")
     end
 
-    self.params = new_args
+    replace_params(new_args)
   end
 
   # Merge the given "default" requirements into the list we have.
@@ -978,7 +1062,7 @@ class AbstractQuery < ActiveRecord::Base
   #
   def clean_id_set(ids)
     result = ids.map(&:to_i).uniq[0,MAX_ARRAY].map(&:to_s).join(',')
-    result = '0' if result == ''
+    result = '-1' if result == ''
     return result
   end
 
@@ -1082,13 +1166,13 @@ class AbstractQuery < ActiveRecord::Base
     if fields.length == 1
       args[:where] << google_conditions(search, fields.first)
       select_values(args).map(&:to_i)
-  
+
     else
       # If searching multiple fields, concat them all together into one string.
       concat = 'CONCAT(' + fields.map do |field|
         "IF(#{field} IS NULL,'',#{field})"
       end.join(',') + ')'
-  
+
       # Intermediate case, searching multiple fields, but only one condition.
       if search.goods.flatten.length + search.bads.length <= 1
         args[:where] << google_conditions(search, concat)
@@ -1250,8 +1334,10 @@ class AbstractQuery < ActiveRecord::Base
 
   # Create SQL condition to join two tables.
   def calc_join_condition(from, to)
+    from = from.sub(/\..*/, '')
     # Check for direct join first, e.g., if joining from observatons to
-    # rss_logs, use "observations.rss_log_id = rss_logs.id".
+    # rss_logs, use "observations.rss_log_id = rss_logs.id", because that will
+    # take advantage of the primary key on rss_logs.id.
     if col = (join_conditions[from.to_sym] && join_conditions[from.to_sym][to.to_sym])
       to = to.sub(/\..*/, '')
     # Now look for reverse join.  (In the above example, and this was how it
@@ -1443,34 +1529,34 @@ class AbstractQuery < ActiveRecord::Base
   ##############################################################################
 
   # Return current place in results, as an id.  (Returns nil if not set yet.)
-  def this_id
-    @this_id
+  def current_id
+    @current_id
   end
 
   # Set current place in results; takes id (String or Fixnum).
-  def this_id=(id)
-    @save_this_id = @this_id = id.to_s.to_i
+  def current_id=(id)
+    @save_current_id = @current_id = id.to_s.to_i
   end
 
-  # Reset current place in results to the place last given in a "this=" call.
+  # Reset current place in results to the place last given in a "current=" call.
   def reset
-    @this_id = @save_this_id
+    @current_id = @save_current_id
   end
 
   # Return current place in results, instantiated.  (Returns nil if not set
   # yet.)
-  def this(*args)
-    @this_id ? instantiate([@this_id], *args).first : nil
+  def current(*args)
+    @current_id ? instantiate([@current_id], *args).first : nil
   end
 
   # Set current place in results; takes instance or id (String or Fixnum).
-  def this=(arg)
+  def current=(arg)
     if arg.is_a?(model)
       @results ||= {}
       @results[arg.id] = arg
-      self.this_id = arg.id
+      self.current_id = arg.id
     else
-      self.this_id = arg
+      self.current_id = arg
     end
     return arg
   end
@@ -1482,9 +1568,9 @@ class AbstractQuery < ActiveRecord::Base
     id = new_self.select_value(:limit => '1').to_i
     if id > 0
       if new_self == self
-        @this_id = id
+        @current_id = id
       else
-        new_self.this_id = id
+        new_self.current_id = id
       end
     else
       new_self = nil
@@ -1496,14 +1582,14 @@ class AbstractQuery < ActiveRecord::Base
   def prev
     new_self = self
     ids = result_ids
-    index = result_ids.index(this_id)
+    index = result_ids.index(current_id)
     if !index
       new_self = nil
     elsif index > 0
       if new_self == self
-        @this_id = result_ids[index - 1]
+        @current_id = result_ids[index - 1]
       else
-        new_self.this_id = result_ids[index - 1]
+        new_self.current_id = result_ids[index - 1]
       end
     elsif has_outer?
       while new_self = new_self.outer_prev
@@ -1522,14 +1608,14 @@ class AbstractQuery < ActiveRecord::Base
   def next
     new_self = self
     ids = result_ids
-    index = result_ids.index(this_id)
+    index = result_ids.index(current_id)
     if !index
       new_self = nil
     elsif index < result_ids.length - 1
       if new_self == self
-        @this_id = result_ids[index + 1]
+        @current_id = result_ids[index + 1]
       else
-        new_self.this_id = result_ids[index + 1]
+        new_self.current_id = result_ids[index + 1]
       end
     elsif has_outer?
       while new_self = new_self.outer_next
@@ -1551,9 +1637,9 @@ class AbstractQuery < ActiveRecord::Base
     id = new_self.select_value(:order => :reverse, :limit => '1').to_i
     if id > 0
       if new_self == self
-        @this_id = id
+        @current_id = id
       else
-        new_self.this_id = id
+        new_self.current_id = id
       end
     else
       new_self = nil
@@ -1589,11 +1675,11 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Each inner query corresponds to a single result of the outer query.  This
-  # method is called on the inner query, returning the +this_id+ of the outer
+  # method is called on the inner query, returning the +current_id+ of the outer
   # query for that result.
-  def get_outer_this_id
-    if outer_this_id
-      outer_this_id.call(self)
+  def get_outer_current_id
+    if outer_current_id
+      outer_current_id.call(self)
     else
       params[outer.model_string.underscore.to_sym]
     end
@@ -1605,7 +1691,7 @@ class AbstractQuery < ActiveRecord::Base
     if setup_new_inner_query
       setup_new_inner_query.call(new_params, new_outer)
     else
-      new_params[new_outer.model_string.underscore.to_sym] = new_outer.this_id
+      new_params[new_outer.model_string.underscore.to_sym] = new_outer.current_id
     end
     self.class.lookup_and_save(model, flavor, new_params)
   end
@@ -1615,34 +1701,35 @@ class AbstractQuery < ActiveRecord::Base
   def new_inner_if_necessary(new_outer)
     if !new_outer
       nil
-    elsif new_outer.this_id == get_outer_this_id
+    elsif new_outer.current_id == get_outer_current_id
       self
     else
+      self
       new_inner(new_outer)
     end
   end
 
   # Move outer query to first place.
   def outer_first
-    outer.this_id = get_outer_this_id
+    outer.current_id = get_outer_current_id
     new_inner_if_necessary(outer.first)
   end
 
   # Move outer query to previous place.
   def outer_prev
-    outer.this_id = get_outer_this_id
+    outer.current_id = get_outer_current_id
     new_inner_if_necessary(outer.prev)
   end
 
   # Move outer query to next place.
   def outer_next
-    outer.this_id = get_outer_this_id
+    outer.current_id = get_outer_current_id
     new_inner_if_necessary(outer.next)
   end
 
   # Move outer query to last place.
   def outer_last
-    outer.this_id = get_outer_this_id
+    outer.current_id = get_outer_current_id
     new_inner_if_necessary(outer.last)
   end
 

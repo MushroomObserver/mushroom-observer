@@ -16,7 +16,7 @@ Shall we discuss it in email?
 It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this User: http://localhost:3000/observer/show_user/1
+Show this user: http://localhost:3000/observer/show_user/1
 Stop sending me email like this: http://localhost:3000/account/no_email_general_question/2
 Change your preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000

@@ -1,0 +1,50 @@
+<!--[form:name]-->
+
+<br/>
+<label for="name_rank"><%= :Rank.t %>:</label>
+<%= form.select(:rank, Name.all_ranks.map {|r| [rank_as_string(r), r]}) %><br/><br/>
+
+<label for="name_text_name"><%= :form_names_text_name.t %>:</label>
+<% if @can_make_changes %>
+  <%= form.text_field(:text_name) %><br/>
+  <div class="HelpNote"><%= :form_names_text_name_help.tp %></div>
+<% else %>
+  <%= @name.text_name %><br/>
+  <div class="HelpNote"><%= :form_names_text_name_locked.tp %></div>
+<% end %>
+
+<label for="name_author"><%= :Authority.t %>:</label>
+<% if @can_make_changes or @name.author.nil? or (@name.author == '') %>
+  <%= form.text_field(:author) %><br/>
+  <div class="HelpNote"><%= :form_names_author_help.tp %></div>
+<% else %>
+  <%= h(@name.author) %><br/>
+  <div class="HelpNote"><%= :form_names_author_locked.tp %></div>
+<% end %>
+
+<label for="name_citation"><%= :Citation.t %>:</label>
+<span class="HelpNote"><%= :form_names_citation_help.t %></span><br/>
+<%= form.text_field(:citation, :size => 80) %><br/>
+<div class="HelpNote"><%= :form_names_citation_textilize_note.tp %></div>
+
+<% if !@name.new_record? %>
+  <% if @name.is_misspelling? || @misspelling %>
+    <%= form.check_box(:misspelling, :checked => true) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+    <%= form.text_field(:correct_spelling, :size => 60,
+          :value => @correct_spelling ? @correct_spelling :
+                    @name.correct_spelling ? @name.correct_spelling.search_name : '') %><br/>
+    <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
+    <%= turn_into_name_auto_completer('name_correct_spelling', :primer => @name_primer) %>
+    <% javascript_include_auto_complete %>
+  <% else %>
+    <%= form.check_box(:misspelling, :checked => false) %>
+    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+    <div class="HelpNote"><%= :form_names_misspelling_note_first.tp %></div>
+  <% end %>
+<% end %>
+
+<%= focus_on('name_text_name') %>
+
+<!--[eoform:name]-->

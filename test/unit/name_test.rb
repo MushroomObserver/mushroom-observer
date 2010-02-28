@@ -10,6 +10,29 @@ class NameTest < Test::Unit::TestCase
     return name
   end
 
+  def do_name_parse_test(*args)
+    parse = Name.parse_name(args.shift)
+    assert_equal(args, parse)
+  end
+
+  def do_parse_classification_test(text, expected)
+    begin
+      parse = Name.parse_classification(text)
+      assert_equal(expected, parse)
+    rescue RuntimeError => err
+      raise err if expected
+    end
+  end
+
+  def do_validate_classification_test(rank, text, expected)
+    begin
+      result = Name.validate_classification(rank, text)
+      assert_equal(expected, result)
+    rescue RuntimeError => err
+      raise err if expected
+    end
+  end
+
 ################################################################################
 
   # ----------------------------
@@ -66,11 +89,6 @@ class NameTest < Test::Unit::TestCase
     assert_equal nil, result[0].author
     assert_equal nil, result[1].author
     assert_equal "(With) Another Author", result[2].author
-  end
-
-  def do_name_parse_test(*args)
-    parse = Name.parse_name(args.shift)
-    assert_equal(args, parse)
   end
 
   def test_name_parse_1
@@ -337,15 +355,6 @@ class NameTest < Test::Unit::TestCase
   #  Test classification.
   # -----------------------------
 
-  def do_parse_classification_test(text, expected)
-    begin
-      parse = Name.parse_classification(text)
-      assert_equal(expected, parse)
-    rescue RuntimeError => err
-      raise err if expected
-    end
-  end
-
   def test_parse_classification_1
     do_parse_classification_test("Kingdom: Fungi", [[:Kingdom, "Fungi"]])
   end
@@ -395,15 +404,6 @@ class NameTest < Test::Unit::TestCase
     do_parse_classification_test(%(Kingdom: Fungi\r
       Junk text\r
       Genus: Amanita), false)
-  end
-
-  def do_validate_classification_test(rank, text, expected)
-    begin
-      result = Name.validate_classification(rank, text)
-      assert_equal(expected, result)
-    rescue RuntimeError => err
-      raise err if expected
-    end
   end
 
   def test_validate_classification_1
@@ -644,24 +644,31 @@ class NameTest < Test::Unit::TestCase
   # --------------------------------------
 
   def test_email_notification
+    name = names(:peltigera)
+    desc = name_descriptions(:peltigera_desc)
+
+    @rolf.email_names_admin    = false
     @rolf.email_names_author   = true
     @rolf.email_names_editor   = true
     @rolf.email_names_reviewer = true
     @rolf.email_names_all      = false
     @rolf.save
 
+    @mary.email_names_admin    = false
     @mary.email_names_author   = true
     @mary.email_names_editor   = false
     @mary.email_names_reviewer = false
     @mary.email_names_all      = false
     @mary.save
 
+    @dick.email_names_admin    = false
     @dick.email_names_author   = false
     @dick.email_names_editor   = false
     @dick.email_names_reviewer = false
     @dick.email_names_all      = false
     @dick.save
 
+    @katrina.email_names_admin    = false
     @katrina.email_names_author   = true
     @katrina.email_names_editor   = true
     @katrina.email_names_reviewer = true
@@ -670,22 +677,23 @@ class NameTest < Test::Unit::TestCase
 
     # Start with no reviewers, editors or authors.
     User.current = nil
-    names(:peltigera).gen_desc = ''
-    names(:peltigera).review_status = :unreviewed;
-    names(:peltigera).reviewer = nil;
+    desc.gen_desc = ''
+    desc.review_status = :unreviewed;
+    desc.reviewer = nil;
     Name.without_revision do
-      names(:peltigera).save
+      desc.save
     end
-    names(:peltigera).authors.clear
-    names(:peltigera).editors.clear
-    names(:peltigera).reload
-    version = names(:peltigera).version
+    desc.authors.clear
+    desc.editors.clear
+    desc.reload
+    name_version = name.version
+    description_version = desc.version
     QueuedEmail.queue_emails(true)
     QueuedEmail.all.map(&:destroy)
 
-    assert_equal(0, names(:peltigera).authors.length)
-    assert_equal(0, names(:peltigera).editors.length)
-    assert_equal(nil, names(:peltigera).reviewer_id)
+    assert_equal(0, desc.authors.length)
+    assert_equal(0, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       x       x       .       .
@@ -693,24 +701,33 @@ class NameTest < Test::Unit::TestCase
     # 3 Dick:       .       .       .       .       .
     # 4 Katrina:    x       x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
-    # Rolf changes citation: notify Katrina (all), Rolf becomes editor.
+    # Rolf erases notes: notify Katrina (all), Rolf becomes editor.
     User.current = @rolf
-    names(:peltigera).reload
-    names(:peltigera).citation = ''
-    names(:peltigera).save
-    assert_equal(version + 1, names(:peltigera).version)
-    assert_equal(0, names(:peltigera).authors.length)
-    assert_equal(1, names(:peltigera).editors.length)
-    assert_equal(nil, names(:peltigera).reviewer_id)
-    assert_equal(@rolf, names(:peltigera).editors.first)
+    desc.reload
+    desc.classification = ''
+    desc.gen_desc = ''
+    desc.diag_desc = ''
+    desc.distribution = ''
+    desc.habitat = ''
+    desc.look_alikes = ''
+    desc.uses = ''
+    desc.save
+    assert_equal(description_version + 1, desc.version)
+    assert_equal(0, desc.authors.length)
+    assert_equal(1, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal(@rolf, desc.editors.first)
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
       :to            => @katrina,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version-1,
-      :new_version   => names(:peltigera).version,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
       :review_status => 'no_change'
     )
 
@@ -726,23 +743,26 @@ class NameTest < Test::Unit::TestCase
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
     User.current = @mary
-    names(:peltigera).reload
-    names(:peltigera).gen_desc = "Mary wrote this."
-    names(:peltigera).save
-    assert_equal(version + 2, names(:peltigera).version)
-    assert_equal(1, names(:peltigera).authors.length)
-    assert_equal(1, names(:peltigera).editors.length)
-    assert_equal(nil, names(:peltigera).reviewer_id)
-    assert_equal(@mary, names(:peltigera).authors.first)
-    assert_equal(@rolf, names(:peltigera).editors.first)
+    desc.reload
+    desc.gen_desc = "Mary wrote this."
+    desc.save
+    assert_equal(description_version + 2, desc.version)
+    assert_equal(1, desc.authors.length)
+    assert_equal(1, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal(@mary, desc.authors.first)
+    assert_equal(@rolf, desc.editors.first)
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @mary,
       :to            => @rolf,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version-1,
-      :new_version   => names(:peltigera).version,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
       :review_status => 'no_change'
     )
 
@@ -756,30 +776,33 @@ class NameTest < Test::Unit::TestCase
     # 3 Dick:       .       .       .       .       .
     # 4 Katrina:    x       x       x       .       .
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
-    # Dick changes citation: notify Mary (author); Dick becomes editor.
+    # Dick changes uses: notify Mary (author); Dick becomes editor.
     User.current = @dick
-    names(:peltigera).reload
-    names(:peltigera).citation = "Something more new."
-    names(:peltigera).save
-    assert_equal(version + 3, names(:peltigera).version)
-    assert_equal(1, names(:peltigera).authors.length)
-    assert_equal(2, names(:peltigera).editors.length)
-    assert_equal(nil, names(:peltigera).reviewer_id)
-    assert_equal(@mary, names(:peltigera).authors.first)
-    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
+    desc.reload
+    desc.uses = "Something more new."
+    desc.save
+    assert_equal(description_version + 3, desc.version)
+    assert_equal(1, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal(@mary, desc.authors.first)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
     assert_equal(3, QueuedEmail.count)
     assert_email(2,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @dick,
       :to            => @mary,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version-1,
-      :new_version   => names(:peltigera).version,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
       :review_status => 'no_change'
     )
 
     # Mary opts out of author emails, add Katrina as new author.
-    names(:peltigera).add_author(@katrina)
+    desc.add_author(@katrina)
     @mary.email_names_author = false
     @mary.save
 
@@ -791,27 +814,30 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
     User.current = @rolf
-    names(:peltigera).reload
-    names(:peltigera).update_review_status(:inaccurate)
-    assert_equal(version + 3, names(:peltigera).version)
-    assert_equal(2, names(:peltigera).authors.length)
-    assert_equal(2, names(:peltigera).editors.length)
-    assert_equal(@rolf.id, names(:peltigera).reviewer_id)
-    assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
+    desc.reload
+    desc.update_review_status(:inaccurate)
+    assert_equal(description_version + 3, desc.version)
+    assert_equal(2, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(@rolf.id, desc.reviewer_id)
+    assert_equal([@mary.id, @katrina.id], desc.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
     assert_equal(4, QueuedEmail.count)
     assert_email(3,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
       :to            => @katrina,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version,
-      :new_version   => names(:peltigera).version,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version,
+      :new_description_version => desc.version,
       :review_status => 'inaccurate'
     )
 
     # Have Katrina express disinterest.
-    Interest.create(:object => names(:peltigera), :user => @katrina, :state => false)
+    Interest.create(:object => name, :user => @katrina, :state => false)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -821,34 +847,37 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
     User.current = @dick
-    names(:peltigera).reload
-    names(:peltigera).look_alikes = "Dick added this -- it's suspect"
+    desc.reload
+    desc.look_alikes = "Dick added this -- it's suspect"
     # (This is exactly what is normally done by name controller in edit_name.
     # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
     # The point is to update the review date if Dick *were*, or reset the
     # status to unreviewed in the present case that he *isn't*.)
-    names(:peltigera).update_review_status(:inaccurate)
-    names(:peltigera).save
-    assert_equal(version + 4, names(:peltigera).version)
-    assert_equal(2, names(:peltigera).authors.length)
-    assert_equal(2, names(:peltigera).editors.length)
-    assert_equal(:unreviewed, names(:peltigera).review_status)
-    assert_equal(nil, names(:peltigera).reviewer_id)
-    assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
+    desc.update_review_status(:inaccurate)
+    desc.save
+    assert_equal(description_version + 4, desc.version)
+    assert_equal(2, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(:unreviewed, desc.review_status)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal([@mary.id, @katrina.id], desc.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
     assert_equal(5, QueuedEmail.count)
     assert_email(4,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @dick,
       :to            => @rolf,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version-1,
-      :new_version   => names(:peltigera).version,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
       :review_status => 'unreviewed'
     )
 
     # Mary expresses interest.
-    Interest.create(:object => names(:peltigera), :user => @mary, :state => true)
+    Interest.create(:object => name, :user => @mary, :state => true)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -858,23 +887,27 @@ class NameTest < Test::Unit::TestCase
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes 'uses': notify Mary (interest).
     User.current = @rolf
-    names(:peltigera).reload
-    names(:peltigera).uses = "Rolf added this."
-    names(:peltigera).save
-    assert_equal(version + 5, names(:peltigera).version)
-    assert_equal(2, names(:peltigera).authors.length)
-    assert_equal(2, names(:peltigera).editors.length)
-    assert_equal(nil, names(:peltigera).reviewer_id)
-    assert_equal([@mary.id, @katrina.id], names(:peltigera).authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], names(:peltigera).editors.map(&:id).sort)
+    name.reload
+    name.citation = "Rolf added this."
+    name.save
+    assert_equal(name_version + 1, name.version)
+    assert_equal(description_version + 4, desc.version)
+    assert_equal(2, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal([@mary.id, @katrina.id], desc.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
     assert_equal(6, QueuedEmail.count)
     assert_email(5,
       :flavor        => 'QueuedEmail::NameChange',
       :from          => @rolf,
       :to            => @mary,
-      :name          => names(:peltigera).id,
-      :old_version   => names(:peltigera).version-1,
-      :new_version   => names(:peltigera).version,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version-1,
+      :new_name_version => name.version,
+      :old_description_version => desc.version,
+      :new_description_version => desc.version,
       :review_status => 'no_change'
     )
   end
@@ -903,20 +936,4 @@ class NameTest < Test::Unit::TestCase
     File.delete(NAME_PRIMER_CACHE_FILE)
     assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end
-
-#   @@time = 0
-#   for i in 1..30
-#     eval <<-"end_test"
-#       def test_#{i}
-#         start = Time.now
-#         do_test
-#         @@time += Time.now - start
-#         puts @@time.to_s
-#       end
-#     end_test
-#   end
-# 
-#   def do_test
-#     assert(true)
-#   end
 end

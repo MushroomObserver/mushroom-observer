@@ -3,6 +3,8 @@
 #     index_name          List of results of index/search.
 #     list_names          Alphabetical list of all names, used or otherwise.
 #     observation_index   Alphabetical list of names people have seen.
+#     names_by_author     Alphabetical list of names authored by given user.
+#     names_by_editor     Alphabetical list of names edited by given user.
 #     name_search         Seach for string in name, notes, etc.
 #     show_name           Show info about name.
 #     show_past_name      Show past versions of name info.
@@ -10,13 +12,14 @@
 #     next_name           Show next name in index.
 #   * create_name         Create new name.
 #   * edit_name           Edit name info.
+#   * create_name_description
+#   * edit_name_description
+#   * destroy_name_description
 #   * change_synonyms     Change list of synonyms for a name.
 #   * deprecate_name      Deprecate name in favor of another.
 #   * approve_name        Flag given name as "accepted" (others could be, too).
 #   * bulk_name_edit      Create/synonymize/deprecate a list of names.
 #     map                 Show distribution map.
-#   * review_authors      Let authors/reviewers add/remove authors.
-#   * author_request      Let non-authors request authorship credit.
 #
 #  Admin Tools:
 #   R cleanup_versions
@@ -36,6 +39,11 @@ class NameController < ApplicationController
     :advanced_search,
     :authored_names,
     :auto_complete_name,
+    :create_name,
+    :create_name_description,
+    :destroy_name_description,
+    :edit_name,
+    :edit_name_description,
     :eol,
     :eol_preview,
     :index_name,
@@ -58,10 +66,14 @@ class NameController < ApplicationController
     :bulk_name_edit,
     :change_synonyms,
     :create_name,
+    :create_name_description,
     :deprecate_name,
     :edit_name,
+    :edit_name_description,
     :show_name,
+    :show_name_description,
     :show_past_name,
+    :show_past_name_description,
   ]
 
   ##############################################################################
@@ -176,21 +188,21 @@ class NameController < ApplicationController
 
   # Show selected search results as a list with 'list_names' template.
   def show_selected_names(query, args={})
-    store_query(query)
+    store_query_in_session(query)
     @links ||= []
     args = { :action => 'list_names', :letters => 'names.text_name',
              :num_per_page => 50 }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t], 
+      ['name', :name.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:app_show_objects.t(:types => :observations.t), {
-                  :controller => 'observer', 
+      @links << [:show_objects.t(:type => :observation), {
+                  :controller => 'observer',
                   :action => 'index_observation',
                   :params => query_params(query),
                 }]
@@ -205,56 +217,33 @@ class NameController < ApplicationController
   #
   ################################################################################
 
-  # show_name.rhtml
+  # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
+  # relevant Observations.
   def show_name
-    # Rough testing showed implementation without synonyms takes .23-.39 secs.
-    # elapsed_time = Benchmark.realtime do
-
     pass_query_params
     store_location
-    store_query
-# logger.warn('START ----------------------------------------------'); time=Time.now
-    @name = Name.find(params[:id], :include => [ :authors, :editors, :license,
-                                                 :reviewer, :user ])
-# logger.warn('LOAD_NAME ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    clear_query_in_session
+
+    # Load Name and NameDescription along with a bunch of associated objects.
+    name_id = params[:id]
+    desc_id = params[:desc]
+    @name = Name.find(name_id, :include => [:user, :descriptions])
+    desc_id = @name.description_id if desc_id.to_s == ''
+    @description = NameDescription.find(desc_id, :include =>
+                              [:authors, :editors, :license, :reviewer, :user])
     update_view_stats(@name)
-# logger.warn('VIEW_STATS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @previous_version = Name.connection.select_value %(
-      SELECT version FROM past_names WHERE name_id = #{@name.id}
-      ORDER BY version DESC LIMIT 1, 1
-    )
-# logger.warn('VERSIONS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @parents = @name.parents
+    update_view_stats(@description)
 
-    # Is @user a reviewer?
-# logger.warn('PARENTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @is_reviewer = is_reviewer
-
-    # Is @user "interested" in this name?
-# logger.warn('IS_REVIEWER ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @interest = nil
-    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id,
-                            'Name', @name.id) if @user
-
-    # Get list of drafts for this name.
-# logger.warn('INTERESTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @existing_drafts = DraftName.find_all_by_name_id(@name.id,
-                            :include => :project, :order => "projects.title")
-    @existing_drafts = nil if @existing_drafts == []
-
-    # Get list of projects user is part of.
-# logger.warn('DRAFTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @user_projects = nil
-    if @user and !@existing_drafts
-      groups = @user.user_groups.map(&:id)
-      @user_projects = Project.all(:order => 'title ASC',
-                              :conditions => ['user_group_id IN (?)', groups])
-      @user_projects = nil if @user_projects == []
+    # Get a list of projects the user can create drafts for.
+    @projects = @user && @user.projects_member.select do |project|
+      !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
     end
 
+    # Get list of immediate parents.
+    @parents = @name.parents
+
     # Create query for immediate children.
-# logger.warn('PROJECTS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    @children_query = create_query(:Name, :children, :name => @name)
+    @children_query = create_query(:Name, :of_children, :name => @name)
 
     # Create search queries for observation lists.
     @consensus_query = create_query(:Observation, :of_name, :name => @name)
@@ -262,49 +251,43 @@ class NameController < ApplicationController
                                   :synonyms => :exclusive)
     @other_query = create_query(:Observation, :of_name, :name => @name,
                                 :synonyms => :all, :nonconsensus => :exclusive)
+    if @name.below_genus?
+      @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
+                                                                :all => true)
+    end
 
     # Paginate each of the sections independently.
     @children_pages  = paginate_numbers(:children_page, 24)
     @consensus_pages = paginate_numbers(:consensus_page, 12)
     @synonym_pages   = paginate_numbers(:synonym_page, 12)
     @other_pages     = paginate_numbers(:other_page, 12)
+    if @subtaxa_query
+      @subtaxa_pages = paginate_numbers(:subtaxa_page, 12)
+    end
 
-# logger.warn('CREATE_QUERIES ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     args = { :include => [:name, :location, :user] }
     @children_data  = @children_query.paginate(@children_pages)
-# logger.warn('CHILDREN ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @consensus_data = @consensus_query.paginate(@consensus_pages, args)
-# logger.warn('CONSENSUS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @synonym_data   = @synonym_query.paginate(@synonym_pages, args)
-# logger.warn('SYNONYMS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     @other_data     = @other_query.paginate(@other_pages, args)
-# logger.warn('NONCONSENSUS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-
-    # end
-    # logger.warn("show_name took %s\n" % elapsed_time)
+    if @subtaxa_query
+      @subtaxa_data = @subtaxa_query.paginate(@subtaxa_pages, args)
+    end
   end
 
-  # Callback to let reviewers change the review status of a Name from the
-  # show_name page.
-  def set_review_status
+  # Show just a NameDescription.
+  def show_name_description
+    store_location
     pass_query_params
-    id = params[:id]
-    if is_reviewer?
-      Name.find(id).update_review_status(params[:value])
-    end
-    redirect_to(:action => 'show_name', :id => id, :params => query_params)
-  end
+    @description = NameDescription.find(params[:id], :include =>
+      [:authors, :editors, :license, :reviewer, :user, {:name=>:descriptions}])
+    @name = @description.name
+    update_view_stats(@description)
 
-  # Callback to let reviewers change the export status of a Name from the
-  # show_name page.
-  def set_export_status
-    id = params[:id]
-    if is_reviewer
-      name = Name.find(id)
-      name.ok_for_export = params[:value]
-      name.save
+    # Get a list of projects the user can create drafts for.
+    @projects = @user && @user.projects_member.select do |project|
+      !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
     end
-    redirect_to(:action => 'show_name', :id => id)
   end
 
   # Show past version of Name.  Accessible only from show_name page.
@@ -312,9 +295,25 @@ class NameController < ApplicationController
     pass_query_params
     store_location
     @name = Name.find(params[:id])
-    @past_name = Name.find(params[:id])
-    @past_name.revert_to(params[:version].to_i)
-    @other_versions = @name.versions.reverse
+    @name.revert_to(params[:version].to_i)
+
+    # Old correct spellings could have gotten merged with something else and no longer exist.
+    if @name.is_misspelling?
+      @correct_spelling = Name.connection.select_value %(
+        SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
+      )
+    else
+      @correct_spelling = ''
+    end
+  end
+
+  # Show past version of NameDescription.  Accessible only from
+  # show_name_description page.
+  def show_past_name_description
+    pass_query_params
+    store_location
+    @description = NameDescription.find(params[:id])
+    @description.revert_to(params[:version].to_i)
   end
 
   # Go to next name: redirects to show_name.
@@ -327,6 +326,33 @@ class NameController < ApplicationController
     redirect_to_next_object(:prev, Name, params[:id])
   end
 
+  # Callback to let reviewers change the review status of a Name from the
+  # show_name page.
+  def set_review_status
+    pass_query_params
+    id = params[:id]
+    desc = NameDescription.find(id)
+    if is_reviewer?
+      desc.update_review_status(params[:value])
+    end
+    redirect_to(:action => 'show_name', :id => desc.name_id,
+                :params => query_params)
+  end
+
+  # Callback to let reviewers change the export status of a Name from the
+  # show_name page.
+  def set_export_status
+    pass_query_params
+    id = params[:id]
+    desc = NameDescription.find(id)
+    if is_reviewer?
+      desc.ok_for_export = params[:value]
+      desc.save_without_our_callbacks
+    end
+    redirect_to(:action => 'show_name', :id => desc.name_id,
+                :params => query_params)
+  end
+
   ##############################################################################
   #
   #  :section: Create and Edit
@@ -335,29 +361,20 @@ class NameController < ApplicationController
 
   # Create a new name; accessible from name indexes.
   def create_name
+    store_location
     pass_query_params
+
+    # Reder a blank form.
     if request.method != :post
       @name = Name.new
-      @licenses = License.current_names_and_ids
       @name.rank = :Species
       @can_make_changes = true
+
     else
       begin
+        # Look up name to see if it already exists.
         text_name = params[:name][:text_name].to_s.strip_squeeze
         author    = params[:name][:author].to_s.strip_squeeze
-        rank      = params[:name][:rank].to_s
-
-        # Grab all the notes sections: general description, look-alikes, etc.
-        all_notes = {}
-        for f in Name.all_note_fields
-          all_notes[f] = params[:name][f]
-        end
-
-        # Classification is no longer part of all_notes.
-        classification = params[:name][:classification].to_s
-        classification = Name.validate_classification(rank, classification)
-
-        # Look up name.
         name_str  = text_name
         matches   = nil
         if author != ''
@@ -369,7 +386,7 @@ class NameController < ApplicationController
 
         # Name already exists.
         if matches.length > 0
-          flash_error(:name_create_already_exists.t(:name => name_str))
+          flash_error(:runtime_name_create_already_exists.t(:name => name_str))
           name = matches[0]
 
         # Create name.
@@ -378,22 +395,19 @@ class NameController < ApplicationController
           # given name: genus, species, variety, ...
           names = Name.names_from_string(name_str)
           name = names.last
-          raise :runtime_unable_to_create_name.t(:name => name_str) if !name
+          raise(:runtime_unable_to_create_name.t(:name => name_str)) if !name
 
-          name.rank     = rank # Not quite right since names_from_string sets rank too
-          name.change_text_name(text_name, author, rank) # Validates parse(??)
+          # Not quite right since names_from_string sets rank too.  I don't
+          # understand the subtlety of this. -JPH
+          name.rank = rank = params[:name][:rank].to_s
+
+          # This fills in the four name formats.
+          name.change_text_name(text_name, author, rank)
+
+          # I guess this is all that's left.
           name.citation = params[:name][:citation]
-          name.classification = classification
 
-          # Set all the "notes" fields.
-          if !notes_all_blank?(all_notes)
-            name.all_notes = all_notes
-            name.license_id = params[:name][:license_id]
-          else
-            name.license_id = nil
-          end
-
-          # Save any changed names.
+          # This saves this name, and genus/species above it as necessary.
           for n in names
             save_name(n, :log_name_updated) if n
           end
@@ -405,11 +419,11 @@ class NameController < ApplicationController
         flash_error(err.to_s) if !err.nil?
         flash_object_errors(@name)
         @name.attributes = params[:name]
-        @licenses = License.current_names_and_ids()
         @can_make_changes = true
 
       else
-        # If no errors occurred, changes must've been made successfully.
+        # If no errors occurred, either the name was created successfully, or
+        # it already exists.  In either case redirect to the name in question.
         redirect_to(:action => 'show_name', :id => name.id,
                     :params => query_params)
       end
@@ -418,10 +432,9 @@ class NameController < ApplicationController
 
   # Make changes to name; accessible from show_name page.
   def edit_name
+    store_location
     pass_query_params
-    any_errors = false
     @name = Name.find(params[:id])
-    @licenses = License.current_names_and_ids(@name.license)
 
     # Initialize misspelling fields.  Start with just a checkbox.  If user
     # checks it, it guesses the correct spelling.  If it fails to guess, it
@@ -433,14 +446,14 @@ class NameController < ApplicationController
       @name_primer = Name.primer
     end
 
-    # Only allowed to make substantive changes it you own all the references
+    # Only allowed to make substantive changes if you own all the references
     # to it.  I think checking that the user owns all the namings that use it
     # is correct.  Maybe we should also check observations?  But the
     # observation simply caches the winning naming's name.  Actually not
     # necessarily: obs might use the accepted name if the winning name is
     # deprecated.  Hmmm, I'll check it to be safe.
     @can_make_changes = true
-    if is_in_admin_mode?
+    if !is_in_admin_mode?
       for obj in @name.namings + @name.observations
         if obj.user_id != @user.id
           @can_make_changes = false
@@ -450,101 +463,85 @@ class NameController < ApplicationController
     end
 
     if request.method == :post
+      any_errors = false
       begin
+        # Look up name to see if it already exists.
         text_name = params[:name][:text_name].to_s.strip_squeeze
         author    = params[:name][:author].to_s.strip_squeeze
         rank      = params[:name][:rank].to_s
-
-        # Grab all the notes sections: general description, look-alikes, etc.
-        all_notes = {}
-        for f in Name.all_note_fields
-          all_notes[f] = params[:name][f]
-        end
-
-        # It is possible to change a Name's name if no one is using it yet
-        # (or the user owns all uses of it).  This looks up the name we're
-        # trying to change it to.  If it already exists, it ensures that they
-        # are mergable, then decides which to merge into and which to delete.
-        # Make changes to @name, delete old_name.  (Raises a RuntimeError if
-        # we can't do the merge.)
-        @name, old_name = find_target_name(@name, text_name, author, all_notes)
-
-        # Merge authors.
-        if author == ''
-          author = @name.author.to_s
-          # If merging another name, try its author.
-          if author == '' && old_name
-            author = old_name.author.to_s
-          end
-        end
-
-        # Merge text_names.
-        if text_name == ''
-          text_name = @name.text_name
-        end
-        @name.change_text_name(text_name, author, rank, :save_parents)
-
-        # Merge citations.
-        citation = params[:name][:citation].to_s.strip_squeeze
-        if citation == ''
-          citation = @name.citation.to_s
-          if citation == '' && old_name
-            citation = old_name.citation.to_s
-          end
-        end
-        @name.citation = citation
-
-        # Merge classifications.
-        classification = Name.validate_classification(rank,
-                                          params[:name][:classification].to_s)
-        if classification == ''
-          classification = @name.classification.to_s
-          if classification == '' && old_name
-            classification = old_name.classification.to_s
-          end
-        end
-        @name.classification = classification
-
-        # Merge notes.
-        if notes_all_blank?(all_notes)
-          all_notes = @name.all_notes
-          if notes_all_blank?(all_notes) && old_name
-            all_notes = old_name.all_notes
-          end
-        end
-        @name.all_notes = all_notes
-
-        # Save change to license_id.
-        if @name.has_any_notes?
-          @name.license_id = params[:name][:license_id]
+        name_str  = text_name
+        matches   = nil
+        if author != ''
+          matches = Name.find_all_by_text_name_and_author(text_name, author)
+          name_str += " #{author}"
         else
-          # (Clear it if there are no notes.)
-          @name.license_id = nil
+          matches = Name.find_all_by_text_name(text_name)
         end
 
-        # Let user call this name a misspelling.
-        @misspelling = (params[:name][:misspelling].to_s == '1')
-        @correct_spelling = params[:name][:correct_spelling]
-        if !update_correct_spelling(@name, @misspelling, @correct_spelling)
-          any_errors = true
+        # Take first one that isn't us if there are several matches.  This is
+        # the name that we will merge this name into.
+        merge = nil
+        for match in matches || []
+          if match.id != @name.id
+            merge = match
+            break
+          end
         end
 
-        # If substantive changes are made by a reviewer, call this act a
-        # "review", even though they haven't actually changed the review
-        # status.  If substantive changes are made by a non-reviewer,
-        # this will revert status to unreviewed.
-        if @name.save_version?
-          @name.update_review_status(@name.review_status)
-        end
+        # Merge this name into another.
+        if merge
+          # Copy over any info this name has that the other name doesn't.
+          # Use other name's info where there's conflict.  (Reason: this is
+          # most often used to *get rid* of a misspelt name, such names are
+          # frequently accidentally created, often with incorrect rank.)
+          if merge_name.author.to_s == ''
+            merge.author = author
+          end
+          if merge_name.citation.to_s == ''
+            merge.citation = params[:name][:citation].to_s.strip_squeeze
+          end
+          merge.change_text_name(merge.text_name, merge.author, merge.rank,
+                                 :save_parents)
 
-        if save_name(@name, :log_name_updated)
-          # nothing else to do
-        elsif @name.errors.length > 0
-          raise :runtime_unable_to_save_changes.t
-        end
+          # Admins can actually merge them, then redirect to other location.
+          if is_in_admin_mode?
+            merge.merge(@name)
+            save_name(merge, :log_name_updated) if merge.changed?
+            flash_notice(:runtime_edit_name_merge_success.t(
+              :this => @name.search_name, :that => merge.search_name))
+            @name = merge
 
-        # Merge old_name's attachments to the new name, then destroy it.
-        @name.merge_names(old_name) if old_name
+          # Non-admins just send email-request to admins.
+          else
+            flash_warning(:merge_names_warning.t)
+            content = :email_name_merge.t(:user => @user.login,
+                      :this => @name.display_name, :that => merge.display_name)
+            AccountMailer.deliver_webmaster_question(@user.email, content)
+          end
+
+        # Not merging.
+        else
+          @name.change_text_name(text_name, author, rank, :save_parents)
+          @name.citation = params[:name][:citation].to_s.strip_squeeze rescue ''
+
+          # Let user call this name a misspelling.
+          @misspelling = (params[:name][:misspelling] == '1') rescue false
+          @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze rescue ''
+          if !update_correct_spelling(@name, @misspelling, @correct_spelling)
+            # In case of error, save the rest of the changes, but stay in form.
+            any_errors = true
+          end
+
+          # Save any changes.
+          if !@name.changed?
+            flash_warning(:runtime_edit_name_no_change.t)
+          elsif !save_name(@name, :log_name_updated)
+            raise(:runtime_unable_to_save_changes.t)
+          else
+            flash_notice(:runtime_edit_name_success.t(
+                         :name => @name.search_name))
+          end
+        end
 
       rescue RuntimeError => err
         # Anything causing changes not to get saved ends up here.
@@ -554,7 +551,7 @@ class NameController < ApplicationController
 
       else
         if !any_errors
-          # If no errors occurred, changes must've been made successfully.
+          # If no errors occurred, assume changes were made successfully.
           redirect_to(:action => 'show_name', :id => @name.id,
                       :params => query_params)
         end
@@ -562,48 +559,158 @@ class NameController < ApplicationController
     end
   end
 
-  # Looks up the name we're trying to change this one to.  If it already
-  # exists, ensure that they're mergable, and decide which one we want to keep.
-  # Returns both names; make changes to the first, delete the second.
-  def find_target_name(page_name, text_name, author, all_notes)
+  def create_name_description
+    store_location
+    pass_query_params
+    @name = Name.find(params[:id])
+    @licenses = License.current_names_and_ids
 
-    # Look for other Names that match the new name.  (Take first if several.)
-    old_name = nil
-    if author != ''
-      matches = Name.find_all_by_text_name_and_author(text_name, author)
+    # Reder a blank form.
+    if request.method == :get
+      @description = NameDescription.new
+      @description.name = @name
+      @description.license = @user.license
+
+      # Initialize source-specific stuff.
+      case params[:source]
+      when 'project'
+        @description.source_type  = :project
+        @description.source_name  = Project.find(params[:project])
+        @description.public       = false
+        @description.public_write = false
+      else
+        @description.source_type  = :public
+        @description.public       = true
+        @description.public_write = true
+      end
+
+    # Create new description.
     else
-      matches = Name.find_all_by_text_name(text_name)
-    end
-    for m in matches
-      if m.id != page_name.id
-        old_name = m   # (Just take the first one.)
-        break
-      end
-    end
+      @description = NameDescription.new
+      @description.name = @name
+      @description.attributes = params[:description]
 
-    # If there is a matching Name, which do we actually want to change?
-    result = [page_name, old_name]
-    if old_name
-      if old_name.has_any_notes?
-        # If both Names have notes we don't know how to merge, so throw an error.
-        if !notes_all_blank?(all_notes) && (old_name.all_notes != all_notes)
-          raise :runtime_name_in_use_with_notes.t(:name => text_name,
-                                              :other => old_name.display_name)
+      if @description.save
+        initialize_description_permissions(@description)
+
+        Transaction.post_name_description(
+          @description.all_notes.merge(
+            :id            => @description,
+            :created       => @description.created,
+            :source_type   => @description.source_type,
+            :source_name   => @description.source_name,
+            :locale        => @description.locale,
+            :license       => @description.license,
+            :admin_groups  => @description.admin_groups,
+            :writer_groups => @description.writer_groups,
+            :reader_groups => @description.reader_groups
+          )
+        )
+
+        # Make this the "default" description if there isn't one and this is
+        # publically readable.
+        if !@name.description and
+           @description.public
+          @name.description = @description
         end
-        # Only the old name has notes -- make changes to that one instead.
-        result = [old_name, page_name]
-      elsif !page_name.has_any_notes?
-        # Neither has notes, so we need another criterion. Prefer valid names.
-        if page_name.deprecated and !old_name.deprecated
-          result = [old_name, page_name]
-        # If both are deprecated, take the one with longer history of changes.
-        elsif (old_name.deprecated == page_name.deprecated) and
-              (old_name.version >= page_name.version)
-          result = [old_name, page_name]
+
+        # Keep the parent's classification cache up to date.
+        if (@name.description == @description) and
+           (@name.classification != @description.classification)
+          @name.classification = @description.classification
         end
+
+        # Save any changes to parent name.
+        @name.save if @name.changed?
+
+        flash_notice(:runtime_name_description_success.t(
+                     :id => @description.id))
+        redirect_to(:action => 'show_name_description',
+                    :id => @description.id)
+
+      else
+        flash_object_errors @description
       end
     end
-    result
+  end
+
+  def edit_name_description
+    store_location
+    pass_query_params
+    @description = NameDescription.find(params[:id])
+    @licenses = License.current_names_and_ids
+
+    if request.method == :post
+      @description.attributes = params[:description]
+
+      args = {}
+      args["set_source_type"] = @description.source_type if @description.source_type_changed?
+      args["set_source_name"] = @description.source_name if @description.source_name_changed?
+      args["set_locale"]      = @description.locale      if @description.locale_changed?
+      args["set_license"]     = @description.license     if @description.license_id_changed?
+      for field in NameDescription.all_note_fields
+        if @description.send("#{field}_changed?")
+          args["set_#{field}".to_sym] = @description.send(field)
+        end
+      end
+
+      # Modify permissions based on changes to the two "public" checkboxes.
+      modify_description_permissions(@description, args)
+
+      # If substantive changes are made by a reviewer, call this act a
+      # "review", even though they haven't actually changed the review
+      # status.  If it's a non-reviewer, this will revert it to "unreviewed". 
+      if @description.save_version?
+        @description.update_review_status(@description.review_status, @user,
+                                          Time.now)
+      end
+
+      # No changes made.
+      if args.empty?
+        flash_warning(:runtime_edit_name_description_no_change.t)
+        redirect_to(:action => 'show_name_description',
+                    :id => @description.id)
+
+      # There were error(s).
+      elsif !@description.save
+        flash_object_errors(@description)
+
+      # Updated successfully.
+      else
+        if !args.empty?
+          args[:id] = @description
+          Transaction.put_name_description(args)
+        end
+
+        # Update name's classification cache.
+        name = @description.name
+        if (name.description == @description) and
+           (name.classification != @description.classification)
+          name.classification = @description.classification
+          name.save
+        end
+
+        flash_notice(:runtime_edit_name_description_success.t(
+                     :id => @description.id))
+        redirect_to(:action => 'show_name_description',
+                    :id => @description.id)
+      end
+    end
+  end
+
+  def destroy_name_description
+    pass_query_params
+    @description = NameDescription.find(params[:id])
+    if !@description.is_admin?(@user)
+      flash_error(:runtime_destroy_description_not_admin.t)
+      redirect_to(:action => 'show_name_description', :id => @description.id,
+                  :params => query_params)
+    else
+      flash_notice(:runtime_destroy_description_success.t)
+      @description.destroy
+      redirect_to(:action => 'show_name', :id => @description.name_id,
+                  :params => query_params)
+    end
   end
 
   # Update the misspelling status.
@@ -640,9 +747,9 @@ class NameController < ApplicationController
         name2 = Name.find_by_search_name(correct_spelling)
         name2 ||= Name.find_by_text_name(correct_spelling)
         if !name2
-          flash_error(:form_names_misspelling_bad.t)
+          flash_error(:runtime_form_names_misspelling_bad.t)
         elsif result.id == self.id
-          flash_error(:form_names_misspelling_same.t)
+          flash_error(:runtime_form_names_misspelling_same.t)
         end
 
         # User just checked the box, but didn't tell us the correct
@@ -665,8 +772,7 @@ class NameController < ApplicationController
         # Make sure the "correct" name isn't also a misspelled name!
         if name2.is_misspelling?
           name2.correct_spelling = nil
-          name2.log(:log_name_unmisspelled, :other => name.display_name)
-          name2.save
+          save_name(name2, :log_name_unmisspelled, :other => name.display_name)
         end
 
       # If anything at all goes wrong, clear the misspelling and make the
@@ -679,18 +785,6 @@ class NameController < ApplicationController
     end
 
     return result
-  end
-
-  # Return true if all notes are blank / missing.
-  def notes_all_blank?(note_hash)
-    result = true
-    for key, value in note_hash
-      if value.to_s != ''
-        result = false
-        break
-      end
-    end
-    result
   end
 
   ################################################################################
@@ -815,8 +909,8 @@ class NameController < ApplicationController
     end
 
     @name    = Name.find(params[:id])
-    @what    = params[:proposed][:name].to_s.strip_squeeze
-    @comment = params[:comment][:comment].to_s.strip_squeeze
+    @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
+    @comment = params[:comment][:comment].to_s.strip_squeeze rescue ''
 
     @list_members     = nil
     @new_names        = []
@@ -829,7 +923,7 @@ class NameController < ApplicationController
 
     if request.method == :post
       if @what == ''
-        flash_error :name_deprecate_must_choose.t
+        flash_error :runtime_name_deprecate_must_choose.t
 
       else
         # Find the chosen preferred name.
@@ -853,7 +947,13 @@ class NameController < ApplicationController
 
           # Change target name to "undeprecated".
           target_name.change_deprecated(false)
-          save_name(target_name, :log_name_approved)
+          tag = :log_name_approved
+          args = { :other => @name.search_name }
+          if @comment != ''
+            tag = :log_name_approved_with_comment
+            args[:comment] = @comment
+          end
+          save_name(target_name, tag, args)
 
           # Change this name to "deprecated", set correct spelling, add note.
           @name.change_deprecated(true)
@@ -862,10 +962,13 @@ class NameController < ApplicationController
             @name.correct_spelling = target_name
           end
           comment_join = @comment == "" ? "." : ":\n"
-          @name.prepend_notes("Deprecated in favor of" +
-            " #{target_name.search_name} by #{@user.login} on " +
-            Time.now.to_formatted_s(:db) + comment_join + @comment)
-          save_name(@name, :log_name_deprecated)
+          tag = :log_name_deprecated
+          args = { :other => target_name.search_name }
+          if @comment != ''
+            tag = :log_name_deprecated_with_comment
+            args[:comment] = @comment
+          end
+          save_name(@name, tag, args)
 
           redirect_to(:action => 'show_name', :id => @name.id,
                       :params => query_params)
@@ -881,23 +984,40 @@ class NameController < ApplicationController
     pass_query_params
     @name = Name.find(params[:id])
     @approved_names = @name.approved_synonyms
+    comment = params[:comment][:comment] rescue ''
+    comment = comment.strip_squeeze
     if request.method == :post
-      now = Time.now
+
+      # Deprecate others first.
+      others = []
       if params[:deprecate][:others] == '1'
         for n in @name.approved_synonyms
           n.change_deprecated(true)
-          n.log(:log_name_deprecated, :other => @name.search_name)
-          n.save
+          tag = :log_name_deprecated
+          args = { :other => @name.search_name }
+          if comment == ''
+            tag = :log_name_deprecated_with_comment
+            args[:comment] = comment
+          end
+          save_name(n, tag, args)
+          others << n.search_name
         end
       end
+
+      # Approve this now.
       @name.change_deprecated(false)
-      comment = (params[:comment] && params[:comment][:comment] ?
-         params[:comment][:comment] : "").strip
-      comment_join = comment == "" ? "." : ":\n"
-      @name.prepend_notes("Approved by #{@user.login} on " +
-        Time.now.to_formatted_s(:db) + comment_join + comment)
-      @name.log(:log_approved_by)
-      @name.save
+      tag = :log_approved_by
+      args = {}
+      if others != []
+        tag = :log_name_approved
+        args[:other] = others.join(', ')
+      end
+      if comment == ''
+        tag = "#{tag}_with_comment".to_sym
+        args[:comment] = comment
+      end
+      save_name(@name, tag, args)
+
       redirect_to(:action => 'show_name', :id => @name.id,
                   :params => query_params)
     end
@@ -911,11 +1031,7 @@ class NameController < ApplicationController
     unless name.deprecated
       begin
         name.change_deprecated(true)
-        name.log(:log_deprecated_by)
-        if !name.save
-          flash_object_errors(name)
-          result = false
-        end
+        result = save_name(name, :log_deprecated_by)
       rescue RuntimeError => err
         flash_error(err.to_s)
         result = false
@@ -1158,7 +1274,7 @@ class NameController < ApplicationController
     else
       name = Name.find(name_id)
       case params[:commit]
-      when :app_enable.l, :app_update.l
+      when :ENABLE.l, :UPDATE.l
         note_template = params[:notification][:note_template]
         note_template = nil if note_template == ''
         if @notification.nil?
@@ -1170,64 +1286,11 @@ class NameController < ApplicationController
           flash_notice(:email_tracking_updated_messages.t)
         end
         @notification.save
-      when :app_disable.l
+      when :DISABLE.l
         @notification.destroy
         flash_notice(:email_tracking_no_longer_tracking.t(:name => name.display_name))
       end
       redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
-    end
-  end
-
-  # Form to compose email for the authors/reviewers.  Linked from show_name.
-  # TODO: Use queued_email mechanism.
-  def author_request
-    pass_query_params
-    @name = Name.find(params[:id])
-    if request.method == :post
-      subject = params[:email][:subject] rescue ''
-      content = params[:email][:content] rescue ''
-      for receiver in @name.authors + UserGroup.find_by_name('reviewers').users
-        AccountMailer.deliver_author_request(@user, receiver, @name, subject, content)
-      end
-      flash_notice(:request_success.t)
-      redirect_to(:action => 'show_name', :id => @name.id,
-                  :params => query_params)
-    end
-  end
-
-  # Form to adjust permissions for a user with respect to a project
-  # Linked from: show_name, author_request email
-  # Inputs:
-  #   params[:id]
-  #   params[:add]
-  #   params[:remove]
-  # Success:
-  #   Redraws itself.
-  # Failure:
-  #   Renders show_name.
-  #   Outputs: @name, @authors, @users
-  def review_authors
-    pass_query_params
-    @name = Name.find(params[:id])
-    @authors = @name.authors
-    if @authors.member?(@user) or @user.in_group('reviewers')
-      @users = User.find(:all, :order => "login, name")
-      new_author = params[:add] ?  User.find(params[:add]) : nil
-      if new_author and not @name.authors.member?(new_author)
-        @name.add_author(new_author)
-        flash_notice("Added #{new_author.legal_name}")
-        # Should send email as well
-      end
-      old_author = params[:remove] ? User.find(params[:remove]) : nil
-      if old_author
-        @name.remove_author(old_author)
-        flash_notice("Removed #{old_author.legal_name}")
-        # Should send email as well
-      end
-    else
-      flash_error(:review_authors_denied.t)
-      redirect_to(:action => 'show_name', :id => @name.id,
-                  :params => query_params)
     end
   end
 end

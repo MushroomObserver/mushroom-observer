@@ -21,14 +21,15 @@
 #  ==== Callbacks
 #  before_create::      Do several things before creating a new record.
 #  after_create::       Do several more things after done creating new record.
-#  before_save::        Do several things before commiting changes.
+#  before_update::      Do several things before commiting changes.
 #  before_destroy::     Do some cleanup just before destroying an object.
 #  id_was::             Returns what the id was from before destroy.
+#  set_sync_id::        Fills in +sync_id+ after id is established.
 #  update_view_stats::  Updates the +num_views+ and +last_view+ fields.
 #  update_user_before_save_version::
 #                       Callback to update 'user' when versioned record changes.
-#  save_without_updating_modified::
-#                       Post some changes _without_ doing the +before_save+ callback above.
+#  save_without_our_callbacks::
+#                       Post changes _without_ doing the +before_update+ callback above.
 #
 #  ==== Error handling
 #  dump_errors::        Returns errors in one big printable string.
@@ -44,20 +45,6 @@
 #  autolog_created::    Callback to log creation.
 #  autolog_updated::    Callback to log an update.
 #  autolog_destroyed::  Callback to log destruction.
-#
-#  ===== Authors and Editors
-#  editors::            User's that have edited this Name.
-#  authors::            User's that have made "significant" contributions.
-#  add_editor::         Make given user an "editor".
-#  add_author::         Make given user an "author".
-#  remove_author::      Demote given user to "editor".
-#  author_join_table::  Table used to list authors.
-#  editor_join_table::  Table used to list editors.
-#  past_version_table:: Table used to keep past versions.
-#  check_add_author::   Add User as author/editor after making change.
-#  author_worthy?::     Is this object sufficiently well-defined to warrant authors?
-#  subtract_author_contributions::
-#                       Subtract authorship/editorship contributions after destroy.
 #
 ############################################################################
 
@@ -106,11 +93,7 @@ class AbstractModel < ActiveRecord::Base
   #   obj = Comment.find_object(self.object_type, self.object_id)
   #
   def self.find_object(type, id)
-    begin
-      type.classify.constantize.find(id.to_i)
-    rescue
-      nil
-    end
+    type.classify.constantize.find(id.to_i)
   end
 
   # Add limit to a SQL query, then pass it to find_by_sql.
@@ -135,6 +118,31 @@ class AbstractModel < ActiveRecord::Base
     count_by_sql("select count(*) from (#{sql}) as my_table")
   end
 
+  # Return the version number given an array-like index.  Use negative indexes
+  # to specify index from the end.  Return Fixnum, or nil if doesn't exist.
+  #
+  #   name.find_version(-1)  # Last (current) version.
+  #   name.find_version(-2)  # Next-to-last (previous) version.
+  #   name.find_version(0)   # First (oldest) version. (Should always be 1?)
+  #
+  # *NOTE*: Roughly equivalent to but far more efficient than the following:
+  #
+  #   name.versions[idx].version
+  #
+  def find_version(idx)
+    if idx < 0
+      limit = "DESC LIMIT 1, #{-idx-1}"
+    else
+      limit = "ASC LIMIT 1, #{idx}"
+    end
+    num = self.class.connection.select_value %(
+      SELECT version FROM #{versioned_table_name}
+      WHERE #{self.class.name.underscore}_id = #{id}
+      ORDER BY version #{limit}
+    )
+    num ? num.to_i : nil
+  end
+
   ##############################################################################
   #
   #  :section: Callbacks
@@ -146,11 +154,10 @@ class AbstractModel < ActiveRecord::Base
   # 2) And it creates a new RssLog if this model accepts one, and logs its
   #    creation.
   def before_create
-    self.created ||= Time.now        if respond_to?('created=')
-    self.user_id ||= User.current_id if respond_to?('user_id=')
-    if has_rss_log?
-      autolog_created
-    end
+    self.created  ||= Time.now        if respond_to?('created=')
+    self.modified ||= Time.now        if respond_to?('modified=')
+    self.user_id  ||= User.current_id if respond_to?('user_id=')
+    autolog_created                   if has_rss_log?
   end
 
   # This is called just after an object is created.
@@ -161,42 +168,27 @@ class AbstractModel < ActiveRecord::Base
   # 3) Lastly, it finishes attaching the new RssLog if one exists.
   def after_create
     SiteData.update_contribution(:create, self)
-    if respond_to?('sync_id=') && !sync_id
-      self.sync_id = "#{self.id}#{SERVER_CODE}"
-      self.save_without_updating_modified
-    end
-    if has_rss_log?
-      attach_rss_log
-    end
+    set_sync_id    if respond_to?('sync_id=') && !sync_id
+    attach_rss_log if has_rss_log?
   end
 
-  # This is called just before an object is saved.
+  # This is called just before an object's changes are saved.
   # 1) It updates 'modified' whenever a record changes.
   # 2) It saves a message to the RssLog.
-  # 3) It adds the current User as author or editor.
   #
-  # *NOTE*: Use +save_without_updating_modified+ to save a record without doing
+  # *NOTE*: Use +save_without_our_callbacks+ to save a record without doing
   # either of these things.
-  def before_save
-    if @without_updating_modified
-      @without_updating_modified = nil
-    else
+  def before_update
+    if !@save_without_our_callbacks
       self.modified = Time.now if respond_to?('modified=')
-      if has_rss_log? and !new_record?
-        autolog_updated
-      end
-      if has_authors?
-        check_add_author
-      end
+      autolog_updated          if has_rss_log?
     end
   end
 
-  # Bypass the part of the +before_save+ callback that causes 'modified' to be
-  # updated each time a record is saved.
-  def save_without_updating_modified
-    @without_updating_modified = true
-    save
-  end
+  # This would be called just after an object's changes are saved, but we have
+  # no need of such a callback yet.
+  # def after_update
+  # end
 
   # This is called just before an object is destroyed.
   # 1) It passes off to SiteData, where it will decide whether this affects a
@@ -205,17 +197,40 @@ class AbstractModel < ActiveRecord::Base
   # 3) It also saves the id in case we needed to know what the id was later on.
   def before_destroy
     SiteData.update_contribution(:destroy, self)
+    autolog_destroyed if has_rss_log?
     @id_was = self.id
-    if has_rss_log?
-      autolog_destroyed
-    end
-    if has_authors?
-      subtract_author_contributions
-    end
+  end
+
+  # This would be called just after an object is destroyed, but we have no need
+  # of such a callback yet.
+  # def after_destroy
+  # end
+
+  # Bypass the part of the +before_save+ callback that causes 'modified' to be
+  # updated each time a record is saved.
+  def save_without_our_callbacks
+    @save_without_our_callbacks = true
+    save
+  end
+
+  # Clears the +@save_without_our_callbacks+ flag after save.
+  def after_save
+    @save_without_our_callbacks = nil
   end
 
   # Return id from before destroy.
   def id_was; @id_was; end
+
+  # Set the sync id after an id is established.  Use low-level call to void
+  # any possible confusion and/or overhead dealing with callbacks.  It would
+  # be super-cool if mysql gave us a way to make this the default value...
+  def set_sync_id
+    self.sync_id = sync_id = "#{id}#{SERVER_CODE}"
+    self.class.connection.update %(
+      UPDATE #{self.class.table_name} SET sync_id = '#{sync_id}'
+      WHERE id = #{id}
+    )
+  end
 
   # Handy callback a model may choose to use that updates 'user_id' whenever a
   # versioned record changes non-trivially.
@@ -237,14 +252,14 @@ class AbstractModel < ActiveRecord::Base
   #   end
   #
   # *NOTE*: this does not cause 'modified' to be updated, because it uses
-  # +save_without_updating_modified+.
+  # +save_without_our_callbacks+.
   #
   def update_view_stats
     if respond_to?('num_views=') ||
        respond_to?('last_view=')
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
-      self.save_without_updating_modified
+      self.save_without_our_callbacks
       Transaction.create(
         :method => :view,
         :action => self.class.to_s.underscore,
@@ -306,8 +321,10 @@ class AbstractModel < ActiveRecord::Base
     case name
       when 'Observation', 'Naming', 'Vote', 'User', 'RssLog'
         return 'observer'
-      when 'Comment', 'Image', 'Location', 'Name', 'SpeciesList'
+      when 'Comment', 'Image', 'Location', 'Name', 'Project', 'SpeciesList'
         return name.underscore
+      when /Description$/
+        return $`.underscore
       else
         raise(ArgumentError, "Invalid object type, \"#{name.underscore}\".")
     end
@@ -459,12 +476,16 @@ class AbstractModel < ActiveRecord::Base
       # Don't attach to object if about to destroy.
       if !orphan
         rss_log.send("#{self.class.name.underscore}_id=", id) if id
-        self.rss_log = rss_log
+        rss_log.save
         # Save it now unless we are sure it will be saved later.
-        self.save if !new_record? && !changed?
+        need_to_save = !new_record? && !changed?
+        self.rss_log_id = rss_log.id
+        self.rss_log    = rss_log
+        self.save if need_to_save
+      else
+        # Always save the rss_log.
+        rss_log.save
       end
-      # Always save the rss_log.
-      rss_log.save
       result = rss_log
     end
     # We need to return it in case we created an orphaned log, otherwise
@@ -480,102 +501,4 @@ class AbstractModel < ActiveRecord::Base
       rss_log.save
     end
   end
-
-  ##############################################################################
-  #
-  #  :section: Authors and Editors
-  #
-  ##############################################################################
-
-  # Does this model keep track of authors/editors?
-  def self.has_authors?
-    !!reflect_on_association(:authors)
-  end
-
-  # Does this model keep track of authors/editors?
-  def has_authors?
-    !!self.class.reflect_on_association(:authors)
-  end
-
-  # Name of the join table used to list authors.
-  def author_join_table
-    "authors_#{self.class.table_name}".to_sym
-  end
-
-  # Name of the join table used to list editors.
-  def editor_join_table
-    "editors_#{self.class.table_name}".to_sym
-  end
-
-  # Name of the join table used to hold past versions.
-  def past_version_table
-    "past_#{self.class.table_name}".to_sym
-  end
-
-  # When destroying an object, subtract contributions due to
-  # authorship/editorship.
-  def subtract_author_contributions
-    for user in authors
-      SiteData.update_contribution(:remove, self, author_join_table, user)
-    end
-    for user in editors
-      SiteData.update_contribution(:remove, self, editor_join_table, user)
-    end
-  end
-
-  # Add a User on as an "author".  Saves User if changed.  Returns nothing.
-  def add_author(user)
-    if not authors.member?(user)
-      authors.push(user)
-      SiteData.update_contribution(:add, self, author_join_table, user)
-      if editors.member?(user)
-        editors.delete(user)
-        SiteData.update_contribution(:remove, self, editor_join_table, user)
-      end
-    end
-  end
-
-  # Demote a User to "editor".  Saves User if changed.  Returns nothing.
-  def remove_author(user)
-    if authors.member?(user)
-      authors.delete(user)
-      SiteData.update_contribution(:remove, self, author_join_table, user)
-      if not editors.member?(user) and
-        # Make sure user has actually made at least one change.
-        self.class.connection.select_value %(
-          SELECT id FROM #{past_version_table}
-          WHERE #{self.class.name.underscore}_id = #{id} AND user_id = #{user.id}
-          LIMIT 1
-        )
-        editors.push(user)
-        SiteData.update_contribution(:add, self, editor_join_table, user)
-      end
-    end
-  end
-
-  # Add a user on as an "editor".
-  def add_editor(user)
-    if not authors.member?(user) and not editors.member?(user)
-      editors.push(user)
-      SiteData.update_contribution(:add, self, editor_join_table, user)
-    end
-  end
-
-  # Callback that updates editors and/or authors after a User makes a change.
-  # If the Name has no author and they've made sufficient contributions, they
-  # get promoted to author by default.  In all cases make sure the user is
-  # added on as an editor.
-  def check_add_author
-    if user = User.current
-      if authors.empty? && author_worthy?
-        add_author(user)
-      else
-        add_editor(user)
-      end
-    end
-  end
-
-  # By default make the creating User the first author.  That is, assume it's
-  # worthwhile having authors on all objects, no matter how poorly defined.
-  def author_worthy?; true; end
 end

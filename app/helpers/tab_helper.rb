@@ -13,15 +13,40 @@
 #
 #  == Methods
 #
-#  add_right_tab:: Create new tab set for top-right.
-#  new_tab_set::   Create new tab set for top-left.
-#  add_tab::       Add tab to last top-left tab set.
-#  render_tab::    Render a tab. (used by app/views/layout/application.rhtml)
-#  draw_interest_icons:: Draw the three cutesy eye icons.
+#  draw_prev_next_tabs::  Create tab set for prev/index/next links.
+#  new_tab_set::          Create new tab set for top-left.
+#  add_tab::              Add tab to last top-left tab set.
+#  render_tab::           Render a tab. (used by app/views/layout/application.rhtml)
+#
+#  add_right_tab::        Create new tab set for top-right.
+#  draw_interest_icons::  Draw the three cutesy eye icons.
 #
 ##############################################################################
 
 module ApplicationHelper::Tabs
+
+  # Render a set of tabs for the prev/index/next links.
+  def draw_prev_next_tabs(object, mappable=false)
+    type = object.class.name.underscore
+    new_tab_set do
+      args = {
+        :controller => object.show_controller,
+        :id         => object.id,
+        :params     => query_params,
+      }
+      add_tab("« #{:PREV.t}",  args.merge(:action => "prev_#{type}" ))
+      add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
+      if mappable
+        add_tab(:map.t,
+          :controller => 'location',
+          :action => 'map_locations',
+          :params => query_params
+        )
+      end
+      add_tab("#{:NEXT.t} »",  args.merge(:action => "next#{type}"  ))
+    end
+  end
+
   # Create a new set of tabs.  Use like this:
   #
   #   new_tab_set do
@@ -65,12 +90,11 @@ module ApplicationHelper::Tabs
     end
   end
 
-  # Add tab to float off to the right of the main tabs.  There is only one
-  # set of these, arranged vertically.
-  def add_right_tab(html)
-    @right_tabs ||= []
-    @right_tabs.push(html)
-  end
+  ##############################################################################
+  #
+  #  :section: Right Tabs
+  #
+  ##############################################################################
 
   # Draw the cutesy eye icons in the upper right side of screen.  It does it
   # by creating a "right" tab set.  Thus this must be called in the header of
@@ -89,51 +113,95 @@ module ApplicationHelper::Tabs
   #     end
   #
   #     # Draw interest icons in the top-right.
-  #     draw_interest_icons(@observation, @interest) if @user
+  #     draw_interest_icons(@object)
   #   %>
   #
   # This will cause the set of three icons to be rendered floating in the
   # top-right corner of the content portion of the page.
   #
-  def draw_interest_icons(object, interest)
-    type  = object.class.to_s.underscore.to_sym
-    type2 = object.class.to_s
-    if !@interest
-      alt1 = :interest_watch_help.l(:object => type.l)
-      alt2 = :interest_ignore_help.l(:object => type.l)
-      img1 = image_tag('watch3.png',  :alt => alt1, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      add_right_tab("<div>#{img1} #{img2}</div>")
-    elsif @interest.state
-      alt1 = :interest_watching.l(:object => type.l)
-      alt2 = :interest_default_help.l(:object => type.l)
-      alt3 = :interest_ignore_help.l(:object => type.l)
-      img1 = image_tag('watch2.png',    :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('ignore3.png',   :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    else
-      alt1 = :interest_ignoring.l(:object => type.l)
-      alt2 = :interest_watch_help.l(:object => type.l)
-      alt3 = :interest_default_help.l(:object => type.l)
-      img1 = image_tag('ignore2.png',   :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('watch3.png',    :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
+  def draw_interest_icons(object)
+    if @user
+      type = object.class.name.underscore.to_sym
+
+      # Create link to change interest state.
+      def interest_link(label, object, state) #:nodoc:
+        link_to(label,
+          :controller => 'interest',
+          :action => 'set_interest',
+          :id => object.id,
+          :type => object.class.name,
+          :state => state,
+          :params => query_params
+        )
+      end
+
+      # Create large icon image.
+      def interest_icon_big(type, alt) #:nodoc:
+        image_tag("#{type}2.png",
+          :alt => alt,
+          :width => '50px',
+          :height => '50px',
+          :class => 'interest_big'
+        )
+      end
+
+      # Create small icon image.
+      def interest_icon_small(type, alt) #:nodoc:
+        image_tag("#{type}3.png",
+          :alt => alt,
+          :width => '23px',
+          :height => '23px',
+          :class => 'interest_small'
+        )
+      end
+
+      case @user.interest_in(object)
+      when :watching
+        alt1 = :interest_watching.l(:object => type.l)
+        alt2 = :interest_default_help.l(:object => type.l)
+        alt3 = :interest_ignore_help.l(:object => type.l)
+        img1 = interest_icon_big('watch', alt1)
+        img2 = interest_icon_small('halfopen', alt2)
+        img3 = interest_icon_small('ignore', alt3)
+        img2 = interest_link(img2, object, 0)
+        img3 = interest_link(img3, object, -1)
+        img1 = add_context_help(img1, alt1)
+        img2 = add_context_help(img2, alt2)
+        img3 = add_context_help(img3, alt3)
+        add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
+
+      when :ignoring
+        alt1 = :interest_ignoring.l(:object => type.l)
+        alt2 = :interest_watch_help.l(:object => type.l)
+        alt3 = :interest_default_help.l(:object => type.l)
+        img1 = interest_icon_big('ignore', alt1)
+        img2 = interest_icon_small('watch', alt2)
+        img3 = interest_icon_small('halfopen', alt3)
+        img2 = interest_link(img2, object, 1)
+        img3 = interest_link(img3, object, 0)
+        img1 = add_context_help(img1, alt1)
+        img2 = add_context_help(img2, alt2)
+        img3 = add_context_help(img3, alt3)
+        add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
+
+      else
+        alt1 = :interest_watch_help.l(:object => type.l)
+        alt2 = :interest_ignore_help.l(:object => type.l)
+        img1 = interest_icon_small('watch', alt1)
+        img2 = interest_icon_small('ignore', alt2)
+        img1 = interest_link(img1, object, 1)
+        img2 = interest_link(img2, object, -1)
+        img1 = add_context_help(img1, alt1)
+        img2 = add_context_help(img2, alt2)
+        add_right_tab("<div>#{img1} #{img2}</div>")
+      end
     end
+  end
+
+  # Add tab to float off to the right of the main tabs.  There is only one
+  # set of these, arranged vertically.
+  def add_right_tab(html)
+    @right_tabs ||= []
+    @right_tabs.push(html)
   end
 end

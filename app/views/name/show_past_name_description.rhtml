@@ -1,0 +1,15 @@
+<%
+  @title = :show_name_past_description_title.t(
+    :num  => @description.version,
+    :name => description_title(@description)
+  )
+  Textile.register_name(@name)
+%>
+
+<%= show_past_versions(@description) %>
+
+<%= render(:partial => 'name_description', :object => @description,
+           :locals => { :review => false }) %>
+
+<br/>
+<%= show_object_footer(@description) %>

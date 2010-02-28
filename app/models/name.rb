@@ -60,9 +60,16 @@
 #  there is a lot of redundancy: even if a genus supplies its entire
 #  classification, its parents must _also_ supply their entire classification.
 #
+#  *NOTE*: The classification string is sort of shared between the Name and
+#  NameDescription instances.  It is structural, so it sort of belongs here,
+#  however, at the same time, we want to allow draft descriptions to own a
+#  copy.  Thus it is stored in both.  The one in Name is set whenever the
+#  official NameDescription's copy changes.  Think of the one in Name as
+#  caching the official version. 
+#
 #  == Version
 #
-#  Changes are kept in the "past_names" table using
+#  Changes are kept in the "names_versions" table using
 #  ActiveRecord::Acts::Versioned.
 #
 #  == Attributes
@@ -85,37 +92,14 @@
 #  deprecated::       (V) Boolean: is this name deprecated?
 #  synonym::          (-) Used to group synonyms.
 #  correct_spelling:: (V) Name of correct spelling if misspelled.
-#  classification::   (V) Taxonomic classification.
 #
-#  ==== Statistics
-#  review_status::    (-) :vetted, :unvetted, :inaccurate, :unreviewed.
-#  last_review::      (-) Last time it was reviewed.
-#  reviewer::         (-) User that reviewed it.
-#  ok_for_export::    (-) Boolean: is this ready for export to EOL?
-#  num_views::        (-) Number of times it has been viewed.
-#  last_view::        (-) Last time it was viewed.
-#
-#  ==== Description (moving to another model soon)
-#  license::          (V) License description info is kept under.
-#  gen_desc::         (V) General description.
-#  diag_desc::        (V) Diagnostic description.
-#  distribution::     (V) Distribution.
-#  habitat::          (V) Habitat.
-#  look_alikes::      (V) Look-alikes.
-#  uses::             (V) Uses.
-#  notes::            (V) Other notes.
-#  refs::             (V) References
-#
-#  ('V' indicates that this attribute is versioned in past_names table.)
+#  ('V' indicates that this attribute is versioned in name_versions table.)
 #
 #  == Class methods
 #
 #  ==== Constants
 #  unknown::                 "Unknown": instance of Name.
 #  names_for_unknown::       "Unknown": accepted names in local language.
-#  all_note_fields::         Descriptive text fields: all.
-#  eol_note_fields::         Descriptive text fields: ones that don't require special handling for EOL.
-#  all_review_statuses::     Review status: allowed values.
 #  all_ranks::               Ranks: all
 #  eol_ranks::               Ranks: in the order EOL wants them.
 #  ranks_above_genus::       Ranks: above :Genus.
@@ -191,50 +175,38 @@
 #  deprecated::              Is this name deprecated?
 #  status::                  Returns "Deprecated" or "Valid".
 #  change_deprecated::       Changes deprecation status.
-#  update_review_status::    Updates the review_status and related fields.
 #  reviewed_observations::   (not used by anyone)
 #
-#  ==== Description
-#  has_notes?::              Does it have +notes+ field?
-#  has_any_notes?::          Does it have any description fields?
-#  all_notes::               Return description fields as hash.
-#  set_all_notes::           Set description fields via hash.
-#  note_status::             Status of description fields.
-#  prepend_notes::           Add notes at the top of the existing notes.
-#
 #  ==== Attachments
-#  comments::                Comments about this Name. (not used yet)
-#  descriptions::            Attached descriptions.
+#  versions::                Old versions.
+#  description::             Main NameDescription.
+#  descriptions::            Alternate NameDescription's.
 #  interests::               Interests in this Name.
 #  observations::            Observations using this Name as consensus.
 #  namings::                 Namings that use this Name.
+#  reviewed_observations::   Observation's that have > 80% confidence.
 #
 #  == Callbacks
 #
-#  notify_authors::          After save: notify interested User's of changes.
+#  create_description::      After create: create (empty) official NameDescription.
+#  notify_users::            After save: notify interested User's of changes.
 #
 ################################################################################
 
 class Name < AbstractModel
-  belongs_to :correct_spelling, :class_name => "Name", :foreign_key => "correct_spelling_id"
-  belongs_to :license
-  belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
+  belongs_to :correct_spelling, :class_name => 'Name', :foreign_key => 'correct_spelling_id'
+  belongs_to :description, :class_name => 'NameDescription' # (main one)
   belongs_to :rss_log
   belongs_to :synonym
   belongs_to :user
 
-  has_many :draft_names
-  has_many :comments,  :as => :object, :dependent => :destroy
+  has_many :descriptions, :class_name => 'NameDescription', :order => 'num_views DESC'
   has_many :interests, :as => :object, :dependent => :destroy
   has_many :namings
   has_many :observations
 
-  has_and_belongs_to_many :authors, :class_name => "User", :join_table => "authors_names"
-  has_and_belongs_to_many :editors, :class_name => "User", :join_table => "editors_names"
-
   acts_as_versioned(
-    :class_name => 'PastName',
-    :table_name => 'past_names',
+    :table_name => 'names_versions',
     :if_changed => [
       'rank',
       'text_name',
@@ -245,38 +217,62 @@ class Name < AbstractModel
       'citation',
       'deprecated',
       'correct_spelling',
-      'classification',
-      'license',
-      'gen_desc',
-      'diag_desc',
-      'distribution',
-      'habitat',
-      'look_alikes',
-      'uses',
-      'notes',
-      'refs',
   ])
   non_versioned_columns.push(
     'sync_id',
     'created',
+    'num_views',
+    'last_view',
     'rss_log_id',
     'synonym_id',
-    'review_status',
-    'last_review',
-    'reviewer',
-    'ok_for_export',
-    'num_views',
-    'last_view'
+    'description_id',
+    'classification' # (versioned in the off desc)
   )
 
-  before_save :update_user_if_save_version
-  after_save  :notify_authors
+  versioned_class.before_save {|x| x.user_id = User.current_id}
+  after_update :notify_users
 
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling
 
   # Automatically (but silently) log creation and destruction.
   self.autolog_events = [:destroyed]
+
+  # Get an Array of Observation's for this Name that have > 80% confidence.
+  def reviewed_observations
+    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
+  end
+
+  # Get list of common names to prime auto-completer.  Returns a simple Array
+  # of up to 1000 name String's (no authors).
+  #
+  # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
+  # of a second but that could change...), it gets cached periodically (daily?)
+  # in a plain old file (NAME_PRIMER_CACHE_FILE).
+  #
+  def self.primer
+    result = []
+    if !File.exists?(NAME_PRIMER_CACHE_FILE) ||
+       File.mtime(NAME_PRIMER_CACHE_FILE) < Time.now - 1.day
+
+      # Get list of names sorted by how many times they've been used, then
+      # re-sort by name.
+      result = self.connection.select_values(%(
+        SELECT names.text_name, COUNT(*) AS n
+        FROM namings
+        LEFT OUTER JOIN names ON names.id = namings.name_id
+        WHERE correct_spelling_id IS NULL
+        GROUP BY names.text_name
+        ORDER BY n DESC
+        LIMIT 1000
+      )).uniq.sort
+
+      open(NAME_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
+    else
+      result = open(NAME_PRIMER_CACHE_FILE).readlines.map(&:chomp)
+    end
+    return result
+  end
 
   ################################################################################
   #
@@ -304,7 +300,7 @@ class Name < AbstractModel
   #   "unknown", ""
   #
   def self.names_for_unknown
-    ['unknown', :app_unknown.l.downcase, '']
+    ['unknown', :unknown.l, '']
   end
 
   # Get an instance of the Name that means "unknown".
@@ -739,7 +735,7 @@ class Name < AbstractModel
 
   # Returns "Deprecated" or "Valid" in the local language.
   def status
-    deprecated ? :app_deprecated.l : :app_accepted.l
+    deprecated ? :DEPRECATED.l : :ACCEPTED.l
   end
 
   # Same as synonyms, but returns ids.
@@ -966,7 +962,7 @@ class Name < AbstractModel
     self.misspelling = true
     synonyms = synonym ? synonym.names - [self] : []
     if synonyms.length == 0
-      raise :form_names_misspelling_no_synonyms.t
+      raise :runtime_form_names_misspelling_no_synonyms.t
     else
       candidates = []
       approved_candidates = []
@@ -986,63 +982,111 @@ class Name < AbstractModel
         approved_candidates.push(synonym) if val < 5 && !synonym.deprecated
       end
       if candidates.length == 0
-        raise :form_names_misspelling_no_matches.t
+        raise :runtime_form_names_misspelling_no_matches.t
       elsif approved_candidates.length == 1
         result = approved_candidates.first
       elsif candidates.length == 1
         result = candidates.first
       else
-        raise :form_names_misspelling_many_matches.t
+        raise :runtime_form_names_misspelling_many_matches.t
       end
     end
     return result
   end
 
-  # Merge all the stuff that refers to +old_name+ into +selself+.  No changes
-  # are made to +self+; +old_name+ is destroyed; all the things that referred
-  # to +old_name+ are updated and saved.
+  # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
+  # changes are made to +self+, however it might update the +classification+
+  # cache if the old name had a better one -- NOT SAVED!!  Then +old_name+ is
+  # destroyed; all the things that referred to +old_name+ are updated and
+  # saved. 
   def merge_names(old_name)
+    xargs = {}
 
     # Move all observations over to the new name.
-    for o in old_name.observations
-      o.name = self
-      o.save
+    for obs in old_name.observations
+      obs.name = self
+      obs.save
       Transaction.put_observation(
-        :id   => o,
+        :id   => obs,
         :name => self
       )
     end
 
     # Move all namings over to the new name.
-    for g in old_name.namings
-      g.name = self
-      g.save
+    for name in old_name.namings
+      name.name = self
+      name.save
       Transaction.put_naming(
-        :id   => g,
+        :id   => name,
         :name => self
       )
     end
 
     # Move all misspellings over to the new name.
-    for m in old_name.misspellings
-      if m != self
-        m.correct_spelling = self
-        m.save
+    for name in old_name.misspellings
+      if name != self
+        name.correct_spelling = self
+        name.save
         Transaction.put_name(
-          :id               => m,
+          :id               => name,
           :correct_spelling => self
         )
       end
     end
 
-    # [Why was this only in admin mode?? -JPH 20090127]
+    # Move over any interest in the old name.
+    for int in Interest.find_all_by_object_type_and_object_id('Name',
+                                                              old_name.id)
+      int.object = self
+      int.save
+    end
+
+    # Move over any notifications on the old name.
+    for note in Notification.find_all_by_flavor_and_obj_id('name', old_name.id)
+      note.obj_id = self.id
+      note.save
+    end
+
+    # Merge the two "main" descriptions if it can.
+    if self.description and old_name.description and
+       (self.description.source_type == :public) and
+       (old_name.description.source_type == :public)
+      self.description.merge(old_name.description)
+    end
+
+    # If this one doesn't have a primary description and the other does,
+    # then make it this one's.
+    if !self.description && old_name.description
+      self.description = old_name.description
+    end
+
+    # Update the classification cache if that changed in the process.
+    if self.description && 
+       (self.classification != self.description.classification)
+      self.classification = self.description.classification
+    end
+
+    # Move over any remaining descriptions.
+    for desc in old_name.descriptions
+      xargs = {
+        :id       => desc,
+        :set_name => self,
+      }
+      desc.name_id = self.id
+      desc.save
+      Transaction.put_name_description(xargs)
+    end
+
+    # Log the action.
     old_name.log(:log_name_merged, :this => old_name.display_name,
                  :that => self.display_name)
 
-    # TODO -- what about notifications
-
     # Okay, now it's safe to destroy the name.
+    for ver in old_name.versions
+      ver.destroy
+    end
     old_name.destroy
+    Transaction.delete_name(:id => old_name)
   end
 
   ##############################################################################
@@ -1524,8 +1568,6 @@ class Name < AbstractModel
     result.display_name     = display_name
     result.observation_name = observation_name
     result.search_name      = search_name
-    result.review_status    = :unreviewed
-    result.ok_for_export    = true
     result
   end
 
@@ -1688,181 +1730,45 @@ class Name < AbstractModel
 
   ################################################################################
   #
-  #  :section: Descriptions
-  #
-  ################################################################################
-
-  EOL_NOTE_FIELDS = [:gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses]
-  ALL_NOTE_FIELDS = EOL_NOTE_FIELDS + [:refs, :notes]
-
-  # Returns an Array of all the descriptive text fields that don't require any
-  # special processing when they go to EOL.  Fields are all Symbol's.
-  def self.eol_note_fields
-    # These fields all get handled the same way when they go to EOL
-    EOL_NOTE_FIELDS
-  end
-
-  # Returns an Array of all the descriptive text fields (Symbol's).
-  #
-  # *NOTE*: :references behave differently for EOL output and :notes get
-  # ignored altogether.  Order is important for UI layout.
-  #
-  def self.all_note_fields
-    ALL_NOTE_FIELDS
-  end
-
-  # Are any of the descriptive text fields are non-empty?
-  def has_any_notes?
-    result = false
-    for f in ALL_NOTE_FIELDS
-      result = self.send(f).to_s.strip != ''
-      break if result
-    end
-    result
-  end
-
-  # Returns a Hash containing all the descriptive text fields.  (See also the
-  # counterpart writer-method +all_notes=+.)
-  def all_notes
-    result = {}
-    for f in ALL_NOTE_FIELDS
-      result[f] = self.send(f)
-    end
-    result
-  end
-
-  # Update all the descriptive text fields via Hash.
-  #
-  #   hash = name.all_notes
-  #   hash[:look_alikes] = "new value"
-  #   name.all_notes = hash
-  #
-  def all_notes=(notes)
-    for f in ALL_NOTE_FIELDS
-      self.send("#{f}=", notes[f])
-    end
-  end
-
-  # Find out how much descriptive text has been written for this Name.
-  # Returns the number of fields filled in, and how many characters total.
-  #
-  #   num_fields, total_length = name.note_status
-  #
-  def note_status
-    fieldCount = sizeCount = 0
-    for (k, v) in self.all_notes
-      if v and v.strip != ''
-        fieldCount += 1
-        sizeCount += v.strip_squeeze.length
-      end
-    end
-    [fieldCount, sizeCount]
-  end
-
-  # Is the +notes+ field non-empty?
-  def has_notes?
-    notes.to_s.strip != ''
-  end
-
-  # Stick some (Textile) notes onto the top of existing notes.  *UNSAVED*!!
-  def prepend_notes(str)
-    if has_notes?
-      self.notes = str + "<br>\n\n" + self.notes
-    else
-      self.notes = str
-    end
-  end
-
-  ##############################################################################
-  #
-  #  :section: Reviewing
-  #
-  ##############################################################################
-
-  ALL_REVIEW_STATUSES = [:unreviewed, :unvetted, :vetted, :inaccurate]
-
-  # Returns an Array of all possible values for +review_status+ (Symbol's).
-  def self.all_review_statuses
-    ALL_REVIEW_STATUSES
-  end
-
-  # Update the review status.  Saves the changes if there are no substantive
-  # changes pending.  (Don't want to inadvertantly create multiple past_name
-  # versions.)  Raises a RuntimeError if it fails to save for some reason.
-  #
-  # Note on permissions: Only reviewers can set the value to anything other
-  # than :unreviewed.  The only way for this method to be called by a
-  # non-reviewer is if a non-reviewer publishes a draft.  Note, the review
-  # status can also get reset back to :unreviewed by edit_name in
-  # name_controller if a non-reviewer makes any substantive change to the Name.
-  #
-  def update_review_status(value)
-    user = User.current
-    if not user.in_group('reviewers')
-      # This communicates the name of the old reviewer to notify_authors.
-      # This allows it to notify the old reviewer of the change.
-      @old_reviewer = reviewer
-      value = :unreviewed
-      reviewer_id = nil
-    else
-      reviewer_id = user.id
-    end
-    self.review_status = value
-    self.reviewer_id   = reviewer_id
-    self.last_review   = Time.now
-
-    # Save unless there are substantive changes pending.
-    if !save_version?
-      save_without_updating_modified
-      if errors.length > 0
-        raise "update_review_status failed: [#{dump_errors}]"
-      end
-    end
-  end
-
-  # Get an Array of Observation's for this Name that have > 80% confidence.
-  def reviewed_observations
-    Observation.all(:conditions => "name_id = #{id} and vote_cache >= 2.4")
-  end
-
-  ################################################################################
-  #
   #  :section: Callbacks
   #
   ################################################################################
 
-  # Is this Name worthy of having an author?  This boils down to whether or not
-  # the user has entered anything in the +gen_desc+ field.
-  def author_worthy?
-    gen_desc.to_s.strip_squeeze != ''
-  end
-
   # This is called after saving potential changes to a Name.  It will determine
   # if the changes are important enough to notify the authors, and do so.
-  def notify_authors
+  def notify_users
 
     # "altered?" is acts_as_versioned's equivalent to Rails's changed? method.
-    # It only returns true if *important* changes have been made.  Even though
-    # changing review_status doesn't cause a new version to be created, I want
-    # to notify authors of that change.  (review_status_changed? is an implicit
-    # method created by ActiveRecord)
-    if altered? || review_status_changed?
+    # It only returns true if *important* changes have been made.
+    if altered?
       sender = User.current
       recipients = []
 
+      # Tell admins of the change.
+      for user_list in descriptions.map(&:admins)
+        for user in user_list
+          recipients.push(user) if user.email_names_admin
+        end
+      end
+
       # Tell authors of the change.
-      for user in self.authors
-        recipients.push(user) if user.email_names_author
+      for user_list in descriptions.map(&:authors)
+        for user in user_list
+          recipients.push(user) if user.email_names_author
+        end
       end
 
       # Tell editors of the change.
-      for user in self.editors
-        recipients.push(user) if user.email_names_editor
+      for user_list in descriptions.map(&:editors)
+        for user in user_list
+          recipients.push(user) if user.email_names_editor
+        end
       end
 
-      # Tell reviewer of the change.
-      reviewer = self.reviewer || @old_reviewer
-      recipients.push(reviewer) if reviewer && reviewer.email_names_reviewer
+      # Tell reviewers of the change.
+      for user in descriptions.map(&:reviewer)
+        recipients.push(user) if user && user.email_names_reviewer
+      end
 
       # Tell masochists who want to know about all name changes.
       for user in User.find_all_by_email_names_all(true)
@@ -1882,44 +1788,11 @@ class Name < AbstractModel
       # Send notification to all except the person who triggered the change.
       for recipient in recipients.uniq - [sender]
         if recipient.created_here
-          QueuedEmail::NameChange.create_email(sender, recipient, self, review_status_changed?)
+          QueuedEmail::NameChange.create_email(sender, recipient, self, nil,
+                                               false)
         end
       end
     end
-
-    # No longer need this.
-    @old_reviewer = nil
-  end
-
-  # Get list of common names to prime auto-completer.  Returns a simple Array
-  # of up to 1000 name String's (no authors).
-  #
-  # *NOTE*: Since this is an expensive query (well, okay it only takes a tenth
-  # of a second but that could change...), it gets cached periodically (daily?)
-  # in a plain old file (NAME_PRIMER_CACHE_FILE).
-  #
-  def self.primer
-    result = []
-    if !File.exists?(NAME_PRIMER_CACHE_FILE) ||
-       File.mtime(NAME_PRIMER_CACHE_FILE) < Time.now - 1.day
-
-      # Get list of names sorted by how many times they've been used, then
-      # re-sort by name.
-      result = self.connection.select_values(%(
-        SELECT names.text_name, COUNT(*) AS n
-        FROM namings
-        LEFT OUTER JOIN names ON names.id = namings.name_id
-        WHERE correct_spelling_id IS NULL
-        GROUP BY names.text_name
-        ORDER BY n DESC
-        LIMIT 1000
-      )).uniq.sort
-
-      open(NAME_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
-    else
-      result = open(NAME_PRIMER_CACHE_FILE).readlines.map(&:chomp)
-    end
-    return result
   end
 
 ################################################################################

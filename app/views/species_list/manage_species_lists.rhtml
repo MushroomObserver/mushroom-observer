@@ -2,7 +2,7 @@
   @title = :species_list_manage_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :observation.l), :controller => 'observer',
+    add_tab(:cancel_and_show.t(:type => :observation), :controller => 'observer',
             :action => 'show_observation', :id => @observation.id)
   end
 
@@ -34,9 +34,9 @@
           </td>
           <td valign='middle' class="ListActions">
             <% if check_permission(species_list.user_id) %>
-               <%= link_to(:app_remove.t, { :action => 'remove_observation_from_species_list',
+               <%= link_to(:REMOVE.t, { :action => 'remove_observation_from_species_list',
                            :observation => @observation.id, :species_list => species_list.id },
-                           :confirm => :app_are_you_sure.l) %>
+                           :confirm => :are_you_sure.l) %>
             <% end %>
           </td>
         </tr>
@@ -62,7 +62,7 @@
         </td>
         <td valign='middle' class="ListActions">
           <% if check_permission(species_list.user_id) %>
-            <%= link_to(:app_add.t, { :action => 'add_observation_to_species_list',
+            <%= link_to(:ADD.t, { :action => 'add_observation_to_species_list',
                         :observation => @observation.id, :species_list => species_list.id }) %>
           <% end %>
         </td>

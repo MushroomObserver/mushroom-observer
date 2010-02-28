@@ -10,8 +10,8 @@
   )
 
   fields = ""
-  fields += "*#{:app_observer.l}:* #{link_to(@observation.user.legal_name, observer_url)}\n"
-  fields += "*#{:app_identifier.l}:* #{link_to(@naming.user.legal_name, identifier_url)}\n"
+  fields += "*#{:Observer.l}:* #{link_to(@observation.user.legal_name, observer_url)}\n"
+  fields += "*#{:Identifier.l}:* #{link_to(@naming.user.legal_name, identifier_url)}\n"
   if @observation.specimen
     fields += "*#{:show_observation_specimen_available.l}*\n"
   else
@@ -22,13 +22,13 @@
   handy_links = :email_handy_links
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation.l),
+  links.push([:email_links_show_object.l(:type => :observation),
     observation_url])
   links.push([:email_links_show_observer.l,
     observer_url])
   links.push([:email_links_show_identifier.l,
     identifier_url]) if @observation.user_id != @naming.user_id
-  links.push([:email_links_disable_tracking.l(:type => :name.l),
+  links.push([:email_links_disable_tracking.l(:type => :name),
     "#{HTTP_DOMAIN}/name/email_tracking/#{@naming.name_id}"])
   links.push([:email_links_your_interests.l,
     "#{HTTP_DOMAIN}/interest/list_interests"])

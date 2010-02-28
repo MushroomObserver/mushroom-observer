@@ -1,0 +1,14 @@
+<%= :RANK.t %>: <%= rank_as_string(@name.rank) %><br/>
+<%= :STATUS.t %>: <%= @name.status %>
+  <% if @name.is_misspelling? %>
+    (<%= :MISSPELLED.t %>)
+  <% end %><br/>
+<%= :NAME.t %>: <%= h(@name.text_name) %><br/>
+<%= :AUTHORITY.t %>: <%= sanitize(@name.author.to_s).t %><br/>
+<%= :CITATION.t %>: <%= sanitize(@name.citation.to_s).t %><br/>
+<% if @name.is_misspelling? %>
+  <%= :show_name_misspelling_correct.t %>:
+    <%= link_to((correct_spelling rescue @name.correct_spelling.display_name.t),
+                :action => :show_name, :id => @name.correct_spelling_id,
+                :params => query_params) %><br/>
+<% end %>

@@ -29,10 +29,6 @@ class Query < AbstractQuery
     :by_user => {
       :user => User,
     },
-    :children => {
-      :name => Name,
-      :all? => :boolean,
-    },
     :for_user => {
       :user => User,
     },
@@ -46,12 +42,16 @@ class Query < AbstractQuery
       :observation => Observation,
       :outer       => Query,
     },
+    :of_children => {
+      :name => Name,
+      :all? => :boolean,
+    },
     :of_name => {
       :name          => Name,
       :synonyms?     => {:string => [:no, :all, :exclusive]},
       :nonconsensus? => {:string => [:no, :all, :exclusive]},
     },
-    :parents => {
+    :of_parents => {
       :name => Name,
     },
     :pattern => {
@@ -73,6 +73,10 @@ class Query < AbstractQuery
     },
     :with_observations_in_species_list => {
       :species_list => SpeciesList,
+    },
+    :with_observations_of_children => {
+      :name => Name,
+      :all? => :boolean,
     },
     :with_observations_of_name => {
       :name          => Name,
@@ -102,6 +106,7 @@ class Query < AbstractQuery
       :with_observations_by_user,         # Images with observations by user.
       :with_observations_in_set,          # Images with observations in a given set.
       :with_observations_in_species_list, # Images with observations in a given species list.
+      :with_observations_of_children,     # Images with observations of children a given name.
       :with_observations_of_name,         # Images with observations of a given name.
     ],
     :Location => [
@@ -116,6 +121,7 @@ class Query < AbstractQuery
       :with_observations_by_user,         # Locations with observations by user.
       :with_observations_in_set,          # Locations with observations in a given set.
       :with_observations_in_species_list, # Locations with observations in a given species list.
+      :with_observations_of_children,     # Locations with observations of children of a given name.
       :with_observations_of_name,         # Locations with observations of a given name.
     ],
     :Name => [
@@ -124,9 +130,9 @@ class Query < AbstractQuery
       :by_author,             # Names that list user as an author, alphabetically.
       :by_editor,             # Names that list user as an editor, alphabetically.
       :by_rss_log,            # Names with RSS logs, in RSS order.
-      :children,              # Children of a name.
       :in_set,                # Names in a given set.
-      :parents,               # Parents of a name.
+      :of_children,           # Names of children of a name.
+      :of_parents,            # Names of parents of a name.
       :pattern,               # Names matching a pattern, alphabetically.
       :with_authors,          # Names that have authors, alphabetically.
       :with_observations,                 # Names with observations, alphabetically.
@@ -145,6 +151,7 @@ class Query < AbstractQuery
       :by_user,               # Observations created by user, by modified.
       :in_set,                # Observations in a given set.
       :in_species_list,       # Observations in a given species list, by modified.
+      :of_children,           # Observations of children of a given name.
       :of_name,               # Observations with a given name.
       :pattern,               # Observations matching a pattern, by name.
     ],
@@ -170,24 +177,10 @@ class Query < AbstractQuery
 
   # Map each pair of tables to the foreign key name.
   self.join_conditions = {
-    :authors_locations => {
-      :locations     => :location_id,
-      :users         => :user_id,
-    },
-    :authors_names => {
-      :names         => :name_id,
-      :users         => :user_id,
-    },
     :comments => {
+      :location_descriptions => :object,
+      :name_descriptions => :object,
       :observations  => :object,
-      :users         => :user_id,
-    },
-    :editors_locations => {
-      :locations     => :location_id,
-      :users         => :user_id,
-    },
-    :editors_names => {
-      :names         => :name_id,
       :users         => :user_id,
     },
     :images => {
@@ -205,13 +198,63 @@ class Query < AbstractQuery
       :observations  => :object_id,
       :users         => :user_id,
     },
+    :location_descriptions => {
+      :locations     => :location_id,
+      :users         => :user_id,
+    },
+    :location_descriptions_admins => {
+      :location_descriptions => :location_description_id,
+      :user_groups   => :user_group_id,
+    },
+    :location_descriptions_authors => {
+      :location_descriptions => :location_description_id,
+      :users         => :user_id,
+    },
+    :location_descriptions_editors => {
+      :location_descriptions => :location_description_id,
+      :users         => :user_id,
+    },
+    :location_descriptions_readers => {
+      :location_descriptions => :location_description_id,
+      :user_groups   => :user_group_id,
+    },
+    :location_descriptions_writers => {
+      :location_descriptions => :location_description_id,
+      :user_groups   => :user_group_id,
+    },
     :locations => {
       :licenses      => :license_id,
+      :'location_descriptions.official' => :description_id,
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
     },
+    :name_descriptions => {
+      :names         => :name_id,
+      :users         => :user_id,
+    },
+    :name_descriptions_admins => {
+      :name_descriptions => :name_description_id,
+      :user_groups   => :user_group_id,
+    },
+    :name_descriptions_authors => {
+      :name_descriptions => :name_description_id,
+      :users         => :user_id,
+    },
+    :name_descriptions_editors => {
+      :name_descriptions => :name_description_id,
+      :users         => :user_id,
+    },
+    :name_descriptions_readers => {
+      :name_descriptions => :name_description_id,
+      :user_groups   => :user_group_id,
+    },
+    :name_descriptions_writers => {
+      :name_descriptions => :name_description_id,
+      :user_groups   => :user_group_id,
+    },
     :names => {
       :licenses      => :license_id,
+      :'name_descriptions.official' => :description_id,
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
       :'users.reviewer' => :reviewer_id,
@@ -268,29 +311,38 @@ class Query < AbstractQuery
   }
 
   # This is the order in which we should list tables, numbers are lengths.
+  # This makes absolutely no difference whatsoever in performance. (!!)
   self.table_order = [
-    :licenses,                     # 3
-    :projects,                     # 4
-    :editors_locations,            # 8
-    :user_groups,                  # 9
-    :notifications,                # 57
-    :species_lists,                # 90
-    :user_groups_users,            # 202
-    :authors_names,                # 405
-    :authors_locations,            # 779
-    :locations,                    # 779
-    :interests,                    # 1033
-    :users,                        # 1857
-    :observations_species_lists,   # 12428
-    :comments,                     # 16868
-    :names,                        # 21062
-    :editors_names,                # 23801
-    :observations,                 # 31339
-    :rss_logs,                     # 35095
-    :namings,                      # 37251
-    :votes,                        # 49876
-    :images_observations,          # 71686
-    :images,                       # 73660
+    :licenses,                       # 3
+    :projects,                       # 4
+    :location_descriptions_editors,  # 11
+    :notifications,                  # 57
+    :species_lists,                  # 92
+    :name_descriptions_authors,      # 578
+    :location_descriptions,          # 808
+    :location_descriptions_admins,   # 808
+    :location_descriptions_authors,  # 808
+    :location_descriptions_readers,  # 808
+    :location_descriptions_writers,  # 808
+    :locations,                      # 808
+    :interests,                      # 1021
+    :users,                          # 1907
+    :user_groups,                    # 1917
+    :user_groups_users,              # 4016
+    :observations_species_lists,     # 12837
+    :comments,                       # 17380
+    :names,                          # 21186
+    :name_descriptions,              # 21358
+    :name_descriptions_admins,       # 21358
+    :name_descriptions_readers,      # 21530
+    :name_descriptions_writers,      # 21530
+    :name_descriptions_editors,      # 22733
+    :observations,                   # 32328
+    :rss_logs,                       # 36229
+    :namings,                        # 38528
+    :votes,                          # 51773
+    :images_observations,            # 73975
+    :images,                         # 76154
   ]
 
   # Return the default order for this query.
@@ -318,6 +370,7 @@ class Query < AbstractQuery
     # is to ignore misspellings.)
     if model_symbol == :Name
       args[:misspellings?] = {:string => [:okay, :no, :only]}
+      args[:deprecated?]   = {:string => [:okay, :no, :only]}
     end
 
     return args
@@ -373,7 +426,7 @@ class Query < AbstractQuery
         self.class.lookup(new_model, :by_rss_log, params)
       end
 
-    # Going from objects WITH observations to those observations themselves.
+    # Going from objects with observations to those observations themselves.
     elsif (new_model  == :Observation) and
           [:Image, :Location, :Name].include?(old_model) and
           old_flavor.to_s.match(/^with_observations/)
@@ -402,7 +455,7 @@ class Query < AbstractQuery
         self.class.lookup(new_model, new_flavor, params2)
       end
 
-    # Going from observations to objects WITH those observations.
+    # Going from observations to objects with those observations.
     elsif (old_model == :Observation) and
           [:Image, :Location, :Name].include?(new_model)
       just_test or begin
@@ -415,7 +468,7 @@ class Query < AbstractQuery
         if params2[:title]
           # This can spiral out of control, but so be it.
           params2[:title] = "raw " + :query_title_with_observations_in_set.
-            t(:observations => title, :type => :observaton.t, :types => :observations.t)
+            t(:observations => title, :type => :observaton)
         end
         if params2[:by]
           # Can't be sure old sort order will continue to work.
@@ -459,9 +512,8 @@ class Query < AbstractQuery
   # Give query a default title before passing off to standard initializer.
   def initialize_query
     self.title_args = params.merge(
-      :tag   => "query_title_#{flavor}".to_sym,
-      :type  => model_string.underscore.to_sym.t,
-      :types => model_string.underscore.pluralize.to_sym.t
+      :tag  => "query_title_#{flavor}".to_sym,
+      :type => model_string.underscore.to_sym
     )
     super
   end
@@ -561,7 +613,7 @@ class Query < AbstractQuery
   end
 
   def initialize_with_authors
-    self.join << :authors_names
+    self.join << {:'name_descriptions.official' => :name_descriptions_authors}
     params[:by] ||= 'name'
   end
 
@@ -607,9 +659,10 @@ class Query < AbstractQuery
     title_args[:user] = user.legal_name
     case model_symbol
     when :Name, :Location
-      glue_table = "#{flavor}s_#{model_string}s".downcase
-      glue_table = glue_table[3..-1]
-      self.join << glue_table.to_sym
+      desc_table = "#{model_string}_descriptions.official".downcase.to_sym
+      glue_table = "#{model_string}_descriptions_#{flavor}s".downcase.
+                      sub('_by_', '_').to_sym
+      self.join << {desc_table => glue_table}
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
       params[:by] ||= 'name'
     else
@@ -720,7 +773,7 @@ class Query < AbstractQuery
   #  Queries dealing with taxonomic hierarchy.
   # --------------------------------------------
 
-  def initialize_children
+  def initialize_of_children
     name = find_cached_parameter_instance(Name, :name)
     title_args[:name] = name.display_name
     all = params[:all] || false
@@ -743,9 +796,18 @@ class Query < AbstractQuery
         end
       end
     end
+
+    # Add appropriate joins.
+    if model_symbol == :Observation
+      self.join << :names
+    elsif model_symbol == :Image
+      self.join << {:images_observations => {:observations => :names}}
+    elsif model_symbol == :Location
+      self.join << {:observations => :names}
+    end
   end
 
-  def initialize_parents
+  def initialize_of_parents
     name = find_cached_parameter_instance(Name, :name)
     title_args[:name] = name.display_name
     all = params[:all] || false
@@ -811,7 +873,7 @@ class Query < AbstractQuery
 
   def initialize_with_observations_in_set
     title_args[:observations] = params[:old_title] ||
-      :query_title_in_set.t(:type => :observation.t, :types => :observations.t)
+      :query_title_in_set.t(:type => :observation)
     set = clean_id_set(params[:ids])
     if model_symbol == :Image
       self.join << {:images_observations => :observations}
@@ -838,6 +900,10 @@ class Query < AbstractQuery
       self.where << 'observations.is_collection_location IS TRUE'
     end
     params[:by] ||= 'name'
+  end
+
+  def initialize_with_observations_of_children
+    initialize_of_children
   end
 
   def initialize_with_observations_of_name
@@ -877,13 +943,17 @@ class Query < AbstractQuery
       #                  'comments.summary', 'comments.comment' ])
 
     when :Location
-      ids = google_execute(search, :fields => [ 'locations.display_name',
-          'locations.search_name', 'locations.notes' ])
+      note_fields = LocationDescription.all_note_fields.
+                      map {|x| "location_descriptions.#{x}"}
+      ids = google_execute(search, :join => :location_descriptions,
+        :fields => [ 'locations.display_name', 'locations.search_name',
+                     *note_fields ])
 
     when :Name
-      note_fields = Name.all_note_fields.map {|x| "names.#{x}"}
-      ids = google_execute(search, :fields => [ 'names.search_name',
-          'names.citation', *note_fields ])
+      note_fields = NameDescription.all_note_fields.
+                      map {|x| "name_descriptions.#{x}"}
+      ids = google_execute(search, :join => :name_descriptions,
+        :fields => [ 'names.search_name', 'names.citation', *note_fields ])
 
     when :Observation
       self.join << :names

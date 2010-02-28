@@ -7,7 +7,7 @@ class UserTest < Test::Unit::TestCase
     assert_nil   User.authenticate("nonrolf", "testpassword")
   end
 
-  def test_passwordchange
+  def test_password_change
     @mary.change_password("marypasswd")
     assert_equal @mary, User.authenticate("mary", "marypasswd")
     assert_nil   User.authenticate("mary", "longtest")
@@ -99,5 +99,30 @@ class UserTest < Test::Unit::TestCase
     u.mailing_address = ""
     assert u.save
     assert_equal '74996ba5c4aa1d583563078d8671fef076e2b466', u.password
+  end
+
+  def test_meta_groups
+    all = User.all
+
+    user = User.create!(
+      :password              => 'blah!',
+      :password_confirmation => 'blah!',
+      :login                 => 'bobby',
+      :email                 => 'bob@bigboy.com',
+      :theme                 => nil,
+      :notes                 => '',
+      :mailing_address       => ''
+    )
+
+    assert(group1 = UserGroup.all_users)
+    assert(group2 = UserGroup.one_user(user))
+    assert_user_list_equal(all + [user], group1.users)
+    assert_user_list_equal([user], group2.users)
+
+    user.destroy
+    group1.reload
+    group2.reload # not destroyed, just empty
+    assert_user_list_equal(all, group1.users)
+    assert_user_list_equal([], group2.users)
   end
 end

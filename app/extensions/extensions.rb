@@ -4,8 +4,10 @@
 # explicitly, too.  (Although, I believe ApplicationController is always
 # loaded, no matter what you need(?)...) 
 
+require 'array_extensions'
 require 'enumerable_extensions'
 require 'fixnum_extensions'
+require 'form_builder_extensions'
 require 'hash_extensions'
 require 'object_extensions'
 require 'string_extensions'

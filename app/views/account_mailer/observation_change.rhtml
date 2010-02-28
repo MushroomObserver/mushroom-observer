@@ -2,22 +2,22 @@
   is_now = :email_field_is_now.l
 
   intro = @observation ?
-    :email_object_change_intro.l(:type => :observation.l, :name => @observation.unique_format_name) :
+    :email_object_change_intro.l(:type => :observation, :name => @observation.unique_format_name) :
     :email_observation_destroyed_intro.l
 
   fields = ""
-  fields += "*#{:observation.l}:* #{@note}\n" if !@observation
-  fields += "*#{:app_time.l}:* #{@time.email_time}\n"
-  fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+  fields += "*#{:Observation.l}:* #{@note}\n" if !@observation
+  fields += "*#{:Time.l}:* #{@time.email_time}\n"
+  fields += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   changes = ""
   if @observation and @note
     for field in @note.split(',')
       case field
         when 'date'
-          changes += "*#{:app_date.l} #{is_now}:* #{@observation.when.email_date}\n"
+          changes += "*#{:Date.l} #{is_now}:* #{@observation.when.email_date}\n"
         when 'location'
-          changes += "*#{:location.l} #{is_now}:* #{@observation.place_name}\n"
+          changes += "*#{:Location.l} #{is_now}:* #{@observation.place_name}\n"
         when 'notes'
           notes_changed = true
         when 'specimen'
@@ -35,17 +35,17 @@
       end
     end
   end
-  changes += "*#{:app_notes.l} #{is_now}:*\n" if notes_changed
+  changes += "*#{:Notes.l} #{is_now}:*\n" if notes_changed
 
   handy_links = :email_handy_links
 
   links = []
   if @observation
-    links.push([:email_links_show_object.l(:type => :observation.l),
+    links.push([:email_links_show_object.l(:type => :observation),
       "#{HTTP_DOMAIN}/#{@observation.id}"])
     links.push([:email_links_post_comment.l,
       "#{HTTP_DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
-    links.push([:email_links_not_interested.l(:type => :observation.l),
+    links.push([:email_links_not_interested.l(:type => :observation),
       "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   end
   links.push([:email_links_latest_changes.l,

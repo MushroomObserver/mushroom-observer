@@ -9,7 +9,7 @@
     if check_permission(@project.user_id)
       add_tab(:show_project_destroy.t, { :action => 'destroy_project',
               :id => @project.id, :params => query_params },
-              { :confirm => :app_are_you_sure.l })
+              { :confirm => :are_you_sure.l })
       add_tab(:show_project_edit.t, :action => 'edit_project',
               :id => @project.id, :params => query_params)
     end
@@ -19,14 +19,7 @@
     end
   end
 
-  new_tab_set do
-    add_tab(:app_prev.t, :action => 'prev_project', :id => @project.id,
-            :params => query_params)
-    add_tab(:app_index.t, :action => 'index_project', :id => @project.id,
-            :params => query_params)
-    add_tab(:app_next.t, :action => 'next_project', :id => @project.id,
-            :params => query_params)
-  end
+  draw_prev_next_tabs(@project)
 %>
 
 <table cellpadding="10" width="100%">
@@ -47,7 +40,7 @@
       <td valign="top" width="50%">
         <%= :show_project_drafts.t %>:<br/>
         <% for datum in @draft_data %>
-          &nbsp;&nbsp;<%= link_to(datum['display_name'].t, :action => "show_draft", :id => datum['id']) %>
+          <%= indent + link_to(datum['display_name'].t, :action => "show_draft", :id => datum['id']) %>
           (<%= user_link(User.find(datum['user_id'])) %>)<br/>
         <% end %>
       </td>

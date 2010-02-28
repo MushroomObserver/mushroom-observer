@@ -1,0 +1,25 @@
+<%
+  @title ||= :edit_location_description_title.
+                t(:name => @description.format_name)
+
+  new_tab_set do
+    add_tab(:show_object.t(:type => :location), :action => 'show_location',
+            :id => @description.location_id, :params => query_params)
+    add_tab(:cancel_and_show.t(:type => :location_description),
+            :action => 'show_location_description',
+            :id => @description.id, :params => query_params)
+  end
+%>
+
+<% form_for(:description, :url => {
+               :action => :edit_location_description,
+               :id => @description.id,
+               :params => query_params,
+            }) do |form| %>
+  <br/><center><%= submit_tag(:UPDATE.l) %></center>
+
+  <%= render(:partial => 'form_location_description', :locals =>
+             { :form => form }) %>
+
+  <br/><center><%= submit_tag(:UPDATE.l) %></center>
+<% end %>

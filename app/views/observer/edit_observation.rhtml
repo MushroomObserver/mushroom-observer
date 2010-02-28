@@ -4,7 +4,7 @@
   @title = :edit_observation_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :observation.l),
+    add_tab(:cancel_and_show.t(:type => :observation),
             :action => 'show_observation', :id => @observation.id,
             :params => query_params)
   end
@@ -16,17 +16,17 @@
       <% form_tag({ :action => 'edit_observation', :id => @observation,
                   :approved_name => @what, :params => query_params },
                   { :multipart => true }) do %>
-        <br/><center><%= submit_tag :app_save_changes.l %></center><br/>
+        <br/><center><%= submit_tag :SAVE_EDITS.l %></center><br/>
 
         <%= render(:partial => 'form_observations', :locals => {
           :action           => 'edit_observation',
           :logging_optional => true,
           :include_naming   => false,
           :include_images   => true,
-          :button_name      => :app_save_changes.l,
+          :button_name      => :SAVE_EDITS.l,
         }) %>
 
-        <br/><center><%= submit_tag :app_save_changes.l %></center>
+        <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
       <% end %>
     </td>
   </tr>

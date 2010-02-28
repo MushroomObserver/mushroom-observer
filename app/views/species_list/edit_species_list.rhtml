@@ -3,7 +3,7 @@
   @title = :species_list_edit_title.t(:name => @species_list.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :species_list.l), :action => 'show_species_list', :id => @species_list.id)
+    add_tab(:cancel_and_show.t(:type => :species_list), :action => 'show_species_list', :id => @species_list.id)
     add_tab(:species_list_upload_title.t, :action => 'upload_species_list', :id => @species_list.id)
   end
 %>
@@ -17,7 +17,7 @@
   end
   form_tag(:action => 'edit_species_list', :id => @species_list.id,
            :params => args) do %>
-  <br/><center><%= submit_tag :app_update.l %></center>
+  <br/><center><%= submit_tag :UPDATE.l %></center>
 
   <table cellpadding="10">
 	<tr>

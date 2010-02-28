@@ -2,7 +2,7 @@
 
 <% form_tag(:action => 'ask_user_question', :id => @target.id,
             :params => query_params) do %>
-  <br/><center><%= submit_tag :app_send.l %></center>
+  <br/><center><%= submit_tag :SEND.l %></center>
 
   <label for="email_subject"><%= :ask_user_question_subject.t %>:</label><br/>
   <%= text_field('email', 'subject', :size => 70) %><br/><br/>

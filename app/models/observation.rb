@@ -64,21 +64,31 @@
 #  interests::              List of Interest's attached to this Observation.
 #  species_lists::          List of SpeciesList's that contain this Observation.
 #
-#  ==== Namings and Votes
-#  name::                   Conensus Name instance. (never nil)
+#  ==== Name Formats
 #  text_name::              Plain text.
 #  format_name::            Textilized.
 #  unique_text_name::       Plain text, with id added to make unique.
 #  unique_format_name::     Textilized, with id added to make unique.
+#
+#  ==== Namings and Votes
+#  name::                   Conensus Name instance. (never nil)
 #  namings::                List of Naming's proposed for this Observation.
 #  name_been_proposed?::    Has someone proposed this Name already?
-#  consensus_naming::       Guess which Naming is responsible for consensus.
+#  owner_voted?::           Has the owner voted on a given Naming?
+#  user_voted?::            Has a given User voted on a given Naming? 
+#  owners_vote::            Get the owner's Vote on a given Naming.
+#  users_vote::             Get a given User's Vote on a given Naming.
+#  owners_votes::           Get all of the onwer's Vote's for this Observation.
+#  users_votes::            Get all of a given User's Vote's for this Observation.
 #  is_owners_favorite?::    Is a given naming the owner's favorite?
 #  is_users_favorite?::     Is a given naming a given user's favorite?
-#  review_status::          Decide what the review status is for this Observation.
 #  vote_percent::           Convert Vote score to percentage.
 #  change_vote::            Change a given User's Vote for a given Naming.
+#  consensus_naming::       Guess which Naming is responsible for consensus.
 #  calc_consensus::         Calculate and cache the consensus naming/name.
+#  review_status::          Decide what the review status is for this Observation.
+#  lookup_naming::          Return corresponding Naming instance from this Observation's namings association.
+#  dump_votes::             Dump all the Naming and Vote info as known by this Observation and its associations.
 #
 #  ==== Images
 #  images::                 List of Image's attached to this Observation.
@@ -120,7 +130,7 @@ class Observation < AbstractModel
   has_and_belongs_to_many :species_lists, :after_add => :add_spl_callback,
                                           :before_remove => :remove_spl_callback
 
-  after_save     :notify_users_after_change
+  after_update   :notify_users_after_change
   before_destroy :notify_species_lists
   after_destroy  :notify_users_after_destroy
   after_destroy  :destroy_dependents
@@ -187,134 +197,67 @@ class Observation < AbstractModel
     "%s (%s)" % [name.observation_name, id]
   end
 
+  # Look up the corresponding instance in our namings association.  If we are
+  # careful to keep all the operations within the tree of assocations of the
+  # observations, we should never need to reload anything.
+  def lookup_naming(naming)
+    namings.select {|n| n == naming}.first or
+      raise ActiveRecord::RecordNotFound, "Observation doesn't have naming with ID=#{naming.id}"
+  end
+
+  # Dump out the sitatuation as the observation sees it.  Useful for debugging
+  # problems with reloading requirements.
+  def dump_votes
+    namings.map do |n|
+      "#{n.id} #{n.name.search_name}: " +
+      (n.votes.empty? ? "no votes" : n.votes.map do |v|
+        "#{v.user.login}=#{v.value}" + (v.favorite ? '(*)' : '')
+      end.join(', '))
+    end.join("\n")
+  end
+
   # Has anyone proposed a given Name yet for this observation?
   def name_been_proposed?(name)
     namings.select {|n| n.name == name}.length > 0
   end
 
-  # Try to guess which Naming is responsible for the consensus.  This will
-  # always return a Naming, no matter how ambiguous, unless there are no
-  # namings.
-  def consensus_naming
-    result = nil
+  # Has the owner voted on a given Naming?
+  def owner_voted?(naming)
+    !!lookup_naming(naming).users_vote(user)
+  end
 
-    # First, get the Naming(s) for this Name, if any exists.
-    matches = namings.select {|n| n.name_id == name_id}
+  # Has a given User owner voted on a given Naming?
+  def user_voted?(naming, user)
+    !!lookup_naming(naming).users_vote(user)
+  end
 
-    # If not, it means that a deprecated Synonym won.  Look up all Namings
-    # for Synonyms of the consensus Name.
-    if matches == [] && name && name.synonym
-      synonyms = name.synonym.names
-      matches = namings.select {|n| synonyms.include? n.name}
-    end
+  # Get the owner's Vote on a given Naming.
+  def owners_vote(naming)
+    lookup_naming(naming).users_vote(user)
+  end
 
-    # Only one match -- easy!
-    if matches.length == 1
-      result = matches.first
-
-    # More than one match: take the one with the highest vote.
-    elsif best_naming = matches.first
-      best_value = matches.first.vote_cache
-      for naming in matches
-        if naming.vote_cache > best_value
-          best_naming = naming
-          best_value  = naming.vote_cache
-        end
-      end
-      result = best_naming
-    end
-
-    return result
+  # Get a given User's Vote on a given Naming.
+  def users_vote(naming, user)
+    lookup_naming(naming).users_vote(user)
   end
 
   # Returns true if a given naming has received the highest positive vote from
   # the owner of this observation.  Note, multiple namings can return true for
   # a given observation.
   def is_owners_favorite?(naming)
-    is_users_favorite?(naming, user)
+    lookup_naming(naming).is_users_favorite?(user)
   end
 
   # Returns true if a given naming has received the highest positive vote from
   # the given user (among namings for this observation).  Note, multiple
   # namings can return true for a given user and observation.
   def is_users_favorite?(naming, user)
-    naming.is_users_favorite?(user)
+    lookup_naming(naming).is_users_favorite?(user)
   end
 
-  # Return the review status based on the Vote's on the consensus Name by
-  # current reviewers.  Possible return values:
-  #
-  # unreviewed:: No reviewers have voted for the consensus.
-  # inaccurate:: Some reviewer doubts the consensus (vote.value < 0).
-  # unvetted::   Some reviewer is not completely confident in this naming (vote.value < Vote#maximum_vote).
-  # vetted::     All reviewers that have voted on the current consensus fully support this name (vote.value = Vote#maximum_vote).
-  #
-  # *NOTE*: It probably makes sense to cache this result at some point.
-  #
-  # *NOTE*: This checks all Vote's for Synonym Naming's, taking each reviewer's
-  # highest Vote (if they voted for multiple Synonym's).
-  #
-  def review_status
-
-    # Get list of Name ids we care about.
-    name_ids = [name_id]
-    if name.synonym_id
-      name_ids = Name.connection.select_values %(
-        SELECT `id` FROM `names` WHERE `synonym_id` = '#{synonym_id}'
-      )
-    end
-
-    # Get list of User ids for reviewers.
-    group = UserGroup.find_by_name('reviewers')
-    user_ids = User.connection.select_values %(
-      SELECT `user_id` FROM `user_groups_users`
-      WHERE `user_group_id` = #{group.id}
-    )
-
-    # Get all the reviewers' Vote's for these Name's.
-    # Order of conditions makes no difference: query times are around 0.05 sec.
-    data = Vote.connection.select_rows %(
-      SELECT vote.user_id, vote.value
-      FROM `votes`, `namings`
-      WHERE votes.observation_id = #{id} AND
-            votes.naming_id = namings.id AND
-            namings.name_id IN (#{name_ids.map(&:to_s).uniq.join(',')}) AND
-            votes.user_id IN (#{user_ids.map(&:to_s).uniq.join(',')})
-    )
-
-    # Get highest vote for each User.
-    votes = {}
-    for user_id, value in data
-      value = value.to_f
-      if votes[user_id]
-        votes[user_id] = value if votes[user_id] < value
-      else
-        votes[user_id] = value
-      end
-    end
-
-    # Apply heuristics to determine review status.
-    status = :unreviewed
-    v100 = Vote.maximum_vote.to_f
-    for value in votes.values
-      if value < 0
-        status = :inaccurate
-        break
-      elsif status != :inaccurate
-        if value != v100
-          status = :unvetted
-        elsif status == :unreviewed
-          status = :vetted
-        end
-      end
-    end
-
-    return status
-  end
-
-  # Convert cached Vote score to percentage.
-  def vote_percent
-    Vote.percent(vote_cache)
+  # Get a list of the owner's Votes for this Observation.
+  def owners_votes
+    users_votes(user)
   end
 
   # Get a list of this User's Votes for this Observation.
@@ -328,11 +271,17 @@ class Observation < AbstractModel
     return result
   end
 
+  # Convert cached Vote score to percentage.
+  def vote_percent
+    Vote.percent(vote_cache)
+  end
+
   # Change User's Vote for this naming.  Automatically recalculates the
   # consensus for the Observation in question if anything is changed.  Returns
   # true if something was changed.
   def change_vote(naming, value, user=User.current)
     result = false
+    naming = lookup_naming(naming)
     vote = naming.users_vote(user)
 
     # This special value means destroy vote.
@@ -404,13 +353,12 @@ class Observation < AbstractModel
 
       # Create vote if none exists.
       if !vote
-        vote = Vote.new
-        vote.user        = user
-        vote.observation = self
-        vote.naming      = naming
-        vote.value       = value
-        vote.favorite    = favorite
-        vote.save
+        naming.votes.create!(
+          :user        => user,
+          :observation => self,
+          :value       => value,
+          :favorite    => favorite
+        )
         Transaction.post_vote(
           :id     => vote,
           :naming => naming,
@@ -431,6 +379,41 @@ class Observation < AbstractModel
 
     # Update consensus if anything changed.
     calc_consensus if result
+
+    return result
+  end
+
+  # Try to guess which Naming is responsible for the consensus.  This will
+  # always return a Naming, no matter how ambiguous, unless there are no
+  # namings.
+  def consensus_naming
+    result = nil
+
+    # First, get the Naming(s) for this Name, if any exists.
+    matches = namings.select {|n| n.name_id == name_id}
+
+    # If not, it means that a deprecated Synonym won.  Look up all Namings
+    # for Synonyms of the consensus Name.
+    if matches == [] && name && name.synonym
+      synonyms = name.synonym.names
+      matches = namings.select {|n| synonyms.include? n.name}
+    end
+
+    # Only one match -- easy!
+    if matches.length == 1
+      result = matches.first
+
+    # More than one match: take the one with the highest vote.
+    elsif best_naming = matches.first
+      best_value = matches.first.vote_cache
+      for naming in matches
+        if naming.vote_cache > best_value
+          best_naming = naming
+          best_value  = naming.vote_cache
+        end
+      end
+      result = best_naming
+    end
 
     return result
   end
@@ -667,6 +650,77 @@ return result if debug
     end
   end
 
+  # Return the review status based on the Vote's on the consensus Name by
+  # current reviewers.  Possible return values:
+  #
+  # unreviewed:: No reviewers have voted for the consensus.
+  # inaccurate:: Some reviewer doubts the consensus (vote.value < 0).
+  # unvetted::   Some reviewer is not completely confident in this naming (vote.value < Vote#maximum_vote).
+  # vetted::     All reviewers that have voted on the current consensus fully support this name (vote.value = Vote#maximum_vote).
+  #
+  # *NOTE*: It probably makes sense to cache this result at some point.
+  #
+  # *NOTE*: This checks all Vote's for Synonym Naming's, taking each reviewer's
+  # highest Vote (if they voted for multiple Synonym's).
+  #
+  def review_status
+
+    # Get list of Name ids we care about.
+    name_ids = [name_id]
+    if name.synonym_id
+      name_ids = Name.connection.select_values %(
+        SELECT `id` FROM `names` WHERE `synonym_id` = '#{synonym_id}'
+      )
+    end
+
+    # Get list of User ids for reviewers.
+    group = UserGroup.find_by_name('reviewers')
+    user_ids = User.connection.select_values %(
+      SELECT `user_id` FROM `user_groups_users`
+      WHERE `user_group_id` = #{group.id}
+    )
+
+    # Get all the reviewers' Vote's for these Name's.
+    # Order of conditions makes no difference: query times are around 0.05 sec.
+    data = Vote.connection.select_rows %(
+      SELECT vote.user_id, vote.value
+      FROM `votes`, `namings`
+      WHERE votes.observation_id = #{id} AND
+            votes.naming_id = namings.id AND
+            namings.name_id IN (#{name_ids.map(&:to_s).uniq.join(',')}) AND
+            votes.user_id IN (#{user_ids.map(&:to_s).uniq.join(',')})
+    )
+
+    # Get highest vote for each User.
+    votes = {}
+    for user_id, value in data
+      value = value.to_f
+      if votes[user_id]
+        votes[user_id] = value if votes[user_id] < value
+      else
+        votes[user_id] = value
+      end
+    end
+
+    # Apply heuristics to determine review status.
+    status = :unreviewed
+    v100 = Vote.maximum_vote.to_f
+    for value in votes.values
+      if value < 0
+        status = :inaccurate
+        break
+      elsif status != :inaccurate
+        if value != v100
+          status = :unvetted
+        elsif status == :unreviewed
+          status = :vetted
+        end
+      end
+    end
+
+    return status
+  end
+
   ################################################################################
   #
   #  :section: Images
@@ -884,7 +938,11 @@ protected
   def validate # :nodoc:
     if !self.when
       errors.add(:when, :validate_observation_when_missing.t)
-    elsif self.when > Date.today
+    elsif self.when.is_a?(Date) && self.when > Date.today
+      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Date.today=#{Date.today}")
+      errors.add(:when, :validate_observation_future_time.t)
+    elsif self.when.is_a?(Time) && self.when > Time.now + 6.hours
+      errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Time.now=#{Time.now+6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
     end
     if !self.user && !User.current

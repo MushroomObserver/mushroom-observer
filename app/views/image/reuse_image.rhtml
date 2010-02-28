@@ -2,7 +2,7 @@
   @title = :image_reuse_title.t(:name => @observation.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_show_object.t(:type => :observation.t),
+    add_tab(:show_object.t(:type => :observation),
             :controller => 'observer', :action => 'show_observation',
             :id => @observation.id, :params => query_params)
     add_tab(:image_reuse_edit.t, :controller => 'observer',

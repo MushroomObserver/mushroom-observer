@@ -90,7 +90,9 @@ class Transaction < AbstractModel
       'interest',
       'license',
       'location',
+      'location_description',
       'name',
+      'name_description',
       'naming',
       'notification',
       'observation',
@@ -216,6 +218,16 @@ class Transaction < AbstractModel
         else
           raise "Missing sync_id for :#{key} = #{val.class} ##{val.id || 'nil'}"
         end
+
+      # Convert Array of ActiveRecords into comma-separated list of sync_ids.
+      elsif val.is_a?(Array) and val.all? {|v| v.is_a?(ActiveRecord::Base)}
+        args[key] = val.map do |val2|
+          if val2.respond_to?(:sync_id) && (val3 = val2.sync_id)
+            val3
+          else
+            raise "Missing sync_id for :#{key} = #{val2.class} ##{val2.id || 'nil'}"
+          end
+        end.join(',') 
 
       # Let ActiveSupport::TimeWithZone take care of timezones.
       elsif val.is_a?(Time)

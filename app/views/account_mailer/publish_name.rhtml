@@ -5,13 +5,13 @@
   intro = :email_publish_name_intro.l
 
   fields = ""
-  fields += "*#{:name.l}:* #{@name.display_name}\n"
+  fields += "*#{:Name.l}:* #{@name.display_name}\n"
   fields += "*#{:email_field_published.l}:* #{@publisher.legal_name} (#{@publisher.login})\n"
 
   handy_links = :email_handy_links
 
   links = []
-  links.push([:email_links_show_object.l(:type => :name.l),
+  links.push([:email_links_show_object.l(:type => :name),
     name_url])
   links.push([:email_links_email_publisher.l,
     user_url])

@@ -325,7 +325,7 @@ class ControllerTestCase < ActionController::TestCase
 
     # Iterate over all links, in order.
     html = @response.body
-    while html.match(/<a href="([^"]+)"[^<>]*>(.*?)<\/a>/)
+    while html.match(/<a href="([^"]+)"[^<>]*>(.*?)<\/a>/m)
       html, url, label = $', $1, $2
       url = URI.unescape(url).html_to_ascii
 
@@ -369,7 +369,7 @@ class ControllerTestCase < ActionController::TestCase
       # Allow label to be embedded in HTML tags, with some whitespace, but
       # require it to be the first text inside the <a> tag.
       if passed and args[:label] and
-         !label.match(/^(\s*<\w+[^\\<>]+>)*\s*#{args[:label]}(\s*<\/\w+[^<>]+>)*\s*$/)
+         !label.match(/^(\s*<\w+[^\\<>]+>)*\s*#{args[:label]}(\s*<\/\w+[^<>]+>)*\s*$/m)
         passed = false
       end
 
@@ -580,6 +580,9 @@ class ControllerTestCase < ActionController::TestCase
   #   assert_response(:login)   => /account/login
   #   assert_response(:welcome) => /account/welcome
   #
+  #   # Lastly, expect redirect to full explicit URL.
+  #   assert_response("http://bogus.com")
+  #
   def assert_response(arg, msg='')
     if arg
       clean_our_backtrace do
@@ -620,6 +623,9 @@ class ControllerTestCase < ActionController::TestCase
             url = @controller.url_for(arg).sub(/^http:..test.host./, '')
             msg += "Expected redirect to <#{url}>" + got
             assert_redirected_to(arg, msg)
+          elsif arg.is_a?(String) && arg.match(/^\w+:\/\//)
+            msg += "Expected redirect to <#{arg}>" + got
+            assert_equal(arg, @response.redirect_url, msg)
           elsif arg.is_a?(String)
             controller = @controller.controller_name
             msg += "Expected it to render <#{controller}/#{arg}>" + got

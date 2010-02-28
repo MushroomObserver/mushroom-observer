@@ -60,7 +60,7 @@ class Interest < AbstractModel
   #   "Ignoring Location: Albion, California, USA"
   #
   def summary
-    (self.state ? :app_watching.l : :app_ignoring.l) + ' ' +
+    (self.state ? :WATCHING.l : :IGNORING.l) + ' ' +
     self.object_type.underscore.to_sym.l + ': ' +
     (self.object ? self.object.unique_format_name : '--')
   end

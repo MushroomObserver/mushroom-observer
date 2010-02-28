@@ -28,6 +28,7 @@
 #    is_text_only?       boolean: is browser text-only? (includes robots)
 #    is_like_gecko?      boolean: is rendering engine Gecko or Gecko-like?
 #    is_ie_compatible?   boolean: is rendering engine IE-compatible?
+#    Time.zone           (this is automatically set for each query)
 #
 #    @js                 boolean: is javascript enabled?
 #    @ua                 user agent: :ie, :firefox, :safari, :robot, :text, etc.
@@ -141,16 +142,19 @@ module BrowserStatus
   # off but find that it really is on.
   def check_if_user_turned_javascript_on
 
+    # Set a special cookie so we can determine the browser's timezone offset.
+    code = 'Cookie.set({timezone: (new Date()).getTimezoneOffset()});'
+
     # Reload page with special "_js=on" parameter to let us know that
     # Javascript is turned on in the user's browser.  There are a few
     # cases to be careful of: I ignore it on post of forms to avoid the
     # whole post data and file upload problem; and don't bother if the session
     # isn't working, since we won't be able to remember that JS is on, anyway.
     if !@js && !session[:js_override] && request.method == :get
-      javascript_tag("window.location = '#{reload_with_args(:_js => 'on')}'")
-    else
-      ''
+      code += " window.location = '#{reload_with_args(:_js => 'on')}'"
     end
+
+    javascript_tag(code)
   end
 
   # For backwards compatibility.
@@ -249,6 +253,11 @@ module BrowserStatus
     # print "HTTP_USER_AGENT  = [#{ua              }]\n"
     # print "params           = [#{params.inspect  }]\n"
     # print "========================================\n"
+
+    # What timezone are they in?  (Thanks for the post, techno-weenie!)
+    if !cookies[:timezone].blank?
+      Time.zone = TimeZone[-cookies[:timezone].to_i.minutes]
+    end
 
     # If we've never seen this user before, serve a tiny page that redirects
     # immediately to tell us the state of javascript, and lets us determine

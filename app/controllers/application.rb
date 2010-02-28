@@ -57,11 +57,17 @@
 #  save_names::               (helper)
 #  save_name::                (helper)
 #
+#  ==== Descriptions
+#  initialize_description_permissions::
+#                           Initialize permissions of new Description.
+#
 #  ==== Searching
-#  store_query::            Stores Query in session for use by create_species_list.
+#  clear_query_in_session:: Clears out Query stored in session below.
+#  store_query_in_session:: Stores Query in session for use by create_species_list.
+#  get_query_from_session:: Gets Query that was stored in the session above.
+#  query_params::           Parameters to add to link_to, etc. for passing Query around.
 #  set_query_params::       Make +query_params+ refer to a given Query.
-#  pass_query_params::      Tell +query_params+ to pass the Query through this action.
-#  query_params::           Get parameters to add to link_to, redirect_to, etc.
+#  pass_query_params::      Tell +query_params+ to pass-through the Query given to this action.
 #  find_query::             Find a given Query or return nil.
 #  find_or_create_query::   Find appropriate Query or create as necessary.
 #  create_query::           Create a new Query from scratch.
@@ -69,14 +75,6 @@
 #  show_index_of_objects::  Show paginated set of Query results as a list.
 #  find_or_goto_index::     Look up object by id, displaying error and redirecting on failure.
 #  goto_index::             Redirect to a reasonable fallback (index) page in case of error.
-#
-#  ==== Other search-like stuff
-#  query_ids::              Gets list of ids given SQL query.
-#  field_search::           Creates sql that means "any fields like a pattern?"
-#  clean_sql_pattern::      .
-#  test_calc_condition::    .
-#  calc_condition::         .
-#  calc_advanced_search_query:: .
 #
 #  ==== Pagination
 #  paginate_letters::       Paginate an Array by letter.
@@ -99,7 +97,7 @@ class ApplicationController < ActionController::Base
   require 'login_system'
   include LoginSystem
 
-#   before_filter :browser_status
+  before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
   before_filter :check_user_alert
@@ -132,15 +130,6 @@ class ApplicationController < ActionController::Base
   def autologin
     # render(:text => "Sorry, we've taken MO down to test something urgent.  We'll be back in a few minutes. -Jason", :layout => false)
     # return false
-
-# For testing: eliminate need for session.  Remember to turn on browser_status
-# filter and check_if_user_turned_javascript_on in layout.
-if !TESTING
-@user = User.find(252)
-User.current = @user
-set_session_user(@user)
-return true
-end
 
     # Guilty until proven innocent...
     @user = nil
@@ -214,7 +203,7 @@ end
   #
   def check_permission!(user)
     unless result = check_permission(user)
-      flash_error :app_permission_denied.t
+      flash_error :permission_denied.t
     end
     result
   end
@@ -655,7 +644,8 @@ end
       # an id).
       names = Name.names_from_string(output_what)
       if names.last.nil?
-        flash_error :app_no_create_name.t(:name => output_what)
+        flash_error :runtime_no_create_name.t(:type => :name,
+                                              :value => output_what)
       else
         for n in names
           save_name(n, :log_updated_by) if n
@@ -710,7 +700,8 @@ end
       # Create name object for this name (and any parents, such as genus).
       names = Name.names_from_string(name_parse.search_name)
       if names.last.nil?
-        flash_error :app_no_create_name.t(:name => name_parse.name)
+        flash_error :runtime_no_create_name.t(:type => :name,
+                                              :value => name_parse.name)
       else # (this only happens if above genus, in which case names.length == 1)
         names.last.rank = name_parse.rank if name_parse.rank
         # only save comment if name didn't exist
@@ -732,7 +723,8 @@ end
       # Create the deprecated synonym.
       synonym_names = Name.names_from_string(name_parse.synonym_search_name)
       if synonym_names.last.nil?
-        flash_error :app_no_create_name.t(:name => name_parse.synonym)
+        flash_error :runtime_no_create_name.t(:type => :name,
+                                              :value => name_parse.synonym)
       else
         synonym_name = synonym_names.last
         synonym_name.rank = name_parse.synonym_rank if name_parse.synonym_rank
@@ -771,9 +763,8 @@ end
   # transaction appropriately for syncing with foreign databases.
   def save_name(name, log=:log_name_updated, args={})
 
-    # Get list of args we care about.  (poor-man's intersection)
-    changed_args = name.changed
-    changed_args -= changed_args - [
+    # Get list of args we care about.  (intersection)
+    changed_args = name.changed & [
       :rank,
       :text_name,
       :author,
@@ -781,8 +772,7 @@ end
       :synonym,
       :deprecated,
       :correct_spelling,
-      :license,
-    ] - Name.all_note_fields
+    ]
 
     # Log transaction.
     xargs = { :id => name }
@@ -805,8 +795,122 @@ end
     name.log(log, args) if name.changed?
     if name.save
       Transaction.create(xargs)
+      result = true
     else
       flash_object_errors(name)
+      result = false
+    end
+
+    return result
+  end
+
+  ################################################################################
+  #
+  #  :section: Descriptions
+  #
+  ################################################################################
+
+  # This is called right after a description is created.  It sets the admin,
+  # read and write permissions for a new description.
+  def initialize_description_permissions(desc)
+    read  = desc.public
+    write = desc.public_write == '1'
+    case desc.source_type
+
+    # Creating draft for project.
+    when :project
+      project = Project.find_by_title(desc.source_name)
+      if read
+        desc.reader_groups << UserGroup.all_users
+      else
+        desc.reader_groups << project.user_group
+      end
+      if write
+        desc.writer_groups << UserGroup.all_users
+      else
+        desc.writer_groups << project.admin_group
+        desc.writer_groups << UserGroup.one_user(@user)
+      end
+      desc.admin_groups << project.admin_group
+
+    # Creating personal description, or entering one from a specific source.
+    when :source, :user
+      if read
+        desc.reader_groups << UserGroup.all_users
+      else
+        desc.reader_groups << UserGroup.one_user(@user)
+      end
+      if write
+        desc.writer_groups << UserGroup.all_users
+      else
+        desc.writer_groups << UserGroup.one_user(@user)
+      end
+      desc.admin_groups << UserGroup.one_user(@user)
+
+    else
+      raise :runtime_invalid_source_type.t(:value => desc.source_type.inspect)
+    end
+  end
+
+  # Modify permissions on an existing Description based on two over-simplified
+  # "public readable" and "public writable" checkboxes.  Makes changes to the
+  # UserGroup's and modifies the Transaction +args+ in place. 
+  # desc::      Description object, with +public+ and +public_write+ updated.
+  # args::      Hash of args that will be used to create Transaction.
+  def modify_description_permissions(desc, args)
+    old_read = desc.public_was
+    new_read = desc.public
+    old_write = desc.public_write_was
+    new_write = (desc.public_write == '1')
+
+    # Ensure these special types don't change,
+    case desc.source_type
+    when :public
+      new_read  = true
+      new_write = true
+    when :foreign
+      new_read  = true
+      new_write = false
+    end
+
+    new_readers = []
+    new_writers = []
+
+    # "Public" means "all users" group.
+    if !old_read && new_read
+      new_readers << UserGroup.all_users
+    end
+    if !old_write && new_write
+      new_writers << UserGroup.all_users
+    end
+
+    # "Not Public" means only the owner...
+    if old_read && !new_read
+      new_readers << UserGroup.one_user(desc.user)
+    end
+    if old_write && !new_write
+      new_writers << UserGroup.one_user(desc.user)
+    end
+
+    # ...except in the case of projects.
+    if (desc.source_type == :project) and
+       (project = Project.find_by_title(desc.source_name))
+      if old_read && !new_read
+        # Add project members to readers.
+        new_readers << project.user_group
+      end
+      if old_write && !new_write
+        # Add project admins to writers.
+        new_writers << project.admin_group
+      end
+    end
+
+    # Make changes official.
+    if new_readers.any?
+      args[:set_reader_groups] = desc.reader_groups = new_readers
+    end
+    if new_writers.any?
+      args[:set_writer_groups] = desc.writer_groups = new_writers
     end
   end
 
@@ -904,11 +1008,24 @@ end
   #
   ##############################################################################
 
+  # This clears the search/index saved in the session.
+  def clear_query_in_session
+    session[:checklist_source] = nil
+  end
+
   # This stores the latest search/index used for use by create_species_list.
   # (Stores the Query id in <tt>session[:checklist_source]</tt>.)
-  def store_query(query=nil)
-    id = query && query.id
-    session[:checklist_source] = id if session[:checklist_source] != id
+  def store_query_in_session(query)
+    session[:checklist_source] = query.id
+  end
+
+  # Get Query last stored on the "clipboard" (session).
+  def get_query_from_session
+    if id = session[:checklist_source]
+      Query.safe_find(id)
+    else
+      nil
+    end
   end
 
   # Return query parameter(s) necessary to pass query information along to
@@ -1011,9 +1128,9 @@ end
          (query.model_symbol == :RssLog) and
          (rss_log = object.rss_log rescue nil) and
          query.index(rss_log) and
-         (query.this = object.rss_log) and
+         (query.current = object.rss_log) and
          (new_query = query.send(method)) and
-         (rss_log = new_query.this)
+         (rss_log = new_query.current)
         query  = new_query
         object = rss_log.object || rss_log
         id = object.id
@@ -1025,20 +1142,18 @@ end
       # 3) no more objects being left in the query in the given direction
       else
         query = find_or_create_query(object.class, :default)
-        query.this = object
+        query.current = object
         if !query.index(object)
           type = object.class.name.underscore.to_sym.t
           types = object.class.table_name.to_sym.t
-          flash_error(:app_object_not_in_index.t(:id => object.id,
-                      :type => type, :types => types))
+          flash_error(:runtime_object_not_in_index.t(:id => object.id, :type => type))
         elsif new_query = query.send(method)
           query = new_query
-          id = query.this_id
+          id = query.current_id
         else
           type = object.class.name.underscore.to_sym.t
           types = object.class.table_name.to_sym.t
-          flash_error(:app_no_more_search_objects.t(:type => type,
-                      :types => types))
+          flash_error(:runtime_no_more_search_objects.t(:type => type))
         end
       end
 
@@ -1091,7 +1206,7 @@ end
     # Clear out old query from session.  (Don't do it if caller just finished
     # storing *this* query in there, though!!)
     if session[:checklist_source] != query.id
-      store_query
+      clear_query_in_session
     end
 
     # Pass this query on when clicking on results.
@@ -1152,14 +1267,13 @@ end
   end
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
-  # appropriate index if it no longer exists. 
+  # appropriate index if it no longer exists.
   def find_or_goto_index(model, id, redirect=nil)
     result = model.safe_find(id)
     if !result
       type = object.class.name.underscore.to_sym.t
       types = object.class.table_name.to_sym.t
-      flash_error(:app_object_not_found.t(:id => id,
-                  :type => type, :types => types))
+      flash_error(:runtime_object_not_found.t(:id => id, :type => type))
       goto_index(redirect)
     end
     return result
@@ -1168,7 +1282,7 @@ end
   # Redirects to an appropriate fallback index in case of unrecoverable error.
   # Most such errors are dealt with on a case-by-case basis in the controllers,
   # however a few generic actions don't necessarily know where to send users
-  # when things go south.  This makes a good stab at guessing, at least. 
+  # when things go south.  This makes a good stab at guessing, at least.
   def goto_index(redirect=nil)
     pass_query_params
     redirect = redirect.name.underscore if redirect.is_a?(Class)
@@ -1190,147 +1304,6 @@ end
     raise "Not sure where to go from #{redirect || controller.name}." if !model
     redirect_to(:controller => model.show_controller,
                 :action => model.index_action, :params => query_params)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Other search-like stuff
-  #
-  ##############################################################################
-
-  def clean_sql_pattern(pattern)
-    pattern.gsub(/[*']/,"%")
-  end
-
-  # Creates sql query: any of a list of fields like a pattern?
-  def field_search(fields, sql_pattern)
-    (fields.map{|n| "#{n} like '#{sql_pattern}'"}).join(' or ')
-  end
-
-  # Ultimately running large queries like this and storing the info in the session
-  # may become unwieldy.  Storing the query and selecting chunks will scale better.
-  def query_ids(query)
-    result = []
-    data = Observation.connection.select_all(query)
-    for d in data
-      id = d['id']
-      if id
-        result.push(id.to_i)
-      end
-    end
-    result
-  end
-
-  # Give unit tests access to calc_condition.
-  def test_calc_condition(*args)
-    calc_condition(*args)
-  end
-
-  def calc_condition(pat, fields, tables, conditions, table_set)
-    if pat.nil?
-      pat = ''
-    end
-    pat = pat.strip_squeeze if pat.index('"').nil?
-    if pat != ''
-
-      # Give search string for notes google-like syntax:
-      #   word1 word2     -->  has both word1 and word2
-      #   word1 OR word2  -->  has either word1 or word2
-      #   "word1 word2"   -->  has word1 followed immediately by word2
-      #   -word1          -->  doesn't have word1
-      # Note, to conform to google, "OR" must be greedy, thus:
-      #   word1 word2 OR word3 word4
-      # is interpreted as:
-      #   has word1 and (either word2 or word3) and word4
-      if fields.first.match(/note|summary|comment/)
-        pat2 = pat
-        and_pats = []
-# print "\nStart: [#{pat2}]\n"
-        while pat2.sub!(/^(-?("[^"]*"|[^ ]+)( OR -?("[^"]*"|[^ ]+))*) ?/, '')
-          pat3 = $1
-# print " 1: [#{pat3}] [#{pat2}]\n"
-          or_pats = []
-          while pat3.sub!(/^(-)?"([^"]*)"( OR )?/, '') or
-                pat3.sub!(/^(-)?([^ ]+)( OR )?/, '')
-            do_not = $1 == '-' ? 'not ' : ''
-            pat4 = $2
-# print "  2: #{do_not}[#{pat4}] [#{pat3}]\n"
-            clean_pat = pat4.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
-            or_pats += fields.map {|f| "#{f} #{do_not}like '%#{clean_pat}%'"}
-# print "  ors: [" + or_pats.join("], [") + "]\n"
-          end
-          and_pats.push(or_pats.length > 1 ? '(' + or_pats.join(' or ') + ')' : or_pats.first)
-# print " ands: [" + and_pats.join("], [") + "]\n"
-        end
-        conditions.push(and_pats.length > 1 ? '(' + and_pats.join(' and ') + ')' : and_pats.first)
-
-      # User name, location name, mushroom name, etc. are much simpler.
-      #   aaa bbb             -->  name is "...aaa bbb..."
-      #   aaa bbb OR ccc ddd  -->  name is either "...aaa bbb..." or "...ccc ddd..."
-      else
-        or_pats = []
-        for pat2 in pat.split(' OR ')
-          clean_pat = pat2.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
-          or_pats += fields.map {|f| "#{f} like '%#{clean_pat}%'"}
-        end
-        conditions.push(or_pats.length > 1 ? '(' + or_pats.join(' or ') + ')' : or_pats.first)
-      end
-
-      # Make sure all the tables used are in the list of tables to join.
-      for t in tables
-        table_set.add(t)
-      end
-    end
-  end
-
-  def calc_advanced_search_query(query, table_set, params)
-    conditions = []
-    if params['search']
-      calc_condition(params['search']['location'],
-        ['locations.search_name', 'observations.where'],
-        ['locations'], conditions, table_set)
-      calc_condition(params['search']['observer'],
-        ['users.login', 'users.name'], ['users'], conditions, table_set)
-      calc_condition(params['search']['name'],
-        ['names.search_name'], ['names'], conditions, table_set)
-      calc_condition(params['search']['content'],
-        ['observations.notes', 'comments.summary', 'comments.comment'],
-        ['comments'], conditions, table_set)
-    end
-    if conditions.size == 0
-      raise :advanced_search_at_least_one.t
-    end
-    join_conditions = {
-      'users' => 'observations.user_id = users.id',
-      'comments' => 'comments.object_id = observations.id',
-        # Add this once can comment on non-observations:
-        # '... and comments.object_type = "Observation"'
-      'locations' => 'locations.id = observations.location_id',
-      'names' => 'observations.name_id = names.id',
-      'images' => 'images.id = images_observations.image_id',
-      'images_observations' => 'observations.id = images_observations.observation_id'
-    }
-    table_order =
-    tables = []
-    # Put locations, users and names first if we're using them so STRAIGHT_JOIN has some small tables to
-    # chew on first
-    for t in ['locations', 'users', 'names', 'comments', 'observations', 'images_observations', 'images']
-      if table_set.member?(t)
-        tables.push(t)
-      end
-    end
-    for t in table_set
-      if not tables.member?(t)
-        tables.push(t)
-      end
-    end
-    query += " " + tables.join(', ')
-    for table in tables
-      if join_conditions[table]
-        conditions.push(join_conditions[table])
-      end
-    end
-    query += ' WHERE ' + conditions.join(' AND ') if conditions != []
   end
 
   ##############################################################################

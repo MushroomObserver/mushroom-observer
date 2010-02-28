@@ -10,7 +10,7 @@
     if check_permission(@project.user_id)
       add_tab(:change_member_status_edit.t, :action => 'edit_project', :id => @project.id)
     end
-    add_tab(:app_cancel.t(:type => :project.l), :action => 'show_project', :id => @project.id)
+    add_tab(:cancel_and_show.t(:type => :project), :action => 'show_project', :id => @project.id)
   end
 %>
 

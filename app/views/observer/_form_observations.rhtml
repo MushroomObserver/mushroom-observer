@@ -1,11 +1,11 @@
 <!--[form:observation]-->
 
-<label for="observation_when_1i"><%= :app_when.t %>:</label>
+<label for="observation_when_1i"><%= :WHEN.t %>:</label>
 <%= date_select('observation', 'when', :start_year => 1980,
                 :end_year => Time.now.year) %><br/><br/>
 
 <span style='white-space:nowrap'>
-  <label for="observation_place_name"><%= :app_where.t %>: (<%= :app_required.t %>)</label>
+  <label for="observation_place_name"><%= :WHERE.t %>: (<%= :required.t %>)</label>
   <%= text_field('observation', 'place_name', :size => 60) %>
 </span><br/>
 <%= turn_into_location_auto_completer('observation_place_name', :primer => @location_primer) %>
@@ -29,7 +29,7 @@ end %>
 
 <center><%= submit_tag(button_name) %></center><br/>
 
-<label for="observation_notes"><%= :app_notes.t %>:</label>
+<label for="observation_notes"><%= :NOTES.t %>:</label>
 <span class="HelpNote"><%= :form_observations_notes_help.t %></span><br/>
 <%= text_area('observation', 'notes', :cols => 80) %><br/>
 <%= render(:partial => 'shared/textilize_help') %>
@@ -57,7 +57,7 @@ end %>
           </td>
           <td width="10"></td>
           <td>
-            <label for="image_<%= image.id %>_notes"><%= :app_notes.t %>:</label>
+            <label for="image_<%= image.id %>_notes"><%= :NOTES.t %>:</label>
             <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
             <%= text_area_tag("image_#{image.id}_notes", image.notes, :cols => 60, :rows => 2) %>
           </td>
@@ -66,7 +66,7 @@ end %>
    if false %>
           <td width="10"></td>
           <td>
-            <%= link_to(:app_show_object.t(:type => :image.t),
+            <%= link_to(:show_object.t(:type => :image),
                         :controller => 'image', :action => 'show_image',
                         :id => image.id, :obs => @observation.id,
                         :params => query_params) %><br/>

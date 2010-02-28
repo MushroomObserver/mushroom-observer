@@ -22,16 +22,16 @@
           <td>
             <% if item.is_a?(Notification) %>
               <% if obj %>
-                <%= link_to(:app_show_object.t(:type => obj.class.name.underscore.to_sym.t),
+                <%= link_to(:show_object.t(:type => obj.class.name.underscore.to_sym.t),
                             :controller => obj.show_controller,
                             :action => obj.show_action, :id => obj.id) %> |
               <% end %>
-              <%= link_to(:app_edit.t, item.link_params) %> |
-              <%= link_to(:app_destroy.t, :controller => 'observer',
+              <%= link_to(:EDIT.t, item.link_params) %> |
+              <%= link_to(:DESTROY.t, :controller => 'observer',
                           :action => 'destroy_notification', :id => item.id) %>
             <% else %>
               <% if obj %>
-                <%= link_to(:app_show_object.t(:type => obj.class.name.underscore.to_sym.t),
+                <%= link_to(:show_object.t(:type => obj.class.name.underscore.to_sym.t),
                             :controller => obj.show_controller,
                             :action => obj.show_action, :id => obj.id) %> |
               <% end %>
@@ -39,7 +39,7 @@
                           :controller => 'interest', :action => 'set_interest',
                           :type => item.object_type, :id => item.object_id,
                           :state => item.state ? -1 : 1) %> |
-              <%= link_to(:app_destroy.t, :controller => 'interest',
+              <%= link_to(:DESTROY.t, :controller => 'interest',
                           :action => 'set_interest', :type => item.object_type,
                           :id => item.object_id, :state => 0) %>
             <% end %>

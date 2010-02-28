@@ -9,7 +9,7 @@
         <span class="HelpNote"><%= :form_naming_deprecated_help.t(:button => button_name, :name => @what) %></span><br/>
         <span class="Data"><%= :form_naming_valid_synonyms.t %>:<br/>
           <% for n in @valid_names %>
-            &nbsp;&nbsp;<%= radio_button('chosen_name', 'name_id', n.id) %>
+            <%= indent + radio_button('chosen_name', 'name_id', n.id) %>
             <%= n.display_name.t %><br/>
           <% end %>
         </span>
@@ -26,7 +26,7 @@
     <div class="Errors">
       <span class="Data"><%= :form_naming_multiple_names.t(:name => @what) %>:<br/>
         <% for n in @names %>
-          &nbsp;&nbsp;<%= radio_button('chosen_name', 'name_id', n.id) %>
+          <%= indent + radio_button('chosen_name', 'name_id', n.id) %>
           <%= n.display_name.t %>
             (<%= n.observations.size %>)<br/>
         <% end %>
@@ -39,7 +39,7 @@
 <%# -------------------- Name Autocompleter -------------------- %>
 
 <div style="white-space:nowrap">
-  <label for="name_name"><%= :app_what.t %>:</label>
+  <label for="name_name"><%= :WHAT.t %>:</label>
   <%= text_field('name', 'name', :value => @what) %>
   <span style="margin-left:20px">&nbsp;</span>
   <label for="vote_value"><%= :form_naming_confidence.t %>:</label>

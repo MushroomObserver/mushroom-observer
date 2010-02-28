@@ -1,35 +1,44 @@
 #
 #  Views: ("*" - login required, "R" - root required))
-#     location_search
 #     index_location
 #     list_locations
+#     locations_by_author
+#     locations_by_editor
+#     location_search
 #     map_locations
-#   * create_location
-#   * update_observations_by_where(location, where)
-#     show_past_location
 #     show_location
-#     prev_location             Show previous location in index.
-#     next_location             Show next location in index.
+#     show_past_location
+#     show_location_description
+#     show_past_location_description
+#     prev_location
+#     next_location
+#   * create_location
+#   * edit_location
+#   * create_location_description
+#   * edit_location_description
+#   * destroy_location_description
 #   * list_merge_options
 #   * add_to_location
 #   * edit_location
-#   * review_authors            Let authors/reviewers add/remove authors.
-#   * author_request            Let non-authors request authorship credit.
-#   R merge_locations(location, dest)
-#
-#  AJAX:
-#     auto_complete_location
 #
 #  Helpers:
-#     sorted_locs(where, separator=nil)
+#     split_out_matches(list, substring)
+#     merge_locations(location, dest)
+#     update_observations_by_where(location, where)
 #
 ################################################################################
 
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
+    :create_location,
+    :create_location_description,
+    :edit_location,
+    :edit_location_description,
     :index_location,
     :list_locations,
     :location_search,
+    :locations_by_author,
+    :locations_by_editor,
     :map_locations,
     :next_location,
     :prev_location,
@@ -40,9 +49,13 @@ class LocationController < ApplicationController
   before_filter :disable_link_prefetching, :except => [
     :author_request,
     :create_location,
+    :create_location_description,
     :edit_location,
+    :edit_location_description,
     :show_location,
+    :show_location_description,
     :show_past_location,
+    :show_past_location_description,
   ]
 
   ##############################################################################
@@ -64,6 +77,22 @@ class LocationController < ApplicationController
     show_selected_locations(query)
   end
 
+  # Display list of locations that a given user is author on.
+  def locations_by_author
+    user = User.find(params[:id])
+    @error = :names_by_author_error.t(:name => user.legal_name)
+    query = create_query(:Location, :by_author, :user => user)
+    show_selected_locations(query)
+  end
+
+  # Display list of locations that a given user is editor on.
+  def locations_by_editor
+    user = User.find(params[:id])
+    @error = :names_by_editor_error.t(:name => user.legal_name)
+    query = create_query(:Location, :by_editor, :user => user)
+    show_selected_locations(query)
+  end
+
   # Displays a list of locations matching a given string.
   def location_search
     query = create_query(:Location, :pattern, :pattern => params[:pattern].to_s)
@@ -73,7 +102,7 @@ class LocationController < ApplicationController
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_locations(query, args={})
     store_location
-    store_query
+    clear_query_in_session
     set_query_params(query)
 
     # Supply a default title.
@@ -81,14 +110,14 @@ class LocationController < ApplicationController
 
     # Add some alternate sorting criteria.
     @links = add_sorting_links(query, [
-      ['name', :name.t], 
+      ['name', :name.t],
     ])
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:app_show_objects.t(:types => :observations.t), {
-                  :controller => 'observer', 
+      @links << [:show_objects.t(:type => :observation), {
+                  :controller => 'observer',
                   :action => 'index_observation',
                   :params => query_params(query),
                 }]
@@ -120,8 +149,8 @@ class LocationController < ApplicationController
       sql.sub!(/FROM [^A-Z\n]*/) do |x|
         x.index('`observations`') ? x : "#{x.sub(/,$/,',')} `observations`"
       end
-# flash_notice("ORIGINAL = " + query.query.gsub("\n",'<br/>'))
-# flash_notice("TWEAKED  = " + sql.gsub("\n",'<br/>'))
+      # flash_notice("ORIGINAL = " + query.query.gsub("\n",'<br/>'))
+      # flash_notice("TWEAKED  = " + sql.gsub("\n",'<br/>'))
       # Fail if there is still a condition requiring locations.
       raise if sql.match('locations.')
 
@@ -175,25 +204,59 @@ class LocationController < ApplicationController
   #
   ##############################################################################
 
+  # Show a Location and one of its LocationDescription's, including a map.
   def show_location
     store_location
     pass_query_params
-    @location = Location.find(params[:id], :include => [:user, :authors, :editors])
-    @previous_version = Location.connection.select_value %(
-      SELECT version FROM past_locations WHERE location_id = #{@location.id}
-      ORDER BY version DESC LIMIT 1, 1
-    )
-    @interest = nil
-    @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Location', @location.id) if @user
+    clear_query_in_session
+
+    # Load Location and LocationDescription along with a bunch of associated
+    # objects.
+    loc_id = params[:id]
+    desc_id = params[:desc]
+    @location = Location.find(loc_id, :include => [:user, :descriptions])
+    desc_id = @location.description_id if desc_id.to_s == ''
+    @description = LocationDescription.find(desc_id, :include =>
+                                        [:authors, :editors, :license, :user])
+    update_view_stats(@location)
+    update_view_stats(@description)
+
+    # Get a list of projects the user can create drafts for.
+    @projects = @user && @user.projects_member.select do |project|
+      !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+    end
   end
 
+  # Show just a LocationDescription.
+  def show_location_description
+    store_location
+    pass_query_params
+    @description = LocationDescription.find(params[:id], :include =>
+      [ :authors, :editors, :license, :user, {:location => :descriptions} ])
+    @location = @description.location
+    update_view_stats(@description)
+
+    # Get a list of projects the user can create drafts for.
+    @projects = @user && @user.projects_member.select do |project|
+      !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+    end
+  end
+
+  # Show past version of Location.  Accessible only from show_location page.
   def show_past_location
     store_location
     pass_query_params
     @location = Location.find(params[:id])
-    @past_location = Location.find(params[:id].to_i)
-    @past_location.revert_to(params[:version].to_i)
-    @other_versions = @location.versions.reverse
+    @location.revert_to(params[:version].to_i)
+  end
+
+  # Show past version of LocationDescription.  Accessible only from
+  # show_location_description page.
+  def show_past_location_description
+    store_location
+    pass_query_params
+    @description = LocationDescription.find(params[:id])
+    @description.revert_to(params[:version].to_i)
   end
 
   # Go to next location: redirects to show_location.
@@ -208,103 +271,272 @@ class LocationController < ApplicationController
 
   ##############################################################################
   #
-  #  Create/Edit Location
+  #  :section: Create/Edit Location
   #
   ##############################################################################
 
   def create_location
     store_location
+    pass_query_params
+
+    # (Used when linked from "define this location".)
     @where = params[:where]
+
+    # (Used when linked from user profile: sets primary location after done.)
     @set_user = (params[:set_user] == "1")
-    @licenses = License.current_names_and_ids()
-    if request.method == :get
+
+    # Reder a blank form.
+    if request.method != :post
       @location = Location.new
+
     else
-      # Look to see if the display name is already use.  If it is then just use that
-      # location and ignore the other values.  Probably should be smarter with warnings
-      # and merges and such...
-      @location = Location.find_by_display_name(params[:location][:display_name])
-      if @location # location already exists
-        flash_warning :create_location_already_exists.t
-        update_observations_by_where(@location, @where)
+      # Set to true below if created successfully, or if a matching location
+      # already exists.  In either case, we're done with this form.
+      done = false
+
+      # Look to see if the display name is already use.  If it is then just use
+      # that location and ignore the other values.  Probably should be smarter
+      # with warnings and merges and such...
+      name = params[:location][:display_name].strip_squeeze rescue ''
+      @location = Location.find_by_display_name(name)
+
+      # Location already exists.
+      if @location
+        flash_warning(:runtime_location_already_exists.t(:name => name))
+        done = true
+
+      # Need to create location.
+      elsif (@location = Location.new(params[:location])) and
+            @location.save
+        Transaction.post_location(
+          :id      => @location,
+          :created => @location.created,
+          :name    => @location.display_name,
+          :north   => @location.north,
+          :south   => @location.south,
+          :east    => @location.east,
+          :west    => @location.west,
+          :low     => @location.low,
+          :high    => @location.high
+        )
+        flash_notice(:runtime_location_success.t(:id => @location.id))
+        success = true
+
+      # Failed to create location
+      else
+        flash_object_errors @location
+      end
+
+      # If done, update any observations at @where string originally passed in,
+      # and set user's primary location if called from profile.
+      if done
+        if @where.to_s != ''
+          update_observations_by_where(@location, @where)
+        end
         if @set_user
           @user.location = @location
           @user.save
+          Transaction.put_user(
+            :id           => @user,
+            :set_location => @location
+          )
         end
         redirect_to(:action => 'show_location', :id => @location.id)
-      else         # need to create location
-        @location = Location.new(params[:location])
-        @location.created = Time.now
-        @location.modified = @location.created
-        @location.user = @user
-        @location.version = 0
-        if @location.save
-          Transaction.post_location(
-            :id      => @location,
-            :created => @location.created,
-            :name    => @location.display_name,
-            :notes   => @location.notes,
-            :north   => @location.north,
-            :south   => @location.south,
-            :east    => @location.east,
-            :west    => @location.west,
-            :low     => @location.low,
-            :high    => @location.high,
-            :license => @location.license || 0
-          )
-          @location.add_editor(@user)
-          flash_notice :create_location_success.t
-          update_observations_by_where(@location, @where)
-          if @set_user
-            @user.location = @location
-            @user.save
-            Transaction.put_user(
-              :id           => @user,
-              :set_location => @location
-            )
-          end
-          redirect_to(:action => 'show_location', :id => @location.id)
-        else
-          flash_object_errors @location
-        end
       end
     end
   end
 
   def edit_location
     store_location
+    pass_query_params
     @location = Location.find(params[:id])
-    @licenses = License.current_names_and_ids()
+    done = false
     if request.method == :post
-      matching_name = Location.find_by_display_name(params[:location][:display_name])
-      if matching_name && (matching_name != @location)
-        merge_locations(@location, matching_name)
-      else
-        @location.attributes = params[:location]
+
+      # First check if user changed the name to one that already exists.
+      name = params[:location][:display_name].strip_squeeze rescue ''
+      merge = Location.find_by_display_name(name)
+
+      # Merge with another location.
+      if merge != @location
+
+        # Admins can actually merge them, then redirect to other location.
+        if is_in_admin_mode?
+          merge.merge(@location)
+          merge.save if merge.changed?
+          @location = merge
+          done = true
+
+        # Non-admins just send email-request to admins.
+        else
+          flash_warning(:merge_locations_warning.t)
+          content = :email_location_merge.t(:user => @user.login,
+                  :this => @location.display_name, :that => merge.display_name)
+          AccountMailer.deliver_webmaster_question(@user.email, content)
+        end
+      end
+
+      # Just update this location.
+      if !done
+        for key, val in params[:location]
+          if key != :display_name
+            @location.send("#{key}=", val)
+          end
+        end
+
         args = {}
-        args[:set_name]    = @location.display_name if @location.display_name_changed?
-        args[:set_north]   = @location.north        if @location.north_changed?
-        args[:set_south]   = @location.south        if @location.south_changed?
-        args[:set_west]    = @location.west         if @location.west_changed?
-        args[:set_east]    = @location.east         if @location.east_changed?
-        args[:set_high]    = @location.high         if @location.high_changed?
-        args[:set_low]     = @location.low          if @location.low_changed?
-        args[:set_notes]   = @location.notes        if @location.notes_changed?
-        args[:set_license] = @location.license      if @location.license_id_changed?
+        args[:set_name]  = @location.display_name if @location.display_name_changed?
+        args[:set_north] = @location.north        if @location.north_changed?
+        args[:set_south] = @location.south        if @location.south_changed?
+        args[:set_west]  = @location.west         if @location.west_changed?
+        args[:set_east]  = @location.east         if @location.east_changed?
+        args[:set_high]  = @location.high         if @location.high_changed?
+        args[:set_low]   = @location.low          if @location.low_changed?
+
+        # No changes made.
         if !@location.changed?
-          flash_warning :edit_location_no_change.t
+          flash_warning(:runtime_edit_location_no_change.t)
           redirect_to(:action => 'show_location', :id => @location.id)
-        elsif @location.save
+
+        # There were error(s).
+        elsif !@location.save
+          flash_object_errors @location
+
+        # Updated successfully.
+        else
           if !args.empty?
             args[:id] = @location
             Transaction.put_location(args)
           end
-          flash_notice :edit_location_success.t
-          redirect_to(:action => 'show_location', :id => @location.id)
-        elsif @location.errors.length > 0
-          flash_object_errors @location
+          flash_notice(:runtime_edit_location_success.t(:id => @location.id))
+          done = true
         end
       end
+    end
+
+    if done
+      redirect_to(:action => 'show_location', :id => @location.id)
+    end
+  end
+
+  def create_location_description
+    store_location
+    pass_query_params
+    @location = Location.find(params[:id])
+    @licenses = License.current_names_and_ids
+
+    # Reder a blank form.
+    if request.method == :get
+      @description = LocationDescription.new
+      @description.location = @location
+      @description.license = @user.license
+
+      # Initialize source-specific stuff.
+      case params[:source]
+      when 'project'
+        @description.source_type  = :project
+        @description.source_name  = Project.find(params[:project])
+        @description.public_write = false
+        @description.public       = false
+      else
+        @description.source_type  = :user
+        @description.source_name  = @user.legal_name
+        @description.public_write = false
+        @description.public       = true
+      end
+
+    # Create new description.
+    else
+      @description = LocationDescription.new
+      @description.location = @location
+      @description.attributes = params[:description]
+
+      if @description.save
+        initialize_description_permissions(@description)
+
+        Transaction.post_location_description(
+          @description.all_notes.merge(
+            :id            => @description,
+            :created       => @description.created,
+            :source_type   => @description.source_type,
+            :source_name   => @description.source_name,
+            :locale        => @description.locale,
+            :license       => @description.license,
+            :admin_groups  => @description.admin_groups,
+            :writer_groups => @description.writer_groups,
+            :reader_groups => @description.reader_groups
+          )
+        )
+
+        flash_notice(:runtime_location_description_success.t(
+                     :id => @description.id))
+        redirect_to(:action => 'show_location_description',
+                    :id => @description.id)
+
+      else
+        flash_object_errors @description
+      end
+    end
+  end
+
+  def edit_location_description
+    store_location
+    pass_query_params
+    @description = LocationDescription.find(params[:id])
+    @licenses = License.current_names_and_ids
+
+    if request.method == :post
+      @description.attributes = params[:description]
+
+      args = {}
+      args["set_source_type"] = @description.source_type if @description.source_type_changed?
+      args["set_source_name"] = @description.source_name if @description.source_name_changed?
+      args["set_locale"]      = @description.locale      if @description.locale_changed?
+      args["set_license"]     = @description.license     if @description.license_id_changed?
+      for field in LocationDescription.all_note_fields
+        if @description.send("#{field}_changed?")
+          args["set_#{field}".to_sym] = @description.send(field)
+        end
+      end
+
+      # Modify permissions based on changes to the two "public" checkboxes.
+      modify_description_permissions(@description, args)
+
+      # No changes made.
+      if args.empty?
+        flash_warning(:runtime_edit_location_description_no_change.t)
+        redirect_to(:action => 'show_location_description',
+                    :id => @description.id)
+
+      # There were error(s).
+      elsif !@description.save
+        flash_object_errors(@description)
+
+      # Updated successfully.
+      else
+        if !args.empty?
+          args[:id] = @description
+          Transaction.put_location_description(args)
+        end
+        flash_notice(:runtime_edit_location_description_success.t(
+                     :id => @description.id))
+        redirect_to(:action => 'show_location_description',
+                    :id => @description.id)
+      end
+    end
+  end
+
+  def destroy_location_description
+    pass_query_params
+    @description = LocationDescription.find(params[:id])
+    if !@description.is_admin?(@user)
+      flash_error(:runtime_destroy_description_not_admin.t)
+      redirect_to(:action => 'show_location_description',
+                  :id => @description.id, :params => query_params)
+    else
+      @description.destroy
+      redirect_to(:action => 'show_location',
+                  :id => @description.location_id, :params => query_params)
     end
   end
 
@@ -314,6 +546,8 @@ class LocationController < ApplicationController
   #
   ##############################################################################
 
+  # Show a list of defined locations that match a given +where+ string, in
+  # order of closeness of match.
   def list_merge_options
     store_location
     @where = params[:where].to_s
@@ -347,43 +581,21 @@ class LocationController < ApplicationController
     end
   end
 
-  # Adds the observations assoicated with obs.where set to params[:where] into the given location
+  # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
+  # into the given Location.  Linked from +list_merge_options+, I think.
   def add_to_location
     location = Location.find(params[:location])
-    where = params[:where]
-    if update_observations_by_where(location, where)
-      flash_notice :location_merge_success.t(:this => where, :that => location.display_name)
+    where = params[:where].strip_squeeze rescue ''
+    if (where != '') and
+       update_observations_by_where(location, where)
+      flash_notice(:runtime_location_merge_success.t(:this => where,
+                   :that => location.display_name))
     end
     redirect_to(:action => 'list_locations')
   end
 
-  def merge_locations(location, dest)
-    id = location.id
-    if is_in_admin_mode?
-      for obs in location.observations
-        obs.location = dest
-        obs.save
-      end
-      Transaction.put_observation(
-        :location     => location,
-        :set_location => dest
-      )
-      for past_loc in location.versions
-        past_loc.destroy
-      end
-      location.destroy
-      Transaction.delete_location(:id => location)
-      id = dest.id
-    else
-      flash_warning :merge_locations_warning.t
-      content = "User attempted to merge the locations, #{location.display_name} and #{dest.display_name}."
-      AccountMailer.deliver_webmaster_question(@user.email, content)
-    end
-    redirect_to(:action => 'show_location', :id => id)
-  end
-
+  # Move all the Observation's with a given +where+ into a given Location.
   def update_observations_by_where(location, where)
-    return false if !where
     success = true
     observations = Observation.find_all_by_where(where)
     for o in observations
@@ -403,73 +615,5 @@ class LocationController < ApplicationController
     end
     return success
   end
-
-  ##############################################################################
-  #
-  #  :section: Reviewing and Authors
-  #
-  ##############################################################################
-
-  # Form to allow authors to add/remove other users as author.
-  # Linked from: show_location, author_request email
-  # Inputs:
-  #   params[:id]
-  #   params[:add]
-  #   params[:remove]
-  # Success:
-  #   Redraws itself.
-  # Failure:
-  #   Renders show_location.
-  #   Outputs: @location, @authors, @users
-  def review_authors
-    @location = Location.find(params[:id])
-    @authors = @location.authors
-    if @authors.member?(@user) or @user.in_group('reviewers')
-      @users = User.find(:all, :order => "login, name")
-
-      # Add author if :add parameter used.
-      new_author = params[:add] ? User.find(params[:add]) : nil
-      if new_author and not @location.authors.member?(new_author)
-        @location.add_author(new_author)
-        Transaction.put_location(
-          :id         => @location,
-          :add_author => new_author
-        )
-        flash_notice("Added #{new_author.legal_name}")
-        # Should send email as well
-      end
-
-      # Remove author if :remove parameter used.
-      old_author = params[:remove] ? User.find(params[:remove]) : nil
-      if old_author
-        @location.remove_author(old_author)
-        Transaction.put_location(
-          :id         => @location,
-          :del_author => old_author
-        )
-        flash_notice("Removed #{old_author.legal_name}")
-        # Should send email as well
-      end
-
-    else
-      flash_error(:review_authors_denied.t)
-      redirect_to(:action => 'show_location', :id => @location.id)
-    end
-  end
-
-  # Form accessible from show_location to let users request authorship credit
-  # on a Location. TODO: Use queued_email mechanism.
-  def author_request
-    @location = Location.find(params[:id])
-    if request.method == :post
-      subject = params[:email][:subject]
-      content = params[:email][:content]
-      for receiver in location.authors + UserGroup.find_by_name('reviewers').users
-        AccountMailer.deliver_author_request(@user, receiver, location, subject, content)
-      end
-      flash_notice(:request_success.t)
-      redirect_to(:action => 'show_location', :id => location.id,
-                  :params => query_params)
-    end
-  end
 end
+

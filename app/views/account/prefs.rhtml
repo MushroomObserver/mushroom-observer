@@ -18,7 +18,7 @@
 %>
 
 <% form_for(:user, :url => { :action => :prefs }) do |form| %>
-  <br/><center><input type="submit" value="<%= :app_save_changes.l %>" class="primary" /></center>
+  <br/><center><input type="submit" value="<%= :SAVE_EDITS.l %>" class="primary" /></center>
 
   <p><label for="user_login"><%= :prefs_login.t %></label>:<br/>
   <%= form.text_field("login", :size => 60) %></p>
@@ -89,6 +89,8 @@
     <label for="user_email_observations_all"><%= :prefs_email_observations_all.t %></label><br/><br/>
 
   <b><%= :prefs_email_names.t %>:</b> <%= :prefs_email_please_notify.t %><br/>
+  <%= form.check_box("email_names_admin") %>
+    <label for="user_email_names_admin"><%= :prefs_email_names_admin.t %></label><br/>
   <%= form.check_box("email_names_author") %>
     <label for="user_email_names_author"><%= :prefs_email_names_author.t %></label><br/>
   <%= form.check_box("email_names_editor") %>
@@ -99,6 +101,8 @@
     <label for="user_email_names_all"><%= :prefs_email_names_all.t %></label><br/><br/>
 
   <b><%= :prefs_email_locations.t %>:</b> <%= :prefs_email_please_notify.t %><br/>
+  <%= form.check_box("email_locations_admin") %>
+    <label for="user_email_locations_admin"><%= :prefs_email_locations_admin.t %></label><br/>
   <%= form.check_box("email_locations_author") %>
     <label for="user_email_locations_author"><%= :prefs_email_locations_author.t %></label><br/>
   <%= form.check_box("email_locations_editor") %>
@@ -130,5 +134,5 @@
     <%= :prefs_email_note.tp %>
   </div>
 
-  <br/><center><input type="submit" value="<%= :app_save_changes.l %>" class="primary" /></center>
+  <br/><center><input type="submit" value="<%= :SAVE_EDITS.l %>" class="primary" /></center>
 <% end %>

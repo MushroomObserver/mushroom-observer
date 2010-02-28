@@ -100,8 +100,8 @@ class SpeciesListController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['title', :app_object_title.t], 
-      ['date', :app_date.t], 
+      ['title', :TITLE.t], 
+      ['date', :DATE.t], 
       ['user', :user.t], 
     ]
 
@@ -121,11 +121,11 @@ class SpeciesListController < ApplicationController
   # the usage for show_observation.
   def show_species_list
     store_location
-    store_query
+    clear_query_in_session
     @species_list = SpeciesList.find(params[:id], :include => :user)
     query = create_query(:Observation, :in_species_list, :by => :name,
                          :species_list => @species_list)
-    store_query(query) if params[:set_source].to_s != ''
+    store_query_in_session(query) if params[:set_source].to_s != ''
     set_query_params(query)
     @pages = paginate_letters(:letter, :page, 100)
     @objects = query.paginate(@pages, :letter_field => 'names.text_name',
@@ -247,7 +247,7 @@ class SpeciesListController < ApplicationController
     if check_permission!(@species_list.user_id)
       @species_list.destroy
       Transaction.delete_species_list(:id => @species_list)
-      flash_notice(:species_list_destroy_success.t)
+      flash_notice(:runtime_species_list_destroy_success.t(:id => params[:id]))
       redirect_to(:action => 'list_species_lists')
     else
       redirect_to(:action => 'show_species_list', :id => @species_list)
@@ -283,7 +283,8 @@ class SpeciesListController < ApplicationController
           :del_observation => observation
         )
       end
-      flash_notice(:species_list_remove_observation_success.t(:name => species_list.unique_format_name))
+      flash_notice(:runtime_species_list_remove_observation_success.t(
+        :name => species_list.unique_format_name, :id => observation.id))
       redirect_to(:action => 'manage_species_lists', :id => observation.id)
     else
       redirect_to(:action => 'show_species_list', :id => species_list.id)
@@ -308,7 +309,8 @@ class SpeciesListController < ApplicationController
           :add_observation => observation
         )
       end
-      flash_notice(:species_list_add_observation_success.t(:name => species_list.unique_format_name))
+      flash_notice(:runtime_species_list_add_observation_success.t(
+        :name => species_list.unique_format_name, :id => observation.id))
       redirect_to(:action => 'manage_species_lists', :id => observation.id)
     end
   end
@@ -401,7 +403,7 @@ class SpeciesListController < ApplicationController
         @multiple_names   = []
         @deprecated_names = []
         @member_notes     = nil
-        store_query
+        clear_query_in_session
         calc_checklist
         render(:action => 'create_species_list')
       when :name_lister_submit_txt.l
@@ -569,7 +571,7 @@ class SpeciesListController < ApplicationController
 
     # Does list have "Name one = Name two" type lines?
     if sorter.has_new_synonyms
-      flash_error(:species_list_need_to_use_bulk.t)
+      flash_error(:runtime_species_list_need_to_use_bulk.t)
       sorter.reset_new_names
       failed = true
     end
@@ -659,9 +661,7 @@ class SpeciesListController < ApplicationController
   #
   def calc_checklist(query=nil)
     @checklist = []
-    if query or
-       (query_id = session[:checklist_source]) and
-       (query = Query.safe_find(query_id))
+    if query or (query = get_query_from_session)
       @checklist = case query.model_symbol
 
       when :Name
@@ -718,9 +718,9 @@ class SpeciesListController < ApplicationController
   def construct_observations(spl, params, type_str, user, sorter)
     spl.log("log_species_list_#{type_str}".to_sym)
     if type_str == 'created'
-      flash_notice(:species_list_create_success.t)
+      flash_notice(:runtime_species_list_create_success.t(:id => spl.id))
     else
-      flash_notice(:species_list_edit_success.t)
+      flash_notice(:runtime_species_list_edit_success.t(:id => spl.id))
     end
 
     # Put together a list of arguments to use when creating new observations.

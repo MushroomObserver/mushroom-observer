@@ -26,7 +26,7 @@
             <%= name.display_name.t %><br/>
             <% if approved_names != [] %>
               <% for other_name in approved_names %>
-                &nbsp;&nbsp;<%= radio_button("chosen_approved_names", name.id, other_name.id) %>
+                <%= indent + radio_button("chosen_approved_names", name.id, other_name.id) %>
                 <%= other_name.display_name.t %><br/>
               <% end %>
             <% end %>
@@ -45,7 +45,7 @@
           <% for name in @multiple_names %>
             <%= h(name.text_name) %><br/>
             <% for other_name in name.other_authors %>
-              &nbsp;&nbsp;<%= radio_button("chosen_multiple_names", name.id, other_name.id) %>
+              <%= indent + radio_button("chosen_multiple_names", name.id, other_name.id) %>
               <%= other_name.display_name.t %> (<%= other_name.observations.count %>)<br/>
             <% end %>
           <% end %>
@@ -60,18 +60,18 @@
   </p>
 
   <p>
-  	<label for="species_list_when_1i"><%= :app_when.t %></label>:<br/>
+  	<label for="species_list_when_1i"><%= :WHEN.t %></label>:<br/>
   	<%= date_select('species_list', 'when', :start_year => 1980, :end_year => Time.now.year) %>
   </p>
 
   <p>
-  	<label for="species_list_where"><%= :app_where.t %>: (<%= :app_required.t %>)</label><br/>
+  	<label for="species_list_where"><%= :WHERE.t %>: (<%= :required.t %>)</label><br/>
       <%= text_field('species_list', 'where', :size => 60) %>
   </p>
   <%= turn_into_location_auto_completer('species_list_where') %>
 
   <p>
-  	<label for="species_list_title"><%= :form_species_lists_title.t %>: (<%= :app_required.t %>)</label><br/>
+  	<label for="species_list_title"><%= :form_species_lists_title.t %>: (<%= :required.t %>)</label><br/>
   	<%= text_field('species_list', 'title') %>
   </p>
 

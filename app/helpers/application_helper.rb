@@ -3,268 +3,363 @@
 #
 #  These methods are available to all templates in the application:
 #
-#  lnbsp::                 Replace ' ' with '&nbsp;'.
-#  add_context_help::      Wrap string in '<acronym>' tag.
-#  make_table::            Create table from list of Arrays.
-#  add_header::            Add random string to '<head>' section.
-#  calc_color::            Calculate background color in alternating list.
-#  ---
-#  where_string::          Wrap location name in '<span>' tag.
-#  location_link::         Wrap location name in link to show/search it.
-#  name_link::             Wrap name in link to show_show.
-#  user_link::             Wrap user name in link to show_user.
-#  user_list::             Render list of users.
-#  project_link::          Wrap project name in link to show_project.
-#  ---
-#  rank_as_string::        Translate :Genus into "Genus" (localized).
-#  rank_as_plural_string:: Translate :Genus into "Genera" (localized).
-#  ---
-#  boxify::                Wrap HTML in colored-outline box.
-#  end_boxify::            End boxify box.
+#  ==== Localization
+#  rank_as_string::         Translate :Genus into "Genus" (localized).
+#  rank_as_lower_string::   Translate :Genus into "genus" (localized).
+#  rank_as_plural_string::  Translate :Genus into "Genera" (localized).
+#  quality_as_string::      Translate image quality into localized String.
+#  review_as_string::       Translate review status into localized String.
+#
+#  ==== Common Info Blocks
+#  show_previous_version::  Show version number and link to previous.
+#  show_embedded_description_title:: Show description title with edit/destroy links.
+#  show_alt_descriptions::  Show list of alt descriptions for show_object page.
+#  show_past_versions::     Show list of versions for show_past_object page.
+#  show_authors_and_editors:: Show list of authors and editors below desc page.
+#  show_object_footer::     Show the created/modified/view dates and RSS log.
 #
 ################################################################################
 
 module ApplicationHelper
   require_dependency 'auto_complete_helper'
+  require_dependency 'html_helper'
   require_dependency 'javascript_helper'
   require_dependency 'map_helper'
+  require_dependency 'object_link_helper'
   require_dependency 'paginator_helper'
   require_dependency 'tab_helper'
   require_dependency 'textile_helper'
 
   include AutoComplete
+  include HTML
   include Javascript
   include Map
+  include ObjectLink
   include Paginator
   include Tabs
   include Textile
 
-  # Replace spaces with '&nbsp;'.
+  ##############################################################################
   #
-  #   <%= button_name.lnbsp %>
-  def lnbsp(key)
-    key.l.gsub(' ', '&nbsp;')
+  #  :section: Localization
+  #
+  ##############################################################################
+
+  # Translate Name rank (singular).
+  #
+  #   rank_as_string(:genus)  -->  "Genus"
+  #
+  def rank_as_string(rank)
+    "RANK_#{rank.to_s.upcase}".to_sym.l
   end
 
-  # Wrap an html object in '<acronym>' tag.  This has the effect of giving it
-  # context help (mouse-over popup) in most modern browsers.
+  # Translate Name rank (singular).
   #
-  #   <%= add_context_help(link, "Click here to do something.") %>
-  def add_context_help(object, help)
-    tag('acronym', { :title => help }, true) + object + '</acronym>'
+  #   rank_as_lower_string(:genus)  -->  "genus"
+  #
+  def rank_as_lower_string(rank)
+    "rank_#{rank.to_s.downcase}".to_sym.l
   end
 
-  # Create a table out of a list of Arrays.
+  # Translate Name rank (plural).
   #
-  #   make_table( [1,2], [3,4] )
+  #   rank_as_plural_string(:genus)  -->  "Genera"
   #
-  # Produces:
-  #
-  #   <table>
-  #     <tr>
-  #       <td>1</td>
-  #       <td>2</td>
-  #     </tr>
-  #     <tr>
-  #       <td>3</td>
-  #       <td>4</td>
-  #     </tr>
-  #   </table>
-  #
-  def make_table(*rows)
-    '<table>' + rows.map do |row|
-      '<tr>' + row.map do |cell|
-        '<td>' + h(cell) + '</td>'
-      end.join + '</tr>'
-    end.join + '</table>'
+  def rank_as_plural_string(rank)
+    "RANK_PLURAL_#{rank.to_s.upcase}".to_sym.l
   end
 
-  # Add something to the header from within view.  This can be called as many
-  # times as necessary -- the application layout will mash them all together
-  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
+  # Translate Name rank (plural).
   #
-  #   <%
-  #     add_header(GMap.header)       # adds GMap general header
-  #     gmap = make_map(@locations)
-  #     add_header(finish_map(gmap))  # adds map-specific header
-  #   %>
+  #   rank_as_plural_string(:genus)  -->  "genera"
   #
-  def add_header(str)
-    @header ||= ''
-    @header += str
+  def rank_as_lower_plural_string(rank)
+    "rank_plural_#{rank.to_s.downcase}".to_sym.l
   end
 
-  # Decide what the color should be for a list item.  Returns 0 or 1.
-  # row::       row number
-  # col::       column number
-  # alt_rows::  from layout_params['alternate_rows']
-  # alt_cols::  from layout_params['alternate_columns']
+  # Translate image quality.
   #
-  # (See also ApplicationController#calc_layout_params.)
+  #   quality_as_string(:high)  -->  "Excellent"
   #
-  def calc_color(row, col, alt_rows, alt_cols)
-    color = 0
-    if alt_rows
-      color = row % 2
+  def quality_as_string(val)
+    "quality_#{val}".to_sym.l
+  end
+
+  # Translate review status.
+  #
+  #   review_as_string(:unvetted)  -->  "Reviewed"
+  #
+  def review_as_string(val)
+    "review_#{val}".to_sym.l
+  end
+
+  ##############################################################################
+  #
+  #  :section: Common Info Blocks
+  #
+  ##############################################################################
+
+  # Just shows the current version number and a link to see the previous.
+  #
+  #   <%= show_previous_version(name) %>
+  #
+  #   # Renders just this:
+  #   Version: N <br/>
+  #   Previous Version: N-1<br/>
+  #
+  def show_previous_version(obj)
+    type = obj.class.name.underscore
+    html = ''
+    html += "#{:VERSION.t}: #{obj.version}<br/>\n"
+    if previous_version = obj.find_version(-2)
+      html += link_to("#{:show_name_previous_version.t}: %d" % previous_version,
+                      :action => "show_past_#{type}", :id => obj.id,
+                      :version => previous_version,
+                      :params => query_params) + "<br/>\n"
     end
-    if alt_cols
-      if (col % 2) == 1
-        color = 1 - color
+    return html
+  end
+
+  # Header of the embedded description within a show_object page.
+  #
+  #   <%= show_embedded_description_title(desc, name) %>
+  #
+  #   # Renders something like this:
+  #   <p>EOL Project Draft: Show | Edit | Destroy</p>
+  #
+  def show_embedded_description_title(desc, parent)
+    type = desc.class.name.underscore
+    title = description_title(desc)
+    links = []
+    if @user && desc.is_writer?(@user)
+      links << link_to(:EDIT.t, :id => desc.id, :action => "edit_#{type}",
+                       :params => query_params)
+    end
+    if @user && desc.is_admin?(@user)
+      links << link_to(:DESTROY.t, :id => desc.id,
+                       :action => "destroy_#{type}", :params => query_params)
+    end
+    '<p><big>' + title + ':</big> ' + links.join(' | ') + '</p>'
+  end
+
+  # Show list of alternate descriptions for show_object page.
+  #
+  #   <%= show_alt_descriptions(name, projects) %>
+  #
+  #   # Renders something like this:
+  #   <p>
+  #     Alternate Descriptions: Create Your Own
+  #       Main Description
+  #       EOL Project Draft
+  #       Rolf's Draft (private)
+  #   </p>
+  #
+  #   <p>
+  #     Create New Draft For:
+  #       Another Project
+  #       One More Project
+  #   </p>
+  #
+  def show_alt_descriptions(obj, projects=nil)
+    type = obj.class.name.underscore
+
+    # Show existing drafts, with link to create new one.
+    head = "<big>#{:show_name_descriptions.t}:</big> "
+    if @user
+      head += link_to(:show_name_create_description.t,
+                      :action => "create_#{type}_description",
+                      :id => obj.id, :params => query_params)
+    end
+    any = false
+    list = [head] + obj.descriptions.select do |desc|
+      desc.has_any_notes?  or
+      (desc.user == @user) or
+      is_reviewer          or
+      (desc.source_type == :public)
+    end.map do |desc|
+      any = true
+      item = description_link(desc)
+      if (desc.user == @user) or is_in_admin_mode?
+        item += indent + '['
+        item += link_to(:EDIT.t, :id => desc.id, :params => query_params,
+                        :action => "edit_#{type}_description")
+        item += ' | '
+        item += link_to(:DESTROY.t, { :id => desc.id,
+                        :action => "destroy_#{type}_description",
+                        :params => query_params },
+                        { :confirm => :are_you_sure.t })
+        item += ']'
+      end
+      indent + item
+    end
+    list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
+    html = list.join("<br/>\n")
+    html = '<p style="white-space:nowrap">' + html + '</p>'
+
+    # Show list of projects user is a member of.
+    if projects && projects.length > 0
+      head2 = :show_name_create_draft.t + ': '
+      list = [head2] + projects.map do |project|
+        item = link_to(project.title,
+                       :action => "create_#{type}_description",
+                       :id => obj.id, :project => project.id,
+                       :params => query_params)
+        indent + item
+      end
+      html2 = list.join("<br/>\n")
+      html += '<p style="white-space:nowrap">' + html2 + '</p>'
+    end
+    return html
+  end
+
+  # Show list of past versions for show_past_object pages.
+  #
+  #   <%= show_past_versions(name) %>
+  #
+  #   # Renders something like this:
+  #   <p>
+  #     Other Versions:<br/>
+  #       N: Latest Name<br/>
+  #       N-1: Previous Name<br/>
+  #       ...
+  #       1: Original Name<br/>
+  #   </p>
+  #
+  def show_past_versions(obj, args={})
+    type = obj.class.name.underscore
+    html = obj.versions.reverse.map do |v|
+      line = "#{v.version}: #{v.display_name.t}"
+      if v.version != obj.version
+        if v == obj.versions.last
+          line = link_to(line, :controller => obj.show_controller,
+                         :action => "show_#{type}", :id => obj.id,
+                         :params => query_params)
+        else
+          line = link_to(line, :controller => obj.show_controller,
+                         :action => "show_past_#{type}", :id => obj.id,
+                         :version => v.version, :params => query_params)
+        end
+      end
+      if args[:bold] and args[:bold].call(v)
+        line = '<b>' + line + '</b>'
+      end
+      indent + line
+    end
+    html.unshift("#{:app_versions.t}:")
+    html = '<p style="white-space:nowrap">' + html.join("<br/>\n") + '</p>'
+  end
+
+  # Show list of authors and editors at the bottom of a show_object page, with
+  # the appropriate links for making requests and/or reviewing authors.
+  #
+  #   <%= show_authors_and_editors(name) %>
+  #
+  #   # Renders something like this:
+  #   <p>
+  #     Authors: <user>, <user>, ..., <user> (Request Authorship Credit)<br/>
+  #     Editors: <user>, <user>, ..., <user>
+  #   </p>
+  #
+  def show_authors_and_editors(desc)
+    type = desc.class.name.underscore
+    is_admin = @user && desc.is_admin?(@user)
+    authors  = desc.authors
+    editors  = desc.editors
+    is_author = authors.include?(@user)
+
+    authors = user_list(:show_name_description_authors.t, authors)
+    editors = user_list(:show_name_description_editors.t, editors)
+
+    if is_admin
+      authors += '&nbsp;'
+      authors += link_to("(#{:review_authors_review_authors.t})",
+                         :controller => 'observer',
+                         :action => 'review_authors', :id => desc.id,
+                         :type => type, :params => query_params)
+    elsif !is_author
+      authors += '&nbsp;'
+      authors += link_to("(#{:show_name_author_request.t})",
+                         :controller => 'observer',
+                         :action => 'author_request', :id => desc.id,
+                         :type => type, :params => query_params)
+    end
+
+    return "<p>#{authors}<br/>#{editors}</p>"
+  end
+
+  # Renders the little footer at the bottom of show_object pages.
+  #
+  #   <%= show_object_footer(@name) %>
+  #
+  #   # Non-versioned object:
+  #   <p>
+  #     <span class="Date">
+  #       Created: <date><br/>
+  #       Last Modified: <date><br/>
+  #       Viewed: <num> times, last viewed: <date><br/>
+  #       Show Log<br/>
+  #     </span>
+  #   </p>
+  #
+  #   # Latest version of versioned object:
+  #   <p>
+  #     <span class="Date">
+  #       Created: <date> by <user><br/>
+  #       Last Modified: <date> by <user><br/>
+  #       Viewed: <num> times, last viewed: <date><br/>
+  #       Show Log<br/>
+  #     </span>
+  #   </p>
+  #
+  #   # Old version of versioned object:
+  #   <p>
+  #     <span class="Date">
+  #       Version: <num> of <total>
+  #       Modified: <date> by <user><br/>
+  #       Show Log<br/>
+  #     </span>
+  #   </p>
+  #
+  def show_object_footer(obj)
+    html = []
+    type = obj.class.name.underscore
+    num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
+
+    # Old version of versioned object.
+    if num_versions > 0 && obj.version < num_versions
+      html << :footer_version_out_of.t(:num => obj.version,
+                                    :total => num_versions)
+      html << :footer_modified_by.t(:user => user_link(obj.user),
+                                 :date => obj.modified.web_time) if obj.modified
+
+    # Latest version or non-versioned object.
+    else
+      if num_versions > 0
+        latest_user = User.find(obj.versions.latest.user_id)
+        html << :footer_created_by.t(:user => user_link(obj.user),
+                                  :date => obj.created.web_time) if obj.created
+        html << :footer_last_modified_by.t(:user => user_link(latest_user),
+                                        :date => obj.modified.web_time) if obj.modified
+      else
+        html << :footer_created_at.t(:date => obj.created.web_time) if obj.created
+        html << :footer_last_modified_at.t(:date => obj.modified.web_time) if obj.modified
+      end
+      if obj.respond_to?(:num_views)
+        html << :footer_viewed.t(:date => obj.last_view.web_time,
+                                :times => obj.num_views == 1 ? :one_time.l :
+                                :many_times.l(:num => obj.num_views)) if obj.last_view
       end
     end
-    color
-  end
 
-  # Wrap location name in span: "<span>where (count)</span>"
-  #
-  #   Where: <%= where_string(obs.place_name) %>
-  #
-  def where_string(where, count=nil)
-    result = sanitize(where).t
-    result += " (#{count})" if count
-    result = "<span class=\"Data\">#{result}</span>"
-  end
-
-  # Wrap location name in link to show_location / observations_at_where.
-  #
-  #   Where: <%= location_link(obs.where, obs.location) %>
-  #
-  def location_link(where, location, count=nil, click=false)
-    if location
-      location = Location.find(location) if !location.is_a?(AbstractModel)
-      link_string = where_string(location.display_name, count)
-      link_string += " [#{:app_click_for_map.t}]" if click
-      result = link_to(link_string, :controller => 'location', :action => 'show_location', :id => location.id)
-    else
-      link_string = where_string(where, count)
-      link_string += " [#{:app_search.t}]" if click
-      result = link_to(link_string, :controller => 'observer', :action => 'observations_at_where', :where => where)
+    # Show RSS log for all of the above.
+    if obj.respond_to?(:rss_log_id) and obj.rss_log_id
+      html << link_to(:show_object.t(:type => :log),
+                      :controller => 'observer', :action => 'show_rss_log',
+                      :id => obj.rss_log_id)
     end
-    result
-  end
 
-  # Wrap name in link to show_name.
-  #
-  #   Parent: <%= name_link(name.parent) %>
-  #
-  def name_link(name, str=nil)
-    begin
-      str ||= name.display_name.t
-      name_id = name.is_a?(Fixnum) ? name : name.id
-      link_to(str, :controller => 'name', :action => 'show_name', :id => name_id)
-    rescue
-    end
-  end
-
-  # Wrap user name in link to show_user.
-  #
-  #   Owner:   <%= user_link(name.user) %>
-  #   Authors: <%= name.authors.map(&:user_link).join(', ') %>
-  #
-  #   # If you don't have a full User instance handy:
-  #   Modified by: <%= user_link(login, user_id) %>
-  #
-  def user_link(user, name=nil)
-    begin
-      name ||= h(user.unique_text_name)
-      user_id = user.is_a?(Fixnum) ? user : user.id
-      link_to(name, :controller => 'observer', :action => 'show_user', :id => user_id)
-    rescue
-    end
-  end
-
-  # Render a list of users on one line.  (Renders nothing if user list empty.)
-  # This renders the following strings:
-  #
-  #   <%= user_list('Author', name.authors) %>
-  #
-  #   empty:           ""
-  #   [bob]:           "Author: Bob<br/>"
-  #   [bob,fred,mary]: "Authors: Bob, Fred, Mary<br/>"
-  #
-  def user_list(title, users)
-    result = ''
-    count = users.length
-    if count > 0
-      result = (count > 1 ? title.pluralize : title) + ": "
-      result += users.map {|u| user_link(u, u.legal_name)}.join(', ')
-      result += "<br/>"
-    end
-    result
-  end
-
-  # Wrap project name in link to show_project.
-  #
-  #   Project: <%= project_link(draft_name.project) %>
-  def project_link(project, name=nil)
-    begin
-      name ||= sanitize(project.title).t
-      link_to(name, :controller => 'project', :action => 'show_project', :id => project.id)
-    rescue
-    end
-  end
-
-  # Translate :Genus into "Genus" via internationalization.
-  #
-  #   Rank: <%= rank_as_string(name.rank) %>
-  def rank_as_string(rank)
-    eval(":rank_#{rank.to_s.downcase}.l")
-  end
-
-  # Convert :Genus to "Genera" via internationalization.
-  #
-  #   <% if children = name.children %>
-  #     <%= rank_as_plural_string(children.first.rank) %>:<br/>
-  #     <% for child in children %>
-  #       &nbsp;&nbsp;<%= name_link(child) %><br/>
-  #     <% end %>
-  #   <% end %>
-  def rank_as_plural_string(rank)
-    eval(":rank_plural_#{rank.to_s.downcase}.l")
-  end
-
-  # Wrap some HTML in the cute red/yellow/green box used for +flash[:notice]+.
-  #
-  #   <%= boxify(2, flash[:notice]) %>
-  #
-  #   <% boxify(1) do %>
-  #     Render more stuff in here.
-  #   <% end %>
-  #
-  #   <%= boxify(0) %>
-  #     Render stuff in here.
-  #   <%= end_boxify %>
-  #
-  # Notice levels are:
-  # 0:: notice (green)
-  # 1:: warning (yellow)
-  # 2:: error (red)
-  #
-  def boxify(lvl=0, msg=nil, &block)
-    type = "Notices"
-    type = "Warnings" if lvl == 1
-    type = "Errors"   if lvl == 2
-    msg = capture(&block) if block_given?
-    if msg
-      msg = "<div style='width:500px'>
-        <table class='#{type}'><tr><td>
-          #{msg}
-        </td></tr></table>
-      </div>"
-    else
-      msg = "<div style='width:500px'>
-        <table class='#{type}'><tr><td>"
-    end
-    if block_given?
-      concat(msg, block.binding)
-    else
-      msg
-    end
-  end
-
-  # Close boxify start tag.  Only necessary if no message or block given.
-  def end_boxify
-    "  </td></tr></table>
-    </div>"
+    html = html.join("<br/>\n")
+    html = '<span class="Date">' + html + '</span>'
+    html = '<p>' + html + '</p>'
   end
 end

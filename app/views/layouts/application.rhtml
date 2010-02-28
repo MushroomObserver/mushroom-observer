@@ -7,7 +7,7 @@
   <title><%= :app_title.l %>: <%= if @title.nil? then controller.action_name else @title.strip_html end %></title>
   <%= "<link rel=\"SHORTCUT ICON\" href=\"#{HTTP_DOMAIN}/images/favicon.ico\" />"%>
 
-  <%= check_if_user_turned_javascript_on if false %>
+  <%= check_if_user_turned_javascript_on %>
 
   <%=
     css = nil
@@ -63,51 +63,52 @@
                 <br/>
 
                 <%= link_to(:app_index_a_z.t, :controller => 'name', :action => 'observation_index') %><br/>
+                <%= link_to(:app_list_locations.t, :controller => 'location', :action => 'list_locations') %><br/>
                 <%= link_to(:app_list_projects.t, :controller => 'project', :action => 'list_projects') %><br/>
                 <br/>
 
                 <%= :app_latest.t %>:<br/>
-                &nbsp;&nbsp;<%= link_to(:app_latest_changes.t, :controller => 'observer', :action => 'list_rss_logs') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_news.t, :controller => 'observer', :action => 'news') %><br/>
+                <%= indent + link_to(:app_latest_changes.t, :controller => 'observer', :action => 'list_rss_logs') %><br/>
+                <%= indent + link_to(:app_newest_images.t, :controller => 'image', :action => 'list_images') %><br/>
+                <%= indent + link_to(:app_comments.t, :controller => 'comment', :action => 'list_comments') %><br/>
+                <%= indent + link_to(:app_news.t, :controller => 'observer', :action => 'news') %><br/>
                 <br/>
 
                 <%= :app_observations_left.t %>:<br/>
-                &nbsp;&nbsp;<%= link_to(:app_create_observation.t, :controller => 'observer', :action => 'create_observation') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_sort_by_date_obs.t, :controller => 'observer', :action => 'list_observations') %><br/>
+                <%= indent + link_to(:app_create_observation.t, :controller => 'observer', :action => 'create_observation') %><br/>
+                <%= indent + link_to(:app_sort_by_date_obs.t, :controller => 'observer', :action => 'list_observations') %><br/>
                 <br/>
 
                 <%= :app_species_list.t %>:<br/>
-                &nbsp;&nbsp;<%= link_to(:app_create_list.t, :controller => 'species_list', :action => 'name_lister') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_sort_by_date_spl.t, :controller => 'species_list', :action => 'list_species_lists') %><br/>
-                &nbsp;&nbsp;<%= link_to(:app_sort_by_title.t, :controller => 'species_list', :action => 'species_lists_by_title') %><br/>
+                <%= indent + link_to(:app_create_list.t, :controller => 'species_list', :action => 'name_lister') %><br/>
+                <%= indent + link_to(:app_sort_by_date_spl.t, :controller => 'species_list', :action => 'list_species_lists') %><br/>
+                <%= indent + link_to(:app_sort_by_title.t, :controller => 'species_list', :action => 'species_lists_by_title') %><br/>
                 <br/>
 
                 <% if @user.nil? %>
                   <%= :app_account.t %>:<br/>
-                  &nbsp;&nbsp;<%= link_to(:app_login.t, :controller => 'account', :action => 'login') %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %><br/>
+                  <%= indent + link_to(:app_login.t, :controller => 'account', :action => 'login') %><br/>
+                  <%= indent + link_to(:app_create_account.t, :controller => 'account', :action => 'signup') %><br/>
                 <% else %>
                   <%= :app_current_user.t %>:<br/>
-                  &nbsp;&nbsp;<%= h(@user.login) %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
-                  &nbsp;&nbsp;<a href="http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org"><%= :app_join_mailing_list.t%></a><br/>
-                  &nbsp;&nbsp;<%= link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
+                  <%= indent + h(@user.login) %><br/>
+                  <%= indent + link_to(:app_comments_for_you.t, :controller => 'comment', :action => 'show_comments_for_user', :id => @user.id) %><br/>
+                  <%= indent + link_to(:app_your_observations.t, :controller => 'observer', :action => 'observations_by_user', :id => @user.id) %><br/>
+                  <%= indent + link_to(:app_your_interests.t, :controller => 'interest', :action => 'list_interests') %><br/>
+                  <%= indent + link_to(:app_your_summary.t, :controller => 'observer', :action => 'show_user', :id => @user.id) %><br/>
+                  <%= indent + link_to(:app_preferences.t, :controller => 'account', :action => 'prefs') %><br/>
+                  <%= indent + link_to(:app_join_mailing_list.t, 'http://lists.mushroomobserver.org/listinfo.cgi/general-mushroomobserver.org') %><br/>
+                  <%= indent + link_to(:app_logout.t, :controller => 'account', :action => 'logout_user') %><br/>
                   <% if @user.admin %>
                     <br/>
                     <%= :app_admin.t %>:<br/>
                     <% if is_in_admin_mode? %>
-                      &nbsp;&nbsp;<%= link_to(:app_users.t, :controller => 'observer', :action => 'users_by_name') %><br/>
-                      &nbsp;&nbsp;<%= link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %><br/>
-                      &nbsp;&nbsp;<%= link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %><br/>
-                      &nbsp;&nbsp;<%= link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %><br/>
+                      <%= indent + link_to(:app_users.t, :controller => 'observer', :action => 'users_by_name') %><br/>
+                      <%= indent + link_to(:app_email_all_users.t, :controller => 'observer', :action => 'email_features') %><br/>
+                      <%= indent + link_to(:app_add_to_group.t, :controller => 'account', :action => 'add_user_to_group') %><br/>
+                      <%= indent + link_to(:app_turn_admin_off.t, :controller => 'account', :action => 'turn_admin_off') %><br/>
                     <% else %>
-                      &nbsp;&nbsp;<%= link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %><br/>
+                      <%= indent + link_to(:app_turn_admin_on.t, :controller => 'account', :action => 'turn_admin_on') %><br/>
                     <% end %>
                   <% end %>
                 <% end %>
@@ -115,7 +116,7 @@
 
                 <%= :app_languages.t %>:<br/>
                 <% for locale in all_locales %>
-                  &nbsp;&nbsp;<%= link_to(locale.sub('-','_').to_sym.t, h(reload_with_args(:user_locale => locale))) %><br/>
+                  <%= indent + link_to(locale.sub('-','_').to_sym.t, h(reload_with_args(:user_locale => locale))) %><br/>
                 <% end %>
                 <br/>
 

@@ -112,7 +112,7 @@ class ImageController < ApplicationController
 
   # Show selected search results as a matrix with 'list_images' template.
   def show_selected_images(query, args={})
-    store_query(query)
+    store_query_in_session(query)
     @links ||= []
 
     # I can't figure out why ActiveRecord is not eager-loading all the names.
@@ -125,14 +125,14 @@ class ImageController < ApplicationController
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
       ['name', :name.t], 
-      ['date', :app_date.t],
+      ['date', :DATE.t],
       ['user', :user.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
     if query.is_coercable?(:Observation)
-      @links << [:app_show_objects.t(:types => :observations.t), {
+      @links << [:show_objects.t(:type => :observation), {
                   :controller => 'observer', 
                   :action => 'index_observation',
                   :params => query_params(query),
@@ -175,7 +175,7 @@ class ImageController < ApplicationController
        # in bothering with any of this.
        !is_robot?
       obs_query = find_or_create_query(:Observation)
-      obs_query.this = obs
+      obs_query.current = obs
       img_query = create_query(:Image, :inside_observation,
                                :observation => obs, :outer => obs_query)
       set_query_params(img_query)
@@ -307,7 +307,7 @@ class ImageController < ApplicationController
             if image = @observation.remove_image_by_id(image_id)
               @observation.log(:log_image_removed,
                         :name => image.unique_format_name, :touch => false)
-              flash_notice :image_remove_success.t(:id => image_id)
+              flash_notice :runtime_image_remove_success.t(:id => image_id)
             end
           end
         end
@@ -346,7 +346,7 @@ class ImageController < ApplicationController
         for o in @image.observations
           o.log(:log_image_updated, :name => @image.unique_format_name)
         end
-        flash_notice :image_edit_success.t
+        flash_notice :runtime_image_edit_success.t(:id => @image.id)
         redirect_to(:action => 'show_image', :id => @image.id,
                     :params => query_params)
       end
@@ -364,7 +364,7 @@ class ImageController < ApplicationController
     next_state = nil
     if this_state = find_query(:Image)
       set_query_params(this_state)
-      this_state.this = @image
+      this_state.current = @image
       next_state = this_state.next
     end
 
@@ -372,14 +372,14 @@ class ImageController < ApplicationController
       redirect_to(:action => 'show_image', :id => @image.id,
                   :params => query_params)
     elsif !@image.destroy
-      flash_error :image_destroy_failed.t
+      flash_error :runtime_image_destroy_failed.t(:id => @image.id)
       redirect_to(:action => 'show_image', :id => @image.id,
                   :params => query_params)
     else
       Transaction.delete_image(:id => @image)
-      flash_notice :image_destroy_success.t
+      flash_notice :runtime_image_destroy_success.t(:id => params[:id])
       if next_state
-        redirect_to(:action => 'show_image', :id => next_state.this_id,
+        redirect_to(:action => 'show_image', :id => next_state.current_id,
                     :params => set_query_params(next_state))
       else
         redirect_to(:action => 'list_images')
@@ -396,9 +396,9 @@ class ImageController < ApplicationController
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
     if !check_permission!(@observation.user_id)
-      flash_warning :image_remove_denied.t
+      flash_warning :runtime_image_remove_denied.t(:id => @image.id)
     elsif !@observation.images.include?(@image)
-      flash_warning :image_remove_missing.t
+      flash_warning :runtime_image_remove_missing.t(:id => @image.id)
     else
       @observation.images.delete(@image)
       @observation.log(:log_image_removed, :name => @image.unique_format_name,
@@ -411,7 +411,7 @@ class ImageController < ApplicationController
         :id        => @observation,
         :del_image => @image
       )
-      flash_notice :image_remove_success.t(:id => @image.id)
+      flash_notice :runtime_image_remove_success.t(:id => @image.id)
     end
     redirect_to(:controller => 'observer', :action => 'show_observation',
                 :id => @observation.id, :params => query_params)
@@ -457,7 +457,7 @@ class ImageController < ApplicationController
     if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:id])
         @observation.log(:log_image_reused, :name => image.unique_format_name)
-        flash_notice :image_reuse_success.t(:id => image.id)
+        flash_notice :runtime_image_reuse_success.t(:id => image.id)
       end
     end
     redirect_to(:controller => 'observer', :action => 'show_observation',
@@ -476,7 +476,7 @@ class ImageController < ApplicationController
     if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
         @observation.log(:log_image_reused, :name => image.unique_format_name)
-        flash_notice :image_reuse_success.t(:id => image.id)
+        flash_notice :runtime_image_reuse_success.t(:id => image.id)
       end
     end
     redirect_to(:controller => 'observer', :action => 'show_observation',
@@ -502,12 +502,12 @@ class ImageController < ApplicationController
             :set_image => image
           )
         end
-        flash_notice :image_changed_your_image.t(:id => image.id)
+        flash_notice :runtime_image_changed_your_image.t(:id => image.id)
         redirect_to(:controller => "observer", :action => "show_user",
                     :id => @user.id)
         redirected = true
       rescue(e)
-        flash_error :image_reuse_invalid_id.t
+        flash_error :runtime_image_reuse_invalid_id.t(:id => params[:id])
       end
     end
     if !redirected
@@ -665,7 +665,7 @@ class ImageController < ApplicationController
         image.resize_image(160, 160, image.thumbnail)
       end
     else
-      flash_error :image_resize_denied.t
+      flash_error :runtime_image_resize_denied.t
     end
     redirect_to(:action => 'list_images')
   end

@@ -1,7 +1,7 @@
 <% @title = :admin_request_title.t(:title => @project.title) %>
 
 <% form_tag(:action => 'send_admin_request', :id => @project.id) do %>
-  <br/><center><%= submit_tag :app_send.l %></center><br/>
+  <br/><center><%= submit_tag :SEND.l %></center><br/>
 
   <label for="email_subject"><%= :request_subject.t %></label>:<br/>
   <%= text_field('email', 'subject', :size => 70) %><br/><br/>

@@ -714,12 +714,11 @@ class SpeciesListControllerTest < ControllerTestCase
 
     User.current = @rolf
     tapinella = Name.create(
-      :author => '(Batsch) Šutara',
-      :text_name => 'Tapinella atrotomentosa',
+      :author      => '(Batsch) Šutara',
+      :text_name   => 'Tapinella atrotomentosa',
       :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
-      :deprecated => false,
-      :rank => :Species,
-      :review_status => :unreviewed
+      :deprecated  => false,
+      :rank        => :Species
     )
 
     list = species_lists(:first_species_list)

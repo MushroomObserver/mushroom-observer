@@ -5,31 +5,29 @@
 
   # About <Name> | List Projects | Show Project | Edit Draft
   new_tab_set do
-    add_tab(:app_about_name.t(:name => name.display_name),
+    add_tab(:show_name.t(:name => name.display_name),
             :controller => 'name', :action => 'show_name', :id => name.id)
     add_tab(:app_list_projects.t, :action => 'list_projects')
     add_tab(:show_draft_show_project.t, :action => 'show_project', :id => project.id)
     if @draft_name.can_edit?(@user)
       add_tab(:show_draft_destroy_draft.t,
               { :action => 'destroy_draft', :id => @draft_name.id },
-              { :confirm => :app_are_you_sure.l })
+              { :confirm => :are_you_sure.l })
       add_tab(:show_draft_publish_draft.t,
               { :action => 'publish_draft', :id => @draft_name.id },
-              { :confirm => :app_are_you_sure.l })
+              { :confirm => :are_you_sure.l })
       add_tab(:show_draft_edit_draft.t, :action => 'edit_draft', :id => @draft_name.id)
     end
   end
 %>
 
-<% odd_or_even = 0
-for f in Name.all_note_fields
+<% even = true
+for f in NameDescription.all_note_fields
   value = @draft_name.send(f).to_s
   if value != ''
-    odd_or_even = 1 - odd_or_even %>
+    even = !even %>
     <%= "form_names_#{f}".to_sym.t %>:
-    <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-      <%= sanitize(value).tp %>
-    </div>
+    <%= colored_notes_box(even, sanitize(value).tpl) %>
     <br/>
-  <% end
-end %>
+  <% end %>
+<% end %>

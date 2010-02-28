@@ -1,6 +1,6 @@
 <%
   new_tab_set do
-    add_tab(:location_all.t, :action => 'list_locations')
+    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
   end
 
   if !@locations.empty?
@@ -14,6 +14,6 @@
   <%= if gmap
     gmap.div(:width => 800, :height => 550)
   else
-    :map_locations_no_matches.t(:pattern => @pattern)
+    :runtime_map_locations_no_matches.t(:pattern => @pattern)
   end %>
 </center>

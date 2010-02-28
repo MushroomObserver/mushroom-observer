@@ -9,9 +9,9 @@
   <%= file_field('image', 'image', :index => index) %>
   <% if @js %>
     <span style="margin-left:10px">&nbsp;</span>
-    <%= button_to_function(:app_more_button.t, "image_on(#{index})",
+    <%= button_to_function("#{:app_more.t} »", "image_on(#{index})",
                            { :id => "image_#{index}_more" }) %>
-    <%= button_to_function(:app_less_button.t, "image_off(#{index})",
+    <%= button_to_function("« #{:app_less.t}", "image_off(#{index})",
                            { :id => "image_#{index}_less", :style => 'display:none' }) %>
     <%= javascript_tag("Element.hide('image_#{index}_less')") %>
   <% end %>
@@ -30,7 +30,7 @@
     <%= select('image', :license_id, @licenses, { :value => @image.license_id },
                { :id => "image_#{index}_license_id", :name => "image[#{index}][license_id]" }) %></p>
 
-    <p><label for="image_<%= index %>_notes"><%= :app_notes.t %>:</label>
+    <p><label for="image_<%= index %>_notes"><%= :NOTES.t %>:</label>
     <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
     <%= text_area('image', 'notes', :index => index, :cols => 80, :rows => 1) %></p>
   </div>

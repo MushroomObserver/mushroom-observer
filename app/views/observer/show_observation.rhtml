@@ -3,71 +3,11 @@
   name = @observation.name
   questions_ok = @observation.user.email_general_question
 
-  if @user
-    if !@interest
-      alt1 = :interest_watch_help.l(:object => :observation.l)
-      alt2 = :interest_ignore_help.l(:object => :observation.l)
-      img1 = image_tag('watch3.png', :alt => alt1, :width => '23px',
-                       :height => '23px', :class => 'interest_small')
-      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px',
-                       :height => '23px', :class => 'interest_small')
-      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest',
-                     :id => @observation.id, :type => 'Observation',
-                     :state => 1, :params => query_params)
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest',
-                     :id => @observation.id, :type => 'Observation',
-                     :state => -1, :params => query_params)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      add_right_tab("<div>#{img1} #{img2}</div>")
-    elsif @interest.state
-      alt1 = :interest_watching.l(:object => :observation.l)
-      alt2 = :interest_default_help.l(:object => :observation.l)
-      alt3 = :interest_ignore_help.l(:object => :observation.l)
-      img1 = image_tag('watch2.png', :alt => alt1, :width => '50px',
-                       :height => '50px', :class => 'interest_big')
-      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px',
-                       :height => '23px', :class => 'interest_small')
-      img3 = image_tag('ignore3.png', :alt => alt3, :width => '23px',
-                       :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest',
-                     :id => @observation.id, :type => 'Observation',
-                     :state => 0, :params => query_params)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest',
-                     :id => @observation.id, :type => 'Observation',
-                     :state => -1, :params => query_params)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    else
-      alt1 = :interest_ignoring.l(:object => :observation.l)
-      alt2 = :interest_watch_help.l(:object => :observation.l)
-      alt3 = :interest_default_help.l(:object => :observation.l)
-      img1 = image_tag('ignore2.png', :alt => alt1, :width => '50px',
-                       :height => '50px', :class => 'interest_big')
-      img2 = image_tag('watch3.png', :alt => alt2, :width => '23px',
-                       :height => '23px', :class => 'interest_small')
-      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px',
-                       :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest',
-                     :id => @observation.id, :type => 'Observation',
-                     :state => 1, :params => query_params)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest',
-                     :id => @observation.id, :type => 'Observation',
-                     :state => 0, :params => query_params)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    end
-  end
-
   if name
     new_tab_set do
-      add_tab(:app_about_name.t(:name => name.display_name),
+      add_tab(:show_name.t(:name => name.display_name),
               :controller => 'name', :action => 'show_name', :id => name.id)
-      add_tab(:app_google_images.t, 'http://images.google.com/images?q=%s' % name.text_name)
+      add_tab(:google_images.t, 'http://images.google.com/images?q=%s' % name.text_name)
       add_tab(:show_name_distribution_map.t, :controller => 'name',
               :action => 'map', :id => name.id)
       if @has_notifications
@@ -97,29 +37,19 @@
     end
   end
 
-  new_tab_set do
-    add_tab(:app_prev.t, :action => 'prev_observation', :id => @observation.id,
-            :params => query_params)
-    add_tab(:app_index.t, :action => 'index_observation', :id => @observation.id,
-            :params => query_params)
-    if @mappable
-      add_tab(:map.t, :controller => 'location', :action => 'map_locations',
-              :params => query_params)
-    end
-    add_tab(:app_next.t, :action => 'next_observation', :id => @observation.id,
-            :params => query_params)
-  end
-
   if check_permission(@observation.user_id)
     new_tab_set do
       add_tab(:show_observation_edit_observation.t,
               :action => 'edit_observation', :id => @observation.id,
               :params => query_params)
-      add_tab(:app_destroy.t, { :action => 'destroy_observation',
+      add_tab(:DESTROY.t, { :action => 'destroy_observation',
               :id => @observation.id, :params => query_params },
-              { :confirm => :app_are_you_sure.l })
+              { :confirm => :are_you_sure.l })
     end
   end
+
+  draw_prev_next_tabs(@observation, @mappable)
+  draw_interest_icons(@observation)
 %>
 
 <table width="100%" cellpadding="10">
@@ -130,7 +60,7 @@
       <%= render(:partial => 'show_namings') %>
       <%= render(:partial => 'show_comments',
                  :locals => { :skip_comment => nil }) %>
-      <%= render(:partial => 'show_footer') %>
+      <%= show_object_footer(@observation) %>
 	</td>
     <td width="25%" valign="top">
       <%= render(:partial => 'show_images') %>

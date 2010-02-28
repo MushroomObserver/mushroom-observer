@@ -4,7 +4,7 @@ class NameControllerTest < ControllerTestCase
 
   def empty_notes
     result = {}
-    for f in Name.all_note_fields
+    for f in NameDescription.all_note_fields
       result[f] = ""
     end
     result
@@ -31,13 +31,18 @@ class NameControllerTest < ControllerTestCase
     assert_equal(0, Query.count)
     get_with_dump(:show_name, :id => 2)
     assert_response('show_name')
-    # Creates one for children and all three observations sections.
-    assert_equal(4, Query.count)
+    # Creates one for children and all four observations sections.
+    assert_equal(5, Query.count)
 
     reget(:show_name, :id => 2)
     assert_response('show_name')
     # Should re-use all the old queries.
-    assert_equal(4, Query.count)
+    assert_equal(5, Query.count)
+
+    reget(:show_name, :id => 3)
+    assert_response('show_name')
+    # Needs new queries this time.
+    assert_equal(10, Query.count)
   end
 
   def test_show_past_name
@@ -61,7 +66,7 @@ class NameControllerTest < ControllerTestCase
     assert_response(:action => 'show_name', :id => name12.id, :params => q)
   end
 
-  def test_next_and_prev_
+  def test_next_and_prev_2
     query = Query.lookup_and_save(:Name, :pattern, :pattern => 'lactarius')
     q = @controller.query_params(query)
 
@@ -119,17 +124,17 @@ class NameControllerTest < ControllerTestCase
     assert_response('list_names')
   end
 
-  def test_edit_name
-    name = names(:coprinus_comatus)
-    params = { "id" => name.id.to_s }
-    requires_login(:edit_name, params)
-    assert_form_action(:action => 'edit_name')
-  end
-
-  def test_create_name
-    requires_login(:create_name)
-    assert_form_action(:action => 'create_name')
-  end
+#   def test_edit_name
+#     name = names(:coprinus_comatus)
+#     params = { "id" => name.id.to_s }
+#     requires_login(:edit_name, params)
+#     assert_form_action(:action => 'edit_name')
+#   end
+#
+#   def test_create_name
+#     requires_login(:create_name)
+#     assert_form_action(:action => 'create_name')
+#   end
 
   def test_bulk_name_edit_list
     requires_login(:bulk_name_edit)
@@ -155,41 +160,6 @@ class NameControllerTest < ControllerTestCase
     params = { :id => name.id }
     requires_login(:approve_name, params)
     assert_form_action(:action => 'approve_name')
-  end
-
-  def test_review_authors
-    fungi = names(:fungi)
-
-    # Make sure it lets reviewers get to page.
-    requires_login(:review_authors, :id => 1)
-    assert_response('review_authors')
-
-    # Remove Rolf from reviewers group.
-    user_groups(:reviewers).users.delete(@rolf)
-    assert(!@rolf.reload.in_group('reviewers'))
-
-    # Make sure it fails to let unauthorized users see page.
-    get(:review_authors, :id => 1)
-    assert_response(:action => :show_name, :id => 1)
-
-    # Make Rolf an author.
-    fungi.add_author(@rolf)
-    assert_equal([@rolf.login], fungi.reload.authors.map(&:login).sort)
-
-    # Rolf should be able to do it again now.
-    get(:review_authors, :id => 1)
-    assert_response('review_authors')
-
-    # Rolf giveth with one hand...
-    post(:review_authors, :id => 1, :add => @mary.id)
-    assert_response('review_authors')
-    assert_equal([@mary.login, @rolf.login],
-                 fungi.reload.authors.map(&:login).sort)
-
-    # ...and taketh with the other.
-    post(:review_authors, :id => 1, :remove => @mary.id)
-    assert_response('review_authors')
-    assert_equal([@rolf.login], fungi.reload.authors.map(&:login).sort)
   end
 
   # None of our standard tests ever actually renders pagination_links
@@ -277,9 +247,9 @@ class NameControllerTest < ControllerTestCase
                         :letter => 'L', :page => 1)
     assert_no_link_in_html(3)
 
-    # Some cleverness is required to get pagination links include anchors.
+    # Some cleverness is required to get pagination links to include anchors.
     reget(:test_index, { :num_per_page => 10,
-        :test_anchor => 'blah' }.merge(query_params))
+                        :test_anchor => 'blah' }.merge(query_params))
     assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
                         :params => query_params, :page => 2,
                         :test_anchor => 'blah', :anchor => 'blah')
@@ -310,758 +280,763 @@ class NameControllerTest < ControllerTestCase
     assert_response('map')
   end
 
-  # ----------------------------
-  #  Create name.
-  # ----------------------------
-
-  def test_create_name_post
-    text_name = "Amanita velosa"
-    author = "Lloyd"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :author => author,
-        :rank => :Species,
-        :citation => "__Mycol. Writ.__ 9(15). 1898."
-      }
-    }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:create_name, params)
-    assert_response(:action => :show_name)
-    # Amanita baccata is in there but not Amanita sp., so this creates two names.
-    assert_equal(30, @rolf.reload.contribution)
-    assert(name = Name.find_by_text_name(text_name))
-    assert_equal(text_name, name.text_name)
-    assert_equal(author, name.author)
-    assert_equal(@rolf, name.user)
-  end
-
-  def test_create_name_existing
-    name = names(:conocybe_filaris)
-    text_name = name.text_name
-    count = Name.count
-    params = {
-      :name => {
-        :text_name => text_name,
-        :author => "",
-        :rank => :Species,
-        :citation => ""
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:create_name, params)
-    assert_response(:action => :show_name)
-    assert_equal(10, @rolf.reload.contribution)
-    name = Name.find_by_text_name(text_name)
-    assert_equal(names(:conocybe_filaris), name)
-    assert_equal(count, Name.count)
-  end
-
-  def test_create_name_become_author
-    text_name = "Macrocybe crassa"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :author => "",
-        :rank => :Species,
-        :citation => "",
-        :gen_desc => "The Crass Macrocybe"
-      }
-    }
-    params[:name] = empty_notes.merge(params[:name])
-    login('rolf')
-    post(:create_name, params)
-    assert_response(:action => :show_name)
-    assert_equal(110, @rolf.reload.contribution)
-    assert(name = Name.find_by_text_name(text_name))
-    assert_equal(text_name, name.text_name)
-    assert_equal(@rolf, name.user)
-  end
-
-  def test_create_name_bad_taxonomic_classification
-    text_name = "Amanita pantherina"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :rank => :Species,
-        :classification => "Clade: Basidiomycetes"
-      }
-    }
-    params[:name] = empty_notes.merge(params[:name])
-
-    login('rolf')
-    post(:create_name, params)
-    assert_response('create_name')
-
-    # Should fail and no name should get created
-    assert_nil(Name.find_by_text_name(text_name))
-    assert_form_action(:action => 'create_name')
-  end
-
-  def test_create_name_bad_name
-    text_name = "Amanita Pantherina"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-
-    login('rolf')
-    post(:create_name, params)
-    assert_response('create_name')
-
-    # Should fail and no name should get created
-    assert_nil(Name.find_by_text_name(text_name))
-    assert_form_action(:action => 'create_name')
-  end
-
-  def test_create_name_alt_rank
-    text_name = "Amanita pantherina"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :rank => :Species,
-        :classification => "Division: Basidiomycetes"
-      }
-    }
-    params[:name] = empty_notes.merge(params[:name])
-    login('rolf')
-    post(:create_name, params)
-    assert_response(:action => :show_name)
-    assert(name = Name.find_by_text_name(text_name))
-    assert_equal('Phylum: _Basidiomycetes_', name.classification)
-  end
-
-  # ----------------------------
-  #  Edit name.
-  # ----------------------------
-
-  def test_edit_name_post
-    name = names(:conocybe_filaris)
-    assert_equal("Conocybe filaris", name.text_name)
-    assert_nil(name.author)
-    past_names = name.versions.size
-    assert_equal(0, name.version)
-    params = {
-      :id => name.id,
-      :name => {
-        :text_name => name.text_name,
-        :author => "(Fr.) Kühner",
-        :rank => :Species,
-        :citation => "__Le Genera Galera__, 139. 1935."
-      }
-    }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params)
-    # Must be creating Conocybe sp, too.
-    assert_equal(30, @rolf.reload.contribution)
-    assert_equal("(Fr.) Kühner", name.reload.author)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
-    assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
-    assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
-    assert_equal(@rolf, name.user)
-  end
-
-  # Test to see if add a new general description sets the description author
-  # list to the current user.
-  def test_edit_name_add_gen_desc
-    name = names(:conocybe_filaris)
-    assert_equal([], name.authors)
-    assert_nil(name.gen_desc)
-    past_names = name.versions.size
-    assert_equal(0, name.version)
-    old_contrib = name.user.contribution
-    params = {
-      :id => name.id,
-      :name => {
-        :text_name => name.text_name,
-        :author => "(Fr.) Kühner",
-        :rank => :Species,
-        :citation => "__Le Genera Galera__, 139. 1935.",
-        :gen_desc => "A general description"
-      }
-    }
-    params[:name] = empty_notes.merge(params[:name])
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_equal(100 + 10 + old_contrib, name.reload.user.reload.contribution)
-    assert(name.gen_desc)
-    assert_equal([name.user], name.authors)
-  end
-
-  # Test name changes in various ways.
-  def test_edit_name_deprecated
-    name = names(:lactarius_alpigenes)
-    assert(name.deprecated)
-    params = {
-      :id => name.id,
-      :name => {
-        :text_name => name.text_name,
-        :author => "",
-        :rank => :Species,
-        :citation => ""
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
-    assert_equal(30, @rolf.reload.contribution)
-    assert(name.reload.deprecated)
-  end
-
-  def test_edit_name_different_user
-    name = names(:macrolepiota_rhacodes)
-    name_owner = name.user
-    user = "rolf"
-    # Make sure it's not owned by the default user
-    assert_not_equal(user, name_owner.login)
-    params = {
-      :id => name.id,
-      :name => {
-        :text_name => name.text_name,
-        :author => name.author,
-        :rank => :Species,
-        :citation => name.citation
-      }
-    }
-    params[:name].merge!(name.all_notes)
-    login('rolf')
-    post(:edit_name, params)
-    # Hmmm, this isn't catching the fact that Rolf shouldn't be allowed to
-    # change the name, instead it seems to be doing nothing simply because he's
-    # not actually changing anything!
-    assert_response(:action => :show_name)
-    # (In fact, it is implicitly creating Macrolepiota and adding Rolf as
-    # editor on both it and M. rhacodes, since neither has an editor yet.)
-    assert_equal(30, @rolf.reload.contribution)
-    assert_equal(name_owner, name.reload.user)
-  end
-
-  # If non-reviewer makes significant change, should reset status.
-  def test_edit_name_cause_review_status_reset
-    name = peltigera = names(:peltigera)
-    params = {
-      :id => name.id,
-      :name => {
-        :text_name => name.text_name,
-        :author => name.author,
-        :rank => :Genus,
-        :citation => name.citation,
-        :license_id => name.license_id
-      }
-    }
-    params[:name].merge!(name.all_notes)
-
-    # Non-reviewer making no change.
-    @request.session[:user_id] = @mary.id
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_equal(:vetted, peltigera.reload.review_status)
-
-    # Non-reviewer making change.
-    params[:name][:citation] = "Blah blah blah."
-    @request.session[:user_id] = @mary.id
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_equal(:unreviewed, peltigera.reload.review_status)
-
-    # Set it back to vetted, and have reviewer make a change.
-    User.current = @rolf
-    peltigera.update_review_status(:vetted)
-    params[:name][:citation] = "Whatever."
-    @request.session[:user_id] = @rolf.id
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_equal(:vetted, peltigera.reload.review_status)
-  end
-
-  def test_edit_name_simple_merge
-    misspelt_name = agaricus_campestrus = names(:agaricus_campestrus)
-    correct_name  = agaricus_campestris = names(:agaricus_campestris)
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs = misspelt_name.namings[0].observation
-    assert_equal(2, correct_name.namings.size)
-    correct_obs = correct_name.namings[0].observation
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => agaricus_campestris.text_name,
-        :author => "",
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
-    end
-    assert(correct_name.reload)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
-    assert_equal(3, correct_name.namings.size)
-    assert_equal(agaricus_campestris, misspelt_obs.reload.name)
-    assert_equal(agaricus_campestris, correct_obs.reload.name)
-  end
-
-  def test_edit_name_author_merge
-    misspelt_name = names(:amanita_baccata_borealis)
-    correct_name  = names(:amanita_baccata_arora)
-    assert_not_equal(misspelt_name, correct_name)
-    assert_equal(misspelt_name.text_name, correct_name.text_name)
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => misspelt_name.text_name,
-        :author => correct_name.author,
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
-    end
-    assert(correct_name.reload)
-    assert_equal(correct_author, correct_name.author)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
-  end
-
-  def test_edit_name_misspelling_merge
-    misspelt_name = names(:suilus)
-    wrong_author_name = names(:suillus_by_white)
-    correct_name = names(:suillus)
-    assert_equal(misspelt_name.correct_spelling, wrong_author_name)
-    old_correct_spelling_id = misspelt_name.correct_spelling_id
-    correct_author = correct_name.author
-    assert_not_equal(wrong_author_name.author, correct_author)
-    params = {
-      :id => wrong_author_name.id,
-      :name => {
-        :text_name => wrong_author_name.text_name,
-        :author => correct_name.author,
-        :rank => correct_name.rank
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      wrong_author_name = Name.find(wrong_author_name.id)
-    end
-    assert_not_equal(old_correct_spelling_id, misspelt_name.reload.correct_spelling_id)
-    assert_equal(misspelt_name.correct_spelling, correct_name)
-  end
-
-  # Test that merged names end up as not deprecated if the
-  # correct name is not deprecated.
-  def test_edit_name_deprecated_merge
-    misspelt_name = names(:lactarius_alpigenes)
-    assert(misspelt_name.deprecated)
-    correct_name = names(:lactarius_alpinus)
-    assert(!correct_name.deprecated)
-    assert_not_equal(misspelt_name, correct_name)
-    assert_not_equal(misspelt_name.text_name, correct_name.text_name)
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_name.text_name,
-        :author => correct_name.author,
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
-    end
-    assert(correct_name.reload)
-    assert(!correct_name.deprecated)
-    assert_equal(correct_author, correct_name.author)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
-  end
-
-  # Test that merged names end up as not deprecated even if the
-  # correct name is deprecated but the misspelt name is not deprecated
-  def test_edit_name_deprecated2_merge
-    misspelt_name = names(:lactarius_alpinus)
-    assert(!misspelt_name.deprecated)
-    correct_name = names(:lactarius_alpigenes)
-    assert(correct_name.deprecated)
-    assert_not_equal(misspelt_name, correct_name)
-    assert_not_equal(misspelt_name.text_name, correct_name.text_name)
-    correct_author = correct_name.author
-    correct_text_name = correct_name.text_name
-    assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_name.text_name,
-        :author => correct_name.author,
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      correct_name = Name.find(correct_name.id)
-    end
-    assert(misspelt_name.reload)
-    assert(!misspelt_name.deprecated)
-    assert_equal(correct_author, misspelt_name.author)
-    assert_equal(correct_text_name, misspelt_name.text_name)
-    assert_equal(1, misspelt_name.version)
-    assert_equal(past_names+1, misspelt_name.versions.size)
-  end
-
-  # Test merge two names where the matching_name has notes.
-  def test_edit_name_merge_matching_notes
-    target_name = names(:russula_brevipes_no_author)
-    matching_name = names(:russula_brevipes_author_notes)
-    assert_not_equal(target_name, matching_name)
-    assert_equal(target_name.text_name, matching_name.text_name)
-    assert_nil(target_name.author)
-    assert_nil(target_name.notes)
-    assert_not_nil(matching_name.author)
-    notes = matching_name.notes
-    assert_not_nil(matching_name.notes)
-    params = {
-      :id => target_name.id,
-      :name => {
-        :text_name => target_name.text_name,
-        :citation => "",
-        :author => target_name.author,
-        :rank => target_name.rank
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert(matching_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(target_name.id)
-    end
-    assert_equal(notes, matching_name.notes)
-  end
-
-  # Test merge two names that both start with notes, but the notes are cleared in the input.
-  def test_edit_name_merge_both_notes
-    target_name = names(:russula_cremoricolor_no_author_notes)
-    matching_name = names(:russula_cremoricolor_author_notes)
-    assert_not_equal(target_name, matching_name)
-    assert_equal(target_name.text_name, matching_name.text_name)
-    assert_nil(target_name.author)
-    target_notes = target_name.notes
-    assert_not_nil(target_notes)
-    assert_not_nil(matching_name.author)
-    matching_notes = matching_name.notes
-    assert_not_nil(matching_notes)
-    assert_not_equal(target_notes, matching_notes)
-    params = {
-      :id => target_name.id,
-      :name => {
-        :text_name => target_name.text_name,
-        :citation => "",
-        :author => target_name.author,
-        :rank => target_name.rank
-      }
-    }
-    params[:name].merge!(empty_notes) # Explicitly clear the notes
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert(matching_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(target_name.id)
-    end
-    assert_equal(matching_notes, matching_name.notes)
-  end
-
-  def test_edit_name_misspelt_unmergeable
-    misspelt_name = names(:agaricus_campestras)
-    correct_name = names(:agaricus_campestris)
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs = misspelt_name.namings[0].observation
-    assert_equal(2, correct_name.namings.size)
-    correct_obs = correct_name.namings[0].observation
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => "",
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    # Because misspelt name is unmergable it gets reused and
-    # corrected rather than the correct name
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(correct_name.id)
-    end
-    assert(misspelt_name.reload)
-    assert_equal(1, misspelt_name.version)
-    assert_equal(past_names+1, misspelt_name.versions.size)
-    assert_equal(3, misspelt_name.namings.size)
-    assert_equal(names(:agaricus_campestras), misspelt_obs.reload.name)
-    assert_equal(names(:agaricus_campestras), correct_obs.reload.name)
-  end
-
-  def test_edit_name_correct_unmergeable
-    misspelt_name = names(:agaricus_campestrus)
-    correct_name = names(:agaricus_campestras)
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    correct_notes = correct_name.notes
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs = misspelt_name.namings[0].observation
-    assert_equal(1, correct_name.namings.size)
-    correct_obs = correct_name.namings[0].observation
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => "",
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
-    end
-    assert_equal(correct_notes, correct_name.reload.notes)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
-    assert_equal(2, correct_name.namings.size)
-    assert_equal(names(:agaricus_campestras), misspelt_obs.reload.name)
-    assert_equal(names(:agaricus_campestras), correct_obs.reload.name)
-  end
-
-  def test_edit_name_neither_mergeable
-    misspelt_name = names(:agaricus_campestros)
-    correct_name = names(:agaricus_campestras)
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs = misspelt_name.namings[0].observation
-    assert_equal(1, correct_name.namings.size)
-    correct_obs = correct_name.namings[0].observation
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => misspelt_name.author,
-        :rank => misspelt_name.rank
-      }
-    }
-    all_notes = empty_notes
-    all_notes[:notes] = misspelt_name.notes
-    params[:name].merge!(all_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response('edit_name')
-    assert(misspelt_name.reload)
-    assert(correct_name.reload)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
-    assert_equal(1, correct_name.namings.size)
-    assert_equal(1, misspelt_name.namings.size)
-    assert_not_equal(correct_name.namings[0], misspelt_name.namings[0])
-  end
-
-  def test_edit_name_correct_unmergable_with_notes # Should 'fail'
-    misspelt_name = names(:russula_brevipes_no_author) # Shouldn't have notes
-    correct_name = names(:russula_brevipes_author_notes) # Should have notes
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name, correct_name)
-    assert_nil(misspelt_name.notes)
-    assert(correct_name.notes)
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => misspelt_name.author,
-        :rank => misspelt_name.rank
-      }
-    }
-    all_notes = empty_notes
-    all_notes[:notes] = "Some new notes"
-    params[:name].merge!(all_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response('edit_name')
-    assert(misspelt_name.reload)
-    assert(correct_name.reload)
-  end
-
-  def test_edit_name_page_version_merge
-    page_name = names(:coprinellus_micaceus)
-    other_name = names(:coprinellus_micaceus_no_author)
-    assert(page_name.version > other_name.version)
-    assert_not_equal(page_name, other_name)
-    assert_equal(page_name.text_name, other_name.text_name)
-    assert_not_equal('', correct_author = page_name.author)
-    assert_equal('', other_name.author)
-    past_names = page_name.versions.size
-    params = {
-      :id => page_name.id,
-      :name => {
-        :text_name => page_name.text_name,
-        :author => '',
-        :rank => :Species
-      }.merge(empty_notes)
-    }
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      destroyed_name = Name.find(other_name.id)
-    end
-    assert(page_name.reload)
-    assert_equal(correct_author, page_name.author)
-    assert_equal(past_names, page_name.version)
-  end
-
-  def test_edit_name_other_version_merge
-    page_name = names(:coprinellus_micaceus_no_author)
-    other_name = names(:coprinellus_micaceus)
-    assert(page_name.version < other_name.version)
-    assert_not_equal(page_name, other_name)
-    assert_equal(page_name.text_name, other_name.text_name)
-    assert_equal('', page_name.author)
-    assert_not_equal('', correct_author = other_name.author)
-    past_names = other_name.versions.size
-    params = {
-      :id => page_name.id,
-      :name => {
-        :text_name => page_name.text_name,
-        :author => '',
-        :rank => :Species
-      }.merge(empty_notes)
-    }
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      destroyed_name = Name.find(page_name.id)
-    end
-    assert(other_name.reload)
-    assert_equal(correct_author, other_name.author)
-    assert_equal(past_names, other_name.version)
-  end
-
-  def test_edit_name_add_author
-    name = names(:strobilurus_diminutivus_no_author)
-    old_text_name = name.text_name
-    new_author = 'Desjardin'
-    assert(name.namings.length > 0)
-    params = {
-      :id => name.id,
-      :name => {
-        :author => new_author,
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    # It seems to be creating Strobilurus sp. as well?
-    assert_equal(30, @rolf.reload.contribution)
-    assert_equal(new_author, name.reload.author)
-    assert_equal(old_text_name, name.text_name)
-  end
-
-  # Test merge of name with notes with name without notes
-  def test_edit_name_notes
-    target_name = names(:russula_brevipes_no_author)
-    matching_name = names(:russula_brevipes_author_notes)
-    assert_not_equal(target_name, matching_name)
-    assert_equal(target_name.text_name, matching_name.text_name)
-    assert_nil(target_name.author)
-    assert_nil(target_name.notes)
-    assert_not_nil(matching_name.author)
-    notes = matching_name.notes
-    assert_not_nil(matching_name.notes)
-    params = {
-      :id => target_name.id,
-      :name => {
-        :text_name => target_name.text_name,
-        :citation => "",
-        :author => target_name.author,
-        :rank => target_name.rank
-      }
-    }
-    params[:name].merge!(empty_notes)
-    login('rolf')
-    post(:edit_name, params)
-    assert_response(:action => :show_name)
-    # (creates Russula since not in fixtures, changes R. brevipes, deletes some name, but leaves past_name)
-    assert_equal(30, @rolf.reload.contribution)
-    assert(matching_name.reload)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(target_name.id)
-    end
-    assert_equal(notes, matching_name.notes)
-  end
+#   # ----------------------------
+#   #  Create name.
+#   # ----------------------------
+#
+#   def test_create_name_post
+#     text_name = "Amanita velosa"
+#     author = "Lloyd"
+#     name = Name.find_by_text_name(text_name)
+#     assert_nil(name)
+#     params = {
+#       :name => {
+#         :text_name => text_name,
+#         :author => author,
+#         :rank => :Species,
+#         :citation => "__Mycol. Writ.__ 9(15). 1898."
+#       },
+#       :description => empty_notes
+#     }
+#     post_requires_login(:create_name, params)
+#     assert_response(:action => :show_name)
+#     # Amanita baccata is in there but not Amanita sp., so this creates two names.
+#     assert_equal(30, @rolf.reload.contribution)
+#     assert(name = Name.find_by_text_name(text_name))
+#     assert_equal(text_name, name.text_name)
+#     assert_equal(author, name.author)
+#     assert_equal(@rolf, name.user)
+#   end
+#
+#   def test_create_name_existing
+#     name = names(:conocybe_filaris)
+#     text_name = name.text_name
+#     count = Name.count
+#     params = {
+#       :name => {
+#         :text_name => text_name,
+#         :author => "",
+#         :rank => :Species,
+#         :citation => ""
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:create_name, params)
+#     assert_response(:action => :show_name)
+#     assert_equal(10, @rolf.reload.contribution)
+#     name = Name.find_by_text_name(text_name)
+#     assert_equal(names(:conocybe_filaris), name)
+#     assert_equal(count, Name.count)
+#   end
+#
+#   def test_create_name_become_author
+#     text_name = "Macrocybe crassa"
+#     name = Name.find_by_text_name(text_name)
+#     assert_nil(name)
+#     params = {
+#       :name => {
+#         :text_name => text_name,
+#         :author => "",
+#         :rank => :Species,
+#         :citation => "",
+#       },
+#       :description => empty_notes.merge(
+#         :gen_desc => "The Crass Macrocybe"
+#       )
+#     }
+#     login('rolf')
+#     post(:create_name, params)
+#     assert_response(:action => :show_name)
+#     assert_equal(110, @rolf.reload.contribution)
+#     assert(name = Name.find_by_text_name(text_name))
+#     assert_equal(text_name, name.text_name)
+#     assert_user_list_equal([@rolf], name.description.authors)
+#     assert_user_list_equal([], name.description.editors)
+#   end
+#
+#   def test_create_name_bad_taxonomic_classification
+#     text_name = "Amanita pantherina"
+#     name = Name.find_by_text_name(text_name)
+#     assert_nil(name)
+#     params = {
+#       :name => {
+#         :text_name => text_name,
+#         :rank => :Species,
+#       },
+#       :description => empty_notes.merge(
+#         :classification => "Clade: Basidiomycetes"
+#       )
+#     }
+#     login('rolf')
+#     post(:create_name, params)
+#     assert_response('create_name')
+#
+#     # Should fail and no name should get created
+#     assert_nil(Name.find_by_text_name(text_name))
+#     assert_form_action(:action => 'create_name')
+#   end
+#
+#   def test_create_name_bad_name
+#     text_name = "Amanita Pantherina"
+#     name = Name.find_by_text_name(text_name)
+#     assert_nil(name)
+#     params = {
+#       :name => {
+#         :text_name => text_name,
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:create_name, params)
+#     assert_response('create_name')
+#
+#     # Should fail and no name should get created
+#     assert_nil(Name.find_by_text_name(text_name))
+#     assert_form_action(:action => 'create_name')
+#   end
+#
+#   def test_create_name_alt_rank
+#     text_name = "Amanita pantherina"
+#     name = Name.find_by_text_name(text_name)
+#     assert_nil(name)
+#     params = {
+#       :name => {
+#         :text_name => text_name,
+#         :rank => :Species,
+#       },
+#       :description => empty_notes.merge(
+#         :classification => "Division: Basidiomycetes"
+#       )
+#     }
+#     login('rolf')
+#     post(:create_name, params)
+#     assert_response(:action => :show_name)
+#     assert(name = Name.find_by_text_name(text_name))
+#     assert_equal('Phylum: _Basidiomycetes_', name.classification)
+#   end
+#
+#   # ----------------------------
+#   #  Edit name.
+#   # ----------------------------
+#
+#   def test_edit_name_post
+#     name = names(:conocybe_filaris)
+#     assert_equal("Conocybe filaris", name.text_name)
+#     assert_nil(name.author)
+#     past_names = name.versions.size
+#     assert_equal(0, name.version)
+#     params = {
+#       :id => name.id,
+#       :name => {
+#         :text_name => name.text_name,
+#         :author => "(Fr.) Kühner",
+#         :rank => :Species,
+#         :citation => "__Le Genera Galera__, 139. 1935."
+#       },
+#       :description => name.all_notes
+#     }
+#     post_requires_login(:edit_name, params)
+#     # Must be creating Conocybe sp, too.
+#     assert_equal(30, @rolf.reload.contribution)
+#     assert_equal("(Fr.) Kühner", name.reload.author)
+#     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
+#     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
+#     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
+#     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
+#     assert_equal(@rolf, name.user)
+#   end
+#
+#   # Test to see if add a new general description sets the description author
+#   # list to the current user.
+#   def test_edit_name_add_gen_desc
+#     name = names(:conocybe_filaris)
+#     assert_equal([], name.authors)
+#     assert_nil(name.gen_desc)
+#     past_names = name.versions.size
+#     assert_equal(0, name.version)
+#     old_contrib = name.user.contribution
+#     params = {
+#       :id => name.id,
+#       :name => {
+#         :text_name => name.text_name,
+#         :author => "(Fr.) Kühner",
+#         :rank => :Species,
+#         :citation => "__Le Genera Galera__, 139. 1935.",
+#       },
+#       :description => name.all_notes.merge(
+#         :gen_desc => "A general description"
+#       )
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_equal(100 + 10 + old_contrib, name.reload.user.reload.contribution)
+#     assert(name.gen_desc)
+#     assert_equal([name.user], name.authors)
+#   end
+#
+#   # Test name changes in various ways.
+#   def test_edit_name_deprecated
+#     name = names(:lactarius_alpigenes)
+#     assert(name.deprecated)
+#     params = {
+#       :id => name.id,
+#       :name => {
+#         :text_name => name.text_name,
+#         :author => "",
+#         :rank => :Species,
+#         :citation => ""
+#       },
+#       :description => name.all_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
+#     assert_equal(30, @rolf.reload.contribution)
+#     assert(name.reload.deprecated)
+#   end
+#
+#   def test_edit_name_different_user
+#     name = names(:macrolepiota_rhacodes)
+#     name_owner = name.user
+#     user = "rolf"
+#     # Make sure it's not owned by the default user
+#     assert_not_equal(user, name_owner.login)
+#     params = {
+#       :id => name.id,
+#       :name => {
+#         :text_name => name.text_name,
+#         :author => name.author,
+#         :rank => :Species,
+#         :citation => name.citation
+#       },
+#       :description => name.all_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     # Hmmm, this isn't catching the fact that Rolf shouldn't be allowed to
+#     # change the name, instead it seems to be doing nothing simply because he's
+#     # not actually changing anything!
+#     assert_response(:action => :show_name)
+#     # (In fact, it is implicitly creating Macrolepiota and adding Rolf as
+#     # editor on both it and M. rhacodes, since neither has an editor yet.)
+#     assert_equal(30, @rolf.reload.contribution)
+#     assert_equal(name_owner, name.reload.user)
+#   end
+#
+#   # If non-reviewer makes significant change, should reset status.
+#   def test_edit_name_cause_review_status_reset
+#     name = peltigera = names(:peltigera)
+#     params = {
+#       :id => name.id,
+#       :name => {
+#         :text_name => name.text_name,
+#         :author => name.author,
+#         :rank => :Genus,
+#         :citation => name.citation,
+#       },
+#       :description => name.all_notes.merge(
+#         :license_id => name.license_id
+#       )
+#     }
+#
+#     # Non-reviewer making no change.
+#     @request.session[:user_id] = @mary.id
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_equal(:vetted, peltigera.reload.description.review_status)
+#
+#     # Non-reviewer making change.
+#     params[:name][:citation] = "Blah blah blah."
+#     @request.session[:user_id] = @mary.id
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_equal(:unreviewed, peltigera.reload.description.review_status)
+#
+#     # Set it back to vetted, and have reviewer make a change.
+#     User.current = @rolf
+#     peltigera.update_review_status(:vetted)
+#     params[:name][:citation] = "Whatever."
+#     @request.session[:user_id] = @rolf.id
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_equal(:vetted, peltigera.reload.description.review_status)
+#   end
+#
+#   def test_edit_name_simple_merge
+#     misspelt_name = agaricus_campestrus = names(:agaricus_campestrus)
+#     correct_name  = agaricus_campestris = names(:agaricus_campestris)
+#     assert_not_equal(misspelt_name, correct_name)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     assert_equal(1, misspelt_name.namings.size)
+#     misspelt_obs = misspelt_name.namings[0].observation
+#     assert_equal(2, correct_name.namings.size)
+#     correct_obs = correct_name.namings[0].observation
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => agaricus_campestris.text_name,
+#         :author => "",
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       misspelt_name = Name.find(misspelt_name.id)
+#     end
+#     assert(correct_name.reload)
+#     assert_equal(0, correct_name.version)
+#     assert_equal(past_names, correct_name.versions.size)
+#     assert_equal(3, correct_name.namings.size)
+#     assert_equal(agaricus_campestris, misspelt_obs.reload.name)
+#     assert_equal(agaricus_campestris, correct_obs.reload.name)
+#   end
+#
+#   def test_edit_name_author_merge
+#     misspelt_name = names(:amanita_baccata_borealis)
+#     correct_name  = names(:amanita_baccata_arora)
+#     assert_not_equal(misspelt_name, correct_name)
+#     assert_equal(misspelt_name.text_name, correct_name.text_name)
+#     correct_author = correct_name.author
+#     assert_not_equal(misspelt_name.author, correct_author)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => misspelt_name.text_name,
+#         :author => correct_name.author,
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       misspelt_name = Name.find(misspelt_name.id)
+#     end
+#     assert(correct_name.reload)
+#     assert_equal(correct_author, correct_name.author)
+#     assert_equal(0, correct_name.version)
+#     assert_equal(past_names, correct_name.versions.size)
+#   end
+#
+#   def test_edit_name_misspelling_merge
+#     misspelt_name = names(:suilus)
+#     wrong_author_name = names(:suillus_by_white)
+#     correct_name = names(:suillus)
+#     assert_equal(misspelt_name.correct_spelling, wrong_author_name)
+#     old_correct_spelling_id = misspelt_name.correct_spelling_id
+#     correct_author = correct_name.author
+#     assert_not_equal(wrong_author_name.author, correct_author)
+#     params = {
+#       :id => wrong_author_name.id,
+#       :name => {
+#         :text_name => wrong_author_name.text_name,
+#         :author => correct_name.author,
+#         :rank => correct_name.rank
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       wrong_author_name = Name.find(wrong_author_name.id)
+#     end
+#     assert_not_equal(old_correct_spelling_id, misspelt_name.reload.correct_spelling_id)
+#     assert_equal(misspelt_name.correct_spelling, correct_name)
+#   end
+#
+#   # Test that merged names end up as not deprecated if the
+#   # correct name is not deprecated.
+#   def test_edit_name_deprecated_merge
+#     misspelt_name = names(:lactarius_alpigenes)
+#     assert(misspelt_name.deprecated)
+#     correct_name = names(:lactarius_alpinus)
+#     assert(!correct_name.deprecated)
+#     assert_not_equal(misspelt_name, correct_name)
+#     assert_not_equal(misspelt_name.text_name, correct_name.text_name)
+#     correct_author = correct_name.author
+#     assert_not_equal(misspelt_name.author, correct_author)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => correct_name.text_name,
+#         :author => correct_name.author,
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       misspelt_name = Name.find(misspelt_name.id)
+#     end
+#     assert(correct_name.reload)
+#     assert(!correct_name.deprecated)
+#     assert_equal(correct_author, correct_name.author)
+#     assert_equal(0, correct_name.version)
+#     assert_equal(past_names, correct_name.versions.size)
+#   end
+#
+#   # Test that merged names end up as not deprecated even if the
+#   # correct name is deprecated but the misspelt name is not deprecated
+#   def test_edit_name_deprecated2_merge
+#     misspelt_name = names(:lactarius_alpinus)
+#     assert(!misspelt_name.deprecated)
+#     correct_name = names(:lactarius_alpigenes)
+#     assert(correct_name.deprecated)
+#     assert_not_equal(misspelt_name, correct_name)
+#     assert_not_equal(misspelt_name.text_name, correct_name.text_name)
+#     correct_author = correct_name.author
+#     correct_text_name = correct_name.text_name
+#     assert_not_equal(misspelt_name.author, correct_author)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => correct_name.text_name,
+#         :author => correct_name.author,
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       correct_name = Name.find(correct_name.id)
+#     end
+#     assert(misspelt_name.reload)
+#     assert(!misspelt_name.deprecated)
+#     assert_equal(correct_author, misspelt_name.author)
+#     assert_equal(correct_text_name, misspelt_name.text_name)
+#     assert_equal(1, misspelt_name.version)
+#     assert_equal(past_names+1, misspelt_name.versions.size)
+#   end
+#
+#   # Test merge two names where the matching_name has notes.
+#   def test_edit_name_merge_matching_notes
+#     target_name = names(:russula_brevipes_no_author)
+#     matching_name = names(:russula_brevipes_author_notes)
+#     assert_not_equal(target_name, matching_name)
+#     assert_equal(target_name.text_name, matching_name.text_name)
+#     assert_nil(target_name.author)
+#     assert_nil(target_name.notes)
+#     assert_not_nil(matching_name.author)
+#     notes = matching_name.description.notes
+#     assert_not_nil(matching_name.notes)
+#     params = {
+#       :id => target_name.id,
+#       :name => {
+#         :text_name => target_name.text_name,
+#         :citation => "",
+#         :author => target_name.author,
+#         :rank => target_name.rank
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert(matching_name.reload)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       Name.find(target_name.id)
+#     end
+#     assert_equal(notes, matching_name.description.notes)
+#   end
+#
+#   # Test merge two names that both start with notes, but the notes are cleared in the input.
+#   def test_edit_name_merge_both_notes
+#     target_name = names(:russula_cremoricolor_no_author_notes)
+#     matching_name = names(:russula_cremoricolor_author_notes)
+#     assert_not_equal(target_name, matching_name)
+#     assert_equal(target_name.text_name, matching_name.text_name)
+#     assert_nil(target_name.author)
+#     target_notes = target_name.notes
+#     assert_not_nil(target_notes)
+#     assert_not_nil(matching_name.author)
+#     matching_notes = matching_name.description.notes
+#     assert_not_nil(matching_notes)
+#     assert_not_equal(target_notes, matching_notes)
+#     params = {
+#       :id => target_name.id,
+#       :name => {
+#         :text_name => target_name.text_name,
+#         :citation => "",
+#         :author => target_name.author,
+#         :rank => target_name.rank
+#       },
+#       :description => empty_notes # Explicitly clear the notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert(matching_name.reload)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       Name.find(target_name.id)
+#     end
+#     assert_equal(matching_notes, matching_name.description.notes)
+#   end
+#
+#   def test_edit_name_misspelt_unmergeable
+#     misspelt_name = names(:agaricus_campestras)
+#     correct_name = names(:agaricus_campestris)
+#     correct_text_name = correct_name.text_name
+#     correct_author = correct_name.author
+#     assert_not_equal(misspelt_name, correct_name)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     assert_equal(1, misspelt_name.namings.size)
+#     misspelt_obs = misspelt_name.namings[0].observation
+#     assert_equal(2, correct_name.namings.size)
+#     correct_obs = correct_name.namings[0].observation
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => correct_text_name,
+#         :author => "",
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     # Because misspelt name is unmergable it gets reused and
+#     # corrected rather than the correct name
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       Name.find(correct_name.id)
+#     end
+#     assert(misspelt_name.reload)
+#     assert_equal(1, misspelt_name.version)
+#     assert_equal(past_names+1, misspelt_name.versions.size)
+#     assert_equal(3, misspelt_name.namings.size)
+#     assert_equal(names(:agaricus_campestras), misspelt_obs.reload.name)
+#     assert_equal(names(:agaricus_campestras), correct_obs.reload.name)
+#   end
+#
+#   def test_edit_name_correct_unmergeable
+#     misspelt_name = names(:agaricus_campestrus)
+#     correct_name = names(:agaricus_campestras)
+#     correct_text_name = correct_name.text_name
+#     correct_author = correct_name.author
+#     correct_notes = correct_name.notes
+#     assert_not_equal(misspelt_name, correct_name)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     assert_equal(1, misspelt_name.namings.size)
+#     misspelt_obs = misspelt_name.namings[0].observation
+#     assert_equal(1, correct_name.namings.size)
+#     correct_obs = correct_name.namings[0].observation
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => correct_text_name,
+#         :author => "",
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       misspelt_name = Name.find(misspelt_name.id)
+#     end
+#     assert_equal(correct_notes, correct_name.reload.notes)
+#     assert_equal(0, correct_name.version)
+#     assert_equal(past_names, correct_name.versions.size)
+#     assert_equal(2, correct_name.namings.size)
+#     assert_equal(names(:agaricus_campestras), misspelt_obs.reload.name)
+#     assert_equal(names(:agaricus_campestras), correct_obs.reload.name)
+#   end
+#
+#   def test_edit_name_neither_mergeable
+#     misspelt_name = names(:agaricus_campestros)
+#     correct_name = names(:agaricus_campestras)
+#     correct_text_name = correct_name.text_name
+#     correct_author = correct_name.author
+#     assert_not_equal(misspelt_name, correct_name)
+#     past_names = correct_name.versions.size
+#     assert_equal(0, correct_name.version)
+#     assert_equal(1, misspelt_name.namings.size)
+#     misspelt_obs = misspelt_name.namings[0].observation
+#     assert_equal(1, correct_name.namings.size)
+#     correct_obs = correct_name.namings[0].observation
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => correct_text_name,
+#         :author => misspelt_name.author,
+#         :rank => misspelt_name.rank
+#       },
+#       :description => empty_notes.merge(
+#         :notes => misspelt_name.notes
+#       )
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response('edit_name')
+#     assert(misspelt_name.reload)
+#     assert(correct_name.reload)
+#     assert_equal(0, correct_name.version)
+#     assert_equal(past_names, correct_name.versions.size)
+#     assert_equal(1, correct_name.namings.size)
+#     assert_equal(1, misspelt_name.namings.size)
+#     assert_not_equal(correct_name.namings[0], misspelt_name.namings[0])
+#   end
+#
+#   def test_edit_name_correct_unmergable_with_notes # Should 'fail'
+#     misspelt_name = names(:russula_brevipes_no_author) # Shouldn't have notes
+#     correct_name = names(:russula_brevipes_author_notes) # Should have notes
+#     correct_text_name = correct_name.text_name
+#     correct_author = correct_name.author
+#     assert_not_equal(misspelt_name, correct_name)
+#     assert_nil(misspelt_name.description.notes)
+#     assert(correct_name.description.notes)
+#     params = {
+#       :id => misspelt_name.id,
+#       :name => {
+#         :text_name => correct_text_name,
+#         :author => misspelt_name.author,
+#         :rank => misspelt_name.rank
+#       },
+#       :description => empty_notes.merge(
+#         :notes => "Some new notes"
+#       )
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response('edit_name')
+#     assert(misspelt_name.reload)
+#     assert(correct_name.reload)
+#   end
+#
+#   def test_edit_name_page_version_merge
+#     page_name = names(:coprinellus_micaceus)
+#     other_name = names(:coprinellus_micaceus_no_author)
+#     assert(page_name.version > other_name.version)
+#     assert_not_equal(page_name, other_name)
+#     assert_equal(page_name.text_name, other_name.text_name)
+#     assert_not_equal('', correct_author = page_name.author)
+#     assert_equal('', other_name.author)
+#     past_names = page_name.versions.size
+#     params = {
+#       :id => page_name.id,
+#       :name => {
+#         :text_name => page_name.text_name,
+#         :author => '',
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       destroyed_name = Name.find(other_name.id)
+#     end
+#     assert(page_name.reload)
+#     assert_equal(correct_author, page_name.author)
+#     assert_equal(past_names, page_name.version)
+#   end
+#
+#   def test_edit_name_other_version_merge
+#     page_name = names(:coprinellus_micaceus_no_author)
+#     other_name = names(:coprinellus_micaceus)
+#     assert(page_name.version < other_name.version)
+#     assert_not_equal(page_name, other_name)
+#     assert_equal(page_name.text_name, other_name.text_name)
+#     assert_equal('', page_name.author)
+#     assert_not_equal('', correct_author = other_name.author)
+#     past_names = other_name.versions.size
+#     params = {
+#       :id => page_name.id,
+#       :name => {
+#         :text_name => page_name.text_name,
+#         :author => '',
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       destroyed_name = Name.find(page_name.id)
+#     end
+#     assert(other_name.reload)
+#     assert_equal(correct_author, other_name.author)
+#     assert_equal(past_names, other_name.version)
+#   end
+#
+#   def test_edit_name_add_author
+#     name = names(:strobilurus_diminutivus_no_author)
+#     old_text_name = name.text_name
+#     new_author = 'Desjardin'
+#     assert(name.namings.length > 0)
+#     params = {
+#       :id => name.id,
+#       :name => {
+#         :author => new_author,
+#         :rank => :Species
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     # It seems to be creating Strobilurus sp. as well?
+#     assert_equal(30, @rolf.reload.contribution)
+#     assert_equal(new_author, name.reload.author)
+#     assert_equal(old_text_name, name.text_name)
+#   end
+#
+#   # Test merge of name with notes with name without notes
+#   def test_edit_name_notes
+#     target_name = names(:russula_brevipes_no_author)
+#     matching_name = names(:russula_brevipes_author_notes)
+#     assert_not_equal(target_name, matching_name)
+#     assert_equal(target_name.text_name, matching_name.text_name)
+#     assert_nil(target_name.author)
+#     assert_nil(target_name.description.notes)
+#     assert_not_nil(matching_name.author)
+#     assert_not_nil(notes = matching_name.description.notes)
+#     params = {
+#       :id => target_name.id,
+#       :name => {
+#         :text_name => target_name.text_name,
+#         :citation => "",
+#         :author => target_name.author,
+#         :rank => target_name.rank
+#       },
+#       :description => empty_notes
+#     }
+#     login('rolf')
+#     post(:edit_name, params)
+#     assert_response(:action => :show_name)
+#     # (creates Russula since not in fixtures, changes R. brevipes, deletes some name, but leaves past_name)
+#     assert_equal(30, @rolf.reload.contribution)
+#     assert(matching_name.reload)
+#     assert_raises(ActiveRecord::RecordNotFound) do
+#       Name.find(target_name.id)
+#     end
+#     assert_equal(notes, matching_name.description.notes)
+#   end
 
   # ----------------------------
   #  Bulk names.
@@ -1908,7 +1883,6 @@ class NameControllerTest < ControllerTestCase
     assert_nil(old_name.synonym)
     old_past_name_count = old_name.versions.length
     old_version = old_name.version
-    old_notes = old_name.notes
 
     new_name = names(:chlorophyllum_rachodes)
     assert(!new_name.deprecated)
@@ -1916,7 +1890,6 @@ class NameControllerTest < ControllerTestCase
     new_synonym_length = new_name.synonym.names.size
     new_past_name_count = new_name.versions.length
     new_version = new_name.version
-    new_notes = new_name.notes
 
     params = {
       :id => old_name.id,
@@ -1931,7 +1904,6 @@ class NameControllerTest < ControllerTestCase
     assert(old_name.versions.latest.deprecated)
     assert_not_nil(old_synonym = old_name.synonym)
     assert_equal(old_version+1, old_name.version)
-    assert_not_equal(old_notes, old_name.notes)
 
     assert(!new_name.reload.deprecated)
     assert_equal(new_past_name_count, new_name.versions.length)
@@ -1939,7 +1911,6 @@ class NameControllerTest < ControllerTestCase
     assert_equal(old_synonym, new_synonym)
     assert_equal(new_synonym_length+1, new_synonym.names.size)
     assert_equal(new_version, new_name.version)
-    assert_equal(new_notes, new_name.notes)
   end
 
   # deprecate an existing unique name with an ambiguous name
@@ -2075,7 +2046,6 @@ class NameControllerTest < ControllerTestCase
     old_past_name_count = old_name.versions.length
     old_version = old_name.version
     approved_synonyms = old_name.approved_synonyms
-    old_notes = old_name.notes
 
     params = {
       :id => old_name.id,
@@ -2089,7 +2059,6 @@ class NameControllerTest < ControllerTestCase
     assert_equal(old_past_name_count+1, old_name.versions.length)
     assert(!old_name.versions.latest.deprecated)
     assert_equal(old_version + 1, old_name.version)
-    assert_not_equal(old_notes, old_name.notes)
 
     for n in approved_synonyms
       assert(n.reload.deprecated)
@@ -2142,7 +2111,7 @@ class NameControllerTest < ControllerTestCase
     assert_nil(notification)
     params = {
       :id => name.id,
-      :commit => :app_enable.t,
+      :commit => :ENABLE.t,
       :notification => {
         :note_template => ""
       }
@@ -2167,7 +2136,7 @@ class NameControllerTest < ControllerTestCase
     assert_nil(notification)
     params = {
       :id => name.id,
-      :commit => :app_enable.t,
+      :commit => :ENABLE.t,
       :notification => {
         :note_template => 'A note about :observation from :observer'
       }
@@ -2222,7 +2191,7 @@ class NameControllerTest < ControllerTestCase
     assert(notification)
     params = {
       :id => name.id,
-      :commit => :app_disable.t,
+      :commit => :DISABLE.t,
       :notification => {
         :note_template => 'A note about :observation from :observer'
       }
@@ -2244,7 +2213,7 @@ class NameControllerTest < ControllerTestCase
 
   def test_set_review_status_reviewer
     name = names(:coprinus_comatus)
-    assert_equal(:unreviewed, name.review_status)
+    assert_equal(:unreviewed, name.description.review_status)
     assert(@rolf.in_group('reviewers'))
     params = {
       :id => name.id,
@@ -2252,12 +2221,12 @@ class NameControllerTest < ControllerTestCase
     }
     post_requires_login(:set_review_status, params)
     assert_response(:action => :show_name)
-    assert_equal(:vetted, name.reload.review_status)
+    assert_equal(:vetted, name.reload.description.review_status)
   end
 
   def test_set_review_status_non_reviewer
     name = names(:coprinus_comatus)
-    assert_equal(:unreviewed, name.review_status)
+    assert_equal(:unreviewed, name.description.review_status)
     assert(!@mary.in_group('reviewers'))
     params = {
       :id => name.id,
@@ -2265,26 +2234,7 @@ class NameControllerTest < ControllerTestCase
     }
     post_requires_login(:set_review_status, params, 'mary')
     assert_response(:action => :show_name)
-    assert_equal(:unreviewed, name.reload.review_status)
-  end
-
-  def test_send_author_request
-    params = {
-      :id => names(:coprinus_comatus).id,
-      :email => {
-        :subject => "Author request subject",
-        :message => "Message for authors"
-      }
-    }
-    post_requires_login(:author_request, params)
-    assert_response(:action => "show_name", :id => names(:coprinus_comatus).id)
-    assert_flash(:request_success.t)
-  end
-
-  def test_author_request
-    id = names(:coprinus_comatus).id
-    requires_login(:author_request, :id => id)
-    assert_form_action(:action => 'author_request', :id => id)
+    assert_equal(:unreviewed, name.reload.description.review_status)
   end
 
   # ----------------------------

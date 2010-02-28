@@ -1,0 +1,25 @@
+<%
+  @title ||= :edit_name_description_title.
+                t(:name => @description.format_name)
+
+  new_tab_set do
+    add_tab(:show_object.t(:type => :name), :action => 'show_name',
+            :id => @description.name_id, :params => query_params)
+    add_tab(:cancel_and_show.t(:type => :name_description),
+            :action => 'show_name_description',
+            :id => @description.id, :params => query_params)
+  end
+%>
+
+<% form_for(:description, :url => {
+               :action => :edit_name_description,
+               :id => @description.id,
+               :params => query_params,
+            }) do |form| %>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
+
+  <%= render(:partial => 'form_name_description', :locals =>
+             { :form => form }) %>
+
+  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
+<% end %>

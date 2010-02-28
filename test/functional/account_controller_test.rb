@@ -11,9 +11,12 @@ class AccountControllerTest < ControllerTestCase
   def test_auth_rolf
     @request.session['return-to'] = "http://localhost/bogus/location"
     post(:login, "user_login" => "rolf", "user_password" => "testpassword")
-    assert(@response.has_session_object?(:user_id))
-    assert_equal(@rolf.id, @response.session[:user_id])
-    assert_equal("http://localhost/bogus/location", @response.redirect_url)
+    assert_response("http://localhost/bogus/location")
+    assert_flash(:runtime_login_success.t)
+    assert(@response.has_session_object?(:user_id),
+      "Didn't store user in session after successful login!")
+    assert_equal(@rolf.id, @response.session[:user_id],
+      "Wrong user stored in session after successful login!")
   end
 
   def test_signup
@@ -36,6 +39,11 @@ class AccountControllerTest < ControllerTestCase
     assert_equal(nil, user.verified)
     assert_equal(false, user.admin)
     assert_equal(true, user.created_here)
+
+    # Make sure user groups are updated correctly.
+    assert(UserGroup.all_users.users.include?(user))
+    assert(group = UserGroup.one_user(user))
+    assert_user_list_equal([user], group.users)
   end
 
   def test_bad_signup
@@ -173,10 +181,12 @@ class AccountControllerTest < ControllerTestCase
         :email_observations_consensus => "1",
         :email_observations_naming    => "1",
         :email_observations_all       => "",
+        :email_names_admin            => "1",
         :email_names_author           => "1",
         :email_names_editor           => "",
         :email_names_reviewer         => "1",
         :email_names_all              => "",
+        :email_locations_admin        => "1",
         :email_locations_author       => "1",
         :email_locations_editor       => "",
         :email_locations_all          => "",
@@ -188,7 +198,7 @@ class AccountControllerTest < ControllerTestCase
       }
     }
     post_with_dump(:prefs, params)
-    assert_flash(:prefs_success.t)
+    assert_flash(:runtime_prefs_success.t)
 
     # Make sure changes were made.
     user = @rolf.reload
@@ -207,10 +217,12 @@ class AccountControllerTest < ControllerTestCase
     assert_equal(true,         user.email_observations_consensus)
     assert_equal(true,         user.email_observations_naming)
     assert_equal(false,        user.email_observations_all)
+    assert_equal(true,         user.email_names_admin)
     assert_equal(true,         user.email_names_author)
     assert_equal(false,        user.email_names_editor)
     assert_equal(true,         user.email_names_reviewer)
     assert_equal(false,        user.email_names_all)
+    assert_equal(true,         user.email_locations_admin)
     assert_equal(true,         user.email_locations_author)
     assert_equal(false,        user.email_locations_editor)
     assert_equal(false,        user.email_locations_all)
@@ -246,7 +258,7 @@ class AccountControllerTest < ControllerTestCase
       }
     }
     post_with_dump(:profile, params)
-    assert_flash(:profile_success.t)
+    assert_flash(:runtime_profile_success.t)
 
     # Make sure changes were made.
     user = @rolf.reload

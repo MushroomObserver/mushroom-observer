@@ -2,15 +2,19 @@
   @title ||= :create_location_title.t
 
   new_tab_set do
-    add_tab(:location_all.t, :action => 'list_locations')
+    add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
   end
 %>
 
-<% url_args = { :action => :create_location }
-url_args[:set_user] = 1 if @set_user
-form_for(:location, :url => url_args) do |form| %>
-  <br/><center><%= submit_tag(:app_create.l) %></center>
+<% form_for(:location, :url => {
+               :action => :create_location,
+               :params => query_params,
+               :set_user => @set_user ? 1 : 0
+            }) do |form| %>
+  <br/><center><%= submit_tag(:CREATE.l) %></center>
 
-  <%= render(:partial => 'form_locations', :locals =>
+  <%= render(:partial => 'form_location', :locals =>
              { :where => @where, :form => form }) %>
+
+  <br/><center><%= submit_tag(:CREATE.l) %></center>
 <% end %>

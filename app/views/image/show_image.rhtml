@@ -4,9 +4,9 @@
 
   for obs in @image.observations
     new_tab_set do
-      add_tab(:app_about_name.t(:name => obs.format_name),
+      add_tab(:show_name.t(:name => obs.format_name),
               :controller => 'name', :action => "show_name", :id => obs.name.id)
-      add_tab(:app_google_images.t,
+      add_tab(:google_images.t,
               'http://images.google.com/images?q=%s' % obs.text_name)
     end
   end
@@ -21,14 +21,7 @@
     end
   end
 
-  new_tab_set do
-    add_tab(:app_prev.t, :action => 'prev_image', :id => @image.id,
-            :params => query_params)
-    add_tab(:app_index.t, :action => 'index_image', :id => @image.id,
-            :params => query_params)
-    add_tab(:app_next.t, :action => 'next_image', :id => @image.id,
-            :params => query_params)
-  end
+  draw_prev_next_tabs(@image)
 %>
 
 <div id="copyright">
@@ -60,13 +53,13 @@
                       :id => @image.id, :params => query_params) %> |
           <%= link_to(:image_show_destroy.t, { :action => 'destroy_image',
                       :id => @image.id, :params => query_params },
-                      { :confirm => :app_are_you_sure.l }) %>
+                      { :confirm => :are_you_sure.l }) %>
         </p>
       <% end %>
 
       <p>
         <%= :image_show_quality.t %>:
-          <span class="Data"><%= @image.quality.to_sym.t %></span>
+          <span class="Data"><%= quality_as_string(@image.quality) %></span>
         <% if @image.reviewer %>
           <span class="HelpNote">
             (<%= "#{:show_image_reviewed_by.t}: #{user_link(@image.reviewer, @image.reviewer.login)}" %>)
@@ -75,27 +68,30 @@
         <% if @is_reviewer %>
           <br/>
           <% if is_reviewed = (@image.quality != :unreviewed) %>
-            <%= link_to(:app_next.l, :action => 'next_image',
+            <%= link_to(:NEXT.l, :action => 'next_image',
                         :id => @image.id, :params => query_params) %><br/>
           <% end %>
-          <%= link_to(:low.t, :action => 'set_image_quality', :value => :low,
+          <%= link_to(:quality_low.t, :action => 'set_image_quality', :value => :low,
                       :id => @image.id, :params => query_params) %>
           <% unless is_reviewed %>
-            | <%= link_to(:low_and_next.t, :action => 'set_image_quality',
+            | <%= link_to(:show_image_quality_and_next.t(:quality => :quality_low),
+                          :action => 'set_image_quality',
                           :value => :low, :next => true, :id => @image.id,
                           :params => query_params) %>
           <% end %><br/>
-          <%= link_to(:medium.t, :action => 'set_image_quality', :value => :medium,
+          <%= link_to(:quality_medium.t, :action => 'set_image_quality', :value => :medium,
                       :id => @image.id, :params => query_params) %>
           <% unless is_reviewed %>
-            | <%= link_to(:medium_and_next.t, :action => 'set_image_quality',
+            | <%= link_to(:show_image_quality_and_next.t(:quality => :quality_medium),
+                          :action => 'set_image_quality',
                           :value => :medium, :next => true, :id => @image.id,
                           :params => query_params) %>
           <% end %><br/>
-          <%= link_to(:high.t, :action => 'set_image_quality', :value => :high,
+          <%= link_to(:quality_high.t, :action => 'set_image_quality', :value => :high,
                       :id => @image.id, :params => query_params) %>
           <% unless is_reviewed %>
-            | <%= link_to(:high_and_next.t, :action => 'set_image_quality',
+            | <%= link_to(:show_image_quality_and_next.t(:quality => :quality_high),
+                          :action => 'set_image_quality',
                           :value => :high, :next => true, :id => @image.id,
                           :params => query_params) %>
           <% end %>
@@ -135,12 +131,4 @@
   </tr>
 </table>
 
-<p>
-  <span class="Date">
-    <%= :image_show_created.t %>: <%= @image.created.web_time %><br/>
-    <%= :image_show_modified.t %>: <%= @image.modified.web_time %><br/>
-    <%= :app_viewed.t(:date => @image.last_view.web_time,
-                      :times => @image.num_views == 1 ? :app_one_time.l :
-                        :app_many_times.l(:num => @image.num_views)) %><br/>
-  </span>
-</p>
+<%= show_object_footer(@image) %>

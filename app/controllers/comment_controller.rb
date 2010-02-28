@@ -53,7 +53,7 @@ class CommentController < ApplicationController
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.) 
   def show_comments_for_user
-    query = create_query(:Comment, :for_user, :user => params[:id])
+    query = create_query(:Comment, :for_user, :user => params[:id] || @user)
     show_selected_comments(query)
   end
 
@@ -74,7 +74,7 @@ class CommentController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['date', :app_date.t], 
+      ['date', :DATE.t], 
       ['user', :user.t],
     ]
 
@@ -144,7 +144,7 @@ class CommentController < ApplicationController
         if @object.respond_to?(:log)
           @object.log(:log_comment_added, :summary => @comment.summary)
         end
-        flash_notice :form_comments_create_success.t
+        flash_notice :runtime_form_comments_create_success.t(:id => @comment.id)
         params = @comment.object_type == 'Observation' ? query_params : nil
         redirect_to(:controller => @object.show_controller,
           :action => @object.show_action, :id => @object.id,
@@ -187,7 +187,7 @@ class CommentController < ApplicationController
           @object.log(:log_comment_updated, :summary => @comment.summary,
                       :touch => false)
         end
-        flash_notice :form_comments_edit_success.t
+        flash_notice :runtime_form_comments_edit_success.t(:id => @comment.id)
         redirect_to(:action => 'show_comment', :id => @comment.id)
       end
     end
@@ -206,9 +206,9 @@ class CommentController < ApplicationController
     else
       if @comment.destroy
         Transaction.delete_comment(:id => @comment)
-        flash_notice :form_comments_destroy_success.t
+        flash_notice :runtime_form_comments_destroy_success.t(:id => params[:id])
       else
-        flash_error :form_comments_destroy_failed.t
+        flash_error :runtime_form_comments_destroy_failed.t(:id => params[:id])
       end
       redirect_to(:controller => @object.show_controller,
                   :action => @object.show_action, :id => @object.id)
