@@ -218,7 +218,7 @@ class Location < AbstractModel
     end
 
     # Update any users who call this location their primary location.
-    for user in User.find_by_location_id(old_loc.id)
+    for user in User.find_all_by_location_id(old_loc.id)
       user.location_id = self.id
       Transaction.put_user(
         :id           => user,
@@ -254,7 +254,7 @@ class Location < AbstractModel
       }
       desc.location_id = self.id
       desc.save
-      Transaction.put_locaton_description(xargs)
+      Transaction.put_location_description(xargs)
     end
 
     # Log the action.

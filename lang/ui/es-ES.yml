@@ -507,25 +507,38 @@ rank_plural_subspecies: subespecies
 RANK_PLURAL_VARIETY: Variedades
 rank_plural_variety: variedades
 
+# user statistics field names
+user_stats_comments: "[:COMMENTS]"
+user_stats_images: "[:IMAGES]"
+user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] «Autoradas»"
+user_stats_location_descriptions_editors: "[:LOCATION_DESCRIPTIONS] Editadas"
+user_stats_locations: "[:LOCATIONS] Definidas"
+user_stats_locations_versions: "[:LOCATIONS] Editadas"
+user_stats_name_descriptions_authors: "[:NAME_DESCRIPTIONS] «Autorados»"
+user_stats_name_descriptions_editors: "[:NAME_DESCRIPTIONS] Editadas"
+user_stats_namings: "[:NAMINGS]"
+user_stats_observations: "[:OBSERVATIONS]"
+user_stats_species_list_entries: "Entradas en [:SPECIES_LISTS]"
+user_stats_species_lists: "[:SPECIES_LISTS]"
+user_stats_votes: "[:VOTES]"
+
 # site statistics field names
-site_stats_location_descriptions_authors: Ubicaciones «Autorados»
-site_stats_location_descriptions_editors: Ubicaciones Editados
-site_stats_name_descriptions_authors: Descripciones «Autorados»
-site_stats_name_descriptions_editors: Descripciones Editados
-site_stats_images: Imágenes
+site_stats_comments: "[:COMMENTS]"
+site_stats_images: "[:IMAGES]"
 site_stats_listed_taxa: Taxones incluidos.
-site_stats_names: Taxones
-site_stats_past_names: Cambios de Descripciones
+site_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] «Autoradas»"
+site_stats_location_descriptions_editors: ""
 site_stats_locations: Ubicaciones
-site_stats_past_locations: Cambios de Ubicaciones
-site_stats_species_lists: Lista de Especies
-site_stats_species_list_entries: Entradas en Listas de Especies
-site_stats_comments: Comentarios
-site_stats_observations: Observaciones
+site_stats_locations_versions: ""
+site_stats_name_descriptions_authors: "[:NAME_DESCRIPTIONS] «Autoradas»"
+site_stats_name_descriptions_editors: ""
+site_stats_namings: "[:NAMINGS]"
+site_stats_observations: "[:OBSERVATIONS]"
 site_stats_observed_taxa: Taxones Observados
-site_stats_namings: IDs Propuestas
-site_stats_votes: Votos
+site_stats_species_list_entries: Entradas en Listas de Especies
+site_stats_species_lists: "[:SPECIES_LISTS]"
 site_stats_users: Miembros
+site_stats_votes: "[:VOTES]"
 
 # vote descriptions
 vote_no_opinion: Sin opinión
@@ -859,7 +872,7 @@ runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
 runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
 runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
-runtime_prefs_success: "[:runtime_updated(type=preferences)]"
+runtime_prefs_success: "[:runtime_updated(type=:preferences)]"
 runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
 runtime_profile_success: "[:runtime_updated(type=:profile)]"
@@ -3913,3 +3926,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

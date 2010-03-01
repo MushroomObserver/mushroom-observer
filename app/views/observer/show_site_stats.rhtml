@@ -17,7 +17,8 @@
       if obs_length > 0 %>
         <td>
           <% for obs in @observations[0,3] %>
-            <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id), :class => 'site_stats_image'),
+            <%= link_to(image_tag("thumb/%d.jpg" % obs.thumb_image_id,
+                                  :class => 'site_stats_image'),
                         :action => 'show_observation', :id => obs.id) %><br/>
           <% end %>
         </td>
@@ -25,46 +26,41 @@
 
       <td valign="top" width="50%">
         <table cellpadding="5" cellspacing="5" border="0">
-          <% if @observed_taxa_count %>
-            <tr>
-              <td>
-                <%= :site_stats_observed_taxa.l %>
-              </td>
-              <td>
-                <%= @observed_taxa_count %>
-              </td>
-            </tr>
-          <% end
-             if @listed_taxa_count %>
-            <tr>
-              <td>
-                <%= :site_stats_listed_taxa.l %>
-              </td>
-              <td>
-                <%= @listed_taxa_count %>
-              </td>
-            </tr>
-          <% end
-          for field in SiteData::ALL_FIELDS
+          <% fields = [
+            :images,
+            :observations,
+            :listed_taxa,
+            :observed_taxa,
+            :name_descriptions_authors,
+            :locations,
+            :location_descriptions_authors,
+            :species_lists,
+            :species_list_entries,
+            :namings,
+            :comments,
+            :votes,
+            :users,
+          ]
+          # Do we want to sort the list in order of decreasing size?
+          # fields = fields.sort_by {|f| @site_data[f].to_i}.reverse
+          for field in fields
+            label = "site_stats_#{field}".to_sym.t
             count = @site_data[field]
-            if count %>
+            if count and label != '' %>
           	  <tr>
-          	    <td>
-          	      <%= "site_stats_#{field}".to_sym.t %>
-          	    </td>
-          	    <td>
-          	      <%= count %>
-          	    </td>
+          	    <td><%= "site_stats_#{field}".to_sym.t %></td>
+          	    <td><%= count %></td>
           	  </tr>
-          	<% end
-          end %>
+          	<% end %>
+          <% end %>
         </table>
       </td>
 
       <% if obs_length > 3 %>
         <td>
           <% for obs in @observations[3,3] %>
-            <%= link_to(image_tag(sprintf("thumb/%d.jpg", obs.thumb_image_id), :class => 'site_stats_image'),
+            <%= link_to(image_tag("thumb/%d.jpg" % obs.thumb_image_id,
+                                  :class => 'site_stats_image'),
                         :action => 'show_observation', :id => obs.id) %><br/>
           <% end %>
         </td>

@@ -3,7 +3,6 @@
 #  == Instance Methods
 #
 #  localize:: Wrapper on Globalite#localize.
-#  ---
 #  l::        Alias for localize.
 #  t::        Localize, textilize (no paragraphs or obj links).
 #  tl::       Localize, textilize with obj links (no paragraphs).
@@ -111,7 +110,7 @@ class Symbol
   # *NOTE*: Square brackets are NOT allowed in the literals, even if quoted!
   # That would make the parsing non-trivial and potentially slow.
   #
-  def localize(args={}, level=0)
+  def localize(args={}, level=[])
     capitalize_result = false
     unless (@@test and (
              (result = args[self]) or 
@@ -178,7 +177,8 @@ class Symbol
               val.to_s.capitalize_first
 
           else
-            raise(ArgumentError, "Forgot to pass :#{y.downcase} into localization for :#{self}.")
+            raise(ArgumentError, "Forgot to pass :#{y.downcase} into localization for " +
+                                 ([self] + level).map(&:inspect).join(' --> '))
           end
         end
       end
@@ -211,16 +211,31 @@ class Symbol
             if pair.match(/^:?([a-z]+)=(.*)$/)
               key = $1.to_sym
               val = $2.to_s
-              val = $1.to_sym if val.match(/^:(\w+)$/)
+              if val.match(/^:(\w+)$/)
+                val = $1.to_sym
+              elsif val.match(/^"(.*)"$/) ||
+                    val.match(/^'(.*)'$/) ||
+                    val.match(/^(-?\d+(\.\d+)?)$/)
+                val = $1
+              elsif !val.match(/^([a-z][a-z_]*\d*)$/)
+                raise(ArgumentError, "Invalid argument value \":#{val}\" in localization for " +
+                                       ([self] + level).map(&:inspect).join(' --> '))
+              elsif !args.has_key?(val.to_sym)
+                raise(ArgumentError, "Forgot to pass :#{val} into localization for " +
+                                       ([self] + level).map(&:inspect).join(' --> '))
+              else
+                val = args[val.to_sym]
+              end
               hash[key] = val
             else
-              raise(ArgumentError, "Invalid syntax in :#{self} at \"#{pair}\"" +
-                                   ", in arguments for embedded tag :#{tag}.")
+              raise(ArgumentError, "Invalid syntax at \"#{pair}\" in arguments " +
+                                   "for tag :#{tag} embedded in " +
+                                   ([self] + level).map(&:inspect).join(' --> '))
             end
           end
         end
-        tag.l(hash, level+1)
-      end if level < 8
+        tag.l(hash, level+[self])
+      end if level.length < 8
     end
 
     # Make token attempt to capitalize result if requested [:TAG] for :tag.

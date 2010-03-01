@@ -507,25 +507,38 @@ rank_plural_subspecies:  subspecies
 RANK_PLURAL_VARIETY:  Varieties
 rank_plural_variety:  varieties
 
+# user statistics field names
+user_stats_comments:  "[:COMMENTS]"
+user_stats_images:  "[:IMAGES]"
+user_stats_location_descriptions_authors:  "[:LOCATION_DESCRIPTIONS] Authored"
+user_stats_location_descriptions_editors:  "[:LOCATION_DESCRIPTIONS] Edited"
+user_stats_locations:  "[:LOCATIONS] Defined"
+user_stats_locations_versions:  "[:LOCATIONS] Edited"
+user_stats_name_descriptions_authors:  "[:NAME_DESCRIPTIONS] Authored"
+user_stats_name_descriptions_editors:  "[:NAME_DESCRIPTIONS] Edited"
+user_stats_namings:  "[:NAMINGS]"
+user_stats_observations:  "[:OBSERVATIONS]"
+user_stats_species_list_entries:  "[:SPECIES_LIST] Entries"
+user_stats_species_lists:  "[:SPECIES_LISTS]"
+user_stats_votes:  "[:VOTES]"
+
 # site statistics field names
-site_stats_location_descriptions_authors:  Authored [:LOCATION_DESCRIPTIONS]
-site_stats_location_descriptions_editors:  Edited [:LOCATION_DESCRIPTIONS]
-site_stats_name_descriptions_authors:  Authored [:NAME_DESCRIPTIONS]
-site_stats_name_descriptions_editors:  Edited [:NAME_DESCRIPTIONS]
-site_stats_images:  "[:IMAGES]"
-site_stats_listed_taxa: Listed Taxa
-site_stats_names:  Taxa
-site_stats_past_names:  "[:DESCRIPTION] [:CHANGES]"
-site_stats_locations:  "[:LOCATIONS]"
-site_stats_past_locations:  "[:LOCATION] [:CHANGES]"
-site_stats_species_lists:  "[:SPECIES_LISTS]"
-site_stats_species_list_entries:  "[:SPECIES_LIST] Entries"
 site_stats_comments:  "[:COMMENTS]"
+site_stats_images:  "[:IMAGES]"
+site_stats_listed_taxa:  "Listed Taxa"
+site_stats_location_descriptions_authors:  "Authored [:LOCATION_DESCRIPTIONS]"
+site_stats_location_descriptions_editors:  ""
+site_stats_locations:  "Defined [:LOCATIONS]"
+site_stats_locations_versions:  ""
+site_stats_name_descriptions_authors:  "Authored [:NAME_DESCRIPTIONS]"
+site_stats_name_descriptions_editors:  ""
+site_stats_namings:  "[:NAMINGS]"
 site_stats_observations:  "[:OBSERVATIONS]"
-site_stats_observed_taxa:  Observed Taxa
-site_stats_namings:  Proposed IDs
+site_stats_observed_taxa:  "Observed Taxa"
+site_stats_species_list_entries:  "[:SPECIES_LIST] Entries"
+site_stats_species_lists:  "[:SPECIES_LISTS]"
+site_stats_users:  "Members"
 site_stats_votes:  "[:VOTES]"
-site_stats_users:  Members
 
 # vote descriptions
 vote_no_opinion:  No Opinion
@@ -859,7 +872,7 @@ runtime_no_save_observation:  "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match:  "[:runtime_no_match_name(value=match)]"
 runtime_object_not_found:  "[:runtime_no_match_id(value=id)]"
 runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
-runtime_prefs_success:  "[:runtime_updated(type=preferences)]"
+runtime_prefs_success:  "[:runtime_updated(type=:preferences)]"
 runtime_profile_invalid_image:  "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image:  "[:runtime_removed_from(type=:image,name=:profile)]"
 runtime_profile_success:  "[:runtime_updated(type=:profile)]"
@@ -3016,7 +3029,7 @@ destroy_project_success:  Project destroyed.
 
 # project/edit_project
 edit_project_destroy:  "[:destroy_object(type=:project)]"
-edit_project_title:  "[:edit_object(type=>:project)]: [title]"
+edit_project_title:  "[:edit_object(type=:project)]: [title]"
 
 
 # project/_form_projects

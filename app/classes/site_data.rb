@@ -65,47 +65,49 @@ class SiteData
   #
   ##############################################################################
 
-  # List of the categories.
+  # List of the categories.  This is the order they appear in show_user.
   ALL_FIELDS = [
     :name_descriptions_authors,
     :name_descriptions_editors,
-    :images,
+    :locations,
     :location_descriptions_authors,
     :location_descriptions_editors,
+    :images,
     :species_lists,
     :species_list_entries,
-    :comments,
     :observations,
+    :comments,
     :namings,
     :votes,
-    :users
+    :users,
   ]
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
     :name_descriptions_authors     => 100,
     :name_descriptions_editors     => 10,
-    :images                        => 10,
+    :locations                     => 20,
     :location_descriptions_authors => 10,
     :location_descriptions_editors => 5,
+    :images                        => 10,
     :species_lists                 => 5,
     :species_list_entries          => 1,
-    :comments                      => 1,
     :observations                  => 1,
+    :comments                      => 1,
     :namings                       => 1,
     :votes                         => 1,
-    :users                         => 0
+    :users                         => 0,
   }
 
   # Table to query to get score for each category.  (Default is same as the
   # category name.)
   FIELD_TABLES = {
-    :species_list_entries => "observations_species_lists",
+    :species_list_entries => 'observations_species_lists',
   }
 
   # Additional conditions to use for each category.
   FIELD_CONDITIONS = {
-    :users => "`verified` IS NOT NULL"
+    :users => '`verified` IS NOT NULL'
   }
 
 ################################################################################
@@ -123,6 +125,9 @@ class SiteData
     if weight && weight > 0 &&
        obj.respond_to?('user_id') &&
        (user ||= obj.user)
+      if field.to_s.match(/versions/)
+        raise "I'm not sure how to keep points based on versions up to date."
+      end
       user.contribution ||= 0
       if mode == :create || mode == :add
         user.contribution += weight * num
@@ -215,10 +220,17 @@ private
   #
   def get_field_count(field) # :doc:
     table = FIELD_TABLES[field] || field.to_s
-    query = "SELECT COUNT(*) FROM `#{table}`"
-    if FIELD_CONDITIONS[field]
-      query += " WHERE #{FIELD_CONDITIONS[field]}"
+    query = []
+    query << 'SELECT COUNT(*)'
+    query << "FROM `#{table}`"
+    if cond = FIELD_CONDITIONS[field]
+      query << "WHERE #{cond}"
     end
+    if field.to_s.match(/^(\w+)s_versions/)
+      parent = $1
+      query[0] = "SELECT COUNT(DISTINCT #{parent}_id, user_id)"
+    end
+    query = query.join("\n")
     User.connection.select_value(query).to_i
   end
 
@@ -237,18 +249,23 @@ private
   #   end
   #
   def load_field_counts(field, user_id=nil) # :doc:
+    count  = '*'
     tables = FIELD_TABLES[field] || field.to_s
     conditions = user_id ? "user_id = #{user_id}" : "user_id > 0"
 
-    # Some categories require extra joins and/or conditions.
-    case field
-      when :species_list_entries
-        tables = "species_lists s, observations_species_lists os"
-        conditions += " AND s.id=os.species_list_id"
+    # Exception for species list entries.
+    if field == :species_list_entries
+      tables = "species_lists s, observations_species_lists os"
+      conditions += " AND s.id=os.species_list_id"
+    end
+
+    # Exception for past versions.
+    if field.to_s.match(/^(\w+)s_versions/)
+      select = "DISTINCT #{parent}_id"
     end
 
     query = %(
-      SELECT COUNT(*) AS c, user_id AS u
+      SELECT COUNT(#{count}) AS c, user_id AS u
       FROM #{tables}
       WHERE #{conditions}
       GROUP BY u

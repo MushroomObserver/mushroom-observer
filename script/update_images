@@ -447,14 +447,18 @@ def list_local_files(path)
   files = {}
   files['date'] = Time.now
   for type in ['thumb', '640', 'orig']
-    cmd = "ls -l #{path}/#{type}"
+    cmd = "ls -lU --color=never #{path}/#{type}"
     verbose cmd
     open("|#{cmd}") do |dir|
+n = 0
       dir.each_line do |line|
+puts "DIR: [#{line.inspect}]" if n < 10
         size, file = line.chomp.split.values_at(4, 7)
+puts "SIZE=#{size.inspect} FILE=#{file.inspect}" if n < 10
         if file && file.match(/^\d+\.jpg$/) && size.to_i != 0
           files["#{type}/#{file}"] = size.to_i
         end
+n += 1
       end
     end
   end
@@ -472,7 +476,7 @@ def list_remote_files(server)
   end
   files = {}
   files['date'] = Time.now
-  cmd = "ssh #{url} ls -l #{path}/{thumb,640,orig}"
+  cmd = "ssh #{url} ls -lU --color=never #{path}/{thumb,640,orig}"
   verbose cmd
   open("|#{cmd}") do |dir|
     type = nil

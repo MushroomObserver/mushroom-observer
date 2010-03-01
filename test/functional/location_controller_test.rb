@@ -2,6 +2,13 @@ require File.dirname(__FILE__) + '/../boot'
 
 class LocationControllerTest < ControllerTestCase
 
+  def setup
+    @loc_pts       = 20
+    @loc_chg_pts   = 0
+    @desc_auth_pts = 10
+    @desc_edit_pts = 5
+  end
+
   # Init params based on existing location.
   def update_params_from_loc(loc)
     { :id => loc.id,
@@ -14,7 +21,6 @@ class LocationControllerTest < ControllerTestCase
         :high => loc.high,
         :low => loc.low,
       },
-      :description => loc.description.all_notes
     }
   end
 
@@ -32,9 +38,6 @@ class LocationControllerTest < ControllerTestCase
         :high => 2000.0,
         :low => 1600.0,
       },
-      :description => {
-        :notes => "A popular spring time collecting area for the Los Angeles Mycological Society."
-      }
     }
   end
 
@@ -79,166 +82,166 @@ class LocationControllerTest < ControllerTestCase
     assert_response('list_locations')
   end
 
-#   def test_create_location
-#     requires_login(:create_location)
-#     assert_form_action(:action => 'create_location')
-#   end
-# 
-#   # Test a simple location creation.
-#   def test_construct_location_simple
-#     count = Location.count
-#     params = barton_flats_params
-#     display_name = params[:where]
-#     post_requires_login(:create_location, params)
-#     assert_response(:action => :show_location)
-#     assert_equal(count + 1, Location.count)
-#     assert_equal(20, @rolf.reload.contribution)
-#     loc = assigns(:location)
-#     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
-#     loc = Location.find_by_display_name(display_name)
-#     assert_user_list_equal([@rolf], loc.description.authors)
-#   end
-# 
-#   def test_construct_location_errors
-#     # Test for north > 90
-#     params = barton_flats_params
-#     params[:location][:north] = 100
-#     construct_location_error(params)
-# 
-#     # Test for south < -90
-#     params = barton_flats_params
-#     params[:location][:south] = -100
-#     construct_location_error(params)
-# 
-#     # Test for north < south
-#     params = barton_flats_params
-#     north = params[:location][:north]
-#     params[:location][:north] = params[:location][:south]
-#     params[:location][:south] = north
-#     construct_location_error(params)
-# 
-#     # Test for west < -180
-#     params = barton_flats_params
-#     params[:location][:west] = -200
-#     construct_location_error(params)
-# 
-#     # Test for west > 180
-#     params = barton_flats_params
-#     params[:location][:west] = 200
-#     construct_location_error(params)
-# 
-#     # Test for east < -180
-#     params = barton_flats_params
-#     params[:location][:east] = -200
-#     construct_location_error(params)
-# 
-#     # Test for east > 180
-#     params = barton_flats_params
-#     params[:location][:east] = 200
-#     construct_location_error(params)
-# 
-#     # Test for high < low
-#     params = barton_flats_params
-#     high = params[:location][:high]
-#     params[:location][:high] = params[:location][:low]
-#     params[:location][:low] = high
-#     construct_location_error(params)
-#   end
-# 
-#   def test_edit_location
-#     loc = locations(:albion)
-#     params = { :id => loc.id.to_s }
-#     requires_login(:edit_location, params)
-#     assert_form_action(:action => 'edit_location')
-#   end
-# 
-#   def test_update_location
-#     count = Location::Version.count
-#     count2 = LocationDescription::Version.count
-#     assert_equal(10, @rolf.reload.contribution)
-# 
-#     # Turn Albion into Barton Flats.
-#     loc = locations(:albion)
-#     desc = loc.description
-#     desc.add_author(@mary)
-#     old_north = loc.north
-#     old_params = update_params_from_loc(loc)
-#     params = barton_flats_params
-#     params[:id] = loc.id
-#     post_requires_login(:edit_location, params)
-#     assert_response(:action => :show_location)
-#     assert_equal(15, @rolf.reload.contribution)
-# 
-#     # Should have created a new version of each.
-#     assert_equal(count + 1, Location::Version.count)
-#     assert_equal(count2 + 1, LocationDescription::Version.count)
-# 
-#     # Should now look like Barton Flats.
-#     loc = Location.find(loc.id)
-#     new_params = update_params_from_loc(loc)
-#     assert_not_equal(new_params, old_params)
-# 
-#     # Only compare the keys that are in both.
-#     bfp = barton_flats_params
-#     key_count = 0
-#     for k in bfp.keys
-#       if new_params[k]
-#         key_count += 1
-#         assert_equal(new_params[k], bfp[k])
-#       end
-#     end
-#     assert(key_count > 0) # Make sure something was compared.
-# 
-#     assert_user_list_equal([@mary], loc.description.authors)
-#   end
-# 
-#   # Test update for north > 90.
-#   def test_update_location_errors
-#     params = update_params_from_loc(locations(:albion))
-#     params[:location][:north] = 100
-#     update_location_error(params)
-#   end
-# 
-#   def test_update_location_user_merge
-#     to_go = locations(:burbank)
-#     to_stay = locations(:albion)
-#     params = update_params_from_loc(to_go)
-#     params[:location][:display_name] = to_stay.display_name
-#     loc_count = Location.count
-#     desc_count = LocationDescription.count
-#     past_loc_count = Location::Version.count
-#     past_desc_count = LocationDescription::Version.count
-#     post_requires_login(:edit_location, params)
-#     assert_response(:action => :show_location)
-#     assert_equal(loc_count, Location.count)
-#     assert_equal(desc_count, LocationDescription.count)
-#     assert_equal(past_loc_count, Location::Version.count)
-#     assert_equal(past_desc_count, LocationDescription::Version.count)
-#     assert_equal(10, @rolf.reload.contribution)
-#   end
-# 
-#   def test_update_location_admin_merge
-#     to_go = locations(:albion)
-#     to_stay = locations(:burbank)
-#     params = update_params_from_loc(to_go)
-#     params[:location][:display_name] = to_stay.display_name
-# 
-#     loc_count = Location.count
-#     desc_count = LocationDescription.count
-#     past_loc_count = Location::Version.count
-#     past_desc_count = LocationDescription::Version.count
-#     past_locs_to_go = to_go.versions.length
-#     past_descs_to_go = to_go.description.versions.length
-# 
-#     make_admin('rolf')
-#     post_with_dump(:edit_location, params)
-#     assert_response(:action => "show_location")
-# 
-#     assert_equal(loc_count - 1, Location.count)
-#     assert_equal(desc_count - 1, LocationDescription.count)
-#     assert_equal(past_loc_count - past_locs_to_go, Location::Version.count)
-#     assert_equal(past_desc_count - past_descs_to_go, LocationDescription::Version.count)
-#   end
+  def test_create_location
+    requires_login(:create_location)
+    assert_form_action(:action => 'create_location', :set_user => 0)
+  end
+
+  # Test a simple location creation.
+  def test_construct_location_simple
+    count = Location.count
+    params = barton_flats_params
+    display_name = params[:where]
+    post_requires_login(:create_location, params)
+    assert_response(:action => :show_location)
+    assert_equal(count + 1, Location.count)
+    assert_equal(10+@loc_pts, @rolf.reload.contribution)
+    loc = assigns(:location)
+    assert_equal(display_name, loc.display_name) # Make sure it's the right Location
+    loc = Location.find_by_display_name(display_name)
+    assert_nil(loc.description)
+  end
+
+  def test_construct_location_errors
+    # Test for north > 90
+    params = barton_flats_params
+    params[:location][:north] = 100
+    construct_location_error(params)
+
+    # Test for south < -90
+    params = barton_flats_params
+    params[:location][:south] = -100
+    construct_location_error(params)
+
+    # Test for north < south
+    params = barton_flats_params
+    north = params[:location][:north]
+    params[:location][:north] = params[:location][:south]
+    params[:location][:south] = north
+    construct_location_error(params)
+
+    # Test for west < -180
+    params = barton_flats_params
+    params[:location][:west] = -200
+    construct_location_error(params)
+
+    # Test for west > 180
+    params = barton_flats_params
+    params[:location][:west] = 200
+    construct_location_error(params)
+
+    # Test for east < -180
+    params = barton_flats_params
+    params[:location][:east] = -200
+    construct_location_error(params)
+
+    # Test for east > 180
+    params = barton_flats_params
+    params[:location][:east] = 200
+    construct_location_error(params)
+
+    # Test for high < low
+    params = barton_flats_params
+    high = params[:location][:high]
+    params[:location][:high] = params[:location][:low]
+    params[:location][:low] = high
+    construct_location_error(params)
+  end
+
+  def test_edit_location
+    loc = locations(:albion)
+    params = { :id => loc.id.to_s }
+    requires_login(:edit_location, params)
+    assert_form_action(:action => 'edit_location')
+  end
+
+  def test_update_location
+    count = Location::Version.count
+    count2 = LocationDescription::Version.count
+    assert_equal(10, @rolf.reload.contribution)
+
+    # Turn Albion into Barton Flats.
+    loc = locations(:albion)
+    desc = loc.description
+    desc.add_author(@mary)
+    old_north = loc.north
+    old_params = update_params_from_loc(loc)
+    params = barton_flats_params
+    params[:id] = loc.id
+    post_requires_login(:edit_location, params)
+    assert_response(:action => :show_location)
+    assert_equal(10 + @loc_chg_pts, @rolf.reload.contribution)
+
+    # Should have created a new version of location only.
+    assert_equal(count + 1, Location::Version.count)
+    assert_equal(count2, LocationDescription::Version.count)
+
+    # Should now look like Barton Flats.
+    loc = Location.find(loc.id)
+    new_params = update_params_from_loc(loc)
+    assert_not_equal(new_params, old_params)
+
+    # Only compare the keys that are in both.
+    bfp = barton_flats_params
+    key_count = 0
+    for k in bfp.keys
+      if new_params[k]
+        key_count += 1
+        assert_equal(new_params[k], bfp[k])
+      end
+    end
+    assert(key_count > 0) # Make sure something was compared.
+
+    assert_user_list_equal([@mary], loc.description.authors)
+  end
+
+  # Test update for north > 90.
+  def test_update_location_errors
+    params = update_params_from_loc(locations(:albion))
+    params[:location][:north] = 100
+    update_location_error(params)
+  end
+
+  def test_update_location_user_merge
+    to_go = locations(:burbank)
+    to_stay = locations(:albion)
+    params = update_params_from_loc(to_go)
+    params[:location][:display_name] = to_stay.display_name
+    loc_count = Location.count
+    desc_count = LocationDescription.count
+    past_loc_count = Location::Version.count
+    past_desc_count = LocationDescription::Version.count
+    post_requires_login(:edit_location, params)
+    assert_response(:action => :show_location)
+    assert_equal(loc_count, Location.count)
+    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(past_loc_count, Location::Version.count)
+    assert_equal(past_desc_count, LocationDescription::Version.count)
+    assert_equal(10, @rolf.reload.contribution)
+  end
+
+  def test_update_location_admin_merge
+    to_go = locations(:albion)
+    to_stay = locations(:burbank)
+    params = update_params_from_loc(to_go)
+    params[:location][:display_name] = to_stay.display_name
+
+    loc_count = Location.count
+    desc_count = LocationDescription.count
+    past_loc_count = Location::Version.count
+    past_desc_count = LocationDescription::Version.count
+    past_locs_to_go = to_go.versions.length
+    past_descs_to_go = 0
+
+    make_admin('rolf')
+    post_with_dump(:edit_location, params)
+    assert_response(:action => "show_location")
+
+    assert_equal(loc_count - 1, Location.count)
+    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(past_loc_count - past_locs_to_go, Location::Version.count)
+    assert_equal(past_desc_count - past_descs_to_go, LocationDescription::Version.count)
+  end
 
   def test_list_merge_options
     albion = locations(:albion)

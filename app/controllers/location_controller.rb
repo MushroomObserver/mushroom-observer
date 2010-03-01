@@ -337,7 +337,7 @@ class LocationController < ApplicationController
           :high    => @location.high
         )
         flash_notice(:runtime_location_success.t(:id => @location.id))
-        success = true
+        done = true
 
       # Failed to create location
       else
@@ -375,7 +375,7 @@ class LocationController < ApplicationController
       merge = Location.find_by_display_name(name)
 
       # Merge with another location.
-      if merge != @location
+      if merge && merge != @location
 
         # Admins can actually merge them, then redirect to other location.
         if is_in_admin_mode?
@@ -391,12 +391,16 @@ class LocationController < ApplicationController
                   :this => @location.display_name, :that => merge.display_name)
           AccountMailer.deliver_webmaster_question(@user.email, content)
         end
+
+      # Otherwise it is safe to change the name.
+      else
+        @location.display_name = name
       end
 
       # Just update this location.
       if !done
         for key, val in params[:location]
-          if key != :display_name
+          if key != 'display_name'
             @location.send("#{key}=", val)
           end
         end

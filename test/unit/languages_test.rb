@@ -57,7 +57,9 @@ class LanguagesTest < Test::Unit::TestCase
   def validate_square_brackets_args(args)
     pass = true
     for pair in args.split(',')
-      if !pair.match(/^:?\w+=/)
+      if !pair.match(/^ :?\w+ = (
+            '.*' | ".*" | -?\d+(\.\d+)? | :\w+ | [a-z][a-z_]*\d*
+          )$/x)
         pass = false
         break
       end

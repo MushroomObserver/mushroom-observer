@@ -1341,6 +1341,14 @@ class ObserverController < ApplicationController
     store_location
     @site_data = SiteData.new.get_site_data
 
+    # Add some extra stats.
+    @site_data[:observed_taxa] = Name.connection.select_value %(
+      SELECT COUNT(DISTINCT name_id) FROM observations
+    )
+    @site_data[:listed_taxa] = Name.connection.select_value %(
+      SELECT COUNT(*) FROM names
+    )
+
     # # This grabs the six latest observations that have high-quality images.
     # ids = Observation.connection.select_values(%(
     #   SELECT DISTINCT observations.id
@@ -1361,13 +1369,6 @@ class ObserverController < ApplicationController
       :include => :thumb_image,
       :conditions => ["thumb_image_id is not null AND images.quality = 'high'"],
       :order => "observations.id desc", :limit => 6
-    )
-
-    @observed_taxa_count = Observation.connection.select_value %(
-      SELECT COUNT(DISTINCT name_id) FROM observations
-    )
-    @listed_taxa_count = Name.connection.select_value %(
-      SELECT COUNT(*) FROM names
     )
   end
 
