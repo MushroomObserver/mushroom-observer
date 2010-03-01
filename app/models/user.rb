@@ -160,7 +160,7 @@
 #  auth_code::          Code used to verify autologin cookie and POSTs in API.
 #  percent_complete::   How much of profile has User finished?
 #  change_password::    Change password (on an existing record).
-#  in_group::           Is User in a given UserGroup?
+#  in_group?::          Is User in a given UserGroup?
 #  remember_me?::       Does User want us to use the autologin cookie thing?
 #  interest_in::        Return state of User's interest in a given object.
 #  watching?::          Is User watching a given object?
@@ -408,17 +408,15 @@ class User < AbstractModel
 
   # Is the User in a given UserGroup?  (Specify group by name, not id.)
   #
-  #   user.in_group('reviewers')
+  #   user.in_group?('reviewers')
   #
-  def in_group(group_name)
+  def in_group?(group)
     result = false
-    for g in self.user_groups
-      if g.name == group_name
-        result = true
-        break
-      end
+    if group.is_a?(UserGroup)
+      user_groups.include?(group)
+    else
+      user_groups.any? {|g| g.name == group.to_s}
     end
-    return result
   end
 
   # Does this User want us to do the autologin cookie thing?

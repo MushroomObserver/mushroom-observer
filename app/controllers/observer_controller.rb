@@ -1167,7 +1167,7 @@ class ObserverController < ApplicationController
     @object = AbstractModel.find_object(params[:type], params[:id])
     @authors = @object.authors
     parent = @object.parent
-    if @authors.member?(@user) or @user.in_group('reviewers')
+    if @authors.member?(@user) or @user.in_group?('reviewers')
       @users = User.all(:order => "login, name")
       new_author = params[:add] ?  User.find(params[:add]) : nil
       if new_author and not @authors.member?(new_author)

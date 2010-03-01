@@ -203,7 +203,7 @@ module ApplicationHelper
         item = link_to(project.title,
                        :action => "create_#{type}_description",
                        :id => obj.id, :project => project.id,
-                       :params => query_params)
+                       :source => 'project', :params => query_params)
         indent + item
       end
       html2 = list.join("<br/>\n")

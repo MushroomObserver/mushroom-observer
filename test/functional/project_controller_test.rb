@@ -25,24 +25,23 @@ class ProjectControllerTest < ControllerTestCase
     assert_form_action(:action => 'edit_project') # Failure
   end
 
-#   def destroy_project_helper(project, changer)
-#     assert(project)
-#     total_draft_count = DraftName.count
-#     project_draft_count = project.draft_names.size
-#     assert(project_draft_count > 0)
-#     params = { :id => project.id.to_s }
-#     requires_user(:destroy_project, :show_project, params, changer.login)
-#     assert_response(:action => :show_project)
-#     assert(Project.find(project.id))
-#     assert(UserGroup.find(project.user_group.id))
-#     assert(UserGroup.find(project.admin_group.id))
-#     assert_equal(total_draft_count, DraftName.count)
-#   end
+  def destroy_project_helper(project, changer)
+    assert(project)
+    drafts = NameDescription.find_all_by_source_name(project.title)
+    assert(drafts.length > 0)
+    params = { :id => project.id.to_s }
+    requires_user(:destroy_project, :show_project, params, changer.login)
+    assert_response(:action => :show_project)
+    assert(Project.find(project.id))
+    assert(UserGroup.find(project.user_group.id))
+    assert(UserGroup.find(project.admin_group.id))
+    assert_obj_list_equal(drafts, NameDescription.find_all_by_source_name(project.title))
+  end
 
   def change_member_status_helper(changer, target_user, commit, admin_before, user_before, admin_after, user_after)
     eol_project = projects(:eol_project)
-    assert_equal(admin_before, target_user.in_group(eol_project.admin_group.name))
-    assert_equal(user_before, target_user.in_group(eol_project.user_group.name))
+    assert_equal(admin_before, target_user.in_group?(eol_project.admin_group.name))
+    assert_equal(user_before, target_user.in_group?(eol_project.user_group.name))
     params = {
       :id => eol_project.id,
       :candidate => target_user.id,
@@ -51,127 +50,9 @@ class ProjectControllerTest < ControllerTestCase
     post_requires_login(:change_member_status, params, changer.login)
     assert_response(:action => 'show_project', :id => eol_project.id)
     target_user = User.find(target_user.id)
-    assert_equal(admin_after, target_user.in_group(eol_project.admin_group.name))
-    assert_equal(user_after, target_user.in_group(eol_project.user_group.name))
+    assert_equal(admin_after, target_user.in_group?(eol_project.admin_group.name))
+    assert_equal(user_after, target_user.in_group?(eol_project.user_group.name))
   end
-
-#   def create_or_edit_draft_tester(draft, project, name, user=nil, page=nil)
-#     if user
-#       assert_not_equal(draft.user, user)
-#     else
-#       user = draft.user
-#     end
-#     count = DraftName.count
-#     params = {
-#       :project => project.id,
-#       :name => name.id
-#     }
-#     requires_login(:create_or_edit_draft, params, user.login)
-#     if page
-#       assert_response(:action => page, :id => draft.id)
-#     else
-#       assert_response('edit_draft')
-#     end
-#     assert_equal(count, DraftName.count)
-#   end
-# 
-#   def edit_draft_tester(draft, user=nil, success=true)
-#     if user
-#       assert_not_equal(user, draft.user)
-#     else
-#       user = draft.user
-#     end
-#     requires_login(:edit_draft, { :id => draft.id }, user.login)
-#     if success
-#       assert_response('edit_draft')
-#     else
-#       assert_response(:action => "show_draft", :id => draft.id)
-#     end
-#   end
-# 
-#   def edit_draft_post_helper(draft, user=nil, success=true, classification="")
-#     if user
-#       assert_not_equal(user, draft.user)
-#     else
-#       user = draft.user
-#     end
-#     gen_desc = "This is a very general description."
-#     assert_not_equal(gen_desc, draft.gen_desc)
-#     diag_desc = "This is a diagnostic description"
-#     assert_not_equal(diag_desc, draft.diag_desc)
-#     params = {
-#       :id => draft.id,
-#       :draft_name => {
-#         :gen_desc => gen_desc,
-#         :diag_desc => diag_desc,
-#         :classification => classification
-#       }
-#     }
-#     post_requires_login(:edit_draft, params, user.login)
-#     if success or classification == ""
-#       assert_response(:action => "show_draft", :id => draft.id)
-#     else
-#       assert_response('edit_draft')
-#     end
-#     draft.reload
-#     if success
-#       assert_equal(gen_desc, draft.gen_desc)
-#       assert_equal(diag_desc, draft.diag_desc)
-#       assert_equal(classification, draft.classification)
-#     else
-#       assert_not_equal(gen_desc, draft.gen_desc)
-#       assert_not_equal(diag_desc, draft.diag_desc)
-#       assert_not_equal(classification, draft.classification)
-#     end
-#   end
-# 
-#   def publish_draft_helper(draft, user=nil, success=true, action='show_draft')
-#     if user
-#       assert_not_equal(draft.user, user)
-#     else
-#       user = draft.user
-#     end
-#     draft_gen_desc = draft.gen_desc
-#     name_gen_desc = draft.name.gen_desc
-#     same_gen_desc = (draft_gen_desc == draft.name.gen_desc)
-#     name_id = draft.name_id
-#     params = {
-#       :id => draft.id
-#     }
-#     requires_login(:publish_draft, params, user.login)
-#     name = Name.find(name_id)
-#     if success
-#       assert_response(:controller => 'name', :action => 'show_name', :id => name_id)
-#       assert_equal(draft_gen_desc, name.gen_desc)
-#     else
-#       assert_response(:action => action, :id => draft.id)
-#       assert_equal(same_gen_desc, draft_gen_desc == draft.name.gen_desc)
-#     end
-#   end
-# 
-#   def destroy_draft_helper(draft, user=nil, success=true)
-#     if user
-#       assert_not_equal(draft.user, user)
-#     else
-#       user = draft.user
-#     end
-#     assert(draft)
-#     total_draft_count = DraftName.count
-#     params = {
-#       :id => draft.id
-#     }
-#     requires_login(:destroy_draft, params, user.login)
-#     assert_response('show_project')
-#     if success
-#       assert_raises(ActiveRecord::RecordNotFound) do
-#         draft = DraftName.find(draft.id)
-#       end
-#       assert_equal(total_draft_count - 1, DraftName.count)
-#     else
-#       assert(DraftName.find(draft.id))
-#       assert_equal(total_draft_count, DraftName.count)
-#     end
-#   end
 
 ################################################################################
 
@@ -267,40 +148,54 @@ class ProjectControllerTest < ControllerTestCase
     edit_project_helper(projects(:bolete_project).title, projects(:eol_project))
   end
 
-#   def test_destroy_project
-#     project = projects(:bolete_project)
-#     assert(project)
-#     user_group = project.user_group
-#     assert(user_group)
-#     admin_group = project.admin_group
-#     assert(admin_group)
-#     total_draft_count = DraftName.count
-#     project_draft_count = project.draft_names.size
-#     assert(project_draft_count > 0)
-#     params = { :id => project.id.to_s }
-#     requires_user(:destroy_project, :show_project, params, 'dick')
-#     assert_response(:action => :list_projects)
-#     assert_raises(ActiveRecord::RecordNotFound) do
-#       project = Project.find(project.id)
-#     end
-#     assert_raises(ActiveRecord::RecordNotFound) do
-#       user_group = UserGroup.find(user_group.id)
-#     end
-#     assert_raises(ActiveRecord::RecordNotFound) do
-#       admin_group = UserGroup.find(admin_group.id)
-#     end
-#     assert_equal(total_draft_count - project_draft_count, DraftName.count)
-#   end
-# 
-#   def test_destroy_project_other
-#     destroy_project_helper(projects(:bolete_project), @rolf)
-#   end
-# 
-#   def test_destroy_project_member
-#     eol_project = projects(:eol_project)
-#     assert(eol_project.is_member?(@katrina))
-#     destroy_project_helper(eol_project, @katrina)
-#   end
+  def test_destroy_project
+    project = projects(:bolete_project)
+    assert(project)
+    user_group = project.user_group
+    assert(user_group)
+    admin_group = project.admin_group
+    assert(admin_group)
+    drafts = NameDescription.find_all_by_source_name(project.title)
+    project_draft_count = drafts.length
+    assert(project_draft_count > 0)
+    params = { :id => project.id.to_s }
+    requires_user(:destroy_project, :show_project, params, 'dick')
+    assert_response(:action => :list_projects)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      project = Project.find(project.id)
+    end
+    assert_raises(ActiveRecord::RecordNotFound) do
+      user_group = UserGroup.find(user_group.id)
+    end
+    assert_raises(ActiveRecord::RecordNotFound) do
+      admin_group = UserGroup.find(admin_group.id)
+    end
+    Name.connection.select_value %(
+      SELECT COUNT(*) FROM name_descriptions_admins
+      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
+    )
+    Name.connection.select_value %(
+      SELECT COUNT(*) FROM name_descriptions_writers
+      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
+    )
+    Name.connection.select_value %(
+      SELECT COUNT(*) FROM name_descriptions_readers
+      WHERE user_group_id IN (#{admin_group.id}, #{user_group.id})
+    )
+    for draft in drafts
+      assert_not_equal(:project, draft.reload.source_type)
+    end
+  end
+
+  def test_destroy_project_other
+    destroy_project_helper(projects(:bolete_project), @rolf)
+  end
+
+  def test_destroy_project_member
+    eol_project = projects(:eol_project)
+    assert(eol_project.is_member?(@katrina))
+    destroy_project_helper(eol_project, @katrina)
+  end
 
   def test_send_admin_request
     eol_project = projects(:eol_project)
@@ -397,8 +292,8 @@ class ProjectControllerTest < ControllerTestCase
   def test_add_one_member_admin
     eol_project = projects(:eol_project)
     target_user = @dick
-    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
-    assert_equal(false, target_user.in_group(eol_project.user_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.user_group.name))
     params = {
       :id => eol_project.id,
       :candidate => target_user.id
@@ -406,15 +301,15 @@ class ProjectControllerTest < ControllerTestCase
     post_requires_login(:add_one_member, params, @mary.login)
     assert_response(:action => 'add_members', :id => eol_project.id)
     target_user = User.find(target_user.id)
-    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
-    assert_equal(true, target_user.in_group(eol_project.user_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
+    assert_equal(true, target_user.in_group?(eol_project.user_group.name))
   end
 
   def test_add_one_member_member
     eol_project = projects(:eol_project)
     target_user = @dick
-    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
-    assert_equal(false, target_user.in_group(eol_project.user_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.user_group.name))
     params = {
       :id => eol_project.id,
       :candidate => target_user.id
@@ -422,8 +317,8 @@ class ProjectControllerTest < ControllerTestCase
     post_requires_login(:add_one_member, params, @katrina.login)
     assert_response(:action => 'add_members', :id => eol_project.id)
     target_user = User.find(target_user.id)
-    assert_equal(false, target_user.in_group(eol_project.admin_group.name))
-    assert_equal(false, target_user.in_group(eol_project.user_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
+    assert_equal(false, target_user.in_group?(eol_project.user_group.name))
   end
 
   def test_add_members
@@ -435,152 +330,4 @@ class ProjectControllerTest < ControllerTestCase
     requires_login(:add_members, { :id => project_id }, @katrina.login)
     assert_response(:action => 'show_project', :id => project_id)
   end
-
-#   # Ensure that draft owner can see a draft they own
-#   def test_show_draft
-#     draft = draft_names(:draft_coprinus_comatus)
-#     requires_login(:show_draft, { :id => draft.id }, draft.user.login)
-#     assert_response('show_draft')
-#   end
-# 
-#   # Ensure that an admin can see a draft they don't own
-#   def test_show_draft_admin
-#     draft = draft_names(:draft_coprinus_comatus)
-#     assert_not_equal(draft.user, @mary)
-#     requires_login(:show_draft, { :id => draft.id }, @mary.login)
-#     assert_response('show_draft')
-#   end
-# 
-#   # Ensure that an member can see a draft they don't own
-#   def test_show_draft_member
-#     draft = draft_names(:draft_agaricus_campestris)
-#     assert_not_equal(draft.user, @katrina)
-#     requires_login(:show_draft, { :id => draft.id }, @katrina.login)
-#     assert_response('show_draft')
-#   end
-# 
-#   # Ensure that a non-member cannot see a draft
-#   def test_show_draft_non_member
-#     draft = draft_names(:draft_agaricus_campestris)
-#     assert(!draft.project.is_member?(@dick))
-#     requires_login(:show_draft, { :id => draft.id }, @dick.login)
-#     assert_response(:action => "show_project")
-#   end
-# 
-#   def test_create_or_edit_draft_owner
-#     create_or_edit_draft_tester(draft_names(:draft_coprinus_comatus),
-#         projects(:eol_project), names(:coprinus_comatus))
-#   end
-# 
-#   def test_create_or_edit_draft_admin
-#     create_or_edit_draft_tester(draft_names(:draft_coprinus_comatus),
-#         projects(:eol_project), names(:coprinus_comatus), @mary)
-#   end
-# 
-#   def test_create_or_edit_draft_not_owner
-#     create_or_edit_draft_tester(draft_names(:draft_agaricus_campestris),
-#         projects(:eol_project), names(:agaricus_campestris), @katrina, "show_draft")
-#   end
-# 
-#   def test_create_or_edit_draft_not_project
-#     create_or_edit_draft_tester(draft_names(:draft_boletus_edulis),
-#         projects(:eol_project), names(:boletus_edulis), @katrina, "show_draft")
-#   end
-# 
-#   def test_create_or_edit_draft_new_draft
-#     count = DraftName.count
-#     params = {
-#       :project => projects(:eol_project).id,
-#       :name => names(:conocybe_filaris).id
-#     }
-#     requires_login(:create_or_edit_draft, params, @katrina.login)
-#     assert_response('edit_draft')
-#     assert_equal(count + 1, DraftName.count)
-#   end
-# 
-#   def test_create_or_edit_draft_no_draft_not_member
-#     count = DraftName.count
-#     params = {
-#       :project => projects(:eol_project).id,
-#       :name => names(:conocybe_filaris).id
-#     }
-#     requires_login(:create_or_edit_draft, params, @dick.login)
-#     assert_response(:action => "show_project", :id => projects(:eol_project).id)
-#     assert_equal(count, DraftName.count)
-#   end
-# 
-#   def test_edit_draft
-#     edit_draft_tester(draft_names(:draft_coprinus_comatus))
-#   end
-# 
-#   def test_edit_draft_admin
-#     assert(draft_names(:draft_coprinus_comatus).project.is_admin?(@mary))
-#     edit_draft_tester(draft_names(:draft_coprinus_comatus), @mary)
-#   end
-# 
-#   def test_edit_draft_member
-#     assert(draft_names(:draft_coprinus_comatus).project.is_member?(@katrina))
-#     edit_draft_tester(draft_names(:draft_agaricus_campestris), @katrina, false)
-#   end
-# 
-#   def test_edit_draft_non_member
-#     assert(!draft_names(:draft_agaricus_campestris).project.is_member?(@dick))
-#     edit_draft_tester(draft_names(:draft_agaricus_campestris), @dick, false)
-#   end
-# 
-#   def test_edit_draft_post
-#     edit_draft_post_helper(draft_names(:draft_coprinus_comatus))
-#   end
-# 
-#   def test_edit_draft_post_admin
-#     edit_draft_post_helper(draft_names(:draft_coprinus_comatus), @mary)
-#   end
-# 
-#   def test_edit_draft_post_member
-#     edit_draft_post_helper(draft_names(:draft_agaricus_campestris), @katrina, false)
-#   end
-# 
-#   def test_edit_draft_post_non_member
-#     edit_draft_post_helper(draft_names(:draft_agaricus_campestris), @dick, false)
-#   end
-# 
-#   def test_edit_draft_post_bad_classification
-#     edit_draft_post_helper(draft_names(:draft_coprinus_comatus), nil, false, "**Domain**: Eukarya")
-#   end
-# 
-#   def test_publish_draft
-#     publish_draft_helper(draft_names(:draft_coprinus_comatus))
-#   end
-# 
-#   def test_publish_draft_admin
-#     publish_draft_helper(draft_names(:draft_coprinus_comatus), @mary)
-#   end
-# 
-#   def test_publish_draft_member
-#     publish_draft_helper(draft_names(:draft_agaricus_campestris), @katrina, false)
-#   end
-# 
-#   def test_publish_draft_non_member
-#     publish_draft_helper(draft_names(:draft_agaricus_campestris), @dick, false)
-#   end
-# 
-#   def test_publish_draft_bad_classification
-#     publish_draft_helper(draft_names(:draft_lactarius_alpinus), nil, false, 'edit_draft')
-#   end
-# 
-#   def test_destroy_draft
-#     destroy_draft_helper(draft_names(:draft_coprinus_comatus))
-#   end
-# 
-#   def test_destroy_draft_admin
-#     destroy_draft_helper(draft_names(:draft_coprinus_comatus), @mary)
-#   end
-# 
-#   def test_destroy_draft_member
-#     destroy_draft_helper(draft_names(:draft_agaricus_campestris), @katrina, false)
-#   end
-# 
-#   def test_destroy_draft_non_member
-#     destroy_draft_helper(draft_names(:draft_agaricus_campestris), @dick, false)
-#   end
 end

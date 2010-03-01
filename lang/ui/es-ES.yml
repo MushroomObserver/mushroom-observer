@@ -879,6 +879,9 @@ runtime_ask_webmaster_antispam: >
   Para reducir el spam de robots, las preguntas de los usuarios no registrados
   no pueden contener «http:» o marcas HTML.
 
+runtime_create_draft_create_denied: >
+  No tiene permiso para crear un borrador para el proyecto [title].
+
 runtime_create_naming_already_proposed: >
   Alguien ya ha propuesto ese nombre.  Si desea hacer comentarios sobre ello,
   intenta publicar un comentario en lugar.
@@ -886,6 +889,9 @@ runtime_create_naming_already_proposed: >
 runtime_destroy_naming_someone_else: >
   Lo sientimos, alguien más lo ha dado su mayor voto positivo.  Usted es
   libre de proponer otros nombres, pero ya no puede borrar este nombre.
+
+runtime_edit_description_denied: >
+  Usted no se ha dado permiso para editar esta descripción.
 
 runtime_edit_naming_someone_else: >
   Lo sientimos, alguien más lo ha dado su mayor voto positivo, por lo que
@@ -936,6 +942,12 @@ runtime_reverify_already_verified: >
 
 runtime_reverify_sent: >
   La verificación ha sido enviada a su cuenta de correo electrónico.
+
+runtime_show_description_denied: >
+  Usted no se ha dado permiso para ver esta descripción.
+
+runtime_show_draft_denied: >
+  Permiso denegado: sólo miembros de proyecto pueden ver los borradores en curso.
 
 runtime_signup_success: >
   Su cuenta se ha creado con éxito.  La verificacion fue enviado a su cuenta
@@ -3098,36 +3110,9 @@ change_user_bonuses_help: >
   that page.
 
 
-# project/create_or_edit_draft
-create_draft_bad_args: >
-  Argumentos invalidos para create_or_edit_draft: project => [project], name => [name]
-
-create_draft_create_denied: >
-  No tiene permiso para crear un borrador para el proyecto [title].
-
-create_draft_edit_denied: >
-  Permiso denegado: sólo el creador de un borrador puede editarlo.
-
-create_draft_failed: No se ha podido crear un nuevo borrador.
-create_draft_updated: El borrador se ha creado con éxito.
-create_draft_multiple: >
-  Permiso denegado: un borrador ya existe para el nombre «[name]» en el
-  proyecto «[title]» y múltiples borradores para el mismo nombre todavía no
-  es possible.
-
-
-# draft/destroy_draft
-destroy_draft_failed: No se ha podido borrar el borrador.
-destroy_draft_success: El borrador se ha borrado.
-
-
 # project/destroy_project
 destroy_project_failed: No se ha podido borrar el proyecto.
 destroy_project_success: El proyecto se ha borrado con éxito.
-
-
-# project/edit_draft
-edit_draft_title: Editar Borrador para [name]
 
 
 # project/edit_project
@@ -3174,17 +3159,6 @@ review_authors_title: Revisar Autor(es) para [name]
 # observer/send_feature_email
 send_feature_email_success: E-mail de características se ha enviado.
 send_feature_email_denied: Sólo el admin puede enviar e-mail de características.
-
-
-# project/show_draft
-show_draft_denied: >
-  Permiso denegado: sólo miembros de proyecto pueden ver los borradores en curso.
-
-show_draft_destroy_draft: Borrar Borrador
-show_draft_edit_draft: Editar Borrador
-show_draft_publish_draft: Publicar Borrador
-show_draft_show_project: Mostrar Proyecto
-show_draft_title: Borrado de [name] para [title]
 
 
 # project/show_project

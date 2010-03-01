@@ -1,19 +1,20 @@
 <!--[form:description]-->
 
-<% if @description.is_admin?(@user) %>
+<% if @description.new_record? or @description.is_admin?(@user) %>
   <p>
     <label for="description_source"><%= :form_description_source.t %>:</label><br/>
     <%=
       need_help = false
       type = @description.source_type
 
-      # When a user creates a new draft, they may choose two source types right
-      # now.  If they choose "source" they need to be able to enter the name of
-      # the source; if they choose "user" they don't get a choice -- it *must*
-      # be their user name.  The javascript callback ensures that "source_name"
-      # is editable only when "source" is chosen.  It also keeps track of the
+      # When a user creates a new draft, they may choose three source types
+      # right now.  If they choose "source" they need to be able to enter the
+      # name of the source; if they choose "user" they don't get a choice -- it
+      # *must* be their user name.  (Let user enter a summary for "public",
+      # too.)  The javascript callback ensures that "source_name" is editable
+      # only when "public" or "source" is chosen.  It also keeps track of the
       # source name, allowing the user to switch back and forth without losing
-      # the source name if they've already entered it.
+      # the source name if they've already entered it. 
       if @description.new_record? && [:public, :source, :user].include?(type)
         need_help = true
         javascript_include('prototype.js')

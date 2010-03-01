@@ -10,6 +10,130 @@ class NameControllerTest < ControllerTestCase
     result
   end
 
+  # Create a draft for a project.
+  def create_draft_tester(project, name, user=nil, success=true)
+    count = NameDescription.count
+    params = {
+      :id => name.id,
+      :source => 'project',
+      :project => project.id,
+    }
+    requires_login(:create_name_description, params, user.login)
+    if success
+      assert_response('create_name_description')
+      assert_equal(count, NameDescription.count)
+    else
+      assert_response(:controller => 'project',
+                      :action => 'show_project', :id => project.id)
+      assert_equal(count, NameDescription.count)
+    end
+  end
+
+  # Edit a draft for a project (GET).
+  def edit_draft_tester(draft, user=nil, success=true, reader=true)
+    if user
+      assert_not_equal(user, draft.user)
+    else
+      user = draft.user
+    end
+    params = {
+      :id => draft.id
+    }
+    requires_login(:edit_name_description, params, user.login)
+    if success
+      assert_response('edit_name_description')
+    elsif reader
+      assert_response(:action => "show_name_description", :id => draft.id)
+    else
+      assert_response(:action => "show_name", :id => draft.name_id)
+    end
+  end
+
+  # Edit a draft for a project (POST).
+  def edit_draft_post_helper(draft, user, params={}, permission=true, success=true)
+    gen_desc = "This is a very general description."
+    assert_not_equal(gen_desc, draft.gen_desc)
+    diag_desc = "This is a diagnostic description"
+    assert_not_equal(diag_desc, draft.diag_desc)
+    classification = "Family: _Agaricaceae_"
+    assert_not_equal(classification, draft.classification)
+    params = {
+      :id => draft.id,
+      :description => {
+        :gen_desc => gen_desc,
+        :diag_desc => diag_desc,
+        :classification => classification,
+      }.merge(params)
+    }
+    post_requires_login(:edit_name_description, params, user.login)
+    if permission && !success
+      assert_response('edit_name_description')
+    elsif draft.is_reader?(user)
+      assert_response(:action => 'show_name_description', :id => draft.id)
+    else
+      assert_response(:action => 'show_name', :id => draft.name_id)
+    end
+    draft.reload
+    if permission && success
+      assert_equal(gen_desc, draft.gen_desc)
+      assert_equal(diag_desc, draft.diag_desc)
+      assert_equal(classification, draft.classification)
+    else
+      assert_not_equal(gen_desc, draft.gen_desc)
+      assert_not_equal(diag_desc, draft.diag_desc)
+      assert_not_equal(classification, draft.classification)
+    end
+  end
+
+#   def publish_draft_helper(draft, user=nil, success=true, action='show_name_description')
+#     if user
+#       assert_not_equal(draft.user, user)
+#     else
+#       user = draft.user
+#     end
+#     draft_gen_desc = draft.gen_desc
+#     name_gen_desc = draft.name.gen_desc
+#     same_gen_desc = (draft_gen_desc == draft.name.gen_desc)
+#     name_id = draft.name_id
+#     params = {
+#       :id => draft.id
+#     }
+#     requires_login(:publish_draft, params, user.login)
+#     name = Name.find(name_id)
+#     if success
+#       assert_response(:controller => 'name', :action => 'show_name', :id => name_id)
+#       assert_equal(draft_gen_desc, name.gen_desc)
+#     else
+#       assert_response(:action => action, :id => draft.id)
+#       assert_equal(same_gen_desc, draft_gen_desc == draft.name.gen_desc)
+#     end
+#   end
+
+  # Destroy a draft of a project.
+  def destroy_draft_helper(draft, user, success=true)
+    assert(draft)
+    count = NameDescription.count
+    params = {
+      :id => draft.id
+    }
+    requires_login(:destroy_name_description, params, user.login)
+    if success
+      assert_response(:action => 'show_name', :id => draft.name_id)
+      assert_raises(ActiveRecord::RecordNotFound) do
+        draft = NameDescription.find(draft.id)
+      end
+      assert_equal(count - 1, NameDescription.count)
+    else
+      assert(NameDescription.find(draft.id))
+      assert_equal(count, NameDescription.count)
+      if draft.is_reader?(user)
+        assert_response(:action => 'show_name_description', :id => draft.id)
+      else
+        assert_response(:action => 'show_name', :id => draft.name_id)
+      end
+    end
+  end
+
 ################################################################################
 
   def test_name_index
@@ -2214,7 +2338,7 @@ class NameControllerTest < ControllerTestCase
   def test_set_review_status_reviewer
     name = names(:coprinus_comatus)
     assert_equal(:unreviewed, name.description.review_status)
-    assert(@rolf.in_group('reviewers'))
+    assert(@rolf.in_group?('reviewers'))
     params = {
       :id => name.id,
       :value => 'vetted'
@@ -2227,7 +2351,7 @@ class NameControllerTest < ControllerTestCase
   def test_set_review_status_non_reviewer
     name = names(:coprinus_comatus)
     assert_equal(:unreviewed, name.description.review_status)
-    assert(!@mary.in_group('reviewers'))
+    assert(!@mary.in_group?('reviewers'))
     params = {
       :id => name.id,
       :value => 'vetted'
@@ -2283,5 +2407,138 @@ class NameControllerTest < ControllerTestCase
       :controller => 'interest', :action => 'set_interest',
       :type => 'Name', :id => peltigera.id, :state => 1
     )
+  end
+
+  # ----------------------------
+  #  Test project drafts.
+  # ----------------------------
+
+  # Ensure that draft owner can see a draft they own
+  def test_show_draft
+    draft = name_descriptions(:draft_coprinus_comatus)
+    login(draft.user.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response('show_name_description')
+  end
+
+  # Ensure that an admin can see a draft they don't own
+  def test_show_draft_admin
+    draft = name_descriptions(:draft_coprinus_comatus)
+    assert_not_equal(draft.user, @mary)
+    login(@mary.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response('show_name_description')
+  end
+
+  # Ensure that an member can see a draft they don't own
+  def test_show_draft_member
+    draft = name_descriptions(:draft_agaricus_campestris)
+    assert_not_equal(draft.user, @katrina)
+    login(@katrina.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response('show_name_description')
+  end
+
+  # Ensure that a non-member cannot see a draft
+  def test_show_draft_non_member
+    project = projects(:eol_project)
+    draft = name_descriptions(:draft_agaricus_campestris)
+    assert(draft.belongs_to_project?(project))
+    assert(!project.is_member?(@dick))
+    login(@dick.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response(:controller => 'project', :action => 'show_project',
+                    :id => project.id)
+  end
+
+  def test_create_draft_member
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @katrina)
+  end
+
+  def test_create_draft_admin
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @mary)
+  end
+
+  def test_create_draft_not_member
+    create_draft_tester(projects(:eol_project), names(:agaricus_campestris), @dick, false)
+  end
+
+  def test_edit_draft
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus))
+  end
+
+  def test_edit_draft_admin
+    assert(projects(:eol_project).is_admin?(@mary))
+    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus), @mary)
+  end
+
+  def test_edit_draft_member
+    assert(projects(:eol_project).is_member?(@katrina))
+    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+  end
+
+  def test_edit_draft_non_member
+    assert(!projects(:eol_project).is_member?(@dick))
+    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+  end
+
+  def test_edit_draft_post_owner
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf, {})
+  end
+
+  def test_edit_draft_post_admin
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @mary, {})
+  end
+
+  def test_edit_draft_post_member
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @katrina, {}, false)
+  end
+
+  def test_edit_draft_post_non_member
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @dick, {}, false)
+  end
+
+  def test_edit_draft_post_bad_classification
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf,
+      { :classification => "**Domain**: Eukarya" }, true, false)
+  end
+
+#   def test_publish_draft
+#     publish_draft_helper(name_descriptions(:draft_coprinus_comatus))
+#   end
+# 
+#   def test_publish_draft_admin
+#     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary)
+#   end
+# 
+#   def test_publish_draft_member
+#     publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+#   end
+# 
+#   def test_publish_draft_non_member
+#     publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
+#   end
+# 
+#   def test_publish_draft_bad_classification
+#     publish_draft_helper(name_descriptions(:draft_lactarius_alpinus), nil, false, 'edit_draft')
+#   end
+
+  def test_destroy_draft_owner
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @rolf)
+  end
+
+  def test_destroy_draft_admin
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary)
+  end
+
+  def test_destroy_draft_member
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+  end
+
+  def test_destroy_draft_non_member
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
   end
 end

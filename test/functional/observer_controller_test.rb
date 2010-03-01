@@ -496,15 +496,15 @@ class ObserverControllerTest < ControllerTestCase
     params = { :id => 1, :type => 'LocationDescription' }
 
     # Make sure it lets Rolf and only Rolf see this page.
-    assert(!@mary.in_group('reviewers'))
-    assert(@rolf.in_group('reviewers'))
+    assert(!@mary.in_group?('reviewers'))
+    assert(@rolf.in_group?('reviewers'))
     requires_user(:review_authors, :show_location, params)
     assert_response('review_authors')
 
     # Remove Rolf from reviewers group.
     user_groups(:reviewers).users.delete(@rolf)
     @rolf.reload
-    assert(!@rolf.in_group('reviewers'))
+    assert(!@rolf.in_group?('reviewers'))
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
@@ -546,7 +546,7 @@ class ObserverControllerTest < ControllerTestCase
 
     # Remove Rolf from reviewers group.
     user_groups(:reviewers).users.delete(@rolf)
-    assert(!@rolf.reload.in_group('reviewers'))
+    assert(!@rolf.reload.in_group?('reviewers'))
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)

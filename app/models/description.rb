@@ -117,7 +117,7 @@ class Description < AbstractModel
 
   # Descriptive title including parent name, in plain text.
   def text_name
-    build_name(:full).t.html_to_ascii
+    put_together_name(:full).t.html_to_ascii
   end
 
   # Same as +text_name+ but with id tacked on.
@@ -308,7 +308,7 @@ class Description < AbstractModel
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
     (source_type == :project) and
-    (source_title == :project.title)
+    (source_name == project.title)
   end
 
   ##############################################################################
@@ -425,11 +425,11 @@ class Description < AbstractModel
   # Array of ids.  Caches result.
   def group_user_ids(table)
     @group_user_ids ||= {}
-    @group_user_ids[table] ||= self.class.connection.select_values(%(
-      SELECT DISTINCT t.user_group_id FROM #{table} t, user_groups_users u
+    @group_user_ids[table] ||= self.class.connection.select_values(x=%(
+      SELECT DISTINCT u.user_id FROM #{table} t, user_groups_users u
       WHERE t.#{self.class.name.underscore}_id = #{id}
         AND t.user_group_id = u.user_group_id
-      ORDER BY t.user_group_id ASC
+      ORDER BY u.user_id ASC
     )).map(&:to_i)
   end
 

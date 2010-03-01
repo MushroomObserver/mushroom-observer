@@ -218,7 +218,7 @@ class ProjectController < ApplicationController
       title = @project.title
       user_group = @project.user_group
       admin_group = @project.admin_group
-      for d in NameDescription.find_by_source_type_and_source_name(:project, @project.title)
+      for d in NameDescription.find_all_by_source_type_and_source_name(:project, @project.title)
         d.source_type = :source
         d.admin_groups.delete(admin_group)
         d.writer_groups.delete(admin_group)

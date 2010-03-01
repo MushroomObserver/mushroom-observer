@@ -149,7 +149,7 @@ class NameDescription < Description
   #
   def update_review_status(value)
     user = User.current
-    if not user.in_group('reviewers')
+    if not user.in_group?('reviewers')
       # This communicates the name of the old reviewer to notify_authors.
       # This allows it to notify the old reviewer of the change.
       @old_reviewer = reviewer
@@ -244,5 +244,17 @@ class NameDescription < Description
 
     # No longer need this.
     @old_reviewer = nil
+  end
+
+################################################################################
+
+protected
+
+  def validate # :nodoc:
+    begin
+      self.classification = Name.validate_classification(parent.rank, self.classification)
+    rescue => e
+      errors.add(:classification, e.to_s)
+    end
   end
 end

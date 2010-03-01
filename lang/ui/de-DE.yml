@@ -879,6 +879,9 @@ runtime_ask_webmaster_antispam: >
   Um spam-bots das Leben schwer zu machen, dürfen Fragen von nicht-registrierten
   Anwendern weder 'http:' noch HTML-Markup enthalten.
 
+runtime_create_draft_create_denied: >
+  Du darfst keine Vorschläge abgeben im Projekt [title].
+
 runtime_create_naming_already_proposed: >
   Jemand hat diesen Namen schon vorgeschlagen. Wenn du darüber auch etwas
   schreiben möchtest, schreib doch einen Kommentar.
@@ -887,6 +890,9 @@ runtime_destroy_naming_someone_else: >
   Entschuldigung, jemand ist sich sicher, dass dies der richtige Name ist.
   Du kannst gern weitere Namen vorschlagen, aber du kannst diesen Namen
   nicht mehr löschen.
+
+runtime_edit_description_denied:  >
+  You have not been given permission to see edit description.
 
 runtime_edit_naming_someone_else: >
   Entschuldigung, jemand anders fand diesen Namen ganz gut, deshalb haben wir
@@ -933,6 +939,12 @@ runtime_reverify_already_verified:  >
 
 runtime_reverify_sent: >
   Überprüfung abgeschickt an Email-Adresse.
+
+runtime_show_description_denied:  >
+  You have not been given permission to see this description.
+
+runtime_show_draft_denied: >
+  Verboten: Nur Projekt-Mitarbeiter können die gegenwärtigen Entwürfe lesen.
 
 runtime_signup_success: >
   Anmeldung erfolgreich.  Überprüfungs-Email in deiner Inbox.
@@ -3000,35 +3012,9 @@ change_user_bonuses_help: >
   that page.
 
 
-# project/create_or_edit_draft
-create_draft_bad_args: >
-  Fehlerhafte Argumente an create_or_edit_draft: Projekt => [project], Name => [name]
-
-create_draft_create_denied: >
-  Du darfst keine Vorschläge abgeben im Projekt [title].
-
-create_draft_edit_denied: >
-  Verboten: Nur der, der den Vorschlag gemacht hat, kann ihn verändern.
-
-create_draft_failed: Kann neuen Vorschlag nicht erstellen.
-create_draft_updated: Vorschlag wurde verändert.
-create_draft_multiple: >
-  Verboten. Im Projekt '[title]' gibt es schon einen Vorschlag mit dem
-  Namen '[name]', und derselbe Name kann noch nicht doppelt vorgeschlagen werden.
-
-
-# draft/destroy_draft
-destroy_draft_failed: Entwurf konnte nicht gelöscht werden.
-destroy_draft_success: Entwurf gelöscht.
-
-
 # project/destroy_project
 destroy_project_failed: Projekt konnte nicht gelöscht werden.
 destroy_project_success: Projekt gelöscht.
-
-
-# project/edit_draft
-edit_draft_title: Bearbeite Entwurf für [name]
 
 
 # project/edit_project
@@ -3076,17 +3062,6 @@ review_authors_title: Autor(en) für [name] bearbeiten
 # observer/send_feature_email
 send_feature_email_success: Funktionalitäten-Email abgeschickt.
 send_feature_email_denied: Nur ein Admin kann eine Funktionalitäten-Email versenden.
-
-
-# project/show_draft
-show_draft_denied: >
-  Verboten: Nur Projekt-Mitarbeiter können die gegenwärtigen Entwürfe lesen.
-
-show_draft_destroy_draft: Entwurf löschen
-show_draft_edit_draft: Entwurf bearbeiten
-show_draft_publish_draft: Entwurf veröffentlichen
-show_draft_show_project: Projekt anzeigen
-show_draft_title: Entwurf von [name] für [title]
 
 
 # project/show_project

@@ -39,11 +39,6 @@ class NameController < ApplicationController
     :advanced_search,
     :authored_names,
     :auto_complete_name,
-    :create_name,
-    :create_name_description,
-    :destroy_name_description,
-    :edit_name,
-    :edit_name_description,
     :eol,
     :eol_preview,
     :index_name,
@@ -57,7 +52,9 @@ class NameController < ApplicationController
     :observation_index,
     :prev_name,
     :show_name,
+    :show_name_description,
     :show_past_name,
+    :show_past_name_description,
     :test_index,
   ]
 
@@ -281,12 +278,31 @@ class NameController < ApplicationController
     pass_query_params
     @description = NameDescription.find(params[:id], :include =>
       [:authors, :editors, :license, :reviewer, :user, {:name=>:descriptions}])
-    @name = @description.name
-    update_view_stats(@description)
 
-    # Get a list of projects the user can create drafts for.
-    @projects = @user && @user.projects_member.select do |project|
-      !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+    # Public or user has permission.
+    if @description.is_reader?(@user)
+      @name = @description.name
+      update_view_stats(@description)
+
+      # Get a list of projects the user can create drafts for.
+      @projects = @user && @user.projects_member.select do |project|
+        !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+      end
+
+    # User doesn't have permission to see this description.
+    else
+      if @description.source_type == :project
+        flash_error(:runtime_show_draft_denied.t)
+        if project = Project.find_by_title(@description.source_name)
+          redirect_to(:controller => 'project', :action => 'show_project',
+                      :id => project.id)
+        else
+          redirect_to(:action => 'show_name', :id => @description.name_id)
+        end
+      else
+        flash_error(:runtime_show_description_denied.t)
+        redirect_to(:action => 'show_name', :id => @description.name_id)
+      end
     end
   end
 
@@ -574,10 +590,17 @@ class NameController < ApplicationController
       # Initialize source-specific stuff.
       case params[:source]
       when 'project'
-        @description.source_type  = :project
-        @description.source_name  = Project.find(params[:project])
-        @description.public       = false
-        @description.public_write = false
+        project = Project.find(params[:project])
+        if @user.in_group?(project.user_group)
+          @description.source_type  = :project
+          @description.source_name  = project.title
+          @description.public       = false
+          @description.public_write = false
+        else
+          flash_error(:runtime_create_draft_create_denied.t(:title => project.title))
+          redirect_to(:controller => 'project', :action => 'show_project',
+                      :id => project.id)
+        end
       else
         @description.source_type  = :public
         @description.public       = true
@@ -640,7 +663,15 @@ class NameController < ApplicationController
     @description = NameDescription.find(params[:id])
     @licenses = License.current_names_and_ids
 
-    if request.method == :post
+    if !@description.is_writer?(@user)
+      flash_error(:runtime_edit_description_denied.t)
+      if @description.is_reader?(@user)
+        redirect_to(:action => 'show_name_description', :id => @description.id)
+      else
+        redirect_to(:action => 'show_name', :id => @description.name_id)
+      end
+
+    elsif request.method == :post
       @description.attributes = params[:description]
 
       args = {}
@@ -661,8 +692,7 @@ class NameController < ApplicationController
       # "review", even though they haven't actually changed the review
       # status.  If it's a non-reviewer, this will revert it to "unreviewed". 
       if @description.save_version?
-        @description.update_review_status(@description.review_status, @user,
-                                          Time.now)
+        @description.update_review_status(@description.review_status)
       end
 
       # No changes made.
@@ -701,15 +731,20 @@ class NameController < ApplicationController
   def destroy_name_description
     pass_query_params
     @description = NameDescription.find(params[:id])
-    if !@description.is_admin?(@user)
-      flash_error(:runtime_destroy_description_not_admin.t)
-      redirect_to(:action => 'show_name_description', :id => @description.id,
-                  :params => query_params)
-    else
+    if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
       @description.destroy
       redirect_to(:action => 'show_name', :id => @description.name_id,
                   :params => query_params)
+    else
+      flash_error(:runtime_destroy_description_not_admin.t)
+      if @description.is_reader?(@user)
+        redirect_to(:action => 'show_name_description', :id => @description.id,
+                    :params => query_params)
+      else
+        redirect_to(:action => 'show_name', :id => @description.name_id,
+                    :params => query_params)
+      end
     end
   end
 

@@ -877,6 +877,9 @@ runtime_ask_webmaster_antispam: >
   To cut down on robot spam, questions from unregistered users cannot contain
   'http:' or HTML markup.
 
+runtime_create_draft_create_denied: >
+  You do not have permission to create a draft for the project [title].
+
 runtime_create_naming_already_proposed: >
   Someone has already proposed that name.  If you would like to comment on it,
   try posting a comment instead.
@@ -885,6 +888,9 @@ runtime_destroy_naming_someone_else: >
   Sorry, someone else has given this their strongest positive vote.  You are
   free to propose alternate names, but we can no longer let you delete this
   name.
+
+runtime_edit_description_denied: >
+  You have not been given permission to see edit description.
 
 runtime_edit_naming_someone_else: >
   Sorry, someone else has given this a positive vote, so we had to create a new
@@ -930,6 +936,12 @@ runtime_reverify_already_verified: >
 
 runtime_reverify_sent: >
   Another verification email was sent to your email account.
+
+runtime_show_description_denied: >
+  You have not been given permission to see this description.
+
+runtime_show_draft_denied: >
+  Permission denied: only project members can view drafts in progress.
 
 runtime_signup_success: >
   Signup successful.  Verification sent to your email account.
@@ -2995,35 +3007,9 @@ change_user_bonuses_help: >
   that page.
 
 
-# project/create_or_edit_draft
-create_draft_bad_args: >
-  Bad arguments for create_or_edit_draft: project => [project], name => [name]
-
-create_draft_create_denied: >
-  You do not have permission to create a draft for the project [title].
-
-create_draft_edit_denied: >
-  Permission denied: Only the creator of a draft can edit it.
-
-create_draft_failed: Unable to create new draft.
-create_draft_updated: Draft was successfully updated.
-create_draft_multiple: >
-  Permission denied.  A draft already exists for the name '[name]' in the
-  project '[title]' and multiple drafts for the same name are not yet supported.
-
-
-# draft/destroy_draft
-destroy_draft_failed: Failed to destroy draft.
-destroy_draft_success: Draft destroyed.
-
-
 # project/destroy_project
 destroy_project_failed: Failed to destroy project.
 destroy_project_success: Project destroyed.
-
-
-# project/edit_draft
-edit_draft_title: Editing Draft for [name]
 
 
 # project/edit_project
@@ -3070,17 +3056,6 @@ review_authors_title: Reviewing Author(s) for [name]
 # observer/send_feature_email
 send_feature_email_success: Delivered feature mail.
 send_feature_email_denied: Only the admin can send feature mail.
-
-
-# project/show_draft
-show_draft_denied: >
-  Permission denied: only project members can view drafts in progress.
-
-show_draft_destroy_draft: Destroy Draft
-show_draft_edit_draft: Edit Draft
-show_draft_publish_draft: Publish Draft
-show_draft_show_project: Show Project
-show_draft_title: Draft of [name] for [title]
 
 
 # project/show_project

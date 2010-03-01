@@ -30,10 +30,6 @@
 
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
-    :create_location,
-    :create_location_description,
-    :edit_location,
-    :edit_location_description,
     :index_location,
     :list_locations,
     :location_search,
@@ -43,7 +39,9 @@ class LocationController < ApplicationController
     :next_location,
     :prev_location,
     :show_location,
+    :show_location_description,
     :show_past_location,
+    :show_past_location_description,
   ]
 
   before_filter :disable_link_prefetching, :except => [
@@ -233,12 +231,31 @@ class LocationController < ApplicationController
     pass_query_params
     @description = LocationDescription.find(params[:id], :include =>
       [ :authors, :editors, :license, :user, {:location => :descriptions} ])
-    @location = @description.location
-    update_view_stats(@description)
 
-    # Get a list of projects the user can create drafts for.
-    @projects = @user && @user.projects_member.select do |project|
-      !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+    # Public or user has permission.
+    if @description.is_reader?(@user)
+      @location = @description.location
+      update_view_stats(@description)
+
+      # Get a list of projects the user can create drafts for.
+      @projects = @user && @user.projects_member.select do |project|
+        !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+      end
+
+    # User doesn't have permission to see this description.
+    else
+      if @description.source_type == :project
+        flash_error(:runtime_show_draft_denied.t)
+        if project = Project.find_by_title(@description.source_name)
+          redirect_to(:controller => 'project', :action => 'show_project',
+                      :id => project.id)
+        else
+          redirect_to(:action => 'show_location', :id => @description.location_id)
+        end
+      else
+        flash_error(:runtime_show_description_denied.t)
+        redirect_to(:action => 'show_location', :id => @description.location_id)
+      end
     end
   end
 
@@ -485,7 +502,15 @@ class LocationController < ApplicationController
     @description = LocationDescription.find(params[:id])
     @licenses = License.current_names_and_ids
 
-    if request.method == :post
+    if !@description.is_writer?(@user)
+      flash_error(:runtime_edit_description_denied.t)
+      if @description.is_reader?(@user)
+        redirect_to(:action => 'show_location_description', :id => @description.id)
+      else
+        redirect_to(:action => 'show_location', :id => @description.location_id)
+      end
+
+    elsif request.method == :post
       @description.attributes = params[:description]
 
       args = {}
@@ -529,14 +554,20 @@ class LocationController < ApplicationController
   def destroy_location_description
     pass_query_params
     @description = LocationDescription.find(params[:id])
-    if !@description.is_admin?(@user)
-      flash_error(:runtime_destroy_description_not_admin.t)
-      redirect_to(:action => 'show_location_description',
-                  :id => @description.id, :params => query_params)
-    else
+    if @description.is_admin?(@user)
+      flash_notice(:runtime_destroy_description_success.t)
       @description.destroy
-      redirect_to(:action => 'show_location',
-                  :id => @description.location_id, :params => query_params)
+      redirect_to(:action => 'show_location', :id => @description.location_id,
+                  :params => query_params)
+    else
+      flash_error(:runtime_destroy_description_not_admin.t)
+      if @description.is_reader?(@user)
+        redirect_to(:action => 'show_location_description', :id => @description.id,
+                    :params => query_params)
+      else
+        redirect_to(:action => 'show_location', :id => @description.location_id,
+                    :params => query_params)
+      end
     end
   end
 

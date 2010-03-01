@@ -214,7 +214,7 @@ class ApplicationController < ActionController::Base
   def is_reviewer?
     result = false
     if @user
-      result = @user.in_group('reviewers')
+      result = @user.in_group?('reviewers')
     end
     result
   end
