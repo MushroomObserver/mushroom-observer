@@ -180,7 +180,7 @@ class SpeciesListControllerTest < ControllerTestCase
     login('rolf')
     post(:create_species_list, params)
     assert_response(:action => :show_species_list)
-    assert_equal(28, @rolf.reload.contribution)
+    assert_equal(18, @rolf.reload.contribution)
     spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
     new_name = Name.find_by_text_name(new_name_str)
@@ -263,7 +263,7 @@ class SpeciesListControllerTest < ControllerTestCase
     post(:create_species_list, params)
     assert_response(:action => :show_species_list)
     # Must be creating Lactarius sp as well as L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(38, @rolf.reload.contribution)
+    assert_equal(18, @rolf.reload.contribution)
     spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
     obs = spl.observations.first
@@ -295,7 +295,7 @@ class SpeciesListControllerTest < ControllerTestCase
     login('rolf')
     post(:create_species_list, params)
     assert_response(:action => :show_species_list)
-    assert_equal(28, @rolf.reload.contribution)
+    assert_equal(18, @rolf.reload.contribution)
     spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
     new_name = Name.find_by_text_name(new_name_str)
@@ -361,7 +361,7 @@ class SpeciesListControllerTest < ControllerTestCase
     login('rolf')
     post(:create_species_list, params)
     assert_response(:action => :show_species_list)
-    assert_equal(50, @rolf.reload.contribution)
+    assert_equal(30, @rolf.reload.contribution)
     spl = SpeciesList.find_by_title(list_title)
     assert(spl.name_included(deprecated_name))
     assert(spl.name_included(multiple_name))
@@ -518,7 +518,7 @@ class SpeciesListControllerTest < ControllerTestCase
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
     # Creates New sp and New name, as well as an observations/splentry/naming.
-    assert_equal(33, spl.user.reload.contribution)
+    assert_equal(13, spl.user.reload.contribution)
     assert_equal(sp_count + 1, spl.reload.observations.size)
   end
 

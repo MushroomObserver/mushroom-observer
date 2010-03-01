@@ -856,7 +856,7 @@ runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
 runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
 runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
-runtime_observation_success: "[:runtime_created_id(type=:observation)]"
+runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
 runtime_prefs_success: "[:runtime_updated(type=preferences)]"
 runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
@@ -2075,13 +2075,13 @@ show_observation_view_notifications: View Notifications
 
 
 # location/show_past_location
-show_past_location_title: "[:VERSION] [num]: [location]"
+show_past_location_title: "[:VERSION] [num]: [name]"
 show_past_location_other_versions: Other Versions
 
 
 
 # location/show_past_location_description
-show_past_location_description_title: "[:VERSION] [num]: [location]"
+show_past_location_description_title: "[:VERSION] [num]: [name]"
 
 
 
