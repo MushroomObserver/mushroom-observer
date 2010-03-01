@@ -7,7 +7,7 @@
 #  sorting and selection conditions.
 #
 #  Queries are specified by a model and flavor.  The model specifies which kind
-#  of objects are being requests, e.g. :Name or :Observation.  The flavor
+#  of objects are being requested, e.g. :Name or :Observation.  The flavor
 #  summarizes the type of search, e.g. :all or :at_location.  Only certain
 #  flavors are allowed for a given model.  For example, it makes no sense to
 #  request comments sorted by name since they have no name.
