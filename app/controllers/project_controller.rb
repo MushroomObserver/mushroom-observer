@@ -13,11 +13,6 @@
 #  ** change_member_status       Adjust the member status of a particular user (admin only)
 #  ** add_members                Consider adding any existing user to a project (admin only)
 #  ** add_one_member             Add a particular user as a project member (admin only)
-#  ** show_draft                 Show the latest version of a draft (member only)
-#  ** create_or_edit_draft       Create a new draft if none exists then edit it (member only)
-#  ** edit_draft                 Edit an existing draft (draft owner or admin only)
-#  ** publish_draft              Move draft data to a new version of the given naem (draft owner  or admin only)
-#  ** destroy_draft              Destroy draft (draft owner or admin only)
 #
 #  TODO:
 #   Add comments?
@@ -40,10 +35,7 @@ class ProjectController < ApplicationController
   before_filter :disable_link_prefetching, :except => [
     :admin_request,
     :change_member_status,
-    :create_or_edit_draft,
-    :edit_draft,
     :edit_project,
-    :show_draft,
     :show_project,
   ]
 
@@ -226,9 +218,19 @@ class ProjectController < ApplicationController
       title = @project.title
       user_group = @project.user_group
       admin_group = @project.admin_group
-      for d in @project.draft_names
-        d.destroy
-        # Transaction.delete_something?(TODO)
+      for d in NameDescription.find_by_source_type_and_source_name(:project, @project.title)
+        d.source_type = :source
+        d.admin_groups.delete(admin_group)
+        d.writer_groups.delete(admin_group)
+        d.reader_groups.delete(user_group)
+        d.save
+        Transaction.put_name_description(
+          :id               => d,
+          :set_source_type  => :source,
+          :del_admin_group  => admin_group,
+          :del_writer_group => admin_group,
+          :del_reader_group => user_group
+        )
       end
       if @project.destroy
         # project.log("Project destroyed by #{@user.login}: #{title}", :touch => false)
@@ -361,203 +363,49 @@ class ProjectController < ApplicationController
     end
   end
 
-  # Show the given draft if the current user has permission
-  # otherwise just show the project.
-  # Linked from: show_project, show_name
-  # Inputs:
-  #   params[:id]
-  # Outputs:
-  #   @draft_name
-  # Success:
-  #   Renders show_draft.
-  # Failure: (not member of project)
-  #   Redirect to show_project or list_projects (if can't figure out project)
-  #   Outputs: @draft_name
-  def show_draft
-    @draft_name = DraftName.find(params[:id])
-    if @draft_name
-      project = @draft_name.project
-      unless project.is_member?(@user)
-        flash_error(:show_draft_denied.t)
-        redirect_to(:action => 'show_project', :id => project.id)
-      end
-    else
-      redirect_to(:action => 'list_projects')
-    end
-  end
-
-  # Look for any drafts of the given name.
-  # If none exists create one and start editing.
-  # If one exists and it is assocated with this project and user, then start editing.
-  # Otherwise report error and show a violating draft.
-  # (Really should give warning and provide option for creating a new draft for this project and user,
-  # but we'll worry about that later.)
-  # Linked from: show_name
-  # Inputs:
-  #   params[:project]
-  #   params[:name]
-  # Success:
-  #   Redirects to edit_draft.
-  # Failure:
-  #   Redirects show_draft or show_project or list_projects depending on permissions and validity of input.
-  def create_or_edit_draft
-    project = Project.find(params[:project])
-    name = Name.find(params[:name])
-    alt_page = nil # Meaning go to edit_draft
-    if project and name
-      draft = DraftName.find(:first, :conditions => ["name_id = ? and project_id = ? and user_id = ?", name.id, project.id, @user.id])
-      if draft
-        if not draft.can_edit?(@user)
-          alt_page = 'show_draft'
-        end
-      else
-        draft = DraftName.find(:first, :conditions => ["name_id = ?", name.id])
-        if draft
-          unless draft.project_id == project.id and project.is_admin?(@user)
-            flash_error(:create_draft_multiple.t(:name => name.display_name, :title => project.title))
-            alt_page = 'show_draft'
-          end
-        else
-          if project.is_member?(@user)
-            draft = DraftName.new({
-              :user_id => @user.id,
-              :project_id => project.id,
-              :name_id => name.id})
-            for f in Name.all_note_fields:
-              draft.send("#{f}=", name.send(f))
-            end
-            if draft.has_any_notes?
-              draft.license_id = @user.license_id
-            else
-              draft.license_id = nil
-            end
-            unless draft.save
-              # Transaction.post_something?(TODO)
-              flash_error(:create_draft_failed.t)
-              draft = nil
-            end
-          else
-            flash_error(:create_draft_create_denied.t(:title => project.title))
-            draft = nil
-          end
-        end
-      end
-      if draft
-        if alt_page
-          redirect_to(:action => 'show_draft', :id => draft.id)
-        else
-          @draft_name = draft
-          @licenses = License.current_names_and_ids(draft.license)
-          render(:action => 'edit_draft')
-        end
-      else
-        redirect_to(:action => 'show_project', :id => project.id)
-      end
-    else
-      flash_error(:create_draft_bad_args.t(:project => params[:project],
-                                           :name => params[:name]))
-      redirect_to(:action => 'list_projects')
-    end
-  end
-
-  # Form to edit a draft name
-  # Linked from: create_or_edit_draft
-  # Inputs:
-  #   params[:id]
-  #   params[:draft_name][<note-fields>]
-  # Success:
-  #   Redirects to show_draft.
-  # Failure:
-  #   Renders edit_draft again.
-  #   Outputs: @draft_name
-  def edit_draft
-    @draft_name = DraftName.find(params[:id])
-    @licenses = License.current_names_and_ids(@draft_name.license)
-    if @draft_name.can_edit?(@user)
-      if request.method == :post
-        begin
-          params[:draft_name][:classification] = Name.validate_classification(@draft_name.name.rank, params[:draft_name][:classification])
-          if !@draft_name.update_attributes(params[:draft_name])
-            flash_object_errors(@draft_name)
-          else
-            # Transaction.put_something?(TODO)
-            flash_notice(:create_draft_updated.t)
-            redirect_to(:action => 'show_draft', :id => @draft_name.id)
-          end
-        rescue RuntimeError => err
-          flash_error(err.to_s) if !err.nil?
-          flash_object_errors(@draft_name)
-          @draft_name.attributes = params[:draft_name]
-        end
-      end
-    else
-      flash_error(:create_draft_edit_denied.t)
-      redirect_to(:action => 'show_draft', :id => @draft_name.id)
-    end
-  end
-
-  # Publishes the draft back to the originating name
-  # Linked from: show_draft
-  # Inputs:
-  #   params[:id]
-  # Success:
-  #   Redirects to show_name.
-  # Failure:
-  #   Redirects to show_draft.
-  def publish_draft
-    draft = DraftName.find(params[:id])
-    if check_permission!(draft.user_id) or draft.project.is_admin?(@user)
-      begin
-        draft.classification = Name.validate_classification(draft.name.rank, draft.classification)
-        name = draft.name
-        args = { :id => name }
-        name.license_id = draft.license_id
-        args[:set_license] = draft.license if draft.license
-        for f in Name.all_note_fields
-          name.send("#{f}=", draft.send(f))
-          args["set_#{f}"] = draft.send(f).to_s
-        end
-        if name.changed? &&
-           name.save
-          name.log(:log_name_updated)
-          Transaction.put_name(args)
-        end
-        name.update_review_status(:vetted)
-        user_set = Set.new(name.authors)
-        user_set.merge(UserGroup.find_by_name('reviewers').users)
-        for recipient in user_set
-          if recipient && recipient.created_here
-            QueuedEmail::Publish.create_email(@user, recipient, name)
-          end
-        end
-        redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
-      rescue RuntimeError => err
-        flash_error(err.to_s) if !err.nil?
-        flash_object_errors(draft)
-        redirect_to(:action => 'edit_draft', :id => draft.id)
-      end
-    else
-      flash_error(:publish_draft_denied.t)
-      redirect_to(:action => 'show_draft', :id => draft.id)
-    end
-  end
-
-  # Callback to destroy a draft.
-  # Linked from: show_draft
-  # Redirects to show_project
-  # Inputs: params[:id]
-  # Outputs: @project
-  def destroy_draft
-    draft = DraftName.find(params[:id])
-    if check_permission!(draft.user_id) or draft.project.is_admin?(@user)
-      if draft.destroy
-        # Transaction.delete_something?(TODO)
-        flash_notice(:destroy_draft_success.t)
-      else
-        flash_error(:destroy_draft_failed.t)
-      end
-    end
-    @project = draft.project
-    render(:action => 'show_project')
-  end
+  # # Publishes the draft back to the originating name
+  # # Linked from: show_draft
+  # # Inputs:
+  # #   params[:id]
+  # # Success:
+  # #   Redirects to show_name.
+  # # Failure:
+  # #   Redirects to show_draft.
+  # def publish_draft
+  #   draft = DraftName.find(params[:id])
+  #   if check_permission!(draft.user_id) or draft.project.is_admin?(@user)
+  #     begin
+  #       draft.classification = Name.validate_classification(draft.name.rank, draft.classification)
+  #       name = draft.name
+  #       args = { :id => name }
+  #       name.license_id = draft.license_id
+  #       args[:set_license] = draft.license if draft.license
+  #       for f in Name.all_note_fields
+  #         name.send("#{f}=", draft.send(f))
+  #         args["set_#{f}"] = draft.send(f).to_s
+  #       end
+  #       if name.changed? &&
+  #          name.save
+  #         name.log(:log_name_updated)
+  #         Transaction.put_name(args)
+  #       end
+  #       name.update_review_status(:vetted)
+  #       user_set = Set.new(name.authors)
+  #       user_set.merge(UserGroup.find_by_name('reviewers').users)
+  #       for recipient in user_set
+  #         if recipient && recipient.created_here
+  #           QueuedEmail::Publish.create_email(@user, recipient, name)
+  #         end
+  #       end
+  #       redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
+  #     rescue RuntimeError => err
+  #       flash_error(err.to_s) if !err.nil?
+  #       flash_object_errors(draft)
+  #       redirect_to(:action => 'edit_draft', :id => draft.id)
+  #     end
+  #   else
+  #     flash_error(:publish_draft_denied.t)
+  #     redirect_to(:action => 'show_draft', :id => draft.id)
+  #   end
+  # end
 end

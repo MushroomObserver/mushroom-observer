@@ -196,7 +196,7 @@ for sect in ['consensus', 'synonym', 'other', 'subtaxa']
               <%= :observation_made_confidence.t %>:
                 <%= v = obs.vote_cache
                 if v.nil? || v == ''
-                  :show_name_no_votes.t
+                  :show_namings_no_votes.t
                 else
                   (v.to_f*100/3).round.to_s + "%"
                 end %>

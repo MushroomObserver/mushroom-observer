@@ -317,6 +317,8 @@ SEARCH: Suchen
 search: suchen
 SEND: Schicken
 send: schicken
+SUBMIT:  Submit
+submit:  submit
 UPDATE: Update
 update: update
 UPLOAD: Hochladen
@@ -382,6 +384,8 @@ create_object: Neuen [type] eingeben
 destroy_object: "[Type] löschen"
 edit_object: "[Type] bearbeiten"
 list_objects: "[Types] anzeigen"
+remove_object:  Remove [TYPE]
+remove_objects:  Remove [TYPES]
 show_all: Alle anzeigen
 show_name: Über [name]
 show_object: "[Type] anzeigen"
@@ -611,27 +615,27 @@ log_updated_by: Verbessert von [user].
 log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
 log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
 log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
-log_image_created0: [:log_object_created_no_user(type=:image)]
+log_image_created0: "[:log_object_created_no_user(type=:image)]"
 log_image_created: "[:log_object_created_by_user_with_name(type=:image)]"
-log_image_destroyed0: [:log_object_destroyed_no_user(type=:image)]
+log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
 log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
-log_image_removed0: [:log_object_removed_no_user(type=:image)]
+log_image_removed0: "[:log_object_removed_no_user(type=:image)]"
 log_image_removed: "[:log_object_removed_by_user_with_name(type=:image)]"
-log_image_reused0: [:log_object_added_no_user(type=:image)]
+log_image_reused0: "[:log_object_added_no_user(type=:image)]"
 log_image_reused: "[:log_object_added_by_user_with_name(type=:image)]"
-log_image_updated0: [:log_object_updated_no_user(type=:image)]
+log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
 log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
-log_name_updated: "[:log_object_updated_with_user(type=:name)]"
+log_name_updated: "[:log_object_updated_by_user(type=:name)]"
 log_naming_created: "[:log_object_created_by_user_with_name(type=:naming)]"
 log_naming_destroyed: "[:log_object_destroyed_by_user_with_name(type=:naming)]"
 log_naming_updated: "[:log_object_updated_by_user_with_name(type=:naming)]"
-log_observation_created: "[:log_object_created_with_user(type=:observation)]"
-log_observation_destroyed2: [:log_object_destroyed_by_user_with_name(type=:observation)]
-log_observation_destroyed: "[:log_object_destroyed_with_user(type=:observation)]"
-log_observation_updated: "[:log_object_updated_with_user(type=:observation)]"
-log_species_list_created: "[:log_object_created_with_user(type=:species_list)]"
-log_species_list_destroyed: "[:log_object_destroyed_with_user(type=:species_list)]"
-log_species_list_updated: "[:log_object_updated_with_user(type=:species_list)]"
+log_observation_created: "[:log_object_created_by_user(type=:observation)]"
+log_observation_destroyed2: "[:log_object_destroyed_by_user_with_name(type=:observation)]"
+log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
+log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
+log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
+log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
+log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
 log_object_added: "[:log_object_added_by_user]"
 log_object_created: "[:log_object_created_by_user]"
 log_object_destroyed: "[:log_object_destroyed_by_user]"
@@ -644,7 +648,7 @@ validate_invalid: "Ungültiger [field]."
 validate_missing: "[Field] fehlt."
 validate_not_a_number: "[Field] ist keine Zahl."
 validate_not_in_range: "[Field] ist außerhalb des erlaubten Bereichs."
-validate_this_more_that_that: "[That] muss größer sein als [this]."
+validate_this_more_than_that: "[That] muss größer sein als [this]."
 validate_too_large: "[Field] kann nicht höher sein als [max]."
 validate_too_long: "[Field] muss kürzer als [max] Buchstaben sein."
 validate_too_long_or_short: "[Field] muss zwischen [min] und [max] Buchstaben lang sein."
@@ -763,8 +767,8 @@ runtime_no_save: "Kann [type] nicht speichern."
 runtime_no_update: "Kann [types] nicht ändern."
 runtime_no_update_id: "Kann den [types] #[value] nicht ändern."
 runtime_no_update_name: "Kann den [types] '[value]' nicht ändern."
-runtime_not_onwer: "[Type] '[value]' gehört dir nicht."
-runtime_not_onwer_id: "[Type] #[value] gehört dir nicht."
+runtime_not_owner: "[Type] '[value]' gehört dir nicht."
+runtime_not_owner_id: "[Type] #[value] gehört dir nicht."
 runtime_removed: "[Type] löschen."
 runtime_removed_from: "[Type] von [name] löschen."
 runtime_removed_id: "[Type] #[value] löschen."
@@ -834,12 +838,15 @@ runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
 runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
 runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
 runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
+runtime_invalid_source_type:  "[:runtime_invalid(type=:source)]"
 runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
 runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
 runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
 runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
 runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
+runtime_merge_locations_warning:  "[:runtime_merge_warning(type=:location)]"
+runtime_merge_names_warning:  "[:runtime_merge_warning(type=:name)]"
 runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
 runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
 runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
@@ -851,7 +858,7 @@ runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
 runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
 runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
-runtime_observation_success: "[:runtime_created_id[:Observation] was successfully created."
+runtime_observation_success: "[:runtime_created_id(type=:observation)]"
 runtime_prefs_success: "[:runtime_updated(type=preferences)]"
 runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
@@ -911,6 +918,11 @@ runtime_image_remove_denied: >
 
 runtime_image_remove_missing: >
   Das Bild gehört nicht zu diesem Fund!
+
+runtime_merge_warning: >
+  Da dabei Daten verloren gehen können, darf nur der Admin bestehende [TYPES]
+  kombinieren. Der Admin bekommt jetzt eine Email, in der ihm vorgeschlagen wird,
+  diese Fundorte zu kombinieren.
 
 runtime_profile_must_define: >
   Du musst erst diesen Fundort definieren, dann können wir ihn als
@@ -1128,6 +1140,9 @@ email_features_intro:  >
 
 email_location_merge:  >
   User [user] wants to merge the location [this] into [that].
+
+email_name_merge:  >
+  User [user] wants to merge the name [this] into [that].
 
 email_name_proposal_intro:  >
   h2. *Name Proposal*
@@ -1415,7 +1430,7 @@ form_list_feedback_missing_names_help: >
 form_locations_gen_desc: "[:form_names_gen_desc]"
 form_locations_ecology:  Habitat Description
 form_locations_species:  Interesting Species
-form_locations_notes: "[:app_notes]"
+form_locations_notes: "[:NOTES]"
 form_locations_refs: "[:form_names_refs]"
 form_locations_refs_help:  "[:form_names_refs_help]"
 form_locations_help: >
@@ -1946,6 +1961,13 @@ show_location_observations: Funde an diesem Ort
 show_location_highest: Höchste Erhebung
 show_location_lowest: Niedrigste Tiefe
 show_location_description_empty:  "[:show_name_description_empty]"
+show_location_create_description:  "[:CREATE]"
+
+
+
+# location/show_location_description
+show_location_description_edit:  "[:edit_object(type=:location_description)]"
+show_location_description_destroy:  "[:destroy_object(type=:location_description)]"
 
 
 
@@ -1975,7 +1997,6 @@ show_name_content_status: Status des Inhalts
 show_name_latest_review: "Zuletzt bearbeitet: am [date] von [user]"
 show_name_previous_version: Vorige Version
 show_name_other_versions: Andere Versionen
-show_name_past_title: "Version [version]: [name]"
 show_name_observations: Funde
 show_name_synonym_observations: Funde unter Synonymen
 show_name_other_observations: Ähnliche Funde
@@ -2046,6 +2067,27 @@ show_observation_comment_created: Erstellt
 show_observation_comment_created_by: von
 show_observation_send_question: Finder eine Frage stellen
 show_observation_view_notifications: Mitteilungen anzeigen
+
+
+
+# location/show_past_location
+show_past_location_title: "Version [num]: [name]"
+show_past_location_other_versions: Andere Versionen
+
+
+
+# location/show_past_location_description
+show_past_location_description_title:  "[:VERSION] [num]: [location]"
+
+
+
+# name/show_past_name
+show_past_name_title:  "[:VERSION] [num]: [name]"
+
+
+
+# name/show_past_name_description
+show_past_name_description_title:  "[:VERSION] [num]: [name]"
 
 
 
@@ -2419,13 +2461,6 @@ location_merge_success: "[this] und [that] sind nun kombiniert."
 make_report_not_supported: Report-Dateien des Typs *.[type] werden nicht unterstützt.
 
 
-# location/merge_locations
-merge_locations_warning: >
-  Da dabei Daten verloren gehen können, darf nur der Admin bestehende Fundorte
-  kombinieren. Der Admin bekommt jetzt eine Email, in der ihm vorgeschlagen wird,
-  diese Fundorte zu kombinieren.
-
-
 # name/bulk_name_edit
 name_bulk_help: >
   Jede Zeile entspricht einer Gruppe von Änderungen.
@@ -2463,7 +2498,7 @@ name_bulk_help: >
   eckige Klammern eingeschlossen. Dieser Kommentar wird beim Erstellen der Namens
   in den Bemerkungen abgespeichert.
   \n\n
-  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm. [Trivialname: Violetter Rötelritterling]
+  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm.
 
 name_bulk_label: Namensänderungen
 name_bulk_success: Jetzt sind alle Namen in der Datenbank.
@@ -2802,11 +2837,6 @@ set_interest_user_mismatch:  Another [:user] is logged on at this machine.  Plea
 show_notifications_title: Neue Mitteilungen für [user]
 
 
-# location/show_past_location
-show_past_location_other_versions: Andere Versionen
-show_past_location_title: "Version [num]: [name]"
-
-
 # observer/<Theme>
 theme_agaricus: _Agaricus_ Schema
 theme_amanita: _Amanita_ Schema
@@ -2958,7 +2988,6 @@ change_member_status_title: Für [name] wird der Mitarbeiter-Status im Projekt [
 # observer/change_user_bonuses
 change_user_bonuses: Award Bonus
 change_user_bonuses_help: >
-
   List one bonus per line, each specifiying a number of points and reason, like
   this:
   \n\n
@@ -3013,6 +3042,7 @@ form_projects_title: Titel
 
 
 # project/list_projects
+list_projects_title:  "[:list_objects(type=:project)]"
 list_projects_add_project: Projekt starten
 
 
@@ -3077,6 +3107,7 @@ show_project_user_group: Nutzergruppe
 
 
 # observer/users_by_name
+users_by_name_title:  Users by Name
 users_by_name_created: Erstellt
 users_by_name_groups: Gruppen
 users_by_name_id: ID
@@ -3692,4 +3723,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

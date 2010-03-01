@@ -317,6 +317,8 @@ SEARCH: Buscar
 search: buscar
 SEND: Enviar
 send: enviar
+SUBMIT: Enviar
+submit: enviar
 UPDATE: Actualizar
 update: actualizar
 UPLOAD: Cargar
@@ -382,6 +384,8 @@ create_object: Crear [TYPE]
 destroy_object: Borrar [TYPE]
 edit_object: Editar [TYPE]
 list_objects: Registrar [TYPES]
+remove_object: Eliminar [TYPE]
+remove_objects: Eliminar [TYPES]
 show_all: Mostrar Todos
 show_name: Acerca de [NAME]
 show_object: Mostrar [TYPE]
@@ -644,7 +648,7 @@ validate_invalid: "[Field] no válido."
 validate_missing: "Falta [field]."
 validate_not_a_number: "[Field] no es un número."
 validate_not_in_range: "[Field] está fuera de rango."
-validate_this_more_that_that: "[That] debe ser mayor que [this]."
+validate_this_more_than_that: "[That] debe ser mayor que [this]."
 validate_too_large: "[Field] debe ser inferior a [max]."
 validate_too_long: "[Field] debe ser inferior a [max] caracteres de longitud."
 validate_too_long_or_short: "[Field] debe ser de [min] a [max] caracteres de longitud."
@@ -763,8 +767,8 @@ runtime_no_save: "No se ha podido guardar [type]."
 runtime_no_update: "No se ha podido realizar [type]."
 runtime_no_update_id: "No se ha podido realizar [type] #[value]."
 runtime_no_update_name: "No se ha podido realizar [type] «[value]»."
-runtime_not_onwer: "Usted no posee el/la [type] «[value]»."
-runtime_not_onwer_id: "Usted no posee el/la [type] #[value]."
+runtime_not_owner: "Usted no posee el/la [type] «[value]»."
+runtime_not_owner_id: "Usted no posee el/la [type] #[value]."
 runtime_removed: "[Type] fue eliminado con éxito."
 runtime_removed_from: "[Type] fue eliminado de [name] con éxito."
 runtime_removed_id: "[Type] #[value] fue eliminado con éxito."
@@ -834,12 +838,15 @@ runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
 runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
 runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
 runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
+runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
 runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
 runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
 runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
 runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
 runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
+runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
+runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
 runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
 runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
 runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
@@ -851,7 +858,7 @@ runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
 runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
 runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
-runtime_observation_success: "[:runtime_created_id[:Observation] was successfully created."
+runtime_observation_success: "[:runtime_created_id(type=:observation)]"
 runtime_prefs_success: "[:runtime_updated(type=preferences)]"
 runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
@@ -914,6 +921,11 @@ runtime_image_remove_denied: >
 
 runtime_image_remove_missing: >
   ¡Esa imagen no es adjunta a la presente observación!
+
+runtime_merge_warning: >
+  Porque puede ser destructiva, sólo el admin puede fusionar los/las [TYPES]
+  existentes.  Un mesaje de e-mail pidiendole la propuesta de fusión ha sido
+  enviada al admin.
 
 runtime_profile_must_define: >
   Debe definir esta ubicación antes de que puede hacer que su ubicación
@@ -1132,6 +1144,9 @@ email_features_intro: >
   Las siguientes nuevas funciones se han publicado en Mushroom Observer:
 
 email_location_merge: >
+  El usuario [user] quiere fusionar [this] en [that].
+
+email_name_merge: >
   El usuario [user] quiere fusionar [this] en [that].
 
 email_name_proposal_intro: >
@@ -1429,7 +1444,7 @@ form_list_feedback_missing_names_help: >
 form_locations_gen_desc: "[:form_names_gen_desc]"
 form_locations_ecology: Descripción de Hábitat
 form_locations_species: Especies Interesantes
-form_locations_notes: "[:app_notes]"
+form_locations_notes: "[:NOTES]"
 form_locations_refs: "[:form_names_refs]"
 form_locations_refs_help: "[:form_names_refs_help]"
 form_locations_help: >
@@ -1929,7 +1944,7 @@ reverify_welcome: Volver a Verificar su Cuenta
 reverify_link: Volver a Verificar
 reverify_note: >
   Su cuenta, [user], no se ha verificado todavía.
-
+  \n\n
   Revise su e-mail para encontrar su verificación e-mail.  Haga clic en el
   vínculo de abajo para tener el correo enviado de nuevo.
 
@@ -1968,6 +1983,13 @@ show_location_observations: Observaciones en Esta Ubicación
 show_location_highest: Mayor altitud
 show_location_lowest: Más baja altitud
 show_location_description_empty: "[:show_name_description_empty]"
+show_location_create_description: "[:CREATE]"
+
+
+
+# location/show_location_description
+show_location_description_edit: "[:edit_object(type=:location_description)]"
+show_location_description_destroy: "[:destroy_object(type=:location_description)]"
 
 
 
@@ -1997,7 +2019,6 @@ show_name_content_status: Estatus de Contenidos
 show_name_latest_review: "Última Revisión: [date] para [user]"
 show_name_previous_version: Versión Anterior
 show_name_other_versions: Otros Versiones
-show_name_past_title: "Version [version]: [name]"
 show_name_observations: Observaciones
 show_name_synonym_observations: Observaciones de Sinónimos
 show_name_other_observations: Observaciones Similares
@@ -2073,6 +2094,27 @@ show_observation_comment_created: Creado
 show_observation_comment_created_by: por
 show_observation_send_question: Enviar pregunta al observador.
 show_observation_view_notifications: Ver Notificaciones
+
+
+
+# location/show_past_location
+show_past_location_title: "Version [num]: [name]"
+show_past_location_other_versions: Otros Versiones
+
+
+
+# location/show_past_location_description
+show_past_location_description_title: "[:VERSION] [num]: [location]"
+
+
+
+# name/show_past_name
+show_past_name_title: "[:VERSION] [num]: [name]"
+
+
+
+# name/show_past_name_description
+show_past_name_description_title: "[:VERSION] [num]: [name]"
 
 
 
@@ -2234,11 +2276,11 @@ users_by_contribution_3: >
 # account/verify
 verify_note: >
   Su cuenta se ha verificado...
-
+  \n\n
   Ahora debe ser capaz de crear observaciones, subir imágenes, editar nombres,
   describir nuevas ubicaciones, agregar comentarios, y proponer y votar sobre
   identificaciones de hongos at "MushroomObserver.org":[domain].
-
+  \n\n
   ¡Gracias por unirse a nosotros!
 
 
@@ -2463,13 +2505,6 @@ location_merge_success: Se fusionó [this] con [that] con éxito.
 make_report_not_supported: El tipo de archivo «*.[type]» no es compatible.
 
 
-# location/merge_locations
-merge_locations_warning: >
-  Porque puede ser destructiva, sólo el admin puede fusionar las ubicaciones
-  existentes.  Un mesaje de e-mail pidiendole la propuesta de fusión ha sido
-  enviada al admin.
-
-
 # name/bulk_name_edit
 name_bulk_help: >
   Cada línea indica una serie de cambios.
@@ -2508,7 +2543,7 @@ name_bulk_help: >
   entre corchetes.  Esto se guardará en las notas cuando el nombre es creado.
   (Actualmente, se hace caso omiso si el nombre ya existe.)
   \n\n
-  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H. E. Bigelow & A. H. Sm. [Nombre común: blewit]
+  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H. E. Bigelow & A. H. Sm.
 
 name_bulk_label: Cambios de Nombre
 name_bulk_success: Todos los nombres se han agregado a la base de datos.
@@ -2531,12 +2566,12 @@ name_lister_help: >
   borrar un nombre, seleccionarlo en la tercera columna y haga doble-clic o
   pulse «borrar».  (Puede usar las flechas para navegar, o escriba
   nombres parcial para buscar dentro de una columna.)
-
+  \n\n
   *Guardar Lista:* Cuando haya terminado, haga clic en qualquiera de los
   botones en la parte inferior de la página.  «Crear Lista de
   Especies» te lleva de vuelta a la vieja forma de creación, donde
   será capaz de escribir fecha, lugar, notas, etc. antes de guardar la lista.
-
+  \n\n
   *Informes:* La informe de texta sin formato es una simple lista de taxones
   sin autor o otro formato.  Texta enriquecido puede utilizarse para la
   importación de la lista en Microsoft Word, con autor y todo el formato
@@ -2897,11 +2932,6 @@ set_interest_user_mismatch: >
 show_notifications_title: Neuva Notificación para [user]
 
 
-# location/show_past_location
-show_past_location_other_versions: Otros Versiones
-show_past_location_title: "Version [num]: [name]"
-
-
 # observer/<Theme>
 theme_agaricus: _Agaricus_ Tema
 theme_amanita: _Amanita_ Tema
@@ -3054,9 +3084,9 @@ change_member_status_title: Cambiar Estado de [name] para [title]
 
 
 # observer/change_user_bonuses
+change_user_bonuses_title: Contribution Bonuses for [user]
 change_user_bonuses: Award Bonus
 change_user_bonuses_help: >
-
   List one bonus per line, each specifiying a number of points and reason, like
   this:
   \n\n
@@ -3067,7 +3097,6 @@ change_user_bonuses_help: >
   Keep the reasons short or it might mess up the formatting of the table on
   that page.
 
-change_user_bonuses_title: Contribution Bonuses for [user]
 
 
 # project/create_or_edit_draft
@@ -3112,6 +3141,7 @@ form_projects_title: Título
 
 
 # project/list_projects
+list_projects_title: "[:list_objects(type=:project)]"
 list_projects_add_project: Agregar Proyecto
 
 
@@ -3175,6 +3205,7 @@ show_project_user_group: Grupo de Usuarios
 
 
 # observer/users_by_name
+users_by_name_title: Usuarios por Nombre
 users_by_name_created: Creado
 users_by_name_groups: Grupos
 users_by_name_id: ID
@@ -3370,7 +3401,7 @@ how_searching: >
   Cada vez que haga clic en una observación o otro resultado en una página de
   índice, que le llevará a una página con ese resultado.  En la parte superior
   de la página podrás ver los enlaces «Anterior», «Siguiente», y
-  «[:app_index]».  Estos te permiten navegar hacia adelante o hacia atrás a
+  «[:INDEX]».  Estos te permiten navegar hacia adelante o hacia atrás a
   través de los resultados o volver al índice.  En la parte superior de la
   página de índice que suelen ver los enlaces que le permite ordenar los
   resultados por diferentes criterios, como por fecha, nombre o usuario.  En el
@@ -3378,9 +3409,9 @@ how_searching: >
   índice de las observaciones en un índice de nombres o imágenes de esas mismas
   observaciones.  Por ejemplo, si hace clic en «[:app_your_observations]», se
   le mostrará una lista de observaciones que han publicado.  Haga clic en
-  «[:app_show_objects(types=:names)]» en la parte superior de la página para
+  «[:show_objects(types=:names)]» en la parte superior de la página para
   ver una lista de las especies que han visto, o haga clic en
-  «[:app_show_objects(types=:locations)]» para ver una lista de todos los
+  «[:show_objects(types=:locations)]» para ver una lista de todos los
   ubicaciones en que has publicado observaciones.
   \n\n
   Los usuarios avanzados también pueden estar interesados en nuestro nuevo API
@@ -3401,12 +3432,12 @@ how_unknown_help: >
   Una vez haya entrado, cree una nueva "Observación":#observation,
   seleccionando «[:app_create_observation]» en el panel izquierdo.
   Introduzca todos los detalles que puede en la forma resultante.  Puede dejar
-  el campo «[:app_what]» en blanco, llamar «[:app_unknown]», o si usted
+  el campo «[:WHAT]» en blanco, llamar «[:UNKNOWN]», o si usted
   cree que sabe el género o la familia o otro grupo, que dan este nombre
   seguido de «sp.», por ejemplo, «Russula sp.».  En el campo
-  «[:app_notes]» proporcionan la información sobre el hábitat, el olor y todo
+  «[:NOTES]» proporcionan la información sobre el hábitat, el olor y todo
   lo demás que no está claro en las fotos.  Una vez que la forma es tan
-  completo como usted puede hacerlo, haga clic en «[:app_create]».
+  completo como usted puede hacerlo, haga clic en «[:CREATE]».
   \n\n
   Ahora debe estar mirando una página que muestra la información que usted
   acaba de ingresar.  Sin embargo, si utiliza un nombre que no se encuentra
@@ -3434,13 +3465,13 @@ how_unknown_help: >
   por e-mail.  Si se le pide que proporcione más detalles sobre la collección,
   nosotros preferimos que usted seleccione
   «[:show_observation_edit_observation]» (en la cima de la página de
-  observación) y añadirlas al campo «[:app_notes]» que acaba de publicar otro
+  observación) y añadirlas al campo «[:NOTES]» que acaba de publicar otro
   comentario.
 
 how_adding_observations: >
   *Adición de Observaciones Que Se Han Identificado* - Utilice el mismo proceso
   de "Obtener Ayuda con un Desconocido":#unknown_help, excepto que esta vez
-  proporcionar su identificación en el campo «[:app_what]».  Se le recomienda
+  proporcionar su identificación en el campo «[:WHAT]».  Se le recomienda
   enfáticamente a decir algo acerca de cómo llegó a la identificación.  Hemos
   proporcionado un pequeño conjunto de casillas para hacer esto fácil
   («[:naming_reason_label_1]», «[:naming_reason_label_3]», etc.), pero se
@@ -3459,7 +3490,7 @@ how_proposing_names: >
   "Nombres Propuestos":#proposed_name encerrado en un recuadro de líneas finas.
   La mayoría de las observaciones ya se tienen al menos un nombre propuesto
   (por el propietario).  Desde aquí usted puede haga clic en
-  «:show_namings_propose_new_name]» o "votar":#voting sobre los nombres
+  «[:show_namings_propose_new_name]» o "votar":#voting sobre los nombres
   existentes.  En cualquier caso, usted tendrá que iniciar sesión antes de que
   se les permite hacerlo.
   \n\n
@@ -3467,11 +3498,11 @@ how_proposing_names: >
   presentará con una forma muy similar a la utilizada para crear una
   observación.  Además del nombre, se requiere que usted seleccione un nivel de
   confianza.  Esta es su "Voto":#vote, y lo podrá cambiar en la página
-  «[:app_show_object(type=:observation)]» en cualquier momento que desee.  Al
+  «[:show_object(type=:observation)]» en cualquier momento que desee.  Al
   igual que con la creación de una observación, se le recomienda
   encarecidamente que dar alguna explicación de por qué usted piensa que su
   nombre se aplica a esta observación (y por qué los nombres de otros no).
-  Cuando haya terminado, haga clic en «[:app_create]».  Se le dará la
+  Cuando haya terminado, haga clic en «[:CREATE]».  Se le dará la
   oportunidad de corregir errores ortográficos o de elegir un nombre aceptado
   si introdujo un obsoleto.
   \n\n
@@ -3543,7 +3574,7 @@ how_tracking_species: >
   el momento de la observación se crea, que se mostrará el mensaje de inmediato
   a través del sitio.  Puede modificar o desactivar su solicitud de un nombre
   en particular, volviendo a ese nombre una y otra vez seleccionando
-  «[:show_name_email_tracking]» y pulsando el botón «[:app_disable]» en la
+  «[:show_name_email_tracking]» y pulsando el botón «[:DISABLE]» en la
   página que aparece.
 
 how_describing_species: >
@@ -3571,7 +3602,7 @@ how_projects: >
   «[:list_projects_add_project]».  La persona que crea el proyecto es siempre
   un miembro y un administrador para ese proyecto.  Un administrador de un
   proyecto puede agregar nuevos miembros haciendo clic en el
-  «[:show_project_add_member]» en la parte superior de la página «Mostrar
+  «[:show_project_add_members]» en la parte superior de la página «Mostrar
   Proyecto».  Los administradores también pueden hacer otros usuarios los
   administradores del proyecto, vaya a uno de los
   «[:add_members_change_status]» enlaces disponibles en las páginas
@@ -3606,7 +3637,7 @@ how_maps: >
   cualquier nombre.  La forma más fácil es crear una nueva
   "Observación":#observation utilizando una "Ubicación":#location ya definido.
   Nota, sin embargo, que la terminación automática para el campo
-  «[:app_where]», aparecerá una lista de todos las ubicaciones de juego si se
+  «[:WHERE]», aparecerá una lista de todos las ubicaciones de juego si se
   definen o no.
   \n\n
   Usted puede también de manera explícita elegir no tener una observación se
@@ -3626,16 +3657,18 @@ how_defining_locations: >
   estas ubicaciones no definidos.
   \n\n
   Al navegar a través de observaciones, los nombres de ubicación definida será
-  seguido por un enlace titulado «[:app_click_for_map]».  Nombres de la
-  ubicación no definida será seguido por un enlace llamado «[:app_search]».
-  Si hace clic en el enlace de una ubicación no definida, se mostrará una lista
-  de observaciones reportadas para esa ubicación.  La página resultante
-  incluirá dos enlaces en la parte superior de la página:
-  «[:location_define]» y «[:location_merge]».  Al hacer clic en
-  «[:location_define]» presentará un formulario que usted puede utilizar para
-  crear esa ubicación.  Al hacer clic en «[:location_merge]» le presentará
-  una lista de ubicaciones similares que ya han sido definidos.  Al hacer clic
-  en cualquiera de estas ubicaciones lleva a cabo la fusión.
+  seguido por un enlace titulado «[:click_for_map]».  Nombres de la
+  ubicación no definida será seguido por un enlace llamado «[:SEARCH]».  Si
+  hace clic en el enlace de una ubicación no definida, se mostrará una lista de
+  observaciones reportadas para esa ubicación.  La página resultante incluirá
+  dos enlaces en la parte superior de la página:
+  «[:list_observations_location_define]» y
+  «[:list_observations_location_merge]».  Al hacer clic en
+  «[:list_observations_location_define]» presentará un formulario que usted
+  puede utilizar para crear esa ubicación.  Al hacer clic en
+  «[:list_observations_location_merge]» le presentará una lista de ubicaciones
+  similares que ya han sido definidos.  Al hacer clic en cualquiera de estas
+  ubicaciones lleva a cabo la fusión.
   \n\n
   También puede ver una lista de todos las ubicaciones en uso haciendo clic en
   «"[:app_list_locations]":/ubicacion/list_locations» en el panel izquierdo.
@@ -3809,7 +3842,7 @@ how_license: >
   predeterminada para nuevos "Usuarios":#user.  Sin embargo, usted puede
   seleccionar la licencia no comercial para ser predeterminado, seleccionándolo
   en la página «"[:app_preferences]":/account/prefs» y haciendo clic en
-  «[:app_save_changes]».
+  «[:SAVE_CHANGES]».
 
 how_location: >
   *Ubicación* - Una región rectangular que encierra por completo un lugar, tal
@@ -3907,11 +3940,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-
-################################################################################
-
-# Extra/unnecessary translations:
-description_full_title_alt: Descripción Alternativa de [object]
-description_full_title_main: Descripción Principal de [object]
-description_part_title_alt: Descripción Alternativa
-description_part_title_main: Descripción Principal

@@ -9,9 +9,9 @@
   <%= file_field('image', 'image', :index => index) %>
   <% if @js %>
     <span style="margin-left:10px">&nbsp;</span>
-    <%= button_to_function("#{:app_more.t} »", "image_on(#{index})",
+    <%= button_to_function("#{:MORE.t} »", "image_on(#{index})",
                            { :id => "image_#{index}_more" }) %>
-    <%= button_to_function("« #{:app_less.t}", "image_off(#{index})",
+    <%= button_to_function("« #{:LESS.t}", "image_off(#{index})",
                            { :id => "image_#{index}_less", :style => 'display:none' }) %>
     <%= javascript_tag("Element.hide('image_#{index}_less')") %>
   <% end %>

@@ -317,6 +317,8 @@ SEARCH:  Search
 search:  search
 SEND:  Send
 send:  send
+SUBMIT:  Submit
+submit:  submit
 UPDATE:  Update
 update:  update
 UPLOAD:  Upload
@@ -382,6 +384,8 @@ create_object:  Create [TYPE]
 destroy_object:  Destroy [TYPE]
 edit_object:  Edit [TYPE]
 list_objects:  List [TYPES]
+remove_object:  Remove [TYPE]
+remove_objects:  Remove [TYPES]
 show_all:  Show All
 show_name:  About [NAME]
 show_object:  Show [TYPE]
@@ -621,17 +625,17 @@ log_image_reused0:  "[:log_object_added_no_user(type=:image)]"
 log_image_reused:  "[:log_object_added_by_user_with_name(type=:image)]"
 log_image_updated0:  "[:log_object_updated_no_user(type=:image)]"
 log_image_updated:  "[:log_object_updated_by_user_with_name(type=:image)]"
-log_name_updated:  "[:log_object_updated_with_user(type=:name)]"
+log_name_updated:  "[:log_object_updated_by_user(type=:name)]"
 log_naming_created:  "[:log_object_created_by_user_with_name(type=:naming)]"
 log_naming_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:naming)]"
 log_naming_updated:  "[:log_object_updated_by_user_with_name(type=:naming)]"
-log_observation_created:  "[:log_object_created_with_user(type=:observation)]"
+log_observation_created:  "[:log_object_created_by_user(type=:observation)]"
 log_observation_destroyed2:  "[:log_object_destroyed_by_user_with_name(type=:observation)]"
-log_observation_destroyed:  "[:log_object_destroyed_with_user(type=:observation)]"
-log_observation_updated:  "[:log_object_updated_with_user(type=:observation)]"
-log_species_list_created:  "[:log_object_created_with_user(type=:species_list)]"
-log_species_list_destroyed:  "[:log_object_destroyed_with_user(type=:species_list)]"
-log_species_list_updated:  "[:log_object_updated_with_user(type=:species_list)]"
+log_observation_destroyed:  "[:log_object_destroyed_by_user(type=:observation)]"
+log_observation_updated:  "[:log_object_updated_by_user(type=:observation)]"
+log_species_list_created:  "[:log_object_created_by_user(type=:species_list)]"
+log_species_list_destroyed:  "[:log_object_destroyed_by_user(type=:species_list)]"
+log_species_list_updated:  "[:log_object_updated_by_user(type=:species_list)]"
 log_object_added:  "[:log_object_added_by_user]"
 log_object_created:  "[:log_object_created_by_user]"
 log_object_destroyed:  "[:log_object_destroyed_by_user]"
@@ -644,7 +648,7 @@ validate_invalid:  Invalid [field].
 validate_missing:  Missing [field].
 validate_not_a_number:  "[Field] is not a number."
 validate_not_in_range:  "[Field] is out of range."
-validate_this_more_that_that:  "[That] should be greater than [this]."
+validate_this_more_than_that:  "[That] should be greater than [this]."
 validate_too_large:  "[Field] should be at most [max]."
 validate_too_long:  "[Field] must be less than [max] characters long."
 validate_too_long_or_short:  "[Field] must be [min] to [max] characters long."
@@ -763,8 +767,8 @@ runtime_no_save:  "Unable to save [type]."
 runtime_no_update:  "Unable to update [type]."
 runtime_no_update_id:  "Unable to update [type] #[value]."
 runtime_no_update_name:  "Unable to update [type] '[value]'."
-runtime_not_onwer:  "You are not the owner of [type] '[value]'."
-runtime_not_onwer_id:  "You are not the owner of [type] #[value]."
+runtime_not_owner:  "You are not the owner of [type] '[value]'."
+runtime_not_owner_id:  "You are not the owner of [type] #[value]."
 runtime_removed:  "Successfully removed [type]."
 runtime_removed_from:  "Successfully removed [type] from [name]."
 runtime_removed_id:  "Successfully removed [type] #[value]."
@@ -834,12 +838,15 @@ runtime_image_reuse_invalid_id:  "[:runtime_no_match_id(type=:image,value=id)]"
 runtime_image_reuse_success:  "[:runtime_added_id(type=:image,value=id)]"
 runtime_invalid_classification:  "[:runtime_no_parse(value=text)]"
 runtime_invalid_name:  "[:runtime_invalid(type=:name,value=name)]"
+runtime_invalid_source_type:  "[:runtime_invalid(type=:source)]"
 runtime_list_location_no_matches:  "[:runtime_no_matches(type=:location)]"
 runtime_location_already_exists:  "[:runtime_already_exists(type=:location,value=name)]"
 runtime_location_description_success:  "[:runtime_created_id(type=:location_description,value=id)]"
 runtime_location_merge_success:  "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success:  "[:runtime_created_id(type=:location,value=id)]"
 runtime_map_locations_no_matches:  "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
+runtime_merge_locations_warning:  "[:runtime_merge_warning(type=:location)]"
+runtime_merge_names_warning:  "[:runtime_merge_warning(type=:name)]"
 runtime_name_already_used:  "[:runtime_already_used(type=:name,value=name)]"
 runtime_name_create_already_exists:  "[:runtime_already_exists(type=:name,value=name)]"
 runtime_name_deprecate_must_choose:  "[:runtime_missing(field=:preferred_name)]"
@@ -851,7 +858,7 @@ runtime_no_save_naming:  "[:runtime_no_save(type=:naming)]"
 runtime_no_save_observation:  "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match:  "[:runtime_no_match_name(value=match)]"
 runtime_object_not_found:  "[:runtime_no_match_id(value=id)]"
-runtime_observation_success:  "[:runtime_created_id[:Observation] was successfully created."
+runtime_observation_success:  "[:runtime_created_id(type=:observation)]"
 runtime_prefs_success:  "[:runtime_updated(type=preferences)]"
 runtime_profile_invalid_image:  "[:runtime_invalid(type=:image,value=name)]"
 runtime_profile_removed_image:  "[:runtime_removed_from(type=:image,name=:profile)]"
@@ -912,6 +919,10 @@ runtime_image_remove_denied:  >
 
 runtime_image_remove_missing:  >
   This observation doesn't have that image!
+
+runtime_merge_warning:  >
+  Because it can be destructive, only the admin can merge existing [types].
+  An email requesting the proposed merge has been sent to the admins.
 
 runtime_profile_must_define:  >
   You must define this location before we can make it your primary location.
@@ -1128,6 +1139,9 @@ email_features_intro:  >
 
 email_location_merge:  >
   User [user] wants to merge the location [this] into [that].
+
+email_name_merge:  >
+  User [user] wants to merge the name [this] into [that].
 
 email_name_proposal_intro:  >
   h2. *Name Proposal*
@@ -1951,6 +1965,13 @@ show_location_observations:  "Observations at this Location"
 show_location_highest:  Highest Altitude
 show_location_lowest:  Lowest Altitude
 show_location_description_empty:  "[:show_name_description_empty]"
+show_location_create_description:  "[:CREATE]"
+
+
+
+# location/show_location_description
+show_location_description_edit:  "[:edit_object(type=:location_description)]"
+show_location_description_destroy:  "[:destroy_object(type=:location_description)]"
 
 
 
@@ -1980,7 +2001,6 @@ show_name_content_status:  Description status
 show_name_latest_review:  "Latest review: [date] by [user]"
 show_name_previous_version:  Previous Version
 show_name_other_versions:  Other Versions
-show_name_past_title:  "[:VERSION] [version]: [name]"
 show_name_observations:  "[:OBSERVATIONS]"
 show_name_synonym_observations:  "Synonym [:OBSERVATIONS]"
 show_name_other_observations:  "Similar [:OBSERVATIONS]"
@@ -2053,6 +2073,27 @@ show_observation_comment_created:  "[:Created]"
 show_observation_comment_created_by:  "[:By]"
 show_observation_send_question:  Send Observer a Question
 show_observation_view_notifications:  View Notifications
+
+
+
+# location/show_past_location
+show_past_location_title:  "[:VERSION] [num]: [location]"
+show_past_location_other_versions:  Other Versions
+
+
+
+# location/show_past_location_description
+show_past_location_description_title:  "[:VERSION] [num]: [location]"
+
+
+
+# name/show_past_name
+show_past_name_title:  "[:VERSION] [num]: [name]"
+
+
+
+# name/show_past_name_description
+show_past_name_description_title:  "[:VERSION] [num]: [name]"
 
 
 
@@ -2422,12 +2463,6 @@ location_merge_success:  Successfully merged [this] with [that].
 make_report_not_supported:  We don't support report filetype *.[type].
 
 
-# location/merge_locations
-merge_locations_warning:  >
-  Because it can be destructive, only the admin can merge existing [:locations].
-  An email requesting the proposed merge has been sent to the admins.
-
-
 # name/bulk_name_edit
 name_bulk_help:  >
   Each line indicates a set of changes.
@@ -2464,7 +2499,7 @@ name_bulk_help:  >
   after either the accepted or deprecated name, enclosed in square brackets.
   This will be saved in the notes when the name is created.
   \n\n
-  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm. [Common name: blewit]
+  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm.
 
 name_bulk_label:  Name Edits
 name_bulk_success:  All names are now in the database.
@@ -2800,11 +2835,6 @@ set_interest_user_mismatch:  Another [:user] is logged on at this machine.  Plea
 show_notifications_title:  New Notifications for [user]
 
 
-# location/show_past_location
-show_past_location_other_versions:  Other Versions
-show_past_location_title:  "Version [num]: [name]"
-
-
 # observer/<Theme>
 theme_agaricus:  _Agaricus_ Theme
 theme_amanita:  _Amanita_ Theme
@@ -2955,7 +2985,6 @@ change_member_status_title:  Changing [:user] Status of [name] for [title]
 # observer/change_user_bonuses
 change_user_bonuses: Award Bonus
 change_user_bonuses_help: >
-
   List one bonus per line, each specifiying a number of points and reason, like
   this:
   \n\n
@@ -3002,7 +3031,7 @@ edit_draft_title:  Editing Draft for [name]
 
 # project/edit_project
 edit_project_destroy:  "[:destroy_object(type=:project)]"
-edit_project_title:  "[:edit_project(type=>:project)]: [title]"
+edit_project_title:  "[:edit_object(type=>:project)]: [title]"
 
 
 # project/_form_projects
@@ -3010,7 +3039,8 @@ form_projects_title:  "[:Title]"
 
 
 # project/list_projects
-list_projects_add_project:  Add Project
+list_projects_title:  "[:list_objects(type=:project)]"
+list_projects_add_project:  "[:add_object(type=:project)]"
 
 
 # draft/publish_draft
@@ -3073,6 +3103,7 @@ show_project_user_group:  User Group
 
 
 # observer/users_by_name
+users_by_name_title:  Users by Name
 users_by_name_created:  Created
 users_by_name_groups:  Groups
 users_by_name_id:  ID
@@ -3172,7 +3203,7 @@ how_help_contributors:  >
   p(normal).  Beyond adding pictures and descriptions of mushrooms that you've
   seen, you can make a big difference to the site by "describing
   species":/observer/how_to_use#describing_species or "defining
-  locations":/observer/how_to_use#location_defining.
+  locations":/observer/how_to_use#defining_locations.
 
 how_help_designers:  >
   h2. 2. Designers
@@ -3255,16 +3286,16 @@ how_searching:  >
   \n\n
   Whenever you click an observation or other result on an index page, it will
   take you to a page showing that result.  At the top of the page you will see
-  '[:app_prev]', '[:app_next]', and '[:app_index]' links.  These let you browse
+  '[:PREV]', '[:NEXT]', and '[:INDEX]' links.  These let you browse
   forward or backward through the results or return to the index.  At the top
   of the index page you will often see links allowing you to sort the results
   by different criteria, such as by date, name or user.  In the same place you
   will sometimes find links that let you turn an index of observations into an
   index of names or images of those same observations.  For example, if you
   click '[:app_your_observations]', it will show you a list of observations you
-  have posted.  Click '[:app_show_objects(types=:names)]' at the top of the
+  have posted.  Click '[:show_objects(types=:names)]' at the top of the
   page to see a list of the species you have seen, or click
-  '[:app_show_objects(types=:locations)]' to see a list of all the locations
+  '[:show_objects(types=:locations)]' to see a list of all the locations
   you've gone mushrooming in.
   \n\n
   Power users may also be interested in our new API providing direct access to
@@ -3281,12 +3312,12 @@ how_unknown_help:  >
   \n\n
   Once you are logged in, create a new "Observation":#observation by selecting
   '[:app_create_observation]' in the left-hand panel.  Enter all the details
-  you can into the resulting form.  You can leave the '[:app_what]' field blank
-  call it '[:app_unknown]', or if you think you know the genus or family or
+  you can into the resulting form.  You can leave the '[:WHAT]' field blank
+  call it '[:unknown]', or if you think you know the genus or family or
   other group, give that "Name":#name followed by 'sp.', e.g., 'Russula sp.'.
-  In the '[:app_notes]' field provide information about habitat, odor, smell
+  In the '[:NOTES]' field provide information about habitat, odor, smell
   and anything else not clear from the photos.  Once the form is as complete as
-  you can make it, click '[:app_create]'.
+  you can make it, click '[:CREATE]'.
   \n\n
   You should now be looking at a page showing you the information you just
   entered.  However, if you used a name that is not currently in the database,
@@ -3299,7 +3330,7 @@ how_unknown_help:  >
   right-side of the page.  It is very important either that it be an image you
   took or that you have the explicit permission of the person who created the
   image to upload it to the site.  If you did not take the image, please update
-  the '[:form_images_copyright_holde]' field to reflect the actual owner.  This
+  the '[:form_images_copyright_holder]' field to reflect the actual owner.  This
   page also allows you to select the "License":#license you want to release the
   image under.
   \n\n
@@ -3312,12 +3343,12 @@ how_unknown_help:  >
   comments posted about your observations to you by email.  If you are asked to
   provide more details on the collection, we prefer that you select
   '[:show_observation_edit_observation]' (at the top of the observation page)
-  and add them to the '[:app_notes]' field than to just post another comment.
+  and add them to the '[:NOTES]' field than to just post another comment.
 
 how_adding_observations:  >
   *Adding Observations You Have Identified* - Use the same process as "Getting
   Help with an Unknown":#unknown_help, except this time provide your
-  identification in the '[:app_what]' field.  You are strongly encouraged to
+  identification in the '[:WHAT]' field.  You are strongly encouraged to
   say something about how you arrived at the identification.  We've provided a
   small set of checkboxes to make this easy ('[:naming_reason_label_1]',
   '[:naming_reason_label_3]', etc.), but you are encouraged to elaborate on
@@ -3341,10 +3372,10 @@ how_proposing_names:  >
   a form much like the one used to create an observation.  In addition to the
   name, you are required to choose a confidence level.  This is your
   "Vote":#vote, and you may change it on the
-  '[:app_show_object(type=:observation)]' page at any time you like.  As with
+  '[:show_object(type=:observation)]' page at any time you like.  As with
   creating an observation, you are strongly encouraged to give some explanation
   as to why you think your Name applies to this Observation (and why other
-  names don't).  When you are finished, click '[:app_create]'.  You will be
+  names don't).  When you are finished, click '[:CREATE]'.  You will be
   given a chance to correct typos or to choose an accepted name if you entered
   a deprecated one.
   \n\n
@@ -3410,7 +3441,7 @@ how_tracking_species:  >
   created, they will be shown your message immediately through the website.
   You can modify or disable your request for a particular name by going back to
   that name and again selecting '[:show_name_email_tracking]' and clicking the
-  '[:app_disable]' button on the page that comes up.
+  '[:DISABLE]' button on the page that comes up.
 
 how_describing_species:  >
   *Describing Species* - Click any "Name":#name link you see throughout the
@@ -3437,7 +3468,7 @@ how_projects:  >
   then clicking on '[:list_projects_add_project]'.  The person who creates the
   project is always a member and an administrator for that project.  An
   administrator for a project can add new members by clicking the
-  '[:show_project_add_member]' link at the top of a project's 'Show Project'
+  '[:show_project_add_members]' link at the top of a project's 'Show Project'
   page.  Administrators can also make other users administrators for the
   project by going to one of the '[:add_members_change_status]' links available
   on the 'Show Project' or 'Add Members' pages.  Any User can send requests to
@@ -3469,7 +3500,7 @@ how_maps:  >
   "Users":#user are encouraged to add to the distribution map for a name.  The
   easiest way is to create a new "Observation":#observation using an already
   defined "Location":#location.  Note, however, that auto-completion for the
-  '[:app_where]' field will list all matching locations whether they are
+  '[:WHERE]' field will list all matching locations whether they are
   defined or not.
   \n\n
   You can also explicitly choose not to have an observation show up on the
@@ -3488,12 +3519,12 @@ how_defining_locations:  >
   defined these undefined locations.
   \n\n
   When browsing through observations, defined location names will be followed
-  by a link labelled '[:app_click_for_map]'.  Undefined location names will be
-  followed by a link labelled '[:app_search]'.  If you click the link for an
+  by a link labelled '[:click_for_map]'.  Undefined location names will be
+  followed by a link labelled '[:SEARCH]'.  If you click the link for an
   undefined location, it will show a list of observations reported for that
   location.  The resulting page will include two links at the top of the page:
-  '[:location_define]' and '[:location_merge]'.  Clicking on
-  '[:location_define]' will present a form which you can use to create that
+  '[:list_observations_location_define]' and '[:list_observations_location_merge]'.  Clicking on
+  '[:list_observations_location_define]' will present a form which you can use to create that
   location.  Clicking on 'Merge With a Defined Location' will present you with
   a list of similar locations which have already been defined.  Clicking on any
   of these locations will perform the merge.
@@ -3652,7 +3683,7 @@ how_license:  >
   license is the default for new "Users":#user.  However, you can select the
   non-commercial license to be your default by selecting it on your
   '"[:app_preferences]":/account/prefs' page and clicking on
-  '[:app_save_changes]'.
+  '[:SAVE_CHANGES]'.
 
 how_location:  >
   *Location* - A rectangular region enclosing a given location, as defined by
@@ -3741,4 +3772,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

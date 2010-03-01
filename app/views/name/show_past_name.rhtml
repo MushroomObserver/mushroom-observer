@@ -1,6 +1,8 @@
 <%
-  @title = :show_name_past_title.t(:version => @name.version,
-                                   :name => @name.display_name)
+  @title = :show_past_name_title.t(
+    :num  => @name.version,
+    :name => @name.display_name
+  )
 %>
 
 <table cellpadding="10">

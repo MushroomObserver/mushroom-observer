@@ -369,7 +369,7 @@ class LocationController < ApplicationController
 
         # Non-admins just send email-request to admins.
         else
-          flash_warning(:merge_locations_warning.t)
+          flash_warning(:runtime_merge_locations_warning.t)
           content = :email_location_merge.t(:user => @user.login,
                   :this => @location.display_name, :that => merge.display_name)
           AccountMailer.deliver_webmaster_question(@user.email, content)
@@ -608,7 +608,7 @@ class LocationController < ApplicationController
             :set_location => location
           )
         else
-          flash_error :create_location_merge_failed.t(:name => o.unique_format_name)
+          flash_error :runtime_location_merge_failed.t(:name => o.unique_format_name)
           success = false
         end
       end

@@ -6,11 +6,11 @@
       add_tab(:species_list_show_clone_list.t,
               { :action => 'create_species_list', :clone => @species_list.id,
               :params => query_params },
-              { :help => :show_species_list_show_clone_list_help.l })
+              { :help => :species_list_show_clone_list_help.l })
       add_tab(:species_list_show_set_source.t, { :action => 'show_species_list',
               :id => @species_list.id, :set_source => 1,
               :params => query_params },
-              { :help => :show_species_list_show_set_source_help.l })
+              { :help => :species_list_show_set_source_help.l })
     end
     if check_permission(@species_list.user_id)
       add_tab(:species_list_show_edit.t, :action => 'edit_species_list',

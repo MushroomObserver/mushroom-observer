@@ -245,7 +245,7 @@ module ApplicationHelper
       end
       indent + line
     end
-    html.unshift("#{:app_versions.t}:")
+    html.unshift("#{:VERSIONS.t}:")
     html = '<p style="white-space:nowrap">' + html.join("<br/>\n") + '</p>'
   end
 

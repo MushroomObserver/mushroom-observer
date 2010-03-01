@@ -117,6 +117,12 @@ module BrowserStatus
   TEST_UA              = :firefox
   TEST_UA_VERSION      = 3.0
 
+  # Short snippet of javascript that stores the browser's timezone offset
+  # (in minutes from UTC) in a cookied called "tz".
+  JAVASCRIPT_THAT_SETS_TIMEZONE =
+    'try { document.cookie = "tz=" + (new Date()).getTimezoneOffset(); } ' +
+    'catch(err) { }'
+
   # This is the minimal page that is served when a user first encounters the
   # site.  Subsequently, the session will store a cookie in the browser so that
   # they are recognized, and we won't ever have to do this again.  NOTE: no
@@ -126,6 +132,7 @@ module BrowserStatus
     <html>
       <head>
         <script>
+          #{JAVASCRIPT_THAT_SETS_TIMEZONE}
           window.location = '%s';
         </script>
       </head>
@@ -143,7 +150,7 @@ module BrowserStatus
   def check_if_user_turned_javascript_on
 
     # Set a special cookie so we can determine the browser's timezone offset.
-    code = 'Cookie.set({timezone: (new Date()).getTimezoneOffset()});'
+    code = JAVASCRIPT_THAT_SETS_TIMEZONE
 
     # Reload page with special "_js=on" parameter to let us know that
     # Javascript is turned on in the user's browser.  There are a few
@@ -254,9 +261,16 @@ module BrowserStatus
     # print "params           = [#{params.inspect  }]\n"
     # print "========================================\n"
 
-    # What timezone are they in?  (Thanks for the post, techno-weenie!)
-    if !cookies[:timezone].blank?
-      Time.zone = TimeZone[-cookies[:timezone].to_i.minutes]
+    # Find time zone that matches the best.
+    if offset = -cookies[:tz].to_i * 60 rescue nil
+      for zone in TimeZone.all.sort_by(&:utc_offset)
+        if zone.utc_offset >= offset
+          Time.zone = zone
+          break
+        end
+      end
+    else
+      Time.zone = Time.default_zone
     end
 
     # If we've never seen this user before, serve a tiny page that redirects
