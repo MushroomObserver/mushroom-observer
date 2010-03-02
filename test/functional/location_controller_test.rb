@@ -3,8 +3,9 @@ require File.dirname(__FILE__) + '/../boot'
 class LocationControllerTest < ControllerTestCase
 
   def setup
-    @loc_pts  = 20
-    @auth_pts = 10
+    @new_pts  = 10
+    @chg_pts  = 5
+    @auth_pts = 50
     @edit_pts = 5
   end
 
@@ -94,7 +95,7 @@ class LocationControllerTest < ControllerTestCase
     post_requires_login(:create_location, params)
     assert_response(:action => :show_location)
     assert_equal(count + 1, Location.count)
-    assert_equal(10+@loc_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
     loc = Location.find_by_display_name(display_name)
@@ -219,7 +220,7 @@ class LocationControllerTest < ControllerTestCase
     assert_equal(past_desc_count, LocationDescription::Version.count)
     # Rolf is getting added to authors for the Albion description when it
     # is moved over to Burbank (location_id is changed and it is saved).
-    assert_equal(10 - @loc_pts + @auth_pts, @rolf.reload.contribution)
+    assert_equal(10 - @new_pts + @auth_pts, @rolf.reload.contribution)
   end
 
   def test_update_location_admin_merge

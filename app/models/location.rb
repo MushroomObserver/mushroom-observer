@@ -98,12 +98,23 @@ class Location < AbstractModel
     'search_name'
   )
 
-  versioned_class.before_save {|x| x.user_id = User.current_id}
   before_save  :set_search_name
   after_update :notify_users
 
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed]
+
+  # Callback whenever new version is created.
+  versioned_class.before_save do |ver|
+    ver.user_id = User.current_id
+    if (ver.version != 1) and
+       Location.connection.select_value(%(
+         SELECT COUNT(*) FROM locations_versions
+         WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
+       )) == '0'
+      SiteData.update_contribution(:add, :locations_versions)
+    end
+  end
 
   ##############################################################################
   #
@@ -268,10 +279,20 @@ class Location < AbstractModel
     old_loc.log(:log_location_merged, :this => old_loc.display_name,
                  :that => self.display_name)
 
-    # Okay, now it's safe to destroy the name.
+    # Destroy past versions.
+    editors = []
     for ver in old_loc.versions
+      editors << ver.user_id
       ver.destroy
     end
+
+    # Update contributions for editors.
+    editors.delete(old_loc.user_id)
+    for user_id in editors.uniq
+      SiteData.update_contribution(:del, :locations_versions, user_id)
+    end
+
+    # Finally destroy the location.
     old_loc.destroy
     Transaction.delete_location(:id => old_loc)
   end

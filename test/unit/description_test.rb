@@ -32,7 +32,7 @@ class DescriptionTest < Test::Unit::TestCase
       case model.name
       when 'LocationDescription'
         obj = model.new(:location_id => 1, :license_id => 1)
-        a, e = 10, 5
+        a, e = 50, 5
       when 'NameDescription'
         obj = model.new(:name_id => 1, :license_id => 1)
         a, e = 100, 10

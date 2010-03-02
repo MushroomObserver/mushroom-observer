@@ -518,7 +518,9 @@ user_stats_locations: "[:LOCATIONS] Definidas"
 user_stats_locations_versions: "[:LOCATIONS] Editadas"
 user_stats_name_descriptions_authors: "[:NAME_DESCRIPTIONS] «Autorados»"
 user_stats_name_descriptions_editors: "[:NAME_DESCRIPTIONS] Editadas"
-user_stats_namings: "[:NAMINGS]"
+user_stats_names: "[:NAMES] Creados"
+user_stats_names_versions: "[:NAMES] Editados"
+user_stats_namings: IDs Propuestas
 user_stats_observations: "[:OBSERVATIONS]"
 user_stats_species_list_entries: "Entradas en [:SPECIES_LISTS]"
 user_stats_species_lists: "[:SPECIES_LISTS]"
@@ -534,7 +536,9 @@ site_stats_locations: Ubicaciones
 site_stats_locations_versions: ""
 site_stats_name_descriptions_authors: "[:NAME_DESCRIPTIONS] «Autoradas»"
 site_stats_name_descriptions_editors: ""
-site_stats_namings: "[:NAMINGS]"
+site_stats_names: ""
+site_stats_names_versions: ""
+site_stats_namings: IDs Propuestas
 site_stats_observations: "[:OBSERVATIONS]"
 site_stats_observed_taxa: Taxones Observados
 site_stats_species_list_entries: Entradas en Listas de Especies

@@ -31,7 +31,7 @@ class ObserverControllerTest < ControllerTestCase
     assert_equal(o_count + o_num, Observation.count)
     assert_equal(g_count + g_num, Naming.count)
     assert_equal(n_count + n_num, Name.count)
-    assert_equal(score + o_num + 2*g_num + 0*n_num, @rolf.reload.contribution)
+    assert_equal(score + o_num + 2*g_num + 10*n_num, @rolf.reload.contribution)
     if o_num == 1
       assert_not_equal(0, @controller.instance_variable_get('@observation').thumb_image_id)
     end
@@ -1037,7 +1037,7 @@ class ObserverControllerTest < ControllerTestCase
     post(:edit_naming, params)
     assert_response(:action => :show_observation)
     # Clones naming, creates Easter sp and E. bunny, but no votes.
-    assert_equal(12, @rolf.reload.contribution)
+    assert_equal(10 + 10*2 + 2, @rolf.reload.contribution)
     nam = assigns(:naming)
     assert_equal(new_name, nam.text_name)
     assert_not_equal(old_name, nam.text_name)
@@ -1316,7 +1316,8 @@ class ObserverControllerTest < ControllerTestCase
     login("dick")
     post(:create_naming, params)
     assert_response(:action => "show_observation", :id => observations(:coprinus_comatus_obs).id)
-    assert_equal(12, @dick.reload.contribution)
+    # Dick is getting points for the naming, vote, and name change.
+    assert_equal(12 + 10, @dick.reload.contribution)
     naming = Naming.last
     assert_equal("Conocybe filaris", naming.name.text_name)
     assert_equal("(With) Author", naming.name.author)

@@ -3,9 +3,10 @@ require File.dirname(__FILE__) + '/../boot'
 class NameControllerTest < ControllerTestCase
 
   def setup
+    @new_pts  = 10
+    @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
-    @name_pts = 0
   end
 
   def empty_notes
@@ -452,7 +453,7 @@ class NameControllerTest < ControllerTestCase
     post_requires_login(:create_name, params)
     assert_response(:action => :show_name, :id => Name.last.id)
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
-    assert_equal(10 + 2 * @name_pts, @rolf.reload.contribution)
+    assert_equal(10 + 2 * @new_pts, @rolf.reload.contribution)
     assert(name = Name.find_by_text_name(text_name))
     assert_equal(text_name, name.text_name)
     assert_equal(author, name.author)
@@ -553,8 +554,9 @@ class NameControllerTest < ControllerTestCase
       },
     }
     post_requires_login(:edit_name, params)
-    # Must be creating Conocybe sp, too.
-    assert_equal(10 + 2 * @name_pts, @rolf.reload.contribution)
+    # Must be creating Conocybe sp, too.  (But Rolf gets no points for the
+    # change because he's the one who created Conocybe filaris.)
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
     assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
@@ -573,15 +575,16 @@ class NameControllerTest < ControllerTestCase
         :text_name => name.text_name,
         :author => '',
         :rank => :Species,
-        :citation => ''
+        :citation => 'new citation'
       },
     }
-    login('rolf')
+    login('mary')
     post(:edit_name, params)
     assert_response(:action => :show_name)
     # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
-    assert_equal(10 + 2 * @name_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
     assert(name.reload.deprecated)
+    assert_equal('new citation', name.citation)
   end
 
   def test_edit_name_different_user
@@ -606,7 +609,7 @@ class NameControllerTest < ControllerTestCase
     # not actually changing anything!
     assert_response(:action => :show_name)
     # (In fact, it is implicitly creating Macrolepiota.)
-    assert_equal(10 + @name_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
     # (But owner remains.)
     assert_equal(name_owner, name.reload.user)
   end
@@ -981,13 +984,12 @@ class NameControllerTest < ControllerTestCase
         :author => new_author,
         :rank => :Species
       },
-      :description => empty_notes
     }
-    login('rolf')
+    login('mary')
     post(:edit_name, params)
     assert_response(:action => :show_name)
     # It seems to be creating Strobilurus sp. as well?
-    assert_equal(10 + @name_pts, @rolf.reload.contribution)
+    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
     assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
   end

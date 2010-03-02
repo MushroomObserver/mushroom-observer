@@ -65,13 +65,16 @@ class SiteData
   #
   ##############################################################################
 
-  # List of the categories.  This is the order they appear in show_user.
+  # List of the categories.  This might be the order they appear in show_user.
   ALL_FIELDS = [
     :name_descriptions_authors,
     :name_descriptions_editors,
-    :locations,
+    :names,
+    :names_versions,
     :location_descriptions_authors,
     :location_descriptions_editors,
+    :locations,
+    :locations_versions,
     :images,
     :species_lists,
     :species_list_entries,
@@ -84,19 +87,22 @@ class SiteData
 
   # Relative score for each category.
   FIELD_WEIGHTS = {
+    :comments                      => 1,
+    :images                        => 10,
+    :location_descriptions_authors => 50,
+    :location_descriptions_editors => 5,
+    :locations                     => 10,
+    :locations_versions            => 5,
     :name_descriptions_authors     => 100,
     :name_descriptions_editors     => 10,
-    :locations                     => 20,
-    :location_descriptions_authors => 10,
-    :location_descriptions_editors => 5,
-    :images                        => 10,
-    :species_lists                 => 5,
-    :species_list_entries          => 1,
-    :observations                  => 1,
-    :comments                      => 1,
+    :names                         => 10,
+    :names_versions                => 10,
     :namings                       => 1,
-    :votes                         => 1,
+    :observations                  => 1,
+    :species_list_entries          => 1,
+    :species_lists                 => 5,
     :users                         => 0,
+    :votes                         => 1,
   }
 
   # Table to query to get score for each category.  (Default is same as the
@@ -119,25 +125,43 @@ class SiteData
   # This is called every time any object (not just one we care about) is
   # created or destroyed.  Figure out what kind of object from the class name,
   # and then update the owner's contribution as appropriate.
-  def self.update_contribution(mode, obj, field=nil, user=nil, num=1)
-    field ||= obj.class.to_s.tableize.to_sym
+  def self.update_contribution(mode, obj, user_id=nil)
+
+    # Two modes: 1) pass in object, 2) pass in field name
+    if obj.is_a?(ActiveRecord::Base)
+      field = obj.class.to_s.tableize.to_sym
+      user_id ||= obj.user_id rescue nil
+    else
+      field = obj
+      user_id ||= User.current_id
+    end
+
     weight = FIELD_WEIGHTS[field]
-    if weight && weight > 0 &&
-       obj.respond_to?('user_id') &&
-       (user ||= obj.user)
-      if field.to_s.match(/versions/)
-        raise "I'm not sure how to keep points based on versions up to date."
+    if weight && weight > 0 && user_id
+      weight = -weight if mode == :del
+      User.connection.update %(
+        UPDATE users SET contribution =
+          IF(contribution IS NULL, #{weight}, contribution + #{weight})
+        WHERE id = #{user_id}
+      )
+    end
+
+    # Debugging information: show transaction log of all objects created and
+    # destroyed, plus all editors/authors added and removed.
+    if false
+      desc = field.to_s
+      if obj.is_a?(ActiveRecord::Base)
+        desc += " (new)"              if obj.new_record?
+        desc += " ##{obj.id}"         if obj.id
+        desc += " (#{obj.text_name})" if obj.respond_to?(:text_name)
       end
-      user.contribution ||= 0
-      if mode == :create || mode == :add
-        user.contribution += weight * num
-      elsif mode == :destroy || mode == :remove
-        user.contribution -= weight * num
+      action = ''
+      if weight && weight > 0 && user_id
+        user = User.safe_find(user_id)
+        action += " --> #{user.login} = #{user.contribution}"
       end
-      user.save
-# puts ">>>> #{mode} #{field} #{weight} #{num} (##{obj.id || 'x'}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''}) -> #{user.login}=#{user.contribution}"
-# else puts ">>>> #{mode} #{field} (##{obj.id || 'x'}#{obj.respond_to?(:text_name) ? ' ' + obj.text_name : ''})"
-# puts obj.args.inspect if obj.is_a?(Transaction)
+      puts ">>>> #{mode} #{weight} #{desc} #{action}"
+      puts obj.args.inspect if obj.is_a?(Transaction)
     end
   end
 
@@ -197,14 +221,20 @@ private
   #     ...
   #   )
   #
-  def calc_metric(fields) # :doc:
+  def calc_metric(data) # :doc:
     metric = 0
-    if fields
+    if data
       for field in ALL_FIELDS
-        metric += FIELD_WEIGHTS[field] * fields[field].to_i
+        if data[field]
+          # This fixes the double-counting of created records.
+          if field.to_s.match(/^(\w+)_versions$/)
+            data[field] -= data[$1] || 0
+          end
+          metric += FIELD_WEIGHTS[field] * data[field]
+        end
       end
-      metric += fields[:bonuses].to_i
-      fields[:metric] = metric
+      metric += data[:bonuses].to_i
+      data[:metric] = metric
     end
     return metric
   end
@@ -227,11 +257,14 @@ private
       query << "WHERE #{cond}"
     end
     if field.to_s.match(/^(\w+)s_versions/)
-      parent = $1
-      query[0] = "SELECT COUNT(DISTINCT #{parent}_id, user_id)"
+      # Does this actually make sense??
+      # parent = $1
+      # query[0] = "SELECT COUNT(DISTINCT #{parent}_id, user_id)"
+      0
+    else
+      query = query.join("\n")
+      User.connection.select_value(query).to_i
     end
-    query = query.join("\n")
-    User.connection.select_value(query).to_i
   end
 
   # Do a query to get the number of records in a given category broken down
@@ -250,41 +283,46 @@ private
   #
   def load_field_counts(field, user_id=nil) # :doc:
     count  = '*'
-    tables = FIELD_TABLES[field] || field.to_s
-    conditions = user_id ? "user_id = #{user_id}" : "user_id > 0"
+    table  = FIELD_TABLES[field] || field.to_s
+    tables = "#{table} t"
+    conditions = "t.user_id " + (user_id ? "= #{user_id}" : "> 0")
 
     # Exception for species list entries.
     if field == :species_list_entries
-      tables = "species_lists s, observations_species_lists os"
-      conditions += " AND s.id=os.species_list_id"
+      tables = "species_lists t, #{table} os"
+      conditions += " AND os.species_list_id = t.id"
     end
 
     # Exception for past versions.
-    if field.to_s.match(/^(\w+)s_versions/)
-      select = "DISTINCT #{parent}_id"
+    if table.match(/^(\w+)s_versions/)
+      parent = $1
+      count = "DISTINCT #{parent}_id"
+      tables += ", #{parent}s p"
+      conditions += " AND t.#{parent}_id = p.id"
+      conditions += " AND t.user_id != p.user_id"
     end
 
     query = %(
-      SELECT COUNT(#{count}) AS c, user_id AS u
+      SELECT COUNT(#{count}) AS cnt, t.user_id
       FROM #{tables}
       WHERE #{conditions}
-      GROUP BY u
-      ORDER BY c DESC
+      GROUP BY t.user_id
+      ORDER BY cnt DESC
     )
 
     # Get data as:
     #   data = [
-    #     {'u' => user_id, 'c' => count},
-    #     {'u' => user_id, 'c' => count},
+    #     [count, user_id],
+    #     [count, user_id],
     #     ...
     #   ]
-    data = User.connection.select_all(query)
+    data = User.connection.select_rows(query)
 
     # Fill in @user_data structure.
-    for d in data
-      user_id = d['u'].to_i
+    for count, user_id in data
+      user_id = user_id.to_i
       @user_data[user_id] ||= {}
-      @user_data[user_id][field] = d['c'].to_i
+      @user_data[user_id][field] = count.to_i
     end
   end
 
@@ -296,7 +334,7 @@ private
   def load_user_data(id=nil) # :doc:
     if !id
       @user_id = nil
-      users = User.find(:all)
+      users = User.all
     else
       @user_id = id.to_i
       users = [User.find(id)]
@@ -318,10 +356,11 @@ private
       load_field_counts(field)
     end
 
-    # Now fix any user contribution caches that have the incorrect number.
-    # (Add in user bonuses here, too.)
+    # Calculate full contribution for each user.  This will also correct some
+    # double-counting of versioned records.
     for user in users
       contribution = calc_metric(@user_data[user.id])
+      # Make sure contribution caches are correct.
       if user.contribution != contribution
         user.contribution = contribution
         user.save

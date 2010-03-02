@@ -476,10 +476,10 @@ class Description < AbstractModel
   def add_author(user)
     if not authors.member?(user)
       authors.push(user)
-      SiteData.update_contribution(:add, self, authors_join_table, user)
+      SiteData.update_contribution(:add, authors_join_table, user.id)
       if editors.member?(user)
         editors.delete(user)
-        SiteData.update_contribution(:remove, self, editors_join_table, user)
+        SiteData.update_contribution(:del, editors_join_table, user.id)
       end
     end
   end
@@ -488,7 +488,7 @@ class Description < AbstractModel
   def remove_author(user)
     if authors.member?(user)
       authors.delete(user)
-      SiteData.update_contribution(:remove, self, authors_join_table, user)
+      SiteData.update_contribution(:del, authors_join_table, user.id)
       if not editors.member?(user) and
         # Make sure user has actually made at least one change.
         self.class.connection.select_value %(
@@ -497,7 +497,7 @@ class Description < AbstractModel
           LIMIT 1
         )
         editors.push(user)
-        SiteData.update_contribution(:add, self, editors_join_table, user)
+        SiteData.update_contribution(:add, editors_join_table, user.id)
       end
     end
   end
@@ -506,7 +506,7 @@ class Description < AbstractModel
   def add_editor(user)
     if not authors.member?(user) and not editors.member?(user)
       editors.push(user)
-      SiteData.update_contribution(:add, self, editors_join_table, user)
+      SiteData.update_contribution(:add, editors_join_table, user.id)
     end
   end
 
@@ -536,10 +536,10 @@ class Description < AbstractModel
   # authorship/editorship.
   def before_destroy
     for user in authors
-      SiteData.update_contribution(:remove, self, authors_join_table, user)
+      SiteData.update_contribution(:del, authors_join_table, user.id)
     end
     for user in editors
-      SiteData.update_contribution(:remove, self, editors_join_table, user)
+      SiteData.update_contribution(:del, editors_join_table, user.id)
     end
     super
   end

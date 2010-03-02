@@ -232,7 +232,6 @@ class Name < AbstractModel
     'classification' # (versioned in the off desc)
   )
 
-  versioned_class.before_save {|x| x.user_id = User.current_id}
   after_update :notify_users
 
   # Used by name/_form_name.rhtml
@@ -240,6 +239,18 @@ class Name < AbstractModel
 
   # Automatically (but silently) log creation and destruction.
   self.autolog_events = [:destroyed]
+
+  # Callbacks whenever new version is created.
+  versioned_class.before_save do |ver|
+    ver.user_id = User.current_id
+    if (ver.version != 1) and 
+       Name.connection.select_value(%(
+         SELECT COUNT(*) FROM names_versions
+         WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
+       )) == '0'
+      SiteData.update_contribution(:add, :names_versions)
+    end
+  end
 
   # Get an Array of Observation's for this Name that have > 80% confidence.
   def reviewed_observations
@@ -1096,10 +1107,20 @@ class Name < AbstractModel
     old_name.log(:log_name_merged, :this => old_name.display_name,
                  :that => self.display_name)
 
-    # Okay, now it's safe to destroy the name.
+    # Destroy past versions.
+    editors = []
     for ver in old_name.versions
+      editors << ver.user_id
       ver.destroy
     end
+
+    # Update contributions for editors.
+    editors.delete(old_name.user_id)
+    for user_id in editors.uniq
+      SiteData.update_contribution(:del, :names_versions, user_id)
+    end
+
+    # Finally destroy the name.
     old_name.destroy
     Transaction.delete_name(:id => old_name)
   end

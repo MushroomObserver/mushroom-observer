@@ -167,7 +167,7 @@ class AbstractModel < ActiveRecord::Base
   #    causing each record to get saved twice.)
   # 3) Lastly, it finishes attaching the new RssLog if one exists.
   def after_create
-    SiteData.update_contribution(:create, self)
+    SiteData.update_contribution(:add, self)
     set_sync_id    if respond_to?('sync_id=') && !sync_id
     attach_rss_log if has_rss_log?
   end
@@ -196,7 +196,7 @@ class AbstractModel < ActiveRecord::Base
   # 2) It orphans the old RssLog if it had one.
   # 3) It also saves the id in case we needed to know what the id was later on.
   def before_destroy
-    SiteData.update_contribution(:destroy, self)
+    SiteData.update_contribution(:del, self)
     autolog_destroyed if has_rss_log?
     @id_was = self.id
   end

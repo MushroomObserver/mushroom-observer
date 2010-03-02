@@ -13,10 +13,14 @@
                               :action => 'locations_by_author', :id => id),
     :location_descriptions_editors => url_for(:controller => 'location',
                               :action => 'locations_by_editor', :id => id),
+    :locations => url_for(:controller => 'location',
+                              :action => 'locations_by_user', :id => id),
     :name_descriptions_authors => url_for(:controller => 'name',
                               :action => 'names_by_author', :id => id),
     :name_descriptions_editors => url_for(:controller => 'name',
                               :action => 'names_by_editor', :id => id),
+    :names => url_for(:controller => 'name', :action => 'names_by_user',
+                              :id => id),
     :observations => url_for(:controller => 'observer',
                               :action => 'observations_by_user', :id => id),
     :species_lists => url_for(:controller => 'species_list',
@@ -97,30 +101,40 @@ end %>
       <td valign="top" width="50%">
         <table cellpadding="5" cellspacing="5" border="0">
           <% total = 0
-          for field in SiteData::ALL_FIELDS
-            label  = "user_stats_#{field}".to_sym.t
+          rows = SiteData::ALL_FIELDS.map do |field| {
+            :field  => field,
+            :label  => "user_stats_#{field}".to_sym.t,
+            :count  => (count = @user_data[field].to_i),
+            :weight => (weight = SiteData::FIELD_WEIGHTS[field]),
+            :points => count * weight,
+          } end
+          rows += @show_user.bonuses.map do |points, reason| {
+            :label  => reason.to_s.t,
+            :points => points.to_i,
+          } end
+          # Do we want to sort by points?
+          rows = rows.sort_by {|row| row[:points]}.reverse
+          for row in rows
+            field  = row[:field]
+            label  = row[:label]
+            count  = row[:count]
+            weight = row[:weight]
+            points = row[:points]
             url    = links[field]
             link   = url ? link_to(label, url) : label
-            count  = @user_data[field]
-            if count and label != ''
-              weight = SiteData::FIELD_WEIGHTS[field]
-              points = count * weight
-              total += points %>
+            total += points
+            if !count %>
+              <tr>
+                <td colspan="2"><%= label %></td>
+                <td>=</td>
+                <td align="right"><%= points %></td>
+              </tr>
+            <% elsif count > 0 and label != '' %>
               <tr>
                 <td><%= link %></td>
                 <td><%= count %> * <%= weight %></td>
                 <td>=</td>
                 <td align="right"><%= points %></td>
-              </tr>
-            <% end
-          end
-          if @show_user.bonuses
-            for points, reason in @show_user.bonuses
-              total += points.to_i %>
-              <tr>
-                <td colspan="2"><%= reason.to_s.tl %></td>
-                <td>=</td>
-                <td align="right"><%= points.to_i %></td>
               </tr>
             <% end
           end
