@@ -53,11 +53,12 @@
 #  unique_format_name:: (same thing, with id tacked on to make unique)
 #
 #  ==== Attachments
-#  versions::                Old versions.
-#  description::             Main LocationDescription.
-#  descriptions::            Alternate LocationDescription's.
-#  interests::               Interests in this Location.
-#  observations::            Observations using this Location as consensus.
+#  versions::           Old versions.
+#  description::        Main LocationDescription.
+#  descriptions::       Alternate LocationDescription's.
+#  interests::          Interests in this Location.
+#  observations::       Observations using this Location as consensus.
+#  mergable?::          Is it safe to merge this Location into another.
 #
 #  == Callbacks
 #
@@ -199,9 +200,15 @@ class Location < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Other Stuff
+  #  :section: Merging
   #
   ##############################################################################
+
+  # Is it safe to merge this Location with another?  If any information will
+  # get lost we return false.  In practice only if it has Observations.
+  def mergable?
+    observations.length == 0
+  end
 
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to

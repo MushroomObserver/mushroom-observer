@@ -1,210 +1,84 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-fungi_writers:
+agaricus_campestras_desc_writers:
   name_description_id: 1
   user_group_id: 6
 
-coprinus_comatus_writers:
+agaricus_campestros_desc_writers:
   name_description_id: 2
   user_group_id: 6
 
-agaricus_campestris_writers:
+russula_brevipes_author_notes_desc_writers:
   name_description_id: 3
   user_group_id: 6
 
-conocybe_filaris_writers:
+russula_cremoricolor_no_author_notes_desc_writers:
   name_description_id: 4
   user_group_id: 6
 
-amanita_baccata_arora_writers:
+russula_cremoricolor_author_notes_desc_writers:
   name_description_id: 5
   user_group_id: 6
 
-amanita_baccata_borealis_writers:
+peltigera_desc_writers:
   name_description_id: 6
   user_group_id: 6
 
-lepiota_rachodes_writers:
+suillus_desc_writers:
   name_description_id: 7
   user_group_id: 6
 
-lepiota_rhacodes_writers:
-  name_description_id: 8
-  user_group_id: 6
-
-macrolepiota_rachodes_writers:
-  name_description_id: 9
-  user_group_id: 6
-
-macrolepiota_rhacodes_writers:
-  name_description_id: 10
-  user_group_id: 6
-
-chlorophyllum_rachodes_writers:
-  name_description_id: 11
-  user_group_id: 6
-
-chlorophyllum_rhacodes_writers:
-  name_description_id: 12
-  user_group_id: 6
-
-lactarius_alpinus_writers:
-  name_description_id: 13
-  user_group_id: 6
-
-lactarius_alpigenes_writers:
-  name_description_id: 14
-  user_group_id: 6
-
-lactarius_kuehneri_writers:
-  name_description_id: 15
-  user_group_id: 6
-
-lactarius_subalpinus_writers:
-  name_description_id: 16
-  user_group_id: 6
-
-psalliota_writers:
-  name_description_id: 17
-  user_group_id: 6
-
-agaricus_writers:
-  name_description_id: 18
-  user_group_id: 6
-
-agaricus_campestrus_writers:
-  name_description_id: 19
-  user_group_id: 6
-
-agaricus_campestras_writers:
-  name_description_id: 20
-  user_group_id: 6
-
-agaricus_campestros_writers:
-  name_description_id: 21
-  user_group_id: 6
-
-coprinellus_micaceus_writers:
-  name_description_id: 22
-  user_group_id: 6
-
-coprinellus_micaceus_no_author_writers:
-  name_description_id: 23
-  user_group_id: 6
-
-strobilurus_diminutivus_no_author_writers:
-  name_description_id: 24
-  user_group_id: 6
-
-pluteus_petasatus_approved_writers:
-  name_description_id: 25
-  user_group_id: 6
-
-pluteus_petasatus_deprecated_writers:
-  name_description_id: 26
-  user_group_id: 6
-
-lepiota_writers:
-  name_description_id: 27
-  user_group_id: 6
-
-chlorophyllum_writers:
-  name_description_id: 28
-  user_group_id: 6
-
-bugs_bunny_one_writers:
-  name_description_id: 29
-  user_group_id: 6
-
-bugs_bunny_two_writers:
-  name_description_id: 30
-  user_group_id: 6
-
-russula_brevipes_no_author_writers:
-  name_description_id: 31
-  user_group_id: 6
-
-russula_brevipes_author_notes_writers:
-  name_description_id: 32
-  user_group_id: 6
-
-russula_cremoricolor_no_author_notes_writers:
-  name_description_id: 33
-  user_group_id: 6
-
-russula_cremoricolor_author_notes_writers:
-  name_description_id: 34
-  user_group_id: 6
-
-lentinellus_ursinus_author1_writers:
-  name_description_id: 35
-  user_group_id: 6
-
-lentinellus_ursinus_author2_writers:
-  name_description_id: 36
-  user_group_id: 6
-
-macrocybe_pegler_writers:
-  name_description_id: 37
-  user_group_id: 6
-
-macrocybe_titans_writers:
-  name_description_id: 38
-  user_group_id: 6
-
-boletus_edulis_writers:
-  name_description_id: 39
-  user_group_id: 6
-
-peltigera_writers:
-  name_description_id: 40
-  user_group_id: 6
-
-petigera_writers:
-  name_description_id: 41
-  user_group_id: 6
-
-suillus_writers:
-  name_description_id: 42
-  user_group_id: 6
-
-suillus_by_white_writers:
-  name_description_id: 43
-  user_group_id: 6
-
-suilus_writers:
-  name_description_id: 44
-  user_group_id: 6
-
 draft_coprinus_comatus_writers1:
-  name_description_id: 45
+  name_description_id: 8
   user_group_id: 3
 
 draft_agaricus_campestris_writers1:
-  name_description_id: 46
+  name_description_id: 9
   user_group_id: 3
 
 draft_boletus_edulis_writers1:
-  name_description_id: 47
+  name_description_id: 10
   user_group_id: 5
 
 draft_lactarius_alpinus_writers1:
-  name_description_id: 48
+  name_description_id: 11
   user_group_id: 3
 
 draft_coprinus_comatus_writers2:
-  name_description_id: 45
+  name_description_id: 8
   user_group_id: 11
 
 draft_agaricus_campestris_writers2:
-  name_description_id: 46
+  name_description_id: 9
   user_group_id: 8
 
 draft_boletus_edulis_writers2:
-  name_description_id: 47
+  name_description_id: 10
   user_group_id: 10
 
 draft_lactarius_alpinus_writers2:
-  name_description_id: 48
+  name_description_id: 11
   user_group_id: 11
 
+# all users
+peltigera_alt_desc_writers:
+  name_description_id: 12
+  user_group_id: 6
+
+# mary and dick can edit mary's desc
+peltigera_user_desc_writers1:
+  name_description_id: 13
+  user_group_id: 8
+
+peltigera_user_desc_writers2:
+  name_description_id: 13
+  user_group_id: 10
+
+# only katrina can edit desc from brodo
+peltigera_source_desc_writers:
+  name_description_id: 14
+  user_group_id: 11
+
+coprinus_comatus_desc_writers:
+  name_description_id: 15
+  user_group_id: 6

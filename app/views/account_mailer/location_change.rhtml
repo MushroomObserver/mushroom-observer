@@ -6,19 +6,21 @@
   # at all the LocationDescriptions, else only need to look at the
   # LocationDescription that actually changed.  If notifiable for multiple
   # reasons, choose the least restrictive -- i.e. 'all' first, then admin,
-  # editor and lastly author. 
+  # editor and lastly author.
   email_type = if @user.email_locations_all
     'all'
   elsif @user.watching?(@new_loc)
     'interest'
   elsif @new_loc.version != @old_loc.version
-    @new_loc.descriptions.any? {|d| d.is_editor?(@user)} ? 'editor' :
-    @new_loc.descriptions.any? {|d| d.is_author?(@user)} ? 'author' :
-    @new_loc.descriptions.any? {|d| d.is_admin?(@user)}  ? 'admin'  : nil
+    @user.email_locations_editor && @new_loc.descriptions.any? {|d| d.is_editor?(@user)} ? 'editor' :
+    @user.email_locations_author && @new_loc.descriptions.any? {|d| d.is_author?(@user)} ? 'author' :
+    @user.email_locations_admin  && @new_loc.descriptions.any? {|d| d.is_admin?(@user)}  ? 'admin'  : nil
+  elsif @new_desc
+    @user.email_locations_editor && @new_desc.is_editor?(@user) ? 'editor' :
+    @user.email_locations_author && @new_desc.is_author?(@user) ? 'author' :
+    @user.email_locations_admin  && @new_desc.is_admin?(@user)  ? 'admin'  : nil
   else
-    @new_desc.is_editor?(@user) ? 'editor' :
-    @new_desc.is_author?(@user) ? 'author' :
-    @new_desc.is_admin?(@user)  ? 'admin'  : nil
+    nil
   end
 
   intro = :email_object_change_intro.l(
@@ -30,7 +32,7 @@
   fields += "*#{:Time.l}:* #{@time.email_time}\n"
   fields += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
-  license = @new_desc.license
+  license = @new_desc ? @new_desc.license : nil
 
   one_liners = ''
   one_liners += "*#{:Name.l} #{is_now}:* #{@new_loc.display_name}\n"          if @new_loc.display_name != @old_loc.display_name
@@ -40,13 +42,15 @@
   one_liners += "*#{:email_field_west.l} #{is_now}:* #{@new_loc.west}\n"      if @new_loc.west  != @old_loc.west
   one_liners += "*#{:show_location_highest.l} #{is_now}:* #{@new_loc.high}\n" if @new_loc.high  != @old_loc.high
   one_liners += "*#{:show_location_highest.l} #{is_now}:* #{@new_loc.low}\n"  if @new_loc.low   != @old_loc.low
-  one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"        if @new_desc.license_id != @old_desc.license_id && license
+  one_liners += "*#{:license.l} #{is_now}:* #{license.display_name}\n"        if license && @new_desc.license_id != @old_desc.license_id
 
   many_liners = []
-  for field in LocationDescription.all_note_fields
-    old_val = @old_desc.send(field)
-    new_val = @new_desc.send(field)
-    many_liners.push([('form_locations_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+  if @new_desc
+    for field in LocationDescription.all_note_fields
+      old_val = @old_desc.send(field)
+      new_val = @new_desc.send(field)
+      many_liners.push([('form_locations_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
+    end
   end
 
   handy_links = :email_handy_links

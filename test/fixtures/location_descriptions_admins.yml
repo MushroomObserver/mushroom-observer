@@ -3,36 +3,3 @@
 albion_admins:
   location_description_id: 1
   user_group_id: 1
-
-burbank_admins:
-  location_description_id: 2
-  user_group_id: 1
-
-mitrula_marsh_admins:
-  location_description_id: 3
-  user_group_id: 1
-
-salt_point_admins:
-  location_description_id: 4
-  user_group_id: 1
-
-gualala_admins:
-  location_description_id: 5
-  user_group_id: 1
-
-elgin_co_admins:
-  location_description_id: 6
-  user_group_id: 1
-
-brett_woods_admins:
-  location_description_id: 7
-  user_group_id: 1
-
-point_reyes_admins:
-  location_description_id: 8
-  user_group_id: 1
-
-howarth_park_admins:
-  location_description_id: 9
-  user_group_id: 1
-

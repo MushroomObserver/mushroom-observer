@@ -36,7 +36,7 @@
 
 <%= render(:partial => 'location', :object => @location) %>
 
-<% if @description.has_any_notes? %>
+<% if @description && @description.has_any_notes? %>
   <hr/>
   <%= show_embedded_description_title(@description, @location) %>
   <%= render(:partial => 'location_description', :object => @description) %>

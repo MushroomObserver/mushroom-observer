@@ -207,6 +207,8 @@ PASSWORD_CONFIRMATION:  Password Confirmation
 password_confirmation:  password confirmation
 PASSWORD_CONFIRMATIONS:  Password Confirmations
 password_confirmations:  password confirmations
+PREFERENCES: Einstellungen
+preferences: Einstellungen
 PREFERRED_NAME: Bevorzugt Name
 preferred_name: bevorzugt Name
 PREFERRED_NAMES: Bevorzugten Namen
@@ -3710,4 +3712,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

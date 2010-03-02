@@ -260,11 +260,6 @@ class AbstractModel < ActiveRecord::Base
       self.num_views = (num_views || 0) + 1 if respond_to?('num_views=')
       self.last_view = Time.now             if respond_to?('last_view=')
       self.save_without_our_callbacks
-      Transaction.create(
-        :method => :view,
-        :action => self.class.to_s.underscore,
-        :id     => self
-      )
     end
   end
 

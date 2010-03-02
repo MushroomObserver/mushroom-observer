@@ -945,14 +945,18 @@ class Query < AbstractQuery
     when :Location
       note_fields = LocationDescription.all_note_fields.
                       map {|x| "location_descriptions.#{x}"}
-      ids = google_execute(search, :join => :location_descriptions,
+      ids = google_execute(search,
+        :fields => [ 'locations.display_name', 'locations.search_name' ])
+      ids += google_execute(search, :join => :location_descriptions,
         :fields => [ 'locations.display_name', 'locations.search_name',
                      *note_fields ])
 
     when :Name
       note_fields = NameDescription.all_note_fields.
                       map {|x| "name_descriptions.#{x}"}
-      ids = google_execute(search, :join => :name_descriptions,
+      ids = google_execute(search,
+        :fields => [ 'names.search_name', 'names.citation' ])
+      ids += google_execute(search, :join => :name_descriptions,
         :fields => [ 'names.search_name', 'names.citation', *note_fields ])
 
     when :Observation

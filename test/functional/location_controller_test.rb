@@ -3,10 +3,9 @@ require File.dirname(__FILE__) + '/../boot'
 class LocationControllerTest < ControllerTestCase
 
   def setup
-    @loc_pts       = 20
-    @loc_chg_pts   = 0
-    @desc_auth_pts = 10
-    @desc_edit_pts = 5
+    @loc_pts  = 20
+    @auth_pts = 10
+    @edit_pts = 5
   end
 
   # Init params based on existing location.
@@ -170,7 +169,7 @@ class LocationControllerTest < ControllerTestCase
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
     assert_response(:action => :show_location)
-    assert_equal(10 + @loc_chg_pts, @rolf.reload.contribution)
+    assert_equal(10, @rolf.reload.contribution)
 
     # Should have created a new version of location only.
     assert_equal(count + 1, Location::Version.count)
@@ -202,6 +201,7 @@ class LocationControllerTest < ControllerTestCase
     update_location_error(params)
   end
 
+  # Burbank has observations so it stays.
   def test_update_location_user_merge
     to_go = locations(:burbank)
     to_stay = locations(:albion)
@@ -213,11 +213,13 @@ class LocationControllerTest < ControllerTestCase
     past_desc_count = LocationDescription::Version.count
     post_requires_login(:edit_location, params)
     assert_response(:action => :show_location)
-    assert_equal(loc_count, Location.count)
+    assert_equal(loc_count-1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
-    assert_equal(past_loc_count, Location::Version.count)
+    assert_equal(past_loc_count-2, Location::Version.count)
     assert_equal(past_desc_count, LocationDescription::Version.count)
-    assert_equal(10, @rolf.reload.contribution)
+    # Rolf is getting added to authors for the Albion description when it
+    # is moved over to Burbank (location_id is changed and it is saved).
+    assert_equal(10 - @loc_pts + @auth_pts, @rolf.reload.contribution)
   end
 
   def test_update_location_admin_merge

@@ -33,13 +33,14 @@
 ################################################################################
 
 class QueuedEmail::NameChange < QueuedEmail
-  def name;                    get_object(:name, ::Name);                   end
-  def description;             get_object(:description, ::NameDescription); end
-  def old_name_version;        get_integer(:old_name_version);              end
-  def new_name_version;        get_integer(:new_name_version);              end
-  def old_description_version; get_integer(:old_description_version);       end
-  def new_description_version; get_integer(:new_description_version);       end
-  def review_status;           get_string(:review_status).to_sym;           end
+  def name;                    get_object(:name, ::Name);             end
+  def description;             get_object(:description, ::NameDescription,
+                                          :allow_nil); end
+  def old_name_version;        get_integer(:old_name_version);        end
+  def new_name_version;        get_integer(:new_name_version);        end
+  def old_description_version; get_integer(:old_description_version); end
+  def new_description_version; get_integer(:new_description_version); end
+  def review_status;           get_string(:review_status).to_sym;     end
 
   def self.create_email(sender, recipient, name, desc, review_status_changed)
     result = create(sender, recipient)
@@ -60,10 +61,9 @@ class QueuedEmail::NameChange < QueuedEmail
       result.add_integer(:old_description_version, (desc.altered? ? desc.version - 1 : desc.version))
       result.add_string(:review_status, review_status_changed ? desc.review_status : :no_change)
     else
-      desc = name.description
-      result.add_integer(:description, desc.id)
-      result.add_integer(:new_description_version, desc.version)
-      result.add_integer(:old_description_version, desc.version)
+      result.add_integer(:description, 0)
+      result.add_integer(:new_description_version, 0)
+      result.add_integer(:old_description_version, 0)
       result.add_string(:review_status, :no_change)
     end
     result.finish

@@ -4,34 +4,3 @@ albion_readers:
   location_description_id: 1
   user_group_id: 6
 
-burbank_readers:
-  location_description_id: 2
-  user_group_id: 6
-
-mitrula_marsh_readers:
-  location_description_id: 3
-  user_group_id: 6
-
-salt_point_readers:
-  location_description_id: 4
-  user_group_id: 6
-
-gualala_readers:
-  location_description_id: 5
-  user_group_id: 6
-
-elgin_co_readers:
-  location_description_id: 6
-  user_group_id: 6
-
-brett_woods_readers:
-  location_description_id: 7
-  user_group_id: 6
-
-point_reyes_readers:
-  location_description_id: 8
-  user_group_id: 6
-
-howarth_park_readers:
-  location_description_id: 9
-  user_group_id: 6

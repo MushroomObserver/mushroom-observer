@@ -903,11 +903,11 @@ class NameTest < Test::Unit::TestCase
       :from          => @rolf,
       :to            => @mary,
       :name          => name.id,
-      :description   => desc.id,
+      :description   => 0,
       :old_name_version => name.version-1,
       :new_name_version => name.version,
-      :old_description_version => desc.version,
-      :new_description_version => desc.version,
+      :old_description_version => 0,
+      :new_description_version => 0,
       :review_status => 'no_change'
     )
   end

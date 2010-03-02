@@ -11,8 +11,8 @@ class Descriptions < ActiveRecord::Migration
     #  Add some new email prefs.
     # ----------------------------
 
-    add_column :users, :email_locations_admin, :boolean, :default => true
-    add_column :users, :email_names_admin,     :boolean, :default => true
+    add_column :users, :email_locations_admin, :boolean, :default => false
+    add_column :users, :email_names_admin,     :boolean, :default => false
 
     # --------------------------------------
     #  First create the "all users" group.

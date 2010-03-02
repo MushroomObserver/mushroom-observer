@@ -65,7 +65,7 @@
 #  however, at the same time, we want to allow draft descriptions to own a
 #  copy.  Thus it is stored in both.  The one in Name is set whenever the
 #  official NameDescription's copy changes.  Think of the one in Name as
-#  caching the official version. 
+#  caching the official version.
 #
 #  == Version
 #
@@ -159,7 +159,6 @@
 #  approved_synonyms::       List of approved synonyms.
 #  clear_synonym::           Remove this Name from its Synonym.
 #  merge_synonyms::          Merge Synonym's of this and another Name.
-#  merge_names::             Merge old name into this one and remove old one.
 #  transfer_synonym::        Transfer a Name from another Synonym into this Name's Synonym.
 #  other_authors::           List of names that differ only in author.
 #  other_author_ids::        List of names that differ only in author, just ids.
@@ -185,6 +184,10 @@
 #  observations::            Observations using this Name as consensus.
 #  namings::                 Namings that use this Name.
 #  reviewed_observations::   Observation's that have > 80% confidence.
+#
+#  ==== Merging
+#  mergable?::               Is it safe to merge this Name into another.
+#  merge::                   Merge old name into this one and remove old one.
 #
 #  == Callbacks
 #
@@ -994,12 +997,24 @@ class Name < AbstractModel
     return result
   end
 
+  ################################################################################
+  #
+  #  :section: Merging
+  #
+  ################################################################################
+
+  # Is it safe to merge this Name with another?  If any information will get
+  # lost we return false.  In practice only if it has Namings.
+  def mergable?
+    namings.length == 0
+  end
+
   # Merge all the stuff that refers to +old_name+ into +self+.  Usually, no
   # changes are made to +self+, however it might update the +classification+
   # cache if the old name had a better one -- NOT SAVED!!  Then +old_name+ is
   # destroyed; all the things that referred to +old_name+ are updated and
-  # saved. 
-  def merge_names(old_name)
+  # saved.
+  def merge(old_name)
     xargs = {}
 
     # Move all observations over to the new name.
@@ -1061,7 +1076,7 @@ class Name < AbstractModel
     end
 
     # Update the classification cache if that changed in the process.
-    if self.description && 
+    if self.description &&
        (self.classification != self.description.classification)
       self.classification = self.description.classification
     end

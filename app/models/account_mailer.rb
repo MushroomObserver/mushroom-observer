@@ -218,8 +218,8 @@ class AccountMailer < ActionMailer::Base
                       new_loc_version, old_desc_version, new_desc_version)
     old_loc              = loc.versions.find_by_version(old_loc_version)
     new_loc              = loc; loc.revert_to(new_loc_version)
-    old_desc             = desc.versions.find_by_version(old_desc_version)
-    new_desc             = desc; desc.revert_to(new_desc_version)
+    old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
+    new_desc             = desc; desc.revert_to(new_desc_version) if desc
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
@@ -254,8 +254,8 @@ class AccountMailer < ActionMailer::Base
           new_name_version, old_desc_version, new_desc_version, review_status)
     old_name             = name.versions.find_by_version(old_name_version)
     new_name             = name; name.revert_to(new_name_version)
-    old_desc             = desc.versions.find_by_version(old_desc_version)
-    new_desc             = desc; desc.revert_to(new_desc_version)
+    old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
+    new_desc             = desc; desc.revert_to(new_desc_version) if desc
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_name_change.l(:name => (old_name ? old_name.search_name : new_name.search_name))

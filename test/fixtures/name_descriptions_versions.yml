@@ -1,174 +1,9 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-fungi_desc_version_1:
-  id: 1
-  name_description_id: 1
-  modified: 2007-02-26 17:20:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-coprinus_comatus_desc_version_1:
-  id: 2
-  name_description_id: 2
-  modified: 2007-02-27 20:48:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-agaricus_campestris_desc_version_1:
-  id: 3
-  name_description_id: 3
-  modified: 2007-03-19 17:20:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-conocybe_filaris_desc_version_1:
-  id: 4
-  name_description_id: 4
-  modified: 2007-03-19 15:51:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-amanita_baccata_arora_desc_version_1:
-  id: 5
-  name_description_id: 5
-  modified: 2007-04-09 08:53:30
-  user_id: 1
-  version: 1
-  classification: ''
-
-amanita_baccata_borealis_desc_version_1:
-  id: 6
-  name_description_id: 6
-  modified: 2007-04-09 08:54:30
-  user_id: 1
-  version: 1
-  classification: ''
-
-# No Taxon 1
-lepiota_rachodes_desc_version_1:
-  id: 7
-  name_description_id: 7
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-# No Taxon 2
-lepiota_rhacodes_desc_version_1:
-  id: 8
-  name_description_id: 8
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Taxon 1, Name 1
-macrolepiota_rachodes_desc_version_1:
-  id: 9
-  name_description_id: 9
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Taxon 1, Name 2
-macrolepiota_rhacodes_desc_version_1:
-  id: 10
-  name_description_id: 10
-  modified: 2007-04-30 21:34:00
-  user_id: 2
-  version: 1
-  classification: ''
-
-# Taxon 2, Name 1
-chlorophyllum_rachodes_desc_version_1:
-  id: 11
-  name_description_id: 11
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Taxon 2, Name 2
-chlorophyllum_rhacodes_desc_version_1:
-  id: 12
-  name_description_id: 12
-  modified: 2007-04-30 21:34:00
-  user_id: 2
-  version: 1
-  classification: ''
-
-# Taxon 3, Name 1
-lactarius_alpinus_desc_version_1:
-  id: 13
-  name_description_id: 13
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Taxon 3, Name 2
-lactarius_alpigenes_desc_version_1:
-  id: 14
-  name_description_id: 14
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Taxon 3, Name 3
-lactarius_kuehneri_desc_version_1:
-  id: 15
-  name_description_id: 15
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Taxon 3, Name 4
-lactarius_subalpinus_desc_version_1:
-  id: 16
-  name_description_id: 16
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Deprecated genus
-psalliota_desc_version_1:
-  id: 17
-  name_description_id: 17
-  modified: 2007-06-09 08:06:40
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Valid genus
-agaricus_desc_version_1:
-  id: 18
-  name_description_id: 18
-  modified: 2007-06-09 08:06:40
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Misspelt name for testing merging
-agaricus_campestrus_desc_version_1:
-  id: 19
-  name_description_id: 19
-  modified: 2007-06-23 20:04:00
-  user_id: 1
-  version: 1
-  classification: ''
-
 # Name with notes (not mergeable)
 agaricus_campestras_desc_version_1:
-  id: 20
-  name_description_id: 20
+  id: 1
+  name_description_id: 1
   modified: 2007-06-23 20:04:00
   user_id: 1
   version: 1
@@ -177,105 +12,17 @@ agaricus_campestras_desc_version_1:
 
 # Another name with notes (not mergeable)
 agaricus_campestros_desc_version_1:
-  id: 21
-  name_description_id: 21
+  id: 2
+  name_description_id: 2
   modified: 2007-06-23 20:04:00
   user_id: 1
   version: 1
   notes: Need two to get an error
   classification: ''
 
-# For testing merges with existings versions
-coprinellus_micaceus_desc_version_1:
-  id: 22
-  name_description_id: 22
-  modified: 2007-06-24 12:45:55
-  user_id: 1
-  version: 1
-  classification: ''
-
-# For testing merges with existing versions
-coprinellus_micaceus_no_author_desc_version_1:
-  id: 23
-  name_description_id: 23
-  modified: 2007-06-24 12:45:55
-  user_id: 1
-  version: 1
-  classification: ''
-
-# For testing when the author is added to a name that has an observation
-strobilurus_diminutivus_no_author_desc_version_1:
-  id: 24
-  name_description_id: 24
-  modified: 2007-07-20 20:54:45
-  user_id: 1
-  version: 1
-  classification: ''
-
-# For testing when there are both an approved and deprecated name with the same text name
-pluteus_petasatus_approved_desc_version_1:
-  id: 25
-  name_description_id: 25
-  modified: 2007-07-20 20:54:45
-  user_id: 1
-  version: 1
-  classification: ''
-
-# For testing the where the author is added when a name has an observation
-pluteus_petasatus_deprecated_desc_version_1:
-  id: 26
-  name_description_id: 26
-  modified: 2007-07-20 21:12:45
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Valid genus
-lepiota_desc_version_1:
-  id: 27
-  name_description_id: 27
-  modified: 2007-07-30 08:06:40
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Valid genus
-chlorophyllum_desc_version_1:
-  id: 28
-  name_description_id: 28
-  modified: 2007-07-30 22:06:40
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Two fake names with non-alphanumerics for severe stress-testing species lists.
-bugs_bunny_one_desc_version_1:
-  id: 29
-  name_description_id: 29
-  modified: 2008-01-31 01:01:01
-  user_id: 1
-  version: 1
-  classification: ''
-
-bugs_bunny_two_desc_version_1:
-  id: 30
-  name_description_id: 30
-  modified: 2008-01-31 01:01:01
-  user_id: 1
-  version: 1
-  classification: ''
-
-russula_brevipes_no_author_desc_version_1:
-  id: 31
-  name_description_id: 31
-  modified: 2008-03-10 22:31:27
-  user_id: 1
-  version: 1
-  classification: ''
-
 russula_brevipes_author_notes_desc_version_1:
-  id: 32
-  name_description_id: 32
+  id: 3
+  name_description_id: 3
   modified: 2008-03-10 22:33:05
   user_id: 1
   version: 1
@@ -283,8 +30,8 @@ russula_brevipes_author_notes_desc_version_1:
   classification: ''
 
 russula_cremoricolor_no_author_notes_desc_version_1:
-  id: 33
-  name_description_id: 33
+  id: 4
+  name_description_id: 4
   modified: 2008-03-12 20:53:18
   user_id: 1
   version: 1
@@ -292,59 +39,17 @@ russula_cremoricolor_no_author_notes_desc_version_1:
   classification: ''
 
 russula_cremoricolor_author_notes_desc_version_1:
-  id: 34
-  name_description_id: 34
+  id: 5
+  name_description_id: 5
   modified: 2008-03-12 20:53:40
   user_id: 1
   version: 1
   notes: Some different notes
   classification: ''
 
-lentinellus_ursinus_author1_desc_version_1:
-  id: 35
-  name_description_id: 35
-  modified: 2008-03-19 08:35:37
-  user_id: 1
-  version: 1
-  classification: ''
-
-lentinellus_ursinus_author2_desc_version_1:
-  id: 36
-  name_description_id: 36
-  modified: 2008-03-19 08:35:37
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Genus with correct author
-macrocybe_pegler_desc_version_1:
-  id: 37
-  name_description_id: 37
-  modified: 2008-09-05 22:30:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-# Genus with incorrect author
-macrocybe_titans_desc_version_1:
-  id: 38
-  name_description_id: 38
-  modified: 2008-09-05 22:30:00
-  user_id: 1
-  version: 1
-  classification: ''
-
-boletus_edulis_desc_version_1:
-  id: 39
-  name_description_id: 39
-  modified: 2008-10-05 16:17:08
-  user_id: 4
-  version: 1
-  classification: ''
-
 peltigera_desc_version_1:
-  id: 40
-  name_description_id: 40
+  id: 6
+  name_description_id: 6
   modified: 2009-01-01 01:01:01
   user_id: 1
   version: 1
@@ -352,8 +57,8 @@ peltigera_desc_version_1:
   classification: ''
 
 peltigera_desc_version_2:
-  id: 41
-  name_description_id: 40
+  id: 7
+  name_description_id: 6
   modified: 2009-01-02 01:01:01
   user_id: 4
   version: 2
@@ -366,43 +71,19 @@ peltigera_desc_version_2:
   look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
   uses: "Good for making birds nests... if you're a bird."
 
-petigera_desc_version_1:
-  id: 42
-  name_description_id: 41
-  modified: 2009-01-02 01:01:01
-  user_id: 4
-  version: 1
-  classification: ''
-
 suillus_desc_version_1:
-  id: 43
-  name_description_id: 42
+  id: 8
+  name_description_id: 7
   modified: 2009-10-12 21:30:01
   user_id: 4
   version: 1
   gen_desc: A __Suillus__ by any other name would smell as sweet...
   classification: ''
 
-suillus_by_white_desc_version_1:
-  id: 44
-  name_description_id: 43
-  modified: 2009-10-12 21:30:01
-  user_id: 4
-  version: 1
-  classification: ''
-
-suilus_desc_version_1:
-  id: 45
-  name_description_id: 44
-  modified: 2009-10-12 21:30:01
-  user_id: 4
-  version: 1
-  classification: ''
-
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
 draft_coprinus_comatus_version_1:
-  id: 46
-  name_description_id: 45
+  id: 9
+  name_description_id: 8
   user_id: 5
   version: 1
   gen_desc: This is a general description of __C. comatus__.
@@ -410,26 +91,50 @@ draft_coprinus_comatus_version_1:
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
 draft_agaricus_campestris_version_1:
-  id: 47
-  name_description_id: 46
+  id: 10
+  name_description_id: 9
   user_id: 2
   version: 1
   modified: 2008-10-05 12:37:35
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
 draft_boletus_edulis_version_1:
-  id: 48
-  name_description_id: 47
+  id: 11
+  name_description_id: 10
   user_id: 4
   version: 1
   modified: 2008-10-05 16:19:45
 
 # A draft of Lactarius alpinus with a bad classification field
 draft_lactarius_alpinus_version_1:
-  id: 49
-  name_description_id: 48
+  id: 12
+  name_description_id: 11
   user_id: 5
   version: 1
   modified: 2009-05-04 19:56:25
   classification: "**Domain**: Eukarya"
+
+peltigera_alt_desc_version_1:
+  id: 13
+  name_description_id: 12
+  modified: 2010-01-01 01:01:01
+  user_id: 1
+  version: 1
+  gen_desc: "Another general description of _Peltigera_."
+
+peltigera_user_desc_version_1:
+  id: 14
+  name_description_id: 13
+  modified: 2010-01-02 01:01:01
+  user_id: 2
+  version: 1
+  gen_desc: "Mary's general description of _Peltigera_."
+
+peltigera_source_desc_version_1:
+  id: 15
+  name_description_id: 14
+  modified: 2010-01-03 01:01:01
+  user_id: 5
+  version: 1
+  diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
 

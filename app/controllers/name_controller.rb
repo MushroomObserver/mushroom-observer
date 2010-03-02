@@ -226,10 +226,16 @@ class NameController < ApplicationController
     desc_id = params[:desc]
     @name = Name.find(name_id, :include => [:user, :descriptions])
     desc_id = @name.description_id if desc_id.to_s == ''
-    @description = NameDescription.find(desc_id, :include =>
+    if desc_id.to_s != ''
+      @description = NameDescription.find(desc_id, :include =>
                               [:authors, :editors, :license, :reviewer, :user])
+      @description = nil if !@description.is_reader?(@user)
+    else
+      @description = nil
+    end
+
     update_view_stats(@name)
-    update_view_stats(@description)
+    update_view_stats(@description) if @description
 
     # Get a list of projects the user can create drafts for.
     @projects = @user && @user.projects_member.select do |project|
@@ -506,21 +512,31 @@ class NameController < ApplicationController
 
         # Merge this name into another.
         if merge
-          # Copy over any info this name has that the other name doesn't.
-          # Use other name's info where there's conflict.  (Reason: this is
-          # most often used to *get rid* of a misspelt name, such names are
-          # frequently accidentally created, often with incorrect rank.)
-          if merge_name.author.to_s == ''
-            merge.author = author
+          # Swap order if only one is mergable.
+          if !@name.mergable? && merge.mergable?
+            @name, merge = merge, @name
           end
-          if merge_name.citation.to_s == ''
-            merge.citation = params[:name][:citation].to_s.strip_squeeze
-          end
-          merge.change_text_name(merge.text_name, merge.author, merge.rank,
-                                 :save_parents)
 
           # Admins can actually merge them, then redirect to other location.
-          if is_in_admin_mode?
+          if is_in_admin_mode? || @name.mergable?
+
+            # Copy over any info this name has that the other name doesn't.
+            # Use other name's info where there's conflict.  (Reason: this is
+            # most often used to *get rid* of a misspelt name, such names are
+            # frequently accidentally created, often with incorrect rank and
+            # bogus author.)
+            if merge.author.to_s == ''
+              merge.author = author
+            end
+            if merge.citation.to_s == ''
+              merge.citation = params[:name][:citation].to_s.strip_squeeze
+            end
+            if params[:name][:deprecated] != '1'
+              merge.deprecated = false
+            end
+            merge.change_text_name(merge.text_name, merge.author, merge.rank,
+                                   :save_parents)
+
             merge.merge(@name)
             save_name(merge, :log_name_updated) if merge.changed?
             flash_notice(:runtime_edit_name_merge_success.t(
@@ -690,7 +706,7 @@ class NameController < ApplicationController
 
       # If substantive changes are made by a reviewer, call this act a
       # "review", even though they haven't actually changed the review
-      # status.  If it's a non-reviewer, this will revert it to "unreviewed". 
+      # status.  If it's a non-reviewer, this will revert it to "unreviewed".
       if @description.save_version?
         @description.update_review_status(@description.review_status)
       end

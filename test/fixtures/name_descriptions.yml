@@ -1,546 +1,76 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-fungi_desc:
-  id: 1
-  name_id: 1
-  sync_id: 1xx1
-  created: 2007-02-26 17:20:00
-  modified: 2007-02-26 17:20:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-coprinus_comatus_desc:
-  id: 2
-  name_id: 2
-  sync_id: 2xx1
-  created: 2007-02-27 20:47:00
-  modified: 2007-02-27 20:48:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-agaricus_campestris_desc:
-  id: 3
-  name_id: 3
-  sync_id: 3xx1
-  created: 2007-03-19 17:20:00
-  modified: 2007-03-19 17:20:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-conocybe_filaris_desc:
-  id: 4
-  name_id: 4
-  sync_id: 4xx1
-  created: 2007-03-28 15:50:00
-  modified: 2007-03-19 15:51:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-amanita_baccata_arora_desc:
-  id: 5
-  name_id: 5
-  sync_id: 5xx1
-  created: 2007-04-08 08:53:20
-  modified: 2007-04-09 08:53:30
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-amanita_baccata_borealis_desc:
-  id: 6
-  name_id: 6
-  sync_id: 6xx1
-  created: 2007-04-08 08:54:20
-  modified: 2007-04-09 08:54:30
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# No Taxon 1
-lepiota_rachodes_desc:
-  id: 7
-  name_id: 7
-  sync_id: 7xx1
-  created: 2007-04-30 21:34:00
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# No Taxon 2
-lepiota_rhacodes_desc:
-  id: 8
-  name_id: 8
-  sync_id: 8xx1
-  created: 2007-04-30 21:34:00
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 1, Name 1
-macrolepiota_rachodes_desc:
-  id: 9
-  name_id: 9
-  sync_id: 9xx1
-  created: 2007-04-30 21:34:00
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 1, Name 2
-macrolepiota_rhacodes_desc:
-  id: 10
-  name_id: 10
-  sync_id: 10xx1
-  created: 2007-04-30 21:34:00
-  modified: 2007-04-30 21:34:00
-  user_id: 2
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 2, Name 1
-chlorophyllum_rachodes_desc:
-  id: 11
-  name_id: 11
-  sync_id: 11xx1
-  created: 2007-04-30 21:34:00
-  modified: 2007-04-30 21:34:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 2, Name 2
-chlorophyllum_rhacodes_desc:
-  id: 12
-  name_id: 12
-  sync_id: 12xx1
-  created: 2007-04-30 21:34:00
-  modified: 2007-04-30 21:34:00
-  user_id: 2
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 3, Name 1
-lactarius_alpinus_desc:
-  id: 13
-  name_id: 13
-  sync_id: 13xx1
-  created: 2007-05-28 15:14:00
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 3, Name 2
-lactarius_alpigenes_desc:
-  id: 14
-  name_id: 14
-  sync_id: 14xx1
-  created: 2007-05-28 15:14:00
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 3, Name 3
-lactarius_kuehneri_desc:
-  id: 15
-  name_id: 15
-  sync_id: 15xx1
-  created: 2007-05-28 15:14:00
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Taxon 3, Name 4
-lactarius_subalpinus_desc:
-  id: 16
-  name_id: 16
-  sync_id: 16xx1
-  created: 2007-05-28 15:14:00
-  modified: 2007-04-30 15:14:10
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Deprecated genus
-psalliota_desc:
-  id: 17
-  name_id: 17
-  sync_id: 17xx1
-  created: 2007-06-09 08:06:28
-  modified: 2007-06-09 08:06:40
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Valid genus
-agaricus_desc:
-  id: 18
-  name_id: 18
-  sync_id: 18xx1
-  created: 2007-06-09 08:06:28
-  modified: 2007-06-09 08:06:40
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Misspelt name for testing merging
-agaricus_campestrus_desc:
-  id: 19
-  name_id: 19
-  sync_id: 19xx1
-  created: 2007-06-23 20:04:00
-  modified: 2007-06-23 20:04:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
 # Name with notes (not mergeable)
 agaricus_campestras_desc:
-  id: 20
+  id: 1
   name_id: 20
-  sync_id: 20xx1
+  sync_id: 1xx1
   created: 2007-06-23 20:04:00
   modified: 2007-06-23 20:04:00
   user_id: 1
   version: 1
   notes: This is should prevent me for merging
   review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 # Another name with notes (not mergeable)
 agaricus_campestros_desc:
-  id: 21
+  id: 2
   name_id: 21
-  sync_id: 21xx1
+  sync_id: 2xx1
   created: 2007-06-23 20:04:00
   modified: 2007-06-23 20:04:00
   user_id: 1
   version: 1
   notes: Need two to get an error
   review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# For testing merges with existings versions
-coprinellus_micaceus_desc:
-  id: 22
-  name_id: 22
-  sync_id: 22xx1
-  created: 2007-06-24 12:45:55
-  modified: 2007-06-24 12:45:55
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# For testing merges with existing versions
-coprinellus_micaceus_no_author_desc:
-  id: 23
-  name_id: 23
-  sync_id: 23xx1
-  created: 2007-06-24 12:45:55
-  modified: 2007-06-24 12:45:55
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# For testing when the author is added to a name that has an observation
-strobilurus_diminutivus_no_author_desc:
-  id: 24
-  name_id: 24
-  sync_id: 24xx1
-  created: 2007-07-20 20:54:45
-  modified: 2007-07-20 20:54:45
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# For testing when there are both an approved and deprecated name with the same text name
-pluteus_petasatus_approved_desc:
-  id: 25
-  name_id: 25
-  sync_id: 25xx1
-  created: 2007-07-20 20:54:45
-  modified: 2007-07-20 20:54:45
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# For testing the where the author is added when a name has an observation
-pluteus_petasatus_deprecated_desc:
-  id: 26
-  name_id: 26
-  sync_id: 26xx1
-  created: 2007-07-20 21:12:45
-  modified: 2007-07-20 21:12:45
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Valid genus
-lepiota_desc:
-  id: 27
-  name_id: 27
-  sync_id: 27xx1
-  created: 2007-07-30 08:06:28
-  modified: 2007-07-30 08:06:40
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Valid genus
-chlorophyllum_desc:
-  id: 28
-  name_id: 28
-  sync_id: 28xx1
-  created: 2007-07-30 22:06:28
-  modified: 2007-07-30 22:06:40
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Two fake names with non-alphanumerics for severe stress-testing species lists.
-bugs_bunny_one_desc:
-  id: 29
-  name_id: 29
-  sync_id: 29xx1
-  created: 2008-01-31 01:01:01
-  modified: 2008-01-31 01:01:01
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-bugs_bunny_two_desc:
-  id: 30
-  name_id: 30
-  sync_id: 30xx1
-  created: 2008-01-31 01:01:01
-  modified: 2008-01-31 01:01:01
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-russula_brevipes_no_author_desc:
-  id: 31
-  name_id: 31
-  sync_id: 31xx1
-  created: 2008-03-10 22:31:25
-  modified: 2008-03-10 22:31:27
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 russula_brevipes_author_notes_desc:
-  id: 32
+  id: 3
   name_id: 32
-  sync_id: 32xx1
+  sync_id: 3xx1
   created: 2008-03-10 22:33:00
   modified: 2008-03-10 22:33:05
   user_id: 1
   version: 1
   notes: Here are some notes
   review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 russula_cremoricolor_no_author_notes_desc:
-  id: 33
+  id: 4
   name_id: 33
-  sync_id: 33xx1
+  sync_id: 4xx1
   created: 2008-03-12 20:53:08
   modified: 2008-03-12 20:53:18
   user_id: 1
   version: 1
   notes: Here are some notes
   review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 russula_cremoricolor_author_notes_desc:
-  id: 34
+  id: 5
   name_id: 34
-  sync_id: 34xx1
+  sync_id: 5xx1
   created: 2008-03-12 20:53:36
   modified: 2008-03-12 20:53:40
   user_id: 1
   version: 1
   notes: Some different notes
   review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-lentinellus_ursinus_author1_desc:
-  id: 35
-  name_id: 35
-  sync_id: 35xx1
-  created: 2008-03-19 08:35:30
-  modified: 2008-03-19 08:35:37
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-lentinellus_ursinus_author2_desc:
-  id: 36
-  name_id: 36
-  sync_id: 36xx1
-  created: 2008-03-19 08:35:30
-  modified: 2008-03-19 08:35:37
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Genus with correct author
-macrocybe_pegler_desc:
-  id: 37
-  name_id: 37
-  sync_id: 37xx1
-  created: 2008-09-05 22:30:00
-  modified: 2008-09-05 22:30:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-# Genus with incorrect author
-macrocybe_titans_desc:
-  id: 38
-  name_id: 38
-  sync_id: 38xx1
-  created: 2008-09-05 22:30:00
-  modified: 2008-09-05 22:30:00
-  user_id: 1
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-boletus_edulis_desc:
-  id: 39
-  name_id: 39
-  sync_id: 39xx1
-  created: 2008-10-05 16:16:50
-  modified: 2008-10-05 16:17:08
-  user_id: 4
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 peltigera_desc:
-  id: 40
+  id: 6
   name_id: 40
-  sync_id: 40xx1
+  sync_id: 6xx1
   created: 2009-01-01 01:01:01
   modified: 2009-01-02 01:01:01
   user_id: 4
@@ -557,67 +87,27 @@ peltigera_desc:
   habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
   look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
   uses: "Good for making birds nests... if you're a bird."
-  source_type: main
-  public: 1
-
-petigera_desc:
-  id: 41
-  name_id: 41
-  sync_id: 41xx1
-  created: 2009-01-01 01:01:01
-  modified: 2009-01-02 01:01:01
-  user_id: 4
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 suillus_desc:
-  id: 42
+  id: 7
   name_id: 42
-  sync_id: 42xx1
+  sync_id: 7xx1
   created: 2009-10-12 21:30:01
   modified: 2009-10-12 21:30:01
   user_id: 4
   version: 1
   review_status: unreviewed
   gen_desc: A __Suillus__ by any other name would smell as sweet...
-  classification: ''
-  source_type: main
-  public: 1
-
-suillus_by_white_desc:
-  id: 43
-  name_id: 43
-  sync_id: 43xx1
-  created: 2009-10-12 21:30:01
-  modified: 2009-10-12 21:30:01
-  user_id: 4
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
-  public: 1
-
-suilus_desc:
-  id: 44
-  name_id: 44
-  sync_id: 44xx1
-  created: 2009-10-12 21:30:01
-  modified: 2009-10-12 21:30:01
-  user_id: 4
-  version: 1
-  review_status: unreviewed
-  classification: ''
-  source_type: main
+  source_type: public
   public: 1
 
 # A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
 draft_coprinus_comatus:
-  id: 45
+  id: 8
   name_id: 2
-  sync_id: 45xx1
+  sync_id: 8xx1
   user_id: 5
   version: 1
   review_status: unreviewed
@@ -630,9 +120,9 @@ draft_coprinus_comatus:
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
 draft_agaricus_campestris:
-  id: 46
+  id: 9
   name_id: 3
-  sync_id: 46xx1
+  sync_id: 9xx1
   user_id: 2
   version: 1
   review_status: unreviewed
@@ -644,9 +134,9 @@ draft_agaricus_campestris:
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
 draft_boletus_edulis:
-  id: 47
+  id: 10
   name_id: 39
-  sync_id: 47xx1
+  sync_id: 10xx1
   user_id: 4
   version: 1
   review_status: unreviewed
@@ -658,9 +148,9 @@ draft_boletus_edulis:
 
 # A draft of Lactarius alpinus with a bad classification field
 draft_lactarius_alpinus:
-  id: 48
+  id: 11
   name_id: 13
-  sync_id: 48xx1
+  sync_id: 11xx1
   user_id: 5
   version: 1
   review_status: unreviewed
@@ -670,3 +160,58 @@ draft_lactarius_alpinus:
   source_type: project
   source_name: EOL Project
   public: 0
+
+peltigera_alt_desc:
+  id: 12
+  name_id: 40
+  sync_id: 12xx1
+  created: 2010-01-01 01:01:01
+  modified: 2010-01-01 01:01:01
+  user_id: 1
+  version: 1
+  review_status: unreviewed
+  ok_for_export: 1
+  gen_desc: "Another general description of _Peltigera_."
+  source_type: public
+  public: 1
+
+peltigera_user_desc:
+  id: 13
+  name_id: 40
+  sync_id: 13xx1
+  created: 2010-01-02 01:01:01
+  modified: 2010-01-02 01:01:01
+  user_id: 2
+  version: 1
+  review_status: unreviewed
+  ok_for_export: 1
+  gen_desc: "Mary's general description of _Peltigera_."
+  source_type: user
+  public: 0
+
+peltigera_source_desc:
+  id: 14
+  name_id: 40
+  sync_id: 14xx1
+  created: 2010-01-03 01:01:01
+  modified: 2010-01-03 01:01:01
+  user_id: 5
+  version: 1
+  review_status: unreviewed
+  ok_for_export: 1
+  diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
+  source_type: source
+  source_name: Lichens of North America
+  public: 1
+
+coprinus_comatus_desc:
+  id: 15
+  name_id: 2
+  sync_id: 15xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 1
+  review_status: unreviewed
+  source_type: public
+  public: 1

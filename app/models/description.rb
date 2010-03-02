@@ -29,7 +29,7 @@
 #  all_notes::            Return all the notes fields via a Hash.
 #  all_notes=::           Change all the notes fields via a Hash.
 #  note_status::          Return some basic stats on notes fields.
-#  merge_descriptions::   Merge descriptive text of two Description's.
+#  merge::                Merge descriptive text of two Description's.
 #
 #  ==== Source Info
 #  source_type::          Category of source, e.g. :public, :project, :user.
@@ -242,7 +242,7 @@ class Description < AbstractModel
   # Attempt to merge another description into this one, deleting the old one
   # if successful.  It will only do so if there is no conflict on any of the
   # description fields, i.e. one or the other is blank for any given field.
-  def merge_descriptions(src)
+  def merge(src)
     dest = self
     src_notes = src.all_notes
     dest_notes = dest.all_notes
@@ -399,7 +399,7 @@ class Description < AbstractModel
     if user.is_a?(User)
       user.admin || group_user_ids(table).include?(user.id)
     elsif !user
-      group_ids(table).include?(UserGroup.all_users)
+      group_ids(table).include?(UserGroup.all_users.id)
     elsif user.to_i != 0
       group_user_ids(table).include?(user.to_i)
     else

@@ -1,22 +1,33 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-rolf_author_on_cc:
-  user_id: 1
-  name_description_id: 2
-
 draft_coprinus_comatus_authors:
-  name_description_id: 45
+  name_description_id: 8
   user_id: 5
 
 draft_agaricus_campestris_authors:
-  name_description_id: 46
+  name_description_id: 9
   user_id: 2
 
 draft_boletus_edulis_authors:
-  name_description_id: 47
+  name_description_id: 10
   user_id: 4
 
 draft_lactarius_alpinus_authors:
-  name_description_id: 48
+  name_description_id: 11
   user_id: 5
 
+peltigera_alt_desc_authors:
+  name_description_id: 12
+  user_id: 1
+
+peltigera_user_desc_authors:
+  name_description_id: 13
+  user_id: 2
+
+peltigera_source_desc_authors:
+  name_description_id: 14
+  user_id: 5
+
+coprinus_comatus_desc_authors:
+  name_description_id: 15
+  user_id: 1

@@ -76,7 +76,6 @@ class AccountController < ApplicationController
         @user.modified = now
         @user.save
         set_session_user(@user)
-        Transaction.login_user(:id => @user)
         if @remember
           set_autologin_cookie(@user)
         else
@@ -375,7 +374,6 @@ class AccountController < ApplicationController
 
   def logout_user
     if @user
-      Transaction.logout_user(:id => @user)
       @user = set_session_user(nil)
       clear_autologin_cookie
     end

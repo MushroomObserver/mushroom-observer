@@ -431,22 +431,6 @@ class API
           end
         end
 
-      # Update view stats real quick.
-      elsif method == :view
-        object = parse_object(:id, model)
-
-        raise error(302, "VIEW method requires admin") if !@safe
-        raise error(201, "#{action} not found") if !object
-        raise error(101, "VIEW method not applicable to #{action}") \
-                                         if !object.respond_to?('num_views=')
-        raise error(102, "missing time") if !@time
-
-        object.num_views ||= 0
-        object.num_views  += 1
-        object.last_view   = @time if object.respond_to?('last_view=')
-        object.last_viewer = @user if object.respond_to?('last_viewer=')
-        object.save
-
       # Other random methods.
       else
         send("#{method}_#{action}")
@@ -1157,34 +1141,6 @@ class API
 
     naming.change_vote(@user, vote)
     return Vote.find_by_user_and_naming(@user, naming)
-  end
-
-  ##############################################################################
-  #
-  #  :section: Other Request Methods
-  #
-  #  A couple non-HTTP-like request methods are also allowed for XML-RPC:
-  #
-  #  login_user::   Update user record after login.
-  #  logout_user::  Update user record after logout.
-  #  view_object::  Update view stats whenever someone does a "show_object".
-  #
-  ##############################################################################
-
-  # This is used whenever a user logs in.
-  def login_user
-    user = parse_object(:id, User)
-    time = parse_time(:time)
-    raise error(201, "user not found") if !user
-    raise error(102, "missing time")   if !time
-    user.last_login = time
-    user.modified   = time
-    user.save
-  end
-
-  # This is used whenever a user logs out.
-  def logout_user
-    # Errr... do nothing?
   end
 
   ##############################################################################

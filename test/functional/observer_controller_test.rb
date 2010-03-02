@@ -535,10 +535,10 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_review_authors_name
-    name = names(:fungi)
+    name = names(:peltigera)
     desc = name.description
 
-    params = { :id => 1, :type => 'NameDescription' }
+    params = { :id => desc.id, :type => 'NameDescription' }
 
     # Make sure it lets reviewers get to page.
     requires_login(:review_authors, params)
@@ -550,7 +550,7 @@ class ObserverControllerTest < ControllerTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
-    assert_response(:action => :show_name, :id => 1)
+    assert_response(:action => :show_name, :id => name.id)
 
     # Make Rolf an author.
     desc.add_author(@rolf)

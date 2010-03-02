@@ -214,10 +214,16 @@ class LocationController < ApplicationController
     desc_id = params[:desc]
     @location = Location.find(loc_id, :include => [:user, :descriptions])
     desc_id = @location.description_id if desc_id.to_s == ''
-    @description = LocationDescription.find(desc_id, :include =>
+    if desc_id.to_s != ''
+      @description = LocationDescription.find(desc_id, :include =>
                                         [:authors, :editors, :license, :user])
+      @description = nil if !@description.is_reader?(@user)
+    else
+      @description = nil
+    end
+
     update_view_stats(@location)
-    update_view_stats(@description)
+    update_view_stats(@description) if @description
 
     # Get a list of projects the user can create drafts for.
     @projects = @user && @user.projects_member.select do |project|
@@ -377,8 +383,13 @@ class LocationController < ApplicationController
       # Merge with another location.
       if merge && merge != @location
 
+        # Swap order if only one is mergable.
+        if !@location.mergable? && merge.mergable?
+          @location, merge = merge, @location
+        end
+
         # Admins can actually merge them, then redirect to other location.
-        if is_in_admin_mode?
+        if is_in_admin_mode? || @location.mergable?
           merge.merge(@location)
           merge.save if merge.changed?
           @location = merge

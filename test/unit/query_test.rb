@@ -1138,9 +1138,15 @@ class QueryTest < Test::Unit::TestCase
 
   def test_location_by_author
     loc1, loc2, loc3 = Location.all
+    loc1.description ||= LocationDescription.create!(:location_id => loc1.id)
+    loc2.description ||= LocationDescription.create!(:location_id => loc2.id)
+    loc3.description ||= LocationDescription.create!(:location_id => loc3.id)
     loc1.description.add_author(@rolf)
     loc2.description.add_author(@mary)
     loc3.description.add_author(@rolf)
+    loc1.save if loc1.changed?
+    loc2.save if loc2.changed?
+    loc3.save if loc3.changed?
     assert_query([loc1, loc3], :Location, :by_author, :user => @rolf, :by => :id)
     assert_query([loc2], :Location, :by_author, :user => @mary)
     assert_query([], :Location, :by_author, :user => @dick)
@@ -1148,9 +1154,15 @@ class QueryTest < Test::Unit::TestCase
 
   def test_location_by_editor
     loc1, loc2, loc3 = Location.all
+    loc1.description ||= LocationDescription.create!(:location_id => loc1.id)
+    loc2.description ||= LocationDescription.create!(:location_id => loc2.id)
+    loc3.description ||= LocationDescription.create!(:location_id => loc3.id)
     loc1.description.add_editor(@rolf)
     loc2.description.add_editor(@mary)
     loc3.description.add_editor(@rolf)
+    loc1.save if loc1.changed?
+    loc2.save if loc2.changed?
+    loc3.save if loc3.changed?
     assert_query([loc1, loc3], :Location, :by_editor, :user => @rolf, :by => :id)
     assert_query([loc2], :Location, :by_editor, :user => @mary)
     assert_query([], :Location, :by_editor, :user => @dick)

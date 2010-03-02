@@ -76,10 +76,7 @@ class Transaction < AbstractModel
 
   # Set of allowed methods.
   def self.all_methods
-    [
-      'get', 'put', 'post', 'delete',
-      'login', 'logout', 'view',
-    ]
+    [ 'get', 'put', 'post', 'delete' ]
   end
 
   # Set of allowed actions.

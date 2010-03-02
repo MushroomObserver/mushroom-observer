@@ -15,7 +15,7 @@ and this is why...
 
 Here are some handy links:
 
-Make sender an author: http://localhost:3000/observer/review_authors/2?type=name_description&add=5
+Make sender an author: http://localhost:3000/observer/review_authors/15?type=name_description&add=5
 Show user's profile: http://localhost:3000/observer/show_user/5
 Latest changes at Mushroom Observer: http://localhost:3000
 

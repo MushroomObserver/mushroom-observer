@@ -81,9 +81,9 @@ class AbstractModelTest < Test::Unit::TestCase
     comment_attrs  = comment.attributes.dup
     interest_attrs = interest.attributes.dup
     location_attrs = location.attributes.dup
-    loc_desc_attrs = loc_desc.attributes.dup
+    assert_nil(loc_desc)
     name_attrs     = name.attributes.dup
-    name_desc_attrs= name_desc.attributes.dup
+    assert_nil(name_desc)
     naming_attrs   = naming.attributes.dup
     user_attrs     = user.attributes.dup
 
@@ -99,9 +99,7 @@ class AbstractModelTest < Test::Unit::TestCase
       [ comment_attrs,  comment  ],
       [ interest_attrs, interest ],
       [ location_attrs, location ],
-      [ loc_desc_attrs, loc_desc ],
       [ name_attrs,     name     ],
-      [ name_desc_attrs,name_desc],
       [ naming_attrs,   naming   ],
       [ user_attrs,     user     ],
     ]
@@ -114,30 +112,7 @@ class AbstractModelTest < Test::Unit::TestCase
     assert_equal(num_past_name_descs+ 0, NameDescription::Version.count)
     assert_equal(num_past_locations + 0, Location::Version.count)
     assert_equal(num_past_loc_descs + 0, LocationDescription::Version.count)
-    assert_equal(num_transactions   + 6, Transaction.count)
-
-    t1, t2, t3, t4, t5, t6 = Transaction.all
-
-    assert_equal(:view,                  t1.method)
-    assert_equal(:view,                  t2.method)
-    assert_equal(:view,                  t3.method)
-    assert_equal(:view,                  t4.method)
-    assert_equal(:view,                  t5.method)
-    assert_equal(:view,                  t6.method)
-
-    assert_equal('observation',          t1.action)
-    assert_equal('image',                t2.action)
-    assert_equal('location',             t3.action)
-    assert_equal('location_description', t4.action)
-    assert_equal('name',                 t5.action)
-    assert_equal('name_description',     t6.action)
-
-    assert_equal(obs.sync_id,            t1.args[:id])
-    assert_equal(image.sync_id,          t2.args[:id])
-    assert_equal(location.sync_id,       t3.args[:id])
-    assert_equal(loc_desc.sync_id,       t4.args[:id])
-    assert_equal(name.sync_id,           t5.args[:id])
-    assert_equal(name_desc.sync_id,      t6.args[:id])
+    assert_equal(num_transactions   + 0, Transaction.count)
   end
 
   # -------------------------------------------------------------------
