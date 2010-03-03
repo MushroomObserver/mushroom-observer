@@ -1,25 +1,33 @@
 #
 #  Views: ("*" - login required, "R" - root required)
-#     index_name          List of results of index/search.
-#     list_names          Alphabetical list of all names, used or otherwise.
-#     observation_index   Alphabetical list of names people have seen.
-#     names_by_author     Alphabetical list of names authored by given user.
-#     names_by_editor     Alphabetical list of names edited by given user.
-#     name_search         Seach for string in name, notes, etc.
-#     show_name           Show info about name.
-#     show_past_name      Show past versions of name info.
-#     prev_name           Show previous name in index.
-#     next_name           Show next name in index.
-#   * create_name         Create new name.
-#   * edit_name           Edit name info.
-#   * create_name_description
-#   * edit_name_description
-#   * destroy_name_description
-#   * change_synonyms     Change list of synonyms for a name.
-#   * deprecate_name      Deprecate name in favor of another.
-#   * approve_name        Flag given name as "accepted" (others could be, too).
-#   * bulk_name_edit      Create/synonymize/deprecate a list of names.
-#     map                 Show distribution map.
+#     index_name                  List of results of index/search.
+#     list_names                  Alphabetical list of all names, used or otherwise.
+#     observation_index           Alphabetical list of names people have seen.
+#     names_by_user               Alphabetical list of names created by given user.
+#     names_by_editor             Alphabetical list of names edited by given user.
+#     name_search                 Seach for string in name, notes, etc.
+#     map                         Show distribution map.
+#     index_name_description      List of results of index/search.
+#     list_name_descriptions      Alphabetical list of all name_descriptions, used or otherwise.
+#     name_descriptions_by_author Alphabetical list of name_descriptions authored by given user.
+#     name_descriptions_by_editor Alphabetical list of name_descriptions edited by given user.
+#     show_name                   Show info about name.
+#     show_past_name              Show past versions of name info.
+#     prev_name                   Show previous name in index.
+#     next_name                   Show next name in index.
+#     show_name_description       Show info about name_description.
+#     show_past_name_description  Show past versions of name_description info.
+#     prev_name_description       Show previous name_description in index.
+#     next_name_description       Show next name_description in index.
+#   * create_name                 Create new name.
+#   * edit_name                   Edit name.
+#   * create_name_description     Create new name_description.
+#   * edit_name_description       Edit name_description.
+#   * destroy_name_description    Destroy name_description.
+#   * change_synonyms             Change list of synonyms for a name.
+#   * deprecate_name              Deprecate name in favor of another.
+#   * approve_name                Flag given name as "accepted" (others could be, too).
+#   * bulk_name_edit              Create/synonymize/deprecate a list of names.
 #
 #  Admin Tools:
 #   R cleanup_versions
@@ -38,19 +46,24 @@ class NameController < ApplicationController
   before_filter :login_required, :except => [
     :advanced_search,
     :authored_names,
-    :auto_complete_name,
     :eol,
     :eol_preview,
     :index_name,
+    :index_name_description,
     :map,
+    :list_name_descriptions,
     :list_names,
     :name_search,
-    :names_by_author,
+    :name_descriptions_by_author,
+    :name_descriptions_by_editor,
+    :names_by_user,
     :names_by_editor,
     :needed_descriptions,
     :next_name,
+    :next_name_description,
     :observation_index,
     :prev_name,
+    :prev_name_description,
     :show_name,
     :show_name_description,
     :show_past_name,
@@ -100,7 +113,7 @@ class NameController < ApplicationController
 
   # Display list of names that have authors.
   def authored_names
-    query = create_query(:Name, :with_authors)
+    query = create_query(:Name, :with_descriptions)
     show_selected_names(query) do |name|
       # Add some extra fields to the index.
       [ name.authors.map(&:login).join(', '),
@@ -110,17 +123,17 @@ class NameController < ApplicationController
   end
 
   # Display list of names that a given user is author on.
-  def names_by_author
+  def names_by_user
     user = User.find(params[:id])
-    @error = :names_by_author_error.t(:name => user.legal_name)
-    query = create_query(:Name, :by_author, :user => user)
+    @error = :runtime_names_by_user_error.t(:user => user.legal_name)
+    query = create_query(:Name, :by_user, :user => user)
     show_selected_names(query)
   end
 
   # Display list of names that a given user is editor on.
   def names_by_editor
     user = User.find(params[:id])
-    @error = :names_by_editor_error.t(:name => user.legal_name)
+    @error = :runtime_names_by_editor_error.t(:user => user.legal_name)
     query = create_query(:Name, :by_editor, :user => user)
     show_selected_names(query)
   end
@@ -158,7 +171,7 @@ class NameController < ApplicationController
        (name = Name.safe_find(pattern))
       redirect_to(:action => 'show_name', :id => name.id)
     else
-      query = create_query(:Name, :pattern, :pattern => pattern)
+      query = create_query(:Name, :pattern_search, :pattern => pattern)
       show_selected_names(query)
     end
   end
@@ -201,6 +214,77 @@ class NameController < ApplicationController
       @links << [:show_objects.t(:type => :observation), {
                   :controller => 'observer',
                   :action => 'index_observation',
+                  :params => query_params(query),
+                }]
+    end
+
+    # Add "show descriptions" link if this query can be coerced into a
+    # description query.
+    if query.is_coercable?(:NameDescription)
+      @links << [:show_objects.t(:type => :description), {
+                  :action => 'index_name_description',
+                  :params => query_params(query),
+                }]
+    end
+
+    show_index_of_objects(query, args)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Description Indexes and Searches
+  #
+  ##############################################################################
+
+  # Display list of names in last index/search query.
+  def index_name_description
+    query = find_or_create_query(:NameDescription, :all,
+                                 :by => params[:by] || :name)
+    query.params[:by] = params[:by] if params[:by]
+    show_selected_name_descriptions(query, :id => params[:id])
+  end
+
+  # Display list of all (correctly-spelled) name_descriptions in the database.
+  def list_name_descriptions
+    query = create_query(:NameDescription, :all, :by => :name)
+    show_selected_name_descriptions(query)
+  end
+
+  # Display list of name_descriptions that a given user is author on.
+  def name_descriptions_by_author
+    user = User.find(params[:id])
+    @error = :runtime_name_descriptions_by_author_error.
+               t(:user => user.legal_name)
+    query = create_query(:NameDescription, :by_author, :user => user)
+    show_selected_name_descriptions(query)
+  end
+
+  # Display list of name_descriptions that a given user is editor on.
+  def name_descriptions_by_editor
+    user = User.find(params[:id])
+    @error = :runtime_name_descriptions_by_editor_error.
+               t(:user => user.legal_name)
+    query = create_query(:NameDescription, :by_editor, :user => user)
+    show_selected_name_descriptions(query)
+  end
+
+  # Show selected search results as a list with 'list_names' template.
+  def show_selected_name_descriptions(query, args={})
+    store_query_in_session(query)
+    @links ||= []
+    args = { :action => 'list_name_descriptions',
+             :num_per_page => 50 }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name', :name.t],
+    ]
+
+    # Add "show names" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Name)
+      @links << [:show_objects.t(:type => :name), {
+                  :action => 'index_name',
                   :params => query_params(query),
                 }]
     end
@@ -346,6 +430,16 @@ class NameController < ApplicationController
   # Go to previous name: redirects to show_name.
   def prev_name
     redirect_to_next_object(:prev, Name, params[:id])
+  end
+
+  # Go to next name: redirects to show_name.
+  def next_name_description
+    redirect_to_next_object(:next, NameDescription, params[:id])
+  end
+
+  # Go to previous name_description: redirects to show_name_description.
+  def prev_name_description
+    redirect_to_next_object(:prev, NameDescription, params[:id])
   end
 
   # Callback to let reviewers change the review status of a Name from the
@@ -951,13 +1045,11 @@ class NameController < ApplicationController
   def deprecate_name
     pass_query_params
 
-    # Unit tests sometimes forget to supply required args.
-    if TESTING
-      params[:proposed]    ||= {}
-      params[:comment]     ||= {}
-      params[:chosen_name] ||= {}
-      params[:is]          ||= {}
-    end
+    # These parameters aren't always provided.
+    params[:proposed]    ||= {}
+    params[:comment]     ||= {}
+    params[:chosen_name] ||= {}
+    params[:is]          ||= {}
 
     @name    = Name.find(params[:id])
     @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
@@ -969,7 +1061,7 @@ class NameController < ApplicationController
     @synonym_names    = []
     @deprecate_all    = '1'
     @names            = []
-    @misspelling      = params[:is][:misspelling] == '1'
+    @misspelling      = (params[:is][:misspelling] == '1')
     @name_primer      = Name.primer
 
     if request.method == :post
@@ -1046,7 +1138,7 @@ class NameController < ApplicationController
           n.change_deprecated(true)
           tag = :log_name_deprecated
           args = { :other => @name.search_name }
-          if comment == ''
+          if comment != ''
             tag = :log_name_deprecated_with_comment
             args[:comment] = comment
           end
@@ -1063,7 +1155,7 @@ class NameController < ApplicationController
         tag = :log_name_approved
         args[:other] = others.join(', ')
       end
-      if comment == ''
+      if comment != ''
         tag = "#{tag}_with_comment".to_sym
         args[:comment] = comment
       end

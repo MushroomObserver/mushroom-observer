@@ -80,16 +80,15 @@ module ApplicationHelper::ObjectLink
   #   <%= user_list('Author', name.authors) %>
   #
   #   empty:           ""
-  #   [bob]:           "Author: Bob<br/>"
-  #   [bob,fred,mary]: "Authors: Bob, Fred, Mary<br/>"
+  #   [bob]:           "Author: Bob"
+  #   [bob,fred,mary]: "Authors: Bob, Fred, Mary"
   #
   def user_list(title, users)
     result = ''
     count = users.length
     if count > 0
-      result = (count > 1 ? title.pluralize.t : title.t) + ": "
+      result = (count > 1 ? title.to_s.pluralize.to_sym.t : title.t) + ": "
       result += users.map {|u| user_link(u, u.legal_name)}.join(', ')
-      result += "<br/>"
     end
     result
   end

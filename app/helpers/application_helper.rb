@@ -260,28 +260,39 @@ module ApplicationHelper
   #     Editors: <user>, <user>, ..., <user>
   #   </p>
   #
-  def show_authors_and_editors(desc)
-    type = desc.class.name.underscore
-    is_admin = @user && desc.is_admin?(@user)
-    authors  = desc.authors
-    editors  = desc.editors
-    is_author = authors.include?(@user)
+  def show_authors_and_editors(obj)
+    type = obj.class.name.underscore
 
-    authors = user_list(:show_name_description_authors.t, authors)
-    editors = user_list(:show_name_description_editors.t, editors)
+    # Descriptions.
+    if type.match(/description/)
+      is_admin = @user && obj.is_admin?(@user)
+      authors  = obj.authors
+      editors  = obj.editors
+      is_author = authors.include?(@user)
 
-    if is_admin
-      authors += '&nbsp;'
-      authors += link_to("(#{:review_authors_review_authors.t})",
-                         :controller => 'observer',
-                         :action => 'review_authors', :id => desc.id,
-                         :type => type, :params => query_params)
-    elsif !is_author
-      authors += '&nbsp;'
-      authors += link_to("(#{:show_name_author_request.t})",
-                         :controller => 'observer',
-                         :action => 'author_request', :id => desc.id,
-                         :type => type, :params => query_params)
+      authors = user_list(:show_name_description_author, authors)
+      editors = user_list(:show_name_description_editor, editors)
+
+      if is_admin
+        authors += '&nbsp;'
+        authors += link_to("(#{:review_authors_review_authors.t})",
+                           :controller => 'observer',
+                           :action => 'review_authors', :id => obj.id,
+                           :type => type, :params => query_params)
+      elsif !is_author
+        authors += '&nbsp;'
+        authors += link_to("(#{:show_name_author_request.t})",
+                           :controller => 'observer',
+                           :action => 'author_request', :id => obj.id,
+                           :type => type, :params => query_params)
+      end
+
+    # Locations and names.
+    else
+      editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
+      editors = User.all(:conditions => ["id IN (?)", editors])
+      authors = user_list(:"show_#{type}_creator", [obj.user])
+      editors = user_list(:"show_#{type}_editor", editors)
     end
 
     return "<p>#{authors}<br/>#{editors}</p>"

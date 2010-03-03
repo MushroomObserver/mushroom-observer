@@ -148,6 +148,11 @@ class NameControllerTest < ControllerTestCase
     assert_response('list_names')
   end
 
+  def test_name_index
+    get_with_dump(:list_name_descriptions)
+    assert_response('list_name_descriptions')
+  end
+
   def test_observation_index
     get_with_dump(:observation_index)
     assert_response('list_names')
@@ -155,8 +160,7 @@ class NameControllerTest < ControllerTestCase
 
   def test_authored_names
     get_with_dump(:authored_names)
-    assert_response(:action => 'show_name', :id => 2,
-                    :params => @controller.query_params)
+    assert_response('list_names')
   end
 
   def test_show_name
@@ -199,7 +203,7 @@ class NameControllerTest < ControllerTestCase
   end
 
   def test_next_and_prev_2
-    query = Query.lookup_and_save(:Name, :pattern, :pattern => 'lactarius')
+    query = Query.lookup_and_save(:Name, :pattern_search, :pattern => 'lactarius')
     q = @controller.query_params(query)
 
     name1 = names(:lactarius_alpigenes)
@@ -228,25 +232,36 @@ class NameControllerTest < ControllerTestCase
     assert_flash(/no more/i)
   end
 
-  def test_names_by_author
-    get_with_dump(:names_by_author, :id => 1)
-    assert_response(:action => :show_name, :id => 2)
+  def test_names_by_user
+    get_with_dump(:names_by_user, :id => 1)
+    assert_response('list_names')
   end
 
   def test_names_by_editor
     get_with_dump(:names_by_editor, :id => 1)
-    assert_response(:action => :show_name, :id => 2)
+    assert_response('list_names')
+  end
+
+  def test_name_descriptions_by_author
+    get_with_dump(:name_descriptions_by_author, :id => 1)
+    assert_response('list_name_descriptions')
+  end
+
+  def test_name_descriptions_by_editor
+    get_with_dump(:name_descriptions_by_editor, :id => 1)
+    assert_response(:action => :show_name_description, :id => 15,
+                    :params => @controller.query_params)
   end
 
   def test_name_search
     get_with_dump(:name_search, :pattern => '56')
     assert_response('list_names')
-    assert_equal(:query_title_pattern.t(:types => 'Names', :pattern => '56'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Names', :pattern => '56'),
                  @controller.instance_variable_get('@title'))
   end
 
   def test_advanced_search
-    query = Query.lookup_and_save(:Name, :advanced,
+    query = Query.lookup_and_save(:Name, :advanced_search,
       :name => "Don't know",
       :user => "myself",
       :content => "Long pink stem and small pink cap",

@@ -10,16 +10,20 @@
     :images => url_for(:controller => 'image', :action => 'images_by_user',
                               :id => id),
     :location_descriptions_authors => url_for(:controller => 'location',
-                              :action => 'locations_by_author', :id => id),
+                              :action => 'location_descriptions_by_author', :id => id),
     :location_descriptions_editors => url_for(:controller => 'location',
-                              :action => 'locations_by_editor', :id => id),
+                              :action => 'location_descriptions_by_editor', :id => id),
     :locations => url_for(:controller => 'location',
                               :action => 'locations_by_user', :id => id),
+    :locations_versions => url_for(:controller => 'location',
+                              :action => 'locations_by_editor', :id => id),
     :name_descriptions_authors => url_for(:controller => 'name',
-                              :action => 'names_by_author', :id => id),
+                              :action => 'name_descriptions_by_author', :id => id),
     :name_descriptions_editors => url_for(:controller => 'name',
-                              :action => 'names_by_editor', :id => id),
+                              :action => 'name_descriptions_by_editor', :id => id),
     :names => url_for(:controller => 'name', :action => 'names_by_user',
+                              :id => id),
+    :names_versions => url_for(:controller => 'name', :action => 'names_by_editor',
                               :id => id),
     :observations => url_for(:controller => 'observer',
                               :action => 'observations_by_user', :id => id),
@@ -108,10 +112,12 @@ end %>
             :weight => (weight = SiteData::FIELD_WEIGHTS[field]),
             :points => count * weight,
           } end
-          rows += @show_user.bonuses.map do |points, reason| {
-            :label  => reason.to_s.t,
-            :points => points.to_i,
-          } end
+          if @show_user.bonuses
+            rows += @show_user.bonuses.map do |points, reason| {
+              :label  => reason.to_s.t,
+              :points => points.to_i,
+            } end
+          end
           # Do we want to sort by points?
           rows = rows.sort_by {|row| row[:points]}.reverse
           for row in rows

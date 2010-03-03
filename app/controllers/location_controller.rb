@@ -2,16 +2,22 @@
 #  Views: ("*" - login required, "R" - root required))
 #     index_location
 #     list_locations
-#     locations_by_author
+#     locations_by_user
 #     locations_by_editor
 #     location_search
 #     map_locations
+#     index_location_description
+#     list_location_descriptions
+#     location_descriptions_by_author
+#     location_descriptions_by_editor
 #     show_location
 #     show_past_location
 #     show_location_description
 #     show_past_location_description
 #     prev_location
 #     next_location
+#     prev_location_description
+#     next_location_description
 #   * create_location
 #   * edit_location
 #   * create_location_description
@@ -19,7 +25,6 @@
 #   * destroy_location_description
 #   * list_merge_options
 #   * add_to_location
-#   * edit_location
 #
 #  Helpers:
 #     split_out_matches(list, substring)
@@ -31,13 +36,19 @@
 class LocationController < ApplicationController
   before_filter :login_required, :except => [
     :index_location,
+    :index_location_description,
+    :list_location_descriptions,
     :list_locations,
+    :location_descriptions_by_author,
+    :location_descriptions_by_editor,
     :location_search,
-    :locations_by_author,
     :locations_by_editor,
+    :locations_by_user,
     :map_locations,
     :next_location,
     :prev_location,
+    :next_location_description,
+    :prev_location_description,
     :show_location,
     :show_location_description,
     :show_past_location,
@@ -45,7 +56,6 @@ class LocationController < ApplicationController
   ]
 
   before_filter :disable_link_prefetching, :except => [
-    :author_request,
     :create_location,
     :create_location_description,
     :edit_location,
@@ -76,24 +86,24 @@ class LocationController < ApplicationController
   end
 
   # Display list of locations that a given user is author on.
-  def locations_by_author
+  def locations_by_user
     user = User.find(params[:id])
-    @error = :names_by_author_error.t(:name => user.legal_name)
-    query = create_query(:Location, :by_author, :user => user)
+    @error = :runtime_locations_by_user_error.t(:user => user.legal_name)
+    query = create_query(:Location, :by_user, :user => user)
     show_selected_locations(query)
   end
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor
     user = User.find(params[:id])
-    @error = :names_by_editor_error.t(:name => user.legal_name)
+    @error = :runtime_locations_by_editor_error.t(:user => user.legal_name)
     query = create_query(:Location, :by_editor, :user => user)
     show_selected_locations(query)
   end
 
   # Displays a list of locations matching a given string.
   def location_search
-    query = create_query(:Location, :pattern, :pattern => params[:pattern].to_s)
+    query = create_query(:Location, :pattern_search, :pattern => params[:pattern].to_s)
     show_selected_locations(query)
   end
 
@@ -117,6 +127,15 @@ class LocationController < ApplicationController
       @links << [:show_objects.t(:type => :observation), {
                   :controller => 'observer',
                   :action => 'index_observation',
+                  :params => query_params(query),
+                }]
+    end
+
+    # Add "show descriptions" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:LocationDescription)
+      @links << [:show_objects.t(:type => :description), {
+                  :action => 'index_location_description',
                   :params => query_params(query),
                 }]
     end
@@ -194,6 +213,68 @@ class LocationController < ApplicationController
     @title = query.flavor == :all ? :map_locations_global_map.t :
                              :map_locations_title.t(:locations => query.title)
     @locations = query.results
+  end
+
+  ################################################################################
+  #
+  #  :section: Description Searches and Indexes
+  #
+  ################################################################################
+
+  # Displays a list of selected locations, based on current Query.
+  def index_location_description
+    query = find_or_create_query(:LocationDescription, :all,
+                                 :by => params[:by] || :name)
+    query.params[:by] = params[:by] if params[:by]
+    show_selected_location_descriptions(query, :id => params[:id])
+  end
+
+  # Displays a list of all location_descriptions.
+  def list_location_descriptions
+    query = create_query(:LocationDescription, :all, :by => :name)
+    show_selected_location_descriptions(query)
+  end
+
+  # Display list of location_descriptions that a given user is author on.
+  def location_descriptions_by_author
+    user = User.find(params[:id])
+    @error = :runtime_location_descriptions_by_author_error.
+               t(:user => user.legal_name)
+    query = create_query(:LocationDescription, :by_author, :user => user)
+    show_selected_location_descriptions(query)
+  end
+
+  # Display list of location_descriptions that a given user is editor on.
+  def location_descriptions_by_editor
+    user = User.find(params[:id])
+    @error = :runtime_location_descriptions_by_editor_error.
+               t(:user => user.legal_name)
+    query = create_query(:LocationDescription, :by_editor, :user => user)
+    show_selected_location_descriptions(query)
+  end
+
+  # Show selected search results as a list with 'list_locations' template.
+  def show_selected_location_descriptions(query, args={})
+    store_query_in_session(query)
+    @links ||= []
+    args = { :action => 'list_location_descriptions',
+             :num_per_page => 50 }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name', :name.t],
+    ]
+
+    # Add "show locations" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Location)
+      @links << [:show_objects.t(:type => :location), {
+                  :action => 'index_location',
+                  :params => query_params(query),
+                }]
+    end
+
+    show_index_of_objects(query, args)
   end
 
   ##############################################################################
@@ -290,6 +371,16 @@ class LocationController < ApplicationController
   # Go to previous location: redirects to show_location.
   def prev_location
     redirect_to_next_object(:prev, Location, params[:id])
+  end
+
+  # Go to next location: redirects to show_location.
+  def next_location_description
+    redirect_to_next_object(:next, LocationDescription, params[:id])
+  end
+
+  # Go to previous location: redirects to show_location.
+  def prev_location_description
+    redirect_to_next_object(:prev, LocatioDescriptionn, params[:id])
   end
 
   ##############################################################################

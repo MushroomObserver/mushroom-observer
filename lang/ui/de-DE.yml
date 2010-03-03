@@ -568,7 +568,7 @@ vote_agreement_0: Keinesfalls
 # [order] is sort order (singular), e.g., "Name" or "Date"
 # [name], [location], [where], [pattern], etc. are un-translatable strings
 #
-query_title_advanced: "Erweiterte Suche"
+query_title_advanced_search: "Erweiterte Suche"
 query_title_all: "[Type]-Index"
 query_title_all_by: "[Types] Nach [order] sortiert"
 query_title_at_location: "[Types] aus [location]"
@@ -576,7 +576,7 @@ query_title_at_where: "[Types] aus '[where]'"
 query_title_by_author:  "[TYPES] Authored by [USER]"
 query_title_by_editor:  "[TYPES] Edited by [USER]"
 query_title_by_rss_log: "[types] in Logbuch der neuen Änderungen"
-query_title_by_user: "[Types] von [user]"
+query_title_by_user:  "[TYPES] created by [USER]"
 query_title_for_user: "[Types] für [user]"
 query_title_in_set:  "Selected [TYPES]"
 query_title_in_species_list: "[Types] von [species_list]"
@@ -586,18 +586,22 @@ query_title_of_name: "[Types] von [name]"
 query_title_of_name_synonym: "[Types] von synonyme von [name]"
 query_title_of_name_nonconsensus:  "[TYPES] That Might Be [NAME]"
 query_title_of_parents:  "Higher Taxa Containing [NAME]"
-query_title_pattern: "[Types], die zu '[pattern]' passen"
-query_title_with_authors:  "[TYPES] with Authors"
+query_title_pattern_search: "[Types], die zu '[pattern]' passen"
+query_title_with_descriptions:  "[TYPES] with [:DESCRIPTIONS]"
+query_title_with_descriptions_by_author:  "[TYPES] with [:query_title_by_author(type=:description)]"
+query_title_with_descriptions_by_editor:  "[TYPES] with [:query_title_by_editor(type=:description)]"
+query_title_with_descriptions_by_user:  "[TYPES] with [:query_title_by_user(type=:description)]"
+query_title_with_descriptions_in_set:  "[TYPES] with [descriptions]"
 query_title_with_observations:  "[TYPES] with [:OBSERVATIONS]"
-query_title_with_observations_at_location:  "[TYPES] with [:OBSERVATIONS] from [LOCATION]"
-query_title_with_observations_at_where:  "[TYPES] with [:OBSERVATIONS] from '[WHERE]'"
-query_title_with_observations_by_user:  "[TYPES] with [:OBSERVATIONS] by [USER]"
+query_title_with_observations_at_location:  "[TYPES] with [:query_title_at_location(type=:observation)]"
+query_title_with_observations_at_where:  "[TYPES] with [:query_title_at_where(type=:observation)]"
+query_title_with_observations_by_user:  "[TYPES] with [:query_title_by_user(type=:observation)]"
 query_title_with_observations_in_set:  "[TYPES] with [observations]"
-query_title_with_observations_in_species_list:  "[TYPES] with [:OBSERVATIONS] in [SPECIES_LIST]"
-query_title_with_observations_of_children:  "[TYPES] with [:OBSERVATIONS] of Lower Taxa under [NAME]"
-query_title_with_observations_of_name:  "[TYPES] with [:OBSERVATIONS] of [NAME]"
-query_title_with_observations_of_name_synonym:  "[TYPES] with [:OBSERVATIONS] of Synonyms of [NAME]"
-query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:OBSERVATIONS] That Might Be [NAME]"
+query_title_with_observations_in_species_list:  "[TYPES] with [:query_title_in_species_list(type=:observation)]"
+query_title_with_observations_of_children:  "[TYPES] with [:query_title_of_children(type=:observation)]"
+query_title_with_observations_of_name:  "[TYPES] with [:query_title_of_name(type=:observation)]"
+query_title_with_observations_of_name_synonym:  "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
+query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
 
 # RSS log messages.
 log_ancient: "[String]"
@@ -748,11 +752,11 @@ validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
 
 # Runtime error and success messages.
 runtime_added: "[Type] ist hinzugefügt worden."
-runtime_added_to: "[Type] zu [name] ist hinzugefügt worden."
 runtime_added_id: "[Type] #[value] ist hinzugefügt worden."
 runtime_added_id_to: "[Type] #[value] zu [name] ist hinzugefügt worden."
 runtime_added_name: "[Type] '[value]' ist hinzugefügt worden."
 runtime_added_name_to: "[Type] '[value]' zu [name] ist hinzugefügt worden."
+runtime_added_to: "[Type] zu [name] ist hinzugefügt worden."
 runtime_admin_only: "Du musst Admin sein das zu tun."
 runtime_already_exists: "Den [types] '[value]' gibt es schon."
 runtime_already_used: "Den [types] '[value]' gibt es schon."
@@ -800,6 +804,9 @@ runtime_updated_name: "[Type] '[value]' ist geändert worden."
 runtime_uploaded: "[Type] ist hochgeladen worden."
 runtime_uploaded_id: "[Type] #[value] ist hochgeladen worden."
 runtime_uploaded_name: "[Type] '[value]' ist hochgeladen worden."
+runtime_user_hasnt_authored:  "[user] hasn't written any [types]."
+runtime_user_hasnt_created:  "[user] hasn't created any [types]."
+runtime_user_hasnt_edited:  "[user] hasn't edited any [types]."
 
 # One-time-use messages.
 runtime_destroy_description_not_admin:  Only a description's admins can delete that description.
@@ -857,19 +864,30 @@ runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
 runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
 runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
 runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
-runtime_invalid_source_type:  "[:runtime_invalid(type=:source)]"
+runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
 runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
 runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
+runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
 runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
+runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
+runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
 runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
+runtime_locations_by_editor_error: "[:runtime_user_hasnt_edited(type=:location)]"
+runtime_locations_by_user_error: "[:runtime_user_hasnt_created(type=:location)]"
 runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
-runtime_merge_locations_warning:  "[:runtime_merge_warning(type=:location)]"
-runtime_merge_names_warning:  "[:runtime_merge_warning(type=:name)]"
+runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
+runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
 runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
 runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
 runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
+runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
 runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
+runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
+runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
+runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
+runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
+runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
 runtime_naming_created: "[:runtime_created(type=:naming)]"
 runtime_naming_updated: "[:runtime_updated(type=:naming)]"
 runtime_no_more_search_objects: "[:runtime_no_more]"
@@ -1852,7 +1870,6 @@ name_deprecate_comments_help: >
 # name/name_index (and other actions using same view)
 name_index_add_name: Namen erstellen
 name_index_bulk_edit: Viele Namen auf einmal bearbeiten
-name_index_no_matches:  No matching names.
 
 
 
@@ -1991,8 +2008,12 @@ show_location_destroy:  "[:destroy_object(type=:location)]"
 show_location_observations: Funde an diesem Ort
 show_location_highest: Höchste Erhebung
 show_location_lowest: Niedrigste Tiefe
+show_location_no_descriptions:  There are no descriptions for this location yet.
 show_location_description_empty:  "[:show_name_description_empty]"
 show_location_create_description:  "[:CREATE]"
+show_location_creator:  User who defined this location
+show_location_editor:  "[:Editors]"
+show_location_editors:  "[:Editors]"
 
 
 
@@ -2018,6 +2039,7 @@ show_name_misspelling:  This name is misspelled.
 show_name_misspelling_correct:  "[:CORRECT_SPELLING]"
 show_name_descriptions: "[:Descriptions]"
 show_name_create_draft: Neuen Entwurf erstellen für
+show_name_no_descriptions:  There are no descriptions for this name yet.
 show_name_description_author:  "[:Description] author"
 show_name_description_authors: Autor(en) der Beschreibung
 show_name_description_editor:  "[:Description] editor"
@@ -2032,6 +2054,9 @@ show_name_observations: Funde
 show_name_synonym_observations: Funde unter Synonymen
 show_name_other_observations: Ähnliche Funde
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"
+show_name_creator:  First person to use this name
+show_name_editor:  "[:Editors]"
+show_name_editors:  "[:Editors]"
 show_name_other_observations_notes: >
   (Jemand hat [name] für diese Funde vorgeschlagen, aber die Mehrheitsmeinung
   weicht weiterhin hiervon ab. Der Grad der Gewissheit gilt für  __diesen__ Namen, und nicht
@@ -2574,14 +2599,6 @@ name_lister_submit_rtf: Als Rich Text speichern
 name_lister_submit_spl: Artenliste erstellen
 name_lister_submit_txt: Als Textformat speichern
 name_lister_title: Namenslisten-Generator
-
-
-# name/names_by_author
-names_by_author_error:  "[name] hasn't written any descriptions."
-
-
-# name/names_by_editor
-names_by_editor_error:  "[name] hasn't edited any descriptions."
 
 
 # name/needed_descriptions

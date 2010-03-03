@@ -327,7 +327,7 @@ class AbstractQuery < ActiveRecord::Base
   #     :by_user   => {:user => User}
   #     :with_name => {:name => Name, :optional_flag? => :boolean}
   #     :in_set    => {:ids => [:id]}
-  #     :pattern   => {:pattern => :string, :mode? => {:string => [:simple, :complex]}}
+  #     :search    => {:pattern => :string, :mode? => {:string => [:simple, :complex]}}
   #   }
   #
   # The question marks mean "optional" -- they are not actually part of the

@@ -82,6 +82,35 @@ class LocationControllerTest < ControllerTestCase
     assert_response('list_locations')
   end
 
+  def test_locations_by_user
+    get_with_dump(:locations_by_user, :id => 1)
+    assert_response('list_locations')
+  end
+
+  def test_locations_by_editor
+    get_with_dump(:locations_by_editor, :id => 1)
+    assert_response('list_locations')
+  end
+
+  def test_list_location_descriptions
+    login('mary')
+    Location.find(2).description = LocationDescription.create!(:location_id => 2)
+    get_with_dump(:list_location_descriptions)
+    assert_response('list_location_descriptions')
+  end
+
+  def test_location_descriptions_by_author
+    descs = LocationDescription.all
+    assert_equal(1, descs.length)
+    get_with_dump(:location_descriptions_by_author, :id => 1)
+    assert_response(:action => 'show_location_description', :id => descs.first.id)
+  end
+
+  def test_location_descriptions_by_editor
+    get_with_dump(:location_descriptions_by_editor, :id => 1)
+    assert_response('list_location_descriptions')
+  end
+
   def test_create_location
     requires_login(:create_location)
     assert_form_action(:action => 'create_location', :set_user => 0)
@@ -162,8 +191,6 @@ class LocationControllerTest < ControllerTestCase
 
     # Turn Albion into Barton Flats.
     loc = locations(:albion)
-    desc = loc.description
-    desc.add_author(@mary)
     old_north = loc.north
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
@@ -192,7 +219,10 @@ class LocationControllerTest < ControllerTestCase
     end
     assert(key_count > 0) # Make sure something was compared.
 
-    assert_user_list_equal([@mary], loc.description.authors)
+    # Rolf was already author, Mary doesn't become editor because
+    # there was no change.
+    assert_user_list_equal([@rolf], loc.description.authors)
+    assert_user_list_equal([], loc.description.editors)
   end
 
   # Test update for north > 90.
@@ -218,9 +248,7 @@ class LocationControllerTest < ControllerTestCase
     assert_equal(desc_count, LocationDescription.count)
     assert_equal(past_loc_count-2, Location::Version.count)
     assert_equal(past_desc_count, LocationDescription::Version.count)
-    # Rolf is getting added to authors for the Albion description when it
-    # is moved over to Burbank (location_id is changed and it is saved).
-    assert_equal(10 - @new_pts + @auth_pts, @rolf.reload.contribution)
+    assert_equal(10 - @new_pts, @rolf.reload.contribution)
   end
 
   def test_update_location_admin_merge

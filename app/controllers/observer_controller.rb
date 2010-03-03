@@ -348,6 +348,8 @@ class ObserverController < ApplicationController
   #   observer/observation_search
   def pattern_search
     pattern = params[:search][:pattern].to_s rescue ''
+    # Save it so that we can keep it in the search bar in subsequent pages.
+    session[:pattern] = pattern
     case params[:commit]
     when :app_images_find.l
       redirect_to(:controller => 'image', :action => 'image_search',
@@ -396,7 +398,7 @@ class ObserverController < ApplicationController
       end
 
       # Create query (this just validates the parameters).
-      query = create_query(model, :advanced, search)
+      query = create_query(model, :advanced_search, search)
 
       # Let the individual controllers execute and render it.
       redirect_to(:controller => model.show_controller,
@@ -459,7 +461,7 @@ class ObserverController < ApplicationController
        (observation = Observation.safe_find(pattern))
       redirect_to(:action => 'show_observation', :id => observation.id)
     else
-      query = create_query(:Observation, :pattern, :pattern => pattern)
+      query = create_query(:Observation, :pattern_search, :pattern => pattern)
       show_selected_observations(query)
     end
   end

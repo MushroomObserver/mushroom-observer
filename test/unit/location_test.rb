@@ -53,6 +53,10 @@ class LocationTest < Test::Unit::TestCase
     location_version = loc.version
     description_version = desc.version
 
+    desc.authors.clear
+    desc.editors.clear
+    desc.reload
+
     @rolf.email_locations_admin  = false
     @rolf.email_locations_author = true
     @rolf.email_locations_editor = false

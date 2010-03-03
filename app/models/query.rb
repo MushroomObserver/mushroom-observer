@@ -8,7 +8,7 @@ class Query < AbstractQuery
 
   # Parameters required for each flavor.
   self.required_params = {
-    :advanced => {
+    :advanced_search => {
       :name?     => :string,
       :location? => :string,
       :user?     => :string,
@@ -54,8 +54,22 @@ class Query < AbstractQuery
     :of_parents => {
       :name => Name,
     },
-    :pattern => {
+    :pattern_search => {
       :pattern => :string,
+    },
+    :with_descriptions_by_author => {
+      :user => User,
+    },
+    :with_descriptions_by_editor => {
+      :user => User,
+    },
+    :with_descriptions_by_user => {
+      :user => User,
+    },
+    :with_descriptions_in_set => {
+      :ids        => [AbstractModel],
+      :old_title? => :string,
+      :old_by?    => :string,
     },
     :with_observations_at_location => {
       :location => Location,
@@ -94,12 +108,12 @@ class Query < AbstractQuery
       :for_user,              # Comments sent to used, by modified.
     ],
     :Image => [
-      :advanced,              # Advanced search results.
+      :advanced_search,       # Advanced search results.
       :all,                   # All images, by created.
       :by_user,               # Images created by user, by modified.
       :in_set,                # Images in a given set.
       :inside_observation,    # Images belonging to outer observation query.
-      :pattern,               # Images matching a pattern, by ???.
+      :pattern_search,        # Images matching a pattern, by ???.
       :with_observations,                 # Images with observations, alphabetically.
       :with_observations_at_location,     # Images with observations at a defined location.
       :with_observations_at_where,        # Images with observations at an undefined 'where'.
@@ -110,13 +124,18 @@ class Query < AbstractQuery
       :with_observations_of_name,         # Images with observations of a given name.
     ],
     :Location => [
-      :advanced,              # Advanced search results.
+      :advanced_search,       # Advanced search results.
       :all,                   # All locations, alphabetically.
-      :by_author,             # Locations that list user as an author, alphabetically.
-      :by_editor,             # Locations that list user as an editor, alphabetically.
+      :by_user,               # Locations created by a given user, alphabetically.
+      :by_editor,             # Locations modified by a given user, alphabetically.
       :by_rss_log,            # Locations with RSS logs, in RSS order.
       :in_set,                # Locations in a given set.
-      :pattern,               # Locations matching a pattern, alphabetically.
+      :pattern_search,        # Locations matching a pattern, alphabetically.
+      :with_descriptions,                 # Locations with descriptions, alphabetically.
+      :with_descriptions_by_author,       # Locations with descriptions authored by a given user, alphabetically.
+      :with_descriptions_by_editor,       # Locations with descriptions edited by a given user, alphabetically.
+      :with_descriptions_by_user,         # Locations with descriptions created by a given user, alphabetically.
+      :with_descriptions_in_set,          # Locations with descriptions in a given set, alphabetically.
       :with_observations,                 # Locations with observations, alphabetically.
       :with_observations_by_user,         # Locations with observations by user.
       :with_observations_in_set,          # Locations with observations in a given set.
@@ -124,17 +143,28 @@ class Query < AbstractQuery
       :with_observations_of_children,     # Locations with observations of children of a given name.
       :with_observations_of_name,         # Locations with observations of a given name.
     ],
+    :LocationDescription => [
+      :all,                   # All location descriptions, alphabetically.
+      :by_author,             # Location descriptions that list given user as an author, alphabetically.
+      :by_editor,             # Location descriptions that list given user as an editor, alphabetically.
+      :by_user,               # Location descriptions created by a given user, alphabetically.
+      :in_set,                # Location descriptions in a given set.
+    ],
     :Name => [
-      :advanced,              # Advanced search results.
+      :advanced_search,       # Advanced search results.
       :all,                   # All names, alphabetically.
-      :by_author,             # Names that list user as an author, alphabetically.
-      :by_editor,             # Names that list user as an editor, alphabetically.
+      :by_user,               # Names created by a given user, alphabetically.
+      :by_editor,             # Names modified by a given user, alphabetically.
       :by_rss_log,            # Names with RSS logs, in RSS order.
       :in_set,                # Names in a given set.
       :of_children,           # Names of children of a name.
       :of_parents,            # Names of parents of a name.
-      :pattern,               # Names matching a pattern, alphabetically.
-      :with_authors,          # Names that have authors, alphabetically.
+      :pattern_search,        # Names matching a pattern, alphabetically.
+      :with_descriptions,                 # Names with descriptions, alphabetically.
+      :with_descriptions_by_author,       # Names with descriptions authored by a given user, alphabetically.
+      :with_descriptions_by_editor,       # Names with descriptions edited by a given user, alphabetically.
+      :with_descriptions_by_user,         # Names with descriptions created by a given user, alphabetically.
+      :with_descriptions_in_set,          # Names with descriptions in a given set, alphabetically.
       :with_observations,                 # Names with observations, alphabetically.
       :with_observations_at_location,     # Names with observations at a defined location.
       :with_observations_at_where,        # Names with observations at an undefined 'where'.
@@ -142,8 +172,15 @@ class Query < AbstractQuery
       :with_observations_in_set,          # Names with observations in a given set.
       :with_observations_in_species_list, # Names with observations in a given species list.
     ],
+    :NameDescription => [
+      :all,                   # All name descriptions, alphabetically.
+      :by_author,             # Name descriptions that list given user as an author, alphabetically.
+      :by_editor,             # Name descriptions that list given user as an editor, alphabetically.
+      :by_user,               # Name descriptions created by a given user, alphabetically.
+      :in_set,                # Name descriptions in a given set.
+    ],
     :Observation => [
-      :advanced,              # Advanced search results.
+      :advanced_search,       # Advanced search results.
       :all,                   # All observations, by date.
       :at_location,           # Observations at a location, by modified.
       :at_where,              # Observations at an undefined location, by modified.
@@ -153,7 +190,7 @@ class Query < AbstractQuery
       :in_species_list,       # Observations in a given species list, by modified.
       :of_children,           # Observations of children of a given name.
       :of_name,               # Observations with a given name.
-      :pattern,               # Observations matching a pattern, by name.
+      :pattern_search,        # Observations matching a pattern, by name.
     ],
     :Project => [
       :all,                   # All projects, by title.
@@ -218,6 +255,9 @@ class Query < AbstractQuery
       :location_descriptions => :location_description_id,
       :user_groups   => :user_group_id,
     },
+    :location_descriptions_versions => {
+      :location_descriptions => :location_description_id,
+    },
     :location_descriptions_writers => {
       :location_descriptions => :location_description_id,
       :user_groups   => :user_group_id,
@@ -227,6 +267,9 @@ class Query < AbstractQuery
       :'location_descriptions.official' => :description_id,
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
+    },
+    :locations_versions => {
+      :locations     => :location_id,
     },
     :name_descriptions => {
       :names         => :name_id,
@@ -248,6 +291,9 @@ class Query < AbstractQuery
       :name_descriptions => :name_description_id,
       :user_groups   => :user_group_id,
     },
+    :name_descriptions_versions => {
+      :name_descriptions => :name_description_id,
+    },
     :name_descriptions_writers => {
       :name_descriptions => :name_description_id,
       :user_groups   => :user_group_id,
@@ -258,6 +304,9 @@ class Query < AbstractQuery
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
       :'users.reviewer' => :reviewer_id,
+    },
+    :names_versions => {
+      :names         => :name_id,
     },
     :namings => {
       :names         => :name_id,
@@ -313,50 +362,54 @@ class Query < AbstractQuery
   # This is the order in which we should list tables, numbers are lengths.
   # This makes absolutely no difference whatsoever in performance. (!!)
   self.table_order = [
+    :location_descriptions_admins,   # 0
     :licenses,                       # 3
     :projects,                       # 4
     :location_descriptions_editors,  # 11
-    :notifications,                  # 57
-    :species_lists,                  # 92
+    :species_lists,                  # 93
+    :name_descriptions_admins,       # 174
+    :location_descriptions,          # 189
+    :location_descriptions_authors,  # 189
+    :location_descriptions_readers,  # 189
+    :location_descriptions_versions, # 215
+    :location_descriptions_writers,  # 378
     :name_descriptions_authors,      # 578
-    :location_descriptions,          # 808
-    :location_descriptions_admins,   # 808
-    :location_descriptions_authors,  # 808
-    :location_descriptions_readers,  # 808
-    :location_descriptions_writers,  # 808
-    :locations,                      # 808
-    :interests,                      # 1021
-    :users,                          # 1907
-    :user_groups,                    # 1917
-    :user_groups_users,              # 4016
-    :observations_species_lists,     # 12837
-    :comments,                       # 17380
-    :names,                          # 21186
-    :name_descriptions,              # 21358
-    :name_descriptions_admins,       # 21358
-    :name_descriptions_readers,      # 21530
-    :name_descriptions_writers,      # 21530
-    :name_descriptions_editors,      # 22733
-    :observations,                   # 32328
-    :rss_logs,                       # 36229
-    :namings,                        # 38528
-    :votes,                          # 51773
-    :images_observations,            # 73975
-    :images,                         # 76154
+    :locations,                      # 836
+    :name_descriptions_editors,      # 1536
+    :locations_versions,             # 1576
+    :name_descriptions,              # 1669
+    :name_descriptions_readers,      # 1843
+    :users,                          # 1959
+    :user_groups,                    # 1969
+    :name_descriptions_writers,      # 3338
+    :user_groups_users,              # 4120
+    :name_descriptions_versions,     # 5906
+    :observations_species_lists,     # 13085
+    :comments,                       # 17974
+    :names,                          # 21867
+    :names_versions,                 # 29233
+    :observations,                   # 33270
+    :rss_logs,                       # 37252
+    :namings,                        # 39722
+    :votes,                          # 53872
+    :images_observations,            # 76425
+    :images,                         # 78678
   ]
 
   # Return the default order for this query.
   def default_order
     case model_symbol
-    when :Comment     ; 'created'
-    when :Image       ; 'created'
-    when :Location    ; 'name'
-    when :Name        ; 'name'
-    when :Observation ; 'date'
-    when :Project     ; 'title'
-    when :RssLog      ; 'modified'
-    when :SpeciesList ; 'title'
-    when :User        ; 'name'
+    when :Comment             ; 'created'
+    when :Image               ; 'created'
+    when :Location            ; 'name'
+    when :LocationDescription ; 'name'
+    when :Name                ; 'name'
+    when :NameDescription     ; 'name'
+    when :Observation         ; 'date'
+    when :Project             ; 'title'
+    when :RssLog              ; 'modified'
+    when :SpeciesList         ; 'title'
+    when :User                ; 'name'
     end
   end
 
@@ -427,14 +480,20 @@ class Query < AbstractQuery
       end
 
     # Going from objects with observations to those observations themselves.
-    elsif (new_model  == :Observation) and
-          [:Image, :Location, :Name].include?(old_model) and
-          old_flavor.to_s.match(/^with_observations/)
+    elsif ( (new_model == :Observation) and
+            [:Image, :Location, :Name].include?(old_model) and
+            old_flavor.to_s.match(/^with_observations/) ) or
+          ( (new_model == :LocationDescription) and
+            (old_model == :Location) and
+            old_flavor.to_s.match(/^with_descriptions/) ) or
+          ( (new_model == :NameDescription) and
+            (old_model == :Name) and
+            old_flavor.to_s.match(/^with_descriptions/) )
       just_test or begin
-        if old_flavor == :with_observations
+        if old_flavor.to_s.match(/^with_[a-z]+$/)
           new_flavor = :all
         else
-          new_flavor = old_flavor.to_s.sub(/^with_observations_/,'').to_sym
+          new_flavor = old_flavor.to_s.sub(/^with_[a-z]+_/,'').to_sym
         end
         params2 = params.dup
         if params2[:title]
@@ -456,19 +515,31 @@ class Query < AbstractQuery
       end
 
     # Going from observations to objects with those observations.
-    elsif (old_model == :Observation) and
-          [:Image, :Location, :Name].include?(new_model)
+    elsif ( (old_model == :Observation) and
+            [:Image, :Location, :Name].include?(new_model) ) or
+          ( (old_model == :LocationDescription) and
+            (new_model == :Location) ) or
+          ( (old_model == :NameDescription) and
+            (new_model == :Name) )
       just_test or begin
-        if old_flavor == :all
-          new_flavor = :with_observations
+        if old_model == :Observation
+          type1 = :observations
+          type2 = :observation
         else
-          new_flavor = "with_observations_#{old_flavor}".to_sym
+          type1 = :descriptions
+          type2 = old_model.to_s.underscore.to_sym
+        end
+        if old_flavor == :all
+          new_flavor = :"with_#{type1}"
+        else
+          new_flavor = :"with_#{type1}_#{old_flavor}"
         end
         params2 = params.dup
         if params2[:title]
           # This can spiral out of control, but so be it.
-          params2[:title] = "raw " + :query_title_with_observations_in_set.
-            t(:observations => title, :type => :observaton)
+          params2[:title] = "raw " +
+            :"query_title_with_#{type1}s_in_set".
+              t(:type1 => title, :type => type2)
         end
         if params2[:by]
           # Can't be sure old sort order will continue to work.
@@ -476,11 +547,11 @@ class Query < AbstractQuery
         end
         if old_flavor == :in_set
           params2.delete(:title) if params2.has_key?(:title)
-          self.class.lookup(new_model, :with_observations_in_set,
+          self.class.lookup(new_model, :"with_#{type1}_in_set",
               params2.merge(:old_title => title, :old_by => params[:by]))
-        elsif old_flavor == :advanced || old_flavor == :pattern
+        elsif old_flavor == :advanced_search || old_flavor == :pattern_search
           params2.delete(:title) if params2.has_key?(:title)
-          self.class.lookup(new_model, :with_observations_in_set,
+          self.class.lookup(new_model, :"with_#{type1}_in_set",
               :ids => result_ids, :old_title => title, :old_by => params[:by])
         elsif (new_model == :Location) and
               (old_flavor == :at_location)
@@ -558,11 +629,19 @@ class Query < AbstractQuery
         self.join << {:images_observations => {:observations => :names}}
         self.group = 'images.id'
         'MIN(names.search_name) ASC, images.when DESC'
+      elsif model == Location
+        'locations.search_name ASC'
+      elsif model == LocationDescription
+        self.join << :locations
+        'locations.search_name ASC, location_descriptions.created ASC'
+      elsif model == Name
+        'names.text_name ASC, names.author ASC'
+      elsif model == NameDescription
+        self.join << :names
+        'names.text_name ASC, names.author ASC, name_descriptions.created ASC'
       elsif model == Observation
         self.join << :names
         'names.text_name ASC, names.author ASC, observations.when DESC'
-      elsif model == Name
-        'names.text_name ASC, names.author ASC'
       elsif model.column_names.include?('search_name')
         "#{table}.search_name ASC"
       elsif model.column_names.include?('name')
@@ -612,11 +691,6 @@ class Query < AbstractQuery
     params[:by] ||= 'rss_log'
   end
 
-  def initialize_with_authors
-    self.join << {:'name_descriptions.official' => :name_descriptions_authors}
-    params[:by] ||= 'name'
-  end
-
   # ----------------------------
   #  Get user contributions.
   # ----------------------------
@@ -635,6 +709,8 @@ class Query < AbstractQuery
       params[:by] ||= 'modified'
     when :Image
       params[:by] ||= 'modified'
+    when :Location, :Name, :LocationDescription, :NameDescription
+      params[:by] ||= 'name'
     when :SpeciesList
       params[:by] ||= 'title'
     when :Comment
@@ -659,10 +735,14 @@ class Query < AbstractQuery
     title_args[:user] = user.legal_name
     case model_symbol
     when :Name, :Location
-      desc_table = "#{model_string}_descriptions.official".downcase.to_sym
-      glue_table = "#{model_string}_descriptions_#{flavor}s".downcase.
+      version_table = "#{model.table_name}_versions".to_sym
+      self.join << version_table
+      self.where << "#{version_table}.user_id = '#{params[:user]}'"
+      self.where << "#{model.table_name}.user_id != '#{params[:user]}'"
+    when :NameDescription, :LocationDescription
+      glue_table = "#{model.name.underscore}s_#{flavor}s".
                       sub('_by_', '_').to_sym
-      self.join << {desc_table => glue_table}
+      self.join << glue_table
       self.where << "#{glue_table}.user_id = '#{params[:user]}'"
       params[:by] ||= 'name'
     else
@@ -911,11 +991,48 @@ class Query < AbstractQuery
     title_args[:tag] = title_args[:tag].to_s.sub('title', 'title_with_observations').to_sym
   end
 
+  # ---------------------------------------------------------------
+  #  Coercable location/name queries based on description-related
+  #  conditions.
+  # ---------------------------------------------------------------
+
+  def initialize_with_descriptions
+    type = model.name.underscore
+    self.join << :"#{type}_descriptions"
+    params[:by] ||= 'name'
+  end
+
+  def initialize_with_descriptions_by_author
+    initialize_with_descriptions_by_editor
+  end
+  
+  def initialize_with_descriptions_by_editor
+    type = model.name.underscore
+    glue = flavor.to_s.sub(/^.*_by_/, '')
+    desc_table = :"#{type}_descriptions"
+    glue_table = :"#{type}_descriptions_#{glue}s"
+    user = find_cached_parameter_instance(User, :user)
+    title_args[:user] = user.legal_name
+    self.join << { desc_table => glue_table }
+    self.where << "#{glue_table}.user_id = '#{params[:user]}'"
+    params[:by] ||= 'name'
+  end
+
+  def initialize_with_descriptions_by_user
+    type = model.name.underscore
+    desc_table = :"#{type}_descriptions"
+    user = find_cached_parameter_instance(User, :user)
+    title_args[:user] = user.legal_name
+    self.join << desc_table
+    self.where << "#{desc_table}.user_id = '#{params[:user]}'"
+    params[:by] ||= 'name'
+  end
+
   # ----------------------------
   #  Pattern search.
   # ----------------------------
 
-  def initialize_pattern
+  def initialize_pattern_search
     pattern = params[:pattern].to_s.strip_squeeze
     search = google_parse(pattern)
 
@@ -986,7 +1103,7 @@ class Query < AbstractQuery
     # Convert this to an "in_set" query now that we have results.
     self.flavor    = :in_set
     params[:ids]   = ids.uniq[0,MAX_ARRAY]
-    params[:title] = ["tag query_title_pattern", "pattern #{pattern}"]
+    params[:title] = ["tag query_title_pattern_search", "pattern #{pattern}"]
     params[:by]  ||= 'name'
     params.delete(:pattern)
     self.save if self.id
@@ -997,7 +1114,7 @@ class Query < AbstractQuery
   #  Advanced search.
   # ----------------------------
 
-  def initialize_advanced
+  def initialize_advanced_search
     name     = params[:name].to_s.strip_squeeze
     user     = params[:user].to_s.strip_squeeze
     location = params[:location].to_s.strip_squeeze
@@ -1043,10 +1160,10 @@ class Query < AbstractQuery
       if !allowed_model_flavors[model_symbol].include?(:with_observations_in_set)
         raise "Forgot to tell me how to build a :#{with_observations_in_set} query for #{model}!"
       end
-      subquery = self.class.lookup(:Observation, :advanced, params)
+      subquery = self.class.lookup(:Observation, :advanced_search, params)
       self.flavor    = :with_observations_in_set
       params[:ids]   = subquery.result_ids.uniq[0,MAX_ARRAY]
-      params[:title] = ["tag query_title_advanced"]
+      params[:title] = ["tag query_title_advanced_search"]
       params[:by]  ||= 'name'
       self.save if self.id
       initialize_query
@@ -1093,7 +1210,7 @@ class Query < AbstractQuery
 
       self.flavor    = :in_set
       params[:ids]   = ids.uniq[0,MAX_ARRAY]
-      params[:title] = ["tag query_title_advanced"]
+      params[:title] = ["tag query_title_advanced_search"]
       params[:by]  ||= 'name'
       self.save if self.id
       initialize_query

@@ -144,11 +144,11 @@ class ImageControllerTest < ControllerTestCase
   def test_image_search
     get_with_dump(:image_search, :pattern => 'Notes')
     assert_response('list_images')
-    assert_equal(:query_title_pattern.t(:types => 'Images', :pattern => 'Notes'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Images', :pattern => 'Notes'),
                  @controller.instance_variable_get('@title'))
     get_with_dump(:image_search, :pattern => 'Notes', :page => 2)
     assert_response('list_images')
-    assert_equal(:query_title_pattern.t(:types => 'Images', :pattern => 'Notes'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Images', :pattern => 'Notes'),
                  @controller.instance_variable_get('@title'))
   end
 
@@ -163,7 +163,7 @@ class ImageControllerTest < ControllerTestCase
   end
 
   def test_advanced_search
-    query = Query.lookup_and_save(:Image, :advanced,
+    query = Query.lookup_and_save(:Image, :advanced_search,
       :name => "Don't know",
       :user => "myself",
       :content => "Long pink stem and small pink cap",

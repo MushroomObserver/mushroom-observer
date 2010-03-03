@@ -481,7 +481,7 @@ class Descriptions < ActiveRecord::Migration
           ld['location_id'] = l_id
           ld['public']      = '1'
           ld['locale']      = 'en-US'
-          ld['source_type'] = 'main'
+          ld['source_type'] = 'public'
           ld['source_name'] = nil
           l['description_id'] = ld_id
 

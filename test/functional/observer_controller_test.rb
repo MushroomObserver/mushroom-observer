@@ -201,7 +201,7 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_advanced_search
-    query = Query.lookup_and_save(:Observation, :advanced,
+    query = Query.lookup_and_save(:Observation, :advanced_search,
       :name => "Don't know",
       :user => "myself",
       :content => "Long pink stem and small pink cap",
@@ -236,12 +236,12 @@ class ObserverControllerTest < ControllerTestCase
   def test_observation_search
     get_with_dump(:observation_search, :pattern => '12')
     assert_response('list_observations')
-    assert_equal(:query_title_pattern.t(:types => 'Observations', :pattern => '12'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '12'),
                  @controller.instance_variable_get('@title'))
 
     get_with_dump(:observation_search, :pattern => '12', :page => 2)
     assert_response('list_observations')
-    assert_equal(:query_title_pattern.t(:types => 'Observations', :pattern => '12'),
+    assert_equal(:query_title_pattern_search.t(:types => 'Observations', :pattern => '12'),
                  @controller.instance_variable_get('@title'))
   end
 
@@ -493,7 +493,10 @@ class ObserverControllerTest < ControllerTestCase
   end
 
   def test_review_authors_locatios
-    params = { :id => 1, :type => 'LocationDescription' }
+    desc = location_descriptions(:albion_desc)
+    params = { :id => desc.id, :type => 'LocationDescription' }
+    desc.authors.clear
+    assert_user_list_equal([], desc.reload.authors)
 
     # Make sure it lets Rolf and only Rolf see this page.
     assert(!@mary.in_group?('reviewers'))
@@ -508,14 +511,13 @@ class ObserverControllerTest < ControllerTestCase
 
     # Make sure it fails to let unauthorized users see page.
     get(:review_authors, params)
-    assert_response(:action => :show_location, :id => 1)
+    assert_response(:action => :show_location, :id => desc.id)
 
     # Make Rolf an author.
-    albion = location_descriptions(:albion_desc)
-    albion.add_author(@rolf)
-    albion.save
-    albion.reload
-    assert_user_list_equal([@rolf], albion.authors)
+    desc.add_author(@rolf)
+    desc.save
+    desc.reload
+    assert_user_list_equal([@rolf], desc.authors)
 
     # Rolf should be able to do it now.
     get(:review_authors, params)
@@ -524,14 +526,14 @@ class ObserverControllerTest < ControllerTestCase
     # Rolf giveth with one hand...
     post(:review_authors, params.merge(:add => @mary.id))
     assert_response('review_authors')
-    albion.reload
-    assert_user_list_equal([@mary, @rolf], albion.authors)
+    desc.reload
+    assert_user_list_equal([@mary, @rolf], desc.authors)
 
     # ...and taketh with the other.
     post(:review_authors, params.merge(:remove => @mary.id))
     assert_response('review_authors')
-    albion.reload
-    assert_user_list_equal([@rolf], albion.authors)
+    desc.reload
+    assert_user_list_equal([@rolf], desc.authors)
   end
 
   def test_review_authors_name

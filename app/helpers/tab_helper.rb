@@ -37,13 +37,13 @@ module ApplicationHelper::Tabs
       add_tab("« #{:PREV.t}",  args.merge(:action => "prev_#{type}" ))
       add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
       if mappable
-        add_tab(:map.t,
+        add_tab(:MAP.t,
           :controller => 'location',
           :action => 'map_locations',
           :params => query_params
         )
       end
-      add_tab("#{:NEXT.t} »",  args.merge(:action => "next#{type}"  ))
+      add_tab("#{:NEXT.t} »",  args.merge(:action => "next_#{type}"  ))
     end
   end
 
