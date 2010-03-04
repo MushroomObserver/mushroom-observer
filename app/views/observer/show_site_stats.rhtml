@@ -41,8 +41,10 @@
             :votes,
             :users,
           ]
+
           # Do we want to sort the list in order of decreasing size?
-          fields = fields.sort_by {|f| @site_data[f].to_i}.reverse
+          # fields = fields.sort_by {|f| @site_data[f].to_i}.reverse
+
           for field in fields
             label = "site_stats_#{field}".to_sym.t
             count = @site_data[field]

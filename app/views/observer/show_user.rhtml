@@ -105,21 +105,43 @@ end %>
       <td valign="top" width="50%">
         <table cellpadding="5" cellspacing="5" border="0">
           <% total = 0
-          rows = SiteData::ALL_FIELDS.map do |field| {
+
+          # These are roughly in decreasing order of importance.
+          rows = [
+            :name_descriptions_authors,
+            :name_descriptions_editors,
+            :names,
+            :names_versions,
+            :location_descriptions_authors,
+            :location_descriptions_editors,
+            :locations,
+            :locations_versions,
+            :images,
+            :species_lists,
+            :species_list_entries,
+            :observations,
+            :comments,
+            :namings,
+            :votes,
+          ].map do |field| {
             :field  => field,
             :label  => "user_stats_#{field}".to_sym.t,
             :count  => (count = @user_data[field].to_i),
             :weight => (weight = SiteData::FIELD_WEIGHTS[field]),
             :points => count * weight,
           } end
+
+          # Add bonuses at the bottom.
           if @show_user.bonuses
             rows += @show_user.bonuses.map do |points, reason| {
               :label  => reason.to_s.t,
               :points => points.to_i,
             } end
           end
+
           # Do we want to sort by points?
-          rows = rows.sort_by {|row| row[:points]}.reverse
+          # rows = rows.sort_by {|row| row[:points]}.reverse
+
           for row in rows
             field  = row[:field]
             label  = row[:label]
@@ -144,6 +166,7 @@ end %>
               </tr>
             <% end
           end
+
           if total > 0 %>
             <tr>
               <td colspan="4"><hr/></td>

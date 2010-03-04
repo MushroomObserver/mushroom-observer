@@ -353,6 +353,7 @@ private
     # Load record counts for each category.
     # (The :users category only applies to site-wide stats.)
     for field in ALL_FIELDS - [:users]
+puts field.to_s
       load_field_counts(field)
     end
 
