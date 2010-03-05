@@ -24,9 +24,10 @@
 #
 #  == MO Test Cases
 #
-#  MO::TestCase::             Generic test case with all our extensions added to it.
-#  MO::Model::TestCase::      Test case for models (same as MO::TestCase for now).
-#  MO::Controller::TestCase:: Test case for controllers (derives from ActionController::TestCase).
+#  MO::TestCase::              Generic test case with all our extensions added to it.
+#  MO::Model::TestCase::       Test case for models (same as MO::TestCase for now).
+#  MO::Controller::TestCase::  Test case for controllers (derives from ActionController::TestCase).
+#  MO::Integration::TestCase:: Test case for integration tests (derives from ActionController::IntegrationTest).
 #
 #  == Note on New File Name
 #
@@ -48,7 +49,9 @@ require File.expand_path(File.dirname(__FILE__) + '/../config/environment')
 require 'test_help'
 require 'extensions'
 require File.expand_path(File.dirname(__FILE__) + '/test_case')
+require File.expand_path(File.dirname(__FILE__) + '/flash_assertions')
 require File.expand_path(File.dirname(__FILE__) + '/controller_test_case')
+require File.expand_path(File.dirname(__FILE__) + '/integration_test_case')
 
 # Used to test image uploads.  The normal "live" params[:upload] is
 # essentially a file with a "content_type" field added to it.  This is

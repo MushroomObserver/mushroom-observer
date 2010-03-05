@@ -1,45 +1,46 @@
-<% if @observation.images.length > 0 %>
-  <%= :images.t %>:<br/>
-<% end %>
-
-<% if check_permission(@observation.user_id) %>
-  <%= link_to(:show_observation_add_images.t, :controller => 'image',
-              :action => 'add_image', :id => @observation.id,
-              :params => query_params) %><br/>
-  <%= link_to(:show_observation_reuse_image.t, :controller => 'image',
-              :action => 'reuse_image', :id => @observation.id,
-              :params => query_params) %><br/>
+<div class='show_images'>
   <% if @observation.images.length > 0 %>
-    <%= link_to(:show_observation_remove_images.t, :controller => 'image',
-                :action => 'remove_images', :id => @observation.id,
-                :params => query_params) %><br/>
+    <%= :IMAGES.t %>:<br/>
   <% end %>
-<% end %>
-<br/>
 
-<center>
-  <% done = {}
-  # This sort puts the thumbnail first.  We can't use thumb_image, because we
-  # haven't eager-loaded it; we *have* eager-loaded all the other images.
-  for image in @observation.images.
-                 sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id}
-    if image && !done[image.id]
-      done[image.id] = true %>
-      <p>
-        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) +
-                      "<br/>#{:image.t} ##{image.id}",
-                    :controller => 'image', :action => 'show_image',
-                    :id => image.id, :obs => @observation.id,
-                    :params => query_params) %><br/>
-        <% if image.notes.to_s != '' %>
-          <small>
-            <%= # This is really ugly; could break up formatting unit.
-            str = image.notes[0..300].tl
-            str += '...' if image.notes.length > 301
-            str %>
-          </small>
-        <% end %>
-      </p>
+  <% if check_permission(@observation.user_id) %>
+    <%= link_to(:show_observation_add_images.t, :controller => 'image',
+                :action => 'add_image', :id => @observation.id,
+                :params => query_params) %><br/>
+    <%= link_to(:show_observation_reuse_image.t, :controller => 'image',
+                :action => 'reuse_image', :id => @observation.id,
+                :params => query_params) %><br/>
+    <% if @observation.images.length > 0 %>
+      <%= link_to(:show_observation_remove_images.t, :controller => 'image',
+                  :action => 'remove_images', :id => @observation.id,
+                  :params => query_params) %><br/>
     <% end %>
   <% end %>
-</center>
+  <br/>
+
+  <center>
+    <% done = {}
+    # This sort puts the thumbnail first.  We can't use thumb_image, because we
+    # haven't eager-loaded it; we *have* eager-loaded all the other images.
+    for image in @observation.images.
+                   sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id}
+      if image && !done[image.id]
+        done[image.id] = true %>
+        <p>
+          <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)),
+                      :controller => 'image', :action => 'show_image',
+                      :id => image.id, :obs => @observation.id,
+                      :params => query_params) %><br/>
+          <% if image.notes.to_s != '' %>
+            <small>
+              <%= # This is really ugly; could break up formatting unit.
+              str = image.notes[0..300].tl
+              str += '...' if image.notes.length > 301
+              str %>
+            </small>
+          <% end %>
+        </p>
+      <% end %>
+    <% end %>
+  </center>
+</div>

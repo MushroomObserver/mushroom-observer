@@ -38,6 +38,16 @@ class Symbol
     to_s.capitalize_first.to_sym
   end
 
+  # Return a list of missing tags we've encountered.
+  def self.missing_tags
+    @@missing_tags
+  end
+
+  # Reset the list of missing tags.
+  def self.missing_tags=(x)
+    @@missing_tags = x
+  end
+
   # Run +localize+ in test mode.
   def test_localize(*args) # :nodoc:
     @@test = true
@@ -119,6 +129,9 @@ class Symbol
              (result = Globalite.localize(self, nil, {})) or
              ((result = Globalite.localize(downcase, nil, {})) and (capitalize_result = true))
            )
+      if TESTING
+        @@missing_tags << self if defined?(@@missing_tags)
+      end
       result = "[:#{self}]"
     end
 

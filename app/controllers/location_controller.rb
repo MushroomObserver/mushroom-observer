@@ -197,7 +197,7 @@ class LocationController < ApplicationController
 
     # If only one result (before pagination), redirect to show_location.
     if (@known_pages.num_total == 1) and
-       (@undef_pages.num_total == 0) and
+       (!@undef_pages || @undef_pages.num_total == 0) and
        (object = @known_data.first)
       redirect_to(:action => 'show_location', :id => object.id)
 

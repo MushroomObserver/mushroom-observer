@@ -97,6 +97,7 @@ class ApplicationController < ActionController::Base
   require 'login_system'
   include LoginSystem
 
+  around_filter :catch_errors if TESTING
   before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
@@ -104,6 +105,13 @@ class ApplicationController < ActionController::Base
   # before_filter :extra_gc
   # after_filter  :extra_gc
   # after_filter  :log_memory_usage
+
+  # Catch errors for integration tests.
+  def catch_errors
+    yield
+  rescue => e
+    @error = e
+  end
 
   ##############################################################################
   #
@@ -1144,15 +1152,13 @@ class ApplicationController < ActionController::Base
         query = find_or_create_query(object.class, :default)
         query.current = object
         if !query.index(object)
-          type = object.class.name.underscore.to_sym.t
-          types = object.class.table_name.to_sym.t
+          type = object.class.name.underscore.to_sym
           flash_error(:runtime_object_not_in_index.t(:id => object.id, :type => type))
         elsif new_query = query.send(method)
           query = new_query
           id = query.current_id
         else
-          type = object.class.name.underscore.to_sym.t
-          types = object.class.table_name.to_sym.t
+          type = object.class.name.underscore.to_sym
           flash_error(:runtime_no_more_search_objects.t(:type => type))
         end
       end
@@ -1271,8 +1277,7 @@ class ApplicationController < ActionController::Base
   def find_or_goto_index(model, id, redirect=nil)
     result = model.safe_find(id)
     if !result
-      type = object.class.name.underscore.to_sym.t
-      types = object.class.table_name.to_sym.t
+      type = object.class.name.underscore.to_sym
       flash_error(:runtime_object_not_found.t(:id => id, :type => type))
       goto_index(redirect)
     end

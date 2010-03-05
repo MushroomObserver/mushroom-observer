@@ -1771,12 +1771,12 @@ image_show_full_size: Show Full Size
 image_show_inquiry: Send Commercial Inquiry About Image
 image_show_edit: "[:edit_object(type=:image)]"
 image_show_destroy: "[:DESTROY]"
-image_show_when: "[:When]"
-image_show_notes: "[:Notes]"
+image_show_when: "[:WHEN]"
+image_show_notes: "[:NOTES]"
 image_show_copyright: Copyright
 image_show_quality: Quality
 image_show_comments: "[num] comment(s)"
-image_show_observations: "[:observations]"
+image_show_observations: "[:OBSERVATIONS]"
 
 
 

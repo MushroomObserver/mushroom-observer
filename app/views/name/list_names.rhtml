@@ -11,7 +11,7 @@
 
   if @objects == []
     @error ||= :runtime_name_index_no_matches
-    flash_error @error.t
+    flash_error @error.t(:type => :name)
   end
 %>
 

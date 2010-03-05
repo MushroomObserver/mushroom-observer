@@ -5,7 +5,7 @@
     add_tab(:name_map_about.t(:name => @name.display_name),
             :action => 'show_name', :id => @name.id, :params => query_params)
     add_tab(:show_objects.t(:type => :location),
-            :controller => 'location', :action => 'list_locations',
+            :controller => 'location', :action => 'index_location',
             :params => query_params(@query))
   end
 

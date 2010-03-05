@@ -191,7 +191,9 @@
             if @tab_sets %>
               <div class='tab_sets'>
                 <% for set in @tab_sets %>
-                  <%= set.map {|tab| render_tab(*tab)}.join(' | ') %><br/>
+                  <div class='tab_set'>
+                    <%= set.map {|tab| render_tab(*tab)}.join(' | ') %><br/>
+                  </div>
                 <% end %>
               </div>
             <% end %>

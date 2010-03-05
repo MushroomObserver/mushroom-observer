@@ -30,6 +30,7 @@ module ApplicationHelper::Paginator
     numbers = pagination_numbers(pages, args).to_s
     body = capture(&block).to_s
     str = letters + numbers + body + numbers + letters
+    str = '<div class="results">' + str + '</div>'
     concat(str, block.binding)
   end
 

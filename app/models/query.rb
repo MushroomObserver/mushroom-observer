@@ -668,9 +668,9 @@ class Query < AbstractQuery
 
   # (These are used by :query_title_all_by for :all queries.)
   BY_TAGS = {
-    :date  => :app_date,
+    :date  => :date,
     :name  => :name,
-    :title => :app_object_title,
+    :title => :title,
     :user  => :user,
   }
 
