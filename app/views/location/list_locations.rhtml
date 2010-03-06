@@ -12,8 +12,8 @@
 
   if (!@known_pages || @known_pages.length == 0) and
      (!@undef_pages || @undef_pages.length == 0)
-    @error ||= :runtime_no_matches
-    flash_error @error.t(:type => :location)
+    @error ||= :runtime_no_matches.t(:type => :location)
+    flash_error @error
   end
 %>
 

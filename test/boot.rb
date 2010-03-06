@@ -7,7 +7,7 @@
 #  2) Run config/environment.rb, booting our application and rails.
 #  3) Include the rails test extensions (test_help).
 #  4) Include out own core extensions (everything else is auto-loaded).
-#  5) Load our own test extensions (test_case and controller_test_case).
+#  5) Load our own test cases and extensions (all the files in this directory).
 #  6) Test::Unit magically runs everything in an +atexit+ hook.
 #
 #  It is, furthermore, worth knowing how and where rails meddles with the
@@ -18,23 +18,42 @@
 #  active_record/fixtures::         Adds +fixtures+ support.
 #  action_controller/test_case::    Adds a handy +setup+ callback.
 #  action_controller/test_process:: Defines fake request and response classes and much more.
-#  action_controller/integration::  ...
+#  action_controller/integration::  Very confusing mix of Session and TestCase, I'm stumped.
 #  action_mailer/test_case::        ...
 #  active_support/core_ext/test::   ...
 #
 #  == MO Test Cases
 #
-#  MO::TestCase::              Generic test case with all our extensions added to it.
-#  MO::Model::TestCase::       Test case for models (same as MO::TestCase for now).
-#  MO::Controller::TestCase::  Test case for controllers (derives from ActionController::TestCase).
-#  MO::Integration::TestCase:: Test case for integration tests (derives from ActionController::IntegrationTest).
+#  UnitTestCase::        Used by unit tests, just derives from Test::Unit::TestCase.
+#  FunctionalTestCase::  Used by functional tests, derives from ActionController::TestCase.
+#  IntegrationTestCase:: Used by integration tests, similar to ActionController::IntegrationTest.
+#  IntegrationSession::  Used by integration tests, derived from ActionController::Integration::Session
 #
-#  == Note on New File Name
+#  == MO Test Extensions
 #
-#  This file used to be called +test_helper.rb+, however it turns out that rake
-#  would include it once, while all our test units were including it a second
-#  time.  We _must_ do the latter, because that's how this file gets included
-#  when running tests individually from the command line:
+#  GeneralExtensions::     Generally useful MO-specific assertions.
+#  ControllerExtensions::  Several additional helpers used by functional tests.
+#  FlashExtensions::       Encapsulates flash error mechanism (used by functional and integration tests).
+#  IntegrationExtensions:: Some high-level integration test helpers.
+#  SessionExtensions::     Several very handy extensions to the Rails integration tester.
+#
+#  == Notes
+#
+#  The Rails integration test case did not allow us to subclass the test
+#  session class, and did not give us proper control over things like cookies.
+#  So I've rewritten it minimally.  It did very little to start with, so this
+#  was actually the easiest way to go.  See the notes on IntegrationTestCase
+#  for better documentation of the (few) differences.
+#
+#  Beware, Rails has polluted Test::Unit::TestCase with a bunch of
+#  controller-related stuff.  This all comes from ActionController::TestProcess
+#  module.
+#
+#  Also note that this file used to be called +test_helper.rb+.  However it
+#  turns out that rake would include it once, while all our test units were
+#  including it a second time.  We _must_ do the latter, because that's how
+#  this file gets included when running tests individually from the command
+#  line: 
 #
 #    ruby -Ilib:test test/units/api_test.rb
 #
@@ -48,10 +67,22 @@ ENV['RAILS_ENV'] = 'test'
 require File.expand_path(File.dirname(__FILE__) + '/../config/environment')
 require 'test_help'
 require 'extensions'
-require File.expand_path(File.dirname(__FILE__) + '/test_case')
-require File.expand_path(File.dirname(__FILE__) + '/flash_assertions')
-require File.expand_path(File.dirname(__FILE__) + '/controller_test_case')
-require File.expand_path(File.dirname(__FILE__) + '/integration_test_case')
+
+# Load all of our test cases and extensions.
+for file in %w(
+  general_extensions
+  flash_extensions
+  controller_extensions
+  integration_extensions
+  session_extensions
+  test_case
+  unit_test_case
+  functional_test_case
+  integration_test_case
+  integration_session
+)
+  require File.expand_path(File.dirname(__FILE__) + "/#{file}")
+end
 
 # Used to test image uploads.  The normal "live" params[:upload] is
 # essentially a file with a "content_type" field added to it.  This is

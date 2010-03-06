@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class RssLogTest < Test::Unit::TestCase
+class RssLogTest < UnitTestCase
 
   # -------------------------------------------------------------------
   #  Test the auto-rss-log magic.  Make sure RssLog objects are being

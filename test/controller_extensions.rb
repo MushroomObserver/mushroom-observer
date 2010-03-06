@@ -1,8 +1,7 @@
 #
 #  = Controller Test Helpers
 #
-#  TestCase to use with ActionController tests.  This includes a number of
-#  useful helpers and assertions that apply only to controller tests.
+#  Methods in this class are available to all the functional tests.
 #
 #  == Request helpers
 #  reget::                      Resets request and calls +get+.
@@ -32,12 +31,10 @@
 #  assert_response_equal_file:: Response body is same as copy in a file.
 #  assert_request::             Check heuristics of an arbitrary request.
 #  assert_response::            Check that last request resulted in a given redirect / render.
-#  assert_flash::               Assert that an error was rendered or is pending.
 #
 ################################################################################
 
-class ControllerTestCase < ActionController::TestCase
-  include FlashAssertions
+module ControllerExtensions 
 
   ##############################################################################
   #
@@ -275,12 +272,6 @@ class ControllerTestCase < ActionController::TestCase
   #  :section: HTML Helpers
   #
   ##############################################################################
-
-  # Get the errors rendered in the last request, or current set of errors if
-  # redirected.
-  def get_last_flash
-    flash[:rendered_notice] || session[:notice]
-  end
 
   # Return URL for +link_to+ style Hash of parameters.
   def url_for(args={})
@@ -645,27 +636,6 @@ class ControllerTestCase < ActionController::TestCase
             raise "Invalid response type expected: [#{arg.class}: #{arg}]\n"
           end
         end
-      end
-    end
-  end
-
-  # Assert that an error was rendered or is pending.
-  def assert_flash(expect, msg='')
-    clean_our_backtrace do
-      if got = get_last_flash
-        lvl = got[0,1].to_i
-        got = got[1..-1]
-      end
-      if !expect && got
-        assert_equal(nil, got, msg + "Shouldn't have been any flash errors.")
-      elsif expect && !got
-        assert_equal(expect, nil, msg + "Expected a flash error.")
-      elsif expect.is_a?(Fixnum)
-        assert_equal(expect, lvl, msg + "Wrong flash error level.")
-      elsif expect.is_a?(Regexp)
-        assert_match(expect, got, msg + "Got the wrong flash error(s).")
-      else
-        assert_equal(expect, got, msg + "Got the wrong flash error(s).")
       end
     end
   end

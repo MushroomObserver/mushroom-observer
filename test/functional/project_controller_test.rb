@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class ProjectControllerTest < ControllerTestCase
+class ProjectControllerTest < FunctionalTestCase
 
   def add_project_helper(title, summary)
     params = {

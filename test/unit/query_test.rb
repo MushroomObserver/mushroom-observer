@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class QueryTest < Test::Unit::TestCase
+class QueryTest < UnitTestCase
 
   def assert_state_exists(id)
     assert(!id.nil? && Query.find(id))

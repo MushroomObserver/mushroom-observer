@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class NameTest < Test::Unit::TestCase
+class NameTest < UnitTestCase
 
   def create_test_name(string, force_rank=nil)
     User.current = @rolf

@@ -1,12 +1,15 @@
 #
-#  = Flash Helpers
+#  = Flash Test Helpers
+#
+#  Methods in this class are available to all the functional and integration
+#  tests. 
 #
 #  get_last_flash::     Retrieve the current list of errors or last set rendered.
 #  assert_flash::       Assert that an error was rendered or is pending.
 #
 ################################################################################
 
-module FlashAssertions
+module FlashExtensions
 
   # Get the errors rendered in the last request, or current set of errors if
   # redirected.

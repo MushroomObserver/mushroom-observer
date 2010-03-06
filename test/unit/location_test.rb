@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class LocationTest < Test::Unit::TestCase
+class LocationTest < UnitTestCase
 
   def test_versioning
     User.current = @mary

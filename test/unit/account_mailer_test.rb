@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../boot'
 require 'account_mailer'
 
-class AccountMailerTest < Test::Unit::TestCase
+class AccountMailerTest < UnitTestCase
   FIXTURES_PATH = File.dirname(__FILE__) + '/../fixtures/account_mailer'
 
   def setup

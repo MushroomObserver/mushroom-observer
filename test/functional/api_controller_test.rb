@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class ApiControllerTest < ControllerTestCase
+class ApiControllerTest < FunctionalTestCase
 
   def test_filters
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,pt;q=0.5"

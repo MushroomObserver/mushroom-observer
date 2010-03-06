@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class InterestControllerTest < ControllerTestCase
+class InterestControllerTest < FunctionalTestCase
 
   # Test list feature from left-hand column.
   def test_list_interests

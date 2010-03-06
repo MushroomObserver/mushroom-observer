@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class NameParseTest < Test::Unit::TestCase
+class NameParseTest < UnitTestCase
 
   def test_default
     name_parse = NameParse.new('Foo bar')

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class CommentControllerTest < ControllerTestCase
+class CommentControllerTest < FunctionalTestCase
 
   def test_list_comments
     get_with_dump(:list_comments)

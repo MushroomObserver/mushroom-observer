@@ -284,7 +284,7 @@ class ApplicationController < ActionController::Base
 
   # Destroy the auto-login cookie.
   def clear_autologin_cookie
-    cookies.delete :mo_user
+    cookies.delete(:mo_user)
   end
 
   # Store User in session (id only).

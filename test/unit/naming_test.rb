@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class NamingTest < Test::Unit::TestCase
+class NamingTest < UnitTestCase
 
   # Propose a naming for an observation.
   def test_create

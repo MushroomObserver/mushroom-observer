@@ -11,8 +11,8 @@
   end
 
   if @objects == []
-    @error ||= :location_description_index_no_matches
-    flash_error @error.t(:type => :description)
+    @error ||= :location_description_index_no_matches.t(:type => :description)
+    flash_error @error
   end
 %>
 

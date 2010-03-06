@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class ObserverControllerTest < ControllerTestCase
+class ObserverControllerTest < FunctionalTestCase
 
   # Test constructing observations in various ways (with minimal namings).
   def generic_construct_observation(params, o_num, g_num, n_num)

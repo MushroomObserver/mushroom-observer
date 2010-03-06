@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class DescriptionTest < Test::Unit::TestCase
+class DescriptionTest < UnitTestCase
 
   # Make sure authors and editors are as they should be.
   def assert_authors_and_editors(obj, authors, editors, msg)

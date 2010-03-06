@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class AbstractModelTest < Test::Unit::TestCase
+class AbstractModelTest < UnitTestCase
 
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg='')

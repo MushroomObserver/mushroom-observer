@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class LocationControllerTest < ControllerTestCase
+class LocationControllerTest < FunctionalTestCase
 
   def setup
     @new_pts  = 10

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class MOPaginatorTest < Test::Unit::TestCase
+class MOPaginatorTest < UnitTestCase
   def test_basic
     pages = MOPaginator.new
 

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class SiteDataTest < Test::Unit::TestCase
+class SiteDataTest < UnitTestCase
 
   def test_create
     obj = SiteData.new

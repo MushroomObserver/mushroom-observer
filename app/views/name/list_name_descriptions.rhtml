@@ -8,8 +8,8 @@
   end
 
   if @objects == []
-    @error ||= :runtime_name_description_index_no_matches
-    flash_error @error.t(:type => :description)
+    @error ||= :runtime_name_description_index_no_matches.t(:type => :description)
+    flash_error @error
   end
 %>
 

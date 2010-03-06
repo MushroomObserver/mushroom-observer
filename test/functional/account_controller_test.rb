@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class AccountControllerTest < ControllerTestCase
+class AccountControllerTest < FunctionalTestCase
 
   def setup
     @request.host = "localhost"

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class VoteTest < Test::Unit::TestCase
+class VoteTest < UnitTestCase
 
   # Create one.
   def test_create

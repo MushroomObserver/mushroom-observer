@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class LanguagesTest < Test::Unit::TestCase
+class LanguagesTest < UnitTestCase
 
   LANGUAGE_PATH  = "#{RAILS_ROOT}/lang/ui"
   LANGUAGE_FILES = "#{LANGUAGE_PATH}/*.yml"

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class ExtensionTest < Test::Unit::TestCase
+class ExtensionTest < UnitTestCase
 
   ##############################################################################
   #

@@ -58,9 +58,9 @@ class AccountController < ApplicationController
       @login = ""
       @remember = true
     else
-      @login = params['user_login']
-      @password = params['user_password']
-      @remember = params['user'] && params['user']['remember_me'] == "1"
+      @login = params['user_login'].to_s
+      @password = params['user_password'].to_s
+      @remember = params['user'] && params['user']['remember_me'] == '1'
       user = User.authenticate(@login, @password)
       user ||= User.authenticate(@login, @password.strip)
       if !user

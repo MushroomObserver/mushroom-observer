@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class InterestTest < Test::Unit::TestCase
+class InterestTest < UnitTestCase
 
   def test_setting_and_getting
     Interest.new(

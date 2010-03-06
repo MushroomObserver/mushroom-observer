@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class ImageControllerTest < ControllerTestCase
+class ImageControllerTest < FunctionalTestCase
 
   def test_list_images
     get_with_dump(:list_images)

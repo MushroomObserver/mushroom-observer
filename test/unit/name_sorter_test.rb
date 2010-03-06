@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class NameSorterTest < Test::Unit::TestCase
+class NameSorterTest < UnitTestCase
 
   def test_add_name_default
     name_sorter = NameSorter.new

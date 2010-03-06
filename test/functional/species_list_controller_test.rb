@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class SpeciesListControllerTest < ControllerTestCase
+class SpeciesListControllerTest < FunctionalTestCase
 
   def spl_params(spl)
     params = {

@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../boot'
 
-class ObservationTest < Test::Unit::TestCase
+class ObservationTest < UnitTestCase
 
   def create_new_objects
     @cc_obs = Observation.new
