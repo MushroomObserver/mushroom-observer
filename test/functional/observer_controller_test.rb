@@ -1753,7 +1753,7 @@ class ObserverControllerTest < FunctionalTestCase
     time3 = Time.utc(2003)
     week_ago = 1.week.ago
 
-    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    setup_image_dirs
     file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
     file1 = FilePlus.new(file)
     file1.content_type = 'image/jpeg'
@@ -1829,7 +1829,7 @@ class ObserverControllerTest < FunctionalTestCase
   def test_image_upload_when_create_fails
     login('rolf')
 
-    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    setup_image_dirs
     file = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
     file = FilePlus.new(file)
     file.content_type = 'image/jpeg'

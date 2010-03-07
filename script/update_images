@@ -110,8 +110,8 @@ def refresh_listings(cronjob=false)
   verbose("Getting local listing...\n")
   files['local'] = list = list_local_files(@@local_path)
   verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
-  vervose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
-  vervose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
+  verbose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
+  verbose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
   write_cached_file_list('local', list)
 
   # Get remote lists so we can refresh the caches.
@@ -120,9 +120,9 @@ def refresh_listings(cronjob=false)
     verbose("Getting #{server} listing...\n")
     if list = list_remote_files(server)
       write_cached_file_list(server, list)
-      vervose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
-      vervose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
-      vervose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
+      verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
+      verbose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
+      verbose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
       files[server] = list
     else
       log("  (failed)\n") if cronjob

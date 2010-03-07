@@ -216,7 +216,9 @@ class Query < AbstractQuery
   self.join_conditions = {
     :comments => {
       :location_descriptions => :object,
+      :locations     => :object,
       :name_descriptions => :object,
+      :names         => :object,
       :observations  => :object,
       :users         => :user_id,
     },
@@ -1199,7 +1201,8 @@ class Query < AbstractQuery
         search = google_parse(content)
         more_ids += google_execute(search, :fields => [ 'observations.notes' ])
         more_ids += google_execute(search, :join => :comments,
-            :fields => [ 'observations.notes', 'comments.summary', 'comments.comment' ])
+            :fields => [ 'observations.notes', 'comments.summary',
+                         'comments.comment' ])
 
         if location != ''
           ids = intersect_id_sets(ids, more_ids)

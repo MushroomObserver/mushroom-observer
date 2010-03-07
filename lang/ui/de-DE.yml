@@ -2069,7 +2069,7 @@ show_name_observations: Funde
 show_name_synonym_observations: Funde unter Synonymen
 show_name_other_observations: Ähnliche Funde
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"
-show_name_creator:  First person to use this name
+show_name_creator:  First person to use this name on MO
 show_name_editor:  "[:Editors]"
 show_name_editors:  "[:Editors]"
 show_name_other_observations_notes: >

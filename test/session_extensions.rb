@@ -6,8 +6,10 @@
 #  ==== Debugging
 #  dump_links::       Show list of all the links on the last page rendered.
 #  save_page::        Save response from last request in a file.
-#  get_with_error_checking::  Call get_via_redirect with extra error checking.
-#  post_with_error_checking:: Call post_via_redirect with extra error checking.
+#  get::              Call get_via_redirect with extra error checking.
+#  post::             Call post_via_redirect with extra error checking.
+#  get_without_redirecting::  Call the original 'get'.
+#  post_without_redirecting:: Call the original 'post'.
 #
 #  ==== Helpers
 #  parse_query_params:: Get (our) query params from the given URL.
@@ -18,10 +20,10 @@
 #  ==== Navigation
 #  push_page::        Save response from last query so we can go back to it.
 #  go_back::          Go back a number of times.
-#  click_on::         Click on first link that matches the given args.
+#  click::         Click on first link that matches the given args.
 #
 #  ==== Forms
-#  do_form::          Encapsulate filling out and posting a given form.
+#  open_form::          Encapsulate filling out and posting a given form.
 #
 ################################################################################
 
@@ -53,25 +55,55 @@ module SessionExtensions
   # Call get/post_via_redirect, checking for 500 errors and missing language
   # tags.  Saves body of all successful responses for debugging, too.
   def process_with_error_checking(method, url, *args)
+    @doing_with_error_checking = true
     Symbol.missing_tags = []
     send("#{method}_via_redirect", url, *args)
     if status == 500
-      error = controller.instance_variable_get('@error')
-      msg = "#{error}\n#{error.backtrace.join("\n")}"
-      assert_equal(200, status, msg)
+      if error = controller.instance_variable_get('@error')
+        msg = "#{error}\n#{error.backtrace.join("\n")}"
+      else
+        msg = 'Got unknown 500 error from outside our application?!'
+      end
+      assert_block(msg) { false }
     end
     assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
     save_page
+  ensure
+    @doing_with_error_checking = false
   end
 
-  # Wrapper on process_with_error_checking.
-  def get_with_error_checking(*args)
-    process_with_error_checking('get', *args)
+  # Override all 'get' calls and do a bunch of extra error checking.
+  def get(*args)
+    if !@doing_with_error_checking
+      process_with_error_checking('get', *args)
+    else
+      super
+    end
   end
 
-  # Wrapper on process_with_error_checking.
-  def post_with_error_checking(*args)
-    process_with_error_checking('post', *args)
+  # Override all 'post' calls and do a bunch of extra error checking.
+  def post(*args)
+    if !@doing_with_error_checking
+      process_with_error_checking('post', *args)
+    else
+      super
+    end
+  end
+
+  # Call the original +get+.
+  def get_without_redirecting(*args)
+    @doing_with_error_checking = true
+    get(*args)
+  ensure
+    @doing_with_error_checking = false
+  end
+
+  # Call the original +post+.
+  def post_without_redirecting(*args)
+    @doing_with_error_checking = true
+    post(*args)
+  ensure
+    @doing_with_error_checking = false
   end
 
   ##############################################################################
@@ -108,10 +140,10 @@ module SessionExtensions
   def login(login, password='testpassword', remember_me=true)
     login = login.login if login.is_a?(User)
     get('/account/login') if path != '/account/login'
-    do_form('form[action$=login]') do |form|
-      form.edit_field('login', login)
-      form.edit_field('password', password)
-      form.edit_field('remember_me', remember_me)
+    open_form do |form|
+      form.change('login', login)
+      form.change('password', password)
+      form.change('remember_me', remember_me)
       form.submit('Login')
     end
   end
@@ -126,16 +158,21 @@ module SessionExtensions
 
   # Logout the current user and make sure it was successful.
   def logout
-    click_on(:label => 'Logout')
+    click(:label => 'Logout')
     assert_flash(/success/i)
   end
 
   # Look up a given form, initialize a Hash of parameters for it, and wrap up
   # the whole thing in a Form instance.  Returns (and yields) an instance of
-  # IntegrationSession::Form.
-  def do_form(*args)
+  # IntegrationSession::Form.  (If no parameters passed, by default it looks
+  # for a form that posts back to the same page.)
+  def open_form(*args)
     form = nil
     clean_our_backtrace do
+      if args == []
+        action = path.sub(/\?.*/,'')
+        args << "form[action*=#{action}]"
+      end
       assert_select(*args) do |elems|
         assert_equal(1, elems.length,
                      "Found multiple forms matching #{args.inspect}.")
@@ -191,7 +228,7 @@ module SessionExtensions
   # label:: Label contains a String or matches a Regexp.
   # href::  URL starts with a String or matches a Regexp.
   # in::    Link contained in a given element type(s).
-  def click_on(args={})
+  def click(args={})
     clean_our_backtrace do
       select = 'a[href]'
       sargs  = []
@@ -199,7 +236,11 @@ module SessionExtensions
       # Filter links based on URL.
       if arg = args[:href]
         if arg.is_a?(Regexp)
-          select = "a[href^=?]"
+          if arg.to_s.match(/^..-mix:\^/)
+            select = "a[href^=?]"
+          else
+            select = "a[href*=?]"
+          end
           sargs << arg
         else
           select = "a[href^=#{arg}]"
@@ -237,8 +278,7 @@ module SessionExtensions
           # Click on first link that matches everything.
           if match
             url = CGI.unescapeHTML(link.attributes['href'])
-# puts "CLICK ON: #{url}"
-            get_with_error_checking(url)
+            get(url)
             done = true
             break
           end

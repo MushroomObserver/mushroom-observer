@@ -267,7 +267,7 @@ class AccountMailer < ActionMailer::Base
     @body['new_name']    = new_name
     @body['old_desc']    = old_desc
     @body['new_desc']    = new_desc
-    @body['review_status'] = "review_#{review_status}".to_sym.l
+    @body['review_status'] = "review_#{review_status}".to_sym.l if review_status != :no_change
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS

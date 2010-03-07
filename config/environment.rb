@@ -171,3 +171,22 @@ module RedCloth
   end
 end
 
+# There appears to be a bug in read_multipart.  I checked, this is never used
+# by the live server.  But it *is* used by integration tests, and it fails
+# hideously if you are foolish enough to try to upload a file in such tests.
+# Apparently it simply forgot to unescape the parameter names.  Easy fix. -JPH
+module ActionController
+  class AbstractRequest
+    class << self
+      alias fubar_read_multipart read_multipart
+      def read_multipart(*args)
+        params = fubar_read_multipart(*args)
+        for key, val in params
+          params.delete(key)
+          params[URI.unescape(key)] = val
+        end
+        return params
+      end
+    end
+  end
+end

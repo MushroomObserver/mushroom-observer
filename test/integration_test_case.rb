@@ -43,8 +43,8 @@
 #    def test_simplest
 #      get('/controller/action?args=...')
 #      assert_template('controller/action')
-#      click_on(:label => 'Post Comment')
-#      do_form('form.comment') do |form|
+#      click(:label => 'Post Comment')
+#      open_form do |form|
 #        form.edit_field('message', 'This is a test.')
 #        form.submit('Post')
 #      end
@@ -56,7 +56,7 @@
 #      # Rolf's session is current throughout the block.
 #      rolf = open_session do
 #        get('/login')
-#        do_form('form.login') do
+#        open_form do |form|
 #          form.edit_field('login', 'rolf')
 #          form.edit_field('password', 'password')
 #          form.submit('Login')

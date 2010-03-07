@@ -846,6 +846,7 @@ class ApplicationController < ActionController::Base
         desc.writer_groups << UserGroup.one_user(@user)
       end
       desc.admin_groups << project.admin_group
+      desc.admin_groups << UserGroup.one_user(@user)
 
     # Creating personal description, or entering one from a specific source.
     when :source, :user

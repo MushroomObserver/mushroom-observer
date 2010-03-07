@@ -2073,7 +2073,7 @@ show_name_observations:  "[:OBSERVATIONS]"
 show_name_synonym_observations:  "Synonym [:OBSERVATIONS]"
 show_name_other_observations:  "Similar [:OBSERVATIONS]"
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"
-show_name_creator:  First person to use this name
+show_name_creator:  First person to use this name on MO
 show_name_editor:  "[:Editors]"
 show_name_editors:  "[:Editors]"
 show_name_other_observations_notes:  >

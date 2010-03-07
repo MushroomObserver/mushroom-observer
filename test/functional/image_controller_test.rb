@@ -356,7 +356,7 @@ class ImageControllerTest < FunctionalTestCase
   end
 
   def test_upload_image
-    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    setup_image_dirs
     obs = observations(:coprinus_comatus_obs)
     img_count = obs.images.size
     file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg")

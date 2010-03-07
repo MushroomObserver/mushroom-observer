@@ -6,13 +6,13 @@
 #
 #  == Test unit helpers
 #  clean_our_backtrace::        Make asserts appear to fail in the test unit.
-#  application_setup::          Universal setup: sets locale.
-#  application_teardown::       Universal teardown: removes images.
+#  setup_image_dirs::           Create test image dirs for tests that do image uploads.
 #
 #  == General Assertions
 #  assert_true::                Make sure something is true.
 #  assert_false::               Make sure something is false.
 #  assert_not_match::           Make sure a string does NOT match.
+#  assert_dates_equal::         Compare two Date/Time/DateTime/TimeWithZone instances as dates.
 #  assert_objs_equal::          Compare two model instances.
 #  assert_users_equal::         Compare two user instances.
 #  assert_names_equal::         Compare two name instances.
@@ -54,6 +54,11 @@ module GeneralExtensions
     raise
   end
 
+  # Create test image dirs for tests that do image uploads.
+  def setup_image_dirs
+    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+  end
+
   ##############################################################################
   #
   #  :section: General assertions
@@ -81,6 +86,16 @@ module GeneralExtensions
       expect = Regexp.new(expect) if expect.is_a?(String)
       msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
       assert_block(msg) { actual !~ expect }
+    end
+  end
+
+  # Compare two Date/Time/DateTime/TimeWithZone instances.
+  def assert_dates_equal(expect, actual, msg=nil)
+    clean_our_backtrace do
+      expect = expect.strftime('%Y%m%d')
+      actual = actual.strftime('%Y%m%d')
+      msg = build_message(msg, 'Expected <?> to be <?>.', expect, actual)
+      assert_block(msg) { expect == actual }
     end
   end
 

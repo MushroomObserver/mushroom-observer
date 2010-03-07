@@ -263,7 +263,7 @@ module BrowserStatus
 
     # Find time zone that matches the best.
     if offset = -cookies[:tz].to_i * 60 rescue nil
-      for zone in TimeZone.all.sort_by(&:utc_offset)
+      for zone in ActiveSupport::TimeZone.all.sort_by(&:utc_offset)
         if zone.utc_offset >= offset
           Time.zone = zone
           break

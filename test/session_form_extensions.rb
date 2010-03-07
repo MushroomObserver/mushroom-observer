@@ -17,7 +17,7 @@
 #  new::            Initialize form from HTML element returned by assert_select.
 #  get_field::      Return Form::Field matching the given DOM id.
 #  get_field!::     Same as get_field, but flunks an assertion if not found.
-#  edit_field::     Change the value of a given field.
+#  change::         Change the value of a given field.
 #  select::         Change the selection of a pulldown menu.
 #  assert_value::   Make sure a given field has a certain value.
 #  submit::         Submit the form.
@@ -71,6 +71,9 @@ class SessionExtensions::Form
     # List of options available to pulldown (select).
     attr_accessor :options
 
+    # Is this field modifiable?
+    attr_accessor :disabled
+
     def initialize(args={})
       args.each {|k,v| send("#{k}=", v)}
     end
@@ -102,14 +105,16 @@ class SessionExtensions::Form
         name = CGI.unescapeHTML(elem.attributes['name'] || '')
         val  = CGI.unescapeHTML(elem.attributes['value'] || '')
         type = (elem.name == 'input') ? elem.attributes['type'] : elem.name
+        disabled = elem.attributes['disabled'] == 'disabled'
 
         field = Field.new(
-          :node    => elem,
-          :type    => type.to_sym,
-          :name    => name,
-          :id      => id,
-          :default => val,
-          :value   => val
+          :node     => elem,
+          :type     => type.to_sym,
+          :name     => name,
+          :id       => id,
+          :default  => val,
+          :value    => val,
+          :disabled => disabled
         )
 
         case type
@@ -121,6 +126,10 @@ class SessionExtensions::Form
 
         when 'textarea'
           field.value = CGI.unescapeHTML(elem.children.map(&:to_s).join(''))
+          inputs << field
+
+        when 'file'
+          field.value = nil
           inputs << field
 
         when 'checkbox'
@@ -191,17 +200,30 @@ class SessionExtensions::Form
   # <tt>""</tt> by HTML forms.  Pass in either a String or a Regexp for the
   # expected value.
   def assert_value(id, val, msg=nil)
-    if field = get_field(id)
-      val2 = field.value.to_s
-    else
-      val2 = ''
-    end
+    field = get_field!(id)
+    val2 = field.value.to_s
     msg ||= "Expected value of form field #{id.inspect} to be #{val.inspect}."
     if val.is_a?(Regexp)
       context.assert_match(val, val2.to_s, msg)
     else
       context.assert_equal(val.to_s, val2.to_s, msg)
     end
+  end
+
+  # Make sure a given field is enabled for editing.
+  def assert_enabled(id, msg=nil)
+    field = get_field!(id)
+    msg ||= "Expected field #{id.inspect} to be enabled."
+    context.assert_block(msg) { !field.disabled }
+    return field
+  end
+
+  # Make sure a given field is disabled.
+  def assert_disabled(id, msg=nil)
+    field = get_field!(id)
+    msg ||= "Expected field #{id.inspect} to be disabled."
+    context.assert_block(msg) { field.disabled }
+    return field
   end
 
   # Allow user to make further HTML assertions on the form.
@@ -211,20 +233,40 @@ class SessionExtensions::Form
 
   # Change the value of the given input field.  Matches field whose ID _ends_
   # in the given String.
-  def edit_field(id, val)
-    field = get_field!(id)
-    field.value = val
+  def change(id, val)
+    assert_enabled(id).value = val
+  end
+
+  # Check a given check-box.
+  def check(id)
+    field = assert_enabled(id)
+    context.assert_equal(:checkbox, field.type)
+    field.value = true
+  end
+
+  # Uncheck a given check-box.
+  def uncheck(id)
+    field = assert_enabled(id)
+    context.assert_equal(:checkbox, field.type)
+    field.value = false
+  end
+
+  # Upload a file in a file field.
+  def upload(id, file, type)
+    field = assert_enabled(id)
+    context.assert_equal(:file, field.type)
+    field.value = ActionController::TestUploadedFile.new(file, type, :binary)
   end
 
   # Change selection of pulldown menu.
   def select(id, label)
-    field = get_field!(id)
+    field = assert_enabled(id)
     context.assert_block("Expected field #{id.inspect} to be a select field!") \
       { field.type == :select }
     matches = []
     for opt in field.options
       if label.is_a?(Regexp) ? opt.label.match(label) :
-                               (opt.label == label)
+                               (opt.label == label.to_s)
         field.value = opt.value
         matches << opt.label
       end
@@ -240,8 +282,7 @@ class SessionExtensions::Form
 
   # Submit the form using the given button.  Button can be specified by a
   # String (full exact match), Regexp, or +nil+ (meaning use the first one).
-  # Post is processed on the session that owns this form, using
-  # +post_via_redirect+ (wrapped in +post_with_error_checking+).
+  # Post is processed on the session that owns this form.
   def submit(button=nil)
     found = false
     hash = {}
@@ -256,16 +297,18 @@ class SessionExtensions::Form
       if button.is_a?(Regexp) and field.value.match(button) or
          button.is_a?(String) and (field.value == button) or
          button.nil?
-        hash[field.name] = field.value
+        context.assert_block("Tried to submit form with disabled button: " +
+                             button.inspect) { !field.disabled }
         context.assert_block("Found multiple non-identical submit " +
-                              "buttons matching #{button.inspect}") \
-          { !found || found == field.value }
+                             "buttons matching #{button.inspect}") \
+                             { !found || found == field.value }
+        hash[field.name] = field.value
         found = field.value
       end
     end
     context.assert_block("Couldn't find submit button labelled " +
                           "#{button.inspect}.") { found }
     puts "POST #{url}: #{hash.inspect}" if debug
-    context.post_with_error_checking(url, hash)
+    context.post(url, hash)
   end
 end

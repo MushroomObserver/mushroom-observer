@@ -2,10 +2,14 @@
 #  = Flash Test Helpers
 #
 #  Methods in this class are available to all the functional and integration
-#  tests. 
+#  tests.
 #
-#  get_last_flash::     Retrieve the current list of errors or last set rendered.
-#  assert_flash::       Assert that an error was rendered or is pending.
+#  get_last_flash::       Retrieve the current list of errors or last set rendered.
+#  assert_flash::         Assert that an error was rendered or is pending.
+#  assert_no_flash::      Assert that there was no notice, warning or error.
+#  assert_flash_success:: Assert that there was a notice but no warning or error.
+#  assert_flash_warning:: Assert that there was a warning but no error.
+#  assert_flash_error::   Assert that there was an error.
 #
 ################################################################################
 
@@ -15,6 +19,26 @@ module FlashExtensions
   # redirected.
   def get_last_flash
     flash[:rendered_notice] || session[:notice]
+  end
+
+  # Assert that there was no notice, warning or error.
+  def assert_no_flash(msg='')
+    assert_flash(nil, msg)
+  end
+
+  # Assert that there was a notice but no warning or error.
+  def assert_flash_success(msg='')
+    assert_flash(0, msg)
+  end
+
+  # Assert that there was warning but no error.
+  def assert_flash_error(msg='')
+    assert_flash(1, msg)
+  end
+
+  # Assert that there was a error.
+  def assert_flash_error(msg='')
+    assert_flash(2, msg)
   end
 
   # Assert that an error was rendered or is pending.

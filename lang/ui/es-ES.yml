@@ -2091,7 +2091,7 @@ show_name_observations: Observaciones
 show_name_synonym_observations: Observaciones de Sinónimos
 show_name_other_observations: Observaciones Similares
 show_name_subtaxa_observations: Observaciones de Taxones Inferiores
-show_name_creator: El primero persona que utiliza este nombre
+show_name_creator: El primero persona que utiliza este nombre en MO
 show_name_editor: "[:Editors]"
 show_name_editors: "[:Editors]"
 show_name_other_observations_notes: >

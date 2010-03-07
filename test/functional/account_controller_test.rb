@@ -271,7 +271,7 @@ class AccountControllerTest < FunctionalTestCase
   def test_add_mugshot
 
     # Create image directory and populate with test images.
-    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    setup_image_dirs
 
     # Open file we want to upload.
     file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/sticky.jpg")
