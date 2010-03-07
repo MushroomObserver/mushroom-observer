@@ -355,5 +355,10 @@ class BasicUserTest < IntegrationTestCase
 #   end
 
   def test_posting_observation
+    get_with_error_checking('/observer/create_observation')
+    assert_template('account/login')
+    login!(@katrina)
+    assert_template('observer/create_observation')
+
   end
 end

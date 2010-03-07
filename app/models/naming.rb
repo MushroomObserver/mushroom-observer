@@ -106,7 +106,7 @@ class Naming < AbstractModel
       for taxon in taxa
         for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
           if n.user.created_here
-            QueuedEmail::Naming.create_email(n, self)
+            QueuedEmail::NameTracking.create_email(n, self)
           end
         end
       end

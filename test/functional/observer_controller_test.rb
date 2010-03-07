@@ -446,7 +446,7 @@ class ObserverControllerTest < FunctionalTestCase
     note.note_template = 'blah!'
     assert(note.save)
     QueuedEmail.queue_emails(true)
-    QueuedEmail::Naming.create_email(note, namings(:coprinus_comatus_other_naming))
+    QueuedEmail::NameTracking.create_email(note, namings(:coprinus_comatus_other_naming))
 
     # Now we can be sure show_notifications is supposed to actually show a
     # non-empty list, and thus that this test is meaningful.

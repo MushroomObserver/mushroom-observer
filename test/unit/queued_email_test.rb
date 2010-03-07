@@ -90,9 +90,9 @@ class QueuedEmailTest < UnitTestCase
   end
 
   def test_naming_email
-    QueuedEmail::Naming.create_email(notifications(:agaricus_campestris_notification_with_note), namings(:agaricus_campestris_naming))
+    QueuedEmail::NameTracking.create_email(notifications(:agaricus_campestris_notification_with_note), namings(:agaricus_campestris_naming))
     assert_email(0,
-      :flavor       => 'QueuedEmail::Naming',
+      :flavor       => 'QueuedEmail::NameTracking',
       :from         => @mary,
       :to           => @rolf,
       :naming       => namings(:agaricus_campestris_naming).id,

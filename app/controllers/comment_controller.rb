@@ -97,6 +97,7 @@ class CommentController < ApplicationController
     @comment = Comment.find(params[:id],
                             :include => [:user, {:object => :name}])
     @object = @comment.object
+    allowed_to_see!(@object)
   end
 
   # Go to next comment: redirects to show_comment.
@@ -124,6 +125,7 @@ class CommentController < ApplicationController
   def add_comment
     pass_query_params
     @object = Comment.find_object(params[:type], params[:id])
+    allowed_to_see!(@object)
     if request.method == :get
       @comment = Comment.new
       @comment.object = @object
@@ -170,6 +172,7 @@ class CommentController < ApplicationController
     pass_query_params
     @comment = Comment.find(params[:id])
     @object = @comment.object
+    allowed_to_see!(@object)
     if !check_permission!(@comment.user_id)
       redirect_to(:controller => @object.show_controller,
                   :action => @object.show_action, :id => @object.id,
@@ -221,6 +224,18 @@ class CommentController < ApplicationController
       redirect_to(:controller => @object.show_controller,
                   :action => @object.show_action, :id => @object.id,
                   :params => query_params)
+    end
+  end
+
+  # Make sure users can't see/add comments on objects they aren't allowed to
+  # view!
+  def allowed_to_see!(object)
+    if object.respond_to?(:is_reader?) and
+       !object.is_reader?(@user)
+      flash_error(:runtime_show_description_denied.t)
+      parent = object.parent
+      redirect_to(:controller => parent.show_controller,
+                  :action => parent.show_action, :id => parent.id)
     end
   end
 end

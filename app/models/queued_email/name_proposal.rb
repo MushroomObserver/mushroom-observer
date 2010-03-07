@@ -8,7 +8,7 @@
 #  2. anyone "interested in" the Observation
 #
 #  *NOTE*: Users who are tracking a name will get a different type of email,
-#  QueuedEmail::Naming.
+#  QueuedEmail::NameTracking.
 #
 #  == Associated data
 #
@@ -28,8 +28,8 @@
 ################################################################################
 
 class QueuedEmail::NameProposal < QueuedEmail
-  def naming;      get_object(:naming, ::Naming);           end
-  def observation; get_object(:observation, ::Observation); end
+  def naming;      get_object(:naming, Naming);           end
+  def observation; get_object(:observation, Observation); end
 
   def self.create_email(sender, recipient, observation, naming)
     result = create(sender, recipient)

@@ -22,9 +22,9 @@
 #
 ################################################################################
 
-class QueuedEmail::Naming < QueuedEmail
-  def notification; get_object(:notification, ::Notification); end
-  def naming;       get_object(:naming, ::Naming);             end
+class QueuedEmail::NameTracking < QueuedEmail
+  def notification; get_object(:notification, Notification); end
+  def naming;       get_object(:naming, Naming);             end
 
   def self.create_email(notification, naming)
     raise "Missing notification!" if !notification
