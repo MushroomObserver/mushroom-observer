@@ -3,9 +3,9 @@ require File.dirname(__FILE__) + '/../boot'
 class QueuedEmailTest < UnitTestCase
 
   def test_comment_email
-    QueuedEmail::Comment.find_or_create_email(@rolf, @mary, comments(:minimal_comment))
+    QueuedEmail::CommentAdd.find_or_create_email(@rolf, @mary, comments(:minimal_comment))
     assert_email(0,
-      :flavor  => 'QueuedEmail::Comment',
+      :flavor  => 'QueuedEmail::CommentAdd',
       :from    => @rolf,
       :to      => @mary,
       :comment => comments(:minimal_comment).id

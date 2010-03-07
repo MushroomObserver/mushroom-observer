@@ -12,6 +12,8 @@
 #  == General Assertions
 #  assert_true::                Make sure something is true.
 #  assert_false::               Make sure something is false.
+#  assert_not_match::           Make sure a string does NOT match.
+#  assert_objs_equal::          Compare two model instances.
 #  assert_users_equal::         Compare two user instances.
 #  assert_names_equal::         Compare two name instances.
 #  assert_list_equal::          Compare two lists by mapping and sorting elements.
@@ -59,10 +61,39 @@ module GeneralExtensions
   ##############################################################################
 
   # Assert that something is true.
-  def assert_true(got, *msg); assert_equal(true, !!got, *msg); end
+  def assert_true(got, *msg)
+    clean_our_backtrace do
+      assert_equal(true, !!got, *msg)
+    end
+  end
 
   # Assert that something is false.
-  def assert_false(got, *msg); assert_equal(false, !!got, *msg); end
+  def assert_false(got, *msg)
+    clean_our_backtrace do
+      assert_equal(false, !!got, *msg)
+    end
+  end
+
+  # Exactly the opposite of +assert_match+ (and essentially copied verbatim
+  # from Test::Unit::Assertions source).
+  def assert_not_match(expect, actual, msg=nil)
+    clean_our_backtrace do
+      expect = Regexp.new(expect) if expect.is_a?(String)
+      msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
+      assert_block(msg) { actual !~ expect }
+    end
+  end
+
+  # Assert that two User instances are equal.
+  def assert_objs_equal(expect, got, *msg)
+    clean_our_backtrace do
+      assert_equal(
+        (expect ? "#{expect.class.name} ##{expect.id}" : "nil"),
+        (got ? "#{got.class.name} ##{got.id}" : "nil"),
+        *msg
+      )
+    end
+  end
 
   # Assert that two User instances are equal.
   def assert_users_equal(expect, got, *msg)
@@ -175,7 +206,7 @@ module GeneralExtensions
   # Test whether the n-1st queued email matches.  For example:
   #
   #   assert_email(0,
-  #     :flavor  => 'QueuedEmail::Comment',
+  #     :flavor  => 'QueuedEmail::CommentAdd',
   #     :from    => @mary,
   #     :to      => @rolf,
   #     :comment => @comment_on_minmal_unknown.id
@@ -188,7 +219,7 @@ module GeneralExtensions
       for arg in args.keys
         case arg
         when :flavor
-          assert_equal(args[arg], email.flavor, "Flavor is wrong")
+          assert_equal(args[arg].to_s, email.flavor.to_s, "Flavor is wrong")
         when :from
           assert_equal(args[arg].id, email.user_id, "Sender is wrong")
         when :to

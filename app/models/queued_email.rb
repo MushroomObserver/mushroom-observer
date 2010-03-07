@@ -97,17 +97,18 @@
 #
 #  The QueuedEmail subclasses use ActiveRecord's single table inheritance
 #  capability.  All the subclasses' records are stored in one table,
-#  "queued_emails".  The class is determined by the flavor.  QueuedEmail::Comment's
-#  flavor is "QueuedEmail::Comment", and so on.  When a QueuedEmail record is
-#  instantiated, it automatically is cast as the correct class: 
+#  "queued_emails".  The class is determined by the flavor.
+#  QueuedEmail::CommentAdd's flavor is "QueuedEmail::CommentAdd", and so on.
+#  When a QueuedEmail record is instantiated, it automatically is cast as the
+#  correct class: 
 #
-#    # This returns an instance of QueuedEmail::Comment.
-#    email = QueuedEmail.find_by_flavor('QueuedEmail::Comment')
+#    # This returns an instance of QueuedEmail::CommentAdd.
+#    email = QueuedEmail.find_by_flavor('QueuedEmail::CommentAdd')
 #
 #  Create records just like normal:
 #
-#    # This automatically sets flavor to 'QueuedEmail::Comment'.
-#    email = QueuedEmail::Comment.new
+#    # This automatically sets flavor to 'QueuedEmail::CommentAdd'.
+#    email = QueuedEmail::CommentAdd.new
 #
 ################################################################################
 
@@ -124,12 +125,12 @@ class QueuedEmail < AbstractModel
   set_inheritance_column 'flavor'
   self.store_full_sti_class = true
 
-  # Ensure that all the subclasses get loaded.  Problem is some subclasses
-  # have the same name as toplevel classes, e.g., QueuedEmail::Comment.  Thus
-  # the constant QueuedEmail::Comment will already be "defined" if Comment
-  # is loaded, so it won't know to try to load the one in QueuedEmail.  This
-  # way, soon as QueuedEmail is defined, we know that all subclasses are also
-  # properly defined, and we no longer have to rely on autoloading.
+  # Ensure that all the subclasses get loaded.  Problem is some subclasses have
+  # the same name as toplevel classes, e.g., QueuedEmail::Comment.  Thus the
+  # constant QueuedEmail::Comment will already be "defined" if Comment is
+  # loaded, so it won't know to try to load the one in QueuedEmail.  This way,
+  # soon as QueuedEmail is defined, we know that all subclasses are also
+  # properly defined, and we no longer have to rely on autoloading. 
   Dir["#{RAILS_ROOT}/app/models/queued_email/*.rb"].each do |file|
     if file.match(/(\w+).rb/)
       require "queued_email/#{$1}"
@@ -145,7 +146,7 @@ class QueuedEmail < AbstractModel
   # caches it.)
   #
   #   # Validate flavor.
-  #   raise unless QueuedEmail.all_flavors.include? 'QueuedEmail::Comment'
+  #   raise unless QueuedEmail.all_flavors.include? 'QueuedEmail::CommentAdd'
   def self.all_flavors
     if !defined? @@all_flavors
       @@all_flavors = []

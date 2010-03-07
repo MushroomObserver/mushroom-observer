@@ -4,9 +4,6 @@
   new_tab_set do
     add_tab(:show_object.t(:type => :name), :action => 'show_name',
             :id => @description.name_id, :params => query_params)
-    add_tab(:show_name_create_description.t,
-            :action => 'create_name_description',
-            :id => @description.name_id, :params => query_params)
     if @user && @description.is_writer?(@user)
       add_tab(:show_name_description_edit.t,
               :action => 'edit_name_description',
@@ -38,6 +35,9 @@
 
 <%= render(:partial => 'name_description', :object => @description,
            :locals => { :review => true }) %>
+
+<%= render(:partial => 'comment/show_comments', :locals =>
+           { :object => @description, :controls => true, :limit => 10 }) %>
 
 <br/>
 <%= show_object_footer(@description) %>

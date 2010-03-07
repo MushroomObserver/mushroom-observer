@@ -555,6 +555,7 @@ class Descriptions < ActiveRecord::Migration
       t.boolean  'deprecated',       :default => false, :null => false
       t.integer  'synonym_id'
       t.integer  'correct_spelling_id'
+      t.text     'notes'
     end
 
     create_table 'names_versions', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|
@@ -571,6 +572,7 @@ class Descriptions < ActiveRecord::Migration
       t.text     'citation'
       t.boolean  'deprecated',       :default => false, :null => false
       t.integer  'correct_spelling_id'
+      t.text     'notes'
     end
 
     create_table 'name_descriptions', :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|

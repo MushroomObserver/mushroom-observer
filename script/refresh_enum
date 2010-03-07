@@ -30,6 +30,13 @@ TABLES
     ActiveRecord::Migration.change_column(:queries, :model, :enum, :limit => Query.all_models)
     ActiveRecord::Migration.change_column(:queries, :flavor, :enum, :limit => Query.all_flavors)
     done_anything = true
+  when 'email', 'emails', 'queued_email', 'queued_emails'
+    ActiveRecord::Migration.change_column(:queued_emails, :flavor, :enum, :limit => QueuedEmail.all_flavors)
+    done_anything = true
+  when 'jason'
+    ActiveRecord::Migration.add_column(:names, :notes, :text)
+    ActiveRecord::Migration.add_column(:names_versions, :notes, :text)
+    done_anything = true
   else
     $stderr.puts "Unsupported or invalid table: '#{arg}'"
     status = 1

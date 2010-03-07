@@ -21,16 +21,9 @@
         <tr>
       <% end %>
       <td align="center" valign="top" class="ListLine<%= color %>">
-        <%= if observation = rss_log.observation
-          render(:partial => 'observation', :object => observation,
-                 :locals => { :rss_log => rss_log })
-        elsif species_list = rss_log.species_list
-          render(:partial => 'species_list', :object => species_list)
-        elsif name = rss_log.name
-          render(:partial => 'name', :object => name)
-        else
-          render(:partial => 'rss_log', :object => rss_log)
-        end %>
+        <%= object = rss_log.object
+        render(:partial => object.class.name.underscore, :object => object,
+               :locals => { :rss_log => rss_log }) %>
       </td>
       <% if col_count == (@layout["columns"] - 1) %>
         </tr>

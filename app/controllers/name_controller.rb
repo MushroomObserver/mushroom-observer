@@ -1090,13 +1090,8 @@ class NameController < ApplicationController
 
           # Change target name to "undeprecated".
           target_name.change_deprecated(false)
-          tag = :log_name_approved
-          args = { :other => @name.search_name }
-          if @comment != ''
-            tag = :log_name_approved_with_comment
-            args[:comment] = @comment
-          end
-          save_name(target_name, tag, args)
+          save_name(target_name, :log_name_approved,
+                    :other => @name.search_name)
 
           # Change this name to "deprecated", set correct spelling, add note.
           @name.change_deprecated(true)
@@ -1104,14 +1099,11 @@ class NameController < ApplicationController
             @name.misspelling = true
             @name.correct_spelling = target_name
           end
-          comment_join = @comment == "" ? "." : ":\n"
-          tag = :log_name_deprecated
-          args = { :other => target_name.search_name }
+          save_name(@name, :log_name_deprecated,
+                    :other => target_name.search_name)
           if @comment != ''
-            tag = :log_name_deprecated_with_comment
-            args[:comment] = @comment
+            post_comment(:deprecate, @name, @comment)
           end
-          save_name(@name, tag, args)
 
           redirect_to(:action => 'show_name', :id => @name.id,
                       :params => query_params)
@@ -1136,13 +1128,7 @@ class NameController < ApplicationController
       if params[:deprecate][:others] == '1'
         for n in @name.approved_synonyms
           n.change_deprecated(true)
-          tag = :log_name_deprecated
-          args = { :other => @name.search_name }
-          if comment != ''
-            tag = :log_name_deprecated_with_comment
-            args[:comment] = comment
-          end
-          save_name(n, tag, args)
+          save_name(n, :log_name_deprecated, :other => @name.search_name)
           others << n.search_name
         end
       end
@@ -1155,11 +1141,10 @@ class NameController < ApplicationController
         tag = :log_name_approved
         args[:other] = others.join(', ')
       end
-      if comment != ''
-        tag = "#{tag}_with_comment".to_sym
-        args[:comment] = comment
-      end
       save_name(@name, tag, args)
+      if @comment != ''
+        post_comment(:approve, @name, @comment)
+      end
 
       redirect_to(:action => 'show_name', :id => @name.id,
                   :params => query_params)
@@ -1249,6 +1234,22 @@ class NameController < ApplicationController
     for n in sorter.all_synonyms.map(&:id)
       logger.warn(n)
     end
+  end
+
+  # Post a comment after approval or deprecation if the user entered one.
+  def post_comment(action, name, message)
+    summary = :"name_#{action}_comment_summary".l
+    comment = Comment.create!(
+      :object  => name,
+      :summary => summary,
+      :comment => message
+    )
+    Transaction.post_comment(
+      :id      => comment,
+      :object  => name,
+      :summary => summary,
+      :comment => message
+    )
   end
 
   ##############################################################################

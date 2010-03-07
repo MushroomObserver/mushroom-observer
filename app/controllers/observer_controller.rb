@@ -688,11 +688,10 @@ class ObserverController < ApplicationController
       @bad_images  = create_image_objects(params[:image], @observation, @good_images)
 
       # Validate name.
-      (success, @what, @name, @names, @valid_names) = resolve_name(
-        (params[:name] ? params[:name][:name] : nil),
-        params[:approved_name],
-        (params[:chosen_name] ? params[:chosen_name][:name_id] : nil)
-      )
+      given_name  = params[:name][:name].to_s           rescue ''
+      chosen_name = params[:chosen_name][:name_id].to_s rescue ''
+      (success, @what, @name, @names, @valid_names) =
+        resolve_name(given_name, params[:approved_name], chosen_name)
       @naming.name = @name if @name
 
       # Validate objects.
@@ -879,12 +878,17 @@ class ObserverController < ApplicationController
       @vote   = create_vote_object(params[:vote], @naming)
 
       # Validate name.
-      (success, @what, @name, @names, @valid_names) = resolve_name(
-        (params[:name] ? params[:name][:name] : nil),
-        params[:approved_name],
-        (params[:chosen_name] ? params[:chosen_name][:name_id] : nil)
-      )
-      success = false if !@name
+      given_name  = params[:name][:name].to_s           rescue ''
+      chosen_name = params[:chosen_name][:name_id].to_s rescue ''
+      (success, @what, @name, @names, @valid_names) =
+        resolve_name(given_name, params[:approved_name], chosen_name)
+      if !@name
+        if !given_name.match(/\S/)
+          @naming.errors.add(:name, :validate_naming_name_missing.t)
+          flash_object_errors(@naming)
+        end
+        success = false
+      end
 
       if success && @observation.name_been_proposed?(@name)
         flash_warning(:runtime_create_naming_already_proposed.t)
@@ -960,12 +964,17 @@ class ObserverController < ApplicationController
 
     else
       # Validate name.
-      (success, @what, @name, @names, @valid_names) = resolve_name(
-        (params[:name] ? params[:name][:name] : nil),
-        params[:approved_name],
-        (params[:chosen_name] ? params[:chosen_name][:name_id] : nil)
-      )
-      success = false if !@name
+      given_name  = params[:name][:name].to_s           rescue ''
+      chosen_name = params[:chosen_name][:name_id].to_s rescue ''
+      (success, @what, @name, @names, @valid_names) =
+        resolve_name(given_name, params[:approved_name], chosen_name)
+      if !@name
+        if !given_name.match(/\S/)
+          @naming.errors.add(:name, :validate_naming_name_missing.t)
+          flash_object_errors(@naming)
+        end
+        success = false
+      end
 
       if success and (@naming.name != @name) and
          @observation.name_been_proposed?(@name)
@@ -1948,7 +1957,7 @@ class ObserverController < ApplicationController
 
       ignore_approved_name = false
       # Has user chosen among multiple matching names or among multiple approved names?
-      if chosen_name
+      if chosen_name && chosen_name != '' 
         names = [Name.find(chosen_name)]
         # This tells it to check if this name is deprecated below EVEN IF the user didn't change the what field.
         # This will solve the problem of multiple matching deprecated names discussed below.

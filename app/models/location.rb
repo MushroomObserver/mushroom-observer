@@ -74,6 +74,7 @@ class Location < AbstractModel
   belongs_to :user
 
   has_many :descriptions, :class_name => 'LocationDescription', :order => 'num_views DESC'
+  has_many :comments,  :as => :object, :dependent => :destroy
   has_many :interests, :as => :object, :dependent => :destroy
   has_many :observations
 

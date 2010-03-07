@@ -9,7 +9,8 @@
   <tr>
     <td valign="top">
       <p>
-        <%= render(:partial => 'name', :object => @name) %>
+        <%= render(:partial => 'name', :object => @name, :locals =>
+                   { :synonyms => false }) %>
       </p>
     </td>
 

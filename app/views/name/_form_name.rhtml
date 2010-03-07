@@ -45,6 +45,11 @@
   <% end %>
 <% end %>
 
+<p>
+  <label for="notes"><%= :form_names_taxonomic_notes.t %>:</label><br/>
+  <%= form.text_area(:notes, :cols => 80) %>
+</p>
+
 <%= focus_on('name_text_name') %>
 
 <!--[eoform:name]-->

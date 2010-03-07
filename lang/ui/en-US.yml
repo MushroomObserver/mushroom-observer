@@ -1515,7 +1515,8 @@ form_locations_notes_help: >
 form_names_text_name: Scientific Name
 form_names_misspelling: This name is misspelled.
 form_names_misspelling_it_should_be: It should be
-form_names_classification: Taxonomic classification
+form_names_taxonomic_notes: Notes on Taxonomy
+form_names_classification: Taxonomic Classification
 form_names_gen_desc: General Description
 form_names_diag_desc: Diagnostic Description
 form_names_look_alikes: Look Alikes
@@ -1795,6 +1796,11 @@ list_place_names_merge: Merge
 
 
 
+# _location (RSS log display)
+location_change: Change to Location
+
+
+
 # account/login
 login_please_login: Please login
 login_login: Login
@@ -1829,6 +1835,7 @@ map_locations_global_map: Global Map
 
 # name/approve_name
 name_approve_title: Approve [name]
+name_approve_comment_summary: "[:Approved]"
 name_approve_comments: "[:Comments]"
 name_approve_comments_help: >
   Please include any notes about why this name has been approved.\n
@@ -1856,6 +1863,7 @@ name_change_synonyms_confirm: Please confirm that this is what you intended.
 # name/deprecate_name
 name_deprecate_title: Deprecate [name]
 name_deprecate_preferred: Preferred name
+name_deprecate_comment_summary: "[:Deprecated]"
 name_deprecate_comments: "[:Comments]"
 name_deprecate_submit: "[:SUBMIT]"
 name_deprecate_preferred_help: >
@@ -1996,6 +2004,12 @@ shared_textile_help: >
 
 
 
+# comment/_show_comments
+show_comments_add_comment: "[:add_object(type=:comment)]"
+show_comments_no_comments_yet: No one has commented yet.
+
+
+
 # image/show_image
 show_image_reviewed_by: Reviewed by
 show_image_quality_and_next: "[Quality] & [:NEXT]"
@@ -2039,6 +2053,7 @@ show_name_preferred_synonyms: Preferred Synonym(s)
 show_name_deprecated_synonyms: Deprecated Synonym(s)
 show_name_misspelling: This name is misspelled.
 show_name_misspelling_correct: "[:CORRECT_SPELLING]"
+show_name_notes: Notes on Taxonomy
 show_name_descriptions: "[:DESCRIPTIONS]"
 show_name_create_draft: Create New Draft for
 show_name_no_descriptions: There are no descriptions for this name yet.
@@ -2121,10 +2136,6 @@ show_observation_reuse_image: Reuse Image
 show_observation_add_images: "[:add_objects(type=:image)]"
 show_observation_species_lists: "[:SPECIES_LISTS]"
 show_observation_manage_species_lists: Manage Species Lists
-show_observation_add_comment: "[:add_object(type=:comment)]"
-show_observation_no_comments_yet: No one has commented yet.
-show_observation_comment_created: "[:Created]"
-show_observation_comment_created_by: "[:By]"
 show_observation_send_question: Send Observer a Question
 show_observation_view_notifications: View Notifications
 
@@ -3425,7 +3436,7 @@ how_voting: >
 how_adding_comments: >
   *Adding Comments* - When you are looking at an "Observation":#observation, if
   you would like to post or respond to a "Comment":#comment, select the
-  '[:show_observation_add_comment]' link near the top of the page.  If you are
+  '[:show_comments_add_comment]' link near the top of the page.  If you are
   not currently logged in to a "User":#user account, you will be asked to log
   in.  Once you are logged in, you will be given a form asking for a summary
   and your comment.  Note that you can do some simple formatting in the comment

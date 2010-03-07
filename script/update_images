@@ -107,36 +107,37 @@ def refresh_listings(cronjob=false)
 
   # Get local list for diagnostic purposes only.
   log("Getting local listing\n") if cronjob
-  puts "Getting local listing...\n"
+  verbose("Getting local listing...\n")
   files['local'] = list = list_local_files(@@local_path)
-  puts "  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n"
-  puts "  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n"
-  puts "  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n"
+  verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
+  vervose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
+  vervose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
   write_cached_file_list('local', list)
 
   # Get remote lists so we can refresh the caches.
   for server in OFFICIAL_SERVERS
     log("Getting #{server} listing\n") if cronjob
-    puts "Getting #{server} listing...\n"
+    verbose("Getting #{server} listing...\n")
     if list = list_remote_files(server)
       write_cached_file_list(server, list)
-      puts "  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n"
-      puts "  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n"
-      puts "  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n"
+      vervose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
+      vervose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
+      vervose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
       files[server] = list
     else
       log("  (failed)\n") if cronjob
-      puts "  server is down\n"
+      puts "Server #{server} is down!\n"
     end
   end
 
-  # Look for and complain about mismatches.
-  check_for_mismatches(files, cronjob)
+  return files
 end
 
-# This takes a hash of file-list hashes and checks for mismatches in size
-def check_for_mismatches(file_lists, cronjob=false)
+# This takes a hash of file-list hashes and checks for mismatches in size.
+# Returns Hash of Arrays of files that need to be uploaded, keyed on server.
+def check_for_mismatches(file_lists, clean=false)
   servers = file_lists.keys.sort
+  need_to_upload = {}
 
   # Get union of files on all servers.
   files = {}
@@ -158,17 +159,29 @@ def check_for_mismatches(file_lists, cronjob=false)
         any_different = true if size && size2 && size != size2
         any_missing = true   if !size2
         size = size2         if !size
+        local_size = size2   if server == 'local'
       end
 
       # Remove originals if they exist and are correct on all remote servers.
-      if cronjob && !any_different && !any_missing && file[0,4] == 'orig'
+      if clean && !any_different && !any_missing && file[0,4] == 'orig'
         File.delete("#{@@local_path}/#{file}")
-        verbose("deleting #{file}")
         log("Deleting #{file}\n")
+        verbose("deleting #{file}")
+      end
+
+      # Get a list of files that we need to be uploaded.
+      if any_different
+        for server in servers
+          if file_lists[server][file] != local_size
+            need_to_upload[server] ||= []
+            need_to_upload[server] << file
+          end
+        end
       end
     end
 
-    any_different
+    # Return list of files that need to be uploaded.
+    return need_to_upload
   end
 
   # Now print out the list of problems in a table.
@@ -447,18 +460,17 @@ def list_local_files(path)
   files = {}
   files['date'] = Time.now
   for type in ['thumb', '640', 'orig']
-    cmd = "ls -lU --color=never #{path}/#{type}"
+    cmd = "ls #{path}/#{type}"
     verbose cmd
     open("|#{cmd}") do |dir|
-n = 0
       dir.each_line do |line|
-puts "DIR: [#{line.inspect}]" if n < 10
-        size, file = line.chomp.split.values_at(4, 7)
-puts "SIZE=#{size.inspect} FILE=#{file.inspect}" if n < 10
-        if file && file.match(/^\d+\.jpg$/) && size.to_i != 0
-          files["#{type}/#{file}"] = size.to_i
+        file = line.chomp
+        if file && file.match(/^\d+\.jpg$/)
+          size = File.size("#{path}/#{type}/#{file}")
+          if size > 0
+            files["#{type}/#{file}"] = size
+          end
         end
-n += 1
       end
     end
   end
@@ -606,6 +618,7 @@ def upload_files(files, local, remote)
   tempfile = "/tmp/update_images.#{$$}"
   open(tempfile, 'w') do |fh|
     for file in files.sort
+verbose("queuing #{from} #{to} #{file}")
       fh.puts(file)
     end
   end
@@ -785,12 +798,18 @@ case get_next_arg
 
   when '-l', '--ls'
     any_args_left?
-    refresh_listings
+    files = refresh_listings
+    check_for_mismatches(files)
     exit 0
 
   when '-c', '--clean'
     any_args_left?
-    refresh_listings(true)
+    files = refresh_listings
+    uploads = check_for_mismatches(files, :clean)
+@@verbose = true
+    for server, files in uploads
+      upload_files(files, 'local', server)
+    end
     exit 0
 
   when '-s', '--sync'
@@ -957,14 +976,16 @@ EXAMPLES
     Stop daemon.
 
   update_images --ls
-    Force daemon to refresh its list of images on the remote servers.  This
-    normally happens once a day at 3am.
+    Force daemon to refresh its list of images on the remote servers.
+
+  update_images --clean
+    Refresh listings and remove any originals that have been transferred.
 
   update_images --sync dreamhost --upload
     Run this on slicehost to force it to upload any images missing on
     dreamhost.
 
-  update_images --sync dreamhost --download --orig --local-path image_backup
+  update_images --sync dreamhost --download --orig --local image_backup
     Run this on your local machine to update your backup copy of the original
     images in a directory called image_backup/orig.
 

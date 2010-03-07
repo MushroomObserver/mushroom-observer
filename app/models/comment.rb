@@ -71,14 +71,19 @@ class Comment < AbstractModel
   # 4. users masochistic enough to want to be notified of _all_ comments
   #
   def notify_users
-    if self.object && self.object_type == 'Observation'
-      object = self.object
-      owner  = object.user
+    if object = self.object
       sender = self.user
       recipients = []
 
-      # Send to owner if they want.
-      recipients.push(owner) if owner && owner.email_comments_owner
+      # Send to owner/authors if they want.
+      if object.respond_to?(:authors)
+        owners = object.authors || []
+      else
+        owners = [object.user]
+      end
+      for user in owners
+        recipients.push(user) if user && user.email_comments_owner
+      end
 
       # Send to masochists who want to see all comments.
       for user in User.find_all_by_email_comments_all(true)
@@ -105,7 +110,7 @@ class Comment < AbstractModel
       # Send comment to everyone (except the person who wrote the comment!)
       for recipient in recipients.uniq - [sender]
         if recipient.created_here
-          QueuedEmail::Comment.find_or_create_email(sender, recipient, self)
+          QueuedEmail::CommentAdd.find_or_create_email(sender, recipient, self)
         end
       end
     end

@@ -46,24 +46,8 @@
     %>
     <td valign="top" width="50%">
       <p>
-        <%= render(:partial => 'name', :object => @name) %>
-
-        <% approved_synonyms, deprecated_synonyms = @name.sort_synonyms %>
-        <% if approved_synonyms != []
-          links = approved_synonyms.map do |n|
-            link_to(n.display_name.t, :action => "show_name", :id => n.id,
-                    :params => query_params)
-          end %>
-          <%= @name.deprecated ? :show_name_preferred_synonyms.t :
-                        :show_name_synonyms.t %>: <%= links.join(', ') %><br/>
-        <% end
-        if deprecated_synonyms != []
-          links = deprecated_synonyms.map do |n|
-            link_to(n.display_name.t, :action => "show_name", :id => n.id,
-                    :params => query_params)
-          end %>
-          <%= :show_name_deprecated_synonyms.t %>: <%= links.join(', ') %><br/>
-        <% end %>
+        <%= render(:partial => 'name', :object => @name, :locals =>
+                   { :synonyms => true } ) %>
 
         <%= show_previous_version(@name) %>
 
@@ -86,9 +70,22 @@
   </tr>
 </table>
 
+<%
+# ----------------------------------------
+#  Show comments and notes.
+# ----------------------------------------
+%>
+<% if @name.has_notes? %>
+  <p><%= :show_name_notes.t %>:</p>
+  <%= colored_notes_box(true, sanitize(@name.notes).tpl) %>
+<% end %>
+
 <center>
   <%= show_authors_and_editors(@name) %>
 </center>
+
+<%= render(:partial => 'comment/show_comments', :locals =>
+           { :object => @name, :controls => true, :limit => 2 }) %>
 
 <hr/><br/>
 
@@ -100,6 +97,8 @@ if @description && @description.has_any_notes? %>
   <%= show_embedded_description_title(@description, @name) %>
   <%= render(:partial => 'name_description', :object => @description,
              :locals => { :review => true }) %>
+  <%= render(:partial => 'comment/show_comments', :locals =>
+             { :object => @description, :controls => true, :limit => 2 }) %>
   <br/><hr/><br/>
 <% end %>
 

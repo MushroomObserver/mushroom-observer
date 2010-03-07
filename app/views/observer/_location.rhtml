@@ -1,7 +1,7 @@
 <table cellpadding="10">
   <tr>
     <td align="center" valign="middle" width="160">
-      <%= :name_change.t %>:
+      <%= :location_change.t %>:
     </td>
 <% if @layout['vertical_layout'] %>
   </tr>
@@ -10,14 +10,14 @@
 <% else %>
     <td valign="middle">
 <% end %>
-      <%= link_to(sprintf('<span class="ListName">%s</span><br/>', name.display_name.t),
-                  :controller => 'name', :action => 'show_name', :id => name.id,
+      <%= link_to(sprintf('<span class="ListName">%s</span><br/>', location.display_name.t),
+                  :controller => 'location', :action => 'show_location', :id => location.id,
                   :params => query_params) %>
-      <span class="ListWho"><br/><%= :rss_name_by.t(:user => user_link(name.user)) %></span>
+      <span class="ListWho"><br/><%= :BY.t(:user => user_link(location.user)) %></span>
 
       <% if rss_log && rss_log.notes
         logs = rss_log.parse_log
-        if logs.first[2] > name.created + 10.seconds %>
+        if logs.first[2] > location.created + 10.seconds %>
           <span>
             <%= key, args, time = logs.first
             key.t(args) %>

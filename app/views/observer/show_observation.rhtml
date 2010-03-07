@@ -24,7 +24,7 @@
     add_tab(:show_observation_propose_new_name.t, :controller => 'observer',
             :action => 'create_naming', :id => @observation.id,
             :params => query_params)
-    add_tab(:show_observation_add_comment.t, :controller => 'comment',
+    add_tab(:show_comments_add_comment.t, :controller => 'comment',
             :action => 'add_comment', :id => @observation.id,
             :type => 'Observation', :params => query_params)
     add_tab(:show_observation_manage_species_lists.t,
@@ -58,8 +58,9 @@
       <%= render(:partial => 'show_observation',
                  :locals => { :observation => @observation }) %>
       <%= render(:partial => 'show_namings') %>
-      <%= render(:partial => 'show_comments',
-                 :locals => { :skip_comment => nil }) %>
+      <%= render(:partial => 'comment/show_comments', :locals => 
+                 { :object => @observation, :controls => true,
+                   :limit => nil }) %>
       <%= show_object_footer(@observation) %>
 	</td>
     <td width="25%" valign="top">

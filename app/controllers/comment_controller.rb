@@ -155,22 +155,25 @@ class CommentController < ApplicationController
     end
   end
 
-  # Form to edit a comment for an observation.
-  # Linked from: show_comment, show_observation
+  # Form to edit a comment for an object..
+  # Linked from: show_comment, show_object.
   # Inputs:
   #   params[:id]
   #   params[:comment][:summary]
   #   params[:comment][:comment]
   # Success:
-  #   Redirects to show_comment.
+  #   Redirects to show_object.
   # Failure:
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
   def edit_comment
+    pass_query_params
     @comment = Comment.find(params[:id])
-    @object = @comment.object if @comment
+    @object = @comment.object
     if !check_permission!(@comment.user_id)
-      redirect_to(:action => 'show_comment')
+      redirect_to(:controller => @object.show_controller,
+                  :action => @object.show_action, :id => @object.id,
+                  :params => query_params)
     elsif request.method == :post
       @comment.attributes = params[:comment]
       args = {}
@@ -187,22 +190,27 @@ class CommentController < ApplicationController
           @object.log(:log_comment_updated, :summary => @comment.summary,
                       :touch => false)
         end
-        flash_notice :runtime_form_comments_edit_success.t(:id => @comment.id)
-        redirect_to(:action => 'show_comment', :id => @comment.id)
+        flash_notice(:runtime_form_comments_edit_success.t(:id => @comment.id))
+        redirect_to(:controller => @object.show_controller,
+                    :action => @object.show_action, :id => @object.id,
+                    :params => query_params)
       end
     end
   end
 
   # Callback to destroy a comment.
-  # Linked from: show_comment, show_observation
-  # Redirects to show_observation.
+  # Linked from: show_comment, show_object.
+  # Redirects to show_object.
   # Inputs: params[:id]
   # Outputs: none
   def destroy_comment
+    pass_query_params
     @comment = Comment.find(params[:id])
     @object = @comment.object
     if !check_permission!(@comment.user_id)
-      redirect_to(:action => 'show_comment')
+      redirect_to(:controller => @object.show_controller,
+                  :action => @object.show_action, :id => @object.id,
+                  :params => query_params)
     else
       if @comment.destroy
         Transaction.delete_comment(:id => @comment)
@@ -211,7 +219,8 @@ class CommentController < ApplicationController
         flash_error :runtime_form_comments_destroy_failed.t(:id => params[:id])
       end
       redirect_to(:controller => @object.show_controller,
-                  :action => @object.show_action, :id => @object.id)
+                  :action => @object.show_action, :id => @object.id,
+                  :params => query_params)
     end
   end
 end

@@ -11,8 +11,8 @@
 <% for f in NameDescription.all_note_fields %>
   <% if (f != :classification) or @description.parent.above_species? %>
     <p>
-      <label for="description_<%= f %>"><%= "form_names_#{f}".to_sym.t %>:</label>
-      <span class="HelpNote"><%= "form_names_#{f}_help".to_sym.l(:rank => rank) %></span><br/>
+      <label for="description_<%= f %>"><%= :"form_names_#{f}".t %>:</label>
+      <span class="HelpNote"><%= :"form_names_#{f}_help".l(:rank => rank) %></span><br/>
       <%= form.text_area(f, :cols => 80) %>
     </p>
   <% end %>

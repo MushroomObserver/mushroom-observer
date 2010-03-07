@@ -191,7 +191,7 @@ class ObservationTest < UnitTestCase
     )
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
-      :flavor  => 'QueuedEmail::Comment',
+      :flavor  => 'QueuedEmail::CommentAdd',
       :from    => @mary,
       :to      => @rolf,
       :comment => new_comment.id
@@ -245,7 +245,7 @@ class ObservationTest < UnitTestCase
     )
     assert_equal(4, QueuedEmail.count)
     assert_email(3,
-      :flavor  => 'QueuedEmail::Comment',
+      :flavor  => 'QueuedEmail::CommentAdd',
       :from    => @rolf,
       :to      => @mary,
       :comment => new_comment.id
@@ -295,7 +295,7 @@ class ObservationTest < UnitTestCase
     )
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
-      :flavor  => 'QueuedEmail::Comment',
+      :flavor  => 'QueuedEmail::CommentAdd',
       :from    => @mary,
       :to      => @dick,
       :comment => new_comment.id

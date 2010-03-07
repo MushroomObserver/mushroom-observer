@@ -1516,6 +1516,7 @@ form_locations_notes_help: >
 form_names_text_name: Wissenschaftlicher Name
 form_names_misspelling:  This name is misspelled.
 form_names_misspelling_it_should_be:  It should be
+form_names_taxonomic_notes:  Notes on Taxonomy
 form_names_classification: Taxonomische Einteilung
 form_names_gen_desc: Allgemeine Beschreibung
 form_names_diag_desc: Beschreibung der Kennzeichen
@@ -1796,6 +1797,11 @@ list_place_names_merge: Kombinieren
 
 
 
+# _location (RSS log display)
+location_change:  Change to Location
+
+
+
 # account/login
 login_please_login: Bitte einloggen
 login_login: Login
@@ -1829,6 +1835,7 @@ map_locations_global_map: Weltkarte mit allen Fundorten
 
 # name/approve_name
 name_approve_title: Bestätige [name]
+name_approve_comment_summary:  "[:Approved]"
 name_approve_comments: Kommentare
 name_approve_comments_help: >
   Bitte gib an warum dieser Name akzeptiert worden ist..\n
@@ -1856,6 +1863,7 @@ name_change_synonyms_confirm: Bitte bestätige, dass du es so meintest.
 # name/deprecate_name
 name_deprecate_title: Markiere [name] als veraltet
 name_deprecate_preferred: Akzeptierter Name
+name_deprecate_comment_summary:  "[:Deprecated]"
 name_deprecate_comments: Kommentare
 name_deprecate_submit: Schicken
 name_deprecate_preferred_help: >
@@ -1994,6 +2002,12 @@ shared_textile_help: >
 
 
 
+# comment/_show_comments
+show_comments_add_comment: Kommentar abgeben
+show_comments_no_comments_yet:  No one has commented yet.
+
+
+
 # image/show_image
 show_image_reviewed_by: Begutachtet durch
 show_image_quality_and_next: "[QUALITY] & [:NEXT]"
@@ -2037,6 +2051,7 @@ show_name_preferred_synonyms: Bevorzugte Synonyme
 show_name_deprecated_synonyms: Veraltete Synonyme (veraltetes Synonym)
 show_name_misspelling:  This name is misspelled.
 show_name_misspelling_correct:  "[:CORRECT_SPELLING]"
+show_name_notes:  Notes on Taxonomy
 show_name_descriptions: "[:Descriptions]"
 show_name_create_draft: Neuen Entwurf erstellen für
 show_name_no_descriptions:  There are no descriptions for this name yet.
@@ -2117,10 +2132,6 @@ show_observation_reuse_image: Bild recyclen
 show_observation_add_images: Bilder hinzufügen
 show_observation_species_lists: Artenlisten
 show_observation_manage_species_lists: Artenlisten verwalten
-show_observation_add_comment: Kommentar abgeben
-show_observation_no_comments_yet:  No one has commented yet.
-show_observation_comment_created: Erstellt
-show_observation_comment_created_by: von
 show_observation_send_question: Finder eine Frage stellen
 show_observation_view_notifications: Mitteilungen anzeigen
 

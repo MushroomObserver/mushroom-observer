@@ -80,6 +80,7 @@
 #  modified::         (V) Date/time it was last modified.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
+#  notes::            (V) Discussion of taxonomy.
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
@@ -151,6 +152,7 @@
 #  all_children::            Array of all children.
 #  validate_classification:: Make sure +classification+ syntax is valid.
 #  parse_classification::    Parse +classification+ string.
+#  has_notes?::              Does it have notes discussing taxonomy?
 #
 #  ==== Synonymy
 #  synonyms:                 List of all synonyms, including this Name.
@@ -180,6 +182,7 @@
 #  versions::                Old versions.
 #  description::             Main NameDescription.
 #  descriptions::            Alternate NameDescription's.
+#  comments::                Comments on this Name.
 #  interests::               Interests in this Name.
 #  observations::            Observations using this Name as consensus.
 #  namings::                 Namings that use this Name.
@@ -204,6 +207,7 @@ class Name < AbstractModel
   belongs_to :user
 
   has_many :descriptions, :class_name => 'NameDescription', :order => 'num_views DESC'
+  has_many :comments,  :as => :object, :dependent => :destroy
   has_many :interests, :as => :object, :dependent => :destroy
   has_many :namings
   has_many :observations
@@ -741,6 +745,11 @@ class Name < AbstractModel
     self.class.parse_classification(str || classification)
   end
 
+  # Does this Name have notes (presumably discussing taxonomy).
+  def has_notes?
+    notes and notes.match(/\S/)
+  end
+
   ##############################################################################
   #
   #  :section: Synonymy
@@ -1118,6 +1127,22 @@ class Name < AbstractModel
     editors.delete(old_name.user_id)
     for user_id in editors.uniq
       SiteData.update_contribution(:del, :names_versions, user_id)
+    end
+
+    # Save any notes the old name had.
+    if old_name.has_notes?
+      do_save if !changed?
+      if has_notes?
+        notes += "\n\nThese notes came from #{old_name.format_name} " +
+                 "when it was merged with this name:\n\n"
+        notes += old_name.notes
+      else
+        notes = old_name.notes
+      end
+      if do_save
+        log(:log_name_updated, :touch => true)
+        self.save
+      end
     end
 
     # Finally destroy the name.

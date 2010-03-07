@@ -1533,6 +1533,7 @@ form_locations_notes_help: >
 form_names_text_name: Nombre Científico
 form_names_misspelling: Este nombre es una falta de ortografía.
 form_names_misspelling_it_should_be: Debería ser
+form_names_taxonomic_notes: Notas Taxonómicas
 form_names_classification: Clasificación taxonómica
 form_names_gen_desc: Descripción General
 form_names_diag_desc: Descripción Diagnóstica
@@ -1815,6 +1816,11 @@ list_place_names_merge: Combinar
 
 
 
+# _location (RSS log display)
+location_change: Cambio de Ubicación
+
+
+
 # account/login
 login_please_login: Por Favor Iniciar Sesión
 login_login: Iniciar Sesión
@@ -1846,6 +1852,7 @@ map_locations_global_map: Mapa Global de Todos las Ubicaciones
 
 # name/approve_name
 name_approve_title: Aprobar [name]
+name_approve_comment_summary: "[:Approved]"
 name_approve_comments: Comentarios
 name_approve_comments_help: >
   Por favor, incluir alguna notas acerca de por qué este nombre ha sido
@@ -1874,6 +1881,7 @@ name_change_synonyms_confirm: Por favor, confirme que esto es lo que pretende.
 # name/deprecate_name
 name_deprecate_title: Desaprobar [name]
 name_deprecate_preferred: Nombre Preferido
+name_deprecate_comment_summary: "[:Deprecated]"
 name_deprecate_comments: Comentarios
 name_deprecate_submit: Enviar
 name_deprecate_preferred_help: >
@@ -2016,6 +2024,12 @@ shared_textile_help: >
 
 
 
+# comment/_show_comments
+show_comments_add_comment: Agregar Comentario
+show_comments_no_comments_yet: Nadie ha comentado todavía.
+
+
+
 # image/show_image
 show_image_reviewed_by: Revisado por
 show_image_quality_and_next: "[QUALITY] & [:NEXT]"
@@ -2059,6 +2073,7 @@ show_name_preferred_synonyms: Sinónimo(s) Preferidos
 show_name_deprecated_synonyms: Sinónimo(s) Desaprobados
 show_name_misspelling: Este nombre está mal escrito.
 show_name_misspelling_correct: Ortografía Correcta
+show_name_notes: Notas Sobre Taxonomía
 show_name_descriptions: "[:Descriptions]"
 show_name_create_draft: Crear Nuevo Borrador para
 show_name_no_descriptions: Ya no hay descripciones para este nombre.
@@ -2144,10 +2159,6 @@ show_observation_reuse_image: Reutilizar Imagen
 show_observation_add_images: Agregar Imágenes
 show_observation_species_lists: Listas de Especies
 show_observation_manage_species_lists: Gestionar listas de especies.
-show_observation_add_comment: Agregar Comentario
-show_observation_no_comments_yet: Nadie ha comentado todavía.
-show_observation_comment_created: Creado
-show_observation_comment_created_by: por
 show_observation_send_question: Enviar pregunta al observador.
 show_observation_view_notifications: Ver Notificaciones
 
@@ -3557,7 +3568,7 @@ how_adding_comments: >
   *Agregar Comentarios* - Cuando usted está mirando una
   "Observación":#observation, si usted desea publicar o responder a un
   "Comentario":#comment, seleccione el vínculo
-  «[:show_observation_add_comment]» en la parte superior de la página.  Si
+  «[:show_comments_add_comment]» en la parte superior de la página.  Si
   usted no está actualmente conectado a una cuenta de "Usuario":#user, se le
   pedirá a iniciar un sesión.  Una vez que se ha identificado, se le entregará
   un formulario pidiendo un resumen y su comentario.  Tenga en cuenta que usted

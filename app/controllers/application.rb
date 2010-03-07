@@ -825,6 +825,12 @@ class ApplicationController < ActionController::Base
     write = desc.public_write == '1'
     case desc.source_type
 
+    # Creating standard "public" description.
+    when :public
+      desc.reader_groups << UserGroup.all_users
+      desc.writer_groups << UserGroup.all_users
+      desc.admin_groups  << UserGroup.reviewers
+
     # Creating draft for project.
     when :project
       project = Project.find_by_title(desc.source_name)

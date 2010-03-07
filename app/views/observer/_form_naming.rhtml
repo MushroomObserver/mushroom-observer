@@ -63,9 +63,10 @@
     check    = r.used?
     notes    = r.notes.to_s
     default  = r.default?
-    onclick  = "Element.toggle('reason_#{num}_div'); setTimeout(function() { if ($('reason_#{num}_check').checked) $('reason_#{num}_notes').focus() }, 0.25)"
+    onclick  = "Element.toggle('reason_#{num}_div'); setTimeout(function() " +
+               "{ if ($('reason_#{num}_check').checked) $('reason_#{num}_notes').focus() }, 0.25)"
     checkbox = check_box('reason', 'check', { :index => num, :checked => check,
-                         :onclick => can_do_ajax? ? onclick : 1})
+                         :onclick => (can_do_ajax? ? onclick : 1)}, '1')
     label    = "<label for='reason_#{num}_check'>#{label} #{default ? '(default)' : ''}</label><br/>"
     textarea = text_area('reason', 'notes', { :index => num, :cols => 80, :rows => 1, :value => notes })
     textarea += "<br/>"

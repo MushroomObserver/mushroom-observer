@@ -1,0 +1,55 @@
+<%
+  comments = object.comments.sort_by(&:created).reverse
+  comments = comments[0..limit-1] if limit
+%>
+
+<% if controls
+  link = link_to(:"show_comments_add_comment".t, :controller => 'comment',
+                 :action => 'add_comment', :id => object.id,
+                 :type => object.class.name, :params => query_params)
+  if comments.empty? %>
+    <p><%= :"show_comments_no_comments_yet".t + indent + link %></p>
+  <% else %>
+    <p><%= :COMMENTS.t + ':' + indent + link %></p>
+  <% end
+elsif comments.any? %>
+  <p><%= :COMMENTS.t %>:</p>
+<% end %>
+
+<% odd_or_even = 0
+for comment in comments
+  odd_or_even = 1 - odd_or_even %>
+  <div class="ListLine<%= odd_or_even %>">
+    <table><tr><td width="100%">
+
+      <p>
+        <%= :CREATED.t %>:
+          <span class="Data"><%= comment.created.web_time %></span><br/>
+        <%= :BY.t %>:
+          <%= user_link(comment.user) %>
+          <% if check_permission(comment.user_id) %>
+            [<%= link_to(:EDIT.t, :controller => 'comment',
+                         :action => 'edit_comment', :id => comment.id,
+                         :params => query_params) %> |
+            <%= link_to(:DESTROY.t, { :controller => 'comment',
+                        :action => 'destroy_comment', :id => comment.id,
+                        :params => query_params },
+                        { :confirm => :are_you_sure.l }) %>]
+          <% end %><br/>
+        <%= :SUMMARY.t %>:
+          <span class="Data"><%= comment.summary.tl %></span>
+      </p>
+
+      <%= sanitize(comment.comment).tpl %>
+
+      <% user = comment.user
+      if user.image_id %>
+        </td><td>
+        <%= link_to(image_tag("thumb/%d.jpg" % user.image_id, :border => 0),
+                    :controller => "image", :action => "show_image",
+                    :id => user.image_id, :params => query_params) %>
+      <% end %>
+
+    </td></tr></table>
+  </div>
+<% end %>

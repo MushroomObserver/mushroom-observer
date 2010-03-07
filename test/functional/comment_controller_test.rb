@@ -32,7 +32,7 @@ class CommentControllerTest < FunctionalTestCase
     comment = comments(:minimal_comment)
     params = { "id" => comment.id.to_s }
     assert_equal("rolf", comment.user.login)
-    requires_user(:edit_comment, :show_comment, params)
+    requires_user(:edit_comment, ['observer', 'show_observation'], params)
     assert_form_action(:action => 'edit_comment')
   end
 
@@ -42,7 +42,7 @@ class CommentControllerTest < FunctionalTestCase
     assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
     params = {"id" => comment.id.to_s}
-    requires_user(:destroy_comment, :show_comment, params)
+    requires_user(:destroy_comment, ['observer', 'show_observation'], params)
     assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(9, @rolf.reload.contribution)
     obs.reload
@@ -109,7 +109,7 @@ class CommentControllerTest < FunctionalTestCase
       }
     }
     assert("rolf" == comment.user.login)
-    post_requires_user(:edit_comment, :show_comment, params)
+    post_requires_user(:edit_comment, ['observer', 'show_observation'], params)
     assert_equal(10, @rolf.reload.contribution)
     comment = Comment.find(comment.id)
     assert_equal("New Summary", comment.summary)

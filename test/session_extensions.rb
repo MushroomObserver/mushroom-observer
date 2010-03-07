@@ -12,6 +12,8 @@
 #  ==== Helpers
 #  parse_query_params:: Get (our) query params from the given URL.
 #  get_links::        Get an Array of URLs for a set of links.
+#  login::            Log in a given user.
+#  logout::           Log out the current user.
 #
 #  ==== Navigation
 #  push_page::        Save response from last query so we can go back to it.
@@ -44,7 +46,7 @@ module SessionExtensions
   def save_page(file=nil)
     file ||= "#{RAILS_ROOT}/public/test.html"
     File.open(file, 'w') do |fh|
-      fh.write(@response.body)
+      fh.write(response.body)
     end
   end
 
@@ -101,6 +103,52 @@ module SessionExtensions
     end
   end
 
+  # Login the given user, do no testing, doesn't re-get login form if already
+  # served.
+  def login(login, password='testpassword', remember_me=true)
+    login = login.login if login.is_a?(User)
+    get('/account/login') if path != '/account/login'
+    do_form('form[action$=login]') do |form|
+      form.edit_field('login', login)
+      form.edit_field('password', password)
+      form.edit_field('remember_me', remember_me)
+      form.submit('Login')
+    end
+  end
+
+  # Logion the given user, testing to make sure it was successful.
+  def login!(user, *args)
+    login(user, *args)
+    assert_flash(/success/i)
+    user = User.find_by_login(user) if user.is_a?(String)
+    assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
+  end
+
+  # Logout the current user and make sure it was successful.
+  def logout
+    click_on(:label => 'Logout')
+    assert_flash(/success/i)
+  end
+
+  # Look up a given form, initialize a Hash of parameters for it, and wrap up
+  # the whole thing in a Form instance.  Returns (and yields) an instance of
+  # IntegrationSession::Form.
+  def do_form(*args)
+    form = nil
+    clean_our_backtrace do
+      assert_select(*args) do |elems|
+        assert_equal(1, elems.length,
+                     "Found multiple forms matching #{args.inspect}.")
+        elem = elems.first
+        assert_equal('form', elem.name,
+                     "Expected #{args.inspect} to find a form!")
+        form = Form.new(self, elem)
+        yield(form) if block_given?
+      end
+    end
+    return form
+  end
+
   ##############################################################################
   #
   #  :section: Navigation
@@ -112,7 +160,7 @@ module SessionExtensions
     @page_stack ||= []
     @page_stack.push({
       :name => name,
-      :body => @response.body,
+      :body => response.body,
     })
   end
 
@@ -134,8 +182,8 @@ module SessionExtensions
         raise("Missing page called #{name.inspect}!")
       end
     end
-    @response.body = @page_stack.last[:body]
-    @html_document = HTML::Document.new(@response.body)
+    response.body = @page_stack.last[:body]
+    @html_document = HTML::Document.new(response.body)
     save_page
   end
 
@@ -197,178 +245,7 @@ module SessionExtensions
         end
       end
 
-      assert(nil, "Expected a link matching: #{args.inspect}") if !done
-    end
-  end
-
-  ##############################################################################
-  #
-  #  :section: Forms
-  #
-  #  Provides a handy encapsulation for filling out and submitting forms.
-  #
-  #    get(page)
-  #    do_form('form[action=search]') do |form|
-  #      form.edit_field(id1, val1)
-  #      form.edit_field(id2, val2)
-  #      form.submit(button)
-  #    end
-  #
-  ##############################################################################
-
-  # Look up a given form, initialize a Hash of parameters for it, and wrap up
-  # the whole thing in a Form instance.  Returns (and yields) an instance of
-  # IntegrationSession::Form.
-  def do_form(*args)
-    form = nil
-    clean_our_backtrace do
-      assert_select(*args) do |elems|
-        assert_equal(1, elems.length,
-                     "Found multiple forms matching #{args.inspect}.")
-        elem = elems.first
-        assert_equal('form', elem.name,
-                     "Expected #{args.inspect} to find a form!")
-        form = Form.new(self, elem)
-        yield(form) if block_given?
-      end
-    end
-    return form
-  end
-
-  # Class that represents a single HTML form.  Allow you to make assertions
-  # about the kinds and values of input fields available, allows you to modify
-  # them and then submit the result.
-  class Form
-
-    # Instance of the session that this form came from.
-    attr_accessor :context
-
-    # HTML element containing the form.
-    attr_accessor :form
-
-    # Array of input fields.
-    attr_accessor :inputs
-
-    # Array of submit buttons.
-    attr_accessor :submits
-
-    # Class used to encapsulates a single input field in a Form.
-    class Field
-      attr_accessor :type, :name, :id, :default, :value
-      def initialize(args={})
-        args.each {|k,v| send("#{k}=", v.to_s)}
-      end
-    end
-
-    # Create and fill in the default values of a form.
-    def initialize(context, form)
-      @context = context
-      @form    = form
-      @url     = CGI.unescapeHTML(form.attributes['action'])
-      @inputs  = []
-      @submits = []
-      fill_in_initial_values!
-    end
-
-    # Parse the default or initial values from the HTML and populate the
-    # +inputs+ and +submits+ Arrays with the results.  Called automatically
-    # by the constructor.
-    def fill_in_initial_values!
-      @context.assert_select(@form, 'input') do |elems|
-        for elem in elems
-          id   = CGI.unescapeHTML(elem.attributes['id'] || '')
-          name = CGI.unescapeHTML(elem.attributes['name'] || '')
-          val  = CGI.unescapeHTML(elem.attributes['value'] || '')
-          type = elem.attributes['type']
-          # Work-around for the check-box work-around: Rails adds an extra
-          # hidden field imediately after every check-box for the benefit of
-          # browsers that fail to post check-boxes whivh aren't checked.
-          unless (id == '') and (type == 'hidden') and
-                 @inputs.last and (@inputs.last.name == name)
-            case type
-            when 'submit'
-              @submits << Field.new(
-                :type  => :submit,
-                :name  => name,
-                :value => val
-              )
-            else
-              @inputs << Field.new(
-                :type    => type.to_sym,
-                :name    => name,
-                :id      => id,
-                :default => val,
-                :value   => val
-              )
-            end
-          end
-        end
-      end
-    end
-
-    # Find the field whose ID ends in the given string.  Returns an instance
-    # of IntegrationSession::Form::Field or +nil+.
-    def get_field(id)
-      result = nil
-      for field in @inputs
-        id2 = field.id
-        if (i = id2.index(id)) and
-           (i + id.length == id2.length)
-          result = field
-          break
-        end
-      end
-      return result
-    end
-
-    # Assert the value of a given input field.  Change the value of the given
-    # input field.  Matches field whose ID _ends_ in the given String.
-    # Converts everything to String since +nil+ isn't distinguished from
-    # <tt>""</tt> by HTML forms.  Pass in either a String or a Regexp for the
-    # expected value.
-    def assert_value(id, val, msg=nil)
-      if field = get_field(id)
-        val2 = field.value.to_s
-      else
-        val2 = ''
-      end
-      msg ||= "Expected value of form field #{id.inspect} to be #{val.inspect}."
-      if val.is_a?(Regexp)
-        @context.assert_match(val, val2.to_s, msg)
-      else
-        @context.assert_equal(val.to_s, val2.to_s, msg)
-      end
-    end
-
-    # Change the value of the given input field.  Matches field whose ID _ends_
-    # in the given String.
-    def edit_field(id, val)
-      @context.assert(field = get_field(id),
-                      "Couldn't find input field with ID ending in #{id.inspect}.\n" +
-                      "Have these: #{@inputs.map(&:id).sort.inspect}")
-      field.value = val
-    end
-
-    # Submit the form using the given button.  (Button label must match String
-    # exactly.)  Post is processed on the session that owns this form, using
-    # +post_via_redirect+ (wrapped in +post_with_error_checking+).
-    def submit(button)
-      found = false
-      hash = {}
-      for field in @inputs
-        hash[field.name] = field.value if field.value.to_s != ''
-      end
-      for field in @submits
-        if field.value == button
-          hash[field.name] = field.value
-          found = true
-          break
-        end
-      end
-      if !found
-        @context.assert(nil, "Couldn't find submit button labelled #{button.inspect}.")
-      end
-      @context.post_with_error_checking(@url, hash)
+      assert_block("Expected a link matching: #{args.inspect}") { done }
     end
   end
 end
