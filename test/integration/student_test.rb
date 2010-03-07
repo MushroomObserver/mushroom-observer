@@ -122,5 +122,6 @@ class StudentTest < IntegrationTestCase
     lurker.assert_flash_error
     lurker.assert_template('project/show_project')
     lurker.assert_nil(lurker.assigns(:description))
+    lurker.assert_match(name.text_name, lurker.response.body)
   end
 end
