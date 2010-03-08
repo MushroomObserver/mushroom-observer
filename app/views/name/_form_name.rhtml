@@ -14,7 +14,7 @@
 <% end %>
 
 <label for="name_author"><%= :Authority.t %>:</label>
-<% if @can_make_changes or @name.author.nil? or (@name.author == '') %>
+<% if @can_make_changes or @name.author.blank? %>
   <%= form.text_field(:author) %><br/>
   <div class="HelpNote"><%= :form_names_author_help.tp %></div>
 <% else %>

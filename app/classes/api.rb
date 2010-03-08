@@ -1029,7 +1029,7 @@ class API
 
     # Make sure name doesn't already exist.
     match = nil
-    if author && author != ''
+    if !author.blank?
       match = Name.find_by_text_name_and_author(name_str, author)
       name_str2 = "#{name_str} #{author}"
     else
@@ -1156,7 +1156,7 @@ private
     name = name.to_sym
     @used ||= {}
     result = nil
-    if @args[name].to_s != ''
+    if !@args[name].blank?
       @used[name] = true
       result = @args[name].to_s
     end

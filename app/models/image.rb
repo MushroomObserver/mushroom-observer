@@ -163,7 +163,7 @@ class Image < AbstractModel
   #
   def unique_text_name
     title = observations.map(&:text_name).uniq.sort.join(' & ')
-    if title == ''
+    if title.blank?
       sprintf("%s #%d", :image.l, id)
     else
       sprintf("%s (%d)", title, id)
@@ -179,7 +179,7 @@ class Image < AbstractModel
   #
   def unique_format_name
     title = observations.map(&:format_name).uniq.sort.join(' & ')
-    if title == ''
+    if title.blank?
       sprintf("%s #%d", :image.l, id)
     else
       sprintf("%s (%d)", title, id)

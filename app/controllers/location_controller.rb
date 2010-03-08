@@ -25,6 +25,10 @@
 #   * destroy_location_description
 #   * list_merge_options
 #   * add_to_location
+#   * make_description_default
+#   * merge_descriptions
+#   * publish_descriptions
+#   * adjust_permissions
 #
 #  Helpers:
 #     split_out_matches(list, substring)
@@ -34,6 +38,8 @@
 ################################################################################
 
 class LocationController < ApplicationController
+  include DescriptionControllerHelpers
+
   before_filter :login_required, :except => [
     :index_location,
     :index_location_description,
@@ -187,9 +193,9 @@ class LocationController < ApplicationController
     # Now it's okay to paginate this (query.paginate with letters can cause
     # it to add a condition to the query to select for a letter).
     @known_pages = paginate_letters(:letter, :page, 50)
-    if (args[:id].to_s != '') and
-       (params[:letter].to_s == '') and
-       (params[:page].to_s == '')
+    if !args[:id].blank? and
+       params[:letter].blank? and
+       params[:page].blank?
       @known_pages.show_index(query.index(args[:id]))
     end
     @known_data = query.paginate(@known_pages,
@@ -294,8 +300,8 @@ class LocationController < ApplicationController
     loc_id = params[:id]
     desc_id = params[:desc]
     @location = Location.find(loc_id, :include => [:user, :descriptions])
-    desc_id = @location.description_id if desc_id.to_s == ''
-    if desc_id.to_s != ''
+    desc_id = @location.description_id if desc_id.blank?
+    if !desc_id.blank?
       @description = LocationDescription.find(desc_id, :include =>
                                         [:authors, :editors, :license, :user])
       @description = nil if !@description.is_reader?(@user)
@@ -444,7 +450,7 @@ class LocationController < ApplicationController
       # If done, update any observations at @where string originally passed in,
       # and set user's primary location if called from profile.
       if done
-        if @where.to_s != ''
+        if !@where.blank?
           update_observations_by_where(@location, @where)
         end
         if @set_user
@@ -548,25 +554,11 @@ class LocationController < ApplicationController
     @location = Location.find(params[:id])
     @licenses = License.current_names_and_ids
 
-    # Reder a blank form.
+    # Render a blank form.
     if request.method == :get
       @description = LocationDescription.new
       @description.location = @location
-      @description.license = @user.license
-
-      # Initialize source-specific stuff.
-      case params[:source]
-      when 'project'
-        @description.source_type  = :project
-        @description.source_name  = Project.find(params[:project])
-        @description.public_write = false
-        @description.public       = false
-      else
-        @description.source_type  = :user
-        @description.source_name  = @user.legal_name
-        @description.public_write = false
-        @description.public       = true
-      end
+      initialize_description_source(@description)
 
     # Create new description.
     else
@@ -723,7 +715,7 @@ class LocationController < ApplicationController
   def add_to_location
     location = Location.find(params[:location])
     where = params[:where].strip_squeeze rescue ''
-    if (where != '') and
+    if !where.blank? and
        update_observations_by_where(location, where)
       flash_notice(:runtime_location_merge_success.t(:this => where,
                    :that => location.display_name))

@@ -22,5 +22,5 @@
     <input type="hidden" id="<%=id%>" name="<%=name%>" value="<%=escape_once(value)%>" />
   <% end %>
 
-  <%= focus_on(@login && @login != '' ? 'user_password' : 'user_login') %>
+  <%= focus_on(!@login.blank? ? 'user_password' : 'user_login') %>
 <% end %>

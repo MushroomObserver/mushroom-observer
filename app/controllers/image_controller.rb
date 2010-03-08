@@ -170,7 +170,7 @@ class ImageController < ApplicationController
     # show_observation request.  We know we came from an observation-type page
     # because that's the only time the 'obs' param will be set (with obs id).
     obs = params[:obs]
-    if obs.to_s != '' &&
+    if !obs.blank? &&
        # The outer search on observation won't be saved for robots, so no sense
        # in bothering with any of this.
        !is_robot?
@@ -252,7 +252,7 @@ class ImageController < ApplicationController
   end
 
   def process_image(args, upload)
-    if upload and upload != ""
+    if !upload.blank?
       name = upload.full_original_filename if upload.respond_to? :full_original_filename
       @image = Image.new(args)
       @image.created  = Time.now
@@ -614,7 +614,7 @@ class ImageController < ApplicationController
 ################################################################################
 
   def test_process_image(user, upload, count, size)
-    if upload and upload != ""
+    if !upload.blank?
       args = {
         :user => user,
         :image => upload

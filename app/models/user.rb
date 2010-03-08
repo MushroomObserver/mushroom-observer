@@ -348,7 +348,7 @@ class User < AbstractModel
   #   user.change_password('new_password')
   #
   def change_password(pass)
-    if pass.to_s != ''
+    if !pass.blank?
       update_attribute "password", self.class.sha1(pass)
     end
   end
@@ -365,10 +365,10 @@ class User < AbstractModel
   #   name missing:  "fred99"
   #
   def unique_text_name
-    if self.name.to_s != ''
-      sprintf("%s (%s)", self.name, self.login)
+    if !name.blank?
+      sprintf("%s (%s)", name, login)
     else
-      self.login
+      login
     end
   end
 

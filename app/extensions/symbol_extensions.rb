@@ -219,7 +219,7 @@ class Symbol
         tag = $1.to_sym
         args2 = $2.to_s
         hash = args.dup
-        if args2 != ''
+        if !args2.blank?
           args2.split(',').each do |pair|
             if pair.match(/^:?([a-z]+)=(.*)$/)
               key = $1.to_sym

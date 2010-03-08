@@ -8,7 +8,7 @@
 
 <% for user in @users
   name = user.name
-  if name and name.strip != ""
+  if !name.blank?
     name = " (#{name})"
   else
     name = ""

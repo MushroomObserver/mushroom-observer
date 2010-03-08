@@ -1,7 +1,7 @@
 <!--[form:naming]-->
 
 <%# Section for handling deprecated, new and multiple names on naming creation and edit pages %>
-<% if @what && @what != '' %>
+<% if !@what.blank? %>
   <% if @valid_names %>
     <div class="Errors">
       <span class="Data"><%= :form_naming_deprecated.t(:name => @what) %></span><br/>
@@ -78,7 +78,7 @@
     end
     html += checkbox + label + textarea
   end
-  if can_do_ajax? && !show_reasons && @what.to_s == ""
+  if can_do_ajax? && !show_reasons && @what.blank?
     html = "<div id='reasons_div'>#{html}</div>"
     html += javascript_tag("Element.hide('reasons_div')");
   end

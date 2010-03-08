@@ -1122,19 +1122,19 @@ class Query < AbstractQuery
     location = params[:location].to_s.strip_squeeze
     content  = params[:content].to_s.strip_squeeze
 
-    if name + user + location + content == ''
+    if (name + user + location + content).blank?
       raise "You must specify at least one of the four conditions."
 
     # I was thinking about turning these into pattern searches.  But I think
     # that could be confusing.  Adding, say, a "user" condition to one of
     # these, the results would be totally different.
-    # elsif (model_symbol == :Name) and (user + location + content == '')
-    # elsif (model_symbol == :Image) and (user + location + name == '')
-    # elsif (model_symbol == :Location) and (user + name + content == '')
+    # elsif (model_symbol == :Name) and (user + location + content).blank?
+    # elsif (model_symbol == :Image) and (user + location + name).blank?
+    # elsif (model_symbol == :Location) and (user + name + content).blank?
 
     # Easy case: just searching on Name and User.
-    elsif location + content == ''
-      if name != ''
+    elsif (location + content).blank?
+      if !name.blank?
         clean = clean_pattern(name)
         self.where << "names.search_name LIKE '%#{clean}%'"
         case model_symbol
@@ -1143,7 +1143,7 @@ class Query < AbstractQuery
         when :Observation ; self.join << :names
         end
       end
-      if user != ''
+      if !user.blank?
         clean = clean_pattern(user)
         self.where << "users.name LIKE '%#{clean}%' OR " +
                       "users.login LIKE '%#{clean}%'"
@@ -1175,20 +1175,20 @@ class Query < AbstractQuery
     else
       ids = []
 
-      if name != ''
+      if !name.blank?
         self.join << :names
         clean = clean_pattern(name)
         self.where << "names.search_name LIKE '%#{clean}%'"
       end
 
-      if user != ''
+      if !user.blank?
         clean = clean_pattern(user)
         self.where << "users.name LIKE '%#{clean}%' OR " +
                       "users.login LIKE '%#{clean}%'"
         self.join << :users
       end
 
-      if location != ''
+      if !location.blank?
         search = google_parse(location)
         ids += google_execute(search, :fields => [ 'observations.where' ],
             :where => 'observations.location_id IS NULL')
@@ -1196,7 +1196,7 @@ class Query < AbstractQuery
             :fields => [ 'locations.display_name', 'locations.search_name' ])
       end
 
-      if content != ''
+      if !content.blank?
         more_ids = []
         search = google_parse(content)
         more_ids += google_execute(search, :fields => [ 'observations.notes' ])
@@ -1204,7 +1204,7 @@ class Query < AbstractQuery
             :fields => [ 'observations.notes', 'comments.summary',
                          'comments.comment' ])
 
-        if location != ''
+        if !location.blank?
           ids = intersect_id_sets(ids, more_ids)
         else
           ids = more_ids

@@ -51,7 +51,7 @@
   </p>
 <% end %>
 
-<% if observation.notes.to_s != ""
+<% if !observation.notes.blank?
   Textile.register_name(observation.namings.map {|n| n.name})
   Textile.register_name(observation.name) %>
   <%= sanitize(:NOTES.l + ': ' + observation.notes.to_s).tpl %>

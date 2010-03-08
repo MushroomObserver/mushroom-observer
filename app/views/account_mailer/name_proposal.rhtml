@@ -9,7 +9,7 @@
   fields += "*#{:By.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
   for reason in @naming.get_reasons
     if reason.used?
-      if reason.notes == ''
+      if reason.notes.blank?
         fields += "*#{reason.label.l}*\n"
       else
         fields += "*#{reason.label.l}:* #{reason.notes}\n"

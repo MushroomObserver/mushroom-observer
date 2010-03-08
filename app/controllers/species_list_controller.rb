@@ -125,7 +125,7 @@ class SpeciesListController < ApplicationController
     @species_list = SpeciesList.find(params[:id], :include => :user)
     query = create_query(:Observation, :in_species_list, :by => :name,
                          :species_list => @species_list)
-    store_query_in_session(query) if params[:set_source].to_s != ''
+    store_query_in_session(query) if !params[:set_source].blank?
     set_query_params(query)
     @pages = paginate_letters(:letter, :page, 100)
     @objects = query.paginate(@pages, :letter_field => 'names.text_name',
@@ -163,7 +163,7 @@ class SpeciesListController < ApplicationController
       @deprecated_names = []
       @list_members     = nil
       @member_notes     = nil
-      if (params[:clone].to_s != '') and
+      if !params[:clone].blank? and
          (clone = SpeciesList.safe_find(params[:clone]))
         query = create_query(:Observation, :in_species_list,
                              :species_list => clone)
@@ -362,7 +362,7 @@ class SpeciesListController < ApplicationController
     for rec in @species
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
       need_author = occurs[n] > 1
-      n += '|' + a if a.to_s != '' && need_author
+      n += '|' + a if !a.blank? && need_author
       if s.to_i > 0 && d.to_i != 1
         l = valid[s] ||= []
         l.push(n) if !l.include?(n)
@@ -376,7 +376,7 @@ class SpeciesListController < ApplicationController
     @species = @species.map do |rec|
       n, a, d, s = rec.values_at('n', 'a', 'd', 's')
       need_author = occurs[n] > 1
-      n += '|' + a if a.to_s != '' && need_author
+      n += '|' + a if !a.blank? && need_author
       n += '*' if d.to_i != 1
       d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
     end.flatten
@@ -447,7 +447,7 @@ class SpeciesListController < ApplicationController
     charset = charset.upcase
     raise UnsupportedCharsetError if !['ASCII', 'ISO-8859-1', 'UTF-8'].include?(charset)
     str = names.map do |name|
-      if true && name.author.to_s != ''
+      if !name.author.blank?
         name.text_name + ' ' + name.author
       else
         name.text_name
@@ -473,7 +473,7 @@ class SpeciesListController < ApplicationController
       csv << ['name', 'author', 'citation', 'valid']
       names.each do |name|
         csv << [name.text_name, name.author, name.citation,
-          name.deprecated ? '' : '1'].map {|v| v == '' ? nil : v}
+          name.deprecated ? '' : '1'].map {|v| v.blank? ? nil : v}
       end
     end
     str = case charset
@@ -503,7 +503,7 @@ class SpeciesListController < ApplicationController
         node = node.italic
       end
       node << text_name
-      doc << " " + author if author && author != ""
+      doc << " " + author if !author.blank?
       doc.line_break
     end
     send_data(doc.to_rtf,

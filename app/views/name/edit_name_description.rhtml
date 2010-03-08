@@ -8,6 +8,11 @@
     add_tab(:cancel_and_show.t(:type => :name_description),
             :action => 'show_name_description',
             :id => @description.id, :params => query_params)
+    if @description.is_admin?(@user) || is_in_admin_mode?
+      add_tab(:show_description_adjust_permissions.t,
+              :action => 'adjust_permissions', :id => @description.id,
+              :params => query_params)
+    end
   end
 %>
 

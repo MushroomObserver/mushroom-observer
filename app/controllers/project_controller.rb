@@ -118,7 +118,7 @@ class ProjectController < ApplicationController
       user_group = UserGroup.find_by_name(title)
       admin_name = "#{title}.admin"
       admin_group = UserGroup.find_by_name(admin_name)
-      if title == ""
+      if title.blank?
         flash_error(:add_project_need_title.t)
       elsif project
         flash_error(:add_project_already_exists.t(:title => project.title))
@@ -187,7 +187,7 @@ class ProjectController < ApplicationController
       args = {}
       args[:set_title]   = @title   if @project_title   != @title
       args[:set_summary] = @summary if @project_summary != @summary
-      if @title == ''
+      if @title.blank?
         flash_error(:add_project_need_title.t)
       elsif Project.find_by_title(@title) != @project
         flash_error(:add_project_already_exists.t(:title => @title))

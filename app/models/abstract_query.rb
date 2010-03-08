@@ -679,7 +679,7 @@ class AbstractQuery < ActiveRecord::Base
     end
 
     # Provide default flavor.
-    if flavor == :default || flavor == ''
+    if flavor == :default || flavor.blank?
       flavor = default_flavors[model.to_s.to_sym] || :all
     end
 
@@ -1004,7 +1004,7 @@ class AbstractQuery < ActiveRecord::Base
     table = model.table_name
 
     by = params[:by]
-    if by || order.to_s == ''
+    if by || order.blank?
       by ||= default_order
 
       # Allow any of these to be reversed.
@@ -1062,7 +1062,7 @@ class AbstractQuery < ActiveRecord::Base
   #
   def clean_id_set(ids)
     result = ids.map(&:to_i).uniq[0,MAX_ARRAY].map(&:to_s).join(',')
-    result = '-1' if result == ''
+    result = '-1' if result.blank?
     return result
   end
 
@@ -1127,7 +1127,7 @@ class AbstractQuery < ActiveRecord::Base
   def google_parse(str)
     goods = []
     bads  = []
-    if (str = str.to_s.strip) != ''
+    if (str = str.to_s.strip_squeeze) != ''
       str.gsub!(/\s+/, ' ')
       # Pull off "and" clauses one at a time from the beginning of the string.
       while true
@@ -1252,7 +1252,7 @@ class AbstractQuery < ActiveRecord::Base
 
     # Tack id at end of order to disambiguate the order.
     # (I despise programs that render random results!)
-    if (our_order.to_s != '') and
+    if !our_order.blank? and
        !our_order.match(/.id( |$)/)
       our_order += ", #{model.table_name}.id DESC"
     end
@@ -1261,10 +1261,10 @@ class AbstractQuery < ActiveRecord::Base
       SELECT #{our_select}
       FROM #{our_from}
     )
-    sql += "  WHERE #{our_where}\n"    if our_where.to_s != ''
-    sql += "  GROUP BY #{our_group}\n" if our_group.to_s != ''
-    sql += "  ORDER BY #{our_order}\n" if our_order.to_s != ''
-    sql += "  LIMIT #{our_limit}\n"    if our_limit.to_s != ''
+    sql += "  WHERE #{our_where}\n"    if !our_where.blank?
+    sql += "  GROUP BY #{our_group}\n" if !our_group.blank?
+    sql += "  ORDER BY #{our_order}\n" if !our_order.blank?
+    sql += "  LIMIT #{our_limit}\n"    if !our_limit.blank?
 
     return sql
   end

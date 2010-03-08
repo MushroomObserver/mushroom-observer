@@ -37,8 +37,10 @@ class ExpertTest < IntegrationTestCase
       form.assert_value('public', true)
       form.assert_enabled('source_type')
       form.assert_enabled('source_name')
-      form.assert_disabled('public_write')
-      form.assert_disabled('public')
+      # (have to be enabled because user could switch to :source or :user,
+      # instead must used javascript to disable these when :public)
+      form.assert_enabled('public_write')
+      form.assert_enabled('public')
       form.change('notes', 'I like this mushroom.')
       form.submit
     end
@@ -105,5 +107,7 @@ class ExpertTest < IntegrationTestCase
       form.assert_no_field('public_write')
       form.assert_no_field('public')
     end
+
+    
   end
 end

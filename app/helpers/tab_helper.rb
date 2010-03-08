@@ -77,17 +77,26 @@ module ApplicationHelper::Tabs
   # Render a tab in HTML.  Used in: app/views/layouts/application.rb
   def render_tab(label, link_args=nil, html_args={})
     if !link_args
-      label
+      result = label
     elsif link_args.is_a?(String) && (link_args[0..6] == 'http://')
-      "<a href=\"#{link_args}\" target=\"_new\">#{label}</a>"
-    elsif html_args.has_key?(:help)
-      help = html_args[:help]
-      html_args = html_args.dup
-      html_args.delete(:help)
-      add_context_help(link_to(label, link_args, html_args), help)
+      result = "<a href=\"#{link_args}\" target=\"_new\">#{label}</a>"
     else
-      link_to(label, link_args, html_args)
+      if link_args.is_a?(Hash) && link_args.has_key?(:help)
+        help = link_args[:help]
+        link_args = link_args.dup
+        link_args.delete(:help)
+      elsif html_args.has_key?(:help)
+        help = html_args[:help]
+        html_args = html_args.dup
+        html_args.delete(:help)
+      else
+        help = nil
+      end
+      link = link_to(label, link_args, html_args)
+      link = add_context_help(link, help) if help
+      result = link
     end
+    return result
   end
 
   ##############################################################################

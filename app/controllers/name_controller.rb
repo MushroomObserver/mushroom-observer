@@ -24,18 +24,16 @@
 #   * create_name_description     Create new name_description.
 #   * edit_name_description       Edit name_description.
 #   * destroy_name_description    Destroy name_description.
+#   * make_description_default    Make a description the default one.
+#   * merge_descriptions          Merge a description with another.
+#   * publish_descriptions        Publish a draft description.
+#   * adjust_permissions          Adjust permissions on a description.
 #   * change_synonyms             Change list of synonyms for a name.
 #   * deprecate_name              Deprecate name in favor of another.
 #   * approve_name                Flag given name as "accepted" (others could be, too).
 #   * bulk_name_edit              Create/synonymize/deprecate a list of names.
 #
-#  Admin Tools:
-#   R cleanup_versions
-#   R do_maintenance
-#
 #  Helpers:
-#    name_locs(name_id)             List of locs where name has been observed.
-#    find_target_names(...)         (used by edit_name)
 #    deprecate_synonym(name)        (used by change_synonyms)
 #    check_for_new_synonym(...)     (used by change_synonyms)
 #    dump_sorter(sorter)            Error diagnostics for change_synonyms.
@@ -43,6 +41,8 @@
 ################################################################################
 
 class NameController < ApplicationController
+  include DescriptionControllerHelpers
+
   before_filter :login_required, :except => [
     :advanced_search,
     :authored_names,
@@ -309,8 +309,8 @@ class NameController < ApplicationController
     name_id = params[:id]
     desc_id = params[:desc]
     @name = Name.find(name_id, :include => [:user, :descriptions])
-    desc_id = @name.description_id if desc_id.to_s == ''
-    if desc_id.to_s != ''
+    desc_id = @name.description_id if desc_id.blank?
+    if !desc_id.blank?
       @description = NameDescription.find(desc_id, :include =>
                               [:authors, :editors, :license, :reviewer, :user])
       @description = nil if !@description.is_reader?(@user)
@@ -493,7 +493,7 @@ class NameController < ApplicationController
         author    = params[:name][:author].to_s.strip_squeeze
         name_str  = text_name
         matches   = nil
-        if author != ''
+        if !author.blank?
           matches = Name.find_all_by_text_name_and_author(text_name, author)
           name_str += " #{author}"
         else
@@ -587,7 +587,7 @@ class NameController < ApplicationController
         rank      = params[:name][:rank].to_s
         name_str  = text_name
         matches   = nil
-        if author != ''
+        if !author.blank?
           matches = Name.find_all_by_text_name_and_author(text_name, author)
           name_str += " #{author}"
         else
@@ -619,10 +619,10 @@ class NameController < ApplicationController
             # most often used to *get rid* of a misspelt name, such names are
             # frequently accidentally created, often with incorrect rank and
             # bogus author.)
-            if merge.author.to_s == ''
+            if merge.author.blank?
               merge.author = author
             end
-            if merge.citation.to_s == ''
+            if merge.citation.blank?
               merge.citation = params[:name][:citation].to_s.strip_squeeze
             end
             if params[:name][:deprecated] != '1'
@@ -691,31 +691,11 @@ class NameController < ApplicationController
     @name = Name.find(params[:id])
     @licenses = License.current_names_and_ids
 
-    # Reder a blank form.
+    # Render a blank form.
     if request.method == :get
       @description = NameDescription.new
       @description.name = @name
-      @description.license = @user.license
-
-      # Initialize source-specific stuff.
-      case params[:source]
-      when 'project'
-        project = Project.find(params[:project])
-        if @user.in_group?(project.user_group)
-          @description.source_type  = :project
-          @description.source_name  = project.title
-          @description.public       = false
-          @description.public_write = false
-        else
-          flash_error(:runtime_create_draft_create_denied.t(:title => project.title))
-          redirect_to(:controller => 'project', :action => 'show_project',
-                      :id => project.id)
-        end
-      else
-        @description.source_type  = :public
-        @description.public       = true
-        @description.public_write = true
-      end
+      initialize_description_source(@description)
 
     # Create new description.
     else
@@ -887,7 +867,7 @@ class NameController < ApplicationController
 
       # User has told us what the correct spelling should be.  Make sure
       # this is a valid name!
-      if correct_spelling.to_s != ''
+      if correct_spelling.blank?
         self.misspelling = true
         name2 = Name.find_by_search_name(correct_spelling)
         name2 ||= Name.find_by_text_name(correct_spelling)
@@ -1065,7 +1045,7 @@ class NameController < ApplicationController
     @name_primer      = Name.primer
 
     if request.method == :post
-      if @what == ''
+      if @what.blank?
         flash_error :runtime_name_deprecate_must_choose.t
 
       else
@@ -1101,7 +1081,7 @@ class NameController < ApplicationController
           end
           save_name(@name, :log_name_deprecated,
                     :other => target_name.search_name)
-          if @comment != ''
+          if !@comment.blank?
             post_comment(:deprecate, @name, @comment)
           end
 
@@ -1142,7 +1122,7 @@ class NameController < ApplicationController
         args[:other] = others.join(', ')
       end
       save_name(@name, tag, args)
-      if @comment != ''
+      if !@comment.blank?
         post_comment(:approve, @name, @comment)
       end
 
@@ -1406,7 +1386,7 @@ class NameController < ApplicationController
         @note_template = @notification.note_template
       else
         mailing_address = @user.mailing_address.strip
-        mailing_address = ':mailing_address' if mailing_address == ''
+        mailing_address = ':mailing_address' if mailing_address.blank?
         @note_template = :email_tracking_note_template.l(
           :species_name => @name.text_name,
           :mailing_address => mailing_address,
@@ -1420,7 +1400,7 @@ class NameController < ApplicationController
       case params[:commit]
       when :ENABLE.l, :UPDATE.l
         note_template = params[:notification][:note_template]
-        note_template = nil if note_template == ''
+        note_template = nil if note_template.blank?
         if @notification.nil?
           @notification = Notification.new(:flavor => :name, :user => @user,
               :obj_id => name_id, :note_template => note_template)

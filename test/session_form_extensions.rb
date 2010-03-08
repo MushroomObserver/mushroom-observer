@@ -6,22 +6,32 @@
 #  them and then submit the result.
 #
 #  == Attributes
-#  context::        Instance of the session that this form came from.
-#  form::           HTML element containing the form.
-#  url::            URL of action form POSTs to.
-#  inputs::         Array of input fields.
-#  submits::        Array of submit buttons.
-#  debug::          Set to true to have it display POST data on submit.
+#  context::          Instance of the session that this form came from.
+#  form::             HTML element containing the form.
+#  url::              URL of action form POSTs to.
+#  inputs::           Array of input fields.
+#  submits::          Array of submit buttons.
+#  debug::            Set to true to have it display POST data on submit.
 #
 #  == Methods
-#  new::            Initialize form from HTML element returned by assert_select.
-#  get_field::      Return Form::Field matching the given DOM id.
-#  get_field!::     Same as get_field, but flunks an assertion if not found.
-#  change::         Change the value of a given field.
-#  select::         Change the selection of a pulldown menu.
-#  assert_value::   Make sure a given field has a certain value.
-#  submit::         Submit the form.
-#  assert_select::  Call assert_select on the form.
+#  new::              Initialize form from HTML element returned by assert_select.
+#  get_field::        Return Form::Field matching the given DOM id.
+#  get_field!::       Same as get_field, but flunks an assertion if not found.
+#
+#  ==== Form actions
+#  change::           Change the value of a given field.
+#  check::            Change value of checkbox to 'checked'.
+#  uncheck::          Change value of checkbox to 'unchecked'.
+#  upload::           Select a file to upload.
+#  select::           Change the selection of a pulldown menu.
+#  submit::           Submit the form.
+#
+#  ==== Assertions
+#  assert_no_field::  Make sure a given field is _not_ present.
+#  assert_value::     Make sure a given field has a certain value.
+#  assert_enabled::   Make sure a given field is enabled.
+#  assert_disabled::  Make sure a given field is disabled.
+#  assert_select::    Call assert_select on the form.
 #
 ################################################################################
 
@@ -192,6 +202,12 @@ class SessionExtensions::Form
   # Call get_field and flunk an assertion if field not found.
   def get_field!(id)
     get_field(id, :strict)
+  end
+
+  # Make sure the form does _not_ have a given field.
+  def assert_no_field(id, msg=nil)
+    msg ||= "Expected form NOT to have field #{id.inspect}."
+    context.assert_block(msg) { !get_field(id) }
   end
 
   # Assert the value of a given input field.  Change the value of the given

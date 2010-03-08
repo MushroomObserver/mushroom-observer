@@ -73,7 +73,7 @@ end %>
   <b><%= :show_user_primary_location.t %>:</b>
      <%= location_link(nil, @show_user.location) %><br/>
 <% end %>
-<% if @show_user.mailing_address != '' %>
+<% if !@show_user.mailing_address.blank? %>
   <b><%= :show_user_mailing_address.t %>:</b>
      <%= @show_user.mailing_address %><br/>
 <% end %>
@@ -157,7 +157,7 @@ end %>
                 <td>=</td>
                 <td align="right"><%= points %></td>
               </tr>
-            <% elsif count > 0 and label != '' %>
+            <% elsif count > 0 and !label.blank? %>
               <tr>
                 <td><%= link %></td>
                 <td><%= count %> * <%= weight %></td>

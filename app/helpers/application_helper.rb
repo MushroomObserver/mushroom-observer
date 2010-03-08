@@ -10,18 +10,14 @@
 #  quality_as_string::      Translate image quality into localized String.
 #  review_as_string::       Translate review status into localized String.
 #
-#  ==== Common Info Blocks
-#  show_previous_version::  Show version number and link to previous.
-#  show_embedded_description_title:: Show description title with edit/destroy links.
-#  show_alt_descriptions::  Show list of alt descriptions for show_object page.
-#  show_past_versions::     Show list of versions for show_past_object page.
-#  show_authors_and_editors:: Show list of authors and editors below desc page.
+#  ==== Other Stuff
 #  show_object_footer::     Show the created/modified/view dates and RSS log.
 #
 ################################################################################
 
 module ApplicationHelper
   require_dependency 'auto_complete_helper'
+  require_dependency 'description_helper'
   require_dependency 'html_helper'
   require_dependency 'javascript_helper'
   require_dependency 'map_helper'
@@ -31,6 +27,7 @@ module ApplicationHelper
   require_dependency 'textile_helper'
 
   include AutoComplete
+  include Description
   include HTML
   include Javascript
   include Map
@@ -95,208 +92,9 @@ module ApplicationHelper
 
   ##############################################################################
   #
-  #  :section: Common Info Blocks
+  #  :section: Other Stuff
   #
   ##############################################################################
-
-  # Just shows the current version number and a link to see the previous.
-  #
-  #   <%= show_previous_version(name) %>
-  #
-  #   # Renders just this:
-  #   Version: N <br/>
-  #   Previous Version: N-1<br/>
-  #
-  def show_previous_version(obj)
-    type = obj.class.name.underscore
-    html = ''
-    html += "#{:VERSION.t}: #{obj.version}<br/>\n"
-    if previous_version = obj.find_version(-2)
-      html += link_to("#{:show_name_previous_version.t}: %d" % previous_version,
-                      :action => "show_past_#{type}", :id => obj.id,
-                      :version => previous_version,
-                      :params => query_params) + "<br/>\n"
-    end
-    return html
-  end
-
-  # Header of the embedded description within a show_object page.
-  #
-  #   <%= show_embedded_description_title(desc, name) %>
-  #
-  #   # Renders something like this:
-  #   <p>EOL Project Draft: Show | Edit | Destroy</p>
-  #
-  def show_embedded_description_title(desc, parent)
-    type = desc.class.name.underscore
-    title = description_title(desc)
-    links = []
-    if @user && desc.is_writer?(@user)
-      links << link_to(:EDIT.t, :id => desc.id, :action => "edit_#{type}",
-                       :params => query_params)
-    end
-    if @user && desc.is_admin?(@user)
-      links << link_to(:DESTROY.t, :id => desc.id,
-                       :action => "destroy_#{type}", :params => query_params)
-    end
-    '<p><big>' + title + ':</big> ' + links.join(' | ') + '</p>'
-  end
-
-  # Show list of alternate descriptions for show_object page.
-  #
-  #   <%= show_alt_descriptions(name, projects) %>
-  #
-  #   # Renders something like this:
-  #   <p>
-  #     Alternate Descriptions: Create Your Own
-  #       Main Description
-  #       EOL Project Draft
-  #       Rolf's Draft (private)
-  #   </p>
-  #
-  #   <p>
-  #     Create New Draft For:
-  #       Another Project
-  #       One More Project
-  #   </p>
-  #
-  def show_alt_descriptions(obj, projects=nil)
-    type = obj.class.name.underscore
-
-    # Show existing drafts, with link to create new one.
-    head = "<big>#{:show_name_descriptions.t}:</big> "
-    if @user
-      head += link_to(:show_name_create_description.t,
-                      :action => "create_#{type}_description",
-                      :id => obj.id, :params => query_params)
-    end
-    any = false
-    list = [head] + obj.descriptions.select do |desc|
-      desc.has_any_notes?  or
-      (desc.user == @user) or
-      is_reviewer          or
-      (desc.source_type == :public)
-    end.map do |desc|
-      any = true
-      item = description_link(desc)
-      if (desc.user == @user) or is_in_admin_mode?
-        item += indent + '['
-        item += link_to(:EDIT.t, :id => desc.id, :params => query_params,
-                        :action => "edit_#{type}_description")
-        item += ' | '
-        item += link_to(:DESTROY.t, { :id => desc.id,
-                        :action => "destroy_#{type}_description",
-                        :params => query_params },
-                        { :confirm => :are_you_sure.t })
-        item += ']'
-      end
-      indent + item
-    end
-    list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
-    html = list.join("<br/>\n")
-    html = '<p style="white-space:nowrap">' + html + '</p>'
-
-    # Show list of projects user is a member of.
-    if projects && projects.length > 0
-      head2 = :show_name_create_draft.t + ': '
-      list = [head2] + projects.map do |project|
-        item = link_to(project.title,
-                       :action => "create_#{type}_description",
-                       :id => obj.id, :project => project.id,
-                       :source => 'project', :params => query_params)
-        indent + item
-      end
-      html2 = list.join("<br/>\n")
-      html += '<p style="white-space:nowrap">' + html2 + '</p>'
-    end
-    return html
-  end
-
-  # Show list of past versions for show_past_object pages.
-  #
-  #   <%= show_past_versions(name) %>
-  #
-  #   # Renders something like this:
-  #   <p>
-  #     Other Versions:<br/>
-  #       N: Latest Name<br/>
-  #       N-1: Previous Name<br/>
-  #       ...
-  #       1: Original Name<br/>
-  #   </p>
-  #
-  def show_past_versions(obj, args={})
-    type = obj.class.name.underscore
-    html = obj.versions.reverse.map do |v|
-      line = "#{v.version}: #{v.display_name.t}"
-      if v.version != obj.version
-        if v == obj.versions.last
-          line = link_to(line, :controller => obj.show_controller,
-                         :action => "show_#{type}", :id => obj.id,
-                         :params => query_params)
-        else
-          line = link_to(line, :controller => obj.show_controller,
-                         :action => "show_past_#{type}", :id => obj.id,
-                         :version => v.version, :params => query_params)
-        end
-      end
-      if args[:bold] and args[:bold].call(v)
-        line = '<b>' + line + '</b>'
-      end
-      indent + line
-    end
-    html.unshift("#{:VERSIONS.t}:")
-    html = '<p style="white-space:nowrap">' + html.join("<br/>\n") + '</p>'
-  end
-
-  # Show list of authors and editors at the bottom of a show_object page, with
-  # the appropriate links for making requests and/or reviewing authors.
-  #
-  #   <%= show_authors_and_editors(name) %>
-  #
-  #   # Renders something like this:
-  #   <p>
-  #     Authors: <user>, <user>, ..., <user> (Request Authorship Credit)<br/>
-  #     Editors: <user>, <user>, ..., <user>
-  #   </p>
-  #
-  def show_authors_and_editors(obj)
-    type = obj.class.name.underscore
-
-    # Descriptions.
-    if type.match(/description/)
-      is_admin = @user && obj.is_admin?(@user)
-      authors  = obj.authors
-      editors  = obj.editors
-      is_author = authors.include?(@user)
-
-      authors = user_list(:show_name_description_author, authors)
-      editors = user_list(:show_name_description_editor, editors)
-
-      if is_admin
-        authors += '&nbsp;'
-        authors += link_to("(#{:review_authors_review_authors.t})",
-                           :controller => 'observer',
-                           :action => 'review_authors', :id => obj.id,
-                           :type => type, :params => query_params)
-      elsif !is_author
-        authors += '&nbsp;'
-        authors += link_to("(#{:show_name_author_request.t})",
-                           :controller => 'observer',
-                           :action => 'author_request', :id => obj.id,
-                           :type => type, :params => query_params)
-      end
-
-    # Locations and names.
-    else
-      editors = obj.versions.map(&:user_id).uniq - [obj.user_id]
-      editors = User.all(:conditions => ["id IN (?)", editors])
-      authors = user_list(:"show_#{type}_creator", [obj.user])
-      editors = user_list(:"show_#{type}_editor", editors)
-    end
-
-    return "<p>#{authors}<br/>#{editors}</p>"
-  end
 
   # Renders the little footer at the bottom of show_object pages.
   #

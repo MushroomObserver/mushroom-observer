@@ -117,7 +117,7 @@ class StudentTest < IntegrationTestCase
     # Likewise for lurker.
     lurker.get(show_name)
     lurker.assert_select('a[href*=show_name_description]', 1)
-    lurker.assert_select('a[href*=create_name_description]', 0)
+    lurker.assert_select('a[href*=create_name_description]', 1)
     lurker.click(:href => /show_name_description/)
     lurker.assert_flash_error
     lurker.assert_template('project/show_project')

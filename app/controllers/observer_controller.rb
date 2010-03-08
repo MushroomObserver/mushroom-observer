@@ -384,16 +384,16 @@ class ObserverController < ApplicationController
       # Pass along all given search fields (remove angle-bracketed user name,
       # though, since it was only included by the auto-completer as a hint).
       search = {}
-      if (x = params[:search][:name].to_s) != ''
+      if !(x = params[:search][:name].to_s).blank?
         search[:name] = x
       end
-      if (x = params[:search][:location].to_s) != ''
+      if !(x = params[:search][:location].to_s).blank?
         search[:location] = x
       end
-      if (x = params[:search][:user].to_s) != ''
+      if !(x = params[:search][:user].to_s).blank?
         search[:user] = x.sub(/ <.*/, '')
       end
-      if (x = params[:search][:content].to_s) != ''
+      if !(x = params[:search][:content].to_s).blank?
         search[:content] = x
       end
 
@@ -1086,7 +1086,7 @@ class ObserverController < ApplicationController
       @observation = Observation.find(id)
       flash_notice(:observer_recalc_old_name.t(:name => @observation.name.display_name))
       text = @observation.calc_consensus(true)
-      flash_notice text if !text.nil? && text != ''
+      flash_notice text if !text.blank?
       flash_notice(:observer_recalc_new_name.t(:name => @observation.name.display_name))
     rescue => err
       flash_error(:observer_recalc_caught_error.t(:error => err))
@@ -1434,12 +1434,12 @@ class ObserverController < ApplicationController
     @email_error = false
     if request.method != :post
       @email = @user.email if @user
-    elsif @email.nil? or @email.strip == '' or @email.index('@').nil?
+    elsif @email.blank? or @email.index('@').nil?
       flash_error (:runtime_ask_webmaster_need_address.t)
       @email_error = true
     elsif /http:/ =~ @content or /<[\/a-zA-Z]+>/ =~ @content
       flash_error(:runtime_ask_webmaster_antispam.t)
-    elsif @content.nil? or @content.strip == ''
+    elsif @content.blank?
       flash_error(:runtime_ask_webmaster_need_content.t)
     else
       AccountMailer.deliver_webmaster_question(@email, @content)
@@ -1771,7 +1771,7 @@ class ObserverController < ApplicationController
           notes = x[:notes]
           # Reason is "used" if checked or notes non-empty.
           if (check == '1') or
-             (notes.to_s != '')
+             !notes.blank?
             reason.notes = notes
           elsif
             reason.delete
@@ -1801,7 +1801,7 @@ class ObserverController < ApplicationController
         check = x[:check]
         notes = x[:notes]
         if (check == '1') or
-           (!was_js_on && notes.to_s != '')
+           (!was_js_on && !notes.blank?)
           reason.notes = notes
         else
           reason.delete
@@ -1826,7 +1826,7 @@ class ObserverController < ApplicationController
     if args
       i = 0
       while args2 = args[i.to_s]
-        if (upload = args2[:image]) && upload != ''
+        if !(upload = args2[:image]).blank?
           name = upload.full_original_filename if upload.respond_to?(:full_original_filename)
           image = Image.new(args2)
           image.created = Time.now
@@ -1957,7 +1957,7 @@ class ObserverController < ApplicationController
 
       ignore_approved_name = false
       # Has user chosen among multiple matching names or among multiple approved names?
-      if chosen_name && chosen_name != '' 
+      if !chosen_name.blank?
         names = [Name.find(chosen_name)]
         # This tells it to check if this name is deprecated below EVEN IF the user didn't change the what field.
         # This will solve the problem of multiple matching deprecated names discussed below.

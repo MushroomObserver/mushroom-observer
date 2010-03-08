@@ -1,0 +1,15 @@
+<br/><br/>
+
+<p><%= :merge_descriptions_header.t %>:</p>
+
+<ul type="none">
+  <% any = false
+  for desc in description.parent.descriptions - [description]
+    any = true %>
+    <li><%= link_to(description_title(desc), :id => description.id,
+                    :target => desc.id) %></li>
+  <% end
+  if !any %>
+    <li><%= :merge_descriptions_no_others.t %></li>
+  <% end %>
+</ul>

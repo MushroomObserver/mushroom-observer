@@ -112,6 +112,10 @@ ACCOUNT: Konto
 account: Konto
 ACCOUNTS: Konten
 accounts: Konten
+ADMIN: Admin
+admin: admin
+ADMINS:  Admins
+admins:  admins
 ADMIN_GROUP: Admin-Gruppe
 admin_group: Admin-Gruppe
 ADMIN_GROUPS: Admin-Gruppen
@@ -198,6 +202,10 @@ OBSERVER: Nutzer
 observer: Nutzer
 OBSERVERS: Nutzer
 observers: Nutzer
+OWNER: Besitzer
+owner: Besitzer
+OWNERS: Besitzer
+owners: Besitzer
 PASSWORD: Passwort
 password: Passwort
 PASSWORDS: Passwörter
@@ -221,6 +229,10 @@ RANK: Rang
 rank: Rang
 RANKS: Reihen
 ranks: Reihen
+REVIEWER: Rezensent
+reviewer: Rezensent
+REVIEWERS: Rezensenten
+reviewers: Rezensenten
 STATUS: Status
 status: Status
 STATUSS: Status
@@ -305,8 +317,8 @@ EDIT: Ändern
 edit: ändern
 ENABLE: Aktivieren
 enable: aktivieren
-OKAY:  Okay
-okay:  okay
+OKAY: Okay
+okay: okay
 REMOVE: Löschen
 remove: löschen
 SAVE: Speichern
@@ -369,13 +381,17 @@ UNKNOWN: Unbekannt
 unknown: unbekannt
 
 # Permissions: restricted means access is restricted but the current user has
-# access; private means the current user does not have access.
+# access; private means the current user does not have access; default means
+# this is the default description that shows up on the show_name/location page
+# (synonyms that might work better are "principle" or "main" or "official").
 PRIVATE:  Private
 private:  private
 PUBLIC:  Public
 public:  public
 RESTRICTED:  Restricted
 restricted:  restricted
+DEFAULT:  Default
+default:  default
 
 # Common verbs/actions with objects:
 add_object: "[Type] hinzufügen"
@@ -436,20 +452,29 @@ naming_reason_label_4: Anhand von chemischen Beobachtungen
 # Description types, note full_title combines the titles below with the title
 # of the object the description is describing, e.g. "User's [:description] of
 # Agaricus campestris" or "Draft for EOL Initiative by login of Amanita lanei".
+
+# These are used as page title and in index results: must include both the type
+# of description and the title of the object ([object]) they're describing.
 description_full_title_public:  "Public [:DESCRIPTION] of [object]"
-description_full_title_public_with_summary:  "Public [:DESCRIPTION] of [object]"
-description_full_title_foreign:  "[:DESCRIPTION] of [object] from [SERVER]"
-description_full_title_project:  "Draft of [object] for [PROJECT] by [USER]"
-description_full_title_source:  "[:DESCRIPTION] of [object] from [SOURCE]"
+description_full_title_foreign:  "[:DESCRIPTION] of [object] from [text]"
+description_full_title_project:  "Draft of [object] for [text] by [user]"
+description_full_title_source:  "[:DESCRIPTION] of [object] from [text]"
 description_full_title_user:  "[USER]'s [:DESCRIPTION] of [object]"
-description_full_title_user_yours:  "Your [:DESCRIPTION] of [object]"
+description_full_title_yours:  "Your [:DESCRIPTION] of [object]"
+
+# These are used when listing the available descriptions in the show_name page.
 description_part_title_public:  "Public [:DESCRIPTION]"
-description_part_title_public_with_summary:  "[SUMMARY]"
-description_part_title_foreign:  "[:DESCRIPTION] from [SERVER]"
-description_part_title_project:  "Draft for [PROJECT] by [USER]"
-description_part_title_source:  "[:DESCRIPTION] from [SOURCE]"
 description_part_title_user:  "[USER]'s [:DESCRIPTION]"
-description_part_title_user_yours:  "Your [:DESCRIPTION]"
+description_part_title_yours:  "Your [:DESCRIPTION]"
+
+# Same thing, but this time the optional text field was filled in.  Note that
+# the text field is not optional for half of the source types.
+description_part_title_public_with_text:  "[TEXT]"
+description_part_title_foreign_with_text:  "[:DESCRIPTION] From [TEXT]"
+description_part_title_project_with_text:  "Draft for [TEXT] by [USER]"
+description_part_title_source_with_text:  "[:DESCRIPTION] From [TEXT]"
+description_part_title_user_with_text:  "[TEXT] by [USER]"
+description_part_title_yours_with_text:  "[TEXT] by You"
 
 # Footers: "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
 footer_created_at: "*[Type] erstellt am*: [date]"
@@ -809,6 +834,12 @@ runtime_user_hasnt_created:  "[user] hasn't created any [types]."
 runtime_user_hasnt_edited:  "[user] hasn't edited any [types]."
 
 # One-time-use messages.
+runtime_description_added_admin:  Gave admin permission to [name].
+runtime_description_added_reader:  Gave view permission to [name].
+runtime_description_added_writer:  Gave edit permission to [name].
+runtime_description_removed_admin:  Revoked admin permission for [name].
+runtime_description_removed_reader:  Revoked view permission for [name].
+runtime_description_removed_writer:  Revoked edit permission for [name].
 runtime_destroy_description_not_admin:  Only a description's admins can delete that description.
 runtime_duplicate_rank:  "Rank appears twice: '[rank]'"
 runtime_image_updated_notes: "Kommentar auf Bild #[id] geändert."
@@ -832,6 +863,9 @@ runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
 runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
 runtime_ask_webmaster_success: "[:runtime_delivered_message]"
 runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
+runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
+runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
+runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
 runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
 runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
 runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
@@ -923,13 +957,49 @@ runtime_create_naming_already_proposed: >
   Jemand hat diesen Namen schon vorgeschlagen. Wenn du darüber auch etwas
   schreiben möchtest, schreib doch einen Kommentar.
 
+runtime_description_must_be_admin:  >
+  You must be an admin for a description to use this feature.
+
+runtime_description_foreign_read_wrong:  >
+  Descriptions from other servers must be readable by the general public.
+
+runtime_description_foreign_write_wrong:  >
+  Descriptions from other servers must be read-only.
+
+runtime_description_make_default_only_public:  >
+  You are only allowed to make public descriptions the default. All users must
+  be allowed at least to read it.
+
+runtime_description_merge_conflict:  >
+  There is a conflict.  Please merge the two descriptions by hand.  (Look at
+  the text fields below.  Where there is a conflict both descriptions have
+  been entered one on top of the other separated by a line.)  You may cancel
+  the operation at any time without making any changes.  When you are finished,
+  be sure to destroy the old description.
+
+runtime_description_merge_success:  >
+  Successfully merged the descriptions.  The old description has been
+  destroyed: [old].
+
+runtime_description_permissions_fixed:  >
+  This type of description has fixed permissions.
+
+runtime_description_public_read_wrong:  >
+  Public descriptions must be readable by the general public.
+
+runtime_description_public_write_wrong:  >
+  Public descriptions must be writable by the general public.
+
+runtime_description_user_not_found:  >
+  User or Group "[name]" not found!
+
 runtime_destroy_naming_someone_else: >
   Entschuldigung, jemand ist sich sicher, dass dies der richtige Name ist.
   Du kannst gern weitere Namen vorschlagen, aber du kannst diesen Namen
   nicht mehr löschen.
 
 runtime_edit_description_denied:  >
-  You have not been given permission to see edit description.
+  You have not been given permission to edit this description.
 
 runtime_edit_naming_someone_else: >
   Entschuldigung, jemand anders fand diesen Namen ganz gut, deshalb haben wir
@@ -1436,20 +1506,30 @@ form_description_source_user:  "[:USER]"
 form_description_permissions:  Permissions
 form_description_public_writable:  Modifiable by the general public.
 form_description_public_readable:  Visible to the general public.
-form_description_adjust_permissions:  Adjust Permissions
 form_description_source_help:  >
-  Where did the essential content of this description come from?  If you are
-  posting a description that derives from copyrighted material, please be sure
-  to rewrite it in your own words.
+  There are three kinds of descriptions you can create:\n
+  1. *Public:* These are wikipedia-style documents that are editable by
+  everyone on the site.  The default title is
+  "[:description_part_title_public]". Use the text field above to customize
+  this.\n
+  2. *Source:* These descriptions come from a third-party source, and typically
+  are not meant to be modifiable.  Enter the name of the source in the text
+  field above.  Note, if you are posting a description that derives from
+  copyrighted material, please be sure to rewrite it in your own words.\n
+  3. *User:* Use this to create your own personalized description.  The default
+  title will be "[:description_part_title_yours]".  Use the text field above to
+  customize this.  In both this and the 'Source' type above, you will have
+  exclusive rights to choose who can view and modify this description (see the
+  check-boxes below).
+
+form_description_permissions_help:  >
+  Is the general public is allowed to view or make modifications to this
+  description?  If you wish to have more control over read, write and admin
+  permissions, please use the '[:show_description_adjust_permissions]' link
+  above.
 
 form_description_license_help: >
   Klicke "Lizenz":/observer/how_to_use#license für den nachfolgenden Text.
-
-form_description_permissions_help:  >
-  Please indicate whether the general public is allowed to view or make
-  modifications to this description.  If you wish to have more control over
-  read, write and admin permissions, please use the
-  '[:form_description_adjust_permissions]' link above.
 
 
 
@@ -2008,6 +2088,36 @@ show_comments_no_comments_yet:  No one has commented yet.
 
 
 
+# name/show_name_description or location/show_location_description
+show_description_empty:  Nothing has been written for this description yet.
+show_description_destroy: "[:DESTROY]"
+show_description_edit: "[:EDIT]"
+show_description_clone:  Clone
+show_description_merge:  Merge With Another
+show_description_publish:  Publish
+show_description_make_default:  Make Default
+show_description_adjust_permissions:  Adjust Permissions
+show_description_read_permissions:  View
+show_description_write_permissions:  Edit
+show_description_clone_help:  >
+  Create your own description based on this description.
+
+show_description_merge_help:  >
+  Merge this description into another, then remove this one.
+
+show_description_publish_help:  >
+  Publish this draft and make it the default public description.
+
+show_description_make_default_help:  >
+  Make this the default description that is shown on the main
+  '[:show_name(name=:name)]' page.
+
+show_description_adjust_permissions_help:  >
+  Change the set of users who are allowed to view, modify or administrate this
+  description.
+
+
+
 # image/show_image
 show_image_reviewed_by: Begutachtet durch
 show_image_quality_and_next: "[QUALITY] & [:NEXT]"
@@ -2023,17 +2133,10 @@ show_location_observations: Funde an diesem Ort
 show_location_highest: Höchste Erhebung
 show_location_lowest: Niedrigste Tiefe
 show_location_no_descriptions:  There are no descriptions for this location yet.
-show_location_description_empty:  "[:show_name_description_empty]"
 show_location_create_description:  "[:CREATE]"
 show_location_creator:  User who defined this location
 show_location_editor:  "[:Editors]"
 show_location_editors:  "[:Editors]"
-
-
-
-# location/show_location_description
-show_location_description_edit:  "[:edit_object(type=:location_description)]"
-show_location_description_destroy:  "[:destroy_object(type=:location_description)]"
 
 
 
@@ -2059,7 +2162,6 @@ show_name_description_author:  "[:Description] author"
 show_name_description_authors: Autor(en) der Beschreibung
 show_name_description_editor:  "[:Description] editor"
 show_name_description_editors: Rezensent(en) der Beschreibung
-show_name_description_empty:  Nothing has been written for this description yet.
 show_name_author_request: Punkte für Autorschaft verlangen
 show_name_content_status: Status des Inhalts
 show_name_latest_review: "Zuletzt bearbeitet: am [date] von [user]"
@@ -2076,12 +2178,6 @@ show_name_other_observations_notes: >
   (Jemand hat [name] für diese Funde vorgeschlagen, aber die Mehrheitsmeinung
   weicht weiterhin hiervon ab. Der Grad der Gewissheit gilt für  __diesen__ Namen, und nicht
   für die Mehrheitsmeinung.)
-
-
-
-# name/show_name_description
-show_name_description_edit:  "[:edit_object(type=:name_description)]"
-show_name_description_destroy:  "[:destroy_object(type=:name_description)]"
 
 
 
@@ -2329,6 +2425,15 @@ welcome_note: >
 
 # LESS POPULAR PAGES
 
+# description/adjust_permissions
+adjust_permissions_user_header:  User or Group
+adjust_permissions_reader_header:  View
+adjust_permissions_writer_header: "[:EDIT]"
+adjust_permissions_admin_header: "[:ADMIN]"
+adjust_permissions_all_users:  All Users
+adjust_permissions_site_admin:  site admin
+
+
 # observer/advanced_search
 advanced_search_at_least_one:  Please provide at least one search parameter
 advanced_search_caveat:  >
@@ -2526,6 +2631,12 @@ location_merge_success: "[this] und [that] sind nun kombiniert."
 
 # species_list/make_report
 make_report_not_supported: Report-Dateien des Typs *.[type] werden nicht unterstützt.
+
+
+# description/merge_descriptions
+merge_descriptions_title:  Merge [object] Into Another Description
+merge_descriptions_header:  Other Descriptions
+merge_descriptions_no_others:  "(there is only the one description)"
 
 
 # name/bulk_name_edit

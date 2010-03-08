@@ -18,7 +18,7 @@ xml.naming(
 
   for reason in object.get_reasons
     if reason.used?
-      if reason.notes == ''
+      if reason.notes.blank?
         xml.reason(:num => reason.num, :label => reason.label.l)
       else
         xml.reason({:num => reason.num, :label => reason.label.l}, reason.notes) 

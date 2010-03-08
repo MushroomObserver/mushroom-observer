@@ -237,7 +237,7 @@ private
         # distinguish between publication titles and taxa, e.g., "Lichen Flora
         # of the Greater Sonoran Region".  I'm sure it can still break with species
         # but it should be very infrequent (I don't see it in current tests). -JPH
-        (author == '' || parse[5] != :Genus)
+        (author.blank? || parse[5] != :Genus)
 
         # Update which genus this first letter would mean in an abbrev.
         if parse[0].match(/([A-Z])/)
@@ -257,7 +257,7 @@ private
         # label.gsub!(/ (var|subsp|f)\. /, '__ \\1. __')
         #
         # # Tack author on to end (if any).
-        # label += ' ' + parse[6] if parse[6].to_s != ''
+        # label += ' ' + parse[6] if !parse[6].blank?
 
         # Hmmm... better not to reformat what the user entered at all.
         label = "__#{str1}__"

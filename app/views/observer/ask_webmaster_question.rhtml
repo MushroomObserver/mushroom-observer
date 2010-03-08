@@ -11,5 +11,5 @@
   <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
   <%= text_area('question', 'content', :value => @content, :cols => 80) %>
 
-  <%= focus_on(@email && @email != '' && !@email_error ? 'question_content' : 'user_email') %>
+  <%= focus_on(!@email.blank? && !@email_error ? 'question_content' : 'user_email') %>
 <% end %>

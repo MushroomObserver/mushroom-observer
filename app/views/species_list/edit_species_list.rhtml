@@ -9,7 +9,7 @@
 %>
 
 <% args = {}
-  if @new_names.to_s != ''
+  if !@new_names.blank?
     args[:approved_names] = @new_names
   end
   if @deprecated_names && @deprecated_names != []

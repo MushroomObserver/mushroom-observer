@@ -110,7 +110,7 @@ class Vote < AbstractModel
 
   # Convert a given Vote value to a percentage.
   def self.percent(v)
-    if v.to_s == ''
+    if v.blank?
       0.0
     else
       v.to_f * 100 / 3

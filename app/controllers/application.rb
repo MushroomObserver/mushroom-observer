@@ -57,10 +57,6 @@
 #  save_names::               (helper)
 #  save_name::                (helper)
 #
-#  ==== Descriptions
-#  initialize_description_permissions::
-#                           Initialize permissions of new Description.
-#
 #  ==== Searching
 #  clear_query_in_session:: Clears out Query stored in session below.
 #  store_query_in_session:: Stores Query in session for use by create_species_list.
@@ -353,7 +349,7 @@ class ApplicationController < ActionController::Base
     code = if params[:user_locale]
       logger.debug "[globalite] loading locale: #{params[:user_locale]} from params"
       params[:user_locale]
-    elsif @user && @user.locale && @user.locale != ''
+    elsif @user && !@user.locale.blank?
       logger.debug "[globalite] loading locale: #{@user.locale} from @user"
       @user.locale
     elsif session[:locale]
@@ -691,7 +687,7 @@ class ApplicationController < ActionController::Base
         approved_names = approved_names.split("/")
       end
       for ns in name_list
-        if ns.strip != ''
+        if !ns.blank?
           name_parse = NameParse.new(ns)
           construct_approved_name(name_parse, approved_names, deprecate)
         end
@@ -810,123 +806,6 @@ class ApplicationController < ActionController::Base
     end
 
     return result
-  end
-
-  ################################################################################
-  #
-  #  :section: Descriptions
-  #
-  ################################################################################
-
-  # This is called right after a description is created.  It sets the admin,
-  # read and write permissions for a new description.
-  def initialize_description_permissions(desc)
-    read  = desc.public
-    write = desc.public_write == '1'
-    case desc.source_type
-
-    # Creating standard "public" description.
-    when :public
-      desc.reader_groups << UserGroup.all_users
-      desc.writer_groups << UserGroup.all_users
-      desc.admin_groups  << UserGroup.reviewers
-
-    # Creating draft for project.
-    when :project
-      project = Project.find_by_title(desc.source_name)
-      if read
-        desc.reader_groups << UserGroup.all_users
-      else
-        desc.reader_groups << project.user_group
-      end
-      if write
-        desc.writer_groups << UserGroup.all_users
-      else
-        desc.writer_groups << project.admin_group
-        desc.writer_groups << UserGroup.one_user(@user)
-      end
-      desc.admin_groups << project.admin_group
-      desc.admin_groups << UserGroup.one_user(@user)
-
-    # Creating personal description, or entering one from a specific source.
-    when :source, :user
-      if read
-        desc.reader_groups << UserGroup.all_users
-      else
-        desc.reader_groups << UserGroup.one_user(@user)
-      end
-      if write
-        desc.writer_groups << UserGroup.all_users
-      else
-        desc.writer_groups << UserGroup.one_user(@user)
-      end
-      desc.admin_groups << UserGroup.one_user(@user)
-
-    else
-      raise :runtime_invalid_source_type.t(:value => desc.source_type.inspect)
-    end
-  end
-
-  # Modify permissions on an existing Description based on two over-simplified
-  # "public readable" and "public writable" checkboxes.  Makes changes to the
-  # UserGroup's and modifies the Transaction +args+ in place. 
-  # desc::      Description object, with +public+ and +public_write+ updated.
-  # args::      Hash of args that will be used to create Transaction.
-  def modify_description_permissions(desc, args)
-    old_read = desc.public_was
-    new_read = desc.public
-    old_write = desc.public_write_was
-    new_write = (desc.public_write == '1')
-
-    # Ensure these special types don't change,
-    case desc.source_type
-    when :public
-      new_read  = true
-      new_write = true
-    when :foreign
-      new_read  = true
-      new_write = false
-    end
-
-    new_readers = []
-    new_writers = []
-
-    # "Public" means "all users" group.
-    if !old_read && new_read
-      new_readers << UserGroup.all_users
-    end
-    if !old_write && new_write
-      new_writers << UserGroup.all_users
-    end
-
-    # "Not Public" means only the owner...
-    if old_read && !new_read
-      new_readers << UserGroup.one_user(desc.user)
-    end
-    if old_write && !new_write
-      new_writers << UserGroup.one_user(desc.user)
-    end
-
-    # ...except in the case of projects.
-    if (desc.source_type == :project) and
-       (project = Project.find_by_title(desc.source_name))
-      if old_read && !new_read
-        # Add project members to readers.
-        new_readers << project.user_group
-      end
-      if old_write && !new_write
-        # Add project admins to writers.
-        new_writers << project.admin_group
-      end
-    end
-
-    # Make changes official.
-    if new_readers.any?
-      args[:set_reader_groups] = desc.reader_groups = new_readers
-    end
-    if new_writers.any?
-      args[:set_writer_groups] = desc.writer_groups = new_writers
-    end
   end
 
   ##############################################################################
@@ -1057,7 +936,7 @@ class ApplicationController < ActionController::Base
   # Get query parameter(s) from request params.
   def pass_query_params
     @query_params = {}
-    @query_params[:q] = params[:q] if params[:q].to_s != ''
+    @query_params[:q] = params[:q] if !params[:q].blank?
     @query_params
   end
 
@@ -1089,7 +968,7 @@ class ApplicationController < ActionController::Base
   def find_query(model, update=!is_robot?)
     model = model.to_s
     result = nil
-    if params[:q].to_s != ''
+    if !params[:q].blank?
       if query = Query.safe_find(params[:q].dealphabetize)
         # This is right kind of query.
         if query.model_string == model
@@ -1249,17 +1128,17 @@ class ApplicationController < ActionController::Base
     else
       if field = args[:letters]
         @pages = paginate_letters(letter_arg, number_arg, num_per_page)
-        if (args[:id].to_s != '') and
-           (params[@pages.letter_arg].to_s == '') and
-           (params[@pages.number_arg].to_s == '')
+        if !args[:id].blank? and
+           params[@pages.letter_arg].blank? and
+           params[@pages.number_arg].blank?
           @pages.show_index(query.index(args[:id]))
         end
         @objects = query.paginate(@pages, :include => include,
                                   :letter_field => field)
       else
         @pages = paginate_numbers(number_arg, num_per_page)
-        if (args[:id].to_s != '') and
-           (params[@pages.number_arg].to_s == '')
+        if !args[:id].blank? and
+           params[@pages.number_arg].blank?
           @pages.show_index(query.index(args[:id]))
         end
         @objects = query.paginate(@pages, :include => include)

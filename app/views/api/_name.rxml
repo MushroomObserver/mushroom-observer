@@ -37,7 +37,7 @@ xml.name(
     end
   end
 
-  if refs && object.classification.to_s != ''
+  if refs && !object.classification.blank?
 
     # This is less complete but doesn't require any additional queries.
     parse = Name.parse_classification(object.classification)

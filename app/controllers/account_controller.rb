@@ -144,7 +144,7 @@ class AccountController < ApplicationController
           flash_object_errors(@new_user)
         end
       else
-        if theme.strip != ''
+        if !theme.blank?
           AccountMailer.deliver_denied(params['new_user'])
         end
         redirect_back_or_default(:action => "welcome")
@@ -283,7 +283,7 @@ class AccountController < ApplicationController
 
         # Make sure the given location exists before accepting it.
         @place_name = params['user']['place_name'].to_s
-        if @place_name != ''
+        if !@place_name.blank?
           location = Location.find_by_display_name(@place_name)
           if !location
             need_to_create_location = true
@@ -299,7 +299,7 @@ class AccountController < ApplicationController
 
         # Check if we need to upload an image.
         upload = params['user']['upload_image']
-        if upload && upload != ''
+        if !upload.blank?
           name = upload.full_original_filename if upload.respond_to? :full_original_filename
           date = Time.local(params['date']['copyright_year'])
           image = Image.new(
@@ -362,7 +362,7 @@ class AccountController < ApplicationController
   def destroy_user
     if is_in_admin_mode?
       id = params['id']
-      if id.to_s != ''
+      if !id.blank?
         user = User.find(id)
         if user.destroy
           Transaction.delete_user(:id => user)
@@ -530,7 +530,7 @@ class AccountController < ApplicationController
         @user.alert_next_showing = Time.now + 1.day
         @user.save
       end
-      if params[:back].to_s != ''
+      if !params[:back].blank?
         redirect_to params[:back]
       else
         redirect_to '/'
@@ -550,7 +550,7 @@ class AccountController < ApplicationController
         if params[:commit] == :user_alert_save.l
           @user2.alert_type  = params[:user2][:alert_type]
           @user2.alert_notes = params[:user2][:alert_notes]
-          if params[:user2][:alert_type].to_s == ''
+          if params[:user2][:alert_type].blank?
             flash_error :user_alert_missing_type.t
             @user2.errors.add(:alert_type)
             redirect = false

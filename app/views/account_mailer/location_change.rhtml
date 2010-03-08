@@ -81,7 +81,7 @@ if @user.email_html ######################################################### %>
 <body topmargin=0 leftmargin=0 rightmargin=0 bottommargin=0><br/>
 <%= intro.tp %>
 <%= fields.tp %>
-<%= one_liners.tp if one_liners != '' %>
+<%= one_liners.tp if !one_liners.blank? %>
 <% for var, val in many_liners %>
   <%= "*#{var} #{:email_field_is_now.l}:*".tp %>
   <div style='margin-left:20px; margin-right:20px; padding-left:20px; padding-right:20px; padding-top:10px; padding-bottom:10px; border:1px dotted; background:#E0E0E0; color:#000000;'>
@@ -102,7 +102,7 @@ if @user.email_html ######################################################### %>
 
 <%= fields.tp.html_to_ascii %>
 
-<%= one_liners.tp.html_to_ascii if one_liners != '' %>
+<%= one_liners.tp.html_to_ascii if !one_liners.blank? %>
 <% for var, val in many_liners %>
 <%= "#{var} #{:email_field_is_now.l}:" %>
 --------------------------------------------------

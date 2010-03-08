@@ -34,7 +34,6 @@
 #  ==== Source Info
 #  source_type::          Category of source, e.g. :public, :project, :user.
 #  source_name::          Source identifier (e.g., Project title).
-#  source_title::         Return String describing the source.
 #  source_object::        Return reference to object representing source.
 #  belongs_to_project?::  Does this Description belong to a given Project?
 #
@@ -159,26 +158,19 @@ class Description < AbstractModel
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part) # :nodoc:
-    tag = "description_#{full_or_part}_title_#{source_type}".to_sym
-    args = { :object => parent.format_name }
-    result = case source_type
-    when :public
-      if source_title.to_s != ''
-        args[:summary] = source_title
-        tag = "#{tag}_with_summary".to_sym
-      end
-    when :foreign
-      args[:server]  = source_title
-    when :project
-      args[:project] = source_title
-      args[:user]    = user.legal_name
-    when :source
-      args[:source]  = source_title
-    when :user
-      args[:user]    = user.legal_name
-      if user == User.current
-        tag = "#{tag}_yours".to_sym
-      end
+    if (source_type == :user) and (user == User.current)
+      tag = :"description_#{full_or_part}_title_yours"
+    else
+      tag = :"description_#{full_or_part}_title_#{source_type}"
+    end
+    args = {
+      :text => source_name,
+      :user => user.legal_name,
+    }
+    if full_or_part == :full
+      args[:object] = parent.format_name
+    elsif !source_name.blank?
+      tag = :"#{tag}_with_text"
     end
     return tag.l(args)
   end
@@ -206,7 +198,7 @@ class Description < AbstractModel
     for field in self.class.all_note_fields
       value = self.send(field).to_s.
                    gsub(/\s+$/, '').sub(/\A\n+/, '').sub(/\n+\Z/, '')
-      result[field] = value != '' ? value : nil
+      result[field] = value.blank? ? nil : value
     end
     result
   end
@@ -231,7 +223,7 @@ class Description < AbstractModel
   def note_status
     fieldCount = sizeCount = 0
     for (k, v) in self.all_notes
-      if v and v.strip != ''
+      if !v.blank?
         fieldCount += 1
         sizeCount += v.strip_squeeze.length
       end
@@ -247,9 +239,9 @@ class Description < AbstractModel
     src_notes = src.all_notes
     dest_notes = dest.all_notes
     if !self.class.all_note_fields.any? \
-         {|f| (src_notes[f].to_s != '') and (dest_notes[f].to_s != '')}
-      for f, val in dest_notes
-        dest.send("#{f}=", val) if val.to_s != ''
+         {|f| (!src_notes[f].blank?) and (!dest_notes[f].blank?)}
+      for f, val in src_notes
+        dest.send("#{f}=", val) if !val.blank?
       end
       dest.save if dest.changed?
       src.destroy
@@ -265,11 +257,12 @@ class Description < AbstractModel
   #
   ################################################################################
 
+  # Note, this is the order they will be listed in show_name.
   ALL_SOURCE_TYPES = [
     :public,    # Public ones created by any user.
     :foreign,   # Foreign "public" description(s) written on another server.
-    :project,   # Draft created for a project.
     :source,    # Derived from another source, e.g. another website or book.
+    :project,   # Draft created for a project.
     :user       # Created by an individual user.
   ]
 
@@ -278,27 +271,13 @@ class Description < AbstractModel
     ALL_SOURCE_TYPES
   end
 
-  # Return a String describing the source if applicable, e.g. Project title,
-  # server name, User's name, source's name.  All else return +nil+.
-  def source_title
-    source_name
-  end
-
-    # case source_type
-    # when :public  ; self.source_name  # (arbitrary description)
-    # when :foreign ; self.source_name  # (server name)
-    # when :project ; self.source_name  # (project title)
-    # when :source  ; self.source_name  # (free-form)
-    # when :user    ; self.source_name  # (user's full name)
-    # end
-
   # Retreive object representing the source (if applicable).  Presently, this
   # only works for Project drafts and User's personal descriptions.  All others
   # return +nil+.
   def source_object
     case source_type
                     # (this may eventually be replaced with source_id)
-    when :project ; Project.find_by_title(source_title)
+    when :project ; Project.find_by_title(source_name)
     when :source  ; nil  # (haven't created "Source" model yet)
     when :user    ; user
     else            nil
@@ -535,12 +514,21 @@ class Description < AbstractModel
   # When destroying an object, subtract contributions due to
   # authorship/editorship.
   def before_destroy
+
+    # Update editors' and authors' contributions.
     for user in authors
       SiteData.update_contribution(:del, authors_join_table, user.id)
     end
     for user in editors
       SiteData.update_contribution(:del, editors_join_table, user.id)
     end
+
+    # Make sure parent doesn't point to a nonexisting object.
+    if parent.description_id == self.id
+      parent.description_id = nil
+      parent.save_without_our_callbacks
+    end
+  
     super
   end
 end

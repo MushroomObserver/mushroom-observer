@@ -476,11 +476,11 @@ class Name < AbstractModel
         if !lines
           # Check this name's classification first.
           str = classification
-          if str.to_s.strip == '' && results.last
+          if str.blank? && results.last
             # Next try the last genus's classification from subgeneric results.
             str = results.last.classification
           end
-          if str.to_s.strip == ''
+          if str.blank?
             # Finally try searching for any classification that includes this
             # name in it!
             str = Name.connection.select_value %(
@@ -727,7 +727,7 @@ class Name < AbstractModel
           end
           line_name = match[2]
           results.push([line_rank, line_name])
-        elsif line.strip != ''
+        elsif !line.blank?
           raise :runtime_invalid_classification.t(:text => line)
         end
       end
@@ -1564,7 +1564,7 @@ class Name < AbstractModel
         # Look up name, trying to match author if supplied.
         matches = []
         name = text_name
-        if author.to_s == ''
+        if author.blank?
           matches = Name.all(:conditions => ["text_name = ?", text_name])
         else
           matches = Name.all(:conditions => ["search_name = ?", search_name])
@@ -1586,7 +1586,7 @@ class Name < AbstractModel
         # If found a unique match, take it.  Add author if one supplied.
         elsif matches.length == 1
           name = matches.first
-          if (name.author.to_s == '') and (author.to_s != '')
+          if name.author.blank? and !author.blank?
             name.change_author author
           end
           result << name
@@ -1777,10 +1777,10 @@ class Name < AbstractModel
   # This was used by +change_text_name+, but apparently no longer.
   def self.check_for_repeats(text_name, author) # :nodoc:
     matches = []
-    if author != ''
-      matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
+    if !author.blank?
+      matches = Name.all(:conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
     else
-      matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
+      matches = Name.all(:conditions => "text_name = '%s'" % text_name)
     end
     for m in matches
       if m.id != self.id

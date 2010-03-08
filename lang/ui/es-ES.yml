@@ -112,6 +112,10 @@ ACCOUNT: Cuenta
 account: cuenta
 ACCOUNTS: Cuentas
 accounts: cuentas
+ADMIN: Admin
+admin: admin
+ADMINS: Administradores
+admins: administradores
 ADMIN_GROUP: Grupo de Admin
 admin_group: grupo de admin
 ADMIN_GROUPS: Grupos de Admin
@@ -198,6 +202,10 @@ OBSERVER: Observador
 observer: observador
 OBSERVERS: Observadores
 observers: observadores
+OWNER: Propietario
+owner: propietario
+OWNERS: Propietarios
+owners: propietarios
 PASSWORD: Contraseña
 password: contraseña
 PASSWORDS: Contraseñas
@@ -221,6 +229,10 @@ RANK: Rango
 rank: rango
 RANKS: Rangos
 ranks: rangos
+REVIEWER: Revisor
+reviewer: revisor
+REVIEWERS: Revisores
+reviewers: revisores
 STATUS: Estatus
 status: estatus
 STATUSS: Estatutos
@@ -369,13 +381,17 @@ UNKNOWN: Desconocido
 unknown: desconocido
 
 # Permissions: restricted means access is restricted but the current user has
-# access; private means the current user does not have access.
+# access; private means the current user does not have access; default means
+# this is the default description that shows up on the show_name/location page
+# (synonyms that might work better are "principle" or "main" or "official").
 PRIVATE: Privado
 private: privado
 PUBLIC: Público
 public: público
 RESTRICTED: Restringido
 restricted: restringido
+DEFAULT: Principal
+default: principal
 
 # Common verbs/actions with objects:
 add_object: Aggregar [TYPE]
@@ -436,20 +452,29 @@ naming_reason_label_4: Según las características químicas
 # Description types, note full_title combines the titles below with the title
 # of the object the description is describing, e.g. "User's [:description] of
 # Agaricus campestris" or "Draft for EOL Initiative by login of Amanita lanei".
+
+# These are used as page title and in index results: must include both the type
+# of description and the title of the object ([object]) they're describing.
 description_full_title_public: Descripción Pública de [object]
-description_full_title_public_with_summary: Descripción Pública de [object]
-description_full_title_foreign: Descripción de [object] de [server]
-description_full_title_project: Borrador de [object] para [project] por [user]
-description_full_title_source: Descripción de [object] de [source]
+description_full_title_foreign: Descripción de [object] de [text]
+description_full_title_project: Borrador de [object] para [text] por [user]
+description_full_title_source: Descripción de [object] de [text]
 description_full_title_user: Descripción de [object] por [user]
-description_full_title_user_yours: Su Descripción de [object]
+description_full_title_yours: Su Descripción de [object]
+
+# These are used when listing the available descriptions in the show_name page.
 description_part_title_public: Descripción Pública
-description_part_title_public_with_summary: "[SUMMARY]"
-description_part_title_foreign: Descripción de [server]
-description_part_title_project: Borrador para [project] por [user]
-description_part_title_source: Descripción de [source]
 description_part_title_user: Descripción por [user]
-description_part_title_user_yours: Su Descripción
+description_part_title_yours: "Su [:DESCRIPTION]"
+
+# Same thing, but this time the optional text field was filled in.  Note that
+# the text field is not optional for half of the source types.
+description_part_title_public_with_text: "[TEXT]"
+description_part_title_foreign_with_text: "[:DESCRIPTION] de [TEXT]"
+description_part_title_project_with_text: "Borrador para [TEXT] por [USER]"
+description_part_title_source_with_text: "[:DESCRIPTION] de [TEXT]"
+description_part_title_user_with_text: "[TEXT] por [USER]"
+description_part_title_yours_with_text: "[TEXT] por Usted"
 
 # Footers: "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
 footer_created_at: "*Creado:* [date]"
@@ -809,6 +834,12 @@ runtime_user_hasnt_created: "[user] no ha creado ninguna [type]."
 runtime_user_hasnt_edited: "[user] no ha editado ninguna [type]."
 
 # One-time-use messages.
+runtime_description_added_admin: Dio permisos de admin a [name].
+runtime_description_added_reader: Dio permisos de lectura a [name].
+runtime_description_added_writer: Dio permisos de escritura a [name].
+runtime_description_removed_admin: Revocó permisos de admin para [name].
+runtime_description_removed_reader: Revocó permisos de lectura para [name].
+runtime_description_removed_writer: Revocó permisos de escritura para [name].
 runtime_destroy_description_not_admin: Sólo un admin de la descripción se puede borrar.
 runtime_duplicate_rank: El rango «[rank]» aparece dos veces.
 runtime_image_updated_notes: "Las notas para imagen #[id] se ha realizado."
@@ -832,6 +863,9 @@ runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
 runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
 runtime_ask_webmaster_success: "[:runtime_delivered_message]"
 runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
+runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
+runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
+runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
 runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
 runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
 runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
@@ -922,6 +956,45 @@ runtime_create_draft_create_denied: >
 runtime_create_naming_already_proposed: >
   Alguien ya ha propuesto ese nombre.  Si desea hacer comentarios sobre ello,
   intenta publicar un comentario en lugar.
+
+runtime_description_must_be_admin: >
+  Usted debe ser un administrador para una descripción para utilizar esa
+  página.
+
+runtime_description_foreign_read_wrong: >
+  Las descripciones de otros servidores deberán ser legibles por el público en
+  general.
+
+runtime_description_foreign_write_wrong: >
+  Las descripciones de otros servidores deberán ser de sólo lectura.
+
+runtime_description_make_default_only_public: >
+  Sólo se le permite hacer descripciones del público el valor por defecto.
+  Todos los usuarios se debe permitir por lo menos a leerlo.
+
+runtime_description_merge_conflict: >
+  Hay un conflicto.  Por favor, fusionar las dos descripciones de la mano.
+  (Mira a los campos de texto a continuación.  Cuando hay un conflicto, tanto
+  de las descripciones se han introducido una sobre la otra separadas por una
+  línea.)  Usted puede cancelar la operación en cualquier momento sin realizar
+  ningún cambio.  Cuando haya terminado, asegúrese de destruir la descripción
+  de edad.
+
+runtime_description_merge_success: >
+  Fusionaron con éxito las descripciones. La descripción de edad ha sido
+  destruido: [old].
+
+runtime_description_permissions_fixed: >
+  Este tipo de descripción se ha fijado los permisos.
+
+runtime_description_public_read_wrong: >
+  Descripciones públicas deben ser legibles para el público en general.
+
+runtime_description_public_write_wrong: >
+  Descripciones públicas deben ser escribible para el público en general.
+
+runtime_description_user_not_found: >
+  Usuario o grupo «[name]» no encontrado.
 
 runtime_destroy_naming_someone_else: >
   Lo sientimos, alguien más lo ha dado su mayor voto positivo.  Usted es
@@ -1447,21 +1520,32 @@ form_description_source_user: "[:USER]"
 form_description_permissions: Permisos
 form_description_public_writable: Modificable por el público en general.
 form_description_public_readable: Misible para el público en general.
-form_description_adjust_permissions: Ajustar Permisos
 form_description_source_help: >
-  ¿De dónde el contenido esencial de esta descripción viene?  Si usted está
-  escribiendo una descripción que se deriva de material con derechos de autor,
-  por favor, asegúrese de volver a escribir en sus propias palabras.
+  Hay tres tipos de descripciones que puede crear:\n
+  1. *Público:* Se trata de documentos de estilo de Wikipedia que son editables
+  por todos en el sitio.  El título por defecto es
+  "[:description_part_title_public]".  Utilice el campo de texto de arriba para
+  personalizarlos.\n
+  2. *Fuente:* Estas descripciones provienen de una fuente de terceros, y
+  normalmente no están destinados a ser modificables.  Introduzca el nombre de
+  la fuente en el campo de texto anterior.  Tenga en cuenta, si envías una
+  descripción que se deriva de material con derechos de autor, por favor,
+  asegúrese de volver a escribir en sus propias palabras.\n
+  3. *Usuario:* Use esto para crear su descripción personalizada.  El título
+  por defecto será "[:description_part_title_yours]".  Utilice el campo de
+  texto de arriba para personalizarlos.  En tanto en el presente y el tipo de
+  la 'Fuente' arriba, usted tendrá los derechos exclusivos de elegir quién
+  puede ver y modificar esta descripción (ver las casillas más abajo).
+
+form_description_permissions_help: >
+  ¿Es el público en general les permite ver o hacer modificaciones a esta
+  descripción?  Si desea tener más control sobre lectura, escritura y permisos
+  de administrador, por favor use el enlace arriba
+  '[:show_description_adjust_permissions]'.
 
 form_description_license_help: >
   Por favor, elegir "la licencia":/observer/how_to_use#license que desea
   utilizar para esta descripción.
-
-form_description_permissions_help: >
-  Por facor, indicar si el público en general se le permite ver o hacer
-  modificaciones a esta descripción.  Si desea tener más control sobre lectura,
-  escritura y permisos de administrador, por favor use el enlace arriba
-  '[:form_description_adjust_permissions]'.
 
 
 
@@ -2030,6 +2114,36 @@ show_comments_no_comments_yet: Nadie ha comentado todavía.
 
 
 
+# name/show_name_description or location/show_location_description
+show_description_empty: Nada ha sido escrito para esta descripción todavía.
+show_description_destroy: "[:DESTROY]"
+show_description_edit: "[:EDIT]"
+show_description_clone: Clonar
+show_description_merge: Fusionar con Otro
+show_description_publish: Publicar
+show_description_make_default: Hacer de Este el Valor por Defecto
+show_description_adjust_permissions: Ajustar Permisos
+show_description_read_permissions: Lectura
+show_description_write_permissions: Escritura
+show_description_clone_help: >
+  Crea tu propia descripción sobre la base de esta descripción.
+
+show_description_merge_help: >
+  Combinar esta descripción en otro, a continuación, quitar este.
+
+show_description_publish_help: >
+  Publicar este borrador y hacer que el valor por defecto descripción pública.
+
+show_description_make_default_help: >
+  Convertir esta en la descripción predeterminada que se muestra en la página
+  principal «[:show_name(name=:name)]».
+
+show_description_adjust_permissions_help: >
+  Cambiar el conjunto de usuarios que se les permite ver, modificar o
+  administrar esta descripción.
+
+
+
 # image/show_image
 show_image_reviewed_by: Revisado por
 show_image_quality_and_next: "[QUALITY] & [:NEXT]"
@@ -2045,17 +2159,10 @@ show_location_observations: Observaciones en Esta Ubicación
 show_location_highest: Mayor altitud
 show_location_lowest: Más baja altitud
 show_location_no_descriptions: Ya no hay descripciones para esta ubicación.
-show_location_description_empty: "[:show_name_description_empty]"
 show_location_create_description: "[:CREATE]"
 show_location_creator: Usuario que se se define esta ubicación
 show_location_editor: "[:Editors]"
 show_location_editors: "[:Editors]"
-
-
-
-# location/show_location_description
-show_location_description_edit: "[:edit_object(type=:location_description)]"
-show_location_description_destroy: "[:destroy_object(type=:location_description)]"
 
 
 
@@ -2081,7 +2188,6 @@ show_name_description_author: "[:Description] author"
 show_name_description_authors: "[:Description] autores"
 show_name_description_editor: "[:Description] editor"
 show_name_description_editors: "[:Description] editores"
-show_name_description_empty: Nada ha sido escrito para esta descripción todavía.
 show_name_author_request: Solicitar Crédito de Autor
 show_name_content_status: Estatus de Contenidos
 show_name_latest_review: "Última Revisión: [date] para [user]"
@@ -2098,12 +2204,6 @@ show_name_other_observations_notes: >
   (Alguien propuso [name] para estos observaciones, pero la comunidad no ha
   aceptado.  El valor de confianza es para __este__ nombre, no el nombre de
   consenso.)
-
-
-
-# name/show_name_description
-show_name_description_edit: "[:edit_object(type=:name_description)]"
-show_name_description_destroy: "[:destroy_object(type=:name_description)]"
 
 
 
@@ -2366,6 +2466,15 @@ welcome_note: >
 
 # LESS POPULAR PAGES
 
+# description/adjust_permissions
+adjust_permissions_user_header: Usuario o Grupo
+adjust_permissions_reader_header: Ver
+adjust_permissions_writer_header: "[:EDIT]"
+adjust_permissions_admin_header: "[:ADMIN]"
+adjust_permissions_all_users: Todos Usuarios
+adjust_permissions_site_admin: admin del sitio
+
+
 # observer/advanced_search
 advanced_search_at_least_one: Sírvanse proporcionar al menos un parámetro de búsqueda.
 advanced_search_caveat: >
@@ -2503,7 +2612,7 @@ eol_preview_explanation: >
   Actualmente los expertos designados están ya sea profesores activos de la
   micología que tienen previsto proporcionar datos a la EOL a través de
   Mushroom Observer, o persones en la comunidad de Mushroom Observer que han
-  mostrado dedicacion a la sitio y están expertos reconocidos en identificación
+  mostrado dedicacion al sitio y están expertos reconocidos en identificación
   de hongos.  Todo los aspectos del proceso están todavía objectos de debate y
   están abiertos al cambio.  Por favor, envíe preguntas o comentarios al
   webmaster de Mushroom Observer.
@@ -2570,6 +2679,12 @@ location_merge_success: Se fusionó [this] con [that] con éxito.
 
 # species_list/make_report
 make_report_not_supported: El tipo de archivo «*.[type]» no es compatible.
+
+
+# description/merge_descriptions
+merge_descriptions_title: Fusionar [object] con Otra Descripción
+merge_descriptions_header: Otras Descripciones
+merge_descriptions_no_others: "(soló hay una descripción)"
 
 
 # name/bulk_name_edit

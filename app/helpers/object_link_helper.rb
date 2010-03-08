@@ -110,12 +110,17 @@ module ApplicationHelper::ObjectLink
     result = desc.partial_format_name.t
 
     # Indicate rough permissions.
-    if desc.public
-      result += " (#{:public.t})"
+    permit = if desc.parent.description_id == desc.id
+      :default.l
+    elsif desc.public
+      :public.l
     elsif desc.is_reader?(@user)
-      result += " (#{:restricted.t})"
+      :restricted.l
     else
-      result += " (#{:private.t})"
+      :private.l
+    end
+    unless result.match(/(^| )#{permit}( |$)/i)
+      result += " (#{permit})"
     end
 
     return result

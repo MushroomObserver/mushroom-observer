@@ -252,16 +252,16 @@ class SpeciesList < AbstractModel
     now  = Time.now
     user = User.current
 
-    args[:created]  = now        if args[:created].to_s == ''
-    args[:modified] = now        if args[:modified].to_s == ''
-    args[:user]     = user       if args[:modified].to_s == ''
-    args[:when]     = self.when  if args[:when].to_s == ''
-    args[:where]    = where      if args[:where].to_s == ''
-    args[:notes]    = ''         if args[:notes].to_s == ''
-    args[:specimen] = ''         if args[:specimen].to_s == ''
-    args[:vote]     = ''         if args[:vote].to_s == ''
+    args[:created]  = now        if args[:created].blank?
+    args[:modified] = now        if args[:modified].blank?
+    args[:user]     = user       if args[:modified].blank?
+    args[:when]     = self.when  if args[:when].blank?
+    args[:where]    = where      if args[:where].blank?
+    args[:notes]    = ''         if args[:notes].blank?
+    args[:specimen] = ''         if args[:specimen].blank?
+    args[:vote]     = ''         if args[:vote].blank?
 
-    if args[:what].to_s != ''
+    if !args[:what].blank?
       obs = Observation.create(
         :created  => args[:created],
         :modified => args[:modified],
@@ -281,7 +281,7 @@ class SpeciesList < AbstractModel
         :observation => obs
       )
 
-      if args[:vote].to_s != ''
+      if !args[:vote].blank?
         vote = Vote.create(
           :created     => args[:created],
           :modified    => args[:modified],
