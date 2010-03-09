@@ -703,8 +703,9 @@ class NameController < ApplicationController
       @description.name = @name
       @description.attributes = params[:description]
 
-      if @description.save
+      if @description.valid?
         initialize_description_permissions(@description)
+        @description.save
 
         Transaction.post_name_description(
           @description.all_notes.merge(
@@ -721,7 +722,7 @@ class NameController < ApplicationController
         )
 
         # Make this the "default" description if there isn't one and this is
-        # publically readable.
+        # publicly readable.
         if !@name.description and
            @description.public
           @name.description = @description

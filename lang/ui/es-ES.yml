@@ -837,6 +837,7 @@ runtime_user_hasnt_edited: "[user] no ha editado ninguna [type]."
 runtime_description_added_admin: Dio permisos de admin a [name].
 runtime_description_added_reader: Dio permisos de lectura a [name].
 runtime_description_added_writer: Dio permisos de escritura a [name].
+runtime_description_private: That description is private!
 runtime_description_removed_admin: Revocó permisos de admin para [name].
 runtime_description_removed_reader: Revocó permisos de lectura para [name].
 runtime_description_removed_writer: Revocó permisos de escritura para [name].

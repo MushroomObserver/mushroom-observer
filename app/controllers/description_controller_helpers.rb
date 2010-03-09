@@ -63,10 +63,15 @@ module DescriptionControllerHelpers
     else
       src_title = src.format_name
       dest = find_description(params[:target])
+      src_was_default = (src.parent.description_id == src.id)
       if !dest.is_writer?(@user)
         flash_error(:runtime_edit_description_denied.t)
         @description = src
       elsif dest.merge(src)
+        if src_was_default
+          dest.parent.description = dest
+          dest.parent.save
+        end
         flash_notice(:runtime_description_merge_success.
                      t(:old => src_title, :new => dest.format_name))
         redirect_to(:action => dest.show_action, :id => dest.id,
@@ -296,11 +301,16 @@ module DescriptionControllerHelpers
     # Cloning an existing description.
     elsif !params[:clone].blank?
       clone = find_description(params[:clone])
-      desc.all_notes = clone.all_notes
-      desc.source_type  = :user
-      desc.source_name  = ''
-      desc.public       = false
-      desc.public_write = false
+      if clone.is_reader?(@user)
+        desc.all_notes = clone.all_notes
+        desc.source_type  = :user
+        desc.source_name  = ''
+        desc.public       = false
+        desc.public_write = false
+      else
+        flash_error(:runtime_description_private.t)
+        redirect_to(:action => 'show_name', :id => desc.parent_id)
+      end
 
     # Otherwise default to :public description.
     else
@@ -326,6 +336,7 @@ module DescriptionControllerHelpers
       desc.writer_groups << UserGroup.all_users
       desc.admin_groups  << UserGroup.reviewers
       desc.public = true
+      desc.save
 
     # Creating draft for project.
     when :project

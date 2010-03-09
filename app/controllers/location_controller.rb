@@ -566,8 +566,9 @@ class LocationController < ApplicationController
       @description.location = @location
       @description.attributes = params[:description]
 
-      if @description.save
+      if @description.valid?
         initialize_description_permissions(@description)
+        @description.save
 
         Transaction.post_location_description(
           @description.all_notes.merge(

@@ -32,7 +32,7 @@ module FlashExtensions
   end
 
   # Assert that there was warning but no error.
-  def assert_flash_error(msg='')
+  def assert_flash_warning(msg='')
     assert_flash(1, msg)
   end
 
@@ -49,11 +49,11 @@ module FlashExtensions
         got = got[1..-1]
       end
       if !expect && got
-        assert_equal(nil, got, msg + "Shouldn't have been any flash errors.")
+        assert_equal(nil, got, msg + "Shouldn't have been any flash errors.  Got <#{got}>.")
       elsif expect && !got
-        assert_equal(expect, nil, msg + "Expected a flash error.")
+        assert_equal(expect, nil, msg + "Expected a flash error.  Got nothing.")
       elsif expect.is_a?(Fixnum)
-        assert_equal(expect, lvl, msg + "Wrong flash error level.")
+        assert_equal(expect, lvl, msg + "Wrong flash error level.  Message: <#{got}>.")
       elsif expect.is_a?(Regexp)
         assert_match(expect, got, msg + "Got the wrong flash error(s).")
       else

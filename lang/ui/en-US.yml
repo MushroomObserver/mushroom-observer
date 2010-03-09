@@ -835,6 +835,7 @@ runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
 runtime_description_added_admin: Gave admin permission to [name].
 runtime_description_added_reader: Gave view permission to [name].
 runtime_description_added_writer: Gave edit permission to [name].
+runtime_description_private: That description is private!
 runtime_description_removed_admin: Revoked admin permission for [name].
 runtime_description_removed_reader: Revoked view permission for [name].
 runtime_description_removed_writer: Revoked edit permission for [name].

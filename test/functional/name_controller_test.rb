@@ -2415,4 +2415,222 @@ class NameControllerTest < FunctionalTestCase
   def test_destroy_draft_non_member
     destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
   end
+
+  # ------------------------------
+  #  Test creating descriptions.
+  # ------------------------------
+
+  def test_create_description_load_form_no_desc_yet
+    name = names(:conocybe_filaris)
+    assert_equal(0, name.descriptions.length)
+    params = {:id => name.id}
+
+    # Make sure it requires login.
+    requires_login(:create_name_description, params)
+    desc = assigns(:description)
+    assert_equal(:public, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+
+    # Test draft creation by project member.
+    login('rolf') # member
+    project = projects(:eol_project)
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response('create_name_description')
+    desc = assigns(:description)
+    assert_equal(:project, desc.source_type)
+    assert_equal(project.title, desc.source_name)
+    assert_equal(false, desc.public)
+    assert_equal(false, desc.public_write)
+
+    # Test draft creation by project non-member.
+    login('dick')
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response(:controller => 'project', :action => 'show_project',
+                    :id => project.id)
+    assert_flash_error
+  end
+
+  def test_create_description_load_form_already_has_desc
+    name = names(:peltigera)
+    assert_not_equal(0, name.descriptions.length)
+    params = {:id => name.id}
+
+    # Make sure it requires login.
+    requires_login(:create_name_description, params)
+    desc = assigns(:description)
+    assert_equal(:public, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+
+    # Test draft creation by project member.
+    login('katrina') # member
+    project = projects(:eol_project)
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response('create_name_description')
+    desc = assigns(:description)
+    assert_equal(:project, desc.source_type)
+    assert_equal(project.title, desc.source_name)
+    assert_equal(false, desc.public)
+    assert_equal(false, desc.public_write)
+
+    # Test draft creation by project non-member.
+    login('dick')
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response(:controller => 'project', :action => 'show_project',
+                    :id => project.id)
+    assert_flash_error
+
+    # Test clone of private description if not reader.
+    other = name_descriptions(:peltigera_user_desc)
+    login('katrina') # random user
+    get(:create_name_description, params.merge(:clone => other.id))
+    assert_response(:action => 'show_name', :id => name.id)
+    assert_flash_error
+
+    # Test clone of private description if can read.
+    login('dick') # reader
+    get(:create_name_description, params.merge(:clone => other.id))
+    assert_response('create_name_description')
+    desc = assigns(:description)
+    assert_equal(:user, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(false, desc.public)
+    assert_equal(false, desc.public_write)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.reader_groups)
+  end
+
+  def test_create_name_description_public
+
+    # Minimum args.
+    params = {
+      :description => empty_notes.merge(
+        :source_type  => :public,
+        :source_name  => '',
+        :public       => '1',
+        :public_write => '1'
+      )
+    }
+
+    # No desc yet -> make new desc default. 
+    name = names(:conocybe_filaris)
+    assert_equal(0, name.descriptions.length)
+    post(:create_name_description, params)
+    assert_response(:redirect)
+    login('dick')
+    params[:id] = name.id
+    post(:create_name_description, params)
+    assert_flash_success
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+    name.reload
+    assert_objs_equal(desc, name.description)
+    assert_obj_list_equal([desc], name.descriptions)
+    assert_equal(:public, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+
+    # Already have default, try to make public desc private -> warn and make
+    # public but not default.
+    name = names(:coprinus_comatus)
+    assert(default = name.description)
+    assert_not_equal(0, name.descriptions.length)
+    params[:id] = name.id
+    params[:description][:public]       = '0'
+    params[:description][:public_write] = '0'
+    params[:description][:source_name]  = 'Alternate Description'
+    post(:create_name_description, params)
+    assert_flash_warning # tried to make it private
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+    name.reload
+    assert_objs_equal(default, name.description)
+    assert_true(name.descriptions.include?(desc))
+    assert_equal(:public, desc.source_type)
+    assert_equal('Alternate Description', desc.source_name.to_s)
+    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+  end
+
+  def test_create_name_description_bogus_classification
+    name = names(:agaricus_campestris)
+    login('dick')
+
+    bad_class = "*Order*: Agaricales\r\nFamily: Agaricaceae"
+    good_class  = "Family: Agaricaceae\r\nOrder: Agaricales"
+    final_class = "Order: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+    params = {
+      :id => name.id,
+      :description => empty_notes.merge(
+        :source_type  => :public,
+        :source_name  => '',
+        :public       => '1',
+        :public_write => '1'
+      )
+    }
+
+    params[:description][:classification] = bad_class
+    post(:create_name_description, params)
+    assert_flash_error
+    assert_response('create_name_description')
+
+    params[:description][:classification] = good_class
+    post(:create_name_description, params)
+    assert_flash_success
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+
+    name.reload
+    assert_equal(final_class, name.classification)
+    assert_equal(final_class, desc.classification)
+  end
+
+  def test_create_name_description_source
+    login('dick')
+
+    name = names(:conocybe_filaris)
+    assert_nil(name.description)
+    assert_equal(0, name.descriptions.length)
+
+    params = {
+      :id => name.id,
+      :description => empty_notes.merge(
+        :source_type  => :source,
+        :source_name  => 'Mushrooms Demystified',
+        :public       => '0',
+        :public_write => '0'
+      )
+    }
+
+    post(:create_name_description, params)
+    assert_flash_success
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+
+    name.reload
+    assert_nil(name.description)
+    assert_true(name.descriptions.include?(desc))
+    assert_equal(:source, desc.source_type)
+    assert_equal('Mushrooms Demystified', desc.source_name)
+    assert_false(desc.public)
+    assert_false(desc.public_write)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.reader_groups)
+  end
 end
