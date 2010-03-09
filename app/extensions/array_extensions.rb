@@ -14,7 +14,7 @@ class Array
   #   none? {|x| cond}
   #   !any? {|x| cond}
   #
-  def none?(*args)
+  def none?(&block)
     proc = block || lambda {|x| x}
     self.each do |x|
       return false if proc.call(x)

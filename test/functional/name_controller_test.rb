@@ -92,29 +92,36 @@ class NameControllerTest < FunctionalTestCase
     end
   end
 
-#   def publish_draft_helper(draft, user=nil, success=true, action='show_name_description')
-#     if user
-#       assert_not_equal(draft.user, user)
-#     else
-#       user = draft.user
-#     end
-#     draft_gen_desc = draft.gen_desc
-#     name_gen_desc = draft.name.gen_desc
-#     same_gen_desc = (draft_gen_desc == draft.name.gen_desc)
-#     name_id = draft.name_id
-#     params = {
-#       :id => draft.id
-#     }
-#     requires_login(:publish_draft, params, user.login)
-#     name = Name.find(name_id)
-#     if success
-#       assert_response(:controller => 'name', :action => 'show_name', :id => name_id)
-#       assert_equal(draft_gen_desc, name.gen_desc)
-#     else
-#       assert_response(:action => action, :id => draft.id)
-#       assert_equal(same_gen_desc, draft_gen_desc == draft.name.gen_desc)
-#     end
-#   end
+  def publish_draft_helper(draft, user=nil, merged=true, conflict=false)
+    if user
+      assert_not_equal(draft.user, user)
+    else
+      user = draft.user
+    end
+    draft_gen_desc = draft.gen_desc
+    name_gen_desc = draft.name.description.gen_desc rescue nil
+    same_gen_desc = (draft_gen_desc == name_gen_desc)
+    name_id = draft.name_id
+    params = {
+      :id => draft.id
+    }
+    requires_login(:publish_description, params, user.login)
+    name = Name.find(name_id)
+    new_gen_desc = name.description.gen_desc rescue nil
+    if merged
+      assert_equal(draft_gen_desc, new_gen_desc)
+    else
+      assert_equal(same_gen_desc, draft_gen_desc == new_gen_desc)
+      assert(NameDescription.safe_find(draft.id))
+    end
+    if conflict
+      assert_template('edit_name_description')
+      assert(assigns(:description).gen_desc.index(draft_gen_desc))
+      assert(assigns(:description).gen_desc.index(name_gen_desc))
+    else
+      assert_response(:action => 'show_name', :id => name_id)
+    end
+  end
 
   # Destroy a draft of a project.
   def destroy_draft_helper(draft, user, success=true)
@@ -2353,25 +2360,45 @@ class NameControllerTest < FunctionalTestCase
       { :classification => "**Domain**: Eukarya" }, true, false)
   end
 
-#   def test_publish_draft
-#     publish_draft_helper(name_descriptions(:draft_coprinus_comatus))
-#   end
-# 
-#   def test_publish_draft_admin
-#     publish_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary)
-#   end
-# 
-#   def test_publish_draft_member
-#     publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false)
-#   end
-# 
-#   def test_publish_draft_non_member
-#     publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
-#   end
-# 
-#   def test_publish_draft_bad_classification
-#     publish_draft_helper(name_descriptions(:draft_lactarius_alpinus), nil, false, 'edit_draft')
-#   end
+  # Owner can publish.
+  def test_publish_draft
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil, :merged, false)
+  end
+
+  # Admin can, too.
+  def test_publish_draft_admin
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary, :merged, false)
+  end
+
+  # Other members cannot.
+  def test_publish_draft_member
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false, false)
+  end
+
+  # Non-members certainly can't.
+  def test_publish_draft_non_member
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+  end
+
+  # Non-members certainly can't.
+  def test_publish_draft_conflict
+    draft = name_descriptions(:draft_coprinus_comatus)
+    # Create a simple public description to cause conflict.
+    name = draft.name
+    name.description = desc = NameDescription.create!(
+      :name        => name,
+      :user        => @rolf,
+      :source_type => :public,
+      :source_name => '',
+      :public      => true,
+      :gen_desc    => "Pre-existing general description."
+    )
+    name.save
+    desc.admin_groups  << UserGroup.reviewers
+    desc.writer_groups << UserGroup.all_users
+    desc.reader_groups << UserGroup.all_users
+    publish_draft_helper(draft.reload, nil, false, :conflict)
+  end
 
   def test_destroy_draft_owner
     destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @rolf)

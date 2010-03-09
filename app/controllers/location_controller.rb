@@ -27,7 +27,7 @@
 #   * add_to_location
 #   * make_description_default
 #   * merge_descriptions
-#   * publish_descriptions
+#   * publish_description
 #   * adjust_permissions
 #
 #  Helpers:

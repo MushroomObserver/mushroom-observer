@@ -26,7 +26,7 @@
 #   * destroy_name_description    Destroy name_description.
 #   * make_description_default    Make a description the default one.
 #   * merge_descriptions          Merge a description with another.
-#   * publish_descriptions        Publish a draft description.
+#   * publish_description         Publish a draft description.
 #   * adjust_permissions          Adjust permissions on a description.
 #   * change_synonyms             Change list of synonyms for a name.
 #   * deprecate_name              Deprecate name in favor of another.

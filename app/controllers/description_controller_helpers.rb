@@ -91,7 +91,17 @@ module DescriptionControllerHelpers
     parent = draft.parent
     old = parent.description
     type = parent.class.name.underscore
-    if !old || !old.is_writer?(@user)
+
+    # Must be admin on the draft in order for this to work.  (Must be able
+    # to delete the draft after publishing it.)
+    if !draft.is_admin?(@user)
+      flash_error(:runtime_edit_description_denied.t)
+      redirect_to(:action => parent.show_action, :id => parent.id,
+                  :params => query_params)
+
+    # 1) No default desc: turn this into public desc and make it the default.
+    # 2) Default is not writable: same thing, make this the default instead.
+    elsif !old || !old.is_writer?(@user)
       if old
         flash_warning(:runtime_description_publish_denied.t(:default =>
                       old.format_name))
@@ -115,6 +125,9 @@ module DescriptionControllerHelpers
         :set_writer_groups => draft.writer_groups,
         :set_reader_groups => draft.reader_groups
       )
+
+    # Default description is writable.  Try to merge.  If fails, send user
+    # to edit_description to sort out the conflicts.
     elsif !old.merge(draft)
       flash_warning(:runtime_description_merge_conflict.t)
       @description = old
@@ -122,6 +135,9 @@ module DescriptionControllerHelpers
       merge_description_notes(draft, old)
       render(:action => "edit_#{type}_description")
     end
+
+    # In every case except conflict above, it hasn't rendered or redirected
+    # yet, so send user on to show_name.
     if !performed?
       redirect_to(:action => parent.show_action, :id => parent.id,
                   :params => query_params)

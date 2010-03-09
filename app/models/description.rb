@@ -236,14 +236,17 @@ class Description < AbstractModel
   # description fields, i.e. one or the other is blank for any given field.
   def merge(src)
     dest = self
-    src_notes = src.all_notes
+    src_notes  = src.all_notes
     dest_notes = dest.all_notes
-    if !self.class.all_note_fields.any? \
-         {|f| (!src_notes[f].blank?) and (!dest_notes[f].blank?)}
+    # Mergeable if there are no fields which are non-blank in both descriptions.
+    if self.class.all_note_fields.none? \
+         {|f| !src_notes[f].blank? and !dest_notes[f].blank?}
       for f, val in src_notes
         dest.send("#{f}=", val) if !val.blank?
       end
-      dest.save if dest.changed?
+      if dest.changed?
+        dest.save
+      end
       src.destroy
       result = true
     else

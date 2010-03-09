@@ -54,7 +54,7 @@
 
     if @new_desc
       for field in NameDescription.all_note_fields
-        old_val = @old_desc.send(field)
+        old_val = @old_desc.send(field) rescue nil
         new_val = @new_desc.send(field)
         many_liners.push([('form_names_' + field.to_s).to_sym.t, new_val]) if new_val != old_val
       end
