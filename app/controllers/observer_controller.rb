@@ -1837,7 +1837,7 @@ class ObserverController < ApplicationController
           if !image.save
             bad_images.push(image)
             flash_object_errors(image)
-          elsif !image.save_image
+          elsif !image.process_image
             logger.error('Unable to upload image')
             flash_notice(:runtime_no_upload_image.t(:name => (name ? "'#{name}'" : "##{image.id}")))
             bad_images.push(image)

@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+require 'net/http'
+require 'uri'
+
+file, id = *ARGV
+w = h = 0
+
+# Grab dimensions from JPEG header.
+File.open(file) do |fh|
+  fh.sysseek(2)
+  while str = fh.sysread(4)
+    x, l = str.unpack('nn')
+    if x == 0xFFC0
+      h, w =fh.sysread(5).unpack('xnn')
+      break
+    elsif x < 0xFF00
+      $stderr.puts 'Invalid header!'
+      exit 1
+    else
+      fh.sysseek(l - 2, IO::SEEK_CUR)
+    end
+  end
+end
+
+if id.to_s == ''
+  puts "#{w} #{h}"
+else 
+  http = Net::HTTP.new('localhost')
+  http.put("/api/images?id=#{id}&set_width=#{w}&set_height=#{h}")
+end
+
+exit 0

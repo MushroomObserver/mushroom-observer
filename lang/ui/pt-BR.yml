@@ -710,11 +710,13 @@ validate_too_small_or_large:  "[Field] should be between [min] and [max]."
 validate_image_content_type_images_only:  You can only upload [:images].
 validate_image_file_missing:  Had problems uploading [:image].
 validate_image_file_too_big:  We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
+validate_image_md5_mismatch:  The MD5 sum did not come out right.  Please try uploading your image again.
 validate_observation_future_time:  Time travel is not allowed, pick a date from the past.
 validate_observation_thumb_image_id_invalid:  Unable to find a corresponding [:image] for thumbnail.
 validate_observation_where_missing:  Please tell us where it was seen or collected.
 validate_user_email_missing:  Please give us a valid email address so we can verify your [:account].
 validate_user_login_taken:  Sorry, that login name is already taken.
+validate_image_wrong_type:  The file you tried to upload is not recognized as an image.  It is of type '[type]'.
 
 # These shouldn't need translating, but you are free to override if you need to.
 validate_comment_object_type_too_long:  "[:validate_too_long(field=''object_type'',max=30)]"
@@ -897,10 +899,12 @@ runtime_form_comments_edit_success:  "[:runtime_updated_id(type=:comment,value=i
 runtime_image_destroy_failed:  "[:runtime_no_destroy_id(type=:image,value=id)]"
 runtime_image_destroy_success:  "[:runtime_destroyed_id(type=:image,value=id)]"
 runtime_image_edit_success:  "[:runtime_updated_id(type=:image,value=id)]"
+runtime_image_invalid_image:  "[:runtime_invalid(type=:image,value=name)]"
 runtime_image_remove_success:  "[:runtime_removed_id(type=:image,value=id)]"
 runtime_image_resize_denied:  "[:runtime_admin_only]"
 runtime_image_reuse_invalid_id:  "[:runtime_no_match_id(type=:image,value=id)]"
 runtime_image_reuse_success:  "[:runtime_added_id(type=:image,value=id)]"
+runtime_image_uploaded_image:  "[:runtime_uploaded_name(type=:image,value=name)]"
 runtime_invalid_classification:  "[:runtime_no_parse(value=text)]"
 runtime_invalid_name:  "[:runtime_invalid(type=:name,value=name)]"
 runtime_invalid_source_type:  "[:runtime_invalid(type=:source)]"
@@ -1031,6 +1035,14 @@ runtime_form_names_misspelling_no_synonyms:  >
 
 runtime_image_changed_your_image:  >
   Changed your profile image to image #[id].
+
+runtime_image_move_failed:  >
+  Something went wrong on the server and we failed to save image #[id].  Please
+  try again. 
+
+runtime_image_process_failed:  >
+  Something went wrong on the server and we failed to process image #[id].
+  Please try again. 
 
 runtime_image_remove_denied:  >
   You do not have permission to remove images from this observation.
@@ -1468,6 +1480,11 @@ edit_location_title:  "[:edit_object(type=:location)]"
 
 
 
+# location/edit_location_description
+edit_location_description_title:  Edit [name]
+
+
+
 # name/edit_name_description
 edit_name_description_title:  Edit [name]
 
@@ -1854,8 +1871,6 @@ image_reuse_id_help:  >
 
 # image/show_image
 image_show_title:  "[:IMAGE]: [name]"
-image_show_normal_size:  Show Normal Size
-image_show_full_size:  Show Full Size
 image_show_inquiry:  Send Commercial Inquiry About Image
 image_show_edit:  "[:edit_object(type=:image)]"
 image_show_destroy:  "[:DESTROY]"
@@ -1865,6 +1880,13 @@ image_show_copyright:  Copyright
 image_show_quality:  Quality
 image_show_comments:  "[num] comment(s)"
 image_show_observations:  "[:OBSERVATIONS]"
+image_show_thumbnail:  Thumbnail
+image_show_small:  Small
+image_show_medium:  Medium
+image_show_large:  Large
+image_show_huge:  Huge
+image_show_full_size:  Full Size
+image_show_original:  Show Original Image
 
 
 
@@ -3915,3 +3937,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

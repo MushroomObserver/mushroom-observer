@@ -8,11 +8,20 @@ class Descriptions < ActiveRecord::Migration
     add_column :user_groups, :meta, :boolean, :default => false
 
     # ----------------------------
-    #  Add some new email prefs.
+    #  Add some new user prefs.
     # ----------------------------
 
     add_column :users, :email_locations_admin, :boolean, :default => false
     add_column :users, :email_names_admin,     :boolean, :default => false
+    add_column :users, :thumbnail_size, :enum, :default => :thumbnail, :limit => [:thumbnail, :small]
+    add_column :users, :image_size,     :enum, :default => :medium, :limit => Image.all_sizes
+
+    # ----------------------------
+    #  Add size to image.
+    # ----------------------------
+
+    add_column :images, :width, :integer
+    add_column :images, :height, :integer
 
     # --------------------------------------
     #  First create the "all users" group.

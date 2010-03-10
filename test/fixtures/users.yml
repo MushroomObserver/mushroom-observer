@@ -12,6 +12,8 @@ rolf:
   contribution: 10
   created_here: true
   locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Mary has no images
 mary:
@@ -25,6 +27,8 @@ mary:
   contribution: 10
   created_here: true
   locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Junk gets denied
 junk:
@@ -37,6 +41,8 @@ junk:
   contribution: 10
   created_here: true
   locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Need third for testing votes
 dick:
@@ -50,6 +56,8 @@ dick:
   contribution: 10
   created_here: true
   locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Need third for testing votes
 katrina:
@@ -62,4 +70,6 @@ katrina:
   verified: 2008-03-02 21:14:00
   contribution: 10
   created_here: true
+  thumbnail_size: :thumbnail
+  image_size: :medium
 

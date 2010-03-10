@@ -5,8 +5,8 @@ class AbstractModelTest < UnitTestCase
   # Make sure update_view_stats updated stuff correctly (and did nothing else).
   def assert_same_but_view_stats(old_attrs, new_attrs, msg='')
     for key in (old_attrs.keys + new_attrs.keys).map(&:to_s).uniq.sort
-      old_val = old_attrs[key] #|| old_attrs[key.to_sym]
-      new_val = new_attrs[key] #|| new_attrs[key.to_sym]
+      old_val = old_attrs[key]
+      new_val = new_attrs[key]
       if key == 'num_views'
         assert_equal((old_val || 0) + 1, new_val, msg + "num_views wrong")
       elsif key == 'last_view'

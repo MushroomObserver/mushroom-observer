@@ -1,16 +1,22 @@
 #!/bin/sh
 
 id=$1
+ext=$2
+set_size=$3
 
 server=velosa@images.mushroomobserver.org:images.mushroomobserver.org
 images=public/images
 
-orig=$images/orig/$id.jpg
-big=$images/640/$id.jpg
+orig=$images/orig/$id.$ext
+full=$images/orig/$id.jpg
+huge=$images/1280/$id.jpg
+large=$images/960/$id.jpg
+medium=$images/640/$id.jpg
+small=$images/320/$id.jpg
 thumb=$images/thumb/$id.jpg
 
 big_icon=$images/place_holder_640.jpg
-thumb_icon=$images/place_holder_thumb.jpg
+small_icon=$images/place_holder_thumb.jpg
 
 log=log/process_image.$$
 log2=log/process_image.log
@@ -53,7 +59,7 @@ if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 	    webmaster       $email
 	    image server    $server
 	    place-holders   $big_icon
-	                    $thumb_icon
+	                    $small_icon
 	    error log       $log2
 
 	EOH
@@ -65,6 +71,7 @@ fi
 # --------------------------------------------------
 
 function run() {
+echo $*
     echo "`date`>" $* >> $log
     if !($* >> $log 2>&1); then
         errors=1
@@ -77,8 +84,11 @@ function run() {
 #  until smaller images are done.
 # -----------------------------------------------
 
-run cp $thumb_icon $thumb
-run cp $big_icon $big
+run cp $small_icon $thumb
+run cp $small_icon $small
+run cp $big_icon $medium
+run cp $big_icon $large
+run cp $big_icon $huge
 
 # ----------------------------
 #  Resize images.
@@ -87,8 +97,19 @@ run cp $big_icon $big
 # Wait for other conversions to finish first.
 while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
 
-run convert -thumbnail '160x160>' -quality 90 $orig $thumb
-run convert -thumbnail '640x640>' -quality 70 $orig $big
+if [[ $orig != $full ]]; then
+  run convert -thumbnail -quality 70 $orig $full
+fi
+
+if (( $set_size )); then
+  run script/set_image_size $full $id
+fi
+
+run convert -thumbnail '160x160>' -quality 90 $full $thumb
+run convert -thumbnail '320x320>' -quality 80 $full $small
+run convert -thumbnail '640x640>' -quality 70 $full $medium
+run convert -thumbnail '960x960>' -quality 70 $full $large
+run convert -thumbnail '1280x1280>' -quality 70 $full $huge
 
 # ----------------------------
 #  Transfer images.
@@ -100,9 +121,15 @@ if (( $production )); then
   # Wait for other transfers to finish first.
   while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
 
-  run scp $orig $server/orig/$id.jpg
-  run scp $big $server/640/$id.jpg
-  run scp $thumb $server/thumb/$id.jpg
+  if [[ $orig != $full ]]; then
+    run scp $orig   $server/orig/$id.$ext
+  fi
+  run scp $full   $server/orig/$id.jpg
+  run scp $huge   $server/1280/$id.jpg
+  run scp $large  $server/960/$id.jpg
+  run scp $medium $server/640/$id.jpg
+  run scp $small  $server/320/$id.jpg
+  run scp $thumb  $server/thumb/$id.jpg
 fi
 
 # ------------------------------

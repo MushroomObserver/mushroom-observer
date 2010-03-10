@@ -1,23 +1,25 @@
 #
 #  = Image Model
 #
-#  Most images are, of course, mushrooms, but mugshots use
-#  this class, as well.  They are indistinguishable at the moment.
+#  Most images are, of course, mushrooms, but mugshots use this class, as well.
+#  They are indistinguishable at the moment. 
 #
 #  == Files
 #
-#  The actual image is stored in three files:
+#  The actual image is stored in several files:
 #
-#    RAILS_ROOT/public/images/orig/id.jpg
-#    RAILS_ROOT/public/images/640/id.jpg
-#    RAILS_ROOT/public/images/thumb/id.jpg
+#    RAILS_ROOT/public/images/orig/<id>.<ext>  # (original file if not jpeg)
+#    RAILS_ROOT/public/images/orig/<id>.jpg
+#    RAILS_ROOT/public/images/1280/<id>.jpg
+#    RAILS_ROOT/public/images/960/<id>.jpg
+#    RAILS_ROOT/public/images/640/<id>.jpg
+#    RAILS_ROOT/public/images/320/<id>.jpg
+#    RAILS_ROOT/public/images/thumb/<id>.jpg
 #
-#  They are also being transferred to a remote image server with more disk
-#  space: (images take up 100 Gb as of Jan 2010)
+#  They are also transferred to a remote image server with more disk space:
+#  (images take up 100 Gb as of Jan 2010) 
 #
-#    IMAGE_DOMAIN/orig/id.jpg
-#    IMAGE_DOMAIN/640/id.jpg
-#    IMAGE_DOMAIN/thumb/id.jpg
+#    IMAGE_DOMAIN/<dir>/<id>.<ext>
 #
 #  After the images are successfully transferred, we remove the originals from
 #  the web server (see scripts/update_images).
@@ -35,44 +37,49 @@
 #         :notes   => 'close-up of stipe'
 #       )
 #
-#  2. Attach the image itself by setting to +image+ attribute, then save the
+#  2. Attach the image itself by setting the +image+ attribute, then save the
 #     Image record:
 #
 #       # via HTTP form:
 #       image.image = params[:image][:upload]
-#       image.save
 #
 #       # via local file:
 #       image.image = File.open('file.jpg')
+#
+#       # Supply any extra header info you may have.
+#       image.content_type = 'image/jpeg'
+#       image.md5sum = request.header[...]
+#
+#       # Validate and save record.
 #       image.save
 #
-#  3. After the record is saved, it knows the id so it can finally write out
+#  3. After the record is saved, it knows the ID so it can finally write out
 #     the original image:
 #
-#       RAILS_ROOT/public/images/orig/id.jpg
+#       RAILS_ROOT/public/images/orig/<id>.<ext>
 #
 #  4. Now it forks off a tiny shell script that takes care of the rest:
 #
-#       script/process_image $id
+#       script/process_image $id $ext
 #
-#  5. First it fills in the normal-size and thumbnail images with a
-#     place-holder:
+#  5. First it fills in all the other size images with a place-holder:
 #
 #       cd RAILS_ROOT/public/images
-#       cp place_holder_640.jpg   640/$id.jpg
-#       cp place_holder_thumb.jpg thumb/$id.jpg
+#       cp place_holder_<size>.jpg <size>/$id.jpg
 #
-#  6. Next it resizes the original twice to create real normal-size and
-#     thumbnail images: (uses ImageMagick)
+#  6. Next it resizes the original using ImageMagick:
 #
 #       convert -thumbnail '160x160>' -quality 90 orig/$id.jpg thumb/$id.jpg
+#       convert -thumbnail '320x320>' -quality 80 orig/$id.jpg 320/$id.jpg
 #       convert -thumbnail '640x640>' -quality 70 orig/$id.jpg 640/$id.jpg
+#       etc.
 #
-#  7. Lastly it transfers all three images to the image server:
+#  7. Lastly it transfers all the images to the image server:
 #
-#       scp orig/$id.jpg  IMAGE_DOMAIN/orig/$id.jpg
-#       scp 640/$id.jpg   IMAGE_DOMAIN/640/$id.jpg
-#       scp thumb/$id.jpg IMAGE_DOMAIN/thumb/$id.jpg
+#       scp orig/$id.<ext>  IMAGE_DOMAIN/orig/$id.<ext>
+#       scp orig/$id.jpg    IMAGE_DOMAIN/orig/$id.jpg
+#       scp 1280/$id.jpg    IMAGE_DOMAIN/1280/$id.jpg
+#       etc.
 #
 #     (If any errors occur in +script/process_image+ they get emailed to the
 #     webmasters.)
@@ -82,9 +89,24 @@
 #
 #       script/update_images --clean
 #
-#     Currently it only removes originals, leaving thumbnail and normal-size
-#     images on the web server.  [Also, for unknown reasons, +update_images+
-#     doesn't actually delete anything?! -JPH 20100114]
+#     Currently it only removes ones over 640, leaving the rest local.
+#
+#  == Low Level Details
+#
+#  Apache waits for all uploads to arrive before passing the request off to
+#  Rails.  It stores them in /tmp somewhere until Rails is done with them.
+#
+#  Rails passes anything larger than 1024 or so as an
+#  ActionController::UploadedTempfile < TempFile < File, which has the methods
+#  "original_filename", "size", "path", "delete", etc.  Small files get loaded
+#  into memory immediately as ActionController::UploadedStringIO < StringIO <
+#  Data, which also has the methods "original_filename", "size", etc.  
+#
+#  If we ever get an IO stream instead of a TempFile, we write it out to a
+#  tempfile ourselves (using File.copy_stream).  This way we can run <tt>file
+#  -i</tt> on it to determine the correct content type (the users' browsers,
+#  as it turns out, cannot be trusted).  Once we've validated it, we move it
+#  into place.
 #
 #  == Attributes
 #
@@ -105,9 +127,13 @@
 #
 #  ==== Temporary attributes
 #
-#  img_dir::            Where images are stored (default is IMG_DIR).
-#  content_length::     Length of original image file (if available).
-#  content_md5::        MD5 hash of original image file (if available).
+#  image_dir::          Where images are stored (default is IMG_DIR).
+#  upload_handle::      File or IO handle of upload stream.
+#  upload_temp_file::   Path of the tempfile holding the upload until we process it.
+#  upload_length::      Length of the upload (if available).
+#  upload_type::        Mime type of the upload (if available).
+#  upload_md5sum::      MD5 hash of the upload (if available).
+#  upload_original_name:: Name of the file on the user's machine (if available).
 #
 #  == Class Methods
 #
@@ -119,19 +145,32 @@
 #  unique_text_name::   Plain-text title.
 #  observations::       Observations that use this image.
 #  thumb_clients::      Observations that use this image as their "thumbnail".
-#  ---
-#  image=::             Attach an image (via IO stream or UploadedTempfile).
-#  save_image::         Call this after saving new record to process image.
-#  ---
-#  original_image::     Filename of original image.
-#  big_image::          Filename of normal-size image.
-#  thumbnail::          Filename of thumbnail.
+#  has_size?::          Does image have this size?
+#
+#  ==== Filenames
+#  original_image::     Path of original image.
+#  full_size_image::    Path of full-size jpeg.
+#  huge_image::         Path of 1280 image.
+#  large_image::        Path of 960 image.
+#  medium_image::       Path of 640 image.
+#  small_image::        Path of 320 image.
+#  thumbnail_image::    Path of thumbnail.
+#
+#  ==== URLs
 #  original_url::       URL of original image.
-#  big_url::            URL of normal-size image.
+#  full_size_url::      URL of full-size jpeg.
+#  huge_url::           URL of 1280 image.
+#  large_url::          URL of 960 image.
+#  medium_url::         URL of 640 image.
+#  small_url::          URL of 320 image.
 #  thumbnail_url::      URL of thumbnail.
 #
-#  == Callbacks
+#  ==== Uploading
+#  image=::             Attach an image (via IO stream or File).
+#  process_image::      Call this after saving new record to process image.
+#  validate_upload::    Perform all the checks we can on the upload.
 #
+#  ==== Callbacks
 #  log_destruction      Log destruction and change thumbnails before destroy.
 #
 ################################################################################
@@ -142,7 +181,6 @@ class Image < AbstractModel
   belongs_to :user
   belongs_to :license
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
-  attr_accessor :img_dir, :content_length, :content_md5
 
   before_destroy :log_destruction
 
@@ -186,6 +224,287 @@ class Image < AbstractModel
     end
   end
 
+  ##############################################################################
+  #
+  #  :section: Image File Names
+  #
+  ##############################################################################
+
+  # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
+  def self.all_sizes
+    [:thumbnail, :small, :medium, :large, :huge, :full_size]
+  end
+
+  def original_extension
+    case content_type
+    when 'image/jpeg'     ; 'jpg'
+    when 'image/gif'      ; 'gif'
+    when 'image/png'      ; 'png'
+    when 'image/tiff'     ; 'tiff'
+    when 'image/x-ms-bmp' ; 'bmp'
+    else                  ; 'raw'
+    end
+  end
+
+  def original_file;  "orig/#{id}.#{original_extension}"; end
+  def full_size_file; "orig/#{id}.jpg";  end
+  def huge_file;      "1280/#{id}.jpg";  end
+  def large_file;     "960/#{id}.jpg";   end
+  def medium_file;    "640/#{id}.jpg";   end
+  def small_file;     "320/#{id}.jpg";   end
+  def thumbnail_file; "thumb/#{id}.jpg"; end
+
+  def original_image;  "#{image_dir}/#{original_file}";  end
+  def full_size_image; "#{image_dir}/#{full_size_file}"; end
+  def huge_image;      "#{image_dir}/#{huge_file}";      end
+  def large_image;     "#{image_dir}/#{large_file}";     end
+  def medium_image;    "#{image_dir}/#{medium_file}";    end
+  def small_image;     "#{image_dir}/#{small_file}";     end
+  def thumbnail_image; "#{image_dir}/#{thumbnail_file}"; end
+
+  def original_url;  "#{IMAGE_DOMAIN}/#{original_file}";  end
+  def full_size_url; "#{IMAGE_DOMAIN}/#{full_size_file}"; end
+  def huge_url;      "#{IMAGE_DOMAIN}/#{huge_file}";      end
+  def large_url;     "#{IMAGE_DOMAIN}/#{large_file}";     end
+  def medium_url;    "#{IMAGE_DOMAIN}/#{medium_file}";    end
+  def small_url;     "#{IMAGE_DOMAIN}/#{small_file}";     end
+  def thumbnail_url; "#{IMAGE_DOMAIN}/#{thumbnail_file}"; end
+
+  def has_size?(size)
+    max = width.to_i > height.to_i ? width.to_i : height.to_i
+    case size.to_s
+    when 'thumbnail' ; true
+    when 'small'     ; max > 160
+    when 'medium'    ; max > 320
+    when 'large'     ; max > 640
+    when 'huge'      ; max > 960
+    when 'full_size' ; max > 1280
+    when 'original'  ; true
+    else             ; false
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Image Upload
+  #
+  #  This is the general public interface:
+  #
+  #    img = Image.new(args)              # Initialize record.
+  #    img.image = File.new('photo.jpg')  # Attach upload.
+  #    img.md5sum = request.header[xxx]   # Supply extra header info.
+  #    img.validate_upload                # Validate it.
+  #    img.save                           # Create record (to get id).
+  #    img.process_image                  # Resize and transfer images.
+  #
+  ##############################################################################
+
+  # Directory images are stored under.  (Default is +IMG_DIR+.)
+  attr_accessor :image_dir
+  def image_dir
+    @iamge_dir || IMG_DIR
+  end
+
+  # Upload file handle.
+  attr_accessor :upload_handle
+
+  # Original name of the file on the user's machine (if available).
+  attr_accessor :upload_original_name
+
+  # Name of the temp file it is stored in while processing it.
+  attr_accessor :upload_temp_file
+
+  # Length of the file.
+  attr_accessor :upload_length
+
+  # Mime type, e.g. "image/jpeg" or "image/x-ms-bmp".
+  attr_accessor :upload_type
+
+  # MD5 sum (if available).
+  attr_accessor :upload_md5sum
+
+  # Initialize the upload process.  Pass in the value of the file upload filed
+  # from the CGI +params+ struct, or any other I/O stream.  You will have the
+  # opportunity to provide extra information, such as the original file name,
+  # MD5 sum, etc. afterwards before it actually processes the image.
+  def image=(file)
+    self.upload_handle = file
+
+    case file
+      # Image is already stored in a local temp file.  This is how Rails passes
+      # large files from Apache.
+      when Tempfile
+        self.upload_temp_file = file.path
+        self.upload_length = file.size
+        self.upload_type   = file.content_type if file.respond_to?(:content_type)
+        self.upload_md5sum = file.md5sum       if file.respond_to?(:md5sum)
+        self.upload_original_name = file.original_name if file.respond_to?(:original_name)
+
+      # Image is given as an input stream.  We need to save it to a temp file
+      # before we can do anything useful with it.
+      when IO, StringIO
+        self.upload_temp_file = nil
+        self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
+        self.upload_length = file.size           if file.respond_to?(:size)
+        self.upload_type   = file.content_type   if file.respond_to?(:content_type)
+        self.upload_md5sum = file.md5sum         if file.respond_to?(:md5sum)
+        self.upload_original_name = file.original_name if file.respond_to?(:original_name)
+    end
+  end
+
+  # Perform what checks we can on the prospective upload before actually
+  # processing it.  Any errors are added to the :image field.
+  def validate_upload
+    validate_image_length
+    validate_image_type
+    validate_image_md5sum
+  end
+
+  # Check to make sure the image isn't too egregiously large.  (Large images
+  # can cause ImageMagick to bring the system to its knees.)  Returns true if
+  # okay, otherwise adds an error to the :image field.
+  def validate_image_length
+    if upload_length || save_to_temp_file
+      if upload_length > IMAGE_UPLOAD_MAX_SIZE
+        errors.add(:image, :validate_image_file_too_big.t(:size => upload_length,
+                   :max => IMAGE_UPLOAD_MAX_SIZE.to_s.sub(/\d{6}$/, 'Mb')))
+        result = false
+      else
+        result = true
+      end
+    end
+    return result
+  end
+
+  # Check image type to make sure we were given a valid image.  Returns true
+  # if okay, otherwise adds an error to the :image field.
+  def validate_image_type
+    if save_to_temp_file
+      # Override whatever user gave us with result of "file -i".
+      type = File.read("| file -i #{upload_temp_file}").chomp.split[1]
+      self.upload_type = type if type
+      if upload_type.match(/^image\//)
+        result = true
+      else
+        errors.add(:image, :validate_image_wrong_type.t(:type => upload_type))
+        result = false
+      end
+    end
+    self.content_type = upload_type
+    return result
+  end
+
+  # Check to make sure the MD5 sum is correct (if available).  Returns true
+  # unless the test fails, in which case it adds an error to the :image field.
+  def validate_image_md5sum
+    result = true
+    if upload_md5sum and save_to_temp_file
+      if (sum = File.read("| md5sum #{upload_temp_file}")) &&
+         (sum.split.first == content_md5)
+        result = true
+      else
+        errors.add(:image, :validate_image_md5_mismatch.
+          t(:actual => sum.split.first, :expect => upload_md5sum))
+        result = false
+      end
+    end
+    return result
+  end
+
+  # Save upload to temp file if haven't already done so.  Any errors are added
+  # to the :image field.  Returns true if the file is successfully saved.
+  def save_to_temp_file
+    result = true
+    if !upload_temp_file
+
+      # Image is supplied in a input stream.  This can happen in a variety of
+      # cases, including during testing, and also when the image comes in as
+      # the body of a request.
+      if upload_handle.is_a?(IO) or
+         upload_handle.is_a?(StringIO)
+        begin
+          file = Tempfile.new('image_upload')
+          FileUtils.copy_stream(upload_handle, file)
+          self.upload_temp_file = file.path
+          self.upload_length = file.size
+          result = true
+        rescue => e
+          errors.add(:image, e.to_s)
+          result = false
+        end
+
+      # It should never reach here.
+      else
+        errors.add(:image, "Unexpected error: did not receive a valid upload " +
+                           "stream from the webserver (we got an instance of " +
+                           "#{upload_handle.class.name}).  Please try again.")
+        result = false
+      end
+    end
+    return result
+  end
+
+  # Process image now that we're sure everything is okay.  This should only
+  # be called after the image has been validated and the record saved.  (We
+  # need to have an ID at this point.)  Adds any errors to the :image field
+  # and returns false.
+  def process_image
+    result = true
+    if new_record?
+      errors.add(:image, "Called process_image before saving image record.")
+      result = false
+    elsif save_to_temp_file
+      ext = original_extension
+      set_image_size(upload_temp_file) if ext == 'jpg'
+      set = width.nil? ? 'set' : ''
+      if !move_original
+        result = false
+      elsif PRODUCTION && !system("script/process_image #{id} #{ext} #{set}&")
+        # Spawn process to resize and transfer images to image server.
+        errors.add(:image, :runtime_image_process_failed.t(:id => id))
+        result = false
+      end
+    end
+    return result
+  end
+
+  # Move temp file into its final position.  Adds any errors to the :image
+  # field and returns false.
+  def move_original
+    raise(SystemCallError, "Don't move my test images!!") if TESTING
+    if !File.rename(upload_temp_file, original_image)
+      raise(SystemCallError, "Try again.")
+    end
+    File.chmod(0644, original_image)
+    return true
+  rescue SystemCallError
+    if !system('cp', upload_temp_file, original_image)
+      raise(:runtime_image_move_failed.t(:id => id))
+    end
+    return true
+  rescue SystemCallError
+    errors.add(:image, :runtime_image_move_failed.t(:id => id))
+    return false
+  end
+
+  # Get image size from JPEG header and set the corresponding record fields.
+  # Saves the record.
+  def set_image_size(file=original_image)
+    script = "#{RAILS_ROOT}/script/set_image_size"
+    w, h = File.read("| #{script} #{file}").chomp.split
+    if w.to_s.match(/^\d+$/)
+      self.width  = w.to_i
+      self.height = h.to_i
+      self.save_without_our_callbacks
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Callbacks
+  #
+  ##############################################################################
+
   # Callback that logs destruction before Image is destroyed.  (Also change
   # thumbnail Observation's to another Image whenever necessary.)
   def log_destruction
@@ -201,185 +520,35 @@ class Image < AbstractModel
     end
   end
 
-  # Check uploaded file and make note of its temporary location.  It can take
-  # a variety of argument types.  All must provide a few capabilities:
-  #
-  #   img.image = file
-  #
-  #   # Must supply MIME type, e.g., 'image/tiff'.
-  #   file.content_type
-  #
-  #   # Must supply length via one of these two:
-  #   file.size
-  #   file.content_length
-  #
-  # Additionally, if you have access to the MD5 hash, you can inform the Image
-  # record of that at any time before calling +save_image+:
-  #
-  #   # (syntax of HTTP.get is probably wrong)
-  #   request = Net::HTTP.get(uri, domain, port)
-  #   img.image          = request.body
-  #   img.content_length = request.content_length         
-  #   img.content_type   = request.content_type           
-  #   img.content_md5    = request.headers['Content-MD5'] 
-  #
-  # Apache waits for all uploads to arrive before passing the request off to
-  # Rails.  It stores them in /tmp somewhere until Rails is done with them.
-  # (File is an ActionController::UploadedTempfile, which has the method
-  # "original_filename", and inherits from Tempfile, which has the methods
-  # "size", "path", "delete", etc. and inherits in turn from File...) 
-  #
-  # *NOTE*: Cannot actually process the image yet since we don't know what the
-  # id is going to be.  That's why you have to wait until the record is saved.
-  # See +save_image+ for the rest of the job.
-  #
-  def image=(file)
-    @img = file
-
-    # This is the default.  Doing it this way allows us to override the default
-    # while testing.
-    self.img_dir = IMG_DIR
-
-    # Try to determine the file size.
-    if @img.respond_to?(:content_length)
-      self.content_length = @img.content_length
-    elsif @img.respond_to?(:size)
-      self.content_length = @img.size
-    else
-      # require caller to set it explicitly
-    end
-
-    # Try to determine the file type.
-    if @img.respond_to?(:content_type)
-      self.content_type = file.content_type.chomp
-    else
-      # require caller to set it explicitly
-    end
-
-    return @img
-  end
-
-  # Call this once the new record is saved and we know the id.  Move, copy or
-  # save the original file into the correct place, then initiate resizing and
-  # transfers.
-  #
-  #   img = Image.new(args)
-  #   img.image = File.new('photo.jpg')
-  #   img.save
-  #   img.save_image
-  #
-  def save_image
-    result = false
-    if @img
-
-      # Image is stored in a local file.  This is what Apache does with them.
-      if @img.is_a?(ActionController::UploadedTempfile)
-        begin
-          raise(SystemCallError, "Don't move my test images!!") if TESTING
-          result = true if File.rename(@img.path, original_image) and
-                           File.chmod(0644, original_image) == 1
-        rescue SystemCallError
-          result = true if system('cp', @img.path, original_image)
-        rescue => e
-          errors.add(:image, e.to_s)
-          result = false
-        end
-
-      # Image is supplied in a input stream.  This can happen in a variety of
-      # cases, including during testing, and also when the image comes in as
-      # the body of a request.
-      elsif @img.is_a?(IO) || @img.is_a?(StringIO)
-        begin
-          File.open(original_image, 'w') do |fh|
-            FileUtils.copy_stream(@img, fh)
-          end
-          result = true
-        rescue => e
-          errors.add(:image, e.to_s)
-          result = false
-        end
-
-      # Raise an error for all other cases.
-      else
-        errors.add(:image, "Unexpected internal I/O type: #{@img.class}")
-        result = false
-      end
-
-      if result
-        # Check MD5 sum if supplied with image.
-        if content_md5 && !(
-           (sum = File.read("| md5sum #{original_image}")) &&
-           (sum.split.first == content_md5)
-        )
-          errors.add(:image, "md5 sum doesn't match\ngot:    #{sum.split.first}\nexpect: #{content_md5}]")
-          result = false
-        end
-
-        # If we successfully received the raw image, spawn process to resize it
-        # and transfer it to image server.
-        if PRODUCTION && !system("script/process_image #{self.id}&")
-          errors.add(:image, 'Something went wrong when spawning process_image...')
-          result = false
-        end
-      end
-    end
-    return result
-  end
-
-  # Return file name of original image.
-  def original_image
-    sprintf("%s/orig/%d.jpg", self.img_dir, self.id)
-  end
-
-  # Return file name of normal-size image.
-  def big_image
-    sprintf("%s/640/%d.jpg", self.img_dir, self.id)
-  end
-
-  # Return file name of thumbnail image.
-  def thumbnail
-    sprintf("%s/thumb/%d.jpg", self.img_dir, self.id)
-  end
-
-  # Return URL for original image.
-  def original_url
-    sprintf("%s/orig/%d.jpg", IMAGE_DOMAIN, self.id)
-  end
-
-  # Return URL for normal-size image.
-  def big_url
-    sprintf("%s/640/%d.jpg", IMAGE_DOMAIN, self.id)
-  end
-
-  # Return URL for thumbnail image.
-  def thumbnail_url
-    sprintf("%s/thumb/%d.jpg", IMAGE_DOMAIN, self.id)
-  end
-
 ################################################################################
 
 protected
 
   def validate # :nodoc:
+    if upload_handle
+      validate_upload
+    end
+
+    # I guess this is kind of serious -- uploading with no one logged in??!
     if !self.user && !User.current
       errors.add(:user, :validate_image_user_missing.t)
     end
-    if !self.when
-      errors.add(:when, :validate_image_when_missing.t)
-    end
 
-    if !self.content_type.to_s.match(/^image/)
-      errors.add(:content_type, :validate_image_content_type_images_only.t)
-    elsif self.content_type.to_s.length > 100
-      errors.add(:content_type, :validate_image_content_type_too_long.t)
-    end
+    # Try everything in our power to make uploads succeed.  Let the user worry
+    # about correcting the date later if need be.
+    self.when ||= Time.now
+    # if !self.when
+    #   errors.add(:when, :validate_image_when_missing.t)
+    # end
 
-    if content_length.to_i > IMAGE_UPLOAD_MAX_SIZE
-      errors.add(:image, :validate_image_file_too_big.t(:max => IMAGE_UPLOAD_MAX_SIZE.to_s.sub(/\d{6}$/, 'Mb')))
-    end
+    # Who cares?
+    # id self.content_type.to_s.length > 100
+    #   errors.add(:content_type, :validate_image_content_type_too_long.t)
+    # end
 
-    if self.copyright_holder.to_s.length > 100
-      errors.add(:copyright_holder, :validate_image_copyright_holder_too_long.t)
-    end
+    # Who cares?
+    # if self.copyright_holder.to_s.length > 100
+    #   errors.add(:copyright_holder, :validate_image_copyright_holder_too_long.t)
+    # end
   end
 end

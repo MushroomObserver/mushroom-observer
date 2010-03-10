@@ -300,7 +300,11 @@ class AccountController < ApplicationController
         # Check if we need to upload an image.
         upload = params['user']['upload_image']
         if !upload.blank?
-          name = upload.full_original_filename if upload.respond_to? :full_original_filename
+          if upload.respond_to?(:full_original_filename)
+            name = upload.full_original_filename
+          else
+            name = nil
+          end
           date = Time.local(params['date']['copyright_year'])
           image = Image.new(
             :image            => upload,
@@ -313,10 +317,10 @@ class AccountController < ApplicationController
           )
           if !image.save
             flash_object_errors(image)
-          elsif !image.save_image
+          elsif !image.process_image
             logger.error("Unable to upload image")
-            flash_error :runtime_profile_invalid_image.
-              t(:name => (name ? "'#{name}'" : '???'))
+            flash_error(:runtime_profile_invalid_image.
+              t(:name => (name ? "'#{name}'" : '???')))
             flash_object_errors(image)
           else
             Transaction.post_image(

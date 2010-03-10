@@ -710,11 +710,13 @@ validate_too_small_or_large: "[Field] debe estar entre [min] y [max]."
 validate_image_content_type_images_only: Sólo puede cargar imágenes.
 validate_image_file_missing: Hubo problemas al cargar la imagen.
 validate_image_file_too_big: No podemos manejar imágenes tan grandes. Si no reducirlo a menos de [max] antes de subir.
+validate_image_md5_mismatch: La suma MD5 no salió bien. Por favor, intenta subir tu imagen de nuevo.
 validate_observation_future_time: Viaje en tiempo no está permitido. Elija una fecha del pasado.
 validate_observation_thumb_image_id_invalid: No se puede encontrar una imagen correspondiente para la miniatura.
 validate_observation_where_missing: Por favor, escriba la ubicación que es visto o recogido.
 validate_user_email_missing: Por favor, darnos una dirección de e-mail válida para que podamos verificar su cuenta.
 validate_user_login_taken: Lo sentimos, ese nombre de usuario ya está tomada.
+validate_image_wrong_type: El archivo que trata de subir no es reconocida como una imagen. Es del tipo «[type]».
 
 # These shouldn't need translating, but you are free to override if you need to.
 validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
@@ -897,10 +899,12 @@ runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id
 runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
 runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
 runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
+runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
 runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
 runtime_image_resize_denied: "[:runtime_admin_only]"
 runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
 runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
+runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
 runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
 runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
 runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
@@ -1036,6 +1040,14 @@ runtime_form_names_misspelling_no_synonyms: >
 
 runtime_image_changed_your_image: >
   "Su imagen se ha cambiado a imagen #[id]."
+
+runtime_image_move_failed: >
+  Algo salió mal en el servidor y no hemos podido guardar la imagen #[id].
+  Por favor, intenta volver a subirlo.
+
+runtime_image_process_failed: >
+  Algo salió mal en el servidor y no hemos podido procesar la imagen #[id].
+  Por favor, intenta volver a subirlo.
 
 runtime_image_remove_denied: >
   No tiene permiso para eliminar las imágenes de este observación.
@@ -1483,6 +1495,11 @@ edit_location_title: Editar Ubicación
 
 
 
+# location/edit_location_description
+edit_location_description_title: Editar [name]
+
+
+
 # name/edit_name_description
 edit_name_description_title: Editar [name]
 
@@ -1876,8 +1893,6 @@ image_reuse_id_help: >
 
 # image/show_image
 image_show_title: "Imagen: [name]"
-image_show_normal_size: Mostrar en Tamaño Normal
-image_show_full_size: Mostrar en Tamaño Completo
 image_show_inquiry: Enviar Investigación Comercial sobre Imagen
 image_show_edit: Editar Imagen
 image_show_destroy: Borrar
@@ -1887,6 +1902,13 @@ image_show_copyright: Copyright
 image_show_quality: Qualidad
 image_show_comments: "[num] comentario(s)"
 image_show_observations: Observaciones
+image_show_thumbnail: Miniatura
+image_show_small: Pequeño
+image_show_medium: Mediano
+image_show_large: Grande
+image_show_huge: Enorme
+image_show_full_size: Completo
+image_show_original: Mostrar la Imágen Original
 
 
 

@@ -5,7 +5,6 @@
 #     images_by_user      Display list of images by a given user.
 #     image_search        Search for matching images.
 #     show_image          Show in standard size (640 pixels max dimension).
-#     show_original       Show original size.
 #     prev_image          Show previous image (from search results).
 #     next_image          Show next image (from search results).
 #   * add_image           Upload and add images to observation.
@@ -44,7 +43,6 @@ class ImageController < ApplicationController
     :next_image,
     :prev_image,
     :show_image,
-    :show_original,
     :test_upload_speed,
   ]
 
@@ -124,7 +122,7 @@ class ImageController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t], 
+      ['name', :name.t],
       ['date', :DATE.t],
       ['user', :user.t],
     ]
@@ -133,7 +131,7 @@ class ImageController < ApplicationController
     # observation query.
     if query.is_coercable?(:Observation)
       @links << [:show_objects.t(:type => :observation), {
-                  :controller => 'observer', 
+                  :controller => 'observer',
                   :action => 'index_observation',
                   :params => query_params(query),
                 }]
@@ -165,6 +163,11 @@ class ImageController < ApplicationController
     @is_reviewer = is_reviewer
     pass_query_params
 
+    # Decide which size to display.
+    @size = :medium
+    @size = @user.image_size if @user
+    @size = params[:size].to_sym if !params[:size].blank?
+
     # Wait until here to create this search query to save server resources.
     # Otherwise we'd be creating a new search query for images for every single
     # show_observation request.  We know we came from an observation-type page
@@ -180,16 +183,6 @@ class ImageController < ApplicationController
                                :observation => obs, :outer => obs_query)
       set_query_params(img_query)
     end
-  end
-
-  # Show the original size image.
-  # Linked from: show_image
-  # Inputs: params[:id] (image)
-  # Outputs: @image
-  def show_original
-    store_location
-    pass_query_params
-    @image = Image.find(params[:id])
   end
 
   # Go to next image: redirects to show_image.
@@ -261,10 +254,10 @@ class ImageController < ApplicationController
       @image.image    = upload
       if !@image.save
         flash_object_errors(@image)
-      elsif !@image.save_image
+      elsif !@image.process_image
         logger.error("Unable to upload image")
-        flash_error :profile_invalid_image. \
-          t(:name => (name ? "'#{name}'" : '???'))
+        flash_error :runtime_image_invalid_image.
+                      t(:name => (name ? "'#{name}'" : '???'))
         flash_object_errors(@image)
       else
         Transaction.post_image(
@@ -276,8 +269,8 @@ class ImageController < ApplicationController
           :license          => @image.license
         )
         @observation.add_image_with_log(@image, @user)
-        flash_notice :profile_uploaded_image.
-                          t(:name => name ? "'#{name}'" : "##{@image.id}")
+        flash_notice :runtime_image_uploaded_image.
+                       t(:name => name ? "'#{name}'" : "##{@image.id}")
       end
     end
   end
@@ -621,8 +614,8 @@ class ImageController < ApplicationController
       }
       @image = Image.new(args)
       @image.id = user.id
-      @image.img_dir = TEST_IMG_DIR
-      @image.save_image
+      @image.image_dir = TEST_IMG_DIR
+      @image.process_image
       count += 1
       size += File.new(@image.original_image).stat.size
     end

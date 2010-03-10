@@ -1,0 +1,85 @@
+#!/usr/bin/perl
+use strict;
+use lib "/home/jason/lib";
+
+my @FILES;
+
+# ----------------------------
+#  Help messsage.
+# ----------------------------
+
+(print <<EOB), exit 0 if $ARGV[0] eq "-h";
+jpegsize.prl [-h] [-f <list>] [<jpeg>]
+
+  -h            This message.
+  -f <list>     Get list of jpegs from this file.
+  <jpegs>       List of jpegs to query.
+
+Prints out list of filenames and sizes:
+
+  file1.jpg:  width1  height1
+  file2.jpg:  width2  height2
+  ...
+  fileN.jpg:  widthN  heightN
+
+EOB
+
+# ----------------------------
+#  Get list of files.
+# ----------------------------
+
+if ($ARGV[0] eq "-f") {
+    open(my $fh, "<$ARGV[1]") or
+        die "Couldn't read file-list file, $ARGV[1]: $!";
+    while (<$fh>) {
+        my @files = split;
+        push @FILES, @files;
+    }
+    close($fh);
+} else {
+    @FILES = @ARGV;
+}
+
+# ----------------------------
+#  Query files.
+# ----------------------------
+
+FILE: foreach my $file (@FILES) {
+
+    # Do jpegs myself because I'm faster.
+    if ($file =~ /\.jpg$/) {
+        open(FILE, "<$file");
+        sysread(FILE, $_, 2);
+        while (sysread(FILE, $_, 4)) {
+            my ($x, $l) = unpack("nn", $_);
+            if ($x == 0xFFC0) {
+                sysread(FILE, $_, 5);
+                my ($y, $x) = unpack("xnn", $_);
+                print "$file: $x $y\n";
+                next FILE;
+            } elsif ($x < 0xFF00) {
+                print "$file: invalid header\n";
+                next FILE;
+            } else {
+                sysseek(FILE, $l-2, 1);
+            }
+        }
+    }
+
+    # Other file types I rely on ImageMagick for.
+    else {
+        if (!open(FILE, "identify $file |")) {
+            print "$file: identify failed: $!\n";
+        } else {
+            my $result = <FILE>;
+            if ($result !~ /^\S+ \S+ (\d+)x(\d+)/) {
+                print "$file: identify failed\n";
+            } else {
+                print "$file: $1 $2\n";
+            }
+        }
+        close(FILE);
+    }
+}
+
+exit 0;

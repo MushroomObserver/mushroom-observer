@@ -134,11 +134,10 @@ class ImageControllerTest < FunctionalTestCase
   def test_show_image
     get_with_dump(:show_image, :id => 1)
     assert_response('show_image')
-  end
-
-  def test_show_original
-    get_with_dump(:show_original, :id => 1)
-    assert_response('show_original')
+    for size in Image.all_sizes + [:original]
+      get(:show_image, :id => 1, :size => size)
+      assert_response('show_image')
+    end
   end
 
   def test_image_search
@@ -381,7 +380,7 @@ class ImageControllerTest < FunctionalTestCase
     assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(20, @rolf.reload.contribution)
     assert(obs.reload.images.size == (img_count + 1))
-    assert_flash(:profile_uploaded_image.t(:name => "##{obs.images.last.id}"))
+    assert_flash(:runtime_image_uploaded_image.t(:name => "##{obs.images.last.id}"))
   end
 
   # This is what would happen when user first opens form.

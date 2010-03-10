@@ -43,6 +43,12 @@ TABLES
     ActiveRecord::Migration.add_column(:location_descriptions, :merge_source_id, :integer)
     ActiveRecord::Migration.add_column(:location_descriptions_versions, :merge_source_id, :integer)
     done_anything = true
+  when 'jason3'
+    ActiveRecord::Migration.add_column(:images, :width, :integer)
+    ActiveRecord::Migration.add_column(:images, :height, :integer)
+    ActiveRecord::Migration.add_column(:users, :thumbnail_size, :enum, :default => :thumbnail, :limit => [:thumbnail, :small])
+    ActiveRecord::Migration.add_column(:users, :image_size, :enum, :default => :medium, :limit => Image.all_sizes)
+    done_anything = true
   else
     $stderr.puts "Unsupported or invalid table: '#{arg}'"
     status = 1

@@ -966,7 +966,7 @@ class API
       :content_type     => content_type,
       :content_md5      => content_md5
     )
-    raise error(202, image.formatted_errors) if !image.save || !image.save_image
+    raise error(202, image.formatted_errors) if !image.save || !image.process_image
     observation.add_image_with_log(image, @user) if observation
     return image
 

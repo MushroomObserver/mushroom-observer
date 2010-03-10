@@ -194,7 +194,8 @@ class LanguagesTest < UnitTestCase
       n = 0
       for line in File.readlines(file)
         n += 1
-        line.gsub(/:(\w+)\.(l|t|tl|tp|tpl)(\W|$)/) do
+        line.sub!(/(^#| # ).*/, '')
+        line.gsub(/:(\w+)\.(l|t|tl|tp|tpl| |#|$)(\W|$)/) do
           if !tags.has_key?($1.downcase)
             errors << "#{file} line #{n} [:#{$1}]\n"
           end

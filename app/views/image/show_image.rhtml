@@ -12,12 +12,12 @@
   end
 
   new_tab_set do
-    add_tab(:image_show_full_size.t, :action => 'show_original',
-            :id => @image.id, :params => query_params)
+    add_tab(:image_show_original.t, :action => 'show_image',
+            :id => @image.id, :size => 'original', :params => query_params)
     if commercial_inquiries_ok
-	  add_tab(:image_show_inquiry.t, :controller => 'observer',
-            :action => 'commercial_inquiry', :id => @image.id,
-            :params => query_params)
+	    add_tab(:image_show_inquiry.t, :controller => 'observer',
+              :action => 'commercial_inquiry', :id => @image.id,
+              :params => query_params)
     end
   end
 
@@ -36,17 +36,31 @@
 <table cellpadding="10">
   <tr>
     <td align="center">
-
       <div>
-        <%= link_to(image_tag("640/#{@image.id}.jpg"),
-                    :action => 'show_original', :id => @image.id,
-                    :params => query_params) %><br/>
-        <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
+        <p><%=
+          Image.all_sizes.select do |size|
+            @image.has_size?(size)
+          end.map do |size|
+            if size.to_s == @size.to_s
+              :"image_show_#{size}".t
+            else
+              link_to(:"image_show_#{size}".t, :action => 'show_image',
+                      :id => @image.id, :size => size, :params => query_params)
+            end
+          end.join(' | ')
+        %></p>
+
+        <%= link_to(image_tag(@image.send("#{@size}_url")),
+                    :action => 'show_image', :id => @image.id,
+                    :size => 'full_size', :params => query_params) %><br/>
+
+        <p>
+          <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
+        </p>
       </div>
-
     </td>
-    <td>
 
+    <td>
       <% if check_permission(@image.user_id) %>
         <p>
           <%= link_to(:image_show_edit.t, :action => 'edit_image',
@@ -126,7 +140,6 @@
       <% if !@image.notes.blank? %>
         <%= sanitize(:image_show_notes.l + ': ' + @image.notes.to_s).tpl %>
       <% end %>
-
     </td>
   </tr>
 </table>

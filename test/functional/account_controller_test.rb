@@ -295,6 +295,7 @@ class AccountControllerTest < FunctionalTestCase
     }
     post_requires_login(:profile, params)
     assert_response(:controller => :observer, :action => :show_user, :id => 1)
+    assert_flash_success
 
     @rolf.reload
     assert_equal(num_images+1, Image.count)
