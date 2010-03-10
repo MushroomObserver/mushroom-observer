@@ -231,10 +231,16 @@ class Description < AbstractModel
     [fieldCount, sizeCount]
   end
 
+  ##############################################################################
+  #
+  #  :section: Merging
+  #
+  ##############################################################################
+
   # Attempt to merge another description into this one, deleting the old one
   # if successful.  It will only do so if there is no conflict on any of the
   # description fields, i.e. one or the other is blank for any given field.
-  def merge(src)
+  def merge(src, delete_after=true)
     dest = self
     src_notes  = src.all_notes
     dest_notes = dest.all_notes
@@ -244,10 +250,11 @@ class Description < AbstractModel
       for f, val in src_notes
         dest.send("#{f}=", val) if !val.blank?
       end
+      dest.merge_source_id = src.versions.latest.id
       if dest.changed?
         dest.save
       end
-      src.destroy
+      src.destroy if delete_after
       result = true
     else
       result = false
@@ -531,7 +538,7 @@ class Description < AbstractModel
       parent.description_id = nil
       parent.save_without_our_callbacks
     end
-  
+
     super
   end
 end

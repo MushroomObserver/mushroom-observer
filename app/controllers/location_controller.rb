@@ -366,7 +366,13 @@ class LocationController < ApplicationController
     store_location
     pass_query_params
     @description = LocationDescription.find(params[:id])
-    @description.revert_to(params[:version].to_i)
+    if params[:merge_source_id].blank?
+      @description.revert_to(params[:version].to_i)
+    else
+      version = LocationDescription::Version.find(params[:merge_source_id])
+      @description.clone_versioned_model(version, @description)
+      @old_parent_id = version.location_description_id
+    end
   end
 
   # Go to next location: redirects to show_location.
@@ -638,12 +644,29 @@ class LocationController < ApplicationController
 
       # Updated successfully.
       else
+        flash_notice(:runtime_edit_location_description_success.t(
+                     :id => @description.id))
+
         if !args.empty?
           args[:id] = @description
           Transaction.put_location_description(args)
         end
-        flash_notice(:runtime_edit_location_description_success.t(
-                     :id => @description.id))
+
+        # Delete old description after resolving conflicts of merge.
+        if (params[:delete_after] == 'true') and
+           (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
+          v = @description.versions.latest
+          v.merge_source_id = old_desc.versions.latest.id
+          v.save
+          if !old_desc.is_admin?(@user)
+            flash_warning(:runtime_description_merge_delete_denied.t)
+          else
+            flash_notice(:runtime_description_merge_deleted.
+                           t(:old => old_desc.partial_format_name))
+            old_desc.destroy
+          end
+        end
+
         redirect_to(:action => 'show_location_description',
                     :id => @description.id)
       end

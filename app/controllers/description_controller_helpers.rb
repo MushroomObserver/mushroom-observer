@@ -54,20 +54,30 @@ module DescriptionControllerHelpers
     pass_query_params
     src = find_description(params[:id])
     type = src.class.name.underscore.sub(/_description/, '')
-    if !src.is_admin?(@user)
-      flash_error(:runtime_edit_description_denied.t)
+    if !src.is_reader?(@user)
+      flash_error(:runtime_description_private.t)
       redirect_to(:action => src.parent.show_action, :id => src.parent_id,
                   :params => query_params)
-    elsif params[:target].blank?
+    elsif request.method != :post
       @description = src
     else
+      delete_after = (params[:delete] == '1')
       src_title = src.format_name
       dest = find_description(params[:target])
       src_was_default = (src.parent.description_id == src.id)
       if !dest.is_writer?(@user)
         flash_error(:runtime_edit_description_denied.t)
         @description = src
-      elsif dest.merge(src)
+      elsif dest.merge(src, false)
+        if delete_after
+          if !src.is_admin?(@user)
+            flash_warning(:runtime_description_merge_delete_denied.t)
+          else
+            flash_notice(:runtime_description_merge_deleted.
+                           t(:old => src.partial_format_name))
+            src.destroy
+          end
+        end
         if src_was_default
           dest.parent.description = dest
           dest.parent.save
@@ -81,6 +91,9 @@ module DescriptionControllerHelpers
         @description = dest
         @licenses = License.current_names_and_ids
         merge_description_notes(src, dest)
+        @merge = true
+        @old_desc_id = src.id
+        @delete_after = delete_after
         render(:action => "edit_#{type}_description")
       end
     end

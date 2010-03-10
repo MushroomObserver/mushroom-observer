@@ -593,6 +593,7 @@ class Descriptions < ActiveRecord::Migration
       t.string   'locale',         :limit => 8
       t.boolean  'public'
       t.integer  'license_id'
+      t.integer  'merge_source_id'
       for field in name_descriptions_note_fields
         t.text field
       end
@@ -604,6 +605,7 @@ class Descriptions < ActiveRecord::Migration
       t.datetime 'modified'
       t.integer  'user_id'
       t.integer  'license_id'
+      t.integer  'merge_source_id'
       for field in name_descriptions_note_fields
         t.text field
       end
@@ -657,6 +659,7 @@ class Descriptions < ActiveRecord::Migration
       t.string   'locale',      :limit => 8
       t.boolean  'public'
       t.integer  'license_id'
+      t.integer  'merge_source_id'
       for field in location_descriptions_note_fields
         t.text field
       end
@@ -668,6 +671,7 @@ class Descriptions < ActiveRecord::Migration
       t.datetime 'modified'
       t.integer  'user_id'
       t.integer  'license_id'
+      t.integer  'merge_source_id'
       for field in location_descriptions_note_fields
         t.text field
       end

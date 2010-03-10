@@ -68,27 +68,6 @@ module ApplicationHelper::Description
     end
   end
 
-  # Just shows the current version number and a link to see the previous.
-  #
-  #   <%= show_previous_version(name) %>
-  #
-  #   # Renders just this:
-  #   Version: N <br/>
-  #   Previous Version: N-1<br/>
-  #
-  def show_previous_version(obj)
-    type = obj.class.name.underscore
-    html = ''
-    html += "#{:VERSION.t}: #{obj.version}<br/>\n"
-    if previous_version = obj.find_version(-2)
-      html += link_to("#{:show_name_previous_version.t}: %d" % previous_version,
-                      :action => "show_past_#{type}", :id => obj.id,
-                      :version => previous_version,
-                      :params => query_params) + "<br/>\n"
-    end
-    return html
-  end
-
   # Header of the embedded description within a show_object page.
   #
   #   <%= show_embedded_description_title(desc, name) %>
@@ -208,6 +187,35 @@ module ApplicationHelper::Description
     return html
   end
 
+  # Just shows the current version number and a link to see the previous.
+  #
+  #   <%= show_previous_version(name) %>
+  #
+  #   # Renders just this:
+  #   Version: N <br/>
+  #   Previous Version: N-1<br/>
+  #
+  def show_previous_version(obj)
+    type = obj.class.name.underscore
+    html = "#{:VERSION.t}: #{obj.version}"
+    latest_version = obj.versions.latest
+    if (latest_version.merge_source_id rescue false)
+      html += indent(1) + get_version_merge_link(obj, latest_version)
+    end
+    html += "<br/>\n"
+    if previous_version = latest_version.previous
+      html += link_to("#{:show_name_previous_version.t}: %d" % previous_version.version,
+                      :action => "show_past_#{type}", :id => obj.id,
+                      :version => previous_version,
+                      :params => query_params)
+      if (previous_version.merge_source_id rescue false)
+        html += indent(1) + get_version_merge_link(obj, previous_version)
+      end
+      html += "<br/>\n"
+    end
+    return html
+  end
+
   # Show list of past versions for show_past_object pages.
   #
   #   <%= show_past_versions(name) %>
@@ -223,26 +231,74 @@ module ApplicationHelper::Description
   #
   def show_past_versions(obj, args={})
     type = obj.class.name.underscore
-    html = obj.versions.reverse.map do |v|
-      line = "#{v.version}: #{v.display_name.t}"
-      if v.version != obj.version
-        if v == obj.versions.last
-          line = link_to(line, :controller => obj.show_controller,
+    if !@old_parent_id
+      versions = obj.versions.reverse
+    else
+      version_class = "#{obj.class.name}::Version".constantize
+      versions = version_class.find_by_sql %(
+        SELECT * FROM #{type}s_versions WHERE #{type}_id = #{@old_parent_id}
+        ORDER BY id DESC
+      )
+    end
+    table = versions.map do |ver|
+
+      # Date change was made.
+      date = ver.modified.web_date rescue :unknown.t
+
+      # User making the change.
+      if user = User.safe_find(ver.user_id)
+        user = user_link(user, user.login)
+      else
+        user = :unknown.t
+      end
+
+      # Version number (and name if available).
+      link = "#{:VERSION.t} #{ver.version}"
+      if ver.respond_to?(:format_name)
+        link += ' ' + ver.format_name.t
+      end
+      if ver.version != obj.version
+        if ver == obj.versions.last
+          link = link_to(link, :controller => obj.show_controller,
                          :action => "show_#{type}", :id => obj.id,
                          :params => query_params)
         else
-          line = link_to(line, :controller => obj.show_controller,
+          link = link_to(link, :controller => obj.show_controller,
                          :action => "show_past_#{type}", :id => obj.id,
-                         :version => v.version, :params => query_params)
+                         :version => ver.version, :params => query_params)
         end
       end
-      if args[:bold] and args[:bold].call(v)
-        line = '<b>' + line + '</b>'
+      if args[:bold] and args[:bold].call(ver)
+        link = '<b>' + link + '</b>'
       end
-      indent + line
+
+      # Was this the result of a merge?
+      if ver.respond_to?(:merge_source_id)
+        merge = get_version_merge_link(obj, ver)
+      else
+        merge = nil
+      end
+
+      i = indent(1)
+      [ date, i, user, i, link, i, merge ]
     end
-    html.unshift("#{:VERSIONS.t}:")
-    html = '<p style="white-space:nowrap">' + html.join("<br/>\n") + '</p>'
+    table = make_table(table, :style => 'margin-left:20px')
+    html = "<p>#{:VERSIONS.t}:</p>#{table}<br/>"
+  end
+
+  # Return link to orphaned versions of old description if this version
+  # was the result of a merge.
+  def get_version_merge_link(obj, ver)
+    type = obj.class.name.underscore
+    if ver.merge_source_id and
+       (other_ver = ver.class.find(ver.merge_source_id) rescue nil)
+      parent_id = other_ver.send("#{type}_id")
+      link_to(:show_past_version_merged_with.t(:id => parent_id),
+              :controller => obj.show_controller,
+              :action => "show_past_#{type}", :id => obj.id,
+              :merge_source_id => ver.merge_source_id,
+              :params => query_params)
+    end
   end
 
   # Show list of authors and editors at the bottom of a show_object page, with

@@ -38,7 +38,7 @@ module ApplicationHelper::HTML
 
   # Create a table out of a list of Arrays.
   #
-  #   make_table( [1,2], [3,4] )
+  #   make_table([[1,2],[3,4]])
   #
   # Produces:
   #
@@ -53,12 +53,16 @@ module ApplicationHelper::HTML
   #     </tr>
   #   </table>
   #
-  def make_table(*rows)
-    '<table>' + rows.map do |row|
-      '<tr>' + row.map do |cell|
-        '<td>' + h(cell) + '</td>'
-      end.join + '</tr>'
-    end.join + '</table>'
+  def make_table(rows, table_opts={}, tr_opts={}, td_opts={})
+    content_tag(:table, table_opts) do
+      rows.map do |row|
+        content_tag(:tr, tr_opts) do
+          row.map do |cell|
+            content_tag(:td, cell.to_s, td_opts)
+          end.join
+        end
+      end.join
+    end
   end
 
   # Add something to the header from within view.  This can be called as many

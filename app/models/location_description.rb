@@ -14,6 +14,9 @@
 #  modified::         (V) Date/time it was last modified.
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
+#  merge_source_id::  (V) Used to keep track of descriptions that were merged into this one.
+#                         Primarily useful in the past versions: stores id of latest version
+#                         of the Description merged into this one at the time of the merge.
 #
 #  ==== Statistics
 #  num_views::        (-) Number of times it has been viewed.
@@ -64,7 +67,8 @@ class LocationDescription < Description
 
   acts_as_versioned(
     :table_name => 'location_descriptions_versions',
-    :if_changed => ALL_NOTE_FIELDS
+    :if_changed => ALL_NOTE_FIELDS,
+    :association_options => { :dependent => :orphan }
   )
   non_versioned_columns.push(
     'sync_id',

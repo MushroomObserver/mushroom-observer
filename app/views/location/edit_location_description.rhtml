@@ -27,4 +27,8 @@
              { :form => form }) %>
 
   <br/><center><%= submit_tag(:UPDATE.l) %></center>
+  <% if @merge %>
+    <%= hidden_field_tag('old_desc_id', @old_desc_id) %>
+    <%= hidden_field_tag('delete_after', @delete_after) %>
+  <% end %>
 <% end %>

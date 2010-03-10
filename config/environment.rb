@@ -190,3 +190,36 @@ module ActionController
     end
   end
 end
+
+# Add the option to "orphan" attachments if you use ":dependent => :orphan" in
+# the has_many association options.  This has the effect of doing *nothing* to
+# the attachements.  The other options allowed by Rails already are: 
+#
+#   :delete_all   Delete directly from database without callbacks.
+#   :destroy      Call "destroy" on all attachments.
+#   nil           Set the parent id to NULL.
+#
+# New option:
+#
+#   :orphan       Do nothing.
+#
+module ActiveRecord
+  module Associations
+    class HasManyAssociation
+      alias original_delete_records delete_records
+      def delete_records(records)
+        if @reflection.options[:dependent] != :orphan
+          original_delete_records(records)
+        end
+      end
+    end
+    module ClassMethods
+      alias original_configure_dependency_for_has_many configure_dependency_for_has_many
+      def configure_dependency_for_has_many(reflection)
+        if reflection.options[:dependent] != :orphan
+          original_configure_dependency_for_has_many(reflection)
+        end
+      end
+    end
+  end
+end

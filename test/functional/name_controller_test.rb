@@ -2432,9 +2432,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal('', desc.source_name.to_s)
     assert_equal(true, desc.public)
     assert_equal(true, desc.public_write)
-    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
 
     # Test draft creation by project member.
     login('rolf') # member
@@ -2502,9 +2499,6 @@ class NameControllerTest < FunctionalTestCase
     assert_equal('', desc.source_name.to_s)
     assert_equal(false, desc.public)
     assert_equal(false, desc.public_write)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.admin_groups)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.writer_groups)
-    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.reader_groups)
   end
 
   def test_create_name_description_public

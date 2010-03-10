@@ -315,6 +315,8 @@ EDIT: Edit
 edit: edit
 ENABLE: Enable
 enable: enable
+MERGE: Merge
+merge: merge
 OKAY: Okay
 okay: okay
 REMOVE: Remove
@@ -835,6 +837,8 @@ runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
 runtime_description_added_admin: Gave admin permission to [name].
 runtime_description_added_reader: Gave view permission to [name].
 runtime_description_added_writer: Gave edit permission to [name].
+runtime_description_merge_delete_denied: You don't have permission to delete the old description.
+runtime_description_merge_deleted: "The old description was deleted: [old]"
 runtime_description_private: That description is private!
 runtime_description_removed_admin: Revoked admin permission for [name].
 runtime_description_removed_reader: Revoked view permission for [name].
@@ -2259,6 +2263,11 @@ show_past_name_description_title: "[:VERSION] [num]: [name]"
 
 
 
+# object/show_past_versions
+show_past_version_merged_with: "(merged with #[id])"
+
+
+
 # observer/show_rss_log
 show_rss_log_title: Log for [title]
 
@@ -2638,6 +2647,7 @@ make_report_not_supported: We don't support report filetype *.[type].
 merge_descriptions_title: Merge [object] Into Another Description
 merge_descriptions_header: Other Descriptions
 merge_descriptions_no_others: "(there is only the one description)"
+merge_descriptions_delete_after: "Delete old description after merge?"
 
 
 # name/bulk_name_edit

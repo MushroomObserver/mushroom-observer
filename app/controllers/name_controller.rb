@@ -419,7 +419,13 @@ class NameController < ApplicationController
     pass_query_params
     store_location
     @description = NameDescription.find(params[:id])
-    @description.revert_to(params[:version].to_i)
+    if params[:merge_source_id].blank?
+      @description.revert_to(params[:version].to_i)
+    else
+      version = NameDescription::Version.find(params[:merge_source_id])
+      @description.clone_versioned_model(version, @description)
+      @old_parent_id = version.name_description_id
+    end
   end
 
   # Go to next name: redirects to show_name.
@@ -798,6 +804,9 @@ class NameController < ApplicationController
 
       # Updated successfully.
       else
+        flash_notice(:runtime_edit_name_description_success.t(
+                     :id => @description.id))
+
         if !args.empty?
           args[:id] = @description
           Transaction.put_name_description(args)
@@ -811,8 +820,21 @@ class NameController < ApplicationController
           name.save
         end
 
-        flash_notice(:runtime_edit_name_description_success.t(
-                     :id => @description.id))
+        # Delete old description after resolving conflicts of merge.
+        if (params[:delete_after] == 'true') and
+           (old_desc = NameDescription.safe_find(params[:old_desc_id]))
+          v = @description.versions.latest
+          v.merge_source_id = old_desc.versions.latest.id
+          v.save
+          if !old_desc.is_admin?(@user)
+            flash_warning(:runtime_description_merge_delete_denied.t)
+          else
+            flash_notice(:runtime_description_merge_deleted.
+                           t(:old => old_desc.partial_format_name))
+            old_desc.destroy
+          end
+        end
+
         redirect_to(:action => 'show_name_description',
                     :id => @description.id)
       end

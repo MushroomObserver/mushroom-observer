@@ -88,11 +88,11 @@ module ApplicationHelper::Map
     link = link_to(loc.display_name.t, :controller => :location,
                    :action => :show_location, :id => loc.id,
                    :params => query_params)
-    table = make_table(
-      ['', loc.north, ''],
-      [loc.west, '', loc.east],
-      ['', loc.south, '']
-    )
+    table = make_table([
+      ['', h(loc.north), ''],
+      [h(loc.west), '', h(loc.east)],
+      ['', h(loc.south), '']
+    ])
     info = '<span class="gmap">' + link + table + '</span>'
     map.overlay_init( GMarker.new(
       loc.center(),

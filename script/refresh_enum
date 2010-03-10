@@ -37,6 +37,12 @@ TABLES
     ActiveRecord::Migration.add_column(:names, :notes, :text)
     ActiveRecord::Migration.add_column(:names_versions, :notes, :text)
     done_anything = true
+  when 'jason2'
+    ActiveRecord::Migration.add_column(:name_descriptions, :merge_source_id, :integer)
+    ActiveRecord::Migration.add_column(:name_descriptions_versions, :merge_source_id, :integer)
+    ActiveRecord::Migration.add_column(:location_descriptions, :merge_source_id, :integer)
+    ActiveRecord::Migration.add_column(:location_descriptions_versions, :merge_source_id, :integer)
+    done_anything = true
   else
     $stderr.puts "Unsupported or invalid table: '#{arg}'"
     status = 1

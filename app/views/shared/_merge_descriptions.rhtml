@@ -1,15 +1,29 @@
-<br/><br/>
+<% form_tag(:action => 'merge_descriptions', :id => description.id) do %>
+  <br/><br/>
 
-<p><%= :merge_descriptions_header.t %>:</p>
+  <p><big><%= :merge_descriptions_header.t %>:</big></p>
 
-<ul type="none">
-  <% any = false
-  for desc in description.parent.descriptions - [description]
-    any = true %>
-    <li><%= link_to(description_title(desc), :id => description.id,
-                    :target => desc.id) %></li>
-  <% end
-  if !any %>
-    <li><%= :merge_descriptions_no_others.t %></li>
-  <% end %>
-</ul>
+  <ul type="none">
+    <% any = false
+    options = description.parent.descriptions - [description]
+    only_one = (options.length == 1)
+    for desc in options
+      any = true %>
+      <li><%= radio_button_tag(:target, desc.id, only_one) %>
+          <%= description_title(desc) %></li>
+    <% end
+    if !any %>
+      <li><%= :merge_descriptions_no_others.t %></li>
+    <% end %>
+  </ul>
+
+  <%= check_box_tag("delete", '1', description.is_admin?(@user)) %>
+    <%= :merge_descriptions_delete_after.t %>
+  <input type="hidden" name="delete" value="0"/>
+
+  <br/><br/>
+
+  <center><%= submit_tag(:MERGE.t) %></center>
+
+  <br/><br/>
+<% end %>

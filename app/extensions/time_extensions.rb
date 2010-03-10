@@ -26,22 +26,22 @@ class ActiveSupport::TimeWithZone
   Time::DATE_FORMATS[:email] = EMAIL_TIME_FORMAT
 
   # Format as date for API XML responses.
-  def web_date; to_s(:web); end
+  def web_date; strftime(WEB_DATE_FORMAT); end
 
   # Format as date-time for API XML responses.
-  def web_time; to_s(:web); end
+  def web_time; strftime(WEB_TIME_FORMAT); end
 
   # Format as date for API XML responses.
-  def api_date; utc.to_s(:api); end
+  def api_date; utc.strftime(API_TIME_FORMAT); end
 
   # Format as date-time for API XML responses.
-  def api_time; utc.to_s(:api); end
+  def api_time; utc.strftime(API_TIME_FORMAT); end
 
   # Format as date for emails.
-  def email_date; to_s(:email); end
+  def email_date; strftime(EMAIL_TIME_FORMAT); end
 
   # Format as date-time for emails.
-  def email_time; to_s(:email); end
+  def email_time; strftime(EMAIL_TIME_FORMAT); end
 end
 
 class Time
