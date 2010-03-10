@@ -244,16 +244,25 @@ class Description < AbstractModel
     dest = self
     src_notes  = src.all_notes
     dest_notes = dest.all_notes
+
     # Mergeable if there are no fields which are non-blank in both descriptions.
     if self.class.all_note_fields.none? \
          {|f| !src_notes[f].blank? and !dest_notes[f].blank?}
+
+      # Copy over all non-blank descriptive fields.
       for f, val in src_notes
         dest.send("#{f}=", val) if !val.blank?
       end
+
+      # Store where merge came from in new version of destination.
       dest.merge_source_id = src.versions.latest.id
-      if dest.changed?
-        dest.save
-      end
+      dest.save
+
+      # Copy over authors and editors.
+      src.authors.each {|user| dest.add_author(user)}
+      src.editors.each {|user| dest.add_editors(user)}
+
+      # Destroy old description if requested.
       src.destroy if delete_after
       result = true
     else

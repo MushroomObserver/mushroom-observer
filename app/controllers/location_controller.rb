@@ -369,9 +369,16 @@ class LocationController < ApplicationController
     if params[:merge_source_id].blank?
       @description.revert_to(params[:version].to_i)
     else
-      version = LocationDescription::Version.find(params[:merge_source_id])
-      @description.clone_versioned_model(version, @description)
+      @merge_source_id = params[:merge_source_id]
+      version = LocationDescription::Version.find(@merge_source_id)
       @old_parent_id = version.location_description_id
+      subversion = params[:version]
+      if !subversion.blank? and
+         (version.version != subversion.to_i)
+        version = LocationDescription::Version.
+          find_by_version_and_location_description_id(params[:version], @old_parent_id)
+      end
+      @description.clone_versioned_model(version, @description)
     end
   end
 

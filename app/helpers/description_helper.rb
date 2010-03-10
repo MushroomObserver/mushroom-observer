@@ -8,8 +8,8 @@
 #  show_description_tab_set:: Create tabs for show_description page.
 #  show_alt_descriptions::    Show list of alt descriptions for show_object page.
 #  show_embedded_description_title:: Show description title with edit/destroy links.
-#  show_past_versions::       Show list of versions for show_past_object page.
 #  show_previous_version::    Show version number and link to previous.
+#  show_past_versions::       Show list of versions for show_past_object page.
 #  show_authors_and_editors:: Show list of authors and editors below desc page.
 #
 ##############################################################################
@@ -231,12 +231,13 @@ module ApplicationHelper::Description
   #
   def show_past_versions(obj, args={})
     type = obj.class.name.underscore
-    if !@old_parent_id
+    if !@merge_source_id
       versions = obj.versions.reverse
     else
       version_class = "#{obj.class.name}::Version".constantize
       versions = version_class.find_by_sql %(
-        SELECT * FROM #{type}s_versions WHERE #{type}_id = #{@old_parent_id}
+        SELECT * FROM #{type}s_versions
+        WHERE #{type}_id = #{@old_parent_id} AND id <= #{@merge_source_id}
         ORDER BY id DESC
       )
     end
@@ -258,7 +259,12 @@ module ApplicationHelper::Description
         link += ' ' + ver.format_name.t
       end
       if ver.version != obj.version
-        if ver == obj.versions.last
+        if @merge_source_id
+          link = link_to(link, :controller => obj.show_controller,
+                         :action => "show_past_#{type}", :id => obj.id,
+                         :merge_source_id => @merge_source_id,
+                         :version => version, :params => query_params)
+        elsif ver == obj.versions.last
           link = link_to(link, :controller => obj.show_controller,
                          :action => "show_#{type}", :id => obj.id,
                          :params => query_params)
