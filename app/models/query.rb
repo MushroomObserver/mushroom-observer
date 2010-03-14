@@ -625,6 +625,8 @@ class Query < AbstractQuery
         "#{table}.date DESC"
       elsif model.column_names.include?('when')
         "#{table}.when DESC"
+      elsif model.column_names.include?('created')
+        "#{table}.created DESC"
       end
     when 'name'
       if model == Image

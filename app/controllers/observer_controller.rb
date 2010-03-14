@@ -490,6 +490,7 @@ class ObserverController < ApplicationController
       ['name', :name.t],
       ['date', :DATE.t],
       ['user', :user.t],
+      ['modified', :modified.t],
     ]
 
     # Add "show map" link if this query can be coerced into a location query.

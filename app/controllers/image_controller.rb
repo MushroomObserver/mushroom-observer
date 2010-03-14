@@ -125,6 +125,7 @@ class ImageController < ApplicationController
       ['name', :name.t],
       ['date', :DATE.t],
       ['user', :user.t],
+      ['modified', :modified.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
