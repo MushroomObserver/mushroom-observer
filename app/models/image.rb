@@ -381,7 +381,7 @@ class Image < AbstractModel
   def validate_image_type
     if save_to_temp_file
       # Override whatever user gave us with result of "file -i".
-      type = File.read("| file -i #{upload_temp_file}").chomp.split[1]
+      type = File.read("| file --mime #{upload_temp_file}").chomp.split[1]
       self.upload_type = type if type
       if upload_type.match(/^image\//)
         result = true
