@@ -364,7 +364,8 @@ class AmateurTest < IntegrationTestCase
 
   def test_posting_observation
     katrina = current_session
-    date  = Time.now - 1.year - 2.months - 3.days
+    local_now = Time.now.in_time_zone
+    date  = local_now - 1.year - 2.months - 3.days
     place = 'Burbank, CA'
     loc   = locations(:burbank)
     name  = names(:coprinus_comatus)
@@ -381,9 +382,9 @@ class AmateurTest < IntegrationTestCase
     assert_template('observer/create_observation')
 
     open_form do |form|
-      form.assert_value('observation_when_1i', Time.now.year)
-      form.assert_value('observation_when_2i', Time.now.month)
-      form.assert_value('observation_when_3i', Time.now.day)
+      form.assert_value('observation_when_1i', local_now.year)
+      form.assert_value('observation_when_2i', local_now.month)
+      form.assert_value('observation_when_3i', local_now.day)
       form.assert_value('observation_place_name', '')
       form.assert_value('name_name', '')
       form.assert_value('is_collection_location', true)

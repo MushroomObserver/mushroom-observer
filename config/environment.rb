@@ -114,9 +114,11 @@ Rails::Initializer.run do |config|
   # Make Active Record use UTC instead of local time.  This is critical if we
   # want to sync up remote servers.
   config.time_zone = ENV['TZ']
-  config.active_record.time_zone_aware_attributes = true
-  config.active_record.default_timezone = :utc
-
+  if config.time_zone.nil?
+    # Localization isn't loaded yet.
+    raise 'TZ environment variable must be set. Run "rake -D time" for a list of tasks for finding appropriate time zone names.'
+  end
+  
   # This instructs ActionView how to mark form fields which have an error.
   # I just change the CSS class to "has_error", which gives it a red border.
   # This is superior to the default, which encapsulates the field in a div,
