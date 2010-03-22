@@ -41,18 +41,24 @@
           Image.all_sizes.select do |size|
             @image.has_size?(size)
           end.map do |size|
-            if size.to_s == @size.to_s
-              :"image_show_#{size}".t
-            else
+            if size.to_s != @size.to_s
               link_to(:"image_show_#{size}".t, :action => 'show_image',
                       :id => @image.id, :size => size, :params => query_params)
+            else
+              :"image_show_#{size}".t
             end
           end.join(' | ')
-        %></p>
+        %><br/>
+        <%= if @size != @default_size
+          link_to(:image_show_make_default.t, :action => 'show_image',
+                  :id => @image.id, :size => @size, :make_default => 1,
+                  :params => query_params)
+        end %></p>
 
         <%= link_to(image_tag(@image.send("#{@size}_url")),
                     :action => 'show_image', :id => @image.id,
-                    :size => 'full_size', :params => query_params) %><br/>
+                    :size => (@size == @default_size ? :full_size : @default_size),
+                    :params => query_params) %><br/>
 
         <p>
           <%= render(:partial => "shared/form_#{@image.license.form_name}") %>

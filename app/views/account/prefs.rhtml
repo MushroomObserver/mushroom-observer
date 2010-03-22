@@ -32,30 +32,40 @@
   <p><label for="user_password_confirmation"><%= :prefs_password_confirm.t %></label>:<br/>
   <%= form.password_field("password_confirmation", :size => 30) %></p>
 
-  <table cellpadding="0" cellspacing="0" style="margin-top:1em">
+  <br/>
+
+  <p><label for="user_license_id"><b><%= :License.t %>:</b></label>
+    <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
+  <%= form.select(:license_id, @licenses) %></p>
+
+  <table cellpadding="0" cellspacing="0">
     <tr>
-      <td>
-        <label for="user_theme"><b><%= :prefs_theme.t %>:</b></label><br/>
-        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %>
-      </td>
-
-      <td width="20">
-      </td>
-
-      <td>
-        <label for="user_license_id"><b><%= :license.t %>:</b></label>
-          <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
-        <%= form.select(:license_id, @licenses) %>
-      </td>
-
-      <td width="20">
-      </td>
-
-      <td>
-        <label for="user_locale"><b><%= :prefs_locale.t %>:</b></label><br/>
+      <td><label for="user_theme"><b><%= :prefs_theme.t %>:</b></label><br/>
+        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %></td>
+      <td width="20"></td>
+      <td><label for="user_locale"><b><%= :prefs_locale.t %>:</b></label><br/>
         <% locales = all_locales.map { |x| [x.sub('-','_').to_sym.t, x] } %>
-        <%= form.select(:locale, locales) %>
-      </td>
+        <%= form.select(:locale, locales) %></td>
+    </tr>
+  </table><br/>
+
+  <table cellpadding="0" cellspacing="0">
+    <tr>
+      <td><label for="user_thumbnail_size"><b><%= :prefs_thumbnail_size.t %>:</b></label><br/>
+        <%= form.select(:thumbnail_size, [
+          [:prefs_thumbnail_small.l, :thumbnail],
+          [:prefs_thumbnail_large.l, :small],
+        ]) %></td>
+      <td width="20"></td>
+      <td><label for="user_image_size"><b><%= :prefs_image_size.t %>:</b></label>
+        <span class="HelpNote">(<%= :prefs_image_size_help.t %>)</span><br/>
+        <%= form.select(:image_size, [
+          [:prefs_image_small.l,     :small],
+          [:prefs_image_medium.l,    :medium],
+          [:prefs_image_large.l,     :large],
+          [:prefs_image_huge.l,      :huge],
+          [:prefs_image_full_size.l, :full_size],
+        ]) %></td>
     </tr>
   </table><br/>
 

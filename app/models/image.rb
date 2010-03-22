@@ -138,6 +138,8 @@
 #  == Class Methods
 #
 #  all_qualities::      Allowed values for +quality+ (Array of Aymbol's).
+#  file_name::          Filename (relative to IMG_DIR) given size and id.
+#  url::                Full URL on image server given size and id.
 #
 #  == Instance Methods
 #
@@ -246,6 +248,21 @@ class Image < AbstractModel
     end
   end
 
+  def self.file_name(size, id)
+    case size
+    when :full_size; "orig/#{id}.jpg"
+    when :huge;      "1280/#{id}.jpg"
+    when :large;     "960/#{id}.jpg"
+    when :medium;    "640/#{id}.jpg"
+    when :small;     "320/#{id}.jpg"
+    when :thumbnail; "thumb/#{id}.jpg"
+    end
+  end
+
+  def self.url(size, id)
+    "#{IMAGE_DOMAIN}/#{file_name(size, id)}"
+  end
+
   def original_file;  "orig/#{id}.#{original_extension}"; end
   def full_size_file; "orig/#{id}.jpg";  end
   def huge_file;      "1280/#{id}.jpg";  end
@@ -292,7 +309,8 @@ class Image < AbstractModel
   #
   #    img = Image.new(args)              # Initialize record.
   #    img.image = File.new('photo.jpg')  # Attach upload.
-  #    img.md5sum = request.header[xxx]   # Supply extra header info.
+  #    img.upload_length = ...            # Supply extra header info.
+  #    img.upload_md5sum = ...
   #    img.validate_upload                # Validate it.
   #    img.save                           # Create record (to get id).
   #    img.process_image                  # Resize and transfer images.

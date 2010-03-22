@@ -1909,6 +1909,7 @@ image_show_large: Grande
 image_show_huge: Enorme
 image_show_full_size: Completo
 image_show_original: Mostrar la Imágen Original
+image_show_make_default: Hacen de este el tamaño predeterminado.
 
 
 
@@ -2041,6 +2042,16 @@ prefs_password_confirm: Confirmar nueva contraseña
 prefs_theme: Tema preferido
 prefs_locale: Idioma
 prefs_license_note: '"La licencia":/observer/how_to_use#license por defecto que desea para nuevas imágenes.'
+prefs_thumbnail_size: Tamaño de las miniaturas
+prefs_thumbnail_small: "[:image_show_small]"
+prefs_thumbnail_large: "[:image_show_large]"
+prefs_image_size: Tamaño de las imágenes
+prefs_image_size_help: Tamaño de la muestra al hacer clic en una imagen.
+prefs_image_small: "[:image_show_small] (320 x 320)"
+prefs_image_medium: "[:image_show_medium] (640 x 640)"
+prefs_image_large: "[:image_show_large] (960 x 960)"
+prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
+prefs_image_full_size: "[:image_show_full_size]"
 prefs_layout_title: Diseño de páginas de listas
 prefs_rows_by: filas x
 prefs_columns: columnas

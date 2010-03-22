@@ -1885,6 +1885,7 @@ image_show_large: Large
 image_show_huge: Huge
 image_show_full_size: Full Size
 image_show_original: Show Original Image
+image_show_make_default: Make this the default size
 
 
 
@@ -2018,7 +2019,17 @@ prefs_password_new: New password
 prefs_password_confirm: Confirm new password
 prefs_theme: Preferred theme
 prefs_locale: Language
-prefs_license_note: Default "license":/observer/how_to_use#license you want for new images
+prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
+prefs_thumbnail_size: Thumbnail size
+prefs_thumbnail_small: "[:image_show_small]"
+prefs_thumbnail_large: "[:image_show_large]"
+prefs_image_size: Image size
+prefs_image_size_help: Size shown when you click on an image.
+prefs_image_small: "[:image_show_small] (320 x 320)"
+prefs_image_medium: "[:image_show_medium] (640 x 640)"
+prefs_image_large: "[:image_show_large] (960 x 960)"
+prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
+prefs_image_full_size: "[:image_show_full_size]"
 prefs_layout_title: List page layout
 prefs_rows_by: rows x
 prefs_columns: columns

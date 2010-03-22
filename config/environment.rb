@@ -91,7 +91,7 @@ require File.join(File.dirname(__FILE__), 'consts')
 Rails::Initializer.run do |config|
 
   # Add our local classes and modules (e.g., Textile and LoginSystem) and class
-  # extensions (e.g., String and Symbol extensions) to the include path. 
+  # extensions (e.g., String and Symbol extensions) to the include path.
   config.load_paths += %W(
     #{RAILS_ROOT}/app/classes
     #{RAILS_ROOT}/app/extensions
@@ -112,13 +112,20 @@ Rails::Initializer.run do |config|
   # config.action_controller.fragment_cache_store = :file_store, "#{RAILS_ROOT}/cache"
 
   # Make Active Record use UTC instead of local time.  This is critical if we
-  # want to sync up remote servers.
+  # want to sync up remote servers.  It causes Rails to store dates in UTC and
+  # convert from UTC to whatever we've set the timezone to when reading them
+  # back in.  It shouldn't actually make any difference how the database is
+  # configured.  It takes dates as a string, stores them however it chooses,
+  # performing whatever conversions it deems fit, then returns them back to us
+  # in exactly the same format we gave them to it.  (NOTE: only the first line
+  # should be necessary, but for whatever reason, Rails is failing to do the
+  # other configs on some platforms.)
   config.time_zone = ENV['TZ']
   if config.time_zone.nil?
     # Localization isn't loaded yet.
     raise 'TZ environment variable must be set. Run "rake -D time" for a list of tasks for finding appropriate time zone names.'
   end
-  
+
   # This instructs ActionView how to mark form fields which have an error.
   # I just change the CSS class to "has_error", which gives it a red border.
   # This is superior to the default, which encapsulates the field in a div,
@@ -197,7 +204,7 @@ end
 
 # Add the option to "orphan" attachments if you use ":dependent => :orphan" in
 # the has_many association options.  This has the effect of doing *nothing* to
-# the attachements.  The other options allowed by Rails already are: 
+# the attachements.  The other options allowed by Rails already are:
 #
 #   :delete_all   Delete directly from database without callbacks.
 #   :destroy      Call "destroy" on all attachments.

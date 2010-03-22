@@ -776,6 +776,7 @@ class ApplicationController < ActionController::Base
       :synonym,
       :deprecated,
       :correct_spelling,
+      :notes
     ]
 
     # Log transaction.

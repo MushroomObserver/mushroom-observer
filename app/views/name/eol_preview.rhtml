@@ -15,8 +15,8 @@ for name in @names
     </p>
     <% if @image_data[name.id]
       for image_id, observation_id in @image_data[name.id] %>
-        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image_id), :border => 0),
-                    :controller => 'observer', :action => 'show_observation', :id => observation_id) %>
+        <%= thumbnail(image_id, :border => 0, :link => :show_observation,
+                      :obs => observation_id) %>
       <% end
     end %>
   </div>

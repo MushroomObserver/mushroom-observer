@@ -1,7 +1,7 @@
 <table cellpadding="10">
   <tr>
     <td align="center" valign="middle" width="160">
-      <%= link_to(image_tag(sprintf("thumb/%d.jpg", image_reuse.id), :border => 0), link_args) %>
+      <%= thumbnail(image_reuse, :border => 0, :link => link_args) %>
     </td>
   </tr>
 </table>

@@ -27,10 +27,7 @@
       if image && !done[image.id]
         done[image.id] = true %>
         <p>
-          <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)),
-                      :controller => 'image', :action => 'show_image',
-                      :id => image.id, :obs => @observation.id,
-                      :params => query_params) %><br/>
+          <%= thumbnail(image, :border => 0, :obs => @observation.id) %><br/>
           <% if !image.notes.blank? %>
             <small>
               <%= # This is really ugly; could break up formatting unit.

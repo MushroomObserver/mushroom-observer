@@ -57,6 +57,24 @@ class Project < AbstractModel
     title.to_s
   end
 
+  # When deleting a project, "orphan" its unpublished drafts and remove the
+  # user groups.
+  def destroy
+    title       = self.title
+    user_group  = self.user_group
+    admin_group = self.admin_group
+    for d in NameDescription.find_all_by_source_type_and_source_name(:project, title)
+      d.source_type = :source
+      d.admin_groups.delete(admin_group)
+      d.writer_groups.delete(admin_group)
+      d.reader_groups.delete(user_group)
+      d.save
+    end
+    user_group.destroy
+    admin_group.destroy
+    super
+  end
+
 ################################################################################
 
 protected

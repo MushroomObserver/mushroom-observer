@@ -45,9 +45,8 @@ for comment in comments
       <% user = comment.user
       if user.image_id %>
         </td><td>
-        <%= link_to(image_tag("thumb/%d.jpg" % user.image_id, :border => 0),
-                    :controller => "image", :action => "show_image",
-                    :id => user.image_id, :params => query_params) %>
+        <%= thumbnail(user.image_id, :border => 0, :size => :thumbnail,
+                      :link => :show_user, :user => user.id) %>
       <% end %>
 
     </td></tr></table>

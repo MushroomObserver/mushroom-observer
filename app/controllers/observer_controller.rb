@@ -1671,22 +1671,32 @@ class ObserverController < ApplicationController
     success = true
     args = {}
     if observation.new_record?
-      args[:method]      = 'post'
-      args[:action]      = 'observation'
-      args[:date]        = observation.when
-      args[:location]    = observation.place_name
-      args[:notes]       = observation.notes.to_s
-      args[:specimen]    = !!observation.specimen
-      args[:thumb_image] = observation.thumb_image_id.to_i
+      args[:method] = 'post'
+      args[:action] = 'observation'
+      args[:date]   = observation.when
+      if observation.location_id
+        args[:location] = observation.location
+      else
+        args[:location] = observation.where
+      end
+      args[:notes]     = observation.notes.to_s
+      args[:specimen]  = !!observation.specimen
+      args[:thumbnail] = observation.thumb_image_id.to_i
       args[:is_collection_location] = observation.is_collection_location
     else
-      args[:method]          = 'put'
-      args[:action]          = 'observation'
-      args[:set_date]        = observation.when                if observation.when_changed?
-      args[:set_location]    = observation.place_name          if observation.where_changed? || observation.location_id_changed?
-      args[:set_notes]       = observation.notes               if observation.notes_changed?
-      args[:set_specimen]    = observation.specimen            if observation.specimen_changed?
-      args[:set_thumb_image] = observation.thumb_image_id.to_i if observation.thumb_image_id_changed?
+      args[:method]   = 'put'
+      args[:action]   = 'observation'
+      args[:set_date] = observation.when                if observation.when_changed?
+      if observation.where_changed? or observation.location_id_changed?
+        if observation.location_id
+          args[:set_location] = observation.location
+        else
+          args[:set_location] = observation.where
+        end
+      end
+      args[:set_notes]     = observation.notes               if observation.notes_changed?
+      args[:set_specimen]  = observation.specimen            if observation.specimen_changed?
+      args[:set_thumbnail] = observation.thumb_image_id.to_i if observation.thumb_image_id_changed?
       args[:set_is_collection_location] = observation.is_collection_location
     end
     if observation.save

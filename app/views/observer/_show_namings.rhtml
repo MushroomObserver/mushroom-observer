@@ -28,7 +28,7 @@
     <div class="ThinBox">
       <% cols = logged_in ? 7 : 5 %>
       <table cellspacing="0" cellpadding="0">
-        <tr style='white-space:nowrap'>
+        <tr>
           <th><%= :show_namings_proposed_name.t %></th>
           <th></th>
           <th><%= :show_namings_user.t %></th>
@@ -45,13 +45,13 @@
         <% for naming in @observation.namings.sort_by(&:created) %>
           <tr>
             <td>
-              <div style='white-space:nowrap'>
+              <div>
                 <%= link_to(sanitize(naming.format_name).t,
                             :controller => 'name', :action => 'show_name',
                             :id => naming.name, :params => query_params) %>
               </div>
               <% if check_permission(naming.user_id) %>
-                <div style='white-space:nowrap'>
+                <div>
                   (<%= link_to(:EDIT.t, :action => 'edit_naming',
                                :id => naming, :params => query_params) %>
                   | <%= link_to(:DESTROY.t, { :action => 'destroy_naming',
@@ -61,7 +61,7 @@
               <% end %>
             </td>
             <td width="20">&nbsp;</td>
-            <td style='white-space:nowrap'>
+            <td>
               <span class="Data"><%= user_link(naming.user, naming.user.login) %></span>
             </td>
 
@@ -87,7 +87,7 @@
 
             <% if logged_in %>
               <td width="20">&nbsp;</td>
-              <td nowrap="nowrap">
+              <td>
                 <% @vote = @votes[naming.id]
                 menu = check_permission(naming.user_id) ? @confidence_menu : @agreement_menu
                 # It *is* still possible for the owner not to have voted.  In which case I
@@ -102,7 +102,7 @@
             <% end %>
 
             <td width="20">&nbsp;</td>
-            <td nowrap="nowrap"><%=
+            <td><%=
               (@observation.is_owners_favorite?(naming) ? image_tag("eye3.png") : "") +
               (naming == consensus ? image_tag("eyes3.png") : "")
             %></td>

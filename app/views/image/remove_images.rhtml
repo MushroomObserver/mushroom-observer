@@ -24,12 +24,7 @@
           <%= check_box("selected", image.id, {}, "yes", "no") %>
         </td>
         <td align="center">
-          <p>
-            <%= link_to(image_tag("thumb/%d.jpg" % image.id) +
-                          "<br/>#{:image.t} ##{image.id}",
-                        :action => 'show_image', :id => image.id,
-                        :params => query_params) %>
-          </p>
+          <p><%= thumbnail(image, :append => "<br/>#{:image.t} ##{image.id}") %></p>
         </td>
       </tr>
     <% end %>

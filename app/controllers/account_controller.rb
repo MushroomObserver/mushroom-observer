@@ -135,7 +135,8 @@ class AccountController < ApplicationController
             :id    => @new_user,
             :name  => @new_user.name,
             :email => @new_user.email,
-            :login => @new_user.login
+            :login => @new_user.login,
+            :group => UserGroup.one_user(@new_user)
           )
           flash_notice :runtime_signup_success.t
           AccountMailer.deliver_verify(@new_user)
@@ -227,6 +228,8 @@ class AccountController < ApplicationController
             [ :bool, :email_general_question ],
             [ :str,  :email_digest ],
             [ :bool, :email_html ],
+            [ :str,  :thumbnail_size ],
+            [ :str,  :image_size ],
           ]
             val = params[:user][arg]
             val = case type

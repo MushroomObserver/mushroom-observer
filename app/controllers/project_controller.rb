@@ -216,29 +216,9 @@ class ProjectController < ApplicationController
       redirect_to(:action => 'show_project')
     else
       title = @project.title
-      user_group = @project.user_group
-      admin_group = @project.admin_group
-      for d in NameDescription.find_all_by_source_type_and_source_name(:project, @project.title)
-        d.source_type = :source
-        d.admin_groups.delete(admin_group)
-        d.writer_groups.delete(admin_group)
-        d.reader_groups.delete(user_group)
-        d.save
-        Transaction.put_name_description(
-          :id               => d,
-          :set_source_type  => :source,
-          :del_admin_group  => admin_group,
-          :del_writer_group => admin_group,
-          :del_reader_group => user_group
-        )
-      end
       if @project.destroy
         # project.log("Project destroyed by #{@user.login}: #{title}", :touch => false)
-        user_group.destroy
-        admin_group.destroy
         Transaction.delete_project(:id => @project)
-        Transaction.delete_user_group(:id => user_group)
-        Transaction.delete_user_group(:id => admin_group)
         flash_notice(:destroy_project_success.t)
       else
         flash_error(:destroy_project_failed.t)

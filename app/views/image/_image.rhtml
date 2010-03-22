@@ -1,9 +1,7 @@
 <table cellpadding="10" width="100%">
   <tr>
     <td align="center" valign="middle" width="160">
-      <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id), :border => 0),
-                  :action => 'show_image', :id => image.id,
-                  :params => query_params) %>
+      <%= thumbnail(image, :border => 0, :size => :thumbnail) %>
     </td>
 <% if @layout['vertical_layout'] %>
   </tr>

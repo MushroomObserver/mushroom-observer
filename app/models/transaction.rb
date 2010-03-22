@@ -134,6 +134,7 @@ class Transaction < AbstractModel
   # it was already created remotely, and uses _that_ as the sync_id for the new
   # record.
   def self.create(args)
+    return # DISABLE TEMPORARILY
     xact = new(args)
     xact.create_query
     xact.save
@@ -146,6 +147,7 @@ class Transaction < AbstractModel
   #   Transaction.delete_image(:id => 1234).execute
   #
   def self.method_missing(*args)
+    return # DISABLE TEMPORARILY
     if args[0].to_s.match(/^([a-z]+)_(\w+)$/) &&
        all_methods.include?(method=$1) &&
        all_actions.include?(action=$2)

@@ -165,9 +165,16 @@ class ImageController < ApplicationController
     pass_query_params
 
     # Decide which size to display.
-    @size = :medium
-    @size = @user.image_size if @user
-    @size = params[:size].to_sym if !params[:size].blank?
+    @default_size = @user ? @user.image_size : :medium
+    @size = params[:size].blank? ? @default_size : params[:size].to_sym
+
+    # Make this size the default image size for this user.
+    if @user and (@default_size != @size) and
+       (params[:make_default] == '1')
+      @user.image_size = @size
+      @user.save_without_our_callbacks
+      @default_size = @size
+    end
 
     # Wait until here to create this search query to save server resources.
     # Otherwise we'd be creating a new search query for images for every single

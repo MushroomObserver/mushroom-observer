@@ -2,6 +2,7 @@ require File.dirname(__FILE__) + '/../boot'
 
 class ApiControllerTest < FunctionalTestCase
 
+  # This is a good place to test this stuff, since the filters are simplified.
   def test_filters
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "pt-pt,pt;q=0.5"
     get(:test)

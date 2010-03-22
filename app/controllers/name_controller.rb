@@ -767,13 +767,8 @@ class NameController < ApplicationController
     @description = NameDescription.find(params[:id])
     @licenses = License.current_names_and_ids
 
-    if !@description.is_writer?(@user)
-      flash_error(:runtime_edit_description_denied.t)
-      if @description.is_reader?(@user)
-        redirect_to(:action => 'show_name_description', :id => @description.id)
-      else
-        redirect_to(:action => 'show_name', :id => @description.name_id)
-      end
+    if !check_description_edit_permission(@description, params[:description])
+      # already redirected
 
     elsif request.method == :post
       @description.attributes = params[:description]

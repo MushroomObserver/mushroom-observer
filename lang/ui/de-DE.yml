@@ -471,7 +471,7 @@ description_part_title_yours:  "Your [:DESCRIPTION]"
 
 # Same thing, but this time the optional text field was filled in.  Note that
 # the text field is not optional for half of the source types.
-description_part_title_public_with_text:  "[TEXT]"
+description_part_title_public_with_text: "[TEXT]"
 description_part_title_foreign_with_text:  "[:DESCRIPTION] From [TEXT]"
 description_part_title_project_with_text:  "Draft for [TEXT] by [USER]"
 description_part_title_source_with_text:  "[:DESCRIPTION] From [TEXT]"
@@ -1447,7 +1447,7 @@ commercial_inquiry_header: >
 
 
 # location/create_location_description
-create_location_description_title:  "[:create_name_description_title]"
+create_location_description_title: "[:create_name_description_title]"
 
 
 
@@ -1519,12 +1519,12 @@ form_comments_summary: Zusammenfassung
 
 
 # shared/_form_description
-form_description_source:  "[:SOURCE]"
+form_description_source: "[:SOURCE]"
 form_description_source_public:  Public [:app_title] Description
 form_description_source_foreign:  From Another [:app_title] Server
-form_description_source_project:  "[:PROJECT]"
+form_description_source_project: "[:PROJECT]"
 form_description_source_source:  Independent Source
-form_description_source_user:  "[:USER]"
+form_description_source_user: "[:USER]"
 form_description_permissions:  Permissions
 form_description_public_writable:  Modifiable by the general public.
 form_description_public_readable:  Visible to the general public.
@@ -1583,7 +1583,7 @@ form_locations_ecology:  Habitat Description
 form_locations_species:  Interesting Species
 form_locations_notes: "[:NOTES]"
 form_locations_refs: "[:form_names_refs]"
-form_locations_refs_help:  "[:form_names_refs_help]"
+form_locations_refs_help: "[:form_names_refs_help]"
 form_locations_help: >
   Gib einen eindeutigen Namen für diesen Fundort ein, der auch
   internationell Sinn macht. Zum Beispiel:\n
@@ -1886,6 +1886,7 @@ image_show_large:  Large
 image_show_huge:  Huge
 image_show_full_size: Großbild zeigen
 image_show_original:  Show Original Image
+image_show_make_default:  Make this the default size
 
 
 
@@ -1942,7 +1943,7 @@ map_locations_global_map: Weltkarte mit allen Fundorten
 
 # name/approve_name
 name_approve_title: Bestätige [name]
-name_approve_comment_summary:  "[:Approved]"
+name_approve_comment_summary: "[:Approved]"
 name_approve_comments: Kommentare
 name_approve_comments_help: >
   Bitte gib an warum dieser Name akzeptiert worden ist..\n
@@ -1970,7 +1971,7 @@ name_change_synonyms_confirm: Bitte bestätige, dass du es so meintest.
 # name/deprecate_name
 name_deprecate_title: Markiere [name] als veraltet
 name_deprecate_preferred: Akzeptierter Name
-name_deprecate_comment_summary:  "[:Deprecated]"
+name_deprecate_comment_summary: "[:Deprecated]"
 name_deprecate_comments: Kommentare
 name_deprecate_submit: Schicken
 name_deprecate_preferred_help: >
@@ -2019,6 +2020,16 @@ prefs_password_confirm: Neues Passwort wiederholen
 prefs_theme: Lieblings-Farbschema
 prefs_locale: Sprache
 prefs_license_note: Standard-"Lizenz":/observer/how_to_use#license gilt für neue Bilder
+prefs_thumbnail_size:  Thumbnail size
+prefs_thumbnail_small: "[:image_show_small]"
+prefs_thumbnail_large: "[:image_show_large]"
+prefs_image_size:  Image size
+prefs_image_size_help:  Size shown when you click on an image.
+prefs_image_small: "[:image_show_small] (320 x 320)"
+prefs_image_medium: "[:image_show_medium] (640 x 640)"
+prefs_image_large: "[:image_show_large] (960 x 960)"
+prefs_image_huge: "[:image_show_huge] Huge (1280 x 1280)"
+prefs_image_full_size: "[:image_show_full_size]"
 prefs_layout_title: Layout der Listenseiten
 prefs_rows_by: Reihen x
 prefs_columns: Spalten
@@ -2155,15 +2166,15 @@ show_image_quality_and_next: "[QUALITY] & [:NEXT]"
 show_location_title: "Fundort: [name]"
 show_location_create: Neuen Fundort anlegen
 show_location_edit: Fundort bearbeiten
-show_location_destroy:  "[:destroy_object(type=:location)]"
+show_location_destroy: "[:destroy_object(type=:location)]"
 show_location_observations: Funde an diesem Ort
 show_location_highest: Höchste Erhebung
 show_location_lowest: Niedrigste Tiefe
 show_location_no_descriptions:  There are no descriptions for this location yet.
-show_location_create_description:  "[:CREATE]"
+show_location_create_description: "[:CREATE]"
 show_location_creator:  User who defined this location
-show_location_editor:  "[:Editors]"
-show_location_editors:  "[:Editors]"
+show_location_editor: "[:Editors]"
+show_location_editors: "[:Editors]"
 
 
 
@@ -2175,12 +2186,12 @@ show_name_bulk_name_edit: Viele Namen auf einmal bearbeiten
 show_name_distribution_map: Verbreitungskarte
 show_name_change_synonyms: Synonyme ändern
 show_name_email_tracking: Bei Änderungen per Email benachrichtigen
-show_name_create_description:  "[:CREATE]"
+show_name_create_description: "[:CREATE]"
 show_name_synonyms: Synonym(e)
 show_name_preferred_synonyms: Bevorzugte Synonyme
 show_name_deprecated_synonyms: Veraltete Synonyme (veraltetes Synonym)
 show_name_misspelling:  This name is misspelled.
-show_name_misspelling_correct:  "[:CORRECT_SPELLING]"
+show_name_misspelling_correct: "[:CORRECT_SPELLING]"
 show_name_notes:  Notes on Taxonomy
 show_name_descriptions: "[:Descriptions]"
 show_name_create_draft: Neuen Entwurf erstellen für
@@ -2199,8 +2210,8 @@ show_name_synonym_observations: Funde unter Synonymen
 show_name_other_observations: Ähnliche Funde
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"
 show_name_creator:  First person to use this name on MO
-show_name_editor:  "[:Editors]"
-show_name_editors:  "[:Editors]"
+show_name_editor: "[:Editors]"
+show_name_editors: "[:Editors]"
 show_name_other_observations_notes: >
   (Jemand hat [name] für diese Funde vorgeschlagen, aber die Mehrheitsmeinung
   weicht weiterhin hiervon ab. Der Grad der Gewissheit gilt für  __diesen__ Namen, und nicht
@@ -2267,17 +2278,17 @@ show_past_location_other_versions: Andere Versionen
 
 
 # location/show_past_location_description
-show_past_location_description_title:  "[:VERSION] [num]: [name]"
+show_past_location_description_title: "[:VERSION] [num]: [name]"
 
 
 
 # name/show_past_name
-show_past_name_title:  "[:VERSION] [num]: [name]"
+show_past_name_title: "[:VERSION] [num]: [name]"
 
 
 
 # name/show_past_name_description
-show_past_name_description_title:  "[:VERSION] [num]: [name]"
+show_past_name_description_title: "[:VERSION] [num]: [name]"
 
 
 
@@ -3888,4 +3899,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

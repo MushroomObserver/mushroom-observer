@@ -3,14 +3,15 @@
 #
 #  These are helpers used to render links to various objects.
 #
-#  where_string::          Wrap location name in '<span>' tag.
-#  location_link::         Wrap location name in link to show/search it.
-#  name_link::             Wrap name in link to show_show.
-#  user_link::             Wrap user name in link to show_user.
-#  user_list::             Render list of users.
-#  project_link::          Wrap project name in link to show_project.
-#  description_title::     Create a meaningful title for a Description.
-#  description_link::      Create a link to show a given Description.
+#  where_string::         Wrap location name in '<span>' tag.
+#  location_link::        Wrap location name in link to show/search it.
+#  name_link::            Wrap name in link to show_show.
+#  user_link::            Wrap user name in link to show_user.
+#  user_list::            Render list of users.
+#  project_link::         Wrap project name in link to show_project.
+#  description_title::    Create a meaningful title for a Description.
+#  description_link::     Create a link to show a given Description.
+#  thumbnail::            Draw thumbnail image linked to show_image.
 #
 ################################################################################
 
@@ -136,5 +137,56 @@ module ApplicationHelper::ObjectLink
         :action => desc.show_action, :id => desc.id, :params => query_params)
     end
     return result
+  end
+
+  # Draw a thumbnail image.  It takes either an Image instance or an id.  Args:
+  # size::      Size of image.  (default is user's default thumbnail size)
+  # link::      :show_image, :show_observation, :show_user, :none, or Hash of +link_to+ args.  (default is :show_image)
+  # obs::       Add <tt>:obs => id</tt> to the show_image link args.
+  # user::      Add <tt>:obs => id</tt> to the show_image link args.
+  # border::    Set +border+ attribute, e.g. <tt>:border => 0</tt>.
+  # style::     Add +style+ attribute, e.g. <tt>:style => 'float:right'</tt>.
+  # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
+  # append::    HTML to tack on after +img+ tag; will be included in the link.
+  def thumbnail(image, args={})
+
+    # Get URL to image.
+    id = image.is_a?(Image) ? image.id : image.to_s
+    size = args[:size] || (@user ? @user.thumbnail_size : :thumbnail)
+    file = Image.file_name(size, id)
+    if DEVELOPMENT and !File.exists?("#{IMG_DIR}/#{file}")
+      file = Image.url(size, id)
+    end
+
+    # Create <img> tag.
+    opts = {}
+    opts[:border] = args[:border] if args.has_key?(:border)
+    opts[:style]  = args[:style]  if args.has_key?(:style)
+    opts[:class]  = args[:class]  if args.has_key?(:class)
+    str = image_tag(file, opts)
+    str += args[:append].to_s
+
+    # Decide what to link it to.
+    case link = args[:link] || :show_image
+    when :show_image
+      link = { :controller => 'image', :action => 'show_image', :id => id,
+               :params => query_params }
+      link[:obs] = args[:obs] if args.has_key?(:obs)
+    when :show_observation
+      link = { :controller => 'observation', :action => 'show_observation',
+               :id => args[:obs], :params => query_params }
+      raise "missing :obs" if !args.has_key?(:obs)
+    when :show_user
+      link = { :controller => 'observation', :action => 'show_user',
+               :id => args[:user] }
+      raise "missing :user" if !args.has_key?(:user)
+    when :none
+      link = nil
+    when Hash
+    else
+      raise "invalid link"
+    end
+
+    return link ? link_to(str, link) : str
   end
 end

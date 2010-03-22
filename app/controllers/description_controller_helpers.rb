@@ -136,12 +136,12 @@ module DescriptionControllerHelpers
       parent.description = draft
       parent.save
       Transaction.send("put_#{type}_description",
-        :id                => draft,
-        :set_source_type   => draft.source_type,
-        :set_source_name   => draft.source_name,
-        :set_admin_groups  => draft.admin_groups,
-        :set_writer_groups => draft.writer_groups,
-        :set_reader_groups => draft.reader_groups
+        :id              => draft,
+        :set_source_type => draft.source_type,
+        :set_source_name => draft.source_name,
+        :set_admins      => draft.admin_groups,
+        :set_writers     => draft.writer_groups,
+        :set_readers     => draft.reader_groups
       )
 
     # Default description is writable.  Try to merge.  If fails, send user
@@ -385,6 +385,37 @@ module DescriptionControllerHelpers
     else
       raise :runtime_invalid_source_type.t(:value => desc.source_type.inspect)
     end
+  end
+
+  # Make sure user is allowed to make the changes they are trying to make.
+  def check_description_edit_permission(desc, params)
+    okay = true
+
+    # Fail completely if they don't even have write permission.
+    if !desc.is_writer?(@user)
+      flash_error(:runtime_edit_description_denied.t)
+      if desc.is_reader?(@user)
+        redirect_to(:action => desc.show_action, :id => desc.id)
+      else
+        redirect_to(:action => desc.parent.show_action, :id => desc.parent_id)
+      end
+      okay = false
+    end
+
+    # Just ignore illegal changes otherwise.  Form should prevent these,
+    # anyway, but user could try to get sneaky and make changes via URL. 
+    if params.is_a?(Hash)
+      root = is_in_admin_mode?
+      admin = desc.is_admin?(@user)
+      author = desc.is_author?(@user)
+
+      params.delete(:source_type) unless root
+      params.delete(:source_name) unless root or ((admin || author) and
+        (desc.source_type != :project && desc.source_type != :project))
+      params.delete(:license_id) unless root or admin or author
+    end
+
+    return okay
   end
 
   # Modify permissions on an existing Description based on two over-simplified

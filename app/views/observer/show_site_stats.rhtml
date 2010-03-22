@@ -17,9 +17,8 @@
       if obs_length > 0 %>
         <td>
           <% for obs in @observations[0,3] %>
-            <%= link_to(image_tag("thumb/%d.jpg" % obs.thumb_image_id,
-                                  :class => 'site_stats_image'),
-                        :action => 'show_observation', :id => obs.id) %><br/>
+            <%= thumbnail(obs.thumb_image_id, :class => 'site_stats_image',
+                          :link => :show_observation, :obs => obs.id) %><br/>
           <% end %>
         </td>
       <% end %>
@@ -61,9 +60,8 @@
       <% if obs_length > 3 %>
         <td>
           <% for obs in @observations[3,3] %>
-            <%= link_to(image_tag("thumb/%d.jpg" % obs.thumb_image_id,
-                                  :class => 'site_stats_image'),
-                        :action => 'show_observation', :id => obs.id) %><br/>
+            <%= thumbnail(obs.thumb_image_id, :class => 'site_stats_image',
+                          :link => :show_observation, :obs => obs.id) %><br/>
           <% end %>
         </td>
       <% end %>
