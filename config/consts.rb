@@ -63,6 +63,9 @@ EXCEPTION_RECIPIENTS      = "webmaster@#{DOMAIN}"        if !defined? EXCEPTION_
 NAME_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/name_primer.#{RAILS_ENV}" if !defined? NAME_PRIMER_CACHE_FILE
 USER_PRIMER_CACHE_FILE = "#{RAILS_ROOT}/tmp/user_primer.#{RAILS_ENV}" if !defined? USER_PRIMER_CACHE_FILE
 
+# File where we keep name_lister data cache.
+NAME_LISTER_CACHE_FILE = "#{RAILS_ROOT}/public/javascripts/name_list_data.js" if !defined? NAME_LISTER_CACHE_FILE
+
 # Limit size of image uploads (ImageMagick bogs down on large images).
 IMAGE_UPLOAD_MAX_SIZE = 20000000                         if !defined? IMAGE_UPLOAD_MAX_SIZE
 

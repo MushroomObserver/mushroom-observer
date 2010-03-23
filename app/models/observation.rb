@@ -164,11 +164,16 @@ class Observation < AbstractModel
     end
   end
 
-  # Set both +where+ and +location+.  If given Location doesn't exist, it sets
-  # +location+ to nil.
+  # Set +where+ or +location+, depending on whether a Location is defined with
+  # the given +display_name+.  (Fills the other in with +nil+.)
   def place_name=(where)
-    self.where = where
-    self.location = Location.find_by_display_name(where)
+    if loc = Location.find_by_display_name(where)
+      self.where = nil
+      self.location = loc
+    else
+      self.where = where
+      self.location = nil
+    end
   end
 
   ##############################################################################

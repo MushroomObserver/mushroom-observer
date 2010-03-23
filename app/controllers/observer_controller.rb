@@ -564,7 +564,7 @@ class ObserverController < ApplicationController
                       :images,
                       :location,
                       :name,
-                      {:namings => [:name, :votes, :user]},
+                      {:namings => [:name, :user, {:votes => :user}]},
                       :species_lists,
                       :user,
                    ])

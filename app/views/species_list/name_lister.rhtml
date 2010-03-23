@@ -4,6 +4,7 @@
     javascript_include 'effects'
     javascript_include 'controls'
     javascript_include 'name_list'
+    javascript_include 'name_list_data'
   end
 
   @title = :name_lister_title.t
@@ -63,13 +64,12 @@
   </table><br/>
 
   <%= javascript_tag %(
-    var NL_GENERA  = [#{@genera.map  {|n| "'#{escape_javascript(n)}'"}.join(",")}];
-    var NL_SPECIES = [#{@species.map {|n| "'#{escape_javascript(n)}'"}.join(",")}];
-    var NL_NAMES   = [];
     nl_initialize_names();
     nl_draw('g', NL_GENERA);
     nl_draw('n', NL_NAMES);
+    Event.observe(document, 'keypress', nl_keypress);
     Event.observe(document, 'keydown', nl_keydown);
+    Event.observe(document, 'keyup', nl_keyup);
     Event.observe(document, 'click', nl_unfocus);
   ) %>
 

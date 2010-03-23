@@ -19,6 +19,13 @@
 #  created with the same date, location, and (optionally) notes, and they all
 #  get a single Naming without any Vote's.
 #
+#  == Location
+#
+#  A SpeciesList can belong to either a defined Location (+location+, a
+#  Location instance) or an undefined one (+where+, just a String), but not
+#  both.  To make this a little easier, you can refer to +place_name+ instead,
+#  which returns the name of whichever is present. 
+#
 #  == Attributes
 #
 #  id::                    Locally unique numerical id, starting at 1.
@@ -34,6 +41,7 @@
 #  ==== "Fake" attributes
 #  file::                  Upload text file into +data+.
 #  data::                  Internal temporary data field.
+#  place_name::            Wrapper on top of +where+ and +location+.
 #
 #  == Class methods
 #
@@ -64,6 +72,7 @@
 ################################################################################
 
 class SpeciesList < AbstractModel
+  belongs_to :location
   belongs_to :rss_log
   belongs_to :user
 
@@ -83,6 +92,28 @@ class SpeciesList < AbstractModel
   # Callback that updates User contribution when removing Observation's.
   def remove_obs_callback(o)
     SiteData.update_contribution(:del, :species_list_entries, user_id)
+  end
+
+  # Abstraction over +where+ and +location.display_name+.  Returns Location
+  # name as a string, preferring +location+ over +where+ wherever both exist.
+  def place_name
+    if location
+      location.display_name
+    else
+      self.where
+    end
+  end
+
+  # Set +where+ or +location+, depending on whether a Location is defined with
+  # the given +display_name+.  (Fills the other in with +nil+.)
+  def place_name=(where)
+    if loc = Location.find_by_display_name(where)
+      self.where = nil
+      self.location = loc
+    else
+      self.where = where
+      self.location = nil
+    end
   end
 
   # Return title in plain text for debugging.
@@ -244,6 +275,7 @@ class SpeciesList < AbstractModel
   #     :where    => spl.where,
   #     :what     => name,  # (no default)
   #     :notes    => '',
+  #     :is_collection_location => false,
   #     :specimen => false,
   #     :vote     => nil
   #   )
@@ -252,14 +284,22 @@ class SpeciesList < AbstractModel
     now  = Time.now
     user = User.current
 
-    args[:created]  = now        if args[:created].blank?
-    args[:modified] = now        if args[:modified].blank?
-    args[:user]     = user       if args[:modified].blank?
-    args[:when]     = self.when  if args[:when].blank?
-    args[:where]    = where      if args[:where].blank?
-    args[:notes]    = ''         if args[:notes].blank?
-    args[:specimen] = ''         if args[:specimen].blank?
-    args[:vote]     = ''         if args[:vote].blank?
+    args[:created]  ||= now        
+    args[:modified] ||= now        
+    args[:user]     ||= user       
+    args[:when]     ||= self.when  
+    args[:notes]    ||= ''
+    args[:vote]     ||= Vote.maximum_vote
+    if !args[:where] && !args[:location]
+      args[:where]    = where      
+      args[:location] = location   
+    end
+    if args[:specimen].nil?
+      args[:specimen] = false
+    end
+    if args[:is_collection_location].nil?
+      args[:is_collection_location] = true
+    end
 
     if !args[:what].blank?
       obs = Observation.create(
@@ -268,9 +308,11 @@ class SpeciesList < AbstractModel
         :user     => args[:user],
         :when     => args[:when],
         :where    => args[:where],
+        :location => args[:location],
         :name     => args[:what],
         :notes    => args[:notes],
-        :specimen => args[:specimen]
+        :specimen => args[:specimen],
+        :is_collection_location => args[:is_collection_location]
       )
 
       naming = Naming.create(
@@ -281,7 +323,7 @@ class SpeciesList < AbstractModel
         :observation => obs
       )
 
-      if !args[:vote].blank?
+      if args[:vote]
         vote = Vote.create(
           :created     => args[:created],
           :modified    => args[:modified],
@@ -297,10 +339,11 @@ class SpeciesList < AbstractModel
       Transaction.post_observation(
         :id           => obs,
         :date         => args[:when],
-        :location     => args[:where],
+        :location     => obs.location || obs.where,
         :name         => args[:what],
         :notes        => args[:notes],
         :specimen     => args[:specimen],
+        :is_collection_location => args[:is_collection_location],
         :species_list => self
       )
 

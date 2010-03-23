@@ -54,31 +54,23 @@
 #    # of any name they've listed that has synonyms.  This is a bit misnamed.
 #    only_approved_synonyms
 #
-#  3. And finally act upon the result:
+#  == Note on Timestamps
 #
-#    # Once ambiguous and unrecognized names have been cleared up, use this to
-#    # implement the synonymies specified using the "Species = Synonym" syntax.
-#    create_new_synonyms
+#  When adding names to the sorter (e.g., via +add_name+ or +sort_names+), you
+#  can include timestamps.  This can be used, for example, by the SpeciesList
+#  constructor to specify the date each species was observed, overriding the
+#  default date that is implicitly given each Observation.  This was originally
+#  used only by some external script Nathan wrote for Darvin.  I've now hooked
+#  up the comment mechanism to give web users access to this feature, too.  The
+#  syntax would look like this:
 #
-#    # Get a full list of all possible synonyms for the listed names.
-#    all_synonyms
+#    Abrothallus hypotrachynae [20100320]
+#    Paraparmelia alabamensis [2010-03-21]
+#    Cladonia strepsilis [2010/3/22 2:30pm]
 #
-#    # Reconstruct the original list:
-#    new_line_strs         # New names.
-#    multiple_line_strs    # Ambiguous names.
-#    single_line_strs      # Recognized, unambiguous names.
-#    all_line_strs         # (all of the above)
-#
-#    # Extract lists of name strings:
-#    new_name_strs         # New names.
-#    deprecated_name_strs  # Deprecated names.
-#    synonym_name_strs     # Synonyms.
-#
-#    # Lists of Name objects:
-#    all_names             # All recognized Name's.
-#    single_names          # All unambiguous recognized Name's, as [Name, Time].
-#    deprecated_names      # All deprecated Name's.
-#    multiple_names        # Representatives of sets of ambiguous Name's.
+#  (Basically, include anything that +Time.parse+ would recognize inside square
+#  brackets after the name.  It will be interpreted in the browser's local
+#  time zone.)
 #
 ################################################################################
 
@@ -210,6 +202,11 @@ class NameSorter
     name_str = name_parse.name
     chosen = false
 
+    # Did user enter a date/timestamp via comment?
+    if x = Time.parse(name_parse.comment) rescue nil
+      timestamp = x
+    end
+
     # Need all deprecated names even when another name is chosen
     # in case something else forces a redisplay
     names = name_parse.find_names
@@ -332,7 +329,9 @@ class NameSorter
     result
   end
 
-  # Add a list of name strings.
+  # Add a list of name strings.  *NOTE*: +name_list+ can be a String separated
+  # by newlines or an Array of String's.  Each String must contain a single
+  # name
   def sort_names(name_list)
     for n in name_list
       if n.match(/\S/)

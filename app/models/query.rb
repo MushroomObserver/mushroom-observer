@@ -202,6 +202,8 @@ class Query < AbstractQuery
     ],
     :SpeciesList => [
       :all,                   # All species lists, alphabetically.
+      :at_location,           # Species lists at a location, by modified.
+      :at_where,              # Species lists at an undefined location, by modified.
       :by_rss_log,            # Species lists with RSS log, in RSS order
       :by_user,               # Species lists created by user, alphabetically.
       :in_set,                # Species lists in a given set.
@@ -342,6 +344,7 @@ class Query < AbstractQuery
       :species_lists => :species_list_id,
     },
     :species_lists => {
+      :locations     => :location_id,
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
     },
@@ -762,7 +765,7 @@ class Query < AbstractQuery
     location = find_cached_parameter_instance(Location, :location)
     title_args[:location] = location.display_name
     self.join << :names
-    self.where   << "observations.location_id = '#{params[:location]}'"
+    self.where << "#{model.table_name}.location_id = '#{params[:location]}'"
     params[:by] ||= 'name'
   end
 
@@ -770,7 +773,7 @@ class Query < AbstractQuery
     title_args[:where] = params[:where]
     pattern = clean_pattern(params[:location])
     self.join << :names
-    self.where   << "observations.where LIKE '%#{pattern}%'"
+    self.where << "#{model.table_name}.where LIKE '%#{pattern}%'"
     params[:by] ||= 'name'
   end
 
@@ -779,7 +782,7 @@ class Query < AbstractQuery
     title_args[:species_list] = species_list.format_name
     self.join << :names
     self.join << :observations_species_lists
-    self.where   << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
+    self.where << "observations_species_lists.species_list_id = '#{params[:species_list]}'"
     params[:by] ||= 'name'
   end
 

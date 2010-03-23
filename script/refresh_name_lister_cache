@@ -1,0 +1,98 @@
+#!/usr/bin/env ruby
+#
+#  USAGE::
+#
+#    script/refresh_name_lister_cache
+#
+#  DESCRIPTION::
+#
+#    This is a nightly cronjob that updates the name_lister data cache.
+#    It just writes the file NAME_LISTER_CACHE_FILE:
+#
+#      RAILS_ROOT/public/javascripts/name_list_data.js
+#
+################################################################################
+
+require File.dirname(__FILE__) + '/../config/boot'
+require File.dirname(__FILE__) + '/../config/environment'
+
+# Tired of fighting with ActionView to get it to let me use the one in
+# helpers/javascript_helper.rb, so I just copied it verbatim.
+def escape(str)
+  str.to_s.gsub('\\','\0\0').gsub('</','<\/').gsub(/\r\n|\n|\r/, "\\n").gsub(/["']/) { |m| "\\#{m}" }
+end
+
+# Instead of doing all of this every time someone requests name_lister, let's
+# cache as a separate JS file and serve it up directly (bypassing Rails
+# altogether if all goes well!)  This should plug one of our major memory
+# leaks.  (fingers crossed) 
+
+genera = Name.connection.select_all %(
+  SELECT text_name as n, deprecated as d
+  FROM names
+  WHERE rank = 'Genus' AND correct_spelling_id IS NULL
+  ORDER BY text_name
+)
+
+species = Name.connection.select_all %(
+  SELECT text_name as n, author as a, deprecated as d, synonym_id as s
+  FROM names
+  WHERE (rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form')
+        AND correct_spelling_id IS NULL
+  ORDER BY text_name
+)
+
+# Place "*" after all accepted genera.
+seen = {}
+genera = genera.map do |rec|
+  n, d = rec.values_at('n', 'd')
+  val = d.to_i == 1 ? n : n + '*'
+  seen[val] = true
+  val
+end.uniq
+genera.reject! do |n|
+  seen[n + '*']
+end
+
+# How many times is each name used?
+occurs = {}
+for rec in species
+  n = rec['n']
+  occurs[n] ||= 0
+  occurs[n] += 1
+end
+
+# Build map from synonym_id to list of valid names.
+valid = {}
+for rec in species
+  n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+  need_author = occurs[n] > 1
+  n += '|' + a if !a.blank? && need_author
+  if s.to_i > 0 && d.to_i != 1
+    l = valid[s] ||= []
+    l.push(n) if !l.include?(n)
+  end
+end
+
+# Now insert valid synonyms after each deprecated name.  Stick a "*" after
+# all accepted names (including, of course, the accepted synonyms).
+# Include author after names, using a "|" to help make it easy for
+# javascript to parse it correctly.
+species = species.map do |rec|
+  n, a, d, s = rec.values_at('n', 'a', 'd', 's')
+  need_author = occurs[n] > 1
+  n += '|' + a if !a.blank? && need_author
+  n += '*' if d.to_i != 1
+  d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
+end.flatten
+
+# Write cache.
+File.open(NAME_LISTER_CACHE_FILE, 'w') do |fh|
+  fh.write %(
+    var NL_GENERA  = [#{genera.map  {|n| "'#{escape(n)}'"}.join(",")}];
+    var NL_SPECIES = [#{species.map {|n| "'#{escape(n)}'"}.join(",")}];
+    var NL_NAMES   = [];
+  )
+end
+
+exit 0

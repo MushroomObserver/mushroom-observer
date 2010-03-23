@@ -23,6 +23,22 @@ class Descriptions < ActiveRecord::Migration
     add_column :images, :width, :integer
     add_column :images, :height, :integer
 
+    # -----------------------------------------------------------
+    #  Add location to species_lists, parallel to observations.
+    # -----------------------------------------------------------
+
+    add_column :species_lists, :location_id, :integer
+    Location.connection.update %(
+      UPDATE species_lists spl, locations loc
+      SET spl.location_id = loc.id, spl.where = NULL
+      WHERE spl.where = loc.display_name
+    )
+
+    # Clean up observations while we're at it.
+    Observation.connection.update %(
+      UPDATE observations SET `where` = NULL WHERE location_id IS NOT NULL
+    )
+
     # --------------------------------------
     #  First create the "all users" group.
     # --------------------------------------
@@ -293,7 +309,7 @@ class Descriptions < ActiveRecord::Migration
 
           name_descriptions          << nd
           name_descriptions_versions += ndvs
-          name_descriptions_writers  += admins
+          name_descriptions_admins   += admins
           name_descriptions_writers  += writers
           name_descriptions_readers  += readers
           name_descriptions_authors  += authors
@@ -516,7 +532,7 @@ class Descriptions < ActiveRecord::Migration
 
           location_descriptions          << ld
           location_descriptions_versions += ldvs
-          location_descriptions_writers  += admins
+          location_descriptions_admins   += admins
           location_descriptions_writers  += writers
           location_descriptions_readers  += readers
           location_descriptions_authors  += authors

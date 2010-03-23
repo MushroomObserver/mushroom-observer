@@ -470,7 +470,7 @@ class AmateurTest < IntegrationTestCase
     obs.reload
     img.reload
     assert_objs_equal(loc, obs.location)
-    assert_equal(loc.display_name, obs.where)
+    assert_equal(loc.display_name, obs.place_name)
     assert_equal(new_img_notes, img.notes)
     assert_select('a[href*=observations_at_where]', 0)
     assert_select('a[href*=show_location]', 1)

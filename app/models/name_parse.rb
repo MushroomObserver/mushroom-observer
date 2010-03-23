@@ -30,11 +30,11 @@
 #      np.synonym_comment        # "Lichen Mushroom"
 #      np.find_synonym_names     # (Array of Name instances matching "L. umbellifera")
 #
-#      np.line_str               # "Phyllum Myxomycota [Highly polyphylletic]"
+#      np.line_str               # "Phyllum Myxomycota [Highly polyphyletic]"
 #      np.name                   # "Phyllum Myxomycota"
 #      np.search_name            # "Myxomycota"
 #      np.rank                   # :Phyllum
-#      np.comment                # "Highly polyphylletic"
+#      np.comment                # "Highly polyphyletic"
 #      np.find_names             # (Array of Name instances matching "Myxomycota")
 #      np.has_synonym            # false
 #    end

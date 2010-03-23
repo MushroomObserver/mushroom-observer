@@ -271,11 +271,12 @@ class Naming < AbstractModel
     # Gather votes, doing a weighted sum in the process.
     tot_sum = 0
     tot_wgt = 0
-    for v in self.votes
+    for v in votes
       str = v.agreement
       wgt = v.user_weight
       table[str][:wgt] += wgt
       table[str][:num] += 1
+      table[str][:users] << v.user
       tot_sum += v.value * wgt
       tot_wgt += wgt
     end

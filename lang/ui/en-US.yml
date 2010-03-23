@@ -2731,7 +2731,7 @@ name_lister_bad_browser: This page will not work on your browser, sorry!
 name_lister_bad_submit: Invalid commit button '[button]'.
 name_lister_charset: Character Encoding
 name_lister_charset_help: (Try changing this if authors get garbled.)
-name_lister_classic: Classic [:species_list] Generator
+name_lister_classic: Classic [:SPECIES_LIST] Generator
 name_lister_genera: Genera
 name_lister_help: >
   *Create List:* Click a genus in the first column to pull up a list of

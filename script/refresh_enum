@@ -22,33 +22,30 @@ DESCRIPTION
   Refreshes the enumerated column(s) from one or more listed tables.
 
 TABLES
-  queries     models and flavors
+  queries     allowed models and flavors
+  emails      queued_email flavors
   (more to come)
 
     EOH
+
   when 'query', 'queries'
     ActiveRecord::Migration.change_column(:queries, :model, :enum, :limit => Query.all_models)
     ActiveRecord::Migration.change_column(:queries, :flavor, :enum, :limit => Query.all_flavors)
     done_anything = true
+
   when 'email', 'emails', 'queued_email', 'queued_emails'
     ActiveRecord::Migration.change_column(:queued_emails, :flavor, :enum, :limit => QueuedEmail.all_flavors)
     done_anything = true
+
   when 'jason'
-    ActiveRecord::Migration.add_column(:names, :notes, :text)
-    ActiveRecord::Migration.add_column(:names_versions, :notes, :text)
+    # ActiveRecord::Migration.add_column :species_lists, :location_id, :integer
+    Location.connection.update %(
+      UPDATE species_lists spl, locations loc
+      SET spl.location_id = loc.id, spl.where = NULL
+      WHERE spl.where = loc.display_name
+    )
     done_anything = true
-  when 'jason2'
-    ActiveRecord::Migration.add_column(:name_descriptions, :merge_source_id, :integer)
-    ActiveRecord::Migration.add_column(:name_descriptions_versions, :merge_source_id, :integer)
-    ActiveRecord::Migration.add_column(:location_descriptions, :merge_source_id, :integer)
-    ActiveRecord::Migration.add_column(:location_descriptions_versions, :merge_source_id, :integer)
-    done_anything = true
-  when 'jason3'
-    ActiveRecord::Migration.add_column(:images, :width, :integer)
-    ActiveRecord::Migration.add_column(:images, :height, :integer)
-    ActiveRecord::Migration.add_column(:users, :thumbnail_size, :enum, :default => :thumbnail, :limit => [:thumbnail, :small])
-    ActiveRecord::Migration.add_column(:users, :image_size, :enum, :default => :medium, :limit => Image.all_sizes)
-    done_anything = true
+
   else
     $stderr.puts "Unsupported or invalid table: '#{arg}'"
     status = 1

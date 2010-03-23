@@ -100,9 +100,9 @@ class SpeciesListController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['title', :TITLE.t], 
-      ['date', :DATE.t], 
-      ['user', :user.t], 
+      ['title', :TITLE.t],
+      ['date', :DATE.t],
+      ['user', :user.t],
     ]
 
     show_index_of_objects(query, args)
@@ -157,20 +157,23 @@ class SpeciesListController < ApplicationController
   def create_species_list
     @species_list = SpeciesList.new
     if request.method != :post
-      @checklist_names  = {}
-      @new_names        = []
-      @multiple_names   = []
-      @deprecated_names = []
-      @list_members     = nil
-      @member_notes     = nil
+      @checklist_names   = {}
+      @new_names         = []
+      @multiple_names    = []
+      @deprecated_names  = []
+      @list_members      = nil
+      @member_notes      = nil
+      @member_is_col_loc = true
+      @member_specimen   = false
       if !params[:clone].blank? and
          (clone = SpeciesList.safe_find(params[:clone]))
         query = create_query(:Observation, :in_species_list,
                              :species_list => clone)
         @checklist = calc_checklist(query)
-        @species_list.when  = clone.when
-        @species_list.where = clone.where
-        @species_list.title = clone.title
+        @species_list.when     = clone.when
+        @species_list.where    = clone.where
+        @species_list.location = clone.location
+        @species_list.title    = clone.title
       else
         @checklist = calc_checklist
       end
@@ -197,13 +200,20 @@ class SpeciesListController < ApplicationController
     if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
     elsif request.method != :post
-      @checklist_names  = {}
-      @list_members     = nil
-      @member_notes     = nil
-      @new_names        = []
-      @multiple_names   = []
-      @deprecated_names = @species_list.names.select(&:deprecated)
-      @checklist        = calc_checklist
+      @checklist_names   = {}
+      @list_members      = nil
+      @member_notes      = nil
+      @member_is_col_loc = true
+      @member_specimen   = false
+      @new_names         = []
+      @multiple_names    = []
+      @deprecated_names  = @species_list.names.select(&:deprecated)
+      @checklist         = calc_checklist
+      if obs = @species_list.observations.last
+        @member_notes      = obs.notes
+        @member_is_col_loc = obs.is_collection_location
+        @member_specimen   = obs.specimen
+      end
     else
       process_species_list('updated')
     end
@@ -328,58 +338,6 @@ class SpeciesListController < ApplicationController
   # Outputs:
   #  @names
   def name_lister
-    @genera = Name.connection.select_all %(
-      SELECT text_name as n, deprecated as d
-      FROM names
-      WHERE rank = 'Genus' AND correct_spelling_id IS NULL
-      ORDER BY text_name
-    )
-
-    @species = Name.connection.select_all %(
-      SELECT text_name as n, author as a, deprecated as d, synonym_id as s
-      FROM names
-      WHERE (rank = 'Species' OR rank = 'Subspecies' OR rank = 'Variety' OR rank = 'Form')
-            AND correct_spelling_id IS NULL
-      ORDER BY text_name
-    )
-
-    # Place "*" after all accepted genera.
-    @genera = @genera.map do |rec|
-      n, d = rec.values_at('n', 'd')
-      d.to_i == 1 ? n : n + '*'
-    end
-
-    # How many times is each name used?
-    occurs = {}
-    for rec in @species
-      n = rec['n']
-      occurs[n] ||= 0
-      occurs[n] += 1
-    end
-
-    # Build map from synonym_id to list of valid names.
-    valid = {}
-    for rec in @species
-      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      need_author = occurs[n] > 1
-      n += '|' + a if !a.blank? && need_author
-      if s.to_i > 0 && d.to_i != 1
-        l = valid[s] ||= []
-        l.push(n) if !l.include?(n)
-      end
-    end
-
-    # Now insert valid synonyms after each deprecated name.  Stick a "*" after
-    # all accepted names (including, of course, the accepted synonyms).
-    # Include author after names, using a "|" to help make it easy for
-    # javascript to parse it correctly.
-    @species = @species.map do |rec|
-      n, a, d, s = rec.values_at('n', 'a', 'd', 's')
-      need_author = occurs[n] > 1
-      n += '|' + a if !a.blank? && need_author
-      n += '*' if d.to_i != 1
-      d.to_i == 1 && valid[s] ? ([n] + valid[s].map {|x| "= #{x}"}) : n
-    end.flatten
 
     # Names are passed in as string, one name per line.
     @names = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
@@ -606,16 +564,18 @@ class SpeciesListController < ApplicationController
           Transaction.post_species_list(
             :id       => @species_list,
             :date     => @species_list.when,
-            :location => @species_list.where,
+            :location => @species_list.location || @species_list.where,
             :title    => @species_list.title,
             :notes    => @species_list.notes
           )
         else
           args = {}
-          args[:date]     = @species_list.when  if @species_list.when_changed?
-          args[:location] = @species_list.where if @species_list.where_changed?
-          args[:title]    = @species_list.title if @species_list.title_changed?
-          args[:notes]    = @species_list.notes if @species_list.notes_changed?
+          args[:date] = @species_list.when  if @species_list.when_changed?
+          if @species_list.where_changed? || @species_list.location_id_changed?
+            args[:location] = @species_list.location || @species_list.where
+          end
+          args[:title] = @species_list.title if @species_list.title_changed?
+          args[:notes] = @species_list.notes if @species_list.notes_changed?
           if !args.empty?
             args[:id] = @species_list
             Transaction.put_species_list(args)
@@ -635,12 +595,14 @@ class SpeciesListController < ApplicationController
 
     # Failed to create due to synonyms, unrecognized names, etc.
     if !redirected
-      @list_members     = sorter.all_line_strs.join("\r\n")
-      @new_names        = sorter.new_name_strs.uniq.sort
-      @multiple_names   = sorter.multiple_names.uniq.sort_by(&:text_name)
-      @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
-      @checklist_names  = params[:checklist_data] || {}
-      @member_notes     = params[:member] ? params[:member][:notes] : ""
+      @list_members      = sorter.all_line_strs.join("\r\n")
+      @new_names         = sorter.new_name_strs.uniq.sort
+      @multiple_names    = sorter.multiple_names.uniq.sort_by(&:text_name)
+      @deprecated_names  = sorter.deprecated_names.uniq.sort_by(&:search_name)
+      @checklist_names   = params[:checklist_data] || {}
+      @member_notes      = (params[:member][:notes].to_s) rescue ''
+      @member_is_col_loc = (params[:member][:is_col_loc] == '1') rescue true
+      @member_specimen   = (params[:member][:specimen] == '1') rescue false
     end
   end
 
@@ -728,9 +690,11 @@ class SpeciesListController < ApplicationController
       :created  => spl.modified,
       :modified => spl.modified,
       :user     => user,
+      :location => spl.location,
       :where    => spl.where,
-      :specimen => 0,
-      :notes    => params[:member][:notes]
+      :specimen => (params[:member][:specimen] == '1'),
+      :is_collection_location => (params[:member][:is_col_loc] == '1'),
+      :notes    => params[:member][:notes].to_s
     }
 
     # This updates certain observation namings already in the list.  It looks
@@ -754,8 +718,9 @@ class SpeciesListController < ApplicationController
       end
     end
 
-    # Add all "single names" from text list into species_list.  Creates a new
-    # observation for each name.  What are "single names", incidentally??
+    # Add all names from text box into species_list.  Creates a new observation
+    # for each name.  ("single names" are names that matched a single name
+    # uniquely.) 
     for name, timestamp in sorter.single_names
       sp_args[:when] = timestamp || spl.when
       sp_args2 = sp_args.dup.merge(:what => name)
