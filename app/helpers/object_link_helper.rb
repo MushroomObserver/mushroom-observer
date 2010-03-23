@@ -173,11 +173,11 @@ module ApplicationHelper::ObjectLink
                :params => query_params }
       link[:obs] = args[:obs] if args.has_key?(:obs)
     when :show_observation
-      link = { :controller => 'observation', :action => 'show_observation',
+      link = { :controller => 'observer', :action => 'show_observation',
                :id => args[:obs], :params => query_params }
       raise "missing :obs" if !args.has_key?(:obs)
     when :show_user
-      link = { :controller => 'observation', :action => 'show_user',
+      link = { :controller => 'observer', :action => 'show_user',
                :id => args[:user] }
       raise "missing :user" if !args.has_key?(:user)
     when :none
