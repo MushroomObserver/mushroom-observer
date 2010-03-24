@@ -66,8 +66,7 @@ class SpeciesListController < ApplicationController
   # Display list of selected species_lists, based on current Query.  (Linked
   # from show_species_list, next to "prev" and "next".)
   def index_species_list
-    query = find_or_create_query(:SpeciesList, :all, :by => params[:by] || :date)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:SpeciesList, :by => params[:by])
     show_selected_species_lists(query, :id => params[:id])
   end
 
@@ -95,16 +94,32 @@ class SpeciesListController < ApplicationController
   # Show selected list of species_lists.
   def show_selected_species_lists(query, args={})
     @links ||= []
-    args = { :action => :list_species_lists, :num_per_page => 20,
-             :include => :user, :letters => 'species_lists.title' }.merge(args)
+    args = {
+      :action => :list_species_lists,
+      :num_per_page => 20,
+      :include => [:location, :user],
+      :letters => 'species_lists.title'
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['title', :TITLE.t],
-      ['date', :DATE.t],
-      ['user', :user.t],
+      ['title',   :sort_by_title.t],
+      ['date',    :sort_by_date.t],
+      ['user',    :sort_by_user.t],
+      ['created', :sort_by_created.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
+                  :sort_by_modified.t],
     ]
 
+    # Paginate by letter if sorting by user.
+    if (query.params[:by] == 'user') or
+       (query.params[:by] == 'reverse_user')
+      args[:letters] = 'users.login'
+    # Can always paginate by title letter.
+    else
+      args[:letters] = 'species_lists.title'
+    end
+    
     show_index_of_objects(query, args)
   end
 

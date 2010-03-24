@@ -14,6 +14,9 @@ class Query < AbstractQuery
       :user?     => :string,
       :content?  => :string
     },
+    :all => {
+      :type? => {:string => [:all, :location, :name, :observation, :species_list]}
+    },
     :at_location => {
       :location => Location,
     },
@@ -481,7 +484,9 @@ class Query < AbstractQuery
        (old_flavor == :all) and
        (new_model.to_s.constantize.reflect_on_association(:rss_log) rescue false)
       just_test or begin
-        self.class.lookup(new_model, :by_rss_log, params)
+        params2 = params.dup
+        params2.delete(:type)
+        self.class.lookup(new_model, :by_rss_log, params2)
       end
 
     # Going from objects with observations to those observations themselves.
@@ -656,7 +661,7 @@ class Query < AbstractQuery
       elsif model.column_names.include?('title')
         "#{table}.title ASC"
       end
-    when 'title', 'login', 'summary'
+    when 'title', 'login', 'summary', 'copyright_holder'
       if model.column_names.include?(by)
         "#{table}.#{by} ASC"
       end
@@ -673,23 +678,23 @@ class Query < AbstractQuery
     end
   end
 
-  # (These are used by :query_title_all_by for :all queries.)
-  BY_TAGS = {
-    :date  => :date,
-    :name  => :name,
-    :title => :title,
-    :user  => :user,
-  }
-
   # --------------------------------------------
   #  Queries that essentially have no filters.
   # --------------------------------------------
 
   def initialize_all
     if (by = params[:by]) and
-       (by = BY_TAGS[by.to_sym])
+       (by = :"sort_by_#{by}")
       title_args[:tag]   = :query_title_all_by
       title_args[:order] = by.t
+    end
+
+    # Allow users to filter RSS logs for the object type they're interested in.
+    if model_symbol == :RssLog
+      x = params[:type] ||= :all
+      self.where << "rss_logs.#{params[:type]}_id IS NOT NULL" if x != :all
+    elsif params[:type]
+      raise "Can't use :type parameter in :#{model_symbol} :all queries!"
     end
   end
 

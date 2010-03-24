@@ -39,8 +39,7 @@ class CommentController < ApplicationController
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
   def index_comment
-    query = find_or_create_query(:Comment, :all, :by => params[:by] || :created)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:Comment, :by => params[:by])
     show_selected_comments(query, :id => params[:id])
   end
 
@@ -70,13 +69,25 @@ class CommentController < ApplicationController
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
     args = { :action => :list_comments, :num_per_page => 24,
-             :include => [:user, {:object => :name}] }.merge(args)
+             :include => [:user, :object] }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['date', :DATE.t], 
-      ['user', :user.t],
+      # ['summary',  :sort_by_summary.t],
+      ['user',     :sort_by_user.t],
+      ['created',  :sort_by_posted.t], 
+      ['modified', :sort_by_modified.t], 
     ]
+
+    # Paginate by letter if sorting by user.
+    if (query.params[:by] == 'user') or
+       (query.params[:by] == 'reverse_user')
+      args[:letters] = 'users.login'
+    # Paginate by letter if sorting by summary.
+    # elsif (query.params[:by] == 'summary') or
+    #    (query.params[:by] == 'reverse_summary')
+    #   args[:letters] = 'comments.summary'
+    end
 
     show_index_of_objects(query, args)
   end

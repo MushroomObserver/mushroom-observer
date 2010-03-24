@@ -1,13 +1,10 @@
 <%
   @title ||= :list_notifications_title.t(:user => @user.legal_name)
 
+  new_tab_set(:sort_by_header.t, @sorts)
   new_tab_set do
     add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
-    if @links
-      for link in @links
-        add_tab(*link)
-      end
-    end
+    add_tabs(@links)
   end
 %>
 

@@ -813,93 +813,19 @@ class ApplicationController < ActionController::Base
   #
   #  :section: Searching
   #
-  #  == Overview
-  #
   #  The general idea is that the user executes a search or requests an index,
   #  then clicks on a result.  This takes the user to a show_object page.  This
-  #  page "knows" about the search or index via one or more search parameters
-  #  passed around in the URL.
+  #  page "knows" about the search or index via a special universal URL
+  #  parameter (via +query_params+).  When the user then clicks on "prev" or
+  #  "next", it can then step through the query results.
   #
-  #  While going through the results via the "prev" and "next" buttons, the
-  #  user may want to divert temporarily to add a comment or propose a name or
-  #  something.  These actions are responsible for keeping track of these
-  #  search parameters, and eventually passing them back to the show_object
-  #  page.
+  #  While browsing like this, the user may want to divert temporarily to add a
+  #  comment or propose a name or something.  These actions are responsible for
+  #  keeping track of these search parameters, and eventually passing them back
+  #  to the show_object page.  Usually they just pass the query parameter
+  #  through via +pass_query_params+.
   #
-  #  See Query for more detail.
-  #
-  #  == Typical usage
-  #
-  #    def rss_logs
-  #      # Create Query so we can get list of observations to display.
-  #      query = create_query(:observations_by_rss_log)
-  #      @pages = paginate_numbers(:page, 50)
-  #      @objects = query.paginate(@pages)
-  #      set_query_params(query) # (redundant)
-  #
-  #      # Results in the view must pass "query_params" to show_observation.
-  #      #
-  #      #   for observation in @objects
-  #      #     link_to(observation.name,
-  #      #       :action => 'show_observation',
-  #      #       :id     => observation.id,
-  #      #       :params => query_params
-  #      #     )
-  #      #   end
-  #    end
-  #
-  #    def show_observation
-  #      @observation = Observation.find(params[:id])
-  #
-  #      # Need to get a copy of the Query so we can do next/prev links.
-  #      query = find_or_create_query(:observations_by_rss_log)
-  #      set_query_params(query) # (redundant)
-  #
-  #      # All links in the view must include "query_params", so that the
-  #      # query state will be passed on to the next actions.
-  #      #
-  #      #   link_to('prev/next',
-  #      #     :action => 'show_observation',
-  #      #     :id     => @query.prev/next_id,
-  #      #     :params => query_params
-  #      #   )
-  #      #   link_to('post comment',
-  #      #     :controller => 'comment',
-  #      #     :action     => 'create_comment',
-  #      #     :id         => @observation.id,
-  #      #     :params => query_params
-  #      #   )
-  #    end
-  #
-  #    def post_comment
-  #      @observation = Observation.find(params[:id])
-  #
-  #      # We don't actually need the Query, just pass it through.
-  #      pass_query_params
-  #
-  #      if request.method == :get
-  #        # The form_tag and "cancel" link must include "query_params".
-  #        #
-  #        #   form_tag(
-  #        #     :action => 'post_comment',
-  #        #     :id     => @observation.id,
-  #        #     :params => query_params
-  #        #   )
-  #        #   link_to('cancel',
-  #        #     :action => 'show_observation',
-  #        #     :id     => @observation.id,
-  #        #     :params => query_params
-  #        #   )
-  #
-  #      elsif request.method == :post
-  #        # Lastly, this, too, must include "query_params".
-  #        redirect_to(
-  #          :action => :show_observation,
-  #          :id     => @observation.id,
-  #          :params => query_params
-  #        )
-  #      end
-  #    end
+  #  See Query and AbstractQuery for more detail.
   #
   ##############################################################################
 
@@ -924,7 +850,7 @@ class ApplicationController < ActionController::Base
   end
 
   # Return query parameter(s) necessary to pass query information along to
-  # another action. *NOTE*: This method is available to views.
+  # the next request. *NOTE*: This method is available to views.
   def query_params(query=nil)
     if query
       {:q => query.id.alphabetize}
@@ -934,30 +860,47 @@ class ApplicationController < ActionController::Base
   end
   helper_method :query_params
 
-  # Get query parameter(s) from request params.
+  # Pass the in-coming query parameter(s) through to the next request.
   def pass_query_params
     @query_params = {}
     @query_params[:q] = params[:q] if !params[:q].blank?
     @query_params
   end
 
-  # Set query parameter(s) for a given query (or clear them if nil).
+  # Change the query that +query_params+ passes along to the next request.
   def set_query_params(query=nil)
     @query_params = {}
     @query_params[:q] = query.id.alphabetize if query
     @query_params
   end
 
-  # Lookup an appropriate Query or create a default one if necessary.  At the
-  # moment it will only use a pre-existing query if it was passed in via
-  # query_params.  I was getting highly non-intuitive behavior by falling back
-  # on the latest query of the right flavor or just model, even if I required
-  # that it be a Query this user created (which was useless if the user wasn't
-  # logged in, anyway.)
-  def find_or_create_query(model, flavor=:default, args={})
+  # Lookup an appropriate Query or create a default one if necessary.  If you
+  # pass in arguments, it modifies the query as necessary to ensure they are
+  # correct.  (Useful for specifying sort conditions, for example.)
+  def find_or_create_query(model, args={})
     model = model.to_s
-    result = find_query(model, false)
-    result ||= create_query(model, flavor, args)
+    if result = find_query(model, false)
+
+      # Check if the existing query needs to be modified.
+      any_changes = false
+      for arg, val in args
+        if result.params[:arg] != val
+          any_changes = true
+          break
+        end
+      end
+
+      # If it does, we need to create a new query, otherwise the modifications
+      # won't persist.  Use the existing query as the template, though.
+      if any_changes
+        result = create_query(model, result.flavor, result.params.merge(args))
+      end
+
+    # Otherwise, just create a default one.
+    else
+      result = create_query(model, :default, args)
+    end
+
     if result && !is_robot?
       result.access_count += 1
       result.save
@@ -1036,7 +979,7 @@ class ApplicationController < ActionController::Base
       # 2) current object missing from results of the current query
       # 3) no more objects being left in the query in the given direction
       else
-        query = find_or_create_query(object.class, :default)
+        query = find_or_create_query(object.class)
         query.current = object
         if !query.index(object)
           type = object.class.name.underscore.to_sym
@@ -1060,16 +1003,31 @@ class ApplicationController < ActionController::Base
   # Create sorting links for index pages, "graying-out" the current order.
   def add_sorting_links(query, links)
     results = []
+    this_by = query.params[:by] || query.default_order
+    this_by = this_by.to_s.sub(/^reverse_/, '')
+
     for by, label in links
-      if query.params[:by] == by.to_s
-        results << :app_sort_by.t(:order => label)
+      str = label.t
+      if by.to_s == this_by
+        results << str
       else
-        results << [:app_sort_by.t(:order => label),
-                   { :controller => query.model.show_controller,
-                   :action => query.model.index_action,
-                   :by => by, :params => query_params }]
+        results << [str, { :controller => query.model.show_controller,
+                           :action => query.model.index_action,
+                           :by => by, :params => query_params }]
       end
     end
+
+    # Add a "reverse" button.
+    str = :sort_by_reverse.t
+    if query.params[:by].to_s.match(/^reverse_/)
+      reverse_by = this_by
+    else
+      reverse_by = "reverse_#{this_by}"
+    end
+    results << [str, { :controller => query.model.show_controller,
+                       :action => query.model.index_action,
+                       :by => reverse_by, :params => query_params }]
+
     return results
   end
 
@@ -1088,6 +1046,7 @@ class ApplicationController < ActionController::Base
   # sorting_links:: Array of pairs: ["by" String, label String]
   #
   def show_index_of_objects(query, args={})
+# flash_notice("Query params: [#{query.params.inspect}]")
     letter_arg   = args[:letter_arg]   || :letter
     number_arg   = args[:number_arg]   || :page
     num_per_page = args[:num_per_page] || 50
@@ -1109,8 +1068,12 @@ class ApplicationController < ActionController::Base
     @title ||= query.title
 
     # Add magic links for sorting.
-    @links ||= []
-    @links += add_sorting_links(query, args[:sorting_links] || [])
+    if (sorts = args[:sorting_links]) and
+       (sorts.length > 1)
+      @sorts = add_sorting_links(query, sorts)
+    else
+      @sorts = nil
+    end
 
     # Get user prefs for displaying results as a matrix.
     if args[:matrix]

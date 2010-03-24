@@ -94,8 +94,7 @@ class NameController < ApplicationController
 
   # Display list of names in last index/search query.
   def index_name
-    query = find_or_create_query(:Name, :all, :by => params[:by] || :name)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:Name, :by => params[:by])
     show_selected_names(query, :id => params[:id])
   end
 
@@ -205,7 +204,10 @@ class NameController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t],
+      ['name',     :sort_by_name.t],
+      ['created',  :sort_by_created.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
+                  :sort_by_modified.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
@@ -238,9 +240,7 @@ class NameController < ApplicationController
 
   # Display list of names in last index/search query.
   def index_name_description
-    query = find_or_create_query(:NameDescription, :all,
-                                 :by => params[:by] || :name)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:NameDescription, :by => params[:by])
     show_selected_name_descriptions(query, :id => params[:id])
   end
 
@@ -277,7 +277,9 @@ class NameController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t],
+      ['name',     :sort_by_name.t],
+      ['created',  :sort_by_created.t],
+      ['modified', :sort_by_modified.t],
     ]
 
     # Add "show names" link if this query can be coerced into an

@@ -17,7 +17,7 @@
                           species_list.when, species_list.unique_text_name.t),
                   :controller => 'species_list', :action => 'show_species_list',
                   :id => species_list.id, :params => query_params) %>
-      <span class="ListWhere"><%= sanitize(species_list.where).t %></span><br/>
+      <span class="ListWhere"><%= sanitize(species_list.place_name).t %></span><br/>
       <span class="ListWho"><%= h(species_list.user.unique_text_name) %></span>
     </td>
   </tr>

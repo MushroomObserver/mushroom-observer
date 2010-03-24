@@ -1008,6 +1008,7 @@ class AbstractQuery < ActiveRecord::Base
       by ||= default_order
 
       # Allow any of these to be reversed.
+      by = by.dup
       reverse = !!by.sub!(/^reverse_/, '')
 
       # Let subclass decide how to order things.

@@ -8,6 +8,8 @@ server=velosa@images.mushroomobserver.org:images.mushroomobserver.org
 images=public/images
 
 orig=$images/orig/$id.$ext
+orig_first=$images/orig/$id-0.$ext
+orig_other=$images/orig/$id-'*'.$ext
 full=$images/orig/$id.jpg
 huge=$images/1280/$id.jpg
 large=$images/960/$id.jpg
@@ -97,19 +99,30 @@ run cp $big_icon $huge
 # Wait for other conversions to finish first.
 while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
 
+# Do we need to convert the original to a JPEG?
 if [[ $orig != $full ]]; then
   run convert -thumbnail -quality 70 $orig $full
+
+  # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
+  # Take the first one, and delete the rest.
+  if [[ -e $orig_first ]]; then
+    run mv $orig_first $orig
+    rm $orig_other
+  fi
 fi
 
+# Do we need to report the image size back to Rails?
 if (( $set_size )); then
   run script/set_image_size $full $id
 fi
 
-run convert -thumbnail '160x160>' -quality 90 $full $thumb
-run convert -thumbnail '320x320>' -quality 80 $full $small
-run convert -thumbnail '640x640>' -quality 70 $full $medium
-run convert -thumbnail '960x960>' -quality 70 $full $large
+# Create the other sizes now.  Image processing theory says that reducing
+# images by no more than 50% at a time is optimal.
 run convert -thumbnail '1280x1280>' -quality 70 $full $huge
+run convert -thumbnail '960x960>' -quality 70 $huge $large
+run convert -thumbnail '640x640>' -quality 70 $huge $medium
+run convert -thumbnail '320x320>' -quality 80 $medium $small
+run convert -thumbnail '160x160>' -quality 90 $small $thumb
 
 # ----------------------------
 #  Transfer images.

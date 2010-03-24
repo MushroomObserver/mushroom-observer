@@ -1,11 +1,6 @@
 <%
-  if @links
-    new_tab_set do
-      for link in @links
-        add_tab(*link)
-      end
-    end
-  end
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set(@links)
 %>
 
 <% paginate_block(@pages) do %>

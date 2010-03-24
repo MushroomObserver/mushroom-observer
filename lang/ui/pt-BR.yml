@@ -630,6 +630,23 @@ query_title_with_observations_of_name:  "[TYPES] with [:query_title_of_name(type
 query_title_with_observations_of_name_synonym:  "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
 query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
 
+# Sorting criteria.
+sort_by_header:  "Sort by:"
+sort_by_id:  ID
+sort_by_name:  "[:NAME]"
+sort_by_title:  "[:TITLE]"
+sort_by_summary:  "[:SUMMARY]"
+sort_by_date:  "[:DATE]"
+sort_by_posted:  Date Posted
+sort_by_created:  Date Created
+sort_by_modified:  Time Last Modified
+sort_by_rss_log:  "[:sort_by_modified]"
+sort_by_last_login:  Last Login
+sort_by_user:  "[:USER]"
+sort_by_login:  "[:LOGIN_NAME]"
+sort_by_copyright_holder:  "[:COPYRIGHT_HOLDER]"
+sort_by_reverse:  Reverse Order
+
 # RSS log messages.
 log_ancient:  "[String]"
 log_approved_by:  Approved by [user].
@@ -1559,7 +1576,7 @@ form_description_license_help:  >
 form_images_when_taken:  When Was It Taken
 form_images_when_help:  Date the photograph or drawing was created.
 form_images_notes_help:  Enter notes that are specific to this particular image.
-form_images_copyright_holder:  Copyright Holder
+form_images_copyright_holder:  "[:COPYRIGHT_HOLDER]"
 form_images_select_license:  Select a "License":/observer/how_to_use#license
 form_images_license_help:  >
   Select "license":/observer/how_to_use#license you want to give for this image.
@@ -2112,6 +2129,8 @@ rss_log_of_deleted_item:  Log of\nDeleted\nItem
 rss_log_title: Registro de Atividades
 rss_name_by:  by [user]
 rss_title: Observação de Cogumelo
+rss_show_all:  Everything
+rss_show_header:  "Show:"
 
 
 
@@ -2624,7 +2643,7 @@ eol_preview_explanation:  >
 # image/license_updater
 image_updater_count:  Count
 image_updater_current:  Current License
-image_updater_holder:  Copyright Holder
+image_updater_holder:  "[:COPYRIGHT_HOLDER]"
 image_updater_new:  New License
 image_updater_title:  Updating Licenses for [user]
 image_updater_update:  Update
@@ -2733,7 +2752,7 @@ name_lister_bad_browser:  This page will not work on your browser, sorry!
 name_lister_bad_submit:  Invalid commit button '[button]'.
 name_lister_charset:  Character Encoding
 name_lister_charset_help:  (Try changing this if authors get garbled.)
-name_lister_classic:  Classic [:species_list] Generator
+name_lister_classic:  Classic [:SPECIES_LIST] Generator
 name_lister_genera:  Genera
 name_lister_help:  >
   *Create List:* Click a genus in the first column to pull up a list of

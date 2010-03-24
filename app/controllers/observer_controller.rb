@@ -45,6 +45,7 @@
 #   * author_request      Let non-authors request authorship credit on descriptions.
 #
 #   R change_user_bonuses
+#   R index_user
 #   R users_by_name
 #     users_by_contribution
 #     show_user
@@ -408,8 +409,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
-    query = find_or_create_query(:Observation, :all, :by => params[:by] || :date)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:Observation, :by => params[:by])
     show_selected_observations(query, :id => params[:id])
   end
 
@@ -487,10 +487,12 @@ class ObserverController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t],
-      ['date', :DATE.t],
-      ['user', :user.t],
-      ['modified', :modified.t],
+      ['name',     :sort_by_name.t],
+      ['date',     :sort_by_date.t],
+      ['user',     :sort_by_user.t],
+      ['created',  :sort_by_posted.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
+                  :sort_by_modified.t],
     ]
 
     # Add "show map" link if this query can be coerced into a location query.
@@ -525,8 +527,12 @@ class ObserverController < ApplicationController
                 }]
     end
 
-    # Paginate by letter as well as page if names are included in query.
-    if query.uses_table?(:names)
+    # Paginate by letter if sorting by user.
+    if (query.params[:by] == 'user') or
+       (query.params[:by] == 'reverse_user')
+      args[:letters] = 'users.login'
+    # Paginate by letter if names are included in query.
+    elsif query.uses_table?(:names)
       args[:letters] = 'names.text_name'
     end
 
@@ -565,7 +571,7 @@ class ObserverController < ApplicationController
                       :location,
                       :name,
                       {:namings => [:name, :user, {:votes => :user}]},
-                      :species_lists,
+                      {:species_lists => :location},
                       :user,
                    ])
 # logger.warn('LOAD_OBSERVATION ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
@@ -1242,15 +1248,55 @@ class ObserverController < ApplicationController
   #
   ##############################################################################
 
-  # users_by_name.rhtml
-  # Restricted to the admin user
-  def users_by_name
-    if is_in_admin_mode?
-      @users = User.all(:order => "last_login desc", :include => :user_groups)
-    else
+  # User index, restricted to admins.
+  def index_user
+    if !is_in_admin_mode?
       flash_error(:permission_denied.t)
       redirect_to(:action => 'list_rss_logs')
+    else
+      query = find_or_create_query(:User, :by => params[:by])
+      show_selected_users(query)
     end
+  end
+
+  # User index, restricted to admins.
+  def users_by_name
+    if !is_in_admin_mode?
+      flash_error(:permission_denied.t)
+      redirect_to(:action => 'list_rss_logs')
+    else
+      query = create_query(:User, :all, :by => :name)
+      show_selected_users(query)
+    end
+  end
+
+  def show_selected_users(query, args={})
+    store_query_in_session(query)
+    @links ||= []
+    args = {
+      :action => 'list_users',
+      :include => :user_groups,
+    }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['id',         :sort_by_id.t],
+      ['login',      :sort_by_login.t],
+      ['name',       :sort_by_name.t],
+      ['created',    :sort_by_created.t],
+      ['modified',   :sort_by_modified.t],
+      ['last_login', :sort_by_last_login.t],
+    ]
+
+    # Paginate by "correct" letter.
+    if (query.params[:by] == 'login') or
+       (query.params[:by] == 'reverse_login')
+      args[:letters] = 'users.login'
+    else
+      args[:letters] = 'users.name'
+    end
+
+    show_index_of_objects(query, args)
   end
 
   # users_by_contribution.rhtml
@@ -1507,8 +1553,7 @@ class ObserverController < ApplicationController
 
   # Displays matrix of selected RssLog's (based on current Query).
   def index_rss_log
-    query = find_or_create_query(:RssLog, :all, :by => params[:by] || :modified)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:RssLog, :type => params[:type])
     show_selected_rss_logs(query, :id => params[:id])
   end
 
@@ -1526,15 +1571,29 @@ class ObserverController < ApplicationController
       :action => 'list_rss_logs',
       :matrix => true,
       :include => {
-        :observation  => [:name, :location, :user],
+        :observation  => [:location, :name, :user],
         :name         => :user,
-        :species_list => :user,
+        :species_list => [:location, :user],
       },
     }.merge(args)
 
-    # Add some alternate sorting criteria.
-    # args[:sorting_links] = [
-    # ]
+    # Add set of links to filter by object type.
+    str = :rss_show_all.t
+    if (query.params[:type] || :all) == :all
+      @links << [str]
+    else
+      @links << [str, { :action => 'index_rss_log', :type => :all,
+                        :params => query_params(query) }]
+    end
+    for type in [:observation, :name, :location, :species_list]
+      str = :"#{type.to_s.upcase}S".t
+      if type == query.params[:type]
+        @links << [str]
+      else
+        @links << [str, { :action => 'index_rss_log', :type => type,
+                          :params => query_params(query) }]
+      end
+    end
 
     show_index_of_objects(query, args)
   end

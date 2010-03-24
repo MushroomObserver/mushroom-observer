@@ -187,16 +187,8 @@
               <div class='right_tabs'>
                 <%= @right_tabs.join('<br/>') %>
               </div>
-            <% end
-            if @tab_sets %>
-              <div class='tab_sets'>
-                <% for set in @tab_sets %>
-                  <div class='tab_set'>
-                    <%= set.map {|tab| render_tab(*tab)}.join(' | ') %><br/>
-                  </div>
-                <% end %>
-              </div>
             <% end %>
+            <%= render_tab_sets %>
 
             <div id="Title"><%= @title %></div>
 

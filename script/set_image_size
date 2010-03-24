@@ -11,12 +11,12 @@ File.open(file) do |fh|
   fh.sysseek(2)
   while str = fh.sysread(4)
     x, l = str.unpack('nn')
-    if x == 0xFFC0
+    if x == 0xFFC0 || x == 0xFFC2
       h, w =fh.sysread(5).unpack('xnn')
       break
-    elsif x < 0xFF00
-      $stderr.puts 'Invalid header!'
-      exit 1
+    # elsif x < 0xFF00
+    #   $stderr.puts 'Invalid header!'
+    #   exit 1
     else
       fh.sysseek(l - 2, IO::SEEK_CUR)
     end

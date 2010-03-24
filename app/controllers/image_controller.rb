@@ -66,8 +66,7 @@ class ImageController < ApplicationController
 
   # Display matrix of selected images, based on current Query.
   def index_image
-    query = find_or_create_query(:Image, :all, :by => params[:by] || :created)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:Image, :by => params[:by])
     show_selected_images(query, :id => params[:id])
   end
 
@@ -122,10 +121,12 @@ class ImageController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t],
-      ['date', :DATE.t],
-      ['user', :user.t],
-      ['modified', :modified.t],
+      ['name',     :sort_by_name.t],
+      ['date',     :sort_by_date.t],
+      ['user',     :sort_by_user.t],
+      # ['copyright_holder', :sort_by_copyright_holder.t],
+      ['created',  :sort_by_posted.t],
+      ['modified', :sort_by_modified.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
@@ -138,8 +139,16 @@ class ImageController < ApplicationController
                 }]
     end
 
-    # Paginate by letter as well as page if names are included in query.
-    if query.uses_table?(:names)
+    # Paginate by letter if sorting by user.
+    if (query.params[:by] == 'user') or
+       (query.params[:by] == 'reverse_user')
+      args[:letters] = 'users.login'
+    # Paginate by letter if sorting by copyright holder.
+    elsif (query.params[:by] == 'copyright_holder') or
+          (query.params[:by] == 'reverse_copyright_holder')
+      args[:letters] = 'images.copyright_holder'
+    # Paginate by letter if names are included in query.
+    elsif query.uses_table?(:names)
       args[:letters] = 'names.text_name'
     end
 
@@ -557,7 +566,7 @@ class ImageController < ApplicationController
           if current_id != new_id
             Image.connection.update %(
               UPDATE images SET license_id = #{new_id}
-              WHERE copyright_holder = "#{copyright_holder.gsub('"','\\"').gsub('\\','\\\\')}"
+              WHERE copyright_holder = "#{copyright_holder.to_s.gsub('"','\\"').gsub('\\','\\\\')}"
                 AND license_id = #{current_id} AND user_id = #{@user.id}
             )
             Transaction.put_image(

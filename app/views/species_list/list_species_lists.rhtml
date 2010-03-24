@@ -1,11 +1,6 @@
 <%
-  if @links
-    new_tab_set do
-      for link in @links
-        add_tab(*link)
-      end
-    end
-  end
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set(@links)
 %>
 
 <% paginate_block(@pages) do %>
@@ -18,7 +13,7 @@
         <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListWhat">%s</span><br/>',
                             species_list.when, species_list.unique_text_name.t),
                     :action => 'show_species_list', :id => species_list.id) %>
-          <span class="ListWhere"><%= sanitize(species_list.where).t %></span>
+          <span class="ListWhere"><%= sanitize(species_list.place_name).t %></span>
           <span class="ListWho"><%= user_link(species_list.user) %></span>
         </td>
       </tr>

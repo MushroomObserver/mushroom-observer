@@ -24,14 +24,14 @@ FILE: foreach my $file (@FILES) {
     sysread($fh, $_, 2);
     while (sysread($fh, $_, 4)) {
         my ($x, $l) = unpack("nn", $_);
-        if ($x == 0xFFC0) {
+        if ($x == 0xFFC0 || $x == 0xFFC2) {
             sysread($fh, $_, 5);
             my ($y, $x) = unpack("xnn", $_);
             print "$file: $x $y\n";
             next FILE;
-        } elsif ($x < 0xFF00) {
-            print "$file: invalid header\n";
-            next FILE;
+#         } elsif ($x < 0xFF00) {
+#             print "$file: invalid header\n";
+#             next FILE;
         } else {
             sysseek($fh, $l-2, 1);
         }

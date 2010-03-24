@@ -31,7 +31,7 @@
 %>
 
 <p><%= :WHEN.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
-<p><%= :WHERE.t %>: <span class="Data"><%= sanitize(@species_list.where).t %></span></p>
+<p><%= :WHERE.t %>: <span class="Data"><%= sanitize(@species_list.place_name).t %></span></p>
 <p><%= :WHO.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
 <p><%= :NOTES.t %>:</p>
 <%= sanitize(@species_list.notes.to_s).tpl %>
@@ -57,7 +57,7 @@
                             :controller => 'observer', :action => 'show_observation', :id => observation.id,
                             :params => query_params) %>
               </span><br/>
-              <span class="ListWhere"><%= location_link(observation.where, observation.location) %></span>:
+              <span class="ListWhere"><%= location_link(observation.place_name, observation.location) %></span>:
               <span class="ListWho"><%= user_link(observation.user) %></span>:
               <span class="ListWhen"><%= observation.when.web_date %></span>
             </td>

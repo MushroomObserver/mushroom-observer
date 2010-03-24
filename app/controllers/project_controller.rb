@@ -41,8 +41,7 @@ class ProjectController < ApplicationController
 
   # Show list of selected projects, based on current Query.
   def index_project
-    query = find_or_create_query(:Project, :all, :by => params[:by] || :title)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:Project, :by => params[:by])
     show_selected_projects(query, :id => params[:id])
   end
 
@@ -55,14 +54,20 @@ class ProjectController < ApplicationController
   # Show selected list of projects.
   def show_selected_projects(query)
     @links ||= []
+    args = {
+      :action => :list_projects,
+      :letters => 'projects.title',
+      :num_per_page => 10,
+    }
 
     # Add some alternate sorting criteria.
-    # args[:sorting_links] = [
-    #   ['name', :name.t], 
-    # ]
+    args[:sorting_links] = [
+      ['name',     :sort_by_title.t], 
+      ['created',  :sort_by_created.t], 
+      ['modified', :sort_by_modified.t], 
+    ]
 
-    show_index_of_objects(query, :action => :list_projects,
-                          :letters => 'projects.title', :num_per_page => 10)
+    show_index_of_objects(query, args)
   end
 
   # Display project by itself.

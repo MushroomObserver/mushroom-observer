@@ -1,13 +1,3 @@
-<%
-  if @links
-    new_tab_set do
-      for link in @links
-        add_tab(*link)
-      end
-    end
-  end
-%>
-
 <% paginate_block(@pages) do %>
   <% if @objects.length > 0 %>
     <table cellpadding="5" cellspacing="0" width="100%">

@@ -630,6 +630,23 @@ query_title_with_observations_of_name:  "[TYPES] with [:query_title_of_name(type
 query_title_with_observations_of_name_synonym:  "[TYPES] with [:query_title_of_name_synonym(type=:observation)]"
 query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:query_title_of_name_nonconsensus(type=:observation)]"
 
+# Sorting criteria.
+sort_by_header:  "Sort by:"
+sort_by_id:  ID
+sort_by_name: "[:NAME]"
+sort_by_title: "[:TITLE]"
+sort_by_summary: "[:SUMMARY]"
+sort_by_date: "[:DATE]"
+sort_by_posted:  Date Posted
+sort_by_created:  Date Created
+sort_by_modified:  Time Last Modified
+sort_by_rss_log: "[:sort_by_modified]"
+sort_by_last_login:  Last Login
+sort_by_user: "[:USER]"
+sort_by_login: "[:LOGIN_NAME]"
+sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_reverse:  Reverse Order
+
 # RSS log messages.
 log_ancient: "[String]"
 log_approved_by: Zugelassen von [user].
@@ -2108,6 +2125,8 @@ rss_log_of_deleted_item: Platzhalter eines \ngelöschten\nEintrags
 rss_log_title: Logbuch der neuen Änderungen
 rss_name_by: von [user]
 rss_title: Mushroom Observer
+rss_show_all:  Everything
+rss_show_header:  "Show:"
 
 
 

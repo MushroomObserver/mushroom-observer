@@ -16,6 +16,7 @@
 #  draw_prev_next_tabs::  Create tab set for prev/index/next links.
 #  new_tab_set::          Create new tab set for top-left.
 #  add_tab::              Add tab to last top-left tab set.
+#  add_tabs::             Add zero or more tabs to last top-left tab set.
 #  render_tab::           Render a tab. (used by app/views/layout/application.rhtml)
 #
 #  add_right_tab::        Create new tab set for top-right.
@@ -58,19 +59,72 @@ module ApplicationHelper::Tabs
   #                               { :confirm => :are_you_sure.l })
   #   end
   #
-  def new_tab_set(&block)
+  # Tab sets now support headers.  Syntaxes allowed are:
+  #
+  #   new_tab_set
+  #   new_tab_set("Header:")
+  #   new_tab_set("Header:", [tab1, tab2, ...])
+  #   new_tab_set([tab1, tab2, ...]) # (no header)
+  #
+  # These render like:
+  #
+  #   Header: link1 | link2 | link3 | ...
+  #
+  def new_tab_set(header=nil, tabs=nil, &block)
+    header, tabs = nil, header if header.is_a?(Array)
     @tab_sets ||= []
-    @tab_sets.push(new_set = [])
-    yield(new_set)
+    @tab_sets.push(new_set = [header])
+    add_tabs(tabs) if tabs
+    yield(new_set) if block
     return new_set
   end
 
-  # Add a tab to an open tab set.  See new_tab_set.
+  # Change the header of the open tab set.
+  def set_tab_set_header(header)
+    if @tab_sets and @tab_sets.last
+      @tab_sets.last.first = header
+    else
+      raise(RuntimeError, 'You forgot to call new_tab_set().')
+    end
+  end
+
+  # Add zero or more tabs to an open tab set.  See +new_tab_set+.
+  def add_tabs(tabs)
+    if tabs.is_a?(Array)
+      for tab in tabs
+        add_tab(*tab)
+      end
+    end
+  end
+
+  # Add a tab to an open tab set.  See +new_tab_set+.
   def add_tab(*args)
-    if @tab_sets && @tab_sets.last
+    if @tab_sets and @tab_sets.last
       @tab_sets.last.push(args)
     else
       raise(RuntimeError, 'You must place add_tab() calls inside a new_tab_set() block.')
+    end
+  end
+
+  # Render tab sets in upper left of page body.  (Only used by app layout.)
+  def render_tab_sets
+    if @tab_sets
+      content_tag(:div, :class => 'tab_sets') do
+        @tab_sets.map do |set|
+          render_tab_set(*set)
+        end.join('')
+      end
+    end
+  end
+
+  # Render one tab set in upper left of page body.  (Only used by
+  # +render_tab_sets+.)
+  def render_tab_set(header, *links)
+    header += ' ' if header
+    content_tag(:div, :class => 'tab_set') do
+      header.to_s + links.map do |tab|
+        render_tab(*tab)
+      end.join(' | ') + '<br/>'
     end
   end
 

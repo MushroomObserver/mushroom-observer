@@ -29,7 +29,7 @@
   <%= if @image.copyright_holder == @image.user.name
     user_link(@image.user)
   else
-    @image.copyright_holder.t
+    @image.copyright_holder.to_s.t
   end %>
 </div>
 

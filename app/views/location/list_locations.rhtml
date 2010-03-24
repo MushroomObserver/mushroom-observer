@@ -1,13 +1,10 @@
 <%
+  new_tab_set(:sort_by_header.t, @sorts)
   new_tab_set do
     add_tab(:list_place_names_map.t, :action => :map_locations,
             :params => query_params)
     add_tab(:all_objects.t(:type => :location), :action => :list_locations)
-    if @links
-      for link in @links
-        add_tab(*link)
-      end
-    end
+    add_tabs(@links)
   end
 
   if (!@known_pages || @known_pages.length == 0) and

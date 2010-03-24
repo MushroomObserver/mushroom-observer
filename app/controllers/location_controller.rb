@@ -80,8 +80,7 @@ class LocationController < ApplicationController
 
   # Displays a list of selected locations, based on current Query.
   def index_location
-    query = find_or_create_query(:Location, :all, :by => params[:by] || :name)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:Location, :by => params[:by])
     show_selected_locations(query, :id => params[:id])
   end
 
@@ -118,13 +117,17 @@ class LocationController < ApplicationController
     store_location
     clear_query_in_session
     set_query_params(query)
+    @links ||= []
 
     # Supply a default title.
     @title ||= query.title
 
     # Add some alternate sorting criteria.
-    @links = add_sorting_links(query, [
-      ['name', :name.t],
+    @sorts = add_sorting_links(query, [
+      ['name',    :sort_by_name.t],
+      ['created', :sort_by_created.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
+                  :sort_by_modified.t],
     ])
 
     # Add "show observations" link if this query can be coerced into an
@@ -215,7 +218,7 @@ class LocationController < ApplicationController
 
   # Map results of a search or index.
   def map_locations
-    query = find_or_create_query(:Location, :all)
+    query = find_or_create_query(:Location)
     @title = query.flavor == :all ? :map_locations_global_map.t :
                              :map_locations_title.t(:locations => query.title)
     @locations = query.results
@@ -229,9 +232,7 @@ class LocationController < ApplicationController
 
   # Displays a list of selected locations, based on current Query.
   def index_location_description
-    query = find_or_create_query(:LocationDescription, :all,
-                                 :by => params[:by] || :name)
-    query.params[:by] = params[:by] if params[:by]
+    query = find_or_create_query(:LocationDescription, :by => params[:by])
     show_selected_location_descriptions(query, :id => params[:id])
   end
 
@@ -268,7 +269,9 @@ class LocationController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name', :name.t],
+      ['name',     :sort_by_name.t],
+      ['created',  :sort_by_created.t],
+      ['modified', :sort_by_modified.t],
     ]
 
     # Add "show locations" link if this query can be coerced into an
