@@ -1234,7 +1234,7 @@ class Name < AbstractModel
       raise :runtime_unrecognized_rank.t(:rank => rank)
     end
     if !results
-      raise :runtime_invalid_for_rank.t(:rank => rank, :name => name)
+      raise :runtime_invalid_for_rank.t(:rank => in_rank, :name => in_str)
     end
     return results
   end

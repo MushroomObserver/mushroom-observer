@@ -569,7 +569,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       :id => name.id,
       :name => {
-        :text_name => name.text_name,
+        :text_name => '',
         :author => "(Fr.) Kühner",
         :rank => :Species,
         :citation => "__Le Genera Galera__, 139. 1935."
