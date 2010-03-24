@@ -2125,8 +2125,14 @@ rss_log_of_deleted_item: Platzhalter eines \ngelöschten\nEintrags
 rss_log_title: Logbuch der neuen Änderungen
 rss_name_by: von [user]
 rss_title: Mushroom Observer
-rss_show_all:  Everything
-rss_show_header:  "Show:"
+rss_show:  "Show:"
+rss_hide:  "Hide:"
+rss_all:  Everything
+rss_only:  "Only [TYPES]"
+rss_one:  "[TYPES]"
+rss_make_default:  Make This the Default
+rss_this_is_default:  This is the Default
+rss_fine_tune:  Fine Tune Options
 
 
 

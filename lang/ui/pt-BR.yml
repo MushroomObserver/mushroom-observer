@@ -2129,8 +2129,14 @@ rss_log_of_deleted_item:  Log of\nDeleted\nItem
 rss_log_title: Registro de Atividades
 rss_name_by:  by [user]
 rss_title: Observação de Cogumelo
-rss_show_all:  Everything
-rss_show_header:  "Show:"
+rss_show:  "Show:"
+rss_hide:  "Hide:"
+rss_all:  Everything
+rss_only:  "Only [TYPES]"
+rss_one:  "[TYPES]"
+rss_make_default:  Make This the Default
+rss_this_is_default:  This is the Default
+rss_fine_tune:  Fine Tune Options
 
 
 

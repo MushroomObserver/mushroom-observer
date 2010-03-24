@@ -2151,8 +2151,14 @@ rss_log_of_deleted_item: Registro de\nElemento\nEliminado
 rss_log_title: Registro de Actividad
 rss_name_by: por [user]
 rss_title: Mushroom Observer
-rss_show_all: Todo
-rss_show_header: "Mostrar:"
+rss_show: "Mostrar:"
+rss_hide: "Ocultar:"
+rss_all: Todo
+rss_only: "Sólo [TYPES]"
+rss_one: "[TYPES]"
+rss_make_default: Hacen de Este el Predeterminado
+rss_this_is_default: Este es el Predeterminado
+rss_fine_tune: Refinar Sus Opciones
 
 
 

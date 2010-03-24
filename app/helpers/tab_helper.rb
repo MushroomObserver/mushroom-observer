@@ -72,10 +72,14 @@ module ApplicationHelper::Tabs
   #
   def new_tab_set(header=nil, tabs=nil, &block)
     header, tabs = nil, header if header.is_a?(Array)
-    @tab_sets ||= []
-    @tab_sets.push(new_set = [header])
-    add_tabs(tabs) if tabs
-    yield(new_set) if block
+    if tabs && tabs.empty?
+      new_set = nil
+    else
+      @tab_sets ||= []
+      @tab_sets.push(new_set = [header])
+      add_tabs(tabs) if tabs
+      yield(new_set) if block
+    end
     return new_set
   end
 

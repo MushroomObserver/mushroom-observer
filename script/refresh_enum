@@ -38,12 +38,7 @@ TABLES
     done_anything = true
 
   when 'jason'
-    # ActiveRecord::Migration.add_column :species_lists, :location_id, :integer
-    Location.connection.update %(
-      UPDATE species_lists spl, locations loc
-      SET spl.location_id = loc.id, spl.where = NULL
-      WHERE spl.where = loc.display_name
-    )
+    raise "nothing to do"
     done_anything = true
 
   else

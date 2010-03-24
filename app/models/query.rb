@@ -12,10 +12,10 @@ class Query < AbstractQuery
       :name?     => :string,
       :location? => :string,
       :user?     => :string,
-      :content?  => :string
+      :content?  => :string,
     },
     :all => {
-      :type? => {:string => [:all, :location, :name, :observation, :species_list]}
+      :type? => :string,
     },
     :at_location => {
       :location => Location,
@@ -691,8 +691,14 @@ class Query < AbstractQuery
 
     # Allow users to filter RSS logs for the object type they're interested in.
     if model_symbol == :RssLog
-      x = params[:type] ||= :all
-      self.where << "rss_logs.#{params[:type]}_id IS NOT NULL" if x != :all
+      x = params[:type] ||= 'all'
+      if x == 'none'
+        self.where << 'FALSE'
+      elsif x != 'all'
+        self.where << x.split.map do |type|
+          "rss_logs.#{type}_id IS NOT NULL"
+        end.join(' OR ')
+      end
     elsif params[:type]
       raise "Can't use :type parameter in :#{model_symbol} :all queries!"
     end

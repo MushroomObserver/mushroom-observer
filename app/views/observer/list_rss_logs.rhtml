@@ -1,7 +1,9 @@
 <%
   @title = :rss_log_title.t.nowrap
 
-  new_tab_set(:rss_show_header.t, @links)
+  new_tab_set(:rss_show.t, @show_links)
+  new_tab_set(:rss_hide.t, @hide_links)
+  new_tab_set(@other_links)
 %>
 
 <% paginate_block(@pages) do %>
