@@ -224,6 +224,7 @@ class Name < AbstractModel
       'citation',
       'deprecated',
       'correct_spelling',
+      'notes',
   ])
   non_versioned_columns.push(
     'sync_id',
@@ -1231,10 +1232,11 @@ class Name < AbstractModel
     elsif :Group == rank
       results = parse_group(in_str, in_deprecated)
     elsif
-      raise :runtime_unrecognized_rank.t(:rank => rank)
+      raise :runtime_unrecognized_rank.t(:rank => :"rank_#{rank.to_s.downcase}")
     end
     if !results
-      raise :runtime_invalid_for_rank.t(:rank => in_rank, :name => in_str)
+      raise :runtime_invalid_for_rank.t(:rank => :"rank_#{rank.to_s.downcase}",
+                                        :name => in_str)
     end
     return results
   end

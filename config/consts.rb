@@ -75,3 +75,5 @@ CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe)     if !defined? CSS
 # URL of the subversion source repository.
 SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings" if !defined? SVN_REPOSITORY
 
+# Date after which votes become nonanonymous.
+VOTE_CUTOFF = '20010101'

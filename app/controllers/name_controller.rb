@@ -640,6 +640,9 @@ class NameController < ApplicationController
             if merge.citation.blank?
               merge.citation = params[:name][:citation].to_s.strip_squeeze
             end
+            if merge.notes.blank?
+              merge.notes = params[:name][:notes].to_s.strip rescue ''
+            end
             if params[:name][:deprecated] != '1'
               merge.deprecated = false
             end
@@ -662,8 +665,13 @@ class NameController < ApplicationController
 
         # Not merging.
         else
-          @name.change_text_name(text_name, author, rank, :save_parents)
+          # This can be blank if name in use and therefore not editable.
+          if !text_name.blank?
+            @name.change_text_name(text_name, author, rank, :save_parents)
+          end
+
           @name.citation = params[:name][:citation].to_s.strip_squeeze rescue ''
+          @name.notes = params[:name][:notes].to_s.strip rescue ''
 
           # Let user call this name a misspelling.
           @misspelling = (params[:name][:misspelling] == '1') rescue false

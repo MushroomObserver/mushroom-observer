@@ -562,29 +562,71 @@ class NameControllerTest < FunctionalTestCase
 
   def test_edit_name_post
     name = names(:conocybe_filaris)
-    assert_equal("Conocybe filaris", name.text_name)
+    assert_equal('Conocybe filaris', name.text_name)
     assert_nil(name.author)
     past_names = name.versions.size
     assert_equal(1, name.version)
     params = {
       :id => name.id,
       :name => {
-        :text_name => '',
-        :author => "(Fr.) Kühner",
+        :text_name => 'Conocybe filaris',
+        :author => '(Fr.) Kühner',
         :rank => :Species,
-        :citation => "__Le Genera Galera__, 139. 1935."
+        :citation => '__Le Genera Galera__, 139. 1935.'
       },
     }
     post_requires_login(:edit_name, params)
-    # Must be creating Conocybe sp, too.  (But Rolf gets no points for the
-    # change because he's the one who created Conocybe filaris.)
-    assert_equal(10 + @new_pts, @rolf.reload.contribution)
-    assert_equal("(Fr.) Kühner", name.reload.author)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
-    assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
-    assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
+    assert_flash_success
+    assert_equal(20, @rolf.reload.contribution)
+    assert_equal('(Fr.) Kühner', name.reload.author)
+    assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.display_name)
+    assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.observation_name)
+    assert_equal('Conocybe filaris (Fr.) Kühner', name.search_name)
+    assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
     assert_equal(@rolf, name.user)
+  end
+
+  # This catches a bug that was happening when editing a name that was in use.
+  # In this case text_name and author are missing, confusing edit_name
+  def test_edit_name_post_not_changeable
+    name = names(:conocybe_filaris)
+    params = {
+      :id => name.id,
+      :name => {
+        :rank => :Species,
+        :citation => '__Le Genera Galera__, 139. 1935.'
+      },
+    }
+    post_requires_login(:edit_name, params)
+    assert_flash_success
+    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(nil, name.reload.author)
+    assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
+    assert_equal(@rolf, name.user)
+  end
+
+  def test_edit_name_post_just_change_notes
+    name = names(:conocybe_filaris)
+    past_names = name.versions.size
+    assert_equal(1, name.version)
+    assert_equal('', name.notes)
+    new_notes = 'Add this to the notes.'
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => 'Conocybe filaris',
+        :author => '',
+        :rank => :Species,
+        :citation => '',
+        :notes => new_notes
+      },
+    }
+    post_requires_login(:edit_name, params)
+    assert_flash_success
+    # It's implicitly creating Conocybe, because not in fixtures.
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(new_notes, name.reload.notes)
+    assert_equal(past_names + 1, name.versions.size)
   end
 
   # Test name changes in various ways.

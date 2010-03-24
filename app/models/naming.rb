@@ -252,7 +252,7 @@ class Naming < AbstractModel
   #     num    = record[:num]    # Number of users who voted near this level.
   #     weight = record[:wgt]    # Sum of users' weights.
   #     value  = record[:value]  # Value of this level of vote (arbitrary scale).
-  #     users  = record[:users]  # List of users who voted near this level.
+  #     votes  = record[:votes]  # List of actual votes.
   #   end
   #
   def calc_vote_table
@@ -264,7 +264,7 @@ class Naming < AbstractModel
         :num   => 0,
         :wgt   => 0.0,
         :value => val,
-        :users => [],
+        :votes => [],
       }
     end
 
@@ -274,9 +274,9 @@ class Naming < AbstractModel
     for v in votes
       str = v.agreement
       wgt = v.user_weight
-      table[str][:wgt] += wgt
       table[str][:num] += 1
-      table[str][:users] << v.user
+      table[str][:wgt] += wgt
+      table[str][:votes] << v
       tot_sum += v.value * wgt
       tot_wgt += wgt
     end

@@ -31,11 +31,23 @@
         <td align="center"><%= "%.2f" % wgt %></td>
         <td>&nbsp;</td>
         <td align="center"><%= num %></td>
-        <td align="left"><small><%= if num > 0
-          '(' + table[str][:users].map do |user|
-            user_link(user, user.login)
-          end.join(',') + ')'
-        end %></small></td>
+        <td align="left"><small><%=
+          vote_cutoff = Time.parse(VOTE_CUTOFF)
+          votes = table[str][:votes].select do |vote|
+            vote.modified > vote_cutoff
+          end.sort_by(&:rand)[0..3]
+          if votes.length > 0
+            n = 0
+            '(' + votes.map do |vote|
+              n += 1
+              if n < 4
+                user_link(vote.user, vote.user.login)
+              else
+                '...'
+              end
+            end.join(',') + ')'
+          end
+        %></small></td>
         <td>&nbsp;</td>
       </tr>
     <% end %>
