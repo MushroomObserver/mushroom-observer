@@ -226,7 +226,7 @@ class AccountController < ApplicationController
             [ :bool, :email_general_feature ],
             [ :bool, :email_general_commercial ],
             [ :bool, :email_general_question ],
-            [ :str,  :email_digest ],
+            # [ :str,  :email_digest ],
             [ :bool, :email_html ],
             [ :str,  :thumbnail_size ],
             [ :str,  :image_size ],

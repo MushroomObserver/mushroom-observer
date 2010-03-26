@@ -193,7 +193,6 @@ class AccountControllerTest < FunctionalTestCase
         :email_general_feature        => "1",
         :email_general_commercial     => "1",
         :email_general_question       => "1",
-        :email_digest                 => "immediately",
         :email_html                   => "1",
       }
     }
@@ -229,7 +228,6 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal(true,         user.email_general_feature)
     assert_equal(true,         user.email_general_commercial)
     assert_equal(true,         user.email_general_question)
-    assert_equal(:immediately, user.email_digest)
     assert_equal(true,         user.email_html)
   end
 
