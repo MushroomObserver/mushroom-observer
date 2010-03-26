@@ -348,6 +348,12 @@ div.popup_frame {
   background: #EEE;
   color: #000;
 }
+div.popup_frame a { color: #a06463; } /* brasiliensis */
+div.popup_frame a:visited { color: #3b2821; }  /* cupreobrunneus */
+div.popup_frame a:hover {
+  color: #743931; /* brasiliensis */
+  background-color: #f6f0f2;  /* campestris */
+}
 
 div.form_image {
   margin-bottom: 5px;
