@@ -1539,38 +1539,25 @@ class ObserverController < ApplicationController
 
   # Displays matrix of selected RssLog's (based on current Query).
   def index_rss_log
-    # Normal mode.
-    if params[:add_type].blank? and
-       params[:del_type].blank?
+    if request.method == :post
+      types = RssLog.all_types.select {|type| params["show_#{type}"] == '1'}
+      types = 'all' if types.length == RssLog.all_types.length
+      types = 'none' if types.empty?
+      types = types.map(&:to_s).join(' ')
+      query = find_or_create_query(:RssLog, :type => types)
+    elsif !params[:type].blank?
       query = find_or_create_query(:RssLog, :type => params[:type])
-
-    # Fine-tune mode.
     else
-      if query = find_query(:RssLog, false)
-        types = query.params[:type]
-      else
-        types = @user ? @user.default_rss_type : 'all'
-      end
-      types = types.to_s.split
-      types.push(params[:add_type])
-      types.delete(params[:del_type])
-      all = types.include?('all') && params[:del_type].blank?
-      types &= ['observation', 'name', 'location', 'species_list']
-      all = true if types.length == 4
-      if all
-        query = find_or_create_query(:RssLog, :type => 'all')
-      else
-        types << 'none' if types.empty?
-        query = find_or_create_query(:RssLog, :type => types.join(' '))
-      end
+      query = find_or_create_query(:RssLog)
     end
-
     show_selected_rss_logs(query, :id => params[:id])
   end
 
   # Show selected search results as a matrix with 'list_rss_logs' template.
   def show_selected_rss_logs(query, args={})
     store_query_in_session(query)
+    set_query_params(query)
+
     args = {
       :action => 'list_rss_logs',
       :matrix => true,
@@ -1581,65 +1568,17 @@ class ObserverController < ApplicationController
       },
     }.merge(args)
 
-    @show_links ||= []
-    @hide_links ||= []
-    @other_links ||= []
-
-    this_type = query.params[:type] || 'all'
-    types = ['all', 'observation', 'name', 'location', 'species_list']
-
-    # Add simple set of links to filter by a single object type.
-    if params[:fine_tune] != '1'
-      for type in types
-        if type == 'all'
-          str = :rss_all.t 
-        else
-          str = :rss_only.t(:type => type.to_sym)
-        end
-        if type == this_type
-          @show_links << [str]
-        else
-          @show_links << [str, { :action => 'index_rss_log', :type => type,
-                                 :params => query_params(query) }]
-        end
-      end
-
-    # Add two sets of links, one to add types to the list shown, one to hide.
-    else
-      this_types = this_type.split
-      for type in types
-        if type == 'all'
-          str = :rss_all.t
-        else
-          str = :rss_one.t(:type => type.to_sym)
-        end
-        if this_types.include?('all') || this_types.include?(type)
-          @show_links << [str]
-          @hide_links << [str, { :action => 'index_rss_log', :del_type => type,
-                          :fine_tune => '1', :params => query_params(query) }]
-        else
-          @show_links << [str, { :action => 'index_rss_log', :add_type => type,
-                          :fine_tune => '1', :params => query_params(query) }]
-          @hide_links << [str]
-        end
-      end
-    end
+    @types = query.params[:type].to_s.split.sort
+    @links = []
 
     # Let the user make this their default and fine tune.
     if @user
-      if @user.default_rss_type == this_type
-        @other_links << :rss_this_is_default.t
-      elsif params[:make_default] == '1'
-        @user.default_rss_type = this_type
+      if params[:make_default] == '1'
+        @user.default_rss_type = @types.join(' ')
         @user.save_without_our_callbacks
-      else
-        @other_links << [:rss_make_default.t, { :action => 'index_rss_log',
-                         :make_default => 1, :fine_tune => params[:fine_tune],
-                         :params => query_params(query) }]
-      end
-      if params[:fine_tune] != '1'
-        @other_links << [:rss_fine_tune.t, { :action => 'index_rss_log',
-                         :fine_tune => 1, :params => query_params(query) }]
+      elsif @user.default_rss_type.to_s.split.sort != @types
+        @links << [:rss_make_default.t, { :action => 'index_rss_log',
+                   :make_default => 1, :params => query_params }]
       end
     end
 

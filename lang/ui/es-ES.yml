@@ -2161,11 +2161,11 @@ rss_title: Mushroom Observer
 rss_show: "Mostrar:"
 rss_hide: "Ocultar:"
 rss_all: Todo
-rss_only: "Sólo [TYPES]"
+rss_all_help: Mostrar todos los tipos de objetos.
 rss_one: "[TYPES]"
+rss_one_help: Mostrar sólo [types].
 rss_make_default: Hacen de Este el Predeterminado
 rss_this_is_default: Este es el Predeterminado
-rss_fine_tune: Refinar Sus Opciones
 rss_created: "[TYPE] Creado"
 rss_changed: "Cambio de [TYPE]"
 
@@ -4147,3 +4147,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

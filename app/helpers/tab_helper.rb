@@ -15,6 +15,7 @@
 #
 #  draw_prev_next_tabs::  Create tab set for prev/index/next links.
 #  new_tab_set::          Create new tab set for top-left.
+#  custom_tab_set::       Add custom-made tab set.
 #  add_tab::              Add tab to last top-left tab set.
 #  add_tabs::             Add zero or more tabs to last top-left tab set.
 #  render_tab::           Render a tab. (used by app/views/layout/application.rhtml)
@@ -83,6 +84,12 @@ module ApplicationHelper::Tabs
     return new_set
   end
 
+  # Add custom-made tab set.
+  def custom_tab_set(set)
+    @tab_sets ||= []
+    @tab_sets.push(set)
+  end
+
   # Change the header of the open tab set.
   def set_tab_set_header(header)
     if @tab_sets and @tab_sets.last
@@ -115,7 +122,11 @@ module ApplicationHelper::Tabs
     if @tab_sets
       content_tag(:div, :class => 'tab_sets') do
         @tab_sets.map do |set|
-          render_tab_set(*set)
+          if set.is_a?(Array)
+            render_tab_set(*set)
+          else
+            set.to_s
+          end
         end.join('')
       end
     end

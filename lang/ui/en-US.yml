@@ -2137,11 +2137,11 @@ rss_title: "[:app_title]"
 rss_show: "Show:"
 rss_hide: "Hide:"
 rss_all: Everything
-rss_only: "Only [TYPES]"
+rss_all_help: Show all object types.
 rss_one: "[TYPES]"
+rss_one_help: Show only [types].
 rss_make_default: Make This My Default
 rss_this_is_default: This Is Your Default
-rss_fine_tune: Fine Tune Options
 rss_created: "[TYPE] Created"
 rss_changed: "Change to [TYPE]"
 

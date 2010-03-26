@@ -26,7 +26,7 @@
              sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
       <p>
         <%= thumbnail(image, :border => 0, :obs => @observation.id) %><br/>
-        <%= if @js && @user && @user != @observation.user
+        <%= if @js && @user
           javascript_include('image_vote')
           current = image.users_vote(@user)
           '<small>' + Image.all_votes.map do |value|

@@ -82,7 +82,7 @@
         <span class="Data"><%= image_vote_as_long_string(@image.vote_cache.to_i) %></span>
       </p>
 
-      <% if @user && @user != @image.user %>
+      <% if @user %>
         <p>
           <%= :image_show_your_vote.t %>:<br/>
           <% current = @image.users_vote(@user)

@@ -71,20 +71,20 @@
 #
 #  == Class methods
 #
-#  None.
+#  all_types::          Object types with RssLog's (Array of Symbol's).
 #
 #  == Instance methods
 #
-#  add_with_date        Same, but adds timestamp.
-#  orphan               About to delete object: add notes, clear association.
-#  orphan_title         Get old title from top line of orphaned log.
-#  object               Return owner object: Observation, Name, etc.
-#  text_name            Return title string of associated object.
-#  format_name          Return formatted title string of associated object.
-#  unique_text_name     (same, with id tacked on to make unique)
-#  unique_format_name   (same, with id tacked on to make unique)
-#  url                  Return "show_blah/id" URL for associated object.
-#  parse_log            Parse log, see method for description of return value.
+#  add_with_date::      Same, but adds timestamp.
+#  orphan::             About to delete object: add notes, clear association.
+#  orphan_title::       Get old title from top line of orphaned log.
+#  object::             Return owner object: Observation, Name, etc.
+#  text_name::          Return title string of associated object.
+#  format_name::        Return formatted title string of associated object.
+#  unique_text_name::   (same, with id tacked on to make unique)
+#  unique_format_name:: (same, with id tacked on to make unique)
+#  url::                Return "show_blah/id" URL for associated object.
+#  parse_log::          Parse log, see method for description of return value.
 #
 #  == Callbacks
 #
@@ -97,6 +97,11 @@ class RssLog < AbstractModel
   belongs_to :name
   belongs_to :observation
   belongs_to :species_list
+
+  # List of all object types that can have RssLog's.
+  def self.all_types
+    ['observation', 'name', 'location', 'species_list']
+  end
 
   # Returns the associated object, or nil if it's an orphan.
   def object
