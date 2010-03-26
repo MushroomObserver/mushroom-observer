@@ -188,19 +188,16 @@ class ApiController < ApplicationController
       # It reads the first letter of the field, and returns all the locations
       # (or "where" strings) with words beginning with that letter.
       elsif type == 'location'
-        @items = Location.connection.select_values %(
-          SELECT DISTINCT IF(o.location_id > 0, l.display_name, o.where) AS x
-          FROM observations o
-          LEFT OUTER JOIN locations l ON l.id = o.location_id
-          WHERE (
-            LOWER(o.where) LIKE '#{letter}%' OR
-            LOWER(o.where) LIKE '% #{letter}%' OR
-            LOWER(l.search_name) LIKE '#{letter}%' OR
-            LOWER(l.search_name) LIKE '% #{letter}%'
-          )
-          ORDER BY x ASC
-        )
-
+        @items = Observation.connection.select_values(%(
+          SELECT DISTINCT `where` FROM observations
+          WHERE `where` LIKE '#{letter}%' OR
+                `where` LIKE '% #{letter}%'
+        )) + Location.connection.select_values(%(
+          SELECT DISTINCT `display_name` FROM locations
+          WHERE `search_name` LIKE '#{letter}%' OR
+                `search_name` LIKE '% #{letter}%'
+        ))
+        @items.sort!
       end
     end
 
@@ -209,5 +206,51 @@ class ApiController < ApplicationController
     render(:layout => false, :inline => letter + %(
       <%= @items.uniq.map {|n| h(n.gsub(/[\r\n].*/,'')) + "\n"}.join('') %>
     ))
+  end
+
+  # Process AJAX request for casting votes.
+  # type::   Type of object.
+  # id::     ID of object.
+  # value::  Value of vote.
+  #
+  # Valid types are:
+  # naming:: Vote on a proposed id -- any logged-in user.
+  # image::  Vote on an image -- only reviewers.
+  #
+  # Examples:
+  #
+  #   /ajax/vote/naming/1234?value=2
+  #   /ajax/vote/image/1234?value=high
+  #
+  def ajax_vote
+    type  = params[:type].to_s
+    id    = params[:id].to_s
+    value = params[:value].to_s
+
+    result = nil
+    if user = login_for_ajax
+      case type
+
+      when 'naming'
+        if (value = Vote.validate_value(val)) and
+           (naming = Naming.safe_find(id))
+          naming.observation.change_vote(naming, value, user)
+          result = value
+        end
+
+      when 'image'
+        if user.in_group?('reviewers') and
+           Image.all_qualities.include?(value.to_sym) and
+           (image = Image.safe_find(id))
+          image.quality = value
+          image.reviewer_id = user.id
+          image.save_without_our_callbacks
+          result = value
+        end
+      end
+    end
+
+    # Result is the new value if successful, or nil if error.
+    render(:text => result.to_s)
   end
 end

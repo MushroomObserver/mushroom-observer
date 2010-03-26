@@ -679,35 +679,35 @@ log_orphan: "[Title]"
 log_updated_by: Realizado por [user].
 
 # These should not need any translation.
-log_comment_added: "Comentario agregado por [user]: [summary]"
-log_comment_destroyed: "Comentario borrado por [user]: [summary]"
-log_comment_updated: "Comentario realizado por [user]: [summary]"
-log_image_created0: Imagen agregado.
-log_image_created: "Imagen creado por [user]: [name]"
-log_image_destroyed0: Imagen elimado.
-log_image_destroyed: "Imagen borrado por [user]: [name]"
-log_image_removed0: Imagen elimado.
-log_image_removed: "Imagen eliminado por [user]: [name]"
-log_image_reused0: Imagen agregado.
-log_image_reused: "Imagen reutilizado por [user]: [name]"
-log_image_updated0: Imagen realizado.
-log_image_updated: "Imagen realizado por [user]: [name]"
-log_name_updated: Nombre realizado por [user].
-log_naming_created: "Nombre propuesto creado por [user]: [name]"
-log_naming_destroyed: "Nombre propuesto borrado por [user]: [name]"
-log_naming_updated: "Nombre propuesto realizado por [user]: [name]"
-log_observation_created: Observación creado por [user].
-log_observation_destroyed2: "Observación borrado por [user]: [name]"
-log_observation_destroyed: Observación borrado por [user].
-log_observation_updated: Observación realizado por [user].
-log_species_list_created: Lista de especies creado por [user].
-log_species_list_destroyed: Lista de especies borrado por [user].
-log_species_list_updated: Lista de especies realizado por [user].
+log_comment_added: "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
+log_comment_destroyed: "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
+log_comment_updated: "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+log_image_created0: "[:log_object_added_no_user(type=:image)]"
+log_image_created: "[:log_object_added_by_user_with_name(type=:image)]"
+log_image_destroyed0: "[:log_object_destroyed_no_user(type=:image)]"
+log_image_destroyed: "[:log_object_destroyed_by_user_with_name(type=:image)]"
+log_image_removed0: "[:log_object_removed_no_user(type=:image)]"
+log_image_removed: "[:log_object_removed_by_user_with_name(type=:image)]"
+log_image_reused0: "[:log_object_added_no_user(type=:image)]"
+log_image_reused: "[:log_object_added_by_user_with_name(type=:image)]"
+log_image_updated0: "[:log_object_updated_no_user(type=:image)]"
+log_image_updated: "[:log_object_updated_by_user_with_name(type=:image)]"
+log_name_updated: "[:log_object_updated_by_user(type=:name)]"
+log_naming_created: "[:log_object_created_by_user_with_name(type=:naming)]"
+log_naming_destroyed: "[:log_object_destroyed_by_user_with_name(type=:naming)]"
+log_naming_updated: "[:log_object_updated_by_user_with_name(type=:naming)]"
+log_observation_created: "[:log_object_created_by_user(type=:observation)]"
+log_observation_destroyed2: "[:log_object_destroyed_by_user_with_name(type=:observation)]"
+log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
+log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
+log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
+log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
+log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
 log_object_added: "[:log_object_added_by_user]"
-log_object_created: "[type] creado por [user]."
-log_object_destroyed: "[type] borrado por [user]."
+log_object_created: "[:log_object_created_by_user]"
+log_object_destroyed: "[:log_object_destroyed_by_user]"
 log_object_removed: "[:log_object_removed_by_user]"
-log_object_updated: "[type] realizado por [user]."
+log_object_updated: "[:log_object_updated_by_user]"
 
 # ActiveRecord validation error messages.
 validate_confirmation_mismatch: "[Field] no coincide con la confirmación."
@@ -1995,11 +1995,6 @@ name_approve_deprecate_help: >
 
 
 
-# _name (RSS log display)
-name_change: Cambio de Nombre
-
-
-
 # name/change_synonyms
 name_change_synonyms_title: Sinónimos para [name]
 name_change_synonyms_submit: Enviar
@@ -2149,7 +2144,7 @@ reverify_note: >
 rss_description: Lista de cambios a Mushroom Observer como de que se produzcan.
 rss_log_of_deleted_item: Registro de\nElemento\nEliminado
 rss_log_title: Registro de Actividad
-rss_name_by: por [user]
+rss_by: por [user]
 rss_title: Mushroom Observer
 rss_show: "Mostrar:"
 rss_hide: "Ocultar:"
@@ -2159,6 +2154,8 @@ rss_one: "[TYPES]"
 rss_make_default: Hacen de Este el Predeterminado
 rss_this_is_default: Este es el Predeterminado
 rss_fine_tune: Refinar Sus Opciones
+rss_created: "[TYPE] Creado"
+rss_changed: "Cambio de [TYPE]"
 
 
 

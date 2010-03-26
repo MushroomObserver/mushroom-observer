@@ -790,7 +790,7 @@ return result if debug
 
   # Calls add_image and logs it.  Returns Image.
   def add_image_with_log(image, user)
-    log(:log_image_created, :name => image.unique_format_name)
+    log(:log_image_created, :name => "#{:Image.t} ##{image.id}")
     return add_image(image)
   end
 

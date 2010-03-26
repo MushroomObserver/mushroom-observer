@@ -682,8 +682,8 @@ log_updated_by:  Updated by [user].
 log_comment_added:  "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
 log_comment_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
 log_comment_updated:  "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
-log_image_created0:  "[:log_object_created_no_user(type=:image)]"
-log_image_created:  "[:log_object_created_by_user_with_name(type=:image)]"
+log_image_created0:  "[:log_object_added_no_user(type=:image)]"
+log_image_created:  "[:log_object_added_by_user_with_name(type=:image)]"
 log_image_destroyed0:  "[:log_object_destroyed_no_user(type=:image)]"
 log_image_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:image)]"
 log_image_removed0:  "[:log_object_removed_no_user(type=:image)]"
@@ -1975,11 +1975,6 @@ name_approve_deprecate_help:  >
 
 
 
-# _name (RSS log display)
-name_change:  Change to Name
-
-
-
 # name/change_synonyms
 name_change_synonyms_title:  "Synonyms for [name]"
 name_change_synonyms_submit:  Submit Changes
@@ -2127,7 +2122,7 @@ reverify_note:  >
 rss_description: Lista de alterações nas observações de cogumelo na ordem em que acontecem.
 rss_log_of_deleted_item:  Log of\nDeleted\nItem
 rss_log_title: Registro de Atividades
-rss_name_by:  by [user]
+rss_by:  by [user]
 rss_title: Observação de Cogumelo
 rss_show:  "Show:"
 rss_hide:  "Hide:"
@@ -2137,6 +2132,8 @@ rss_one:  "[TYPES]"
 rss_make_default:  Make This the Default
 rss_this_is_default:  This is the Default
 rss_fine_tune:  Fine Tune Options
+rss_created:  "[TYPE] Created"
+rss_changed:  "Change to [TYPE]"
 
 
 

@@ -176,6 +176,13 @@ class ApplicationController < ActionController::Base
     return true
   end
 
+  # Much-streamlined login "filter" used by AJAX methods that require login.
+  # Just calls get_session_user, requires that the user already be logged in
+  # and has user id stored in the session.
+  def login_for_ajax
+    get_session_user
+  end
+
   # ----------------------------
   #  "Public" methods.
   # ----------------------------

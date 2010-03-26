@@ -7,6 +7,7 @@
 #     show_image          Show in standard size (640 pixels max dimension).
 #     prev_image          Show previous image (from search results).
 #     next_image          Show next image (from search results).
+#   R set_image_quality   Set image quality and go to next.
 #   * add_image           Upload and add images to observation.
 #   * remove_images       Remove image(s) from an observation (not destroy!)
 #   * edit_image          Edit date, copyright, notes.
@@ -212,6 +213,7 @@ class ImageController < ApplicationController
     redirect_to_next_object(:prev, Image, params[:id])
   end
 
+  # Set image quality and go to next image.
   def set_image_quality
     id = params[:id]
     if is_reviewer
@@ -220,8 +222,8 @@ class ImageController < ApplicationController
       image.reviewer_id = @user.id
       image.save
     end
-    redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image', :id => id,
-                :params => query_params)
+    redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image',
+                :id => id, :params => query_params)
   end
 
   # Form for uploading and adding images to an observation.
@@ -316,7 +318,7 @@ class ImageController < ApplicationController
           if do_it == 'yes'
             if image = @observation.remove_image_by_id(image_id)
               @observation.log(:log_image_removed,
-                        :name => image.unique_format_name, :touch => false)
+                        :name => "#{:Image.t} ##{image.id}", :touch => false)
               flash_notice :runtime_image_remove_success.t(:id => image_id)
             end
           end
@@ -354,7 +356,7 @@ class ImageController < ApplicationController
         flash_object_errors(@image)
       else
         for o in @image.observations
-          o.log(:log_image_updated, :name => @image.unique_format_name)
+          o.log(:log_image_updated, :name => "#{:Image.t} ##{@image.id}")
         end
         flash_notice :runtime_image_edit_success.t(:id => @image.id)
         redirect_to(:action => 'show_image', :id => @image.id,
@@ -411,7 +413,7 @@ class ImageController < ApplicationController
       flash_warning :runtime_image_remove_missing.t(:id => @image.id)
     else
       @observation.images.delete(@image)
-      @observation.log(:log_image_removed, :name => @image.unique_format_name,
+      @observation.log(:log_image_removed, :name => "#{:Image.t} ##{@image.id}",
                        :touch => false)
       if @observation.thumb_image_id == @image.id
         @observation.thumb_image_id = nil
@@ -466,7 +468,7 @@ class ImageController < ApplicationController
     @observation = Observation.find(params[:obs_id])
     if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:id])
-        @observation.log(:log_image_reused, :name => image.unique_format_name)
+        @observation.log(:log_image_reused, :name => "#{:Image.t} ##{image.id}")
         flash_notice :runtime_image_reuse_success.t(:id => image.id)
       end
     end
@@ -485,7 +487,7 @@ class ImageController < ApplicationController
     @observation = Observation.find(params[:observation][:id])
     if check_permission!(@observation.user_id)
       if image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
-        @observation.log(:log_image_reused, :name => image.unique_format_name)
+        @observation.log(:log_image_reused, :name => "#{:Image.t} ##{image.id}")
         flash_notice :runtime_image_reuse_success.t(:id => image.id)
       end
     end

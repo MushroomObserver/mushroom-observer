@@ -527,7 +527,7 @@ class Image < AbstractModel
   # thumbnail Observation's to another Image whenever necessary.)
   def log_destruction
     if user = User.current
-      image_name = unique_format_name
+      image_name = "#{:Image.t} ##{id}"
       for obs in observations
         obs.log(:log_image_destroyed, :name => image_name)
         if obs.thumb_image_id == id

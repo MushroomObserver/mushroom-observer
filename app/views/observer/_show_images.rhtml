@@ -19,25 +19,32 @@
   <br/>
 
   <center>
-    <% done = {}
+    <%
     # This sort puts the thumbnail first.  We can't use thumb_image, because we
     # haven't eager-loaded it; we *have* eager-loaded all the other images.
     for image in @observation.images.
-                   sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id}
-      if image && !done[image.id]
-        done[image.id] = true %>
-        <p>
-          <%= thumbnail(image, :border => 0, :obs => @observation.id) %><br/>
-          <% if !image.notes.blank? %>
-            <small>
-              <%= # This is really ugly; could break up formatting unit.
-              str = image.notes[0..300].tl
-              str += '...' if image.notes.length > 301
-              str %>
-            </small>
-          <% end %>
-        </p>
-      <% end %>
+             sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
+      <p>
+        <%= thumbnail(image, :border => 0, :obs => @observation.id) %><br/>
+        <%= if is_reviewer? && @js
+          javascript_include('image_vote')
+          current = image.quality
+          [:low, :medium, :high].map do |quality|
+            str = if quality == current
+              content_tag(:b, :"quality_#{quality}".t)
+            else
+              link_to_function(:"quality_#{quality}".t,
+                               "image_vote(#{image.id}, '#{quality}')")
+            end
+            content_tag(:span, str, :id => "image_#{image.id}_#{quality}")
+          end.join(' | ') + '<br/>'
+        end %>
+        <% if !image.notes.blank? %>
+          <small>
+            <%= image.notes.tl.truncate_html(300) %>
+          </small>
+        <% end %>
+      </p>
     <% end %>
   </center>
 </div>

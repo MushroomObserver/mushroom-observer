@@ -55,10 +55,10 @@
                   :params => query_params)
         end %></p>
 
-        <%= link_to(image_tag(@image.send("#{@size}_url")),
-                    :action => 'show_image', :id => @image.id,
-                    :size => (@size == @default_size ? :full_size : @default_size),
-                    :params => query_params) %><br/>
+        <%= thumbnail(@image, :size => @size,
+                      :link => { :action => 'show_image', :id => @image.id,
+                      :size => (@size == @default_size ? :full_size : @default_size),
+                      :params => query_params }) %><br/>
 
         <p>
           <%= render(:partial => "shared/form_#{@image.license.form_name}") %>
@@ -129,7 +129,7 @@
           text = '<span class="Data">' + observation.unique_format_name.t
           if !observation.notes.blank?
             text += '</span><span class="HelpNote"><br/>%s: %s...' %
-                    [:image_show_notes.t, observation.notes[0..15]]
+                  [:image_show_notes.t, observation.notes.tl.truncate_html(30)]
           end
           len = observation.comments.length
           if len > 0

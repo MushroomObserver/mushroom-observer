@@ -305,8 +305,8 @@ class ImageControllerTest < FunctionalTestCase
 
     assert(obs.reload.rss_log)
     assert(obs.rss_log.notes.include?('log_image_updated'))
-    assert(obs.rss_log.notes.include?("user=#{obs.user.login}"))
-    assert(obs.rss_log.notes.include?("name=#{RssLog.escape(image.unique_format_name)}"))
+    assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
+    assert(obs.rss_log.notes.include?("name #{RssLog.escape("Image ##{image.id}")}"))
   end
 
   def test_remove_images

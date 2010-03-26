@@ -153,8 +153,14 @@ module ApplicationHelper::ObjectLink
     # Get URL to image.
     id = image.is_a?(Image) ? image.id : image.to_s
     size = args[:size] || (@user ? @user.thumbnail_size : :thumbnail)
-    file = Image.file_name(size, id)
+    if size == :original
+      # Must pass in image instance to display original!
+      file = image.original_file
+    else
+      file = Image.file_name(size, id)
+    end
     if DEVELOPMENT and !File.exists?("#{IMG_DIR}/#{file}")
+      # Serve images I'm locally missing directly from image server.
       file = Image.url(size, id)
     end
 

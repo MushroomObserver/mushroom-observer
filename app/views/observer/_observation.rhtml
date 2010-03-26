@@ -1,3 +1,15 @@
+<% if rss_log
+  tag, args, time = rss_log.parse_log.first
+  if !time || time < observation.created + 1.minute
+    detail = :rss_created.t(:type => :observation)
+  elsif tag.to_s.match(/^(log_image_created|reused|removed|destroyed)/)
+    # This will remove redundant user and image title stuff.
+    detail = :"#{tag}0".t(args)
+  else
+    detail = tag.t(args)
+  end
+end %>
+
 <table cellpadding="10" width="100%">
   <tr>
     <td align="center" valign="middle" width="160">
@@ -14,7 +26,7 @@
     <td valign="middle">
 <% end %>
 
-      <span class="ListName">
+      <span class="ListWhat">
         <%= link_to(observation.unique_format_name.t,
                     :action => 'show_observation', :id => observation.id,
                     :params => query_params) %>
@@ -24,24 +36,18 @@
         <%= location_link(observation.where, observation.location) %>
       </span><br/>
 
-      <span class="ListWhen"><%= observation.when.web_date %>:</span>
-      <span class="ListWho"><%= user_link(observation.user) %></span><br/>
+      <span class="ListWhen">
+        <%= observation.when.web_date %>:
+      </span>
+      <span class="ListWho">
+        <%= user_link(observation.user) %>
+      </span><br/><br/>
 
-      <% if rss_log && rss_log.notes
-        logs = rss_log.parse_log
-        if logs.first[2] > observation.created + 10.seconds %>
-          <span>
-            <%= key, args, time = logs.first
-            if match = key.to_s.match(/^(log_image_created|reused|removed|destroyed)/)
-              # This will remove redundant user and image title stuff.
-              "#{key}0".to_sym.t(args)
-            else
-              key.t(args)
-            end %>
-          </span>
-        <% end %>
+      <% if rss_log %>
+        <span class="ListDetail">
+          <%= detail %>
+        </span>
       <% end %>
-
     </td>
   </tr>
 </table>

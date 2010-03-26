@@ -79,7 +79,7 @@ TESTING     = (RAILS_ENV == 'test')
 
 # Do site-specific global constants first.
 file = File.join(File.dirname(__FILE__), 'consts-site')
-require file if File.exists?(file)
+require file if File.exists?(file + '.rb')
 
 # Now provide defaults for the rest.
 require File.join(File.dirname(__FILE__), 'consts')

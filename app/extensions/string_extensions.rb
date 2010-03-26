@@ -15,6 +15,7 @@
 #  to_ascii::       Convert string from UTF-8 to plain ASCII.
 #  iconv::          Convert string from UTF-8 to 'charset'.
 #  strip_html::     Remove HTML tags (not entities) from string.
+#  truncate_html::  Truncate an HTML string to N display characters.
 #  html_to_ascii::  Convert HTML into plain text.
 #  nowrap::         Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::  Strip and squeeze whitespace.
@@ -397,6 +398,45 @@ class String
   # safe for HTML header field.
   def strip_html
     self.gsub(/<[^>]*>/, '')
+  end
+
+  # Truncate an HTML string, being careful to close off any open formatting
+  # tags.  If greater than +max+, truncates to <tt>max - 1</tt> and adds "..."
+  # to the end (inside any formatting tags open at that point).  Assumes the
+  # String is well-formatted HTML with properly-nested tags.
+  def truncate_html(max)
+    result = ''
+    str = self.dup
+    opens = []
+    while str != ''
+      # Self-closing tag.
+      if str.sub!(/^<(\w+)[^<>]*\/ *>/, '')
+        result += $&
+      # Opening tag.
+      elsif str.sub!(/^<(\w+)[^<>]*>/, '')
+        result += $&
+        opens << $1
+      # Closing tag -- just assume tags are nested properly.
+      elsif str.sub!(/^< *\/ *(\w+)[^<>]*>/, '')
+        result += $&
+        opens.pop
+      # Normal text.
+      elsif str.sub!(/^[^<>]+/, '')
+        part = $&
+        if part.length > max
+          result += part[0,max-1] + '...'
+          break
+        else
+          max -= part.length
+          result += part
+        end
+      # All bets are off if not well-formatted HTML.
+      else
+        break
+      end
+    end
+    result += opens.reverse.map {|x| "<\/#{x}>"}.join('')
+    return result
   end
 
   # Attempt to turn HTML into plain text.  Remove all '<blah>' tags, and
