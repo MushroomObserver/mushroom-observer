@@ -429,10 +429,17 @@ permission_denied: Nicht erlaubt.
 units_meters: Meter
 
 # Quality values.
-quality_unreviewed: Nicht begutachtet
-quality_low: Schlecht
-quality_medium: Gut
-quality_high: Ausgezeichnet
+image_vote_long_0:  Unrated
+image_vote_long_1:  Okay but not so useful
+image_vote_long_2:  Useful for identification
+image_vote_long_3:  Good enough for a field guide
+image_vote_long_4:  Exceptional
+
+image_vote_short_0:  Unrated
+image_vote_short_1:  Okay
+image_vote_short_2:  Useful
+image_vote_short_3:  Good
+image_vote_short_4:  Great
 
 # Review statuses. (Note: "unvetted" means it's been looked at but the reviewer
 # doesn't feel comfortable declaring it "accurate"; thus "unvetted" means
@@ -645,6 +652,7 @@ sort_by_last_login:  Last Login
 sort_by_user: "[:USER]"
 sort_by_login: "[:LOGIN_NAME]"
 sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_thumbnail_quality:  Thumbnail Quality
 sort_by_reverse:  Reverse Order
 
 # RSS log messages.
@@ -1894,6 +1902,8 @@ image_show_when: Wann
 image_show_notes: Bemerkungen
 image_show_copyright: Copyright
 image_show_quality: Qualität
+image_show_your_vote:  Your Vote
+image_show_vote_and_next:  "Vote & [:NEXT]"
 image_show_comments: "[num] Kommentar(e)"
 image_show_observations: Funde
 image_show_thumbnail:  Thumbnail
@@ -2125,8 +2135,8 @@ rss_hide:  "Hide:"
 rss_all:  Everything
 rss_only:  "Only [TYPES]"
 rss_one:  "[TYPES]"
-rss_make_default:  Make This the Default
-rss_this_is_default:  This is the Default
+rss_make_default:  Make This My Default
+rss_this_is_default:  This Is Your Default
 rss_fine_tune:  Fine Tune Options
 rss_created:  "[TYPE] Created"
 rss_changed: "Änderung am [TYPE]"
@@ -2175,12 +2185,6 @@ show_description_make_default_help:  >
 show_description_adjust_permissions_help:  >
   Change the set of users who are allowed to view, modify or administrate this
   description.
-
-
-
-# image/show_image
-show_image_reviewed_by: Begutachtet durch
-show_image_quality_and_next: "[QUALITY] & [:NEXT]"
 
 
 

@@ -335,14 +335,17 @@ class NameController < ApplicationController
     @children_query = create_query(:Name, :of_children, :name => @name)
 
     # Create search queries for observation lists.
-    @consensus_query = create_query(:Observation, :of_name, :name => @name)
+    @consensus_query = create_query(:Observation, :of_name, :name => @name,
+                                    :by => :thumbnail_quality)
     @synonym_query = create_query(:Observation, :of_name, :name => @name,
-                                  :synonyms => :exclusive)
+                                  :synonyms => :exclusive,
+                                  :by => :thumbnail_quality)
     @other_query = create_query(:Observation, :of_name, :name => @name,
-                                :synonyms => :all, :nonconsensus => :exclusive)
+                                :synonyms => :all, :nonconsensus => :exclusive,
+                                :by => :thumbnail_quality)
     if @name.below_genus?
       @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
-                                                                :all => true)
+                                    :all => true, :by => :thumbnail_quality)
     end
 
     # Paginate each of the sections independently.
@@ -1315,7 +1318,7 @@ class NameController < ApplicationController
       AND observations.id = images_observations.observation_id
       AND observations.vote_cache >= 2.4
       AND images_observations.image_id = images.id
-      AND images.quality in ('medium', 'high')
+      AND images.vote_cache >= 2
       ORDER BY observations.vote_cache
     )
 

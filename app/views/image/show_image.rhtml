@@ -79,44 +79,59 @@
 
       <p>
         <%= :image_show_quality.t %>:
-          <span class="Data"><%= quality_as_string(@image.quality) %></span>
-        <% if @image.reviewer %>
-          <span class="HelpNote">
-            (<%= "#{:show_image_reviewed_by.t}: #{user_link(@image.reviewer, @image.reviewer.login)}" %>)
-          </span>
-        <% end %><br/>
-        <% if @is_reviewer %>
-          <br/>
-          <% if is_reviewed = (@image.quality != :unreviewed) %>
-            <%= link_to(:NEXT.l, :action => 'next_image',
-                        :id => @image.id, :params => query_params) %><br/>
-          <% end %>
-          <%= link_to(:quality_low.t, :action => 'set_image_quality', :value => :low,
-                      :id => @image.id, :params => query_params) %>
-          <% unless is_reviewed %>
-            | <%= link_to(:show_image_quality_and_next.t(:quality => :quality_low),
-                          :action => 'set_image_quality',
-                          :value => :low, :next => true, :id => @image.id,
-                          :params => query_params) %>
-          <% end %><br/>
-          <%= link_to(:quality_medium.t, :action => 'set_image_quality', :value => :medium,
-                      :id => @image.id, :params => query_params) %>
-          <% unless is_reviewed %>
-            | <%= link_to(:show_image_quality_and_next.t(:quality => :quality_medium),
-                          :action => 'set_image_quality',
-                          :value => :medium, :next => true, :id => @image.id,
-                          :params => query_params) %>
-          <% end %><br/>
-          <%= link_to(:quality_high.t, :action => 'set_image_quality', :value => :high,
-                      :id => @image.id, :params => query_params) %>
-          <% unless is_reviewed %>
-            | <%= link_to(:show_image_quality_and_next.t(:quality => :quality_high),
-                          :action => 'set_image_quality',
-                          :value => :high, :next => true, :id => @image.id,
-                          :params => query_params) %>
-          <% end %>
-        <% end %>
+        <span class="Data"><%= image_vote_as_long_string(@image.vote_cache.to_i) %></span>
       </p>
+
+      <% if @user && @user != @image.user %>
+        <p>
+          <%= :image_show_your_vote.t %>:<br/>
+          <% current = @image.users_vote(@user)
+
+          # ----------------------------
+          #  Javascript on.
+          # ----------------------------
+          if @js
+            javascript_include('prototype')
+            javascript_include('image_vote')
+            current = @image.users_vote(@user) %>
+            <%= Image.all_votes.map do |value|
+              str1 = image_vote_as_short_string(value)
+              str2 = image_vote_as_long_string(value)
+              str = if value == current
+                content_tag(:b, content_tag(:acronym, str1, :title => str2))
+              else
+                link_to_function(str1, "image_vote(#{@image.id},'#{value}')",
+                                 :title => str2)
+              end
+              content_tag(:span, str, :id => "image_#{@image.id}_#{value}")
+            end.join(' | ') %><br/><%
+
+          # ----------------------------
+          #  Javascript off.
+          # ----------------------------
+          else
+            if current %>
+              <%= link_to(:NEXT.l, :action => 'next_image',
+                          :id => @image.id, :params => query_params) %><br/>
+            <% end
+            for value in Image.all_votes
+              str1 = image_vote_as_short_string(value)
+              str2 = image_vote_as_long_string(value)
+              str3 = :image_show_vote_and_next.t(:value => str1)
+              if value == current %>
+                <b><%= content_tag(:acronym, str1, :title => str2) %></b><br/>
+              <% else %>
+                <%= link_to(str1, :action => 'cast_vote', :value => value,
+                            :id => @image.id, :params => query_params,
+                            :help => str2) %> |
+                <%= link_to(str3, :action => 'cast_vote', :value => value,
+                            :id => @image.id, :next => true,
+                            :params => query_params, :help => str2) %><br/>
+              <% end
+            end
+          end %>
+        </p>
+      <% end %>
 
       <p>
         <%= :image_show_when.t %>:

@@ -462,7 +462,7 @@ class String
   # Surround HTML string with a span that prevents long strings from being
   # broken.
   def nowrap
-    '<span style="white-space: nowrap">' + self + '</span>'
+    '<span style="white-space:nowrap">' + self + '</span>'
   end
 
   # Strip leading and trailing whitespace, and squeeze embedded whitespace.

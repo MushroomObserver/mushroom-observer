@@ -7,7 +7,7 @@
 #     show_image          Show in standard size (640 pixels max dimension).
 #     prev_image          Show previous image (from search results).
 #     next_image          Show next image (from search results).
-#   R set_image_quality   Set image quality and go to next.
+#   * cast_vote           Change user's vote and go to next.
 #   * add_image           Upload and add images to observation.
 #   * remove_images       Remove image(s) from an observation (not destroy!)
 #   * edit_image          Edit date, copyright, notes.
@@ -213,17 +213,15 @@ class ImageController < ApplicationController
     redirect_to_next_object(:prev, Image, params[:id])
   end
 
-  # Set image quality and go to next image.
-  def set_image_quality
-    id = params[:id]
-    if is_reviewer
-      image = Image.find(id)
-      image.quality = params[:value]
-      image.reviewer_id = @user.id
-      image.save
+  # Change user's vote and go to next image.
+  def cast_vote
+    image = Image.find(params[:id])
+    image.change_vote(@user, params[:value])
+    if params[:next]
+      redirect_to_next_object(:next, Image, params[:id])
+    else
+      redirect_to(:action => 'show_image', :id => id, :params => query_params)
     end
-    redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image',
-                :id => id, :params => query_params)
   end
 
   # Form for uploading and adding images to an observation.
@@ -597,7 +595,11 @@ class ImageController < ApplicationController
     end
   end
 
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Test Actions
+  #
+  ##############################################################################
 
   def test_upload_speed
     logger.warn(params)
@@ -622,8 +624,6 @@ class ImageController < ApplicationController
       logger.warn(cmd)
     end
   end
-
-################################################################################
 
   def test_process_image(user, upload, count, size)
     if !upload.blank?
@@ -667,8 +667,6 @@ class ImageController < ApplicationController
   def test_add_image_report
     @log_entries = AddImageTestLog.find(:all, :order => 'created desc')
   end
-
-################################################################################
 
   def resize_images
     if is_in_admin_mode?

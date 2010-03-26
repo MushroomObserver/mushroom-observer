@@ -220,7 +220,7 @@ class ApiController < ApplicationController
   # Examples:
   #
   #   /ajax/vote/naming/1234?value=2
-  #   /ajax/vote/image/1234?value=high
+  #   /ajax/vote/image/1234?value=4
   #
   def ajax_vote
     type  = params[:type].to_s
@@ -239,12 +239,9 @@ class ApiController < ApplicationController
         end
 
       when 'image'
-        if user.in_group?('reviewers') and
-           Image.all_qualities.include?(value.to_sym) and
+        if (value = Image.validate_vote(value)) and
            (image = Image.safe_find(id))
-          image.quality = value
-          image.reviewer_id = user.id
-          image.save_without_our_callbacks
+          image.change_vote(user, value)
           result = value
         end
       end

@@ -230,7 +230,6 @@ class Query < AbstractQuery
     :images => {
       :users         => :user_id,
       :licenses      => :license_id,
-      :'users.reviewers' => :reviewer_id,
     },
     :images_observations => {
       :images        => :image_id,
@@ -674,6 +673,11 @@ class Query < AbstractQuery
       if model.column_names.include?('rss_log_id')
         self.join << :rss_logs
         'rss_logs.modified DESC'
+      end
+    when 'thumbnail_quality'
+      if model_symbol == :Observation
+        self.join << :'images.thumb_image'
+        "images.vote_cache DESC, observations.vote_cache DESC"
       end
     end
   end

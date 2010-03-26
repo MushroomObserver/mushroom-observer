@@ -1311,16 +1311,9 @@ class ObserverController < ApplicationController
     id = params[:id]
     @show_user = User.find(id, :include => :location)
     @user_data = SiteData.new.get_user_data(id)
-
-    # This grabs the six latest observations whose thumbnails are high-quality,
-    # falling back on medium or low-quality images if 6 high-quality images
-    # can't be found.
-    @observations = Observation.all(
-      :include => :thumb_image,
-      :conditions => ["observations.user_id = ? and observations.thumb_image_id is not null", id],
-      :order => "IF(images.quality = 'high', 3, IF(images.quality = 'medium', 2, IF(images.quality = 'low', 1, 0))) DESC, observations.id DESC",
-      :limit => 6
-    )
+    query = Query.lookup(:Observation, :by_user, :user => @show_user,
+                         :limit => 6, :by => :thumbnail_quality)
+    @observations = query.results(:include => :thumb_image)
   end
 
   # Admin util linked from show_user page that lets admin add or change bonuses
@@ -1407,27 +1400,11 @@ class ObserverController < ApplicationController
       SELECT COUNT(*) FROM names
     )
 
-    # # This grabs the six latest observations that have high-quality images.
-    # ids = Observation.connection.select_values(%(
-    #   SELECT DISTINCT observations.id
-    #   FROM observations
-    #   LEFT OUTER JOIN images_observations
-    #     ON images_observations.observation_id = observations.id
-    #   LEFT OUTER JOIN images
-    #     ON images_observations.image_id = images.id
-    #   WHERE images.quality = 'high'
-    #   ORDER BY observations.id DESC
-    #   LIMIT 6
-    # ))
-    # @observations = Observation.all(:conditions => ['id in [?]', ids],
-    #   :order => "observations.id desc")
-
-    # This grabs the six latest observations whose *thumbnails* are high-quality.
-    @observations = Observation.all(
-      :include => :thumb_image,
-      :conditions => ["thumb_image_id is not null AND images.quality = 'high'"],
-      :order => "observations.id desc", :limit => 6
-    )
+    # Get the last six observations whose thumbnails are highly rated.
+    query = Query.lookup(:Observation, :all, :limit => 6, :by => :modified,
+                         :where => 'images.vote_cache > 3.5',
+                         :join => :'images.thumb_image')
+    @observations = query.results(:include => :thumb_image)
   end
 
   # server_status.rhtml

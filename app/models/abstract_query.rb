@@ -297,7 +297,7 @@ class AbstractQuery < ActiveRecord::Base
   self.abstract_class = true
 
   # Low-level description of SQL query.
-  attr_accessor :join, :tables, :where, :group, :order
+  attr_accessor :join, :tables, :where, :group, :order, :limit
 
   # Prevent SQL statements from getting absurdly large.  Any "id IN (...)"
   # conditions are limited to this number of values.
@@ -788,6 +788,7 @@ class AbstractQuery < ActiveRecord::Base
       :where?  => [:string],
       :group?  => :string,
       :order?  => :string,
+      :limit?  => :string,
       :by?     => :string
     )
 
@@ -980,6 +981,7 @@ class AbstractQuery < ActiveRecord::Base
     self.where  = []
     self.group  = ''
     self.order  = ''
+    self.limit  = ''
 
     # Setup query for the given flavor.
     send("initialize_#{flavor}")
@@ -997,6 +999,7 @@ class AbstractQuery < ActiveRecord::Base
     self.where  += params[:where]  if params[:where]
     self.group   = params[:group]  if params[:group]
     self.order   = params[:order]  if params[:order]
+    self.limit   = params[:limit]  if params[:limit]
   end
 
   # Do mechanics of the :by => :type sorting mechanism.
@@ -1249,7 +1252,7 @@ class AbstractQuery < ActiveRecord::Base
     our_group   = args[:group] || self.group
     our_order   = args[:order] || self.order
     our_order   = reverse_order(self.order) if our_order == :reverse
-    our_limit   = args[:limit]
+    our_limit   = args[:limit] || self.limit
 
     # Tack id at end of order to disambiguate the order.
     # (I despise programs that render random results!)

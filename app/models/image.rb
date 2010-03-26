@@ -2,7 +2,20 @@
 #  = Image Model
 #
 #  Most images are, of course, mushrooms, but mugshots use this class, as well.
-#  They are indistinguishable at the moment. 
+#  They are indistinguishable at the moment.
+#
+#  == Votes
+#
+#  Voting is kept very simple for now.  More might be done later using RDF.
+#  User's can choose one of four levels.  Their vote is stored in a simple
+#  text string in +votes+:
+#
+#    "user_id val user_id val ..."
+#
+#  The average vote is stored in +vote_cache+.  This is just a floating point
+#  between 1.0 and 4.0, with 4.0 being the best quality.  All work with votes
+#  is done via a single method, +change_vote+, keeping it nicely encapsulated
+#  in case we want to do it "properly" later.
 #
 #  == Files
 #
@@ -17,7 +30,7 @@
 #    RAILS_ROOT/public/images/thumb/<id>.jpg
 #
 #  They are also transferred to a remote image server with more disk space:
-#  (images take up 100 Gb as of Jan 2010) 
+#  (images take up 100 Gb as of Jan 2010)
 #
 #    IMAGE_DOMAIN/<dir>/<id>.<ext>
 #
@@ -100,7 +113,7 @@
 #  ActionController::UploadedTempfile < TempFile < File, which has the methods
 #  "original_filename", "size", "path", "delete", etc.  Small files get loaded
 #  into memory immediately as ActionController::UploadedStringIO < StringIO <
-#  Data, which also has the methods "original_filename", "size", etc.  
+#  Data, which also has the methods "original_filename", "size", etc.
 #
 #  If we ever get an IO stream instead of a TempFile, we write it out to a
 #  tempfile ourselves (using File.copy_stream).  This way we can run <tt>file
@@ -137,7 +150,7 @@
 #
 #  == Class Methods
 #
-#  all_qualities::      Allowed values for +quality+ (Array of Aymbol's).
+#  validate_vote::      Validate a vote value.
 #  file_name::          Filename (relative to IMG_DIR) given size and id.
 #  url::                Full URL on image server given size and id.
 #
@@ -185,14 +198,6 @@ class Image < AbstractModel
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
 
   before_destroy :log_destruction
-
-  # Array of allowed values for +review+ (Symbol's).
-  #
-  #   raise unless Image.all_qualities.include? :medium
-  #
-  def self.all_qualities
-    [:unreviewed, :low, :medium, :high]
-  end
 
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
@@ -515,6 +520,83 @@ class Image < AbstractModel
       self.height = h.to_i
       self.save_without_our_callbacks
     end
+  end
+
+  ################################################################################
+  #
+  #  :section: Voting
+  #
+  ################################################################################
+
+  # Returns an Array of all valid vote values.
+  def self.all_votes
+    [1, 2, 3, 4]
+  end
+
+  # Validate a vote value.  Returns type-cast vote (Fixnum from 1 to 4) if
+  # valid, or nil if not.
+  def self.validate_vote(value)
+    value = value.to_i rescue 0
+    value = nil if value < 1 or value > 4
+    return value
+  end
+
+  # Retrieve the given User's vote for this Image.  Returns a Fixnum from
+  # 1 to 4, or nil if the User hasn't voted.
+  def users_vote(user=User.current)
+    vote_hash[user.id]
+  end
+
+  # Change a user's vote to the given value.  Pass in either the numerical vote
+  # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
+  # integers.
+  def change_vote(user, value)
+    save_changes = !self.changed?
+
+    hash = self.vote_hash
+    if value = self.class.validate_vote(value)
+      hash[user.id] = value.to_i
+    else
+      hash.delete(user.id)
+    end
+    self.vote_hash = hash
+
+    # Save changes unless there were already pending changes to be saved
+    # (meaning the caller is presumably about to save the changes anyway so
+    # we don't need to do it twice).  No need to update +modified+ or do any
+    # of the other callbacks, either, since this doesn't result in emails,
+    # contribution changes, or rss log entries.
+    if save_changes
+      save_without_our_callbacks
+    end
+  end
+
+  # Retrieve list of users who have voted as a Hash mapping user ids to
+  # numerical vote values (Fixnum).  (Forces all votes to be integers.)
+  def vote_hash # :nodoc:
+    if votes.blank?
+      {}
+    else
+      Hash[*votes.split(' ').map(&:to_i)]
+    end
+  rescue
+    {}
+  end
+
+  # Update +votes+ and +vote_cache+.  Pass in Hash mapping user ids to
+  # numerical vote values.
+  def vote_hash=(hash) # :nodoc:
+    vals = []
+    sum = 0
+    num = 0
+    for user_id, value in hash
+      vals << user_id.to_s
+      vals << value.to_s
+      sum += value.to_f
+      num += 1
+    end
+    self.votes = vals.join(' ')
+    self.vote_cache = num > 0 ? sum / num : nil
   end
 
   ##############################################################################

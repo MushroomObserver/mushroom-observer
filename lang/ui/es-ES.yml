@@ -429,10 +429,17 @@ permission_denied: Permiso denegado.
 units_meters: metros
 
 # Quality values.
-quality_unreviewed: No revisado
-quality_low: Bajo
-quality_medium: Bueno
-quality_high: Excelente
+image_vote_long_0: No está valorado
+image_vote_long_1: Okay, pero no tan útil
+image_vote_long_2: Útiles para identificación
+image_vote_long_3: Bastante bueno para una guía de campo
+image_vote_long_4: Excepcional
+
+image_vote_short_0: Nada
+image_vote_short_1: Okay
+image_vote_short_2: Útiles
+image_vote_short_3: Bueno
+image_vote_short_4: ¡Gran!
 
 # Review statuses. (Note: "unvetted" means it's been looked at but the reviewer
 # doesn't feel comfortable declaring it "accurate"; thus "unvetted" means
@@ -645,6 +652,7 @@ sort_by_last_login: Último Inicio de Sesión
 sort_by_user: "[:USER]"
 sort_by_login: "[:LOGIN_NAME]"
 sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_thumbnail_quality: Calidad de Miniatura
 sort_by_reverse: Invertir Orden
 
 # RSS log messages.
@@ -1917,6 +1925,8 @@ image_show_when: Cuándo
 image_show_notes: Notas
 image_show_copyright: Copyright
 image_show_quality: Qualidad
+image_show_your_vote: Su Vota
+image_show_vote_and_next: "Votar & [:NEXT]"
 image_show_comments: "[num] comentario(s)"
 image_show_observations: Observaciones
 image_show_thumbnail: Miniatura
@@ -2201,12 +2211,6 @@ show_description_make_default_help: >
 show_description_adjust_permissions_help: >
   Cambiar el conjunto de usuarios que se les permite ver, modificar o
   administrar esta descripción.
-
-
-
-# image/show_image
-show_image_reviewed_by: Revisado por
-show_image_quality_and_next: "[QUALITY] & [:NEXT]"
 
 
 

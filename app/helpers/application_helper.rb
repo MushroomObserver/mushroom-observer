@@ -7,7 +7,8 @@
 #  rank_as_string::         Translate :Genus into "Genus" (localized).
 #  rank_as_lower_string::   Translate :Genus into "genus" (localized).
 #  rank_as_plural_string::  Translate :Genus into "Genera" (localized).
-#  quality_as_string::      Translate image quality into localized String.
+#  image_vote_as_long_string::  Translate image vote into (long) localized String.
+#  image_vote_as_short_string:: Translate image vote into (short) localized String.
 #  review_as_string::       Translate review status into localized String.
 #
 #  ==== Other Stuff
@@ -47,7 +48,7 @@ module ApplicationHelper
   #   rank_as_string(:genus)  -->  "Genus"
   #
   def rank_as_string(rank)
-    "RANK_#{rank.to_s.upcase}".to_sym.l
+    :"RANK_#{rank.to_s.upcase}".l
   end
 
   # Translate Name rank (singular).
@@ -55,7 +56,7 @@ module ApplicationHelper
   #   rank_as_lower_string(:genus)  -->  "genus"
   #
   def rank_as_lower_string(rank)
-    "rank_#{rank.to_s.downcase}".to_sym.l
+    :"rank_#{rank.to_s.downcase}".l
   end
 
   # Translate Name rank (plural).
@@ -63,7 +64,7 @@ module ApplicationHelper
   #   rank_as_plural_string(:genus)  -->  "Genera"
   #
   def rank_as_plural_string(rank)
-    "RANK_PLURAL_#{rank.to_s.upcase}".to_sym.l
+    :"RANK_PLURAL_#{rank.to_s.upcase}".l
   end
 
   # Translate Name rank (plural).
@@ -71,15 +72,23 @@ module ApplicationHelper
   #   rank_as_plural_string(:genus)  -->  "genera"
   #
   def rank_as_lower_plural_string(rank)
-    "rank_plural_#{rank.to_s.downcase}".to_sym.l
+    :"rank_plural_#{rank.to_s.downcase}".l
   end
 
   # Translate image quality.
   #
-  #   quality_as_string(:high)  -->  "Excellent"
+  #   image_vote_as_long_string(3)  -->  "Good enough for a field guide."
   #
-  def quality_as_string(val)
-    "quality_#{val}".to_sym.l
+  def image_vote_as_long_string(val)
+    :"image_vote_long_#{val || 0}".l
+  end
+
+  # Translate image quality.
+  #
+  #   image_vote_as_short_string(3)  -->  "Good"
+  #
+  def image_vote_as_short_string(val)
+    :"image_vote_short_#{val || 0}".l
   end
 
   # Translate review status.
@@ -87,7 +96,7 @@ module ApplicationHelper
   #   review_as_string(:unvetted)  -->  "Reviewed"
   #
   def review_as_string(val)
-    "review_#{val}".to_sym.l
+    :"review_#{val}".l
   end
 
   ##############################################################################

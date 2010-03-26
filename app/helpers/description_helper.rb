@@ -169,7 +169,7 @@ module ApplicationHelper::Description
     list.unshift(head)
     list << indent + "show_#{type}_no_descriptions".to_sym.t if !any
     html = list.join("<br/>\n")
-    html = '<p style="white-space:nowrap">' + html + '</p>'
+    html = '<p>' + html + '</p>'
 
     # Show list of projects user is a member of.
     if projects && projects.length > 0
@@ -182,7 +182,7 @@ module ApplicationHelper::Description
         indent + item
       end
       html2 = list.join("<br/>\n")
-      html += '<p style="white-space:nowrap">' + html2 + '</p>'
+      html += '<p>' + html2 + '</p>'
     end
     return html
   end
