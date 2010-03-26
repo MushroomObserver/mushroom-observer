@@ -674,6 +674,17 @@ class Query < AbstractQuery
         self.join << :rss_logs
         'rss_logs.modified DESC'
       end
+    when 'confidence'
+      if model_symbol == :Image
+        self.join << {:images_observations => :observations}
+        "observations.vote_cache DESC"
+      elsif model_symbol == :Observation
+        "observations.vote_cache DESC"
+      end
+    when 'image_quality'
+      if model_symbol == :Image
+        "images.vote_cache DESC"
+      end
     when 'thumbnail_quality'
       if model_symbol == :Observation
         self.join << :'images.thumb_image'

@@ -493,6 +493,8 @@ class ObserverController < ApplicationController
       ['created',  :sort_by_posted.t],
       [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
                   :sort_by_modified.t],
+      ['confidence', :sort_by_confidence.t],
+      ['thumbnail_quality', :sort_by_thumbnail_quality.t],
     ]
 
     # Add "show map" link if this query can be coerced into a location query.
@@ -1402,7 +1404,7 @@ class ObserverController < ApplicationController
 
     # Get the last six observations whose thumbnails are highly rated.
     query = Query.lookup(:Observation, :all, :limit => 6, :by => :modified,
-                         :where => 'images.vote_cache > 3.5',
+                         :where => 'images.vote_cache >= 3',
                          :join => :'images.thumb_image')
     @observations = query.results(:include => :thumb_image)
   end

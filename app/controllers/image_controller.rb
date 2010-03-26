@@ -128,6 +128,8 @@ class ImageController < ApplicationController
       # ['copyright_holder', :sort_by_copyright_holder.t],
       ['created',  :sort_by_posted.t],
       ['modified', :sort_by_modified.t],
+      ['confidence', :sort_by_confidence.t],
+      ['image_quality', :sort_by_image_quality.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an

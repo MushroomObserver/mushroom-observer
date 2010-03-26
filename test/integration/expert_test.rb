@@ -90,13 +90,13 @@ class ExpertTest < IntegrationTestCase
       form.assert_enabled('public')
     end
     reviewer.open_form do |form|
-      form.assert_disabled('source_type')
+      form.assert_hidden('source_type')
       form.assert_enabled('source_name')
       form.assert_disabled('public_write')
       form.assert_disabled('public')
     end
     owner.open_form do |form|
-      form.assert_disabled('source_type')
+      form.assert_hidden('source_type')
       form.assert_enabled('source_name')
       form.assert_disabled('public_write')
       form.assert_disabled('public')
@@ -107,7 +107,5 @@ class ExpertTest < IntegrationTestCase
       form.assert_no_field('public_write')
       form.assert_no_field('public')
     end
-
-    
   end
 end

@@ -1053,7 +1053,6 @@ class ApplicationController < ActionController::Base
   # sorting_links:: Array of pairs: ["by" String, label String]
   #
   def show_index_of_objects(query, args={})
-# flash_notice("Query params: [#{query.params.inspect}]")
     letter_arg   = args[:letter_arg]   || :letter
     number_arg   = args[:number_arg]   || :page
     num_per_page = args[:num_per_page] || 50

@@ -31,6 +31,7 @@
 #  assert_value::     Make sure a given field has a certain value.
 #  assert_enabled::   Make sure a given field is enabled.
 #  assert_disabled::  Make sure a given field is disabled.
+#  assert_hidden::    Make sure a given field is there but hidden
 #  assert_select::    Call assert_select on the form.
 #
 ################################################################################
@@ -239,6 +240,14 @@ class SessionExtensions::Form
     field = get_field!(id)
     msg ||= "Expected field #{id.inspect} to be disabled."
     context.assert_block(msg) { field.disabled }
+    return field
+  end
+
+  # Make sure a given field is there but hidden.
+  def assert_hidden(id, msg=nil)
+    field = get_field!(id)
+    msg ||= "Expected field #{id.inspect} to be hidden."
+    context.assert_block(msg) { field.type == :hidden }
     return field
   end
 
