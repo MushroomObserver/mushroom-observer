@@ -1,0 +1,18 @@
+copy over consts-slicehost.rb to consts-site.rb on server
+adjust site-specific configs:
+  VOTE_CUTOFF
+  others?
+
+backup database
+rake db:migrate
+
+script/clean_rss_logs
+script/recalc_contributions
+script/refresh_name_lister_cache
+# script/fix_name_notes
+
+get sizes.txt
+get types.txt
+script/populate_image_sizes
+
+add script/refresh_name_lister_cache to crontab

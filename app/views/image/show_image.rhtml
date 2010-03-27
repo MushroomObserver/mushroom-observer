@@ -42,8 +42,10 @@
             @image.has_size?(size)
           end.map do |size|
             if size.to_s != @size.to_s
-              link_to(:"image_show_#{size}".t, :action => 'show_image',
-                      :id => @image.id, :size => size, :params => query_params)
+              w, h = @image.size(size)
+              link_to(:"image_show_#{size}".t, { :action => 'show_image',
+                      :id => @image.id, :size => size, :params => query_params },
+                      { :title => "#{w} &#215; #{h} pixels" })
             else
               :"image_show_#{size}".t
             end

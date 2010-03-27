@@ -2043,6 +2043,10 @@ prefs_password_new: New password
 prefs_password_confirm: Confirm new password
 prefs_theme: Preferred theme
 prefs_locale: Language
+prefs_votes_anonymous: Votes on proposed names
+prefs_votes_anonymous_no: Always public
+prefs_votes_anonymous_yes: Always anonymous
+prefs_votes_anonymous_old: "Public after [cutoff]"
 prefs_license_note: Default "license":/observer/how_to_use#license you want for new images.
 prefs_thumbnail_size: Thumbnail size
 prefs_thumbnail_small: "[:image_show_small]"
@@ -2261,6 +2265,7 @@ show_namings_consensus: Community Vote
 show_namings_no_votes: no votes
 show_namings_your_vote: Your Vote
 show_namings_update_votes: Update Votes
+show_namings_go_public: Make all of my votes public.
 show_namings_cast: Cast Vote
 show_namings_user: "[:User]"
 show_namings_consensus_help: >
@@ -2274,6 +2279,10 @@ show_namings_lose_changes: >
 
 show_namings_please_login: >
   Please login to propose your own names and vote on existing names.
+
+show_namings_gone_public: >
+  Thank you!  All your votes are now public.  You can always change your mind
+  and hide them again by going to you account preferences.
 
 
 

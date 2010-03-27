@@ -20,7 +20,11 @@
     <%= link_to(:show_namings_propose_new_name.t, :action => 'create_naming',
                 :id => @observation, :params => query_params) %>
     <% if logged_in && any_names && can_do_ajax? %>
-      &nbsp;<%= submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") %>
+      &nbsp;<%= submit_tag(:show_namings_update_votes.l,
+                           :onclick => "set_changed(0)") %><br/>
+      <% if @user.votes_anonymous != :no %>
+        <%= check_box_tag('go_public') %>&nbsp;<%= :show_namings_go_public.t %>
+      <% end %>
     <% end %>
   </p>
 

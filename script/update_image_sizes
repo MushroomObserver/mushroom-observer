@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+require File.dirname(__FILE__) + '/../config/boot'
+require File.dirname(__FILE__) + '/../config/environment'
+
+puts "Reading types..."
+types = {}
+for line in File.readlines('types.txt')
+  if line.match(/(\d+)\.\w+:\s+(\S+)/)
+    types[$1.to_i] = $2
+  end
+end
+
+puts "Reading sizes..."
+sizes = {}
+for line in File.readlines('sizes.txt')
+  if line.match(/(\d+)\.jpg:\s+(\d+)\s+(\d+)/)
+    sizes[$1.to_i] = [$2, $3]
+  end
+end
+
+i = 0
+last_pct = nil
+num = Image.count
+for image in Image.all
+  i += 1
+  pct = 100*i/num
+  if pct != last_pct
+    $stdout.print("#{pct}%\r")
+    $stdout.flush
+    last_pct = pct
+  end
+
+  id = image.id.to_i
+  w = sizes[id][0] rescue nil
+  h = sizes[id][1] rescue nil
+  type = types[id] rescue nil
+  image.width  = w if w
+  image.height = h if h
+  image.content_type = type if type
+  image.save_without_our_callbacks if image.changed?
+
+  # x = []
+  # x << "id=#{id}"
+  # x << "w=#{w}" if w
+  # x << "h=#{h}" if h
+  # x << "t=#{type}" if type
+  # puts x.join(" ")
+end
+

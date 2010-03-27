@@ -306,6 +306,28 @@ class Image < AbstractModel
     end
   end
 
+  # Calculate the approximate dimensions of the image of the given size.
+  def size(size)
+    w = width
+    h = height
+    if width && height
+      d = w > h ? w : h
+      max = case size.to_s
+      when 'thumbnail' ; 160
+      when 'small'     ; 320
+      when 'medium'    ; 640
+      when 'large'     ; 960
+      when 'huge'      ; 1280
+      when 'full_size', 'original' ; 1e10
+      end
+      if max < d
+        w = w * max / d
+        h = h * max / d
+      end
+    end
+    return [w, h]
+  end
+
   ##############################################################################
   #
   #  :section: Image Upload

@@ -297,7 +297,7 @@ class AbstractQuery < ActiveRecord::Base
   self.abstract_class = true
 
   # Low-level description of SQL query.
-  attr_accessor :join, :tables, :where, :group, :order, :limit
+  attr_accessor :join, :tables, :where, :group, :order
 
   # Prevent SQL statements from getting absurdly large.  Any "id IN (...)"
   # conditions are limited to this number of values.
@@ -788,7 +788,6 @@ class AbstractQuery < ActiveRecord::Base
       :where?  => [:string],
       :group?  => :string,
       :order?  => :string,
-      :limit?  => :string,
       :by?     => :string
     )
 
@@ -981,7 +980,6 @@ class AbstractQuery < ActiveRecord::Base
     self.where  = []
     self.group  = ''
     self.order  = ''
-    self.limit  = ''
 
     # Setup query for the given flavor.
     send("initialize_#{flavor}")
@@ -999,7 +997,6 @@ class AbstractQuery < ActiveRecord::Base
     self.where  += params[:where]  if params[:where]
     self.group   = params[:group]  if params[:group]
     self.order   = params[:order]  if params[:order]
-    self.limit   = params[:limit]  if params[:limit]
   end
 
   # Do mechanics of the :by => :type sorting mechanism.
@@ -1252,7 +1249,7 @@ class AbstractQuery < ActiveRecord::Base
     our_group   = args[:group] || self.group
     our_order   = args[:order] || self.order
     our_order   = reverse_order(self.order) if our_order == :reverse
-    our_limit   = args[:limit] || self.limit
+    our_limit   = args[:limit]
 
     # Tack id at end of order to disambiguate the order.
     # (I despise programs that render random results!)
@@ -1414,7 +1411,32 @@ class AbstractQuery < ActiveRecord::Base
   #
   #  :section: High-Level Queries
   #
+  #  Note that most of these methods accept a few optional arguments.  For
+  #  example, all methods that return instantiated results accept +:include+
+  #  which is passed in to <tt>model.all</tt>.
+  #
+  #  limit::          Put a limit on the number of results from the raw query.
+  #  letter_field::   Filter results by a given first letter (for pagination).
+  #  include::        Eager-load these associations when instantiating results.
+  #
+  #  Add additional arguments to the three "global" Arrays immediately below:
+  #
+  #  RESULTS_ARGS::       Args passed to +select_values+ via +result_ids+.
+  #  PAGINATE_ARGS::      Args passed to +paginate_ids+.
+  #  INSTANTIATE_ARGS::   Args passed to +model.all+ via +instantiate+.
+  #
   ##############################################################################
+
+  # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
+  # through into +select_values+.)
+  RESULTS_ARGS = [:limit]
+
+  # Args accepted by +paginate+ and +paginate_ids+.
+  PAGINATE_ARGS = [:letter_field]
+
+  # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
+  # call +instantiate+, too).
+  INSTANTIATE_ARGS = [:include]
 
   # Return an Array of tables used in this query (Symbol's).
   def tables_used
@@ -1429,18 +1451,20 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Number of results the query returns.
-  def num_results
-    result_ids.length
+  def num_results(args={})
+    result_ids(args).length
   end
 
   # Array of all results, just ids.
-  def result_ids
-    @result_ids ||= select_values.map(&:to_i)
+  def result_ids(args={})
+    expect_args(:result_ids, args, RESULTS_ARGS)
+    @result_ids ||= select_values(args).map(&:to_i)
   end
 
   # Array of all results, instantiated.
-  def results(*args)
-    instantiate(result_ids, *args)
+  def results(args={})
+    instantiate_args, results_args = split_args(args, INSTANTIATE_ARGS)
+    instantiate(result_ids(results_args), instantiate_args)
   end
 
   # Let caller supply results if they happen to have them.  *NOTE*: These had
@@ -1461,23 +1485,27 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Get index of a given record / id in the results.
-  def index(arg)
+  def index(arg, args={})
     if arg.is_a?(ActiveRecord::Base)
-      result_ids.index(arg.id)
+      result_ids(args).index(arg.id)
     else
-      result_ids.index(arg.to_s.to_i)
+      result_ids(args).index(arg.to_s.to_i)
     end
   end
 
   # Returns a subset of the results (as ids).  Optional arguments:
   # +letter_field+:: Field in query to use for pagination-by-letter.  Pulls
   #                  the first letter from this field, even if not a letter!
+  # (Also accepts args for
   def paginate_ids(paginator, args={})
-    expect_args(:paginate_ids, args, :letter_field)
+    results_args, args = split_args(args, RESULTS_ARGS)
+    expect_args(:paginate_ids, args, PAGINATE_ARGS)
 
     # Get list of letters used in results.
     if letter_field = args[:letter_field]
-      paginator.used_letters = select_values(:select => "DISTINCT LEFT(#{letter_field},1)")
+      paginator.used_letters = select_values(results_args.merge({
+        :select => "DISTINCT LEFT(#{letter_field},1)"
+      }))
     end
 
     # Filter by letter.
@@ -1487,15 +1515,16 @@ class AbstractQuery < ActiveRecord::Base
     end
 
     # Paginate remaining results.
-    paginator.num_total = num_results
+    paginator.num_total = num_results(results_args)
     from, to = paginator.from, paginator.to
-    result_ids[from..to] || []
+    result_ids(results_args)[from..to] || []
   end
 
   # Returns a subset of the results (as ActiveRecord instances).
+  # (Takes same args as both +instantiate+ and +paginate_ids+.)
   def paginate(paginator, args={})
-    args1, args2 = split_args(args, :letter_field)
-    instantiate(paginate_ids(paginator, args1), args2)
+    paginate_args, instantiate_args = split_args(args, PAGINATE_ARGS)
+    instantiate(paginate_ids(paginator, paginate_args), instantiate_args)
   end
 
   # Instantiate a set of records given as an Array of ids.  Returns a list of
@@ -1503,7 +1532,7 @@ class AbstractQuery < ActiveRecord::Base
   # +include+:: Tables to eager load (see argument of same name in
   #             ActiveRecord::Base#find for syntax).
   def instantiate(ids, args={})
-    expect_args(:instantiate, args, :include)
+    expect_args(:instantiate, args, INSTANTIATE_ARGS)
     @results ||= {}
     ids.map!(&:to_i)
     needed = (ids - @results.keys).uniq
@@ -1744,7 +1773,7 @@ class AbstractQuery < ActiveRecord::Base
   ##############################################################################
 
   # Raise an error if caller passed any unexpected arguments.
-  def expect_args(method, args={}, *expect) # :nodoc:
+  def expect_args(method, args, expect) # :nodoc:
     extra_args = args.keys - expect
     if !extra_args.empty?
       raise "Unexpected arguments to Query##{method}: #{extra_args.inspect}"
@@ -1753,7 +1782,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Split up a Hash of arguments, putting all the ones in the given list in
   # the first of two Hash's, and all the rest in the other.  Returns two Hash's.
-  def split_args(args={}, *keys_in_first) # :nodoc:
+  def split_args(args, keys_in_first) # :nodoc:
     args1 = {}
     args2 = {}
     args.each do |key, val|

@@ -586,7 +586,6 @@ class ObserverController < ApplicationController
 # logger.warn('QUERY ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
 
     if @user
-
       # This happens when user clicks on "Update Votes".
       if request.method == :post
         if params[:vote]
@@ -599,6 +598,15 @@ class ObserverController < ApplicationController
               flashed = true
             end
           end
+        end
+
+        # Make it really easy for users to elect to go public with their votes.
+        if params[:go_public] == '1'
+          @user.votes_anonymous = :no
+          @user.save
+          flash_notice(:show_namings_gone_public.t)
+          # In case the user decides to test us immediately after changing! :)
+          @observation.users_votes(@user).each {|v| v.user.votes_anonymous = :no }
         end
       end
 
@@ -1314,8 +1322,8 @@ class ObserverController < ApplicationController
     @show_user = User.find(id, :include => :location)
     @user_data = SiteData.new.get_user_data(id)
     query = Query.lookup(:Observation, :by_user, :user => @show_user,
-                         :limit => 6, :by => :thumbnail_quality)
-    @observations = query.results(:include => :thumb_image)
+                         :by => :thumbnail_quality)
+    @observations = query.results(:limit => 6, :include => :thumb_image)
   end
 
   # Admin util linked from show_user page that lets admin add or change bonuses
@@ -1403,10 +1411,10 @@ class ObserverController < ApplicationController
     )
 
     # Get the last six observations whose thumbnails are highly rated.
-    query = Query.lookup(:Observation, :all, :limit => 6, :by => :modified,
+    query = Query.lookup(:Observation, :all, :by => :modified,
                          :where => 'images.vote_cache >= 3',
                          :join => :'images.thumb_image')
-    @observations = query.results(:include => :thumb_image)
+    @observations = query.results(:limit => 6, :include => :thumb_image)
   end
 
   # server_status.rhtml

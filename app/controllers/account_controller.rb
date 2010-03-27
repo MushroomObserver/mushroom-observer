@@ -203,6 +203,7 @@ class AccountController < ApplicationController
             [ :str,  :theme ],
             [ :str,  :locale ],
             [ :int,  :license_id ],
+            [ :str,  :votes_anonymous ],
             [ :int,  :rows ],
             [ :int,  :columns ],
             [ :bool, :alternate_rows ],

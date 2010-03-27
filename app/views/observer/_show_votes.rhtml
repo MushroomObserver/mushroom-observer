@@ -34,7 +34,8 @@
         <td align="left"><small><%=
           vote_cutoff = Time.parse(VOTE_CUTOFF)
           votes = table[str][:votes].select do |vote|
-            vote.modified > vote_cutoff
+            (vote.user.votes_anonymous == :no) or
+            (vote.user.votes_anonymous == :old and vote.modified > vote_cutoff)
           end.sort_by(&:rand)[0..3]
           if votes.length > 0
             n = 0

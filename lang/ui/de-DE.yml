@@ -2043,6 +2043,10 @@ prefs_password_new: Neues Passwort
 prefs_password_confirm: Neues Passwort wiederholen
 prefs_theme: Lieblings-Farbschema
 prefs_locale: Sprache
+prefs_votes_anonymous:  Votes on proposed names
+prefs_votes_anonymous_no:  Always public
+prefs_votes_anonymous_yes:  Always anonymous
+prefs_votes_anonymous_old:  "Public after [cutoff]"
 prefs_license_note: Standard-"Lizenz":/observer/how_to_use#license gilt für neue Bilder
 prefs_thumbnail_size:  Thumbnail size
 prefs_thumbnail_small: "[:image_show_small]"
@@ -2259,6 +2263,7 @@ show_namings_consensus: Community-Meinung
 show_namings_no_votes: keine Stimmen
 show_namings_your_vote: Deine Stimme
 show_namings_update_votes: Stimmen abgeben
+show_namings_go_public:  Make all of my votes public.
 show_namings_cast: Stimme abgeben
 show_namings_user: Nutzer
 show_namings_consensus_help: >
@@ -2270,6 +2275,10 @@ show_namings_consensus_help: >
 show_namings_lose_changes: Du musst auf 'Stimmen abgeben' klicken, um Änderungen abzuspeichern.
 show_namings_please_login: >
   Bitte logge dich ein, um eigene Namen vorzuschlagen und über die Vorschläge abzustimmen.
+
+show_namings_gone_public:  >
+  Thank you!  All your votes are now public.  You can always change your mind
+  and hide them again by going to you account preferences.
 
 
 
@@ -3927,4 +3936,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

@@ -1,0 +1,57 @@
+#!/usr/bin/env perl
+use strict;
+
+die <<EOH if `pwd` !~ /velosa.images.mushroomobserver.org/;
+
+This script is supposed to be run from the images directory of the image
+server.  It takes the complete list of original jpegs (./orig/*.jpg) and
+determines which of the smaller images are missing and generates them.  It
+takes no command line arguments.  You might have to run it two or three times
+because dreamhost often kills the ImageMagick process when downsizing full-size
+images.  You will know it's finished when it does nothing.
+
+EOH
+
+my $a = get_dir('thumb');
+my $b = get_dir('320');
+my $c = get_dir('640');
+my $d = get_dir('960');
+my $e = get_dir('1280');
+my $f = get_dir('orig');
+
+process_missing('1280',  $e, $f, '1280', 'orig', 70);
+process_missing('960',   $d, $f, '960',  '1280', 70);
+process_missing('640',   $c, $f, '640',  '1280', 70);
+process_missing('320',   $b, $f, '320',  '640',  80);
+process_missing('thumb', $a, $f, '160',  '320',  90);
+
+sub get_dir {
+  my $dir = shift;
+  my @result;
+  my $cmd = "ls $dir/*.jpg";
+  print "$cmd\n";
+  open(my $fh, "$cmd|");
+  while (<$fh>) {
+    chomp;
+    if (/^\w+\/(\d+)\.jpg$/) {
+      push(@result, $1);
+    } else {
+      print "Unexpected file: $_\n";
+    }
+  }
+  print "Got ". (scalar @result). "\n";
+  return \@result;
+}
+
+sub process_missing {
+  my ($path, $got, $need, $size, $size2, $quality) = @_;
+  my %got;
+  @got{@$got} = ();
+  foreach my $id (@$need) {
+    next if exists $got{$id};
+    my $cmd = "convert -thumbnail '${size}x${size}>' -quality $quality ".
+              "$size2/$id.jpg $path/$id.jpg";
+    print "$cmd\n";
+    system($cmd);
+  }
+}
