@@ -448,7 +448,7 @@ class ObserverController < ApplicationController
         :action => 'create_location', :where => where } ],
       [ :list_observations_location_merge.l, { :controller => 'location',
         :action => 'list_merge_options', :where => where } ],
-      [ :list_observations_location_all, { :controller => 'location',
+      [ :list_observations_location_all.l, { :controller => 'location',
         :action => 'list_locations' } ],
     ]
     show_selected_observations(query)

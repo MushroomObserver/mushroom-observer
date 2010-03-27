@@ -1931,6 +1931,12 @@ class NameControllerTest < FunctionalTestCase
     assert_equal(old_synonym, new_synonym)
     assert_equal(new_synonym_length+1, new_synonym.names.size)
     assert_equal(new_version, new_name.version)
+
+    comment = Comment.last
+    assert_equal('Name', comment.object_type)
+    assert_equal(old_name.id, comment.object_id)
+    assert_match(/deprecat/i, comment.summary)
+    assert_equal("Don't like this name", comment.comment)
   end
 
   # deprecate an existing unique name with an ambiguous name
@@ -1944,6 +1950,8 @@ class NameControllerTest < FunctionalTestCase
     assert(!new_name.deprecated)
     assert_nil(new_name.synonym)
     new_past_name_count = new_name.versions.length
+
+    comments = Comment.count
 
     params = {
       :id => old_name.id,
@@ -1962,6 +1970,8 @@ class NameControllerTest < FunctionalTestCase
     assert(!new_name.reload.deprecated)
     assert_equal(new_past_name_count, new_name.versions.length)
     assert_nil(new_name.synonym)
+
+    assert_equal(comments, Comment.count)
   end
 
   # deprecate an existing unique name with an ambiguous name, but using :chosen_name to disambiguate
@@ -2083,6 +2093,12 @@ class NameControllerTest < FunctionalTestCase
     for n in approved_synonyms
       assert(n.reload.deprecated)
     end
+
+    comment = Comment.last
+    assert_equal('Name', comment.object_type)
+    assert_equal(old_name.id, comment.object_id)
+    assert_match(/approve/i, comment.summary)
+    assert_equal("Prefer this name", comment.comment)
   end
 
   # approve a deprecated name, but don't deprecate the synonyms
@@ -2092,6 +2108,8 @@ class NameControllerTest < FunctionalTestCase
     assert(old_name.synonym)
     old_past_name_count = old_name.versions.length
     approved_synonyms = old_name.approved_synonyms
+
+    comments = Comment.count
 
     params = {
       :id => old_name.id,
@@ -2109,6 +2127,8 @@ class NameControllerTest < FunctionalTestCase
     for n in approved_synonyms
       assert(!n.reload.deprecated)
     end
+
+    assert_equal(comments, Comment.count)
   end
 
   # ----------------------------
