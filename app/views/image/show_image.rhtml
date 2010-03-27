@@ -38,14 +38,16 @@
     <td align="center">
       <div>
         <p><%=
+          # Assume all sizes available until we receive the dimensions.
           Image.all_sizes.select do |size|
-            @image.has_size?(size)
+            !@image.width || @image.has_size?(size)
           end.map do |size|
             if size.to_s != @size.to_s
               w, h = @image.size(size)
+              help = w ? { :title => "#{w} &#215; #{h} pixels" } : {}
               link_to(:"image_show_#{size}".t, { :action => 'show_image',
                       :id => @image.id, :size => size, :params => query_params },
-                      { :title => "#{w} &#215; #{h} pixels" })
+                      help)
             else
               :"image_show_#{size}".t
             end

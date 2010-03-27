@@ -1160,8 +1160,8 @@ class NameController < ApplicationController
         args[:other] = others.join(', ')
       end
       save_name(@name, tag, args)
-      if !@comment.blank?
-        post_comment(:approve, @name, @comment)
+      if !comment.blank?
+        post_comment(:approve, @name, comment)
       end
 
       redirect_to(:action => 'show_name', :id => @name.id,
