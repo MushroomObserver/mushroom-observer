@@ -563,6 +563,15 @@ class Image < AbstractModel
     return value
   end
 
+  # Count number of votes at a given level.  Returns all votes if no +value+.
+  def num_votes(value=nil)
+    if value
+      vote_hash.values.select {|v| v == value.to_i}.length
+    else
+      vote_hash.values.length
+    end
+  end
+
   # Retrieve the given User's vote for this Image.  Returns a Fixnum from
   # 1 to 4, or nil if the User hasn't voted.
   def users_vote(user=User.current)

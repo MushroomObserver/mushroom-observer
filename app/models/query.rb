@@ -1110,12 +1110,16 @@ class Query < AbstractQuery
     # coerce into images.
     if (model_symbol == :Image) and !content.blank?
       self.executor = lambda do |args|
-        args = args.dup
-        ids = self.class.lookup(:Observation, flavor, params).result_ids(args)
+        args2 = args.dup
+        args2.delete(:select)
+        params2 = params.dup
+        params2.delete(:by)
+        ids = self.class.lookup(:Observation, flavor, params2).result_ids(args2)
         ids = clean_id_set(ids)
-        extend_join(args)  << :images_observations
-        extend_where(args) << "images_observations.observation_id IN (#{ids})"
-        model.connection.select_values(query(args))
+        args2 = args.dup
+        extend_join(args2)  << :images_observations
+        extend_where(args2) << "images_observations.observation_id IN (#{ids})"
+        model.connection.select_rows(query(args2))
       end
       return
     end
@@ -1162,15 +1166,26 @@ class Query < AbstractQuery
 
     # Content of observation and comments...
     if !content.blank?
+
+      # # This was the old query using left outer join to include comments.
+      # self.join << case model_symbol
+      # when :Image       ; {:images_observations => {:observations => :comments!}}
+      # when :Location    ; {:observations => :comments!}
+      # when :Name        ; {:observations => :comments!}
+      # when :Observation ; :comments!
+      # end
+      # self.where += google_conditions(content,
+      #   'CONCAT(observations.notes,IF(comments.id,CONCAT(comments.summary,comments.comment),""))')
+
+      # Cannot do left outer join from observations to comments, because it
+      # will never return.  Instead, break it into two queries, one without
+      # comments, and another with inner join on comments.
       self.executor = lambda do |args|
-        # Cannot do left outer join from observations to comments, because it
-        # will never return.  Instead, break it into two queries, one without
-        # comments, and another with inner join on comments.
         args2 = args.dup
         extend_where(args2)
         args2[:where] += google_conditions(content, 'observations.notes')
-        results = model.connection.select_values(query(args2))
-
+        results = model.connection.select_rows(query(args2))
+      
         args2 = args.dup
         extend_join(args2) << case model_symbol
         when :Image       ; {:images_observations => {:observations => :comments}}
@@ -1181,7 +1196,7 @@ class Query < AbstractQuery
         extend_where(args2)
         args2[:where] += google_conditions(content,
           'CONCAT(observations.notes,comments.summary,comments.comment)')
-        results |= model.connection.select_values(query(args2))
+        results |= model.connection.select_rows(query(args2))
       end
     end
   end

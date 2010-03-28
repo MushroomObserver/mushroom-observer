@@ -88,8 +88,9 @@
 #
 #    # Or if you want to paginate by letter first, then page number:
 #    query = create_query(:Name)
+#    query.need_letters = 'names.search_name'
 #    @pages = paginate_letters
-#    @names = query.paginate(@pages, :letter_field => 'names.search_name')
+#    @names = query.paginate(@pages)
 #
 #  == Sequence Operators
 #
@@ -287,6 +288,7 @@
 #  @save_current_id::   Fixnum: saved copy of +@current_id+ for +reset+.
 #  @result_ids::        Array of Fixnum: all results.
 #  @results::           Hash: maps ids to instantiated records.
+#  @letters::           Cache of first-letters (if +need_letters given).
 #  @outer::             AbstractQuery: cached copy of outer query (nested
 #                       queries only).
 #  @params_cache::      Hash: where instances passed in via params are cached.
@@ -299,7 +301,16 @@ class AbstractQuery < ActiveRecord::Base
   # Low-level description of SQL query.
   attr_accessor :join, :tables, :where, :group, :order, :executor
 
-  # Savelast query for debug / diagnostic purposes.
+  # Will we need first-letters for pagination-by-letter later?  Value is the
+  # field or SQL expression to use.  We can do some simple optimizations to
+  # grab the pagination letter along with the ids the first time through if we
+  # know that we will need them. 
+  attr_accessor :need_letters
+
+  # Cached Hash mapping result ids (Fixnum) to first-letters (String).
+  attr_accessor :letters
+
+  # Save last query for debug / diagnostic purposes.
   attr_accessor :last_query
 
   # Prevent SQL statements from getting absurdly large.  Any "id IN (...)"
@@ -1378,7 +1389,7 @@ class AbstractQuery < ActiveRecord::Base
   def select_value(args={})
     initialize_query
     if executor
-      executor.call(args).first
+      executor.call(args).first.first
     else
       model.connection.select_value(query(args))
     end
@@ -1388,7 +1399,7 @@ class AbstractQuery < ActiveRecord::Base
   def select_values(args={})
     initialize_query
     if executor
-      executor.call(args)
+      executor.call(args).map(&:first)
     else
       model.connection.select_values(query(args))
     end
@@ -1397,15 +1408,21 @@ class AbstractQuery < ActiveRecord::Base
   # Call model.connection.select_rows.
   def select_rows(args={})
     initialize_query
-    raise "This query doesn't support low-level access!" if executor
-    model.connection.select_rows(query(args))
+    if executor
+      executor.call(args)
+    else
+      model.connection.select_rows(query(args))
+    end
   end
 
   # Call model.connection.select_one.
   def select_one(args={})
     initialize_query
-    raise "This query doesn't support low-level access!" if executor
-    model.connection.select_one(query(args))
+    if executor
+      executor.call(args).first
+    else
+      model.connection.select_one(query(args))
+    end
   end
 
   # Call model.connection.select_all.
@@ -1433,7 +1450,6 @@ class AbstractQuery < ActiveRecord::Base
   #  join::           Add extra join clause(s) to query.
   #  where::          Add extra condition(s) to query.
   #  limit::          Put a limit on the number of results from the raw query.
-  #  letter_field::   Filter results by a given first letter (for pagination).
   #  include::        Eager-load these associations when instantiating results.
   #
   #  Add additional arguments to the three "global" Arrays immediately below:
@@ -1449,7 +1465,7 @@ class AbstractQuery < ActiveRecord::Base
   RESULTS_ARGS = [:join, :where, :limit]
 
   # Args accepted by +paginate+ and +paginate_ids+.
-  PAGINATE_ARGS = [:letter_field]
+  PAGINATE_ARGS = []
 
   # Args accepted by +instantiate+ (and +paginate+ and +results+ since they
   # call +instantiate+, too).
@@ -1475,7 +1491,23 @@ class AbstractQuery < ActiveRecord::Base
   # Array of all results, just ids.
   def result_ids(args={})
     expect_args(:result_ids, args, RESULTS_ARGS)
-    @result_ids ||= select_values(args).map(&:to_i)
+    @result_ids ||= if !need_letters
+      select_values(args).map(&:to_i)
+    else
+
+      # Include first letter of paginate-by-letter field right away; there's
+      # typically no avoiding it.  This optimizes away an extra query or two.
+      self.letters = map = {}
+      ids = []
+      select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},1)"
+      for id, letter in select_rows(args.merge(:select => select))
+        if letter.match(/[a-zA-Z]/)
+          map[id.to_i] = letter.upcase
+        end
+        ids << id.to_i
+      end
+      ids
+    end
   end
 
   # Array of all results, instantiated.
@@ -1510,25 +1542,32 @@ class AbstractQuery < ActiveRecord::Base
     end
   end
 
+  # Make sure we requery if we change the letter field.
+  def need_letters=(x)
+    if !x.is_a?(String)
+      raise "You need to pass in a SQL expression to 'need_letters'."
+    elsif @need_letters != x
+      @result_ids = nil
+      @need_letters = x
+    end
+  end
+
   # Returns a subset of the results (as ids).  Optional arguments:
-  # +letter_field+:: Field in query to use for pagination-by-letter.  Pulls
-  #                  the first letter from this field, even if not a letter!
   # (Also accepts args for
   def paginate_ids(paginator, args={})
     results_args, args = split_args(args, RESULTS_ARGS)
     expect_args(:paginate_ids, args, PAGINATE_ARGS)
 
     # Get list of letters used in results.
-    if letter_field = args[:letter_field]
-      paginator.used_letters = select_values(results_args.merge(
-        :select => "DISTINCT LEFT(#{letter_field},1)"
-      ))
-    end
+    if need_letters
+      num_results
+      map = letters
+      paginator.used_letters = map.values.uniq
 
-    # Filter by letter.
-    if letter = paginator.letter
-      extend_where(results_args) << "LEFT(#{letter_field},1) = '#{letter}'"
-      @result_ids = nil
+      # Filter by letter. (paginator keeps letter upper case, as do we)
+      if letter = paginator.letter
+        @result_ids = @result_ids.select {|id| map[id] == letter}
+      end
     end
 
     # Paginate remaining results.
@@ -1568,8 +1607,9 @@ class AbstractQuery < ActiveRecord::Base
   # Clear out the results cache.  Useful if you need to reload results with
   # more eager loading, or if you need to repaginate something with letters.
   def clear_cache
-    @results = nil
+    @results    = nil
     @result_ids = nil
+    @letters    = nil
   end
 
   ##############################################################################

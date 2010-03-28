@@ -1103,7 +1103,12 @@ class ApplicationController < ActionController::Base
       num_per_page = @layout['count']
     end
 
-    # Time query.
+    # Inform the query that we'll need the first letters as well as ids.
+    if args[:letters]
+      query.need_letters = args[:letters]
+    end
+
+    # Time query -- this caches the ids (and first letters if needed).
     @timer_start = Time.now
     query.num_results
     @timer_end = Time.now
@@ -1116,27 +1121,25 @@ class ApplicationController < ActionController::Base
                   :id => query.result_ids.first,
                   :params => query_params)
 
-    # Otherwise paginate results.
+    # Otherwise paginate results.  (Everything we need should be cached now.)
     else
-      if field = args[:letters]
-        @pages = paginate_letters(letter_arg, number_arg, num_per_page)
-        if !args[:id].blank? and
-           params[@pages.letter_arg].blank? and
-           params[@pages.number_arg].blank?
-          @pages.show_index(query.index(args[:id]))
-        end
-        @objects = query.paginate(@pages, :include => include,
-                                  :letter_field => field)
+      @pages = if args[:letters]
+        paginate_letters(letter_arg, number_arg, num_per_page)
       else
-        @pages = paginate_numbers(number_arg, num_per_page)
-        if !args[:id].blank? and
-           params[@pages.number_arg].blank?
-          @pages.show_index(query.index(args[:id]))
-        end
-        @objects = query.paginate(@pages, :include => include)
+        paginate_numbers(number_arg, num_per_page)
       end
 
-      # Give the caller the opportunity to add extra columns to index.
+      # Skip to correct place if coming back in to index from show_object.
+      if !args[:id].blank? and
+         params[@pages.letter_arg].blank? and
+         params[@pages.number_arg].blank?
+        @pages.show_index(query.index(args[:id]))
+      end
+
+      # Instantiate correct subset.
+      @objects = query.paginate(@pages, :include => include)
+
+      # Give the caller the opportunity to add extra columns.
       if block_given?
         @extra_data = @objects.inject({}) do |data,object|
           row = yield(object)
@@ -1202,8 +1205,9 @@ class ApplicationController < ActionController::Base
   #
   #   # In controller:
   #   query  = create_query(:Name, :by_user, :user => params[:id])
+  #   query.need_letters('names.observation_name')
   #   @pages = paginate_letters(:letter, :page, 50)
-  #   @names = query.paginate(@pages, :letter_field => 'names.observation_name')
+  #   @names = query.paginate(@pages)
   #
   #   # In view:
   #   <%= pagination_letters(@pages) %>

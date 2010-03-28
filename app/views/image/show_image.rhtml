@@ -107,8 +107,10 @@
                 link_to_function(str1, "image_vote(#{@image.id},'#{value}')",
                                  :title => str2)
               end
+              num = @image.num_votes(value)
+              str += " (#{num})" if num > 0
               content_tag(:span, str, :id => "image_#{@image.id}_#{value}")
-            end.join(' | ') %><br/><%
+            end.join('<br/>') %><br/><%
 
           # ----------------------------
           #  Javascript off.
