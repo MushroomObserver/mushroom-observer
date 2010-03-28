@@ -25,7 +25,12 @@
             <% end %>
             <br/>
             <span class="ListWhen"><%= comment.created.web_time %></span>:
-            <span class="ListWho"><%= user_link(comment.user) %></span><br/>
+            <span class="ListWho"><%= user_link(comment.user) %></span>
+            <% if object %>
+              (<span class="ListDetail"><%= object.class.name.to_sym.t %></span>)
+            <% else %>
+              (<span class="ListDetail"><%= :runtime_object_deleted %></span>)
+            <% end %>
           </td>
         </tr>
       <% end %>

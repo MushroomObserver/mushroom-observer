@@ -360,6 +360,10 @@ class SpeciesList < AbstractModel
 protected
 
   def validate # :nodoc:
+    # Clean off leading/trailing whitespace from +where+.
+    self.where = self.where.strip_squeeze if self.where
+    self.where = nil if self.where == ''
+
     if self.title.to_s.blank?
       errors.add(:title, :validate_species_list_title_missing.t)
     elsif self.title.length > 100

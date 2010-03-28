@@ -39,6 +39,20 @@ class Descriptions < ActiveRecord::Migration
       UPDATE observations SET `where` = NULL WHERE location_id IS NOT NULL
     )
 
+    # --------------------------------------------------------------------
+    #  Clean up obs.where and spl.where (remove leading/trailing space).
+    # --------------------------------------------------------------------
+
+    Observation.connection.update %(
+      UPDATE observations SET where = RTRIM(LTRIM(`where`))
+      WHERE `where` IS NOT NULL
+    )
+
+    SpeciesList.connection.update %(
+      UPDATE species_lists SET where = RTRIM(LTRIM(`where`))
+      WHERE `where` IS NOT NULL
+    )
+
     # --------------------------------------
     #  First create the "all users" group.
     # --------------------------------------

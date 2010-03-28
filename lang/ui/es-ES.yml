@@ -652,9 +652,12 @@ sort_by_last_login: Último Inicio de Sesión
 sort_by_user: "[:USER]"
 sort_by_login: "[:LOGIN_NAME]"
 sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_where: "[:LOCATION]"
+sort_by_location: "[:LOCATION]"
 sort_by_confidence: "[:CONFIDENCE_LEVEL]"
 sort_by_image_quality: Calidad de Imágen
 sort_by_thumbnail_quality: Calidad de Miniatura
+sort_by_contribution: Contribución
 sort_by_reverse: Invertir Orden
 
 # RSS log messages.
@@ -884,9 +887,12 @@ runtime_location_merge_failed: No se ha podido fusionar la observación [name].
 runtime_login_failed: No se ha podido iniciar sesión.
 runtime_login_success: Su sesión se ha iniciado con éxito.
 runtime_name_in_use_with_notes: El nombre «[name]» ya está en uso y «[other]» ha notas.
+runtime_no_conditions: ¡Usted no ha indicado sus condiciones!
 runtime_no_upload_image: No se ha podido subir la imagen «[name]».
+runtime_object_deleted: Este objeto se ha eliminado.
 runtime_object_not_in_index: "No se puede encontrar [type] #[id] en la índice o la búsqueda actual."
 runtime_prefs_password_no_match: La contraseña y la confirmación no coinciden.
+runtime_search_has_expired: Su búsqueda por el usuario ha caducado, por favor, inténtelo de nuevo.
 runtime_show_observation_success: Su vota se ha cambiado con éxito.
 runtime_unable_to_transfer_name: No se ha podido transferir [name] a otro sinónimo.
 
@@ -1167,12 +1173,11 @@ app_powered_by: Hecho con
 app_preferred_browser: Preferencia navegador
 
 # This is for the search bar at the top of every page.
-app_advanced_search: Búsqueda Avanzada
 app_find: Buscar
-app_observations_find: Observaciones
-app_names_find: Nombres
-app_images_find: Imágenes
-app_locations_find: Ubicaciones
+app_search: Buscar
+app_refine_search: Refinar
+app_advanced_search: Búsqueda Avanzada
+app_timer: "(tiempo: [seconds] seg)"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
@@ -1951,7 +1956,9 @@ list_observations_location_merge: Fusionar con una Ubicación Definida
 
 # location/list_place_names
 list_place_names_known: Ubicaciones Conocidas
-list_place_names_undef: Ubicaciones Indefinidas (por frecuencia)
+list_place_names_known_order: '(por nombre)'
+list_place_names_undef: Ubicaciones Indefinidas
+list_place_names_undef_order: '(por frecuencia)'
 list_place_names_map: Trazar un Mapa de las Ubicaciones
 list_place_names_merge: Combinar
 
@@ -2751,6 +2758,11 @@ list_merge_options_title: Ubicaciones para Fusionarse con [where]
 
 # observer/list_notifications
 list_notifications_title: E-mail Alertas para [user]
+
+
+# observer/list_users
+list_users_joined: Se Unió
+list_users_contribution: Contribución
 
 
 # location/add_to_location
@@ -3845,9 +3857,9 @@ how_maps: >
   «"[:map_locations_global_map]":/location/map_locations».
   \n\n
   Para ver un mapa de distribución para un "Nombre":#name determinado, ir a la
-  página de ese nombre (por ejemplo, escriba el nombre en la barra de búsqueda
-  y haga clic en «[:app_names_find]»), a continuación, haga clic en
-  «[:show_name_distribution_map]» en la parte superior de la página.
+  página de ese nombre (por ejemplo, escriba el nombre en la barra de búsqueda,
+  seleccione «[:NAMES]»), haga clic en «[:app_search]», y haga clic en
+  «[:show_name_distribution_map]» en la parte superior de la página siguiente.
   \n\n
   Se recomienda a los "Usuarios":#user añadir al mapa de distribución para
   cualquier nombre.  La forma más fácil es crear una nueva

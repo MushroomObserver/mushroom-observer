@@ -103,7 +103,6 @@ class ImageController < ApplicationController
       show_selected_images(query)
     rescue => err
       flash_error(err)
-      flash_error(err.backtrace.join("<br/>"))
       redirect_to(:controller => 'observer', :action => 'advanced_search')
     end
   end

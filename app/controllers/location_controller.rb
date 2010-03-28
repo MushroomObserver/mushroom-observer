@@ -41,6 +41,7 @@ class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
   before_filter :login_required, :except => [
+    :advanced_search,
     :index_location,
     :index_location_description,
     :list_location_descriptions,
@@ -87,7 +88,7 @@ class LocationController < ApplicationController
   # Displays a list of all locations.
   def list_locations
     query = create_query(:Location, :all, :by => :name)
-    show_selected_locations(query)
+    show_selected_locations(query, :undef_by_frequency => true)
   end
 
   # Display list of locations that a given user is author on.
@@ -95,7 +96,7 @@ class LocationController < ApplicationController
     user = User.find(params[:id])
     @error = :runtime_locations_by_user_error.t(:user => user.legal_name)
     query = create_query(:Location, :by_user, :user => user)
-    show_selected_locations(query)
+    show_selected_locations(query, :undef_by_frequency => true)
   end
 
   # Display list of locations that a given user is editor on.
@@ -109,26 +110,33 @@ class LocationController < ApplicationController
   # Displays a list of locations matching a given string.
   def location_search
     query = create_query(:Location, :pattern_search, :pattern => params[:pattern].to_s)
-    show_selected_locations(query)
+    show_selected_locations(query, :undef_by_frequency => true)
+  end
+
+  # Displays matrix of advanced search results.
+  def advanced_search
+    begin
+      query = find_query(:Location)
+      show_selected_locations(query, :undef_by_frequency => true)
+    rescue => err
+      flash_error(err)
+      redirect_to(:controller => 'observer', :action => 'advanced_search_form')
+    end
   end
 
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_locations(query, args={})
-    store_location
-    clear_query_in_session
-    set_query_params(query)
     @links ||= []
-
-    # Supply a default title.
-    @title ||= query.title
+    args[:letters] = 'locations.search_name'
+    args[:link_all_sorts] = args[:undef_by_frequency]
 
     # Add some alternate sorting criteria.
-    @sorts = add_sorting_links(query, [
+    args[:sorting_links] = [
       ['name',    :sort_by_name.t],
       ['created', :sort_by_created.t],
       [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
                   :sort_by_modified.t],
-    ])
+    ]
 
     # Add "show observations" link if this query can be coerced into an
     # observation query.
@@ -149,71 +157,35 @@ class LocationController < ApplicationController
                 }]
     end
 
-    # Try to turn this into a query on observations.where instead.
-    # Yesyesyes, this is a tremendous kludge, but tell me how else to do it?
-    # It is known to work on the following :Location query flavors:
-    #   :all
-    #   :pattern
-    #   :with_observations_of_name
-    begin
-      sql = query.query(
-        :select => 'DISTINCT observations.`where`, COUNT(1) AS cnt',
-        :where  => 'observations.location_id IS NULL',
-        :group  => 'observations.`where`',
-        :order  => 'cnt DESC'
-      )
-
-      # Remove condition joining observations to locations (if present).
-      sql.sub!(' AND (observations.location_id = locations.id)', '')
-      # Convert any conditions on 'location name' to 'observation where'.
-      sql.gsub!(/locations.(display|search)_name/, 'observations.`where`')
-      # Remove any non-critical conditions on 'location notes'.
-      sql.gsub!(/ OR locations.notes LIKE '[^']+'/, '')
-      # Remove locations from list of tables.
-      sql.sub!(/(FROM [^A-Z]*)`locations`,?/, '\\1')
-      # Add observations to list of tables (if not already there).
-      sql.sub!(/FROM [^A-Z\n]*/) do |x|
-        x.index('`observations`') ? x : "#{x.sub(/,$/,',')} `observations`"
+    # Get matching *undefined* locations.
+    if query2 = coerce_query_for_undefined_locations(query)
+      select_args = {
+        :group => 'observations.where',
+        :select => 'observations.where AS w, COUNT(observations.id) AS c',
+      }
+      if args[:undef_by_frequency]
+        select_args[:order] = 'c DESC'
+        # (This tells it to say "by name" and "by frequency" by the subtitles.
+        # If user has explicitly selected the order, then this is disabled.)
+        @default_orders = true
       end
-      # flash_notice("ORIGINAL = " + query.query.gsub("\n",'<br/>'))
-      # flash_notice("TWEAKED  = " + sql.gsub("\n",'<br/>'))
-      # Fail if there is still a condition requiring locations.
-      raise if sql.match('locations.')
-
       @undef_pages = paginate_letters(:letter2, :page2, 50)
-      @undef_data = Observation.connection.select_all(sql)
-      @undef_pages.used_letters = @under_data.map {|r| r[0][0,1]}.uniq
+      @undef_data = query2.select_rows(select_args)
+      @undef_pages.used_letters = @undef_data.map {|row| row[0][0,1]}.uniq
       if (letter = params[:letter2].to_s.downcase) != ''
-        @undef_data = @undef_data.select {|r| r[0][0,1].downcase == letter}
+        @undef_data = @undef_data.select {|row| row[0][0,1].downcase == letter}
       end
       @undef_pages.num_total = @undef_data.length
       @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
-    rescue
+    else
       @undef_pages = nil
       @undef_data = nil
     end
 
-    # Now it's okay to paginate this (query.paginate with letters can cause
-    # it to add a condition to the query to select for a letter).
-    @known_pages = paginate_letters(:letter, :page, 50)
-    if !args[:id].blank? and
-       params[:letter].blank? and
-       params[:page].blank?
-      @known_pages.show_index(query.index(args[:id]))
-    end
-    @known_data = query.paginate(@known_pages,
-                                 :letter_field => 'locations.search_name')
-
-    # If only one result (before pagination), redirect to show_location.
-    if (@known_pages.num_total == 1) and
-       (!@undef_pages || @undef_pages.num_total == 0) and
-       (object = @known_data.first)
-      redirect_to(:action => 'show_location', :id => object.id)
-
-    # Otherwise paginate results.
-    else
-      render(:action => 'list_locations')
-    end
+    # Paginate the defined locations using the usual helper.   
+    args[:always_index] = (@undef_pages && @undef_pages.num_total > 0)
+    args[:action] = 'list_locations'
+    show_index_of_objects(query, args)
   end
 
   # Map results of a search or index.
@@ -222,6 +194,75 @@ class LocationController < ApplicationController
     @title = query.flavor == :all ? :map_locations_global_map.t :
                              :map_locations_title.t(:locations => query.title)
     @locations = query.results
+  end
+
+  # Try to turn this into a query on observations.where instead.
+  # Yes, still a kludge, but a little better than tweaking SQL by hand...
+  def coerce_query_for_undefined_locations(query)
+    model  = :Observation
+    flavor = query.flavor
+    args   = query.params.dup
+    result = nil
+
+    # Select only observations with undefined location.
+    if !args[:where]
+      args[:where] = []
+    elsif !args[:where].is_a?(Array)
+      args[:where] = [args[:where]]
+    end
+    args[:where] << 'observations.where IS NOT NULL'
+
+    # "By name" means something different to observation.
+    if args[:by].blank? or
+       (args[:by] == 'name')
+      args[:by] = 'where'
+    end
+
+    case query.flavor
+
+    # These are okay as-is.
+    when :all, :by_user
+      true
+
+    # Clearly all observations have an observation!
+    when :with_observations,
+         :with_observations_by_user
+      flavor = :all
+
+    # Temporarily kludge in pattern search the old way.
+    when :pattern_search
+      flavor = :all
+      search = query.google_parse(args[:pattern])
+      args[:where] += query.google_conditions(search, 'observations.where')
+      args.delete(:pattern)
+
+    # Simple coercions.
+    when :with_observations_in_set
+      flavor = :in_set
+    when :with_observations_in_species_list
+      flavor = :in_species_list
+    when :with_observations_of_children
+      flavor = :of_children
+    when :with_observations_of_name
+      flavor = :of_name
+
+    # None of the rest make sense.
+    else
+      flavor = nil
+    end
+
+    # Create query if okay.  (Still need to tweak select and group clauses.)
+    if flavor
+      result = create_query(model, flavor, args)
+
+      # Also make sure it doesn't reference locations anywhere.  This would
+      # presumably be the result of customization of one of the above flavors.
+      if result.query.match(/\Wlocations\./)
+        result = nil
+      end
+    end
+
+    return result
   end
 
   ################################################################################

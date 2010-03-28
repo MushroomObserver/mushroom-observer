@@ -189,7 +189,7 @@ class ObserverControllerTest < FunctionalTestCase
         :search => {
           :name => "Don't know",
           :user => "myself",
-          :type => (model == Name ? 'Description' : model.name),
+          :type => model.name.underscore,
           :content => "Long pink stem and small pink cap",
           :location => "Eastern Oklahoma"
         },
@@ -212,25 +212,40 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_pattern_search
-    params = {:commit => nil, :search => {:pattern => '12'}}
+    params = {:search => {:pattern => '12', :type => 'observation'}}
     get_with_dump(:pattern_search, params)
     assert_response(:controller => 'observer', :action => 'observation_search',
                     :pattern => '12')
 
-    params = {:commit => :app_images_find.l, :search => {:pattern => '34'}}
+    params = {:search => {:pattern => '34', :type => 'image'}}
     get_with_dump(:pattern_search, params)
     assert_response(:controller => 'image', :action => 'image_search',
                     :pattern => '34')
 
-    params = {:commit => :app_names_find.l, :search => {:pattern => '56'}}
+    params = {:search => {:pattern => '56', :type => 'name'}}
     get_with_dump(:pattern_search, params)
     assert_response(:controller => 'name', :action => 'name_search',
                     :pattern => '56')
 
-    params = {:commit => :app_locations_find.l, :search => {:pattern => '78'}}
+    params = {:search => {:pattern => '78', :type => 'location'}}
     get_with_dump(:pattern_search, params)
     assert_response(:controller => 'location', :action => 'location_search',
                     :pattern => '78')
+
+    params = {:search => {:pattern => '90', :type => 'comment'}}
+    get_with_dump(:pattern_search, params)
+    assert_response(:controller => 'comment', :action => 'comment_search',
+                    :pattern => '90')
+
+    params = {:search => {:pattern => '12', :type => 'species_list'}}
+    get_with_dump(:pattern_search, params)
+    assert_response(:controller => 'species_list', :action => 'species_list_search',
+                    :pattern => '12')
+
+    params = {:search => {:pattern => '34', :type => 'user'}}
+    get_with_dump(:pattern_search, params)
+    assert_response(:controller => 'observer', :action => 'user_search',
+                    :pattern => '34')
   end
 
   def test_observation_search

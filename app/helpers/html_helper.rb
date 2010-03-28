@@ -36,6 +36,21 @@ module ApplicationHelper::HTML
     tag('acronym', { :title => help }, true) + object + '</acronym>'
   end
 
+  # Add something to the header from within view.  This can be called as many
+  # times as necessary -- the application layout will mash them all together
+  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
+  #
+  #   <%
+  #     add_header(GMap.header)       # adds GMap general header
+  #     gmap = make_map(@locations)
+  #     add_header(finish_map(gmap))  # adds map-specific header
+  #   %>
+  #
+  def add_header(str)
+    @header ||= ''
+    @header += str
+  end
+
   # Create a table out of a list of Arrays.
   #
   #   make_table([[1,2],[3,4]])
@@ -57,27 +72,47 @@ module ApplicationHelper::HTML
     content_tag(:table, table_opts) do
       rows.map do |row|
         content_tag(:tr, tr_opts) do
-          row.map do |cell|
-            content_tag(:td, cell.to_s, td_opts)
-          end.join
+          if !row.is_a?(Array)
+            row
+          else
+            row.map do |cell|
+              content_tag(:td, cell.to_s, td_opts)
+            end.join
+          end
         end
       end.join
     end
   end
 
-  # Add something to the header from within view.  This can be called as many
-  # times as necessary -- the application layout will mash them all together
-  # and stick them at the end of the <tt>&gt;head&lt;/tt> section.
+  # Draw the fancy check-board matrix of objects used, e.g., in list_rss_log.
+  # Just pass in a list of objects (and make sure @layout is initialized).
+  # It yields for each object, then renders the whole thing.
   #
-  #   <%
-  #     add_header(GMap.header)       # adds GMap general header
-  #     gmap = make_map(@locations)
-  #     add_header(finish_map(gmap))  # adds map-specific header
-  #   %>
+  #   <% make_matrix(@objects) do |obj %>
+  #     <%= render(obj) %>
+  #   <% end %>
   #
-  def add_header(str)
-    @header ||= ''
-    @header += str
+  # *NOTE*: You *must* include a <tt><% ... %></tt> within the block somewhere!
+  # This is some arcane requirement of +capture+.
+  #
+  def make_matrix(list, table_opts={}, row_opts={}, col_opts={}, &block)
+    rows = []
+    cols = []
+    for obj in list
+      color = calc_color(rows.length, cols.length, @layout['alternate_rows'],
+                         @layout['alternate_columns'])
+      cols << content_tag(:td, {:align => 'center', :valign => 'top',
+                          :class => "ListLine#{color}"}.merge(col_opts)) do
+        capture(obj, &block)
+      end
+      if cols.length >= @layout["columns"]
+        rows << cols.join('')
+        cols = []
+      end
+    end
+    rows << cols.join('') if cols.any?
+    table = make_table(rows, {:cellspacing => 0}.merge(table_opts), row_opts)
+    concat(table, block.binding)
   end
 
   # Decide what the color should be for a list item.  Returns 0 or 1.

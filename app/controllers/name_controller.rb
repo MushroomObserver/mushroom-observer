@@ -1280,7 +1280,7 @@ class NameController < ApplicationController
   def eol
     headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
-    @start = Time.now()
+    @timer_start = Time.now()
     eol_data(['unvetted', 'vetted'], params[:last_name])
     render(:action => "eol", :layout => false)
   end

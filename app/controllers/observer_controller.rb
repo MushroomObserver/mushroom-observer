@@ -111,6 +111,7 @@ class ObserverController < ApplicationController
     :index,
     :index_observation,
     :index_rss_log,
+    :index_user,
     :intro,
     :list_observations,
     :list_rss_logs,
@@ -150,6 +151,7 @@ class ObserverController < ApplicationController
     :turn_javascript_nil,
     :turn_javascript_off,
     :turn_javascript_on,
+    :user_search,
     :users_by_contribution,
     :w3c_tests,
   ]
@@ -343,26 +345,35 @@ class ObserverController < ApplicationController
 
   # This is the action the search bar commits to.  It just redirects to one of
   # several "foreign" search actions:
+  #   comment/image_search
   #   image/image_search
   #   location/location_search
   #   name/name_search
   #   observer/observation_search
+  #   observer/user_search
+  #   species_list/species_list_search
   def pattern_search
-    pattern = params[:search][:pattern].to_s rescue ''
+    pattern = params[:search][:pattern].to_s.strip_squeeze rescue nil
+    type    = params[:search][:type].to_sym                rescue nil
+
     # Save it so that we can keep it in the search bar in subsequent pages.
     session[:pattern] = pattern
-    case params[:commit]
-    when :app_images_find.l
-      redirect_to(:controller => 'image', :action => 'image_search',
-                  :pattern => pattern)
-    when :app_locations_find.l
-      redirect_to(:controller => 'location', :action => 'location_search',
-                  :pattern => pattern)
-    when :app_names_find.l
-      redirect_to(:controller => 'name', :action => 'name_search',
-                  :pattern => pattern)
+    session[:search_type] = type
+
+    case type
+    when :observation, :user
+      ctrl = 'observer'
+    when :comment, :image, :location, :name, :species_list
+      ctrl = type
     else
-      redirect_to(:controller => 'observer', :action => 'observation_search',
+      raise "Invalid search type: #{type.inspect}"
+    end
+
+    # If pattern is blank, this would devolve into a very expensive index.
+    if pattern.blank?
+      redirect_to(:controller => ctrl, :action => "list_#{type}s")
+    else
+      redirect_to(:controller => ctrl, :action => "#{type}_search",
                   :pattern => pattern)
     end
   end
@@ -378,9 +389,7 @@ class ObserverController < ApplicationController
       @name_primer     = Name.primer
       @user_primer     = User.primer
     else
-      model = params[:search][:type].to_s.camelize
-      model = 'Name' if model == 'Description' # (for now)
-      model = model.constantize
+      model = params[:search][:type].to_s.camelize.constantize
 
       # Pass along all given search fields (remove angle-bracketed user name,
       # though, since it was only included by the auto-completer as a hint).
@@ -1260,8 +1269,9 @@ class ObserverController < ApplicationController
 
   # User index, restricted to admins.
   def index_user
-    if !is_in_admin_mode?
-      flash_error(:permission_denied.t)
+    if !is_in_admin_mode? and
+       !find_query(:User)
+      flash_error(:runtime_search_has_expired.t)
       redirect_to(:action => 'list_rss_logs')
     else
       query = find_or_create_query(:User, :by => params[:by])
@@ -1280,23 +1290,46 @@ class ObserverController < ApplicationController
     end
   end
 
+  # Display list of User's whose name, notes, etc. match a string pattern.
+  def user_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (user = User.safe_find(pattern))
+      redirect_to(:action => 'show_user', :id => user.id)
+    else
+      query = create_query(:User, :pattern_search, :pattern => pattern)
+      show_selected_users(query)
+    end
+  end
+
   def show_selected_users(query, args={})
     store_query_in_session(query)
     @links ||= []
     args = {
       :action => 'list_users',
       :include => :user_groups,
+      :matrix  => !is_in_admin_mode?,
     }.merge(args)
 
     # Add some alternate sorting criteria.
-    args[:sorting_links] = [
-      ['id',         :sort_by_id.t],
-      ['login',      :sort_by_login.t],
-      ['name',       :sort_by_name.t],
-      ['created',    :sort_by_created.t],
-      ['modified',   :sort_by_modified.t],
-      ['last_login', :sort_by_last_login.t],
-    ]
+    if is_in_admin_mode?
+      args[:sorting_links] = [
+        ['id',         :sort_by_id.t],
+        ['login',      :sort_by_login.t],
+        ['name',       :sort_by_name.t],
+        ['created',    :sort_by_created.t],
+        ['modified',   :sort_by_modified.t],
+        ['last_login', :sort_by_last_login.t],
+      ]
+    else
+      args[:sorting_links] = [
+        ['login',      :sort_by_login.t],
+        ['name',       :sort_by_name.t],
+        ['created',    :sort_by_created.t],
+        ['location',   :sort_by_location.t],
+        ['contribution', :sort_by_contribution.t],
+      ]
+    end
 
     # Paginate by "correct" letter.
     if (query.params[:by] == 'login') or

@@ -109,6 +109,7 @@ class Query < AbstractQuery
       :by_user,               # Comments created by user, by modified.
       :in_set,                # Comments in a given set.
       :for_user,              # Comments sent to used, by modified.
+      :pattern_search,        # Comments matching a pattern, by modified.
     ],
     :Image => [
       :advanced_search,       # Advanced search results.
@@ -210,10 +211,12 @@ class Query < AbstractQuery
       :by_rss_log,            # Species lists with RSS log, in RSS order
       :by_user,               # Species lists created by user, alphabetically.
       :in_set,                # Species lists in a given set.
+      :pattern_search,        # Species lists matching a pattern, alphabetically.
     ],
     :User => [
       :all,                   # All users, by name.
       :in_set,                # Users in a given set.
+      :pattern_search,        # Users matching login/name, alphabetically.
     ],
   }
 
@@ -270,7 +273,7 @@ class Query < AbstractQuery
     },
     :locations => {
       :licenses      => :license_id,
-      :'location_descriptions.official' => :description_id,
+      :'location_descriptions.default' => :description_id,
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
     },
@@ -306,7 +309,7 @@ class Query < AbstractQuery
     },
     :names => {
       :licenses      => :license_id,
-      :'name_descriptions.official' => :description_id,
+      :'name_descriptions.default' => :description_id,
       :rss_logs      => :rss_log_id,
       :users         => :user_id,
       :'users.reviewer' => :reviewer_id,
@@ -365,43 +368,6 @@ class Query < AbstractQuery
       :users         => :user_id,
     },
   }
-
-  # This is the order in which we should list tables, numbers are lengths.
-  # This makes absolutely no difference whatsoever in performance. (!!)
-  self.table_order = [
-    :location_descriptions_admins,   # 0
-    :licenses,                       # 3
-    :projects,                       # 4
-    :location_descriptions_editors,  # 11
-    :species_lists,                  # 93
-    :name_descriptions_admins,       # 174
-    :location_descriptions,          # 189
-    :location_descriptions_authors,  # 189
-    :location_descriptions_readers,  # 189
-    :location_descriptions_versions, # 215
-    :location_descriptions_writers,  # 378
-    :name_descriptions_authors,      # 578
-    :locations,                      # 836
-    :name_descriptions_editors,      # 1536
-    :locations_versions,             # 1576
-    :name_descriptions,              # 1669
-    :name_descriptions_readers,      # 1843
-    :users,                          # 1959
-    :user_groups,                    # 1969
-    :name_descriptions_writers,      # 3338
-    :user_groups_users,              # 4120
-    :name_descriptions_versions,     # 5906
-    :observations_species_lists,     # 13085
-    :comments,                       # 17974
-    :names,                          # 21867
-    :names_versions,                 # 29233
-    :observations,                   # 33270
-    :rss_logs,                       # 37252
-    :namings,                        # 39722
-    :votes,                          # 53872
-    :images_observations,            # 76425
-    :images,                         # 78678
-  ]
 
   # Return the default order for this query.
   def default_order
@@ -660,7 +626,7 @@ class Query < AbstractQuery
       elsif model.column_names.include?('title')
         "#{table}.title ASC"
       end
-    when 'title', 'login', 'summary', 'copyright_holder'
+    when 'title', 'login', 'summary', 'copyright_holder', 'where'
       if model.column_names.include?(by)
         "#{table}.#{by} ASC"
       end
@@ -668,6 +634,11 @@ class Query < AbstractQuery
       if model.column_names.include?('user_id')
         self.join << :users
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
+      end
+    when 'location'
+      if model.column_names.include?('location_id')
+        self.join << :locations
+        'locations.search_name ASC'
       end
     when 'rss_log'
       if model.column_names.include?('rss_log_id')
@@ -689,6 +660,10 @@ class Query < AbstractQuery
       if model_symbol == :Observation
         self.join << :'images.thumb_image'
         "images.vote_cache DESC, observations.vote_cache DESC"
+      end
+    when 'contribution'
+      if model_symbol == :User
+        'users.contribution DESC'
       end
     end
   end
@@ -1038,7 +1013,7 @@ class Query < AbstractQuery
   def initialize_with_descriptions_by_author
     initialize_with_descriptions_by_editor
   end
-  
+
   def initialize_with_descriptions_by_editor
     type = model.name.underscore
     glue = flavor.to_s.sub(/^.*_by_/, '')
@@ -1067,202 +1042,147 @@ class Query < AbstractQuery
 
   def initialize_pattern_search
     pattern = params[:pattern].to_s.strip_squeeze
+    clean  = clean_pattern(pattern)
     search = google_parse(pattern)
 
     case model_symbol
 
-    when :Image
-      self.join << {:images_observations => {:observations => :names}}
-      ids = []
-      # Search observations without location first.
-      ids += google_execute(search, :where => 'observations.location_id IS NULL',
-          :fields => [ 'observations.notes', 'observations.where',
-                       'names.search_name', 'images.copyright_holder',
-                       'images.notes' ])
-      # Now search observations with location.
-      ids += google_execute(search,
-          :join => {:images_observations => {:observations => :locations}},
-          :fields => [ 'observations.notes', 'names.search_name',
-                       'images.copyright_holder', 'images.notes',
-                       'locations.display_name', 'locations.search_name' ])
-      # This is what we'd do to include comments.
-      # ids += google_execute(search,
-      #     :join => {:images_observations => {:observations => :comments}},
-      #     :fields => [ 'observations.notes', 'names.search_name',
-      #                  'images.copyright_holder', 'images.notes',
-      #                  'comments.summary', 'comments.comment' ])
+      when :Comment
+        self.where += google_conditions(search,
+          'CONCAT(comments.summary,comments.comment)')
 
-    when :Location
-      note_fields = LocationDescription.all_note_fields.
-                      map {|x| "location_descriptions.#{x}"}
-      ids = google_execute(search,
-        :fields => [ 'locations.display_name', 'locations.search_name' ])
-      ids += google_execute(search, :join => :location_descriptions,
-        :fields => [ 'locations.display_name', 'locations.search_name',
-                     *note_fields ])
+      when :Image
+        self.join << {:images_observations => {:observations =>
+          [:locations!, :names] }}
+        self.where += google_conditions(search,
+          'CONCAT(names.search_name,images.copyright_holder,images.notes,' +
+          'IF(locations.id,locations.search_name,observations.where))')
 
-    when :Name
-      note_fields = NameDescription.all_note_fields.
-                      map {|x| "name_descriptions.#{x}"}
-      ids = google_execute(search,
-        :fields => [ 'names.search_name', 'names.citation' ])
-      ids += google_execute(search, :join => :name_descriptions,
-        :fields => [ 'names.search_name', 'names.citation', *note_fields ])
+      when :Location
+        # self.join << :"location_descriptions.default!"
+        # note_fields = LocationDescription.all_note_fields.
+        #                 map {|x| "location_descriptions.#{x}"}
+        self.where += google_conditions(search, 'locations.search_name')
 
-    when :Observation
-      self.join << :names
-      ids = []
-      # Search observations without location or comments.
-      ids += google_execute(search, :where => 'observations.location_id IS NULL',
-          :fields => [ 'observations.notes', 'observations.where',
-                       'names.search_name' ])
-      # Search observations with location.
-      ids += google_execute(search, :join => :locations, :fields =>
-          [ 'observations.notes', 'names.search_name', 'locations.display_name',
-            'locations.search_name' ])
-      # Search observations with comments.  This is not correct, but it's a
-      # reasonable compromise.  Ideally, we'd like to allow different positive
-      # assertions apply to different comments, but that would require N
-      # queries for N positive assertions.  Yesyesyes, granted, subsequent
-      # queries become very small, but...
-      ids += google_execute(search, :join => :comments, :fields =>
-          [ 'observations.notes', 'names.search_name', 'comments.summary',
-            'comments.comment' ])
+      when :Name
+        # self.join << :"name_descriptions.default!"
+        # note_fields = NameDescription.all_note_fields.
+        #                 map {|x| "name_descriptions.#{x}"}
+        self.where += google_conditions(search, 'names.search_name')
 
-    else
-      raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
+      when :Observation
+        self.join << [:locations!, :names]
+        self.where += google_conditions(search,
+          'CONCAT(names.search_name,observations.notes,' +
+          'IF(locations.id,locations.search_name,observations.where))')
+
+      when :SpeciesList
+        self.join << :locations!
+        self.where += google_conditions(search,
+          'CONCAT(species_lists.title,species_lists.notes,' +
+          'IF(locations.id,locations.search_name,species_lists.where))')
+
+      when :User
+        self.where += google_conditions(search,
+          'CONCAT(users.login,users.name)')
+
+      else
+        raise "Forgot to tell me how to build a :#{flavor} query for #{model}!"
+      end
     end
-
-    # Convert this to an "in_set" query now that we have results.
-    self.flavor    = :in_set
-    params[:ids]   = ids.uniq[0,MAX_ARRAY]
-    params[:title] = ["tag query_title_pattern_search", "pattern #{pattern}"]
-    params[:by]  ||= 'name'
-    params.delete(:pattern)
-    self.save if self.id
-    initialize_query
-  end
 
   # ----------------------------
   #  Advanced search.
   # ----------------------------
 
   def initialize_advanced_search
-    name     = params[:name].to_s.strip_squeeze
-    user     = params[:user].to_s.strip_squeeze
-    location = params[:location].to_s.strip_squeeze
-    content  = params[:content].to_s.strip_squeeze
+    name     = google_parse(params[:name])
+    user     = google_parse(params[:user])
+    location = google_parse(params[:location])
+    content  = google_parse(params[:content])
 
-    if (name + user + location + content).blank?
-      raise "You must specify at least one of the four conditions."
-
-    # I was thinking about turning these into pattern searches.  But I think
-    # that could be confusing.  Adding, say, a "user" condition to one of
-    # these, the results would be totally different.
-    # elsif (model_symbol == :Name) and (user + location + content).blank?
-    # elsif (model_symbol == :Image) and (user + location + name).blank?
-    # elsif (model_symbol == :Location) and (user + name + content).blank?
-
-    # Easy case: just searching on Name and User.
-    elsif (location + content).blank?
-      if !name.blank?
-        clean = clean_pattern(name)
-        self.where << "names.search_name LIKE '%#{clean}%'"
-        case model_symbol
-        when :Image       ; self.join << {:images_observations => {:observations => :names}}
-        when :Location    ; self.join << {:observations => :names}
-        when :Observation ; self.join << :names
-        end
-      end
-      if !user.blank?
-        clean = clean_pattern(user)
-        self.where << "users.name LIKE '%#{clean}%' OR " +
-                      "users.login LIKE '%#{clean}%'"
-        case model_symbol
-        when :Image       ; self.join << {:images_observations => {:observations => :users}}
-        when :Location    ; self.join << {:observations => :users}
-        when :Name        ; self.join << {:observations => :users}
-        when :Observation ; self.join << :users
-        end
-      end
-      params[:by] ||= 'name'
-
-    # The other easy cases are the non-observation models: run the query for
-    # observation first, then coerce into our type.
-    elsif model_symbol != :Observation
-      if !allowed_model_flavors[model_symbol].include?(:with_observations_in_set)
-        raise "Forgot to tell me how to build a :#{with_observations_in_set} query for #{model}!"
-      end
-      subquery = self.class.lookup(:Observation, :advanced_search, params)
-      self.flavor    = :with_observations_in_set
-      params[:ids]   = subquery.result_ids.uniq[0,MAX_ARRAY]
-      params[:title] = ["tag query_title_advanced_search"]
-      params[:by]  ||= 'name'
-      self.save if self.id
-      initialize_query
-
-    # Now we've reduced the problem to merely doing a hideously nasty query
-    # for observations.  At least the joins are smaller this way.
-    else
-      ids = []
-
-      if !name.blank?
-        self.join << :names
-        clean = clean_pattern(name)
-        self.where << "names.search_name LIKE '%#{clean}%'"
-      end
-
-      if !user.blank?
-        clean = clean_pattern(user)
-        self.where << "users.name LIKE '%#{clean}%' OR " +
-                      "users.login LIKE '%#{clean}%'"
-        self.join << :users
-      end
-
-      if !location.blank?
-        search = google_parse(location)
-        ids += google_execute(search, :fields => [ 'observations.where' ],
-            :where => 'observations.location_id IS NULL')
-        ids += google_execute(search, :join => :locations,
-            :fields => [ 'locations.display_name', 'locations.search_name' ])
-      end
-
-      if !content.blank?
-        more_ids = []
-        search = google_parse(content)
-        more_ids += google_execute(search, :fields => [ 'observations.notes' ])
-        more_ids += google_execute(search, :join => :comments,
-            :fields => [ 'observations.notes', 'comments.summary',
-                         'comments.comment' ])
-
-        if !location.blank?
-          ids = intersect_id_sets(ids, more_ids)
-        else
-          ids = more_ids
-        end
-      end
-
-      self.flavor    = :in_set
-      params[:ids]   = ids.uniq[0,MAX_ARRAY]
-      params[:title] = ["tag query_title_advanced_search"]
-      params[:by]  ||= 'name'
-      self.save if self.id
-      initialize_query
+    # Force user to enter *something*.
+    if name.blank? and user.blank? and location.blank? and content.blank?
+      raise :runtime_no_conditions.t
     end
-  end
 
-  # Find intersection of a bunch of sets.
-  def intersect_id_sets(*sets)
-    if sets.length > 1
-      counter = {}
-      for id in sets.flatten
-        counter[id] ||= 0
-        counter[id] += 1
+    # This case is a disaster.  Perform it as an observation query, then
+    # coerce into images.
+    if (model_symbol == :Image) and !content.blank?
+      self.executor = lambda do |args|
+        args = args.dup
+        ids = self.class.lookup(:Observation, flavor, params).result_ids(args)
+        ids = clean_id_set(ids)
+        extend_join(args)  << :images_observations
+        extend_where(args) << "images_observations.observation_id IN (#{ids})"
+        model.connection.select_values(query(args))
       end
-      n = sets.length
-      counter.keys.select {|id| counter[id] == n}
-    else
-      sets.first
+      return
+    end
+
+    case model_symbol
+    when :Image
+      self.join << {:images_observations => {:observations => :users}}      if !user.blank?
+      self.join << {:images_observations => {:observations => :names}}      if !name.blank?
+      self.join << {:images_observations => {:observations => :locations!}} if !location.blank?
+      self.join << {:images_observations => :observations}                  if !content.blank?
+    when :Location 
+      self.join << {:observations => :users} if !user.blank?
+      self.join << {:observations => :names} if !name.blank?
+      self.join << :observations             if !content.blank?
+    when :Name
+      self.join << {:observations => :users}      if !user.blank?
+      self.join << {:observations => :locations!} if !location.blank?
+      self.join << :observations                  if !content.blank?
+    when :Observation
+      self.join << :names      if !name.blank?
+      self.join << :users      if !user.blank?
+      self.join << :locations! if !location.blank?
+    end
+
+    # Name of mushroom...
+    if !name.blank?
+      self.where += google_conditions(name, 'names.search_name')
+    end
+
+    # Who observed the mushroom...
+    if !user.blank?
+      self.where += google_conditions(user, 'CONCAT(users.login,users.name)')
+    end
+
+    # Where the mushroom was seen...
+    if !location.blank?
+      if model_symbol == :Location
+        self.where += google_conditions(location, 'locations.search_name')
+      else
+        self.where += google_conditions(location,
+          'IF(locations.id,locations.search_name,observations.where)')
+      end
+    end
+
+    # Content of observation and comments...
+    if !content.blank?
+      self.executor = lambda do |args|
+        # Cannot do left outer join from observations to comments, because it
+        # will never return.  Instead, break it into two queries, one without
+        # comments, and another with inner join on comments.
+        args2 = args.dup
+        extend_where(args2)
+        args2[:where] += google_conditions(content, 'observations.notes')
+        results = model.connection.select_values(query(args2))
+
+        args2 = args.dup
+        extend_join(args2) << case model_symbol
+        when :Image       ; {:images_observations => {:observations => :comments}}
+        when :Location    ; {:observations => :comments}
+        when :Name        ; {:observations => :comments}
+        when :Observation ; :comments
+        end
+        extend_where(args2)
+        args2[:where] += google_conditions(content,
+          'CONCAT(observations.notes,comments.summary,comments.comment)')
+        results |= model.connection.select_values(query(args2))
+      end
     end
   end
 
@@ -1283,7 +1203,7 @@ class Query < AbstractQuery
 
     # Tell it to skip observations with no images!
     self.tweak_outer_query = lambda do |outer|
-      (outer.params[:join] ||= []) << :images_observations
+      extend_join(outer.params) << :images_observations
     end
   end
 end

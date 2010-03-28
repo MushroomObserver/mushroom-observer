@@ -652,9 +652,12 @@ sort_by_last_login:  Last Login
 sort_by_user: "[:USER]"
 sort_by_login: "[:LOGIN_NAME]"
 sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_where:  "[:LOCATION]"
+sort_by_location:  "[:LOCATION]"
 sort_by_confidence:  "[:CONFIDENCE_LEVEL]"
 sort_by_image_quality:  Image Quality
 sort_by_thumbnail_quality:  Thumbnail Quality
+sort_by_contribution:  Contribution
 sort_by_reverse:  Reverse Order
 
 # RSS log messages.
@@ -884,9 +887,12 @@ runtime_location_merge_failed: "Konnte Fund [name] nicht kombinieren."
 runtime_login_failed: "Login fehlgeschlagen."
 runtime_login_success: "Login erfolgreich."
 runtime_name_in_use_with_notes: "Der Name '[name]' wird schon verwendet und [other] hat Bemerkungen."
+runtime_no_conditions:  You didn't specify any conditions!
 runtime_no_upload_image: Beim Hochladen von [name] gab es Probleme.
+runtime_object_deleted:  This object has been deleted.
 runtime_object_not_in_index:  "Can't find [type] #[id] in the results of the current search or index."
 runtime_prefs_password_no_match: "Die beiden Passwörter sind verschieden."
+runtime_search_has_expired:  Your user-search has expired, please try again.
 runtime_show_observation_success: "Deine Stimmen sind gezählt worden."
 runtime_unable_to_transfer_name: "Kann nicht von [name] zu anderen Synonymen übertragen."
 
@@ -1160,12 +1166,11 @@ app_powered_by: Hergestellt mit
 app_preferred_browser: Lieblings-Browser
 
 # This is for the search bar at the top of every page.
-app_advanced_search: Erweiterte Suche
 app_find: Suchen
-app_observations_find: Funde
-app_names_find: Namen
-app_images_find: Bilder
-app_locations_find: Fundorte
+app_search:  Search
+app_refine_search:  Refine
+app_advanced_search: Erweiterte Suche
+app_timer:  "(time: [seconds] sec)"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
@@ -1928,7 +1933,9 @@ list_observations_location_merge: Mit einem bekannten Fundort kombinieren
 
 # location/list_place_names
 list_place_names_known: Bekannte Fundorte
-list_place_names_undef: Fundorte ohne Kartenposition (nach Häufigkeit)
+list_place_names_known_order: '(nach Namen)'
+list_place_names_undef: Fundorte ohne Kartenposition
+list_place_names_undef_order: '(nach Häufigkeit)'
 list_place_names_map: Karte der Fundorte
 list_place_names_merge: Kombinieren
 
@@ -2703,6 +2710,11 @@ list_merge_options_title: Optionen zum Kombinieren von [where]
 
 # observer/list_notifications
 list_notifications_title: Email-Benachrichtigungen für [user]
+
+
+# observer/list_users
+list_users_joined:  Joined
+list_users_contribution:  Contribution
 
 
 # location/add_to_location

@@ -941,6 +941,10 @@ return result if debug
 protected
 
   def validate # :nodoc:
+    # Clean off leading/trailing whitespace from +where+.
+    self.where = self.where.strip_squeeze if self.where
+    self.where = nil if self.where == ''
+
     if !self.when
       errors.add(:when, :validate_observation_when_missing.t)
     elsif self.when.is_a?(Date) && self.when > Date.today

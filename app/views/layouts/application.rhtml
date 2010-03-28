@@ -147,18 +147,31 @@
         <td width="100%" valign="top" class="main">
           <div style="padding:10px">
 
-            <% pattern = session[:pattern]
-            form_tag(:controller => 'observer', :action => 'pattern_search') do %>
-              <%= :app_find.t %>: <%= text_field("search", "pattern", :size => 30, :value => pattern)%>
-              <%= submit_tag :app_observations_find.l %>
-              <%= submit_tag :app_images_find.l %>
-              <%= submit_tag :app_names_find.l %>
-              <%= submit_tag :app_locations_find.l %>
+            <% form_tag(:controller => 'observer', :action => 'pattern_search') do %>
+              <%= :app_find.t %>: <%= text_field(:search, :pattern, :size => 30,
+                                                 :value => session[:pattern])%>
+              <%= options = [
+                [ :OBSERVATIONS.l, :observation ],
+                [ :IMAGES.l, :image ],
+                [ :NAMES.l, :name ],
+                [ :LOCATIONS.l, :location ],
+                [ :SPECIES_LISTS.l, :species_list ],
+                [ :COMMENTS.l, :comment ],
+              ]
+              options << [ :USERS.l, :user ] if true
+              select(:search, :type, options,
+                     :selected => session[:search_type] || :observation) %>
+              <%= submit_tag :app_search.l %>
+              <% if false %>
+                <%= link_to(:app_refine_search.l, :controller => 'observer',
+                            :action => 'refine_search') %> |
+              <% end %>
               <%= link_to(:app_advanced_search.l, :controller => 'observer',
                           :action => 'advanced_search_form') %>
-              <% if @start %>
-                Start: <%= Time.now.to_f - @start.to_f %>
-                <% @start = nil %>
+              <% if @timer_start 
+                @timer_end ||= Time.now %>
+                <%= :app_timer.t(:seconds => '%.4f' % (@timer_end.to_f - @timer_start.to_f)) %>
+                <% @timer_start = nil %>
               <% end %>
             <% end %>
 

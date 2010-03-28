@@ -650,9 +650,12 @@ sort_by_last_login: Last Login
 sort_by_user: "[:USER]"
 sort_by_login: "[:LOGIN_NAME]"
 sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
+sort_by_where: "[:LOCATION]"
+sort_by_location: "[:LOCATION]"
 sort_by_confidence: "[:CONFIDENCE_LEVEL]"
 sort_by_image_quality: Image Quality
 sort_by_thumbnail_quality: Thumbnail Quality
+sort_by_contribution: Contribution
 sort_by_reverse: Reverse Order
 
 # RSS log messages.
@@ -882,9 +885,12 @@ runtime_location_merge_failed: Failed to merge observation [name].
 runtime_login_failed: Login unsuccessful.
 runtime_login_success: Login successful.
 runtime_name_in_use_with_notes: The name '[name]' is already in use and [other] has notes.
+runtime_no_conditions: You didn't specify any conditions!
 runtime_no_upload_image: Had problems uploading image '[name]'.
+runtime_object_deleted: This object has been deleted.
 runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
 runtime_prefs_password_no_match: Password and confirmation did not match.
+runtime_search_has_expired: Your user-search has expired, please try again.
 runtime_show_observation_success: Successfully changed vote.
 runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
 
@@ -1157,12 +1163,11 @@ app_powered_by: Powered by
 app_preferred_browser: Preferred browser
 
 # This is for the search bar at the top of every page.
-app_advanced_search: Advanced Search
 app_find: Find
-app_observations_find: "[:OBSERVATIONS]"
-app_names_find: "[:NAMES]"
-app_images_find: "[:IMAGES]"
-app_locations_find: "[:LOCATIONS]"
+app_search: Search
+app_refine_search: Refine
+app_advanced_search: Advanced Search
+app_timer: "(time: [seconds] sec)"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
@@ -1926,8 +1931,10 @@ list_observations_location_merge: Merge With A Defined Location
 
 
 # location/list_place_names
-list_place_names_known: Known Locations (by name)
-list_place_names_undef: Undefined Locations (by frequency)
+list_place_names_known: Known Locations
+list_place_names_known_order: '(by name)'
+list_place_names_undef: Undefined Locations
+list_place_names_undef_order: '(by frequency)'
 list_place_names_map: Map Locations
 list_place_names_merge: Merge
 
@@ -2703,6 +2710,11 @@ list_merge_options_title: Merge Options for [where]
 
 # observer/list_notifications
 list_notifications_title: Email Alerts for [user]
+
+
+# observer/list_users
+list_users_joined: Joined
+list_users_contribution: Contribution
 
 
 # location/add_to_location
@@ -3703,8 +3715,8 @@ how_maps: >
   "[:map_locations_global_map]":/location/map_locations.
   \n\n
   To see a distribution map for a particular "Name":#name, go to the page for
-  that name (e.g., enter the name in the search bar and click
-  '[:app_names_find]'), then click '[:show_name_distribution_map]' at the
+  that name (e.g., enter the name in the search bar, select '[:NAMES]'), and
+  click '[:app_search]', then click '[:show_name_distribution_map]' at the
   top of the page.
   \n\n
   "Users":#user are encouraged to add to the distribution map for a name.  The

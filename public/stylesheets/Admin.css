@@ -15,3 +15,16 @@ body {
   margin-bottom: 20px;
 }
 
+img { border-color: #000000; }
+a img:hover { border-color: #ff0000; }
+
+li.selected { background-color: #ff0000 ! important }
+
+.ListLine0                            { background: #aa00aa; }
+.ListLine0 div.textile table          { background: #220022; }
+.ListLine0 div.textile table table td { background: #aa00aa; }
+
+.ListLine1                            { background: #aaaa00; }
+.ListLine1 div.textile table          { background: #222200; }
+.ListLine1 div.textile table table td { background: #aaaa00; }
+

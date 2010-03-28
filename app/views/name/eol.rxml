@@ -71,6 +71,6 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
           end
         end
       end
-      break if @max_secs and @start and (Time.now() > (@start + @max_secs))
+      break if @max_secs and @timer_start and (Time.now() > (@timer_start + @max_secs))
     end
   }

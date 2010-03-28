@@ -31,35 +31,13 @@
 %>
 
 <% paginate_block(@pages) do %>
-  <table cellpadding="5" cellspacing="0" width="100%">
-    <% row_count = 0
-    col_count = 0
-    for rss_log in @objects
-      color = calc_color(row_count, col_count, @layout["alternate_rows"],
-                         @layout["alternate_columns"])
-      if col_count == 0 %>
-        <tr>
-      <% end %>
-      <td align="center" valign="top" class="ListLine<%= color %>">
-        <%= object = rss_log.object
-        if object
-          render(:partial => object.class.name.underscore, :object => object,
-                 :locals => { :rss_log => rss_log })
-        else
-          render(:partial => 'rss_log', :object => rss_log)
-        end %>
-      </td>
-      <% if col_count == (@layout["columns"] - 1) %>
-        </tr>
-      <% end
-      col_count += 1
-      if col_count >= @layout["columns"]
-        col_count = 0
-        row_count += 1
-      end
-    end
-    if col_count != 0 %>
-      </tr>
-    <% end %>
-  </table>
+  <% make_matrix(@objects, :width => '100%') do |rss_log|
+    object = rss_log.object
+    if object %>
+      <%= render(:partial => object.class.name.underscore, :object => object,
+                 :locals => { :rss_log => rss_log }) %>
+    <% else %>
+      <%= render(:partial => 'rss_log', :object => rss_log) %>
+    <% end
+  end %>
 <% end %>

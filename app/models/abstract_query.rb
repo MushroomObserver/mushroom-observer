@@ -297,7 +297,10 @@ class AbstractQuery < ActiveRecord::Base
   self.abstract_class = true
 
   # Low-level description of SQL query.
-  attr_accessor :join, :tables, :where, :group, :order
+  attr_accessor :join, :tables, :where, :group, :order, :executor
+
+  # Savelast query for debug / diagnostic purposes.
+  attr_accessor :last_query
 
   # Prevent SQL statements from getting absurdly large.  Any "id IN (...)"
   # conditions are limited to this number of values.
@@ -386,11 +389,6 @@ class AbstractQuery < ActiveRecord::Base
   #
   superclass_delegating_accessor :join_conditions
   self.join_conditions = {}
-
-  # This is the order in which we should list tables, smallest first.  Any
-  # tables not listed in here get stuck at the end, alphabetically.
-  superclass_delegating_accessor :table_order
-  self.table_order = []
 
   # Add these to the list of required parameters.  For example, it you want
   # all queries for a given model add an optional parameter:
@@ -975,11 +973,12 @@ class AbstractQuery < ActiveRecord::Base
     table = model.table_name
 
     # By default, no conditions, ordering, etc.
-    self.join   = []
-    self.tables = []
-    self.where  = []
-    self.group  = ''
-    self.order  = ''
+    self.join     = []
+    self.tables   = []
+    self.where    = []
+    self.group    = ''
+    self.order    = ''
+    self.executor = nil
 
     # Setup query for the given flavor.
     send("initialize_#{flavor}")
@@ -1155,44 +1154,6 @@ class AbstractQuery < ActiveRecord::Base
     )
   end
 
-  # Execute google-style search.  Pass in the GoogleSearch from +google_parse+,
-  # an Array of fields to search, and any other query parameters, such as
-  # +join+ table(s) or extra +where+ condition(s).  It returns a list of ids.
-  def google_execute(search, args={})
-    fields = args[:fields]
-    args[:where] ||= []
-    args[:where] = [args[:where]] if args[:where].is_a?(String)
-
-    # Easiest case, only searching one field.
-    if fields.length == 1
-      args[:where] << google_conditions(search, fields.first)
-      select_values(args).map(&:to_i)
-
-    else
-      # If searching multiple fields, concat them all together into one string.
-      concat = 'CONCAT(' + fields.map do |field|
-        "IF(#{field} IS NULL,'',#{field})"
-      end.join(',') + ')'
-
-      # Intermediate case, searching multiple fields, but only one condition.
-      if search.goods.flatten.length + search.bads.length <= 1
-        args[:where] << google_conditions(search, concat)
-        select_values(args).map(&:to_i)
-
-      # General case, searching multiple fields with multiple conditions.
-      # Create a subquery that concats all the search fields together, then
-      # apply all our conditions to that monster string.
-      else
-        args[:select] = "#{model.table_name}.id AS id, #{concat} AS str"
-        subquery = query(args)
-        model.connection.select_values(%(
-          SELECT DISTINCT tmp.id FROM (#{subquery}) AS tmp
-          WHERE #{google_conditions(search, 'tmp.str')}
-        )).map(&:to_i)
-      end
-    end
-  end
-
   # Put together a bunch of SQL conditions that describe a given search.
   def google_conditions(search, field)
     goods = search.goods
@@ -1202,7 +1163,7 @@ class AbstractQuery < ActiveRecord::Base
       or_clause(*good.map {|str| "#{field} LIKE '%#{clean_pattern(str)}%'"})
     end
     ands += bads.map {|bad| "#{field} NOT LIKE '%#{clean_pattern(bad)}%'"}
-    ands.join(' AND ')
+    [ands.join(' AND ')]
   end
 
   # Simple class to hold the results of +google_parse+.  It just has two
@@ -1212,6 +1173,9 @@ class AbstractQuery < ActiveRecord::Base
     def initialize(args={})
       self.goods = args[:goods]
       self.bads = args[:bads]
+    end
+    def blank? 
+      !goods.any? && !bads.any?
     end
   end
 
@@ -1244,7 +1208,6 @@ class AbstractQuery < ActiveRecord::Base
     our_where   = self.where.dup
     our_where  += args[:where] if args[:where].is_a?(Array)
     our_where  << args[:where] if args[:where].is_a?(String)
-    our_where  += calc_join_conditions(model.table_name, our_join)
     our_where   = calc_where_clause(our_where)
     our_group   = args[:group] || self.group
     our_order   = args[:order] || self.order
@@ -1267,6 +1230,7 @@ class AbstractQuery < ActiveRecord::Base
     sql += "  ORDER BY #{our_order}\n" if !our_order.blank?
     sql += "  LIMIT #{our_limit}\n"    if !our_limit.blank?
 
+    self.last_query = sql
     return sql
   end
 
@@ -1285,10 +1249,13 @@ class AbstractQuery < ActiveRecord::Base
 
   # Extract and format list of tables names from join tree for FROM clause.
   def calc_from_clause(our_join=join, our_tables=tables)
-    tables = table_list(our_join, our_tables).
-      sort_by {|x| table_order.index(x.to_s.to_sym) or raise("Don't know the table '#{x}'.")}.
-      map {|x| "`#{x}`"}.
-      join(', ')
+    implicits = [model.table_name] + our_tables
+    result = implicits.uniq.map {|x| "`#{x}`"}.join(', ')
+    if our_join
+      result += ' '
+      result += calc_join_conditions(model.table_name, our_join).join(' ')
+    end
+    return result
   end
 
   # Extract a complete list of tables being used by this query.  (Combines
@@ -1317,44 +1284,66 @@ class AbstractQuery < ActiveRecord::Base
   # Figure out which additional conditions we need to connect all the joined
   # tables.  Note, +to+ can be an Array and/or tree-like Hash of dependencies.
   # (I believe it is identical to how :include is done in ActiveRecord#find.)
-  def calc_join_conditions(from, to)
+  def calc_join_conditions(from, to, done=[from.to_s])
     result = []
     from = from.to_s
     if to.is_a?(Hash)
       for key, val in to
-        result += calc_join_condition(from, key.to_s)
-        result += calc_join_conditions(key.to_s, val)
+        result += calc_join_condition(from, key.to_s, done)
+        result += calc_join_conditions(key.to_s, val, done)
       end
     elsif to.is_a?(Array)
-      result += to.map {|x| calc_join_conditions(from, x)}.flatten
+      result += to.map {|x| calc_join_conditions(from, x, done)}.flatten
     else
-      result += calc_join_condition(from, to.to_s)
+      result += calc_join_condition(from, to.to_s, done)
     end
     return result
   end
 
-  # Create SQL condition to join two tables.
-  def calc_join_condition(from, to)
+  # Create SQL 'JOIN ON' clause to join two tables.  Tack on an exclamation to
+  # make it an outer join.  Tack on '.field' to specify alternate association.
+  def calc_join_condition(from, to, done)
     from = from.sub(/\..*/, '')
-    # Check for direct join first, e.g., if joining from observatons to
-    # rss_logs, use "observations.rss_log_id = rss_logs.id", because that will
-    # take advantage of the primary key on rss_logs.id.
-    if col = (join_conditions[from.to_sym] && join_conditions[from.to_sym][to.to_sym])
-      to = to.sub(/\..*/, '')
-    # Now look for reverse join.  (In the above example, and this was how it
-    # used to be, it would be "observations.id = rss_logs.observation_id".)
-    elsif col = (join_conditions[to.to_sym] && join_conditions[to.to_sym][from.to_sym])
-      to = to.sub(/\..*/, '')
-      from, to = to, from
-    else
-      raise("Don't know how to join from #{from} to #{to}.")
+    to = to.dup
+    do_outer = to.sub!(/!$/, '')
+
+    result = []
+    if !done.include?(to)
+      done << to
+
+      # Check for "forward" join first, e.g., if joining from observatons to
+      # rss_logs, use "observations.rss_log_id = rss_logs.id", because that will
+      # take advantage of the primary key on rss_logs.id.
+      if col = (join_conditions[from.to_sym] && join_conditions[from.to_sym][to.to_sym])
+        to.sub!(/\..*/, '')
+        target_table = to
+
+      # Now look for "reverse" join.  (In the above example, and this was how it
+      # used to be, it would be "observations.id = rss_logs.observation_id".)
+      elsif col = (join_conditions[to.to_sym] && join_conditions[to.to_sym][from.to_sym])
+        to.sub!(/\..*/, '')
+        target_table = to
+        from, to = to, from
+      else
+        raise("Don't know how to join from #{from} to #{to}.")
+      end
+
+      # Calculate conditions.
+      if col == :obj || col == :object
+        conds = "#{from}.#{col}_id = #{to}.id AND " +
+                "#{from}.#{col}_type = '#{to.singularize.camelize}'"
+      else
+        conds = "#{from}.#{col} = #{to}.id"
+      end
+
+      # Put the whole JOIN clause together.
+      if do_outer
+        result << ["LEFT OUTER JOIN `#{target_table}` ON #{conds}"]
+      else
+        result << ["JOIN `#{target_table}` ON #{conds}"]
+      end
     end
-    if col == :obj || col == :object
-      ["#{from}.#{col}_id = #{to}.id",
-       "#{from}.#{col}_type = '#{to.singularize.camelize}'"]
-    else
-      ["#{from}.#{col} = #{to}.id"]
-    end
+    return result
   end
 
   # Reverse order of an ORDER BY clause.
@@ -1368,42 +1357,68 @@ class AbstractQuery < ActiveRecord::Base
   #
   #  :section: Low-Level Queries
   #
+  #  *NOTE*: These methods are not allowed for queries that have a customized
+  #  +executor+ (e.g., google-style searches).
+  #
   ##############################################################################
 
   # Execute query after wrapping select clause in COUNT().
   def select_count(args={})
-    select = args[:select] || "DISTINCT #{model.table_name}.id"
-    args = args.merge(:select => "COUNT(#{select})")
-    model.connection.select_value(query(args)).to_i
+    initialize_query
+    if executor
+      executor.call(args).length
+    else
+      select = args[:select] || "DISTINCT #{model.table_name}.id"
+      args = args.merge(:select => "COUNT(#{select})")
+      model.connection.select_value(query(args)).to_i
+    end
   end
 
   # Call model.connection.select_value.
   def select_value(args={})
-    model.connection.select_value(query(args))
+    initialize_query
+    if executor
+      executor.call(args).first
+    else
+      model.connection.select_value(query(args))
+    end
   end
 
   # Call model.connection.select_values.
   def select_values(args={})
-    model.connection.select_values(query(args))
+    initialize_query
+    if executor
+      executor.call(args)
+    else
+      model.connection.select_values(query(args))
+    end
   end
 
   # Call model.connection.select_rows.
   def select_rows(args={})
+    initialize_query
+    raise "This query doesn't support low-level access!" if executor
     model.connection.select_rows(query(args))
   end
 
   # Call model.connection.select_one.
   def select_one(args={})
+    initialize_query
+    raise "This query doesn't support low-level access!" if executor
     model.connection.select_one(query(args))
   end
 
   # Call model.connection.select_all.
   def select_all(args={})
+    initialize_query
+    raise "This query doesn't support low-level access!" if executor
     model.connection.select_all(query(args))
   end
 
   # Call model.find_by_sql.
   def find_by_sql(args={})
+    initialize_query
+    raise "This query doesn't support low-level access!" if executor
     model.find_by_sql(query_all(args))
   end
 
@@ -1415,6 +1430,8 @@ class AbstractQuery < ActiveRecord::Base
   #  example, all methods that return instantiated results accept +:include+
   #  which is passed in to <tt>model.all</tt>.
   #
+  #  join::           Add extra join clause(s) to query.
+  #  where::          Add extra condition(s) to query.
   #  limit::          Put a limit on the number of results from the raw query.
   #  letter_field::   Filter results by a given first letter (for pagination).
   #  include::        Eager-load these associations when instantiating results.
@@ -1429,7 +1446,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Args accepted by +results+, +result_ids+, +num_results+.  (These are passed
   # through into +select_values+.)
-  RESULTS_ARGS = [:limit]
+  RESULTS_ARGS = [:join, :where, :limit]
 
   # Args accepted by +paginate+ and +paginate_ids+.
   PAGINATE_ARGS = [:letter_field]
@@ -1503,14 +1520,14 @@ class AbstractQuery < ActiveRecord::Base
 
     # Get list of letters used in results.
     if letter_field = args[:letter_field]
-      paginator.used_letters = select_values(results_args.merge({
+      paginator.used_letters = select_values(results_args.merge(
         :select => "DISTINCT LEFT(#{letter_field},1)"
-      }))
+      ))
     end
 
     # Filter by letter.
     if letter = paginator.letter
-      self.where << "LEFT(#{letter_field},1) = '#{letter}'"
+      extend_where(results_args) << "LEFT(#{letter_field},1) = '#{letter}'"
       @result_ids = nil
     end
 
@@ -1793,5 +1810,30 @@ class AbstractQuery < ActiveRecord::Base
       end
     end
     return [args1, args2]
+  end
+
+  # Safely add to :where in +args+.  Dups <tt>args[:where]</tt>, casts it into
+  # an Array, and returns the new Array.
+  def extend_where(args)
+    extend_arg(args, :where)
+  end
+
+  # Safely add to :join in +args+.  Dups <tt>args[:join]</tt>, casts it into
+  # an Array, and returns the new Array.
+  def extend_join(args)
+    extend_arg(args, :join)
+  end
+
+  # Safely add to +arg+ in +args+.  Dups <tt>args[arg]</tt>, casts it into
+  # an Array, and returns the new Array.
+  def extend_arg(args, arg)
+    case old_arg = args[arg]
+    when Symbol, String
+      args[arg] = [old_arg]
+    when Array
+      args[arg] = old_arg.dup
+    else
+      args[arg] = []
+    end
   end
 end

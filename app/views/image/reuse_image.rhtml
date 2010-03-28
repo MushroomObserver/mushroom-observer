@@ -29,31 +29,12 @@
   </big></p><br/>
 
   <% paginate_block(@pages) do %>
-    <table cellspacing="0">
-      <% row_count = 0
-      col_count = 0
-      for image in @objects
-        color = calc_color(row_count, col_count, @layout["alternate_rows"],
-                           @layout["alternate_columns"])
-        if col_count == 0 %>
-          <tr>
-        <% end %>
-        <td align="left" valign="top" class="ListLine<%= color %>">
-          <%= render(:partial => 'image_reuse', :object => image, :locals =>
-                     { :link_args => { :action => 'add_image_to_obs',
-                     :id => image.id, :obs_id => @observation.id,
-                     :params => query_params } }) %>
-        </td>
-        <% if col_count == (@layout["columns"] - 1) %>
-          </tr>
-        <% end
-        col_count += 1
-        if col_count >= @layout["columns"]
-          col_count = 0
-          row_count += 1
-        end
-      end %>
-    </table>
+    <% make_matrix(@objects) do |image| %>
+      <%= render(:partial => 'image_reuse', :object => image, :locals =>
+                 { :link_args => { :action => 'add_image_to_obs',
+                 :id => image.id, :obs_id => @observation.id,
+                 :params => query_params } }) %>
+    <% end %>
   <% end %>
 
   <%= focus_on('observation_idstr') %>

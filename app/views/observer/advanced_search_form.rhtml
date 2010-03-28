@@ -10,9 +10,14 @@
 
   <label for="search_type"><%= :advanced_search_result_type.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_result_type_help.t %></span><br/>
-  <%= select('search', 'type', [:observation.l, :image.l, :location.l, :description.l]) %><br/><br/>
+  <%= select('search', 'type', [
+    [:OBSERVATIONS.l, :observation],
+    [:IMAGES.l, :image],
+    [:LOCATIONS.l, :location],
+    [:NAME_DESCRIPTIONS.l, :name],
+  ]) %><br/><br/>
 
-  <label for="search_name"><%= :name.t %>:</label><br/>
+  <label for="search_name"><%= :NAME.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_name_help.t %></span><br/>
   <%= text_field('search', 'name', :size => 70) %><br/><br/>
   <%= turn_into_name_auto_completer('search_name', :primer => @name_primer) %>
@@ -22,7 +27,7 @@
   <%= text_field('search', 'user', :size => 70) %><br/><br/>
   <%= turn_into_user_auto_completer('search_user', :primer => @user_primer) %>
   
-  <label for="search_location"><%= :location.t %>:</label><br/>
+  <label for="search_location"><%= :LOCATION.t %>:</label><br/>
   <span class="HelpNote"><%= :advanced_search_location_help.t %></span><br/>
   <%= text_field('search', 'location', :size => 70) %><br/><br/>
   <%= turn_into_location_auto_completer('search_location', :primer => @location_primer) %>

@@ -8,6 +8,7 @@ minimal_unknown:
   user_id:   2
   location_id: 2
   name_id:   1
+  notes:     ''
 
 detailed_unknown:
   id:        2
@@ -104,4 +105,5 @@ unknown_with_no_naming:
   user_id:   2
   where:     Who knows where
   name_id:   1
+  notes:     ''
 

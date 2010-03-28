@@ -46,6 +46,7 @@ class SpeciesListController < ApplicationController
     :next_species_list,
     :prev_species_list,
     :show_species_list,
+    :species_list_search,
     :species_lists_by_title,
     :species_lists_by_user,
   ]
@@ -89,6 +90,18 @@ class SpeciesListController < ApplicationController
   def species_lists_by_title
     query = create_query(:SpeciesList, :all, :by => :title)
     show_selected_species_lists(query)
+  end
+
+  # Display list of SpeciesList's whose title, notes, etc. matches a string pattern.
+  def species_list_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (spl = SpeciesList.safe_find(pattern))
+      redirect_to(:action => 'show_species_list', :id => spl.id)
+    else
+      query = create_query(:SpeciesList, :pattern_search, :pattern => pattern)
+      show_selected_species_lists(query)
+    end
   end
 
   # Show selected list of species_lists.

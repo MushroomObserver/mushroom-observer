@@ -15,6 +15,7 @@
 
 class CommentController < ApplicationController
   before_filter :login_required, :except => [
+    :comment_search,
     :index_comment,
     :list_comments,
     :next_comment,
@@ -61,6 +62,18 @@ class CommentController < ApplicationController
   def show_comments_by_user
     query = create_query(:Comment, :by_user, :user => params[:id])
     show_selected_comments(query)
+  end
+
+  # Display list of Comment's whose text matches a string pattern.
+  def comment_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (comment = Comment.safe_find(pattern))
+      redirect_to(:action => 'show_comment', :id => comment.id)
+    else
+      query = create_query(:Comment, :pattern_search, :pattern => pattern)
+      show_selected_comments(query)
+    end
   end
 
   # Show selected list of comments.

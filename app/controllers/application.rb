@@ -1008,14 +1008,14 @@ class ApplicationController < ActionController::Base
   end
 
   # Create sorting links for index pages, "graying-out" the current order.
-  def add_sorting_links(query, links)
+  def add_sorting_links(query, links, link_all=false)
     results = []
     this_by = query.params[:by] || query.default_order
     this_by = this_by.to_s.sub(/^reverse_/, '')
 
     for by, label in links
       str = label.t
-      if by.to_s == this_by
+      if !link_all and (by.to_s == this_by)
         results << str
       else
         results << [str, { :controller => query.model.show_controller,
@@ -1051,6 +1051,22 @@ class ApplicationController < ActionController::Base
   # number_arg::    Param used to store page number for pagination.
   # num_per_page::  Number of results per page.
   # sorting_links:: Array of pairs: ["by" String, label String]
+  # always_index::  Always show index, even if only one result.
+  # link_all_sorts:: Don't gray-out the current sort criteria.
+  #
+  # Side-effects: (sets/uses the following instance variables for the view)
+  # @title::        Provides default title.
+  # @links::        
+  # @sorts::        
+  # @layout::       
+  # @pages::        Paginator instance.
+  # @objects::      Array of objects to be shown.
+  # @extra_data::   Results of block yielded on every object if block given.
+  #
+  # Other side-effects:
+  # store_location::          Sets this as the +redirect_back_or_default+ location.
+  # clear_query_in_session::  Clears the query from the "clipboard" (if you didn't just store this query on it!).
+  # set_query_params::        Tells +query_params+ to pass this query on in links on this page.
   #
   def show_index_of_objects(query, args={})
     letter_arg   = args[:letter_arg]   || :letter
@@ -1076,7 +1092,7 @@ class ApplicationController < ActionController::Base
     # Add magic links for sorting.
     if (sorts = args[:sorting_links]) and
        (sorts.length > 1)
-      @sorts = add_sorting_links(query, sorts)
+      @sorts = add_sorting_links(query, sorts, args[:link_all_sorts])
     else
       @sorts = nil
     end
@@ -1087,8 +1103,14 @@ class ApplicationController < ActionController::Base
       num_per_page = @layout['count']
     end
 
+    # Time query.
+    @timer_start = Time.now
+    query.num_results
+    @timer_end = Time.now
+
     # If only one result (before pagination), redirect to 'show' action.
-    if query.num_results == 1
+    if (query.num_results == 1) and
+       !args[:always_index]
       redirect_to(:controller => query.model.show_controller,
                   :action => query.model.show_action,
                   :id => query.result_ids.first,
@@ -1124,7 +1146,8 @@ class ApplicationController < ActionController::Base
         end
       end
 
-      render(:action => args[:action])
+      # Render the list if given template.
+      render(:action => args[:action]) if args[:action]
     end
   end
 

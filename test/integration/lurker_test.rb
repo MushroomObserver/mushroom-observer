@@ -88,26 +88,31 @@ class LurkerTest < IntegrationTestCase
     # Search for a name.  (Only one.)
     form = open_form('form[action*=search]')
     form.change('pattern', 'Coprinus comatus')
-    form.submit('Names')
+    form.select('type', 'Names')
+    form.submit('Search')
     assert_match(/^.name.show_name.2\?/, path)
 
     # Search for observations of that name.  (Only one.)
-    form.submit('Observations')
+    form.select('type', 'Observations')
+    form.submit('Search')
     assert_match(/^.3\?/, path)
 
     # Search for images of the same thing.  (Still only one.)
-    form.submit('Images')
+    form.select('type', 'Images')
+    form.submit('Search')
     assert_match(/^.image.show_image.5\?/, path)
 
     # There should be no locations of that name, though.
-    form.submit('Locations')
+    form.select('type', 'Locations')
+    form.submit('Search')
     assert_template('location/list_locations')
     assert_flash(/no.*found/i)
     assert_select('div.results a[href]', false)
 
     # This should give us just about all the locations.
     form.change('pattern', 'california OR canada')
-    form.submit('Locations')
+    form.select('type', 'Locations')
+    form.submit('Search')
     assert_select('div.results a[href]') do |links|
       labels = links.map {|l| l.to_s.html_to_ascii}
       assert(labels.any? {|l| l.match(/Canada$/)},
@@ -123,8 +128,12 @@ class LurkerTest < IntegrationTestCase
     # Start at distribution map for Fungi.
     get('/name/map/1')
 
-    # Get a list of locations shown on map. (Only one so goes to show_loc.)
+    # Get a list of locations shown on map. (One defined, one undefined.)
     click(:label => 'Show Locations', :in => :tabs)
+    assert_template('location/list_locations')
+
+    # Click on the defined location.
+    click(:label => /Burbank/)
     assert_template('location/show_location')
 
     # Get a list of observations from there.  (Several so goes to index.)
