@@ -28,9 +28,12 @@
 #     observations_by_user
 #     observations_at_location
 #     observations_at_where
-#     pattern_search
 #     observation_search
-#     location_search
+#     advanced_search
+#
+#     pattern_search
+#     advanced_search_form
+#     refine_search
 #
 #     lookup_comment
 #     lookup_image
@@ -101,6 +104,9 @@ class ObserverController < ApplicationController
   require 'ftools'
   require 'set'
 
+  require_dependency 'refine_search'
+  include RefineSearch
+
   before_filter :login_required, :except => CSS + [
     :advanced_search,
     :advanced_search_form,
@@ -137,6 +143,7 @@ class ObserverController < ApplicationController
     :observations_at_location,
     :pattern_search,
     :prev_observation,
+    :refine_search,
     :rss,
     :show_observation,
     :show_rss_log,
@@ -413,6 +420,33 @@ class ObserverController < ApplicationController
       # Let the individual controllers execute and render it.
       redirect_to(:controller => model.show_controller,
         :action => 'advanced_search', :params => query_params(query))
+    end
+  end
+
+  # Allow users to refine an existing query.
+  def refine_search
+    # Create a bogus object with all the parameters used in the form.
+    @conds = Wrapper.new(params[:conds] || {})
+    @first_time = params[:conds].blank?
+
+    # Query has expired!
+    if !(@query = find_query)
+      flash_error(:runtime_search_has_expired.t)
+      redirect_back_or_default(:action => 'list_rss_logs')
+      
+    # Some models aren't supported yet.
+    elsif !(@fields = get_refine_search_fields(@query))
+      type = @query.model_string.underscore.to_sym
+      flash_error(:runtime_refine_search_model_not_supported.t(:type => type))
+      redirect_back_or_default(:action => 'list_rss_logs')
+
+    # Redisplay the index if the tweak is successful.
+    elsif !is_robot? and
+          (request.method == :post) and
+          (query2 = modify_query(@query, @fields, @conds))
+      redirect_to(:controller => query2.model.show_controller,
+                  :action => query2.model.index_action,
+                  :params => query_params(query2))
     end
   end
 

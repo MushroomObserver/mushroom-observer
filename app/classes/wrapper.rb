@@ -42,11 +42,20 @@ class Wrapper < BlankSlate
     @attributes.inspect.sub(/^\{/, '<Wrapper: ').sub(/\}$/, '>')
   end
 
+  def send(*args) # :nodoc:
+    method_missing(*args)
+  end
+
   def method_missing(name, *args) # :nodoc:
     if name.to_s.match(/^(\w+)=$/)
       @attributes[$1.to_sym] = args[0]
     else
       @attributes[name.to_s.to_sym]
     end
+  end
+
+  def respond_to?(name) # :nodoc:
+    name.to_s.match(/=$/) or
+    @attributes.has_key?(name.to_s.to_sym)
   end
 end

@@ -147,61 +147,77 @@
         <td width="100%" valign="top" class="main">
           <div style="padding:10px">
 
-            <% form_tag(:controller => 'observer', :action => 'pattern_search') do %>
-              <%= :app_find.t %>: <%= text_field(:search, :pattern, :size => 30,
-                                                 :value => session[:pattern])%>
-              <%= options = [
-                [ :OBSERVATIONS.l, :observation ],
-                [ :IMAGES.l, :image ],
-                [ :NAMES.l, :name ],
-                [ :LOCATIONS.l, :location ],
-                [ :SPECIES_LISTS.l, :species_list ],
-                [ :COMMENTS.l, :comment ],
-              ]
-              options << [ :USERS.l, :user ] if true
-              select(:search, :type, options,
-                     :selected => session[:search_type] || :observation) %>
-              <%= submit_tag :app_search.l %>
-              <% if false %>
-                <%= link_to(:app_refine_search.l, :controller => 'observer',
-                            :action => 'refine_search') %> |
+            <div id="search_bar">
+              <% form_tag(:controller => 'observer', :action => 'pattern_search') do %>
+                <b><%= :app_find.t %></b>:&nbsp;
+                  <%= text_field(:search, :pattern, :size => 30,
+                                 :value => session[:pattern])%>
+                <%= options = [
+                  [ :OBSERVATIONS.l, :observation ],
+                  [ :IMAGES.l, :image ],
+                  [ :NAMES.l, :name ],
+                  [ :LOCATIONS.l, :location ],
+                  [ :SPECIES_LISTS.l, :species_list ],
+                  [ :COMMENTS.l, :comment ],
+                ]
+                options << [ :USERS.l, :user ] if true
+                select(:search, :type, options,
+                       :selected => session[:search_type] || :observation) %>
+                <%= submit_tag :app_search.l %>&nbsp;&nbsp;
+                <% if query_params != {} %>
+                  <%= link_to(:app_refine_search.l.nowrap, :controller => 'observer',
+                              :action => 'refine_search',
+                              :params => query_params) %> |
+                <% end %>
+                <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer',
+                            :action => 'advanced_search_form') %>
               <% end %>
-              <%= link_to(:app_advanced_search.l, :controller => 'observer',
-                          :action => 'advanced_search_form') %>
-              <% if @timer_start 
-                @timer_end ||= Time.now %>
-                <%= :app_timer.t(:seconds => '%.4f' % (@timer_end.to_f - @timer_start.to_f)) %>
-                <% @timer_start = nil %>
-              <% end %>
+            </div>
+
+            <% if @timer_start %>
+              <div id="timer">
+                <%= @timer_end ||= Time.now
+                secs = '%.2f' % (@timer_end.to_f - @timer_start.to_f)
+                @timer_start = nil
+                if @num_results
+                  :app_index_timer.t(:seconds => secs,
+                                     :num => @num_results.to_i)
+                else
+                  :app_timer.t(:seconds => secs)
+                end %>
+              </div>
             <% end %>
 
-            <% 
-              if flash_notices?
-                boxify(flash_notice_level) do %>
-                  <%= flash_get_notices %>
-                <% end
-              end
-              flash_clear
-            %>
+            <div id="flashes">
+              <% if flash_notices? %>
+                  <% boxify(flash_notice_level) do %>
+                    <%= flash_get_notices %>
+                  <% end %>
+              <% end
+              flash_clear %>
+            </div>
 
-            <% no_session = !session_working?
-            no_javascript = !javascript_enabled? && session[:js_override] != :off
-            no_ajax       = can_do_ajax? == false && javascript_enabled? && session[:js_override] != :on
-            no_browser    = can_do_ajax? == nil   && javascript_enabled? && session[:js_override] != :on
-            if no_session || no_javascript || no_ajax || no_browser
-              new_tab_set do
-                add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if no_session
-                add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if no_javascript
-                add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
-                add_tab(:app_no_browser.t,    :controller => 'observer', :action => 'no_browser')    if no_browser
-              end
-            end
-            if @right_tabs %>
-              <div class='right_tabs'>
+            <% if @right_tabs %>
+              <div id="right_tabs">
                 <%= @right_tabs.join('<br/>') %>
               </div>
             <% end %>
-            <%= render_tab_sets %>
+
+            <div id="left_tabs">
+              <%= no_session = !session_working?
+              no_javascript = !javascript_enabled? && session[:js_override] != :off
+              no_ajax       = can_do_ajax? == false && javascript_enabled? && session[:js_override] != :on
+              no_browser    = can_do_ajax? == nil   && javascript_enabled? && session[:js_override] != :on
+              if no_session || no_javascript || no_ajax || no_browser
+                new_tab_set do
+                  add_tab(:app_no_session.t,    :controller => 'observer', :action => 'no_session')    if no_session
+                  add_tab(:app_no_javascript.t, :controller => 'observer', :action => 'no_javascript') if no_javascript
+                  add_tab(:app_no_ajax.t,       :controller => 'observer', :action => 'no_ajax')       if no_ajax
+                  add_tab(:app_no_browser.t,    :controller => 'observer', :action => 'no_browser')    if no_browser
+                end
+              end
+              render_tab_sets %>
+            </div>
 
             <div id="Title"><%= @title %></div>
 

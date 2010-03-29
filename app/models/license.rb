@@ -50,14 +50,16 @@ class License < AbstractModel
     display_name.to_s
   end
 
-  # Get list of non-deprecated License's.  Returns an Array of pairs:
+  # Get list of non-deprecated License's.  Returns an Array of pairs (such as
+  # would be needed by a pulldown menu helper):
   #
   #   for name, id in License.current_names_and_ids
   #     puts "license ##{id}: '#{name}'"
   #   end
   #
   def self.current_names_and_ids(current_license=nil)
-    result = License.find(:all, :conditions => "deprecated = 0").map{|l| [l.display_name, l.id]}
+    result = License.find(:all, :conditions => "deprecated = 0").
+                     map {|l| [l.display_name, l.id]}
     if current_license
       if current_license.deprecated
         result.push([current_license.display_name, current_license.id])

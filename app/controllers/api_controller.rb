@@ -149,6 +149,8 @@ class ApiController < ApplicationController
   # name::     Returns Name#text_name starting with the given letter.
   # location:: Returns Observation#where or Location#display_name with a word
   #            starting with the given letter.
+  # species_list:: Returns SpeciesList#title starting with the given letter.
+  # user::     Returns "login <Full Name>" with a word starting with the given letter.
   #
   # Examples:
   #
@@ -162,32 +164,11 @@ class ApiController < ApplicationController
     @items = []
     if instr.match(/^(\w)/)
       letter = $1
-
-      # It reads the first letter of the field, and returns all the names
-      # beginning with it.
-      if type == 'name'
-        @items = Name.connection.select_values %(
-          SELECT text_name FROM names
-          WHERE LOWER(text_name) LIKE '#{letter}%'
-          AND correct_spelling_id IS NULL
-          ORDER BY text_name ASC
-        )
-
-      # It reads the first letter of the field, and returns all the names
-      # beginning with it.
-      elsif type == 'user'
-        @items = User.connection.select_values %(
-          SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-          FROM users
-          WHERE login LIKE '#{letter}%'
-             OR name LIKE '#{letter}%'
-             OR name LIKE '% #{letter}%'
-          ORDER BY login ASC
-        )
+      case type
 
       # It reads the first letter of the field, and returns all the locations
       # (or "where" strings) with words beginning with that letter.
-      elsif type == 'location'
+      when 'location'
         @items = Observation.connection.select_values(%(
           SELECT DISTINCT `where` FROM observations
           WHERE `where` LIKE '#{letter}%' OR
@@ -198,6 +179,37 @@ class ApiController < ApplicationController
                 `search_name` LIKE '% #{letter}%'
         ))
         @items.sort!
+
+      # It reads the first letter of the field, and returns all the names
+      # beginning with it.
+      when 'name'
+        @items = Name.connection.select_values %(
+          SELECT text_name FROM names
+          WHERE text_name LIKE '#{letter}%'
+          AND correct_spelling_id IS NULL
+          ORDER BY text_name ASC
+        )
+
+      # It reads the first letter of the field, and returns all the names
+      # beginning with it.
+      when 'species_list'
+        @items = SpeciesList.connection.select_values %(
+          SELECT title FROM species_lists
+          WHERE title LIKE '#{letter}%'
+          ORDER BY title ASC
+        )
+
+      # It reads the first letter of the field, and returns all the names
+      # beginning with it.
+      when 'user'
+        @items = User.connection.select_values %(
+          SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+          FROM users
+          WHERE login LIKE '#{letter}%'
+             OR name LIKE '#{letter}%'
+             OR name LIKE '% #{letter}%'
+          ORDER BY login ASC
+        )
       end
     end
 

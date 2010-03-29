@@ -890,7 +890,8 @@ runtime_no_upload_image: Had problems uploading image '[name]'.
 runtime_object_deleted: This object has been deleted.
 runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
 runtime_prefs_password_no_match: Password and confirmation did not match.
-runtime_search_has_expired: Your user-search has expired, please try again.
+runtime_refine_search_model_not_supported: Sorry, Refine Search doesn't support [type] queries yet.
+runtime_search_has_expired: Your query has expired, please try again.
 runtime_show_observation_success: Successfully changed vote.
 runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
 
@@ -1165,9 +1166,10 @@ app_preferred_browser: Preferred browser
 # This is for the search bar at the top of every page.
 app_find: Find
 app_search: Search
-app_refine_search: Refine
+app_refine_search: Refine Search
 app_advanced_search: Advanced Search
 app_timer: "(time: [seconds] sec)"
+app_index_timer: "([num] results in [seconds] sec)"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
@@ -3017,6 +3019,76 @@ no_session_body: >
   Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions.
 
 no_session_title: You Have Cookies Disabled
+
+
+
+# observer/refine_search
+refine_search_title: Refine Search
+refine_search_query: Query
+refine_search_model: Data type
+refine_search_flavor: Basic flavor
+refine_search_order: Sort order
+refine_search_params: Parameters
+refine_search_joins: Joined tables
+refine_search_old_conditions: Existing Conditions
+refine_search_add_conditions: Additional Conditions
+refine_search_yes: "yes"
+refine_search_no: "no"
+
+refine_search_above_rank: Rank above
+refine_search_below_rank: Rank below
+refine_search_child: Is a subtaxon of this name
+refine_search_classification: classification
+refine_search_comment_for: Comments for this user
+refine_search_contains: "[Type] contains"
+refine_search_created_by: Created by this user
+refine_search_created_on: Created on this date
+refine_search_date: Observed on this date
+refine_search_deprecated: Is deprecated
+refine_search_has: Has [type]
+refine_search_has_admin: This user is an admin
+refine_search_has_default_description: Has a default description
+refine_search_has_image_of_min_quality: Has images of minimum quality
+refine_search_has_member: This user is a member
+refine_search_has_public_description: Has a public description
+refine_search_has_species_list: Belongs to a species list
+refine_search_has_specimen: Specimen is available
+refine_search_in_species_list: Belongs to this species list
+refine_search_is_collection_location: Observed where it grew?
+refine_search_last_modified_on: Last modified on date
+refine_search_license: License
+refine_search_location_defined: Is location defined?
+refine_search_maximum_confidence: Maximum confidence level
+refine_search_minimum_confidence: Minimum confidence level
+refine_search_minimum_quality: Minimum quality
+refine_search_minimum_size: Minimum dimension (pixels)
+refine_search_misspelled: Is it misspelled?
+refine_search_misspelling: Is a misspelling of this name
+refine_search_modified_by: Modified by this user
+refine_search_name: Species name
+refine_search_object_id: ID of object
+refine_search_object_type: Type of object
+refine_search_original_type: File type of original
+refine_search_posted_by: Posted by this user
+refine_search_rank: Taxonomic rank
+refine_search_synonym: Is a synonym of this name
+
+refine_search_help: Help
+refine_search_add_conditions_help: >
+  Fill in one or more of the following fields to narrow down your search.  If
+  there are more conditions you would like to see, please suggest them to the
+  webmaster.  Thanks!
+
+refine_search_date_help: >
+  Enter a date in the format YYYY-MM-DD.  To indicate a range of dates, enter
+  two dates separated by a space.  Month and day are optional.  Or, if you
+  like enter only a month and day!
+
+refine_search_time_help: >
+  Enter a date in the format YYYY-MM-DD:HH:MM:SS.   To indicate a range of
+  dates enter two dates separated by a space.  Enter only as many figures as
+  you want, starting from the left.  (Year at very least is required.)
+
 
 
 # observer/textile

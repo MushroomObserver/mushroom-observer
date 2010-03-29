@@ -250,7 +250,7 @@ module SessionExtensions
       # Filter links by parent element types.
       if arg = args[:in]
         if arg == :tabs
-          arg = 'div.tab_sets'
+          arg = 'div#left_tabs'
         elsif arg == :left_panel
           arg = 'table.LeftSide'
         elsif arg == :results

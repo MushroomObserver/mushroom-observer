@@ -242,6 +242,21 @@ class Image < AbstractModel
     [:thumbnail, :small, :medium, :large, :huge, :full_size]
   end
 
+  # Return an Array of all the extensions of all the image types we explicitly
+  # support.
+  def self.all_extensions
+    ['jpg', 'gif', 'png', 'tiff', 'bmp', 'raw']
+  end
+
+  # Return an Array of all the extensions of all the image content types we
+  # explicitly support.  (These will correspond one-to-one with the values
+  # returned by +all_extensions+.)  (Note that the catch-all "raw" is just
+  # referred to as +nil+ here, however the actual content type should be stored
+  # in the image.  It's just that we haven't seen any other types yet.)
+  def self.all_content_types
+    ['image/jpeg', 'image/gif', 'image/png', 'image/tiff', 'image/x-ms-bmp', nil]
+  end
+
   def original_extension
     case content_type
     when 'image/jpeg'     ; 'jpg'

@@ -120,15 +120,13 @@ module ApplicationHelper::Tabs
   # Render tab sets in upper left of page body.  (Only used by app layout.)
   def render_tab_sets
     if @tab_sets
-      content_tag(:div, :class => 'tab_sets') do
-        @tab_sets.map do |set|
-          if set.is_a?(Array)
-            render_tab_set(*set)
-          else
-            set.to_s
-          end
-        end.join('')
-      end
+      @tab_sets.map do |set|
+        if set.is_a?(Array)
+          render_tab_set(*set)
+        else
+          set.to_s
+        end
+      end.join('')
     end
   end
 
@@ -219,7 +217,8 @@ module ApplicationHelper::Tabs
           :alt => alt,
           :width => '50px',
           :height => '50px',
-          :class => 'interest_big'
+          :class => 'interest_big',
+          :title => alt
         )
       end
 
@@ -229,7 +228,8 @@ module ApplicationHelper::Tabs
           :alt => alt,
           :width => '23px',
           :height => '23px',
-          :class => 'interest_small'
+          :class => 'interest_small',
+          :title => alt
         )
       end
 
@@ -243,9 +243,9 @@ module ApplicationHelper::Tabs
         img3 = interest_icon_small('ignore', alt3)
         img2 = interest_link(img2, object, 0)
         img3 = interest_link(img3, object, -1)
-        img1 = add_context_help(img1, alt1)
-        img2 = add_context_help(img2, alt2)
-        img3 = add_context_help(img3, alt3)
+        # img1 = add_context_help(img1, alt1)
+        # img2 = add_context_help(img2, alt2)
+        # img3 = add_context_help(img3, alt3)
         add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
 
       when :ignoring
@@ -257,9 +257,9 @@ module ApplicationHelper::Tabs
         img3 = interest_icon_small('halfopen', alt3)
         img2 = interest_link(img2, object, 1)
         img3 = interest_link(img3, object, 0)
-        img1 = add_context_help(img1, alt1)
-        img2 = add_context_help(img2, alt2)
-        img3 = add_context_help(img3, alt3)
+        # img1 = add_context_help(img1, alt1)
+        # img2 = add_context_help(img2, alt2)
+        # img3 = add_context_help(img3, alt3)
         add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
 
       else
@@ -269,8 +269,8 @@ module ApplicationHelper::Tabs
         img2 = interest_icon_small('ignore', alt2)
         img1 = interest_link(img1, object, 1)
         img2 = interest_link(img2, object, -1)
-        img1 = add_context_help(img1, alt1)
-        img2 = add_context_help(img2, alt2)
+        # img1 = add_context_help(img1, alt1)
+        # img2 = add_context_help(img2, alt2)
         add_right_tab("<div>#{img1} #{img2}</div>")
       end
     end

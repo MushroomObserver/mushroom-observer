@@ -26,6 +26,7 @@
 #  turn_into_auto_completer::          Turn text field into auto-completer.
 #  turn_into_location_auto_completer:: Turn into location auto-completer.
 #  turn_into_name_auto_completer::     Turn into name auto-completer.
+#  turn_into_species_list_auto_completer:: Turn into species list auto-completer.
 #  turn_into_user_auto_completer::     Turn into user-name auto-completer.
 #  javascript_include_auto_complete::  Include javascript libs for auto-completion.
 #
@@ -83,14 +84,13 @@ module ApplicationHelper::AutoComplete
 
   # Make text_field auto-complete for location name.
   def turn_into_location_auto_completer(id, opts={})
-    opts = {
+    turn_into_auto_completer(id, {
       :url           => '/ajax/auto_complete/location',
       :indicator     => 'indicator',
       :frequency     => 0.1,
       :wordMatch     => true,
       :js_class      => 'CachedAutocompleter',
-    }.clone.merge(opts)
-    turn_into_auto_completer(id, opts)
+    }.merge(opts))
   end
 
   # Make text_field auto-complete for mushroom name.
@@ -102,6 +102,17 @@ module ApplicationHelper::AutoComplete
       :collapse      => true,
       :js_class      => 'CachedAutocompleter',
       :inherit_width => (@ua == :ie ? 1 : 0),
+    }.merge(opts))
+  end
+
+  # Make text_field auto-complete for mushroom name.
+  def turn_into_species_list_auto_completer(id, opts={})
+    turn_into_auto_completer(id, {
+      :url           => '/ajax/auto_complete/species_list',
+      :indicator     => 'indicator',
+      :frequency     => 0.1,
+      :wordMatch     => true,
+      :js_class      => 'CachedAutocompleter',
     }.merge(opts))
   end
 

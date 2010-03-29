@@ -915,14 +915,14 @@ class ApplicationController < ActionController::Base
     return result
   end
 
-  # Lookup the given Query, returning nil if it no longer exists.
-  def find_query(model, update=!is_robot?)
-    model = model.to_s
+  # Lookup the given kind of Query, returning nil if it no longer exists.
+  def find_query(model=nil, update=!is_robot?)
+    model = model.to_s if model
     result = nil
     if !params[:q].blank?
       if query = Query.safe_find(params[:q].dealphabetize)
         # This is right kind of query.
-        if query.model_string == model
+        if !model or (query.model_string == model)
           result = query
         # If not, try coercing it.
         elsif query2 = query.coerce(model)
@@ -1110,7 +1110,7 @@ class ApplicationController < ActionController::Base
 
     # Time query -- this caches the ids (and first letters if needed).
     @timer_start = Time.now
-    query.num_results
+    @num_results = query.num_results
     @timer_end = Time.now
 
     # If only one result (before pagination), redirect to 'show' action.

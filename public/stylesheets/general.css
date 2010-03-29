@@ -94,6 +94,34 @@ pre {
 #columns {
 }
 
+#search_bar {
+  float: left;
+  clear: right;
+  font-size: 11px;
+}
+
+#timer {
+  float: right;
+  font-size: 11px;
+}
+
+#flashes {
+  clear: left;
+}
+
+#left_tabs {
+  margin: 10px;
+}
+
+#right_tabs {
+  float: right;
+  margin: 10px;
+}
+
+#right_tabs div a:hover {
+  background: none;
+}
+
 .main {
 }
 
@@ -115,19 +143,6 @@ div.progressBar div.background {
   background-color: #333;
   height: 18px;
   width: 0%;
-}
-
-div.tab_sets {
-  margin: 10px;
-}
-
-div.right_tabs {
-  float: right;
-  margin: 10px;
-}
-
-div.right_tabs div a:hover {
-  background: none;
 }
 
 .Notices, .Warnings, .Errors {

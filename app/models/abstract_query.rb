@@ -254,6 +254,7 @@
 #  find_by_sql::        Call model.find_by_sql.
 #  tables_used::        Array of tables used in query (Symbol's).
 #  uses_table?::        Does the query use this table?
+#  uses_join?::         Does the query use this join clause?
 #  num_results::        Number of results the query returns.
 #  results::            Array of all results, instantiated.
 #  result_ids::         Array of all results, just ids.
@@ -1066,6 +1067,11 @@ class AbstractQuery < ActiveRecord::Base
   #
   ##############################################################################
 
+  # Make a value safe for SQL.
+  def escape(val)
+    model.connection.quote(val)
+  end
+
   # Put together a list of ids for use in a "id IN (1,2,...)" condition.
   #
   #   set = clean_id_set(name.children)
@@ -1481,6 +1487,26 @@ class AbstractQuery < ActiveRecord::Base
   def uses_table?(table)
     initialize_query if !initialized?
     table_list.map(&:to_s).include?(table.to_s)
+  end
+
+  # Does this query join to the given table?  (Takes a Symbol; distinguishes
+  # between the different ways to join to a given table via the "table.field"
+  # syntax used in +join_conditions+ table.)
+  def uses_join?(join_spec)
+    initialize_query if !initialized?
+    uses_join_sub(join, join_spec)
+  end
+
+  def uses_join_sub(tree, arg) # :nodoc:
+    case tree
+    when Array
+      tree.any? {|sub| uses_join_sub(sub, arg)}
+    when Hash
+      tree.keys.include?(arg) or
+      tree.values.any? {|sub| uses_join_sub(sub, arg)}
+    else
+      (tree == arg)
+    end
   end
 
   # Number of results the query returns.
