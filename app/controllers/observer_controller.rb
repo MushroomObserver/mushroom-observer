@@ -428,6 +428,7 @@ class ObserverController < ApplicationController
     # Create a bogus object with all the parameters used in the form.
     @conds = Wrapper.new(params[:conds] || {})
     @first_time = params[:conds].blank?
+    @goto_index = true if params[:commit] == :refine_search_goto_index.l
 
     # Query has expired!
     if !(@query = find_query)
@@ -435,18 +436,27 @@ class ObserverController < ApplicationController
       redirect_back_or_default(:action => 'list_rss_logs')
       
     # Some models aren't supported yet.
-    elsif !(@fields = get_refine_search_fields(@query))
+    elsif !(@fields = refine_search_get_fields(@query))
       type = @query.model_string.underscore.to_sym
       flash_error(:runtime_refine_search_model_not_supported.t(:type => type))
       redirect_back_or_default(:action => 'list_rss_logs')
 
-    # Redisplay the index if the tweak is successful.
     elsif !is_robot? and
           (request.method == :post) and
-          (query2 = modify_query(@query, @fields, @conds))
-      redirect_to(:controller => query2.model.show_controller,
-                  :action => query2.model.index_action,
-                  :params => query_params(query2))
+          (query2 = refine_search_apply_changes(@query, @fields, @conds))
+      @query = query2
+      @conds = Wrapper.new
+      @first_time = true
+      if !@goto_index
+        flash_notice(:refine_search_success.t(:num => @query.num_results))
+      end
+    end
+
+    # Redisplay the index if user presses "Index".
+    if @goto_index
+      redirect_to(:controller => @query.model.show_controller,
+                  :action => @query.model.index_action,
+                  :params => query_params(@query))
     end
   end
 

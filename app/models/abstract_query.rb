@@ -1003,7 +1003,7 @@ class AbstractQuery < ActiveRecord::Base
     extra_initialization
 
     # Give all queries ability to override / customize.
-    self.join   += params[:join]   if params[:join]
+    initialize_join(params[:join]) if params[:join]
     self.tables += params[:tables] if params[:tables]
     self.where  += params[:where]  if params[:where]
     self.group   = params[:group]  if params[:group]
@@ -1044,6 +1044,19 @@ class AbstractQuery < ActiveRecord::Base
       else
         raise("Can't figure out how to sort #{model_string} by :#{by}.")
       end
+    end
+  end
+
+  # Join parameter needs to be converted into an include-style "tree".  It just
+  # evals the string, so the syntax is almost identical to what you're used to:
+  #
+  #   ":table, :table"
+  #   ":table => :table"
+  #   ":table => [:table, {:table => :table}]"
+  #
+  def initialize_join(val)
+    self.join += val.map do |str|
+      str.to_s.index(' ') ? eval(str) : str
     end
   end
 
@@ -1279,21 +1292,25 @@ class AbstractQuery < ActiveRecord::Base
   # this table (+model.table_name+) with tables from +join+ with custom-joined
   # tables from +tables+.)
   def table_list(our_join=join, our_tables=tables)
-    flatten_join([model.table_name] + our_join + our_tables).uniq
+    flatten_joins([model.table_name] + our_join + our_tables, false).uniq
   end
 
-  # Flatten join "tree" into a simple Array of Strings.
-  def flatten_join(arg)
+  # Flatten join "tree" into a simple Array of Strings.  Set +keep_qualifiers+
+  # to +false+ to tell it to remove the ".column" qualifiers on ambiguous
+  # table join specs. 
+  def flatten_joins(arg=join, keep_qualifiers=true)
     result = []
     if arg.is_a?(Hash)
       for key, val in arg
-        result << key.to_s.sub(/\..*/, '')
-        result += flatten_join(val)
+        key = key.to_s.sub(/\..*/, '') if !keep_qualifiers
+        result << key.to_s
+        result += flatten_joins(val)
       end
     elsif arg.is_a?(Array)
-      result += arg.map {|x| flatten_join(x)}.flatten
+      result += arg.map {|x| flatten_joins(x)}.flatten
     else
-      result << arg.to_s.sub(/\..*/, '')
+      arg = arg.to_s.sub(/\..*/, '') if !keep_qualifiers
+      result << arg.to_s
     end
     return result
   end
@@ -1495,17 +1512,16 @@ class AbstractQuery < ActiveRecord::Base
   def uses_join?(join_spec)
     initialize_query if !initialized?
     uses_join_sub(join, join_spec)
-  end
-
-  def uses_join_sub(tree, arg) # :nodoc:
-    case tree
-    when Array
-      tree.any? {|sub| uses_join_sub(sub, arg)}
-    when Hash
-      tree.keys.include?(arg) or
-      tree.values.any? {|sub| uses_join_sub(sub, arg)}
-    else
-      (tree == arg)
+    def uses_join_sub(tree, arg) # :nodoc:
+      case tree
+      when Array
+        tree.any? {|sub| uses_join_sub(sub, arg)}
+      when Hash
+        tree.keys.include?(arg) or
+        tree.values.any? {|sub| uses_join_sub(sub, arg)}
+      else
+        (tree == arg)
+      end
     end
   end
 

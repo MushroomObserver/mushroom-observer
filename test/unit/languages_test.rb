@@ -176,6 +176,11 @@ class LanguagesTest < UnitTestCase
       end
     end
 
+    # Really, we should include the Globalite translations, too, but for now
+    # let's just add the only two we actually use.
+    tags['date_helper_abbr_month_names'] = true
+    tags['date_helper_month_names']      = true
+
     # Traverse a directory structure looking for source files.
     def source_files(path, &block)
       for file in Dir.glob("#{path}/*")
