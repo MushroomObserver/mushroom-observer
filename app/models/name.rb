@@ -1421,8 +1421,10 @@ class Name < AbstractModel
   def self.find_names(in_str, rank=nil, deprecated=false)
     in_str = in_str.to_s.strip_squeeze
 
-    # Add dot to "var" and "ssp".
-    in_str.sub!(/ (subsp|ssp|var|f) /, ' \\1. ')
+    # Standardize "ssp", "var" and "f".
+    in_str.sub!(/ (subsp|ssp)\.? /, ' subsp. ')
+    in_str.sub!(/ (var|v)\.? /, ' var. ')
+    in_str.sub!(/ (forma|f)\.? /, ' f. ')
 
     # This removes the "sp" or "sp." in "Lactarius sp" and "Lactarius sp Author".
     if m = SP_PAT.match(in_str)

@@ -7,14 +7,16 @@
   end
 %>
 
-<% args = {}
-  if !@new_names.blank?
-    args[:approved_names] = @new_names
-  end
-  if @deprecated_names && @deprecated_names != []
-    args[:approved_deprecated_names] = @deprecated_names.map(&:id)
-  end
-  form_tag(:action => 'create_species_list', :params => args) do %>
+<% form_tag(:action => 'create_species_list') do %>
+  <% if !@new_names.blank?
+    val = @new_names.map {|x| CGI::escapeHTML(x)}.join('&#10;') %>
+    <input id="approved_names" type="hidden" value="<%= val %>"/>
+  <% end %>
+  <% if !@deprecated_names.blank?
+    val = @deprecated_names.map(&:id).join(' ') %>
+    <input id="approved_deprecated_names" type="hidden" value="<%= val %>"/>
+  <% end %>
+
   <br/><center><%= submit_tag :CREATE.l %></center>
 
   <table cellpadding="10">

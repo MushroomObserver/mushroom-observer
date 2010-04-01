@@ -158,11 +158,7 @@ class Description < AbstractModel
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part) # :nodoc:
-    if (source_type == :user) and (user == User.current)
-      tag = :"description_#{full_or_part}_title_yours"
-    else
-      tag = :"description_#{full_or_part}_title_#{source_type}"
-    end
+    tag = :"description_#{full_or_part}_title_#{source_type}"
     args = {
       :text => source_name,
       :user => user.legal_name,
@@ -514,6 +510,11 @@ class Description < AbstractModel
   #
   ################################################################################
 
+  # By default make first user to add any text an author.
+  def author_worthy?
+    has_any_notes?
+  end
+
   # Callback that updates editors and/or authors after a User makes a change.
   # If the Name has no author and they've made sufficient contributions, they
   # get promoted to author by default.  In all cases make sure the user is
@@ -521,7 +522,7 @@ class Description < AbstractModel
   def before_save
     if !@save_without_our_callbacks and
        (user = User.current)
-      if authors.empty? && has_any_notes?
+      if authors.empty? && author_worthy?
         add_author(user)
       else
         add_editor(user)

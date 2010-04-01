@@ -33,9 +33,11 @@ class DescriptionTest < UnitTestCase
       when 'LocationDescription'
         obj = model.new(:location_id => 1, :license_id => 1)
         a, e = 50, 5
+        set_nontrivial = 'notes='
       when 'NameDescription'
         obj = model.new(:name_id => 1, :license_id => 1)
         a, e = 100, 10
+        set_nontrivial = 'gen_desc='
       end
 
       msg = "#{model}: Initial conditions."
@@ -77,7 +79,7 @@ class DescriptionTest < UnitTestCase
       assert_contributions(0, e, 0, 0, msg)
 
       # Now have Dick make a non-trivial change.
-      obj.notes = "This is weighty stuff..."
+      obj.send(set_nontrivial, 'This is weighty stuff...')
       User.current = @dick
       obj.save
       msg = "#{model}: No authors, so Dick should become author."
@@ -85,7 +87,7 @@ class DescriptionTest < UnitTestCase
       assert_contributions(0, e, a, 0, msg)
 
       # Now have Katrina make another non-trivial change.
-      obj.notes = "This is even weightier stuff..."
+      obj.send(set_nontrivial, 'This is even weightier stuff...')
       User.current = @katrina
       obj.save
       msg = "#{model}: Already authors, so Katrina should become editor."

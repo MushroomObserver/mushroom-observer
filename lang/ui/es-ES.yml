@@ -469,12 +469,10 @@ description_full_title_foreign: Descripción de [object] de [text]
 description_full_title_project: Borrador de [object] para [text] por [user]
 description_full_title_source: Descripción de [object] de [text]
 description_full_title_user: Descripción de [object] por [user]
-description_full_title_yours: Su Descripción de [object]
 
 # These are used when listing the available descriptions in the show_name page.
 description_part_title_public: Descripción Pública
 description_part_title_user: Descripción por [user]
-description_part_title_yours: "Su [:DESCRIPTION]"
 
 # Same thing, but this time the optional text field was filled in.  Note that
 # the text field is not optional for half of the source types.
@@ -483,7 +481,6 @@ description_part_title_foreign_with_text: "[:DESCRIPTION] de [TEXT]"
 description_part_title_project_with_text: "Borrador para [TEXT] por [USER]"
 description_part_title_source_with_text: "[:DESCRIPTION] de [TEXT]"
 description_part_title_user_with_text: "[TEXT] por [USER]"
-description_part_title_yours_with_text: "[TEXT] por Usted"
 
 # Footers: "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
 footer_created_at: "*Creado:* [date]"
@@ -668,6 +665,8 @@ log_consensus_changed: Comunidad rechaza [old] en favor de [new].
 log_consensus_reached: "Consenso establecido: [name]"
 log_deprecated_by: Desaprobado por [user].
 log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
+log_changed_default_description: "Descripción predeterminada cambiado a [name] por [user]."
+log_changed_permissions: "Permisos realizados por [user]: [name]."
 log_name_approved: Aprobado por [user] sobre [other].
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
 log_name_deprecated: Desaprobado por [user] en favor de [other].
@@ -682,6 +681,8 @@ log_object_created_no_user: "[Type] creado."
 log_object_destroyed_by_user: "[Type] borrado por [user]."
 log_object_destroyed_by_user_with_name: "[Type] borrado por [user]: [name]."
 log_object_destroyed_no_user: "[Type] borrado."
+log_object_merged_by_user: "Fusionado [from] en [to] por [user]."
+log_object_merged_no_user: "Fusionado [from] en [to]."
 log_object_removed_by_user: "[Type] eliminado por [user]."
 log_object_removed_by_user_with_name: "[Type] eliminado por [user]: [name]."
 log_object_removed_no_user: "[Type] eliminado."
@@ -689,6 +690,7 @@ log_object_updated_by_user: "[Type] realizado por [user]."
 log_object_updated_by_user_with_name: "[Type] realizado por [user]: [name]."
 log_object_updated_no_user: "[Type] realizado."
 log_orphan: "[Title]"
+log_published_description: "Descripción publicado por [user]: [name]."
 log_updated_by: Realizado por [user].
 
 # These should not need any translation.
@@ -1589,7 +1591,7 @@ form_description_source_help: >
   descripción que se deriva de material con derechos de autor, por favor,
   asegúrese de volver a escribir en sus propias palabras.\n
   3. *Usuario:* Use esto para crear su descripción personalizada.  El título
-  por defecto será "[:description_part_title_yours]".  Utilice el campo de
+  por defecto será "[:description_part_title_user(user=:name)]".  Utilice el campo de
   texto de arriba para personalizarlos.  En tanto en el presente y el tipo de
   la 'Fuente' arriba, usted tendrá los derechos exclusivos de elegir quién
   puede ver y modificar esta descripción (ver las casillas más abajo).

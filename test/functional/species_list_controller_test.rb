@@ -188,7 +188,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str]
+      :approved_names => new_list_str
     }
     login('rolf')
     post(:create_species_list, params)
@@ -247,7 +247,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str]
+      :approved_names => new_name_str
     }
     login('rolf')
     post(:create_species_list, params)
@@ -304,7 +304,7 @@ class SpeciesListControllerTest < FunctionalTestCase
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str]
+      :approved_names => new_name_str
     }
     login('rolf')
     post(:create_species_list, params)
@@ -365,13 +365,13 @@ class SpeciesListControllerTest < FunctionalTestCase
         :notes => "List Notes"
       },
     }
-    params[:approved_names] = [new_name_str]
+    params[:approved_names] = new_name_str
     params[:chosen_multiple_names] =
         { multiple_name.id.to_s => multiple_name.id.to_s }
     params[:chosen_approved_names] =
         { deprecated_checklist_name.id.to_s => approved_name.id.to_s }
     params[:approved_deprecated_names] =
-        [deprecated_name.id.to_s, deprecated_checklist_name.id.to_s]
+        [deprecated_name.id.to_s, deprecated_checklist_name.id.to_s].join("\r\n")
 
     login('rolf')
     post(:create_species_list, params)
@@ -529,7 +529,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "New name"
-    params[:approved_names] = ["New name"]
+    params[:approved_names] = "New name"
     login(spl.user.login)
     post(:edit_species_list, params)
     assert_response(:action => :show_species_list)
@@ -834,7 +834,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       'Agaricus "blah"',
       'Chlorophyllum Author',
       'Lepiota sp Author',
-    ].join('/')
+    ].join("\r\n")
     post(:create_species_list, params)
     assert_response(:action => "show_species_list")
     assert_equal([
@@ -863,7 +863,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     ].join("\n")
     params[:approved_names] = [
       'Psalliota sp.',
-    ].join('/')
+    ].join("\r\n")
     post(:create_species_list, params)
     assert_response(:action => "show_species_list")
     assert_equal([

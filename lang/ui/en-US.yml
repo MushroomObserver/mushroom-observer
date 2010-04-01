@@ -467,12 +467,10 @@ description_full_title_foreign: "[:DESCRIPTION] of [object] from [text]"
 description_full_title_project: "Draft of [object] for [text] by [user]"
 description_full_title_source: "[:DESCRIPTION] of [object] from [text]"
 description_full_title_user: "[USER]'s [:DESCRIPTION] of [object]"
-description_full_title_yours: "Your [:DESCRIPTION] of [object]"
 
 # These are used when listing the available descriptions in the show_name page.
 description_part_title_public: "Public [:DESCRIPTION]"
 description_part_title_user: "[USER]'s [:DESCRIPTION]"
-description_part_title_yours: "Your [:DESCRIPTION]"
 
 # Same thing, but this time the optional text field was filled in.  Note that
 # the text field is not optional for half of the source types.
@@ -481,7 +479,6 @@ description_part_title_foreign_with_text: "[:DESCRIPTION] From [TEXT]"
 description_part_title_project_with_text: "Draft for [TEXT] by [USER]"
 description_part_title_source_with_text: "[:DESCRIPTION] From [TEXT]"
 description_part_title_user_with_text: "[TEXT] by [USER]"
-description_part_title_yours_with_text: "[TEXT] by You"
 
 # Footers: "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
 footer_created_at: "*[:Created]:* [date]"
@@ -666,6 +663,8 @@ log_consensus_changed: Consensus rejected [old] in favor of [new].
 log_consensus_reached: "Consensus established: [name]"
 log_deprecated_by: Deprecated by [user].
 log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
+log_changed_default_description: "Default description changed to [name] by [user]."
+log_changed_permissions: "Permissions modified by [user]: [name]."
 log_name_approved: Approved by [user] over [other].
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
 log_name_deprecated: Deprecated by [user] in favor of [other].
@@ -680,6 +679,8 @@ log_object_created_no_user: "[Type] created."
 log_object_destroyed_by_user: "[Type] destroyed by [user]."
 log_object_destroyed_by_user_with_name: "[Type] destroyed by [user]: [name]."
 log_object_destroyed_no_user: "[Type] destroyed."
+log_object_merged_by_user: "Merged [from] into [to] by [user]."
+log_object_merged_no_user: "Merged [from] into [to]."
 log_object_removed_by_user: "[Type] removed by [user]."
 log_object_removed_by_user_with_name: "[Type] removed by [user]: [name]."
 log_object_removed_no_user: "[Type] removed."
@@ -687,6 +688,7 @@ log_object_updated_by_user: "[Type] updated by [user]."
 log_object_updated_by_user_with_name: "[Type] updated by [user]: [name]."
 log_object_updated_no_user: "[Type] updated."
 log_orphan: "[Title]"
+log_published_description: "Description published by [user]: [name]."
 log_updated_by: Updated by [user].
 
 # These should not need any translation.
@@ -1571,10 +1573,10 @@ form_description_source_help: >
   field above.  Note, if you are posting a description that derives from
   copyrighted material, please be sure to rewrite it in your own words.\n
   3. *User:* Use this to create your own personalized description.  The default
-  title will be "[:description_part_title_yours]".  Use the text field above to
-  customize this.  In both this and the 'Source' type above, you will have
-  exclusive rights to choose who can view and modify this description (see the
-  check-boxes below).
+  title will be "[:description_part_title_user(user=:name)]".  Use the text
+  field above to customize this.  In both this and the 'Source' type above, you
+  will have exclusive rights to choose who can view and modify this description
+  (see the check-boxes below). 
 
 form_description_permissions_help: >
   Is the general public is allowed to view or make modifications to this

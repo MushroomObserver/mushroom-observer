@@ -68,7 +68,8 @@ class SpeciesListController < ApplicationController
   # from show_species_list, next to "prev" and "next".)
   def index_species_list
     query = find_or_create_query(:SpeciesList, :by => params[:by])
-    show_selected_species_lists(query, :id => params[:id])
+    show_selected_species_lists(query, :id => params[:id],
+                                :always_index => true)
   end
 
   # Display list of all species_lists, sorted by date.  (Linked from left

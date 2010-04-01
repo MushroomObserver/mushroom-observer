@@ -82,7 +82,7 @@ class LocationController < ApplicationController
   # Displays a list of selected locations, based on current Query.
   def index_location
     query = find_or_create_query(:Location, :by => params[:by])
-    show_selected_locations(query, :id => params[:id])
+    show_selected_locations(query, :id => params[:id], :always_index => true)
   end
 
   # Displays a list of all locations.
@@ -274,7 +274,8 @@ class LocationController < ApplicationController
   # Displays a list of selected locations, based on current Query.
   def index_location_description
     query = find_or_create_query(:LocationDescription, :by => params[:by])
-    show_selected_location_descriptions(query, :id => params[:id])
+    show_selected_location_descriptions(query, :id => params[:id],
+                                        :always_index => true)
   end
 
   # Displays a list of all location_descriptions.
@@ -641,6 +642,11 @@ class LocationController < ApplicationController
           )
         )
 
+        # Log action in parent location.
+        @description.location.log(:log_object_created_by_user_with_name,
+                 :type => :description, :user => @user.login, :touch => true,
+                 :name => @description.unique_partial_format_name)
+
         flash_notice(:runtime_location_description_success.t(
                      :id => @description.id))
         redirect_to(:action => 'show_location_description',
@@ -698,6 +704,11 @@ class LocationController < ApplicationController
           Transaction.put_location_description(args)
         end
 
+        # Log action in parent location.
+        @description.location.log(:log_object_updated_by_user_with_name,
+                 :type => :description, :user => @user.login, :touch => true,
+                 :name => @description.unique_partial_format_name)
+
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == 'true') and
            (old_desc = LocationDescription.safe_find(params[:old_desc_id]))
@@ -709,6 +720,10 @@ class LocationController < ApplicationController
           else
             flash_notice(:runtime_description_merge_deleted.
                            t(:old => old_desc.partial_format_name))
+            @description.location.log(:log_object_merged_by_user,
+                     :user => @user.login, :touch => true,
+                     :from => old_desc.unique_partial_format_name,
+                     :to => @description.unique_partial_format_name)
             old_desc.destroy
           end
         end
@@ -724,6 +739,9 @@ class LocationController < ApplicationController
     @description = LocationDescription.find(params[:id])
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
+      @description.location.log(:log_object_destroyed_by_user_with_name,
+               :type => :description, :user => @user.login, :touch => true,
+               :name => @description.unique_partial_format_name)
       @description.destroy
       redirect_to(:action => 'show_location', :id => @description.location_id,
                   :params => query_params)

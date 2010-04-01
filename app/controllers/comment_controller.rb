@@ -41,7 +41,7 @@ class CommentController < ApplicationController
   # show_comment, next to "prev" and "next"... or will be.)
   def index_comment
     query = find_or_create_query(:Comment, :by => params[:by])
-    show_selected_comments(query, :id => params[:id])
+    show_selected_comments(query, :id => params[:id], :always_index => true)
   end
 
   # Show list of latest comments. (Linked from left panel.)

@@ -42,7 +42,7 @@ class ProjectController < ApplicationController
   # Show list of selected projects, based on current Query.
   def index_project
     query = find_or_create_query(:Project, :by => params[:by])
-    show_selected_projects(query, :id => params[:id])
+    show_selected_projects(query, :id => params[:id], :always_index => true)
   end
 
   # Show list of latest projects.  (Linked from left panel.)

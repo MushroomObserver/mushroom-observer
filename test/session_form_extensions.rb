@@ -208,7 +208,10 @@ class SessionExtensions::Form
   # Make sure the form does _not_ have a given field.
   def assert_no_field(id, msg=nil)
     msg ||= "Expected form NOT to have field #{id.inspect}."
-    context.assert_block(msg) { !get_field(id) }
+    context.assert_block(msg) {
+      field = get_field(id)
+      !field or (field.type == :hidden)
+    }
   end
 
   # Assert the value of a given input field.  Change the value of the given

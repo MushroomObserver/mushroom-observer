@@ -106,6 +106,11 @@ class NameDescription < Description
   after_update :notify_users
   after_save :update_classification_cache
 
+  # Don't add any authors until someone has written something "useful".
+  def author_worthy?
+    !gen_desc.blank? || !diag_desc.blank?
+  end
+
   ################################################################################
   #
   #  :section: Descriptions

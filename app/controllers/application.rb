@@ -690,8 +690,8 @@ class ApplicationController < ActionController::Base
   #
   def construct_approved_names(name_list, approved_names, deprecate=false)
     if approved_names
-      if approved_names.class == String
-        approved_names = approved_names.split("/")
+      if approved_names.is_a?(String)
+        approved_names = approved_names.split(/\r?\n/)
       end
       for ns in name_list
         if !ns.blank?
@@ -707,45 +707,78 @@ class ApplicationController < ActionController::Base
   def construct_approved_name(name_parse, approved_names, deprecate)
 
     # Don't do anything if the given names are not approved
-    if approved_names.member?(name_parse.search_name)
+    if approved_names.member?(name_parse.name)
+
       # Create name object for this name (and any parents, such as genus).
       names = Name.names_from_string(name_parse.search_name)
+
+      # Parse must have failed.
       if names.last.nil?
         flash_error :runtime_no_create_name.t(:type => :name,
                                               :value => name_parse.name)
-      else # (this only happens if above genus, in which case names.length == 1)
-        names.last.rank = name_parse.rank if name_parse.rank
-        # only save comment if name didn't exist
+
+      # Was successful.
+      else
+        name = names.last
+        name.rank = name_parse.rank if name_parse.rank
+
+        # Process comments (for bulk name editor).
         if comment = name_parse.comment
+          # Okay to add citation to any record without an existing citation.
           if comment.match(/^citation: *(.*)/)
-            names.last.citation = comment if names.last.citation.blank?
+            citation = $1
+            name.citation = citation if name.citation.blank?
+          # Only save comment if name didn't exist
           elsif names.new_record?
-            names.last.notes = name_parse.comment
+            name.notes = comment
           else
-            flash_warning "Didn't save comment for #{names.last.search_name}, name already exists: \"#{name_parse.comment}\""
+            flash_warning("Didn't save comment for #{name.search_name}, " +
+                          "name already exists. (comment = \"#{comment}\")")
           end
         end
+
+        # Only bulk name editor allows the synonym syntax now.  Tell it to
+        # approve the left-hand name.
+        deprecate2 = deprecate
+        deprecate2 = false if name_parse.has_synonym
+
         # Save the names (deals with deprecation here).
-        save_names(names, deprecate)
+        save_names(names, deprecate2)
       end
     end
 
     # Do the same thing for synonym (found the Approved = Synonym syntax).
-    if name_parse.has_synonym && approved_names.member?(name_parse.synonym_search_name)
-      synonym_names = []
-      # Create the deprecated synonym.
-      synonym_names = Name.names_from_string(name_parse.synonym_search_name)
-      if synonym_names.last.nil?
+    if name_parse.has_synonym and
+       approved_names.member?(name_parse.synonym)
+
+      # Create the synonym.
+      synonyms = Name.names_from_string(name_parse.synonym_search_name)
+
+      # Parse must have failed.
+      if synonyms.last.nil?
         flash_error :runtime_no_create_name.t(:type => :name,
                                               :value => name_parse.synonym)
+
+      # Was successful.
       else
-        synonym_name = synonym_names.last
-        synonym_name.rank = name_parse.synonym_rank if name_parse.synonym_rank
-        # only save comment if name didn't exist
-        synonym_name.notes = name_parse.synonym_comment if !synonym_name.id && name_parse.synonym_comment
-        synonym_name.change_deprecated(true)
-        save_name(synonym_name, :log_deprecated_by, :touch => true)
-        save_names(synonym_names[0..-2], nil) # Don't change higher taxa
+        synonym = synonyms.last
+        synonym.rank = name_parse.synonym_rank if name_parse.synonym_rank
+
+        # Process comments (for bulk name editor).
+        if comment = name_parse.synonym_comment
+          # Only save comment if name didn't exist
+          if synonym.new_record?
+            synonym.notes = comment
+          else
+            flash_warning("Didn't save comment for #{synonym.search_name}, " +
+                          "name already exists. (comment = \"#{comment}\")")
+          end
+        end
+
+        # Deprecate and save.
+        synonym.change_deprecated(true)
+        save_name(synonym, :log_deprecated_by, :touch => true)
+        save_names(synonyms[0..-2], nil) # Don't change higher taxa
       end
     end
   end
@@ -774,7 +807,8 @@ class ApplicationController < ActionController::Base
   # Save any changes to this name (including creating it if it is a new
   # record), log the change, add the current user as the editor, and log the
   # transaction appropriately for syncing with foreign databases.
-  def save_name(name, log=:log_name_updated, args={})
+  def save_name(name, log=nil, args={})
+    log ||= :log_name_updated
 
     # Get list of args we care about.  (intersection)
     changed_args = name.changed & [

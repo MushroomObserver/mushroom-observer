@@ -68,7 +68,7 @@ class ImageController < ApplicationController
   # Display matrix of selected images, based on current Query.
   def index_image
     query = find_or_create_query(:Image, :by => params[:by])
-    show_selected_images(query, :id => params[:id])
+    show_selected_images(query, :id => params[:id], :always_index => true)
   end
 
   # Display matrix of images, most recent first.

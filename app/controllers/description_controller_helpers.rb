@@ -39,6 +39,8 @@ module DescriptionControllerHelpers
       flash_error(:runtime_description_make_default_only_public.t)
     else
       desc.parent.description_id = desc.id
+      desc.parent.log(:log_changed_default_description, :user => @user.login,
+                      :name => desc.unique_partial_format_name, :touch => true)
       desc.parent.save
     end
     redirect_to(:action => "show_#{desc.class.name.underscore}",
@@ -69,19 +71,30 @@ module DescriptionControllerHelpers
         flash_error(:runtime_edit_description_denied.t)
         @description = src
       elsif dest.merge(src, false)
+        src_name = src.unique_partial_format_name
         if delete_after
           if !src.is_admin?(@user)
             flash_warning(:runtime_description_merge_delete_denied.t)
           else
             flash_notice(:runtime_description_merge_deleted.
                            t(:old => src.partial_format_name))
+            desc.parent.log(:log_object_destroyed_by_user_with_name,
+                            :type => :description, :user => @user.login,
+                            :name => src.unique_partial_format_name,
+                            :touch => true)
             src.destroy
           end
         end
         if src_was_default
+          desc.parent.log(:log_changed_default_description,
+                          :user => @user.login, :touch => true,
+                          :name => dest.unique_partial_format_name)
           dest.parent.description = dest
           dest.parent.save
         end
+        desc.parent.log(:log_object_merged_by_user, :user => @user.login,
+                        :touch => true, :from => src_name,
+                        :to => dest.unique_partial_format_name)
         flash_notice(:runtime_description_merge_success.
                      t(:old => src_title, :new => dest.format_name))
         redirect_to(:action => dest.show_action, :id => dest.id,
@@ -109,6 +122,7 @@ module DescriptionControllerHelpers
     parent = draft.parent
     old = parent.description
     type = parent.class.name.underscore
+    need_redirect = true
 
     # Must be admin on the draft in order for this to work.  (Must be able
     # to delete the draft after publishing it.)
@@ -116,6 +130,7 @@ module DescriptionControllerHelpers
       flash_error(:runtime_edit_description_denied.t)
       redirect_to(:action => parent.show_action, :id => parent.id,
                   :params => query_params)
+      need_redirect = false
 
     # 1) No default desc: turn this into public desc and make it the default.
     # 2) Default is not writable: same thing, make this the default instead.
@@ -133,6 +148,8 @@ module DescriptionControllerHelpers
       draft.reader_groups.clear
       draft.reader_groups << UserGroup.all_users
       draft.save
+      parent.log(:log_changed_default_description, :user => @user.login,
+                 :name => draft.unique_partial_format_name, :touch => true)
       parent.description = draft
       parent.save
       Transaction.send("put_#{type}_description",
@@ -152,11 +169,29 @@ module DescriptionControllerHelpers
       @licenses = License.current_names_and_ids
       merge_description_notes(draft, old)
       render(:action => "edit_#{type}_description")
+      need_redirect = false
+
+    # Success: delete draft, log everything.
+    else
+      # (something very screwy happens if I name one of these "draft_name1"...
+      # this works some I'm not f---ing with it any more)
+      x1 = old.partial_format_name
+      x2 = old.unique_partial_format_name
+      y1 = draft.partial_format_name
+      y2 = draft.unique_partial_format_name
+      parent.log(:log_object_destroyed_by_user_with_name,
+                 :touch => true, :type => :description, :user => @user.login,
+                 :name => y2)
+      flash_notice(:runtime_description_merge_success.
+                     t(:old => y1, :new => x1))
+      parent.log(:log_published_description, :user => @user.login,
+                 :name => y2, :touch => true)
+      draft.destroy
     end
 
     # In every case except conflict above, it hasn't rendered or redirected
     # yet, so send user on to show_name.
-    if !performed?
+    if need_redirect
       redirect_to(:action => parent.show_action, :id => parent.id,
                   :params => query_params)
     end
@@ -230,6 +265,10 @@ module DescriptionControllerHelpers
           :set_writers => @description.writer_groups,
           :set_admins  => @description.admin_groups
         )
+
+        @description.parent.log(:log_changed_permissions,
+                            :user => @user.login, :touch => false,
+                            :name => @description.unique_partial_format_name)
       else
         flash_notice(:runtime_description_adjust_permissions_no_changes.t)
       end

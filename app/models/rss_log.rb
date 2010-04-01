@@ -265,10 +265,12 @@ private
   # time:: TimeWithZone
   def self.encode(tag, args, time)
     time = time.utc.strftime('%Y%m%d%H%M%S')
+    tag = tag.to_s
+    raise "Invalid rss log tag: #{tag}" if tag.blank?
     args = args.keys.sort_by(&:to_s).map do |key|
              [key.to_s, escape(args[key])]
            end.flatten
-    [time, tag.to_s, *args].join(' ')
+    [time, tag, *args].join(' ')
   end
 
   # Decode a line from the log.  Returns a triplet:
@@ -282,6 +284,7 @@ private
       odd = !odd
       odd ? x.to_sym : unescape(x)
     end
+    args << '' if odd
     time = Time.utc(time[0,4], time[4,2], time[6,2],
                     time[8,2], time[10,2], time[12,2]).in_time_zone
     [tag.to_sym, Hash[*args], time]

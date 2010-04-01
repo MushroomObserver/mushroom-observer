@@ -158,7 +158,7 @@ class NameSorter
   def add_approved_deprecated_names(new_names)
     if new_names
       for n in new_names
-        @approved_deprecated_names += n.split("/")
+        @approved_deprecated_names += n.split
       end
     end
   end

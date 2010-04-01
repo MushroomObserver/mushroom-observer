@@ -1084,7 +1084,7 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(Name.find_by_text_name(new_synonym_str))
     params = {
       :list => { :members => "#{new_name_str} = #{new_synonym_str}"},
-      :approved_names => [new_name_str, new_synonym_str]
+      :approved_names => [new_name_str, new_synonym_str].join("\r\n")
     }
     login('rolf')
     post(:bulk_name_edit, params)
@@ -1155,7 +1155,7 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(Name.find_by_search_name(new_synonym_str))
     params = {
       :list => { :members => "#{approved_name.search_name} = #{new_synonym_str}" },
-      :approved_names => [approved_name.search_name, new_synonym_str]
+      :approved_names => [approved_name.search_name, new_synonym_str].join("\r\n")
     }
     login('rolf')
     post(:bulk_name_edit, params)
@@ -1178,7 +1178,7 @@ class NameControllerTest < FunctionalTestCase
     assert(target_synonym)
     params = {
       :list => { :members => "#{new_name_str} = #{synonym_name.search_name}" },
-      :approved_names => [new_name_str, synonym_name.search_name]
+      :approved_names => [new_name_str, synonym_name.search_name].join("\r\n")
     }
     login('rolf')
     post(:bulk_name_edit, params)
@@ -1204,7 +1204,7 @@ class NameControllerTest < FunctionalTestCase
     assert_nil(Name.find_by_text_name(new_name_str))
     params = {
       :list => { :members => "#{new_name_str}" },
-      :approved_names => [new_name_str]
+      :approved_names => new_name_str
     }
     login('rolf')
     post(:bulk_name_edit, params)
@@ -1317,7 +1317,7 @@ class NameControllerTest < FunctionalTestCase
     params = {
       :id => selected_name.id,
       :synonym => { :members => "Lepiota rachodes var. rachodes" },
-      :approved_names => ["Lepiota rachodes var. rachodes"],
+      :approved_names => "Lepiota rachodes var. rachodes",
       :deprecate => { :all => "1" }
     }
     login('rolf')
@@ -1353,7 +1353,7 @@ class NameControllerTest < FunctionalTestCase
       :approved_names => [
         "Lepiota rachodes var. rachodes",
         "Lepiota rhacodes var. rhacodes"
-      ],
+      ].join("\r\n"),
       :deprecate => { :all => "1" }
     }
     login('rolf')

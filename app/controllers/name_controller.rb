@@ -95,7 +95,7 @@ class NameController < ApplicationController
   # Display list of names in last index/search query.
   def index_name
     query = find_or_create_query(:Name, :by => params[:by])
-    show_selected_names(query, :id => params[:id])
+    show_selected_names(query, :id => params[:id], :always_index => true)
   end
 
   # Display list of all (correctly-spelled) names in the database.
@@ -241,7 +241,8 @@ class NameController < ApplicationController
   # Display list of names in last index/search query.
   def index_name_description
     query = find_or_create_query(:NameDescription, :by => params[:by])
-    show_selected_name_descriptions(query, :id => params[:id])
+    show_selected_name_descriptions(query, :id => params[:id],
+                                    :always_index => true)
   end
 
   # Display list of all (correctly-spelled) name_descriptions in the database.
@@ -760,6 +761,11 @@ class NameController < ApplicationController
           @name.classification = @description.classification
         end
 
+        # Log action in parent name.
+        @description.name.log(:log_object_created_by_user_with_name,
+                 :type => :description, :user => @user.login, :touch => true,
+                 :name => @description.unique_partial_format_name)
+
         # Save any changes to parent name.
         @name.save if @name.changed?
 
@@ -835,6 +841,11 @@ class NameController < ApplicationController
           name.save
         end
 
+        # Log action to parent name.
+        name.log(:log_object_updated_by_user_with_name, :touch => true,
+                 :type => :description, :user => @user.login,
+                 :name => @description.unique_partial_format_name)
+
         # Delete old description after resolving conflicts of merge.
         if (params[:delete_after] == 'true') and
            (old_desc = NameDescription.safe_find(params[:old_desc_id]))
@@ -846,6 +857,10 @@ class NameController < ApplicationController
           else
             flash_notice(:runtime_description_merge_deleted.
                            t(:old => old_desc.partial_format_name))
+            name.log(:log_object_merged_by_user,
+                     :user => @user.login, :touch => true,
+                     :from => old_desc.unique_partial_format_name,
+                     :to => @description.unique_partial_format_name)
             old_desc.destroy
           end
         end
@@ -861,6 +876,9 @@ class NameController < ApplicationController
     @description = NameDescription.find(params[:id])
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
+      @description.name.log(:log_object_destroyed_by_user_with_name,
+               :type => :description, :user => @user.login, :touch => true,
+               :name => @description.unique_partial_format_name)
       @description.destroy
       redirect_to(:action => 'show_name', :id => @description.name_id,
                   :params => query_params)
@@ -1376,10 +1394,6 @@ class NameController < ApplicationController
       list = params[:list][:members].strip_squeeze
       construct_approved_names(list, params[:approved_names])
       sorter = NameSorter.new
-      sorter.add_chosen_names(params[:chosen_multiple_names]) # hash on id
-      sorter.add_chosen_names(params[:chosen_approved_names]) # hash on id
-      sorter.add_approved_deprecated_names(params[:approved_deprecated_names])
-      sorter.check_for_deprecated_checklist(params[:checklist_data])
       sorter.sort_names(list)
       if sorter.only_single_names
         sorter.create_new_synonyms()
@@ -1388,10 +1402,10 @@ class NameController < ApplicationController
       else
         if sorter.new_name_strs != []
           # This error message is no longer necessary.
-          # flash_error "Unrecognized names including #{sorter.new_name_strs[0]} given."
+          flash_error "Unrecognized names given, including: #{sorter.new_name_strs[0].inspect}" if TESTING
         else
-          # Same with this one.
-          # flash_error "Ambiguous names including #{sorter.multiple_line_strs[0]} given."
+          # Same with this one... err, no this is not reported anywhere.
+          flash_error "Ambiguous names given, including: #{sorter.multiple_line_strs[0].inspect}"
         end
         @list_members = sorter.all_line_strs.join("\r\n")
         @new_names    = sorter.new_name_strs.uniq.sort

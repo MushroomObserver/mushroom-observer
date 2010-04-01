@@ -463,7 +463,8 @@ class ObserverController < ApplicationController
   # Displays matrix of selected Observation's (based on current Query).
   def index_observation
     query = find_or_create_query(:Observation, :by => params[:by])
-    show_selected_observations(query, :id => params[:id])
+    show_selected_observations(query, :id => params[:id],
+                               :always_index => true)
   end
 
   # Displays matrix of all Observation's, sorted by date.
@@ -1319,7 +1320,7 @@ class ObserverController < ApplicationController
       redirect_to(:action => 'list_rss_logs')
     else
       query = find_or_create_query(:User, :by => params[:by])
-      show_selected_users(query)
+      show_selected_users(query, :id => params[:id], :always_index => true)
     end
   end
 
@@ -1401,6 +1402,16 @@ class ObserverController < ApplicationController
     query = Query.lookup(:Observation, :by_user, :user => @show_user,
                          :by => :thumbnail_quality)
     @observations = query.results(:limit => 6, :include => :thumb_image)
+  end
+
+  # Go to next user: redirects to show_user.
+  def next_user
+    redirect_to_next_object(:next, User, params[:id])
+  end
+
+  # Go to previous user: redirects to show_user.
+  def prev_user
+    redirect_to_next_object(:prev, User, params[:id])
   end
 
   # Admin util linked from show_user page that lets admin add or change bonuses
