@@ -44,12 +44,12 @@ class Descriptions < ActiveRecord::Migration
     # --------------------------------------------------------------------
 
     Observation.connection.update %(
-      UPDATE observations SET where = RTRIM(LTRIM(`where`))
+      UPDATE observations SET `where` = RTRIM(LTRIM(`where`))
       WHERE `where` IS NOT NULL
     )
 
     SpeciesList.connection.update %(
-      UPDATE species_lists SET where = RTRIM(LTRIM(`where`))
+      UPDATE species_lists SET `where` = RTRIM(LTRIM(`where`))
       WHERE `where` IS NOT NULL
     )
 
