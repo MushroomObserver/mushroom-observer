@@ -716,8 +716,10 @@ class ApplicationController < ActionController::Base
       else # (this only happens if above genus, in which case names.length == 1)
         names.last.rank = name_parse.rank if name_parse.rank
         # only save comment if name didn't exist
-        if name_parse.comment
-          if names.new_record?
+        if comment = name_parse.comment
+          if comment.match(/^citation: *(.*)/)
+            names.last.citation = comment if names.last.citation.blank?
+          elsif names.new_record?
             names.last.notes = name_parse.comment
           else
             flash_warning "Didn't save comment for #{names.last.search_name}, name already exists: \"#{name_parse.comment}\""
