@@ -274,6 +274,8 @@ class NameSorter
           s.save
           name.merge_synonyms(s)
         end
+        name.change_deprecated(false)
+        name.save
       else
         raise TypeError.new("Unexpected ambiguity: #{names.map{|n| n.search_name}.join(', ')}")
       end

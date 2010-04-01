@@ -666,7 +666,7 @@ log_consensus_reached:  "Consensus established: [name]"
 log_deprecated_by:  Deprecated by [user].
 log_deprecated_by_with_comment: "[:log_deprecated_by] [comment]"
 log_changed_default_description:  "Default description changed to [name] by [user]."
-log_changed_permissions:  "Modified permissions of [name] by [user]."
+log_changed_permissions:  "Permissions modified by [user]: [name]."
 log_name_approved:  Approved by [user] over [other].
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
 log_name_deprecated:  Deprecated by [user] in favor of [other].
@@ -690,7 +690,7 @@ log_object_updated_by_user:  "[Type] updated by [user]."
 log_object_updated_by_user_with_name:  "[Type] updated by [user]: [name]."
 log_object_updated_no_user:  "[Type] updated."
 log_orphan:  "[Title]"
-log_published_description:  "Published description [name] by [user]."
+log_published_description:  "Description published by [user]: [name]."
 log_updated_by:  Updated by [user].
 
 # These should not need any translation.
@@ -2775,7 +2775,7 @@ name_bulk_help:  >
   after either the accepted or deprecated name, enclosed in square brackets.
   This will be saved in the notes when the name is created.
   \n\n
-  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm.
+  p(bulk_pre). Herpothallon Tobler [[citation:Aptroot, A, G Thor, ...]]
 
 name_bulk_label:  Name Edits
 name_bulk_success:  All names are now in the database.

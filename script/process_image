@@ -17,8 +17,9 @@ medium=$images/640/$id.jpg
 small=$images/320/$id.jpg
 thumb=$images/thumb/$id.jpg
 
-big_icon=$images/place_holder_640.jpg
-small_icon=$images/place_holder_thumb.jpg
+icon_640=$images/place_holder2_640.jpg
+icon_320=$images/place_holder2_320.jpg
+icon_160=$images/place_holder2_160.jpg
 
 log=log/process_image.$$
 log2=log/process_image.log
@@ -60,8 +61,9 @@ if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 	FILES:
 	    webmaster       $email
 	    image server    $server
-	    place-holders   $big_icon
-	                    $small_icon
+	    place-holders   $icon_640
+	                    $icon_320
+	                    $icon_160
 	    error log       $log2
 
 	EOH
@@ -86,11 +88,11 @@ echo $*
 #  until smaller images are done.
 # -----------------------------------------------
 
-run cp $small_icon $thumb
-run cp $small_icon $small
-run cp $big_icon $medium
-run cp $big_icon $large
-run cp $big_icon $huge
+run cp $icon_160 $thumb
+run cp $icon_320 $small
+run cp $icon_640 $medium
+run cp $icon_640 $large
+run cp $icon_640 $huge
 
 # ----------------------------
 #  Resize images.

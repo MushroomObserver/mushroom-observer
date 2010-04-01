@@ -676,6 +676,7 @@ peltigera:
   observation_name: **__Peltigera sp.__** (Old) New Auth.
   search_name: Peltigera sp. (Old) New Auth.
   classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
+  synonym_id: 4
   notes: ''
 
 petigera:
@@ -692,6 +693,7 @@ petigera:
   search_name: Petigera sp.
   correct_spelling_id: 40
   deprecated: true
+  synonym_id: 4
   citation: ''
   notes: ''
 

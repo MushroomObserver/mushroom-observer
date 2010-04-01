@@ -251,6 +251,9 @@ class Symbol
       end if level.length < 8
     end
 
+    # Allow literal square brackets by doubling them.
+    result = result.gsub(/\[\[/,'[').gsub(/\]\]/,']') if result.is_a?(String)
+
     # Make token attempt to capitalize result if requested [:TAG] for :tag.
     capitalize_result ? result.capitalize_first : result
   end

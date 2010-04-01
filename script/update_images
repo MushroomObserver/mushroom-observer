@@ -110,7 +110,10 @@ def refresh_listings(cronjob=false)
   verbose("Getting local listing...\n")
   files['local'] = list = list_local_files(@@local_path)
   verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
+  verbose("  320:   #{list.keys.select {|f| f[0,3] == '320'}.length}\n")
   verbose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
+  verbose("  960:   #{list.keys.select {|f| f[0,3] == '960'}.length}\n")
+  verbose("  1280:  #{list.keys.select {|f| f[0,4] == '1280'}.length}\n")
   verbose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
   write_cached_file_list('local', list)
 
@@ -121,7 +124,10 @@ def refresh_listings(cronjob=false)
     if list = list_remote_files(server)
       write_cached_file_list(server, list)
       verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
+      verbose("  320:   #{list.keys.select {|f| f[0,3] == '320'}.length}\n")
       verbose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
+      verbose("  960:   #{list.keys.select {|f| f[0,3] == '960'}.length}\n")
+      verbose("  1280:  #{list.keys.select {|f| f[0,3] == '1280'}.length}\n")
       verbose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
       files[server] = list
     else
@@ -173,6 +179,7 @@ def check_for_mismatches(file_lists, clean=false)
       if any_different
         for server in servers
           if file_lists[server][file] != local_size
+            verbose("need to upload #{file} to #{server}")
             need_to_upload[server] ||= []
             need_to_upload[server] << file
           end
@@ -271,7 +278,8 @@ end
 #  Command-line utility mode.
 # -----------------------------
 
-def sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, use_cache)
+def sync_command(local,remote, do_upload,do_download,
+    do_thumb,do_320,do_640,do_960,do_1280,do_orig, use_cache)
   local_files = {}     # local_files['orig/1234.jpg'] = 123456 (bytes)
   remote_files = {}    # remote_files['orig/1234.jpg'] = 123456
 
@@ -298,7 +306,10 @@ def sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, u
     size = 0
     for file in local_files.keys - remote_files.keys
       if do_thumb && file[0..4] == 'thumb' ||
+         do_320   && file[0..2] == '320'   ||
          do_640   && file[0..2] == '640'   ||
+         do_960   && file[0..2] == '960'   ||
+         do_1280  && file[0..3] == '1280'  ||
          do_orig  && file[0..3] == 'orig'
         files.push(file)
         size += local_files[file]
@@ -318,7 +329,10 @@ def sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, u
     size = 0
     for file in remote_files.keys - local_files.keys
       if do_thumb && file[0..4] == 'thumb' ||
+         do_320   && file[0..2] == '320'   ||
          do_640   && file[0..2] == '640'   ||
+         do_960   && file[0..2] == '960'   ||
+         do_1280  && file[0..3] == '1280'  ||
          do_orig  && file[0..3] == 'orig'
         files.push(file)
         size += remote_files[file]
@@ -459,7 +473,7 @@ end
 def list_local_files(path)
   files = {}
   files['date'] = Time.now
-  for type in ['thumb', '640', 'orig']
+  for type in ['thumb', '320', '640', '960', '1280', 'orig']
     cmd = "ls #{path}/#{type}"
     verbose cmd
     open("|#{cmd}") do |dir|
@@ -488,7 +502,7 @@ def list_remote_files(server)
   end
   files = {}
   files['date'] = Time.now
-  cmd = "ssh #{url} ls -lU --color=never #{path}/{thumb,640,orig}"
+  cmd = "ssh #{url} ls -lU --color=never #{path}/{thumb,320,640,960,1280,orig}"
   verbose cmd
   open("|#{cmd}") do |dir|
     type = nil
@@ -513,18 +527,27 @@ def update_local_files(files, path)
   Dir.foreach("#{path}/orig") do |file|
     if file.match(/^\d+\.jpg$/) && !files.has_key?("orig/#{file}")
       file1 = "#{path}/thumb/#{file}"
-      file2 = "#{path}/640/#{file}"
-      file3 = "#{path}/orig/#{file}"
+      file2 = "#{path}/320/#{file}"
+      file3 = "#{path}/640/#{file}"
+      file4 = "#{path}/960/#{file}"
+      file5 = "#{path}/1280/#{file}"
+      file6 = "#{path}/orig/#{file}"
       # Wait for all three images, otherwise the daemon might wake up after
       # the original has been uploaded but before the smaller sizes have been
       # created.  That would result in the smaller sizes being missed until
       # the nightly job finally caught the error.
-      if File.exists?(file1) && (size1 = File.size(file1).to_i) != 0
-         File.exists?(file2) && (size2 = File.size(file2).to_i) != 0
-         File.exists?(file3) && (size3 = File.size(file3).to_i) != 0
+      if File.exists?(file1) && (size1 = File.size(file1).to_i) != 0 &&
+         File.exists?(file2) && (size2 = File.size(file2).to_i) != 0 &&
+         File.exists?(file3) && (size3 = File.size(file3).to_i) != 0 &&
+         File.exists?(file4) && (size4 = File.size(file4).to_i) != 0 &&
+         File.exists?(file5) && (size5 = File.size(file5).to_i) != 0 &&
+         File.exists?(file6) && (size6 = File.size(file6).to_i) != 0
         files["thumb/#{file}"] = size1
-        files["640/#{file}"]   = size2
-        files["orig/#{file}"]  = size3
+        files["320/#{file}"]   = size2
+        files["640/#{file}"]   = size3
+        files["960/#{file}"]   = size4
+        files["1280/#{file}"]  = size5
+        files["orig/#{file}"]  = size6
         log "Found new image #{file}\n"
       end
     end
@@ -820,9 +843,13 @@ case get_next_arg
     do_upload = do_download = true unless do_upload || do_download
 
     do_thumb = true if get_flag('-T') || get_flag('--thumb')
+    do_320   = true if get_flag('-N') || get_flag('--320')
     do_640   = true if get_flag('-N') || get_flag('--640')
+    do_960   = true if get_flag('-N') || get_flag('--960')
+    do_1280  = true if get_flag('-N') || get_flag('--1280')
     do_orig  = true if get_flag('-O') || get_flag('--orig')
-    do_thumb = do_640 = do_orig = true unless do_thumb || do_640 || do_orig
+    do_thumb = do_320 = do_640 = do_960 = do_1280 = do_orig = true \
+      unless do_thumb || do_320 || do_640 || do_960 || do_1280 || do_orig
 
     use_cache = true if get_flag('--use_cache')
 
@@ -836,7 +863,10 @@ case get_next_arg
     elsif File.directory?('images')
       local = 'images'
     elsif File.directory?('thumb') ||
-          File.directory?('640') ||
+          File.directory?('320')   ||
+          File.directory?('640')   ||
+          File.directory?('960')   ||
+          File.directory?('1280')  ||
           File.directory?('orig')
       local = '.'
     else
@@ -852,16 +882,29 @@ case get_next_arg
       puts "Creating "#{local}/thumb\n"
       Dir.mkdir("#{local}/thumb\n")
     end
+    if do_320 && !File.directory?("#{local}/320")
+      puts "Creating "#{local}/320\n"
+      Dir.mkdir("#{local}/320\n")
+    end
     if do_640 && !File.directory?("#{local}/640")
       puts "Creating "#{local}/640\n"
       Dir.mkdir("#{local}/640\n")
+    end
+    if do_960 && !File.directory?("#{local}/960")
+      puts "Creating "#{local}/960\n"
+      Dir.mkdir("#{local}/960\n")
+    end
+    if do_1280 && !File.directory?("#{local}/1280")
+      puts "Creating "#{local}/1280\n"
+      Dir.mkdir("#{local}/1280\n")
     end
     if do_orig && !File.directory?("#{local}/orig")
       puts "Creating "#{local}/orig\n"
       Dir.mkdir("#{local}/orig\n")
     end
 
-    sync_command(local,remote, do_upload,do_download, do_thumb,do_640,do_orig, use_cache)
+    sync_command(local,remote, do_upload,do_download,
+      do_thumb,do_320,do_640,do_960,do_1280,do_orig, use_cache)
     exit 0
 
 ################################################################################
@@ -894,7 +937,10 @@ OPTIONS
     -U --upload            Only upload images to remote server.
     -D --download          Only download images from remote server.
     -T --thumb             Only update thumbnails.
-    -N --640               Only update normal-size images.
+    -N --320               Only update small images.
+    -N --640               Only update normal images.
+    -N --960               Only update large images.
+    -N --1280              Only update huge images.
     -O --orig              Only update originals.
        --use_cache         Just use cached file list (don't refresh).
 

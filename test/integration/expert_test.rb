@@ -75,7 +75,7 @@ class ExpertTest < IntegrationTestCase
     user.assert_template('name/edit_name_description')
 
     # The lurker appears to have same permissions, but will need to login in
-    # order to actually do anything. 
+    # order to actually do anything.
     lurker.get(show_name)
     lurker.assert_select('a[href*=edit_name_description]')
     lurker.assert_select('a[href*=destroy_name_description]', 0)
@@ -107,5 +107,158 @@ class ExpertTest < IntegrationTestCase
       form.assert_no_field('public_write')
       form.assert_no_field('public')
     end
+  end
+
+  # --------------------------------------------------------
+  #  Test passing of arguments around in bulk name editor.
+  # --------------------------------------------------------
+
+  def test_bulk_name_editor
+    name1 = "Caloplaca arnoldii"
+    author1 = "(Wedd.) Zahlbr."
+    full_name1 = "#{name1} #{author1}"
+
+    name2 = "Caloplaca arnoldii ssp. obliterate"
+    author2 = "(Pers.) Gaya"
+    full_name2 = "#{name1} #{author2}"
+
+    name3 = "Acarospora nodulosa var. reagens"
+    author3 = "Zahlbr."
+    full_name3 = "#{name1} #{author3}"
+
+    name4 = "Lactarius subalpinus"
+    name5 = "Lactarius newname"
+
+    list =
+      "#{name1} #{author1}\r\n" +
+      "#{name2} #{author2}\r\n" +
+      "#{name3} #{author3}\r\n" +
+      "#{name4} = #{name5}"
+
+    login!(@dick)
+    get('name/bulk_name_edit')
+    open_form do |form|
+      form.assert_value('list_members', '')
+      form.change('list_members', list)
+      form.submit
+    end
+    assert_flash_error
+    assert_response(:success)
+    assert_template('name/bulk_name_edit')
+
+    # Don't mess around, just let it do whatever it does, and make sure it is
+    # correct.  I don't want to make any assumptions about how the internals
+    # work (e.g., I don't want to make any assertions about the hidden fields)
+    # -- all I want to be sure of is that it doesn't f--- up our list of names.
+    open_form do |form|
+      assert_equal(list.split(/\r\n/).sort,
+                   form.get_value!('list_members').split(/\r\n/).sort)
+      # field = form.get_field('approved_names')
+      form.submit
+    end
+    assert_flash_success
+    assert_template('observer/list_rss_logs')
+
+    assert_not_nil(Name.find_by_text_name('Caloplaca'))
+
+    names = Name.find_all_by_text_name(name1)
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(author1, names.first.author)
+    assert_equal(false, names.first.deprecated)
+
+    names = Name.find_all_by_text_name(name2.sub(/ssp/, 'subsp'))
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(author2, names.first.author)
+    assert_equal(false, names.first.deprecated)
+
+    names = Name.find_all_by_text_name(name2.sub(/ssp/, 'subsp'))
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(author2, names.first.author)
+    assert_equal(false, names.first.deprecated)
+
+    assert_not_nil(Name.find_by_text_name('Acarospora'))
+    assert_not_nil(Name.find_by_text_name('Acarospora nodulosa'))
+
+    names = Name.find_all_by_text_name(name3)
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(author3, names.first.author)
+    assert_equal(false, names.first.deprecated)
+
+    names = Name.find_all_by_text_name(name4)
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(false, names.first.deprecated)
+
+    names = Name.find_all_by_text_name(name5)
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(nil, names.first.author)
+    assert_equal(true, names.first.deprecated)
+
+    # I guess this is left alone, even though you would probably
+    # expect it to be deprecated.
+    names = Name.find_all_by_text_name('Lactarius alpinus')
+    assert_equal(1, names.length, names.map(&:search_name).inspect)
+    assert_equal(false, names.first.deprecated)
+  end
+
+  # ----------------------------------------------------------
+  #  Test passing of arguments around in species list forms.
+  # ----------------------------------------------------------
+
+  def test_species_list_forms
+    names = [
+      'Petigera',
+      'Lactarius alpigenes',
+      'Suillus',
+      'Amanita baccata',
+      'Caloplaca arnoldii ssp. obliterate',
+    ]
+    list = names.join("\r\n")
+
+    amanita = Name.find_all_by_text_name('Amanita baccata')
+    suillus = Name.find_all_by_text_name('Suillus')
+
+    login!(@dick)
+    get('species_list/create_species_list')
+    open_form do |form|
+      form.assert_value('list_members', '')
+      form.change('list_members', list)
+      form.change('title', 'Anything')
+      form.change('place_name', 'Anywhere')
+      form.submit
+    end
+    assert_flash_error
+    assert_response(:success)
+    assert_template('species_list/create_species_list')
+
+    assert_select('div#missing_names', /Caloplaca arnoldii ssp. obliterate/)
+    assert_select('div#deprecated_names', /Lactarius alpigenes/)
+    assert_select('div#deprecated_names', /Lactarius alpinus/)
+    assert_select('div#deprecated_names', /Petigera/)
+    assert_select('div#deprecated_names', /Peltigera/)
+    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Arora/)
+    assert_select('div#ambiguous_names', /Amanita baccata.*sensu Borealis/)
+    assert_select('div#ambiguous_names', /Suillus.*Gray/)
+    assert_select('div#ambiguous_names', /Suillus.*White/)
+
+    open_form do |form|
+      assert_equal(list.split(/\r\n/).sort,
+                   form.get_value!('list_members').split(/\r\n/).sort)
+      form.check(/chosen_multiple_names_\d+_#{amanita[0].id}/)
+      form.check(/chosen_multiple_names_\d+_#{suillus[1].id}/)
+      form.submit
+    end
+    assert_flash_success
+    assert_template('species_list/show_species_list')
+
+    spl = SpeciesList.last
+    obs = spl.observations
+    assert_equal(5, obs.length, obs.map(&:text_name).inspect)
+    assert_equal([
+      'Petigera sp.',
+      'Lactarius alpigenes Kühn.',
+      'Suillus sp. E.B. White',
+      'Amanita baccata sensu Arora',
+      'Caloplaca arnoldii subsp. obliterate',
+    ].sort, obs.map(&:name).map(&:search_name).sort)
   end
 end

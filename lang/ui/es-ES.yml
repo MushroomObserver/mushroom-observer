@@ -2823,7 +2823,7 @@ name_bulk_help: >
   entre corchetes.  Esto se guardará en las notas cuando el nombre es creado.
   (Actualmente, se hace caso omiso si el nombre ya existe.)
   \n\n
-  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H. E. Bigelow & A. H. Sm.
+  p(bulk_pre). Herpothallon Tobler [[citation:Aptroot, A, G Thor, ...]]
 
 name_bulk_label: Cambios de Nombre
 name_bulk_success: Todos los nombres se han agregado a la base de datos.

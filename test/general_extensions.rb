@@ -9,6 +9,7 @@
 #  setup_image_dirs::           Create test image dirs for tests that do image uploads.
 #
 #  == General Assertions
+#  assert_fail::                Make sure an assertion fails.
 #  assert_true::                Make sure something is true.
 #  assert_false::               Make sure something is false.
 #  assert_not_match::           Make sure a string does NOT match.
@@ -64,6 +65,13 @@ module GeneralExtensions
   #  :section: General assertions
   #
   ##############################################################################
+
+  # Assert that an assertion fails.
+  def assert_fail(*msg, &block)
+    clean_our_backtrace do
+      assert_raises(Test::Unit::AssertionFailedError, *msg, &block)
+    end
+  end
 
   # Assert that something is true.
   def assert_true(got, *msg)

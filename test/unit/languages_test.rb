@@ -40,6 +40,8 @@ class LanguagesTest < UnitTestCase
     pass = true
     while value.match(/\S/)
       if value.sub!(/^[^\[\]]+/, '')
+      elsif value.sub!(/^\[\[/, '')
+      elsif value.sub!(/^\]\]/, '')
       elsif value.sub!(/^\[\w+\]/, '')
       elsif value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, '')
         if $1 && !validate_square_brackets_args($1)

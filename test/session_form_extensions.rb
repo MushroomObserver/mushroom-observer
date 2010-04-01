@@ -17,6 +17,8 @@
 #  new::              Initialize form from HTML element returned by assert_select.
 #  get_field::        Return Form::Field matching the given DOM id.
 #  get_field!::       Same as get_field, but flunks an assertion if not found.
+#  get_value::        Return value (String) of field matching the given DOM id.
+#  get_value!::       Same as get_value, but flunks an assertion if not found.
 #
 #  ==== Form actions
 #  change::           Change the value of a given field.
@@ -117,6 +119,7 @@ class SessionExtensions::Form
         val  = CGI.unescapeHTML(elem.attributes['value'] || '')
         type = (elem.name == 'input') ? elem.attributes['type'] : elem.name
         disabled = elem.attributes['disabled'] == 'disabled'
+        name = id if name.blank?
 
         field = Field.new(
           :node     => elem,
@@ -143,7 +146,7 @@ class SessionExtensions::Form
           field.value = nil
           inputs << field
 
-        when 'checkbox'
+        when 'checkbox', 'radio'
           field.on_value = val
           field.value = (elem.attributes['checked'] == 'checked')
           inputs << field
@@ -203,6 +206,17 @@ class SessionExtensions::Form
   # Call get_field and flunk an assertion if field not found.
   def get_field!(id)
     get_field(id, :strict)
+  end
+
+  # Find the field whose ID ends in the given String or matches the given
+  # Regexp.  Returns its value as a String if found, else +nil+.
+  def get_value(id)
+    get_field(id).value
+  end
+
+  # Call get_value and flunk an assertion if field not found.
+  def get_value!(id)
+    get_field(id, :strict).value
   end
 
   # Make sure the form does _not_ have a given field.
@@ -268,14 +282,27 @@ class SessionExtensions::Form
   # Check a given check-box.
   def check(id)
     field = assert_enabled(id)
-    context.assert_equal(:checkbox, field.type)
+    context.assert_block("Must be a check-box or radio-box.") do
+      [:checkbox, :radio].include?(field.type)
+    end
     field.value = true
+
+    # Uncheck all the other radio-boxes in this group.
+    if field.type == :radio
+      for field2 in inputs
+        if (field2 != field) and (field2.name == field.name)
+          field2.value = false
+        end
+      end
+    end
   end
 
   # Uncheck a given check-box.
   def uncheck(id)
     field = assert_enabled(id)
-    context.assert_equal(:checkbox, field.type)
+    context.assert_block("Must be a check-box.") do
+      [:checkbox].include?(field.type)
+    end
     field.value = false
   end
 
@@ -317,6 +344,8 @@ class SessionExtensions::Form
     for field in inputs
       if field.type == :checkbox
         hash[field.name] = field.value ? field.on_value : '0'
+      elsif field.type == :radio
+        hash[field.name] = field.on_value if field.value
       elsif field.value.to_s != ''
         hash[field.name] = field.value
       end

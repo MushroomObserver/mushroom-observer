@@ -1396,7 +1396,7 @@ class NameController < ApplicationController
       sorter = NameSorter.new
       sorter.sort_names(list)
       if sorter.only_single_names
-        sorter.create_new_synonyms()
+        sorter.create_new_synonyms
         flash_notice :name_bulk_success.t
         redirect_to(:controller => 'observer', :action => 'list_rss_logs')
       else

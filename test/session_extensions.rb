@@ -170,7 +170,7 @@ module SessionExtensions
     form = nil
     clean_our_backtrace do
       if args == []
-        action = path.sub(/\?.*/,'')
+        action = path.sub(/\?.*/, '')
         args << "form[action*=#{action}]"
       end
       assert_select(*args) do |elems|

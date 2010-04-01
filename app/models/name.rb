@@ -787,7 +787,7 @@ class Name < AbstractModel
         # Takes on average 0.050 seconds.
         Name.all(:conditions => "synonym_id = #{synonym_id}")
 
-        # Involves instantiating a Synonym, something which should never happen.
+        # Involves instantiating a Synonym, something which need never happen.
         # synonym ? synonym.names : [self]
       else
         [self]

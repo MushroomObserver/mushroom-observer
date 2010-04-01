@@ -2773,7 +2773,7 @@ name_bulk_help: >
   after either the accepted or deprecated name, enclosed in square brackets.
   This will be saved in the notes when the name is created.
   \n\n
-  p(bulk_pre). Clitocybe nuda (Bull.:Fr.) H.E. Bigelow & A.H. Sm.
+  p(bulk_pre). Herpothallon Tobler [[citation:Aptroot, A, G Thor, ...]]
 
 name_bulk_label: Name Edits
 name_bulk_success: All names are now in the database.
