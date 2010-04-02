@@ -19,6 +19,9 @@
               :id => @species_list.id, :params => query_params },
               { :confirm => :are_you_sure.l })
     end
+  end
+
+  new_tab_set do
     add_tab(:species_list_show_save_as_txt.t, :action => 'make_report',
             :id => @species_list.id, :type => 'txt')
     add_tab(:species_list_show_save_as_rtf.t, :action => 'make_report',
@@ -36,8 +39,15 @@
 <p><%= :NOTES.t %>:</p>
 <%= sanitize(@species_list.notes.to_s).tpl %>
 
-<% if @pages && @pages.length > 0 %>
-  <%= :species_list_show_members.t %>:<br/>
+<% if @pages && @pages.length > 0
+  set_query_params(@query) %>
+  <%= :species_list_show_members.t %>: 
+    <%= link_to(:show_objects.t(:type => :observation),
+                :controller => :observer, :action => :index_observation,
+                :params => query_params) %> |
+    <%= link_to(:show_objects.t(:type => :name),
+                :controller => :name, :action => :index_name,
+                :params => query_params) %><br/>
   <% paginate_block(@pages) do %>
     <% if @objects && @objects.length > 0 %>
       <table cellpadding="5" cellspacing="0" width="100%">

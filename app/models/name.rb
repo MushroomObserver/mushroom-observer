@@ -146,6 +146,7 @@
 #  below_genus?::            Is ranked below genus?
 #  above_species?::          Is ranked above species?
 #  below_species?::          Is ranked below species?
+#  is_lichen::               Is this a lichen or lichenicolous fungus?
 #  all_parents::             Array of all parents.
 #  parents::                 Array of immediate parents.
 #  children::                Array of immediate children.
@@ -248,7 +249,7 @@ class Name < AbstractModel
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
     ver.user_id = User.current_id
-    if (ver.version != 1) and 
+    if (ver.version != 1) and
        Name.connection.select_value(%(
          SELECT COUNT(*) FROM names_versions
          WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
@@ -402,6 +403,27 @@ class Name < AbstractModel
   # Is this Name a subspecies or lower?
   def below_species?
     RANKS_BELOW_SPECIES.include?(self.rank)
+  end
+
+  # Is this Name in the "lichens" SpeciesList?  This is a temporary kludge
+  # until RDF allows me to explicitly tag things as "lichenized".
+  def is_lichen?
+    # Check both this and genus, just in case I'm missing some species.
+    ids = [id]
+    if below_genus?
+      genus = self.class.find_by_text_name(text_name.split.first)
+      ids << genus.id if genus
+    end
+    ids = ids.map(&:to_s).join(',')
+
+    (spl = SpeciesList.find_by_title('lichens')) and
+    !!self.connection.select_value(%(
+      SELECT names.id FROM observations_species_lists os
+      JOIN observations o ON os.observation_id = o.id
+      JOIN names ON names.id = o.name_id
+      WHERE os.species_list_id = #{spl.id}
+        AND o.name_id IN (#{ids})
+    ))
   end
 
   # Returns an Array of all of this Name's ancestors, starting with its

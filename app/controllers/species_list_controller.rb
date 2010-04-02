@@ -151,14 +151,14 @@ class SpeciesListController < ApplicationController
   def show_species_list
     store_location
     clear_query_in_session
+    pass_query_params
     @species_list = SpeciesList.find(params[:id], :include => :user)
-    query = create_query(:Observation, :in_species_list, :by => :name,
-                         :species_list => @species_list)
-    store_query_in_session(query) if !params[:set_source].blank?
-    set_query_params(query)
-    query.need_letters = 'names.text_name'
+    @query = create_query(:Observation, :in_species_list, :by => :name,
+                             :species_list => @species_list)
+    store_query_in_session(@query) if !params[:set_source].blank?
+    @query.need_letters = 'names.text_name'
     @pages = paginate_letters(:letter, :page, 100)
-    @objects = query.paginate(@pages, :include => [:user, :name, :location])
+    @objects = @query.paginate(@pages, :include => [:user, :name, :location])
   end
 
   # Go to next species_list: redirects to show_species_list.

@@ -911,11 +911,13 @@ class ApplicationController < ActionController::Base
   end
 
   # Change the query that +query_params+ passes along to the next request.
+  # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
     @query_params = {}
     @query_params[:q] = query.id.alphabetize if query
     @query_params
   end
+  helper_method :set_query_params
 
   # Lookup an appropriate Query or create a default one if necessary.  If you
   # pass in arguments, it modifies the query as necessary to ensure they are

@@ -14,7 +14,7 @@ class CleanRssLogs < ActiveRecord::Migration
       end
       old_pct = pct
 
-      new_notes, last_modified = clean_notes(log.notes, cutoff)
+      new_notes, last_modified = clean_notes(log.notes, log.modified, cutoff)
 
       # Delete logs that haven't been used in a long time.
       if !last_modified || last_modified < cutoff
@@ -35,7 +35,7 @@ class CleanRssLogs < ActiveRecord::Migration
   def self.down
   end
 
-  def self.clean_notes(notes, cutoff)
+  def self.clean_notes(notes, modified, cutoff)
     result = []
     last_time = nil
     for line in notes.to_s
@@ -56,7 +56,9 @@ class CleanRssLogs < ActiveRecord::Migration
         last_time ||= time
 
         # Reformat message only if we're going to keep it.
-        if time > cutoff
+        if time < cutoff
+          break
+        else
           # Only keep the old "new" format.
           if str.match(/^([\w\%]+)\((.*)\)$/)
             tag = $1
@@ -78,8 +80,13 @@ class CleanRssLogs < ActiveRecord::Migration
         end
 
       # Orphan title.
-      else
+      elsif modified && modified > cutoff
         result << reescape(line)
+
+      # Delete this entry.
+      else
+        last_time = nil
+        break
       end
     end
     return [result.join("\n"), last_time]

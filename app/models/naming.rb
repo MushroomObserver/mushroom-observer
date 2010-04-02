@@ -103,6 +103,7 @@ class Naming < AbstractModel
       @initial_name_id = self.name_id
       taxa = self.name.all_parents
       taxa.push(self.name)
+      taxa.push(Name.find_by_text_name('Lichen')) if self.name.is_lichen?
       for taxon in taxa
         for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
           if n.user.created_here
@@ -312,7 +313,7 @@ class Naming < AbstractModel
   ]
 
   # Return reasons as Array of Reason instances.  Changes to these instances
-  # will make appropriate changes to the Naming. 
+  # will make appropriate changes to the Naming.
   def get_reasons
     self.reasons ||= {}
     ALL_REASONS.map do |num|
@@ -321,7 +322,7 @@ class Naming < AbstractModel
   end
 
   # Return reasons as Hash of Reason instances.  Changes to these instances
-  # will make appropriate changes to the Naming. 
+  # will make appropriate changes to the Naming.
   def get_reasons_hash
     result = {}
     for reason in get_reasons

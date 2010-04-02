@@ -302,6 +302,8 @@ class SpeciesList < AbstractModel
     end
 
     if !args[:what].blank?
+      name = args[:what]
+      name = name.id if name.is_a?(Name)
       obs = Observation.create(
         :created  => args[:created],
         :modified => args[:modified],
@@ -309,7 +311,7 @@ class SpeciesList < AbstractModel
         :when     => args[:when],
         :where    => args[:where],
         :location => args[:location],
-        :name     => args[:what],
+        :name_id  => name,
         :notes    => args[:notes],
         :specimen => args[:specimen],
         :is_collection_location => args[:is_collection_location]
@@ -319,11 +321,11 @@ class SpeciesList < AbstractModel
         :created     => args[:created],
         :modified    => args[:modified],
         :user        => args[:user],
-        :name        => args[:what],
+        :name_id     => name,
         :observation => obs
       )
 
-      if args[:vote]
+      if args[:vote] && (args[:vote].to_i != 0)
         vote = Vote.create(
           :created     => args[:created],
           :modified    => args[:modified],
