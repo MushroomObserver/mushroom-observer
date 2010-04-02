@@ -43,7 +43,8 @@
         end %>
         <% if !image.notes.blank? %>
           <small>
-            <%= image.notes.tl.truncate_html(300) %>
+            <%= content_tag(:span, image.notes.tl.truncate_html(300),
+                            :title => image.notes.tp.html_to_ascii) %>
           </small>
         <% end %>
       </p>

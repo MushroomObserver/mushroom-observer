@@ -6,13 +6,13 @@ adjust site-specific configs:
 backup database
 rake db:migrate
 
-script/clean_rss_logs
 script/recalc_contributions
 script/refresh_name_lister_cache
-# script/fix_name_notes
+# script/fix_name_notes (working on this)
 
 get sizes.txt
 get types.txt
 script/populate_image_sizes
 
 add script/refresh_name_lister_cache to crontab
+add script/update_lichen_list to crontab

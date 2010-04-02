@@ -187,6 +187,12 @@ class ImageController < ApplicationController
       @default_size = @size
     end
 
+    # Update export status.
+    if !params[:set_export].blank?
+      @image.ok_for_export = (params[:set_export] == '1')
+      @image.save_without_our_callbacks
+    end
+
     # Wait until here to create this search query to save server resources.
     # Otherwise we'd be creating a new search query for images for every single
     # show_observation request.  We know we came from an observation-type page

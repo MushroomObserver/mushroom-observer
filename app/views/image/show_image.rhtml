@@ -86,6 +86,23 @@
         <span class="Data"><%= image_vote_as_long_string(@image.vote_cache.to_i) %></span>
       </p>
 
+      <% if is_reviewer? %>
+        <p>
+          <%= if @image.ok_for_export
+            content_tag(:b, :review_ok_for_export.t)
+          else
+            link_to(:review_ok_for_export.t, :set_export => 1,
+                    :params => query_params)
+          end %><br/>
+          <%= if @image.ok_for_export
+            link_to(:review_no_export.t, :set_export => 0,
+                    :params => query_params)
+          else
+            content_tag(:b, :review_no_export.t)
+          end %>
+        </p>
+      <% end %>
+
       <% if @user %>
         <p>
           <%= :image_show_your_vote.t %>:<br/>
@@ -151,6 +168,9 @@
           if !observation.notes.blank?
             text += '</span><span class="HelpNote"><br/>%s: %s...' %
                   [:image_show_notes.t, observation.notes.tl.truncate_html(30)]
+            title_args = { :title => observation.notes.tp.html_to_ascii }
+          else
+            title_args = {}
           end
           len = observation.comments.length
           if len > 0
@@ -158,9 +178,9 @@
             text += :image_show_comments.t(:num => len)
           end
           text += '</span>' %>
-          <%= link_to(text, :controller => 'observer',
+          <%= link_to(text, { :controller => 'observer',
                       :action => 'show_observation', :id => observation.id,
-                      :params => query_params) %>
+                      :params => query_params }, title_args) %>
         <% end %>
       </p>
 
