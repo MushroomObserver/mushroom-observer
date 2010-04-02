@@ -24,7 +24,7 @@ Voting:
   new votes public. 
 
   All users are now encouraged to vote on image quality.  At Chris Parrish's
-  and Debbie Viess's suggestions we've deliberately removed all negative votes.
+  and Debbie Viess's suggestions we've deliberately omitted negative votes.
   Image quality is only used to rank images in search results.  Also, only
   images of a minimum quality ("useful for identification") are being shared
   with third-party sources, such as EOL.org.  As with proposed names, there

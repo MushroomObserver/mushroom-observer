@@ -1337,6 +1337,7 @@ class NameController < ApplicationController
       AND observations.vote_cache >= 2.4
       AND images_observations.image_id = images.id
       AND images.vote_cache >= 2
+      AND images.ok_for_export
       ORDER BY observations.vote_cache
     )
 
