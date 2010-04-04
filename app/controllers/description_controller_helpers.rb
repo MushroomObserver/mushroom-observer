@@ -10,10 +10,10 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  make_description_default::  L . .
-#  merge_descriptions::        L V .
-#  publish_descriptions::      L . .
-#  adjust_permissions::        L V .
+#  make_description_default::
+#  merge_descriptions::
+#  publish_descriptions::
+#  adjust_permissions::
 #
 #  == Helpers
 #  find_description::                   Look up a description based on id and controller name.
@@ -40,7 +40,7 @@ module DescriptionControllerHelpers
   ################################################################################
 
   # Make a description the default one.  Description must be public-readable.
-  def make_description_default
+  def make_description_default # :norobots:
     pass_query_params
     desc = find_description(params[:id])
     if !desc.public
@@ -60,7 +60,7 @@ module DescriptionControllerHelpers
   # (so they can modify it).  If there is a conflict, it dumps the user into
   # the edit_description form and forces them to do the merge and delete the
   # old description afterword.
-  def merge_descriptions
+  def merge_descriptions # :norobots:
     pass_query_params
     src = find_description(params[:id])
     type = src.class.name.underscore.sub(/_description/, '')
@@ -116,7 +116,7 @@ module DescriptionControllerHelpers
   # the draft into a public description and make it the default.  If the name
   # has a default description try to merge the draft into it.  If there is a
   # conflict bring up the edit_description form to let the user do the merge.
-  def publish_description
+  def publish_description # :norobots:
     pass_query_params
     draft = find_description(params[:id])
     parent = draft.parent
@@ -197,7 +197,7 @@ module DescriptionControllerHelpers
   end
 
   # Adjust permissions on a description.
-  def adjust_permissions
+  def adjust_permissions # :norobots:
     pass_query_params
     @description = find_description(params[:id])
     done = false
@@ -449,7 +449,7 @@ module DescriptionControllerHelpers
     end
 
     # Just ignore illegal changes otherwise.  Form should prevent these,
-    # anyway, but user could try to get sneaky and make changes via URL. 
+    # anyway, but user could try to get sneaky and make changes via URL.
     if params.is_a?(Hash)
       root = is_in_admin_mode?
       admin = desc.is_admin?(@user)

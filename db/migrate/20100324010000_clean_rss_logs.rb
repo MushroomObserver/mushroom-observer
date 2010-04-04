@@ -14,7 +14,11 @@ class CleanRssLogs < ActiveRecord::Migration
       end
       old_pct = pct
 
-      new_notes, last_modified = clean_notes(log.notes, log.modified, cutoff)
+      if log.modified > cutoff
+        new_notes, last_modified = clean_notes(log.notes, log.modified, cutoff)
+      else
+        new_notes = last_modified = nil
+      end
 
       # Delete logs that haven't been used in a long time.
       if !last_modified || last_modified < cutoff

@@ -8,34 +8,36 @@
 #   P = prefetching allowed
 #
 #  ==== Sign-up
-#  signup::             . V P
-#  verify::             . V .
-#  reverify::           . V .
-#  send_verify::        . . .
-#  welcome::            . V .
+#  signup::             <tt>(. V P)</tt> Create new account.
+#  verify::             <tt>(. V .)</tt> Verify new account.
+#  reverify::           <tt>(. V .)</tt> If verify fails(?)
+#  send_verify::        <tt>(. . .)</tt> Callback used by reverify.
+#  welcome::            <tt>(. V .)</tt> Welcome page after signup and verify.
 #
 #  ==== Login
-#  login::              . V P
-#  logout_user::        . V .
-#  email_new_password:: . V .
-#  show_alert::         . V .
+#  login::              <tt>(. V P)</tt>
+#  logout_user::        <tt>(. V .)</tt>
+#  email_new_password:: <tt>(. V .)</tt>
+#  show_alert::         <tt>(. V .)</tt>
 #
 #  ==== Preferences
-#  prefs::              L V P
-#  profile::            L V P
-#  remove_image::       L . .
-#  no_email::           L V .
+#  prefs::              <tt>(L V P)</tt>
+#  profile::            <tt>(L V P)</tt>
+#  remove_image::       <tt>(L . .)</tt>
+#  no_email::           <tt>(L V .)</tt>
 #
 #  ==== Admin utilities
-#  turn_admin_on::      R . .
-#  turn_admin_off::     R . .
-#  add_user_to_group::  R V .
-#  create_alert::       R V .
-#  destroy_user::       R . .
+#  turn_admin_on::      <tt>(R . .)</tt>
+#  turn_admin_off::     <tt>(R . .)</tt>
+#  add_user_to_group::  <tt>(R V .)</tt>
+#  create_alert::       <tt>(R V .)</tt>
+#  destroy_user::       <tt>(R . .)</tt>
 #
 #  ==== Testing
-#  test_autologin::     L V .
-#  test_flash::         . . .
+#  test_autologin::     <tt>(L V .)</tt>
+#  test_flash::         <tt>(. . .)</tt>
+#
+#  :all_norobots:
 #
 ################################################################################
 
@@ -66,7 +68,7 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def signup
+  def signup # :nologin: :prefetch:
     if request.method != :post
       @new_user = User.new
     else
@@ -110,7 +112,7 @@ class AccountController < ApplicationController
     end
   end
 
-  def verify
+  def verify # :nologin:
     id        = params['id']
     auth_code = params['auth_code']
     user = User.find(id)
@@ -149,12 +151,12 @@ class AccountController < ApplicationController
   end
 
   # This action is never actually used.  It's template is rendered by verify.
-  def reverify
+  def reverify # :nologin:
     raise "This action should never occur!"
   end
 
   # This is used by the "reverify" page to re-send the verification email.
-  def send_verify
+  def send_verify # :nologin:
     user = User.find(params[:id])
     AccountMailer.deliver_verify(user)
     flash_notice :runtime_reverify_sent.t
@@ -162,7 +164,7 @@ class AccountController < ApplicationController
   end
 
   # This is the welcome page for new users who just created an account.
-  def welcome
+  def welcome # :nologin:
   end
 
   ##############################################################################
@@ -171,7 +173,7 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def login
+  def login # :nologin: :prefetch:
     if request.method != :post
       @login = ""
       @remember = true
@@ -204,7 +206,7 @@ class AccountController < ApplicationController
     end
   end
 
-  def email_new_password
+  def email_new_password # :nologin:
     if request.method != :post
       @new_user = User.new
     else
@@ -227,12 +229,12 @@ class AccountController < ApplicationController
     end
   end
 
-  def logout_user
+  def logout_user # :nologin:
     @user = set_session_user(nil)
     clear_autologin_cookie
   end
 
-  def show_alert
+  def show_alert # :nologin:
     if !@user
       redirect_back_or_default(:action => :welcome)
     elsif !@user.alert || !@user.alert_type
@@ -263,7 +265,7 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def prefs
+  def prefs # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
     if request.method == :post
 
@@ -341,7 +343,7 @@ class AccountController < ApplicationController
     end
   end
 
-  def profile
+  def profile # :prefetch:
     @licenses = License.current_names_and_ids(@user.license)
     if request.method != :post
       @place_name      = @user.location ? @user.location.display_name : ""
@@ -502,19 +504,19 @@ class AccountController < ApplicationController
   #
   ##############################################################################
 
-  def turn_admin_on
+  def turn_admin_on # :root:
     if @user && @user.admin && !is_in_admin_mode?
       session[:admin] = true
     end
     redirect_back_or_default(:action => :welcome)
   end
 
-  def turn_admin_off
+  def turn_admin_off # :root:
     session[:admin] = nil
     redirect_back_or_default(:action => :welcome)
   end
 
-  def add_user_to_group
+  def add_user_to_group # :root:
     redirect = true
     if is_in_admin_mode?
       if request.method == :post
@@ -549,7 +551,7 @@ class AccountController < ApplicationController
     end
   end
 
-  def create_alert
+  def create_alert # :root:
     redirect = true
     id = params[:id]
     @user2 = User.find(id)
@@ -584,9 +586,9 @@ class AccountController < ApplicationController
     end
   end
 
-  # This is messy, but the new +User.erase_user+ method makes a pretty good
+  # This is messy, but the new User#erase_user method makes a pretty good
   # stab at the problem.
-  def destroy_user
+  def destroy_user # :root:
     if is_in_admin_mode?
       id = params['id']
       if !id.blank?
@@ -608,7 +610,7 @@ class AccountController < ApplicationController
   end
 
   # This is used to test the flash error mechanism in the unit tests.
-  def test_flash
+  def test_flash # :nologin:
     notice   = params[:notice]
     warning  = params[:warning]
     error    = params[:error]

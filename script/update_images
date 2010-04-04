@@ -135,11 +135,7 @@ def refresh_listings(cronjob=false)
   log("Getting local listing\n") if cronjob
   verbose("Getting local listing...\n")
   file_lists['local'] = list = list_local_files(@@local_path)
-  for size in ALL_SIZES
-    verbose("  %-5s: %d\n" % [
-      size, list.keys.select {|f| f[0,size.length] == size}.length
-    ])
-  end
+  report_sizes(list) if @@verbose
   write_cached_file_list('local', list)
 
   # Get remote lists so we can refresh the caches.
@@ -148,11 +144,7 @@ def refresh_listings(cronjob=false)
     verbose("Getting #{server} listing...\n")
     if list = list_remote_files(server)
       write_cached_file_list(server, list)
-      for size in ALL_SIZES
-        verbose("  %-5s: %d\n" % [
-          size, list.keys.select {|f| f[0,size.length] == size}.length
-        ])
-      end
+      report_sizes(list) if @@verbose
       file_lists[server] = list
     else
       log("  (failed)\n") if cronjob
@@ -161,6 +153,23 @@ def refresh_listings(cronjob=false)
   end
 
   return file_lists
+end
+
+# Report the numbers of files if in verbose mode.
+def report_sizes(list)
+  for size in ALL_SIZES
+    if size != 'orig'
+      verbose("  %-5s: %d\n" % [ size, list.keys.select do |f|
+        f[0,size.length] == size
+      end.length ])
+    else
+      verbose("  %-5s: %d + %d\n" % [ size, list.keys.select do |f|
+        f[0,size.length] == size && f[-3..-1] == 'jpg'
+      end.length, list.keys.select do |f|
+        f[0,size.length] == size && f[-3..-1] != 'jpg'
+      end.length ])
+    end
+  end
 end
 
 # This takes a hash of file-list hashes and checks for mismatches in size.
@@ -388,7 +397,7 @@ def get_cached_file_list(server, size=nil)
   cache_file = "#{@@local_path}/#{server}.files"
   if File.exists?(cache_file)
     files = {}
-    verbose "reading #{size || 'all'} from #{@@local_path}/#{server}.files"
+    verbose "reading #{size || 'all'} from #{cache_file}"
     open(cache_file) do |fh|
       fh.each_line do |line|
         file, size2 = line.chomp.split
@@ -406,7 +415,7 @@ end
 def write_cached_file_list(server, files, size=nil)
   cache_file = "#{@@local_path}/#{server}.files"
   if !size
-    verbose "writing all to #{@@local_path}/#{server}.files"
+    verbose "writing all to #{cache_file}"
     open(cache_file, 'w') do |fh|
       files.each_pair do |file, size|
         fh.puts("#{file} #{size}\n")
@@ -414,10 +423,12 @@ def write_cached_file_list(server, files, size=nil)
     end
   else
     old = []
-    verbose "updating #{size} in #{@@local_path}/#{server}.files"
-    open(cache_file) do |fh|
-      fh.each_line do |line|
-        old << line.chomp if line[0,size.length] != size
+    verbose "updating #{size} in #{cache_file}"
+    if File.exists?(cache_file)
+      open(cache_file) do |fh|
+        fh.each_line do |line|
+          old << line.chomp if line[0,size.length] != size
+        end
       end
     end
     open(cache_file, 'w') do |fh|

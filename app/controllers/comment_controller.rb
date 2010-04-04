@@ -8,21 +8,21 @@
 #   P = prefetching allowed
 #
 #  ==== Searches and Indexes
-#  list_comments::           . V .
-#  show_comments_for_user::  . . .
-#  show_comments_by_user::   . . .
-#  comment_search::          . . .
-#  index_comment::           . . .
-#  show_selected_comments::  (helper)
+#  list_comments::
+#  show_comments_for_user::
+#  show_comments_by_user::
+#  comment_search::
+#  index_comment::
+#  show_selected_comments::
 #
 #  ==== Show, Create and Edit
-#  show_comment::            . V P
-#  next_comment::            . . .
-#  prev_comment::            . . .
-#  add_comment::             L V P
-#  edit_comment::            L V P
-#  destroy_comment::         L . .
-#  allowed_to_see!::         (helper)
+#  show_comment::
+#  next_comment::
+#  prev_comment::
+#  add_comment::
+#  edit_comment::
+#  destroy_comment::
+#  allowed_to_see!::
 #
 ################################################################################
 
@@ -52,33 +52,33 @@ class CommentController < ApplicationController
 
   # Show selected list of comments, based on current Query.  (Linked from
   # show_comment, next to "prev" and "next"... or will be.)
-  def index_comment
+  def index_comment # :nologin: :norobots:
     query = find_or_create_query(:Comment, :by => params[:by])
     show_selected_comments(query, :id => params[:id], :always_index => true)
   end
 
   # Show list of latest comments. (Linked from left panel.)
-  def list_comments
+  def list_comments # :nologin:
     query = create_query(:Comment, :all, :by => :created)
     show_selected_comments(query)
   end
 
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
-  def show_comments_for_user
+  def show_comments_for_user # :nologin: :norobots:
     query = create_query(:Comment, :for_user, :user => params[:id] || @user)
     show_selected_comments(query)
   end
 
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
-  def show_comments_by_user
+  def show_comments_by_user # :nologin: :norobots:
     query = create_query(:Comment, :by_user, :user => params[:id])
     show_selected_comments(query)
   end
 
   # Display list of Comment's whose text matches a string pattern.
-  def comment_search
+  def comment_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (comment = Comment.safe_find(pattern))
@@ -128,7 +128,7 @@ class CommentController < ApplicationController
   # Linked from: show_<object>, list_comments
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
-  def show_comment
+  def show_comment # :nologin: :prefetch:
     store_location
     pass_query_params
     @comment = Comment.find(params[:id], :include => [:object, :user])
@@ -137,12 +137,12 @@ class CommentController < ApplicationController
   end
 
   # Go to next comment: redirects to show_comment.
-  def next_comment
+  def next_comment # :nologin: :norobots:
     redirect_to_next_object(:next, Comment, params[:id])
   end
 
   # Go to previous comment: redirects to show_comment.
-  def prev_comment
+  def prev_comment # :nologin: :norobots:
     redirect_to_next_object(:prev, Comment, params[:id])
   end
 
@@ -158,7 +158,7 @@ class CommentController < ApplicationController
   # Failure:
   #   Renders add_comment again.
   #   Outputs: @comment, @object
-  def add_comment
+  def add_comment # :prefetch: :norobots:
     pass_query_params
     @object = Comment.find_object(params[:type], params[:id])
     if !allowed_to_see!(@object)
@@ -199,7 +199,7 @@ class CommentController < ApplicationController
   # Failure:
   #   Renders edit_comment again.
   #   Outputs: @comment, @object
-  def edit_comment
+  def edit_comment # :prefetch: :norobots:
     pass_query_params
     @comment = Comment.find(params[:id])
     @object = @comment.object
@@ -239,7 +239,7 @@ class CommentController < ApplicationController
   # Redirects to show_object.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy_comment
+  def destroy_comment # :norobots:
     pass_query_params
     @comment = Comment.find(params[:id])
     @object = @comment.object

@@ -1,11 +1,14 @@
 #
+#  = API and AJAX Controller
+#
 #  This controller handles the XML interface.
 #
-#  Views:
-#    xml_rpc        Entry point for XML-RPC requests.
-#    <table>        Entry point for REST requests.
-#    ajax           Entry point for AJAX requests.
-#    test           Test action that just renders "test".
+#  == Actions
+#
+#  xml_rpc::      Entry point for XML-RPC requests.
+#  <table>::      Entry point for REST requests.
+#  ajax::         Entry point for AJAX requests.
+#  test::         Test action that just renders "test".
 #
 ################################################################################
 

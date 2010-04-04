@@ -8,34 +8,34 @@
 #   P = prefetching allowed
 #
 #  ==== Searches and Indexes
-#  list_images::           . V .
-#  images_by_user::        . . .
-#  image_search::          . . .
-#  advanced_search::       . . .
-#  index_image::           . . .
-#  show_selected_images::  (helper)
+#  list_images::
+#  images_by_user::
+#  image_search::
+#  advanced_search::
+#  index_image::
+#  show_selected_images::
 #
 #  ==== Show Images
-#  show_image::            . V P
-#  next_image::            . . .
-#  prev_image::            . . .
-#  cast_vote::             L . .
+#  show_image::
+#  next_image::
+#  prev_image::
+#  cast_vote::
 #
 #  ==== Work With Images
-#  add_image::             L V P  Upload images for observation.
-#  edit_image::            L V P  Edit notes, etc. for image.
-#  destroy_image::         L . .  Callback: destroy image.
-#  remove_image::          L . .  Callback: remove image from observation.
-#  reuse_image::           L V P  Choose images to add to observation.
-#  remove_images::         L V P  Choose images to remove from observation.
-#  license_updater::       L V .  Change copyright of many images.
+#  add_image::             Upload images for observation.
+#  edit_image::            Edit notes, etc. for image.
+#  destroy_image::         Callback: destroy image.
+#  remove_image::          Callback: remove image from observation.
+#  reuse_image::           Choose images to add to observation.
+#  remove_images::         Choose images to remove from observation.
+#  license_updater::       Change copyright of many images.
 #  process_image::         (helper for add_image)
 #
 #  ==== Test Actions
-#  test_add_image::        L V .
-#  test_add_image_report:: L V .
-#  test_upload_image::     L . .
-#  test_upload_speed::     . V .
+#  test_add_image::
+#  test_add_image_report::
+#  test_upload_image::
+#  test_upload_speed::
 #  test_process_image::    (helper for test_upload_image)
 #  resize_image::          (helper for test_upload_speed)
 #
@@ -57,9 +57,6 @@ class ImageController < ApplicationController
   before_filter :disable_link_prefetching, :except => [
     :add_image,
     :edit_image,
-    :remove_images,
-    :reuse_image,
-    :reuse_image_for_user,
     :show_image,
   ]
 
@@ -70,26 +67,26 @@ class ImageController < ApplicationController
   ##############################################################################
 
   # Display matrix of selected images, based on current Query.
-  def index_image
+  def index_image # :nologin: :norobots:
     query = find_or_create_query(:Image, :by => params[:by])
     show_selected_images(query, :id => params[:id], :always_index => true)
   end
 
   # Display matrix of images, most recent first.
-  def list_images
+  def list_images # :nologin:
     query = create_query(:Image, :all, :by => :created)
     show_selected_images(query)
   end
 
   # Display matrix of images by a given user.
-  def images_by_user
+  def images_by_user # :nologin: :norobots:
     user = User.find(params[:id])
     query = create_query(:Image, :by_user, :user => user)
     show_selected_images(query)
   end
 
   # Display matrix of images whose notes, names, etc. match a string pattern.
-  def image_search
+  def image_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (image = Image.safe_find(pattern))
@@ -101,7 +98,7 @@ class ImageController < ApplicationController
   end
 
   # Displays matrix of advanced search results.
-  def advanced_search
+  def advanced_search # :nologin: :norobots:
     begin
       query = find_query(:Image)
       show_selected_images(query)
@@ -171,7 +168,7 @@ class ImageController < ApplicationController
   # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
   # Outputs: @image
-  def show_image
+  def show_image # :nologin: :prefetch:
     store_location
     @image = Image.find(params[:id],
                         :include => [:user, {:observations => :name}])
@@ -215,17 +212,17 @@ class ImageController < ApplicationController
   end
 
   # Go to next image: redirects to show_image.
-  def next_image
+  def next_image # :nologin: :norobots:
     redirect_to_next_object(:next, Image, params[:id])
   end
 
   # Go to previous image: redirects to show_image.
-  def prev_image
+  def prev_image # :nologin: :norobots:
     redirect_to_next_object(:prev, Image, params[:id])
   end
 
   # Change user's vote and go to next image.
-  def cast_vote
+  def cast_vote # :norobots:
     image = Image.find(params[:id])
     val = image.change_vote(@user, params[:value])
     Transaction.put_images(:id => image, :set_vote => val)
@@ -254,7 +251,7 @@ class ImageController < ApplicationController
   # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
   # Redirects to show_observation.
-  def add_image
+  def add_image # :prefetch: :norobots:
     pass_query_params
     @observation = Observation.find(params[:id])
     if !check_permission!(@observation.user_id)
@@ -318,7 +315,7 @@ class ImageController < ApplicationController
   #   params[:comment][:summary]
   #   params[:comment][:comment]
   # Outputs: @image, @licenses
-  def edit_image
+  def edit_image # :prefetch: :norobots:
     pass_query_params
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
@@ -351,7 +348,7 @@ class ImageController < ApplicationController
   # Linked from: show_image/original
   # Inputs: params[:id] (image)
   # Redirects to list_images.
-  def destroy_image
+  def destroy_image # :norobots:
 
     # All of this just to decide where to redirect after deleting image.
     @image = Image.find(params[:id])
@@ -383,7 +380,7 @@ class ImageController < ApplicationController
   # Linked from: observer/edit_observation
   # Inputs: params[:image_id], params[:observation_id]
   # Redirects to show_observation.
-  def remove_image
+  def remove_image # :norobots:
     pass_query_params
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
@@ -420,7 +417,7 @@ class ImageController < ApplicationController
   #   @observation    observation (if in observation mode)
   #   @layout         layout parameters
   # Posts to the same action.  Redirects to show_observation or show_user.
-  def reuse_image
+  def reuse_image # :norobots:
     pass_query_params
     @mode = params[:mode].to_sym
     @observation = Observation.find(params[:obs_id]) if @mode == :observation
@@ -486,7 +483,7 @@ class ImageController < ApplicationController
   #   params[:selected][image_id]  (value of "yes" means delete)
   # Outputs: @observation
   # Redirects to show_observation.
-  def remove_images
+  def remove_images # :norobots:
     pass_query_params
     @observation = Observation.find(params[:id], :include => :images)
 
@@ -528,7 +525,7 @@ class ImageController < ApplicationController
   #   @data[n]['select_id']         ID of HTML select menu element.
   #   @data[n]['select_name']       Name of HTML select menu element.
   #   @data[n]['licenses']          Options for select menu.
-  def license_updater
+  def license_updater # :norobots:
 
     # Process any changes.
     if request.method == :post
@@ -576,7 +573,7 @@ class ImageController < ApplicationController
   #
   ##############################################################################
 
-  def test_upload_speed
+  def test_upload_speed # :nologin: # :norobots:
     logger.warn(params)
     image_stream = params[:file]
     data = image_stream.read
@@ -615,7 +612,7 @@ class ImageController < ApplicationController
     [count, size]
   end
 
-  def test_upload_image
+  def test_upload_image # :norobots:
     @log_entry = AddImageTestLog.find(params[:log_id])
     @log_entry.upload_start = Time.now
     @log_entry.save # Record that upload started
@@ -631,14 +628,14 @@ class ImageController < ApplicationController
     redirect_to(:action => 'test_add_image_report')
   end
 
-  def test_add_image
+  def test_add_image # :norobots:
     @log_entry = AddImageTestLog.new
     @log_entry.user = @user
     @log_entry.save
     @upload = {}
   end
 
-  def test_add_image_report
+  def test_add_image_report # :norobots:
     @log_entries = AddImageTestLog.find(:all, :order => 'created desc')
   end
 end

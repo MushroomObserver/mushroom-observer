@@ -2,6 +2,11 @@
   javascript_include_auto_complete
   javascript_include 'element_extensions'
   @title = :app_advanced_search.t
+
+  new_tab_set do
+    add_tab(:app_refine_search.l.nowrap, :controller => 'observer',
+            :action => 'refine_search', :params => query_params)
+  end
 %>
 
 <div class="HelpNote"><%= :advanced_search_caveat.tp %></div>

@@ -401,6 +401,7 @@ class ObserverController < ApplicationController
   #   observer/advanced_search
   def advanced_search_form
     if request.method != :post
+      pass_query_params # (temporary thing while refine_search tab is here)
       @location_primer = Location.primer
       @name_primer     = Name.primer
       @user_primer     = User.primer
