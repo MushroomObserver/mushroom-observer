@@ -7,39 +7,38 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  Views: ("*" - login required)
-#     index_species_list                     List of lists in current query.
-#     list_species_lists                     List of lists by date.
-#     species_lists_by_title                 List of lists by title.
-#     species_lists_by_user                  List of lists created by user.
-#     show_species_list                      Display notes/etc. and list of species.
-#     prev_species_list                      Display previous species list in index.
-#     next_species_list                      Display next species list in index.
-#     make_report                            Display contents of species list as report.
-#   * create_species_list                    Create new list.
-#   * name_lister                            Efficient javascripty way to build a list of names.
-#   * edit_species_list                      Edit existing list.
-#   * upload_species_list                    Same as edit_species_list but gets list from file.
-#   * destroy_species_list                   Destroy list.
-#   * manage_species_lists                   Add/remove an observation from a user's lists.
-#   * add_observation_to_species_list        (post method)
-#   * remove_observation_from_species_list   (post method)
+#  index_species_list::                   List of lists in current query.
+#  list_species_lists::                   List of lists by date.
+#  species_lists_by_title::               List of lists by title.
+#  species_lists_by_user::                List of lists created by user.
+#  show_species_list::                    Display notes/etc. and list of species.
+#  prev_species_list::                    Display previous species list in index.
+#  next_species_list::                    Display next species list in index.
+#  make_report::                          Display contents of species list as report.
+#  create_species_list::                  Create new list.
+#  name_lister::                          Efficient javascripty way to build a list of names.
+#  edit_species_list::                    Edit existing list.
+#  upload_species_list::                  Same as edit_species_list but gets list from file.
+#  destroy_species_list::                 Destroy list.
+#  manage_species_lists::                 Add/remove an observation from a user's lists.
+#  add_observation_to_species_list::      (post method)
+#  remove_observation_from_species_list:: (post method)
 #
-#  Helpers:
-#    calc_checklist(query)                Get list of names for LHS of _species_list_form.
-#    process_species_list(...)            Create/update species list using form data.
-#    construct_observations(...)          Create observations for new names added to list.
-#    find_chosen_name(id, alternatives)   (helper)
-#    render_name_list_as_txt(names)       Display list as text file.
-#    render_name_list_as_rtf(names)       Display list as richtext file.
-#    render_name_list_as_csv(names)       Display list as csv spreadsheet.
+#  ==== Helpers
+#  calc_checklist::                       Get list of names for LHS of form_species_list.
+#  process_species_list::                 Create/update species list using form data.
+#  construct_observations::               Create observations for new names added to list.
+#  find_chosen_name::                     (helper)
+#  render_name_list_as_txt::              Display list as text file.
+#  render_name_list_as_rtf::              Display list as richtext file.
+#  render_name_list_as_csv::              Display list as csv spreadsheet.
 #
-#  NOTE: There is some ambiguity between observations and names that makes this
-#  slightly confusing.  The end result of a species list is actually a list of
-#  *observations*, not species.  However, creation and editing is generally
-#  accomplished via names alone (although see manage_species_lists for the one
-#  exception).  In the end all these names cause rudimentary observations to
-#  spring into existence.
+#  *NOTE*: There is some ambiguity between observations and names that makes
+#  this slightly confusing.  The end result of a species list is actually a
+#  list of Observation's, not Name's.  However, creation and editing is
+#  generally accomplished via Name's alone (although see manage_species_lists
+#  for the one exception).  In the end all these Name's cause rudimentary
+#  Observation's to spring into existence. 
 #
 ################################################################################
 
@@ -47,7 +46,7 @@ class SpeciesListController < ApplicationController
   require 'rtf'
 
   before_filter :login_required, :except => [
-    :index_species_lists,
+    :index_species_list,
     :list_species_lists,
     :make_report,
     :name_lister,
@@ -74,7 +73,7 @@ class SpeciesListController < ApplicationController
 
   # Display list of selected species_lists, based on current Query.  (Linked
   # from show_species_list, next to "prev" and "next".)
-  def index_species_list
+  def index_species_list # :nologin: :norobots:
     query = find_or_create_query(:SpeciesList, :by => params[:by])
     show_selected_species_lists(query, :id => params[:id],
                                 :always_index => true)
@@ -82,27 +81,27 @@ class SpeciesListController < ApplicationController
 
   # Display list of all species_lists, sorted by date.  (Linked from left
   # panel.)
-  def list_species_lists
+  def list_species_lists # :nologin:
     query = create_query(:SpeciesList, :all, :by => :date)
     show_selected_species_lists(query, :id => params[:id], :by => params[:by])
   end
 
   # Display list of user's species_lists, sorted by date.  (Linked from left
   # panel.)
-  def species_lists_by_user
+  def species_lists_by_user # :nologin: :norobots:
     query = create_query(:SpeciesList, :by_user, :user => params[:id])
     show_selected_species_lists(query)
   end
 
   # Display list of all species_lists, sorted by title.  (Linked from left
   # panel.)
-  def species_lists_by_title
+  def species_lists_by_title # :nologin: :norobots:
     query = create_query(:SpeciesList, :all, :by => :title)
     show_selected_species_lists(query)
   end
 
   # Display list of SpeciesList's whose title, notes, etc. matches a string pattern.
-  def species_list_search
+  def species_list_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (spl = SpeciesList.safe_find(pattern))
@@ -156,7 +155,7 @@ class SpeciesListController < ApplicationController
   # Outputs: @species_list, @observation_list
   # Use session to store the current species list since this parallels
   # the usage for show_observation.
-  def show_species_list
+  def show_species_list # :nologin: :prefetch:
     store_location
     clear_query_in_session
     pass_query_params
@@ -170,12 +169,12 @@ class SpeciesListController < ApplicationController
   end
 
   # Go to next species_list: redirects to show_species_list.
-  def next_species_list
+  def next_species_list # :nologin: :norobots:
     redirect_to_next_object(:next, SpeciesList, params[:id])
   end
 
   # Go to previous species_list: redirects to show_species_list.
-  def prev_species_list
+  def prev_species_list # :nologin: :norobots:
     redirect_to_next_object(:prev, SpeciesList, params[:id])
   end
 
@@ -191,7 +190,7 @@ class SpeciesListController < ApplicationController
   #   @deprecated_names
   #   @member_notes
   #   session[:checklist_source]
-  def create_species_list
+  def create_species_list # :prefetch: :norobots:
     @species_list = SpeciesList.new
     if request.method != :post
       @checklist_names   = {}
@@ -232,7 +231,7 @@ class SpeciesListController < ApplicationController
   #   @deprecated_names
   #   @member_notes
   #   session[:checklist_source]
-  def edit_species_list
+  def edit_species_list # :prefetch: :norobots:
     @species_list = SpeciesList.find(params[:id])
     if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
@@ -262,7 +261,7 @@ class SpeciesListController < ApplicationController
   #   params[:species_list][:file]
   # Get: @species_list
   # Post: goes to edit_species_list
-  def upload_species_list
+  def upload_species_list # :norobots:
     @species_list = SpeciesList.find(params[:id])
     if !check_permission!(@species_list.user_id)
       redirect_to(:action => 'show_species_list', :id => @species_list)
@@ -289,7 +288,7 @@ class SpeciesListController < ApplicationController
   # Linked from: show_species_list
   # Inputs: params[:id] (species_list)
   # Redirects to list_species_lists.
-  def destroy_species_list
+  def destroy_species_list # :norobots:
     @species_list = SpeciesList.find(params[:id])
     if check_permission!(@species_list.user_id)
       @species_list.destroy
@@ -305,7 +304,7 @@ class SpeciesListController < ApplicationController
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Outputs: @observation
-  def manage_species_lists
+  def manage_species_lists # :prefetch: :norobots:
     @observation = Observation.find(params[:id], :include => :species_lists)
     @all_lists = @observation.species_lists.
                    select {|spl| spl.user_id == @user.id}.
@@ -318,7 +317,7 @@ class SpeciesListController < ApplicationController
   #   params[:species_list]
   #   params[:observation]
   # Redirects back to manage_species_lists.
-  def remove_observation_from_species_list
+  def remove_observation_from_species_list # :norobots:
     species_list = SpeciesList.find(params[:species_list],
                                     :include => :observations)
     if check_permission!(species_list.user_id)
@@ -344,7 +343,7 @@ class SpeciesListController < ApplicationController
   #   params[:species_list]
   #   params[:observation]
   # Redirects back to manage_species_lists.
-  def add_observation_to_species_list
+  def add_observation_to_species_list # :norobots:
     species_list = SpeciesList.find(params[:species_list],
                                     :include => :observations)
     if check_permission!(species_list.user_id)
@@ -374,7 +373,7 @@ class SpeciesListController < ApplicationController
   #  params[:results]
   # Outputs:
   #  @names
-  def name_lister
+  def name_lister # :nologin:
 
     # Names are passed in as string, one name per line.
     @names = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
@@ -417,7 +416,7 @@ class SpeciesListController < ApplicationController
   # Inputs:
   #   params[:id] (species_list)
   #   params[:type] (file extension)
-  def make_report
+  def make_report # :nologin: :norobots:
     names = SpeciesList.find(params[:id]).names
     case params[:type]
     when 'txt'

@@ -1,0 +1,8 @@
+#!/usr/bin/ruby
+
+PATH = '../app/controllers'
+GLOB = '*_controller.rb'
+
+for file in Dir.glob("#{PATH}/#{GLOB}")
+  puts file
+end

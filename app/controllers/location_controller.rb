@@ -7,42 +7,6 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  Views: ("*" - login required, "R" - root required))
-#     index_location
-#     list_locations
-#     locations_by_user
-#     locations_by_editor
-#     location_search
-#     map_locations
-#     index_location_description
-#     list_location_descriptions
-#     location_descriptions_by_author
-#     location_descriptions_by_editor
-#     show_location
-#     show_past_location
-#     show_location_description
-#     show_past_location_description
-#     prev_location
-#     next_location
-#     prev_location_description
-#     next_location_description
-#   * create_location
-#   * edit_location
-#   * create_location_description
-#   * edit_location_description
-#   * destroy_location_description
-#   * list_merge_options
-#   * add_to_location
-#   * make_description_default
-#   * merge_descriptions
-#   * publish_description
-#   * adjust_permissions
-#
-#  Helpers:
-#     split_out_matches(list, substring)
-#     merge_locations(location, dest)
-#     update_observations_by_where(location, where)
-#
 ################################################################################
 
 class LocationController < ApplicationController
@@ -88,19 +52,19 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def index_location
+  def index_location # :nodoc: :norobots:
     query = find_or_create_query(:Location, :by => params[:by])
     show_selected_locations(query, :id => params[:id], :always_index => true)
   end
 
   # Displays a list of all locations.
-  def list_locations
+  def list_locations # :nologin:
     query = create_query(:Location, :all, :by => :name)
     show_selected_locations(query, :undef_by_frequency => true)
   end
 
   # Display list of locations that a given user is author on.
-  def locations_by_user
+  def locations_by_user # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_locations_by_user_error.t(:user => user.legal_name)
     query = create_query(:Location, :by_user, :user => user)
@@ -108,7 +72,7 @@ class LocationController < ApplicationController
   end
 
   # Display list of locations that a given user is editor on.
-  def locations_by_editor
+  def locations_by_editor # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_locations_by_editor_error.t(:user => user.legal_name)
     query = create_query(:Location, :by_editor, :user => user)
@@ -116,13 +80,13 @@ class LocationController < ApplicationController
   end
 
   # Displays a list of locations matching a given string.
-  def location_search
+  def location_search # :nologin: :norobots:
     query = create_query(:Location, :pattern_search, :pattern => params[:pattern].to_s)
     show_selected_locations(query, :undef_by_frequency => true)
   end
 
   # Displays matrix of advanced search results.
-  def advanced_search
+  def advanced_search # :nologin: :norobots:
     begin
       query = find_query(:Location)
       show_selected_locations(query, :undef_by_frequency => true)
@@ -197,7 +161,7 @@ class LocationController < ApplicationController
   end
 
   # Map results of a search or index.
-  def map_locations
+  def map_locations # :nologin: :norobots:
     query = find_or_create_query(:Location)
     @title = query.flavor == :all ? :map_locations_global_map.t :
                              :map_locations_title.t(:locations => query.title)
@@ -280,20 +244,20 @@ class LocationController < ApplicationController
   ################################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def index_location_description
+  def index_location_description # :nodoc: :norobots:
     query = find_or_create_query(:LocationDescription, :by => params[:by])
     show_selected_location_descriptions(query, :id => params[:id],
                                         :always_index => true)
   end
 
   # Displays a list of all location_descriptions.
-  def list_location_descriptions
+  def list_location_descriptions # :nologin:
     query = create_query(:LocationDescription, :all, :by => :name)
     show_selected_location_descriptions(query)
   end
 
   # Display list of location_descriptions that a given user is author on.
-  def location_descriptions_by_author
+  def location_descriptions_by_author # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_location_descriptions_by_author_error.
                t(:user => user.legal_name)
@@ -302,7 +266,7 @@ class LocationController < ApplicationController
   end
 
   # Display list of location_descriptions that a given user is editor on.
-  def location_descriptions_by_editor
+  def location_descriptions_by_editor # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_location_descriptions_by_editor_error.
                t(:user => user.legal_name)
@@ -343,7 +307,7 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Show a Location and one of its LocationDescription's, including a map.
-  def show_location
+  def show_location # :nologin: :prefetch:
     store_location
     pass_query_params
     clear_query_in_session
@@ -372,7 +336,7 @@ class LocationController < ApplicationController
   end
 
   # Show just a LocationDescription.
-  def show_location_description
+  def show_location_description # :nologin: :prefetch:
     store_location
     pass_query_params
     @description = LocationDescription.find(params[:id], :include =>
@@ -406,7 +370,7 @@ class LocationController < ApplicationController
   end
 
   # Show past version of Location.  Accessible only from show_location page.
-  def show_past_location
+  def show_past_location # :nologin: :prefetch: :norobots:
     store_location
     pass_query_params
     @location = Location.find(params[:id])
@@ -415,7 +379,7 @@ class LocationController < ApplicationController
 
   # Show past version of LocationDescription.  Accessible only from
   # show_location_description page.
-  def show_past_location_description
+  def show_past_location_description # :nologin: :prefetch: :norobots:
     store_location
     pass_query_params
     @description = LocationDescription.find(params[:id])
@@ -436,22 +400,22 @@ class LocationController < ApplicationController
   end
 
   # Go to next location: redirects to show_location.
-  def next_location
+  def next_location # :nologin: :norobots:
     redirect_to_next_object(:next, Location, params[:id])
   end
 
   # Go to previous location: redirects to show_location.
-  def prev_location
+  def prev_location # :nologin: :norobots:
     redirect_to_next_object(:prev, Location, params[:id])
   end
 
   # Go to next location: redirects to show_location.
-  def next_location_description
+  def next_location_description # :nologin: :norobots:
     redirect_to_next_object(:next, LocationDescription, params[:id])
   end
 
   # Go to previous location: redirects to show_location.
-  def prev_location_description
+  def prev_location_description # :nologin: :norobots:
     redirect_to_next_object(:prev, LocatioDescriptionn, params[:id])
   end
 
@@ -461,7 +425,7 @@ class LocationController < ApplicationController
   #
   ##############################################################################
 
-  def create_location
+  def create_location # :prefetch: :norobots:
     store_location
     pass_query_params
 
@@ -532,7 +496,7 @@ class LocationController < ApplicationController
     end
   end
 
-  def edit_location
+  def edit_location # :prefetch: :norobots:
     store_location
     pass_query_params
     @location = Location.find(params[:id])
@@ -614,7 +578,7 @@ class LocationController < ApplicationController
     end
   end
 
-  def create_location_description
+  def create_location_description # :prefetch: :norobots:
     store_location
     pass_query_params
     @location = Location.find(params[:id])
@@ -666,7 +630,7 @@ class LocationController < ApplicationController
     end
   end
 
-  def edit_location_description
+  def edit_location_description # :prefetch: :norobots:
     store_location
     pass_query_params
     @description = LocationDescription.find(params[:id])
@@ -742,7 +706,7 @@ class LocationController < ApplicationController
     end
   end
 
-  def destroy_location_description
+  def destroy_location_description # :norobots:
     pass_query_params
     @description = LocationDescription.find(params[:id])
     if @description.is_admin?(@user)
@@ -773,7 +737,7 @@ class LocationController < ApplicationController
 
   # Show a list of defined locations that match a given +where+ string, in
   # order of closeness of match.
-  def list_merge_options
+  def list_merge_options # :norobots:
     store_location
     @where = params[:where].to_s
 
@@ -808,7 +772,7 @@ class LocationController < ApplicationController
 
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
   # into the given Location.  Linked from +list_merge_options+, I think.
-  def add_to_location
+  def add_to_location # :norobots:
     location = Location.find(params[:location])
     where = params[:where].strip_squeeze rescue ''
     if !where.blank? and

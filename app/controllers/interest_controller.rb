@@ -7,8 +7,8 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  list_interests::   L V .
-#  set_interest::     L V .
+#  list_interests::
+#  set_interest::
 #
 ################################################################################
 
@@ -23,7 +23,7 @@ class InterestController < ApplicationController
   # Linked from: left-hand panel
   # Inputs: params[:page]
   # Outputs: @objects, @object_pages
-  def list_interests
+  def list_interests # :norobots:
     store_location
     @title = :list_interests_title.t
     notifications = Notification.find_all_by_user_id(@user.id).sort do |a,b|
@@ -48,7 +48,7 @@ class InterestController < ApplicationController
   # Redirects back (falls back on show_<object>)
   # Inputs: params[:type], params[:id], params[:state], params[:user]
   # Outputs: none
-  def set_interest
+  def set_interest # :norobots:
     pass_query_params
     type   = params[:type].to_s
     oid    = params[:id].to_i

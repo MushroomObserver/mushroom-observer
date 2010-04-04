@@ -7,44 +7,43 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  Views: ("*" - login required, "R" - root required)
-#     index_name                  List of results of index/search.
-#     list_names                  Alphabetical list of all names, used or otherwise.
-#     observation_index           Alphabetical list of names people have seen.
-#     names_by_user               Alphabetical list of names created by given user.
-#     names_by_editor             Alphabetical list of names edited by given user.
-#     name_search                 Seach for string in name, notes, etc.
-#     map                         Show distribution map.
-#     index_name_description      List of results of index/search.
-#     list_name_descriptions      Alphabetical list of all name_descriptions, used or otherwise.
-#     name_descriptions_by_author Alphabetical list of name_descriptions authored by given user.
-#     name_descriptions_by_editor Alphabetical list of name_descriptions edited by given user.
-#     show_name                   Show info about name.
-#     show_past_name              Show past versions of name info.
-#     prev_name                   Show previous name in index.
-#     next_name                   Show next name in index.
-#     show_name_description       Show info about name_description.
-#     show_past_name_description  Show past versions of name_description info.
-#     prev_name_description       Show previous name_description in index.
-#     next_name_description       Show next name_description in index.
-#   * create_name                 Create new name.
-#   * edit_name                   Edit name.
-#   * create_name_description     Create new name_description.
-#   * edit_name_description       Edit name_description.
-#   * destroy_name_description    Destroy name_description.
-#   * make_description_default    Make a description the default one.
-#   * merge_descriptions          Merge a description with another.
-#   * publish_description         Publish a draft description.
-#   * adjust_permissions          Adjust permissions on a description.
-#   * change_synonyms             Change list of synonyms for a name.
-#   * deprecate_name              Deprecate name in favor of another.
-#   * approve_name                Flag given name as "accepted" (others could be, too).
-#   * bulk_name_edit              Create/synonymize/deprecate a list of names.
+#  index_name::                  List of results of index/search.
+#  list_names::                  Alphabetical list of all names, used or otherwise.
+#  observation_index::           Alphabetical list of names people have seen.
+#  names_by_user::               Alphabetical list of names created by given user.
+#  names_by_editor::             Alphabetical list of names edited by given user.
+#  name_search::                 Seach for string in name, notes, etc.
+#  map::                         Show distribution map.
+#  index_name_description::      List of results of index/search.
+#  list_name_descriptions::      Alphabetical list of all name_descriptions, used or otherwise.
+#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored by given user.
+#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited by given user.
+#  show_name::                   Show info about name.
+#  show_past_name::              Show past versions of name info.
+#  prev_name::                   Show previous name in index.
+#  next_name::                   Show next name in index.
+#  show_name_description::       Show info about name_description.
+#  show_past_name_description::  Show past versions of name_description info.
+#  prev_name_description::       Show previous name_description in index.
+#  next_name_description::       Show next name_description in index.
+#  create_name::                 Create new name.
+#  edit_name::                   Edit name.
+#  create_name_description::     Create new name_description.
+#  edit_name_description::       Edit name_description.
+#  destroy_name_description::    Destroy name_description.
+#  make_description_default::    Make a description the default one.
+#  merge_descriptions::          Merge a description with another.
+#  publish_description::         Publish a draft description.
+#  adjust_permissions::          Adjust permissions on a description.
+#  change_synonyms::             Change list of synonyms for a name.
+#  deprecate_name::              Deprecate name in favor of another.
+#  approve_name::                Flag given name as "accepted" (others could be, too).
+#  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #
-#  Helpers:
-#    deprecate_synonym(name)        (used by change_synonyms)
-#    check_for_new_synonym(...)     (used by change_synonyms)
-#    dump_sorter(sorter)            Error diagnostics for change_synonyms.
+#  ==== Helpers
+#  deprecate_synonym::         (used by change_synonyms)
+#  check_for_new_synonym::     (used by change_synonyms)
+#  dump_sorter::               Error diagnostics for change_synonyms.
 #
 ################################################################################
 
@@ -101,25 +100,25 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Display list of names in last index/search query.
-  def index_name
+  def index_name # :nologin: :norobots:
     query = find_or_create_query(:Name, :by => params[:by])
     show_selected_names(query, :id => params[:id], :always_index => true)
   end
 
   # Display list of all (correctly-spelled) names in the database.
-  def list_names
+  def list_names # :nologin:
     query = create_query(:Name, :all, :by => :name)
     show_selected_names(query)
   end
 
   # Display list of names that have observations.
-  def observation_index
+  def observation_index # :nologin: :norobots:
     query = create_query(:Name, :with_observations)
     show_selected_names(query)
   end
 
   # Display list of names that have authors.
-  def authored_names
+  def authored_names # :nologin: :norobots:
     query = create_query(:Name, :with_descriptions)
     show_selected_names(query) do |name|
       # Add some extra fields to the index.
@@ -130,7 +129,7 @@ class NameController < ApplicationController
   end
 
   # Display list of names that a given user is author on.
-  def names_by_user
+  def names_by_user # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_names_by_user_error.t(:user => user.legal_name)
     query = create_query(:Name, :by_user, :user => user)
@@ -138,7 +137,7 @@ class NameController < ApplicationController
   end
 
   # Display list of names that a given user is editor on.
-  def names_by_editor
+  def names_by_editor # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_names_by_editor_error.t(:user => user.legal_name)
     query = create_query(:Name, :by_editor, :user => user)
@@ -146,7 +145,7 @@ class NameController < ApplicationController
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
-  def needed_descriptions
+  def needed_descriptions # :nologin: :norobots:
     data = Name.connection.select_rows %(
       SELECT names.id, name_counts.count
       FROM names LEFT OUTER JOIN descriptions ON names.id = descriptions.name_id,
@@ -172,7 +171,7 @@ class NameController < ApplicationController
   end
 
   # Display list of names that match a string.
-  def name_search
+  def name_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (name = Name.safe_find(pattern))
@@ -184,7 +183,7 @@ class NameController < ApplicationController
   end
 
   # Displays list of advanced search results.
-  def advanced_search
+  def advanced_search # :nologin: :norobots:
     begin
       query = find_query(:Name)
       show_selected_names(query)
@@ -195,7 +194,7 @@ class NameController < ApplicationController
   end
 
   # Used to test pagination.
-  def test_index
+  def test_index # :nologin: :norobots:
     query = find_query(:Name) or raise "Missing query: #{params[:q]}"
     if params[:test_anchor]
       @test_pagination_args = {:anchor => params[:test_anchor]}
@@ -247,20 +246,20 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Display list of names in last index/search query.
-  def index_name_description
+  def index_name_description # :nologin: :norobots:
     query = find_or_create_query(:NameDescription, :by => params[:by])
     show_selected_name_descriptions(query, :id => params[:id],
                                     :always_index => true)
   end
 
   # Display list of all (correctly-spelled) name_descriptions in the database.
-  def list_name_descriptions
+  def list_name_descriptions # :nologin:
     query = create_query(:NameDescription, :all, :by => :name)
     show_selected_name_descriptions(query)
   end
 
   # Display list of name_descriptions that a given user is author on.
-  def name_descriptions_by_author
+  def name_descriptions_by_author # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_name_descriptions_by_author_error.
                t(:user => user.legal_name)
@@ -269,7 +268,7 @@ class NameController < ApplicationController
   end
 
   # Display list of name_descriptions that a given user is editor on.
-  def name_descriptions_by_editor
+  def name_descriptions_by_editor # :nologin: :norobots:
     user = User.find(params[:id])
     @error = :runtime_name_descriptions_by_editor_error.
                t(:user => user.legal_name)
@@ -311,7 +310,7 @@ class NameController < ApplicationController
 
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
-  def show_name
+  def show_name # :nologin: :prefetch:
     pass_query_params
     store_location
     clear_query_in_session
@@ -377,7 +376,7 @@ class NameController < ApplicationController
   end
 
   # Show just a NameDescription.
-  def show_name_description
+  def show_name_description # :nologin: :prefetch:
     store_location
     pass_query_params
     @description = NameDescription.find(params[:id], :include =>
@@ -411,7 +410,7 @@ class NameController < ApplicationController
   end
 
   # Show past version of Name.  Accessible only from show_name page.
-  def show_past_name
+  def show_past_name # :nologin: :prefetch: :norobots:
     pass_query_params
     store_location
     @name = Name.find(params[:id])
@@ -429,7 +428,7 @@ class NameController < ApplicationController
 
   # Show past version of NameDescription.  Accessible only from
   # show_name_description page.
-  def show_past_name_description
+  def show_past_name_description # :nologin: :prefetch: :norobots:
     pass_query_params
     store_location
     @description = NameDescription.find(params[:id])
@@ -450,28 +449,28 @@ class NameController < ApplicationController
   end
 
   # Go to next name: redirects to show_name.
-  def next_name
+  def next_name # :nologin: :norobots:
     redirect_to_next_object(:next, Name, params[:id])
   end
 
   # Go to previous name: redirects to show_name.
-  def prev_name
+  def prev_name # :nologin: :norobots:
     redirect_to_next_object(:prev, Name, params[:id])
   end
 
   # Go to next name: redirects to show_name.
-  def next_name_description
+  def next_name_description # :nologin: :norobots:
     redirect_to_next_object(:next, NameDescription, params[:id])
   end
 
   # Go to previous name_description: redirects to show_name_description.
-  def prev_name_description
+  def prev_name_description # :nologin: :norobots:
     redirect_to_next_object(:prev, NameDescription, params[:id])
   end
 
   # Callback to let reviewers change the review status of a Name from the
   # show_name page.
-  def set_review_status
+  def set_review_status # :norobots:
     pass_query_params
     id = params[:id]
     desc = NameDescription.find(id)
@@ -484,7 +483,7 @@ class NameController < ApplicationController
 
   # Callback to let reviewers change the export status of a Name from the
   # show_name page.
-  def set_export_status
+  def set_export_status # :norobots:
     pass_query_params
     id = params[:id]
     desc = NameDescription.find(id)
@@ -503,7 +502,7 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Create a new name; accessible from name indexes.
-  def create_name
+  def create_name # :prefetch: :norobots:
     store_location
     pass_query_params
 
@@ -574,7 +573,7 @@ class NameController < ApplicationController
   end
 
   # Make changes to name; accessible from show_name page.
-  def edit_name
+  def edit_name # :prefetch: :norobots:
     store_location
     pass_query_params
     @name = Name.find(params[:id])
@@ -720,7 +719,7 @@ class NameController < ApplicationController
     end
   end
 
-  def create_name_description
+  def create_name_description # :prefetch: :norobots:
     store_location
     pass_query_params
     @name = Name.find(params[:id])
@@ -788,7 +787,7 @@ class NameController < ApplicationController
     end
   end
 
-  def edit_name_description
+  def edit_name_description # :prefetch: :norobots:
     store_location
     pass_query_params
     @description = NameDescription.find(params[:id])
@@ -879,7 +878,7 @@ class NameController < ApplicationController
     end
   end
 
-  def destroy_name_description
+  def destroy_name_description # :norobots:
     pass_query_params
     @description = NameDescription.find(params[:id])
     if @description.is_admin?(@user)
@@ -984,7 +983,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets a user review all the synonyms
   # of a name, removing others, writing in new, etc.
-  def change_synonyms
+  def change_synonyms # :prefetch: :norobots:
     pass_query_params
     @name = Name.find(params[:id])
     @list_members     = nil
@@ -1086,7 +1085,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets the user deprecate a name in favor
   # of another name.
-  def deprecate_name
+  def deprecate_name # :prefetch: :norobots:
     pass_query_params
 
     # These parameters aren't always provided.
@@ -1159,7 +1158,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets a user make call this an accepted
   # name, possibly deprecating its synonyms at the same time.
-  def approve_name
+  def approve_name # :prefetch: :norobots:
     pass_query_params
     @name = Name.find(params[:id])
     @approved_names = @name.approved_synonyms
@@ -1303,7 +1302,7 @@ class NameController < ApplicationController
   ##############################################################################
 
   # Send stuff to eol.
-  def eol
+  def eol # :nologin: :norobots:
     headers["Content-Type"] = "application/xml"
     @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
     @timer_start = Time.now()
@@ -1312,14 +1311,14 @@ class NameController < ApplicationController
   end
 
   # Show the data getting sent to EOL
-  def eol_preview
+  def eol_preview # :nologin: :norobots:
     @timer_start = Time.now
     eol_data(['unvetted', 'vetted'])
     @timer_end = Time.now
   end
 
   # Show the data not getting sent to EOL
-  def eol_need_review
+  def eol_need_review # :norobots:
     eol_data(['unreviewed'])
     @title = :eol_need_review_title.t
     render(:action => 'eol_preview')
@@ -1401,7 +1400,7 @@ class NameController < ApplicationController
   # Utility accessible from a number of name pages (e.g. indexes and
   # show_name?) that lets you enter a whole list of names, together with
   # synonymy, and create them all in one blow.
-  def bulk_name_edit
+  def bulk_name_edit # :prefetch: :norobots:
     @list_members = nil
     @new_names    = nil
     if request.method == :post
@@ -1428,7 +1427,7 @@ class NameController < ApplicationController
   end
 
   # Draw a map of all the locations where this name has been observed.
-  def map
+  def map # :nologin: :norobots:
     pass_query_params
     @name = Name.find(params[:id])
     @query = create_query(:Location, :with_observations_of_name, :name => @name)
@@ -1437,7 +1436,7 @@ class NameController < ApplicationController
 
   # Form accessible from show_name that lets a user setup tracker notifications
   # for a name.
-  def email_tracking
+  def email_tracking # :norobots:
     pass_query_params
     name_id = params[:id]
     @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)

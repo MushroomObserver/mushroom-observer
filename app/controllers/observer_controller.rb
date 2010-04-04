@@ -7,103 +7,111 @@
 #   V = has view
 #   P = prefetching allowed
 #
-#  Views: ("*" - login required; "R" - root only)
-#     list_rss_logs = index
-#     index_rss_log
-#     show_rss_log
-#     next_rss_log
-#     prev_rss_log
-#     rss
+#  ==== RssLog's
+#  list_rss_logs::
+#  index_rss_log::
+#  show_rss_log::
+#  next_rss_log::
+#  prev_rss_log::
+#  rss::
 #
-#     show_observation
-#     next_observation
-#     prev_observation
-#   * create_observation
-#   * edit_observation
-#   * destroy_observation
-#   * create_naming
-#   * edit_naming
-#   * destroy_naming
-#   * cast_vote
-#     show_votes
+#  ==== Observation's
+#  show_observation::
+#  next_observation::
+#  prev_observation::
+#  create_observation::
+#  edit_observation::
+#  destroy_observation::
+#  create_naming::
+#  edit_naming::
+#  destroy_naming::
+#  cast_vote::
+#  show_votes::
 #
-#     show_notifications
-#     list_notifications
+#  ==== Notification's
+#  show_notifications::
+#  list_notifications::
 #
-#     index_observation
-#     list_observations
-#     observations_by_name
-#     observations_by_user
-#     observations_at_location
-#     observations_at_where
-#     observation_search
-#     advanced_search
+#  ==== Observation Index
+#  index_observation::
+#  list_observations::
+#  observations_by_name::
+#  observations_by_user::
+#  observations_at_location::
+#  observations_at_where::
+#  observation_search::
+#  advanced_search::
+#  show_selected_observations:: (helper)
 #
-#     pattern_search
-#     advanced_search_form
-#     refine_search
+#  ==== Searches
+#  pattern_search::
+#  advanced_search_form::
+#  refine_search::
 #
-#     lookup_comment
-#     lookup_image
-#     lookup_location
-#     lookup_name
-#     lookup_observation
-#     lookup_project
-#     lookup_species_list
-#     lookup_user
+#  ==== Textile Object Links
+#  lookup_comment::
+#  lookup_image::
+#  lookup_location::
+#  lookup_name::
+#  lookup_observation::
+#  lookup_project::
+#  lookup_species_list::
+#  lookup_user::
+#  lookup_general:: (helper)
 #
-#   * review_authors      Let authors/reviewers add/remove authors from descriptions.
-#   * author_request      Let non-authors request authorship credit on descriptions.
+#  ==== Description Authors
+#  review_authors::    Let authors/reviewers add/remove authors from descriptions.
+#  author_request::    Let non-authors request authorship credit on descriptions.
 #
-#   R change_user_bonuses
-#   R index_user
-#   R users_by_name
-#     users_by_contribution
-#     show_user
-#     show_site_stats
+#  ==== Users
+#  change_user_bonuses::
+#  index_user::
+#  users_by_name::
+#  users_by_contribution::
+#  show_user::
+#  show_site_stats::
 #
-#     ask_webmaster_question
-#   R email_features
-#   R send_feature_email
-#   * ask_user_question
-#   * ask_observation_question
-#   * commercial_inquiry
+#  ==== Email Questions
+#  ask_webmaster_question::
+#  email_features::
+#  send_feature_email::
+#  ask_user_question::
+#  ask_observation_question::
+#  commercial_inquiry::
+#  email_question:: (helper)
 #
-#     intro
-#     how_to_help
-#     how_to_use
-#     news
-#     textile_sandbox (= textile)
-#     translators_note
+#  ==== Site Info
+#  intro::
+#  how_to_help::
+#  how_to_use::
+#  news::
+#  textile_sandbox::
+#  translators_note::
 #
-#     no_ajax
-#     no_browser
-#     no_javascript
-#     no_session
-#     turn_javascript_on
-#     turn_javascript_off
+#  ==== Global Callbacks
+#  no_ajax::
+#  no_browser::
+#  no_javascript::
+#  no_session::
+#  turn_javascript_on::
+#  turn_javascript_off::
 #
-#     color_themes
-#     Agaricus
-#     Amanita
-#     Cantharellus
-#     Hygrocybe
+#  ==== Themes
+#  color_themes::
+#  Agaricus::
+#  Amanita::
+#  Cantharellus::
+#  Hygrocybe::
 #
-#  Test Views:
-#     throw_error
-#   * throw_mobile_error
+#  ==== Test Views
+#  throw_error::
+#  throw_mobile_error::
 #
-#  Admin Tools:
-#     recalc
-#   * refresh_vote_cache
-#   * clear_session
-#     w3c_tests
-#
-#  Helpers:
-#    lookup_general(model, controller, action)
-#    show_selected_observations(title, conditions, order, source=:nothing, links=nil)
-#    email_question(user, target_page, target_obj)
-#    rewrite_url(obj, old_method, new_method)
+#  ==== Admin Tools
+#  recalc::
+#  refresh_vote_cache::
+#  clear_session::
+#  w3c_tests::
 #
 ################################################################################
 
@@ -129,7 +137,6 @@ class ObserverController < ApplicationController
     :intro,
     :list_observations,
     :list_rss_logs,
-    :location_search,
     :lookup_comment,
     :lookup_image,
     :lookup_location,
@@ -176,8 +183,6 @@ class ObserverController < ApplicationController
     :create_observation,
     :edit_naming,
     :edit_observation,
-    :next_observation,
-    :prev_observation,
     :show_observation,
     :show_user,
     :show_votes,
@@ -191,23 +196,23 @@ class ObserverController < ApplicationController
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
-  def index
+  def index # :nologin:
     list_rss_logs
   end
 
   # Provided just as a way to verify the before_filter.
   # This page should always require the user to be logged in.
-  def login
+  def login # :norobots:
     list_rss_logs
   end
 
   # Another test method.  Repurpose as needed.
-  def throw_error
+  def throw_error # :nologin: :norobots:
     raise "Something bad happened."
   end
 
   # Used for initial investigation of specialized mobile support
-  def throw_mobile_error
+  def throw_mobile_error # :nologin: :norobots:
     if request.env["HTTP_USER_AGENT"].index("BlackBerry")
       raise "This is a BlackBerry!"
     else
@@ -216,46 +221,46 @@ class ObserverController < ApplicationController
   end
 
   # Intro to site.
-  def intro
+  def intro # :nologin:
   end
 
   # Recent features.
-  def news
+  def news # :nologin:
   end
 
   # Help page.
-  def how_to_use
+  def how_to_use # :nologin:
     @min_pos_vote = Vote.agreement(Vote.min_pos_vote).l
     @min_neg_vote = Vote.agreement(Vote.min_neg_vote).l
     @maximum_vote = Vote.agreement(Vote.maximum_vote).l
   end
 
   # A few ways in which users can help.
-  def how_to_help
+  def how_to_help # :nologin:
   end
 
   # Info on color themes.
-  def color_themes
+  def color_themes # :nologin:
   end
 
   # Explanation of why not having AJAX is bad.
-  def no_ajax
+  def no_ajax # :nologin: :norobots:
   end
 
   # Explanation of why it's important that we recognize the user's browser.
-  def no_browser
+  def no_browser # :nologin: :norobots:
   end
 
   # Explanation of why having javascript disabled is bad.
-  def no_javascript
+  def no_javascript # :nologin: :norobots:
   end
 
   # Explanation of why having cookies disabled is bad.
-  def no_session
+  def no_session # :nologin: :norobots:
   end
 
   # Simple form letting us test our implementation of Textile.
-  def textile_sandbox
+  def textile_sandbox # :nologin:
     if request.method != :post
       @code = nil
     else
@@ -266,24 +271,24 @@ class ObserverController < ApplicationController
   end
 
   # I keep forgetting the stupid "_sandbox" thing.
-  alias :textile :textile_sandbox
+  alias_method :textile, :textile_sandbox # :nologin:
 
   # Force javascript on.
-  def turn_javascript_on
+  def turn_javascript_on # :nologin: :norobots:
     session[:js_override] = :on
     flash_notice(:turn_javascript_on_body.t)
     redirect_to(:back)
   end
 
   # Force javascript off.
-  def turn_javascript_off
+  def turn_javascript_off # :nologin: :norobots:
     session[:js_override] = :off
     flash_notice(:turn_javascript_off_body.t)
     redirect_to(:back)
   end
 
   # Enable auto-detection.
-  def turn_javascript_nil
+  def turn_javascript_nil # :nologin: :norobots:
     session[:js_override] = nil
     flash_notice(:turn_javascript_nil_body.t)
     redirect_to(:back)
@@ -291,8 +296,12 @@ class ObserverController < ApplicationController
 
   # Simple list of all the files in public/html that are linked to the W3C
   # validator to make testing easy.
-  def w3c_tests
+  def w3c_tests # :nologin:
     render(:layout => false)
+  end
+
+  # Allow translator to enter a special note linked to from the lower left.
+  def translators_note # :nologin:
   end
 
   ##############################################################################
@@ -301,14 +310,14 @@ class ObserverController < ApplicationController
   #
   ##############################################################################
 
-  def lookup_comment;      lookup_general(Comment);     end
-  def lookup_image;        lookup_general(Image);       end
-  def lookup_location;     lookup_general(Location);    end
-  def lookup_name;         lookup_general(Name);        end
-  def lookup_observation;  lookup_general(Observation); end
-  def lookup_project;      lookup_general(Project);     end
-  def lookup_species_list; lookup_general(SpeciesList); end
-  def lookup_user;         lookup_general(User);        end
+  def lookup_comment;      lookup_general(Comment);     end # :nologin
+  def lookup_image;        lookup_general(Image);       end # :nologin
+  def lookup_location;     lookup_general(Location);    end # :nologin
+  def lookup_name;         lookup_general(Name);        end # :nologin
+  def lookup_observation;  lookup_general(Observation); end # :nologin
+  def lookup_project;      lookup_general(Project);     end # :nologin
+  def lookup_species_list; lookup_general(SpeciesList); end # :nologin
+  def lookup_user;         lookup_general(User);        end # :nologin
 
   # Alternative to controller/show_object/id.  These were included for the
   # benefit of the textile wrapper: We don't want to be looking up all these
@@ -368,7 +377,7 @@ class ObserverController < ApplicationController
   #   observer/user_search
   #   project/project_search
   #   species_list/species_list_search
-  def pattern_search
+  def pattern_search # :nologin: :norobots:
     pattern = params[:search][:pattern].to_s.strip_squeeze rescue nil
     type    = params[:search][:type].to_sym                rescue nil
 
@@ -399,7 +408,7 @@ class ObserverController < ApplicationController
   #   image/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
-  def advanced_search_form
+  def advanced_search_form # :nologin:
     if request.method != :post
       pass_query_params # (temporary thing while refine_search tab is here)
       @location_primer = Location.primer
@@ -434,7 +443,7 @@ class ObserverController < ApplicationController
   end
 
   # Allow users to refine an existing query.
-  def refine_search
+  def refine_search # :nologin:
     # Create a bogus object with all the parameters used in the form.
     @conds = Wrapper.new(params[:conds] || {})
     @first_time = params[:conds].blank?
@@ -471,40 +480,40 @@ class ObserverController < ApplicationController
   end
 
   # Displays matrix of selected Observation's (based on current Query).
-  def index_observation
+  def index_observation # :nologin: :norobots:
     query = find_or_create_query(:Observation, :by => params[:by])
     show_selected_observations(query, :id => params[:id],
                                :always_index => true)
   end
 
   # Displays matrix of all Observation's, sorted by date.
-  def list_observations
+  def list_observations # :nologin:
     query = create_query(:Observation, :all, :by => :date)
     show_selected_observations(query)
   end
 
   # Displays matrix of all Observation's, alphabetically.
-  def observations_by_name
+  def observations_by_name # :nologin: :norobots:
     query = create_query(:Observation, :all, :by => :name)
     show_selected_observations(query)
   end
 
   # Displays matrix of User's Observation's, by date.
-  def observations_by_user
+  def observations_by_user # :nologin: :norobots:
     user = User.find(params[:id])
     query = create_query(:Observation, :by_user, :user => user)
     show_selected_observations(query)
   end
 
   # Displays matrix of Observation's at a Location, by date.
-  def observations_at_location
+  def observations_at_location # :nologin: :norobots:
     location = Location.find(params[:id])
     query = create_query(:Observation, :at_location, :location => location)
     show_selected_observations(query)
   end
 
   # Display matrix of Observation's whose 'where' matches a string.
-  def observations_at_where
+  def observations_at_where # :nologin: :norobots:
     where = params[:where].to_s
     query = create_query(:Observation, :at_where, :location => where)
     @links = [
@@ -519,7 +528,7 @@ class ObserverController < ApplicationController
   end
 
   # Display matrix of Observation's whose notes, etc. match a string pattern.
-  def observation_search
+  def observation_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (observation = Observation.safe_find(pattern))
@@ -531,7 +540,7 @@ class ObserverController < ApplicationController
   end
 
   # Displays matrix of advanced search results.
-  def advanced_search
+  def advanced_search # :nologin: :norobots:
     begin
       query = find_query(:Observation)
       show_selected_observations(query)
@@ -626,7 +635,7 @@ class ObserverController < ApplicationController
   #   @observation
   #   @confidence/agreement_menu    (used to create vote menus)
   #   @votes                        (user's vote for each naming.id)
-  def show_observation
+  def show_observation # :nologin: :prefetch:
     pass_query_params
     store_location
 
@@ -691,12 +700,12 @@ class ObserverController < ApplicationController
   end
 
   # Go to next observation: redirects to show_observation.
-  def next_observation
+  def next_observation # :nologin: :norobots:
     redirect_to_next_object(:next, Observation, params[:id])
   end
 
   # Go to previous observation: redirects to show_observation.
-  def prev_observation
+  def prev_observation # :nologin: :norobots:
     redirect_to_next_object(:prev, Observation, params[:id])
   end
 
@@ -730,7 +739,7 @@ class ObserverController < ApplicationController
   #   @new_image                        blank image object
   #   @good_images                      list of images already downloaded
   #
-  def create_observation
+  def create_observation # :prefetch: :norobots:
     # These are needed to create pulldown menus in form.
     @licenses = License.current_names_and_ids(@user.license)
     @new_image = init_image(Time.now)
@@ -834,7 +843,7 @@ class ObserverController < ApplicationController
   #   @new_image                        blank image object
   #   @good_images                      list of images already attached
   #
-  def edit_observation
+  def edit_observation # :prefetch: :norobots:
     pass_query_params
     @observation = Observation.find(params[:id], :include =>
                                     [:name, :images, :location])
@@ -887,7 +896,7 @@ class ObserverController < ApplicationController
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects to list_observations.
-  def destroy_observation
+  def destroy_observation # :norobots:
 
     # All of this just to decide where to redirect after deleting observation.
     @observation = Observation.find(params[:id])
@@ -941,7 +950,7 @@ class ObserverController < ApplicationController
   #   @confidence_menu                  used for vote option menu
   #   @reason                           array of naming_reasons
   #
-  def create_naming
+  def create_naming # :prefetch: :norobots:
     pass_query_params
     @observation = Observation.find(params[:id])
     @confidence_menu = translate_menu(Vote.confidence_menu)
@@ -1025,7 +1034,7 @@ class ObserverController < ApplicationController
   #   @confidence_menu                  used for vote option menu
   #   @reason                           array of naming_reasons
   #
-  def edit_naming
+  def edit_naming # :prefetch: :norobots:
     pass_query_params
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
@@ -1142,7 +1151,7 @@ class ObserverController < ApplicationController
   # Linked from: show_observation
   # Inputs: params[:id] (observation)
   # Redirects back to show_observation.
-  def destroy_naming
+  def destroy_naming # :norobots:
     pass_query_params
     @naming = Naming.find(params[:id])
     @observation = @naming.observation
@@ -1162,7 +1171,7 @@ class ObserverController < ApplicationController
 
   # I'm tired of tweaking show_observation to call calc_consensus for debugging.
   # I'll just leave this stupid action in and have it forward to show_observation.
-  def recalc
+  def recalc # :root: :norobots:
     pass_query_params
     id = params[:id]
     begin
@@ -1190,7 +1199,7 @@ class ObserverController < ApplicationController
   # Linked from: (nowhere)
   # Inputs: params[]
   # Redirects to show_observation.
-  def cast_vote
+  def cast_vote # :norobots:
     pass_query_params
     naming = Naming.find(params[:id])
     observation = naming.observation
@@ -1204,13 +1213,13 @@ class ObserverController < ApplicationController
   # Linked from: show_observation
   # Inputs: params[:id] (naming)
   # Outputs: @naming
-  def show_votes
+  def show_votes # :nologin: :prefetch:
     pass_query_params
     @naming = Naming.find(params[:id], :include => [:name, :votes])
   end
 
   # Refresh vote cache for all observations in the database.
-  def refresh_vote_cache
+  def refresh_vote_cache # :root: :norobots:
     if is_in_admin_mode?
       # Naming.refresh_vote_cache
       Observation.refresh_vote_cache
@@ -1227,7 +1236,7 @@ class ObserverController < ApplicationController
 
   # Form to compose email for the authors/reviewers.  Linked from show_<object>.
   # TODO: Use queued_email mechanism.
-  def author_request
+  def author_request # :norobots:
     pass_query_params
     @object = AbstractModel.find_object(params[:type], params[:id])
     if request.method == :post
@@ -1256,7 +1265,7 @@ class ObserverController < ApplicationController
   # Failure:
   #   Renders show_name.
   #   Outputs: @name, @authors, @users
-  def review_authors
+  def review_authors # :norobots:
     pass_query_params
     @object = AbstractModel.find_object(params[:type], params[:id])
     @authors = @object.authors
@@ -1293,7 +1302,7 @@ class ObserverController < ApplicationController
   # Inputs: params[:naming], params[:observation]
   # Outputs:
   #   @notifications
-  def show_notifications
+  def show_notifications # :norobots:
     pass_query_params
     data = []
     @observation = Observation.find(params[:id])
@@ -1314,7 +1323,7 @@ class ObserverController < ApplicationController
   # Inputs: none
   # Outputs:
   #   @notifications
-  def list_notifications
+  def list_notifications # :norobots:
     @notifications = Notification.find_all_by_user_id(@user.id, :order => :flavor)
   end
 
@@ -1325,7 +1334,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   # User index, restricted to admins.
-  def index_user
+  def index_user # :nologin: :norobots:
     if !is_in_admin_mode? and
        !find_query(:User)
       flash_error(:runtime_search_has_expired.t)
@@ -1337,7 +1346,7 @@ class ObserverController < ApplicationController
   end
 
   # User index, restricted to admins.
-  def users_by_name
+  def users_by_name # :norobots:
     if !is_in_admin_mode?
       flash_error(:permission_denied.t)
       redirect_to(:action => 'list_rss_logs')
@@ -1348,7 +1357,7 @@ class ObserverController < ApplicationController
   end
 
   # Display list of User's whose name, notes, etc. match a string pattern.
-  def user_search
+  def user_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (user = User.safe_find(pattern))
@@ -1400,13 +1409,13 @@ class ObserverController < ApplicationController
   end
 
   # users_by_contribution.rhtml
-  def users_by_contribution
+  def users_by_contribution # :nologin: :norobots:
     SiteData.new
     @users = User.all(:order => "contribution desc, name, login")
   end
 
   # show_user.rhtml
-  def show_user
+  def show_user # :nologin: :prefetch:
     store_location
     id = params[:id]
     @show_user = User.find(id, :include => :location)
@@ -1417,18 +1426,18 @@ class ObserverController < ApplicationController
   end
 
   # Go to next user: redirects to show_user.
-  def next_user
+  def next_user # :norobots:
     redirect_to_next_object(:next, User, params[:id])
   end
 
   # Go to previous user: redirects to show_user.
-  def prev_user
+  def prev_user # :norobots:
     redirect_to_next_object(:prev, User, params[:id])
   end
 
   # Admin util linked from show_user page that lets admin add or change bonuses
   # for a given user.
-  def change_user_bonuses
+  def change_user_bonuses # :root: :norobots:
     @user2 = User.find(params[:id])
     if is_in_admin_mode?
       if request.method != :post
@@ -1498,7 +1507,7 @@ class ObserverController < ApplicationController
   ##############################################################################
 
   # show_site_stats.rhtml
-  def show_site_stats
+  def show_site_stats # :nologin: :norobots:
     store_location
     @site_data = SiteData.new.get_site_data
 
@@ -1520,7 +1529,7 @@ class ObserverController < ApplicationController
   # server_status.rhtml
   # Restricted to the admin user
   # Reports on the health of the system
-  def server_status
+  def server_status # :root: :norobots:
     if is_in_admin_mode?
       case params[:commit]
       when :system_status_gc.l
@@ -1546,7 +1555,7 @@ class ObserverController < ApplicationController
 
   # email_features.rhtml
   # Restricted to the admin user
-  def email_features
+  def email_features # :root: :norobots:
     if !is_in_admin_mode?
       flash_error(:permission_denied.t)
       redirect_to(:action => 'list_rss_logs')
@@ -1562,7 +1571,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  def ask_webmaster_question
+  def ask_webmaster_question # :nologin: :norobots:
     @email = params[:user][:email] if params[:user]
     @content = params[:question][:content] if params[:question]
     @email_error = false
@@ -1582,7 +1591,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  def ask_user_question
+  def ask_user_question # :norobots:
     @target = User.find(params[:id])
     if email_question(@user) &&
        (request.method == :post)
@@ -1594,7 +1603,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  def ask_observation_question
+  def ask_observation_question # :norobots:
     @observation = Observation.find(params[:id])
     if email_question(@observation) &&
        (request.method == :post)
@@ -1606,7 +1615,7 @@ class ObserverController < ApplicationController
     end
   end
 
-  def commercial_inquiry
+  def commercial_inquiry # :norobots:
     @image = Image.find(params[:id])
     if email_question(@image, :email_general_commercial) &&
        (request.method == :post)
@@ -1638,15 +1647,8 @@ class ObserverController < ApplicationController
   #
   ##############################################################################
 
-  # This is the main site index.  Nice how it's buried way down here, huh?
-  def list_rss_logs
-    query = create_query(:RssLog, :all,
-                         :type => @user ? @user.default_rss_type : 'all')
-    show_selected_rss_logs(query)
-  end
-
   # Displays matrix of selected RssLog's (based on current Query).
-  def index_rss_log
+  def index_rss_log # :nologin: :norobots:
     if request.method == :post
       types = RssLog.all_types.select {|type| params["show_#{type}"] == '1'}
       types = 'all' if types.length == RssLog.all_types.length
@@ -1659,6 +1661,13 @@ class ObserverController < ApplicationController
       query = find_or_create_query(:RssLog)
     end
     show_selected_rss_logs(query, :id => params[:id], :always_index => true)
+  end
+
+  # This is the main site index.  Nice how it's buried way down here, huh?
+  def list_rss_logs # :nologin:
+    query = create_query(:RssLog, :all,
+                         :type => @user ? @user.default_rss_type : 'all')
+    show_selected_rss_logs(query)
   end
 
   # Show selected search results as a matrix with 'list_rss_logs' template.
@@ -1694,24 +1703,24 @@ class ObserverController < ApplicationController
   end
 
   # Show a single RssLog.
-  def show_rss_log
+  def show_rss_log # :nologin:
     pass_query_params
     store_location
     @rss_log = RssLog.find(params['id'])
   end
 
   # Go to next RssLog: redirects to show_<object>.
-  def next_rss_log
+  def next_rss_log # :norobots:
     redirect_to_next_object(:next, RssLog, params[:id])
   end
 
   # Go to previous RssLog: redirects to show_<object>.
-  def prev_rss_log
+  def prev_rss_log # :norobots:
     redirect_to_next_object(:prev, RssLog, params[:id])
   end
 
   # this is the site's rss feed.
-  def rss
+  def rss # :nologin: :norobots:
     headers["Content-Type"] = "application/xml"
     @logs = RssLog.all(:conditions => "datediff(now(), modified) <= 31",
                        :order => "modified desc", :limit => 100, :include => [

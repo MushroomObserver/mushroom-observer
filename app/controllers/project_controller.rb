@@ -8,27 +8,24 @@
 #   P = prefetching allowed
 #
 #  ==== Index
-#  list_projects::           . V .
-#  project_search::          . . .
-#  index_project::           . . .
+#  list_projects::
+#  project_search::
+#  index_project::
 #  show_selected_projects::  (helper)
 #
 #  ==== Show, Create, Edit
-#  show_project::            . V P
-#  next_project::            . . .
-#  prev_project::            . . .
-#  add_project::             L V .
-#  edit_project::            L V P
-#  destroy_project::         L . .
+#  show_project::
+#  next_project::
+#  prev_project::
+#  add_project::
+#  edit_project::
+#  destroy_project::
 #
 #  ==== Manage
-#  admin_request::           L V P
-#  add_members::             A V .
-#  change_member_status::    A V .
+#  admin_request::
+#  add_members::
+#  change_member_status::
 #  set_status::              (helper)
-#
-#  == TODO
-#  * RssLog
 #
 ################################################################################
 
@@ -56,19 +53,19 @@ class ProjectController < ApplicationController
   ##############################################################################
 
   # Show list of selected projects, based on current Query.
-  def index_project
+  def index_project # :nologin: :norobots:
     query = find_or_create_query(:Project, :by => params[:by])
     show_selected_projects(query, :id => params[:id], :always_index => true)
   end
 
   # Show list of latest projects.  (Linked from left panel.)
-  def list_projects
+  def list_projects # :nologin:
     query = create_query(:Project, :all, :by => :title)
     show_selected_projects(query)
   end
 
   # Display list of Project's whose title or notes match a string pattern.
-  def project_search
+  def project_search # :nologin: :norobots:
     pattern = params[:pattern].to_s
     if pattern.match(/^\d+$/) and
        (project = Project.safe_find(pattern))
@@ -109,7 +106,7 @@ class ProjectController < ApplicationController
   # Linked from: show_observation, list_projects
   # Inputs: params[:id] (project)
   # Outputs: @project
-  def show_project
+  def show_project # :nologin: :prefetch:
     store_location
     pass_query_params
     @project = Project.find(params[:id])
@@ -129,12 +126,12 @@ class ProjectController < ApplicationController
   end
 
   # Go to next project: redirects to show_project.
-  def next_project
+  def next_project # :nologin: :norobots:
     redirect_to_next_object(:next, Project, params[:id])
   end
 
   # Go to previous project: redirects to show_project.
-  def prev_project
+  def prev_project # :nologin: :norobots:
     redirect_to_next_object(:prev, Project, params[:id])
   end
 
@@ -149,7 +146,7 @@ class ProjectController < ApplicationController
   # Failure:
   #   Renders add_project again.
   #   Outputs: @project
-  def add_project
+  def add_project # :norobots:
     pass_query_params
     if request.method == :get
       @project = Project.new
@@ -227,7 +224,7 @@ class ProjectController < ApplicationController
   # Failure:
   #   Renders edit_project again.
   #   Outputs: @project
-  def edit_project
+  def edit_project # :prefetch: :norobots:
     pass_query_params
     @project = Project.find(params[:id])
     if !check_permission!(@project.user_id)
@@ -263,7 +260,7 @@ class ProjectController < ApplicationController
   # Redirects to show_observation.
   # Inputs: params[:id]
   # Outputs: none
-  def destroy_project
+  def destroy_project # :norobots:
     pass_query_params
     @project = Project.find(params[:id])
     if !check_permission!(@project.user_id)
@@ -294,7 +291,7 @@ class ProjectController < ApplicationController
   # Outputs:
   #   @project
   # Posts to the same action.  Redirects back to show_project.
-  def admin_request
+  def admin_request # :prefetch: :norobots:
     sender = @user
     pass_query_params
     @project = Project.find(params[:id])
@@ -319,7 +316,7 @@ class ProjectController < ApplicationController
   # Outputs:
   #   @project, @users
   # "Posts" to the same action.  Stays on this view until done.
-  def add_members
+  def add_members # :norobots:
     pass_query_params
     @project = Project.find(params[:id])
     @users = User.all(:order => "login, name")
@@ -340,7 +337,7 @@ class ProjectController < ApplicationController
   #   params[:commit]
   # Outputs: @project, @candidate
   # Posts to same action.  Redirects to show_project when done.
-  def change_member_status
+  def change_member_status # :norobots:
     pass_query_params
     @project = Project.find(params[:id])
     @candidate = User.find(params[:candidate])

@@ -285,7 +285,12 @@ private
           'species_list',
           'user'
          ].include?(type.downcase)
-        result = "#{prefix}x{#{type.upcase} __#{type} #{id}__ }{ #{id} }x"
+        if id.match(/^\d+$/)
+          label = "#{type.downcase.capitalize_first.to_sym.l} ##{id}"
+        else
+          label = id
+        end
+        result = "#{prefix}x{#{type.upcase} __#{label}__ }{ #{id} }x"
       end
       result
     end
