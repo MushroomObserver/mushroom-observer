@@ -115,7 +115,7 @@ fi
 
 # Do we need to report the image size back to Rails?
 if (( $set_size )); then
-  run script/set_image_size $full $id
+  run script/jpegsize --set $id $full
 fi
 
 # Create the other sizes now.  Image processing theory says that reducing

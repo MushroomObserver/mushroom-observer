@@ -559,7 +559,7 @@ class Image < AbstractModel
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
   def set_image_size(file=original_image)
-    script = "#{RAILS_ROOT}/script/jpegsize.rb"
+    script = "#{RAILS_ROOT}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
       self.width  = w.to_i
