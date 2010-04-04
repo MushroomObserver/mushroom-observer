@@ -178,11 +178,20 @@ private
     # fill in id.  Look for "Name":name_id and make sure id matches name just
     # in case the user changed the name without updating the id.
     self.gsub!(/
-      (^|\W) (?:\**_+)
-        ( (?: "?[A-Z](?:[a-z\-]*|\.)"? (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\. ) |
-          (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"? ) )
-        ( \s+ (?: "?[^a-z"\s_] | in\s?ed\.? | auct\.? | van\sd[a-z]+\s[A-Z] | s[\.\s] | sensu\s ) [^_]* )?
-      (?:_+\**) (?=(?:s|ish|like)?(?:\W|’|\Z))
+      (^|\W)
+        (?:\**_+)
+        (
+          "?[A-Z](?:[a-z\-]*|\.)"?
+            (?: (?:\s+ (?:[a-z]+\.\s+)? "?[a-z\-]+"? )* | \s+ sp\. ) |
+          (?:subsp|ssp|var|v|forma?|f)\.? \s+ "?[a-zë\-]+"?
+        ) (
+          \s+
+          (?: "?[^a-z"\s_] | in\s?ed\.? | auct\.? | van\sd[a-z]+\s[A-Z] |
+              s[\.\s] | sensu\s )
+          [^_]*
+        )?
+        (?:_+\**)
+      (?= (?:s|ish|like)? (?:\W|’|\Z) )
     /x) do |orig|
       result = orig
       prefix = $1.to_s

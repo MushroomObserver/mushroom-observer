@@ -281,7 +281,7 @@ module DescriptionControllerHelpers
       end
     end
 
-    if redirect
+    if done
       redirect_to(:action => @description.show_action,
                   :id => @description.id, :params => query_params)
 

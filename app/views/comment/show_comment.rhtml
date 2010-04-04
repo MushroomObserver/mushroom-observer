@@ -2,6 +2,13 @@
   @title = :comment_show_title.t(:name => @object.unique_format_name)
   object_type = @comment.object_type_localized
 
+  if @comment.object_type == 'Observation'
+    for naming in @comment.object.namings
+      Textile.register_name(naming.name)
+    end
+    Textile.register_name(@comment.object.name)
+  end
+
   new_tab_set do
     add_tab(:comment_show_show.t(:type => object_type),
             :controller => @object.show_controller,
@@ -22,5 +29,5 @@
 
 <p><%= :comment_show_created.t %>: <%= @comment.created.web_time %></p>
 <p><%= :comment_show_by.t %>: <%= user_link(@comment.user) %></p>
-<p><%= :comment_show_summary.t %>: <%= sanitize(@comment.summary).tl %></p>
+<p><%= :comment_show_summary.t %>: <%= (@comment.summary).tl %></p>
 <%= sanitize(:comment_show_comment.l + ': ' + @comment.comment).tpl %>
