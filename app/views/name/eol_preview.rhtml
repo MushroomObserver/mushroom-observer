@@ -9,14 +9,16 @@
 <% odd_or_even = 0
 for name in @names
   odd_or_even = 1 - odd_or_even %>
-  <div class="ListLine<%= odd_or_even %>" style="padding-top:10px; padding-bottom:10px;">
+  <div class="ListLine<%= odd_or_even %>"
+       style="padding-top:10px; padding-bottom:10px;">
     <p>
-      <%= link_to(name.display_name.t, :controller => "name", :action => "show_name", :id => name.id) %>
+      <%= link_to(name.display_name.t, :controller => "name",
+                  :action => "show_name", :id => name.id) %>
     </p>
     <% if @image_data[name.id]
       for image_id, observation_id in @image_data[name.id] %>
         <%= thumbnail(image_id, :border => 0, :link => :show_observation,
-                      :obs => observation_id) %>
+                      :obs => observation_id, :size => :thumbnail) %>
       <% end
     end %>
   </div>

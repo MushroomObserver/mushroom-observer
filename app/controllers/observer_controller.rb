@@ -629,6 +629,17 @@ class ObserverController < ApplicationController
     pass_query_params
     store_location
 
+    # Make it really easy for users to elect to go public with their votes.
+    if params[:go_public] == '1'
+      @user.votes_anonymous = :no
+      @user.save
+      flash_notice(:show_votes_gone_public.t)
+    elsif params[:go_private] == '1'
+      @user.votes_anonymous = :yes
+      @user.save
+      flash_notice(:show_votes_gone_private.t)
+    end
+
 # logger.warn('START ----------------------------------------------'); time=Time.now
     @observation = Observation.find(params[:id], :include => [
                       {:comments => :user},
@@ -661,15 +672,6 @@ class ObserverController < ApplicationController
               flashed = true
             end
           end
-        end
-
-        # Make it really easy for users to elect to go public with their votes.
-        if params[:go_public] == '1'
-          @user.votes_anonymous = :no
-          @user.save
-          flash_notice(:show_namings_gone_public.t)
-          # In case the user decides to test us immediately after changing! :)
-          @observation.users_votes(@user).each {|v| v.user.votes_anonymous = :no }
         end
       end
 

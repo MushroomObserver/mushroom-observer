@@ -337,6 +337,14 @@ class NameControllerTest < FunctionalTestCase
     assert_form_action(:action => 'approve_name')
   end
 
+  def test_eol
+    get('eol')
+  end
+
+  def test_eol_preview
+    get_with_dump('eol_preview')
+  end
+
   # None of our standard tests ever actually renders pagination_links
   # or pagination_letters.  This tests all the above.
   def test_pagination

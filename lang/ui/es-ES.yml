@@ -2315,7 +2315,6 @@ show_namings_consensus: Voto de la Comunidad
 show_namings_no_votes: No votos
 show_namings_your_vote: Su Voto
 show_namings_update_votes: Actualizar Votos
-show_namings_go_public: Hacer todas mis votaciones públicas.
 show_namings_cast: Depositar
 show_namings_user: Usuario
 show_namings_consensus_help: >
@@ -2332,10 +2331,6 @@ show_namings_lose_changes: >
 show_namings_please_login: >
   Por favor, iniciar sesión para proponer sus propios nombres, y para votar
   sobre los nombres existentes.
-
-show_namings_gone_public: >
-  ¡Gracias! Todos sus votos son ahora públicos. Usted siempre puede cambiar de
-  opinión y ocultar de nuevo por ir a las preferencias de su cuenta.
 
 
 
@@ -2359,8 +2354,8 @@ show_observation_remove_images: Eliminar Imágenes
 show_observation_reuse_image: Reutilizar Imagen
 show_observation_add_images: Agregar Imágenes
 show_observation_species_lists: Listas de Especies
-show_observation_manage_species_lists: Gestionar listas de especies.
-show_observation_send_question: Enviar pregunta al observador.
+show_observation_manage_species_lists: Gestionar listas de especies
+show_observation_send_question: Enviar pregunta al observador
 show_observation_view_notifications: Ver Notificaciones
 
 
@@ -2408,6 +2403,8 @@ show_votes_vote: Voto
 show_votes_weight: Peso
 show_votes_average: Promedio
 show_votes_score: Puntuación
+show_votes_go_public: Hacer todas mis votos públicos.
+show_votes_go_private: Hacer todas mis votos anónimos.
 show_votes_total: >
   Puntuación Global\n
   suma(puntuación * peso) /\n
@@ -2417,6 +2414,22 @@ show_votes_descript: >
   Los votos del usuario son ponderados por su contribución a la cita web
   (log<span style='font-size:50%'>10</span> contribución).  Además, el usuario
   que ha creado la observación recibe una votación extra.
+
+show_votes_go_public_confirm: >
+  Esto hará todos sus votos para todas las observaciones públicos, no
+  sólo su voto por ese nombre. ¿Es esto lo que quieres hacer?
+
+show_votes_go_private_confirm: >
+  Esto hará todos sus votos para todas las observaciones anónimos, no
+  sólo su voto por ese nombre. ¿Es esto lo que quieres hacer?
+
+show_votes_gone_public: >
+  ¡Gracias! Tus preferencias han sido actualizadas. Otros usuarios ahora pueden
+  ver sus votos.
+
+show_votes_gone_private: >
+  Tus preferencias han sido actualizadas. Otros usuarios no pueden ver sus
+  votos.
 
 
 
@@ -3150,7 +3163,7 @@ refine_search_joins: Tablas utilizadas
 refine_search_success: La consulta nueva coincide ahora con [num] objetos.
 refine_search_goto_index: "[:show_object(type=:index)]"
 refine_search_old_conditions: Condiciones Existentes
-refine_search_add_conditions: Conditions Adicionales
+refine_search_add_conditions: Condiciones Adicionales
 refine_search_yes: "sí"
 refine_search_no: "no"
 

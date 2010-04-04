@@ -2289,7 +2289,6 @@ show_namings_consensus: Community-Meinung
 show_namings_no_votes: keine Stimmen
 show_namings_your_vote: Deine Stimme
 show_namings_update_votes: Stimmen abgeben
-show_namings_go_public:  Make all of my votes public.
 show_namings_cast: Stimme abgeben
 show_namings_user: Nutzer
 show_namings_consensus_help: >
@@ -2301,10 +2300,6 @@ show_namings_consensus_help: >
 show_namings_lose_changes: Du musst auf 'Stimmen abgeben' klicken, um Änderungen abzuspeichern.
 show_namings_please_login: >
   Bitte logge dich ein, um eigene Namen vorzuschlagen und über die Vorschläge abzustimmen.
-
-show_namings_gone_public:  >
-  Thank you!  All your votes are now public.  You can always change your mind
-  and hide them again by going to you account preferences.
 
 
 
@@ -2377,11 +2372,28 @@ show_votes_vote: Stimme
 show_votes_weight: Gewichtung
 show_votes_average: Durchschnitt
 show_votes_score: Punktzahl
+show_votes_go_public:  Make all of my votes public.
+show_votes_go_private:  Make all of my votes anonymous.
 show_votes_total: Gesamtpunktzahl<br/>Summe(Punkte * Gewichtung) /<br/>(Gesamtgewichtung + 1)
 show_votes_descript: >
   Stimmen der Nutzer werden bewertet entsprechend deren Beitrag zur Webseite
   (log<span style='font-size:50%'>10</span> Beitrag).
   Außerdem hat der Nutzer, der den Fund einträgt, eine Zusatzstimme.
+
+show_votes_go_public_confirm:  >
+  This will make all your votes for all observations public, not just your vote
+  for this name.  Is this what you want to do? 
+
+show_votes_go_private_confirm:  >
+  This will make all your votes for all observations anonymous, not just your
+  vote for this name.  Is this what you want to do? 
+
+show_votes_gone_public:  >
+  Thank you!  Your preferences have been updated.  Other users can now see your
+  votes.
+
+show_votes_gone_private:  >
+  Your preferences have been updated.  Other users can no longer see your votes.
 
 
 

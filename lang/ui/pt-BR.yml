@@ -2293,7 +2293,6 @@ show_namings_consensus:  Community Vote
 show_namings_no_votes:  no votes
 show_namings_your_vote:  Your Vote
 show_namings_update_votes:  Update Votes
-show_namings_go_public:  Make all of my votes public.
 show_namings_cast:  Cast Vote
 show_namings_user:  "[:User]"
 show_namings_consensus_help:  >
@@ -2307,10 +2306,6 @@ show_namings_lose_changes:  >
 
 show_namings_please_login:  >
   Please login to propose your own names and vote on existing names.
-
-show_namings_gone_public:  >
-  Thank you!  All your votes are now public.  You can always change your mind
-  and hide them again by going to you account preferences.
 
 
 
@@ -2383,11 +2378,32 @@ show_votes_vote:  "[:Vote]"
 show_votes_weight:  Weight
 show_votes_average:  Average
 show_votes_score:  Score
-show_votes_total:  Overall Score<br/>sum(score * weight) /<br/>(total weight + 1)
+show_votes_go_public:  Make all of my votes public.
+show_votes_go_private:  Make all of my votes anonymous.
+show_votes_total:  >
+  Overall Score\n
+  sum(score * weight) /\n
+  (total weight + 1)
+
 show_votes_descript:  >
   User's votes are weighted by their contribution to the site
   (log<span style='font-size:50%'>10</span> contribution).
   In addition, the user who created the observation gets an extra vote.
+
+show_votes_go_public_confirm:  >
+  This will make all your votes for all observations public, not just your vote
+  for this name.  Is this what you want to do? 
+
+show_votes_go_private_confirm:  >
+  This will make all your votes for all observations anonymous, not just your
+  vote for this name.  Is this what you want to do? 
+
+show_votes_gone_public:  >
+  Thank you!  Your preferences have been updated.  Other users can now see your
+  votes.
+
+show_votes_gone_private:  >
+  Your preferences have been updated.  Other users can no longer see your votes.
 
 
 

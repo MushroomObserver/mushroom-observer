@@ -1313,7 +1313,9 @@ class NameController < ApplicationController
 
   # Show the data getting sent to EOL
   def eol_preview
+    @timer_start = Time.now
     eol_data(['unvetted', 'vetted'])
+    @timer_end = Time.now
   end
 
   # Show the data not getting sent to EOL
@@ -1324,66 +1326,69 @@ class NameController < ApplicationController
   end
 
   # Gather data for EOL feed.
-  #
-  # @licenses::   Hash: ???
-  # @authors::    Hash: ???
-  # @users::      Hash: ???
-  # @names::      Hash: ???
-  # @image_data:: Hash: ???
-  #
   def eol_data(review_status_list, last_name=nil)
-    rsl_list = review_status_list.join("', '")
-    conditions = "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1"
-    conditions += " and text_name > '#{last_name}'" if last_name
-    names = Name.find(:all, :conditions => conditions, :order => "search_name")
+    @names      = []
+    @descs      = {} # name.id    -> [NameDescription, NmeDescription, ...]
+    @image_data = {} # name.id    -> [img.id, obs.id, user.id, lic.id, date]
+    @users      = {} # user.id    -> user.legal_name
+    @licenses   = {} # license.id -> license.url
+    @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
 
+    # Get name descriptions that are exportable.
+    rsl = review_status_list.join("', '")
+    conditions = "review_status IN ('#{rsl}') AND " +
+                 "gen_desc IS NOT NULL AND " +
+                 "ok_for_export = 1 AND " +
+                 "public = 1"
+    descs = NameDescription.all(:conditions => conditions)
+
+    # Fill in @descs, @users, @authors, @licenses.
+    for desc in descs
+      name_id = desc.name_id.to_i
+      @descs[name_id] ||= []
+      @descs[name_id] << desc
+      authors = Name.connection.select_values(%(
+        SELECT user_id FROM name_descriptions_authors
+        WHERE name_description_id = #{desc.id}
+      )).map(&:to_i)
+      authors = [desc.user_id] if authors.empty?
+      for author in authors
+        @users[author.to_i] ||= User.find(author).legal_name
+      end
+      @authors[desc.id] = authors.map {|id| @users[id.to_i]}.join(', ')
+      @licenses[desc.license_id] ||= desc.license.url if desc.license_id
+    end
+
+    # Get corresponding names.
+    name_ids = @descs.keys.map(&:to_s).join(',')
+    @names = Name.all(:conditions => "id IN (#{name_ids})",
+                      :order => 'text_name ASC, author ASC')
+
+    # Get corresponding images.
     image_data = Name.connection.select_all %(
-      SELECT name_id, image_id, observation_id, images.user_id, images.license_id, images.created
-      FROM names, observations, images_observations, images
-      WHERE names.id = observations.name_id
-      AND observations.id = images_observations.observation_id
+      SELECT name_id, image_id, observation_id, images.user_id,
+             images.license_id, images.created
+      FROM observations, images_observations, images
+      WHERE observations.name_id IN (#{name_ids})
       AND observations.vote_cache >= 2.4
+      AND observations.id = images_observations.observation_id
       AND images_observations.image_id = images.id
       AND images.vote_cache >= 2
       AND images.ok_for_export
       ORDER BY observations.vote_cache
     )
 
-    @image_data = {}
-    @users = {}
-    @licenses = {}
+    # Fill in @image_data, @users, and @licenses.
     for row in image_data
-      name_id = row['name_id'].to_i
-      image_datum = [row['image_id'], row['observation_id'], row['user_id'], row['license_id'], row['created']]
-      @image_data[name_id] = [] unless @image_data[name_id]
-      @image_data[name_id].push(image_datum)
-      user_id = row['user_id'].to_i
-      @users[user_id] = User.find(user_id).legal_name unless @users[user_id]
+      name_id    = row['name_id'].to_i
+      user_id    = row['user_id'].to_i
       license_id = row['license_id'].to_i
-      @licenses[license_id] = License.find(license_id).url unless @licenses[license_id]
-    end
-
-    @names = []
-    @authors = {} # Maps name.id -> lists of user.ids
-    @authors.default = []
-    for n in names
-      if @image_data[n.id] or n.has_any_notes?
-        @names.push(n)
-        author_data = Name.connection.select_all("SELECT user_id FROM authors_names WHERE name_id = #{n.id}")
-        authors = author_data.map {|d| d['user_id']}
-        authors = [n.user_id] if authors == []
-        @authors[n.id] = authors
-        for author in authors
-          author_id = author.to_i
-          unless @users[author_id]
-            @users[author_id] = User.find(author_id).legal_name
-          end
-        end
-        @authors[n.id] = (authors.map {|id| @users[id.to_i]}).join(', ')
-        unless n.license_id.nil? or @licenses[n.license_id]
-          @licenses[n.license_id] = n.license.url
-        end
-      end
+      image_datum = row.values_at('image_id', 'observation_id', 'user_id',
+                                  'license_id', 'created')
+      @image_data[name_id] ||= []
+      @image_data[name_id].push(image_datum)
+      @users[user_id]       ||= User.find(user_id).legal_name
+      @licenses[license_id] ||= License.find(license_id).url
     end
   end
 

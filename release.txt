@@ -1,7 +1,8 @@
 We are pleased to finally announce a major set of new features on Mushroom
 Observer!  This is the result of several months of intensive development,
 mostly by Jason since Nathan has been rather preoccupied by his exciting new
-position as Director of Biodiversity Informatics at EOL.org (congratulations, Nathan!) 
+position as Director of Biodiversity Informatics at EOL.org (congratulations,
+Nathan!) 
 
 Much of the work should be invisible to the casual user.  (Outside of the
 occasional bugs that we inevitably failed to catch, of course.)  Below is a
@@ -32,12 +33,12 @@ Voting:
   to dislike!
 
   If you have javascript enabled, you will be able to vote on images directly
-  from the observation page.  At Curtis Björk's suggestion, we now provide
-  larger thumbnails.  Please go to your account "Preferences" to select the
-  larger size.  Additional image sizes are available when you click on an
-  image, as well.  As it takes longer to process all the new image sizes,
-  please be patient after posting observations -- you will be seeing the
-  cartoon Amanita more often than before.
+  from the observation page.  At Alan Rockefeller's and Curtis Björk's
+  suggestion, we now provide larger thumbnails.  Please go to your account
+  "Preferences" to select the larger size.  Additional image sizes are
+  available when you click on an image, as well.  As it takes longer to process
+  all the new image sizes, please be patient after posting observations -- you
+  will be seeing the cartoon Amanita more often than before. 
 
 Name and Location Descriptions:
 

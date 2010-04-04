@@ -22,39 +22,49 @@ xml.response("xmlns" => "http://www.eol.org/transfer/content/0.2",
         if !citation.blank?
           xml.reference(citation.t)
         end
-        if taxon.refs
-          for r in taxon.refs.split(/[\n\r]/)
-            ref = r.strip
-            if !ref.blank? and ref != citation
-              xml.reference(ref.t)
+        refs = []
+        for desc in @descs[taxon.id]
+          if !desc.refs.blank?
+            for ref in desc.refs.split(/[\n\r]/)
+              ref = ref.strip
+              if !ref.blank? and ref != citation
+                refs << ref.t
+              end
             end
           end
         end
-        for f in Name.eol_note_fields
-          value = taxon.send(f)
-          if !value.blank?
-            xml.dataObject do
-              xml.dc(:identifier, "Name-#{taxon.id}-#{f}")
-              xml.dataType("http://purl.org/dc/dcmitype/Text")
-              xml.mimeType("text/html")
-              xml.agent(@authors[taxon.id], :role => "author")
-              xml.dcterms(:modified, taxon.modified.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
-              xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => "en")
-              xml.dc(:language, "en")
-              xml.license(@licenses[taxon.license_id])
-              xml.dcterms(:rightsHolder, @authors[taxon.id])
-              xml.audience('General public')
-              
-              # Note the following mapping assumes that this is being read in English
-              xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" % "form_names_#{f}".to_sym.l.gsub(" ", ""))
-              
-              xml.dc(:description, taxon.send(f).tp, "xml:lang" => "en")
-              # xml.reviewStatus(taxon.review_status)
+        for ref in refs.uniq
+          xml.reference(ref.t)
+        end
+        for desc in @descs[taxon.id]
+          for f in NameDescription.eol_note_fields
+            value = desc.send(f)
+            if !value.blank?
+              xml.dataObject do
+                lang = desc.locale.sub(/-.*/, '') rescue 'en'
+                xml.dc(:identifier, "NameDescription-#{desc.id}-#{f}")
+                xml.dataType("http://purl.org/dc/dcmitype/Text")
+                xml.mimeType("text/html")
+                xml.agent(@authors[desc.id], :role => "author")
+                xml.dcterms(:modified, desc.modified.utc.strftime('%Y-%m-%dT%H:%M:%SZ'))
+                xml.dc(:title, "form_names_#{f}".to_sym.l, "xml:lang" => "en")
+                xml.dc(:language, lang)
+                xml.license(@licenses[desc.license_id])
+                xml.dcterms(:rightsHolder, @authors[desc.id])
+                xml.audience('General public')
+                
+                # Note the following mapping assumes that this is being read in English
+                xml.subject("http://rs.tdwg.org/ontology/voc/SPMInfoItems#%s" %
+                            "form_names_#{f}".to_sym.l.gsub(" ", ""))
+                
+                xml.dc(:description, desc.send(f).tp, "xml:lang" => lang)
+                # xml.reviewStatus(desc.review_status)
+              end
             end
           end
         end
         if @image_data[taxon.id]
-          for image_id, observation_id, user_id, license_id, created in @image_data[taxon.id]
+          for image_id, obs_id, user_id, license_id, created in @image_data[taxon.id]
             xml.dataObject do
               xml.dc(:identifier, "Image-#{image_id}")
               xml.dataType("http://purl.org/dc/dcmitype/StillImage")
