@@ -3,7 +3,46 @@
 #
 #  A comment is a bit of text a User attaches to an object such as an
 #  Observation.  It is polymorphic in the sense that Comment's can be attached
-#  to any kind of object, although currently only to Observation's.
+#  to any kind of object, including:
+#
+#  * Location
+#  * Name
+#  * Observation
+#  * Project
+#
+#  == Adding Comments to Model
+#
+#  It's very easy.  Don't forget to add interests as well, because that will
+#  allow the owner/authors of the object commented on to be notified of the
+#  new comment.  Just follow these easy steps:
+#
+#  1) Add +has_many+ relationships to the model:
+#
+#       has_many :comments,  :as => :object, :dependent => :destroy
+#       has_many :interests, :as => :object, :dependent => :destroy
+#
+#  2) Add interest "eyes" to the header section of the show_object view:
+#
+#       draw_interest_icons(@object)
+#
+#  3) Add show_comments partial at the bottom of the show_object view:
+#
+#       <%= render(:partial => 'comment/show_comments', :locals =>
+#             { :object => @object, :controls => true, :limit => nil }) %>
+#
+#  4) Tell comment/_object shared view how to display the object (used to
+#     embed info about object while user is posting/editing a comment):
+#
+#       when 'YourModel'
+#         render(:partial => 'model/model', :object => object)
+#
+#  5) Tell Query how to do the polymorphic join (optional):
+#
+#       self.join_conditions => {
+#         :comments => {
+#           :new_table => :object,
+#         }
+#       }
 #
 #  == Attributes
 #
@@ -21,10 +60,13 @@
 #  text_name::              Alias for +summary+ for debugging.
 #  object_type_localized::  Translate the name of the object type it's attached to.
 #
-#  == Callbacks
+#  ==== Logging
+#  log_create::             Log creation on object's log if it can.
+#  log_update::             Log update on object's log if it can.
+#  log_destroy::            Log destruction on object's log if it can.
 #
+#  ==== Callbacks
 #  notify_users::           Sends notification emails after creation.
-#  log_destruction::        Log destruction after destroy.
 #
 #  == Polymorphism
 #
@@ -50,20 +92,57 @@ class Comment < AbstractModel
   belongs_to :object, :polymorphic => true
   belongs_to :user
 
-  after_create  :notify_users
-  after_destroy :log_destruction
+  after_create :notify_users
 
-  # Callback that logs destruction after comment is destroyed.
-  def log_destruction
-    if (user = User.current) &&
-       (object = self.object) &&
-       (object.respond_to?(:log))
+  # Returns +summary+ for debugging.
+  def text_name
+    summary.to_s
+  end
+
+  # Returns the name of the object type, translated into the local language.
+  # Returns '' if fails for any reason.  Equivalent to:
+  #
+  #   comment.object_type.downcase.to_sym.l
+  #
+  def object_type_localized
+    self.object_type.downcase.to_sym.l rescue ''
+  end
+
+  ##############################################################################
+  #
+  #  :section: Logging
+  #
+  ##############################################################################
+
+  # Log creation of comment on object's RSS log if it can.
+  def log_create(object=self.object)
+    if object && object.respond_to?(:log)
+      object.log(:log_comment_added, :summary => summary, :touch => true)
+    end
+  end
+
+  # Log update of comment on object's RSS log if it can.
+  def log_update(object=self.object)
+    if object && object.respond_to?(:log)
+      object.log(:log_comment_updated, :summary => summary, :touch => false)
+    end
+  end
+
+  # Log destruction of comment on object's RSS log if it can.
+  def log_destroy(object=self.object)
+    if object && object.respond_to?(:log)
       object.log(:log_comment_destroyed, :summary => summary, :touch => false)
     end
   end
 
+  ##############################################################################
+  #
+  #  :section: Callbacks
+  #
+  ##############################################################################
+
   # Callback called after creation.  Lots of people potentially can receive an
-  # email whenever a Comment is posted: 
+  # email whenever a Comment is posted:
   #
   # 1. the owner of the object
   # 2. users who already commented on the same object
@@ -113,24 +192,6 @@ class Comment < AbstractModel
           QueuedEmail::CommentAdd.find_or_create_email(sender, recipient, self)
         end
       end
-    end
-  end
-
-  # Returns +summary+ for debugging.
-  def text_name
-    summary.to_s
-  end
-
-  # Returns the name of the object type, translated into the local language.
-  # Returns '' if fails for any reason.  Equivalent to:
-  #
-  #   comment.object_type.downcase.to_sym.l
-  #
-  def object_type_localized
-    begin
-      self.object_type.downcase.to_sym.l
-    rescue
-      ''
     end
   end
 

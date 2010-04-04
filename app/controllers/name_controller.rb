@@ -1,4 +1,12 @@
 #
+#  = Name Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
 #  Views: ("*" - login required, "R" - root required)
 #     index_name                  List of results of index/search.
 #     list_names                  Alphabetical list of all names, used or otherwise.
@@ -141,14 +149,14 @@ class NameController < ApplicationController
   def needed_descriptions
     data = Name.connection.select_rows %(
       SELECT names.id, name_counts.count
-      FROM names LEFT OUTER JOIN draft_names ON names.id = draft_names.name_id,
+      FROM names LEFT OUTER JOIN descriptions ON names.id = descriptions.name_id,
            (SELECT count(*) AS count, name_id
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
         AND names.rank = 'Species'
         AND (names.gen_desc IS NULL OR names.gen_desc = '')
         AND name_counts.count > 1
-        AND draft_names.name_id IS NULL
+        AND descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - modified > #{1.week.to_i}
       ORDER BY name_counts.count DESC, names.search_name ASC
       LIMIT 100

@@ -995,7 +995,10 @@ class API
     save_new_object(image)
     raise error(202, image.formatted_errors) if !image.process_image
 
-    observation.add_image_with_log(image, user) if observation
+    if observation
+      observation.add_image(image)
+      observation.log_create_image(image)
+    end
     return image
 
   ensure
@@ -1768,12 +1771,15 @@ class API
     sets[:login]           = x if x = parse_string(:set_login, 80)
     sets[:name]            = x if x = parse_string(:set_name,  80)
     sets[:email]           = x if x = parse_string(:set_email, 80)
+    sets[:verify]          = x if x = parse_boolean(:set_verify)
     sets[:notes]           = x if x = parse_string(:set_notes)
     sets[:image]           = x if x = parse_object(:set_image, Image)
     sets[:location]        = x if x = parse_object(:set_location, Location)
     sets[:mailing_address] = x if x = parse_string(:set_mailing_address)
     sets[:license]         = x if x = parse_object(:set_license, License)
     sets[:locale]          = x if x = parse_string(:set_locale, 5)
+    sets[:votes_anonymous] = x if x = parse_enum(:set_votes_anonymous, [:yes, :no, :old])
+    sets[:email_html]      = x if x = parse_boolean(:set_email_html)
     return standard_setter(sets)
   end
 

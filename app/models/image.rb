@@ -185,8 +185,17 @@
 #  process_image::      Call this after saving new record to process image.
 #  validate_upload::    Perform all the checks we can on the upload.
 #
-#  ==== Callbacks
-#  log_destruction      Log destruction and change thumbnails before destroy.
+#  ==== Voting
+#  all_votes::          Array of valid vote values.
+#  validate_vote::      Return valid vote value or +nil+.
+#  num_votes::          Number of votes cast for this Image.
+#  users_vote::         Get User's vote for this Image.
+#  change_vote::        Change a User's vote for this Image.
+#
+#  ==== Callbacks and Logging
+#  update_thumbnails::  Change thumbnails before destroy.
+#  log_update::         Log update in assocaited Observation's.
+#  log_destroy::        Log destroy in assocaited Observation's.
 #
 ################################################################################
 
@@ -197,7 +206,7 @@ class Image < AbstractModel
   belongs_to :license
   belongs_to :reviewer, :class_name => "User", :foreign_key => "reviewer_id"
 
-  before_destroy :log_destruction
+  before_destroy :update_thumbnails
 
   # Create plain-text title for image from observations, appending image id to
   # guarantee uniqueness.  Examples:
@@ -550,7 +559,7 @@ class Image < AbstractModel
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
   def set_image_size(file=original_image)
-    script = "#{RAILS_ROOT}/script/set_image_size"
+    script = "#{RAILS_ROOT}/script/jpegsize.rb"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)
       self.width  = w.to_i
@@ -595,7 +604,7 @@ class Image < AbstractModel
 
   # Change a user's vote to the given value.  Pass in either the numerical vote
   # value (from 1 to 4) or nil to delete their vote.  Forces all votes to be
-  # integers.
+  # integers.  Returns value of new vote.
   def change_vote(user, value)
     save_changes = !self.changed?
 
@@ -615,6 +624,8 @@ class Image < AbstractModel
     if save_changes
       save_without_our_callbacks
     end
+
+    return value
   end
 
   # Retrieve list of users who have voted as a Hash mapping user ids to
@@ -647,22 +658,31 @@ class Image < AbstractModel
 
   ##############################################################################
   #
-  #  :section: Callbacks
+  #  :section: Callbacks and Logging
   #
   ##############################################################################
 
-  # Callback that logs destruction before Image is destroyed.  (Also change
-  # thumbnail Observation's to another Image whenever necessary.)
-  def log_destruction
-    if user = User.current
-      image_name = "#{:Image.t} ##{id}"
-      for obs in observations
-        obs.log(:log_image_destroyed, :name => image_name)
-        if obs.thumb_image_id == id
-          obs.thumb_image = (obs.images - self).first
-          obs.save
-        end
+  # Callback that changes Observation's thumbnails when an image is destroyed.
+  def update_thumbnails
+    for obs in observations
+      if obs.thumb_image_id == id
+        obs.thumb_image_id = (obs.image_ids - [id]).first
+        obs.save
       end
+    end
+  end
+
+  # Log update in associated Observation's.
+  def log_update
+    for obs in observations
+      obs.log_update_image(self)
+    end
+  end
+
+  # Log destruction in associated Observation's.
+  def log_destroy
+    for obs in observations
+      obs.log_destroy_image(self)
     end
   end
 

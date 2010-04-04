@@ -75,7 +75,7 @@
 #  namings::                List of Naming's proposed for this Observation.
 #  name_been_proposed?::    Has someone proposed this Name already?
 #  owner_voted?::           Has the owner voted on a given Naming?
-#  user_voted?::            Has a given User voted on a given Naming? 
+#  user_voted?::            Has a given User voted on a given Naming?
 #  owners_vote::            Get the owner's Vote on a given Naming.
 #  users_vote::             Get a given User's Vote on a given Naming.
 #  owners_votes::           Get all of the onwer's Vote's for this Observation.
@@ -93,13 +93,16 @@
 #  ==== Images
 #  images::                 List of Image's attached to this Observation.
 #  add_image::              Attach an Image.
-#  add_image_by_id::        Attach an Image by id.
-#  add_image_with_log::     Attach an Image and log it.
 #  remove_image::           Remove an Image.
-#  remove_image_by_id::     Remove an Image by id.
 #
-#  == Callbacks
+#  ==== Logging
+#  log_create_image::       Log addition of new Image.
+#  log_reuse_image::        Log reuse of old Image.
+#  log_update_image::       Log update to Image.
+#  log_remove_image::       Log removal of Image.
+#  log_destroy_image::      Log destruction of Image.
 #
+#  ==== Callbacks
 #  add_spl_callback::           After add: update contribution.
 #  remove_spl_callback::        After remove: update contribution.
 #  notify_species_lists::       Before destroy: log destruction on species_lists.
@@ -330,10 +333,6 @@ class Observation < AbstractModel
           if v.value > v80
             v.value = v80
             v.save
-            Transaction.put_vote(
-              :id        => v,
-              :set_value => v80
-            )
           end
         end
       end
@@ -364,21 +363,12 @@ class Observation < AbstractModel
           :value       => value,
           :favorite    => favorite
         )
-        Transaction.post_vote(
-          :id     => vote,
-          :naming => naming,
-          :value  => value
-        )
 
       # Change vote if it exists.
       else
         vote.value    = value
         vote.favorite = favorite
         vote.save
-        Transaction.put_vote(
-          :id        => vote,
-          :set_value => value
-        )
       end
     end
 
@@ -737,16 +727,10 @@ return result if debug
   def add_image(img)
     if !images.include?(img)
       images << img
-      args = {
-        :id        => self,
-        :add_image => img,
-      }
       unless thumb_image
         self.thumb_image = img
         self.save
-        args[:set_thumb_image] = img
       end
-      Transaction.put_observation(args)
       notify_users(:added_image)
     end
     return img
@@ -758,40 +742,43 @@ return result if debug
   def remove_image(img)
     if images.include?(img)
       images.delete(img)
-      args = {
-        :id        => self,
-        :del_image => img
-      }
       if thumb_image_id == img.id
         if images != []
           self.thumb_image = img2 = images.first
-          args[:set_thumb_image] = img2
         else
           self.thumb_image = nil
-          args[:set_thumb_image] = 0
         end
         self.save
       end
-      Transaction.put_observation(args)
       notify_users(:removed_image)
     end
     return img
   end
 
-  # Finds Image by id then calls add_image.  Saves changes.  Returns Image.
-  def add_image_by_id(id)
-    add_image(Image.find(id))
-  end
+  ##############################################################################
+  #
+  #  :section: Logging
+  #
+  ##############################################################################
 
-  # Finds Image by id then calls remove_image.  Saves changes.  Returns Image.
-  def remove_image_by_id(id)
-    remove_image(Image.find(id))
-  end
+  # Logs addition of new Image.
+  def log_create_image(image); log_image(:log_image_created, image, true); end
 
-  # Calls add_image and logs it.  Returns Image.
-  def add_image_with_log(image, user)
-    log(:log_image_created, :name => "#{:Image.t} ##{image.id}")
-    return add_image(image)
+  # Logs addition of existing Image.
+  def log_reuse_image(image); log_image(:log_image_reused, image, true); end
+
+  # Logs update of Image.
+  def log_update_image(image); log_image(:log_image_updated, image, false); end
+
+  # Logs removal of Image.
+  def log_remove_image(image); log_image(:log_image_removed, image, false); end
+
+  # Logs destruction of Image.
+  def log_destroy_image(image); log_image(:log_image_destroyed, image, false); end
+
+  def log_image(tag, image, touch) # :nodoc:
+    name = "#{:Image.t} ##{image.id || image.was || '??'}"
+    log(tag, :name => name, :touch => touch)
   end
 
   ################################################################################

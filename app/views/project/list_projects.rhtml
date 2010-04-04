@@ -3,7 +3,8 @@
 
   new_tab_set(:sort_by_header.t, @sorts)
   new_tab_set do
-    add_tab(:list_projects_add_project.t, :action => 'add_project')
+    add_tab(:list_projects_add_project.t, :action => 'add_project',
+            :params => query_params)
     add_tabs(@links)
   end
 %>
@@ -17,7 +18,8 @@
         <tr valign="top" class="ListLine<%= odd_or_even %>">
           <td width="100%">
             <%= link_to(sprintf('<span class="ListWhat">%s</span>', project.title.t),
-                        :action => 'show_project', :id => project.id) %>:
+                        :action => 'show_project', :id => project.id,
+                        :params => query_params) %>:
             <br/>
             <span class="ListWhen"><%= project.created.web_time %></span>:
             <span class="ListWho"><%= user_link(project.user) %></span><br/>

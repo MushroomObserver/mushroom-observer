@@ -24,9 +24,6 @@ RETRIES = 5
 ROOT = '/var/web/mo'
 # ROOT = '/home/jason/public_html/mo_trunk'
 
-# Where pid of daemon is stored by default.
-PID_FILE = 'tmp/pids/update_images.pid'
-
 # Where daemon and cronjob log stuff by default.
 LOG_FILE = 'log/update_images.log'
 
@@ -37,8 +34,6 @@ LOCAL_PATH = 'public/images'
 SERVER_ALIASES = {
   'dreamhost' => 'velosa@images.mushroomobserver.org:images.mushroomobserver.org',
   'slicehost' => 'mushroomobserver.org:/var/web/mo/public/images',
-# 'dreamhost' => 'velosa@images.mushroomobserver.org:images.mushroomobserver.org/test',
-# 'slicehost' => 'mushroomobserver.org:test',
 }
 
 # List of official image servers to keep updated from main webserver.
@@ -48,6 +43,12 @@ OFFICIAL_SERVERS = [
 
 # Default image server to use for --sync mode.
 DEFAULT_IMAGE_SERVER = 'dreamhost'
+
+# List of all image sizes available.
+ALL_SIZES = ['thumb', '320', '640', '960', '1280', 'orig']
+
+# List of sizes we don't want to keep on slicehost due to space constraints.
+DELETE_SIZES = ['orig']
 
 # ----------------------------
 #  Command line parsing.
@@ -101,20 +102,44 @@ end
 #  Nightly job.
 # ----------------------------
 
+def get_cached_listings(cronjob=false)
+  file_lists = {}
+
+  verbose("Getting local listing...\n")
+  file_lists['local'] = list = get_cached_file_list('local')
+  for size in ALL_SIZES
+    verbose("  %-5s: %d\n" % [
+      size, list.keys.select {|f| f[0,size.length] == size}.length
+    ])
+  end
+
+  for server in OFFICIAL_SERVERS
+    verbose("Getting #{server} listing...\n")
+    list = get_cached_file_list(server)
+    for size in ALL_SIZES
+      verbose("  %-5s: %d\n" % [
+        size, list.keys.select {|f| f[0,size.length] == size}.length
+      ])
+    end
+    file_lists[server] = list
+  end
+
+  return file_lists
+end
+
 def refresh_listings(cronjob=false)
   log("Refreshing listings\n") if cronjob
-  files = {}
+  file_lists = {}
 
   # Get local list for diagnostic purposes only.
   log("Getting local listing\n") if cronjob
   verbose("Getting local listing...\n")
-  files['local'] = list = list_local_files(@@local_path)
-  verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
-  verbose("  320:   #{list.keys.select {|f| f[0,3] == '320'}.length}\n")
-  verbose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
-  verbose("  960:   #{list.keys.select {|f| f[0,3] == '960'}.length}\n")
-  verbose("  1280:  #{list.keys.select {|f| f[0,4] == '1280'}.length}\n")
-  verbose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
+  file_lists['local'] = list = list_local_files(@@local_path)
+  for size in ALL_SIZES
+    verbose("  %-5s: %d\n" % [
+      size, list.keys.select {|f| f[0,size.length] == size}.length
+    ])
+  end
   write_cached_file_list('local', list)
 
   # Get remote lists so we can refresh the caches.
@@ -123,27 +148,27 @@ def refresh_listings(cronjob=false)
     verbose("Getting #{server} listing...\n")
     if list = list_remote_files(server)
       write_cached_file_list(server, list)
-      verbose("  thumb: #{list.keys.select {|f| f[0,5] == 'thumb'}.length}\n")
-      verbose("  320:   #{list.keys.select {|f| f[0,3] == '320'}.length}\n")
-      verbose("  640:   #{list.keys.select {|f| f[0,3] == '640'}.length}\n")
-      verbose("  960:   #{list.keys.select {|f| f[0,3] == '960'}.length}\n")
-      verbose("  1280:  #{list.keys.select {|f| f[0,3] == '1280'}.length}\n")
-      verbose("  orig:  #{list.keys.select {|f| f[0,4] == 'orig'}.length}\n")
-      files[server] = list
+      for size in ALL_SIZES
+        verbose("  %-5s: %d\n" % [
+          size, list.keys.select {|f| f[0,size.length] == size}.length
+        ])
+      end
+      file_lists[server] = list
     else
       log("  (failed)\n") if cronjob
       puts "Server #{server} is down!\n"
     end
   end
 
-  return files
+  return file_lists
 end
 
 # This takes a hash of file-list hashes and checks for mismatches in size.
 # Returns Hash of Arrays of files that need to be uploaded, keyed on server.
-def check_for_mismatches(file_lists, clean=false)
+def check_for_mismatches(file_lists, cronjob=false)
   servers = file_lists.keys.sort
   need_to_upload = {}
+  verbose("Checking for mismatches between #{servers.join(', ')}")
 
   # Get union of files on all servers.
   files = {}
@@ -152,6 +177,7 @@ def check_for_mismatches(file_lists, clean=false)
       files[file] = nil
     end
   end
+  verbose("Number of files in union: #{files.keys.length}")
 
   # Get list of files with mismatches.
   mismatches = files.keys.select do |file|
@@ -169,14 +195,16 @@ def check_for_mismatches(file_lists, clean=false)
       end
 
       # Remove originals if they exist and are correct on all remote servers.
-      if clean && !any_different && !any_missing && file[0,4] == 'orig'
+      if cronjob && !any_different && !any_missing &&
+         (DELETE_SIZES.any? {|size| file[0,size.length] == size}) &&
+         File.exists?("#{@@local_path}/#{file}")
         File.delete("#{@@local_path}/#{file}")
         log("Deleting #{file}\n")
         verbose("deleting #{file}")
       end
 
       # Get a list of files that we need to be uploaded.
-      if any_different
+      if local_size && local_size != 0 && (any_different || any_missing)
         for server in servers
           if file_lists[server][file] != local_size
             verbose("need to upload #{file} to #{server}")
@@ -187,8 +215,8 @@ def check_for_mismatches(file_lists, clean=false)
       end
     end
 
-    # Return list of files that need to be uploaded.
-    return need_to_upload
+    # Collect list of mismatches.
+    any_different
   end
 
   # Now print out the list of problems in a table.
@@ -209,94 +237,33 @@ def check_for_mismatches(file_lists, clean=false)
     puts str
     log(str + "\n") if cronjob
   end
-end
 
-# ----------------------------
-#  Daemon.
-# ----------------------------
-
-def daemon(delay)
-  log_break
-  log("Starting daemon\n")
-  local_files = {}     # local_files['orig/1234.jpg'] = 123456 (bytes)
-  remote_files = {}    # remote_files['dreamhost']['orig/1234.jpg'] = 123456
-  server_status = {}   # server_status['dreamhost'] = ServerStatus instance
-
-  # Get initial list of files on local and remote servers.
-  log("Getting local listing\n")
-  local_files = list_local_files(@@local_path)
-  for server in OFFICIAL_SERVERS
-    server_status[server] = status = ServerStatus.new(server)
-    list = get_cached_file_list(server)
-    if !list
-      log("Getting #{server} listing\n")
-      list = list_remote_files(server)
-      if list
-        write_cached_file_list(server, list)
-      else
-        log("  (failed)\n")
-        status.listing_failed
-      end
-    end
-    remote_files[server] = list
-  end
-
-  while true
-    # Look for any new files.
-    update_file_cache(local_files, 'local')
-    update_local_files(local_files, @@local_path)
-
-    # Attempt to transfer any files not on any of the remote servers.
-    # This will work continuously until done or the server fails.
-    for server in OFFICIAL_SERVERS
-      status = server_status[server]
-      if status.okay_to_upload?
-        update_file_cache(remote_files[server], server)
-        for file in local_files.keys - remote_files[server].keys
-          log("Transferring #{file} to #{server}\n")
-          if transfer_file(file, @@local_path, server)
-            status.upload_worked
-            remote_files[server][file] = size = local_files[file]
-            add_file_to_cached_file_list(server, file, size)
-          else
-            log("  (failed)\n")
-            status.upload_failed
-            if !status.okay_to_upload?
-              break
-            end
-          end
-        end
-      end
-    end
-
-    # Wait for a bit before checking for new files.
-    sleep delay
-  end
+  # Return list of files that need to be uploaded.
+  return need_to_upload
 end
 
 # -----------------------------
 #  Command-line utility mode.
 # -----------------------------
 
-def sync_command(local,remote, do_upload,do_download,
-    do_thumb,do_320,do_640,do_960,do_1280,do_orig, use_cache)
+def sync_command(local,remote, do_upload,do_download, size)
   local_files = {}     # local_files['orig/1234.jpg'] = 123456 (bytes)
   remote_files = {}    # remote_files['orig/1234.jpg'] = 123456
 
   # Get initial list of files locally and on remote server.
   puts "Getting local listing...\n"
-  if use_cache
-    local_files = get_cached_file_list('local')
+  if @@use_cache
+    local_files = get_cached_file_list('local', size)
   else
-    local_files = list_local_files(local)
-    write_cached_file_list('local', local_files)
+    local_files = list_local_files(local, size)
+    write_cached_file_list('local', local_files, size)
   end
   puts "Getting remote listing...\n"
-  if use_cache
-    remote_files = get_cached_file_list(remote)
+  if @@use_cache
+    remote_files = get_cached_file_list(remote, size)
   else
-    remote_files = list_remote_files(remote)
-    write_cached_file_list(remote, remote_files)
+    remote_files = list_remote_files(remote, size)
+    write_cached_file_list(remote, remote_files, size)
   end
   check_for_mismatches('local' => local_files, 'remote' => remote_files)
 
@@ -305,15 +272,8 @@ def sync_command(local,remote, do_upload,do_download,
     files = []
     size = 0
     for file in local_files.keys - remote_files.keys
-      if do_thumb && file[0..4] == 'thumb' ||
-         do_320   && file[0..2] == '320'   ||
-         do_640   && file[0..2] == '640'   ||
-         do_960   && file[0..2] == '960'   ||
-         do_1280  && file[0..3] == '1280'  ||
-         do_orig  && file[0..3] == 'orig'
-        files.push(file)
-        size += local_files[file]
-      end
+      files.push(file)
+      size += local_files[file]
     end
     if files.empty?
       puts "Nothing to upload.\n"
@@ -328,15 +288,8 @@ def sync_command(local,remote, do_upload,do_download,
     files = []
     size = 0
     for file in remote_files.keys - local_files.keys
-      if do_thumb && file[0..4] == 'thumb' ||
-         do_320   && file[0..2] == '320'   ||
-         do_640   && file[0..2] == '640'   ||
-         do_960   && file[0..2] == '960'   ||
-         do_1280  && file[0..3] == '1280'  ||
-         do_orig  && file[0..3] == 'orig'
-        files.push(file)
-        size += remote_files[file]
-      end
+      files.push(file)
+      size += remote_files[file]
     end
     if files.empty?
       puts "Nothing to download.\n"
@@ -345,98 +298,6 @@ def sync_command(local,remote, do_upload,do_download,
       download_files(files, local, remote)
     end
   end
-end
-
-# ----------------------------
-#  Daemon administration.
-# ----------------------------
-
-# Get pid of the daemon.
-def daemon_pid
-  pid = nil
-  if File.exists?(@@pid_file)
-    open(@@pid_file) do |fh|
-      line = fh.gets
-      pid = line.chomp.to_i if line
-    end
-  end
-  return pid
-end
-
-# Write daemon's pid to the official pid file.
-def save_daemon_pid(pid)
-  open(@@pid_file, 'w') do |fh|
-    fh.puts(pid.to_s)
-  end
-end
-
-# Check if the daemon is up and running by doing a 'ps' on it.
-def is_daemon_running?
-  status = false
-  if pid = daemon_pid
-    status = true if is_running?(pid)
-  end
-  return status
-end
-
-# Check if a given process is running by doing a 'ps' on it.
-def is_running?(pid)
-  status = false
-  open("|ps -p #{pid}") do |ps|
-    ps.gets
-    status = true if ps.gets
-  end
-  return status
-end
-
-# Start the daemon, trapping HUP signals so that other processes can interrupt
-# its sleep by sending it a HUP signal.
-def start_daemon(delay)
-  result = false
-  pid = Process.fork do
-    Signal.trap('HUP') do
-      log("Prodded")
-    end
-    Signal.trap('TERM') do
-      log("Killed")
-      exit 0
-    end
-    daemon(delay)
-    exit 1
-  end
-  if pid
-    save_daemon_pid(pid)
-    result = true
-  end
-  return result
-end
-
-# Send daemon a HUP signal to get it to check for new images immediately.
-def prod_daemon
-  result = false
-  if pid = daemon_pid
-    Process.kill("HUP", pid)
-    result = true
-  end
-  return result
-end
-
-# Kill the daemon.  Waits several seconds for it to die.  If the process
-# goes away, it deletes the pid file.
-def kill_daemon
-  result = false
-  pid = daemon_pid
-  Process.kill("TERM", pid)
-  # Wait up to five seconds for it to stop.
-  for i in [1..5]
-    sleep 1
-    if !is_running?(pid)
-      File.delete(@@pid_file)
-      result = true
-      break
-    end
-  end
-  return result
 end
 
 # ---------------------------------
@@ -470,16 +331,17 @@ end
 
 # Get list of local images.  Returns a hash whose keys are filenames (without
 # path, just 'thumb/1234.jpg') and whose values are file sizes.
-def list_local_files(path)
+def list_local_files(path, size=nil)
   files = {}
   files['date'] = Time.now
-  for type in ['thumb', '320', '640', '960', '1280', 'orig']
+  sizes = size ? [size] : ALL_SIZES
+  for type in sizes
     cmd = "ls #{path}/#{type}"
     verbose cmd
     open("|#{cmd}") do |dir|
       dir.each_line do |line|
         file = line.chomp
-        if file && file.match(/^\d+\.jpg$/)
+        if file && file.match(/^\d+\.\w+$/)
           size = File.size("#{path}/#{type}/#{file}")
           if size > 0
             files["#{type}/#{file}"] = size
@@ -493,7 +355,7 @@ end
 
 # Get list of images on a remote server.  The +server+ parameter can be an
 # alias of an established image server, or a scp-style url (user@host:path).
-def list_remote_files(server)
+def list_remote_files(server, size=nil)
   url = SERVER_ALIASES[server] || server
   if url.index(':')
     url, path = url.split(':')
@@ -502,16 +364,14 @@ def list_remote_files(server)
   end
   files = {}
   files['date'] = Time.now
-  cmd = "ssh #{url} ls -lU --color=never #{path}/{thumb,320,640,960,1280,orig}"
-  verbose cmd
-  open("|#{cmd}") do |dir|
-    type = nil
-    dir.each_line do |line|
-      if line.chomp.match(/^\S+\/(\w+):$/)
-        type = $1
-      else
+  sizes = size ? [size] : ALL_SIZES
+  for type in sizes
+    cmd = "ssh #{url} ls -lU --color=never #{path}/#{type}"
+    verbose cmd
+    open("|#{cmd}") do |dir|
+      dir.each_line do |line|
         size, file = line.chomp.split.values_at(4, 7)
-        if file && file.match(/^\d+\.jpg$/) && size.to_i != 0
+        if file && file.match(/^\d+\.\w+$/) && size.to_i != 0
           files["#{type}/#{file}"] = size.to_i
         end
       end
@@ -520,58 +380,21 @@ def list_remote_files(server)
   return files
 end
 
-# Look for new images locally by just doing a directory of originals -- this
-# directory should be nearly empty at all times, with only the latest images
-# in it that haven't been transferred to the image servers yet.
-def update_local_files(files, path)
-  Dir.foreach("#{path}/orig") do |file|
-    if file.match(/^\d+\.jpg$/) && !files.has_key?("orig/#{file}")
-      file1 = "#{path}/thumb/#{file}"
-      file2 = "#{path}/320/#{file}"
-      file3 = "#{path}/640/#{file}"
-      file4 = "#{path}/960/#{file}"
-      file5 = "#{path}/1280/#{file}"
-      file6 = "#{path}/orig/#{file}"
-      # Wait for all three images, otherwise the daemon might wake up after
-      # the original has been uploaded but before the smaller sizes have been
-      # created.  That would result in the smaller sizes being missed until
-      # the nightly job finally caught the error.
-      if File.exists?(file1) && (size1 = File.size(file1).to_i) != 0 &&
-         File.exists?(file2) && (size2 = File.size(file2).to_i) != 0 &&
-         File.exists?(file3) && (size3 = File.size(file3).to_i) != 0 &&
-         File.exists?(file4) && (size4 = File.size(file4).to_i) != 0 &&
-         File.exists?(file5) && (size5 = File.size(file5).to_i) != 0 &&
-         File.exists?(file6) && (size6 = File.size(file6).to_i) != 0
-        files["thumb/#{file}"] = size1
-        files["320/#{file}"]   = size2
-        files["640/#{file}"]   = size3
-        files["960/#{file}"]   = size4
-        files["1280/#{file}"]  = size5
-        files["orig/#{file}"]  = size6
-        log "Found new image #{file}\n"
-      end
-    end
-  end
-  return files
-end
-
-# ----------------------------
-#  File listing caches.
-# ----------------------------
-
 # Get cached directory.  Returns a hash whose keys are filenames (no path, just
 # 'thumb/1234.jpg'), and whose values are the size of the file in bytes.  The
 # +server+ parameter is either 'local' or an alias for an remote image server.
-def get_cached_file_list(server)
+def get_cached_file_list(server, size=nil)
   files = nil
   cache_file = "#{@@local_path}/#{server}.files"
   if File.exists?(cache_file)
     files = {}
-    verbose "reading #{@@local_path}/#{server}.files"
+    verbose "reading #{size || 'all'} from #{@@local_path}/#{server}.files"
     open(cache_file) do |fh|
       fh.each_line do |line|
-        file, size = line.chomp.split
-        files[file] = size.to_i
+        file, size2 = line.chomp.split
+        if !size || file[0,size.length] == size
+          files[file] = size2.to_i
+        end
       end
     end
     files['date'] = File.mtime(cache_file)
@@ -580,39 +403,33 @@ def get_cached_file_list(server)
 end
 
 # Write directory cache.
-def write_cached_file_list(server, files)
-  verbose "writing #{@@local_path}/#{server}.files"
-  open("#{@@local_path}/#{server}.files", 'w') do |fh|
-    files.each_pair do |file, size|
-      fh.puts("#{file} #{size}\n")
+def write_cached_file_list(server, files, size=nil)
+  cache_file = "#{@@local_path}/#{server}.files"
+  if !size
+    verbose "writing all to #{@@local_path}/#{server}.files"
+    open(cache_file, 'w') do |fh|
+      files.each_pair do |file, size|
+        fh.puts("#{file} #{size}\n")
+      end
+    end
+  else
+    old = []
+    verbose "updating #{size} in #{@@local_path}/#{server}.files"
+    open(cache_file) do |fh|
+      fh.each_line do |line|
+        old << line.chomp if line[0,size.length] != size
+      end
+    end
+    open(cache_file, 'w') do |fh|
+      old.each do |line|
+        fh.puts(line)
+      end
+      files.each_pair do |file, size|
+        fh.puts("#{file} #{size}\n")
+      end
     end
   end
   files['date'] = Time.now
-end
-
-# Add a file that was just transferred.
-def add_file_to_cached_file_list(server, file, size)
-  verbose "adding '#{file} #{size}' to #{@@local_path}/#{server}.files"
-  open("#{@@local_path}/#{server}.files", 'a') do |fh|
-    fh.puts("#{file} #{size}\n")
-  end
-end
-
-# Check if cached directory for the given server has been refreshed.  (This
-# is used by the daemon which is running continuously.  It checks each cycle
-# to see if the nightly --clean job has run, and refreshes its internal cache
-# accordingly when it has.  This will theoretically catch those rare cases
-# where it *looks* like a transfer has worked, but for some reason hasn't.)
-# Returns nothing; changes file list in place as necessary.
-def update_file_cache(files, server)
-  file = "#{@@local_path}/#{server}.files"
-  if File.exists?(file) && File.mtime(file) > files['date']
-    log("Daemon refreshing #{server} listing")
-    new_files = get_cached_file_list(server)
-    if new_files
-      files.replace(new_files)
-    end
-  end
 end
 
 # ----------------------------
@@ -641,7 +458,6 @@ def upload_files(files, local, remote)
   tempfile = "/tmp/update_images.#{$$}"
   open(tempfile, 'w') do |fh|
     for file in files.sort
-verbose("queuing #{from} #{to} #{file}")
       fh.puts(file)
     end
   end
@@ -693,61 +509,6 @@ def download_files(files, local, remote)
   File.delete(tempfile)
 end
 
-# -------------------------------
-#  Keep track of server status.
-# -------------------------------
-
-# Class used to keep track of status of each server, and whether or not we are
-# willing to try to use it.  The current logic is: we start assuming it is
-# okay, if an upload fails we move on to the next file and try up to 5 files
-# if they all fail, we disable the server for 10 minutes, then try again.  If
-# any upload ever works it resets the counter.
-class ServerStatus
-  def initialize(name)
-    @name   = name   # server name for log
-    @fails  = 0      # number of times it's failed
-    @cycles = 0      # number of cycles until we try again
-    @alert  = false  # will log server is back up if true
-  end
-
-  # Call this to tell it that an upload worked.
-  def upload_worked
-    log("Server #{@name} is back up") if @alert
-    @fails  = 0
-    @cycles = 0
-    @alert  = false
-  end
-
-  # Call this to tell it that an upload failed.
-  def upload_failed
-    @fails += 1
-    log("Server #{@name} is down") if @fails == 5
-  end
-
-  # Call this to tell it that it failed to return a directory listing.
-  def listing_failed
-    @fails  = 5
-    @cycles = 0
-    log("Server #{@name} is down")
-  end
-
-  # Call this to determine if you should try to use the server.
-  def okay_to_upload?
-    status = false
-    if @fails < 5
-      status  = true
-    elsif @cycles >= 10
-      @fails  = 0
-      @cycles = 0
-      @alert  = true
-      status  = true
-    else
-      @cycles += 1
-    end
-    return status
-  end
-end
-
 # ----------------------------
 #  Main program.
 # ----------------------------
@@ -755,83 +516,28 @@ end
 # Turn on verbose messages.
 @@verbose = get_flag('-v') || get_flag('--verbose')
 
+# Tell it not to refresh listings (speeds things up for debugging.
+@@use_cache = get_flag('-u') || get_flag('--user_cache')
+
 # Let user override some of the defaults.
 @@root       = get_parm('-R') || get_parm('--root')       || ROOT
-@@pid_file   = get_parm('-F') || get_parm('--pid-file')   || "#{@@root}/#{PID_FILE}"
 @@log_file   = get_parm('-L') || get_parm('--log-file')   || "#{@@root}/#{LOG_FILE}"
 @@local_path = get_parm('-P') || get_parm('--local-path') || "#{@@root}/#{LOCAL_PATH}"
 
 case get_next_arg
-  when '-d', '--start'
-    delay = (is_next_arg_value? ? get_next_arg : DAEMON_DELAY).to_i
-    any_args_left?
-    if is_daemon_running? || start_daemon(delay)
-      exit 0
-    else
-      puts "Failed to start daemon.\n"
-      exit 1
-    end
-
-  when '-r', '--restart'
-    delay = (is_next_arg_value? ? get_next_arg : DAEMON_DELAY).to_i
-    any_args_left?
-    if is_daemon_running?
-      kill_daemon
-    end
-    if start_daemon(delay)
-      exit 0
-    else
-      puts "Failed to start daemon.\n"
-      exit 1
-    end
-
-  when '-k', '--stop'
-    any_args_left?
-    if is_daemon_running?
-      kill_daemon
-      exit 0
-    else
-      puts "Daemon is not running.\n"
-      exit 1
-    end
-
-  when '-p', '--prod'
-    # This isn't interrupting the sleep command in the main event loop.
-    # We'll need to have it wake up more often and check if it's been prodded?
-    puts "Prodding sleeping daemons is a bad idea."
-    exit 1
-    any_args_left?
-    if is_daemon_running?
-      prod_daemon
-      exit 0
-    else
-      puts "Daemon is not running.\n"
-      exit 1
-    end
-
-  when '-i', '--pid'
-    any_args_left?
-    if is_daemon_running?
-      puts daemon_pid
-      exit 0
-    else
-      puts "Daemon is not running.\n"
-      exit 1
-    end
-
   when '-l', '--ls'
     any_args_left?
-    files = refresh_listings
+    files = @@use_cache ? get_cached_listings : refresh_listings
     check_for_mismatches(files)
     exit 0
 
   when '-c', '--clean'
     any_args_left?
-    files = refresh_listings
-    uploads = check_for_mismatches(files, :clean)
 @@verbose = true
+    files = @@use_cache ? get_cached_listings(:cron) : refresh_listings(:cron)
+    uploads = check_for_mismatches(files, :cron)
     for server, files in uploads
-      upload_files(files, 'local', server)
+      upload_files(files, @@local_path, server)
     end
     exit 0
 
@@ -842,16 +548,16 @@ case get_next_arg
     do_download = true if get_flag('-D') || get_flag('--download')
     do_upload = do_download = true unless do_upload || do_download
 
-    do_thumb = true if get_flag('-T') || get_flag('--thumb')
-    do_320   = true if get_flag('-N') || get_flag('--320')
-    do_640   = true if get_flag('-N') || get_flag('--640')
-    do_960   = true if get_flag('-N') || get_flag('--960')
-    do_1280  = true if get_flag('-N') || get_flag('--1280')
-    do_orig  = true if get_flag('-O') || get_flag('--orig')
-    do_thumb = do_320 = do_640 = do_960 = do_1280 = do_orig = true \
-      unless do_thumb || do_320 || do_640 || do_960 || do_1280 || do_orig
-
-    use_cache = true if get_flag('--use_cache')
+    do_size = {}
+    for size in ALL_SIZES
+      flag = size.match(/^\d/) ? '-N' : ('-' + size[0,1].upcase)
+      do_size[size] = true if get_flag(flag) || get_flag("--#{size}")
+    end
+    if do_size.empty?
+      for size in ALL_SIZES
+        do_size[size] = true
+      end
+    end
 
     any_args_left?
 
@@ -862,12 +568,7 @@ case get_next_arg
       local = 'public/images'
     elsif File.directory?('images')
       local = 'images'
-    elsif File.directory?('thumb') ||
-          File.directory?('320')   ||
-          File.directory?('640')   ||
-          File.directory?('960')   ||
-          File.directory?('1280')  ||
-          File.directory?('orig')
+    elsif ALL_SIZES.any? {|x| File.directory?(x)}
       local = '.'
     else
       puts "I cannot find your local images directory.\n" +
@@ -878,33 +579,18 @@ case get_next_arg
     puts "Remote server: #{remote}\n"
 
     # Make sure subdirectories exist.
-    if do_thumb && !File.directory?("#{local}/thumb")
-      puts "Creating "#{local}/thumb\n"
-      Dir.mkdir("#{local}/thumb\n")
-    end
-    if do_320 && !File.directory?("#{local}/320")
-      puts "Creating "#{local}/320\n"
-      Dir.mkdir("#{local}/320\n")
-    end
-    if do_640 && !File.directory?("#{local}/640")
-      puts "Creating "#{local}/640\n"
-      Dir.mkdir("#{local}/640\n")
-    end
-    if do_960 && !File.directory?("#{local}/960")
-      puts "Creating "#{local}/960\n"
-      Dir.mkdir("#{local}/960\n")
-    end
-    if do_1280 && !File.directory?("#{local}/1280")
-      puts "Creating "#{local}/1280\n"
-      Dir.mkdir("#{local}/1280\n")
-    end
-    if do_orig && !File.directory?("#{local}/orig")
-      puts "Creating "#{local}/orig\n"
-      Dir.mkdir("#{local}/orig\n")
+    for size in ALL_SIZES
+      if do_size[size] && !File.directory?("#{local}/#{size}")
+        puts "Creating #{local}/#{size}\n"
+        Dir.mkdir("#{local}/#{size}\n")
+      end
     end
 
-    sync_command(local,remote, do_upload,do_download,
-      do_thumb,do_320,do_640,do_960,do_1280,do_orig, use_cache)
+    # Do sizes one at a time.
+    for size in (ALL_SIZES & do_size.keys)
+      sync_command(local,remote, do_upload,do_download, size)
+    end
+
     exit 0
 
 ################################################################################
@@ -916,10 +602,6 @@ USAGE
   script/update_images --<mode> [args...]
 
 MODES
-  -d --start [delay]    Start the daemon (if not already started).
-  -r --restart [delay]  Restart the daemon.
-  -k --stop             Kill the daemon.
-  -i --pid              Print the pid of the daemon (if running).
   -l --ls               Refresh the local list of images on the remote servers.
   -c --clean            Refresh the list and remove originals that are done.
   -s --sync [server]    Sync up the images at the given server.
@@ -928,60 +610,33 @@ MODES
 OPTIONS
   These can be used in any mode:
     -R --root <path>        Override rails root path.   /var/web/mo
-    -F --pid-file <path>    Override pid file.          $root/tmp/pids/$0.pid
     -L --log-file <path>    Override log file.          $root/log/$0.log
     -P --local-path <path>  Override local image path.  $root/public/images
     -v --verbose            Turn on verbose messages.
+    -u --use_cache          Use cached file lists.
 
   These can all be used in --sync mode:
     -U --upload            Only upload images to remote server.
     -D --download          Only download images from remote server.
     -T --thumb             Only update thumbnails.
-    -N --320               Only update small images.
-    -N --640               Only update normal images.
-    -N --960               Only update large images.
-    -N --1280              Only update huge images.
+    -N --320|640|960...    Only update normal images.
     -O --orig              Only update originals.
-       --use_cache         Just use cached file list (don't refresh).
 
 DESCRIPTION
-  This program is used to keep image servers in sync.  The primary mode is to
-  run as a daemon on the main webserver along side the rails instances.  But
-  it can also be run as a command-line utility from any machine.
-
-DAEMON MODE
-  It is started and monitored automatically by the monit daemon on the main
-  webserver.  When first started, it gets a directory of all the images present
-  locally, and it reads a list of files known to be present on the remote image
-  servers.
-
-  Every minute it wakes up and looks for new *original* images locally, and
-  checks if any local images are missing on the remote servers.  It tries to
-  upload a file 5 times before giving up on the server.  Once a server goes
-  down, it will wait 10 minutes before trying it again.
-
-  Every night at 3:00am a cronjob requests a full listing of images on the
-  remote image servers and caches the result (using the --clean mode).  It
-  ignores remote images that are a different size from local images.  (It
-  considers images of size 0 not to exist at all, on either side.)  At this
-  time it will delete all original images locally if they are confirmed present
-  on the remote servers.
-
-SYNC MODE
-  When run as a command-line utility, it first grabs a directory of all images
-  both locally and remotely.  If there are any size mismatches, it complains
-  and ignores those images until you can decide which is correct.  Then it
-  copies any images that are on one but not the other so that both machines
-  wind up with identical copies.
+  This program is used to keep image servers in sync.  It first grabs a
+  directory of all images both locally and remotely.  If there are any size
+  mismatches, it complains and ignores those images until you can decide which
+  is correct.  Then it copies any images that are on one but not the other so
+  that both machines wind up with identical copies. 
 
   By default it will update both local and remote servers, and it will do all
-  image types (thumbnails, normal-sized, and originals).  You can restrict it
-  to just upload or just download, and you can tell it only to do thumbnails,
-  originals, etc.
+  image sizes (thumbnails, normal-sized, etc.).  You can restrict it to just
+  upload or just download, and you can tell it only to do thumbnails,
+  originals, etc. 
 
-  Unlike the daemon, it copies all files of a given type in a single command,
-  running an instance of tar on both machines connected via pipes in ssh.  This
-  should be very efficient.
+  It copies all files of a given type in a single command, running an instance
+  of tar on both machines connected via pipes in ssh.  This should be very
+  efficient. 
 
 SSH PASSWORDS
   You must set up password-less ssh with each remote machine for this to work.
@@ -1006,21 +661,11 @@ FILES
   The defaults are:
 
     root        /var/web/mo
-    pid file    /var/web/mo/tmp/pids/update_images.pid
     file lists  /var/web/mo/public/images/dreamhost.files
     local path  /var/web/mo/public/images
     server      dreamhost
 
 EXAMPLES
-  update_images --start 60
-    Start daemon, telling it to check for new images every 60 seconds.
-
-  update_images --restart 300
-    Restart daemon, telling it to check for new images every 5 minutes.
-
-  update_images --stop
-    Stop daemon.
-
   update_images --ls
     Force daemon to refresh its list of images on the remote servers.
 
@@ -1031,15 +676,15 @@ EXAMPLES
     Run this on slicehost to force it to upload any images missing on
     dreamhost.
 
-  update_images --sync dreamhost --download --orig --local image_backup
+  update_images --root . --sync dreamhost --download --orig --local image_backup
     Run this on your local machine to update your backup copy of the original
     images in a directory called image_backup/orig.
 
-  update_images --sync dreamhost --download --thumb
+  update_images --root . --sync dreamhost --download --thumb
     Run this on your local machine to grab all the thumbnails for testing
     purposes.
 
-  update_images --sync dreamhost
+  update_images --root . --sync dreamhost
     Run this on a hypothetical second image server to sync them up: copy
     images missing on the second from the first, and vice versa.
 
@@ -1050,4 +695,3 @@ EOH
     puts "Invalid or missing mode.  Use -h or --help for list.\n"
     exit 1
 end
-

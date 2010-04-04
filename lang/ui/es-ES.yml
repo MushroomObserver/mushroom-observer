@@ -190,6 +190,10 @@ LONGITUDE: Longitud
 longitude: longitud
 LONGITUDES: Longitudes
 longitudes: longitudes
+MEMBER: Miembro
+member: miembro
+MEMBERS: Miembros
+members: miembros
 MESSAGE: Mensaje
 message: mensaje
 MESSAGES: Mensajes
@@ -715,6 +719,13 @@ log_observation_created: "[:log_object_created_by_user(type=:observation)]"
 log_observation_destroyed2: "[:log_object_destroyed_by_user_with_name(type=:observation)]"
 log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
 log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
+log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
+log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
+log_project_created: "[:log_object_created_by_user(type=:project)]"
+log_project_destroyed: "[:log_object_destroyed_by_user(type=:project)]"
+log_project_removed_admin: "[:log_object_removed_by_user_with_name(type=:admin)]"
+log_project_removed_member: "[:log_object_removed_by_user_with_name(type=:member)]"
+log_project_updated: "[:log_object_updated_by_user(type=:project)]"
 log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
 log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
 log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
@@ -1003,9 +1014,8 @@ runtime_create_naming_already_proposed: >
   Alguien ya ha propuesto ese nombre.  Si desea hacer comentarios sobre ello,
   intenta publicar un comentario en lugar.
 
-runtime_description_must_be_admin: >
-  Usted debe ser un administrador para una descripción para utilizar esa
-  página.
+runtime_description_already_default: >
+  ¡Esta descripción ya es la descripción predeterminada!
 
 runtime_description_foreign_read_wrong: >
   Las descripciones de otros servidores deberán ser legibles por el público en
@@ -1029,6 +1039,10 @@ runtime_description_merge_conflict: >
 runtime_description_merge_success: >
   Fusionaron con éxito las descripciones. La descripción de edad ha sido
   destruido: [old].
+
+runtime_description_must_be_admin: >
+  Usted debe ser un administrador para una descripción para utilizar esa
+  página.
 
 runtime_description_permissions_fixed: >
   Este tipo de descripción se ha fijado los permisos.

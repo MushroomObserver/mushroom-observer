@@ -8,7 +8,7 @@ rake db:migrate
 
 script/recalc_contributions
 script/refresh_name_lister_cache
-# script/fix_name_notes (working on this)
+script/fix_name_notes
 
 get sizes.txt
 get types.txt

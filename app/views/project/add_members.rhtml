@@ -2,7 +2,8 @@
   @title = :add_members_title.t(:title => @project.title)
 
   new_tab_set do
-    add_tab(:cancel_and_show.t(:type => :project), :action => 'show_project', :id => @project.id)
+    add_tab(:cancel_and_show.t(:type => :project), :action => 'show_project',
+            :id => @project.id, :params => query_params)
   end
 %>
 
@@ -18,8 +19,9 @@
     <%= user_link(user, "#{user.login}#{name}") %>:
   </span>
   <%= link_to(:add_members_change_status.t, :action => :change_member_status,
-              :id => @project.id, :candidate => user.id) %>
-  <%= link_to(:ADD.t, :action => :add_one_member,
-              :id => @project.id, :candidate => user.id) %>
+              :id => @project.id, :candidate => user.id,
+              :params => query_params) %>
+  <%= link_to(:ADD.t, :action => :add_members, :id => @project.id,
+              :candidate => user.id, :params => query_params) %>
   <br/>
 <% end %>

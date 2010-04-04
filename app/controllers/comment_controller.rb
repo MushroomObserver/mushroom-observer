@@ -1,15 +1,28 @@
 #
-#  Views: ("*" - login required)
-#     index_comment              List comments in current query.
-#     list_comments              List latest comments.
-#     show_comments_for_user     Show a comments *for* a user.
-#     show_comments_by_user      Show a comments *by* a user.
-#     show_comment               Show a single comment.
-#     prev_comment               Show a previous comment in index.
-#     next_comment               Show a next comment in index.
-#   * add_comment                Create a comment.
-#   * edit_comment               Edit a comment.
-#   * destroy_comment            Destroy comment.
+#  = Comment Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
+#  ==== Searches and Indexes
+#  list_comments::           . V .
+#  show_comments_for_user::  . . .
+#  show_comments_by_user::   . . .
+#  comment_search::          . . .
+#  index_comment::           . . .
+#  show_selected_comments::  (helper)
+#
+#  ==== Show, Create and Edit
+#  show_comment::            . V P
+#  next_comment::            . . .
+#  prev_comment::            . . .
+#  add_comment::             L V P
+#  edit_comment::            L V P
+#  destroy_comment::         L . .
+#  allowed_to_see!::         (helper)
 #
 ################################################################################
 
@@ -51,7 +64,7 @@ class CommentController < ApplicationController
   end
 
   # Shows comments for a given user, most recent first.  (Linked from left
-  # panel.) 
+  # panel.)
   def show_comments_for_user
     query = create_query(:Comment, :for_user, :user => params[:id] || @user)
     show_selected_comments(query)
@@ -82,14 +95,14 @@ class CommentController < ApplicationController
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
     args = { :action => :list_comments, :num_per_page => 24,
-             :include => [:user, :object] }.merge(args)
+             :include => [:object, :user] }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
       # ['summary',  :sort_by_summary.t],
       ['user',     :sort_by_user.t],
-      ['created',  :sort_by_posted.t], 
-      ['modified', :sort_by_modified.t], 
+      ['created',  :sort_by_posted.t],
+      ['modified', :sort_by_modified.t],
     ]
 
     # Paginate by letter if sorting by user.
@@ -107,19 +120,18 @@ class CommentController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Show and Post Comments
+  #  :section: Show, Create and Edit
   #
   ##############################################################################
 
   # Display comment by itself.
-  # Linked from: show_observation, list_comments
+  # Linked from: show_<object>, list_comments
   # Inputs: params[:id] (comment)
   # Outputs: @comment, @object
   def show_comment
     store_location
     pass_query_params
-    @comment = Comment.find(params[:id],
-                            :include => [:user, {:object => :name}])
+    @comment = Comment.find(params[:id], :include => [:object, :user])
     @object = @comment.object
     allowed_to_see!(@object)
   end
@@ -149,34 +161,29 @@ class CommentController < ApplicationController
   def add_comment
     pass_query_params
     @object = Comment.find_object(params[:type], params[:id])
-    allowed_to_see!(@object)
-    if request.method == :get
+    if !allowed_to_see!(@object)
+      # redirected already
+    elsif request.method == :get
       @comment = Comment.new
       @comment.object = @object
     else
       @comment = Comment.new(params[:comment])
-      @comment.created  = now = Time.now
-      @comment.modified = now
-      @comment.user     = @user
-      @comment.object   = @object
-      if @comment.save
-        type = @object.class.to_s.underscore.to_sym
+      @comment.object = @object
+      if !@comment.save
+        flash_object_errors(@comment)
+      else
+        type = @object.class.name.underscore.to_sym
         Transaction.post_comment(
           :id      => @comment,
           type     => @object,
           :summary => @comment.summary,
           :content => @comment.comment
         )
-        if @object.respond_to?(:log)
-          @object.log(:log_comment_added, :summary => @comment.summary)
-        end
-        flash_notice :runtime_form_comments_create_success.t(:id => @comment.id)
-        params = @comment.object_type == 'Observation' ? query_params : nil
+        @comment.log_create
+        flash_notice(:runtime_form_comments_create_success.t(:id => @comment.id))
         redirect_to(:controller => @object.show_controller,
-          :action => @object.show_action, :id => @object.id,
-          :params => params)
-      else
-        flash_object_errors(@comment)
+                    :action => @object.show_action, :id => @object.id,
+                    :params => query_params)
       end
     end
   end
@@ -196,28 +203,30 @@ class CommentController < ApplicationController
     pass_query_params
     @comment = Comment.find(params[:id])
     @object = @comment.object
-    allowed_to_see!(@object)
-    if !check_permission!(@comment.user_id)
+    if !allowed_to_see!(@object)
+      # redirected already
+    elsif !check_permission!(@comment.user_id)
       redirect_to(:controller => @object.show_controller,
                   :action => @object.show_action, :id => @object.id,
                   :params => query_params)
     elsif request.method == :post
       @comment.attributes = params[:comment]
-      args = {}
-      args[:summary] = @comment.summary if @comment.summary_changed?
-      args[:content] = @comment.comment if @comment.comment_changed?
-      if !@comment.save
+      xargs = {}
+      xargs[:summary] = @comment.summary if @comment.summary_changed?
+      xargs[:content] = @comment.comment if @comment.comment_changed?
+      if xargs.empty?
+        flash_notice(:runtime_no_changes.t)
+        done = true
+      elsif !@comment.save
         flash_object_errors(@comment)
       else
-        if !args.empty?
-          args[:id] = @comment
-          Transaction.put_comment(args)
-        end
-        if @object.respond_to?(:log)
-          @object.log(:log_comment_updated, :summary => @comment.summary,
-                      :touch => false)
-        end
+        xargs[:id] = @comment
+        Transaction.put_comment(xargs)
+        @comment.log_update
         flash_notice(:runtime_form_comments_edit_success.t(:id => @comment.id))
+        done = true
+      end
+      if done
         redirect_to(:controller => @object.show_controller,
                     :action => @object.show_action, :id => @object.id,
                     :params => query_params)
@@ -235,24 +244,21 @@ class CommentController < ApplicationController
     @comment = Comment.find(params[:id])
     @object = @comment.object
     if !check_permission!(@comment.user_id)
-      redirect_to(:controller => @object.show_controller,
-                  :action => @object.show_action, :id => @object.id,
-                  :params => query_params)
+      # all cases redirect to object show page
+    elsif !@comment.destroy
+      flash_error(:runtime_form_comments_destroy_failed.t(:id => params[:id]))
     else
-      if @comment.destroy
-        Transaction.delete_comment(:id => @comment)
-        flash_notice :runtime_form_comments_destroy_success.t(:id => params[:id])
-      else
-        flash_error :runtime_form_comments_destroy_failed.t(:id => params[:id])
-      end
-      redirect_to(:controller => @object.show_controller,
-                  :action => @object.show_action, :id => @object.id,
-                  :params => query_params)
+      Transaction.delete_comment(:id => @comment)
+      @comment.log_destroy
+      flash_notice(:runtime_form_comments_destroy_success.t(:id => params[:id]))
     end
+    redirect_to(:controller => @object.show_controller,
+                :action => @object.show_action, :id => @object.id,
+                :params => query_params)
   end
 
   # Make sure users can't see/add comments on objects they aren't allowed to
-  # view!
+  # view!  Redirect and return +false+ if they can't, else return +true+.
   def allowed_to_see!(object)
     if object.respond_to?(:is_reader?) and
        !object.is_reader?(@user)
@@ -260,6 +266,9 @@ class CommentController < ApplicationController
       parent = object.parent
       redirect_to(:controller => parent.show_controller,
                   :action => parent.show_action, :id => parent.id)
+      return false
+    else
+      return true
     end
   end
 end

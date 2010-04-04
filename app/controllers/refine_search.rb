@@ -1,3 +1,10 @@
+#
+#  = Refine Search
+#
+#  Controller mix-in used by ObserverController for observer/refine_search.
+#
+################################################################################
+
 module RefineSearch
 
   ################################################################################

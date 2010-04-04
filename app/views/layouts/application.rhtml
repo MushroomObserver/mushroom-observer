@@ -159,8 +159,9 @@
                   [ :LOCATIONS.l, :location ],
                   [ :SPECIES_LISTS.l, :species_list ],
                   [ :COMMENTS.l, :comment ],
+                  [ :USERS.l, :user ],
+                  [ :PROJECTS.l, :project ],
                 ]
-                options << [ :USERS.l, :user ] if true
                 select(:search, :type, options,
                        :selected => session[:search_type] || :observation) %>
                 <%= submit_tag :app_search.l %>&nbsp;&nbsp;

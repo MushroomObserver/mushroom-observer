@@ -11,11 +11,9 @@
   end
 %>
 
-<% form_tag({ :action => 'remove_images', :id => @observation.id,
-            :params => query_params }, :multipart => true) do %>
+<% form_tag(:action => 'remove_images', :id => @observation.id,
+            :params => query_params) do %>
   <br/><center><%= submit_tag(:image_remove_remove.l) %></center><br/>
-
-  <%= hidden_field("observation", "id") %>
 
   <table>
     <% for image in @observation.images %>

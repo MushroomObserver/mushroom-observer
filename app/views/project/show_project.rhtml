@@ -20,6 +20,7 @@
   end
 
   draw_prev_next_tabs(@project)
+  draw_interest_icons(@project)
 %>
 
 <table cellpadding="10" width="100%">
@@ -33,17 +34,25 @@
       <%= sanitize(:show_project_summary.l + ': ' + @project.summary.to_s).tpl %>
 
       <% if @user and @project.user_group.users.member?(@user) %>
-        <%= render(:partial => 'show_groups', :locals => { :project => @project, :user => @user }) %>
+        <%= render(:partial => 'show_groups', :locals => { :project => @project,
+                   :user => @user }) %>
       <% end %>
     </td>
     <% if @draft_data %>
       <td valign="top" width="50%">
         <%= :show_project_drafts.t %>:<br/>
         <% for datum in @draft_data %>
-          <%= indent + link_to(datum['display_name'].t, :action => "show_draft", :id => datum['id']) %>
+          <%= indent + link_to(datum['display_name'].t, :action => "show_draft",
+                               :id => datum['id'], :params => query_params) %>
           (<%= user_link(User.find(datum['user_id'])) %>)<br/>
         <% end %>
       </td>
     <% end %>
   </tr>
 </table>
+
+<%= render(:partial => 'comment/show_comments', :locals => 
+           { :object => @project, :controls => true, :limit => nil }) %>
+<br/>
+
+<%= show_object_footer(@project) %>

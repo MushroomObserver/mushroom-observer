@@ -54,10 +54,11 @@ class UserGroup < AbstractModel
     @@all_users ||= find_by_name('all users')
   end
 
-  # Return the meta-group that contains just the given users.
+  # Return the meta-group that contains just the given users.  Takes id or User.
   def self.one_user(user)
+    user_id = user.is_a?(User) ? user.id.to_i : user.to_i
     @@one_users ||= {}
-    @@one_users[user.id] ||= find_by_name("user #{user.id}")
+    @@one_users[user_id] ||= find_by_name("user #{user_id}")
   end
 
   # Return the meta-group that contains all users.

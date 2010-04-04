@@ -1,7 +1,14 @@
 #
-#  Views: ("*" - login required)
-#   * list_interests    Show objects user has expressed interest in.
-#   * set_interest      Callback to change interest state.
+#  = Interest Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
+#  list_interests::   L V .
+#  set_interest::     L V .
 #
 ################################################################################
 
@@ -67,7 +74,6 @@ class InterestController < ApplicationController
           elsif !interest.destroy
             flash_notice(:set_interest_failure.l(:name => name))
           else
-            Transaction.delete_interest(:id => interest)
             if interest.state
               flash_notice(:set_interest_success_was_on.l(:name => name))
             else
@@ -84,10 +90,6 @@ class InterestController < ApplicationController
           if !interest.save
             flash_notice(:set_interest_failure.l(:name => object.unique_text_name))
           else
-            Transaction.put_interest(
-              :id    => interest,
-              :state => state
-            )
             if state > 0
               flash_notice(:set_interest_success_on.l(:name => object.unique_text_name))
             else

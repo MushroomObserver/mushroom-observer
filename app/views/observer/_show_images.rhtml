@@ -8,8 +8,8 @@
                 :action => 'add_image', :id => @observation.id,
                 :params => query_params) %><br/>
     <%= link_to(:show_observation_reuse_image.t, :controller => 'image',
-                :action => 'reuse_image', :id => @observation.id,
-                :params => query_params) %><br/>
+                :action => 'reuse_image', :obs_id => @observation.id,
+                :mode => 'observation', :params => query_params) %><br/>
     <% if @observation.images.length > 0 %>
       <%= link_to(:show_observation_remove_images.t, :controller => 'image',
                   :action => 'remove_images', :id => @observation.id,

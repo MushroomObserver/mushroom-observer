@@ -188,6 +188,10 @@ LONGITUDE: Longitude
 longitude: longitude
 LONGITUDES: Longitudes
 longitudes: longitudes
+MEMBER: Member
+member: member
+MEMBERS: Members
+members: members
 MESSAGE: Message
 message: message
 MESSAGES: Messages
@@ -713,6 +717,13 @@ log_observation_created: "[:log_object_created_by_user(type=:observation)]"
 log_observation_destroyed2: "[:log_object_destroyed_by_user_with_name(type=:observation)]"
 log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
 log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
+log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
+log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
+log_project_created: "[:log_object_created_by_user(type=:project)]"
+log_project_destroyed: "[:log_object_destroyed_by_user(type=:project)]"
+log_project_removed_admin: "[:log_object_removed_by_user_with_name(type=:admin)]"
+log_project_removed_member: "[:log_object_removed_by_user_with_name(type=:member)]"
+log_project_updated: "[:log_object_updated_by_user(type=:project)]"
 log_species_list_created: "[:log_object_created_by_user(type=:species_list)]"
 log_species_list_destroyed: "[:log_object_destroyed_by_user(type=:species_list)]"
 log_species_list_updated: "[:log_object_updated_by_user(type=:species_list)]"
@@ -1001,8 +1012,8 @@ runtime_create_naming_already_proposed: >
   Someone has already proposed that name.  If you would like to comment on it,
   try posting a comment instead.
 
-runtime_description_must_be_admin: >
-  You must be an admin for a description to use this feature.
+runtime_description_already_default: >
+  This description is already the default description!
 
 runtime_description_foreign_read_wrong: >
   Descriptions from other servers must be readable by the general public.
@@ -1024,6 +1035,9 @@ runtime_description_merge_conflict: >
 runtime_description_merge_success: >
   Successfully merged the descriptions.  The old description has been
   destroyed: [old].
+
+runtime_description_must_be_admin: >
+  You must be an admin for a description to use this feature.
 
 runtime_description_permissions_fixed: >
   This type of description has fixed permissions.

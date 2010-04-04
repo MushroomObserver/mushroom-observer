@@ -18,6 +18,7 @@
 #
 #  ==== User authentication
 #  autologin::              (filter: determine which user is logged in)
+#  login_for_ajax::         (filter: minimal version of autologin for ajax)
 #  check_permission::       Make sure current User is the right one.
 #  check_permission!::      Same, but flashes "denied" message, too.
 #  is_reviewer?::           Is the current User a reviewer?
@@ -68,11 +69,12 @@
 #  find_or_create_query::   Find appropriate Query or create as necessary.
 #  create_query::           Create a new Query from scratch.
 #  redirect_to_next_object:: Find next object from a Query and redirect to its show page.
+#
+#  ==== Indexes
 #  show_index_of_objects::  Show paginated set of Query results as a list.
+#  add_sorting_links::      Create sorting links for index pages.
 #  find_or_goto_index::     Look up object by id, displaying error and redirecting on failure.
 #  goto_index::             Redirect to a reasonable fallback (index) page in case of error.
-#
-#  ==== Pagination
 #  paginate_letters::       Paginate an Array by letter.
 #  paginate_numbers::       Paginate an Array normally.
 #
@@ -82,9 +84,10 @@
 #  count_objects::          (does... nothing??!!... for every Object that currently exists)
 #
 #  ==== Other stuff
-#  disable_link_prefetching:: Filter: prevents prefetching of destroy methods.
+#  disable_link_prefetching:: (filter: prevents prefetching of destroy methods)
 #  update_view_stats::      Called after each show_object request.
 #  calc_layout_params::     Gather User's list layout preferences.
+#  catch_errors             (filter: catches errors for integration tests)
 #
 ################################################################################
 
@@ -387,12 +390,8 @@ class ApplicationController < ActionController::Base
 
     # Update user preference.
     if @user && @user.locale.to_s != Locale.code.to_s
-      @user.locale = Locale.code.to_s
-      @user.save
-      Transaction.put_user(
-        :id         => @user,
-        :set_locale => Locale.code.to_s
-      )
+      @user.update_attributes(:locale => Locale.code.to_s)
+      Transaction.put_user(:id => @user, :set_locale => Locale.code.to_s)
     end
 
     logger.debug "[globalite] Locale set to #{Locale.code}"
@@ -826,27 +825,27 @@ class ApplicationController < ActionController::Base
     xargs = { :id => name }
     if name.new_record?
       for arg in changed_args
-        arg2 = arg.to_s.sub(/_id$/,'').to_sym
-        xargs[arg2] = name.send(arg)
+        xargs[arg] = name.send(arg)
       end
       xargs[:method] = :post
     else
       for arg in changed_args
-        arg2 = arg.to_s.sub(/_id$/,'').to_sym
-        xargs["set_#{arg2}"] = name.send(arg)
+        xargs[:"set_#{arg}"] = name.send(arg)
       end
       xargs[:method] = :put
     end
 
     # Save any changes.
-    args = { :touch => name.altered? }.merge(args)
-    name.log(log, args) if name.changed?
-    if name.save
-      Transaction.create(xargs)
-      result = true
-    else
-      flash_object_errors(name)
-      result = false
+    if name.changed?
+      args = { :touch => name.altered? }.merge(args)
+      name.log(log, args)
+      if name.save
+        Transaction.create(xargs)
+        result = true
+      else
+        flash_object_errors(name)
+        result = false
+      end
     end
 
     return result
@@ -1045,36 +1044,11 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Create sorting links for index pages, "graying-out" the current order.
-  def add_sorting_links(query, links, link_all=false)
-    results = []
-    this_by = query.params[:by] || query.default_order
-    this_by = this_by.to_s.sub(/^reverse_/, '')
-
-    for by, label in links
-      str = label.t
-      if !link_all and (by.to_s == this_by)
-        results << str
-      else
-        results << [str, { :controller => query.model.show_controller,
-                           :action => query.model.index_action,
-                           :by => by, :params => query_params }]
-      end
-    end
-
-    # Add a "reverse" button.
-    str = :sort_by_reverse.t
-    if query.params[:by].to_s.match(/^reverse_/)
-      reverse_by = this_by
-    else
-      reverse_by = "reverse_#{this_by}"
-    end
-    results << [str, { :controller => query.model.show_controller,
-                       :action => query.model.index_action,
-                       :by => reverse_by, :params => query_params }]
-
-    return results
-  end
+  ##############################################################################
+  #
+  #  :section: Indexes
+  #
+  ##############################################################################
 
   # Render an index or set of search results as a list or matrix. Arguments:
   # query::     Query instance describing search/index.
@@ -1192,6 +1166,37 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Create sorting links for index pages, "graying-out" the current order.
+  def add_sorting_links(query, links, link_all=false)
+    results = []
+    this_by = query.params[:by] || query.default_order
+    this_by = this_by.to_s.sub(/^reverse_/, '')
+
+    for by, label in links
+      str = label.t
+      if !link_all and (by.to_s == this_by)
+        results << str
+      else
+        results << [str, { :controller => query.model.show_controller,
+                           :action => query.model.index_action,
+                           :by => by, :params => query_params }]
+      end
+    end
+
+    # Add a "reverse" button.
+    str = :sort_by_reverse.t
+    if query.params[:by].to_s.match(/^reverse_/)
+      reverse_by = this_by
+    else
+      reverse_by = "reverse_#{this_by}"
+    end
+    results << [str, { :controller => query.model.show_controller,
+                       :action => query.model.index_action,
+                       :by => reverse_by, :params => query_params }]
+
+    return results
+  end
+
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id, redirect=nil)
@@ -1230,12 +1235,6 @@ class ApplicationController < ActionController::Base
     redirect_to(:controller => model.show_controller,
                 :action => model.index_action, :params => query_params)
   end
-
-  ##############################################################################
-  #
-  #  :section: Pagination
-  #
-  ##############################################################################
 
   # Initialize Paginator object.  This now does very little thanks to the new
   # Query model.

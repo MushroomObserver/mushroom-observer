@@ -22,15 +22,15 @@
 #
 #  == Class methods
 #
-#  text_name::              Alias for +display_name+ for debugging.
 #  current_names_and_ids::  List non-deprecated License names/ids.
 #
 #  == Instance methods
 #
-#  images::     Array of Image's that use this License.
-#  users::      Array of User's for whom this is the default License.
-#  names::      Array of Name's that use this License.
-#  text_name::  Alias for +display_name+ for debugging.
+#  images::                 Array of Image's that use this License.
+#  users::                  Array of User's for whom this is the default License.
+#  location_descriptions::  Array of Name's that use this License.
+#  name_descriptions::      Array of Name's that use this License.
+#  text_name::              Alias for +display_name+ for debugging.
 #
 #  == Callbacks
 #
@@ -40,9 +40,9 @@
 
 class License < AbstractModel
   has_many :images
+  has_many :location_descriptions
+  has_many :name_descriptions
   has_many :users
-  has_many :names
-  has_many :draft_names
 
   # Various debugging things require all models respond to text_name.  Just
   # returns +display_name+.

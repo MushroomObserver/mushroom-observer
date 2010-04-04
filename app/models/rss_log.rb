@@ -17,7 +17,50 @@
 #  * Location
 #  * Name
 #  * Observation
+#  * Project
 #  * SpeciesList
+#
+#  == Adding RssLog to Model
+#
+#  I think this is relatively easy.  Try following these steps:
+#
+#  1) Add columns to rss_logs and new model tables via migration:
+#
+#       class AddRssLogToModel < ActiveRecord::Migration
+#         def self.up
+#           add_column(:rss_logs, :model_id, :integer)
+#           add_column(:models, :rss_log_id, :integer)
+#         end
+#         def self.down
+#           remove_column(:rss_logs, :model_id)
+#           remove_column(:models, :rss_log_id)
+#         end
+#       end
+#
+#  2) Inform model of the new association: (automatically inherits +log+ 
+#     method from AbstractModel)
+#
+#       belongs_to :rss_log
+#
+#  3) Inform RssLog of the new association:
+#
+#       (just search for "location" in this file)
+#
+#  4) Add partial view for +list_rss_logs+:
+#
+#       (just clone, e.g., app/views/observer/_location.rhtml)
+#
+#  5) Add "show log" link at bottom of model's show page:
+#
+#       <%= show_object_footer(@object) %>
+#
+#  6) Add +by_rss_log+ flavor to Query for your model:
+#
+#       self.allowed_model_flavors = {
+#         :Model => [
+#           :by_rss_log, # Models with RSS logs, in RSS order.
+#         ]
+#       }
 #
 #  == Usage
 #
@@ -67,6 +110,7 @@
 #  location::           Owning Location (or nil).
 #  name::               Owning Name (or nil).
 #  observation::        Owning Observation (or nil).
+#  project::            Owning Project (or nil).
 #  species_list::       Owning SpeciesList (or nil).
 #
 #  == Class methods
@@ -96,16 +140,17 @@ class RssLog < AbstractModel
   belongs_to :location
   belongs_to :name
   belongs_to :observation
+  belongs_to :project
   belongs_to :species_list
 
   # List of all object types that can have RssLog's.
   def self.all_types
-    ['observation', 'name', 'location', 'species_list']
+    ['observation', 'name', 'location', 'project', 'species_list']
   end
 
   # Returns the associated object, or nil if it's an orphan.
   def object
-    location || name || observation || species_list
+    location || name || observation || project || species_list
   end
 
   # Handy for prev/next handler.  Any object that responds to rss_log has an
@@ -169,6 +214,8 @@ class RssLog < AbstractModel
       result = sprintf("/name/show_name/%d?time=%d", name_id, self.modified.tv_sec)
     elsif observation_id
       result = sprintf("/observer/show_observation/%d?time=%d", observation_id, self.modified.tv_sec)
+    elsif project_id
+      result = sprintf("/project/show_project/%d?time=%d", project_id, self.modified.tv_sec)
     elsif species_list_id
       result = sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.modified.tv_sec)
     else
@@ -226,6 +273,7 @@ class RssLog < AbstractModel
     self.location     = nil
     self.name         = nil
     self.observation  = nil
+    self.project      = nil
     self.species_list = nil
     self.save_without_our_callbacks
   end

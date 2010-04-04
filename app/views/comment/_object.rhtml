@@ -1,8 +1,10 @@
 <%= case object.class.name
 
-  when 'Observation'
-    render(:partial => 'observer/show_observation',
-           :locals => { :observation => object })
+  when 'Location'
+    render(:partial => 'location/location', :object => object)
+
+  when 'LocationDescription'
+    render(:partial => 'location/location_description', :object => object)
 
   when 'Name'
     str = render(:partial => 'name/name', :object => object, :locals =>
@@ -17,11 +19,12 @@
     render(:partial => 'name/name_description', :object => object,
            :locals => { :review => false })
 
-  when 'Location'
-    render(:partial => 'location/location', :object => object)
+  when 'Observation'
+    render(:partial => 'observer/show_observation',
+           :locals => { :observation => object })
 
-  when 'LocationDescription'
-    render(:partial => 'location/location_description', :object => object)
+  when 'Project'
+    render(:partial => 'project/project', :object => object)
 
   else
     raise("We appear to have forgotten to tell add/edit_comment " +

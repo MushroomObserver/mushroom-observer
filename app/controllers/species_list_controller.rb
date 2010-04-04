@@ -1,4 +1,12 @@
 #
+#  = Species List Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
 #  Views: ("*" - login required)
 #     index_species_list                     List of lists in current query.
 #     list_species_lists                     List of lists by date.

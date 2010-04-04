@@ -1,4 +1,12 @@
 #
+#  = Main Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
 #  Views: ("*" - login required; "R" - root only)
 #     list_rss_logs = index
 #     index_rss_log
@@ -358,6 +366,7 @@ class ObserverController < ApplicationController
   #   name/name_search
   #   observer/observation_search
   #   observer/user_search
+  #   project/project_search
   #   species_list/species_list_search
   def pattern_search
     pattern = params[:search][:pattern].to_s.strip_squeeze rescue nil
@@ -369,18 +378,18 @@ class ObserverController < ApplicationController
 
     case type
     when :observation, :user
-      ctrl = 'observer'
-    when :comment, :image, :location, :name, :species_list
-      ctrl = type
+      ctrlr = 'observer'
+    when :comment, :image, :location, :name, :project, :species_list
+      ctrlr = type
     else
       raise "Invalid search type: #{type.inspect}"
     end
 
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
-      redirect_to(:controller => ctrl, :action => "list_#{type}s")
+      redirect_to(:controller => ctrlr, :action => "list_#{type}s")
     else
-      redirect_to(:controller => ctrl, :action => "#{type}_search",
+      redirect_to(:controller => ctrlr, :action => "#{type}_search",
                   :pattern => pattern)
     end
   end
@@ -1646,7 +1655,7 @@ class ObserverController < ApplicationController
     else
       query = find_or_create_query(:RssLog)
     end
-    show_selected_rss_logs(query, :id => params[:id])
+    show_selected_rss_logs(query, :id => params[:id], :always_index => true)
   end
 
   # Show selected search results as a matrix with 'list_rss_logs' template.
@@ -2057,8 +2066,10 @@ class ObserverController < ApplicationController
   def attach_good_images(observation, images)
     if images
       for image in images
-        # This only adds it if it's not already there.
-        observation.add_image_with_log(image, @user)
+        if !observation.image_ids.include?(image.id)
+          observation.add_image(image)
+          observation.log_create_image(image)
+        end
       end
     end
   end
@@ -2247,5 +2258,4 @@ class ObserverController < ApplicationController
   action_has_moved 'image', 'test_upload_image'
   action_has_moved 'image', 'test_add_image'
   action_has_moved 'image', 'test_add_image_report'
-  action_has_moved 'image', 'resize_images'
 end

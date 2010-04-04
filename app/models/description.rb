@@ -29,7 +29,6 @@
 #  all_notes::            Return all the notes fields via a Hash.
 #  all_notes=::           Change all the notes fields via a Hash.
 #  note_status::          Return some basic stats on notes fields.
-#  merge::                Merge descriptive text of two Description's.
 #
 #  ==== Source Info
 #  source_type::          Category of source, e.g. :public, :project, :user.
@@ -225,45 +224,6 @@ class Description < AbstractModel
       end
     end
     [fieldCount, sizeCount]
-  end
-
-  ##############################################################################
-  #
-  #  :section: Merging
-  #
-  ##############################################################################
-
-  # Attempt to merge another description into this one, deleting the old one
-  # if successful.  It will only do so if there is no conflict on any of the
-  # description fields, i.e. one or the other is blank for any given field.
-  def merge(src, delete_after=true)
-    dest = self
-    src_notes  = src.all_notes
-    dest_notes = dest.all_notes
-
-    # Mergeable if there are no fields which are non-blank in both descriptions.
-    if self.class.all_note_fields.none? \
-         {|f| !src_notes[f].blank? and !dest_notes[f].blank?}
-
-      # Copy over all non-blank descriptive fields.
-      for f, val in src_notes
-        dest.send("#{f}=", val) if !val.blank?
-      end
-
-      # Store where merge came from in new version of destination.
-      dest.merge_source_id = src.versions.latest.id
-      dest.save
-
-      # Copy over authors and editors.
-      src.authors.each {|user| dest.add_author(user)}
-      src.editors.each {|user| dest.add_editors(user)}
-
-      # Destroy old description if requested.
-      src.destroy if delete_after
-      result = true
-    else
-      result = false
-    end
   end
 
   ################################################################################

@@ -1105,12 +1105,12 @@ class Name < AbstractModel
       note.save
     end
 
-    # Merge the two "main" descriptions if it can.
-    if self.description and old_name.description and
-       (self.description.source_type == :public) and
-       (old_name.description.source_type == :public)
-      self.description.merge(old_name.description)
-    end
+#     # Merge the two "main" descriptions if it can.
+#     if self.description and old_name.description and
+#        (self.description.source_type == :public) and
+#        (old_name.description.source_type == :public)
+#       self.description.merge(old_name.description, true)
+#     end
 
     # If this one doesn't have a primary description and the other does,
     # then make it this one's.

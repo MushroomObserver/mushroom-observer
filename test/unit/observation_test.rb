@@ -68,16 +68,16 @@ class ObservationTest < UnitTestCase
     assert_equal(observations(:detailed_unknown).id, obs[1].id)
   end
 
-  def test_remove_image_by_id_twice
+  def test_remove_image_twice
     observations(:minimal_unknown).images = [
       images(:commercial_inquiry_image),
       images(:disconnected_coprinus_comatus_image),
       images(:connected_coprinus_comatus_image)
     ]
     observations(:minimal_unknown).thumb_image = images(:commercial_inquiry_image)
-    observations(:minimal_unknown).remove_image_by_id(images(:commercial_inquiry_image).id)
+    observations(:minimal_unknown).remove_image(images(:commercial_inquiry_image))
     assert_equal(observations(:minimal_unknown).thumb_image, images(:disconnected_coprinus_comatus_image))
-    observations(:minimal_unknown).remove_image_by_id(images(:disconnected_coprinus_comatus_image).id)
+    observations(:minimal_unknown).remove_image(images(:disconnected_coprinus_comatus_image))
     assert_equal(observations(:minimal_unknown).thumb_image, images(:connected_coprinus_comatus_image))
   end
 
@@ -348,9 +348,9 @@ class ObservationTest < UnitTestCase
     assert_equal(4, QueuedEmail.count)
 
     # Same deal with adding and removing images.
-    obs.add_image_by_id(images(:disconnected_coprinus_comatus_image).id)
+    obs.add_image(images(:disconnected_coprinus_comatus_image))
     assert_equal(4, QueuedEmail.count)
-    obs.remove_image_by_id(images(:disconnected_coprinus_comatus_image).id)
+    obs.remove_image(images(:disconnected_coprinus_comatus_image))
     assert_equal(4, QueuedEmail.count)
 
     # All the above modify this email:
@@ -410,7 +410,7 @@ class ObservationTest < UnitTestCase
     assert_save(dicks_interest)
 
     User.current = @rolf
-    obs.reload.add_image_by_id(images(:disconnected_coprinus_comatus_image).id)
+    obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
     assert_equal(2, QueuedEmail.count)
     assert_email(1,
       :flavor      => 'QueuedEmail::ObservationChange',

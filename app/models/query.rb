@@ -198,7 +198,9 @@ class Query < AbstractQuery
     ],
     :Project => [
       :all,                   # All projects, by title.
+      :by_rss_log,            # Projects with RSS logs, in RSS order.
       :in_set,                # Projects in a given set.
+      :pattern_search,        # Projects matching a pattern, by title.
     ],
     :RssLog => [
       :all,                   # All RSS logs, most recent activity first.
@@ -228,6 +230,7 @@ class Query < AbstractQuery
       :name_descriptions => :object,
       :names         => :object,
       :observations  => :object,
+      :projects      => :object,
       :users         => :user_id,
     },
     :images => {
@@ -444,7 +447,7 @@ class Query < AbstractQuery
     old_flavor = self.flavor
     new_model  = new_model.to_s.to_sym
 
-    # Going from list_rss_logs to showing observation, name, or species list.
+    # Going from list_rss_logs to showing observation, name, etc.
     if (old_model  == :RssLog) and
        (old_flavor == :all) and
        (new_model.to_s.constantize.reflect_on_association(:rss_log) rescue false)
@@ -1075,6 +1078,10 @@ class Query < AbstractQuery
         self.where += google_conditions(search,
           'CONCAT(names.search_name,observations.notes,' +
           'IF(locations.id,locations.search_name,observations.where))')
+
+      when :Project
+        self.where += google_conditions(search,
+          'CONCAT(projects.title,projects.summary)')
 
       when :SpeciesList
         self.join << :locations!

@@ -1,7 +1,9 @@
 #
 #  = Extensions to ActiveRecord::Base
 #
-#  == Class Methods
+#  == Methods
+#
+#  type_tag::           Language tag, e.g., :observation, :rss_log, etc.
 #
 #  ==== Extensions to "find"
 #  find::               Extend <tt>find(id)</tt> to look up by id _or_ sync_id.
@@ -15,8 +17,7 @@
 #  ==== Report "show" action for object/model
 #  show_controller::    These two return the controller and action of the main.
 #  show_action::        Page used to display this object.
-#
-#  == Instance Methods
+#  index_action::       Page used to display index of these objects.
 #
 #  ==== Callbacks
 #  before_create::      Do several things before creating a new record.
@@ -50,6 +51,16 @@
 
 class AbstractModel < ActiveRecord::Base
   self.abstract_class = true
+
+  # Language tag for name, e.g. :observation, :rss_log, etc.
+  def self.type_tag
+    self.name.underscore.to_sym
+  end
+
+  # Language tag for name, e.g. :observation, :rss_log, etc.
+  def type_tag
+    self.class.name.underscore.to_sym
+  end
 
   ##############################################################################
   #

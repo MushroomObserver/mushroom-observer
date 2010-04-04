@@ -1,43 +1,59 @@
 #
-#  Views: ("*" - login required, "**" - special permission required)
-#     index_project              Projects in current query.
-#     list_projects              Project alphabetically.
-#     show_project               Show a single project.
-#     prev_project               Show previous project in index.
-#     next_project               Show next project in index.
-#   * add_project                Create a project.
-#   * edit_project               Edit a project.
-#   * destroy_project            Destroy project.
-#     admin_request              Compose email to the project admins
-#     send_admin_request         Send email to the project admins
-#  ** change_member_status       Adjust the member status of a particular user (admin only)
-#  ** add_members                Consider adding any existing user to a project (admin only)
-#  ** add_one_member             Add a particular user as a project member (admin only)
+#  = Project Controller
 #
-#  TODO:
-#   Add comments?
-#   Projects should be able to log stuff
-#   Are query_params needed for project pages?
+#  == Actions
+#   L = login required
+#   A = admin required
+#   V = has view
+#   P = prefetching allowed
+#
+#  ==== Index
+#  list_projects::           . V .
+#  project_search::          . . .
+#  index_project::           . . .
+#  show_selected_projects::  (helper)
+#
+#  ==== Show, Create, Edit
+#  show_project::            . V P
+#  next_project::            . . .
+#  prev_project::            . . .
+#  add_project::             L V .
+#  edit_project::            L V P
+#  destroy_project::         L . .
+#
+#  ==== Manage
+#  admin_request::           L V P
+#  add_members::             A V .
+#  change_member_status::    A V .
+#  set_status::              (helper)
+#
+#  == TODO
+#  * RssLog
 #
 ################################################################################
 
 class ProjectController < ApplicationController
-  require 'set'
 
   before_filter :login_required, :except => [
     :index_project,
     :list_projects,
     :next_project,
     :prev_project,
+    :project_search,
     :show_project,
   ]
 
   before_filter :disable_link_prefetching, :except => [
     :admin_request,
-    :change_member_status,
     :edit_project,
     :show_project,
   ]
+
+  ##############################################################################
+  #
+  #  :section: Index
+  #
+  ##############################################################################
 
   # Show list of selected projects, based on current Query.
   def index_project
@@ -51,24 +67,43 @@ class ProjectController < ApplicationController
     show_selected_projects(query)
   end
 
+  # Display list of Project's whose title or notes match a string pattern.
+  def project_search
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (project = Project.safe_find(pattern))
+      redirect_to(:action => 'show_project', :id => project.id)
+    else
+      query = create_query(:Project, :pattern_search, :pattern => pattern)
+      show_selected_projects(query)
+    end
+  end
+
   # Show selected list of projects.
-  def show_selected_projects(query)
-    @links ||= []
+  def show_selected_projects(query, args={})
     args = {
       :action => :list_projects,
       :letters => 'projects.title',
       :num_per_page => 10,
-    }
+    }.merge(args)
+
+    @links ||= []
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',     :sort_by_title.t], 
-      ['created',  :sort_by_created.t], 
-      ['modified', :sort_by_modified.t], 
+      ['name',     :sort_by_title.t],
+      ['created',  :sort_by_created.t],
+      ['modified', :sort_by_modified.t],
     ]
 
     show_index_of_objects(query, args)
   end
+
+  ##############################################################################
+  #
+  #  :section: Show, Create, Edit
+  #
+  ##############################################################################
 
   # Display project by itself.
   # Linked from: show_observation, list_projects
@@ -115,6 +150,7 @@ class ProjectController < ApplicationController
   #   Renders add_project again.
   #   Outputs: @project
   def add_project
+    pass_query_params
     if request.method == :get
       @project = Project.new
     else
@@ -156,6 +192,14 @@ class ProjectController < ApplicationController
         elsif !@project.save
           flash_object_errors(@project)
         else
+          Transaction.post_user_group(
+            :id   => admin_group,
+            :name => admin_name
+          )
+          Transaction.post_user_group(
+            :id   => user_group,
+            :name => title
+          )
           Transaction.post_project(
             :id          => @project,
             :title       => @project.title,
@@ -163,9 +207,10 @@ class ProjectController < ApplicationController
             :admin_group => admin_group,
             :user_group  => user_group
           )
-          # @project.log("Project added by #{@user.login}: #{@project.title}")
+          @project.log_create
           flash_notice(:add_project_success.t)
-          redirect_to(:action => :show_project, :id => @project.id)
+          redirect_to(:action => :show_project, :id => @project.id,
+                      :params => query_params)
         end
       end
     end
@@ -183,15 +228,17 @@ class ProjectController < ApplicationController
   #   Renders edit_project again.
   #   Outputs: @project
   def edit_project
+    pass_query_params
     @project = Project.find(params[:id])
     if !check_permission!(@project.user_id)
-      redirect_to(:action => 'show_project', :id => @project.id)
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
     elsif request.method == :post
       @title = params[:project][:title].to_s
       @summary = params[:project][:summary]
-      args = {}
-      args[:set_title]   = @title   if @project_title   != @title
-      args[:set_summary] = @summary if @project_summary != @summary
+      xargs = {}
+      xargs[:set_title]   = @title   if @project_title   != @title
+      xargs[:set_summary] = @summary if @project_summary != @summary
       if @title.blank?
         flash_error(:add_project_need_title.t)
       elsif Project.find_by_title(@title) != @project
@@ -199,13 +246,14 @@ class ProjectController < ApplicationController
       elsif !@project.update_attributes(params[:project])
         flash_object_errors(@project)
       else
-        if !args.empty?
-          args[:id] = @project
-          Transaction.put_project(args)
+        if !xargs.empty?
+          xargs[:id] = @project
+          Transaction.put_project(xargs)
         end
-        # @project.log("Project updated by #{@user.login}: #{@project.summary}", :touch => false)
+        @project.log_update
         flash_notice(:runtime_edit_project_success.t(:id => @project.id))
-        redirect_to(:action => 'show_project', :id => @project.id)
+        redirect_to(:action => 'show_project', :id => @project.id,
+                    :params => query_params)
       end
     end
   end
@@ -216,181 +264,123 @@ class ProjectController < ApplicationController
   # Inputs: params[:id]
   # Outputs: none
   def destroy_project
+    pass_query_params
     @project = Project.find(params[:id])
     if !check_permission!(@project.user_id)
-      redirect_to(:action => 'show_project')
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
+    elsif !@project.destroy
+      flash_error(:destroy_project_failed.t)
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
     else
-      title = @project.title
-      if @project.destroy
-        # project.log("Project destroyed by #{@user.login}: #{title}", :touch => false)
-        Transaction.delete_project(:id => @project)
-        flash_notice(:destroy_project_success.t)
-      else
-        flash_error(:destroy_project_failed.t)
-      end
-      redirect_to(:action => :list_projects)
+      @project.log_destroy
+      Transaction.delete_project(:id => @project)
+      flash_notice(:destroy_project_success.t)
+      redirect_to(:action => :index_project, :params => query_params)
     end
   end
+
+  ##############################################################################
+  #
+  #  :section: Manage
+  #
+  ##############################################################################
 
   # Form to compose email for the admins
   # Linked from: show_project
   # Inputs:
   #   params[:id]
-  # Outputs: @project
+  # Outputs:
+  #   @project
+  # Posts to the same action.  Redirects back to show_project.
   def admin_request
+    sender = @user
+    pass_query_params
     @project = Project.find(params[:id])
+    if request.method == :post
+      subject = params[:email][:subject]
+      content = params[:email][:content]
+      for receiver in @project.admin_group.users
+        AccountMailer.deliver_admin_request(sender, receiver, @project,
+                                            subject, content)
+      end
+      flash_notice(:admin_request_success.t(:title => @project.title))
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
+    end
   end
 
-  # Sends email to admins
-  # Linked from: admin_request
+  # View that lists all users with links to add each as a member.
+  # Linked from: show_project (for admins only)
   # Inputs:
   #   params[:id]
-  #   params[:email][:subject]
-  #   params[:email][:content]
-  # Success:
-  #   Redirects to show_project.
-  #
-  # TODO: Use queued_email mechanism
-  def send_admin_request
-    sender = @user
-    project = Project.find(params[:id])
-    subject = params[:email][:subject]
-    content = params[:email][:content]
-    for receiver in project.admin_group.users
-      AccountMailer.deliver_admin_request(sender, receiver, project, subject, content)
-    end
-    flash_notice(:admin_request_success.t(:title => project.title))
-    redirect_to(:action => 'show_project', :id => project.id)
-  end
-
-  # TODO: Changes should get logged
-  def set_status(user, group, add)
-    if add
-      group.users << user unless group.users.member?(user)
-      Transaction.put_user_group(
-        :id       => group,
-        :add_user => user
-      )
-    else
-      group.users.delete(user)
-      Transaction.put_user_group(
-        :id       => group,
-        :del_user => user
-      )
+  #   params[:candidate]  (when click on user)
+  # Outputs:
+  #   @project, @users
+  # "Posts" to the same action.  Stays on this view until done.
+  def add_members
+    pass_query_params
+    @project = Project.find(params[:id])
+    @users = User.all(:order => "login, name")
+    if !@project.is_admin?(@user)
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
+    elsif !params[:candidate].blank?
+      @candidate = User.find(params[:candidate])
+      set_status(@project, :member, @candidate, :add)
     end
   end
 
-  # Form to adjust permissions for a user with respect to a project
+  # Form to make a given User either a member or an admin.
   # Linked from: show_project, add_users, admin_request email
   # Inputs:
   #   params[:id]
   #   params[:candidate]
   #   params[:commit]
-  # Success:
-  #   Redirects to show_project.
-  # Failure:
-  #   Renders show_project.
-  #   Outputs: @project, @candidate
+  # Outputs: @project, @candidate
+  # Posts to same action.  Redirects to show_project when done.
   def change_member_status
+    pass_query_params
     @project = Project.find(params[:id])
-    if @project.is_admin?(@user)
-      @candidate = User.find(params[:candidate])
+    @candidate = User.find(params[:candidate])
+    if !@project.is_admin?(@user)
+      flash_error(:change_member_status_denied.t)
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
+    elsif request.method == :post
       user_group = @project.user_group
       admin_group = @project.admin_group
-      if request.method == :post
-        admin = member = false
-        case params[:commit]
-        when :change_member_status_make_admin.l
-          admin = member = true
-        when :change_member_status_make_member.l
-          member = true
-        end
-        set_status(@candidate, admin_group, admin)
-        set_status(@candidate, user_group, member)
-        redirect_to(:action => 'show_project', :id => @project.id)
+      admin = member = :remove
+      case params[:commit]
+      when :change_member_status_make_admin.l
+        admin = member = :add
+      when :change_member_status_make_member.l
+        member = :add
+      end
+      set_status(@project, :admin, @candidate, admin)
+      set_status(@project, :member, @candidate, member)
+      redirect_to(:action => 'show_project', :id => @project.id,
+                  :params => query_params)
+    end
+  end
+
+  # Add/remove a given User to/from a given UserGroup.
+  # TODO: Changes should get logged
+  def set_status(project, type, user, mode)
+    group = project.send(type == :member ? :user_group : :admin_group)
+    if mode == :add
+      if !group.users.include?(user)
+        group.users << user unless group.users.member?(user)
+        Transaction.put_project(:id => project, :"add_#{type}" => user)
+        project.send("log_add_#{type}", user)
       end
     else
-      flash_error(:change_member_status_denied.t)
-      redirect_to(:action => 'show_project', :id => @project.id)
+      if group.users.include?(user)
+        group.users.delete(user)
+        Transaction.put_project(:id => project, :"del_#{type}" => user)
+        project.send("log_remove_#{type}", user)
+      end
     end
   end
-
-  # Action for adding just one member
-  # Linked from: add_members
-  # Inputs:
-  #   params[:id]
-  #   params[:candidate]
-  # Success or failure:
-  #   Redirects to add_members.
-  def add_one_member
-    @project = Project.find(params[:id])
-    if @project.is_admin?(@user)
-      @candidate = User.find(params[:candidate])
-      set_status(@candidate, @project.user_group, true)
-    else
-      flash_error(:add_members_denied.t)
-    end
-    redirect_to(:action => 'add_members', :id => @project.id)
-  end
-
-  # View that lists all users with links to add each as a member
-  # Linked from: show_project (for admins only)
-  # Inputs:
-  #   params[:id]
-  # Outputs:
-  #   @project, @users
-  def add_members
-    @project = Project.find(params[:id])
-    if @project.is_admin?(@user)
-      @users = User.find(:all, :order => "login, name")
-    else
-      redirect_to(:action => 'show_project', :id => @project.id)
-    end
-  end
-
-  # # Publishes the draft back to the originating name
-  # # Linked from: show_draft
-  # # Inputs:
-  # #   params[:id]
-  # # Success:
-  # #   Redirects to show_name.
-  # # Failure:
-  # #   Redirects to show_draft.
-  # def publish_draft
-  #   draft = DraftName.find(params[:id])
-  #   if check_permission!(draft.user_id) or draft.project.is_admin?(@user)
-  #     begin
-  #       draft.classification = Name.validate_classification(draft.name.rank, draft.classification)
-  #       name = draft.name
-  #       args = { :id => name }
-  #       name.license_id = draft.license_id
-  #       args[:set_license] = draft.license if draft.license
-  #       for f in Name.all_note_fields
-  #         name.send("#{f}=", draft.send(f))
-  #         args["set_#{f}"] = draft.send(f).to_s
-  #       end
-  #       if name.changed? &&
-  #          name.save
-  #         name.log(:log_name_updated)
-  #         Transaction.put_name(args)
-  #       end
-  #       name.update_review_status(:vetted)
-  #       user_set = Set.new(name.authors)
-  #       user_set.merge(UserGroup.find_by_name('reviewers').users)
-  #       for recipient in user_set
-  #         if recipient && recipient.created_here
-  #           QueuedEmail::Publish.create_email(@user, recipient, name)
-  #         end
-  #       end
-  #       redirect_to(:controller => 'name', :action => 'show_name', :id => name.id)
-  #     rescue RuntimeError => err
-  #       flash_error(err.to_s) if !err.nil?
-  #       flash_object_errors(draft)
-  #       redirect_to(:action => 'edit_draft', :id => draft.id)
-  #     end
-  #   else
-  #     flash_error(:publish_draft_denied.t)
-  #     redirect_to(:action => 'show_draft', :id => draft.id)
-  #   end
-  # end
 end

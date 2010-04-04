@@ -247,6 +247,8 @@ class ApiController < ApplicationController
         if (value = Vote.validate_value(val)) and
            (naming = Naming.safe_find(id))
           naming.observation.change_vote(naming, value, user)
+          Transaction.put_naming(:id => naming, :_user => user,
+                                 :set_vote => value)
           result = value
         end
 
@@ -254,6 +256,8 @@ class ApiController < ApplicationController
         if (value = Image.validate_vote(value)) and
            (image = Image.safe_find(id))
           image.change_vote(user, value)
+          Transaction.put_image(:id => image, :_user => user,
+                                :set_vote => value)
           result = value
         end
       end

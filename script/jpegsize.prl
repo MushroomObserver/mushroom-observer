@@ -22,6 +22,8 @@ if ($ARGV[0] eq "-f") {
 FILE: foreach my $file (@FILES) {
     open(my $fh, "<$file");
     sysread($fh, $_, 2);
+    my ($x) = unpack("n", $_);
+    next if $x != 0xFFD8;
     while (sysread($fh, $_, 4)) {
         my ($x, $l) = unpack("nn", $_);
         if ($x == 0xFFC0 || $x == 0xFFC2) {

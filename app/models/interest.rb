@@ -10,8 +10,14 @@
 #  that they stop receiving any sort of notifications about objects they are
 #  ignoring (even if they own it, for example).
 #
-#  Currently this functionality is implemented for Observation, Name, and
-#  Location.
+#  Currently this functionality is implemented for:
+#
+#  * Location
+#  * LocationDescription
+#  * Name
+#  * NameDescription
+#  * Observation
+#  * Project
 #
 #  == Attributes
 #

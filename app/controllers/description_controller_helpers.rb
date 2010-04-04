@@ -2,24 +2,32 @@
 #  = Description Controller Helpers
 #
 #  This is a module that is included by all controllers that deal with
-#  descriptions.
+#  descriptions.  (Just LocationController and NameController right now.)
 #
 #  == Actions
-#  make_description_default::           Make a description the default one.
-#  merge_descriptions::                 Merge one description into another.
-#  publish_descriptions::               Turn draft into public description and make it the default.
-#  adjust_permissions::                 Manage read/write/admin permissions for description.
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
+#  make_description_default::  L . .
+#  merge_descriptions::        L V .
+#  publish_descriptions::      L . .
+#  adjust_permissions::        L V .
 #
 #  == Helpers
 #  find_description::                   Look up a description based on id and controller name.
 #  merge_description_notes::            Merge the notes fields of two descriptions.
 #  initialize_description_source::      Initialize source info before serving creation form.
 #  initialize_description_permissions:: Initialize permissions of new Description.
+#  check_description_edit_permission::  Double check that no illegal changes are being made.
 #  modify_description_permissions::     Update blah_groups based on changed to two public checkboxes.
 #  update_writein::                     Update the permissions for a write-in user or group.
 #  update_groups::                      Update one type of permissions for a Hash of groups.
 #  update_group::                       Update one type of permission for one group.
 #  flash_description_changes::          Show changes made to permissions.
+#  group_name::                         Return human-readable name of UserGroup.
+#  perform_merge::                      Merge one description into another if it can.
 #
 ################################################################################
 
@@ -56,50 +64,32 @@ module DescriptionControllerHelpers
     pass_query_params
     src = find_description(params[:id])
     type = src.class.name.underscore.sub(/_description/, '')
+
+    # Doesn't have permission to see source.
     if !src.is_reader?(@user)
       flash_error(:runtime_description_private.t)
       redirect_to(:action => src.parent.show_action, :id => src.parent_id,
                   :params => query_params)
+
+    # GET method.
     elsif request.method != :post
       @description = src
+
+    # POST method
     else
       delete_after = (params[:delete] == '1')
       src_title = src.format_name
       dest = find_description(params[:target])
       src_was_default = (src.parent.description_id == src.id)
+      src_name = src.unique_partial_format_name
+
+      # Doesn't have permission to edit destination.
       if !dest.is_writer?(@user)
         flash_error(:runtime_edit_description_denied.t)
         @description = src
-      elsif dest.merge(src, false)
-        src_name = src.unique_partial_format_name
-        if delete_after
-          if !src.is_admin?(@user)
-            flash_warning(:runtime_description_merge_delete_denied.t)
-          else
-            flash_notice(:runtime_description_merge_deleted.
-                           t(:old => src.partial_format_name))
-            desc.parent.log(:log_object_destroyed_by_user_with_name,
-                            :type => :description, :user => @user.login,
-                            :name => src.unique_partial_format_name,
-                            :touch => true)
-            src.destroy
-          end
-        end
-        if src_was_default
-          desc.parent.log(:log_changed_default_description,
-                          :user => @user.login, :touch => true,
-                          :name => dest.unique_partial_format_name)
-          dest.parent.description = dest
-          dest.parent.save
-        end
-        desc.parent.log(:log_object_merged_by_user, :user => @user.login,
-                        :touch => true, :from => src_name,
-                        :to => dest.unique_partial_format_name)
-        flash_notice(:runtime_description_merge_success.
-                     t(:old => src_title, :new => dest.format_name))
-        redirect_to(:action => dest.show_action, :id => dest.id,
-                    :params => query_params)
-      else
+
+      # Conflict: render edit form.
+      elsif !perform_merge(src, dest, delete_after)
         flash_warning(:runtime_description_merge_conflict.t)
         @description = dest
         @licenses = License.current_names_and_ids
@@ -108,6 +98,16 @@ module DescriptionControllerHelpers
         @old_desc_id = src.id
         @delete_after = delete_after
         render(:action => "edit_#{type}_description")
+
+      # Merged successfully.
+      else
+        desc.parent.log(:log_object_merged_by_user, :user => @user.login,
+                        :touch => true, :from => src_name,
+                        :to => dest.unique_partial_format_name)
+        flash_notice(:runtime_description_merge_success.
+                     t(:old => src_title, :new => dest.format_name))
+        redirect_to(:action => dest.show_action, :id => dest.id,
+                    :params => query_params)
       end
     end
   end
@@ -123,12 +123,21 @@ module DescriptionControllerHelpers
     old = parent.description
     type = parent.class.name.underscore
     need_redirect = true
+    old_partial   = old.unique_partial_format_name if old
+    draft_partial = draft.unique_partial_format_name
 
     # Must be admin on the draft in order for this to work.  (Must be able
     # to delete the draft after publishing it.)
     if !draft.is_admin?(@user)
       flash_error(:runtime_edit_description_denied.t)
       redirect_to(:action => parent.show_action, :id => parent.id,
+                  :params => query_params)
+      need_redirect = false
+
+    # Can't merge it into itself!
+    elsif old == draft
+      flash_error(:runtime_description_already_default.t)
+      redirect_to(:action => draft.show_action, :id => draft.id,
                   :params => query_params)
       need_redirect = false
 
@@ -148,7 +157,7 @@ module DescriptionControllerHelpers
       draft.reader_groups.clear
       draft.reader_groups << UserGroup.all_users
       draft.save
-      parent.log(:log_changed_default_description, :user => @user.login,
+      parent.log(:log_published_description, :user => @user.login,
                  :name => draft.unique_partial_format_name, :touch => true)
       parent.description = draft
       parent.save
@@ -163,7 +172,7 @@ module DescriptionControllerHelpers
 
     # Default description is writable.  Try to merge.  If fails, send user
     # to edit_description to sort out the conflicts.
-    elsif !old.merge(draft)
+    elsif !perform_merge(draft, old, true)
       flash_warning(:runtime_description_merge_conflict.t)
       @description = old
       @licenses = License.current_names_and_ids
@@ -171,22 +180,12 @@ module DescriptionControllerHelpers
       render(:action => "edit_#{type}_description")
       need_redirect = false
 
-    # Success: delete draft, log everything.
+    # Success: log everything.
     else
-      # (something very screwy happens if I name one of these "draft_name1"...
-      # this works some I'm not f---ing with it any more)
-      x1 = old.partial_format_name
-      x2 = old.unique_partial_format_name
-      y1 = draft.partial_format_name
-      y2 = draft.unique_partial_format_name
-      parent.log(:log_object_destroyed_by_user_with_name,
-                 :touch => true, :type => :description, :user => @user.login,
-                 :name => y2)
       flash_notice(:runtime_description_merge_success.
-                     t(:old => y1, :new => x1))
+                     t(:old => draft_partial, :new => old_partial))
       parent.log(:log_published_description, :user => @user.login,
-                 :name => y2, :touch => true)
-      draft.destroy
+                 :name => draft_partial, :touch => true)
     end
 
     # In every case except conflict above, it hasn't rendered or redirected
@@ -201,16 +200,24 @@ module DescriptionControllerHelpers
   def adjust_permissions
     pass_query_params
     @description = find_description(params[:id])
-    redirect = false
+    done = false
+
+    # Doesn't have permission.
     if !@description.is_admin?(@user) and !is_in_admin_mode?
       flash_error(:runtime_description_adjust_permissions_denied.t)
-      redirect = true
+      done = true
+
+    # These types have fixed permissions.
     elsif [:public, :foreign].include?(@description.source_type) and
           !is_in_admin_mode?
       flash_error(:runtime_description_permissions_fixed.t)
-      redirect = true
+      done = true
+
+    # GET method.
     elsif request.method != :post
       @data = nil
+
+    # POST method.
     else
       old_readers = @description.reader_groups.sort_by(&:id)
       old_writers = @description.writer_groups.sort_by(&:id)
@@ -223,7 +230,7 @@ module DescriptionControllerHelpers
 
       # Look up write-ins and adjust their permissions.
       @data = [nil]
-      redirect = true
+      done = true
       for n in params[:writein_name].keys.sort
         name   = params[:writein_name][n].to_s     rescue ''
         reader = params[:writein_reader][n] == '1' rescue false
@@ -234,7 +241,7 @@ module DescriptionControllerHelpers
           @data << { :name => name, :reader => reader, :writer => writer,
                      :admin => admin }
           flash_error(:runtime_description_user_not_found.t(:name => name))
-          redirect = false
+          done = false
         end
       end
 
@@ -277,10 +284,10 @@ module DescriptionControllerHelpers
     if redirect
       redirect_to(:action => @description.show_action,
                   :id => @description.id, :params => query_params)
-    else
 
-      # Gather list of all the groups, authors, editors and owner.
-      # If the user wants more they can write them in.
+    # Gather list of all the groups, authors, editors and owner.
+    # If the user wants more they can write them in.
+    else
       @groups = (
         [UserGroup.all_users] +
         @description.admin_groups.sort_by(&:name) +
@@ -593,5 +600,62 @@ module DescriptionControllerHelpers
     else
       group.name
     end
+  end
+
+  # Attempt to merge one description into another, deleting the old one
+  # if requested.  It will only do so if there is no conflict on any of the
+  # description fields, i.e. one or the other is blank for any given field.
+  def perform_merge(src, dest, delete_after)
+    src_notes  = src.all_notes
+    dest_notes = dest.all_notes
+    result = false
+
+    # Mergeable if there are no fields which are non-blank in both descriptions.
+    if src.class.all_note_fields.none? \
+         {|f| !src_notes[f].blank? and !dest_notes[f].blank?}
+      result = true
+
+      # Copy over all non-blank descriptive fields.
+      xargs = {}
+      for f, val in src_notes
+        if !val.blank?
+          dest.send("#{f}=", val)
+          xargs[:"set_#{f}"] = val
+        end
+      end
+
+      # Store where merge came from in new version of destination.
+      dest.merge_source_id = src.versions.latest.id rescue nil
+      xargs[:set_merge_source] = src
+
+      # Save changes to destination.
+      dest.save
+      Transaction.send("put_#{dest.class.name.underscore}", xargs)
+
+      # Copy over authors and editors.
+      src.authors.each {|user| dest.add_author(user)}
+      src.editors.each {|user| dest.add_editor(user)}
+
+      # Delete old description if requested.
+      if delete_after
+        if !src.is_admin?(@user)
+          flash_warning(:runtime_description_merge_delete_denied.t)
+        else
+          src_was_default = (src.parent.description_id == src.id)
+          Transaction.send("delete_#{src.class.name.underscore}", :id => src)
+          flash_notice(:runtime_description_merge_deleted.
+                         t(:old => src.unique_partial_format_name))
+          src.destroy
+
+          # Make destination the default if source used to be the default.
+          if src_was_default && dest.public
+            dest.parent.description = dest
+            dest.parent.save
+          end
+        end
+      end
+
+    end
+    return result
   end
 end

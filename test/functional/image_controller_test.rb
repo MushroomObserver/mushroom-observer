@@ -176,7 +176,6 @@ class ImageControllerTest < FunctionalTestCase
     requires_login(:add_image, :id => observations(:coprinus_comatus_obs).id)
     assert_form_action(:action => 'add_image')
     # Check that image cannot be added to an observation the user doesn't own.
-    flash[:params] = nil # (disable the spontaneous logout fix!!!)
     get_with_dump(:add_image, :id => observations(:minimal_unknown).id)
     assert_response(:controller => "observer", :action => "show_observation")
   end
@@ -186,7 +185,8 @@ class ImageControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     image = images(:disconnected_coprinus_comatus_image)
     assert(!obs.images.member?(image))
-    requires_login(:add_image_to_obs, "obs_id" => obs.id, "id" => image.id)
+    requires_login(:reuse_image, :mode => 'observation', :obs_id => obs.id,
+                   :img_id => image.id)
     assert_response(:controller => :observer, :action => :show_observation)
     assert(obs.reload.images.member?(image))
   end
@@ -293,10 +293,10 @@ class ImageControllerTest < FunctionalTestCase
       "id" => image.id,
       "image" => {
         "when(1i)" => "2001",
-        "copyright_holder" => "Rolf Singer",
         "when(2i)" => "5",
         "when(3i)" => "12",
-        "notes" => ""
+        "copyright_holder" => "Rolf Singer",
+        "notes"    => ""
       }
     }
     post_requires_login(:edit_image, params)
@@ -317,19 +317,13 @@ class ImageControllerTest < FunctionalTestCase
     assert_form_action(:action => 'remove_images')
   end
 
-  def test_resize_images
-    requires_login(:resize_images)
-    assert_response(:action => :list_images)
-    assert_flash(:runtime_image_resize_denied.t)
-    # How should real image files be handled?
-  end
-
   def test_reuse_image
     obs = observations(:agaricus_campestris_obs)
-    params = { :id => obs.id }
+    params = { :mode => 'observation', :obs_id => obs.id }
     assert_equal('rolf', obs.user.login)
     requires_user(:reuse_image, [:observer, :show_observation], params)
-    assert_form_action(:action => 'reuse_image_by_id', :id => obs.id)
+    assert_form_action(:action => 'reuse_image', :mode => 'observation',
+                       :obs_id => obs.id)
   end
 
   def test_reuse_image_by_id
@@ -337,19 +331,18 @@ class ImageControllerTest < FunctionalTestCase
     image = images(:commercial_inquiry_image)
     assert(!obs.images.member?(image))
     params = {
-      :observation => {
-        :id => obs.id,
-        :idstr => "3"
-      }
+      :mode   => 'observation',
+      :obs_id => obs.id.to_s,
+      :img_id => '3',
     }
     owner = obs.user.login
     assert_not_equal('mary', owner)
-    requires_login(:reuse_image_by_id, params, "mary")
+    requires_login(:reuse_image, params, "mary")
     assert_response(:controller => :observer, :action => :show_observation)
     assert(!obs.reload.images.member?(image))
 
     login(owner)
-    get_with_dump(:reuse_image_by_id, params)
+    get_with_dump(:reuse_image, params)
     assert_response(:controller => "observer", :action => "show_observation")
     assert(obs.reload.images.member?(image))
   end
@@ -385,16 +378,16 @@ class ImageControllerTest < FunctionalTestCase
 
   # This is what would happen when user first opens form.
   def test_reuse_image_for_user
-    requires_login(:reuse_image_for_user)
-    assert_response('reuse_image_for_user')
-    assert_form_action(:action => 'reuse_image_for_user')
+    requires_login(:reuse_image, :mode => 'profile')
+    assert_response('reuse_image')
+    assert_form_action(:action => 'reuse_image', :mode => 'profile')
   end
 
   # This would happen if user clicked on image.
   def test_reuse_image_for_user_post1
     image = images(:commercial_inquiry_image)
-    params = { :id => image.id.to_s }
-    requires_login(:reuse_image_for_user, params)
+    params = { :mode => 'profile', :img_id => image.id.to_s }
+    requires_login(:reuse_image, params)
     assert_response(:controller => :observer, :action => :show_user,
                     :id => @rolf.id)
     assert_equal(@rolf.id, session[:user_id])
@@ -404,8 +397,8 @@ class ImageControllerTest < FunctionalTestCase
   # This would happen if user typed in id and submitted.
   def test_reuse_image_for_user_post2
     image = images(:commercial_inquiry_image)
-    params = { :id => image.id.to_s }
-    post_requires_login(:reuse_image_for_user, params)
+    params = { :mode => 'profile', :img_id => image.id.to_s }
+    post_requires_login(:reuse_image, params)
     assert_response(:controller => :observer, :action => :show_user,
                     :id => @rolf.id)
     assert_equal(@rolf.id, session[:user_id])

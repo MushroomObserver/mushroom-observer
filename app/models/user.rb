@@ -145,26 +145,28 @@
 #  place_name::             Allows User to enter location by name.
 #  password_confirmation::  Used to confirm password during sign-up.
 #
-#  == Class methods
+#  == Methods
 #
 #  current::            Report the User that is currently logged in.
 #  current_id::         Report the User (id) that is currently logged in.
-#  all_alert_types::    List of accepted alert types.
-#  authenticate::       Verify login + password.
 #
-#  == Instance methods
-#
+#  ==== Names
 #  text_name::          User name as: "loging" (for debugging)
 #  legal_name::         User name as: "First Last" or "login"
 #  unique_text_name::   User name as: "First Last (login)" or "login"
+#
+#  ==== Authentication
+#  authenticate::       Verify login + password.
 #  auth_code::          Code used to verify autologin cookie and POSTs in API.
-#  percent_complete::   How much of profile has User finished?
 #  change_password::    Change password (on an existing record).
-#  in_group?::          Is User in a given UserGroup?
-#  remember_me?::       Does User want us to use the autologin cookie thing?
+#
+#  ==== Interests
 #  interest_in::        Return state of User's interest in a given object.
 #  watching?::          Is User watching a given object?
 #  ignoring?::          Is User ignoring a given object?
+#
+#  ==== Profile
+#  percent_complete::   How much of profile has User finished?
 #  sum_bonuses::        Add up all the bonuses User has earned.
 #
 #  ==== Object ownership
@@ -184,6 +186,7 @@
 #  ==== Other relationships
 #  to_emails::          QueuedEmail's they've caused to be sent.
 #  user_groups::        UserGroup's they're members of.
+#  in_group?::          Is User in a given UserGroup?
 #  reviewed_images::    Image's they've reviewed.
 #  reviewed_names::     Name's they've reviewed.
 #  authored_names::     Name's they've authored.
@@ -193,13 +196,18 @@
 #  projects_admin::     Projects's they're an admin for.
 #  projects_member::    Projects's they're a member of.
 #
-#  ==== Alert methods
+#  ==== Alerts
+#  all_alert_types::    List of accepted alert types.
 #  alert_user::         Which admin created the alert.
 #  alert_created::      When alert was created.
 #  alert_next_showing:: When is the alert going to be shown next?
 #  alert_type::         What type of alert, e.g., :bounced_email.
 #  alert_notes::        Additional notes to add to message.
 #  alert_message::      Actual message, translated into local language.
+#
+#  ==== Other Stuff
+#  primer::             Primer for auto-complete.
+#  erase_user::         Erase all references to a given User (by id).
 #
 #  == Callbacks
 #
@@ -278,8 +286,6 @@ class User < AbstractModel
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
-  after_create  {|user| UserGroup.create_user(user)}
-  after_destroy {|user| UserGroup.destroy_user(user)}
 
   # This causes the data structures in these fields to be serialized
   # automatically with YAML and stored as plain old text strings.
@@ -318,6 +324,50 @@ class User < AbstractModel
     @@user = x
   end
 
+  ##############################################################################
+  #
+  #  :section: Names
+  #
+  ##############################################################################
+
+  # Returns +login+ for debugging.
+  def text_name
+    login.to_s
+  end
+
+  # Return User's full name (if present) together with login.  This is
+  # guaranteed to be unique.
+  #
+  #   name present:  "Fred Flintstone (fred99)"
+  #   name missing:  "fred99"
+  #
+  def unique_text_name
+    if !name.blank?
+      sprintf("%s (%s)", name, login)
+    else
+      login
+    end
+  end
+
+  # Return User's full name if present, else return login.
+  #
+  #   name present:  "Fred Flintstone"
+  #   name missing:  "fred99"
+  #
+  def legal_name
+    if self.name.to_s != ''
+      self.name
+    else
+      self.login
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Authentication
+  #
+  ##############################################################################
+
   # Look up User record by login and hashed password.  Accepts any of +login+,
   # +name+ or +email+ in place of +login+.
   #
@@ -353,58 +403,11 @@ class User < AbstractModel
     end
   end
 
-  # Returns +login+ for debugging.
-  def text_name
-    login.to_s
-  end
-
-  # Return User's full name (if present) together with login.  This is
-  # guaranteed to be unique.
+  ##############################################################################
   #
-  #   name present:  "Fred Flintstone (fred99)"
-  #   name missing:  "fred99"
+  #  :section: Groups
   #
-  def unique_text_name
-    if !name.blank?
-      sprintf("%s (%s)", name, login)
-    else
-      login
-    end
-  end
-
-  # Return User's full name if present, else return login.
-  #
-  #   name present:  "Fred Flintstone"
-  #   name missing:  "fred99"
-  #
-  def legal_name
-    if self.name.to_s != ''
-      self.name
-    else
-      self.login
-    end
-  end
-
-  # Calculate the User's progress in completing their profile.  It is currently
-  # based on three equal factors:
-  # * notes = 33%
-  # * location = 33%
-  # * image = 33%
-  #
-  def percent_complete
-    max = 3
-    result = 0
-    if self.notes && self.notes != ""
-      result += 1
-    end
-    if self.location_id
-      result += 1
-    end
-    if self.image_id
-      result += 1
-    end
-    result * 100 / max
-  end
+  ##############################################################################
 
   # Is the User in a given UserGroup?  (Specify group by name, not id.)
   #
@@ -419,10 +422,29 @@ class User < AbstractModel
     end
   end
 
-  # Does this User want us to do the autologin cookie thing?
-  def remember_me?
-    self.remember_me
+  # Return an Array of Project's that this User is an admin for.
+  def projects_admin
+    Project.find_by_sql %(
+      SELECT projects.* FROM projects, user_groups_users
+      WHERE projects.admin_group_id = user_groups_users.user_group_id
+        AND user_groups_users.user_id = #{id}
+    )
   end
+
+  # Return an Array of Project's that this User is a member of.
+  def projects_member
+    Project.find_by_sql %(
+      SELECT projects.* FROM projects, user_groups_users
+      WHERE projects.user_group_id = user_groups_users.user_group_id
+        AND user_groups_users.user_id = #{id}
+    )
+  end
+
+  ################################################################################
+  #
+  #  :section: Interests
+  #
+  ################################################################################
 
   # Has this user expressed positive or negative interest in a given object?
   # Returns +:watching+ or +:ignoring+ if so, else +nil+.  Caches result.
@@ -462,6 +484,33 @@ class User < AbstractModel
     interest_in(object) == :ignoring
   end
 
+  ##############################################################################
+  #
+  #  :section: Profile
+  #
+  ##############################################################################
+
+  # Calculate the User's progress in completing their profile.  It is currently
+  # based on three equal factors:
+  # * notes = 33%
+  # * location = 33%
+  # * image = 33%
+  #
+  def percent_complete
+    max = 3
+    result = 0
+    if self.notes && self.notes != ""
+      result += 1
+    end
+    if self.location_id
+      result += 1
+    end
+    if self.image_id
+      result += 1
+    end
+    result * 100 / max
+  end
+
   # Sum up all the bonuses the User has earned.
   #
   #   contribution += user.sum_bonuses
@@ -472,52 +521,9 @@ class User < AbstractModel
     end
   end
 
-  # Return an Array of Project's that this User is an admin for.
-  def projects_admin
-    Project.find_by_sql %(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.admin_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    )
-  end
-
-  # Return an Array of Project's that this User is a member of.
-  def projects_member
-    Project.find_by_sql %(
-      SELECT projects.* FROM projects, user_groups_users
-      WHERE projects.user_group_id = user_groups_users.user_group_id
-        AND user_groups_users.user_id = #{id}
-    )
-  end
-
-  # Get list of users to prime auto-completer.  Returns a simple Array of up to
-  # 1000 (by contribution or created within the last month) login String's
-  # (with full name in parens).
-  def self.primer
-    result = []
-    if !File.exists?(USER_PRIMER_CACHE_FILE) ||
-       File.mtime(USER_PRIMER_CACHE_FILE) < Time.now - 1.day
-
-      # Get list of users sorted first by when they last logged in (if recent),
-      # then by cotribution.
-      result = self.connection.select_values(%(
-        SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
-        FROM users
-        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH, last_login, NULL) DESC,
-                 contribution DESC
-        LIMIT 1000
-      )).uniq.sort
-
-      open(USER_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
-    else
-      result = open(USER_PRIMER_CACHE_FILE).readlines.map(&:chomp)
-    end
-    return result
-  end
-
   ##############################################################################
   #
-  #  :section: Alert Stuff
+  #  :section: Alerts
   #
   ##############################################################################
 
@@ -591,6 +597,130 @@ class User < AbstractModel
   #
   def alert_message
     "user_alert_message_#{alert_type}".to_sym
+  end
+
+  ################################################################################
+  #
+  #  :section: Other
+  #
+  ################################################################################
+
+  # Get list of users to prime auto-completer.  Returns a simple Array of up to
+  # 1000 (by contribution or created within the last month) login String's
+  # (with full name in parens).
+  def self.primer
+    result = []
+    if !File.exists?(USER_PRIMER_CACHE_FILE) ||
+       File.mtime(USER_PRIMER_CACHE_FILE) < Time.now - 1.day
+
+      # Get list of users sorted first by when they last logged in (if recent),
+      # then by cotribution.
+      result = self.connection.select_values(%(
+        SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))
+        FROM users
+        ORDER BY IF(last_login > CURRENT_TIMESTAMP - INTERVAL 1 MONTH, last_login, NULL) DESC,
+                 contribution DESC
+        LIMIT 1000
+      )).uniq.sort
+
+      open(USER_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
+    else
+      result = open(USER_PRIMER_CACHE_FILE).readlines.map(&:chomp)
+    end
+    return result
+  end
+
+  # Erase all references to a given user (by id).  Missing:
+  # 1) *Text* references, e.g., RssLog entries refering to their login.
+  # 2) Image votes.
+  # 3) Personal descriptions and drafts.
+  def self.erase_user(id)
+
+    # Blank out any references in public records.
+    for table, col in [
+      [:location_descriptions,          :user_id],
+      [:location_descriptions_versions, :user_id],
+      [:locations,                      :user_id],
+      [:locations_versions,             :user_id],
+      [:name_descriptions,              :user_id],
+      [:name_descriptions,              :reviewer_id],
+      [:name_descriptions_versions,     :user_id],
+      [:names,                          :user_id],
+      [:names_versions,                 :user_id],
+      # Leave projects, because they're intertwined with descriptions too much.
+      [:projects,                       :user_id],
+      # Leave votes and namings, because I don't want to recalc consensuses.
+      [:namings,                        :user_id],
+      [:votes,                          :user_id],
+    ]
+      User.connection.update %(
+        UPDATE #{table} SET `#{col}` = 0 WHERE `#{col}` = #{id}
+      )
+    end
+
+    # Delete references to their one-user group.
+    group = UserGroup.one_user(id)
+    for table, col in [
+      [:location_descriptions_admins,  :user_group_id],
+      [:location_descriptions_readers, :user_group_id],
+      [:location_descriptions_writers, :user_group_id],
+      [:name_descriptions_admins,      :user_group_id],
+      [:name_descriptions_readers,     :user_group_id],
+      [:name_descriptions_writers,     :user_group_id],
+      [:user_groups,                   :id],
+    ]
+      User.connection.delete %(
+        DELETE FROM #{table} WHERE `#{col}` = #{group.id}
+      )
+    end
+
+    # Delete their observations' attachments.
+    ids = User.connection.select_values %(
+      SELECT id FROM observations WHERE user_id = #{id}
+    )
+    if ids.any?
+      ids = ids.join(',')
+      for table, id, type in [
+        [:comments,            :object_id, :object_type],
+        [:images_observations, :observation_id],
+        [:interests,           :object_id, :object_type],
+        [:namings,             :observation_id],
+        [:rss_logs,            :observation_id],
+        [:votes,               :observation_id],
+      ]
+        if type
+          User.connection.delete %(
+            DELETE FROM #{table}
+            WHERE `#{col}` IN (#{ids}) AND `#{type}` = 'Observation'
+          )
+        else
+          User.connection.delete %(
+            DELETE FROM #{table}
+            WHERE `#{col}` IN (#{ids})
+          )
+        end
+      end
+    end
+
+    # Delete records they own, culminating in the user record itself.
+    for table, col in [
+      [:comments,                      :user_id],
+      [:images,                        :user_id],
+      [:interests,                     :user_id],
+      [:location_descriptions_authors, :user_id],
+      [:location_descriptions_editors, :user_id],
+      [:name_descriptions_authors,     :user_id],
+      [:name_descriptions_editors,     :user_id],
+      [:notifications,                 :user_id],
+      [:observations,                  :user_id],
+      [:species_lists,                 :user_id],
+      [:user_groups_users,             :user_id],
+      [:users,                         :id],
+    ]
+      User.connection.delete %(
+        DELETE FROM #{table} WHERE `#{col}` = #{id}
+      )
+    end
   end
 
 ################################################################################

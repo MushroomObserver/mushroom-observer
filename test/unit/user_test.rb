@@ -113,12 +113,14 @@ class UserTest < UnitTestCase
       :notes                 => '',
       :mailing_address       => ''
     )
+    UserGroup.create_user(user)
 
     assert(group1 = UserGroup.all_users)
     assert(group2 = UserGroup.one_user(user))
     assert_user_list_equal(all + [user], group1.users)
     assert_user_list_equal([user], group2.users)
 
+    UserGroup.destroy_user(user)
     user.destroy
     group1.reload
     group2.reload # not destroyed, just empty

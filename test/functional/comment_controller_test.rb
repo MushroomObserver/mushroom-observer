@@ -71,34 +71,6 @@ class CommentControllerTest < FunctionalTestCase
     assert_equal("Some text.", comment.comment)
   end
 
-  # Reproduces problem with a spontaneous logout between
-  # add_comment and save_comment.
-  def test_save_comment_indirect_params
-    obs = observations(:minimal_unknown)
-    comment_count = obs.comments.size
-    comment_params = {
-      :id => obs.id,
-      :type => 'Observation',
-      :comment => {
-        "summary" => "Garble",
-        "comment" => "Blarble."
-      }
-    }
-    post(:add_comment, comment_params)
-    assert_response(:controller => "account", :action => "login")
-    assert_equal(flash[:params][:comment], comment_params[:comment])
-
-    # Have to do login explicitly to manage the session object correctly.
-    # Will have to test hidden inputs, etc. in account controller tester.
-    login('rolf')
-    post(:add_comment, {})
-    assert_response(:controller => "observer", :action => "show_observation")
-    obs.reload
-    assert_equal(comment_count + 1, obs.comments.size)
-    assert_equal("Garble", obs.comments.last.summary)
-    assert_equal("Blarble.", obs.comments.last.comment)
-  end
-
   def test_update_comment
     comment = comments(:minimal_comment)
     params = {

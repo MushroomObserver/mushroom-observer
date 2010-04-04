@@ -160,7 +160,7 @@ class ProjectControllerTest < FunctionalTestCase
     assert(project_draft_count > 0)
     params = { :id => project.id.to_s }
     requires_user(:destroy_project, :show_project, params, 'dick')
-    assert_response(:action => :list_projects)
+    assert_response(:action => :index_project)
     assert_raises(ActiveRecord::RecordNotFound) do
       project = Project.find(project.id)
     end
@@ -197,7 +197,7 @@ class ProjectControllerTest < FunctionalTestCase
     destroy_project_helper(eol_project, @katrina)
   end
 
-  def test_send_admin_request
+  def test_post_admin_request
     eol_project = projects(:eol_project)
     params = {
       :id => eol_project.id,
@@ -206,7 +206,7 @@ class ProjectControllerTest < FunctionalTestCase
         :message => "Message for admins"
       }
     }
-    requires_login(:send_admin_request, params)
+    post_requires_login(:admin_request, params)
     assert_response(:action => "show_project", :id => eol_project.id)
     assert_flash(:admin_request_success.t(:title => eol_project.title))
   end
@@ -214,7 +214,7 @@ class ProjectControllerTest < FunctionalTestCase
   def test_admin_request
     id = projects(:eol_project).id
     requires_login(:admin_request, :id => id)
-    assert_form_action(:action => 'send_admin_request', :id => id)
+    assert_form_action(:action => 'admin_request', :id => id)
   end
 
   def test_change_member_status
@@ -288,8 +288,20 @@ class ProjectControllerTest < FunctionalTestCase
   # There are many other combinations that shouldn't work for change_member_status, but I think the above
   # covers the key cases
 
+  # Make sure admin can see form.
+  def test_add_members
+    requires_login(:add_members, :id => projects(:eol_project).id)
+  end
 
-  def test_add_one_member_admin
+  # Make sure non-admin cannot see form.
+  def test_add_members_non_admin
+    project_id = projects(:eol_project).id
+    requires_login(:add_members, { :id => project_id }, @katrina.login)
+    assert_response(:action => 'show_project', :id => project_id)
+  end
+
+  # Make sure admin can add members.
+  def test_add_member_admin
     eol_project = projects(:eol_project)
     target_user = @dick
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
@@ -298,14 +310,15 @@ class ProjectControllerTest < FunctionalTestCase
       :id => eol_project.id,
       :candidate => target_user.id
     }
-    post_requires_login(:add_one_member, params, @mary.login)
-    assert_response(:action => 'add_members', :id => eol_project.id)
+    requires_login(:add_members, params, @mary.login)
+    assert_response(:success)
     target_user = User.find(target_user.id)
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(true, target_user.in_group?(eol_project.user_group.name))
   end
 
-  def test_add_one_member_member
+  # Make sure mere member cannot add members.
+  def test_add_member_member
     eol_project = projects(:eol_project)
     target_user = @dick
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
@@ -314,20 +327,10 @@ class ProjectControllerTest < FunctionalTestCase
       :id => eol_project.id,
       :candidate => target_user.id
     }
-    post_requires_login(:add_one_member, params, @katrina.login)
-    assert_response(:action => 'add_members', :id => eol_project.id)
+    requires_login(:add_members, params, @katrina.login)
+    assert_response(:action => :show_project, :id => eol_project.id)
     target_user = User.find(target_user.id)
     assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
     assert_equal(false, target_user.in_group?(eol_project.user_group.name))
-  end
-
-  def test_add_members
-    requires_login(:add_members, :id => projects(:eol_project).id)
-  end
-
-  def test_add_members_non_admin
-    project_id = projects(:eol_project).id
-    requires_login(:add_members, { :id => project_id }, @katrina.login)
-    assert_response(:action => 'show_project', :id => project_id)
   end
 end

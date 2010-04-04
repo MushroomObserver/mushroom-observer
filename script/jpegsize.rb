@@ -1,0 +1,110 @@
+#!/usr/bin/env ruby
+
+# ------------------------------------
+#  Grab dimensions from JPEG header.
+# ------------------------------------
+
+def get_size(file)
+  w = h = nil
+  File.open(file) do |fh|
+    x = fh.sysread(2).unpack('n').first
+    if x != 0xFFD8
+      $stderr.puts("#{file}: not jpeg")
+      break
+    end
+    while str = fh.sysread(4)
+      x, l = str.unpack('nn')
+      if x == 0xFFC0 || x == 0xFFC2
+        h, w = fh.sysread(5).unpack('xnn')
+        break
+      # elsif x < 0xFF00
+      #   $stderr.puts('Invalid header!')
+      #   exit 1
+      else
+        fh.sysseek(l - 2, IO::SEEK_CUR)
+      end
+    end
+  end
+  return [w, h]
+end
+
+# --------------------------------
+#  Set size in database via API.
+# --------------------------------
+
+def set_size(id, w, h)
+  require 'net/http'
+  require 'uri'
+  if id.to_s == ''
+    puts "#{w} #{h}"
+  else
+    http = Net::HTTP.new('localhost')
+    http.put("/api/images?id=#{id}&set_width=#{w}&set_height=#{h}")
+  end
+end
+
+# ----------------------------
+#  Main program.
+# ----------------------------
+
+case ARGV[0]
+
+# Help message
+when '-h', '--help'
+  # Fall through to display help.
+
+# Given file of files.
+when '-f', '--file'
+  file = ARGV[1]
+  any = false
+  File.readlines(file).each do |line|
+    file2 = line.chomp
+    w, h = get_size(file2)
+    if w
+      $stdout.puts("#{file2}: #{w} #{h}")
+      any = true
+    end
+  end
+  exit(any ? 0 : 1)
+
+# Given file and ID of images record.
+when '-s', '--set'
+  id, file = ARGV[1..2]
+  w, h = get_size(file)
+  if w && set_size(id, w, h)
+    exit(0)
+  else
+    exit(1)
+  end
+
+# Just given single filename.
+else
+  if (ARGV.length == 1) and !ARGV[0].match(/^-/)
+    file = ARGV[0]
+    w, h = get_size(file)
+    if w
+      $stdout.puts("#{w} #{h}")
+      exit(0)
+    else
+      exit(1)
+    end
+  end
+end
+
+# Help message whenever screw up command line.
+$stderr.puts %(
+  USAGE
+    script/jpegsize.rb <file>.jpg
+    script/jpegsize.rb -f <file_list>.txt
+    script/jpegsize.rb -s <id> <file>.jpg
+
+  DESCRIPTION
+    Reports the size of one or more JPEG files.
+
+  OPTIONS
+    -h --help             Print this message.
+    -f --file <file>      Report size of all files listed in <file>.
+    -s --set <id> <file>  Set size of <file> in database for image #<id>.
+
+)
+exit(1)
