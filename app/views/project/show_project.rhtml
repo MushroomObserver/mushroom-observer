@@ -42,7 +42,8 @@
       <td valign="top" width="50%">
         <%= :show_project_drafts.t %>:<br/>
         <% for datum in @draft_data %>
-          <%= indent + link_to(datum['display_name'].t, :action => "show_draft",
+          <%= indent + link_to(datum['display_name'].t, :controller => 'name',
+                               :action => 'show_name_description',
                                :id => datum['id'], :params => query_params) %>
           (<%= user_link(User.find(datum['user_id'])) %>)<br/>
         <% end %>

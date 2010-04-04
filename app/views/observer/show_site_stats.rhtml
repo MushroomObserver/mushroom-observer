@@ -18,7 +18,8 @@
         <td>
           <% for obs in @observations[0,3] %>
             <%= thumbnail(obs.thumb_image_id, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id) %><br/>
+                          :link => :show_observation, :obs => obs.id,
+                          :votes => true) %><br/>
           <% end %>
         </td>
       <% end %>
@@ -61,7 +62,8 @@
         <td>
           <% for obs in @observations[3,3] %>
             <%= thumbnail(obs.thumb_image_id, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id) %><br/>
+                          :link => :show_observation, :obs => obs.id,
+                          :votes => true) %><br/>
           <% end %>
         </td>
       <% end %>

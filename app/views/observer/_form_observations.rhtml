@@ -50,7 +50,8 @@ end %>
         <table><tr>
           <td style="white-space:nowrap">
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
-            <%= thumbnail(image, :border => 0, :obs => @observation.id) %>
+            <%= thumbnail(image, :border => 0, :obs => @observation.id,
+                          :votes => true) %>
           </td>
           <td width="10"></td>
           <td>

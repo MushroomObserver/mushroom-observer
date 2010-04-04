@@ -148,10 +148,16 @@ module ApplicationHelper::ObjectLink
   # style::     Add +style+ attribute, e.g. <tt>:style => 'float:right'</tt>.
   # class::     Set +class+ attribute, e.g. <tt>:class => 'thumbnail'</tt>.
   # append::    HTML to tack on after +img+ tag; will be included in the link.
+  # votes::     Add AJAX vote links below image?
   def thumbnail(image, args={})
+    if image.is_a?(Image)
+      id = image.id
+    else
+      id = image.to_s.to_i
+      image = nil
+    end
 
     # Get URL to image.
-    id = image.is_a?(Image) ? image.id : image.to_s
     size = args[:size] || (@user ? @user.thumbnail_size : :thumbnail)
     if size == :original
       # Must pass in image instance to display original!
@@ -193,6 +199,26 @@ module ApplicationHelper::ObjectLink
       raise "invalid link"
     end
 
-    return link ? link_to(str, link) : str
+    # Enclose image in a link?
+    result = link ? link_to(str, link) : str
+
+    # Include AJAX vote links below image?
+    if @js && @user && args[:votes] && image
+      javascript_include('image_vote')
+      current = image.users_vote(@user)
+      result += '<br/><center><small>' + Image.all_votes.map do |value|
+        str1 = image_vote_as_short_string(value)
+        str2 = image_vote_as_long_string(value)
+        str = if value == current
+          content_tag(:b, content_tag(:acronym, str1, :title => str2))
+        else
+          link_to_function(str1, "image_vote(#{image.id},'#{value}')",
+                           :title => str2)
+        end
+        content_tag(:span, str, :id => "image_#{image.id}_#{value}")
+      end.join(' | ') + '</small></center>'
+    end
+
+    return result
   end
 end

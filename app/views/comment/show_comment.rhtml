@@ -2,11 +2,20 @@
   @title = :comment_show_title.t(:name => @object.unique_format_name)
   object_type = @comment.object_type_localized
 
+  # Register pertinent names so that Textile know what the "G." in "_G.
+  # species_" stands for.  Include all proposed names, because there's no
+  # telling which names will be referred to in the comment.  Likewise, include
+  # all synonyms if commenting on taxonomy of Name. 
   if @comment.object_type == 'Observation'
     for naming in @comment.object.namings
       Textile.register_name(naming.name)
     end
     Textile.register_name(@comment.object.name)
+  elsif @comment.object_type == 'Name'
+    for name in @comment.object.synonyms
+      Textile.register_name(name)
+    end
+    Textile.register_name(@comment.object)
   end
 
   new_tab_set do

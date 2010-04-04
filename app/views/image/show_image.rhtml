@@ -59,7 +59,7 @@
                   :params => query_params)
         end %></p>
 
-        <%= thumbnail(@image, :size => @size,
+        <%= thumbnail(@image, :size => @size, :votes => false,
                       :link => { :action => 'show_image', :id => @image.id,
                       :size => (@size == @default_size ? :full_size : @default_size),
                       :params => query_params }) %><br/>

@@ -65,7 +65,8 @@
 %>
 
 <%= if @show_user.image_id
-  thumbnail(@show_user.image_id, :border => 0, :style => 'float:right')
+  thumbnail(@show_user.image_id, :border => 0, :style => 'float:right',
+            :votes => false)
 end %>
 
 <b><%= :show_user_joined.t %>:</b> <%= @show_user.verified %><br/>
@@ -96,7 +97,8 @@ end %>
         <td align="center">
           <% for obs in @observations[3,3] %>
             <%= thumbnail(obs.thumb_image_id, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id) %><br/>
+                          :link => :show_observation, :obs => obs.id,
+                          :votes => true) %><br/>
           <% end %>
         </td>
       <% end %>
@@ -184,7 +186,8 @@ end %>
         <td align="center">
           <% for obs in @observations[0,3] %>
             <%= thumbnail(obs.thumb_image_id, :class => 'site_stats_image',
-                          :link => :show_observation, :obs => obs.id) %><br/>
+                          :link => :show_observation, :obs => obs.id,
+                          :votes => true) %><br/>
           <% end %>
         </td>
       <% end %>

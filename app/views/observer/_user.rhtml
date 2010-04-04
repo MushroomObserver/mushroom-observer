@@ -3,7 +3,7 @@
     <td align="center" valign="middle" width="160">
       <%= if user.image_id
         thumbnail(user.image_id, :border => 0, :link => :show_user,
-                  :user => user)
+                  :user => user, :votes => false, :size => :thumbnail)
       end %>
     </td>
 

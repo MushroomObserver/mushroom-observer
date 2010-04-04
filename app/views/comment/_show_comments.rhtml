@@ -46,7 +46,7 @@ for comment in comments
       if user.image_id %>
         </td><td>
         <%= thumbnail(user.image_id, :border => 0, :size => :thumbnail,
-                      :link => :show_user, :user => user.id) %>
+                     :link => :show_user, :user => user.id, :votes => false) %>
       <% end %>
 
     </td></tr></table>

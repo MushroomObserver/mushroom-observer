@@ -16,7 +16,7 @@
               <td>
                 <%= if user.image_id
                   thumbnail(user.image_id, :border => 0, :link => :show_user,
-                            :user => user.id)
+                        :user => user.id, :votes => false, :size => :thumbnail)
                 end %>
               </td>
               <td>
