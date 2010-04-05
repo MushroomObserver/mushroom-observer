@@ -76,4 +76,4 @@ CSS = %w(Agaricus Amanita Cantharellaceae Hygrocybe)     if !defined? CSS
 SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings" if !defined? SVN_REPOSITORY
 
 # Date after which votes become public.
-VOTE_CUTOFF = '20100401'
+VOTE_CUTOFF = '20100401'                                 if !defined? VOTE_CUTOFF
