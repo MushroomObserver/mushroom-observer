@@ -408,7 +408,7 @@ class ObserverController < ApplicationController
   #   image/advanced_search
   #   name/advanced_search
   #   observer/advanced_search
-  def advanced_search_form # :nologin:
+  def advanced_search_form # :nologin: :norobots:
     if request.method != :post
       pass_query_params # (temporary thing while refine_search tab is here)
       @location_primer = Location.primer
@@ -2221,53 +2221,42 @@ class ObserverController < ApplicationController
     EOS
   end
 
-  action_has_moved 'comment', 'list_comments'
-  action_has_moved 'comment', 'show_comments_for_user'
-  action_has_moved 'comment', 'show_comment'
   action_has_moved 'comment', 'add_comment'
-  action_has_moved 'comment', 'edit_comment'
   action_has_moved 'comment', 'destroy_comment'
+  action_has_moved 'comment', 'edit_comment'
+  action_has_moved 'comment', 'list_comments'
+  action_has_moved 'comment', 'show_comment'
+  action_has_moved 'comment', 'show_comments_for_user'
 
-  action_has_moved 'name', 'all_names'
-  action_has_moved 'name', 'name_index', 'all_names'
-  action_has_moved 'name', 'observation_index'
-  action_has_moved 'name', 'all_names'
-  action_has_moved 'name', 'show_name'
-  action_has_moved 'name', 'show_past_name'
-  action_has_moved 'name', 'edit_name'
-  action_has_moved 'name', 'change_synonyms'
-  action_has_moved 'name', 'deprecate_name'
-  action_has_moved 'name', 'approve_name'
-  action_has_moved 'name', 'bulk_name_edit'
-  action_has_moved 'name', 'map'
-  action_has_moved 'name', 'cleanup_versions'
-  action_has_moved 'name', 'do_maintenance'
-
-  action_has_moved 'species_list', 'list_species_lists'
-  action_has_moved 'species_list', 'show_species_list'
-  action_has_moved 'species_list', 'species_lists_by_title'
-  action_has_moved 'species_list', 'create_species_list'
-  action_has_moved 'species_list', 'edit_species_list'
-  action_has_moved 'species_list', 'upload_species_list'
-  action_has_moved 'species_list', 'destroy_species_list'
-  action_has_moved 'species_list', 'manage_species_lists'
-  action_has_moved 'species_list', 'remove_observation_from_species_list'
-  action_has_moved 'species_list', 'add_observation_to_species_list'
-
+  action_has_moved 'image', 'add_image'
+  action_has_moved 'image', 'destroy_image'
+  action_has_moved 'image', 'edit_image'
+  action_has_moved 'image', 'license_updater'
   action_has_moved 'image', 'list_images'
-  action_has_moved 'image', 'show_image'
-  action_has_moved 'image', 'show_original'
   action_has_moved 'image', 'next_image'
   action_has_moved 'image', 'prev_image'
-  action_has_moved 'image', 'add_image'
   action_has_moved 'image', 'remove_images'
-  action_has_moved 'image', 'edit_image'
-  action_has_moved 'image', 'destroy_image'
   action_has_moved 'image', 'reuse_image'
-  action_has_moved 'image', 'add_image_to_obs'
-  action_has_moved 'image', 'reuse_image_by_id'
-  action_has_moved 'image', 'license_updater'
-  action_has_moved 'image', 'test_upload_image'
-  action_has_moved 'image', 'test_add_image'
-  action_has_moved 'image', 'test_add_image_report'
+  action_has_moved 'image', 'show_image'
+
+  action_has_moved 'name', 'approve_name'
+  action_has_moved 'name', 'bulk_name_edit'
+  action_has_moved 'name', 'change_synonyms'
+  action_has_moved 'name', 'deprecate_name'
+  action_has_moved 'name', 'edit_name'
+  action_has_moved 'name', 'map'
+  action_has_moved 'name', 'observation_index'
+  action_has_moved 'name', 'show_name'
+  action_has_moved 'name', 'show_past_name'
+
+  action_has_moved 'species_list', 'add_observation_to_species_list'
+  action_has_moved 'species_list', 'create_species_list'
+  action_has_moved 'species_list', 'destroy_species_list'
+  action_has_moved 'species_list', 'edit_species_list'
+  action_has_moved 'species_list', 'list_species_lists'
+  action_has_moved 'species_list', 'manage_species_lists'
+  action_has_moved 'species_list', 'remove_observation_from_species_list'
+  action_has_moved 'species_list', 'show_species_list'
+  action_has_moved 'species_list', 'species_lists_by_title'
+  action_has_moved 'species_list', 'upload_species_list'
 end

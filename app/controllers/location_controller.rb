@@ -52,7 +52,7 @@ class LocationController < ApplicationController
   ##############################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def index_location # :nodoc: :norobots:
+  def index_location # :nologin: :norobots:
     query = find_or_create_query(:Location, :by => params[:by])
     show_selected_locations(query, :id => params[:id], :always_index => true)
   end
@@ -244,7 +244,7 @@ class LocationController < ApplicationController
   ################################################################################
 
   # Displays a list of selected locations, based on current Query.
-  def index_location_description # :nodoc: :norobots:
+  def index_location_description # :nologin: :norobots:
     query = find_or_create_query(:LocationDescription, :by => params[:by])
     show_selected_location_descriptions(query, :id => params[:id],
                                         :always_index => true)

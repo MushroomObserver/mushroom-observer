@@ -373,7 +373,7 @@ class SpeciesListController < ApplicationController
   #  params[:results]
   # Outputs:
   #  @names
-  def name_lister # :nologin:
+  def name_lister # :nologin: :norobots:
 
     # Names are passed in as string, one name per line.
     @names = (params[:results] || '').chomp.split("\n").map {|n| n.to_s.chomp}
