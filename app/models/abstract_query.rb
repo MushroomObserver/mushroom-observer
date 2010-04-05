@@ -953,7 +953,9 @@ class AbstractQuery < ActiveRecord::Base
       @params_cache[arg] = val
       val.id
     elsif val.is_a?(Fixnum) or
-          val.is_a?(String) && val.match(/^[1-9]\d*$/)
+          val.is_a?(String) && val.match(/^[1-9]\d*$/) or
+          # (blasted admin user has id = 0!)
+          val.is_a?(String) && (val == '0') && (arg == :user)
       val.to_i
     else
       raise("Value for :#{arg} should be id or an #{type} instance, got: #{val.inspect}")

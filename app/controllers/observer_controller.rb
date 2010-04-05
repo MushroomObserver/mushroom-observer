@@ -278,6 +278,8 @@ class ObserverController < ApplicationController
     session[:js_override] = :on
     flash_notice(:turn_javascript_on_body.t)
     redirect_to(:back)
+  rescue ActionController::RedirectBackError
+    redirect_to('/')
   end
 
   # Force javascript off.
@@ -285,6 +287,8 @@ class ObserverController < ApplicationController
     session[:js_override] = :off
     flash_notice(:turn_javascript_off_body.t)
     redirect_to(:back)
+  rescue ActionController::RedirectBackError
+    redirect_to('/')
   end
 
   # Enable auto-detection.
@@ -292,6 +296,8 @@ class ObserverController < ApplicationController
     session[:js_override] = nil
     flash_notice(:turn_javascript_nil_body.t)
     redirect_to(:back)
+  rescue ActionController::RedirectBackError
+    redirect_to('/')
   end
 
   # Simple list of all the files in public/html that are linked to the W3C
