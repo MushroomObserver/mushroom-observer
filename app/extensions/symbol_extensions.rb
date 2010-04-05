@@ -190,8 +190,9 @@ class Symbol
               val.to_s.capitalize_first
 
           else
-            raise(ArgumentError, "Forgot to pass :#{y.downcase} into localization for " +
-                                 ([self] + level).map(&:inspect).join(' --> '))
+            raise(ArgumentError, "Forgot to pass :#{y.downcase} into " +
+              "#{Locale.code} localization for " +
+              ([self] + level).map(&:inspect).join(' --> '))
           end
         end
       end
@@ -231,19 +232,21 @@ class Symbol
                     val.match(/^(-?\d+(\.\d+)?)$/)
                 val = $1
               elsif !val.match(/^([a-z][a-z_]*\d*)$/)
-                raise(ArgumentError, "Invalid argument value \":#{val}\" in localization for " +
-                                       ([self] + level).map(&:inspect).join(' --> '))
+                raise(ArgumentError, "Invalid argument value \":#{val}\" in " +
+                  "#{Locale.code} localization for " +
+                  ([self] + level).map(&:inspect).join(' --> '))
               elsif !args.has_key?(val.to_sym)
-                raise(ArgumentError, "Forgot to pass :#{val} into localization for " +
-                                       ([self] + level).map(&:inspect).join(' --> '))
+                raise(ArgumentError, "Forgot to pass :#{val} into " +
+                  "#{Locale.code} localization for " +
+                  ([self] + level).map(&:inspect).join(' --> '))
               else
                 val = args[val.to_sym]
               end
               hash[key] = val
             else
-              raise(ArgumentError, "Invalid syntax at \"#{pair}\" in arguments " +
-                                   "for tag :#{tag} embedded in " +
-                                   ([self] + level).map(&:inspect).join(' --> '))
+              raise(ArgumentError, "Invalid syntax at \"#{pair}\" in " +
+                "arguments for #{Locale.code} tag :#{tag} embedded in " +
+                ([self] + level).map(&:inspect).join(' --> '))
             end
           end
         end

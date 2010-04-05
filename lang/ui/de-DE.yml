@@ -493,14 +493,14 @@ description_part_title_source_with_text:  "[:DESCRIPTION] From [TEXT]"
 description_part_title_user_with_text:  "[TEXT] by [USER]"
 
 # Footers: "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
-footer_created_at: "*[Type] erstellt am*: [date]"
-footer_created_by: "*[Type] erstellt von* [user] *am*: [date]"
-footer_modified_at: "*Geändert am* [date]"
-footer_modified_by: "*Geändert von* [user] *am* [date]"
-footer_last_modified_at: "*Zuletzt geändert am* [date]"
-footer_last_modified_by: "*Zuletzt geändert von* [user] *am* [date]"
+footer_created_at: "*Erstellt am:* [date]"
+footer_created_by: "*Erstellt am:* [date] *von* [user]"
+footer_modified_at: "*Geändert am:* [date]"
+footer_modified_by: "*Geändert am:* [date] *von* [user]"
+footer_last_modified_at: "*Zuletzt geändert am:* [date]"
+footer_last_modified_by: "*Zuletzt geändert am*: [date] *von* [user]"
 footer_viewed: "[times] *aufgerufen*, *zuletzt am*: [date]"
-footer_version_out_of:  "*[:Version]:* [num] *of* [total]"
+footer_version_out_of:  "*[:Version]:* [num] *von* [total]"
 
 # Taxonomic ranks.
 RANK_CLASS: Klasse
