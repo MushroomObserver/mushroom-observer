@@ -1,9 +1,14 @@
+* shutdown mongrel
+backup database
+* move production log to logs.mushroomobserver.org
+[are there other logs we should preserve/reset?]
+* svn update
+
 copy over consts-slicehost.rb to consts-site.rb on server
 adjust site-specific configs:
   VOTE_CUTOFF
   others?
 
-backup database
 rake db:migrate
 
 script/recalc_contributions
