@@ -1,8 +1,8 @@
 <%
-  @title = :show_user_title.t(:user => @user_data[:name])
+  id   = @show_user.id
+  name = @show_user.unique_text_name
 
-  id   = @user_data[:id]
-  name = @user_data[:name]
+  @title = :show_user_title.t(:user => name)
 
   links = {
     :comments => url_for(:controller => 'comment',
