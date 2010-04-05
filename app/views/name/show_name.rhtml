@@ -111,7 +111,7 @@ if @children_data && @children_data.length > 0 %>
     <a id="children"></a>
     <big><%= rank_as_plural_string(@children_data[0].rank) %></big>:
     <%= if @children_data.length < @children_query.num_results
-      link_to("(#{:show_all.t})", :action => 'list_names',
+      link_to("(#{:show_object.t(:type => :index)})", :action => 'list_names',
               :params => query_params(@children_query))
     end %>
   </p>
@@ -165,10 +165,17 @@ for sect in ['consensus', 'synonym', 'other', 'subtaxa']
     <p>
       <a id="<%=sect%>"></a>
       <big><%= head %></big>
-      <%= if data.length < query.num_results
-        link_to("(#{:show_all.t})", :controller => 'observer',
-                :action => 'index_observation', :params => query_params(query))
-      end %>
+      (<%= links = []
+      if true or (data.length < query.num_results)
+        links << link_to(:show_object.t(:type => :index),
+                         :controller => 'observer',
+                         :action => 'index_observation',
+                         :params => query_params(query))
+      end
+      # links << link_to(:IMAGES.t, :controller => 'image',
+      #                  :action => 'index_image', :by => 'image_quality',
+      #                  :params => query_params(query))
+      links.join(' | ') if links.any? %>)
     </p>
     <% paginate_block(pages, :anchor => sect) do %>
       <table cellpadding="5" cellspacing="0">

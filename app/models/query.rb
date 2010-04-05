@@ -852,7 +852,7 @@ class Query < AbstractQuery
       self.where << "observations.is_collection_location IS TRUE"
 
     elsif model_symbol == :Image
-      if nonconsensus != :no
+      if nonconsensus == :no
         self.join << {:images_observations => :observations}
       else
         self.join << {:images_observations => {:observations => :namings}}
