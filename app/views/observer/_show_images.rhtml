@@ -26,7 +26,7 @@
              sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
       <p>
         <%= thumbnail(image, :border => 0, :obs => @observation.id,
-                      :votes => true) %><br/>
+                      :votes => true) %>
         <% if !image.notes.blank? %>
           <small>
             <%= content_tag(:span, image.notes.tl.truncate_html(300),

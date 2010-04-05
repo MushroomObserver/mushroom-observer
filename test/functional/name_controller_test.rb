@@ -2467,7 +2467,10 @@ class NameControllerTest < FunctionalTestCase
     desc.admin_groups  << UserGroup.reviewers
     desc.writer_groups << UserGroup.all_users
     desc.reader_groups << UserGroup.all_users
-    publish_draft_helper(draft.reload, nil, false, :conflict)
+    # It should make the draft both public and default, "true" below tells it
+    # that the default gen_desc should look like the draft's after done.  No
+    # more conflicts.
+    publish_draft_helper(draft.reload, nil, true, false)
   end
 
   def test_destroy_draft_owner

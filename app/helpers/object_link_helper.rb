@@ -201,12 +201,13 @@ module ApplicationHelper::ObjectLink
 
     # Enclose image in a link?
     result = link ? link_to(str, link) : str
+    result += '<br/>'
 
     # Include AJAX vote links below image?
     if @js && @user && args[:votes] && image
       javascript_include('image_vote')
       current = image.users_vote(@user)
-      result += '<br/><center><small>' + Image.all_votes.map do |value|
+      result += '<small>' + Image.all_votes.map do |value|
         str1 = image_vote_as_short_string(value)
         str2 = image_vote_as_long_string(value)
         str = if value == current
@@ -216,7 +217,7 @@ module ApplicationHelper::ObjectLink
                            :title => str2)
         end
         content_tag(:span, str, :id => "image_#{image.id}_#{value}")
-      end.join(' | ') + '</small></center>'
+      end.join(' | ') + '</small><br/>'
     end
 
     return result

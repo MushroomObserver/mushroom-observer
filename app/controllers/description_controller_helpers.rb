@@ -141,13 +141,9 @@ module DescriptionControllerHelpers
                   :params => query_params)
       need_redirect = false
 
-    # 1) No default desc: turn this into public desc and make it the default.
-    # 2) Default is not writable: same thing, make this the default instead.
-    elsif !old || !old.is_writer?(@user)
-      if old
-        flash_warning(:runtime_description_publish_denied.t(:default =>
-                      old.format_name))
-      end
+    # I've temporarily decided to always just turn it into a public desc.
+    # User can then merge by hand if public desc already exists.
+    else
       draft.source_type = :public
       draft.source_name = ''
       draft.admin_groups.clear
@@ -169,24 +165,34 @@ module DescriptionControllerHelpers
         :set_writers     => draft.writer_groups,
         :set_readers     => draft.reader_groups
       )
-
-    # Default description is writable.  Try to merge.  If fails, send user
-    # to edit_description to sort out the conflicts.
-    elsif !perform_merge(draft, old, true)
-      flash_warning(:runtime_description_merge_conflict.t)
-      @description = old
-      @licenses = License.current_names_and_ids
-      merge_description_notes(draft, old)
-      render(:action => "edit_#{type}_description")
-      need_redirect = false
-
-    # Success: log everything.
-    else
-      flash_notice(:runtime_description_merge_success.
-                     t(:old => draft_partial, :new => old_partial))
-      parent.log(:log_published_description, :user => @user.login,
-                 :name => draft_partial, :touch => true)
     end
+
+    # 1) No default desc: turn this into public desc and make it the default.
+    # 2) Default is not writable: same thing, make this the default instead.
+    # elsif !old || !old.is_writer?(@user)
+    #   if old
+    #     flash_warning(:runtime_description_publish_denied.t(:default =>
+    #                   old.format_name))
+    #   end
+    #   ...(see above)...
+    #
+    # # Default description is writable.  Try to merge.  If fails, send user
+    # # to edit_description to sort out the conflicts.
+    # elsif !perform_merge(draft, old, true)
+    #   flash_warning(:runtime_description_merge_conflict.t)
+    #   @description = old
+    #   @licenses = License.current_names_and_ids
+    #   merge_description_notes(draft, old)
+    #   render(:action => "edit_#{type}_description")
+    #   need_redirect = false
+    #
+    # # Success: log everything.
+    # else
+    #   flash_notice(:runtime_description_merge_success.
+    #                  t(:old => draft_partial, :new => old_partial))
+    #   parent.log(:log_published_description, :user => @user.login,
+    #              :name => draft_partial, :touch => true)
+    # end
 
     # In every case except conflict above, it hasn't rendered or redirected
     # yet, so send user on to show_name.
@@ -404,6 +410,7 @@ module DescriptionControllerHelpers
         desc.reader_groups << UserGroup.all_users
       else
         desc.reader_groups << project.user_group
+        desc.writer_groups << UserGroup.one_user(@user)
       end
       if write
         desc.writer_groups << UserGroup.all_users

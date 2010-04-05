@@ -990,13 +990,13 @@ class NameController < ApplicationController
     @new_names        = nil
     @synonym_name_ids = []
     @synonym_names    = []
-    @deprecate_all    = '1'
+    @deprecate_all    = true
     if request.method == :post
       list = params[:synonym][:members].strip_squeeze
-      deprecate = (params[:deprecate][:all] == '1')
+      @deprecate_all = (params[:deprecate][:all] == '1')
 
       # Create any new names that have been approved.
-      construct_approved_names(list, params[:approved_names], deprecate)
+      construct_approved_names(list, params[:approved_names], @deprecate_all)
 
       # Parse the write-in list of names.
       sorter = NameSorter.new
@@ -1057,7 +1057,7 @@ class NameController < ApplicationController
 
         # Deprecate everything if that check-box has been marked.
         success = true
-        if deprecate
+        if @deprecate_all
           for n in sorter.all_names
             if !deprecate_synonym(n)
               # Already flashed error message.
@@ -1079,7 +1079,6 @@ class NameController < ApplicationController
       @new_names        = sorter.new_name_strs.uniq
       @synonym_name_ids = sorter.all_synonyms.map(&:id)
       @synonym_names    = @synonym_name_ids.map {|id| Name.find(id)}
-      @deprecate_all    = params[:deprecate][:all]
     end
   end
 

@@ -4,11 +4,21 @@ require File.dirname(__FILE__) + '/../boot'
 
 class ExpertTest < IntegrationTestCase
 
+  def empty_notes
+    hash = {}
+    for f in NameDescription.all_note_fields
+      hash[f] = nil
+    end
+    return hash
+  end
+
+################################################################################
+
   # -----------------------------------------
-  #  Test a few kinds of name descriptions.
+  #  Test standard creation of public desc.
   # -----------------------------------------
 
-  def test_creating_public_descriptions
+  def test_creating_public_description
     name = Name.find_by_text_name('Strobilurus diminutivus')
     assert_equal([], name.descriptions)
 
@@ -107,6 +117,111 @@ class ExpertTest < IntegrationTestCase
       form.assert_no_field('public_write')
       form.assert_no_field('public')
     end
+
+    # Verify that permissions and authors and editors are right.
+    desc = NameDescription.last
+    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+    assert_user_list_equal([], desc.authors)
+    assert_user_list_equal([@mary], desc.editors) # (owner = mary)
+    assert_equal('I like this mushroom.', desc.notes)
+  end
+
+  # -------------------------------------------
+  #  Test standard creation of personal desc.
+  # -------------------------------------------
+
+  def test_creating_user_description
+    name = Name.find_by_text_name('Peltigera')
+    assert_equal(4, name.descriptions.length)
+
+    @dick.admin = true
+    @dick.save
+
+    show_name = "/name/show_name/#{name.id}"
+
+    admin    = login!(@dick)     # we'll make him admin
+    reviewer = login!(@rolf)     # reviewer
+    owner    = login!(@mary)     # random user
+    user     = login!(@katrina)  # another random user
+    lurker   = open_session      # nobody
+
+    # Make Dick an admin.
+    admin.click(:href => /turn_admin_on/)
+
+    # Have random user create a personal description.
+    owner.get(show_name)
+    owner.click(:href => /create_name_description/)
+    owner.assert_template('name/create_name_description')
+    owner.open_form do |form|
+      form.assert_value('source_type', 'public')
+      form.assert_value('source_name', '')
+      form.assert_value('public_write', true)
+      form.assert_value('public', true)
+      form.assert_enabled('source_type')
+      form.assert_enabled('source_name')
+      form.assert_enabled('public_write')
+      form.assert_enabled('public')
+      form.select('source_type', /user/i)
+      form.change('source_name', "Mary's Corner")
+      form.uncheck('public_write')
+      form.change('gen_desc', 'Leafy felt lichens.')
+      form.change('diag_desc', 'Usually with veins and tomentum below.')
+      form.change('look_alikes', '_Solorina_ maybe, but not much else.')
+      form.submit
+    end
+    owner.assert_flash_success
+    owner.assert_template('name/show_name_description')
+
+    desc = NameDescription.last
+    assert_equal(:user, desc.source_type)
+    assert_equal("Mary's Corner", desc.source_name)
+    assert_equal(false, desc.public_write)
+    assert_equal(true, desc.public)
+    assert_obj_list_equal([UserGroup.one_user(@mary)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(@mary)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+    assert_user_list_equal([@mary], desc.authors)
+    assert_user_list_equal([], desc.editors)
+    assert_equal(empty_notes.merge(
+      :gen_desc => 'Leafy felt lichens.',
+      :diag_desc => 'Usually with veins and tomentum below.',
+      :look_alikes => '_Solorina_ maybe, but not much else.'
+    ), desc.all_notes)
+
+    edit_name    = "/name/edit_name_description/#{desc.id}"
+    destroy_name = "/name/destroy_name_description/#{desc.id}"
+
+    # Admin of course can do anything.
+    admin.get(show_name)
+    admin.assert_select("a[href*=#{edit_name}]")
+    admin.assert_select("a[href*=#{destroy_name}]")
+    admin.click(:href => edit_name)
+
+    # Reviewer is nothing in this case.
+    reviewer.get(show_name)
+    reviewer.assert_select("a[href*=#{edit_name}]", 0)
+    reviewer.assert_select("a[href*=#{destroy_name}]", 0)
+
+    # Owner, is an admin and can do anything.
+    # destroy.  But can edit.
+    owner.get(show_name)
+    owner.assert_select("a[href*=#{edit_name}]")
+    owner.assert_select("a[href*=#{destroy_name}]")
+    owner.click(:href => edit_name)
+    owner.assert_template('name/edit_name_description')
+
+    # Other random users are also nobodies.
+    user.get(show_name)
+    user.assert_select("a[href*=#{edit_name}]", 0)
+    user.assert_select("a[href*=#{destroy_name}]", 0)
+
+    # The lurker is nobody.
+    lurker.get(show_name)
+    lurker.assert_select("a[href*=#{edit_name}]", 0)
+    lurker.assert_select("a[href*=#{destroy_name}]", 0)
+
   end
 
   # --------------------------------------------------------

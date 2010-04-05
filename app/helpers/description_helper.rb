@@ -26,9 +26,10 @@ module ApplicationHelper::Description
         add_tab(:show_object.t(:type => type.to_sym), :action => "show_#{type}",
                 :id => desc.parent_id, :params => query_params)
       end
-      if writer
-        add_tab(:show_description_edit.t,
-                :action => "edit_#{type}_description", :id => desc.id,
+      if (desc.source_type == :project) and
+         (project = desc.source_object)
+        add_tab(:show_object.t(:type => :project), :controller => 'project',
+                :action => 'show_project', :id => project.id,
                 :params => query_params)
       end
       if admin
@@ -48,22 +49,27 @@ module ApplicationHelper::Description
                 :id => desc.id, :params => query_params,
                 :help => :show_description_merge_help.l)
       end
-      if (desc.source_type != :public) and (@user == desc.user)
-        add_tab(:show_description_publish.t, :action => 'publish_description',
-                :id => desc.id, :params => query_params,
-                :help => :show_description_publish_help.l)
-      end
       if admin
         add_tab(:show_description_adjust_permissions.t,
                 :action => 'adjust_permissions', :id => @description.id,
                 :params => query_params,
                 :help => :show_description_adjust_permissions_help.l)
       end
-      if @user && (desc.parent.description_id != desc.id)
+      if desc.public && @user && (desc.parent.description_id != desc.id)
         add_tab(:show_description_make_default.t,
                 :action => 'make_description_default', :id => desc.id,
                 :params => query_params,
                 :help => :show_description_make_default_help.l)
+      end
+      if admin and (desc.source_type != :public)
+        add_tab(:show_description_publish.t, :action => 'publish_description',
+                :id => desc.id, :params => query_params,
+                :help => :show_description_publish_help.l)
+      end
+      if writer
+        add_tab(:show_description_edit.t,
+                :action => "edit_#{type}_description", :id => desc.id,
+                :params => query_params)
       end
     end
   end
@@ -152,15 +158,14 @@ module ApplicationHelper::Description
       writer = desc.is_writer?(@user) || is_in_admin_mode?
       admin  = desc.is_admin?(@user)  || is_in_admin_mode?
       if writer || admin
-        item += indent + '['
-        item += link_to(:EDIT.t, :id => desc.id, :params => query_params,
-                        :action => "edit_#{type}_description") if writer
-        item += ' | '
-        item += link_to(:DESTROY.t, { :id => desc.id,
-                        :action => "destroy_#{type}_description",
-                        :params => query_params },
-                        { :confirm => :are_you_sure.t }) if admin
-        item += ']'
+        links = []
+        links << link_to(:EDIT.t, :id => desc.id, :params => query_params,
+                         :action => "edit_#{type}_description") if writer
+        links << link_to(:DESTROY.t, { :id => desc.id,
+                         :action => "destroy_#{type}_description",
+                         :params => query_params },
+                         { :confirm => :are_you_sure.t }) if admin
+        item += indent + "[#{links.join(' | ')}]" if links.any?
       end
       indent + item
     end

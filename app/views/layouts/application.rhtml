@@ -165,7 +165,7 @@
                 select(:search, :type, options,
                        :selected => session[:search_type] || :observation) %>
                 <%= submit_tag :app_search.l %>&nbsp;&nbsp;
-                <% if is_reviewer? && query_params != {} %>
+                <% if false && query_params != {} %>
                   <%= link_to(:app_refine_search.l.nowrap, :controller => 'observer',
                               :action => 'refine_search',
                               :params => query_params) %> |

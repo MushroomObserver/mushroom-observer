@@ -375,6 +375,7 @@ class Descriptions < ActiveRecord::Migration
         ug = user_groups[d['user_id'].to_i]
         admins = [
           { 'name_description_id' => nd_id, 'user_group_id' => ag },
+          { 'name_description_id' => nd_id, 'user_group_id' => ug },
         ]
         writers = [
           { 'name_description_id' => nd_id, 'user_group_id' => ag },

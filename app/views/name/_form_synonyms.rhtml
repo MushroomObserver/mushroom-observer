@@ -59,7 +59,7 @@
       <% end %>
 
       <p>
-        <%= check_box("deprecate", "all", { :checked => @deprecate_all }, '1') %>
+        <%= check_box("deprecate", "all", { :checked => @deprecate_all && 'checked' }, '1') %>
         <label for="deprecate_all"><%= :form_synonyms_deprecate_synonyms.t %></label><br/>
         <span class="HelpNote"><%= :form_synonyms_deprecate_synonyms_help.t %></span>
       </p>
