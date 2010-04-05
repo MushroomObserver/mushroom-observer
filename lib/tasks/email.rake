@@ -4,7 +4,7 @@ namespace :email do
     print "#{DOMAIN}, #{RAILS_ENV}\n"
     for e in QueuedEmail.find(:all, :include => [
       :queued_email_integers, :queued_email_note, :queued_email_strings, :user])
-      e.dump()
+      print e.dump()
     end
   end
 
