@@ -894,7 +894,7 @@ class ApplicationController < ActionController::Base
   # Return query parameter(s) necessary to pass query information along to
   # the next request. *NOTE*: This method is available to views.
   def query_params(query=nil)
-    if query
+    if query && query.id
       {:q => query.id.alphabetize}
     else
       @query_params || {}
