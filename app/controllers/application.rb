@@ -428,10 +428,6 @@ class ApplicationController < ActionController::Base
   # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
   # Returns a String, or <tt>nil</tt> if no valid match found.
   def get_valid_locale_from_request_header
-    match = nil
-
-    # Get list of available locales.
-    available_locales = Globalite.ui_locales.values.map(&:to_s).sort
 
     # Get list of languages browser requested, sorted in the order it prefers
     # them.  (And convert them to standardized format: 'en' or 'en-US'.)
@@ -442,6 +438,18 @@ class ApplicationController < ActionController::Base
         locale = locale.downcase
       end
     end
+
+    # Lookup the closest match based on the given request priorities.
+    lookup_valid_locale(requested_locales)
+  end
+
+  # Returns our locale that best suits the HTTP_ACCEPT_LANGUAGE request header.
+  # Returns a String, or <tt>nil</tt> if no valid match found.
+  def lookup_valid_locale(requested_locales)
+    match = nil
+
+    # Get list of available locales.
+    available_locales = Globalite.ui_locales.values.map(&:to_s).sort
 
     # Look for matches.
     fallback = nil
@@ -521,6 +529,8 @@ class ApplicationController < ActionController::Base
   def standardize_locale(code)
     if code.to_s.match(/^([a-z][a-z])[_\-](\w+)/i)
       $1.downcase + '-' + $2.upcase
+    elsif code2 = lookup_valid_locale([code])
+      code2
     else
       raise "Invalid locale: '#{code}'"
     end

@@ -3159,7 +3159,7 @@ sandbox_sample: >
   _image 12345_ or !image 12345!\n
   _comment 12345_\n
   \n
-  Include footnote[1] references after any word[2].\n
+  Include footnote[[1]] references after any word[[2]].\n
   \n
   fn1. And then define the footnote at the bottom.\n
   \n

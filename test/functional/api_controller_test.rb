@@ -26,6 +26,10 @@ class ApiControllerTest < FunctionalTestCase
     @request.env['HTTP_ACCEPT_LANGUAGE'] = "en-xx,en;q=0.5"
     get(:test)
     assert_equal(:'en-US', Locale.code)
+
+    @request.env['HTTP_ACCEPT_LANGUAGE'] = "ru-*"
+    get(:test)
+    assert_equal(:'en-US', Locale.code)
   end
 
 #   # Basic comment request.

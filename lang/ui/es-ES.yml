@@ -3255,7 +3255,7 @@ sandbox_sample: >
   _image 12345_ or !image 12345!\n
   _comment 12345_\n
   \n
-  Incluir notas[1] después de cualquier palabra[2].\n
+  Incluir notas[[1]] después de cualquier palabra[[2]].\n
   \n
   fn1. Entonces definir las notas en la parte inferior.\n
   \n
