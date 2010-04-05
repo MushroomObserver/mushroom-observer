@@ -2255,6 +2255,8 @@ class ObserverController < ApplicationController
   action_has_moved 'name', 'show_name'
   action_has_moved 'name', 'show_past_name'
 
+  action_has_moved 'observer', 'show_user_observations', 'observations_by_user'
+
   action_has_moved 'species_list', 'add_observation_to_species_list'
   action_has_moved 'species_list', 'create_species_list'
   action_has_moved 'species_list', 'destroy_species_list'
