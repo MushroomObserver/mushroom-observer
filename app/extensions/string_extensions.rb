@@ -424,9 +424,9 @@ class String
       elsif str.sub!(/^[^<>]+/, '')
         part = $&
         if part.length > max
-          result += part[0,max-1] + '...'
+          result += part[0,max-1].to_s + '...'
           break
-        else
+        elsif part
           max -= part.length
           result += part
         end
