@@ -433,11 +433,17 @@ permission_denied: Permiso denegado.
 units_meters: metros
 
 # Quality values.
-image_vote_long_0: No está valorado
-image_vote_long_1: Okay, pero no tan útil
-image_vote_long_2: Útiles para identificación
-image_vote_long_3: Bastante bueno para una guía de campo
-image_vote_long_4: Excepcional
+image_vote_long_0: No está valorado.
+image_vote_long_1: **Okay**, pero no tan útil.
+image_vote_long_2: **Útiles** para identificación.
+image_vote_long_3: **Bueno** bastante para una guía de campo.
+image_vote_long_4: **¡Gran!** Más allá del trabajo de los mortales.
+
+image_vote_help_0: No está valorado.
+image_vote_help_1: Okay, pero no tan útil.
+image_vote_help_2: Útiles para identificación.
+image_vote_help_3: Bueno bastante para una guía de campo.
+image_vote_help_4: ¡Gran! Más allá del trabajo de los mortales.
 
 image_vote_short_0: Nada
 image_vote_short_1: Okay

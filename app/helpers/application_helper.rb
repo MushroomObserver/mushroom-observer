@@ -7,7 +7,8 @@
 #  rank_as_string::         Translate :Genus into "Genus" (localized).
 #  rank_as_lower_string::   Translate :Genus into "genus" (localized).
 #  rank_as_plural_string::  Translate :Genus into "Genera" (localized).
-#  image_vote_as_long_string::  Translate image vote into (long) localized String.
+#  image_vote_as_long_string::  Translate image vote into (long) localized String with short version enboldened.
+#  image_vote_as_help_string::  Translate image vote into (long) localized String.
 #  image_vote_as_short_string:: Translate image vote into (short) localized String.
 #  review_as_string::       Translate review status into localized String.
 #
@@ -77,10 +78,18 @@ module ApplicationHelper
 
   # Translate image quality.
   #
-  #   image_vote_as_long_string(3)  -->  "Good enough for a field guide."
+  #   image_vote_as_long_string(3)  -->  "**Good** enough for a field guide."
   #
   def image_vote_as_long_string(val)
     :"image_vote_long_#{val || 0}".l
+  end
+
+  # Translate image quality.
+  #
+  #   image_vote_as_help_string(3)  -->  "Good enough for a field guide."
+  #
+  def image_vote_as_help_string(val)
+    :"image_vote_help_#{val || 0}".l
   end
 
   # Translate image quality.

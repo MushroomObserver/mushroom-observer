@@ -344,16 +344,16 @@ class NameController < ApplicationController
 
     # Create search queries for observation lists.
     @consensus_query = create_query(:Observation, :of_name, :name => @name,
-                                    :by => :thumbnail_quality)
+                                    :by => :confidence)
     @synonym_query = create_query(:Observation, :of_name, :name => @name,
                                   :synonyms => :exclusive,
-                                  :by => :thumbnail_quality)
+                                  :by => :confidence)
     @other_query = create_query(:Observation, :of_name, :name => @name,
                                 :synonyms => :all, :nonconsensus => :exclusive,
-                                :by => :thumbnail_quality)
+                                :by => :confidence)
     if @name.below_genus?
       @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
-                                    :all => true, :by => :thumbnail_quality)
+                                    :all => true, :by => :confidence)
     end
 
     # Paginate each of the sections independently.

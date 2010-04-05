@@ -209,7 +209,7 @@ module ApplicationHelper::ObjectLink
       current = image.users_vote(@user)
       result += '<small>' + Image.all_votes.map do |value|
         str1 = image_vote_as_short_string(value)
-        str2 = image_vote_as_long_string(value)
+        str2 = image_vote_as_help_string(value)
         str = if value == current
           content_tag(:b, content_tag(:acronym, str1, :title => str2))
         else

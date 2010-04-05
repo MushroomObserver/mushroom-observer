@@ -83,7 +83,7 @@
 
       <p>
         <%= :image_show_quality.t %>:
-        <span class="Data"><%= image_vote_as_long_string(@image.vote_cache.to_i) %></span>
+        <span class="Data"><%= image_vote_as_long_string(@image.vote_cache.to_i).t %></span>
       </p>
 
       <% if is_reviewer? %>
@@ -116,13 +116,11 @@
             javascript_include('image_vote')
             current = @image.users_vote(@user) %>
             <%= Image.all_votes.map do |value|
-              str1 = image_vote_as_short_string(value)
-              str2 = image_vote_as_long_string(value)
+              str = image_vote_as_long_string(value).t
               str = if value == current
-                content_tag(:b, content_tag(:acronym, str1, :title => str2))
+                content_tag(:b, content_tag(:acronym, str))
               else
-                link_to_function(str1, "image_vote(#{@image.id},'#{value}')",
-                                 :title => str2)
+                link_to_function(str, "image_vote(#{@image.id},'#{value}')")
               end
               num = @image.num_votes(value)
               str += " (#{num})" if num > 0
@@ -139,7 +137,7 @@
             <% end
             for value in Image.all_votes
               str1 = image_vote_as_short_string(value)
-              str2 = image_vote_as_long_string(value)
+              str2 = image_vote_as_help_string(value)
               str3 = :image_show_vote_and_next.t(:value => str1)
               if value == current %>
                 <b><%= content_tag(:acronym, str1, :title => str2) %></b><br/>
