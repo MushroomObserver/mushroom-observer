@@ -154,7 +154,6 @@ Disallow: /observer/remove_images
 Disallow: /observer/remove_observation_from_species_list
 Disallow: /observer/reuse_image
 Disallow: /observer/review_authors
-Disallow: /observer/rss
 Disallow: /observer/server_status
 Disallow: /observer/show_comments_for_user
 Disallow: /observer/show_notifications

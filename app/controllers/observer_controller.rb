@@ -1720,7 +1720,7 @@ class ObserverController < ApplicationController
   end
 
   # this is the site's rss feed.
-  def rss # :nologin: :norobots:
+  def rss # :nologin:
     headers["Content-Type"] = "application/xml"
     @logs = RssLog.all(:conditions => "datediff(now(), modified) <= 31",
                        :order => "modified desc", :limit => 100, :include => [
