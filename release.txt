@@ -2,13 +2,14 @@ We are pleased to finally announce a major set of new features on Mushroom
 Observer!  This is the result of several months of intensive development,
 mostly by Jason since Nathan has been rather preoccupied by his exciting new
 position as Director of Biodiversity Informatics at EOL.org (congratulations,
-Nathan!).  Nathan has helped with the overall design and testing the new features.
+Nathan!).  Nathan has helped with the overall design and testing the new
+features. 
 
 Much of the work should be invisible to the casual user.  (Outside of the
 occasional bugs that we inevitably failed to catch, of course.)  However, there
-are some major new features that we hope will delight you.  Below is a
-list of the most important new developments.  Our apologies if we've failed to
-acknowledge your suggestions.
+are some major new features that we hope will delight you.  Below is a list of
+the most important new developments.  Our apologies if we've failed to
+acknowledge your suggestions. 
 
 Enjoy!
 
@@ -18,32 +19,31 @@ Jason & Nathan
 
 Voting:
 
-  Users may now make their votes public.  By default all pre-existing votes
-  are anonymous, but starting April 5, 2010 the will be for them to be public.
-  See http://mushroomobserver.org/25184 and click on the percentage below
-  'Community Vote' next to the name Lichenomphalia umbellifera to see an example
-  of something Jason and Nathan have voted on.  You can change the visible of
-  your votes by going to your account "Preferences".  We only provide for either all
-  new votes being public, or all new votes being anonymous, although existing users
-  have this option of grandfathering in old anonymous votes while making all
-  new votes public. 
+  Users may now make their votes public.  By default all pre-existing votes are
+  anonymous, but starting April 5, 2010 the default will be for them to be
+  public.  See http://mushroomobserver.org/25184 and click on the percentage
+  below 'Community Vote' next to the name Lichenomphalia umbellifera to see an
+  example of something Jason and Nathan have voted on.  You can change the
+  visibility of your votes by going to your account "Preferences".  We only
+  provide for either all new votes being public, or all new votes being
+  anonymous, although existing users have the option of grandfathering in old
+  anonymous votes while making all new votes public. 
 
   All users are now encouraged to vote on image quality.  At Chris Parrish's
   and Debbie Viess's suggestions we've deliberately omitted negative votes.
   Image quality is only used to rank images in search results.  Also, only
   images of a minimum quality ("useful for identification") are being shared
   with third-party sources, such as EOL.org.  As with proposed names, there
-  will never be any sort of penalty for posting an image that other users happen
-  to dislike!
+  will never be any sort of penalty for posting an image that other users
+  happen to dislike! 
 
   If you have javascript enabled, you will be able to vote on images directly
-  from most place on the site.  At Alan Rockefeller's and Curtis Björk's
-  suggestion, we now optionally provide both larger thumbnails and larger images
-  for the Image pages.  The thumbnail size can be changed in your account
-  "Preferences". Additional image sizes are available when you click on an image,
-  as well.  As it takes longer to process all the new image sizes, please be patient
-  after posting observations -- you will be seeing the cartoon Amanita more often 
-  than before. 
+  from most places on the site.  At Alan Rockefeller's and Curtis Björk's
+  suggestion, we now optionally provide larger thumbnails.  The thumbnail size
+  can be changed in your account "Preferences".  Additional image sizes are
+  available when you click on an image, as well.  As it takes longer to process
+  all the new image sizes, please be patient after posting observations -- you
+  will be seeing the cartoon Amanita more often than before. 
 
 Name and Location Descriptions:
 
@@ -52,7 +52,7 @@ Name and Location Descriptions:
   attached object.  This allows us to develop multiple descriptions for a
   species, e.g., the standard public one, private drafts developed by students
   for a class, descriptions extracted automatically from third-party sources,
-  and alternate descriptions provided by individual users. 
+  and alternate ("personal") descriptions provided by individual users. 
 
   Each name has a "default" description.  This is the old public description,
   where one existed.  All users will be allowed to read this description.
@@ -68,22 +68,22 @@ Name and Location Descriptions:
   permissions.  Public descriptions are intended to always be readable and
   writable by everyone so their permissions cannot be changed except by the
   site admins.  In extreme cases the site admins could make a public
-  description read-only, but we hope that will not be needed.
+  description read-only, but we hope that will not be necessary.
 
-  Existing drafts (for the undergraduate projects) have been transformed into 
-  special private descriptions.  Read, write and admin permissions should remain 
-  unchanged.  Drafts (and any other description) may still be "published" whenever
-  you are ready.  In this new context, "publishing" is a process that turns your 
-  draft into a public description and makes it the default.  If a public draft 
-  already exists and it doesn't know how to merge the two, then it opens up a 
-  form to allow you to merge them by hand. 
+  Existing drafts (for the undergraduate projects) have been transformed into
+  special private descriptions.  Read, write and admin permissions should
+  remain unchanged.  Drafts (and any other description) may still be
+  "published" whenever you are ready.  In this new context, "publishing" is a
+  process that turns your draft into a public description and makes it the
+  default.  If a public description already exists, you may choose to merge
+  your draft with it instead.
 
-  Users may now comment directly on names (and location).  Note, if
-  you enter a comment when approving or deprecating a name, it shows up as a
-  comment now, instead of being inserted into the general "Notes" field.
-  Hopefully users will find it convenient to use this forum to debate taxonomic
-  issues, rather than under the observation of the moment, where the comments
-  are soon lost under the mountain of new observations.
+  Users may now comment directly on names (and locations).  Note, if you enter
+  a comment when approving or deprecating a name, it shows up as a comment now,
+  instead of being inserted into the general "Notes" field.  Hopefully users
+  will find it convenient to use this forum to debate taxonomic issues, rather
+  than under the observation of the moment, where the comments are soon lost
+  under the mountain of new observations. 
 
 Searching:
 
@@ -96,7 +96,7 @@ Searching:
   done throughout the site.  One sign you will notice is that in addition to
   the old "<< Prev | Next >>" tabs at the top of observation and name pages,
   there is now also an "Index" link that shows you the results of the latest
-  index or search.  All three links are now present for all types of objects.
+  index or search.  All three links are now present for all types of objects. 
 
   You can now also request to see a list of names, locations or images from the
   index of observation results, and vice versa.  This can be particularly
@@ -109,7 +109,7 @@ Searching:
   to the set of results starting with a given letter. 
 
   You may now use the search bar at the top of the page to search for comments,
-  species lists, and users.
+  species lists, and users. 
 
 Infrastructure:
 
@@ -122,8 +122,8 @@ Infrastructure:
   performance.  (In some common cases, such as the "Activity Log" site index,
   the new version takes less than half the time to respond in local tests!)
   Unfortunately there are many factors involved in the overall response time of
-  a live production server, so it remains to be seen how much of an
-  improvement the average user will see.  We are guardedly optimistic. 
+  a live production server, so it remains to be seen how much of an improvement
+  the average user will see.  We are guardedly optimistic. 
 
   We have added the ability to synchronize with additional remote webservers.
   In particular, we hope to establish a close working relationship with a clone
