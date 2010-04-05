@@ -191,8 +191,7 @@ class Description < AbstractModel
   def all_notes
     result = {}
     for field in self.class.all_note_fields
-      value = self.send(field).to_s.
-                   gsub(/\s+$/, '').sub(/\A\n+/, '').sub(/\n+\Z/, '')
+      value = self.send(field).to_s
       result[field] = value.blank? ? nil : value
     end
     result

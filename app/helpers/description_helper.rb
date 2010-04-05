@@ -72,6 +72,8 @@ module ApplicationHelper::Description
                 :params => query_params)
       end
     end
+
+    draw_prev_next_tabs(desc)
   end
 
   # Header of the embedded description within a show_object page.

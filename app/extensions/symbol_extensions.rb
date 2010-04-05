@@ -141,11 +141,15 @@ class Symbol
 
       # Expand arguments.  (See comments above.)
       if args.is_a?(Hash)
-        result.gsub!(/\[(\w+?)\]/) do
+        result.gsub!(/\[(\[?\w+?)\]/) do
           x = y = $1
 
+          # Ignore double-brackets.
+          if x[0,1] == '['
+            x
+
           # Want :type, given :type.
-          if args.has_key?(arg = x.to_sym)
+          elsif args.has_key?(arg = x.to_sym)
             val = args[arg]
             val.is_a?(Symbol) ?
               val.l :
