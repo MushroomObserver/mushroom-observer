@@ -48,7 +48,7 @@ DEFAULT_IMAGE_SERVER = 'dreamhost'
 ALL_SIZES = ['thumb', '320', '640', '960', '1280', 'orig']
 
 # List of sizes we don't want to keep on slicehost due to space constraints.
-DELETE_SIZES = ['orig']
+DELETE_SIZES = ['960', '1280', 'orig']
 
 # ----------------------------
 #  Command line parsing.
