@@ -107,6 +107,12 @@ class ObserverControllerTest < FunctionalTestCase
 
     get_with_dump(:login)
     assert_response(:controller => "account", :action => "login")
+
+    get_with_dump(:textile)
+    assert_response('textile_sandbox')
+
+    get_with_dump(:textile_sandbox)
+    assert_response('textile_sandbox')
   end
 
   def test_prev_and_next_observation
@@ -347,9 +353,8 @@ class ObserverControllerTest < FunctionalTestCase
   end
 
   def test_show_user_no_id
-    assert_raises(ActiveRecord::RecordNotFound, "Couldn't find User without an ID") do
-      get_with_dump(:show_user)
-    end
+    get_with_dump(:show_user)
+    assert_response(:action => 'index_user')
   end
 
   def test_ask_questions

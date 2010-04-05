@@ -1131,9 +1131,13 @@ class ApplicationController < ActionController::Base
     end
 
     # Time query -- this caches the ids (and first letters if needed).
+    logger.warn("QUERY starting: #{query.query.inspect}")
     @timer_start = Time.now
     @num_results = query.num_results
     @timer_end = Time.now
+    logger.warn("QUERY finished: model=#{query.model_string}, " +
+                "flavor=#{query.flavor}, params=#{query.params.inspect}, " +
+                "time=#{(@timer_end-@timer_start).to_f}")
 
     # If only one result (before pagination), redirect to 'show' action.
     if (query.num_results == 1) and
@@ -1209,12 +1213,13 @@ class ApplicationController < ActionController::Base
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
-  def find_or_goto_index(model, id, redirect=nil)
-    result = model.safe_find(id)
+  def find_or_goto_index(model, id, *args)
+    result = model.safe_find(id, *args)
     if !result
-      type = object.class.name.underscore.to_sym
-      flash_error(:runtime_object_not_found.t(:id => id, :type => type))
-      goto_index(redirect)
+      flash_error(:runtime_object_not_found.t(:id => id || '0',
+                                              :type => model.type_tag))
+      redirect_to(:controller => model.show_controller,
+                  :action => model.index_action, :params => query_params)
     end
     return result
   end
@@ -1226,7 +1231,7 @@ class ApplicationController < ActionController::Base
   def goto_index(redirect=nil)
     pass_query_params
     redirect = redirect.name.underscore if redirect.is_a?(Class)
-    model = case (redirect || controller.name)
+    model = case (redirect || controller.name).to_s
       when 'account'      ; RssLog
       when 'comment'      ; Comment
       when 'image'        ; Image

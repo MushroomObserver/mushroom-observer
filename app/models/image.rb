@@ -599,7 +599,14 @@ class Image < AbstractModel
   # Retrieve the given User's vote for this Image.  Returns a Fixnum from
   # 1 to 4, or nil if the User hasn't voted.
   def users_vote(user=User.current)
-    vote_hash[user.id]
+    user_id = user.is_a?(User) ? user.id : user.to_i
+    vote_hash[user_id]
+  end
+
+  # In case we don't have an instantiated Image...
+  def self.users_vote(str, user=User.current)
+    user_id = user.is_a?(User) ? user.id : user.to_i
+    vote_hash(str)[user_id]
   end
 
   # Change a user's vote to the given value.  Pass in either the numerical vote
@@ -631,6 +638,12 @@ class Image < AbstractModel
   # Retrieve list of users who have voted as a Hash mapping user ids to
   # numerical vote values (Fixnum).  (Forces all votes to be integers.)
   def vote_hash # :nodoc:
+    self.class.vote_hash(votes)
+  end
+
+  # Used in the case that you don't have an Image instance, and just have the
+  # raw votes string instead.
+  def self.vote_hash(votes) # :nodoc:
     if votes.blank?
       {}
     else

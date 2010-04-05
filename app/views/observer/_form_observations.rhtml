@@ -51,13 +51,15 @@ end %>
           <td style="white-space:nowrap">
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
             <%= thumbnail(image, :border => 0, :obs => @observation.id,
-                          :votes => true) %>
+                          :votes => false, :nodiv => true) %>
           </td>
           <td width="10"></td>
           <td>
             <label for="image_<%= image.id %>_notes"><%= :NOTES.t %>:</label>
             <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
-            <%= text_area_tag("image_#{image.id}_notes", image.notes, :cols => 60, :rows => 2) %>
+            <%= text_area_tag("image_#{image.id}_notes", image.notes,
+                              :cols => 60, :rows => 2) %><br/>
+            <%= :Vote.t %>: <%= image_vote_tabs(image) %>
           </td>
 <% # These controls are dangerous because they cause you to lose any
    # changes made in the form.  They should be re-cast as ajax requests.

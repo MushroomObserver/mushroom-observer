@@ -316,22 +316,28 @@ class LocationController < ApplicationController
     # objects.
     loc_id = params[:id]
     desc_id = params[:desc]
-    @location = Location.find(loc_id, :include => [:user, :descriptions])
-    desc_id = @location.description_id if desc_id.blank?
-    if !desc_id.blank?
-      @description = LocationDescription.find(desc_id, :include =>
-                                        [:authors, :editors, :license, :user])
-      @description = nil if !@description.is_reader?(@user)
-    else
-      @description = nil
-    end
+    if @location = find_or_goto_index(Location, loc_id,
+                                      :include => [:user, :descriptions])
 
-    update_view_stats(@location)
-    update_view_stats(@description) if @description
+      # Load default description if user didn't request one explicitly.
+      desc_id = @location.description_id if desc_id.blank?
+      if desc_id.blank?
+        @description = nil
+      elsif @description = LocationDescription.safe_find(desc_id, :include =>
+                                         [:authors, :editors, :license, :user])
+        @description = nil if !@description.is_reader?(@user)
+      else
+        flash_error(:runtime_object_not_found.t(:type => :description,
+                                                :id => desc_id))
+      end
 
-    # Get a list of projects the user can create drafts for.
-    @projects = @user && @user.projects_member.select do |project|
-      !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+      update_view_stats(@location)
+      update_view_stats(@description) if @description
+
+      # Get a list of projects the user can create drafts for.
+      @projects = @user && @user.projects_member.select do |project|
+        !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+      end
     end
   end
 
@@ -339,32 +345,34 @@ class LocationController < ApplicationController
   def show_location_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    @description = LocationDescription.find(params[:id], :include =>
-      [ :authors, :editors, :license, :user, {:location => :descriptions} ])
+    if @description = find_or_goto_index(LocationDescription, params[:id],
+                         :include => [ :authors, :editors, :license, :user,
+                                       {:location => :descriptions} ])
 
-    # Public or user has permission.
-    if @description.is_reader?(@user)
-      @location = @description.location
-      update_view_stats(@description)
+      # Public or user has permission.
+      if @description.is_reader?(@user)
+        @location = @description.location
+        update_view_stats(@description)
 
-      # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
-        !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
-      end
+        # Get a list of projects the user can create drafts for.
+        @projects = @user && @user.projects_member.select do |project|
+          !@location.descriptions.any? {|d| d.belongs_to_project?(project)}
+        end
 
-    # User doesn't have permission to see this description.
-    else
-      if @description.source_type == :project
-        flash_error(:runtime_show_draft_denied.t)
-        if project = Project.find_by_title(@description.source_name)
-          redirect_to(:controller => 'project', :action => 'show_project',
-                      :id => project.id)
+      # User doesn't have permission to see this description.
+      else
+        if @description.source_type == :project
+          flash_error(:runtime_show_draft_denied.t)
+          if project = Project.find_by_title(@description.source_name)
+            redirect_to(:controller => 'project', :action => 'show_project',
+                        :id => project.id)
+          else
+            redirect_to(:action => 'show_location', :id => @description.location_id)
+          end
         else
+          flash_error(:runtime_show_description_denied.t)
           redirect_to(:action => 'show_location', :id => @description.location_id)
         end
-      else
-        flash_error(:runtime_show_description_denied.t)
-        redirect_to(:action => 'show_location', :id => @description.location_id)
       end
     end
   end
@@ -373,8 +381,9 @@ class LocationController < ApplicationController
   def show_past_location # :nologin: :prefetch: :norobots:
     store_location
     pass_query_params
-    @location = Location.find(params[:id])
-    @location.revert_to(params[:version].to_i)
+    if @location = find_or_goto_index(Location, params[:id])
+      @location.revert_to(params[:version].to_i)
+    end
   end
 
   # Show past version of LocationDescription.  Accessible only from
@@ -382,20 +391,21 @@ class LocationController < ApplicationController
   def show_past_location_description # :nologin: :prefetch: :norobots:
     store_location
     pass_query_params
-    @description = LocationDescription.find(params[:id])
-    if params[:merge_source_id].blank?
-      @description.revert_to(params[:version].to_i)
-    else
-      @merge_source_id = params[:merge_source_id]
-      version = LocationDescription::Version.find(@merge_source_id)
-      @old_parent_id = version.location_description_id
-      subversion = params[:version]
-      if !subversion.blank? and
-         (version.version != subversion.to_i)
-        version = LocationDescription::Version.
-          find_by_version_and_location_description_id(params[:version], @old_parent_id)
+    if @description = find_or_goto_index(LocationDescription, params[:id])
+      if params[:merge_source_id].blank?
+        @description.revert_to(params[:version].to_i)
+      else
+        @merge_source_id = params[:merge_source_id]
+        version = LocationDescription::Version.find(@merge_source_id)
+        @old_parent_id = version.location_description_id
+        subversion = params[:version]
+        if !subversion.blank? and
+           (version.version != subversion.to_i)
+          version = LocationDescription::Version.
+            find_by_version_and_location_description_id(params[:version], @old_parent_id)
+        end
+        @description.clone_versioned_model(version, @description)
       end
-      @description.clone_versioned_model(version, @description)
     end
   end
 

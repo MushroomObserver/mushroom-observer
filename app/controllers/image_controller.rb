@@ -170,44 +170,45 @@ class ImageController < ApplicationController
   # Outputs: @image
   def show_image # :nologin: :prefetch:
     store_location
-    @image = Image.find(params[:id],
+    if @image = find_or_goto_index(Image, params[:id],
                         :include => [:user, {:observations => :name}])
-    update_view_stats(@image)
-    @is_reviewer = is_reviewer
-    pass_query_params
+      update_view_stats(@image)
+      @is_reviewer = is_reviewer
+      pass_query_params
 
-    # Decide which size to display.
-    @default_size = @user ? @user.image_size : :medium
-    @size = params[:size].blank? ? @default_size : params[:size].to_sym
+      # Decide which size to display.
+      @default_size = @user ? @user.image_size : :medium
+      @size = params[:size].blank? ? @default_size : params[:size].to_sym
 
-    # Make this size the default image size for this user.
-    if @user and (@default_size != @size) and
-       (params[:make_default] == '1')
-      @user.image_size = @size
-      @user.save_without_our_callbacks
-      @default_size = @size
-    end
+      # Make this size the default image size for this user.
+      if @user and (@default_size != @size) and
+         (params[:make_default] == '1')
+        @user.image_size = @size
+        @user.save_without_our_callbacks
+        @default_size = @size
+      end
 
-    # Update export status.
-    if !params[:set_export].blank?
-      @image.ok_for_export = (params[:set_export] == '1')
-      @image.save_without_our_callbacks
-    end
+      # Update export status.
+      if !params[:set_export].blank?
+        @image.ok_for_export = (params[:set_export] == '1')
+        @image.save_without_our_callbacks
+      end
 
-    # Wait until here to create this search query to save server resources.
-    # Otherwise we'd be creating a new search query for images for every single
-    # show_observation request.  We know we came from an observation-type page
-    # because that's the only time the 'obs' param will be set (with obs id).
-    obs = params[:obs]
-    if !obs.blank? &&
-       # The outer search on observation won't be saved for robots, so no sense
-       # in bothering with any of this.
-       !is_robot?
-      obs_query = find_or_create_query(:Observation)
-      obs_query.current = obs
-      img_query = create_query(:Image, :inside_observation,
-                               :observation => obs, :outer => obs_query)
-      set_query_params(img_query)
+      # Wait until here to create this search query to save server resources.
+      # Otherwise we'd be creating a new search query for images for every single
+      # show_observation request.  We know we came from an observation-type page
+      # because that's the only time the 'obs' param will be set (with obs id).
+      obs = params[:obs]
+      if !obs.blank? &&
+         # The outer search on observation won't be saved for robots, so no sense
+         # in bothering with any of this.
+         !is_robot?
+        obs_query = find_or_create_query(:Observation)
+        obs_query.current = obs
+        img_query = create_query(:Image, :inside_observation,
+                                 :observation => obs, :outer => obs_query)
+        set_query_params(img_query)
+      end
     end
   end
 

@@ -109,20 +109,21 @@ class ProjectController < ApplicationController
   def show_project # :nologin: :prefetch:
     store_location
     pass_query_params
-    @project = Project.find(params[:id])
-    @is_member = @project.is_member?(@user)
-    @is_admin = @project.is_admin?(@user)
+    if @project = find_or_goto_index(Project, params[:id])
+      @is_member = @project.is_member?(@user)
+      @is_admin = @project.is_admin?(@user)
 
-    @draft_data = Project.connection.select_all %(
-      SELECT n.display_name, nd.id, nd.user_id
-      FROM names n, name_descriptions nd, name_descriptions_admins nda
-      WHERE nda.user_group_id = #{@project.admin_group_id}
-        AND nd.id = nda.name_description_id
-        AND n.id = nd.name_id
-      ORDER BY n.text_name ASC, n.author ASC
-    )
+      @draft_data = Project.connection.select_all %(
+        SELECT n.display_name, nd.id, nd.user_id
+        FROM names n, name_descriptions nd, name_descriptions_admins nda
+        WHERE nda.user_group_id = #{@project.admin_group_id}
+          AND nd.id = nda.name_description_id
+          AND n.id = nd.name_id
+        ORDER BY n.text_name ASC, n.author ASC
+      )
 
-    @name_data = @draft_data.map {|d| d['display_name']}.uniq.length
+      @name_data = @draft_data.map {|d| d['display_name']}.uniq.length
+    end
   end
 
   # Go to next project: redirects to show_project.

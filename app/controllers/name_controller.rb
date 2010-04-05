@@ -318,60 +318,66 @@ class NameController < ApplicationController
     # Load Name and NameDescription along with a bunch of associated objects.
     name_id = params[:id]
     desc_id = params[:desc]
-    @name = Name.find(name_id, :include => [:user, :descriptions])
-    desc_id = @name.description_id if desc_id.blank?
-    if !desc_id.blank?
-      @description = NameDescription.find(desc_id, :include =>
-                              [:authors, :editors, :license, :reviewer, :user])
-      @description = nil if !@description.is_reader?(@user)
-    else
-      @description = nil
-    end
+    if @name = find_or_goto_index(Name, name_id,
+                                  :include => [:user, :descriptions])
 
-    update_view_stats(@name)
-    update_view_stats(@description) if @description
+      # Display default description if user didn't request one explicitly.
+      desc_id = @name.description_id if desc_id.blank?
+      if desc_id.blank?
+        @description = nil
+      elsif @description = NameDescription.safe_find(desc_id, :include =>
+                                         [:authors, :editors, :license, :user])
+        @description = nil if !@description.is_reader?(@user)
+      else
+        flash_error(:runtime_object_not_found.t(:type => :description,
+                                                :id => desc_id))
+      end
 
-    # Get a list of projects the user can create drafts for.
-    @projects = @user && @user.projects_member.select do |project|
-      !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
-    end
+      update_view_stats(@name)
+      update_view_stats(@description) if @description
 
-    # Get list of immediate parents.
-    @parents = @name.parents
+      # Get a list of projects the user can create drafts for.
+      @projects = @user && @user.projects_member.select do |project|
+        !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+      end
 
-    # Create query for immediate children.
-    @children_query = create_query(:Name, :of_children, :name => @name)
+      # Get list of immediate parents.
+      @parents = @name.parents
 
-    # Create search queries for observation lists.
-    @consensus_query = create_query(:Observation, :of_name, :name => @name,
+      # Create query for immediate children.
+      @children_query = create_query(:Name, :of_children, :name => @name)
+
+      # Create search queries for observation lists.
+      @consensus_query = create_query(:Observation, :of_name, :name => @name,
+                                      :by => :confidence)
+      @synonym_query = create_query(:Observation, :of_name, :name => @name,
+                                    :synonyms => :exclusive,
                                     :by => :confidence)
-    @synonym_query = create_query(:Observation, :of_name, :name => @name,
-                                  :synonyms => :exclusive,
+      @other_query = create_query(:Observation, :of_name, :name => @name,
+                                  :synonyms => :all, :nonconsensus => :exclusive,
                                   :by => :confidence)
-    @other_query = create_query(:Observation, :of_name, :name => @name,
-                                :synonyms => :all, :nonconsensus => :exclusive,
-                                :by => :confidence)
-    if @name.below_genus?
-      @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
-                                    :all => true, :by => :confidence)
-    end
+      if @name.below_genus?
+        @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
+                                      :all => true, :by => :confidence)
+      end
 
-    # Paginate each of the sections independently.
-    @children_pages  = paginate_numbers(:children_page, 24)
-    @consensus_pages = paginate_numbers(:consensus_page, 12)
-    @synonym_pages   = paginate_numbers(:synonym_page, 12)
-    @other_pages     = paginate_numbers(:other_page, 12)
-    if @subtaxa_query
-      @subtaxa_pages = paginate_numbers(:subtaxa_page, 12)
-    end
+      # Paginate each of the sections independently.
+      @children_pages  = paginate_numbers(:children_page, 24)
+      @consensus_pages = paginate_numbers(:consensus_page, 12)
+      @synonym_pages   = paginate_numbers(:synonym_page, 12)
+      @other_pages     = paginate_numbers(:other_page, 12)
+      if @subtaxa_query
+        @subtaxa_pages = paginate_numbers(:subtaxa_page, 12)
+      end
 
-    args = { :include => [:name, :location, :user] }
-    @children_data  = @children_query.paginate(@children_pages)
-    @consensus_data = @consensus_query.paginate(@consensus_pages, args)
-    @synonym_data   = @synonym_query.paginate(@synonym_pages, args)
-    @other_data     = @other_query.paginate(@other_pages, args)
-    if @subtaxa_query
-      @subtaxa_data = @subtaxa_query.paginate(@subtaxa_pages, args)
+      args = { :include => [:name, :location, :thumb_image, :user] }
+      @children_data  = @children_query.paginate(@children_pages)
+      @consensus_data = @consensus_query.paginate(@consensus_pages, args)
+      @synonym_data   = @synonym_query.paginate(@synonym_pages, args)
+      @other_data     = @other_query.paginate(@other_pages, args)
+      if @subtaxa_query
+        @subtaxa_data = @subtaxa_query.paginate(@subtaxa_pages, args)
+      end
     end
   end
 
@@ -379,32 +385,34 @@ class NameController < ApplicationController
   def show_name_description # :nologin: :prefetch:
     store_location
     pass_query_params
-    @description = NameDescription.find(params[:id], :include =>
-      [:authors, :editors, :license, :reviewer, :user, {:name=>:descriptions}])
+    if @description = find_or_goto_index(NameDescription, params[:id],
+                        :include => [:authors, :editors, :license, :reviewer,
+                                     :user, {:name=>:descriptions}])
 
-    # Public or user has permission.
-    if @description.is_reader?(@user)
-      @name = @description.name
-      update_view_stats(@description)
+      # Public or user has permission.
+      if @description.is_reader?(@user)
+        @name = @description.name
+        update_view_stats(@description)
 
-      # Get a list of projects the user can create drafts for.
-      @projects = @user && @user.projects_member.select do |project|
-        !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
-      end
+        # Get a list of projects the user can create drafts for.
+        @projects = @user && @user.projects_member.select do |project|
+          !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+        end
 
-    # User doesn't have permission to see this description.
-    else
-      if @description.source_type == :project
-        flash_error(:runtime_show_draft_denied.t)
-        if project = Project.find_by_title(@description.source_name)
-          redirect_to(:controller => 'project', :action => 'show_project',
-                      :id => project.id)
+      # User doesn't have permission to see this description.
+      else
+        if @description.source_type == :project
+          flash_error(:runtime_show_draft_denied.t)
+          if project = Project.find_by_title(@description.source_name)
+            redirect_to(:controller => 'project', :action => 'show_project',
+                        :id => project.id)
+          else
+            redirect_to(:action => 'show_name', :id => @description.name_id)
+          end
         else
+          flash_error(:runtime_show_description_denied.t)
           redirect_to(:action => 'show_name', :id => @description.name_id)
         end
-      else
-        flash_error(:runtime_show_description_denied.t)
-        redirect_to(:action => 'show_name', :id => @description.name_id)
       end
     end
   end
@@ -413,16 +421,17 @@ class NameController < ApplicationController
   def show_past_name # :nologin: :prefetch: :norobots:
     pass_query_params
     store_location
-    @name = Name.find(params[:id])
-    @name.revert_to(params[:version].to_i)
+    if @name = find_or_goto_index(Name, params[:id])
+      @name.revert_to(params[:version].to_i)
 
-    # Old correct spellings could have gotten merged with something else and no longer exist.
-    if @name.is_misspelling?
-      @correct_spelling = Name.connection.select_value %(
-        SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
-      )
-    else
-      @correct_spelling = ''
+      # Old correct spellings could have gotten merged with something else and no longer exist.
+      if @name.is_misspelling?
+        @correct_spelling = Name.connection.select_value %(
+          SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
+        )
+      else
+        @correct_spelling = ''
+      end
     end
   end
 
@@ -431,20 +440,21 @@ class NameController < ApplicationController
   def show_past_name_description # :nologin: :prefetch: :norobots:
     pass_query_params
     store_location
-    @description = NameDescription.find(params[:id])
-    if params[:merge_source_id].blank?
-      @description.revert_to(params[:version].to_i)
-    else
-      @merge_source_id = params[:merge_source_id]
-      version = NameDescription::Version.find(@merge_source_id)
-      @old_parent_id = version.name_description_id
-      subversion = params[:version]
-      if !subversion.blank? and
-         (version.version != subversion.to_i)
-        version = NameDescription::Version.
-          find_by_version_and_name_description_id(params[:version], @old_parent_id)
+    if @description = find_or_goto_index(NameDescription, params[:id])
+      if params[:merge_source_id].blank?
+        @description.revert_to(params[:version].to_i)
+      else
+        @merge_source_id = params[:merge_source_id]
+        version = NameDescription::Version.find(@merge_source_id)
+        @old_parent_id = version.name_description_id
+        subversion = params[:version]
+        if !subversion.blank? and
+           (version.version != subversion.to_i)
+          version = NameDescription::Version.
+            find_by_version_and_name_description_id(params[:version], @old_parent_id)
+        end
+        @description.clone_versioned_model(version, @description)
       end
-      @description.clone_versioned_model(version, @description)
     end
   end
 

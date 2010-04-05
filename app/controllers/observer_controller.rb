@@ -656,52 +656,47 @@ class ObserverController < ApplicationController
       flash_notice(:show_votes_gone_private.t)
     end
 
-# logger.warn('START ----------------------------------------------'); time=Time.now
-    @observation = Observation.find(params[:id], :include => [
-                      {:comments => :user},
-                      :images,
-                      :location,
-                      :name,
-                      {:namings => [:name, :user, {:votes => :user}]},
-                      {:species_lists => :location},
-                      :user,
-                   ])
-# logger.warn('LOAD_OBSERVATION ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-    update_view_stats(@observation)
-# logger.warn('VIEW_STATS ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+    if @observation = find_or_goto_index(Observation, params[:id], :include => [
+                        {:comments => :user},
+                        :images,
+                        :location,
+                        :name,
+                        {:namings => [:name, :user, {:votes => :user}]},
+                        {:species_lists => :location},
+                        :user,
+                     ])
+      update_view_stats(@observation)
 
-    # Decide if the current query can be used to create a map.
-    query = find_query(:Observation)
-    @mappable = query && query.is_coercable?(:Location)
-# logger.warn('QUERY ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
+      # Decide if the current query can be used to create a map.
+      query = find_query(:Observation)
+      @mappable = query && query.is_coercable?(:Location)
 
-    if @user
-      # This happens when user clicks on "Update Votes".
-      if request.method == :post
-        if params[:vote]
-          flashed = false
-          for naming in @observation.namings
-            if (value = params[:vote][naming.id.to_s][:value].to_i rescue nil) and
-               @observation.change_vote(naming, value) and
-               !flashed
-              flash_notice(:runtime_show_observation_success.t)
-              flashed = true
+      if @user
+        # This happens when user clicks on "Update Votes".
+        if request.method == :post
+          if params[:vote]
+            flashed = false
+            for naming in @observation.namings
+              if (value = params[:vote][naming.id.to_s][:value].to_i rescue nil) and
+                 @observation.change_vote(naming, value) and
+                 !flashed
+                flash_notice(:runtime_show_observation_success.t)
+                flashed = true
+              end
             end
           end
         end
-      end
 
-      # Provide a list of user's votes to view.
-# logger.warn('OTHER ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
-      @votes = {}
-      for naming in @observation.namings
-        vote = naming.votes.select {|x| x.user_id == @user.id}.first
-        vote ||= Vote.new(:value => 0)
-        @votes[naming.id] = vote
+        # Provide a list of user's votes to view.
+        @votes = {}
+        for naming in @observation.namings
+          vote = naming.votes.select {|x| x.user_id == @user.id}.first
+          vote ||= Vote.new(:value => 0)
+          @votes[naming.id] = vote
+        end
+        @confidence_menu = translate_menu(Vote.confidence_menu)
+        @agreement_menu  = translate_menu(Vote.agreement_menu)
       end
-      @confidence_menu = translate_menu(Vote.confidence_menu)
-      @agreement_menu  = translate_menu(Vote.agreement_menu)
-# logger.warn('VOTES ' + ((time2=Time.now)-time).to_s + ' ----------------------------------------------'); time=time2
     end
   end
 
@@ -1221,7 +1216,7 @@ class ObserverController < ApplicationController
   # Outputs: @naming
   def show_votes # :nologin: :prefetch:
     pass_query_params
-    @naming = Naming.find(params[:id], :include => [:name, :votes])
+    @naming = find_or_goto_index(Naming, params[:id], :include => [:name, :votes])
   end
 
   # Refresh vote cache for all observations in the database.
@@ -1311,18 +1306,19 @@ class ObserverController < ApplicationController
   def show_notifications # :norobots:
     pass_query_params
     data = []
-    @observation = Observation.find(params[:id])
-    for q in QueuedEmail.find_all_by_flavor_and_to_user_id('QueuedEmail::NameTracking', @user.id)
-      naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
-      if shown.nil?
-        notification = Notification.find(notification_id)
-        if notification.note_template
-          data.push([notification, Naming.find(naming_id)])
+    if @observation = find_or_goto_index(Observation, params[:id])
+      for q in QueuedEmail.find_all_by_flavor_and_to_user_id('QueuedEmail::NameTracking', @user.id)
+        naming_id, notification_id, shown = q.get_integers([:naming, :notification, :shown])
+        if shown.nil?
+          notification = Notification.find(notification_id)
+          if notification.note_template
+            data.push([notification, Naming.find(naming_id)])
+          end
+          q.add_integer(:shown, 1)
         end
-        q.add_integer(:shown, 1)
       end
+      @data = data.sort_by { rand }
     end
-    @data = data.sort_by { rand }
   end
 
   # Lists notifications that the given user has created.
@@ -1424,11 +1420,12 @@ class ObserverController < ApplicationController
   def show_user # :nologin: :prefetch:
     store_location
     id = params[:id]
-    @show_user = User.find(id, :include => :location)
-    @user_data = SiteData.new.get_user_data(id)
-    query = Query.lookup(:Observation, :by_user, :user => @show_user,
-                         :by => :thumbnail_quality)
-    @observations = query.results(:limit => 6, :include => :thumb_image)
+    if @show_user = find_or_goto_index(User, id, :include => :location)
+      @user_data = SiteData.new.get_user_data(id)
+      query = Query.lookup(:Observation, :by_user, :user => @show_user,
+                           :by => :thumbnail_quality)
+      @observations = query.results(:limit => 6, :include => :thumb_image)
+    end
   end
 
   # Go to next user: redirects to show_user.
@@ -1685,7 +1682,7 @@ class ObserverController < ApplicationController
       :action => 'list_rss_logs',
       :matrix => true,
       :include => {
-        :observation  => [:location, :name, :user],
+        :observation  => [:location, :name, :thumb_image, :user],
         :name         => :user,
         :species_list => [:location, :user],
       },
@@ -1712,7 +1709,7 @@ class ObserverController < ApplicationController
   def show_rss_log # :nologin:
     pass_query_params
     store_location
-    @rss_log = RssLog.find(params['id'])
+    @rss_log = find_or_goto_index(RssLog, params['id'])
   end
 
   # Go to next RssLog: redirects to show_<object>.

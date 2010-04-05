@@ -131,9 +131,11 @@ class CommentController < ApplicationController
   def show_comment # :nologin: :prefetch:
     store_location
     pass_query_params
-    @comment = Comment.find(params[:id], :include => [:object, :user])
-    @object = @comment.object
-    allowed_to_see!(@object)
+    if @comment = find_or_goto_index(Comment, params[:id],
+                                     :include => [:object, :user])
+      @object = @comment.object
+      allowed_to_see!(@object)
+    end
   end
 
   # Go to next comment: redirects to show_comment.

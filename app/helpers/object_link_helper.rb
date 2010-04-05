@@ -12,6 +12,7 @@
 #  description_title::    Create a meaningful title for a Description.
 #  description_link::     Create a link to show a given Description.
 #  thumbnail::            Draw thumbnail image linked to show_image.
+#  image_vote_tabs::      Render the AJAX vote tabs that go below thumbnails.
 #
 ################################################################################
 
@@ -174,7 +175,6 @@ module ApplicationHelper::ObjectLink
     opts = {}
     opts[:border] = args[:border] if args.has_key?(:border)
     opts[:style]  = args[:style]  if args.has_key?(:style)
-    opts[:class]  = args[:class]  if args.has_key?(:class)
     str = image_tag(file, opts)
     str += args[:append].to_s
 
@@ -201,25 +201,40 @@ module ApplicationHelper::ObjectLink
 
     # Enclose image in a link?
     result = link ? link_to(str, link) : str
-    result += '<br/>'
 
     # Include AJAX vote links below image?
-    if @js && @user && args[:votes] && image
-      javascript_include('image_vote')
-      current = image.users_vote(@user)
-      result += '<small>' + Image.all_votes.map do |value|
-        str1 = image_vote_as_short_string(value)
-        str2 = image_vote_as_help_string(value)
-        str = if value == current
-          content_tag(:b, content_tag(:acronym, str1, :title => str2))
-        else
-          link_to_function(str1, "image_vote(#{image.id},'#{value}')",
-                           :title => str2)
-        end
-        content_tag(:span, str, :id => "image_#{image.id}_#{value}")
-      end.join(' | ') + '</small><br/>'
+    if @js && @user && args[:votes]
+      result += '<br/><small>'
+      result += image_vote_tabs(image || id, args[:vote_data])
+      result += '</small>'
     end
 
-    return result
+    if args[:nodiv]
+      result
+    else
+      content_tag(:div, result, :class => args[:class] || 'thumbnail')
+    end
+  end
+
+  # Render the AJAX vote tabs that go below thumbnails.
+  def image_vote_tabs(image, data=nil)
+    id = image.is_a?(Image) ? image.id : image.to_i
+    javascript_include('image_vote')
+    if image
+      current = image.users_vote(@user)
+    elsif args[:vote_data]
+      current = Image.users_vote(args[:vote_data], @user)
+    end
+    Image.all_votes.map do |value|
+      str1 = image_vote_as_short_string(value)
+      str2 = image_vote_as_help_string(value)
+      str = if value == current
+        content_tag(:b, content_tag(:acronym, str1, :title => str2))
+      else
+        link_to_function(str1, "image_vote(#{id},'#{value}')",
+                         :title => str2)
+      end
+      content_tag(:span, str, :id => "image_#{id}_#{value}")
+    end.join(' | ')
   end
 end

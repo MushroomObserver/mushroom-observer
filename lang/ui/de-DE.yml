@@ -500,7 +500,7 @@ footer_modified_by: "*Geändert am:* [date] *von* [user]"
 footer_last_modified_at: "*Zuletzt geändert am:* [date]"
 footer_last_modified_by: "*Zuletzt geändert am*: [date] *von* [user]"
 footer_viewed: "[times] *aufgerufen*, *zuletzt am*: [date]"
-footer_version_out_of:  "*[:Version]:* [num] *von* [total]"
+footer_version_out_of:  "*[:Version]:* [num] *of* [total]"
 
 # Taxonomic ranks.
 RANK_CLASS: Klasse
@@ -991,7 +991,6 @@ runtime_no_more_search_objects: "[:runtime_no_more]"
 runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
 runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
 runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
-runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
 runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
 runtime_prefs_success: "[:runtime_updated(type=:preferences)]"
 runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
@@ -1111,6 +1110,7 @@ runtime_merge_warning: >
   kombinieren. Der Admin bekommt jetzt eine Email, in der ihm vorgeschlagen wird,
   diese Fundorte zu kombinieren.
 
+runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
 runtime_profile_must_define: >
   Du musst erst diesen Fundort definieren, dann können wir ihn als
   Standard-Fundort registrieren.

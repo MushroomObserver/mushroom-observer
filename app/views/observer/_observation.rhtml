@@ -14,7 +14,7 @@ end %>
   <tr>
     <td align="center" valign="middle" width="160">
       <%= if observation.thumb_image_id
-        thumbnail(observation.thumb_image_id, :border => 0, :votes => true,
+        thumbnail(observation.thumb_image, :border => 0, :votes => true,
                   :link => :show_observation, :obs => observation.id)
       end %>
     </td>

@@ -47,6 +47,9 @@
                 :params => query_params) %> |
     <%= link_to(:show_objects.t(:type => :name),
                 :controller => :name, :action => :index_name,
+                :params => query_params) %> |
+    <%= link_to(:show_objects.t(:type => :image),
+                :controller => :image, :action => :index_image,
                 :params => query_params) %><br/>
   <% paginate_block(@pages) do %>
     <% if @objects && @objects.length > 0 %>
@@ -57,10 +60,10 @@
           <tr valign="top" class="ListLine<%= odd_or_even %>">
             <td width="110" align="center" valign="middle">
               <%= if observation.thumb_image_id
-                thumbnail(observation.thumb_image_id, :border => 0,
+                thumbnail(observation.thumb_image, :border => 0,
                           :link => :show_observation, :obs => observation.id,
                           :votes => true)
-              end %><br/>
+              end %>
             </td>
             <td width="100%" valign="middle">
               <span class="ListName">

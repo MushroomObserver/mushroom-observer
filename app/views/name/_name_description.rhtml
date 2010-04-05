@@ -1,4 +1,7 @@
-<% desc = name_description %>
+<%
+  desc = name_description
+  Textile.register_name(desc.name)
+%>
 
 <% if review %>
   <% if !desc.ok_for_export %>
