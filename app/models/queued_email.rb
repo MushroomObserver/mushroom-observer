@@ -215,19 +215,25 @@ class QueuedEmail < AbstractModel
   # This is called by <tt>rake email:send</tt>.  It just checks that sender !=
   # receiver, then passes it off to the subclass (via deliver_email). 
   def send_email
+    result = false
     if user == to_user
-      print "Skipping email with same sender and recipient: #{user.email}\n" if !TESTING
+      raise("Skipping email with same sender and recipient: #{user.email}\n") if !TESTING
     else
-      deliver_email
+      result = deliver_email
     end
+    return result
+  rescue => e
+    raise e if TESTING
+    $stderr.puts(e.to_s)
+    return false
   end
 
   # This method needs to be defined in the subclasses.
   def deliver_email
     error = "We forgot to define #{type}#deliver_email.\n"
     # Failing to send email should not throw an error in production
-    if ENV['RAILS_ENV'] == 'production'
-      print error
+    if PRODUCTION
+      $stderr.puts(error)
     else
       raise error
     end

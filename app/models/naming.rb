@@ -106,7 +106,7 @@ class Naming < AbstractModel
       taxa.push(Name.find_by_text_name('Lichen')) if self.name.is_lichen?
       for taxon in taxa
         for n in Notification.find_all_by_flavor_and_obj_id(:name, taxon.id)
-          if n.user.created_here
+          if n.user.created_here && n.user != user
             QueuedEmail::NameTracking.create_email(n, self)
           end
         end
