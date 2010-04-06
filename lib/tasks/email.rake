@@ -17,7 +17,7 @@ namespace :email do
 
         # Sent successfully.  (Delete it without sending if user isn't local!
         # This shouldn't happen, but just in case, better safe...)
-        if !e.to_user || !e.to_user.local || e.send_email
+        if !e.to_user || !e.to_user.created_here || e.send_email
           e.destroy
           count += 1
           if count >= EMAIL_PER_MINUTE
