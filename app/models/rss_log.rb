@@ -333,8 +333,14 @@ private
       odd ? x.to_sym : unescape(x)
     end
     args << '' if odd
-    time = Time.utc(time[0,4], time[4,2], time[6,2],
-                    time[8,2], time[10,2], time[12,2]).in_time_zone
+    begin
+      time2 = Time.utc(time[0,4], time[4,2], time[6,2],
+                      time[8,2], time[10,2], time[12,2]).in_time_zone
+      time = time2
+    rescue => e
+      # Caught this error in the log, not sure how/why.
+      raise "rss_log timestamp corrupt: id=#{id.inspect}, time=#{time.inspect}, err=#{e}"
+    end
     [tag.to_sym, Hash[*args], time]
   end
 

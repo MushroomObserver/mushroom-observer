@@ -1062,16 +1062,24 @@ class Query < AbstractQuery
           'IF(locations.id,locations.search_name,observations.where))')
 
       when :Location
-        # self.join << :"location_descriptions.default!"
-        # note_fields = LocationDescription.all_note_fields.
-        #                 map {|x| "location_descriptions.#{x}"}
-        self.where += google_conditions(search, 'locations.search_name')
+        self.join << :"location_descriptions.default!"
+        self.where << 'location_descriptions.public IS TRUE OR ' +
+                      'location_descriptions.public IS NULL'
+        note_fields = LocationDescription.all_note_fields.map do |x|
+          "IF(location_descriptions.#{x} IS NULL, '', location_descriptions.#{x})"
+        end
+        self.where += google_conditions(search,
+            "CONCAT(locations.search_name,#{note_fields.join(',')})")
 
       when :Name
-        # self.join << :"name_descriptions.default!"
-        # note_fields = NameDescription.all_note_fields.
-        #                 map {|x| "name_descriptions.#{x}"}
-        self.where += google_conditions(search, 'names.search_name')
+        self.join << :"name_descriptions.default!"
+        self.where << 'name_descriptions.public IS TRUE OR ' +
+                      'name_descriptions.public IS NULL'
+        note_fields = NameDescription.all_note_fields.map do |x|
+          "IF(name_descriptions.#{x} IS NULL, '', name_descriptions.#{x})"
+        end
+        self.where += google_conditions(search,
+            "CONCAT(names.search_name,#{note_fields.join(',')})")
 
       when :Observation
         self.join << [:locations!, :names]

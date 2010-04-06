@@ -531,8 +531,10 @@ class ApplicationController < ActionController::Base
       $1.downcase + '-' + $2.upcase
     elsif code2 = lookup_valid_locale([code])
       code2
+    elsif PRODUCTION
+      DEFAULT_LOCALE
     else
-      raise "Invalid locale: '#{code}'"
+      raise("Invalid locale: #{code.inspect}")
     end
   end
 
@@ -923,7 +925,7 @@ class ApplicationController < ActionController::Base
   # *NOTE*: This method is available to views.
   def set_query_params(query=nil)
     @query_params = {}
-    @query_params[:q] = query.id.alphabetize if query
+    @query_params[:q] = query.id.alphabetize if query && query.id
     @query_params
   end
   helper_method :set_query_params
@@ -1349,7 +1351,7 @@ class ApplicationController < ActionController::Base
   def disable_link_prefetching
     if request.env["HTTP_X_MOZ"] == "prefetch"
       logger.debug "prefetch detected: sending 403 Forbidden"
-      render_nothing "403 Forbidden"
+      render(:nothing, :status => 403)
       return false
     end
   end

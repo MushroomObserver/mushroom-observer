@@ -941,7 +941,7 @@ class NameController < ApplicationController
       # User has told us what the correct spelling should be.  Make sure
       # this is a valid name!
       if correct_spelling.blank?
-        self.misspelling = true
+        name.misspelling = true
         name2 = Name.find_by_search_name(correct_spelling)
         name2 ||= Name.find_by_text_name(correct_spelling)
         if !name2

@@ -512,7 +512,7 @@ class Name < AbstractModel
               LIMIT 1
             )
           end
-          lines = parse_classification(str)
+          lines = parse_classification(str) rescue []
           break if lines.empty?
         end
 

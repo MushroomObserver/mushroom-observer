@@ -366,8 +366,8 @@ class ObserverController < ApplicationController
       redirect_to(:controller => obj.show_controller,
                   :action => obj.show_action, :id => obj.id)
     else
-      type = object.class.name.underscore.to_sym.t
-      types = object.class.table_name.to_sym.t
+      type = obj.class.name.underscore.to_sym.t
+      types = obj.class.table_name.to_sym.t
       flash_error(:runtime_object_no_match.t(:match => id, :type => type))
       goto_index(model)
     end
@@ -397,7 +397,8 @@ class ObserverController < ApplicationController
     when :comment, :image, :location, :name, :project, :species_list
       ctrlr = type
     else
-      raise "Invalid search type: #{type.inspect}"
+      flash_error(:runtime_invalid.t(:type => :search, :value => type.inspect))
+      redirect_back_or_default(:action => 'list_rss_logs')
     end
 
     # If pattern is blank, this would devolve into a very expensive index.

@@ -200,6 +200,7 @@ class LocationController < ApplicationController
     when :with_observations,
          :with_observations_by_user
       flavor = :all
+      args.delete(:user)
 
     # Temporarily kludge in pattern search the old way.
     when :pattern_search
