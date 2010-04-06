@@ -119,7 +119,6 @@ class SessionExtensions::Form
         val  = CGI.unescapeHTML(elem.attributes['value'] || '')
         type = (elem.name == 'input') ? elem.attributes['type'] : elem.name
         disabled = elem.attributes['disabled'] == 'disabled'
-        name = id if name.blank?
 
         field = Field.new(
           :node     => elem,

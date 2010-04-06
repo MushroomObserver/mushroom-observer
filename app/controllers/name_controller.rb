@@ -1413,7 +1413,7 @@ class NameController < ApplicationController
     @list_members = nil
     @new_names    = nil
     if request.method == :post
-      list = params[:list][:members].strip_squeeze
+      list = params[:list][:members].strip_squeeze rescue ''
       construct_approved_names(list, params[:approved_names])
       sorter = NameSorter.new
       sorter.sort_names(list)

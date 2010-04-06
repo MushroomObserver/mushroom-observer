@@ -1661,7 +1661,9 @@ class ObserverController < ApplicationController
     elsif !params[:type].blank?
       query = find_or_create_query(:RssLog, :type => params[:type])
     else
-      query = find_or_create_query(:RssLog)
+      query = find_query(:RssLog)
+      query ||= create_query(:RssLog, :all,
+                             :type => @user ? @user.default_rss_type : 'all')
     end
     show_selected_rss_logs(query, :id => params[:id], :always_index => true)
   end
