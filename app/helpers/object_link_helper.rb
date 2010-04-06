@@ -219,6 +219,7 @@ module ApplicationHelper::ObjectLink
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
     id = image.is_a?(Image) ? image.id : image.to_i
+    javascript_include('prototype')
     javascript_include('image_vote')
     if image
       current = image.users_vote(@user)
