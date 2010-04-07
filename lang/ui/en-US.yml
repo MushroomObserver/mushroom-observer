@@ -422,6 +422,8 @@ google_images: Google Images
 many_times: "[num] times"
 one_time: once
 permission_denied: Permission denied.
+yes: "yes"
+no: "no"
 
 ################################################################################
 
@@ -1110,7 +1112,7 @@ runtime_merge_warning: >
 
 runtime_object_not_found: >
   Sorry, the [type] you tried to display (id #[id]) no longer exists.  Someone
-  has either deleted it or merged it into another. 
+  has either deleted it or merged it into another.
 
 runtime_profile_must_define: >
   You must define this location before we can make it your primary location.
@@ -1599,7 +1601,7 @@ form_description_source_help: >
   title will be "[:description_part_title_user(user=:name)]".  Use the text
   field above to customize this.  In both this and the 'Source' type above, you
   will have exclusive rights to choose who can view and modify this description
-  (see the check-boxes below). 
+  (see the check-boxes below).
 
 form_description_permissions_help: >
   Is the general public is allowed to view or make modifications to this
@@ -2399,11 +2401,11 @@ show_votes_descript: >
 
 show_votes_go_public_confirm: >
   This will make all your votes for all observations public, not just your vote
-  for this name.  Is this what you want to do? 
+  for this name.  Is this what you want to do?
 
 show_votes_go_private_confirm: >
   This will make all your votes for all observations anonymous, not just your
-  vote for this name.  Is this what you want to do? 
+  vote for this name.  Is this what you want to do?
 
 show_votes_gone_public: >
   Thank you!  Your preferences have been updated.  Other users can now see your
@@ -3071,63 +3073,57 @@ refine_search_model: Data type
 refine_search_flavor: Basic flavor
 refine_search_order: Sort order
 refine_search_num_results: Matches
-refine_search_params: Parameters
 refine_search_joins: Joined tables
 refine_search_success: Modified query now matches [num] objects.
 refine_search_goto_index: "[:show_object(type=:index)]"
-refine_search_old_conditions: Existing Conditions
-refine_search_add_conditions: Additional Conditions
-refine_search_yes: "yes"
-refine_search_no: "no"
+refine_search_conditions: Parameters
+refine_search_unknown_object: "Unknown [TYPE] #[id]"
 
-refine_search_above_rank: Rank above
-refine_search_below_rank: Rank below
-refine_search_child: Is a subtaxon of this name
-refine_search_classification: classification
-refine_search_comment_for: Comments for this user
-refine_search_contains: "[Type] contains"
-refine_search_created_by: Created by this user
-refine_search_created_on: Created on this date
-refine_search_date: Observed on this date
-refine_search_deprecated: Is deprecated
-refine_search_has: Has [type]
-refine_search_has_admin: This user is an admin
-refine_search_has_default_description: Has a default description
-refine_search_has_image_of_min_quality: Has images of minimum quality
-refine_search_has_member: This user is a member
-refine_search_has_public_description: Has a public description
-refine_search_has_species_list: Belongs to a species list
-refine_search_has_specimen: Specimen is available
-refine_search_in_species_list: Belongs to this species list
-refine_search_is_collection_location: Observed where it was growing
-refine_search_last_modified_on: Last modified on date
-refine_search_license: License
-refine_search_location_defined: Is location defined
-refine_search_maximum_confidence: Maximum confidence level
-refine_search_minimum_confidence: Minimum confidence level
-refine_search_minimum_quality: Minimum quality
-refine_search_minimum_size: Minimum dimension (pixels)
-refine_search_misspelled: Is it misspelled
-refine_search_misspelling: Is a misspelling of this name
-refine_search_modified_by: Modified by this user
-refine_search_name: Species name
-refine_search_object_id: ID of object
-refine_search_object_type: Type of object
-refine_search_original_type: File type of original file
-refine_search_posted_by: Posted by this user
-refine_search_rank: Taxonomic rank
-refine_search_synonym: Is a synonym of this name
+refine_search_advanced_search_content: "[:refine_search_pattern_search]"
+refine_search_advanced_search_location: "[:Location]"
+refine_search_advanced_search_name: "[:Name]"
+refine_search_advanced_search_user: "[:Observer]"
+refine_search_all_children: Which children?
+refine_search_all_children_false: only immediate children
+refine_search_all_children_true: all children
+refine_search_deprecated: Include deprecated names?
+refine_search_deprecated_either: doesn't matter
+refine_search_deprecated_no: only approved names
+refine_search_deprecated_only: only deprecated names
+refine_search_misspellings: Include misspellings?
+refine_search_misspellings_either: doesn't matter
+refine_search_misspellings_no: only correct names
+refine_search_misspellings_only: only misspelt names
+refine_search_nonconsensus: Include "other" observations?
+refine_search_nonconsensus_all: use any proposed name
+refine_search_nonconsensus_exclusive: only nonconsensus names
+refine_search_nonconsensus_no: just use consensus name
+refine_search_observation: "[:Observation]"
+refine_search_pattern_search: Search string
+refine_search_rss_log_type: Type of object
+refine_search_rss_log_type_all: All
+refine_search_synonyms: Include synonym observations?
+refine_search_synonyms_all: this name and synonyms
+refine_search_synonyms_exclusive: only synonyms
+refine_search_synonyms_no: just this name
 
 refine_search_help: Help
-refine_search_date_help: > 
+refine_search_conditions_help: >
+  Use the following conditions to narrow down your query results.  Only the
+  fields in boldface are required (if any).  Results must match all of the
+  conditions that are not left blank.  Many of the conditions accept a range or
+  allow multiple values.  Syntax con be complicated; click on the [[Help]] tags
+  next to the fields for pointers on what kind of values are accepted.
+
+refine_search_date_help: >
   Enter a year or year range (e.g., "2008-2009"), month or month range (e.g.,
   "Dec" or "March to April"), or a full or partial date or range in
-  "YYYY-MM-DD" format (e.g., "2008-03" or "2008-03-31 2009-03-31"). 
+  "YYYY-MM-DD" format (e.g., "2008-03" or "2008-03-31 2009-03-31").
 
 refine_search_time_help: >
   Enter a date or date range in the format "YYYY-MM-DD:HH:MM:SS".  Enter only
   as many figures as you want, starting with year.  Example: "2010-01 to
-  2010-03". 
+  2010-03".
 
 
 

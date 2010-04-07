@@ -11,8 +11,8 @@
 end %>
 
 <table cellpadding="10" width="100%">
-  <tr>
-    <td align="center" valign="middle" width="160">
+  <tr style="padding-bottom:0px">
+    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <%= if observation.thumb_image_id
         thumbnail(observation.thumb_image, :border => 0, :votes => true,
                   :link => :show_observation, :obs => observation.id)
@@ -41,7 +41,8 @@ end %>
       </span>
       <span class="ListWho">
         <%= user_link(observation.user) %>
-      </span><br/><br/>
+      </span><br/>
+      <span style="line-height:1em"><br/></span>
 
       <% if rss_log %>
         <span class="ListDetail">

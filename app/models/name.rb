@@ -508,7 +508,7 @@ class Name < AbstractModel
             # name in it!
             str = Name.connection.select_value %(
               SELECT classification FROM names
-              WHERE classification LIKE '%#{rank}: _%'
+              WHERE classification LIKE '%#{rank}: _#{text_name}%'
               LIMIT 1
             )
           end

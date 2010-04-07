@@ -417,7 +417,6 @@ class ObserverController < ApplicationController
   #   observer/advanced_search
   def advanced_search_form # :nologin: :norobots:
     if request.method != :post
-      pass_query_params # (temporary thing while refine_search tab is here)
       @location_primer = Location.primer
       @name_primer     = Name.primer
       @user_primer     = User.primer
@@ -452,8 +451,8 @@ class ObserverController < ApplicationController
   # Allow users to refine an existing query.
   def refine_search # :nologin:
     # Create a bogus object with all the parameters used in the form.
-    @conds = Wrapper.new(params[:conds] || {})
-    @first_time = params[:conds].blank?
+    @values = Wrapper.new(params[:values] || {})
+    @first_time = params[:values].blank?
     @goto_index = true if params[:commit] == :refine_search_goto_index.l
 
     # Query has expired!
@@ -462,16 +461,16 @@ class ObserverController < ApplicationController
       redirect_back_or_default(:action => 'list_rss_logs')
       
     # Some models aren't supported yet.
-    elsif !(@fields = refine_search_get_fields(@query))
+    elsif !(@fields = refine_search_get_fields(@query, @values))
       type = @query.model_string.underscore.to_sym
       flash_error(:runtime_refine_search_model_not_supported.t(:type => type))
       redirect_back_or_default(:action => 'list_rss_logs')
 
     elsif !is_robot? and
           (request.method == :post) and
-          (query2 = refine_search_apply_changes(@query, @fields, @conds))
+          (query2 = refine_search_apply_changes(@query, @fields, @values))
       @query = query2
-      @conds = Wrapper.new
+      @values = Wrapper.new
       @first_time = true
       if !@goto_index
         flash_notice(:refine_search_success.t(:num => @query.num_results))

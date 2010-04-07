@@ -212,6 +212,11 @@ class ImageController < ApplicationController
     end
   end
 
+  # For backwards compatibility.
+  def show_original
+    redirect_to(:action => 'show_image', :size => 'full_size')
+  end
+
   # Go to next image: redirects to show_image.
   def next_image # :nologin: :norobots:
     redirect_to_next_object(:next, Image, params[:id])

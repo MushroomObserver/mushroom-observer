@@ -8,8 +8,8 @@
 %>
 
 <table cellpadding="10">
-  <tr>
-    <td align="center" valign="middle" width="160">
+  <tr style="padding-bottom:0px">
+    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <%= link_to(image_tag("splist.png", :border => 0),
                   :controller => 'species_list',
                   :action => 'show_species_list', :id => species_list.id,
@@ -39,7 +39,8 @@
       </span>
       <span class="ListWho">
         <%= user_link(species_list.user) %>
-      </span><br/><br/>
+      </span><br/>
+      <span style="line-height:1em"><br/></span>
 
       <span class="ListDetail">
         <%= detail %>

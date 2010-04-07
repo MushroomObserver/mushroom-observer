@@ -711,6 +711,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert(name)
     assert_equal(new_name, name.text_name)
 
+    QueuedEmail.queue_emails(true)
     count_before = QueuedEmail.count
     name = names(:agaricus_campestris)
     notifications = Notification.find_all_by_flavor_and_obj_id(:name, name.id)

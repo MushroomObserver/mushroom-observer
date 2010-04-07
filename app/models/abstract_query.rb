@@ -19,7 +19,7 @@
 #  later, this query will have been culled by the garbage collector (see
 #  below), so prev and next need to be able to create a default query on the
 #  fly.  In this case it may be :Observation :all (see default_flavors array
-#  below). 
+#  below).
 #
 #  In addition, some queries require additional parameters.  For example,
 #  :Comment :for_user requires a user_id (it retrieves comments posted on a
@@ -191,7 +191,7 @@
 #  necessary.  (I found that requesting all the ids was not significantly
 #  slower than requesting the count, while calling _both_ was nearly twice as
 #  long as just one.  So, there was no reason to optimize the query if you only
-#  want the number of results.) 
+#  want the number of results.)
 #
 #  The next and prev sequence operators always grab the entire set of
 #  result_ids.  No attempt is made to reduce the query.  TODO - we might be
@@ -279,7 +279,7 @@
 #
 #  ==== Class Variables
 #  @@last_cleanup::     Time: last time database was cleaned up.
-#  @@default_required_params:: Default required parameters declarations.
+#  @@default_flavor_params:: Default required parameters declarations.
 #
 #  ==== Instance Variables
 #  @params::            Hash:: cached copy of deserialized parameter hash.
@@ -305,7 +305,7 @@ class AbstractQuery < ActiveRecord::Base
   # Will we need first-letters for pagination-by-letter later?  Value is the
   # field or SQL expression to use.  We can do some simple optimizations to
   # grab the pagination letter along with the ids the first time through if we
-  # know that we will need them. 
+  # know that we will need them.
   attr_accessor :need_letters
 
   # Cached Hash mapping result ids (Fixnum) to first-letters (String).
@@ -338,7 +338,7 @@ class AbstractQuery < ActiveRecord::Base
   # Parameters required for each flavor.  The keys are the parameter names, the
   # values are the "declaration".  An example explains it pretty well:
   #
-  #   self.required_params = {
+  #   self.flavor_params = {
   #     :by_user   => {:user => User}
   #     :with_name => {:name => Name, :optional_flag? => :boolean}
   #     :in_set    => {:ids => [:id]}
@@ -367,9 +367,40 @@ class AbstractQuery < ActiveRecord::Base
   # Additional types: You may define additional types in your subclass.  Just
   # define methods called <tt>validate_<type>(arg, val)</tt>.
   #
-  superclass_delegating_accessor :required_params
-  self.required_params = {}
-  @@default_required_params = {:ids => [:id]}
+  superclass_delegating_accessor :flavor_params
+  self.flavor_params = {}
+  @@default_flavor_params = {
+    :ids => [:id],
+  }
+
+  # Add these to the list of required parameters for a given model (Symbol).
+  #
+  #   self.model_params = {
+  #     :Name => { :misspellings => :boolean },
+  #     :User => ...,
+  #   }
+  #
+  superclass_delegating_accessor :model_params
+  self.model_params = {}
+  @@default_model_params = {}
+
+  # Add these to the list of required parameters for all queries.
+  #
+  #   self.global_params = {
+  #     :title? => :string,
+  #     ...
+  #   }
+  #
+  superclass_delegating_accessor :global_params
+  self.global_params = {}
+  @@default_global_params = {
+    :join?   => [:string],
+    :tables? => [:string],
+    :where?  => [:string],
+    :group?  => :string,
+    :order?  => :string,
+    :by?     => :string,
+  }
 
   # Allowed flavors for each model.  Just a hash mapping model (symbols) to
   # arrays of allowed flavors (also symbols).
@@ -402,26 +433,18 @@ class AbstractQuery < ActiveRecord::Base
   superclass_delegating_accessor :join_conditions
   self.join_conditions = {}
 
-  # Add these to the list of required parameters.  For example, it you want
-  # all queries for a given model add an optional parameter:
-  #
-  #   def extra_parameters
-  #     if model_symbol == :Name
-  #       {:include_synonyms? => :boolean}
-  #     end
-  #   end
-  #
-  def extra_parameters; nil; end
-
   # This gives the subclass opportunity to make extra global initializations
-  # *after* flavor-specific initializations.  The following three global
+  # *after* flavor- and model-specific initializations.  The following global
   # initializations cannot be overridden:
   #
-  # +join+::  Joins to additional table(s).
-  # +where+:: Adds extra condition(s) to WHERE condition.
-  # +order+:: Overrides ORDER BY clause.
+  # +join+::   Joins to additional table(s).
+  # +tables+:: Extra table(s) or subqueries.
+  # +where+::  Adds extra condition(s) to WHERE condition.
+  # +group+::  Adds GROUP BY clause.
+  # +order+::  Overrides ORDER BY clause.
+  # +by+::     Sort order (see +initialize_order+).
   #
-  def extra_initialization; end
+  def initialize_global; end
 
   # Returns the default sort order for the query.  This should be recognized
   # by the <tt>:by => :order</tt> parameter, as handled by +initialize_order+
@@ -784,22 +807,8 @@ class AbstractQuery < ActiveRecord::Base
     old_args = params.dup
     new_args = {}
 
-    # Get the parameters declarations for this flavor.
-    reqs = required_params[flavor] || @@default_required_params[flavor] || {}
-
-    # Let the subclass declare some additional default parameters.
-    merge_requirements(reqs, extra_parameters)
-
-    # Let's add our own universal declarations that let the caller customize
-    # any query. (But allow subclass to redeclare for some flavors.)
-    merge_requirements(reqs,
-      :join?   => [:string],
-      :tables? => [:string],
-      :where?  => [:string],
-      :group?  => :string,
-      :order?  => :string,
-      :by?     => :string
-    )
+    # Get the parameters declarations.
+    reqs = parameter_declarations
 
     # Validate all expected parameters one at a time.
     for arg, type in reqs
@@ -837,6 +846,17 @@ class AbstractQuery < ActiveRecord::Base
     end
 
     replace_params(new_args)
+  end
+
+  # Get the parameters declarations.
+  def parameter_declarations
+    reqs = @@default_flavor_params[flavor] || {}
+    merge_requirements(reqs, @@default_model_params[model_symbol] || {})
+    merge_requirements(reqs, @@default_global_params || {})
+    merge_requirements(reqs, flavor_params[flavor] || {})
+    merge_requirements(reqs, model_params[model_symbol] || {})
+    merge_requirements(reqs, global_params || {})
+    return reqs
   end
 
   # Merge the given "default" requirements into the list we have.
@@ -997,19 +1017,16 @@ class AbstractQuery < ActiveRecord::Base
     # Setup query for the given flavor.
     send("initialize_#{flavor}")
 
+    # Give models ability to customize.
+    if respond_to?("initialize_#{model_string.downcase}")
+      send("initialize_#{model_string.downcase}")
+    end
+
     # Give all queries the ability to order via simple :by => :name mechanism.
     superclass_initialize_order
 
-    # Give subclass opportunity to make extra initializations before the final
-    # customization / overriding below.
-    extra_initialization
-
-    # Give all queries ability to override / customize.
-    initialize_join(params[:join]) if params[:join]
-    self.tables += params[:tables] if params[:tables]
-    self.where  += params[:where]  if params[:where]
-    self.group   = params[:group]  if params[:group]
-    self.order   = params[:order]  if params[:order]
+    # Perform final global initialization.
+    superclass_initialize_global
   end
 
   # Do mechanics of the :by => :type sorting mechanism.
@@ -1047,6 +1064,19 @@ class AbstractQuery < ActiveRecord::Base
         raise("Can't figure out how to sort #{model_string} by :#{by}.")
       end
     end
+  end
+
+  # Give all queries ability to override / customize low-level parameters.
+  def superclass_initialize_global
+
+    # Give subclass one last opportunity.
+    initialize_global
+
+    initialize_join(params[:join]) if params[:join]
+    self.tables += params[:tables] if params[:tables]
+    self.where  += params[:where]  if params[:where]
+    self.group   = params[:group]  if params[:group]
+    self.order   = params[:order]  if params[:order]
   end
 
   # Join parameter needs to be converted into an include-style "tree".  It just
@@ -1206,7 +1236,7 @@ class AbstractQuery < ActiveRecord::Base
       self.goods = args[:goods]
       self.bads = args[:bads]
     end
-    def blank? 
+    def blank?
       !goods.any? && !bads.any?
     end
   end
@@ -1299,7 +1329,7 @@ class AbstractQuery < ActiveRecord::Base
 
   # Flatten join "tree" into a simple Array of Strings.  Set +keep_qualifiers+
   # to +false+ to tell it to remove the ".column" qualifiers on ambiguous
-  # table join specs. 
+  # table join specs.
   def flatten_joins(arg=join, keep_qualifiers=true)
     result = []
     if arg.is_a?(Hash)

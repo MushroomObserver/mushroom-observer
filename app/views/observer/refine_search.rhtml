@@ -1,6 +1,6 @@
 <% @title ||= :refine_search_title.t(:type => @query.model_symbol) %>
 
-<table class="ListLine0" style="border:1px solid; padding:10px; margin:10px; float:right">
+<table class="ListLine0" style="border:1px solid; padding:10px; margin:10px">
   <tr>
     <td>
       <center><span class="Name"><%= @query.title %></span></center>
@@ -13,16 +13,7 @@
         <%= h(@query.params[:by] || @query.default_order) %><br/>
       <span class="Data"><%= :refine_search_num_results.t %>:</span>
         <%= @query.num_results %><br/>
-      <% keys = @query.params.keys - [:by, :join, :where]
-      if keys.any? %>
-        <span class="Data"><%= :refine_search_params.t %>:</span><br/>
-        <% for key in keys
-          val = @query.params[key] %>
-          <%= indent + h(key.to_s) + ': ' +
-                       h(val.inspect).truncate_html(40) %><br/>
-        <% end
-      end
-      if !@query.params[:join].blank? %>
+      <% if !@query.params[:join].blank? %>
         <span class="Data"><%= :refine_search_joins.t %>:</span><br/>
         <% for join in @query.flatten_joins.uniq %>
           <%= indent + h(join) %><br/>
@@ -32,18 +23,23 @@
   </tr>
 </table>
 
-<% form_for(:conds, :url => {:action => 'refine_search',
+<% form_for(:values, :url => {:action => 'refine_search',
             :params => query_params(@query)}) do |form| %>
 
-  <br/>
   <table>
     <tr>
-      <td colspan="4" align="center">
+      <td colspan="3" align="center">
+        <br/>
 
 <p align="left"><big>This is a prototype only.  We are still debating the
 interface and implementation.  Feedback is welcome, particularly at this early
 stage. -Jason</big></p><br/>
 
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" align="center">
         <center>
           <%= submit_tag(:UPDATE.t) %>
           <%= indent(20) %>
@@ -53,62 +49,73 @@ stage. -Jason</big></p><br/>
       </td>
     </tr>
 
-    <% if !@query.params[:where].blank? %>
-      <tr>
-        <td colspan="4">
-          <span class="Name"><%= :refine_search_old_conditions.t %>:</span>
-          <br/><br/>
-          <% i = 0
-          for cond in @query.params[:where]
-            i += 1
-            @conds.send("old_#{i}=", true) if @first_time %>
-            <%= indent + form.check_box(:"old_#{i}") + indent(5) +
-                                        h(cond).truncate_html(80) %><br/>
-          <% end %><br/>
-        </td>
-      </tr>
-    <% end %>
-
     <tr>
-      <td colspan="4" class="Name">
-        <%= :refine_search_add_conditions.t %>:<br/><br/>
+      <td colspan="3">
+        <span class="Name"><%= :refine_search_conditions.t %>:</span><br/>
+        <span class="HelpNote"><%= :refine_search_conditions_help.t %></span>
+        <br/><br/>
       </td>
     </tr>
 
     <% autos = []
     for field in @fields
-      name = field[:name]
-      label = field[:label] %>
+      name = field.name
+      label = field.label.t
+      label += ':' if label[-1,1] != '?' %>
       <tr>
-        <% case field[:input]
-        when :string %>
-          <td><label for="conds_<%= name %>"><%= label %></label>:</td>
-          <td><%= indent %></td>
-          <td><%= form.text_field(name, :size => 20) %></td>
-        <% when :enum
-          raise "Missing opts for #{name.inspect}!" if !field[:opts] %>
-          <td><label for="conds_<%= name %>"><%= label %></label>:</td>
-          <td><%= indent %></td>
-          <td><%= form.select(name, field[:opts], :include_blank => true) %></td>
-        <% end %>
-        <% if type = field[:autocomplete]
-          autos << send("turn_into_#{type}_auto_completer", "conds_#{name}")
-        end %>
-        <% if field[:help] %>
-          <td>
+        <td width="1" style="white-space:nowrap">
+          <label for="values_<%= name %>"><%= field.required ?
+            content_tag(:b, label) : label %></label>
+        </td>
+        <td width="1"><%= indent %></td>
+        <td width="1">
+          <% case field.input
+          when :text %>
+            <%= form.text_field(name, :size => 40) %>
+          <% when :text2 %>
+            <%= form.text_field("#{name}_1", :size => 18) %>
+            <%= indent(2) %>
+            <%= form.text_field("#{name}_2", :size => 18) %>
+          <% when :menu
+            raise "Missing opts for #{name.inspect}!" if !field.opts %>
+            <%= args = {}
+            args[:include_blank] = true     if field.blank
+            @values[name] ||= field.default if field.default
+            menu = translate_menu(field.opts)
+            form.select(name, menu, args) %>
+          <% when :menu2
+            raise "Missing opts for #{name.inspect}!" if !field.opts %>
+            <%= name1 = "#{name}_1"
+            args = {}
+            args[:include_blank] = true      if field.blank
+            @values[name1] ||= field.default if field.default
+            menu = translate_menu(field.opts)
+            form.select(name1, menu, args) %>
+            <%= indent(2) %>
+            <%= name2 = "#{name}_2"
+            args = {}
+            args[:include_blank] = true      if field.blank
+            @values[name2] ||= field.default if field.default
+            form.select(name2, menu, args) %>
+          <% end
+          if type = field.autocomplete
+            autos << send("turn_into_#{type}_auto_completer", "values_#{name}")
+          end
+          if field.help %>
             <%=
+              help = field.help.l
               link = '[' + :refine_search_help.t + ']'
-              help = field[:help].gsub(/\\/, '\\').gsub(/"/, '\\"').gsub(/\n/, '\\n')
+              help = help.gsub(/\\/, '\\').gsub(/"/, '\\"').gsub(/\n/, '\\n')
               link = link_to_function(link, "alert(\"#{help}\")")
-              indent + content_tag(:span, link, :title => field[:help])
+              indent + content_tag(:span, link, :title => help)
             %>
-          </td>
-        <% end %>
+          <% end %>
+        </td>
       </tr>
     <% end %>
 
     <tr>
-      <td colspan="4" align="center">
+      <td colspan="3" align="center">
         <br/><br/>
         <center>
           <%= submit_tag(:UPDATE.t) %>

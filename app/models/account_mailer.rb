@@ -62,6 +62,7 @@ class AccountMailer < ActionMailer::Base
   # subject::   Subject of message (provided by user?).
   # message::   Content of message (provided by user).
   def admin_request(sender, receiver, project, subject, message)
+    log_email
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = subject
@@ -85,6 +86,7 @@ class AccountMailer < ActionMailer::Base
   # subject::   Subject of message (provided by user?).
   # message::   Content of message (provided by user).
   def author_request(sender, receiver, object, subject, message)
+    log_email
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = subject
@@ -107,6 +109,7 @@ class AccountMailer < ActionMailer::Base
   # object::    Object that was commented upon.
   # comment::   Comment that triggered this email.
   def comment(sender, receiver, object, comment)
+    log_email
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_comment.l(:name => object.unique_text_name)
@@ -128,6 +131,7 @@ class AccountMailer < ActionMailer::Base
   # image::              Image in question.
   # commercial_inquiry:: Content of message (provided by user).
   def commercial_inquiry(sender, image, commercial_inquiry)
+    log_email
     @user                = image.user
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_commercial_inquiry.l(:name => image.unique_text_name)
@@ -152,6 +156,7 @@ class AccountMailer < ActionMailer::Base
   # new_name::      New consensus Name.
   # time::          Time the change took place.
   def consensus_change(sender, receiver, observation, old_name, new_name, time)
+    log_email
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_consensus_change.l(:id => observation.id,
@@ -175,6 +180,7 @@ class AccountMailer < ActionMailer::Base
   # Email sent to Nathan when sign-up is denied.
   # user_params::   Hash of parameters from form.
   def denied(user_params)
+    log_email
     Locale.code          = DEFAULT_LOCALE
     @subject             = :email_subject_denied.l
     @body['subject']     = @subject
@@ -190,6 +196,7 @@ class AccountMailer < ActionMailer::Base
   # user::      User we're sending announcement to.
   # features::  Description of changes (body of email).
   def email_features(user, features)
+    log_email
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_features.l
@@ -216,6 +223,7 @@ class AccountMailer < ActionMailer::Base
   # new_desc_ver::  Version number of the LocationDescription _after_ the change (may be the same).
   def location_change(sender, receiver, time, loc, desc, old_loc_version,
                       new_loc_version, old_desc_version, new_desc_version)
+    log_email
     old_loc              = loc.versions.find_by_version(old_loc_version)
     new_loc              = loc; loc.revert_to(new_loc_version)
     old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
@@ -252,6 +260,7 @@ class AccountMailer < ActionMailer::Base
   # review_status:: Current review status.
   def name_change(sender, receiver, time, name, desc, old_name_version,
           new_name_version, old_desc_version, new_desc_version, review_status)
+    log_email
     old_name             = name.versions.find_by_version(old_name_version)
     new_name             = name; name.revert_to(new_name_version)
     old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
@@ -282,6 +291,7 @@ class AccountMailer < ActionMailer::Base
   # naming::        Naming in question.
   # observation::   Observation in question.
   def name_proposal(sender, receiver, naming, observation)
+    log_email
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_name_proposal.l(:name => naming.text_name, :id => observation.id)
@@ -302,6 +312,7 @@ class AccountMailer < ActionMailer::Base
   # naming::        Naming that was proposed that triggered this email.
   # notification::  Notification instance registering interest in this Name.
   def naming_for_observer(observer, naming, notification)
+    log_email
     sender               = notification.user
     @user                = observer
     Locale.code          = @user.locale || DEFAULT_LOCALE
@@ -322,6 +333,7 @@ class AccountMailer < ActionMailer::Base
   # tracker::   User that has created the Notification registering interest in this Name.
   # naming::    Naming that triggered this email.
   def naming_for_tracker(tracker, naming)
+    log_email
     @user                = tracker
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_naming_for_tracker.l
@@ -341,6 +353,7 @@ class AccountMailer < ActionMailer::Base
   # user::      User who requested the new password.
   # password::  The new password (unencrypted).
   def new_password(user, password)
+    log_email
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_new_password.l
@@ -362,6 +375,7 @@ class AccountMailer < ActionMailer::Base
   # note::          List of changed attributes (see QueuedEmail::ObservationChange).
   # time::          Time the change took place.
   def observation_change(sender, receiver, observation, note, time)
+    log_email
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = observation ? :email_subject_observation_change.l(:name => observation.unique_text_name) :
@@ -385,6 +399,7 @@ class AccountMailer < ActionMailer::Base
   # observation::   Observation the question is about.
   # question::      The actual question (content).
   def observation_question(sender, observation, question)
+    log_email
     @user                = observation.user
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_observation_question.l(:name => observation.unique_text_name)
@@ -406,6 +421,7 @@ class AccountMailer < ActionMailer::Base
   # receiver::  Reviewer receiving the announcement.
   # name::      Name whose description is being published.
   def publish_name(publisher, receiver, name)
+    log_email
     @user                = receiver
     @name                = name
     Locale.code          = @user.locale || DEFAULT_LOCALE
@@ -428,6 +444,7 @@ class AccountMailer < ActionMailer::Base
   # subject::   Subject of question (provided by user).
   # content::   Content of question (provided by user).
   def user_question(sender, user, subject, content)
+    log_email
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = subject
@@ -446,6 +463,7 @@ class AccountMailer < ActionMailer::Base
   # Email sent to verify user's email.
   # user::      User that just signed up.
   def verify(user)
+    log_email
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
     @subject             = :email_subject_verify.l
@@ -462,6 +480,7 @@ class AccountMailer < ActionMailer::Base
   # sender::    User asking the question.
   # question::  Content of the question.
   def webmaster_question(sender, question)
+    log_email
     Locale.code          = DEFAULT_LOCALE
     @subject             = :email_subject_webmaster_question.l(:user => sender)
     @body['question']    = question
@@ -491,6 +510,33 @@ private
       fh = File.new(file, "w")
       fh.write(mail)
       fh.close
+    end
+  end
+
+  def log_email
+    File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a') do |fh|
+      time = Time.now.strftime('%Y-%m-%d:%H:%M:%S')
+
+      begin
+        raise RuntimeError
+      rescue RuntimeError => e
+        trace = e.backtrace
+      rescue
+        trace = []
+      end
+
+      type = trace[3].match(/`(\w+)'/) ? $1 : 'nil'
+
+      caller = nil
+      for x in trace[4..-1]
+        if !x.match(/^\/usr/)
+          caller = x
+          break
+        end
+      end
+
+      fh.puts("time=#{time} cmd=#{$0.inspect} type=#{type.inspect} " +
+              "caller=#{caller.inspect}")
     end
   end
 end

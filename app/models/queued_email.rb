@@ -205,10 +205,11 @@ class QueuedEmail < AbstractModel
 
   # This is called after an email is created and populated.  In normal
   # production mode this does nothing.  In testing mode it "delivers" the email
-  # immediately (via deliver_email).
+  # immediately (via deliver_email) and then removes it from the queue.
   def finish
     unless QUEUE_EMAIL || @@queue
       self.deliver_email
+      self.destroy
     end
   end
 

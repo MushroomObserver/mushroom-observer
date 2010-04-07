@@ -10,8 +10,8 @@
 %>
 
 <table cellpadding="10">
-  <tr>
-    <td align="center" valign="middle" width="160">
+  <tr style="padding-bottom:0px">
+    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
       <span class="ListRssHeader">
         <%= title %>:
       </span>
@@ -27,7 +27,8 @@
         <%= link_to(location.display_name.t, :controller => 'location',
                     :action => 'show_location', :id => location.id,
                     :params => query_params) %>
-      </span><br/><br/>
+      </span><br/>
+      <span style="line-height:1em"><br/></span>
       <span class="ListDetail">
         <%= detail %>
       </span>

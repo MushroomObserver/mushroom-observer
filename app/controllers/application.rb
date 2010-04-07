@@ -340,7 +340,7 @@ class ApplicationController < ActionController::Base
   def translate_menu(menu)
     result = []
     for k,v in menu
-      result << [ k.l, v ]
+      result << [ (k.is_a?(Symbol) ? k.l : k.to_s), v ]
     end
     return result
   end

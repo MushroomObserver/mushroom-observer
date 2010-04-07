@@ -64,8 +64,8 @@ class QueryTest < UnitTestCase
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, :by => true) }
     assert_equal('id', Query.lookup(:Name, :all, :by => :id).params[:by])
 
-    assert_equal(:okay, Query.lookup(:Name, :all, :misspellings => :okay).params[:misspellings])
-    assert_equal(:okay, Query.lookup(:Name, :all, :misspellings => 'okay').params[:misspellings])
+    assert_equal(:either, Query.lookup(:Name, :all, :misspellings => :either).params[:misspellings])
+    assert_equal(:either, Query.lookup(:Name, :all, :misspellings => 'either').params[:misspellings])
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, :misspellings => 'bogus') }
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, :misspellings => true) }
     assert_raises(RuntimeError) { Query.lookup(:Name, :all, :misspellings => 123) }
@@ -428,7 +428,7 @@ class QueryTest < UnitTestCase
   end
 
     def test_low_levels
-      query = Query.lookup(:Name, :all, :misspellings => :okay, :by => :id)
+      query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
 
       @fungi = names(:fungi)
       @agaricus = names(:agaricus)
@@ -503,7 +503,7 @@ class QueryTest < UnitTestCase
       #   num_total=    lets Query tell it how many results there are
       #   letter        selected letter (if any)
       #   used_letters= lets Query tell it which letters have results
-      query = Query.lookup(:Name, :all, :misspellings => :okay, :by => :id)
+      query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
       @names = Name.all
 
       pages = Wrapper.new(:from => 1, :to => 4)
@@ -585,7 +585,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_next_and_prev
-    query = Query.lookup(:Name, :all, :misspellings => :okay, :by => :id)
+    query = Query.lookup(:Name, :all, :misspellings => :either, :by => :id)
     @names = Name.all
 
     query.current = @names[2]
@@ -1318,7 +1318,7 @@ class QueryTest < UnitTestCase
     expect_good = expect.reject(&:is_misspelling?)
     expect_bad  = expect.select(&:is_misspelling?)
     assert_query(expect_good, :Name, :all)
-    assert_query(expect, :Name, :all, :misspellings => :okay)
+    assert_query(expect, :Name, :all, :misspellings => :either)
     assert_query(expect_good, :Name, :all, :misspellings => :no)
     assert_query(expect_bad, :Name, :all, :misspellings => :only)
   end
@@ -1364,7 +1364,7 @@ class QueryTest < UnitTestCase
 
   def test_name_pattern
     assert_query([], :Name, :pattern_search, :pattern => 'petigera') # search_name
-    assert_query([41], :Name, :pattern_search, :pattern => 'petigera', :misspellings => :okay)
+    assert_query([41], :Name, :pattern_search, :pattern => 'petigera', :misspellings => :either)
     # assert_query([40], :Name, :pattern_search, :pattern => 'ye auld manual of lichenes') # citation
     # assert_query([20], :Name, :pattern_search, :pattern => 'prevent me') # notes
     # assert_query([42], :Name, :pattern_search, :pattern => 'smell as sweet') # gen_desc

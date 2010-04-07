@@ -165,13 +165,13 @@
                 select(:search, :type, options,
                        :selected => session[:search_type] || :observation) %>
                 <%= submit_tag :app_search.l %>&nbsp;&nbsp;
-                <% if false && query_params != {} %>
+                <% if DEVELOPMENT && query_params != {} %>
                   <%= link_to(:app_refine_search.l.nowrap, :controller => 'observer',
                               :action => 'refine_search',
                               :params => query_params) %> |
                 <% end %>
                 <%= link_to(:app_advanced_search.l.nowrap, :controller => 'observer',
-                            :action => 'advanced_search_form', :params => query_params) %>
+                            :action => 'advanced_search_form') %>
               <% end %>
             </div>
 

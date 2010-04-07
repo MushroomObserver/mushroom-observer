@@ -1,6 +1,15 @@
 #!/bin/sh
+
 declare -x RUBYLIB="/usr/lib/ruby/site_ruby/1.8"
 declare -x GEM_HOME="/usr/lib/ruby/gems/1.8"
-declare -x TZ="Eastern Time (US & Canada)"
-echo Running /var/web/mo/script/$*
-exec /var/web/mo/script/$*
+
+dir=/var/web/mo
+if [[ !(-d $dir) ]]; then
+  dir=.
+fi
+
+if [[ $2 == '-v' ]]; then
+  echo Running $dir/script/$*
+fi
+
+exec $dir/script/$*

@@ -6,8 +6,42 @@
 class Query < AbstractQuery
   belongs_to :user
 
+  # Parameters allowed in every query.
+  self.global_params = {
+    # Allow every query to customize its title.
+    :title? => [:string],
+  }
+
+  # Parameters allowed in every query for a given model.
+  self.model_params = {
+    :Comment => {
+    },
+    :Image => {
+    },
+    :Location => {
+    },
+    :LocationDescription => {
+    },
+    :Name => {
+      :misspellings? => {:string => [:no, :either, :only]},
+      :deprecated?   => {:string => [:either, :no, :only]},
+    },
+    :NameDescription => {
+    },
+    :Observation => {
+    },
+    :Project => {
+    },
+    :RssLog => {
+    },
+    :SpeciesList => {
+    },
+    :User => {
+    },
+  }
+
   # Parameters required for each flavor.
-  self.required_params = {
+  self.flavor_params = {
     :advanced_search => {
       :name?     => :string,
       :location? => :string,
@@ -389,22 +423,6 @@ class Query < AbstractQuery
     end
   end
 
-  # Extra parameters allowed in every query by default.
-  def extra_parameters
-
-    # Every query can customize title.
-    args = { :title? => [:string] }
-
-    # All Name queries get to control inclusion of misspellings.  (The default
-    # is to ignore misspellings.)
-    if model_symbol == :Name
-      args[:misspellings?] = {:string => [:okay, :no, :only]}
-      args[:deprecated?]   = {:string => [:okay, :no, :only]}
-    end
-
-    return args
-  end
-
   ##############################################################################
   #
   #  :section: Titles
@@ -539,7 +557,7 @@ class Query < AbstractQuery
               (old_flavor == :of_name)
           # TODO -- need 'synonyms' flavor
           # params[:synonyms] == :all / :no / :exclusive
-          # params[:misspellings] == :okay / :no / :only
+          # params[:misspellings] == :either / :no / :only
           nil
         elsif allowed_model_flavors[new_model].include?(new_flavor)
           self.class.lookup(new_model, new_flavor, params2)
@@ -567,19 +585,8 @@ class Query < AbstractQuery
     super
   end
 
-  def extra_initialization
-    # Give all Name queries control over inclusion of misspellings.
-    if model_symbol == :Name
-      case params[:misspellings] || :no
-      when :no
-        self.where << 'names.correct_spelling_id IS NULL'
-      when :only
-        self.where << 'names.correct_spelling_id IS NOT NULL'
-      else
-      end
-    end
-
-    # Allow all queries to customize title.
+  # Allow all queries to customize title.
+  def initialize_global
     if args = params[:title]
       for line in args
         raise "Invalid syntax in :title parameter: '#{line}'" if line !~ / /
@@ -588,14 +595,20 @@ class Query < AbstractQuery
     end
   end
 
+  # ----------------------------
+  #  Sort orders.
+  # ----------------------------
+
   # Tell SQL how to sort results using the <tt>:by => :blah</tt> mechanism.
   def initialize_order(by)
     table = model.table_name
     case by
+
     when 'modified', 'created', 'last_login'
       if model.column_names.include?(by)
         "#{table}.#{by} DESC"
       end
+
     when 'date'
       if model.column_names.include?('date')
         "#{table}.date DESC"
@@ -604,6 +617,7 @@ class Query < AbstractQuery
       elsif model.column_names.include?('created')
         "#{table}.created DESC"
       end
+
     when 'name'
       if model == Image
         self.join << {:images_observations => {:observations => :names}}
@@ -629,25 +643,30 @@ class Query < AbstractQuery
       elsif model.column_names.include?('title')
         "#{table}.title ASC"
       end
+
     when 'title', 'login', 'summary', 'copyright_holder', 'where'
       if model.column_names.include?(by)
         "#{table}.#{by} ASC"
       end
+
     when 'user'
       if model.column_names.include?('user_id')
         self.join << :users
         'IF(users.name = "" OR users.name IS NULL, users.login, users.name) ASC'
       end
+
     when 'location'
       if model.column_names.include?('location_id')
         self.join << :locations
         'locations.search_name ASC'
       end
+
     when 'rss_log'
       if model.column_names.include?('rss_log_id')
         self.join << :rss_logs
         'rss_logs.modified DESC'
       end
+
     when 'confidence'
       if model_symbol == :Image
         self.join << {:images_observations => :observations}
@@ -655,19 +674,41 @@ class Query < AbstractQuery
       elsif model_symbol == :Observation
         "observations.vote_cache DESC"
       end
+
     when 'image_quality'
       if model_symbol == :Image
         "images.vote_cache DESC"
       end
+
     when 'thumbnail_quality'
       if model_symbol == :Observation
         self.join << :'images.thumb_image'
         "images.vote_cache DESC, observations.vote_cache DESC"
       end
+
     when 'contribution'
       if model_symbol == :User
         'users.contribution DESC'
       end
+    end
+  end
+
+  # ----------------------------
+  #  Name customization.
+  # ----------------------------
+
+  def initialize_name
+
+    # Is the name misspelt?
+    case params[:misspellings] || :no
+    when :no   ; self.where << 'names.correct_spelling_id IS NULL'
+    when :only ; self.where << 'names.correct_spelling_id IS NOT NULL'
+    end
+
+    # Is the name deprecated?
+    case params[:deprecated] || :either
+    when :no   ; self.where << 'names.deprecated IS FALSE'
+    when :only ; self.where << 'names.deprecated IS TRUE'
     end
   end
 
@@ -1145,7 +1186,7 @@ class Query < AbstractQuery
       self.join << {:images_observations => {:observations => :names}}      if !name.blank?
       self.join << {:images_observations => {:observations => :locations!}} if !location.blank?
       self.join << {:images_observations => :observations}                  if !content.blank?
-    when :Location 
+    when :Location
       self.join << {:observations => :users} if !user.blank?
       self.join << {:observations => :names} if !name.blank?
       self.join << :observations             if !content.blank?
@@ -1200,7 +1241,7 @@ class Query < AbstractQuery
         extend_where(args2)
         args2[:where] += google_conditions(content, 'observations.notes')
         results = model.connection.select_rows(query(args2))
-      
+
         args2 = args.dup
         extend_join(args2) << case model_symbol
         when :Image       ; {:images_observations => {:observations => :comments}}
