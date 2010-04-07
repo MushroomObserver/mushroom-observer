@@ -29,7 +29,7 @@ namespace :email do
           File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a') do |fh|
             fh.puts("sending #{e.id.inspect}...")
             result = e.send_email
-            fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : 'false'")
+            fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : 'false'}")
           end
 
           # Destroy if sent successfully.
