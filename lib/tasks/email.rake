@@ -17,30 +17,47 @@ namespace :email do
 
         # Sent successfully.  (Delete it without sending if user isn't local!
         # This shouldn't happen, but just in case, better safe...)
-        if !e.to_user || !e.to_user.created_here || e.send_email
+        if !e.to_user || !e.to_user.created_here
           e.destroy
           count += 1
           if count >= EMAIL_PER_MINUTE
             # break
           end
 
-        # After a few tries give up and delete it.
-        elsif e.num_attempts and (e.num_attempts >= EMAIL_NUM_ATTEMPTS - 1)
-          File.open(EMAIL_LOG, 'a') do |fh|
-            fh.puts('Failed to send email #%d at %s' % [e.id, now])
-            fh.puts(e.dump)
-          end
-          e.destroy
-
-        # Schedule next attempt for 5 minutes later.
         else
-          e.queued = now
-          if e.num_attempts
-            e.num_attempts += 1
-          else
-            e.num_attempts = 1
+          result = nil
+          File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a') do |fh|
+            fh.puts("sending #{e.id.inspect}...")
+            result = e.send_email
+            fh.puts("sent #{e.id.inspect} = #{result ? result.class.name : 'false'")
           end
-          e.save
+
+          # Destroy if sent successfully.
+          if result
+            e.destroy
+            count += 1
+            if count >= EMAIL_PER_MINUTE
+              # break
+            end
+
+          # After a few tries give up and delete it.
+          elsif e.num_attempts and (e.num_attempts >= EMAIL_NUM_ATTEMPTS - 1)
+            File.open(EMAIL_LOG, 'a') do |fh|
+              fh.puts('Failed to send email #%d at %s' % [e.id, now])
+              fh.puts(e.dump)
+            end
+            e.destroy
+
+          # Schedule next attempt for 5 minutes later.
+          else
+            e.queued = now
+            if e.num_attempts
+              e.num_attempts += 1
+            else
+              e.num_attempts = 1
+            end
+            e.save
+          end
         end
       end
     end
