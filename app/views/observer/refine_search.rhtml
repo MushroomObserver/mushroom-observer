@@ -99,7 +99,8 @@ stage. -Jason</big></p><br/>
             form.select(name2, menu, args) %>
           <% end
           if type = field.autocomplete
-            autos << send("turn_into_#{type}_auto_completer", "values_#{name}")
+            autos << send("turn_into_#{type}_auto_completer", "values_#{name}",
+                          :tokens => ' OR ')
           end
           if field.help %>
             <%=

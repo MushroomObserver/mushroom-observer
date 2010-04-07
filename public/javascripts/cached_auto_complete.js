@@ -121,16 +121,88 @@ var CachedAutocompleter = Class.create(base, {
     this.lastValue = this.element.value;
   },
 
+  // Get index of first and last character of current token.
+  getTokenBounds: function() {
+    if (this.tokenBounds != null)
+      return this.tokenBounds;
+    var value = this.element.value;
+    var a=0, b=value.length-1;
+    if (this.options.tokens.length > 0) {
+      var seps = this.options.tokens;
+      var num = seps.length
+      var diff = 0;
+      var old_value = this.oldElementValue;
+      while (diff < value.length && diff < old_value.length) {
+        if (value.substring(0, diff+1) != old_value.substring(0, diff+1))
+          break;
+        diff++;
+      }
+      for (var i=0; i<num; i++) {
+        var x = value.substr(0,diff).lastIndexOf(seps[i]);
+        if (x > -1) {
+          a = x + seps[i].length;
+          break;
+        }
+      }
+      for (var i=0; i<num; i++) {
+        var x = value.substr(diff).indexOf(seps[i]);
+        if (x > -1) {
+          b = diff + x - 1;
+          break;
+        }
+      }
+    }
+    return (this.tokenBounds = [a, b]);
+  },
+
+  // Get the current token (without separators, unstripped).
+  getToken: function() {
+    var value = this.element.value;
+    if (this.options.tokens.length > 0) {
+      var bounds = this.getTokenBounds();
+      value = value.substring(bounds[0], bounds[1]+1);
+    }
+    return value;
+  },
+
+  // Replace the current token with the given value (unstripped).
+  replaceToken: function(value) {
+    if (this.options.tokens.length > 0) {
+      var bounds = this.getTokenBounds();
+      var whole = this.element.value;
+      if (bounds[0] > 0)
+        value = whole.substring(0, bounds[0]) + value;
+      if (bounds[1] < whole.length)
+        value = value + whole.substring(bounds[1] + 1);
+    }
+    this.oldElementValue = this.element.value = value;
+    this.tokenBounds = null;
+  },
+
   // When an entry is selected we need to run getUpdatedChoices() again in case
   // there are multiple choices that have been collapsed (e.g. species under a
-  // given genus).
+  // given genus).  Also, leave it active.
   selectEntry: function() {
-    // Token stuff doesn't seem to work right -- this seems to disable it.
-    this.tokenBounds = [-1];
     this.updateElement(this.getCurrentEntry());
-    if (this.options.collapse && this.element.value.indexOf(' ') < 0)
-      this.oldElementValue = this.element.value += ' ';
     this.getUpdatedChoices();
+  },
+
+  // Scriptaculous messes this up, too.  How did this ever work for them??!
+  updateElement: function(selectedElement) {
+    var value = '';
+    if (this.options.select) {
+      var nodes = $(selectedElement).select('.' + this.options.select) || [];
+      if (nodes.length > 0)
+        value = Element.collectTextNodes(nodes[0], this.options.select);
+    } else {
+      value = Element.collectTextNodesIgnoreClass(selectedElement, 'informal');
+    }
+    if (this.options.collapse && value.indexOf(' ') < 0)
+      value += ' ';
+    this.replaceToken(value);
+    this.element.focus();
+    if (this.options.afterUpdateElement)
+      this.options.afterUpdateElement(this.element, selectedElement);
   },
 
   // This is called when AJAX request returns: result is a list of items, one
@@ -168,7 +240,7 @@ var CachedAutocompleter = Class.create(base, {
   // and draws the menu of choices as appropriate, collapsing multiple choices
   // that start with the same first word (if this behavior is requested).
   getUpdatedChoices: function() {
-    var part = this.element.value;
+    var part = this.getToken();
     var results = [];
     var strings;
 
