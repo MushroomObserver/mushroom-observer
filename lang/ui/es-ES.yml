@@ -1849,7 +1849,13 @@ form_names_classification_help: >
   Cada línea debe ser del tipo «Rango: nombre» (en Inglés).  Un rango
   determinado sólo deben aparecer una vez, y debe ser más alta que la de este
   nombre.  Por ejemplo:\n
-  Family: _Pluteaceae_
+  Domain: _Eukarya_<br/>
+  Reino: _Fungi_<br/>
+  Phylum: _Basidiomycota_<br/>
+  Clase: _Agaricomycetes_<br/>
+  Orden: _Agaricales_<br/>
+  Familia: _Agaricaceae_<br/>
+  Género: _Agaricus_<br/>
 
 form_names_gen_desc_help: >
   Describir el aspecto general de este taxón.

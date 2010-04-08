@@ -1825,11 +1825,13 @@ form_names_misspelling_note: >
 
 form_names_classification_help: >
   List the higher taxa containing this [rank], one name per rank.  Example:<br/>
-  &nbsp;&nbsp;Kingdom: _Fungi_<br/>
-  &nbsp;&nbsp;Phylum: _Basidiomycetes_<br/>
-  &nbsp;&nbsp;Class: _Agaricomycetes_<br/>
-  &nbsp;&nbsp;Order: _Agaricales_<br/>
-  &nbsp;&nbsp;Family: _Agaricaceae_<br/>
+  Domain: _Eukarya_<br/>
+  Kingdom: _Fungi_<br/>
+  Phylum: _Basidiomycota_<br/>
+  Class: _Agaricomycetes_<br/>
+  Order: _Agaricales_<br/>
+  Family: _Agaricaceae_<br/>
+  Genus: _Agaricus_<br/>
 
 form_names_gen_desc_help: >
   Describe the general appearance of this taxon.

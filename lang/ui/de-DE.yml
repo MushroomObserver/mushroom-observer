@@ -1823,7 +1823,13 @@ form_names_classification_help: >
   Jede Zeile muss der Form 'Rang: Name' entsprechen. Jeder angegebene
   Rang darf nur einmal auftreten und muss höher sein als der Rang der
   Beschreibung. Z.B.<br/>
-  Familie: _Pluteaceae_
+  Domain: _Eukarya_<br/>
+  Reich: _Fungi_<br/>
+  Abteilung: _Basidiomycota_<br/>
+  Klasse: _Agaricomycetes_<br/>
+  Ordnung: _Agaricales_<br/>
+  Familie: _Agaricaceae_<br/>
+  Gattung: _Agaricus_<br/>
 
 form_names_gen_desc_help: >
   Gib eine allgemeine Beschreibung für dieses Taxon.
