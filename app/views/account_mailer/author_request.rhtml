@@ -1,5 +1,5 @@
 <%
-  type = @object.class.name.underscore
+  type = @object.type_tag
 
   intro = :email_author_request_intro.l(
     :user => @sender.legal_name,

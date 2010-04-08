@@ -34,7 +34,7 @@
   <% make_matrix(@objects, :width => '100%') do |rss_log|
     object = rss_log.object
     if object %>
-      <%= render(:partial => object.class.name.underscore, :object => object,
+      <%= render(:partial => object.type_tag.to_s, :object => object,
                  :locals => { :rss_log => rss_log }) %>
     <% else %>
       <%= render(:partial => 'rss_log', :object => rss_log) %>

@@ -779,8 +779,8 @@ class NameController < ApplicationController
         end
 
         # Log action in parent name.
-        @description.name.log(:log_object_created_by_user_with_name,
-                 :type => :description, :user => @user.login, :touch => true,
+        @description.name.log(:log_description_created,
+                 :user => @user.login, :touch => true,
                  :name => @description.unique_partial_format_name)
 
         # Save any changes to parent name.
@@ -859,8 +859,7 @@ class NameController < ApplicationController
         end
 
         # Log action to parent name.
-        name.log(:log_object_updated_by_user_with_name, :touch => true,
-                 :type => :description, :user => @user.login,
+        name.log(:log_description_updated, :touch => true, :user => @user.login,
                  :name => @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
@@ -893,8 +892,8 @@ class NameController < ApplicationController
     @description = NameDescription.find(params[:id])
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
-      @description.name.log(:log_object_destroyed_by_user_with_name,
-               :type => :description, :user => @user.login, :touch => true,
+      @description.name.log(:log_description_destroyed,
+               :user => @user.login, :touch => true,
                :name => @description.unique_partial_format_name)
       @description.destroy
       redirect_to(:action => 'show_name', :id => @description.name_id,

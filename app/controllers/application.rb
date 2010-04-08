@@ -1038,13 +1038,13 @@ class ApplicationController < ActionController::Base
         query = find_or_create_query(object.class)
         query.current = object
         if !query.index(object)
-          type = object.class.name.underscore.to_sym
+          type = object.type_tag
           flash_error(:runtime_object_not_in_index.t(:id => object.id, :type => type))
         elsif new_query = query.send(method)
           query = new_query
           id = query.current_id
         else
-          type = object.class.name.underscore.to_sym
+          type = object.type_tag
           flash_error(:runtime_no_more_search_objects.t(:type => type))
         end
       end

@@ -5,13 +5,13 @@
     type = :observation
   else
     obj  = @notification.object
-    type = obj.class.to_s.underscore.to_sym
+    type = obj.type_tag
   end
 
   intro = :email_naming_for_observer_intro.l(
     :user  => @notification.user.legal_name,
     :email => @notification.user.email,
-    :type  => type.l,
+    :type  => type,
     :name  => obj.unique_format_name
   )
 
@@ -27,7 +27,7 @@
   handy_links += ' ' + :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.l(:type => type.l),
+  links.push([:email_links_show_object.l(:type => type),
     "#{HTTP_DOMAIN}/#{obj.show_controller}/#{obj.show_action}/#{obj.id}"])
   links.push([:email_links_latest_changes.l,
     HTTP_DOMAIN])

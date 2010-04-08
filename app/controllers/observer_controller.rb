@@ -366,8 +366,7 @@ class ObserverController < ApplicationController
       redirect_to(:controller => obj.show_controller,
                   :action => obj.show_action, :id => obj.id)
     else
-      type = obj.class.name.underscore.to_sym.t
-      types = obj.class.table_name.to_sym.t
+      type = model.type_tag
       flash_error(:runtime_object_no_match.t(:match => id, :type => type))
       goto_index(model)
     end

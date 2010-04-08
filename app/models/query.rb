@@ -29,6 +29,25 @@ class Query < AbstractQuery
     :NameDescription => {
     },
     :Observation => {
+      # :date_created
+      # :date_modified
+      # :date_observed
+      # :user
+      # :name
+      # :location
+      # :species_list
+      # :confidence
+      # :specimen
+      # :is_col_loc
+      # :confidence
+      # :has_location
+      # :has_notes
+      # :has_name
+      # :has_images
+      # :has_votes
+      # :has_comments
+      # :notes_has
+      # :comments_has
     },
     :Project => {
     },

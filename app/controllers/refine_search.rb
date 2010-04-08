@@ -604,7 +604,7 @@ module RefineSearch
   #
   # def refine_search_lookup(query, params, val, args)
   #   model = args[:model]
-  #   type = model.name.underscore.to_sym
+  #   type = model.type_tag
   #   val = val.to_s.strip_squeeze
   #   ids = objs = nil
   #
@@ -808,8 +808,8 @@ module RefineSearch
     Field.new(
       :id    => :model_flavor,
       :name  => :model_flavor,
-      :label => :refine_search_flavor,
-      :help  => :refine_search_flavor_help,
+      :label => :refine_search_model_flavor,
+      :help  => :refine_search_model_flavor_help,
       :input => :menu,
       :opts  => menu,
       :required => true

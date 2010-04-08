@@ -1,5 +1,5 @@
 <%
-  type = description.parent.class.name.underscore
+  type = description.parent.type_tag
 
   if description.reader_groups.include?(UserGroup.all_users)
     read = :public.t
@@ -20,7 +20,7 @@
 
 <p>
   <%= :TITLE.t %>: <%= description_title(description) %><br/>
-  <%= type.upcase.to_sym.t %>: <%= description.parent.format_name.t %><br/>
+  <%= type.to_s.upcase.to_sym.t %>: <%= description.parent.format_name.t %><br/>
   <%= :show_description_read_permissions.t %>: <%= read %><br/>
   <%= :show_description_write_permissions.t %>: <%= write %><br/>
   <%= show_previous_version(description) %>

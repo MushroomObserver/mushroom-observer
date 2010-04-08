@@ -89,7 +89,7 @@ class Description < AbstractModel
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.
   def parent_type
-    self.class.name.underscore.sub('_description', '')
+    self.type_tag.to_s.sub('_description', '')
   end
 
   # Is this group writable by the general public?
@@ -380,7 +380,7 @@ class Description < AbstractModel
     @group_user_ids ||= {}
     @group_user_ids[table] ||= self.class.connection.select_values(x=%(
       SELECT DISTINCT u.user_id FROM #{table} t, user_groups_users u
-      WHERE t.#{self.class.name.underscore}_id = #{id}
+      WHERE t.#{self.type_tag}_id = #{id}
         AND t.user_group_id = u.user_group_id
       ORDER BY u.user_id ASC
     )).map(&:to_i)
@@ -392,7 +392,7 @@ class Description < AbstractModel
     @group_ids ||= {}
     @group_ids[table] ||= self.class.connection.select_values(%(
       SELECT DISTINCT user_group_id FROM #{table}
-      WHERE #{self.class.name.underscore}_id = #{id}
+      WHERE #{self.type_tag}_id = #{id}
       ORDER BY user_group_id ASC
     )).map(&:to_i)
   end
@@ -446,7 +446,7 @@ class Description < AbstractModel
         # Make sure user has actually made at least one change.
         self.class.connection.select_value %(
           SELECT id FROM #{versioned_table_name}
-          WHERE #{self.class.name.underscore}_id = #{id} AND user_id = #{user.id}
+          WHERE #{self.type_tag}_id = #{id} AND user_id = #{user.id}
           LIMIT 1
         )
         editors.push(user)

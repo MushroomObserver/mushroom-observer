@@ -18,12 +18,12 @@ module ApplicationHelper::Description
 
   # Create tabs for show_description page.
   def show_description_tab_set(desc)
-    type = desc.class.name.underscore.sub(/_description/, '')
+    type = desc.type_tag.to_s.sub(/_description/, '').to_sym
     writer = desc.is_writer?(@user) || is_in_admin_mode?
     admin  = desc.is_admin?(@user)  || is_in_admin_mode?
     new_tab_set do
       if true
-        add_tab(:show_object.t(:type => type.to_sym), :action => "show_#{type}",
+        add_tab(:show_object.t(:type => type), :action => "show_#{type}",
                 :id => desc.parent_id, :params => query_params)
       end
       if (desc.source_type == :project) and
@@ -34,7 +34,7 @@ module ApplicationHelper::Description
       end
       if admin
         add_tab(:show_description_destroy.t,
-                { :action => 'destroy_#{type}_description',
+                { :action => "destroy_#{type}_description",
                 :id => desc.id, :params => query_params },
                 { :confirm => :are_you_sure.l })
       end
@@ -84,7 +84,7 @@ module ApplicationHelper::Description
   #   <p>EOL Project Draft: Show | Edit | Destroy</p>
   #
   def show_embedded_description_title(desc, parent)
-    type = desc.class.name.underscore
+    type = desc.type_tag
     title = description_title(desc)
     links = []
     if @user && desc.is_writer?(@user)
@@ -117,7 +117,7 @@ module ApplicationHelper::Description
   #   </p>
   #
   def show_alt_descriptions(obj, projects=nil)
-    type = obj.class.name.underscore
+    type = obj.type_tag
 
     # Show existing drafts, with link to create new one.
     head = "<big>#{:show_name_descriptions.t}:</big> "
@@ -203,7 +203,7 @@ module ApplicationHelper::Description
   #   Previous Version: N-1<br/>
   #
   def show_previous_version(obj)
-    type = obj.class.name.underscore
+    type = obj.type_tag
     html = "#{:VERSION.t}: #{obj.version}"
     latest_version = obj.versions.latest
     if (latest_version.merge_source_id rescue false)
@@ -237,7 +237,7 @@ module ApplicationHelper::Description
   #   </p>
   #
   def show_past_versions(obj, args={})
-    type = obj.class.name.underscore
+    type = obj.type_tag
     if !@merge_source_id
       versions = obj.versions.reverse
     else
@@ -302,7 +302,7 @@ module ApplicationHelper::Description
   # Return link to orphaned versions of old description if this version
   # was the result of a merge.
   def get_version_merge_link(obj, ver)
-    type = obj.class.name.underscore
+    type = obj.type_tag
     if ver.merge_source_id and
        (other_ver = ver.class.find(ver.merge_source_id) rescue nil)
       parent_id = other_ver.send("#{type}_id")
@@ -326,10 +326,10 @@ module ApplicationHelper::Description
   #   </p>
   #
   def show_authors_and_editors(obj)
-    type = obj.class.name.underscore
+    type = obj.type_tag
 
     # Descriptions.
-    if type.match(/description/)
+    if type.to_s.match(/description/)
       is_admin = @user && obj.is_admin?(@user)
       authors  = obj.authors
       editors  = obj.editors

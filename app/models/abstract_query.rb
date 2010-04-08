@@ -1868,7 +1868,7 @@ class AbstractQuery < ActiveRecord::Base
     if outer_current_id
       outer_current_id.call(self)
     else
-      params[outer.model_string.underscore.to_sym]
+      params[outer.model.type_tag]
     end
   end
 
@@ -1878,7 +1878,7 @@ class AbstractQuery < ActiveRecord::Base
     if setup_new_inner_query
       setup_new_inner_query.call(new_params, new_outer)
     else
-      new_params[new_outer.model_string.underscore.to_sym] = new_outer.current_id
+      new_params[new_outer.model.type_tag] = new_outer.current_id
     end
     self.class.lookup_and_save(model, flavor, new_params)
   end

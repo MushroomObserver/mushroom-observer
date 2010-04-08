@@ -1,21 +1,21 @@
 <%
   @title ||= :review_authors_title.t(:name => @object.format_name)
   parent = @object.parent
-  type = @object.class.name.underscore
-  parent_type = parent.class.name.underscore
+  type = @object.type_tag
+  parent_type = parent.type_tag
 
   # Show Object | Show Object Description
   new_tab_set do
-    add_tab(:show_object.t(:type => parent_type.to_sym.t),
+    add_tab(:show_object.t(:type => parent_type),
             :controller => parent.show_controller,
             :action => parent.show_action, :id => parent.id)
-    add_tab(:show_object.t(:type => type.to_sym.t),
+    add_tab(:show_object.t(:type => type),
             :controller => @object.show_controller,
             :action => @object.show_action, :id => @object.id)
   end
 %>
 
-<%= :review_authors_note.tp if type == 'name_description' %>
+<%= :review_authors_note.tp if type == :name_description %>
 
 <p>
   <%= :review_authors_authors.t %><br/>

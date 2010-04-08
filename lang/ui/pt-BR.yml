@@ -809,6 +809,9 @@ log_updated_by:  Updated by [user].
 log_comment_added:  "[:log_object_added_by_user_with_name(type=:comment,name=summary)]"
 log_comment_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:comment,name=summary)]"
 log_comment_updated:  "[:log_object_updated_by_user_with_name(type=:comment,name=summary)]"
+log_description_created:  "[:log_object_created_by_user_with_name(type=:description)]"
+log_description_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:description)]"
+log_description_updated:  "[:log_object_updated_by_user_with_name(type=:description)]"
 log_image_created0:  "[:log_object_added_no_user(type=:image)]"
 log_image_created:  "[:log_object_added_by_user_with_name(type=:image)]"
 log_image_destroyed0:  "[:log_object_destroyed_no_user(type=:image)]"
@@ -819,6 +822,11 @@ log_image_reused0:  "[:log_object_added_no_user(type=:image)]"
 log_image_reused:  "[:log_object_added_by_user_with_name(type=:image)]"
 log_image_updated0:  "[:log_object_updated_no_user(type=:image)]"
 log_image_updated:  "[:log_object_updated_by_user_with_name(type=:image)]"
+log_location_created:  "[:log_object_created_by_user(type=:location)]"
+log_location_destroyed:  "[:log_object_destroyed_by_user(type=:location]"
+log_location_updated:  "[:log_object_updated_by_user(type=:location)]"
+log_name_created:  "[:log_object_created_by_user(type=:name)]"
+log_name_destroyed:  "[:log_object_destroyed_by_user(type=:name)]"
 log_name_updated:  "[:log_object_updated_by_user(type=:name)]"
 log_naming_created:  "[:log_object_created_by_user_with_name(type=:naming)]"
 log_naming_destroyed:  "[:log_object_destroyed_by_user_with_name(type=:naming)]"
@@ -3198,13 +3206,13 @@ refine_search_deprecated:  Include deprecated names?
 refine_search_deprecated_either:  doesn't matter
 refine_search_deprecated_no:  only approved names
 refine_search_deprecated_only:  only deprecated names
-refine_search_flavor:  Query flavor
 refine_search_location:  Location (defined)
 refine_search_location_where:  Location (undefined)
 refine_search_misspellings:  Include misspellings?
 refine_search_misspellings_either:  doesn't matter
 refine_search_misspellings_no:  only correct names
 refine_search_misspellings_only:  only misspelt names
+refine_search_model_flavor:  Query flavor
 refine_search_nonconsensus:  Include "other" observations?
 refine_search_nonconsensus_all:  use any proposed name
 refine_search_nonconsensus_exclusive:  only nonconsensus names
@@ -3231,7 +3239,7 @@ refine_search_date_help:  >
   "Dec" or "March to April"), or a full or partial date or range in
   "YYYY-MM-DD" format (e.g., "2008-03" or "2008-03-31 2009-03-31").
 
-refine_search_flavor_help:  >
+refine_search_model_flavor_help:  >
   These are all of our basic query flavors.  The names might be a bit obscure.
   It might be easier to go browsing around normally until you find a query
   that is close to what you want and refine that query instead.  Another
@@ -4233,3 +4241,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

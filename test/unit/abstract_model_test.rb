@@ -125,7 +125,7 @@ class AbstractModelTest < UnitTestCase
     User.current = @rolf
 
     for model in [Location, Name, Observation, SpeciesList]
-      model_name = model.name.underscore.to_sym.l.gsub(' ','%20')
+      model_name = model.type_tag
 
       case model.name
       when 'Location'
@@ -170,7 +170,7 @@ class AbstractModelTest < UnitTestCase
         assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
                      "#{model}.rss_log should only have creation line:\n" +
                      "<#{obj.rss_log.notes}>")
-        assert_match(/log_object_created.*#{model_name}/, obj.rss_log.notes,
+        assert_match(/log_#{model_name}_created/, obj.rss_log.notes,
                      "#{model}.rss_log should have creation line:\n" +
                      "<#{obj.rss_log.notes}>")
       else
@@ -209,7 +209,7 @@ class AbstractModelTest < UnitTestCase
         assert_equal((num+=1), obj.rss_log.notes.split("\n").length,
                      "#{model}.rss_log should have create, test, update lines:\n" +
                      "<#{obj.rss_log.notes}>")
-        assert_match(/log_object_updated.*#{model_name}/, obj.rss_log.notes,
+        assert_match(/log_#{model_name}_updated/, obj.rss_log.notes,
                      "#{model}.rss_log should have update line:\n" +
                      "<#{obj.rss_log.notes}>")
         assert_not_equal(time, obj.rss_log.modified,
@@ -221,7 +221,7 @@ class AbstractModelTest < UnitTestCase
       assert_equal((num+=2), obj.rss_log.notes.split("\n").length,
                    "#{model}.rss_log should have create, test, update, destroy, orphan lines:\n" +
                    "<#{obj.rss_log.notes}>")
-      assert_match(/log_object_destroyed.*#{model_name}/, obj.rss_log.notes,
+      assert_match(/log_#{model_name}_destroyed/, obj.rss_log.notes,
                    "#{model}.rss_log should have destroy line:\n" +
                    "<#{obj.rss_log.notes}>")
       assert_equal(time, obj.rss_log.modified,

@@ -149,7 +149,7 @@ module ApplicationHelper
   #
   def show_object_footer(obj)
     html = []
-    type = obj.class.name.underscore
+    type = obj.type_tag
     num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
 
     # Old version of versioned object.

@@ -626,8 +626,8 @@ class LocationController < ApplicationController
         )
 
         # Log action in parent location.
-        @description.location.log(:log_object_created_by_user_with_name,
-                 :type => :description, :user => @user.login, :touch => true,
+        @description.location.log(:log_description_created,
+                 :user => @user.login, :touch => true,
                  :name => @description.unique_partial_format_name)
 
         flash_notice(:runtime_location_description_success.t(
@@ -688,8 +688,8 @@ class LocationController < ApplicationController
         end
 
         # Log action in parent location.
-        @description.location.log(:log_object_updated_by_user_with_name,
-                 :type => :description, :user => @user.login, :touch => true,
+        @description.location.log(:log_description_updated,
+                 :user => @user.login, :touch => true,
                  :name => @description.unique_partial_format_name)
 
         # Delete old description after resolving conflicts of merge.
@@ -722,8 +722,8 @@ class LocationController < ApplicationController
     @description = LocationDescription.find(params[:id])
     if @description.is_admin?(@user)
       flash_notice(:runtime_destroy_description_success.t)
-      @description.location.log(:log_object_destroyed_by_user_with_name,
-               :type => :description, :user => @user.login, :touch => true,
+      @description.location.log(:log_description_destroyed,
+               :user => @user.login, :touch => true,
                :name => @description.unique_partial_format_name)
       @description.destroy
       redirect_to(:action => 'show_location', :id => @description.location_id,

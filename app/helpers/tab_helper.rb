@@ -29,7 +29,7 @@ module ApplicationHelper::Tabs
 
   # Render a set of tabs for the prev/index/next links.
   def draw_prev_next_tabs(object, mappable=false)
-    type = object.class.name.underscore
+    type = object.type_tag
     new_tab_set do
       args = {
         :controller => object.show_controller,
@@ -197,7 +197,7 @@ module ApplicationHelper::Tabs
   #
   def draw_interest_icons(object)
     if @user
-      type = object.class.name.underscore.to_sym
+      type = object.type_tag
 
       # Create link to change interest state.
       def interest_link(label, object, state) #:nodoc:

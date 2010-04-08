@@ -174,7 +174,7 @@ class CommentController < ApplicationController
       if !@comment.save
         flash_object_errors(@comment)
       else
-        type = @object.class.name.underscore.to_sym
+        type = @object.type_tag
         Transaction.post_comment(
           :id      => @comment,
           type     => @object,

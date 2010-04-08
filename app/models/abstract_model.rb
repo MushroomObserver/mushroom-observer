@@ -148,7 +148,7 @@ class AbstractModel < ActiveRecord::Base
     end
     num = self.class.connection.select_value %(
       SELECT version FROM #{versioned_table_name}
-      WHERE #{self.class.name.underscore}_id = #{id}
+      WHERE #{self.type_tag}_id = #{id}
       ORDER BY version #{limit}
     )
     num ? num.to_i : nil
@@ -460,12 +460,12 @@ class AbstractModel < ActiveRecord::Base
       touch = nil
     end
     if touch != nil
-      msg = "log_object_#{event}".to_sym
-      type = self.class.name.underscore.to_sym.l
+      type = self.type_tag
+      msg = "log_#{type}_#{event}".to_sym
       if orphan
-        orphan_log(msg, :type => type, :touch => touch)
+        orphan_log(msg, :touch => touch)
       else
-        log(msg, :type => type, :touch => touch)
+        log(msg, :touch => touch)
       end
     end
   end
@@ -481,7 +481,7 @@ class AbstractModel < ActiveRecord::Base
       rss_log = RssLog.new
       # Don't attach to object if about to destroy.
       if !orphan
-        rss_log.send("#{self.class.name.underscore}_id=", id) if id
+        rss_log.send("#{self.type_tag}_id=", id) if id
         rss_log.save
         # Save it now unless we are sure it will be saved later.
         need_to_save = !new_record? && !changed?
@@ -502,8 +502,8 @@ class AbstractModel < ActiveRecord::Base
   # Fill in reverse-lookup id in RssLog after creating new record.
   def attach_rss_log
     if rss_log and
-       rss_log.send("#{self.class.name.underscore}_id") != id
-      rss_log.send("#{self.class.name.underscore}_id=", id)
+       rss_log.send("#{self.type_tag}_id") != id
+      rss_log.send("#{self.type_tag}_id=", id)
       rss_log.save
     end
   end

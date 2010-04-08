@@ -51,8 +51,8 @@ module DescriptionControllerHelpers
                       :name => desc.unique_partial_format_name, :touch => true)
       desc.parent.save
     end
-    redirect_to(:action => "show_#{desc.class.name.underscore}",
-                :id => desc.id, :params => query_params)
+    redirect_to(:action => desc.show_action, :id => desc.id,
+                :params => query_params)
   end
 
   # Merge a description with another.  User must be both an admin for the
@@ -63,7 +63,7 @@ module DescriptionControllerHelpers
   def merge_descriptions # :norobots:
     pass_query_params
     src = find_description(params[:id])
-    type = src.class.name.underscore.sub(/_description/, '')
+    type = src.type_tag.to_s.sub(/_description/, '')
 
     # Doesn't have permission to see source.
     if !src.is_reader?(@user)
@@ -121,7 +121,7 @@ module DescriptionControllerHelpers
     draft = find_description(params[:id])
     parent = draft.parent
     old = parent.description
-    type = parent.class.name.underscore
+    type = parent.type_tag
     need_redirect = true
     old_partial   = old.unique_partial_format_name if old
     draft_partial = draft.unique_partial_format_name
@@ -272,7 +272,7 @@ module DescriptionControllerHelpers
         end
 
         # Log change with Transaction.
-        Transaction.send("put_#{@description.class.name.underscore}",
+        Transaction.send("put_#{@description.type_tag}",
           :id          => @description,
           :set_readers => @description.reader_groups,
           :set_writers => @description.writer_groups,
@@ -637,7 +637,7 @@ module DescriptionControllerHelpers
 
       # Save changes to destination.
       dest.save
-      Transaction.send("put_#{dest.class.name.underscore}", xargs)
+      Transaction.send("put_#{dest.type_tag}", xargs)
 
       # Copy over authors and editors.
       src.authors.each {|user| dest.add_author(user)}
@@ -649,7 +649,7 @@ module DescriptionControllerHelpers
           flash_warning(:runtime_description_merge_delete_denied.t)
         else
           src_was_default = (src.parent.description_id == src.id)
-          Transaction.send("delete_#{src.class.name.underscore}", :id => src)
+          Transaction.send("delete_#{src.type_tag}", :id => src)
           flash_notice(:runtime_description_merge_deleted.
                          t(:old => src.unique_partial_format_name))
           src.destroy

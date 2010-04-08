@@ -12,7 +12,7 @@
           <td>
             <% if item.is_a?(Notification) %>
               <% if obj %>
-                <%= link_to(:show_object.t(:type => obj.class.name.underscore.to_sym.t),
+                <%= link_to(:show_object.t(:type => obj.type_tag.t),
                             :controller => obj.show_controller,
                             :action => obj.show_action, :id => obj.id) %> |
               <% end %>
@@ -21,7 +21,7 @@
                           :action => 'destroy_notification', :id => item.id) %>
             <% else %>
               <% if obj %>
-                <%= link_to(:show_object.t(:type => obj.class.name.underscore.to_sym.t),
+                <%= link_to(:show_object.t(:type => obj.type_tag.t),
                             :controller => obj.show_controller,
                             :action => obj.show_action, :id => obj.id) %> |
               <% end %>
