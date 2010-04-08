@@ -1351,7 +1351,7 @@ class ApplicationController < ActionController::Base
   def disable_link_prefetching
     if request.env["HTTP_X_MOZ"] == "prefetch"
       logger.debug "prefetch detected: sending 403 Forbidden"
-      render(:nothing, :status => 403)
+      render(:text => '', :status => 403)
       return false
     end
   end

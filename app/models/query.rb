@@ -15,24 +15,43 @@ class Query < AbstractQuery
   # Parameters allowed in every query for a given model.
   self.model_params = {
     :Comment => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :users?    => [User],
     },
     :Image => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :date?     => [:date],
+      :users?    => [User],
     },
     :Location => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :users?    => [User],
     },
     :LocationDescription => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :users?    => [User],
     },
     :Name => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :users?    => [User],
       :misspellings? => {:string => [:no, :either, :only]},
       :deprecated?   => {:string => [:either, :no, :only]},
     },
     :NameDescription => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :users?    => [User],
     },
     :Observation => {
-      # :date_created
-      # :date_modified
-      # :date_observed
-      # :user
+      :created?  => [:time],
+      :modified? => [:time],
+      :date?     => [:date],
+      :users?    => [User],
       # :name
       # :location
       # :species_list
@@ -50,12 +69,22 @@ class Query < AbstractQuery
       # :comments_has
     },
     :Project => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :users?    => [User],
     },
     :RssLog => {
+      :modified? => [:time],
     },
     :SpeciesList => {
+      :created?  => [:time],
+      :modified? => [:time],
+      :date?     => [:date],
+      :users?    => [User],
     },
     :User => {
+      :created?  => [:time],
+      :modified? => [:time],
     },
   }
 
@@ -713,21 +742,178 @@ class Query < AbstractQuery
   end
 
   # ----------------------------
-  #  Name customization.
+  #  Model customization.
   # ----------------------------
 
-  def initialize_name
+  def initialize_comment
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_objects_by_id(:users)
+  end
 
-    # Is the name misspelt?
+  def initialize_image
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_date(:date, :when)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_location
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_location_description
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_name
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_objects_by_id(:users)
+    initialize_model_do_misspellings
+    initialize_model_do_deprecated
+  end
+
+  def initialize_name_description
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_observation
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_date(:date, :when)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_project
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_rss_log
+    initialize_model_do_time(:modified)
+  end
+
+  def initialize_species_list
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+    initialize_model_do_date(:date, :when)
+    initialize_model_do_objects_by_id(:users)
+  end
+
+  def initialize_user
+    initialize_model_do_time(:created)
+    initialize_model_do_time(:modified)
+  end
+
+  # -------------------------------
+  #  Model customization helpers.
+  # -------------------------------
+
+  def initialize_model_do_deprecated
+    case params[:deprecated] || :either
+    when :no   ; self.where << 'names.deprecated IS FALSE'
+    when :only ; self.where << 'names.deprecated IS TRUE'
+    end
+  end
+
+  def initialize_model_do_misspellings
     case params[:misspellings] || :no
     when :no   ; self.where << 'names.correct_spelling_id IS NULL'
     when :only ; self.where << 'names.correct_spelling_id IS NOT NULL'
     end
+  end
 
-    # Is the name deprecated?
-    case params[:deprecated] || :either
-    when :no   ; self.where << 'names.deprecated IS FALSE'
-    when :only ; self.where << 'names.deprecated IS TRUE'
+  def initialize_model_do_objects_by_id(arg, col=nil)
+    if ids = params[arg]
+      col ||= "#{model.table_name}.#{arg.to_s.sub(/s$/,'')}_id"
+      set = clean_id_set(ids)
+      self.where << "#{col} IN (#{set})"
+    end
+  end
+
+  # ----------------------------
+  #  Date customization.
+  # ----------------------------
+
+  def initialize_model_do_date(arg=:date, col=arg)
+    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    if vals = params[arg]
+      initialize_model_do_date_half(true, vals[0], col)
+      initialize_model_do_date_half(false, vals[1], col)
+    end
+  end
+
+  def initialize_model_do_date_half(min, val, col)
+    dir = min ? '>' : '<'
+    if val.match(/^\d\d\d\d/)
+      y, m, d = val.split('-')
+      m ||= min ? 1 : 12
+      d ||= min ? 1 : 31
+      self.where << "#{col} #{dir}= '%04d-%02d-%02d'" % [y, m, d]
+    elsif val.match(/-/)
+      m, d = val.split('-')
+      self.where << "MONTH(#{col}) #{dir} #{m} OR " +
+                    "(MONTH(#{col}) = #{m} AND " +
+                    "DAY(#{col}) #{dir}= #{d})"
+    else
+      self.where << "MONTH(#{col}) #{dir}= #{val}"
+    end
+  end
+
+  def initialize_model_do_time(arg=:time, col=arg)
+    col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+    if vals = params[arg]
+      initialize_model_do_time_half(true, vals[0], col)
+      initialize_model_do_time_half(false, vals[1], col)
+    end
+  end
+
+  def initialize_model_do_time_half(min, val, col)
+    dir = min ? '>' : '<'
+    y, m, d, h, n, s = val.split('-')
+    m ||= min ? 1 : 12
+    d ||= min ? 1 : 31
+    h ||= min ? 0 : 24
+    n ||= min ? 0 : 60
+    s ||= min ? 0 : 60
+    self.where << "#{col} #{dir}= '%04d-%02d-%02d %02d:%02d:%02d'" %
+                                  [y, m, d, h, n, s]
+  end
+
+  def validate_date(arg, val)
+    if val.acts_like?(:date)
+      val = val.in_time_zone
+      '%04d-%02d-%02d' % [val.year, val.mon, val.day]
+    elsif val.to_s.match(/^\d\d\d\d(-\d\d?){0,2}$/i)
+      val
+    elsif val.to_s.match(/^\d\d?(-\d\d?)?$/i)
+      val
+    elsif val.blank? || val.to_s == '0'
+      nil
+    else
+      raise("Value for :#{arg} should be a date (YYYY-MM-DD or MM-DD), got: #{val.inspect}")
+    end
+  end
+
+  def validate_time(arg, val)
+    if val.acts_like?(:time)
+      val = val.in_time_zone
+      '%04d-%02d-%02d-%02d-%02d-%02d' %
+        [val.year, val.mon, val.day, val.hour, val.min, val.sec]
+    elsif val.to_s.match(/^\d\d\d\d(-\d\d?){0,5}$/i)
+      val
+    elsif val.blank? || val.to_s == '0'
+      nil
+    else
+      raise("Value for :#{arg} should be a time (YYYY-MM-DD-HH-MM-SS), got: #{val.inspect}")
     end
   end
 

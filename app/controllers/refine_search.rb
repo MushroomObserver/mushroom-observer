@@ -54,11 +54,14 @@ module RefineSearch
   #  Order of fields in form.
   # ----------------------------
 
-  RS_FIELD_ORDER = {
+  FIELD_ORDER = {
 
     :Comment => [
       :pattern,
       :user,
+      :created,
+      :modified,
+      :users,
     ],
 
     :Image => [
@@ -75,6 +78,10 @@ module RefineSearch
       :observation,
       :nonconsensus,
       :synonyms,
+      :created,
+      :modified,
+      :date,
+      :users,
     ],
 
     :Location => [
@@ -91,10 +98,16 @@ module RefineSearch
       :observation,
       :nonconsensus,
       :synonyms,
+      :created,
+      :modified,
+      :users,
     ],
 
     :LocationDescription => [
       :user,
+      :created,
+      :modified,
+      :users,
     ],
 
     :Name => [
@@ -112,10 +125,16 @@ module RefineSearch
       :all_children,
       :deprecated,
       :misspellings,
+      :created,
+      :modified,
+      :users,
     ],
 
     :NameDescription => [
       :user,
+      :created,
+      :modified,
+      :users,
     ],
 
     :Observation => [
@@ -133,14 +152,22 @@ module RefineSearch
       :synonyms,
       :nonconsensus,
       :all_children,
+      :created,
+      :modified,
+      :date,
+      :users,
     ],
 
     :Project => [
       :pattern,
+      :created,
+      :modified,
+      :users,
     ],
 
     :RssLog => [
       :rss_type,
+      :modified,
     ],
 
     :SpeciesList => [
@@ -148,10 +175,16 @@ module RefineSearch
       :user,
       :location,
       :location_where,
+      :created,
+      :modified,
+      :date,
+      :users,
     ],
 
     :User => [
       :pattern,
+      :created,
+      :modified,
     ],
   }
 
@@ -159,7 +192,7 @@ module RefineSearch
   #  Flavor- and model-specific aliases.
   # --------------------------------------
 
-  RS_FLAVOR_FIELDS = {
+  FLAVOR_FIELDS = {
     :advanced_search => {
       :user     => :advanced_search_user,
       :name     => :advanced_search_name,
@@ -171,15 +204,18 @@ module RefineSearch
     :with_observations_of_children => { :all => :all_children },
   }
 
-  RS_MODEL_FIELDS = {
-    :RssLog => { :type => :rss_type },
+  MODEL_FIELDS = {
+    :RssLog => {
+      :modified => :rss_modified,
+      :type     => :rss_type,
+    },
   }
 
   # ----------------------------
   #  Field specifications.
   # ----------------------------
 
-  RS_FIELDS = [
+  FIELDS = [
 
     # Advanced search fields.
     Field.new(
@@ -226,6 +262,26 @@ module RefineSearch
       :default => false,
       :blank => false,
       :parse => :boolean
+    ),
+
+    # Specify time or range of times for time created.
+    Field.new(
+      :id     => :created,
+      :name   => :created,
+      :label  => :refine_search_created,
+      :help   => :refine_search_times_help,
+      :input  => :text2,
+      :parse  => :times
+    ),
+
+    # Specify a date, range of dates, month or range of months.
+    Field.new(
+      :id     => :date,
+      :name   => :date,
+      :label  => :refine_search_date,
+      :help   => :refine_search_dates_help,
+      :input  => :text2,
+      :parse  => :dates
     ),
 
     # Include deprecated names?
@@ -277,6 +333,26 @@ module RefineSearch
       ],
       :default => :no,
       :blank => false
+    ),
+
+    # Specify time or range of times for last modified.
+    Field.new(
+      :id     => :modified,
+      :name   => :modified,
+      :label  => :refine_search_modified,
+      :help   => :refine_search_times_help,
+      :input  => :text2,
+      :parse  => :times
+    ),
+
+    # Specify time or range of times for RSS activity.
+    Field.new(
+      :id     => :rss_modified,
+      :name   => :rss_modified,
+      :label  => :refine_search_rss_modified,
+      :help   => :refine_search_times_help,
+      :input  => :text2,
+      :parse  => :times
     ),
 
     # Specify a given name.
@@ -368,6 +444,18 @@ module RefineSearch
       :autocomplete => :user,
       :parse => :user
     ),
+
+    # Specify one or more users.
+    Field.new(
+      :id     => :users,
+      :name   => :users,
+      :label  => :refine_search_users,
+      :help   => :refine_search_users_help,
+      :input  => :text,
+      :autocomplete => :user,
+      :tokens => true,
+      :parse  => :users
+    ),
   ]
 
   ##############################################################################
@@ -398,6 +486,10 @@ module RefineSearch
     vals = ['all'] if vals.include?('all')
     vals.join(' ')
   end
+
+  # ----------------------------
+  #  Object parsers.
+  # ----------------------------
 
   def rs_format_image(v,f);        rs_format_object(Image, v,f);       end
   def rs_format_location(v,f);     rs_format_object(Location, v,f);    end
@@ -484,188 +576,111 @@ module RefineSearch
   end
 
   def rs_format_objects(model, val, field)
-    val.map {|v| rs_format_object(model, v)}.join(' OR ')
+    val = [] if val.blank?
+    val.map {|v| rs_format_object(model, v, field)}.join(' OR ')
   end
 
   def rs_parse_objects(model, val, field)
     val = val.strip_squeeze
-    val.split(/\s+OR\s+/).map {|v| rs_parse_object(model, v)}
+    val.split(/\s+OR\s+/).map {|v| rs_parse_object(model, v, field)}
   end
 
-  # def refine_search_date(query, params, val, args)
-  #   f = args[:field]
-  #   val = val.to_s.strip_squeeze
-  #   unless val.match(/^(\d\d\d\d)((-)(\d\d\d\d))$/) or
-  #          val.match(/^([a-z]\w+)((-)([a-z]\w+))$/i) or
-  #          val.match(/^([\w\-]+)( (- |to |a )?([\w\-]+))?$/)
-  #     raise :runtime_invalid.t(:type => :date, :value => val)
-  #   end
-  #   date1, date2 = $1, $4
-  #   y1, m1, d1 = refine_search_parse_date(date1)
-  #   if date2
-  #     y2, m2, d2 = refine_search_parse_date(date2)
-  #     if (!!y1 != !!y2) or (!!m1 != !!m2) or (!!d1 != !!d2)
-  #       raise :runtime_dates_must_be_same_format.t
-  #     end
-  #
-  #     # Two full dates.
-  #     if y1
-  #       params[:where] << "#{f} >= '%04d-%02d-%02d' AND #{f} <= '%04d-%02d-%02d'" % [y1, m1 || 1, d1 || 1, y2, m2 || 12, d2 || 31]
-  #
-  #     # Two months and days.
-  #     elsif d1
-  #       if "#{m1}#{d1}".to_i < "#{m2}#{d2}".to_i
-  #         params[:where] << "(MONTH(#{f}) > #{m1} OR MONTH(#{f}) = #{m1} AND DAY(#{f}) >= #{d1}) AND (MONTH(#{f}) < #{m2} OR MONTH(#{f}) = #{m2} AND DAY(#{f}) <= #{d2})"
-  #       else
-  #         params[:where] << "MONTH(#{f}) > #{m1} OR MONTH(#{f}) = #{m1} AND DAY(#{f}) >= #{d1} OR MONTH(#{f}) < #{m2} OR MONTH(#{f}) = #{m2} AND DAY(#{f}) <= #{d2}"
-  #       end
-  #
-  #     # Two months.
-  #     else
-  #       if m1 < m2
-  #         params[:where] << "MONTH(#{f}) >= #{m1} AND MONTH(#{f}) <= #{m2}"
-  #       else
-  #         params[:where] << "MONTH(#{f}) >= #{m1} OR MONTH(#{f}) <= #{m2}"
-  #       end
-  #     end
-  #
-  #   # One full date.
-  #   elsif y1 && m1 && d1
-  #     params[:where] << "#{f} = '%04d-%02d-%02d'" % [y1, m1, d2]
-  #   elsif y1 && m1
-  #     params[:where] << "YEAR(#{f}) = #{y1} AND MONTH(#{f}) = #{m1}"
-  #   elsif y1
-  #     params[:where] << "YEAR(#{f}) = #{y1}"
-  #
-  #   # One month (and maybe day).
-  #   elsif d1
-  #     params[:where] << "MONTH(#{f}) = #{m1} AND DAY(#{f}) = #{d1}"
-  #   else
-  #     params[:where] << "MONTH(#{f}) = #{m1}"
-  #   end
-  # end
-  #
-  # def refine_search_time(query, params, val, args)
-  #   f = args[:field]
-  #   val = val.to_s.strip_squeeze
-  #   if !val.match(/^([\w\-\:]+)( (- |to |a )?([\w\-\:]+))?$/)
-  #     raise :runtime_invalid.t(:type => :date, :value => val)
-  #   end
-  #   date1, date2 = $1, ($4 || $1)
-  #   y1, m1, d1, h1, n1, s1 = refine_search_parse_time(date1)
-  #   y2, m2, d2, h2, n2, s2 = refine_search_parse_time(date2)
-  #   m1 ||=  1; d1 ||=  1; h1 ||=  0; n1 ||=  0; s1 ||=  0
-  #   m2 ||= 12; d2 ||= 31; h2 ||= 23; n2 ||= 59; s2 ||= 59
-  #   params[:where] << "#{f} >= '%04d-%02d-%02d %02d:%02d:%02d' AND #{f} <= '%04d-%02d-%02d %02d:%02d:%02d'" % [y1, m1, d1, h1, n1, s1, y2, m2, d2, h2, n2, s2]
-  # end
-  #
-  # def refine_search_parse_date(str)
-  #   y = m = d = nil
-  #   if str.match(/^(\d\d\d\d)(-(\d\d|[a-z]{3,}))?(-(\d\d))?$/i)
-  #     y, m, d = $1, $3, $5
-  #     if m && m.length > 2
-  #       m = :date_helper_month_names.l.index(m) ||
-  #           :date_helper_abbr_month_names.l.index(m)
-  #     end
-  #   elsif str.match(/^(\d\d|[a-z]{3,})(-(\d\d))?$/i)
-  #     m, d = $1, $3
-  #     m = refine_search_parse_month(m) if m && m.length > 2
-  #   else
-  #     raise :runtime_invalid.t(:type => :date, :value => str)
-  #   end
-  #   return [y, m, d].map {|x| x && x.to_i}
-  # end
-  #
-  # def refine_search_parse_time(str)
-  #   if !str.match(/^(\d\d\d\d)(-(\d\d|[a-z]{3,}))?(-(\d\d))?(:(\d\d))?(:(\d\d))?(:(\d\d))?(am|pm)?$/i)
-  #     raise :runtime_invalid.t(:type => :date, :value => str)
-  #   end
-  #   y, m, d, h, n, s, am = $1, $3, $5, $7, $9, $11, $12
-  #   if m && m.length > 2
-  #     m = :date_helper_month_names.l.index(m) ||
-  #         :date_helper_abbr_month_names.l.index(m)
-  #   end
-  #   h = h.to_i + 12 if h && am && am.downcase == 'pm'
-  #   return [y, m, d, h, n, s].map {|x| x && x.to_i}
-  # end
-  #
-  # def refine_search_parse_month(str)
-  #   result = nil
-  #   str = str.downcase
-  #   for list in [
-  #     :date_helper_month_names.l,
-  #     :date_helper_abbr_month_names.l
-  #   ]
-  #     result = list.map {|v| v.is_a?(String) && v.downcase }.index(str)
-  #     break if result
-  #   end
-  #   return result
-  # end
-  #
-  # def refine_search_lookup(query, params, val, args)
-  #   model = args[:model]
-  #   type = model.type_tag
-  #   val = val.to_s.strip_squeeze
-  #   ids = objs = nil
-  #
-  #   # Supplied one or more ids.
-  #   if val.match(/^\d+(,? ?\d+)*$/)
-  #     ids = val.split(/[, ]+/).map(&:to_i)
-  #     if args[:method]
-  #       objs = model.all(:conditions => ['id IN (?)', ids])
-  #     end
-  #
-  #   # Supplied full or partial string.
-  #   else
-  #     case type
-  #     when :name
-  #       objs = model.find_all_by_search_name(val)
-  #       objs = model.find_all_by_text_name(val) if objs.empty?
-  #       if objs.empty?
-  #         val  = query.clean_pattern(val)
-  #         objs = model.all(:conditions => "search_name LIKE '#{val}%'")
-  #       end
-  #     when :species_list
-  #       objs = model.find_all_by_title(val)
-  #       if objs.empty?
-  #         val  = query.clean_pattern(val)
-  #         objs = model.all(:conditions => "title LIKE '#{val}%'")
-  #       end
-  #     when :user
-  #       val.sub!(/ *<.*>/, '')
-  #       objs = model.find_all_by_login(val)
-  #       objs = model.find_all_by_name(val) if objs.empty?
-  #       if objs.empty?
-  #         val  = query.clean_pattern(val)
-  #         objs = model.all(:conditions => "login LIKE '#{val}%' OR name LIKE '#{val}%'")
-  #       end
-  #     else
-  #       raise "Unsupported model in lookup condition: #{args[:model].name.inspect}"
-  #     end
-  #   end
-  #
-  #   if objs && objs.empty?
-  #     raise :runtime_no_matches.t(:type => type)
-  #   end
-  #
-  #   # Call an additional method on each result?
-  #   if method = args[:method]
-  #     if !objs.first.respond_to?(method)
-  #       raise "Invalid :method for lookup condition: #{method.inspect}"
-  #     end
-  #     if method.to_s.match(/_ids$/)
-  #       ids = objs.map(&method).flatten
-  #     else
-  #       ids = objs.map(&method).flatten.map(&:id)
-  #     end
-  #   elsif objs
-  #     ids = objs.map(&:id)
-  #   end
-  #
-  #   # Put together final condition.
-  #   ids = ids.uniq.map(&:to_s).join(',')
-  #   params[:where] << "#{args[:field]} IN (#{ids})"
-  # end
+  # ----------------------------
+  #  Date parsers.
+  # ----------------------------
+
+  def rs_format_date(val, field)
+    if val == '0' || val.blank?
+      ''
+    elsif val.match(/^\d\d\d\d/)
+      y, m, d = val.split('-')
+      val  =  '%04d' % y
+      val += '-%02d' % m if m
+      val += '-%02d' % d if d
+      val
+    elsif val.match(/-/)
+      m, d = val.split('-')
+      :date_helper_month_names.l[m.to_i] + (' %d' % d)
+    else
+      :date_helper_month_names.l[val.to_i]
+    end
+  end
+
+  def rs_format_time(val, field)
+    if val == '0' || val.blank?
+      ''
+    else
+      y, m, d, h, n, s = val.to_s.split('-')
+      val  =  '%04d' % y
+      val += '-%02d' % m if m
+      val += '-%02d' % d if d
+      val += ' %02d' % h if h
+      val += ':%02d' % n if n
+      val += ':%02d' % s if s
+      val
+    end
+  end
+
+  def rs_format_dates(val, field)
+    val = [] if val.blank?
+    val.map {|v| rs_format_date(v, field)}
+  end
+
+  def rs_format_times(val, field)
+    val = [] if val.blank?
+    val.map {|v| rs_format_time(v, field)}
+  end
+
+  def rs_parse_date(val, field)
+    val = val.strip_squeeze
+    if val.match(/^(\d\d\d\d)([- :](\d\d?|[a-z]{3,}))?([- :](\d\d?))?$/i)
+      y, m, d = $1, $3, $5
+      m = rs_parse_month(m) if m && m.length > 2
+      [y, m, d].reject(&:nil?).join('-')
+    elsif val.to_s.match(/^(\d\d?|[a-z]{3,})([- :](\d\d?))?$/i)
+      m, d = $1, $3
+      m = rs_parse_month(m) if m && m.length > 2
+      [m, d].reject(&:nil?).join('-')
+    elsif val.blank?
+      '0'
+    else
+      raise(:runtime_invalid.t(:type => :date, :value => val))
+    end
+  end
+
+  def rs_parse_time(val, field)
+    val = val.strip_squeeze
+    if val.match(/^(\d\d\d\d)([- :](\d\d?|[a-z]{3,}))?([- :](\d\d?))?([- :](\d\d?))?([- :](\d\d?))?([- :](\d\d?))?(am|pm)?$/i)
+      y, m, d, h, n, s, am = $1, $3, $5, $7, $9, $11, $12
+      m = rs_parse_month(m)      if m && m.length > 2
+      h = '%02s' % (h.to_i + 12) if h && am && am.downcase == 'pm'
+      [y, m, d, h, n, s].reject(&:nil?).join('-')
+    elsif val.blank?
+      '0'
+    else
+      raise(:runtime_invalid.t(:type => :time, :value => val))
+    end
+  end
+
+  def rs_parse_month(str)
+    str = str.downcase
+    m = :date_helper_month_names.l[1..-1].map(&:downcase).index(str) ||
+        :date_helper_abbr_month_names.l[1..-1].map(&:downcase).index(str)
+    return '%02d' % (m + 1)
+  end
+
+  def rs_parse_times(val, field)
+    val = [] if val.blank?
+    [rs_parse_time(val[0], field),
+     rs_parse_time(val[1], field)]
+  end
+
+  def rs_parse_dates(val, field)
+flash_notice("Parsing #{field.name}: #{val.inspect}")
+    val = [] if val.blank?
+    [rs_parse_date(val[0], field),
+     rs_parse_date(val[1], field)]
+  end
 
   ##############################################################################
   #
@@ -679,17 +694,17 @@ module RefineSearch
     query.parameter_declarations.each do |key, val|
       name = key.to_s.sub(/(\?)$/,'').to_sym
       required = !$1
-      id = RS_MODEL_FIELDS[query.model_symbol][name] rescue nil
-      id ||= RS_FLAVOR_FIELDS[query.flavor][name]    rescue nil
+      id = MODEL_FIELDS[query.model_symbol][name] rescue nil
+      id ||= FLAVOR_FIELDS[query.flavor][name]    rescue nil
       id ||= name
-      if field = RS_FIELDS.select {|f| f.id == id}.first
+      if field = FIELDS.select {|f| f.id == id}.first
         field = field.dup
         field.required = required
         field.declare  = val
         results << field
       end
     end
-    order = RS_FIELD_ORDER[query.model_symbol]
+    order = FIELD_ORDER[query.model_symbol]
     return results.sort_by {|f| order.index(f.id)}
   end
 
@@ -704,7 +719,14 @@ module RefineSearch
       when Proc
         val = proc.call(val, field)
       end
-      values.send("#{field.name}=", val)
+      if field.input.to_s.match(/(\d+)$/)
+        n = $1.to_i
+        for i in 1..n
+          values.send("#{field.name}_#{i}=", val[i-1])
+        end
+      else
+        values.send("#{field.name}=", val)
+      end
     end
   end
 

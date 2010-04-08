@@ -511,7 +511,7 @@ class ObserverController < ApplicationController
             end
           rescue => e
             flash_error(e)
-            # flash_error(e.backtrace.join("<br>"))
+            flash_error(e.backtrace.join("<br>"))
           end
         end
       end
@@ -1702,7 +1702,8 @@ class ObserverController < ApplicationController
       types = types.map(&:to_s).join(' ')
       query = find_or_create_query(:RssLog, :type => types)
     elsif !params[:type].blank?
-      query = find_or_create_query(:RssLog, :type => params[:type])
+      types = params[:type].split & (['all'] + RssLog.all_types)
+      query = find_or_create_query(:RssLog, :type => types.join(' '))
     else
       query = find_query(:RssLog)
       query ||= create_query(:RssLog, :all,
