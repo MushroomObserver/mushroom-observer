@@ -1,40 +1,46 @@
-<% @title ||= :refine_search_title.t(:type => @query.model_symbol) %>
+<%
+  @title = :refine_search_title.t(:type => @query.model.type_tag)
 
-<table class="ListLine0" style="border:1px solid; padding:10px; margin:10px">
-  <tr>
-    <td>
-      <center><span class="Name"><%= @query.title %></span></center>
-      <table height="8px"></table>
-      <span class="Data"><%= :refine_search_model.t %>:</span>
-        <%= h(@query.model_string) %><br/>
-      <span class="Data"><%= :refine_search_flavor.t %>:</span>
-        <%= h(@query.flavor) %><br/>
-      <span class="Data"><%= :refine_search_order.t %>:</span>
-        <%= h(@query.params[:by] || @query.default_order) %><br/>
-      <span class="Data"><%= :refine_search_num_results.t %>:</span>
-        <%= @query.num_results %><br/>
-      <% if !@query.params[:join].blank? %>
-        <span class="Data"><%= :refine_search_joins.t %>:</span><br/>
-        <% for join in @query.flatten_joins.uniq %>
-          <%= indent + h(join) %><br/>
-        <% end
-      end %>
-    </td>
-  </tr>
-</table>
-
+  begin
+    start = Time.now
+    num   = @query.num_results 
+  rescue => e
+    flash_error(e)
+    num = 0
+  end
+  time  = "%.3f" % (Time.now - start).to_f
+  flash_notice("")
+  flash_notice(@query.params.inspect)
+%>
 <% form_for(:values, :url => {:action => 'refine_search',
             :params => query_params(@query)}) do |form| %>
 
   <table>
     <tr>
       <td colspan="3" align="center">
+        <table class="ListLine0" style="border:1px solid; padding:10px; margin:10px">
+          <tr>
+            <td>
+              <center><span class="Name"><%= @query.title %></span></center>
+              <table height="8px"></table>
+              <span class="Data"><%= :refine_search_model.t %>:</span>
+                <%= h(@query.model_string) %><br/>
+              <span class="Data"><%= :refine_search_flavor.t %>:</span>
+                <%= h(@query.flavor) %><br/>
+              <span class="Data"><%= :refine_search_order.t %>:</span>
+                <%= h(@query.params[:by] || @query.default_order) %><br/>
+              <span class="Data"><%= :refine_search_num_results.t %>:</span>
+                <%= :app_index_timer.t(:num => num, :seconds => time) %><br/>
+              <% if !@query.params[:join].blank? %>
+                <span class="Data"><%= :refine_search_joins.t %>:</span><br/>
+                <% for join in @query.flatten_joins.uniq %>
+                  <%= indent + h(join) %><br/>
+                <% end
+              end %>
+            </td>
+          </tr>
+        </table>
         <br/>
-
-<p align="left"><big>This is a prototype only.  We are still debating the
-interface and implementation.  Feedback is welcome, particularly at this early
-stage. -Jason</big></p><br/>
-
       </td>
     </tr>
 
@@ -58,7 +64,7 @@ stage. -Jason</big></p><br/>
     </tr>
 
     <% autos = []
-    for field in @fields
+    for field in [@flavor_field] + (@fields || [])
       name = field.name
       label = field.label.t
       label += ':' if label[-1,1] != '?' %>
@@ -68,49 +74,53 @@ stage. -Jason</big></p><br/>
             content_tag(:b, label) : label %></label>
         </td>
         <td width="1"><%= indent %></td>
-        <td width="1">
-          <% case field.input
-          when :text %>
-            <%= form.text_field(name, :size => 40) %>
-          <% when :text2 %>
-            <%= form.text_field("#{name}_1", :size => 18) %>
-            <%= indent(2) %>
-            <%= form.text_field("#{name}_2", :size => 18) %>
-          <% when :menu
-            raise "Missing opts for #{name.inspect}!" if !field.opts %>
-            <%= args = {}
-            args[:include_blank] = true     if field.blank
-            @values[name] ||= field.default if field.default
-            menu = translate_menu(field.opts)
-            form.select(name, menu, args) %>
-          <% when :menu2
-            raise "Missing opts for #{name.inspect}!" if !field.opts %>
-            <%= name1 = "#{name}_1"
+        <td width="1"<%= @errors.include?(field.name) ?
+                         ' class="has_error"' : '' %>>
+          <%= result = []
+          case field.input
+          when :text
+            result << form.text_field(name, :size => 40)
+          when :text2
+            result << form.text_field("#{name}_1", :size => 18)
+            result << indent(2)
+            result << form.text_field("#{name}_2", :size => 18)
+          when :menu
+            raise "Missing opts for #{name.inspect}!" if !field.opts
             args = {}
-            args[:include_blank] = true      if field.blank
-            @values[name1] ||= field.default if field.default
+            args[:include_blank] = true   if field.blank
             menu = translate_menu(field.opts)
-            form.select(name1, menu, args) %>
-            <%= indent(2) %>
-            <%= name2 = "#{name}_2"
+            result << form.select(name, menu, args)
+          when :menu2
+            raise "Missing opts for #{name.inspect}!" if !field.opts
+            name1 = "#{name}_1"
+            name2 = "#{name}_2"
             args = {}
-            args[:include_blank] = true      if field.blank
-            @values[name2] ||= field.default if field.default
-            form.select(name2, menu, args) %>
-          <% end
-          if type = field.autocomplete
-            autos << send("turn_into_#{type}_auto_completer", "values_#{name}",
-                          :tokens => ' OR ')
+            args[:include_blank] = true if field.blank
+            menu = translate_menu(field.opts)
+            result << form.select(name1, menu, args)
+            result << indent(2)
+            result << form.select(name2, menu, args)
           end
-          if field.help %>
-            <%=
-              help = field.help.l
-              link = '[' + :refine_search_help.t + ']'
-              help = help.gsub(/\\/, '\\').gsub(/"/, '\\"').gsub(/\n/, '\\n')
-              link = link_to_function(link, "alert(\"#{help}\")")
-              indent + content_tag(:span, link, :title => help)
-            %>
-          <% end %>
+          if type = field.autocomplete
+            turner = "turn_into_#{type}_auto_completer"
+            args = {}
+            args[:tokens] = ' OR '       if field.tokens
+            args[:primer] = field.primer if field.primer
+            args[:instant] = true        if type == :menu
+            autos << send(turner, "values_#{name}", args)
+          end
+          if field.help
+            help = field.help.l
+            link = '[' + :refine_search_help.t + ']'
+            help = help.gsub(/\\/, '\\').gsub(/"/, '\\"')
+            help2 = help.gsub(/\n/, '\\n')
+            link = link_to_function(link, "alert(\"#{help2}\")")
+            result << indent
+            result << content_tag(:span, link, :title => help)
+            result[-3..-1] = content_tag(:span, result[-3..-1].join,
+                                         :style => 'white-space:nowrap')
+          end
+          result.join %>
         </td>
       </tr>
     <% end %>

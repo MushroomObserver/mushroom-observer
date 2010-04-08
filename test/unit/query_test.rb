@@ -102,6 +102,10 @@ class QueryTest < UnitTestCase
 
     assert_raises(RuntimeError) { Query.lookup(:Name, :of_children) }
     assert_equal(nil, Query.lookup(:Name, :of_children, :name => @fungi).params[:all])
+    assert_equal(false, Query.lookup(:Name, :of_children, :name => @fungi, :all => false).params[:all])
+    assert_equal(false, Query.lookup(:Name, :of_children, :name => @fungi, :all => 'false').params[:all])
+    assert_equal(false, Query.lookup(:Name, :of_children, :name => @fungi, :all => 0).params[:all])
+    assert_equal(false, Query.lookup(:Name, :of_children, :name => @fungi, :all => :no).params[:all])
     assert_equal(true, Query.lookup(:Name, :of_children, :name => @fungi, :all => true).params[:all])
     assert_equal(true, Query.lookup(:Name, :of_children, :name => @fungi, :all => 'true').params[:all])
     assert_equal(true, Query.lookup(:Name, :of_children, :name => @fungi, :all => 1).params[:all])

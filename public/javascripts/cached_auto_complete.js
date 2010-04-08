@@ -22,6 +22,12 @@ var CachedAutocompleter = Class.create(base, {
     // the user clicks or presses tab/return, or when they leave the field.)
     this.onChange = options.onChange ? options.onChange.bind(this) : null;
 
+    // If we want pulldown to show instantly on focus, need to watch event.
+    if (this.options.instant) {
+      Event.observe(this.element, 'focus', this.activate.bindAsEventListener(this));
+      this.options.minChars = -1;
+    }
+
     // Overwrite default onShow callback to have it NOT set the width.
     this.options.onShow = function(element, update) { 
       if (!update.style.position || update.style.position == 'absolute') {
@@ -138,7 +144,7 @@ var CachedAutocompleter = Class.create(base, {
         diff++;
       }
       for (var i=0; i<num; i++) {
-        var x = value.substr(0,diff).lastIndexOf(seps[i]);
+        var x = value.substr(0,diff+1).lastIndexOf(seps[i]);
         if (x > -1) {
           a = x + seps[i].length;
           break;
@@ -248,11 +254,20 @@ var CachedAutocompleter = Class.create(base, {
     var letter = part;
     while (letter.length > 0 && !letter.match(/^[A-Za-z0-9]/))
       letter = letter.substr(1);
-    if (letter.length > 0) {
+
+    // Display all choices instantly if given 'instant' option.
+    if (this.options.instant && part.length == 0) {
+      strings = this.primer;
+      for (var i=0; i<strings.length; i++)
+        results.push(i);
+    }
+
+    // Otherwise wait for first letter.
+    else if (letter.length > 0) {
       letter = letter.charAt(0).toLowerCase();
 
       // Need to request list for new first-letter?
-      if (this.letter != letter) {
+      if (!this.options.noAjax && this.letter != letter) {
         this.letter = letter;
         if (this.cache == null || this.cacheLetter != letter) {
           this.loading = true;
@@ -263,6 +278,7 @@ var CachedAutocompleter = Class.create(base, {
 
       var part2 = part.toLowerCase();
       var part3 = ' ' + part2;
+      var part4 = '&lt;' + part2;
       var plen = part.length;
       var more_detail = false;
       var do_words = this.options.wordMatch;
@@ -278,7 +294,8 @@ var CachedAutocompleter = Class.create(base, {
             if (str.length > plen)
               more_detail = true;
             results.push(j);
-          } else if (do_words && str.indexOf(part3) >= 0) {
+          } else if (do_words && (str.indexOf(part3) >= 0 ||
+                                  str.indexOf(part4) >= 0)) {
             results.push(j);
           }
         }

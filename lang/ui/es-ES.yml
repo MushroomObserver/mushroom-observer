@@ -268,6 +268,8 @@ VERSIONS: Versiones
 versions: versiones
 
 # Common nouns/adjectives used as labels, never pluralized:
+ALL:  All
+all:  all
 EAST: Este
 east: este
 HIGH: Alto
@@ -280,6 +282,8 @@ MORE: Más
 more: más
 NEXT: Siguiente
 next: siguiente
+NONE:  None
+none:  none
 NORTH: Norte
 north: norte
 PREV: Anterior
@@ -424,6 +428,8 @@ google_images: Google Imágenes
 many_times: "[num] veces"
 one_time: una vez
 permission_denied: Permiso denegado.
+yes:  "yes"
+no:  "no"
 
 ################################################################################
 
@@ -643,6 +649,102 @@ query_title_with_observations_of_children: "[TYPES] con [:query_title_of_childre
 query_title_with_observations_of_name: "[TYPES] con [:query_title_of_name(type=:observation)]"
 query_title_with_observations_of_name_synonym: "[TYPES] con [:query_title_of_name_synonym(type=:observation)]"
 query_title_with_observations_of_name_nonconsensus: "[TYPES] con [:query_title_of_name_nonconsensus(type=:observation)]"
+
+# Brief description of each query flavor.
+query_help_comment_all:  all comments
+query_help_comment_by_user:  comments created by a given user
+query_help_comment_in_set:  comments in a given set
+query_help_comment_for_user:  comments sent to a given user
+query_help_comment_pattern_search:  comments matching a search string
+query_help_image_advanced_search:  images of observations matching advanced search criteria
+query_help_image_all:  all images
+query_help_image_by_user:  images created by a given user
+query_help_image_in_set:  images in a given set
+query_help_image_inside_observation:  images belonging to an outer observation query
+query_help_image_pattern_search:  images matching a search_string
+query_help_image_with_observations:  images of observations
+query_help_image_with_observations_at_location:  images of observations at a defined location
+query_help_image_with_observations_at_where:  images of observations at an undefined location
+query_help_image_with_observations_by_user:  images of observations by a given user
+query_help_image_with_observations_in_set:  images of observations in a given set
+query_help_image_with_observations_in_species_list:  images of observations in a given species list
+query_help_image_with_observations_of_children:  images of observations of children a given name
+query_help_image_with_observations_of_name:  images of observations of a given name
+query_help_location_advanced_search:  locations of observations matching advanced search criteria
+query_help_location_all:  all locations
+query_help_location_by_user:  locations created by a given user
+query_help_location_by_editor:  locations modified by a given user
+query_help_location_by_rss_log:  locations with recent activity
+query_help_location_in_set:  locations in a given set
+query_help_location_pattern_search:  locations matching a search string
+query_help_location_with_descriptions:  locations with descriptions
+query_help_location_with_descriptions_by_author:  locations with descriptions authored by a given user
+query_help_location_with_descriptions_by_editor:  locations with descriptions edited by a given user
+query_help_location_with_descriptions_by_user:  locations with descriptions created by a given user
+query_help_location_with_descriptions_in_set:  locations with descriptions in a given set
+query_help_location_with_observations:  locations of observations
+query_help_location_with_observations_by_user:  locations of observations by a given user
+query_help_location_with_observations_in_set:  locations of observations in a given set
+query_help_location_with_observations_in_species_list:  locations of observations in a given species list
+query_help_location_with_observations_of_children:  locations of observations of children of a given name
+query_help_location_with_observations_of_name:  locations of observations of a given name
+query_help_location_description_all:  all location descriptions
+query_help_location_description_by_author:  location descriptions that list given user as an author
+query_help_location_description_by_editor:  location descriptions that list given user as an editor
+query_help_location_description_by_user:  location descriptions created by a given user
+query_help_location_description_in_set:  location descriptions in a given set
+query_help_name_advanced_search:  names of observations matching advanced search criteria
+query_help_name_all:  all names
+query_help_name_by_user:  names created by a given user
+query_help_name_by_editor:  names modified by a given user
+query_help_name_by_rss_log:  names with recent activity
+query_help_name_in_set:  names in a given set
+query_help_name_of_children:  names of children of a name
+query_help_name_of_parents:  names of parents of a name
+query_help_name_pattern_search:  names matching a search string
+query_help_name_with_descriptions:  names with descriptions
+query_help_name_with_descriptions_by_author:  names with descriptions authored by a given user
+query_help_name_with_descriptions_by_editor:  names with descriptions edited by a given user
+query_help_name_with_descriptions_by_user:  names with descriptions created by a given user
+query_help_name_with_descriptions_in_set:  names with descriptions in a given set
+query_help_name_with_observations:  names of observations, alphabetically
+query_help_name_with_observations_at_location:  names of observations at a defined location
+query_help_name_with_observations_at_where:  names of observations at an undefined location
+query_help_name_with_observations_by_user:  names of observations by a given user
+query_help_name_with_observations_in_set:  names of observations in a given set
+query_help_name_with_observations_in_species_list:  names of observations in a given species list
+query_help_name_description_all:  all name descriptions
+query_help_name_description_by_author:  name descriptions that list a given user as an author
+query_help_name_description_by_editor:  name descriptions that list a given user as an editor
+query_help_name_description_by_user:  name descriptions created by a given user
+query_help_name_description_in_set:  name descriptions in a given set
+query_help_observation_advanced_search:  observations matching advanced search criteria
+query_help_observation_all:  all observations
+query_help_observation_at_location:  observations at a defined location
+query_help_observation_at_where:  observations at an undefined location
+query_help_observation_by_rss_log:  observations with recent activity
+query_help_observation_by_user:  observations created by a given user
+query_help_observation_in_set:  observations in a given set
+query_help_observation_in_species_list:  observations in a given species list
+query_help_observation_of_children:  observations of children of a given name
+query_help_observation_of_name:  observations of a given name
+query_help_observation_pattern_search:  observations matching a search string
+query_help_project_all:  all projects
+query_help_project_by_rss_log:  projects with recent activity
+query_help_project_in_set:  projects in a given set
+query_help_project_pattern_search:  projects matching a search string
+query_help_rss_log_all:  all recent activity logs
+query_help_rss_log_in_set:  activity logs in a given set
+query_help_species_list_all:  all species lists
+query_help_species_list_at_location:  species lists at a defined location
+query_help_species_list_at_where:  species lists at an undefined location
+query_help_species_list_by_rss_log:  species lists with recent activity
+query_help_species_list_by_user:  species lists created by a given user
+query_help_species_list_in_set:  species lists in a given set
+query_help_species_list_pattern_search:  species lists matching a search string
+query_help_user_all:  all users
+query_help_user_in_set:  users in a given set
+query_help_user_pattern_search:  users matching a search string
 
 # Sorting criteria.
 sort_by_header: "Ordenar por:"
@@ -912,7 +1014,11 @@ runtime_no_upload_image: No se ha podido subir la imagen «[name]».
 runtime_object_deleted: Este objeto se ha eliminado.
 runtime_object_not_in_index: "No se puede encontrar [type] #[id] en la índice o la búsqueda actual."
 runtime_prefs_password_no_match: La contraseña y la confirmación no coinciden.
+runtime_refine_search_expect_id:  "Invalid [type] in '[field]' -- expected a valid id."
+runtime_refine_search_field_required:  "Missing required field '[field]'."
+runtime_refine_search_invalid_rss_type:  "Invalid object type '[value]'."
 runtime_refine_search_model_not_supported: Lo sentimos, «[:app_refine_search]» no es compatible con [tipo] consultas todavía.
+runtime_refine_search_object_not_found:  "Couldn't find [type] matching '[value]' in '[field]'."
 runtime_search_has_expired: Su búsqueda por el usuario ha caducado, por favor, inténtelo de nuevo.
 runtime_show_observation_success: Su vota se ha cambiado con éxito.
 runtime_unable_to_transfer_name: No se ha podido transferir [name] a otro sinónimo.
@@ -1204,8 +1310,8 @@ app_find: Buscar
 app_search: Buscar
 app_refine_search: Afinar Búsqueda
 app_advanced_search: Búsqueda Avanzada
-app_timer: "(tiempo: [seconds] seg)"
-app_index_timer: "([num] resultados en [seconds] sec)"
+app_timer: "tiempo: [seconds] seg"
+app_index_timer: "[num] resultados en [seconds] sec"
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
@@ -3164,61 +3270,77 @@ no_session_title: Cookies Estan Deshabilitados
 refine_search_title: "Afinar Búsqueda de [TYPES]"
 refine_search_query: Consulta
 refine_search_model: Tipo de datos
-refine_search_flavor: Sabor básico
+refine_search_flavor:  Basic flavor
 refine_search_order: Tipo de orden
 refine_search_num_results: Partidos
-refine_search_params: Parámetros
 refine_search_joins: Tablas utilizadas
 refine_search_success: La consulta nueva coincide ahora con [num] objetos.
 refine_search_goto_index: "[:show_object(type=:index)]"
-refine_search_old_conditions: Condiciones Existentes
-refine_search_add_conditions: Condiciones Adicionales
-refine_search_yes: "sí"
-refine_search_no: "no"
+refine_search_conditions:  Parameters
+refine_search_unknown_object:  "Unknown [TYPE] #[id]"
 
-refine_search_above_rank: Rango de arriba
-refine_search_below_rank: Rango inferior
-refine_search_child: Es un subtaxon de este nombre
-refine_search_classification: clasificación
-refine_search_comment_for: Comentarios para este usuario
-refine_search_contains: "[Type] contienen"
-refine_search_created_by: Creado por este usuario
-refine_search_created_on: Creado en esta fecha
-refine_search_date: Observado en esta fecha
+refine_search_advanced_search_content:  "[:refine_search_pattern_search]"
+refine_search_advanced_search_location:  "[:Location]"
+refine_search_advanced_search_name:  "[:Name]"
+refine_search_advanced_search_user:  "[:Observer]"
+refine_search_all_children:  Which children?
+refine_search_all_children_true:  all children
+refine_search_all_children_false:  only immediate children
 refine_search_deprecated: Está desaprobar
-refine_search_has: Tiene [type]
-refine_search_has_admin: Este usuario es un admin
-refine_search_has_default_description: Tiene una descripción predeterminada
-refine_search_has_image_of_min_quality: Tiene imágenes of minimum quality
-refine_search_has_member: Este usuario es miembro
-refine_search_has_public_description: Tiene una descripción pública
-refine_search_has_species_list: Pertenece a una lista de especies
-refine_search_has_specimen: Especímen está disponible
-refine_search_in_species_list: Pertenece a esta lista de especies
-refine_search_is_collection_location: Observado en la que estaba creciendo
-refine_search_last_modified_on: Modificada por última vez en esta fecha
-refine_search_license: Licencia
-refine_search_location_defined: Es la ubicación definida
-refine_search_maximum_confidence: Nivel de confianza máximo
-refine_search_minimum_confidence: Nivel de confianza mínimo
-refine_search_minimum_quality: Mínimos de calidad
-refine_search_minimum_size: Mínimos de dimensión (pixels)
-refine_search_misspelled: Es mal escritos
-refine_search_misspelling: Es un error ortográfico de este nombre
-refine_search_modified_by: Modificado por este usuario
-refine_search_name: Nombre de especies
-refine_search_object_id: ID de objeto
-refine_search_object_type: Tipo de objeto
-refine_search_original_type: Tipo de archivo original
-refine_search_posted_by: Publicado por este usuario
-refine_search_rank: Rango taxonómico
-refine_search_synonym: Es un sinónimo de este nombre
+refine_search_deprecated_either:  doesn't matter
+refine_search_deprecated_no:  only approved names
+refine_search_deprecated_only:  only deprecated names
+refine_search_flavor:  Query flavor
+refine_search_location:  Location (defined)
+refine_search_location_where:  Location (undefined)
+refine_search_misspellings:  Include misspellings?
+refine_search_misspellings_either:  doesn't matter
+refine_search_misspellings_no:  only correct names
+refine_search_misspellings_only:  only misspelt names
+refine_search_nonconsensus:  Include "other" observations?
+refine_search_nonconsensus_all:  use any proposed name
+refine_search_nonconsensus_exclusive:  only nonconsensus names
+refine_search_nonconsensus_no:  just use consensus name
+refine_search_observation:  "[:Observation]"
+refine_search_pattern_search:  Search string
+refine_search_rss_log_type:  Type of object
+refine_search_rss_log_type_all:  All
+refine_search_synonyms:  Include synonym observations?
+refine_search_synonyms_all:  this name and synonyms
+refine_search_synonyms_exclusive:  only synonyms
+refine_search_synonyms_no:  just this name
 
 refine_search_help: Ayuda
+refine_search_conditions_help:  >
+  Use the following conditions to narrow down your query results.  Only the
+  fields in boldface are required (if any).  Results must match all of the
+  conditions that are not left blank.  Many of the conditions accept a range or
+  allow multiple values.  Syntax con be complicated; click on the [[Help]] tags
+  next to the fields for pointers on what kind of values are accepted.
+
 refine_search_date_help: >
   Introduzca un año o rango de años (e.g., «2008-2009»), un mes o rango mes
   (e.g., «Dic» or «Marzo to Abril»), o una fecha completa o parcial en el
   formato «AAAA-MM-DD» (e.g., «2008-03» or «2008-03-31 2009-03-31»).
+
+refine_search_flavor_help:  >
+  These are all of our basic query flavors.  The names might be a bit obscure.
+  It might be easier to go browsing around normally until you find a query
+  that is close to what you want and refine that query instead.  Another
+  option is to select one of the unconstrained queries like "all observations"
+  or "all images" as a good starting point.
+
+refine_search_location_help:  >
+  Enter name or id of a location.  This will only include results that belong
+  to a DEFINED location.  Sorry, you must use a different flavor of query
+  to search for results that belong to undefined locations.  A good starting
+  point is '[:app_list_locations]' in the left-hand panel.
+
+refine_search_location_where_help:  >
+  Enter name of a location.  This will only include results that DO NOT
+  belong to a defined location.  Sorry, you must use a different flavor of
+  query to search for results that belong to defined locations.  A good
+  starting point is '[:app_list_locations]' in the left-hand panel.
 
 refine_search_time_help: >
   Introduzca una fecha o rango de fechas en el formato «AAAA-MM-DD:HH:MM:SS».

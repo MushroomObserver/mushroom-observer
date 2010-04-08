@@ -24,6 +24,7 @@
 #  == Methods
 #
 #  turn_into_auto_completer::          Turn text field into auto-completer.
+#  turn_into_menu_auto_completer::     Turn into auto-completer for set menu.
 #  turn_into_location_auto_completer:: Turn into location auto-completer.
 #  turn_into_name_auto_completer::     Turn into name auto-completer.
 #  turn_into_species_list_auto_completer:: Turn into species list auto-completer.
@@ -80,6 +81,17 @@ module ApplicationHelper::AutoComplete
         %(new #{js_class}('#{id}', '#{div_id}', '#{url}', { #{js_args} }))
       return div + script
     end
+  end
+
+  # Make text_field auto-complete for fixed set of strings.
+  def turn_into_menu_auto_completer(id, opts={})
+    raise "Missing primer for menu auto-completer!" if !opts[:primer]
+    turn_into_auto_completer(id, {
+      :url           => '/ajax/auto_complete/name',
+      :frequency     => 0.1,
+      :js_class      => 'CachedAutocompleter',
+      :noAjax        => true,
+    }.merge(opts))
   end
 
   # Make text_field auto-complete for location name.

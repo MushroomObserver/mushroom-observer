@@ -454,26 +454,67 @@ class ObserverController < ApplicationController
     @values = Wrapper.new(params[:values] || {})
     @first_time = params[:values].blank?
     @goto_index = true if params[:commit] == :refine_search_goto_index.l
+    @errors = []
 
     # Query has expired!
     if !(@query = find_query)
       flash_error(:runtime_search_has_expired.t)
       redirect_back_or_default(:action => 'list_rss_logs')
-      
-    # Some models aren't supported yet.
-    elsif !(@fields = refine_search_get_fields(@query, @values))
-      type = @query.model_string.underscore.to_sym
-      flash_error(:runtime_refine_search_model_not_supported.t(:type => type))
-      redirect_back_or_default(:action => 'list_rss_logs')
 
-    elsif !is_robot? and
-          (request.method == :post) and
-          (query2 = refine_search_apply_changes(@query, @fields, @values))
-      @query = query2
-      @values = Wrapper.new
-      @first_time = true
-      if !@goto_index
-        flash_notice(:refine_search_success.t(:num => @query.num_results))
+    else
+      # Need to know about change to basic flavor immediately.
+      if @first_time || @values.model_flavor.blank?
+        query2 = @query
+      else
+        model2, flavor2 = @values.model_flavor.to_s.split(' ', 2)
+        query2 = Query.template(model2.camelize, flavor2) rescue @query
+      end
+      model2  = query2.model_symbol
+      flavor2 = query2.flavor
+
+      # Get Array of parameters we can play with.
+      @fields = refine_search_get_fields(query2)
+
+      # First time through initialize form values from existing query.
+      if @first_time
+        refine_search_initialize_values(@fields, @values, @query)
+
+      # Modify the query on POST, test it out, and redirect or re-serve form.
+      elsif (request.method == :post) and !is_robot?
+        params2 = refine_search_clone_params(query2, @query.params)
+        @errors = refine_search_change_params(@fields, @values, params2)
+
+        if @errors.any?
+          # Already flashed errors.
+
+        # No changes.  This may not be apparent due to vagaries of parsing.
+        # This will change all the form values to be what's currently in the
+        # query.  The user will then know exactly why we say "no changes".
+        elsif (model2  == @query.model_symbol) and
+              (flavor2 == @query.flavor) and
+              (params2 == @query.params)
+          if !@goto_index
+            flash_notice(:runtime_no_changes.t)
+            refine_search_initialize_values(@fields, @values, @query)
+          end
+
+        else
+          begin
+            # Create and initialize the new query to test it out.
+            query2 = Query.lookup(model2, flavor2, params2)
+            query2.initialize_query
+            query2.save
+            @query = query2
+            if !@goto_index
+              @values = Wrapper.new
+              refine_search_initialize_values(@fields, @values, @query)
+              flash_notice(:refine_search_success.t(:num => @query.num_results))
+            end
+          rescue => e
+            flash_error(e)
+            # flash_error(e.backtrace.join("<br>"))
+          end
+        end
       end
     end
 
@@ -482,6 +523,9 @@ class ObserverController < ApplicationController
       redirect_to(:controller => @query.model.show_controller,
                   :action => @query.model.index_action,
                   :params => query_params(@query))
+    else
+      @flavor_field = refine_search_flavor_field
+      @values.model_flavor = "#{model2.to_s.underscore} #{flavor2}"
     end
   end
 

@@ -759,6 +759,28 @@ class AbstractQuery < ActiveRecord::Base
     return query
   end
 
+  # Instantiate (unsaved!) a dummy lookup without any parameters.
+  def self.template(model, flavor)
+    model  = model.to_s.to_sym
+    flavor = flavor.to_s.to_sym
+
+    # Make sure this is a recognized query type.
+    if !allowed_model_flavors.has_key?(model)
+      raise("Invalid model: '#{model}'")
+    elsif !allowed_model_flavors[model].include?(flavor)
+      raise("Invalid query for #{model} model: '#{flavor}'")
+    end
+
+    # Create minimal instance.
+    query = new(
+      :model  => model,
+      :flavor => flavor
+    )
+    query.replace_params({})
+
+    return query
+  end
+
   # Only keep unused states around for an hour, and used states for a day.
   # This goes through the whole lot and destroys old ones.
   def self.cleanup
@@ -818,12 +840,13 @@ class AbstractQuery < ActiveRecord::Base
 
       # Allow parameter names to be either symbols or strings.
       arg_sym = arg.to_sym
-      val = old_args[arg] || old_args[arg_sym]
+      val = old_args[arg]
+      val = old_args[arg_sym] if val.nil?
       old_args.delete(arg)
       old_args.delete(arg_sym)
 
       # Validate value if given.
-      if val
+      if !val.nil?
         if type.is_a?(Array)
           val = array_validate(arg, val, type.first)
         else
@@ -832,7 +855,7 @@ class AbstractQuery < ActiveRecord::Base
       end
 
       # Place validated value in final array, complaining if missing.
-      if val
+      if !val.nil?
         new_args[arg_sym] = val
       elsif !question
         raise("Missing :#{arg} parameter for #{model} :#{flavor} query.")

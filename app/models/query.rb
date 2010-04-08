@@ -908,7 +908,8 @@ class Query < AbstractQuery
   def initialize_of_children
     name = find_cached_parameter_instance(Name, :name)
     title_args[:name] = name.display_name
-    all = params[:all] || false
+    all = params[:all]
+    all = false if params[:all].nil?
     params[:by] ||= 'name'
 
     # If we have to rely on classification strings, just let Name do it, and
@@ -1153,7 +1154,7 @@ class Query < AbstractQuery
 
   def initialize_advanced_search
     name     = google_parse(params[:name])
-    user     = google_parse(params[:user])
+    user     = google_parse(params[:user].to_s.gsub(/ *<[^<>]*>/, ''))
     location = google_parse(params[:location])
     content  = google_parse(params[:content])
 

@@ -111,14 +111,15 @@ if @children_data && @children_data.length > 0 %>
     <a id="children"></a>
     <big><%= rank_as_plural_string(@children_data[0].rank) %></big>:
     <%= if @children_data.length < @children_query.num_results
-      link_to("(#{:show_object.t(:type => :index)})", :action => 'list_names',
+      link_to("(#{:show_object.t(:type => :index)})", :action => 'index_name',
               :params => query_params(@children_query))
     end %>
   </p>
   <% paginate_block(@children_pages, :anchor => 'children') do %>
     <p>
       <% for child in @children_data %>
-        <%= link_to(child.display_name.t, :action => 'show_name', :id => child.id,
+        <%= link_to(child.display_name.t, :action => 'show_name',
+                    :id => child.id,
                     :params => query_params(@children_query)) %><br/>
       <% end %>
     </p>

@@ -181,10 +181,10 @@
                 secs = '%.2f' % (@timer_end.to_f - @timer_start.to_f)
                 @timer_start = nil
                 if @num_results
-                  :app_index_timer.t(:seconds => secs,
-                                     :num => @num_results.to_i)
+                  '(' + :app_index_timer.t(:seconds => secs,
+                                           :num => @num_results.to_i) + ')'
                 else
-                  :app_timer.t(:seconds => secs)
+                  '(' + :app_timer.t(:seconds => secs) + ')'
                 end %>
               </div>
             <% end %>
