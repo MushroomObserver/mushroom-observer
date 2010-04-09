@@ -115,6 +115,10 @@ class Query < AbstractQuery
     :by_user => {
       :user => User,
     },
+    :for_object => {
+      :object => AbstractModel,
+      :type   => :string,
+    },
     :for_user => {
       :user => User,
     },
@@ -189,10 +193,11 @@ class Query < AbstractQuery
   self.allowed_model_flavors = {
     :Comment => [
       :all,                   # All comments, by created.
-      :by_user,               # Comments created by user, by modified.
+      :by_user,               # Comments created by user, by created.
       :in_set,                # Comments in a given set.
-      :for_user,              # Comments sent to used, by modified.
-      :pattern_search,        # Comments matching a pattern, by modified.
+      :for_object,            # Comments on a given object, by created.
+      :for_user,              # Comments sent to user, by created.
+      :pattern_search,        # Comments matching a pattern, by created.
     ],
     :Image => [
       :advanced_search,       # Advanced search results.
@@ -1110,6 +1115,18 @@ class Query < AbstractQuery
     end
   end
 
+  def initialize_for_object
+    type = params[:type].to_s.constantize rescue nil
+    if (!type.reflect_on_association(:comments) rescue true)
+      raise "The model #{params[:type].inspect} does not support comments!"
+    end
+    object = find_cached_parameter_instance(type, :object)
+    title_args[:object] = object.unique_format_name
+    self.where << "comments.object_id = '#{object.id}'"
+    self.where << "comments.object_type = '#{type.name}'"
+    params[:by] ||= 'created'
+  end
+
   def initialize_for_user
     user = find_cached_parameter_instance(User, :user)
     title_args[:user] = user.legal_name
@@ -1434,50 +1451,47 @@ class Query < AbstractQuery
 
       when :Comment
         self.where += google_conditions(search,
-          'CONCAT(comments.summary,comments.comment)')
+          'CONCAT(comments.summary,COALESCE(comments.comment,""))')
 
       when :Image
         self.join << {:images_observations => {:observations =>
           [:locations!, :names] }}
         self.where += google_conditions(search,
-          'CONCAT(names.search_name,images.copyright_holder,images.notes,' +
+          'CONCAT(names.search_name,' +
+          'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
           'IF(locations.id,locations.search_name,observations.where))')
 
       when :Location
         self.join << :"location_descriptions.default!"
-        self.where << 'location_descriptions.public IS TRUE OR ' +
-                      'location_descriptions.public IS NULL'
         note_fields = LocationDescription.all_note_fields.map do |x|
-          "IF(location_descriptions.#{x} IS NULL, '', location_descriptions.#{x})"
+          "COALESCE(location_descriptions.#{x},'')"
         end
         self.where += google_conditions(search,
             "CONCAT(locations.search_name,#{note_fields.join(',')})")
 
       when :Name
         self.join << :"name_descriptions.default!"
-        self.where << 'name_descriptions.public IS TRUE OR ' +
-                      'name_descriptions.public IS NULL'
         note_fields = NameDescription.all_note_fields.map do |x|
-          "IF(name_descriptions.#{x} IS NULL, '', name_descriptions.#{x})"
+          "COALESCE(name_descriptions.#{x},'')"
         end
         self.where += google_conditions(search,
-            "CONCAT(names.search_name,names.citation,names.notes," +
-                   "#{note_fields.join(',')})")
+            "CONCAT(names.search_name,COALESCE(names.citation,'')," +
+                    "COALESCE(names.notes,''),#{note_fields.join(',')})")
 
       when :Observation
         self.join << [:locations!, :names]
         self.where += google_conditions(search,
-          'CONCAT(names.search_name,observations.notes,' +
+          'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
           'IF(locations.id,locations.search_name,observations.where))')
 
       when :Project
         self.where += google_conditions(search,
-          'CONCAT(projects.title,projects.summary)')
+          'CONCAT(projects.title,COALESCE(projects.summary,""))')
 
       when :SpeciesList
         self.join << :locations!
         self.where += google_conditions(search,
-          'CONCAT(species_lists.title,species_lists.notes,' +
+          'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
           'IF(locations.id,locations.search_name,species_lists.where))')
 
       when :User

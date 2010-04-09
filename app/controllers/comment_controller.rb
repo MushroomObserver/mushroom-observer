@@ -9,8 +9,9 @@
 #
 #  ==== Searches and Indexes
 #  list_comments::
-#  show_comments_for_user::
 #  show_comments_by_user::
+#  show_comments_for_object::
+#  show_comments_for_user::
 #  comment_search::
 #  index_comment::
 #  show_selected_comments::
@@ -35,6 +36,7 @@ class CommentController < ApplicationController
     :prev_comment,
     :show_comment,
     :show_comments_by_user,
+    :show_comments_for_object,
     :show_comments_for_user,
   ]
 
@@ -65,15 +67,23 @@ class CommentController < ApplicationController
 
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
-  def show_comments_for_user # :nologin: :norobots:
-    query = create_query(:Comment, :for_user, :user => params[:id] || @user)
+  def show_comments_by_user # :nologin: :norobots:
+    query = create_query(:Comment, :by_user, :user => params[:id])
     show_selected_comments(query)
   end
 
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
-  def show_comments_by_user # :nologin: :norobots:
-    query = create_query(:Comment, :by_user, :user => params[:id])
+  def show_comments_for_user # :nologin: :norobots:
+    query = create_query(:Comment, :for_user, :user => params[:id] || @user)
+    show_selected_comments(query)
+  end
+
+  # Shows comments for a given object, most recent first.  (Linked from the
+  # "and more..." thingy at the bottom of truncated embedded comment lists.)
+  def show_comments_for_object # :nologin: :norobots:
+    query = create_query(:Comment, :for_object, :object => params[:id],
+                         :type => params[:type])
     show_selected_comments(query)
   end
 
@@ -114,6 +124,8 @@ class CommentController < ApplicationController
     #    (query.params[:by] == 'reverse_summary')
     #   args[:letters] = 'comments.summary'
     end
+
+    @full_detail = (query.flavor == :for_object)
 
     show_index_of_objects(query, args)
   end

@@ -626,6 +626,7 @@ query_title_by_author:  "[TYPES] Authored by [USER]"
 query_title_by_editor:  "[TYPES] Edited by [USER]"
 query_title_by_rss_log: "[types] in Logbuch der neuen Änderungen"
 query_title_by_user:  "[TYPES] created by [USER]"
+query_title_for_object:  "[TYPES] on [OBJECT]"
 query_title_for_user: "[Types] für [user]"
 query_title_in_set:  "Selected [TYPES]"
 query_title_in_species_list: "[Types] von [species_list]"
@@ -656,6 +657,7 @@ query_title_with_observations_of_name_nonconsensus:  "[TYPES] with [:query_title
 query_help_comment_all:  all comments
 query_help_comment_by_user:  comments created by a given user
 query_help_comment_in_set:  comments in a given set
+query_help_comment_for_object:  comments about a given object
 query_help_comment_for_user:  comments sent to a given user
 query_help_comment_pattern_search:  comments matching a search string
 query_help_image_advanced_search:  images of observations matching advanced search criteria
@@ -2319,6 +2321,7 @@ shared_textile_help: >
 # comment/_show_comments
 show_comments_add_comment: Kommentar abgeben
 show_comments_no_comments_yet:  No one has commented yet.
+show_comments_and_more:  And [num] more...
 
 
 
@@ -4389,4 +4392,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

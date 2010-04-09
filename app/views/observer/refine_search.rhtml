@@ -216,7 +216,7 @@
     while sql.sub!(/^(SELECT)(.*?)(?=FROM)/, '') ||
           sql.sub!(/^(FROM)\s+(((\(.*?\) AS `?\w+`?|`?\w+`?( AS `?\w+`?)?),?)+)/, '') ||
           sql.sub!(/^(FROM)(.*?)(?=JOIN|WHERE|GROUP|ORDER|LIMIT|$)/, '') ||
-          sql.sub!(/^(JOIN)(.*?)(?=JOIN|WHERE|GROUP|ORDER|LIMIT|$)/, '') ||
+          sql.sub!(/^(JOIN|LEFT OUTER JOIN)(.*?)(?=JOIN|WHERE|GROUP|ORDER|LIMIT|$)/, '') ||
           sql.sub!(/^(WHERE)(.*?)(?=AND|GROUP|ORDER|LIMIT|$)/, '') ||
           sql.sub!(/^(AND)(.*?)(?=AND|GROUP|ORDER|LIMIT|$)/, '') ||
           sql.sub!(/^(GROUP BY)(.*?)(?=ORDER|LIMIT|$)/, '') ||
