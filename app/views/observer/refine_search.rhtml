@@ -3,15 +3,14 @@
 
   begin
     start = Time.now
-    num   = @query.num_results 
+    num = @query.num_results 
   rescue => e
     flash_error(e)
     num = 0
   end
-  time  = "%.3f" % (Time.now - start).to_f
-  flash_notice("")
-  flash_notice(@query.params.inspect)
+  time = "%.3f" % (Time.now - start).to_f
 %>
+
 <% form_for(:values, :url => {:action => 'refine_search',
             :params => query_params(@query)}) do |form| %>
 
@@ -64,12 +63,14 @@
     </tr>
 
     <% autos = []
-    for field in [@flavor_field] + (@fields || [])
+    fields = @fields || []
+    fields.unshift(@flavor_field) if @user && @user.admin
+    for field in fields
       name = field.name
       label = field.label.t
       label += ':' if label[-1,1] != '?' %>
       <tr>
-        <td width="1" style="white-space:nowrap">
+        <td width="1" valign="top" style="white-space:nowrap">
           <label for="values_<%= name %>"><%= field.required ?
             content_tag(:b, label) : label %></label>
         </td>
@@ -78,20 +79,36 @@
                          ' class="has_error"' : '' %>>
           <%= result = []
           case field.input
+
           when :text
             result << form.text_field(name, :size => 40)
+
           when :text2
             result << form.text_field("#{name}_1", :size => 18)
             result << indent(2)
+            if field.word
+              result << "&lt; #{field.word.t} &lt;".nowrap
+              result << indent(2)
+            end
             result << form.text_field("#{name}_2", :size => 18)
+
+          when :textN
+            word = field.word || 'OR'
+            result << form.hidden_field("#{name}_n")
+            for i in 1..(field.num || 1)
+              result << form.text_field("#{name}_#{i}", :size => 40)
+              result << indent(2) + word + '<br/>' if i != field.num
+            end
+
           when :menu
-            raise "Missing opts for #{name.inspect}!" if !field.opts
+            raise ("Missing opts for #{field.id.inspect}!") if !field.opts
             args = {}
-            args[:include_blank] = true   if field.blank
+            args[:include_blank] = true if field.blank
             menu = translate_menu(field.opts)
             result << form.select(name, menu, args)
+
           when :menu2
-            raise "Missing opts for #{name.inspect}!" if !field.opts
+            raise("Missing opts for #{field.id.inspect}!") if !field.opts
             name1 = "#{name}_1"
             name2 = "#{name}_2"
             args = {}
@@ -99,21 +116,56 @@
             menu = translate_menu(field.opts)
             result << form.select(name1, menu, args)
             result << indent(2)
+            if field.word
+              result << "&lt; #{field.word.t} &lt;".nowrap
+              result << indent(2)
+            end
             result << form.select(name2, menu, args)
+
+          when :menuN
+            raise("Missing opts for #{field.id.inspect}!") if !field.opts
+            args = {}
+            args[:include_blank] = true if field.blank
+            menu = translate_menu(field.opts)
+            word = field.word || 'OR'
+            result << form.hidden_field("#{name}_n")
+            for i in 1..field.num
+              result << form.select("#{name}_#{i}", menu, args)
+              result << indent(2) + word + '<br/>' if i != field.num
+            end
+
+          when :checkboxes
+            raise("Missing opts for #{field.id.inspect}!") if !field.opts
+            vals = @values.send(name) || []
+            vals = vals.map(&:to_s)
+            for label, val in field.opts
+              checked = vals.include?(val.to_s)
+              result << form.check_box("#{name}_#{val}", :checked => checked)
+              result << indent(0)
+              result << label.l
+              result << indent(0)
+            end
           end
+
           if type = field.autocomplete
             turner = "turn_into_#{type}_auto_completer"
             args = {}
             args[:tokens] = ' OR '       if field.tokens
             args[:primer] = field.primer if field.primer
             args[:instant] = true        if type == :menu
-            autos << send(turner, "values_#{name}", args)
+            if !field.num
+              autos << send(turner, "values_#{name}", args)
+            else
+              for i in 1..field.num
+                autos << send(turner, "values_#{name}_#{i}", args)
+              end
+            end
           end
-          if field.help
-            help = field.help.l
-            link = '[' + :refine_search_help.t + ']'
-            help = help.gsub(/\\/, '\\').gsub(/"/, '\\"')
-            help2 = help.gsub(/\n/, '\\n')
+
+          help = :"#{field.label}_help".l.gsub(/\n/,' ').strip_squeeze
+          if !help.blank?
+            link = :refine_search_help.t
+            help2 = help.gsub(/\\/, '\\').gsub(/"/, '\\"').gsub(/\n/, '\\n')
             link = link_to_function(link, "alert(\"#{help2}\")")
             result << indent
             result << content_tag(:span, link, :title => help)
@@ -142,4 +194,48 @@
     javascript_include_auto_complete
     autos.join("\n")
   end %>
+<% end %>
+
+<% if @user && @user.admin %>
+  <br/>
+  <table class="ListLine0" style="border:1px solid; padding:10px; margin:10px">
+    <% for key, val in @query.params.sort_by {|x| x[0].to_s} %>
+      <tr>
+        <td width="1" valign="top">
+          <span class="Data"><%= key.to_s.nowrap %>:</span></td>
+        <td width="1"><%= indent(0) %></td>
+        <td><%= h(val.inspect) %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <br/>
+  <table class="ListLine0" style="border:1px solid; padding:10px; margin:10px">
+    <% parts = []
+    sql = @query.last_query.strip.gsub(/\s+/, ' ').dup
+    while sql.sub!(/^(SELECT)(.*?)(?=FROM)/, '') ||
+          sql.sub!(/^(FROM)\s+(((\(.*?\) AS `?\w+`?|`?\w+`?( AS `?\w+`?)?),?)+)/, '') ||
+          sql.sub!(/^(FROM)(.*?)(?=JOIN|WHERE|GROUP|ORDER|LIMIT|$)/, '') ||
+          sql.sub!(/^(JOIN)(.*?)(?=JOIN|WHERE|GROUP|ORDER|LIMIT|$)/, '') ||
+          sql.sub!(/^(WHERE)(.*?)(?=AND|GROUP|ORDER|LIMIT|$)/, '') ||
+          sql.sub!(/^(AND)(.*?)(?=AND|GROUP|ORDER|LIMIT|$)/, '') ||
+          sql.sub!(/^(GROUP BY)(.*?)(?=ORDER|LIMIT|$)/, '') ||
+          sql.sub!(/^(ORDER BY)(.*?)(?=GROUP|LIMIT|$)/, '') ||
+          sql.sub!(/^(LIMIT)(.*?)(?=GROUP|ORDER|$)/, '')
+      part, val = $1, $2
+      part = indent + part if part == 'AND'
+      parts << [part, val]
+      sql.sub!(/^\s+/, '')
+    end
+    parts << ['', sql] if !sql.blank?
+    for label, val in parts %>
+      <tr>
+        <td width="1"><span class="Data">
+          <%= content_tag(:b, label).nowrap %></span></td>
+        <td width="1"><%= indent(0) %></td>
+        <td width="1"><%= h(val.strip).nowrap %></td>
+      </tr>
+    <% end %>
+  </table>
+  <br/>
 <% end %>

@@ -148,11 +148,11 @@ class LanguagesTest < UnitTestCase
       while !lines.empty?
         case line = lines.shift
         when /^#/, /^ *$/
-        when /^\w+:  ?(?!>)(\S(.*\S)?)/
+        when /^(?:\w+|"\w+"):  ?(?!>)(\S(.*\S)?)/
           validate_one_liner($1) do
             errors << "#{file} line #{num - lines.length}: #{line}"
           end
-        when /^\w+:  ?> *$/
+        when /^(?:\w+|"\w+"):  ?> *$/
           validate_multiliner(lines) do |line|
             errors << "#{file} line #{num - lines.length}: #{line}"
           end

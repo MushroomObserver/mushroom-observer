@@ -956,6 +956,8 @@ class AbstractQuery < ActiveRecord::Base
     if val.is_a?(Fixnum) or
        val.is_a?(String) and val.match(/^-?\d+$/)
       val.to_i
+    elsif val.blank?
+      nil
     else
       raise("Value for :#{arg} should be an integer, got: #{val.inspect}")
     end
@@ -1139,40 +1141,47 @@ class AbstractQuery < ActiveRecord::Base
   def escape(val)
     model.connection.quote(val)
   end
+  def self.escape(val)
+    User.connection.quote(val)
+  end
 
   # Put together a list of ids for use in a "id IN (1,2,...)" condition.
   #
   #   set = clean_id_set(name.children)
   #   self.where << "names.id IN (#{set})"
   #
-  def clean_id_set(ids)
+  def self.clean_id_set(ids)
     result = ids.map(&:to_i).uniq[0,MAX_ARRAY].map(&:to_s).join(',')
     result = '-1' if result.blank?
     return result
   end
+  def clean_id_set(ids); self.class.clean_id_set(ids); end
 
   # Clean a pattern for use in LIKE condition.  Takes and returns a String.
-  def clean_pattern(pattern)
+  def self.clean_pattern(pattern)
     pattern.gsub(/[%'"\\]/) {|x| '\\' + x}.gsub('*', '%')
   end
+  def clean_pattern(pattern); self.class.clean_pattern(pattern); end
 
   # Combine args into single parenthesized condition by anding them together.
-  def and_clause(*args)
+  def self.and_clause(*args)
     if args.length > 1
       '(' + args.join(' AND ') + ')'
     else
       args.first
     end
   end
+  def and_clause(*args); self.class.and_clause(*args); end
 
   # Combine args into single parenthesized condition by oring them together.
-  def or_clause(*args)
+  def self.or_clause(*args)
     if args.length > 1
       '(' + args.join(' OR ') + ')'
     else
       args.first
     end
   end
+  def or_clause(*args); self.class.or_clause(*args); end
 
   # Give search string for notes google-like syntax:
   #   word1 word2     -->  any has both word1 and word2
@@ -1209,7 +1218,7 @@ class AbstractQuery < ActiveRecord::Base
   #   search.goods = [ [ "agaricus", "amanita" ] ]
   #   search.bads  = [ "amanitarita" ]
   #
-  def google_parse(str)
+  def self.google_parse(str)
     goods = []
     bads  = []
     if (str = str.to_s.strip_squeeze) != ''
@@ -1238,6 +1247,7 @@ class AbstractQuery < ActiveRecord::Base
       :bads  => bads
     )
   end
+  def google_parse(str); self.class.google_parse(str); end
 
   # Put together a bunch of SQL conditions that describe a given search.
   def google_conditions(search, field)
@@ -1565,8 +1575,7 @@ class AbstractQuery < ActiveRecord::Base
   # between the different ways to join to a given table via the "table.field"
   # syntax used in +join_conditions+ table.)
   def uses_join?(join_spec)
-    initialize_query if !initialized?
-    uses_join_sub(join, join_spec)
+
     def uses_join_sub(tree, arg) # :nodoc:
       case tree
       when Array
@@ -1578,6 +1587,9 @@ class AbstractQuery < ActiveRecord::Base
         (tree == arg)
       end
     end
+
+    initialize_query if !initialized?
+    uses_join_sub(join, join_spec)
   end
 
   # Number of results the query returns.

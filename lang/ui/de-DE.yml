@@ -428,8 +428,10 @@ google_images: Google Bilder
 many_times: "[num]-mal"
 one_time: einmal
 permission_denied: Nicht erlaubt.
-yes:  "yes"
-no:  "no"
+"YES": "Ja"
+"NO": "Nein"
+"yes": "ja"
+"no": "nein"
 
 ################################################################################
 
@@ -1228,6 +1230,10 @@ runtime_object_not_found: "[:runtime_no_match_id(value=id)]"
 runtime_profile_must_define: >
   Du musst erst diesen Fundort definieren, dann können wir ihn als
   Standard-Fundort registrieren.
+
+runtime_refine_search_bad_google_minus:  >
+  Invalid search syntax in [name] at '[value]'.  Please only use the minus sign
+  syntax at the beginning of the line.
 
 runtime_reverify_already_verified:  >
   Your account is already verified!  Please log in.
@@ -3193,6 +3199,7 @@ refine_search_success:  Modified query now matches [num] objects.
 refine_search_goto_index:  "[:show_object(type=:index)]"
 refine_search_conditions:  Parameters
 refine_search_unknown_object:  "Unknown [TYPE] #[id]"
+refine_search_help:  "[[Help]]"
 
 refine_search_advanced_search_content:  "[:refine_search_pattern_search]"
 refine_search_advanced_search_location:  "[:Location]"
@@ -3201,66 +3208,259 @@ refine_search_advanced_search_user:  "[:Observer]"
 refine_search_all_children:  Which children?
 refine_search_all_children_true:  all children
 refine_search_all_children_false:  only immediate children
+refine_search_comments_has:  Search comments
+refine_search_confidence:  Confidence level
+refine_search_created:  Date created
+refine_search_date_image:  Date taken
+refine_search_date_observation:  Date observed
+refine_search_date_species_list:  Date of list
 refine_search_deprecated:  Include deprecated names?
-refine_search_deprecated_either:  doesn't matter
 refine_search_deprecated_no:  only approved names
 refine_search_deprecated_only:  only deprecated names
-refine_search_location:  Location (defined)
-refine_search_location_where:  Location (undefined)
+refine_search_deprecated_either:  doesn't matter
+refine_search_has_comments:  Does it have comments?
+refine_search_has_images:  Does it have images?
+refine_search_has_location:  Does it a defined location?
+refine_search_has_name:  Does it have a name?
+refine_search_has_notes:  Does it have notes?
+refine_search_has_specimen:  Is a specimen available?
+refine_search_has_votes:  Does it have votes?
+refine_search_is_col_loc:  Was this where it was seen?
+refine_search_location_defined:  Location (defined)
+refine_search_location_undefined:  Location (undefined)
+refine_search_locations:  Restrict to these location(s)
 refine_search_misspellings:  Include misspellings?
-refine_search_misspellings_either:  doesn't matter
 refine_search_misspellings_no:  only correct names
 refine_search_misspellings_only:  only misspelt names
+refine_search_misspellings_either:  doesn't matter
 refine_search_model_flavor:  Query flavor
+refine_search_modified:  Date last modified
+refine_search_name:  Species name
+refine_search_names:  Restrict to these species
 refine_search_nonconsensus:  Include "other" observations?
+refine_search_nonconsensus_no:  just use consensus name
 refine_search_nonconsensus_all:  use any proposed name
 refine_search_nonconsensus_exclusive:  only nonconsensus names
-refine_search_nonconsensus_no:  just use consensus name
-refine_search_observation:  "[:Observation]"
+refine_search_notes_has:  Search notes
 refine_search_pattern_search:  Search string
+refine_search_pattern_comment:  "[:refine_search_pattern_search]"
+refine_search_pattern_image:  "[:refine_search_pattern_search]"
+refine_search_pattern_location:  "[:refine_search_pattern_search]"
+refine_search_pattern_name:  "[:refine_search_pattern_search]"
+refine_search_pattern_observation:  "[:refine_search_pattern_search]"
+refine_search_pattern_project:  "[:refine_search_pattern_search]"
+refine_search_pattern_species_list:  "[:refine_search_pattern_search]"
+refine_search_pattern_user:  "[:refine_search_pattern_search]"
 refine_search_rss_log_type:  Type of object
-refine_search_rss_log_type_all:  All
+refine_search_rss_modified:  Date of last activity
+refine_search_species_lists:  Belongs to these species list(s)
+refine_search_synonym_names:  Restrict to synonyms of these
 refine_search_synonyms:  Include synonym observations?
+refine_search_synonyms_no:  just this name
 refine_search_synonyms_all:  this name and synonyms
 refine_search_synonyms_exclusive:  only synonyms
-refine_search_synonyms_no:  just this name
+refine_search_users:  Restrict to these user(s)
 
-refine_search_help:  Help
+refine_search_advanced_search_content_help:  >
+  Search text of observations' notes and comments. [:refine_search_google_help]
+
+refine_search_advanced_search_location_help:  >
+  Where the mushroom was found. [:refine_search_locations_help]
+
+refine_search_advanced_search_name_help:  >
+  Name of the mushroom.  [:refine_search_names_help]
+
+refine_search_advanced_search_user_help:  >
+  Who observed the mushroom.  [:refine_search_users_help]
+
+refine_search_all_children_help:  >
+  Should we include all taxa below the name given above, or just immediate
+  children?  For example, immediate children of a Agaricus would be all the
+  species in Agaricus, but not subspecies or varieties.
+
+refine_search_comments_has_help:  >
+  [:refine_search_google_help]
+
 refine_search_conditions_help:  >
   Use the following conditions to narrow down your query results.  Only the
   fields in boldface are required (if any).  Results must match all of the
   conditions that are not left blank.  Many of the conditions accept a range or
-  allow multiple values.  Syntax con be complicated; click on the [[Help]] tags
-  next to the fields for pointers on what kind of values are accepted.
+  allow multiple values.  Syntax can be complicated; click on the
+  [:refine_search_help] tags next to the fields for pointers on what kind of
+  values are accepted.
+
+refine_search_confidence_help:  >
+  This refers to the average confidence of the community to the current
+  consensus name of the observation.
+
+refine_search_created_help:  >
+  [:refine_search_time_help]
 
 refine_search_date_help:  >
-  Enter a year or year range (e.g., "2008-2009"), month or month range (e.g.,
-  "Dec" or "March to April"), or a full or partial date or range in
-  "YYYY-MM-DD" format (e.g., "2008-03" or "2008-03-31 2009-03-31").
+  Enter a year or year range (e.g., "2008"), month or month range (e.g.,
+  "Dec" or "March"), or a full or partial date or range in
+  "YYYY-MM-DD" format (e.g., "2008-03" or "2008-03-31").
+
+refine_search_date_image_help:  >
+  Date the photograph was taken.  [:refine_search_date_help]
+
+refine_search_date_observation_help:  >
+  Date the mushroom was observed.  [:refine_search_date_help]
+
+refine_search_date_species_list_help:  >
+  Date of the species list, not necessarily when it was first created.  The
+  meaning of this date may vary from list to list.  In some lists it may not
+  have any meaning at all.  [:refine_search_date_help]
+
+refine_search_deprecated_help:  ""
+refine_search_google_help:  >
+  Enter one word or phrase at a time.  Each time you update the form you will
+  see all the previous entries, and you will get another empty field.  Records
+  must match each line you have filled in.  If you enter a minus sign as the
+  first letter, it will require that the subsequent word or phrase NOT be
+  present, e.g., "-Joe Public".  You may list alternatives with the special
+  word "OR" in all caps, e.g., "red OR pink OR orange".  Records must contain
+  at least one of these alternatives.  Unlike on the google search bar,
+  double-quotes are unnecessary for grouping words into a phrase here.  For
+  example, this does what you'd expect: "Agaricus sp. OR Leucoagaricus sp.".
+
+refine_search_has_comments_help:  ""
+refine_search_has_images_help:  ""
+refine_search_has_location_help:  ""
+refine_search_has_name_help:  ""
+refine_search_has_notes_help:  ""
+refine_search_has_specimen_help:  ""
+refine_search_has_votes_help:  ""
+refine_search_is_col_loc_help:  ""
+refine_search_location_defined_help:  >
+  Enter name or id of a location.  This will only include results that belong
+  to a DEFINED location. [:refine_search_location_apology(other=undefined)]
+  [:refine_search_location_help]
+
+refine_search_location_undefined_help:  >
+  Enter name of a location.  This will only include results that DO NOT belong
+  to a defined location. [:refine_search_location_apology(other=defined)]
+  [:refine_search_location_help]
+
+refine_search_locations_help:  >
+  Includes both defined or undefined locations.
+  [:refine_search_multiple_help(things="location_names")]
+  [:refine_search_location_help]
+
+refine_search_location_help:  >
+  Use "*" as a wildcard.  Punctuation and case is ignored, but abbreviations
+  must be correct if included.  For example "Marin County, CA" will NOT match
+  "Marin Co., California".  However, "marin co california" and
+  "Marin*California" will.
+
+refine_search_location_apology:  >
+  Sorry, you must use a different flavor of query to search for results that
+  belong to [other] locations.  A good starting point is
+  '[:app_list_locations]' in the left-hand panel.
+
+refine_search_misspellings_help:  >
+  Use this parameter to tell it how to deal with misspellings.  All name
+  queries accept this parameter.  By default it screens out misspellings
+  ("[:refine_search_misspellings_no]"), however you can ask it to return both
+  ("[:refine_search_misspellings_either]") or only misspelt ones
+  ("[:refine_search_misspellings_only]"). 
 
 refine_search_model_flavor_help:  >
   These are all of our basic query flavors.  The names might be a bit obscure.
   It might be easier to go browsing around normally until you find a query
   that is close to what you want and refine that query instead.  Another
   option is to select one of the unconstrained queries like "all observations"
-  or "all images" as a good starting point.
+  or "all images" as good starting points.
 
-refine_search_location_help:  >
-  Enter name or id of a location.  This will only include results that belong
-  to a DEFINED location.  Sorry, you must use a different flavor of query
-  to search for results that belong to undefined locations.  A good starting
-  point is '[:app_list_locations]' in the left-hand panel.
+refine_search_modified_help:  >
+  [:refine_search_time_help]
 
-refine_search_location_where_help:  >
-  Enter name of a location.  This will only include results that DO NOT
-  belong to a defined location.  Sorry, you must use a different flavor of
-  query to search for results that belong to defined locations.  A good
-  starting point is '[:app_list_locations]' in the left-hand panel.
+refine_search_multiple_help:  >
+  List one or more [things].  Either enter them one at a time on separate
+  lines, updating the form after each one, or enter several at once on the same
+  line, separated by the special word "OR".
+
+refine_search_name_help:  >
+  Enter the name the query is based on.  If this is an "observations of
+  children of a given name" query, this is the "given name" whose children it
+  uses.  This can be any rank, but must resolve to a single name.  In the case
+  of ambiguity, it takes the first one it finds.  Update the form to see which
+  name it chooses.
+
+refine_search_names_help:  >
+  [:refine_search_multiple_help(things="names")] You can enter any rank, not
+  just species, e.g.  "A*muscaria*flavivolvata" or "Agaricales".  Note,
+  however, that listing higher taxa returns those taxa only, not the children
+  of it.  Thus Agaricus returns only Agarcius, not the species of Agaricus. 
+
+refine_search_nonconsensus_help:  >
+  Use this parameter to tell it how to deal with alternate proposed names for
+  observations.  By default it only considers the consensus name
+  ("[:refine_search_nonconsensus_no]"), however you can tell it to include all
+  proposed names ("[:refine_search_nonconsensus_all]") or JUST the alternates
+  ("[:refine_search_nonconsensus_exclusive]").
+
+refine_search_notes_has_help:  >
+  [:refine_search_google_help]
+
+refine_search_pattern_comment_help:  >
+  Searches both summary and content.
+  [:refine_search_google_help]
+
+refine_search_pattern_image_help:  >
+  Searches image notes, copyright holder, location and species name(s).
+  [:refine_search_google_help]
+
+refine_search_pattern_location_help:  >
+  Searches name and default description (if exists).
+  [:refine_search_google_help]
+
+refine_search_pattern_name_help:  >
+  Searches name, author, citation, notes, and default description (if exists).
+  [:refine_search_google_help]
+
+refine_search_pattern_observation_help:  >
+  Searches name, location, and notes (but not comments).
+  [:refine_search_google_help]
+
+refine_search_pattern_project_help:  >
+  Searches title and summary notes.
+  [:refine_search_google_help]
+
+refine_search_pattern_species_list_help:  >
+  Searches title, location and notes.
+  [:refine_search_google_help]
+
+refine_search_pattern_user_help:  >
+  Searches login and name only.
+  [:refine_search_google_help]
+
+refine_search_rss_log_type_help:  ""
+refine_search_rss_modified_help:  >
+  [:refine_search_time_help]
+
+refine_search_species_lists_help:  >
+  [:refine_search_multiple_help(things="titles")] Use "*" for a wildcard.  You
+  may also enter partial titles. 
+
+refine_search_synonym_names_help:  >
+  [:refine_search_multiple_help(things="names")]
+
+refine_search_synonyms_help:  >
+  Use this parameter to tell it how to deal with synonyms of the name given
+  above.  By default it includes observations of synonyms
+  ("[:refine_search_synonyms_all]"), however you can tell it to ignore synonyms
+  ("[:refine_search_synonyms_no]") or include JUST synonyms
+  ("[:refine_search_synonyms_exclusive]").  Note that for this purpose,
+  misspelt names are treated exactly the same as the correctly-spelled name. 
 
 refine_search_time_help:  >
-  Enter a date or date range in the format "YYYY-MM-DD:HH:MM:SS".  Enter only
-  as many figures as you want, starting with year.  Example: "2010-01 to
-  2010-03".
+  Enter a date or date range in the format "YYYY-MM-DD HH:MM:SS".  Enter only
+  as many figures as you want, starting with year.  Example: "2010-01" or
+  "2010-1-31 1am".
+
+refine_search_users_help:  >
+  [:refine_search_multiple_help(things="names")] Use "*" for a wildcard.
 
 
 
@@ -4189,3 +4389,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

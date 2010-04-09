@@ -474,12 +474,9 @@ class ObserverController < ApplicationController
       # Get Array of parameters we can play with.
       @fields = refine_search_get_fields(query2)
 
-      # First time through initialize form values from existing query.
-      if @first_time
-        refine_search_initialize_values(@fields, @values, @query)
-
       # Modify the query on POST, test it out, and redirect or re-serve form.
-      elsif (request.method == :post) and !is_robot?
+      if !@first_time &&
+         (request.method == :post) and !is_robot?
         params2 = refine_search_clone_params(query2, @query.params)
         @errors = refine_search_change_params(@fields, @values, params2)
 
@@ -492,10 +489,7 @@ class ObserverController < ApplicationController
         elsif (model2  == @query.model_symbol) and
               (flavor2 == @query.flavor) and
               (params2 == @query.params)
-          if !@goto_index
-            flash_notice(:runtime_no_changes.t)
-            refine_search_initialize_values(@fields, @values, @query)
-          end
+          flash_notice(:runtime_no_changes.t) if !@goto_index
 
         else
           begin
@@ -505,13 +499,11 @@ class ObserverController < ApplicationController
             query2.save
             @query = query2
             if !@goto_index
-              @values = Wrapper.new
-              refine_search_initialize_values(@fields, @values, @query)
               flash_notice(:refine_search_success.t(:num => @query.num_results))
             end
           rescue => e
             flash_error(e)
-            flash_error(e.backtrace.join("<br>"))
+            # flash_error(e.backtrace.join("<br>"))
           end
         end
       end
@@ -525,6 +517,7 @@ class ObserverController < ApplicationController
     else
       @flavor_field = refine_search_flavor_field
       @values.model_flavor = "#{model2.to_s.underscore} #{flavor2}"
+      refine_search_initialize_values(@fields, @values, @query)
     end
   end
 

@@ -183,11 +183,16 @@ class Location < AbstractModel
   #     :conditions => ['search_name LIKE "%?%"', pattern]
   #   )
   #
-  def self.clean_name(str)
+  def self.clean_name(str, leave_stars=false)
     str = str.to_ascii
-    str.gsub!(/\W+/, ' ')
-    str.gsub!(/ \w\w? /, ' ')
-    return str.strip.downcase
+    if leave_stars
+      str.gsub!(/[^\w\*]+/, ' ')
+      str.gsub!(/ +\*/, '*')
+      str.gsub!(/\* +/, '*')
+    else
+      str.gsub!(/\W+/, ' ')
+    end
+    return str.strip_squeeze.downcase
   end
 
   # Look at the most recent Observation's the current User has posted.  Return

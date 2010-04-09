@@ -19,10 +19,9 @@ module RefineSearch
   ##############################################################################
 
   class Field
-    attr_accessor :id         # Our id for it (Symbol).
+    attr_accessor :id         # Our parameter name (for disambiguation) (Symbol).
     attr_accessor :name       # Parameter name (Symbol).
     attr_accessor :label      # Label of form field (Symbol).
-    attr_accessor :help       # Help text, if any (Symbol).
     attr_accessor :input      # Input type: :text, :text2, :menu, :menu2
     attr_accessor :autocomplete # Autocompleter: :name, :user, etc.
     attr_accessor :tokens     # Allow multiple values (OR) in autocompletion?
@@ -30,6 +29,8 @@ module RefineSearch
     attr_accessor :opts       # Menu options: [ [label, val], ... ]
     attr_accessor :default    # Default value (if non-blank).
     attr_accessor :blank      # Include blank in menu?
+    attr_accessor :num        # Number of fields to include if variable.
+    attr_accessor :word       # Word in between pairs of texts / menus.
     attr_accessor :format     # Formatter: method name or Proc. (if != :parse)
     attr_accessor :parse      # Parser: method name or Proc.
     attr_accessor :declare    # Original declaration from Query.
@@ -72,12 +73,12 @@ module RefineSearch
       :advanced_search_content,
       :user,
       :name,
-      :location,
-      :location_where,
+      :synonyms,
+      :nonconsensus,
+      :location_defined,
+      :location_undefined,
       :species_list,
       :observation,
-      :nonconsensus,
-      :synonyms,
       :created,
       :modified,
       :date,
@@ -92,12 +93,12 @@ module RefineSearch
       :advanced_search_content,
       :user,
       :name,
-      :location,
-      :location_where,
+      :synonyms,
+      :nonconsensus,
+      :location_defined,
+      :location_undefined,
       :species_list,
       :observation,
-      :nonconsensus,
-      :synonyms,
       :created,
       :modified,
       :users,
@@ -118,16 +119,17 @@ module RefineSearch
       :advanced_search_content,
       :user,
       :name,
-      :location,
-      :location_where,
+      :all_children,
+      :location_defined,
+      :location_undefined,
       :species_list,
       :observation,
-      :all_children,
       :deprecated,
       :misspellings,
       :created,
       :modified,
       :users,
+      :synonym_names,
     ],
 
     :NameDescription => [
@@ -145,17 +147,32 @@ module RefineSearch
       :advanced_search_content,
       :user,
       :name,
-      :location,
-      :location_where,
-      :species_list,
-      :observation,
+      :all_children,
       :synonyms,
       :nonconsensus,
-      :all_children,
+      :location_defined,
+      :location_undefined,
+      :species_list,
+      :observation,
       :created,
       :modified,
       :date,
       :users,
+      :names,
+      :synonym_names,
+      :locations,
+      :species_lists,
+      :confidence,
+      :is_col_loc,
+      :has_specimen,
+      :has_name,
+      :has_location,
+      :has_images,
+      :has_votes,
+      :has_notes,
+      :notes_has,
+      :has_comments,
+      :comments_has,
     ],
 
     :Project => [
@@ -173,8 +190,8 @@ module RefineSearch
     :SpeciesList => [
       :pattern,
       :user,
-      :location,
-      :location_where,
+      :location_defined,
+      :location_undefined,
       :created,
       :modified,
       :date,
@@ -188,68 +205,11 @@ module RefineSearch
     ],
   }
 
-  # --------------------------------------
-  #  Flavor- and model-specific aliases.
-  # --------------------------------------
-
-  FLAVOR_FIELDS = {
-    :advanced_search => {
-      :user     => :advanced_search_user,
-      :name     => :advanced_search_name,
-      :location => :advanced_search_location,
-      :content  => :advanced_search_content,
-    },
-    :at_where    => { :location => :location_where },
-    :of_children => { :all => :all_children },
-    :with_observations_of_children => { :all => :all_children },
-  }
-
-  MODEL_FIELDS = {
-    :RssLog => {
-      :modified => :rss_modified,
-      :type     => :rss_type,
-    },
-  }
-
   # ----------------------------
   #  Field specifications.
   # ----------------------------
 
-  FIELDS = [
-
-    # Advanced search fields.
-    Field.new(
-      :id    => :advanced_search_content,
-      :name  => :content,
-      :label => :refine_search_advanced_search_content,
-      :input => :text
-    ),
-    Field.new(
-      :id    => :advanced_search_location,
-      :name  => :location,
-      :label => :refine_search_advanced_search_location,
-      :input => :text,
-      :autocomplete => :location,
-      :tokens => true
-    ),
-    Field.new(
-      :id    => :advanced_search_name,
-      :name  => :name,
-      :label => :refine_search_advanced_search_name,
-      :input => :text,
-      :autocomplete => :name,
-      :tokens => true
-    ),
-    Field.new(
-      :id    => :advanced_search_user,
-      :name  => :user,
-      :label => :refine_search_advanced_search_user,
-      :input => :text,
-      :autocomplete => :user,
-      :tokens => true
-    ),
-
-    # Include all children or only immediate children?
+  def rs_field_all(model, flavor)
     Field.new(
       :id    => :all_children,
       :name  => :all,
@@ -262,31 +222,63 @@ module RefineSearch
       :default => false,
       :blank => false,
       :parse => :boolean
-    ),
+    )
+  end
 
-    # Specify time or range of times for time created.
+  def rs_field_comments_has(model, flavor)
     Field.new(
-      :id     => :created,
+      :name  => :comments_has,
+      :label => :refine_search_comments_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_confidence(model, flavor)
+    Field.new(
+      :name  => :confidence,
+      :label => :refine_search_confidence,
+      :input => :menu2,
+      :word  => :VOTE,
+      :opts  => Vote.confidence_menu.map {|a,b| [a,b.to_s]},
+      :blank => true
+    )
+  end
+
+  def rs_field_content(model, flavor)
+    Field.new(
+      :id    => :advanced_search_content,
+      :name  => :content,
+      :label => :refine_search_advanced_search_content,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_created(model, flavor)
+    Field.new(
       :name   => :created,
       :label  => :refine_search_created,
-      :help   => :refine_search_times_help,
       :input  => :text2,
-      :parse  => :times
-    ),
+      :word   => :TIME,
+      :parse  => :time2
+    )
+  end
 
-    # Specify a date, range of dates, month or range of months.
+  def rs_field_date(model, flavor)
     Field.new(
-      :id     => :date,
       :name   => :date,
-      :label  => :refine_search_date,
-      :help   => :refine_search_dates_help,
+      :label  => :"refine_search_date_#{model.to_s.underscore}",
       :input  => :text2,
-      :parse  => :dates
-    ),
+      :word   => :DATE,
+      :parse  => :date2
+    )
+  end
 
-    # Include deprecated names?
+  def rs_field_deprecated(model, flavor)
     Field.new(
-      :id    => :deprecated,
       :name  => :deprecated,
       :label => :refine_search_deprecated,
       :input => :menu,
@@ -295,34 +287,143 @@ module RefineSearch
         [:refine_search_deprecated_only, 'only'],
         [:refine_search_deprecated_either, 'either'],
       ],
-      :default => :either,
+      :default => 'either',
       :blank => false
-    ),
+    )
+  end
 
-    # Specify a given (defined) location.
+  def rs_field_has_comments(model, flavor)
     Field.new(
-      :id    => :location,
-      :name  => :location,
-      :label => :refine_search_location,
-      :help  => :refine_search_location_help,
-      :input => :text,
+      :name  => :has_comments,
+      :label => :refine_search_has_comments,
+      :input => :menu,
+      :opts  => [[:yes, 'yes']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_images(model, flavor)
+    Field.new(
+      :name  => :has_images,
+      :label => :refine_search_has_images,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_location(model, flavor)
+    Field.new(
+      :name  => :has_location,
+      :label => :refine_search_has_location,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_name(model, flavor)
+    Field.new(
+      :name  => :has_name,
+      :label => :refine_search_has_name,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_notes(model, flavor)
+    Field.new(
+      :name  => :has_notes,
+      :label => :refine_search_has_notes,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_specimen(model, flavor)
+    Field.new(
+      :name  => :has_specimen,
+      :label => :refine_search_has_specimen,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_votes(model, flavor)
+    Field.new(
+      :name  => :has_votes,
+      :label => :refine_search_has_votes,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_is_col_loc(model, flavor)
+    Field.new(
+      :name  => :is_col_loc,
+      :label => :refine_search_is_col_loc,
+      :input => :menu,
+      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_location(model, flavor)
+    if flavor == :advanced_search
+      Field.new(
+        :id    => :advanced_search_location,
+        :name  => :location,
+        :label => :refine_search_advanced_search_location,
+        :input => :text,
+        :autocomplete => :location,
+        :tokens => true
+      )
+    elsif (flavor == :at_location) or
+          (flavor == :with_observations_at_location)
+      Field.new(
+        :name  => :location,
+        :label => :refine_search_location_defined,
+        :input => :text,
+        :parse => :location,
+        :autocomplete => :location
+      )
+    elsif (flavor == :at_where) or
+          (flavor == :with_observations_at_where)
+      Field.new(
+        :name  => :location,
+        :label => :refine_search_location_undefined,
+        :input => :text,
+        :parse => :location,
+        :autocomplete => :location
+      )
+    end
+  end
+
+  def rs_field_locations(model, flavor)
+    Field.new(
+      :name   => :locations,
+      :label  => :refine_search_locations,
+      :input  => :textN,
       :autocomplete => :location,
-      :parse => :location
-    ),
+      :tokens => true,
+      :parse  => :location_nameN
+    )
+  end
 
-    # Specify a given (undefined) location.
+  def rs_field_misspellings(model, flavor)
     Field.new(
-      :id    => :location_where,
-      :name  => :location,
-      :label => :refine_search_location_where,
-      :help  => :refine_search_location_where_help,
-      :input => :text,
-      :autocomplete => :location
-    ),
-
-    # Include misspelt names?
-    Field.new(
-      :id    => :misspellings,
       :name  => :misspellings,
       :label => :refine_search_misspellings,
       :input => :menu,
@@ -331,43 +432,86 @@ module RefineSearch
         [:refine_search_misspellings_only, 'only'],
         [:refine_search_misspellings_either, 'either'],
       ],
-      :default => :no,
+      :default => 'no',
       :blank => false
-    ),
+    )
+  end
 
-    # Specify time or range of times for last modified.
-    Field.new(
-      :id     => :modified,
-      :name   => :modified,
-      :label  => :refine_search_modified,
-      :help   => :refine_search_times_help,
-      :input  => :text2,
-      :parse  => :times
-    ),
+  def rs_field_modified(model, flavor)
+    if model == :RssLog
+      Field.new(
+        :name   => :modified,
+        :label  => :refine_search_rss_modified,
+        :input  => :text2,
+        :word   => :TIME,
+        :parse  => :time2
+      )
+    else
+      Field.new(
+        :name   => :modified,
+        :label  => :refine_search_modified,
+        :input  => :text2,
+        :word   => :TIME,
+        :parse  => :time2
+      )
+    end
+  end
 
-    # Specify time or range of times for RSS activity.
-    Field.new(
-      :id     => :rss_modified,
-      :name   => :rss_modified,
-      :label  => :refine_search_rss_modified,
-      :help   => :refine_search_times_help,
-      :input  => :text2,
-      :parse  => :times
-    ),
+  def rs_field_name(model, flavor)
+    if flavor == :advanced_search
+      Field.new(
+        :id    => :advanced_search_name,
+        :name  => :name,
+        :label => :refine_search_advanced_search_name,
+        :input => :text,
+        :autocomplete => :name,
+        :tokens => true
+      )
+    else
+      Field.new(
+        :name  => :name,
+        :label => :Name,
+        :input => :text,
+        :autocomplete => :name,
+        :parse => :name
+      )
+    end
+  end
 
-    # Specify a given name.
+  def rs_field_names(model, flavor)
     Field.new(
-      :id    => :name,
-      :name  => :name,
-      :label => :Name,
-      :input => :text,
+      :name   => :names,
+      :label  => :refine_search_names,
+      :input  => :textN,
       :autocomplete => :name,
-      :parse => :name
-    ),
+      :tokens => true,
+      :parse  => :name_nameN
+    )
+  end
 
-    # Include observations whose nonconsensus names match a given name?
+  def rs_field_notes_has(model, flavor)
     Field.new(
-      :id    => :nonconsensus,
+      :name  => :notes_has,
+      :label => :refine_search_notes_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_synonym_names(model, flavor)
+    Field.new(
+      :name   => :synonym_names,
+      :label  => :refine_search_synonym_names,
+      :input  => :textN,
+      :autocomplete => :name,
+      :tokens => true,
+      :parse  => :name_nameN
+    )
+  end
+
+  def rs_field_nonconsensus(model, flavor)
+    Field.new(
       :name  => :nonconsensus,
       :label => :refine_search_nonconsensus,
       :input => :menu,
@@ -376,53 +520,53 @@ module RefineSearch
         [:refine_search_nonconsensus_all, 'all'],
         [:refine_search_nonconsensus_exclusive, 'exclusive'],
       ],
-      :default => :no,
+      :default => 'no',
       :blank => false
-    ),
+    )
+  end
 
-    # Specify a given observation.
+  def rs_field_observation(model, flavor)
     Field.new(
-      :id    => :observation,
       :name  => :observation,
       :label => :Observation,
       :input => :text,
       :parse => :observation
-    ),
+    )
+  end
 
-    # Search string for pattern search.
+  def rs_field_pattern(model, flavor)
     Field.new(
-      :id    => :pattern,
       :name  => :pattern,
-      :label => :refine_search_pattern_search,
-      :input => :text
-    ),
+      :label => :"refine_search_pattern_#{model.to_s.underscore}",
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
 
-    # Include observations whose nonconsensus names match a given name?
+  def rs_field_species_list(model, flavor)
     Field.new(
-      :id    => :rss_type,
-      :name  => :type,
-      :label => :refine_search_rss_log_type,
-      :input => :text,
-      :autocomplete => :menu,
-      :tokens => true,
-      :primer => [:all.t] + RssLog.all_types.map(&:to_sym).map(&:l),
-      :parse => :rss_type,
-      :default => 'all'
-    ),
-
-    # Specify a given species list.
-    Field.new(
-      :id    => :species_list,
       :name  => :species_list,
       :label => :Species_list,
       :input => :text,
       :autocomplete => :species_list,
       :parse => :species_list
-    ),
+    )
+  end
 
-    # Include observations of synonyms of a given name?
+  def rs_field_species_lists(model, flavor)
     Field.new(
-      :id    => :synonyms,
+      :name   => :species_lists,
+      :label  => :refine_search_species_lists,
+      :input  => :textN,
+      :autocomplete => :species_list,
+      :tokens => true,
+      :parse  => :species_list_nameN
+    )
+  end
+
+  def rs_field_synonyms(model, flavor)
+    Field.new(
       :name  => :synonyms,
       :label => :refine_search_synonyms,
       :input => :menu,
@@ -431,96 +575,194 @@ module RefineSearch
         [:refine_search_synonyms_all, 'all'],
         [:refine_search_synonyms_exclusive, 'exclusive'],
       ],
-      :default => :no,
+      :default => 'no',
       :blank => false
-    ),
+    )
+  end
 
-    # Specify a given user.
+  def rs_field_type(model, flavor)
     Field.new(
-      :id    => :user,
-      :name  => :user,
-      :label => :User,
-      :input => :text,
-      :autocomplete => :user,
-      :parse => :user
-    ),
+      :id    => :rss_type,
+      :name  => :type,
+      :label => :refine_search_rss_log_type,
+      :input => :checkboxes,
+      :opts  => RssLog.all_types.map do |val|
+        [ :"#{val.upcase}S", val ]
+      end,
+      :parse => :rss_type,
+      :default => 'all'
+    )
+  end
 
-    # Specify one or more users.
+  def rs_field_user(model, flavor)
+    if flavor == :advanced_search
+      Field.new(
+        :id    => :advanced_search_user,
+        :name  => :user,
+        :label => :refine_search_advanced_search_user,
+        :input => :text,
+        :autocomplete => :user,
+        :tokens => true
+      )
+    else
+      Field.new(
+        :name  => :user,
+        :label => :User,
+        :input => :text,
+        :autocomplete => :user,
+        :parse => :user
+      )
+    end
+  end
+
+  def rs_field_users(model, flavor)
     Field.new(
-      :id     => :users,
       :name   => :users,
       :label  => :refine_search_users,
-      :help   => :refine_search_users_help,
-      :input  => :text,
+      :input  => :textN,
       :autocomplete => :user,
       :tokens => true,
-      :parse  => :users
-    ),
-  ]
+      :parse  => :userN
+    )
+  end
 
   ##############################################################################
   #
   #  :section: Formaters and Parsers
+  #
+  #  rs_format_blah::
+  #    This takes a value from query.params and formats it into a single
+  #    scalar or Array of scalars (depending on input type).  Return nil in
+  #    any case if there is no value.
+  #
+  #  rs_parse_blah::
+  #    This takes essentially whatever value rs_format_blah returns and turns
+  #    it back into something that gets stored in query.params.
+  #
+  #  input types::
+  #    text::       Value of string to place in field.
+  #    text2::      Pair of two values, e.g. dates or times.
+  #    textN::      Array of values, will create N + 1 text fields.
+  #    menu::       Value of selected item.
+  #    menu2::      Pair of values, e.g. confidence levels.
+  #    checkboxes:: Array of values of checked check-boxes.
   #
   ##############################################################################
 
   def rs_format_boolean(v,f); v ? 'true' : 'false'; end
   def rs_parse_boolean(v,f); v == 'true'; end
 
-  def rs_format_rss_type(v,f)
-    v.to_s.split.map(&:to_sym).map(&:l).join(' OR ')
+  def rs_format_rss_type(val, fielf)
+    vals = val.to_s.split
+    if vals.include?('all')
+      RssLog.all_types
+    else
+      RssLog.all_types & vals
+    end
   end
 
-  def rs_parse_rss_type(v,f)
-    map = {}
-    for type in [:all] + RssLog.all_types.map(&:to_sym)
-      map[type.l.downcase.strip_squeeze] = type.to_s
-    end
-    vals = v.to_s.split(/\s+OR\s+/).map do |x|
-      if y = map[x.downcase.strip_squeeze]
-        y
-      else
-        raise(:runtime_refine_search_invalid_rss_type.t(:value => x))
+  def rs_parse_rss_type(val, field)
+    val = ['all']  if val.sort == RssLog.all_types.sort
+    val = ['none'] if val.empty?
+    val.join(' ')
+  end
+
+  def rs_format_stringN(val, field)
+    result = []
+    if !val.blank?
+      search = Query.google_parse(val)
+      result += search.bads.map do |x|
+        "-#{x}"
       end
-    end.uniq
-    vals = ['all'] if vals.include?('all')
-    vals.join(' ')
+      result += search.goods.map do |x|
+        x.join(' OR ')
+      end
+    end
+    return result
+  end
+
+  def rs_parse_stringN(val, field)
+    result = nil
+    if val.is_a?(Array)
+      result = val.reject(&:blank?).map do |x|
+        x = x.dup.strip_squeeze
+        if x.sub!(/^-/, '')
+          if x.match(/ OR /)
+            raise(:runtime_refine_search_bad_google_minus.
+                    t(:name => field.name, :value => "-#{x}"))
+          end
+          x.match(/ /) ? "-\"#{x}\"" : "-#{x}"
+        else
+          x.split(/ OR /).map do |y|
+            if y.match(/^-/)
+              raise(:runtime_refine_search_bad_google_minus.
+                      t(:name => field.name, :value => "-#{y}"))
+            end
+            y.match(/ /) ? "\"#{y}\"" : y
+          end.join(' OR ')
+        end
+      end.join(' ')
+      result = nil if result.blank?
+    end
+    return result
   end
 
   # ----------------------------
   #  Object parsers.
   # ----------------------------
 
-  def rs_format_image(v,f);        rs_format_object(Image, v,f);       end
-  def rs_format_location(v,f);     rs_format_object(Location, v,f);    end
-  def rs_format_name(v,f);         rs_format_object(Name, v,f);        end
+  def rs_format_image(v,f);        rs_format_object(Image,       v,f); end
+  def rs_format_location(v,f);     rs_format_object(Location,    v,f); end
+  def rs_format_name(v,f);         rs_format_object(Name,        v,f); end
   def rs_format_observation(v,f);  rs_format_object(Observation, v,f); end
   def rs_format_species_list(v,f); rs_format_object(SpeciesList, v,f); end
-  def rs_format_user(v,f);         rs_format_object(User, v,f);        end
+  def rs_format_user(v,f);         rs_format_object(User,        v,f); end
 
-  def rs_parse_image(v,f);        rs_parse_object(Image, v,f);       end
-  def rs_parse_location(v,f);     rs_parse_object(Location, v,f);    end
-  def rs_parse_name(v,f);         rs_parse_object(Name, v,f);        end
-  def rs_parse_observation(v,f);  rs_parse_object(Observation, v,f); end
-  def rs_parse_species_list(v,f); rs_parse_object(SpeciesList, v,f); end
-  def rs_parse_user(v,f);         rs_parse_object(User, v,f);        end
+  def rs_format_location_name(v,f);     rs_format_object(Location,    v,f); end
+  def rs_format_name_name(v,f);         rs_format_object(Name,        v,f); end
+  def rs_format_species_list_name(v,f); rs_format_object(SpeciesList, v,f); end
+  def rs_format_user_name(v,f);         rs_format_object(User,        v,f); end
 
-  def rs_format_images(v,f);        rs_format_objects(Image, v,f);       end
-  def rs_format_locations(v,f);     rs_format_objects(Location, v,f);    end
-  def rs_format_names(v,f);         rs_format_objects(Name, v,f);        end
-  def rs_format_observations(v,f);  rs_format_objects(Observation, v,f); end
-  def rs_format_species_lists(v,f); rs_format_objects(SpeciesList, v,f); end
-  def rs_format_users(v,f);         rs_format_objects(User, v,f);        end
+  def rs_parse_image(v,f);        rs_parse_object(Image,       v,f,1); end
+  def rs_parse_location(v,f);     rs_parse_object(Location,    v,f,1); end
+  def rs_parse_name(v,f);         rs_parse_object(Name,        v,f,1); end
+  def rs_parse_observation(v,f);  rs_parse_object(Observation, v,f,1); end
+  def rs_parse_species_list(v,f); rs_parse_object(SpeciesList, v,f,1); end
+  def rs_parse_user(v,f);         rs_parse_object(User,        v,f,1); end
 
-  def rs_parse_images(v,f);        rs_parse_objects(Image, v,f);       end
-  def rs_parse_locations(v,f);     rs_parse_objects(Location, v,f);    end
-  def rs_parse_names(v,f);         rs_parse_objects(Name, v,f);        end
-  def rs_parse_observations(v,f);  rs_parse_objects(Observation, v,f); end
-  def rs_parse_species_lists(v,f); rs_parse_objects(SpeciesList, v,f); end
-  def rs_parse_users(v,f);         rs_parse_objects(User, v,f);        end
+  def rs_parse_location_name(v,f);     rs_parse_object(Location,    v,f); end
+  def rs_parse_name_name(v,f);         rs_parse_object(Name,        v,f); end
+  def rs_parse_species_list_name(v,f); rs_parse_object(SpeciesList, v,f); end
+  def rs_parse_user_name(v,f);         rs_parse_object(User,        v,f); end
+
+  def rs_format_imageN(v,f);        rs_format_objectN(Image,       v,f); end
+  def rs_format_locationN(v,f);     rs_format_objectN(Location,    v,f); end
+  def rs_format_nameN(v,f);         rs_format_objectN(Name,        v,f); end
+  def rs_format_observationN(v,f);  rs_format_objectN(Observation, v,f); end
+  def rs_format_species_listN(v,f); rs_format_objectN(SpeciesList, v,f); end
+  def rs_format_userN(v,f);         rs_format_objectN(User,        v,f); end
+
+  def rs_format_location_nameN(v,f);     rs_format_objectN(Location,    v,f); end
+  def rs_format_name_nameN(v,f);         rs_format_objectN(Name,        v,f); end
+  def rs_format_species_list_nameN(v,f); rs_format_objectN(SpeciesList, v,f); end
+  def rs_format_user_nameN(v,f);         rs_format_objectN(User,        v,f); end
+
+  def rs_parse_imageN(v,f);        rs_parse_objectN(Image,       v,f,1); end
+  def rs_parse_locationN(v,f);     rs_parse_objectN(Location,    v,f,1); end
+  def rs_parse_nameN(v,f);         rs_parse_objectN(Name,        v,f,1); end
+  def rs_parse_observationN(v,f);  rs_parse_objectN(Observation, v,f,1); end
+  def rs_parse_species_listN(v,f); rs_parse_objectN(SpeciesList, v,f,1); end
+  def rs_parse_userN(v,f);         rs_parse_objectN(User,        v,f,1); end
+
+  def rs_parse_location_nameN(v,f);     rs_parse_objectN(Location,    v,f); end
+  def rs_parse_name_nameN(v,f);         rs_parse_objectN(Name,        v,f); end
+  def rs_parse_species_list_nameN(v,f); rs_parse_objectN(SpeciesList, v,f); end
+  def rs_parse_user_nameN(v,f);         rs_parse_objectN(User,        v,f); end
 
   def rs_format_object(model, val, field)
-    if obj = model.safe_find(val)
+    if !val.to_s.match(/^\d+$/)
+      val
+    elsif obj = model.safe_find(val)
       case model.name
       when 'Location'
         obj.display_name
@@ -544,7 +786,7 @@ module RefineSearch
     end
   end
 
-  def rs_parse_object(model, val, field)
+  def rs_parse_object(model, val, field, convert=false)
     val = val.strip_squeeze
     if val.blank?
       nil
@@ -553,7 +795,9 @@ module RefineSearch
     else
       case model.name
       when 'Location'
-        obj = Location.find_by_display_name(val)
+        pattern = Query.clean_pattern(Location.clean_name(val, :leave_stars))
+        obj = Location.find_by_display_name(val) ||
+              Location.first(:conditions => "search_name LIKE '%#{pattern}%'")
       when 'Name'
         obj = Name.find_by_search_name(val) ||
               Name.find_by_text_name(val)
@@ -568,21 +812,34 @@ module RefineSearch
                 :field => field.label.t, :value => val))
       end
       if !obj
-        raise(:runtime_refine_search_object_not_found.t(:type => model.type_tag,
-                :field => field.label.t, :value => val))
+        error = :runtime_refine_search_object_not_found.t(
+          :type => model.type_tag, :field => field.label.t, :value => val
+        )
+        if convert
+          raise(error)
+        else
+          flash_warning(error)
+        end
       end
-      obj.id.to_s
+      convert ? obj.id.to_s : val
     end
   end
 
-  def rs_format_objects(model, val, field)
+  def rs_format_objectN(model, val, field)
     val = [] if val.blank?
-    val.map {|v| rs_format_object(model, v, field)}.join(' OR ')
+    val.map {|v| rs_format_object(model, v, field)}
   end
 
-  def rs_parse_objects(model, val, field)
-    val = val.strip_squeeze
-    val.split(/\s+OR\s+/).map {|v| rs_parse_object(model, v, field)}
+  def rs_parse_objectN(model, val, field, convert=false)
+    result = []
+    if !val.blank?
+      for val2 in val
+        result += val2.to_s.split(/\s+OR\s+/).map do |val3|
+          rs_parse_object(model, val3, field, convert)
+        end.reject(&:blank?)
+      end
+    end
+    result.empty? ? nil : result
   end
 
   # ----------------------------
@@ -621,12 +878,12 @@ module RefineSearch
     end
   end
 
-  def rs_format_dates(val, field)
+  def rs_format_date2(val, field)
     val = [] if val.blank?
     val.map {|v| rs_format_date(v, field)}
   end
 
-  def rs_format_times(val, field)
+  def rs_format_time2(val, field)
     val = [] if val.blank?
     val.map {|v| rs_format_time(v, field)}
   end
@@ -642,7 +899,7 @@ module RefineSearch
       m = rs_parse_month(m) if m && m.length > 2
       [m, d].reject(&:nil?).join('-')
     elsif val.blank?
-      '0'
+      nil
     else
       raise(:runtime_invalid.t(:type => :date, :value => val))
     end
@@ -656,7 +913,7 @@ module RefineSearch
       h = '%02s' % (h.to_i + 12) if h && am && am.downcase == 'pm'
       [y, m, d, h, n, s].reject(&:nil?).join('-')
     elsif val.blank?
-      '0'
+      nil
     else
       raise(:runtime_invalid.t(:type => :time, :value => val))
     end
@@ -669,17 +926,18 @@ module RefineSearch
     return '%02d' % (m + 1)
   end
 
-  def rs_parse_times(val, field)
+  def rs_parse_time2(val, field)
     val = [] if val.blank?
-    [rs_parse_time(val[0], field),
-     rs_parse_time(val[1], field)]
+    val1 = rs_parse_time(val[0], field)
+    val2 = rs_parse_time(val[1], field)
+    val2 ? [val1, val2] : val1 ? val1 : nil
   end
 
-  def rs_parse_dates(val, field)
-flash_notice("Parsing #{field.name}: #{val.inspect}")
+  def rs_parse_date2(val, field)
     val = [] if val.blank?
-    [rs_parse_date(val[0], field),
-     rs_parse_date(val[1], field)]
+    val1 = rs_parse_date(val[0], field)
+    val2 = rs_parse_date(val[1], field)
+    val2 ? [val1, val2] : val1 ? val1 : nil
   end
 
   ##############################################################################
@@ -691,13 +949,15 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
   # Get Array of conditions that the user can use to narrow their search.
   def refine_search_get_fields(query)
     results = []
+    model = query.model_symbol
+    flavor = query.flavor
     query.parameter_declarations.each do |key, val|
       name = key.to_s.sub(/(\?)$/,'').to_sym
       required = !$1
-      id = MODEL_FIELDS[query.model_symbol][name] rescue nil
-      id ||= FLAVOR_FIELDS[query.flavor][name]    rescue nil
-      id ||= name
-      if field = FIELDS.select {|f| f.id == id}.first
+      if respond_to?("rs_field_#{name}")
+        field = send("rs_field_#{name}", model, flavor)
+      end
+      if field
         field = field.dup
         field.required = required
         field.declare  = val
@@ -705,7 +965,18 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
       end
     end
     order = FIELD_ORDER[query.model_symbol]
-    return results.sort_by {|f| order.index(f.id)}
+    results = results.sort_by {|f| f.name.to_s}
+    return results.sort_by do |f|
+      id = f.id || f.name
+      n = order.index(id)
+      if !n
+        if DEVELOPMENT
+          raise("Unordered field #{id.inspect} for #{query.model_symbol}.")
+        end
+        n = 1000 + results.index(f)
+      end
+      n
+    end
   end
 
   # Fill in form values from query first time through.
@@ -718,9 +989,15 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
         val = send("rs_format_#{proc}", val, field)
       when Proc
         val = proc.call(val, field)
+      else
+        val = val.is_a?(Array) ? val.map(&:to_s) : val.to_s
       end
-      if field.input.to_s.match(/(\d+)$/)
-        n = $1.to_i
+# flash_notice("init: name=#{field.name} default=#{field.default.inspect} from=#{query.params[field.name].inspect} to=#{val.inspect}")
+      if field.input.to_s.match(/(\d+|N)$/)
+        n = ($1 != 'N') ? $1.to_i :
+            (val.is_a?(Array) && val.length > 0) ? val.length + 1 : 1
+        field.num = n
+        values.send("#{field.name}_n=", n)
         for i in 1..n
           values.send("#{field.name}_#{i}=", val[i-1])
         end
@@ -749,9 +1026,7 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
     for field in fields
       begin
         val = refine_search_parse(field, values)
-        if val.nil?
-          val = field.default
-        end
+        val = field.default if val.nil?
         if val.nil? && field.required
           flash_error(:runtime_refine_search_field_required.t(:field =>
                                                               field.label))
@@ -759,7 +1034,7 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
         end
       rescue => e
         flash_error(e)
-        flash_error(e.backtrace.join("<br>"))
+        # flash_error(e.backtrace.join("<br>"))
         errors << field.name
         val = field.default
       end
@@ -774,34 +1049,39 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
   # Parse a single value (or tuple of values).
   def refine_search_parse(field, values)
     result = nil
-    if field.input.to_s.match(/(\d+)$/)
-      n = $1.to_i
-      val = []
-      for i in 1..n
-        val << refine_search_get_value(field, values, i)
+    if field.input == :checkboxes
+      result = []
+      for label, val in field.opts
+        if values.send("#{field.name}_#{val}") == '1'
+          result << val
+        end
       end
-      if val.none?(&:blank?)
-        case (proc = field.parse)
-        when Symbol
-          result = send("rs_parse_#{proc}", val, field)
-        when Proc
-          result = proc.call(val, field)
-        else
-          result = val
+    elsif field.input.to_s.match(/(\d+|N)$/)
+      n = ($1 != 'N') ? $1.to_i : values.send("#{field.name}_n").to_i
+      n = 1 if n.blank? || n == 0
+      result = []
+      for i in 1..n
+        result << refine_search_get_value(field, values, i)
+      end
+    else
+      result = refine_search_get_value(field, values)
+    end
+    if !result.blank?
+      case field.parse
+      when Symbol
+        result = send("rs_parse_#{field.parse}", result, field)
+      when Proc
+        result = field.parse.call(result, field)
+      else
+        if result.is_a?(Array)
+          while result.length > 0 && result.last.blank?
+            result.pop
+          end
+          result = nil if result.empty?
         end
       end
     else
-      val = refine_search_get_value(field, values)
-      if !val.blank?
-        case field.parse
-        when Symbol
-          result = send("rs_parse_#{field.parse}", val, field)
-        when Proc
-          result = field.parse.call(val, field)
-        else
-          result = val
-        end
-      end
+      result = nil
     end
     return result
   end
@@ -831,7 +1111,6 @@ flash_notice("Parsing #{field.name}: #{val.inspect}")
       :id    => :model_flavor,
       :name  => :model_flavor,
       :label => :refine_search_model_flavor,
-      :help  => :refine_search_model_flavor_help,
       :input => :menu,
       :opts  => menu,
       :required => true

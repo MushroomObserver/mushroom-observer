@@ -39,6 +39,7 @@ class Query < AbstractQuery
       :created?  => [:time],
       :modified? => [:time],
       :users?    => [User],
+      :synonym_names? => [:string],
       :misspellings? => {:string => [:no, :either, :only]},
       :deprecated?   => {:string => [:either, :no, :only]},
     },
@@ -48,25 +49,25 @@ class Query < AbstractQuery
       :users?    => [User],
     },
     :Observation => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :date?     => [:date],
-      :users?    => [User],
-      # :name
-      # :location
-      # :species_list
-      # :confidence
-      # :specimen
-      # :is_col_loc
-      # :confidence
-      # :has_location
-      # :has_notes
-      # :has_name
-      # :has_images
-      # :has_votes
-      # :has_comments
-      # :notes_has
-      # :comments_has
+      :created?       => [:time],
+      :modified?      => [:time],
+      :date?          => [:date],
+      :users?         => [User],
+      :names?         => [:string],
+      :synonym_names? => [:string],
+      :locations?     => [:string],
+      :species_lists? => [:string],
+      :confidence?    => [:integer],
+      :is_col_loc?    => :boolean,
+      :has_specimen?  => :boolean,
+      :has_location?  => :boolean,
+      :has_notes?     => :boolean,
+      :has_name?      => :boolean,
+      :has_images?    => :boolean,
+      :has_votes?     => :boolean,
+      :has_comments?  => {:string => [:yes]},
+      :notes_has?     => :string,
+      :comments_has?  => :string,
     },
     :Project => {
       :created?  => [:time],
@@ -75,6 +76,7 @@ class Query < AbstractQuery
     },
     :RssLog => {
       :modified? => [:time],
+      :type?     => :string,
     },
     :SpeciesList => {
       :created?  => [:time],
@@ -97,7 +99,6 @@ class Query < AbstractQuery
       :content?  => :string,
     },
     :all => {
-      :type? => :string,
     },
     :at_location => {
       :location => Location,
@@ -776,6 +777,7 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_misspellings
     initialize_model_do_deprecated
+    initialize_model_do_objects_by_name(Name, :synonym_names, :id, :synonyms)
   end
 
   def initialize_name_description
@@ -789,6 +791,52 @@ class Query < AbstractQuery
     initialize_model_do_time(:modified)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
+    initialize_model_do_objects_by_name(Name, :names)
+    initialize_model_do_objects_by_name(
+      Name, :synonym_names, :name_id, :synonyms
+    )
+    initialize_model_do_locations
+    initialize_model_do_observations_species_lists
+    initialize_model_do_range(:confidence, :vote_cache)
+    initialize_model_do_search(:notes_has, :notes)
+    initialize_model_do_boolean(:is_col_loc,
+      'observations.is_collection_location IS TRUE',
+      'observations.is_collection_location IS FALSE'
+    )
+    initialize_model_do_boolean(:has_specimen,
+      'observations.specimen IS TRUE',
+      'observations.specimen IS FALSE'
+    )
+    initialize_model_do_boolean(:has_location,
+      'observations.location_id IS NOT NULL',
+      'observations.location_id IS NULL'
+    )
+    if !params[:has_name].nil?
+      id = Name.unknown.id
+      initialize_model_do_boolean(:has_name,
+        "observations.name_id != #{id}",
+        "observations.name_id == #{id}")
+    end
+    initialize_model_do_boolean(:has_notes,
+      'LENGTH(COALESCE(observations.notes,"")) > 0',
+      'LENGTH(COALESCE(observations.notes,"")) = 0'
+    )
+    initialize_model_do_boolean(:has_images,
+      'observations.thumb_image_id IS NOT NULL',
+      'observations.thumb_image_id IS NULL'
+    )
+    initialize_model_do_boolean(:has_votes,
+      'observations.vote_cache IS NOT NULL',
+      'observations.vote_cache IS NULL'
+    )
+    if params[:has_comments]
+      self.join << :comments
+    end
+    if !params[:comments_has].blank?
+      initialize_model_do_search(:comments_has,
+        'CONCAT(comments.summary,comments.notes)')
+      self.join << :comments
+    end
   end
 
   def initialize_project
@@ -817,6 +865,28 @@ class Query < AbstractQuery
   #  Model customization helpers.
   # -------------------------------
 
+  def initialize_model_do_boolean(arg, true_cond, false_cond)
+    if !params[arg].nil?
+      self.where << (params[arg] ? true_cond : false_cond)
+    end
+  end
+
+  def initialize_model_do_search(arg, col=nil)
+    if !params[arg].blank?
+      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      search = google_parse(params[arg])
+      self.where += google_conditions(search, col)
+    end
+  end
+
+  def initialize_model_do_range(arg, col)
+    if params[arg].is_a?(Array)
+      min, max = params[arg]
+      self.where << "#{col} >= #{min}" if !min.blank?
+      self.where << "#{col} <= #{max}" if !max.blank?
+    end
+  end
+
   def initialize_model_do_deprecated
     case params[:deprecated] || :either
     when :no   ; self.where << 'names.deprecated IS FALSE'
@@ -833,9 +903,68 @@ class Query < AbstractQuery
 
   def initialize_model_do_objects_by_id(arg, col=nil)
     if ids = params[arg]
-      col ||= "#{model.table_name}.#{arg.to_s.sub(/s$/,'')}_id"
+      col ||= "#{arg.to_s.sub(/s$/,'')}_id"
+      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
       set = clean_id_set(ids)
       self.where << "#{col} IN (#{set})"
+    end
+  end
+
+  def initialize_model_do_objects_by_name(model, arg, col=nil, filter=nil)
+    if names = params[arg]
+      col ||= arg.to_s.sub(/s?$/, '_id')
+      col = "#{self.model.table_name}.#{col}" if !col.to_s.match(/\./)
+      objs = []
+      for name in names
+        if name.to_s.match(/^\d+$/)
+          obj = model.safe_find(name)
+          objs << obj if obj
+        else
+          case model.name
+          when 'Location'
+            pattern = clean_pattern(Location.clean_name(name))
+            objs += model.all(:conditions => "search_name LIKE '%#{pattern}%'")
+          when 'Name'
+            objs += model.find_all_by_search_name(name)
+            objs += model.find_all_by_text_name(name) if objs.empty?
+          when 'SpeciesList'
+            objs += model.find_all_by_title(name)
+          when 'User'
+            name.sub(/ *<.*>/, '')
+            objs += model.find_all_by_login(name)
+          else
+            raise("Forgot to tell initialize_model_do_objects_by_name how " +
+                  "to find instances of #{model.name}!")
+          end
+        end
+      end
+      if filter
+        objs = objs.uniq.map(&filter).flatten
+      end
+      set = clean_id_set(objs.map(&:id).uniq)
+      self.where << "#{col} IN (#{set})"
+    end
+  end
+
+  def initialize_model_do_observations_species_lists
+    if params[:species_lists]
+      initialize_model_do_objects_by_name(SpeciesList, :species_lists,
+                                  'observations_species_lists.species_list_id')
+      self.join << :observations_species_lists
+    end
+  end
+
+  def initialize_model_do_locations
+    if params[:locations]
+      initialize_model_do_objects_by_name(Location, :locations)
+      str = self.where.pop
+      for name in params[:locations]
+        if name.match(/\D/)
+          pattern = clean_pattern(name)
+          str += " OR #{model.table_name}.where LIKE '%#{pattern}%'"
+        end
+      end
+      self.where << str
     end
   end
 
@@ -863,7 +992,7 @@ class Query < AbstractQuery
       self.where << "MONTH(#{col}) #{dir} #{m} OR " +
                     "(MONTH(#{col}) = #{m} AND " +
                     "DAY(#{col}) #{dir}= #{d})"
-    else
+    elsif !val.blank?
       self.where << "MONTH(#{col}) #{dir}= #{val}"
     end
   end
@@ -877,15 +1006,17 @@ class Query < AbstractQuery
   end
 
   def initialize_model_do_time_half(min, val, col)
-    dir = min ? '>' : '<'
-    y, m, d, h, n, s = val.split('-')
-    m ||= min ? 1 : 12
-    d ||= min ? 1 : 31
-    h ||= min ? 0 : 24
-    n ||= min ? 0 : 60
-    s ||= min ? 0 : 60
-    self.where << "#{col} #{dir}= '%04d-%02d-%02d %02d:%02d:%02d'" %
-                                  [y, m, d, h, n, s]
+    if !val.blank?
+      dir = min ? '>' : '<'
+      y, m, d, h, n, s = val.split('-')
+      m ||= min ? 1 : 12
+      d ||= min ? 1 : 31
+      h ||= min ? 0 : 24
+      n ||= min ? 0 : 60
+      s ||= min ? 0 : 60
+      self.where << "#{col} #{dir}= '%04d-%02d-%02d %02d:%02d:%02d'" %
+                                    [y, m, d, h, n, s]
+    end
   end
 
   def validate_date(arg, val)
@@ -931,12 +1062,16 @@ class Query < AbstractQuery
     # Allow users to filter RSS logs for the object type they're interested in.
     if model_symbol == :RssLog
       x = params[:type] ||= 'all'
-      if x == 'none'
-        self.where << 'FALSE'
-      elsif x != 'all'
-        self.where << x.split.map do |type|
-          "rss_logs.#{type}_id IS NOT NULL"
-        end.join(' OR ')
+      types = x.to_s.split
+      if !types.include?('all')
+        types &= RssLog.all_types
+        if types.empty?
+          self.where << 'FALSE'
+        else
+          self.where << types.map do |type|
+            "rss_logs.#{type}_id IS NOT NULL"
+          end.join(' OR ')
+        end
       end
     elsif params[:type]
       raise "Can't use :type parameter in :#{model_symbol} :all queries!"
@@ -1326,7 +1461,8 @@ class Query < AbstractQuery
           "IF(name_descriptions.#{x} IS NULL, '', name_descriptions.#{x})"
         end
         self.where += google_conditions(search,
-            "CONCAT(names.search_name,#{note_fields.join(',')})")
+            "CONCAT(names.search_name,names.citation,names.notes," +
+                   "#{note_fields.join(',')})")
 
       when :Observation
         self.join << [:locations!, :names]

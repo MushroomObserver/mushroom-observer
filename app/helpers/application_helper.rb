@@ -162,11 +162,15 @@ module ApplicationHelper
     # Latest version or non-versioned object.
     else
       if num_versions > 0
-        latest_user = User.find(obj.versions.latest.user_id)
+        latest_user = User.safe_find(obj.versions.latest.user_id)
         html << :footer_created_by.t(:user => user_link(obj.user),
                                   :date => obj.created.web_time) if obj.created
-        html << :footer_last_modified_by.t(:user => user_link(latest_user),
-                                        :date => obj.modified.web_time) if obj.modified
+        if latest_user && obj.modified
+          html << :footer_last_modified_by.t(:user => user_link(latest_user),
+                                             :date => obj.modified.web_time)
+        elsif obj.modified
+          html << :footer_last_modified_at.t(:date => obj.modified.web_time)
+        end
       else
         html << :footer_created_at.t(:date => obj.created.web_time) if obj.created
         html << :footer_last_modified_at.t(:date => obj.modified.web_time) if obj.modified
