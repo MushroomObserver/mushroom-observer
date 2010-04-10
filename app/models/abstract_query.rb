@@ -872,7 +872,7 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Get the parameters declarations.
-  def parameter_declarations
+  def self.parameter_declarations(model_symbol, flavor)
     reqs = @@default_flavor_params[flavor] || {}
     merge_requirements(reqs, @@default_model_params[model_symbol] || {})
     merge_requirements(reqs, @@default_global_params || {})
@@ -883,7 +883,7 @@ class AbstractQuery < ActiveRecord::Base
   end
 
   # Merge the given "default" requirements into the list we have.
-  def merge_requirements(reqs, extras)
+  def self.merge_requirements(reqs, extras)
     for key, val in extras || {}
       key1 = key.to_s.sub(/\?$/,'').to_sym
       key2 = "#{key1}?".to_sym
@@ -892,6 +892,50 @@ class AbstractQuery < ActiveRecord::Base
         reqs[key] = val
       end
     end
+  end
+
+  # Return a list of required parameters sorted by name (Symbol's).
+  def self.required_parameters(model_symbol, flavor)
+    result = []
+    for key, val in parameter_declarations(model_symbol, flavor)
+      result << key if !key.to_s.match(/\?$/)
+    end
+    return result.sort_by(&:to_s)
+  end
+
+  # Return a list of optional parameters sorted by name (Symbol's).
+  def self.optional_parameters(model_symbol, flavor)
+    result = []
+    for key, val in parameter_declarations(model_symbol, flavor)
+      result << $1.to_sym if key.to_s.match(/(.*)\?$/)
+    end
+    return result.sort_by(&:to_s)
+  end
+
+  # Return a list of all parameters, required first (Symbol's).
+  def self.all_parameters(model_symbol, flavor)
+    required_parameters(model_symbol, flavor) +
+    optional_parameters(model_symbol, flavor)
+  end
+
+  # Get the parameters declarations.
+  def parameter_declarations
+    self.class.parameter_declarations(model_symbol, flavor)
+  end
+
+  # Return a list of required parameters sorted by name (Symbol's).
+  def required_parameters
+    self.class.required_parameters(model_symbol, flavor)
+  end
+
+  # Return a list of optional parameters sorted by name (Symbol's).
+  def optional_parameters
+    self.class.optional_parameters(model_symbol, flavor)
+  end
+
+  # Return a list of all parameters, required first (Symbol's).
+  def all_parameters
+    required_parameters + optional_parameters
   end
 
   # Validate an Array of values.

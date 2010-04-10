@@ -80,9 +80,10 @@ class ImageController < ApplicationController
 
   # Display matrix of images by a given user.
   def images_by_user # :nologin: :norobots:
-    user = User.find(params[:id])
-    query = create_query(:Image, :by_user, :user => user)
-    show_selected_images(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Image, :by_user, :user => user)
+      show_selected_images(query)
+    end
   end
 
   # Display matrix of images whose notes, names, etc. match a string pattern.
@@ -117,8 +118,11 @@ class ImageController < ApplicationController
     # When I do an explicit test (load the first 100 images) it eager-loads
     # about 90%, but for some reason misses 10%, and always the same 10%, but
     # apparently with no rhyme or reason. -JPH 20100204
-    args = { :action => 'list_images', :matrix => true,
-             :include => [:user, {:observations => :name}] }.merge(args)
+    args = {
+      :action => 'list_images',
+      :matrix => true,
+      :include => [:user, {:observations => :name}],
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [

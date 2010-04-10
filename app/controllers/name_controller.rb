@@ -114,39 +114,34 @@ class NameController < ApplicationController
   # Display list of names that have observations.
   def observation_index # :nologin: :norobots:
     query = create_query(:Name, :with_observations)
-    @links = [[:all_objects.t(:type => :name), { :action => 'list_names' }]]
     show_selected_names(query)
   end
 
   # Display list of names that have authors.
   def authored_names # :nologin: :norobots:
     query = create_query(:Name, :with_descriptions)
-    show_selected_names(query) do |name|
-      # Add some extra fields to the index.
-      [ name.authors.map(&:login).join(', '),
-        name.note_status.map(&:to_s).join('/'),
-        name.review_status.t ]
-    end
+    show_selected_names(query)
   end
 
   # Display list of names that a given user is author on.
   def names_by_user # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_names_by_user_error.t(:user => user.legal_name)
-    query = create_query(:Name, :by_user, :user => user)
-    show_selected_names(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Name, :by_user, :user => user)
+      show_selected_names(query)
+    end
   end
 
   # Display list of names that a given user is editor on.
   def names_by_editor # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_names_by_editor_error.t(:user => user.legal_name)
-    query = create_query(:Name, :by_editor, :user => user)
-    show_selected_names(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Name, :by_editor, :user => user)
+      show_selected_names(query)
+    end
   end
 
   # Display list of the most popular 100 names that don't have descriptions.
   def needed_descriptions # :nologin: :norobots:
+    # NOTE!! -- all this extra info and help will be lost if user re-sorts.
     data = Name.connection.select_rows %(
       SELECT names.id, name_counts.count
       FROM names LEFT OUTER JOIN descriptions ON names.id = descriptions.name_id,
@@ -207,8 +202,16 @@ class NameController < ApplicationController
   def show_selected_names(query, args={})
     store_query_in_session(query)
     @links ||= []
-    args = { :action => 'list_names', :letters => 'names.text_name',
-             :num_per_page => 50 }.merge(args)
+    args = {
+      :action => 'list_names',
+      :letters => 'names.text_name',
+      :num_per_page => (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50),
+    }.merge(args)
+
+    # Tired of not having an easy link to list_names.
+    if query.flavor == :with_observations
+      @links << [:all_objects.t(:type => :name), { :action => 'list_names' }]
+    end
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -238,7 +241,18 @@ class NameController < ApplicationController
                 }]
     end
 
-    show_index_of_objects(query, args)
+    # Add some extra fields to the index for authored_names.
+    if query.flavor == :with_descriptions
+      show_index_of_objects(query, args) do |name|
+        if desc = name.description
+          [ desc.authors.map(&:login).join(', '),
+            desc.note_status.map(&:to_s).join('/'),
+            desc.review_status.t ]
+        end
+      end
+    else
+      show_index_of_objects(query, args)
+    end
   end
 
   ##############################################################################
@@ -262,28 +276,28 @@ class NameController < ApplicationController
 
   # Display list of name_descriptions that a given user is author on.
   def name_descriptions_by_author # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_name_descriptions_by_author_error.
-               t(:user => user.legal_name)
-    query = create_query(:NameDescription, :by_author, :user => user)
-    show_selected_name_descriptions(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:NameDescription, :by_author, :user => user)
+      show_selected_name_descriptions(query)
+    end
   end
 
   # Display list of name_descriptions that a given user is editor on.
   def name_descriptions_by_editor # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_name_descriptions_by_editor_error.
-               t(:user => user.legal_name)
-    query = create_query(:NameDescription, :by_editor, :user => user)
-    show_selected_name_descriptions(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:NameDescription, :by_editor, :user => user)
+      show_selected_name_descriptions(query)
+    end
   end
 
   # Show selected search results as a list with 'list_names' template.
   def show_selected_name_descriptions(query, args={})
     store_query_in_session(query)
     @links ||= []
-    args = { :action => 'list_name_descriptions',
-             :num_per_page => 50 }.merge(args)
+    args = {
+      :action => 'list_name_descriptions',
+      :num_per_page => 50
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [

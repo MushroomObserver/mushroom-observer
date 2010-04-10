@@ -60,36 +60,36 @@ class LocationController < ApplicationController
   # Displays a list of all locations.
   def list_locations # :nologin:
     query = create_query(:Location, :all, :by => :name)
-    show_selected_locations(query, :undef_by_frequency => true)
+    show_selected_locations(query, :link_all_sorts => true)
   end
 
   # Display list of locations that a given user is author on.
   def locations_by_user # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_locations_by_user_error.t(:user => user.legal_name)
-    query = create_query(:Location, :by_user, :user => user)
-    show_selected_locations(query, :undef_by_frequency => true)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Location, :by_user, :user => user)
+      show_selected_locations(query, :link_all_sorts => true)
+    end
   end
 
   # Display list of locations that a given user is editor on.
   def locations_by_editor # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_locations_by_editor_error.t(:user => user.legal_name)
-    query = create_query(:Location, :by_editor, :user => user)
-    show_selected_locations(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Location, :by_editor, :user => user)
+      show_selected_locations(query)
+    end
   end
 
   # Displays a list of locations matching a given string.
   def location_search # :nologin: :norobots:
     query = create_query(:Location, :pattern_search, :pattern => params[:pattern].to_s)
-    show_selected_locations(query, :undef_by_frequency => true)
+    show_selected_locations(query, :link_all_sorts => true)
   end
 
   # Displays matrix of advanced search results.
   def advanced_search # :nologin: :norobots:
     begin
       query = find_query(:Location)
-      show_selected_locations(query, :undef_by_frequency => true)
+      show_selected_locations(query, :link_all_sorts => true)
     rescue => err
       flash_error(err)
       redirect_to(:controller => 'observer', :action => 'advanced_search_form')
@@ -99,8 +99,9 @@ class LocationController < ApplicationController
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_locations(query, args={})
     @links ||= []
-    args[:letters] = 'locations.search_name'
-    args[:link_all_sorts] = args[:undef_by_frequency]
+    args = {
+      :letters => 'locations.search_name',
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -136,7 +137,7 @@ class LocationController < ApplicationController
         :group => 'observations.where',
         :select => 'observations.where AS w, COUNT(observations.id) AS c',
       }
-      if args[:undef_by_frequency]
+      if args[:link_all_sorts]
         select_args[:order] = 'c DESC'
         # (This tells it to say "by name" and "by frequency" by the subtitles.
         # If user has explicitly selected the order, then this is disabled.)
@@ -260,28 +261,28 @@ class LocationController < ApplicationController
 
   # Display list of location_descriptions that a given user is author on.
   def location_descriptions_by_author # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_location_descriptions_by_author_error.
-               t(:user => user.legal_name)
-    query = create_query(:LocationDescription, :by_author, :user => user)
-    show_selected_location_descriptions(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:LocationDescription, :by_author, :user => user)
+      show_selected_location_descriptions(query)
+    end
   end
 
   # Display list of location_descriptions that a given user is editor on.
   def location_descriptions_by_editor # :nologin: :norobots:
-    user = User.find(params[:id])
-    @error = :runtime_location_descriptions_by_editor_error.
-               t(:user => user.legal_name)
-    query = create_query(:LocationDescription, :by_editor, :user => user)
-    show_selected_location_descriptions(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:LocationDescription, :by_editor, :user => user)
+      show_selected_location_descriptions(query)
+    end
   end
 
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_location_descriptions(query, args={})
     store_query_in_session(query)
     @links ||= []
-    args = { :action => 'list_location_descriptions',
-             :num_per_page => 50 }.merge(args)
+    args = {
+      :action => 'list_location_descriptions',
+      :num_per_page => 50,
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [

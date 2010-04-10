@@ -542,30 +542,24 @@ class ObserverController < ApplicationController
 
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
-    user = User.find(params[:id])
-    query = create_query(:Observation, :by_user, :user => user)
-    show_selected_observations(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Observation, :by_user, :user => user)
+      show_selected_observations(query)
+    end
   end
 
   # Displays matrix of Observation's at a Location, by date.
   def observations_at_location # :nologin: :norobots:
-    location = Location.find(params[:id])
-    query = create_query(:Observation, :at_location, :location => location)
-    show_selected_observations(query)
+    if location = find_or_goto_index(Location, params[:id])
+      query = create_query(:Observation, :at_location, :location => location)
+      show_selected_observations(query)
+    end
   end
 
   # Display matrix of Observation's whose 'where' matches a string.
   def observations_at_where # :nologin: :norobots:
     where = params[:where].to_s
     query = create_query(:Observation, :at_where, :location => where)
-    @links = [
-      [ :list_observations_location_define.l, { :controller => 'location',
-        :action => 'create_location', :where => where } ],
-      [ :list_observations_location_merge.l, { :controller => 'location',
-        :action => 'list_merge_options', :where => where } ],
-      [ :list_observations_location_all.l, { :controller => 'location',
-        :action => 'list_locations' } ],
-    ]
     show_selected_observations(query)
   end
 
@@ -596,9 +590,24 @@ class ObserverController < ApplicationController
   def show_selected_observations(query, args={})
     store_query_in_session(query)
     @links ||= []
+    args = {
+      :action => 'list_observations',
+      :matrix => true,
+      :include => [:name, :location, :user, :rss_log],
+    }.merge(args)
 
-    args = { :action => 'list_observations', :matrix => true,
-             :include => [:name, :location, :user, :rss_log] }.merge(args)
+    # Add some extra links to the index user is sent to if they click on an
+    # undefined location.
+    if query.flavor == :at_where
+      @links += [
+        [ :list_observations_location_define.l, { :controller => 'location',
+          :action => 'create_location', :where => params[:location] } ],
+        [ :list_observations_location_merge.l, { :controller => 'location',
+          :action => 'list_merge_options', :where => params[:location] } ],
+        [ :list_observations_location_all.l, { :controller => 'location',
+          :action => 'list_locations' } ],
+      ]
+    end
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [

@@ -982,6 +982,7 @@ runtime_no_match_name:  "Can't find [type] matching '[value]'."
 runtime_no_matches:  "No matching [types] found."
 runtime_no_matches_pattern:  "No [types] matching '[value]' found."
 runtime_no_more:  There are no more [types].
+runtime_no_objects:  There are no [types].
 runtime_no_parse:  "Unable to parse: '[value]'"
 runtime_no_save:  "Unable to save [type]."
 runtime_no_update:  "Unable to update [type]."
@@ -1020,6 +1021,16 @@ runtime_destroy_description_not_admin:  Only a description's admins can delete t
 runtime_duplicate_rank:  "Rank appears twice: '[rank]'"
 runtime_image_updated_notes:  "Updated notes on image #[id]."
 runtime_image_uploaded:  Uploaded image '[name]'.
+runtime_index_no_at_location:  No [types] at [location].
+runtime_index_no_by_rss_log:  No [types] have had any recent activity.
+runtime_index_no_for_object:  No [types] for this object.
+runtime_index_no_for_user:  No [types] for [user].
+runtime_index_no_in_species_list:  No [types] in [name].
+runtime_index_no_inside_observation:  Observation #[id] has no [types].
+runtime_index_no_of_children:  There are no [types] for children of [name].
+runtime_index_no_of_name:  There are no [types] of [name].
+runtime_index_no_of_parents:  There are no [types] for parents of [name].
+runtime_index_no_with:  There are no [types] with [attachments].
 runtime_invalid_for_rank:  "Name is invalid for the rank [rank]: '[name]'"
 runtime_invalid_rank:  "Ranks are out of order: '[line_rank]' is the same as or below '[rank]'"
 runtime_location_merge_failed:  Failed to merge observation [name].
@@ -1093,8 +1104,6 @@ runtime_location_descriptions_by_author_error:  "[:runtime_user_hasnt_authored(t
 runtime_location_descriptions_by_editor_error:  "[:runtime_user_hasnt_edited(type=:location_description)]"
 runtime_location_merge_success:  "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success:  "[:runtime_created_id(type=:location,value=id)]"
-runtime_locations_by_editor_error:  "[:runtime_user_hasnt_edited(type=:location)]"
-runtime_locations_by_user_error:  "[:runtime_user_hasnt_created(type=:location)]"
 runtime_map_locations_no_matches:  "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
 runtime_merge_locations_warning:  "[:runtime_merge_warning(type=:location)]"
 runtime_merge_names_warning:  "[:runtime_merge_warning(type=:name)]"
@@ -4480,3 +4489,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

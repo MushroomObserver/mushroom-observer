@@ -229,8 +229,8 @@ PROFILE: Perfil
 profile: perfil
 PROFILES: Perfiles
 profiles: perfiles
-QUALITY:  Quality
-quality:  quality
+QUALITY: Calidad
+quality: calidad
 RANK: Rango
 rank: rango
 RANKS: Rangos
@@ -239,8 +239,8 @@ REVIEWER: Revisor
 reviewer: revisor
 REVIEWERS: Revisores
 reviewers: revisores
-SIZE:  Size
-size:  size
+SIZE: Tamaño
+size: tamaño
 STATUS: Estatus
 status: estatus
 STATUSS: Estatutos
@@ -774,7 +774,7 @@ sort_by_location: "[:LOCATION]"
 sort_by_confidence: "[:CONFIDENCE_LEVEL]"
 sort_by_image_quality: Calidad de Imágen
 sort_by_thumbnail_quality: Calidad de Miniatura
-sort_by_num_views:  Popularity
+sort_by_num_views: Popularidad
 sort_by_contribution: Contribución
 sort_by_reverse: Invertir Orden
 
@@ -982,6 +982,7 @@ runtime_no_match_name: "No se puede encontrar [type] coincidente «[value]»."
 runtime_no_matches: "No se puede encontrar cualquier [types] coincidentes."
 runtime_no_matches_pattern: "No se puede encontrar cualquier [types] que coincidan «[value]»."
 runtime_no_more: "No ha más [types]."
+runtime_no_objects: No hay [types].
 runtime_no_parse: "No se ha podido analizar: «[value]»"
 runtime_no_save: "No se ha podido guardar [type]."
 runtime_no_update: "No se ha podido realizar [type]."
@@ -1020,6 +1021,16 @@ runtime_destroy_description_not_admin: Sólo un admin de la descripción se pued
 runtime_duplicate_rank: El rango «[rank]» aparece dos veces.
 runtime_image_updated_notes: "Las notas para imagen #[id] se ha realizado."
 runtime_image_uploaded: La imagen «[name]» se ha subido.
+runtime_index_no_at_location: No hay [types] en [location].
+runtime_index_no_by_rss_log: No hay [types] han tenido actividad reciente.
+runtime_index_no_for_object: No hay [types] para este objeto.
+runtime_index_no_for_user: No hay [types] para [user].
+runtime_index_no_in_species_list: No hay [types] en [name].
+runtime_index_no_inside_observation: Observación #[id] no contiene [types].
+runtime_index_no_of_children: No hay [types] para los hijos de [name].
+runtime_index_no_of_name: No hay [types] para [name].
+runtime_index_no_of_parents: No hay [types] para los padres de [name].
+runtime_index_no_with: No hay [types] con [attachments].
 runtime_invalid_for_rank: El nombre «[name]» no es válido para el rango «[rank]».
 runtime_invalid_rank: El rango «[line_rank]» no está por encima de «[rank]».
 runtime_location_merge_failed: No se ha podido fusionar la observación [name].
@@ -1093,8 +1104,6 @@ runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(ty
 runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
 runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
 runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
-runtime_locations_by_editor_error: "[:runtime_user_hasnt_edited(type=:location)]"
-runtime_locations_by_user_error: "[:runtime_user_hasnt_created(type=:location)]"
 runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
 runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
 runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
@@ -4652,3 +4661,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

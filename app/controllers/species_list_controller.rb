@@ -89,13 +89,10 @@ class SpeciesListController < ApplicationController
   # Display list of user's species_lists, sorted by date.  (Linked from left
   # panel.)
   def species_lists_by_user # :nologin: :norobots:
-    if params[:id].blank?
-      flash_error(:runtime_missing.t(:field => 'id'))
-      query = create_query(:SpeciesList, :all, :by => date)
-    else
-      query = create_query(:SpeciesList, :by_user, :user => params[:id])
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:SpeciesList, :by_user, :user => user)
+      show_selected_species_lists(query)
     end
-    show_selected_species_lists(query)
   end
 
   # Display list of all species_lists, sorted by title.  (Linked from left

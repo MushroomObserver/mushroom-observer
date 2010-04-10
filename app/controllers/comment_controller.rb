@@ -68,23 +68,34 @@ class CommentController < ApplicationController
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
   def show_comments_by_user # :nologin: :norobots:
-    query = create_query(:Comment, :by_user, :user => params[:id])
-    show_selected_comments(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Comment, :by_user, :user => user)
+      show_selected_comments(query)
+    end
   end
 
   # Shows comments for a given user, most recent first.  (Linked from left
   # panel.)
   def show_comments_for_user # :nologin: :norobots:
-    query = create_query(:Comment, :for_user, :user => params[:id] || @user)
-    show_selected_comments(query)
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Comment, :for_user, :user => user)
+      show_selected_comments(query)
+    end
   end
 
   # Shows comments for a given object, most recent first.  (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_object # :nologin: :norobots:
-    query = create_query(:Comment, :for_object, :object => params[:id],
-                         :type => params[:type])
-    show_selected_comments(query)
+    model = params[:type].to_s.constantize rescue nil
+    if !model.is_a?(AbstractModel)
+      flash_error(:runtime_invalid.t(:type => '"type"',
+                                     :value => params[:type].to_s))
+      redirect_back_or_default(:action => :list_comments)
+    elsif object = find_or_goto_index(model, params[:id])
+      query = create_query(:Comment, :for_object, :object => object.id,
+                           :type => object.class.name)
+      show_selected_comments(query)
+    end
   end
 
   # Display list of Comment's whose text matches a string pattern.
@@ -104,8 +115,11 @@ class CommentController < ApplicationController
 
     # (Eager-loading of names might fail when comments start to apply to
     # objects other than observations.)
-    args = { :action => :list_comments, :num_per_page => 24,
-             :include => [:object, :user] }.merge(args)
+    args = {
+      :action => :list_comments,
+      :num_per_page => 25,
+      :include => [:object, :user],
+    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
