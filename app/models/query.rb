@@ -27,10 +27,10 @@ class Query < AbstractQuery
       :modified?        => [:time],
       :date?            => [:date],
       :users?           => [User],
-      :names?           => [Name],
-      :synonym_names?   => [Name],
-      :locations?       => [Location],
-      :species_lists?   => [SpeciesList],
+      :names?           => [:string],
+      :synonym_names?   => [:string],
+      :locations?       => [:string],
+      :species_lists?   => [:string],
       :has_observation? => {:string => [:yes]},
       :size?            => [{:string => Image.all_sizes - [:full_size]}],
       :content_types?   => :string,
@@ -790,9 +790,6 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_name(
       Name, :synonym_names, 'observations.name_id',
       :filter => :synonyms,
-      :join => {:images_observations => :observations}
-    )
-    initialize_model_do_locations('observations',
       :join => {:images_observations => :observations}
     )
     initialize_model_do_locations('observations',
