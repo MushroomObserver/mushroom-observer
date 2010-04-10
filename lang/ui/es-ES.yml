@@ -229,6 +229,8 @@ PROFILE: Perfil
 profile: perfil
 PROFILES: Perfiles
 profiles: perfiles
+QUALITY:  Quality
+quality:  quality
 RANK: Rango
 rank: rango
 RANKS: Rangos
@@ -237,6 +239,8 @@ REVIEWER: Revisor
 reviewer: revisor
 REVIEWERS: Revisores
 reviewers: revisores
+SIZE:  Size
+size:  size
 STATUS: Estatus
 status: estatus
 STATUSS: Estatutos
@@ -770,6 +774,7 @@ sort_by_location: "[:LOCATION]"
 sort_by_confidence: "[:CONFIDENCE_LEVEL]"
 sort_by_image_quality: Calidad de Imágen
 sort_by_thumbnail_quality: Calidad de Miniatura
+sort_by_num_views:  Popularity
 sort_by_contribution: Contribución
 sort_by_reverse: Invertir Orden
 
@@ -3302,6 +3307,7 @@ refine_search_goto_index: "[:show_object(type=:index)]"
 refine_search_conditions:  Parameters
 refine_search_unknown_object:  "Unknown [TYPE] #[id]"
 refine_search_help: Ayuda
+refine_search_max_size:  Max Size
 
 refine_search_advanced_search_content:  "[:refine_search_pattern_search]"
 refine_search_advanced_search_location:  "[:Location]"
@@ -3310,8 +3316,12 @@ refine_search_advanced_search_user:  "[:Observer]"
 refine_search_all_children:  Which children?
 refine_search_all_children_true:  all children
 refine_search_all_children_false:  only immediate children
+refine_search_comment_types:  Object type(s)
 refine_search_comments_has:  Search comments
 refine_search_confidence:  Confidence level
+refine_search_content_has:  Search message body
+refine_search_content_types:  Original image type(s)
+refine_search_copyright_holder_has:  Search copyright holder
 refine_search_created:  Date created
 refine_search_date_image:  Date taken
 refine_search_date_observation:  Date observed
@@ -3325,9 +3335,11 @@ refine_search_has_images:  Does it have images?
 refine_search_has_location:  Does it a defined location?
 refine_search_has_name:  Does it have a name?
 refine_search_has_notes:  Does it have notes?
+refine_search_has_observation:  Does it have an observation?
 refine_search_has_specimen:  Is a specimen available?
 refine_search_has_votes:  Does it have votes?
 refine_search_is_col_loc:  Was this where it was seen?
+refine_search_license:  "[:License]"
 refine_search_location_defined:  Location (defined)
 refine_search_location_undefined:  Location (undefined)
 refine_search_locations:  Restrict to these location(s)
@@ -3344,6 +3356,7 @@ refine_search_nonconsensus_no:  just use consensus name
 refine_search_nonconsensus_all:  use any proposed name
 refine_search_nonconsensus_exclusive:  only nonconsensus names
 refine_search_notes_has:  Search notes
+refine_search_ok_for_export:  Okay for export?
 refine_search_pattern_search:  Search string
 refine_search_pattern_comment:  "[:refine_search_pattern_search]"
 refine_search_pattern_image:  "[:refine_search_pattern_search]"
@@ -3353,9 +3366,12 @@ refine_search_pattern_observation:  "[:refine_search_pattern_search]"
 refine_search_pattern_project:  "[:refine_search_pattern_search]"
 refine_search_pattern_species_list:  "[:refine_search_pattern_search]"
 refine_search_pattern_user:  "[:refine_search_pattern_search]"
+refine_search_quality:  Image quality
 refine_search_rss_log_type:  Type of object
 refine_search_rss_modified:  Date of last activity
+refine_search_size:  Available sizes
 refine_search_species_lists:  Belongs to these species list(s)
+refine_search_summary_has:  Search message summary
 refine_search_synonym_names:  Restrict to synonyms of these
 refine_search_synonyms:  Include synonym observations?
 refine_search_synonyms_no:  just this name
@@ -3380,7 +3396,11 @@ refine_search_all_children_help:  >
   children?  For example, immediate children of a Agaricus would be all the
   species in Agaricus, but not subspecies or varieties.
 
+refine_search_comment_types_help:  ""
 refine_search_comments_has_help:  >
+  [:refine_search_google_help]
+
+refine_search_content_has_help:  >
   [:refine_search_google_help]
 
 refine_search_conditions_help:  >
@@ -3395,6 +3415,11 @@ refine_search_confidence_help:  >
   This refers to the average confidence of the community to the current
   consensus name of the observation.
 
+refine_search_content_types_help:  >
+  All reduced sizes are JPEGs.  This only applies to the original image.  Most
+  users upload JPEGs, however a small percentage are in other formats.
+
+refine_search_copyright_holder_has_help:  ""
 refine_search_created_help:  >
   [:refine_search_time_help]
 
@@ -3431,9 +3456,11 @@ refine_search_has_images_help:  ""
 refine_search_has_location_help:  ""
 refine_search_has_name_help:  ""
 refine_search_has_notes_help:  ""
+refine_search_has_observation_help:  ""
 refine_search_has_specimen_help:  ""
 refine_search_has_votes_help:  ""
 refine_search_is_col_loc_help:  ""
+refine_search_license_help:  ""
 refine_search_location_defined_help:  >
   Enter name or id of a location.  This will only include results that belong
   to a DEFINED location. [:refine_search_location_apology(other=undefined)]
@@ -3465,7 +3492,7 @@ refine_search_misspellings_help:  >
   queries accept this parameter.  By default it screens out misspellings
   ("[:refine_search_misspellings_no]"), however you can ask it to return both
   ("[:refine_search_misspellings_either]") or only misspelt ones
-  ("[:refine_search_misspellings_only]"). 
+  ("[:refine_search_misspellings_only]").
 
 refine_search_model_flavor_help:  >
   These are all of our basic query flavors.  The names might be a bit obscure.
@@ -3493,7 +3520,7 @@ refine_search_names_help:  >
   [:refine_search_multiple_help(things="names")] You can enter any rank, not
   just species, e.g.  "A*muscaria*flavivolvata" or "Agaricales".  Note,
   however, that listing higher taxa returns those taxa only, not the children
-  of it.  Thus Agaricus returns only Agarcius, not the species of Agaricus. 
+  of it.  Thus Agaricus returns only Agarcius, not the species of Agaricus.
 
 refine_search_nonconsensus_help:  >
   Use this parameter to tell it how to deal with alternate proposed names for
@@ -3505,6 +3532,7 @@ refine_search_nonconsensus_help:  >
 refine_search_notes_has_help:  >
   [:refine_search_google_help]
 
+refine_search_ok_for_export_help:  ""
 refine_search_pattern_comment_help:  >
   Searches both summary and content.
   [:refine_search_google_help]
@@ -3537,13 +3565,21 @@ refine_search_pattern_user_help:  >
   Searches login and name only.
   [:refine_search_google_help]
 
+refine_search_quality_help:  ""
 refine_search_rss_log_type_help:  ""
 refine_search_rss_modified_help:  >
   [:refine_search_time_help]
 
+refine_search_size_help:  >
+  Restrict to images of a minimum size.  You may also indicate a maximum size,
+  although in practice this is less useful.
+
 refine_search_species_lists_help:  >
   [:refine_search_multiple_help(things="titles")] Use "*" for a wildcard.  You
-  may also enter partial titles. 
+  may also enter partial titles.
+
+refine_search_summary_has_help:  >
+  [:refine_search_google_help]
 
 refine_search_synonym_names_help:  >
   [:refine_search_multiple_help(things="names")]
@@ -3554,7 +3590,7 @@ refine_search_synonyms_help:  >
   ("[:refine_search_synonyms_all]"), however you can tell it to ignore synonyms
   ("[:refine_search_synonyms_no]") or include JUST synonyms
   ("[:refine_search_synonyms_exclusive]").  Note that for this purpose,
-  misspelt names are treated exactly the same as the correctly-spelled name. 
+  misspelt names are treated exactly the same as the correctly-spelled name.
 
 refine_search_time_help: >
   Introduzca una fecha o rango de fechas en el formato «AAAA-MM-DD:HH:MM:SS».

@@ -602,14 +602,15 @@ class ObserverController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',     :sort_by_name.t],
-      ['date',     :sort_by_date.t],
-      ['user',     :sort_by_user.t],
-      ['created',  :sort_by_posted.t],
+      ['name',       :sort_by_name.t],
+      ['date',       :sort_by_date.t],
+      ['user',       :sort_by_user.t],
+      ['created',    :sort_by_posted.t],
       [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
-                  :sort_by_modified.t],
+                     :sort_by_modified.t],
       ['confidence', :sort_by_confidence.t],
       ['thumbnail_quality', :sort_by_thumbnail_quality.t],
+      ['num_views',  :sort_by_num_views.t],
     ]
 
     # Add "show map" link if this query can be coerced into a location query.

@@ -104,10 +104,11 @@ class LocationController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',    :sort_by_name.t],
-      ['created', :sort_by_created.t],
+      ['name',      :sort_by_name.t],
+      ['created',   :sort_by_created.t],
       [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
-                  :sort_by_modified.t],
+                    :sort_by_modified.t],
+      ['num_views', :sort_by_num_views.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an
@@ -284,9 +285,10 @@ class LocationController < ApplicationController
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
-      ['name',     :sort_by_name.t],
-      ['created',  :sort_by_created.t],
-      ['modified', :sort_by_modified.t],
+      ['name',      :sort_by_name.t],
+      ['created',   :sort_by_created.t],
+      ['modified',  :sort_by_modified.t],
+      ['num_views', :sort_by_num_views.t],
     ]
 
     # Add "show locations" link if this query can be coerced into an

@@ -16,27 +16,28 @@
 #  allow the owner/authors of the object commented on to be notified of the
 #  new comment.  Just follow these easy steps:
 #
-#  1) Add +has_many+ relationships to the model:
+#  1. Add to +all_types+ Array in this file.
+#  2. Add +has_many+ relationships to the model:
 #
 #       has_many :comments,  :as => :object, :dependent => :destroy
 #       has_many :interests, :as => :object, :dependent => :destroy
 #
-#  2) Add interest "eyes" to the header section of the show_object view:
+#  3. Add interest "eyes" to the header section of the show_object view:
 #
 #       draw_interest_icons(@object)
 #
-#  3) Add show_comments partial at the bottom of the show_object view:
+#  4. Add show_comments partial at the bottom of the show_object view:
 #
 #       <%= render(:partial => 'comment/show_comments', :locals =>
 #             { :object => @object, :controls => true, :limit => nil }) %>
 #
-#  4) Tell comment/_object shared view how to display the object (used to
+#  5. Tell comment/_object shared view how to display the object (used to
 #     embed info about object while user is posting/editing a comment):
 #
 #       when 'YourModel'
 #         render(:partial => 'model/model', :object => object)
 #
-#  5) Tell Query how to do the polymorphic join (optional):
+#  6. Tell Query how to do the polymorphic join (optional):
 #
 #       self.join_conditions => {
 #         :comments => {
@@ -93,6 +94,11 @@ class Comment < AbstractModel
   belongs_to :user
 
   after_create :notify_users
+
+  # Returns Array of all valid +object_type+ values (Symbol's).
+  def self.all_types
+    [ Location, Name, Observation, Project ]
+  end
 
   # Returns +summary+ for debugging.
   def text_name

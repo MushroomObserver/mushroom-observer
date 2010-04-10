@@ -15,15 +15,33 @@ class Query < AbstractQuery
   # Parameters allowed in every query for a given model.
   self.model_params = {
     :Comment => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :users?    => [User],
+      :created?     => [:time],
+      :modified?    => [:time],
+      :users?       => [User],
+      :types?       => :string,
+      :summary_has? => :string,
+      :content_has? => :string,
     },
     :Image => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :date?     => [:date],
-      :users?    => [User],
+      :created?         => [:time],
+      :modified?        => [:time],
+      :date?            => [:date],
+      :users?           => [User],
+      :names?           => [Name],
+      :synonym_names?   => [Name],
+      :locations?       => [Location],
+      :species_lists?   => [SpeciesList],
+      :has_observation? => {:string => [:yes]},
+      :size?            => [{:string => Image.all_sizes - [:full_size]}],
+      :content_types?   => :string,
+      :has_notes?       => :boolean,
+      :notes_has?       => :string,
+      :copyright_holder_has? => :string,
+      :license?         => License,
+      :has_votes?       => :boolean,
+      :quality?         => [:integer],
+      :confidence?      => [:integer],
+      :ok_for_export?   => :boolean,
     },
     :Location => {
       :created?  => [:time],
@@ -658,7 +676,7 @@ class Query < AbstractQuery
     table = model.table_name
     case by
 
-    when 'modified', 'created', 'last_login'
+    when 'modified', 'created', 'last_login', 'num_views'
       if model.column_names.include?(by)
         "#{table}.#{by} DESC"
       end
@@ -755,6 +773,9 @@ class Query < AbstractQuery
     initialize_model_do_time(:created)
     initialize_model_do_time(:modified)
     initialize_model_do_objects_by_id(:users)
+    initialize_model_do_comment_types
+    initialize_model_do_search(:summary_has, :summary)
+    initialize_model_do_search(:content_has, :comment)
   end
 
   def initialize_image
@@ -762,6 +783,49 @@ class Query < AbstractQuery
     initialize_model_do_time(:modified)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
+    initialize_model_do_objects_by_name(
+      Name, :names, 'observations.name_id',
+      :join => {:images_observations => :observations}
+    )
+    initialize_model_do_objects_by_name(
+      Name, :synonym_names, 'observations.name_id',
+      :filter => :synonyms,
+      :join => {:images_observations => :observations}
+    )
+    initialize_model_do_locations('observations',
+      :join => {:images_observations => :observations}
+    )
+    initialize_model_do_locations('observations',
+      :join => {:images_observations => :observations}
+    )
+    initialize_model_do_objects_by_name(
+      SpeciesList, :species_lists, 'observations_species_lists.species_list_id',
+      :join => {:images_observations => {:observations => :observations_species_lists}}
+    )
+    if params[:has_observation]
+      self.join << :images_observations
+    end
+    initialize_model_do_image_size
+    initialize_model_do_image_types
+    initialize_model_do_boolean(:has_notes,
+      'LENGTH(COALESCE(images.notes,"")) > 0',
+      'LENGTH(COALESCE(images.notes,"")) = 0'
+    )
+    initialize_model_do_search(:notes_has, :notes)
+    initialize_model_do_search(:copyright_holder_has, :copyright_holder)
+    initialize_model_do_license
+    initialize_model_do_boolean(:has_votes,
+      'LENGTH(COALESCE(images.votes,"")) > 0',
+      'LENGTH(COALESCE(images.votes,"")) = 0'
+    )
+    initialize_model_do_range(:quality, :vote_cache)
+    initialize_model_do_range(:confidence, 'observations.vote_cache',
+      :join => {:images_observations => :observations}
+    )
+    initialize_model_do_boolean(:ok_for_export,
+      'images.ok_for_export IS TRUE',
+      'images.ok_for_export IS FALSE'
+    )
   end
 
   def initialize_location
@@ -782,7 +846,9 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_misspellings
     initialize_model_do_deprecated
-    initialize_model_do_objects_by_name(Name, :synonym_names, :id, :synonyms)
+    initialize_model_do_objects_by_name(
+      Name, :synonym_names, :id, :filter => :synonyms
+    )
   end
 
   def initialize_name_description
@@ -798,10 +864,14 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_id(:users)
     initialize_model_do_objects_by_name(Name, :names)
     initialize_model_do_objects_by_name(
-      Name, :synonym_names, :name_id, :synonyms
+      Name, :synonym_names, :name_id, :filter => :synonyms
     )
     initialize_model_do_locations
-    initialize_model_do_observations_species_lists
+    initialize_model_do_objects_by_name(
+      SpeciesList, :species_lists,
+      'observations_species_lists.species_list_id',
+      :join => :observations_species_lists
+    )
     initialize_model_do_range(:confidence, :vote_cache)
     initialize_model_do_search(:notes_has, :notes)
     initialize_model_do_boolean(:is_col_loc,
@@ -884,11 +954,15 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_range(arg, col)
+  def initialize_model_do_range(arg, col, args={})
     if params[arg].is_a?(Array)
       min, max = params[arg]
       self.where << "#{col} >= #{min}" if !min.blank?
       self.where << "#{col} <= #{max}" if !max.blank?
+      if (join = args[:join]) and
+         (!min.blank? || !max.blank?)
+        self.join << join
+      end
     end
   end
 
@@ -915,8 +989,9 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_objects_by_name(model, arg, col=nil, filter=nil)
-    if names = params[arg]
+  def initialize_model_do_objects_by_name(model, arg, col=nil, args={})
+    names = params[arg]
+    if names && names.any?
       col ||= arg.to_s.sub(/s?$/, '_id')
       col = "#{self.model.table_name}.#{col}" if !col.to_s.match(/\./)
       objs = []
@@ -943,33 +1018,85 @@ class Query < AbstractQuery
           end
         end
       end
-      if filter
+      if filter = args[:filter]
         objs = objs.uniq.map(&filter).flatten
+      end
+      if join = args[:join]
+        self.join << join
       end
       set = clean_id_set(objs.map(&:id).uniq)
       self.where << "#{col} IN (#{set})"
     end
   end
 
-  def initialize_model_do_observations_species_lists
-    if params[:species_lists]
-      initialize_model_do_objects_by_name(SpeciesList, :species_lists,
-                                  'observations_species_lists.species_list_id')
-      self.join << :observations_species_lists
-    end
-  end
-
-  def initialize_model_do_locations
-    if params[:locations]
-      initialize_model_do_objects_by_name(Location, :locations)
+  def initialize_model_do_locations(table=model.table_name, args={})
+    locs = params[:locations]
+    if locs && locs.any?
+      loc_col = "#{table}.location_id"
+      initialize_model_do_objects_by_name(Location, :locations, loc_col, args)
       str = self.where.pop
-      for name in params[:locations]
+      for name in locs
         if name.match(/\D/)
           pattern = clean_pattern(name)
-          str += " OR #{model.table_name}.where LIKE '%#{pattern}%'"
+          str += " OR #{table}.where LIKE '%#{pattern}%'"
         end
       end
       self.where << str
+    end
+  end
+
+  def initialize_model_do_comment_types
+    if !params[:types].blank?
+      types = params[:types].to_s.strip_squeeze.split
+      types &= Comment.all_types.map(&:to_s)
+      if types.any?
+        self.where << "comments.object_type IN ('#{types.join("','")}')"
+      end
+    end
+  end
+
+  def initialize_model_do_image_size
+    if params[:size]
+      min, max = params[:size]
+      sizes  = Image.all_sizes
+      pixels = Image.all_sizes_in_pixels
+      if min
+        size = pixels[sizes.index(min)]
+        self.where << "images.width >= #{size} OR images.height >= #{size}"
+      end
+      if max
+        size = pixels[sizes.index(max) + 1]
+        self.where << "images.width < #{size} AND images.height < #{size}"
+      end
+    end
+  end
+
+  def initialize_model_do_image_types
+    if !params[:content_types].blank?
+      exts  = Image.all_extensions.map(&:to_s)
+      mimes = Image.all_content_types.map(&:to_s) - ['']
+      types = params[:types].to_s.strip_squeeze.split & exts
+      if types.any?
+        other = types.include?('raw')
+        types -= ['raw']
+        types = types.map {|x| mimes[exts.index(x)]}
+        str1 = "comments.object_type IN ('#{types.join("','")}')"
+        str2 = "comments.object_type NOT IN ('#{mimes.join("','")}')"
+        if types.empty?
+          self.where << str2
+        elsif other
+          self.where << "#{str1} OR #{str2}"
+        else
+          self.where << str1
+        end
+      end
+    end
+  end
+
+  def initialize_model_do_license
+    if !params[:license].blank?
+      license = find_cached_parameter_instance(License, :license)
+      self.where << "#{model.table_name}.license_id = #{license.id}"
     end
   end
 

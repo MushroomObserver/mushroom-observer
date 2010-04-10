@@ -130,6 +130,7 @@ class ImageController < ApplicationController
       ['modified', :sort_by_modified.t],
       ['confidence', :sort_by_confidence.t],
       ['image_quality', :sort_by_image_quality.t],
+      ['num_views', :sort_by_num_views.t],
     ]
 
     # Add "show observations" link if this query can be coerced into an

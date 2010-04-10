@@ -9,8 +9,6 @@ module RefineSearch
 
   # ranks      = Name.all_ranks.reverse.map {|r| ["rank_#{r}".upcase.to_sym, r]}
   # quality    = Image.all_votes.reverse.map {|v| [:"image_vote_short_#{v}", v]}
-  # confidence = Vote.confidence_menu
-  # licenses   = License.current_names_and_ids.map {|l,v| [l.sub(/Creative Commons/,'CC'), v]}
 
   ##############################################################################
   #
@@ -63,6 +61,9 @@ module RefineSearch
       :created,
       :modified,
       :users,
+      :comment_types,
+      :summary_has,
+      :content_has,
     ],
 
     :Image => [
@@ -83,6 +84,21 @@ module RefineSearch
       :modified,
       :date,
       :users,
+      :names,
+      :synonym_names,
+      :locations,
+      :species_lists,
+      :has_observation,
+      :size,
+      :content_types,
+      :has_notes,
+      :notes_has,
+      :copyright_holder_has,
+      :license,
+      :has_votes,
+      :quality,
+      :confidence,
+      :ok_for_export,
     ],
 
     :Location => [
@@ -216,8 +232,8 @@ module RefineSearch
       :label => :refine_search_all_children,
       :input => :menu,
       :opts  => [
-        [:refine_search_all_children_true, 'true'],
-        [:refine_search_all_children_false, 'false'],
+        [:refine_search_all_children_true.l, 'true'],
+        [:refine_search_all_children_false.l, 'false'],
       ],
       :default => false,
       :blank => false,
@@ -240,8 +256,8 @@ module RefineSearch
       :name  => :confidence,
       :label => :refine_search_confidence,
       :input => :menu2,
-      :word  => :VOTE,
-      :opts  => Vote.confidence_menu.map {|a,b| [a,b.to_s]},
+      :word  => :VOTE.t,
+      :opts  => Vote.confidence_menu.map {|a,b| [a.l,b.to_s]},
       :blank => true
     )
   end
@@ -257,12 +273,44 @@ module RefineSearch
     )
   end
 
+  def rs_field_content_has(model, flavor)
+    Field.new(
+      :name  => :content_has,
+      :label => :refine_search_content_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_content_types(model, flavor)
+    Field.new(
+      :name  => :content_types,
+      :label => :refine_search_content_types,
+      :input => :checkboxes,
+      :opts  => Image.all_extensions.map do |val|
+        [ "*.#{val}", val.to_s ]
+      end,
+      :parse => :content_types
+    )
+  end
+
+  def rs_field_copyright_holder_has(model, flavor)
+    Field.new(
+      :name  => :copyright_holder_has,
+      :label => :refine_search_copyright_holder_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
   def rs_field_created(model, flavor)
     Field.new(
       :name   => :created,
       :label  => :refine_search_created,
       :input  => :text2,
-      :word   => :TIME,
+      :word   => :TIME.t,
       :parse  => :time2
     )
   end
@@ -272,7 +320,7 @@ module RefineSearch
       :name   => :date,
       :label  => :"refine_search_date_#{model.to_s.underscore}",
       :input  => :text2,
-      :word   => :DATE,
+      :word   => :DATE.t,
       :parse  => :date2
     )
   end
@@ -283,9 +331,9 @@ module RefineSearch
       :label => :refine_search_deprecated,
       :input => :menu,
       :opts  => [
-        [:refine_search_deprecated_no, 'no'],
-        [:refine_search_deprecated_only, 'only'],
-        [:refine_search_deprecated_either, 'either'],
+        [:refine_search_deprecated_no.l, 'no'],
+        [:refine_search_deprecated_only.l, 'only'],
+        [:refine_search_deprecated_either.l, 'either'],
       ],
       :default => 'either',
       :blank => false
@@ -297,7 +345,7 @@ module RefineSearch
       :name  => :has_comments,
       :label => :refine_search_has_comments,
       :input => :menu,
-      :opts  => [[:yes, 'yes']],
+      :opts  => [[:yes.l, 'yes']],
       :default => nil,
       :blank => true
     )
@@ -308,7 +356,7 @@ module RefineSearch
       :name  => :has_images,
       :label => :refine_search_has_images,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
     )
@@ -319,7 +367,7 @@ module RefineSearch
       :name  => :has_location,
       :label => :refine_search_has_location,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
     )
@@ -330,7 +378,7 @@ module RefineSearch
       :name  => :has_name,
       :label => :refine_search_has_name,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
     )
@@ -341,7 +389,18 @@ module RefineSearch
       :name  => :has_notes,
       :label => :refine_search_has_notes,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_observation(model, flavor)
+    Field.new(
+      :name  => :has_observation,
+      :label => :refine_search_has_observation,
+      :input => :menu,
+      :opts  => [[:yes.l, 'yes']],
       :default => nil,
       :blank => true
     )
@@ -352,7 +411,7 @@ module RefineSearch
       :name  => :has_specimen,
       :label => :refine_search_has_specimen,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
     )
@@ -363,7 +422,7 @@ module RefineSearch
       :name  => :has_votes,
       :label => :refine_search_has_votes,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
     )
@@ -374,9 +433,21 @@ module RefineSearch
       :name  => :is_col_loc,
       :label => :refine_search_is_col_loc,
       :input => :menu,
-      :opts  => [[:yes, 'true'], [:no, 'false']],
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
+    )
+  end
+
+  def rs_field_license(model, flavor)
+    Field.new(
+      :name   => :license,
+      :label  => :refine_search_license,
+      :input  => :menu,
+      :opts   => License.current_names_and_ids.map do |l,v|
+        [l.sub(/Creative Commons/,'CC'), v]
+      end,
+      :blank  => true
     )
   end
 
@@ -428,9 +499,9 @@ module RefineSearch
       :label => :refine_search_misspellings,
       :input => :menu,
       :opts  => [
-        [:refine_search_misspellings_no, 'no'],
-        [:refine_search_misspellings_only, 'only'],
-        [:refine_search_misspellings_either, 'either'],
+        [:refine_search_misspellings_no.l, 'no'],
+        [:refine_search_misspellings_only.l, 'only'],
+        [:refine_search_misspellings_either.l, 'either'],
       ],
       :default => 'no',
       :blank => false
@@ -443,7 +514,7 @@ module RefineSearch
         :name   => :modified,
         :label  => :refine_search_rss_modified,
         :input  => :text2,
-        :word   => :TIME,
+        :word   => :TIME.t,
         :parse  => :time2
       )
     else
@@ -451,7 +522,7 @@ module RefineSearch
         :name   => :modified,
         :label  => :refine_search_modified,
         :input  => :text2,
-        :word   => :TIME,
+        :word   => :TIME.t,
         :parse  => :time2
       )
     end
@@ -499,14 +570,14 @@ module RefineSearch
     )
   end
 
-  def rs_field_synonym_names(model, flavor)
+  def rs_field_ok_for_export(model, flavor)
     Field.new(
-      :name   => :synonym_names,
-      :label  => :refine_search_synonym_names,
-      :input  => :textN,
-      :autocomplete => :name,
-      :tokens => true,
-      :parse  => :name_nameN
+      :name  => :ok_for_export,
+      :label => :refine_search_ok_for_export,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
     )
   end
 
@@ -516,9 +587,9 @@ module RefineSearch
       :label => :refine_search_nonconsensus,
       :input => :menu,
       :opts  => [
-        [:refine_search_nonconsensus_no, 'no'],
-        [:refine_search_nonconsensus_all, 'all'],
-        [:refine_search_nonconsensus_exclusive, 'exclusive'],
+        [:refine_search_nonconsensus_no.l, 'no'],
+        [:refine_search_nonconsensus_all.l, 'all'],
+        [:refine_search_nonconsensus_exclusive.l, 'exclusive'],
       ],
       :default => 'no',
       :blank => false
@@ -544,6 +615,32 @@ module RefineSearch
     )
   end
 
+  def rs_field_quality(model, flavor)
+    Field.new(
+      :name  => :quality,
+      :label => :refine_search_quality,
+      :input => :menu2,
+      :word  => :QUALITY.t,
+      :opts  => Image.all_votes.map do |x|
+        [:"image_vote_short_#{x}".l, x.to_s]
+      end,
+      :blank => true
+    )
+  end
+
+  def rs_field_size(model, flavor)
+    Field.new(
+      :name  => :size,
+      :label => :refine_search_size,
+      :input => :menu2,
+      :word  => :refine_search_max_size.t,
+      :opts  => (Image.all_sizes - [:full_size]).map do |x|
+        [:"image_show_#{x}".l, x.to_s]
+      end,
+      :blank => true
+    )
+  end
+
   def rs_field_species_list(model, flavor)
     Field.new(
       :name  => :species_list,
@@ -565,15 +662,36 @@ module RefineSearch
     )
   end
 
+  def rs_field_summary_has(model, flavor)
+    Field.new(
+      :name  => :summary_has,
+      :label => :refine_search_summary_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_synonym_names(model, flavor)
+    Field.new(
+      :name   => :synonym_names,
+      :label  => :refine_search_synonym_names,
+      :input  => :textN,
+      :autocomplete => :name,
+      :tokens => true,
+      :parse  => :name_nameN
+    )
+  end
+
   def rs_field_synonyms(model, flavor)
     Field.new(
       :name  => :synonyms,
       :label => :refine_search_synonyms,
       :input => :menu,
       :opts  => [
-        [:refine_search_synonyms_no, 'no'],
-        [:refine_search_synonyms_all, 'all'],
-        [:refine_search_synonyms_exclusive, 'exclusive'],
+        [:refine_search_synonyms_no.l, 'no'],
+        [:refine_search_synonyms_all.l, 'all'],
+        [:refine_search_synonyms_exclusive.l, 'exclusive'],
       ],
       :default => 'no',
       :blank => false
@@ -587,10 +705,23 @@ module RefineSearch
       :label => :refine_search_rss_log_type,
       :input => :checkboxes,
       :opts  => RssLog.all_types.map do |val|
-        [ :"#{val.upcase}S", val ]
+        [ :"#{val.upcase}S".l, val ]
       end,
       :parse => :rss_type,
       :default => 'all'
+    )
+  end
+
+  def rs_field_types(model, flavor)
+    Field.new(
+      :id    => :comment_types,
+      :name  => :types,
+      :label => :refine_search_comment_types,
+      :input => :checkboxes,
+      :opts  => Comment.all_types.map do |val|
+        [ :"#{val.to_s.underscore.upcase}S".l, val.to_s ]
+      end,
+      :parse => :comment_types
     )
   end
 
@@ -652,8 +783,8 @@ module RefineSearch
   def rs_format_boolean(v,f); v ? 'true' : 'false'; end
   def rs_parse_boolean(v,f); v == 'true'; end
 
-  def rs_format_rss_type(val, fielf)
-    vals = val.to_s.split
+  def rs_format_rss_type(val, field)
+    vals = val.to_s.strip_squeeze.split
     if vals.include?('all')
       RssLog.all_types
     else
@@ -665,6 +796,36 @@ module RefineSearch
     val = ['all']  if val.sort == RssLog.all_types.sort
     val = ['none'] if val.empty?
     val.join(' ')
+  end
+
+  def rs_format_comment_types(val, field)
+    if !val.blank?
+      vals = val.to_s.strip_squeeze.split
+      Comment.all_types.map(&:to_s) & vals
+    end
+  end
+
+  def rs_parse_comment_types(val, field)
+    if val.empty?
+      val = nil
+    else
+      val.join(' ')
+    end
+  end
+
+  def rs_format_content_types(val, field)
+    if !val.blank?
+      vals = val.to_s.strip_squeeze.split
+      Image.all_extensions.map(&:to_s) & vals
+    end
+  end
+
+  def rs_parse_content_types(val, field)
+    if val.empty?
+      val = nil
+    else
+      val.join(' ')
+    end
   end
 
   def rs_format_stringN(val, field)
@@ -1103,7 +1264,7 @@ module RefineSearch
     for model, list in Query.allowed_model_flavors
       model = model.to_s.underscore.to_sym
       for flavor in list
-        menu << [:"Query_help_#{model}_#{flavor}", "#{model} #{flavor}"]
+        menu << [:"Query_help_#{model}_#{flavor}".l, "#{model} #{flavor}"]
       end
     end
     menu = menu.sort_by {|x| x[0].to_s}

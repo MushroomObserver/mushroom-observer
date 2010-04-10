@@ -75,7 +75,7 @@
             content_tag(:b, label) : label %></label>
         </td>
         <td width="1"><%= indent %></td>
-        <td width="1"<%= @errors.include?(field.name) ?
+        <td<%= @errors.include?(field.name) ?
                          ' class="has_error"' : '' %>>
           <%= result = []
           case field.input
@@ -87,7 +87,7 @@
             result << form.text_field("#{name}_1", :size => 18)
             result << indent(2)
             if field.word
-              result << "&lt; #{field.word.t} &lt;".nowrap
+              result << "&lt; #{field.word} &lt;".nowrap
               result << indent(2)
             end
             result << form.text_field("#{name}_2", :size => 18)
@@ -104,8 +104,7 @@
             raise ("Missing opts for #{field.id.inspect}!") if !field.opts
             args = {}
             args[:include_blank] = true if field.blank
-            menu = translate_menu(field.opts)
-            result << form.select(name, menu, args)
+            result << form.select(name, field.opts, args)
 
           when :menu2
             raise("Missing opts for #{field.id.inspect}!") if !field.opts
@@ -113,24 +112,22 @@
             name2 = "#{name}_2"
             args = {}
             args[:include_blank] = true if field.blank
-            menu = translate_menu(field.opts)
-            result << form.select(name1, menu, args)
+            result << form.select(name1, field.opts, args)
             result << indent(2)
             if field.word
-              result << "&lt; #{field.word.t} &lt;".nowrap
+              result << "&lt; #{field.word} &lt;".nowrap
               result << indent(2)
             end
-            result << form.select(name2, menu, args)
+            result << form.select(name2, field.opts, args)
 
           when :menuN
             raise("Missing opts for #{field.id.inspect}!") if !field.opts
             args = {}
             args[:include_blank] = true if field.blank
-            menu = translate_menu(field.opts)
             word = field.word || 'OR'
             result << form.hidden_field("#{name}_n")
             for i in 1..field.num
-              result << form.select("#{name}_#{i}", menu, args)
+              result << form.select("#{name}_#{i}", field.opts, args)
               result << indent(2) + word + '<br/>' if i != field.num
             end
 
@@ -142,7 +139,7 @@
               checked = vals.include?(val.to_s)
               result << form.check_box("#{name}_#{val}", :checked => checked)
               result << indent(0)
-              result << label.l
+              result << label
               result << indent(0)
             end
           end

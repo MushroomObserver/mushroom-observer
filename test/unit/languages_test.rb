@@ -173,7 +173,8 @@ class LanguagesTest < UnitTestCase
     # First get list of tags defined in the main language file.
     tags = {}
     for line in File.readlines(LANGUAGE_MAIN_FILE)
-      if line.match(/^(\w+):/)
+      if line.match(/^(\w+):/) ||
+         line.match(/^"(\w+)":/)
         tags[$1.downcase] = true
       end
     end

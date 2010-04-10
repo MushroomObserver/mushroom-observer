@@ -153,6 +153,10 @@
 #  validate_vote::      Validate a vote value.
 #  file_name::          Filename (relative to IMG_DIR) given size and id.
 #  url::                Full URL on image server given size and id.
+#  all_sizes::          All image sizes from +:thumbnail+ to +:full_size+.
+#  all_sizes_in_pixels:: All image sizes as pixels instead of Symbol's.
+#  all_extensions::     All image extensions, with "raw" for "other".
+#  all_content_types::  All image content_types, with +nil+ for "other".
 #
 #  == Instance Methods
 #
@@ -249,6 +253,11 @@ class Image < AbstractModel
   # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
   def self.all_sizes
     [:thumbnail, :small, :medium, :large, :huge, :full_size]
+  end
+
+  # Return an Array of all image sizes as pixels (Fixnum) instead of Symbol's.
+  def self.all_sizes_in_pixels
+    [160, 320, 640, 960, 1280, 1e10]
   end
 
   # Return an Array of all the extensions of all the image types we explicitly
