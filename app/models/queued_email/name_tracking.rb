@@ -42,9 +42,10 @@ class QueuedEmail::NameTracking < QueuedEmail
   end
   
   def deliver_email
-    AccountMailer.deliver_naming_for_tracker(user, naming)
+    result = AccountMailer.deliver_naming_for_tracker(user, naming)
     if notification.note_template
-      AccountMailer.deliver_naming_for_observer(to_user, naming, notification)
+      result = AccountMailer.deliver_naming_for_observer(to_user, naming, notification)
     end
+    return result
   end
 end
