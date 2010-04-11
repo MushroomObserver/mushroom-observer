@@ -804,6 +804,8 @@ log_object_destroyed_by_user_with_name: "[Type] gelöscht von [user]: [name]."
 log_object_destroyed_no_user: "[Type] gelöscht."
 log_object_merged_by_user:  "Merged [from] into [to] by [user]."
 log_object_merged_no_user:  "Merged [from] into [to]."
+log_object_moved_by_user:  "Moved [from] into [to] by [user]."
+log_object_moved_no_user:  "Moved [from] into [to]."
 log_object_removed_by_user: "[Type] entfernt von [user]."
 log_object_removed_by_user_with_name: "[Type] entfernt von [user]: [name]."
 log_object_removed_no_user: "[Type] entfernt."
@@ -1011,8 +1013,11 @@ runtime_dates_must_be_same_format:  If you give two dates, they must be the same
 runtime_description_added_admin:  Gave admin permission to [name].
 runtime_description_added_reader:  Gave view permission to [name].
 runtime_description_added_writer:  Gave edit permission to [name].
+runtime_description_copy_success:  Successfully copied the description.
 runtime_description_merge_delete_denied:  You don't have permission to delete the old description.
 runtime_description_merge_deleted:  "The old description was deleted: [old]"
+runtime_description_merge_success:  Successfully merged the descriptions.
+runtime_description_move_success:  Successfully moved the description.
 runtime_description_private:  That description is private!
 runtime_description_removed_admin:  Revoked admin permission for [name].
 runtime_description_removed_reader:  Revoked view permission for [name].
@@ -1171,9 +1176,10 @@ runtime_description_merge_conflict:  >
   the operation at any time without making any changes.  When you are finished,
   be sure to destroy the old description.
 
-runtime_description_merge_success:  >
-  Successfully merged the descriptions.  The old description has been
-  destroyed: [old].
+runtime_description_move_invalid_classification:  >
+  The classification has incorrect syntax.  We can't save a new description
+  with it like this, so we've temporarily blanked out the classification field
+  until you correct it.
 
 runtime_description_must_be_admin:  >
   You must be an admin for a description to use this feature.
@@ -1910,7 +1916,7 @@ form_naming_name_help: >
 
 form_naming_deprecated_help: Wähle einen gültigen Namen oder klicke auf '[button]', um den Namen '[name]' zu verwenden.
 form_naming_correct_help:  >
-  ¿Te refieres a uno de los siguientes nombres? [:form_naming_deprecated_help]
+  Did you mean one of the following names? [:form_naming_deprecated_help]
 
 form_naming_not_recognized_help: >
   Klicke auf '[button]', um diesen Namen neu anzulegen, oder korrigiere
@@ -2909,10 +2915,27 @@ make_report_not_supported: Report-Dateien des Typs *.[type] werden nicht unterst
 
 
 # description/merge_descriptions
-merge_descriptions_title:  Merge [object] Into Another Description
-merge_descriptions_header:  Other Descriptions
-merge_descriptions_no_others:  "(there is only the one description)"
+merge_descriptions_title:  Merge [object]
+merge_descriptions_merge_header:  Merge with another description
+merge_descriptions_move_header:  Move / copy to a synonym
+merge_descriptions_merge:  "[:MERGE]"
+merge_descriptions_move:  "Move / Copy"
+merge_descriptions_merge_or_move:  "Merge / Move / Copy"
+merge_descriptions_no_others:  "(there are no other descriptions)"
 merge_descriptions_delete_after:  "Delete old description after merge?"
+merge_descriptions_merge_help:  >
+  This will copy any non-blank sections from the source description into the
+  description you select below.  If the target description already has text in
+  any of those fields, you will be given an editing form with the text from
+  both descriptions.  This will allow you to reconcile any conflicts by hand
+  before saving the form and making the merger official.
+
+merge_descriptions_move_help:  >
+  This will move the source description into a synonym.  It will just copy it
+  if you elect not to delete the old description.  If you wish to merge with an
+  existing description in the other name, you must first move your description
+  into that name, then select [:show_description_merge] again from there. 
+
 
 
 # name/bulk_name_edit

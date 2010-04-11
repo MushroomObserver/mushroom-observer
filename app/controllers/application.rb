@@ -659,8 +659,8 @@ class ApplicationController < ActionController::Base
   #   end
   #
   def flash_object_errors(obj)
-    if obj && obj.errors && obj.errors.length > 0
-      flash_error obj.formatted_errors.join("<br/>")
+    if obj && obj.errors && (obj.errors.length > 0)
+      flash_error(obj.formatted_errors.join("<br/>"))
     end
   end
 

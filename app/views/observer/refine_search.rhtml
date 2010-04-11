@@ -75,7 +75,7 @@
             content_tag(:b, label) : label %></label>
         </td>
         <td width="1"><%= indent %></td>
-        <td<%= @errors.include?(field.name) ?
+        <td width="1"<%= @errors.include?(field.name) ?
                          ' class="has_error"' : '' %>>
           <%= result = []
           case field.input

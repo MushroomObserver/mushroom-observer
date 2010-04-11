@@ -804,6 +804,8 @@ log_object_destroyed_by_user_with_name: "[Type] borrado por [user]: [name]."
 log_object_destroyed_no_user: "[Type] borrado."
 log_object_merged_by_user: "Fusionado [from] en [to] por [user]."
 log_object_merged_no_user: "Fusionado [from] en [to]."
+log_object_moved_by_user: "Trasladado [from] a [to] por [user]."
+log_object_moved_no_user: "Trasladado [from] a [to]."
 log_object_removed_by_user: "[Type] eliminado por [user]."
 log_object_removed_by_user_with_name: "[Type] eliminado por [user]: [name]."
 log_object_removed_no_user: "[Type] eliminado."
@@ -1011,9 +1013,12 @@ runtime_dates_must_be_same_format: Si usted le da dos fechas, que debe ser el mi
 runtime_description_added_admin: Dio permisos de admin a [name].
 runtime_description_added_reader: Dio permisos de lectura a [name].
 runtime_description_added_writer: Dio permisos de escritura a [name].
+runtime_description_copy_success: Copiado la descripción con éxito.
 runtime_description_merge_delete_denied: Usted no tiene permiso para eliminar la descripción de edad.
 runtime_description_merge_deleted: "La descripción de edad se ha eliminado: [old]"
-runtime_description_private: That description is private!
+runtime_description_merge_success: Fusionado las descripciones con éxito.
+runtime_description_move_success: Trasladado la descripción con éxito.
+runtime_description_private: Esta descripción es privado!
 runtime_description_removed_admin: Revocó permisos de admin para [name].
 runtime_description_removed_reader: Revocó permisos de lectura para [name].
 runtime_description_removed_writer: Revocó permisos de escritura para [name].
@@ -1173,9 +1178,10 @@ runtime_description_merge_conflict: >
   ningún cambio.  Cuando haya terminado, asegúrese de destruir la descripción
   de edad.
 
-runtime_description_merge_success: >
-  Fusionaron con éxito las descripciones. La descripción de edad ha sido
-  destruido: [old].
+runtime_description_move_invalid_classification: >
+  La clasificación tiene una sintaxis incorrecta.  No podemos salvar una nueva
+  descripción con ella como esta, por lo que hemos eliminadas temporalmente el
+  campo de clasificación hasta que la corrige.
 
 runtime_description_must_be_admin: >
   Usted debe ser un administrador para una descripción para utilizar esa
@@ -1935,7 +1941,7 @@ form_naming_deprecated_help: >
   Elegir un nombre aceptado o hacer clic en «[button]» para
   utilizar «[name]».
 
-form_naming_correct_help:  >
+form_naming_correct_help: >
   ¿Te refieres a uno de los siguientes nombres? [:form_naming_deprecated_help]
 
 form_naming_not_recognized_help: >
@@ -2961,10 +2967,29 @@ make_report_not_supported: El tipo de archivo «*.[type]» no es compatible.
 
 
 # description/merge_descriptions
-merge_descriptions_title: Fusionar [object] con Otra Descripción
-merge_descriptions_header: Otras Descripciones
+merge_descriptions_title: Fusionar [object]
+merge_descriptions_merge_header: Fusionar con un otra descripción
+merge_descriptions_move_header: Mover o copiar a un sinónimo
+merge_descriptions_merge: "[:MERGE]"
+merge_descriptions_move: "Mover / Copiar"
+merge_descriptions_merge_or_move: "Fusionar / Mover / Copiar"
 merge_descriptions_no_others: "(soló hay una descripción)"
 merge_descriptions_delete_after: ¿Desea eliminar la descripción de edad después?
+merge_descriptions_merge_help: >
+  Esto copiará todas los campos que no están en blanco en la descripción de
+  fuente a la descripción que usted seleccione a continuación.  Si la
+  descripción de destino ya tiene texto en cualquier de estos campos, se le
+  dará un formulario de edición con el texto de ambas descipciones.  Esto le
+  permitirá conciliar cualquier conflicto por la mano antes de guardar la forma
+  y la oficialización de la fusión.
+
+merge_descriptions_move_help: >
+  Esto moverá la descripción de fuente a un sinónimo.  Simplemente lo copia si
+  opta por no eliminar la descripción de edad.  Si desea fusionarse con una
+  descripción existente en el otro nombre, primero debe mover su descripción en
+  ese nombre, a continuación, seleccione [:show_description_merge] de nuevo
+  desde allí.
+
 
 
 # name/bulk_name_edit

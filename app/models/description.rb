@@ -84,7 +84,7 @@ class Description < AbstractModel
   # Aliases for location / name.
   def parent;        self.send(parent_type);             end
   def parent_id;     self.send("#{parent_type}_id");     end
-  def parent=(x);    self.send("#{parent_type}", x);     end
+  def parent=(x);    self.send("#{parent_type}=", x);    end
   def parent_id=(x); self.send("#{parent_type}_id=", x); end
 
   # Return parent's class name in lowercase, e.g. 'name' or 'location'.

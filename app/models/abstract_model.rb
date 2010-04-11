@@ -299,15 +299,15 @@ class AbstractModel < ActiveRecord::Base
   #   obj.errors.add(:attr, "message").
   def formatted_errors
     out = []
-    self.errors.each { |attr, msg|
+    self.errors.each do |attr, msg|
       if msg.match(/^[A-Z]/)
         out << msg
       else
-        name = attr.to_s.gsub(/_/, " ")
-        obj = self.class.to_s.gsub(/_/, " ")
+        name = attr.to_s.to_sym.l
+        obj = self.type_tag.to_s.capitalize_first.to_sym.l
         out << "#{obj} #{name} #{msg}."
       end
-    }
+    end
     return out
   end
 
