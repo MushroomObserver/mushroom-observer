@@ -98,6 +98,7 @@ class ApplicationController < ActionController::Base
   include LoginSystem
 
   around_filter :catch_errors if TESTING
+  before_filter :fix_bad_domains
   before_filter :browser_status
   before_filter :autologin
   before_filter :set_locale
@@ -111,6 +112,30 @@ class ApplicationController < ActionController::Base
     yield
   rescue => e
     @error = e
+  end
+
+  # Redirect from www.mo.org to mo.org.
+  #
+  # This would be much easier to check if HTTP_HOST != DOMAIN, but if this ever
+  # were to break we'd get into an infinite loop too easily that way.  I think
+  # this is a lot safer.  BAD_DOMAINS would be something like: 
+  #
+  #   BAD_DOMAINS = [
+  #     'www.mushroomobserver.org',
+  #     'mushroomobserver.com',
+  #   ]
+  #
+  # The importance of this is that browsers are storing different cookies
+  # for the different domains, even though they are all getting routed here.
+  # This is particularly problematic when a fully-specified link in, say,
+  # a comment's body is different.  This results in you having to re-login
+  # when you click on these embedded links.
+  #
+  def fix_bad_domains
+    if (request.method == :get) and
+       BAD_DOMAINS.include?(request.env['HTTP_HOST'])
+      redirect_to("#{HTTP_DOMAIN}#{request.request_uri}")
+    end
   end
 
   ##############################################################################

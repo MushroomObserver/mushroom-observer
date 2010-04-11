@@ -17,6 +17,7 @@ DOMAIN       = 'localhost'                               if !defined? DOMAIN
 MAIL_DOMAIN  = "mail.#{DOMAIN}"                          if !defined? MAIL_DOMAIN
 HTTP_DOMAIN  = "http://#{DOMAIN}:3000"                   if !defined? HTTP_DOMAIN
 IMAGE_DOMAIN = "#{HTTP_DOMAIN}/images"                   if !defined? IMAGE_DOMAIN
+BAD_DOMAINS  = ['localhost.localdomain:3000']            if !defined? BAD_DOMAINS
 
 # Where images are kept.
 IMG_DIR      = "#{RAILS_ROOT}/public/images"             if !TESTING && !defined? IMG_DIR
