@@ -2180,7 +2180,7 @@ class ObserverController < ApplicationController
     valid_name = nil
 
     what2 = what.to_s.gsub('_', ' ').strip_squeeze
-    if !what2.empty? && !Name.names_for_unknown.member?(what2.downcase)
+    if !what2.blank? && !Name.names_for_unknown.member?(what2.downcase)
       success = false
 
       ignore_approved_name = false
@@ -2199,13 +2199,19 @@ class ObserverController < ApplicationController
       # Create temporary name object for it.  (This will not save anything
       # EXCEPT in the case of user supplying author for existing name that
       # has no author.)
-      if names.length == 0
-        names = [create_needed_names(approved_name, what2)]
+      if names.empty? and
+         (name = create_needed_names(approved_name, what2))
+        names << name
       end
 
-      target_name = names.first
-      names = [] if !target_name
-      if target_name && names.length == 1
+      # No matches -- suggest some correct names to make Debbie happy.
+      if names.empty?
+        valid_names = guess_correct_name(what2)
+        @suggest_corrections = true
+
+      # Only one match (or we just created an approved new name).
+      elsif names.length == 1
+        target_name = names.first
         # Single matching name.  Check if it's deprecated.
         if target_name.deprecated and (ignore_approved_name or (approved_name != what))
           # User has not explicitly approved the deprecated name: get list of
@@ -2222,17 +2228,21 @@ class ObserverController < ApplicationController
           # (This is the only way to get out of here with success.)
           success = true
         end
-      elsif names.length > 1 && names.reject {|n| n.deprecated}.empty?
-        # Multiple matches, all of which are deprecated.  Check if they all
-        # have the same set of approved names.  Pain in the butt, but otherwise
-        # can get stuck choosing between Helvella infula Fr. and H. infula
-        # Schaeff. without anyone mentioning that both are deprecated by
-        # Gyromitra infula.
-        valid_set = Set.new()
-        for n in names
-          valid_set.merge(n.approved_synonyms)
+
+      # Multiple matches.
+      elsif names.length > 1
+        if names.reject {|n| n.deprecated}.empty?
+          # Multiple matches, all of which are deprecated.  Check if they all
+          # have the same set of approved names.  Pain in the butt, but otherwise
+          # can get stuck choosing between Helvella infula Fr. and H. infula
+          # Schaeff. without anyone mentioning that both are deprecated by
+          # Gyromitra infula.
+          valid_set = Set.new()
+          for n in names
+            valid_set.merge(n.approved_synonyms)
+          end
+          valid_names = valid_set.sort_by(&:search_name)
         end
-        valid_names = valid_set.sort_by(&:search_name)
       end
     end
 

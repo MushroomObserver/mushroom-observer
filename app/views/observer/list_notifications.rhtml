@@ -6,6 +6,8 @@
     add_tab(:show_user_edit_profile.t, :controller => "account", :action => "profile")
     add_tabs(@links)
   end
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <% if @notifications.length > 0 %>

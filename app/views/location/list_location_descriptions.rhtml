@@ -7,10 +7,7 @@
     add_tabs(@links)
   end
 
-  if @objects == []
-    @error ||= :runtime_location_description_index_no_matches.t
-    flash_error @error
-  end
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <% paginate_block(@pages) do %>

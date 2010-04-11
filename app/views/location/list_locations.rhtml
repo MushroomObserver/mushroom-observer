@@ -10,10 +10,9 @@
   @known_pages = @pages
   @known_data = @objects
 
-  if (!@known_pages || @known_pages.length == 0) and
-     (!@undef_pages || @undef_pages.length == 0)
-    @error ||= :runtime_no_matches.t(:type => :location)
-    flash_error @error
+  if (!@known_pages or @known_pages.empty?) and
+     (!@undef_pages or @undef_pages.empty?)
+    flash_error(@error) if @error
   end
 %>
 

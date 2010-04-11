@@ -1,43 +1,8 @@
 <!--[form:naming]-->
 
-<%# Section for handling deprecated, new and multiple names on naming creation and edit pages %>
-<% if !@what.blank? %>
-  <% if @valid_names %>
-    <div class="Errors">
-      <span class="Data"><%= :form_naming_deprecated.t(:name => @what) %></span><br/>
-      <% if @valid_names.length > 0 %>
-        <span class="HelpNote"><%= :form_naming_deprecated_help.t(:button => button_name, :name => @what) %></span><br/>
-        <span class="Data"><%= :form_naming_valid_synonyms.t %>:<br/>
-          <% for n in @valid_names %>
-            <%= indent + radio_button('chosen_name', 'name_id', n.id) %>
-            <%= n.display_name.t %><br/>
-          <% end %>
-        </span>
-      <% else %>
-        <span class="HelpNote"><%= :form_naming_not_recognized_help.t(:button => button_name) %></span><br/>
-      <% end %>
-    </div>
-  <% elsif @names && @names.length == 0 %>
-    <div class="Errors">
-      <span class="Data"><%= :form_naming_not_recognized.t(:name => @what) %></span><br/>
-      <span class="HelpNote"><%= :form_naming_not_recognized_help.t(:button => button_name) %></span><br/>
-    </div>
-  <% elsif @names && @names.length > 1 %>
-    <div class="Errors">
-      <span class="Data"><%= :form_naming_multiple_names.t(:name => @what) %>:<br/>
-        <% for n in @names %>
-          <%= indent + radio_button('chosen_name', 'name_id', n.id) %>
-          <%= n.display_name.t %>
-            (<%= n.observations.size %>)<br/>
-        <% end %>
-      </span>
-      <span class="HelpNote"><%= :form_naming_multiple_names_help.t %></span><br/>
-    </div>
-  <% end %>
-<% end %>
-
 <%# -------------------- Name Autocompleter -------------------- %>
-
+<%= render(:partial => 'shared/form_name_feedback',
+           :locals => { :button_name => button_name }) %>
 <div style="white-space:nowrap">
   <label for="name_name"><%= :WHAT.t %>:</label>
   <%= text_field('name', 'name', :value => @what) %>
@@ -54,7 +19,6 @@
   :onChange => %( function(v) { if (v && v != "") Element.show('reasons_div') } )) %>
  
 <%# -------------------- Naming Reasons -------------------- %>
-
 <%=
   html = "<br/>"
   for r in @reason.values.sort_by(&:order)
@@ -86,7 +50,6 @@
 %>
 
 <%= hidden_field_tag("was_js_on", "yes") if can_do_ajax? %>
-
 <%= focus_on('name_name') %>
 
 <!--[eoform:naming]-->

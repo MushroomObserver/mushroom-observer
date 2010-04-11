@@ -29,6 +29,7 @@ module RefineSearch
     attr_accessor :blank      # Include blank in menu?
     attr_accessor :num        # Number of fields to include if variable.
     attr_accessor :word       # Word in between pairs of texts / menus.
+    attr_accessor :or_equal   # Include "=" in [field] < word < [field] lines?
     attr_accessor :format     # Formatter: method name or Proc. (if != :parse)
     attr_accessor :parse      # Parser: method name or Proc.
     attr_accessor :declare    # Original declaration from Query.
@@ -257,6 +258,7 @@ module RefineSearch
       :label => :refine_search_confidence,
       :input => :menu2,
       :word  => :VOTE.t,
+      :or_equal => true,
       :opts  => Vote.confidence_menu.map {|a,b| [a.l,b.to_s]},
       :blank => true
     )
@@ -311,6 +313,7 @@ module RefineSearch
       :label  => :refine_search_created,
       :input  => :text2,
       :word   => :TIME.t,
+      :or_equal => true,
       :parse  => :time2
     )
   end
@@ -321,6 +324,7 @@ module RefineSearch
       :label  => :"refine_search_date_#{model.to_s.underscore}",
       :input  => :text2,
       :word   => :DATE.t,
+      :or_equal => true,
       :parse  => :date2
     )
   end
@@ -515,6 +519,7 @@ module RefineSearch
         :label  => :refine_search_rss_modified,
         :input  => :text2,
         :word   => :TIME.t,
+        :or_equal => true,
         :parse  => :time2
       )
     else
@@ -523,6 +528,7 @@ module RefineSearch
         :label  => :refine_search_modified,
         :input  => :text2,
         :word   => :TIME.t,
+        :or_equal => true,
         :parse  => :time2
       )
     end
@@ -621,6 +627,7 @@ module RefineSearch
       :label => :refine_search_quality,
       :input => :menu2,
       :word  => :QUALITY.t,
+      :or_equal => true,
       :opts  => Image.all_votes.map do |x|
         [:"image_vote_short_#{x}".l, x.to_s]
       end,
@@ -634,6 +641,7 @@ module RefineSearch
       :label => :refine_search_size,
       :input => :menu2,
       :word  => :refine_search_max_size.t,
+      :or_equal => true,
       :opts  => (Image.all_sizes - [:full_size]).map do |x|
         [:"image_show_#{x}".l, x.to_s]
       end,

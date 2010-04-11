@@ -94,6 +94,9 @@ class MOPaginator
   alias page number
   alias length num_total
 
+  def blank?; num_total == 0; end
+  def empty?; num_total == 0; end
+
   # Create and initialize new instance.
   def initialize(args={})
     args.each do |key, val|

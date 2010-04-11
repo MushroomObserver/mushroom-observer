@@ -6,10 +6,7 @@
     add_tabs(@links)
   end
 
-  if @objects == []
-    @error ||= :runtime_name_index_no_matches.t(:type => :name)
-    flash_error @error
-  end
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <%= @help.tp if @help %>
@@ -26,8 +23,15 @@ args = @test_pagination_args || {} %>
           <td><%= link_to(name.observation_name.t, :action => 'show_name',
                           :id => name.id, :params => query_params) %></td>
           <% if @extra_data %>
-            <% for val in @extra_data[name.id] || [] %>
-              <td><%= val %></td>
+            <% data = @extra_data[name.id]
+            if data && !data.empty?
+              for val in @extra_data[name.id] || [] %>
+                <td><%= val %></td>
+              <% end
+            else %>
+              <td align="center" colspan="3" style="letter-spacing:0.5em">
+                --- not the default ---
+              </td>
             <% end %>
           <% end %>
         </tr>

@@ -87,7 +87,8 @@
             result << form.text_field("#{name}_1", :size => 18)
             result << indent(2)
             if field.word
-              result << "&lt; #{field.word} &lt;".nowrap
+              op = '&lt;' + (field.or_equal ? '=' : '')
+              result << "#{op} #{field.word} #{op}".nowrap
               result << indent(2)
             end
             result << form.text_field("#{name}_2", :size => 18)
@@ -115,7 +116,8 @@
             result << form.select(name1, field.opts, args)
             result << indent(2)
             if field.word
-              result << "&lt; #{field.word} &lt;".nowrap
+              op = '&lt;' + (field.or_equal ? '=' : '')
+              result << "#{op} #{field.word} #{op}".nowrap
               result << indent(2)
             end
             result << form.select(name2, field.opts, args)

@@ -1935,6 +1935,9 @@ form_naming_deprecated_help: >
   Elegir un nombre aceptado o hacer clic en «[button]» para
   utilizar «[name]».
 
+form_naming_correct_help:  >
+  ¿Te refieres a uno de los siguientes nombres? [:form_naming_deprecated_help]
+
 form_naming_not_recognized_help: >
   Hacer clic en «[button]» para crear este nombre, o editar el
   nombre por bajo para corregirlo.
@@ -4661,4 +4664,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

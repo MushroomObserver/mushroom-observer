@@ -1909,6 +1909,9 @@ form_naming_name_help: >
   die Datenbank übernehmen oder ggf. Tippfehler korrigieren.
 
 form_naming_deprecated_help: Wähle einen gültigen Namen oder klicke auf '[button]', um den Namen '[name]' zu verwenden.
+form_naming_correct_help:  >
+  ¿Te refieres a uno de los siguientes nombres? [:form_naming_deprecated_help]
+
 form_naming_not_recognized_help: >
   Klicke auf '[button]', um diesen Namen neu anzulegen, oder korrigiere
   ggf. Tippfehler unten.
@@ -4437,4 +4440,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-

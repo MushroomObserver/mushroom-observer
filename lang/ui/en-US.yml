@@ -1911,6 +1911,9 @@ form_naming_name_help: >
 form_naming_deprecated_help: >
   Select a valid name or click '[button]' to use '[name]'.
 
+form_naming_correct_help: >
+  Did you mean one of the following names? [:form_naming_deprecated_help]
+
 form_naming_not_recognized_help: >
   Click '[button]' to create this name or edit the name below to correct any
   typo.

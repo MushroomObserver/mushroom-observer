@@ -247,7 +247,9 @@ class NameController < ApplicationController
         if desc = name.description
           [ desc.authors.map(&:login).join(', '),
             desc.note_status.map(&:to_s).join('/'),
-            desc.review_status.t ]
+            :"review_#{desc.review_status}".t ]
+        else
+          []
         end
       end
     else
@@ -1143,14 +1145,19 @@ class NameController < ApplicationController
         else
           @names = Name.find_names(@what)
         end
-        if @names.length == 0 &&
-          new_name = create_needed_names(params[:approved_name], @what)
+        if @names.empty? and
+           (new_name = create_needed_names(params[:approved_name], @what))
           @names = [new_name]
         end
         target_name = @names.first
 
+        # No matches: try to guess.
+        if @names.empty?
+          @valid_names = guess_correct_name(@what)
+          @suggest_corrections = true
+
         # If written-in name matches uniquely an existing name:
-        if target_name && @names.length == 1
+        elsif target_name && @names.length == 1
           now = Time.now
 
           # Merge this name's synonyms with the preferred name's synonyms.

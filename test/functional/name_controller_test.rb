@@ -441,6 +441,31 @@ class NameControllerTest < FunctionalTestCase
                         :test_anchor => 'blah', :anchor => 'blah')
   end
 
+  def test_name_guessing
+    def create_needed_names(str)
+      @controller.create_needed_names(str, str)
+    end
+
+    # Not all the genera actually have records in our test database.
+    User.current = @rolf
+    @controller.instance_variable_set('@user', @rolf)
+    create_needed_names('Agaricus')
+    create_needed_names('Pluteus')
+    create_needed_names('Coprinus comatus subsp. bogus var. varietus')
+
+    def guess_correct_name(str)
+      results = @controller.guess_correct_name(str)
+      assert_block("Couldn't guess #{str.inspect}.") { results.any? }
+    end
+
+    guess_correct_name('Agricus')
+    guess_correct_name('Ptligera')
+    guess_correct_name(' plutues _petastus  ')
+    guess_correct_name('Coprinis comatis')
+    guess_correct_name('Coprinis comatis blah. boggle')
+    guess_correct_name('Coprinis comatis blah. boggle var. varitus')
+  end
+
   # ----------------------------
   #  Maps
   # ----------------------------

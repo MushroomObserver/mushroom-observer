@@ -7,6 +7,8 @@
   links = {
     :comments => url_for(:controller => 'comment',
                               :action => 'show_comments_by_user', :id => id),
+    :comments_for => url_for(:controller => 'comment',
+                              :action => 'show_comments_for_user', :id => id),
     :images => url_for(:controller => 'image', :action => 'images_by_user',
                               :id => id),
     :location_descriptions_authors => url_for(:controller => 'location',
@@ -36,7 +38,7 @@
             :action => 'users_by_contribution')
     if @show_user == @user
       add_tab(:show_user_your_observations.t, links[:observations])
-      add_tab(:show_user_comments_for_you.t, links[:comments])
+      add_tab(:show_user_comments_for_you.t, links[:comments_for])
       add_tab(:show_user_your_notifications.t, :controller => "interest",
               :action => "list_interests")
       add_tab(:show_user_edit_profile.t, :controller => "account",
@@ -44,7 +46,7 @@
       add_tab(:app_preferences.t, :controller => "account", :action => "prefs")
     else
       add_tab(:show_user_observations_by.t(:name => name), links[:observations])
-      add_tab(:show_user_comments_for.t(:name => name), links[:comments])
+      add_tab(:show_user_comments_for.t(:name => name), links[:comments_for])
       add_tab(:show_user_email_to.t(:name => name), :controller => "observer",
               :action => "ask_user_question", :id => id)
     end

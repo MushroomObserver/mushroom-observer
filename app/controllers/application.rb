@@ -52,6 +52,7 @@
 #  flash_object_errors::    Add all errors for a given instance.
 #
 #  ==== Name validation
+#  guess_correct_name::       Check for alternative spellings of misspelt names.
 #  create_needed_names::      Creates the given name if it's been approved.
 #  construct_approved_names:: Creates a list of names if they've been approved.
 #  construct_approved_name::  (helper)
@@ -644,18 +645,114 @@ class ApplicationController < ActionController::Base
   #
   ##############################################################################
 
+  # Do some simple queries to try to find alternate spellings of the given
+  # (incorrectly-spelled) name.
+  def guess_correct_name(name)
+    results = []
+
+    # Do some really basic pre-parsing, stripping off author and spuh.
+    name = name.gsub('_',' ').strip_squeeze.capitalize_first
+    name = name.sub(/ sp\.?$/, '')
+    name = Name.parse_author(name).first # (strip author off)
+
+    # Guess genus first, then species, and so on.
+    if name
+      words = name.split
+      num = words.length
+      results = guess_correct_word('', words.first)
+      for i in 2..num
+        if results.any?
+          if (i & 1) == 0
+            prefixes = results.map(&:text_name).uniq
+            results = []
+            word = (i == 2) ? words[i-1] : "#{words[i-2]} #{words[i-1]}"
+            for prefix in prefixes
+              results |= guess_correct_word(prefix, word)
+            end
+          end
+        end
+      end
+    end
+
+    return results
+  end
+
+  # Guess correct name of partial string.
+  def guess_correct_word(prefix, word) # :nodoc:
+    str = "#{prefix} #{word}"
+    results = guess_correct_try(str, 1)
+    results = guess_correct_try(str, 2)
+    results = guess_correct_try(str, 3) if results.empty?
+    return results
+  end
+
+  # Look up name replacing n letters at a time with a star.
+  def guess_correct_try(name, n) # :nodoc:
+    patterns = []
+
+    # Restrict search to names close in length.
+    a = name.length - 2
+    b = name.length + 2
+
+    # Create a bunch of SQL "like" patterns.
+    name = name.gsub(/ \w+\. /, ' % ')
+    words = name.split
+    for i in 0..(words.length-1)
+      word = words[i]
+      if word != '%'
+        if word.length < n
+          patterns << guess_correct_pattern(words, i, '%')
+        else
+          for j in 0..(word.length-n)
+            sub = ''
+            sub += word[0..(j-1)] if j > 0
+            sub += '%'
+            sub += word[(j+n)..(-1)] if j + n < word.length
+            patterns << guess_correct_pattern(words, i, sub)
+          end
+        end
+      end
+    end
+
+    # Create SQL query out of these patterns.
+    conds = patterns.map do |pat|
+      "text_name LIKE '#{pat}'"
+    end.join(' OR ')
+    conds = "(LENGTH(text_name) BETWEEN #{a} AND #{b}) AND (#{conds})"
+    names = Name.all(:conditions => conds, :limit => 10)
+
+    # Screen out ones way too different.
+    names = names.reject do |x|
+      (x.text_name.length < a) or
+      (x.text_name.length > b)
+    end
+
+    return names
+  end
+
+  # String words together replacing the one at index +i+ with +sub+.
+  def guess_correct_pattern(words, i, sub) # :nodoc:
+    result = []
+    for j in 0..(words.length-1)
+      result << (i == j ? sub : words[j])
+    end
+    return result.join(' ')
+  end
+
   # This is called by +create_name_helper+ (used by +create_observation+,
   # +create_naming+, and +edit_naming+) and +deprecate_name+.  It creates a new
   # name, first checking if it is a valid name, and that it has been approved
   # by the user.  Uses <tt>Name.names_from_string(@what)</tt> to do the
   # parsing.
   #
-  # Inputs:
-  #
-  #   input_what    params[:approved_name]  (name that user typed before
-  #                 getting the "this name not recognized" message)
-  #   output_what   @what (name after "this name not recognized" message,
-  #                 must be the same or it is not "approved")
+  # input_what::   params[:approved_name] (name that user typed before
+  #                getting the "this name not recognized" message)
+  # output_what::  @what (name after "this name not recognized" message,
+  #                must be the same or it is not "approved")
+  # 
+  # Returns +nil+ if user hasn't approved the name.  If approved, it creates
+  # and returns a new Name record (saved).
+  #   
   def create_needed_names(input_what, output_what)
     result = nil
     if input_what == output_what

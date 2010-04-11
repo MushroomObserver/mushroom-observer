@@ -28,6 +28,8 @@
 
   custom_tab_set(form)
   new_tab_set(@links)
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
 %>
 
 <% paginate_block(@pages) do %>
