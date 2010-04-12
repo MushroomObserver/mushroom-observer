@@ -103,7 +103,7 @@ while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
 
 # Do we need to convert the original to a JPEG?
 if [[ $orig != $full ]]; then
-  run convert -thumbnail -quality 70 $orig $full
+  run convert -quality 70 $orig $full
 
   # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
   # Take the first one, and delete the rest.
