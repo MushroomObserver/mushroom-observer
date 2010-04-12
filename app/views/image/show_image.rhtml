@@ -84,7 +84,8 @@
       <p>
         <%= :image_show_quality.t %>:
         <span class="Data">
-          <%= image_vote_as_long_string((@image.vote_cache + 0.5).to_i).t %>
+          <%= vote = (@image.vote_cache + 0.5).to_i rescue 0
+          image_vote_as_long_string(vote).t %>
         </span>
       </p>
 
