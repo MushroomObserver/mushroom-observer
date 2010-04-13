@@ -11,25 +11,33 @@
 require 'config/boot'
 require 'config/environment'
 
+file = ARGV[0]
+puts "Getting corrections from #{file}..."
+
 groups = [[]]
-$stdin.each_line do |line|
-  line.chomp!
-  if line.blank?
-    groups << [] if groups.last != []
-  elsif line.match(/^(\*)?(\d+)\t(.*)/)
-    groups.last << [$2, $3, $1 == '*']
+File.open(file) do |fh|
+  fh.each_line do |line|
+    line.chomp!
+    if line.blank?
+      groups << [] if groups.last != []
+    elsif line.match(/^(\*)?(\d+)\t(.*)/)
+      groups.last << [$2, $3, $1 == '*']
+    end
   end
 end
 
+puts "Pushing corrections into database..."
 for group in groups
-  correct = nil
+  correct_id = nil
   for id, name, legit in group
     if legit
-      correct = id
+      correct_id = id
+      correct_name = name
     elsif correct
+      puts "#{name} (#{id}) --> #{correct_name} (#{correct_id})"
       Name.connection.update %(
         UPDATE names
-        SET correct_spelling_id = #{correct}, deprecated = 1
+        SET correct_spelling_id = #{correct_id}, deprecated = 1
         WHERE id = #{id}
       )
     end
