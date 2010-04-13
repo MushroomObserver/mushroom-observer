@@ -1,5 +1,4 @@
 <td width="100%">
-
   <p>
     <%= :CREATED.t %>:
       <span class="Data"><%= comment.created.web_time %></span><br/>
@@ -19,12 +18,12 @@
   </p>
 
   <%= sanitize(comment.comment).tpl %>
+</td>
 
+<td>
   <% user = comment.user
   if user.image_id %>
-    </td><td>
     <%= thumbnail(user.image_id, :border => 0, :size => :thumbnail,
                  :link => :show_user, :user => user.id, :votes => false) %>
   <% end %>
-
 </td>
