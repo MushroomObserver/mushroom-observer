@@ -792,7 +792,7 @@ log_name_approved: "[User] fand [other] weniger gut."
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
 log_name_deprecated: "[User] fand [other] besser."
 log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
-log_name_merged: Name mit [name] verbunden.
+log_name_merged: "[This] mit [that] verbunden."
 log_object_added_by_user: "[Type] hinzugefügt von [user]."
 log_object_added_by_user_with_name: "[Type] hinzugefügt von [user]: [name]."
 log_object_added_no_user: "[Type] hinzugefügt."

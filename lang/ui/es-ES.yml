@@ -792,7 +792,7 @@ log_name_approved: Aprobado por [user] sobre [other].
 log_name_approved_with_comment: "[:log_name_approved] [comment]"
 log_name_deprecated: Desaprobado por [user] en favor de [other].
 log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
-log_name_merged: Nombre fusionó con [name].
+log_name_merged: "[This] fusionó con [that]."
 log_object_added_by_user: "[Type] agregado por [user]."
 log_object_added_by_user_with_name: "[Type] agregado por [user]: [name]."
 log_object_added_no_user: "[Type] agregado."
