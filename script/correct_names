@@ -1,0 +1,38 @@
+#!/usr/bin/ruby
+
+# Expects output as from script/find_misspellings.
+# Done in two parts to give the human operator a chance to verify changes.
+#
+#   script/find_misspellings > x
+#   vi x
+#   cat x | script/correct_names
+#
+
+require 'config/boot'
+require 'config/environment'
+
+groups = [[]]
+$stdin.each_line do |line|
+  line.chomp!
+  if line.blank?
+    groups << [] if groups.last != []
+  elsif line.match(/^(\*)?(\d+)\t(.*)/)
+    groups.last << [$2, $3, $1 == '*']
+  end
+end
+
+for group in groups
+  correct = nil
+  for id, name, legit in group
+    if legit
+      correct = id
+    elsif correct
+      Name.connection.update %(
+        UPDATE names
+        SET correct_spelling_id = #{correct}, deprecated = 1
+        WHERE id = #{id}
+      )
+    end
+  end
+end
+
