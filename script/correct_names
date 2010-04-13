@@ -33,7 +33,7 @@ for group in groups
     if legit
       correct_id = id
       correct_name = name
-    elsif correct
+    elsif correct_id
       puts "#{name} (#{id}) --> #{correct_name} (#{correct_id})"
       Name.connection.update %(
         UPDATE names
