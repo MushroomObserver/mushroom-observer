@@ -2,6 +2,7 @@
 
 declare -x RUBYLIB="/usr/lib/ruby/site_ruby/1.8"
 declare -x GEM_HOME="/usr/lib/ruby/gems/1.8"
+declare -x RAILS_ENV="production"
 
 dir=/var/web/mo
 if [[ !(-d $dir) ]]; then
