@@ -251,7 +251,7 @@ class Description < AbstractModel
   def source_object
     case source_type
                     # (this may eventually be replaced with source_id)
-    when :project ; Project.find_by_title(source_name)
+    when :project ; project
     when :source  ; nil  # (haven't created "Source" model yet)
     when :user    ; user
     else            nil
@@ -261,7 +261,7 @@ class Description < AbstractModel
   # Does this Description belong to a given Project?
   def belongs_to_project?(project)
     (source_type == :project) and
-    (source_name == project.title)
+    (self.project_id == project.id)
   end
 
   ##############################################################################

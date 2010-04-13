@@ -52,6 +52,7 @@
 class LocationDescription < Description
   belongs_to :license
   belongs_to :location
+  belongs_to :project
   belongs_to :user
 
   has_many :comments,  :as => :object, :dependent => :destroy
@@ -76,8 +77,10 @@ class LocationDescription < Description
     'location_id',
     'num_views',
     'last_view',
+    'ok_for_export',
     'source_type',
     'source_name',
+    'project_id',
     'public',
     'locale'
   )

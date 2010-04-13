@@ -90,20 +90,7 @@
       </p>
 
       <% if is_reviewer? %>
-        <p>
-          <%= if @image.ok_for_export
-            content_tag(:b, :review_ok_for_export.t)
-          else
-            link_to(:review_ok_for_export.t, :set_export => 1,
-                    :params => query_params)
-          end %><br/>
-          <%= if @image.ok_for_export
-            link_to(:review_no_export.t, :set_export => 0,
-                    :params => query_params)
-          else
-            content_tag(:b, :review_no_export.t)
-          end %>
-        </p>
+        <p><%= set_export_status_controls(@image) %></p>
       <% end %>
 
       <% if @user %>

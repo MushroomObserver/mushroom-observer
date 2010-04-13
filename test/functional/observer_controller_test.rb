@@ -593,6 +593,44 @@ class ObserverControllerTest < FunctionalTestCase
     assert_user_list_equal([@rolf], desc.reload.authors)
   end
 
+  # Test setting export status of names and descriptions.
+  def test_set_export_status
+    name = names(:petigera)
+    params = {
+      :id => name.id,
+      :type => 'name',
+      :value => '1',
+    }
+
+    # Require login.
+    get('set_export_status', params)
+    assert_response(:controller => 'account', :action => 'login')
+
+    # Require reviewer.
+    login('dick')
+    get('set_export_status', params)
+    assert_flash_error
+    logout
+
+    # Require correct params.
+    login('rolf')
+    get('set_export_status', params.merge(:id => 9999))
+    assert_flash_error
+    get('set_export_status', params.merge(:type => 'bogus'))
+    assert_flash_error
+    get('set_export_status', params.merge(:value => 'true'))
+    assert_flash_error
+
+    # Now check *correct* usage.
+    assert_equal(true, name.reload.ok_for_export)
+    get('set_export_status', params.merge(:value => '0'))
+    assert_response(:controller => 'name', :action => 'show_name', :id => name.id)
+    assert_equal(false, name.reload.ok_for_export)
+    get('set_export_status', params.merge(:value => '1'))
+    assert_response(:controller => 'name', :action => 'show_name', :id => name.id)
+    assert_equal(true, name.reload.ok_for_export)
+  end
+
   # ------------------------------
   #  Test creating observations.
   # ------------------------------

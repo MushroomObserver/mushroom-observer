@@ -66,6 +66,7 @@
 class NameDescription < Description
   belongs_to :license
   belongs_to :name
+  belongs_to :project
   belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
   belongs_to :user
 
@@ -98,6 +99,7 @@ class NameDescription < Description
     'last_view',
     'source_type',
     'source_name',
+    'project_id',
     'public',
     'locale'
   )

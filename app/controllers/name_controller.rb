@@ -422,7 +422,7 @@ class NameController < ApplicationController
       else
         if @description.source_type == :project
           flash_error(:runtime_show_draft_denied.t)
-          if project = Project.find_by_title(@description.source_name)
+          if project = @description.project
             redirect_to(:controller => 'project', :action => 'show_project',
                         :id => project.id)
           else
@@ -505,20 +505,6 @@ class NameController < ApplicationController
     desc = NameDescription.find(id)
     if is_reviewer?
       desc.update_review_status(params[:value])
-    end
-    redirect_to(:action => 'show_name', :id => desc.name_id,
-                :params => query_params)
-  end
-
-  # Callback to let reviewers change the export status of a Name from the
-  # show_name page.
-  def set_export_status # :norobots:
-    pass_query_params
-    id = params[:id]
-    desc = NameDescription.find(id)
-    if is_reviewer?
-      desc.ok_for_export = params[:value]
-      desc.save_without_our_callbacks
     end
     redirect_to(:action => 'show_name', :id => desc.name_id,
                 :params => query_params)

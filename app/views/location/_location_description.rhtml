@@ -1,3 +1,7 @@
+<% if is_reviewer? %>
+  <p><%= set_export_status_controls(location_description) %></p>
+<% end %>
+
 <% even = true
 any = false
 desc = location_description

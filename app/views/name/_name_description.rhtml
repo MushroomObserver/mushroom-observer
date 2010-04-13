@@ -4,8 +4,8 @@
 %>
 
 <% if review %>
-  <% if !desc.ok_for_export %>
-    <%= :review_no_export.t %><br/>
+  <% if is_reviewer? %>
+    <%= set_export_status_controls(desc) %><br/>
   <% end %>
 
   <%= :show_name_content_status.t %>: <%= review_as_string(desc.review_status) %><br/>
@@ -28,15 +28,6 @@
     <%= indent + link_to(:review_inaccurate.t, :action => 'set_review_status',
                          :value => :inaccurate, :id => desc.id,
                          :params => query_params) %><br/>
-    <% if desc.ok_for_export %>
-      <%= indent + link_to(:review_no_export.t, :action => 'set_export_status',
-                           :value => false, :id => desc.id,
-                           :params => query_params) %><br/>
-    <% else %>
-      <%= indent + link_to(:review_ok_for_export.t, :action => 'set_export_status',
-                           :value => true, :id => desc.id,
-                           :params => query_params) %><br/>
-    <% end %>
   <% end %><br/>
 <% end %>
 

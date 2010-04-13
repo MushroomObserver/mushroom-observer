@@ -165,6 +165,7 @@ module DescriptionControllerHelpers
         :parent      => dest,
         :source_type => src.source_type,
         :source_name => src.source_name,
+        :project_id  => src.project_id,
         :locale      => src.locale,
         :public      => src.public,
         :license     => src.license,
@@ -201,6 +202,7 @@ module DescriptionControllerHelpers
           :parent      => desc,
           :source_type => desc.source_type,
           :source_name => desc.source_name,
+          :project     => desc.project,
           :locale      => desc.locale,
           :public      => desc.public,
           :license     => desc.license,
@@ -246,6 +248,7 @@ module DescriptionControllerHelpers
       else
         draft.source_type = :public
         draft.source_name = ''
+        draft.project     = nil
         draft.admin_groups.clear
         draft.admin_groups << UserGroup.reviewers
         draft.writer_groups.clear
@@ -261,6 +264,7 @@ module DescriptionControllerHelpers
           :id              => draft,
           :set_source_type => draft.source_type,
           :set_source_name => draft.source_name,
+          :set_project     => draft.project,
           :set_admins      => draft.admin_groups,
           :set_writers     => draft.writer_groups,
           :set_readers     => draft.reader_groups
@@ -424,6 +428,7 @@ module DescriptionControllerHelpers
       if @user.in_group?(project.user_group)
         desc.source_type  = :project
         desc.source_name  = project.title
+        desc.project      = project
         desc.public       = false
         desc.public_write = false
       else
@@ -440,6 +445,7 @@ module DescriptionControllerHelpers
         desc.all_notes = clone.all_notes
         desc.source_type  = :user
         desc.source_name  = ''
+        desc.project_id   = nil
         desc.public       = false
         desc.public_write = false
       else
@@ -451,6 +457,7 @@ module DescriptionControllerHelpers
     else
       desc.source_type  = :public
       desc.source_name  = ''
+      desc.project_id   = nil
       desc.public       = true
       desc.public_write = true
     end
@@ -475,7 +482,7 @@ module DescriptionControllerHelpers
 
     # Creating draft for project.
     when :project
-      project = Project.find_by_title(desc.source_name)
+      project = desc.project
       if read
         desc.reader_groups << UserGroup.all_users
       else
@@ -588,7 +595,7 @@ module DescriptionControllerHelpers
 
     # ...except in the case of projects.
     if (desc.source_type == :project) and
-       (project = Project.find_by_title(desc.source_name))
+       (project = desc.project)
       if old_read && !new_read
         # Add project members to readers.
         new_readers << project.user_group

@@ -94,6 +94,7 @@ class Location < AbstractModel
     'created',
     'num_views',
     'last_view',
+    'ok_for_export',
     'rss_log_id',
     'description_id',
     'search_name'

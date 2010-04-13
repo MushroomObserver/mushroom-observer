@@ -89,6 +89,8 @@
 #  update_view_stats::      Called after each show_object request.
 #  calc_layout_params::     Gather User's list layout preferences.
 #  catch_errors             (filter: catches errors for integration tests)
+#  default_thumbnail_size:: Default thumbnail size: :thumbnail or :small.
+#  set_default_thumbnail_size:: Change the default thumbnail size for the current user.
 #
 ################################################################################
 
@@ -1540,6 +1542,31 @@ class ApplicationController < ActionController::Base
   def update_view_stats(object)
     if object.respond_to?(:update_view_stats) && !is_robot?
       object.update_view_stats
+    end
+  end
+
+  # Default image size to use for thumbnails: either :thumbnail or :small.
+  # Looks at both the user's pref (if logged in) or the session (if not logged
+  # in), else reverts to small. *NOTE*: This method is available to views. 
+  def default_thumbnail_size
+    if @user
+      @user.thumbnail_size
+    else
+      session[:thumbnail_size] || :thumbnail
+    end
+  end
+  helper_method :default_thumbnail_size
+
+  # Set the default thumbnail size, either for the current user if logged in,
+  # or for the current session.
+  def set_default_thumbnail_size(val)
+    if @user
+      if @user.thumbnail_size != val
+        @user.thumbnail_size = val
+        @user.save_without_our_callbacks
+      end
+    else
+      session[:thumbnail_size] = val
     end
   end
 

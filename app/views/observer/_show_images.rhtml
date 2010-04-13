@@ -1,6 +1,15 @@
 <div class='show_images'>
   <% if @observation.images.length > 0 %>
-    <%= :IMAGES.t %>:<br/>
+    <%= :IMAGES.t %>:
+    <%= if thumb_size_control
+      if default_thumbnail_size == :thumbnail
+        link_to(:show_images_large_thumbs.t, :id => @observation.id,
+                :set_thumbnail_size => 'small', :params => query_params)
+      else
+        link_to(:show_images_small_thumbs.t, :id => @observation.id,
+                :set_thumbnail_size => 'thumbnail', :params => query_params)
+      end
+    end %>
   <% end %>
 
   <% if check_permission(@observation.user_id) %>

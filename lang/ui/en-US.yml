@@ -2379,6 +2379,12 @@ show_description_adjust_permissions_help: >
 
 
 
+# observer/_show_images
+show_images_small_thumbs: "(small thumbnails)"
+show_images_large_thumbs: "(large thumbnails)"
+
+
+
 # location/show_location
 show_location_title: "[:LOCATION]: [name]"
 show_location_create: "[:create_object(type=:location)]"

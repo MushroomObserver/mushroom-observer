@@ -2407,6 +2407,12 @@ show_description_adjust_permissions_help: >
 
 
 
+# observer/_show_images
+show_images_small_thumbs: "(miniaturas pequeñas)"
+show_images_large_thumbs: "(miniaturas grandes)"
+
+
+
 # location/show_location
 show_location_title: "Ubicación: [name]"
 show_location_create: Crear Nueva Ubicación

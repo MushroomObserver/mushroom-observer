@@ -116,6 +116,7 @@ draft_coprinus_comatus:
   modified: 2008-10-05 12:31:12
   source_type: project
   source_name: EOL Project
+  project_id: 1
   public: 0
 
 # A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
@@ -130,6 +131,7 @@ draft_agaricus_campestris:
   modified: 2008-10-05 12:37:35
   source_type: project
   source_name: EOL Project
+  project_id: 1
   public: 0
 
 # A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
@@ -144,6 +146,7 @@ draft_boletus_edulis:
   modified: 2008-10-05 16:19:45
   source_type: project
   source_name: Bolete Project
+  project_id: 2
   public: 0
 
 # A draft of Lactarius alpinus with a bad classification field
@@ -159,6 +162,7 @@ draft_lactarius_alpinus:
   classification: "**Domain**: Eukarya"
   source_type: project
   source_name: EOL Project
+  project_id: 1
   public: 0
 
 peltigera_alt_desc:

@@ -13,6 +13,7 @@
 #  description_link::     Create a link to show a given Description.
 #  thumbnail::            Draw thumbnail image linked to show_image.
 #  image_vote_tabs::      Render the AJAX vote tabs that go below thumbnails.
+#  set_export_status_controls:: Render the two set_export_status controls.
 #
 ################################################################################
 
@@ -159,7 +160,7 @@ module ApplicationHelper::ObjectLink
     end
 
     # Get URL to image.
-    size = args[:size] || (@user ? @user.thumbnail_size : :thumbnail)
+    size = (args[:size] || default_thumbnail_size).to_sym
     if size == :original
       # Must pass in image instance to display original!
       file = image.original_file
@@ -237,5 +238,26 @@ module ApplicationHelper::ObjectLink
       end
       content_tag(:span, str, :id => "image_#{id}_#{value}")
     end.join(' | ')
+  end
+
+  # Display the two export statuses, making the current state plain text and
+  # the other a link to the observer/set_export_status callback.
+  def set_export_status_controls(obj)
+    if is_reviewer?
+      if obj.ok_for_export
+        content_tag(:b, :review_ok_for_export.t)
+      else
+        link_to(:review_ok_for_export.t, :controller => 'observer',
+                :action => 'set_export_status', :type => obj.type_tag,
+                :id => obj.id, :value => '1', :params => query_params)
+      end + '<br/>' +
+      if obj.ok_for_export
+        link_to(:review_no_export.t, :controller => 'observer',
+                :action => 'set_export_status', :type => obj.type_tag,
+                :id => obj.id, :value => '0', :params => query_params)
+      else
+        content_tag(:b, :review_no_export.t)
+      end
+    end
   end
 end

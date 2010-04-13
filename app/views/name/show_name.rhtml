@@ -56,6 +56,8 @@
             <%= link_to(parent.display_name.t, :action => 'show_name',
                         :id => parent.id, :params => query_params) %><br/>
         <% end %>
+
+        <%= set_export_status_controls(@name) %>
       </p>
     </td>
 

@@ -81,6 +81,7 @@
 #  user::             (V) User that created it.
 #  version::          (V) Version number.
 #  notes::            (V) Discussion of taxonomy.
+#  ok_for_export::    (-) Mark names like "Candy canes" so they don't go to EOL.
 #
 #  ==== Definition of Taxon
 #  rank::             (V) :Species, :Genus, :Order, etc.
@@ -232,10 +233,11 @@ class Name < AbstractModel
     'created',
     'num_views',
     'last_view',
+    'ok_for_export',
     'rss_log_id',
     'synonym_id',
     'description_id',
-    'classification' # (versioned in the off desc)
+    'classification' # (versioned in the default desc)
   )
 
   after_update :notify_users

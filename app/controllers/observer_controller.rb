@@ -702,6 +702,11 @@ class ObserverController < ApplicationController
       flash_notice(:show_votes_gone_private.t)
     end
 
+    # Make it easy for users to change thumbnail size.
+    if !params[:set_thumbnail_size].blank?
+      set_default_thumbnail_size(params[:set_thumbnail_size])
+    end
+
     if @observation = find_or_goto_index(Observation, params[:id], :include => [
                         {:comments => :user},
                         :images,
@@ -1277,7 +1282,7 @@ class ObserverController < ApplicationController
 
   ##############################################################################
   #
-  #  :section: Author Stuff
+  #  :section: Reviewer Utilities
   #
   ##############################################################################
 
@@ -1335,6 +1340,34 @@ class ObserverController < ApplicationController
       flash_error(:review_authors_denied.t)
       redirect_to(:controller => parent.show_controller,
                   :action => parent.show_action, :id => parent.id,
+                  :params => query_params)
+    end
+  end
+
+  # Callback to let reviewers change the export status of a Name from the
+  # show_name page.
+  def set_export_status # :norobots:
+    pass_query_params
+    id    = params[:id].to_s
+    type  = params[:type].to_s
+    value = params[:value].to_s
+    model = type.camelize.constantize rescue nil
+    if !is_reviewer?
+      flash_error(:runtime_admin_only.t)
+      redirect_back_or_default('/')
+    elsif !model or
+          !model.respond_to?(:column_names) or
+          !model.column_names.include?('ok_for_export')
+      flash_error(:runtime_invalid.t(:type => '"type"', :value => type))
+      redirect_back_or_default('/')
+    elsif !value.match(/^[01]$/)
+      flash_error(:runtime_invalid.t(:type => '"value"', :value => value))
+      redirect_back_or_default('/')
+    elsif obj = find_or_goto_index(model, id)
+      obj.ok_for_export = (value == '1')
+      obj.save_without_our_callbacks
+      redirect_to(:controller => obj.show_controller,
+                  :action => obj.show_action, :id => id,
                   :params => query_params)
     end
   end
