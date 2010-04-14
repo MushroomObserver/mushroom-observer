@@ -54,12 +54,35 @@ class Query < AbstractQuery
       :users?    => [User],
     },
     :Name => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :users?    => [User],
-      :synonym_names? => [:string],
-      :misspellings? => {:string => [:no, :either, :only]},
-      :deprecated?   => {:string => [:either, :no, :only]},
+      :created?            => [:time],
+      :modified?           => [:time],
+      :users?              => [User],
+      :synonym_names?      => [:string],
+      :misspellings?       => {:string => [:no, :either, :only]},
+      :deprecated?         => {:string => [:either, :no, :only]},
+      :has_synonyms?       => :boolean,
+      :locations?          => [:string],
+      :species_lists?      => [:string],
+      :rank?               => [{:string => Name.all_ranks}],
+      :is_deprecated?      => :boolean,
+      :text_name_has?      => :string,
+      :has_author?         => :boolean,
+      :author_has?         => :string,
+      :has_citation?       => :boolean,
+      :citation_has?       => :string,
+      :has_classification? => :boolean,
+      :classification_has? => :string,
+      :has_notes?          => :boolean,
+      :notes_has?          => :string,
+      :has_comments?       => {:string => [:yes]},
+      :comments_has?       => :string,
+      :has_default_desc?   => :boolean,
+      :join_desc?          => {:string => [:default,:any]},
+      :desc_type?          => :string,
+      :desc_project?       => [:string],
+      :desc_creator?       => [User],
+      :desc_content?       => :string,
+      :ok_for_export?      => :boolean,
     },
     :NameDescription => {
       :created?  => [:time],
@@ -773,7 +796,7 @@ class Query < AbstractQuery
     initialize_model_do_time(:created)
     initialize_model_do_time(:modified)
     initialize_model_do_objects_by_id(:users)
-    initialize_model_do_comment_types
+    initialize_model_do_type_list(:types, :object_type, Comment.all_types)
     initialize_model_do_search(:summary_has, :summary)
     initialize_model_do_search(:content_has, :comment)
   end
@@ -846,6 +869,89 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_name(
       Name, :synonym_names, :id, :filter => :synonyms
     )
+    initialize_model_do_locations('observations', :join => :observations)
+    initialize_model_do_objects_by_name(
+      SpeciesList, :species_lists,
+      'observations_species_lists.species_list_id',
+      :join => {:observations => :observations_species_lists}
+    )
+    initialize_model_do_rank
+    initialize_model_do_boolean(:is_deprecated,
+      'names.deprecated IS TRUE',
+      'names.deprecated IS FALSE'
+    )
+    initialize_model_do_boolean(:has_synonyms,
+      'names.synonym_id IS NOT NULL',
+      'names.synonym_id IS NULL'
+    )
+    initialize_model_do_boolean(:ok_for_export,
+      'names.ok_for_export IS TRUE',
+      'names.ok_for_export IS FALSE'
+    )
+    if !params[:text_name_has].blank?
+      initialize_model_do_search(:text_name_has, 'text_name')
+    end
+    initialize_model_do_boolean(:has_author,
+      'LENGTH(COALESCE(names.author,"")) > 0',
+      'LENGTH(COALESCE(names.author,"")) = 0'
+    )
+    if !params[:author_has].blank?
+      initialize_model_do_search(:author_has, 'author')
+    end
+    initialize_model_do_boolean(:has_citation,
+      'LENGTH(COALESCE(names.citation,"")) > 0',
+      'LENGTH(COALESCE(names.citation,"")) = 0'
+    )
+    if !params[:citation_has].blank?
+      initialize_model_do_search(:citation_has, 'citation')
+    end
+    initialize_model_do_boolean(:has_classification,
+      'LENGTH(COALESCE(names.classification,"")) > 0',
+      'LENGTH(COALESCE(names.classification,"")) = 0'
+    )
+    if !params[:classification_has].blank?
+      initialize_model_do_search(:classification_has, 'classification')
+    end
+    initialize_model_do_boolean(:has_notes,
+      'LENGTH(COALESCE(names.notes,"")) > 0',
+      'LENGTH(COALESCE(names.notes,"")) = 0'
+    )
+    if !params[:notes_has].blank?
+      initialize_model_do_search(:notes_has, 'notes')
+    end
+    if params[:has_comments]
+      self.join << :comments
+    end
+    if !params[:comments_has].blank?
+      initialize_model_do_search(:comments_has,
+        'CONCAT(comments.summary,comments.notes)')
+      self.join << :comments
+    end
+    initialize_model_do_boolean(:has_default_desc,
+      'names.description_id IS NOT NULL',
+      'names.description_id IS NULL'
+    )
+    if params[:join_desc] == :default
+      self.join << :'name_descriptions.default'
+    elsif (params[:join_desc] == :any) or
+          !params[:desc_type].blank? or
+          !params[:desc_project].blank? or
+          !params[:desc_creator].blank? or
+          !params[:desc_content].blank?
+      self.join << :name_descriptions
+    end
+    initialize_model_do_type_list(:desc_type,
+      'name_descriptions.source_type', Description.all_source_types
+    )
+    initialize_model_do_objects_by_name(
+      Project, :desc_project, 'name_descriptions.project_id'
+    )
+    initialize_model_do_objects_by_name(
+      User, :desc_creator, 'name_descriptions.user_id'
+    )
+    fields = NameDescription.all_note_fields
+    fields = fields.map {|f| "COALESCE(name_descriptions.#{f},'')"}
+    initialize_model_do_search(:desc_content, "CONCAT(#{fields.join(',')})")
   end
 
   def initialize_name_description
@@ -963,6 +1069,17 @@ class Query < AbstractQuery
     end
   end
 
+  def initialize_model_do_type_list(arg, col, vals)
+    if !params[arg].blank?
+      col = "#{model.table_name}.#{col}" if !col.to_s.match(/\./)
+      types = params[arg].to_s.strip_squeeze.split
+      types &= vals.map(&:to_s)
+      if types.any?
+        self.where << "#{col} IN ('#{types.join("','")}')"
+      end
+    end
+  end
+
   def initialize_model_do_deprecated
     case params[:deprecated] || :either
     when :no   ; self.where << 'names.deprecated IS FALSE'
@@ -1004,7 +1121,7 @@ class Query < AbstractQuery
           when 'Name'
             objs += model.find_all_by_search_name(name)
             objs += model.find_all_by_text_name(name) if objs.empty?
-          when 'SpeciesList'
+          when 'Project', 'SpeciesList'
             objs += model.find_all_by_title(name)
           when 'User'
             name.sub(/ *<.*>/, '')
@@ -1042,13 +1159,15 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_model_do_comment_types
-    if !params[:types].blank?
-      types = params[:types].to_s.strip_squeeze.split
-      types &= Comment.all_types.map(&:to_s)
-      if types.any?
-        self.where << "comments.object_type IN ('#{types.join("','")}')"
-      end
+  def initialize_model_do_rank
+    if !params[:rank].blank?
+      min, max = params[:rank]
+      all_ranks = Name.all_ranks
+      a = all_ranks.index(min) || 0
+      b = all_ranks.index(max) || (all_ranks.length - 1)
+      a, b = b, a if a > b
+      ranks = all_ranks[a..b].map {|r| "'#{r}'"}
+      self.where << "names.rank IN (#{ranks.join(',')})"
     end
   end
 

@@ -169,8 +169,6 @@ class ApiController < ApplicationController
       letter = $1
       case type
 
-      # It reads the first letter of the field, and returns all the locations
-      # (or "where" strings) with words beginning with that letter.
       when 'location'
         @items = Observation.connection.select_values(%(
           SELECT DISTINCT `where` FROM observations
@@ -183,8 +181,6 @@ class ApiController < ApplicationController
         ))
         @items.sort!
 
-      # It reads the first letter of the field, and returns all the names
-      # beginning with it.
       when 'name'
         @items = Name.connection.select_values %(
           SELECT text_name FROM names
@@ -193,17 +189,22 @@ class ApiController < ApplicationController
           ORDER BY text_name ASC
         )
 
-      # It reads the first letter of the field, and returns all the names
-      # beginning with it.
+      when 'project'
+        @items = Project.connection.select_values %(
+          SELECT title FROM projects
+          WHERE title LIKE '#{letter}%'
+             OR title LIKE '%#{letter}%'
+          ORDER BY title ASC
+        )
+
       when 'species_list'
         @items = SpeciesList.connection.select_values %(
           SELECT title FROM species_lists
           WHERE title LIKE '#{letter}%'
+             OR title LIKE '%#{letter}%'
           ORDER BY title ASC
         )
 
-      # It reads the first letter of the field, and returns all the names
-      # beginning with it.
       when 'user'
         @items = User.connection.select_values %(
           SELECT CONCAT(users.login, IF(users.name = "", "", CONCAT(" <", users.name, ">")))

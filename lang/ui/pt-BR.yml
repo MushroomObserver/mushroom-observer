@@ -2945,7 +2945,7 @@ merge_descriptions_move_help:  >
   This will move the source description into a synonym.  It will just copy it
   if you elect not to delete the old description.  If you wish to merge with an
   existing description in the other name, you must first move your description
-  into that name, then select [:show_description_merge] again from there. 
+  into that name, then select [:show_description_merge] again from there.
 
 
 
@@ -3257,8 +3257,11 @@ refine_search_advanced_search_location:  "[:Location]"
 refine_search_advanced_search_name:  "[:Name]"
 refine_search_advanced_search_user:  "[:Observer]"
 refine_search_all_children:  Which children?
-refine_search_all_children_true:  all children
 refine_search_all_children_false:  only immediate children
+refine_search_all_children_true:  all children
+refine_search_author_has:  Search authority
+refine_search_citation_has:  Search citation
+refine_search_classification_has:  Search classification
 refine_search_comment_types:  Object type(s)
 refine_search_comments_has:  Search comments
 refine_search_confidence:  Confidence level
@@ -3270,46 +3273,65 @@ refine_search_date_image:  Date taken
 refine_search_date_observation:  Date observed
 refine_search_date_species_list:  Date of list
 refine_search_deprecated:  Include deprecated names?
+refine_search_deprecated_either:  doesn't matter
 refine_search_deprecated_no:  only approved names
 refine_search_deprecated_only:  only deprecated names
-refine_search_deprecated_either:  doesn't matter
+refine_search_desc_content:  Search description text
+refine_search_desc_creator:  Description creator
+refine_search_desc_project:  Draft for project
+refine_search_desc_type:  Description type
+refine_search_desc_type_foreign:  foreign
+refine_search_desc_type_project:  draft
+refine_search_desc_type_public:  public
+refine_search_desc_type_source:  other
+refine_search_desc_type_user:  personal
+refine_search_has_author:  Has an authority?
+refine_search_has_citation:  Has a citation?
+refine_search_has_classification:  Has classification?
 refine_search_has_comments:  Does it have comments?
+refine_search_has_has_default_desc:  Has a default description?
 refine_search_has_images:  Does it have images?
 refine_search_has_location:  Does it a defined location?
 refine_search_has_name:  Does it have a name?
 refine_search_has_notes:  Does it have notes?
 refine_search_has_observation:  Does it have an observation?
 refine_search_has_specimen:  Is a specimen available?
+refine_search_has_synonyms:  Has synonyms?
 refine_search_has_votes:  Does it have votes?
 refine_search_is_col_loc:  Was this where it was seen?
+refine_search_is_deprecated:  Is deprecated?
+refine_search_join_desc:  Which descriptions to search?
+refine_search_join_desc_any:  all descriptions
+refine_search_join_desc_default:  default only
 refine_search_license:  "[:License]"
 refine_search_location_defined:  Location (defined)
 refine_search_location_undefined:  Location (undefined)
 refine_search_locations:  Restrict to these location(s)
 refine_search_misspellings:  Include misspellings?
+refine_search_misspellings_either:  doesn't matter
 refine_search_misspellings_no:  only correct names
 refine_search_misspellings_only:  only misspelt names
-refine_search_misspellings_either:  doesn't matter
 refine_search_model_flavor:  Query flavor
 refine_search_modified:  Date last modified
 refine_search_name:  Species name
 refine_search_names:  Restrict to these species
 refine_search_nonconsensus:  Include "other" observations?
-refine_search_nonconsensus_no:  just use consensus name
 refine_search_nonconsensus_all:  use any proposed name
 refine_search_nonconsensus_exclusive:  only nonconsensus names
+refine_search_nonconsensus_no:  just use consensus name
 refine_search_notes_has:  Search notes
 refine_search_ok_for_export:  Okay for export?
-refine_search_pattern_search:  Search string
 refine_search_pattern_comment:  "[:refine_search_pattern_search]"
 refine_search_pattern_image:  "[:refine_search_pattern_search]"
 refine_search_pattern_location:  "[:refine_search_pattern_search]"
 refine_search_pattern_name:  "[:refine_search_pattern_search]"
 refine_search_pattern_observation:  "[:refine_search_pattern_search]"
 refine_search_pattern_project:  "[:refine_search_pattern_search]"
+refine_search_pattern_search:  Search string
 refine_search_pattern_species_list:  "[:refine_search_pattern_search]"
 refine_search_pattern_user:  "[:refine_search_pattern_search]"
 refine_search_quality:  Image quality
+refine_search_rank:  "[:Rank]"
 refine_search_rss_log_type:  Type of object
 refine_search_rss_modified:  Date of last activity
 refine_search_size:  Available sizes
@@ -3317,9 +3339,10 @@ refine_search_species_lists:  Belongs to these species list(s)
 refine_search_summary_has:  Search message summary
 refine_search_synonym_names:  Restrict to synonyms of these
 refine_search_synonyms:  Include synonym observations?
-refine_search_synonyms_no:  just this name
 refine_search_synonyms_all:  this name and synonyms
 refine_search_synonyms_exclusive:  only synonyms
+refine_search_synonyms_no:  just this name
+refine_search_text_name_has:  Search taxon name
 refine_search_users:  Restrict to these user(s)
 
 refine_search_advanced_search_content_help:  >
@@ -3338,6 +3361,15 @@ refine_search_all_children_help:  >
   Should we include all taxa below the name given above, or just immediate
   children?  For example, immediate children of a Agaricus would be all the
   species in Agaricus, but not subspecies or varieties.
+
+refine_search_author_has_help:  >
+  [:refine_search_google_help]
+
+refine_search_citation_has_help:  >
+  [:refine_search_google_help]
+
+refine_search_classification_has_help:  >
+  [:refine_search_google_help]
 
 refine_search_comment_types_help:  ""
 refine_search_comments_has_help:  >
@@ -3383,6 +3415,19 @@ refine_search_date_species_list_help:  >
   have any meaning at all.  [:refine_search_date_help]
 
 refine_search_deprecated_help:  ""
+refine_search_desc_content_help:  >
+  Searches all the text fields of the description.
+  [:refine_search_google_help]
+
+refine_search_desc_creator_help:  >
+  Restrict to names with descriptions created by these user(s).
+
+refine_search_desc_project_help:  >
+  Restrict to names with drafts for these project(s).
+
+refine_search_desc_type_help:  >
+  Restrict to names with descriptions of these type(s).
+
 refine_search_google_help:  >
   Enter one word or phrase at a time.  Each time you update the form you will
   see all the previous entries, and you will get another empty field.  Records
@@ -3394,15 +3439,31 @@ refine_search_google_help:  >
   double-quotes are unnecessary for grouping words into a phrase here.  For
   example, this does what you'd expect: "Agaricus sp. OR Leucoagaricus sp.".
 
+refine_search_has_author_help:  ""
+refine_search_has_citation_help:  ""
+refine_search_has_classification_help:  ""
 refine_search_has_comments_help:  ""
+refine_search_has_has_default_desc_help:  ""
 refine_search_has_images_help:  ""
 refine_search_has_location_help:  ""
 refine_search_has_name_help:  ""
 refine_search_has_notes_help:  ""
 refine_search_has_observation_help:  ""
 refine_search_has_specimen_help:  ""
+refine_search_has_synonyms_help:  ""
 refine_search_has_votes_help:  ""
 refine_search_is_col_loc_help:  ""
+refine_search_is_deprecated_help:  ""
+refine_search_join_desc_help:  >
+  The fields below require that names be joined with their descriptions.  There
+  are two ways this can be done: (1) You may join with just the default
+  description, in which case the following fields will only apply to the
+  default description and will automatically restrict the results to names that
+  actually have a default description.  (2) You may also join with all of a
+  name's descriptions, in which case the following fields can apply to any
+  description.  This will only restrict the results to names that have
+  descriptions, not just names with a default one.
+
 refine_search_license_help:  ""
 refine_search_location_defined_help:  >
   Enter name or id of a location.  This will only include results that belong
@@ -3509,6 +3570,7 @@ refine_search_pattern_user_help:  >
   [:refine_search_google_help]
 
 refine_search_quality_help:  ""
+refine_search_rank_help:  ""
 refine_search_rss_log_type_help:  ""
 refine_search_rss_modified_help:  >
   [:refine_search_time_help]
@@ -3534,6 +3596,9 @@ refine_search_synonyms_help:  >
   ("[:refine_search_synonyms_no]") or include JUST synonyms
   ("[:refine_search_synonyms_exclusive]").  Note that for this purpose,
   misspelt names are treated exactly the same as the correctly-spelled name.
+
+refine_search_text_name_has_help:  >
+  [:refine_search_google_help]
 
 refine_search_time_help:  >
   Enter a date or date range in the format "YYYY-MM-DD HH:MM:SS".  Enter only

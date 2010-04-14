@@ -147,6 +147,29 @@ module RefineSearch
       :modified,
       :users,
       :synonym_names,
+      :locations,
+      :species_lists,
+      :rank,
+      :is_deprecated,
+      :has_synonyms,
+      :ok_for_export,
+      :text_name_has,
+      :has_author,
+      :author_has,
+      :has_citation,
+      :citation_has,
+      :has_classification,
+      :classification_has,
+      :has_notes,
+      :notes_has,
+      :has_comments,
+      :comments_has,
+      :has_default_desc,
+      :join_desc,
+      :desc_type,
+      :desc_project,
+      :desc_creator,
+      :desc_content,
     ],
 
     :NameDescription => [
@@ -239,6 +262,36 @@ module RefineSearch
       :default => false,
       :blank => false,
       :parse => :boolean
+    )
+  end
+
+  def rs_field_author_has(model, flavor)
+    Field.new(
+      :name  => :author_has,
+      :label => :refine_search_author_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_citation_has(model, flavor)
+    Field.new(
+      :name  => :citation_has,
+      :label => :refine_search_citation_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_classification_has(model, flavor)
+    Field.new(
+      :name  => :classification_has,
+      :label => :refine_search_classification_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
     )
   end
 
@@ -344,12 +397,100 @@ module RefineSearch
     )
   end
 
+  def rs_field_desc_content(model, flavor)
+    Field.new(
+      :name  => :desc_content,
+      :label => :refine_search_desc_content,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_desc_creator(model, flavor)
+    Field.new(
+      :name   => :desc_creator,
+      :label  => :refine_search_desc_creator,
+      :input  => :textN,
+      :autocomplete => :user,
+      :tokens => true,
+      :parse  => :userN
+    )
+  end
+
+  def rs_field_desc_project(model, flavor)
+    Field.new(
+      :name   => :desc_project,
+      :label  => :refine_search_desc_project,
+      :input  => :textN,
+      :autocomplete => :project,
+      :tokens => true,
+      :parse  => :project_nameN
+    )
+  end
+
+  def rs_field_desc_type(model, flavor)
+    Field.new(
+      :name  => :desc_type,
+      :label => :refine_search_desc_type,
+      :input => :checkboxes,
+      :opts  => Description.all_source_types.map do |val|
+        [ :"refine_search_desc_type_#{val}".l, val ]
+      end,
+      :parse => :desc_type
+    )
+  end
+
+  def rs_field_has_author(model, flavor)
+    Field.new(
+      :name  => :has_author,
+      :label => :refine_search_has_author,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_citation(model, flavor)
+    Field.new(
+      :name  => :has_citation,
+      :label => :refine_search_has_citation,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_classification(model, flavor)
+    Field.new(
+      :name  => :has_classification,
+      :label => :refine_search_has_classification,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
   def rs_field_has_comments(model, flavor)
     Field.new(
       :name  => :has_comments,
       :label => :refine_search_has_comments,
       :input => :menu,
       :opts  => [[:yes.l, 'yes']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_has_has_default_desc(model, flavor)
+    Field.new(
+      :name  => :has_has_default_desc,
+      :label => :refine_search_has_has_default_desc,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
       :blank => true
     )
@@ -421,6 +562,17 @@ module RefineSearch
     )
   end
 
+  def rs_field_has_synonyms(model, flavor)
+    Field.new(
+      :name  => :has_synonyms,
+      :label => :refine_search_has_synonyms,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
   def rs_field_has_votes(model, flavor)
     Field.new(
       :name  => :has_votes,
@@ -439,6 +591,30 @@ module RefineSearch
       :input => :menu,
       :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
       :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_is_deprecated(model, flavor)
+    Field.new(
+      :name  => :is_deprecated,
+      :label => :refine_search_is_deprecated,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_join_desc(model, flavor)
+    Field.new(
+      :name  => :join_desc,
+      :label => :refine_search_join_desc,
+      :input => :menu,
+      :opts  => [
+        [:refine_search_join_desc_default.l, 'default'],
+        [:refine_search_join_desc_any.l, 'any'],
+      ],
       :blank => true
     )
   end
@@ -566,27 +742,6 @@ module RefineSearch
     )
   end
 
-  def rs_field_notes_has(model, flavor)
-    Field.new(
-      :name  => :notes_has,
-      :label => :refine_search_notes_has,
-      :input => :textN,
-      :parse => :stringN,
-      :word  => 'AND'
-    )
-  end
-
-  def rs_field_ok_for_export(model, flavor)
-    Field.new(
-      :name  => :ok_for_export,
-      :label => :refine_search_ok_for_export,
-      :input => :menu,
-      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
-      :default => nil,
-      :blank => true
-    )
-  end
-
   def rs_field_nonconsensus(model, flavor)
     Field.new(
       :name  => :nonconsensus,
@@ -602,12 +757,33 @@ module RefineSearch
     )
   end
 
+  def rs_field_notes_has(model, flavor)
+    Field.new(
+      :name  => :notes_has,
+      :label => :refine_search_notes_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
   def rs_field_observation(model, flavor)
     Field.new(
       :name  => :observation,
       :label => :Observation,
       :input => :text,
       :parse => :observation
+    )
+  end
+
+  def rs_field_ok_for_export(model, flavor)
+    Field.new(
+      :name  => :ok_for_export,
+      :label => :refine_search_ok_for_export,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
     )
   end
 
@@ -630,6 +806,20 @@ module RefineSearch
       :or_equal => true,
       :opts  => Image.all_votes.map do |x|
         [:"image_vote_short_#{x}".l, x.to_s]
+      end,
+      :blank => true
+    )
+  end
+
+  def rs_field_rank(model, flavor)
+    Field.new(
+      :name  => :rank,
+      :label => :refine_search_rank,
+      :input => :menu2,
+      :word  => :RANK.t,
+      :or_equal => true,
+      :opts  => Name.all_ranks.reverse.map do |x|
+        [:"rank_#{x.to_s.downcase}".l, x.to_s]
       end,
       :blank => true
     )
@@ -703,6 +893,16 @@ module RefineSearch
       ],
       :default => 'no',
       :blank => false
+    )
+  end
+
+  def rs_field_text_name_has(model, flavor)
+    Field.new(
+      :name  => :text_name_has,
+      :label => :refine_search_text_name_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
     )
   end
 
@@ -806,29 +1006,38 @@ module RefineSearch
     val.join(' ')
   end
 
+  def rs_format_desc_type(val, field)
+    rs_format_enum_types(val, field, Description.all_source_types)
+  end
+
+  def rs_parse_desc_type(val, field)
+    rs_parse_enum_types(val, field)
+  end
+
   def rs_format_comment_types(val, field)
-    if !val.blank?
-      vals = val.to_s.strip_squeeze.split
-      Comment.all_types.map(&:to_s) & vals
-    end
+    rs_format_enum_types(val, field, Comment.all_types)
   end
 
   def rs_parse_comment_types(val, field)
-    if val.empty?
-      val = nil
-    else
-      val.join(' ')
-    end
+    rs_parse_enum_types(val, field)
   end
 
   def rs_format_content_types(val, field)
-    if !val.blank?
-      vals = val.to_s.strip_squeeze.split
-      Image.all_extensions.map(&:to_s) & vals
-    end
+    rs_format_enum_types(val, field, Image.all_extensions)
   end
 
   def rs_parse_content_types(val, field)
+    rs_parse_enum_types(val, field)
+  end
+
+  def rs_format_enum_types(val, field, all_types)
+    if !val.blank?
+      vals = val.to_s.strip_squeeze.split
+      all_types.map(&:to_s) & vals
+    end
+  end
+
+  def rs_parse_enum_types(val, field)
     if val.empty?
       val = nil
     else
@@ -884,11 +1093,13 @@ module RefineSearch
   def rs_format_location(v,f);     rs_format_object(Location,    v,f); end
   def rs_format_name(v,f);         rs_format_object(Name,        v,f); end
   def rs_format_observation(v,f);  rs_format_object(Observation, v,f); end
+  def rs_format_project(v,f);      rs_format_object(Project,     v,f); end
   def rs_format_species_list(v,f); rs_format_object(SpeciesList, v,f); end
   def rs_format_user(v,f);         rs_format_object(User,        v,f); end
 
   def rs_format_location_name(v,f);     rs_format_object(Location,    v,f); end
   def rs_format_name_name(v,f);         rs_format_object(Name,        v,f); end
+  def rs_format_project_name(v,f);      rs_format_object(Project,     v,f); end
   def rs_format_species_list_name(v,f); rs_format_object(SpeciesList, v,f); end
   def rs_format_user_name(v,f);         rs_format_object(User,        v,f); end
 
@@ -896,11 +1107,13 @@ module RefineSearch
   def rs_parse_location(v,f);     rs_parse_object(Location,    v,f,1); end
   def rs_parse_name(v,f);         rs_parse_object(Name,        v,f,1); end
   def rs_parse_observation(v,f);  rs_parse_object(Observation, v,f,1); end
+  def rs_parse_project(v,f);      rs_parse_object(Project,     v,f,1); end
   def rs_parse_species_list(v,f); rs_parse_object(SpeciesList, v,f,1); end
   def rs_parse_user(v,f);         rs_parse_object(User,        v,f,1); end
 
   def rs_parse_location_name(v,f);     rs_parse_object(Location,    v,f); end
   def rs_parse_name_name(v,f);         rs_parse_object(Name,        v,f); end
+  def rs_parse_project_name(v,f);      rs_parse_object(Project,     v,f); end
   def rs_parse_species_list_name(v,f); rs_parse_object(SpeciesList, v,f); end
   def rs_parse_user_name(v,f);         rs_parse_object(User,        v,f); end
 
@@ -908,11 +1121,13 @@ module RefineSearch
   def rs_format_locationN(v,f);     rs_format_objectN(Location,    v,f); end
   def rs_format_nameN(v,f);         rs_format_objectN(Name,        v,f); end
   def rs_format_observationN(v,f);  rs_format_objectN(Observation, v,f); end
+  def rs_format_projectN(v,f);      rs_format_objectN(Project,     v,f); end
   def rs_format_species_listN(v,f); rs_format_objectN(SpeciesList, v,f); end
   def rs_format_userN(v,f);         rs_format_objectN(User,        v,f); end
 
   def rs_format_location_nameN(v,f);     rs_format_objectN(Location,    v,f); end
   def rs_format_name_nameN(v,f);         rs_format_objectN(Name,        v,f); end
+  def rs_format_project_nameN(v,f);      rs_format_objectN(Project,     v,f); end
   def rs_format_species_list_nameN(v,f); rs_format_objectN(SpeciesList, v,f); end
   def rs_format_user_nameN(v,f);         rs_format_objectN(User,        v,f); end
 
@@ -920,11 +1135,13 @@ module RefineSearch
   def rs_parse_locationN(v,f);     rs_parse_objectN(Location,    v,f,1); end
   def rs_parse_nameN(v,f);         rs_parse_objectN(Name,        v,f,1); end
   def rs_parse_observationN(v,f);  rs_parse_objectN(Observation, v,f,1); end
+  def rs_parse_projectN(v,f);      rs_parse_objectN(Project,     v,f,1); end
   def rs_parse_species_listN(v,f); rs_parse_objectN(SpeciesList, v,f,1); end
   def rs_parse_userN(v,f);         rs_parse_objectN(User,        v,f,1); end
 
   def rs_parse_location_nameN(v,f);     rs_parse_objectN(Location,    v,f); end
   def rs_parse_name_nameN(v,f);         rs_parse_objectN(Name,        v,f); end
+  def rs_parse_project_nameN(v,f);      rs_parse_objectN(Project,     v,f); end
   def rs_parse_species_list_nameN(v,f); rs_parse_objectN(SpeciesList, v,f); end
   def rs_parse_user_nameN(v,f);         rs_parse_objectN(User,        v,f); end
 
@@ -970,6 +1187,8 @@ module RefineSearch
       when 'Name'
         obj = Name.find_by_search_name(val) ||
               Name.find_by_text_name(val)
+      when 'Project'
+        obj = Project.find_by_title(val)
       when 'SpeciesList'
         obj = SpeciesList.find_by_title(val)
       when 'User'

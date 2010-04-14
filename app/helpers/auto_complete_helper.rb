@@ -25,10 +25,11 @@
 #
 #  turn_into_auto_completer::          Turn text field into auto-completer.
 #  turn_into_menu_auto_completer::     Turn into auto-completer for set menu.
-#  turn_into_location_auto_completer:: Turn into location auto-completer.
-#  turn_into_name_auto_completer::     Turn into name auto-completer.
-#  turn_into_species_list_auto_completer:: Turn into species list auto-completer.
-#  turn_into_user_auto_completer::     Turn into user-name auto-completer.
+#  turn_into_location_auto_completer:: Turn into Location name auto-completer.
+#  turn_into_name_auto_completer::     Turn into Name auto-completer.
+#  turn_into_project_auto_completer::  Turn into Project title auto-completer.
+#  turn_into_species_list_auto_completer:: Turn into SpeciesList title auto-completer.
+#  turn_into_user_auto_completer::     Turn into User name auto-completer.
 #  javascript_include_auto_complete::  Include javascript libs for auto-completion.
 #
 ################################################################################
@@ -94,7 +95,7 @@ module ApplicationHelper::AutoComplete
     }.merge(opts))
   end
 
-  # Make text_field auto-complete for location name.
+  # Make text_field auto-complete for Location display name.
   def turn_into_location_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
       :url           => '/ajax/auto_complete/location',
@@ -105,7 +106,7 @@ module ApplicationHelper::AutoComplete
     }.merge(opts))
   end
 
-  # Make text_field auto-complete for mushroom name.
+  # Make text_field auto-complete for Name text_name.
   def turn_into_name_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
       :url           => '/ajax/auto_complete/name',
@@ -117,7 +118,18 @@ module ApplicationHelper::AutoComplete
     }.merge(opts))
   end
 
-  # Make text_field auto-complete for mushroom name.
+  # Make text_field auto-complete for Project title.
+  def turn_into_project_auto_completer(id, opts={})
+    turn_into_auto_completer(id, {
+      :url           => '/ajax/auto_complete/project',
+      :indicator     => 'indicator',
+      :frequency     => 0.1,
+      :wordMatch     => true,
+      :js_class      => 'CachedAutocompleter',
+    }.merge(opts))
+  end
+
+  # Make text_field auto-complete for SpeciesList title.
   def turn_into_species_list_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
       :url           => '/ajax/auto_complete/species_list',
@@ -128,7 +140,7 @@ module ApplicationHelper::AutoComplete
     }.merge(opts))
   end
 
-  # Make text_field auto-complete for user name/login.
+  # Make text_field auto-complete for User name/login.
   def turn_into_user_auto_completer(id, opts={})
     turn_into_auto_completer(id, {
       :url           => '/ajax/auto_complete/user',
