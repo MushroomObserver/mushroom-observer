@@ -52,6 +52,9 @@
 class AbstractModel < ActiveRecord::Base
   self.abstract_class = true
 
+  def self.acts_like_model?; true; end
+  def acts_like_model?; true; end
+
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def self.type_tag
     self.name.underscore.to_sym

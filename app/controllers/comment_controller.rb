@@ -87,7 +87,7 @@ class CommentController < ApplicationController
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
   def show_comments_for_object # :nologin: :norobots:
     model = params[:type].to_s.constantize rescue nil
-    if !model.is_a?(AbstractModel)
+    if !model || !model.acts_like?(:model)
       flash_error(:runtime_invalid.t(:type => '"type"',
                                      :value => params[:type].to_s))
       redirect_back_or_default(:action => :list_comments)
