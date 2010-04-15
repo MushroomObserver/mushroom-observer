@@ -2,11 +2,8 @@
 
 <%= :eol_preview_explanation.tp %>
 
-<p>
-  <%= :eol_preview_name_count.t :count => @names.length %><br/>
-  <%= :eol_preview_image_count.t :count => @image_data.length %>
-</p>
 <% odd_or_even = 0
+image_count = 0
 for name in @names.select(&:ok_for_export)
   odd_or_even = 1 - odd_or_even %>
   <div class="ListLine<%= odd_or_even %>"
@@ -16,6 +13,7 @@ for name in @names.select(&:ok_for_export)
                   :action => "show_name", :id => name.id) %>
     </p>
     <% if @image_data[name.id]
+      image_count += @image_data[name.id].length
       for image_id, observation_id in @image_data[name.id] %>
         <%= thumbnail(image_id, :border => 0, :link => :show_observation,
                       :obs => observation_id, :votes => false,
@@ -24,3 +22,7 @@ for name in @names.select(&:ok_for_export)
     end %>
   </div>
 <% end %>
+<p>
+  <%= :eol_preview_name_count.t :count => @names.length %><br/>
+  <%= :eol_preview_image_count.t :count => image_count %>
+</p>
