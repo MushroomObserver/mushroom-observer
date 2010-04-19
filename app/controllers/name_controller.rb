@@ -72,6 +72,7 @@ class NameController < ApplicationController
     :prev_name,
     :prev_name_description,
     :show_name,
+    :show_name2,
     :show_name_description,
     :show_past_name,
     :show_past_name_description,
@@ -330,6 +331,85 @@ class NameController < ApplicationController
   # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
   # relevant Observations.
   def show_name # :nologin: :prefetch:
+    pass_query_params
+    store_location
+    clear_query_in_session
+
+    # Load Name and NameDescription along with a bunch of associated objects.
+    name_id = params[:id]
+    desc_id = params[:desc]
+    if @name = find_or_goto_index(Name, name_id,
+                                  :include => [:user, :descriptions])
+
+      # Display default description if user didn't request one explicitly.
+      desc_id = @name.description_id if desc_id.blank?
+      if desc_id.blank?
+        @description = nil
+      elsif @description = NameDescription.safe_find(desc_id, :include =>
+                                         [:authors, :editors, :license, :user])
+        @description = nil if !@description.is_reader?(@user)
+      else
+        flash_error(:runtime_object_not_found.t(:type => :description,
+                                                :id => desc_id))
+      end
+
+      update_view_stats(@name)
+      update_view_stats(@description) if @description
+
+      # Get a list of projects the user can create drafts for.
+      @projects = @user && @user.projects_member.select do |project|
+        !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
+      end
+
+      # Get list of immediate parents.
+      @parents = @name.parents
+
+      # Create query for immediate children.
+      @children_query = create_query(:Name, :of_children, :name => @name)
+
+      # Create search queries for observation lists.
+      @consensus_query = create_query(:Observation, :of_name, :name => @name,
+                                      :by => :confidence)
+      @synonym_query = create_query(:Observation, :of_name, :name => @name,
+                                    :synonyms => :exclusive,
+                                    :by => :confidence)
+      @other_query = create_query(:Observation, :of_name, :name => @name,
+                                  :synonyms => :all, :nonconsensus => :exclusive,
+                                  :by => :confidence)
+      if @name.below_genus?
+        @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
+                                      :all => true, :by => :confidence)
+      end
+
+      # Paginate each of the sections independently.
+      @children_pages  = paginate_numbers(:children_page, 24)
+      @consensus_pages = paginate_numbers(:consensus_page, 12)
+      @synonym_pages   = paginate_numbers(:synonym_page, 12)
+      @other_pages     = paginate_numbers(:other_page, 12)
+      if @subtaxa_query
+        @subtaxa_pages = paginate_numbers(:subtaxa_page, 12)
+      end
+
+      args = { :include => [:name, :location, :thumb_image, :user] }
+      @children_data  = @children_query.paginate(@children_pages)
+      @consensus_data = @consensus_query.paginate(@consensus_pages, args)
+      @synonym_data   = @synonym_query.paginate(@synonym_pages, args)
+      @other_data     = @other_query.paginate(@other_pages, args)
+      if @subtaxa_query
+        @subtaxa_data = @subtaxa_query.paginate(@subtaxa_pages, args)
+      end
+    end
+  end
+
+  ################################################################################
+  #
+  #  :section: Show Name2
+  #
+  ################################################################################
+
+  # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
+  # relevant Observations.
+  def show_name2 # :nologin: :prefetch:
     pass_query_params
     store_location
     clear_query_in_session

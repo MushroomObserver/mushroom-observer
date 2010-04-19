@@ -98,6 +98,20 @@ module ApplicationHelper::Description
     '<p><big>' + title + ':</big> ' + links.join(' | ') + '</p>'
   end
 
+  def show_best_image(data)
+    result = ""
+    if data
+      for obs in data
+        if image = obs.thumb_image
+          result = thumbnail(image, :border => 0, :link => :show_observation,
+                             :obs => obs.id, :size => :small)
+          break
+        end
+      end
+    end
+    result
+  end
+
   # Show list of alternate descriptions for show_object page.
   #
   #   <%= show_alt_descriptions(name, projects) %>
@@ -361,5 +375,14 @@ module ApplicationHelper::Description
     end
 
     return "<p>#{authors}<br/>#{editors}</p>"
+  end
+end
+
+def name_section_link(title, data, query)
+  if data && data.length > 0
+    link_to(title,
+            :controller => 'observer',
+            :action => 'index_observation',
+            :params => query_params(query)) + "<br/>"
   end
 end
