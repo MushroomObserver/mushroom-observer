@@ -51,6 +51,7 @@ class ImageController < ApplicationController
     :next_image,
     :prev_image,
     :show_image,
+    :show_original,
     :test_upload_speed,
   ]
 

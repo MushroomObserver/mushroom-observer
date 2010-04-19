@@ -131,6 +131,11 @@ class ImageControllerTest < FunctionalTestCase
                     :params => @controller.query_params(Query.last))
   end
 
+  def test_show_original
+    get_with_dump(:show_original, :id => 1)
+    assert_response(:action => "show_image", :size => 'full_size', :id => 1)
+  end
+
   def test_show_image
     get_with_dump(:show_image, :id => 1)
     assert_response('show_image')
