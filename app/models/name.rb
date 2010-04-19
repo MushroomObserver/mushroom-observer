@@ -172,7 +172,6 @@
 #  correct_spelling::        Link to the correctly-spelled Name (or nil).
 #  misspellings::            Names that call this their "correct spelling".
 #  misspelling_ids::         Names that call this their "correct spelling", just ids.
-#  guess_correct_spelling::  Guess what the correct spelling should be.
 #
 #  ==== Status
 #  deprecated::              Is this name deprecated?
@@ -998,48 +997,6 @@ class Name < AbstractModel
         Name.all(:conditions => "correct_spelling_id = #{id}")
       end
     end
-  end
-
-  # Attempt to guess the correct name via synonyms.  There can be multiple
-  # accepted names, in which case look for the one that shares the most
-  # letters(!)  If none are close, notify user (raises RuntimeError) and ask
-  # them to be explicit.  Returns a Name instance or nil.  (Used only by
-  # /name/edit_name.)
-  def guess_correct_spelling
-    result = nil
-    self.misspelling = true
-    synonyms = synonym ? synonym.names - [self] : []
-    if synonyms.length == 0
-      raise :runtime_form_names_misspelling_no_synonyms.t
-    else
-      candidates = []
-      approved_candidates = []
-      for synonym in synonyms
-        # Count letters in one but not the other and vice versa.
-        val  = 0
-        copy = synonym.text_name
-        self.text_name.each_char do |c|
-          if i = copy.index(c)
-            copy[i] = ''
-          else
-            val += 1
-          end
-        end
-        val += copy.length
-        candidates.push(synonym)          if val < 5
-        approved_candidates.push(synonym) if val < 5 && !synonym.deprecated
-      end
-      if candidates.length == 0
-        raise :runtime_form_names_misspelling_no_matches.t
-      elsif approved_candidates.length == 1
-        result = approved_candidates.first
-      elsif candidates.length == 1
-        result = candidates.first
-      else
-        raise :runtime_form_names_misspelling_many_matches.t
-      end
-    end
-    return result
   end
 
   ################################################################################

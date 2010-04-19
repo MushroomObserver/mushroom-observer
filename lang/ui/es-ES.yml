@@ -1220,18 +1220,6 @@ runtime_form_names_misspelling_bad: >
 runtime_form_names_misspelling_same: >
   ¡La ortografía correcta y la ortografía incorrecta son lo mismo!
 
-runtime_form_names_misspelling_many_matches: >
-  Hay varias posibles variantes ortográficas.  Por favor, escriba la ortografía
-  correcta de la mano.
-
-runtime_form_names_misspelling_no_matches: >
-  Ninguno de los sinónimos se ve bien.  Por favor, escriba la ortografía
-  correcta de la mano.
-
-runtime_form_names_misspelling_no_synonyms: >
-  No se puede encontrar cualquier sinónimos.  Por favor, escriba la ortografía
-  correcta de la mano.
-
 runtime_image_changed_your_image: >
   "Su imagen se ha cambiado a imagen #[id]."
 
@@ -1871,15 +1859,10 @@ form_names_citation_help: Cita bibliográfica original.
 form_names_citation_textilize_note: >
   Citas pueden ser formateados utilizando marcas Textile.
 
-form_names_misspelling_note_first: >
-  Marque esta casilla si cree que este nombre es una falta de ortografía.  Si
-  no podemos averiguar lo que es la ortografía correcta, usted tendrá la
-  oportunidad de decirnos más tarde. *NOTA:* Por favor, no use este desaprobar
-  sinónimos escrita correctamente!
-
-form_names_misspelling_note: >
-  Por favor, escriba la ortografía correcta de este nombre. *NOTA:* Por favor,
-  no use este desaprobar sinónimos escrita correctamente!
+form_names_misspelling_note:  >
+  If this name is misspelt, please check the box and enter the correct
+  spelling. *NOTE:* Please do not use this to deprecate correctly-spelled
+  synonyms. 
 
 form_names_classification_help: >
   Cada línea debe ser del tipo «Rango: nombre» (en Inglés).  Un rango
@@ -4764,3 +4747,4 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+

@@ -673,15 +673,15 @@ class NameController < ApplicationController
     pass_query_params
     @name = Name.find(params[:id])
 
-    # Initialize misspelling fields.  Start with just a checkbox.  If user
-    # checks it, it guesses the correct spelling.  If it fails to guess, it
-    # flashes an error, and subsequent times through it presents a text field
-    # (with auto-completer).
-    @misspelling = false
-    if @name.is_misspelling? || (params[:name] && params[:name][:misspelling] == '1')
-      @name.misspelling = true
-      @name_primer = Name.primer
+    # Get fields ready for misspelling.
+    if !params[:name]
+      @misspelling = @name.is_misspelling?
+      @correct_spelling = @misspelling ? @name.correct_spelling.search_name : ''
+    else
+      @misspelling = (params[:name][:misspelling] == '1')
+      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
     end
+    @name_primer = Name.primer
 
     # Only allowed to make substantive changes if you own all the references
     # to it.  I think checking that the user owns all the namings that use it
@@ -780,8 +780,6 @@ class NameController < ApplicationController
           @name.notes = params[:name][:notes].to_s.strip rescue ''
 
           # Let user call this name a misspelling.
-          @misspelling = (params[:name][:misspelling] == '1') rescue false
-          @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze rescue ''
           if !update_correct_spelling(@name, @misspelling, @correct_spelling)
             # In case of error, save the rest of the changes, but stay in form.
             any_errors = true
@@ -998,55 +996,35 @@ class NameController < ApplicationController
   # Update the misspelling status.
   #
   # name::             Name whose status we're changing.
-  # misspelling::      Boolean: is the "this is a misspelling" box checked?
+  # misspelling::      Boolean: is the "this is misspelt" box checked?
   # correct_spelling:: String: the correct name, as entered by the user.
   #
-  # 1) If the checkbox is unchecked, it clears all the misspelling stuff.
-  # 2) If the checkbox is checked and a name is entered, it validates it.
-  # 3) If the checkbox is checked but no name entered, it tries to guess.
+  # 1) If the checkbox is unchecked, and name used to be misspelt, then it
+  #    clears correct_spelling_id.
+  # 2) Otherwise, if the text field is filled in it looks up the name and
+  #    sets correct_spelling_id.
   #
-  # There are no side-effects (except that the "correct name" is marked as "not
-  # a misspelling").  All changes are made (but not saved) to +name+.  It
-  # returns true if everything went well.  If anything at all fails, it clears
-  # all the misspelling stuff in +name+, prints an error message and makes the
-  # user fix whatever it is.
+  # All changes are made (but not saved) to +name+.  It returns true if
+  # everything went well.  If it couldn't recognize the correct name, it
+  # changes nothing, flashes and error message, and returns false. 
   #
   def update_correct_spelling(name, misspelling, correct_spelling)
     result = true
 
     # Clear status if checkbox unchecked.
-    if !misspelling
-      name.misspelling = false
+    if name.is_misspelling? && (!misspelling || correct_spelling.blank?)
       name.correct_spelling = nil
 
-    else
-      name2 = nil
-
-      # User has told us what the correct spelling should be.  Make sure
-      # this is a valid name!
-      if correct_spelling.blank?
-        name.misspelling = true
-        name2 = Name.find_by_search_name(correct_spelling)
-        name2 ||= Name.find_by_text_name(correct_spelling)
-        if !name2
-          flash_error(:runtime_form_names_misspelling_bad.t)
-        elsif result.id == self.id
-          flash_error(:runtime_form_names_misspelling_same.t)
-        end
-
-        # User just checked the box, but didn't tell us the correct
+    # Set correct_spelling if one given.
+    elsif !correct_spelling.blank?
+      name2 = Name.find_names(correct_spelling).first
+      if !name2
+        flash_error(:runtime_form_names_misspelling_bad.t)
+        result = false
+      elsif name2.id == name.id
+        flash_error(:runtime_form_names_misspelling_same.t)
+        result = false
       else
-        # answer -- let's see if we can guess it before complaining.
-        begin
-          name2 = name.guess_correct_spelling
-        rescue => err
-          flash_error(err)
-        end
-      end
-
-      # Found a good name: make that the correct spelling for this one.
-      if name2
-        name.misspelling = true
         name.correct_spelling = name2
         name.merge_synonyms(name2)
         name.change_deprecated(true)
@@ -1056,13 +1034,6 @@ class NameController < ApplicationController
           name2.correct_spelling = nil
           save_name(name2, :log_name_unmisspelled, :other => name.display_name)
         end
-
-      # If anything at all goes wrong, clear the misspelling and make the
-      # user fix whatever it was.
-      else
-        name.misspelling = false
-        name.correct_spelling = nil
-        result = false
       end
     end
 

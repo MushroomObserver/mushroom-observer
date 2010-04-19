@@ -49,6 +49,7 @@ module ApplicationHelper::AutoComplete
   #
   def turn_into_auto_completer(id, opts={})
     if can_do_ajax?
+      javascript_include_auto_complete
       url       = nil
       div_id    = "#{id}_auto_complete"
       div_class = "auto_complete"

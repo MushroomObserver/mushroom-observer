@@ -1216,15 +1216,6 @@ runtime_form_names_misspelling_bad: >
 runtime_form_names_misspelling_same: >
   Correct spelling and incorrect spelling are the same!
 
-runtime_form_names_misspelling_many_matches: >
-  There are several possible spellings, please enter correct spelling by hand.
-
-runtime_form_names_misspelling_no_matches: >
-  None of the synonyms looks right, please enter correct spelling by hand.
-
-runtime_form_names_misspelling_no_synonyms: >
-  Can't find any synonyms, please enter correct spelling by hand.
-
 runtime_image_changed_your_image: >
   Changed your profile image to image #[id].
 
@@ -1817,7 +1808,7 @@ form_locations_notes_help: >
 
 # observer/_form_name
 form_names_text_name: Scientific Name
-form_names_misspelling: This name is misspelled.
+form_names_misspelling: This name is misspelt.
 form_names_misspelling_it_should_be: It should be
 form_names_taxonomic_notes: Notes on Taxonomy
 form_names_classification: Taxonomic Classification
@@ -1850,14 +1841,10 @@ form_names_citation_help: >
 form_names_citation_textilize_note: >
   Citations can be formatted using the Textile markup system.
 
-form_names_misspelling_note_first: >
-  Check this box if you think this name is a misspelling.  If we can't figure
-  out what the correct spelling is, you'll have a chance to tell us later.
-  *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
-
 form_names_misspelling_note: >
-  Please enter the correct spelling for this name. *NOTE:* Please do not use
-  this to deprecate correctly-spelled synonyms.
+  If this name is misspelt, please check the box and enter the correct
+  spelling. *NOTE:* Please do not use this to deprecate correctly-spelled
+  synonyms. 
 
 form_names_classification_help: >
   List the higher taxa containing this [rank], one name per rank.  Example:<br/>

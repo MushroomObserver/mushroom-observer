@@ -27,22 +27,14 @@
 <%= form.text_field(:citation, :size => 80) %><br/>
 <div class="HelpNote"><%= :form_names_citation_textilize_note.tp %></div>
 
-<% if !@name.new_record? %>
-  <% if @name.is_misspelling? || @misspelling %>
-    <%= form.check_box(:misspelling, :checked => true) %>
-    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
-    <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
-    <%= form.text_field(:correct_spelling, :size => 60,
-          :value => @correct_spelling ? @correct_spelling :
-                    @name.correct_spelling ? @name.correct_spelling.search_name : '') %><br/>
-    <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
-    <%= turn_into_name_auto_completer('name_correct_spelling', :primer => @name_primer) %>
-    <% javascript_include_auto_complete %>
-  <% else %>
-    <%= form.check_box(:misspelling, :checked => false) %>
-    <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
-    <div class="HelpNote"><%= :form_names_misspelling_note_first.tp %></div>
-  <% end %>
+<% if !@misspelling.nil? %>
+  <%= form.check_box(:misspelling, :checked => @misspelling) %>
+  <label for="name_misspelling"><%= :form_names_misspelling.t %></label>
+  <label for="name_correct_spelling"><%= :form_names_misspelling_it_should_be.t %>:</label>
+  <%= form.text_field(:correct_spelling, :size => 60,
+                      :value => @correct_spelling) %><br/>
+  <div class="HelpNote"><%= :form_names_misspelling_note.tp %></div>
+  <%= turn_into_name_auto_completer('name_correct_spelling', :primer => @name_primer) %>
 <% end %>
 
 <p>
