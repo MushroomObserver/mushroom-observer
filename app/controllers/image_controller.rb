@@ -213,7 +213,7 @@ class ImageController < ApplicationController
 
   # For backwards compatibility.
   def show_original
-    redirect_to(:action => 'show_image', :size => 'full_size')
+    redirect_to(:action => 'show_image', :size => 'full_size', :id => params[:id])
   end
 
   # Go to next image: redirects to show_image.
