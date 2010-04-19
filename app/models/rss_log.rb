@@ -318,7 +318,11 @@ private
     args = args.keys.sort_by(&:to_s).map do |key|
              [key.to_s, escape(args[key])]
            end.flatten
-    [time, tag, *args].join(' ')
+    [time, tag, *args].map do |x|
+      # Make *absolutely* sure no logs are ever created with fields missing,
+      # since this can royally f--- up the parser and crash things.
+      x.blank? ? '.' : x.gsub(/\s+/, '_')
+    end.join(' ')
   end
 
   # Decode a line from the log.  Returns a triplet:
@@ -339,7 +343,7 @@ private
       time = time2
     rescue => e
       # Caught this error in the log, not sure how/why.
-      raise "rss_log timestamp corrupt: id=#{id.inspect}, time=#{time.inspect}, err=#{e}"
+      raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
     end
     [tag.to_sym, Hash[*args], time]
   end

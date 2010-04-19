@@ -3342,6 +3342,7 @@ refine_search_synonyms_all:  this name and synonyms
 refine_search_synonyms_exclusive:  only synonyms
 refine_search_synonyms_no:  just this name
 refine_search_text_name_has:  Search taxon name
+refine_search_title_has:  Search title
 refine_search_users:  Restrict to these user(s)
 
 refine_search_advanced_search_content_help:  >
@@ -3597,6 +3598,9 @@ refine_search_synonyms_help:  >
   misspelt names are treated exactly the same as the correctly-spelled name.
 
 refine_search_text_name_has_help:  >
+  [:refine_search_google_help]
+
+refine_search_title_has_help:  >
   [:refine_search_google_help]
 
 refine_search_time_help:  >

@@ -120,10 +120,16 @@ class Query < AbstractQuery
       :type?     => :string,
     },
     :SpeciesList => {
-      :created?  => [:time],
-      :modified? => [:time],
-      :date?     => [:date],
-      :users?    => [User],
+      :created?       => [:time],
+      :modified?      => [:time],
+      :date?          => [:date],
+      :users?         => [User],
+      :names?         => [:string],
+      :synonym_names? => [:string],
+      :locations?     => [:string],
+      :title_has?     => :string,
+      :has_notes?     => :boolean,
+      :notes_has?     => :string,
     },
     :User => {
       :created?  => [:time],
@@ -1032,6 +1038,21 @@ class Query < AbstractQuery
     initialize_model_do_time(:modified)
     initialize_model_do_date(:date, :when)
     initialize_model_do_objects_by_id(:users)
+    initialize_model_do_objects_by_name(Name, :names,
+      'observations.name_id',
+      :join => {:observations_species_lists => :observations}
+    )
+    initialize_model_do_objects_by_name(Name, :synonym_names,
+      'observations.name_id', :filter => :synonyms,
+      :join => {:observations_species_lists => :observations}
+    )
+    initialize_model_do_locations
+    initialize_model_do_search(:title_has, :title)
+    initialize_model_do_search(:notes_has, :notes)
+    initialize_model_do_boolean(:has_notes,
+      'LENGTH(COALESCE(species_lists.notes,"")) > 0',
+      'LENGTH(COALESCE(species_lists.notes,"")) = 0'
+    )
   end
 
   def initialize_user

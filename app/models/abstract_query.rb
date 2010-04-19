@@ -1087,8 +1087,8 @@ class AbstractQuery < ActiveRecord::Base
     send("initialize_#{flavor}")
 
     # Give models ability to customize.
-    if respond_to?("initialize_#{model_string.downcase}")
-      send("initialize_#{model_string.downcase}")
+    if respond_to?("initialize_#{model_string.underscore}")
+      send("initialize_#{model_string.underscore}")
     end
 
     # Give all queries the ability to order via simple :by => :name mechanism.

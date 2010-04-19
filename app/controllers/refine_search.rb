@@ -236,6 +236,12 @@ module RefineSearch
       :modified,
       :date,
       :users,
+      :names,
+      :synonym_names,
+      :locations,
+      :title_has,
+      :has_notes,
+      :notes_has,
     ],
 
     :User => [
@@ -900,6 +906,16 @@ module RefineSearch
     Field.new(
       :name  => :text_name_has,
       :label => :refine_search_text_name_has,
+      :input => :textN,
+      :parse => :stringN,
+      :word  => 'AND'
+    )
+  end
+
+  def rs_field_title_has(model, flavor)
+    Field.new(
+      :name  => :title_has,
+      :label => :refine_search_title_has,
       :input => :textN,
       :parse => :stringN,
       :word  => 'AND'
