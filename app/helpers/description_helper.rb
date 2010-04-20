@@ -98,15 +98,12 @@ module ApplicationHelper::Description
     '<p><big>' + title + ':</big> ' + links.join(' | ') + '</p>'
   end
 
-  def show_best_image(data)
+  def show_best_image(obs)
     result = ""
-    if data
-      for obs in data
-        if image = obs.thumb_image
-          result = thumbnail(image, :border => 0, :link => :show_observation,
-                             :obs => obs.id, :size => :small)
-          break
-        end
+    if obs
+      if image = obs.thumb_image
+        result = thumbnail(image, :border => 0, :link => :show_observation,
+                           :obs => obs.id, :size => :small)
       end
     end
     result
@@ -379,7 +376,7 @@ module ApplicationHelper::Description
 end
 
 def name_section_link(title, data, query)
-  if data && data.length > 0
+  if data
     link_to(title,
             :controller => 'observer',
             :action => 'index_observation',

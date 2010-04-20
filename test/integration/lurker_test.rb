@@ -71,8 +71,8 @@ class LurkerTest < IntegrationTestCase
     # (Should be at least two links to show the name Fungi.)
     assert_select('a[href^=/name/show_name/1]', :minimum => 2)
     click(:label => /About.*Fungi/)
-    # (Make sure observation #2 is shown somewhere.)
-    assert_select('a[href^=/2?]')
+    # (Make sure the page contains create_name_description.)
+    assert_select('a[href^=/name/create_name_description/1]')
 
     # And lastly there are some images.
     go_back
