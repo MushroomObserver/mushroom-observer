@@ -3641,7 +3641,7 @@ sandbox_sample:  >
   _location 382_, _location Mt. Wilson_\n
   _user 252_, _user jason_\n
   _observation 12345_\n
-  _image 12345_ or !image 12345!\n
+  _image 12345_, !image 12345!, or !image 640/12345!\n
   _comment 12345_\n
   \n
   Include footnote[[1]] references after any word[[2]].\n

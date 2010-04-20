@@ -3640,7 +3640,7 @@ sandbox_sample: >
   _location 382_, _location Mt. Wilson_\n
   _user 252_, _user jason_\n
   _observation 12345_\n
-  _image 12345_ or !image 12345!\n
+  _image 12345_, !image 12345!, oder !image 640/12345!\n
   _comment 12345_\n
   \n
   Fußnotenzeichen[[1]] können nach beliebigen Wörtern auftreten[[2]].\n

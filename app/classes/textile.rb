@@ -307,9 +307,11 @@ private
 
   # Convert !image 12345! in a textile string.
   def check_our_images!
-    self.gsub!(/!image (\d+)!/) do
-      '"!%s/thumb/%d.jpg!":%s/image/show_image/%d' %
-        [IMAGE_DOMAIN, $1, HTTP_DOMAIN, $1]
+    self.gsub!(/!image (\w+\/)?(\d+)!/) do
+      size, id = $1, $2
+      size ||= 'thumb/'
+      '"!%s/%s%d.jpg!":%s/image/show_image/%d' %
+        [IMAGE_DOMAIN, size, id, HTTP_DOMAIN, id]
     end
   end
 end
