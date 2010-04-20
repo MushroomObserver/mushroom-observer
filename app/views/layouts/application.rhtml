@@ -161,6 +161,7 @@
                   [ :COMMENTS.l, :comment ],
                   [ :USERS.l, :user ],
                   [ :PROJECTS.l, :project ],
+                  [ :app_search_google.l, :google ],
                 ]
                 select(:search, :type, options,
                        :selected => session[:search_type] || :observation) %>

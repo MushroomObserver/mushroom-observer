@@ -1325,6 +1325,7 @@ app_preferred_browser: Lieblings-Browser
 # This is for the search bar at the top of every page.
 app_find: Suchen
 app_search:  Search
+app_search_google:  Site (via google)
 app_refine_search:  Refine Search
 app_advanced_search: Erweiterte Suche
 app_timer:  "time: [seconds] sec"
@@ -3246,6 +3247,7 @@ refine_search_all_children:  Which children?
 refine_search_all_children_false:  only immediate children
 refine_search_all_children_true:  all children
 refine_search_author_has:  Search authority
+refine_search_children_names:  Restrict to children of these
 refine_search_citation_has:  Search citation
 refine_search_classification_has:  Search classification
 refine_search_comment_types:  Object type(s)
@@ -3284,6 +3286,7 @@ refine_search_has_observation:  Does it have an observation?
 refine_search_has_specimen:  Is a specimen available?
 refine_search_has_synonyms:  Has synonyms?
 refine_search_has_votes:  Does it have votes?
+refine_search_include_admin:  Include pseudo-observations?
 refine_search_is_col_loc:  Was this where it was seen?
 refine_search_is_deprecated:  Is deprecated?
 refine_search_join_desc:  Which descriptions to search?
@@ -3351,6 +3354,10 @@ refine_search_all_children_help:  >
 
 refine_search_author_has_help:  >
   [:refine_search_google_help]
+
+refine_search_children_names_help:  >
+  [:refine_search_multiple_help(things="names")]  It will include results for
+  both the names given and their children (e.g., species in a genus).
 
 refine_search_citation_has_help:  >
   [:refine_search_google_help]
@@ -3439,6 +3446,11 @@ refine_search_has_observation_help:  ""
 refine_search_has_specimen_help:  ""
 refine_search_has_synonyms_help:  ""
 refine_search_has_votes_help:  ""
+refine_search_include_admin_help:  >
+  Some observations are created just to fill out species lists.  These "fake"
+  observations have no votes, images, notes, location, comments, or anything.
+  By default they are excluded from search results.
+
 refine_search_is_col_loc_help:  ""
 refine_search_is_deprecated_help:  ""
 refine_search_join_desc_help:  >

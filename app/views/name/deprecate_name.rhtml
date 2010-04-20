@@ -22,7 +22,7 @@
   </div>
   <%= turn_into_name_auto_completer('proposed_name', :primer => @name_primer) %>
 
-  <p><%= check_box('is', 'misspelling', :value => @misspelling) %>
+  <p><%= check_box('is', 'misspelling', :checked => @misspelling) %>
   <label for="misspelling"><%= :form_names_misspelling.t %></label></p>
 
   <p><label for="comment_comment"><%= :name_deprecate_comments.t %>:</label><br/>

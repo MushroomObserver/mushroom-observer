@@ -391,7 +391,7 @@ class ObserverController < ApplicationController
     session[:search_type] = type
 
     case type
-    when :observation, :user
+    when :observation, :user, :google
       ctrlr = 'observer'
     when :comment, :image, :location, :name, :project, :species_list
       ctrlr = type
@@ -402,7 +402,11 @@ class ObserverController < ApplicationController
 
     # If pattern is blank, this would devolve into a very expensive index.
     if pattern.blank?
+      type = 'rss_log' if type == :google
       redirect_to(:controller => ctrlr, :action => "list_#{type}s")
+    elsif type == :google
+      pat = URI.escape("site:#{DOMAIN} #{pattern}")
+      redirect_to("http://google.com?q=#{pat}")
     else
       redirect_to(:controller => ctrlr, :action => "#{type}_search",
                   :pattern => pattern)

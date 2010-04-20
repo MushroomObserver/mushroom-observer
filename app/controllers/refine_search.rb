@@ -87,6 +87,7 @@ module RefineSearch
       :users,
       :names,
       :synonym_names,
+      :children_names,
       :locations,
       :species_lists,
       :has_observation,
@@ -147,6 +148,7 @@ module RefineSearch
       :modified,
       :users,
       :synonym_names,
+      :children_names,
       :locations,
       :species_lists,
       :rank,
@@ -200,9 +202,11 @@ module RefineSearch
       :users,
       :names,
       :synonym_names,
+      :children_names,
       :locations,
       :species_lists,
       :confidence,
+      :include_admin,
       :is_col_loc,
       :has_specimen,
       :has_name,
@@ -238,6 +242,7 @@ module RefineSearch
       :users,
       :names,
       :synonym_names,
+      :children_names,
       :locations,
       :title_has,
       :has_notes,
@@ -278,6 +283,17 @@ module RefineSearch
       :input => :textN,
       :parse => :stringN,
       :word  => 'AND'
+    )
+  end
+
+  def rs_field_children_names(model, flavor)
+    Field.new(
+      :name   => :children_names,
+      :label  => :refine_search_children_names,
+      :input  => :textN,
+      :autocomplete => :name,
+      :tokens => true,
+      :parse  => :name_nameN
     )
   end
 
@@ -585,6 +601,17 @@ module RefineSearch
       :label => :refine_search_has_votes,
       :input => :menu,
       :opts  => [[:yes.l, 'true'], [:no.l, 'false']],
+      :default => nil,
+      :blank => true
+    )
+  end
+
+  def rs_field_include_admin(model, flavor)
+    Field.new(
+      :name  => :include_admin,
+      :label => :refine_search_include_admin,
+      :input => :menu,
+      :opts  => [[:yes.l, 'true']],
       :default => nil,
       :blank => true
     )

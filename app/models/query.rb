@@ -29,6 +29,7 @@ class Query < AbstractQuery
       :users?           => [User],
       :names?           => [:string],
       :synonym_names?   => [:string],
+      :children_names?  => [:string],
       :locations?       => [:string],
       :species_lists?   => [:string],
       :has_observation? => {:string => [:yes]},
@@ -58,6 +59,7 @@ class Query < AbstractQuery
       :modified?           => [:time],
       :users?              => [User],
       :synonym_names?      => [:string],
+      :children_names?     => [:string],
       :misspellings?       => {:string => [:no, :either, :only]},
       :deprecated?         => {:string => [:either, :no, :only]},
       :has_synonyms?       => :boolean,
@@ -90,25 +92,27 @@ class Query < AbstractQuery
       :users?    => [User],
     },
     :Observation => {
-      :created?       => [:time],
-      :modified?      => [:time],
-      :date?          => [:date],
-      :users?         => [User],
-      :names?         => [:string],
-      :synonym_names? => [:string],
-      :locations?     => [:string],
-      :species_lists? => [:string],
-      :confidence?    => [:integer],
-      :is_col_loc?    => :boolean,
-      :has_specimen?  => :boolean,
-      :has_location?  => :boolean,
-      :has_notes?     => :boolean,
-      :has_name?      => :boolean,
-      :has_images?    => :boolean,
-      :has_votes?     => :boolean,
-      :has_comments?  => {:string => [:yes]},
-      :notes_has?     => :string,
-      :comments_has?  => :string,
+      :created?        => [:time],
+      :modified?       => [:time],
+      :date?           => [:date],
+      :users?          => [User],
+      :names?          => [:string],
+      :synonym_names?  => [:string],
+      :children_names? => [:string],
+      :locations?      => [:string],
+      :species_lists?  => [:string],
+      :confidence?     => [:integer],
+      :include_admin?  => :boolean,
+      :is_col_loc?     => :boolean,
+      :has_specimen?   => :boolean,
+      :has_location?   => :boolean,
+      :has_notes?      => :boolean,
+      :has_name?       => :boolean,
+      :has_images?     => :boolean,
+      :has_votes?      => :boolean,
+      :has_comments?   => {:string => [:yes]},
+      :notes_has?      => :string,
+      :comments_has?   => :string,
     },
     :Project => {
       :created?  => [:time],
@@ -120,16 +124,17 @@ class Query < AbstractQuery
       :type?     => :string,
     },
     :SpeciesList => {
-      :created?       => [:time],
-      :modified?      => [:time],
-      :date?          => [:date],
-      :users?         => [User],
-      :names?         => [:string],
-      :synonym_names? => [:string],
-      :locations?     => [:string],
-      :title_has?     => :string,
-      :has_notes?     => :boolean,
-      :notes_has?     => :string,
+      :created?        => [:time],
+      :modified?       => [:time],
+      :date?           => [:date],
+      :users?          => [User],
+      :names?          => [:string],
+      :synonym_names?  => [:string],
+      :children_names? => [:string],
+      :locations?      => [:string],
+      :title_has?      => :string,
+      :has_notes?      => :boolean,
+      :notes_has?      => :string,
     },
     :User => {
       :created?  => [:time],
@@ -821,6 +826,11 @@ class Query < AbstractQuery
       :filter => :synonyms,
       :join => {:images_observations => :observations}
     )
+    initialize_model_do_objects_by_name(
+      Name, :children_names, 'observations.name_id',
+      :filter => :all_children,
+      :join => {:images_observations => :observations}
+    )
     initialize_model_do_locations('observations',
       :join => {:images_observations => :observations}
     )
@@ -874,6 +884,9 @@ class Query < AbstractQuery
     initialize_model_do_deprecated
     initialize_model_do_objects_by_name(
       Name, :synonym_names, :id, :filter => :synonyms
+    )
+    initialize_model_do_objects_by_name(
+      Name, :children_names, :id, :filter => :all_children
     )
     initialize_model_do_locations('observations', :join => :observations)
     initialize_model_do_objects_by_name(
@@ -975,6 +988,9 @@ class Query < AbstractQuery
     initialize_model_do_objects_by_name(
       Name, :synonym_names, :name_id, :filter => :synonyms
     )
+    initialize_model_do_objects_by_name(
+      Name, :children_names, :name_id, :filter => :all_children
+    )
     initialize_model_do_locations
     initialize_model_do_objects_by_name(
       SpeciesList, :species_lists,
@@ -1021,6 +1037,9 @@ class Query < AbstractQuery
         'CONCAT(comments.summary,comments.notes)')
       self.join << :comments
     end
+    if !params[:include_admin]
+      self.where << "observations.user_id != 0"
+    end
   end
 
   def initialize_project
@@ -1044,6 +1063,10 @@ class Query < AbstractQuery
     )
     initialize_model_do_objects_by_name(Name, :synonym_names,
       'observations.name_id', :filter => :synonyms,
+      :join => {:observations_species_lists => :observations}
+    )
+    initialize_model_do_objects_by_name(Name, :children_names,
+      'observations.name_id', :filter => :all_children,
       :join => {:observations_species_lists => :observations}
     )
     initialize_model_do_locations
