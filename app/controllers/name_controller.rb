@@ -131,6 +131,9 @@ class NameController < ApplicationController
     end
   end
 
+  # This no longer makes sense, but is being requested by robots.
+  alias names_by_author names_by_user
+
   # Display list of names that a given user is editor on.
   def names_by_editor # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user

@@ -324,6 +324,10 @@ img.interest_small:hover {
   border-width: 2px;
 }
 
+table.vote_meter {
+  margin-top: 4px;
+}
+
 div.auto_complete {
   background-color:#fff;
   border:1px solid #888;

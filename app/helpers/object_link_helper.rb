@@ -205,7 +205,9 @@ module ApplicationHelper::ObjectLink
 
     # Include AJAX vote links below image?
     if @js && @user && args[:votes]
-      result += '<br/><small>'
+      result += '<br/>'
+      result += image_vote_meter(image, size) if image
+      result += '<small>'
       result += image_vote_tabs(image || id, args[:vote_data])
       result += '</small>'
     end
@@ -227,6 +229,37 @@ module ApplicationHelper::ObjectLink
       link = image.copyright_holder.to_s.t
     end
     "<div id=\"copyright\"> #{:image_show_copyright.t} &copy;#{year} #{link} </div>"
+  end
+
+  # Show the silly little "vote meter" thingy under image thumbnails.  Use
+  # <table> because this is most stable across various browsers.
+  def image_vote_meter(image, size)
+    result = ''
+    vals = Image.all_votes
+    min = vals.first.to_f
+    max = vals.last.to_f
+    val = image.vote_cache.to_f
+    w, h = image.size(size)
+    w1 = (w.to_f / (max - min + 1.0)).to_i
+    w2 = ((val - min + 1.0) * w1).to_i
+    w3 = w1 * vals.length
+    h = image.num_votes
+    h = 8 if h > 8
+    result += "<table class='vote_meter' width='#{w3}' height='#{h}'" +
+                " cellspacing='0' cellpadding='0'><tr>"
+    for val in vals
+      if w2 > w1
+        result += "<td class='on' width='#{w1-2}' height='#{h}'></td>"
+        result += "<td width='2' height='#{h}'></td>"
+        w2 -= w1
+        w3 -= w1
+      else
+        result += "<td class='on' width='#{w2}' height='#{h}'></td>"
+        result += "<td width='#{w3-w2}' height='#{h}'></td>"
+        break
+      end
+    end
+    result += "</tr></table>"
   end
 
   # Render the AJAX vote tabs that go below thumbnails.

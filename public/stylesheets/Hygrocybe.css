@@ -89,3 +89,5 @@ li.selected { background-color: #f19c05 ! important }
 .ListLine1 a:hover {
       color: #37372f; /* conica stain */
 }
+
+table.vote_meter td.on { background: #37372f; } /* conica stain */

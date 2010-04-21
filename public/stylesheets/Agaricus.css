@@ -85,3 +85,5 @@ li.selected { background-color: #eccf95 ! important }
 .ListLine1 a:visited {
       color: #3b2821; /* cupreobrunneus */
 }
+
+table.vote_meter td.on { background: #3b2821; } /* cupreobrunneus */

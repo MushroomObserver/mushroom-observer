@@ -16,6 +16,10 @@ ActionController::Routing::Routes.draw do |map|
   # instead of a file named 'wsdl'
   # map.connect ':controller/service.wsdl', :action => 'wsdl'
 
+  # It's not handling name lookups right for some reason.
+  map.connect 'observer/:action/:id', :controller => 'observer',
+                                         :action => /lookup_\w+/, :id => /.*/
+
   # Redirect to observer controller by default.
   map.connect ':controller/:action/:id', :controller => 'observer'
 

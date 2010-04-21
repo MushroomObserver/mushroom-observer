@@ -75,3 +75,5 @@ li.selected { background-color: #dd9d5f ! important }
 .ListLine1 a:visited {
       color: #beb977; /* phalloides middle-cap */
 }
+
+table.vote_meter td.on { background: #bfc0bb; } /* pachycolea */

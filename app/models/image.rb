@@ -165,6 +165,7 @@
 #  observations::       Observations that use this image.
 #  thumb_clients::      Observations that use this image as their "thumbnail".
 #  has_size?::          Does image have this size?
+#  size::               Calculate size of image of given type.
 #
 #  ==== Filenames
 #  original_image::     Path of original image.
