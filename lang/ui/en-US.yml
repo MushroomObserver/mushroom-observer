@@ -2416,7 +2416,7 @@ show_name_content_status: Description status
 show_name_latest_review: "Latest review: [date] by [user]"
 show_name_previous_version: Previous Version
 show_name_other_versions: Other Versions
-show_name_observations: "[:OBSERVATIONS]"
+show_name_observations: "More [:OBSERVATIONS]"
 show_name_synonym_observations: "Synonym [:OBSERVATIONS]"
 show_name_other_observations: "Similar [:OBSERVATIONS]"
 show_name_subtaxa_observations: "Subtaxa [:OBSERVATIONS]"

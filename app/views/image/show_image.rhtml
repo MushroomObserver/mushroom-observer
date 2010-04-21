@@ -24,14 +24,7 @@
   draw_prev_next_tabs(@image)
 %>
 
-<div id="copyright">
-  <%= :image_show_copyright.t %> &copy;<%= @image.when and @image.when.year %>
-  <%= if @image.copyright_holder == @image.user.name
-    user_link(@image.user)
-  else
-    @image.copyright_holder.to_s.t
-  end %>
-</div>
+<%= image_copyright(@image) %>
 
 <table cellpadding="10">
   <tr>

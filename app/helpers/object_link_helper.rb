@@ -217,6 +217,18 @@ module ApplicationHelper::ObjectLink
     end
   end
 
+  # Provide the copyright for an image
+  def image_copyright(image)
+    year = image.when
+    year = image.when.year if year
+    link = if image.copyright_holder == image.user.name
+      link = user_link(image.user)
+    else
+      link = image.copyright_holder.to_s.t
+    end
+    "<div id=\"copyright\"> #{:image_show_copyright.t} &copy;#{year} #{link} </div>"
+  end
+
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
     id = image.is_a?(Image) ? image.id : image.to_i

@@ -103,7 +103,7 @@ module ApplicationHelper::Description
     if obs
       if image = obs.thumb_image
         result = thumbnail(image, :border => 0, :link => :show_observation,
-                           :obs => obs.id, :size => :small)
+                           :obs => obs.id, :size => :small) + image_copyright(image)
       end
     end
     result
