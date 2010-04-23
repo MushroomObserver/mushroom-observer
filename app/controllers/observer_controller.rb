@@ -564,7 +564,7 @@ class ObserverController < ApplicationController
   def observations_at_where # :nologin: :norobots:
     where = params[:where].to_s
     query = create_query(:Observation, :at_where, :location => where)
-    show_selected_observations(query)
+    show_selected_observations(query, {:always_index => 1})
   end
 
   # Display matrix of Observation's whose notes, etc. match a string pattern.
