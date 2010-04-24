@@ -28,4 +28,4 @@ li.selected { background-color: #ff0000 ! important }
 .ListLine1 div.textile table          { background: #222200; }
 .ListLine1 div.textile table table td { background: #aaaa00; }
 
-table.vote_meter td.on { background: #000000 }
+table.vote_meter div.on { background: #000000 }

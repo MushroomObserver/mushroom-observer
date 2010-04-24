@@ -606,6 +606,15 @@ class Image < AbstractModel
     end
   end
 
+  # Count number of votes at a given level.  Returns all votes if no +value+.
+  def self.num_votes(raw_data, value=nil)
+    if value
+      vote_hash(raw_data).values.select {|v| v == value.to_i}.length
+    else
+      vote_hash(raw_data).values.length
+    end
+  end
+
   # Retrieve the given User's vote for this Image.  Returns a Fixnum from
   # 1 to 4, or nil if the User hasn't voted.
   def users_vote(user=User.current)
@@ -613,10 +622,21 @@ class Image < AbstractModel
     vote_hash[user_id]
   end
 
-  # In case we don't have an instantiated Image...
-  def self.users_vote(str, user=User.current)
+  # Retrieve the given User's vote for this Image.  Returns a Fixnum from
+  # 1 to 4, or nil if the User hasn't voted.
+  def self.users_vote(raw_data, user=User.current)
     user_id = user.is_a?(User) ? user.id : user.to_i
-    vote_hash(str)[user_id]
+    vote_hash(raw_data)[user_id]
+  end
+
+  # Calculate the average vote given the raw vote data.
+  def self.users_vote(raw_data)
+    sum = num = 0
+    for user, value in vote_hash(raw_data)
+      sum += value.to_f
+      num += 1
+    end
+    num > 0 ? sum / num : nil
   end
 
   # Change a user's vote to the given value.  Pass in either the numerical vote

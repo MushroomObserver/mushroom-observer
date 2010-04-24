@@ -76,4 +76,4 @@ li.selected { background-color: #dd9d5f ! important }
       color: #beb977; /* phalloides middle-cap */
 }
 
-table.vote_meter td.on { background: #bfc0bb; } /* pachycolea */
+table.vote_meter div.on { background: #bfc0bb; } /* pachycolea */

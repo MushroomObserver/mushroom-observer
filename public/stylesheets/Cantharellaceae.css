@@ -82,4 +82,4 @@ li.selected { background-color: #f6ae4a ! important }
      color: #10110b;
 }
 
-table.vote_meter td.on { background: #10110b; } /* cornucopioides dark-hymenium */
+table.vote_meter div.on { background: #10110b; } /* cornucopioides dark-hymenium */

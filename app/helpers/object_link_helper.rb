@@ -205,11 +205,8 @@ module ApplicationHelper::ObjectLink
 
     # Include AJAX vote links below image?
     if @js && @user && args[:votes]
-      result += '<br/>'
-      result += image_vote_meter(image, size) if image
-      result += '<small>'
-      result += image_vote_tabs(image || id, args[:vote_data])
-      result += '</small>'
+      table = image_vote_tabs(image || id, args[:vote_data])
+      result += '<br/>' + content_tag(:div, table, :id => "image_votes_#{id}")
     end
 
     if args[:nodiv]
@@ -231,65 +228,64 @@ module ApplicationHelper::ObjectLink
     "<div id=\"copyright\"> #{:image_show_copyright.t} &copy;#{year} #{link} </div>"
   end
 
-  # Show the silly little "vote meter" thingy under image thumbnails.  Use
-  # <table> because this is most stable across various browsers.
-  def image_vote_meter(image, size)
-    if image.width.nil?
-      image.set_image_size()
-    end
-    result = ''
-    vals = Image.all_votes
-    min = vals.first.to_f
-    max = vals.last.to_f
-    val = image.vote_cache.to_f
-    w, h = image.size(size)
-    w1 = (w.to_f / (max - min + 1.0)).to_i
-    w2 = ((val - min + 1.0) * w1).to_i
-    w3 = w1 * vals.length
-    h = image.num_votes
-    if h > 0
-      h += 1
-      h = 8 if h > 8
-      result += "<table class='vote_meter' width='#{w3}' height='#{h}'" +
-                  " cellspacing='0' cellpadding='0'><tr>"
-      for val in vals
-        if w2 > w1
-          result += "<td class='on' width='#{w1-2}' height='#{h}'></td>"
-          result += "<td width='2' height='#{h}'></td>"
-          w2 -= w1
-          w3 -= w1
-        else
-          result += "<td class='on' width='#{w2}' height='#{h}'></td>"
-          result += "<td width='#{w3-w2}' height='#{h}'></td>"
-          break
-        end
-      end
-      result += "</tr></table>"
-    end
-    result
-  end
-
   # Render the AJAX vote tabs that go below thumbnails.
   def image_vote_tabs(image, data=nil)
-    id = image.is_a?(Image) ? image.id : image.to_i
     javascript_include('prototype')
     javascript_include('image_vote')
-    if image
-      current = image.users_vote(@user)
-    elsif args[:vote_data]
-      current = Image.users_vote(args[:vote_data], @user)
+
+    if image.is_a?(Image)
+      id  = image.id
+      cur = image.users_vote(@user)
+      avg = image.vote_cache
+      num = image.num_votes
+    elsif data
+      id  = image.to_i
+      cur = Image.users_vote(data, @user)
+      avg = Image.vote_cache(data)
+      num = Image.num_votes(data)
+    else
+      id  = image.to_i
+      cur = nil
+      avg = nil
+      num = nil
     end
-    Image.all_votes.map do |value|
-      str1 = image_vote_as_short_string(value)
-      str2 = image_vote_as_help_string(value)
-      str = if value == current
-        content_tag(:b, content_tag(:acronym, str1, :title => str2))
-      else
-        link_to_function(str1, "image_vote(#{id},'#{value}')",
-                         :title => str2)
+
+    row1 = ''
+    if num && num > 0
+      num += 1
+      num = 8 if num > 8
+      Image.all_votes.map do |val|
+        if val <= avg
+          str = content_tag(:div, '', :class => 'on')
+        elsif val <= avg + 1.0
+          pct = ((avg + 1.0 - val) * 100).to_i
+          str = content_tag(:div, '', :class => 'on',
+                              :style => "width:#{pct}%")
+        else
+          str = ''
+        end
+        row1 += content_tag(:td, str, :height => num)
       end
-      content_tag(:span, str, :id => "image_#{id}_#{value}")
-    end.join(' | ')
+      row1 = content_tag(:tr, row1)
+    end
+
+    row2 = ''
+    Image.all_votes.map do |val|
+      str1 = image_vote_as_short_string(val)
+      str2 = image_vote_as_help_string(val)
+      if val == cur
+        str = content_tag(:b, content_tag(:span, str1, :title => str2))
+      else
+        str = link_to_function(str1, "image_vote(#{id},'#{val}')",
+                               :title => str2)
+      end
+      str = '&nbsp;|&nbsp;' + str if val != 1
+      row2 += content_tag(:td, content_tag(:small, str))
+    end
+    row2 = content_tag(:tr, row2)
+
+    content_tag(:table, row1 + row2, :class => 'vote_meter',
+                :cellspacing => '0', :cellpadding => '0')
   end
 
   # Display the two export statuses, making the current state plain text and

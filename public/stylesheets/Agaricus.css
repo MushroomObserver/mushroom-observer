@@ -86,4 +86,4 @@ li.selected { background-color: #eccf95 ! important }
       color: #3b2821; /* cupreobrunneus */
 }
 
-table.vote_meter td.on { background: #3b2821; } /* cupreobrunneus */
+table.vote_meter div.on { background: #3b2821; } /* cupreobrunneus */

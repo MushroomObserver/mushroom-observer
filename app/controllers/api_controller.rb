@@ -253,7 +253,9 @@ class ApiController < ApplicationController
           naming.observation.change_vote(naming, value, user)
           Transaction.put_naming(:id => naming, :_user => user,
                                  :set_vote => value)
-          result = value
+          render(:text => result.to_s)
+        else
+          render(:text => '')
         end
 
       when 'image'
@@ -262,12 +264,12 @@ class ApiController < ApplicationController
           image.change_vote(user, value)
           Transaction.put_image(:id => image, :_user => user,
                                 :set_vote => value)
-          result = value
+          @image, @user = image, user
+          render(:inline => '<%= image_vote_tabs(@image) %>')
+        else
+          render(:text => '')
         end
       end
     end
-
-    # Result is the new value if successful, or nil if error.
-    render(:text => result.to_s)
   end
 end
