@@ -381,7 +381,7 @@ class Image < AbstractModel
   # Directory images are stored under.  (Default is +IMG_DIR+.)
   attr_accessor :image_dir
   def image_dir
-    @iamge_dir || IMG_DIR
+    @image_dir || IMG_DIR
   end
 
   # Upload file handle.
@@ -568,7 +568,7 @@ class Image < AbstractModel
 
   # Get image size from JPEG header and set the corresponding record fields.
   # Saves the record.
-  def set_image_size(file=original_image)
+  def set_image_size(file=full_size_image)
     script = "#{RAILS_ROOT}/script/jpegsize"
     w, h = File.read("| #{script} #{file}").chomp.split
     if w.to_s.match(/^\d+$/)

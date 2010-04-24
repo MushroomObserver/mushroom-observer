@@ -234,6 +234,9 @@ module ApplicationHelper::ObjectLink
   # Show the silly little "vote meter" thingy under image thumbnails.  Use
   # <table> because this is most stable across various browsers.
   def image_vote_meter(image, size)
+    if image.width.nil?
+      image.set_image_size()
+    end
     result = ''
     vals = Image.all_votes
     min = vals.first.to_f
@@ -244,22 +247,26 @@ module ApplicationHelper::ObjectLink
     w2 = ((val - min + 1.0) * w1).to_i
     w3 = w1 * vals.length
     h = image.num_votes
-    h = 8 if h > 8
-    result += "<table class='vote_meter' width='#{w3}' height='#{h}'" +
-                " cellspacing='0' cellpadding='0'><tr>"
-    for val in vals
-      if w2 > w1
-        result += "<td class='on' width='#{w1-2}' height='#{h}'></td>"
-        result += "<td width='2' height='#{h}'></td>"
-        w2 -= w1
-        w3 -= w1
-      else
-        result += "<td class='on' width='#{w2}' height='#{h}'></td>"
-        result += "<td width='#{w3-w2}' height='#{h}'></td>"
-        break
+    if h > 0
+      h += 1
+      h = 8 if h > 8
+      result += "<table class='vote_meter' width='#{w3}' height='#{h}'" +
+                  " cellspacing='0' cellpadding='0'><tr>"
+      for val in vals
+        if w2 > w1
+          result += "<td class='on' width='#{w1-2}' height='#{h}'></td>"
+          result += "<td width='2' height='#{h}'></td>"
+          w2 -= w1
+          w3 -= w1
+        else
+          result += "<td class='on' width='#{w2}' height='#{h}'></td>"
+          result += "<td width='#{w3-w2}' height='#{h}'></td>"
+          break
+        end
       end
+      result += "</tr></table>"
     end
-    result += "</tr></table>"
+    result
   end
 
   # Render the AJAX vote tabs that go below thumbnails.
