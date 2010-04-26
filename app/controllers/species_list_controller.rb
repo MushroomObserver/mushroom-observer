@@ -237,26 +237,27 @@ class SpeciesListController < ApplicationController
   #   @member_notes
   #   session[:checklist_source]
   def edit_species_list # :prefetch: :norobots:
-    @species_list = SpeciesList.find(params[:id])
-    if !check_permission!(@species_list.user_id)
-      redirect_to(:action => 'show_species_list', :id => @species_list)
-    elsif request.method != :post
-      @checklist_names   = {}
-      @list_members      = nil
-      @member_notes      = nil
-      @member_is_col_loc = true
-      @member_specimen   = false
-      @new_names         = []
-      @multiple_names    = []
-      @deprecated_names  = @species_list.names.select(&:deprecated)
-      @checklist         = calc_checklist
-      if obs = @species_list.observations.last
-        @member_notes      = obs.notes
-        @member_is_col_loc = obs.is_collection_location
-        @member_specimen   = obs.specimen
+    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+      if !check_permission!(@species_list.user_id)
+        redirect_to(:action => 'show_species_list', :id => @species_list)
+      elsif request.method != :post
+        @checklist_names   = {}
+        @list_members      = nil
+        @member_notes      = nil
+        @member_is_col_loc = true
+        @member_specimen   = false
+        @new_names         = []
+        @multiple_names    = []
+        @deprecated_names  = @species_list.names.select(&:deprecated)
+        @checklist         = calc_checklist
+        if obs = @species_list.observations.last
+          @member_notes      = obs.notes
+          @member_is_col_loc = obs.is_collection_location
+          @member_specimen   = obs.specimen
+        end
+      else
+        process_species_list('updated')
       end
-    else
-      process_species_list('updated')
     end
   end
 
@@ -267,25 +268,26 @@ class SpeciesListController < ApplicationController
   # Get: @species_list
   # Post: goes to edit_species_list
   def upload_species_list # :norobots:
-    @species_list = SpeciesList.find(params[:id])
-    if !check_permission!(@species_list.user_id)
-      redirect_to(:action => 'show_species_list', :id => @species_list)
-    elsif request.method == :get
-      query = create_query(:Observation, :in_species_list, :by => :name,
-                           :species_list => @species_list)
-      @observation_list = query.results
-    else
-      file_data = params[:species_list][:file]
-      @species_list.file = file_data
-      sorter = NameSorter.new
-      @species_list.process_file_data(sorter)
-      @list_members     = sorter.all_line_strs.join("\r\n")
-      @new_names        = sorter.new_name_strs.uniq.sort
-      @multiple_names   = sorter.multiple_names.uniq.sort_by(&:text_name)
-      @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
-      @checklist_names  = {}
-      @member_notes     = ''
-      render(:action => 'edit_species_list')
+    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+      if !check_permission!(@species_list.user_id)
+        redirect_to(:action => 'show_species_list', :id => @species_list)
+      elsif request.method == :get
+        query = create_query(:Observation, :in_species_list, :by => :name,
+                             :species_list => @species_list)
+        @observation_list = query.results
+      else
+        file_data = params[:species_list][:file]
+        @species_list.file = file_data
+        sorter = NameSorter.new
+        @species_list.process_file_data(sorter)
+        @list_members     = sorter.all_line_strs.join("\r\n")
+        @new_names        = sorter.new_name_strs.uniq.sort
+        @multiple_names   = sorter.multiple_names.uniq.sort_by(&:text_name)
+        @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
+        @checklist_names  = {}
+        @member_notes     = ''
+        render(:action => 'edit_species_list')
+      end
     end
   end
 
@@ -294,14 +296,15 @@ class SpeciesListController < ApplicationController
   # Inputs: params[:id] (species_list)
   # Redirects to list_species_lists.
   def destroy_species_list # :norobots:
-    @species_list = SpeciesList.find(params[:id])
-    if check_permission!(@species_list.user_id)
-      @species_list.destroy
-      Transaction.delete_species_list(:id => @species_list)
-      flash_notice(:runtime_species_list_destroy_success.t(:id => params[:id]))
-      redirect_to(:action => 'list_species_lists')
-    else
-      redirect_to(:action => 'show_species_list', :id => @species_list)
+    if @species_list = find_or_goto_index(SpeciesList, params[:id])
+      if check_permission!(@species_list.user_id)
+        @species_list.destroy
+        Transaction.delete_species_list(:id => @species_list)
+        flash_notice(:runtime_species_list_destroy_success.t(:id => params[:id]))
+        redirect_to(:action => 'list_species_lists')
+      else
+        redirect_to(:action => 'show_species_list', :id => @species_list)
+      end
     end
   end
 
@@ -310,8 +313,10 @@ class SpeciesListController < ApplicationController
   # Inputs: params[:id] (observation)
   # Outputs: @observation
   def manage_species_lists # :prefetch: :norobots:
-    @observation = Observation.find(params[:id], :include => :species_lists)
-    @all_lists = SpeciesList.find_all_by_user_id(@user.id, :order => 'modified DESC')
+    @observation = find_or_goto_index(Observation, params[:id],
+                                      :include => :species_lists)
+    @all_lists = SpeciesList.find_all_by_user_id(@user.id,
+                                                 :order => "'modified' DESC")
   end
 
   # Remove an observation from a species_list.
@@ -321,22 +326,24 @@ class SpeciesListController < ApplicationController
   #   params[:observation]
   # Redirects back to manage_species_lists.
   def remove_observation_from_species_list # :norobots:
-    species_list = SpeciesList.find(params[:species_list],
-                                    :include => :observations)
-    if check_permission!(species_list.user_id)
-      observation = Observation.find(params[:observation])
-      if species_list.observations.include?(observation)
-        species_list.observations.delete(observation)
-        Transaction.put_species_list(
-          :id              => species_list,
-          :del_observation => observation
-        )
+    if species_list = find_or_goto_index(SpeciesList, params[:species_list],
+                                         :include => :observations)
+      if observation = find_or_goto_index(Observation, params[:observation])
+        if check_permission!(species_list.user_id)
+          if species_list.observations.include?(observation)
+            species_list.observations.delete(observation)
+            Transaction.put_species_list(
+              :id              => species_list,
+              :del_observation => observation
+            )
+          end
+          flash_notice(:runtime_species_list_remove_observation_success.t(
+            :name => species_list.unique_format_name, :id => observation.id))
+          redirect_to(:action => 'manage_species_lists', :id => observation.id)
+        else
+          redirect_to(:action => 'show_species_list', :id => species_list.id)
+        end
       end
-      flash_notice(:runtime_species_list_remove_observation_success.t(
-        :name => species_list.unique_format_name, :id => observation.id))
-      redirect_to(:action => 'manage_species_lists', :id => observation.id)
-    else
-      redirect_to(:action => 'show_species_list', :id => species_list.id)
     end
   end
 
@@ -347,20 +354,22 @@ class SpeciesListController < ApplicationController
   #   params[:observation]
   # Redirects back to manage_species_lists.
   def add_observation_to_species_list # :norobots:
-    species_list = SpeciesList.find(params[:species_list],
-                                    :include => :observations)
-    if check_permission!(species_list.user_id)
-      observation = Observation.find(params[:observation])
-      if !species_list.observations.include?(observation)
-        species_list.observations << observation
-        Transaction.put_species_list(
-          :id              => species_list,
-          :add_observation => observation
-        )
+    if species_list = find_or_goto_index(SpeciesList, params[:species_list],
+                                         :include => :observations)
+      if observation = find_or_goto_index(Observation, params[:observation])
+        if check_permission!(species_list.user_id)
+          if !species_list.observations.include?(observation)
+            species_list.observations << observation
+            Transaction.put_species_list(
+              :id              => species_list,
+              :add_observation => observation
+            )
+          end
+          flash_notice(:runtime_species_list_add_observation_success.t(
+            :name => species_list.unique_format_name, :id => observation.id))
+          redirect_to(:action => 'manage_species_lists', :id => observation.id)
+        end
       end
-      flash_notice(:runtime_species_list_add_observation_success.t(
-        :name => species_list.unique_format_name, :id => observation.id))
-      redirect_to(:action => 'manage_species_lists', :id => observation.id)
     end
   end
 

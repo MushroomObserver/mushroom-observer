@@ -607,7 +607,7 @@ class ObserverController < ApplicationController
         [ :list_observations_location_define.l, { :controller => 'location',
           :action => 'create_location', :where => params[:location] } ],
         [ :list_observations_location_merge.l, { :controller => 'location',
-          :action => 'list_merge_options', :where => params[:location] } ],
+          :action => 'list_merge_options', :where => params[:where] } ],
         [ :list_observations_location_all.l, { :controller => 'location',
           :action => 'list_locations' } ],
       ]
