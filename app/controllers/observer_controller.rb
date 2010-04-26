@@ -605,7 +605,7 @@ class ObserverController < ApplicationController
     if query.flavor == :at_where
       @links += [
         [ :list_observations_location_define.l, { :controller => 'location',
-          :action => 'create_location', :where => params[:location] } ],
+          :action => 'create_location', :where => params[:where] } ],
         [ :list_observations_location_merge.l, { :controller => 'location',
           :action => 'list_merge_options', :where => params[:where] } ],
         [ :list_observations_location_all.l, { :controller => 'location',
