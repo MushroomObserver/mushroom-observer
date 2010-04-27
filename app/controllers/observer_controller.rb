@@ -559,6 +559,7 @@ class ObserverController < ApplicationController
       show_selected_observations(query)
     end
   end
+  alias show_location_observations observations_at_location
 
   # Display matrix of Observation's whose 'where' matches a string.
   def observations_at_where # :nologin: :norobots:

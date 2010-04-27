@@ -315,8 +315,8 @@ class SpeciesListController < ApplicationController
   def manage_species_lists # :prefetch: :norobots:
     @observation = find_or_goto_index(Observation, params[:id],
                                       :include => :species_lists)
-    @all_lists = SpeciesList.find_all_by_user_id(@user.id,
-                                                 :order => "'modified' DESC")
+    @all_lists = SpeciesList.find_all_by_user_id(@user.id)
+    #                                            :order => "`modified' DESC")
   end
 
   # Remove an observation from a species_list.
