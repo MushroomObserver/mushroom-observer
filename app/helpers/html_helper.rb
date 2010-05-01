@@ -3,7 +3,7 @@
 #
 #  lnbsp::                 Replace ' ' with '&nbsp;'.
 #  indent::                Create whitespace of the given width.
-#  add_context_help::      Wrap string in '<acronym>' tag.
+#  add_context_help::      Wrap string in '<span title="blah">' tag.
 #  make_table::            Create table from list of Arrays.
 #  add_header::            Add random string to '<head>' section.
 #  calc_color::            Calculate background color in alternating list.
@@ -18,6 +18,7 @@ module ApplicationHelper::HTML
   # Replace spaces with '&nbsp;'.
   #
   #   <%= button_name.lnbsp %>
+  #
   def lnbsp(key)
     key.l.gsub(' ', '&nbsp;')
   end
@@ -28,12 +29,13 @@ module ApplicationHelper::HTML
    "<span style='margin-left:#{w}px'>&nbsp;</span>"
   end
 
-  # Wrap an html object in '<acronym>' tag.  This has the effect of giving it
-  # context help (mouse-over popup) in most modern browsers.
+  # Wrap an html object in '<span title="blah">' tag.  This has the effect of
+  # giving it context help (mouse-over popup) in most modern browsers.
   #
   #   <%= add_context_help(link, "Click here to do something.") %>
+  #
   def add_context_help(object, help)
-    tag('acronym', { :title => help }, true) + object + '</acronym>'
+    content_tag('span', object, :title => help)
   end
 
   # Add something to the header from within view.  This can be called as many
