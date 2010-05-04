@@ -546,7 +546,11 @@ class ObserverController < ApplicationController
 
   # Displays matrix of User's Observation's, by date.
   def observations_by_user # :nologin: :norobots:
-    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+    if !user
+      flash_error(:runtime_missing.t(:field => 'id'))
+      redirect_to(:action => 'list_rss_logs')
+    else
       query = create_query(:Observation, :by_user, :user => user)
       show_selected_observations(query)
     end
