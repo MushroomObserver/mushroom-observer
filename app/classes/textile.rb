@@ -23,6 +23,11 @@
 ################################################################################
 
 class Textile < String
+  @@name_lookup     = {}
+  @@last_species    = nil
+  @@last_subspecies = nil
+  @@last_variety    = nil
+
   if !defined?(URI_ESCAPE)
     URL_TRUNCATION_LENGTH = 60
 
@@ -101,20 +106,21 @@ class Textile < String
     end
 
     # Now turn bare urls into links.
-    gsub!(/([a-z]+:\/\/[^\s<>]+)/) do |url|
-      extra = url.sub!(/([^\w\/]+$)/, '') ? $1 : ''
-      url2 = ''
-      if url.length > URL_TRUNCATION_LENGTH and not url.starts_with?(HTTP_DOMAIN)
-        if url.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
+    gsub!(/([a-z]+:\/\/([^\s<>]|<span class="caps">[A-Z]+<\/span>)+)/) do |url|
+      url1  = url.gsub(/<span class="caps">([A-Z]+)<\/span>/, '\\1')
+      extra = url1.sub!(/([^\w\/]+$)/, '') ? $1 : ''
+      url2  = ''
+      if url1.length > URL_TRUNCATION_LENGTH and not url1.starts_with?(HTTP_DOMAIN)
+        if url1.match(/^(\w+:\/\/[^\/]+)(.*?)$/)
           url2 = $1 + '/...'
         else
-          url2 = url[0..URL_TRUNCATION_LENGTH] + '...'
+          url2 = url1[0..URL_TRUNCATION_LENGTH] + '...'
         end
       else
-        url2 = url
+        url2 = url1
       end
-      url.gsub!(/([ "%<>\\])/) {URI_ESCAPE[$1]}
-      "<a href=\"#{url}\">#{url2}</a>"
+      url1.gsub!(/([ "%<>\\])/) {URI_ESCAPE[$1]}
+      "<a href=\"#{url1}\">#{url2}</a>"
     end
 
     # Convert _object_ tags into proper links.
