@@ -390,8 +390,8 @@ class Observation < AbstractModel
     # If not, it means that a deprecated Synonym won.  Look up all Namings
     # for Synonyms of the consensus Name.
     if matches == [] && name && name.synonym
-      synonyms = name.synonym.names
-      matches = namings.select {|n| synonyms.include? n.name}
+      synonyms = name.synonyms
+      matches = namings.select {|n| synonyms.include?(n.name)}
     end
 
     # Only one match -- easy!
@@ -551,8 +551,11 @@ result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
     # Now deal with synonymy properly.  If there is a single accepted name,
     # great, otherwise we need to somehow disambiguate.
     if best && best.synonym
-      names = best.approved_synonyms
-      names = best.synonym.names if names.length == 0
+      # This does not allow the community to choose a deprecated synonym over
+      # an approved synonym.  See obs #45234 for reasonable-use case.
+      # names = best.approved_synonyms
+      # names = best.synonyms if names.length == 0
+      names = best.synonyms
       if names.length == 1
         best = names.first
       elsif names.length > 1
