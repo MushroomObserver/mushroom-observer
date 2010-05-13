@@ -559,7 +559,7 @@ result += "unmash: best=#{best ? best.text_name : "nil"}<br/>" if debug
       if names.length == 1
         best = names.first
       elsif names.length > 1
-result += "Multiple approved synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
+result += "Multiple synonyms: #{names.map {|x| x.id}.join(', ')}<br>" if debug
 
         # First combine votes for each name; exactly analagous to what we did
         # with taxa above.
