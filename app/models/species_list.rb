@@ -372,10 +372,10 @@ protected
       errors.add(:title, :validate_species_list_title_too_long.t)
     end
 
-    if self.where.to_s.blank?
-      errors.add(:where, :validate_species_list_where_missing.t)
-    elsif self.where.length > 100
-      errors.add(:where, :validate_species_list_where_too_long.t)
+    if self.where.to_s.blank? and !self.location
+      errors.add(:place_name, :validate_species_list_where_missing.t)
+    elsif self.where.to_s.length > 100
+      errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 
     if !self.user && !User.current
