@@ -445,13 +445,13 @@ permission_denied:  Permission denied.
 units_meters:  meters
 
 # Quality values.
-image_vote_long_0:  Unrated.
+image_vote_long_0:  No opinion.
 image_vote_long_1:  **Okay** but not so useful.
 image_vote_long_2:  **Useful** for identification.
 image_vote_long_3:  **Good** enough for a field guide.
 image_vote_long_4:  **Great!** Beyond the work of mortals.
 
-image_vote_help_0:  Unrated.
+image_vote_help_0:  No opinion.
 image_vote_help_1:  Okay but not so useful.
 image_vote_help_2:  Useful for identification.
 image_vote_help_3:  Good enough for a field guide.
@@ -2418,7 +2418,7 @@ show_name_content_status:  Description status
 show_name_latest_review:  "Latest review: [date] by [user]"
 show_name_previous_version:  Previous Version
 show_name_other_versions:  Other Versions
-show_name_observations:  "[:OBSERVATIONS]"
+show_name_observations:  "More [:OBSERVATIONS]"
 show_name_synonym_observations:  "Synonym [:OBSERVATIONS]"
 show_name_other_observations:  "Similar [:OBSERVATIONS]"
 show_name_subtaxa_observations:  "Subtaxa [:OBSERVATIONS]"

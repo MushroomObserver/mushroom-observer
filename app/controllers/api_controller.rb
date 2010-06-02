@@ -259,8 +259,9 @@ class ApiController < ApplicationController
         end
 
       when 'image'
-        if (value = Image.validate_vote(value)) and
+        if (value == '0' or (value = Image.validate_vote(value))) and
            (image = Image.safe_find(id))
+          value = nil if value == '0'
           image.change_vote(user, value)
           Transaction.put_image(:id => image, :_user => user,
                                 :set_vote => value)

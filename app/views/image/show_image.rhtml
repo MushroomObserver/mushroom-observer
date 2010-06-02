@@ -89,50 +89,22 @@
       <% if @user %>
         <p>
           <%= :image_show_your_vote.t %>:<br/>
-          <% current = @image.users_vote(@user)
-
-          # ----------------------------
-          #  Javascript on.
-          # ----------------------------
-          if @js
-            javascript_include('prototype')
-            javascript_include('image_vote')
-            current = @image.users_vote(@user) %>
-            <%= Image.all_votes.map do |value|
-              str = image_vote_as_long_string(value).t
-              str = if value == current
-                content_tag(:b, str)
-              else
-                link_to_function(str, "image_vote(#{@image.id},'#{value}')")
-              end
-              num = @image.num_votes(value)
-              str += " (#{num})" if num > 0
-              content_tag(:span, str, :id => "image_#{@image.id}_#{value}")
-            end.join('<br/>') %><br/><%
-
-          # ----------------------------
-          #  Javascript off.
-          # ----------------------------
-          else
-            if current %>
-              <%= link_to(:NEXT.l, :action => 'next_image',
-                          :id => @image.id, :params => query_params) %><br/>
+          <% current = @image.users_vote(@user).to_i
+          args = {:params => query_params, :id => @image.id}
+          args[:size] = @size if @size != @default_size
+          for value in [0] + Image.all_votes
+            str1 = image_vote_as_short_string(value)
+            str2 = image_vote_as_help_string(value)
+            str3 = :image_show_vote_and_next.t(:value => str1)
+            if value == current %>
+              <%= content_tag(:b, str2) %> |
+              <%= link_to(:NEXT.l, { :vote => value, :next => true }.
+                                merge(args)) %><br/>
+            <% else %>
+              <%= link_to(str2, { :vote => value }.merge(args)) %> |
+              <%= link_to(str3, { :vote => value, :next => true }.
+                                merge(args)) %><br/>
             <% end
-            for value in Image.all_votes
-              str1 = image_vote_as_short_string(value)
-              str2 = image_vote_as_help_string(value)
-              str3 = :image_show_vote_and_next.t(:value => str1)
-              if value == current %>
-                <b><%= content_tag(:span, str1, :title => str2) %></b><br/>
-              <% else %>
-                <%= link_to(str1, :action => 'cast_vote', :value => value,
-                            :id => @image.id, :params => query_params,
-                            :help => str2) %> |
-                <%= link_to(str3, :action => 'cast_vote', :value => value,
-                            :id => @image.id, :next => true,
-                            :params => query_params, :help => str2) %><br/>
-              <% end
-            end
           end %>
         </p>
       <% end %>

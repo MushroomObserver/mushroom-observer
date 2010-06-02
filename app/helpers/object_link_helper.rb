@@ -254,6 +254,7 @@ module ApplicationHelper::ObjectLink
     if num && num > 0
       num += 1
       num = 8 if num > 8
+      row1 += content_tag(:td, '', :height => num) if cur.to_i > 0
       Image.all_votes.map do |val|
         if val <= avg
           str = content_tag(:div, '', :class => 'on')
@@ -270,6 +271,10 @@ module ApplicationHelper::ObjectLink
     end
 
     row2 = ''
+    str = link_to_function('(X)', "image_vote(#{id},0)",
+                           :title => :image_vote_help_0.l)
+    str += indent(5)
+    row2 += content_tag(:td, content_tag(:small, str)) if cur.to_i > 0
     Image.all_votes.map do |val|
       str1 = image_vote_as_short_string(val)
       str2 = image_vote_as_help_string(val)
@@ -279,7 +284,7 @@ module ApplicationHelper::ObjectLink
         str = link_to_function(str1, "image_vote(#{id},'#{val}')",
                                :title => str2)
       end
-      str = '&nbsp;|&nbsp;' + str if val != 1
+      str = '&nbsp;|&nbsp;' + str if val > 1
       row2 += content_tag(:td, content_tag(:small, str))
     end
     row2 = content_tag(:tr, row2)

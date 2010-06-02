@@ -178,7 +178,6 @@ class ImageController < ApplicationController
     store_location
     if @image = find_or_goto_index(Image, params[:id],
                         :include => [:user, {:observations => :name}])
-      update_view_stats(@image)
       @is_reviewer = is_reviewer
       pass_query_params
 
@@ -209,6 +208,30 @@ class ImageController < ApplicationController
                                  :observation => obs, :outer => obs_query)
         set_query_params(img_query)
       end
+
+      # Cast user's vote if passed in 'vote' parameter.
+      if (val = params[:vote]) and
+         (val == '0' or (val = Image.validate_vote(val)))
+        val = nil if val == '0'
+        cur = @image.users_vote
+        if cur != val
+          @image.change_vote(@user, val)
+          Transaction.put_images(:id => @image, :set_vote => val)
+        end
+        
+        # Advance to next image automatically if 'next' parameter set.
+        if params[:next]
+          query = find_or_create_query(Image)
+          query.current = @image
+          if query.index(@image) and
+             (query = query.next)
+            @image = query.current
+          end
+        end
+      end
+
+      # Update view stats on image we're actually showing.
+      update_view_stats(@image)
     end
   end
 
