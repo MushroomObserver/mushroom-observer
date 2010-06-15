@@ -615,6 +615,10 @@ class NameController < ApplicationController
         else
           matches = Name.find_all_by_text_name(text_name)
         end
+flash_notice("text_name: #{text_name.inspect}")
+flash_notice("author: #{author.inspect}")
+flash_notice("name_str: #{name_str.inspect}")
+flash_notice("matches: #{matches.inspect}")
 
         # Take first one that isn't us if there are several matches.  This is
         # the name that we will merge this name into.
@@ -672,8 +676,11 @@ class NameController < ApplicationController
 
         # Not merging.
         else
-          # This can be blank if name in use and therefore not editable.
-          if !text_name.blank?
+          # Text_name is blank if the name is in use (therefore not editable).
+          if !text_name.blank? ||
+             # However let user fill in missing authority, even if in use.
+             @name.author.blank? && !author.blank?
+            text_name = @name.text_name if text_name.blank?
             @name.change_text_name(text_name, author, rank, :save_parents)
           end
 
