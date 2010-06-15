@@ -615,10 +615,6 @@ class NameController < ApplicationController
         else
           matches = Name.find_all_by_text_name(text_name)
         end
-flash_notice("text_name: #{text_name.inspect}")
-flash_notice("author: #{author.inspect}")
-flash_notice("name_str: #{name_str.inspect}")
-flash_notice("matches: #{matches.inspect}")
 
         # Take first one that isn't us if there are several matches.  This is
         # the name that we will merge this name into.
