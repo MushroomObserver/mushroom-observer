@@ -214,6 +214,7 @@ class LocationController < ApplicationController
     # Simple coercions.
     when :with_observations_in_set
       flavor = :in_set
+      args.delete(:old_title)
     when :with_observations_in_species_list
       flavor = :in_species_list
     when :with_observations_of_children
