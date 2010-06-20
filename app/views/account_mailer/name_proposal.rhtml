@@ -31,7 +31,7 @@
   links.push([:email_links_latest_changes.l,
     HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
   <title>Mushroom Observer: <%= @subject %></title>
@@ -48,8 +48,7 @@ if @user.email_html ######################################################### %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= fields.tp.html_to_ascii %>
 
@@ -60,4 +59,4 @@ if @user.email_html ######################################################### %>
     result += "#{label}: #{url}\n"
   end
   result %>
-<% end ###################################################################### %>
+<% end %>

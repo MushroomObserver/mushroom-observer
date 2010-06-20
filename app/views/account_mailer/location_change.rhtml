@@ -25,7 +25,7 @@
 
   intro = :email_object_change_intro.l(
     :type => :location,
-    :name => "#{@old_loc.display_name} (#{@new_loc.id})"
+    :name => "#{Location.user_name(@user, @old_loc.name)} (#{@new_loc.id})"
   )
 
   fields = ""
@@ -35,7 +35,7 @@
   license = @new_desc ? @new_desc.license : nil
 
   one_liners = ''
-  one_liners += "*#{:Name.l} #{is_now}:* #{@new_loc.display_name}\n"          if @new_loc.display_name != @old_loc.display_name
+  one_liners += "*#{:Name.l} #{is_now}:* #{@new_loc.display_name}\n"          if @new_loc.name != @old_loc.name
   one_liners += "*#{:email_field_north.l} #{is_now}:* #{@new_loc.north}\n"    if @new_loc.north != @old_loc.north
   one_liners += "*#{:email_field_south.l} #{is_now}:* #{@new_loc.south}\n"    if @new_loc.south != @old_loc.south
   one_liners += "*#{:email_field_east.l} #{is_now}:* #{@new_loc.east}\n"      if @new_loc.east  != @old_loc.east
@@ -73,7 +73,7 @@
   links.push([:email_links_latest_changes.l,
     HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
 <title>Mushroom Observer: <%= @subject %></title>
@@ -97,8 +97,7 @@ if @user.email_html ######################################################### %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= fields.tp.html_to_ascii %>
 
@@ -116,4 +115,4 @@ if @user.email_html ######################################################### %>
     result += "#{label}: #{url}\n"
   end
   result %>
-<% end ###################################################################### %>
+<% end %>
