@@ -33,7 +33,7 @@
 
 class QueuedEmail::LocationChange < QueuedEmail
   def location;                get_object(:location, ::Location);     end
-  def description;             get_object(:description, ::LocationDescription); end
+  def description;             get_object(:description, ::LocationDescription, :nil_okay); end
   def old_location_version;    get_integer(:old_location_version);    end
   def new_location_version;    get_integer(:new_location_version);    end
   def old_description_version; get_integer(:old_description_version); end
@@ -46,8 +46,7 @@ class QueuedEmail::LocationChange < QueuedEmail
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
       result.add_integer(:old_location_version, (location.altered? ? location.version - 1 : location.version))
-    else
-      location = desc.location
+    elsif location = desc.location
       result.add_integer(:location, location.id)
       result.add_integer(:new_location_version, location.version)
       result.add_integer(:old_location_version, location.version)
@@ -56,8 +55,7 @@ class QueuedEmail::LocationChange < QueuedEmail
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
       result.add_integer(:old_description_version, (desc.altered? ? desc.version - 1 : desc.version))
-    else
-      desc = location.description
+    elsif desc = location.description
       result.add_integer(:description, desc.id)
       result.add_integer(:new_description_version, desc.version)
       result.add_integer(:old_description_version, desc.version)
