@@ -1,4 +1,4 @@
-/* Build with: gcc thumbnail.c -ljpeg -lm -O2 -o thumbnail
+/* Build with: gcc jpegresize.c -ljpeg -lm -O2 -o jpegresize
 /*
 /* runtime:  flags:
 /* 2.8956
@@ -33,7 +33,7 @@
 
 #define PI 3.14159265358979
 
-#define USAGE "thumbnail [-flags] [-param <val>] <w>x<h> <input.jpg> <output.jpg>"
+#define USAGE "jpegresize [-flags] [-param <val>] <w>x<h> <input.jpg> <output.jpg>"
 
 void  bad_usage(char*, char*);
 char* remove_arg(char**, int*, int);

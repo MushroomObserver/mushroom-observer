@@ -41,8 +41,10 @@ Dir.foreach(ORIG) do |file|
     file = "#{ORIG}/#{file}"
     file2 = file.sub('orig', '640')
     file3 = file.sub('orig', 'thumb')
-    if system "convert -thumbnail '640x640>' -quality 70 #{file} #{file2}" and
-       system "convert -thumbnail '160x160>' -quality 90 #{file} #{file3}"
+    # if system("convert -thumbnail '640x640>' -quality 70 #{file} #{file2}") and
+    #    system("convert -thumbnail '160x160>' -quality 90 #{file} #{file3}")
+    if system("jpegresize 640x640 -q 70 --max-size #{file} #{file2}") and
+       system("jpegresize 160x160 -q 90 --max-size #{file} #{file3}")
       File.open(DONE, 'a') do |log|
         log.puts id
       end

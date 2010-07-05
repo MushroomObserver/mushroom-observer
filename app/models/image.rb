@@ -82,9 +82,9 @@
 #
 #  6. Next it resizes the original using ImageMagick:
 #
-#       convert -thumbnail '160x160>' -quality 90 orig/$id.jpg thumb/$id.jpg
-#       convert -thumbnail '320x320>' -quality 80 orig/$id.jpg 320/$id.jpg
-#       convert -thumbnail '640x640>' -quality 70 orig/$id.jpg 640/$id.jpg
+#       jpegresize 160x160 -q 90 --max-size orig/$id.jpg thumb/$id.jpg
+#       jpegresize 320x320 -q 80 --max-size orig/$id.jpg 320/$id.jpg
+#       jpegresize 640x640 -q 70 --max-size orig/$id.jpg 640/$id.jpg
 #       etc.
 #
 #  7. Lastly it transfers all the images to the image server:

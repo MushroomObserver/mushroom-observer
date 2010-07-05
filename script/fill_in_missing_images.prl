@@ -49,7 +49,9 @@ sub process_missing {
   @got{@$got} = ();
   foreach my $id (@$need) {
     next if exists $got{$id};
-    my $cmd = "convert -thumbnail '${size}x${size}>' -quality $quality ".
+    # my $cmd = "convert -thumbnail '${size}x${size}>' -quality $quality ".
+    #           "$size2/$id.jpg $path/$id.jpg";
+    my $cmd = "jpegresize ${size}x${size} -q $quality --max-size ".
               "$size2/$id.jpg $path/$id.jpg";
     print "$cmd\n";
     system($cmd);
