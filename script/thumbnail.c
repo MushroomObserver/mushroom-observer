@@ -24,6 +24,13 @@
 #define F_KEYS      6
 #define F_LANCZOS   7
 
+#define M_SET_SIZE  1
+#define M_MAX_SIZE  2
+#define M_MIN_SIZE  3
+#define M_SET_AREA  4
+#define M_MAX_AREA  5
+#define M_MIN_AREA  6
+
 #define PI 3.14159265358979
 
 #define USAGE "thumbnail [-flags] [-param <val>] <w>x<h> <input.jpg> <output.jpg>"
@@ -62,6 +69,7 @@ int main(int argc, char **argv) {
     float **ptrs;  /* pointers into input buffer, one for each scanline */
     JSAMPLE *line; /* input/output buffer */
     float *fx,*fy; /* convolution kernel cache */
+    int mode;      /* resize mode (see M_SET_SIZE, etc.) */
     int quality;   /* jpeg quality: 0 to 100 */
     int len;       /* length of one line in data */
     int w1, h1;    /* size of input image */
@@ -94,6 +102,13 @@ int main(int argc, char **argv) {
         printf("    <input.jpg>         Input image.  Must be 'normal' RGB color JPEG.\n");
         printf("    <output.jpg>        Output image.  Clobbers any existing file.\n");
         printf("\n");
+        printf("    --set-size          Default mode: set to given size, ignoring aspect ratio.\n");
+        printf("    --set-area          Keep aspect ratio, reducing/enlarging to area of given box.\n");
+        printf("    --max-size          Keep aspect ratio, reducing to within given box.\n");
+        printf("    --max-area          Keep aspect ratio, reducing to area of given box.\n");
+        printf("    --min-size          Keep aspect ratio, enlarging to contain given box.\n");
+        printf("    --min-area          Keep aspect ratio, enlarging to area of given box.\n");
+        printf("\n");
         printf("    -q --quality <pct>  JPEG quality of output image; default depends on size.\n");
         printf("    -r --radius <n>     Radius of convolution kernel, > 0; default is 1.0.\n");
         printf("    -s --sharp <n>      Amount to sharpen output, >= 0; default is 0.2.\n");
@@ -120,6 +135,14 @@ int main(int argc, char **argv) {
     sharp   = get_value(argv, &argc, "-s", "--sharp", 0.2);
     verbose = get_flag(argv, &argc, "-v", "--verbose");
     kernel  = get_flag(argv, &argc, "-k", "--kernel");
+
+    /* Only allowed one mode flag. */
+    mode = get_flag(argv, &argc, "--set-size", 0) ? M_SET_SIZE :
+           get_flag(argv, &argc, "--max-size", 0) ? M_MAX_SIZE :
+           get_flag(argv, &argc, "--min-size", 0) ? M_MIN_SIZE :
+           get_flag(argv, &argc, "--set-area", 0) ? M_SET_AREA :
+           get_flag(argv, &argc, "--max-area", 0) ? M_MAX_AREA :
+           get_flag(argv, &argc, "--min-area", 0) ? M_MIN_AREA : M_SET_SIZE;
 
     /* Each filter type takes different arguments. */
     if (get_filter(argv, &argc, "--flat", 0, 0, 0)) {
@@ -156,22 +179,6 @@ int main(int argc, char **argv) {
     file2 = get_file(argv, &argc);
     if (argc > 1) bad_usage("unexpected argument: %s", argv[1]);
 
-    if (verbose) {
-        printf("input:   %s\n", file1);
-        printf("output:  %s\n", file2);
-        printf("width:   %d\n", w2);
-        printf("height:  %d\n", h2);
-        printf("quality: %d\n", quality);
-        printf("radius:  %f\n", radius);
-        printf("sharp:   %f\n", sharp);
-        if (filter == F_FLAT)    printf("filter:  flat\n");
-        if (filter == F_LINEAR)  printf("filter:  bilinear\n");
-        if (filter == F_HERMITE) printf("filter:  hermite\n");
-        if (filter == F_CATROM)  printf("filter:  Catmull-Rom (M=%f)\n", arg1);
-        if (filter == F_KEYS)    printf("filter:  Keys-family (B=%f, C=%f)\n", arg1, arg2);
-        if (filter == F_LANCZOS) printf("filter:  Lanczos (N=%f)\n", arg1);
-    }
-
     /* Create and initialize decompress object. */
     dinfo.err = jpeg_std_error(&jerr);
     jpeg_create_decompress(&dinfo);
@@ -190,6 +197,68 @@ int main(int argc, char **argv) {
         dinfo.output_components != 3) {
         fprintf(stderr, "JPEG image is not standard RGB.\n");
         exit(1);
+    }
+
+    /* Choose output size. */
+    if (mode == M_SET_SIZE) {
+        /* leave as is */
+    } else if (mode == M_MAX_SIZE) {
+        if (w1 > w2 && h1 * w2 / w1 < h2) {
+            h2 = h1 * w2 / w1 + 0.5;
+        } else if (h1 > h2) {
+            w2 = w1 * h2 / h1 + 0.5;
+        } else {
+            w2 = w1;
+            h2 = h1;
+        }
+    } else if (mode == M_MIN_SIZE) {
+        if (w1 < w2 && h1 * w2 / w1 > h2) {
+            h2 = h1 * w2 / w1 + 0.5;
+        } else if (h1 < h2) {
+            w2 = w1 * h2 / h1 + 0.5;
+        } else {
+            w2 = w1;
+            h2 = h1;
+        }
+    } else if (mode == M_SET_AREA) {
+        double f = sqrt(((double)w2) * h2 / w1 / h1);
+        w2 = w1 * f + 0.5;
+        h2 = h1 * f + 0.5;
+    } else if (mode == M_MAX_AREA) {
+        if (w1 * h1 > w2 * h2) {
+            double f = sqrt(((double)w2) * h2 / w1 / h1);
+            w2 = w1 * f + 0.5;
+            h2 = h1 * f + 0.5;
+        } else {
+            w2 = w1;
+            h2 = h1;
+        }
+    } else if (mode == M_MIN_AREA) {
+        if (w1 * h1 < w2 * h2) {
+            double f = sqrt(((double)w2) * h2 / w1 / h1);
+            w2 = w1 * f + 0.5;
+            h2 = h1 * f + 0.5;
+        } else {
+            w2 = w1;
+            h2 = h1;
+        }
+    } else {
+        fprintf(stderr, "invalid mode: %d!", mode);
+        exit(1);
+    }
+
+    if (verbose) {
+        printf("input:   %dx%d %s\n", w1, h1, file1);
+        printf("output:  %dx%d %s\n", w2, h2, file2);
+        printf("quality: %d\n", quality);
+        printf("radius:  %f\n", radius);
+        printf("sharp:   %f\n", sharp);
+        if (filter == F_FLAT)    printf("filter:  flat\n");
+        if (filter == F_LINEAR)  printf("filter:  bilinear\n");
+        if (filter == F_HERMITE) printf("filter:  hermite\n");
+        if (filter == F_CATROM)  printf("filter:  Catmull-Rom (M=%f)\n", arg1);
+        if (filter == F_KEYS)    printf("filter:  Keys-family (B=%f, C=%f)\n", arg1, arg2);
+        if (filter == F_LANCZOS) printf("filter:  Lanczos (N=%f)\n", arg1);
     }
 
     /* Calculate size of convolution kernel. */
