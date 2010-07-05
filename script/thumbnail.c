@@ -256,15 +256,13 @@ int main(int argc, char **argv) {
     for (x2=0, ptr3=fx; x2<w2; x2++) {
         xf = ((float)x2) * w1 / w2;
         for (i=0, x=(int)xf-xo; i<w3; i++, x++) {
-            *ptr3++ = 1.0;
-            /* *ptr3++ = calc_factor(fabs(xf-x) / ax); */
+            *ptr3++ = calc_factor(fabs(xf-x) / ax);
         }
     }
     for (y2=0, ptr3=fy; y2<h2; y2++) {
         yf = ((float)y2) * h1 / h2;
         for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
-            *ptr3++ = 1.0;
-            /* *ptr3++ = calc_factor(fabs(yf-y) / ay); */
+            *ptr3++ = calc_factor(fabs(yf-y) / ay);
         }
     }
 
