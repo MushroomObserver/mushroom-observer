@@ -13,7 +13,7 @@ Estimated time: An hour or two
 root> yum update
 root> yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
 root> yum install ImageMagick subversion httpd mysql-devel mysql-server monit
-root> yum install ruby ruby-devel rubygem-mongrel
+root> yum install ruby ruby-devel rubygem-mongrel libjpeg-devel
 
 # Setup clock to PDT (actually did this at the end so it might have to happen later)
 root> cp /etc/localtime /etc/localtime-orig
@@ -237,6 +237,11 @@ jason> echo "This is a test." | mutt -s test pellaea@gmail.com
     so that it looks at /etc/hosts before looking up ip on dns)
     (note also that /etc/hosts is cached via nscd, try
     "service nscd reload")
+
+# Build jpegresize
+jason> cd /var/web/mo/script
+jason> gcc jpegresize.c -ljpeg -lm -O2 -o jpegresize
+root> cp jpegresize /usr/bin
 
 # Place server into production mode.
 root> vi /etc/httpd/conf/httpd.conf
