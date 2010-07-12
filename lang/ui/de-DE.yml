@@ -3990,7 +3990,7 @@ intro_image_sharing: >
 intro_source_code: >
   *Quellcode:* Der Quellcode dieser Webseite kann unter "[repo]":[repo] abgerufen werden,
   unter der "Open Source MIT Lizenz":http://www.opensource.org/licenses/mit-license.php.
-  Beiträge zum Quellcode sind erwünscht. Hier eine Liste der "geplanten Erweiterungen":[todo_list].
+  Beiträge zum Quellcode sind erwünscht ("README":[readme]). Hier eine Liste der "geplanten Erweiterungen":[todo_list].
   Wir freuen uns über alle Kommentare und Anregungen. Wenn du beitragen willst, schicke bitte eine
   Email an *nathan at collectivesource.com*, damit wir unsere Energien bündeln können.
 

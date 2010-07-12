@@ -3992,7 +3992,7 @@ intro_source_code: >
   *Código Fonte:* O código fonte desse site está disponível em:
   "[repo]":[repo] e está licenciado nos termos da
   "Open Source MIT License":http://www.opensource.org/licenses/mit-license.php.
-  Contribuições são bem-vindas.  Aqui você encontra a lista de "recursos planejados":[todo_list].
+  Contribuições são bem-vindas ("README":[readme]).  Aqui você encontra a lista de "recursos planejados":[todo_list].
   Sugestões e comentários são bem-vindos.  Se você quiser contribuir, por
   favor envie uma mensagem para: *nathan at collectivesource.com* e assim
   poderemos coordenar nossos esforços.

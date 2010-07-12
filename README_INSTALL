@@ -1,5 +1,8 @@
 The following are notes I took while setting up a local, self-contained
 version of MushroomObserver.org on an installation of Ubuntu 6.10, Edgy Eft.
+Please send us an updated version of this document if you find errors or
+differences for your platform of choice.  Feel free to get in touch if you
+get stuck.
 
 Get software using Synaptic Package Manager
 (System -> Administration -> Synaptic Package Manager)
@@ -31,10 +34,10 @@ Secured automatically created accounts:
   mysql> SET PASSWORD FOR '<user>'@'<host>' = PASSWORD('<newpwd>');
 
 Get Mushroom Observer source
-  shell> svn checkout http://svn.collectivesource.com/mushroom_sightings/
+  shell> svn checkout http://svn.collectivesource.com/mushroom_sightings/trunk
 
 Create database.yml from database.yml-template
-  shell> cd mushroom_sightings/trunk/config
+  shell> cd trunk/config
   shell> cp database.yml-template database.yml
 
 Edit the passwords in database.yml.  You can also change the usernames

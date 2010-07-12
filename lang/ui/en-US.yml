@@ -3988,7 +3988,7 @@ intro_source_code: >
   *Source Code:* Source code for the site is available at: "[repo]":[repo] and
   is licensed under the "Open Source MIT
   License":http://www.opensource.org/licenses/mit-license.php.  Source code
-  contributions are welcome.  Here's a list of "planned features":[todo_list].
+  contributions are welcome ("README":[readme]). Here's a list of "planned features":[todo_list].
   All suggestions and comments are welcome.  If you would like to contribute,
   please send mail to *nathan at collectivesource.com* so we can coordinate
   our efforts.

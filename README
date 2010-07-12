@@ -1,8 +1,11 @@
+Last Revised: July 11, 2010
 
 = MushroomObserver
 
-I'll let Nathan introduce his website.  Instead I will just give an overview of
-the code for prospective developers.
+The following is an overview of the code for the Mushroom Observer website for
+prospective developers.  See http://mushroomobserver.org/observer/intro for an
+introduction to the website itself.  This version of the README is not completely
+up to date, but I've added some notes where I know there are inconsistencies.
 
 
 
@@ -17,12 +20,14 @@ just checkout a copy, and give it a shot.  (The latest stable release is in
 I'm pretty sure you must be running a Unix-type O/S, Linux and MacOSX have been
 tested, but I know Rails and Mysql and everything else MO needs is available in
 Windows, so feel free to be the first to try it out!  Nathan has written up excellent
-notes describing how he's installed it on Ubuntu 6.10, Edgy Eft (see below).
+notes describing how he's installed it on Ubuntu 6.10, Edgy Eft (see README_INSTALL).
 
-You'll at very least need to install ruby, rails and mysql.  Fortunately
-these are all very popular so it's easy to find pre-built binaries for most
-operating systems.  I was hopeless at system administration when I started,
-and I had no trouble getting it up and running in an hour or two.
+You'll at very least need to install ruby (1.8.7: the code hasn't been tested
+with 1.9), rails (2.1.1: we really need to upgrade to 2.3, but it's not backwards
+compatible) and mysql (5.1.47 is known to work, but later ones probably will as
+well).  Fortunately these are all very popular so it's easy to find pre-built
+binaries for most operating systems.  I was hopeless at system administration
+when I started, and I had no trouble getting it up and running in an hour or two.
 
 For more information:
 
@@ -72,7 +77,8 @@ test
   Used by unit tests.  All changes are thrown away between each test.  And
   probably a host of other technical things.
 
-For more information:
+For more information (note that most of these no longer discuss Rails 2.1,
+but you should be able to find the docs for this version by digging a bit):
 
 Ruby Documentation:: http://www.ruby-doc.org/core/
 Ruby Quick Ref:: http://www.zenspider.com/Languages/Ruby/QuickRef.html
@@ -97,7 +103,9 @@ handled using the handy migrations in <tt>db/migrate</tt>.
 Access is all done via subclasses of ActiveRecord::Base.  Look for observations
 in the class Observation, user/account settings in User, taxonomy in Name and
 Synonym, and so on.  These are all found in <tt>app/models</tt>.  Here are the
-major ones:
+major ones [Note: As of April 2010, we've broken up Names and Locations to add
+NameDescriptions and LocationDescriptions, so the following is not completely
+accurate, but you'll get the idea]:
 
 User::              Users: name, email, password, prefs, etc.
 Observation::       Observations: where, when, what, notes.
@@ -125,8 +133,8 @@ FeatureEmail::       Subclass of QueuedEmail, for site-wide emails.
 And a few other random database classes:
 
 Synonym::           Group of synonymized Name's.
-PastName::          Old versions of Name's.
-PastLocation::      Old versions of Location's.
+PastName::          Old versions of Name's. (deprecated: using the acts_as_version plugin now)
+PastLocation::      Old versions of Location's. (deprecated: using the acts_as_version plugin now)
 License::           Types of licenses available for Image's to use.
 RssLog::            Used to report changes via RSS feed.
 
@@ -136,8 +144,8 @@ The following non-database-related classes are also found in
 AccountMailer::     Used to actually send an email
 NameParse::         Used by Name to parse scientific names.
 NameSorter::        Used by Name to... I don't remember.
-SearchState::       Used to keep track of search queries.
-SequenceState::     Used to keep track of prev/next position.
+SearchState::       Used to keep track of search queries. (Note: Jason totally rewrote this stuff.)
+SequenceState::     Used to keep track of prev/next position. (Note: Jason totally rewrote this stuff.)
 SiteData::          Used to calculate number of objects people have created.
 
 For those who prefer a graphical representation: (Arrow denotes "belongs to".)
