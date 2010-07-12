@@ -1078,7 +1078,7 @@ class API
     raise error(102, 'missing west')  if !west
 
     # Check if already exists.
-    if Location.find_by_display_name(name)
+    if Location.find_by_name(name)
       raise error(202, "location already exists")
     end
 
@@ -1568,7 +1568,7 @@ class API
       must_authenticate
       obj.attributes = sets
       # Check for merge.
-      merge = Location.find_by_display_name(obj.display_name)
+      merge = Location.find_by_name(obj.name)
       if merge == obj
         save_changes(obj)
       else
@@ -2196,7 +2196,7 @@ private
     if x = parse_string(arg, 100)
       if (loc = Location.safe_find(x)) or
          (loc = Location.find_by_sync_id(x)) or
-         (loc = Location.find_by_display_name(x))
+         (loc = Location.find_by_name(x))
         result = [loc, nil]
       else
         result = [nil, x]

@@ -56,7 +56,7 @@ class LurkerTest < IntegrationTestCase
 
     # Check out location.
     go_back
-    click(:label => 'Burbank, Los Angeles')
+    click(:label => 'Burbank, California') # Don't include USA due to <span>
     assert_template('location/show_location')
 
     # Check out species list.

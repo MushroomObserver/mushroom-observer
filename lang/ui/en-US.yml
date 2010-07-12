@@ -623,7 +623,7 @@ query_title_advanced_search: "[:app_advanced_search]"
 query_title_all: "[TYPE] Index"
 query_title_all_by: "[TYPES] by [ORDER]"
 query_title_at_location: "[TYPES] from [LOCATION]"
-query_title_at_where: "[TYPES] from '[LOCATION]'"
+query_title_at_where: "[TYPES] from '[USER_WHERE]'"
 query_title_by_author: "[TYPES] Authored by [USER]"
 query_title_by_editor: "[TYPES] Edited by [USER]"
 query_title_by_rss_log: "[TYPES] in Activity Log"
@@ -898,7 +898,7 @@ validate_image_user_missing: "[:validate_missing(field=:user)]"
 validate_image_when_missing: "[:validate_missing(field=:date)]"
 validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
 validate_interest_user_missing: "[:validate_missing(field=:user)]"
-validate_location_display_name_too_long: "[:validate_too_long(field=:name,max=200)]"
+validate_location_name_too_long: "[:validate_too_long(field=''name'',max=200)]"
 validate_location_east_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
 validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
 validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
@@ -2213,6 +2213,9 @@ prefs_password_new: New password
 prefs_password_confirm: Confirm new password
 prefs_theme: Preferred theme
 prefs_locale: Language
+prefs_location_format: Location Format
+prefs_location_format_postal: "Postal (New York, USA)"
+prefs_location_format_scientific: "Scientific (USA, New York)"
 prefs_votes_anonymous: Votes on proposed names
 prefs_votes_anonymous_no: Always public
 prefs_votes_anonymous_yes: Always anonymous
@@ -2386,7 +2389,7 @@ show_location_create_description: "[:CREATE]"
 show_location_creator: User who defined this location
 show_location_editor: "[:Editors]"
 show_location_editors: "[:Editors]"
-
+show_location_reverse: Reverse Location
 
 
 # name/show_name

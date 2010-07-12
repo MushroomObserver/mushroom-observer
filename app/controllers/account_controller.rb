@@ -285,6 +285,7 @@ class AccountController < ApplicationController
         [ :str,  :locale,          true ],
         [ :int,  :license_id,      true ],
         [ :str,  :votes_anonymous, true ],
+        [ :str,  :location_format, true ],
         [ :bool, :email_html,      true ],
         [ :str,  :theme ],
         [ :int,  :rows ],
@@ -364,7 +365,7 @@ class AccountController < ApplicationController
       # Make sure the given location exists before accepting it.
       @place_name = params['user']['place_name'].to_s
       if !@place_name.blank?
-        location = Location.find_by_display_name(@place_name)
+        location = Location.search_by_name(@place_name)
         if !location
           need_to_create_location = true
         elsif @user.location != location

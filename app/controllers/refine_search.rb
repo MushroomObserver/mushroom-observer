@@ -1225,7 +1225,7 @@ module RefineSearch
       case model.name
       when 'Location'
         pattern = Query.clean_pattern(Location.clean_name(val, :leave_stars))
-        obj = Location.find_by_display_name(val) ||
+        obj = Location.search_by_name(val) ||
               Location.first(:conditions => "search_name LIKE '%#{pattern}%'")
       when 'Name'
         obj = Name.find_by_search_name(val) ||

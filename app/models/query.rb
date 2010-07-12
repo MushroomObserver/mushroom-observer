@@ -157,6 +157,7 @@ class Query < AbstractQuery
     },
     :at_where => {
       :location => :string,
+      :user_where => :string,
     },
     :by_author => {
       :user => User,
@@ -218,6 +219,7 @@ class Query < AbstractQuery
     },
     :with_observations_at_where => {
       :location => :string,
+      :user_where => :string,
     },
     :with_observations_by_user => {
       :user => User,

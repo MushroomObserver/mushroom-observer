@@ -222,7 +222,11 @@ class AccountMailer < ActionMailer::Base
     new_desc             = desc; desc.revert_to(new_desc_version) if desc
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_subject_location_change.l(:name => old_loc.display_name)
+    
+    # Ideally there would be an old_loc.display_name, but I don't know where that would go
+    old_loc_name = Location.user_name(@user, old_loc.name)
+    
+    @subject             = :email_subject_location_change.l(:name => old_loc_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender

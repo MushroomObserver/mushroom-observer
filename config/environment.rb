@@ -77,6 +77,10 @@ PRODUCTION  = (RAILS_ENV == 'production')
 DEVELOPMENT = (RAILS_ENV == 'development')
 TESTING     = (RAILS_ENV == 'test')
 
+# Should be one of [:normal, :silent]
+# :silent turns off event logging and email notifications
+RUN_LEVEL = :normal # :silent
+
 # Do site-specific global constants first.
 file = File.join(File.dirname(__FILE__), 'consts-site')
 require file if File.exists?(file + '.rb')

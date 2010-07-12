@@ -48,6 +48,7 @@
           <table cellpadding="5" cellspacing="0" width="100%">          
             <% odd_or_even = 0
             for loc, cnt in @undef_data
+              loc = Location.reverse_name(loc) if @undef_location_format == :scientific
               odd_or_even = 1 - odd_or_even %>
               <tr valign="top" class="ListLine<%= odd_or_even %>">
                 <td width="100%">

@@ -5,7 +5,7 @@ class LocationTest < UnitTestCase
   def test_versioning
     User.current = @mary
     loc = Location.create!(
-      :display_name => 'Anywhere',
+      :name => 'Anywhere',
       :north        => 60,
       :south        => 50,
       :east         => 40,

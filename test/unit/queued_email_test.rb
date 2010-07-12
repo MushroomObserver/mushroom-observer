@@ -2,6 +2,10 @@ require File.dirname(__FILE__) + '/../boot'
 
 class QueuedEmailTest < UnitTestCase
 
+  def test_not_silent
+    assert(RUN_LEVEL != :silent)
+  end
+  
   def test_comment_email
     QueuedEmail::CommentAdd.find_or_create_email(@rolf, @mary, comments(:minimal_comment))
     assert_email(0,

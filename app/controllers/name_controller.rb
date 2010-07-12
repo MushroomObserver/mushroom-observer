@@ -152,7 +152,6 @@ class NameController < ApplicationController
             FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
         AND names.rank = 'Species'
-        AND (names.gen_desc IS NULL OR names.gen_desc = '')
         AND name_counts.count > 1
         AND descriptions.name_id IS NULL
         AND CURRENT_TIMESTAMP - modified > #{1.week.to_i}
@@ -161,7 +160,7 @@ class NameController < ApplicationController
     )
     @help = :needed_descriptions_help
     query = create_query(:Name, :in_set, :ids => data.map(&:first),
-                         :title => ":needed_descriptions_title")
+                         :title => :needed_descriptions_title.l)
     show_selected_names(query, :num_per_page => 100) do |name|
       # Add number of observations (parenthetically).
       row = data.select {|id,count| id == name.id}.first
@@ -678,6 +677,8 @@ class NameController < ApplicationController
              @name.author.blank? && !author.blank?
             text_name = @name.text_name if text_name.blank?
             @name.change_text_name(text_name, author, rank, :save_parents)
+          elsif @name.author.blank? and !author.blank?
+            @name.change_text_name(@name.text_name, author, @name.rank, :save_parents)
           end
 
           @name.citation = params[:name][:citation].to_s.strip_squeeze rescue ''

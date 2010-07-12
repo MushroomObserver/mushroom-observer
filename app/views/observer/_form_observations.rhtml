@@ -4,6 +4,12 @@
 <%= date_select('observation', 'when', :start_year => 1980,
                 :end_year => Time.now.year) %><br/><br/>
 
+<% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
+  <div class="Errors">
+    <%= @dubious_where_reasons.join('<br/>') %>
+  </div>
+<% end %>
+
 <span style='white-space:nowrap'>
   <label for="observation_place_name"><%= :WHERE.t %>: (<%= :required.t %>)</label>
   <%= text_field('observation', 'place_name', :size => 60) %>

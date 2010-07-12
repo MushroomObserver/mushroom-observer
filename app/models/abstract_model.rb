@@ -455,20 +455,22 @@ class AbstractModel < ActiveRecord::Base
 
   # Do we log this event? and how?
   def autolog_event(event, orphan=nil)
-    if autolog_events.include?(event)
-      touch = false
-    elsif autolog_events.include?("#{event}!".to_sym)
-      touch = true
-    else
-      touch = nil
-    end
-    if touch != nil
-      type = self.type_tag
-      msg = "log_#{type}_#{event}".to_sym
-      if orphan
-        orphan_log(msg, :touch => touch)
+    if RUN_LEVEL != :silent
+      if autolog_events.include?(event)
+        touch = false
+      elsif autolog_events.include?("#{event}!".to_sym)
+        touch = true
       else
-        log(msg, :touch => touch)
+        touch = nil
+      end
+      if touch != nil
+        type = self.type_tag
+        msg = "log_#{type}_#{event}".to_sym
+        if orphan
+          orphan_log(msg, :touch => touch)
+        else
+          log(msg, :touch => touch)
+        end
       end
     end
   end

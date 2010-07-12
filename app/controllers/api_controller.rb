@@ -175,10 +175,13 @@ class ApiController < ApplicationController
           WHERE `where` LIKE '#{letter}%' OR
                 `where` LIKE '% #{letter}%'
         )) + Location.connection.select_values(%(
-          SELECT DISTINCT `display_name` FROM locations
+          SELECT DISTINCT `name` FROM locations
           WHERE `search_name` LIKE '#{letter}%' OR
                 `search_name` LIKE '% #{letter}%'
         ))
+        if User.current_location_format == :scientific
+          @items.map! {|i| Location.reverse_name(i)}
+        end
         @items.sort!
 
       when 'name'

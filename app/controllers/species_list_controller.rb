@@ -197,6 +197,9 @@ class SpeciesListController < ApplicationController
   #   session[:checklist_source]
   def create_species_list # :prefetch: :norobots:
     @species_list = SpeciesList.new
+    # for key in params[:species_list].keys().sort()
+    #   flash_notice("#{key}: #{params[:species_list][key]}")
+    # end
     if request.method != :post
       @checklist_names   = {}
       @new_names         = []
@@ -558,6 +561,7 @@ class SpeciesListController < ApplicationController
     @species_list.modified   = now
     @species_list.user       = @user
     @species_list.attributes = args
+    @species_list.place_name = args[:place_name] # This one is virtual
 
     # This just makes sure all the names (that have been approved) exist.
     list = params[:list][:members].gsub('_', ' ').strip_squeeze

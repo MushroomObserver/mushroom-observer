@@ -684,7 +684,7 @@ class QueryTest < UnitTestCase
     q6a = Query.lookup_and_save(:Observation, :pattern_search, :pattern => '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search, :location => 'glendale')
     q8a = Query.lookup_and_save(:Observation, :at_location, :location => 2)
-    q9a = Query.lookup_and_save(:Observation, :at_where, :location => 'california')
+    q9a = Query.lookup_and_save(:Observation, :at_where, :user_where => 'california', :location => 'california')
     qAa = Query.lookup_and_save(:Observation, :of_children, :name => 4)
     assert_equal(10, Query.count)
 
@@ -778,7 +778,7 @@ class QueryTest < UnitTestCase
     q6a = Query.lookup_and_save(:Observation, :pattern_search, :pattern => '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search, :location => 'glendale')
     q8a = Query.lookup_and_save(:Observation, :at_location, :location => 2)
-    q9a = Query.lookup_and_save(:Observation, :at_where, :location => 'california')
+    q9a = Query.lookup_and_save(:Observation, :at_where, :user_where => 'california', :location => 'california')
     qAa = Query.lookup_and_save(:Observation, :of_children, :name => 4)
     assert_equal(10, Query.count)
 
@@ -881,7 +881,7 @@ class QueryTest < UnitTestCase
     q6a = Query.lookup_and_save(:Observation, :pattern_search, :pattern => '"somewhere else"')
     q7a = Query.lookup_and_save(:Observation, :advanced_search, :location => 'glendale')
     q8a = Query.lookup_and_save(:Observation, :at_location, :location => 2)
-    q9a = Query.lookup_and_save(:Observation, :at_where, :location => 'california')
+    q9a = Query.lookup_and_save(:Observation, :at_where, :user_where => 'california', :location => 'california')
     assert_equal(9, Query.count)
 
     # Try coercing them all.
@@ -1131,8 +1131,8 @@ class QueryTest < UnitTestCase
   end
 
   def test_image_with_observations_at_where
-    assert_query([5], :Image, :with_observations_at_where, :location => 'glendale')
-    assert_query([], :Image, :with_observations_at_where, :location => 'snazzle')
+    assert_query([5], :Image, :with_observations_at_where, :user_where => 'glendale', :location => 'glendale')
+    assert_query([], :Image, :with_observations_at_where, :user_where => 'snazzle', :location => 'snazzle')
   end
 
   def test_image_with_observations_by_user
@@ -1408,7 +1408,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_name_with_observations_at_where
-    assert_query([2], :Name, :with_observations_at_where, :location => 'glendale')
+    assert_query([2], :Name, :with_observations_at_where, :user_where => 'glendale', :location => 'glendale')
   end
 
   def test_name_with_observations_by_user
@@ -1472,7 +1472,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_at_where
-    assert_query([3], :Observation, :at_where, :location => 'glendale')
+    assert_query([3], :Observation, :at_where, :user_where => 'glendale', :location => 'glendale')
   end
 
   def test_observation_by_rss_log

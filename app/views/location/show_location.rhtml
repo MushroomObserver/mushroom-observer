@@ -13,6 +13,8 @@
     if is_in_admin_mode?
       add_tab(:show_location_destroy.t, :action => 'destroy_location',
               :id => @location.id, :params => query_params)
+      add_tab(:show_location_reverse.t, :action => 'reverse_name_order',
+              :id => @location.id, :params => query_params)
     end
   end
 

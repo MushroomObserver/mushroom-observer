@@ -1714,6 +1714,7 @@ class Name < AbstractModel
     # Clean up inputs.
     in_str     = in_str.to_s.strip_squeeze
     new_author = new_author.to_s.strip_squeeze
+
     self.class.common_errors(in_str)
 
     new_text_name, new_display_name, new_observation_name, new_search_name,

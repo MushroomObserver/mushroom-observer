@@ -63,6 +63,13 @@ class LocationController < ApplicationController
     show_selected_locations(query, :link_all_sorts => true)
   end
 
+  # Displays a list of all locations.
+  def list_dubious_locations # :nologin:
+    query = create_query(:Location, :all, :by => :name)
+    show_selected_locations(query, :link_all_sorts => true,
+      :action => :list_dubious_locations, :num_per_page => 1000)
+  end
+
   # Display list of locations that a given user is author on.
   def locations_by_user # :nologin: :norobots:
     if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
@@ -132,6 +139,7 @@ class LocationController < ApplicationController
     end
 
     # Get matching *undefined* locations.
+    @undef_location_format = User.current_location_format
     if query2 = coerce_query_for_undefined_locations(query)
       select_args = {
         :group => 'observations.where',
@@ -143,7 +151,7 @@ class LocationController < ApplicationController
         # If user has explicitly selected the order, then this is disabled.)
         @default_orders = true
       end
-      @undef_pages = paginate_letters(:letter2, :page2, 50)
+      @undef_pages = paginate_letters(:letter2, :page2, args[:num_per_page] || 50)
       @undef_data = query2.select_rows(select_args)
       @undef_pages.used_letters = @undef_data.map {|row| row[0][0,1]}.uniq
       if (letter = params[:letter2].to_s.downcase) != ''
@@ -158,7 +166,7 @@ class LocationController < ApplicationController
 
     # Paginate the defined locations using the usual helper.   
     args[:always_index] = (@undef_pages && @undef_pages.num_total > 0)
-    args[:action] = 'list_locations'
+    args[:action] = args[:action] || 'list_locations'
     show_index_of_objects(query, args)
   end
 
@@ -462,8 +470,8 @@ class LocationController < ApplicationController
       # Look to see if the display name is already use.  If it is then just use
       # that location and ignore the other values.  Probably should be smarter
       # with warnings and merges and such...
-      name = params[:location][:display_name].strip_squeeze rescue ''
-      @location = Location.find_by_display_name(name)
+      name = params[:location][:name].strip_squeeze rescue ''
+      @location = Location.search_by_name(name)
 
       # Location already exists.
       if @location
@@ -476,7 +484,7 @@ class LocationController < ApplicationController
         Transaction.post_location(
           :id      => @location,
           :created => @location.created,
-          :name    => @location.display_name,
+          :name    => @location.name,
           :north   => @location.north,
           :south   => @location.south,
           :east    => @location.east,
@@ -520,7 +528,7 @@ class LocationController < ApplicationController
 
       # First check if user changed the name to one that already exists.
       name = params[:location][:display_name].strip_squeeze rescue ''
-      merge = Location.find_by_display_name(name)
+      merge = Location.search_by_name(name)
 
       # Merge with another location.
       if merge && merge != @location
@@ -541,7 +549,7 @@ class LocationController < ApplicationController
         else
           flash_warning(:runtime_merge_locations_warning.t)
           content = :email_location_merge.t(:user => @user.login,
-                  :this => @location.display_name, :that => merge.display_name)
+                  :this => @location.name, :that => merge.name)
           AccountMailer.deliver_webmaster_question(@user.email, content)
         end
 
@@ -559,7 +567,7 @@ class LocationController < ApplicationController
         end
 
         args = {}
-        args[:set_name]  = @location.display_name if @location.display_name_changed?
+        args[:set_name]  = @location.name         if @location.name_changed?
         args[:set_north] = @location.north        if @location.north_changed?
         args[:set_south] = @location.south        if @location.south_changed?
         args[:set_west]  = @location.west         if @location.west_changed?
@@ -762,7 +770,7 @@ class LocationController < ApplicationController
     #   2) all that start with everything in "where" up to the comma
     #   3) all that start with the first word in "where"
     #   4) there just aren't any matches, give up
-    all = Location.all(:order => 'display_name')
+    all = Location.all(:order => 'name')
     @matches, @others = (
       split_out_matches(all, @where) or
       split_out_matches(all, @where.split(',').first) or
@@ -775,7 +783,7 @@ class LocationController < ApplicationController
   # don't.  If none match, then return nil.
   def split_out_matches(list, substring)
     matches = list.select do |loc|
-      (loc.display_name.to_s[0,substring.length] == substring) or
+      (loc.name.to_s[0,substring.length] == substring) or
       (loc.search_name.to_s[0,substring.length] == substring)
     end
     if matches.empty?
@@ -785,13 +793,20 @@ class LocationController < ApplicationController
     end
   end
 
+  def reverse_name_order
+    location = Location.find(params[:id])
+    location.name = Location.reverse_name(location.name())
+    location.save()
+    redirect_to(:action => 'show_location', :id => params[:id])
+  end
+  
   # Adds the Observation's associated with <tt>obs.where == params[:where]</tt>
   # into the given Location.  Linked from +list_merge_options+, I think.
   def add_to_location # :norobots:
     location = Location.find(params[:location])
     where = params[:where].strip_squeeze rescue ''
     if !where.blank? and
-       update_observations_by_where(location, where)
+      update_observations_by_where(location, where)
       flash_notice(:runtime_location_merge_success.t(:this => where,
                    :that => location.display_name))
     end
@@ -801,8 +816,10 @@ class LocationController < ApplicationController
   # Move all the Observation's with a given +where+ into a given Location.
   def update_observations_by_where(location, where)
     success = true
-    observations = Observation.find_all_by_where(where)
+    observations = Observation.find_all_by_where(Location.user_name(@user, where))
+    count = 3
     for o in observations
+      count += 1
       unless o.location_id
         o.location_id = location.id
         o.where = nil
@@ -819,6 +836,7 @@ class LocationController < ApplicationController
     end
     return success
   end
+
 end
 
 # list_locations::          . V .

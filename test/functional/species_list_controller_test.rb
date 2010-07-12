@@ -19,7 +19,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       :id => spl.id,
       :species_list => {
-        :where => spl.where,
+        :place_name => spl.where,
         :title => spl.title,
         "when(1i)" => spl.when.year.to_s,
         "when(2i)" => spl.when.month.to_s,
@@ -132,7 +132,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => names(:coprinus_comatus).text_name },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -156,7 +156,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -184,7 +184,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -218,7 +218,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -243,7 +243,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -267,7 +267,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => new_name_str },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -300,7 +300,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -360,7 +360,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :checklist_data => checklist_data,
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "6",
@@ -397,7 +397,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => "\n Warnerbros  bugs-bunny " },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => "Testing nonalphas",
         "when(1i)" => "2008",
         "when(2i)" => "1",
@@ -421,7 +421,7 @@ class SpeciesListControllerTest < FunctionalTestCase
       :list => { :members => "Warnerbros bugs-bunny\r\n" },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => "Testing nonalphas",
         "when(1i)" => "2008",
         "when(2i)" => "1",
@@ -485,7 +485,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus"
-    params[:species_list][:where] = "New Place"
+    params[:species_list][:place_name] = "New Place"
     params[:species_list][:title] = "New Title"
     params[:species_list][:notes] = "New notes."
     owner = spl.user.login
@@ -742,7 +742,7 @@ class SpeciesListControllerTest < FunctionalTestCase
 
     list = species_lists(:first_species_list)
     args = {
-      :where    => 'limbo',
+      :place_name    => 'limbo',
       :when     => now,
       :created  => now,
       :modified => now,
@@ -809,7 +809,7 @@ class SpeciesListControllerTest < FunctionalTestCase
     params = {
       :species_list => {
         :when  => Time.now,
-        :where => 'somewhere',
+        :place_name => 'somewhere',
         :title => 'title',
         :notes => 'notes',
       },

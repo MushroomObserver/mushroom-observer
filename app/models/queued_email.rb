@@ -207,25 +207,31 @@ class QueuedEmail < AbstractModel
   # production mode this does nothing.  In testing mode it "delivers" the email
   # immediately (via deliver_email) and then removes it from the queue.
   def finish
+    current_locale = Locale.code
     unless QUEUE_EMAIL || @@queue
-      self.deliver_email
+      self.deliver_email if RUN_LEVEL != :silent
       self.destroy
     end
+    Locale.code = current_locale
   end
 
   # This is called by <tt>rake email:send</tt>.  It just checks that sender !=
   # receiver, then passes it off to the subclass (via deliver_email). 
   def send_email
+    return true if RUN_LEVEL == :silent
+    current_locale = Locale.code
     result = false
     if user == to_user
       raise("Skipping email with same sender and recipient: #{user.email}\n") if !TESTING
     else
       result = deliver_email
     end
+    Locale.code = current_locale
     return result
   rescue => e
     raise e if TESTING
     $stderr.puts(e.to_s)
+    Locale.code = current_locale
     return false
   end
 
@@ -296,7 +302,7 @@ class QueuedEmail < AbstractModel
       result = @objects[key]
     else
       id = get_integer(key)
-      result = @objects[key] = (id == 0 && allow_nil) ? nil : model.find(id)
+      result = @objects[key] = (id == 0 && allow_nil) ? nil : model.safe_find(id)
     end
     result
   end

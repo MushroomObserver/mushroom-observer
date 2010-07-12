@@ -34,6 +34,11 @@
 
   <br/>
 
+  <p><label for="user_location_format"><b><%= :prefs_location_format.t %></b></label>:<br/>
+  <%= form.select(:location_format, [
+    [:prefs_location_format_postal.l, :postal],
+      [:prefs_location_format_scientific.l, :scientific]]) %></p>
+
   <p><label for="user_votes_anonymous"><b><%= :prefs_votes_anonymous.t %></b></label>:<br/>
   <%= values = [
     [:prefs_votes_anonymous_no.l, :no],

@@ -18,7 +18,7 @@
 #  user::          (V) User that created it.
 #  version::       (V) Version number.
 #  ---
-#  display_name::  (V) Name, e.g.: "Lacy Park, Los Angeles Co., California, USA"
+#  name::          (V) Name, e.g.: "Lacy Park, Los Angeles Co., California, USA"
 #  search_name::   (-) Name, e.g.: "lacy park los angeles co california usa"
 #  north::         (V) North edge in degrees north, e.g. 37.8233
 #  south::         (V) South edge in degrees north, e.g. 37.8035
@@ -26,6 +26,7 @@
 #  west::          (V) West edge in degrees east, e.g. -122.204
 #  high::          (V) Maximum elevation in meters, e.g. 100
 #  low::           (V) Minimum elevation in meters, e.g. 0
+#  notes::         (V) Arbitrary extra notes supplied by User.
 #
 #  ('V' indicates that this attribute is versioned in past_locations table.)
 #
@@ -47,6 +48,7 @@
 #  center::             [n+s/2, e+w/2]
 #
 #  ==== Name methods
+#  display_name::       +name+ reformated based on user's preference.
 #  text_name::          Plain-text version of +display_name+.
 #  format_name::        Alias for +display_name+ (for compatibility).
 #  unique_text_name::   (same thing, with id tacked on to make unique)
@@ -81,13 +83,14 @@ class Location < AbstractModel
   acts_as_versioned(
     :table_name => 'locations_versions',
     :if_changed => [
-      'display_name',
+      'name',
       'north',
       'south',
       'west',
       'east',
       'high',
-      'low'
+      'low',
+      'notes'
   ])
   non_versioned_columns.push(
     'sync_id',
@@ -155,6 +158,22 @@ class Location < AbstractModel
   #
   ##############################################################################
 
+  def display_name()
+    if User.current_location_format == :scientific
+      Location.reverse_name(self.name())
+    else
+      self.name()
+    end
+  end
+
+  def display_name=(val)
+    if User.current_location_format == :scientific
+      self.name = Location.reverse_name(val)
+    else
+      self.name = val
+    end
+  end
+  
   # Plain text version of +display_name+.
   def text_name
     self.display_name.t.html_to_ascii
@@ -206,16 +225,411 @@ class Location < AbstractModel
     if User.current
       where = "WHERE observations.user_id = #{User.current_id}"
     end
-    self.connection.select_values(%(
-      SELECT DISTINCT IF(observations.location_id > 0, locations.display_name, observations.where) AS x
+    result = self.connection.select_values(%(
+      SELECT DISTINCT IF(observations.location_id > 0, locations.name, observations.where) AS x
       FROM observations
       LEFT OUTER JOIN locations ON locations.id = observations.location_id
       #{where}
       ORDER BY observations.modified DESC
       LIMIT 100
     )).sort
+    if User.current_location_format == :scientific
+      result.map! {|n| Location.reverse_name(n)}
+    end
+    result
   end
 
+  # Takes a location string splits on commas, reverses the order, and joins it back together
+  # E.g., "New York, USA" => "USA, New York"
+  # Used to support the "scientific" location format.
+  def self.reverse_name(name)
+    tokens = name.split(',').map { |x| x.strip() }
+    tokens.delete("")
+    return tokens.reverse.join(', ')
+  end
+
+  # Looks for a matching location using either location order just to be sure
+  def self.search_by_name(name)
+    result = find_by_name(name)
+    if !result
+      result = find_by_name(reverse_name(name))
+    end
+    result
+  end
+  
+  def self.user_name(user, name)
+    if user and (user.location_format == :scientific)
+      Location.reverse_name(name)
+    else
+      name
+    end
+  end
+  
+  UNDERSTOOD_COUNTRIES = {
+    "Africa" => 0,
+    "Albania" => 0,
+    "Antarctica" => 0,
+    "Argentina" => 0,
+    "Asia" => 0,
+    "Australia" => 0,
+    "Austria" => 0,
+    "Bahamas" => 0,
+    "Belize" => 0,
+    "Bolivia" => 0,
+    "Brazil" => 0,
+    "Bulgaria" => 0,
+    "Cambodia" => 0,
+    "Canada" => 0,
+    "Chile" => 0,
+    "China" => 0,
+    "Colombia" => 0,
+    "Costa Rica" => 0,
+    "Croatia" => 0,
+    "Czech Republic" => 0,
+    "Dominican Republic" => 0,
+    "Ecuador" => 0,
+    "England" => 0,
+    "Europe" => 0,
+    "Finland" => 0,
+    "France" => 0,
+    "Germany" => 0,
+    "Greece" => 0,
+    "Hungary" => 0,
+    "India" => 0,
+    "Indonesia" => 0,
+    "Iran" => 0,
+    "Israel" => 0,
+    "Italy" => 0,
+    "Japan" => 0,
+    "Kenya" => 0,
+    "Lebanon" => 0,
+    "Macedonia" => 0,
+    "Malaysia" => 0,
+    "Mexico" => 0,
+    "Morocco" => 0,
+    "Namibia" => 0,
+    "Netherlands" => 0,
+    "New Zealand" => 0,
+    "North America" => 0,
+    "Norway" => 0,
+    "Panama" => 0,
+    "Poland" => 0,
+    "Portugal" => 0,
+    "Russia" => 0,
+    "Scotland" => 0,
+    "Slovenia" => 0,
+    "South America" => 0,
+    "South Africa" => 0,
+    "South Korea" => 0,
+    "Spain" => 0,
+    "Sweden" => 0,
+    "Switzerland" => 0,
+    "Thailand" => 0,
+    "Turkey" => 0,
+    "United Kingdom" => 0,
+    "USA" => 0,
+    "Unknown" => 0
+  }
+  
+  UNDERSTOOD_STATES = {
+    "USA" => {
+      "Alabama" => 0,
+      "Alaska" => 0,
+      "American Samoa" => 0,
+      "Arizona" => 0,
+      "Arkansas" => 0,
+      "California" => 0,
+      "Colorado" => 0,
+      "Connecticut" => 0,
+      "Delaware" => 0,
+      "Federated States of Micronesia" => 0,
+      "Florida" => 0,
+      "Georgia" => 0,
+      "Guam" => 0,
+      "Hawaii" => 0,
+      "Idaho" => 0,
+      "Illinois" => 0,
+      "Indiana" => 0,
+      "Iowa" => 0,
+      "Kansas" => 0,
+      "Kentucky" => 0,
+      "Louisiana" => 0,
+      "Maine" => 0,
+      "Marshall Islands" => 0,
+      "Maryland" => 0,
+      "Massachusetts" => 0,
+      "Michigan" => 0,
+      "Minnesota" => 0,
+      "Mississippi" => 0,
+      "Missouri" => 0,
+      "Montana" => 0,
+      "Nebraska" => 0,
+      "Nevada" => 0,
+      "New England" => 0,
+      "New Hampshire" => 0,
+      "New Jersey" => 0,
+      "New Mexico" => 0,
+      "New York" => 0,
+      "North Carolina" => 0,
+      "North Dakota" => 0,
+      "Northern Mariana Islands" => 0,
+      "Ohio" => 0,
+      "Oklahoma" => 0,
+      "Oregon" => 0,
+      "Pacific Northwest" => 0,
+      "Palau" => 0,
+      "Pennsylvania" => 0,
+      "Puerto Rico" => 0,
+      "Rhode Island" => 0,
+      "South Carolina" => 0,
+      "South Dakota" => 0,
+      "Tennessee" => 0,
+      "Texas" => 0,
+      "Utah" => 0,
+      "Vermont" => 0,
+      "Virgin Islands" => 0,
+      "Virginia" => 0,
+      "Washington" => 0,
+      "Washington DC" => 0,
+      "West Virginia" => 0,
+      "Wisconsin" => 0,
+      "Wyoming" => 0
+    },
+    "Australia" => {
+      "Australian Capital Territory" => 0,
+      "New South Wales" => 0,
+      "Northern Territory" => 0,
+      "Queensland" => 0,
+      "South Australia" => 0,
+      "Tasmania" => 0,
+      "Victoria" => 0,
+      "Western Australia" => 0
+    },
+    "Canada" => {
+      "Alberta" => 0,
+      "British Columbia" => 0,
+      "Labrador" => 0,
+      "Manitoba" => 0,
+      "New Brunswick" => 0,
+      "Newfoundland" => 0,
+      "Newfoundland and Labrador" => 0,
+      "Nova Scotia" => 0,
+      "Ontario" => 0,
+      "Prince Edward Island" => 0,
+      "Quebec" => 0,
+      "Saskatchewan" => 0,
+      "Northwest Territories" => 0,
+      "Nunavut" => 0,
+      "Yukon" => 0,
+    },
+  }
+  
+  # Handling of '.'s
+  BAD_TERMS = {
+    "Hwy" => "Highway",
+    "Hwy." => "Highway",
+    "Mt" => "Mount",
+    "Mt." => "Mount",
+    "Mtn" => "Mountain",
+    "Mtn." => "Mountain",
+    " AL," => " Alabama,",
+    " AK," => " Alaska,",
+    " AS," => " American Samoa,",
+    " AZ," => " Arizona,",
+    " AR," => " Arkansas,",
+    " CA," => " California,",
+    " CT," => " Connecticut,",
+    " DE," => " Delaware,",
+    " Washington, DC," => " Washington DC,",
+    " FM," => " Federated States of Micronesia,",
+    " FL," => " Florida,",
+    " GA," => " Georgia,",
+    " GU," => " Guam,",
+    " HI," => " Hawaii,",
+    " ID," => " Idaho,",
+    " IL," => " Illinois,",
+    " IN," => " Indiana,",
+    " IA," => " Iowa,",
+    " KS," => " Kansas,",
+    " KY," => " Kentucky,",
+    " LA," => " Louisiana,",
+    " ME," => " Maine,",
+    " MH," => " Marshall Islands,",
+    " MD," => " Maryland,",
+    " MA," => " Massachusetts,",
+    " MI," => " Michigan,",
+    " MN," => " Minnesota,",
+    " MS," => " Mississippi,",
+    " MO," => " Missouri,",
+    " MT," => " Montana,",
+    " NE," => " Nebraska,",
+    " NV," => " Nevada,",
+    " NH," => " New Hampshire,",
+    " NJ," => " New Jersey,",
+    " NM," => " New Mexico,",
+    " NY," => " New York,",
+    " NC," => " North Carolina,",
+    " ND," => " North Dakota,",
+    " MP," => " Northern Mariana Islands,",
+    " OH," => " Ohio,",
+    " OK," => " Oklahoma,",
+    " OR," => " Oregon,",
+    " PW," => " Palau,",
+    " PA," => " Pennsylvania,",
+    " PR," => " Puerto Rico,",
+    " RI," => " Rhode Island,",
+    " SC," => " South Carolina,",
+    " SD," => " South Dakota,",
+    " TN," => " Tennessee,",
+    " TX," => " Texas,",
+    " UT," => " Utah,",
+    " VT," => " Vermont,",
+    " VI," => " Virgin Islands,",
+    " VA," => " Virginia,",
+    " WA," => " Washington,",
+    " WV," => " West Virginia,",
+    " WI," => " Wisconsin,",
+    " WY," => " Wyoming,",
+    " BC," => " British Columbia,",
+    " ACT," => " Australian Capital Territory,",
+    " NSW," => " New South Wales,",
+    " QLD," => " Queensland,",
+    " NP," => " National Park,",
+    "County," => "Co.,",
+    "CO" => "Co. or Colorado",
+    "Road," => "Rd.,",
+    "Street," => "St.,",
+    "Avenue" => "Ave.",
+    "Boulevard," => "Blvd.,",
+    "United States of America" => "USA",
+    "Washington, DC" => "Washington DC",
+  }
+  
+  BAD_REGEXS = {
+    /^[a-z]/ => "Location names should start with capitals"
+  }
+  
+  OK_PREFIXES = ['Central', 'Interior', 'Northern', 'Southern', 'Eastern', 'Western', 'Northeastern', 'Northwestern', 'Southeastern', 'Southwestern']
+
+  def self.understood_with_prefixes(candidate, understood_places)
+    result = understood_places.member?(candidate)
+    if not result
+      tokens = candidate.split
+      count = 0
+      for s in tokens
+        if OK_PREFIXES.member?(s)
+          count += 1
+        else
+          if understood_places.member?(tokens[count..-1].join(' '))
+            return true
+          else
+            return false
+          end
+        end
+      end
+    end
+    result
+  end
+
+  def self.has_known_states?(a_country)
+    UNDERSTOOD_STATES.member?(a_country)
+  end
+  
+  def self.understood_state?(candidate, a_country)
+    understood_with_prefixes(candidate, UNDERSTOOD_STATES[a_country])
+  end
+
+  def self.understood_country?(candidate)
+    understood_with_prefixes(candidate, UNDERSTOOD_COUNTRIES)
+  end
+
+  @@location_cache = nil
+
+  def self.location_exists(name)
+    if name
+      if @@location_cache.nil?
+        @@location_cache = Location.connection.select_values("SELECT DISTINCT name FROM locations") +
+	  Location.connection.select_values(%(
+            SELECT DISTINCT `where` FROM `observations`
+            WHERE `where` is not NULL
+            ORDER BY `where`
+          ))
+      end
+      @@location_cache.member?(name)
+    else
+      false
+    end
+  end
+      
+  # Decide if the given name is dubious for any reason
+  def self.dubious_name?(name, reasons=false, check_db=true)
+    reasons = []
+    if not (check_db and location_exists(name))
+      canonical_form = Location.reverse_name(Location.reverse_name(name))
+      if canonical_form != name
+        return true if !reasons
+	      reasons.push("Not in canonical form: #{canonical_form}")
+      end
+      if name.index('Forest,').nil? and location_exists(no_dubious_county(name))
+        return true if !reasons
+        reasons.push("County may be redundant: #{name}")
+      end
+      a_country = country(name)
+      if not understood_country?(a_country)
+        return true if !reasons
+        reasons.push("Unrecognized country: #{name}")
+      end
+      if has_known_states?(a_country)
+        a_state = state(name)
+        if a_state and not understood_state?(a_state, a_country)
+	        return true if !reasons
+          reasons.push("Unknown state: #{a_state}, #{a_country}")
+        end
+      end
+      for key in BAD_TERMS.keys()
+        if name.index(key)
+          return true if !reasons
+          reasons.push("Contains bad term: #{key} rather than #{BAD_TERMS[key]}")
+        end
+      end
+    end
+    return false if !reasons
+    reasons
+  end
+  
+  def self.country(name)
+    name.split(',')[-1].strip()
+  end
+  
+  def self.state(name)
+    result = name.split(',')[-2]
+    result.strip() if result
+  end
+  
+  def self.dubious_country?(name)
+    not understood_country?(country(name))
+  end
+  
+  def self.no_dubious_county(name)
+    tokens = name.split(", ")
+    alt = [tokens[0]]
+    for t in tokens[1..-1]
+      alt.push(t) if " Co." != t[-4..-1]
+    end
+    result = alt.join(", ")
+    if result == name
+      nil
+    else
+      result
+    end
+  end
+    
+  def self.fix_country(name)
+    c = country(name)
+    new_country = 
+    name[0..(name.rindex(c)-1)] + COUNTRY_FIXES[c]
+  end
+  
   ##############################################################################
   #
   #  :section: Merging
@@ -231,7 +645,7 @@ class Location < AbstractModel
   # Merge all the stuff that refers to +old_loc+ into +self+.  No changes are
   # made to +self+; +old_loc+ is destroyed; all the things that referred to
   # +old_loc+ are updated and saved. 
-  def merge(old_loc)
+  def merge(old_loc, log = true)
     # Move observations over first.
     for obs in old_loc.observations
       obs.location = self
@@ -283,8 +697,8 @@ class Location < AbstractModel
     end
 
     # Log the action.
-    old_loc.log(:log_location_merged, :this => old_loc.display_name,
-                 :that => self.display_name)
+    old_loc.log(:log_location_merged, :this => old_loc.name,
+                 :that => self.name) if log
 
     # Destroy past versions.
     editors = []
@@ -312,8 +726,8 @@ class Location < AbstractModel
 
   # Callback that updates +search_name+ before saving a record.  See +clean_name+.
   def set_search_name
-    if new_record? || display_name_changed?
-      self.search_name = self.class.clean_name(display_name)
+    if new_record? || name_changed?
+      self.search_name = self.class.clean_name(name)
     end
   end
 
@@ -402,8 +816,8 @@ protected
       errors.add(:user, :validate_location_user_missing.t)
     end
 
-    if self.display_name.to_s.length > 200
-      errors.add(:display_name, :validate_location_display_name_too_long.t)
+    if self.name.to_s.length > 200
+      errors.add(:name, :validate_location_name_too_long.t)
     end
     if self.search_name.to_s.length > 200
       errors.add(:search_name, :validate_location_search_name_too_long.t)

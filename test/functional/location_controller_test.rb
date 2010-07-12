@@ -13,30 +13,32 @@ class LocationControllerTest < FunctionalTestCase
   def update_params_from_loc(loc)
     { :id => loc.id,
       :location => {
-        :display_name => loc.display_name,
+        :name => loc.name,
         :north => loc.north,
         :west => loc.west,
         :east => loc.east,
         :south => loc.south,
         :high => loc.high,
         :low => loc.low,
+        :notes => loc.notes
       },
     }
   end
 
   # A location that isn't in fixtures.
   def barton_flats_params
-    display_name = "Barton Flats, San Bernardino Co., California, USA"
+    name = "Barton Flats, San Bernardino Co., California, USA"
     {
-      :where => display_name,
+      :where => name,
       :location => {
-        :display_name => display_name,
+        :name => name,
         :north => 34.1865,
         :west => -116.924,
         :east => -116.88,
         :south => 34.1571,
         :high => 2000.0,
         :low => 1600.0,
+        :notes => "This is now Barton Flats",
       },
     }
   end
@@ -127,7 +129,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(10 + @new_pts, @rolf.reload.contribution)
     loc = assigns(:location)
     assert_equal(display_name, loc.display_name) # Make sure it's the right Location
-    loc = Location.find_by_display_name(display_name)
+    loc = Location.search_by_name(display_name)
     assert_nil(loc.description)
   end
 

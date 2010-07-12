@@ -8,7 +8,7 @@ albion:
   modified: 2007-12-27 06:41:20
   user_id: 1
   version: 2
-  display_name: Albion, Mendocino Co., California, USA
+  name: Albion, California, USA
   search_name: albion mendocino co california usa
   north: 39.32
   west: -123.82
@@ -24,7 +24,7 @@ burbank:
   modified: 2007-12-27 06:47:00
   user_id: 1
   version: 1
-  display_name: Burbank, Los Angeles Co., California, USA
+  name: Burbank, California, USA
   search_name: burbank los angeles co california usa
   north: 34.22
   west: -118.37
@@ -40,7 +40,7 @@ mitrula_marsh:
   modified: 2007-12-27 06:47:00
   user_id: 1
   version: 1
-  display_name: \"Mitrula Marsh\", Sand Lake, Bassetts, Yuba Co., California, USA
+  name: \"Mitrula Marsh\", Sand Lake, Bassetts, Yuba Co., California, USA
   search_name: mitrula marsh sand lake bassetts yuba co california usa
   north: 39.7184
   west: -120.687
@@ -55,7 +55,7 @@ salt_point:
   modified: 2007-12-27 06:47:00
   user_id: 1
   version: 1
-  display_name: Salt Point State Park, Sonoma Co., California, USA
+  name: Salt Point State Park, Sonoma Co., California, USA
   search_name: salt point state park sonoma co california usa
   north: 38.5923
   west: -123.343
@@ -63,6 +63,7 @@ salt_point:
   south: 38.5584
   high: 100.0
   low: 0.0
+  notes: It's legal to collect in Salt Point (at least in 2010). Let's hope it stays that way!
 
 gualala:
   id: 5
@@ -71,7 +72,7 @@ gualala:
   modified: 2007-12-27 06:47:00
   user_id: 1
   version: 1
-  display_name: Gualala, Mendocino Co., California, USA
+  name: Gualala, California, USA
   search_name: gualala mendocino co california usa
   north: 38.7868
   west: -123.557
@@ -87,7 +88,7 @@ elgin_co:
   modified: 2007-12-27 06:47:00
   user_id: 1
   version: 1
-  display_name: Elgin County, Ontario, Canada
+  name: Elgin Co., Ontario, Canada
   search_name: elgin county ontario canada
   north: 42.876
   west: -81.8179
@@ -101,7 +102,7 @@ brett_woods:
   modified: 2007-12-27 06:47:00
   user_id: 1
   version: 1
-  display_name: Brett Woods, Fairfield Co., Connecticut, USA
+  name: Brett Woods, Fairfield Co., Connecticut, USA
   search_name: brett woods fairfield co connecticut usa
   north: 41.2125
   west: -73.3295
@@ -115,12 +116,13 @@ point_reyes:
   modified: 2008-01-01 11:50:00
   user_id: 1
   version: 1
-  display_name: Point Reyes National Seashore, Marin Co., California, USA
+  name: Point Reyes National Seashore, Marin Co., California, USA
   search_name: point reyes national seashore marin co california usa
   north: 38.2441
   west: -123.0256
   east: -122.7092
   south: 37.9255
+  notes: Is it legal to collect in Point Reyes without a permit?
 
 howarth_park:
   id: 9
@@ -129,7 +131,7 @@ howarth_park:
   modified: 2008-01-01 15:24:18
   user_id: 1
   version: 1
-  display_name: Howarth Park, Santa Rosa, Sonoma Co., California, USA
+  name: Howarth Park, Santa Rosa, California, USA
   search_name: howarth park santa rosa sonoma co california usa
   north: 38.4582
   west: -122.6712

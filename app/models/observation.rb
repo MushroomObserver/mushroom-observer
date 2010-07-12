@@ -52,7 +52,7 @@
 #
 #  ==== "Fake" attributes
 #  idstr::                  Used by <tt>observer/reuse_image.rhtml</tt>.
-#  place_name::             Wrapper on top of +where+ and +location+.
+#  place_name::             Wrapper on top of +where+ and +location+.  Handles location_format.
 #
 #  == Class methods
 #
@@ -159,9 +159,12 @@ class Observation < AbstractModel
 
   # Abstraction over +where+ and +location.display_name+.  Returns Location
   # name as a string, preferring +location+ over +where+ wherever both exist.
+  # Also applies the location_format of the current user (defaults to :postal).
   def place_name
     if location
       location.display_name
+    elsif User.current_location_format == :scientific
+      Location.reverse_name(self.where)
     else
       self.where
     end
@@ -169,8 +172,14 @@ class Observation < AbstractModel
 
   # Set +where+ or +location+, depending on whether a Location is defined with
   # the given +display_name+.  (Fills the other in with +nil+.)
-  def place_name=(where)
-    if loc = Location.find_by_display_name(where)
+  # Adjusts for the current user's location_format as well.
+  def place_name=(place_name)
+    where = if User.current_location_format == :scientific
+      Location.reverse_name(self.where)
+    else
+      place_name
+    end
+    if loc = Location.find_by_name(where)
       self.where = nil
       self.location = loc
     else

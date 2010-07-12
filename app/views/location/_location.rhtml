@@ -49,6 +49,10 @@
   </tr>
 </table>
 
+<% if !location.notes.blank? %>
+  <%= sanitize(:NOTES.l + ': ' + location.notes.to_s).tpl %>
+<% end %>
+
 <center>
   <%= show_authors_and_editors(location) %>
 </center>

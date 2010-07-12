@@ -193,4 +193,5 @@ module ApplicationHelper
     html = '<span class="Date">' + html + '</span>'
     html = '<p>' + html + '</p>'
   end
+
 end

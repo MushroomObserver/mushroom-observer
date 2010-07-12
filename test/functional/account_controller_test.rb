@@ -251,7 +251,7 @@ class AccountControllerTest < FunctionalTestCase
       :user => {
         :name       => "new_name",
         :notes      => "new_notes",
-        :place_name => "Burbank, Los Angeles Co., California, USA",
+        :place_name => "Burbank, California, USA",
         :mailing_address => ""
       }
     }

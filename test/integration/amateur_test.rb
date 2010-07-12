@@ -366,7 +366,7 @@ class AmateurTest < IntegrationTestCase
     katrina = current_session
     local_now = Time.now.in_time_zone
     date  = local_now - 1.year - 2.months - 3.days
-    place = 'Burbank, CA'
+    place = 'Glendale, California, USA'
     loc   = locations(:burbank)
     name  = names(:coprinus_comatus)
     file  = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
@@ -447,7 +447,9 @@ class AmateurTest < IntegrationTestCase
 
     # Make sure important bits show up somewhere on page.
     assert_match(obs.when.web_date, response.body)
-    assert_match(obs.where, response.body)
+    for token in obs.where.split(', ') # USA ends up as <span class=\"caps\">USA</span>, so just search for each component
+      assert_match(token, response.body)
+    end
     assert_match(:show_observation_seen_at.l, response.body)
     assert_match(/specimen available/, response.body)
     assert_match(notes, response.body)

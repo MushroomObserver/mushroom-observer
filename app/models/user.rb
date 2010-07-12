@@ -318,6 +318,18 @@ class User < AbstractModel
     return @@user && @@user.id
   end
 
+  # Report current user's preferred location_format
+  #
+  # location_format = User.current_location_format
+  #
+  def self.current_location_format
+    if !defined?(@@user) or @@user.nil?
+      :postal
+    else
+      @@user.location_format
+    end
+  end
+  
   # Tell User model which User is currently logged in (if any).  This is used
   # by the +autologin+ filter.
   def self.current=(x)

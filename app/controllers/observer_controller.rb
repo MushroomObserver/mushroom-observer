@@ -568,7 +568,9 @@ class ObserverController < ApplicationController
   # Display matrix of Observation's whose 'where' matches a string.
   def observations_at_where # :nologin: :norobots:
     where = params[:where].to_s
-    query = create_query(:Observation, :at_where, :location => where)
+    params[:location] = where
+    query = create_query(:Observation, :at_where,
+      :user_where => where, :location => Location.user_name(@user, where))
     show_selected_observations(query, {:always_index => 1})
   end
 
@@ -610,9 +612,9 @@ class ObserverController < ApplicationController
     if query.flavor == :at_where
       @links += [
         [ :list_observations_location_define.l, { :controller => 'location',
-          :action => 'create_location', :where => params[:where] } ],
+          :action => 'create_location', :where => query.params[:user_where] } ],
         [ :list_observations_location_merge.l, { :controller => 'location',
-          :action => 'list_merge_options', :where => params[:where] } ],
+          :action => 'list_merge_options', :where => query.params[:user_where] } ],
         [ :list_observations_location_all.l, { :controller => 'location',
           :action => 'list_locations' } ],
       ]
@@ -783,6 +785,7 @@ class ObserverController < ApplicationController
   #   params[:observation][...]         observation args
   #   params[:name][:name]              name
   #   params[:approved_name]            old name
+  #   params[:approved_where]           old where
   #   params[:chosen_name][:name_id]    name radio boxes
   #   params[:vote][...]                vote args
   #   params[:reason][n][...]           naming_reason args
@@ -847,6 +850,14 @@ class ObserverController < ApplicationController
         resolve_name(given_name, params[:approved_name], chosen_name)
       @naming.name = @name if @name
 
+      # Validate where.
+      @place_name = params[:observation][:place_name]
+      @dubious_where_reasons = []
+      if @place_name != params[:approved_place_name]
+        @dubious_where_reasons = Location.dubious_name?(@place_name, true)
+        success = false if @dubious_where_reasons != []
+      end
+      
       # Validate objects.
       success = validate_observation(@observation) if success
       success = validate_naming(@naming) if @name && success
@@ -1918,6 +1929,15 @@ class ObserverController < ApplicationController
     success = true
     if !vote.valid?
       flash_object_errors(vote)
+      success = false
+    end
+    return success
+  end
+
+  # Make sure there are no warnings for where.
+  def validate_where(where)
+    success = true
+    if Location.dubious_name?(where)
       success = false
     end
     return success

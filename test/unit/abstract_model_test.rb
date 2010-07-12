@@ -130,7 +130,7 @@ class AbstractModelTest < UnitTestCase
       case model.name
       when 'Location'
         obj = Location.new(
-          :display_name => 'Test Location',
+          :name => 'Test Location',
           :north => 54,
           :south => 53,
           :west  => -101,
