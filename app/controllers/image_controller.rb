@@ -1,243 +1,273 @@
 #
-#  Views: ("*" - login required, "R" - root required))
-#     list_images         Display matrix of images, sorted by date.
-#     images_by_user      Display list of images by a given user.
-#     image_search        Search for matching images.
-#     show_image          Show in standard size (640 pixels max dimension).
-#     show_original       Show original size.
-#     prev_image          Show previous image (from search results).
-#     next_image          Show next image (from search results).
-#   * add_image           Upload and add images to observation.
-#   * remove_images       Remove image(s) from an observation (not destroy!)
-#   * edit_image          Edit date, copyright, notes.
-#   * destroy_image       Destroy image.
-#   * remove_image        Remove an image from an observation.
-#   * reuse_image         Add an already-uploaded image to an observation.
-#   * add_image_to_obs    (post method #1 for reuse_image)
-#   * reuse_image_by_id   (post method #2 for reuse_image)
-#   * reuse_image_for_user Select an already-uploaded image to user profile.
-#   * license_updater     Bulk license editor.
+#  = Image Controller
 #
-#  Admin Tools:
-#   R resize_images      Re-create all thumbnails.
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
 #
-#  Test Views:
-#     test_upload_image
-#     test_add_image
-#     test_add_image_report
-#     test_process_image(user, upload, count, size)
+#  ==== Searches and Indexes
+#  list_images::
+#  images_by_user::
+#  image_search::
+#  advanced_search::
+#  index_image::
+#  show_selected_images::
 #
-#  Helpers:
-#    process_image(args, upload)
-#    calc_image_ids(obs)
-#    next_id(id, id_list)
-#    prev_id(id, id_list)
-#    next_image_list(observation_id, id_list)
-#    prev_image_list(observation_id, id_list)
-#    show_selected_images(title, conditions, order, source)
-#    inc_image_from_obs_search(state, inc_func, direction)
-#    inc_image(func_name, direction)
+#  ==== Show Images
+#  show_image::
+#  next_image::
+#  prev_image::
+#  cast_vote::
+#
+#  ==== Work With Images
+#  add_image::             Upload images for observation.
+#  edit_image::            Edit notes, etc. for image.
+#  destroy_image::         Callback: destroy image.
+#  remove_image::          Callback: remove image from observation.
+#  reuse_image::           Choose images to add to observation.
+#  remove_images::         Choose images to remove from observation.
+#  license_updater::       Change copyright of many images.
+#  process_image::         (helper for add_image)
+#
+#  ==== Test Actions
+#  test_add_image::
+#  test_add_image_report::
+#  test_upload_image::
+#  test_upload_speed::
+#  test_process_image::    (helper for test_upload_image)
+#  resize_image::          (helper for test_upload_speed)
 #
 ################################################################################
 
 class ImageController < ApplicationController
   before_filter :login_required, :except => [
-    :advanced_obj_search,
-    :list_images,
-    :images_by_user,
+    :advanced_search,
     :image_search,
-    :show_image,
-    :show_original,
+    :images_by_user,
+    :index_image,
+    :list_images,
     :next_image,
     :prev_image,
-    :test_upload_speed
+    :show_image,
+    :show_original,
+    :test_upload_speed,
   ]
 
+  before_filter :disable_link_prefetching, :except => [
+    :add_image,
+    :edit_image,
+    :show_image,
+  ]
+
+  ##############################################################################
+  #
+  #  :section: Searches and Indexes
+  #
+  ##############################################################################
+
+  # Display matrix of selected images, based on current Query.
+  def index_image # :nologin: :norobots:
+    query = find_or_create_query(:Image, :by => params[:by])
+    show_selected_images(query, :id => params[:id], :always_index => true)
+  end
+
   # Display matrix of images, most recent first.
-  # Linked from: left-hand panel
-  # Inputs: none
-  # Outputs: @objs, @obj_pages, @layout
-  def list_images
-    session[:checklist_source] = :nothing
-    session_setup
-    store_location
-    @layout = calc_layout_params
-    @obj_pages, @objs = paginate(:images, :order => "modified desc", :per_page => @layout["count"])
+  def list_images # :nologin:
+    query = create_query(:Image, :all, :by => :created)
+    show_selected_images(query)
   end
 
-  # Display list of images by a given user.
-  # Linked from observer/show_user
-  # Inputs: params[:id] (user)
-  # Outputs: @images
-  def images_by_user
-    user = User.find(params[:id])
-    session[:checklist_source] = :nothing
-    session_setup
-    store_location
-    @layout = calc_layout_params
-    @title = :images_by_user.t(:user => user.legal_name)
-    @obj_pages, @objs = paginate(:images, :order => "modified desc",
-      :conditions => "user_id = #{user.id}", :per_page => @layout["count"])
-    render(:action => "list_images")
-  end
-
-  # Searches image notes, copyright, and consensus name (including author)
-  # for all observations it's associated with.
-  # Redirected from: pattern_search (search bar)
-  # Inputs:
-  #   session[:pattern]
-  # Outputs:
-  #   Renders list_images.
-  def image_search
-    store_location
-    @layout = calc_layout_params
-    @pattern = params[:pattern] || session[:pattern] || ''
-    id = @pattern.to_i
-    image = nil
-    if @pattern == id.to_s
-      begin
-        image = Image.find(id)
-      rescue ActiveRecord::RecordNotFound
-      end
+  # Display matrix of images by a given user.
+  def images_by_user # :nologin: :norobots:
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Image, :by_user, :user => user)
+      show_selected_images(query)
     end
-    if image
-      redirect_to(:action => 'show_image', :id => id)
+  end
+
+  # Display matrix of images whose notes, names, etc. match a string pattern.
+  def image_search # :nologin: :norobots:
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (image = Image.safe_find(pattern))
+      redirect_to(:action => 'show_image', :id => image.id)
     else
-      show_selected_images(:image_search_title.t(:pattern => @pattern),
-        field_search(["n.search_name", "i.notes", "i.copyright_holder"], "%#{@pattern.gsub(/[*']/,"%")}%"),
-        "n.search_name, `when` desc", :nothing)
+      query = create_query(:Image, :pattern_search, :pattern => pattern)
+      show_selected_images(query)
     end
   end
 
-  def advanced_obj_search
+  # Displays matrix of advanced search results.
+  def advanced_search # :nologin: :norobots:
     begin
-      @layout = calc_layout_params
-      query = calc_advanced_search_query("SELECT STRAIGHT_JOIN DISTINCT images.* FROM",
-        Set.new(['observations', 'images_observations', 'images']), params)
-      show_selected_objs("Advanced Search", query, nil, :nothing, :advanced_images, 'list_images', nil)
+      query = find_query(:Image)
+      show_selected_images(query)
     rescue => err
       flash_error(err)
       redirect_to(:controller => 'observer', :action => 'advanced_search')
     end
   end
 
-  def show_selected_images(title, conditions, order, source)
-    # If provided, link should be the arguments for link_to as a list of lists,
-    # e.g. [[:action => 'blah'], [:action => 'blah']]
-    show_selected_objs(title, conditions, order, source, :images, 'list_images')
+  # Show selected search results as a matrix with 'list_images' template.
+  def show_selected_images(query, args={})
+    store_query_in_session(query)
+    @links ||= []
+
+    # I can't figure out why ActiveRecord is not eager-loading all the names.
+    # When I do an explicit test (load the first 100 images) it eager-loads
+    # about 90%, but for some reason misses 10%, and always the same 10%, but
+    # apparently with no rhyme or reason. -JPH 20100204
+    args = {
+      :action => 'list_images',
+      :matrix => true,
+      :include => [:user, {:observations => :name}],
+    }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name',     :sort_by_name.t],
+      ['date',     :sort_by_date.t],
+      ['user',     :sort_by_user.t],
+      # ['copyright_holder', :sort_by_copyright_holder.t],
+      ['created',  :sort_by_posted.t],
+      ['modified', :sort_by_modified.t],
+      ['confidence', :sort_by_confidence.t],
+      ['image_quality', :sort_by_image_quality.t],
+      ['num_views', :sort_by_num_views.t],
+    ]
+
+    # Add "show observations" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Observation)
+      @links << [:show_objects.t(:type => :observation), {
+                  :controller => 'observer',
+                  :action => 'index_observation',
+                  :params => query_params(query),
+                }]
+    end
+
+    # Paginate by letter if sorting by user.
+    if (query.params[:by] == 'user') or
+       (query.params[:by] == 'reverse_user')
+      args[:letters] = 'users.login'
+    # Paginate by letter if sorting by copyright holder.
+    elsif (query.params[:by] == 'copyright_holder') or
+          (query.params[:by] == 'reverse_copyright_holder')
+      args[:letters] = 'images.copyright_holder'
+    # Paginate by letter if names are included in query.
+    elsif query.uses_table?(:names)
+      args[:letters] = 'names.text_name'
+    end
+
+    show_index_of_objects(query, args)
   end
 
-  # Show the 640x640 (max size) version of image.
+  ##############################################################################
+  #
+  #  :section: Show Images
+  #
+  ##############################################################################
+
+  # Show the 640x640 ("normal" size) version of image.
   # Linked from: thumbnails, next/prev_image, etc.
   # Inputs: params[:id] (image)
   # Outputs: @image
-  def show_image
+  def show_image # :nologin: :prefetch:
     store_location
-    pass_seq_params()
-    @image = Image.find(params[:id])
-    update_view_stats(@image)
-    @is_reviewer = is_reviewer
-  end
+    if @image = find_or_goto_index(Image, params[:id],
+                        :include => [:user, {:observations => :name}])
+      @is_reviewer = is_reviewer
+      pass_query_params
 
-  # Show the original size image.
-  # Linked from: show_image
-  # Inputs: params[:id] (image)
-  # Outputs: @image
-  def show_original
-    store_location
-    pass_seq_params()
-    @image = Image.find(params[:id])
-  end
+      # Decide which size to display.
+      @default_size = @user ? @user.image_size : :medium
+      @size = params[:size].blank? ? @default_size : params[:size].to_sym
 
-  def inc_image_from_obs_search(state, inc_func, direction)
-    current_image_id = params[:id].to_i
-    current_image = Image.find(current_image_id)
-    new_image = nil
-    current_observation_id = state.current_id
-    current_observation = Observation.find(current_observation_id)
-    if current_image && current_observation
-      images = current_observation.images
-      index = (direction == 1) ? images.rindex(current_image) : images.index(current_image)
-      if index
-        index += direction
-        if 0 <= index && index < images.length # Have to check explicitly since foo[-1] is the not nil
-          new_image = images[index]
-        end
+      # Make this size the default image size for this user.
+      if @user and (@default_size != @size) and
+         (params[:make_default] == '1')
+        @user.image_size = @size
+        @user.save_without_our_callbacks
+        @default_size = @size
       end
-      if new_image.nil?
-        inc_func.call
-        count = Observation.count
-        while current_observation_id != state.current_id
-          current_observation_id = state.current_id
-          current_observation = Observation.find(current_observation_id)
-          if current_observation
-            if direction == -1
-              new_image = current_observation.images[-1] # Start from the last image
-            else
-              new_image = current_observation.images[0]
-            end
-            count -= 1
-            if new_image.nil? and count > 0
-              inc_func.call()
-            end
+
+      # Wait until here to create this search query to save server resources.
+      # Otherwise we'd be creating a new search query for images for every single
+      # show_observation request.  We know we came from an observation-type page
+      # because that's the only time the 'obs' param will be set (with obs id).
+      obs = params[:obs]
+      if !obs.blank? &&
+         # The outer search on observation won't be saved for robots, so no sense
+         # in bothering with any of this.
+         !is_robot?
+        obs_query = find_or_create_query(:Observation)
+        obs_query.current = obs
+        img_query = create_query(:Image, :inside_observation,
+                                 :observation => obs, :outer => obs_query)
+        set_query_params(img_query)
+      end
+
+      # Cast user's vote if passed in 'vote' parameter.
+      if (val = params[:vote]) and
+         (val == '0' or (val = Image.validate_vote(val)))
+        val = nil if val == '0'
+        cur = @image.users_vote
+        if cur != val
+          @image.change_vote(@user, val)
+          Transaction.put_images(:id => @image, :set_vote => val)
+        end
+        
+        # Advance to next image automatically if 'next' parameter set.
+        if params[:next]
+          query = find_or_create_query(Image)
+          query.current = @image
+          if query.index(@image) and
+             (query = query.next)
+            @image = query.current
           end
         end
       end
+
+      # Update view stats on image we're actually showing.
+      update_view_stats(@image)
     end
-    if new_image.nil?
-      flash_warning(:image_no_new_image.t)
-      new_image = current_image
-    end
-    state.save if !is_robot?
-    redirect_to(:action => 'show_image', :id => new_image, :seq_key => state.id)
   end
 
-  def inc_image(func_name, direction) # direction is 1 or -1 depending on if we're doing next or prev
-    state = SequenceState.lookup(params, :images, logger)
-    inc_func = state.method(func_name)
-    pass_seq_params()
-    case state.query_type
-    when :images
-      inc_func.call()
-      state.save if !is_robot?
-      id = state.current_id
-      if id
-        redirect_to(:action => 'show_image', :id => id, :seq_key => state.id)
-      else
-        redirect_to(:controller => 'observer', :action => 'list_rss_logs')
-      end
-    when :observations
-      # Need to walk through images for current observation, then walk through the remaining observations
-      inc_image_from_obs_search(state, inc_func, direction)
-    when :rss_logs
-      inc_image_from_obs_search(state, inc_func, direction)
-    when :name_observations
-      inc_image_from_obs_search(state, inc_func, direction)
+  # For backwards compatibility.
+  def show_original
+    redirect_to(:action => 'show_image', :size => 'full_size', :id => params[:id])
+  end
+
+  # Go to next image: redirects to show_image.
+  def next_image # :nologin: :norobots:
+    redirect_to_next_object(:next, Image, params[:id])
+  end
+
+  # Go to previous image: redirects to show_image.
+  def prev_image # :nologin: :norobots:
+    redirect_to_next_object(:prev, Image, params[:id])
+  end
+
+  # Change user's vote and go to next image.
+  def cast_vote # :norobots:
+    image = Image.find(params[:id])
+    val = image.change_vote(@user, params[:value])
+    Transaction.put_images(:id => image, :set_vote => val)
+    if params[:next]
+      redirect_to_next_object(:next, Image, params[:id])
     else
-      redirect_to(:controller => 'observer', :action => 'list_rss_logs')
+      redirect_to(:action => 'show_image', :id => id, :params => query_params)
     end
   end
 
-  def next_image
-    inc_image("next", 1)
-  end
+  ##############################################################################
+  #
+  #  :section: Work With Images
+  #
+  ##############################################################################
 
-  def prev_image
-    inc_image("prev", -1)
-  end
-
-  def set_image_quality
-    id = params[:id]
-    if is_reviewer
-      image = Image.find(id)
-      image.quality = params[:value]
-      image.reviewer_id = session[:user_id]
-      image.save
-    end
-    redirect_to(:action => (params[:next]) ? 'next_image' : 'show_image', :id => id,
-                :seq_key => params[:seq_key], :search_seq => params[:search_seq], :obs => params[:obs])
-  end
-  
   # Form for uploading and adding images to an observation.
   # Linked from: show_observation, reuse_image, and
   #   create/edit_naming (via _show_images partial)
@@ -250,11 +280,13 @@ class ImageController < ApplicationController
   # Outputs: @image, @observation
   #   @licenses     (options for license select menu)
   # Redirects to show_observation.
-  def add_image
+  def add_image # :prefetch: :norobots:
+    pass_query_params
     @observation = Observation.find(params[:id])
-    if !check_user_id(@observation.user_id)
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-    elsif request.method == :get
+    if !check_permission!(@observation.user_id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
+    elsif request.method != :post
       @image = Image.new
       @image.license = @user.license
       @image.copyright_holder = @user.legal_name
@@ -268,64 +300,40 @@ class ImageController < ApplicationController
       process_image(args, params[:upload][:image2])
       process_image(args, params[:upload][:image3])
       process_image(args, params[:upload][:image4])
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
     end
   end
 
   def process_image(args, upload)
-    if upload and upload != ""
+    if !upload.blank?
       name = upload.full_original_filename if upload.respond_to? :full_original_filename
-      args[:image] = upload
       @image = Image.new(args)
-      @image.created = Time.now
+      @image.created  = Time.now
       @image.modified = @image.created
-      @image.user = @user
+      @image.user     = @user
+      @image.image    = upload
       if !@image.save
         flash_object_errors(@image)
-      elsif !@image.save_image
+      elsif !@image.process_image
         logger.error("Unable to upload image")
-        flash_error :profile_invalid_image. \
-          t(:name => (name ? "'#{name}'" : '???'))
+        flash_error(:runtime_image_invalid_image.
+                      t(:name => (name ? "'#{name}'" : '???')))
         flash_object_errors(@image)
       else
-        @observation.add_image_with_log(@image, @user)
-        flash_notice :profile_uploaded_image. \
-          t(:name => name ? "'#{name}'" : "##{@image.id}")
-      end
-    end
-  end
-
-  # Form used to remove one or more images from an observation (not destroy!)
-  # Linked from: show_observation, create/edit_naming (via _show_images partial)
-  # Inputs: params[:id] (observation)
-  #   params[:observation][:id]
-  #   params[:selected][image_id]       (value of "yes" means delete)
-  # Outputs: @observation
-  # Redirects to show_observation.
-  def remove_images
-    @observation = Observation.find(params[:id])
-    if verify_user()
-      if !check_user_id(@observation.user_id)
-        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-      elsif request.method == :get
-        # @image = Image.new
-        # @image.copyright_holder = @user.legal_name
-      else
-        # Delete images
-        images = params[:selected]
-        if images
-          images.each do |image_id, do_it|
-            if do_it == 'yes'
-              image = @observation.remove_image_by_id(image_id)
-              if !image.nil?
-                @observation.log(:log_image_removed, { :user => @user.login,
-                  :name => image.unique_format_name }, false)
-                flash_notice :image_remove_success.t(:id => image_id)
-              end
-            end
-          end
-        end
-        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+        @observation.add_image(@image)
+        @observation.log_create_image(@image)
+        Transaction.post_image(
+          :id               => @image,
+          :url              => @image.original_url,
+          :date             => @image.when,
+          :notes            => @image.notes,
+          :copyright_holder => @image.copyright_holder,
+          :license          => @image.license,
+          :observation      => @observation
+        )
+        flash_notice(:runtime_image_uploaded_image.
+                       t(:name => name ? "'#{name}'" : "##{@image.id}"))
       end
     end
   end
@@ -336,44 +344,62 @@ class ImageController < ApplicationController
   #   params[:comment][:summary]
   #   params[:comment][:comment]
   # Outputs: @image, @licenses
-  def edit_image
+  def edit_image # :prefetch: :norobots:
+    pass_query_params
     @image = Image.find(params[:id])
     @licenses = License.current_names_and_ids(@image.license)
-    if verify_user()
-      if !check_user_id(@image.user_id)
-        redirect_to(:action => 'show_image', :id => @image)
-      elsif request.method == :post
-        @image.attributes = params[:image]
-        @image.modified = Time.now
-        if !@image.save
-          flash_object_errors(@image)
-        else
-          for o in @image.observations
-            o.log(:log_image_updated, { :user => @user.login,
-              :name => @image.unique_format_name }, true)
-          end
-          flash_notice :image_edit_success.t
-          redirect_to(:action => 'show_image', :id => @image.id)
-        end
+    if !check_permission!(@image.user_id)
+      redirect_to(:action => 'show_image', :id => @image,
+                  :params => query_params)
+    elsif request.method == :post
+      @image.attributes = params[:image]
+      xargs = {}
+      xargs[:set_date]             = @image.when             if @image.when_changed?
+      xargs[:set_notes]            = @image.notes            if @image.notes_changed?
+      xargs[:set_copyright_holder] = @image.copyright_holder if @image.copyright_holder_changed?
+      xargs[:set_license]          = @image.license          if @image.license_id_changed?
+      if xargs.empty?
+        flash_notice(:runtime_no_changes.t)
+      elsif !@image.save
+        flash_object_errors(@image)
+      else
+        xargs[:id] = @image
+        Transaction.put_image(xargs)
+        @image.log_update
+        flash_notice :runtime_image_edit_success.t(:id => @image.id)
+        redirect_to(:action => 'show_image', :id => @image.id,
+                    :params => query_params)
       end
     end
   end
 
   # Callback to destroy an image.
-  # Should this be allowed?  How do we cleanup corresponding observations?
   # Linked from: show_image/original
   # Inputs: params[:id] (image)
   # Redirects to list_images.
-  def destroy_image
+  def destroy_image # :norobots:
+
+    # All of this just to decide where to redirect after deleting image.
     @image = Image.find(params[:id])
-    if verify_user()
-      if !check_user_id(@image.user_id)
-        redirect_to(:action => 'show_image', :id => @image.id)
-      elsif !@image.destroy(@user)
-        flash_error :image_destroy_failed.t
-        redirect_to(:action => 'show_image', :id => @image.id)
+    next_state = nil
+    if this_state = find_query(:Image)
+      set_query_params(this_state)
+      this_state.current = @image
+      next_state = this_state.next
+    end
+
+    if !check_permission!(@image.user_id)
+      redirect_to(:action => 'show_image', :id => @image.id,
+                  :params => query_params)
+    else
+      @image.log_destroy
+      @image.destroy
+      Transaction.delete_image(:id => @image)
+      flash_notice(:runtime_image_destroy_success.t(:id => params[:id]))
+      if next_state
+        redirect_to(:action => 'show_image', :id => next_state.current_id,
+                    :params => set_query_params(next_state))
       else
-        flash_notice :image_destroy_success.t
         redirect_to(:action => 'list_images')
       end
     end
@@ -383,125 +409,133 @@ class ImageController < ApplicationController
   # Linked from: observer/edit_observation
   # Inputs: params[:image_id], params[:observation_id]
   # Redirects to show_observation.
-  def remove_image
+  def remove_image # :norobots:
+    pass_query_params
     @image = Image.find(params[:image_id])
     @observation = Observation.find(params[:observation_id])
-    if verify_user()
-      if !check_user_id(@observation.user_id)
-        flash_warning :image_remove_denied.t
-      elsif !@observation.images.include?(@image)
-        flash_warning :image_remove_missing.t
-      else
-        @observation.images.delete(@image)
-        @observation.log(:log_image_removed, { :user => @user.login,
-          :name => @image.unique_format_name }, false)
-        if @observation.thumb_image_id == @image.id
-          @observation.thumb_image_id = nil
-          @observation.save
-        end
-        flash_notice :image_remove_success.t(:id => @image.id)
-      end
-      redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
+    if !check_permission!(@observation.user_id)
+      flash_error(:runtime_image_remove_denied.t(:id => @image.id))
+    elsif !@observation.images.include?(@image)
+      flash_error(:runtime_image_remove_missing.t(:id => @image.id))
+    else
+      @observation.remove_image(@image)
+      @observation.log_remove_image(@image)
+      Transaction.put_observation(
+        :id        => @observation,
+        :del_image => @image
+      )
+      flash_notice(:runtime_image_remove_success.t(:id => @image.id))
     end
+    redirect_to(:controller => 'observer', :action => 'show_observation',
+                :id => @observation.id, :params => query_params)
   end
 
   # Browse through matrix of recent images to let a user reuse an image
   # they've already uploaded for another observation.
-  # Linked from: show_observation
-  # Inputs: params[:id] (observation)
-  # Outputs: @images, @image_pages, @observation, @layout
-  # (See also add_image_to_obs and reuse_image_by_id.)
-  def reuse_image
-    @observation = Observation.find(params[:id])
-    @layout = calc_layout_params
-    if verify_user()
-      if !check_user_id(@observation.user_id)
-        redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-      elsif params[:all_users] == '1'
-        @all_users = true
-        @image_pages, @images = paginate(:images,
-                                         :order => "modified desc",
-                                         :per_page => @layout["count"])
+  # Linked from: observer/show_observation and account/profile
+  # Inputs:
+  #   params[:mode]       'observation' or 'profile'
+  #   params[:obs_id]     (observation)
+  #   params[:img_id]     (image)
+  #   params[:all_users]  '0' or '1'
+  # Outputs:
+  #   @mode           :observation or :profile
+  #   @all_users      true or false
+  #   @pages          paginator for images
+  #   @objects        Array of images
+  #   @observation    observation (if in observation mode)
+  #   @layout         layout parameters
+  # Posts to the same action.  Redirects to show_observation or show_user.
+  def reuse_image # :norobots:
+    pass_query_params
+    @mode = params[:mode].to_sym
+    @observation = Observation.find(params[:obs_id]) if @mode == :observation
+    done = false
+
+    # Make sure user owns the observation.
+    if (@mode == :observation) and
+       !check_permission!(@observation.user_id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
+      done = true
+
+    # User entered an image id by hand or clicked on an image.
+    elsif (request.method == :post) or
+          !params[:img_id].blank?
+      image = Image.safe_find(params[:img_id])
+      if !image
+        flash_error(:runtime_image_reuse_invalid_id.t(:id => params[:img_id]))
+
+      # Add image to observation.
+      elsif @mode == :observation
+        @observation.add_image(image)
+        @observation.log_reuse_image(image)
+        Transaction.put_observation(:id => @observation, :add_image => image)
+        redirect_to(:controller => 'observer', :action => 'show_observation',
+                    :id => @observation.id, :params => query_params)
+        done = true
+
+      # Change user's profile image.
       else
-        @image_pages, @images = paginate(:images,
-                                         :conditions => ['user_id = ?', @user.id],
-                                         :order => "modified desc",
-                                         :per_page => @layout["count"])
+        if @user.image == image
+          flash_notice(:runtime_no_changes.t)
+        else
+          @user.update_attributes(:image => image)
+          Transaction.put_user(:id => @user, :set_image => image)
+          flash_notice(:runtime_image_changed_your_image.t(:id => image.id))
+        end
+        redirect_to(:controller => "observer", :action => "show_user",
+                    :id => @user.id)
+        done = true
       end
     end
-  end
 
-  # First post method for reuse_image: user has clicked on one of the images.
-  # Add this image to the new observation.
-  # Inputs:
-  #   params[:id]       (image)
-  #   params[:obs_id]   (observation)
-  # Redirects to show_observation.
-  def add_image_to_obs
-    @observation = Observation.find(params[:obs_id])
-    if check_user_id(@observation.user_id)
-      image = @observation.add_image_by_id(params[:id])
-      if !image.nil?
-        @observation.log(:log_image_reused, { :user => @user.login,
-          :name => image.unique_format_name }, true)
-        flash_notice :image_reuse_success.t(:id => image.id)
-      end
-    end
-    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-  end
-
-  # Second post method for reuse_image: user has entered an image id in the
-  # text field.  Add this image (assuming it exists!) to the new observation.
-  # Inputs:
-  #   params[:observation][:id]     (observation)
-  #   params[:observation][:idstr]  (image)
-  # Redirects to show_observation.
-  def reuse_image_by_id
-    @observation = Observation.find(params[:observation][:id])
-    if check_user_id(@observation.user_id)
-      image = @observation.add_image_by_id(params[:observation][:idstr].to_i)
-      if !image.nil?
-        @observation.log(:log_image_reused, { :user => @user.login,
-          :name => image.unique_format_name }, true)
-        flash_notice :image_reuse_success.t(:id => image.id)
-      end
-    end
-    redirect_to(:controller => 'observer', :action => 'show_observation', :id => @observation.id)
-  end
-
-  # Browse through matrix of recent images to let a user reuse an image
-  # they've already uploaded for their profile.  This method does get and post.
-  # Linked from: account/prefs
-  # Inputs: none
-  # Outputs: @images, @image_pages, @layout
-  def reuse_image_for_user
-    # Will return here either by typing in id and posting form, or by
-    # clicking on an image (in which case method is "get").
-    if request.method == "post" || params[:id]
-      begin
-        image = Image.find(params[:id])
-        @user.image = image
-        @user.save
-        flash_notice :image_changed_your_image.t(:id => image.id)
-        redirect_to(:controller => "observer", :action => "show_user", :id => @user.id)
-        redirected = true
-      rescue(e)
-        flash_error :image_reuse_invalid_id.t
-      end
-    end
-    if !redirected
-      @layout = calc_layout_params
+    # Serve form.
+    if !done
       if params[:all_users] == '1'
         @all_users = true
-        @image_pages, @images = paginate(:images,
-                                         :order => "modified desc",
-                                         :per_page => @layout["count"])
+        query = create_query(:Image, :all, :by => :modified)
       else
-        @image_pages, @images = paginate(:images,
-                                         :conditions => ['user_id = ?', @user.id],
-                                         :order => "modified desc",
-                                         :per_page => @layout["count"])
+        query = create_query(:Image, :by_user, :user => @user, :by => :modified)
       end
+      @layout = calc_layout_params
+      @pages = paginate_numbers(:page, @layout['count'])
+      @objects = query.paginate(@pages,
+                                :include => [:user, {:observations => :name}])
+    end
+  end
+
+  # Form used to remove one or more images from an observation (not destroy!)
+  # Linked from: show_observation
+  # Inputs:
+  #   params[:id]                  (observation)
+  #   params[:selected][image_id]  (value of "yes" means delete)
+  # Outputs: @observation
+  # Redirects to show_observation.
+  def remove_images # :norobots:
+    pass_query_params
+    @observation = Observation.find(params[:id], :include => :images)
+
+    # Make sure user owns the observation.
+    if !check_permission!(@observation.user_id)
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
+
+    # POST -- remove selected images.
+    elsif request.method == :post
+      if images = params[:selected]
+        images.each do |image_id, do_it|
+          if do_it == 'yes'
+            if image = Image.find(image_id)
+              @observation.remove_image(image)
+              @observation.log_remove_image(image)
+              flash_notice(:runtime_image_remove_success.t(:id => image_id))
+            end
+          end
+        end
+      end
+      redirect_to(:controller => 'observer', :action => 'show_observation',
+                  :id => @observation.id, :params => query_params)
     end
   end
 
@@ -520,45 +554,55 @@ class ImageController < ApplicationController
   #   @data[n]['select_id']         ID of HTML select menu element.
   #   @data[n]['select_name']       Name of HTML select menu element.
   #   @data[n]['licenses']          Options for select menu.
-  def license_updater
-    if verify_user()
-      #
-      # Process any changes.
-      if request.method == :post
-        for current_id, value in params[:updates]
-          current_id = current_id.to_i
-          for copyright_holder, new_id in value
-            new_id = new_id.to_i
-            if current_id != new_id
-              Image.connection.update %(
-                UPDATE images SET license_id = #{new_id}
-                WHERE copyright_holder = "#{copyright_holder.gsub('"','\\"')}"
-                  AND license_id = #{current_id} AND user_id = #{@user.id}
-              )
-            end
+  def license_updater # :norobots:
+
+    # Process any changes.
+    if request.method == :post
+      for current_id, value in params[:updates]
+        current_id = current_id.to_i
+        current_license = License.find(current_id)
+        for copyright_holder, new_id in value
+          new_id = new_id.to_i
+          new_license = License.find(new_id)
+          if current_id != new_id
+            Image.connection.update %(
+              UPDATE images SET license_id = #{new_id}
+              WHERE copyright_holder = #{Image.connection.quote(copyright_holder.to_s)}
+                AND license_id = #{current_id} AND user_id = #{@user.id}
+            )
+            Transaction.put_image(
+              :copyright_holder => copyright_holder,
+              :license          => current_license,
+              :user             => @user,
+              :set_license      => new_license
+            )
           end
         end
       end
-      #
-      # Gather data for form.
-      id = @user.id.to_i # Make sure it's an integer
-      query = "select count(*) as license_count, copyright_holder, license_id
-        from images where user_id = #{id} group by copyright_holder, license_id"
-      @data = Image.connection.select_all(query)
-      for datum in @data
-        license = License.find(datum['license_id'])
-        datum['license_name'] = license.display_name
-        datum['select_id']    = "updates_#{datum['license_id']}_#{datum['copyright_holder']}".gsub!(/\W/, '_')
-        datum['select_name']  = "updates[#{datum['license_id']}][#{datum['copyright_holder']}]"
-        datum['licenses']     = License.current_names_and_ids(license)
-        datum['selected']     = license.id
-      end
+    end
+
+    # Gather data for form.
+    id = @user.id.to_i # Make sure it's an integer
+    query = "select count(*) as license_count, copyright_holder, license_id
+      from images where user_id = #{id} group by copyright_holder, license_id"
+    @data = Image.connection.select_all(query)
+    for datum in @data
+      license = License.find(datum['license_id'])
+      datum['license_name'] = license.display_name
+      datum['select_id']    = "updates_#{datum['license_id']}_#{datum['copyright_holder']}".gsub!(/\W/, '_')
+      datum['select_name']  = "updates[#{datum['license_id']}][#{datum['copyright_holder']}]"
+      datum['licenses']     = License.current_names_and_ids(license)
+      datum['selected']     = license.id
     end
   end
 
-################################################################################
+  ##############################################################################
+  #
+  #  :section: Test Actions
+  #
+  ##############################################################################
 
-  def test_upload_speed
+  def test_upload_speed # :nologin: # :norobots:
     logger.warn(params)
     image_stream = params[:file]
     data = image_stream.read
@@ -581,171 +625,46 @@ class ImageController < ApplicationController
       logger.warn(cmd)
     end
   end
-  
-################################################################################
 
   def test_process_image(user, upload, count, size)
-    if upload and upload != ""
-      args = {
-        :user => user,
+    if !upload.blank?
+      @image = Image.new(
+        :user  => user,
         :image => upload
-      }
-      @image = Image.new(args)
+      )
       @image.id = user.id
-      @image.img_dir = TEST_IMG_DIR
-      @image.save_image
+      @image.image_dir = TEST_IMG_DIR
+      @image.process_image
       count += 1
       size += File.new(@image.original_image).stat.size
     end
     [count, size]
   end
 
-  def test_upload_image
-    if verify_user()
-      @log_entry = AddImageTestLog.find(params[:log_id])
-      @log_entry.upload_start = Time.now
-      @log_entry.save # Record that upload started
-      @log_entry.upload_data_start = Time.now # Just in case save takes a long time
-      count, size = test_process_image(@user, params[:upload][:image1], 0, 0)
-      count, size = test_process_image(@user, params[:upload][:image2], count, size)
-      count, size = test_process_image(@user, params[:upload][:image3], count, size)
-      count, size = test_process_image(@user, params[:upload][:image4], count, size)
-      @log_entry.upload_end = Time.now
-      @log_entry.image_count = count
-      @log_entry.image_bytes = size
-      @log_entry.save
-      redirect_to(:action => 'test_add_image_report')
-    end
+  def test_upload_image # :norobots:
+    @log_entry = AddImageTestLog.find(params[:log_id])
+    @log_entry.upload_start = Time.now
+    @log_entry.save # Record that upload started
+    @log_entry.upload_data_start = Time.now # Just in case save takes a long time
+    count, size = test_process_image(@user, params[:upload][:image1], 0, 0)
+    count, size = test_process_image(@user, params[:upload][:image2], count, size)
+    count, size = test_process_image(@user, params[:upload][:image3], count, size)
+    count, size = test_process_image(@user, params[:upload][:image4], count, size)
+    @log_entry.upload_end = Time.now
+    @log_entry.image_count = count
+    @log_entry.image_bytes = size
+    @log_entry.save
+    redirect_to(:action => 'test_add_image_report')
   end
 
-  def test_add_image
-    if verify_user()
-      @log_entry = AddImageTestLog.new
-      @log_entry.user = @user
-      @log_entry.save
-      @upload = {}
-    end
+  def test_add_image # :norobots:
+    @log_entry = AddImageTestLog.new
+    @log_entry.user = @user
+    @log_entry.save
+    @upload = {}
   end
 
-  def test_add_image_report
-    if verify_user()
-      @log_entries = AddImageTestLog.find(:all, :order => 'created_at desc')
-    end
-  end
-
-################################################################################
-
-  def resize_images
-    if check_permission(0)
-      for image in Image.find(:all)
-        image.calc_size()
-        image.resize_image(160, 160, image.thumbnail)
-      end
-    else
-      flash_error :image_resize_denied.t
-    end
-    redirect_to(:action => 'list_images')
-  end
-
-################################################################################
-
-  helper_method :next_id
-  def next_id(id, id_list)
-    result = id
-    if id_list.length > 0
-      result = id_list[0]
-      index = id_list.index(id)
-      if index
-        index = index + 1
-        if index < id_list.length
-          result = id_list[index]
-        end
-      end
-    end
-    result
-  end
-
-  helper_method :next_image_list
-  def next_image_list(observation_id, id_list)
-    image_list = []
-    current_id = observation_id
-    if id_list.length > 0
-      index = id_list.index(observation_id)
-      if index.nil?
-        index = id_list.length - 1
-        observation_id = id_list[index]
-      end
-      current_id = observation_id
-      while image_list == []
-        current_id = next_id(current_id, id_list)
-        if current_id == observation_id
-          break
-        end
-        images = Observation.find(current_id).images
-        image_list = []
-        for i in images
-          image_list.push(i.id)
-        end
-      end
-    end
-    [image_list, current_id]
-  end
-
-  helper_method :prev_id
-  def prev_id(id, id_list)
-    result = id
-    if id_list.length > 0
-      result = id_list[-1]
-      index = id_list.index(id)
-      if index
-        index = index - 1
-        if index >= 0
-          result = id_list[index]
-        end
-      end
-    end
-    result
-  end
-
-  helper_method :prev_image_list
-  def prev_image_list(observation_id, id_list)
-    image_list = []
-    current_id = observation_id
-    if id_list.length > 0
-      index = id_list.index(observation_id)
-      if index.nil?
-        index = 0
-        observation_id = id_list[index]
-      end
-      current_id = observation_id
-      while image_list == []
-        current_id = prev_id(current_id, id_list)
-        if current_id == observation_id
-          break
-        end
-        images = Observation.find(current_id).images
-        image_list = []
-        for i in images
-          image_list.push(i.id)
-        end
-      end
-    end
-    [image_list, current_id]
-  end
-
-  helper_method :calc_image_ids
-  def calc_image_ids(obs)
-    result = nil
-    if obs
-      result = []
-      for ob_id in obs:
-        img_ids = Observation.connection.select_all("select image_id
-          from images_observations where observation_id=" + ob_id.to_s)
-        for h in img_ids
-          result.push(h['image_id'].to_i)
-        end
-      end
-    end
-    result
+  def test_add_image_report # :norobots:
+    @log_entries = AddImageTestLog.find(:all, :order => 'created desc')
   end
 end

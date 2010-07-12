@@ -1,186 +1,213 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'image_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-class ImageControllerTest < Test::Unit::TestCase
-  fixtures :images
-  fixtures :observations
-  fixtures :images_observations
-  fixtures :namings
-  fixtures :names
-  fixtures :locations
-  fixtures :users
-  fixtures :licenses
-
-  def setup
-    @controller = ImageController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
-    # FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
-  end
-
-  def teardown
-    if File.exists?(IMG_DIR)
-      FileUtils.rm_rf(IMG_DIR)
-    end
-  end
+class ImageControllerTest < FunctionalTestCase
 
   def test_list_images
-    get_with_dump :list_images
-    assert_response :success
-    assert_template 'list_images'
+    get_with_dump(:list_images)
+    assert_response('list_images')
   end
 
   def test_images_by_user
-    get_with_dump :images_by_user, { :id => @rolf.id }
-    assert_response :success
-    assert_template 'list_images'
+    get_with_dump(:images_by_user, :id => @rolf.id)
+    assert_response('list_images')
   end
 
   def test_next_image
-    get_with_dump :next_image
-    assert_redirected_to(:controller => "image", :action => "show_image", :id => 2)
+    get_with_dump(:next_image, :id => 2)
+    assert_response(:action => "show_image", :id => 1)
   end
 
   def test_next_image_ss
-    state = SequenceState.lookup({}, :images)
-    state.next()
-    state.next()
-    next_id = state.current_id
-    state.prev()
-    state.save
+    outer = Query.lookup_and_save(:Observation, :in_set, :ids => [2,1,4,3])
+    inner = Query.lookup_and_save(:Image, :inside_observation, :outer => outer,
+                                  :observation => 2, :by => :id)
+
+    # Make sure the outer query is working right first.
+    outer.current_id = 2
+    new_outer = outer.next
+    assert_equal(outer, new_outer)
+    assert_equal(1, outer.current_id)
+    assert_equal(0, outer.current.images.size)
+    new_outer = outer.next
+    assert_equal(outer, new_outer)
+    assert_equal(4, outer.current_id)
+    assert_equal(1, outer.current.images.size)
+    new_outer = outer.next
+    assert_equal(outer, new_outer)
+    assert_equal(3, outer.current_id)
+    assert_equal(1, outer.current.images.size)
+    new_outer = outer.next
+    assert_equal(nil, new_outer)
+
+    # No more images for obs #2, so goes to next obs (#1), but this has no
+    # images, so goes to next (#4), this has one image (#6).  (Shouldn't
+    # care that outer query has changed, inner query remembers where it
+    # was when inner query was created.)
+    inner.current_id = 2
+    assert(new_inner = inner.next)
+    assert_not_equal(inner, new_inner)
+    assert_equal(6, new_inner.current_id)
+    save_query = Query.last
+    assert(new_new_inner = new_inner.next)
+    assert_not_equal(new_inner, new_new_inner)
+    assert_equal(5, new_new_inner.current_id)
+    assert_nil(new_new_inner.next)
+
     params = {
-      :seq_key => state.id,
-      :id => state.current_id
-    }
-    get_with_dump :next_image, params
-    assert_redirected_to(:controller => "image", :action => "show_image", :id => next_id)
+      :id => 2,
+      :params => @controller.query_params(inner),
+    }.flatten
+    get(:next_image, params)
+    assert_response(:action => "show_image", :id => 6,
+                    :params => @controller.query_params(save_query))
   end
 
   # Test next_image in the context of a search
   def test_next_image_search
-    search_state = SearchState.lookup({}, :images)
-    search_state.setup('Title', @controller.field_search(["n.search_name",
-      "i.notes", "i.copyright_holder"], "%Notes%"),
-      "n.search_name, `when` desc", :nothing)
-    search_state.save
+    image = Image.find(5)
+
+    # Create simple index.
+    query = Query.lookup_and_save(:Image, :by_user, :user => @rolf)
+    assert_equal([6, 5, 4, 3], query.result_ids)
+
+    # See what should happen if we look up an Image search and go to next.
+    query.current = image
+    assert(new_query = query.next)
+    assert_equal(query, new_query)
+    assert_equal(4, new_query.current_id)
+
+    # Now do it for real.
     params = {
-      :search_seq => search_state.id
-    }
-    state = SequenceState.lookup(params, :images)
-    state.prev() # Really go to the start of the list
-    state.next() # Peek ahead
-    next_id = state.current_id
-    state.prev() # Go back
-    state.save
-    params = {
-      :seq_key => state.id,
-      :id => state.current_id
-    }
-    get_with_dump :next_image, params # Now try it for real
-    assert_redirected_to(:controller => "image", :action => "show_image",
-      :id => next_id, :seq_key => state.id)
+      :id => 5,
+      :params => @controller.query_params(query),
+    }.flatten
+    get(:next_image, params)
+    assert_response(:action => "show_image", :id => 4,
+                    :params => @controller.query_params(query))
   end
 
   def test_prev_image
-    get_with_dump :prev_image
-    assert_redirected_to(:controller => "image", :action => "show_image")
+    get_with_dump(:prev_image, :id => 1)
+    assert_response(:action => "show_image", :id => 2)
   end
 
   def test_prev_image_ss
-    state = SequenceState.lookup({}, :images)
-    state.next()
-    prev_id = state.current_id
-    state.next()
-    state.save
-    params = {
-      :seq_key => state.id,
-      :id => state.current_id
-    }
-    get_with_dump :prev_image, params
-    assert_redirected_to(:controller => "image", :action => "show_image", :id => prev_id)
-  end
+    outer = Query.lookup_and_save(:Observation, :in_set, :ids => [2,1,4,3])
+    inner = Query.lookup_and_save(:Image, :inside_observation, :outer => outer,
+                                  :observation => 4, :by => :id)
 
-  def test_show_image
-    get_with_dump :show_image, :id => 1
-    assert_response :success
-    assert_template 'show_image'
+    # Make sure the outer query is working right first.
+    outer.current_id = 4
+    new_outer = outer.prev
+    assert_equal(outer, new_outer)
+    assert_equal(1, outer.current_id)
+    assert_equal(0, outer.current.images.size)
+    new_outer = outer.prev
+    assert_equal(outer, new_outer)
+    assert_equal(2, outer.current_id)
+    assert_equal(2, outer.current.images.size)
+    new_outer = outer.prev
+    assert_equal(nil, new_outer)
+
+    # No more images for obs #4, so goes to next obs (#1), but this has no
+    # images, so goes to next (#2), this has two images (#1 and #2).
+    # (Shouldn't care that outer query has changed, inner query remembers where
+    # it was when inner query was created.)
+    inner.current_id = 6
+    assert(new_inner = inner.prev)
+    assert_not_equal(inner, new_inner)
+    assert_equal(2, new_inner.current_id)
+    assert(new_new_inner = new_inner.prev)
+    assert_equal(new_inner, new_new_inner)
+    assert_equal(1, new_inner.current_id)
+    assert_nil(new_inner.prev)
+
+    params = {
+      :id => 6,
+      :params => @controller.query_params(inner),
+    }.flatten
+    get(:prev_image, params)
+    assert_response(:action => "show_image", :id => 2,
+                    :params => @controller.query_params(Query.last))
   end
 
   def test_show_original
-    get_with_dump :show_original, :id => 1
-    assert_response :success
-    assert_template 'show_original'
+    get_with_dump(:show_original, :id => 1)
+    assert_response(:action => "show_image", :size => 'full_size', :id => 1)
+  end
+
+  def test_show_image
+    get_with_dump(:show_image, :id => 1)
+    assert_response('show_image')
+    for size in Image.all_sizes + [:original]
+      get(:show_image, :id => 1, :size => size)
+      assert_response('show_image')
+    end
   end
 
   def test_image_search
-    @request.session[:pattern] = "Notes"
-    get_with_dump :image_search
-    assert_response :success
-    assert_template 'list_images'
-    assert_equal :image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title')
-    get_with_dump :image_search, { :page => 2 }
-    assert_response :success
-    assert_template 'list_images'
-    assert_equal :image_search_title.t(:pattern => 'Notes'), @controller.instance_variable_get('@title')
+    get_with_dump(:image_search, :pattern => 'Notes')
+    assert_response('list_images')
+    assert_equal(:query_title_pattern_search.t(:types => 'Images', :pattern => 'Notes'),
+                 @controller.instance_variable_get('@title'))
+    get_with_dump(:image_search, :pattern => 'Notes', :page => 2)
+    assert_response('list_images')
+    assert_equal(:query_title_pattern_search.t(:types => 'Images', :pattern => 'Notes'),
+                 @controller.instance_variable_get('@title'))
   end
 
   def test_image_search_next
-    @request.session[:pattern] = "Notes"
-    get_with_dump :image_search
-    assert_response :success
-    assert_template 'list_images'
+    get_with_dump(:image_search, :pattern => 'Notes')
+    assert_response('list_images')
   end
 
   def test_image_search_by_number
-    @request.session[:pattern] = "3"
-    get_with_dump :image_search
-    assert_redirected_to(:controller => "image", :action => "show_image")
+    get_with_dump(:image_search, :pattern => 3)
+    assert_response(:action => "show_image", :id => 3)
   end
 
-  def test_advanced_obj_search
-    get_with_dump(:advanced_obj_search, {
-      "search"=>{
-        "name"=>"Don't know",
-        "observer"=>"myself",
-        "content"=>"Long pink stem and small pink cap",
-        "location"=>"Eastern Oklahoma"
-      }, "commit"=>"Search"})
-      assert_response :success
-      assert_template 'list_images'
+  def test_advanced_search
+    query = Query.lookup_and_save(:Image, :advanced_search,
+      :name => "Don't know",
+      :user => "myself",
+      :content => "Long pink stem and small pink cap",
+      :location => "Eastern Oklahoma"
+    )
+    get(:advanced_search, @controller.query_params(query))
+    assert_response('list_images')
   end
 
   def test_add_image
-    requires_login :add_image, {:id => @coprinus_comatus_obs.id}
-    assert_form_action :action => 'add_image'
-    # Check that image cannot be added to an observation the user doesn't own
-    flash[:params] = nil # (disable the spontaneous logout fix!!!)
-    get_with_dump :add_image, {:id => @minimal_unknown.id}
-    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    requires_login(:add_image, :id => observations(:coprinus_comatus_obs).id)
+    assert_form_action(:action => 'add_image')
+    # Check that image cannot be added to an observation the user doesn't own.
+    get_with_dump(:add_image, :id => observations(:minimal_unknown).id)
+    assert_response(:controller => "observer", :action => "show_observation")
   end
 
   # Test reusing an image by id number.
   def test_add_image_to_obs
-    obs = @coprinus_comatus_obs
-    image = @disconnected_coprinus_comatus_image
+    obs = observations(:coprinus_comatus_obs)
+    image = images(:disconnected_coprinus_comatus_image)
     assert(!obs.images.member?(image))
-    requires_login(:add_image_to_obs, { "obs_id" => obs.id, "id" => image.id }, false)
-    assert_redirected_to(:controller => "observer", :action => "show_observation")
-    obs2 = Observation.find(obs.id) # Need to reload observation to pick up changes
-    assert(obs2.images.member?(image))
+    requires_login(:reuse_image, :mode => 'observation', :obs_id => obs.id,
+                   :img_id => image.id)
+    assert_response(:controller => :observer, :action => :show_observation)
+    assert(obs.reload.images.member?(image))
   end
 
   def test_license_updater
-    requires_login :license_updater
-    assert_form_action :action => 'license_updater'
+    requires_login(:license_updater)
+    assert_form_action(:action => 'license_updater')
   end
 
   def test_update_licenses
-    example_image = @agaricus_campestris_image
+    example_image    = images(:agaricus_campestris_image)
     user_id          = example_image.user_id
     copyright_holder = example_image.copyright_holder
 
     target_license = example_image.license
-    new_license    = @ccwiki30
+    new_license    = licenses(:ccwiki30)
     assert_not_equal(target_license, new_license)
 
     target_count = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
@@ -195,9 +222,8 @@ class ImageControllerTest < Test::Unit::TestCase
         }
       }
     }
-    post_requires_login(:license_updater, params, false)
-    assert_response :success
-    assert_template 'license_updater'
+    post_requires_login(:license_updater, params)
+    assert_response('license_updater')
     assert_equal(10, @rolf.reload.contribution)
 
     target_count_after = Image.find_all_by_user_id_and_license_id_and_copyright_holder(user_id, target_license.id, copyright_holder).length
@@ -208,9 +234,9 @@ class ImageControllerTest < Test::Unit::TestCase
   end
 
   def test_delete_images
-    obs = @detailed_unknown
-    keep = @turned_over
-    remove = @in_situ
+    obs = observations(:detailed_unknown)
+    keep = images(:turned_over)
+    remove = images(:in_situ)
     assert(obs.images.member?(keep))
     assert(obs.images.member?(remove))
     assert_equal(remove.id, obs.thumb_image_id)
@@ -218,43 +244,44 @@ class ImageControllerTest < Test::Unit::TestCase
     selected = {}
     selected[keep.id.to_s] = "no"
     selected[remove.id.to_s] = "yes"
-    params = {"id"=>obs.id.to_s, "selected"=>selected}
-    post_requires_login(:remove_images, params, false, "mary")
-    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    params = {
+      :id => obs.id.to_s,
+      :selected => selected
+    }
+    post_requires_login(:remove_images, params, 'mary')
+    assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(10, @mary.reload.contribution)
-
-    obs = Observation.find(obs.id)
-    assert(obs.images.member?(keep))
+    assert(obs.reload.images.member?(keep))
     assert(!obs.images.member?(remove))
     assert_equal(keep.id, obs.thumb_image_id)
 
     selected = {}
     selected[keep.id.to_s] = "yes"
-    params = {"id"=>obs.id.to_s, "selected"=>selected}
+    params = {
+      :id => obs.id.to_s,
+      :selected => selected
+    }
     post(:remove_images, params)
-    assert_redirected_to(:controller => "observer", :action => "show_observation")
+    assert_response(:controller => "observer", :action => "show_observation")
     assert_equal(10, @mary.reload.contribution)
-
-    obs = Observation.find(obs.id)
-    assert(!obs.images.member?(keep))
+    assert(!obs.reload.images.member?(keep))
     assert_equal(nil, obs.thumb_image_id)
   end
 
   def test_destroy_image
-    image = @turned_over
-    obs = image.observations[0]
+    image = images(:turned_over)
+    obs = image.observations.first
     assert(obs.images.member?(image))
-    params = {"id"=>image.id.to_s}
-    assert("mary" == image.user.login)
-    requires_user(:destroy_image, ["image", "show_image"], params, false, "mary")
-    assert_redirected_to(:controller => "image", :action => "list_images")
+    params = { :id => image.id.to_s }
+    assert_equal('mary', image.user.login)
+    requires_user(:destroy_image, :show_image, params, 'mary')
+    assert_response(:action => :list_images)
     assert_equal(0, @mary.reload.contribution)
-    obs = Observation.find(obs.id) # Need to reload observation to pick up changes
-    assert(!obs.images.member?(image))
+    assert(!obs.reload.images.member?(image))
   end
 
   def test_edit_image
-    image = @connected_coprinus_comatus_image
+    image = images(:connected_coprinus_comatus_image)
     params = { "id" => image.id.to_s }
     assert("rolf" == image.user.login)
     requires_user(:edit_image, ['image', 'show_image'], params)
@@ -262,7 +289,7 @@ class ImageControllerTest < Test::Unit::TestCase
   end
 
   def test_update_image
-    image = @agaricus_campestris_image
+    image = images(:agaricus_campestris_image)
     obs = image.observations.first
     assert(obs)
     assert(obs.rss_log.nil?)
@@ -271,70 +298,65 @@ class ImageControllerTest < Test::Unit::TestCase
       "id" => image.id,
       "image" => {
         "when(1i)" => "2001",
-        "copyright_holder" => "Rolf Singer",
         "when(2i)" => "5",
         "when(3i)" => "12",
-        "notes" => ""
+        "copyright_holder" => "Rolf Singer",
+        "notes"    => ""
       }
     }
-    post_requires_login(:edit_image, params, false)
-    assert_redirected_to(:controller => "image", :action => "show_image")
+    post_requires_login(:edit_image, params)
+    assert_response(:action => :show_image)
     assert_equal(10, @rolf.reload.contribution)
 
-    obs = Observation.find(obs.id)
-    assert(obs.rss_log)
+    assert(obs.reload.rss_log)
     assert(obs.rss_log.notes.include?('log_image_updated'))
-    assert(obs.rss_log.notes.include?("user=#{obs.user.login}"))
-    assert(obs.rss_log.notes.include?("name=#{RssLog.escape(image.unique_format_name)}"))
+    assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
+    assert(obs.rss_log.notes.include?("name #{RssLog.escape("Image ##{image.id}")}"))
   end
 
   def test_remove_images
-    obs = @coprinus_comatus_obs
+    obs = observations(:coprinus_comatus_obs)
     params = { :id => obs.id }
-    assert("rolf" == obs.user.login)
-    requires_user(:remove_images, ['observer', 'show_observation'], params)
-    assert_form_action :action => 'remove_images'
-  end
-
-  def test_resize_images
-    requires_login :resize_images, {}, false
-    assert_equal(:image_resize_denied.t, flash[:notice])
-    assert_redirected_to(:controller => "image", :action => "list_images")
-    # How should real image files be handled?
+    assert_equal('rolf', obs.user.login)
+    requires_user(:remove_images, [:observer, :show_observation], params)
+    assert_form_action(:action => 'remove_images')
   end
 
   def test_reuse_image
-    obs = @agaricus_campestris_obs
-    params = { :id => obs.id }
-    assert("rolf" == obs.user.login)
-    requires_user(:reuse_image, ['observer', 'show_observation'], params)
-    assert_form_action :action => 'reuse_image_by_id'
+    obs = observations(:agaricus_campestris_obs)
+    params = { :mode => 'observation', :obs_id => obs.id }
+    assert_equal('rolf', obs.user.login)
+    requires_user(:reuse_image, [:observer, :show_observation], params)
+    assert_form_action(:action => 'reuse_image', :mode => 'observation',
+                       :obs_id => obs.id)
   end
 
   def test_reuse_image_by_id
-    obs = @agaricus_campestris_obs
-    image = @commercial_inquiry_image
+    obs = observations(:agaricus_campestris_obs)
+    image = images(:commercial_inquiry_image)
     assert(!obs.images.member?(image))
-    params = { :observation => { :id => obs.id, :idstr => "3" } }
+    params = {
+      :mode   => 'observation',
+      :obs_id => obs.id.to_s,
+      :img_id => '3',
+    }
     owner = obs.user.login
-    assert("mary" != owner)
-    requires_login(:reuse_image_by_id, params, false, "mary")
-    assert_redirected_to(:controller => "observer", :action => "show_observation")
-    obs = Observation.find(obs.id) # Reload Observation
-    assert(!obs.images.member?(image))
+    assert_not_equal('mary', owner)
+    requires_login(:reuse_image, params, "mary")
+    assert_response(:controller => :observer, :action => :show_observation)
+    assert(!obs.reload.images.member?(image))
 
-    login owner
-    get_with_dump(:reuse_image_by_id, params)
-    assert_redirected_to(:controller => "observer", :action => "show_observation")
-    obs = Observation.find(obs.id) # Reload Observation
-    assert(obs.images.member?(image))
+    login(owner)
+    get_with_dump(:reuse_image, params)
+    assert_response(:controller => "observer", :action => "show_observation")
+    assert(obs.reload.images.member?(image))
   end
 
   def test_upload_image
-    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
-    obs = @coprinus_comatus_obs
+    setup_image_dirs
+    obs = observations(:coprinus_comatus_obs)
     img_count = obs.images.size
-    file = FilePlus.new("test/fixtures/images/Coprinus_comatus.jpg")
+    file = FilePlus.new("#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg")
     file.content_type = 'image/jpeg'
     params = {
       :id => obs.id,
@@ -352,37 +374,39 @@ class ImageControllerTest < Test::Unit::TestCase
         :image4 => ''
       }
     }
-    post_requires_user(:add_image, ['observer', 'show_observation'], params, false)
-    assert_redirected_to(:controller => 'observer', :action => 'show_observation')
+    post_requires_user(:add_image, [:observer, :show_observation], params)
+    assert_response(:controller => :observer, :action => :show_observation)
     assert_equal(20, @rolf.reload.contribution)
-    obs = Observation.find(obs.id)
-    assert(obs.images.size == (img_count + 1))
-    assert_equal(:profile_uploaded_image.t(:name => "##{obs.images.last.id}"), flash[:notice])
+    assert(obs.reload.images.size == (img_count + 1))
+    assert_flash(:runtime_image_uploaded_image.t(:name => "##{obs.images.last.id}"))
   end
 
   # This is what would happen when user first opens form.
   def test_reuse_image_for_user
-    requires_login(:reuse_image_for_user, {}, true)
-    assert_form_action :action => 'reuse_image_for_user'
+    requires_login(:reuse_image, :mode => 'profile')
+    assert_response('reuse_image')
+    assert_form_action(:action => 'reuse_image', :mode => 'profile')
   end
 
   # This would happen if user clicked on image.
   def test_reuse_image_for_user_post1
-    image = @commercial_inquiry_image
-    params = { :id => image.id.to_s }
-    requires_login(:reuse_image_for_user, params, false)
-    assert(user_id = session[:user_id])
-    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user_id)
-    assert_equal(User.find(user_id).image_id, image.id)
+    image = images(:commercial_inquiry_image)
+    params = { :mode => 'profile', :img_id => image.id.to_s }
+    requires_login(:reuse_image, params)
+    assert_response(:controller => :observer, :action => :show_user,
+                    :id => @rolf.id)
+    assert_equal(@rolf.id, session[:user_id])
+    assert_equal(image.id, @rolf.reload.image_id)
   end
 
   # This would happen if user typed in id and submitted.
   def test_reuse_image_for_user_post2
-    image = @commercial_inquiry_image
-    params = { :id => image.id.to_s }
-    post_requires_login(:reuse_image_for_user, params, false)
-    assert(user_id = session[:user_id])
-    assert_redirected_to(:controller => 'observer', :action => 'show_user', :id => user_id)
-    assert_equal(User.find(user_id).image_id, image.id)
+    image = images(:commercial_inquiry_image)
+    params = { :mode => 'profile', :img_id => image.id.to_s }
+    post_requires_login(:reuse_image, params)
+    assert_response(:controller => :observer, :action => :show_user,
+                    :id => @rolf.id)
+    assert_equal(@rolf.id, session[:user_id])
+    assert_equal(image.id, @rolf.reload.image_id)
   end
 end

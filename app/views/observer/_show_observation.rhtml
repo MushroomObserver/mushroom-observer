@@ -9,7 +9,8 @@
     approved_synonyms, deprecated_synonyms = name.sort_synonyms
     if approved_synonyms != []
       links = approved_synonyms.map do |n|
-        link_to(n.display_name.t, :controller => 'name', :action => "show_name", :id => n)
+        link_to(n.display_name.t, :controller => 'name',
+                :action => "show_name", :id => n)
       end %>
       <% if name.deprecated %>
         <%= links.length > 1 ? :show_observation_preferred_names.t : :show_observation_preferred_name.t %>:
@@ -20,15 +21,15 @@
     <% end %>
   <% end %>
 
-  <%= :app_when.t %>: <span class="Data"><%= observation.when %></span><br/>
+  <%= :WHEN.t %>: <span class="Data"><%= observation.when.web_date %></span><br/>
   <% if observation.is_collection_location %>
     <%= :show_observation_collection_location.t %>:
   <% else %>
     <%= :show_observation_seen_at.t %>:
   <% end %>
-  <%= location_link(observation.place_name, observation.location_id, nil, true) %><br/>
+  <%= location_link(observation.place_name, observation.location, nil, true) %><br/>
 
-  <%= :app_who.t %>: <span class="Data">
+  <%= :WHO.t %>: <span class="Data">
     <%= user_link(observation.user) %>
   </span><br/>
 
@@ -44,13 +45,14 @@
 <% if lists.length > 0 %>
   <p><%= :show_observation_species_lists.t %>:<br/>
     <% for l in lists %>
-      <%= link_to(l.unique_text_name, :controller => 'species_list', :action => 'show_species_list', :id => l.id) %><br/>
+      <%= link_to(l.unique_text_name, :controller => 'species_list',
+                  :action => 'show_species_list', :id => l.id) %><br/>
     <% end %>
   </p>
 <% end %>
 
-<% if observation.notes.to_s != ""
-  String.register_name(observation.namings.map {|n| n.name})
-  String.register_name(observation.name) %>
-  <%= sanitize(:app_notes.l + ': ' + observation.notes.to_s).tpl %>
+<% if !observation.notes.blank?
+  Textile.register_name(observation.namings.map {|n| n.name})
+  Textile.register_name(observation.name) %>
+  <%= sanitize(:NOTES.l + ': ' + observation.notes.to_s).tpl %>
 <% end %>

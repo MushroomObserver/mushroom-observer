@@ -28,6 +28,7 @@
 #    is_text_only?       boolean: is browser text-only? (includes robots)
 #    is_like_gecko?      boolean: is rendering engine Gecko or Gecko-like?
 #    is_ie_compatible?   boolean: is rendering engine IE-compatible?
+#    Time.zone           (this is automatically set for each query)
 #
 #    @js                 boolean: is javascript enabled?
 #    @ua                 user agent: :ie, :firefox, :safari, :robot, :text, etc.
@@ -116,6 +117,12 @@ module BrowserStatus
   TEST_UA              = :firefox
   TEST_UA_VERSION      = 3.0
 
+  # Short snippet of javascript that stores the browser's timezone offset
+  # (in minutes from UTC) in a cookied called "tz".
+  JAVASCRIPT_THAT_SETS_TIMEZONE =
+    'try { document.cookie = "tz=" + (new Date()).getTimezoneOffset(); } ' +
+    'catch(err) { }'
+
   # This is the minimal page that is served when a user first encounters the
   # site.  Subsequently, the session will store a cookie in the browser so that
   # they are recognized, and we won't ever have to do this again.  NOTE: no
@@ -125,6 +132,7 @@ module BrowserStatus
     <html>
       <head>
         <script>
+          #{JAVASCRIPT_THAT_SETS_TIMEZONE}
           window.location = '%s';
         </script>
       </head>
@@ -141,20 +149,23 @@ module BrowserStatus
   # off but find that it really is on.
   def check_if_user_turned_javascript_on
 
+    # Set a special cookie so we can determine the browser's timezone offset.
+    code = JAVASCRIPT_THAT_SETS_TIMEZONE
+
     # Reload page with special "_js=on" parameter to let us know that
     # Javascript is turned on in the user's browser.  There are a few
     # cases to be careful of: I ignore it on post of forms to avoid the
     # whole post data and file upload problem; and don't bother if the session
     # isn't working, since we won't be able to remember that JS is on, anyway.
     if !@js && !session[:js_override] && request.method == :get
-      javascript_tag("window.location = '#{reload_with_args(:_js => 'on')}'")
-    else
-      ''
+      code += " window.location = '#{reload_with_args(:_js => 'on')}'"
     end
+
+    javascript_tag(code)
   end
 
   # For backwards compatibility.
-  alias :report_browser_status :check_if_user_turned_javascript_on
+  alias report_browser_status check_if_user_turned_javascript_on
 
   # This is designed to be run as a before_filter at the top of
   # application_controller, before anthing else is run.  It sets several
@@ -169,7 +180,7 @@ module BrowserStatus
       @js              = TEST_JS
       @ua              = TEST_UA
       @ua_version      = TEST_UA_VERSION
-      return
+      return true
     end
 
     ua = request.env['HTTP_USER_AGENT']
@@ -250,6 +261,18 @@ module BrowserStatus
     # print "params           = [#{params.inspect  }]\n"
     # print "========================================\n"
 
+    # Find time zone that matches the best.
+    if offset = -cookies[:tz].to_i * 60 rescue nil
+      for zone in ActiveSupport::TimeZone.all.sort_by(&:utc_offset)
+        if zone.utc_offset >= offset
+          Time.zone = zone
+          break
+        end
+      end
+    else
+      Time.zone = Time.default_zone
+    end
+
     # If we've never seen this user before, serve a tiny page that redirects
     # immediately to tell us the state of javascript, and lets us determine
     # whether session and cookies are woring correctly immediately.  (The
@@ -259,7 +282,24 @@ module BrowserStatus
         reload_with_args(:_js => 'on',  :_new => 'true'),
         reload_with_args(:_js => 'off', :_new => 'true'),
       ])
+    else
+      return true
     end
+  end
+
+  # Get user agent directly without relying on +browser_status+ filter.
+  # Returns the type:
+  #
+  #   case user_agent
+  #   when :ie
+  #     ...
+  #   when :robot
+  #     ...
+  #   end
+  #   
+  def user_agent
+    @ua, @ua_version = parse_user_agent(request.env['HTTP_USER_AGENT'])
+    return @ua
   end
 
   # Return the number of entries in our_session_cache
@@ -351,8 +391,10 @@ module BrowserStatus
     add_args_to_url(request.request_uri, new_args)
   end
 
-  # Take an arbitrary URL and change the parameters.  Returns new URL.
-  # Should even handle the fancy "/object/id" case.
+  # Take an arbitrary URL and change the parameters.  Returns new URL.  Should
+  # even handle the fancy "/object/id" case.  (Note: use +nil+ to mean delete
+  # -- i.e. <tt>add_args_to_url(url, :old_arg => nil)</tt> deletes the
+  # parameter named +old_arg+ from +url+.) 
   #
   #   url = url_for(:action => "blah", ...)
   #   new_url = add_args_to_url(url, :arg1 => :val1, :arg2 => :val2, ...)

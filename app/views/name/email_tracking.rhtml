@@ -2,7 +2,7 @@
   @title = :email_tracking_title.t(:name => @name.display_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :name.l),
+    add_tab(:cancel_and_show.t(:type => :name),
             :action => 'show_name', :id => @name.id)
   end
 %>
@@ -12,9 +12,9 @@
 <% form_tag(:action => 'email_tracking', :id => @name.id) do %>
   <br/><center>
     <%= if @notification
-      submit_tag(:app_update.t) + ' ' + submit_tag(:app_disable.t)
+      submit_tag(:UPDATE.t) + ' ' + submit_tag(:DISABLE.t)
     else
-      submit_tag(:app_enable.t)
+      submit_tag(:ENABLE.t)
     end %>
   </center>
 

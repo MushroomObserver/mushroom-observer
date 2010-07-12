@@ -1,23 +1,23 @@
 # Locals:
-#   :vote               Vote instance.
-#   :details            Include details?
+#   :object             Vote instance.
+#   :detail             Include details?
 
-details ||= false
+detail ||= false
 
 xml.vote(
-  :id => vote.id
+  :id => object.id
 ) do
-  xml.value vote.value
+  xml.value object.value
 
-  if details
-    xml.created  xml_datetime(vote.created)
-    xml.modified xml_datetime(vote.modified)
-    xml.naming(:id => vote.naming_id)
-    xml.observation(:id => vote.observation_id)
+  if detail
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
+    xml.naming(:id => object.naming_id)
+    xml.observation(:id => object.observation_id)
 
     render_xml_partial(xml, :user, :locals => {
-      :user => vote.user,
-      :details => false,
+      :object => object.user,
+      :detail => false,
     })
   end
 end

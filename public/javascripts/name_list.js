@@ -5,6 +5,16 @@ var NL_FOCUS = null;
 // event within one of the three columns.
 var NL_IGNORE_UNFOCUS = false;
 
+// Keycode of key that's currently pressed if any (and if focused).
+var NL_KEY = null;
+
+// Callback used to simulate key repeats.
+var NL_REPEAT_CALLBACK = null;
+
+// Timing of key repeat.
+var NL_FIRST_KEY_DELAY = 250;
+var NL_NEXT_KEY_DELAY = 25;
+
 // Accumulator for typed letters, used to search in columns.
 var NL_WORD = "";
 
@@ -65,6 +75,47 @@ function nd(s, i) {
     nl_remove_name(NL_NAMES[i]);
 }
 
+// Are we watching this key event?
+function nl_watching(event) {
+  var c = String.fromCharCode(event.keyCode || event.which).toLowerCase();
+  if (c.match(/[a-zA-Z \-]/) && !event.ctrlKey)
+    return true;
+  switch (event.keyCode) {
+  case Event.KEY_BACKSPACE:
+  case Event.KEY_DELETE:
+  case Event.KEY_RETURN:
+  case Event.KEY_TAB:
+  case Event.KEY_UP:
+  case Event.KEY_DOWN:
+  case Event.KEY_RIGHT:
+  case Event.KEY_LEFT:
+  case Event.KEY_HOME:
+  case Event.KEY_END:
+  case Event.KEY_PGUP:
+  case Event.KEY_PGDN:
+    return true;
+  }
+  return false;
+}
+
+// Also called when user presses a key.  Disable this if focused.
+function nl_keypress(event) {
+  if (NL_FOCUS && nl_watching(event)) {
+    Event.stop(event);
+    return false;
+  } else {
+    return true;
+  }
+}
+
+// Called when user un-presses a key.  Need to know so we can stop repeat.
+function nl_keyup(event) {
+  NL_KEY = null;
+  if (NL_REPEAT_CALLBACK) {
+    clearTimeout(NL_REPEAT_CALLBACK);
+    NL_REPEAT_CALLBACK = null;
+  }
+}
 
 // Called when user presses a key.  We keep track of where user is typing by
 // updating NL_FOCUS (value is 'g', 's' or 'n').
@@ -72,7 +123,34 @@ function nl_keydown(event) {
 
   // Cursors, etc. must be explicitly focused to work.  (Otherwise you can't
   // use them to navigate through the page as a whole.)
-  if (!NL_FOCUS) return true;
+  if (!NL_FOCUS || !nl_watching(event)) return true;
+
+  NL_KEY = event;
+  nl_process_key(event);
+
+  // Schedule first repeat event.
+  NL_REPEAT_CALLBACK =
+    window.setTimeout(function() {nl_keyrepeat(NL_KEY)}, NL_FIRST_KEY_DELAY);
+
+  // Stop browser from doing anything with key presses when focused.
+  Event.stop(event);
+  return false;
+}
+
+// Called when a key repeats.
+function nl_keyrepeat(event) {
+  if (NL_FOCUS && NL_KEY) {
+    nl_process_key(NL_KEY);
+    NL_REPEAT_CALLBACK =
+      window.setTimeout(function() {nl_keyrepeat(NL_KEY)}, NL_NEXT_KEY_DELAY);
+  } else {
+    NL_KEY = null;
+  }
+}
+
+// Process a key stroke.  This happens when the user first presses a key, and
+// periodically after if they keep the key down.
+function nl_process_key(event) {
 
   // Normal letters.
   var c = String.fromCharCode(event.keyCode || event.which).toLowerCase();
@@ -95,11 +173,8 @@ function nl_keydown(event) {
     if (NL_FOCUS == 's')
       word = NL_SPECIES_CUR[0].replace(/\*$|\|.*/, '') + ' ' + NL_WORD;
     nl_search(list, word);
-
-    // Update test div just below columns.
     nl_update_word(word);
-    Event.stop(event);
-    return false;
+    return;
   }
 
   // Clear word if user does *anything* else.
@@ -168,15 +243,7 @@ function nl_keydown(event) {
       if (NL_FOCUS == 'n' && i != null)
         nl_remove_name(NL_NAMES[i]);
       break;
-
-    // Let the rest pass through.
-    default:
-      return true;
   }
-
-  // Stop all events that we processed successfully.
-  Event.stop(event);
-  return false;
 }
 
 // ---------------------------------  HTML  ------------------------------------

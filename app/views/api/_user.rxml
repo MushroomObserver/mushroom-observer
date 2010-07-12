@@ -1,34 +1,34 @@
 # Locals:
-#   :user               User instance.
-#   :details            Boolean: include details?
+#   :object             User instance.
+#   :detail             Boolean: include details?
 
-details ||= false
+detail ||= false
 
 xml.user(
-  :id => user.id,
-  :url => "#{DOMAIN}/observer/show_user/#{user.id}"
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/observer/show_user/#{object.id}"
 ) do
-  xml.legal_name user.name
-  xml.login      user.login
+  xml.legal_name object.name
+  xml.login      object.login
 
-  if details
-    xml.created      xml_datetime(user.created)
-    xml.notes        user.notes.to_s.tpl_nodiv
-    xml.contribution user.contribution
+  if detail
+    xml.created      object.created.api_time
+    xml.notes        object.notes.to_s.tpl_nodiv
+    xml.contribution object.contribution
 
-    if user.location
+    if object.location
       render_xml_partial(xml, :location, :locals => {
-        :location => user.location,
-        :details => false,
+        :object => object.location,
+        :detail => false,
       })
     end
 
-    if user.image
+    if object.image
       render_xml_partial(xml, :image, :locals => {
-        :image => user.image,
-        :details => false,
-        :files => true,
-        :refs => false,
+        :object => object.image,
+        :detail => false,
+        :files  => true,
+        :refs   => false,
       })
     end
   end

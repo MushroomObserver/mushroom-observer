@@ -1,9 +1,13 @@
 xml.results(:number => @objects.length) do
-  for comment in @objects
-    render_xml_partial(xml, :comment, :locals => {
-      :comment => comment,
-      :details => true,
-      :refs => false,
-    })
+  for object in @objects
+    if @detail == :none
+      xml.comment(:id => object.id)
+    else
+      render_xml_partial(xml, :comment, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+        :refs   => false,
+      })
+    end
   end
 end

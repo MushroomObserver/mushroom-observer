@@ -1,0 +1,15 @@
+<%
+  @title ||= @description.format_name.t
+
+  new_tab_set do
+    add_tab(:show_object.t(:type => :name), :action => 'show_name',
+            :id => @description.parent_id, :params => query_params)
+    add_tab(:show_object.t(:type => :name_description),
+            :action => 'show_name_description',
+            :id => @description.id, :params => query_params)
+  end
+%>
+
+<%= render(:partial => 'shared/adjust_permissions', :locals =>
+           { :description => @description, :groups => @groups,
+             :data => @data }) %>

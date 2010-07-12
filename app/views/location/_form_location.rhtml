@@ -1,0 +1,78 @@
+<!--[form:location]-->
+
+<input type="hidden" id="where" name="where" value="<%=escape_once(@where)%>" />
+
+<br/>
+<label for="location_display_name"><%= :Where.t %>:</label>
+<%= form.text_field('display_name', :value => @where, :size => 80) %><br/>
+<div class="HelpNote"><%= :form_locations_help.tp %></div>
+
+<table cellpadding="10">
+  <tr>
+    <td width="50%" align="center">
+      <table cellpadding="5">
+        <tr>
+          <td></td>
+          <td>
+            <label for="location_north"><%= :North.t %>:</label><br/>
+            <%= form.text_field('north', :size => 12) %>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>
+            <label for="location_west"><%= :West.t %>:</label><br/>
+            <%= form.text_field('west', :size => 12) %>
+          </td>
+          <td>
+          	<div class="HelpNote"><%= :form_locations_lat_long_help.tp %></div><br/>                
+          </td>
+          <td>
+            <label for="location_east"><%= :East.t %>:</label><br/>
+            <%= form.text_field('east', :size => 12) %>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <label for="location_south"><%= :South.t %>:</label><br/>
+            <%= form.text_field('south', :size => 12) %>
+          </td>
+          <td></td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <p class="HelpNote">
+        <%= :form_locations_lat_long_finders.t %>:<br/>
+        <a target="_new" href="http://www.satsig.net/maps/lat-long-finder.htm">http://www.satsig.net/maps/lat-long-finder.htm</a><br/>
+        <a target="_new" href="http://www.ccalmr.ogi.edu/nanoos/latlon.php">http://www.ccalmr.ogi.edu/nanoos/latlon.php</a>
+      </p>
+    </td>
+    <td width="50%" align="center">
+      <table cellpadding="5">
+        <tr>
+          <td>
+            <label for="location_high"><%= :show_location_highest.t %>:</label><br/>
+            <%= form.text_field('high', :size => 12) %> <%= :units_meters.t %>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="location_low"><%= :show_location_lowest.t %>:</label><br/>
+            <%= form.text_field('low', :size => 12) %> <%= :units_meters.t %>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<label for="location_notes"><%= :NOTES.t %>:</label>
+<span class="HelpNote"><%= :form_locations_notes_help.t %></span><br/>
+<%= text_area('location', 'notes', :cols => 80) %><br/>
+<%= render(:partial => 'shared/textilize_help') %>
+
+<%= focus_on('location_display_name') %>
+
+<!--[eoform:location]-->

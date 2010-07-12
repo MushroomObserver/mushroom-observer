@@ -1,0 +1,221 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# Name with notes (not mergeable)
+agaricus_campestras_desc:
+  id: 1
+  name_id: 20
+  sync_id: 1xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 1
+  notes: This is should prevent me for merging
+  review_status: unreviewed
+  source_type: public
+  public: 1
+
+# Another name with notes (not mergeable)
+agaricus_campestros_desc:
+  id: 2
+  name_id: 21
+  sync_id: 2xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 1
+  notes: Need two to get an error
+  review_status: unreviewed
+  source_type: public
+  public: 1
+
+russula_brevipes_author_notes_desc:
+  id: 3
+  name_id: 32
+  sync_id: 3xx1
+  created: 2008-03-10 22:33:00
+  modified: 2008-03-10 22:33:05
+  user_id: 1
+  version: 1
+  notes: Here are some notes
+  review_status: unreviewed
+  source_type: public
+  public: 1
+
+russula_cremoricolor_no_author_notes_desc:
+  id: 4
+  name_id: 33
+  sync_id: 4xx1
+  created: 2008-03-12 20:53:08
+  modified: 2008-03-12 20:53:18
+  user_id: 1
+  version: 1
+  notes: Here are some notes
+  review_status: unreviewed
+  source_type: public
+  public: 1
+
+russula_cremoricolor_author_notes_desc:
+  id: 5
+  name_id: 34
+  sync_id: 5xx1
+  created: 2008-03-12 20:53:36
+  modified: 2008-03-12 20:53:40
+  user_id: 1
+  version: 1
+  notes: Some different notes
+  review_status: unreviewed
+  source_type: public
+  public: 1
+
+peltigera_desc:
+  id: 6
+  name_id: 40
+  sync_id: 6xx1
+  created: 2009-01-01 01:01:01
+  modified: 2009-01-02 01:01:01
+  user_id: 4
+  version: 2
+  reviewer_id: 1
+  review_status: vetted
+  ok_for_export: 1
+  last_review: 2009-01-02 02:01:01
+  license_id: 2
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
+  gen_desc: "Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines."
+  diag_desc: "Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose."
+  distribution: Cosmopolitan.
+  habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
+  look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
+  uses: "Good for making birds nests... if you're a bird."
+  source_type: public
+  public: 1
+
+suillus_desc:
+  id: 7
+  name_id: 42
+  sync_id: 7xx1
+  created: 2009-10-12 21:30:01
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  review_status: unreviewed
+  gen_desc: A __Suillus__ by any other name would smell as sweet...
+  source_type: public
+  public: 1
+
+# A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
+draft_coprinus_comatus:
+  id: 8
+  name_id: 2
+  sync_id: 8xx1
+  user_id: 5
+  version: 1
+  review_status: unreviewed
+  gen_desc: This is a general description of __C. comatus__.
+  created: 2008-10-05 12:31:10
+  modified: 2008-10-05 12:31:12
+  source_type: project
+  source_name: EOL Project
+  project_id: 1
+  public: 0
+
+# A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
+draft_agaricus_campestris:
+  id: 9
+  name_id: 3
+  sync_id: 9xx1
+  user_id: 2
+  version: 1
+  review_status: unreviewed
+  created: 2008-10-05 12:37:33
+  modified: 2008-10-05 12:37:35
+  source_type: project
+  source_name: EOL Project
+  project_id: 1
+  public: 0
+
+# A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
+draft_boletus_edulis:
+  id: 10
+  name_id: 39
+  sync_id: 10xx1
+  user_id: 4
+  version: 1
+  review_status: unreviewed
+  created: 2008-10-05 16:19:45
+  modified: 2008-10-05 16:19:45
+  source_type: project
+  source_name: Bolete Project
+  project_id: 2
+  public: 0
+
+# A draft of Lactarius alpinus with a bad classification field
+draft_lactarius_alpinus:
+  id: 11
+  name_id: 13
+  sync_id: 11xx1
+  user_id: 5
+  version: 1
+  review_status: unreviewed
+  created: 2009-05-04 16:19:45
+  modified: 2009-05-04 19:56:25
+  classification: "**Domain**: Eukarya"
+  source_type: project
+  source_name: EOL Project
+  project_id: 1
+  public: 0
+
+peltigera_alt_desc:
+  id: 12
+  name_id: 40
+  sync_id: 12xx1
+  created: 2010-01-01 01:01:01
+  modified: 2010-01-01 01:01:01
+  user_id: 1
+  version: 1
+  review_status: unreviewed
+  ok_for_export: 1
+  gen_desc: "Another general description of _Peltigera_."
+  source_type: public
+  public: 1
+
+peltigera_user_desc:
+  id: 13
+  name_id: 40
+  sync_id: 13xx1
+  created: 2010-01-02 01:01:01
+  modified: 2010-01-02 01:01:01
+  user_id: 2
+  version: 1
+  review_status: unreviewed
+  ok_for_export: 1
+  gen_desc: "Mary's general description of _Peltigera_."
+  source_type: user
+  public: 0
+
+peltigera_source_desc:
+  id: 14
+  name_id: 40
+  sync_id: 14xx1
+  created: 2010-01-03 01:01:01
+  modified: 2010-01-03 01:01:01
+  user_id: 5
+  version: 1
+  review_status: unreviewed
+  ok_for_export: 1
+  diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
+  source_type: source
+  source_name: Lichens of North America
+  public: 1
+
+coprinus_comatus_desc:
+  id: 15
+  name_id: 2
+  sync_id: 15xx1
+  created: 2007-06-23 20:04:00
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 1
+  review_status: unreviewed
+  source_type: public
+  public: 1

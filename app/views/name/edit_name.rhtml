@@ -1,14 +1,22 @@
 <%
-  @title = :edit_name_title.t(:name => @name.display_name)
+  @title ||= :edit_name_title.t(:name => @name.display_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => :name.l),
-            :action => 'show_name', :id => @name.id)
+    add_tab(:all_objects.t(:type => :name), :action => 'list_names')
+    add_tab(:cancel_and_show.t(:type => :name), :action => 'show_name',
+            :id => @name.id, :params => query_params)
   end
 %>
 
-<% form_tag(:action => 'edit_name', :id => @name) do %>
-  <br/><center><%= submit_tag :app_save_changes.l %></center><br/>
+<% form_for(:name, :url => {
+              :action => :edit_name,
+              :id => @name.id,
+              :params => query_params,
+            }) do |form| %>
+  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
 
-  <%= render(:partial => 'form_names', :locals => { :button => :app_save_changes.l }) %>
+  <%= render(:partial => 'form_name', :locals =>
+             { :form => form }) %>
+
+  <br/><center><%= submit_tag(:SAVE_EDITS.l) %></center>
 <% end %>

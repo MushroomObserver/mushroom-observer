@@ -1,0 +1,52 @@
+require 'digest/md5'
+require 'net/http'
+require 'uri'
+
+# Net::HTTP.get_print(URI.parse('http://localhost:3000/observer/how_to_help'))
+# exit
+
+# Net::HTTP.get_print('localhost', '/observer/how_to_help', 3000)
+# exit
+
+# http = Net::HTTP.new('localhost', 3000)
+# response = http.get('/api/licenses?id=3')
+# puts response.body
+# exit
+
+# http = Net::HTTP.new('localhost', 3000)
+# path = '/api/images?' + [
+#   'date=20100102',
+#   'notes=blah%20blah',
+#   'auth_id=252',
+#   'auth_code=dd772e209cd40bd07c0b6535abf00b08d41712b3',
+# ].join('&')
+# data = 'this is a test'
+# head = {
+#   'Content-Type' => 'image/text',
+#   'Content-Length' => data.length.to_s,
+#   'Content-MD5' => Digest::MD5.hexdigest(data)
+# }
+# response = http.post(path, data, head)
+# puts response.body
+
+# http = Net::HTTP.new('localhost', 3000)
+# path = '/api/images?' + [
+#   'date=20100102',
+#   'notes=blah%20blah',
+#   'auth_id=252',
+#   'auth_code=dd772e209cd40bd07c0b6535abf00b08d41712b3',
+#   'url=http://localhost:3000/images/thumb/1.jpg'
+# ].join('&')
+# response = http.post(path, nil)
+# puts response.body
+
+http = Net::HTTP.new('localhost', 3000)
+path = '/api/images?' + [
+  'date=20100102',
+  'notes=blah%20blah',
+  'auth_id=252',
+  'auth_code=dd772e209cd40bd07c0b6535abf00b08d41712b3',
+  'file=test.jpg'
+].join('&')
+response = http.post(path, nil)
+puts response.body

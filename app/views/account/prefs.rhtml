@@ -18,7 +18,7 @@
 %>
 
 <% form_for(:user, :url => { :action => :prefs }) do |form| %>
-  <br/><center><input type="submit" value="<%= :app_save_changes.l %>" class="primary" /></center>
+  <br/><center><input type="submit" value="<%= :SAVE_EDITS.l %>" class="primary" /></center>
 
   <p><label for="user_login"><%= :prefs_login.t %></label>:<br/>
   <%= form.text_field("login", :size => 60) %></p>
@@ -32,30 +32,57 @@
   <p><label for="user_password_confirmation"><%= :prefs_password_confirm.t %></label>:<br/>
   <%= form.password_field("password_confirmation", :size => 30) %></p>
 
-  <table cellpadding="0" cellspacing="0" style="margin-top:1em">
+  <br/>
+
+  <p><label for="user_location_format"><b><%= :prefs_location_format.t %></b></label>:<br/>
+  <%= form.select(:location_format, [
+    [:prefs_location_format_postal.l, :postal],
+      [:prefs_location_format_scientific.l, :scientific]]) %></p>
+
+  <p><label for="user_votes_anonymous"><b><%= :prefs_votes_anonymous.t %></b></label>:<br/>
+  <%= values = [
+    [:prefs_votes_anonymous_no.l, :no],
+    [:prefs_votes_anonymous_yes.l, :yes],
+  ]
+  # Allow old users to granfather in old anonymous votes, but choose to go
+  # public from here forward.
+  if @user.created && @user.created < Time.parse(VOTE_CUTOFF)
+    values << [:prefs_votes_anonymous_old.l(:cutoff => VOTE_CUTOFF), :old]
+  end
+  form.select(:votes_anonymous, values) %></p>
+
+  <p><label for="user_license_id"><b><%= :License.t %>:</b></label>
+    <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
+  <%= form.select(:license_id, @licenses) %></p>
+
+  <table cellpadding="0" cellspacing="0">
     <tr>
-      <td>
-        <label for="user_theme"><b><%= :prefs_theme.t %>:</b></label><br/>
-        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %>
-      </td>
-
-      <td width="20">
-      </td>
-
-      <td>
-        <label for="user_license_id"><b><%= :license.t %>:</b></label>
-          <span class="HelpNote">(<%= :prefs_license_note.t %>)</span><br/>
-        <%= form.select(:license_id, @licenses) %>
-      </td>
-
-      <td width="20">
-      </td>
-
-      <td>
-        <label for="user_locale"><b><%= :prefs_locale.t %>:</b></label><br/>
+      <td><label for="user_theme"><b><%= :prefs_theme.t %>:</b></label><br/>
+        <%= form.select(:theme, [[:theme_random.l, "NULL"]] + CSS) %></td>
+      <td width="20"></td>
+      <td><label for="user_locale"><b><%= :prefs_locale.t %>:</b></label><br/>
         <% locales = all_locales.map { |x| [x.sub('-','_').to_sym.t, x] } %>
-        <%= form.select(:locale, locales) %>
-      </td>
+        <%= form.select(:locale, locales) %></td>
+    </tr>
+  </table><br/>
+
+  <table cellpadding="0" cellspacing="0">
+    <tr>
+      <td><label for="user_thumbnail_size"><b><%= :prefs_thumbnail_size.t %>:</b></label><br/>
+        <%= form.select(:thumbnail_size, [
+          [:prefs_thumbnail_small.l, :thumbnail],
+          [:prefs_thumbnail_large.l, :small],
+        ]) %></td>
+      <td width="20"></td>
+      <td><label for="user_image_size"><b><%= :prefs_image_size.t %>:</b></label>
+        <span class="HelpNote">(<%= :prefs_image_size_help.t %>)</span><br/>
+        <%= form.select(:image_size, [
+          [:prefs_image_small.l,     :small],
+          [:prefs_image_medium.l,    :medium],
+          [:prefs_image_large.l,     :large],
+          [:prefs_image_huge.l,      :huge],
+          [:prefs_image_full_size.l, :full_size],
+        ]) %></td>
     </tr>
   </table><br/>
 
@@ -89,6 +116,8 @@
     <label for="user_email_observations_all"><%= :prefs_email_observations_all.t %></label><br/><br/>
 
   <b><%= :prefs_email_names.t %>:</b> <%= :prefs_email_please_notify.t %><br/>
+  <%= form.check_box("email_names_admin") %>
+    <label for="user_email_names_admin"><%= :prefs_email_names_admin.t %></label><br/>
   <%= form.check_box("email_names_author") %>
     <label for="user_email_names_author"><%= :prefs_email_names_author.t %></label><br/>
   <%= form.check_box("email_names_editor") %>
@@ -99,6 +128,8 @@
     <label for="user_email_names_all"><%= :prefs_email_names_all.t %></label><br/><br/>
 
   <b><%= :prefs_email_locations.t %>:</b> <%= :prefs_email_please_notify.t %><br/>
+  <%= form.check_box("email_locations_admin") %>
+    <label for="user_email_locations_admin"><%= :prefs_email_locations_admin.t %></label><br/>
   <%= form.check_box("email_locations_author") %>
     <label for="user_email_locations_author"><%= :prefs_email_locations_author.t %></label><br/>
   <%= form.check_box("email_locations_editor") %>
@@ -115,14 +146,6 @@
     <label for="user_email_general_question"><%= :prefs_email_general_questions.t %></label><br/><br/>
 
   <b><%= :prefs_email_prefs.t %>:</b><br/>
-<!--
-  <%= form.radio_button("email_digest", "immediately") %>
-    <label for="user_email_digest_immediate"><%= :prefs_email_digest_immediate.t %></label><br/>
-  <%= form.radio_button("email_digest", "daily") %>
-    <label for="user_email_digest_daily"><%= :prefs_email_digest_daily.t %></label><br/>
-  <%= form.radio_button("email_digest", "weekly") %>
-    <label for="user_email_digest_weekly"><%= :prefs_email_digest_weekly.t %></label><br/>
--->
   <%= form.check_box("email_html") %>
     <label for="user_email_html"><%= :prefs_email_html.t %></label><br/>
 
@@ -130,5 +153,5 @@
     <%= :prefs_email_note.tp %>
   </div>
 
-  <br/><center><input type="submit" value="<%= :app_save_changes.l %>" class="primary" /></center>
+  <br/><center><input type="submit" value="<%= :SAVE_EDITS.l %>" class="primary" /></center>
 <% end %>

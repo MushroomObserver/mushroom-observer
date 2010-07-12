@@ -1,11 +1,17 @@
 <!--[form:observation]-->
 
-<label for="observation_when_1i"><%= :app_when.t %>:</label>
+<label for="observation_when_1i"><%= :WHEN.t %>:</label>
 <%= date_select('observation', 'when', :start_year => 1980,
                 :end_year => Time.now.year) %><br/><br/>
 
+<% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
+  <div class="Errors">
+    <%= @dubious_where_reasons.join('<br/>') %>
+  </div>
+<% end %>
+
 <span style='white-space:nowrap'>
-  <label for="observation_place_name"><%= :app_where.t %>: (<%= :app_required.t %>)</label>
+  <label for="observation_place_name"><%= :WHERE.t %>: (<%= :required.t %>)</label>
   <%= text_field('observation', 'place_name', :size => 60) %>
 </span><br/>
 <%= turn_into_location_auto_completer('observation_place_name', :primer => @location_primer) %>
@@ -29,7 +35,7 @@ end %>
 
 <center><%= submit_tag(button_name) %></center><br/>
 
-<label for="observation_notes"><%= :app_notes.t %>:</label>
+<label for="observation_notes"><%= :NOTES.t %>:</label>
 <span class="HelpNote"><%= :form_observations_notes_help.t %></span><br/>
 <%= text_area('observation', 'notes', :cols => 80) %><br/>
 <%= render(:partial => 'shared/textilize_help') %>
@@ -50,24 +56,33 @@ end %>
         <table><tr>
           <td style="white-space:nowrap">
             <%= radio_button('observation', 'thumb_image_id', image.id) %>
-            <%= link_to(image_tag("thumb/#{image.id}.jpg", :border => 0),
-                        :controller => 'image', :action => 'show_image', :id => image.id) %>
+            <%= thumbnail(image, :border => 0, :obs => @observation.id,
+                          :votes => false, :nodiv => true) %>
           </td>
           <td width="10"></td>
           <td>
-            <label for="image_<%= image.id %>_notes"><%= :app_notes.t %>:</label>
+            <label for="image_<%= image.id %>_notes"><%= :NOTES.t %>:</label>
             <span class="HelpNote"> <%= :form_images_notes_help.t %></span><br/>
-            <%= text_area_tag("image_#{image.id}_notes", image.notes, :cols => 60, :rows => 2) %>
+            <%= text_area_tag("image_#{image.id}_notes", image.notes,
+                              :cols => 60, :rows => 2) %><br/>
+            <%= :Vote.t %>: <%= image_vote_tabs(image) %>
           </td>
 <% # These controls are dangerous because they cause you to lose any
    # changes made in the form.  They should be re-cast as ajax requests.
    if false %>
           <td width="10"></td>
           <td>
-            <%= link_to(:app_show_image.t, :controller => 'image', :action => 'show_image', :id => image.id) %><br/>
-            <%= link_to(:form_observations_edit_image.t, :controller => 'image', :action => 'edit_image', :id => image.id) %><br/>
-            <%= link_to(:form_observations_remove_image.t, { :controller => 'image', :action => 'remove_image',
-                        :image_id => image.id, :observation_id => @observation.id },
+            <%= link_to(:show_object.t(:type => :image),
+                        :controller => 'image', :action => 'show_image',
+                        :id => image.id, :obs => @observation.id,
+                        :params => query_params) %><br/>
+            <%= link_to(:form_observations_edit_image.t,
+                        :controller => 'image', :action => 'edit_image',
+                        :id => image.id, :params => query_params) %><br/>
+            <%= link_to(:form_observations_remove_image.t,
+                        { :controller => 'image', :action => 'remove_image',
+                        :observation_id => @observation.id,
+                        :image_id => image.id, :params => query_params  },
                         { :confirm => :form_observations_remove_image_confirm.l }) %><br/>
           </td>
 <% end %>
@@ -165,7 +180,7 @@ end %>
 
 <% if logging_optional %>
   <br/>
-  <%= check_box('log_change', 'checked', :checked => 'checked') %>
+  <%= check_box('log_change', 'checked', :checked => '1') %>
   <label for="log_change_checked"><%= :form_observations_log_change.t %></label>
 <% end %>
 

@@ -1,12 +1,39 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
-class NameTest < Test::Unit::TestCase
-  fixtures :names
-  fixtures :namings
-  fixtures :past_names
-  fixtures :users
-  fixtures :user_groups
-  fixtures :user_groups_users
+class NameTest < UnitTestCase
+
+  def create_test_name(string, force_rank=nil)
+    User.current = @rolf
+    (text_name, display_name, observation_name, search_name, parent_name, rank, author) = Name.parse_name(string)
+    name = Name.create_name(force_rank || rank, text_name, author, display_name, observation_name, search_name)
+    assert(name.save, "Error saving name \"#{string}\": [#{name.dump_errors}]")
+    return name
+  end
+
+  def do_name_parse_test(*args)
+    parse = Name.parse_name(args.shift)
+    assert_equal(args, parse)
+  end
+
+  def do_parse_classification_test(text, expected)
+    begin
+      parse = Name.parse_classification(text)
+      assert_equal(expected, parse)
+    rescue RuntimeError => err
+      raise err if expected
+    end
+  end
+
+  def do_validate_classification_test(rank, text, expected)
+    begin
+      result = Name.validate_classification(rank, text)
+      assert_equal(expected, result)
+    rescue RuntimeError => err
+      raise err if expected
+    end
+  end
+
+################################################################################
 
   # ----------------------------
   #  Test name parsing.
@@ -62,11 +89,6 @@ class NameTest < Test::Unit::TestCase
     assert_equal nil, result[0].author
     assert_equal nil, result[1].author
     assert_equal "(With) Another Author", result[2].author
-  end
-
-  def do_name_parse_test(*args)
-    parse = Name.parse_name(args.shift)
-    assert_equal(args, parse)
   end
 
   def test_name_parse_1
@@ -333,15 +355,6 @@ class NameTest < Test::Unit::TestCase
   #  Test classification.
   # -----------------------------
 
-  def do_parse_classification_test(text, expected)
-    begin
-      parse = Name.parse_classification(text)
-      assert_equal(expected, parse)
-    rescue RuntimeError => err
-      raise err if expected
-    end
-  end
-
   def test_parse_classification_1
     do_parse_classification_test("Kingdom: Fungi", [[:Kingdom, "Fungi"]])
   end
@@ -391,15 +404,6 @@ class NameTest < Test::Unit::TestCase
     do_parse_classification_test(%(Kingdom: Fungi\r
       Junk text\r
       Genus: Amanita), false)
-  end
-
-  def do_validate_classification_test(rank, text, expected)
-    begin
-      result = Name.validate_classification(rank, text)
-      assert_equal(expected, result)
-    rescue RuntimeError => err
-      raise err if expected
-    end
   end
 
   def test_validate_classification_1
@@ -468,39 +472,24 @@ class NameTest < Test::Unit::TestCase
   #  Test ancestors and parents.
   # ------------------------------
 
-  def assert_name_list_equal(expect, got)
-    assert_equal(expect.map(&:search_name), got.map(&:search_name))
-  end
-
-  def create_test_name(string, force_rank=nil)
-    (text_name, display_name, observation_name, search_name, parent_name, rank, author) = Name.parse_name(string)
-    name = Name.create_name(force_rank || rank, text_name, author, display_name, observation_name, search_name)
-    name.user = @rolf
-    if !name.save
-      print "Error saving name \"#{string}\": [#{name.dump_errors}]\n"
-      assert(nil)
-    end
-    return name
-  end
-
   def test_ancestors_1
-    assert_name_list_equal([@agaricus], @agaricus_campestris.ancestors)
-    assert_name_list_equal([@agaricus], @agaricus_campestris.parents)
-    assert_name_list_equal([], @agaricus_campestris.children)
-    assert_name_list_equal([], @agaricus.ancestors)
-    assert_name_list_equal([], @agaricus.parents)
+    assert_name_list_equal([names(:agaricus)], names(:agaricus_campestris).all_parents)
+    assert_name_list_equal([names(:agaricus)], names(:agaricus_campestris).parents)
+    assert_name_list_equal([], names(:agaricus_campestris).children)
+    assert_name_list_equal([], names(:agaricus).all_parents)
+    assert_name_list_equal([], names(:agaricus).parents)
     assert_name_list_equal([
-      @agaricus_campestras,
-      @agaricus_campestris,
-      @agaricus_campestros,
-      @agaricus_campestrus
-    ], @agaricus.children)
+      names(:agaricus_campestras),
+      names(:agaricus_campestris),
+      names(:agaricus_campestros),
+      names(:agaricus_campestrus)
+    ], names(:agaricus).children)
   end
 
   def test_ancestors_2
     # (use Petigera instead of Peltigera because it has no classification string)
-    p = @petigera
-    assert_name_list_equal([], p.ancestors)
+    p = names(:petigera)
+    assert_name_list_equal([], p.all_parents)
     assert_name_list_equal([], p.children)
 
     pc   = create_test_name('Petigera canina (L.) Willd.')
@@ -518,22 +507,50 @@ class NameTest < Test::Unit::TestCase
     ppn  = create_test_name('Petigera polydactylon var. neopolydactyla Gyelnik')
 
     assert_name_list_equal([pa, pc, pp, pp2], p.children)
-    assert_name_list_equal([pcr, pcri, pcs], pc.children)
-    # assert_name_list_equal([pcri], pcr.children) # (doesn't work on infraspecific taxa yet)
+    assert_name_list_equal([pcr, pcs], pc.children)
+    assert_name_list_equal([pcri], pcr.children)
     assert_name_list_equal([pac, pav], pa.children)
     assert_name_list_equal([pph, ppn], pp.children)
 
-    assert_name_list_equal([p], pc.ancestors)
-    assert_name_list_equal([pc, p], pcr.ancestors)
-    assert_name_list_equal([pcr, pc, p], pcri.ancestors)
-    assert_name_list_equal([pc, p], pcs.ancestors)
-    assert_name_list_equal([p], pa.ancestors)
-    assert_name_list_equal([pa, p], pac.ancestors)
-    assert_name_list_equal([pa, p], pav.ancestors)
-    assert_name_list_equal([p], pp.ancestors)
-    assert_name_list_equal([p], pp2.ancestors)
-    assert_name_list_equal([pp2, pp, p], pph.ancestors)
-    assert_name_list_equal([pp2, pp, p], ppn.ancestors)
+    # Oops! Petigera is misspelled, so these aren't right...
+    assert_name_list_equal([], pc.all_parents)
+    assert_name_list_equal([pc], pcr.all_parents)
+    assert_name_list_equal([pcr, pc], pcri.all_parents)
+    assert_name_list_equal([pc], pcs.all_parents)
+    assert_name_list_equal([], pa.all_parents)
+    assert_name_list_equal([pa], pac.all_parents)
+    assert_name_list_equal([pa], pav.all_parents)
+    assert_name_list_equal([], pp.all_parents)
+    assert_name_list_equal([], pp2.all_parents)
+    assert_name_list_equal([pp], pph.all_parents)
+    assert_name_list_equal([pp], ppn.all_parents)
+
+    assert_name_list_equal([], pc.parents)
+    assert_name_list_equal([pc], pcr.parents)
+    assert_name_list_equal([pcr], pcri.parents)
+    assert_name_list_equal([pc], pcs.parents)
+    assert_name_list_equal([], pa.parents)
+    assert_name_list_equal([pa], pac.parents)
+    assert_name_list_equal([pa], pav.parents)
+    assert_name_list_equal([], pp.parents)
+    assert_name_list_equal([pp2, pp], pph.parents)
+    assert_name_list_equal([pp2, pp], ppn.parents)
+
+    # Try it again if we clear the misspelling flag.
+    p.correct_spelling = nil
+    p.save
+
+    assert_name_list_equal([p], pc.all_parents)
+    assert_name_list_equal([pc, p], pcr.all_parents)
+    assert_name_list_equal([pcr, pc, p], pcri.all_parents)
+    assert_name_list_equal([pc, p], pcs.all_parents)
+    assert_name_list_equal([p], pa.all_parents)
+    assert_name_list_equal([pa, p], pac.all_parents)
+    assert_name_list_equal([pa, p], pav.all_parents)
+    assert_name_list_equal([p], pp.all_parents)
+    assert_name_list_equal([p], pp2.all_parents)
+    assert_name_list_equal([pp, p], pph.all_parents)
+    assert_name_list_equal([pp, p], ppn.all_parents)
 
     assert_name_list_equal([p], pc.parents)
     assert_name_list_equal([pc], pcr.parents)
@@ -550,8 +567,8 @@ class NameTest < Test::Unit::TestCase
     pp2.save
 
     assert_name_list_equal([pa, pc, pp, pp2], p.children)
-    assert_name_list_equal([pp, p], pph.ancestors)
-    assert_name_list_equal([pp, p], ppn.ancestors)
+    assert_name_list_equal([pp, p], pph.all_parents)
+    assert_name_list_equal([pp, p], ppn.all_parents)
     assert_name_list_equal([pp], pph.parents)
     assert_name_list_equal([pp], ppn.parents)
 
@@ -559,45 +576,67 @@ class NameTest < Test::Unit::TestCase
     pp.save
 
     assert_name_list_equal([pa, pc, pp, pp2], p.children)
-    assert_name_list_equal([pp2, pp, p], pph.ancestors)
-    assert_name_list_equal([pp2, pp, p], ppn.ancestors)
+    assert_name_list_equal([pp, p], pph.all_parents)
+    assert_name_list_equal([pp, p], ppn.all_parents)
     assert_name_list_equal([pp2, pp], pph.parents)
     assert_name_list_equal([pp2, pp], ppn.parents)
   end
 
   def test_ancestors_3
-    kng = @fungi
+    kng = names(:fungi)
     phy = create_test_name('Ascomycota', :Phylum)
     cls = create_test_name('Ascomycetes', :Class)
     ord = create_test_name('Lecanorales', :Order)
     fam = create_test_name('Peltigeraceae', :Family)
-    gen = @peltigera
+    gen = names(:peltigera)
     spc = create_test_name('Peltigera canina (L.) Willd.')
     ssp = create_test_name('Peltigera canina ssp. bogus (Bugs) Bunny')
     var = create_test_name('Peltigera canina ssp. bogus var. rufescens (Weiss) Mudd')
     frm = create_test_name('Peltigera canina ssp. bogus var. rufescens f. innovans (Körber) J. W. Thomson')
 
-    assert_name_list_equal([], kng.ancestors)
-    assert_name_list_equal([], phy.ancestors)
-    assert_name_list_equal([], cls.ancestors)
-    assert_name_list_equal([], ord.ancestors)
-    assert_name_list_equal([], fam.ancestors)
-    assert_name_list_equal([fam, ord, cls, phy, kng], gen.ancestors)
-    assert_name_list_equal([gen, fam, ord, cls, phy, kng], spc.ancestors)
-    assert_name_list_equal([spc, gen, fam, ord, cls, phy, kng], ssp.ancestors)
-    assert_name_list_equal([ssp, spc, gen, fam, ord, cls, phy, kng], var.ancestors)
-    assert_name_list_equal([var, ssp, spc, gen, fam, ord, cls, phy, kng], frm.ancestors)
+    assert_name_list_equal([], kng.all_parents)
+    assert_name_list_equal([kng], phy.all_parents)
+    assert_name_list_equal([phy, kng], cls.all_parents)
+    assert_name_list_equal([cls, phy, kng], ord.all_parents)
+    assert_name_list_equal([ord, cls, phy, kng], fam.all_parents)
+    assert_name_list_equal([fam, ord, cls, phy, kng], gen.all_parents)
+    assert_name_list_equal([gen, fam, ord, cls, phy, kng], spc.all_parents)
+    assert_name_list_equal([spc, gen, fam, ord, cls, phy, kng], ssp.all_parents)
+    assert_name_list_equal([ssp, spc, gen, fam, ord, cls, phy, kng], var.all_parents)
+    assert_name_list_equal([var, ssp, spc, gen, fam, ord, cls, phy, kng], frm.all_parents)
 
-    assert_name_list_equal([], kng.children)
-    assert_name_list_equal([], phy.children)
-    assert_name_list_equal([], cls.children)
-    assert_name_list_equal([], ord.children)
-    assert_name_list_equal([], fam.children)
+    assert_name_list_equal([],    kng.parents)
+    assert_name_list_equal([kng], phy.parents)
+    assert_name_list_equal([phy], cls.parents)
+    assert_name_list_equal([cls], ord.parents)
+    assert_name_list_equal([ord], fam.parents)
+    assert_name_list_equal([fam], gen.parents)
+    assert_name_list_equal([gen], spc.parents)
+    assert_name_list_equal([spc], ssp.parents)
+    assert_name_list_equal([ssp], var.parents)
+    assert_name_list_equal([var], frm.parents)
+
+    assert_name_list_equal([phy], kng.children)
+    assert_name_list_equal([cls], phy.children)
+    assert_name_list_equal([ord], cls.children)
+    assert_name_list_equal([fam], ord.children)
+    assert_name_list_equal([gen], fam.children)
     assert_name_list_equal([spc], gen.children)
-    assert_name_list_equal([ssp, var, frm], spc.children)
-    # assert_name_list_equal([var, frm], ssp.children) # (doesn't work on infraspecific taxa yet)
-    # assert_name_list_equal([frm], var.children)      # (doesn't work on infraspecific taxa yet)
-    # assert_name_list_equal([], frm.children)         # (doesn't work on infraspecific taxa yet)
+    assert_name_list_equal([ssp], spc.children)
+    assert_name_list_equal([var], ssp.children)
+    assert_name_list_equal([frm], var.children)
+    assert_name_list_equal([],    frm.children)
+
+    assert_name_list_equal([phy,cls,ord,fam,gen,spc,ssp,var,frm], kng.all_children)
+    assert_name_list_equal([cls,ord,fam,gen,spc,ssp,var,frm], phy.all_children)
+    assert_name_list_equal([ord,fam,gen,spc,ssp,var,frm], cls.all_children)
+    assert_name_list_equal([fam,gen,spc,ssp,var,frm], ord.all_children)
+    assert_name_list_equal([gen,spc,ssp,var,frm], fam.all_children)
+    assert_name_list_equal([spc,ssp,var,frm], gen.all_children)
+    assert_name_list_equal([ssp, var, frm], spc.all_children)
+    assert_name_list_equal([var, frm], ssp.all_children)
+    assert_name_list_equal([frm], var.all_children)
+    assert_name_list_equal([], frm.all_children)
   end
 
   # --------------------------------------
@@ -605,43 +644,56 @@ class NameTest < Test::Unit::TestCase
   # --------------------------------------
 
   def test_email_notification
-    @rolf.email_names_author   = true;
-    @rolf.email_names_editor   = true;
-    @rolf.email_names_reviewer = true;
-    @rolf.email_names_all      = false;
+    name = names(:peltigera)
+    desc = name_descriptions(:peltigera_desc)
+
+    @rolf.email_names_admin    = false
+    @rolf.email_names_author   = true
+    @rolf.email_names_editor   = true
+    @rolf.email_names_reviewer = true
+    @rolf.email_names_all      = false
     @rolf.save
 
-    @mary.email_names_author   = true;
-    @mary.email_names_editor   = false;
-    @mary.email_names_reviewer = false;
-    @mary.email_names_all      = false;
+    @mary.email_names_admin    = false
+    @mary.email_names_author   = true
+    @mary.email_names_editor   = false
+    @mary.email_names_reviewer = false
+    @mary.email_names_all      = false
     @mary.save
 
-    @dick.email_names_author   = false;
-    @dick.email_names_editor   = false;
-    @dick.email_names_reviewer = false;
-    @dick.email_names_all      = false;
+    @dick.email_names_admin    = false
+    @dick.email_names_author   = false
+    @dick.email_names_editor   = false
+    @dick.email_names_reviewer = false
+    @dick.email_names_all      = false
     @dick.save
 
-    @katrina.email_names_author   = true;
-    @katrina.email_names_editor   = true;
-    @katrina.email_names_reviewer = true;
-    @katrina.email_names_all      = true;
+    @katrina.email_names_admin    = false
+    @katrina.email_names_author   = true
+    @katrina.email_names_editor   = true
+    @katrina.email_names_reviewer = true
+    @katrina.email_names_all      = true
     @katrina.save
 
-    # Start with no reviewer.
-    @peltigera.gen_desc = ''
-    @peltigera.review_status = :unreviewed;
-    @peltigera.reviewer = nil;
-    @peltigera.save
-    @peltigera.reload
-    version = @peltigera.version
-
+    # Start with no reviewers, editors or authors.
+    User.current = nil
+    desc.gen_desc = ''
+    desc.review_status = :unreviewed;
+    desc.reviewer = nil;
+    Name.without_revision do
+      desc.save
+    end
+    desc.authors.clear
+    desc.editors.clear
+    desc.reload
+    name_version = name.version
+    description_version = desc.version
     QueuedEmail.queue_emails(true)
-    emails = QueuedEmail.find(:all).length
-    assert_equal(0, @peltigera.authors.length)
-    assert_equal(0, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer)
+    QueuedEmail.all.map(&:destroy)
+
+    assert_equal(0, desc.authors.length)
+    assert_equal(0, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       x       x       .       .
@@ -649,24 +701,35 @@ class NameTest < Test::Unit::TestCase
     # 3 Dick:       .       .       .       .       .
     # 4 Katrina:    x       x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
-    # Rolf changes citation: notify Katrina (all), Rolf becomes editor.
-    @peltigera.citation = ''
-    @peltigera.save_if_changed(@rolf, :log_name_updated, { :user => 'rolf' }, Time.now, true) and @peltigera.add_editor(@rolf)
-    assert_equal(version + 1, @peltigera.version)
-    assert_equal(0, @peltigera.authors.length)
-    assert_equal(1, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer)
-    assert_equal(@rolf, @peltigera.editors.first)
-    assert_equal(emails + 1, QueuedEmail.find(:all).length)
-    assert_email(emails, {
-        :flavor        => :name_change,
-        :from          => @rolf,
-        :to            => @katrina,
-        :name          => @peltigera.id,
-        :old_version   => @peltigera.version-1,
-        :new_version   => @peltigera.version,
-        :review_status => 'no_change',
-    })
+    # Rolf erases notes: notify Katrina (all), Rolf becomes editor.
+    User.current = @rolf
+    desc.reload
+    desc.classification = ''
+    desc.gen_desc = ''
+    desc.diag_desc = ''
+    desc.distribution = ''
+    desc.habitat = ''
+    desc.look_alikes = ''
+    desc.uses = ''
+    desc.save
+    assert_equal(description_version + 1, desc.version)
+    assert_equal(0, desc.authors.length)
+    assert_equal(1, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal(@rolf, desc.editors.first)
+    assert_equal(1, QueuedEmail.count)
+    assert_email(0,
+      :flavor        => 'QueuedEmail::NameChange',
+      :from          => @rolf,
+      :to            => @katrina,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
+      :review_status => 'no_change'
+    )
 
     # Katrina wisely reconsiders requesting notifications of all name changes.
     @katrina.email_names_all = false;
@@ -679,27 +742,33 @@ class NameTest < Test::Unit::TestCase
     # 4 Katrina:    x       x       x       .       .
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
-    @peltigera.gen_desc = "Mary wrote this."
-    @peltigera.save_if_changed(@mary, :log_name_updated, { :user => 'mary' }, Time.now, true) && @peltigera.add_editor(@mary)
-    assert_equal(version + 2, @peltigera.version)
-    assert_equal(1, @peltigera.authors.length)
-    assert_equal(1, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer)
-    assert_equal(@mary, @peltigera.authors.first)
-    assert_equal(@rolf, @peltigera.editors.first)
-    assert_equal(emails + 2, QueuedEmail.find(:all).length)
-    assert_email(emails + 1, {
-        :flavor        => :name_change,
-        :from          => @mary,
-        :to            => @rolf,
-        :name          => @peltigera.id,
-        :old_version   => @peltigera.version-1,
-        :new_version   => @peltigera.version,
-        :review_status => 'no_change',
-    })
+    User.current = @mary
+    desc.reload
+    desc.gen_desc = "Mary wrote this."
+    desc.save
+    assert_equal(description_version + 2, desc.version)
+    assert_equal(1, desc.authors.length)
+    assert_equal(1, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal(@mary, desc.authors.first)
+    assert_equal(@rolf, desc.editors.first)
+    assert_equal(2, QueuedEmail.count)
+    assert_email(1,
+      :flavor        => 'QueuedEmail::NameChange',
+      :from          => @mary,
+      :to            => @rolf,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
+      :review_status => 'no_change'
+    )
 
     # Rolf doesn't want to be notified if people change names he's edited.
-    @peltigera.editors.first.email_names_editor = false
+    @rolf.email_names_editor = false
+    @rolf.save
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -707,29 +776,35 @@ class NameTest < Test::Unit::TestCase
     # 3 Dick:       .       .       .       .       .
     # 4 Katrina:    x       x       x       .       .
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
-    # Dick changes citation: notify Mary (author); Dick becomes editor.
-    @peltigera.citation = "Something more new."
-    @peltigera.save_if_changed(@dick, :log_name_updated, { :user => 'dick' }, Time.now, true) && @peltigera.add_editor(@dick)
-    assert_equal(version + 3, @peltigera.version)
-    assert_equal(1, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(nil, @peltigera.reviewer)
-    assert_equal(@mary, @peltigera.authors.first)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
-    assert_equal(emails + 3, QueuedEmail.find(:all).length)
-    assert_email(emails + 2, {
-        :flavor        => :name_change,
-        :from          => @dick,
-        :to            => @mary,
-        :name          => @peltigera.id,
-        :old_version   => @peltigera.version-1,
-        :new_version   => @peltigera.version,
-        :review_status => 'no_change',
-    })
+    # Dick changes uses: notify Mary (author); Dick becomes editor.
+    User.current = @dick
+    desc.reload
+    desc.uses = "Something more new."
+    desc.save
+    assert_equal(description_version + 3, desc.version)
+    assert_equal(1, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal(@mary, desc.authors.first)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
+    assert_equal(3, QueuedEmail.count)
+    assert_email(2,
+      :flavor        => 'QueuedEmail::NameChange',
+      :from          => @dick,
+      :to            => @mary,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
+      :review_status => 'no_change'
+    )
 
     # Mary opts out of author emails, add Katrina as new author.
-    @peltigera.authors.first.email_names_author = false
-    @peltigera.add_author(@katrina)
+    desc.add_author(@katrina)
+    @mary.email_names_author = false
+    @mary.save
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -738,26 +813,31 @@ class NameTest < Test::Unit::TestCase
     # 4 Katrina:    x       x       x       .       .
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
-    @peltigera.update_review_status(:inaccurate, @rolf)
-    assert_equal(version + 3, @peltigera.version)
-    assert_equal(2, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(@rolf, @peltigera.reviewer)
-    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
-    assert_equal(emails + 4, QueuedEmail.find(:all).length)
-    assert_email(emails + 3, {
-        :flavor        => :name_change,
-        :from          => @rolf,
-        :to            => @katrina,
-        :name          => @peltigera.id,
-        :old_version   => @peltigera.version,
-        :new_version   => @peltigera.version,
-        :review_status => 'inaccurate',
-    })
+    User.current = @rolf
+    desc.reload
+    desc.update_review_status(:inaccurate)
+    assert_equal(description_version + 3, desc.version)
+    assert_equal(2, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(@rolf.id, desc.reviewer_id)
+    assert_equal([@mary.id, @katrina.id], desc.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
+    assert_equal(4, QueuedEmail.count)
+    assert_email(3,
+      :flavor        => 'QueuedEmail::NameChange',
+      :from          => @rolf,
+      :to            => @katrina,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version,
+      :new_description_version => desc.version,
+      :review_status => 'inaccurate'
+    )
 
     # Have Katrina express disinterest.
-    Interest.new(:object => @peltigera, :user => @katrina, :state => false).save
+    Interest.create(:object => name, :user => @katrina, :state => false)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -766,28 +846,38 @@ class NameTest < Test::Unit::TestCase
     # 4 Katrina:    x       x       x       .       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
-    @peltigera.look_alikes = "Dick added this -- it's suspect"
-    @peltigera.update_review_status(:inaccurate, @dick) # (normally done by name controller in edit_name)
-    @peltigera.save_if_changed(@dick, :log_name_updated, { :user => 'dick' }, Time.now, true) && @peltigera.add_editor(@dick)
-    assert_equal(version + 4, @peltigera.version)
-    assert_equal(2, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(@rolf, @peltigera.reviewer)
-    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
-    assert_equal(emails + 5, QueuedEmail.find(:all).length)
-    assert_email(emails + 4, {
-        :flavor        => :name_change,
-        :from          => @dick,
-        :to            => @rolf,
-        :name          => @peltigera.id,
-        :old_version   => @peltigera.version-1,
-        :new_version   => @peltigera.version,
-        :review_status => 'unreviewed',
-    })
+    User.current = @dick
+    desc.reload
+    desc.look_alikes = "Dick added this -- it's suspect"
+    # (This is exactly what is normally done by name controller in edit_name.
+    # Yes, Dick isn't actually trying to review, and isn't even a reviewer.
+    # The point is to update the review date if Dick *were*, or reset the
+    # status to unreviewed in the present case that he *isn't*.)
+    desc.update_review_status(:inaccurate)
+    desc.save
+    assert_equal(description_version + 4, desc.version)
+    assert_equal(2, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(:unreviewed, desc.review_status)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal([@mary.id, @katrina.id], desc.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
+    assert_equal(5, QueuedEmail.count)
+    assert_email(4,
+      :flavor        => 'QueuedEmail::NameChange',
+      :from          => @dick,
+      :to            => @rolf,
+      :name          => name.id,
+      :description   => desc.id,
+      :old_name_version => name.version,
+      :new_name_version => name.version,
+      :old_description_version => desc.version-1,
+      :new_description_version => desc.version,
+      :review_status => 'unreviewed'
+    )
 
     # Mary expresses interest.
-    Interest.new(:object => @peltigera, :user => @mary, :state => true).save
+    Interest.create(:object => name, :user => @mary, :state => true)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -796,46 +886,53 @@ class NameTest < Test::Unit::TestCase
     # 4 Katrina:    x       x       x       .       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes 'uses': notify Mary (interest).
-    @peltigera.uses = "Rolf added this."
-    @peltigera.save_if_changed(@rolf, :log_name_updated, { :user => 'rolf' }, Time.now, true) && @peltigera.add_editor(@rolf)
-    assert_equal(version + 5, @peltigera.version)
-    assert_equal(2, @peltigera.authors.length)
-    assert_equal(2, @peltigera.editors.length)
-    assert_equal(@rolf, @peltigera.reviewer)
-    assert_equal([@mary.id, @katrina.id], @peltigera.authors.map(&:id).sort)
-    assert_equal([@rolf.id, @dick.id], @peltigera.editors.map(&:id).sort)
-    assert_equal(emails + 6, QueuedEmail.find(:all).length)
-    assert_email(emails + 5, {
-        :flavor        => :name_change,
-        :from          => @rolf,
-        :to            => @mary,
-        :name          => @peltigera.id,
-        :old_version   => @peltigera.version-1,
-        :new_version   => @peltigera.version,
-        :review_status => 'no_change',
-    })
+    User.current = @rolf
+    name.reload
+    name.citation = "Rolf added this."
+    name.save
+    assert_equal(name_version + 1, name.version)
+    assert_equal(description_version + 4, desc.version)
+    assert_equal(2, desc.authors.length)
+    assert_equal(2, desc.editors.length)
+    assert_equal(nil, desc.reviewer_id)
+    assert_equal([@mary.id, @katrina.id], desc.authors.map(&:id).sort)
+    assert_equal([@rolf.id, @dick.id], desc.editors.map(&:id).sort)
+    assert_equal(6, QueuedEmail.count)
+    assert_email(5,
+      :flavor        => 'QueuedEmail::NameChange',
+      :from          => @rolf,
+      :to            => @mary,
+      :name          => name.id,
+      :description   => 0,
+      :old_name_version => name.version-1,
+      :new_name_version => name.version,
+      :old_description_version => 0,
+      :new_description_version => 0,
+      :review_status => 'no_change'
+    )
   end
 
   def test_misspelling
+    User.current = @rolf
+
     # Make sure deprecating a name doesn't clear misspelling stuff.
-    @petigera.change_deprecated(true)
-    assert(@petigera.is_misspelling?)
-    assert_equal(@peltigera, @petigera.correct_spelling)
+    names(:petigera).change_deprecated(true)
+    assert(names(:petigera).is_misspelling?)
+    assert_equal(names(:peltigera), names(:petigera).correct_spelling)
 
     # Make sure approving a name clears misspelling stuff.
-    @petigera.change_deprecated(false)
-    assert(!@petigera.is_misspelling?)
-    assert_nil(@petigera.correct_spelling)
+    names(:petigera).change_deprecated(false)
+    assert(!names(:petigera).is_misspelling?)
+    assert_nil(names(:petigera).correct_spelling)
 
     # Coprinus comatus should normally end up in name primer.
-    File.delete(NAME_PRIMER_CACHE_FILE)
+    File.delete(NAME_PRIMER_CACHE_FILE) if File.exists?(NAME_PRIMER_CACHE_FILE)
     assert(!Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
 
     # Mark it as misspelled and see that it gets removed from the primer list.
-    @coprinus_comatus.misspelling = true
-    @coprinus_comatus.correct_spelling = @agaricus_campestris
-    @coprinus_comatus.change_deprecated(true)
-    @coprinus_comatus.save
+    names(:coprinus_comatus).correct_spelling = names(:agaricus_campestris)
+    names(:coprinus_comatus).change_deprecated(true)
+    names(:coprinus_comatus).save
     File.delete(NAME_PRIMER_CACHE_FILE)
     assert(Name.primer.select {|n| n == 'Coprinus comatus'}.empty?)
   end

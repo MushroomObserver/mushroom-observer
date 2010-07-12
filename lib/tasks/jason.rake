@@ -501,7 +501,7 @@ namespace :jason do
           obs.created = obs.modified = Time.now
           obs.name_id = what.id if what
           if where.is_a?(Location)
-            obs.where = where.display_name
+            obs.where = where.name
             obs.location = where
           else
             obs.where = where
@@ -612,12 +612,12 @@ namespace :jason do
 
   def lookup_location(val, lines)
     force = val.sub!(/\*$/, '')
-    loc = Location.find_by_display_name(val)
+    loc = Location.search_by_name(val)
     if force
       loc ||= val
     elsif !loc
       val2 = val.downcase.gsub(/\W+/, ' ')
-      results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "display_name asc")
+      results = Location.find(:all, :conditions => "search_name like '%#{val2}%'", :order => "name asc")
       if results.length == 0
         lines.push('>>>>>>>> couldn\'t find any matching locations (add "*" to end to create)')
       elsif results.length == 1
@@ -625,7 +625,7 @@ namespace :jason do
       elsif results.length > 1
         lines.push('>>>>>>>> multiple locations match: (add "*" to end to create)')
         for x in results
-          lines.push('>>>>>>>>   %s' % x.display_name)
+          lines.push('>>>>>>>>   %s' % x.name)
         end
       end
     end

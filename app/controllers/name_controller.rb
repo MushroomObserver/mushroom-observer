@@ -1,1224 +1,1230 @@
 #
-#  Views: ("*" - login required, "R" - root required)
-#     name_index          Alphabetical list of all names, used or otherwise.
-#     observation_index   Alphabetical list of names people have seen.
-#     name_search
-#     show_name           Show info about name.
-#     show_past_name      Show past versions of name info.
-#   * create_name         Create new name.
-#   * edit_name           Edit name info.
-#   * change_synonyms     Change list of synonyms for a name.
-#   * deprecate_name      Deprecate name in favor of another.
-#   * approve_name        Flag given name as "accepted" (others could be, too).
-#   * bulk_name_edit      Create/synonymize/deprecate a list of names.
-#     map                 Show distribution map.
-#   * review_authors      Let authors/reviewers add/remove authors.
-#   * author_request      Let non-authors request authorship credit.
-#   * send_author_request (post method of author_request)
+#  = Name Controller
 #
-#  AJAX:
-#     auto_complete_name
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
 #
-#  Admin Tools:
-#   R cleanup_versions
-#   R do_maintenance
+#  index_name::                  List of results of index/search.
+#  list_names::                  Alphabetical list of all names, used or otherwise.
+#  observation_index::           Alphabetical list of names people have seen.
+#  names_by_user::               Alphabetical list of names created by given user.
+#  names_by_editor::             Alphabetical list of names edited by given user.
+#  name_search::                 Seach for string in name, notes, etc.
+#  map::                         Show distribution map.
+#  index_name_description::      List of results of index/search.
+#  list_name_descriptions::      Alphabetical list of all name_descriptions, used or otherwise.
+#  name_descriptions_by_author:: Alphabetical list of name_descriptions authored by given user.
+#  name_descriptions_by_editor:: Alphabetical list of name_descriptions edited by given user.
+#  show_name::                   Show info about name.
+#  show_past_name::              Show past versions of name info.
+#  prev_name::                   Show previous name in index.
+#  next_name::                   Show next name in index.
+#  show_name_description::       Show info about name_description.
+#  show_past_name_description::  Show past versions of name_description info.
+#  prev_name_description::       Show previous name_description in index.
+#  next_name_description::       Show next name_description in index.
+#  create_name::                 Create new name.
+#  edit_name::                   Edit name.
+#  create_name_description::     Create new name_description.
+#  edit_name_description::       Edit name_description.
+#  destroy_name_description::    Destroy name_description.
+#  make_description_default::    Make a description the default one.
+#  merge_descriptions::          Merge a description with another.
+#  publish_description::         Publish a draft description.
+#  adjust_permissions::          Adjust permissions on a description.
+#  change_synonyms::             Change list of synonyms for a name.
+#  deprecate_name::              Deprecate name in favor of another.
+#  approve_name::                Flag given name as "accepted" (others could be, too).
+#  bulk_name_edit::              Create/synonymize/deprecate a list of names.
 #
-#  Helpers:
-#    name_locs(name_id)             List of locs where name has been observed.
-#    find_target_names(...)         (used by edit_name)
-#    deprecate_synonym(name, user)  (used by change_synonyms)
-#    check_for_new_synonym(...)     (used by change_synonyms)
-#    dump_sorter(sorter)            Error diagnostics for change_synonyms.
-#    name_index_helper
+#  ==== Helpers
+#  deprecate_synonym::         (used by change_synonyms)
+#  check_for_new_synonym::     (used by change_synonyms)
+#  dump_sorter::               Error diagnostics for change_synonyms.
 #
 ################################################################################
 
 class NameController < ApplicationController
+  include DescriptionControllerHelpers
+
   before_filter :login_required, :except => [
-    :advanced_obj_search,
+    :advanced_search,
     :authored_names,
-    :auto_complete_name,
     :eol,
     :eol_preview,
+    :index_name,
+    :index_name_description,
     :map,
-    :name_index,
+    :list_name_descriptions,
+    :list_names,
     :name_search,
-    :names_by_author,
+    :name_descriptions_by_author,
+    :name_descriptions_by_editor,
+    :names_by_user,
     :names_by_editor,
+    :needed_descriptions,
+    :next_name,
+    :next_name_description,
     :observation_index,
+    :prev_name,
+    :prev_name_description,
     :show_name,
-    :show_past_name
+    :show_name_description,
+    :show_past_name,
+    :show_past_name_description,
+    :test_index,
   ]
 
-  # Process AJAX request for autocompletion of mushroom name.  It reads the
-  # first letter of the field, and returns all the names beginning with it.
-  # Inputs: params[:letter]
-  # Outputs: renders sorted list of names, one per line, in plain text
-  def auto_complete_name
-    letter = params[:letter] || ''
-    if letter.length > 0
-      @items = Name.connection.select_values %(
-        SELECT text_name FROM names
-        WHERE LOWER(text_name) LIKE '#{letter}%'
-        AND misspelling = false
-        ORDER BY text_name ASC
-      )
-    else
-      letter = ' '
-      @items = []
+  before_filter :disable_link_prefetching, :except => [
+    :approve_name,
+    :bulk_name_edit,
+    :change_synonyms,
+    :create_name,
+    :create_name_description,
+    :deprecate_name,
+    :edit_name,
+    :edit_name_description,
+    :show_name,
+    :show_name_description,
+    :show_past_name,
+    :show_past_name_description,
+  ]
+
+  ##############################################################################
+  #
+  #  :section: Indexes and Searches
+  #
+  ##############################################################################
+
+  # Display list of names in last index/search query.
+  def index_name # :nologin: :norobots:
+    query = find_or_create_query(:Name, :by => params[:by])
+    show_selected_names(query, :id => params[:id], :always_index => true)
+  end
+
+  # Display list of all (correctly-spelled) names in the database.
+  def list_names # :nologin:
+    query = create_query(:Name, :all, :by => :name)
+    show_selected_names(query)
+  end
+
+  # Display list of names that have observations.
+  def observation_index # :nologin: :norobots:
+    query = create_query(:Name, :with_observations)
+    show_selected_names(query)
+  end
+
+  # Display list of names that have authors.
+  def authored_names # :nologin: :norobots:
+    query = create_query(:Name, :with_descriptions)
+    show_selected_names(query)
+  end
+
+  # Display list of names that a given user is author on.
+  def names_by_user # :nologin: :norobots:
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Name, :by_user, :user => user)
+      show_selected_names(query)
     end
-    render(:inline => letter + '<%= @items.uniq.map {|n| h(n) + "\n"}.join("") %>')
   end
 
-  # Paginate and select name index data in prep for name_index view.
-  # Input:   params['page'], params['letter'], @name_data
-  # Outputs: @letter, @letters, @name_data, @name_subset, @page, @pages
-  def name_index_helper
-    @letter = params[:letter]
-    @page = params[:page]
-    @letters, @name_subset = paginate_letters(@name_data, 100) \
-      {|d| d['display_name'].match(/([a-z])/i) ? $~[1] : nil}
-    @pages, @name_subset = paginate_array(@name_subset, @letter.to_s.empty? ? 100: 1e6)
+  # This no longer makes sense, but is being requested by robots.
+  alias names_by_author names_by_user
+
+  # Display list of names that a given user is editor on.
+  def names_by_editor # :nologin: :norobots:
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:Name, :by_editor, :user => user)
+      show_selected_names(query)
+    end
   end
 
-  # List all the names
-  def name_index
-    store_location
-    session[:list_members] = nil
-    session[:new_names] = nil
-    session[:checklist_source] = :all_names
-    @title = :name_index_name_index.t
-    @name_data = Name.connection.select_all %(
-      SELECT id, display_name
-      FROM names
-      WHERE misspelling = false
-      ORDER BY text_name asc, author asc
-    )
-    name_index_helper
-  end
-
-  # Just list the names that have observations
-  def observation_index
-    store_location
-    session[:list_members] = nil
-    session[:new_names] = nil
-    session[:checklist_source] = :all_observations
-    @title = :name_index_observation_index.t
-    @name_data = Name.connection.select_all %(
-      SELECT distinct names.id, names.display_name
-      FROM names, observations
-      WHERE observations.name_id = names.id
-      ORDER BY names.text_name asc, author asc
-    )
-    name_index_helper
-    render(:action => 'name_index')
-  end
-
-  # Just list the names that have observations
-  def needed_descriptions
-    store_location
-    session[:list_members] = nil
-    session[:new_names] = nil
-    session[:checklist_source] = :all_observations
-    @name_data = Name.connection.select_all %(
-      SELECT name_counts.count, names.id, names.display_name
-      FROM names left outer join draft_names on names.id = draft_names.name_id,
-         (SELECT count(*) AS count, name_id
-                   FROM observations group by name_id)
-                  AS name_counts
+  # Display list of the most popular 100 names that don't have descriptions.
+  def needed_descriptions # :nologin: :norobots:
+    # NOTE!! -- all this extra info and help will be lost if user re-sorts.
+    data = Name.connection.select_rows %(
+      SELECT names.id, name_counts.count
+      FROM names LEFT OUTER JOIN descriptions ON names.id = descriptions.name_id,
+           (SELECT count(*) AS count, name_id
+            FROM observations group by name_id) AS name_counts
       WHERE names.id = name_counts.name_id
-      AND names.rank = 'Species'
-      AND (names.gen_desc is NULL or names.gen_desc = '')
-      AND name_counts.count > 1
-      AND draft_names.name_id is NULL
-      AND current_timestamp - modified > #{1.week.to_i}
-      ORDER BY name_counts.count desc, names.text_name asc
+        AND names.rank = 'Species'
+        AND name_counts.count > 1
+        AND descriptions.name_id IS NULL
+        AND CURRENT_TIMESTAMP - modified > #{1.week.to_i}
+      ORDER BY name_counts.count DESC, names.search_name ASC
       LIMIT 100
     )
+    @help = :needed_descriptions_help
+    query = create_query(:Name, :in_set, :ids => data.map(&:first),
+                         :title => :needed_descriptions_title.l)
+    show_selected_names(query, :num_per_page => 100) do |name|
+      # Add number of observations (parenthetically).
+      row = data.select {|id,count| id == name.id}.first
+      row ? "(#{count} #{:observations.t})" : ''
+    end
   end
 
-  # Searches name, author, notes, and citation.
-  # Redirected from: pattern_search (search bar)
-  # View: name_index
-  # Inputs:
-  #   session[:pattern]
-  # Only one match: redirects to show_name.
-  # Multiple matches: sets @name_data and renders name_index.
-  def name_search
-    store_location
-    pattern = params[:pattern] || session[:pattern] || ''
-    title = :name_index_matching.t(:pattern => pattern)
-    id = pattern.to_i
-    name_data = nil
-    if pattern == id.to_s
-      begin
-        name = Name.find(id)
-        if name
-          name_data = [{'id' => id, 'display_name' => name.display_name}]
-        end
-      rescue ActiveRecord::RecordNotFound
-      end
-    end
-    if name_data.nil?
-      sql_pattern = "%#{pattern.gsub(/[*']/,"%")}%"
-      conditions = field_search(["search_name", "citation"] + Name.all_note_fields, sql_pattern)
-      session[:checklist_source] = :nothing
-      name_data = Name.connection.select_all %(
-        SELECT distinct id, display_name
-        FROM names
-        WHERE #{conditions} AND misspelling = false
-        ORDER BY text_name asc, author asc
-      )
-    end
-    @pattern = pattern
-    show_name_data(title, name_data, :name_search_none_found.t(:pattern => pattern))
-  end
-  
-  def authored_names
-    base_data = Name.connection.select_all %(
-      SELECT distinct names.id, names.display_name, users.login, names.review_status
-      FROM names, authors_names, users
-      WHERE names.id = authors_names.name_id
-      AND authors_names.user_id = users.id
-      ORDER BY names.text_name asc, names.author asc
-    )
-    last_name_id = users = name = nil
-    name_data = []
-    for row in base_data:
-      if last_name_id != row['id']
-        last_row = row.clone
-        name_data.push(last_row)
-        last_name_id = row['id']
-        users = [row['login']]
-        name = Name.find(last_name_id)
-        field_count, size_count = name.note_status()
-      else
-        users.push(row['login'])
-      end
-      last_row['extra'] = "#{users.join(', ')}</td><td>#{field_count}/#{size_count}</td><td>#{last_row['review_status'].to_sym.t}"
-      # last_row['display_name'] = "#{row['display_name']} (#{users.join(', ')} )"
-    end
-    show_name_data(:authored_names_title.t, name_data, :authored_names_error.t)
-  end
-    
-  def names_by_author
-    names_by(:author, :names_by_author_title, :names_by_author_error)
-  end
-  
-  def names_by_editor
-    names_by(:editor, :names_by_editor_title, :names_by_editor_error)
-  end
-  
-  def names_by(role, title, error)
-    user = User.find(params[:id])
-    if user
-      name_data = Name.connection.select_all %(
-        SELECT distinct names.id, names.display_name
-        FROM names, #{role}s_names
-        WHERE names.id = #{role}s_names.name_id
-        AND #{role}s_names.user_id = #{user.id}
-        ORDER BY names.text_name asc, names.author asc
-      )
-      for row in name_data:
-        row['display_name'] = "#{row['display_name']} [#{user.login}]"
-      end
-      user_name = user.legal_name
-      show_name_data(title.t(:name => user_name), name_data, error.t(:name => user_name))
+  # Display list of names that match a string.
+  def name_search # :nologin: :norobots:
+    pattern = params[:pattern].to_s
+    if pattern.match(/^\d+$/) and
+       (name = Name.safe_find(pattern))
+      redirect_to(:action => 'show_name', :id => name.id)
     else
-      redirect_to(:name_index)
+      query = create_query(:Name, :pattern_search, :pattern => pattern)
+      show_selected_names(query)
     end
   end
-  
-  def show_name_data(title, name_data, error)
-    store_location
-    @layout = calc_layout_params
-    @title = title
-    @name_data = name_data
-    len = name_data.length
-    if len == 1
-      redirect_to(:action => 'show_name', :id => name_data[0]['id'])
-    else
-      if len == 0
-        flash_warning(error)
-      end
-      name_index_helper
-      render(:action => 'name_index')
-    end
-  end
-  
-  def advanced_obj_search
+
+  # Displays list of advanced search results.
+  def advanced_search # :nologin: :norobots:
     begin
-      @layout = calc_layout_params
-      query = calc_advanced_search_query("SELECT DISTINCT names.id, names.display_name FROM",
-        Set.new(['names', 'observations']), params)
-      query += " ORDER BY names.text_name asc, names.author asc"
-      show_name_data(:advanced_search_title.l, Name.connection.select_all(query), :advanced_search_none_found.t)
+      query = find_query(:Name)
+      show_selected_names(query)
     rescue => err
       flash_error(err)
-      redirect_to(:controller => 'observer', :action => 'advanced_search')
+      redirect_to(:controller => 'observer', :action => 'advanced_search_form')
     end
   end
 
-  # AJAX request used for autocompletion of "what" field in deprecate_name.
-  # View: none
-  # Inputs: params[:proposed][:name]
-  # Outputs: none
-  def auto_complete_for_proposed_name
-    auto_complete_name(:proposed, :name)
+  # Used to test pagination.
+  def test_index # :nologin: :norobots:
+    query = find_query(:Name) or raise "Missing query: #{params[:q]}"
+    if params[:test_anchor]
+      @test_pagination_args = {:anchor => params[:test_anchor]}
+    end
+    show_selected_names(query, :num_per_page => params[:num_per_page].to_i)
   end
 
-  # show_name.rhtml
-  def show_name
-    # Rough testing showed implementation without synonyms takes .23-.39 secs.
-    # elapsed_time = Benchmark.realtime do
-      store_location
-      name_id = params[:id]
-      @name = Name.find(name_id)
-      @past_name = @name.versions.latest
-      @past_name = @past_name.previous if @past_name
-      @children_data = @name.children
-      @parents = @name.parents
-      @interest = nil
-      @interest = Interest.find_by_user_id_and_object_type_and_object_id(@user.id, 'Name', @name.id) if @user
+  # Show selected search results as a list with 'list_names' template.
+  def show_selected_names(query, args={})
+    store_query_in_session(query)
+    @links ||= []
+    args = {
+      :action => 'list_names',
+      :letters => 'names.text_name',
+      :num_per_page => (params[:letter].to_s.match(/^[a-z]/i) ? 500 : 50),
+    }.merge(args)
+
+    # Tired of not having an easy link to list_names.
+    if query.flavor == :with_observations
+      @links << [:all_objects.t(:type => :name), { :action => 'list_names' }]
+    end
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name',      :sort_by_name.t],
+      ['created',   :sort_by_created.t],
+      [(query.flavor == :by_rss_log ? 'rss_log' : 'modified'),
+                    :sort_by_modified.t],
+      ['num_views', :sort_by_num_views.t],
+    ]
+
+    # Add "show observations" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Observation)
+      @links << [:show_objects.t(:type => :observation), {
+                  :controller => 'observer',
+                  :action => 'index_observation',
+                  :params => query_params(query),
+                }]
+    end
+
+    # Add "show descriptions" link if this query can be coerced into a
+    # description query.
+    if query.is_coercable?(:NameDescription)
+      @links << [:show_objects.t(:type => :description), {
+                  :action => 'index_name_description',
+                  :params => query_params(query),
+                }]
+    end
+
+    # Add some extra fields to the index for authored_names.
+    if query.flavor == :with_descriptions
+      show_index_of_objects(query, args) do |name|
+        if desc = name.description
+          [ desc.authors.map(&:login).join(', '),
+            desc.note_status.map(&:to_s).join('/'),
+            :"review_#{desc.review_status}".t ]
+        else
+          []
+        end
+      end
+    else
+      show_index_of_objects(query, args)
+    end
+  end
+
+  ##############################################################################
+  #
+  #  :section: Description Indexes and Searches
+  #
+  ##############################################################################
+
+  # Display list of names in last index/search query.
+  def index_name_description # :nologin: :norobots:
+    query = find_or_create_query(:NameDescription, :by => params[:by])
+    show_selected_name_descriptions(query, :id => params[:id],
+                                    :always_index => true)
+  end
+
+  # Display list of all (correctly-spelled) name_descriptions in the database.
+  def list_name_descriptions # :nologin:
+    query = create_query(:NameDescription, :all, :by => :name)
+    show_selected_name_descriptions(query)
+  end
+
+  # Display list of name_descriptions that a given user is author on.
+  def name_descriptions_by_author # :nologin: :norobots:
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:NameDescription, :by_author, :user => user)
+      show_selected_name_descriptions(query)
+    end
+  end
+
+  # Display list of name_descriptions that a given user is editor on.
+  def name_descriptions_by_editor # :nologin: :norobots:
+    if user = params[:id] ? find_or_goto_index(User, params[:id]) : @user
+      query = create_query(:NameDescription, :by_editor, :user => user)
+      show_selected_name_descriptions(query)
+    end
+  end
+
+  # Show selected search results as a list with 'list_names' template.
+  def show_selected_name_descriptions(query, args={})
+    store_query_in_session(query)
+    @links ||= []
+    args = {
+      :action => 'list_name_descriptions',
+      :num_per_page => 50
+    }.merge(args)
+
+    # Add some alternate sorting criteria.
+    args[:sorting_links] = [
+      ['name',      :sort_by_name.t],
+      ['created',   :sort_by_created.t],
+      ['modified',  :sort_by_modified.t],
+      ['num_views', :sort_by_num_views.t],
+    ]
+
+    # Add "show names" link if this query can be coerced into an
+    # observation query.
+    if query.is_coercable?(:Name)
+      @links << [:show_objects.t(:type => :name), {
+                  :action => 'index_name',
+                  :params => query_params(query),
+                }]
+    end
+
+    show_index_of_objects(query, args)
+  end
+
+  ################################################################################
+  #
+  #  :section: Show Name
+  #
+  ################################################################################
+
+  # Show a Name, one of its NameDescription's, associated taxa, and a bunch of
+  # relevant Observations.
+  def show_name # :nologin: :prefetch:
+    pass_query_params
+    store_location
+    clear_query_in_session
+
+    # Load Name and NameDescription along with a bunch of associated objects.
+    name_id = params[:id]
+    desc_id = params[:desc]
+    if @name = find_or_goto_index(Name, name_id,
+                                  :include => [:user, :descriptions])
+
       update_view_stats(@name)
 
-      # In theory much of the following should really be handled by the new search_sequences,
-      # but for now if it ain't broke...
-      # Matches on consensus name, any vote.
-      consensus_query = %(
-        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
-          u.name, u.login, o.user_id, n.observation_name, o.vote_cache
-        FROM observations o, users u, names n
-        WHERE o.name_id = %s and n.id = o.name_id and u.id = o.user_id
-        ORDER BY o.vote_cache desc, o.when desc
-      )
-
-      # Matches on consensus name, only non-negative votes.
-      synonym_query = %(
-        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
-          u.name, u.login, o.user_id, n.observation_name, o.vote_cache
-        FROM observations o, users u, names n
-        WHERE o.name_id = %s and n.id = o.name_id and u.id = o.user_id and
-          (o.vote_cache >= 0 || o.vote_cache is null)
-        ORDER BY o.vote_cache desc, o.when desc
-      )
-
-      # Matches on non-consensus namings, any vote.
-      other_query = %(
-        SELECT o.id, o.when, o.thumb_image_id, o.where, o.location_id,
-          u.name, u.login, o.user_id, n.observation_name, g.vote_cache
-        FROM observations o, users u, names n, namings g
-        WHERE g.name_id = %s and o.id = g.observation_id and
-          n.id = o.name_id and u.id = o.user_id and
-          o.name_id != g.name_id
-        ORDER BY g.vote_cache desc, o.when desc
-      )
-
-      # Get list of observations matching on consensus: these are "reliable".
-      @consensus_data = Observation.connection.select_all(consensus_query % name_id)
-
-      # Get list of observations matching on other names: "look-alikes".
-      @other_data = Observation.connection.select_all(other_query % name_id)
-
-      # Get list of observations matching any of its synonyms.
-      @synonym_data = []
-      synonym_ids = []
-      synonym = @name.synonym
-      if synonym
-        for n in synonym.names
-          if n != @name
-            synonym_ids.push(n.id)
-            data = Observation.connection.select_all(synonym_query % n.id)
-            @synonym_data += data
-          end
-        end
+      # Get a list of projects the user can create drafts for.
+      @projects = @user && @user.projects_member.select do |project|
+        !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
       end
 
-      @search_seqs = {}
-      if @consensus_data.length > 0
-        @search_seqs["consensus"] = calc_search(:name_observations,
-          "o.name_id = %s" % name_id, "o.vote_cache desc, o.when desc").id
+      # Get list of immediate parents.
+      @parents = @name.parents
+
+      # Create query for immediate children.
+      @children_query = create_query(:Name, :of_children, :name => @name)
+
+      # Create search queries for observation lists.
+      @consensus_query = create_query(:Observation, :of_name, :name => @name,
+                                      :by => :confidence)
+      @synonym_query = create_query(:Observation, :of_name, :name => @name,
+                                    :synonyms => :exclusive,
+                                    :by => :confidence)
+      @other_query = create_query(:Observation, :of_name, :name => @name,
+                                  :synonyms => :all, :nonconsensus => :exclusive,
+                                  :by => :confidence)
+      if @name.below_genus?
+        @subtaxa_query = create_query(:Observation, :of_children, :name => @name,
+                                      :all => true, :by => :confidence)
       end
-      if @synonym_data.length > 0
-        @search_seqs["synonym"] = calc_search(:synonym_observations,
-          "o.name_id in (%s)" % synonym_ids.join(", "), "o.vote_cache desc, o.when desc").id
+
+      # Determine which queries actually have results and instantiate the ones we'll use
+      @first_child = @children_query.results(:limit => 1)[0]
+      @first_consensus = @consensus_query.results(:limit => 1)[0]
+      @has_synonym = @synonym_query.select_one()
+      @has_other = @other_query.select_one()
+      if @subtaxa_query
+        @has_subtaxa = @subtaxa_query.select_one()
       end
-      if @other_data.length > 0
-        @search_seqs["other"] = calc_search(:other_observations,
-          "g.name_id = %s" % name_id, "g.vote_cache desc, o.when desc").id
-      end
-      #consensus_search = SearchState.lookup(params, :name_observations, logger)
-      #if not consensus_search.setup?
-      #  consensus_search.setup(nil, , :nothing)
-      #end
-      #consensus_search.save if !is_robot?
-      #@search_seqs = { "consensus" => consensus_search.id }
-
-      # Remove duplicates. (Select block sets seen[id] to true and returns true
-      # for the first occurrance of an id, else implicitly returns false.)
-      seen = {}
-      @consensus_data = @consensus_data.select {|d|
-        seen[d["id"]] = true if !seen[d["id"]] }
-      @synonym_data = @synonym_data.select {|d|
-        seen[d["id"]] = true if !seen[d["id"]] }
-      @other_data = @other_data.select {|d|
-        seen[d["id"]] = true if !seen[d["id"]] }
-
-      # Gather full list of IDs for the prev/next buttons to cycle through.
-      session_setup
-
-      # Paginate the sections independently.
-      per_page = 12
-      @children_page = params['children_page']
-      @children_page = 1 if !@children_page
-      @consensus_page = params['consensus_page']
-      @consensus_page = 1 if !@consensus_page
-      @synonym_page = params['synonym_page']
-      @synonym_page = 1 if !@synonym_page
-      @other_page = params['other_page']
-      @other_page = 1 if !@other_page
-      @children_pages, @children_data =
-        paginate_array(@children_data, per_page*2, @children_page)
-      @consensus_pages, @consensus_data =
-        paginate_array(@consensus_data, per_page, @consensus_page)
-      @synonym_pages, @synonym_data =
-        paginate_array(@synonym_data, per_page, @synonym_page)
-      @other_pages, @other_data =
-        paginate_array(@other_data, per_page, @other_page)
-      @children_data = [] if !@children_data
-      @consensus_data = [] if !@consensus_data
-      @synonym_data = [] if !@synonym_data
-      @other_data = [] if !@other_data
-      @is_reviewer = is_reviewer
-
-      # By default we query the consensus name above, but if the user
-      # is logged in we need to redo it and calc the preferred name for each.
-      # Note that there's no reason to do duplicate observations.  (Note, only
-      # need to do this to subset on the page we can actually see.)
-      projects = []
-      if @user
-        for d in @consensus_data + @synonym_data + @other_data
-          d["observation_name"] = Observation.find(d["id"].to_i).format_name
-        end
-        if @name.draft_names.length == 0
-          for group in @user.user_groups
-            project = group.project
-            if project
-              projects.push(project)
-            end
-          end
-          projects.sort! {|x,y| x.title <=> y.title }
-        end
-      end
-      @user_projects = projects unless projects == []
-
-      @existing_drafts = DraftName.find_all_by_name_id(name_id, :include => :project, :order => "projects.title") # for view/edit draft section
-      @existing_drafts = nil if @existing_drafts == []
-      # session[:checklist_source] = :observation_ids
-    # end
-    # logger.warn("show_name took %s\n" % elapsed_time)
-  end
-
-  # Callback to let reviewers change the review status of a Name from the show_name page.
-  def set_review_status
-    id = params[:id]
-    if is_reviewer
-      Name.find(id).update_review_status(params[:value], @user)
     end
-    redirect_to(:action => 'show_name', :id => id)
   end
 
-  # Callback to let reviewers change the export status of a Name from the show_name page.
-  def set_export_status
-    id = params[:id]
-    if is_reviewer
-      name = Name.find(id)
-      name.ok_for_export = params[:value]
-      name.save
-    end
-    redirect_to(:action => 'show_name', :id => id)
-  end
-
-  def show_past_name
+  # Show just a NameDescription.
+  def show_name_description # :nologin: :prefetch:
     store_location
-    @name = Name.find(params[:id].to_i)
-    @past_name = Name.find(params[:id].to_i) # clone or dclone?
-    @past_name.revert_to(params[:version].to_i)
-    @other_versions = @name.versions.reverse
-  end
+    pass_query_params
+    if @description = find_or_goto_index(NameDescription, params[:id],
+                        :include => [:authors, :editors, :license, :reviewer,
+                                     :user, {:name=>:descriptions}])
 
-  # name_index.rhtml -> create_name.rhtml
-  def create_name
-    if verify_user()
-      if request.method == :post
-        begin
-          text_name = (params[:name][:text_name] || '').strip
-          author = (params[:name][:author] || '').strip
-          name_str = text_name
-          params[:name][:classification] = Name.validate_classification(params[:name][:rank], params[:name][:classification])
-          matches = nil
-          if author != ''
-            matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
-            name_str += " #{author}"
-          else
-            matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
-          end
-          if matches.length > 0
-            flash_error(:name_create_already_exists.t(:name => name_str))
-            name = matches[0]
-          else
-            names = Name.names_from_string(name_str)
-            name = names.last
-            if name.nil?
-              raise :runtime_unable_to_create_name.t(:name => name_str)
-            end
-            name.citation = params[:name][:citation]
-            name.rank = params[:name][:rank] # Not quite right since names_from_string sets rank too
-            name.change_text_name(text_name, author, params[:name][:rank]) # Validates parse
+      # Public or user has permission.
+      if @description.is_reader?(@user)
+        @name = @description.name
+        update_view_stats(@description)
 
-            has_notes = false
-            for f in Name.all_note_fields
-              note = params[:name][f]
-              has_notes |= (note and (note != ''))
-              name.send("#{f}=", note)
-            end
-            if has_notes
-              name.license_id = params[:name][:license_id]
-            else
-              name.license_id = nil
-            end
-            for n in names
-              if n
-                n.user_id = @user.id
-                n.save
-                n.add_editor(@user)
-              end
-            end
-          end
-        rescue RuntimeError => err
-          # Anything causing changes not to get saved ends up here.
-          @name = Name.new
-          flash_error(err.to_s) if !err.nil?
-          flash_object_errors(@name)
-          @name.attributes = params[:name]
-          @licenses = License.current_names_and_ids()
-          @can_make_changes = true
-
-        else
-          # If no errors occurred, changes must've been made successfully.
-          redirect_to(:action => 'show_name', :id => name)
+        # Get a list of projects the user can create drafts for.
+        @projects = @user && @user.projects_member.select do |project|
+          !@name.descriptions.any? {|d| d.belongs_to_project?(project)}
         end
+
+      # User doesn't have permission to see this description.
       else
-        @name = Name.new
-        @licenses = License.current_names_and_ids()
-        @name.rank = :Species
-        @can_make_changes = true
+        if @description.source_type == :project
+          flash_error(:runtime_show_draft_denied.t)
+          if project = @description.project
+            redirect_to(:controller => 'project', :action => 'show_project',
+                        :id => project.id)
+          else
+            redirect_to(:action => 'show_name', :id => @description.name_id)
+          end
+        else
+          flash_error(:runtime_show_description_denied.t)
+          redirect_to(:action => 'show_name', :id => @description.name_id)
+        end
       end
     end
   end
 
-  def blank_notes(note_hash)
-    result = true
-    for key, value in note_hash
-      unless (value.nil? or value == '')
-        result = false
-        break
+  # Show past version of Name.  Accessible only from show_name page.
+  def show_past_name # :nologin: :prefetch: :norobots:
+    pass_query_params
+    store_location
+    if @name = find_or_goto_index(Name, params[:id])
+      @name.revert_to(params[:version].to_i)
+
+      # Old correct spellings could have gotten merged with something else and no longer exist.
+      if @name.is_misspelling?
+        @correct_spelling = Name.connection.select_value %(
+          SELECT display_name FROM names WHERE id = #{@name.correct_spelling_id}
+        )
+      else
+        @correct_spelling = ''
       end
     end
-    result
   end
-  
-  # show_name.rhtml -> edit_name.rhtml
-  # Updates modified and saves changes
-  def edit_name
-    any_errors = false
-    if verify_user()
-      @name = Name.find(params[:id])
-      @licenses = License.current_names_and_ids(@name.license)
-      @misspelling = false
-      if @name.is_misspelling? || (params[:name] && params[:name][:misspelling] == '1')
-        @name_primer = Name.primer(@user)
-      end
 
-      # Only allowed to make substantive changes it you own all the references to it.
-      # I think checking that the user owns all the namings that use it is correct.
-      # Maybe we should also check observations?  But the observation simply caches
-      # the winning naming's name.  Actually not necessarily: obs might use the accepted
-      # name if the winning name is deprecated.  Hmmm, I'll check it to be safe.
+  # Show past version of NameDescription.  Accessible only from
+  # show_name_description page.
+  def show_past_name_description # :nologin: :prefetch: :norobots:
+    pass_query_params
+    store_location
+    if @description = find_or_goto_index(NameDescription, params[:id])
+      if params[:merge_source_id].blank?
+        @description.revert_to(params[:version].to_i)
+      else
+        @merge_source_id = params[:merge_source_id]
+        version = NameDescription::Version.find(@merge_source_id)
+        @old_parent_id = version.name_description_id
+        subversion = params[:version]
+        if !subversion.blank? and
+           (version.version != subversion.to_i)
+          version = NameDescription::Version.
+            find_by_version_and_name_description_id(params[:version], @old_parent_id)
+        end
+        @description.clone_versioned_model(version, @description)
+      end
+    end
+  end
+
+  # Go to next name: redirects to show_name.
+  def next_name # :nologin: :norobots:
+    redirect_to_next_object(:next, Name, params[:id])
+  end
+
+  # Go to previous name: redirects to show_name.
+  def prev_name # :nologin: :norobots:
+    redirect_to_next_object(:prev, Name, params[:id])
+  end
+
+  # Go to next name: redirects to show_name.
+  def next_name_description # :nologin: :norobots:
+    redirect_to_next_object(:next, NameDescription, params[:id])
+  end
+
+  # Go to previous name_description: redirects to show_name_description.
+  def prev_name_description # :nologin: :norobots:
+    redirect_to_next_object(:prev, NameDescription, params[:id])
+  end
+
+  # Callback to let reviewers change the review status of a Name from the
+  # show_name page.
+  def set_review_status # :norobots:
+    pass_query_params
+    id = params[:id]
+    desc = NameDescription.find(id)
+    if is_reviewer?
+      desc.update_review_status(params[:value])
+    end
+    redirect_to(:action => 'show_name', :id => desc.name_id,
+                :params => query_params)
+  end
+
+  ##############################################################################
+  #
+  #  :section: Create and Edit
+  #
+  ##############################################################################
+
+  # Create a new name; accessible from name indexes.
+  def create_name # :prefetch: :norobots:
+    store_location
+    pass_query_params
+
+    # Reder a blank form.
+    if request.method != :post
+      @name = Name.new
+      @name.rank = :Species
       @can_make_changes = true
-      if @user.id != 0
-        for obj in @name.namings + @name.observations
-          if obj.user.id != @user.id
-            @can_make_changes = false
+
+    else
+      begin
+        # Look up name to see if it already exists.
+        text_name = params[:name][:text_name].to_s.strip_squeeze
+        author    = params[:name][:author].to_s.strip_squeeze
+        name_str  = text_name
+        matches   = nil
+        if !author.blank?
+          matches = Name.find_all_by_text_name_and_author(text_name, author)
+          name_str += " #{author}"
+        else
+          matches = Name.find_all_by_text_name(text_name)
+        end
+
+        # Name already exists.
+        if matches.length > 0
+          flash_error(:runtime_name_create_already_exists.t(:name => name_str))
+          name = matches[0]
+
+        # Create name.
+        else
+          # This returns a list of names starting with genus, on down to the
+          # given name: genus, species, variety, ...
+          names = Name.names_from_string(name_str)
+          name = names.last
+          raise(:runtime_unable_to_create_name.t(:name => name_str)) if !name
+
+          # Not quite right since names_from_string sets rank too.  I don't
+          # understand the subtlety of this. -JPH
+          name.rank = rank = params[:name][:rank].to_s
+
+          # This fills in the four name formats.
+          name.change_text_name(text_name, author, rank)
+
+          # I guess this is all that's left.
+          name.citation = params[:name][:citation]
+
+          # This saves this name, and genus/species above it as necessary.
+          for n in names
+            save_name(n, :log_name_updated) if n
+          end
+        end
+
+      # Anything causing changes not to get saved ends up here.
+      rescue RuntimeError => err
+        @name = Name.new
+        flash_error(err.to_s) if !err.nil?
+        flash_object_errors(@name)
+        @name.attributes = params[:name]
+        @can_make_changes = true
+
+      else
+        # If no errors occurred, either the name was created successfully, or
+        # it already exists.  In either case redirect to the name in question.
+        redirect_to(:action => 'show_name', :id => name.id,
+                    :params => query_params)
+      end
+    end
+  end
+
+  # Make changes to name; accessible from show_name page.
+  def edit_name # :prefetch: :norobots:
+    store_location
+    pass_query_params
+    @name = Name.find(params[:id])
+
+    # Get fields ready for misspelling.
+    if !params[:name]
+      @misspelling = @name.is_misspelling?
+      @correct_spelling = @misspelling ? @name.correct_spelling.search_name : ''
+    else
+      @misspelling = (params[:name][:misspelling] == '1')
+      @correct_spelling = params[:name][:correct_spelling].to_s.strip_squeeze
+    end
+    @name_primer = Name.primer
+
+    # Only allowed to make substantive changes if you own all the references
+    # to it.  I think checking that the user owns all the namings that use it
+    # is correct.  Maybe we should also check observations?  But the
+    # observation simply caches the winning naming's name.  Actually not
+    # necessarily: obs might use the accepted name if the winning name is
+    # deprecated.  Hmmm, I'll check it to be safe.
+    @can_make_changes = true
+    if !is_in_admin_mode?
+      for obj in @name.namings + @name.observations
+        if obj.user_id != @user.id
+          @can_make_changes = false
+          break
+        end
+      end
+    end
+
+    if request.method == :post
+      any_errors = false
+      begin
+        # Look up name to see if it already exists.
+        text_name = params[:name][:text_name].to_s.strip_squeeze
+        author    = params[:name][:author].to_s.strip_squeeze
+        rank      = params[:name][:rank].to_s
+        name_str  = text_name
+        matches   = nil
+        if !author.blank?
+          matches = Name.find_all_by_text_name_and_author(text_name, author)
+          name_str += " #{author}"
+        else
+          matches = Name.find_all_by_text_name(text_name)
+        end
+
+        # Take first one that isn't us if there are several matches.  This is
+        # the name that we will merge this name into.
+        merge = nil
+        for match in matches || []
+          if match.id != @name.id
+            merge = match
             break
           end
         end
-      end
 
-      if request.method == :post
-        begin
-          current_time = Time.now
-          text_name = (params[:name][:text_name] || '').strip
-          author = (params[:name][:author] || '').strip
-
-          # Grab all the notes sections: general description, look-alikes, etc.
-          all_notes = {}
-          params[:name][:classification] = Name.validate_classification(params[:name][:rank], params[:name][:classification])
-          for f in Name.all_note_fields
-            all_notes[f] = params[:name][f]
+        # Merge this name into another.
+        if merge
+          # Swap order if only one is mergable.
+          if !@name.mergable? && merge.mergable?
+            @name, merge = merge, @name
           end
 
-          # It is possible to change a Name's name if no one is using it yet
-          # (or the user owns all uses of it).  This tells us which Name we're
-          # actually going to change (@name), and if we need to merge and
-          # remove a "duplicate" (old_name). 
-          (@name, old_name) = find_target_names(params[:id], text_name, author, all_notes)
-          if text_name == ''
-            text_name = @name.text_name
-          end
+          # Admins can actually merge them, then redirect to other location.
+          if is_in_admin_mode? || @name.mergable?
 
-          # Don't allow author to be cleared if we can find an author in either
-          # of the pre-existing matching names.
-          if author == ''
-            author = @name.author || ''
-            if author == '' && old_name
-              author = old_name.author || ''
+            # Copy over any info this name has that the other name doesn't.
+            # Use other name's info where there's conflict.  (Reason: this is
+            # most often used to *get rid* of a misspelt name, such names are
+            # frequently accidentally created, often with incorrect rank and
+            # bogus author.)
+            if merge.author.blank?
+              merge.author = author
             end
-          end
-
-          # Save changes to name.  (Keep old name for log message if we are
-          # merging old_name into @name.)  Note: alt_ids is not used.
-          old_display_name = @name.display_name
-          alt_ids = @name.change_text_name(text_name, author, params[:name][:rank])
-
-          # Save changes to citation.
-          @name.citation = params[:name][:citation]
-
-          # Prevent user from erasing all the notes.  This also has the effect of
-          # merging notes from the old "duplicate" Name if it has any notes.  (As
-          # I understand find_target_names, this should never occur.)
-          if blank_notes(all_notes) && old_name # no new notes given and merge happened
-            all_notes = @name.all_notes
-            if blank_notes(all_notes)
-              all_notes = old_name.all_notes # try old_name's notes
+            if merge.citation.blank?
+              merge.citation = params[:name][:citation].to_s.strip_squeeze
             end
-          end
+            if merge.notes.blank?
+              merge.notes = params[:name][:notes].to_s.strip rescue ''
+            end
+            if params[:name][:deprecated] != '1'
+              merge.deprecated = false
+            end
+            merge.change_text_name(merge.text_name, merge.author, merge.rank,
+                                   :save_parents)
 
-          # Save changes to notes.
-          @name.set_notes(all_notes)
+            merge.merge(@name)
+            save_name(merge, :log_name_updated) if merge.changed?
+            flash_notice(:runtime_edit_name_merge_success.t(
+              :this => @name.search_name, :that => merge.search_name))
+            @name = merge
 
-          # Save change to license_id.
-          # (Clear out license_id if there are no notes.)
-          if @name.has_any_notes?
-            @name.license_id = params[:name][:license_id]
+          # Non-admins just send email-request to admins.
           else
-            @name.license_id = nil
+            flash_warning(:runtime_merge_names_warning.t)
+            content = :email_name_merge.t(:user => @user.login,
+                      :this => @name.display_name, :that => merge.display_name)
+            AccountMailer.deliver_webmaster_question(@user.email, content)
           end
 
-          # Let user call this a misspelling.  Look up the correct name
-          # via synonyms.  There can be multiple accepted names, in which
-          # case look for the one that shares the most letters(!)  If none
-          # are close, notify user and ask them to be explicit.
-          @misspelling = (params[:name][:misspelling].to_s == '1')
-          @correct_spelling = params[:name][:correct_spelling]
-          if !@misspelling
-            @name.misspelling = false
-            @name.correct_spelling = nil
-          else
-            name2 = nil
-
-            # Look up correct spelling if given explicitly.
-            if @correct_spelling.to_s != ''
-              @name.misspelling = true
-              name2 = Name.find_by_search_name(@correct_spelling) 
-              name2 ||= Name.find_by_text_name(@correct_spelling) 
-              if !name2
-                flash_error(:form_names_misspelling_bad.t)
-              elsif name2.id == @name.id
-                flash_error(:form_names_misspelling_same.t)
-                name2 = nil
-              end
-
-            # Try to guess if not given explicitly.
-            elsif !@name.correct_spelling
-              @name.misspelling = true
-              synonyms = @name.synonym ? @name.synonym.names - [@name] : []
-              if synonyms.length == 0
-                flash_error(:form_names_misspelling_no_synonyms.t)
-              else
-                candidates = []
-                approved_candidates = []
-                for synonym in synonyms
-                  # Count letters in one but not the other and vice versa.
-                  val  = 0
-                  copy = synonym.text_name
-                  @name.text_name.each_char do |c|
-                    if i = copy.index(c)
-                      copy[i] = ''
-                    else
-                      val += 1
-                    end
-                  end
-                  val += copy.length
-                  candidates.push(synonym)          if val < 5
-                  approved_candidates.push(synonym) if val < 5 && !synonym.deprecated
-                end
-                if candidates.length == 0
-                  flash_error(:form_names_misspelling_no_matches.t)
-                elsif approved_candidates.length == 1
-                  name2 = approved_candidates.first
-                elsif candidates.length == 1
-                  name2 = candidates.first
-                else
-                  flash_error(:form_names_misspelling_many_matches.t)
-                end
-              end
-            end
-
-            # Make sure correct spelling is a synonym, and not itself misspelled.
-            if name2
-              @name.misspelling = true
-              @name.correct_spelling = name2
-              @name.merge_synonyms(name2)
-              @name.change_deprecated(true)
-              name2.misspelling = false
-              name2.correct_spelling = nil
-              if name2.save_if_changed(@user,
-                :log_name_unmisspelled, { :user => @user.login,
-                :other => @name.display_name }, Time.now, true)
-                name2.add_editor(@user)
-              end
-            else
-              @name.misspelling = false
-              @name.correct_spelling = nil
-              any_errors = true
-            end
-          end
-
-          # Errr... when would this ever happen?
-          raise user_update_nonexisting_name.t if !@name.id
-
-          # If substantive changes are made by a reviewer, call this act a
-          # "review", even though they haven't actually changed the review
-          # status.  If substantive changes are made by a non-reviewer,
-          # this will revert status to unreviewed.
-          if @name.save_version?
-            @name.update_review_status(@name.review_status, @user, current_time)
-          end
-
-          # This saves changes, and returns true if a new version was created.
-          if @name.save_if_changed(@user, :log_name_updated, { :user => @user.login }, current_time, true)
-            @name.add_editor(@user)
-          elsif @name.errors.length > 0
-            raise :runtime_unable_to_save_changes.t
-          end
-
-          # Merge and remove "duplicate" Name.
-          if old_name
-            for o in old_name.observations
-              o.name = @name
-              o.modified = current_time
-              o.save
-            end
-            for g in old_name.namings
-              g.name = @name
-              g.modified = current_time
-              g.save
-            end
-            for m in old_name.misspellings
-              m.correct_spelling = @name
-              m.save
-            end
-            if @user.id != 0
-              old_name.log(:log_name_merged, { :this => old_display_name,
-                :that => @name.display_name }, true)
-            end
-            old_name.destroy
-          end
-
-        rescue RuntimeError => err
-          # Anything causing changes not to get saved ends up here.
-          flash_error(err.to_s) if !err.nil?
-          flash_object_errors(@name)
-          @name.attributes = params[:name]
-
+        # Not merging.
         else
-          # If no errors occurred, changes must've been made successfully.
-          redirect_to(:action => 'show_name', :id => @name.id) if !any_errors
-        end
-      end
-    end
-  end
+          # Text_name is blank if the name is in use (therefore not editable).
+          if !text_name.blank? ||
+             # However let user fill in missing authority, even if in use.
+             @name.author.blank? && !author.blank?
+            text_name = @name.text_name if text_name.blank?
+            @name.change_text_name(text_name, author, rank, :save_parents)
+          elsif @name.author.blank? and !author.blank?
+            @name.change_text_name(@name.text_name, author, @name.rank, :save_parents)
+          end
 
-  # change_synonyms.rhtml -> transfer_synonyms -> show_name.rhtml
-  def change_synonyms
-    if verify_user()
-      @name = Name.find(params[:id])
-      @list_members     = nil
-      @new_names        = nil
-      @synonym_name_ids = []
-      @synonym_names    = []
-      @deprecate_all    = "checked"
-      if request.method == :post
-        list = params[:synonym][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
-        deprecate = (params[:deprecate][:all] == "checked")
-        construct_approved_names(list, params[:approved_names], @user, deprecate)
-        sorter = NameSorter.new
-        sorter.sort_names(list)
-        sorter.append_approved_synonyms(params[:approved_synonyms])
-        # When does this fail??
-        if !sorter.only_single_names
-          dump_sorter(sorter)
-        elsif !sorter.only_approved_synonyms
-          flash_notice :name_change_synonyms_confirm.t
-        else
-          timestamp = Time.now
-          synonym = @name.synonym
-          if synonym.nil?
-            synonym = Synonym.new
-            synonym.created = timestamp
-            synonym.save
-            @name.synonym = synonym
-            if @name.save_if_changed(@user, nil, nil, timestamp, true)
-              @name.add_editor(@user)
-            end
+          @name.citation = params[:name][:citation].to_s.strip_squeeze rescue ''
+          @name.notes = params[:name][:notes].to_s.strip rescue ''
+
+          # Let user call this name a misspelling.
+          if !update_correct_spelling(@name, @misspelling, @correct_spelling)
+            # In case of error, save the rest of the changes, but stay in form.
+            any_errors = true
           end
-          proposed_synonyms = params[:proposed_synonyms] || {}
-          for n in sorter.all_names
-            if proposed_synonyms[n.id.to_s] != '0'
-              synonym.transfer(n)
-            end
-          end
-          for name_id in sorter.proposed_synonym_ids
-            n = Name.find(name_id)
-            if proposed_synonyms[name_id.to_s] != '0'
-              synonym.transfer(n)
-            end
-          end
-          check_for_new_synonym(@name, synonym.names, params[:existing_synonyms] || {})
-          synonym.modified = timestamp
-          synonym.save
-          success = true
-          if deprecate
-            for n in sorter.all_names
-              success = false if !deprecate_synonym(n, @user)
-            end
-          end
-          if success
-            redirect_to(:action => 'show_name', :id => @name.id)
+
+          # Save any changes.
+          if !@name.changed?
+            flash_warning(:runtime_edit_name_no_change.t)
+          elsif !save_name(@name, :log_name_updated)
+            raise(:runtime_unable_to_save_changes.t)
           else
-            flash_object_errors(@name)
-            flash_object_errors(@name.synonym)
+            flash_notice(:runtime_edit_name_success.t(
+                         :name => @name.search_name))
           end
         end
-        @list_members     = sorter.all_line_strs.join("\r\n")
-        @new_names        = sorter.new_name_strs.uniq
-        @synonym_name_ids = sorter.proposed_synonym_ids.uniq
-        @synonym_names    = @synonym_name_ids.map {|id| Name.find(id)}
-        @deprecate_all    = params[:deprecate][:all]
-      end
-    end
-  end
 
-  def deprecate_name
-    if verify_user()
-      @name    = Name.find(params[:id])
-      @what    = (params[:proposed] && params[:proposed][:name] ? params[:proposed][:name] : '').strip
-      @comment = (params[:comment] && params[:comment][:comment] ? params[:comment][:comment] : '').strip
-      @list_members     = nil
-      @new_names        = []
-      @synonym_name_ids = []
-      @synonym_names    = []
-      @deprecate_all    = "checked"
-      @names            = []
-      @misspelling      = params[:is] && params[:is][:misspelling] == '1'
-      if request.method == :post
-        if @what == ''
-          flash_error :name_deprecate_must_choose.t
-        else
-          if params[:chosen_name] && params[:chosen_name][:name_id]
-            new_names = [Name.find(params[:chosen_name][:name_id])]
-          else
-            new_names = Name.find_names(@what)
-          end
-          if new_names.length == 0
-            new_names = [create_needed_names(params[:approved_name], @what, @user)]
-          end
-          target_name = new_names.first
-          if target_name
-            @names = new_names
-            if new_names.length == 1
-              @name.merge_synonyms(target_name)
-              target_name.change_deprecated(false)
-              current_time = Time.now
-              if target_name.save_if_changed(@user,
-                :log_name_approved, { :user => @user.login,
-                :other => @name.display_name }, current_time, true)
-                target_name.add_editor(@user)
-              end
-              @name.change_deprecated(true)
-              if @misspelling
-                @name.misspelling = true
-                @name.correct_spelling = target_name
-              end
-              comment_join = @comment == "" ? "." : ":\n"
-              @name.prepend_notes("Deprecated in favor of" +
-                " #{target_name.search_name} by #{@user.login} on " +
-                Time.now.to_formatted_s(:db) + comment_join + @comment)
-              if @name.save_if_changed(@user,
-                :log_name_deprecated, { :user => @user.login,
-                :other => target_name.display_name }, current_time, true)
-                @name.add_editor(@user)
-              end
-              redirect_to(:action => 'show_name', :id => @name.id)
-            end
-end
-        end
-      end
-    end
-  end
+      rescue RuntimeError => err
+        # Anything causing changes not to get saved ends up here.
+        flash_error(err.to_s) if !err.nil?
+        flash_object_errors(@name)
+        @name.attributes = params[:name]
 
-  def approve_name
-    if verify_user()
-      @name = Name.find(params[:id])
-      @approved_names = @name.approved_synonyms
-      if request.method == :post
-        now = Time.now
-        if params[:deprecate][:others] == '1'
-          for n in @name.approved_synonyms
-            n.change_deprecated(true)
-            if n.save_if_changed(@user,
-              :log_name_deprecated, { :user => @user.login,
-              :other => @name.search_name }, now, true)
-              n.add_editor(@user)
-            end
-          end
-        end
-        @name.change_deprecated(false)
-        comment = (params[:comment] && params[:comment][:comment] ?
-           params[:comment][:comment] : "").strip
-        comment_join = comment == "" ? "." : ":\n"
-        @name.prepend_notes("Approved by #{@user.login} on " +
-          Time.now.to_formatted_s(:db) + comment_join + comment)
-        if @name.save_if_changed(@user, :log_approved_by, { :user => @user.login }, now, true)
-          @name.add_editor(@user)
-        end
-        redirect_to(:action => 'show_name', :id => @name.id)
-      end
-    end
-  end
-
-  # name_index/create_species_list -> bulk_name_edit
-  def bulk_name_edit
-    if verify_user()
-      @list_members = nil
-      @new_names    = nil
-      if request.method == :post
-        list = params[:list][:members].squeeze(" ") # Get rid of extra whitespace while we're at it
-        construct_approved_names(list, params[:approved_names], @user)
-        sorter = setup_sorter(params, nil, list)
-        if sorter.only_single_names
-          sorter.create_new_synonyms()
-          flash_notice :name_bulk_success.t
-          redirect_to(:controller => 'observer', :action => 'list_rss_logs')
-        else
-          if sorter.new_name_strs != []
-            # This error message is no longer necessary.
-            # flash_error "Unrecognized names including #{sorter.new_name_strs[0]} given."
-          else
-            # Same with this one.
-            # flash_error "Ambiguous names including #{sorter.multiple_line_strs[0]} given."
-          end
-          @list_members = sorter.all_line_strs.join("\r\n")
-          @new_names    = sorter.new_name_strs.uniq.sort
-        end
-      end
-    end
-  end
-
-  def map
-    name_id = params[:id]
-    @name = Name.find(name_id)
-    locs = name_locs(name_id)
-    @synonym_data = []
-    synonym = @name.synonym
-    if synonym
-      for n in synonym.names
-        if n != @name
-          syn_locs = name_locs(n.id)
-          for l in syn_locs
-            unless locs.member?(l)
-              locs.push(l)
-            end
-          end
-        end
-      end
-    end
-    @map = nil
-    @header = nil
-    if locs.length > 0
-      @map = make_map(locs)
-      @header = "#{GMap.header}\n#{finish_map(@map)}"
-    end
-  end
-
-  def email_tracking
-    name_id = params[:id]
-    if verify_user()
-      @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
-      if request.method == :post
-        name = Name.find(name_id)
-        case params[:commit]
-        when :app_enable.l, :app_update.l
-          note_template = params[:notification][:note_template]
-          note_template = nil if note_template == ''
-          if @notification.nil?
-            @notification = Notification.new(:flavor => :name, :user => @user, :obj_id => name_id,
-                :note_template => note_template)
-            flash_notice(:email_tracking_now_tracking.t(:name => name.display_name))
-          else
-            @notification.note_template = note_template
-            flash_notice(:email_tracking_updated_messages.t)
-          end
-          @notification.save
-        when :app_disable.l
-          @notification.destroy()
-          flash_notice(:email_tracking_no_longer_tracking.t(:name => name.display_name))
-        end
-        redirect_to(:action => 'show_name', :id => name_id)
       else
-        @name = Name.find(name_id)
-        if [:Family, :Order, :Class, :Phylum, :Kingdom, :Group].member?(@name.rank)
-          flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
+        if !any_errors
+          # If no errors occurred, assume changes were made successfully.
+          redirect_to(:action => 'show_name', :id => @name.id,
+                      :params => query_params)
         end
-        if @notification
-          @note_template = @notification.note_template
-        else
-          mailing_address = @user.mailing_address.strip
-          mailing_address = ':mailing_address' if mailing_address == ''
-          @note_template = :email_tracking_note_template.l(
-            :species_name => @name.text_name,
-            :mailing_address => mailing_address,
-            :users_name => @user.legal_name
+      end
+    end
+  end
+
+  def create_name_description # :prefetch: :norobots:
+    store_location
+    pass_query_params
+    @name = Name.find(params[:id])
+    @licenses = License.current_names_and_ids
+
+    # Render a blank form.
+    if request.method == :get
+      @description = NameDescription.new
+      @description.name = @name
+      initialize_description_source(@description)
+
+    # Create new description.
+    else
+      @description = NameDescription.new
+      @description.name = @name
+      @description.attributes = params[:description]
+
+      if @description.valid?
+        initialize_description_permissions(@description)
+        @description.save
+
+        Transaction.post_name_description(
+          @description.all_notes.merge(
+            :id            => @description,
+            :created       => @description.created,
+            :source_type   => @description.source_type,
+            :source_name   => @description.source_name,
+            :locale        => @description.locale,
+            :license       => @description.license,
+            :admin_groups  => @description.admin_groups,
+            :writer_groups => @description.writer_groups,
+            :reader_groups => @description.reader_groups
+          )
+        )
+
+        # Make this the "default" description if there isn't one and this is
+        # publicly readable.
+        if !@name.description and
+           @description.public
+          @name.description = @description
+        end
+
+        # Keep the parent's classification cache up to date.
+        if (@name.description == @description) and
+           (@name.classification != @description.classification)
+          @name.classification = @description.classification
+        end
+
+        # Log action in parent name.
+        @description.name.log(:log_description_created,
+                 :user => @user.login, :touch => true,
+                 :name => @description.unique_partial_format_name)
+
+        # Save any changes to parent name.
+        @name.save if @name.changed?
+
+        flash_notice(:runtime_name_description_success.t(
+                     :id => @description.id))
+        redirect_to(:action => 'show_name_description',
+                    :id => @description.id)
+
+      else
+        flash_object_errors @description
+      end
+    end
+  end
+
+  def edit_name_description # :prefetch: :norobots:
+    store_location
+    pass_query_params
+    @description = NameDescription.find(params[:id])
+    @licenses = License.current_names_and_ids
+
+    if !check_description_edit_permission(@description, params[:description])
+      # already redirected
+
+    elsif request.method == :post
+      @description.attributes = params[:description]
+
+      args = {}
+      args["set_source_type"] = @description.source_type if @description.source_type_changed?
+      args["set_source_name"] = @description.source_name if @description.source_name_changed?
+      args["set_locale"]      = @description.locale      if @description.locale_changed?
+      args["set_license"]     = @description.license     if @description.license_id_changed?
+      for field in NameDescription.all_note_fields
+        if @description.send("#{field}_changed?")
+          args["set_#{field}".to_sym] = @description.send(field)
+        end
+      end
+
+      # Modify permissions based on changes to the two "public" checkboxes.
+      modify_description_permissions(@description, args)
+
+      # If substantive changes are made by a reviewer, call this act a
+      # "review", even though they haven't actually changed the review
+      # status.  If it's a non-reviewer, this will revert it to "unreviewed".
+      if @description.save_version?
+        @description.update_review_status(@description.review_status)
+      end
+
+      # No changes made.
+      if args.empty?
+        flash_warning(:runtime_edit_name_description_no_change.t)
+        redirect_to(:action => 'show_name_description',
+                    :id => @description.id)
+
+      # There were error(s).
+      elsif !@description.save
+        flash_object_errors(@description)
+
+      # Updated successfully.
+      else
+        flash_notice(:runtime_edit_name_description_success.t(
+                     :id => @description.id))
+
+        if !args.empty?
+          args[:id] = @description
+          Transaction.put_name_description(args)
+        end
+
+        # Update name's classification cache.
+        name = @description.name
+        if (name.description == @description) and
+           (name.classification != @description.classification)
+          name.classification = @description.classification
+          name.save
+        end
+
+        # Log action to parent name.
+        name.log(:log_description_updated, :touch => true, :user => @user.login,
+                 :name => @description.unique_partial_format_name)
+
+        # Delete old description after resolving conflicts of merge.
+        if (params[:delete_after] == 'true') and
+           (old_desc = NameDescription.safe_find(params[:old_desc_id]))
+          v = @description.versions.latest
+          v.merge_source_id = old_desc.versions.latest.id
+          v.save
+          if !old_desc.is_admin?(@user)
+            flash_warning(:runtime_description_merge_delete_denied.t)
+          else
+            flash_notice(:runtime_description_merge_deleted.
+                           t(:old => old_desc.partial_format_name))
+            name.log(:log_object_merged_by_user,
+                     :user => @user.login, :touch => true,
+                     :from => old_desc.unique_partial_format_name,
+                     :to => @description.unique_partial_format_name)
+            old_desc.destroy
+          end
+        end
+
+        redirect_to(:action => 'show_name_description',
+                    :id => @description.id)
+      end
+    end
+  end
+
+  def destroy_name_description # :norobots:
+    pass_query_params
+    @description = NameDescription.find(params[:id])
+    if @description.is_admin?(@user)
+      flash_notice(:runtime_destroy_description_success.t)
+      @description.name.log(:log_description_destroyed,
+               :user => @user.login, :touch => true,
+               :name => @description.unique_partial_format_name)
+      @description.destroy
+      redirect_to(:action => 'show_name', :id => @description.name_id,
+                  :params => query_params)
+    else
+      flash_error(:runtime_destroy_description_not_admin.t)
+      if @description.is_reader?(@user)
+        redirect_to(:action => 'show_name_description', :id => @description.id,
+                    :params => query_params)
+      else
+        redirect_to(:action => 'show_name', :id => @description.name_id,
+                    :params => query_params)
+      end
+    end
+  end
+
+  # Update the misspelling status.
+  #
+  # name::             Name whose status we're changing.
+  # misspelling::      Boolean: is the "this is misspelt" box checked?
+  # correct_spelling:: String: the correct name, as entered by the user.
+  #
+  # 1) If the checkbox is unchecked, and name used to be misspelt, then it
+  #    clears correct_spelling_id.
+  # 2) Otherwise, if the text field is filled in it looks up the name and
+  #    sets correct_spelling_id.
+  #
+  # All changes are made (but not saved) to +name+.  It returns true if
+  # everything went well.  If it couldn't recognize the correct name, it
+  # changes nothing, flashes and error message, and returns false. 
+  #
+  def update_correct_spelling(name, misspelling, correct_spelling)
+    result = true
+
+    # Clear status if checkbox unchecked.
+    if name.is_misspelling? && (!misspelling || correct_spelling.blank?)
+      name.correct_spelling = nil
+
+    # Set correct_spelling if one given.
+    elsif !correct_spelling.blank?
+      name2 = Name.find_names(correct_spelling).first
+      if !name2
+        flash_error(:runtime_form_names_misspelling_bad.t)
+        result = false
+      elsif name2.id == name.id
+        flash_error(:runtime_form_names_misspelling_same.t)
+        result = false
+      else
+        name.correct_spelling = name2
+        name.merge_synonyms(name2)
+        name.change_deprecated(true)
+
+        # Make sure the "correct" name isn't also a misspelled name!
+        if name2.is_misspelling?
+          name2.correct_spelling = nil
+          save_name(name2, :log_name_unmisspelled, :other => name.display_name)
+        end
+      end
+    end
+
+    return result
+  end
+
+  ################################################################################
+  #
+  #  :section: Synonymy
+  #
+  ################################################################################
+
+  # Form accessible from show_name that lets a user review all the synonyms
+  # of a name, removing others, writing in new, etc.
+  def change_synonyms # :prefetch: :norobots:
+    pass_query_params
+    @name = Name.find(params[:id])
+    @list_members     = nil
+    @new_names        = nil
+    @synonym_name_ids = []
+    @synonym_names    = []
+    @deprecate_all    = true
+    if request.method == :post
+      list = params[:synonym][:members].strip_squeeze
+      @deprecate_all = (params[:deprecate][:all] == '1')
+
+      # Create any new names that have been approved.
+      construct_approved_names(list, params[:approved_names], @deprecate_all)
+
+      # Parse the write-in list of names.
+      sorter = NameSorter.new
+      sorter.sort_names(list)
+      sorter.append_approved_synonyms(params[:approved_synonyms])
+
+      # Are any names unrecognized (only unapproved names will still be
+      # unrecognized at this point) or ambiguous?
+      if !sorter.only_single_names
+        dump_sorter(sorter)
+      # Has the user NOT had a chance to choose from among the synonyms of any
+      # names they've written in?
+      elsif !sorter.only_approved_synonyms
+        flash_notice :name_change_synonyms_confirm.t
+      else
+        now = Time.now
+
+        # Create synonym and add this name to it if this name not already
+        # associated with a synonym.
+        if !@name.synonym_id
+          @name.synonym = Synonym.create
+          @name.save
+          Transaction.post_synonym(
+            :id => @name.synonym
+          )
+          Transaction.put_name(
+            :id          => @name,
+            :set_synonym => @name.synonym
           )
         end
-      end
-    end
-  end
 
-  # Form to compose email for the authors/reviewers
-  # Linked from: show_name
-  # Inputs:
-  #   params[:id]
-  # Outputs: @name
-  def author_request
-    @name = Name.find(params[:id])
-  end
-
-  # Sends email to the authors/reviewers
-  # Linked from: author_request
-  # Inputs:
-  #   params[:id]
-  #   params[:email][:subject]
-  #   params[:email][:content]
-  # Success:
-  #   Redirects to show_name.
-  #
-  # TODO: Use queued_email mechanism
-  def send_author_request
-    sender = @user
-    name = Name.find(params[:id])
-    subject = params[:email][:subject]
-    content = params[:email][:content]
-    for receiver in name.authors + UserGroup.find_by_name('reviewers').users
-      AccountMailer.deliver_author_request(sender, receiver, name, subject, content)
-    end
-    flash_notice(:request_success.t)
-    redirect_to(:action => 'show_name', :id => name.id)
-  end
-
-  # Form to adjust permissions for a user with respect to a project
-  # Linked from: show_name, author_request email
-  # Inputs:
-  #   params[:id]
-  #   params[:add]
-  #   params[:remove]
-  # Success:
-  #   Redraws itself.
-  # Failure:
-  #   Renders show_name.
-  #   Outputs: @name, @authors, @users
-  def review_authors
-    @name = Name.find(params[:id])
-    if verify_user()
-      @authors = @name.authors
-      if @authors.member?(@user) or @user.in_group('reviewers')
-        @users = User.find(:all, :order => "login, name")
-        new_author = params[:add] ?  User.find(params[:add]) : nil
-        if new_author and not @name.authors.member?(new_author)
-          @name.add_author(new_author)
-          flash_notice("Added #{new_author.legal_name}")
-          # Should send email as well
-        end
-        old_author = params[:remove] ? User.find(params[:remove]) : nil
-        if old_author
-          @name.remove_author(old_author)
-          flash_notice("Removed #{old_author.legal_name}")
-          # Should send email as well
-        end
-      else
-        flash_error(:review_authors_denied.t)
-        redirect_to(:action => 'show_name', :id => @name.id)
-      end
-    end
-  end
-
-  def eol_data(review_status_list, last_name=nil)
-    rsl_list = review_status_list.join("', '")
-    conditions = "review_status IN ('#{rsl_list}') and gen_desc is not null and ok_for_export = 1"
-    conditions += " and text_name > '#{last_name}'" if last_name
-    names = Name.find(:all, :conditions => conditions, :order => "search_name")
-    
-    image_data = Name.connection.select_all %(
-      SELECT name_id, image_id, observation_id, images.user_id, images.license_id, images.created
-      FROM names, observations, images_observations, images
-      WHERE names.id = observations.name_id
-      AND observations.id = images_observations.observation_id
-      AND observations.vote_cache >= 2.4
-      AND images_observations.image_id = images.id
-      AND images.quality in ('medium', 'high')
-      ORDER BY observations.vote_cache
-    )
-    @image_data = {}
-    @users = {}
-    @licenses = {}
-    for row in image_data
-      name_id = row['name_id'].to_i
-      image_datum = [row['image_id'], row['observation_id'], row['user_id'], row['license_id'], row['created']]
-      @image_data[name_id] = [] unless @image_data[name_id]
-      @image_data[name_id].push(image_datum)
-      user_id = row['user_id'].to_i
-      @users[user_id] = User.find(user_id).legal_name unless @users[user_id]
-      license_id = row['license_id'].to_i
-      @licenses[license_id] = License.find(license_id).url unless @licenses[license_id]
-    end
-    @names = []
-    @authors = {} # Maps name.id -> lists of user.ids
-    @authors.default = []
-    for n in names
-      if @image_data[n.id] or n.has_any_notes?
-        @names.push(n)
-        author_data = Name.connection.select_all("SELECT user_id FROM authors_names WHERE name_id = #{n.id}")
-        authors = author_data.map {|d| d['user_id']}
-        authors = [n.user_id] if authors == []
-        @authors[n.id] = authors
-        for author in authors
-          author_id = author.to_i
-          unless @users[author_id]
-            @users[author_id] = User.find(author_id).legal_name
+        # Go through list of all synonyms for this name and written-in names.
+        # Exclude any names that have un-checked check-boxes: newly written-in
+        # names will not have a check-box yet, names written-in in previous
+        # attempt to submit this form will have checkboxes and therefore must
+        # be checked to proceed -- the default initial state.
+        proposed_synonyms = params[:proposed_synonyms] || {}
+        for n in sorter.all_synonyms
+          # Synonymize all names that have been checked, or that don't have
+          # checkboxes.
+          if proposed_synonyms[n.id.to_s] != '0'
+            if n.synonym_id != @name.synonym_id
+              @name.transfer_synonym(n)
+              Transaction.put_name(
+                :id          => n,
+                :set_synonym => @name.synonym
+              )
+            end
           end
         end
-        @authors[n.id] = (authors.map {|id| @users[id.to_i]}).join(', ')
-        unless n.license_id.nil? or @licenses[n.license_id]
-          @licenses[n.license_id] = n.license.url
+
+        # De-synonymize any old synonyms in the "existing synonyms" list that
+        # have been unchecked.  This creates a new synonym to connect them if
+        # there are multiple unchecked names -- that is, it splits this
+        # synonym into two synonyms, with checked names staying in this one,
+        # and unchecked names moving to the new one.
+        check_for_new_synonym(@name, @name.synonyms, params[:existing_synonyms] || {})
+
+        # Deprecate everything if that check-box has been marked.
+        success = true
+        if @deprecate_all
+          for n in sorter.all_names
+            if !deprecate_synonym(n)
+              # Already flashed error message.
+              success = false
+            end
+          end
+        end
+
+        if success
+          redirect_to(:action => 'show_name', :id => @name.id,
+                      :params => query_params)
+        else
+          flash_object_errors(@name)
+          flash_object_errors(@name.synonym)
         end
       end
+
+      @list_members     = sorter.all_line_strs.join("\r\n")
+      @new_names        = sorter.new_name_strs.uniq
+      @synonym_name_ids = sorter.all_synonyms.map(&:id)
+      @synonym_names    = @synonym_name_ids.map {|id| Name.find(id)}
     end
   end
 
-  def eol
-    headers["Content-Type"] = "application/xml"
-    @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
-    @start = Time.now()
-    eol_data(['unvetted', 'vetted'], params[:last_name])
-    render(:action => "eol", :layout => false)
-  end
+  # Form accessible from show_name that lets the user deprecate a name in favor
+  # of another name.
+  def deprecate_name # :prefetch: :norobots:
+    pass_query_params
 
-  # Show the data getting sent to EOL
-  def eol_preview
-    eol_data(['unvetted', 'vetted'])
-  end
+    # These parameters aren't always provided.
+    params[:proposed]    ||= {}
+    params[:comment]     ||= {}
+    params[:chosen_name] ||= {}
+    params[:is]          ||= {}
 
-  # Show the data not getting sent to EOL
-  def eol_need_review
-    eol_data(['unreviewed'])
-    @title = :eol_need_review_title.t
-    render(:action => 'eol_preview')
-  end
+    @name    = Name.find(params[:id])
+    @what    = params[:proposed][:name].to_s.strip_squeeze rescue ''
+    @comment = params[:comment][:comment].to_s.strip_squeeze rescue ''
 
-################################################################################
+    @list_members     = nil
+    @new_names        = []
+    @synonym_name_ids = []
+    @synonym_names    = []
+    @deprecate_all    = '1'
+    @names            = []
+    @misspelling      = (params[:is][:misspelling] == '1')
+    @name_primer      = Name.primer
 
-  # Finds the intended name and if another matching name exists,
-  # then ensure it is mergable.  Returns [target_name, other_name]
-  # It is expected that changes be made to target_name, and that
-  # other_name gets deleted after the merge(?)
-  def find_target_names(id_str, text_name, author, all_notes)
+    if request.method == :post
+      if @what.blank?
+        flash_error :runtime_name_deprecate_must_choose.t
 
-    # Look up name we're changing first (by id).
-    page_name = nil
-    id = nil
-    if id_str
-      id = id_str.to_i
-      page_name = Name.find(id)
-    end
-
-    # Look for other Names that match the new name.  (Take first if several.)
-    other_name = nil
-    matches = []
-    if author != ''
-      matches = Name.find(:all, :conditions => "text_name = '%s' and author = '%s'" % [text_name, author])
-    else
-      matches = Name.find(:all, :conditions => "text_name = '%s'" % text_name)
-    end
-    for m in matches
-      if m.id != id
-        other_name = m # Just take the first one
-        break
-      end
-    end
-
-    # Return Name we're changing and matching Name.
-    result = [page_name, other_name]
-
-    # If there is a matching Name, which do we actually want to change?
-    if other_name
-      if other_name.has_any_notes?
-        # If both Names have notes we don't know how to merge, so throw an error.
-        if !blank_notes(all_notes) && (other_name.all_notes != all_notes)
-          raise :runtime_name_in_use_with_notes.t(:name => text_name, :other => other_name.display_name)
+      else
+        # Find the chosen preferred name.
+        if params[:chosen_name][:name_id]
+          @names = [Name.find(params[:chosen_name][:name_id])]
+        else
+          @names = Name.find_names(@what)
         end
-        # Only the *other* name has notes -- make changes to that one instead.
-        result = [other_name, page_name]
-      elsif page_name.nil?
-        # If we're trying to create a new Name but find a matching one already exists, return that Name.
-        result = [other_name, page_name]
-      elsif !page_name.has_any_notes?
-        # Neither has notes, so we need another criterion
-        if page_name.deprecated and !other_name.deprecated # Prefer valid names
-          result = [other_name, page_name]
-        # If both are deprecated, take the one with longer history of changes.
-        elsif (other_name.deprecated == page_name.deprecated) and (other_name.version >= page_name.version)
-          result = [other_name, page_name]
+        if @names.empty? and
+           (new_name = create_needed_names(params[:approved_name], @what))
+          @names = [new_name]
         end
-      end
-    end
-    result
+        target_name = @names.first
+
+        # No matches: try to guess.
+        if @names.empty?
+          @valid_names = guess_correct_name(@what)
+          @suggest_corrections = true
+
+        # If written-in name matches uniquely an existing name:
+        elsif target_name && @names.length == 1
+          now = Time.now
+
+          # Merge this name's synonyms with the preferred name's synonyms.
+          @name.merge_synonyms(target_name)
+
+          # Change target name to "undeprecated".
+          target_name.change_deprecated(false)
+          save_name(target_name, :log_name_approved,
+                    :other => @name.search_name)
+
+          # Change this name to "deprecated", set correct spelling, add note.
+          @name.change_deprecated(true)
+          if @misspelling
+            @name.misspelling = true
+            @name.correct_spelling = target_name
+          end
+          save_name(@name, :log_name_deprecated,
+                    :other => target_name.search_name)
+          if !@comment.blank?
+            post_comment(:deprecate, @name, @comment)
+          end
+
+          redirect_to(:action => 'show_name', :id => @name.id,
+                      :params => query_params)
+        end
+
+      end # @what
+    end # :post
   end
 
-  def deprecate_synonym(name, user)
+  # Form accessible from show_name that lets a user make call this an accepted
+  # name, possibly deprecating its synonyms at the same time.
+  def approve_name # :prefetch: :norobots:
+    pass_query_params
+    @name = Name.find(params[:id])
+    @approved_names = @name.approved_synonyms
+    comment = params[:comment][:comment] rescue ''
+    comment = comment.strip_squeeze
+    if request.method == :post
+
+      # Deprecate others first.
+      others = []
+      if params[:deprecate][:others] == '1'
+        for n in @name.approved_synonyms
+          n.change_deprecated(true)
+          save_name(n, :log_name_deprecated, :other => @name.search_name)
+          others << n.search_name
+        end
+      end
+
+      # Approve this now.
+      @name.change_deprecated(false)
+      tag = :log_approved_by
+      args = {}
+      if others != []
+        tag = :log_name_approved
+        args[:other] = others.join(', ')
+      end
+      save_name(@name, tag, args)
+      if !comment.blank?
+        post_comment(:approve, @name, comment)
+      end
+
+      redirect_to(:action => 'show_name', :id => @name.id,
+                  :params => query_params)
+    end
+  end
+
+  # Helper used by change_synonyms.  Deprecates a single name.  Returns true
+  # if it worked.  Flashes an error and returns false if it fails for whatever
+  # reason.
+  def deprecate_synonym(name)
+    result = true
     unless name.deprecated
       begin
-        count = 0
         name.change_deprecated(true)
-        if name.save_if_changed(user, :log_deprecated_by, { :user => user.login }, Time.now, true)
-          name.add_editor(@user)
-        end
+        result = save_name(name, :log_deprecated_by)
       rescue RuntimeError => err
         flash_error(err.to_s)
-        return false
+        result = false
       end
     end
-    return true
+    return result
+  end
+
+  # If changing the synonyms of a name that already has synonyms, the user is
+  # presented with a list of "existing synonyms".  This is a list of check-
+  # boxes.  They all start out checked.  If the user unchecks one, then that
+  # name is removed from this synonym.  If the user unchecks several, then a
+  # new synonym is created to synonymize all those names.
+  def check_for_new_synonym(name, candidates, checks)
+    new_synonym_members = []
+    # Gather all names with un-checked checkboxes.
+    for n in candidates
+      if (name != n) && (checks[n.id.to_s] == '0')
+        new_synonym_members.push(n)
+      end
+    end
+    len = new_synonym_members.length
+    if len > 1
+      name = new_synonym_members.shift
+      name.synonym = new_synonym = Synonym.create
+      name.save
+      Transaction.post_synonym(
+        :id => new_synonym
+      )
+      Transaction.put_name(
+        :id          => name,
+        :set_synonym => new_synonym
+      )
+      for n in new_synonym_members
+        name.transfer_synonym(n)
+        Transaction.put_name(
+          :id          => n,
+          :set_synonym => new_synonym
+        )
+      end
+    elsif len == 1
+      name = new_synonym_members.first
+      name.clear_synonym
+      Transaction.put_name(
+        :id          => name,
+        :set_synonym => 0
+      )
+    end
   end
 
   def dump_sorter(sorter)
@@ -1241,41 +1247,213 @@ end
         logger.warn(n)
       end
     end
-    logger.warn("\nSynonym name ids:")
-    for n in sorter.proposed_synonym_ids.uniq
+    logger.warn("\nSynonym names:")
+    for n in sorter.all_synonyms.map(&:id)
       logger.warn(n)
     end
   end
 
-  # Look through the candidates for names that are not marked in checks.
-  # If there are more than 1, then create a new synonym containing those taxa.
-  # If there is only one then remove it from any synonym it belongs to
-  def check_for_new_synonym(name, candidates, checks)
-    new_synonym_members = []
-    for n in candidates
-      if (name != n) && (checks[n.id.to_s] == "0")
-        new_synonym_members.push(n)
+  # Post a comment after approval or deprecation if the user entered one.
+  def post_comment(action, name, message)
+    summary = :"name_#{action}_comment_summary".l
+    comment = Comment.create!(
+      :object  => name,
+      :summary => summary,
+      :comment => message
+    )
+    Transaction.post_comment(
+      :id      => comment,
+      :object  => name,
+      :summary => summary,
+      :comment => message
+    )
+  end
+
+  ##############################################################################
+  #
+  #  :section: EOL Feed
+  #
+  ##############################################################################
+
+  # Send stuff to eol.
+  def eol # :nologin: :norobots:
+    headers["Content-Type"] = "application/xml"
+    @max_secs = params[:max_secs] ? params[:max_secs].to_i : nil
+    @timer_start = Time.now()
+    eol_data(['unvetted', 'vetted'], params[:last_name])
+    render(:action => "eol", :layout => false)
+  end
+
+  # Show the data getting sent to EOL
+  def eol_preview # :nologin: :norobots:
+    @timer_start = Time.now
+    eol_data(['unvetted', 'vetted'])
+    @timer_end = Time.now
+  end
+
+  # Show the data not getting sent to EOL
+  def eol_need_review # :norobots:
+    eol_data(['unreviewed'])
+    @title = :eol_need_review_title.t
+    render(:action => 'eol_preview')
+  end
+
+  # Gather data for EOL feed.
+  def eol_data(review_status_list, last_name=nil)
+    @names      = []
+    @descs      = {} # name.id    -> [NameDescription, NmeDescription, ...]
+    @image_data = {} # name.id    -> [img.id, obs.id, user.id, lic.id, date]
+    @users      = {} # user.id    -> user.legal_name
+    @licenses   = {} # license.id -> license.url
+    @authors    = {} # desc.id    -> "user.legal_name, user.legal_name, ..."
+
+    # Get name descriptions that are exportable.
+    rsl = review_status_list.join("', '")
+    conditions = "review_status IN ('#{rsl}') AND " +
+                 "gen_desc IS NOT NULL AND " +
+                 "ok_for_export = 1 AND " +
+                 "public = 1"
+    descs = NameDescription.all(:conditions => conditions)
+
+    # Fill in @descs, @users, @authors, @licenses.
+    for desc in descs
+      name_id = desc.name_id.to_i
+      @descs[name_id] ||= []
+      @descs[name_id] << desc
+      authors = Name.connection.select_values(%(
+        SELECT user_id FROM name_descriptions_authors
+        WHERE name_description_id = #{desc.id}
+      )).map(&:to_i)
+      authors = [desc.user_id] if authors.empty?
+      for author in authors
+        @users[author.to_i] ||= User.find(author).legal_name
       end
+      @authors[desc.id] = authors.map {|id| @users[id.to_i]}.join(', ')
+      @licenses[desc.license_id] ||= desc.license.url if desc.license_id
     end
-    len = new_synonym_members.length
-    if len > 1
-      new_synonym = Synonym.new
-      new_synonym.created = Time.now
-      new_synonym.save
-      for n in new_synonym_members
-        new_synonym.transfer(n)
-      end
-    elsif len == 1
-      new_synonym_members[0].clear_synonym
+
+    # Get corresponding names.
+    name_ids = @descs.keys.map(&:to_s).join(',')
+    @names = Name.all(:conditions => "id IN (#{name_ids})",
+                      :order => 'text_name ASC, author ASC')
+
+    # Get corresponding images.
+    image_data = Name.connection.select_all %(
+      SELECT name_id, image_id, observation_id, images.user_id,
+             images.license_id, images.created
+      FROM observations, images_observations, images
+      WHERE observations.name_id IN (#{name_ids})
+      AND observations.vote_cache >= 2.4
+      AND observations.id = images_observations.observation_id
+      AND images_observations.image_id = images.id
+      AND images.vote_cache >= 2
+      AND images.ok_for_export
+      ORDER BY observations.vote_cache
+    )
+
+    # Fill in @image_data, @users, and @licenses.
+    for row in image_data
+      name_id    = row['name_id'].to_i
+      user_id    = row['user_id'].to_i
+      license_id = row['license_id'].to_i
+      image_datum = row.values_at('image_id', 'observation_id', 'user_id',
+                                  'license_id', 'created')
+      @image_data[name_id] ||= []
+      @image_data[name_id].push(image_datum)
+      @users[user_id]       ||= User.find(user_id).legal_name
+      @licenses[license_id] ||= License.find(license_id).url
     end
   end
 
-  def name_locs(name_id)
-    Location.find(:all, {
-      :include => :observations,
-      :conditions => ["observations.name_id = ? and
-        observations.is_collection_location = true and
-        (observations.vote_cache >= 0 or observations.vote_cache is NULL)", name_id]
-    })
+  ################################################################################
+  #
+  #  :section: Other Stuff
+  #
+  ################################################################################
+
+  # Utility accessible from a number of name pages (e.g. indexes and
+  # show_name?) that lets you enter a whole list of names, together with
+  # synonymy, and create them all in one blow.
+  def bulk_name_edit # :prefetch: :norobots:
+    @list_members = nil
+    @new_names    = nil
+    if request.method == :post
+      list = params[:list][:members].strip_squeeze rescue ''
+      construct_approved_names(list, params[:approved_names])
+      sorter = NameSorter.new
+      sorter.sort_names(list)
+      if sorter.only_single_names
+        sorter.create_new_synonyms
+        flash_notice :name_bulk_success.t
+        redirect_to(:controller => 'observer', :action => 'list_rss_logs')
+      else
+        if sorter.new_name_strs != []
+          # This error message is no longer necessary.
+          flash_error "Unrecognized names given, including: #{sorter.new_name_strs[0].inspect}" if TESTING
+        else
+          # Same with this one... err, no this is not reported anywhere.
+          flash_error "Ambiguous names given, including: #{sorter.multiple_line_strs[0].inspect}"
+        end
+        @list_members = sorter.all_line_strs.join("\r\n")
+        @new_names    = sorter.new_name_strs.uniq.sort
+      end
+    end
+  end
+
+  # Draw a map of all the locations where this name has been observed.
+  def map # :nologin: :norobots:
+    pass_query_params
+    @name = Name.find(params[:id])
+    @query = create_query(:Location, :with_observations_of_name, :name => @name)
+    @locations = @query.results
+  end
+
+  # Form accessible from show_name that lets a user setup tracker notifications
+  # for a name.
+  def email_tracking # :norobots:
+    pass_query_params
+    name_id = params[:id]
+    @notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name_id, @user.id)
+
+    # Initialize form.
+    if request.method != :post
+      @name = Name.find(name_id)
+      if Name.ranks_above_genus.member?(@name.rank)
+        flash_warning(:email_tracking_enabled_only_for.t(:name => @name.display_name, :rank => @name.rank))
+      end
+      if @notification
+        @note_template = @notification.note_template
+      else
+        mailing_address = @user.mailing_address.strip
+        mailing_address = ':mailing_address' if mailing_address.blank?
+        @note_template = :email_tracking_note_template.l(
+          :species_name => @name.text_name,
+          :mailing_address => mailing_address,
+          :users_name => @user.legal_name
+        )
+      end
+
+    # Submit form.
+    else
+      name = Name.find(name_id)
+      case params[:commit]
+      when :ENABLE.l, :UPDATE.l
+        note_template = params[:notification][:note_template]
+        note_template = nil if note_template.blank?
+        if @notification.nil?
+          @notification = Notification.new(:flavor => :name, :user => @user,
+              :obj_id => name_id, :note_template => note_template)
+          flash_notice(:email_tracking_now_tracking.t(:name => name.display_name))
+        else
+          @notification.note_template = note_template
+          flash_notice(:email_tracking_updated_messages.t)
+        end
+        @notification.save
+      when :DISABLE.l
+        @notification.destroy
+        flash_notice(:email_tracking_no_longer_tracking.t(:name => name.display_name))
+      end
+      redirect_to(:action => 'show_name', :id => name_id, :params => query_params)
+    end
   end
 end

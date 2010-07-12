@@ -1,0 +1,117 @@
+#!/usr/bin/ruby
+
+require '../config/boot'
+require '../config/environment'
+
+root = User.find(1)
+User.current = root
+
+users = {
+  'pellaea'   => User.find_by_login('jason'),
+  'Ganoderma' => User.find(0),
+}
+
+def quote(x)
+  Name.connection.quote(x)
+end
+
+def update_desc(desc, notes)
+  notes = '' if notes.blank?
+  Name.connection.update %(
+    UPDATE name_descriptions
+    SET notes = #{quote(notes)}
+    WHERE id = #{desc.id}
+  )
+end
+
+def delete_desc(desc, notes)
+  notes = '' if notes.blank?
+  Name.connection.update %(
+    UPDATE names
+    SET description_id = NULL, notes = #{quote(notes)}
+    WHERE id = #{desc.name_id}
+  )
+  Name.connection.delete %(
+    DELETE FROM name_descriptions
+    WHERE id = #{desc.id}
+  )
+end
+
+i = 0
+num = NameDescription.count
+for desc in NameDescription.all
+  i += 1
+  $stderr.print "%.1f%%...\r" % (i.to_f/num*100)
+  $stderr.flush
+
+  if !(notes = desc.notes).blank?
+puts "\ndesc=#{desc.id} name=#{desc.name_id}"
+    notes.gsub!(/\r/,'')
+    old_notes = notes.dup
+    comments = []
+    while true
+      if notes.sub!(/(\A|\n\n)Approved by [^<>\n]+ on \d+-\d+-\d+ \d+:\d+:\d+\.(<br>)*\n*/m, '') or
+         notes.sub!(/(\A|\n\n)Deprecated in favor of [^<>\n]+ on \d+-\d+-\d+ \d+:\d+:\d+\.(<br>)*\n*/m, '')
+      elsif notes.sub!(/(\A|\n\n)(Approved) by ([^<>\n]+) on (\d+-\d+-\d+ \d+:\d+:\d+):(.*?)(<br>+\n+|(<br>)*\n(\n+|Approved|Deprecated)|(<br>)*\n*\Z)/m, '') or
+            notes.sub!(/(\A|\n\n)(Deprecated) in favor of [^<>\n]+ by ([^<>\n]+) on (\d+-\d+-\d+ \d+:\d+:\d+):(.*?)(<br>+\n+|(<br>)*\n(\n+|Approved|Deprecated)|(<br>)*\n*\Z)/m, '')
+        comments << [$2.downcase, $3, $4, $5]
+      else
+        break
+      end
+    end
+
+    # Was able to parse some comments.
+    if notes != old_notes
+      notes.sub!(/\s+\Z/, '')
+      notes.sub!(/^\s+/, '')
+      notes = '' if notes.blank?
+
+      desc.notes = ''
+      if desc.has_any_notes? && (
+         !notes.to_s.match(/^The preferred name is/)
+       )
+        update_desc(desc, notes)
+puts "notes: #{old_notes.inspect}"
+puts "changed: #{notes.inspect}"
+      else
+        delete_desc(desc, notes)
+puts "notes: #{old_notes.inspect}"
+puts "moved: #{notes.inspect}"
+      end
+
+      for summary, login, date, comment in comments
+        user = users[login] ||= User.find_by_login(login)
+        time = Time.parse(date)
+        summary = summary.downcase
+        comment = comment.strip
+        Comment.create(
+          :created  => time,
+          :modified => time,
+          :user     => user,
+          :summary  => summary,
+          :comment  => comment,
+          :object   => desc.name
+        )
+puts "comment: #{time.strftime("%Y%m%d%H%M%S")} #{user ? user.id : "<#{login}>"} #{summary.inspect} #{comment.inspect}"
+      end
+
+    # Move bare notes into parent name, because more than likely it is taxonomic
+    # stuff and belongs there.
+    else
+      notes.sub!(/\s+\Z/, '')
+      desc.notes = ''
+      if !desc.has_any_notes? &&
+         !old_notes.match(/^Images of Myxomycetes/) &&
+         !old_notes.match(/^An online key/) &&
+         !old_notes.match(/^This is an interesting segregate genus/) &&
+         !old_notes.match(/^Emended diagnosis from __Mycotaxon__ 103/) &&
+         !old_notes.match(/^h2\./)
+puts "notes: #{old_notes.inspect}"
+puts "moved: (as is)"
+        delete_desc(desc, notes)
+      else
+puts "unchanged"
+      end
+    end
+  end
+end

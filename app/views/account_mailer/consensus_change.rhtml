@@ -5,35 +5,35 @@
 
   fields = ""
   if @old_name
-    fields += "*#{:email_field_old_name.l}:* " + link_to(@old_name.display_name, "#{DOMAIN}/name/show_name/#{@old_name.id}") + "\n"
+    fields += "*#{:email_field_old_name.l}:* " + link_to(@old_name.display_name, "#{HTTP_DOMAIN}/name/show_name/#{@old_name.id}") + "\n"
   else
     fields += "*#{:email_field_old_name.l}:* --\n"
   end
   if @new_name
-    fields += "*#{:email_field_new_name.l}:* " + link_to(@new_name.display_name, "#{DOMAIN}/name/show_name/#{@new_name.id}") + "\n"
+    fields += "*#{:email_field_new_name.l}:* " + link_to(@new_name.display_name, "#{HTTP_DOMAIN}/name/show_name/#{@new_name.id}") + "\n"
   else
     fields += "*#{:email_field_new_name.l}:* --\n"
   end
-  fields += "*#{:app_time.l}:* #{@time.to_formatted_s(:db)}\n"
-  fields += "*#{:app_by.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+  fields += "*#{:Time.l}:* #{@time.email_time}\n"
+  fields += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
 
   handy_links = :email_handy_links
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation.l),
-    "#{DOMAIN}/#{@observation.id}"])
+  links.push([:email_links_show_object.l(:type => :observation),
+    "#{HTTP_DOMAIN}/#{@observation.id}"])
   links.push([:email_links_post_comment.l,
-    "#{DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
-  links.push([:email_links_not_interested.l(:type => :observation.l),
-    "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@observation.id}&type=Observation"])
+  links.push([:email_links_not_interested.l(:type => :observation),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
-    "#{DOMAIN}/account/no_email_observations_consensus/#{@user.id}"]) unless watching
+    "#{HTTP_DOMAIN}/account/no_email_observations_consensus/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.l,
-    "#{DOMAIN}/account/prefs/#{@user.id}"])
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.l,
-    DOMAIN])
+    HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
   <title>Mushroom Observer: <%= @subject %></title>
@@ -50,8 +50,7 @@ if @user.email_html ######################################################### %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= fields.tp.html_to_ascii %>
 
@@ -62,4 +61,4 @@ if @user.email_html ######################################################### %>
     result += "#{label}: #{url}\n"
   end
   result %>
-<% end ###################################################################### %>
+<% end %>

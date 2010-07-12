@@ -14,9 +14,9 @@
           if user && user.contribution > 0 %>
             <tr>
               <td>
-                <%= if user.image
-                  link_to(image_tag(sprintf("thumb/%d.jpg", user.image.id), :border => 0),
-                          :controller => "image", :action => "show_image", :id => user.image.id)
+                <%= if user.image_id
+                  thumbnail(user.image_id, :border => 0, :link => :show_user,
+                        :user => user.id, :votes => false, :size => :thumbnail)
                 end %>
               </td>
               <td>
@@ -30,7 +30,7 @@
                 end %>
               </td>
               <td>
-                <%= link_to(:observations.t, :action => "show_user_observations", :id => user.id) %>
+                <%= link_to(:observations.t, :action => "observations_by_user", :id => user.id) %>
               </td>
               <td>
                 <%= user_link(user.id, user.contribution) %>
@@ -45,23 +45,30 @@
       <%= :users_by_contribution_1.tp %>
 
       <table style="margin-left:20px">
-        <% for field in ALL_FIELDS %>
-          <% if FIELD_WEIGHTS[field] > 0 %>
-            <%= "<tr><td nowrap='nowrap'>#{"site_stats_#{field}".to_sym.t} &nbsp; </td><td>#{FIELD_WEIGHTS[field]}</td></tr>" %>
+        <% for field in SiteData::ALL_FIELDS %>
+          <% if SiteData::FIELD_WEIGHTS[field] > 0 %>
+            <%= "<tr><td nowrap='nowrap'>#{"user_stats_#{field}".to_sym.t} &nbsp; </td><td>#{SiteData::FIELD_WEIGHTS[field]}</td></tr>" %>
           <% end %>
         <% end %>
       </table><br/>
 
       <%= :users_by_contribution_2.tp %>
 
+      <%
+        v1 = SiteData::FIELD_WEIGHTS[:images]
+        v2 = SiteData::FIELD_WEIGHTS[:name_descriptions_editors]
+        v3 = SiteData::FIELD_WEIGHTS[:observations]
+        v4 = SiteData::FIELD_WEIGHTS[:namings]
+        v5 = SiteData::FIELD_WEIGHTS[:votes]
+      %>
       <table style="margin-left:20px">
-        <tr><td></td><td>3 * <%= FIELD_WEIGHTS[:images] %> &nbsp; </td><td>(<%= :users_by_contribution_2a.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:editors_names] %></td><td>(<%= :users_by_contribution_2b.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:observations] %></td><td>(<%= :users_by_contribution_2c.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:namings] %></td><td>(<%= :users_by_contribution_2d.t %>)</td></tr>
-        <tr><td>+</td><td>1 * <%= FIELD_WEIGHTS[:votes] %></td><td>(<%= :users_by_contribution_2e.t %>)</td></tr>
+        <tr><td></td><td>3 * <%= v1 %> &nbsp; </td><td>(<%= :users_by_contribution_2a.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v2 %></td><td>(<%= :users_by_contribution_2b.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v3 %></td><td>(<%= :users_by_contribution_2c.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v4 %></td><td>(<%= :users_by_contribution_2d.t %>)</td></tr>
+        <tr><td>+</td><td>1 * <%= v5 %></td><td>(<%= :users_by_contribution_2e.t %>)</td></tr>
         <tr><td colspan="3"><hr/></td></tr>
-        <tr><td></td><td colspan="2"><%= 3*FIELD_WEIGHTS[:images] + FIELD_WEIGHTS[:editors_names] + FIELD_WEIGHTS[:observations] + FIELD_WEIGHTS[:namings] + FIELD_WEIGHTS[:votes] %> <%= :users_by_contribution_2f.t %></td></tr>
+        <tr><td></td><td colspan="2"><%= 3*v1 + v2 + v3 + v4 + v5 %> <%= :users_by_contribution_2f.t %></td></tr>
       </table><br/>
 
       <%= :users_by_contribution_3.tp %>

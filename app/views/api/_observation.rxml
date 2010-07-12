@@ -1,76 +1,76 @@
 # Locals:
-#   :observation        Observation instance.
-#   :details            Include details?
+#   :object             Observation instance.
+#   :detail             Include details?
 #   :refs               Include images and comments?
 
-details ||= false
-refs    ||= false
+detail ||= false
+refs   ||= false
 
 xml.observation(
-  :id => observation.id,
-  :url => "#{DOMAIN}/observer/show_observation/#{observation.id}"
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/observer/show_observation/#{object.id}"
 ) do
-  xml.date  xml_date(observation.when)
-  xml.notes observation.notes.to_s.tpl_nodiv
+  xml.date  xml_date(object.when)
+  xml.notes object.notes.to_s.tpl_nodiv
 
-  if observation.location
+  if object.location
     render_xml_partial(xml, :location, :locals => {
-      :location => observation.location,
-      :details => false,
+      :object => object.location,
+      :detail => false,
     })
   else
     xml.location do
-      xml.title observation.where
+      xml.title object.where
     end
   end
 
   xml.consensus_name do
     render_xml_partial(xml, :name, :locals => {
-      :name => observation.name,
-      :details => false,
-      :refs => details,
+      :object => object.name,
+      :detail => false,
+      :refs   => detail,
     })
   end
 
-  if details
-    xml.created  xml_datetime(observation.created)
-    xml.modified xml_datetime(observation.modified)
-    xml.specimen_available observation.specimen ? 'true' : 'false'
-    xml.is_collection_location observation.is_collection_location ? 'true' : 'false'
+  if detail
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
+    xml.specimen_available object.specimen ? 'true' : 'false'
+    xml.is_collection_location object.is_collection_location ? 'true' : 'false'
 
     render_xml_partial(xml, :user, :locals => {
-      :user => observation.user,
-      :details => false,
+      :object => object.user,
+      :detail => false,
     })
 
-    xml.namings(:number => observation.namings.length) do
-      for naming in observation.namings
+    xml.namings(:number => object.namings.length) do
+      for naming in object.namings
         render_xml_partial(xml, :naming, :locals => {
-          :naming => naming,
-          :details => false,
-          :refs => false,
+          :object => naming,
+          :detail => false,
+          :refs    => false,
         })
       end
     end
   end
 
   if refs
-    xml.images(:number => observation.images.length) do
-      for image in observation.images
+    xml.images(:number => object.images.length) do
+      for image in object.images
         render_xml_partial(xml, :image, :locals => {
-          :image => image,
-          :details => true,
-          :files => true,
-          :refs => false,
+          :object => image,
+          :detail => true,
+          :files  => true,
+          :refs   => false,
         })
       end
     end
 
-    xml.comments(:number => observation.comments.length) do
-      for comment in observation.comments
+    xml.comments(:number => object.comments.length) do
+      for comment in object.comments
         render_xml_partial(xml, :comment, :locals => {
-          :comment => comment,
-          :details => false,
+          :object => comment,
+          :detail => false,
         })
       end
     end

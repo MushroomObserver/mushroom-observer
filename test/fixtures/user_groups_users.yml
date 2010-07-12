@@ -31,3 +31,43 @@ bolete_user_dick:
 bolete_admin_dick:
   user_id: 4
   user_group_id: 5
+
+all_users_1:
+  user_id: 1
+  user_group_id: 6
+
+all_users_2:
+  user_id: 2
+  user_group_id: 6
+
+all_users_3:
+  user_id: 3
+  user_group_id: 6
+
+all_users_4:
+  user_id: 4
+  user_group_id: 6
+
+all_users_5:
+  user_id: 5
+  user_group_id: 6
+
+user_1_1:
+  user_id: 1
+  user_group_id: 7
+
+user_2_2:
+  user_id: 2
+  user_group_id: 8
+
+user_3_3:
+  user_id: 3
+  user_group_id: 9
+
+user_4_4:
+  user_id: 4
+  user_group_id: 10
+
+user_5_5:
+  user_id: 5
+  user_group_id: 11

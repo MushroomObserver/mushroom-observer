@@ -1,64 +1,88 @@
 <%
   @title = :species_list_show_title.t(:name => @species_list.unique_format_name)
-  search_params = calc_search_params()
 
   new_tab_set do
-    if check_permission(@species_list.user_id)
-      add_tab(:species_list_show_edit.t, :action => 'edit_species_list', :id => @species_list.id)
-      add_tab(:app_destroy.t, { :action => 'destroy_species_list', :id => @species_list.id }, { :confirm => :app_are_you_sure.l })
+    if @user
+      add_tab(:species_list_show_clone_list.t,
+              { :action => 'create_species_list', :clone => @species_list.id,
+              :params => query_params },
+              { :help => :species_list_show_clone_list_help.l })
+      add_tab(:species_list_show_set_source.t, { :action => 'show_species_list',
+              :id => @species_list.id, :set_source => 1,
+              :params => query_params },
+              { :help => :species_list_show_set_source_help.l })
     end
-    add_tab(:species_list_show_save_as_txt.t, :action => 'make_report', :id => @species_list.id, :type => 'txt')
-    add_tab(:species_list_show_save_as_rtf.t, :action => 'make_report', :id => @species_list.id, :type => 'rtf')
-    add_tab(:species_list_show_save_as_csv.t, :action => 'make_report', :id => @species_list.id, :type => 'csv')
+    if check_permission(@species_list.user_id)
+      add_tab(:species_list_show_edit.t, :action => 'edit_species_list',
+              :id => @species_list.id, :params => query_params)
+      add_tab(:DESTROY.t, { :action => 'destroy_species_list',
+              :id => @species_list.id, :params => query_params },
+              { :confirm => :are_you_sure.l })
+    end
   end
+
+  new_tab_set do
+    add_tab(:species_list_show_save_as_txt.t, :action => 'make_report',
+            :id => @species_list.id, :type => 'txt')
+    add_tab(:species_list_show_save_as_rtf.t, :action => 'make_report',
+            :id => @species_list.id, :type => 'rtf')
+    add_tab(:species_list_show_save_as_csv.t, :action => 'make_report',
+            :id => @species_list.id, :type => 'csv')
+  end
+
+  draw_prev_next_tabs(@species_list)
 %>
 
-<p><%= :app_when.t %>: <span class="Data"><%= @species_list.when %></span></p>
-<p><%= :app_where.t %>: <span class="Data"><%= sanitize(@species_list.where).t %></span></p>
-<p><%= :app_who.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
-<p><%= :app_notes.t %>:</p>
+<p><%= :WHEN.t %>: <span class="Data"><%= @species_list.when.web_date %></span></p>
+<p><%= :WHERE.t %>: <span class="Data"><%= sanitize(@species_list.place_name).t %></span></p>
+<p><%= :WHO.t %>: <span class="Data"><%= user_link(@species_list.user) %></span></p>
+<p><%= :NOTES.t %>:</p>
 <%= sanitize(@species_list.notes.to_s).tpl %>
 
-<%= :species_list_show_members.t %>:<br/>
-<% if @observation_list %>
-  <div class="pagination"><%= pagination_letters(@letters) %></div>
-  <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
-
-  <% if @observation_list && @observation_list.length > 0 %>
-    <table cellpadding="5" cellspacing="0" width="100%">
-      <% odd_or_even = 0
-      for observation in @observation_list
-        odd_or_even = 1 - odd_or_even %>
-        <tr valign="top" class="ListLine<%= odd_or_even %>">
-          <td width="110" align="center" valign="middle">
-            <%= image = observation.thumb_image
-            if image
-              link_to(image_tag(sprintf("thumb/%d.jpg", observation.thumb_image_id), :border => 0),
-                      :controller => 'observer', :action => 'show_observation', :id => observation.id,
-                      :params => search_params)
-            end %><br/>
-          </td>
-          <td width="100%" valign="middle">
-            <span class="ListName">
-              <%= link_to(observation.unique_format_name.t,
-                          :controller => 'observer', :action => 'show_observation', :id => observation.id,
-                          :params => search_params) %>
-            </span><br/>
-            <span class="ListWhere"><%= location_link(observation.where, observation.location_id) %></span>:
-            <span class="ListWho"><%= user_link(observation.user) %></span>:
-            <span class="ListWhen"><%= observation.when %></span>
-          </td>
-        </tr>
-      <% end %>
-    </table>
+<% if @pages && @pages.length > 0
+  set_query_params(@query) %>
+  <%= :species_list_show_members.t %>: 
+    <%= link_to(:show_objects.t(:type => :observation),
+                :controller => :observer, :action => :index_observation,
+                :params => query_params) %> |
+    <%= link_to(:show_objects.t(:type => :name),
+                :controller => :name, :action => :index_name,
+                :params => query_params) %> |
+    <%= link_to(:show_objects.t(:type => :image),
+                :controller => :image, :action => :index_image,
+                :params => query_params) %><br/>
+  <% paginate_block(@pages) do %>
+    <% if @objects && @objects.length > 0 %>
+      <table cellpadding="5" cellspacing="0" width="100%">
+        <% odd_or_even = 0
+        for observation in @objects
+          odd_or_even = 1 - odd_or_even %>
+          <tr valign="top" class="ListLine<%= odd_or_even %>">
+            <td width="110" align="center" valign="middle">
+              <%= if observation.thumb_image_id
+                thumbnail(observation.thumb_image, :border => 0,
+                          :link => :show_observation, :obs => observation.id,
+                          :votes => true)
+              end %>
+            </td>
+            <td width="100%" valign="middle">
+              <span class="ListName">
+                <%= link_to(observation.unique_format_name.t,
+                            :controller => 'observer', :action => 'show_observation', :id => observation.id,
+                            :params => query_params) %>
+              </span><br/>
+              <span class="ListWhere"><%= location_link(observation.place_name, observation.location) %></span>:
+              <span class="ListWho"><%= user_link(observation.user) %></span>:
+              <span class="ListWhen"><%= observation.when.web_date %></span>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    <% end %>
   <% end %>
-
-  <div class="pagination"><%= pagination_numbers(@pages, @letters) %></div>
-  <div class="pagination"><%= pagination_letters(@letters) %></div>
+<% else %>
+  <%= :species_list_show_no_members.tp %>
 <% end %>
 <br/>
 
-<% rss_log = @species_list.rss_log
-if rss_log %>
-  <%= link_to(:app_show_log.t, :controller => 'observer', :action => 'show_rss_log', :id => rss_log.id) %>
-<% end %>
+<%= show_object_footer(@species_list) %>

@@ -1,4 +1,3 @@
-<% table = @naming.calc_vote_table %>
 <table cellpadding="0" cellspacing="5" style='margin:10px; color:black; white-space:nowrap'>
 
   <tr style='white-space:normal'>
@@ -14,9 +13,10 @@
     <th width="20"><%= :show_votes_weight.t %></th>
     <th width="5" >&nbsp;</th>
     <th width="20"><%= :show_votes_users.t %></th>
-    <th width="20"><table width="25"><tr><td></td></tr></table></th>
+    <th width="20">&nbsp;</th>
   </tr>
 
+  <% table = @naming.calc_vote_table %>
   <% for str in table.keys.sort {|x,y| table[y][:value] <=> table[x][:value]}
     val = table[str][:value]
     wgt = table[str][:wgt]
@@ -31,6 +31,24 @@
         <td align="center"><%= "%.2f" % wgt %></td>
         <td>&nbsp;</td>
         <td align="center"><%= num %></td>
+        <td align="left"><small><%=
+          vote_cutoff = Time.parse(VOTE_CUTOFF)
+          votes = table[str][:votes].select do |vote|
+            (vote.user.votes_anonymous == :no) or
+            (vote.user.votes_anonymous == :old and vote.modified > vote_cutoff)
+          end.sort_by(&:rand)[0..3]
+          if votes.length > 0
+            n = 0
+            '(' + votes.map do |vote|
+              n += 1
+              if n < 4
+                user_link(vote.user, vote.user.login)
+              else
+                '...'
+              end
+            end.join(',') + ')'
+          end
+        %></small></td>
         <td>&nbsp;</td>
       </tr>
     <% end %>
@@ -50,10 +68,28 @@
     <td>&nbsp;</td>
   </tr>
 
+  <% if @user %>
+    <tr style='white-space:normal'>
+      <td colspan="9" align="center">
+        <%= if @user.votes_anonymous == :yes
+          link_to(:show_votes_go_public.t, { :action => 'show_observation',
+                  :id => @observation.id, :go_public => '1',
+                  :params => query_params },
+                  { :confirm => :show_votes_go_public_confirm.l })
+        else
+          link_to(:show_votes_go_private.t, { :action => 'show_observation',
+                  :id => @observation.id, :go_private => '1',
+                  :params => query_params },
+                  { :confirm => :show_votes_go_private_confirm.l })
+        end %>
+      </td>
+    </tr>
+  <% end %>
+
 </table>
 
 <% if do_cancel %>
   <center>
-    <%= button_to_function(:app_close.t, "hide_votes(#{@naming.id})") %>
+    <%= button_to_function(:CLOSE.t, "hide_votes(#{@naming.id})") %>
   </center>
 <% end %>

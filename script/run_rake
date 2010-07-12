@@ -1,0 +1,4 @@
+#!/bin/sh
+declare -x RUBYLIB="/usr/lib/ruby/site_ruby/1.8"
+declare -x GEM_HOME="/usr/lib/ruby/gems/1.8"
+/usr/bin/rake $* RAILS_ENV=production -f /var/web/mo/Rakefile | grep -v '(in /home/'

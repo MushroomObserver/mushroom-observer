@@ -1,0 +1,84 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+agaricus_campestras_desc_writers:
+  name_description_id: 1
+  user_group_id: 6
+
+agaricus_campestros_desc_writers:
+  name_description_id: 2
+  user_group_id: 6
+
+russula_brevipes_author_notes_desc_writers:
+  name_description_id: 3
+  user_group_id: 6
+
+russula_cremoricolor_no_author_notes_desc_writers:
+  name_description_id: 4
+  user_group_id: 6
+
+russula_cremoricolor_author_notes_desc_writers:
+  name_description_id: 5
+  user_group_id: 6
+
+peltigera_desc_writers:
+  name_description_id: 6
+  user_group_id: 6
+
+suillus_desc_writers:
+  name_description_id: 7
+  user_group_id: 6
+
+draft_coprinus_comatus_writers1:
+  name_description_id: 8
+  user_group_id: 3
+
+draft_agaricus_campestris_writers1:
+  name_description_id: 9
+  user_group_id: 3
+
+draft_boletus_edulis_writers1:
+  name_description_id: 10
+  user_group_id: 5
+
+draft_lactarius_alpinus_writers1:
+  name_description_id: 11
+  user_group_id: 3
+
+draft_coprinus_comatus_writers2:
+  name_description_id: 8
+  user_group_id: 11
+
+draft_agaricus_campestris_writers2:
+  name_description_id: 9
+  user_group_id: 8
+
+draft_boletus_edulis_writers2:
+  name_description_id: 10
+  user_group_id: 10
+
+draft_lactarius_alpinus_writers2:
+  name_description_id: 11
+  user_group_id: 11
+
+# all users
+peltigera_alt_desc_writers:
+  name_description_id: 12
+  user_group_id: 6
+
+# mary and dick can edit mary's desc
+peltigera_user_desc_writers1:
+  name_description_id: 13
+  user_group_id: 8
+
+peltigera_user_desc_writers2:
+  name_description_id: 13
+  user_group_id: 10
+
+# only katrina can edit desc from brodo
+peltigera_source_desc_writers:
+  name_description_id: 14
+  user_group_id: 11
+
+coprinus_comatus_desc_writers:
+  name_description_id: 15
+  user_group_id: 6

@@ -1,0 +1,20 @@
+<!--[form:location_description]-->
+
+<%= render(:partial => 'shared/form_description',
+           :locals => { :form => form }) %>
+
+<label><%= :DESCRIPTION.t %>:</lable><br/>
+<%= render(:partial => 'shared/textilize_help') %>
+<br/>
+
+<% for f in LocationDescription.all_note_fields %>
+  <p>
+    <label for="description_<%= f %>"><%= "form_locations_#{f}".to_sym.t %>:</label>
+    <span class="HelpNote"><%= "form_locations_#{f}_help".to_sym.l %></span><br/>
+    <%= form.text_area(f, :cols => 80) %>
+  </p>
+<% end %>
+
+<%= focus_on('description_gen_desc') %>
+
+<!--[eoform:location_description]-->

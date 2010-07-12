@@ -1,12 +1,49 @@
-class Notification < ActiveRecord::Base
+#
+#  = Notification Model
+#
+#  == Attributes
+#
+#  id::             Locally unique numerical id, starting at 1.
+#  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
+#  modified::       Date/time it was last modified.
+#  user::           User that created it.
+#  flavor::         Type of Notification.
+#  obj_id::         Id of principle object.
+#  note_template::  Template for an email (context depends on type of Notification).
+#
+#  == Class methods
+#
+#  all_flavors::    List of Notifcation types available.
+#
+#  == Instance methods
+#
+#  calc_note::      Create body of the email we're about to send.
+#  object::         Return principle object involved.
+#  summary::        String summarizing what this Notification is about.
+#  link_params::    Hash of link_to options for edit action.
+#  text_name::      Alias for +summary+ for debugging.
+#
+#  == Callbacks
+#
+#  None.
+#
+################################################################################
+
+class Notification < AbstractModel
   belongs_to :user
 
-  # Returns: array of symbols used for the different flavors of Notifications
-  def self.all_flavors()
-    [:name, :observation, :user, :all_comments]
+  # List of all available flavors (Symbol's).
+  def self.all_flavors
+    [:name]
   end
 
-  # Create body of the email notification we're about to send.
+  # Create body of the email we're about to send.  Each flavor requires a
+  # different set of arguments:
+  #
+  # [name]
+  #   user::      Owner of Observation.
+  #   naming::    Naming that triggered this email.
+  #
   def calc_note(args)
     if template = self.note_template
       case self.flavor
@@ -16,7 +53,7 @@ class Notification < ActiveRecord::Base
         raise "Missing 'user' argument for #{self.flavor} notification."   if !user
         raise "Missing 'naming' argument for #{self.flavor} notification." if !naming
         template.gsub(':observer', user.login).
-                 gsub(':observation', "#{DOMAIN}/#{naming.observation_id}").
+                 gsub(':observation', "#{HTTP_DOMAIN}/#{naming.observation_id}").
                  gsub(':mailing_address', user.mailing_address).
                  gsub(':location', naming.observation.place_name).
                  gsub(':name', naming.format_name)
@@ -24,8 +61,11 @@ class Notification < ActiveRecord::Base
     end
   end
 
-  # Return principle object involved, e.g., the Name if notifying observers
-  # of taxa you're doing research on.
+  # Return principle object involved.  Again, this is different for each
+  # flavor:
+  #
+  # name::   Name that User is tracking.
+  #
   def object
     result = nil
     if @object
@@ -40,19 +80,22 @@ class Notification < ActiveRecord::Base
     result
   end
 
-  # Return a string summarizing what this notification is about.
-  def summary()
+  # Return a string summarizing what this Notification is about.
+  def summary
     result = "Unrecognized notification flavor"
     case self.flavor
     when :name
-      result = "#{:app_tracking.l} #{:name.l}: #{self.object ? self.object.display_name : '?'}"
+      result = "#{:TRACKING.l} #{:name.l}: #{self.object ? self.object.display_name : '?'}"
     end
     result
   end
+  alias_method :text_name, :summary
 
-  # Returns hash of options for use in link_to() call to link to edit action:
+  # Returns hash of options to pass into link_to to link to edit action:
+  #
   #   link_to("edit", notification.link_params)
-  def link_params()
+  #
+  def link_params
     result = {}
     case self.flavor
     when :name
@@ -63,10 +106,12 @@ class Notification < ActiveRecord::Base
     result
   end
 
-  protected
+################################################################################
+
+protected
 
   def validate # :nodoc:
-    if !self.user
+    if !self.user && !User.current
       errors.add(:user, :validate_notification_user_missing.t)
     end
   end

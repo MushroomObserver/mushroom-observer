@@ -1,8 +1,12 @@
 xml.results(:number => @objects.length) do
-  for vote in @objects
-    render_xml_partial(xml, :vote, :locals => {
-      :vote => vote,
-      :details => true,
-    })
+  for object in @objects
+    if @detail == :none
+      xml.vote(:id => object.id)
+    else
+      render_xml_partial(xml, :vote, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+      })
+    end
   end
 end

@@ -28,9 +28,9 @@
   <p><label for="user_upload_image"><%= @user.image_id ?
     :profile_image_change.t : :profile_image_create.t %></label> (33%)
     <%= link_to(:profile_image_reuse.t, :controller => 'image',
-                :action => 'reuse_image_for_user') %>
+                :action => 'reuse_image', :mode => 'profile') %>
     <%= link_to(:profile_image_remove.t, { :action => 'remove_image' },
-                { :confirm => :app_are_you_sure.l }) if @user.image %><br/>
+                { :confirm => :are_you_sure.l }) if @user.image %><br/>
   <%= form.file_field("upload_image") %></p>
 
   <p><label for="copyright_holder"><%= :profile_copyright_holder.t %></label><br/>
@@ -38,7 +38,7 @@
   <%= select_year(@copyright_year, :field_name => "copyright_year",
                   :start_year => 1980, :end_year => Time.now.year) %></p>
 
-  <p><%= select("upload", "license_id", @licenses, {:selected => @upload_license_id}) %><br/>
+  <p><%= select("upload", "license_id", @licenses, :selected => @upload_license_id) %><br/>
   <span id="help_note">(<%= :profile_copyright_warning.t %>)</span></p>
 
   <p><label for="user_mailing_address"><%= :profile_mailing_address.t %></label><br/>

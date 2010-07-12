@@ -1,10 +1,14 @@
 xml.results(:number => @objects.length) do
-  for image in @objects
-    render_xml_partial(xml, :image, :locals => {
-      :image => image,
-      :details => true,
-      :refs => false,
-      :files => true,
-    })
+  for object in @objects
+    if @detail == :none
+      xml.image(:id => object.id)
+    else
+      render_xml_partial(xml, :image, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+        :files  => @detail == :high,
+        :refs   => false,
+      })
+    end
   end
 end

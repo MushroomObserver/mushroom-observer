@@ -1,26 +1,26 @@
 ActionController::Routing::Routes.draw do |map|
-  # Add your own custom routes here.
   # The priority is based upon order of creation: first created -> highest priority.
   
-  # Here's a sample route:
-  # map.connect 'products/:id', :controller => 'catalog', :action => 'view'
-  # Keep in mind you can assign values other than :controller and :action
-
-  # You can have the root of your site routed by hooking up '' 
-  # -- just remember to delete public/index.html.
-  # map.connect '', :controller => "welcome"
-
-  # Ensure that '' goes to /observer/index
+  # Route / to /observer/index
   map.connect '', :controller => 'observer'
   
-  # Route /# to /observer/show_observation/#
+  # Route /123 to /observer/show_observation/123.
   map.connect ':id', :controller => 'observer', :action => 'show_observation'
+
+  # Route /ajax/method to /api/ajax/method.
+  map.connect 'ajax/:method', :controller => 'api', :action => 'ajax'
+  map.connect 'ajax/:method/:id', :controller => 'api', :action => 'ajax'
+  map.connect 'ajax/:method/:type/:id', :controller => 'api', :action => 'ajax'
   
   # Allow downloading Web Service WSDL as a file with an extension
   # instead of a file named 'wsdl'
   # map.connect ':controller/service.wsdl', :action => 'wsdl'
 
-  # Redirect to observer controller by default
+  # It's not handling name lookups right for some reason.
+  map.connect 'observer/:action/:id', :controller => 'observer',
+                                         :action => /lookup_\w+/, :id => /.*/
+
+  # Redirect to observer controller by default.
   map.connect ':controller/:action/:id', :controller => 'observer'
 
 end

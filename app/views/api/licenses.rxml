@@ -1,8 +1,12 @@
 xml.results(:number => @objects.length) do
-  for license in @objects
-    render_xml_partial(xml, :license, :locals => {
-      :license => license,
-      :details => true,
-    })
+  for object in @objects
+    if @detail == :none
+      xml.license(:id => object.id)
+    else
+      render_xml_partial(xml, :license, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+      })
+    end
   end
 end

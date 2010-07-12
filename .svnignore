@@ -1,7 +1,8 @@
 MY_NOTES
 MY_TODO
-svn.log
-test.log
+doc
+log
 tmp
-names
-x
+local
+*.log
+?

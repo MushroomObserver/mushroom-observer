@@ -81,3 +81,5 @@ li.selected { background-color: #f6ae4a ! important }
 .ListLine1 a:hover {
      color: #10110b;
 }
+
+table.vote_meter div.on { background: #10110b; } /* cornucopioides dark-hymenium */

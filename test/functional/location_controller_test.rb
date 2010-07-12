@@ -1,209 +1,177 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'location_controller'
-require 'site_data'
+require File.dirname(__FILE__) + '/../boot'
 
-# Re-raise errors caught by the controller.
-class LocationController; def rescue_action(e) raise e end; end
-
-class LocationControllerTest < Test::Unit::TestCase
-  fixtures :locations
-  fixtures :past_locations
-  fixtures :users
-  fixtures :observations
-  fixtures :licenses
-  fixtures :user_groups
-  fixtures :user_groups_users
+class LocationControllerTest < FunctionalTestCase
 
   def setup
-    @controller = LocationController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
+    @new_pts  = 10
+    @chg_pts  = 5
+    @auth_pts = 50
+    @edit_pts = 5
   end
 
-  def test_where_search
-    get_with_dump :where_search
-    assert_redirected_to(:controller => "location", :action => "list_place_names")
-  end
-
-  def test_where_search_for_something
-    params = {
-      :where => 'Burbank'
-    }
-    get_with_dump(:where_search, params)
-    assert_redirected_to(:controller => "observer", :action => "location_search")
-  end
-
-  def test_show_location
-    get_with_dump :show_location, :id => 1
-    assert_response :success
-    assert_template 'show_location'
-  end
-
-  def test_show_past_location
-    get_with_dump :show_past_location, :id => 1
-    assert_response :success
-    assert_template 'show_past_location'
-  end
-
-  def test_list_place_names
-    get_with_dump :list_place_names
-    assert_response :success
-    assert_template 'list_place_names'
-  end
-
-  def test_author_request
-    requires_login(:author_request, :id => 1)
-    assert_response :success
-    assert_template 'author_request'
-  end
-
-  def test_review_authors
-    # Make sure it lets reviewers get to page.
-    requires_login(:review_authors, { :id => 1 })
-    assert_response(:success)
-    assert_template('review_authors')
-
-    # Remove Rolf from reviewers group.
-    @reviewers.users.delete(@rolf)
-    @rolf.reload
-    assert(!@rolf.in_group('reviewers'))
-
-    # Make sure it fails to let unauthorized users see page.
-    get(:review_authors, :id => 1)
-    assert_redirected_to(:action => :show_location, :id => 1)
-
-    # Make Rolf an author.
-    @albion.add_author(@rolf)
-    @albion.save
-    @albion.reload
-    assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
-
-    # Rolf should be able to do it now.
-    get(:review_authors, :id => 1)
-    assert_response(:success)
-    assert_template('review_authors')
-
-    # Rolf giveth with one hand...
-    post(:review_authors, :id => 1, :add => @mary.id)
-    assert_response(:success)
-    assert_template('review_authors')
-    @albion.reload
-    assert_equal([@mary.login, @rolf.login], @albion.authors.map(&:login).sort)
-
-    # ...and taketh with the other.
-    post(:review_authors, :id => 1, :remove => @mary.id)
-    assert_response(:success)
-    assert_template('review_authors')
-    @albion.reload
-    assert_equal([@rolf.login], @albion.authors.map(&:login).sort)
-  end
-
-  def test_create_location
-    requires_login :create_location
-    assert_form_action :action => 'create_location'
-  end
-
-  # A location that isn't in locations.yml
-  def barton_flats_params()
-    display_name = "Barton Flats, San Bernardino Co., California, USA"
-    {
-      :where => display_name,
+  # Init params based on existing location.
+  def update_params_from_loc(loc)
+    { :id => loc.id,
       :location => {
-        :display_name => display_name,
+        :name => loc.name,
+        :north => loc.north,
+        :west => loc.west,
+        :east => loc.east,
+        :south => loc.south,
+        :high => loc.high,
+        :low => loc.low,
+        :notes => loc.notes
+      },
+    }
+  end
+
+  # A location that isn't in fixtures.
+  def barton_flats_params
+    name = "Barton Flats, San Bernardino Co., California, USA"
+    {
+      :where => name,
+      :location => {
+        :name => name,
         :north => 34.1865,
         :west => -116.924,
         :east => -116.88,
         :south => 34.1571,
         :high => 2000.0,
         :low => 1600.0,
-        :notes => "A popular spring time collecting area for the Los Angeles Mycological Society."
-      }
+        :notes => "This is now Barton Flats",
+      },
     }
   end
 
-  def test_construct_location_simple
-    # Test a simple location creation
-    count = Location.find(:all).length
-    params = barton_flats_params
-    display_name = params[:where]
-    post_requires_login(:create_location, params, false)
-    assert_redirected_to(:controller => "location", :action => "show_location")
-    assert_equal(count + 1, Location.find(:all).length)
-    assert_equal(20, @rolf.reload.contribution)
-    loc = assigns(:location)
-    assert_equal(display_name, loc.display_name) # Make sure it's the right Location
-    loc = Location.find_by_display_name(display_name)
-    assert_equal([@rolf.login], loc.authors.map(&:login).sort)
-  end
-
+  # Post a change that fails -- make sure no new version created.
   def location_error(page, params)
-    loc_count = Location.find(:all).length
-    past_loc_count = Location::PastLocation.find(:all).length
-    post_requires_login(page, params, false)
-    assert_response :success
-    assert_template(page.to_s) # Really indicates an error
-
-    assert_equal(loc_count, Location.find(:all).length)
-    assert_equal(past_loc_count, Location::PastLocation.find(:all).length)
+    loc_count = Location.count
+    past_loc_count = Location::Version.count
+    desc_count = LocationDescription.count
+    past_desc_count = LocationDescription::Version.count
+    post_requires_login(page, params)
+    assert_response(page.to_s)
+    assert_equal(loc_count, Location.count)
+    assert_equal(past_loc_count, Location::Version.count)
+    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(past_desc_count, LocationDescription::Version.count)
   end
 
+  # Post "create_location" with errors.
   def construct_location_error(params)
     location_error(:create_location, params)
   end
 
-  # Test for north > 90
-  def test_construct_location_north_error
+  # Post "update_location" with errors.
+  def update_location_error(params)
+    location_error(:edit_location, params)
+  end
+
+################################################################################
+
+  def test_show_location
+    get_with_dump(:show_location, :id => 1)
+    assert_response('show_location')
+  end
+
+  def test_show_past_location
+    get_with_dump(:show_past_location, :id => 1)
+    assert_response('show_past_location')
+  end
+
+  def test_list_locations
+    get_with_dump(:list_locations)
+    assert_response('list_locations')
+  end
+
+  def test_locations_by_user
+    get_with_dump(:locations_by_user, :id => 1)
+    assert_response('list_locations')
+  end
+
+  def test_locations_by_editor
+    get_with_dump(:locations_by_editor, :id => 1)
+    assert_response('list_locations')
+  end
+
+  def test_list_location_descriptions
+    login('mary')
+    Location.find(2).description = LocationDescription.create!(:location_id => 2)
+    get_with_dump(:list_location_descriptions)
+    assert_response('list_location_descriptions')
+  end
+
+  def test_location_descriptions_by_author
+    descs = LocationDescription.all
+    assert_equal(1, descs.length)
+    get_with_dump(:location_descriptions_by_author, :id => 1)
+    assert_response(:action => 'show_location_description', :id => descs.first.id)
+  end
+
+  def test_location_descriptions_by_editor
+    get_with_dump(:location_descriptions_by_editor, :id => 1)
+    assert_response('list_location_descriptions')
+  end
+
+  def test_create_location
+    requires_login(:create_location)
+    assert_form_action(:action => 'create_location', :set_user => 0)
+  end
+
+  # Test a simple location creation.
+  def test_construct_location_simple
+    count = Location.count
+    params = barton_flats_params
+    display_name = params[:where]
+    post_requires_login(:create_location, params)
+    assert_response(:action => :show_location)
+    assert_equal(count + 1, Location.count)
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    loc = assigns(:location)
+    assert_equal(display_name, loc.display_name) # Make sure it's the right Location
+    loc = Location.search_by_name(display_name)
+    assert_nil(loc.description)
+  end
+
+  def test_construct_location_errors
+    # Test for north > 90
     params = barton_flats_params
     params[:location][:north] = 100
     construct_location_error(params)
-  end
 
-  # Test for south < -90
-  def test_construct_location_south_error
+    # Test for south < -90
     params = barton_flats_params
     params[:location][:south] = -100
     construct_location_error(params)
-  end
 
-  # Test for north < south
-  def test_construct_location_north_south_error
+    # Test for north < south
     params = barton_flats_params
     north = params[:location][:north]
     params[:location][:north] = params[:location][:south]
     params[:location][:south] = north
     construct_location_error(params)
-  end
 
-  # Test for west < -180
-  def test_construct_location_west_error_1
+    # Test for west < -180
     params = barton_flats_params
     params[:location][:west] = -200
     construct_location_error(params)
-  end
 
-  # Test for west > 180
-  def test_construct_location_west_error_2
+    # Test for west > 180
     params = barton_flats_params
     params[:location][:west] = 200
     construct_location_error(params)
-  end
 
-  # Test for east < -180
-  def test_construct_location_east_error_1
+    # Test for east < -180
     params = barton_flats_params
     params[:location][:east] = -200
     construct_location_error(params)
-  end
 
-  # Test for east > 180
-  def test_construct_location_east_error_2
+    # Test for east > 180
     params = barton_flats_params
     params[:location][:east] = 200
     construct_location_error(params)
-  end
 
-  # Test for high < low
-  def test_construct_location_high_low_error
+    # Test for high < low
     params = barton_flats_params
     high = params[:location][:high]
     params[:location][:high] = params[:location][:low]
@@ -212,50 +180,37 @@ class LocationControllerTest < Test::Unit::TestCase
   end
 
   def test_edit_location
-    loc = @albion
-    params = { "id" => loc.id.to_s }
+    loc = locations(:albion)
+    params = { :id => loc.id.to_s }
     requires_login(:edit_location, params)
-    assert_form_action :action => 'edit_location'
-  end
-
-  def update_params_from_loc(loc)
-    { :id => loc.id,
-      :location => {
-        :display_name => loc.display_name,
-        :north => loc.north,
-        :west => loc.west,
-        :east => loc.east,
-        :south => loc.south,
-        :high => loc.high,
-        :low => loc.low,
-        :notes => loc.notes
-      }
-    }
+    assert_form_action(:action => 'edit_location')
   end
 
   def test_update_location
-    count = Location::PastLocation.find(:all).length
+    count = Location::Version.count
+    count2 = LocationDescription::Version.count
+    assert_equal(10, @rolf.reload.contribution)
 
-    # Turn Albion into Barton Flats
-    loc = @albion
-    loc.add_author(@mary)
+    # Turn Albion into Barton Flats.
+    loc = locations(:albion)
     old_north = loc.north
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
     params[:id] = loc.id
-    post_requires_login(:edit_location, params, false)
-    assert_redirected_to(:controller => "location", :action => "show_location")
-    assert_equal(15, @rolf.reload.contribution)
+    post_requires_login(:edit_location, params)
+    assert_response(:action => :show_location)
+    assert_equal(10, @rolf.reload.contribution)
 
-    # Should have created a PastLocation
-    assert_equal(count + 1, Location::PastLocation.find(:all).length)
+    # Should have created a new version of location only.
+    assert_equal(count + 1, Location::Version.count)
+    assert_equal(count2, LocationDescription::Version.count)
 
-    # Should now look like Barton Flats
+    # Should now look like Barton Flats.
     loc = Location.find(loc.id)
     new_params = update_params_from_loc(loc)
     assert_not_equal(new_params, old_params)
 
-    # Only compare the keys that are in both
+    # Only compare the keys that are in both.
     bfp = barton_flats_params
     key_count = 0
     for k in bfp.keys
@@ -264,115 +219,115 @@ class LocationControllerTest < Test::Unit::TestCase
         assert_equal(new_params[k], bfp[k])
       end
     end
-    assert(key_count > 0) # Make sure something was compared
+    assert(key_count > 0) # Make sure something was compared.
 
-    assert_equal([@mary.login], loc.authors.map(&:login).sort)
+    # Rolf was already author, Mary doesn't become editor because
+    # there was no change.
+    assert_user_list_equal([@rolf], loc.description.authors)
+    assert_user_list_equal([], loc.description.editors)
   end
 
-
-  def update_location_error(params)
-    location_error(:edit_location, params)
-  end
-
-  # Test for north > 90
-  def test_construct_location_north_error
-    params = update_params_from_loc(@albion)
+  # Test update for north > 90.
+  def test_update_location_errors
+    params = update_params_from_loc(locations(:albion))
     params[:location][:north] = 100
     update_location_error(params)
   end
 
+  # Burbank has observations so it stays.
   def test_update_location_user_merge
-    to_go = @burbank
-    to_stay = @albion
+    to_go = locations(:burbank)
+    to_stay = locations(:albion)
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
-    loc_count = Location.find(:all).length
-    past_loc_count = Location::PastLocation.find(:all).length
-    post_requires_login(:edit_location, params, false)
-    assert_redirected_to(:controller => "location", :action => "show_location")
-    assert(loc_count == Location.find(:all).length)
-    assert(past_loc_count == Location::PastLocation.find(:all).length)
-    assert_equal(10, @rolf.reload.contribution)
+    loc_count = Location.count
+    desc_count = LocationDescription.count
+    past_loc_count = Location::Version.count
+    past_desc_count = LocationDescription::Version.count
+    post_requires_login(:edit_location, params)
+    assert_response(:action => :show_location)
+    assert_equal(loc_count-1, Location.count)
+    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(past_loc_count-2, Location::Version.count)
+    assert_equal(past_desc_count, LocationDescription::Version.count)
+    assert_equal(10 - @new_pts, @rolf.reload.contribution)
   end
 
   def test_update_location_admin_merge
-    to_go = @albion
-    to_stay = @burbank
+    to_go = locations(:albion)
+    to_stay = locations(:burbank)
     params = update_params_from_loc(to_go)
     params[:location][:display_name] = to_stay.display_name
 
-    loc_count = Location.find(:all).length
-    past_loc_count = Location::PastLocation.find(:all).length
+    loc_count = Location.count
+    desc_count = LocationDescription.count
+    past_loc_count = Location::Version.count
+    past_desc_count = LocationDescription::Version.count
     past_locs_to_go = to_go.versions.length
+    past_descs_to_go = 0
 
-    # Make rolf the admin.  Unit tests don't like a yaml user with id=0
-    user = User.authenticate('rolf', 'testpassword')
-    assert(user)
-    user.id = 0
-    @request.session[:user_id] = user.id
-
+    make_admin('rolf')
     post_with_dump(:edit_location, params)
-    assert_redirected_to(:controller => "location", :action => "show_location")
+    assert_response(:action => "show_location")
 
-    assert_equal(loc_count - 1, Location.find(:all).length)
-    assert_equal(past_loc_count - past_locs_to_go, Location::PastLocation.find(:all).length)
+    assert_equal(loc_count - 1, Location.count)
+    assert_equal(desc_count, LocationDescription.count)
+    assert_equal(past_loc_count - past_locs_to_go, Location::Version.count)
+    assert_equal(past_desc_count - past_descs_to_go, LocationDescription::Version.count)
   end
 
-  def test_list_merge_options_full
-    requires_login(:list_merge_options, { :where => @albion.display_name }) # Full match with @albion
-    assert_equal(assigns(:matches), [@albion])
-  end
+  def test_list_merge_options
+    albion = locations(:albion)
 
-  def test_list_merge_options_comma
-    requires_login(:list_merge_options, { :where => 'Albion, CA' }) # Should match against @albion
-    assert_equal(assigns(:matches), [@albion])
-  end
+    # Full match with albion.
+    requires_login(:list_merge_options, :where => albion.display_name)
+    assert_obj_list_equal([albion], assigns(:matches))
 
-  def test_list_merge_options_space
-    requires_login(:list_merge_options, { :where => 'Albion Field Station, CA' }) # Should match against @albion
-    assert_equal(assigns(:matches), [@albion])
-  end
+    # Should match against albion.
+    requires_login(:list_merge_options, :where => 'Albion, CA')
+    assert_obj_list_equal([albion], assigns(:matches))
 
-  def test_list_merge_options_no_match
-    requires_login(:list_merge_options, { :where => 'Somewhere out there' }) # Shouldn't match anything
+    # Should match against albion.
+    requires_login(:list_merge_options, :where => 'Albion Field Station, CA')
+    assert_obj_list_equal([albion], assigns(:matches))
+
+    # Shouldn't match anything.
+    requires_login(:list_merge_options, :where => 'Somewhere out there')
     assert_equal(nil, assigns(:matches))
   end
 
   def test_add_to_location
-    loc = @albion
-    obs = @strobilurus_diminutivus_obs
+    User.current = @rolf
+    albion = locations(:albion)
+    obs = Observation.create!(
+      :when  => Time.now,
+      :where => (where = 'undefined location'),
+      :notes => 'new observation'
+    )
     assert_equal(obs.location, nil)
     where = obs.where
     params = {
-      :where => where,
-      :location => loc.id
+      :where    => where,
+      :location => albion.id
     }
-    requires_login(:add_to_location, params, false) # Full match with @albion
-    assert_redirected_to(:controller => "location", :action => 'list_place_names')
-    obs = Observation.find(obs.id) # Reload
-    assert_not_equal(obs.location, nil)
-    assert_equal(obs.location, @albion)
+    requires_login(:add_to_location, params)
+    assert_response(:action => :list_locations)
+    assert_not_nil(obs.reload.location)
+    assert_equal(albion, obs.location)
   end
 
-  # test_map_locations - map everything
   def test_map_locations
-    get_with_dump :map_locations
-    assert_response :success
-    assert_template 'map_locations'
-  end
+    # test_map_locations - map everything
+    get_with_dump(:map_locations)
+    assert_response('map_locations')
 
-  # test_map_locations_empty - map nothing
-  def test_map_locations_empty
-    get_with_dump :map_locations, :pattern => 'Never Never Land'
-    assert_response :success
-    assert_template 'map_locations'
-  end
+    # test_map_locations_empty - map nothing
+    get_with_dump(:map_locations, :pattern => 'Never Never Land')
+    assert_response('map_locations')
 
-  # test_map_locations_some - map something
-  def test_map_locations_some
-    get_with_dump :map_locations, :pattern => 'California'
-    assert_response :success
-    assert_template 'map_locations'
+    # test_map_locations_some - map something
+    get_with_dump(:map_locations, :pattern => 'California')
+    assert_response('map_locations')
   end
 
   # ----------------------------
@@ -381,43 +336,44 @@ class LocationControllerTest < Test::Unit::TestCase
 
   def test_interest_in_show_location
     # No interest in this location yet.
-    @request.session[:user_id] = @rolf.id
-    get(:show_location, { :id => @albion.id })
-    assert_response :success
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+    albion = locations(:albion)
+    login('rolf')
+    get(:show_location, :id => albion.id)
+    assert_response('show_location')
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 1
-    })
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :type => 'Location', :id => albion.id, :state => 1
+    )
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => -1
-    })
+      :type => 'Location', :id => albion.id, :state => -1
+    )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.new(:object => @albion, :user => @rolf, :state => true).save
-    get(:show_location, { :id => @albion.id })
-    assert_response :success
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
+    Interest.new(:object => albion, :user => @rolf, :state => true).save
+    get(:show_location, :id => albion.id)
+    assert_response('show_location')
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 0
-    })
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :type => 'Location', :id => albion.id, :state => 0
+    )
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => -1
-    })
+      :type => 'Location', :id => albion.id, :state => -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.new(:object => @albion, :user => @rolf, :state => false).save
-    get(:show_location, { :id => @albion.id })
-    assert_response :success
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
+    Interest.new(:object => albion, :user => @rolf, :state => false).save
+    get(:show_location, :id => albion.id)
+    assert_response('show_location')
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 0
-    })
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :type => 'Location', :id => albion.id, :state => 0
+    )
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Location', :id => @albion.id, :state => 1
-    })
+      :type => 'Location', :id => albion.id, :state => 1
+    )
   end
 end

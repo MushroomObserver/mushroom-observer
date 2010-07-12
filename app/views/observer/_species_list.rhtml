@@ -1,21 +1,50 @@
+<%
+  tag, args, time = rss_log.parse_log.first
+  if !time || time < species_list.created + 1.minute
+    detail = :rss_created.t(:type => :species_list)
+  else
+    detail = tag.t(args)
+  end
+%>
+
 <table cellpadding="10">
-  <tr>
-    <td align="center" valign="middle" width="160">
-      <%= link_to(image_tag("splist.png", :border => 0), :controller => 'species_list',
-                  :action => 'show_species_list', :id => species_list.id) %>
+  <tr style="padding-bottom:0px">
+    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
+      <%= link_to(image_tag("splist.png", :border => 0),
+                  :controller => 'species_list',
+                  :action => 'show_species_list', :id => species_list.id,
+                  :params => query_params) %>
     </td>
-<% if vertical_layout %>
+<% if @layout['vertical_layout'] %>
   </tr>
   <tr>
     <td align="center" valign="middle">
 <% else %>
     <td valign="middle">
 <% end %>
-      <%= link_to(sprintf('<span class="ListWhen">%s: </span><span class="ListName">%s</span><br/>',
-                          species_list.when, species_list.unique_text_name.t),
-                  :controller => 'species_list', :action => 'show_species_list', :id => species_list.id) %>
-      <span class="ListWhere"><%= sanitize(species_list.where).t %></span><br/>
-      <span class="ListWho"><%= h(species_list.user.unique_text_name) %></span>
+
+      <span class="ListWhat">
+        <%= link_to(species_list.unique_format_name.t,
+                    :controller => 'species_list',
+                    :action => 'show_species_list', :id => species_list.id,
+                    :params => query_params) %>
+      </span><br/>
+
+      <span class="ListWhere">
+        <%= location_link(species_list.where, species_list.location) %>
+      </span><br/>
+
+      <span class="ListWhen">
+        <%= species_list.when.web_date %>:
+      </span>
+      <span class="ListWho">
+        <%= user_link(species_list.user) %>
+      </span><br/>
+      <span style="line-height:1em"><br/></span>
+
+      <span class="ListDetail">
+        <%= detail %>
+      </span>
     </td>
   </tr>
 </table>

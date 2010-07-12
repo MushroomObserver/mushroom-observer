@@ -94,6 +94,34 @@ pre {
 #columns {
 }
 
+#search_bar {
+  float: left;
+  clear: right;
+  font-size: 11px;
+}
+
+#timer {
+  float: right;
+  font-size: 11px;
+}
+
+#flashes {
+  clear: left;
+}
+
+#left_tabs {
+  margin: 10px;
+}
+
+#right_tabs {
+  float: right;
+  margin: 10px;
+}
+
+#right_tabs div a:hover {
+  background: none;
+}
+
 .main {
 }
 
@@ -115,19 +143,6 @@ div.progressBar div.background {
   background-color: #333;
   height: 18px;
   width: 0%;
-}
-
-div.tab_sets {
-  margin: 10px;
-}
-
-div.right_tabs {
-  float: right;
-  margin: 10px;
-}
-
-div.right_tabs div a:hover {
-  background: none;
 }
 
 .Notices, .Warnings, .Errors {
@@ -190,6 +205,12 @@ div.right_tabs div a:hover {
   font-size: small;
   text-align: right;
   padding-left: 1em;
+}
+
+.ListRssHeader {
+}
+
+.ListDetail {
 }
 
 .ImageFields {
@@ -303,6 +324,14 @@ img.interest_small:hover {
   border-width: 2px;
 }
 
+table.vote_meter {
+  margin-top: 4px;
+}
+table.vote_meter div.on {
+  width:  100%;
+  height: 100%;
+}
+
 div.auto_complete {
   background-color:#fff;
   border:1px solid #888;
@@ -341,6 +370,16 @@ div.popup_frame {
   border-bottom: 5px solid #333;
   background: #EEE;
   color: #000;
+}
+div.popup_frame a {
+  color: #a06463; /* Agaricus brasiliensis */
+}
+div.popup_frame a:visited {
+  color: #3b2821; /* Agaricus cupreobrunneus */
+}
+div.popup_frame a:hover {
+  color: #743931; /* Agaricus brasiliensis */
+  background-color: #f6f0f2;  /* Agaricus campestris */
 }
 
 div.form_image {

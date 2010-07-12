@@ -1,7 +1,18 @@
-<% @title = :name_create_title.t %>
+<%
+  @title ||= :create_name_title.t
 
-<% form_tag(:action => 'create_name', :id => @name.id) do %>
-  <br/><center><%= submit_tag :name_create_submit.l %></center><br/>
+  new_tab_set do
+    add_tab(:all_objects.t(:type => :name), :action => 'list_names')
+  end
+%>
 
-  <%= render(:partial => 'form_names', :locals => { :button => :name_create_submit.l }) %>
+<% form_for(:name, :url => {
+               :action => :create_name,
+               :params => query_params,
+            }) do |form| %>
+  <br/><center><%= submit_tag(:CREATE.l) %></center>
+
+  <%= render(:partial => 'form_name', :locals => {:form => form }) %>
+
+  <br/><center><%= submit_tag(:CREATE.l) %></center>
 <% end %>

@@ -1,24 +1,24 @@
 # Locals:
-#   :name               Name instance.
-#   :details            Boolean: include details?
+#   :object             Name instance.
+#   :detail             Boolean: include details?
 #   :refs               Boolean: include synonyms and ancestors?
 
-details ||= false
-refs    ||= false
+detail ||= false
+refs   ||= false
 
 xml.name(
-  :id => name.id,
-  :url => "#{DOMAIN}/name/show_name/#{name.id}"
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/name/show_name/#{object.id}"
 ) do
-  xml.text_name  name.text_name
-  xml.author     name.author
-  xml.citation   name.citation
-  xml.rank       name.rank.to_s.downcase
-  xml.deprecated name.deprecated ? 'true' : 'false'
+  xml.text_name  object.text_name
+  xml.author     object.author
+  xml.citation   object.citation
+  xml.rank       object.rank.to_s.downcase
+  xml.deprecated object.deprecated ? 'true' : 'false'
 
-  if details
-    xml.created  xml_datetime(name.created)
-    xml.modified xml_datetime(name.modified)
+  if detail
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
 
     # authors
     # editors
@@ -26,21 +26,21 @@ xml.name(
     # ...
   end
 
-  if refs && name.synonym
-    xml.synonyms(:number => name.synonym.names.length - 1) do
-      for synonym in name.synonym.names - [name]
+  if refs && object.synonym
+    xml.synonyms(:number => object.synonym.names.length - 1) do
+      for synonym in object.synonym.names - [name]
         render_xml_partial(xml, :name, :locals => {
-          :name => synonym,
-          :details => false,
+          :object => synonym,
+          :detail => false,
         })
       end
     end
   end
 
-  if refs && name.classification.to_s != ''
+  if refs && !object.classification.blank?
 
     # This is less complete but doesn't require any additional queries.
-    parse = Name.parse_classification(name.classification)
+    parse = Name.parse_classification(object.classification)
     xml.classification(:number => parse.length) do
       for rank, name in parse
         xml.name do
@@ -51,12 +51,12 @@ xml.name(
     end
 
     # This requires extra database queries.
-    # ancestors = name.ancestors
-    # xml.classification(:number => ancestors.length) do
-    #   for parent in ancestors
+    # all_parents = object.all_parents
+    # xml.classification(:number => all_parents.length) do
+    #   for parent in all_parents
     #     render_xml_partial(xml, :name, :locals => {
-    #       :name => parent,
-    #       :details => false,
+    #       :object => parent,
+    #       :detail => false,
     #     })
     #   end
     # end

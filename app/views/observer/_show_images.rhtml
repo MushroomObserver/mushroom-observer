@@ -1,33 +1,48 @@
-<% if @observation.images.length > 0 %>
-  <%= :images.t %>:<br/>
-<% end %>
-
-<% if check_permission(@observation.user_id) %>
-  <%= link_to(:show_observation_add_images.t, :controller => 'image', :action => 'add_image', :id => @observation.id) %><br/>
-  <%= link_to(:show_observation_reuse_image.t, :controller => 'image', :action => 'reuse_image', :id => @observation.id) %><br/>
+<div class='show_images'>
   <% if @observation.images.length > 0 %>
-    <%= link_to(:show_observation_remove_images.t, :controller => 'image', :action => 'remove_images', :id => @observation.id) %><br/>
+    <%= :IMAGES.t %>:
+    <%= if thumb_size_control
+      if default_thumbnail_size == :thumbnail
+        link_to(:show_images_large_thumbs.t, :id => @observation.id,
+                :set_thumbnail_size => 'small', :params => query_params)
+      else
+        link_to(:show_images_small_thumbs.t, :id => @observation.id,
+                :set_thumbnail_size => 'thumbnail', :params => query_params)
+      end + '<br/>'
+    end %>
   <% end %>
-<% end %>
-<br/>
 
-<center>
-  <% done = {}
-  for image in [@observation.thumb_image] + @observation.images
-    if image && !done[image.id]
-      done[image.id] = true %>
+  <% if check_permission(@observation.user_id) %>
+    <%= link_to(:show_observation_add_images.t, :controller => 'image',
+                :action => 'add_image', :id => @observation.id,
+                :params => query_params) %><br/>
+    <%= link_to(:show_observation_reuse_image.t, :controller => 'image',
+                :action => 'reuse_image', :obs_id => @observation.id,
+                :mode => 'observation', :params => query_params) %><br/>
+    <% if @observation.images.length > 0 %>
+      <%= link_to(:show_observation_remove_images.t, :controller => 'image',
+                  :action => 'remove_images', :id => @observation.id,
+                  :params => query_params) %><br/>
+    <% end %>
+  <% end %>
+  <br/>
+
+  <center>
+    <%
+    # This sort puts the thumbnail first.  We can't use thumb_image, because we
+    # haven't eager-loaded it; we *have* eager-loaded all the other images.
+    for image in @observation.images.
+             sort_by {|x| x.id == @observation.thumb_image_id ? -1 : x.id} %>
       <p>
-        <%= link_to(image_tag(sprintf("thumb/%d.jpg", image.id)) + '<br/>' +
-                      image.unique_format_name.t,
-                    :controller => 'image', :action => 'show_image', :id => image.id, :params => search_params) %><br/>
-        <% if image.notes && image.notes != '' %>
+        <%= thumbnail(image, :border => 0, :obs => @observation.id,
+                      :votes => true) %>
+        <% if !image.notes.blank? %>
           <small>
-            <%= str = image.notes[0..300].tl
-            str += '...' if image.notes.length > 301
-            str %>
+            <%= content_tag(:span, image.notes.tl.truncate_html(300),
+                            :title => image.notes.tp.html_to_ascii) %>
           </small>
         <% end %>
       </p>
     <% end %>
-  <% end %>
-</center>
+  </center>
+</div>

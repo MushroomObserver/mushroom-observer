@@ -1,21 +1,21 @@
 <% @title = :image_updater_title.t(:user => @user.login) %>
 
 <% form_tag(:action => 'license_updater') do %>
-  <br/><center><%= submit_tag :image_updater_update.l %></center>
+  <center><%= submit_tag :image_updater_update.l %></center><br/>
 
   <table cellpadding="5" cellspacing="5" border="1">
     <tr class="Data">
       <td>
-        :image_updater_holder.t
+        <%= :image_updater_holder.t %>
       </td>
       <td>
-        :image_updater_count.t
+        <%= :image_updater_count.t %>
       </td>
       <td>
-        :image_updater_current.t
+        <%= :image_updater_current.t %>
       </td>
       <td>
-        :image_updater_new.t
+        <%= :image_updater_new.t %>
       </td>
     </tr>
 
@@ -35,5 +35,6 @@
         </td>
       </tr>
     <% end %>
-  </table>
+  </table><br/>
+  <center><%= submit_tag :image_updater_update.l %></center><br/>
 <% end %>

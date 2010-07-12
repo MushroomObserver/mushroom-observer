@@ -1,0 +1,72 @@
+<!--[form:description]-->
+
+<%
+desc       = @description
+type       = desc.source_type
+new_record = desc.new_record?
+admin      = new_record || desc.is_admin?(@user)
+author     = new_record || desc.is_author?(@user)
+owner      = desc.user == @user
+root       = is_in_admin_mode?
+if new_record or admin or author or owner or root %>
+  <p>
+    <label for="description_source"><%= :form_description_source.t %>:</label><br/>
+    <%=
+      need_help = false
+      if root
+        form.select(:source_type, [
+          [:form_description_source_public.l,  :public],
+          [:form_description_source_foreign.l, :foreign],
+          [:form_description_source_project.l, :project],
+          [:form_description_source_source.l,  :source],
+          [:form_description_source_user.l,    :user],
+        ])
+      elsif new_record and [:public, :source, :user].include?(type)
+        need_help = true
+        form.select(:source_type, [
+          [:form_description_source_public.l, :public],
+          [:form_description_source_source.l, :source],
+          [:form_description_source_user.l,   :user],
+        ])
+      else
+        form.hidden_field(:source_type) +
+        "form_description_source_#{type}".to_sym.l
+      end
+    %>
+
+    <%=
+      indent + if (type == :foreign or type == :project) and !root
+        form.hidden_field(:source_name) +
+        @description.source_name.t
+      else
+        form.text_field(:source_name, :size => 40)
+      end
+    %>
+    <%= form.hidden_field(:project_id) %>
+  </p>
+
+  <% if need_help %>
+    <div class="HelpNote"><%= :form_description_source_help.tpl %></div>
+  <% end %>
+
+  <p>
+    <label><%= :form_description_permissions.t %>:</label><br/>
+    <% args = {}
+    if [:public, :foreign].include?(type) and !root and !new_record
+      args[:disabled] = 'disabled'
+    end %>
+    <%= form.check_box(:public_write, args) %>
+      <label for="description_source"><%= :form_description_public_writable.t %></label><br/>
+    <%= form.check_box(:public, args) %>
+      <label for="description_source"><%= :form_description_public_readable.t %></label><br/>
+    <span class="HelpNote"><%= :form_description_permissions_help.t %></span><br/>
+  </p>
+
+  <p>
+    <label for="description_license_id"><%= :License.t %>:</label><br/>
+    <%= form.select(:license_id, @licenses) %><br/>
+    <span class="HelpNote"><%= :form_description_license_help.t %></span><br/>
+  </p>
+<% end %>
+
+<!--[eoform:description]-->

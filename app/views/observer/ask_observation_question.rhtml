@@ -1,7 +1,8 @@
 <% @title = :ask_observation_question_title.t(:name => @observation.unique_format_name) %>
 
-<% form_tag(:action => 'send_observation_question', :id => @observation.id) do %>
-  <br/><center><%= submit_tag :app_send.l %></center><br/>
+<% form_tag(:action => 'ask_observation_question', :id => @observation.id,
+            :params => query_params) do %>
+  <br/><center><%= submit_tag :SEND.l %></center><br/>
 
   <table width="1">
     <tr>

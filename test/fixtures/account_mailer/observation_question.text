@@ -1,14 +1,13 @@
-From: news@mushroomobserver.org
+From: news@localhost
 Reply-To: rolf@collectivesource.com
 To: mary@collectivesource.com
-Bcc: mo@collectivesource.com
-Subject: [MO] Question about Fungi sp. (2)
+Subject: [MO] Question About Fungi sp. (2)
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 
 Question from Another User
 
-Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following question to you about your Observation Fungi sp. (2):
+Rolf Singer (rolf@collectivesource.com) asked the Mushroom Observer website to forward the following question to you about your observation Fungi sp. (2):
 
 Where did you find it?
 
@@ -17,9 +16,9 @@ Where did you find it?
 It is entirely up to you whether you want to reply to Rolf Singer (rolf@collectivesource.com) by replying directly to this email.
 Here are some handy links:
 
-Show this Observation: http://localhost:3000/2
+Show this observation: http://localhost:3000/2
 Stop sending me email like this: http://localhost:3000/account/no_email_general_question/2
 Change your preferences: http://localhost:3000/account/prefs/2
 Latest changes at Mushroom Observer: http://localhost:3000
 
-If you feel this user is abusing this service please forward this entire email message to: webmaster@mushroomobserver.org
+If you feel this user is abusing this service please forward this entire email message to: webmaster@localhost

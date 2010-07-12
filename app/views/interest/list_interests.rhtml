@@ -1,43 +1,45 @@
-<%= pagination_numbers(@item_pages) if @item_pages.length > 0 %>
+<%
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
 
-<% if @items.length > 0 %>
-  <table cellpadding="5" cellspacing="0" width="100%">
-    <% odd_or_even = 0
-    for item in @items
-      obj = item.object
-      odd_or_even = 1 - odd_or_even %>
-      <tr valign="top" class="ListLine<%= odd_or_even %>">
-        <td>
-          <span class='ListWhat'><%= item.summary.t %></span>
-        </td>
-        <td>
-          <% if item.is_a?(Notification) %>
-            <% if obj %>
-              <%= link_to("app_show_#{obj.class.to_s.underscore}".to_sym.t,
-                          :controller => obj.show_controller,
-                          :action => obj.show_action, :id => obj.id) %> |
+<% paginate_block(@pages) do %>
+  <% if @objects.length > 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% odd_or_even = 0
+      for item in @objects
+        obj = item.object
+        odd_or_even = 1 - odd_or_even %>
+        <tr valign="top" class="ListLine<%= odd_or_even %>">
+          <td>
+            <span class='ListWhat'><%= item.summary.t %></span>
+          </td>
+          <td>
+            <% if item.is_a?(Notification) %>
+              <% if obj %>
+                <%= link_to(:show_object.t(:type => obj.type_tag.t),
+                            :controller => obj.show_controller,
+                            :action => obj.show_action, :id => obj.id) %> |
+              <% end %>
+              <%= link_to(:EDIT.t, item.link_params) %> |
+              <%= link_to(:DESTROY.t, :controller => 'observer',
+                          :action => 'destroy_notification', :id => item.id) %>
+            <% else %>
+              <% if obj %>
+                <%= link_to(:show_object.t(:type => obj.type_tag.t),
+                            :controller => obj.show_controller,
+                            :action => obj.show_action, :id => obj.id) %> |
+              <% end %>
+              <%= link_to(item.state ? :list_interests_turn_off.t : :list_interests_turn_on.t,
+                          :controller => 'interest', :action => 'set_interest',
+                          :type => item.object_type, :id => item.object_id,
+                          :state => item.state ? -1 : 1) %> |
+              <%= link_to(:DESTROY.t, :controller => 'interest',
+                          :action => 'set_interest', :type => item.object_type,
+                          :id => item.object_id, :state => 0) %>
             <% end %>
-            <%= link_to(:app_edit.t, item.link_params) %> |
-            <%= link_to(:app_destroy.t, :controller => 'observer',
-                        :action => 'destroy_notification', :id => item.id) %>
-          <% else %>
-            <% if obj %>
-              <%= link_to("app_show_#{item.object_type.underscore}".to_sym.t,
-                          :controller => obj.show_controller,
-                          :action => obj.show_action, :id => obj.id) %> |
-            <% end %>
-            <%= link_to(item.state ? :list_interests_turn_off.t : :list_interests_turn_on.t,
-                        :controller => 'interest', :action => 'set_interest',
-                        :type => item.object_type, :id => item.object_id,
-                        :state => item.state ? -1 : 1) %> |
-            <%= link_to(:app_destroy.t, :controller => 'interest',
-                        :action => 'set_interest', :type => item.object_type,
-                        :id => item.object_id, :state => 0) %>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </table>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
 <% end %>
-
-<%= pagination_numbers(@item_pages) if @item_pages.length > 0 %>

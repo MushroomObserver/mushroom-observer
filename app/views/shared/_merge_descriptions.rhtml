@@ -1,0 +1,61 @@
+<%
+merges = description.parent.descriptions - [description]
+moves = description.parent.synonyms - [description.parent]
+moves.reject!(&:is_misspelling?)
+
+form_tag(:action => 'merge_descriptions', :id => description.id) do %>
+  <br/><br/>
+
+  <p><big><%= :merge_descriptions_merge_header.t %>:</big><br/>
+    <span class="HelpNote"><%= :merge_descriptions_merge_help.t %></span></p>
+
+  <ul type="none">
+    <% for desc in merges %>
+      <li><%= radio_button_tag(:target, "desc_#{desc.id}",
+                               merges.length == 1 && moves.length == 0) %>
+          <%= description_title(desc) %></li>
+    <% end
+    if merges.empty? %>
+      <li><%= :merge_descriptions_no_others.t %></li>
+    <% end %>
+  </ul>
+
+  <% if moves.any? %>
+    <p><big><%= :merge_descriptions_move_header.t %>:</big><br/>
+      <span class="HelpNote"><%= :merge_descriptions_move_help.t %></span></p>
+
+    <ul type="none">
+      <% for name in moves.sort(&lambda do |a,b|
+        x = ((a.deprecated ? 1 : 0) <=> (b.deprecated ? 1 : 0))
+        x = (a.text_name <=> b.text_name) if x == 0
+        x = (a.author <=> b.author) if x == 0
+        x = (a.id <=> b.id) if x == 0
+        x
+      end) %>
+        <li><%= radio_button_tag(:target, "parent_#{name.id}",
+                                 merges.length == 0 && moves.length == 1) %>
+            <%= name.display_name.t %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if merges.any? || moves.any? %>
+    <%= check_box_tag("delete", '1', description.is_admin?(@user)) %>
+      <%= :merge_descriptions_delete_after.t %>
+    <input type="hidden" name="delete" value="0"/>
+  <% end %>
+
+  <% button = nil
+  if merges.any? && moves.empty?
+    button = :merge_descriptions_merge.l
+  elsif merges.empty? && moves.any?
+    button = :merge_descriptions_move.l
+  elsif merges.any? && moves.any?
+    button = :merge_descriptions_merge_or_move.l
+  end
+  if button %>
+    <br/><br/>
+    <center><%= submit_tag(button) %></center>
+    <br/>
+  <% end %>
+<% end %>

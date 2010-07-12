@@ -1,6 +1,7 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 first_species_list:
   id: 1
+  sync_id: 1xx1
   created: 2006-03-01 21:14:00
   modified: 2006-03-01 21:14:00
   when: 2006-03-01
@@ -8,9 +9,11 @@ first_species_list:
   where: Burbank, CA
   title: A Species List
   notes: Got Skunked!
+  rss_log_id: 2
 
 another_species_list:
   id: 2
+  sync_id: 2xx1
   created: 2006-03-02 21:14:00
   modified: 2006-03-02 21:14:00
   when: 2006-03-02
@@ -21,6 +24,7 @@ another_species_list:
 
 unknown_species_list:
   id: 3
+  sync_id: 3xx1
   created: 2006-03-09 21:14:00
   modified: 2006-03-09 21:14:00
   when: 2006-03-09

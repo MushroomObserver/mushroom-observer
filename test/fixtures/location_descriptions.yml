@@ -1,0 +1,14 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+albion_desc:
+  id: 1
+  location_id: 1
+  sync_id: 1xx1
+  created: 2007-12-27 06:41:20
+  modified: 2007-12-27 06:41:20
+  user_id: 1
+  version: 2
+  notes: Here are some new notes to play with.
+  source_type: public
+  public: 1
+

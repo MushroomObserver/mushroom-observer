@@ -1,51 +1,66 @@
 #
-#  Subclass of ActionMailer::Base.  It is used to send all email.  See also
-#  QueuedEmail for more information about how queuing works and how all the
-#  email-related classes and subclasses are related.
+#  = Email Handler
 #
-#  Public methods:
-#    admin_request(...)           Ask for admin privileges on project?
-#    author_request(...)          Ask for authorship credit.
-#    comment(...)                 Notify user of comment on their object.
-#    commercial_inquiry(...)      User asking user about an image.
-#    consensus_change(...)        Notify user of name change of their obs.
-#    denied(...)                  Email sent to Nathan when sign-up is denied.
-#    email_features(...)          Mass-mailing about new features.
-#    location_change(...)         Notify user of change in location description.
-#    name_change(...)             Notify user of change in name description.
-#    name_proposal(...)           Notify user of name proposal for their obs.
-#    naming_for_observer(...)     Tell observer someone is interested in their obs.
-#    naming_for_tracker(...)      Notify user someone has observed a name they are interested in.
-#    new_password(...)            User forgot their password.
-#    observation_change(...)      Notify user of change in observation.
-#    observation_question(...)    User asking user about an observation.
-#    publish_name(...)            Notify reviewers that a draft has been published.
-#    user_question(...)           User asking user about anything else.
-#    verify(...)                  Email sent to verify user's email.
-#    webmaster_question(...)      User asking webmaster a question.
+#  This class is used to send all email.  Note that it is just a collection of
+#  class methods; it is never instantiated.  It is a subclass of
+#  ActionMailer::Base.  See also QueuedEmail for more information about how
+#  queuing works and how all the email-related classes and subclasses are
+#  related.
 #
-#  Private methods:
-#    perform_delivery_file(mail)  Used if delivery_method is configured as :file.
+#  == Class methods
+#
+#  admin_request::          Ask project admins for admin privileges on project.
+#  author_request::         Ask reviewers for authorship credit.
+#  comment::                Notify user of comment on their object.
+#  commercial_inquiry::     User asking user about an image.
+#  consensus_change::       Notify user of name change of their obs.
+#  denied::                 Email sent to Nathan when sign-up is denied.
+#  email_features::         Mass-mailing about new features.
+#  location_change::        Notify user of change in location description.
+#  name_change::            Notify user of change in name description.
+#  name_proposal::          Notify user of name proposal for their obs.
+#  naming_for_observer::    Tell observer someone is interested in their obs.
+#  naming_for_tracker::     Notify user someone has observed a name they are interested in.
+#  new_password::           User forgot their password.
+#  observation_change::     Notify user of change in observation.
+#  observation_question::   User asking user about an observation.
+#  publish_name::           Notify reviewers that a draft has been published.
+#  user_question::          User asking user about anything else.
+#  verify::                 Email sent to verify user's email.
+#  webmaster_question::     User asking webmaster a question.
+#
+#  == Delivery methods
+#
+#  There are four delivery methods available, configurable in
+#  config/environment.rb as:
+#
+#    config.action_mailer.delivery_method = :method
+#
+#  Where <tt>:method</tt> is one of these:
+#
+#  smtp::      Default for production: uses the Net::SMTP ruby library.
+#  sendmail::  We've never used this: uses <tt>/usr/sbin/sendmail</tt>.
+#  test::      Default for unit tests: ???
+#  file::      Default for development: writes emails as files in
+#                <tt>RAILS_ROOT/../mail</tt> (if this directory exists).
+#
+#  == Privacy policy
+#
+#  Our current policy is that a user's email address is only revealed to people
+#  they explicitly send questions to, or to the owner of the observation they
+#  comment on. *NOT* to third parties who are simply interested in or who have
+#  also commented on the same observation.
 #
 ################################################################################
 
 class AccountMailer < ActionMailer::Base
 
-  NEWS_EMAIL_ADDRESS        = "news@mushroomobserver.org"
-  NOREPLY_EMAIL_ADDRESS     = "no-reply@mushroomobserver.org"
-  ACCOUNTS_EMAIL_ADDRESS    = "accounts@mushroomobserver.org"
-  ERROR_EMAIL_ADDRESS       = "errors@mushroomobserver.org"
-  WEBMASTER_EMAIL_ADDRESS   = "webmaster@mushroomobserver.org"
-  EXTRA_BCC_EMAIL_ADDRESSES = "mo@collectivesource.com"
-  EXCEPTION_RECIPIENTS      = %w{webmaster@mushroomobserver.org}
-
-  DEFAULT_LOCALE = 'en-US'
-
-  # Note: privacy policy is currently that a user's email address is only
-  # revealed to people they explicitly send questions to, or to the owner
-  # of the observation they comment on.  NOT to third parties who are simply
-  # interested in or who have also commented on the same observation.
-
+  # Ask project admins for admin privileges on project.
+  # sender::    User asking for permission.
+  # receiver::  Admin user.
+  # project::   Project instance.
+  # subject::   Subject of message (provided by user?).
+  # message::   Content of message (provided by user).
   def admin_request(sender, receiver, project, subject, message)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
@@ -63,6 +78,12 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Ask reviewers for authorship credit.
+  # sender::    User asking for credit.
+  # receiver::  Reviewer/admin user.
+  # object::    NameDescription or LocationDescription on which User would like to be author.
+  # subject::   Subject of message (provided by user?).
+  # message::   Content of message (provided by user).
   def author_request(sender, receiver, object, subject, message)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
@@ -80,10 +101,15 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Notify user of comment on their object.
+  # sender::    User who posted the Comment.
+  # receiver::  Owner of object (or interested party).
+  # object::    Object that was commented upon.
+  # comment::   Comment that triggered this email.
   def comment(sender, receiver, object, comment)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_comment_subject.l(:name => object.unique_text_name)
+    @subject             = :email_subject_comment.l(:name => object.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -97,10 +123,14 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # User asking user about an image.
+  # sender::             User asking the question.
+  # image::              Image in question.
+  # commercial_inquiry:: Content of message (provided by user).
   def commercial_inquiry(sender, image, commercial_inquiry)
     @user                = image.user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_commercial_inquiry_subject.l(:name => image.unique_text_name)
+    @subject             = :email_subject_commercial_inquiry.l(:name => image.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -114,10 +144,17 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Notify user of name change of their obs.
+  # sender::        User who voted or proposed the name that caused the change.
+  # receiver::      Owner of the Observation (or interested third party).
+  # observation::   Observation in question.
+  # old_name::      Old consensus Name.
+  # new_name::      New consensus Name.
+  # time::          Time the change took place.
   def consensus_change(sender, receiver, observation, old_name, new_name, time)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_consensus_change_subject.l(:id => observation.id,
+    @subject             = :email_subject_consensus_change.l(:id => observation.id,
                                 :old => (old_name ? old_name.search_name : 'none'),
                                 :new => (new_name ? new_name.search_name : 'none'))
     @body['subject']     = @subject
@@ -135,21 +172,27 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Email sent to Nathan when sign-up is denied.
+  # user_params::   Hash of parameters from form.
   def denied(user_params)
     Locale.code          = DEFAULT_LOCALE
-    @subject             = :email_denied_subject.l
+    @subject             = :email_subject_denied.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['user_params'] = user_params
-    @recipients          = EXTRA_BCC_EMAIL_ADDRESSES
+    @recipients          = WEBMASTER_EMAIL_ADDRESS
+    @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = ACCOUNTS_EMAIL_ADDRESS
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Mass-mailing about new features.
+  # user::      User we're sending announcement to.
+  # features::  Description of changes (body of email).
   def email_features(user, features)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_features_subject.l
+    @subject             = :email_subject_features.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['features']    = features
@@ -161,18 +204,37 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
-  def location_change(sender, receiver, time, location, old_version, new_version)
-    old_location         = location.versions.find_by_version(old_version)
-    new_location         = location; location.revert_to(new_version)
+  # Notify user of change in location description.
+  # sender::        User who changed the Location.
+  # receiver::      Owner of the Location (or interested third party).
+  # time::          Time the change took place.
+  # loc::           Location in question.
+  # desc::          LocationDescription in question.
+  # old_loc_ver::   Version number of the Location _before_ the change.
+  # new_loc_ver::   Version number of the Location _after_ the change (may be the same).
+  # old_desc_ver::  Version number of the LocationDescription _before_ the change.
+  # new_desc_ver::  Version number of the LocationDescription _after_ the change (may be the same).
+  def location_change(sender, receiver, time, loc, desc, old_loc_version,
+                      new_loc_version, old_desc_version, new_desc_version)
+    old_loc              = loc.versions.find_by_version(old_loc_version)
+    new_loc              = loc; loc.revert_to(new_loc_version)
+    old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
+    new_desc             = desc; desc.revert_to(new_desc_version) if desc
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_location_change_subject.l(:name => old_location.display_name)
+    
+    # Ideally there would be an old_loc.display_name, but I don't know where that would go
+    old_loc_name = Location.user_name(@user, old_loc.name)
+    
+    @subject             = :email_subject_location_change.l(:name => old_loc_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['time']        = time
-    @body['old_location'] = old_location
-    @body['new_location'] = new_location
+    @body['old_loc']     = old_loc
+    @body['new_loc']     = new_loc
+    @body['old_desc']    = old_desc
+    @body['new_desc']    = new_desc
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
@@ -181,19 +243,35 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
-  def name_change(sender, receiver, time, name, old_version, new_version, review_status)
-    old_name             = name.versions.find_by_version(old_version)
-    new_name             = name; name.revert_to(new_version)
+  # Notify user of change in name description.
+  # sender::        User who changed the Name.
+  # receiver::      Owner of the Name (or interested third party).
+  # time::          Time the change took place.
+  # name::          Name in question.
+  # desc::          NameDescription in question.
+  # old_name_ver::  Version number of the Name _before_ the change.
+  # new_name_ver::  Version number of the Name _after_ the change (may be the same).
+  # old_desc_ver::  Version number of the NameDescription _before_ the change.
+  # new_desc_ver::  Version number of the NameDescription _after_ the change (may be the same).
+  # review_status:: Current review status.
+  def name_change(sender, receiver, time, name, desc, old_name_version,
+          new_name_version, old_desc_version, new_desc_version, review_status)
+    old_name             = name.versions.find_by_version(old_name_version)
+    new_name             = name; name.revert_to(new_name_version)
+    old_desc             = desc ? desc.versions.find_by_version(old_desc_version) : nil
+    new_desc             = desc; desc.revert_to(new_desc_version) if desc
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_name_change_subject.l(:name => (old_name ? old_name.search_name : new_name.search_name))
+    @subject             = :email_subject_name_change.l(:name => (old_name ? old_name.search_name : new_name.search_name))
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
     @body['time']        = time
     @body['old_name']    = old_name
     @body['new_name']    = new_name
-    @body['review_status'] = review_status
+    @body['old_desc']    = old_desc
+    @body['new_desc']    = new_desc
+    @body['review_status'] = "review_#{review_status}".to_sym.l if review_status != :no_change
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
@@ -202,10 +280,15 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Notify user of name proposal for their obs.
+  # sender::        User who proposed the Name.
+  # receiver::      Owner of the Observation (or interested third party).
+  # naming::        Naming in question.
+  # observation::   Observation in question.
   def name_proposal(sender, receiver, naming, observation)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_name_proposal_subject.l(:name => naming.text_name, :id => observation.id)
+    @subject             = :email_subject_name_proposal.l(:name => naming.text_name, :id => observation.id)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['naming']      = naming
@@ -218,11 +301,15 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Tell observer someone is interested in their obs.
+  # observer::      Owner of the Observation.
+  # naming::        Naming that was proposed that triggered this email.
+  # notification::  Notification instance registering interest in this Name.
   def naming_for_observer(observer, naming, notification)
     sender               = notification.user
     @user                = observer
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_naming_for_observer_subject.l
+    @subject             = :email_subject_naming_for_observer.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['naming']      = naming
@@ -235,10 +322,13 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Notify user someone has observed a name they are interested in.
+  # tracker::   User that has created the Notification registering interest in this Name.
+  # naming::    Naming that triggered this email.
   def naming_for_tracker(tracker, naming)
     @user                = tracker
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_naming_for_tracker_subject.l
+    @subject             = :email_subject_naming_for_tracker.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['observation'] = naming.observation
@@ -251,10 +341,13 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # User forgot their password.
+  # user::      User who requested the new password.
+  # password::  The new password (unencrypted).
   def new_password(user, password)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_new_password_subject.l
+    @subject             = :email_subject_new_password.l
     @body['subject']     = @subject
     @body['user']        = @user
     @body['password']    = password
@@ -266,11 +359,17 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Notify user of change in observation.
+  # sender::        User who changed the Observation (should be the owner).
+  # receiver::      Third party user who is interested in this Observation.
+  # observation::   Observation in question.
+  # note::          List of changed attributes (see QueuedEmail::ObservationChange).
+  # time::          Time the change took place.
   def observation_change(sender, receiver, observation, note, time)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = observation ? :email_observation_change_subject.l(:name => observation.unique_text_name) :
-                                         :email_observation_destroy_subject.l(:name => note).t.html_to_ascii
+    @subject             = observation ? :email_subject_observation_change.l(:name => observation.unique_text_name) :
+                                         :email_subject_observation_destroy.l(:name => note).t.html_to_ascii
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -285,10 +384,14 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # User asking user about an observation.
+  # sender::        User asking the question.
+  # observation::   Observation the question is about.
+  # question::      The actual question (content).
   def observation_question(sender, observation, question)
     @user                = observation.user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_observation_question_subject.l(:name => observation.unique_text_name)
+    @subject             = :email_subject_observation_question.l(:name => observation.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
@@ -302,11 +405,15 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Notify reviewers that a draft has been published.
+  # publisher:: User who is publishing the draft.
+  # receiver::  Reviewer receiving the announcement.
+  # name::      Name whose description is being published.
   def publish_name(publisher, receiver, name)
     @user                = receiver
     @name                = name
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_publish_name_subject.l
+    @subject             = :email_subject_publish_name.l
     @body['subject']     = @subject
     @body['user']        = receiver
     @body['publisher']   = publisher
@@ -319,6 +426,11 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # User asking user about anything else.
+  # sender::    User asking the question.
+  # user::      User receiving the question.
+  # subject::   Subject of question (provided by user).
+  # content::   Content of question (provided by user).
   def user_question(sender, user, subject, content)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
@@ -335,10 +447,12 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # Email sent to verify user's email.
+  # user::      User that just signed up.
   def verify(user)
     @user                = user
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_verify_subject.l
+    @subject             = :email_subject_verify.l
     @body['subject']     = @subject
     @body['user']        = user
     @recipients          = user.email
@@ -348,15 +462,22 @@ class AccountMailer < ActionMailer::Base
     @subject             = '[MO] ' + @subject.to_ascii
   end
 
+  # User asking webmaster a question.
+  # sender::    User asking the question.
+  # question::  Content of the question.
   def webmaster_question(sender, question)
     Locale.code          = DEFAULT_LOCALE
-    @subject             = :email_webmaster_question_subject.l(:user => sender)
+    @subject             = :email_subject_webmaster_question.l(:user => sender)
     @body['question']    = question
     @recipients          = WEBMASTER_EMAIL_ADDRESS
     @bcc	             = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = sender
     @subject             = '[MO] ' + @subject.to_ascii
   end
+
+################################################################################
+
+private
 
   # Set delivery_method to :file to cause this method to be called whenever
   # mail is sent anywhere.  It just stuffs them all in ../mail/0001 etc.
@@ -376,4 +497,32 @@ class AccountMailer < ActionMailer::Base
       fh.close
     end
   end
+
+  # Log exactly who is sending email at what times.
+  # def log_email
+  #   File.open("#{RAILS_ROOT}/log/email-low-level.log", 'a') do |fh|
+  #     time = Time.now.strftime('%Y-%m-%d:%H:%M:%S')
+  #
+  #     begin
+  #       raise RuntimeError
+  #     rescue RuntimeError => e
+  #       trace = e.backtrace
+  #     rescue
+  #       trace = []
+  #     end
+  #
+  #     type = trace[3].match(/`(\w+)'/) ? $1 : 'nil'
+  #
+  #     caller = nil
+  #     for x in trace[4..-1]
+  #       if !x.match(/^\/usr/)
+  #         caller = x
+  #         break
+  #       end
+  #     end
+  #
+  #     fh.puts("time=#{time} cmd=#{$0.inspect} type=#{type.inspect} " +
+  #             "caller=#{caller.inspect}")
+  #   end
+  # end
 end

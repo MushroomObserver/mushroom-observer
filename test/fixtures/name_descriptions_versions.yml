@@ -1,0 +1,140 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# Name with notes (not mergeable)
+agaricus_campestras_desc_version_1:
+  id: 1
+  name_description_id: 1
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 1
+  notes: This is should prevent me for merging
+  classification: ''
+
+# Another name with notes (not mergeable)
+agaricus_campestros_desc_version_1:
+  id: 2
+  name_description_id: 2
+  modified: 2007-06-23 20:04:00
+  user_id: 1
+  version: 1
+  notes: Need two to get an error
+  classification: ''
+
+russula_brevipes_author_notes_desc_version_1:
+  id: 3
+  name_description_id: 3
+  modified: 2008-03-10 22:33:05
+  user_id: 1
+  version: 1
+  notes: Here are some notes
+  classification: ''
+
+russula_cremoricolor_no_author_notes_desc_version_1:
+  id: 4
+  name_description_id: 4
+  modified: 2008-03-12 20:53:18
+  user_id: 1
+  version: 1
+  notes: Here are some notes
+  classification: ''
+
+russula_cremoricolor_author_notes_desc_version_1:
+  id: 5
+  name_description_id: 5
+  modified: 2008-03-12 20:53:40
+  user_id: 1
+  version: 1
+  notes: Some different notes
+  classification: ''
+
+peltigera_desc_version_1:
+  id: 6
+  name_description_id: 6
+  modified: 2009-01-01 01:01:01
+  user_id: 1
+  version: 1
+  license_id: 1
+  classification: ''
+
+peltigera_desc_version_2:
+  id: 7
+  name_description_id: 6
+  modified: 2009-01-02 01:01:01
+  user_id: 4
+  version: 2
+  license_id: 2
+  classification: "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_\r\nClass: _Ascomycetes_\r\nOrder: _Lecanorales_\r\nFamily: _Peltigeraceae_"
+  gen_desc: "Broad leafy lichens with soft, felty undersurface, generally with conspicuous veins and rhizines."
+  diag_desc: "Large foliose lichens with either green algae or cyanobacterial photopartners; apothecia on the upper surface of the lobes; soredia, isidia, and/or lobules often present; undersurface ecorticate, often with raised veins and rhizines; upper surface smooth to often tomentose."
+  distribution: Cosmopolitan.
+  habitat: "Mostly found growing with or over mosses, on soil, base of tree trunks, logs and rocks, rarely on trees or limbs."
+  look_alikes: "Other felt lichens such as _Lobaria_, _Pseudocyphellaria_, _Sticta_ and _Nephroma_ look superficially similar but never have well-developed veins or rhizines underneath."
+  uses: "Good for making birds nests... if you're a bird."
+
+suillus_desc_version_1:
+  id: 8
+  name_description_id: 7
+  modified: 2009-10-12 21:30:01
+  user_id: 4
+  version: 1
+  gen_desc: A __Suillus__ by any other name would smell as sweet...
+  classification: ''
+
+# A draft of Coprinus comatus owned by a member (katrina) of the EOL Project
+draft_coprinus_comatus_version_1:
+  id: 9
+  name_description_id: 8
+  user_id: 5
+  version: 1
+  gen_desc: This is a general description of __C. comatus__.
+  modified: 2008-10-05 12:31:12
+
+# A draft of Agaricus campestris owned by an admin (mary) of the EOL Project
+draft_agaricus_campestris_version_1:
+  id: 10
+  name_description_id: 9
+  user_id: 2
+  version: 1
+  modified: 2008-10-05 12:37:35
+
+# A draft of Boletus edulis owned by an admin (dick) of the Boletus Project
+draft_boletus_edulis_version_1:
+  id: 11
+  name_description_id: 10
+  user_id: 4
+  version: 1
+  modified: 2008-10-05 16:19:45
+
+# A draft of Lactarius alpinus with a bad classification field
+draft_lactarius_alpinus_version_1:
+  id: 12
+  name_description_id: 11
+  user_id: 5
+  version: 1
+  modified: 2009-05-04 19:56:25
+  classification: "**Domain**: Eukarya"
+
+peltigera_alt_desc_version_1:
+  id: 13
+  name_description_id: 12
+  modified: 2010-01-01 01:01:01
+  user_id: 1
+  version: 1
+  gen_desc: "Another general description of _Peltigera_."
+
+peltigera_user_desc_version_1:
+  id: 14
+  name_description_id: 13
+  modified: 2010-01-02 01:01:01
+  user_id: 2
+  version: 1
+  gen_desc: "Mary's general description of _Peltigera_."
+
+peltigera_source_desc_version_1:
+  id: 15
+  name_description_id: 14
+  modified: 2010-01-03 01:01:01
+  user_id: 5
+  version: 1
+  diag_desc: "Ernie Brodo's diagnostic description of _Peltigera_."
+

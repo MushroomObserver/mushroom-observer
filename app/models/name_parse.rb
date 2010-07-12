@@ -1,4 +1,6 @@
 #
+#  = Name Parser
+#
 #  This class is used by NameSorter and a few controllers (e.g.
 #  NameController, SpeciesListController) to help parse lists of names, such as
 #  in bulk_name_edit, create/edit_species_list, and change_synonyms.  It splits
@@ -28,11 +30,11 @@
 #      np.synonym_comment        # "Lichen Mushroom"
 #      np.find_synonym_names     # (Array of Name instances matching "L. umbellifera")
 #
-#      np.line_str               # "Phyllum Myxomycota [Highly polyphylletic]"
+#      np.line_str               # "Phyllum Myxomycota [Highly polyphyletic]"
 #      np.name                   # "Phyllum Myxomycota"
 #      np.search_name            # "Myxomycota"
 #      np.rank                   # :Phyllum
-#      np.comment                # "Highly polyphylletic"
+#      np.comment                # "Highly polyphyletic"
 #      np.find_names             # (Array of Name instances matching "Myxomycota")
 #      np.has_synonym            # false
 #    end
@@ -66,7 +68,7 @@ class NameParse
   def initialize(spl_line)
     result = []
     name_str = ''
-    @line_str = spl_line.strip.squeeze(" ")
+    @line_str = spl_line.strip_squeeze
     equal_pos = @line_str.index('=')
     if equal_pos
       @name = @line_str[0..equal_pos-1].strip
@@ -118,5 +120,4 @@ class NameParse
     end
     result
   end
-
 end

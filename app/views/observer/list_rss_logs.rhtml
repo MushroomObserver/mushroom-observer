@@ -1,42 +1,45 @@
 <%
   @title = :rss_log_title.t.nowrap
-  search_params = calc_search_params()
-%>
 
-<%= pagination_numbers(@rss_log_pages) %>
-
-<table cellpadding="5" cellspacing="0" width="100%">
-  <% row_count = 0
-  col_count = 0
-  for rss_log in @rss_logs
-    color = calc_color(row_count, col_count, @layout["alternate_rows"],
-                       @layout["alternate_columns"])
-    if col_count == 0 %>
-      <tr>
-    <% end %>
-    <td align="center" valign="top" class="ListLine<%= color %>">
-      <%= if observation = rss_log.observation
-        render(:partial => 'observation', :object => observation, :locals => { :vertical_layout => @layout["vertical_layout"], :search_params => search_params })
-      elsif species_list = rss_log.species_list
-        render(:partial => 'species_list', :object => species_list, :locals => { :vertical_layout => @layout["vertical_layout"] })
-      elsif name = rss_log.name
-        render(:partial => 'name', :object => name, :locals => { :vertical_layout => @layout["vertical_layout"] })
-      else
-        render(:partial => 'rss_log', :object => rss_log, :locals => { :vertical_layout => @layout["vertical_layout"] })
-      end %>
-    </td>
-    <% if col_count == (@layout["columns"] - 1) %>
-      </tr>
-    <% end
-    col_count += 1
-    if col_count >= @layout["columns"]
-      col_count = 0
-      row_count += 1
+  form = form_tag(:action => 'index_rss_log', :params => query_params)
+  form += :rss_show.t + ' '
+  if @types == ['all']
+    form += :rss_all.t
+  else
+    help = :rss_all_help.t
+    form += link_to(:rss_all.t, { :action => 'index_rss_log', :type => 'all',
+                    :params => query_params }, { :title => help })
+  end
+  for type in RssLog.all_types.map(&:to_s)
+    checked = @types.include?(type) || @types == ['all']
+    form += ' | '
+    form += check_box_tag("show_#{type}", '1', checked) + ' '
+    str = :rss_one.t(:type => type.to_sym)
+    if @types == [type]
+      form += str
+    else
+      help = :rss_one_help.t(:type => type.to_sym)
+      form += link_to(str, { :action => 'index_rss_log', :type => type,
+                      :params => query_params }, { :title => help })
     end
   end
-  if col_count != 0 %>
-    </tr>
-  <% end %>
-</table>
+  form += indent + submit_tag(:SUBMIT.t)
+  form += '</form>'
 
-<%= pagination_numbers(@rss_log_pages) %>
+  custom_tab_set(form)
+  new_tab_set(@links)
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
+
+<% paginate_block(@pages) do %>
+  <% make_matrix(@objects, :width => '100%') do |rss_log|
+    object = rss_log.object
+    if object %>
+      <%= render(:partial => object.type_tag.to_s, :object => object,
+                 :locals => { :rss_log => rss_log }) %>
+    <% else %>
+      <%= render(:partial => 'rss_log', :object => rss_log) %>
+    <% end
+  end %>
+<% end %>

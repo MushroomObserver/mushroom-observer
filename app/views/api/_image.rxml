@@ -1,41 +1,41 @@
 # Locals:
-#   :image              Image instance.
-#   :details            Boolean: include details?
+#   :object             Image instance.
+#   :detail             Boolean: include details?
 #   :refs               Boolean: include observations?
 #   :files              Boolean: include image files/urls?
 
-details ||= false
-refs    ||= false
-files   ||= false
+detail ||= false
+refs   ||= false
+files  ||= false
 
 xml.image(
-  :id => image.id,
-  :url => "#{DOMAIN}/image/show_image/#{image.id}"
+  :id  => object.id,
+  :url => "#{HTTP_DOMAIN}/image/show_image/#{object.id}"
 ) do
-  xml.date xml_date(image.when)
+  xml.date xml_date(object.when)
 
-  if details
-    xml.created          xml_datetime(image.created)
-    xml.modified         xml_datetime(image.modified)
-    xml.notes            image.notes.to_s.tpl_nodiv
-    xml.copyright_holder image.copyright_holder
+  if detail
+    xml.created          object.created.api_time
+    xml.modified         object.modified.api_time
+    xml.notes            object.notes.to_s.tpl_nodiv
+    xml.copyright_holder object.copyright_holder
 
     render_xml_partial(xml, :license, :locals => {
-      :license => image.license,
+      :object => object.license,
     })
 
     render_xml_partial(xml, :user, :locals => {
-      :user => image.user,
-      :details => false,
+      :object => object.user,
+      :detail => false,
     })
   end
 
   if refs
-    xml.observations(:number => image.observations.length) do
-      for obs in image.observations
+    xml.observations(:number => object.observations.length) do
+      for obs in object.observations
         render_xml_partial(xml, :observation, :locals => {
-          :observation => obs,
-          :details => false,
+          :object => obs,
+          :detail => false,
         })
       end
     end
@@ -43,16 +43,16 @@ xml.image(
 
   if files
     xml.original_file do
-      xml.url          image.original_url
-      xml.content_type image.content_type
+      xml.url          object.original_url
+      xml.content_type object.content_type
     end
     xml.normal_file do
-      xml.url          image.big_url
-      xml.content_type image.content_type
+      xml.url          object.big_url
+      xml.content_type object.content_type
     end
     xml.thumbnail_file do
-      xml.url          image.thumbnail_url
-      xml.content_type image.content_type
+      xml.url          object.thumbnail_url
+      xml.content_type object.content_type
     end
   end
 end

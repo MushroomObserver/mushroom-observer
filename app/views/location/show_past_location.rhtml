@@ -1,21 +1,12 @@
 <%
   @title = :show_past_location_title.t(
-    :num => @past_location.version,
-    :name => sanitize(@past_location.display_name)
+    :num  => @location.version,
+    :name => sanitize(@location.display_name)
   )
 %>
 
-<%= :show_past_location_other_versions.t %>:<br/>
-<% for v in @other_versions %>
-  <%= if v.version == @location.version
-    link_to("#{v.version}: #{v.display_name.t}",
-            :action => 'show_location', :id => @location.id)
-  elsif v.version == @past_location.version
-    "#{v.version}: #{v.display_name.t}"
-  else
-    link_to("#{v.version}: #{v.display_name.t}",
-            :action => 'show_past_location', :id => @location.id, :version => v.version)
-  end %><br/>
-<% end %><br/>
+<%= show_past_versions(@location) %>
 
-<%= render(:partial => 'show_location', :locals => { :location => @past_location }) %>
+<%= render(:partial => 'location', :object => @location) %>
+
+<%= show_object_footer(@location) %>

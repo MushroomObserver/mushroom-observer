@@ -1,106 +1,119 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'species_list_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-# Create subclasses of StringIO and File that have a content_type member
-# to replicate the dynamic method addition that happens in Rails
-# cgi.rb.
-class StringIOPlus < StringIO
-  attr_accessor :content_type
-end
+class SpeciesListControllerTest < FunctionalTestCase
 
-class FilePlus < File
-  attr_accessor :content_type
-end
+  # Score for one new name.
+  def v_nam; 10; end
 
-class SpeciesListControllerTest < Test::Unit::TestCase
-  fixtures :species_lists
-  fixtures :observations
-  fixtures :observations_species_lists
-  fixtures :namings
-  fixtures :names
-  fixtures :locations
-  fixtures :users
-  fixtures :notifications
+  # Score for one species list.
+  def v_spl; 5; end
 
-  def setup
-    @controller = SpeciesListController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
+  # Score for one observation:
+  #   species_list entry  1
+  #   observation         1
+  #   naming              1
+  #   vote                1
+  def v_obs; 4; end
+
+  def spl_params(spl)
+    params = {
+      :id => spl.id,
+      :species_list => {
+        :place_name => spl.where,
+        :title => spl.title,
+        "when(1i)" => spl.when.year.to_s,
+        "when(2i)" => spl.when.month.to_s,
+        "when(3i)" => spl.when.day.to_s,
+        :notes => spl.notes
+      },
+      :list => { :members => "" },
+      :checklist_data => {},
+      :member => { :notes => "" },
+    }
   end
 
+################################################################################
+
   def test_list_species_lists
-    get_with_dump :list_species_lists
-    assert_response :success
-    assert_template 'list_species_lists'
+    get_with_dump(:list_species_lists)
+    assert_response('list_species_lists')
   end
 
   def test_show_species_list
-    get_with_dump :show_species_list, :id => 1
-    assert_response :success
-    assert_template 'show_species_list'
+    # Show empty list with no one logged in.
+    get_with_dump(:show_species_list, :id => 1)
+    assert_response('show_species_list')
+
+    # Show same list with non-owner logged in.
+    login('mary')
+    get_with_dump(:show_species_list, :id => 1)
+    assert_response('show_species_list')
+
+    # Show non-empty list with owner logged in.
+    get_with_dump(:show_species_list, :id => 3)
+    assert_response('show_species_list')
   end
 
   def test_species_lists_by_title
-    get_with_dump :species_lists_by_title
-    assert_response :success
-    assert_template 'species_lists_by_title'
+    get_with_dump(:species_lists_by_title)
+    assert_response('list_species_lists')
   end
 
   def test_species_lists_by_user
-    get_with_dump :species_lists_by_user, { :id => @rolf.id }
-    assert_response :success
-    assert_template 'list_species_lists'
+    get_with_dump(:species_lists_by_user, :id => @rolf.id)
+    assert_response('list_species_lists')
   end
 
   def test_destroy_species_list
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     assert(spl)
     id = spl.id
-    params = {"id"=>id.to_s}
-    assert("rolf" == spl.user.login)
-    requires_user(:destroy_species_list, ["species_list", "show_species_list"], params, false)
-    assert_redirected_to(:controller => "species_list", :action => "list_species_lists")
+    params = { :id => id.to_s }
+    assert_equal("rolf", spl.user.login)
+    requires_user(:destroy_species_list, [:show_species_list], params)
+    assert_response(:action => :list_species_lists)
     assert_raises(ActiveRecord::RecordNotFound) do
-      spl = SpeciesList.find(id) # Need to reload observation to pick up changes
+      SpeciesList.find(id)
     end
   end
 
   def test_manage_species_lists
-    obs = @coprinus_comatus_obs
-    params = { "id" => obs.id.to_s }
-    requires_login :manage_species_lists, params
+    obs = observations(:coprinus_comatus_obs)
+    params = { :id => obs.id.to_s }
+    requires_login(:manage_species_lists, params)
+    assert_block('Missing species lists!') {
+      assigns(:all_lists).length > 0 rescue nil
+    }
   end
 
   def test_add_observation_to_species_list
-    sp = @first_species_list
-    obs = @coprinus_comatus_obs
+    sp = species_lists(:first_species_list)
+    obs = observations(:coprinus_comatus_obs)
     assert(!sp.observations.member?(obs))
-    requires_login(:add_observation_to_species_list, { "species_list" => sp.id, "observation" => obs.id }, false)
-    assert_redirected_to(:controller => "species_list", :action => "manage_species_lists")
-    sp2 = SpeciesList.find(sp.id)
-    assert(sp2.observations.member?(obs))
+    params = { :species_list => sp.id, :observation => obs.id }
+    requires_login(:add_observation_to_species_list, params)
+    assert_response(:action => :manage_species_lists)
+    assert(sp.reload.observations.member?(obs))
   end
 
   def test_remove_observation_from_species_list
-    spl = @unknown_species_list
-    obs = @minimal_unknown
+    spl = species_lists(:unknown_species_list)
+    obs = observations(:minimal_unknown)
     assert(spl.observations.member?(obs))
     params = { :species_list => spl.id, :observation => obs.id }
     owner = spl.user.login
-    assert("rolf" != owner)
+    assert_not_equal('rolf', owner)
 
     # Try with non-owner (can't use requires_user since failure is a redirect)
-    requires_login(:remove_observation_from_species_list, params, false)
     # effectively fails and gets redirected to show_species_list
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    spl = SpeciesList.find(spl.id)
-    assert(spl.observations.member?(obs))
+    requires_login(:remove_observation_from_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert(spl.reload.observations.member?(obs))
 
     login owner
     get_with_dump(:remove_observation_from_species_list, params)
-    assert_redirected_to(:controller => "species_list", :action => "manage_species_lists")
-    spl = SpeciesList.find(spl.id)
-    assert(!spl.observations.member?(obs))
+    assert_response(:action => "manage_species_lists")
+    assert(!spl.reload.observations.member?(obs))
   end
 
   # ----------------------------
@@ -108,18 +121,18 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   # ----------------------------
 
   def test_create_species_list
-    requires_login :create_species_list
-    assert_form_action :action => 'create_species_list'
+    requires_login(:create_species_list)
+    assert_form_action(:action => 'create_species_list')
   end
 
   # Test constructing species lists in various ways.
   def test_construct_species_list
     list_title = "List Title"
     params = {
-      :list => { :members => @coprinus_comatus.text_name },
+      :list => { :members => names(:coprinus_comatus).text_name },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -127,22 +140,23 @@ class SpeciesListControllerTest < Test::Unit::TestCase
         :notes => "List Notes"
       }
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(18, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    post_requires_login(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    assert(spl.name_included(@coprinus_comatus))
+    assert(spl.name_included(names(:coprinus_comatus)))
   end
 
   def test_construct_species_list_existing_genus
+    agaricus = names(:agaricus)
     list_title = "List Title"
     params = {
-      :list => { :members => "#{@agaricus.rank} #{@agaricus.text_name}" },
+      :list => { :members => "#{agaricus.rank} #{agaricus.text_name}" },
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -150,12 +164,13 @@ class SpeciesListControllerTest < Test::Unit::TestCase
         :notes => "List Notes"
       }
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(18, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    assert(spl.name_included(@agaricus))
+    assert(spl.name_included(agaricus))
   end
 
   def test_construct_species_list_new_family
@@ -163,27 +178,29 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     rank = :Family
     new_name_str = "Agaricaceae"
     new_list_str = "#{rank} #{new_name_str}"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    assert_nil(Name.find_by_text_name(new_name_str))
     params = {
       :list => { :members => new_list_str },
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str]
+      :approved_names => new_list_str
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(28, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    # Creates Agaricaceae, spl, and obs/naming/splentry.
+    assert_equal(10 + v_nam + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
+    new_name = Name.find_by_text_name(new_name_str)
     assert_not_nil(new_name)
     assert_equal(rank, new_name.rank)
     assert(spl.name_included(new_name))
@@ -192,8 +209,8 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   # <name> = <name> shouldn't work in construct_species_list
   def test_construct_species_list_synonym
     list_title = "List Title"
-    name = @macrolepiota_rachodes
-    synonym_name = @lepiota_rachodes
+    name = names(:macrolepiota_rachodes)
+    synonym_name = names(:lepiota_rachodes)
     assert(!synonym_name.deprecated)
     assert_nil(synonym_name.synonym)
     params = {
@@ -201,7 +218,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
@@ -209,39 +226,38 @@ class SpeciesListControllerTest < Test::Unit::TestCase
         :notes => "List Notes"
       },
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_response(:success)
-    assert_template("create_species_list")
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response('create_species_list')
     assert_equal(10, @rolf.reload.contribution)
-    synonym_name = Name.find(synonym_name.id)
-    assert(!synonym_name.deprecated)
+    assert(!synonym_name.reload.deprecated)
     assert_nil(synonym_name.synonym)
   end
 
   def test_construct_species_list_junk
     list_title = "List Title"
     new_name_str = "This is a bunch of junk"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    assert_nil(Name.find_by_text_name(new_name_str))
     params = {
       :list => { :members => new_name_str },
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str]
+      :approved_names => new_name_str
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_response(:success)
-    assert_template("create_species_list")
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response('create_species_list')
     assert_equal(10, @rolf.reload.contribution)
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
-    assert_equal([], SpeciesList.find(:all, :conditions => "title = '#{list_title}'"))
+    assert_nil(Name.find_by_text_name(new_name_str))
+    assert_nil(SpeciesList.find_by_title(list_title))
   end
 
   def test_construct_species_list_double_space
@@ -251,25 +267,26 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       :list => { :members => new_name_str },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str.squeeze(" ")]
+      :approved_names => new_name_str.squeeze(" ")
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response(:action => :show_species_list)
     # Must be creating Lactarius sp as well as L. rubidus (and spl and obs/splentry/naming).
-    assert_equal(38, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    assert_equal(10 + v_nam*2 + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    obs = spl.observations[0]
+    obs = spl.observations.first
     assert_not_nil(obs)
     assert_not_nil(obs.modified)
-    name = Name.find(:first, :conditions => ["search_name = ?", new_name_str.squeeze(" ")])
+    name = Name.find_by_search_name(new_name_str.squeeze(" "))
     assert_not_nil(name)
     assert(spl.name_included(name))
   end
@@ -277,34 +294,36 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   def test_construct_species_list_rankless_taxon
     list_title = "List Title"
     new_name_str = "Agaricaceae"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    assert_nil(Name.find_by_text_name(new_name_str))
     params = {
       :list => { :members => new_name_str },
       :checklist_data => {},
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "3",
         "when(3i)" => "14",
         :notes => "List Notes"
       },
-      :approved_names => [new_name_str]
+      :approved_names => new_name_str
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(28, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    # Creates Agaricaceae, spl, obs/naming/splentry.
+    assert_equal(10 + v_nam + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
     assert_not_nil(spl)
-    new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
+    new_name = Name.find_by_text_name(new_name_str)
     assert_not_nil(new_name)
     assert_equal(:Genus, new_name.rank)
     assert(spl.name_included(new_name))
   end
 
-  # Rather than repeat everything done for update_species, this construct species just
-  # does a bit of everything:
+  # Rather than repeat everything done for update_species, this construct
+  # species just does a bit of everything:
   #   Written in:
   #     Lactarius subalpinus (deprecated, approved)
   #     Amanita baccata      (ambiguous, checked Arora in radio boxes)
@@ -320,20 +339,20 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   #   Lactarius alpinus
   #   (but *NOT* L. alpingenes)
   def test_construct_species_list_extravaganza
-    deprecated_name = @lactarius_subalpinus
+    deprecated_name = names(:lactarius_subalpinus)
     list_members = [deprecated_name.text_name]
-    multiple_name = @amanita_baccata_arora
+    multiple_name = names(:amanita_baccata_arora)
     list_members.push(multiple_name.text_name)
     new_name_str = "New name"
     list_members.push(new_name_str)
-    assert_nil(Name.find(:first, :conditions => "text_name = '#{new_name_str}'"))
+    assert_nil(Name.find_by_text_name(new_name_str))
 
     checklist_data = {}
-    current_checklist_name = @agaricus_campestris
-    checklist_data[current_checklist_name.id.to_s] = "checked"
-    deprecated_checklist_name = @lactarius_alpigenes
-    approved_name = @lactarius_alpinus
-    checklist_data[deprecated_checklist_name.id.to_s] = "checked"
+    current_checklist_name = names(:agaricus_campestris)
+    checklist_data[current_checklist_name.id.to_s] = '1'
+    deprecated_checklist_name = names(:lactarius_alpigenes)
+    approved_name = names(:lactarius_alpinus)
+    checklist_data[deprecated_checklist_name.id.to_s] = '1'
 
     list_title = "List Title"
     params = {
@@ -341,7 +360,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       :checklist_data => checklist_data,
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => list_title,
         "when(1i)" => "2007",
         "when(2i)" => "6",
@@ -349,32 +368,36 @@ class SpeciesListControllerTest < Test::Unit::TestCase
         :notes => "List Notes"
       },
     }
-    params[:approved_names] = [new_name_str]
-    params[:chosen_names] = { multiple_name.text_name.gsub(/\W/,"_") => multiple_name.id.to_s }
-    params[:approved_deprecated_names] = [deprecated_name.text_name, deprecated_checklist_name.search_name]
-    params[:chosen_approved_names] = { deprecated_checklist_name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
+    params[:approved_names] = new_name_str
+    params[:chosen_multiple_names] =
+        { multiple_name.id.to_s => multiple_name.id.to_s }
+    params[:chosen_approved_names] =
+        { deprecated_checklist_name.id.to_s => approved_name.id.to_s }
+    params[:approved_deprecated_names] =
+        [deprecated_name.id.to_s, deprecated_checklist_name.id.to_s].join("\r\n")
 
-    post_requires_login(:create_species_list, params, false)
-    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
-    assert_equal(50, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all, :conditions => "title = '#{list_title}'")[0]
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response(:action => :show_species_list)
+    # Creates "New" and "New name", spl, and five obs/naming/splentries.
+    assert_equal(10 + v_nam*2 + v_spl + v_obs*5, @rolf.reload.contribution)
+    spl = SpeciesList.find_by_title(list_title)
     assert(spl.name_included(deprecated_name))
     assert(spl.name_included(multiple_name))
-    assert(spl.name_included(Name.find(:first, :conditions => "text_name = '#{new_name_str}'")))
+    assert(spl.name_included(Name.find_by_text_name(new_name_str)))
     assert(spl.name_included(current_checklist_name))
     assert(!spl.name_included(deprecated_checklist_name))
     assert(spl.name_included(approved_name))
   end
 
   def test_construct_species_list_nonalpha_multiple
-    #
     # First try creating it with ambiguous name "Warnerbros bugs-bunny".
     # (There are two such names with authors One and Two, respectively.)
     params = {
       :list => { :members => "\n Warnerbros  bugs-bunny " },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => "Testing nonalphas",
         "when(1i)" => "2008",
         "when(2i)" => "1",
@@ -382,306 +405,287 @@ class SpeciesListControllerTest < Test::Unit::TestCase
         :notes => ""
       },
     }
-    post_requires_login(:create_species_list, params, false)
-    assert_response :success
-    assert_template 'create_species_list'
+    login('rolf')
+    post(:create_species_list, params)
+    assert_response('create_species_list')
     assert_equal(10, @rolf.reload.contribution)
-    assert_equal("Warnerbros bugs-bunny", @controller.instance_variable_get('@list_members'))
+    assert_equal("Warnerbros bugs-bunny",
+                 @controller.instance_variable_get('@list_members'))
     assert_equal([], @controller.instance_variable_get('@new_names'))
-    assert_equal(["Warnerbros bugs-bunny"], @controller.instance_variable_get('@multiple_names'))
+    assert_equal([names(:bugs_bunny_one)],
+                 @controller.instance_variable_get('@multiple_names'))
     assert_equal([], @controller.instance_variable_get('@deprecated_names'))
-    #
+
     # Now re-post, having selected Two.
     params = {
       :list => { :members => "Warnerbros bugs-bunny\r\n" },
       :member => { :notes => "" },
       :species_list => {
-        :where => "Burbank, California",
+        :place_name => "Burbank, California",
         :title => "Testing nonalphas",
         "when(1i)" => "2008",
         "when(2i)" => "1",
         "when(3i)" => "31",
         :notes => ""
       },
-      :chosen_names => { "Warnerbros_bugs_bunny" => @bugs_bunny_two.id },
+      :chosen_multiple_names => { names(:bugs_bunny_one).id.to_s => names(:bugs_bunny_two).id },
     }
     post(:create_species_list, params)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(18, @rolf.reload.contribution)
-    spl = SpeciesList.find(:all).last
-    assert(spl.name_included(@bugs_bunny_two))
+    assert_response(:action => "show_species_list")
+    assert_equal(10 + v_spl + v_obs, @rolf.reload.contribution)
+    spl = SpeciesList.last
+    assert(spl.name_included(names(:bugs_bunny_two)))
   end
 
   # -----------------------------------------------
   #  Test changing species lists in various ways.
   # -----------------------------------------------
 
-  def spl_params(spl)
-    params = {
-      :id => spl.id,
-      :species_list => {
-        :where => spl.where,
-        :title => spl.title,
-        "when(1i)" => spl.when.year.to_s,
-        "when(2i)" => spl.when.month.to_s,
-        "when(3i)" => spl.when.day.to_s,
-        :notes => spl.notes
-      },
-      :list => { :members => "" },
-      :checklist_data => {},
-      :member => { :notes => "" },
-    }
-  end
-
   def test_edit_species_list
-    spl = @first_species_list
-    params = { "id" => spl.id.to_s }
-    assert("rolf" == spl.user.login)
-    requires_user(:edit_species_list, ["species_list", "show_species_list"], params, false)
-    assert_response :success
-    assert_template "edit_species_list"
-    assert_form_action :action => 'edit_species_list'
+    spl = species_lists(:first_species_list)
+    params = { :id => spl.id.to_s }
+    assert_equal('rolf', spl.user.login)
+    requires_user(:edit_species_list, :show_species_list, params)
+    assert_response('edit_species_list')
+    assert_form_action(:action => 'edit_species_list')
   end
 
   def test_update_species_list_nochange
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
-    post_requires_user(:edit_species_list, ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    post_requires_user(:edit_species_list, :show_species_list, params,
+                       spl.user.login)
+    assert_response(:action => :show_species_list)
     assert_equal(10, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count, spl.observations.size)
+    assert_equal(sp_count, spl.reload.observations.size)
   end
 
   def test_update_species_list_text_add_multiple
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
     owner = spl.user.login
-    assert("rolf" != owner)
-    post_requires_login(:edit_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_not_equal('rolf', owner)
+    login('rolf')
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
     assert_equal(10, @rolf.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert(spl.observations.size == sp_count)
+    assert_equal(sp_count, spl.reload.observations.size)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_redirected_to(:controller=>"species_list", :action=>"show_species_list")
-    assert_equal(16, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 2, spl.observations.size)
+    assert_response(:action => "show_species_list")
+    assert_equal(10 + v_obs*2, spl.user.reload.contribution)
+    assert_equal(sp_count + 2, spl.reload.observations.size)
   end
 
   def test_update_species_list_text_add
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus"
-    params[:species_list][:where] = "New Place"
+    params[:species_list][:place_name] = "New Place"
     params[:species_list][:title] = "New Title"
     params[:species_list][:notes] = "New notes."
     owner = spl.user.login
-    assert("rolf" != owner)
-    post_requires_login(:edit_species_list, params, false)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_not_equal('rolf', owner)
+    login('rolf')
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
     assert_equal(10, @rolf.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert(spl.observations.size == sp_count)
+    assert(spl.reload.observations.size == sp_count)
     login owner
     post_with_dump(:edit_species_list, params)
-    assert_redirected_to(:controller=>"species_list", :action=>"show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    assert_response(:action => "show_species_list")
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert_equal("New Place", spl.where)
     assert_equal("New Title", spl.title)
     assert_equal("New notes.", spl.notes)
   end
 
   def test_update_species_list_text_notifications
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "Coprinus comatus\r\nAgaricus campestris"
-    post_requires_login(:edit_species_list, params, false)
-    assert_redirected_to(:controller=>"observer", :action=>"show_notifications")
+    login('rolf')
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
   end
 
   def test_update_species_list_new_name
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "New name"
-    post_requires_user(:edit_species_list, ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_response :success
-    assert_template "edit_species_list"
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count, spl.observations.size)
+    assert_equal(sp_count, spl.reload.observations.size)
   end
 
   def test_update_species_list_approved_new_name
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
     params = spl_params(spl)
     params[:list][:members] = "New name"
-    params[:approved_names] = ["New name"]
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    # Creates New sp and New name, as well as an observations/splentry/naming.
-    assert_equal(33, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:approved_names] = "New name"
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    # Creates 'New', 'New name', observations/splentry/naming.
+    assert_equal(10 + v_nam*2 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
   end
 
   def test_update_species_list_multiple_match
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @amanita_baccata_arora
+    name = names(:amanita_baccata_arora)
     assert(!spl.name_included(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_response :success
-    assert_template "edit_species_list"
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count, spl.observations.size)
+    assert_equal(sp_count, spl.reload.observations.size)
     assert(!spl.name_included(name))
   end
 
   def test_update_species_list_chosen_multiple_match
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @amanita_baccata_arora
+    name = names(:amanita_baccata_arora)
     assert(!spl.name_included(name))
     params = spl_params(spl)
     params[:list][:members] = name.text_name
-    params[:chosen_names] = {name.text_name.gsub(/\W/,"_") => name.id}
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:chosen_multiple_names] = {name.id.to_s => name.id.to_s}
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
 
   def test_update_species_list_deprecated
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_response :success
-    assert_template "edit_species_list"
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count, spl.observations.size)
+    assert_equal(sp_count, spl.reload.observations.size)
     assert(!spl.name_included(name))
   end
 
   def test_update_species_list_approved_deprecated
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
     params[:list][:members] = name.text_name
-    params[:approved_deprecated_names] = [name.text_name]
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:approved_deprecated_names] = [name.id.to_s]
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
 
   def test_update_species_list_checklist_add
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_alpinus
+    name = names(:lactarius_alpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:checklist_data][name.id.to_s] = '1'
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
 
   def test_update_species_list_deprecated_checklist
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_response :success
-    assert_template "edit_species_list"
+    params[:checklist_data][name.id.to_s] = '1'
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response('edit_species_list')
     assert_equal(10, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count, spl.observations.size)
+    assert_equal(sp_count, spl.reload.observations.size)
     assert(!spl.name_included(name))
   end
 
   def test_update_species_list_approved_deprecated_checklist
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
+    name = names(:lactarius_subalpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
-    params[:approved_deprecated_names] = [name.search_name]
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:checklist_data][name.id.to_s] = '1'
+    params[:approved_deprecated_names] = [name.id.to_s]
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(spl.name_included(name))
   end
 
   def test_update_species_list_approved_renamed_deprecated_checklist
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
-    approved_name = @lactarius_alpinus
+    name = names(:lactarius_subalpinus)
+    approved_name = names(:lactarius_alpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
-    params[:checklist_data][name.id.to_s] = "checked"
-    params[:approved_deprecated_names] = [name.search_name]
-    params[:chosen_approved_names] = { name.search_name.gsub(/\W/,"_") => approved_name.id.to_s }
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:checklist_data][name.id.to_s] = '1'
+    params[:approved_deprecated_names] = [name.id.to_s]
+    params[:chosen_approved_names] =
+                { name.id.to_s => approved_name.id.to_s }
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(!spl.name_included(name))
     assert(spl.name_included(approved_name))
   end
 
   def test_update_species_list_approved_rename
-    spl = @unknown_species_list
+    spl = species_lists(:unknown_species_list)
     sp_count = spl.observations.size
-    name = @lactarius_subalpinus
-    approved_name = @lactarius_alpinus
+    name = names(:lactarius_subalpinus)
+    approved_name = names(:lactarius_alpinus)
     params = spl_params(spl)
     assert(!spl.name_included(name))
     assert(!spl.name_included(approved_name))
     params[:list][:members] = name.text_name
-    params[:approved_deprecated_names] = name.text_name
-    params[:chosen_approved_names] = { name.text_name.gsub(/\W/,"_") => approved_name.id.to_s }
-    post_requires_user("edit_species_list", ["species_list", "show_species_list"], params, false, spl.user.login)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
-    assert_equal(13, spl.user.reload.contribution)
-    spl = SpeciesList.find(spl.id)
-    assert_equal(sp_count + 1, spl.observations.size)
+    params[:approved_deprecated_names] = name.id.to_s
+    params[:chosen_approved_names] =
+                { name.id.to_s => approved_name.id.to_s }
+    login(spl.user.login)
+    post(:edit_species_list, params)
+    assert_response(:action => :show_species_list)
+    assert_equal(10 + v_obs, spl.user.reload.contribution)
+    assert_equal(sp_count + 1, spl.reload.observations.size)
     assert(!spl.name_included(name))
     assert(spl.name_included(approved_name))
   end
@@ -691,18 +695,18 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   # ----------------------------
 
   def test_upload_species_list
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     params = {
       :id => spl.id
     }
-    requires_user("upload_species_list", ["species_list", "show_species_list"], params, false)
-    assert_form_action :action => 'upload_species_list'
+    requires_user(:upload_species_list, :show_species_list, params)
+    assert_form_action(:action => 'upload_species_list')
   end
 
   def test_read_species_list
     # TODO: Test read_species_list with a file larger than 13K to see if it
     # gets a TempFile or a StringIO.
-    spl = @first_species_list
+    spl = species_lists(:first_species_list)
     assert_equal(0, spl.observations.length)
     list_data = "Agaricus bisporus\r\nBoletus rubripes\r\nAmanita phalloides"
     file = StringIOPlus.new(list_data)
@@ -713,9 +717,8 @@ class SpeciesListControllerTest < Test::Unit::TestCase
         "file" => file
       }
     }
-    post_requires_login :upload_species_list, params, false
-    assert_response(:success)
-    assert_template("edit_species_list")
+    post_requires_login(:upload_species_list, params)
+    assert_response('edit_species_list')
     assert_equal(10, @rolf.reload.contribution)
     # Doesn't actually change list, just feeds it to edit_species_list
     assert_equal(list_data, @controller.instance_variable_get('@list_members'))
@@ -728,42 +731,41 @@ class SpeciesListControllerTest < Test::Unit::TestCase
   def test_make_report
     now = Time.now
 
-    tapinella = Name.new({
-      :user_id => 1,
-      :author => '(Batsch) Šutara',
-      :text_name => 'Tapinella atrotomentosa',
+    User.current = @rolf
+    tapinella = Name.create(
+      :author      => '(Batsch) Šutara',
+      :text_name   => 'Tapinella atrotomentosa',
       :search_name => 'Tapinella atrotomentosa (Batsch) Šutara',
-      :deprecated => false,
-      :rank => :Species,
-      :review_status => :unreviewed
-    })
-    tapinella.save
+      :deprecated  => false,
+      :rank        => :Species
+    )
 
-    list = @first_species_list
+    list = species_lists(:first_species_list)
     args = {
-      :where    => 'limbo',
+      :place_name    => 'limbo',
       :when     => now,
       :created  => now,
       :modified => now,
       :user     => @rolf,
       :specimen => false,
     }
-    list.construct_observation(tapinella, args)
-    list.construct_observation(@fungi, args)
-    list.construct_observation(@coprinus_comatus, args)
-    list.construct_observation(@lactarius_alpigenes, args)
+    list.construct_observation(args.merge(:what => tapinella))
+    list.construct_observation(args.merge(:what => names(:fungi)))
+    list.construct_observation(args.merge(:what => names(:coprinus_comatus)))
+    list.construct_observation(args.merge(:what => names(:lactarius_alpigenes)))
     list.save # just in case
 
-    get(:make_report, { :id => list.id, :type => 'txt' })
-    assert_response_equal_file('test/fixtures/reports/test.txt')
+    get(:make_report, :id => list.id, :type => 'txt')
+    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    assert_response_equal_file("#{path}/test.txt")
 
-    get(:make_report, { :id => list.id, :type => 'rtf' })
-    assert_response_equal_file('test/fixtures/reports/test.rtf') do |x|
+    get(:make_report, :id => list.id, :type => 'rtf')
+    assert_response_equal_file("#{path}/test.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end
 
-    get(:make_report, { :id => list.id, :type => 'csv' })
-    assert_response_equal_file('test/fixtures/reports/test.csv')
+    get(:make_report, :id => list.id, :type => 'csv')
+    assert_response_equal_file("#{path}/test.csv")
   end
 
   def test_name_lister
@@ -781,32 +783,33 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     }
 
     @request.session[:user_id] = 1
-    post(:name_lister, params.merge({ :commit => :name_lister_submit_spl.l }))
+    post(:name_lister, params.merge(:commit => :name_lister_submit_spl.l))
     ids = @controller.instance_variable_get('@objs').map {|n| n.id}
     assert_equal([6, 2, 1, 14], ids)
-    assert_response(:success)
-    assert_template('create_species_list')
+    assert_response('create_species_list')
 
     @request.session[:user_id] = nil
-    post(:name_lister, params.merge({ :commit => :name_lister_submit_txt.l }))
-    assert_response_equal_file('test/fixtures/reports/test2.txt')
+    post(:name_lister, params.merge(:commit => :name_lister_submit_txt.l))
+    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    assert_response_equal_file("#{path}/test2.txt")
 
     @request.session[:user_id] = nil
-    post(:name_lister, params.merge({ :commit => :name_lister_submit_rtf.l }))
-    assert_response_equal_file('test/fixtures/reports/test2.rtf') do |x|
+    post(:name_lister, params.merge(:commit => :name_lister_submit_rtf.l))
+    path = "#{RAILS_ROOT}/test/fixtures/reports"
+    assert_response_equal_file("#{path}/test2.rtf") do |x|
       x.sub(/\{\\createim\\yr.*\}/, '')
     end
 
     @request.session[:user_id] = nil
-    post(:name_lister, params.merge({ :commit => :name_lister_submit_csv.l }))
-    assert_response_equal_file('test/fixtures/reports/test2.csv')
+    post(:name_lister, params.merge(:commit => :name_lister_submit_csv.l))
+    assert_response_equal_file("#{path}/test2.csv")
   end
 
   def test_name_resolution
     params = {
       :species_list => {
         :when  => Time.now,
-        :where => 'somewhere',
+        :place_name => 'somewhere',
         :title => 'title',
         :notes => 'notes',
       },
@@ -834,9 +837,9 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       'Agaricus "blah"',
       'Chlorophyllum Author',
       'Lepiota sp Author',
-    ].join('/')
+    ].join("\r\n")
     post(:create_species_list, params)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_response(:action => "show_species_list")
     assert_equal([
       'Fungi sp.',
       'Agaricus sp.',
@@ -847,7 +850,7 @@ class SpeciesListControllerTest < Test::Unit::TestCase
       '"Two" sp.',
       '"Three" sp.',
       'Agaricus "blah"',
-    ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}.sort)
+    ].sort, assigns(:species_list).observations.map {|x| x.name.search_name}. sort)
 
     params[:list][:members] = [
       'Fungi',
@@ -863,9 +866,9 @@ class SpeciesListControllerTest < Test::Unit::TestCase
     ].join("\n")
     params[:approved_names] = [
       'Psalliota sp.',
-    ].join('/')
+    ].join("\r\n")
     post(:create_species_list, params)
-    assert_redirected_to(:controller => "species_list", :action => "show_species_list")
+    assert_response(:action => "show_species_list")
     assert_equal([
       'Fungi sp.',
       'Agaricus sp.',

@@ -1,0 +1,258 @@
+#!/usr/bin/ruby
+
+# require 'config/boot'
+# require 'config/environment'
+
+PATH = File.dirname(__FILE__) + '/..'
+
+PRAGMAS = {
+  'nologin'  => true,   # Doesn't require login.
+  'root'     => true,   # Requires root (for docs only).
+  'norobots' => true,   # Off-limit to web crawlers.
+  'prefetch' => true,   # Allow browser to prefetch.
+}
+
+# ------------------------------------
+#  Get list of views from views dir.
+# ------------------------------------
+
+def get_list_of_views(controller)
+  # results = []
+  # for file in Dir.glob("#{PATH}/app/views/#{controller}/[a-z]*.{rhtml,rxml}")
+  #   file.match(/(\w+)\.\w+$/)
+  #   results << $1
+  # end
+  # return results.sort
+end
+
+# ---------------------------------------------------------------------
+#  Extract existing docs of views from comments at top of controller.
+# ---------------------------------------------------------------------
+
+def read_headers(file)
+  headers = {}
+  File.open(file) do |fh|
+    fh.each_line do |line|
+      if line.match(/^ *# *:(all_\w+):/)
+        headers[$1.to_sym] = true
+      # elsif ...
+      end
+    end
+  end
+  return headers
+end
+
+# -----------------------------------
+#  Extract actions from controller.
+# -----------------------------------
+
+def extract_actions(file)
+  actions = []
+  section = nil
+  comment = nil
+  globals = []
+  if file.match(/(\w+)_controller/)
+    controller = $1
+  end
+  File.open(file) do |fh|
+    num = 0
+    fh.each_line do |line|
+      num += 1
+      if line.match(/^ *# *:section: *(\S.*\S)/)
+        section = $1
+      elsif line.match(/^ *# *:all_(\w+):/)
+        if !PRAGMAS[pragma = $1]
+          $stderr.puts("Unrecognized pragma :all_#{pragma}: on " +
+                       "line #{num} of #{file}.")
+        else
+          globals << pragma
+        end
+      elsif line.match(/^  # (\S[^\.]*\S)/)
+        comment ||= $1
+      elsif line.match(/^  def (\w+)( .*|$)/)
+        name  = $1
+        notes = $2
+        action = {
+          :controller => controller,
+          :section => section,
+          :name    => name,
+          :comment => comment,
+          :notes   => (hash = {}),
+        }
+        for pragma in globals
+          hash[pragma.to_sym] = true
+        end
+        while notes.sub!(/:(\w+):/, '')
+          if !PRAGMAS[pragma = $1]
+            $stderr.puts("Unrecognized pragma :#{pragma}: on " +
+                         "line #{num} of #{file}.")
+          else
+            hash[pragma.to_sym] = true
+          end
+        end
+        actions << action
+      elsif !line.match(/^  #/)
+        comment = nil
+      end
+    end
+  end
+  return actions
+end
+
+# --------------------------------------------------------
+#  Write new controller, updating docs and filter specs.
+# --------------------------------------------------------
+
+def redo_headers(file, headers, actions, views)
+  # save_copy(file)
+  # File.open(file, 'w') do |fh|
+  # end
+end
+
+# -----------------------------------------------------------------------
+#  Make sure we don't have any unused redirects in observer controller.
+# -----------------------------------------------------------------------
+
+def check_for_unused_redirects(actions, old_actions)
+  norobots = []
+  for path in old_actions
+    controller, name = path.split('/')[1..2]
+    used = false
+    for action in actions
+      if (action[:controller] == controller) and
+         (action[:name] == name)
+        used = true
+        if action[:notes][:norobots]
+          norobots << "/observer/#{name}"
+        end
+      end
+    end
+    if !used
+      $stderr.puts("No longer need redirect to #{controller} #{name} from observer!")
+    end
+  end
+  return norobots
+end
+
+# ------------------------------------------------
+#  Add actions marked :norobots: to master list.
+# ------------------------------------------------
+
+def save_norobots(master, controller, actions)
+  last_one = nil
+  for action in actions.sort_by {|x| x[:name]}
+    name = action[:name]
+    if action[:notes][:norobots]
+      master << "/#{controller}/#{name}"
+      last_one = name
+    elsif last_one and
+          (name[0,last_one.length] == last_one)
+      $stderr.puts("Accidentally blocked /#{controller}/#{name}!!")
+    end
+  end
+end
+
+# ----------------------------
+#  Write robots.txt.
+# ----------------------------
+
+def write_robots(data)
+  file = "#{PATH}/public/robots.txt"
+  save_copy(file)
+  File.open(file, 'w') do |fh|
+    fh.puts <<EOB
+# See http://www.robotstxt.org/wc/norobots.html for documentation on how to use
+# the robots.txt file.
+
+User-agent: *
+EOB
+    for file in data.sort.uniq
+      fh.puts "Disallow: #{file}"
+    end
+  end
+end
+
+# ----------------------------
+#  Save copy of old file.
+# ----------------------------
+
+def save_copy(new_file)
+  old_file = "#{new_file}.old"
+  if File.exists?(new_file)
+    if File.exists?(old_file)
+      File.delete(old_file)
+    end
+    File.rename(new_file, old_file)
+  end
+end
+
+# ----------------------------
+#  Main program.
+# ----------------------------
+
+norobots = [
+  '/ajax/',
+  '/api/',
+]
+
+# These are all being redirected from observer.
+old_actions = [
+  '/comment/add_comment',
+  '/comment/destroy_comment',
+  '/comment/edit_comment',
+  '/comment/list_comments',
+  '/comment/show_comment',
+  '/comment/show_comments_for_user',
+  '/image/add_image',
+  '/image/destroy_image',
+  '/image/edit_image',
+  '/image/license_updater',
+  '/image/list_images',
+  '/image/next_image',
+  '/image/prev_image',
+  '/image/remove_images',
+  '/image/reuse_image',
+  '/image/show_image',
+  '/name/approve_name',
+  '/name/bulk_name_edit',
+  '/name/change_synonyms',
+  '/name/deprecate_name',
+  '/name/edit_name',
+  '/name/map',
+  '/name/observation_index',
+  '/name/show_name',
+  '/name/show_past_name',
+  '/species_list/add_observation_to_species_list',
+  '/species_list/create_species_list',
+  '/species_list/destroy_species_list',
+  '/species_list/edit_species_list',
+  '/species_list/list_species_lists',
+  '/species_list/manage_species_lists',
+  '/species_list/remove_observation_from_species_list',
+  '/species_list/show_species_list',
+  '/species_list/species_lists_by_title',
+  '/species_list/upload_species_list',
+]
+
+all_actions = []
+for file in Dir.glob("#{PATH}/app/controllers/*_controller.rb").sort
+  file.match(/(\w+)_controller.rb/)
+  controller = $1
+  if controller != 'api'
+    headers = read_headers(file)
+    actions = extract_actions(file)
+    views   = get_list_of_views(controller)
+    redo_headers(file, headers, actions, views)
+    if headers[:all_norobots]
+      norobots << "/#{controller}/"
+    else
+      save_norobots(norobots, controller, actions)
+    end
+    all_actions += actions
+  end
+end
+
+norobots += check_for_unused_redirects(all_actions, old_actions)
+write_robots(norobots)
+
+exit 0

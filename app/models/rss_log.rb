@@ -1,236 +1,356 @@
 #
-#  This model handles the RSS feed.  Every object we care about gets one an
-#  RssLog instance to report changes in that object.
+#  = RSS Log Model
 #
-#  1. has a timestamp
-#  2. has notes
-#  3. belongs an object
+#  This model handles the RSS feed.  Every object we care about gets an RssLog
+#  instance to report changes in that object.  Going forward, every new object
+#  gets assigned one; historically, there are loads of objects without, but we
+#  don't really care, so they stay that way until they are modified. 
 #
-#  Right now there is a separate <tt>#{object}_id</tt> field for each kind
-#  of object that can own an RssLog.  This should probably be changed to a
-#  polymorphic association.  Possible owners are currently:
+#  There is a separate <tt>#{object}_id</tt> field for each kind of object that
+#  can own an RssLog.  I thought it would be cleaner to use a polymorphic
+#  association, however that makes it impossible to eager-load different
+#  associations for the different types of owners.  The resulting performance
+#  hit was significant. 
 #
-#  * Observation
-#  * SpeciesList
+#  Possible owners are currently:
+#
+#  * Location
 #  * Name
-#  * Synonym (hmmm, this doesn't seem to work...)
+#  * Observation
+#  * Project
+#  * SpeciesList
 #
-#  Usage:
+#  == Adding RssLog to Model
+#
+#  I think this is relatively easy.  Try following these steps:
+#
+#  1) Add columns to rss_logs and new model tables via migration:
+#
+#       class AddRssLogToModel < ActiveRecord::Migration
+#         def self.up
+#           add_column(:rss_logs, :model_id, :integer)
+#           add_column(:models, :rss_log_id, :integer)
+#         end
+#         def self.down
+#           remove_column(:rss_logs, :model_id)
+#           remove_column(:models, :rss_log_id)
+#         end
+#       end
+#
+#  2) Inform model of the new association: (automatically inherits +log+ 
+#     method from AbstractModel)
+#
+#       belongs_to :rss_log
+#
+#  3) Inform RssLog of the new association:
+#
+#       (just search for "location" in this file)
+#
+#  4) Add partial view for +list_rss_logs+:
+#
+#       (just clone, e.g., app/views/observer/_location.rhtml)
+#
+#  5) Add "show log" link at bottom of model's show page:
+#
+#       <%= show_object_footer(@object) %>
+#
+#  6) Add +by_rss_log+ flavor to Query for your model:
+#
+#       self.allowed_model_flavors = {
+#         :Model => [
+#           :by_rss_log, # Models with RSS logs, in RSS order.
+#         ]
+#       }
+#
+#  == Usage
+#
+#  AbstractModel provides a standardized interface for all models that handle
+#  RssLog (see the list above).  These are inherited automatically by any model
+#  that contains an "rss_log_id" column.
+#
 #    rss_log = observation.rss_log
 #    rss_log.add("Made some change.")
 #    rss_log.orphan("Deleting observation.")
 #
-#  Note, after an object is deleted, no one will ever be able to change that
+#  *NOTE*: After an object is deleted, no one will ever be able to change that
 #  RssLog again -- i.e. it is orphaned.
 #
-#  Public Methods:
-#    touch
-#    add(key, args, touch?)     Add entry to notes, and save it.
-#    add_with_date(key, args, touch?) Same, but adds timestamp.
-#    orphan(title, entry)       About to delete object: add notes, clear association.
-#    text_name                  Return title string of associated object.
-#    format_name                Return formatted title string of associated object.
-#    url                        Return "show_blah/id" URL for associated object.
-#    parse_log                  Parse log, see method for description of return value.
+#  == Log Syntax
+#
+#  The log is kept in a variable-length text field, +notes+.  Each entry is
+#  stored as a single line, with newest entries first.  Each line has time
+#  stamp, localization string and any arguments required.  If the underlying
+#  object is destroyed, the log becomes orphaned, and the object's last known
+#  title string is stored at the very top of the log.
+#
+#  Here is an example of an Observation's log with five entries created by two
+#  high-level actions: it is first created along with two images and a naming;
+#  then it is destroyed, orphaning the log:
+#
+#    **__Russula%20chloroides__**%20Krbh.
+#    20091214035011 log_observation_destroyed user douglas 
+#    20090722075919 log_image_created name 51164 user douglas 
+#    20090722075919 log_image_created name 51163 user douglas 
+#    20090722075919 log_consensus_changed new **__Russula%20chloroides__**%20Krbh. old **__Fungi%20sp.__**%20L.
+#    20090722075918 log_observation_created user douglas
+#
+#  *NOTE*: All non-alphanumeric characters are escaped via private class
+#  methods +escape+ and +unescape+.
+#
+#  *NOTE*: Somewhere in 2008/2009 we changed the syntax of the logs so we could
+#  translate them.  We made the deliberate decision _not_ to convert all the
+#  pre-existing logs.  Thus you will see various syntaxes prior to this
+#  switchover.  These are processed specially in +parse_log+.
+#
+#  == Attributes
+#
+#  id::                 Locally unique numerical id, starting at 1.
+#  modified::           Date/time it was last modified.
+#  notes::              Log of changes.
+#  location::           Owning Location (or nil).
+#  name::               Owning Name (or nil).
+#  observation::        Owning Observation (or nil).
+#  project::            Owning Project (or nil).
+#  species_list::       Owning SpeciesList (or nil).
+#
+#  == Class methods
+#
+#  all_types::          Object types with RssLog's (Array of Symbol's).
+#
+#  == Instance methods
+#
+#  add_with_date::      Same, but adds timestamp.
+#  orphan::             About to delete object: add notes, clear association.
+#  orphan_title::       Get old title from top line of orphaned log.
+#  object::             Return owner object: Observation, Name, etc.
+#  text_name::          Return title string of associated object.
+#  format_name::        Return formatted title string of associated object.
+#  unique_text_name::   (same, with id tacked on to make unique)
+#  unique_format_name:: (same, with id tacked on to make unique)
+#  url::                Return "show_blah/id" URL for associated object.
+#  parse_log::          Parse log, see method for description of return value.
+#
+#  == Callbacks
+#
+#  None.
 #
 ################################################################################
 
-class RssLog < ActiveRecord::Base
-
-  belongs_to :observation
-  belongs_to :species_list
+class RssLog < AbstractModel
+  belongs_to :location
   belongs_to :name
+  belongs_to :observation
+  belongs_to :project
+  belongs_to :species_list
 
-  # Set +modified+ to now and save.
-  def touch
-    self.modified = Time.now
-    self.save
+  # List of all object types that can have RssLog's.
+  def self.all_types
+    ['observation', 'name', 'location', 'project', 'species_list']
   end
 
-  # Add entry to top of notes and save.  Changes +modified+ if +t+ is true.
-  # Pass in a localization key and a hash of arguments it requires.
-  def add(key, args=nil, t=false)
-    args ||= {}
-    entry = RssLog.escape(key)
-    entry += '(' + args.keys.sort_by {|x| x.to_s}.map do |k|
-      RssLog.escape(k) + '=' + RssLog.escape(args[k])
-    end.join(',') + ')'
-    self.notes = entry + "\n" + self.notes.to_s
-    if t
-      self.touch
+  # Returns the associated object, or nil if it's an orphan.
+  def object
+    location || name || observation || project || species_list
+  end
+
+  # Handy for prev/next handler.  Any object that responds to rss_log has an
+  # attached RssLog.  In this case, it *is* the RssLog itself, meaning it is
+  # an orphan log for a deleted object.
+  def rss_log
+    self
+  end
+
+  # Get title from top line of orphaned log.  (Should be the +format_name+.)
+  def orphan_title
+    RssLog.unescape(notes.to_s.split("\n", 2).first)
+  end
+
+  # Returns plain text title of the associated object.
+  def text_name
+    if object
+      object.text_name
     else
-      self.save
+      orphan_title.t.html_to_ascii.sub(/ (\d+)$/, '')
     end
   end
 
-  # Add entry with timestamp to top of notes and save.  Changes +modified+ if +t+
-  # is true.  Pass in a localization key and a hash of arguments it requires.
-  def add_with_date(key, args=nil, t=false)
-    add(key, args, false)
-    self.notes = Time.now.to_s + ":" + self.notes.to_s
-    if t
-      self.touch
+  # Returns plain text title of the associated object, with id tacked on.
+  def unique_text_name
+    if object
+      object.unique_text_name
     else
-      self.save
+      orphan_title.t.html_to_ascii
     end
+  end
+
+  # Returns formatted title of the associated object.
+  def format_name
+    if object
+      object.format_name
+    else
+      orphan_title.sub(/ (\d+)$/, '')
+    end
+  end
+
+  # Returns formatted title of the associated object, with id tacked on.
+  def unique_format_name
+    if object
+      object.unique_format_name
+    else
+      orphan_title
+    end
+  end
+
+  # Returns URL of <tt>show_#{object}</tt> action for the associated object.
+  # That is, the RssLog for an Observation would return
+  # <tt>"/observer/show_observation/#{id}"</tt>, and so on.  If the RssLog is
+  # an orphan, it returns the generic <tt>"/observer/show_rss_log/#{id}"</tt>
+  # URL.
+  def url
+    result = ''
+    if location_id
+      result = sprintf("/location/show_location/%d?time=%d", location_id, self.modified.tv_sec)
+    elsif name_id
+      result = sprintf("/name/show_name/%d?time=%d", name_id, self.modified.tv_sec)
+    elsif observation_id
+      result = sprintf("/observer/show_observation/%d?time=%d", observation_id, self.modified.tv_sec)
+    elsif project_id
+      result = sprintf("/project/show_project/%d?time=%d", project_id, self.modified.tv_sec)
+    elsif species_list_id
+      result = sprintf("/observer/show_species_list/%d?time=%d", species_list_id, self.modified.tv_sec)
+    else
+      result = sprintf("/observer/show_rss_log/%d?time=%d", id, self.modified.tv_sec)
+    end
+    result
+  end
+
+  # Add entry to top of notes and save.  Pass in a localization key and a hash
+  # of arguments it requires.  Changes +modified+ unless <tt>args[:touch]</tt>
+  # is false.  (Changing +modified+ has the effect of pushing it to the front
+  # of the RSS feed.)
+  #
+  #   name.rss_log.add(:log_name_updated,
+  #     :user => user.login,
+  #     :touch => false
+  #   )
+  #
+  # *NOTE*: By default it includes these in args:
+  #
+  #   :user  => User.current    # Which user is responsible?
+  #   :touch => true            # Bring to top of RSS feed?
+  #   :time  => Time.now        # Timestamp to use.
+  #   :save  => true            # Save changes?
+  #
+  def add_with_date(tag, args={})
+    args = {
+      :user  => (User.current ? User.current.login : :UNKNOWN.l),
+      :touch => true,
+      :time  => Time.now,
+      :save  => true,
+    }.merge(args)
+
+    args2 = args.dup
+    args2.delete(:touch)
+    args2.delete(:time)
+    args2.delete(:save)
+    entry = RssLog.encode(tag, args2, args[:time])
+
+    self.notes = entry + "\n" + notes.to_s
+    self.modified = args[:time] if args[:touch]
+    self.save_without_our_callbacks if args[:save]
   end
 
   # Add line with timestamp and +title+ to notes, clear references to
   # associated object, and save.  Once this is done and the owner has been
   # deleted, this RssLog will be "orphaned" and will never change again.
-  def orphan(title, key, args=nil)
-    self.observation  = nil
-    self.species_list = nil
+  #
+  #   obs.rss_log.orphan(observation.format_name, :log_observation_destroyed)
+  #
+  def orphan(title, key, args={})
+    args = args.merge(:save => false)
+    add_with_date(key, args)
+    self.notes        = RssLog.escape(title) + "\n" + notes.to_s
+    self.location     = nil
     self.name         = nil
-    add_with_date(key, args, false)
-    self.notes = RssLog.escape(title) + "\n" + self.notes.to_s
-    self.save
+    self.observation  = nil
+    self.project      = nil
+    self.species_list = nil
+    self.save_without_our_callbacks
   end
 
-  # Returns the associated object, or nil if it's an orphan.
-  def object
-    self.observation || self.species_list || self.name
-  end
-
-  # Returns title of the associated object.  If this RssLog is an orphan, it
-  # returns the first line of the notes (which is the old title from the
-  # moment before the owner was deleted, see orphan method).
-  def text_name
-    result = ''
-    if observation = self.observation
-      result = observation.unique_text_name
-    elsif species_list = self.species_list
-      result = species_list.unique_text_name
-    elsif name = self.name
-      result = name.search_name
-    else
-      result = RssLog.unescape(self.notes.to_s.split("\n").first)
-    end
-    result
-  end
-
-  # Returns title of the associated object.  If this RssLog is an orphan, it
-  # returns the first line of the notes (which is the old title from the
-  # moment before the owner was deleted, see orphan method).
-  def format_name
-    result = ''
-    if observation = self.observation
-      result = observation.unique_format_name
-    elsif species_list = self.species_list
-      result = species_list.unique_format_name
-    elsif name = self.name
-      result = name.display_name
-    else
-      result = RssLog.unescape(self.notes.to_s.split("\n").first)
-    end
-    result
-  end
-
-  # Returns URL of <tt>show_#{object}</tt> action for the associated object.
-  # That is, the RssLog for an Observation would return <tt>"/observer/show_observation/#{id}"</tt>,
-  # and so on.  If the RssLog is an orphan, it returns the generic <tt>"/observer/show_rss_log/#{id}"</tt> URL.
-  def url
-    result = ''
-    if observation = self.observation
-      result = sprintf("/observer/show_observation/%d?time=%d", observation.id, self.modified.tv_sec)
-    elsif species_list = self.species_list
-      result = sprintf("/observer/show_species_list/%d?time=%d", species_list.id, self.modified.tv_sec)
-    elsif name = self.name
-      result = sprintf("/name/show_name/%d?time=%d", name.id, self.modified.tv_sec)
-    else
-      result = sprintf("/observer/show_rss_log/%d?time=%d", self.id, self.modified.tv_sec)
-    end
-    result
-  end
-
-  # Parse the log, returning a list of triplets, one for each line, newest first:
-  #   for line in rss_log.parse_log
-  #     key, args, time = *line
-  #     print key.t(args)
+  # Parse the log, returning a list of triplets, one for each line, newest
+  # first:
+  #
+  #   for tag, args, time in rss_log.parse_log
+  #     puts "#{time.web_time}: #{key.t(args)}"
   #   end
-  def parse_log
+  #
+  def parse_log(cutoff_time=nil)
     first = true
-    self.notes.split("\n").map do |str|
-      key  = nil
-      args = {}
-      time = Time.gm(2000)
-
-      # Strip timestamp off first.
-      if str.match(/^(.*?\d\d\d\d): *(.*)/)
-        time = Time.parse($1)
-        str  = $2
+    results = []
+    for line in notes.to_s
+      if first && !line.match(/^\d{14}/)
+        tag  = :log_orphan
+        args = { :title => self.class.unescape(line) }
+        time = modified
+      elsif !line.blank?
+        tag, args, time = self.class.decode(line)
       end
-
-      # First entry of orphan log is title.
-      if first && !self.object
-        key   = :log_orphan
-        args  = { :title => RssLog.unescape(key) }
-        first = false
-
-      # This is the "new" syntax: "key(arg=val,arg=val)"
-      elsif str.match(/^([\w\%]+)\(([\w\%\=\,]*)\)$/)
-        key = $1
-        for keyval in $2.split(',')
-          if keyval.match(/=/)
-            k = $`
-            v = $'
-            k = RssLog.unescape(k).to_sym
-            v = RssLog.unescape(v)
-            args[k] = v
-          end
-        end
-        key = RssLog.unescape(key).to_sym
-
-      # These are the old log messages.
-      elsif str.match(/^Approved by (.*?)\.?$/);                          key = :log_approved_by;            args = { :user => $1 }
-      elsif str.match(/^Comment added by (.*?): (.*?)\.?$/);              key = :log_comment_added;          args = { :user => $1, :summary => $2 }
-      elsif str.match(/^Comment destroyed by (.*?): (.*?)\.?$/);          key = :log_comment_destroyed;      args = { :user => $1, :summary => $2 }
-      elsif str.match(/^Comment updated by (.*?): (.*?)\.?$/);            key = :log_comment_updated;        args = { :user => $1, :summary => $2 }
-      elsif str.match(/^Consensus established: (.*?)\.?$/);               key = :log_consensus_reached;      args = { :name => $1 }
-      elsif str.match(/^Consensus rejected (.*?) in favor of (.*?)\.?$/); key = :log_consensus_changed;      args = { :old => $1, :new => $2 }
-      elsif str.match(/^Deprecated by (.*?)\.?$/);                        key = :log_deprecated_by;          args = { :user => $1 }
-      elsif str.match(/^Deprecated in favor of (.*?) by (.*?)\.?$/);      key = :log_name_deprecated;        args = { :user => $2, :other => $1 }
-      elsif str.match(/^Image created by (.*?): (.*?)\.?$/);              key = :log_image_created;          args = { :user => $1, :name => $2 }
-      elsif str.match(/^Image destroyed by (.*?): (.*?)\.?$/);            key = :log_image_destroyed;        args = { :user => $1, :name => $2 }
-      elsif str.match(/^Image removed by (.*?): (.*?)\.?$/);              key = :log_image_removed;          args = { :user => $1, :name => $2 }
-      elsif str.match(/^Image removed (.*?)\.?$/);                        key = :log_image_removed;          args = { :user => '', :name => $1 }
-      elsif str.match(/^Image reused by (.*?): (.*?)\.?$/);               key = :log_image_reused;           args = { :user => $1, :name => $2 }
-      elsif str.match(/^Name deprecated by (.*?)\.?$/);                   key = :log_deprecated_by;          args = { :user => $1 }
-      elsif str.match(/^Name merged with (.*?)\.?$/);                     key = :log_name_merged;            args = { :name => $1 }
-      elsif str.match(/^Name updated by (.*?)\.?$/);                      key = :log_name_updated;           args = { :user => $1 }
-      elsif str.match(/^Naming changed by (.*?): (.*?)\.?$/);             key = :log_naming_updated;         args = { :user => $1, :name => $2 }
-      elsif str.match(/^Naming created by (.*?): (.*?)\.?$/);             key = :log_naming_created;         args = { :user => $1, :name => $2 }
-      elsif str.match(/^Naming deleted by (.*?): (.*?)\.?$/);             key = :log_naming_destroyed;       args = { :user => $1, :name => $2 }
-      elsif str.match(/^Observation created by (.*?)\.?$/);               key = :log_observation_created;    args = { :user => $1 }
-      elsif str.match(/^Observation destroyed by (.*?)\.?$/);             key = :log_observation_destroyed;  args = { :user => $1 }
-      elsif str.match(/^Observation updated by (.*?)\.?$/);               key = :log_observation_updated;    args = { :user => $1 }
-      elsif str.match(/^Preferred over (.*?) by (.*?)\.?$/);              key = :log_name_approved;          args = { :user => $2, :other => $1 }
-      elsif str.match(/^Species list created by (.*?)\.?$/);              key = :log_species_list_created;   args = { :user => $1 }
-      elsif str.match(/^Species list destroyed by (.*?)\.?$/);            key = :log_species_list_destroyed; args = { :user => $1 }
-      elsif str.match(/^Species list updated by (.*?)\.?$/);              key = :log_species_list_updated;   args = { :user => $1 }
-      elsif str.match(/^Updated by (.*?)\.?$/);                           key = :log_updated_by;             args = { :user => $1 }
-      elsif str.match(/^Comment, (.*?), added by (.*?)\.?$/);             key = :log_comment_added;          args = { :user => $2, :summary => $1 }
-      elsif str.match(/^Comment, (.*?), updated by (.*?)\.?$/);           key = :log_comment_updated;        args = { :user => $2, :summary => $1 }
-      elsif str.match(/^Comment, (.*?), destroyed by (.*?)\.?$/);         key = :log_comment_destroyed;      args = { :user => $2, :summary => $1 }
-      elsif str.match(/^Image, (.*?), created by (.*?)\.?$/);             key = :log_image_created;          args = { :user => $2, :name => $1 }
-      elsif str.match(/^Image, (.*?), destroyed by (.*?)\.?$/);           key = :log_image_destroyed;        args = { :user => $2, :name => $1 }
-      elsif str.match(/^Image, (.*?), removed by (.*?)\.?$/);             key = :log_image_removed;          args = { :user => $2, :name => $1 }
-      elsif str.match(/^Image, (.*?), updated by (.*?)\.?$/);             key = :log_image_updated;          args = { :user => $2, :name => $1 }
-      elsif str.match(/^Image, (.*?), reused by (.*?)\.?$/);              key = :log_image_reused;           args = { :user => $2, :name => $1 }
-      elsif str.match(/^Observation, (.*?), destroyed by (.*?)\.?$/);     key = :log_observation_destroyed2; args = { :user => $2, :name => $1 }
-      elsif str.match(/^(.*?) merged with (.*?)\.?$/);                    key = :log_name_merged;            args = { :name => $2 }
-      else
-        key = :log_ancient
-        args = { :string => str }
-      end
-
-      [key, args, time]
+      break if cutoff_time && time < cutoff_time
+      results << [tag, args, time]
+      first = false
     end
+    return results
   end
 
-  # Protect special characters in string for log encoder/decoder.
+################################################################################
+
+private
+
+  # Encode a line of the log.  Pass in a triplet:
+  # tag:: Symbol
+  # args:: Hash
+  # time:: TimeWithZone
+  def self.encode(tag, args, time)
+    time = time.utc.strftime('%Y%m%d%H%M%S')
+    tag = tag.to_s
+    raise "Invalid rss log tag: #{tag}" if tag.blank?
+    args = args.keys.sort_by(&:to_s).map do |key|
+             [key.to_s, escape(args[key])]
+           end.flatten
+    [time, tag, *args].map do |x|
+      # Make *absolutely* sure no logs are ever created with fields missing,
+      # since this can royally f--- up the parser and crash things.
+      x.blank? ? '.' : x.gsub(/\s+/, '_')
+    end.join(' ')
+  end
+
+  # Decode a line from the log.  Returns a triplet:
+  # tag:: Symbol
+  # args:: Hash
+  # time:: TimeWithZone
+  def self.decode(line)
+    time, tag, *args = line.split
+    odd = false
+    args.map! do |x|
+      odd = !odd
+      odd ? x.to_sym : unescape(x)
+    end
+    args << '' if odd
+    begin
+      time2 = Time.utc(time[0,4], time[4,2], time[6,2],
+                      time[8,2], time[10,2], time[12,2]).in_time_zone
+      time = time2
+    rescue => e
+      # Caught this error in the log, not sure how/why.
+      raise "rss_log timestamp corrupt: time=#{time.inspect}, err=#{e}"
+    end
+    [tag.to_sym, Hash[*args], time]
+  end
+
+  # Protect special characters (whitespace) in string for log encoder/decoder.
   def self.escape(str)
-    str.to_s.gsub(/\W/) { |x| '%%%02X' % x[0] }
+    str.to_s.gsub(/[%\s]/) { '%%%02X' % $&[0] }
   end
 
   # Reverse protection of special characters in string for log encoder/decoder.

@@ -1,0 +1,29 @@
+<td width="100%">
+  <p>
+    <%= :CREATED.t %>:
+      <span class="Data"><%= comment.created.web_time %></span><br/>
+    <%= :BY.t %>:
+      <%= user_link(comment.user) %>
+      <% if check_permission(comment.user_id) %>
+        [<%= link_to(:EDIT.t, :controller => 'comment',
+                     :action => 'edit_comment', :id => comment.id,
+                     :params => query_params) %> |
+        <%= link_to(:DESTROY.t, { :controller => 'comment',
+                    :action => 'destroy_comment', :id => comment.id,
+                    :params => query_params },
+                    { :confirm => :are_you_sure.l }) %>]
+      <% end %><br/>
+    <%= :SUMMARY.t %>:
+      <span class="Data"><%= comment.summary.tl %></span>
+  </p>
+
+  <%= sanitize(comment.comment).tpl %>
+</td>
+
+<td>
+  <% user = comment.user
+  if user.image_id %>
+    <%= thumbnail(user.image_id, :border => 0, :size => :thumbnail,
+                 :link => :show_user, :user => user.id, :votes => false) %>
+  <% end %>
+</td>

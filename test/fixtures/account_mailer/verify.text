@@ -1,12 +1,11 @@
-From: accounts@mushroomobserver.org
+From: accounts@localhost
 To: mary@collectivesource.com
-Bcc: mo@collectivesource.com
 Subject: [MO] Email Verification
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 
 Hello mary
 
-Please click on the following link to verify that you received this email and activate your Mushroom Observer account:
+Please click the following link to verify that you received this email and activate your Mushroom Observer account:
 
-http://localhost:3000/account/verify/2
+http://localhost:3000/account/verify/2?auth_code=cb0b1a56ab378a7c4f8ecd172dccf8b3c4a7f0ba

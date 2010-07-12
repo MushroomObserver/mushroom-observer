@@ -1,0 +1,19 @@
+<!--[form:name_description]-->
+
+<%= render(:partial => 'shared/form_description',
+           :locals => { :form => form }) %>
+
+<label><%= :DESCRIPTION.t %>:</label><br/>
+<%= render(:partial => 'shared/textilize_help') %>
+<br/>
+
+<% rank = rank_as_lower_string(@description.parent.rank) %>
+<% for f in NameDescription.all_note_fields %>
+  <p>
+    <label for="description_<%= f %>"><%= :"form_names_#{f}".t %>:</label>
+    <span class="HelpNote"><%= :"form_names_#{f}_help".l(:rank => rank) %></span><br/>
+    <%= form.text_area(f, :cols => 80) %>
+  </p>
+<% end %>
+
+<!--[eoform:name_description]-->

@@ -1,0 +1,6 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+albion_readers:
+  location_description_id: 1
+  user_group_id: 6
+

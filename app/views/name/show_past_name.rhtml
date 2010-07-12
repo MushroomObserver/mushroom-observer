@@ -1,84 +1,23 @@
 <%
-  @title = :show_name_past_title.t(:version => @past_name.version, :name => @past_name.display_name)
-  String.register_name(@past_name)
-
-  correct_spelling = nil
-  if @past_name.misspelling
-    # Old correct spellings could have gotten merged with something else and no longer exist.
-    begin; correct_spelling = Name.find(@past_name.correct_spelling_id); rescue; end
-  end
+  @title = :show_past_name_title.t(
+    :num  => @name.version,
+    :name => @name.display_name
+  )
 %>
 
 <table cellpadding="10">
   <tr>
-
     <td valign="top">
       <p>
-        <%= :app_rank.t %>: <%= @past_name.rank %><br/>
-        <%= :app_name_status.t %>: <%= @past_name.status %>
-          <% if @past_name.misspelling %>
-            (<%= :app_misspelled.t %>)
-          <% end %><br/>
-        <%= :app_name.t %>: <%= h(@past_name.text_name) %><br/>
-        <%= :app_author.t %>: <%= sanitize(@past_name.author.to_s).t %><br/>
-        <%= :app_citation.t %>: <%= sanitize(@past_name.citation.to_s).t %><br/>
-        <% if correct_spelling %>
-          <%= :show_name_misspelling_correct.t %>:
-            <%= link_to(correct_spelling.display_name.t, :action => :show_name, :id => correct_spelling.id) %><br/>
-        <% end %>
-        <%= :show_name_content_status.t %>: <%= @past_name.review_status.t %><br/>
-        <% if @past_name.reviewer %>
-          <span class="HelpNote">
-            &nbsp;&nbsp;(<%= :show_name_latest_review.t(
-              :date => @past_name.last_review ? @past_name.last_review.strftime("%Y-%m-%d") : :app_unknown.t,
-              :user => user_link(@past_name.reviewer, @past_name.reviewer.login)
-            ) %>)
-          </span><br/>
-        <% end %>
+        <%= render(:partial => 'name', :object => @name, :locals =>
+                   { :synonyms => false }) %>
       </p>
     </td>
 
     <td valign="top" width="50%">
-      <%= :show_name_other_versions.t %>:<br/>
-      <% for v in @other_versions %>
-        <%= '<b>' if !v.deprecated %>
-        <% if v.version == @past_name.version %>
-          <%= "%s: %s" % [v.version, v.display_name.t] %>
-        <% elsif v.version == @name.version %>
-          <%= link_to("%s: %s" % [v.version, v.display_name.t],
-                      :action => 'show_name', :id => @name.id) %>
-        <% else %>
-          <%= link_to("%s: %s" % [v.version, v.display_name.t],
-                      :action => 'show_past_name', :id => @name.id, :version => v.version) %>
-        <% end %>
-        <%= '</b>' if !v.deprecated %>
-        <br/>
-      <% end %>
+      <%= show_past_versions(@name, :bold => lambda {|v| !v.deprecated}) %>
     </td>
-
-  </tr>
-  <tr>
-
-    <td colspan="2">
-      <% odd_or_even = 0
-      for f in Name.all_note_fields
-        value = @past_name.send(f).to_s
-        if value != ''
-          odd_or_even = 1 - odd_or_even %>
-          <%= "form_names_#{f}".to_sym.t %>:
-          <div class="ListLine<%= odd_or_even %>" style='margin-left:10px; margin-right:10px; padding-left:10px; padding-right:10px; padding-top:10px; padding-bottom:10px; border:1px dotted; '>
-            <%= sanitize(value).tpl %>
-          </div>
-          <br/>
-        <% end %>
-      <% end %>
-      <p>
-        <span class="Date">
-          <%= :app_created.t(:type => :app_name.l, :date => @past_name.created) %><br/>
-          <%= :app_last_modified.t(:date => @past_name.created, :user => user_link(@past_name.user)) %><br/>
-        </span>
-      </p>
-    </td>
-
   </tr>
 </table>
+
+<%= show_object_footer(@name) %>

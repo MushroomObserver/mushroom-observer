@@ -3,7 +3,7 @@
 <%= :ask_webmaster_note.tp(:todo_list => "#{SVN_REPOSITORY}/trunk/TODO") %>
 
 <% form_tag(:action => 'ask_webmaster_question') do %>
-  <br/><center><%= submit_tag :app_send.l %></center>
+  <br/><center><%= submit_tag :SEND.l %></center>
 
   <label for="user_email"><%= :ask_webmaster_your_email.t %>:</label><br/>
   <%= text_field("user", "email", :value => @email, :size => 60) %><br/><br/>
@@ -11,5 +11,5 @@
   <label for="question_content"><%= :ask_webmaster_question.t %>:</label><br/>
   <%= text_area('question', 'content', :value => @content, :cols => 80) %>
 
-  <%= focus_on(@email && @email != '' && !@email_error ? 'question_content' : 'user_email') %>
+  <%= focus_on(!@email.blank? && !@email_error ? 'question_content' : 'user_email') %>
 <% end %>

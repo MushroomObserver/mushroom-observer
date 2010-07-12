@@ -1,0 +1,36 @@
+<%
+  comments = object.comments.sort_by(&:created).reverse
+  if limit
+    and_more = comments.length - limit
+    comments = comments[0..limit-1]
+  end
+%>
+
+<% if controls
+  link = link_to(:"show_comments_add_comment".t, :controller => 'comment',
+                 :action => 'add_comment', :id => object.id,
+                 :type => object.class.name, :params => query_params)
+  if comments.empty? %>
+    <p><%= :"show_comments_no_comments_yet".t + indent + link %></p>
+  <% else %>
+    <p><%= :COMMENTS.t + ':' + indent + link %></p>
+  <% end
+elsif comments.any? %>
+  <p><%= :COMMENTS.t %>:</p>
+<% end %>
+
+<table cellpadding="5" cellspacing="0" width="100%">
+  <% odd_or_even = 0
+  for comment in comments
+    odd_or_even = 1 - odd_or_even %>
+    <tr valign="top" class="ListLine<%= odd_or_even %>">
+      <%= render(:partial => 'comment/comment', :object => comment) %>
+    </tr>
+  <% end %>
+</table>
+
+<%= if limit and (and_more > 0)
+  link_to(:show_comments_and_more.t(:num => and_more),
+          :controller => 'comment', :action => 'show_comments_for_object',
+          :id => object.id, :type => object.class.name)
+end %>

@@ -1,25 +1,8 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 require 'account_mailer'
 
-class AccountMailerTest < Test::Unit::TestCase
+class AccountMailerTest < UnitTestCase
   FIXTURES_PATH = File.dirname(__FILE__) + '/../fixtures/account_mailer'
-
-  fixtures :comments
-  fixtures :images
-  fixtures :images_observations
-  fixtures :licenses
-  fixtures :locations
-  fixtures :names
-  fixtures :naming_reasons
-  fixtures :namings
-  fixtures :notifications
-  fixtures :observations
-  fixtures :past_locations
-  fixtures :past_names
-  fixtures :projects
-  fixtures :user_groups
-  fixtures :user_groups_users
-  fixtures :users
 
   def setup
     Locale.code = "en-US"
@@ -30,225 +13,215 @@ class AccountMailerTest < Test::Unit::TestCase
     @expected.mime_version = '1.0'
   end
 
-  # At the moment at least Redcloth produces slightly different output on Nathan's
-  # laptop than on Jason's.  I've gotten it down to just these <br>'s.  It's easiest
-  # to convert everything to Nathan's format.  (Arg, and some extraneous blank
-  # lines and leading whitespace -- I'll remove them all from both, so there.)
+  # At the moment at least Redcloth produces slightly different output on
+  # Nathan's laptop than on Jason's.  I'm trying to reduce both responses to a
+  # common form so that we don't need to continue to tweak two separate copies
+  # of every email response.  But I'm failing...
   def fix_mac_vs_pc!(email)
     email.gsub!(/<br \/>\n/, '<br/>')
     email.gsub!(/&#38;/, '&amp;')
     email.gsub!(/ &#8212;/, '&#8212;')
-    email.gsub!(/^ +/, '')
+    email.gsub!(/^\s+/, '')
     email.gsub!(/[\n\r]+/, "\n")
   end
 
+  # Run off an email in both HTML and text form.
+  def run_mail_test(name, user=nil, &block)
+    text_files = Dir.glob("#{FIXTURES_PATH}/#{name}.text*").
+                     reject {|x| x.match(/\.new$/)}
+    html_files = Dir.glob("#{FIXTURES_PATH}/#{name}.html*").
+                     reject {|x| x.match(/\.new$/)}
+
+    if !text_files.empty?
+      user.email_html = false if user
+      email = block.call.encoded
+      assert_string_equal_file(email, *text_files)
+    end
+
+    if !html_files.empty?
+      user.email_html = true if user
+      email = block.call.encoded
+      fix_mac_vs_pc!(email)
+      assert_string_equal_file(email, *html_files)
+    end
+  end
+
+################################################################################
+
   def test_email_1
-    email = AccountMailer.create_admin_request(@katrina, @rolf,
-      @eol_project, 'Please do something or other', 'and this is why...').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/admin_request.html", "#{FIXTURES_PATH}/admin_request.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_admin_request(@katrina, @rolf,
-      @eol_project, 'Please do something or other', 'and this is why...').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/admin_request.text")
+    project = projects(:eol_project)
+    run_mail_test('admin_request', @rolf) do
+      AccountMailer.create_admin_request(@katrina, @rolf, project,
+        'Please do something or other', 'and this is why...')
+    end
   end
 
   def test_email_2
-    email = AccountMailer.create_author_request(@katrina, @rolf,
-      @coprinus_comatus, 'Please do something or other', 'and this is why...').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/author_request.html", "#{FIXTURES_PATH}/author_request.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_author_request(@katrina, @rolf,
-      @coprinus_comatus, 'Please do something or other', 'and this is why...').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/author_request.text")
+    obj = names(:coprinus_comatus)
+    run_mail_test('author_request', @rolf) do
+      AccountMailer.create_author_request(@katrina, @rolf, obj.description,
+                        'Please do something or other', 'and this is why...')
+    end
   end
 
   def test_email_3
-    email = AccountMailer.create_comment(@dick, @rolf, @minimal_unknown, @another_comment).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/comment_response.html", "#{FIXTURES_PATH}/comment_response.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_comment(@dick, @rolf, @minimal_unknown, @another_comment).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/comment_response.text")
+    obs = observations(:minimal_unknown)
+    comment = comments(:another_comment)
+    run_mail_test('comment_response', @rolf) do
+      email = AccountMailer.create_comment(@dick, @rolf, obs, comment)
+    end
   end
 
   def test_email_4
-    email = AccountMailer.create_comment(@rolf, @mary,
-      @minimal_unknown, @minimal_comment).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/comment.html", "#{FIXTURES_PATH}/comment.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_comment(@rolf, @mary,
-      @minimal_unknown, @minimal_comment).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/comment.text")
+    obs = observations(:minimal_unknown)
+    comment = comments(:minimal_comment)
+    run_mail_test('comment', @mary) do
+      email = AccountMailer.create_comment(@rolf, @mary, obs, comment)
+    end
   end
 
   def test_email_5
-    email = AccountMailer.create_commercial_inquiry(@mary, @commercial_inquiry_image,
-      'Did test_commercial_inquiry work?').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/commercial_inquiry.html", "#{FIXTURES_PATH}/commercial_inquiry.html.mac")
-    @commercial_inquiry_image.user.email_html = false
-    email = AccountMailer.create_commercial_inquiry(@mary, @commercial_inquiry_image,
-      'Did test_commercial_inquiry work?').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/commercial_inquiry.text")
+    image = images(:commercial_inquiry_image)
+    run_mail_test('commercial_inquiry', image.user) do
+      AccountMailer.create_commercial_inquiry(@mary, image,
+                                          'Did test_commercial_inquiry work?')
+    end
   end
 
   def test_email_6
+    obs = observations(:coprinus_comatus_obs)
+    name1 = names(:agaricus_campestris)
+    name2 = obs.name
+
     # The umlaut in Mull. is making it do weird encoding on the subject line.
-    @coprinus_comatus.search_name = @coprinus_comatus.search_name.to_ascii
-    email = AccountMailer.create_consensus_change(@dick, @mary, @coprinus_comatus_obs, @agaricus_campestris, @coprinus_comatus, @coprinus_comatus_obs.created).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/consensus_change.html", "#{FIXTURES_PATH}/consensus_change.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_consensus_change(@dick, @mary, @coprinus_comatus_obs, @agaricus_campestris, @coprinus_comatus, @coprinus_comatus_obs.created).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/consensus_change.text")
+    name2.search_name = name2.search_name.to_ascii
+    name2.display_name = name2.display_name.to_ascii
+
+    run_mail_test('consensus_change', @mary) do
+      AccountMailer.create_consensus_change(@dick, @mary, obs, name1, name2,
+                                            obs.created)
+    end
   end
 
   def test_email_7
-    email = AccountMailer.create_denied(@junk).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/denied.text")
+    run_mail_test('denied') do
+      AccountMailer.create_denied(@junk)
+    end
   end
 
   def test_email_8
-    email = AccountMailer.create_email_features(@rolf, 'A feature').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/email_features.html", "#{FIXTURES_PATH}/email_features.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_email_features(@rolf, 'A feature').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/email_features.text")
+    run_mail_test('email_features', @rolf) do
+      AccountMailer.create_email_features(@rolf, 'A feature')
+    end
   end
 
   def test_email_9
-    email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 1, 2, @peltigera.review_status).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.html", "#{FIXTURES_PATH}/name_change.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 1, 2, @peltigera.review_status).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change.text.pc",
-                                    "#{FIXTURES_PATH}/name_change.text.mac")
-  end
-
-  def test_email_9b
-    # Test for bug that occurred in the wild
-    email = AccountMailer.create_name_change(@dick, @mary, @peltigera.modified, @peltigera, 0, 1, @peltigera.review_status).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_change2.html", "#{FIXTURES_PATH}/name_change2.html.mac")
+    loc = locations(:albion)
+    desc = loc.description
+    run_mail_test('location_change', @mary) do
+      AccountMailer.create_location_change(@dick, @mary, loc.modified, loc,
+                                           desc, 1, 2, 1, 2)
+    end
   end
 
   def test_email_10
-    email = AccountMailer.create_name_proposal(@mary, @rolf, @coprinus_comatus_other_naming, @coprinus_comatus_obs).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_proposal.html", "#{FIXTURES_PATH}/name_proposal.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_name_proposal(@mary, @rolf, @coprinus_comatus_other_naming, @coprinus_comatus_obs).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/name_proposal.text")
+    name = names(:peltigera)
+    desc = name.description
+    run_mail_test('name_change', @mary) do
+      AccountMailer.create_name_change(@dick, @mary, name.modified, name, desc,
+                                       1, 2, 1, 2, desc.review_status)
+    end
   end
 
   def test_email_11
-    email = AccountMailer.create_naming_for_observer(@rolf, @agaricus_campestris_naming,
-      @agaricus_campestris_notification_with_note).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/naming_for_observer.html", "#{FIXTURES_PATH}/naming_for_observer.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_naming_for_observer(@rolf, @agaricus_campestris_naming,
-      @agaricus_campestris_notification_with_note).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/naming_for_observer.text")
+    # Test for bug that occurred in the wild
+    name = names(:peltigera)
+    desc = name.description
+    run_mail_test('name_change2', @mary) do
+      AccountMailer.create_name_change(@dick, @mary, name.modified, name, desc,
+                                       0, 1, 0, 1, desc.review_status)
+    end
   end
 
   def test_email_12
-    email = AccountMailer.create_naming_for_tracker(@mary, @agaricus_campestris_naming).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/naming_for_tracker.html", "#{FIXTURES_PATH}/naming_for_tracker.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_naming_for_tracker(@mary, @agaricus_campestris_naming).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/naming_for_tracker.text")
+    naming = namings(:coprinus_comatus_other_naming)
+    obs = observations(:coprinus_comatus_obs)
+    run_mail_test('name_proposal', @rolf) do
+      AccountMailer.create_name_proposal(@mary, @rolf, naming, obs)
+    end
   end
 
   def test_email_13
-    email = AccountMailer.create_new_password(@rolf, 'A password').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/new_password.html", "#{FIXTURES_PATH}/new_password.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_new_password(@rolf, 'A password').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/new_password.text")
+    naming = namings(:agaricus_campestris_naming)
+    notification = notifications(:agaricus_campestris_notification_with_note)
+    run_mail_test('naming_for_observer', @rolf) do
+      AccountMailer.create_naming_for_observer(@rolf, naming, notification)
+    end
   end
 
   def test_email_14
-    # The umlaut in Mull. is making it do weird encoding on the subject line.
-    @coprinus_comatus_obs.name.search_name = @coprinus_comatus.search_name.to_ascii
-    @coprinus_comatus_obs.name.display_name = @coprinus_comatus.display_name.to_ascii
-    email = AccountMailer.create_observation_change(@dick, @mary, @coprinus_comatus_obs,
-      'date,location,specimen,is_collection_location,notes,thumb_image_id,added_image,removed_image',
-      @coprinus_comatus_obs.created).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_change.html", "#{FIXTURES_PATH}/observation_change.html.mac")
-    email = AccountMailer.create_observation_change(@dick, @mary, nil,
-      '**__Coprinus comatus__** L. (123)', @coprinus_comatus_obs.created).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_destroy.html")
-    @mary.email_html = false
-    email = AccountMailer.create_observation_change(@dick, @mary, @coprinus_comatus_obs,
-      'date,location,specimen,is_collection_location,notes,thumb_image_id,added_image,removed_image',
-      @coprinus_comatus_obs.created).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_change.text")
-    email = AccountMailer.create_observation_change(@dick, @mary, nil,
-      '**__Coprinus comatus__** L. (123)', @coprinus_comatus_obs.created).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_destroy.text")
+    naming = namings(:agaricus_campestris_naming)
+    run_mail_test('naming_for_tracker', @mary) do
+      AccountMailer.create_naming_for_tracker(@mary, naming)
+    end
   end
 
   def test_email_15
-    email = AccountMailer.create_observation_question(@rolf, @detailed_unknown,
-      'Where did you find it?').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_question.html", "#{FIXTURES_PATH}/observation_question.html.mac")
-    @detailed_unknown.user.email_html = false
-    email = AccountMailer.create_observation_question(@rolf, @detailed_unknown,
-      'Where did you find it?').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/observation_question.text")
+    run_mail_test('new_password', @rolf) do
+      AccountMailer.create_new_password(@rolf, 'A password')
+    end
   end
 
   def test_email_16
-    email = AccountMailer.create_publish_name(@mary, @rolf, @agaricus_campestris).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/publish_name.html", "#{FIXTURES_PATH}/publish_name.html.mac")
-    @rolf.email_html = false
-    email = AccountMailer.create_publish_name(@mary, @rolf, @agaricus_campestris).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/publish_name.text")
+    obs = observations(:coprinus_comatus_obs)
+    name = obs.name
+
+    # The umlaut in Mull. is making it do weird encoding on the subject line.
+    name.search_name = name.search_name.to_ascii
+    name.display_name = name.display_name.to_ascii
+
+    run_mail_test('observation_change', @mary) do
+      AccountMailer.create_observation_change(@dick, @mary, obs,
+        'date,location,specimen,is_collection_location,notes,' +
+        'thumb_image_id,added_image,removed_image', obs.created)
+    end
+    run_mail_test('observation_destroy', @mary) do
+      AccountMailer.create_observation_change(@dick, @mary, nil,
+        '**__Coprinus comatus__** L. (123)', obs.created)
+    end
   end
 
   def test_email_17
-    email = AccountMailer.create_user_question(@rolf, @mary, 'Interesting idea',
-      'Shall we discuss it in email?').encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/user_question.html", "#{FIXTURES_PATH}/user_question.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_user_question(@rolf, @mary, 'Interesting idea',
-      'Shall we discuss it in email?').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/user_question.text")
+    obs = observations(:detailed_unknown)
+    run_mail_test('observation_question', obs.user) do
+      AccountMailer.create_observation_question(@rolf, obs,
+        'Where did you find it?')
+    end
   end
 
   def test_email_18
-    email = AccountMailer.create_verify(@mary).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/verify.html", "#{FIXTURES_PATH}/verify.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_verify(@mary).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/verify.text")
+    name = names(:agaricus_campestris)
+    run_mail_test('publish_name', @rolf) do
+      AccountMailer.create_publish_name(@mary, @rolf, name)
+    end
   end
 
   def test_email_19
-    email = AccountMailer.create_webmaster_question(@mary.email, 'A question').encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/webmaster_question.text")
+    run_mail_test('user_question', @mary) do
+      AccountMailer.create_user_question(@rolf, @mary,
+        'Interesting idea', 'Shall we discuss it in email?')
+    end
   end
 
   def test_email_20
-    email = AccountMailer.create_location_change(@dick, @mary, @albion.modified, @albion, 0, 1).encoded
-    fix_mac_vs_pc!(email)
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/location_change.html", "#{FIXTURES_PATH}/location_change.html.mac")
-    @mary.email_html = false
-    email = AccountMailer.create_location_change(@dick, @mary, @albion.modified, @albion, 0, 1).encoded
-    assert_string_equal_file(email, "#{FIXTURES_PATH}/location_change.text")
+    run_mail_test('verify', @mary) do
+      AccountMailer.create_verify(@mary)
+    end
+  end
+
+  def test_email_21
+    run_mail_test('webmaster_question') do
+      AccountMailer.create_webmaster_question(@mary.email, 'A question')
+    end
   end
 end

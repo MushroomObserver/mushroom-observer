@@ -3,49 +3,73 @@
 # Rolf is an experienced user
 rolf:
   id: 1
+  sync_id: 1xx1
   login: rolf
   name: Rolf Singer
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: rolf@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10
+  created_here: true
+  locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Mary has no images
 mary:
   id: 2
+  sync_id: 2xx1
   login: mary
   name: Mary Newbie
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: mary@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10
+  created_here: true
+  locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Junk gets denied
 junk:
   id: 3
+  sync_id: 3xx1
   login: junk
   name: Junk Box
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: junk@collectivesource.com
   contribution: 10
+  created_here: true
+  locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Need third for testing votes
 dick:
   id: 4
+  sync_id: 4xx1
   login: dick
   name: Tricky Dick
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: dick@collectivesource.com
   verified: 2006-03-02 21:14:00
   contribution: 10
+  created_here: true
+  locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
 
 # Need third for testing votes
 katrina:
   id: 5
+  sync_id: 5xx1
   login: katrina
   name: Katrina
   password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
   email: katrina@collectivesource.com
   verified: 2008-03-02 21:14:00
   contribution: 10
+  created_here: true
+  thumbnail_size: :thumbnail
+  image_size: :medium
 

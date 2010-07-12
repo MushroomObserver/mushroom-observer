@@ -1,0 +1,45 @@
+<table cellpadding="10" width="100%">
+  <tr>
+    <td align="center" valign="middle" width="160">
+      <%= if user.image_id
+        thumbnail(user.image_id, :border => 0, :link => :show_user,
+                  :user => user, :votes => false, :size => :thumbnail)
+      end %>
+    </td>
+
+<% if @layout['vertical_layout'] %>
+  </tr>
+  <tr>
+    <td align="center" valign="middle">
+<% else %>
+    <td valign="middle">
+<% end %>
+
+      <span class="ListWhat">
+        <%= link_to(user.unique_text_name, :action => 'show_user',
+                   :id => user.id, :params => query_params) %>
+      </span><br/>
+
+      <% if user.location %>
+        <span class="ListWhere">
+          <%= location_link(nil, user.location) %>
+        </span><br/>
+      <% end %><br/>
+
+      <span class="ListDetail">
+        <%= :list_users_joined.t %>:
+        <%= user.created.web_date %>
+      </span><br/>
+
+      <span class="ListDetail">
+        <%= :list_users_contribution.t %>:
+        <%= user.contribution %>
+      </span><br/>
+
+      <span class="ListDetail">
+        <%= :Observations.t %>:
+        <%= user.observations.count %>
+      </span><br/>
+    </td>
+  </tr>
+</table>

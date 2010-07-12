@@ -1,7 +1,9 @@
-/* Global default colors */
 body {
-    background-color: #ff0000; /* campestris */
-    color: #000000; /* cupreobrunneus */
+  background-color: #DD00DD;
+  color: #000000;
+}
+.LeftSide {
+  background-color: #FFFF00;
 }
 
 .Admin {
@@ -12,7 +14,18 @@ body {
   padding-bottom: 12px;
   margin-bottom: 20px;
 }
-/* Colors for the left hand panel */
-.LeftSide {
-    background-color: #ffff00; /* augustus */
-}
+
+img { border-color: #000000; }
+a img:hover { border-color: #ff0000; }
+
+li.selected { background-color: #ff0000 ! important }
+
+.ListLine0                            { background: #aa00aa; }
+.ListLine0 div.textile table          { background: #220022; }
+.ListLine0 div.textile table table td { background: #aa00aa; }
+
+.ListLine1                            { background: #aaaa00; }
+.ListLine1 div.textile table          { background: #222200; }
+.ListLine1 div.textile table table td { background: #aaaa00; }
+
+table.vote_meter div.on { background: #000000 }

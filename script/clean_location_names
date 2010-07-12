@@ -1,0 +1,31 @@
+#!/usr/bin/ruby
+require 'config/boot'
+require 'config/environment'
+
+test = (ARGV[0] == '-v')
+
+i = 0
+num = Location.count
+old_pct = nil
+for id, name, old_name in Location.connection.select_rows %(
+  SELECT id, name, search_name from locations
+)
+  i += 1
+  pct = 100 * i / num
+  if pct != old_pct
+    $stderr.print "\r#{pct}%"
+    $stderr.flush
+  end
+  old_pct = pct
+
+  new_name = Location.clean_name(name)
+  if new_name != old_name
+    if test
+      puts "#{id} #{name}\t#{old_name}\t#{new_name}"
+    else
+      Location.connection.update %(
+        UPDATE locations SET search_name = '#{new_name}' WHERE id = #{id}
+      )
+    end
+  end
+end

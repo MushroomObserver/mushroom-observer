@@ -1,0 +1,5 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+albion_admins:
+  location_description_id: 1
+  user_group_id: 1

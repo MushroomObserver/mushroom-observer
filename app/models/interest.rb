@@ -1,59 +1,83 @@
 #
-#  Simple model for registering interest in arbitrary objects.  There are
-#  absolutely no restrictions on what kind of objects may be referred to.
+#  = Interest Model
 #
-#  In practice "interest" in an object means that the user receives some sort
-#  of notification whenever anything changes or happens to that object.
+#  Simple model for registering interest in arbitrary objects.  Any User may
+#  register either positive interest ("watch") or negative interest ("ignore")
+#  in any object.
 #
-#  The only object this works for right now is Observation: users expressing
-#  interest in an observation will be notified whenever someone comments on
-#  it, proposes a new name, or the consensus name changes.
+#  In practice this means that the User receives some sort of notification
+#  whenever anything changes or happens to objects that they are watching; and
+#  that they stop receiving any sort of notifications about objects they are
+#  ignoring (even if they own it, for example).
 #
-#  The basic properties of an "interest" object are:
+#  Currently this functionality is implemented for:
 #
-#  1. refers to an object (via polymorphic relationship)
-#  2. has an owner (user who is expressing interest or lack thereof)
-#  3. has a state (true or false: interested or not)
+#  * Location
+#  * LocationDescription
+#  * Name
+#  * NameDescription
+#  * Observation
+#  * Project
 #
-#  Note that there are effectively three states: explicit interest, explicit
-#  lack of interest, and no preference whatsoever.  The last state is what
-#  is expressed by absence of an Interest instance linking a given user to a
-#  given object.  In this case the user's global preferences and other standard
-#  heuristics are consulted to determine whether that user is notified of
-#  changes to that object.
+#  == Attributes
 #
-#  Public Methods:
-#    interest.user          User who is expressing interest.
-#    interest.object        Object user is interested in.
-#    interest.state         True = interested, false = not interested.
-#    interest.summary       "Watching Observation: **__Amanita velosa__**"
+#  id::             Locally unique numerical id, starting at 1.
+#  sync_id::        Globally unique alphanumeric id, used to sync with remote servers.
+#  modified::       Date/time it was last modified.
+#  user::           User that created it.
+#  object::         Object in question.
+#  state::          Either true (watching) or false (ignoring).
 #
-#    Interest.find_all_by_object(object)   Look up all interest in an object.
+#  == Class methods
+#
+#  find_all_by_object::   Find all Interests for a given object.
+#
+#  == Instance methods
+#
+#  summary::        Human-readable summary of state.
+#  text_name::      Alias for +summary+ for debugging.
+#
+#  == Callbacks
+#
+#  None.
+#
+#  == Polymorphism
+#
+#  See comments under Comment.
 #
 ################################################################################
 
-class Interest < ActiveRecord::Base
-
+class Interest < AbstractModel
   belongs_to :object, :polymorphic => true
   belongs_to :user
 
-  # Look up all interest in a given object.
-  def self.find_all_by_object(object)
-    self.find(:all, :conditions => ['object_type = ? and object_id = ?', object.class.to_s, object.id], :include => 'user')
+  # Find all Interests associated with a given object.  This should really be
+  # created magically like all the other find_all_by_xxx methods, but the
+  # polymorphism messes it up.
+  def self.find_all_by_object(obj)
+    if obj.is_a?(ActiveRecord::Base) && obj.id
+      find_all_by_object_type_and_object_id(obj.class.to_s, obj.id)
+    end
   end
 
-  # To be compatible with Notification: returns string summarizing the object,
-  # e.g., "Watching observation Amanita virosa".
+  # To be compatible with Notification need to have summary string:
+  #
+  #   "Watching Observation: Amanita virosa"
+  #   "Ignoring Location: Albion, California, USA"
+  #
   def summary
-    (self.state ? :app_watching.l : :app_ignoring.l) + ' ' +
+    (self.state ? :WATCHING.l : :IGNORING.l) + ' ' +
     self.object_type.underscore.to_sym.l + ': ' +
     (self.object ? self.object.unique_format_name : '--')
   end
+  alias_method :text_name, :summary
 
-  protected
+################################################################################
+
+protected
 
   def validate # :nodoc:
-    if !self.user
+    if !self.user && !User.current
       errors.add(:user, :validate_interest_user_missing.t)
     end
 

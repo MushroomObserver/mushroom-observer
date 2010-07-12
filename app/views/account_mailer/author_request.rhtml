@@ -1,21 +1,23 @@
 <%
+  type = @object.type_tag
+
   intro = :email_author_request_intro.l(
     :user => @sender.legal_name,
     :email => @sender.email,
-    :object => @object.unique_format_name
+    :object => @object.parent.unique_format_name
   )
 
   handy_links = :email_handy_links
 
   links = []
   links.push([:author_request_add_author.l,
-    "#{DOMAIN}/#{@object.show_controller}/review_authors/#{@object.id}?add=#{@sender.id}"])
+    "#{HTTP_DOMAIN}/observer/review_authors/#{@object.id}?type=#{type}&add=#{@sender.id}"])
   links.push([:email_links_show_user.l,
-    "#{DOMAIN}/observer/show_user/#{@sender.id}"])
+    "#{HTTP_DOMAIN}/observer/show_user/#{@sender.id}"])
   links.push([:email_links_latest_changes.l,
-    DOMAIN])
+    HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
   <title>Mushroom Observer: <%= @subject %></title>
@@ -31,12 +33,11 @@ if @user.email_html ######################################################### %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
-<%= :email_report_abuse.tp %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= @message.tp.html_to_ascii %>
 
@@ -49,5 +50,5 @@ if @user.email_html ######################################################### %>
     result += "#{label.t.html_to_ascii}: #{url}\n"
   end
   result %>
-<%= :email_report_abuse.tp.html_to_ascii %>
-<% end ###################################################################### %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<% end %>

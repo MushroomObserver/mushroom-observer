@@ -1,8 +1,0 @@
-<% @title ||= :needed_descriptions_title.l %>
-
-<%= :needed_descriptions_help.tp %>
-
-<% for datum in @name_data || [] %>
-  <%= link_to("#{datum['display_name'].t} (#{datum['count']} #{:needed_descriptions_observations.t})",
-              { :action => 'edit_name', :id => datum['id'] }) %><br/>
-<% end %>

@@ -1,0 +1,41 @@
+<%
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set do
+    add_tab(:name_index_bulk_edit.t, :action => 'bulk_name_edit')
+    add_tab(:name_index_add_name.t, :action => 'create_name')
+    add_tabs(@links)
+  end
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
+
+<%= @help.tp if @help %>
+
+<% # Let test_index test passing args to pagination_links.
+args = @test_pagination_args || {} %>
+<% paginate_block(@pages, args) do %>
+  <% if @objects != [] %>
+    <% odd_or_even = 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% for name in @objects || []
+        odd_or_even = 1 - odd_or_even %>
+        <tr class="ListLine<%= odd_or_even %>">
+          <td><%= link_to(name.observation_name.t, :action => 'show_name',
+                          :id => name.id, :params => query_params) %></td>
+          <% if @extra_data %>
+            <% data = @extra_data[name.id]
+            if data && !data.empty?
+              for val in @extra_data[name.id] || [] %>
+                <td><%= val %></td>
+              <% end
+            else %>
+              <td align="center" colspan="3" style="letter-spacing:0.5em">
+                --- not the default ---
+              </td>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

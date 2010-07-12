@@ -1,28 +1,18 @@
 <%
-  search_params = @comment.object_type == 'Observation' ? calc_search_params() : nil
-  object_type = @comment.object_type_localized
-
   @title = :comment_add_title.t(:name => @object.unique_format_name)
 
   new_tab_set do
-    add_tab(:app_cancel.t(:type => object_type),
-            :controller => @object.show_controller, :action => @object.show_action, :id => @object.id, :params => search_params)
+    add_tab(:cancel_and_show.t(:type => @comment.object_type.to_sym),
+            :controller => @object.show_controller,
+            :action => @object.show_action, :id => @object.id,
+            :params => query_params)
   end
 %>
 
 <% form_tag(:action => 'add_comment', :id => @comment.object_id,
-            :type => @comment.object_type, :params => search_params) do %>
+            :type => @comment.object_type, :params => query_params) do %>
   <br/><center><%= submit_tag :comment_add_create.l %></center>
-
   <%= render(:partial => 'form_comments') %>
-
   <br/><hr align="center" width="90%" />
-
-  <%= case @comment.object_type
-    when 'Observation'
-      render(:partial => 'observer/show_observation', :locals => { :observation => @object })
-    else
-      raise(ArgumentError, "We appear to have forgotten to tell add_comment how to display objects of type \"#{@comment.object_type}\".")
-  end %>
-
+  <%= render(:partial => 'object', :object => @object) %>
 <% end %>

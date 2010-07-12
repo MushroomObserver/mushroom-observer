@@ -1,9 +1,0 @@
-CREATE TABLE `comments` (
-  `id` int(11) NOT NULL auto_increment,
-  `created` datetime default NULL,
-  `who` varchar(100) default NULL,
-  `summary` varchar(100) default NULL,
-  `comment` text,
-  `observation_id` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;

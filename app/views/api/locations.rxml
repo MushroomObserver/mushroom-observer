@@ -1,8 +1,12 @@
 xml.results(:number => @objects.length) do
-  for loc in @objects
-    render_xml_partial(xml, :location, :locals => {
-      :location => loc,
-      :details => true,
-    })
+  for object in @objects
+    if @detail == :none
+      xml.location(:id => object.id)
+    else
+      render_xml_partial(xml, :location, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+      })
+    end
   end
 end

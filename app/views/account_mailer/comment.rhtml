@@ -1,6 +1,6 @@
 <%
   type = @comment.object_type
-  type_str = type.downcase.to_sym.l
+  type_sym = type.downcase.to_sym
 
   # Tricky bit of logic to determine what kind of email is being sent here.  If
   # sending comment to owner of object it is not a "response to their comment"
@@ -36,13 +36,13 @@
   intro = is_owner ?    :email_comment_intro_to_owner :
           is_response ? :email_comment_intro_response :
                         :email_comment_intro_other
-  intro = intro.l(:type => type_str, :name => @object.unique_format_name)
+  intro = intro.l(:type => type_sym, :name => @object.unique_format_name)
 
   fields = ""
-  fields += "*#{:app_created_bare.l}:* #{@comment.created.to_formatted_s(:db)}\n"
-  fields += "*#{:app_by.l}:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
-  fields += "*#{:app_summary.l}:* #{@comment.summary.to_s}\n"
-  fields += "*#{:comment.l}:*\n" if @comment.comment
+  fields += "*#{:Created.l}:* #{@comment.created.email_time}\n"
+  fields += "*#{:By.l}:* #{@comment.user.legal_name} (#{@comment.user.login})\n" if @comment.user
+  fields += "*#{:Summary.l}:* #{@comment.summary.to_s}\n"
+  fields += "*#{:Comment.l}:*\n" if @comment.comment
 
   # Only give the owner of the object being commented on access to the email
   # address of the user who commented on it.
@@ -52,20 +52,20 @@
   handy_links += ' ' + :email_handy_links.l
 
   links = []
-  links.push([:email_links_show_object.l(:type => type_str),
-    "#{DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"])
+  links.push([:email_links_show_object.l(:type => type_sym),
+    "#{HTTP_DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"])
   links.push([:email_links_post_comment.l,
-    "#{DOMAIN}/comment/add_comment?id=#{@comment.object_id}&type=#{@comment.object_type}"])
-  links.push([:email_links_not_interested.l(:type => type_str),
-    "#{DOMAIN}/interest/set_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}&state=-1"])
+    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@comment.object_id}&type=#{@comment.object_type}"])
+  links.push([:email_links_not_interested.l(:type => type_sym),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
-    "#{DOMAIN}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
+    "#{HTTP_DOMAIN}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.l,
-    "#{DOMAIN}/account/prefs/#{@user.id}"])
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.l,
-    DOMAIN])
+    HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
   <title>Mushroom Observer: <%= @subject %></title>
@@ -84,12 +84,11 @@ if @user.email_html ######################################################### %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
-<%= :email_report_abuse.tp %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= fields.tp.html_to_ascii %>
 
@@ -103,5 +102,5 @@ if @user.email_html ######################################################### %>
     result += "#{label}: #{url}\n"
   end
   result %>
-<%= :email_report_abuse.tp.html_to_ascii %>
-<% end ###################################################################### %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<% end %>

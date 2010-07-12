@@ -1,0 +1,27 @@
+<%
+  new_tab_set(:sort_by_header.t, @sorts)
+  new_tab_set do
+    add_tab(:list_place_names_map.t, :action => :map_locations,
+            :params => query_params)
+    add_tab(:all_objects.t(:type => :location), :action => :list_locations)
+    add_tabs(@links)
+  end
+
+  flash_error(@error) if @error and (!@objects or @objects.empty?)
+%>
+
+<% paginate_block(@pages) do %>
+  <% if @objects != [] %>
+    <% odd_or_even = 0 %>
+    <table cellpadding="5" cellspacing="0" width="100%">
+      <% for desc in @objects || []
+        odd_or_even = 1 - odd_or_even %>
+        <tr class="ListLine<%= odd_or_even %>">
+          <td><%= link_to(desc.format_name.t,
+                          :action => 'show_location_description',
+                          :id => desc.id, :params => query_params) %><td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+<% end %>

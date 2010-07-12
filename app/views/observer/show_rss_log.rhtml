@@ -1,11 +1,15 @@
-<% @title = :show_rss_log_title.t(:title => @rss_log.format_name) %>
+<%
+  @title = :show_rss_log_title.t(:title => @rss_log.unique_format_name)
+
+  draw_prev_next_tabs(@rss_log)
+%>
 
 <% if @rss_log.notes %>
   <table>
     <% for key, args, time in @rss_log.parse_log
       if key != :log_orphan %>
         <tr>
-          <td><%= time.strftime("%a %b %d, %Y %H:%M:%S %Z") %></td>
+          <td style="white-space:nowrap"><%= time.web_time %></td>
           <td width="10"></td>
           <td><%= key.t(args) %></td>
         </tr>
@@ -14,10 +18,9 @@
   </table>
 <% end %>
 
-<%= if observation = @rss_log.observation
-  link_to(:app_show_observation.t, :action => 'show_observation', :id => observation.id)
-elsif species_list = @rss_log.species_list
-  link_to(:app_show_species_list.t, :controller => 'species_list', :action => 'show_species_list', :id => species_list.id)
-elsif name = @rss_log.name
-  link_to(:app_show_name.t, :controller => 'name', :action => 'show_name', :id => name.id)
+<%= if object = @rss_log.object
+  link_to(:show_object.t(:type => object.type_tag),
+          :controller => object.show_controller,
+          :action => object.show_action, :id => object.id,
+          :params => query_params)
 end %>

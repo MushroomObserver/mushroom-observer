@@ -1,46 +1,52 @@
 # Locals:
-#   :naming             Naming instance.
-#   :details            Include details?
+#   :object             Naming instance.
+#   :detail             Include details?
 #   :refs               Include observation and votes?
 
-details ||= false
-refs    ||= false
+detail ||= false
+refs   ||= false
 
 xml.naming(
-  :id => naming.id
+  :id => object.id
 ) do
-  xml.vote naming.vote_cache
+  xml.vote object.vote_cache
 
   render_xml_partial(xml, :name, :locals => {
-    :name => naming.name,
-    :details => false,
+    :object => object.name,
+    :detail => false,
   })
 
-  for reason in naming.naming_reasons
-    xml.reason({:type => reason.reason}, reason.notes) 
+  for reason in object.get_reasons
+    if reason.used?
+      if reason.notes.blank?
+        xml.reason(:num => reason.num, :label => reason.label.l)
+      else
+        xml.reason({:num => reason.num, :label => reason.label.l}, reason.notes) 
+      end
+    end
   end
 
-  if details
-    xml.created  xml_datetime(naming.created)
-    xml.modified xml_datetime(naming.modified)
+  if detail
+    xml.created  object.created.api_time
+    xml.modified object.modified.api_time
 
     render_xml_partial(xml, :user, :locals => {
-      :user => naming.user,
-      :details => false,
+      :object => object.user,
+      :detail => false,
     })
   end
 
   if refs
     render_xml_partial(xml, :observation, :locals => {
-      :observation => naming.observation,
-      :details => details,
+      :object => object.observation,
+      :detail => detail,
     })
 
-    xml.votes(:number => naming.votes.length) do
-      for vote in naming.votes
+    xml.votes(:number => object.votes.length) do
+      for vote in object.votes
         render_xml_partial(xml, :vote, :locals => {
-          :vote => vote,
-          :details => details,
+          :object => vote,
+          :detail => detail,
         })
       end
     end

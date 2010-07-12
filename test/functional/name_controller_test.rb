@@ -1,171 +1,469 @@
-require File.dirname(__FILE__) + '/../test_helper'
-require 'name_controller'
+require File.dirname(__FILE__) + '/../boot'
 
-# Re-raise errors caught by the controller.
-class NameController; def rescue_action(e) raise e end; end
-
-class NameControllerTest < Test::Unit::TestCase
-  fixtures :names
-  fixtures :users
-  fixtures :namings
-  fixtures :observations
-  fixtures :locations
-  fixtures :synonyms
-  fixtures :past_names
-  fixtures :notifications
-  fixtures :user_groups
-  fixtures :user_groups_users
+class NameControllerTest < FunctionalTestCase
 
   def setup
-    @controller = NameController.new
-    @request    = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
+    @new_pts  = 10
+    @chg_pts  = 10
+    @auth_pts = 100
+    @edit_pts = 10
+  end
+
+  def empty_notes
+    result = {}
+    for f in NameDescription.all_note_fields
+      result[f] = ''
+    end
+    result
+  end
+
+  # Create a draft for a project.
+  def create_draft_tester(project, name, user=nil, success=true)
+    count = NameDescription.count
+    params = {
+      :id => name.id,
+      :source => 'project',
+      :project => project.id,
+    }
+    requires_login(:create_name_description, params, user.login)
+    if success
+      assert_response('create_name_description')
+      assert_equal(count, NameDescription.count)
+    else
+      assert_response(:controller => 'project',
+                      :action => 'show_project', :id => project.id)
+      assert_equal(count, NameDescription.count)
+    end
+  end
+
+  # Edit a draft for a project (GET).
+  def edit_draft_tester(draft, user=nil, success=true, reader=true)
+    if user
+      assert_not_equal(user, draft.user)
+    else
+      user = draft.user
+    end
+    params = {
+      :id => draft.id
+    }
+    requires_login(:edit_name_description, params, user.login)
+    if success
+      assert_response('edit_name_description')
+    elsif reader
+      assert_response(:action => "show_name_description", :id => draft.id)
+    else
+      assert_response(:action => "show_name", :id => draft.name_id)
+    end
+  end
+
+  # Edit a draft for a project (POST).
+  def edit_draft_post_helper(draft, user, params={}, permission=true, success=true)
+    gen_desc = "This is a very general description."
+    assert_not_equal(gen_desc, draft.gen_desc)
+    diag_desc = "This is a diagnostic description"
+    assert_not_equal(diag_desc, draft.diag_desc)
+    classification = "Family: _Agaricaceae_"
+    assert_not_equal(classification, draft.classification)
+    params = {
+      :id => draft.id,
+      :description => {
+        :gen_desc => gen_desc,
+        :diag_desc => diag_desc,
+        :classification => classification,
+      }.merge(params)
+    }
+    post_requires_login(:edit_name_description, params, user.login)
+    if permission && !success
+      assert_response('edit_name_description')
+    elsif draft.is_reader?(user)
+      assert_response(:action => 'show_name_description', :id => draft.id)
+    else
+      assert_response(:action => 'show_name', :id => draft.name_id)
+    end
+    draft.reload
+    if permission && success
+      assert_equal(gen_desc, draft.gen_desc)
+      assert_equal(diag_desc, draft.diag_desc)
+      assert_equal(classification, draft.classification)
+    else
+      assert_not_equal(gen_desc, draft.gen_desc)
+      assert_not_equal(diag_desc, draft.diag_desc)
+      assert_not_equal(classification, draft.classification)
+    end
+  end
+
+  def publish_draft_helper(draft, user=nil, merged=true, conflict=false)
+    if user
+      assert_not_equal(draft.user, user)
+    else
+      user = draft.user
+    end
+    draft_gen_desc = draft.gen_desc
+    name_gen_desc = draft.name.description.gen_desc rescue nil
+    same_gen_desc = (draft_gen_desc == name_gen_desc)
+    name_id = draft.name_id
+    params = {
+      :id => draft.id
+    }
+    requires_login(:publish_description, params, user.login)
+    name = Name.find(name_id)
+    new_gen_desc = name.description.gen_desc rescue nil
+    if merged
+      assert_equal(draft_gen_desc, new_gen_desc)
+    else
+      assert_equal(same_gen_desc, draft_gen_desc == new_gen_desc)
+      assert(NameDescription.safe_find(draft.id))
+    end
+    if conflict
+      assert_template('edit_name_description')
+      assert(assigns(:description).gen_desc.index(draft_gen_desc))
+      assert(assigns(:description).gen_desc.index(name_gen_desc))
+    else
+      assert_response(:action => 'show_name', :id => name_id)
+    end
+  end
+
+  # Destroy a draft of a project.
+  def destroy_draft_helper(draft, user, success=true)
+    assert(draft)
+    count = NameDescription.count
+    params = {
+      :id => draft.id
+    }
+    requires_login(:destroy_name_description, params, user.login)
+    if success
+      assert_response(:action => 'show_name', :id => draft.name_id)
+      assert_raises(ActiveRecord::RecordNotFound) do
+        draft = NameDescription.find(draft.id)
+      end
+      assert_equal(count - 1, NameDescription.count)
+    else
+      assert(NameDescription.find(draft.id))
+      assert_equal(count, NameDescription.count)
+      if draft.is_reader?(user)
+        assert_response(:action => 'show_name_description', :id => draft.id)
+      else
+        assert_response(:action => 'show_name', :id => draft.name_id)
+      end
+    end
+  end
+
+################################################################################
+
+  def test_name_index
+    get_with_dump(:list_names)
+    assert_response('list_names')
   end
 
   def test_name_index
-    get_with_dump :name_index
-    assert_response :success
-    assert_template 'name_index'
+    get_with_dump(:list_name_descriptions)
+    assert_response('list_name_descriptions')
   end
 
   def test_observation_index
-    get_with_dump :observation_index
-    assert_response :success
-    assert_template 'name_index'
+    get_with_dump(:observation_index)
+    assert_response('list_names')
   end
 
   def test_authored_names
-    get_with_dump :authored_names
-    assert_response :success
-    assert_template 'name_index'
+    get_with_dump(:authored_names)
+    assert_response('list_names')
   end
 
   def test_show_name
-    get_with_dump :show_name, :id => 1
-    assert_response :success
-    assert_template 'show_name'
+    assert_equal(0, Query.count)
+    get_with_dump(:show_name, :id => 2)
+    assert_response('show_name')
+    # Creates one for children and all four observations sections.
+    assert_equal(5, Query.count)
+
+    reget(:show_name, :id => 2)
+    assert_response('show_name')
+    # Should re-use all the old queries.
+    assert_equal(5, Query.count)
+
+    reget(:show_name, :id => 3)
+    assert_response('show_name')
+    # Needs new queries this time.
+    assert_equal(10, Query.count)
   end
 
   def test_show_past_name
-    get_with_dump :show_past_name, :id => 1
-    assert_response :success
-    assert_template 'show_past_name'
+    get_with_dump(:show_past_name, :id => 2)
+    assert_response('show_past_name')
   end
 
-  def test_names_by_author
-    get_with_dump :names_by_author, :id => 1
-    assert_response :success
-    assert_template 'name_index'
+  def test_next_and_prev
+    names = Name.all(:order => 'text_name, author')
+    name12 = names[12]
+    name13 = names[13]
+    name14 = names[14]
+    get(:next_name, :id => name12.id)
+    q = @controller.query_params(Query.last)
+    assert_response(:action => 'show_name', :id => name13.id, :params => q)
+    get(:next_name, :id => name13.id)
+    assert_response(:action => 'show_name', :id => name14.id, :params => q)
+    get(:prev_name, :id => name14.id)
+    assert_response(:action => 'show_name', :id => name13.id, :params => q)
+    get(:prev_name, :id => name13.id)
+    assert_response(:action => 'show_name', :id => name12.id, :params => q)
+  end
+
+  def test_next_and_prev_2
+    query = Query.lookup_and_save(:Name, :pattern_search, :pattern => 'lactarius')
+    q = @controller.query_params(query)
+
+    name1 = names(:lactarius_alpigenes)
+    name2 = names(:lactarius_alpinus)
+    name3 = names(:lactarius_kuehneri)
+    name4 = names(:lactarius_subalpinus)
+
+    get(:next_name, q.merge(:id => name1.id))
+    assert_response(:action => 'show_name', :id => name2.id, :params => q)
+    get(:next_name, q.merge(:id => name2.id))
+    assert_response(:action => 'show_name', :id => name3.id, :params => q)
+    get(:next_name, q.merge(:id => name3.id))
+    assert_response(:action => 'show_name', :id => name4.id, :params => q)
+    get(:next_name, q.merge(:id => name4.id))
+    assert_response(:action => 'show_name', :id => name4.id, :params => q)
+    assert_flash(/no more/i)
+
+    get(:prev_name, q.merge(:id => name4.id))
+    assert_response(:action => 'show_name', :id => name3.id, :params => q)
+    get(:prev_name, q.merge(:id => name3.id))
+    assert_response(:action => 'show_name', :id => name2.id, :params => q)
+    get(:prev_name, q.merge(:id => name2.id))
+    assert_response(:action => 'show_name', :id => name1.id, :params => q)
+    get(:prev_name, q.merge(:id => name1.id))
+    assert_response(:action => 'show_name', :id => name1.id, :params => q)
+    assert_flash(/no more/i)
+  end
+
+  def test_names_by_user
+    get_with_dump(:names_by_user, :id => 1)
+    assert_response('list_names')
   end
 
   def test_names_by_editor
-    get_with_dump :names_by_editor, :id => 1
-    assert_response :success
-    assert_template 'name_index'
+    get_with_dump(:names_by_editor, :id => 1)
+    assert_response('list_names')
+  end
+
+  def test_name_descriptions_by_author
+    get_with_dump(:name_descriptions_by_author, :id => 1)
+    assert_response('list_name_descriptions')
+  end
+
+  def test_name_descriptions_by_editor
+    get_with_dump(:name_descriptions_by_editor, :id => 1)
+    assert_response(:action => :show_name_description, :id => 15,
+                    :params => @controller.query_params)
   end
 
   def test_name_search
-    @request.session[:pattern] = "56"
-    get_with_dump :name_search
-    assert_response :success
-    assert_template 'name_index'
-    assert_equal :name_index_matching.t(:pattern => '56'), @controller.instance_variable_get('@title')
-    # There is no second page of these!
-    # get_with_dump :name_search, { :page => 2 }
-    # assert_response :success
-    # assert_template 'name_index'
-    # assert_equal "Names matching '56'", @controller.instance_variable_get('@title')
+    get_with_dump(:name_search, :pattern => '56')
+    assert_response('list_names')
+    assert_equal(:query_title_pattern_search.t(:types => 'Names', :pattern => '56'),
+                 @controller.instance_variable_get('@title'))
   end
 
-  def test_advanced_obj_search
-    get_with_dump(:advanced_obj_search, {
-      "search"=>{
-        "name"=>"Don't know",
-        "observer"=>"myself",
-        "content"=>"Long pink stem and small pink cap",
-        "location"=>"Eastern Oklahoma"
-      }, "commit"=>"Search"})
-      assert_response :success
-      assert_template 'name_index'
+  def test_advanced_search
+    query = Query.lookup_and_save(:Name, :advanced_search,
+      :name => "Don't know",
+      :user => "myself",
+      :content => "Long pink stem and small pink cap",
+      :location => "Eastern Oklahoma"
+    )
+    get(:advanced_search, @controller.query_params(query))
+    assert_response('list_names')
   end
 
   def test_edit_name
-    name = @coprinus_comatus
+    name = names(:coprinus_comatus)
     params = { "id" => name.id.to_s }
     requires_login(:edit_name, params)
-    assert_form_action :action => 'edit_name'
+    assert_form_action(:action => 'edit_name')
   end
 
   def test_create_name
     requires_login(:create_name)
-    assert_form_action :action => 'create_name'
+    assert_form_action(:action => 'create_name')
+  end
+
+  def test_show_name_description
+    desc = name_descriptions(:peltigera_desc)
+    params = { "id" => desc.id.to_s }
+    get_with_dump(:show_name_description, params)
+    assert_response('show_name_description')
+  end
+
+  def test_create_name_description
+    name = names(:peltigera)
+    params = { "id" => name.id.to_s }
+    requires_login(:create_name_description, params)
+    assert_form_action(:action => 'create_name_description', :id => name.id)
+  end
+
+  def test_edit_name_description
+    desc = name_descriptions(:peltigera_desc)
+    params = { "id" => desc.id.to_s }
+    requires_login(:edit_name_description, params)
+    assert_form_action(:action => 'edit_name_description', :id => desc.id)
   end
 
   def test_bulk_name_edit_list
-    requires_login :bulk_name_edit
-    assert_form_action :action => 'bulk_name_edit'
+    requires_login(:bulk_name_edit)
+    assert_form_action(:action => 'bulk_name_edit')
   end
 
   def test_change_synonyms
-    name = @chlorophyllum_rachodes
+    name = names(:chlorophyllum_rachodes)
     params = { :id => name.id }
     requires_login(:change_synonyms, params)
-    assert_form_action :action => 'change_synonyms', :approved_synonyms => []
+    assert_form_action(:action => 'change_synonyms', :approved_synonyms => [])
   end
 
   def test_deprecate_name
-    name = @chlorophyllum_rachodes
+    name = names(:chlorophyllum_rachodes)
     params = { :id => name.id }
     requires_login(:deprecate_name, params)
-    assert_form_action :action => 'deprecate_name', :approved_name => ''
+    assert_form_action(:action => 'deprecate_name', :approved_name => '')
   end
 
   def test_approve_name
-    name = @lactarius_alpigenes
+    name = names(:lactarius_alpigenes)
     params = { :id => name.id }
     requires_login(:approve_name, params)
-    assert_form_action :action => 'approve_name'
+    assert_form_action(:action => 'approve_name')
   end
 
-  def test_review_authors
-    # Make sure it lets reviewers get to page.
-    requires_login(:review_authors, { :id => 1 })
-    assert_response(:success)
-    assert_template('review_authors')
+  def test_eol
+    get('eol')
+  end
 
-    # Remove Rolf from reviewers group.
-    @reviewers.users.delete(@rolf)
-    @rolf.reload
-    assert(!@rolf.in_group('reviewers'))
+  def test_eol_preview
+    get_with_dump('eol_preview')
+  end
 
-    # Make sure it fails to let unauthorized users see page.
-    get(:review_authors, :id => 1)
-    assert_redirected_to(:action => :show_name, :id => 1)
+  # None of our standard tests ever actually renders pagination_links
+  # or pagination_letters.  This tests all the above.
+  def test_pagination
 
-    # Make Rolf an author.
-    @fungi.add_author(@rolf)
-    @fungi.save
-    @fungi.reload
-    assert_equal([@rolf.login], @fungi.authors.map(&:login).sort)
+    # Straightforward index of all names, showing first 10.
+    query = Query.lookup_and_save(:Name, :all, :by => :name)
+    query_params = @controller.query_params(query)
+    get(:test_index, { :num_per_page => 10 }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(10, name_links.length)
+    expected = Name.all(:order => 'text_name, author', :limit => 10)
+    assert_equal(expected.map(&:id), name_links.map(&:id))
+    assert_equal(@controller.url_for(:action => 'show_name',
+                 :id => expected.first.id, :params => query_params,
+                 :only_path => true), name_links.first.url)
+    assert_no_link_in_html(1)
+    assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :page => 2)
+    assert_no_link_in_html('Z')
+    assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :letter => 'A')
 
-    # Rolf should be able to do it again now.
-    get(:review_authors, :id => 1)
-    assert_response(:success)
-    assert_template('review_authors')
+    # Now go to the second page.
+    reget(:test_index, { :num_per_page => 10, :page => 2 }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(10, name_links.length)
+    expected = Name.all(:order => 'text_name, author', :limit => 10,
+                        :offset => 10)
+    assert_equal(expected.map(&:id), name_links.map(&:id))
+    assert_equal(@controller.url_for(:action => 'show_name',
+                 :id => expected.first.id, :params => query_params,
+                 :only_path => true), name_links.first.url)
+    assert_no_link_in_html(2)
+    assert_link_in_html(1, :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :page => 1)
+    assert_no_link_in_html('Z')
+    assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :letter => 'A')
 
-    # Rolf giveth with one hand...
-    post(:review_authors, :id => 1, :add => @mary.id)
-    assert_response(:success)
-    assert_template('review_authors')
-    @fungi.reload
-    assert_equal([@mary.login, @rolf.login], @fungi.authors.map(&:login).sort)
+    # Now try a letter.
+    l_names = Name.all(:conditions => 'text_name LIKE "L%"',
+                       :order => 'text_name, author')
+    reget(:test_index, { :num_per_page => l_names.size,
+               :letter => 'L' }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(l_names.size, name_links.length)
+    assert_equal(l_names.map(&:id), name_links.map(&:id))
+    assert_equal(@controller.url_for(:action => 'show_name',
+                 :id => l_names.first.id, :params => query_params,
+                 :only_path => true), name_links.first.url)
+    assert_no_link_in_html(1)
+    assert_no_link_in_html('Z')
+    assert_link_in_html('A', :action => :test_index,:params => query_params,
+                        :num_per_page => l_names.size, :letter => 'A')
 
-    # ...and taketh with the other.
-    post(:review_authors, :id => 1, :remove => @mary.id)
-    assert_response(:success)
-    assert_template('review_authors')
-    @fungi.reload
-    assert_equal([@rolf.login], @fungi.authors.map(&:login).sort)
+    # Do it again, but make page size exactly one too small.
+    last_name = l_names.pop
+    reget(:test_index, { :num_per_page => l_names.size,
+        :letter => 'L' }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(l_names.size, name_links.length)
+    assert_equal(l_names.map(&:id), name_links.map(&:id))
+    assert_no_link_in_html(1)
+    assert_link_in_html(2, :action => :test_index, :params => query_params,
+                        :num_per_page => l_names.size,
+                        :letter => 'L', :page => 2)
+    assert_no_link_in_html(3)
+
+    # Check second page.
+    reget(:test_index, { :num_per_page => l_names.size, :letter => 'L',
+        :page => 2 }.merge(query_params))
+    assert_response('list_names')
+    name_links = extract_links(:action => 'show_name')
+    assert_equal(1, name_links.length)
+    assert_equal([last_name.id], name_links.map(&:id))
+    assert_no_link_in_html(2)
+    assert_link_in_html(1, :action => :test_index, :params => query_params,
+                        :num_per_page => l_names.size,
+                        :letter => 'L', :page => 1)
+    assert_no_link_in_html(3)
+
+    # Some cleverness is required to get pagination links to include anchors.
+    reget(:test_index, { :num_per_page => 10,
+                        :test_anchor => 'blah' }.merge(query_params))
+    assert_link_in_html(2, :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :page => 2,
+                        :test_anchor => 'blah', :anchor => 'blah')
+    assert_link_in_html('A', :action => :test_index, :num_per_page => 10,
+                        :params => query_params, :letter => 'A',
+                        :test_anchor => 'blah', :anchor => 'blah')
+  end
+
+  def test_name_guessing
+    def create_needed_names(str)
+      @controller.create_needed_names(str, str)
+    end
+
+    # Not all the genera actually have records in our test database.
+    User.current = @rolf
+    @controller.instance_variable_set('@user', @rolf)
+    create_needed_names('Agaricus')
+    create_needed_names('Pluteus')
+    create_needed_names('Coprinus comatus subsp. bogus var. varietus')
+
+    def guess_correct_name(str)
+      results = @controller.guess_correct_name(str)
+      assert_block("Couldn't guess #{str.inspect}.") { results.any? }
+    end
+
+    guess_correct_name('Agricus')
+    guess_correct_name('Ptligera')
+    guess_correct_name(' plutues _petastus  ')
+    guess_correct_name('Coprinis comatis')
+    guess_correct_name('Coprinis comatis blah. boggle')
+    guess_correct_name('Coprinis comatis blah. boggle var. varitus')
   end
 
   # ----------------------------
@@ -174,36 +472,25 @@ class NameControllerTest < Test::Unit::TestCase
 
   # test_map - name with Observations that have Locations
   def test_map
-    get_with_dump :map, :id => @agaricus_campestris.id
-    assert_response :success
-    assert_template 'map'
+    get_with_dump(:map, :id => names(:agaricus_campestris).id)
+    assert_response('map')
   end
 
   # test_map_no_loc - name with Observations that don't have Locations
   def test_map_no_loc
-    get_with_dump :map, :id => @coprinus_comatus.id
-    assert_response :success
-    assert_template 'map'
+    get_with_dump(:map, :id => names(:coprinus_comatus).id)
+    assert_response('map')
   end
 
   # test_map_no_obs - name with no Observations
   def test_map_no_obs
-    get_with_dump :map, :id => @conocybe_filaris.id
-    assert_response :success
-    assert_template 'map'
+    get_with_dump(:map, :id => names(:conocybe_filaris).id)
+    assert_response('map')
   end
 
   # ----------------------------
   #  Create name.
   # ----------------------------
-
-  def empty_notes
-    result = {}
-    for f in Name.all_note_fields
-      result[f] = ""
-    end
-    result
-  end
 
   def test_create_name_post
     text_name = "Amanita velosa"
@@ -216,83 +503,37 @@ class NameControllerTest < Test::Unit::TestCase
         :author => author,
         :rank => :Species,
         :citation => "__Mycol. Writ.__ 9(15). 1898."
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-
-    post_requires_login(:create_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    post_requires_login(:create_name, params)
+    assert_response(:action => :show_name, :id => Name.last.id)
     # Amanita baccata is in there but not Amanita sp., so this creates two names.
-    assert_equal(30, @rolf.reload.contribution)
-    name = Name.find_by_text_name(text_name)
-    assert(name)
+    assert_equal(10 + 2 * @new_pts, @rolf.reload.contribution)
+    assert(name = Name.find_by_text_name(text_name))
     assert_equal(text_name, name.text_name)
     assert_equal(author, name.author)
     assert_equal(@rolf, name.user)
   end
 
   def test_create_name_existing
-    name = @conocybe_filaris
+    name = names(:conocybe_filaris)
     text_name = name.text_name
-    count = Name.find(:all).length
+    count = Name.count
     params = {
       :name => {
         :text_name => text_name,
-        :author => "",
+        :author => '',
         :rank => :Species,
-        :citation => ""
-      }
+        :citation => ''
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:create_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:create_name, params)
+    assert_response(:action => :show_name, :id => name.id)
     assert_equal(10, @rolf.reload.contribution)
     name = Name.find_by_text_name(text_name)
-    assert_equal(@conocybe_filaris, name)
-    assert_equal(count, Name.find(:all).length)
-  end
-
-  def test_create_name_become_author
-    text_name = "Macrocybe crassa"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :author => "",
-        :rank => :Species,
-        :citation => "",
-        :gen_desc => "The Crass Macrocybe"
-      }
-    }
-    params[:name] = empty_notes.merge(params[:name])
-    post_requires_login(:create_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_equal(110, @rolf.reload.contribution)
-    name = Name.find_by_text_name(text_name)
-    assert(name)
-    assert_equal(text_name, name.text_name)
-    assert_equal(@rolf, name.user)
-  end
-
-  def test_create_name_bad_taxonomic_classification
-    text_name = "Amanita pantherina"
-    name = Name.find_by_text_name(text_name)
-    assert_nil(name)
-    params = {
-      :name => {
-        :text_name => text_name,
-        :rank => :Species,
-        :classification => "Clade: Basidiomycetes"
-      }
-    }
-    params[:name] = empty_notes.merge(params[:name])
-
-    post_requires_login(:create_name, params, false)
-
-    # Should fail and no name should get created
-    assert_nil(Name.find_by_text_name(text_name))
-    assert_form_action(:action => 'create_name')
+    assert_equal(names(:conocybe_filaris), name)
+    assert_equal(count, Name.count)
   end
 
   def test_create_name_bad_name
@@ -303,35 +544,49 @@ class NameControllerTest < Test::Unit::TestCase
       :name => {
         :text_name => text_name,
         :rank => :Species
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-
-    post_requires_login(:create_name, params, false)
-
+    login('rolf')
+    post(:create_name, params)
+    assert_response('create_name')
     # Should fail and no name should get created
     assert_nil(Name.find_by_text_name(text_name))
     assert_form_action(:action => 'create_name')
   end
 
   def test_create_name_alt_rank
-    text_name = "Amanita pantherina"
+    text_name = "Ustilaginomycetes"
     name = Name.find_by_text_name(text_name)
     assert_nil(name)
     params = {
       :name => {
         :text_name => text_name,
-        :rank => :Species,
-        :classification => "Division: Basidiomycetes"
-      }
+        :rank => :Phylum,
+      },
     }
-    params[:name] = empty_notes.merge(params[:name])
+    login('rolf')
+    post(:create_name, params)
+    assert_response(:action => :show_name)
+    assert(name = Name.find_by_text_name(text_name))
+  end
 
-    post_requires_login(:create_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+  def test_create_name_with_many_implicit_creates
+    text_name = "Genus species ssp. subspecies v. variety forma form"
+    text_name2 = "Genus species subsp. subspecies var. variety f. form"
     name = Name.find_by_text_name(text_name)
-    assert(name)
-    assert_equal('Phylum: _Basidiomycetes_', name.classification)
+    count = Name.count
+    assert_nil(name)
+    params = {
+      :name => {
+        :text_name => text_name,
+        :rank => :Form,
+      },
+    }
+    login('rolf')
+    post(:create_name, params)
+    assert_response(:action => :show_name)
+    assert(name = Name.find_by_text_name(text_name2))
+    assert(count + 5, Name.count)
   end
 
   # ----------------------------
@@ -339,87 +594,102 @@ class NameControllerTest < Test::Unit::TestCase
   # ----------------------------
 
   def test_edit_name_post
-    name = @conocybe_filaris
-    assert(name.text_name == "Conocybe filaris")
-    assert(name.author.nil?)
+    name = names(:conocybe_filaris)
+    assert_equal('Conocybe filaris', name.text_name)
+    assert_nil(name.author)
     past_names = name.versions.size
-    assert(0 == name.version)
+    assert_equal(1, name.version)
     params = {
       :id => name.id,
       :name => {
-        :text_name => name.text_name,
-        :author => "(Fr.) Kühner",
+        :text_name => 'Conocybe filaris',
+        :author => '(Fr.) Kühner',
         :rank => :Species,
-        :citation => "__Le Genera Galera__, 139. 1935."
-      }
+        :citation => '__Le Genera Galera__, 139. 1935.'
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    # Must be creating Conocybe sp, too.
-    assert_equal(30, @rolf.reload.contribution)
-    name.reload
-    assert_equal("(Fr.) Kühner", name.author)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.display_name)
-    assert_equal("**__Conocybe filaris__** (Fr.) Kühner", name.observation_name)
-    assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
-    assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
+    post_requires_login(:edit_name, params)
+    assert_flash_success
+    assert_equal(20, @rolf.reload.contribution)
+    assert_equal('(Fr.) Kühner', name.reload.author)
+    assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.display_name)
+    assert_equal('**__Conocybe filaris__** (Fr.) Kühner', name.observation_name)
+    assert_equal('Conocybe filaris (Fr.) Kühner', name.search_name)
+    assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
     assert_equal(@rolf, name.user)
   end
 
-  # Test to see if add a new general description sets the description author list
-  # to the current user.
-  def test_edit_name_add_gen_desc
-    name = @conocybe_filaris
-    assert_equal([], name.authors)
-    assert_nil(name.gen_desc)
-    past_names = name.versions.size
-    assert(0 == name.version)
-    old_contrib = name.user.contribution
+  # This catches a bug that was happening when editing a name that was in use.
+  # In this case text_name and author are missing, confusing edit_name
+  def test_edit_name_post_not_changeable
+    name = names(:conocybe_filaris)
     params = {
       :id => name.id,
       :name => {
-        :text_name => name.text_name,
-        :author => "(Fr.) Kühner",
         :rank => :Species,
-        :citation => "__Le Genera Galera__, 139. 1935.",
-        :gen_desc => "A general description"
-      }
+        :citation => '__Le Genera Galera__, 139. 1935.'
+      },
     }
-    params[:name] = empty_notes.merge(params[:name])
-    post_requires_login(:edit_name, params, false)
-    name.reload
-    assert_equal(100 + 10 + old_contrib, name.user.reload.contribution)
-    assert(name.gen_desc)
-    assert_equal(name.authors, [name.user])
+    post_requires_login(:edit_name, params)
+    assert_flash_success
+    assert_equal(10, @rolf.reload.contribution)
+    assert_equal(nil, name.reload.author)
+    assert_equal('__Le Genera Galera__, 139. 1935.', name.citation)
+    assert_equal(@rolf, name.user)
+  end
+
+  def test_edit_name_post_just_change_notes
+    name = names(:conocybe_filaris)
+    past_names = name.versions.size
+    assert_equal(1, name.version)
+    assert_equal('', name.notes)
+    new_notes = 'Add this to the notes.'
+    params = {
+      :id => name.id,
+      :name => {
+        :text_name => 'Conocybe filaris',
+        :author => '',
+        :rank => :Species,
+        :citation => '',
+        :notes => new_notes
+      },
+    }
+    post_requires_login(:edit_name, params)
+    assert_flash_success
+    # It's implicitly creating Conocybe, because not in fixtures.
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    assert_equal(new_notes, name.reload.notes)
+    assert_equal(past_names + 1, name.versions.size)
   end
 
   # Test name changes in various ways.
   def test_edit_name_deprecated
-    name = @lactarius_alpigenes
+    name = names(:lactarius_alpigenes)
     assert(name.deprecated)
     params = {
       :id => name.id,
       :name => {
         :text_name => name.text_name,
-        :author => "",
+        :author => '',
         :rank => :Species,
-        :citation => ""
-      }
+        :citation => 'new citation'
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('mary')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
     # (creates Lactarius since it's not in the fixtures, AND it changes L. alpigenes)
-    assert_equal(30, @rolf.reload.contribution)
-    name = Name.find(name.id)
-    assert(name.deprecated)
+    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
+    assert(name.reload.deprecated)
+    assert_equal('new citation', name.citation)
   end
 
   def test_edit_name_different_user
-    name = @macrolepiota_rhacodes
+    name = names(:macrolepiota_rhacodes)
     name_owner = name.user
     user = "rolf"
-    assert(user != name_owner.login) # Make sure it's not owned by the default user
+    # Make sure it's not owned by the default user
+    assert_not_equal(user, name_owner.login)
     params = {
       :id => name.id,
       :name => {
@@ -427,551 +697,398 @@ class NameControllerTest < Test::Unit::TestCase
         :author => name.author,
         :rank => :Species,
         :citation => name.citation
-      }
+      },
     }
-    params[:name].merge!(name.all_notes)
-    post_requires_login(:edit_name, params, false, user)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    # Hmmm, this isn't catching the fact that rolf shouldn't be allowed to change the name,
-    # instead it seems to be doing nothing sinply because he's not actually changing anything!
-    assert_equal(10, @rolf.reload.contribution)
-    name = Name.find(name.id)
-    assert(name_owner == name.user)
+    login('rolf')
+    post(:edit_name, params)
+    # Hmmm, this isn't catching the fact that Rolf shouldn't be allowed to
+    # change the name, instead it seems to be doing nothing simply because he's
+    # not actually changing anything!
+    assert_response(:action => :show_name)
+    # (In fact, it is implicitly creating Macrolepiota.)
+    assert_equal(10 + @new_pts, @rolf.reload.contribution)
+    # (But owner remains.)
+    assert_equal(name_owner, name.reload.user)
   end
 
-  # If non-reviewer makes significant change, should reset status.
-  def test_edit_name_cause_review_status_reset
-    name = @peltigera
+  def test_edit_name_destructive_merge
+    old_name = agaricus_campestrus = names(:agaricus_campestrus)
+    new_name  = agaricus_campestris = names(:agaricus_campestris)
+    assert_not_equal(old_name, new_name)
+    new_versions = new_name.versions.size
+    assert_equal(1, new_name.version)
+    assert_equal(1, old_name.namings.size)
+    old_obs = old_name.namings[0].observation
+    assert_equal(2, new_name.namings.size)
+    new_obs = new_name.namings[0].observation
     params = {
-      :id => name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => name.text_name,
-        :author => name.author,
-        :rank => :Genus,
-        :citation => name.citation,
-        :license_id => name.license_id
-      }
-    }
-    params[:name].merge!(name.all_notes)
-
-    # Non-reviewer making no change.
-    @request.session[:user_id] = @mary.id
-    post(:edit_name, params)
-    assert_equal(:vetted, @peltigera.reload.review_status)
-
-    # Non-reviewer making change.
-    params[:name][:citation] = "Blah blah blah."
-    @request.session[:user_id] = @mary.id
-    post(:edit_name, params)
-    assert_equal(:unreviewed, @peltigera.reload.review_status)
-
-    # Set it back to vetted, and have reviewer make a change.
-    @peltigera.update_review_status(:vetted, @rolf)
-    params[:name][:citation] = "Whatever."
-    @request.session[:user_id] = @rolf.id
-    post(:edit_name, params)
-    assert_equal(:vetted, @peltigera.reload.review_status)
-  end
-
-  def test_edit_name_simple_merge
-    misspelt_name = @agaricus_campestrus
-    correct_name = @agaricus_campestris
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert(0 == correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs_id = misspelt_name.namings[0].observation.id
-    assert_equal(2, correct_name.namings.size)
-    correct_obs_id = correct_name.namings[0].observation.id
-
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => @agaricus_campestris.text_name,
-        :author => "",
+        :text_name => agaricus_campestris.text_name,
+        :author => '',
         :rank => :Species
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
-    end
-    correct_name = Name.find(correct_name.id)
-    assert(correct_name)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
 
-    assert_equal(3, correct_name.namings.size)
-    misspelt_obs = Observation.find(misspelt_obs_id)
-    assert_equal(@agaricus_campestris, misspelt_obs.name)
-    correct_obs = Observation.find(correct_obs_id)
-    assert_equal(@agaricus_campestris, correct_obs.name)
+    # Fails because Rolf isn't in admin mode.
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_flash(/admin/)
+    assert(Name.find(old_name.id))
+    assert(new_name.reload)
+    assert_equal(1, new_name.version)
+    assert_equal(new_versions, new_name.versions.size)
+    assert_equal(2, new_name.namings.size)
+    assert_equal(agaricus_campestrus, old_obs.reload.name)
+    assert_equal(agaricus_campestris, new_obs.reload.name)
+
+    # Try again as an admin.
+    make_admin
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      old_name = Name.find(old_name.id)
+    end
+    assert(new_name.reload)
+    assert_equal(1, new_name.version)
+    assert_equal(new_versions, new_name.versions.size)
+    assert_equal(3, new_name.namings.size)
+    assert_equal(agaricus_campestris, old_obs.reload.name)
+    assert_equal(agaricus_campestris, new_obs.reload.name)
   end
 
   def test_edit_name_author_merge
-    misspelt_name = @amanita_baccata_borealis
-    correct_name = @amanita_baccata_arora
-    assert_not_equal(misspelt_name, correct_name)
-    assert_equal(misspelt_name.text_name, correct_name.text_name)
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
+    old_name = names(:amanita_baccata_borealis)
+    new_name  = names(:amanita_baccata_arora)
+    assert_not_equal(old_name, new_name)
+    assert_equal(old_name.text_name, new_name.text_name)
+    new_author = new_name.author
+    assert_not_equal(old_name.author, new_author)
+    new_versions = new_name.versions.size
+    assert_equal(1, new_name.version)
     params = {
-      :id => misspelt_name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => misspelt_name.text_name,
-        :author => correct_name.author,
+        :text_name => old_name.text_name,
+        :author => new_name.author,
         :rank => :Species
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
     assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
+      old_name = Name.find(old_name.id)
     end
-    correct_name = Name.find(correct_name.id)
-    assert(correct_name)
-    assert_equal(correct_author, correct_name.author)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
+    assert(new_name.reload)
+    assert_equal(new_author, new_name.author)
+    assert_equal(1, new_name.version)
+    assert_equal(new_versions, new_name.versions.size)
   end
 
-def test_edit_name_misspelling_merge
-  misspelt_name = @suilus
-  wrong_author_name = @suillus_by_white
-  correct_name = @suillus
-  assert_equal(misspelt_name.correct_spelling, wrong_author_name)
-  spelling_id = misspelt_name.correct_spelling_id
-  correct_author = correct_name.author
-  assert_not_equal(wrong_author_name.author, correct_author)
-  params = {
-    :id => wrong_author_name.id,
-    :name => {
-      :text_name => wrong_author_name.text_name,
-      :author => correct_name.author,
-      :rank => correct_name.rank
+  # Make sure misspelling gets transferred when new name merges away.
+  def test_edit_name_misspelling_merge
+    old_name = names(:suilus)
+    wrong_author_name = names(:suillus_by_white)
+    new_name = names(:suillus)
+    assert_equal(old_name.correct_spelling, wrong_author_name)
+    old_correct_spelling_id = old_name.correct_spelling_id
+    new_author = new_name.author
+    assert_not_equal(wrong_author_name.author, new_author)
+    params = {
+      :id => wrong_author_name.id,
+      :name => {
+        :text_name => wrong_author_name.text_name,
+        :author => new_name.author,
+        :rank => new_name.rank
+      },
     }
-  }
-  params[:name].merge!(empty_notes)
-  post_requires_login(:edit_name, params, false, @dick.login)
-  assert_redirected_to(:controller => "name", :action => "show_name")
-  assert_raises(ActiveRecord::RecordNotFound) do
-    wrong_author_name = Name.find(wrong_author_name.id)
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      wrong_author_name = Name.find(wrong_author_name.id)
+    end
+    assert_not_equal(old_correct_spelling_id, old_name.reload.correct_spelling_id)
+    assert_equal(old_name.correct_spelling, new_name)
   end
-  misspelt_name = Name.find(misspelt_name.id)
-  assert_not_equal(spelling_id, misspelt_name.correct_spelling_id)
-  assert_equal(misspelt_name.correct_spelling, correct_name)
-end
 
   # Test that merged names end up as not deprecated if the
-  # correct name is not deprecated.
+  # new name is not deprecated.
   def test_edit_name_deprecated_merge
-    misspelt_name = @lactarius_alpigenes
-    assert(misspelt_name.deprecated)
-    correct_name = @lactarius_alpinus
-    assert(!correct_name.deprecated)
-    assert_not_equal(misspelt_name, correct_name)
-    assert_not_equal(misspelt_name.text_name, correct_name.text_name)
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
+    old_name = names(:lactarius_alpigenes)
+    assert(old_name.deprecated)
+    new_name = names(:lactarius_alpinus)
+    assert(!new_name.deprecated)
+    assert_not_equal(old_name, new_name)
+    assert_not_equal(old_name.text_name, new_name.text_name)
+    new_author = new_name.author
+    assert_not_equal(old_name.author, new_author)
+    new_versions = new_name.versions.size
+    assert_equal(1, new_name.version)
     params = {
-      :id => misspelt_name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => correct_name.text_name,
-        :author => correct_name.author,
+        :text_name => new_name.text_name,
+        :author => new_name.author,
         :rank => :Species
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
     assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
+      old_name = Name.find(old_name.id)
     end
-    correct_name = Name.find(correct_name.id)
-    assert(correct_name)
-    assert(!correct_name.deprecated)
-    assert_equal(correct_author, correct_name.author)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
+    assert(new_name.reload)
+    assert(!new_name.deprecated)
+    assert_equal(new_author, new_name.author)
+    assert_equal(1, new_name.version)
+    assert_equal(new_versions, new_name.versions.size)
   end
 
   # Test that merged names end up as not deprecated even if the
-  # correct name is deprecated but the misspelt name is not deprecated
+  # new name is deprecated but the old name is not deprecated
   def test_edit_name_deprecated2_merge
-    misspelt_name = @lactarius_alpinus
-    assert(!misspelt_name.deprecated)
-    correct_name = @lactarius_alpigenes
-    assert(correct_name.deprecated)
-    assert_not_equal(misspelt_name, correct_name)
-    assert_not_equal(misspelt_name.text_name, correct_name.text_name)
-    correct_author = correct_name.author
-    correct_text_name = correct_name.text_name
-    assert_not_equal(misspelt_name.author, correct_author)
-    past_names = correct_name.versions.size
-    assert(0 == correct_name.version)
+    old_name = names(:lactarius_alpinus)
+    assert(!old_name.deprecated)
+    new_name = names(:lactarius_alpigenes)
+    assert(new_name.deprecated)
+    assert_not_equal(old_name, new_name)
+    assert_not_equal(old_name.text_name, new_name.text_name)
+    new_author = new_name.author
+    new_text_name = new_name.text_name
+    assert_not_equal(old_name.author, new_author)
+    new_versions = new_name.versions.size
+    assert_equal(1, new_name.version)
     params = {
-      :id => misspelt_name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => correct_name.text_name,
-        :author => correct_name.author,
+        :text_name => new_name.text_name,
+        :author => new_name.author,
         :rank => :Species
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
     assert_raises(ActiveRecord::RecordNotFound) do
-      correct_name = Name.find(correct_name.id)
+      old_name = Name.find(old_name.id)
     end
-    misspelt_name = Name.find(misspelt_name.id)
-    assert(misspelt_name)
-    assert(!misspelt_name.deprecated)
-    assert_equal(correct_author, misspelt_name.author)
-    assert_equal(correct_text_name, misspelt_name.text_name)
-    assert(1 == misspelt_name.version)
-    assert(past_names+1 == misspelt_name.versions.size)
+    assert(new_name.reload)
+    assert(!new_name.deprecated)
+    assert_equal(new_author, new_name.author)
+    assert_equal(new_text_name, new_name.text_name)
+    assert_equal(2, new_name.version)
+    assert_equal(new_versions+1, new_name.versions.size)
   end
 
-  # Test merge two names where the matching_name has notes.
+  # Test merge two names where the new name has notes.
   def test_edit_name_merge_matching_notes
-    target_name = @russula_brevipes_no_author
-    matching_name = @russula_brevipes_author_notes
-    assert_not_equal(target_name, matching_name)
-    assert_equal(target_name.text_name, matching_name.text_name)
-    assert_nil(target_name.author)
-    assert_nil(target_name.notes)
-    assert_not_nil(matching_name.author)
-    notes = matching_name.notes
-    assert_not_nil(matching_name.notes)
-
+    old_name = names(:russula_brevipes_no_author)
+    new_name = names(:russula_brevipes_author_notes)
+    assert_not_equal(old_name, new_name)
+    assert_equal(old_name.text_name, new_name.text_name)
+    assert_nil(old_name.author)
+    assert_nil(old_name.description)
+    assert_not_nil(new_name.author)
+    notes = new_name.description.notes
+    assert_not_nil(new_name.description)
     params = {
-      :id => target_name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => target_name.text_name,
-        :citation => "",
-        :author => target_name.author,
-        :rank => target_name.rank
-      }
+        :text_name => old_name.text_name,
+        :author => old_name.author,
+        :rank => old_name.rank,
+        :citation => '',
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    merged_name = Name.find(matching_name.id)
-    assert(merged_name)
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert(new_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(target_name.id)
+      Name.find(old_name.id)
     end
-    assert_equal(notes, merged_name.notes)
+    assert_equal(notes, new_name.description.notes)
   end
 
-  # Test merge two names that both start with notes, but the notes are cleared in the input.
+  # Test merge two names where the old name had notes.
+  def test_edit_name_merge_matching_notes_2
+    old_name = names(:russula_brevipes_author_notes)
+    new_name = names(:russula_brevipes_no_author)
+    assert_not_equal(old_name, new_name)
+    assert_equal(old_name.text_name, new_name.text_name)
+    assert_not_nil(old_name.author)
+    assert_not_nil(old_name.description)
+    notes = old_name.description.notes
+    assert_nil(new_name.author)
+    assert_nil(new_name.description)
+    params = {
+      :id => old_name.id,
+      :name => {
+        :text_name => old_name.text_name,
+        :author => '',
+        :rank => old_name.rank,
+        :citation => '',
+      },
+    }
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert(new_name.reload)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(old_name.id)
+    end
+    assert_equal(notes, new_name.description.notes)
+  end
+
+  # Test merging two names, only one with observations.  Should work either
+  # direction, but always keeping the name with observations.
+  def test_edit_name_merge_one_with_observations
+    old_name = names(:conocybe_filaris) # no observations
+    new_name = names(:coprinus_comatus) # has observations
+    assert_not_equal(old_name, new_name)
+    params = {
+      :id => old_name.id,
+      :name => {
+        :text_name => new_name.text_name,
+        :author => new_name.author,
+        :rank => old_name.rank,
+        :citation => '',
+      },
+    }
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name, :id => new_name.id)
+    assert(new_name.reload)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(old_name.id)
+    end
+  end
+
+  def test_edit_name_merge_one_with_observations_other_direction
+    old_name = names(:coprinus_comatus) # has observations
+    new_name = names(:conocybe_filaris) # no observations
+    assert_not_equal(old_name, new_name)
+    params = {
+      :id => old_name.id,
+      :name => {
+        :text_name => new_name.text_name,
+        :author => new_name.author,
+        :rank => old_name.rank,
+        :citation => '',
+      },
+    }
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name, :id => old_name.id)
+    assert(old_name.reload)
+    assert_raises(ActiveRecord::RecordNotFound) do
+      Name.find(new_name.id)
+    end
+  end
+
+  # Test merge two names that both start with notes.
   def test_edit_name_merge_both_notes
-    target_name = @russula_cremoricolor_no_author_notes
-    matching_name = @russula_cremoricolor_author_notes
-    assert_not_equal(target_name, matching_name)
-    assert_equal(target_name.text_name, matching_name.text_name)
-    assert_nil(target_name.author)
-    target_notes = target_name.notes
-    assert_not_nil(target_notes)
-    assert_not_nil(matching_name.author)
-    matching_notes = matching_name.notes
-    assert_not_nil(matching_notes)
-    assert_not_equal(target_notes, matching_notes)
-
+    old_name = names(:russula_cremoricolor_no_author_notes)
+    new_name = names(:russula_cremoricolor_author_notes)
+    assert_not_equal(old_name, new_name)
+    assert_equal(old_name.text_name, new_name.text_name)
+    assert_nil(old_name.author)
+    assert_not_nil(new_name.author)
+    assert_not_nil(old_notes = old_name.description.notes)
+    assert_not_nil(new_notes = new_name.description.notes)
+    assert_not_equal(old_notes, new_notes)
     params = {
-      :id => target_name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => target_name.text_name,
-        :citation => "",
-        :author => target_name.author,
-        :rank => target_name.rank
-      }
+        :text_name => old_name.text_name,
+        :citation => '',
+        :author => old_name.author,
+        :rank => old_name.rank
+      },
     }
-    params[:name].merge!(empty_notes) # Explicitly clear the notes
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    merged_name = Name.find(matching_name.id)
-    assert(merged_name)
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
+    assert(new_name.reload)
     assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(target_name.id)
+      Name.find(old_name.id)
     end
-    assert_equal(matching_notes, merged_name.notes)
+    assert_equal(new_notes, new_name.description.notes)
+    # Make sure old notes are still around.
+    other_desc = (new_name.descriptions - [new_name.description]).first
+    assert_equal(old_notes, other_desc.notes)
   end
 
-  def test_edit_name_misspelt_unmergeable
-    misspelt_name = @agaricus_campestras
-    correct_name = @agaricus_campestris
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert(0 == correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs_id = misspelt_name.namings[0].observation.id
-    assert_equal(2, correct_name.namings.size)
-    correct_obs_id = correct_name.namings[0].observation.id
-
+  def test_edit_name_both_with_notes_and_namings
+    old_name = names(:agaricus_campestros)
+    new_name = names(:agaricus_campestras)
+    assert_not_equal(old_name, new_name)
+    assert_not_equal(old_name.text_name, new_name.text_name)
+    assert_equal(old_name.author, new_name.author)
+    assert_equal(1, new_name.version)
+    assert_equal(1, old_name.namings.size)
+    assert_equal(1, new_name.namings.size)
+    new_versions = new_name.versions.size
+    old_obs = old_name.namings[0].observation
+    new_obs = new_name.namings[0].observation
     params = {
-      :id => misspelt_name.id,
+      :id => old_name.id,
       :name => {
-        :text_name => correct_text_name,
-        :author => "",
-        :rank => :Species
-      }
+        :text_name => new_name.text_name,
+        :author => old_name.author,
+        :rank => old_name.rank
+      },
     }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    # Because misspelt name is unmergable it gets reused and
-    # corrected rather than the correct name
+
+    # Fails normally.
+    login('rolf')
+    post(:edit_name, params)
+    assert_response(:action => 'show_name', :id => old_name.id)
+    assert(old_name.reload)
+    assert(new_name.reload)
+    assert_equal(1, new_name.version)
+    assert_equal(new_versions, new_name.versions.size)
+    assert_equal(1, new_name.namings.size)
+    assert_equal(1, old_name.namings.size)
+    assert_not_equal(new_name.namings[0], old_name.namings[0])
+
+    # Try again in admin mode.
+    make_admin
+    post(:edit_name, params)
+    assert_response(:action => 'show_name', :id => new_name.id)
     assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(correct_name.id)
+      assert(old_name.reload)
     end
-    correct_name = Name.find(misspelt_name.id)
-    assert(correct_name)
-    assert(1 == correct_name.version)
-    assert(past_names+1 == correct_name.versions.size)
-
-    assert_equal(3, correct_name.namings.size)
-    misspelt_obs = Observation.find(misspelt_obs_id)
-    assert_equal(@agaricus_campestras, misspelt_obs.name)
-    correct_obs = Observation.find(correct_obs_id)
-    assert_equal(@agaricus_campestras, correct_obs.name)
-  end
-
-  def test_edit_name_correct_unmergeable
-    misspelt_name = @agaricus_campestrus
-    correct_name = @agaricus_campestras
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    correct_notes = correct_name.notes
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert_equal(0, correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs_id = misspelt_name.namings[0].observation.id
-    assert_equal(1, correct_name.namings.size)
-    correct_obs_id = correct_name.namings[0].observation.id
-
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => "",
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_raises(ActiveRecord::RecordNotFound) do
-      misspelt_name = Name.find(misspelt_name.id)
-    end
-    correct_name = Name.find(correct_name.id)
-    assert(correct_name)
-    assert_equal(correct_notes, correct_name.notes)
-    assert_equal(0, correct_name.version)
-    assert_equal(past_names, correct_name.versions.size)
-
-    assert_equal(2, correct_name.namings.size)
-    misspelt_obs = Observation.find(misspelt_obs_id)
-    assert_equal(@agaricus_campestras, misspelt_obs.name)
-    correct_obs = Observation.find(correct_obs_id)
-    assert_equal(@agaricus_campestras, correct_obs.name)
-  end
-
-  def test_edit_name_neither_mergeable
-    misspelt_name = @agaricus_campestros
-    correct_name = @agaricus_campestras
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name, correct_name)
-    past_names = correct_name.versions.size
-    assert(0 == correct_name.version)
-    assert_equal(1, misspelt_name.namings.size)
-    misspelt_obs_id = misspelt_name.namings[0].observation.id
-    assert_equal(1, correct_name.namings.size)
-    correct_obs_id = correct_name.namings[0].observation.id
-
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => misspelt_name.author,
-        :rank => misspelt_name.rank
-      }
-    }
-    all_notes = empty_notes
-    all_notes[:notes] = misspelt_name.notes
-    params[:name].merge!(all_notes)
-
-    post_requires_login(:edit_name, params, false)
-    assert_response :success
-    assert_template 'edit_name'
-    misspelt_name = Name.find(misspelt_name.id)
-    assert(misspelt_name)
-    correct_name = Name.find(correct_name.id)
-    assert(correct_name)
-    assert(0 == correct_name.version)
-    assert(past_names == correct_name.versions.size)
-    assert_equal(1, correct_name.namings.size)
-    assert_equal(1, misspelt_name.namings.size)
-    assert_not_equal(correct_name.namings[0], misspelt_name.namings[0])
-  end
-
-  def test_edit_name_correct_unmergable_with_notes # Should 'fail'
-    misspelt_name = @russula_brevipes_no_author # Shouldn't have notes
-    correct_name = @russula_brevipes_author_notes # Should have notes
-    correct_text_name = correct_name.text_name
-    correct_author = correct_name.author
-    assert_not_equal(misspelt_name, correct_name)
-    assert_nil(misspelt_name.notes)
-    assert(correct_name.notes)
-
-    params = {
-      :id => misspelt_name.id,
-      :name => {
-        :text_name => correct_text_name,
-        :author => misspelt_name.author,
-        :rank => misspelt_name.rank
-      }
-    }
-    all_notes = empty_notes
-    all_notes[:notes] = "Some new notes"
-    params[:name].merge!(all_notes)
-
-    post_requires_login(:edit_name, params, false)
-    assert_response :success
-    assert_template 'edit_name'
-    misspelt_name = Name.find(misspelt_name.id)
-    assert(misspelt_name)
-    correct_name = Name.find(correct_name.id)
-    assert(correct_name)
-  end
-
-  def test_edit_name_page_version_merge
-    page_name = @coprinellus_micaceus
-    other_name = @coprinellus_micaceus_no_author
-    assert(page_name.version > other_name.version)
-    assert_not_equal(page_name, other_name)
-    assert_equal(page_name.text_name, other_name.text_name)
-    correct_author = page_name.author
-    assert_not_equal(other_name.author, correct_author)
-    past_names = page_name.versions.size
-    params = {
-      :id => page_name.id,
-      :name => {
-        :text_name => page_name.text_name,
-        :author => '',
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_raises(ActiveRecord::RecordNotFound) do
-      destroyed_name = Name.find(other_name.id)
-    end
-    merge_name = Name.find(page_name.id)
-    assert(merge_name)
-    assert_equal(correct_author, merge_name.author)
-    assert_equal(past_names, merge_name.version)
-  end
-
-  def test_edit_name_other_version_merge
-    page_name = @coprinellus_micaceus_no_author
-    other_name = @coprinellus_micaceus
-    assert(page_name.version < other_name.version)
-    assert_not_equal(page_name, other_name)
-    assert_equal(page_name.text_name, other_name.text_name)
-    correct_author = other_name.author
-    assert_not_equal(page_name.author, correct_author)
-    past_names = other_name.versions.size
-    params = {
-      :id => page_name.id,
-      :name => {
-        :text_name => page_name.text_name,
-        :author => '',
-        :rank => :Species
-      }
-    }
-    params[:name].merge!(empty_notes)
-
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    assert_raises(ActiveRecord::RecordNotFound) do
-      destroyed_name = Name.find(page_name.id)
-    end
-    merge_name = Name.find(other_name.id)
-    assert(merge_name)
-    assert_equal(correct_author, merge_name.author)
-    assert_equal(past_names, merge_name.version)
+    assert(new_name.reload)
+    assert_equal(1, new_name.version)
+    assert_equal(new_versions, new_name.versions.size)
+    assert_equal(2, new_name.namings.size)
   end
 
   def test_edit_name_add_author
-    name = @strobilurus_diminutivus_no_author
+    name = names(:strobilurus_diminutivus_no_author)
     old_text_name = name.text_name
     new_author = 'Desjardin'
     assert(name.namings.length > 0)
     params = {
       :id => name.id,
       :name => {
+        :text_name => old_text_name,
         :author => new_author,
         :rank => :Species
-      }
+      },
     }
-    params[:name].merge!(empty_notes)
-
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('mary')
+    post(:edit_name, params)
+    assert_response(:action => :show_name)
     # It seems to be creating Strobilurus sp. as well?
-    assert_equal(30, @rolf.reload.contribution)
-    name = Name.find(name.id)
-    assert_equal(new_author, name.author)
+    assert_equal(10 + @new_pts + @chg_pts, @mary.reload.contribution)
+    assert_equal(new_author, name.reload.author)
     assert_equal(old_text_name, name.text_name)
-  end
-
-  # Test merge of name with notes with name without notes
-  def test_edit_name_notes
-    target_name = @russula_brevipes_no_author
-    matching_name = @russula_brevipes_author_notes
-    assert_not_equal(target_name, matching_name)
-    assert_equal(target_name.text_name, matching_name.text_name)
-    assert_nil(target_name.author)
-    assert_nil(target_name.notes)
-    assert_not_nil(matching_name.author)
-    notes = matching_name.notes
-    assert_not_nil(matching_name.notes)
-
-    params = {
-      :id => target_name.id,
-      :name => {
-        :text_name => target_name.text_name,
-        :citation => "",
-        :author => target_name.author,
-        :rank => target_name.rank
-      }
-    }
-    params[:name].merge!(empty_notes)
-
-    post_requires_login(:edit_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    # (creates Russula since not in fixtures, changes R. brevipes, deletes some name, but leaves past_name)
-    assert_equal(30, @rolf.reload.contribution)
-    merged_name = Name.find(matching_name.id)
-    assert(merged_name)
-    assert_raises(ActiveRecord::RecordNotFound) do
-      Name.find(target_name.id)
-    end
-    assert_equal(notes, merged_name.notes)
   end
 
   # ----------------------------
@@ -980,39 +1097,37 @@ end
 
   def test_update_bulk_names_nn_synonym
     new_name_str = "Amanita fergusonii"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    assert_nil(Name.find_by_text_name(new_name_str))
     new_synonym_str = "Amanita lanei"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_synonym_str]))
+    assert_nil(Name.find_by_text_name(new_synonym_str))
     params = {
       :list => { :members => "#{new_name_str} = #{new_synonym_str}"},
     }
-    post_requires_login(:bulk_name_edit, params, false)
-    assert_response :success
-    assert_template 'bulk_name_edit'
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_synonym_str]))
+    post_requires_login(:bulk_name_edit, params)
+    assert_response('bulk_name_edit')
+    assert_nil(Name.find_by_text_name(new_name_str))
+    assert_nil(Name.find_by_text_name(new_synonym_str))
     assert_equal(10, @rolf.reload.contribution)
   end
 
   def test_update_bulk_names_approved_nn_synonym
     new_name_str = "Amanita fergusonii"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    assert_nil(Name.find_by_text_name(new_name_str))
     new_synonym_str = "Amanita lanei"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_synonym_str]))
+    assert_nil(Name.find_by_text_name(new_synonym_str))
     params = {
       :list => { :members => "#{new_name_str} = #{new_synonym_str}"},
-      :approved_names => [new_name_str, new_synonym_str]
+      :approved_names => [new_name_str, new_synonym_str].join("\r\n")
     }
-    post_requires_login(:bulk_name_edit, params, false)
-    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
-    assert(new_name)
+    login('rolf')
+    post(:bulk_name_edit, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert(new_name = Name.find_by_text_name(new_name_str))
     assert_equal(new_name_str, new_name.text_name)
     assert_equal("**__#{new_name_str}__**", new_name.display_name)
     assert(!new_name.deprecated)
     assert_equal(:Species, new_name.rank)
-    synonym_name = Name.find(:first, :conditions => ["text_name = ?", new_synonym_str])
-    assert(synonym_name)
+    assert(synonym_name = Name.find_by_text_name(new_synonym_str))
     assert_equal(new_synonym_str, synonym_name.text_name)
     assert_equal("__#{new_synonym_str}__", synonym_name.display_name)
     assert(synonym_name.deprecated)
@@ -1022,67 +1137,64 @@ end
   end
 
   def test_update_bulk_names_ee_synonym
-    approved_name = @chlorophyllum_rachodes
-    synonym_name = @macrolepiota_rachodes
+    approved_name = names(:chlorophyllum_rachodes)
+    synonym_name = names(:macrolepiota_rachodes)
     assert_not_equal(approved_name.synonym, synonym_name.synonym)
     assert(!synonym_name.deprecated)
     params = {
       :list => { :members => "#{approved_name.search_name} = #{synonym_name.search_name}"},
     }
-    post_requires_login(:bulk_name_edit, params, false)
-    # print "\n#{flash[:notice]}\n"
-    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    approved_name = Name.find(approved_name.id)
-    assert(!approved_name.deprecated)
-    synonym_name = Name.find(synonym_name.id)
-    assert(synonym_name.deprecated)
+    login('rolf')
+    post(:bulk_name_edit, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert(!approved_name.reload.deprecated)
+    assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym)
     assert_equal(approved_name.synonym, synonym_name.synonym)
   end
 
   def test_update_bulk_names_eee_synonym
-    approved_name = @lepiota_rachodes
-    synonym_name = @lepiota_rhacodes
+    approved_name = names(:lepiota_rachodes)
+    synonym_name  = names(:lepiota_rhacodes)
+    synonym_name2 = names(:chlorophyllum_rachodes)
     assert_nil(approved_name.synonym)
     assert_nil(synonym_name.synonym)
-    assert(!synonym_name.deprecated)
-    synonym_name2 = @chlorophyllum_rachodes
     assert_not_nil(synonym_name2.synonym)
-    assert(!synonym_name2.deprecated)
-    params = {
-      :list => { :members => ("#{approved_name.search_name} = #{synonym_name.search_name}\r\n" +
-                              "#{approved_name.search_name} = #{synonym_name2.search_name}")},
-    }
-    post_requires_login(:bulk_name_edit, params, false)
-    # print "\n#{flash[:notice]}\n"
-    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    approved_name = Name.find(approved_name.id)
     assert(!approved_name.deprecated)
-    synonym_name = Name.find(synonym_name.id)
-    assert(synonym_name.deprecated)
+    assert(!synonym_name.deprecated)
+    assert(!synonym_name2.deprecated)
+    params = { :list => {
+      :members =>
+        "#{approved_name.search_name} = #{synonym_name.search_name}\r\n" +
+        "#{approved_name.search_name} = #{synonym_name2.search_name}"
+      }
+    }
+    login('rolf')
+    post(:bulk_name_edit, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert(!approved_name.reload.deprecated)
+    assert(synonym_name.reload.deprecated)
+    assert(synonym_name2.reload.deprecated)
     assert_not_nil(approved_name.synonym)
     assert_equal(approved_name.synonym, synonym_name.synonym)
-    synonym_name2 = Name.find(synonym_name2.id)
-    assert(synonym_name.deprecated)
     assert_equal(approved_name.synonym, synonym_name2.synonym)
   end
 
   def test_update_bulk_names_en_synonym
-    approved_name = @chlorophyllum_rachodes
+    approved_name = names(:chlorophyllum_rachodes)
     target_synonym = approved_name.synonym
     assert(target_synonym)
     new_synonym_str = "New name Wilson"
-    assert_nil(Name.find(:first, :conditions => ["search_name = ?", new_synonym_str]))
+    assert_nil(Name.find_by_search_name(new_synonym_str))
     params = {
-      :list => { :members => "#{approved_name.search_name} = #{new_synonym_str}"},
-      :approved_names => [approved_name.search_name, new_synonym_str]
+      :list => { :members => "#{approved_name.search_name} = #{new_synonym_str}" },
+      :approved_names => [approved_name.search_name, new_synonym_str].join("\r\n")
     }
-    post_requires_login(:bulk_name_edit, params, false)
-    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    approved_name = Name.find(approved_name.id)
-    assert(!approved_name.deprecated)
-    synonym_name = Name.find(:first, :conditions => ["search_name = ?", new_synonym_str])
-    assert(synonym_name)
+    login('rolf')
+    post(:bulk_name_edit, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert(!approved_name.reload.deprecated)
+    assert(synonym_name = Name.find_by_search_name(new_synonym_str))
     assert(synonym_name.deprecated)
     assert_equal(:Species, synonym_name.rank)
     assert_not_nil(approved_name.synonym)
@@ -1092,23 +1204,22 @@ end
 
   def test_update_bulk_names_ne_synonym
     new_name_str = "New name Wilson"
-    assert_nil(Name.find(:first, :conditions => ["search_name = ?", new_name_str]))
-    synonym_name = @macrolepiota_rachodes
+    assert_nil(Name.find_by_search_name(new_name_str))
+    synonym_name = names(:macrolepiota_rachodes)
     assert(!synonym_name.deprecated)
     target_synonym = synonym_name.synonym
     assert(target_synonym)
     params = {
-      :list => { :members => "#{new_name_str} = #{synonym_name.search_name}"},
-      :approved_names => [new_name_str, synonym_name.search_name]
+      :list => { :members => "#{new_name_str} = #{synonym_name.search_name}" },
+      :approved_names => [new_name_str, synonym_name.search_name].join("\r\n")
     }
-    post_requires_login(:bulk_name_edit, params, false)
-    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    approved_name = Name.find(:first, :conditions => ["search_name = ?", new_name_str])
-    assert(approved_name)
+    login('rolf')
+    post(:bulk_name_edit, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert(approved_name = Name.find_by_search_name(new_name_str))
     assert(!approved_name.deprecated)
     assert_equal(:Species, approved_name.rank)
-    synonym_name = Name.find(synonym_name.id)
-    assert(synonym_name.deprecated)
+    assert(synonym_name.reload.deprecated)
     assert_not_nil(approved_name.synonym)
     assert_equal(approved_name.synonym, synonym_name.synonym)
     assert_equal(target_synonym, approved_name.synonym)
@@ -1117,21 +1228,21 @@ end
   # Test a bug fix for the case of adding a subtaxon when the parent taxon is duplicated due to
   # different authors.
   def test_update_bulk_names_approved_for_dup_parents
-    parent1 = @lentinellus_ursinus_author1
-    parent2 = @lentinellus_ursinus_author2
+    parent1 = names(:lentinellus_ursinus_author1)
+    parent2 = names(:lentinellus_ursinus_author2)
     assert_not_equal(parent1, parent2)
     assert_equal(parent1.text_name, parent2.text_name)
     assert_not_equal(parent1.author, parent2.author)
     new_name_str = "#{parent1.text_name} f. robustus"
-    assert_nil(Name.find(:first, :conditions => ["text_name = ?", new_name_str]))
+    assert_nil(Name.find_by_text_name(new_name_str))
     params = {
-      :list => { :members => "#{new_name_str}"},
-      :approved_names => [new_name_str]
+      :list => { :members => "#{new_name_str}" },
+      :approved_names => new_name_str
     }
-    post_requires_login(:bulk_name_edit, params, false)
-    assert_redirected_to(:controller => "observer", :action => "list_rss_logs")
-    new_name = Name.find(:first, :conditions => ["text_name = ?", new_name_str])
-    assert(new_name)
+    login('rolf')
+    post(:bulk_name_edit, params)
+    assert_response(:controller => "observer", :action => "list_rss_logs")
+    assert(Name.find_by_text_name(new_name_str))
   end
 
   # ----------------------------
@@ -1140,13 +1251,13 @@ end
 
   # combine two Names that have no Synonym
   def test_transfer_synonyms_1_1
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
     selected_past_name_count = selected_name.versions.length
     selected_version = selected_name.version
 
-    add_name = @lepiota_rhacodes
+    add_name = names(:lepiota_rhacodes)
     assert(!add_name.deprecated)
     assert_equal("**__Lepiota rhacodes__** Vittad.", add_name.display_name)
     assert_nil(add_name.synonym)
@@ -1156,40 +1267,36 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.text_name },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    post_requires_login(:change_synonyms, params)
+    assert_response(:action => :show_name)
 
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
+    assert(add_name.reload.deprecated)
     assert_equal("__Lepiota rhacodes__ Vittad.", add_name.display_name)
     assert_equal(add_past_name_count+1, add_name.versions.length) # past name should have been created
     assert(add_name.versions.latest.deprecated)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    assert_not_nil(add_synonym = add_name.synonym)
     assert_equal(add_name_version+1, add_name.version)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_past_name_count, selected_name.versions.length)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(2, add_synonym.names.size)
 
-    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!names(:lepiota).reload.deprecated)
   end
 
   # combine two Names that have no Synonym and no deprecation
   def test_transfer_synonyms_1_1_nd
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
     selected_version = selected_name.version
 
-    add_name = @lepiota_rhacodes
+    add_name = names(:lepiota_rhacodes)
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
     add_version = add_name.version
@@ -1199,46 +1306,43 @@ end
       :synonym => { :members => add_name.text_name },
       :deprecate => { :all => "0" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
 
-    add_name = Name.find(add_name.id)
-    assert(!add_name.deprecated)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    assert(!add_name.reload.deprecated)
+    assert_not_nil(add_synonym = add_name.synonym)
     assert_equal(add_version, add_name.version)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(2, add_synonym.names.size)
   end
 
   # add new name string to Name with no Synonym but not approved
   def test_transfer_synonyms_1_0_na
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
+
     params = {
       :id => selected_name.id,
       :synonym => { :members => "Lepiota rachodes var. rachodes" },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_response :success
-    assert_template 'change_synonyms'
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response('change_synonyms')
 
-    selected_name = Name.find(selected_name.id)
-    assert_nil(selected_name.synonym)
+    assert_nil(selected_name.reload.synonym)
     assert(!selected_name.deprecated)
   end
 
   # add new name string to Name with no Synonym but approved
   def test_transfer_synonyms_1_0_a
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1246,15 +1350,15 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => "Lepiota rachodes var. rachodes" },
-      :approved_names => ["Lepiota rachodes var. rachodes"],
-      :deprecate => { :all => "checked" }
+      :approved_names => "Lepiota rachodes var. rachodes",
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    selected_name = Name.find(selected_name.id)
-    assert_equal(selected_version, selected_name.version)
-    synonym = selected_name.synonym
-    assert_not_nil(synonym)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
+
+    assert_equal(selected_version, selected_name.reload.version)
+    assert_not_nil(synonym = selected_name.synonym)
     assert_equal(2, synonym.names.length)
     for n in synonym.names
       if n == selected_name
@@ -1263,47 +1367,54 @@ end
         assert(n.deprecated)
       end
     end
-    assert(!Name.find(@lepiota.id).deprecated)
+
+    assert(!names(:lepiota).reload.deprecated)
   end
 
   # add new name string to Name with no Synonym but approved
   def test_transfer_synonyms_1_00_a
-    selected_name = @lepiota_rachodes
-    assert(!selected_name.deprecated)
-    assert_nil(selected_name.synonym)
+    page_name = names(:lepiota_rachodes)
+    assert(!page_name.deprecated)
+    assert_nil(page_name.synonym)
 
     params = {
-      :id => selected_name.id,
-      :synonym => { :members => "Lepiota rachodes var. rachodes\r\nLepiota rhacodes var. rhacodes" },
-      :approved_names => ["Lepiota rachodes var. rachodes", "Lepiota rhacodes var. rhacodes"],
-      :deprecate => { :all => "checked" }
+      :id => page_name.id,
+      :synonym => {
+        :members => "Lepiota rachodes var. rachodes\r\n" +
+                    "Lepiota rhacodes var. rhacodes"
+      },
+      :approved_names => [
+        "Lepiota rachodes var. rachodes",
+        "Lepiota rhacodes var. rhacodes"
+      ].join("\r\n"),
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
-    synonym = selected_name.synonym
-    assert_not_nil(synonym)
+    assert(!page_name.reload.deprecated)
+    assert_not_nil(synonym = page_name.synonym)
     assert_equal(3, synonym.names.length)
     for n in synonym.names
-      if n == selected_name
+      if n == page_name
         assert(!n.deprecated)
       else
         assert(n.deprecated)
       end
     end
-    assert(!Name.find(@lepiota.id).deprecated)
+
+    assert(!names(:lepiota).reload.deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym
   def test_transfer_synonyms_n_1
-    add_name = @lepiota_rachodes
+    add_name = names(:lepiota_rachodes)
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
     add_version = add_name.version
 
-    selected_name = @chlorophyllum_rachodes
+    selected_name = names(:chlorophyllum_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1313,36 +1424,34 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
 
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    assert(add_name.reload.deprecated)
+    assert_not_nil(add_synonym = add_name.synonym)
     assert_equal(add_version+1, add_name.version)
-    assert(!Name.find(@lepiota.id).deprecated)
+    assert(!names(:lepiota).reload.deprecated)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(start_size + 1, add_synonym.names.size)
-    assert(!Name.find(@chlorophyllum.id).deprecated)
+
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym wih the alternates checked
   def test_transfer_synonyms_n_1_c
-    add_name = @lepiota_rachodes
+    add_name = names(:lepiota_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     assert_nil(add_name.synonym)
 
-    selected_name = @chlorophyllum_rachodes
+    selected_name = names(:chlorophyllum_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1355,48 +1464,46 @@ end
       if n != selected_name # Check all names not matching the selected one
         assert(!n.deprecated)
         split_name = n
-        existing_synonyms[n.id.to_s] = "checked"
+        existing_synonyms[n.id.to_s] = "1"
       end
     end
     assert_not_nil(split_name)
+
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
       :existing_synonyms => existing_synonyms,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
-    assert_equal(add_version+1, add_name.version)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(add_name.reload.deprecated)
+    assert_equal(add_version+1, add_name.version)
+    assert_not_nil(add_synonym = add_name.synonym)
+
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(start_size + 1, add_synonym.names.size)
 
-    split_name = Name.find(split_name.id)
-    assert(!split_name.deprecated)
-    split_synonym = split_name.synonym
-    assert_equal(add_synonym, split_synonym)
-    assert(!Name.find(@lepiota.id).deprecated)
-    assert(!Name.find(@chlorophyllum.id).deprecated)
+    assert(!split_name.reload.deprecated)
+    assert_equal(add_synonym, split_synonym = split_name.synonym)
+
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name with no Synonym to a Name that has a Synonym wih the alternates not checked
   def test_transfer_synonyms_n_1_nc
-    add_name = @lepiota_rachodes
+    add_name = names(:lepiota_rachodes)
     assert(!add_name.deprecated)
     assert_nil(add_name.synonym)
     add_version = add_name.version
 
-    selected_name = @chlorophyllum_rachodes
+    selected_name = names(:chlorophyllum_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1415,46 +1522,45 @@ end
     assert_not_nil(split_name)
     assert(!split_name.deprecated)
     split_version = split_name.version
+
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
       :existing_synonyms => existing_synonyms,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
-    assert_equal(add_version+1, add_name.version)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(add_name.reload.deprecated)
+    assert_equal(add_version+1, add_name.version)
+    assert_not_nil(add_synonym = add_name.synonym)
+
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(add_synonym, selected_synonym)
     assert_equal(2, add_synonym.names.size)
 
-    split_name = Name.find(split_name.id)
-    assert(!split_name.deprecated)
+    assert(!split_name.reload.deprecated)
     assert_equal(split_version, split_name.version)
     assert_nil(split_name.synonym)
-    assert(!Name.find(@lepiota.id).deprecated)
-    assert(!Name.find(@chlorophyllum.id).deprecated)
+
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with no approved synonyms
   def test_transfer_synonyms_1_n_ns
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
 
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1462,39 +1568,37 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_response :success
-    assert_template 'change_synonyms'
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response('change_synonyms')
 
-    add_name = Name.find(add_name.id)
-    assert(!add_name.deprecated)
+    assert(!add_name.reload.deprecated)
     assert_equal(add_version, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_nil(selected_synonym)
 
     assert_equal(start_size, add_synonym.names.size)
-    assert(!Name.find(@lepiota.id).deprecated)
-    assert(!Name.find(@chlorophyllum.id).deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with all approved synonyms
   def test_transfer_synonyms_1_n_s
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
 
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1504,39 +1608,38 @@ end
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
       :approved_synonyms => synonym_ids,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => "show_name")
 
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
+    assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
 
     assert_equal(start_size+1, add_synonym.names.size)
-    assert(!Name.find(@lepiota.id).deprecated)
-    assert(!Name.find(@chlorophyllum.id).deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # add a Name that has a Synonym to a Name with no Synonym with all approved synonyms
   def test_transfer_synonyms_1_n_l
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     start_size = add_synonym.names.size
 
-    selected_name = @lepiota_rachodes
+    selected_name = names(:lepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     assert_nil(selected_name.synonym)
@@ -1545,38 +1648,37 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => synonym_names },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => "show_name")
 
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
+    assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
     assert_equal(add_synonym, selected_synonym)
 
     assert_equal(start_size+1, add_synonym.names.size)
-    assert(!Name.find(@lepiota.id).deprecated)
-    assert(!Name.find(@chlorophyllum.id).deprecated)
+    assert(!names(:lepiota).reload.deprecated)
+    assert(!names(:chlorophyllum).reload.deprecated)
   end
 
   # combine two Names that each have Synonyms with no chosen names
   def test_transfer_synonyms_n_n_ns
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
 
-    selected_name = @macrolepiota_rachodes
+    selected_name = names(:macrolepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -1586,36 +1688,32 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_response :success
-    assert_template 'change_synonyms'
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response('change_synonyms')
 
-    add_name = Name.find(add_name.id)
-    assert(!add_name.deprecated)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    assert(!add_name.reload.deprecated)
+    assert_not_nil(add_synonym = add_name.synonym)
     assert_equal(add_start_size, add_synonym.names.size)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert(!selected_name.reload.deprecated)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_not_equal(add_synonym, selected_synonym)
     assert_equal(selected_start_size, selected_synonym.names.size)
   end
 
   # combine two Names that each have Synonyms with all chosen names
   def test_transfer_synonyms_n_n_s
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
 
-    selected_name = @macrolepiota_rachodes
+    selected_name = names(:macrolepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1628,19 +1726,19 @@ end
       :id => selected_name.id,
       :synonym => { :members => add_name.search_name },
       :approved_synonyms => synonym_ids,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => "show_name")
+
+    assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     assert_equal(add_start_size + selected_start_size, add_synonym.names.size)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
     selected_synonym = selected_name.synonym
     assert_not_nil(selected_synonym)
@@ -1649,14 +1747,14 @@ end
 
   # combine two Names that each have Synonyms with all names listed
   def test_transfer_synonyms_n_n_l
-    add_name = @chlorophyllum_rachodes
+    add_name = names(:chlorophyllum_rachodes)
     assert(!add_name.deprecated)
     add_version = add_name.version
     add_synonym = add_name.synonym
     assert_not_nil(add_synonym)
     add_start_size = add_synonym.names.size
 
-    selected_name = @macrolepiota_rachodes
+    selected_name = names(:macrolepiota_rachodes)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_synonym = selected_name.synonym
@@ -1668,28 +1766,26 @@ end
     params = {
       :id => selected_name.id,
       :synonym => { :members => synonym_names },
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    add_name = Name.find(add_name.id)
-    assert(add_name.deprecated)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => "show_name")
+
+    assert(add_name.reload.deprecated)
     assert_equal(add_version+1, add_name.version)
-    add_synonym = add_name.synonym
-    assert_not_nil(add_synonym)
+    assert_not_nil(add_synonym = add_name.synonym)
     assert_equal(add_start_size + selected_start_size, add_synonym.names.size)
 
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(add_synonym, selected_synonym)
   end
 
   # split off a single name from a name with multiple synonyms
   def test_transfer_synonyms_split_3_1
-    selected_name = @lactarius_alpinus
+    selected_name = names(:lactarius_alpinus)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_id = selected_name.id
@@ -1707,7 +1803,7 @@ end
           existing_synonyms[n.id.to_s] = "0"
         else
           kept_name = n
-          existing_synonyms[n.id.to_s] = "checked" # Check the rest
+          existing_synonyms[n.id.to_s] = "1" # Check the rest
         end
       end
     end
@@ -1715,21 +1811,20 @@ end
     kept_version = kept_name.version
     params = {
       :id => selected_name.id,
-      :synonym => { :members => "" },
+      :synonym => { :members => '' },
       :existing_synonyms => existing_synonyms,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    selected_name = Name.find(selected_name.id)
-    assert_equal(selected_version, selected_name.version)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => "show_name")
+
+    assert_equal(selected_version, selected_name.reload.version)
     assert(!selected_name.deprecated)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(selected_start_size - 1, selected_synonym.names.size)
 
-    split_name = Name.find(split_name.id)
-    assert(split_name.deprecated)
+    assert(split_name.reload.deprecated)
     assert_equal(split_version, split_name.version)
     assert_nil(split_name.synonym)
 
@@ -1739,7 +1834,7 @@ end
 
   # split 4 synonymized names into two sets of synonyms with two members each
   def test_transfer_synonyms_split_2_2
-    selected_name = @lactarius_alpinus
+    selected_name = names(:lactarius_alpinus)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_id = selected_name.id
@@ -1757,34 +1852,32 @@ end
           split_names.push(n)
           existing_synonyms[n.id.to_s] = "0"
         else
-          existing_synonyms[n.id.to_s] = "checked"
+          existing_synonyms[n.id.to_s] = "1"
         end
         count += 1
       end
     end
     assert_equal(2, split_names.length)
     assert_not_equal(split_names[0], split_names[1])
+
     params = {
       :id => selected_name.id,
-      :synonym => { :members => "" },
+      :synonym => { :members => '' },
       :existing_synonyms => existing_synonyms,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    selected_name = Name.find(selected_name.id)
-    assert(!selected_name.deprecated)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
+
+    assert(!selected_name.reload.deprecated)
     assert_equal(selected_version, selected_name.version)
-    selected_synonym = selected_name.synonym
-    assert_not_nil(selected_synonym)
+    assert_not_nil(selected_synonym = selected_name.synonym)
     assert_equal(selected_start_size - 2, selected_synonym.names.size)
 
-    split_names[0] = Name.find(split_names[0].id)
-    assert(split_names[0].deprecated)
-    split_synonym = split_names[0].synonym
-    assert_not_nil(split_synonym)
-    split_names[1] = Name.find(split_names[1].id)
-    assert(split_names[1].deprecated)
+    assert(split_names[0].reload.deprecated)
+    assert_not_nil(split_synonym = split_names[0].synonym)
+    assert(split_names[1].reload.deprecated)
     assert_not_equal(split_names[0], split_names[1])
     assert_equal(split_synonym, split_names[1].synonym)
     assert_equal(2, split_synonym.names.size)
@@ -1792,7 +1885,7 @@ end
 
   # take four synonymized names and separate off one
   def test_transfer_synonyms_split_1_3
-    selected_name = @lactarius_alpinus
+    selected_name = names(:lactarius_alpinus)
     assert(!selected_name.deprecated)
     selected_version = selected_name.version
     selected_id = selected_name.id
@@ -1811,24 +1904,24 @@ end
     end
     assert_not_nil(split_name)
     split_version = split_name.version
+
     params = {
       :id => selected_name.id,
-      :synonym => { :members => "" },
+      :synonym => { :members => '' },
       :existing_synonyms => existing_synonyms,
-      :deprecate => { :all => "checked" }
+      :deprecate => { :all => "1" }
     }
-    post_requires_login(:change_synonyms, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    selected_name = Name.find(selected_name.id)
-    assert_equal(selected_version, selected_name.version)
+    login('rolf')
+    post(:change_synonyms, params)
+    assert_response(:action => :show_name)
+
+    assert_equal(selected_version, selected_name.reload.version)
     assert(!selected_name.deprecated)
     assert_nil(selected_name.synonym)
 
-    split_name = Name.find(split_name.id)
-    assert(split_name.deprecated)
+    assert(split_name.reload.deprecated)
     assert_equal(split_version, split_name.version)
-    split_synonym = split_name.synonym
-    assert_not_nil(split_synonym)
+    assert_not_nil(split_synonym = split_name.synonym)
     assert_equal(selected_start_size - 1, split_synonym.names.size)
   end
 
@@ -1838,172 +1931,168 @@ end
 
   # deprecate an existing unique name with another existing name
   def test_do_deprecation
-    current_name = @lepiota_rachodes
-    assert(!current_name.deprecated)
-    assert_nil(current_name.synonym)
-    current_past_name_count = current_name.versions.length
-    current_version = current_name.version
-    current_notes = current_name.notes
+    old_name = names(:lepiota_rachodes)
+    assert(!old_name.deprecated)
+    assert_nil(old_name.synonym)
+    old_past_name_count = old_name.versions.length
+    old_version = old_name.version
 
-    proposed_name = @chlorophyllum_rachodes
-    assert(!proposed_name.deprecated)
-    assert_not_nil(proposed_name.synonym)
-    proposed_synonym_length = proposed_name.synonym.names.size
-    proposed_past_name_count = proposed_name.versions.length
-    proposed_version = proposed_name.version
-    proposed_notes = proposed_name.notes
+    new_name = names(:chlorophyllum_rachodes)
+    assert(!new_name.deprecated)
+    assert_not_nil(new_name.synonym)
+    new_synonym_length = new_name.synonym.names.size
+    new_past_name_count = new_name.versions.length
+    new_version = new_name.version
 
     params = {
-      :id => current_name.id,
-      :proposed => { :name => proposed_name.text_name },
+      :id => old_name.id,
+      :proposed => { :name => new_name.text_name },
       :comment => { :comment => "Don't like this name" }
     }
-    post_requires_login(:deprecate_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name") # Success
+    post_requires_login(:deprecate_name, params)
+    assert_response(:action => :show_name)
 
-    old_name = Name.find(current_name.id)
-    assert(old_name.deprecated)
-    assert_equal(current_past_name_count+1, old_name.versions.length) # past name should have been created
+    assert(old_name.reload.deprecated)
+    assert_equal(old_past_name_count+1, old_name.versions.length)
     assert(old_name.versions.latest.deprecated)
-    old_synonym = old_name.synonym
-    assert_not_nil(old_synonym)
-    assert_equal(current_version+1, old_name.version)
-    assert_not_equal(current_notes, old_name.notes)
+    assert_not_nil(old_synonym = old_name.synonym)
+    assert_equal(old_version+1, old_name.version)
 
-    new_name = Name.find(proposed_name.id)
-    assert(!new_name.deprecated)
-    assert_equal(proposed_past_name_count, new_name.versions.length)
-    new_synonym = new_name.synonym
-    assert_not_nil(new_synonym)
+    assert(!new_name.reload.deprecated)
+    assert_equal(new_past_name_count, new_name.versions.length)
+    assert_not_nil(new_synonym = new_name.synonym)
     assert_equal(old_synonym, new_synonym)
-    assert_equal(proposed_synonym_length+1, new_synonym.names.size)
-    assert_equal(proposed_version, new_name.version)
-    assert_equal(proposed_notes, new_name.notes)
+    assert_equal(new_synonym_length+1, new_synonym.names.size)
+    assert_equal(new_version, new_name.version)
+
+    comment = Comment.last
+    assert_equal('Name', comment.object_type)
+    assert_equal(old_name.id, comment.object_id)
+    assert_match(/deprecat/i, comment.summary)
+    assert_equal("Don't like this name", comment.comment)
   end
 
   # deprecate an existing unique name with an ambiguous name
   def test_do_deprecation_ambiguous
-    current_name = @lepiota_rachodes
-    assert(!current_name.deprecated)
-    assert_nil(current_name.synonym)
-    current_past_name_count = current_name.versions.length
+    old_name = names(:lepiota_rachodes)
+    assert(!old_name.deprecated)
+    assert_nil(old_name.synonym)
+    old_past_name_count = old_name.versions.length
 
-    proposed_name = @amanita_baccata_arora # Ambiguous text name
-    assert(!proposed_name.deprecated)
-    assert_nil(proposed_name.synonym)
-    proposed_past_name_count = proposed_name.versions.length
+    new_name = names(:amanita_baccata_arora) # Ambiguous text name
+    assert(!new_name.deprecated)
+    assert_nil(new_name.synonym)
+    new_past_name_count = new_name.versions.length
+
+    comments = Comment.count
 
     params = {
-      :id => current_name.id,
-      :proposed => { :name => proposed_name.text_name },
-      :comment => { :comment => ""}
+      :id => old_name.id,
+      :proposed => { :name => new_name.text_name },
+      :comment => { :comment => ''}
     }
-    post_requires_login(:deprecate_name, params, false)
-    assert_response :success # Fail since name can't be disambiguated
-    assert_template 'deprecate_name'
+    login('rolf')
+    post(:deprecate_name, params)
+    assert_response('deprecate_name')
+    # Fail since name can't be disambiguated
 
-    old_name = Name.find(current_name.id)
-    assert(!old_name.deprecated)
-    assert_equal(current_past_name_count, old_name.versions.length)
+    assert(!old_name.reload.deprecated)
+    assert_equal(old_past_name_count, old_name.versions.length)
     assert_nil(old_name.synonym)
 
-    new_name = Name.find(proposed_name.id)
-    assert(!new_name.deprecated)
-    assert_equal(proposed_past_name_count, new_name.versions.length)
+    assert(!new_name.reload.deprecated)
+    assert_equal(new_past_name_count, new_name.versions.length)
     assert_nil(new_name.synonym)
+
+    assert_equal(comments, Comment.count)
   end
 
   # deprecate an existing unique name with an ambiguous name, but using :chosen_name to disambiguate
   def test_do_deprecation_chosen
-    current_name = @lepiota_rachodes
-    assert(!current_name.deprecated)
-    assert_nil(current_name.synonym)
-    current_past_name_count = current_name.versions.length
+    old_name = names(:lepiota_rachodes)
+    assert(!old_name.deprecated)
+    assert_nil(old_name.synonym)
+    old_past_name_count = old_name.versions.length
 
-    proposed_name = @amanita_baccata_arora # Ambiguous text name
-    assert(!proposed_name.deprecated)
-    assert_nil(proposed_name.synonym)
-    proposed_synonym_length = 0
-    proposed_past_name_count = proposed_name.versions.length
+    new_name = names(:amanita_baccata_arora) # Ambiguous text name
+    assert(!new_name.deprecated)
+    assert_nil(new_name.synonym)
+    new_synonym_length = 0
+    new_past_name_count = new_name.versions.length
 
     params = {
-      :id => current_name.id,
-      :proposed => { :name => proposed_name.text_name },
-      :chosen_name => { :name_id => proposed_name.id },
+      :id => old_name.id,
+      :proposed => { :name => new_name.text_name },
+      :chosen_name => { :name_id => new_name.id },
       :comment => { :comment => "Don't like this name"}
     }
-    post_requires_login(:deprecate_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name") # Success
+    login('rolf')
+    post(:deprecate_name, params)
+    assert_response(:action => :show_name)
 
-    old_name = Name.find(current_name.id)
-    assert(old_name.deprecated)
-    assert_equal(current_past_name_count+1, old_name.versions.length) # past name should have been created
+    assert(old_name.reload.deprecated)
+    assert_equal(old_past_name_count+1, old_name.versions.length)
     assert(old_name.versions.latest.deprecated)
-    old_synonym = old_name.synonym
-    assert_not_nil(old_synonym)
+    assert_not_nil(old_synonym = old_name.synonym)
 
-    new_name = Name.find(proposed_name.id)
-    assert(!new_name.deprecated)
-    assert_equal(proposed_past_name_count, new_name.versions.length)
-    new_synonym = new_name.synonym
-    assert_not_nil(new_synonym)
+    assert(!new_name.reload.deprecated)
+    assert_equal(new_past_name_count, new_name.versions.length)
+    assert_not_nil(new_synonym = new_name.synonym)
     assert_equal(old_synonym, new_synonym)
     assert_equal(2, new_synonym.names.size)
   end
 
   # deprecate an existing unique name with an ambiguous name
   def test_do_deprecation_new_name
-    current_name = @lepiota_rachodes
-    assert(!current_name.deprecated)
-    assert_nil(current_name.synonym)
-    current_past_name_count = current_name.versions.length
+    old_name = names(:lepiota_rachodes)
+    assert(!old_name.deprecated)
+    assert_nil(old_name.synonym)
+    old_past_name_count = old_name.versions.length
 
-    proposed_name_str = "New name"
+    new_name_str = "New name"
 
     params = {
-      :id => current_name.id,
-      :proposed => { :name => proposed_name_str },
-      :comment => { :comment => "Don't like this name"}
+      :id => old_name.id,
+      :proposed => { :name => new_name_str },
+      :comment => { :comment => "Don't like this name" }
     }
-    post_requires_login(:deprecate_name, params, false)
-    assert_response :success # Fail since new name is not approved
-    assert_template 'deprecate_name'
+    login('rolf')
+    post(:deprecate_name, params)
+    assert_response('deprecate_name')
+    # Fail since new name is not approved
 
-    old_name = Name.find(current_name.id)
-    assert(!old_name.deprecated)
-    assert_equal(current_past_name_count, old_name.versions.length)
+    assert(!old_name.reload.deprecated)
+    assert_equal(old_past_name_count, old_name.versions.length)
     assert_nil(old_name.synonym)
   end
 
   # deprecate an existing unique name with an ambiguous name, but using :chosen_name to disambiguate
   def test_do_deprecation_approved_new_name
-    current_name = @lepiota_rachodes
-    assert(!current_name.deprecated)
-    assert_nil(current_name.synonym)
-    current_past_name_count = current_name.versions.length
+    old_name = names(:lepiota_rachodes)
+    assert(!old_name.deprecated)
+    assert_nil(old_name.synonym)
+    old_past_name_count = old_name.versions.length
 
-    proposed_name_str = "New name"
+    new_name_str = "New name"
 
     params = {
-      :id => current_name.id,
-      :proposed => { :name => proposed_name_str },
-      :approved_name => proposed_name_str,
+      :id => old_name.id,
+      :proposed => { :name => new_name_str },
+      :approved_name => new_name_str,
       :comment => { :comment => "Don't like this name" }
     }
-    post_requires_login(:deprecate_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name") # Success
+    login('rolf')
+    post(:deprecate_name, params)
+    assert_response(:action => :show_name)
 
-    old_name = Name.find(current_name.id)
-    assert(old_name.deprecated)
-    assert_equal(current_past_name_count+1, old_name.versions.length) # past name should have been created
+    assert(old_name.reload.deprecated)
+    assert_equal(old_past_name_count+1, old_name.versions.length) # past name should have been created
     assert(old_name.versions.latest.deprecated)
-    old_synonym = old_name.synonym
-    assert_not_nil(old_synonym)
+    assert_not_nil(old_synonym = old_name.synonym)
 
-    new_name = Name.find(:first, :conditions => ["text_name = ?", proposed_name_str])
+    new_name = Name.find_by_text_name(new_name_str)
     assert(!new_name.deprecated)
-    new_synonym = new_name.synonym
-    assert_not_nil(new_synonym)
+    assert_not_nil(new_synonym = new_name.synonym)
     assert_equal(old_synonym, new_synonym)
     assert_equal(2, new_synonym.names.size)
   end
@@ -2014,120 +2103,136 @@ end
 
   # approve a deprecated name
   def test_do_approval_default
-    current_name = @lactarius_alpigenes
-    assert(current_name.deprecated)
-    assert(current_name.synonym)
-    current_past_name_count = current_name.versions.length
-    current_version = current_name.version
-    approved_synonyms = current_name.approved_synonyms
-    current_notes = current_name.notes
+    old_name = names(:lactarius_alpigenes)
+    assert(old_name.deprecated)
+    assert(old_name.synonym)
+    old_past_name_count = old_name.versions.length
+    old_version = old_name.version
+    approved_synonyms = old_name.approved_synonyms
 
     params = {
-      :id => current_name.id,
+      :id => old_name.id,
       :deprecate => { :others => '1' },
       :comment => { :comment => "Prefer this name"}
     }
-    post_requires_login(:approve_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name") # Success
+    post_requires_login(:approve_name, params)
+    assert_response(:action => :show_name)
 
-    current_name = Name.find(current_name.id)
-    assert(!current_name.deprecated)
-    assert_equal(current_past_name_count+1, current_name.versions.length) # past name should have been created
-    assert(!current_name.versions.latest.deprecated)
-    assert_equal(current_version + 1, current_name.version)
-    assert_not_equal(current_notes, current_name.notes)
+    assert(!old_name.reload.deprecated)
+    assert_equal(old_past_name_count+1, old_name.versions.length)
+    assert(!old_name.versions.latest.deprecated)
+    assert_equal(old_version + 1, old_name.version)
 
     for n in approved_synonyms
-      n = Name.find(n.id)
-      assert(n.deprecated)
+      assert(n.reload.deprecated)
     end
+
+    comment = Comment.last
+    assert_equal('Name', comment.object_type)
+    assert_equal(old_name.id, comment.object_id)
+    assert_match(/approve/i, comment.summary)
+    assert_equal("Prefer this name", comment.comment)
   end
 
   # approve a deprecated name, but don't deprecate the synonyms
   def test_do_approval_no_deprecate
-    current_name = @lactarius_alpigenes
-    assert(current_name.deprecated)
-    assert(current_name.synonym)
-    current_past_name_count = current_name.versions.length
-    approved_synonyms = current_name.approved_synonyms
+    old_name = names(:lactarius_alpigenes)
+    assert(old_name.deprecated)
+    assert(old_name.synonym)
+    old_past_name_count = old_name.versions.length
+    approved_synonyms = old_name.approved_synonyms
+
+    comments = Comment.count
 
     params = {
-      :id => current_name.id,
+      :id => old_name.id,
       :deprecate => { :others => '0' },
-      :comment => { :comment => ""}
+      :comment => { :comment => ''}
     }
-    post_requires_login(:approve_name, params, false)
-    assert_redirected_to(:controller => "name", :action => "show_name") # Success
+    login('rolf')
+    post(:approve_name, params)
+    assert_response(:action => :show_name)
 
-    current_name = Name.find(current_name.id)
-    assert(!current_name.deprecated)
-    assert_equal(current_past_name_count+1, current_name.versions.length) # past name should have been created
-    assert(!current_name.versions.latest.deprecated)
+    assert(!old_name.reload.deprecated)
+    assert_equal(old_past_name_count+1, old_name.versions.length)
+    assert(!old_name.versions.latest.deprecated)
 
     for n in approved_synonyms
-      n = Name.find(n.id)
-      assert(!n.deprecated)
+      assert(!n.reload.deprecated)
     end
+
+    assert_equal(comments, Comment.count)
   end
 
   # ----------------------------
-  #  Email Tracking (Naming Notifications).
+  #  Naming Notifications.
   # ----------------------------
 
   def test_email_tracking
-    name = @coprinus_comatus
-    params = { "id" => name.id.to_s }
+    name = names(:coprinus_comatus)
+    params = { :id => name.id.to_s }
     requires_login(:email_tracking, params)
-    assert_response :success
-    assert_form_action :action => 'email_tracking'
+    assert_response('email_tracking')
+    assert_form_action(:action => 'email_tracking')
   end
 
   def test_email_tracking_enable_no_note
-    name = @conocybe_filaris
-    count_before = Notification.find(:all).length
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    name = names(:conocybe_filaris)
+    count_before = Notification.count
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
     params = {
       :id => name.id,
-      :commit => :app_enable.t,
+      :commit => :ENABLE.t,
       :notification => {
-        :note_template => ""
+        :note_template => ''
       }
     }
-    post_requires_login(:email_tracking, params, false)
-    count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    post_requires_login(:email_tracking, params)
+    # This is needed before the next find for some reason
+    count_after = Notification.count
     assert_equal(count_before+1, count_after)
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
-    assert_nil(notification.calc_note(:user => @rolf, :naming => @coprinus_comatus_naming))
+    assert_nil(notification.calc_note(:user => @rolf,
+                                      :naming => namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_enable_with_note
-    name = @conocybe_filaris
-    count_before = Notification.find(:all).length
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    name = names(:conocybe_filaris)
+    count_before = Notification.count
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
     params = {
       :id => name.id,
-      :commit => :app_enable.t,
+      :commit => :ENABLE.t,
       :notification => {
         :note_template => 'A note about :observation from :observer'
       }
     }
-    post_requires_login(:email_tracking, params, false)
-    count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    login('rolf')
+    post(:email_tracking, params)
+    assert_response(:action => :show_name)
+    # This is needed before the next find for some reason
+    count_after = Notification.count
     assert_equal(count_before+1, count_after)
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(:user => @mary, :naming => @coprinus_comatus_naming))
+    assert(notification.calc_note(:user => @mary,
+                                  :naming => namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_update_add_note
-    name = @coprinus_comatus
-    count_before = Notification.find(:all).length
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    name = names(:coprinus_comatus)
+    count_before = Notification.count
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert_nil(notification.note_template)
     params = {
@@ -2137,79 +2242,72 @@ end
         :note_template => 'A note about :observation from :observer'
       }
     }
-    post_requires_login(:email_tracking, params, false)
-    count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    login('rolf')
+    post(:email_tracking, params)
+    assert_response(:action => :show_name)
+    # This is needed before the next find for some reason
+    count_after = Notification.count
     assert_equal(count_before, count_after)
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     assert(notification.note_template)
-    assert(notification.calc_note(:user => @rolf, :naming => @coprinus_comatus_naming))
+    assert(notification.calc_note(:user => @rolf,
+                                  :naming => namings(:coprinus_comatus_naming)))
   end
 
   def test_email_tracking_disable
-    name = @coprinus_comatus
-    count_before = Notification.find(:all).length
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    name = names(:coprinus_comatus)
+    count_before = Notification.count
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert(notification)
     params = {
       :id => name.id,
-      :commit => :app_disable.t,
+      :commit => :DISABLE.t,
       :notification => {
         :note_template => 'A note about :observation from :observer'
       }
     }
-    post_requires_login(:email_tracking, params, false)
-    # count_after = Notification.find(:all).length # This is needed before the next find for some reason
+    login('rolf')
+    post(:email_tracking, params)
+    assert_response(:action => :show_name)
+    # This is needed before the next find for some reason
+    # count_after = Notification.count
     # assert_equal(count_before - 1, count_after)
-    notification = Notification.find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
+    notification = Notification.
+                find_by_flavor_and_obj_id_and_user_id(:name, name.id, @rolf.id)
     assert_nil(notification)
   end
 
+  # ----------------------------
+  #  Review status.
+  # ----------------------------
+
   def test_set_review_status_reviewer
-    name = @coprinus_comatus
-    assert_equal(:unreviewed, name.review_status)
-    assert(@rolf.in_group('reviewers'))
+    desc = name_descriptions(:coprinus_comatus_desc)
+    assert_equal(:unreviewed, desc.review_status)
+    assert(@rolf.in_group?('reviewers'))
     params = {
-      :id => name.id,
+      :id => desc.id,
       :value => 'vetted'
     }
-    post_requires_login(:set_review_status, params, false, @rolf.login)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    name = Name.find(name.id) # Reload
-    assert_equal(:vetted, name.review_status)
+    post_requires_login(:set_review_status, params)
+    assert_response(:action => :show_name)
+    assert_equal(:vetted, desc.reload.review_status)
   end
 
   def test_set_review_status_non_reviewer
-    name = @coprinus_comatus
-    assert_equal(:unreviewed, name.review_status)
-    assert(!@mary.in_group('reviewers'))
+    desc = name_descriptions(:coprinus_comatus_desc)
+    assert_equal(:unreviewed, desc.review_status)
+    assert(!@mary.in_group?('reviewers'))
     params = {
-      :id => name.id,
+      :id => desc.id,
       :value => 'vetted'
     }
-    post_requires_login(:set_review_status, params, false, @mary.login)
-    assert_redirected_to(:controller => "name", :action => "show_name")
-    name = Name.find(name.id) # Reload
-    assert_equal(:unreviewed, name.review_status)
-  end
-
-  def test_send_author_request
-    params = {
-      :id => @coprinus_comatus.id,
-      :email => {
-        :subject => "Author request subject",
-        :message => "Message for authors"
-      }
-    }
-    requires_login :send_author_request, params, false
-    assert_equal(:request_success.t, flash[:notice])
-    assert_redirected_to(:action => "show_name", :id => @coprinus_comatus.id)
-  end
-
-  def test_author_request
-    id = @coprinus_comatus.id
-    requires_login(:author_request, {:id => id})
-    assert_form_action(:action => 'send_author_request', :id => id)
+    post_requires_login(:set_review_status, params, 'mary')
+    assert_response(:action => :show_name)
+    assert_equal(:unreviewed, desc.reload.review_status)
   end
 
   # ----------------------------
@@ -2217,44 +2315,414 @@ end
   # ----------------------------
 
   def test_interest_in_show_name
+    peltigera = names(:peltigera)
+    login('rolf')
+
     # No interest in this name yet.
-    @request.session[:user_id] = @rolf.id
-    get(:show_name, { :id => @peltigera.id })
-    assert_response :success
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+    get(:show_name, :id => peltigera.id)
+    assert_response(:success)
+    assert_link_in_html('<img[^>]+watch\d*.png[^>]+>',
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 1
-    })
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :type => 'Name', :id => peltigera.id, :state => 1
+    )
+    assert_link_in_html('<img[^>]+ignore\d*.png[^>]+>',
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => -1
-    })
+      :type => 'Name', :id => peltigera.id, :state => -1
+    )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.new(:object => @peltigera, :user => @rolf, :state => true).save
-    get(:show_name, { :id => @peltigera.id })
-    assert_response :success
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
+    Interest.create(:object => peltigera, :user => @rolf, :state => true)
+    get(:show_name, :id => peltigera.id)
+    assert_response(:success)
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 0
-    })
-    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/, {
+      :type => 'Name', :id => peltigera.id, :state => 0
+    )
+    assert_link_in_html(/<img[^>]+ignore\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => -1
-    })
+      :type => 'Name', :id => peltigera.id, :state => -1
+    )
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.new(:object => @peltigera, :user => @rolf, :state => false).save
-    get(:show_name, { :id => @peltigera.id })
-    assert_response :success
-    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/, {
+    Interest.create(:object => peltigera, :user => @rolf, :state => false)
+    get(:show_name, :id => peltigera.id)
+    assert_response(:success)
+    assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 0
-    })
-    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/, {
+      :type => 'Name', :id => peltigera.id, :state => 0
+    )
+    assert_link_in_html(/<img[^>]+watch\d*.png[^>]+>/,
       :controller => 'interest', :action => 'set_interest',
-      :type => 'Name', :id => @peltigera.id, :state => 1
-    })
+      :type => 'Name', :id => peltigera.id, :state => 1
+    )
+  end
+
+  # ----------------------------
+  #  Test project drafts.
+  # ----------------------------
+
+  # Ensure that draft owner can see a draft they own
+  def test_show_draft
+    draft = name_descriptions(:draft_coprinus_comatus)
+    login(draft.user.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response('show_name_description')
+  end
+
+  # Ensure that an admin can see a draft they don't own
+  def test_show_draft_admin
+    draft = name_descriptions(:draft_coprinus_comatus)
+    assert_not_equal(draft.user, @mary)
+    login(@mary.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response('show_name_description')
+  end
+
+  # Ensure that an member can see a draft they don't own
+  def test_show_draft_member
+    draft = name_descriptions(:draft_agaricus_campestris)
+    assert_not_equal(draft.user, @katrina)
+    login(@katrina.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response('show_name_description')
+  end
+
+  # Ensure that a non-member cannot see a draft
+  def test_show_draft_non_member
+    project = projects(:eol_project)
+    draft = name_descriptions(:draft_agaricus_campestris)
+    assert(draft.belongs_to_project?(project))
+    assert(!project.is_member?(@dick))
+    login(@dick.login)
+    get_with_dump(:show_name_description, { :id => draft.id })
+    assert_response(:controller => 'project', :action => 'show_project',
+                    :id => project.id)
+  end
+
+  def test_create_draft_member
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @katrina)
+  end
+
+  def test_create_draft_admin
+    create_draft_tester(projects(:eol_project), names(:coprinus_comatus), @mary)
+  end
+
+  def test_create_draft_not_member
+    create_draft_tester(projects(:eol_project), names(:agaricus_campestris), @dick, false)
+  end
+
+  def test_edit_draft
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus))
+  end
+
+  def test_edit_draft_admin
+    assert(projects(:eol_project).is_admin?(@mary))
+    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_coprinus_comatus), @mary)
+  end
+
+  def test_edit_draft_member
+    assert(projects(:eol_project).is_member?(@katrina))
+    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+  end
+
+  def test_edit_draft_non_member
+    assert(!projects(:eol_project).is_member?(@dick))
+    assert_equal('EOL Project', name_descriptions(:draft_coprinus_comatus).source_name)
+    edit_draft_tester(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+  end
+
+  def test_edit_draft_post_owner
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf, {})
+  end
+
+  def test_edit_draft_post_admin
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @mary, {})
+  end
+
+  def test_edit_draft_post_member
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @katrina, {}, false)
+  end
+
+  def test_edit_draft_post_non_member
+    edit_draft_post_helper(name_descriptions(:draft_agaricus_campestris), @dick, {}, false)
+  end
+
+  def test_edit_draft_post_bad_classification
+    edit_draft_post_helper(name_descriptions(:draft_coprinus_comatus), @rolf,
+      { :classification => "**Domain**: Eukarya" }, true, false)
+  end
+
+  # Owner can publish.
+  def test_publish_draft
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil, :merged, false)
+  end
+
+  # Admin can, too.
+  def test_publish_draft_admin
+    publish_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary, :merged, false)
+  end
+
+  # Other members cannot.
+  def test_publish_draft_member
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false, false)
+  end
+
+  # Non-members certainly can't.
+  def test_publish_draft_non_member
+    publish_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false, false)
+  end
+
+  # Non-members certainly can't.
+  def test_publish_draft_conflict
+    draft = name_descriptions(:draft_coprinus_comatus)
+    # Create a simple public description to cause conflict.
+    name = draft.name
+    name.description = desc = NameDescription.create!(
+      :name        => name,
+      :user        => @rolf,
+      :source_type => :public,
+      :source_name => '',
+      :public      => true,
+      :gen_desc    => "Pre-existing general description."
+    )
+    name.save
+    desc.admin_groups  << UserGroup.reviewers
+    desc.writer_groups << UserGroup.all_users
+    desc.reader_groups << UserGroup.all_users
+    # It should make the draft both public and default, "true" below tells it
+    # that the default gen_desc should look like the draft's after done.  No
+    # more conflicts.
+    publish_draft_helper(draft.reload, nil, true, false)
+  end
+
+  def test_destroy_draft_owner
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @rolf)
+  end
+
+  def test_destroy_draft_admin
+    destroy_draft_helper(name_descriptions(:draft_coprinus_comatus), @mary)
+  end
+
+  def test_destroy_draft_member
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @katrina, false)
+  end
+
+  def test_destroy_draft_non_member
+    destroy_draft_helper(name_descriptions(:draft_agaricus_campestris), @dick, false)
+  end
+
+  # ------------------------------
+  #  Test creating descriptions.
+  # ------------------------------
+
+  def test_create_description_load_form_no_desc_yet
+    name = names(:conocybe_filaris)
+    assert_equal(0, name.descriptions.length)
+    params = {:id => name.id}
+
+    # Make sure it requires login.
+    requires_login(:create_name_description, params)
+    desc = assigns(:description)
+    assert_equal(:public, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+
+    # Test draft creation by project member.
+    login('rolf') # member
+    project = projects(:eol_project)
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response('create_name_description')
+    desc = assigns(:description)
+    assert_equal(:project, desc.source_type)
+    assert_equal(project.title, desc.source_name)
+    assert_equal(false, desc.public)
+    assert_equal(false, desc.public_write)
+
+    # Test draft creation by project non-member.
+    login('dick')
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response(:controller => 'project', :action => 'show_project',
+                    :id => project.id)
+    assert_flash_error
+  end
+
+  def test_create_description_load_form_already_has_desc
+    name = names(:peltigera)
+    assert_not_equal(0, name.descriptions.length)
+    params = {:id => name.id}
+
+    # Make sure it requires login.
+    requires_login(:create_name_description, params)
+    desc = assigns(:description)
+    assert_equal(:public, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+
+    # Test draft creation by project member.
+    login('katrina') # member
+    project = projects(:eol_project)
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response('create_name_description')
+    desc = assigns(:description)
+    assert_equal(:project, desc.source_type)
+    assert_equal(project.title, desc.source_name)
+    assert_equal(false, desc.public)
+    assert_equal(false, desc.public_write)
+
+    # Test draft creation by project non-member.
+    login('dick')
+    get(:create_name_description, params.merge(:project => project.id))
+    assert_response(:controller => 'project', :action => 'show_project',
+                    :id => project.id)
+    assert_flash_error
+
+    # Test clone of private description if not reader.
+    other = name_descriptions(:peltigera_user_desc)
+    login('katrina') # random user
+    get(:create_name_description, params.merge(:clone => other.id))
+    assert_response(:action => 'show_name', :id => name.id)
+    assert_flash_error
+
+    # Test clone of private description if can read.
+    login('dick') # reader
+    get(:create_name_description, params.merge(:clone => other.id))
+    assert_response('create_name_description')
+    desc = assigns(:description)
+    assert_equal(:user, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(false, desc.public)
+    assert_equal(false, desc.public_write)
+  end
+
+  def test_create_name_description_public
+
+    # Minimum args.
+    params = {
+      :description => empty_notes.merge(
+        :source_type  => :public,
+        :source_name  => '',
+        :public       => '1',
+        :public_write => '1'
+      )
+    }
+
+    # No desc yet -> make new desc default. 
+    name = names(:conocybe_filaris)
+    assert_equal(0, name.descriptions.length)
+    post(:create_name_description, params)
+    assert_response(:redirect)
+    login('dick')
+    params[:id] = name.id
+    post(:create_name_description, params)
+    assert_flash_success
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+    name.reload
+    assert_objs_equal(desc, name.description)
+    assert_obj_list_equal([desc], name.descriptions)
+    assert_equal(:public, desc.source_type)
+    assert_equal('', desc.source_name.to_s)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+
+    # Already have default, try to make public desc private -> warn and make
+    # public but not default.
+    name = names(:coprinus_comatus)
+    assert(default = name.description)
+    assert_not_equal(0, name.descriptions.length)
+    params[:id] = name.id
+    params[:description][:public]       = '0'
+    params[:description][:public_write] = '0'
+    params[:description][:source_name]  = 'Alternate Description'
+    post(:create_name_description, params)
+    assert_flash_warning # tried to make it private
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+    name.reload
+    assert_objs_equal(default, name.description)
+    assert_true(name.descriptions.include?(desc))
+    assert_equal(:public, desc.source_type)
+    assert_equal('Alternate Description', desc.source_name.to_s)
+    assert_obj_list_equal([UserGroup.reviewers], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.all_users], desc.reader_groups)
+    assert_equal(true, desc.public)
+    assert_equal(true, desc.public_write)
+  end
+
+  def test_create_name_description_bogus_classification
+    name = names(:agaricus_campestris)
+    login('dick')
+
+    bad_class = "*Order*: Agaricales\r\nFamily: Agaricaceae"
+    good_class  = "Family: Agaricaceae\r\nOrder: Agaricales"
+    final_class = "Order: _Agaricales_\r\nFamily: _Agaricaceae_"
+
+    params = {
+      :id => name.id,
+      :description => empty_notes.merge(
+        :source_type  => :public,
+        :source_name  => '',
+        :public       => '1',
+        :public_write => '1'
+      )
+    }
+
+    params[:description][:classification] = bad_class
+    post(:create_name_description, params)
+    assert_flash_error
+    assert_response('create_name_description')
+
+    params[:description][:classification] = good_class
+    post(:create_name_description, params)
+    assert_flash_success
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+
+    name.reload
+    assert_equal(final_class, name.classification)
+    assert_equal(final_class, desc.classification)
+  end
+
+  def test_create_name_description_source
+    login('dick')
+
+    name = names(:conocybe_filaris)
+    assert_nil(name.description)
+    assert_equal(0, name.descriptions.length)
+
+    params = {
+      :id => name.id,
+      :description => empty_notes.merge(
+        :source_type  => :source,
+        :source_name  => 'Mushrooms Demystified',
+        :public       => '0',
+        :public_write => '0'
+      )
+    }
+
+    post(:create_name_description, params)
+    assert_flash_success
+    desc = NameDescription.last
+    assert_response(:action => 'show_name_description', :id => desc.id)
+
+    name.reload
+    assert_nil(name.description)
+    assert_true(name.descriptions.include?(desc))
+    assert_equal(:source, desc.source_type)
+    assert_equal('Mushrooms Demystified', desc.source_name)
+    assert_false(desc.public)
+    assert_false(desc.public_write)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.admin_groups)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.writer_groups)
+    assert_obj_list_equal([UserGroup.one_user(@dick)], desc.reader_groups)
   end
 end

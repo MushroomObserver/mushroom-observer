@@ -4,32 +4,34 @@
   intro = :email_name_proposal_intro.l(:id => @observation.id)
 
   fields = ""
-  fields += "*#{:name.l}:* #{@naming.format_name}\n"
-  fields += "*#{:app_time.l}:* #{@naming.created.to_formatted_s(:db)}\n"
-  fields += "*#{:app_by.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
-  for reason in @naming.naming_reasons
-    if reason.notes.nil? || reason.notes == ""
-      fields += "*#{reason.label.to_sym.t}*\n"
-    else
-      fields += "*#{reason.label.to_sym.t}:* #{reason.notes.to_s}\n"
+  fields += "*#{:Name.l}:* #{@naming.format_name}\n"
+  fields += "*#{:Time.l}:* #{@naming.created.email_time}\n"
+  fields += "*#{:By.l}:* #{@naming.user.legal_name} (#{@naming.user.login})\n" if @naming.user
+  for reason in @naming.get_reasons
+    if reason.used?
+      if reason.notes.blank?
+        fields += "*#{reason.label.l}*\n"
+      else
+        fields += "*#{reason.label.l}:* #{reason.notes}\n"
+      end
     end
   end
 
   handy_links = :email_handy_links
 
   links = []
-  links.push([:email_links_show_object.l(:type => :observation.l),
-    "#{DOMAIN}/#{@observation.id}"])
-  links.push([:email_links_not_interested.l(:type => :observation.l),
-    "#{DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
+  links.push([:email_links_show_object.l(:type => :observation),
+    "#{HTTP_DOMAIN}/#{@observation.id}"])
+  links.push([:email_links_not_interested.l(:type => :observation),
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@observation.id}&type=Observation&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
-    "#{DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
+    "#{HTTP_DOMAIN}/account/no_email_observations_naming/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.l,
-    "#{DOMAIN}/account/prefs/#{@user.id}"])
+    "#{HTTP_DOMAIN}/account/prefs/#{@user.id}"])
   links.push([:email_links_latest_changes.l,
-    DOMAIN])
+    HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
   <title>Mushroom Observer: <%= @subject %></title>
@@ -46,8 +48,7 @@ if @user.email_html ######################################################### %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= fields.tp.html_to_ascii %>
 
@@ -58,4 +59,4 @@ if @user.email_html ######################################################### %>
     result += "#{label}: #{url}\n"
   end
   result %>
-<% end ###################################################################### %>
+<% end %>

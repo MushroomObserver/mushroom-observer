@@ -1,7 +1,14 @@
 #
-#  Views: ("*" - login required)
-#   * list_interests    Show objects user has expressed interest in.
-#   * set_interest      Callback to change interest state.
+#  = Interest Controller
+#
+#  == Actions
+#   L = login required
+#   R = root required
+#   V = has view
+#   P = prefetching allowed
+#
+#  list_interests::
+#  set_interest::
 #
 ################################################################################
 
@@ -9,11 +16,14 @@ class InterestController < ApplicationController
   before_filter :login_required, :except => [
   ]
 
+  before_filter :disable_link_prefetching, :except => [
+  ]
+
   # Show list of objects user has expressed interest in.
   # Linked from: left-hand panel
   # Inputs: params[:page]
   # Outputs: @objects, @object_pages
-  def list_interests
+  def list_interests # :norobots:
     store_location
     @title = :list_interests_title.t
     notifications = Notification.find_all_by_user_id(@user.id).sort do |a,b|
@@ -27,8 +37,10 @@ class InterestController < ApplicationController
                (b.object ? b.object.text_name : '') if result == 0
       result
     end
-    @items = notifications + interests
-    @item_pages, @items = paginate_array(@items, 50)
+    @objects = notifications + interests
+    @pages = paginate_numbers(:page, 50)
+    @pages.num_total = @objects.length
+    @objects = @objects[@pages.from..@pages.to]
   end
 
   # Callback to change interest state in an object.
@@ -36,11 +48,12 @@ class InterestController < ApplicationController
   # Redirects back (falls back on show_<object>)
   # Inputs: params[:type], params[:id], params[:state], params[:user]
   # Outputs: none
-  def set_interest
-    type  = params[:type].to_s
-    oid   = params[:id].to_i
-    state = params[:state].to_i
-    uid   = params[:user]
+  def set_interest # :norobots:
+    pass_query_params
+    type   = params[:type].to_s
+    oid    = params[:id].to_i
+    state  = params[:state].to_i
+    uid    = params[:user]
     object = Comment.find_object(type, oid)
     if @user
       interest = Interest.find_by_object_type_and_object_id_and_user_id(type, oid, @user.id)
@@ -60,10 +73,12 @@ class InterestController < ApplicationController
             flash_notice(:set_interest_already_deleted.l(:name => name))
           elsif !interest.destroy
             flash_notice(:set_interest_failure.l(:name => name))
-          elsif interest.state
-            flash_notice(:set_interest_success_was_on.l(:name => name))
           else
-            flash_notice(:set_interest_success_was_off.l(:name => name))
+            if interest.state
+              flash_notice(:set_interest_success_was_on.l(:name => name))
+            else
+              flash_notice(:set_interest_success_was_off.l(:name => name))
+            end
           end
         elsif interest.state == true && state > 0
           flash_notice(:set_interest_already_on.l(:name => object.unique_text_name))
@@ -71,21 +86,26 @@ class InterestController < ApplicationController
           flash_notice(:set_interest_already_off.l(:name => object.unique_text_name))
         else
           interest.state = (state > 0)
+          interest.modified = Time.now
           if !interest.save
             flash_notice(:set_interest_failure.l(:name => object.unique_text_name))
-          elsif state > 0
-            flash_notice(:set_interest_success_on.l(:name => object.unique_text_name))
           else
-            flash_notice(:set_interest_success_off.l(:name => object.unique_text_name))
+            if state > 0
+              flash_notice(:set_interest_success_on.l(:name => object.unique_text_name))
+            else
+              flash_notice(:set_interest_success_off.l(:name => object.unique_text_name))
+            end
           end
         end
       end
     end
     if object
       redirect_back_or_default(:controller => object.show_controller,
-                               :action => object.show_action, :id => oid)
+                               :action => object.show_action, :id => oid,
+                               :params => query_params)
     else
-      redirect_back_or_default(:controller => 'interest', :action => 'list_interests')
+      redirect_back_or_default(:controller => 'interest',
+                               :action => 'list_interests')
     end
   end
 end

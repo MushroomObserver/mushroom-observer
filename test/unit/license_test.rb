@@ -1,7 +1,6 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../boot'
 
-class LicenseTest < Test::Unit::TestCase
-  fixtures :licenses
+class LicenseTest < UnitTestCase
 
   def test_current_names_and_ids
     names_and_ids = License.current_names_and_ids()
@@ -13,7 +12,7 @@ class LicenseTest < Test::Unit::TestCase
   end
 
   def test_current_names_and_ids_ccnc25
-    names_and_ids = License.current_names_and_ids(@ccnc25)
+    names_and_ids = License.current_names_and_ids(licenses(:ccnc25))
     assert_equal(3, names_and_ids.length)
   end
 end

@@ -1,8 +1,14 @@
 xml.instruct!(:xml, :version => '1.0')
-xml.response(:xmlns => "#{DOMAIN}/schema.xsd") do
-  xml.script_version  '1.0'
-  xml.script_date     '2009-12-21'
-  xml.script_run_date xml_date(@start_time)
+xml.response(:xmlns => "#{HTTP_DOMAIN}/response.xsd") do
+  xml.version  @version
+  xml.run_date xml_date(@start_time)
+
+  if @user
+    render_xml_partial(xml, :user, :locals => {
+      :object => @user,
+      :detail => false,
+    })
+  end
 
   if @query
     xml.query       @query
@@ -30,5 +36,5 @@ xml.response(:xmlns => "#{DOMAIN}/schema.xsd") do
 
   end_time = Time.now
   total_time = end_time - @start_time
-  xml.script_run_time '%.4f' % total_time
+  xml.run_time '%.4f' % total_time
 end

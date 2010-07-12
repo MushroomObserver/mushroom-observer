@@ -1,18 +1,37 @@
+<%
+  tag, args, time = rss_log.parse_log.first
+  if !time || time < name.created + 10.seconds
+    title = :rss_created.t(:type => :name)
+    detail = :rss_by.t(:user => name.user.legal_name)
+  else
+    title = :rss_changed.t(:type => :name)
+    detail = tag.t(args)
+  end
+%>
+
 <table cellpadding="10">
-  <tr>
-    <td align="center" valign="middle" width="160">
-      <%= :name_change.t %>:
+  <tr style="padding-bottom:0px">
+    <td align="center" valign="middle" width="160" style="padding-bottom:0px">
+      <span class="ListRssHeader">
+        <%= title %>:
+      </span>
     </td>
-<% if vertical_layout %>
+<% if @layout['vertical_layout'] %>
   </tr>
   <tr>
     <td align="center" valign="middle">
 <% else %>
     <td valign="middle">
 <% end %>
-      <%= link_to(sprintf('<span class="ListName">%s</span><br/>', name.display_name.t),
-                  :controller => 'name', :action => 'show_name', :id => name.id) %>
-      <span class="ListWho"><br/><%= :rss_name_by.t(:user => user_link(name.user)) %></span>
+      <span class="ListWhat">
+        <%= link_to(name.display_name.t, :controller => 'name',
+                    :action => 'show_name', :id => name.id,
+                    :params => query_params) %>
+      </span><br/>
+      <span style="line-height:1em"><br/></span>
+      <span class="ListDetail">
+        <%= detail %>
+      </span>
     </td>
   </tr>
 </table>

@@ -1,0 +1,47 @@
+#!/usr/bin/ruby
+require 'config/boot'
+require 'config/environment'
+
+cutoff = 1.year.ago + 1.week
+
+i = 0
+num = RssLog.count
+old_pct = nil
+for log in RssLog.all
+  i += 1
+  pct = 100 * i / num
+  if pct != old_pct
+    $stdout.print "#{pct}%\r"
+    $stdout.flush
+  end
+  old_pct = pct
+
+  old_notes = log.notes.to_s
+  new_notes = nil
+  last_time = nil
+  if log.modified > cutoff
+    new_notes = old_notes.split(/\r?\n/).select do |line|
+      if line.match(/^(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/)
+        time = Time.utc($1, $2, $3, $4, $5, $6)
+        last_time ||= time
+        time >= cutoff
+      else
+        true
+      end
+    end.join("\n")
+  end
+
+  # Delete logs that haven't been used in a long time.
+  if !last_time || new_notes.blank? || last_time < cutoff
+    if object = log.object
+      object.rss_log = nil
+      object.save_without_our_callbacks
+    end
+    log.destroy
+
+  # Delete old entries from fresh logs.
+  elsif new_notes != old_notes
+    log.notes = new_notes
+    log.save_without_our_callbacks
+  end
+end

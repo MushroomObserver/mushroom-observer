@@ -1,208 +1,197 @@
-require_dependency 'javascript'
-require_dependency 'auto_complete'
-require_dependency 'tab_helper'
-require_dependency 'textile_helper'
-require_dependency 'string_extensions'
-require_dependency 'symbol_extensions'
+#
+#  = Application Helpers
+#
+#  These methods are available to all templates in the application:
+#
+#  ==== Localization
+#  rank_as_string::         Translate :Genus into "Genus" (localized).
+#  rank_as_lower_string::   Translate :Genus into "genus" (localized).
+#  rank_as_plural_string::  Translate :Genus into "Genera" (localized).
+#  image_vote_as_long_string::  Translate image vote into (long) localized String with short version enboldened.
+#  image_vote_as_help_string::  Translate image vote into (long) localized String.
+#  image_vote_as_short_string:: Translate image vote into (short) localized String.
+#  review_as_string::       Translate review status into localized String.
+#
+#  ==== Other Stuff
+#  show_object_footer::     Show the created/modified/view dates and RSS log.
+#
+################################################################################
 
-# Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
+  require_dependency 'auto_complete_helper'
+  require_dependency 'description_helper'
+  require_dependency 'html_helper'
+  require_dependency 'javascript_helper'
+  require_dependency 'map_helper'
+  require_dependency 'object_link_helper'
+  require_dependency 'paginator_helper'
+  require_dependency 'tab_helper'
+  require_dependency 'textile_helper'
 
-  # Replace spaces with '&nbsp;'.
-  def lnbsp(key)
-    key.l.gsub(' ', '&nbsp;')
-  end
-  
-  # Simple helper to wrap an html object in <acronym> tag which has the effect
-  # of giving it context help (mouse-over popup) in most modern browsers.
-  def add_context_help(object, help)
-    tag('acronym', { :title => help }, true) + object + '</acronym>'
-  end
+  include AutoComplete
+  include Description
+  include HTML
+  include Javascript
+  include Map
+  include ObjectLink
+  include Paginator
+  include Tabs
+  include Textile
 
-  # Returns '<span>where (count)</span>'.
-  def where_string(where, count)
-    result = sanitize(where).t
-    result += " (#{count})" if count
-    result = "<span class=\"Data\">#{result}</span>"
-  end
+  ##############################################################################
+  #
+  #  :section: Localization
+  #
+  ##############################################################################
 
-  # Returns link to the given location.
-  def location_link(where, location_id, count=nil, click=false)
-    if location_id
-      loc = Location.find(location_id)
-      link_string = where_string(loc.display_name, count)
-      link_string += " [#{:app_click_for_map.t}]" if click
-      result = link_to(link_string, :controller => 'location', :action => 'show_location', :id => location_id)
-    else
-      link_string = where_string(where, count)
-      link_string += " [#{:app_search.t}]" if click
-      result = link_to(link_string, :controller => 'location', :action => 'where_search', :where => where)
-    end
-    result
-  end
-
-  # Returns link to the given user.
-  def user_link(user, name=nil)
-    begin
-      name = h(user.unique_text_name) if name.nil?
-      link_to(name, :controller => 'observer', :action => 'show_user', :id => user)
-    rescue
-    end
-  end
-  
-  def user_list(title, users)
-    result = ''
-    count = users.length
-    if count > 0
-      result = (count > 1 ? title.pluralize : title) + ": "
-      result += users.map {|u| user_link(u, u.legal_name)}.join(', ')
-      result += "<br/>"
-    end
-    result
-  end
-  
-  # Returns link to the given project.
-  def project_link(project, name=nil)
-    begin
-      name = sanitize(project.title).t if name.nil?
-      link_to(name, :controller => 'project', :action => 'show_project', :id => project.id)
-    rescue
-    end
-  end
-
-  # Convert :Genus to "Genus" via internationalization.
+  # Translate Name rank (singular).
+  #
+  #   rank_as_string(:genus)  -->  "Genus"
+  #
   def rank_as_string(rank)
-    eval(":rank_#{rank.to_s.downcase}.l")
+    :"RANK_#{rank.to_s.upcase}".l
   end
 
-  # Convert :Genus to "Genera" via internationalization.
+  # Translate Name rank (singular).
+  #
+  #   rank_as_lower_string(:genus)  -->  "genus"
+  #
+  def rank_as_lower_string(rank)
+    :"rank_#{rank.to_s.downcase}".l
+  end
+
+  # Translate Name rank (plural).
+  #
+  #   rank_as_plural_string(:genus)  -->  "Genera"
+  #
   def rank_as_plural_string(rank)
-    eval(":rank_plural_#{rank.to_s.downcase}.l")
+    :"RANK_PLURAL_#{rank.to_s.upcase}".l
   end
 
-  # Wrap some body text in the cute red/yellow/green box used for flash[:notice].
-  # Note: the &block thing doesn't work, despite apparently being indentical to
-  # the way form_tag does it.  Beats me.
-  def boxify(lvl, msg=nil, &block)
-    type = "Notices"  if lvl == 0 || !lvl
-    type = "Warnings" if lvl == 1
-    type = "Errors"   if lvl == 2
-    msg = capture(&block) if block_given?
-    if msg
-      "<div style='width:500px'>
-        <table class='#{type}'><tr><td>
-          #{msg}
-        </td></tr></table>
-      </div>"
+  # Translate Name rank (plural).
+  #
+  #   rank_as_plural_string(:genus)  -->  "genera"
+  #
+  def rank_as_lower_plural_string(rank)
+    :"rank_plural_#{rank.to_s.downcase}".l
+  end
+
+  # Translate image quality.
+  #
+  #   image_vote_as_long_string(3)  -->  "**Good** enough for a field guide."
+  #
+  def image_vote_as_long_string(val)
+    :"image_vote_long_#{val || 0}".l
+  end
+
+  # Translate image quality.
+  #
+  #   image_vote_as_help_string(3)  -->  "Good enough for a field guide."
+  #
+  def image_vote_as_help_string(val)
+    :"image_vote_help_#{val || 0}".l
+  end
+
+  # Translate image quality.
+  #
+  #   image_vote_as_short_string(3)  -->  "Good"
+  #
+  def image_vote_as_short_string(val)
+    :"image_vote_short_#{val || 0}".l
+  end
+
+  # Translate review status.
+  #
+  #   review_as_string(:unvetted)  -->  "Reviewed"
+  #
+  def review_as_string(val)
+    :"review_#{val}".l
+  end
+
+  ##############################################################################
+  #
+  #  :section: Other Stuff
+  #
+  ##############################################################################
+
+  # Renders the little footer at the bottom of show_object pages.
+  #
+  #   <%= show_object_footer(@name) %>
+  #
+  #   # Non-versioned object:
+  #   <p>
+  #     <span class="Date">
+  #       Created: <date><br/>
+  #       Last Modified: <date><br/>
+  #       Viewed: <num> times, last viewed: <date><br/>
+  #       Show Log<br/>
+  #     </span>
+  #   </p>
+  #
+  #   # Latest version of versioned object:
+  #   <p>
+  #     <span class="Date">
+  #       Created: <date> by <user><br/>
+  #       Last Modified: <date> by <user><br/>
+  #       Viewed: <num> times, last viewed: <date><br/>
+  #       Show Log<br/>
+  #     </span>
+  #   </p>
+  #
+  #   # Old version of versioned object:
+  #   <p>
+  #     <span class="Date">
+  #       Version: <num> of <total>
+  #       Modified: <date> by <user><br/>
+  #       Show Log<br/>
+  #     </span>
+  #   </p>
+  #
+  def show_object_footer(obj)
+    html = []
+    type = obj.type_tag
+    num_versions = obj.respond_to?(:version) ? obj.versions.length : 0
+
+    # Old version of versioned object.
+    if num_versions > 0 && obj.version < num_versions
+      html << :footer_version_out_of.t(:num => obj.version,
+                                    :total => num_versions)
+      html << :footer_modified_by.t(:user => user_link(obj.user),
+                                 :date => obj.modified.web_time) if obj.modified
+
+    # Latest version or non-versioned object.
     else
-      "<div style='width:500px'>
-        <table class='#{type}'><tr><td>"
-    end
-  end
-
-  def end_boxify
-    "  </td></tr></table>
-    </div>"
-  end
-
-  # Return a hash of parameters required to fix the search/sequence state.
-  def calc_search_params
-    search_params = {}
-    search_params[:search_seq] = @search_seq if @search_seq
-    search_params[:seq_key] = @seq_key if @seq_key
-    search_params[:obs] = @obs if @obs
-    search_params
-  end
-
-  # Insert letter pagination links.  See ApplicationController#paginate_letters.
-  def pagination_letters(letters, args={})
-    if letters
-      params = (args[:params] || {}).clone
-      str = %w(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z).map do |letter|
-        params[letters.arg] = letter
-        letters.used[letter] ? link_to(letter, params) : letter
-      end.join(' ')
-      return %(<div class="pagination">#{str}</div>)
-    else
-      return ''
-    end
-  end
-
-  # Wrapper on ActionView::Helpers#pagination_links designed to work with
-  # pagination_letters.  (Just needs to add a parameter to the pagination
-  # links, that's all.)
-  def pagination_numbers(pages, letters=nil, args={})
-    if letters
-      args[:params] ||= {}
-      args[:params][letters.arg] = letters.letter
-    end
-    str = pagination_links(pages, args)
-    if !str.to_s.empty?
-      arg = args[:name] || :page
-      page = params[arg].to_i
-      page = 1 if page < 1
-      page = pages.length if page > pages.length
-      if page > 1
-        url = h(reload_with_args(arg => page - 1))
-        str = link_to('&laquo; ' + :app_prev.t, url) + ' | ' + str
+      if num_versions > 0
+        latest_user = User.safe_find(obj.versions.latest.user_id)
+        html << :footer_created_by.t(:user => user_link(obj.user),
+                                  :date => obj.created.web_time) if obj.created
+        if latest_user && obj.modified
+          html << :footer_last_modified_by.t(:user => user_link(latest_user),
+                                             :date => obj.modified.web_time)
+        elsif obj.modified
+          html << :footer_last_modified_at.t(:date => obj.modified.web_time)
+        end
+      else
+        html << :footer_created_at.t(:date => obj.created.web_time) if obj.created
+        html << :footer_last_modified_at.t(:date => obj.modified.web_time) if obj.modified
       end
-      if page < pages.length
-        url = h(reload_with_args(arg => page + 1))
-        str = str + ' | ' + link_to(:app_next.t + ' &raquo;', url)
+      if obj.respond_to?(:num_views)
+        html << :footer_viewed.t(:date => obj.last_view.web_time,
+                                :times => obj.num_views == 1 ? :one_time.l :
+                                :many_times.l(:num => obj.num_views)) if obj.last_view
       end
-      return %(<div class="pagination">#{str}</div>)
-    else
-      return ''
     end
+
+    # Show RSS log for all of the above.
+    if obj.respond_to?(:rss_log_id) and obj.rss_log_id
+      html << link_to(:show_object.t(:type => :log),
+                      :controller => 'observer', :action => 'show_rss_log',
+                      :id => obj.rss_log_id)
+    end
+
+    html = html.join("<br/>\n")
+    html = '<span class="Date">' + html + '</span>'
+    html = '<p>' + html + '</p>'
   end
 
-  # Get sorted list of locale codes we have translations for.
-  def all_locales
-    Dir.glob(RAILS_ROOT + '/lang/ui/*.yml').sort.map do |file|
-      file.sub(/.*?(\w+-\w+).yml/, '\\1')
-    end
-  end
-
-  # Draw the cutesy eye icons in the upper right side of screen.
-  def draw_interest_icons(object, interest)
-    type  = object.class.to_s.underscore.to_sym
-    type2 = object.class.to_s
-    if !@interest
-      alt1 = :interest_watch_help.l(:object => type.l)
-      alt2 = :interest_ignore_help.l(:object => type.l)
-      img1 = image_tag('watch3.png',  :alt => alt1, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = image_tag('ignore3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img1 = link_to(img1, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      add_right_tab("<div>#{img1} #{img2}</div>")
-    elsif @interest.state
-      alt1 = :interest_watching.l(:object => type.l)
-      alt2 = :interest_default_help.l(:object => type.l)
-      alt3 = :interest_ignore_help.l(:object => type.l)
-      img1 = image_tag('watch2.png',    :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('halfopen3.png', :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('ignore3.png',   :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => -1)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    else
-      alt1 = :interest_ignoring.l(:object => type.l)
-      alt2 = :interest_watch_help.l(:object => type.l)
-      alt3 = :interest_default_help.l(:object => type.l)
-      img1 = image_tag('ignore2.png',   :alt => alt1, :width => '50px', :height => '50px', :class => 'interest_big')
-      img2 = image_tag('watch3.png',    :alt => alt2, :width => '23px', :height => '23px', :class => 'interest_small')
-      img3 = image_tag('halfopen3.png', :alt => alt3, :width => '23px', :height => '23px', :class => 'interest_small')
-      img2 = link_to(img2, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 1)
-      img3 = link_to(img3, :controller => 'interest', :action => 'set_interest', :id => object.id, :type => type2, :state => 0)
-      img1 = add_context_help(img1, alt1)
-      img2 = add_context_help(img2, alt2)
-      img3 = add_context_help(img3, alt3)
-      add_right_tab("<div>#{img1}<br/>#{img2}#{img3}</div>")
-    end
-  end
 end

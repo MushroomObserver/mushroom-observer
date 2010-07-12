@@ -1,16 +1,25 @@
 #!/bin/sh
 
 id=$1
+ext=$2
+set_size=$3
 
 server=velosa@images.mushroomobserver.org:images.mushroomobserver.org
 images=public/images
 
-orig=$images/orig/$id.jpg
-big=$images/640/$id.jpg
+orig=$images/orig/$id.$ext
+orig_first=$images/orig/$id-0.$ext
+orig_other=$images/orig/$id-'*'.$ext
+full=$images/orig/$id.jpg
+huge=$images/1280/$id.jpg
+large=$images/960/$id.jpg
+medium=$images/640/$id.jpg
+small=$images/320/$id.jpg
 thumb=$images/thumb/$id.jpg
 
-big_icon=$images/place_holder_640.jpg
-thumb_icon=$images/place_holder_thumb.jpg
+icon_640=$images/place_holder2_640.jpg
+icon_320=$images/place_holder2_320.jpg
+icon_160=$images/place_holder2_160.jpg
 
 log=log/process_image.$$
 log2=log/process_image.log
@@ -52,8 +61,9 @@ if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 	FILES:
 	    webmaster       $email
 	    image server    $server
-	    place-holders   $big_icon
-	                    $thumb_icon
+	    place-holders   $icon_640
+	                    $icon_320
+	                    $icon_160
 	    error log       $log2
 
 	EOH
@@ -65,6 +75,7 @@ fi
 # --------------------------------------------------
 
 function run() {
+echo $*
     echo "`date`>" $* >> $log
     if !($* >> $log 2>&1); then
         errors=1
@@ -77,8 +88,11 @@ function run() {
 #  until smaller images are done.
 # -----------------------------------------------
 
-run cp $thumb_icon $thumb
-run cp $big_icon $big
+run cp $icon_160 $thumb
+run cp $icon_320 $small
+run cp $icon_640 $medium
+run cp $icon_640 $large
+run cp $icon_640 $huge
 
 # ----------------------------
 #  Resize images.
@@ -87,8 +101,36 @@ run cp $big_icon $big
 # Wait for other conversions to finish first.
 while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
 
-run convert -thumbnail '160x160>' -quality 90 $orig $thumb
-run convert -thumbnail '640x640>' -quality 70 $orig $big
+# Do we need to convert the original to a JPEG?
+if [[ $orig != $full ]]; then
+  run convert -quality 70 $orig $full
+
+  # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
+  # Take the first one, and delete the rest.
+  if [[ -e $orig_first ]]; then
+    run mv $orig_first $orig
+    rm $orig_other
+  fi
+fi
+
+# Do we need to report the image size back to Rails?
+if (( $set_size )); then
+  run script/jpegsize --set $id $full
+fi
+
+# Create the other sizes now.  Image processing theory says that reducing
+# images by no more than 50% at a time is optimal.
+# run convert -thumbnail '1280x1280>' -quality 70 $full $huge
+# run convert -thumbnail '960x960>' -quality 70 $huge $large
+# run convert -thumbnail '640x640>' -quality 70 $huge $medium
+# run convert -thumbnail '320x320>' -quality 80 $medium $small
+# run convert -thumbnail '160x160>' -quality 90 $small $thumb
+
+run jpegresize 1280x1280 -q 70 --max-size $full $huge
+run jpegresize 960x960 -q 70 --max-size $huge $large
+run jpegresize 640x640 -q 70 --max-size $huge $medium
+run jpegresize 320x320 -q 80 --max-size $medium $small
+run jpegresize 160x160 -q 90 --max-size $small $thumb
 
 # ----------------------------
 #  Transfer images.
@@ -100,9 +142,15 @@ if (( $production )); then
   # Wait for other transfers to finish first.
   while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
 
-  run scp $orig $server/orig/$id.jpg
-  run scp $big $server/640/$id.jpg
-  run scp $thumb $server/thumb/$id.jpg
+  if [[ $orig != $full ]]; then
+    run scp $orig   $server/orig/$id.$ext
+  fi
+  run scp $full   $server/orig/$id.jpg
+  run scp $huge   $server/1280/$id.jpg
+  run scp $large  $server/960/$id.jpg
+  run scp $medium $server/640/$id.jpg
+  run scp $small  $server/320/$id.jpg
+  run scp $thumb  $server/thumb/$id.jpg
 fi
 
 # ------------------------------

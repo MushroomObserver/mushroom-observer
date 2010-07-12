@@ -1,13 +1,59 @@
-<% if @new_names && (@new_names != []) %>
+<% if !@new_names.blank? %>
   <div style="width:500px">
-    <div class="Errors">
+    <div class="Errors" id="missing_names">
       <%= :form_list_feedback_missing_names.t %><br/>
       <span class="HelpNote">
         <%= :form_list_feedback_missing_names_help.t %>
       </span>
       <span class="Data">
         <% for n in @new_names %>
-        <br/>&nbsp;&nbsp;<%= h(n) %>
+        <br/><%= indent + h(n) %>
+        <% end %>
+      </span>
+    </div>
+  </div>
+<% end %>
+
+<% if !@deprecated_names.blank? %>
+  <div style="width:500px">
+    <div class="Errors" id="deprecated_names">
+      <%= :form_species_lists_deprecated.t %>:<br/>
+      <span class="HelpNote">
+        <%= :form_species_lists_deprecated_help.t %>
+      </span><br/>
+      <span class="Data">
+        <% for name in @deprecated_names
+          approved_names = name.approved_synonyms %>
+          <%= name.display_name.t %><br/>
+          <% if approved_names != [] %>
+            <% for other_name in approved_names %>
+              <%= indent + radio_button("chosen_approved_names", name.id,
+                                        other_name.id) %>
+              <%= other_name.display_name.t %><br/>
+            <% end %>
+          <% end %>
+        <% end %>
+      </span>
+    </div>
+  </div>
+<% end %>
+
+<% if !@multiple_names.blank? %>
+  <div style="width:500px">
+    <div class="Errors" id="ambiguous_names">
+      <%= :form_species_lists_multiple_names.t %>:<br/>
+      <span class="HelpNote">
+        <%= :form_species_lists_multiple_names_help.t %>
+      </span><br/>
+      <span class="Data">
+        <% for name in @multiple_names %>
+          <%= name.display_name.t %><br/>
+          <% for other_name in name.other_authors %>
+            <%= indent + radio_button("chosen_multiple_names", name.id,
+                                      other_name.id) %>
+            <%= other_name.display_name.t %>
+              (<%= other_name.observations.count %>)<br/>
+          <% end %>
         <% end %>
       </span>
     </div>

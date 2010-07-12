@@ -9,13 +9,13 @@
 
   links = []
   links.push([:admin_request_change_member_status.l,
-    "#{DOMAIN}/project/change_user_status/#{@project.id}?candidate=#{@sender.id}"])
+    "#{HTTP_DOMAIN}/project/change_user_status/#{@project.id}?candidate=#{@sender.id}"])
   links.push([:email_links_show_user.l,
-    "#{DOMAIN}/observer/show_user/#{@sender.id}"])
+    "#{HTTP_DOMAIN}/observer/show_user/#{@sender.id}"])
   links.push([:email_links_latest_changes.l,
-    DOMAIN])
+    HTTP_DOMAIN])
 
-if @user.email_html ######################################################### %>
+if @user.email_html %>
 <html>
 <head>
   <title>Mushroom Observer: <%= @subject %></title>
@@ -31,12 +31,11 @@ if @user.email_html ######################################################### %>
     <li><%= label %>: <%= link_to(url, url) %></li>
   <% end %>
 </ul>
-<%= :email_report_abuse.tp %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS) %>
 <br/>
 </body>
 </html>
-<% else ##################################################################### %>
-<%= intro.tp.html_to_ascii %>
+<% else %><%= intro.tp.html_to_ascii %>
 
 <%= @message.tp.html_to_ascii %>
 
@@ -49,5 +48,5 @@ if @user.email_html ######################################################### %>
     result += "#{label.t.html_to_ascii}: #{url}\n"
   end
   result %>
-<%= :email_report_abuse.tp.html_to_ascii %>
-<% end ###################################################################### %>
+<%= :email_report_abuse.tp(:email => WEBMASTER_EMAIL_ADDRESS).html_to_ascii %>
+<% end %>

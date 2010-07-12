@@ -1,9 +1,13 @@
 xml.results(:number => @objects.length) do
-  for obs in @objects
-    render_xml_partial(xml, :observation, :locals => {
-      :observation => obs,
-      :details => true,
-      :refs => true,
-    })
+  for object in @objects
+    if @detail == :none
+      xml.obs(:id => object.id)
+    else
+      render_xml_partial(xml, :observation, :locals => {
+        :object => object,
+        :detail => @detail == :high,
+        :refs   => @detail == :high,
+      })
+    end
   end
 end

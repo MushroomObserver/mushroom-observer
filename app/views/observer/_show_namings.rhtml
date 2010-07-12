@@ -3,13 +3,14 @@
   javascript_include 'element_extensions'
   javascript_include 'vote_popup'
 
-  logged_in = !@user.nil? && !@user.verified.nil? && @user.verified
+  logged_in = !@user.nil? && @user.verified
   consensus = @observation.consensus_naming
   any_names = @observation.namings && @observation.namings.length > 0
   popups = []
 %>
 
-<% form_tag(:action => 'show_observation', :id => @observation, :params => search_params) do %>
+<% form_tag(:action => 'show_observation', :id => @observation,
+            :params => query_params) do %>
   <p>
     <% if any_names %>
       <%= :show_namings_proposed_names.t %>:
@@ -17,9 +18,10 @@
       <%= :show_namings_no_names_yet.t %>
     <% end %>&nbsp;
     <%= link_to(:show_namings_propose_new_name.t, :action => 'create_naming',
-                :id => @observation, :params => search_params) %>
+                :id => @observation, :params => query_params) %>
     <% if logged_in && any_names && can_do_ajax? %>
-      &nbsp;<%= submit_tag(:show_namings_update_votes.l, :onclick => "set_changed(0)") %>
+      &nbsp;<%= submit_tag(:show_namings_update_votes.l,
+                           :onclick => "set_changed(0)") %><br/>
     <% end %>
   </p>
 
@@ -27,7 +29,7 @@
     <div class="ThinBox">
       <% cols = logged_in ? 7 : 5 %>
       <table cellspacing="0" cellpadding="0">
-        <tr style='white-space:nowrap'>
+        <tr>
           <th><%= :show_namings_proposed_name.t %></th>
           <th></th>
           <th><%= :show_namings_user.t %></th>
@@ -41,23 +43,26 @@
           <th></th>
         </tr>
 
-        <% for naming in @observation.namings.sort_by {|n| n.created} %>
+        <% for naming in @observation.namings.sort_by(&:created) %>
           <tr>
             <td>
-              <div style='white-space:nowrap'>
+              <div>
                 <%= link_to(sanitize(naming.format_name).t,
-                            :controller => 'name', :action => 'show_name', :id => naming.name) %>
+                            :controller => 'name', :action => 'show_name',
+                            :id => naming.name, :params => query_params) %>
               </div>
               <% if check_permission(naming.user_id) %>
-                <div style='white-space:nowrap'>
-                  (<%= link_to(:app_edit.t, :action => 'edit_naming', :id => naming) %>
-                  | <%= link_to(:app_destroy.t, { :action => 'destroy_naming',
-                                :id => naming.id }, :confirm => :app_are_you_sure.l) %>)
+                <div>
+                  (<%= link_to(:EDIT.t, :action => 'edit_naming',
+                               :id => naming, :params => query_params) %>
+                  | <%= link_to(:DESTROY.t, { :action => 'destroy_naming',
+                                :id => naming.id, :params => query_params },
+                                { :confirm => :are_you_sure.l }) %>)
                 </div>
               <% end %>
             </td>
             <td width="20">&nbsp;</td>
-            <td style='white-space:nowrap'>
+            <td>
               <span class="Data"><%= user_link(naming.user, naming.user.login) %></span>
             </td>
 
@@ -71,7 +76,8 @@
               else
                 html += can_do_ajax? ?
                   link_to_function(h(txt), "show_votes(#{naming.id})") :
-                  link_to(h(txt), :action => 'show_votes', :id => naming.id)
+                  link_to(h(txt), :action => 'show_votes', :id => naming.id,
+                          :params => query_params)
                 popups << naming
               end
               if nvotes != 0
@@ -82,7 +88,7 @@
 
             <% if logged_in %>
               <td width="20">&nbsp;</td>
-              <td nowrap="nowrap">
+              <td>
                 <% @vote = @votes[naming.id]
                 menu = check_permission(naming.user_id) ? @confidence_menu : @agreement_menu
                 # It *is* still possible for the owner not to have voted.  In which case I
@@ -97,26 +103,26 @@
             <% end %>
 
             <td width="20">&nbsp;</td>
-            <td nowrap="nowrap"><%=
-              (naming.is_owners_favorite? ? image_tag("eye3.png") : "") +
+            <td><%=
+              (@observation.is_owners_favorite?(naming) ? image_tag("eye3.png") : "") +
               (naming == consensus ? image_tag("eyes3.png") : "")
             %></td>
           </tr>
 
-          <% String.register_name(naming.name)
-          if naming.naming_reasons.length > 0 %>
-            <tr>
-              <td colspan="<%= cols %>">
-                <% for reason in naming.naming_reasons %>
-                  <% if reason.notes.nil? || reason.notes == "" %>
+          <% Textile.register_name(naming.name) %>
+          <tr>
+            <td colspan="<%= cols %>">
+              <% for reason in naming.get_reasons %>
+                <% if reason.used? %>
+                  <% if reason.notes.blank? %>
                     <%= reason.label.t %>
                   <% else %>
-                    <%= sanitize(reason.label.l + ": " + reason.notes.to_s).tl %>
+                    <%= sanitize(reason.label.l + ": " + reason.notes).tl %>
                   <% end %><br/>
                 <% end %>
-              </td>
-            </tr>
-          <% end %>
+              <% end %>
+            </td>
+          </tr>
         <% end %>
       </table>
     </div>
