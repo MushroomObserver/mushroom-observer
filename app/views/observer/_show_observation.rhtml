@@ -27,7 +27,11 @@
   <% else %>
     <%= :show_observation_seen_at.t %>:
   <% end %>
-  <%= location_link(observation.place_name, observation.location, nil, true) %><br/>
+  <%= location_link(observation.place_name, observation.location, nil, true)%>
+  <% if observation.lat %>
+    <%= "(#{observation.lat}, #{observation.long})"%>
+  <% end %>
+  <br/>
 
   <%= :WHO.t %>: <span class="Data">
     <%= user_link(observation.user) %>

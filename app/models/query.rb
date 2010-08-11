@@ -732,10 +732,10 @@ class Query < AbstractQuery
         self.group = 'images.id'
         'MIN(names.search_name) ASC, images.when DESC'
       elsif model == Location
-        'locations.search_name ASC'
+        'locations.name ASC'
       elsif model == LocationDescription
         self.join << :locations
-        'locations.search_name ASC, location_descriptions.created ASC'
+        'locations.name ASC, location_descriptions.created ASC'
       elsif model == Name
         'names.text_name ASC, names.author ASC'
       elsif model == NameDescription
@@ -766,7 +766,7 @@ class Query < AbstractQuery
     when 'location'
       if model.column_names.include?('location_id')
         self.join << :locations
-        'locations.search_name ASC'
+        'locations.name ASC'
       end
 
     when 'rss_log'
@@ -1163,7 +1163,7 @@ class Query < AbstractQuery
           case model.name
           when 'Location'
             pattern = clean_pattern(Location.clean_name(name))
-            objs += model.all(:conditions => "search_name LIKE '%#{pattern}%'")
+            objs += model.all(:conditions => "name LIKE '%#{pattern}%'")
           when 'Name'
             objs += model.find_all_by_search_name(name)
             objs += model.find_all_by_text_name(name) if objs.empty?
@@ -1748,7 +1748,7 @@ class Query < AbstractQuery
         self.where += google_conditions(search,
           'CONCAT(names.search_name,' +
           'COALESCE(images.copyright_holder,""),COALESCE(images.notes,""),' +
-          'IF(locations.id,locations.search_name,observations.where))')
+          'IF(locations.id,locations.name,observations.where))')
 
       when :Location
         self.join << :"location_descriptions.default!"
@@ -1756,7 +1756,7 @@ class Query < AbstractQuery
           "COALESCE(location_descriptions.#{x},'')"
         end
         self.where += google_conditions(search,
-            "CONCAT(locations.search_name,#{note_fields.join(',')})")
+            "CONCAT(locations.name,#{note_fields.join(',')})")
 
       when :Name
         self.join << :"name_descriptions.default!"
@@ -1771,7 +1771,7 @@ class Query < AbstractQuery
         self.join << [:locations!, :names]
         self.where += google_conditions(search,
           'CONCAT(names.search_name,COALESCE(observations.notes,""),' +
-          'IF(locations.id,locations.search_name,observations.where))')
+          'IF(locations.id,locations.name,observations.where))')
 
       when :Project
         self.where += google_conditions(search,
@@ -1781,7 +1781,7 @@ class Query < AbstractQuery
         self.join << :locations!
         self.where += google_conditions(search,
           'CONCAT(species_lists.title,COALESCE(species_lists.notes,""),' +
-          'IF(locations.id,locations.search_name,species_lists.where))')
+          'IF(locations.id,locations.name,species_lists.where))')
 
       when :User
         self.where += google_conditions(search,
@@ -1858,10 +1858,10 @@ class Query < AbstractQuery
     # Where the mushroom was seen...
     if !location.blank?
       if model_symbol == :Location
-        self.where += google_conditions(location, 'locations.search_name')
+        self.where += google_conditions(location, 'locations.name')
       else
         self.where += google_conditions(location,
-          'IF(locations.id,locations.search_name,observations.where)')
+          'IF(locations.id,locations.name,observations.where)')
       end
     end
 

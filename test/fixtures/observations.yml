@@ -107,3 +107,15 @@ unknown_with_no_naming:
   name_id:   1
   notes:     ''
 
+unknown_with_lat_long:
+  id:        10
+  sync_id:   10x1
+  created:   2010-07-22 09:20:00
+  modified:  2010-07-22 09:21:00
+  when:      2010-07-22
+  user_id:   2
+  location_id: 2
+  name_id:   1
+  notes:     ''
+  lat: 34.1622
+  long: -118.3521

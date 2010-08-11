@@ -182,7 +182,7 @@ module Ym4r
 
       #Registers an event
       def event_init(object,event,callback)
-        @init << "GEvent.addListener(#{object.to_javascript},\"#{MappingObject.javascriptify_method(event.to_s)}\",#{callback});"
+        @init << "GEvent.addListener(#{object.to_javascript},\"#{event.to_s}\",#{callback});"
       end
 
       #Registers an event globally

@@ -59,7 +59,7 @@ dick:
   thumbnail_size: :thumbnail
   image_size: :medium
 
-# Need third for testing votes
+# Need fourth for testing votes
 katrina:
   id: 5
   sync_id: 5xx1
@@ -73,3 +73,18 @@ katrina:
   thumbnail_size: :thumbnail
   image_size: :medium
 
+# Roy is a scientific user
+roy:
+  id: 6
+  sync_id: 6xx1
+  login: roy
+  name: Roy Halling
+  password: ccd15aaa2f49bb115a0a9224f7ff43dd784a8e5f # testpassword
+  email: roy@collectivesource.com
+  verified: 2010-07-15 21:20:00
+  contribution: 10
+  created_here: true
+  locale: en-US
+  thumbnail_size: :thumbnail
+  image_size: :medium
+  location_format: :scientific

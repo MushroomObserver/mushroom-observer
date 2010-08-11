@@ -967,6 +967,7 @@ runtime_destroyed: "Successfully destroyed [type]."
 runtime_destroyed_id: "Successfully destroyed [type] #[value]."
 runtime_destroyed_name: "Successfully destroyed [type] '[value]'."
 runtime_invalid: "[Type] is invalid: '[value]'"
+runtime_lat_long_error: "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
 runtime_merge_success: Successfully merged [type] [this] into [that].
 runtime_missing: Missing [field].
 runtime_no_changes: "No changes made."
@@ -1243,6 +1244,7 @@ runtime_object_not_found: >
 
 runtime_profile_must_define: >
   You must define this location before we can make it your primary location.
+  Any other changes to your profile have been saved.
 
 runtime_refine_search_bad_google_minus: >
   Invalid search syntax in [name] at '[value]'.  Please only use the minus sign
@@ -1775,17 +1777,10 @@ form_locations_species: Interesting Species
 form_locations_notes: "[:Notes]"
 form_locations_refs: "[:form_names_refs]"
 form_locations_refs_help: "[:form_names_refs_help]"
-form_locations_help: >
-  Enter a distinct name for this location that is understandable
-  internationally.  Examples:\n
-  "Mitrula Marsh", Yuba Co., California, USA\n
-  Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
+form_locations_help: <a href="/location/help" target="_new">Help</a>
 
 form_locations_lat_long_help: >
   All values should be in decimal degrees.
-
-form_locations_lat_long_finders: >
-  Here are some lat/long finders to help you find this location
 
 form_locations_license_help: >
   Select "license":/observer/how_to_use#license you want to give for the
@@ -1804,6 +1799,9 @@ form_locations_notes_help: >
   Enter notes that are specific to this particular location.  For example,
   whether it is private or public, whether permits are required, driving
   directions, etc.
+
+form_locations_dubious_help: >
+  Submit again to use this location name or edit the text below to correct any typo.
 
 
 
@@ -1932,6 +1930,11 @@ form_observations_upload_images: Upload Images
 form_observations_upload_another: Upload Another...
 form_observations_edit_image: Edit Image
 form_observations_remove_image: Remove Image
+form_observations_lat_long_help: >
+  Optional GPS location.  Latitude is expected to be between -90.0 and 90.0 and
+  longitude between -180.0 and 180.0.  If you choose to provide this data please
+  make it as accurate as possible.
+
 form_observations_log_change: Log Change
 form_observations_is_collection_location_help: >
   Check when the location is where the mushroom was growing.  Uncheck when it
@@ -1962,6 +1965,9 @@ form_observations_where_help: >
   to the county.  Examples:\n
   Albion, Mendocino Co., California, USA\n
   Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
+
+form_observations_dubious_help: >
+  Click '[button]' to use this location name or edit the text below to correct any typo.
 
 
 
@@ -2107,6 +2113,16 @@ list_place_names_merge: Merge
 location_change: Change to Location
 
 
+# model/location
+location_dubious_ambiguous_country: Ambiguous country or state, '[country]'
+location_dubious_bad_term: Contains bad term, '[bad]', rather than '[good]'
+location_dubious_commas: All commas should be followed by a space and another word
+location_dubious_empty: Empty location given
+location_dubious_redundant_county: County may be redundant
+location_dubious_redundant_state: Both '[state]' and '[country]' are on the list of countries and continents
+location_dubious_unknown_country: Unknown country '[country]'
+location_dubious_unknown_state: Unknown state '[state]', '[country]'
+
 
 # account/login
 login_please_login: Please login
@@ -2184,7 +2200,7 @@ name_index_bulk_edit: "[:name_bulk_title]"
 
 
 # name/map
-name_map_title: Distribution Map for [name]
+name_map_title: Occurrence Map for [name]
 name_map_about: "[:show_name]"
 name_map_no_maps: No observations of [name] have mappable location information.
 
@@ -2397,7 +2413,7 @@ show_name_title: "[:NAME]: [name]"
 show_name_add_name: "[:add_object(type=:name)]"
 show_name_edit_name: "[:edit_object(type=:name)]"
 show_name_bulk_name_edit: "[:name_bulk_title]"
-show_name_distribution_map: Distribution Map
+show_name_distribution_map: Occurrence Map
 show_name_change_synonyms: Change Synonyms
 show_name_email_tracking: Email Tracking
 show_name_create_description: "[:CREATE]"
@@ -4304,40 +4320,40 @@ how_projects: >
 
 how_maps: >
   *Working with Maps* - Currently there are three types of maps available on
-  [:app_title]: Distribution Maps (e.g., "Distribution map for
+  [:app_title]: Occurrence Maps (e.g., "Occurrence map for
   **__Craterellus cornucopioides__**":/name/map/284), Location Maps (e.g.,
   "Salt Point State Park":/location/show_location/4) and the
   "[:map_locations_global_map]":/location/map_locations.
   \n\n
-  To see a distribution map for a particular "Name":#name, go to the page for
+  To see an occurrence map for a particular "Name":#name, go to the page for
   that name (e.g., enter the name in the search bar, select '[:NAMES]'), and
   click '[:app_search]', then click '[:show_name_distribution_map]' at the
   top of the page.
   \n\n
-  "Users":#user are encouraged to add to the distribution map for a name.  The
+  "Users":#user are encouraged to add to the occurrence map for a name.  The
   easiest way is to create a new "Observation":#observation using an already
   defined "Location":#location.  Note, however, that auto-completion for the
   '[:WHERE]' field will list all matching locations whether they are
   defined or not.
   \n\n
   You can also explicitly choose not to have an observation show up on the
-  distribution map.  This allows you to record observations of mushrooms in
+  occurrence map.  This allows you to record observations of mushrooms in
   places like mushroom fairs, old photos or other places where you may not know
   where the mushroom was actually collected.  When creating or editing an
   observation there is a checkbox labeled
   '[:form_observations_is_collection_location]'.  By default it is checked.  If
-  you uncheck it, that observation will not appear in any distribution maps.
+  you uncheck it, that observation will not appear in any occurrence maps.
 
 how_defining_locations: >
   *Defining Undefined Locations* - Many "Observations":#observation have been
   reported from undefined "Locations":#location.  These observations will not
-  appear in our "distribution maps":#maps.  An excellent, easy way for
+  appear in our "occurrence maps":#maps.  An excellent, easy way for
   "Users":#user to help out if they have a little spare time is to locate and
   defined these undefined locations.
   \n\n
   When browsing through observations, defined location names will be followed
-  by a link labelled '[:click_for_map]'.  Undefined location names will be
-  followed by a link labelled '[:SEARCH]'.  If you click the link for an
+  by a link labeled '[:click_for_map]'.  Undefined location names will be
+  followed by a link labeled '[:SEARCH]'.  If you click the link for an
   undefined location, it will show a list of observations reported for that
   location.  The resulting page will include two links at the top of the page:
   '[:list_observations_location_define]' and '[:list_observations_location_merge]'.  Clicking on
@@ -4357,24 +4373,7 @@ how_defining_locations: >
   location (see above).
   \n\n
   When defining a new location, the first thing to do is to review its name.
-  You are strongly encouraged to end each location with country.  In the USA
-  you are also encouraged to include the full state name along with the county.
-  Abbreviations are discouraged with the exception of 'Co.' for County.  Thus a
-  good name is 'Salt Point State Park, Sonoma Co., California, USA' and a bad
-  name would be 'Salt Point, CA'.  For other countries, we don't know enough to
-  make a concrete proposal.  We expect conventions will evolve naturally over
-  time.  In general, please define a location in increasing order of
-  generality, that is, start with the specific place, followed by the local
-  region, then broader regions, and end with the country.
-  \n\n
-  A location is a rectangular region defined by the northern, southern, eastern
-  and western boundaries.  Part of intention of making locations areas rather
-  than a single GPS readings is to allow people safeguard their secret 'spots'
-  while still providing an approximate location that is at least accurate to
-  the county.  We provide links to a couple of location finders to help in
-  determining latitudes and longitudes.  These will open in a separate window
-  or tab.  You can then search for or navigate to the appropriate area of the
-  resulting map and read off the position.
+  Mushroom Observer tries to enforce a set of "rules":/location/help.
   \n\n
   In theory it is possible for the same location to be defined more than once
   (presumably by different users).  If this happens, you can request a merge by
@@ -4573,6 +4572,201 @@ how_vote: >
   being positive and half ("[min_neg_vote]" and below) being negative.  Votes
   are owned by that user, and can only be changed or deleted by the owner or a
   site administrator.
+
+
+################################################################################
+# LANGUAGE HELP PAGE
+
+location_help_title: Locations in Mushroom Observer
+
+location_help_intro: >
+  The Mushroom Observer provides two ways to represent the geographic location 
+  of an observation.  The simplest are latitude and longitude positions associated 
+  with the observation.  Please keep these accurate to within at least 300 meters 
+  (or about 1000 feet).  However, the more widely used method is a simple phrase 
+  describing the location.  For example, "Beebe Woods, Falmouth, Massachusetts, USA".
+  The goal of these location names is to provide a consistent, reusable way of talking
+  about where an observation was made without necessarily revealing a precise "spot".
+  If you are comfortable provide more precise lat/longs for an observation, the
+  location names are still useful for searches so you are encouraged to provide
+  them as well.  The location names should, by default, go from the smallest
+  contained area to the country name.  If you prefer to describe your locations
+  as going from the largest (county) down to the smallest contained area, you can
+  change your preference from the default, "Postal", to "Scientific" on your 
+  preference page.  There are cases such as
+  "Great Smoky Mountains National Park, Blount Co., Tennessee, USA",
+  where the area you are describing overlaps a number of counties, states or
+  even countries.  In these cases, the country and other official political
+  boundaries should come at the end as shown in the example.
+  \n\n
+  Originally, the Mushroom Observer was very loose about these location names, 
+  hoping that the users would create a reasonably consistent set of rules and 
+  correct each other.  After about four years and thousands of location names, 
+  we found that there were rules emerging, but they were not applied at all 
+  consistently and people were not tending to directly correct each other.  
+  Consequently, we have tried to codify these rules and when reasonable to provide 
+  warnings if you attempt to create a new location that violates these rules.  
+  It is not always possible to correct identify "bad" locations, so if you get 
+  some warnings, but after reviewing the location decide it should be "good", 
+  then simply resubmitting the form will force the name into the database.  
+  However, all new location names will get reviewed regularly and may get changed 
+  to better fit the consensus rules.  Below are some examples of "bad" and "good" 
+  location names followed by a more detailed explanation of the current rules.  
+  Each example is labeled with the following section that explains the example 
+  in more detail.  These rules are by no means set it stone and we encourage the 
+  discussion and revision of them.
+
+location_help_example_help: These are cases that are not detected automatically, so no warning would be given.
+location_help_example_title: Some examples
+location_help_bad: Bad
+location_help_good: Good
+location_help_explanation: Explanation
+location_help_rules_title: The Current "Rules"
+
+location_help_rule_reversible: >
+  *Consistent and Reversible Order* - You can now ask for location names to appear in the reverse order from the default.  
+  Thus, you can see a location as either:
+  \n\n
+  Albion, California, USA
+  \n\n
+  or as
+  \n\n
+  USA, California, Albion
+  \n\n
+  You can change this on your Preferences page by selecting 'Postal' (the default) 
+  or 'Scientific' (the one that starts with the country).  When you input new location 
+  names it will of course also follow your preferred order.
+  \n\n
+  Roy Halling was the inspiration for this feature when he started putting in his 
+  locations starting with the country names and we got into a discussion about it.  
+  Apparently the standard practice in the scientific community is to start with the 
+  largest locale (typically a country) and work down to the smallest locale (a county, 
+  town or specific location).  From looking through all the locations that have been 
+  put into MO, it is clear that most people expect to put in the smallest location 
+  first and work up to the country.
+  \n\n
+  In order to enable this feature, I have had to require that the place names be 
+  easily and consistently reversible.  This means you must separate each section 
+  of the location with a ', ' (no period, no missing spaces, no double spaces).  
+  It also means that you should always enter the names in order of increasing size 
+  when you can.  There are some specific exceptions to this rule that are discussed 
+  below.
+
+location_help_rule_countries: >
+  *Use Country Names* - As a further check when you enter an unfamiliar location, it will check to see that 
+  the largest locale has been previously entered for some other location.  This list 
+  currently consists of only countries, continents and the special location 'Unknown'.  
+  Since it does not include all possible countries, it is still possible to override 
+  the check by resubmitting the same name twice.  Such entries will be reviewed carefully 
+  to ensure that this list remains clean.  For now you should only enter country names 
+  as they are written in English.  For example, please use 'Germany' rather than 
+  'Deutschland'.  The goal for the moment is simply consistency.  However, the long 
+  term goal is to actually allow these names to be consistently translated based on 
+  the user's language selection.  Continents should only be used if the country is 
+  not known or there is no country.
+
+location_help_rule_states: >
+  *Use State Names* - In the case of countries where I know the states, I also check for those as 
+  the next smallest area within a country.  At the moment I am checking this 
+  for Canada, Australia and USA.  The primary goal of this in the US at least 
+  is to ensure the uniqueness of the next element in the list.  In the US it 
+  is not unusual to have the same city or county name in more than one state.  
+  If there are other countries where this check would be useful, please let me 
+  know and include an exhaustive list of all states, provinces, territories etc.  
+  To increase the understandability to people from other parts of the world, 
+  state abbreviations (even extremely standard ones) are discouraged and will 
+  create a warning.  The one current exception is 'Washington DC'.  Many people 
+  are not aware of what the 'DC' stands for and would be unlikely to enter 
+  'Washington, District of Columbia'.  Note that in this case I have also 
+  removed the ', ' since that would cause 'USA, DC, Washington' when in 
+  'Scientific' mode.
+
+location_help_rule_counties: >
+  *Counties OR Cities* - In the past, MO has encouraged the use of county names whenever they are 
+  known.  The new policy is that the county should only be included when it 
+  is the smallest political area the location is contained in or when the 
+  city or town name is ambiguous.  For example, what used to be described as 
+  "Berkeley, Alameda Co., California, USA" should now be given as just 
+  "Berkeley, California, USA".  This change is in part due to seeing what 
+  people actually do.  Generally people have been good about using county 
+  names in the case of public lands like parks and national forests where 
+  the county is the most obvious political boundary.  However, with cities 
+  and towns people often don't know what county a city or town is in.  In 
+  addition, the information is typically redundant for towns and cities in 
+  the US where they are almost always completely contained in county or they 
+  are independent of the counties and there are almost never two towns with 
+  same names in a state (there are exceptions though such as Goshen, Vermont).  
+  I've also found that many of the map services such as maps.google.com and 
+  maps.yahoo.com get confused if you include both the city and the county in 
+  the search string.
+  \n\n
+  That being said, there are also often areas that have a local name, but are 
+  not actually an incorporated city or town.  In these cases the county name 
+  is encouraged since the names cannot be assumed to be unique.  For example, 
+  "North Lakeport, Lake Co., California, USA".  Wikipedia has been the most 
+  helpful resource I've found for determining if a town is actually 
+  incorporated.
+
+location_help_rule_near: >
+  *Use 'Near'* - If there is a landmark or town near to the collection location, but the 
+  smallest political boundary is a county or country, then it is helpful to 
+  mention this using the work "Near".  For example, 
+  "Albis Mountain Range, Near Zurich, Switzerland".  Looking through the old 
+  data, I found users used both "Near" and "Area" for this with "Near" being 
+  more common.  This is also better because "Area" sometimes gets used for 
+  place names such as "Day-Use Area" or "Rest Area".
+
+location_help_rule_southern: >
+  *Use of 'Southern', 'Northern' etc.* - If there isn't a known a clear landmark or town near the collection 
+  location, it is fine to use compass directions such as 'Southern', 
+  'Northern', 'Southwestern' etc.  In these cases always use the '-ern' 
+  ending to indicate that it's descriptive.  However, these terms should be 
+  avoided if it creates ambiguity.  For example, "Western Australia" is the 
+  name of an official state in Australia, so it should only be used as such 
+  and should be followed by the country name.
+
+location_help_rule_abbr: >
+  *Avoid Abbreviations (and Periods in General)* - Most abbreviations should be avoids since people apply them somewhat 
+  arbitrarily and inconsistently.  The following are examples of abbreviations 
+  that should definitely be avoided: Hwy, Mt, Mtn, CA, BC.  However, there are 
+  some specific examples, that should be used in preference to there spelled 
+  out versions.  These are:\n
+    Co. for County\n
+    Rd. for Road\n
+    St. for Street\n
+    Ave. for Avenue\n
+    Blvd. for Boulevard\n
+    USA for United States of America\n
+    Washington DC for Washington, District of Columbia\n
+  \n\n
+  Periods in general should be avoided except for the above abbreviations.  
+  They should not be used at the end of country names or as separators.
+
+location_help_rule_other: >
+  *Other Things to Avoid* - All lowercase - In general at least the leading letter of each area should 
+  be capitalized and when in doubt capitalize every leading letter.\n
+  No lat/longs - There is now direct support for this for each observation.  
+  Do not include it in the name of a location.\n
+  No habitat info - Habitat info should go in the notes for the observation.\n
+  Parentheses - If you're tempted to use parens, stop yourself and ask if this 
+  information should be in the notes for the observation or if there is a better 
+  way to describe the location.\n
+  Avoid diacritics (eg é, ü etc.) - As mentioned when discussing country names, you should 
+  try to use the English version of a location name when possible and English does 
+  not include diacritics.  This is intended to encourage consistency and we are 
+  planning on providing proper support for other languages which will benefit from 
+  this consistency.  There are certainly cases where the a city or region is only 
+  know by a name that includes diacritics.  In these cases they should be used.  
+  A few simple web-searches should give you a good idea if there is a common English 
+  variation of a name (e.g., Montreal, Quebec for Montréal, Québec).
+
+location_help_rule_good_habits: >
+  *Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name.  
+  Searching within Mushroom Observer can be helpful.  If you don't find anything 
+  there, then look things up in Google Maps ( http://maps.google.com ) and Wikipedia ( http://wikipedia.org ).  
+  Also feel free to use the notes section of either an observation or a location 
+  to be more specific.
+
 
 ################################################################################
 

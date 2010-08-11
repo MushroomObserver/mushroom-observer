@@ -99,11 +99,10 @@ class Location < AbstractModel
     'last_view',
     'ok_for_export',
     'rss_log_id',
-    'description_id',
-    'search_name'
+    'description_id'
   )
 
-  before_save  :set_search_name
+#  before_save  :set_search_name
   after_update :notify_users
 
   # Automatically log standard events.
@@ -149,7 +148,49 @@ class Location < AbstractModel
 
   # Return center as [lat, long].
   def center
-    [(self.north + self.south)/2, (self.west + self.east)/2]
+    west_east = (east + west)/2
+    west_east += 180 if (west > east)
+    [(self.north + self.south)/2, west_east]
+  end
+  
+  # Update rectangle to include lat and long
+  def tweak(lat, long)
+    # Latitude is easy...
+    if lat >= (self.north + self.south)/2
+      self.north = lat
+    else
+      self.south = lat
+    end
+    
+    # Longitude requires we deal with wrap around
+    east_diff = (long - self.east).abs
+    if east_diff > 180 # Go the other way around the globe
+      east_diff = 360 - east_diff
+    end
+    west_diff = (long - self.west).abs
+    if west_diff > 180 # Go the other way around the globe
+      west_diff = 360 - west_diff
+    end
+    if east_diff <= west_diff
+      self.east = long
+    else
+      self.west = long
+    end
+    
+    save
+  end
+  
+  # Functions for validation latitude and longitude
+  # lat and long are expected to be strings that will be converted to floating point numbers.
+  # Returns true if these are reasonable values.
+  def self.check_lat_long(lat, long)
+    check_value(lat, -90, 90) and check_value(long, -180, 180)
+  end
+
+  # Only allow 0.0 if v is "0" or "0.0"
+  def self.check_value(v, min, max)
+    num = v.to_f
+    (num != 0.0 or v == "0" or v == "0.0") and (min <= num) and (num <= max)
   end
 
   ##############################################################################
@@ -243,9 +284,10 @@ class Location < AbstractModel
   # E.g., "New York, USA" => "USA, New York"
   # Used to support the "scientific" location format.
   def self.reverse_name(name)
-    tokens = name.split(',').map { |x| x.strip() }
-    tokens.delete("")
-    return tokens.reverse.join(', ')
+    name.split(', ').reverse.join(', ') if name
+    # tokens = name.split(',').map { |x| x.strip() }
+    # tokens.delete("")
+    # return tokens.reverse.join(', ')
   end
 
   # Looks for a matching location using either location order just to be sure
@@ -501,8 +543,14 @@ class Location < AbstractModel
     "Street," => "St.,",
     "Avenue" => "Ave.",
     "Boulevard," => "Blvd.,",
+    "Rd," => "Rd.,",
+    "St," => "St.,",
+    "Ave" => "Ave.",
+    "Blvd," => "Blvd.,",
     "United States of America" => "USA",
     "Washington, DC" => "Washington DC",
+    " area " => "Near",
+    " area," => "Near"
   }
   
   BAD_REGEXS = {
@@ -511,20 +559,25 @@ class Location < AbstractModel
   
   OK_PREFIXES = ['Central', 'Interior', 'Northern', 'Southern', 'Eastern', 'Western', 'Northeastern', 'Northwestern', 'Southeastern', 'Southwestern']
 
+  # Returns a member of understood_places if the candidate is either a member or
+  # if the candidate stripped of all the OK_PREFIXES is a member.  Otherwise
+  # it returns nil.
   def self.understood_with_prefixes(candidate, understood_places)
-    result = understood_places.member?(candidate)
-    if not result
+    result = nil
+    if understood_places.member?(candidate)
+      result = candidate
+    else
       tokens = candidate.split
       count = 0
       for s in tokens
         if OK_PREFIXES.member?(s)
           count += 1
         else
-          if understood_places.member?(tokens[count..-1].join(' '))
-            return true
-          else
-            return false
+          trimmed = tokens[count..-1].join(' ')
+          if understood_places.member?(trimmed)
+            result = trimmed
           end
+          break
         end
       end
     end
@@ -560,57 +613,79 @@ class Location < AbstractModel
       false
     end
   end
-      
+  
+  def self.comma_test(name)
+    tokens = name.split(',').map { |x| x.strip() }
+    tokens.delete("")
+    return name != tokens.join(', ')
+  end
+
   # Decide if the given name is dubious for any reason
-  def self.dubious_name?(name, reasons=false, check_db=true)
+  def self.dubious_name?(name, provide_reasons=false, check_db=true)
     reasons = []
     if not (check_db and location_exists(name))
-      canonical_form = Location.reverse_name(Location.reverse_name(name))
-      if canonical_form != name
-        return true if !reasons
-	      reasons.push("Not in canonical form: #{canonical_form}")
+      if name == ''
+        return true if !provide_reasons
+        return [:location_dubious_empty.l]
       end
-      if name.index('Forest,').nil? and location_exists(no_dubious_county(name))
-        return true if !reasons
-        reasons.push("County may be redundant: #{name}")
+      if Location.comma_test(name)
+        return true if !provide_reasons
+	      reasons.push(:location_dubious_commas.l)
       end
-      a_country = country(name)
-      if not understood_country?(a_country)
-        return true if !reasons
-        reasons.push("Unrecognized country: #{name}")
+      if name.index('Forest,').nil? and name.index('Park,').nil? and has_dubious_county?(name)
+        return true if !provide_reasons
+        reasons.push(:location_dubious_redundant_county.l)
+      end
+      a_country = understood_country?(country(name))
+      if a_country.nil?
+        return true if !provide_reasons
+        reasons.push(:location_dubious_unknown_country.t(:country => country(name)))
       end
       if has_known_states?(a_country)
+        if understood_state?(country(name), a_country) # "Western Australia" for example
+          return true if !provide_reasons
+          reasons.push(:location_dubious_ambiguous_country.t(:country => a_country))
+        end
         a_state = state(name)
-        if a_state and not understood_state?(a_state, a_country)
-	        return true if !reasons
-          reasons.push("Unknown state: #{a_state}, #{a_country}")
+        if a_state and understood_state?(a_state, a_country).nil?
+	        return true if !provide_reasons
+          reasons.push(:location_dubious_unknown_state.t(:country => a_country, :state => a_state))
+        end
+      else
+        a_state = state(name)
+        if a_state and understood_country?(a_state)
+          return true if !provide_reasons
+          reasons.push(:location_dubious_redundant_state.t(:country => a_country, :state => a_state))
         end
       end
       for key in BAD_TERMS.keys()
         if name.index(key)
-          return true if !reasons
-          reasons.push("Contains bad term: #{key} rather than #{BAD_TERMS[key]}")
+          return true if !provide_reasons
+          reasons.push(:location_dubious_bad_term.t(:bad => key, :good => BAD_TERMS[key]))
         end
       end
     end
-    return false if !reasons
+    return false if !provide_reasons
     reasons
   end
   
   def self.country(name)
-    name.split(',')[-1].strip()
+    result = name.split(',')[-1]
+    result.strip() if result
+    result
   end
   
   def self.state(name)
     result = name.split(',')[-2]
     result.strip() if result
+    result
   end
   
   def self.dubious_country?(name)
     not understood_country?(country(name))
   end
   
-  def self.no_dubious_county(name)
+  def self.has_dubious_county?(name)
     tokens = name.split(", ")
     alt = [tokens[0]]
     for t in tokens[1..-1]
@@ -672,6 +747,10 @@ class Location < AbstractModel
       int.save
     end
 
+    # Add note to explain the merge
+    # Intentionally not translated
+    add_note("[admin - #{Time.now}]: Merged with #{old_loc.name}: North: #{old_loc.north}, South: #{old_loc.south}, West: #{old_loc.west}, East: #{old_loc.east}")
+    
     # Merge the two "main" descriptions if it can.
     if self.description and old_loc.description and
        (self.description.source_type == :public) and
@@ -725,11 +804,11 @@ class Location < AbstractModel
   ##############################################################################
 
   # Callback that updates +search_name+ before saving a record.  See +clean_name+.
-  def set_search_name
-    if new_record? || name_changed?
-      self.search_name = self.class.clean_name(name)
-    end
-  end
+  # def set_search_name
+  #   if new_record? || name_changed?
+  #     self.search_name = self.class.clean_name(name)
+  #   end
+  # end
 
   # This is called after saving potential changes to a Location.  It will
   # determine if the changes are important enough to notify people, and do so.
@@ -819,8 +898,8 @@ protected
     if self.name.to_s.length > 200
       errors.add(:name, :validate_location_name_too_long.t)
     end
-    if self.search_name.to_s.length > 200
-      errors.add(:search_name, :validate_location_search_name_too_long.t)
-    end
+    # if self.search_name.to_s.length > 200
+    #   errors.add(:search_name, :validate_location_search_name_too_long.t)
+    # end
   end
 end

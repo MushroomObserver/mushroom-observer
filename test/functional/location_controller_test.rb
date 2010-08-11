@@ -13,7 +13,7 @@ class LocationControllerTest < FunctionalTestCase
   def update_params_from_loc(loc)
     { :id => loc.id,
       :location => {
-        :name => loc.name,
+        :display_name => loc.display_name,
         :north => loc.north,
         :west => loc.west,
         :east => loc.east,
@@ -27,11 +27,11 @@ class LocationControllerTest < FunctionalTestCase
 
   # A location that isn't in fixtures.
   def barton_flats_params
-    name = "Barton Flats, San Bernardino Co., California, USA"
+    name = "Barton Flats, California, USA"
     {
-      :where => name,
+      :display_name => name,
       :location => {
-        :name => name,
+        :display_name => name,
         :north => 34.1865,
         :west => -116.924,
         :east => -116.88,
@@ -122,7 +122,7 @@ class LocationControllerTest < FunctionalTestCase
   def test_construct_location_simple
     count = Location.count
     params = barton_flats_params
-    display_name = params[:where]
+    display_name = params[:display_name]
     post_requires_login(:create_location, params)
     assert_response(:action => :show_location)
     assert_equal(count + 1, Location.count)
@@ -133,6 +133,13 @@ class LocationControllerTest < FunctionalTestCase
     assert_nil(loc.description)
   end
 
+  def test_construct_location_name_errors
+    # Test creating a location with a dubious location name
+    params = barton_flats_params
+    params[:location][:display_name] = "Somewhere Dubious"
+    construct_location_error(params)
+  end
+  
   def test_construct_location_errors
     # Test for north > 90
     params = barton_flats_params
@@ -196,6 +203,7 @@ class LocationControllerTest < FunctionalTestCase
     old_north = loc.north
     old_params = update_params_from_loc(loc)
     params = barton_flats_params
+    params[:location][:display_name] = Location.user_name(@rolf, params[:location][:display_name])
     params[:id] = loc.id
     post_requires_login(:edit_location, params)
     assert_response(:action => :show_location)
@@ -234,6 +242,13 @@ class LocationControllerTest < FunctionalTestCase
     update_location_error(params)
   end
 
+  # Test update with a dubious location name
+  def test_update_location_name_errors
+    params = update_params_from_loc(locations(:albion))
+    params[:location][:display_name] = "Somewhere Dubious"
+    update_location_error(params)
+  end
+
   # Burbank has observations so it stays.
   def test_update_location_user_merge
     to_go = locations(:burbank)
@@ -248,7 +263,7 @@ class LocationControllerTest < FunctionalTestCase
     assert_response(:action => :show_location)
     assert_equal(loc_count-1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
-    assert_equal(past_loc_count-2, Location::Version.count)
+    assert_equal(past_loc_count-1, Location::Version.count)
     assert_equal(past_desc_count, LocationDescription::Version.count)
     assert_equal(10 - @new_pts, @rolf.reload.contribution)
   end
@@ -272,7 +287,7 @@ class LocationControllerTest < FunctionalTestCase
 
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)
-    assert_equal(past_loc_count - past_locs_to_go, Location::Version.count)
+    assert_equal(past_loc_count+1 - past_locs_to_go, Location::Version.count)
     assert_equal(past_desc_count - past_descs_to_go, LocationDescription::Version.count)
   end
 

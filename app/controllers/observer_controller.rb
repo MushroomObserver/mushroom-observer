@@ -350,7 +350,7 @@ class ObserverController < ApplicationController
             pattern = id.downcase.gsub(/\W+/, '%')
             ids = Location.connection.select_values %(
               SELECT id FROM locations
-              WHERE LOWER(locations.search_name) LIKE '%#{pattern}%'
+              WHERE LOWER(locations.name) LIKE '%#{pattern}%'
             )
             obj = Location.find(ids.first) if ids.length == 1
 
@@ -833,6 +833,8 @@ class ObserverController < ApplicationController
         @observation.when     = last_observation.when
         @observation.where    = last_observation.where
         @observation.location = last_observation.location
+        @observation.lat      = last_observation.lat
+        @observation.long     = last_observation.long
       end
 
     else
@@ -851,11 +853,17 @@ class ObserverController < ApplicationController
       @naming.name = @name if @name
 
       # Validate where.
-      @place_name = params[:observation][:place_name]
+      @place_name = @observation.where
       @dubious_where_reasons = []
       if @place_name != params[:approved_place_name]
         @dubious_where_reasons = Location.dubious_name?(@place_name, true)
         success = false if @dubious_where_reasons != []
+      end
+      lat = (params[:observation][:lat] or "")
+      long = (params[:observation][:long] or "")
+      if not ((lat == "" and long == "") or Location.check_lat_long(lat, long))
+        flash_error(:runtime_lat_long_error.l)
+        success = false
       end
       
       # Validate objects.
@@ -917,6 +925,7 @@ class ObserverController < ApplicationController
   #
   def edit_observation # :prefetch: :norobots:
     pass_query_params
+    
     @observation = Observation.find(params[:id], :include =>
                                     [:name, :images, :location])
     @licenses = License.current_names_and_ids(@user.license)
@@ -933,31 +942,47 @@ class ObserverController < ApplicationController
       @good_images = @observation.images
 
     else
-      # Update observation first.
-      success = update_observation_object(@observation, params[:observation])
+      # Check lat long.  It's OK for both of them to be blank.
+      lat = params[:observation][:lat]
+      long = params[:observation][:long]
+      good_lat_long = ((lat == "" and long == "") or Location.check_lat_long(lat, long))
+      flash_error(:runtime_lat_long_error.l) if not good_lat_long
+
+      @where = Location.user_name(@user, params[:observation][:place_name])
+      @dubious_where_reasons = []
+      @dubious_where_reasons = Location.dubious_name?(@where, true) if @where != params[:approved_where]
+
+      # Update observation attributes
+      @observation.attributes = params[:observation]
 
       # Now try to upload images.
       @good_images = update_good_images(params[:good_images])
       @bad_images  = create_image_objects(params[:image], @observation, @good_images)
       attach_good_images(@observation, @good_images)
 
-      # Only save observation if there are changes.
-      if success && @observation.changed?
-        @observation.modified = Time.now
-        if success = save_observation(@observation)
-          flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
-          touch = (params[:log_change][:checked] == '1' rescue false)
-          @observation.log(:log_observation_updated, :touch => touch)
+      done = false
+      if good_lat_long and (@dubious_where_reasons == [])
+
+        # Only save observation if there are changes.
+        if @observation.changed?
+          @observation.modified = Time.now
+          if done = save_observation(@observation)
+            flash_notice(:runtime_edit_observation_success.t(:id => @observation.id))
+            touch = (params[:log_change][:checked] == '1' rescue false)
+            @observation.log(:log_observation_updated, :touch => touch)
+          end
+        else
+          done = true
+        end
+
+        # Redirect to show_observation on success.
+        if done && (@bad_images == [])
+          redirect_to(:action => 'show_observation', :id => @observation.id,
+                    :params => query_params)
         end
       end
-
-      # Redirect to show_observation on success.
-      if success && @bad_images == []
-        redirect_to(:action => 'show_observation', :id => @observation.id,
-                  :params => query_params)
-
       # Reload form if anything failed.
-      else
+      if not done
         @images = @bad_images
         @new_image.when = @observation.when
       end

@@ -1,55 +1,74 @@
 <!--[form:location]-->
 
-<input type="hidden" id="where" name="where" value="<%=escape_once(@where)%>" />
+<input type="hidden" id="where" name="where" value="<%=escape_once(where)%>" />
 
 <br/>
+
+<table>
+  <tr valign="top">
+    <td>
+<% if @dubious_where_reasons and (@dubious_where_reasons != []) %>
+  <table class="Warnings"><tr><td>
+    <%= @dubious_where_reasons.join('<br/>') %>
+    <br/>
+    <span class="HelpNote">
+      <%= :form_locations_dubious_help.t %>
+    </span><br/>
+  </td></tr></table>
+<% end %>
+
 <label for="location_display_name"><%= :Where.t %>:</label>
-<%= form.text_field('display_name', :value => @where, :size => 80) %><br/>
-<div class="HelpNote"><%= :form_locations_help.tp %></div>
+<%= form.text_field('display_name', :value => where, :size => 65) %>
+<span class="HelpNote"><%= :form_locations_help.t %></span>
 
 <table cellpadding="10">
   <tr>
-    <td width="50%" align="center">
+    <td width="60%" align="center">
       <table cellpadding="5">
         <tr>
           <td></td>
-          <td>
+          <td align="center">
             <label for="location_north"><%= :North.t %>:</label><br/>
             <%= form.text_field('north', :size => 12) %>
+            <%= javascript_tag("$('location_north').observe('keypress', function (event) {
+              startKeyPressTimer();
+            });") %>
           </td>
           <td></td>
         </tr>
         <tr>
-          <td>
+          <td align="center">
             <label for="location_west"><%= :West.t %>:</label><br/>
             <%= form.text_field('west', :size => 12) %>
+            <%= javascript_tag("$('location_west').observe('keypress', function (event) {
+              startKeyPressTimer();
+            });") %>
           </td>
-          <td>
-          	<div class="HelpNote"><%= :form_locations_lat_long_help.tp %></div><br/>                
+          <td align="center">
+              <%= :form_locations_lat_long_help.l %>
           </td>
-          <td>
+          <td align="center">
             <label for="location_east"><%= :East.t %>:</label><br/>
             <%= form.text_field('east', :size => 12) %>
+            <%= javascript_tag("$('location_east').observe('keypress', function (event) {
+              startKeyPressTimer();
+            });") %>
           </td>
         </tr>
         <tr>
           <td></td>
-          <td>
+          <td align="center">
             <label for="location_south"><%= :South.t %>:</label><br/>
             <%= form.text_field('south', :size => 12) %>
+            <%= javascript_tag("$('location_south').observe('keypress', function (event) {
+              startKeyPressTimer();
+            });") %>
           </td>
           <td></td>
         </tr>
       </table>
     </td>
-    <td>
-      <p class="HelpNote">
-        <%= :form_locations_lat_long_finders.t %>:<br/>
-        <a target="_new" href="http://www.satsig.net/maps/lat-long-finder.htm">http://www.satsig.net/maps/lat-long-finder.htm</a><br/>
-        <a target="_new" href="http://www.ccalmr.ogi.edu/nanoos/latlon.php">http://www.ccalmr.ogi.edu/nanoos/latlon.php</a>
-      </p>
-    </td>
-    <td width="50%" align="center">
+    <td width="40%" align="center">
       <table cellpadding="5">
         <tr>
           <td>
@@ -67,11 +86,25 @@
     </td>
   </tr>
 </table>
-
 <label for="location_notes"><%= :NOTES.t %>:</label>
 <span class="HelpNote"><%= :form_locations_notes_help.t %></span><br/>
-<%= text_area('location', 'notes', :cols => 80) %><br/>
+<%= text_area('location', 'notes', :cols => 65) %><br/>
 <%= render(:partial => 'shared/textilize_help') %>
+    </td>
+    <td>
+      <center>
+        <%=
+          javascript_include 'edit_loc'
+          javascript_include 'prototype'
+          gmap = make_editable_map(@location)
+          add_header(GMap.header)
+          add_header(finish_map(gmap))
+          gmap.div(:width => "500", :height => "500")
+        %>
+      </center>
+    </td>
+  </tr>
+</table>
 
 <%= focus_on('location_display_name') %>
 

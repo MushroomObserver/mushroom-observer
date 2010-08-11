@@ -11,12 +11,12 @@
 <% form_for(:location, :url => {
               :action => :edit_location,
               :id => @location.id,
-              :params => query_params,
+              :params => query_params.merge({:approved_where => @display_name}),
             }) do |form| %>
   <br/><center><%= submit_tag(:UPDATE.l) %></center>
 
   <%= render(:partial => 'form_location', :locals =>
-             { :where => @where, :form => form }) %>
+             { :where => @display_name, :form => form }) %>
 
   <br/><center><%= submit_tag(:UPDATE.l) %></center>
 <% end %>

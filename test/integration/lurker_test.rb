@@ -23,8 +23,8 @@ class LurkerTest < IntegrationTestCase
     assert_template('name/show_name')
     push_page(:name)
 
-    # Take a look at the distribution map.
-    click(:label => 'Distribution Map', :in => :tabs)
+    # Take a look at the occurrence map.
+    click(:label => 'Occurrence Map', :in => :tabs)
     assert_template('name/map')
 
     # Check out a few links from left-hand panel.

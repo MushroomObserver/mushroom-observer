@@ -14,6 +14,7 @@ class LocationController < ApplicationController
 
   before_filter :login_required, :except => [
     :advanced_search,
+    :help,
     :index_location,
     :index_location_description,
     :list_location_descriptions,
@@ -32,6 +33,7 @@ class LocationController < ApplicationController
     :show_location_description,
     :show_past_location,
     :show_past_location_description,
+    :tweak
   ]
 
   before_filter :disable_link_prefetching, :except => [
@@ -88,7 +90,7 @@ class LocationController < ApplicationController
 
   # Displays a list of locations matching a given string.
   def location_search # :nologin: :norobots:
-    query = create_query(:Location, :pattern_search, :pattern => params[:pattern].to_s)
+    query = create_query(:Location, :pattern_search, :pattern => Location.user_name(@user, params[:pattern].to_s))
     show_selected_locations(query, :link_all_sorts => true)
   end
 
@@ -106,9 +108,6 @@ class LocationController < ApplicationController
   # Show selected search results as a list with 'list_locations' template.
   def show_selected_locations(query, args={})
     @links ||= []
-    args = {
-      :letters => 'locations.search_name',
-    }.merge(args)
 
     # Add some alternate sorting criteria.
     args[:sorting_links] = [
@@ -453,58 +452,71 @@ class LocationController < ApplicationController
     pass_query_params
 
     # (Used when linked from "define this location".)
-    @where = params[:where]
+    @display_name = params[:where]
 
     # (Used when linked from user profile: sets primary location after done.)
     @set_user = (params[:set_user] == "1")
 
     # Reder a blank form.
     if request.method != :post
+      @dubious_where_reasons = Location.dubious_name?(Location.user_name(@user, @display_name), true) if @display_name
       @location = Location.new
+      @location.display_name = @display_name || ''
+      @location.north = 80
+      @location.south = -80
+      @location.east = 89
+      @location.west = -89
 
     else
+      @display_name = params[:location][:display_name].strip_squeeze rescue ''
+      
       # Set to true below if created successfully, or if a matching location
       # already exists.  In either case, we're done with this form.
       done = false
 
-      # Look to see if the display name is already use.  If it is then just use
+      # Look to see if the display name is already in use.  If it is then just use
       # that location and ignore the other values.  Probably should be smarter
       # with warnings and merges and such...
-      name = params[:location][:name].strip_squeeze rescue ''
-      @location = Location.search_by_name(name)
+      @location = Location.search_by_name(@display_name)
 
       # Location already exists.
       if @location
-        flash_warning(:runtime_location_already_exists.t(:name => name))
+        flash_warning(:runtime_location_already_exists.t(:name => @display_name))
         done = true
 
       # Need to create location.
-      elsif (@location = Location.new(params[:location])) and
-            @location.save
-        Transaction.post_location(
-          :id      => @location,
-          :created => @location.created,
-          :name    => @location.name,
-          :north   => @location.north,
-          :south   => @location.south,
-          :east    => @location.east,
-          :west    => @location.west,
-          :low     => @location.low,
-          :high    => @location.high
-        )
-        flash_notice(:runtime_location_success.t(:id => @location.id))
-        done = true
-
-      # Failed to create location
       else
-        flash_object_errors @location
+        @location = Location.new(params[:location])
+        # Validate name.
+        @dubious_where_reasons = []
+        if @display_name != params[:approved_where]
+          @dubious_where_reasons = Location.dubious_name?(Location.user_name(@user, @display_name), true)
+        end
+        if (@dubious_where_reasons == []) and @location.save
+          Transaction.post_location(
+            :id      => @location,
+            :created => @location.created,
+            :name    => @location.name,
+            :north   => @location.north,
+            :south   => @location.south,
+            :east    => @location.east,
+            :west    => @location.west,
+            :low     => @location.low,
+            :high    => @location.high
+          )
+          flash_notice(:runtime_location_success.t(:id => @location.id))
+          done = true
+        # Failed to create location
+        else
+          flash_object_errors @location
+        end
       end
 
-      # If done, update any observations at @where string originally passed in,
+      # If done, update any observations at @display_name,
       # and set user's primary location if called from profile.
       if done
-        if !@where.blank?
-          update_observations_by_where(@location, @where)
+        if !@display_name.blank?
+          update_observations_by_where(@location, @display_name)
         end
         if @set_user
           @user.location = @location
@@ -527,12 +539,12 @@ class LocationController < ApplicationController
     if request.method == :post
 
       # First check if user changed the name to one that already exists.
-      name = params[:location][:display_name].strip_squeeze rescue ''
-      merge = Location.search_by_name(name)
+      @display_name = params[:location][:display_name].strip_squeeze rescue ''
+      db_name = Location.user_name(@user, @display_name)
+      merge = Location.search_by_name(db_name)
 
       # Merge with another location.
       if merge && merge != @location
-
         # Swap order if only one is mergable.
         if !@location.mergable? && merge.mergable?
           @location, merge = merge, @location
@@ -555,7 +567,8 @@ class LocationController < ApplicationController
 
       # Otherwise it is safe to change the name.
       else
-        @location.display_name = name
+        # Validate name.
+        @location.display_name = @display_name
       end
 
       # Just update this location.
@@ -575,23 +588,30 @@ class LocationController < ApplicationController
         args[:set_high]  = @location.high         if @location.high_changed?
         args[:set_low]   = @location.low          if @location.low_changed?
 
-        # No changes made.
-        if !@location.changed?
-          flash_warning(:runtime_edit_location_no_change.t)
-          redirect_to(:action => 'show_location', :id => @location.id)
+        @dubious_where_reasons = []
+        if @display_name != params[:approved_where]
+          @dubious_where_reasons = Location.dubious_name?(db_name, true)
+        end
 
-        # There were error(s).
-        elsif !@location.save
-          flash_object_errors @location
+        if @dubious_where_reasons == []
+          # No changes made.
+          if !@location.changed?
+            flash_warning(:runtime_edit_location_no_change.t)
+            redirect_to(:action => 'show_location', :id => @location.id)
 
-        # Updated successfully.
-        else
-          if !args.empty?
-            args[:id] = @location
-            Transaction.put_location(args)
+          # There were error(s).
+          elsif !@location.save
+            flash_object_errors @location
+
+          # Updated successfully.
+          else
+            if !args.empty?
+              args[:id] = @location
+              Transaction.put_location(args)
+            end
+            flash_notice(:runtime_edit_location_success.t(:id => @location.id))
+            done = true
           end
-          flash_notice(:runtime_edit_location_success.t(:id => @location.id))
-          done = true
         end
       end
     end
@@ -783,8 +803,9 @@ class LocationController < ApplicationController
   # don't.  If none match, then return nil.
   def split_out_matches(list, substring)
     matches = list.select do |loc|
-      (loc.name.to_s[0,substring.length] == substring) or
-      (loc.search_name.to_s[0,substring.length] == substring)
+      (loc.name.to_s[0,substring.length] == substring)
+      # or
+      # (loc.search_name.to_s[0,substring.length] == substring)
     end
     if matches.empty?
       nil
@@ -813,6 +834,10 @@ class LocationController < ApplicationController
     redirect_to(:action => 'list_locations')
   end
 
+  # Help for locations
+  def help # :nologin:
+  end
+
   # Move all the Observation's with a given +where+ into a given Location.
   def update_observations_by_where(location, where)
     success = true
@@ -837,6 +862,9 @@ class LocationController < ApplicationController
     return success
   end
 
+  def tweak
+    print("Tweak called\n")
+  end
 end
 
 # list_locations::          . V .

@@ -176,8 +176,8 @@ class ApiController < ApplicationController
                 `where` LIKE '% #{letter}%'
         )) + Location.connection.select_values(%(
           SELECT DISTINCT `name` FROM locations
-          WHERE `search_name` LIKE '#{letter}%' OR
-                `search_name` LIKE '% #{letter}%'
+          WHERE `name` LIKE '#{letter}%' OR
+                `name` LIKE '% #{letter}%'
         ))
         if User.current_location_format == :scientific
           @items.map! {|i| Location.reverse_name(i)}
@@ -276,4 +276,34 @@ class ApiController < ApplicationController
       end
     end
   end
+
+  # Process AJAX request for tweaking existing objects.
+  # type::   Type of object.
+  # id::     ID of object.
+  #
+  # Valid types are:
+  # location:: Expects a :lat and :lng
+  #
+  # Examples:
+  #
+  #   /ajax/tweak/location/710?lat=41.5615&lng=-70.6236
+  #
+  # def ajax_tweak
+  #   type  = params[:type].to_s
+  #   id    = params[:id].to_s
+  #   result = nil
+  #   if user = login_for_ajax
+  #     User.current = user
+  #     case type
+  #     when 'location'
+  #       loc = Location.safe_find(id)
+  #       if loc
+  #         if Location.check_lat_long(params[:lat], params[:lng])
+  #           loc.tweak(params[:lat].to_f, params[:lng].to_f)
+  #           render(:layout => false, :text => '') # What if there's an error?
+  #         end
+  #       end
+  #     end
+  #   end
+  # end
 end

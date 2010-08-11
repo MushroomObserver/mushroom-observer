@@ -57,7 +57,7 @@ class Test::Unit::TestCase
     Locale.code = :'en-US' if Locale.code != :'en-US'
     Time.zone = 'America/New_York'
     User.current = nil
-    @rolf, @mary, @junk, @dick, @katrina = User.all
+    @rolf, @mary, @junk, @dick, @katrina, @roy = User.all
   end
 
   # Standard teardown to run after every test.  Just makes sure any

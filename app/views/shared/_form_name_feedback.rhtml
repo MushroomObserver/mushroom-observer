@@ -1,7 +1,7 @@
 <% # Section for handling deprecated, new and multiple names on naming creation and edit pages
 if !@what.blank?
   if @valid_names %>
-    <div class="Errors">
+    <div class="Warnings">
       <span class="Data"><%= if @suggest_corrections
         :form_naming_not_recognized.t(:name => @what)
       else

@@ -1,47 +1,23 @@
-location work:
-  - switch Location.display_name to use User.location_format to choose the order
-  - get tests working
-  - review all use of display_name
-  - review all use of _form_location
-  - get tests working
-  - test location create & editing in both modes
-  - test location merging in both modes
-  - test SpeciesList location update
-  - switch SpeciesList.where to understand location_format
-  - finding bad locations (accepted lists of countries, geo-coding)
-      - Automated fixes:
-        - reverse(reverse(name)) != name
-        - End in non-canonical version of a country name
-      - By hand:
-        - Don't end in country name
-        - Weird capitalization
-        - Starts with a country name
-      - duplicates?
-      - have fix list for migration
-  detecting bad locations
-    - write rule tester
-    - test fixed against rules (all should pass)
-    - test unfixed against rules (ideally none should pass, but may not be achievable)
-      - look to see if location is already in the database
-      - look to see if location minus the county token is already in the database
-    make changes while storing original value as a comment
-      - if target_name exists as a Location then
-        - adopt the existing one
-        - if source_name exists as a Location delete it
-      - else if source_name is a Location then
-        - rename it
-      - else change source_name to target_name in all Observations
-      - Need to add notes
-        - Need to suppress email and logs when making changes
-      Reload DB to do testing, timing and validation of changes
-    Check for dubiosity when new locations are added
-    Report reasons as warnings that can be forced
-  Process for reviewing new names
-    Fixed bit?
-  Get rid of Location.search_name
-  Add lat/long to observations
+location rollout plan:    
+  Do a db/image update and document the steps
+    Backup db and images
+    Do local db:migrate, location:list to update the list
+    Checkin all the changes
+    Shutdown site
+    svn update
+    rake db:migrate
+    rake location:list > locations.list
+    Review list
+    Switch RUN_LEVEL to :silent
+    rake location:accents
+    rake location:fix (23 minutes locally)
+    # load db locally and run fix as well
+    rake location:list
+
+future location stuff
   geo-coding
-  request location definition for new locations
+  request location definition for new observation locations (ala user profile)
+  interactive lat/long for observations
   
 Jason:
   Should list_locations order by user format or stick with postal?

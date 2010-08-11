@@ -52,6 +52,10 @@ all_users_5:
   user_id: 5
   user_group_id: 6
 
+all_users_6:
+  user_id: 6
+  user_group_id: 6
+
 user_1_1:
   user_id: 1
   user_group_id: 7

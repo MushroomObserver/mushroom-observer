@@ -218,8 +218,8 @@ module ControllerExtensions
       :method        => method,
       :action        => page,
       :params        => params,
-      :user          => username,
-      :password      => password,
+      :user          => (params[:username] or username),
+      :password      => (params[:password] or password),
       :require_login => :login,
       :require_user  => altpage ? [altpage].flatten : nil
     )

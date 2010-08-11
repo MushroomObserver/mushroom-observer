@@ -242,7 +242,7 @@ class AmateurTest < IntegrationTestCase
       form.submit
     end
     assert_template('observer/create_naming')
-    assert_select('div.Errors') do |elems|
+    assert_select('div.Warnings') do |elems|
       assert_block('Expected error about name not existing yet.') do
         elems.any? {|e| e.to_s.match(/#{text_name}.*not recognized/i)}
       end
@@ -368,6 +368,9 @@ class AmateurTest < IntegrationTestCase
     date  = local_now - 1.year - 2.months - 3.days
     place = 'Glendale, California, USA'
     loc   = locations(:burbank)
+    lat   = 34.1622
+    long  = -118.3521
+    
     name  = names(:coprinus_comatus)
     file  = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
     notes = 'A friend showed me this.'
@@ -386,6 +389,8 @@ class AmateurTest < IntegrationTestCase
       form.assert_value('observation_when_2i', local_now.month)
       form.assert_value('observation_when_3i', local_now.day)
       form.assert_value('observation_place_name', '')
+      form.assert_value('observation_lat', '')
+      form.assert_value('observation_long', '')
       form.assert_value('name_name', '')
       form.assert_value('is_collection_location', true)
       form.assert_value('specimen', false)
@@ -406,11 +411,15 @@ class AmateurTest < IntegrationTestCase
       form.assert_value('observation_when_2i', date.month)
       form.assert_value('observation_when_3i', date.day)
       form.assert_value('observation_place_name', '')
+      form.assert_value('observation_lat', '')
+      form.assert_value('observation_long', '')
       form.assert_value('name_name', '')
       form.assert_value('is_collection_location', false)
       form.assert_value('specimen', true)
       form.assert_value('observation_notes', notes)
       form.change('observation_place_name', place)
+      form.change('observation_lat', lat)
+      form.change('observation_long', long)
       form.change('name_name', ' '+name.text_name+' ')
       form.select('vote_value', /promising/i)
       form.select('image_0_when_1i', date.year)
@@ -435,6 +444,8 @@ class AmateurTest < IntegrationTestCase
     assert_dates_equal(date, obs.when)
     assert_equal(place, obs.where)
     assert_nil(obs.location)
+    assert((obs.lat - lat).abs < 0.001)
+    assert((obs.long - long).abs < 0.001)
     assert_names_equal(name, obs.name)
     assert_false(obs.is_collection_location)
     assert_true(obs.specimen)

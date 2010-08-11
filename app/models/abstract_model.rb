@@ -512,4 +512,14 @@ class AbstractModel < ActiveRecord::Base
       rss_log.save
     end
   end
+  
+  # Add a note
+  def add_note(note)
+    if self.notes
+      self.notes += "\n\n" + note
+    else
+      self.notes = note
+    end
+    save
+  end
 end

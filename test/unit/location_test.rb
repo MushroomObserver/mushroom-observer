@@ -2,7 +2,124 @@ require File.dirname(__FILE__) + '/../boot'
 
 class LocationTest < UnitTestCase
 
-  def test_versioning
+  def ignore_test_lat_long
+    assert(Location.check_lat_long("34.16", "-118.35"))
+    assert(Location.check_lat_long("90", "180"))
+    assert(Location.check_lat_long("-90", "-180"))
+    assert(Location.check_lat_long("0", "0.0"))
+    assert_equal(false, Location.check_lat_long("0", ""))
+    assert_equal(false, Location.check_lat_long("90.1", "0"))
+    assert_equal(false, Location.check_lat_long("0", "-180.1"))
+  end
+  
+  def tweak_lat(loc, value, expect_north)
+    north = loc.north
+    south = loc.south
+    east = loc.east
+    west = loc.west
+    loc.tweak(value, east)
+    if expect_north
+      assert_equal([value, south, east, west], [loc.north, loc.south, loc.east, loc.west])
+      loc.tweak(north, east)
+    else
+      assert_equal([north, value, east, west], [loc.north, loc.south, loc.east, loc.west])
+      loc.tweak(south, east)
+    end
+  end
+  
+  def tweak_long(loc, value, east, west, expect_east)
+    north = loc.north
+    south = loc.south
+    loc.east = east
+    loc.west = west
+    loc.save
+    loc.tweak(north, value)
+    if expect_east
+      assert_equal([north, south, value, west], [loc.north, loc.south, loc.east, loc.west])
+      loc.tweak(north, east)
+    else
+      assert_equal([north, south, east, value], [loc.north, loc.south, loc.east, loc.west])
+      loc.tweak(north, west)
+    end
+  end
+  
+  def ignore_test_tweak
+    User.current = @mary
+    loc = Location.create!(
+      :name => 'Unknown',
+      :north        => 60,
+      :south        => 50,
+      :east         => 40,
+      :west         => 30
+    )
+    tweak_lat(loc, 65, true)
+    tweak_lat(loc, 59, true)
+    tweak_lat(loc, 55, true)
+    tweak_lat(loc, 51, false)
+    tweak_lat(loc, 45, false)
+    
+    tweak_long(loc, 50, 40, 30, true)
+    tweak_long(loc, 36, 40, 30, true)
+    tweak_long(loc, 35, 40, 30, true)
+    tweak_long(loc, 34, 40, 30, false)
+    tweak_long(loc, -35, 40, 30, false)
+    tweak_long(loc, 159, -160, 150, false)
+    tweak_long(loc, 151, -160, 150, false)
+    tweak_long(loc, 175, -160, 140, true)
+    tweak_long(loc, -175, 160, -140, true)
+    tweak_long(loc, 91, -89, -91, false)
+    tweak_long(loc, 91, -91, -89, true)
+    tweak_long(loc, 89, -91, -89, false)
+    tweak_long(loc, 50, 40, 30, true)
+  end
+
+  def bad_location(str)
+    assert(Location.dubious_name?(str, true) != [])
+  end
+  
+  def good_location(str)
+    assert(!Location.dubious_name?(str))
+  end
+  
+  def test_dubious_name
+    bad_location("Albion,California,  USA")
+    bad_location("Albion, California")
+    bad_location("Earth")
+    bad_location("USA, North America")
+    bad_location("San Francisco, USA")
+    bad_location("San Francisco, CA, USA")
+    bad_location("San Francisco, San Francisco Co., California, USA")
+    # bad_location("Tilden Park, California, USA") - can't detect
+    # bad_location("Tilden Park, Kensington, California, USA") - can't detect
+    bad_location("Albis Mountain Range, Zurich area, Switzerland")
+    # bad_location("Southern California, California, USA") - can't detect
+    bad_location("South California, USA")
+    bad_location("Western Australia")
+    bad_location("Mt Tam SP, Marin County, CA, USA.")
+    bad_location("Washington, DC, USA")
+    bad_location("bedford, new york, usa")
+    bad_location("Hong Kong, China N22.498, E114.178")
+    bad_location("Washington DC, USA in wood chips")
+    bad_location("Washington DC, USA (near the mall)")
+    bad_location("Montréal, Québec, Canada")
+    good_location("Albion, California, USA")
+    good_location("Unknown")
+    good_location("North America")
+    good_location("San Francisco, California, USA")
+    good_location("Tilden Park, Contra Costa Co., California, USA")
+    good_location("Albis Mountain Range, Near Zurich, Switzerland")
+    good_location("Southern California, USA")
+    good_location("Western Australia, Australia")
+    good_location("Mount Tamalpais State Park, Marin Co., California, USA")
+    good_location("Washington DC, USA")
+    good_location("Bedford, New York, USA")
+    good_location("Hong Kong, China")
+    good_location("Washington DC, USA")
+    good_location("The Mall, Washington DC, USA")
+    good_location("Montreal, Quebec, Canada")
+  end
+  
+  def ignore_test_versioning
     User.current = @mary
     loc = Location.create!(
       :name => 'Anywhere',
@@ -44,7 +161,7 @@ class LocationTest < UnitTestCase
   #  Test email notification heuristics.
   # --------------------------------------
 
-  def test_email_notification
+  def ignore_test_email_notification
     loc  = locations(:albion)
     desc = location_descriptions(:albion_desc)
 

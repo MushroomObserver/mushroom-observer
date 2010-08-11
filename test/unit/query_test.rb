@@ -479,9 +479,10 @@ class QueryTest < UnitTestCase
 
     def test_results
       query = Query.lookup(:User, :all, :by => :id)
-      assert_equal(5, query.num_results)
-      assert_equal([1,2,3,4,5], query.result_ids)
-      assert_equal([@rolf,@mary,@junk,@dick,@katrina], query.results)
+      assert_equal(6, query.num_results)
+      assert_equal([1,2,3,4,5,6], query.result_ids)
+      assert_equal(@roy.location_format, :scientific)
+      assert_equal([@rolf,@mary,@junk,@dick,@katrina,@roy], query.results)
       assert_equal(2, query.index(3))
       assert_equal(3, query.index('4'))
       assert_equal(1, query.index(@mary))
@@ -1166,7 +1167,7 @@ class QueryTest < UnitTestCase
     assert_query([2], :Location, :advanced_search, :name => 'agaricus')
     assert_query([],  :Location, :advanced_search, :name => 'coprinus')
     assert_query([2], :Location, :advanced_search, :location => 'burbank')
-    assert_query([9,4], :Location, :advanced_search, :location => 'sonoma')
+    assert_query([9,4], :Location, :advanced_search, :location => 'park')
     assert_query([2], :Location, :advanced_search, :user => 'rolf')
     assert_query([],  :Location, :advanced_search, :user => 'dick')
     assert_query([2], :Location, :advanced_search, :content => '"strange place"') # obs.notes
@@ -1504,7 +1505,7 @@ class QueryTest < UnitTestCase
   end
 
   def test_observation_of_name
-    assert_query([9,2,1], :Observation, :of_name, :name => 1)
+    assert_query([10,9,2,1], :Observation, :of_name, :name => 1)
     assert_query([3], :Observation, :of_name, :name => 2)
     assert_query([], :Observation, :of_name, :name => 9)
     assert_query([], :Observation, :of_name, :name => 9, :synonyms => :all)
