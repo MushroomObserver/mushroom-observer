@@ -120,7 +120,7 @@ class Textile < String
         url2 = url1
       end
       url1.gsub!(/([ "%<>\\])/) {URI_ESCAPE[$1]}
-      "<a href=\"#{url1}\">#{url2}</a>"
+      "<a href=\"#{url1}\">#{url2}</a>" + extra
     end
 
     # Convert _object_ tags into proper links.

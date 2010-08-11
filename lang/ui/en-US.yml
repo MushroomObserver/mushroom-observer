@@ -4591,7 +4591,7 @@ location_help_intro: >
   location names are still useful for searches so you are encouraged to provide
   them as well.  The location names should, by default, go from the smallest
   contained area to the country name.  If you prefer to describe your locations
-  as going from the largest (county) down to the smallest contained area, you can
+  as going from the largest (country) down to the smallest contained area, you can
   change your preference from the default, "Postal", to "Scientific" on your 
   preference page.  There are cases such as
   "Great Smoky Mountains National Park, Blount Co., Tennessee, USA",
@@ -4726,18 +4726,19 @@ location_help_rule_southern: >
   and should be followed by the country name.
 
 location_help_rule_abbr: >
-  *Avoid Abbreviations (and Periods in General)* - Most abbreviations should be avoids since people apply them somewhat 
+  *Avoid Abbreviations (and Periods in General)* - Most abbreviations should be avoided since people apply them somewhat 
   arbitrarily and inconsistently.  The following are examples of abbreviations 
   that should definitely be avoided: Hwy, Mt, Mtn, CA, BC.  However, there are 
   some specific examples, that should be used in preference to there spelled 
-  out versions.  These are:\n
-    Co. for County\n
-    Rd. for Road\n
-    St. for Street\n
-    Ave. for Avenue\n
-    Blvd. for Boulevard\n
-    USA for United States of America\n
-    Washington DC for Washington, District of Columbia\n
+  out versions.  These are:
+  \n\n
+  Co. for County\n
+  Rd. for Road\n
+  St. for Street\n
+  Ave. for Avenue\n
+  Blvd. for Boulevard\n
+  USA for United States of America\n
+  Washington DC for Washington, District of Columbia\n
   \n\n
   Periods in general should be avoided except for the above abbreviations.  
   They should not be used at the end of country names or as separators.
@@ -4763,7 +4764,7 @@ location_help_rule_other: >
 location_help_rule_good_habits: >
   *Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name.  
   Searching within Mushroom Observer can be helpful.  If you don't find anything 
-  there, then look things up in Google Maps ( http://maps.google.com ) and Wikipedia ( http://wikipedia.org ).  
+  there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org).  
   Also feel free to use the notes section of either an observation or a location 
   to be more specific.
 
