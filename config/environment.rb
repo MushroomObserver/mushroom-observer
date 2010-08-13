@@ -92,6 +92,10 @@ require File.join(File.dirname(__FILE__), 'consts')
 #  General non-mode-specific, non-site-specific configurations here.
 # --------------------------------------------------------------------
 
+# Sacraficial goat and rubber chicken to get Globalite to behave correctly
+# for rake tasks.
+:some_new_symbol
+
 Rails::Initializer.run do |config|
 
   # Add our local classes and modules (e.g., Textile and LoginSystem) and class

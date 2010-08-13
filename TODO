@@ -6,10 +6,10 @@ location rollout plan:
     Shutdown site
     svn update
     rake db:migrate
-    rake location:list > locations.list
-    Review list
     Switch RUN_LEVEL to :silent
     rake location:accents
+    rake location:list > locations.list
+    Review list
     rake location:fix (23 minutes locally)
     # load db locally and run fix as well
     rake location:list

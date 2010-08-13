@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../boot'
 
 class LocationTest < UnitTestCase
 
-  def ignore_test_lat_long
+  def test_lat_long
     assert(Location.check_lat_long("34.16", "-118.35"))
     assert(Location.check_lat_long("90", "180"))
     assert(Location.check_lat_long("-90", "-180"))
@@ -43,7 +43,7 @@ class LocationTest < UnitTestCase
     end
   end
   
-  def ignore_test_tweak
+  def test_tweak
     User.current = @mary
     loc = Location.create!(
       :name => 'Unknown',
@@ -102,14 +102,17 @@ class LocationTest < UnitTestCase
     bad_location("Washington DC, USA in wood chips")
     bad_location("Washington DC, USA (near the mall)")
     bad_location("Montréal, Québec, Canada")
+    bad_location("10th Ave. & Lincoln Way, San Francisco, CA USA")
+    bad_location("Above (about 4800 ft) Chester, California, USA")
     good_location("Albion, California, USA")
     good_location("Unknown")
     good_location("North America")
     good_location("San Francisco, California, USA")
     good_location("Tilden Park, Contra Costa Co., California, USA")
-    good_location("Albis Mountain Range, Near Zurich, Switzerland")
+    good_location("Albis Mountain Range, near Zurich, Switzerland")
     good_location("Southern California, USA")
     good_location("Western Australia, Australia")
+    good_location("Pemberton, Western Australia, Australia")
     good_location("Mount Tamalpais State Park, Marin Co., California, USA")
     good_location("Washington DC, USA")
     good_location("Bedford, New York, USA")
@@ -117,9 +120,11 @@ class LocationTest < UnitTestCase
     good_location("Washington DC, USA")
     good_location("The Mall, Washington DC, USA")
     good_location("Montreal, Quebec, Canada")
+    good_location("10th Ave. and Lincoln Way, San Francisco, California, USA")
+    good_location("near Chester, California, USA")
   end
   
-  def ignore_test_versioning
+  def test_versioning
     User.current = @mary
     loc = Location.create!(
       :name => 'Anywhere',
@@ -161,7 +166,7 @@ class LocationTest < UnitTestCase
   #  Test email notification heuristics.
   # --------------------------------------
 
-  def ignore_test_email_notification
+  def test_email_notification
     loc  = locations(:albion)
     desc = location_descriptions(:albion_desc)
 

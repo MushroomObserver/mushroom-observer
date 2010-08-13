@@ -2115,6 +2115,7 @@ location_change: Change to Location
 
 # model/location
 location_dubious_ambiguous_country: Ambiguous country or state, '[country]'
+location_dubious_bad_char: Contains unexpected character '[char]'
 location_dubious_bad_term: Contains bad term, '[bad]', rather than '[good]'
 location_dubious_commas: All commas should be followed by a space and another word
 location_dubious_empty: Empty location given
@@ -4708,12 +4709,13 @@ location_help_rule_counties: >
   incorporated.
 
 location_help_rule_near: >
-  *Use 'Near'* - If there is a landmark or town near to the collection location, but the 
+  *Use 'near'* - If there is a landmark or town near to the collection location, but the 
   smallest political boundary is a county or country, then it is helpful to 
-  mention this using the work "Near".  For example, 
-  "Albis Mountain Range, Near Zurich, Switzerland".  Looking through the old 
-  data, I found users used both "Near" and "Area" for this with "Near" being 
-  more common.  This is also better because "Area" sometimes gets used for 
+  mention this using the word "near".  When used this way it should always be
+  all lowercase.  For example, 
+  "Albis Mountain Range, near Zurich, Switzerland".  Looking through the old 
+  data, I found users used both "near" and "area" for this with "near" being 
+  more common.  This is also better because "area" sometimes gets used for 
   place names such as "Day-Use Area" or "Rest Area".
 
 location_help_rule_southern: >
@@ -4726,7 +4728,8 @@ location_help_rule_southern: >
   and should be followed by the country name.
 
 location_help_rule_abbr: >
-  *Avoid Abbreviations (and Periods in General)* - Most abbreviations should be avoided since people apply them somewhat 
+  *Avoid Abbreviations (and Periods in General)* - Most abbreviations should be
+  avoided since people apply them somewhat 
   arbitrarily and inconsistently.  The following are examples of abbreviations 
   that should definitely be avoided: Hwy, Mt, Mtn, CA, BC.  However, there are 
   some specific examples, that should be used in preference to there spelled 
@@ -4741,7 +4744,8 @@ location_help_rule_abbr: >
   Washington DC for Washington, District of Columbia\n
   \n\n
   Periods in general should be avoided except for the above abbreviations.  
-  They should not be used at the end of country names or as separators.
+  They should not be used at the end of country names or as separators.\n
+  Finally, 'and' should be used rather than '&'.
 
 location_help_rule_other: >
   *Other Things to Avoid* - All lowercase - In general at least the leading letter of each area should 
@@ -4749,9 +4753,9 @@ location_help_rule_other: >
   No lat/longs - There is now direct support for this for each observation.  
   Do not include it in the name of a location.\n
   No habitat info - Habitat info should go in the notes for the observation.\n
-  Parentheses - If you're tempted to use parens, stop yourself and ask if this 
-  information should be in the notes for the observation or if there is a better 
-  way to describe the location.\n
+  Parentheses and Braces - If you're tempted to use parentheses or braces, stop yourself
+  and ask if this information should be in the notes for the observation or if there is a 
+  better way to describe the location.\n
   Avoid diacritics (eg é, ü etc.) - As mentioned when discussing country names, you should 
   try to use the English version of a location name when possible and English does 
   not include diacritics.  This is intended to encourage consistency and we are 

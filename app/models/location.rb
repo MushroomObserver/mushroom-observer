@@ -544,18 +544,26 @@ class Location < AbstractModel
     "Avenue" => "Ave.",
     "Boulevard," => "Blvd.,",
     "Rd," => "Rd.,",
+    "Rd " => "Rd. ",
     "St," => "St.,",
-    "Ave" => "Ave.",
+    "St " => "St. ",
+    "Ave," => "Ave.,",
+    "Ave " => "Ave. ",
     "Blvd," => "Blvd.,",
+    "Blvd " => "Blvd. ",
     "United States of America" => "USA",
     "Washington, DC" => "Washington DC",
-    " area " => "Near",
-    " area," => "Near"
+    " area " => "near",
+    " area," => "near",
+    "Near " => "near ",
+    "&" => "and",
+    "‘" => "'",
+    "’" => "'",
+    "“" => "\"",
+    "”" => "\"",
   }
   
-  BAD_REGEXS = {
-    /^[a-z]/ => "Location names should start with capitals"
-  }
+  BAD_CHARS = "({[;:|]})"
   
   OK_PREFIXES = ['Central', 'Interior', 'Northern', 'Southern', 'Eastern', 'Western', 'Northeastern', 'Northwestern', 'Southeastern', 'Southwestern']
 
@@ -632,7 +640,7 @@ class Location < AbstractModel
         return true if !provide_reasons
 	      reasons.push(:location_dubious_commas.l)
       end
-      if name.index('Forest,').nil? and name.index('Park,').nil? and has_dubious_county?(name)
+      if name.index('Forest,').nil? and name.index('Park,').nil? and name.index('near ').nil? and has_dubious_county?(name)
         return true if !provide_reasons
         reasons.push(:location_dubious_redundant_county.l)
       end
@@ -664,6 +672,14 @@ class Location < AbstractModel
           reasons.push(:location_dubious_bad_term.t(:bad => key, :good => BAD_TERMS[key]))
         end
       end
+      count = 0
+      while (c = BAD_CHARS[count]) # For some reason BAD_CHARS.chars.each doesn't work
+        if name.index(c)
+          return true if !provide_reasons
+          reasons.push(:location_dubious_bad_char.t(:char => c))
+        end
+        count += 1
+      end
     end
     return false if !provide_reasons
     reasons
@@ -671,13 +687,13 @@ class Location < AbstractModel
   
   def self.country(name)
     result = name.split(',')[-1]
-    result.strip() if result
+    result = result.strip() if result
     result
   end
   
   def self.state(name)
     result = name.split(',')[-2]
-    result.strip() if result
+    result = result.strip() if result
     result
   end
   
