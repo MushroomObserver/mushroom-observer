@@ -74,19 +74,15 @@ function sendOldLoc() {
 }
 
 function dragEndLatLng(location, which) {
-  console.log("Hello, world")
   north = parseFloat($("location_north").value);
   south = parseFloat($("location_south").value);
   east = parseFloat($("location_east").value);
   west = parseFloat($("location_west").value);
   if ((north == -south) && (east == -west)) {
-    console.log("Calling resetToLatLng")
     resetToLatLng(location);
   } else {
     lat = location.lat();
     lng = location.lng();
-    console.log("Doing the usual stuff")
-    console.log("\t" + lat + ", " + lng)
     if (which == 'nw') {north = lat; west = lng;}
     if (which == 'ne') {north = lat; east = lng;}
     if (which == 'sw') {south = lat; west = lng;}
