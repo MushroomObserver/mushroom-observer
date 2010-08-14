@@ -61,7 +61,7 @@ spl ||= SpeciesList.create(
   :modified => now,
   :when     => now,
   :user     => User.find_by_login('jason'),
-  :where    => 'world',
+  :where    => 'Unknown',
   :title    => 'lichens',
   :notes    => %(
 
@@ -98,7 +98,7 @@ if ids.any?
       'specimen', 'is_collection_location'
     ].map {|x| "`#{x}`"}.join(', ')
     values = [
-      now, now, user.id, now.to_date, 'world', id, false, false
+      now, now, user.id, now.to_date, 'Unknown', id, false, false
     ].map {|x| Name.connection.quote(x)}.join(', ')
     obs_id = Name.connection.insert %(
       INSERT INTO observations (#{fields}) VALUES (#{values})
