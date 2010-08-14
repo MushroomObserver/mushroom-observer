@@ -40,7 +40,7 @@
       <% end %>
     </td>
 
-    <% if @undef_pages && @undef_pages.num_total > 0 %>
+    <% if @undef_data && @undef_pages && @undef_pages.num_total > 0 %>
       <td>
         <div class="SubTitle"><%= :list_place_names_undef.t %>
           <%= :list_place_names_undef_order.t if @default_orders %></div>

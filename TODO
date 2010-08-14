@@ -18,6 +18,11 @@ location rollout plan:
     # load db locally and run fix as well
     rake location:list
 
+Reboot server
+Test site
+Send email
+Fix up location.rake
+
 future location stuff
   geo-coding
   request location definition for new observation locations (ala user profile)
