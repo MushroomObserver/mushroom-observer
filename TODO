@@ -1,7 +1,11 @@
 location rollout plan:    
   Do a db/image update and document the steps
     Backup db and images
-    Do local db:migrate, location:list to update the list
+    local:
+      rake db:migrate
+      Switch RUN_LVEL to silent
+      rake location:accents
+      rake location:list > list.out
     Checkin all the changes
     Shutdown site
     svn update

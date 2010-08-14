@@ -5673,6 +5673,20 @@ namespace :location do
       "Near Novigrad, West Istria, Croatia" => "near Novigrad, Istria, Croatia",
       "Near Sterling, Kenai Peninsula Co., Alaska, USA" => "near Sterling, Alaska, USA",
       "Paradise Valley, Near Mist Falls, Sierra Nevada, altitude 1.800 m (5.500 feet), California, USA" => "near Mist Falls, Kings Canyon National Park, Fresno Co., California, USA",
+      "Bear Creek Drive 1/2 mile west of highway 76 - Dorchester, Allamakee County, Iowa" => "Bear Creek Drive 1/2 mile west of Highway 76, Dorchester, Allamakee Co., Iowa, USA",
+      "Bear Creek Drive 3/4 mile west of highway 76 - Dorchester, Allamakee County, Iowa" => "Bear Creek Drive 3/4 mile west of Highway 76, Dorchester, Allamakee Co., Iowa, USA",
+      "Cottonwood Pass, CO. USA" => "Cottonwood Pass, Colorado, USA",
+      "Hoh rain forest, WA" => "Hoh Rain Forest, Olympic National Park, Clallam Co., Washington, USA",
+      "Kalatope wildlife Sanctuary, Dalhousie, Himachal Pradesh, Indiacort" => "Kalatope Wildlife Sanctuary, Dalhousie, Himachal Pradesh, India",
+      "La Garnacha, Estanzuela-Tisey Reserve, Esteli, Nicaragua" => "La Garnacha, Estanzuela-Tisey Reserve, Esteli, Nicaragua",
+      "Lewis River, Yellowstone NP, Wyoming, USA" => "Lewis River, Yellowstone National Park, Wyoming, USA",
+      "Madison Co., Virginia, USA" => "Madison Co., Virginia, USA",
+      "Mayne Island BC Canada 48 51'27\"N 123 20' 27.25\"W" => "Mayne Island, British Columbia, Canada",
+      "Saint Mary Lake, Glacier NP, Montana, USA" => "Saint Mary Lake, Glacier National Park, Montana, USA",
+      "Santa Elena, Monteverde, Costa Rica" => "Santa Elena, Monteverde, Costa Rica",
+      "Soldotna, Alaska" => "Soldotna, Alaska, USA",
+      "Steuben, Maine" => "Steuben, Maine, USA",
+      "Turnipseed county conservation area, Wake County, North Carolina" => "Turnipseed County Conservation Area, Wake Co., North Carolina, USA",
   }
 
   def report_on_name(name)
