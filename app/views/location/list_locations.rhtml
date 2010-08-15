@@ -4,6 +4,8 @@
     add_tab(:list_place_names_map.t, :action => :map_locations,
             :params => query_params)
     add_tab(:all_objects.t(:type => :location), :action => :list_locations)
+    add_tab(:show_location_create.t, :action => 'create_location',
+            :params => query_params)
     add_tabs(@links)
   end
 

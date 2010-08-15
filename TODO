@@ -1,54 +1,26 @@
-location rollout plan:    
-  Do a db/image update and document the steps
-    Backup db and images
-    local:
-      rake db:migrate
-      Switch RUN_LVEL to silent
-      rake location:accents
-      rake location:list > list.out
-    Checkin all the changes
-    Shutdown site
-    svn update
-    rake db:migrate
-    Switch RUN_LEVEL to :silent
-    rake location:accents
-    rake location:list > locations.list
-    Review list
-    rake location:fix (23 minutes locally)
-    # load db locally and run fix as well
-    rake location:list
-
-Reboot server
-Test site
-Send email
-Fix up location.rake
-
 future location stuff
-  geo-coding
+  links for looking stuff up on Google Maps, Yahoo Maps, Wikipedia, Google Search, geo-coding
   request location definition for new observation locations (ala user profile)
   interactive lat/long for observations
+ 
+  1) More work on locations to do geo-coding and to provide an interactive map for observation lat/longs.
+
+  2) Switch to Rail 2.3 (involves getting rid of Globalite and hopefully making the bad symbol mojo go away)
+
+  3) Work on dramatically increasing the amount of stuff that goes to EOL.
+
+  4) Resolve the Section issue
+
+  5) Checklists
+
+  6) Give people a list of things that could do
+ 
   
 Jason:
   Should list_locations order by user format or stick with postal?
   'Show Locations' not limiting results when looking at index_observation for an undefined location
   Mention queued_email fix for Locale.code problem.
   
-
-Questions:
-  Why the sit and spin when defining a location?
-  
-- Create a new class called Description
-- create_table "descriptions", :force => true do |t|
-- Need past_descriptions
-
-- Each description will have it's own set of authors and editors
-  Need authors_descriptions and descriptions_editors
-
-- A Name can have many Descriptions
-
-- Create Descriptions based on Names fields
-
-? Figure out preferred Description
 
 Populate show_name with preferred Descriptions with options to see other descriptions
   Need to figure out author_request, review_authors

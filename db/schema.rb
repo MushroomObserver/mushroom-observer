@@ -26,6 +26,16 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.integer "user_id",        :default => 0, :null => false
   end
 
+  create_table "authors_locations", :id => false, :force => true do |t|
+    t.integer "location_id", :default => 0, :null => false
+    t.integer "user_id",     :default => 0, :null => false
+  end
+
+  create_table "authors_names", :id => false, :force => true do |t|
+    t.integer "name_id", :default => 0, :null => false
+    t.integer "user_id", :default => 0, :null => false
+  end
+
   create_table "comments", :force => true do |t|
     t.datetime "created"
     t.integer  "user_id"
@@ -60,9 +70,41 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.datetime "updated_at"
   end
 
+  create_table "draft_names", :force => true do |t|
+    t.integer  "user_id",                                                                  :default => 0,           :null => false
+    t.integer  "project_id",                                                               :default => 0,           :null => false
+    t.integer  "name_id",                                                                  :default => 0,           :null => false
+    t.integer  "version",                                                                  :default => 0,           :null => false
+    t.text     "gen_desc"
+    t.text     "diag_desc"
+    t.text     "distribution"
+    t.text     "habitat"
+    t.text     "look_alikes"
+    t.text     "uses"
+    t.text     "notes"
+    t.enum     "review_status",  :limit => [:unreviewed, :unvetted, :vetted, :inaccurate], :default => :unreviewed, :null => false
+    t.integer  "reviewer_id"
+    t.datetime "last_review"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "license_id"
+    t.text     "classification"
+    t.text     "refs"
+  end
+
   create_table "editors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
     t.integer "user_id",        :default => 0, :null => false
+  end
+
+  create_table "editors_locations", :id => false, :force => true do |t|
+    t.integer "location_id", :default => 0, :null => false
+    t.integer "user_id",     :default => 0, :null => false
+  end
+
+  create_table "editors_names", :id => false, :force => true do |t|
+    t.integer "name_id", :default => 0, :null => false
+    t.integer "user_id", :default => 0, :null => false
   end
 
   create_table "images", :force => true do |t|
@@ -322,6 +364,12 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.text     "notes"
   end
 
+  create_table "naming_reasons", :force => true do |t|
+    t.integer "naming_id"
+    t.integer "reason"
+    t.text    "notes"
+  end
+
   create_table "namings", :force => true do |t|
     t.datetime "created"
     t.datetime "modified"
@@ -391,6 +439,75 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.datetime "updated_at"
   end
 
+  create_table "past_draft_names", :force => true do |t|
+    t.integer  "draft_name_id",                                                            :default => 0,           :null => false
+    t.integer  "user_id",                                                                  :default => 0,           :null => false
+    t.integer  "project_id",                                                               :default => 0,           :null => false
+    t.integer  "name_id",                                                                  :default => 0,           :null => false
+    t.integer  "version",                                                                  :default => 0,           :null => false
+    t.text     "gen_desc"
+    t.text     "diag_desc"
+    t.text     "distribution"
+    t.text     "habitat"
+    t.text     "look_alikes"
+    t.text     "uses"
+    t.text     "notes"
+    t.enum     "review_status",  :limit => [:unreviewed, :unvetted, :vetted, :inaccurate], :default => :unreviewed, :null => false
+    t.integer  "reviewer_id"
+    t.datetime "last_review"
+    t.datetime "updated_at"
+    t.integer  "license_id"
+    t.text     "classification"
+    t.text     "refs"
+  end
+
+  create_table "past_locations", :force => true do |t|
+    t.integer  "location_id"
+    t.datetime "modified"
+    t.integer  "user_id",                     :default => 0, :null => false
+    t.integer  "version",                     :default => 0, :null => false
+    t.string   "display_name", :limit => 200
+    t.text     "notes"
+    t.float    "north"
+    t.float    "south"
+    t.float    "west"
+    t.float    "east"
+    t.float    "high"
+    t.float    "low"
+    t.integer  "license_id"
+  end
+
+  create_table "past_names", :force => true do |t|
+    t.integer  "name_id"
+    t.datetime "modified"
+    t.integer  "user_id",                                                                                                                             :default => 0,     :null => false
+    t.integer  "version",                                                                                                                             :default => 0,     :null => false
+    t.string   "text_name",           :limit => 100
+    t.string   "author",              :limit => 100
+    t.string   "display_name",        :limit => 200
+    t.string   "observation_name",    :limit => 200
+    t.string   "search_name",         :limit => 200
+    t.text     "notes"
+    t.boolean  "deprecated",                                                                                                                          :default => false, :null => false
+    t.enum     "rank",                :limit => [:Form, :Variety, :Subspecies, :Species, :Genus, :Family, :Order, :Class, :Phylum, :Kingdom, :Group]
+    t.text     "gen_desc"
+    t.text     "diag_desc"
+    t.text     "distribution"
+    t.text     "habitat"
+    t.text     "look_alikes"
+    t.text     "uses"
+    t.integer  "reviewer_id"
+    t.datetime "last_review"
+    t.enum     "review_status",       :limit => [:unreviewed, :unvetted, :vetted, :inaccurate]
+    t.integer  "license_id"
+    t.boolean  "ok_for_export",                                                                                                                       :default => true,  :null => false
+    t.text     "classification"
+    t.text     "citation"
+    t.boolean  "misspelling",                                                                                                                         :default => false, :null => false
+    t.integer  "correct_spelling_id"
+    t.text     "refs"
+  end
+
   create_table "projects", :force => true do |t|
     t.integer  "user_id",                       :default => 0,  :null => false
     t.integer  "admin_group_id",                :default => 0,  :null => false
@@ -445,6 +562,27 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.integer  "name_id"
     t.integer  "location_id"
     t.integer  "project_id"
+  end
+
+  create_table "search_states", :force => true do |t|
+    t.datetime "timestamp"
+    t.integer  "access_count"
+    t.string   "title",        :limit => 100
+    t.text     "conditions"
+    t.text     "order"
+    t.string   "source",       :limit => 20
+    t.enum     "query_type",   :limit => [:species_list_observations, :name_observations, :synonym_observations, :other_observations, :observations, :images, :rss_logs, :advanced_observations, :advanced_images, :advanced_names]
+  end
+
+  create_table "sequence_states", :force => true do |t|
+    t.datetime "timestamp"
+    t.integer  "access_count"
+    t.text     "query"
+    t.integer  "current_id"
+    t.integer  "current_index"
+    t.integer  "prev_id"
+    t.integer  "next_id"
+    t.enum     "query_type",    :limit => [:species_list_observations, :name_observations, :synonym_observations, :other_observations, :observations, :images, :rss_logs]
   end
 
   create_table "species_lists", :force => true do |t|

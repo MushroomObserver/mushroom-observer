@@ -3,6 +3,7 @@
 
   new_tab_set do
     add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
+    add_location_search_tabs(@location.name)
   end
 %>
 

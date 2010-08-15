@@ -5,6 +5,7 @@
     add_tab(:all_objects.t(:type => :location), :action => 'list_locations')
     add_tab(:cancel_and_show.t(:type => :location), :action => 'show_location',
             :id => @location.id, :params => query_params)
+    add_location_search_tabs(@location.name)
   end
 %>
 
