@@ -3023,7 +3023,60 @@ namespace :location do
     "İstanbul, Turkey"
     ])
 
+  #   along loop trail from parking lot to Grizzly Giant, Mariposa, Yosemite National Park (1)  Merge
+  #  at trailhead to Alder Creek Trail/Bridal Veil Falls Trail, Wawona, Yosemite National Park (1) Merge
   LOCATION_FIXES = {
+    "Briones Reservoir, Contra Costa Co., California, USA" => "Briones Reservoir, Contra Costa Co., California, USA",
+    "British coulumiba, Canada" => "British Columbia, Canada",
+    "Cameron Creek, Waterton Lakes National Park, Alberta, Canada" => "Cameron Creek, Waterton Lakes National Park, Alberta, Canada",
+    "Canyon, Contra Costa Co., California, USA" => "Canyon, Contra Costa Co., California, USA",
+    "Coatepec, Veracruz, México" => "Coatepec, Veracruz, Mexico",
+    "Estádio Nacional, Oeiras, Portugal" => "Estádio Nacional, Oeiras, Portugal",
+    "Fraser Experimental Forest, Grand County, Colorado" => "Fraser Experimental Forest, Grand Co., Colorado, USA",
+    "Green Mountain Reservoir, White River National Forest, Colorado, USA" => "Green Mountain Reservoir, White River National Forest, Colorado, USA",
+    "Hilo, Hawaii, USA" => "Hilo, Hawaii, USA",
+    "Huayacocotla, Veracruz, México" => "Huayacocotla, Veracruz, Mexico",
+    "Lafayette, Indiana, USA" => "Lafayette, Indiana, USA",
+    "Little Hartley, Blue Mountains, New South Wales, Australia" => "Little Hartley, Blue Mountains, New South Wales, Australia",
+    "Monroe Co., Michigan, USA" => "Monroe Co., Michigan, USA",
+    "Oakland, Alameda Co., California, USA" => "Oakland, California, USA",
+    "Parc National Forillon, Quebec, Canada" => "Parc National Forillon, Quebec, Canada",
+    "Planalto das Cezaredas, Portugal" => "Planalto das Cezaredas, Portugal",
+    "Salt Lake City, Salt Lake Co., Utah, USA" => "Salt Lake City, Salt Lake Co., Utah, USA",
+    "Santa Cruz Co, Santa Cruz, California" => "Santa Cruz, California, USA",
+    "Schuylkill Co, Pennsylvania, USA" => "Schuylkill Co., Pennsylvania, USA",
+    "Schuylkill Co., Pennsylvania, USA" => "Schuylkill Co., Pennsylvania, USA",
+    "Seal Cove, 25 km southeast of Gaspé, Quebec, Canada" => "Seal Cove, 25 km southeast of Gaspé, Quebec, Canada",
+    "Sibley Volcanic Regional Preserve, Oakland, California, USA" => "Sibley Volcanic Regional Preserve, Oakland, California, USA",
+    "Temoaya, Edo. de México, México" => "Temoaya, Estado de México, Mexico",
+    "Trego, Montana, USA" => "Trego, Montana, USA",
+    "Yosemite National Park, Backside of Wawona Meadow" => "Backside of Wawona Meadows, Yosemite National Park, California, USA",
+    "Yosemite National Park, Backside of Wawona Meadows" => "Backside of Wawona Meadows, Yosemite National Park, California, USA",
+    "Yosemite National Park, Grizzly Giant Area" => "near Grizzly Giant, Yosemite National Park, California, USA",
+    "Yosemite National Park, Hemmet Road near Chinquapin" => "Hemmet Rd. near Chinquapin, Yosemite National Park, California, USA",
+    "Yosemite National Park, Livingston Cabin Area" => "near Livingston Cabin, Yosemite National Park, California, USA",
+    "Yosemite National Park, Loop Trail from Mariposa Grove to Grizzly Giant" => "Loop Trail from Mariposa Grove to Grizzly Giant, Yosemite National Park, California, USA",
+    "Yosemite National Park, Loop Trail from Mariposa Grove to Grizzly Peak" => "Loop Trail from Mariposa Grove to Grizzly Peak, Yosemite National Park, California, USA",
+    "Yosemite National Park, Loop Trail from Mariposa Grove to Grizzly Point" => "Loop Trail from Mariposa Grove to Grizzly Point, Yosemite National Park, California, USA",
+    "Yosemite National Park, Mariposa Grove" => "Mariposa Grove, Yosemite National Park, California, USA",
+    "Yosemite National Park, Mariposa Grove Trailhead" => "Mariposa Grove Trailhead, Yosemite National Park, California, USA",
+    "Yosemite National Park, Mariposa Grove, 0.5 miles from parking lot" => "0.5 miles from parking lot, Mariposa Grove, Yosemite National Park, California, USA",
+    "Yosemite National Park, Mariposa, along loop trail from parking lot to Grizzly Giant" => "Loop trail from parking lot to Grizzly Giant, Mariposa, Yosemite National Park, California, USA",
+    "Yosemite National Park, Meadow Loop Trail" => "Meadow Loop Trail, Yosemite National Park, California, USA",
+    "Yosemite National Park, Off Hemmes Road near Chinquapin" => "near Hemmes Rd. near Chinquapin, Yosemite National Park, California, USA",
+    "Yosemite National Park, Off Highway 41" => "near Highway 41, Yosemite National Park, California, USA",
+    "Yosemite National Park, On trail to Chinualna Falls" => "On trail to Chinualna Falls, Yosemite National Park, California, USA",
+    "Yosemite National Park, Trailhead of Bridal Veil Falls Trail" => "Trailhead of Bridal Veil Falls Trail, Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona" => "Wawona, Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona Meadow Loop Trail (back trail)" => "Wawona Meadow Loop Trail (back trail), Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona Meadow Trailhead" => "Wawona Meadow Trailhead, Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona Trail" => "Wawona Trail, Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona, at trailhead of Alder Creek Trail" => "Trailhead of Alder Creek Trail, Wawona, Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona, at trailhead to Alder Creek Trail/Bridal Veil Falls Trail" => "Trailhead of Bridal Veil Falls Trail, Wawona, Yosemite National Park, California, USA",
+    "Yosemite National Park, Wawona, trailhead to Alder Creek Trail" => "Trailhead to Alder Creek Trail, Wawona, Yosemite National Park, California, USA",
+    "Yosemite National Park, between Livingston House and trail to Chinualna Falls" => "Between Livingston House and trail to Chinualna Falls, Yosemite National Park, California, USA",
+    "Big Oak Flat Road, first pullout on right past Yosemite NP entrance." => "First pullout on right past park entrance, Big Oak Flat Rd., Yosemite National Park, California, USA",
+    "Yosemite NP, first pullout heading east along Big Oak Flat Rd." => "First pullout heading east along Big Oak Flat Rd., Yosemite National Park, California, USA",
   }
 
   def report_on_name(name)
@@ -3105,7 +3158,16 @@ namespace :location do
       object.add_note("[admin - #{Time.now}]: Changed location name from '#{from_name}' to '#{to_name}'")
     end
   end
-    
+  
+  def check_save(o)
+    if not o.save
+      print("Save failed for #{o.class}, #{o.id}\n")
+      for e in o.errors
+        print("\t#{e[1]}\n")
+      end
+    end
+  end
+  
   def fix_location(target_name, current_name, current_location)
     if target_name
       current_sql_safe = current_name.gsub(/[']/, '\\\\\'')
@@ -3115,8 +3177,9 @@ namespace :location do
         obs = Observation.find_all_by_where(current_name)
         if obs.size > 0
           for o in obs
-            o.where = target_name
-            o.save
+            o.location = target_location
+            o.where = nil
+            check_save(o)
             add_comment(o, current_name, target_name)
           end
           # params[:id]Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE `where` = '#{current_sql_safe}'")
@@ -3128,7 +3191,7 @@ namespace :location do
             for o in obs
               o.location = target_location
               o.where = nil
-              o.save
+              check_save(o)
               add_comment(o, current_name, target_name)
             end
             # Observation.connection.update("UPDATE observations SET location_id = #{target_location.id}, `where` = NULL WHERE location_id = #{current_location.id}")
@@ -3138,7 +3201,7 @@ namespace :location do
           if comments.size > 0
             for comment in comments
               comment.object_id = target_location.id
-              comment.save
+              check_save(comment)
             end
             print("Moved #{comments.size} comments from #{current_name} to #{target_name} (#{target_location.id})\n")
           end
@@ -3146,7 +3209,7 @@ namespace :location do
           if descs.size > 0
             for d in descs
               d.location_id = target_location.id
-              d.save
+              check_save(d)
             end
             print("Moved #{descs.size} descriptions from #{current_name} to #{target_name} (#{target_location.id})\n")
           end
@@ -3156,17 +3219,17 @@ namespace :location do
       elsif current_name != target_name
         if current_location
           current_location.name = target_name
-          current_location.save
+          check_save(current_location)
           add_comment(current_location, current_name, target_name)
           print("Renamed location: #{current_name} to: #{target_name}\n")
         else
           obs = Observation.find_all_by_where(current_name)
           for o in obs
             o.where = target_name
-            o.save
+            check_save(o)
             add_comment(o, current_name, target_name)
           end
-          print("Changed non-location: #{current_name} to: #{target_name}\n")
+          print("Changed #{obs.length} non-location(s): #{current_name} to: #{target_name}\n")
         end
       end
     end
@@ -3282,7 +3345,7 @@ namespace :location do
         approved.add(w)
       end
     end
-    print(approved.sort.map {|l| escapeString(l)}.join(",\n    "))
+    print("    " + (approved.sort.map {|l| escapeString(l)}.join(",\n    ")) + "\n")
   end
 
   desc "Random test task"

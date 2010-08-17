@@ -164,6 +164,11 @@ class ApiController < ApplicationController
     type  = params[:type].to_s
     instr = params[:id].to_s
     letter = ' '
+    scientific = false
+    user = login_for_ajax
+    if user
+      scientific = (user.location_format == :scientific)
+    end
     @items = []
     if instr.match(/^(\w)/)
       letter = $1
@@ -179,7 +184,7 @@ class ApiController < ApplicationController
           WHERE `name` LIKE '#{letter}%' OR
                 `name` LIKE '% #{letter}%'
         ))
-        if User.current_location_format == :scientific
+        if scientific
           @items.map! {|i| Location.reverse_name(i)}
         end
         @items.sort!
