@@ -1547,7 +1547,8 @@ class ObserverController < ApplicationController
     if @show_user = find_or_goto_index(User, id, :include => :location)
       @user_data = SiteData.new.get_user_data(id)
       query = Query.lookup(:Observation, :by_user, :user => @show_user,
-                           :by => :thumbnail_quality)
+                           :by => :thumbnail_quality,
+                           :where => "images.user_id = #{id}")
       @observations = query.results(:limit => 6, :include => :thumb_image)
     end
   end
