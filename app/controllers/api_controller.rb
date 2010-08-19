@@ -12,6 +12,8 @@
 #
 ################################################################################
 
+require 'geocoder'
+
 class ApiController < ApplicationController
   require 'xmlrpc/client'
 
@@ -282,33 +284,23 @@ class ApiController < ApplicationController
     end
   end
 
-  # Process AJAX request for tweaking existing objects.
-  # type::   Type of object.
-  # id::     ID of object.
+  # Process AJAX request for geocoding and location name.
+  # name::   Name of location
   #
   # Valid types are:
-  # location:: Expects a :lat and :lng
+  # name:: Comma separate string in the order indicated by the user's preference (default is Postal)
   #
   # Examples:
   #
-  #   /ajax/tweak/location/710?lat=41.5615&lng=-70.6236
+  #   /ajax/geocode?name=Falmouth, Massachusetts, USA
   #
-  # def ajax_tweak
-  #   type  = params[:type].to_s
-  #   id    = params[:id].to_s
-  #   result = nil
-  #   if user = login_for_ajax
-  #     User.current = user
-  #     case type
-  #     when 'location'
-  #       loc = Location.safe_find(id)
-  #       if loc
-  #         if Location.check_lat_long(params[:lat], params[:lng])
-  #           loc.tweak(params[:lat].to_f, params[:lng].to_f)
-  #           render(:layout => false, :text => '') # What if there's an error?
-  #         end
-  #       end
-  #     end
-  #   end
-  # end
+  def ajax_geocode
+    name  = params[:name].to_s
+    if user = login_for_ajax
+      if user.location_format == :scientific
+        name = Location.reverse_name(name)
+      end
+    end
+    render(:inline => Geocoder.new(name).ajax_response)
+  end
 end

@@ -17,9 +17,29 @@
   </td></tr></table>
 <% end %>
 
-<label for="location_display_name"><%= :Where.t %>:</label>
-<%= form.text_field('display_name', :value => where, :size => 65) %>
-<span class="HelpNote"><%= :form_locations_help.t %></span>
+<table>
+  <tr>
+    <td>
+      <label for="location_display_name"><%= :Where.t %>:</label><br/>
+    </td>
+    <td>
+      <%= form.text_field('display_name', :value => where, :size => 65) %><br/>
+    </td>
+    <td>
+      <span class="HelpNote"><%= :form_locations_help.t %></span>
+    </td>
+  </tr>
+  <tr>
+    <td/>
+    <td align="right">
+      <input type="button" id="find_on_map" value="<%= :form_locations_find_on_map.t %>"/> 
+        <%= javascript_tag("$('find_on_map').observe('click', function (event) {
+          findOnMap();
+        });") %>
+    </td>
+    <td/>
+  </tr>
+</table>
 
 <table cellpadding="10">
   <tr>
@@ -96,9 +116,11 @@
         <%=
           javascript_include 'edit_loc'
           javascript_include 'prototype'
+          # add_header("<script src=\"http://maps.google.com/maps/api/js?sensor=false\" type=\"text/javascript\"></script>\n")
           gmap = make_editable_map(@location)
           add_header(GMap.header)
           add_header(finish_map(gmap))
+          add_header("<script  type=\"text/javascript\">//<![CDATA[\nvar geocoder = new GClientGeocoder();\n\n//]]</script>\n\n")
           gmap.div(:width => "500", :height => "500")
         %>
       </center>

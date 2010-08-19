@@ -1778,6 +1778,7 @@ form_locations_notes: "[:Notes]"
 form_locations_refs: "[:form_names_refs]"
 form_locations_refs_help: "[:form_names_refs_help]"
 form_locations_help: <a href="/location/help" target="_new">Help</a>
+form_locations_find_on_map: Find on Map =>
 
 form_locations_lat_long_help: >
   All values should be in decimal degrees.

@@ -9,6 +9,8 @@
 #
 ################################################################################
 
+require 'geocoder'
+
 class LocationController < ApplicationController
   include DescriptionControllerHelpers
 
@@ -457,16 +459,25 @@ class LocationController < ApplicationController
     # (Used when linked from user profile: sets primary location after done.)
     @set_user = (params[:set_user] == "1")
 
-    # Reder a blank form.
+    # Render a blank form.
+    user_name = Location.user_name(@user, @display_name)
     if request.method != :post
-      @dubious_where_reasons = Location.dubious_name?(Location.user_name(@user, @display_name), true) if @display_name
+      @dubious_where_reasons = Location.dubious_name?(user_name, true) if @display_name
       @location = Location.new
-      @location.display_name = @display_name || ''
-      @location.north = 80
-      @location.south = -80
-      @location.east = 89
-      @location.west = -89
-
+      geocoder = Geocoder.new(user_name)
+      if geocoder.valid
+        @location.display_name = @display_name
+        @location.north = geocoder.north
+        @location.south = geocoder.south
+        @location.east = geocoder.east
+        @location.west = geocoder.west
+      else
+        @location.display_name = ''
+        @location.north = 80
+        @location.south = -80
+        @location.east = 89
+        @location.west = -89
+      end
     else
       @display_name = params[:location][:display_name].strip_squeeze rescue ''
       

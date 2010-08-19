@@ -1782,6 +1782,7 @@ form_locations_help: >
   "Mitrula Marsh", Yuba Co., California, USA\n
   Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
 
+form_locations_find_on_map:  Find on Map =>
 
 form_locations_lat_long_help: Alle Angaben sollten in Dezimalgraden gemacht werden.
 form_locations_license_help:  >

@@ -1800,6 +1800,7 @@ form_locations_help: >
   "Mitrula Marsh", Yuba Co., California, USA<br/>
   Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
 
+form_locations_find_on_map:  Find on Map =>
 
 form_locations_lat_long_help: >
   Todos los valores deben estar en grados decimales.
