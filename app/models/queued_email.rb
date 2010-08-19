@@ -207,6 +207,11 @@ class QueuedEmail < AbstractModel
   # production mode this does nothing.  In testing mode it "delivers" the email
   # immediately (via deliver_email) and then removes it from the queue.
   def finish
+    self.class.debug_log("SAVE #{self.flavor} " +
+         "from=#{user.login rescue 'nil'} " +
+         "to=#{to_user.login rescue 'nil'} " +
+         queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
+         queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' '))
     current_locale = Locale.code
     unless QUEUE_EMAIL || @@queue
       self.deliver_email if RUN_LEVEL != :silent
@@ -219,6 +224,11 @@ class QueuedEmail < AbstractModel
   # receiver, then passes it off to the subclass (via deliver_email). 
   def send_email
     return true if RUN_LEVEL == :silent
+    self.class.debug_log("SEND #{self.flavor} " +
+         "from=#{user.login rescue 'nil'} " +
+         "to=#{to_user.login rescue 'nil'} " +
+         queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
+         queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' '))
     current_locale = Locale.code
     result = false
     if user == to_user
@@ -267,6 +277,14 @@ class QueuedEmail < AbstractModel
       result += "\tNote: #{self.queued_email_note.value}\n"
     end
     result
+  end
+
+  # Add line to log to help keep track of what/when/why emails are being queued
+  # and when they are actually sent.
+  def self.debug_log(msg)
+    File.open("#{RAILS_ROOT}/log/email-debug.log", 'a') do |fh|
+      fh.puts("#{Time.now.api_time} #{msg}")
+    end
   end
 
   # -------------------------------------
