@@ -76,6 +76,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL admin_request " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "project=#{project.id}")
   end
 
   # Ask reviewers for authorship credit.
@@ -99,6 +103,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL author_request " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "object=#{object.type}-#{object.id}")
   end
 
   # Notify user of comment on their object.
@@ -121,6 +129,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = (sender && receiver == object.user) ? sender.email : NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL comment " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "object=#{object.type}-#{object.id}")
   end
 
   # User asking user about an image.
@@ -142,6 +154,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL commercial_inquiry " +
+                          "from=#{sender.id} " +
+                          "to=#{image.user_id} " +
+                          "image=#{image.id}")
   end
 
   # Notify user of name change of their obs.
@@ -170,6 +186,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL consensus_change " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "observation=#{observation.id}")
   end
 
   # Email sent to Nathan when sign-up is denied.
@@ -222,10 +242,10 @@ class AccountMailer < ActionMailer::Base
     new_desc             = desc; desc.revert_to(new_desc_version) if desc
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    
+
     # Ideally there would be an old_loc.display_name, but I don't know where that would go
     old_loc_name = Location.user_name(@user, old_loc.name)
-    
+
     @subject             = :email_subject_location_change.l(:name => old_loc_name)
     @body['subject']     = @subject
     @body['user']        = @user
@@ -241,6 +261,11 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL location_change " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "location=#{loc.id rescue 'nil'} " +
+                          "description=#{desc.id rescue 'nil'}")
   end
 
   # Notify user of change in name description.
@@ -278,6 +303,11 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL name_change " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "name=#{name.id rescue 'nil'} " +
+                          "description=#{desc.id rescue 'nil'}")
   end
 
   # Notify user of name proposal for their obs.
@@ -299,6 +329,11 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL name_proposal " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "naming=#{naming.id rescue 'nil'} " +
+                          "observation=#{observation.id rescue 'nil'}")
   end
 
   # Tell observer someone is interested in their obs.
@@ -320,6 +355,11 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender ? sender.email : NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL naming_for_observer " +
+                          "from=#{sender.id rescue 'nil'} " +
+                          "to=#{@user.id rescue 'nil'} " +
+                          "naming=#{naming.id rescue 'nil'} " +
+                          "notification=#{notification.id rescue 'nil'}")
   end
 
   # Notify user someone has observed a name they are interested in.
@@ -339,6 +379,11 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL naming_for_tracker " +
+                          "from=#{'nil'} " +
+                          "to=#{@user.id rescue 'nil'} " +
+                          "naming=#{naming.id rescue 'nil'} " +
+                          "observation=#{naming.observation.id rescue 'nil'}")
   end
 
   # User forgot their password.
@@ -357,6 +402,8 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL new_password " +
+                          "to=#{@user.id rescue 'nil'}")
   end
 
   # Notify user of change in observation.
@@ -382,6 +429,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL observation_change " +
+                          "from=#{sender.id} " +
+                          "to=#{receiver.id} " +
+                          "observation=#{observation.id rescue 'nil'}")
   end
 
   # User asking user about an observation.
@@ -403,6 +454,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL observation_question " +
+                          "from=#{sender.id rescue 'nil'} " +
+                          "to=#{@user.id rescue 'nil'} " +
+                          "observation=#{observation.id rescue nil}")
   end
 
   # Notify reviewers that a draft has been published.
@@ -424,6 +479,10 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL publish_name " +
+                          "from=#{publisher.id rescue 'nil'} " +
+                          "to=#{receiver.id rescue 'nil'} " +
+                          "name=#{name.id rescue nil}")
   end
 
   # User asking user about anything else.
@@ -445,6 +504,9 @@ class AccountMailer < ActionMailer::Base
     @headers['Reply-To'] = sender.email
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL user_question " +
+                          "from=#{sender.id rescue 'nil'} " +
+                          "to=#{user.id rescue 'nil'}")
   end
 
   # Email sent to verify user's email.
@@ -460,6 +522,8 @@ class AccountMailer < ActionMailer::Base
     @from                = ACCOUNTS_EMAIL_ADDRESS
     @content_type        = @user.email_html ? "text/html" : "text/plain"
     @subject             = '[MO] ' + @subject.to_ascii
+    QueuedEmail.debug_log("MAIL verify " +
+                          "to=#{user.id} email=#{user.email}")
   end
 
   # User asking webmaster a question.
