@@ -3064,11 +3064,57 @@ namespace :location do
     "near Hemmes Rd. near Chinquapin, Yosemite National Park, California, USA",
     "near Highway 41, Yosemite National Park, California, USA",
     "near Livingston Cabin, Yosemite National Park, California, USA",
+    "Anchorage, Alaska, USA",
+    "Avalanche Creek, Glacier National Park, Montana, USA",
+    "Bragg Creek, Alberta, Canada",
+    "Bratislavsky Lesny Park, Bratislava, Slovakia",
+    "Buzhaninovo, Moscow oblast, Russia",
+    "Eaton Canyon, Mount Wilson, San Gabriel Mountains, Los Angeles Co., California, USA",
+    "Glacier Point Rd. near Wawona intersection, Yosemite National Park, California, USA",
+    "Glacier Point Rd. near intersection with Wawona Rd., Yosemite National Park, California, USA",
+    "Glacier Point Rd. west of Summit Meadow, Yosemite National Park, California, USA",
+    "Glacier Point Rd., Yosemite National Park, California, USA",
+    "Glacier Point Rd., near intersection with Wawona Rd., Yosemite National Park, California, USA",
+    "Hayden Valley, Yellowstone National Park, Wyoming, USA",
+    "Lainzer Tiergarten, Wien, Austria",
+    "Lizard Creek, Jackson Lake, Grand Teton National Park, Wyoming, USA",
+    "Mount Lemmon, Pima Co., Arizona, USA",
+    "On Alder Creek Trail, Yosemite National Park, California, USA",
+    "Real de Catorce, San Luis Potosí, Mexico",
+    "Rötjärnsbäcken, Hörnefors, Västerbotten, Sweden",
+    "Tamarack Creek, Yosemite National Park, California, USA",
+    "Washtenaw Co., Michigan, USA",
+    "West Yosemite Rd. pulloff, Yosemite National Park, California, USA",
+    "West Yosemite Rd. pulloff, Yosemite National Park, California, USA",
+    "West Yosemite pulloff Hennes Ridge Rd., Yosemite National Park, California, USA",
+    "Yuma Co., Arizona, USA"
     ])
 
-  #   along loop trail from parking lot to Grizzly Giant, Mariposa, Yosemite National Park (1)  Merge
-  #  at trailhead to Alder Creek Trail/Bridal Veil Falls Trail, Wawona, Yosemite National Park (1) Merge
   LOCATION_FIXES = {
+    "Anchorage ,Municipality of Anchorage, Alaska, USA" => "Anchorage, Alaska, USA",
+    "Avalanche Creek, Glacier National Park, Montana, USA" => "Avalanche Creek, Glacier National Park, Montana, USA",
+    "Bragg creek, Alberta" => "Bragg Creek, Alberta, Canada",
+    "Bratislavsky Lesny Park, Bratislava, Slovakia" => "Bratislavsky Lesny Park, Bratislava, Slovakia",
+    "Buzhaninovo, Moscow oblast, Russia" => "Buzhaninovo, Moscow oblast, Russia",
+    "Eaton Canyon, Mount Wilson, San Gabriel Mountains, Los Angeles Co., California, USA" => "Eaton Canyon, Mount Wilson, San Gabriel Mountains, Los Angeles Co., California, USA",
+    "Hayden Valley, Yellowstone National Park, Wyoming, USA" => "Hayden Valley, Yellowstone National Park, Wyoming, USA",
+    "Lainzer Tiergarten, Wien, Austria" => "Lainzer Tiergarten, Wien, Austria",
+    "Lizard Creek, Jackson Lake, Grand Teton National Park, Wyoming, USA" => "Lizard Creek, Jackson Lake, Grand Teton National Park, Wyoming, USA",
+    "Mont. Lemmon, Pima Co., Arizona, USA" => "Mount Lemmon, Pima Co., Arizona, USA",
+    "Real de Catorce, San Luis Potosí, MEXICO" => "Real de Catorce, San Luis Potosí, Mexico",
+    "Rötjärnsbäcken, Hörnefors, Västerbotten, Sweden" => "Rötjärnsbäcken, Hörnefors, Västerbotten, Sweden",
+    "Washtenaw Co., Michigan, USA" => "Washtenaw Co., Michigan, USA",
+    "Yosemite National Park, Glacier Point Rd., near intersection with Wawona Rd." => "Glacier Point Rd., near intersection with Wawona Rd., Yosemite National Park, California, USA",
+    "Yosemite National Park, Glacier Point Road" => "Glacier Point Rd., Yosemite National Park, California, USA",
+    "Yosemite National Park, Glacier Point Road near Wawona intersection" => "Glacier Point Rd. near Wawona intersection, Yosemite National Park, California, USA",
+    "Yosemite National Park, Glacier Point Road near intersection with Wawona Road" => "Glacier Point Rd. near intersection with Wawona Rd., Yosemite National Park, California, USA",
+    "Yosemite National Park, Glacier Point Road west of Summit Meadow" => "Glacier Point Rd. west of Summit Meadow, Yosemite National Park, California, USA",
+    "Yosemite National Park, On Alder Creek Trail" => "On Alder Creek Trail, Yosemite National Park, California, USA",
+    "Yosemite National Park, Tamarack Creek" => "Tamarack Creek, Yosemite National Park, California, USA",
+    "Yosemite National Park, West Yosemite Road pull-off" => "West Yosemite Rd. pulloff, Yosemite National Park, California, USA",
+    "Yosemite National Park, West Yosemite Road pulloff" => "West Yosemite Rd. pulloff, Yosemite National Park, California, USA",
+    "Yosemite National Park, West Yosemite pulloff Hennes Ridge Road" => "West Yosemite pulloff Hennes Ridge Rd., Yosemite National Park, California, USA",
+    "Yuma Co., Arizona" => "Yuma Co., Arizona, USA",
   }
 
   def report_on_name(name)
@@ -3319,25 +3365,9 @@ namespace :location do
     "\"#{s.gsub("\"", "\\\"")}\""
   end
   
-  desc "List the new unapproved locations"
+  desc "List the fixes"
   task(:new => :environment) do
-    approved = Set.new
-    for l in Location.find(:all)
-      if !APPROVED_LOCATIONS.member?(l.name)
-        approved.add(l.name)
-      end
-    end
-    wheres = Observation.connection.select_values %(
-      SELECT DISTINCT `where` FROM `observations`
-      WHERE `where` is not NULL
-      ORDER BY `where`
-    )
-    for w in wheres
-      if !APPROVED_LOCATIONS.member?(w)
-        approved.add(w)
-      end
-    end
-    print("    " + (approved.sort.map {|l| escapeString(l)}.join(",\n    ")) + "\n")
+    print("    " + (LOCATION_FIXES.values.sort.map {|l| escapeString(l)}.join(",\n    ")) + "\n")
   end
 
   desc "Random test task"
