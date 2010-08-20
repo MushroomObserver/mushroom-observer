@@ -78,8 +78,10 @@ function findOnMap() {
         south = parseFloat(list[1]);
         east = parseFloat(list[2]);
         west = parseFloat(list[3]);
-        updateMapOverlay(north, south, east, west);
-        map.centerAndZoomOnPoints([new GLatLng(north, east),new GLatLng(south, west)]);
+        if (!(isNaN(north) || isNaN(south) || isNaN(east) || isNaN(west))) {
+          updateMapOverlay(north, south, east, west);
+          map.centerAndZoomOnPoints([new GLatLng(north, east),new GLatLng(south, west)]);
+        };
       },
       onFailure: function(){ alert('Something went wrong...') }
     });  

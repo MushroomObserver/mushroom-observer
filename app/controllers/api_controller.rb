@@ -296,10 +296,10 @@ class ApiController < ApplicationController
   #
   def ajax_geocode
     name  = params[:name].to_s
-    if user = login_for_ajax
-      if user.location_format == :scientific
-        name = Location.reverse_name(name)
-      end
+    if params[:format]
+      name = Location.reverse_name(name) if params[:format] == "scientific"
+    else
+      name = Location.reverse_name(name) if login_for_ajax.location_format == :scientific
     end
     render(:inline => Geocoder.new(name).ajax_response)
   end

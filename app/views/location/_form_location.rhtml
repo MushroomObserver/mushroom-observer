@@ -32,10 +32,7 @@
   <tr>
     <td/>
     <td align="right">
-      <input type="button" id="find_on_map" value="<%= :form_locations_find_on_map.t %>"/> 
-        <%= javascript_tag("$('find_on_map').observe('click', function (event) {
-          findOnMap();
-        });") %>
+      <input type="button" id="find_on_map" onClick="findOnMap()" value="<%= :form_locations_find_on_map.t %>" /> 
     </td>
     <td/>
   </tr>
