@@ -79,7 +79,22 @@ TESTING     = (RAILS_ENV == 'test')
 
 # Should be one of [:normal, :silent]
 # :silent turns off event logging and email notifications
-RUN_LEVEL = :normal # :silent
+class RunLevel
+  @@runlevel = :normal
+  def self.normal()
+    @@runlevel = :normal
+  end
+  
+  def self.silent()
+    @@runlevel = :silent
+  end
+  
+  def self.is_normal?()
+    @@runlevel == :normal
+  end
+end
+
+# RUN_LEVEL = :normal # :silent
 
 # Do site-specific global constants first.
 file = File.join(File.dirname(__FILE__), 'consts-site')

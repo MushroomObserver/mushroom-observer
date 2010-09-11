@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100425015719) do
+ActiveRecord::Schema.define(:version => 20100910195247) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.integer  "user_id"
@@ -220,7 +220,7 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.integer  "user_id"
     t.integer  "description_id"
     t.integer  "rss_log_id"
-    t.integer  "num_views",                     :default => 0
+    t.integer  "num_views",                      :default => 0
     t.datetime "last_view"
     t.float    "north"
     t.float    "south"
@@ -228,9 +228,9 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.float    "east"
     t.float    "high"
     t.float    "low"
-    t.boolean  "ok_for_export",                 :default => true, :null => false
-    t.string   "name",           :limit => 200
+    t.boolean  "ok_for_export",                  :default => true, :null => false
     t.text     "notes"
+    t.string   "name",           :limit => 1024
   end
 
   create_table "locations_versions", :force => true do |t|
@@ -395,20 +395,20 @@ ActiveRecord::Schema.define(:version => 20100425015719) do
     t.datetime "modified"
     t.date     "when"
     t.integer  "user_id"
-    t.string   "where",                  :limit => 100
-    t.boolean  "specimen",                                                              :default => false, :null => false
+    t.boolean  "specimen",                                                               :default => false, :null => false
     t.text     "notes"
     t.integer  "thumb_image_id"
     t.integer  "name_id"
     t.integer  "location_id"
-    t.boolean  "is_collection_location",                                                :default => true,  :null => false
-    t.float    "vote_cache",                                                            :default => 0.0
-    t.integer  "num_views",                                                             :default => 0,     :null => false
+    t.boolean  "is_collection_location",                                                 :default => true,  :null => false
+    t.float    "vote_cache",                                                             :default => 0.0
+    t.integer  "num_views",                                                              :default => 0,     :null => false
     t.datetime "last_view"
     t.string   "sync_id",                :limit => 16
     t.integer  "rss_log_id"
-    t.decimal  "lat",                                   :precision => 15, :scale => 10
-    t.decimal  "long",                                  :precision => 15, :scale => 10
+    t.decimal  "lat",                                    :precision => 15, :scale => 10
+    t.decimal  "long",                                   :precision => 15, :scale => 10
+    t.string   "where",                  :limit => 1024
   end
 
   create_table "observations_species_lists", :id => false, :force => true do |t|

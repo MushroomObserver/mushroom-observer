@@ -1,8 +1,4 @@
 future location stuff
-  geo-coding
-    when create_location called with a name
-    button on the screen
-    checking that Ajax is enabled from JS (testing without JS)
   request location definition for new observation locations (ala user profile)
   interactive lat/long for observations
  

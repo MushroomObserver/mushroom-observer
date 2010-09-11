@@ -214,7 +214,7 @@ class QueuedEmail < AbstractModel
          queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' '))
     current_locale = Locale.code
     unless QUEUE_EMAIL || @@queue
-      self.deliver_email if RUN_LEVEL != :silent
+      self.deliver_email if RunLevel.is_normal?
       self.destroy
     end
     Locale.code = current_locale
@@ -223,7 +223,7 @@ class QueuedEmail < AbstractModel
   # This is called by <tt>rake email:send</tt>.  It just checks that sender !=
   # receiver, then passes it off to the subclass (via deliver_email). 
   def send_email
-    return true if RUN_LEVEL == :silent
+    return true if not RunLevel.is_normal?
     self.class.debug_log("SEND #{self.flavor} " +
          "from=#{user.login rescue 'nil'} " +
          "to=#{to_user.login rescue 'nil'} " +

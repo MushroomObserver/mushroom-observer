@@ -455,7 +455,7 @@ class AbstractModel < ActiveRecord::Base
 
   # Do we log this event? and how?
   def autolog_event(event, orphan=nil)
-    if RUN_LEVEL != :silent
+    if RunLevel.is_normal?
       if autolog_events.include?(event)
         touch = false
       elsif autolog_events.include?("#{event}!".to_sym)

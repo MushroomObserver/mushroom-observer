@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/../boot'
 class QueuedEmailTest < UnitTestCase
 
   def test_not_silent
-    assert(RUN_LEVEL != :silent)
+    assert(RunLevel.is_normal?)
   end
   
   def test_comment_email

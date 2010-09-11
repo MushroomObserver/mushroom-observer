@@ -959,7 +959,7 @@ protected
 
     if self.where.to_s.blank? && !location_id
       errors.add(:where, :validate_observation_where_missing.t)
-    elsif self.where.to_s.length > 100
+    elsif self.where.to_s.length > 1024
       errors.add(:where, :validate_observation_where_too_long.t)
     end
   end

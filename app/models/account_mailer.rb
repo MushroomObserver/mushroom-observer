@@ -106,7 +106,7 @@ class AccountMailer < ActionMailer::Base
     QueuedEmail.debug_log("MAIL author_request " +
                           "from=#{sender.id} " +
                           "to=#{receiver.id} " +
-                          "object=#{object.type}-#{object.id}")
+                          "object=#{object.type_tag}-#{object.id}")
   end
 
   # Notify user of comment on their object.
@@ -132,7 +132,7 @@ class AccountMailer < ActionMailer::Base
     QueuedEmail.debug_log("MAIL comment " +
                           "from=#{sender.id} " +
                           "to=#{receiver.id} " +
-                          "object=#{object.type}-#{object.id}")
+                          "object=#{object.type_tag}-#{object.id}")
   end
 
   # User asking user about an image.
