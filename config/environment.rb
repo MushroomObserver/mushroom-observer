@@ -197,7 +197,7 @@ module RedCloth
 
       # Post-filters: not catching all the itallics, and seeing spans where
       # they don't belong.
-      result.gsub!(/_+([A-Z][A-Za-z0-9]+)_+/, '<i>\\1</i>')
+      result.gsub!(/(^|\W)_+([A-Z][A-Za-z0-9]+)_+(\W|$)/, '\\1<i>\\2</i>\\3')
       result.gsub!(/<span>(.*?)<\/span>/, '%\\1%')
 
       return result
