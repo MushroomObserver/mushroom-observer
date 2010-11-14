@@ -3554,6 +3554,7 @@ namespace :location do
     ])
 
   LOCATION_FIXES = {
+    "Coyote Lake, California, USA" => "Coyote Lake, Fresno Co., California, USA"
   }
   
   def report_on_name(name)
