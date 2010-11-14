@@ -3550,11 +3550,11 @@ namespace :location do
     "near Devil's Lane, Falmouth, Massachusetts, USA",
     "Åmsele, Västerbotten, Sweden",
     "Ünye, Turkey",
-    "Port Perry, Ontario, Canada"
+    "Port Perry, Ontario, Canada",
+    "Coyote Lake, Fresno Co., California, USA",
     ])
 
   LOCATION_FIXES = {
-    "Coyote Lake, California, USA" => "Coyote Lake, Fresno Co., California, USA"
   }
   
   def report_on_name(name)
