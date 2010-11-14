@@ -3550,11 +3550,10 @@ namespace :location do
     "near Devil's Lane, Falmouth, Massachusetts, USA",
     "Åmsele, Västerbotten, Sweden",
     "Ünye, Turkey",
+    "Port Perry, Ontario, Canada"
     ])
 
   LOCATION_FIXES = {
-    "Baibalak-River, near Khanty-Mansiysk, Russia" => "Baibalak River, near Khanty-Mansiysk, Russia",
-    "Port-Perry, Ontario, Canada" => "Port Perry, Ontario, Canada",
   }
   
   def report_on_name(name)
