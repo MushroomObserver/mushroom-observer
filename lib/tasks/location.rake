@@ -3282,8 +3282,6 @@ namespace :location do
     "Chorleywood House Estate, Hertfordshire, England",
     "Chute Agate, Quebec, Canada",
     "Claytor Lake State Park, Radford, Virginia",
-    "Coyote Lake, California, USA",
-    "Coyote Lake, California, USA",
     "Cranberry Lake Nature Preserve, Westchester Co., New York, USA",
     "Cranberry Township, Pennsylvania, USA",
     "Crescent, Rowan Co., North Carolina, USA",
