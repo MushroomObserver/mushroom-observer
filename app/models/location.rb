@@ -340,6 +340,7 @@ class Location < AbstractModel
     "India" => 0,
     "Indonesia" => 0,
     "Iran" => 0,
+    "Ireland" => 0,
     "Israel" => 0,
     "Italy" => 0,
     "Japan" => 0,
@@ -366,11 +367,13 @@ class Location < AbstractModel
     "Spain" => 0,
     "Sweden" => 0,
     "Switzerland" => 0,
+    "Taiwan" => 0,
     "Thailand" => 0,
     "Turkey" => 0,
     "United Kingdom" => 0,
     "USA" => 0,
-    "Unknown" => 0
+    "Unknown" => 0,
+    "Wales" => 0
   }
   
   UNDERSTOOD_STATES = {
