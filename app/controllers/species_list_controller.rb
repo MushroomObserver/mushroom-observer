@@ -561,7 +561,6 @@ class SpeciesListController < ApplicationController
     @species_list.modified   = now
     @species_list.user       = @user
     @species_list.attributes = args
-    @species_list.place_name = args[:place_name] # This one is virtual
 
     # This just makes sure all the names (that have been approved) exist.
     list = params[:list][:members].gsub('_', ' ').strip_squeeze
