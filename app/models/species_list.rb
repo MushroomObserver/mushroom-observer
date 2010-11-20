@@ -112,7 +112,7 @@ class SpeciesList < AbstractModel
   # Adjusts for the current user's location_format as well.
   def place_name=(place_name)
     where = if User.current_location_format == :scientific
-      Location.reverse_name(self.where)
+      Location.reverse_name(place_name)
     else
       place_name
     end
