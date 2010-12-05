@@ -2,6 +2,7 @@ class SupportController < ApplicationController
   # TODO: Add who
   
   def donate
+    store_location
   end
   
   def create_donation
@@ -24,6 +25,7 @@ class SupportController < ApplicationController
   end
   
   def donors
+    store_location
     @donor_list = Donation.get_donor_list
   end
 end
