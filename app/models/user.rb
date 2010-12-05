@@ -268,6 +268,7 @@ class User < AbstractModel
   has_many :species_lists
   has_many :test_add_image_logs
   has_many :votes
+  has_many :donations
 
   has_many :reviewed_images, :class_name => "Image", :foreign_key => "reviewer_id"
   has_many :reviewed_name_descriptions, :class_name => "NameDescription", :foreign_key => "reviewer_id"

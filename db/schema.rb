@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100910195247) do
+ActiveRecord::Schema.define(:version => 20101130031436) do
 
   create_table "add_image_test_logs", :force => true do |t|
     t.integer  "user_id"
@@ -66,6 +66,14 @@ ActiveRecord::Schema.define(:version => 20100910195247) do
     t.text     "uses"
     t.text     "refs"
     t.text     "notes"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "donations", :force => true do |t|
+    t.decimal  "amount",                    :precision => 12, :scale => 2
+    t.string   "who",        :limit => 100
+    t.string   "email",      :limit => 100
     t.datetime "created_at"
     t.datetime "updated_at"
   end

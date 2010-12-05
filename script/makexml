@@ -10,7 +10,8 @@
 #
 ################################################################################
 
-URL = "http://mushroomobserver.org/name/eol"
+# URL = "http://mushroomobserver.org/name/eol"
+URL = "http://localhost:3000/name/eol"
 
 # Prime the pump both to get around Jason's JavaScript detector
 # and to get the SQL caches loaded

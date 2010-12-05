@@ -4577,6 +4577,37 @@ how_vote: >
 
 
 ################################################################################
+
+# SUPPORT PAGES
+
+donate_thanks: Thank you for your interest in donating to Mushroom Observer!
+donate_explanation: >
+  Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below.
+  Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would
+  like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
+
+donate_pay_pal: PayPal
+donate_credit_card: Credit Card
+donate_fine_print: >
+  Charges will be made to the "Consortium for Digital Mycology Resources (CDMR)":http://digitalmycology.org and will be applied to the
+  Mushroom Observer.  The CDMR has been incorporated in the state of California and recognized by the state as a non-profit.  In addition,
+  it has applied for 501c3 status with the US federal government and as such our understanding is that donations to Mushroom Observer are 
+  tax deductable at least in the US.
+
+donate_title: Donate to Mushroom Observer
+donate_tab: Donate
+
+donors_intro: The Mushroom Observer Community thanks the following donors
+donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
+donors_title: Mushroom Observer Donor List
+donors_tab: Show Donors
+
+create_donation_title: Record Mushroom Observer Donation
+create_donation_not_allowed: Only admins can record donations
+create_donation_add: Add
+create_donation_tab: Record Donation
+
+################################################################################
 # LANGUAGE HELP PAGE
 
 location_help_title: Locations in Mushroom Observer

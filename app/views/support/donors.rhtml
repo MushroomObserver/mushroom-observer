@@ -1,0 +1,25 @@
+<%
+  @title = :donors_title.l
+  new_tab_set do
+    add_tab(:donate_tab.t, :action => 'donate')
+    if is_in_admin_mode?
+	    add_tab(:create_donation_tab.t, :action => 'create_donation')
+    end
+  end
+%>
+
+<p>
+<%= :donors_intro.l %>:
+</p>
+
+<table>
+  <% for donor in @donor_list %>
+    <tr>
+      <td><%= donor['who'] %></td>
+    </tr>
+  <% end %>
+</table>
+<br/>
+<p>
+  <%= :donors_order.l %>
+</p>
