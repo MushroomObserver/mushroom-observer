@@ -381,7 +381,7 @@ Understanding Helpers:: http://wiki.rubyonrails.org/rails/pages/UnderstandingHel
 
 == Testing
 
-Nathan has been very diligent writing unit tests for everything.  Just tun
+Nathan has been very diligent writing unit tests for everything.  Just run
 <tt>rake test</tt> and go get something to eat.  There are several files and
 directories involved, so it's worth an overview:
 

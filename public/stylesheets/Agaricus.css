@@ -24,6 +24,7 @@ a:hover {
     background-color: #f6f0f2;  /* campestris */
 }
 
+.input_image { color: #3b2821; } /* cupreobrunneus */
 img { border-color: #3b2821; } /* cupreobrunneus */
 a img:hover { border-color: #743931; } /* brasiliensis */
 

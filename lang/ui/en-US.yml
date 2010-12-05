@@ -1954,8 +1954,8 @@ form_observations_remove_image_confirm: >
 
 form_observations_specimen_available_help: >
   Check when there is a dried specimen available for further study.  This can
-  be either be at an official herbarium or part of a personal herbarium.
-  Please note where the specimen is in the notes.
+  either be at an official herbarium or part of a personal herbarium.  Please
+  note where the specimen is in the notes.
 
 form_observations_upload_help: >
   Use the checkboxes on the left to select the image you would like to use as

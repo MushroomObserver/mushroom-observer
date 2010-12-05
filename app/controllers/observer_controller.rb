@@ -519,6 +519,7 @@ class ObserverController < ApplicationController
                   :action => @query.model.index_action,
                   :params => query_params(@query))
     else
+      # flash_notice(@query.query)
       @flavor_field = refine_search_flavor_field
       @values.model_flavor = "#{model2.to_s.underscore} #{flavor2}"
       refine_search_initialize_values(@fields, @values, @query)

@@ -689,8 +689,7 @@ namespace :jason do
 
   desc "test"
   task(:test => :environment) do
-    include ApplicationHelper
-    print "First _Cladonia gracilis_ then _ssp turbinata_ and _ssp vulnerata_".tl + "\n"
-    print "Next _Fulgensia bracteata_ then _ssp bracteata_ and then _var alpina_".tl + "\n"
+    user = User.find(252)
+    AccountMailer.deliver_user_question(user, user, 'test', 'test')
   end
 end

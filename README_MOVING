@@ -175,7 +175,7 @@ root> chkconfig --level 345 monit on
 root> service monit start
 
 # Install mailserver.
-root> yum install postfix mutt
+root> yum install postfix mutt cyrus-sasl-md5 cyrus-sasl-ntlm cyrus-sasl-plain
 root> vi /etc/postfix/main.cf
     myhostname = mail.mushroomobserver.org
     mydomain = mushroomobserver.org
@@ -183,6 +183,9 @@ root> vi /etc/postfix/main.cf
     inet_interfaces = $myhostname, localhost
     mydestination = $myhostname, localhost.$mydomain, localhost,
             mail.$mydomain, www.$mydomain, ftp.$mydomain, $mydomain
+    relayhost =
+    smtpd_recipient_restrictions = \
+      permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination
     (I just stick these at the end and comment out the defaults)
 root> vi /etc/aliases
     mailer-daemon:  root
@@ -196,6 +199,44 @@ root> vi /etc/hosts
 root> newaliases
 root> service postfix start
 root> chkconfig --level 345 postfix on
+
+# # Configure SMTP AUTH:
+# root> cat > /etc/pam.d/smtp << __END__
+#   #%PAM-1.0
+#   auth required pam_permit.so
+#   account required pam_permit.so
+#   session required pam_permit.so
+#   password required pam_permit.so
+#   __END__
+# root> vi /etc/sysconfig/saslauthd
+#   (make sure MECH=pam)
+# root> cat > /usr/lib64/sasl2/smtpd.conf << __END__
+#   pwcheck_method: auxprop
+#   auxprop_plugin: sasldb
+#   mech_list: plain login cram-md5 digest-md5 ntlm
+#   __END__
+# root> saslpasswd2 -c mo
+#   <password>
+# root> chmod 640 /etc/sasldb2
+# root> chown root:mail /etc/sasldb2
+# root> service saslauthd restart
+# root> testsaslauthd -u mo -p tst -s smtp
+# root> telnet 127.0.0.1 25
+#   EHLO localhost
+#   AUTH LOGIN
+#   ...
+#   MAIL FROM: from@email.address
+#   RCPT TO: to@email.address
+#   DATA
+#   Subject: Test
+#
+#   Testing...
+#   .
+#   QUIT
+# ...
+# root> iptables -A INPUT -p tcp --dport 587 -j ACCEPT
+# root> chkconfig --level 345 saslauthd on
+# This does not work yet...
 
 # Configure no-reply to bounce correctly.
 root> useradd no-reply

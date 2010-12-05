@@ -15,6 +15,7 @@ body {
   margin-bottom: 20px;
 }
 
+.input_image { color: #000000; }
 img { border-color: #000000; }
 a img:hover { border-color: #ff0000; }
 
