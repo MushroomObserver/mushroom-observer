@@ -8,17 +8,15 @@
   end
 %>
 
-<p>
-<%= :donors_intro.l %>:
-</p>
-
-<table>
+<center>
+<table class="Donors">
   <% for donor in @donor_list %>
-    <tr>
-      <td><%= donor['who'] %></td>
+    <tr align="center">
+      <td class="Donors"><%= donor['who'] %></td>
     </tr>
   <% end %>
 </table>
+</center>
 <br/>
 <p>
   <%= :donors_order.l %>

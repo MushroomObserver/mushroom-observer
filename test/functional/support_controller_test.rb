@@ -20,4 +20,14 @@ class SupportControllerTest < FunctionalTestCase
     get_with_dump(:create_donation)
     assert_response('create_donation')
   end
+
+  def test_thanks
+    get_with_dump(:thanks)
+    assert_response('thanks')
+  end
+
+  def test_letter
+    get_with_dump(:letter)
+    assert_response('letter')
+  end
 end

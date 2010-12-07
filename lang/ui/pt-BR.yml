@@ -1956,8 +1956,8 @@ form_observations_remove_image_confirm:  >
 
 form_observations_specimen_available_help:  >
   Check when there is a dried specimen available for further study.  This can
-  be either be at an official herbarium or part of a personal herbarium.
-  Please note where the specimen is in the notes.
+  either be at an official herbarium or part of a personal herbarium.  Please
+  note where the specimen is in the notes.
 
 form_observations_upload_help:  >
   Use the checkboxes on the left to select the image you would like to use as
@@ -4583,7 +4583,10 @@ how_vote:  >
 
 # SUPPORT PAGES
 
-donate_thanks:  Thank you for your interest in donating to Mushroom Observer!
+donate_thanks:  >
+  Thank you for your interest in donating to Mushroom Observer!  Check out this "open letter to the Mushroom Observer Community":/support/letter
+  if you are curious why we have started asking for donations.
+
 donate_explanation:  >
   Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below.
   Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would
@@ -4600,15 +4603,73 @@ donate_fine_print:  >
 donate_title:  Donate to Mushroom Observer
 donate_tab:  Donate
 
-donors_intro:  The Mushroom Observer Community thanks the following donors
+
 donors_order:  The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
-donors_title:  Mushroom Observer Donor List
+donors_title:  The Mushroom Observer Community Thanks Our Donors
 donors_tab:  Show Donors
+
 
 create_donation_title:  Record Mushroom Observer Donation
 create_donation_not_allowed:  Only admins can record donations
 create_donation_add:  Add
 create_donation_tab:  Record Donation
+
+
+thanks_title:  Thanks for Your Support!
+thanks_note:  >
+  Thank you for helping to support the Mushroom Observer.  Your support is greatly appreciated and will help
+  Mushroom Observer continue its mission.
+  <br/><br/>
+  Your donation will be acknowledged by name on the
+  "Mushroom Observer Donors Page":/support/donors once the funds are received unless you have requested special
+  arrangements for your acknowledgement.  Examples of special arrangements might be to make the donation anonymously
+  or to leave it in someone else's name.  If you would like special arrangements for your acknowledgement please
+  "send us a comment":/observer/ask_webmaster_question.
+
+
+letter_title:  Open Letter to the Community
+letter_body:  >
+  To the Mushroom Observer Community,
+  <br/><br/>
+  It has been an amazing year for us.  This year we hit some
+  major milestones: 100,000 images, 50,000 observations and
+  2,000 registered users.  This means we have essentially
+  been doubling every year.  While Jason has achieved some
+  minor miracles in his volunteer efforts to keep things
+  going with the bare bones server configuration we are
+  using, it is becoming clear that we will soon need more
+  memory and more processors to support our continued growth.
+  <br/><br/>
+  Unfortunately, this means our server expenses will be going
+  up.  So far I have been happy to support the Mushroom
+  Observer server needs out of my own pocket, but those
+  expenses have also been essentially doubling every year and
+  I will soon not be able to afford it.  As a result, I would like to
+  start asking for donations from the community.  Those of you who have
+  gotten a lot out of the site and want to see it continue to grow and
+  expand, now is your chance to give a little back and help with the
+  financial support of the site.
+  <br/><br/>
+  To that end, we have setup
+  a "donation page":/support/donate that can
+  securely accept money from a PayPal account or a regular credit card.
+  <br/><br/>
+  I would like to raise at least $2000 to cover basic server costs.
+  The more we get, the more we can expand our capacity for
+  traffic and growth.  And the fewer times you will encounter server
+  down time and failed uploads.
+  <br/><br/>
+  When you make a donation, you can choose to be acknowledged by name
+  on our "donors page":/support/donors
+  <br/><br/>
+  Please help support this active internet community of
+  people who enjoy sharing and learning more about the
+  mushrooms around us.
+  <br/><br/>
+  Thanks,<br/>
+  -Nathan
+
+app_donate_banner:  "'Tis the season to donate to Mushroom Observer"
 
 ################################################################################
 # LANGUAGE HELP PAGE
@@ -4823,3 +4884,5 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+
+################################################################################

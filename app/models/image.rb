@@ -413,6 +413,7 @@ class Image < AbstractModel
       # Image is already stored in a local temp file.  This is how Rails passes
       # large files from Apache.
       when Tempfile
+        @file = file
         self.upload_temp_file = file.path
         self.upload_length = file.size
         self.upload_type   = file.content_type if file.respond_to?(:content_type)
@@ -422,6 +423,7 @@ class Image < AbstractModel
       # Image is given as an input stream.  We need to save it to a temp file
       # before we can do anything useful with it.
       when IO, StringIO
+        @file = nil
         self.upload_temp_file = nil
         self.upload_length = file.content_length.chomp if file.respond_to?(:content_length)
         self.upload_length = file.size           if file.respond_to?(:size)
@@ -502,10 +504,10 @@ class Image < AbstractModel
       if upload_handle.is_a?(IO) or
          upload_handle.is_a?(StringIO)
         begin
-          file = Tempfile.new('image_upload')
-          FileUtils.copy_stream(upload_handle, file)
-          self.upload_temp_file = file.path
-          self.upload_length = file.size
+          @file = Tempfile.new('image_upload') # Using an instance variable so the temp file last as long as the reference to the path.
+          FileUtils.copy_stream(upload_handle, @file)
+          self.upload_temp_file = @file.path
+          self.upload_length = @file.size
           result = true
         rescue => e
           errors.add(:image, e.to_s)

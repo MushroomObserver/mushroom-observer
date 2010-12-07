@@ -1,0 +1,13 @@
+<%
+  @title = :thanks_title.l
+  new_tab_set do
+    add_tab(:donors_tab.t, :action => 'donors')
+    if is_in_admin_mode?
+	    add_tab(:create_donation_tab.t, :action => 'create_donation')
+    end
+  end
+%>
+
+<p>
+<%= :thanks_note.tp %>
+</p>

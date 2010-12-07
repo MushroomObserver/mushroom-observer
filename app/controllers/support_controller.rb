@@ -1,6 +1,4 @@
 class SupportController < ApplicationController  
-  # TODO: Add who
-  
   def donate
     store_location
   end
@@ -27,5 +25,13 @@ class SupportController < ApplicationController
   def donors
     store_location
     @donor_list = Donation.get_donor_list
+  end
+  
+  def letter
+    store_location
+  end
+  
+  def thanks
+    store_location
   end
 end

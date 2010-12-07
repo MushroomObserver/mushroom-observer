@@ -167,6 +167,12 @@ div.progressBar div.background {
   font-weight: bold;
 }
 
+.Donors {
+  font-size: 24px;
+  line-height: 36px;
+  font-weight: bold;
+}
+
 .Name {
   font-size: larger;
   font-weight: bold;
