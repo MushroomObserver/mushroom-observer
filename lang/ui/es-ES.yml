@@ -4783,8 +4783,6 @@ donate_explanation:  >
   Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would
   like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 
-donate_pay_pal:  PayPal
-donate_credit_card:  Credit Card
 donate_fine_print:  >
   Charges will be made to the "Consortium for Digital Mycology Resources (CDMR)":http://digitalmycology.org and will be applied to the
   Mushroom Observer.  The CDMR has been incorporated in the state of California and recognized by the state as a non-profit.  In addition,
@@ -4793,7 +4791,11 @@ donate_fine_print:  >
 
 donate_title:  Donate to Mushroom Observer
 donate_tab:  Donate
-
+donate_amount:  Amount
+donate_anonymous:  Anonymous donation
+donate_who:  Name for Donors Page
+donate_email:  Email (to ensure uniqueness)
+donate_confirm:  Donate
 
 donors_order:  The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
 donors_title:  The Mushroom Observer Community Thanks Our Donors
@@ -4850,8 +4852,11 @@ letter_body:  >
   traffic and growth.  And the fewer times you will encounter server
   down time and failed uploads.
   <br/><br/>
-  When you make a donation, you can choose to be acknowledged by name
-  on our "donors page":/support/donors
+  When you make a donation, your name by default will be added to our
+  "donors page":/support/donors as soon as we confirm the donation.
+  If you would prefer to donote anonymously or make other special arrangements
+  for your acknowledgement, "send a comment":/observer/ask_webmaster_question
+  after you make your donation.
   <br/><br/>
   Please help support this active internet community of
   people who enjoy sharing and learning more about the
@@ -5077,3 +5082,7 @@ system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
 
 ################################################################################
+
+# Extra/unnecessary translations:
+donate_credit_card:  Credit Card
+donate_pay_pal:  PayPal
