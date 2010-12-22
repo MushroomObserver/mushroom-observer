@@ -155,6 +155,14 @@ div.progressBar div.background {
   border: 2px solid green;
 }
 
+.MessageBanner {
+  margin: 10px 10px 5px 10px;
+  padding: 10px 15px 10px 15px;
+  font-weight: bold;
+  border: 6px solid green;
+  font-size: larger;
+}
+
 .Warnings {
   border: 2px solid yellow;
 }
@@ -164,6 +172,10 @@ div.progressBar div.background {
 }
 
 .Data {
+  font-weight: bold;
+}
+
+.TableColumn {
   font-weight: bold;
 }
 
@@ -273,6 +285,11 @@ div.HelpNoteIndent {
   text-align: center;
   font-size: 30px;
   line-height: 36px;
+}
+
+.SubmitButton {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .SubTitle {

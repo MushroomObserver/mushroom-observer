@@ -4,8 +4,14 @@
     add_tab(:donors_tab.t, :action => 'donors')
     if is_in_admin_mode?
 	    add_tab(:create_donation_tab.t, :action => 'create_donation')
+	    add_tab(:review_donations_tab.t, :action => 'review_donations')
     end
   end
+%>
+
+<%
+  javascript_include 'donate'
+  javascript_include 'prototype'
 %>
 
 <p>
@@ -14,12 +20,38 @@
 <p>
 <%= :donate_explanation.tp %>
 </p>
+
 <center>
-  <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-  <input type="hidden" name="cmd" value="_s-xclick">
-  <input type="hidden" name="hosted_button_id" value="YTQZUX7NQFXRJ">
-  <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-  <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+  <form id="donate_form" name="_xclick" action="/support/confirm" method="post">
+<p>
+  <table>
+    <% for a in [25.00, 50.00, 100.00, 200.00] %>
+      <tr>
+        <td align="left">
+          <%= radio_button("donation", "amount", a, :onchange => "enableOther()") + " $#{a.to_i}<br/>" %>
+        </td>
+      </tr>
+    <% end %>
+    <tr><td>
+      <%= radio_button("donation", "amount", "other", :onchange => "enableOther()")%>
+      <%= :donate_other.t %>: $
+      <%= text_field("donation", "other_amount", :size => 7)%>
+    </td></tr>
+    <tr>
+      <td align="right"><%= :donate_who.t + ": " %></td>
+      <td>
+        <%= text_field('donation', 'who', :size => 50) %>
+        <%= check_box('donation', 'anonymous') %>
+        <label for="donation_anonymous"><%= :donate_anonymous.t %></label>
+      </td>
+    </tr>
+    <tr>
+      <td align="right"><%= :donate_email.t + ": " %></td><td><%= text_field('donation', 'email', :size => 50) %></td>
+    </tr>
+  </table>
+</p>
+
+  <input type="submit" value="<%= :donate_confirm.t %>">
   </form>
 </center>
 <p>

@@ -4065,6 +4065,12 @@ how_help_translators: >
   p(normal). Die Webseite ist dafür eingestellt, in vielen Sprachen zu funktionieren. Wir
   brauchen bloß noch Übersetzer.
 
+how_help_donors:  >
+  h2. 5. Donors
+  \n\n
+  p(normal). Help support our server costs by "donating":/support/donate to
+  the Mushroom Observer.
+
 how_help_business_planning: >
   h2. 5. Geschäftsideen
   \n\n
@@ -4562,23 +4568,31 @@ donate_explanation:  >
   like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 
 donate_fine_print:  >
-  Charges will be made to the "Consortium for Digital Mycology Resources (CDMR)":http://digitalmycology.org and will be applied to the
-  Mushroom Observer.  The CDMR has been incorporated in the state of California and recognized by the state as a non-profit.  In addition,
-  it has applied for 501c3 status with the US federal government and as such our understanding is that donations to Mushroom Observer are 
-  tax deductable at least in the US.
+  Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR) and will be applied
+  to the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.
+  The CDMR has been incorporated in the state of California
+  and recognized by the state as a non-profit.  In addition, it has applied for 501c3 status with the US federal government and as
+  such our understanding is that donations to Mushroom Observer are tax deductable at least in the US.
 
 donate_title:  Donate to Mushroom Observer
 donate_tab:  Donate
-donate_amount:  Amount
+donate_other:  Other Amount
 donate_anonymous:  Anonymous donation
 donate_who:  Name for Donors Page
 donate_email:  Email (to ensure uniqueness)
-donate_confirm:  Donate
+donate_confirm:  Confirm
 
 donors_order:  The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
 donors_title:  The Mushroom Observer Community Thanks Our Donors
 donors_tab:  Show Donors
 
+
+confirm_amount:  Amount
+confirm_title:  Donation Confirmation
+confirm_text:  >
+  Thank you for offering to make the following donation.  To transfer the money to
+  the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR)
+  using PayPal, click the button below.
 
 create_donation_title:  Record Mushroom Observer Donation
 create_donation_not_allowed:  Only admins can record donations
@@ -4586,6 +4600,18 @@ create_donation_add:  Add
 create_donation_tab:  Record Donation
 
 
+review_donations_title:  Review All Donations
+review_donations_not_allowed:  Only admins can review donations
+review_donations_update:  Update
+review_donations_tab:  Review Donations
+review_reviewed:  Reviewed
+review_id:  Id
+review_who:  Who
+review_anon:  Anon
+review_amount:  Amount
+review_email:  Email
+
+thanks_no_amount:  Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
 thanks_title:  Thanks for Your Support!
 thanks_note:  >
   Thank you for helping to support the Mushroom Observer.  Your support is greatly appreciated and will help
@@ -4643,7 +4669,8 @@ letter_body:  >
   Thanks,<br/>
   -Nathan
 
-app_donate_banner:  "'Tis the season to donate to Mushroom Observer"
+app_donate_banner:  "Donating to Mushroom Observer is now easier and we are close to half way to our goal!"
+app_donate:  Donate
 
 ################################################################################
 # LANGUAGE HELP PAGE
@@ -4858,9 +4885,3 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
-
-################################################################################
-
-# Extra/unnecessary translations:
-donate_credit_card:  Credit Card
-donate_pay_pal:  PayPal
