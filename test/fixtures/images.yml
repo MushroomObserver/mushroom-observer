@@ -66,3 +66,14 @@ agaricus_campestris_image:
   when: 2007-03-19
   notes: Some Notes
   copyright_holder: Bob Dobbs
+
+amateur_image:
+  id: 7
+  sync_id: 7xx1
+  created: 2010-12-31 06:46:00
+  modified: 2010-12-31 06:46:00
+  content_type: image/jpeg
+  user_id: 5
+  when: 2010-12-30
+  notes: 'A friend took this photo.'
+  copyright_holder: Nathan Wilson

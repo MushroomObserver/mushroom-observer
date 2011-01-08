@@ -18,6 +18,10 @@ class SupportController < ApplicationController
         @donation.who = params['donation']['who']
         @donation.anonymous = params['donation']['anonymous']
         @donation.email = params['donation']['email']
+        users = User.find_all_by_email(@donation.email)
+        if users.length == 1
+          @donation.user = users[0]
+        end
         @donation.reviewed = true
         @donation.save
       end
@@ -34,6 +38,7 @@ class SupportController < ApplicationController
       if amount == "other"
         amount = params['donation']['other_amount']
       end
+      @donation.user = @user
       @donation.amount = amount
       @donation.who = params['donation']['who']
       @donation.anonymous = params['donation']['anonymous']
@@ -69,24 +74,6 @@ class SupportController < ApplicationController
   end
   
   def letter
-    store_location
-  end
-  
-  def thanks
-    @donation = Donation.new
-    # Merge cookies and params to work around an issue with tests and cookies
-    ['donation_amount', 'who', 'anon', 'email'].each {|arg| params[arg] = (cookies[arg] or params[arg])}
-    @donation.amount = params['donation_amount']
-    if @donation.amount.nil?
-      flash_error(:thanks_no_amount.l)
-      redirect_to(:controller => :observer, :action => 'ask_webmaster_question')
-    end
-    @donation.who = params['who']
-    @donation.anonymous = (params['anon'] == 'true')
-    @donation.email = params['email']
-    @donation.reviewed = false
-    @donation.user = @user
-    @donation.save
     store_location
   end
 end

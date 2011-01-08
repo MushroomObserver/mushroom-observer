@@ -60,3 +60,13 @@ strobilurus_diminutivus_no_opinion_vote:
   favorite:  false
   observation_id: 8
 
+amateur_vote:
+  id:        6
+  sync_id:   6xx1
+  created:   2010-12-31 06:46:00
+  modified:  2010-12-31 06:46:00
+  user_id:   5
+  naming_id: 2
+  value:     2
+  favorite:  true
+  observation_id: 11

@@ -27,7 +27,7 @@ class ObserverControllerTest < FunctionalTestCase
     post_requires_login(:create_observation, params)
     # either_requires_either(:post, :create_observation, nil, params, :username => user.login)
     if o_num == 1
-      assert_response(:action => :show_observation)
+      assert_response(:action => :create_location)
     else
       assert_response(:success)
     end

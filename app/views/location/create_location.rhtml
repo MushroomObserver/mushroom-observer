@@ -10,12 +10,13 @@
 <% form_for(:location, :url => {
                :action => :create_location,
                :params => query_params.merge({:approved_where => @display_name}),
-               :set_user => @set_user ? 1 : 0
+               :set_user => @set_user ? 1 : 0,
+               :set_observation => @set_observation
             }) do |form| %>
-  <br/><center><%= submit_tag(:CREATE.l) %></center>
+  <center><%= submit_tag(:CREATE.l) %></center>
 
   <%= render(:partial => 'form_location', :locals =>
              { :where => @display_name, :form => form }) %>
 
-  <br/><center><%= submit_tag(:CREATE.l) %></center>
+  <center><%= submit_tag(:CREATE.l) %></center>
 <% end %>

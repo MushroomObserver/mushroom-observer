@@ -361,149 +361,256 @@ class AmateurTest < IntegrationTestCase
   # ------------------------------------------------------
   #  Test posting, editing, and destroying observations.
   # ------------------------------------------------------
-
-  def test_posting_observation
-    katrina = current_session
-    local_now = Time.now.in_time_zone
-    date  = local_now - 1.year - 2.months - 3.days
-    place = 'Glendale, California, USA'
-    loc   = locations(:burbank)
-    lat   = 34.1622
-    long  = -118.3521
+  
+  def test_posting_observation_rewrite
+    @expectations = {
+      :observation => observations(:amateur_observation),
+      :image => images(:amateur_image),
+      :location => locations(:burbank),
+      :vote => votes(:amateur_vote)
+    }
+    katrina = regular_user(@expectations)
+    katrina.login_required(@katrina, 'observer/create_observation')
     
-    name  = names(:coprinus_comatus)
-    file  = "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"
-    notes = 'A friend showed me this.'
-    img_user = 'Nathan Wilson'
-    img_notes = 'A friend took this photo.'
-    new_img_notes = img_notes + " Isn't it grand?"
-    setup_image_dirs
+    observation_fields = katrina.fills_in_form(observation_form_defaults, observation_form_no_location)
+    katrina.evaluate_no_location
+    
+    observation_fields = katrina.fills_in_form(observation_fields, observation_form_location,
+      [['image_0_image', "#{RAILS_ROOT}/test/fixtures/images/Coprinus_comatus.jpg"]])
+    katrina.evaluate_new_location_observation
 
-    get('/observer/create_observation')
-    assert_template('account/login')
-    current_session.login!(@katrina)
-    assert_template('observer/create_observation')
-
-    open_form do |form|
-      form.assert_value('observation_when_1i', local_now.year)
-      form.assert_value('observation_when_2i', local_now.month)
-      form.assert_value('observation_when_3i', local_now.day)
-      form.assert_value('observation_place_name', '')
-      form.assert_value('observation_lat', '')
-      form.assert_value('observation_long', '')
-      form.assert_value('name_name', '')
-      form.assert_value('is_collection_location', true)
-      form.assert_value('specimen', false)
-      form.assert_value('observation_notes', '')
-      form.select('observation_when_1i', date.year)
-      form.select('observation_when_2i', date.strftime('%B'))
-      form.select('observation_when_3i', date.day)
-      form.uncheck('is_collection_location')
-      form.check('specimen')
-      form.change('observation_notes', notes)
-      form.submit
-    end
-    assert_template('observer/create_observation')
-    assert_flash(/where|location/i)
-
-    open_form do |form|
-      form.assert_value('observation_when_1i', date.year)
-      form.assert_value('observation_when_2i', date.month)
-      form.assert_value('observation_when_3i', date.day)
-      form.assert_value('observation_place_name', '')
-      form.assert_value('observation_lat', '')
-      form.assert_value('observation_long', '')
-      form.assert_value('name_name', '')
-      form.assert_value('is_collection_location', false)
-      form.assert_value('specimen', true)
-      form.assert_value('observation_notes', notes)
-      form.change('observation_place_name', place)
-      form.change('observation_lat', lat)
-      form.change('observation_long', long)
-      form.change('name_name', ' '+name.text_name+' ')
-      form.select('vote_value', /promising/i)
-      form.select('image_0_when_1i', date.year)
-      form.select('image_0_when_2i', date.strftime('%B'))
-      form.select('image_0_when_3i', date.day)
-      form.change('image_0_copyright_holder', img_user)
-      form.change('image_0_notes', img_notes)
-      form.upload('image_0_image', file, 'image/jpeg')
-      form.submit
-    end
-    assert_flash(/success/i)
-    assert_flash(/uploaded/i)
-    assert_flash(/created observation/i)
-    assert_flash(/created proposed name/i)
-    assert_template('observer/show_observation')
-
-    obs = Observation.last
-    img = Image.last
-    assert_users_equal(@katrina, obs.user)
-    assert(obs.created > Time.now - 1.minute)
-    assert(obs.modified > Time.now - 1.minute)
-    assert_dates_equal(date, obs.when)
-    assert_equal(place, obs.where)
-    assert_nil(obs.location)
-    assert((obs.lat - lat).abs < 0.001)
-    assert((obs.long - long).abs < 0.001)
-    assert_names_equal(name, obs.name)
-    assert_false(obs.is_collection_location)
-    assert_true(obs.specimen)
-    assert_equal(notes, obs.notes)
-    assert_obj_list_equal([img], obs.images)
-    assert_dates_equal(date, img.when)
-    assert_equal(img_user, img.copyright_holder)
-    assert_equal(img_notes, img.notes)
-    assert_objs_equal(obs, assigns(:observation))
-
-    # Make sure important bits show up somewhere on page.
-    assert_match(obs.when.web_date, response.body)
-    for token in obs.where.split(', ') # USA ends up as <span class=\"caps\">USA</span>, so just search for each component
-      assert_match(token, response.body)
-    end
-    assert_match(:show_observation_seen_at.l, response.body)
-    assert_match(/specimen available/, response.body)
-    assert_match(notes, response.body)
-    assert_match(img_notes, response.body)
-    assert_select('a[href*=observations_at_where]', 1)
-    assert_select('a[href*=show_location]', 0)
-    assert_select('a[href*=show_image]')
-
-    # Change location to the correct Burbank.
-    click(:label => /edit observation/i)
-    open_form do |form|
-      form.change('place_name', loc.display_name)
-      form.change("image_#{img.id}_notes", new_img_notes)
-      form.submit
-    end
-    assert_flash_success
-    assert_template('observer/show_observation')
-
-    # Make sure things were changed correctly.
-    obs.reload
-    img.reload
-    assert_objs_equal(loc, obs.location)
-    assert_equal(loc.display_name, obs.place_name)
-    assert_equal(new_img_notes, img.notes)
-    assert_select('a[href*=observations_at_where]', 0)
-    assert_select('a[href*=show_location]', 1)
-
-    # Go to site index and make sure it shows up in RSS log.
-    rolf = open_session
+    katrina.fills_in_form(location_form_defaults)
+    katrina.evaluate_new_location
+    katrina.evaluate_show_observation
+    
+    katrina.click(:label => /edit observation/i)
+    katrina.fills_in_form(edit_observation_form_defaults(katrina.new_observation), observation_form_change_location)
+    katrina.evaluate_change_location
+    
+    rolf = regular_user(@expectations)
     rolf.get('/')
-    rolf.assert_select("a[href^=/#{obs.id}?]", :minimum => 1)
+    rolf.evaluate_observation_on_index
 
-    # Destroy it now.
     katrina.click(:label => /destroy/i, :href => /destroy_observation/)
-    katrina.assert_flash_success
-    katrina.assert_flash(/destroyed/i)
-    katrina.assert_template('observer/list_observations')
-
-    # Have Rolf reload and make sure log shows up as orphan.
+    katrina.evaluate_destruction
+  
     rolf.get('/')
-    rolf.assert_select("a[href^=/#{obs.id}?]", 0)
-    rolf.assert_select('a[href*=show_rss_log]') do |elems|
-      assert(elems.any? {|e| e.to_s.match(/deleted.*item/mi)} )
+    rolf.evaluate_orphan
+  end
+  
+  def regular_user(expectations)
+    open_session do |sess|
+      def sess.set_expectations(expectations)
+        @expectations = expectations
+      end
+      sess.set_expectations(expectations)
+      
+      def sess.login_required(user, page)
+        get(page)
+        assert_template('account/login')
+        login!(user)
+        assert_template(page)
+      end
+      
+      def sess.reload_results
+        @new_observation = Observation.last
+        @new_image = Image.last
+        @new_location = Location.last
+      end
+      
+      def sess.new_observation
+        @new_observation
+      end
+      
+      def sess.fills_in_form(expected, new_values={}, images=[])
+        open_form do |form|
+          for key, value in expected
+            form.assert_value(key, value)
+          end
+          for key, value in new_values
+            form.change(key, value)
+          end
+          setup_image_dirs
+          for id, filename in images
+            form.upload(id, filename, 'image/jpeg')
+          end
+          form.submit
+        end
+        expected.merge(new_values)
+      end
+
+      def sess.evaluate_observation_on_index
+        reload_results
+        assert_select("a[href^=/#{@new_observation.id}?]", :minimum => 1)
+      end
+
+      def sess.evaluate_destruction
+        assert_flash_success
+        assert_flash(/destroyed/i)
+        assert_template('observer/list_observations')
+      end
+      
+      def sess.evaluate_orphan
+        assert_select("a[href^=/#{@new_observation.id}?]", 0)
+        assert_select('a[href*=show_rss_log]') do |elems|
+          assert(elems.any? {|e| e.to_s.match(/deleted.*item/mi)} )
+        end
+      end
+
+      def sess.evaluate_no_location
+        assert_template('observer/create_observation')
+        assert_flash(/where|location/i)
+      end
+
+      def sess.evaluate_new_location_observation
+        assert_flash(/success/i)
+        assert_flash(/uploaded/i)
+        assert_flash(/created observation/i)
+        assert_flash(/created proposed name/i)
+        assert_template('location/create_location')
+
+        reload_results
+        assert_users_equal(@expectations[:observation].user, @new_observation.user)
+        assert(@new_observation.created > Time.now - 1.minute)
+        assert(@new_observation.modified > Time.now - 1.minute)
+        assert_dates_equal(@expectations[:observation].when, @new_observation.when)
+        assert_equal(@expectations[:observation].where, @new_observation.where)
+        assert_nil(@new_observation.location)
+        assert_gps_equal(@new_observation.lat, @expectations[:observation].lat)
+        assert_gps_equal(@new_observation.long, @expectations[:observation].long)
+        assert_names_equal(@expectations[:observation].name, @new_observation.name)
+        assert_equal(@expectations[:observation].is_collection_location, @new_observation.is_collection_location)
+        assert_equal(@expectations[:observation].specimen, @new_observation.specimen)
+        assert_equal(@expectations[:observation].notes, @new_observation.notes)
+        assert_obj_list_equal([@new_image], @new_observation.images)
+        assert_dates_equal(@expectations[:image].when, @new_image.when)
+        assert_equal(@expectations[:image].copyright_holder, @new_image.copyright_holder)
+        assert_equal(@expectations[:image].notes, @new_image.notes)
+        assert(assigns(:location))
+      end
+    
+      def sess.evaluate_new_location
+        assert_flash(/success/i)
+        assert_flash(/created location/i)
+        assert_template('observer/show_observation')
+        
+        reload_results
+        assert_equal(@expectations[:observation].where, @new_location.name)
+        assert_equal(@new_observation.location_id, @new_location.id)
+        assert_match(EXPECTED_PASADENA_GPS['location_north'], @new_location.north.to_s)
+        assert_match(EXPECTED_PASADENA_GPS['location_west'], @new_location.west.to_s)
+        assert_match(EXPECTED_PASADENA_GPS['location_east'], @new_location.east.to_s)
+        assert_match(EXPECTED_PASADENA_GPS['location_south'], @new_location.south.to_s)
+      end
+  
+      def sess.evaluate_show_observation
+        # Make sure important bits show up somewhere on page.
+        assert_match(@new_observation.when.web_date, response.body)
+        for token in @new_observation.location.name.split(', ') # USA ends up as <span class=\"caps\">USA</span>, so just search for each component
+          assert_match(token, response.body)
+        end
+        assert_match(:show_observation_seen_at.l, response.body)
+        assert_match(/specimen available/, response.body)
+        assert_match(@new_observation.notes, response.body)
+        assert_match(@new_image.notes, response.body)
+        assert_select('a[href*=observations_at_where]', 0)
+        assert_select('a[href*=show_location]', 1)
+        assert_select('a[href*=show_image]')
+      end
+
+      def sess.evaluate_change_location
+        assert_flash_success
+        assert_template('observer/show_observation')
+
+        reload_results
+        assert_objs_equal(@expectations[:location], @new_observation.location)
+        assert_equal(@expectations[:location].display_name, @new_observation.place_name)
+        assert_select('a[href*=observations_at_where]', 0)
+        assert_select('a[href*=show_location]', 1)
+      end
     end
+  end
+
+  def observation_form_defaults
+    local_now = Time.now.in_time_zone
+    {
+      'observation_when_1i' => local_now.year,
+      'observation_when_2i' => local_now.month,
+      'observation_when_3i' => local_now.day,
+      'observation_place_name' => '',
+      'observation_lat' => '',
+      'observation_long' => '',
+      'name_name' => '',
+      'is_collection_location' => true,
+      'specimen' => false,
+      'observation_notes' => ''
+    }
+  end
+
+  def observation_form_no_location
+    {
+      'observation_when_1i' => @expectations[:observation].when.year,
+      'observation_when_2i' => @expectations[:observation].when.month,
+      'observation_when_3i' => @expectations[:observation].when.day,
+      'is_collection_location' => @expectations[:observation].is_collection_location,
+      'specimen' => @expectations[:observation].specimen,
+      'observation_notes' => @expectations[:observation].notes
+    }
+  end
+
+  def observation_form_location
+    {
+      'observation_place_name' => @expectations[:observation].where,
+      'observation_lat' => @expectations[:observation].lat,
+      'observation_long'=> @expectations[:observation].long,
+      'name_name' => ' ' + @expectations[:observation].name.text_name + ' ',
+      'vote_value' => @expectations[:vote].value,
+      'image_0_when_1i' => @expectations[:image].when.year,
+      'image_0_when_2i' => @expectations[:image].when.month,
+      'image_0_when_3i' => @expectations[:image].when.day,
+      'image_0_copyright_holder' => @expectations[:image].copyright_holder,
+      'image_0_notes' => @expectations[:image].notes,
+    }
+  end
+
+  # Can't make this a fixture since it would then match the location name 'Pasadena, California, USA'
+  # All these need to be patterns to match the strings returned by the Google Map API.
+  # Note that these tests only work when you have a working Internet connection.
+  EXPECTED_PASADENA_GPS = {
+    'location_north' => /34.251/,
+    'location_west' => /-118.198/,
+    'location_east' => /-118.065/,
+    'location_south' => /34.117/,
+  }
+
+  def location_form_defaults
+    {
+      'location_display_name' => @expectations[:observation].where,
+      'location_high' => '',
+      'location_low' => '',
+      'location_notes' => ''
+    }.merge(EXPECTED_PASADENA_GPS)
+  end
+
+  def edit_observation_form_defaults(new_observation)
+    {
+      'observation_when_1i' => new_observation.when.year,
+      'observation_when_2i' => new_observation.when.month,
+      'observation_when_3i' => new_observation.when.day,
+      'observation_place_name' => new_observation.place_name,
+      'observation_lat' => /#{new_observation.lat}/,
+      'observation_long' => /#{new_observation.long}/,
+      'is_collection_location' => new_observation.is_collection_location,
+      'specimen' => new_observation.specimen,
+      'observation_notes' => new_observation.notes
+    }
+  end
+
+  IMAGE_NOTE_ADDITION = "Isn't it grand?"
+
+  def observation_form_change_location
+    {
+      'observation_place_name' => @expectations[:location].display_name,
+    }
   end
 end

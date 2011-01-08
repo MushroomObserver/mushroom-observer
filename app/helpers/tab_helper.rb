@@ -286,8 +286,8 @@ module ApplicationHelper::Tabs
   def add_location_search_tabs(name)
     search_string = name.gsub(' Co.', ' County').gsub(', USA', '').gsub(' ', '+').gsub(',', '%2C')
     add_tab('Google Maps', 'http://maps.google.com/maps?q=' + search_string)
-    add_tab('Yahoo Maps', 'http://maps.yahoo.com/#mvt=m&q1=' + search_string)
-    add_tab('Wikipedia', 'http://en.wikipedia.org/w/index.php?title=Special:Search&search=' + search_string)
+    add_tab('Yahoo Maps', 'http://maps.yahoo.com/#mvt=m&amp;q1=' + search_string)
+    add_tab('Wikipedia', 'http://en.wikipedia.org/w/index.php?title=Special:Search&amp;search=' + search_string)
     add_tab('Google Search', 'http://www.google.com/search?q=' + search_string)
   end
 end

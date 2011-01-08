@@ -57,7 +57,9 @@ module GeneralExtensions
 
   # Create test image dirs for tests that do image uploads.
   def setup_image_dirs
-    FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    if not FileTest.exist?(IMG_DIR)
+      FileUtils.cp_r(IMG_DIR.gsub(/test_images$/, 'setup_images'), IMG_DIR)
+    end
   end
 
   ##############################################################################
@@ -226,6 +228,12 @@ module GeneralExtensions
     end
   end
 
+  GPS_CLOSE_ENOUGH = 0.001
+
+  def assert_gps_equal(expected, value)
+    assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
+  end
+  
   # Test whether the n-1st queued email matches.  For example:
   #
   #   assert_email(0,

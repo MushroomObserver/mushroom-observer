@@ -815,96 +815,123 @@ class ObserverController < ApplicationController
 
     # Create empty instances first time through.
     if request.method != :post
-      @observation     = Observation.new
-      @naming          = Naming.new
-      @vote            = Vote.new
-      @what            = '' # can't be nil else rails tries to call @name.name
-      @names           = nil
-      @valid_names     = nil
-      @reason          = init_naming_reasons(@naming)
-      @images          = []
-      @good_images     = []
-      @location_primer = Location.primer
-      @name_primer     = Name.primer
-
-      # Grab defaults for date and location from last observation the user
-      # edited if it was less than an hour ago.
-      last_observation = Observation.find_by_user_id(@user.id, :order => 'modified DESC')
-      if last_observation && last_observation.modified > Time.now - 1.hour
-        @observation.when     = last_observation.when
-        @observation.where    = last_observation.where
-        @observation.location = last_observation.location
-        @observation.lat      = last_observation.lat
-        @observation.long     = last_observation.long
-      end
-
+      create_observation_get
     else
-      # Create everything roughly first.
-      @observation = create_observation_object(params[:observation])
-      @naming      = create_naming_object(params[:naming], @observation)
-      @vote        = create_vote_object(params[:vote], @naming)
-      @good_images = update_good_images(params[:good_images])
-      @bad_images  = create_image_objects(params[:image], @observation, @good_images)
+      create_observation_post(params)
+    end
+  end
+  
+  def create_observation_post(params)
+    rough_cut(params)
+    success = validate_name(params)
+    success = validate_place_name(params, success)
+    success = validate_observation(@observation) if success
+    success = validate_naming(@naming) if @name && success
+    success = validate_vote(@vote)     if @name && success
+    success = false                    if @bad_images != []
+    if success &&
+      (success = save_observation(@observation))
+      flash_notice(:runtime_observation_success.t(:id => @observation.id))
+      @observation.log(:log_observation_created)
+    end
 
-      # Validate name.
-      given_name  = params[:name][:name].to_s           rescue ''
-      chosen_name = params[:chosen_name][:name_id].to_s rescue ''
-      (success, @what, @name, @names, @valid_names) =
-        resolve_name(given_name, params[:approved_name], chosen_name)
-      @naming.name = @name if @name
+    # Once observation is saved we can save everything else.
+    if success
+      save_everything_else(params[:reason])
+      decide_on_next_page
 
-      # Validate where.
-      @place_name = @observation.where
-      @dubious_where_reasons = []
-      if @place_name != params[:approved_place_name]
-        @dubious_where_reasons = Location.dubious_name?(@place_name, true)
-        success = false if @dubious_where_reasons != []
-      end
-      lat = (params[:observation][:lat] or "")
-      long = (params[:observation][:long] or "")
-      if not ((lat == "" and long == "") or Location.check_lat_long(lat, long))
-        flash_error(:runtime_lat_long_error.l)
-        success = false
-      end
-      
-      # Validate objects.
-      success = validate_observation(@observation) if success
-      success = validate_naming(@naming) if @name && success
-      success = validate_vote(@vote)     if @name && success
-      success = false                    if @bad_images != []
+    # If anything failed reload the form.
+    else
+      reload_the_form(params[:reason])
+    end
+  end
 
-      # If everything checks out save observation.
-      if success &&
-        (success = save_observation(@observation))
-        flash_notice(:runtime_observation_success.t(:id => @observation.id))
-        @observation.log(:log_observation_created)
-      end
+  def rough_cut(params)
+    # Create everything roughly first.
+    @observation = create_observation_object(params[:observation])
+    @naming      = create_naming_object(params[:naming], @observation)
+    @vote        = create_vote_object(params[:vote], @naming)
+    @good_images = update_good_images(params[:good_images])
+    @bad_images  = create_image_objects(params[:image], @observation, @good_images)
+  end
+  
+  def validate_name(params)
+    # Validate name.
+    given_name  = params[:name][:name].to_s           rescue ''
+    chosen_name = params[:chosen_name][:name_id].to_s rescue ''
+    (success, @what, @name, @names, @valid_names) =
+      resolve_name(given_name, params[:approved_name], chosen_name)
+    @naming.name = @name if @name
+    return success
+  end
+  
+  def validate_place_name(params, success)
+    @place_name = @observation.where
+    @dubious_where_reasons = []
+    if @place_name != params[:approved_place_name]
+      @dubious_where_reasons = Location.dubious_name?(@place_name, true)
+      success = false if @dubious_where_reasons != []
+    end
+    lat = (params[:observation][:lat] or "")
+    long = (params[:observation][:long] or "")
+    if not ((lat == "" and long == "") or Location.check_lat_long(lat, long))
+      flash_error(:runtime_lat_long_error.l)
+      success = false
+    end
+    return success
+  end
 
-      # Once observation is saved we can save everything else.
-      if success
-        if @name
-          create_naming_reasons(@naming, params[:reason])
-          save_naming(@naming)
-          @observation.reload
-          @observation.change_vote(@naming, @vote.value)
-        end
-        attach_good_images(@observation, @good_images)
+  def save_everything_else(reason)
+    if @name
+      create_naming_reasons(@naming, reason)
+      save_naming(@naming)
+      @observation.reload
+      @observation.change_vote(@naming, @vote.value)
+    end
+    attach_good_images(@observation, @good_images)
+  end
 
-        # Check for notifications.
-        if has_unshown_notifications?(@user, :naming)
-          redirect_to(:action => 'show_notifications', :id => @observation.id)
-        else
-          redirect_to(:action => 'show_observation', :id => @observation.id)
-        end
+  def decide_on_next_page
+    if @observation.location.nil?
+      redirect_to(:controller => 'location', :action => 'create_location',
+        :where => Location.user_name(@user, @place_name), :set_observation => @observation.id)
+    elsif has_unshown_notifications?(@user, :naming)
+      redirect_to(:action => 'show_notifications', :id => @observation.id)
+    else
+      redirect_to(:action => 'show_observation', :id => @observation.id)
+    end
+  end
 
-      # If anything failed reload the form.
-      else
-        @reason          = init_naming_reasons(@naming, params[:reason])
-        @images          = @bad_images
-        @new_image.when  = @observation.when
-        @location_primer = Location.primer
-        @name_primer     = Name.primer
-      end
+  def reload_the_form(reason)
+    @reason          = init_naming_reasons(@naming, reason)
+    @images          = @bad_images
+    @new_image.when  = @observation.when
+    @location_primer = Location.primer
+    @name_primer     = Name.primer
+  end
+
+  def create_observation_get
+    @observation     = Observation.new
+    @naming          = Naming.new
+    @vote            = Vote.new
+    @what            = '' # can't be nil else rails tries to call @name.name
+    @names           = nil
+    @valid_names     = nil
+    @reason          = init_naming_reasons(@naming)
+    @images          = []
+    @good_images     = []
+    @location_primer = Location.primer
+    @name_primer     = Name.primer
+
+    # Grab defaults for date and location from last observation the user
+    # edited if it was less than an hour ago.
+    last_observation = Observation.find_by_user_id(@user.id, :order => 'modified DESC')
+    if last_observation && last_observation.modified > Time.now - 1.hour
+      @observation.when     = last_observation.when
+      @observation.where    = last_observation.where
+      @observation.location = last_observation.location
+      @observation.lat      = last_observation.lat
+      @observation.long     = last_observation.long
     end
   end
 
@@ -1962,7 +1989,7 @@ class ObserverController < ApplicationController
   end
 
   # Make sure there are no warnings for where.
-  def validate_where(where)
+  def ignore_validate_where(where)
     success = true
     if Location.dubious_name?(where)
       success = false

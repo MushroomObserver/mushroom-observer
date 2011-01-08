@@ -459,6 +459,9 @@ class LocationController < ApplicationController
     # (Used when linked from user profile: sets primary location after done.)
     @set_user = (params[:set_user] == "1")
 
+    # (Used when linked from create observation.)
+    @set_observation = params[:set_observation]
+
     # Render a blank form.
     user_name = Location.user_name(@user, @display_name)
     if request.method != :post
@@ -526,8 +529,27 @@ class LocationController < ApplicationController
       # If done, update any observations at @display_name,
       # and set user's primary location if called from profile.
       if done
+        action = 'show_location'
+        controller = 'location'
+        id = @location.id
         if !@display_name.blank?
           update_observations_by_where(@location, @display_name)
+        end
+        if @set_observation
+          obs = Observation.find(@set_observation)
+          if obs
+            obs.location_id = @location.id
+            obs.where = nil
+            obs.save
+            controller = 'observer'
+            id = @set_observation
+            if has_unshown_notifications?(@user, :naming)
+              action = 'show_notifications'
+            else
+              action = 'show_observation'
+            end
+            # Is there some Transation that's supposed to happen here?
+          end
         end
         if @set_user
           @user.location = @location
@@ -537,7 +559,7 @@ class LocationController < ApplicationController
             :set_location => @location
           )
         end
-        redirect_to(:action => 'show_location', :id => @location.id)
+        redirect_to(:controller => controller, :action => action, :id => id)
       end
     end
   end
@@ -793,7 +815,7 @@ class LocationController < ApplicationController
   # order of closeness of match.
   def list_merge_options # :norobots:
     store_location
-    @where = params[:where].to_s
+    @where = Location.user_name(@user, params[:where].to_s)
 
     # Split list of all locations into "matches" and "non-matches".  Try
     # matches in the following order:

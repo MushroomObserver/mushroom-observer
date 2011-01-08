@@ -119,3 +119,18 @@ unknown_with_lat_long:
   notes:     ''
   lat: 34.1622
   long: -118.3521
+
+amateur_observation:
+  id:        11
+  sync_id:   11x1
+  created:   2010-12-31 06:46:00
+  modified:  2010-12-31 06:46:00
+  when:      2010-12-30
+  user_id:   5
+  where: 'Pasadena, California, USA'
+  is_collection_location: 0
+  name_id:   4
+  specimen: 1
+  notes:     'A friend showed me this.'
+  lat: 34.1622
+  long: -118.3521

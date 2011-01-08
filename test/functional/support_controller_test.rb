@@ -75,6 +75,7 @@ class SupportControllerTest < FunctionalTestCase
     assert_equal(user.email, donation.email)
     assert_equal(anon, donation.anonymous)
     assert_equal(true, donation.reviewed)
+    assert_equal(@rolf, donation.user)
   end
 
   def test_create_donation_post
@@ -106,30 +107,6 @@ class SupportControllerTest < FunctionalTestCase
     post(:review_donations, params)
     reloaded = Donation.find(unreviewed.id)
     assert(reloaded.reviewed)
-  end
-
-  def test_thanks
-    user = @rolf
-    amount = 95.00
-    anon = false
-    donations = Donation.count
-    params = { # This should really be done through cookies, but I can't figure that out.
-      :donation_amount => amount,
-      :who => user.name,
-      :email => user.email,
-      :anon => anon,
-    }
-    login(@rolf.login)
-    get_with_dump(:thanks, params)
-    assert_response('thanks')
-    assert_equal(donations + 1, Donation.count)
-    donation = Donation.find(:all, :order => "created_at DESC")[0]
-    assert_equal(amount, donation.amount)
-    assert_equal(user.name, donation.who)
-    assert_equal(user.email, donation.email)
-    assert_equal(anon, donation.anonymous)
-    assert_equal(false, donation.reviewed)
-    assert_equal(@rolf, donation.user)
   end
 
   def test_letter

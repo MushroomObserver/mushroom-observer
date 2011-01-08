@@ -32,7 +32,7 @@
   <tr>
     <td/>
     <td align="right">
-      <input type="button" id="find_on_map" onClick="findOnMap()" value="<%= :form_locations_find_on_map.t %>" /> 
+      <input type="button" id="find_on_map" onclick="findOnMap()" value="<%= :form_locations_find_on_map.t %>" /> 
     </td>
     <td/>
   </tr>
@@ -117,7 +117,7 @@
           gmap = make_editable_map(@location)
           add_header(GMap.header)
           add_header(finish_map(gmap))
-          add_header("<script  type=\"text/javascript\">//<![CDATA[\nvar geocoder = new GClientGeocoder();\n\n//]]</script>\n\n")
+          add_header("<script  type=\"text/javascript\">\nvar geocoder = new GClientGeocoder();\n</script>\n\n")
           gmap.div(:width => "500", :height => "500")
         %>
       </center>
