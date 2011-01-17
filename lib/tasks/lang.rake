@@ -25,6 +25,7 @@ namespace :lang do
           key = nil
           at_top = true
           fh.each_line do |line|
+            line.sub!(/^\xEF\xBB\xBF/, '')  # (remove stupid UTF-8 marker)
             if line.match(/^#\s*----/)
               at_top = false
             elsif at_top
