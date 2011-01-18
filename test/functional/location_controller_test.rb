@@ -331,6 +331,26 @@ class LocationControllerTest < FunctionalTestCase
     assert_equal(albion, obs.location)
   end
 
+  def test_add_to_location_scientific
+    login('roy')
+    albion = locations(:albion)
+    obs = Observation.create!(
+      :when  => Time.now,
+      :where => (where = 'Albion, Mendocino Co., California, USA'),
+      :notes => 'new observation'
+    )
+    assert_equal(obs.location, nil)
+    assert_equal(:scientific, @roy.location_format)
+    params = {
+      :where    => where,
+      :location => albion.id
+    }
+    requires_login(:add_to_location, params, 'roy')
+    assert_response(:action => :list_locations)
+    assert_not_nil(obs.reload.location)
+    assert_equal(albion, obs.location)
+  end
+
   def test_map_locations
     # test_map_locations - map everything
     get_with_dump(:map_locations)

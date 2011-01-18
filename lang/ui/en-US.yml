@@ -4603,7 +4603,14 @@ donate_fine_print: >
   to the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.
   The CDMR has been incorporated in the state of California
   and recognized by the state as a non-profit.  In addition, the corporation has applied for 501c3 status with the US federal government
-  and as such our understanding is that donations to Mushroom Observer are tax deductible to the full extent allowed by law.
+  and as such our understanding is that donations to Mushroom Observer are tax deductible to the full extent allowed by law.\n\n
+  If you would prefer not to use PayPal, you are welcome to send a check or money order in US dollars payable to the
+  "Consortium for Digital Mycology Resources" to:\n\n
+  Mushroom Observer\n
+  c/o Nathan Wilson\n
+  43 Cameron Rd.\n
+  North Falmouth, MA 02556\n\n
+  Please indicate on the check or on an included note that the donation is intended for the Mushroom Observer.
 
 donate_title: Donate to Mushroom Observer
 donate_tab: Donate

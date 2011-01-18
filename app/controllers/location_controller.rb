@@ -874,7 +874,7 @@ class LocationController < ApplicationController
   # Move all the Observation's with a given +where+ into a given Location.
   def update_observations_by_where(location, where)
     success = true
-    observations = Observation.find_all_by_where(Location.user_name(@user, where))
+    observations = Observation.find_all_by_where(where)
     count = 3
     for o in observations
       count += 1
