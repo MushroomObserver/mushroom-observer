@@ -2296,6 +2296,8 @@ class ObserverController < ApplicationController
     valid_name = nil
 
     what2 = what.to_s.gsub('_', ' ').strip_squeeze
+    approved_name2 = approved_name.to_s.gsub('_', ' ').strip_squeeze
+
     if !what2.blank? && !Name.names_for_unknown.member?(what2.downcase)
       success = false
 
@@ -2316,7 +2318,7 @@ class ObserverController < ApplicationController
       # EXCEPT in the case of user supplying author for existing name that
       # has no author.)
       if names.empty? and
-         (name = create_needed_names(approved_name, what2))
+         (name = create_needed_names(approved_name2, what2))
         names << name
       end
 

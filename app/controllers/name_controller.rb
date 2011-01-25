@@ -1088,7 +1088,7 @@ class NameController < ApplicationController
           @names = Name.find_names(@what)
         end
         if @names.empty? and
-           (new_name = create_needed_names(params[:approved_name], @what))
+           (new_name = create_needed_names(params[:approved_name].to_s.strip_squeeze, @what))
           @names = [new_name]
         end
         target_name = @names.first
