@@ -1572,4 +1572,10 @@ class QueryTest < UnitTestCase
   def test_user_in_set
     assert_query([1,2,3], :User, :in_set, :ids => [3,2,1], :by => :reverse_name)
   end
+
+  def test_whiny_nil_in_map_locations
+    query = Query.lookup(:User, :in_set, :ids => [1,1000,2])
+    query.query
+    assert_equal(2, query.results.length)
+  end
 end
