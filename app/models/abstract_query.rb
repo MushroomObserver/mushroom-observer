@@ -1172,7 +1172,10 @@ class AbstractQuery < ActiveRecord::Base
     self.order = "FIND_IN_SET(#{table}.id,'#{set}') ASC"
 
     # Hey, check it out, we can populate the results cache immediately!
-    @result_ids = ids
+    # Oh, crap, no we can't.  This fails down the line if bogus ids are given
+    # to us in params[:ids].  query.result_ids returns the bogus ids, and
+    # query.results returns nils for the bogus ids.
+    # @result_ids = ids
   end
 
   ##############################################################################
