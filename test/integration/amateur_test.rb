@@ -580,7 +580,7 @@ class AmateurTest < IntegrationTestCase
     'location_north' => /34.251/,
     'location_west' => /-118.198/,
     'location_east' => /-118.065/,
-    'location_south' => /34.117/,
+    'location_south' => /34.119/,
   }
 
   def location_form_defaults
