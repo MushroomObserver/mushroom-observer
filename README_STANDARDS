@@ -1,5 +1,45 @@
+Last Revised: February 6, 2011
+
 Standards:
 
+There are a number of standards the code conforms to.  I'll just list a few
+that I can think of off the top of my head:
+
+* RedCloth
+
+This simple mark-up is used throughout the site, e.g. in user-supplied notes,
+in scientific names, and in "internationalization" strings (see below).
+
+* sanitize or html_escape
+
+All user-supplied text should be run through +sanitize+ or +html_escape+ to
+strip out any potentially harmful HTML.  (Note +h+ is an alias for
++html_escape+.)
+
+* internationalization
+
+Slowly but surely we are abstractifying all text on the site.  Going forward
+it's very easy: instead of printing a string, print <tt>:some_tag.l</tt>
+instead and insert that string into <tt>lang/ui/*.yml</tt>.
+
+* no Model.method() calls in views!
+
+This is a violation of the MVC architecture.  Ask Nathan about it.  Or check
+out the link under the *Ruby on Rails* section near the top of this document.
+
+* rdoc
+
+Try to remember to comment your code in such a way that *rdoc* can understand
+it.  There is a huge amount of work to do to comment old code, but going
+forward it would be nice if we started to do this.  Wouldn't it?
+
+* unit tests
+
+Write tests for every bug you fix!  Better yet, write tests for every new
+feature you add.  Some people suggest testing new code in *test* before even
+trying it out on the website.  Okay, maybe you can go too far...
+
+*** Needs integration ***
 Use textilize() on notes.
 Don't use anything on fields of fixed types like dates
 Use textilize_without_paragraph h(str) on arbitrary, formatted but size limited strings like Observation.unique_format_name.

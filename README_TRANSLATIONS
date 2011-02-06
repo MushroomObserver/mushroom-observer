@@ -1,9 +1,11 @@
+Last Revised: February 6, 2011
 
 OVERVIEW
 
 This directory contains all the text used by Mushroom Observer.
  
   de-DE.yml   German.
+  el-GR.yml   Greek.
   en-US.yml   English.
   es-ES.yml   Spanish. (how_to_use page unfinished)
   pt-BR.yml   Brazillian Portuguese. (much unfinished)

@@ -43,11 +43,13 @@
       DANGER: You are in administrator mode. Proceed with caution.
     </div>
   <% end %>
-  <div>
-    <center class="MessageBanner">
-      *** <%= link_to(:app_donate_banner.t, :controller => 'support', :action => 'donate') %> ***
-    </center>
-  </div>
+  <% if :app_donate_banner.t != "" %>
+    <div>
+      <center class="MessageBanner">
+        <%= link_to(:app_donate_banner.t, :controller => 'support', :action => 'donate') %>
+      </center>
+    </div>
+  <% end %>
   <div id="columns" style="height:100%">
     <table cellpadding="0" cellspacing="0" border="0" style="height:100%">
       <tr>

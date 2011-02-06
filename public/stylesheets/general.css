@@ -158,8 +158,8 @@ div.progressBar div.background {
 .MessageBanner {
   margin: 10px 10px 5px 10px;
   padding: 10px 15px 10px 15px;
+  border: 2px solid green;
   font-weight: bold;
-  border: 6px solid green;
   font-size: larger;
 }
 
