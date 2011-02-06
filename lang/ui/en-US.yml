@@ -9,6 +9,30 @@ es_ES: Español
 pt_BR: Português
 
 ################################################################################
+#
+#  Overview of File
+#
+#  Translations are presented roughly in order of decreasing importance,
+#  starting with things that are seen on every page, progressing through
+#  commonly-used to rarely-used pages, to emails, error messages, and finally
+#  administrative and debugging messages. Sections:
+#
+#    COMMON WORDS AND PHRASES
+#    ENUMERATED SETS OF VALUES
+#    APPLICATION LAYOUT
+#    MOST POPULAR PAGES
+#    LESS POPULAR PAGES
+#    ADMIN-TYPE PAGES
+#    EMAIL MESSAGES
+#    INTRO PAGE
+#    HOW TO HELP PAGE
+#    HOW TO USE PAGE (COMMON TASKS)
+#    HOW TO USE PAGE (GLOSSARY)
+#    LOCATION HELP PAGE
+#    ERROR MESSAGES
+#    DEBUGGING STUFF
+#
+################################################################################
 
 # COMMON WORDS AND PHRASES
 
@@ -861,414 +885,6 @@ log_object_destroyed: "[:log_object_destroyed_by_user]"
 log_object_removed: "[:log_object_removed_by_user]"
 log_object_updated: "[:log_object_updated_by_user]"
 
-# ActiveRecord validation error messages.
-validate_confirmation_mismatch: "[Field] doesn't match confirmation."
-validate_invalid: Invalid [field].
-validate_missing: Missing [field].
-validate_not_a_number: "[Field] is not a number."
-validate_not_in_range: "[Field] is out of range."
-validate_this_more_than_that: "[That] should be greater than [this]."
-validate_too_large: "[Field] should be at most [max]."
-validate_too_long: "[Field] must be less than [max] characters long."
-validate_too_long_or_short: "[Field] must be [min] to [max] characters long."
-validate_too_short: "[Field] must be at least [min] characters long."
-validate_too_small: "[Field] should be at least [min]."
-validate_too_small_or_large: "[Field] should be between [min] and [max]."
-
-# One-time-use error messages.
-validate_image_content_type_images_only: You can only upload [:images].
-validate_image_file_missing: Had problems uploading [:image].
-validate_image_file_too_big: We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
-validate_image_md5_mismatch: The MD5 sum did not come out right.  Please try uploading your image again.
-validate_observation_future_time: Time travel is not allowed, pick a date from the past.
-validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
-validate_observation_where_missing: Please tell us where it was seen or collected.
-validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
-validate_user_login_taken: Sorry, that login name is already taken.
-validate_image_wrong_type: The file you tried to upload is not recognized as an image.  It is of type '[type]'.
-
-# These shouldn't need translating, but you are free to override if you need to.
-validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
-validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
-validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
-validate_comment_user_missing: "[:validate_missing(field=:user)]"
-validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
-validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
-validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-validate_image_user_missing: "[:validate_missing(field=:user)]"
-validate_image_when_missing: "[:validate_missing(field=:date)]"
-validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
-validate_interest_user_missing: "[:validate_missing(field=:user)]"
-validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
-validate_location_east_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
-validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
-validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
-validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
-validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
-validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
-validate_location_user_missing: "[:validate_missing(field=:user)]"
-validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
-validate_name_author_too_long: "[:validate_too_long(field=:authority,max=100)]"
-validate_name_display_name_too_long: "[:validate_too_long(field=''display_name'',max=100)]"
-validate_name_observation_name_too_long: "[:validate_too_long(field=''observation_name'',max=100)]"
-validate_name_search_name_too_long: "[:validate_too_long(field=''search_name'',max=100)]"
-validate_name_text_name_too_long: "[:validate_too_long(field=''text_name'',max=100)]"
-validate_name_user_missing: "[:validate_missing(field=:user)]"
-validate_naming_name_missing: "[:validate_missing(field=:name)]"
-validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
-validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
-validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
-validate_naming_user_missing: "[:validate_missing(field=:user)]"
-validate_notification_user_missing: "[:validate_missing(field=:user)]"
-validate_observation_user_missing: "[:validate_missing(field=:user)]"
-validate_observation_when_missing: "[:validate_missing(field=:date)]"
-validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
-validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-validate_project_title_missing: "[:validate_missing(field=:title)]"
-validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-validate_project_user_group_missing: Missing [:user_group].
-validate_project_user_missing: "[:validate_missing(field=:user)]"
-validate_species_list_title_missing: "[:validate_missing(field=:title)]"
-validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-validate_species_list_user_missing: "[:validate_missing(field=:user)]"
-validate_species_list_where_missing: "[:validate_missing(field=:location)]"
-validate_species_list_where_too_long: "[:validate_too_long(field=:location,max=100)]"
-validate_user_email_too_long: "[:validate_too_long(field=:email_address,max=80)]"
-validate_user_login_missing: "[:validate_missing(field=:login_name)]"
-validate_user_login_too_long: "[:validate_too_long_or_short(field=:login_name,min=3,max=40)]"
-validate_user_name_too_long: "[:validate_too_long(field=:full_name,max=80)]"
-validate_user_password_confirmation_missing: "[:validate_missing(field=:password_confirmation)]"
-validate_user_password_missing: "[:validate_missing(field=:password)]"
-validate_user_password_no_match: "[:validate_confirmation_mismatch(field=:password)]"
-validate_user_password_too_long: "[:validate_too_long(field=:password,max=40)]"
-validate_user_theme_too_long: "[:validate_too_long(field=''theme_name'',max=40)]"
-validate_vote_naming_missing: "[:validate_missing(field=:naming)]"
-validate_vote_user_missing: "[:validate_missing(field=:user)]"
-validate_vote_value_missing: "[:validate_missing(field=:confidence_level)]"
-validate_vote_value_not_integer: "[:validate_not_a_number(field=:vote)]"
-validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
-
-# Runtime error and success messages.
-runtime_added: "Successfully added [type]."
-runtime_added_id: "Successfully added [type] #[value]."
-runtime_added_id_to: "Successfully added [type] #[value] to [name]."
-runtime_added_name: "Successfully added [type] '[value]'."
-runtime_added_name_to: "Successfully added [type] '[value]' to [name]."
-runtime_added_to: "Successfully added [type] to [name]."
-runtime_admin_only: That operation is restricted to site admins.
-runtime_already_exists: "[Type] already exists: '[value]'"
-runtime_already_used: "[Type] is already in use: '[value]'"
-runtime_created: "Successfully created [type]."
-runtime_created_id: "Successfully created [type] #[value]."
-runtime_created_name: "Successfully created [type] '[value]'."
-runtime_delivered_message: Successfully delivered message.
-runtime_delivered_question: Successfully delivered question.
-runtime_delivered_request: Successfully delivered request.
-runtime_destroyed: "Successfully destroyed [type]."
-runtime_destroyed_id: "Successfully destroyed [type] #[value]."
-runtime_destroyed_name: "Successfully destroyed [type] '[value]'."
-runtime_invalid: "[Type] is invalid: '[value]'"
-runtime_lat_long_error: "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
-runtime_merge_success: Successfully merged [type] [this] into [that].
-runtime_missing: Missing [field].
-runtime_no_changes: "No changes made."
-runtime_no_create: "Unable to create [type]."
-runtime_no_create_id: "Unable to create [type] #[value]."
-runtime_no_create_name: "Unable to create [type] '[value]'."
-runtime_no_destroy: "Unable to destroy [type]."
-runtime_no_destroy_id: "Unable to destroy [type] #[value]."
-runtime_no_destroy_name: "Unable to destroy [type] '[value]'."
-runtime_no_match: "Can't find [type]."
-runtime_no_match_id: "Can't find [type] #[value]."
-runtime_no_match_name: "Can't find [type] matching '[value]'."
-runtime_no_matches: "No matching [types] found."
-runtime_no_matches_pattern: "No [types] matching '[value]' found."
-runtime_no_more: There are no more [types].
-runtime_no_objects: There are no [types].
-runtime_no_parse: "Unable to parse: '[value]'"
-runtime_no_save: "Unable to save [type]."
-runtime_no_update: "Unable to update [type]."
-runtime_no_update_id: "Unable to update [type] #[value]."
-runtime_no_update_name: "Unable to update [type] '[value]'."
-runtime_not_owner: "You are not the owner of [type] '[value]'."
-runtime_not_owner_id: "You are not the owner of [type] #[value]."
-runtime_removed: "Successfully removed [type]."
-runtime_removed_from: "Successfully removed [type] from [name]."
-runtime_removed_id: "Successfully removed [type] #[value]."
-runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
-runtime_removed_name: "Successfully removed [type] '[value]'."
-runtime_removed_name_from: "Successfully removed [type] '[value]' from [name]."
-runtime_updated: "Successfully updated [type]."
-runtime_updated_id: "Successfully updated [type] #[value]."
-runtime_updated_name: "Successfully updated [type] '[value]'."
-runtime_uploaded: "Successfully uploaded [type]."
-runtime_uploaded_id: "Successfully uploaded [type] #[value]."
-runtime_uploaded_name: "Successfully uploaded [type] '[value]'."
-runtime_user_hasnt_authored: "[user] hasn't written any [types]."
-runtime_user_hasnt_created: "[user] hasn't created any [types]."
-runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
-
-# One-time-use messages.
-runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
-runtime_description_added_admin: Gave admin permission to [name].
-runtime_description_added_reader: Gave view permission to [name].
-runtime_description_added_writer: Gave edit permission to [name].
-runtime_description_copy_success: Successfully copied the description.
-runtime_description_merge_delete_denied: You don't have permission to delete the old description.
-runtime_description_merge_deleted: "The old description was deleted: [old]"
-runtime_description_merge_success: Successfully merged the descriptions.
-runtime_description_move_success: Successfully moved the description.
-runtime_description_private: That description is private!
-runtime_description_removed_admin: Revoked admin permission for [name].
-runtime_description_removed_reader: Revoked view permission for [name].
-runtime_description_removed_writer: Revoked edit permission for [name].
-runtime_destroy_description_not_admin: Only a description's admins can delete that description.
-runtime_duplicate_rank: "Rank appears twice: '[rank]'"
-runtime_image_updated_notes: "Updated notes on image #[id]."
-runtime_image_uploaded: Uploaded image '[name]'.
-runtime_index_no_at_location: No [types] at [location].
-runtime_index_no_by_rss_log: No [types] have had any recent activity.
-runtime_index_no_for_object: No [types] for this object.
-runtime_index_no_for_user: No [types] for [user].
-runtime_index_no_in_species_list: No [types] in [name].
-runtime_index_no_inside_observation: Observation #[id] has no [types].
-runtime_index_no_of_children: There are no [types] for children of [name].
-runtime_index_no_of_name: There are no [types] of [name].
-runtime_index_no_of_parents: There are no [types] for parents of [name].
-runtime_index_no_with: There are no [types] with [attachments].
-runtime_invalid_for_rank: "Name is invalid for the rank [rank]: '[name]'"
-runtime_invalid_rank: "Ranks are out of order: '[line_rank]' is the same as or below '[rank]'"
-runtime_location_merge_failed: Failed to merge observation [name].
-runtime_login_failed: Login unsuccessful.
-runtime_login_success: Login successful.
-runtime_name_in_use_with_notes: The name '[name]' is already in use and [other] has notes.
-runtime_no_conditions: You didn't specify any conditions!
-runtime_no_upload_image: Had problems uploading image '[name]'.
-runtime_object_deleted: This object has been deleted.
-runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
-runtime_prefs_password_no_match: Password and confirmation did not match.
-runtime_refine_search_expect_id: "Invalid [type] in '[field]' -- expected a valid id."
-runtime_refine_search_field_required: "Missing required field '[field]'."
-runtime_refine_search_invalid_rss_type: "Invalid object type '[value]'."
-runtime_refine_search_model_not_supported: Sorry, '[:app_refine_search]' doesn't support [type] queries yet.
-runtime_refine_search_object_not_found: "Couldn't find [type] matching '[value]' in '[field]'."
-runtime_search_has_expired: Your query has expired, please try again.
-runtime_show_observation_success: Successfully changed vote.
-runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
-
-# These shouldn't need translating, but you are free to override if you need to.
-runtime_ask_observation_question_success: "[:runtime_delivered_question]"
-runtime_ask_user_question_success: "[:runtime_delivered_question]"
-runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
-runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
-runtime_ask_webmaster_success: "[:runtime_delivered_message]"
-runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
-runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
-runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
-runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
-runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
-runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
-runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
-runtime_destroy_naming_success: "[:runtime_destroyed_id(type=:naming,value=id)]"
-runtime_destroy_observation_denied: "[:runtime_not_owner_id(type=:observation,value=id)]"
-runtime_destroy_observation_failed: "[:runtime_no_destroy_id(type=:observation,value=id)]"
-runtime_destroy_observation_success: "[:runtime_destroyed_id(type=:observation,value=id)]"
-runtime_edit_location_description_no_change: "[:runtime_no_changes]"
-runtime_edit_location_description_success: "[:runtime_updated_id(type=:location_description,value=id)]"
-runtime_edit_location_no_change: "[:runtime_no_changes]"
-runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
-runtime_edit_name_description_no_change: "[:runtime_no_changes]"
-runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
-runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
-runtime_edit_name_no_change: "[:runtime_no_changes]"
-runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
-runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
-runtime_edit_project_success: "[:runtime_updated_id(type=:project,value=id)]"
-runtime_email_new_password_failed: "[:runtime_no_match_name(type=:user,value=user)]"
-runtime_form_comments_create_success: "[:runtime_created_id(type=:comment,value=id)]"
-runtime_form_comments_destroy_failed: "[:runtime_no_destroy_id(type=:comment,value=id)]"
-runtime_form_comments_destroy_success: "[:runtime_destroyed_id(type=:comment,value=id)]"
-runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id)]"
-runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
-runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
-runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
-runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
-runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
-runtime_image_resize_denied: "[:runtime_admin_only]"
-runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
-runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
-runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
-runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
-runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
-runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
-runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
-runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
-runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
-runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
-runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
-runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
-runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
-runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
-runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
-runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
-runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
-runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
-runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
-runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
-runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
-runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
-runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
-runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
-runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
-runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
-runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
-runtime_naming_created: "[:runtime_created(type=:naming)]"
-runtime_naming_updated: "[:runtime_updated(type=:naming)]"
-runtime_no_more_search_objects: "[:runtime_no_more]"
-runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
-runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
-runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
-runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
-runtime_prefs_success: "[:runtime_updated(type=:preferences)]"
-runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
-runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
-runtime_profile_success: "[:runtime_updated(type=:profile)]"
-runtime_profile_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
-runtime_species_list_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
-runtime_species_list_create_success: "[:runtime_created_id(type=:species_list,value=id)]"
-runtime_species_list_destroy_success: "[:runtime_destroyed_id(type=:species_list,value=id)]"
-runtime_species_list_edit_success: "[:runtime_updated_id(type=:species_list,value=id)]"
-runtime_species_list_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
-runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
-runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
-runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
-runtime_user_bad_rank: "[:runtime_invalid(type=rank,value=rank)]"
-
-# Longer messages.
-runtime_ask_webmaster_antispam: >
-  To cut down on robot spam, questions from unregistered users cannot contain
-  'http:' or HTML markup.
-
-runtime_create_draft_create_denied: >
-  You do not have permission to create a draft for the project [title].
-
-runtime_create_naming_already_proposed: >
-  Someone has already proposed that name.  If you would like to comment on it,
-  try posting a comment instead.
-
-runtime_description_already_default: >
-  This description is already the default description!
-
-runtime_description_foreign_read_wrong: >
-  Descriptions from other servers must be readable by the general public.
-
-runtime_description_foreign_write_wrong: >
-  Descriptions from other servers must be read-only.
-
-runtime_description_make_default_only_public: >
-  You are only allowed to make public descriptions the default. All users must
-  be allowed at least to read it.
-
-runtime_description_merge_conflict: >
-  There is a conflict.  Please merge the two descriptions by hand.  (Look at
-  the text fields below.  Where there is a conflict both descriptions have
-  been entered one on top of the other separated by a line.)  You may cancel
-  the operation at any time without making any changes.  When you are finished,
-  be sure to destroy the old description.
-
-runtime_description_move_invalid_classification: >
-  The classification has incorrect syntax.  We can't save a new description
-  with it like this, so we've temporarily blanked out the classification field
-  until you correct it.
-
-runtime_description_must_be_admin: >
-  You must be an admin for a description to use this feature.
-
-runtime_description_permissions_fixed: >
-  This type of description has fixed permissions.
-
-runtime_description_public_read_wrong: >
-  Public descriptions must be readable by the general public.
-
-runtime_description_public_write_wrong: >
-  Public descriptions must be writable by the general public.
-
-runtime_description_user_not_found: >
-  User or Group "[name]" not found!
-
-runtime_destroy_naming_someone_else: >
-  Sorry, someone else has given this their strongest positive vote.  You are
-  free to propose alternate names, but we can no longer let you delete this
-  name.
-
-runtime_edit_description_denied: >
-  You have not been given permission to edit this description.
-
-runtime_edit_naming_someone_else: >
-  Sorry, someone else has given this a positive vote, so we had to create a new
-  name proposal to accomodate your changes.
-
-runtime_email_new_password_success: >
-  Password successfully changed.  New password has been sent to your email
-  account.
-
-runtime_form_names_misspelling_bad: >
-  The alternate spelling you entered is not recognized.
-
-runtime_form_names_misspelling_same: >
-  Correct spelling and incorrect spelling are the same!
-
-runtime_image_changed_your_image: >
-  Changed your profile image to image #[id].
-
-runtime_image_move_failed: >
-  Something went wrong on the server and we failed to save image #[id].  Please
-  try again.
-
-runtime_image_process_failed: >
-  Something went wrong on the server and we failed to process image #[id].
-  Please try again.
-
-runtime_image_remove_denied: >
-  You do not have permission to remove images from this observation.
-
-runtime_image_remove_missing: >
-  This observation doesn't have that image!
-
-runtime_merge_warning: >
-  Because it can be destructive, only the admin can merge existing [types].
-  An email requesting the proposed merge has been sent to the admins.
-
-runtime_object_not_found: >
-  Sorry, the [type] you tried to display (id #[id]) no longer exists.  Someone
-  has either deleted it or merged it into another.
-
-runtime_profile_must_define: >
-  You must define this location before we can make it your primary location.
-  Any other changes to your profile have been saved.
-
-runtime_refine_search_bad_google_minus: >
-  Invalid search syntax in [name] at '[value]'.  Please only use the minus sign
-  syntax at the beginning of the line.
-
-runtime_reverify_already_verified: >
-  Your account is already verified!  Please log in.
-
-runtime_reverify_sent: >
-  Another verification email was sent to your email account.
-
-runtime_show_description_denied: >
-  You have not been given permission to see this description.
-
-runtime_show_draft_denied: >
-  Permission denied: only project members can view drafts in progress.
-
-runtime_signup_success: >
-  Signup successful.  Verification sent to your email account.
-
-runtime_species_list_need_to_use_bulk: >
-  Synonyms can only be created from the [:name_bulk_title] page.
-
 ################################################################################
 
 # APPLICATION LAYOUT -- this stuff appears on every single page
@@ -1347,222 +963,9 @@ app_no_session: You Have Cookies Disabled
 # Title of the RSS auto-discovery link in the HTML header section.
 app_rss: "[:app_title] RSS"
 
-################################################################################
-
-# EMAIL MESSAGES
-
-# Subject lines.
-email_subject_comment: "[:COMMENT] About [name]"
-email_subject_commercial_inquiry: Commercial Inquiry About [Name]
-email_subject_consensus_change: Consensus Rejected [old] in Favor of [new]
-email_subject_denied: "[:USER] Creation Blocked"
-email_subject_features: New [:app_title] Features
-email_subject_location_change: "[name] Has Been Changed"
-email_subject_naming_for_observer: Research Request
-email_subject_naming_for_tracker: Naming Notification
-email_subject_name_change: "[name] Has Been Changed"
-email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
-email_subject_new_password: New Password
-email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
-email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
-email_subject_observation_question: Question About [name]
-email_subject_publish_name: Name Published
-email_subject_verify: Email Verification
-email_subject_webmaster_question: Question From [user]
-
-# Field labels in the "object_change" emails.
-email_field_added_images: Added image(s)
-email_field_changed_thumbnail: Changed thumbnail
-email_field_collection_location: Specimen _was_ collected at this location
-email_field_collection_not_location: Specimen _was not_ collected at this location
-email_field_east: "[:East] edge"
-email_field_image_count: "[:Image] count"
-email_field_new_name: New [:name]
-email_field_no_specimen_available: Specimen is no longer available
-email_field_north: "[:North] edge"
-email_field_old_name: Old [:name]
-email_field_published: Published by
-email_field_removed_images: Removed image(s)
-email_field_south: "[:South] edge"
-email_field_specimen_available: Specimen is now available
-email_field_west: "[:West] edge"
-
-# This is used like this: "<Label>: <old_value> changed to <new_value>"
-email_field_is_now: changed to
-
-# "Helpful" links at the bottom of the email.
-email_links_change_prefs: Change your preferences
-email_links_disable_tracking: Disable tracking for this [type]
-email_links_email_publisher: Send email to the publisher
-email_links_latest_changes: Latest changes at [:app_title]
-email_links_not_interested: I'm not interested in this [type]
-email_links_post_comment: Post a [:comment]
-email_links_show_object: Show this [type]
-email_links_show_user: Show [:user]'s profile
-email_links_show_observer: Show [:observer]'s profile
-email_links_show_identifier: Show [:identifier]'s profile
-email_links_stop_sending: Stop sending me email like this
-email_links_your_interests: Review your [:notifications]
-
-# Some other common phrases and sections.
-email_can_respond: >
-  It is entirely up to you whether you want to reply to [name] ([email]) by
-  replying directly to this email.
-
-email_handy_links: "Here are some handy links:"
-email_no_respond: Please do not reply to this email!
-email_report_abuse: >
-  If you feel this user is abusing this service please forward this entire
-  email message to: [email]
-
-email_respond_via_comment: >
-  Use the link below to respond via your own public comment.
-
-email_welcome: Welcome, [user]
-
-
-# Main message contents.
-email_admin_request_intro: >
-  h2. *Admin Request*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following request to you regarding [project]:
-
-email_author_request_intro: >
-  h2. *Author Request*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following request to you regarding [object]:
-
-email_comment_intro_other: >
-  h2. *Comment on [Type]*
-  \n\n
-  The following comment was posted on the [:app_title] website
-  regarding the [type] <u>[name]</u>:
-
-email_comment_intro_response: >
-  h2. *Comment Response*
-  \n\n
-  The following comment was posted on the [:app_title] website in response
-  to your comment regarding the [type] <u>[name]</u>:
-
-email_comment_intro_to_owner: >
-  h2. *Comment on Your [Type]*
-  \n\n
-  The following comment was posted on the [:app_title] website
-  regarding your [type] <u>[name]</u>:
-
-email_commercial_intro: >
-  h2. *Commercial Inquiry*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following commercial inquiry to you about your image [image]:
-
-email_consensus_change_intro: >
-  h2. *Consensus Change*
-  \n\n
-  Consensus has changed for observation #[id]:
-
-email_features_intro: >
-  h2. *New Features*
-  \n\n
-  The following new features have been released at the [:app_title] website:
-
-email_location_merge: >
-  User [user] wants to merge the location [this] into [that].
-
-email_name_merge: >
-  User [user] wants to merge the name [this] into [that].
-
-email_name_proposal_intro: >
-  h2. *Name Proposal*
-  \n\n
-  A name was proposed for observation #[id]:
-
-email_naming_for_observer_intro: >
-  h2. *Research Request*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following message to you about your [type] <u>[name]</u>:
-
-email_naming_for_tracker_intro: >
-  h2. *Tracking Alert*
-  \n\n
-  An [obs] on the [:app_title] website has been given the name [name], which
-  you are currently tracking.  You can contact either the [:observer] or the
-  [:identifier] by going to the appropriate link below and clicking the email
-  link near the top of the page.
-
-email_new_password_intro: >
-  h2. *New Password*
-  \n\n
-  Your new [:app_title] password is:
-
-email_new_password_what_now: >
-  Once you have logged in, you should change your password to something easier
-  to remember by going to the '[:app_preferences]' page.
-
-email_object_change_intro: >
-  h2. *[Type] was Changed*
-  \n\n
-  There were change(s) made to the [type] <u>[name]</u>:
-
-email_object_new_intro: >
-  h2. *[Type] was Created*
-  \n\n
-  The [type] <u>[name]</u> was created.
-
-email_object_change_reason_all: >
-  You received this email because you have requested to be notified when any
-  [type] changes.
-
-email_object_change_reason_admin: >
-  You received this email because you are an admin for a description of the
-  changed [type].
-
-email_object_change_reason_editor: >
-  You received this email because you have edited a description of the changed
-  [type].
-
-email_object_change_reason_author: >
-  You received this email because you are an author of a description of the
-  changed [type].
-
-email_object_change_reason_reviewer: >
-  You received this email because you reviewed a description of this [type].
-
-email_object_change_reason_interest: >
-  You received this email because you expressed interest in this [type].
-
-email_observation_destroyed_intro: >
-  h2. *Observation Destroyed*
-
-email_observation_question_intro: >
-  h2. *Question from Another User*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following question to you about your observation <u>[name]</u>:
-
-email_publish_name_intro: >
-  h2. *Draft of Name Has Been Published*
-  \n\n
-  A description of a name has been published on the [:app_title] website.
-  You are receiving this email since you are listed as either an author for
-  this taxon or as a reviewer on the site.
-
-email_user_question_intro: >
-  h2. *Question from Another User*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following email to you:
-
-email_verify_intro: >
-  h2. *Hello [user]*
-  \n\n
-  Please click the following link to verify that you received this email and
-  activate your [:app_title] account:
-  \n\n
-  [link]
+# Donation stuff.
+app_donate_banner: "Thank you donors!  We have achieved our goal for 2011 and have started work on improvements."
+app_donate: Donate
 
 ################################################################################
 
@@ -1845,7 +1248,7 @@ form_names_citation_textilize_note: >
 form_names_misspelling_note: >
   If this name is misspelt, please check the box and enter the correct
   spelling. *NOTE:* Please do not use this to deprecate correctly-spelled
-  synonyms. 
+  synonyms.
 
 form_names_classification_help: >
   List the higher taxa containing this [rank], one name per rank.  Example:<br/>
@@ -2715,6 +2118,110 @@ welcome_no_user_title: User not set in session
 welcome_logout_link: Logout
 welcome_no_user_note: If you are not a spammer, please report this as an error.
 welcome_note: You are now logged into the system...
+
+
+
+# support/donate
+donate_title: Donate to Mushroom Observer
+donate_tab: Donate
+donate_other: Other Amount
+donate_anonymous: Anonymous donation
+donate_who: Name for Donors Page
+donate_email: Email (to ensure uniqueness)
+donate_confirm: Confirm
+donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
+donors_title: The Mushroom Observer Community Thanks Our Donors
+donors_tab: Show Donors
+
+donate_thanks: >
+  Thank you for your interest in donating to Mushroom Observer!  Check out this "open letter to the Mushroom Observer Community":/support/letter
+  if you are curious why we have started asking for donations.
+
+donate_explanation: >
+  Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below.
+  Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would
+  like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
+
+donate_fine_print: >
+  Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR) and will be applied
+  to the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.
+  The CDMR has been incorporated in the state of California
+  and recognized by the state as a non-profit.  In addition, the corporation has applied for 501c3 status with the US federal government
+  and as such our understanding is that donations to Mushroom Observer are tax deductible to the full extent allowed by law.\n\n
+  If you would prefer not to use PayPal, you are welcome to send a check or money order in US dollars payable to the
+  "Consortium for Digital Mycology Resources" to:\n\n
+  Mushroom Observer\n
+  c/o Nathan Wilson\n
+  43 Cameron Rd.\n
+  North Falmouth, MA 02556\n\n
+  Please indicate on the check or on an included note that the donation is intended for the Mushroom Observer.
+
+
+
+# support/confirm
+confirm_title: Donation Confirmation
+confirm_amount: Amount
+confirm_text: >
+  Thank you for offering to make the following donation.  To transfer the money to
+  the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR)
+  using PayPal, click the button below.
+
+
+
+# support/thanks
+thanks_title: Thanks for Your Support!
+thanks_no_amount: Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
+thanks_note: >
+  Thank you for helping to support the Mushroom Observer.  Your support is
+  greatly appreciated and will help Mushroom Observer continue its mission. 
+  \n\n
+  Your donation will be acknowledged by name on the "Mushroom Observer Donors
+  Page":/support/donors once the funds are received unless you have requested
+  special arrangements for your acknowledgement.  Examples of special
+  arrangements might be to make the donation anonymously or to leave it in
+  someone else's name.  If you would like special arrangements for your
+  acknowledgement please "send us a comment":/observer/ask_webmaster_question. 
+
+
+
+# support/letter
+letter_title: Open Letter to the Community
+letter_body: >
+  To the Mushroom Observer Community,
+  \n\n
+  It has been an amazing year for us.  This year we hit some major milestones:
+  100,000 images, 50,000 observations and 2,000 registered users.  This means
+  we have essentially been doubling every year.  While Jason has achieved some
+  minor miracles in his volunteer efforts to keep things going with the bare
+  bones server configuration we are using, it is becoming clear that we will
+  soon need more memory and more processors to support our continued growth.
+  \n\n
+  Unfortunately, this means our server expenses will be going up.  So far I
+  have been happy to support the Mushroom Observer server needs out of my own
+  pocket, but those expenses have also been essentially doubling every year and
+  I will soon not be able to afford it.  As a result, I would like to start
+  asking for donations from the community.  Those of you who have gotten a lot
+  out of the site and want to see it continue to grow and expand, now is your
+  chance to give a little back and help with the financial support of the site. 
+  \n\n
+  To that end, we have setup a "donation page":/support/donate that can
+  securely accept money from a PayPal account or a regular credit card. 
+  \n\n
+  I would like to raise at least $2000 to cover basic server costs.  The more
+  we get, the more we can expand our capacity for traffic and growth.  And the
+  fewer times you will encounter server down time and failed uploads. 
+  \n\n
+  When you make a donation, your name by default will be added to our "donors
+  page":/support/donors as soon as we confirm the donation.  If you would
+  prefer to donate anonymously or make other special arrangements for your
+  acknowledgement, "send a comment":/observer/ask_webmaster_question after you
+  make your donation. 
+  \n\n
+  Please help support this active internet community of people who enjoy
+  sharing and learning more about the mushrooms around us. 
+  \n\n
+  Thanks,\n
+  -Nathan
 
 ################################################################################
 
@@ -3935,7 +3442,6 @@ show_project_edit: Edit Project
 show_project_published: Reviewed Published Names
 show_project_summary: Summary
 show_project_title: "Project: [title]"
-
 show_project_user_group: User Group
 
 
@@ -3950,6 +3456,242 @@ users_by_name_name: Name
 users_by_name_theme: Theme
 users_by_name_verified: Verified
 
+
+# support/create_donation
+create_donation_title: Record Mushroom Observer Donation
+create_donation_not_allowed: Only admins can record donations
+create_donation_add: Add
+create_donation_tab: Record Donation
+
+
+# support/review_donations
+review_donations_title: Review All Donations
+review_donations_not_allowed: Only admins can review donations
+review_donations_update: Update
+review_donations_tab: Review Donations
+review_reviewed: Reviewed
+review_id: Id
+review_who: Who
+review_anon: Anon
+review_amount: Amount
+review_email: Email
+
+################################################################################
+
+# EMAIL MESSAGES
+
+# Subject lines.
+email_subject_comment: "[:COMMENT] About [name]"
+email_subject_commercial_inquiry: Commercial Inquiry About [Name]
+email_subject_consensus_change: Consensus Rejected [old] in Favor of [new]
+email_subject_denied: "[:USER] Creation Blocked"
+email_subject_features: New [:app_title] Features
+email_subject_location_change: "[name] Has Been Changed"
+email_subject_naming_for_observer: Research Request
+email_subject_naming_for_tracker: Naming Notification
+email_subject_name_change: "[name] Has Been Changed"
+email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
+email_subject_new_password: New Password
+email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
+email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
+email_subject_observation_question: Question About [name]
+email_subject_publish_name: Name Published
+email_subject_verify: Email Verification
+email_subject_webmaster_question: Question From [user]
+
+# Field labels in the "object_change" emails.
+email_field_added_images: Added image(s)
+email_field_changed_thumbnail: Changed thumbnail
+email_field_collection_location: Specimen _was_ collected at this location
+email_field_collection_not_location: Specimen _was not_ collected at this location
+email_field_east: "[:East] edge"
+email_field_image_count: "[:Image] count"
+email_field_new_name: New [:name]
+email_field_no_specimen_available: Specimen is no longer available
+email_field_north: "[:North] edge"
+email_field_old_name: Old [:name]
+email_field_published: Published by
+email_field_removed_images: Removed image(s)
+email_field_south: "[:South] edge"
+email_field_specimen_available: Specimen is now available
+email_field_west: "[:West] edge"
+
+# This is used like this: "<Label>: <old_value> changed to <new_value>"
+email_field_is_now: changed to
+
+# "Helpful" links at the bottom of the email.
+email_links_change_prefs: Change your preferences
+email_links_disable_tracking: Disable tracking for this [type]
+email_links_email_publisher: Send email to the publisher
+email_links_latest_changes: Latest changes at [:app_title]
+email_links_not_interested: I'm not interested in this [type]
+email_links_post_comment: Post a [:comment]
+email_links_show_object: Show this [type]
+email_links_show_user: Show [:user]'s profile
+email_links_show_observer: Show [:observer]'s profile
+email_links_show_identifier: Show [:identifier]'s profile
+email_links_stop_sending: Stop sending me email like this
+email_links_your_interests: Review your [:notifications]
+
+# Some other common phrases and sections.
+email_can_respond: >
+  It is entirely up to you whether you want to reply to [name] ([email]) by
+  replying directly to this email.
+
+email_handy_links: "Here are some handy links:"
+email_no_respond: Please do not reply to this email!
+email_report_abuse: >
+  If you feel this user is abusing this service please forward this entire
+  email message to: [email]
+
+email_respond_via_comment: >
+  Use the link below to respond via your own public comment.
+
+email_welcome: Welcome, [user]
+
+
+# Main message contents.
+email_admin_request_intro: >
+  h2. *Admin Request*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following request to you regarding [project]:
+
+email_author_request_intro: >
+  h2. *Author Request*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following request to you regarding [object]:
+
+email_comment_intro_other: >
+  h2. *Comment on [Type]*
+  \n\n
+  The following comment was posted on the [:app_title] website
+  regarding the [type] <u>[name]</u>:
+
+email_comment_intro_response: >
+  h2. *Comment Response*
+  \n\n
+  The following comment was posted on the [:app_title] website in response
+  to your comment regarding the [type] <u>[name]</u>:
+
+email_comment_intro_to_owner: >
+  h2. *Comment on Your [Type]*
+  \n\n
+  The following comment was posted on the [:app_title] website
+  regarding your [type] <u>[name]</u>:
+
+email_commercial_intro: >
+  h2. *Commercial Inquiry*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following commercial inquiry to you about your image [image]:
+
+email_consensus_change_intro: >
+  h2. *Consensus Change*
+  \n\n
+  Consensus has changed for observation #[id]:
+
+email_features_intro: >
+  h2. *New Features*
+  \n\n
+  The following new features have been released at the [:app_title] website:
+
+email_location_merge: >
+  User [user] wants to merge the location [this] into [that].
+
+email_name_merge: >
+  User [user] wants to merge the name [this] into [that].
+
+email_name_proposal_intro: >
+  h2. *Name Proposal*
+  \n\n
+  A name was proposed for observation #[id]:
+
+email_naming_for_observer_intro: >
+  h2. *Research Request*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following message to you about your [type] <u>[name]</u>:
+
+email_naming_for_tracker_intro: >
+  h2. *Tracking Alert*
+  \n\n
+  An [obs] on the [:app_title] website has been given the name [name], which
+  you are currently tracking.  You can contact either the [:observer] or the
+  [:identifier] by going to the appropriate link below and clicking the email
+  link near the top of the page.
+
+email_new_password_intro: >
+  h2. *New Password*
+  \n\n
+  Your new [:app_title] password is:
+
+email_new_password_what_now: >
+  Once you have logged in, you should change your password to something easier
+  to remember by going to the '[:app_preferences]' page.
+
+email_object_change_intro: >
+  h2. *[Type] was Changed*
+  \n\n
+  There were change(s) made to the [type] <u>[name]</u>:
+
+email_object_new_intro: >
+  h2. *[Type] was Created*
+  \n\n
+  The [type] <u>[name]</u> was created.
+
+email_object_change_reason_all: >
+  You received this email because you have requested to be notified when any
+  [type] changes.
+
+email_object_change_reason_admin: >
+  You received this email because you are an admin for a description of the
+  changed [type].
+
+email_object_change_reason_editor: >
+  You received this email because you have edited a description of the changed
+  [type].
+
+email_object_change_reason_author: >
+  You received this email because you are an author of a description of the
+  changed [type].
+
+email_object_change_reason_reviewer: >
+  You received this email because you reviewed a description of this [type].
+
+email_object_change_reason_interest: >
+  You received this email because you expressed interest in this [type].
+
+email_observation_destroyed_intro: >
+  h2. *Observation Destroyed*
+
+email_observation_question_intro: >
+  h2. *Question from Another User*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following question to you about your observation <u>[name]</u>:
+
+email_publish_name_intro: >
+  h2. *Draft of Name Has Been Published*
+  \n\n
+  A description of a name has been published on the [:app_title] website.
+  You are receiving this email since you are listed as either an author for
+  this taxon or as a reviewer on the site.
+
+email_user_question_intro: >
+  h2. *Question from Another User*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following email to you:
+
+email_verify_intro: >
+  h2. *Hello [user]*
+  \n\n
+  Please click the following link to verify that you received this email and
+  activate your [:app_title] account:
+  \n\n
+  [link]
 
 ################################################################################
 
@@ -4584,142 +4326,17 @@ how_vote: >
   are owned by that user, and can only be changed or deleted by the owner or a
   site administrator.
 
-
 ################################################################################
 
-# SUPPORT PAGES
-
-donate_thanks: >
-  Thank you for your interest in donating to Mushroom Observer!  Check out this "open letter to the Mushroom Observer Community":/support/letter
-  if you are curious why we have started asking for donations.
-
-donate_explanation: >
-  Donations can be made in any amount through PayPal using most common credit cards or a PayPal account by clicking on the button below.
-  Donors are normally acknowledged by name on the "Mushroom Observer Donors Page":/support/donors once the funds are received.  If you would
-  like special arrangements for your acknowledgement please "send us a comment":/observer/ask_webmaster_question.
-
-donate_fine_print: >
-  Charges will be made to the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR) and will be applied
-  to the Mushroom Observer.  You can learn more about the CDMR at "http://digitalmycology.org":http://digitalmycology.org.
-  The CDMR has been incorporated in the state of California
-  and recognized by the state as a non-profit.  In addition, the corporation has applied for 501c3 status with the US federal government
-  and as such our understanding is that donations to Mushroom Observer are tax deductible to the full extent allowed by law.\n\n
-  If you would prefer not to use PayPal, you are welcome to send a check or money order in US dollars payable to the
-  "Consortium for Digital Mycology Resources" to:\n\n
-  Mushroom Observer\n
-  c/o Nathan Wilson\n
-  43 Cameron Rd.\n
-  North Falmouth, MA 02556\n\n
-  Please indicate on the check or on an included note that the donation is intended for the Mushroom Observer.
-
-donate_title: Donate to Mushroom Observer
-donate_tab: Donate
-donate_other: Other Amount
-donate_anonymous: Anonymous donation
-donate_who: Name for Donors Page
-donate_email: Email (to ensure uniqueness)
-donate_confirm: Confirm
-
-donors_order: The donors names are ordered based first on the total amount donated and then by who has donated the most recently.
-donors_title: The Mushroom Observer Community Thanks Our Donors
-donors_tab: Show Donors
-
-
-confirm_amount: Amount
-confirm_title: Donation Confirmation
-confirm_text: >
-  Thank you for offering to make the following donation.  To transfer the money to
-  the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR)
-  using PayPal, click the button below.
-
-create_donation_title: Record Mushroom Observer Donation
-create_donation_not_allowed: Only admins can record donations
-create_donation_add: Add
-create_donation_tab: Record Donation
-
-
-review_donations_title: Review All Donations
-review_donations_not_allowed: Only admins can review donations
-review_donations_update: Update
-review_donations_tab: Review Donations
-review_reviewed: Reviewed
-review_id: Id
-review_who: Who
-review_anon: Anon
-review_amount: Amount
-review_email: Email
-
-thanks_no_amount: Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
-thanks_title: Thanks for Your Support!
-thanks_note: >
-  Thank you for helping to support the Mushroom Observer.  Your support is greatly appreciated and will help
-  Mushroom Observer continue its mission.
-  <br/><br/>
-  Your donation will be acknowledged by name on the
-  "Mushroom Observer Donors Page":/support/donors once the funds are received unless you have requested special
-  arrangements for your acknowledgement.  Examples of special arrangements might be to make the donation anonymously
-  or to leave it in someone else's name.  If you would like special arrangements for your acknowledgement please
-  "send us a comment":/observer/ask_webmaster_question.
-
-
-letter_title: Open Letter to the Community
-letter_body: >
-  To the Mushroom Observer Community,
-  <br/><br/>
-  It has been an amazing year for us.  This year we hit some
-  major milestones: 100,000 images, 50,000 observations and
-  2,000 registered users.  This means we have essentially
-  been doubling every year.  While Jason has achieved some
-  minor miracles in his volunteer efforts to keep things
-  going with the bare bones server configuration we are
-  using, it is becoming clear that we will soon need more
-  memory and more processors to support our continued growth.
-  <br/><br/>
-  Unfortunately, this means our server expenses will be going
-  up.  So far I have been happy to support the Mushroom
-  Observer server needs out of my own pocket, but those
-  expenses have also been essentially doubling every year and
-  I will soon not be able to afford it.  As a result, I would like to
-  start asking for donations from the community.  Those of you who have
-  gotten a lot out of the site and want to see it continue to grow and
-  expand, now is your chance to give a little back and help with the
-  financial support of the site.
-  <br/><br/>
-  To that end, we have setup
-  a "donation page":/support/donate that can
-  securely accept money from a PayPal account or a regular credit card.
-  <br/><br/>
-  I would like to raise at least $2000 to cover basic server costs.
-  The more we get, the more we can expand our capacity for
-  traffic and growth.  And the fewer times you will encounter server
-  down time and failed uploads.
-  <br/><br/>
-  When you make a donation, your name by default will be added to our
-  "donors page":/support/donors as soon as we confirm the donation.
-  If you would prefer to donote anonymously or make other special arrangements
-  for your acknowledgement, "send a comment":/observer/ask_webmaster_question
-  after you make your donation.
-  <br/><br/>
-  Please help support this active internet community of
-  people who enjoy sharing and learning more about the
-  mushrooms around us.
-  <br/><br/>
-  Thanks,<br/>
-  -Nathan
-
-app_donate_banner: "Thank you donors!  We have achieved our goal for 2011 and have started work on improvements."
-app_donate: Donate
-
-################################################################################
-# LANGUAGE HELP PAGE
+# LOCATION HELP PAGE
 
 location_help_title: Locations in Mushroom Observer
 
 location_help_intro: >
-  The Mushroom Observer provides two ways to represent the geographic location 
-  of an observation.  The simplest are latitude and longitude positions associated 
-  with the observation.  Please keep these accurate to within at least 300 meters 
-  (or about 1000 feet).  However, the more widely used method is a simple phrase 
+  The Mushroom Observer provides two ways to represent the geographic location
+  of an observation.  The simplest are latitude and longitude positions associated
+  with the observation.  Please keep these accurate to within at least 300 meters
+  (or about 1000 feet).  However, the more widely used method is a simple phrase
   describing the location.  For example, "Beebe Woods, Falmouth, Massachusetts, USA".
   The goal of these location names is to provide a consistent, reusable way of talking
   about where an observation was made without necessarily revealing a precise "spot".
@@ -4728,28 +4345,28 @@ location_help_intro: >
   them as well.  The location names should, by default, go from the smallest
   contained area to the country name.  If you prefer to describe your locations
   as going from the largest (country) down to the smallest contained area, you can
-  change your preference from the default, "Postal", to "Scientific" on your 
+  change your preference from the default, "Postal", to "Scientific" on your
   preference page.  There are cases such as
   "Great Smoky Mountains National Park, Blount Co., Tennessee, USA",
   where the area you are describing overlaps a number of counties, states or
   even countries.  In these cases, the country and other official political
   boundaries should come at the end as shown in the example.
   \n\n
-  Originally, the Mushroom Observer was very loose about these location names, 
-  hoping that the users would create a reasonably consistent set of rules and 
-  correct each other.  After about four years and thousands of location names, 
-  we found that there were rules emerging, but they were not applied at all 
-  consistently and people were not tending to directly correct each other.  
-  Consequently, we have tried to codify these rules and when reasonable to provide 
-  warnings if you attempt to create a new location that violates these rules.  
-  It is not always possible to correct identify "bad" locations, so if you get 
-  some warnings, but after reviewing the location decide it should be "good", 
-  then simply resubmitting the form will force the name into the database.  
-  However, all new location names will get reviewed regularly and may get changed 
-  to better fit the consensus rules.  Below are some examples of "bad" and "good" 
-  location names followed by a more detailed explanation of the current rules.  
-  Each example is labeled with the following section that explains the example 
-  in more detail.  These rules are by no means set it stone and we encourage the 
+  Originally, the Mushroom Observer was very loose about these location names,
+  hoping that the users would create a reasonably consistent set of rules and
+  correct each other.  After about four years and thousands of location names,
+  we found that there were rules emerging, but they were not applied at all
+  consistently and people were not tending to directly correct each other.
+  Consequently, we have tried to codify these rules and when reasonable to provide
+  warnings if you attempt to create a new location that violates these rules.
+  It is not always possible to correct identify "bad" locations, so if you get
+  some warnings, but after reviewing the location decide it should be "good",
+  then simply resubmitting the form will force the name into the database.
+  However, all new location names will get reviewed regularly and may get changed
+  to better fit the consensus rules.  Below are some examples of "bad" and "good"
+  location names followed by a more detailed explanation of the current rules.
+  Each example is labeled with the following section that explains the example
+  in more detail.  These rules are by no means set it stone and we encourage the
   discussion and revision of them.
 
 location_help_example_help: These are cases that are not detected automatically, so no warning would be given.
@@ -4760,7 +4377,7 @@ location_help_explanation: Explanation
 location_help_rules_title: The Current "Rules"
 
 location_help_rule_reversible: >
-  *Consistent and Reversible Order* - You can now ask for location names to appear in the reverse order from the default.  
+  *Consistent and Reversible Order* - You can now ask for location names to appear in the reverse order from the default.
   Thus, you can see a location as either:
   \n\n
   Albion, California, USA
@@ -4769,105 +4386,105 @@ location_help_rule_reversible: >
   \n\n
   USA, California, Albion
   \n\n
-  You can change this on your Preferences page by selecting 'Postal' (the default) 
-  or 'Scientific' (the one that starts with the country).  When you input new location 
+  You can change this on your Preferences page by selecting 'Postal' (the default)
+  or 'Scientific' (the one that starts with the country).  When you input new location
   names it will of course also follow your preferred order.
   \n\n
-  Roy Halling was the inspiration for this feature when he started putting in his 
-  locations starting with the country names and we got into a discussion about it.  
-  Apparently the standard practice in the scientific community is to start with the 
-  largest locale (typically a country) and work down to the smallest locale (a county, 
-  town or specific location).  From looking through all the locations that have been 
-  put into MO, it is clear that most people expect to put in the smallest location 
+  Roy Halling was the inspiration for this feature when he started putting in his
+  locations starting with the country names and we got into a discussion about it.
+  Apparently the standard practice in the scientific community is to start with the
+  largest locale (typically a country) and work down to the smallest locale (a county,
+  town or specific location).  From looking through all the locations that have been
+  put into MO, it is clear that most people expect to put in the smallest location
   first and work up to the country.
   \n\n
-  In order to enable this feature, I have had to require that the place names be 
-  easily and consistently reversible.  This means you must separate each section 
-  of the location with a ', ' (no period, no missing spaces, no double spaces).  
-  It also means that you should always enter the names in order of increasing size 
-  when you can.  There are some specific exceptions to this rule that are discussed 
+  In order to enable this feature, I have had to require that the place names be
+  easily and consistently reversible.  This means you must separate each section
+  of the location with a ', ' (no period, no missing spaces, no double spaces).
+  It also means that you should always enter the names in order of increasing size
+  when you can.  There are some specific exceptions to this rule that are discussed
   below.
 
 location_help_rule_countries: >
-  *Use Country Names* - As a further check when you enter an unfamiliar location, it will check to see that 
-  the largest locale has been previously entered for some other location.  This list 
-  currently consists of only countries, continents and the special location 'Unknown'.  
-  Since it does not include all possible countries, it is still possible to override 
-  the check by resubmitting the same name twice.  Such entries will be reviewed carefully 
-  to ensure that this list remains clean.  For now you should only enter country names 
-  as they are written in English.  For example, please use 'Germany' rather than 
-  'Deutschland'.  The goal for the moment is simply consistency.  However, the long 
-  term goal is to actually allow these names to be consistently translated based on 
-  the user's language selection.  Continents should only be used if the country is 
+  *Use Country Names* - As a further check when you enter an unfamiliar location, it will check to see that
+  the largest locale has been previously entered for some other location.  This list
+  currently consists of only countries, continents and the special location 'Unknown'.
+  Since it does not include all possible countries, it is still possible to override
+  the check by resubmitting the same name twice.  Such entries will be reviewed carefully
+  to ensure that this list remains clean.  For now you should only enter country names
+  as they are written in English.  For example, please use 'Germany' rather than
+  'Deutschland'.  The goal for the moment is simply consistency.  However, the long
+  term goal is to actually allow these names to be consistently translated based on
+  the user's language selection.  Continents should only be used if the country is
   not known or there is no country.
 
 location_help_rule_states: >
-  *Use State Names* - In the case of countries where I know the states, I also check for those as 
-  the next smallest area within a country.  At the moment I am checking this 
-  for Canada, Australia and USA.  The primary goal of this in the US at least 
-  is to ensure the uniqueness of the next element in the list.  In the US it 
-  is not unusual to have the same city or county name in more than one state.  
-  If there are other countries where this check would be useful, please let me 
-  know and include an exhaustive list of all states, provinces, territories etc.  
-  To increase the understandability to people from other parts of the world, 
-  state abbreviations (even extremely standard ones) are discouraged and will 
-  create a warning.  The one current exception is 'Washington DC'.  Many people 
-  are not aware of what the 'DC' stands for and would be unlikely to enter 
-  'Washington, District of Columbia'.  Note that in this case I have also 
-  removed the ', ' since that would cause 'USA, DC, Washington' when in 
+  *Use State Names* - In the case of countries where I know the states, I also check for those as
+  the next smallest area within a country.  At the moment I am checking this
+  for Canada, Australia and USA.  The primary goal of this in the US at least
+  is to ensure the uniqueness of the next element in the list.  In the US it
+  is not unusual to have the same city or county name in more than one state.
+  If there are other countries where this check would be useful, please let me
+  know and include an exhaustive list of all states, provinces, territories etc.
+  To increase the understandability to people from other parts of the world,
+  state abbreviations (even extremely standard ones) are discouraged and will
+  create a warning.  The one current exception is 'Washington DC'.  Many people
+  are not aware of what the 'DC' stands for and would be unlikely to enter
+  'Washington, District of Columbia'.  Note that in this case I have also
+  removed the ', ' since that would cause 'USA, DC, Washington' when in
   'Scientific' mode.
 
 location_help_rule_counties: >
-  *Counties OR Cities* - In the past, MO has encouraged the use of county names whenever they are 
-  known.  The new policy is that the county should only be included when it 
-  is the smallest political area the location is contained in or when the 
-  city or town name is ambiguous.  For example, what used to be described as 
-  "Berkeley, Alameda Co., California, USA" should now be given as just 
-  "Berkeley, California, USA".  This change is in part due to seeing what 
-  people actually do.  Generally people have been good about using county 
-  names in the case of public lands like parks and national forests where 
-  the county is the most obvious political boundary.  However, with cities 
-  and towns people often don't know what county a city or town is in.  In 
-  addition, the information is typically redundant for towns and cities in 
-  the US where they are almost always completely contained in county or they 
-  are independent of the counties and there are almost never two towns with 
-  same names in a state (there are exceptions though such as Goshen, Vermont).  
-  I've also found that many of the map services such as maps.google.com and 
-  maps.yahoo.com get confused if you include both the city and the county in 
+  *Counties OR Cities* - In the past, MO has encouraged the use of county names whenever they are
+  known.  The new policy is that the county should only be included when it
+  is the smallest political area the location is contained in or when the
+  city or town name is ambiguous.  For example, what used to be described as
+  "Berkeley, Alameda Co., California, USA" should now be given as just
+  "Berkeley, California, USA".  This change is in part due to seeing what
+  people actually do.  Generally people have been good about using county
+  names in the case of public lands like parks and national forests where
+  the county is the most obvious political boundary.  However, with cities
+  and towns people often don't know what county a city or town is in.  In
+  addition, the information is typically redundant for towns and cities in
+  the US where they are almost always completely contained in county or they
+  are independent of the counties and there are almost never two towns with
+  same names in a state (there are exceptions though such as Goshen, Vermont).
+  I've also found that many of the map services such as maps.google.com and
+  maps.yahoo.com get confused if you include both the city and the county in
   the search string.
   \n\n
-  That being said, there are also often areas that have a local name, but are 
-  not actually an incorporated city or town.  In these cases the county name 
-  is encouraged since the names cannot be assumed to be unique.  For example, 
-  "North Lakeport, Lake Co., California, USA".  Wikipedia has been the most 
-  helpful resource I've found for determining if a town is actually 
+  That being said, there are also often areas that have a local name, but are
+  not actually an incorporated city or town.  In these cases the county name
+  is encouraged since the names cannot be assumed to be unique.  For example,
+  "North Lakeport, Lake Co., California, USA".  Wikipedia has been the most
+  helpful resource I've found for determining if a town is actually
   incorporated.
 
 location_help_rule_near: >
-  *Use 'near'* - If there is a landmark or town near to the collection location, but the 
-  smallest political boundary is a county or country, then it is helpful to 
+  *Use 'near'* - If there is a landmark or town near to the collection location, but the
+  smallest political boundary is a county or country, then it is helpful to
   mention this using the word "near".  When used this way it should always be
-  all lowercase.  For example, 
-  "Albis Mountain Range, near Zurich, Switzerland".  Looking through the old 
-  data, I found users used both "near" and "area" for this with "near" being 
-  more common.  This is also better because "area" sometimes gets used for 
+  all lowercase.  For example,
+  "Albis Mountain Range, near Zurich, Switzerland".  Looking through the old
+  data, I found users used both "near" and "area" for this with "near" being
+  more common.  This is also better because "area" sometimes gets used for
   place names such as "Day-Use Area" or "Rest Area".
 
 location_help_rule_southern: >
-  *Use of 'Southern', 'Northern' etc.* - If there isn't a known a clear landmark or town near the collection 
-  location, it is fine to use compass directions such as 'Southern', 
-  'Northern', 'Southwestern' etc.  In these cases always use the '-ern' 
-  ending to indicate that it's descriptive.  However, these terms should be 
-  avoided if it creates ambiguity.  For example, "Western Australia" is the 
-  name of an official state in Australia, so it should only be used as such 
+  *Use of 'Southern', 'Northern' etc.* - If there isn't a known a clear landmark or town near the collection
+  location, it is fine to use compass directions such as 'Southern',
+  'Northern', 'Southwestern' etc.  In these cases always use the '-ern'
+  ending to indicate that it's descriptive.  However, these terms should be
+  avoided if it creates ambiguity.  For example, "Western Australia" is the
+  name of an official state in Australia, so it should only be used as such
   and should be followed by the country name.
 
 location_help_rule_abbr: >
   *Avoid Abbreviations (and Periods in General)* - Most abbreviations should be
-  avoided since people apply them somewhat 
-  arbitrarily and inconsistently.  The following are examples of abbreviations 
-  that should definitely be avoided: Hwy, Mt, Mtn, CA, BC.  However, there are 
-  some specific examples, that should be used in preference to there spelled 
+  avoided since people apply them somewhat
+  arbitrarily and inconsistently.  The following are examples of abbreviations
+  that should definitely be avoided: Hwy, Mt, Mtn, CA, BC.  However, there are
+  some specific examples, that should be used in preference to there spelled
   out versions.  These are:
   \n\n
   Co. for County\n
@@ -4878,39 +4495,450 @@ location_help_rule_abbr: >
   USA for United States of America\n
   Washington DC for Washington, District of Columbia\n
   \n\n
-  Periods in general should be avoided except for the above abbreviations.  
+  Periods in general should be avoided except for the above abbreviations.
   They should not be used at the end of country names or as separators.\n
   Finally, 'and' should be used rather than '&'.
 
 location_help_rule_other: >
-  *Other Things to Avoid* - All lowercase - In general at least the leading letter of each area should 
+  *Other Things to Avoid* - All lowercase - In general at least the leading letter of each area should
   be capitalized and when in doubt capitalize every leading letter.\n
-  No lat/longs - There is now direct support for this for each observation.  
+  No lat/longs - There is now direct support for this for each observation.
   Do not include it in the name of a location.\n
   No habitat info - Habitat info should go in the notes for the observation.\n
   Parentheses and Braces - If you're tempted to use parentheses or braces, stop yourself
-  and ask if this information should be in the notes for the observation or if there is a 
+  and ask if this information should be in the notes for the observation or if there is a
   better way to describe the location.\n
-  Avoid diacritics (eg é, ü etc.) - As mentioned when discussing country names, you should 
-  try to use the English version of a location name when possible and English does 
-  not include diacritics.  This is intended to encourage consistency and we are 
-  planning on providing proper support for other languages which will benefit from 
-  this consistency.  There are certainly cases where the a city or region is only 
-  know by a name that includes diacritics.  In these cases they should be used.  
-  A few simple web-searches should give you a good idea if there is a common English 
+  Avoid diacritics (eg é, ü etc.) - As mentioned when discussing country names, you should
+  try to use the English version of a location name when possible and English does
+  not include diacritics.  This is intended to encourage consistency and we are
+  planning on providing proper support for other languages which will benefit from
+  this consistency.  There are certainly cases where the a city or region is only
+  know by a name that includes diacritics.  In these cases they should be used.
+  A few simple web-searches should give you a good idea if there is a common English
   variation of a name (e.g., Montreal, Quebec for Montréal, Québec).
 
 location_help_rule_good_habits: >
-  *Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name.  
-  Searching within Mushroom Observer can be helpful.  If you don't find anything 
-  there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org).  
-  Also feel free to use the notes section of either an observation or a location 
+  *Stuff You Are Encouraged to Do* - If you are creating a new name, take some time to figure out a good name.
+  Searching within Mushroom Observer can be helpful.  If you don't find anything
+  there, then look things up in Google Maps (http://maps.google.com) and Wikipedia (http://wikipedia.org).
+  Also feel free to use the notes section of either an observation or a location
   to be more specific.
-
 
 ################################################################################
 
-# NOTHING BELOW HERE NEEDS TRANSLATION!!!
+# ERROR MESSAGES
+
+# ActiveRecord validation error messages.
+validate_confirmation_mismatch: "[Field] doesn't match confirmation."
+validate_invalid: Invalid [field].
+validate_missing: Missing [field].
+validate_not_a_number: "[Field] is not a number."
+validate_not_in_range: "[Field] is out of range."
+validate_this_more_than_that: "[That] should be greater than [this]."
+validate_too_large: "[Field] should be at most [max]."
+validate_too_long: "[Field] must be less than [max] characters long."
+validate_too_long_or_short: "[Field] must be [min] to [max] characters long."
+validate_too_short: "[Field] must be at least [min] characters long."
+validate_too_small: "[Field] should be at least [min]."
+validate_too_small_or_large: "[Field] should be between [min] and [max]."
+
+# One-time-use error messages.
+validate_image_content_type_images_only: You can only upload [:images].
+validate_image_file_missing: Had problems uploading [:image].
+validate_image_file_too_big: We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
+validate_image_md5_mismatch: The MD5 sum did not come out right.  Please try uploading your image again.
+validate_observation_future_time: Time travel is not allowed, pick a date from the past.
+validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
+validate_observation_where_missing: Please tell us where it was seen or collected.
+validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
+validate_user_login_taken: Sorry, that login name is already taken.
+validate_image_wrong_type: The file you tried to upload is not recognized as an image.  It is of type '[type]'.
+
+# These shouldn't need translating, but you are free to override if you need to.
+validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
+validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
+validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+validate_comment_user_missing: "[:validate_missing(field=:user)]"
+validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
+validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
+validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
+validate_image_user_missing: "[:validate_missing(field=:user)]"
+validate_image_when_missing: "[:validate_missing(field=:date)]"
+validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
+validate_interest_user_missing: "[:validate_missing(field=:user)]"
+validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
+validate_location_east_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
+validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
+validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
+validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
+validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
+validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
+validate_location_user_missing: "[:validate_missing(field=:user)]"
+validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
+validate_name_author_too_long: "[:validate_too_long(field=:authority,max=100)]"
+validate_name_display_name_too_long: "[:validate_too_long(field=''display_name'',max=100)]"
+validate_name_observation_name_too_long: "[:validate_too_long(field=''observation_name'',max=100)]"
+validate_name_search_name_too_long: "[:validate_too_long(field=''search_name'',max=100)]"
+validate_name_text_name_too_long: "[:validate_too_long(field=''text_name'',max=100)]"
+validate_name_user_missing: "[:validate_missing(field=:user)]"
+validate_naming_name_missing: "[:validate_missing(field=:name)]"
+validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
+validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
+validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
+validate_naming_user_missing: "[:validate_missing(field=:user)]"
+validate_notification_user_missing: "[:validate_missing(field=:user)]"
+validate_observation_user_missing: "[:validate_missing(field=:user)]"
+validate_observation_when_missing: "[:validate_missing(field=:date)]"
+validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
+validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
+validate_project_title_missing: "[:validate_missing(field=:title)]"
+validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
+validate_project_user_group_missing: Missing [:user_group].
+validate_project_user_missing: "[:validate_missing(field=:user)]"
+validate_species_list_title_missing: "[:validate_missing(field=:title)]"
+validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
+validate_species_list_user_missing: "[:validate_missing(field=:user)]"
+validate_species_list_where_missing: "[:validate_missing(field=:location)]"
+validate_species_list_where_too_long: "[:validate_too_long(field=:location,max=100)]"
+validate_user_email_too_long: "[:validate_too_long(field=:email_address,max=80)]"
+validate_user_login_missing: "[:validate_missing(field=:login_name)]"
+validate_user_login_too_long: "[:validate_too_long_or_short(field=:login_name,min=3,max=40)]"
+validate_user_name_too_long: "[:validate_too_long(field=:full_name,max=80)]"
+validate_user_password_confirmation_missing: "[:validate_missing(field=:password_confirmation)]"
+validate_user_password_missing: "[:validate_missing(field=:password)]"
+validate_user_password_no_match: "[:validate_confirmation_mismatch(field=:password)]"
+validate_user_password_too_long: "[:validate_too_long(field=:password,max=40)]"
+validate_user_theme_too_long: "[:validate_too_long(field=''theme_name'',max=40)]"
+validate_vote_naming_missing: "[:validate_missing(field=:naming)]"
+validate_vote_user_missing: "[:validate_missing(field=:user)]"
+validate_vote_value_missing: "[:validate_missing(field=:confidence_level)]"
+validate_vote_value_not_integer: "[:validate_not_a_number(field=:vote)]"
+validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
+
+# Runtime error and success messages.
+runtime_added: "Successfully added [type]."
+runtime_added_id: "Successfully added [type] #[value]."
+runtime_added_id_to: "Successfully added [type] #[value] to [name]."
+runtime_added_name: "Successfully added [type] '[value]'."
+runtime_added_name_to: "Successfully added [type] '[value]' to [name]."
+runtime_added_to: "Successfully added [type] to [name]."
+runtime_admin_only: That operation is restricted to site admins.
+runtime_already_exists: "[Type] already exists: '[value]'"
+runtime_already_used: "[Type] is already in use: '[value]'"
+runtime_created: "Successfully created [type]."
+runtime_created_id: "Successfully created [type] #[value]."
+runtime_created_name: "Successfully created [type] '[value]'."
+runtime_delivered_message: Successfully delivered message.
+runtime_delivered_question: Successfully delivered question.
+runtime_delivered_request: Successfully delivered request.
+runtime_destroyed: "Successfully destroyed [type]."
+runtime_destroyed_id: "Successfully destroyed [type] #[value]."
+runtime_destroyed_name: "Successfully destroyed [type] '[value]'."
+runtime_invalid: "[Type] is invalid: '[value]'"
+runtime_lat_long_error: "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
+runtime_merge_success: Successfully merged [type] [this] into [that].
+runtime_missing: Missing [field].
+runtime_no_changes: "No changes made."
+runtime_no_create: "Unable to create [type]."
+runtime_no_create_id: "Unable to create [type] #[value]."
+runtime_no_create_name: "Unable to create [type] '[value]'."
+runtime_no_destroy: "Unable to destroy [type]."
+runtime_no_destroy_id: "Unable to destroy [type] #[value]."
+runtime_no_destroy_name: "Unable to destroy [type] '[value]'."
+runtime_no_match: "Can't find [type]."
+runtime_no_match_id: "Can't find [type] #[value]."
+runtime_no_match_name: "Can't find [type] matching '[value]'."
+runtime_no_matches: "No matching [types] found."
+runtime_no_matches_pattern: "No [types] matching '[value]' found."
+runtime_no_more: There are no more [types].
+runtime_no_objects: There are no [types].
+runtime_no_parse: "Unable to parse: '[value]'"
+runtime_no_save: "Unable to save [type]."
+runtime_no_update: "Unable to update [type]."
+runtime_no_update_id: "Unable to update [type] #[value]."
+runtime_no_update_name: "Unable to update [type] '[value]'."
+runtime_not_owner: "You are not the owner of [type] '[value]'."
+runtime_not_owner_id: "You are not the owner of [type] #[value]."
+runtime_removed: "Successfully removed [type]."
+runtime_removed_from: "Successfully removed [type] from [name]."
+runtime_removed_id: "Successfully removed [type] #[value]."
+runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
+runtime_removed_name: "Successfully removed [type] '[value]'."
+runtime_removed_name_from: "Successfully removed [type] '[value]' from [name]."
+runtime_updated: "Successfully updated [type]."
+runtime_updated_id: "Successfully updated [type] #[value]."
+runtime_updated_name: "Successfully updated [type] '[value]'."
+runtime_uploaded: "Successfully uploaded [type]."
+runtime_uploaded_id: "Successfully uploaded [type] #[value]."
+runtime_uploaded_name: "Successfully uploaded [type] '[value]'."
+runtime_user_hasnt_authored: "[user] hasn't written any [types]."
+runtime_user_hasnt_created: "[user] hasn't created any [types]."
+runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
+
+# One-time-use messages.
+runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
+runtime_description_added_admin: Gave admin permission to [name].
+runtime_description_added_reader: Gave view permission to [name].
+runtime_description_added_writer: Gave edit permission to [name].
+runtime_description_copy_success: Successfully copied the description.
+runtime_description_merge_delete_denied: You don't have permission to delete the old description.
+runtime_description_merge_deleted: "The old description was deleted: [old]"
+runtime_description_merge_success: Successfully merged the descriptions.
+runtime_description_move_success: Successfully moved the description.
+runtime_description_private: That description is private!
+runtime_description_removed_admin: Revoked admin permission for [name].
+runtime_description_removed_reader: Revoked view permission for [name].
+runtime_description_removed_writer: Revoked edit permission for [name].
+runtime_destroy_description_not_admin: Only a description's admins can delete that description.
+runtime_duplicate_rank: "Rank appears twice: '[rank]'"
+runtime_image_updated_notes: "Updated notes on image #[id]."
+runtime_image_uploaded: Uploaded image '[name]'.
+runtime_index_no_at_location: No [types] at [location].
+runtime_index_no_by_rss_log: No [types] have had any recent activity.
+runtime_index_no_for_object: No [types] for this object.
+runtime_index_no_for_user: No [types] for [user].
+runtime_index_no_in_species_list: No [types] in [name].
+runtime_index_no_inside_observation: Observation #[id] has no [types].
+runtime_index_no_of_children: There are no [types] for children of [name].
+runtime_index_no_of_name: There are no [types] of [name].
+runtime_index_no_of_parents: There are no [types] for parents of [name].
+runtime_index_no_with: There are no [types] with [attachments].
+runtime_invalid_for_rank: "Name is invalid for the rank [rank]: '[name]'"
+runtime_invalid_rank: "Ranks are out of order: '[line_rank]' is the same as or below '[rank]'"
+runtime_location_merge_failed: Failed to merge observation [name].
+runtime_login_failed: Login unsuccessful.
+runtime_login_success: Login successful.
+runtime_name_in_use_with_notes: The name '[name]' is already in use and [other] has notes.
+runtime_no_conditions: You didn't specify any conditions!
+runtime_no_upload_image: Had problems uploading image '[name]'.
+runtime_object_deleted: This object has been deleted.
+runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
+runtime_prefs_password_no_match: Password and confirmation did not match.
+runtime_refine_search_expect_id: "Invalid [type] in '[field]' -- expected a valid id."
+runtime_refine_search_field_required: "Missing required field '[field]'."
+runtime_refine_search_invalid_rss_type: "Invalid object type '[value]'."
+runtime_refine_search_model_not_supported: Sorry, '[:app_refine_search]' doesn't support [type] queries yet.
+runtime_refine_search_object_not_found: "Couldn't find [type] matching '[value]' in '[field]'."
+runtime_search_has_expired: Your query has expired, please try again.
+runtime_show_observation_success: Successfully changed vote.
+runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
+
+# These shouldn't need translating, but you are free to override if you need to.
+runtime_ask_observation_question_success: "[:runtime_delivered_question]"
+runtime_ask_user_question_success: "[:runtime_delivered_question]"
+runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
+runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
+runtime_ask_webmaster_success: "[:runtime_delivered_message]"
+runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
+runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
+runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
+runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
+runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
+runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
+runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
+runtime_destroy_naming_success: "[:runtime_destroyed_id(type=:naming,value=id)]"
+runtime_destroy_observation_denied: "[:runtime_not_owner_id(type=:observation,value=id)]"
+runtime_destroy_observation_failed: "[:runtime_no_destroy_id(type=:observation,value=id)]"
+runtime_destroy_observation_success: "[:runtime_destroyed_id(type=:observation,value=id)]"
+runtime_edit_location_description_no_change: "[:runtime_no_changes]"
+runtime_edit_location_description_success: "[:runtime_updated_id(type=:location_description,value=id)]"
+runtime_edit_location_no_change: "[:runtime_no_changes]"
+runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
+runtime_edit_name_description_no_change: "[:runtime_no_changes]"
+runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
+runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
+runtime_edit_name_no_change: "[:runtime_no_changes]"
+runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
+runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
+runtime_edit_project_success: "[:runtime_updated_id(type=:project,value=id)]"
+runtime_email_new_password_failed: "[:runtime_no_match_name(type=:user,value=user)]"
+runtime_form_comments_create_success: "[:runtime_created_id(type=:comment,value=id)]"
+runtime_form_comments_destroy_failed: "[:runtime_no_destroy_id(type=:comment,value=id)]"
+runtime_form_comments_destroy_success: "[:runtime_destroyed_id(type=:comment,value=id)]"
+runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id)]"
+runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
+runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
+runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
+runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
+runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
+runtime_image_resize_denied: "[:runtime_admin_only]"
+runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
+runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
+runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
+runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
+runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
+runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
+runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
+runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
+runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
+runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
+runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
+runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
+runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
+runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
+runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
+runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
+runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
+runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
+runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
+runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
+runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
+runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
+runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
+runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
+runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
+runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
+runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
+runtime_naming_created: "[:runtime_created(type=:naming)]"
+runtime_naming_updated: "[:runtime_updated(type=:naming)]"
+runtime_no_more_search_objects: "[:runtime_no_more]"
+runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
+runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
+runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
+runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
+runtime_prefs_success: "[:runtime_updated(type=:preferences)]"
+runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
+runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
+runtime_profile_success: "[:runtime_updated(type=:profile)]"
+runtime_profile_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
+runtime_species_list_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
+runtime_species_list_create_success: "[:runtime_created_id(type=:species_list,value=id)]"
+runtime_species_list_destroy_success: "[:runtime_destroyed_id(type=:species_list,value=id)]"
+runtime_species_list_edit_success: "[:runtime_updated_id(type=:species_list,value=id)]"
+runtime_species_list_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
+runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
+runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
+runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
+runtime_user_bad_rank: "[:runtime_invalid(type=rank,value=rank)]"
+
+# Longer messages.
+runtime_ask_webmaster_antispam: >
+  To cut down on robot spam, questions from unregistered users cannot contain
+  'http:' or HTML markup.
+
+runtime_create_draft_create_denied: >
+  You do not have permission to create a draft for the project [title].
+
+runtime_create_naming_already_proposed: >
+  Someone has already proposed that name.  If you would like to comment on it,
+  try posting a comment instead.
+
+runtime_description_already_default: >
+  This description is already the default description!
+
+runtime_description_foreign_read_wrong: >
+  Descriptions from other servers must be readable by the general public.
+
+runtime_description_foreign_write_wrong: >
+  Descriptions from other servers must be read-only.
+
+runtime_description_make_default_only_public: >
+  You are only allowed to make public descriptions the default. All users must
+  be allowed at least to read it.
+
+runtime_description_merge_conflict: >
+  There is a conflict.  Please merge the two descriptions by hand.  (Look at
+  the text fields below.  Where there is a conflict both descriptions have
+  been entered one on top of the other separated by a line.)  You may cancel
+  the operation at any time without making any changes.  When you are finished,
+  be sure to destroy the old description.
+
+runtime_description_move_invalid_classification: >
+  The classification has incorrect syntax.  We can't save a new description
+  with it like this, so we've temporarily blanked out the classification field
+  until you correct it.
+
+runtime_description_must_be_admin: >
+  You must be an admin for a description to use this feature.
+
+runtime_description_permissions_fixed: >
+  This type of description has fixed permissions.
+
+runtime_description_public_read_wrong: >
+  Public descriptions must be readable by the general public.
+
+runtime_description_public_write_wrong: >
+  Public descriptions must be writable by the general public.
+
+runtime_description_user_not_found: >
+  User or Group "[name]" not found!
+
+runtime_destroy_naming_someone_else: >
+  Sorry, someone else has given this their strongest positive vote.  You are
+  free to propose alternate names, but we can no longer let you delete this
+  name.
+
+runtime_edit_description_denied: >
+  You have not been given permission to edit this description.
+
+runtime_edit_naming_someone_else: >
+  Sorry, someone else has given this a positive vote, so we had to create a new
+  name proposal to accomodate your changes.
+
+runtime_email_new_password_success: >
+  Password successfully changed.  New password has been sent to your email
+  account.
+
+runtime_form_names_misspelling_bad: >
+  The alternate spelling you entered is not recognized.
+
+runtime_form_names_misspelling_same: >
+  Correct spelling and incorrect spelling are the same!
+
+runtime_image_changed_your_image: >
+  Changed your profile image to image #[id].
+
+runtime_image_move_failed: >
+  Something went wrong on the server and we failed to save image #[id].  Please
+  try again.
+
+runtime_image_process_failed: >
+  Something went wrong on the server and we failed to process image #[id].
+  Please try again.
+
+runtime_image_remove_denied: >
+  You do not have permission to remove images from this observation.
+
+runtime_image_remove_missing: >
+  This observation doesn't have that image!
+
+runtime_merge_warning: >
+  Because it can be destructive, only the admin can merge existing [types].
+  An email requesting the proposed merge has been sent to the admins.
+
+runtime_object_not_found: >
+  Sorry, the [type] you tried to display (id #[id]) no longer exists.  Someone
+  has either deleted it or merged it into another.
+
+runtime_profile_must_define: >
+  You must define this location before we can make it your primary location.
+  Any other changes to your profile have been saved.
+
+runtime_refine_search_bad_google_minus: >
+  Invalid search syntax in [name] at '[value]'.  Please only use the minus sign
+  syntax at the beginning of the line.
+
+runtime_reverify_already_verified: >
+  Your account is already verified!  Please log in.
+
+runtime_reverify_sent: >
+  Another verification email was sent to your email account.
+
+runtime_show_description_denied: >
+  You have not been given permission to see this description.
+
+runtime_show_draft_denied: >
+  Permission denied: only project members can view drafts in progress.
+
+runtime_signup_success: >
+  Signup successful.  Verification sent to your email account.
+
+runtime_species_list_need_to_use_bulk: >
+  Synonyms can only be created from the [:name_bulk_title] page.
+
+################################################################################
+
+# DEBUGGING STUFF -- this doesn't need translating
 
 # observer/recalc
 observer_recalc_old_name: "old_name: [name]"

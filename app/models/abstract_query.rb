@@ -1174,7 +1174,10 @@ class AbstractQuery < ActiveRecord::Base
     # Hey, check it out, we can populate the results cache immediately!
     # Oh, crap, no we can't.  This fails down the line if bogus ids are given
     # to us in params[:ids].  query.result_ids returns the bogus ids, and
-    # query.results returns nils for the bogus ids.
+    # query.results returns nils for the bogus ids.  (It turns out that in
+    # most cases this doesn't save us anything, anyway, because if the first
+    # call upon the query is to retrieve results or result_ids, then this is
+    # simply thrown away.  Oops.)
     # @result_ids = ids
   end
 

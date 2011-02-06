@@ -11,6 +11,30 @@ es_ES: Español
 pt_BR: Português
 
 ################################################################################
+#
+#  Overview of File
+#
+#  Translations are presented roughly in order of decreasing importance,
+#  starting with things that are seen on every page, progressing through
+#  commonly-used to rarely-used pages, to emails, error messages, and finally
+#  administrative and debugging messages. Sections:
+#
+#    COMMON WORDS AND PHRASES
+#    ENUMERATED SETS OF VALUES
+#    APPLICATION LAYOUT
+#    MOST POPULAR PAGES
+#    LESS POPULAR PAGES
+#    ADMIN-TYPE PAGES
+#    EMAIL MESSAGES
+#    INTRO PAGE
+#    HOW TO HELP PAGE
+#    HOW TO USE PAGE (COMMON TASKS)
+#    HOW TO USE PAGE (GLOSSARY)
+#    LOCATION HELP PAGE
+#    ERROR MESSAGES
+#    DEBUGGING STUFF
+#
+################################################################################
 
 # COMMON WORDS AND PHRASES
 
@@ -863,395 +887,6 @@ log_object_destroyed: "[:log_object_destroyed_by_user]"
 log_object_removed: "[:log_object_removed_by_user]"
 log_object_updated: "[:log_object_updated_by_user]"
 
-# ActiveRecord validation error messages.
-validate_confirmation_mismatch: "[Field] δεν ταιριάζει με την επιβεβαίωση."
-validate_invalid: Άκυρο [field].
-validate_missing: Λείπει [field].
-validate_not_a_number: "[Field] δεν είναι αριθμός."
-validate_not_in_range: "[Field] είναι εκτός εμβέλειας."
-validate_this_more_than_that: "[That] πρέπει να είναι περισσότερο από [this]."
-validate_too_large: "[Field] πρέπει να είναι το πολύ [max]."
-validate_too_long: "[Field] πρέπει να είναι λιγότερο από [max] χαρακτήρες."
-validate_too_long_or_short: "[Field] πρέπει να είναι από [min] έως [max] χαρακτήρες."
-validate_too_short: "[Field] πρέπει να είναι τουλάχιστον [min] χαρακτήρες."
-validate_too_small: "[Field] πρέπει να είναι τουλάχιστον [min]."
-validate_too_small_or_large: "[Field] πρέπει να είναι μεταξύ [min] και [max]."
-
-# One-time-use error messages.
-validate_image_content_type_images_only: Μπορείτε να ανεβάσετε μόνο [:images].
-validate_image_file_missing: Παρουσιάστηκαν προβλήματα κατά το ανέβασμα [:image].
-validate_image_file_too_big: Δεν μπορούμε να χειριστούμε [:images] τόσο μεγάλες. Παρακαλούμε μειώστε τη σε λιγότερο από [max] πριν την ανεβάσετε.
-validate_image_md5_mismatch: Το άθροισμα MD5 δεν βγήκε σωστό. Παρακαλούμε δοκιμάστε να ξανανεβάσετε την εικόνα σας.
-validate_observation_future_time: Τα ταξίδια στο χρόνο δεν επιτρέπονται, επιλέξτε μια ημερομηνία του παρελθόντος.
-validate_observation_thumb_image_id_invalid: Δεν στάθηκε δυνατή η εύρεση αντίστοιχης [:image] για χρήση ως ενδεικτικής.
-validate_observation_where_missing: Παρακαλούμε πείτε μας που εντοπίστηκε ή συλλέχτηκε.
-validate_user_email_missing: Παρακαλούμε δώστε μας έγκυρη διεύθυνση email, για να μπορέσουμε να επαληθεύσουμε το [:account] σας.
-validate_user_login_taken: Λυπόμαστε, αυτό το όνομα σύνδεσης είναι ήδη κατειλημμένο.
-validate_image_wrong_type: Το αρχείο που προσπαθήσατε να ανεβάσετε δεν αναγνωρίζεται ως εικόνα. Είναι του τύπου '[type]'.
-
-# These shouldn't need translating, but you are free to override if you need to.
-validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
-validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
-validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
-validate_comment_user_missing: "[:validate_missing(field=:user)]"
-validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
-validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
-validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-validate_image_user_missing: "[:validate_missing(field=:user)]"
-validate_image_when_missing: "[:validate_missing(field=:date)]"
-validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
-validate_interest_user_missing: "[:validate_missing(field=:user)]"
-validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
-validate_location_east_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
-validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
-validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
-validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
-validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
-validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
-validate_location_user_missing: "[:validate_missing(field=:user)]"
-validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
-validate_name_author_too_long: "[:validate_too_long(field=:authority,max=100)]"
-validate_name_display_name_too_long: "[:validate_too_long(field=''display_name'',max=100)]"
-validate_name_observation_name_too_long: "[:validate_too_long(field=''observation_name'',max=100)]"
-validate_name_search_name_too_long: "[:validate_too_long(field=''search_name'',max=100)]"
-validate_name_text_name_too_long: "[:validate_too_long(field=''text_name'',max=100)]"
-validate_name_user_missing: "[:validate_missing(field=:user)]"
-validate_naming_name_missing: "[:validate_missing(field=:name)]"
-validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
-validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
-validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
-validate_naming_user_missing: "[:validate_missing(field=:user)]"
-validate_notification_user_missing: "[:validate_missing(field=:user)]"
-validate_observation_user_missing: "[:validate_missing(field=:user)]"
-validate_observation_when_missing: "[:validate_missing(field=:date)]"
-validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
-validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-validate_project_title_missing: "[:validate_missing(field=:title)]"
-validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-validate_project_user_group_missing: Missing [:user_group].
-validate_project_user_missing: "[:validate_missing(field=:user)]"
-validate_species_list_title_missing: "[:validate_missing(field=:title)]"
-validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-validate_species_list_user_missing: "[:validate_missing(field=:user)]"
-validate_species_list_where_missing: "[:validate_missing(field=:location)]"
-validate_species_list_where_too_long: "[:validate_too_long(field=:location,max=100)]"
-validate_user_email_too_long: "[:validate_too_long(field=:email_address,max=80)]"
-validate_user_login_missing: "[:validate_missing(field=:login_name)]"
-validate_user_login_too_long: "[:validate_too_long_or_short(field=:login_name,min=3,max=40)]"
-validate_user_name_too_long: "[:validate_too_long(field=:full_name,max=80)]"
-validate_user_password_confirmation_missing: "[:validate_missing(field=:password_confirmation)]"
-validate_user_password_missing: "[:validate_missing(field=:password)]"
-validate_user_password_no_match: "[:validate_confirmation_mismatch(field=:password)]"
-validate_user_password_too_long: "[:validate_too_long(field=:password,max=40)]"
-validate_user_theme_too_long: "[:validate_too_long(field=''theme_name'',max=40)]"
-validate_vote_naming_missing: "[:validate_missing(field=:naming)]"
-validate_vote_user_missing: "[:validate_missing(field=:user)]"
-validate_vote_value_missing: "[:validate_missing(field=:confidence_level)]"
-validate_vote_value_not_integer: "[:validate_not_a_number(field=:vote)]"
-validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
-
-# Runtime error and success messages.
-runtime_added: "Επιτυχής προσθήκη [type]."
-runtime_added_id: "Επιτυχής προσθήκη [type] #[value]."
-runtime_added_id_to: "Επιτυχής προσθήκη [type] #[value] στο [name]."
-runtime_added_name: "Επιτυχής προσθήκη [type] '[value]'."
-runtime_added_name_to: "Επιτυχής προσθήκη [type] '[value]' στο [name]."
-runtime_added_to: "Επιτυχής προσθήκη [type] στο [name]."
-runtime_admin_only: Η λειτουργία αυτή περιορίζεται στους διαχειριστές της ιστοσελίδας.
-runtime_already_exists: "[Type] υπάρχει ήδη: '[value]'"
-runtime_already_used: "[Type] χρησιμοποιείται ήδη: '[value]'"
-runtime_created: "Επιτυχής δημιουργία [type]."
-runtime_created_id: "Επιτυχής δημιουργία [type] #[value]."
-runtime_created_name: "Επιτυχής δημιουργία [type] '[value]'."
-runtime_delivered_message: Επιτυχής παράδοση μηνύματος.
-runtime_delivered_question: Επιτυχής διαβίβαση ερωτήματος.
-runtime_delivered_request: Επιτυχής διαβίβαση αιτήματος.
-runtime_destroyed: "Επιτυχής καταστροφή [type]."
-runtime_destroyed_id: "Επιτυχής καταστροφή [type] #[value]."
-runtime_destroyed_name: "Επιτυχής καταστροφή [type] '[value]'."
-runtime_invalid: "[Type] είναι άκυρο: '[value]'"
-runtime_lat_long_error: "Το γεωγραφικό πλάτος και μήκος πρέπει να είναι αριθμοί κινητής υποδιαστολής μεταξύ -90 και 90, και -180 και 180 αντίστοιχα."
-runtime_merge_success: Επιτυχής συγχώνευση [type] [this] στο [that].
-runtime_missing: Λείπει το [field].
-runtime_no_changes: "Δεν έγινε καμία αλλαγή."
-runtime_no_create: "Αδυναμία δημιουργίας [type]."
-runtime_no_create_id: "Αδυναμία δημιουργίας [type] #[value]."
-runtime_no_create_name: "Αδυναμία δημιουργίας [type] '[value]'."
-runtime_no_destroy: "Αδυναμία καταστροφής [type]."
-runtime_no_destroy_id: "Unable καταστροφής [type] #[value]."
-runtime_no_destroy_name: "Unable καταστροφής [type] '[value]'."
-runtime_no_match: "Δεν βρέθηκε το [type]."
-runtime_no_match_id: "Δεν βρέθηκε το [type] #[value]."
-runtime_no_match_name: "Δεν βρέθηκε το [type] που να ταιριάζει με '[value]'."
-runtime_no_matches: "Δεν βρέθηκαν [types]."
-runtime_no_matches_pattern: "Δεν βρέθηκαν [types] που να ταιριάζουν με '[value]'."
-runtime_no_more: Δεν υπάρχουν άλλα [types].
-runtime_no_objects: Δεν υπάρχουν [types].
-runtime_no_parse: "Αδυναμία ανάλυσης: '[value]'"
-runtime_no_save: "Αδυναμία αποθήκευσης [type]."
-runtime_no_update: "Αδυναμία ενημέρωσης [type]."
-runtime_no_update_id: "Αδυναμία ενημέρωσης [type] #[value]."
-runtime_no_update_name: "Αδυναμία ενημέρωσης [type] '[value]'."
-runtime_not_owner: "Δεν είστε ιδιοκτήτης του [type] '[value]'."
-runtime_not_owner_id: "Δεν είστε ιδιοκτήτης του [type] #[value]."
-runtime_removed: "Επιτυχής αφαίρεση του [type]."
-runtime_removed_from: "Επιτυχής αφαίρεση του [type] από [name]."
-runtime_removed_id: "Επιτυχής αφαίρεση του [type] #[value]."
-runtime_removed_id_from: "Επιτυχής αφαίρεση του [type] #[value] από [name]."
-runtime_removed_name: "Επιτυχής αφαίρεση του [type] '[value]'."
-runtime_removed_name_from: "Επιτυχής αφαίρεση του [type] '[value]' from [name]."
-runtime_updated: "Επιτυχής ενημέρωση του [type]."
-runtime_updated_id: "Επιτυχής ενημέρωση του [type] #[value]."
-runtime_updated_name: "Επιτυχής ενημέρωση του [type] '[value]'."
-runtime_uploaded: "Επιτυχές ανέβασμα του [type]."
-runtime_uploaded_id: "Επιτυχές ανέβασμα του [type] #[value]."
-runtime_uploaded_name: "Επιτυχές ανέβασμα του [type] '[value]'."
-runtime_user_hasnt_authored: "[user] δεν έχει γράψει [types]."
-runtime_user_hasnt_created: "[user] δεν έχει δημιουργήσει [types]."
-runtime_user_hasnt_edited: "[user] δεν έχει επεξεργαστεί [types]."
-
-# One-time-use messages.
-runtime_dates_must_be_same_format: Όταν δίνετε δύο ημερομηνίες, αυτές πρέπει να έχουν την ίδια διαμόρφωση.
-runtime_description_added_admin: Δόθηκε άδεια διαχειριστή στον/στην [name].
-runtime_description_added_reader: Δόθηκε άδεια επισκόπησης στον/στην [name].
-runtime_description_added_writer: Δόθηκε άδεια επεξεργασίας στον/στην [name].
-runtime_description_copy_success: Επιτυχής αντιγραφή της περιγραφής.
-runtime_description_merge_delete_denied: Δεν έχετε άδεια διαγραφής της παλιάς περιγραφής.
-runtime_description_merge_deleted: "Η παλιά περιγραφή διαγράφηκε: [old]"
-runtime_description_merge_success: Επιτυχής συγχώνευση των περιγραφών.
-runtime_description_move_success: Επιτυχής αφαίρεση της περιγραφής.
-runtime_description_private: Η περιγραφή αυτή είναι ιδιωτική!
-runtime_description_removed_admin: Ανακλήθηκε η άδεια διαχειριστή του [name].
-runtime_description_removed_reader: Ανακλήθηκε η άδεια επισκόπησης του [name].
-runtime_description_removed_writer: Ανακλήθηκε η άδεια επεξεργασίας του [name].
-runtime_destroy_description_not_admin: Μόνο οι διαχειριστές περιγραφής μπορούν να διαγράψουν αυτή την περιγραφή.
-runtime_duplicate_rank: "Η κατάταξη εμφανίζεται δύο φορές: '[rank]'"
-runtime_image_updated_notes: "Ενημερώθηκαν οι σημειώσεις της εικόνας #[id]."
-runtime_image_uploaded: Ανέβηκε η εικόνα '[name]'.
-runtime_index_no_at_location: Δεν υπάρχουν [types] στην [location].
-runtime_index_no_by_rss_log: Δεν υπάρχουν [types] με πρόσφατη δραστηριότητα.
-runtime_index_no_for_object: Δεν υπάρχουν [types] γι’ αυτό το αντικείμενο.
-runtime_index_no_for_user: Δεν υπάρχουν [types] για τον/την [user].
-runtime_index_no_in_species_list: Δεν υπάρχουν [types] στο [name].
-runtime_index_no_inside_observation: Η παρατήρηση #[id] δεν έχει [types].
-runtime_index_no_of_children: Δεν υπάρχουν [types] για τα θυγατρικά είδη του [name].
-runtime_index_no_of_name: Δεν υπάρχουν [types] του [name].
-runtime_index_no_of_parents: Δεν υπάρχουν [types] για τα πατρικά είδη του [name].
-runtime_index_no_with: Δεν υπάρχουν [types] με [attachments].
-runtime_invalid_for_rank: "Το όνομα είναι άκυρο για την κατάταξη [rank]: '[name]'"
-runtime_invalid_rank: "Η κατάταξη είναι σε λάθος σειρά: '[line_rank]' είναι στην ίδια ή σε κατώτερη '[rank]'"
-runtime_location_merge_failed: Αποτυχία συγχώνευσης της παρατήρησης [name].
-runtime_login_failed: Αποτυχία σύνδεσης.
-runtime_login_success: Σύνδεση επιτυχής.
-runtime_name_in_use_with_notes: Το όνομα '[name]' χρησιμοποιείται ήδη και το [other] έχει σημειώσεις.
-runtime_no_conditions: Δεν καθορίσατε όρους!
-runtime_no_upload_image: Παρουσιάστηκε πρόβλημα κατά το ανέβασμα της εικόνας '[name]'.
-runtime_object_deleted: Αυτό το αντικείμενο έχει διαγραφεί.
-runtime_object_not_in_index: "Δεν βρέθηκε το [type] #[id] στα αποτελέσματα της τρέχουσας αναζήτησης ή ευρετηρίου."
-runtime_prefs_password_no_match: Ασυμφωνία κωδικού και επιβεβαίωσης.
-runtime_refine_search_expect_id: "Άκυρο [type] στο '[field]' – αναμενόταν έγκυρη ταυτότητα."
-runtime_refine_search_field_required: "Κενό απαιτούμενο πεδίο '[field]'."
-runtime_refine_search_invalid_rss_type: "Άκυρος τύπος αντικειμένου '[value]'."
-runtime_refine_search_model_not_supported: Λυπόμαστε, η '[:app_refine_search]' δεν υποστηρίζει ακόμη ερωτήματα [type].
-runtime_refine_search_object_not_found: "Δεν βρέθηκε [type] που να ταιριάζει με το '[value]' στο '[field]'."
-runtime_search_has_expired: Το ερώτημά σας έχει λήξη, παρακαλούμε προσπαθήστε ξανά.
-runtime_show_observation_success: Επιτυχής αλλαγή ψήφου.
-runtime_unable_to_transfer_name: Αδυναμία μεταφοράς του [name] σε άλλο συνώνυμο.
-
-# These shouldn't need translating, but you are free to override if you need to.
-runtime_ask_observation_question_success: "[:runtime_delivered_question]"
-runtime_ask_user_question_success: "[:runtime_delivered_question]"
-runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
-runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
-runtime_ask_webmaster_success: "[:runtime_delivered_message]"
-runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
-runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
-runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
-runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
-runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
-runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
-runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
-runtime_destroy_naming_success: "[:runtime_destroyed_id(type=:naming,value=id)]"
-runtime_destroy_observation_denied: "[:runtime_not_owner_id(type=:observation,value=id)]"
-runtime_destroy_observation_failed: "[:runtime_no_destroy_id(type=:observation,value=id)]"
-runtime_destroy_observation_success: "[:runtime_destroyed_id(type=:observation,value=id)]"
-runtime_edit_location_description_no_change: "[:runtime_no_changes]"
-runtime_edit_location_description_success: "[:runtime_updated_id(type=:location_description,value=id)]"
-runtime_edit_location_no_change: "[:runtime_no_changes]"
-runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
-runtime_edit_name_description_no_change: "[:runtime_no_changes]"
-runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
-runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
-runtime_edit_name_no_change: "[:runtime_no_changes]"
-runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
-runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
-runtime_edit_project_success: "[:runtime_updated_id(type=:project,value=id)]"
-runtime_email_new_password_failed: "[:runtime_no_match_name(type=:user,value=user)]"
-runtime_form_comments_create_success: "[:runtime_created_id(type=:comment,value=id)]"
-runtime_form_comments_destroy_failed: "[:runtime_no_destroy_id(type=:comment,value=id)]"
-runtime_form_comments_destroy_success: "[:runtime_destroyed_id(type=:comment,value=id)]"
-runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id)]"
-runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
-runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
-runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
-runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
-runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
-runtime_image_resize_denied: "[:runtime_admin_only]"
-runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
-runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
-runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
-runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
-runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
-runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
-runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
-runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
-runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
-runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
-runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
-runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
-runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
-runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
-runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
-runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
-runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
-runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
-runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
-runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
-runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
-runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
-runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
-runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
-runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
-runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
-runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
-runtime_naming_created: "[:runtime_created(type=:naming)]"
-runtime_naming_updated: "[:runtime_updated(type=:naming)]"
-runtime_no_more_search_objects: "[:runtime_no_more]"
-runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
-runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
-runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
-runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
-runtime_prefs_success: "[:runtime_updated(type=:preferences)]"
-runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
-runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
-runtime_profile_success: "[:runtime_updated(type=:profile)]"
-runtime_profile_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
-runtime_species_list_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
-runtime_species_list_create_success: "[:runtime_created_id(type=:species_list,value=id)]"
-runtime_species_list_destroy_success: "[:runtime_destroyed_id(type=:species_list,value=id)]"
-runtime_species_list_edit_success: "[:runtime_updated_id(type=:species_list,value=id)]"
-runtime_species_list_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
-runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
-runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
-runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
-runtime_user_bad_rank: "[:runtime_invalid(type=rank,value=rank)]"
-
-# Longer messages.
-runtime_ask_webmaster_antispam: >
-  Για την αντιμετώπιση ρομποτικού spam, ερωτήματα από μη εγγεγραμμένους χρήστες δεν είναι δυνατό να περιέχουν 'http:' ή σήμανση HTML.
-
-runtime_create_draft_create_denied: >
-  Δεν έχετε άδεια δημιουργίας προσχεδίου για το έργο [title].
-
-runtime_create_naming_already_proposed: >
-  Κάποιος άλλος έχει ήδη προτείνει αυτό το όνομα. Αν θέλετε να το σχολιάσετε, καλύτερα να δημοσιεύσετε σχόλιο.
-
-runtime_description_already_default: >
-  Η περιγραφή αυτή είναι ήδη η προεπιλεγμένη!
-
-runtime_description_foreign_read_wrong: >
-  Περιγραφές από άλλους εξυπηρέτες πρέπει να είναι αναγνώσιμες από όλους.
-
-runtime_description_foreign_write_wrong: >
-  Περιγραφές από άλλους εξυπηρέτες πρέπει να είναι μόνο για ανάγνωση.
-
-runtime_description_make_default_only_public: >
-  Μόνο μια δημόσια περιγραφή επιτρέπεται να είναι η προεπιλεγμένη. Πρέπει να επιτρέπεται σε όλους τους χρήστες τουλάχιστον να μπορούν να τη διαβάσουν.
-
-runtime_description_merge_conflict: >
-  Υπήρξε κάποια σύγκρουση. Παρακαλούμε να συγχωνεύσετε τις δύο περιγραφές χειροκίνητα. (Δείτε τα πεδία κειμένου παρακάτω. Όπου υπάρχει σύγκρουση, οι περιγραφές έχουν εισαχθεί η μία πάνω από την άλλη και χωρίζονται από μία γραμμή.) Μπορείτε να ακυρώσετε αυτή τη λειτουργία οποτεδήποτε χωρίς να κάνετε αλλαγές. Όταν τελειώσετε, φροντίστε να καταστρέψετε την παλιά περιγραφή.
-
-runtime_description_move_invalid_classification: >
-  Η κατάταξη έχει εσφαλμένη σύνταξη. Δεν είναι δυνατή η αποθήκευση της νέας περιγραφής μαζί της με αυτόν τον τρόπο, γι’ αυτό έχει καθαριστεί το πεδίο ταξινόμησης προκειμένου να κάνετε τις διορθώσεις.
-
-runtime_description_must_be_admin: >
-  Πρέπει να είστε διαχειριστής μιας περιγραφής για να χρησιμοποιήσετε αυτό το χαρακτηριστικό.
-
-runtime_description_permissions_fixed: >
-  Αυτός ο τύπος περιγραφής έχει συγκεκριμένες άδειες.
-
-runtime_description_public_read_wrong: >
-  Οι δημόσιες περιγραφές πρέπει να είναι αναγνώσιμες από όλους.
-
-runtime_description_public_write_wrong: >
-  Οι δημόσιες περιγραφές πρέπει να είναι εγγράψιμες από όλους.
-
-runtime_description_user_not_found: >
-  Το "[name]" χρήστη ή ομάδας δεν βρέθηκε!
-
-runtime_destroy_naming_someone_else: >
-  Λυπόμαστε, κάποιος άλλος έχει δώσει σ’ αυτό την ισχυρότερη θετική ψήφο. Έχετε το δικαίωμα να προτείνετε εναλλακτικά ονόματα, αλλά δεν επιτρέπεται πλέον να διαγράψετε αυτό το όνομα.
-
-runtime_edit_description_denied: >
-  Δεν σας έχει δοθεί άδεια επεξεργασίας αυτής της περιγραφής.
-
-runtime_edit_naming_someone_else: >
-  Λυπόμαστε, κάποιος άλλος έχει δώσει θετική ψήφο, γι’ αυτό χρειάστηκε να δημιουργηθεί νέα πρόταση ονόματος προκειμένου να τακτοποιηθούν οι αλλαγές σας.
-
-runtime_email_new_password_success: >
-  Επιτυχής αλλαγή κωδικού. Ο νέος κωδικός έχει σταλεί στο email σας.
-
-runtime_form_names_misspelling_bad: >
-  Η εναλλακτική γραφή που εισαγάγατε δεν αναγνωρίζεται.
-
-runtime_form_names_misspelling_same: >
-  Η σωστή και η λανθασμένη γραφή είναι ίδιες!
-
-runtime_image_changed_your_image: >
-  Έγινε αντικατάσταση της εικόνας του προφίλ σας με την εικόνα #[id].
-
-runtime_image_move_failed: >
-  Υπήρξε κάποιο πρόβλημα με τον εξυπηρέτη και δεν στάθηκε δυνατό να αποθηκευτεί η εικόνα #[id]. Παρακαλούμε ξαναπροσπαθήστε.
-
-runtime_image_process_failed: >
-  Υπήρξε κάποιο πρόβλημα με τον εξυπηρέτη και δεν στάθηκε δυνατό να γίνει επεξεργασία της εικόνας #[id]. Παρακαλούμε ξαναπροσπαθήστε.
-
-runtime_image_remove_denied: >
-  Δεν έχετε άδεια αφαίρεσης εικόνων από αυτή την παρατήρηση.
-
-runtime_image_remove_missing: >
-  Η συγκεκριμένη εικόνα δεν υπάρχει σ’ αυτή την παρατήρηση!
-
-runtime_merge_warning: >
-  Επειδή υπάρχει πιθανότητα καταστροφής, μόνο ο διαχειριστής μπορεί να συγχωνεύσει τους υπάρχοντες [types]. Έχει σταλεί email στους διαχειριστές με το αίτημα της προτεινόμενης συγχώνευσης.
-
-runtime_object_not_found: >
-  Λυπόμαστε, ο [type] που προσπαθήσατε να εμφανίσετε (id #[id]) δεν υπάρχει πλέον. Κάποιος τον έχει διαγράψει ή συγχωνεύσει με άλλον.
-
-runtime_profile_must_define: >
-  Πρέπει να καθορίσετε την τοποθεσία αυτή πριν γίνει η κύρια τοποθεσία σας. Κάθε άλλη αλλαγή του προφίλ σας έχει αποθηκευτεί.
-
-runtime_refine_search_bad_google_minus: >
-  Άκυρη σύνταξη αναζήτησης στο [name] στην '[value]'. Παρακαλούμε χρησιμοποιήστε μόνο σύνταξη με το σημείο μείον στην αρχή της γραμμής.
-
-runtime_reverify_already_verified: >
-  Ο λογαριασμός σας έχει ήδη επαληθευτεί! Παρακαλούμε συνδεθείτε.
-
-runtime_reverify_sent: >
-  Στάλθηκε άλλο email επαλήθευσης στο email σας.
-
-runtime_show_description_denied: >
-  Δεν σας έχει δοθεί άδεια να δείτε αυτή την περιγραφή.
-
-runtime_show_draft_denied: >
-  Άρνηση χορήγησης αδείας: μόνο μέλη του έργου μπορούν να κάνουν επισκόπηση προσχεδίων που βρίσκονται σε εξέλιξη.
-
-runtime_signup_success: >
-  Εγγραφή επιτυχής. Σας έχει αποσταλεί επαλήθευση στο email σας.
-
-runtime_species_list_need_to_use_bulk: >
-  Συνώνυμα μπορούν να δημιουργηθούν μόνο από τη σελίδα [:name_bulk_title].
-
 ################################################################################
 
 # APPLICATION LAYOUT -- this stuff appears on every single page
@@ -1293,14 +928,14 @@ app_your_observations: Οι Παρατηρήσεις σας
 app_your_interests: Τα Ενδιαφέροντά σας
 app_your_summary: Η Σύνοψή σας
 app_preferences: Προτιμήσεις
-app_join_mailing_list: Εγγραφείτε στον Κατάλογο Ταχυδρομείου
+app_join_mailing_list: Εγγραφείτε στον Κατάλογο<br/>Ταχυδρομείου
 app_logout: Έξοδος
 app_admin: Διαχειριστής
 app_users: "[:list_objects(type=:user)]"
 app_email_all_users: Αποστολή Email σε Όλους τους Χρήστες
 app_add_to_group: Προσθήκη στην Ομάδα
-app_turn_admin_on: Ενεργοποίηση Λειτουργίας Διαχειριστή
-app_turn_admin_off: Απενεργοποίηση Λειτουργίας Διαχειριστή
+app_turn_admin_on: Ενεργοποίηση Λειτουργίας<br/>Διαχειριστή
+app_turn_admin_off: Απενεργοποίηση Λειτουργίας<br/>Διαχειριστή
 app_languages: Γλώσσες
 app_contributors: Συντελεστές
 app_site_stats: Στατιστικά Ιστοσελίδας
@@ -1319,7 +954,7 @@ app_index_timer: "[num] αποτελέσματα σε [seconds] δευτερόλ
 
 # This shows up at the bottom of every page.  We recommend something like:
 # "Translated into <Language> by _user your-login_"
-app_translators_credit: ""
+app_translators_credit: Μεταφράστηκε στα ελληνικά από Άγγελος Παπαδημητρίου
 
 # These are general alerts that appear near the top of the page.
 app_no_ajax: Ο Φυλλομετρητής Σας Είναι Παλιός
@@ -1330,203 +965,9 @@ app_no_session: Έχετε Απενεργοποιήσει τα Cookies
 # Title of the RSS auto-discovery link in the HTML header section.
 app_rss: "[:app_title] RSS"
 
-################################################################################
-
-# EMAIL MESSAGES
-
-# Subject lines.
-email_subject_comment: "[:COMMENT] Σχετικά με [name]"
-email_subject_commercial_inquiry: Ερώτημα Εμπορικής Φύσης Για [Name]
-email_subject_consensus_change: Η Ομοφωνία Απέρριψε το [old] Υπέρ του [new]
-email_subject_denied: "Η Δημιουργία του [:USER] Μπλοκαρίστηκε"
-email_subject_features: Νέα Χαρακτηριστικά [:app_title]
-email_subject_location_change: "[name] Έχει Αλλάξει"
-email_subject_naming_for_observer: Αίτημα Έρευνας
-email_subject_naming_for_tracker: Ειδοποίηση Ονομασίας
-email_subject_name_change: "[name] Έχει Αλλάξει"
-email_subject_name_proposal: "[:OBSERVATION] #[id] Μπορεί να Είναι [name]"
-email_subject_new_password: Νέος Κωδικός
-email_subject_observation_change: "[:OBSERVATION] Άλλαξε, [name]"
-email_subject_observation_destroy: "[:OBSERVATION] Καταστράφηκε, [name]"
-email_subject_observation_question: Ερώτημα Για [name]
-email_subject_publish_name: Δημοσίευση Ονόματος
-email_subject_verify: Επαλήθευση Email
-email_subject_webmaster_question: Ερώτημα Από [user]
-
-# Field labels in the "object_change" emails.
-email_field_added_images: Προσθήκη Εικόνας (-ων)
-email_field_changed_thumbnail: Αλλαγή Ενδεικτικής Εικόνας
-email_field_collection_location: Το Δείγμα _συλλέχθηκε_ σ’ αυτή την τοποθεσία
-email_field_collection_not_location: Το Δείγμα _δεν συλλέχθηκε_ σ’ αυτή την
-email_field_east: "[:East] άκρο"
-email_field_image_count: "[:Image] αρίθμηση"
-email_field_new_name: Νέο [:name]
-email_field_no_specimen_available: Το δείγμα δεν είναι πλέον διαθέσιμο
-email_field_north: "[:North] άκρο"
-email_field_old_name: Παλιό [:name]
-email_field_published: Δημοσιεύτηκε από
-email_field_removed_images: Αφαίρεσε εικόνα (-ες)
-email_field_south: "[:South] άκρο"
-email_field_specimen_available: Το δείγμα είναι τώρα διαθέσιμο
-email_field_west: "[:West] άκρο"
-
-# This is used like this: "<Label>: <old_value> changed to <new_value>"
-email_field_is_now: άλλαξε σε
-
-# "Helpful" links at the bottom of the email.
-email_links_change_prefs: Αλλαγή των προτιμήσεών σας
-email_links_disable_tracking: Απενεργοποίηση εντοπισμού γι’ αυτόν τον [type]
-email_links_email_publisher: Αποστολή email στον εκδότη
-email_links_latest_changes: Τελευταίες αλλαγές στο [:app_title]
-email_links_not_interested: Δεν ενδιαφέρομαι γι’ αυτόν τον [type]
-email_links_post_comment: Δημοσίευση [:comment]
-email_links_show_object: Εμφάνιση αυτού του [type]
-email_links_show_user: Εμφάνιση προφίλ του [:user]
-email_links_show_observer: Εμφάνιση προφίλ του [:observer]
-email_links_show_identifier: Εμφάνιση προφίλ του [:identifier]
-email_links_stop_sending: Μην μου στέλνετε πια τέτοια email
-email_links_your_interests: Δείτε τις [:notifications] σας
-
-# Some other common phrases and sections.
-email_can_respond: >
-  Εξαρτάται αποκλειστικά από εσάς αν θέλετε να απαντήσετε στον/στην [name] ([email]) απαντώντας απευθείας σ’ αυτό το email.
-
-email_handy_links: "Μερικές χρήσιμες συνδέσεις:"
-email_no_respond: Παρακαλούμε μην απαντήσετε σ’ αυτό το email!
-email_report_abuse: >
-  Αν πιστεύετε ότι αυτός ο χρήστης κάνει κατάχρηση αυτής της υπηρεσίας, παρακαλούμε προωθήστε ολόκληρο αυτό το email στο: [email]
-
-email_respond_via_comment: >
-  Χρησιμοποιήστε τον παρακάτω σύνδεσμο για να απαντήσετε με δικό σας δημόσιο σχόλιο.
-
-email_welcome: Καλωσόρισες, [user]
-
-
-# Main message contents.
-email_admin_request_intro: >
-  h2. *Admin Request*
-  \n\n
-  [user] ([email]) asked the [:app_title] website to forward the
-  following request to you regarding [project]:
-
-email_author_request_intro: >
-  h2. *Αίτημα Συντάκτη*
-  \n\n
-  [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήση το ακόλουθο αίτημα προς εσάς σχετικά με το [object]:
-
-email_comment_intro_other: >
-  h2. *Σχόλιο για το [Type]*
-  \n\n
-  Το ακόλουθο σχόλιο δημοσιεύτηκε στην ιστοσελίδα [:app_title] σχετικά με το [type] <u>[name]</u>:
-
-email_comment_intro_response: >
-  h2. *Απάντηση σε σχόλιο*
-  \n\n
-  Το ακόλουθο σχόλιο δημοσιεύτηκε στην ιστοσελίδα [:app_title] σε απάντηση του σχολίου σας σχετικά με το [type] <u>[name]</u>:
-
-email_comment_intro_to_owner: >
-  h2. *Σχόλιο για το [Type] σας*
-  \n\n
-  Το ακόλουθο σχόλιο δημοσιεύτηκε στην ιστοσελίδα[:app_title] σχετικά με το [type] <u>[name]</u> σας:
-
-email_commercial_intro: >
-  h2. *Εμπορικό Ερώτημα*
-  \n\n
-  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο εμπορικό ερώτημα προς εσάς σχετικά με την εικόνα σας [image]:
-
-email_consensus_change_intro: >
-  h2. *Αλλαγή Ομοφωνίας*
-  \n\n
-  Άλλαξε η ομοφωνία για την παρατήρηση #[id]:
-
-email_features_intro: >
-  h2. *Νέα Χαρακτηριστικά*
-  \n\n
-  Τα ακόλουθα νέα χαρακτηριστικά προστέθηκαν στην ιστοσελίδα [:app_title]:
-
-email_location_merge: >
-  Ο χρήστης [user] θέλει να συγχωνεύσει την τοποθεσία [this] με την [that].
-
-email_name_merge: >
-  Ο χρήστης [user] θέλει να συγχωνεύσει το όνομα [this] με το [that].
-
-email_name_proposal_intro: >
-  h2. *Πρόταση Ονόματος*
-  \n\n
-  Προτάθηκε όνομα για την παρατήρηση #[id]:
-
-email_naming_for_observer_intro: >
-  h2. *Αίτημα Έρευνας*
-  \n\n
-  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο μήνυμα προς εσάς σχετικά με το [type] <u>[name]</u> σας:
-
-email_naming_for_tracker_intro: >
-  h2. *Ειδοποίηση Εντοπισμού*
-  \n\n
-  Ένας [obs] στην ιστοσελίδα [:app_title] έλαβε το όνομα [name], το οποίο αυτό το διάστημα προσπαθείτε να εντοπίσετε. Μπορείτε να επικοινωνήσετε είτε με τον [:observer] είτε με τον
-  [:identifier] μεταβαίνοντας στον κατάλληλο σύνδεσμο παρακάτω και πατώντας πάνω στον κατάλληλο σύνδεσμο email κοντά στην κορυφή της.
-
-email_new_password_intro: >
-  h2. *Νέος Κωδικός*
-  \n\n
-  Ο νέος σας κωδικός [:app_title] είναι:
-
-email_new_password_what_now: >
-  Αφού συνδεθείτε, καλό θα είναι να αλλάξετε τον κωδικό σας σε κάτι που θα θυμάστε πιο εύκολα, μεταβαίνοντας στη σελίδα '[:app_preferences]' page.
-
-email_object_change_intro: >
-  h2. *Το [Type] Άλλαξε*
-  \n\n
-  Έγινε (-αν) αλλαγή(-ές) στον [type] <u>[name]</u>:
-
-email_object_new_intro: >
-  h2. *Το [Type] Δημιουργήθηκε*
-  \n\n
-  Το [type] <u>[name]</u> δημιουργήθηκε.
-
-email_object_change_reason_all: >
-  Λάβατε αυτό το email επειδή έχετε ζητήσει να ειδοποιείστε για κάθε αλλαγή του [type].
-
-email_object_change_reason_admin: >
-  Λάβατε αυτό το email επειδή είστε διαχειριστής μιας περιγραφής του [type] που έχει αλλάξει.
-
-email_object_change_reason_editor: >
-  Λάβατε αυτό το email επειδή έχετε επεξεργαστεί μία περιγραφή του [type] που έχει αλλάξει.
-
-email_object_change_reason_author: >
-  Λάβατε αυτό το email επειδή είστε συντάκτης μιας περιγραφής του [type] που έχει αλλάξει.
-
-email_object_change_reason_reviewer: >
-  Λάβατε αυτό το email επειδή έχετε κάνει ανασκόπηση αυτού του [type].
-
-email_object_change_reason_interest: >
-  Λάβατε αυτό το email επειδή έχετε εκφράσει ενδιαφέρον γι’ αυτό το [type].
-
-email_observation_destroyed_intro: >
-  h2. *Καταστροφή Παρατήρησης*
-
-email_observation_question_intro: >
-  h2. *Ερώτημα από Άλλο Χρήστη*
-  \n\n
-  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο ερώτημα προς εσάς σχετικά με την παρατήρησή σας <u>[name]</u>:
-
-email_publish_name_intro: >
-  h2. *Δημοσίευση Προσχεδίου Ονόματος*
-  \n\n
-  Έχει δημοσιευτεί περιγραφή ονόματος στην ιστοσελίδα [:app_title].
-  Λαμβάνετε αυτό το email επειδή αναφέρεστε είτε ως συντάκτης αυτού του τάξιου είτε ως αναθεωρητής στην ιστοσελίδα.
-
-email_user_question_intro: >
-  h2. *Ερώτημα από Άλλο Χρήστη*
-  \n\n
-  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο email προς εσάς:
-
-email_verify_intro: >
-  h2. *Γεια σου [user]*
-  \n\n
-  Παρακαλούμε κάντε κλικ στον ακόλουθο σύνδεσμο για να επαληθεύσετε ότι λάβατε αυτό το email και να ενεργοποιήσετε τον λογαριασμό σας [:app_title]:
-  \n\n
-  [link]
+# Donation stuff.
+app_donate_banner: "Είναι η ώρα να δωρίσετε στον Παρατηρητή Μανιταριών"
+app_donate:  Donate
 
 ################################################################################
 
@@ -2579,6 +2020,71 @@ welcome_logout_link: Αποσύνδεση
 welcome_no_user_note: Αν δεν είστε spammer, παρακαλούμε να το αναφέρετε αυτό ως λάθος.
 welcome_note: Έχετε συνδεθεί με το σύστημα...
 
+
+
+# support/donate
+donate_title: Δωρίστε στον Παρατηρητή Μανιταριών
+donate_tab: Δωρίστε
+donate_other:  Other Amount
+donate_anonymous: Ανώνυμη δωρεά
+donate_who: Όνομα για τη Σελίδα Δωρητών
+donate_email: Email (για εξασφάλιση μοναδικότητας)
+donate_confirm: Δωρίστε
+donors_order: Τα ονόματα των δωρητών ταξινομούνται πρώτα κατά το ύψος του συνολικού ποσού που έχει δωρηθεί και έπειτα κατά το ποιος έχει κάνει δωρεά πιο πρόσφατα.
+donors_title: Η Κοινότητα του Παρατηρητή Μανιταριών Ευχαριστεί τους Δωρητές Της
+donors_tab: Εμφάνιση Δωρητών
+
+donate_thanks: >
+  Σας ευχαριστούμε για το ενδιαφέρον σας να κάνετε δωρεά στον Παρατηρητή Μανιταριών! Δείτε αυτή την "ανοιχτή επιστολή στην Κοινότητα του Παρατηρητή Μανιταριών":/support/letter αν θέλετε να μάθετε γιατί αρχίσαμε να ζητάμε τις δωρεές σας.
+
+donate_explanation: >
+  Δωρεές μπορούν να γίνουν με οποιοδήποτε ποσό μέσω του PayPal χρησιμοποιώντας τις πιο γνωστές πιστωτικές κάρτες ή έναν λογαριασμό του PayPal, κάνοντας κλικ στο παρακάτω πλήκτρο. Οι προσφορές των δωρητών αναγνωρίζονται με αναφορά του ονόματός τους στη "Σελίδα Δωρητών του Παρατηρητή Μανιταριών":/support/donors μόλις ληφθεί η δωρεά τους. Αν επιθυμείτε αναγνώριση της δωρεάς σας με κάποιο ειδικό τρόπο, παρακαλούμε "στείλτε μας ένα σχόλιο":/observer/ask_webmaster_question.
+
+donate_fine_print: >
+  Οι χρεώσεις θα γίνονται στην "Κοινοπραξία για Πόρους Ψηφιακής Μυκητολογίας (Consortium for Digital Mycology Resources (CDMR))":http://digitalmycology.org και θα αφορούν τον Παρατηρητή Μανιταριών. Η CDMR συστάθηκε νομικά στην Πολιτεία της Καλιφόρνια και αναγνωρίστηκε από την πολιτεία ως μη κερδοσκοπική. Επιπλέον, έχει κάνει αίτηση για απόκτηση της ιδιότητας 501c3 στην ομοσπονδιακή κυβέρνηση των ΗΠΑ και ως τέτοια θεωρούμε ότι οι δωρεές στον Παρατηρητή Μανιταριών εκπίπτουν του φόρου, τουλάχιστον στις ΗΠΑ.
+
+
+
+# support/confirm
+confirm_title:  Donation Confirmation
+confirm_amount: Ποσό
+confirm_text:  >
+  Thank you for offering to make the following donation.  To transfer the money to
+  the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR)
+  using PayPal, click the button below.
+
+
+
+# support/thanks
+thanks_title: Ευχαριστούμε για τη Στήριξή Σας!
+thanks_no_amount:  Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
+thanks_note: >
+  Σας ευχαριστούμε που συμβάλλετε στη στήριξη του Παρατηρητή Μανιταριών. Η στήριξή σας εκτιμάται ιδιαίτερα και θα βοηθήσει τον Παρατηρητή Μανιταριών να συνεχίσει την αποστολή του.
+  <br/><br/>
+  Η δωρεά σας θα αναγνωριστεί ονομαστικά στη "Σελίδα Δωρητών του Παρατηρητή Μανιταριών":/support/donors μόλις παραληφθεί η προσφορά σας, εκτός αν έχετε ζητήσει να γίνει η αναγνώριση με ειδικό τρόπο. Παραδείγματα ειδικής αναγνώρισης μπορεί να είναι το να γίνει η δωρεά ανώνυμα ή στο όνομα κάποιου άλλου. Αν επιθυμείτε η αναγνώριση να γίνει με ειδικό τρόπο, παρακαλούμε "στείλτε μας ένα σχόλιο":/observer/ask_webmaster_question.
+
+
+
+# support/letter
+letter_title: Ανοιχτή Επιστολή προς την Κοινότητα
+letter_body: >
+  Προς την Κοινότητα του Παρατηρητή Μανιταριών,
+  <br/><br/>
+  Ήταν μια θαυμάσια χρονιά για εμάς. Εφέτος πετύχαμε μερικά σπουδαία ρεκόρ: 100.000 εικόνες, 50.000 παρατηρήσεις και 2.000 εγγεγραμμένοι χρήστες. Αυτό σημαίνει ότι ουσιαστικά γινόμαστε διπλάσιοι κάθε χρόνο. Παρόλο που ο Jason έχει κάνει μερικά μικρά θαύματα με τις εθελοντικές του προσπάθειες να κρατήσει σε λειτουργία τον ιστότοπο με τη διαμόρφωση του στοιχειωδών δυνατοτήτων του εξυπηρέτη (server) που χρησιμοποιούμε, γίνεται όλο και πιο φανερό ότι σύντομα θα χρειαστούμε περισσότερη μνήμη και περισσότερους επεξεργαστές για να υποστηριχθεί η συνεχιζόμενη ανάπτυξή μας.
+  <br/><br/>
+  Δυστυχώς, αυτό σημαίνει ότι τα έξοδα για τον εξυπηρέτη μας θα αυξηθούν. Μέχρι σήμερα με χαρά κάλυπτα τις ανάγκες του εξυπηρέτη του Παρατηρητή Μανιταριών από την τσέπη μου, αλλά τα έξοδα αυτά στην ουσία διπλασιάζονται κάθε χρόνο και σύντομα δεν θα είμαι σε θέση να τα καλύπτω. Ως αποτέλεσμα, θα ήθελα να αρχίσω να ζητώ δωρεές από την κοινότητα. Όσοι από εσάς έχουν πάρει πολλά από τον ιστότοπο και θέλουν να τον δουν να συνεχίζει να μεγαλώνει και να διευρύνεται, έχετε τώρα την ευκαιρία να προσφέρετε μια μικρή βοήθεια και να συνδράμετε στην οικονομική στήριξη του ιστοχώρου.
+  <br/><br/>
+  Για τον σκοπό αυτό δημιουργήσαμε μία "σελίδα δωρεών":/support/donate που δέχεται με ασφάλεια χρήματα από λογαριασμό του PayPal ή από κανονική πιστωτική κάρτα.
+  <br/><br/>
+  Θα ήθελα να συγκεντρώσω τουλάχιστον $2000 προκειμένου να καλυφθούν βασικά έξοδα εξυπηρέτη. Όσο περισσότερα χρήματα συγκεντρωθούν, τόσο περισσότερο θα μπορέσουμε να επεκτείνουμε τη δυνατότητα εξυπηρέτησης της κίνησης και της ανάπτυξης του ιστοχώρου. Και τόσο λιγότερο θα χρειάζεται να αντιμετωπίσουμε καταστάσεις χρόνου μη λειτουργίας και αποτυχημένων αναφορτώσεων (uploads).
+  <br/><br/>
+  Όταν κάνετε μια δωρεά, το όνομά σας προστίθεται από προεπιλογή στη "σελίδα δωρητών":/support/donors μόλις επιβεβαιώσουμε τη δωρεά. Αν επιθυμείτε να κάνετε ανώνυμη δωρεά ή να γίνουν άλλες ειδικές διευθετήσεις όσον αφορά την αναγνώριση της δωρεάς σας, "στείλτε ένα σχόλιο":/observer/ask_webmaster_question αφού πρώτα κάνετε τη δωρεά σας.
+  <br/><br/>
+  Παρακαλώ βοηθήστε στη στήριξη αυτής της ενεργού διαδικτυακής κοινότητας ανθρώπων που χαίρονται να μοιράζονται και να μαθαίνουν περισσότερα πράγματα για τα μανιτάρια γύρω μας.
+  <br/><br/>
+  Ευχαριστώ,<br/>
+  -Nathan
+
 ################################################################################
 
 # LESS POPULAR PAGES
@@ -3566,7 +3072,6 @@ show_project_edit: Επεξεργασία Έργου
 show_project_published: Τα Δημοσιευμένα Ονόματα Επιθεωρήθηκαν
 show_project_summary: Σύνοψη
 show_project_title: "Έργο: [title]"
-
 show_project_user_group: Ομάδα Χρηστών
 
 
@@ -3581,6 +3086,223 @@ users_by_name_name: Όνομα
 users_by_name_theme: Θέμα
 users_by_name_verified: Επαληθεύτηκε
 
+
+# support/create_donation
+create_donation_title: Καταγραφή Δωρεάς στον Παρατηρητή Μανιταριών
+create_donation_not_allowed: Μόνο διαχειριστές μπορούν να καταγράψουν δωρεές
+create_donation_add: Προσθήκη
+create_donation_tab: Καταγραφή Δωρεάς
+
+
+# support/review_donations
+review_donations_title:  Review All Donations
+review_donations_not_allowed:  Only admins can review donations
+review_donations_update:  Update
+review_donations_tab:  Review Donations
+review_reviewed:  Reviewed
+review_id:  Id
+review_who:  Who
+review_anon:  Anon
+review_amount: Ποσό
+review_email:  Email
+
+################################################################################
+
+# EMAIL MESSAGES
+
+# Subject lines.
+email_subject_comment: "[:COMMENT] Σχετικά με [name]"
+email_subject_commercial_inquiry: Ερώτημα Εμπορικής Φύσης Για [Name]
+email_subject_consensus_change: Η Ομοφωνία Απέρριψε το [old] Υπέρ του [new]
+email_subject_denied: "Η Δημιουργία του [:USER] Μπλοκαρίστηκε"
+email_subject_features: Νέα Χαρακτηριστικά [:app_title]
+email_subject_location_change: "[name] Έχει Αλλάξει"
+email_subject_naming_for_observer: Αίτημα Έρευνας
+email_subject_naming_for_tracker: Ειδοποίηση Ονομασίας
+email_subject_name_change: "[name] Έχει Αλλάξει"
+email_subject_name_proposal: "[:OBSERVATION] #[id] Μπορεί να Είναι [name]"
+email_subject_new_password: Νέος Κωδικός
+email_subject_observation_change: "[:OBSERVATION] Άλλαξε, [name]"
+email_subject_observation_destroy: "[:OBSERVATION] Καταστράφηκε, [name]"
+email_subject_observation_question: Ερώτημα Για [name]
+email_subject_publish_name: Δημοσίευση Ονόματος
+email_subject_verify: Επαλήθευση Email
+email_subject_webmaster_question: Ερώτημα Από [user]
+
+# Field labels in the "object_change" emails.
+email_field_added_images: Προσθήκη Εικόνας (-ων)
+email_field_changed_thumbnail: Αλλαγή Ενδεικτικής Εικόνας
+email_field_collection_location: Το Δείγμα _συλλέχθηκε_ σ’ αυτή την τοποθεσία
+email_field_collection_not_location: Το Δείγμα _δεν συλλέχθηκε_ σ’ αυτή την
+email_field_east: "[:East] άκρο"
+email_field_image_count: "[:Image] αρίθμηση"
+email_field_new_name: Νέο [:name]
+email_field_no_specimen_available: Το δείγμα δεν είναι πλέον διαθέσιμο
+email_field_north: "[:North] άκρο"
+email_field_old_name: Παλιό [:name]
+email_field_published: Δημοσιεύτηκε από
+email_field_removed_images: Αφαίρεσε εικόνα (-ες)
+email_field_south: "[:South] άκρο"
+email_field_specimen_available: Το δείγμα είναι τώρα διαθέσιμο
+email_field_west: "[:West] άκρο"
+
+# This is used like this: "<Label>: <old_value> changed to <new_value>"
+email_field_is_now: άλλαξε σε
+
+# "Helpful" links at the bottom of the email.
+email_links_change_prefs: Αλλαγή των προτιμήσεών σας
+email_links_disable_tracking: Απενεργοποίηση εντοπισμού γι’ αυτόν τον [type]
+email_links_email_publisher: Αποστολή email στον εκδότη
+email_links_latest_changes: Τελευταίες αλλαγές στο [:app_title]
+email_links_not_interested: Δεν ενδιαφέρομαι γι’ αυτόν τον [type]
+email_links_post_comment: Δημοσίευση [:comment]
+email_links_show_object: Εμφάνιση αυτού του [type]
+email_links_show_user: Εμφάνιση προφίλ του [:user]
+email_links_show_observer: Εμφάνιση προφίλ του [:observer]
+email_links_show_identifier: Εμφάνιση προφίλ του [:identifier]
+email_links_stop_sending: Μην μου στέλνετε πια τέτοια email
+email_links_your_interests: Δείτε τις [:notifications] σας
+
+# Some other common phrases and sections.
+email_can_respond: >
+  Εξαρτάται αποκλειστικά από εσάς αν θέλετε να απαντήσετε στον/στην [name] ([email]) απαντώντας απευθείας σ’ αυτό το email.
+
+email_handy_links: "Μερικές χρήσιμες συνδέσεις:"
+email_no_respond: Παρακαλούμε μην απαντήσετε σ’ αυτό το email!
+email_report_abuse: >
+  Αν πιστεύετε ότι αυτός ο χρήστης κάνει κατάχρηση αυτής της υπηρεσίας, παρακαλούμε προωθήστε ολόκληρο αυτό το email στο: [email]
+
+email_respond_via_comment: >
+  Χρησιμοποιήστε τον παρακάτω σύνδεσμο για να απαντήσετε με δικό σας δημόσιο σχόλιο.
+
+email_welcome: Καλωσόρισες, [user]
+
+
+# Main message contents.
+email_admin_request_intro: >
+  h2. *Admin Request*
+  \n\n
+  [user] ([email]) asked the [:app_title] website to forward the
+  following request to you regarding [project]:
+
+email_author_request_intro: >
+  h2. *Αίτημα Συντάκτη*
+  \n\n
+  [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήση το ακόλουθο αίτημα προς εσάς σχετικά με το [object]:
+
+email_comment_intro_other: >
+  h2. *Σχόλιο για το [Type]*
+  \n\n
+  Το ακόλουθο σχόλιο δημοσιεύτηκε στην ιστοσελίδα [:app_title] σχετικά με το [type] <u>[name]</u>:
+
+email_comment_intro_response: >
+  h2. *Απάντηση σε σχόλιο*
+  \n\n
+  Το ακόλουθο σχόλιο δημοσιεύτηκε στην ιστοσελίδα [:app_title] σε απάντηση του σχολίου σας σχετικά με το [type] <u>[name]</u>:
+
+email_comment_intro_to_owner: >
+  h2. *Σχόλιο για το [Type] σας*
+  \n\n
+  Το ακόλουθο σχόλιο δημοσιεύτηκε στην ιστοσελίδα[:app_title] σχετικά με το [type] <u>[name]</u> σας:
+
+email_commercial_intro: >
+  h2. *Εμπορικό Ερώτημα*
+  \n\n
+  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο εμπορικό ερώτημα προς εσάς σχετικά με την εικόνα σας [image]:
+
+email_consensus_change_intro: >
+  h2. *Αλλαγή Ομοφωνίας*
+  \n\n
+  Άλλαξε η ομοφωνία για την παρατήρηση #[id]:
+
+email_features_intro: >
+  h2. *Νέα Χαρακτηριστικά*
+  \n\n
+  Τα ακόλουθα νέα χαρακτηριστικά προστέθηκαν στην ιστοσελίδα [:app_title]:
+
+email_location_merge: >
+  Ο χρήστης [user] θέλει να συγχωνεύσει την τοποθεσία [this] με την [that].
+
+email_name_merge: >
+  Ο χρήστης [user] θέλει να συγχωνεύσει το όνομα [this] με το [that].
+
+email_name_proposal_intro: >
+  h2. *Πρόταση Ονόματος*
+  \n\n
+  Προτάθηκε όνομα για την παρατήρηση #[id]:
+
+email_naming_for_observer_intro: >
+  h2. *Αίτημα Έρευνας*
+  \n\n
+  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο μήνυμα προς εσάς σχετικά με το [type] <u>[name]</u> σας:
+
+email_naming_for_tracker_intro: >
+  h2. *Ειδοποίηση Εντοπισμού*
+  \n\n
+  Ένας [obs] στην ιστοσελίδα [:app_title] έλαβε το όνομα [name], το οποίο αυτό το διάστημα προσπαθείτε να εντοπίσετε. Μπορείτε να επικοινωνήσετε είτε με τον [:observer] είτε με τον
+  [:identifier] μεταβαίνοντας στον κατάλληλο σύνδεσμο παρακάτω και πατώντας πάνω στον κατάλληλο σύνδεσμο email κοντά στην κορυφή της.
+
+email_new_password_intro: >
+  h2. *Νέος Κωδικός*
+  \n\n
+  Ο νέος σας κωδικός [:app_title] είναι:
+
+email_new_password_what_now: >
+  Αφού συνδεθείτε, καλό θα είναι να αλλάξετε τον κωδικό σας σε κάτι που θα θυμάστε πιο εύκολα, μεταβαίνοντας στη σελίδα '[:app_preferences]' page.
+
+email_object_change_intro: >
+  h2. *Το [Type] Άλλαξε*
+  \n\n
+  Έγινε (-αν) αλλαγή(-ές) στον [type] <u>[name]</u>:
+
+email_object_new_intro: >
+  h2. *Το [Type] Δημιουργήθηκε*
+  \n\n
+  Το [type] <u>[name]</u> δημιουργήθηκε.
+
+email_object_change_reason_all: >
+  Λάβατε αυτό το email επειδή έχετε ζητήσει να ειδοποιείστε για κάθε αλλαγή του [type].
+
+email_object_change_reason_admin: >
+  Λάβατε αυτό το email επειδή είστε διαχειριστής μιας περιγραφής του [type] που έχει αλλάξει.
+
+email_object_change_reason_editor: >
+  Λάβατε αυτό το email επειδή έχετε επεξεργαστεί μία περιγραφή του [type] που έχει αλλάξει.
+
+email_object_change_reason_author: >
+  Λάβατε αυτό το email επειδή είστε συντάκτης μιας περιγραφής του [type] που έχει αλλάξει.
+
+email_object_change_reason_reviewer: >
+  Λάβατε αυτό το email επειδή έχετε κάνει ανασκόπηση αυτού του [type].
+
+email_object_change_reason_interest: >
+  Λάβατε αυτό το email επειδή έχετε εκφράσει ενδιαφέρον γι’ αυτό το [type].
+
+email_observation_destroyed_intro: >
+  h2. *Καταστροφή Παρατήρησης*
+
+email_observation_question_intro: >
+  h2. *Ερώτημα από Άλλο Χρήστη*
+  \n\n
+  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο ερώτημα προς εσάς σχετικά με την παρατήρησή σας <u>[name]</u>:
+
+email_publish_name_intro: >
+  h2. *Δημοσίευση Προσχεδίου Ονόματος*
+  \n\n
+  Έχει δημοσιευτεί περιγραφή ονόματος στην ιστοσελίδα [:app_title].
+  Λαμβάνετε αυτό το email επειδή αναφέρεστε είτε ως συντάκτης αυτού του τάξιου είτε ως αναθεωρητής στην ιστοσελίδα.
+
+email_user_question_intro: >
+  h2. *Ερώτημα από Άλλο Χρήστη*
+  \n\n
+  Ο/Η [user] ([email]) ζήτησε από την ιστοσελίδα [:app_title] να προωθήσει το ακόλουθο email προς εσάς:
+
+email_verify_intro: >
+  h2. *Γεια σου [user]*
+  \n\n
+  Παρακαλούμε κάντε κλικ στον ακόλουθο σύνδεσμο για να επαληθεύσετε ότι λάβατε αυτό το email και να ενεργοποιήσετε τον λογαριασμό σας [:app_title]:
+  \n\n
+  [link]
 
 ################################################################################
 
@@ -3807,89 +3529,9 @@ how_user: >
 how_vote: >
   *Ψήφος* - Η ψήφος ενός "Χρήστη":#user για ένα "Προτεινόμενο Όνομα":#proposed_name για μία συγκεκριμένη "Παρατήρηση":#observation. Εκφράζει ένα επίπεδο βεβαιότητας ή συμφωνίας με το συγκεκριμένο όνομα, με τις μισές επιλογές ("[min_pos_vote]" και άνω) να είναι θετικές και τις άλλες μισές ("[min_neg_vote]" και κάτω) να είναι αρνητικές. Οι ψήφοι ανήκουν στον συγκεκριμένο χρήστη και μπορούν να αλλαχθούν ή να διαγραφούν μόνο από τον κάτοχό τους ή έναν διαχειριστή του ιστοχώρου.
 
-
 ################################################################################
 
-# SUPPORT PAGES
-
-donate_thanks: >
-  Σας ευχαριστούμε για το ενδιαφέρον σας να κάνετε δωρεά στον Παρατηρητή Μανιταριών! Δείτε αυτή την "ανοιχτή επιστολή στην Κοινότητα του Παρατηρητή Μανιταριών":/support/letter αν θέλετε να μάθετε γιατί αρχίσαμε να ζητάμε τις δωρεές σας.
-
-donate_explanation: >
-  Δωρεές μπορούν να γίνουν με οποιοδήποτε ποσό μέσω του PayPal χρησιμοποιώντας τις πιο γνωστές πιστωτικές κάρτες ή έναν λογαριασμό του PayPal, κάνοντας κλικ στο παρακάτω πλήκτρο. Οι προσφορές των δωρητών αναγνωρίζονται με αναφορά του ονόματός τους στη "Σελίδα Δωρητών του Παρατηρητή Μανιταριών":/support/donors μόλις ληφθεί η δωρεά τους. Αν επιθυμείτε αναγνώριση της δωρεάς σας με κάποιο ειδικό τρόπο, παρακαλούμε "στείλτε μας ένα σχόλιο":/observer/ask_webmaster_question.
-
-donate_fine_print: >
-  Οι χρεώσεις θα γίνονται στην "Κοινοπραξία για Πόρους Ψηφιακής Μυκητολογίας (Consortium for Digital Mycology Resources (CDMR))":http://digitalmycology.org και θα αφορούν τον Παρατηρητή Μανιταριών. Η CDMR συστάθηκε νομικά στην Πολιτεία της Καλιφόρνια και αναγνωρίστηκε από την πολιτεία ως μη κερδοσκοπική. Επιπλέον, έχει κάνει αίτηση για απόκτηση της ιδιότητας 501c3 στην ομοσπονδιακή κυβέρνηση των ΗΠΑ και ως τέτοια θεωρούμε ότι οι δωρεές στον Παρατηρητή Μανιταριών εκπίπτουν του φόρου, τουλάχιστον στις ΗΠΑ.
-
-donate_title: Δωρίστε στον Παρατηρητή Μανιταριών
-donate_tab: Δωρίστε
-donate_other:  Other Amount
-donate_anonymous: Ανώνυμη δωρεά
-donate_who: Όνομα για τη Σελίδα Δωρητών
-donate_email: Email (για εξασφάλιση μοναδικότητας)
-donate_confirm: Δωρίστε
-
-donors_order: Τα ονόματα των δωρητών ταξινομούνται πρώτα κατά το ύψος του συνολικού ποσού που έχει δωρηθεί και έπειτα κατά το ποιος έχει κάνει δωρεά πιο πρόσφατα.
-donors_title: Η Κοινότητα του Παρατηρητή Μανιταριών Ευχαριστεί τους Δωρητές Της
-donors_tab: Εμφάνιση Δωρητών
-
-
-confirm_amount: Ποσό
-confirm_title:  Donation Confirmation
-confirm_text:  >
-  Thank you for offering to make the following donation.  To transfer the money to
-  the "Consortium for Digital Mycology Resources":http://digitalmycology.org (CDMR)
-  using PayPal, click the button below.
-
-create_donation_title: Καταγραφή Δωρεάς στον Παρατηρητή Μανιταριών
-create_donation_not_allowed: Μόνο διαχειριστές μπορούν να καταγράψουν δωρεές
-create_donation_add: Προσθήκη
-create_donation_tab: Καταγραφή Δωρεάς
-
-
-review_donations_title:  Review All Donations
-review_donations_not_allowed:  Only admins can review donations
-review_donations_update:  Update
-review_donations_tab:  Review Donations
-review_reviewed:  Reviewed
-review_id:  Id
-review_who:  Who
-review_anon:  Anon
-review_amount: Ποσό
-review_email:  Email
-
-thanks_no_amount:  Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
-thanks_title: Ευχαριστούμε για τη Στήριξή Σας!
-thanks_note: >
-  Σας ευχαριστούμε που συμβάλλετε στη στήριξη του Παρατηρητή Μανιταριών. Η στήριξή σας εκτιμάται ιδιαίτερα και θα βοηθήσει τον Παρατηρητή Μανιταριών να συνεχίσει την αποστολή του.
-  <br/><br/>
-  Η δωρεά σας θα αναγνωριστεί ονομαστικά στη "Σελίδα Δωρητών του Παρατηρητή Μανιταριών":/support/donors μόλις παραληφθεί η προσφορά σας, εκτός αν έχετε ζητήσει να γίνει η αναγνώριση με ειδικό τρόπο. Παραδείγματα ειδικής αναγνώρισης μπορεί να είναι το να γίνει η δωρεά ανώνυμα ή στο όνομα κάποιου άλλου. Αν επιθυμείτε η αναγνώριση να γίνει με ειδικό τρόπο, παρακαλούμε "στείλτε μας ένα σχόλιο":/observer/ask_webmaster_question.
-
-
-letter_title: Ανοιχτή Επιστολή προς την Κοινότητα
-letter_body: >
-  Προς την Κοινότητα του Παρατηρητή Μανιταριών,
-  <br/><br/>
-  Ήταν μια θαυμάσια χρονιά για εμάς. Εφέτος πετύχαμε μερικά σπουδαία ρεκόρ: 100.000 εικόνες, 50.000 παρατηρήσεις και 2.000 εγγεγραμμένοι χρήστες. Αυτό σημαίνει ότι ουσιαστικά γινόμαστε διπλάσιοι κάθε χρόνο. Παρόλο που ο Jason έχει κάνει μερικά μικρά θαύματα με τις εθελοντικές του προσπάθειες να κρατήσει σε λειτουργία τον ιστότοπο με τη διαμόρφωση του στοιχειωδών δυνατοτήτων του εξυπηρέτη (server) που χρησιμοποιούμε, γίνεται όλο και πιο φανερό ότι σύντομα θα χρειαστούμε περισσότερη μνήμη και περισσότερους επεξεργαστές για να υποστηριχθεί η συνεχιζόμενη ανάπτυξή μας.
-  <br/><br/>
-  Δυστυχώς, αυτό σημαίνει ότι τα έξοδα για τον εξυπηρέτη μας θα αυξηθούν. Μέχρι σήμερα με χαρά κάλυπτα τις ανάγκες του εξυπηρέτη του Παρατηρητή Μανιταριών από την τσέπη μου, αλλά τα έξοδα αυτά στην ουσία διπλασιάζονται κάθε χρόνο και σύντομα δεν θα είμαι σε θέση να τα καλύπτω. Ως αποτέλεσμα, θα ήθελα να αρχίσω να ζητώ δωρεές από την κοινότητα. Όσοι από εσάς έχουν πάρει πολλά από τον ιστότοπο και θέλουν να τον δουν να συνεχίζει να μεγαλώνει και να διευρύνεται, έχετε τώρα την ευκαιρία να προσφέρετε μια μικρή βοήθεια και να συνδράμετε στην οικονομική στήριξη του ιστοχώρου.
-  <br/><br/>
-  Για τον σκοπό αυτό δημιουργήσαμε μία "σελίδα δωρεών":/support/donate που δέχεται με ασφάλεια χρήματα από λογαριασμό του PayPal ή από κανονική πιστωτική κάρτα.
-  <br/><br/>
-  Θα ήθελα να συγκεντρώσω τουλάχιστον $2000 προκειμένου να καλυφθούν βασικά έξοδα εξυπηρέτη. Όσο περισσότερα χρήματα συγκεντρωθούν, τόσο περισσότερο θα μπορέσουμε να επεκτείνουμε τη δυνατότητα εξυπηρέτησης της κίνησης και της ανάπτυξης του ιστοχώρου. Και τόσο λιγότερο θα χρειάζεται να αντιμετωπίσουμε καταστάσεις χρόνου μη λειτουργίας και αποτυχημένων αναφορτώσεων (uploads).
-  <br/><br/>
-  Όταν κάνετε μια δωρεά, το όνομά σας προστίθεται από προεπιλογή στη "σελίδα δωρητών":/support/donors μόλις επιβεβαιώσουμε τη δωρεά. Αν επιθυμείτε να κάνετε ανώνυμη δωρεά ή να γίνουν άλλες ειδικές διευθετήσεις όσον αφορά την αναγνώριση της δωρεάς σας, "στείλτε ένα σχόλιο":/observer/ask_webmaster_question αφού πρώτα κάνετε τη δωρεά σας.
-  <br/><br/>
-  Παρακαλώ βοηθήστε στη στήριξη αυτής της ενεργού διαδικτυακής κοινότητας ανθρώπων που χαίρονται να μοιράζονται και να μαθαίνουν περισσότερα πράγματα για τα μανιτάρια γύρω μας.
-  <br/><br/>
-  Ευχαριστώ,<br/>
-  -Nathan
-
-app_donate_banner: ""
-app_donate:  Donate
-
-################################################################################
-# LANGUAGE HELP PAGE
+# LOCATION HELP PAGE
 
 location_help_title: Οι Τοποθεσίες στον Παρατηρητή Μανιταριών
 
@@ -3962,10 +3604,402 @@ location_help_rule_other: >
 location_help_rule_good_habits: >
   *Πράγματα που Σας Προτρέπουμε να Κάνετε* - Όταν δημιουργείτε ένα νέο όνομα, αφιερώστε λίγο χρόνο να βρείτε ένα καλό όνομα. Μια αναζήτηση μέσα στον Παρατηρητή Μανιταριών μπορεί να βοηθήσει. Αν δεν βρείτε τίποτε εκεί, τότε ψάξτε στους Χάρτες της Google (http://maps.google.com) και στη Wikipedia (http://wikipedia.org). Επίσης μπορείτε ελεύθερα να χρησιμοποιήσετε το τμήμα σημειώσεων είτε μιας παρατήρησης είτε μιας τοποθεσίας για να γίνετε πιο συγκεκριμένοι.
 
+################################################################################
+
+# ERROR MESSAGES
+
+# ActiveRecord validation error messages.
+validate_confirmation_mismatch: "[Field] δεν ταιριάζει με την επιβεβαίωση."
+validate_invalid: Άκυρο [field].
+validate_missing: Λείπει [field].
+validate_not_a_number: "[Field] δεν είναι αριθμός."
+validate_not_in_range: "[Field] είναι εκτός εμβέλειας."
+validate_this_more_than_that: "[That] πρέπει να είναι περισσότερο από [this]."
+validate_too_large: "[Field] πρέπει να είναι το πολύ [max]."
+validate_too_long: "[Field] πρέπει να είναι λιγότερο από [max] χαρακτήρες."
+validate_too_long_or_short: "[Field] πρέπει να είναι από [min] έως [max] χαρακτήρες."
+validate_too_short: "[Field] πρέπει να είναι τουλάχιστον [min] χαρακτήρες."
+validate_too_small: "[Field] πρέπει να είναι τουλάχιστον [min]."
+validate_too_small_or_large: "[Field] πρέπει να είναι μεταξύ [min] και [max]."
+
+# One-time-use error messages.
+validate_image_content_type_images_only: Μπορείτε να ανεβάσετε μόνο [:images].
+validate_image_file_missing: Παρουσιάστηκαν προβλήματα κατά το ανέβασμα [:image].
+validate_image_file_too_big: Δεν μπορούμε να χειριστούμε [:images] τόσο μεγάλες. Παρακαλούμε μειώστε τη σε λιγότερο από [max] πριν την ανεβάσετε.
+validate_image_md5_mismatch: Το άθροισμα MD5 δεν βγήκε σωστό. Παρακαλούμε δοκιμάστε να ξανανεβάσετε την εικόνα σας.
+validate_observation_future_time: Τα ταξίδια στο χρόνο δεν επιτρέπονται, επιλέξτε μια ημερομηνία του παρελθόντος.
+validate_observation_thumb_image_id_invalid: Δεν στάθηκε δυνατή η εύρεση αντίστοιχης [:image] για χρήση ως ενδεικτικής.
+validate_observation_where_missing: Παρακαλούμε πείτε μας που εντοπίστηκε ή συλλέχτηκε.
+validate_user_email_missing: Παρακαλούμε δώστε μας έγκυρη διεύθυνση email, για να μπορέσουμε να επαληθεύσουμε το [:account] σας.
+validate_user_login_taken: Λυπόμαστε, αυτό το όνομα σύνδεσης είναι ήδη κατειλημμένο.
+validate_image_wrong_type: Το αρχείο που προσπαθήσατε να ανεβάσετε δεν αναγνωρίζεται ως εικόνα. Είναι του τύπου '[type]'.
+
+# These shouldn't need translating, but you are free to override if you need to.
+validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
+validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
+validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
+validate_comment_user_missing: "[:validate_missing(field=:user)]"
+validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
+validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
+validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
+validate_image_user_missing: "[:validate_missing(field=:user)]"
+validate_image_when_missing: "[:validate_missing(field=:date)]"
+validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
+validate_interest_user_missing: "[:validate_missing(field=:user)]"
+validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
+validate_location_east_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
+validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
+validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
+validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
+validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
+validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
+validate_location_user_missing: "[:validate_missing(field=:user)]"
+validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
+validate_name_author_too_long: "[:validate_too_long(field=:authority,max=100)]"
+validate_name_display_name_too_long: "[:validate_too_long(field=''display_name'',max=100)]"
+validate_name_observation_name_too_long: "[:validate_too_long(field=''observation_name'',max=100)]"
+validate_name_search_name_too_long: "[:validate_too_long(field=''search_name'',max=100)]"
+validate_name_text_name_too_long: "[:validate_too_long(field=''text_name'',max=100)]"
+validate_name_user_missing: "[:validate_missing(field=:user)]"
+validate_naming_name_missing: "[:validate_missing(field=:name)]"
+validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
+validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
+validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
+validate_naming_user_missing: "[:validate_missing(field=:user)]"
+validate_notification_user_missing: "[:validate_missing(field=:user)]"
+validate_observation_user_missing: "[:validate_missing(field=:user)]"
+validate_observation_when_missing: "[:validate_missing(field=:date)]"
+validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
+validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
+validate_project_title_missing: "[:validate_missing(field=:title)]"
+validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
+validate_project_user_group_missing: Missing [:user_group].
+validate_project_user_missing: "[:validate_missing(field=:user)]"
+validate_species_list_title_missing: "[:validate_missing(field=:title)]"
+validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
+validate_species_list_user_missing: "[:validate_missing(field=:user)]"
+validate_species_list_where_missing: "[:validate_missing(field=:location)]"
+validate_species_list_where_too_long: "[:validate_too_long(field=:location,max=100)]"
+validate_user_email_too_long: "[:validate_too_long(field=:email_address,max=80)]"
+validate_user_login_missing: "[:validate_missing(field=:login_name)]"
+validate_user_login_too_long: "[:validate_too_long_or_short(field=:login_name,min=3,max=40)]"
+validate_user_name_too_long: "[:validate_too_long(field=:full_name,max=80)]"
+validate_user_password_confirmation_missing: "[:validate_missing(field=:password_confirmation)]"
+validate_user_password_missing: "[:validate_missing(field=:password)]"
+validate_user_password_no_match: "[:validate_confirmation_mismatch(field=:password)]"
+validate_user_password_too_long: "[:validate_too_long(field=:password,max=40)]"
+validate_user_theme_too_long: "[:validate_too_long(field=''theme_name'',max=40)]"
+validate_vote_naming_missing: "[:validate_missing(field=:naming)]"
+validate_vote_user_missing: "[:validate_missing(field=:user)]"
+validate_vote_value_missing: "[:validate_missing(field=:confidence_level)]"
+validate_vote_value_not_integer: "[:validate_not_a_number(field=:vote)]"
+validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
+
+# Runtime error and success messages.
+runtime_added: "Επιτυχής προσθήκη [type]."
+runtime_added_id: "Επιτυχής προσθήκη [type] #[value]."
+runtime_added_id_to: "Επιτυχής προσθήκη [type] #[value] στο [name]."
+runtime_added_name: "Επιτυχής προσθήκη [type] '[value]'."
+runtime_added_name_to: "Επιτυχής προσθήκη [type] '[value]' στο [name]."
+runtime_added_to: "Επιτυχής προσθήκη [type] στο [name]."
+runtime_admin_only: Η λειτουργία αυτή περιορίζεται στους διαχειριστές της ιστοσελίδας.
+runtime_already_exists: "[Type] υπάρχει ήδη: '[value]'"
+runtime_already_used: "[Type] χρησιμοποιείται ήδη: '[value]'"
+runtime_created: "Επιτυχής δημιουργία [type]."
+runtime_created_id: "Επιτυχής δημιουργία [type] #[value]."
+runtime_created_name: "Επιτυχής δημιουργία [type] '[value]'."
+runtime_delivered_message: Επιτυχής παράδοση μηνύματος.
+runtime_delivered_question: Επιτυχής διαβίβαση ερωτήματος.
+runtime_delivered_request: Επιτυχής διαβίβαση αιτήματος.
+runtime_destroyed: "Επιτυχής καταστροφή [type]."
+runtime_destroyed_id: "Επιτυχής καταστροφή [type] #[value]."
+runtime_destroyed_name: "Επιτυχής καταστροφή [type] '[value]'."
+runtime_invalid: "[Type] είναι άκυρο: '[value]'"
+runtime_lat_long_error: "Το γεωγραφικό πλάτος και μήκος πρέπει να είναι αριθμοί κινητής υποδιαστολής μεταξύ -90 και 90, και -180 και 180 αντίστοιχα."
+runtime_merge_success: Επιτυχής συγχώνευση [type] [this] στο [that].
+runtime_missing: Λείπει το [field].
+runtime_no_changes: "Δεν έγινε καμία αλλαγή."
+runtime_no_create: "Αδυναμία δημιουργίας [type]."
+runtime_no_create_id: "Αδυναμία δημιουργίας [type] #[value]."
+runtime_no_create_name: "Αδυναμία δημιουργίας [type] '[value]'."
+runtime_no_destroy: "Αδυναμία καταστροφής [type]."
+runtime_no_destroy_id: "Unable καταστροφής [type] #[value]."
+runtime_no_destroy_name: "Unable καταστροφής [type] '[value]'."
+runtime_no_match: "Δεν βρέθηκε το [type]."
+runtime_no_match_id: "Δεν βρέθηκε το [type] #[value]."
+runtime_no_match_name: "Δεν βρέθηκε το [type] που να ταιριάζει με '[value]'."
+runtime_no_matches: "Δεν βρέθηκαν [types]."
+runtime_no_matches_pattern: "Δεν βρέθηκαν [types] που να ταιριάζουν με '[value]'."
+runtime_no_more: Δεν υπάρχουν άλλα [types].
+runtime_no_objects: Δεν υπάρχουν [types].
+runtime_no_parse: "Αδυναμία ανάλυσης: '[value]'"
+runtime_no_save: "Αδυναμία αποθήκευσης [type]."
+runtime_no_update: "Αδυναμία ενημέρωσης [type]."
+runtime_no_update_id: "Αδυναμία ενημέρωσης [type] #[value]."
+runtime_no_update_name: "Αδυναμία ενημέρωσης [type] '[value]'."
+runtime_not_owner: "Δεν είστε ιδιοκτήτης του [type] '[value]'."
+runtime_not_owner_id: "Δεν είστε ιδιοκτήτης του [type] #[value]."
+runtime_removed: "Επιτυχής αφαίρεση του [type]."
+runtime_removed_from: "Επιτυχής αφαίρεση του [type] από [name]."
+runtime_removed_id: "Επιτυχής αφαίρεση του [type] #[value]."
+runtime_removed_id_from: "Επιτυχής αφαίρεση του [type] #[value] από [name]."
+runtime_removed_name: "Επιτυχής αφαίρεση του [type] '[value]'."
+runtime_removed_name_from: "Επιτυχής αφαίρεση του [type] '[value]' from [name]."
+runtime_updated: "Επιτυχής ενημέρωση του [type]."
+runtime_updated_id: "Επιτυχής ενημέρωση του [type] #[value]."
+runtime_updated_name: "Επιτυχής ενημέρωση του [type] '[value]'."
+runtime_uploaded: "Επιτυχές ανέβασμα του [type]."
+runtime_uploaded_id: "Επιτυχές ανέβασμα του [type] #[value]."
+runtime_uploaded_name: "Επιτυχές ανέβασμα του [type] '[value]'."
+runtime_user_hasnt_authored: "[user] δεν έχει γράψει [types]."
+runtime_user_hasnt_created: "[user] δεν έχει δημιουργήσει [types]."
+runtime_user_hasnt_edited: "[user] δεν έχει επεξεργαστεί [types]."
+
+# One-time-use messages.
+runtime_dates_must_be_same_format: Όταν δίνετε δύο ημερομηνίες, αυτές πρέπει να έχουν την ίδια διαμόρφωση.
+runtime_description_added_admin: Δόθηκε άδεια διαχειριστή στον/στην [name].
+runtime_description_added_reader: Δόθηκε άδεια επισκόπησης στον/στην [name].
+runtime_description_added_writer: Δόθηκε άδεια επεξεργασίας στον/στην [name].
+runtime_description_copy_success: Επιτυχής αντιγραφή της περιγραφής.
+runtime_description_merge_delete_denied: Δεν έχετε άδεια διαγραφής της παλιάς περιγραφής.
+runtime_description_merge_deleted: "Η παλιά περιγραφή διαγράφηκε: [old]"
+runtime_description_merge_success: Επιτυχής συγχώνευση των περιγραφών.
+runtime_description_move_success: Επιτυχής αφαίρεση της περιγραφής.
+runtime_description_private: Η περιγραφή αυτή είναι ιδιωτική!
+runtime_description_removed_admin: Ανακλήθηκε η άδεια διαχειριστή του [name].
+runtime_description_removed_reader: Ανακλήθηκε η άδεια επισκόπησης του [name].
+runtime_description_removed_writer: Ανακλήθηκε η άδεια επεξεργασίας του [name].
+runtime_destroy_description_not_admin: Μόνο οι διαχειριστές περιγραφής μπορούν να διαγράψουν αυτή την περιγραφή.
+runtime_duplicate_rank: "Η κατάταξη εμφανίζεται δύο φορές: '[rank]'"
+runtime_image_updated_notes: "Ενημερώθηκαν οι σημειώσεις της εικόνας #[id]."
+runtime_image_uploaded: Ανέβηκε η εικόνα '[name]'.
+runtime_index_no_at_location: Δεν υπάρχουν [types] στην [location].
+runtime_index_no_by_rss_log: Δεν υπάρχουν [types] με πρόσφατη δραστηριότητα.
+runtime_index_no_for_object: Δεν υπάρχουν [types] γι’ αυτό το αντικείμενο.
+runtime_index_no_for_user: Δεν υπάρχουν [types] για τον/την [user].
+runtime_index_no_in_species_list: Δεν υπάρχουν [types] στο [name].
+runtime_index_no_inside_observation: Η παρατήρηση #[id] δεν έχει [types].
+runtime_index_no_of_children: Δεν υπάρχουν [types] για τα θυγατρικά είδη του [name].
+runtime_index_no_of_name: Δεν υπάρχουν [types] του [name].
+runtime_index_no_of_parents: Δεν υπάρχουν [types] για τα πατρικά είδη του [name].
+runtime_index_no_with: Δεν υπάρχουν [types] με [attachments].
+runtime_invalid_for_rank: "Το όνομα είναι άκυρο για την κατάταξη [rank]: '[name]'"
+runtime_invalid_rank: "Η κατάταξη είναι σε λάθος σειρά: '[line_rank]' είναι στην ίδια ή σε κατώτερη '[rank]'"
+runtime_location_merge_failed: Αποτυχία συγχώνευσης της παρατήρησης [name].
+runtime_login_failed: Αποτυχία σύνδεσης.
+runtime_login_success: Σύνδεση επιτυχής.
+runtime_name_in_use_with_notes: Το όνομα '[name]' χρησιμοποιείται ήδη και το [other] έχει σημειώσεις.
+runtime_no_conditions: Δεν καθορίσατε όρους!
+runtime_no_upload_image: Παρουσιάστηκε πρόβλημα κατά το ανέβασμα της εικόνας '[name]'.
+runtime_object_deleted: Αυτό το αντικείμενο έχει διαγραφεί.
+runtime_object_not_in_index: "Δεν βρέθηκε το [type] #[id] στα αποτελέσματα της τρέχουσας αναζήτησης ή ευρετηρίου."
+runtime_prefs_password_no_match: Ασυμφωνία κωδικού και επιβεβαίωσης.
+runtime_refine_search_expect_id: "Άκυρο [type] στο '[field]' – αναμενόταν έγκυρη ταυτότητα."
+runtime_refine_search_field_required: "Κενό απαιτούμενο πεδίο '[field]'."
+runtime_refine_search_invalid_rss_type: "Άκυρος τύπος αντικειμένου '[value]'."
+runtime_refine_search_model_not_supported: Λυπόμαστε, η '[:app_refine_search]' δεν υποστηρίζει ακόμη ερωτήματα [type].
+runtime_refine_search_object_not_found: "Δεν βρέθηκε [type] που να ταιριάζει με το '[value]' στο '[field]'."
+runtime_search_has_expired: Το ερώτημά σας έχει λήξη, παρακαλούμε προσπαθήστε ξανά.
+runtime_show_observation_success: Επιτυχής αλλαγή ψήφου.
+runtime_unable_to_transfer_name: Αδυναμία μεταφοράς του [name] σε άλλο συνώνυμο.
+
+# These shouldn't need translating, but you are free to override if you need to.
+runtime_ask_observation_question_success: "[:runtime_delivered_question]"
+runtime_ask_user_question_success: "[:runtime_delivered_question]"
+runtime_ask_webmaster_need_address: "[:runtime_missing(field=:email_address)]"
+runtime_ask_webmaster_need_content: "[:runtime_missing(field=:comment)]"
+runtime_ask_webmaster_success: "[:runtime_delivered_message]"
+runtime_commercial_inquiry_success: "[:runtime_delivered_message]"
+runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
+runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
+runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
+runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
+runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
+runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
+runtime_destroy_naming_success: "[:runtime_destroyed_id(type=:naming,value=id)]"
+runtime_destroy_observation_denied: "[:runtime_not_owner_id(type=:observation,value=id)]"
+runtime_destroy_observation_failed: "[:runtime_no_destroy_id(type=:observation,value=id)]"
+runtime_destroy_observation_success: "[:runtime_destroyed_id(type=:observation,value=id)]"
+runtime_edit_location_description_no_change: "[:runtime_no_changes]"
+runtime_edit_location_description_success: "[:runtime_updated_id(type=:location_description,value=id)]"
+runtime_edit_location_no_change: "[:runtime_no_changes]"
+runtime_edit_location_success: "[:runtime_updated_id(type=:location,value=id)]"
+runtime_edit_name_description_no_change: "[:runtime_no_changes]"
+runtime_edit_name_description_success: "[:runtime_updated_id(type=:name_description,value=id)]"
+runtime_edit_name_merge_success: "[:runtime_merge_success(type=:name,this=this,that=that)]"
+runtime_edit_name_no_change: "[:runtime_no_changes]"
+runtime_edit_name_success: "[:runtime_updated_name(type=:name,value=name)]"
+runtime_edit_observation_success: "[:runtime_updated_id(type=:observation,value=id)]"
+runtime_edit_project_success: "[:runtime_updated_id(type=:project,value=id)]"
+runtime_email_new_password_failed: "[:runtime_no_match_name(type=:user,value=user)]"
+runtime_form_comments_create_success: "[:runtime_created_id(type=:comment,value=id)]"
+runtime_form_comments_destroy_failed: "[:runtime_no_destroy_id(type=:comment,value=id)]"
+runtime_form_comments_destroy_success: "[:runtime_destroyed_id(type=:comment,value=id)]"
+runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id)]"
+runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
+runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
+runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
+runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
+runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
+runtime_image_resize_denied: "[:runtime_admin_only]"
+runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
+runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
+runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
+runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
+runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
+runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
+runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
+runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
+runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
+runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
+runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
+runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
+runtime_location_merge_success: "[:runtime_merge_success(type=:location,this=this,that=that)]"
+runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
+runtime_map_locations_no_matches: "[:runtime_no_matches_pattern(type=:location,value=pattern)]"
+runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
+runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
+runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
+runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
+runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
+runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
+runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
+runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
+runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
+runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
+runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
+runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
+runtime_naming_created: "[:runtime_created(type=:naming)]"
+runtime_naming_updated: "[:runtime_updated(type=:naming)]"
+runtime_no_more_search_objects: "[:runtime_no_more]"
+runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
+runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
+runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
+runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
+runtime_prefs_success: "[:runtime_updated(type=:preferences)]"
+runtime_profile_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
+runtime_profile_removed_image: "[:runtime_removed_from(type=:image,name=:profile)]"
+runtime_profile_success: "[:runtime_updated(type=:profile)]"
+runtime_profile_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
+runtime_species_list_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
+runtime_species_list_create_success: "[:runtime_created_id(type=:species_list,value=id)]"
+runtime_species_list_destroy_success: "[:runtime_destroyed_id(type=:species_list,value=id)]"
+runtime_species_list_edit_success: "[:runtime_updated_id(type=:species_list,value=id)]"
+runtime_species_list_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
+runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
+runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
+runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
+runtime_user_bad_rank: "[:runtime_invalid(type=rank,value=rank)]"
+
+# Longer messages.
+runtime_ask_webmaster_antispam: >
+  Για την αντιμετώπιση ρομποτικού spam, ερωτήματα από μη εγγεγραμμένους χρήστες δεν είναι δυνατό να περιέχουν 'http:' ή σήμανση HTML.
+
+runtime_create_draft_create_denied: >
+  Δεν έχετε άδεια δημιουργίας προσχεδίου για το έργο [title].
+
+runtime_create_naming_already_proposed: >
+  Κάποιος άλλος έχει ήδη προτείνει αυτό το όνομα. Αν θέλετε να το σχολιάσετε, καλύτερα να δημοσιεύσετε σχόλιο.
+
+runtime_description_already_default: >
+  Η περιγραφή αυτή είναι ήδη η προεπιλεγμένη!
+
+runtime_description_foreign_read_wrong: >
+  Περιγραφές από άλλους εξυπηρέτες πρέπει να είναι αναγνώσιμες από όλους.
+
+runtime_description_foreign_write_wrong: >
+  Περιγραφές από άλλους εξυπηρέτες πρέπει να είναι μόνο για ανάγνωση.
+
+runtime_description_make_default_only_public: >
+  Μόνο μια δημόσια περιγραφή επιτρέπεται να είναι η προεπιλεγμένη. Πρέπει να επιτρέπεται σε όλους τους χρήστες τουλάχιστον να μπορούν να τη διαβάσουν.
+
+runtime_description_merge_conflict: >
+  Υπήρξε κάποια σύγκρουση. Παρακαλούμε να συγχωνεύσετε τις δύο περιγραφές χειροκίνητα. (Δείτε τα πεδία κειμένου παρακάτω. Όπου υπάρχει σύγκρουση, οι περιγραφές έχουν εισαχθεί η μία πάνω από την άλλη και χωρίζονται από μία γραμμή.) Μπορείτε να ακυρώσετε αυτή τη λειτουργία οποτεδήποτε χωρίς να κάνετε αλλαγές. Όταν τελειώσετε, φροντίστε να καταστρέψετε την παλιά περιγραφή.
+
+runtime_description_move_invalid_classification: >
+  Η κατάταξη έχει εσφαλμένη σύνταξη. Δεν είναι δυνατή η αποθήκευση της νέας περιγραφής μαζί της με αυτόν τον τρόπο, γι’ αυτό έχει καθαριστεί το πεδίο ταξινόμησης προκειμένου να κάνετε τις διορθώσεις.
+
+runtime_description_must_be_admin: >
+  Πρέπει να είστε διαχειριστής μιας περιγραφής για να χρησιμοποιήσετε αυτό το χαρακτηριστικό.
+
+runtime_description_permissions_fixed: >
+  Αυτός ο τύπος περιγραφής έχει συγκεκριμένες άδειες.
+
+runtime_description_public_read_wrong: >
+  Οι δημόσιες περιγραφές πρέπει να είναι αναγνώσιμες από όλους.
+
+runtime_description_public_write_wrong: >
+  Οι δημόσιες περιγραφές πρέπει να είναι εγγράψιμες από όλους.
+
+runtime_description_user_not_found: >
+  Το "[name]" χρήστη ή ομάδας δεν βρέθηκε!
+
+runtime_destroy_naming_someone_else: >
+  Λυπόμαστε, κάποιος άλλος έχει δώσει σ’ αυτό την ισχυρότερη θετική ψήφο. Έχετε το δικαίωμα να προτείνετε εναλλακτικά ονόματα, αλλά δεν επιτρέπεται πλέον να διαγράψετε αυτό το όνομα.
+
+runtime_edit_description_denied: >
+  Δεν σας έχει δοθεί άδεια επεξεργασίας αυτής της περιγραφής.
+
+runtime_edit_naming_someone_else: >
+  Λυπόμαστε, κάποιος άλλος έχει δώσει θετική ψήφο, γι’ αυτό χρειάστηκε να δημιουργηθεί νέα πρόταση ονόματος προκειμένου να τακτοποιηθούν οι αλλαγές σας.
+
+runtime_email_new_password_success: >
+  Επιτυχής αλλαγή κωδικού. Ο νέος κωδικός έχει σταλεί στο email σας.
+
+runtime_form_names_misspelling_bad: >
+  Η εναλλακτική γραφή που εισαγάγατε δεν αναγνωρίζεται.
+
+runtime_form_names_misspelling_same: >
+  Η σωστή και η λανθασμένη γραφή είναι ίδιες!
+
+runtime_image_changed_your_image: >
+  Έγινε αντικατάσταση της εικόνας του προφίλ σας με την εικόνα #[id].
+
+runtime_image_move_failed: >
+  Υπήρξε κάποιο πρόβλημα με τον εξυπηρέτη και δεν στάθηκε δυνατό να αποθηκευτεί η εικόνα #[id]. Παρακαλούμε ξαναπροσπαθήστε.
+
+runtime_image_process_failed: >
+  Υπήρξε κάποιο πρόβλημα με τον εξυπηρέτη και δεν στάθηκε δυνατό να γίνει επεξεργασία της εικόνας #[id]. Παρακαλούμε ξαναπροσπαθήστε.
+
+runtime_image_remove_denied: >
+  Δεν έχετε άδεια αφαίρεσης εικόνων από αυτή την παρατήρηση.
+
+runtime_image_remove_missing: >
+  Η συγκεκριμένη εικόνα δεν υπάρχει σ’ αυτή την παρατήρηση!
+
+runtime_merge_warning: >
+  Επειδή υπάρχει πιθανότητα καταστροφής, μόνο ο διαχειριστής μπορεί να συγχωνεύσει τους υπάρχοντες [types]. Έχει σταλεί email στους διαχειριστές με το αίτημα της προτεινόμενης συγχώνευσης.
+
+runtime_object_not_found: >
+  Λυπόμαστε, ο [type] που προσπαθήσατε να εμφανίσετε (id #[id]) δεν υπάρχει πλέον. Κάποιος τον έχει διαγράψει ή συγχωνεύσει με άλλον.
+
+runtime_profile_must_define: >
+  Πρέπει να καθορίσετε την τοποθεσία αυτή πριν γίνει η κύρια τοποθεσία σας. Κάθε άλλη αλλαγή του προφίλ σας έχει αποθηκευτεί.
+
+runtime_refine_search_bad_google_minus: >
+  Άκυρη σύνταξη αναζήτησης στο [name] στην '[value]'. Παρακαλούμε χρησιμοποιήστε μόνο σύνταξη με το σημείο μείον στην αρχή της γραμμής.
+
+runtime_reverify_already_verified: >
+  Ο λογαριασμός σας έχει ήδη επαληθευτεί! Παρακαλούμε συνδεθείτε.
+
+runtime_reverify_sent: >
+  Στάλθηκε άλλο email επαλήθευσης στο email σας.
+
+runtime_show_description_denied: >
+  Δεν σας έχει δοθεί άδεια να δείτε αυτή την περιγραφή.
+
+runtime_show_draft_denied: >
+  Άρνηση χορήγησης αδείας: μόνο μέλη του έργου μπορούν να κάνουν επισκόπηση προσχεδίων που βρίσκονται σε εξέλιξη.
+
+runtime_signup_success: >
+  Εγγραφή επιτυχής. Σας έχει αποσταλεί επαλήθευση στο email σας.
+
+runtime_species_list_need_to_use_bulk: >
+  Συνώνυμα μπορούν να δημιουργηθούν μόνο από τη σελίδα [:name_bulk_title].
 
 ################################################################################
 
-# NOTHING BELOW HERE NEEDS TRANSLATION!!!
+# DEBUGGING STUFF -- this doesn't need translating
 
 # observer/recalc
 observer_recalc_old_name:  "old_name: [name]"
