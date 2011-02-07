@@ -18,6 +18,8 @@ class ObserverControllerTest < FunctionalTestCase
       'when(3i)'      => '31',
       :specimen       => '0',
       :thumb_image_id => '0',
+      :lat => "",
+      :long => "",
     }.merge(params[:observation] || {})
     params[:vote] = {
       :value => '3',
@@ -796,7 +798,7 @@ class ObserverControllerTest < FunctionalTestCase
     assert_not_nil(obs.rss_log)
 
   end
-
+  
   def test_construct_observation_dubious_place_names
     # Test a reversed name with a scientific user
     where = "USA, Massachusetts, Reversed"
@@ -883,7 +885,7 @@ class ObserverControllerTest < FunctionalTestCase
     }, 1,0,0)
 
     # Test some acceptable additions
-    where = "Near Burbank, Southern California, USA"
+    where = "near Burbank, Southern California, USA"
     generic_construct_observation({
       :observation => { :place_name => where },
       :name => { :name => "Unknown" }
@@ -904,32 +906,32 @@ class ObserverControllerTest < FunctionalTestCase
       :name => {},
       :vote => { :value => "3" },
     }
-
+    expected_page = "create_location"
     # Can we create observation with existing genus?
     agaricus = names(:agaricus)
     params[:name][:name] = 'Agaricus'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp.'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     # Can we create observation with genus and add author?
     params[:name][:name] = 'Agaricus Author'
     params[:approved_name] = 'Agaricus Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
     assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
     agaricus.author = nil
@@ -939,7 +941,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = 'Agaricus sp Author'
     params[:approved_name] = 'Agaricus sp Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
     assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
     agaricus.author = nil
@@ -949,7 +951,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = 'Agaricus sp. Author'
     params[:approved_name] = 'Agaricus sp. Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
     assert_equal('Agaricus sp. Author', agaricus.reload.search_name)
 
@@ -957,19 +959,19 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = 'Agaricus Author'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp Author'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Agaricus sp. Author'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(agaricus.id, assigns(:observation).name_id)
 
     # Can we create observation with deprecated genus?
@@ -977,26 +979,26 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = 'Psalliota'
     params[:approved_name] = 'Psalliota'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Psalliota sp'
     params[:approved_name] = 'Psalliota sp'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
 
     params[:name][:name] = 'Psalliota sp.'
     params[:approved_name] = 'Psalliota sp.'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
 
     # Can we create observation with deprecated genus, adding author?
     params[:name][:name] = 'Psalliota Author'
     params[:approved_name] = 'Psalliota Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
     assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
     psalliota.author = nil
@@ -1006,7 +1008,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = 'Psalliota sp Author'
     params[:approved_name] = 'Psalliota sp Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
     assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
     psalliota.author = nil
@@ -1016,7 +1018,7 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = 'Psalliota sp. Author'
     params[:approved_name] = 'Psalliota sp. Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal(psalliota.id, assigns(:observation).name_id)
     assert_equal('Psalliota sp. Author', psalliota.reload.search_name)
 
@@ -1024,73 +1026,73 @@ class ObserverControllerTest < FunctionalTestCase
     params[:name][:name] = '"One"'
     params[:approved_name] = '"One"'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" sp.', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"Two" sp'
     params[:approved_name] = '"Two" sp'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"Two"', assigns(:observation).name.text_name)
     assert_equal('"Two" sp.', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"Three" sp.'
     params[:approved_name] = '"Three" sp.'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"Three"', assigns(:observation).name.text_name)
     assert_equal('"Three" sp.', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One"'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" sp'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" sp.'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
 
     # Can we create species under the quoted genus?
     params[:name][:name] = '"One" foo'
     params[:approved_name] = '"One" foo'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One" foo', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" "bar"'
     params[:approved_name] = '"One" "bar"'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One" "bar"', assigns(:observation).name.text_name)
 
     params[:name][:name] = '"One" Author'
     params[:approved_name] = '"One" Author'
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One" sp Author'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
 
     params[:name][:name] = '"One" sp. Author'
     params[:approved_name] = nil
     post(:create_observation, params)
-    assert_response(:action => "show_observation")
+    assert_response(:action => expected_page)
     assert_equal('"One"', assigns(:observation).name.text_name)
     assert_equal('"One" sp. Author', assigns(:observation).name.search_name)
   end
@@ -1151,7 +1153,7 @@ class ObserverControllerTest < FunctionalTestCase
         :place_name => where,
         :when => obs.when,
         :notes => obs.notes,
-        :specimen => obs.specimen
+        :specimen => obs.specimen,
       },
       :log_change => { :checked => '0' }
     }

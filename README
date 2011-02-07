@@ -19,19 +19,12 @@ The current code has only be run on Unix-based operating systems, in particular
 Linux and MacOSX.  However, Rails and Mysql and everything else MO needs is 
 available in Windows, so feel free to be the first to try it out!
 
-
 You'll at very least need to install ruby (1.8.7: the code hasn't been tested
 with 1.9), rails (2.1.1: we really need to upgrade to 2.3 or 3.0, but it's not
 backwards compatible) and mysql (5.1.47 is known to work, but later ones 
 probably will as well).  Fortunately these are all very popular so it's easy
 to find pre-built binaries for most operating systems.  New developers have
 reported being able to get the system up and running in under two hours.
-
-For more information:
-
-MO Source:: http://svn.collectivesource.com/mushroom_sightings/
-Nathan's Notes:: link:files/README_INSTALL.html
-Subversion Manual:: http://svnbook.red-bean.com/
 
 == Other READMEs
 

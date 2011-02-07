@@ -874,7 +874,7 @@ class ObserverController < ApplicationController
     end
     lat = (params[:observation][:lat] or "")
     long = (params[:observation][:long] or "")
-    if not ((lat == "" and long == "") or Location.check_lat_long(lat, long))
+    if not valid_lat_long?(lat, long)
       flash_error(:runtime_lat_long_error.l)
       success = false
     end
@@ -973,9 +973,8 @@ class ObserverController < ApplicationController
       # Check lat long.  It's OK for both of them to be blank.
       lat = params[:observation][:lat]
       long = params[:observation][:long]
-      good_lat_long = ((lat == "" and long == "") or Location.check_lat_long(lat, long))
+      good_lat_long = valid_lat_long?(lat, long)
       flash_error(:runtime_lat_long_error.l) if not good_lat_long
-
       @where = Location.user_name(@user, params[:observation][:place_name])
       @dubious_where_reasons = []
       @dubious_where_reasons = Location.dubious_name?(@where, true) if @where != params[:approved_where]
@@ -1017,6 +1016,14 @@ class ObserverController < ApplicationController
     end
   end
 
+  def valid_lat_long?(lat, long)
+    (is_empty?(lat) and is_empty?(long)) or Location.check_lat_long(lat, long)
+  end
+  
+  def is_empty?(str)
+    str.nil? or (str == "")
+  end
+  
   # Callback to destroy an observation (and associated namings, votes, etc.)
   # Linked from: show_observation
   # Inputs: params[:id] (observation)

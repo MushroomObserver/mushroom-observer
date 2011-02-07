@@ -9,17 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20101208030838) do
-
-  create_table "add_image_test_logs", :force => true do |t|
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "upload_start"
-    t.datetime "upload_data_start"
-    t.datetime "upload_end"
-    t.integer  "image_count"
-    t.integer  "image_bytes"
-  end
+ActiveRecord::Schema.define(:version => 20110206214103) do
 
   create_table "authors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
@@ -611,16 +601,6 @@ ActiveRecord::Schema.define(:version => 20101208030838) do
 
   create_table "synonyms", :force => true do |t|
     t.string "sync_id", :limit => 16
-  end
-
-  create_table "t1", :id => false, :force => true do |t|
-    t.integer "i"
-    t.integer "j"
-  end
-
-  create_table "t2", :id => false, :force => true do |t|
-    t.integer "j"
-    t.integer "k"
   end
 
   create_table "transactions", :force => true do |t|

@@ -7,7 +7,7 @@ that I can think of off the top of my head:
 
 * RedCloth
 
-This simple mark-up is used throughout the site, e.g. in user-supplied notes,
+This simple mark-up package is used throughout the site, e.g. in user-supplied notes,
 in scientific names, and in "internationalization" strings (see below).
 
 * sanitize or html_escape
@@ -16,31 +16,41 @@ All user-supplied text should be run through +sanitize+ or +html_escape+ to
 strip out any potentially harmful HTML.  (Note +h+ is an alias for
 +html_escape+.)
 
-* internationalization
+* Internationalization
 
-Slowly but surely we are abstractifying all text on the site.  Going forward
-it's very easy: instead of printing a string, print <tt>:some_tag.l</tt>
-instead and insert that string into <tt>lang/ui/*.yml</tt>.
+All text should be internationalized.  It's very easy: instead of printing a 
+string literal, print <tt>:some_tag.l</tt> instead and insert that string into
+<tt>lang/ui/en-US.yml</tt>.  More details are given in README_TRANSLATIONS.
 
-* no Model.method() calls in views!
+* No Model.method() calls in views!
 
 This is a violation of the MVC architecture.  Ask Nathan about it.  Or check
 out the link under the *Ruby on Rails* section near the top of this document.
 
-* rdoc
+* Clean Code
 
-Try to remember to comment your code in such a way that *rdoc* can understand
-it.  There is a huge amount of work to do to comment old code, but going
-forward it would be nice if we started to do this.  Wouldn't it?
+We try to use what we believe are the best practices for code development.
+Currently that means we like things like "agile methodology", "clean code"
+and "test driven development". There is a great deal of information out on
+the web about all of these terms. A good book about it "Clean Code" by Robert
+Martin. While all the methods pretty much apply in Ruby, that book uses Java
+as it's primary example language. A short summary of the key rules are:
 
-* unit tests
+1) It is better to contribute than to be intimidated by any of the following
+rules.
 
-Write tests for every bug you fix!  Better yet, write tests for every new
-feature you add.  Some people suggest testing new code in *test* before even
-trying it out on the website.  Okay, maybe you can go too far...
+2) Boy Scouts Rule: Leave the code cleaner than you found it.
 
-*** Needs integration ***
-Use textilize() on notes.
-Don't use anything on fields of fixed types like dates
-Use textilize_without_paragraph h(str) on arbitrary, formatted but size limited strings like Observation.unique_format_name.
-Use h(str) on arbitrary, unformatted but size limited strings like Observation.unique_text_name.
+3) Only checkin code that passes all the tests.
+
+4) Do Not Repeat Yourself.
+
+5) Keep functions and classes small and well named.
+
+6) Avoid needing documentation.  Refactor instead.
+
+7) Write tests for every bug you fix and every feature you add.
+
+8) Test Driven Development is encouraged, but not required.
+
+We are also happy to discuss and revise these rules.
