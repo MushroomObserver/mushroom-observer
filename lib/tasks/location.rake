@@ -3848,15 +3848,22 @@ namespace :location do
     "Öland, Sweden",
     "Ünye, Turkey",
     "İstanbul, Turkey",
+    "Iowa City, Iowa, USA",
+    "Jardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico",
+    "Skokomish River Bridge, Mason Co., Washington, USA",
+    "Spodnja Idrija Region, Goriško, Slovenia",
+    "Stanford University Campus, California, USA",
+    "Summit Lake, Thurston Co., Washington, USA",
+    "Brook Run Park, Dekalb Co., Georgia, USA",
+    "King Ferry, New York, USA",
+    "Lebanon State Forest, Burlington Co., New Jersey, USA",
+    "Nisqually Bird Refuge, Thurston Co., Washington, USA",
+    "Tom Miner Creek, Montana, USA",
+    "Waynesville, North Carolina, USA",
+    "near Braselton, Georgia, USA",
     ])
 
   LOCATION_FIXES = {
-    "xIowa City, Iowa, USA" => "Iowa City, Iowa, USA",
-    "xJardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico" => "Jardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico",
-    "xSkokomish River Bridge, Mason Co., Washington, USA" => "Skokomish River Bridge, Mason Co., Washington, USA",
-    "xSpodnja Idrija Region, Goriško, Slovenia" => "Spodnja Idrija Region, Goriško, Slovenia",
-    "xStanford University Campus, California, USA" => "Stanford University Campus, California, USA",
-    "xSummit Lake, Thurston Co., Washington, USA" => "Summit Lake, Thurston Co., Washington, USA",
   }
   
   def report_on_name(name)
