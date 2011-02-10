@@ -3851,20 +3851,12 @@ namespace :location do
     ])
 
   LOCATION_FIXES = {
-    "Brook Run Park, Dekalb Co., Georgia, USA" => "Brook Run Park, Dekalb Co., Georgia, USA",
-    "Dorado Co., California, USA" => "El Dorado Co., California, USA",
-    "Iowa city, Iowa, USA" => "xIowa City, Iowa, USA",
-    "Jardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico " => "xJardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico",
-    "King Ferry, New York, USA" => "King Ferry, New York, USA",
-    "Lebanon State Forest, Burlington Co., New Jersey, USA" => "Lebanon State Forest, Burlington Co., New Jersey, USA",
-    "Nisqually bird refuge, Thurston Co, Washington, USA" => "Nisqually Bird Refuge, Thurston Co., Washington, USA",
-    "Skokomish River bridge, Mason Co., Washington, USA" => "xSkokomish River Bridge, Mason Co., Washington, USA",
-    "Spodnja Idrija region, Goriško, Slovenia" => "xSpodnja Idrija Region, Goriško, Slovenia",
-    "Stanford University campus, California, USA" => "xStanford University Campus, California, USA",
-    "Summit lake, Thurston Co., Washington, USA" => "xSummit Lake, Thurston Co., Washington, USA",
-    "Tom Miner Creek, Montana, USA" => "Tom Miner Creek, Montana, USA",
-    "Waynesville, North Carolina, USA" => "Waynesville, North Carolina, USA",
-    "near Braselton, Georgia, USA" => "near Braselton, Georgia, USA",
+    "xIowa City, Iowa, USA" => "Iowa City, Iowa, USA",
+    "xJardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico" => "Jardín Botánico Francisco Clavijero, Xalapa, Veracruz, Mexico",
+    "xSkokomish River Bridge, Mason Co., Washington, USA" => "Skokomish River Bridge, Mason Co., Washington, USA",
+    "xSpodnja Idrija Region, Goriško, Slovenia" => "Spodnja Idrija Region, Goriško, Slovenia",
+    "xStanford University Campus, California, USA" => "Stanford University Campus, California, USA",
+    "xSummit Lake, Thurston Co., Washington, USA" => "Summit Lake, Thurston Co., Washington, USA",
   }
   
   def report_on_name(name)
