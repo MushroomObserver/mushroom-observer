@@ -13,7 +13,7 @@
 #    }
 #
 #    api = API.execute(request)
-#    objects = api.objects
+#    objects = api.results
 #    errors  = api.errors
 #    args    = api.args
 #
@@ -102,7 +102,7 @@
 #  == Attributes
 #
 #  args::                 Original hash of arguments passed in.
-#  objects::              List of objects found / modified (after +process+).
+#  results::              List of objects found / modified (after +process+).
 #  errors::               List of errors (after +process+).
 #  user::                 Authenticated user making request.
 #  query::                Rough copy of SQL query used.
@@ -223,7 +223,7 @@ class API
   attr_accessor :args
 
   # Array of objects returned.
-  attr_accessor :objects
+  attr_accessor :results
 
   # Array of MoApiException instances returned.
   attr_accessor :errors
@@ -302,7 +302,7 @@ class API
   # that lots of extra information is available through the API instance:
   #
   #   api.args      Copy of the Hash of args you passed in.
-  #   api.objects   Array of objects returned.
+  #   api.results   Array of objects returned.
   #   api.errors    Array of MoApiException instances returned.
   #   api.user      User used to authenticate (if any).
   #   api.query     Basic SQL query used (if any).  (For info purposes only.)
@@ -312,7 +312,7 @@ class API
   #   api.pages     Number of pages of results available.
   #
   def process
-    self.objects = []
+    self.results = []
     self.errors  = []
 
     # Get request method and action.
@@ -344,17 +344,17 @@ class API
 
     # Process specific method.
     send("process_#{method}")
-    [objects, errors]
+    [results, errors]
 
   rescue => e
     errors << convert_error(e, 501, e.to_s, true)
-    [objects, errors]
+    [results, errors]
   end
 
   # POST method: create one object.
   def process_post
     must_authenticate
-    objects << send("post_#{action}")
+    results << send("post_#{action}")
   end
 
   # GET method: look up existing objects.
@@ -402,7 +402,7 @@ class API
     instantiate_results
 
     # Apply updates to all matching objects.
-    new_objects = objects.map do |obj|
+    new_results = results.map do |obj|
       begin
         setter.call(obj)
         obj
@@ -412,7 +412,7 @@ class API
       end
     end
     # (In case any updates caused merges.)
-    self.objects = new_objects
+    self.results = new_results
   end
 
   # DELETE method: look up existing objects and destroy them.
@@ -457,7 +457,7 @@ class API
   def instantiate_results(joins=nil) # :nodoc:
     ids = model.connection.select_values(query)
     make_sure_found_all_objects(ids, action)
-    self.objects = joins ?
+    self.results = joins ?
       model.all(:conditions => ['id in (?)', ids], :include => joins) :
       model.all(:conditions => ['id in (?)', ids])
   end
@@ -500,8 +500,8 @@ class API
     conds += sql_date(:created, 'comments.created')
     conds += sql_date(:modified, 'comments.modified')
     conds += sql_id_or_name(:user, 'comments.user_id', 'users.login', 'users.name')
-    conds += sql_enum(:object_type, 'comments.object_type')
-    conds += sql_id(:object_id, 'comments.object_id')
+    conds += sql_enum(:target_type, 'comments.target_type')
+    conds += sql_id(:target_id, 'comments.target_id')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'comments.id')
 
@@ -554,15 +554,15 @@ class API
   def get_interest
     conds  = []
     tables = []
-    joins  = [:object]
+    joins  = [:result]
 
     raise error(303, "must login to process your interests") if !user
     conds += build_sql(["interests.user_id = ?", user.id])
     conds += sql_date(:created, 'interests.created')
     conds += sql_date(:modified, 'interests.modified')
-    conds += sql_enum(:object_type, 'interests.object_type',
+    conds += sql_enum(:target_type, 'interests.target_type',
                       [ :location, :name, :obsercation ])
-    conds += sql_id(:object_id, 'interests.object_id')
+    conds += sql_id(:target_id, 'interests.target_id')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'interests.id')
 
@@ -721,8 +721,8 @@ class API
     conds += build_sql(["notifications.user_id = ?", user.id])
     conds += sql_date(:created, 'notifications.created')
     conds += sql_date(:modified, 'notifications.modified')
-    conds += sql_enum(:object_type, 'notifications.flavor', [:name])
-    conds += sql_id(:object_id, 'notifications.obj_id')
+    conds += sql_enum(:target_type, 'notifications.flavor', [:name])
+    conds += sql_id(:target_id, 'notifications.obj_id')
     @something_besides_ids = true if !conds.empty?
     conds += sql_id(:id, 'notifications.id')
 
@@ -918,16 +918,16 @@ class API
     summary = parse_string(:summary, 100)
     content = parse_string(:content)
 
-    object = nil
-    object ||= parse_object(:location, Location)
-    object ||= parse_object(:name, Name)
-    object ||= parse_object(:observation, Observation)
+    target = nil
+    target ||= parse_object(:location, Location)
+    target ||= parse_object(:name, Name)
+    target ||= parse_object(:observation, Observation)
 
     summary ||= '.'
     content ||= ''
 
     raise error(102, 'missing content') if !content
-    raise error(102, 'missing object')  if !object
+    raise error(102, 'missing object')  if !target
 
     comment = Comment.new(
       :created  => time,
@@ -935,12 +935,12 @@ class API
       :user     => user,
       :summary  => summary,
       :comment  => content,
-      :object   => object
+      :target   => target
     )
     save_new_object(comment)
 
-    if object.respond_to?(:log)
-      object.log(:log_comment_added, :summary => summary)
+    if result.respond_to?(:log)
+      result.log(:log_comment_added, :summary => summary)
     end
     return comment
   end
@@ -1013,19 +1013,19 @@ class API
   def post_interest
     state = parse_boolean(:state)
 
-    object = nil
-    object ||= parse_object(:location, Location)
-    object ||= parse_object(:name, Name)
-    object ||= parse_object(:observation, Observation)
+    target = nil
+    target ||= parse_object(:location, Location)
+    target ||= parse_object(:name, Name)
+    target ||= parse_object(:observation, Observation)
 
     raise error(102, 'missing state')  if state.nil?
-    raise error(102, 'missing object') if !object
+    raise error(102, 'missing target') if !target
 
     interest = Interest.new(
       :modified => time,
       :user     => user,
       :state    => state,
-      :object   => object
+      :target   => target
     )
     save_new_object(interest)
     return interest
@@ -1732,7 +1732,7 @@ class API
   def put_notification
     sets = {}
     sets[:flavor]        = x if x = parse_enum(:set_flavor, [:name])
-    sets[:object]        = x if x = parse_object(:set_object, Name)
+    sets[:target]        = x if x = parse_object(:set_target, Name)
     sets[:note_template] = x if x = parse_string(:set_note_template)
     return standard_setter(sets)
   end

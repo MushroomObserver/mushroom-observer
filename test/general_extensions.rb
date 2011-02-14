@@ -201,9 +201,11 @@ module GeneralExtensions
       # Check string against each file, looking for at least one that matches.
       body1  = str
       body1  = yield(body1) if block_given?
+      body1.force_encoding('UTF-8') if body1.respond_to?(:force_encoding)
       for file in files
         body2 = File.open(file) {|fh| fh.read}
         body2 = yield(body2) if block_given?
+        body2.force_encoding('UTF-8') if body2.respond_to?(:force_encoding)
         if body1 == body2
           # Stop soon as we find one that matches.
           result = true

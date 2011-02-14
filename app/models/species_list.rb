@@ -255,7 +255,8 @@ class SpeciesList < AbstractModel
         end
         key, value = kv
         if key == 'Date'
-          timestamp = Time.local(*(ParseDate.parsedate(value)))
+          # timestamp = Time.local(*(ParseDate.parsedate(value)))
+          timestamp = Time.parse(value)
         elsif key == 'Name'
           what = value.strip.squeeze(' ')
         elsif key == 'Time'

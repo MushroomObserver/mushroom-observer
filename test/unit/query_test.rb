@@ -1,4 +1,6 @@
-require File.dirname(__FILE__) + '/../boot'
+# encoding: utf-8
+
+require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class QueryTest < UnitTestCase
 
@@ -239,7 +241,7 @@ class QueryTest < UnitTestCase
   def test_cleanup
     # This avoids any possible difference in time zone between mysql and you.
     # (This should be obsolete, but timezone handling is tested elsewhere.)
-    now = DateTime.parse(Query.connection.select_value("SELECT NOW()"))
+    now = DateTime.parse(Query.connection.select_value("SELECT NOW()").to_s)
 
     s11 = Query.new(:access_count => 0, :modified => now - 1.minute)
     s12 = Query.new(:access_count => 0, :modified => now - 6.hour + 1.minute)
@@ -401,8 +403,8 @@ class QueryTest < UnitTestCase
       assert_match(/names.reviewer_id = users.id/, sql)
       assert_match(/observations.name_id = names.id/, sql)
       assert_match(/observations.location_id = locations.id/, sql)
-      assert_match(/comments.object_id = observations.id/, sql)
-      assert_match(/comments.object_type = 'Observation'/, sql)
+      assert_match(/comments.target_id = observations.id/, sql)
+      assert_match(/comments.target_type = 'Observation'/, sql)
       assert_match(/images_observations.observation_id = observations.id/, sql)
       assert_match(/images_observations.image_id = images.id/, sql)
     end
@@ -443,20 +445,26 @@ class QueryTest < UnitTestCase
       assert_equal(num, query.select_count(:limit => 10)) # limit limits number of counts!!
       assert_equal(num_agaricus, query.select_count(:where => 'text_name LIKE "Agaricus%"'))
 
-      assert_equal('1', query.select_value) # first id
-      assert_equal('11', query.select_value(:limit => '10, 10')) # tenth id
-      assert_equal(num.to_s, query.select_value(:order => :reverse)) # last id
-      assert_equal('Fungi', query.select_value(:select => 'text_name'))
+      assert_equal('1', query.select_value.to_s) # first id
+      assert_equal('11', query.select_value(:limit => '10, 10').to_s) # tenth id
+      assert_equal(num.to_s, query.select_value(:order => :reverse).to_s) # last id
+      assert_equal('Fungi', query.select_value(:select => 'text_name').to_s)
 
-      assert_equal((1..num).map(&:to_s), query.select_values)
-      assert_equal(['3','18','19','20','21'], query.select_values(:where => 'text_name LIKE "Agaricus%"'))
-      agaricus = query.select_values(:select => 'text_name', :where => 'text_name LIKE "Agaricus%"')
+      assert_equal((1..num).map(&:to_s), query.select_values.map(&:to_s))
+      assert_equal(['3','18','19','20','21'], query.select_values(:where => 'text_name LIKE "Agaricus%"').map(&:to_s))
+      agaricus = query.select_values(:select => 'text_name', :where => 'text_name LIKE "Agaricus%"').map(&:to_s)
       assert_equal(num_agaricus, agaricus.uniq.length)
       assert_equal(num_agaricus, agaricus.select {|x| x[0,8] == 'Agaricus'}.length)
 
-      assert_equal((1..num).map {|x| [x.to_s]}, query.select_rows)
-      assert_equal((1..num).map {|x| {'id' => x.to_s}}, query.select_all)
-      assert_equal({'id' => '1'}, query.select_one)
+      if RUBY_VERSION < '1.9'
+        assert_equal((1..num).map {|x| [x.to_s]}, query.select_rows)
+        assert_equal((1..num).map {|x| {'id' => x.to_s}}, query.select_all)
+        assert_equal({'id' => '1'}, query.select_one)
+      else
+        assert_equal((1..num).map {|x| [x]}, query.select_rows)
+        assert_equal((1..num).map {|x| {'id' => x}}, query.select_all)
+        assert_equal({'id' => 1}, query.select_one)
+      end
       assert_equal([@fungi], query.find_by_sql(:limit => 1))
       assert_equal(@agaricus.children.sort_by(&:id), query.find_by_sql(:where => 'text_name LIKE "Agaricus %"'))
     end
@@ -545,19 +553,19 @@ class QueryTest < UnitTestCase
     query = Query.lookup(:Observation)
     ids = query.result_ids
 
-    first = *query.instantiate([ids[0]])
+    first = query.instantiate([ids[0]]).first
     assert(!first.images.loaded?)
 
-    first = *query.instantiate([ids[0]], :include => :images)
+    first = query.instantiate([ids[0]], :include => :images).first
     assert(!first.images.loaded?)
 
     # Have to test it on a different one, because first is now cached.
-    second = *query.instantiate([ids[1]], :include => :images)
+    second = query.instantiate([ids[1]], :include => :images).first
     assert(second.images.loaded?)
 
     # Or we can clear out the cache and it will work...
     query.clear_cache
-    first = *query.instantiate([ids[0]], :include => :images)
+    first = query.instantiate([ids[0]], :include => :images).first
     assert(first.images.loaded?)
   end
 
@@ -1320,6 +1328,13 @@ class QueryTest < UnitTestCase
 
   def test_name_all
     expect = Name.all(:order => 'text_name, author')
+
+    # Mysql and ruby sort "Kuhner" and "Kühner" oppositely.
+    pair = expect.select {|x| x.text_name == 'Lentinellus ursinus'}
+    a = expect.index(pair.first)
+    b = expect.index(pair.last)
+    expect[a], expect[b] = expect[b], expect[a]
+
     expect_good = expect.reject(&:is_misspelling?)
     expect_bad  = expect.select(&:is_misspelling?)
     assert_query(expect_good, :Name, :all)

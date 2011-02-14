@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Extensions to String
 #  == Class Methods
@@ -12,6 +13,7 @@
 #  tp_nodiv::       Textilize with paragraphs (no obj links, without div).
 #  tpl_nodiv::      Textilize with paragraphs and obj links, without div).
 #  ---
+#  gsub!::          Gobal replace in place.
 #  to_ascii::       Convert string from UTF-8 to plain ASCII.
 #  iconv::          Convert string from UTF-8 to 'charset'.
 #  strip_html::     Remove HTML tags (not entities) from string.
@@ -535,6 +537,15 @@ class String
       i = alphabet.index(char)
       raise "Character not in alphabet: '#{char}'" if i.nil?
       num = num * len + i
+    end
+  end
+
+  # This method is missing from ruby 1.9.
+  if RUBY_VERSION >= '1.9'
+    def each
+      for x in self.split("\n")
+        yield x
+      end
     end
   end
 end

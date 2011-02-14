@@ -105,5 +105,36 @@ module Rails
   end
 end
 
+################################################################################
+# Stuff to get rails 2.1.1 working with ruby 1.9.  This must be done before
+# booting rails.  Essentially, I'm just trying to make ruby 1.9 minimally
+# backwards compatible for the purposes of getting rails 2 to boot.
+# -Jason, Feb 2011
+
+if RUBY_VERSION >= '1.9'
+  # Deprecated in ruby 1.9. Rational() is roughly equivalent.
+  class Rational
+    def self.new!(*args)   # (used by active_support/vendor/tzinfo)
+      Rational(*args)
+    end
+  end
+
+  # This method isn't actually ever used, but it is aliased, so it must exist.
+  class StringIO < Data
+    attr_accessor :path
+  end
+
+  # This is a fix the constant autoloader.  Class.parent.name now returns nil if
+  # no superclass.  The autoloader splits parent.name on '::'.  There's no way to
+  # overload the splitter, thus I just convince nil.split() to return [] instead.
+  class NilClass
+    def split(*args)
+      []
+    end
+  end
+end
+
+################################################################################
+
 # All that for this:
 Rails.boot!

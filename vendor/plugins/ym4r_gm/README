@@ -366,8 +366,39 @@ Here is an example that will display a marker on Paris:
 You could also have performed the geocoding on the client side with the following code, which is functionnality equivalent to the code above:
 	GMarker.new("Rue Clovis Paris",:info_window => "Rue Clovis Paris")
 
+===Local Search
+Local Search control has been added to the map and control objects. There are two places you need to implement it to get it to work. This is because the local search control needs an additional library added to the import as well as the control added to the map.
+
+In your controller, you add ':local_search => true' to the @map.control_init like this:
+@map = GMap.new("map_div")
+@map.control_init(:large_map => true, :map_type => true, :local_search => true)
+
+And in your view, you pass ':local_search => true' to the GMap.header like this:
+<%= GMap.header(:local_search => true) %>
+<%= @map.to_html %>
+<%= @map.div(:width => 600, :height => 400) %>
+
+You can pass options to the control_init as well. They are:
+:anchor => [:bottom_left (default), :bottom_right, :top_left, :top_right] 
+:offset_width => 10 (default)
+:offset_height => 20 (default)
+:local_search_options => "{suppressZoomToBounds : true, 
+													resultList : google.maps.LocalSearch.RESULT_LIST_INLINE, 
+													suppressInitialResultSelection : true, 
+													searchFormHint : 'Local Search powered by Google', 
+													linkTarget : GSearch.LINK_TARGET_BLANK}"
+
+So if you wanted the local search control to be at the bottom right of the map, 30 pixel in from the right and 20 pixels above the bottom and some local search options it would look like this:
+@map.control_init(:large_map => true, :map_type => true, :local_search => true, :anchor => :bottom_right, :offset_width => 30, :offset_height => 20, :local_search_options => "{suppressZoomToBounds : true, resultList : google.maps.LocalSearch.RESULT_LIST_INLINE, suppressInitialResultSelection : true, searchFormHint : 'Local Search powered by Google', linkTarget : GSearch.LINK_TARGET_BLANK}")
+
+==Sensor
+Google now requires the 'sensor' attribute in the GET API request. It is defaulted to 'false', but if you are writing an application for one of the new cellphones with GPS out there then you can enable it by using the following call:
+
+<%= GMap.header :sensor => true %>
 
 ==Recent changes
+- 'sensor' added to GET URL per Google API Terms of Use. 'false' by default.
+- Local Search overlay added. See above for implementation.
 - GMarker can now be placed by address (in addition to coordinates). Some code to geocode the address when the marker is initialized is added
 - Addition of a +center_zoom_on_points_init+ to center and zoom on a group of pixel
 - In JS, addition of methods to GMap2 and GMarkerGroup to center and zoom on a group of points or markers (thanks to Glen Barnes)

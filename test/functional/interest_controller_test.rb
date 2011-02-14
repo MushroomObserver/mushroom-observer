@@ -1,12 +1,12 @@
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class InterestControllerTest < FunctionalTestCase
 
   # Test list feature from left-hand column.
   def test_list_interests
     login('rolf')
-    Interest.create(:object => observations(:minimal_unknown), :user => @rolf, :state => true)
-    Interest.create(:object => names(:agaricus_campestris), :user => @rolf, :state => true)
+    Interest.create(:target => observations(:minimal_unknown), :user => @rolf, :state => true)
+    Interest.create(:target => names(:agaricus_campestris), :user => @rolf, :state => true)
     get_with_dump(:list_interests)
     assert_response('list_interests')
   end
@@ -42,7 +42,7 @@ class InterestControllerTest < FunctionalTestCase
     # Make sure rolf now has one Interest: interested in minimal_unknown.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
     assert_equal(1, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.object)
+    assert_equal(minimal_unknown, rolfs_interests.first.target)
     assert_equal(true, rolfs_interests.first.state)
 
     # Succeed: Turn same interest off.
@@ -53,7 +53,7 @@ class InterestControllerTest < FunctionalTestCase
     # Make sure rolf now has one Interest: NOT interested in minimal_unknown.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
     assert_equal(1, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.object)
+    assert_equal(minimal_unknown, rolfs_interests.first.target)
     assert_equal(false, rolfs_interests.first.state)
 
     # Succeed: Turn another interest off from no interest.
@@ -64,9 +64,9 @@ class InterestControllerTest < FunctionalTestCase
     # Make sure rolf now has two Interests.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
     assert_equal(2, rolfs_interests.length)
-    assert_equal(minimal_unknown, rolfs_interests.first.object)
+    assert_equal(minimal_unknown, rolfs_interests.first.target)
     assert_equal(false, rolfs_interests.first.state)
-    assert_equal(peltigera, rolfs_interests.last.object)
+    assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
 
     # Succeed: Delete interest in existing object that rolf hasn't expressed interest in yet.
@@ -83,7 +83,7 @@ class InterestControllerTest < FunctionalTestCase
     # Make sure rolf now has one Interest: NOT interested in peltigera.
     rolfs_interests = Interest.find_all_by_user_id(@rolf.id)
     assert_equal(1, rolfs_interests.length)
-    assert_equal(peltigera, rolfs_interests.last.object)
+    assert_equal(peltigera, rolfs_interests.last.target)
     assert_equal(false, rolfs_interests.last.state)
 
     # Succeed: Delete last interest.

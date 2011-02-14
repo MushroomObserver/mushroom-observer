@@ -44,8 +44,8 @@ class Project < AbstractModel
   belongs_to :user
   belongs_to :user_group
 
-  has_many :comments,  :as => :object, :dependent => :destroy
-  has_many :interests, :as => :object, :dependent => :destroy
+  has_many :comments,  :as => :target, :dependent => :destroy
+  has_many :interests, :as => :target, :dependent => :destroy
 
   before_destroy :orphan_drafts
 

@@ -21,9 +21,9 @@ xml.comment(
 
   if refs
     xml.object do
-      type = object.object_type.to_s.underscore.to_sym
+      type = object.target_type.to_s.underscore.to_sym
       render_xml_partial(xml, type, :locals => {
-        :object => object.object,
+        :object => object.target,
         :detail => false,
       })
     end

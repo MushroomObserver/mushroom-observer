@@ -18,7 +18,7 @@
 #  == Instance methods
 #
 #  calc_note::      Create body of the email we're about to send.
-#  object::         Return principle object involved.
+#  target::         Return principle object involved.
 #  summary::        String summarizing what this Notification is about.
 #  link_params::    Hash of link_to options for edit action.
 #  text_name::      Alias for +summary+ for debugging.
@@ -61,21 +61,21 @@ class Notification < AbstractModel
     end
   end
 
-  # Return principle object involved.  Again, this is different for each
+  # Return principle target involved.  Again, this is different for each
   # flavor:
   #
   # name::   Name that User is tracking.
   #
-  def object
+  def target
     result = nil
-    if @object
-      result = @object
+    if @target
+      result = @target
     else
       case self.flavor
       when :name
         result = Name.find(self.obj_id)
       end
-      @object = result
+      @target = result
     end
     result
   end
@@ -85,7 +85,7 @@ class Notification < AbstractModel
     result = "Unrecognized notification flavor"
     case self.flavor
     when :name
-      result = "#{:TRACKING.l} #{:name.l}: #{self.object ? self.object.display_name : '?'}"
+      result = "#{:TRACKING.l} #{:name.l}: #{self.target ? self.target.display_name : '?'}"
     end
     result
   end

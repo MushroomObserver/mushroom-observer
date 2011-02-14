@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+# encoding: utf-8
 
 require 'stringio'
 
@@ -1672,10 +1672,12 @@ module RTF
          text << "\n}"
 
          # Protect non-ASCII characters using "\uNNNx" notation.
-         text.string.gsub(/[^ -~\t\r\n]/) do |char|
+         x = text.string
+         x = x.encode('UTF-8') if x.respond_to?(:encode)
+         x.gsub(/[^ -~\t\r\n]/) do |char|
             safe = ASCII_EQUIVALENTS[char] || '?'
             begin
-               uni = *char.unpack('U')
+               uni = char.unpack('U').first
                uni -= 65536 if uni >= 32768
                '\\u' + uni.to_s + safe
             rescue

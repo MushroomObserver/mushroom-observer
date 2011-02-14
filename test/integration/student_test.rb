@@ -1,6 +1,6 @@
 # Test typical sessions of university student who is writing descriptions.
 
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class StudentTest < IntegrationTestCase
 

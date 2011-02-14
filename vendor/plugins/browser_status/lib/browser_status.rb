@@ -348,13 +348,13 @@ module BrowserStatus
     return true  if session[:js_override] == :on
     return false if !@js
     case @ua
-      when :ie:        @ua_version >= 5.5
-      when :firefox:   @ua_version >= 1.0
-      when :iceweasel: @ua_version >= 1.0
-      when :safari:    @ua_version >= 1.2
-      when :opera:     @ua_version >= 0.0
-      when :chrome:    @ua_version >= 0.0
-      when :netscape:  @ua_version >= 7.0
+      when :ie;        @ua_version >= 5.5
+      when :firefox;   @ua_version >= 1.0
+      when :iceweasel; @ua_version >= 1.0
+      when :safari;    @ua_version >= 1.2
+      when :opera;     @ua_version >= 0.0
+      when :chrome;    @ua_version >= 0.0
+      when :netscape;  @ua_version >= 7.0
       else             nil
     end
   end

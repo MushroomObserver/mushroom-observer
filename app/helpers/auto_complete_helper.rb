@@ -58,11 +58,11 @@ module ApplicationHelper::AutoComplete
       primer    = nil
       opts.each_pair do |key, val|
         case key
-        when :div_id:    div_id    = val
-        when :div_class: div_class = val
-        when :url:       url       = val
-        when :js_class:  js_class  = val
-        when :primer:    primer    = val
+        when :div_id;    div_id    = val
+        when :div_class; div_class = val
+        when :url;       url       = val
+        when :js_class;  js_class  = val
+        when :primer;    primer    = val
         else
           if !key.to_s.match(/^on/) &&
              !val.to_s.match(/^(\d+(\.\d+)?|true|false|null)$/)

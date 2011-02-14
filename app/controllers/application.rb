@@ -1261,7 +1261,7 @@ class ApplicationController < ActionController::Base
       when :by_user
         user = query.find_cached_parameter_instance(User, :user)
         :runtime_user_hasnt_created.t(:type => type, :user => user.legal_name)
-      when :for_object
+      when :for_target
         :runtime_index_no_for_object.t(:type => type)
       when :for_user
         user = query.find_cached_parameter_instance(User, :user)

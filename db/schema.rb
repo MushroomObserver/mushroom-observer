@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110206214103) do
+ActiveRecord::Schema.define(:version => 20110214110100) do
 
   create_table "authors_descriptions", :id => false, :force => true do |t|
     t.integer "description_id", :default => 0, :null => false
@@ -31,8 +31,8 @@ ActiveRecord::Schema.define(:version => 20110206214103) do
     t.integer  "user_id"
     t.string   "summary",     :limit => 100
     t.text     "comment"
-    t.string   "object_type", :limit => 30
-    t.integer  "object_id"
+    t.string   "target_type", :limit => 30
+    t.integer  "target_id"
     t.string   "sync_id",     :limit => 16
     t.datetime "modified"
   end
@@ -133,8 +133,8 @@ ActiveRecord::Schema.define(:version => 20110206214103) do
   end
 
   create_table "interests", :force => true do |t|
-    t.string   "object_type", :limit => 30
-    t.integer  "object_id"
+    t.string   "target_type", :limit => 30
+    t.integer  "target_id"
     t.integer  "user_id"
     t.boolean  "state"
     t.string   "sync_id",     :limit => 16
@@ -637,10 +637,10 @@ ActiveRecord::Schema.define(:version => 20110206214103) do
     t.boolean  "vertical_layout",                                                                                  :default => true,       :null => false
     t.integer  "license_id",                                                                                       :default => 3,          :null => false
     t.integer  "contribution",                                                                                     :default => 0
-    t.text     "notes",                                                                                                                    :null => false
+    t.text     "notes",                                                                                            :default => "",         :null => false
     t.integer  "location_id"
     t.integer  "image_id"
-    t.text     "mailing_address",                                                                                                          :null => false
+    t.text     "mailing_address",                                                                                  :default => "",         :null => false
     t.string   "locale",                       :limit => 5
     t.text     "bonuses"
     t.boolean  "email_comments_owner",                                                                             :default => true,       :null => false

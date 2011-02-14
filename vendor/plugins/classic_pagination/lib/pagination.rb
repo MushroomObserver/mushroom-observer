@@ -60,7 +60,8 @@ module ActionController
     unless const_defined?(:OPTIONS)
       # A hash holding options for controllers using macro-style pagination
       OPTIONS = Hash.new
-  
+    end
+    unless const_defined?(:DEFAULT_OPTIONS)
       # The default options for pagination
       DEFAULT_OPTIONS = {
         :class_name => nil,

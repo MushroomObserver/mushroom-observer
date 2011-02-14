@@ -4,12 +4,6 @@
 # explicitly, too.  (Although, I believe ApplicationController is always
 # loaded, no matter what you need(?)...) 
 
-require 'array_extensions'
-require 'enumerable_extensions'
-require 'fixnum_extensions'
-require 'form_builder_extensions'
-require 'hash_extensions'
-require 'object_extensions'
-require 'string_extensions'
-require 'symbol_extensions'
-require 'time_extensions'
+for file in Dir[File.expand_path('../*_extensions.rb', __FILE__)]
+  require_dependency file
+end

@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Email Handler
 #
@@ -111,28 +112,28 @@ class AccountMailer < ActionMailer::Base
 
   # Notify user of comment on their object.
   # sender::    User who posted the Comment.
-  # receiver::  Owner of object (or interested party).
-  # object::    Object that was commented upon.
+  # receiver::  Owner of target (or interested party).
+  # target::    Object that was commented upon.
   # comment::   Comment that triggered this email.
-  def comment(sender, receiver, object, comment)
+  def comment(sender, receiver, target, comment)
     @user                = receiver
     Locale.code          = @user.locale || DEFAULT_LOCALE
-    @subject             = :email_subject_comment.l(:name => object.unique_text_name)
+    @subject             = :email_subject_comment.l(:name => target.unique_text_name)
     @body['subject']     = @subject
     @body['user']        = @user
     @body['sender']      = sender
-    @body['object']      = object
+    @body['target']      = target
     @body['comment']     = comment
     @recipients          = @user.email
     @bcc                 = EXTRA_BCC_EMAIL_ADDRESSES
     @from                = NEWS_EMAIL_ADDRESS
-    @headers['Reply-To'] = (sender && receiver == object.user) ? sender.email : NOREPLY_EMAIL_ADDRESS
+    @headers['Reply-To'] = (sender && receiver == target.user) ? sender.email : NOREPLY_EMAIL_ADDRESS
     @content_type        = @user.email_html ? 'text/html' : 'text/plain'
     @subject             = '[MO] ' + @subject.to_ascii
     QueuedEmail.debug_log("MAIL comment " +
                           "from=#{sender.id} " +
                           "to=#{receiver.id} " +
-                          "object=#{object.type_tag}-#{object.id}")
+                          "object=#{target.type_tag}-#{target.id}")
   end
 
   # User asking user about an image.

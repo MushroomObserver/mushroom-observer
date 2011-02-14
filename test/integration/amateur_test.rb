@@ -1,7 +1,7 @@
 # Test typical sessions of amateur user who just posts the occasional comment,
 # observations, or votes.
 
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class AmateurTest < IntegrationTestCase
 
@@ -131,7 +131,7 @@ class AmateurTest < IntegrationTestCase
     assert_template('comment/add_comment')
 
     # (Make sure the form is for the correct object!)
-    assert_objs_equal(obs, assigns(:object))
+    assert_objs_equal(obs, assigns(:target))
     # (Make sure there is a tab to go back to show_observation.)
     assert_select("div#left_tabs a[href=/#{obs.id}]")
 

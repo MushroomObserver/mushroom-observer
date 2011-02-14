@@ -70,8 +70,8 @@ class NameDescription < Description
   belongs_to :reviewer, :class_name => 'User', :foreign_key => 'reviewer_id'
   belongs_to :user
 
-  has_many :comments,  :as => :object, :dependent => :destroy
-  has_many :interests, :as => :object, :dependent => :destroy
+  has_many :comments,  :as => :target, :dependent => :destroy
+  has_many :interests, :as => :target, :dependent => :destroy
 
   has_and_belongs_to_many :admin_groups,  :class_name => "UserGroup", :join_table => "name_descriptions_admins"
   has_and_belongs_to_many :writer_groups, :class_name => "UserGroup", :join_table => "name_descriptions_writers"

@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 require 'account_mailer'
 
 class AccountMailerTest < UnitTestCase

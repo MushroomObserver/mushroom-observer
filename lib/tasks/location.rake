@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :location do
 
   APPROVED_LOCATIONS = Set.new([
@@ -4043,8 +4045,8 @@ namespace :location do
   class AccentFixer
     def initialize(pattern, map)
       @pat = "01"
-      @pat[0] = pattern[0]
-      @pat[1] = pattern[1]
+      @pat[0] = pattern[0].to_s
+      @pat[1] = pattern[1].to_s
       @map = {}
       for k in map.keys()
         @map[k + @pat] = map[k]

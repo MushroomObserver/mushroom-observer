@@ -426,9 +426,9 @@ class AbstractQuery < ActiveRecord::Base
   #   #   -or- 'images.reviewer_id = users.id'
   #
   #   # Polymorphic join: (any field that doesn't end in "id")
-  #   join_conditions[:comments][:images] => :object
-  #   # Means: 'comments.object_id = images.id AND
-  #             comments.object_type = "Image"'
+  #   join_conditions[:comments][:images] => :target
+  #   # Means: 'comments.target_id = images.id AND
+  #             comments.target_type = "Image"'
   #
   superclass_delegating_accessor :join_conditions
   self.join_conditions = {}
@@ -1478,7 +1478,7 @@ class AbstractQuery < ActiveRecord::Base
       end
 
       # Calculate conditions.
-      if col == :obj || col == :object
+      if !col.to_s.match(/_id$/)
         conds = "#{from}.#{col}_id = #{to}.id AND " +
                 "#{from}.#{col}_type = '#{to.singularize.camelize}'"
       else

@@ -168,8 +168,8 @@ class Query < AbstractQuery
     :by_user => {
       :user => User,
     },
-    :for_object => {
-      :object => AbstractModel,
+    :for_target => {
+      :target => AbstractModel,
       :type   => :string,
     },
     :for_user => {
@@ -249,7 +249,7 @@ class Query < AbstractQuery
       :all,                   # All comments, by created.
       :by_user,               # Comments created by user, by created.
       :in_set,                # Comments in a given set.
-      :for_object,            # Comments on a given object, by created.
+      :for_target,            # Comments on a given object, by created.
       :for_user,              # Comments sent to user, by created.
       :pattern_search,        # Comments matching a pattern, by created.
     ],
@@ -367,12 +367,12 @@ class Query < AbstractQuery
   # Map each pair of tables to the foreign key name.
   self.join_conditions = {
     :comments => {
-      :location_descriptions => :object,
-      :locations     => :object,
-      :name_descriptions => :object,
-      :names         => :object,
-      :observations  => :object,
-      :projects      => :object,
+      :location_descriptions => :target,
+      :locations     => :target,
+      :name_descriptions => :target,
+      :names         => :target,
+      :observations  => :target,
+      :projects      => :target,
       :users         => :user_id,
     },
     :images => {
@@ -384,9 +384,9 @@ class Query < AbstractQuery
       :observations  => :observation_id,
     },
     :interests => {
-      :locations     => :object,
-      :names         => :object_id,
-      :observations  => :object_id,
+      :locations     => :target,
+      :names         => :target,
+      :observations  => :target,
       :users         => :user_id,
     },
     :location_descriptions => {
@@ -809,7 +809,7 @@ class Query < AbstractQuery
     initialize_model_do_time(:created)
     initialize_model_do_time(:modified)
     initialize_model_do_objects_by_id(:users)
-    initialize_model_do_type_list(:types, :object_type, Comment.all_types)
+    initialize_model_do_type_list(:types, :target_type, Comment.all_types)
     initialize_model_do_search(:summary_has, :summary)
     initialize_model_do_search(:content_has, :comment)
   end
@@ -1242,8 +1242,8 @@ class Query < AbstractQuery
         other = types.include?('raw')
         types -= ['raw']
         types = types.map {|x| mimes[exts.index(x)]}
-        str1 = "comments.object_type IN ('#{types.join("','")}')"
-        str2 = "comments.object_type NOT IN ('#{mimes.join("','")}')"
+        str1 = "comments.target_type IN ('#{types.join("','")}')"
+        str2 = "comments.target_type NOT IN ('#{mimes.join("','")}')"
         if types.empty?
           self.where << str2
         elsif other
@@ -1404,15 +1404,15 @@ class Query < AbstractQuery
     end
   end
 
-  def initialize_for_object
+  def initialize_for_target
     type = params[:type].to_s.constantize rescue nil
     if (!type.reflect_on_association(:comments) rescue true)
       raise "The model #{params[:type].inspect} does not support comments!"
     end
-    object = find_cached_parameter_instance(type, :object)
-    title_args[:object] = object.unique_format_name
-    self.where << "comments.object_id = '#{object.id}'"
-    self.where << "comments.object_type = '#{type.name}'"
+    target = find_cached_parameter_instance(type, :target)
+    title_args[:object] = target.unique_format_name
+    self.where << "comments.target_id = '#{target.id}'"
+    self.where << "comments.target_type = '#{type.name}'"
     params[:by] ||= 'created'
   end
 

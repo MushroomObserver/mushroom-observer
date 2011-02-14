@@ -100,7 +100,7 @@ class ApiController < ApplicationController
   def render_results(api)
     headers['Content-Type'] = 'application/xml'
 
-    @objects = api.objects
+    @results = api.results
     @errors  = api.errors
     @user    = api.user
     @query   = api.query

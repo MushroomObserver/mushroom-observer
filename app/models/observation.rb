@@ -122,8 +122,8 @@ class Observation < AbstractModel
   belongs_to :user
 
   has_many :votes
-  has_many :comments,  :as => :object, :dependent => :destroy
-  has_many :interests, :as => :object, :dependent => :destroy
+  has_many :comments,  :as => :target, :dependent => :destroy
+  has_many :interests, :as => :target, :dependent => :destroy
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!

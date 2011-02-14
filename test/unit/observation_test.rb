@@ -1,4 +1,6 @@
-require File.dirname(__FILE__) + '/../boot'
+# encoding: utf-8
+
+require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class ObservationTest < UnitTestCase
 
@@ -112,7 +114,7 @@ class ObservationTest < UnitTestCase
     User.current = @rolf
     new_comment = Comment.create(
       :summary => 'This is Rolf...',
-      :object  => obs
+      :target  => obs
     )
     assert_equal(0, QueuedEmail.count)
 
@@ -143,7 +145,7 @@ class ObservationTest < UnitTestCase
     User.current = @dick
     new_comment = Comment.create(
       :summary => 'This is Dick...',
-      :object  => observations(:coprinus_comatus_obs)
+      :target  => observations(:coprinus_comatus_obs)
     )
     assert_equal(0, QueuedEmail.count)
 
@@ -187,7 +189,7 @@ class ObservationTest < UnitTestCase
     User.current = @mary
     new_comment = Comment.create(
       :summary => 'This is Mary...',
-      :object  => obs
+      :target  => obs
     )
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
@@ -241,7 +243,7 @@ class ObservationTest < UnitTestCase
     User.current = @rolf
     new_comment = Comment.create(
       :summary => 'This is Rolf...',
-      :object  => observations(:coprinus_comatus_obs)
+      :target  => observations(:coprinus_comatus_obs)
     )
     assert_equal(4, QueuedEmail.count)
     assert_email(3,
@@ -274,14 +276,14 @@ class ObservationTest < UnitTestCase
 
     # Make Rolf ignore his own observation (will override prefs).
     Interest.create(
-      :object => obs,
+      :target => obs,
       :user   => @rolf,
       :state  => false
     )
 
     # But make Dick watch it (will override prefs).
     Interest.create(
-      :object => observations(:coprinus_comatus_obs),
+      :target => observations(:coprinus_comatus_obs),
       :user   => @dick,
       :state  => true
     )
@@ -291,7 +293,7 @@ class ObservationTest < UnitTestCase
     User.current = @mary
     new_comment = Comment.create(
       :summary => 'This is Mary...',
-      :object  => observations(:coprinus_comatus_obs)
+      :target  => observations(:coprinus_comatus_obs)
     )
     assert_equal(1, QueuedEmail.count)
     assert_email(0,
@@ -370,19 +372,19 @@ class ObservationTest < UnitTestCase
     obs = observations(:coprinus_comatus_obs)
 
     marys_interest = Interest.create(
-      :object => observations(:coprinus_comatus_obs),
+      :target => observations(:coprinus_comatus_obs),
       :user   => @mary,
       :state  => false
     )
 
     dicks_interest = Interest.create(
-      :object => observations(:coprinus_comatus_obs),
+      :target => observations(:coprinus_comatus_obs),
       :user   => @dick,
       :state  => false
     )
 
     katrinas_interest = Interest.create(
-      :object => observations(:coprinus_comatus_obs),
+      :target => observations(:coprinus_comatus_obs),
       :user   => @katrina,
       :state  => false
     )

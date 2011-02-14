@@ -1,6 +1,8 @@
+# encoding: utf-8
+
 # Test a few representative sessions of a power-user.
 
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class ExpertTest < IntegrationTestCase
 

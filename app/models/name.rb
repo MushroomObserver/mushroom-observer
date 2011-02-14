@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Name Model
 #
@@ -208,8 +209,8 @@ class Name < AbstractModel
   belongs_to :user
 
   has_many :descriptions, :class_name => 'NameDescription', :order => 'num_views DESC'
-  has_many :comments,  :as => :object, :dependent => :destroy
-  has_many :interests, :as => :object, :dependent => :destroy
+  has_many :comments,  :as => :target, :dependent => :destroy
+  has_many :interests, :as => :target, :dependent => :destroy
   has_many :namings
   has_many :observations
 
@@ -254,7 +255,7 @@ class Name < AbstractModel
        Name.connection.select_value(%(
          SELECT COUNT(*) FROM names_versions
          WHERE name_id = #{ver.name_id} AND user_id = #{ver.user_id}
-       )) == '0'
+       )).to_s == '0'
       SiteData.update_contribution(:add, :names_versions)
     end
   end
@@ -1052,9 +1053,9 @@ class Name < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_object_type_and_object_id('Name',
+    for int in Interest.find_all_by_target_type_and_target_id('Name',
                                                               old_name.id)
-      int.object = self
+      int.target = self
       int.save
     end
 

@@ -1,4 +1,6 @@
-require File.dirname(__FILE__) + '/../boot'
+# encoding: utf-8
+
+require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class LocationTest < UnitTestCase
 
@@ -346,9 +348,9 @@ class LocationTest < UnitTestCase
 
     # Have Mary and Dick express interest, Rolf express disinterest, 
     # then have Dick change it again.  Mary should get an email.
-    Interest.create(:object => loc, :user => @rolf, :state => false)
-    Interest.create(:object => loc, :user => @mary, :state => true)
-    Interest.create(:object => loc, :user => @dick, :state => true)
+    Interest.create(:target => loc, :user => @rolf, :state => false)
+    Interest.create(:target => loc, :user => @mary, :state => true)
+    Interest.create(:target => loc, :user => @dick, :state => true)
 
     # email types:  author  editor  all     interest
     # 1 Rolf:       x       x       .       no

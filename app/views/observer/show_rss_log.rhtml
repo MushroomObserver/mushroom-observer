@@ -18,9 +18,9 @@
   </table>
 <% end %>
 
-<%= if object = @rss_log.object
-  link_to(:show_object.t(:type => object.type_tag),
-          :controller => object.show_controller,
-          :action => object.show_action, :id => object.id,
+<%= if target = @rss_log.target
+  link_to(:show_object.t(:type => target.type_tag),
+          :controller => target.show_controller,
+          :action => target.show_action, :id => target.id,
           :params => query_params)
 end %>

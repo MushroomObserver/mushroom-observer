@@ -117,7 +117,6 @@
 
 class ObserverController < ApplicationController
   require 'find'
-  require 'ftools'
   require 'set'
 
   require_dependency 'refine_search'

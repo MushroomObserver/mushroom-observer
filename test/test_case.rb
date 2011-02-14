@@ -46,9 +46,9 @@ class Test::Unit::TestCase
   # Makes debugging complex interactions absolutely impossible.  Honestly,
   # isn't the world random enough as it is??  Who thought this was a good
   # idea??
-  def self.test_order
-    :not_random!
-  end
+  # def self.test_order
+  #   :not_random!
+  # end
 
   # Standard setup to run before every test.  Sets the locale, timezone,
   # and makes sure User doesn't think a user is logged in.  It also

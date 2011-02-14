@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'stringio'
-require 'parsedate'
+# require 'parsedate'
 
 module RTF
    # This class represents an information group for a RTF document.
@@ -56,13 +56,15 @@ module RTF
          if setting.instance_of?(Time)
             @created = setting
          else
-            datetime = ParseDate::parsedate(setting.to_s)
+            datetime = Time.parse(setting.to_s)
+            # datetime = ParseDate::parsedate(setting.to_s)
             if datetime == nil
                RTFError.fire("Invalid document creation date/time information "\
                              "specified.")
             end
-            @created = Time.local(datetime[0], datetime[1], datetime[2],
-                                  datetime[3], datetime[4], datetime[5])
+            @created = datetime
+            # @created = Time.local(datetime[0], datetime[1], datetime[2],
+            #                       datetime[3], datetime[4], datetime[5])
          end
       end
 

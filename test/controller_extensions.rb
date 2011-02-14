@@ -450,7 +450,9 @@ module ControllerExtensions
   def assert_form_action(url_opts, msg=nil)
     clean_our_backtrace do
       url_opts[:only_path] = true if url_opts[:only_path].nil?
-      url = URI.unescape(@controller.url_for(url_opts))
+      url = @controller.url_for(url_opts)
+      url.force_encoding('UTF-8') if url.respond_to?(:force_encoding)
+      url = URI.unescape(url)
       # Find each occurrance of <form action="blah" method="post">.
       found_it = false
       found = {}

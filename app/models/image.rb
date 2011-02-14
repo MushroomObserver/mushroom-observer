@@ -204,6 +204,8 @@
 #
 ################################################################################
 
+require 'fileutils'
+
 class Image < AbstractModel
   has_and_belongs_to_many :observations
   has_many :thumb_clients, :class_name => "Observation", :foreign_key => "thumb_image_id"
@@ -556,7 +558,7 @@ class Image < AbstractModel
     if !File.rename(upload_temp_file, original_image)
       raise(SystemCallError, "Try again.")
     end
-    File.chmod(0644, original_image)
+    FileUtils.chmod(0644, original_image)
     return true
   rescue SystemCallError
     if !system('cp', upload_temp_file, original_image)

@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Species List Controller
 #
@@ -463,8 +464,8 @@ class SpeciesListController < ApplicationController
       end
     end.join("\r\n")
     str = case charset
-      when 'ASCII': str.to_ascii
-      when 'UTF-8': "\xEF\xBB\xBF" + str
+      when 'ASCII'; str.to_ascii
+      when 'UTF-8'; "\xEF\xBB\xBF" + str
       else str.iconv(charset)
     end
     send_data(str,
@@ -486,9 +487,11 @@ class SpeciesListController < ApplicationController
       end
     end
     str = case charset
-      when 'UTF-8': str
-      when 'ASCII': str.to_ascii
-      else str.iconv(charset)
+      when 'UTF-8'; str
+      when 'ASCII'; str.to_ascii
+      else
+        str.force_encoding('UTF-8') if str.respond_to?(:force_encoding)
+        str.iconv(charset)
     end
     send_data(str,
       :type => "text/csv; charset=#{charset}; header=present",

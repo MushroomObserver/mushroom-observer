@@ -1,5 +1,5 @@
 <%
-  type = @comment.object_type
+  type = @comment.target_type
   type_sym = type.downcase.to_sym
 
   # Tricky bit of logic to determine what kind of email is being sent here.  If
@@ -20,8 +20,8 @@
   # off email_comments_owner will not prevent non-owner from getting them.
   # Interest confuses the whole issue, of course, since it overrides these
   # two prefs.
-  is_owner = (@user == @comment.object.user)
-  recipients_comments = Comment.find_all_by_object_type_and_object_id_and_user_id(@comment.object_type, @comment.object_id, @user.id)
+  is_owner = (@user == @comment.target.user)
+  recipients_comments = Comment.find_all_by_target_type_and_target_id_and_user_id(@comment.target_type, @comment.target_id, @user.id)
   comments_before_this_comment = recipients_comments.select {|c| c.created < @comment.created}
   is_response = (!is_owner && comments_before_this_comment.length > 0)
   # print "is_owner = #{is_owner}\n"
@@ -29,14 +29,14 @@
   # print "coms_bef = #{comments_before_this_comment.length}\n"
   # print "response = #{is_response}\n"
 
-  watching = @user.watching?(@object)
+  watching = @user.watching?(@target)
   email_type = is_response ? 'response' :
                is_owner    ? 'owner'    : 'all'
 
   intro = is_owner ?    :email_comment_intro_to_owner :
           is_response ? :email_comment_intro_response :
                         :email_comment_intro_other
-  intro = intro.l(:type => type_sym, :name => @object.unique_format_name)
+  intro = intro.l(:type => type_sym, :name => @target.unique_format_name)
 
   fields = ""
   fields += "*#{:Created.l}:* #{@comment.created.email_time}\n"
@@ -53,11 +53,11 @@
 
   links = []
   links.push([:email_links_show_object.l(:type => type_sym),
-    "#{HTTP_DOMAIN}/#{@object.show_controller}/#{@object.show_action}/#{@object.id}"])
+    "#{HTTP_DOMAIN}/#{@target.show_controller}/#{@target.show_action}/#{@target.id}"])
   links.push([:email_links_post_comment.l,
-    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@comment.object_id}&type=#{@comment.object_type}"])
+    "#{HTTP_DOMAIN}/comment/add_comment?id=#{@comment.target_id}&type=#{@comment.target_type}"])
   links.push([:email_links_not_interested.l(:type => type_sym),
-    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@comment.object_id}&type=#{@comment.object_type}&user=#{@user.id}&state=-1"])
+    "#{HTTP_DOMAIN}/interest/set_interest?id=#{@comment.target_id}&type=#{@comment.target_type}&user=#{@user.id}&state=-1"])
   links.push([:email_links_stop_sending.l,
     "#{HTTP_DOMAIN}/account/no_email_comments_#{email_type}/#{@user.id}"]) unless watching
   links.push([:email_links_change_prefs.l,

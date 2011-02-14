@@ -1257,13 +1257,13 @@ class NameController < ApplicationController
   def post_comment(action, name, message)
     summary = :"name_#{action}_comment_summary".l
     comment = Comment.create!(
-      :object  => name,
+      :target  => name,
       :summary => summary,
       :comment => message
     )
     Transaction.post_comment(
       :id      => comment,
-      :object  => name,
+      :target  => name,
       :summary => summary,
       :comment => message
     )

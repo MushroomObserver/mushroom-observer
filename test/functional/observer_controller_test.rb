@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class ObserverControllerTest < FunctionalTestCase
 
@@ -2082,7 +2082,7 @@ class ObserverControllerTest < FunctionalTestCase
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.create(:object => minimal_unknown, :user => @rolf, :state => true)
+    Interest.create(:target => minimal_unknown, :user => @rolf, :state => true)
     get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -2096,7 +2096,7 @@ class ObserverControllerTest < FunctionalTestCase
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.create(:object => minimal_unknown, :user => @rolf, :state => false)
+    Interest.create(:target => minimal_unknown, :user => @rolf, :state => false)
     get(:show_observation, :id => minimal_unknown.id)
     assert_response(:success)
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,

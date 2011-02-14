@@ -1,5 +1,5 @@
 <%
-  @title = :comment_edit_title.t(:name => @object.unique_format_name)
+  @title = :comment_edit_title.t(:name => @target.unique_format_name)
 
   new_tab_set do
     add_tab(:cancel_and_show.t(:type => :comment), :action => 'show_comment',
@@ -12,5 +12,5 @@
   <br/><center><%= submit_tag :SAVE_EDITS.l %></center>
   <%= render(:partial => 'form_comments') %>
   <br/><hr align="center" width="90%" />
-  <%= render(:partial => 'object', :object => @comment.object) %>
+  <%= render(:partial => 'object', :object => @comment.target) %>
 <% end %>

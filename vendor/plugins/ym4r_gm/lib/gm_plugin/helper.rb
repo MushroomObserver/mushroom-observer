@@ -39,3 +39,34 @@ Ym4r::GmPlugin::GPolygon.class_eval do
   end
 end
 
+Ym4r::GmPlugin::GPolylineEncoded.class_eval do
+  def self.from_georuby(line_string, color = nil, weight = nil, opacity = nil)
+    encoded_points = GMapPolylineEncoder.new.encode(
+      line_string.points.collect {|p| [p.y, p.x]})
+    GPolylineEncoded.new(
+      :points => encoded_points[:points],
+      :levels => encoded_points[:levels],
+      :num_levels => encoded_points[:numLevels],
+      :zoom_factor => encoded_points[:zoomFactor],
+      :color => color,
+      :weight => weight,
+      :opacity => opacity
+    )
+  end
+end
+
+Ym4r::GmPlugin::GPolygonEncoded.class_eval do
+  def self.from_georuby(ls_or_p, stroke_color="#000000",stroke_weight=1,stroke_opacity=1.0,color="#ff0000",opacity=1.0)
+    if ls_or_p.is_a?(GeoRuby::SimpleFeatures::LineString)
+      GPolygonEncoded.new(
+        GPolylineEncoded.from_georuby(ls_or_p, stroke_color, stroke_weight, stroke_opacity), 
+        color.nil?, color, opacity, stroke_weight > 0)
+    else
+      polylines = ls_or_p.rings.collect do |line_string|
+        GPolylineEncoded.from_georuby(line_string, stroke_color, 
+          stroke_weight, stroke_opacity)
+      end
+      GPolygonEncoded.new(polylines, true, color, opacity, true)
+    end
+  end
+end

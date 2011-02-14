@@ -1,13 +1,13 @@
 <%
-  flash_error(@error) if @error and (!@objects or @objects.empty?)
+  flash_error(@error) if @error and (!@targets or @targets.empty?)
 %>
 
 <% paginate_block(@pages) do %>
-  <% if @objects.length > 0 %>
+  <% if @targets.length > 0 %>
     <table cellpadding="5" cellspacing="0" width="100%">
       <% odd_or_even = 0
-      for item in @objects
-        obj = item.object
+      for item in @targets
+        obj = item.target
         odd_or_even = 1 - odd_or_even %>
         <tr valign="top" class="ListLine<%= odd_or_even %>">
           <td>
@@ -31,11 +31,11 @@
               <% end %>
               <%= link_to(item.state ? :list_interests_turn_off.t : :list_interests_turn_on.t,
                           :controller => 'interest', :action => 'set_interest',
-                          :type => item.object_type, :id => item.object_id,
+                          :type => item.target_type, :id => item.target_id,
                           :state => item.state ? -1 : 1) %> |
               <%= link_to(:DESTROY.t, :controller => 'interest',
-                          :action => 'set_interest', :type => item.object_type,
-                          :id => item.object_id, :state => 0) %>
+                          :action => 'set_interest', :type => item.target_type,
+                          :id => item.target_id, :state => 0) %>
             <% end %>
           </td>
         </tr>

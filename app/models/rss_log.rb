@@ -122,7 +122,7 @@
 #  add_with_date::      Same, but adds timestamp.
 #  orphan::             About to delete object: add notes, clear association.
 #  orphan_title::       Get old title from top line of orphaned log.
-#  object::             Return owner object: Observation, Name, etc.
+#  target::             Return owner object: Observation, Name, etc.
 #  text_name::          Return title string of associated object.
 #  format_name::        Return formatted title string of associated object.
 #  unique_text_name::   (same, with id tacked on to make unique)
@@ -149,7 +149,7 @@ class RssLog < AbstractModel
   end
 
   # Returns the associated object, or nil if it's an orphan.
-  def object
+  def target
     location || name || observation || project || species_list
   end
 
@@ -167,8 +167,8 @@ class RssLog < AbstractModel
 
   # Returns plain text title of the associated object.
   def text_name
-    if object
-      object.text_name
+    if target
+      target.text_name
     else
       orphan_title.t.html_to_ascii.sub(/ (\d+)$/, '')
     end
@@ -176,8 +176,8 @@ class RssLog < AbstractModel
 
   # Returns plain text title of the associated object, with id tacked on.
   def unique_text_name
-    if object
-      object.unique_text_name
+    if target
+      target.unique_text_name
     else
       orphan_title.t.html_to_ascii
     end
@@ -185,8 +185,8 @@ class RssLog < AbstractModel
 
   # Returns formatted title of the associated object.
   def format_name
-    if object
-      object.format_name
+    if target
+      target.format_name
     else
       orphan_title.sub(/ (\d+)$/, '')
     end
@@ -194,8 +194,8 @@ class RssLog < AbstractModel
 
   # Returns formatted title of the associated object, with id tacked on.
   def unique_format_name
-    if object
-      object.unique_format_name
+    if target
+      target.unique_format_name
     else
       orphan_title
     end
@@ -288,7 +288,7 @@ class RssLog < AbstractModel
   def parse_log(cutoff_time=nil)
     first = true
     results = []
-    for line in notes.to_s
+    for line in notes.to_s.split("\n")
       if first && !line.match(/^\d{14}/)
         tag  = :log_orphan
         args = { :title => self.class.unescape(line) }
@@ -350,7 +350,7 @@ private
 
   # Protect special characters (whitespace) in string for log encoder/decoder.
   def self.escape(str)
-    str.to_s.gsub(/[%\s]/) { '%%%02X' % $&[0] }
+    str.to_s.gsub(/[%\s]/) { '%%%02X' % $&[0].ord }
   end
 
   # Reverse protection of special characters in string for log encoder/decoder.

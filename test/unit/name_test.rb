@@ -1,4 +1,6 @@
-require File.dirname(__FILE__) + '/../boot'
+# encoding: utf-8
+
+require File.expand_path(File.dirname(__FILE__) + '/../boot.rb')
 
 class NameTest < UnitTestCase
 
@@ -837,7 +839,7 @@ class NameTest < UnitTestCase
     )
 
     # Have Katrina express disinterest.
-    Interest.create(:object => name, :user => @katrina, :state => false)
+    Interest.create(:target => name, :user => @katrina, :state => false)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .
@@ -877,7 +879,7 @@ class NameTest < UnitTestCase
     )
 
     # Mary expresses interest.
-    Interest.create(:object => name, :user => @mary, :state => true)
+    Interest.create(:target => name, :user => @mary, :state => true)
 
     # email types:  author  editor  review  all     interest
     # 1 Rolf:       x       .       x       .       .

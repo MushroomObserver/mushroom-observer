@@ -7,5 +7,6 @@ require 'gm_plugin/overlay'
 require 'gm_plugin/layer'
 require 'gm_plugin/helper'
 require 'gm_plugin/geocoding'
+require 'gm_plugin/encoder'
 
 include Ym4r::GmPlugin

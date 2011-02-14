@@ -1,27 +1,27 @@
 <%
-  @title = :comment_show_title.t(:name => @object.unique_format_name)
-  object_type = @comment.object_type_localized
+  @title = :comment_show_title.t(:name => @target.unique_format_name)
+  target_type = @comment.target_type_localized
 
   # Register pertinent names so that Textile know what the "G." in "_G.
   # species_" stands for.  Include all proposed names, because there's no
   # telling which names will be referred to in the comment.  Likewise, include
   # all synonyms if commenting on taxonomy of Name. 
-  if @comment.object_type == 'Observation'
-    for naming in @comment.object.namings
+  if @comment.target_type == 'Observation'
+    for naming in @comment.target.namings
       Textile.register_name(naming.name)
     end
-    Textile.register_name(@comment.object.name)
-  elsif @comment.object_type == 'Name'
-    for name in @comment.object.synonyms
+    Textile.register_name(@comment.target.name)
+  elsif @comment.target_type == 'Name'
+    for name in @comment.target.synonyms
       Textile.register_name(name)
     end
-    Textile.register_name(@comment.object)
+    Textile.register_name(@comment.target)
   end
 
   new_tab_set do
-    add_tab(:comment_show_show.t(:type => object_type),
-            :controller => @object.show_controller,
-            :action => @object.show_action, :id => @object.id,
+    add_tab(:comment_show_show.t(:type => target_type),
+            :controller => @target.show_controller,
+            :action => @target.show_action, :id => @target.id,
             :params => query_params)
     if check_permission(@comment.user_id)
       add_tab(:comment_show_edit.t,

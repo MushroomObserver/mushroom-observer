@@ -122,13 +122,25 @@ class Symbol
   #
   def localize(args={}, level=[])
     capitalize_result = false
-    unless (@@test and (
-             (result = args[self]) or 
-             ((result = args[downcase]) and (capitalize_result = true))
-           )) or (
-             (result = Globalite.localize(self, nil, {})) or
-             ((result = Globalite.localize(downcase, nil, {})) and (capitalize_result = true))
-           )
+
+    found = false
+    if @@test
+      if result = args[self]
+        found = true
+      elsif result = args[downcase]
+        capitalize_result = true
+        found = true
+      end
+    else
+      if result = Globalite.localize(self, nil, {})
+        found = true
+      elsif result = Globalite.localize(downcase, nil, {})
+        capitalize_result = true
+        found = true
+      end
+    end
+
+    if !found
       if TESTING
         @@missing_tags << self if defined?(@@missing_tags)
       end

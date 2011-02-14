@@ -7,8 +7,8 @@ minimal_comment:
   user_id: 1
   summary: A comment on minimal unknown
   comment: Wow!  That's really cool
-  object_type: Observation
-  object_id: 1
+  target_type: Observation
+  target_id: 1
 
 another_comment:
   id: 2
@@ -17,8 +17,8 @@ another_comment:
   user_id: 4
   summary: Let's _try_ a more "complicated" comment.
   comment: "With _Agaricus campestris_ links and *boldface* and\n4x4 other weird(tm) !image 2! stuff.\n\nJust to test html_to_ascii...  -A&P"
-  object_type: Observation
-  object_id: 1
+  target_type: Observation
+  target_id: 1
 
 detailed_unknown_comment:
   id: 3
@@ -27,5 +27,5 @@ detailed_unknown_comment:
   user_id: 2
   summary: Let's give detailed_unknown a little of everything.
   comment: ''
-  object_type: Observation
-  object_id: 2
+  target_type: Observation
+  target_id: 2

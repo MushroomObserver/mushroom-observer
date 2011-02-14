@@ -34,9 +34,9 @@
 
 <% paginate_block(@pages) do %>
   <% make_matrix(@objects, :width => '100%') do |rss_log|
-    object = rss_log.object
-    if object %>
-      <%= render(:partial => object.type_tag.to_s, :object => object,
+    target = rss_log.target
+    if target %>
+      <%= render(:partial => target.type_tag.to_s, :object => target,
                  :locals => { :rss_log => rss_log }) %>
     <% else %>
       <%= render(:partial => 'rss_log', :object => rss_log) %>

@@ -19,29 +19,29 @@
 #  1. Add to +all_types+ Array in this file.
 #  2. Add +has_many+ relationships to the model:
 #
-#       has_many :comments,  :as => :object, :dependent => :destroy
-#       has_many :interests, :as => :object, :dependent => :destroy
+#       has_many :comments,  :as => :target, :dependent => :destroy
+#       has_many :interests, :as => :target, :dependent => :destroy
 #
 #  3. Add interest "eyes" to the header section of the show_object view:
 #
-#       draw_interest_icons(@object)
+#       draw_interest_icons(@target)
 #
 #  4. Add show_comments partial at the bottom of the show_object view:
 #
 #       <%= render(:partial => 'comment/show_comments', :locals =>
-#             { :object => @object, :controls => true, :limit => nil }) %>
+#             { :target => @target, :controls => true, :limit => nil }) %>
 #
 #  5. Tell comment/_object shared view how to display the object (used to
 #     embed info about object while user is posting/editing a comment):
 #
 #       when 'YourModel'
-#         render(:partial => 'model/model', :object => object)
+#         render(:partial => 'model/model', :target => target)
 #
 #  6. Tell Query how to do the polymorphic join (optional):
 #
 #       self.join_conditions => {
 #         :comments => {
-#           :new_table => :object,
+#           :new_table => :target,
 #         }
 #       }
 #
@@ -52,14 +52,14 @@
 #  created::   Date/time it was first created.
 #  modified::  Date/time it was last modified.
 #  user::      User that created it.
-#  object::    Object it is attached to.
+#  target::    Object it is attached to.
 #  summary::   Summary line (100 chars).
 #  comment::   Full text (any length).
 #
 #  == Instance Methods
 #
 #  text_name::              Alias for +summary+ for debugging.
-#  object_type_localized::  Translate the name of the object type it's attached to.
+#  target_type_localized::  Translate the name of the object type it's attached to.
 #
 #  ==== Logging
 #  log_create::             Log creation on object's log if it can.
@@ -73,29 +73,29 @@
 #
 #  ActiveRecord accomplishes polymorphism by storing the object _type_ along
 #  side the usual object _id_.  So, while there are the convenience wrappers
-#  +object+ and +object=+ that hide this detail, underneath there are actually
+#  +target+ and +target=+ that hide this detail, underneath there are actually
 #  two columns in the database table:
 #
-#  object_type::  Class name of object (string).
-#  object_id::    Id of object (integer).
+#  target_type::  Class name of object (string).
+#  target_id::    Id of object (integer).
 #
 #  Note that most of ActiveRecord's magic continues to work:
 #
 #    # Find first comment attached to an observation.
-#    Comment.find_by_object(observation)
+#    Comment.find_by_target(observation)
 #
 #    # Have we changed the object reference (either type or id)?
-#    comment.object_changed?
+#    comment.target_changed?
 #
 ################################################################################
 
 class Comment < AbstractModel
-  belongs_to :object, :polymorphic => true
+  belongs_to :target, :polymorphic => true
   belongs_to :user
 
   after_create :notify_users
 
-  # Returns Array of all valid +object_type+ values (Symbol's).
+  # Returns Array of all valid +target_type+ values (Symbol's).
   def self.all_types
     [ Location, Name, Observation, Project ]
   end
@@ -108,10 +108,10 @@ class Comment < AbstractModel
   # Returns the name of the object type, translated into the local language.
   # Returns '' if fails for any reason.  Equivalent to:
   #
-  #   comment.object_type.downcase.to_sym.l
+  #   comment.target_type.downcase.to_sym.l
   #
-  def object_type_localized
-    self.object_type.downcase.to_sym.l rescue ''
+  def target_type_localized
+    self.target_type.downcase.to_sym.l rescue ''
   end
 
   ##############################################################################
@@ -121,23 +121,23 @@ class Comment < AbstractModel
   ##############################################################################
 
   # Log creation of comment on object's RSS log if it can.
-  def log_create(object=self.object)
-    if object && object.respond_to?(:log)
-      object.log(:log_comment_added, :summary => summary, :touch => true)
+  def log_create(target=self.target)
+    if target && target.respond_to?(:log)
+      target.log(:log_comment_added, :summary => summary, :touch => true)
     end
   end
 
   # Log update of comment on object's RSS log if it can.
-  def log_update(object=self.object)
-    if object && object.respond_to?(:log)
-      object.log(:log_comment_updated, :summary => summary, :touch => false)
+  def log_update(target=self.target)
+    if target && target.respond_to?(:log)
+      target.log(:log_comment_updated, :summary => summary, :touch => false)
     end
   end
 
   # Log destruction of comment on object's RSS log if it can.
-  def log_destroy(object=self.object)
-    if object && object.respond_to?(:log)
-      object.log(:log_comment_destroyed, :summary => summary, :touch => false)
+  def log_destroy(target=self.target)
+    if target && target.respond_to?(:log)
+      target.log(:log_comment_destroyed, :summary => summary, :touch => false)
     end
   end
 
@@ -156,15 +156,15 @@ class Comment < AbstractModel
   # 4. users masochistic enough to want to be notified of _all_ comments
   #
   def notify_users
-    if object = self.object
+    if target = self.target
       sender = self.user
       recipients = []
 
       # Send to owner/authors if they want.
-      if object.respond_to?(:authors)
-        owners = object.authors || []
+      if target.respond_to?(:authors)
+        owners = target.authors || []
       else
-        owners = [object.user]
+        owners = [target.user]
       end
       for user in owners
         recipients.push(user) if user && user.email_comments_owner
@@ -177,14 +177,14 @@ class Comment < AbstractModel
 
       # Send to other people who have commented on this same object if they want.
       for other_comment in Comment.find(:all, :conditions =>
-          ['comments.object_type = ? AND comments.object_id = ? AND users.email_comments_response = TRUE',
-          object.class.to_s, object.id], :include => 'user')
+          ['comments.target_type = ? AND comments.target_id = ? AND users.email_comments_response = TRUE',
+          target.class.to_s, target.id], :include => 'user')
         recipients.push(other_comment.user)
       end
 
       # Send to people who have registered interest.
       # Also remove everyone who has explicitly said they are NOT interested.
-      for interest in Interest.find_all_by_object(object)
+      for interest in Interest.find_all_by_target(target)
         if interest.state
           recipients.push(interest.user)
         else
@@ -216,8 +216,8 @@ protected
       errors.add(:summary, :validate_comment_summary_too_long.t)
     end
 
-    if self.object_type.to_s.length > 30
-      errors.add(:object_type, :validate_comment_object_type_too_long.t)
+    if self.target_type.to_s.length > 30
+      errors.add(:target_type, :validate_comment_object_type_too_long.t)
     end
   end
 end

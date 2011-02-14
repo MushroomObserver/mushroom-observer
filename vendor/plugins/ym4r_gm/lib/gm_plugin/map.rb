@@ -25,27 +25,44 @@ module Ym4r
         GMap.header(:with_vml => with_vml)
       end
 
-      #Outputs the header necessary to use the Google Maps API, by including the JS files of the API, as well as a file containing YM4R/GM helper functions. By default, it also outputs a style declaration for VML elements. This default can be overriddent by passing <tt>:with_vml => false</tt> as option to the method. You can also pass a <tt>:host</tt> option in order to select the correct API key for the location where your app is currently running, in case the current environment has multiple possible keys. Usually, in this case, you should pass it <tt>@request.host</tt>. If you have defined only one API key for the current environment, the <tt>:host</tt> option is ignored. Finally you can override all the key settings in the configuration by passing a value to the <tt>:key</tt> key. Finally, you can pass a language for the map type buttons with the <tt>:hl</tt> option (possible values are: Japanese (ja), French (fr), German (de), Italian (it), Spanish (es), Catalan (ca), Basque (eu) and Galician (gl): no values means english)
+      #Outputs the header necessary to use the Google Maps API, by including the JS files of the API, as well as a file containing YM4R/GM helper functions. By default, it also outputs a style declaration for VML elements. This default can be overriddent by passing <tt>:with_vml => false</tt> as option to the method. You can also pass a <tt>:host</tt> option in order to select the correct API key for the location where your app is currently running, in case the current environment has multiple possible keys. Usually, in this case, you should pass it <tt>@request.host</tt>. If you have defined only one API key for the current environment, the <tt>:host</tt> option is ignored. Finally you can override all the key settings in the configuration by passing a value to the <tt>:key</tt> key. You can pass a language for the map type buttons with the <tt>:hl</tt> option (possible values are: Japanese (ja), French (fr), German (de), Italian (it), Spanish (es), Catalan (ca), Basque (eu) and Galician (gl): no values means english). Finally, you can pass <tt>:local_search => true</tt> to get the header css and js information needed for the local search control. If you do want local search you must also add <tt>:local_search => true</tt> to the @map.control_init method.
       def self.header(options = {})
         options[:with_vml] = true unless options.has_key?(:with_vml)
         options[:hl] ||= ''
+        options[:local_search] = false unless options.has_key?(:local_search)
+        options[:sensor] = false unless options.has_key?(:sensor)
+        options[:version] ||= "2.x"
         api_key = ApiKey.get(options)
-        a = "<script src=\"http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=#{api_key}&amp;hl=#{options[:hl]}\" type=\"text/javascript\"></script>\n"
-        a << "<script src=\"/javascripts/ym4r-gm.js\" type=\"text/javascript\"></script>\n" unless options[:without_js]
-        a << "<style type=\"text/css\">\n v\:* { behavior:url(#default#VML);}\n</style>" if options[:with_vml]
+        a = "<script src=\"http://maps.google.com/maps?file=api&amp;v=#{options[:version]}&amp;key=#{api_key}&amp;hl=#{options[:hl]}&amp;sensor=#{options[:sensor]}\" type=\"text/javascript\"></script>\n"
+        a << "<script src=\"#{ActionController::Base.relative_url_root}/javascripts/ym4r-gm.js\" type=\"text/javascript\"></script>\n" unless options[:without_js]
+        a << "<!--[if IE]>\n<style type=\"text/css\">\n v\\:* { behavior:url(#default#VML);}\n</style>\n<![endif]-->\n" if options[:with_vml]
+        a << "<script src=\"http://www.google.com/uds/api?file=uds.js&amp;v=1.0\" type=\"text/javascript\"></script>" if options[:local_search]
+        a << "<script src=\"http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js\" type=\"text/javascript\"></script>\n" if options[:local_search]
+        a << "<style type=\"text/css\">@import url(\"http://www.google.com/uds/css/gsearch.css\");@import url(\"http://www.google.com/uds/solutions/localsearch/gmlocalsearch.css\");}</style>" if options[:local_search]
         a
       end
      
       #Outputs the <div id=...></div> which has been configured to contain the map. You can pass <tt>:width</tt> and <tt>:height</tt> as options to output this in the style attribute of the DIV element (you could also achieve the same effect by putting the dimension info into a CSS or using the instance method GMap#header_width_height). You can aslo pass <tt>:class</tt> to set the classname of the div.
+      # To include initial content in the div, such as a loading message, you
+      # may pass a <tt>:content</tt> option specifying a string, or other
+      # object, such as a REXML fragment, that responds to #to_s.
       def div(options = {})
         attributes = "id=\"#{@container}\" "
         if options.has_key?(:height) && options.has_key?(:width)
-          attributes += "style=\"width:#{options.delete(:width)}px;height:#{options.delete(:height)}px\" "
+          width = options.delete(:width)
+          if width.is_a?(Integer) or width =~ /^[0-9]+$/
+            width = width.to_s + "px"
+          end
+          height = options.delete(:height)
+          if height.is_a?(Integer) or height =~ /^[0-9]+$/
+            height = height.to_s + "px"
+          end
+          attributes += "style=\"width:#{width};height:#{height}\" "
         end
         if options.has_key?(:class)
           attributes += options.keys.map {|opt| "#{opt}=\"#{options[opt]}\"" }.join(" ")
         end
-        "<div #{attributes}></div>"
+        "<div #{attributes}>#{options[:content].to_s}</div>"
       end
 
       #Outputs a style declaration setting the dimensions of the DIV container of the map. This info can also be set manually in a CSS.
@@ -58,14 +75,30 @@ module Ym4r
         @init << code
       end
 
-      #Initializes the controls: you can pass a hash with keys <tt>:small_map</tt>, <tt>:large_map</tt>, <tt>:small_zoom</tt>, <tt>:scale</tt>, <tt>:map_type</tt> and <tt>:overview_map</tt> and a boolean value as the value (usually true, since the control is not displayed by default)
+      #Initializes the controls: you can pass a hash with keys <tt>:small_map</tt>, <tt>:large_map</tt>, <tt>:small_zoom</tt>, <tt>:scale</tt>, <tt>:map_type</tt>, <tt>:overview_map</tt> and hash of options controlling its display (<tt>:hide</tt> and <tt>:size</tt>), <tt>:local_search</tt>, <tt>:local_search_options</tt>, and <tt>:show_on_focus</tt>
       def control_init(controls = {})
         @init_end << add_control(GSmallMapControl.new) if controls[:small_map]
         @init_end << add_control(GLargeMapControl.new) if controls[:large_map]
         @init_end << add_control(GSmallZoomControl.new) if controls[:small_zoom]
         @init_end << add_control(GScaleControl.new) if controls[:scale]
         @init_end << add_control(GMapTypeControl.new) if controls[:map_type]
-        @init_end << add_control(GOverviewMapControl.new) if controls[:overview_map]
+        @init_end << add_control(GHierarchicalMapTypeControl.new) if controls[:hierarchical_map_type]        
+        if controls[:overview_map]
+          if controls[:overview_map].is_a?(Hash)
+            hide = controls[:overview_map][:hide]
+            size = controls[:overview_map][:size]
+          end
+          overview_control = GOverviewMapControl.new(size)
+          @global_init << overview_control.declare("#{@variable}_ovm") if hide
+          @init_end << add_control(overview_control)
+          @init_end << "#{overview_control.variable}.hide(true);" if hide
+        end
+        @init_end << add_control(GLocalSearchControl.new(controls[:anchor], controls[:offset_width], controls[:offset_height], controls[:local_search_options])) if controls[:local_search]
+        if controls[:show_on_focus]  # Should be last
+          @init_end << "#{@variable}.hideControls();"
+          event_init(self, :mouseover, "function(){#{@variable}.showControls();}")
+          event_init(self, :mouseout,  "function(){#{@variable}.hideControls();}")
+        end
       end
       
       #Initializes the interface configuration: double-click zoom, dragging, continuous zoom,... You can pass a hash with keys <tt>:dragging</tt>, <tt>:info_window</tt>, <tt>:double_click_zoom</tt>, <tt>:continuous_zoom</tt> and <tt>:scroll_wheel_zoom</tt>. The values should be true or false. Check the google maps API doc to know what the default values are.
@@ -182,7 +215,7 @@ module Ym4r
 
       #Registers an event
       def event_init(object,event,callback)
-        @init << "GEvent.addListener(#{object.to_javascript},\"#{event.to_s}\",#{callback});"
+        @init << "GEvent.addListener(#{object.to_javascript},\"#{MappingObject.javascriptify_method(event.to_s)}\",#{callback});"
       end
 
       #Registers an event globally

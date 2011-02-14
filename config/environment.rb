@@ -257,3 +257,56 @@ module ActiveRecord
     end
   end
 end
+
+################################################################################
+# Stuff to get rails 2.1.1 working with ruby 1.9. -Jason, Feb 2011
+
+# Need this to force encoding of views to all be utf-8.  (Rails 3 makes this
+# globally configurable using 'config.encoding'.)
+module ActionView
+  module TemplateHandlers
+    module Compilable
+      alias _old_create_template_source create_template_source
+      def create_template_source(*args)
+        result = _old_create_template_source(*args)
+        result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
+        return result
+      end
+    end
+  end
+end
+
+# Easier to make ruby 1.8 forward-compatible in this case.
+#   old: str[0] --> new: str[0].ord
+if RUBY_VERSION < '1.9'
+  class String
+    def ord
+      self[0]
+    end
+  end
+  class Fixnum
+    def ord
+      self
+    end
+  end
+end
+
+# This is used by ym4r_gm plugin.
+module ActionController
+  class Base
+    def self.relative_url_root
+      ''
+    end
+  end
+end
+
+# This must have something to do with ruby 1.9.
+module Ym4r
+  module GmPlugin
+    class Variable
+      alias to_str to_s
+    end
+  end
+end
+
+################################################################################

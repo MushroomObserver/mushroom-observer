@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class LocationControllerTest < FunctionalTestCase
 
@@ -385,7 +385,7 @@ class LocationControllerTest < FunctionalTestCase
     )
 
     # Turn interest on and make sure there is an icon linked to delete it.
-    Interest.new(:object => albion, :user => @rolf, :state => true).save
+    Interest.new(:target => albion, :user => @rolf, :state => true).save
     get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,
@@ -399,7 +399,7 @@ class LocationControllerTest < FunctionalTestCase
 
     # Destroy that interest, create new one with interest off.
     Interest.find_all_by_user_id(@rolf.id).last.destroy
-    Interest.new(:object => albion, :user => @rolf, :state => false).save
+    Interest.new(:target => albion, :user => @rolf, :state => false).save
     get(:show_location, :id => albion.id)
     assert_response('show_location')
     assert_link_in_html(/<img[^>]+halfopen\d*.png[^>]+>/,

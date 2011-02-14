@@ -470,13 +470,13 @@ class User < AbstractModel
   def interest_in(object)
     @interests ||= {}
     @interests["#{object.class.name} #{object.id}"] ||= begin
-      state = Interest.connection.select_value %(
+      state = Interest.connection.select_value(%(
         SELECT state FROM interests
         WHERE user_id = #{id}
-          AND object_type = '#{object.class.name}'
-          AND object_id = #{object.id}
+          AND target_type = '#{object.class.name}'
+          AND target_id = #{object.id}
         LIMIT 1
-      )
+      )).to_s
       state == '1' ? :watching : state == '0' ? :ignoring : nil
     end
   end
@@ -688,15 +688,15 @@ class User < AbstractModel
     end
 
     # Delete their observations' attachments.
-    ids = User.connection.select_values %(
+    ids = User.connection.select_values(%(
       SELECT id FROM observations WHERE user_id = #{id}
-    )
+    )).map(&:to_s)
     if ids.any?
       ids = ids.join(',')
       for table, id, type in [
-        [:comments,            :object_id, :object_type],
+        [:comments,            :target_id, :target_type],
         [:images_observations, :observation_id],
-        [:interests,           :object_id, :object_type],
+        [:interests,           :target_id, :target_type],
         [:namings,             :observation_id],
         [:rss_logs,            :observation_id],
         [:votes,               :observation_id],

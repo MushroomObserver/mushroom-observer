@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../boot'
+require File.expand_path(File.dirname(__FILE__) + '/../boot')
 
 class CommentControllerTest < FunctionalTestCase
 
@@ -38,7 +38,7 @@ class CommentControllerTest < FunctionalTestCase
 
   def test_destroy_comment
     comment = comments(:minimal_comment)
-    obs = comment.object
+    obs = comment.target
     assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
     params = {"id" => comment.id.to_s}

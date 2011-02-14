@@ -378,7 +378,7 @@ class Description < AbstractModel
   # Array of ids.  Caches result.
   def group_user_ids(table)
     @group_user_ids ||= {}
-    @group_user_ids[table] ||= self.class.connection.select_values(x=%(
+    @group_user_ids[table] ||= self.class.connection.select_values(%(
       SELECT DISTINCT u.user_id FROM #{table} t, user_groups_users u
       WHERE t.#{self.type_tag}_id = #{id}
         AND t.user_group_id = u.user_group_id

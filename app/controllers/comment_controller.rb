@@ -10,7 +10,7 @@
 #  ==== Searches and Indexes
 #  list_comments::
 #  show_comments_by_user::
-#  show_comments_for_object::
+#  show_comments_for_target::
 #  show_comments_for_user::
 #  comment_search::
 #  index_comment::
@@ -36,7 +36,7 @@ class CommentController < ApplicationController
     :prev_comment,
     :show_comment,
     :show_comments_by_user,
-    :show_comments_for_object,
+    :show_comments_for_target,
     :show_comments_for_user,
   ]
 
@@ -85,15 +85,15 @@ class CommentController < ApplicationController
 
   # Shows comments for a given object, most recent first.  (Linked from the
   # "and more..." thingy at the bottom of truncated embedded comment lists.)
-  def show_comments_for_object # :nologin: :norobots:
+  def show_comments_for_target # :nologin: :norobots:
     model = params[:type].to_s.constantize rescue nil
     if !model || !model.acts_like?(:model)
       flash_error(:runtime_invalid.t(:type => '"type"',
                                      :value => params[:type].to_s))
       redirect_back_or_default(:action => :list_comments)
-    elsif object = find_or_goto_index(model, params[:id])
-      query = create_query(:Comment, :for_object, :object => object.id,
-                           :type => object.class.name)
+    elsif target = find_or_goto_index(model, params[:id])
+      query = create_query(:Comment, :for_target, :target => target.id,
+                           :type => target.class.name)
       show_selected_comments(query)
     end
   end
@@ -118,7 +118,7 @@ class CommentController < ApplicationController
     args = {
       :action => :list_comments,
       :num_per_page => 25,
-      :include => [:object, :user],
+      :include => [:target, :user],
     }.merge(args)
 
     # Add some alternate sorting criteria.
@@ -139,7 +139,7 @@ class CommentController < ApplicationController
     #   args[:letters] = 'comments.summary'
     end
 
-    @full_detail = (query.flavor == :for_object)
+    @full_detail = (query.flavor == :for_target)
 
     show_index_of_objects(query, args)
   end
@@ -158,9 +158,9 @@ class CommentController < ApplicationController
     store_location
     pass_query_params
     if @comment = find_or_goto_index(Comment, params[:id],
-                                     :include => [:object, :user])
-      @object = @comment.object
-      allowed_to_see!(@object)
+                                     :include => [:target, :user])
+      @target = @comment.target
+      allowed_to_see!(@target)
     end
   end
 
@@ -188,29 +188,29 @@ class CommentController < ApplicationController
   #   Outputs: @comment, @object
   def add_comment # :prefetch: :norobots:
     pass_query_params
-    @object = Comment.find_object(params[:type], params[:id])
-    if !allowed_to_see!(@object)
+    @target = Comment.find_object(params[:type], params[:id])
+    if !allowed_to_see!(@target)
       # redirected already
     elsif request.method == :get
       @comment = Comment.new
-      @comment.object = @object
+      @comment.target = @target
     else
       @comment = Comment.new(params[:comment])
-      @comment.object = @object
+      @comment.target = @target
       if !@comment.save
         flash_object_errors(@comment)
       else
-        type = @object.type_tag
+        type = @target.type_tag
         Transaction.post_comment(
           :id      => @comment,
-          type     => @object,
+          type     => @target,
           :summary => @comment.summary,
           :content => @comment.comment
         )
         @comment.log_create
         flash_notice(:runtime_form_comments_create_success.t(:id => @comment.id))
-        redirect_to(:controller => @object.show_controller,
-                    :action => @object.show_action, :id => @object.id,
+        redirect_to(:controller => @target.show_controller,
+                    :action => @target.show_action, :id => @target.id,
                     :params => query_params)
       end
     end
@@ -230,12 +230,12 @@ class CommentController < ApplicationController
   def edit_comment # :prefetch: :norobots:
     pass_query_params
     @comment = Comment.find(params[:id])
-    @object = @comment.object
-    if !allowed_to_see!(@object)
+    @target = @comment.target
+    if !allowed_to_see!(@target)
       # redirected already
     elsif !check_permission!(@comment.user_id)
-      redirect_to(:controller => @object.show_controller,
-                  :action => @object.show_action, :id => @object.id,
+      redirect_to(:controller => @target.show_controller,
+                  :action => @target.show_action, :id => @target.id,
                   :params => query_params)
     elsif request.method == :post
       @comment.attributes = params[:comment]
@@ -255,8 +255,8 @@ class CommentController < ApplicationController
         done = true
       end
       if done
-        redirect_to(:controller => @object.show_controller,
-                    :action => @object.show_action, :id => @object.id,
+        redirect_to(:controller => @target.show_controller,
+                    :action => @target.show_action, :id => @target.id,
                     :params => query_params)
       end
     end
@@ -270,7 +270,7 @@ class CommentController < ApplicationController
   def destroy_comment # :norobots:
     pass_query_params
     @comment = Comment.find(params[:id])
-    @object = @comment.object
+    @target = @comment.target
     if !check_permission!(@comment.user_id)
       # all cases redirect to object show page
     elsif !@comment.destroy
@@ -280,8 +280,8 @@ class CommentController < ApplicationController
       @comment.log_destroy
       flash_notice(:runtime_form_comments_destroy_success.t(:id => params[:id]))
     end
-    redirect_to(:controller => @object.show_controller,
-                :action => @object.show_action, :id => @object.id,
+    redirect_to(:controller => @target.show_controller,
+                :action => @target.show_action, :id => @target.id,
                 :params => query_params)
   end
 

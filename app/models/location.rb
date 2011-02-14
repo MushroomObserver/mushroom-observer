@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Location Model
 #
@@ -76,8 +77,8 @@ class Location < AbstractModel
   belongs_to :user
 
   has_many :descriptions, :class_name => 'LocationDescription', :order => 'num_views DESC'
-  has_many :comments,  :as => :object, :dependent => :destroy
-  has_many :interests, :as => :object, :dependent => :destroy
+  has_many :comments,  :as => :target, :dependent => :destroy
+  has_many :interests, :as => :target, :dependent => :destroy
   has_many :observations
 
   acts_as_versioned(
@@ -115,7 +116,7 @@ class Location < AbstractModel
        Location.connection.select_value(%(
          SELECT COUNT(*) FROM locations_versions
          WHERE location_id = #{ver.location_id} AND user_id = #{ver.user_id}
-       )) == '0'
+       )).to_s == '0'
       SiteData.update_contribution(:add, :locations_versions)
     end
   end
@@ -612,8 +613,11 @@ class Location < AbstractModel
   def self.location_exists(name)
     if name
       if @@location_cache.nil?
-        @@location_cache = Location.connection.select_values("SELECT DISTINCT name FROM locations") +
-	  Location.connection.select_values(%(
+        @@location_cache =
+          Location.connection.select_values(%(
+            SELECT DISTINCT name FROM locations
+          )) +
+	        Location.connection.select_values(%(
             SELECT DISTINCT `where` FROM `observations`
             WHERE `where` is not NULL
             ORDER BY `where`
@@ -760,9 +764,9 @@ class Location < AbstractModel
     end
 
     # Move over any interest in the old name.
-    for int in Interest.find_all_by_object_type_and_object_id('Location',
+    for int in Interest.find_all_by_target_type_and_target_id('Location',
                                                               old_loc.id)
-      int.object = self
+      int.target = self
       int.save
     end
 

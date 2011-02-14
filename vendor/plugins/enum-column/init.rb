@@ -1,5 +1,6 @@
 require 'enum/enum_adapter'
 require 'enum/mysql_adapter' if defined? ActiveRecord::ConnectionAdapters::MysqlAdapter
+require 'enum/mysql2_adapter' if defined? ActiveRecord::ConnectionAdapters::Mysql2Adapter
 require 'enum/postgresql_adapter' if defined? ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
 require 'enum/sqlite3_adapter' if defined? ActiveRecord::ConnectionAdapters::SQLite3Adapter
 require 'enum/schema_statements'

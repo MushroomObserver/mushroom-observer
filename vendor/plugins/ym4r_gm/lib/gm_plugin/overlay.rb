@@ -104,18 +104,20 @@ module Ym4r
       end
     end
 
-    #Encoded GPolyline class
+    #
+    # Encoded GPolyline class.  This class does NOT perform encoding. 
+    # Instead, you must pass it encoded points, levels, and a zoom_factor
+    # created using Ym4r::GmPlugin::GMapPolylineEncoder.
+    #
+    # For more info on encoding polylines, see
+    #  http://code.google.com/apis/maps/documentation/reference.html#GPolyline.fromEncoded
+    #  http://code.google.com/apis/maps/documentation/overlays.html#Encoded_Polylines
+    #
     class GPolylineEncoded 
       include MappingObject
       attr_accessor :points,:color,:weight,:opacity,:levels,:zoom_factor,:num_levels
 
       def initialize(options={})
-        #points = options[:points]
-        #if !points.empty? and points[0].is_a?(Array)
-        #  @points = points.collect { |pt| GLatLng.new(pt) }
-        #else
-        #@points = points
-          #end
         @points = options[:points]
         @color = options[:color]
         @weight = options[:weight]
@@ -163,7 +165,9 @@ module Ym4r
       end
     end
 
-    #Polygon. Not documented yet in the Google Maps API
+    # Wrapper for the Google Maps GPolygon class.  See the Google Maps API 
+    # docs: 
+    # http://code.google.com/apis/maps/documentation/reference.html#GPolygon
     class GPolygon
       include MappingObject
       
@@ -195,6 +199,13 @@ module Ym4r
       end
     end
 
+    #
+    # Wrapper class for Google Maps GPolygons created using the
+    # GPolygon.fromEncoded() factory method.  Unlike a regular GPolygon, it
+    # creates a polygon from a string of specially encoded points, allowing
+    # complex polygons with multiple rings to be rendered.  When creating a
+    # GPolygonEncoded, pass it GPolylineEncoded objects.
+    #
     class GPolygonEncoded 
       include MappingObject
       
@@ -220,7 +231,10 @@ module Ym4r
           x = "{points: #{MappingObject.javascriptify_variable(p.points)}," 
           x << "levels: #{MappingObject.javascriptify_variable(p.levels)},"
           x << "zoomFactor: #{MappingObject.javascriptify_variable(p.zoom_factor)},"
-          x << "numLevels: #{MappingObject.javascriptify_variable(p.num_levels)} "
+          x << "numLevels: #{MappingObject.javascriptify_variable(p.num_levels)}"
+          x << ", color: #{MappingObject.javascriptify_variable(p.color)}" if p.color
+          x << ", weight: #{MappingObject.javascriptify_variable(p.weight)}" if p.weight
+          x << ", opacity: #{MappingObject.javascriptify_variable(p.opacity)}" if p.opacity
           x << "}"
           polylines_for_polygon << x
         end

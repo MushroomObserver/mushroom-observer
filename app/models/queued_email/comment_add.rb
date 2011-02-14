@@ -50,6 +50,6 @@ class QueuedEmail::CommentAdd < QueuedEmail
   end
 
   def deliver_email
-    AccountMailer.deliver_comment(user, to_user, comment.object, comment)
+    AccountMailer.deliver_comment(user, to_user, comment.target, comment)
   end
 end

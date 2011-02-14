@@ -15,7 +15,8 @@ namespace :globalite do
       end
       @base_keys = @langs[org_base]
       unless @base_keys.blank?
-        @langs.each_key do |@lang|
+        @langs.each_key do |lang|
+          @lang = lang
           @base_keys.each_key do |key|
             unless @langs[@lang].include?(key)
               @missing_localizations[@lang] ||= {}
