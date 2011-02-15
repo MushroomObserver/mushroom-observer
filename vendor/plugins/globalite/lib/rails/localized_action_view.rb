@@ -130,6 +130,7 @@ module ActionView
               %(<option value="#{month_number}">#{month_name}</option>\n)
             )
           end
+          month_options = month_options.join('')
           @selector = select_html(options[:field_name] || 'month', month_options, options, html)
         end
         Locale.code = @original_locale if options[:locale]

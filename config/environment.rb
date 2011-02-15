@@ -215,11 +215,11 @@ module ActionController
       alias fubar_read_multipart read_multipart
       def read_multipart(*args)
         params = fubar_read_multipart(*args)
+        new_params = {}
         for key, val in params
-          params.delete(key)
-          params[URI.unescape(key)] = val
+          new_params[URI.unescape(key)] = val
         end
-        return params
+        return new_params
       end
     end
   end
@@ -307,6 +307,38 @@ module Ym4r
       alias to_str to_s
     end
   end
+end
+
+# Near as I can tell there is simply a bug in the Rails 2.1.1 handling of
+# encodings in assert_select.  It forces the text it's validating to be the
+# same encoding as the selector.  This is fine of the selector is a string,
+# because the selector takes on the source encoding of the caller's file, so
+# we have control over it.  But Ruby second-guesses us when it creates regexen.
+# They do NOT take on the encoding of the source file -- they are implictly
+# downgraded to US-ASCII if no 8-bit characters are used.  This causes rails
+# force the encoding of the text to US-ASCII, as well, causing it to crash.
+# I can find no way to solve this problem without recasting the regexen with
+# the following sleight of hand.  Ugly, but it works.
+if RUBY_VERSION >= '1.9'
+  require 'action_controller'
+  require 'action_controller/assertions'
+  module ActionController
+    module Assertions
+      module SelectorAssertions
+        alias __old_assert_select assert_select
+        def assert_select(*args, &block)
+          args = args.map do |arg|
+            case arg
+            when Regexp ; /#{arg}/u
+            when String ; arg.force_encoding('UTF-8')
+            else        ; arg
+            end
+          end
+          __old_assert_select(*args, &block)
+        end
+      end
+    end
+  end 
 end
 
 ################################################################################
