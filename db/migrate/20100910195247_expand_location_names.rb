@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ExpandLocationNames < ActiveRecord::Migration
   def self.up
     add_column :observations, :where_tmp, :string, :limit => 1024

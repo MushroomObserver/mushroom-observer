@@ -1,3 +1,4 @@
+# encoding: utf-8
 class SupportController < ApplicationController
   def donate
     store_location

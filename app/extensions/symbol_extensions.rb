@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Extensions to Symbol
 #  == Instance Methods

@@ -1,3 +1,4 @@
+# encoding: utf-8
 class CreateDonations < ActiveRecord::Migration
   def self.up
     create_table :donations, :options => 'ENGINE=InnoDB DEFAULT CHARSET=utf8', :force => true do |t|

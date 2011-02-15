@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ImageVotes < ActiveRecord::Migration
   def self.up
     add_column :images, :votes, :text

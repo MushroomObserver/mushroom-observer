@@ -1,3 +1,4 @@
+# encoding: utf-8
 class CleanRssLogs < ActiveRecord::Migration
   def self.up
     cutoff = 1.year.ago

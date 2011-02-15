@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Base Class for Models with Authored Descriptions
 #

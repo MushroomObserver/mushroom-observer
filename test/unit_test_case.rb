@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Unit Test Case
 #

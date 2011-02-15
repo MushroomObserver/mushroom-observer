@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Application Controller Base Class
 #

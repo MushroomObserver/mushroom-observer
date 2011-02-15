@@ -1,3 +1,4 @@
+# encoding: utf-8
 class DefaultRssType < ActiveRecord::Migration
   def self.up
     # Give user the ability to choose which RSS log type(s) they want to see by

@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Test typical sessions of amateur user who just posts the occasional comment,
 # observations, or votes.
 

@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ImageOkForExport < ActiveRecord::Migration
   def self.up
     add_column :images, :ok_for_export, :boolean, :default => true, :null => false

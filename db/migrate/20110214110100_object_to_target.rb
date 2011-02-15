@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ObjectToTarget < ActiveRecord::Migration
   def self.up
     # It is unsafe to override the "object_id" method starting in ruby 1.9.

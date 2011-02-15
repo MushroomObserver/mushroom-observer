@@ -1,3 +1,4 @@
+# encoding: utf-8
 class AnonymousDonations < ActiveRecord::Migration
   def self.up
     add_column :donations, :anonymous, :boolean, :default => false, :null => false

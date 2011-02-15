@@ -1,3 +1,4 @@
+# encoding: utf-8
 class ConvertDatabaseToUtc < ActiveRecord::Migration
   def self.up
     correct_datetimes('+')

@@ -1,3 +1,4 @@
+# encoding: utf-8
 class LocationChanges < ActiveRecord::Migration
   def self.up
     add_column :locations_versions, :name, :string, :limit => 200

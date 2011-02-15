@@ -1,3 +1,4 @@
+# encoding: utf-8
 class AddOkForExportToNames < ActiveRecord::Migration
   def self.up
     add_column :names, :ok_for_export, :boolean, :null => false, :default => true

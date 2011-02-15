@@ -1,3 +1,4 @@
+# encoding: utf-8
 class AddRssLogToProject < ActiveRecord::Migration
   def self.up
     add_column :rss_logs, :project_id, :integer

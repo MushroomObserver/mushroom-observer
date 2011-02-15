@@ -1,3 +1,4 @@
+# encoding: utf-8
 class Descriptions < ActiveRecord::Migration
 
   def self.up

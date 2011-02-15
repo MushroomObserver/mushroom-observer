@@ -1,3 +1,4 @@
+# encoding: utf-8
 class VoteAnonymity < ActiveRecord::Migration
   def self.up
     # Make default "no" (always public), except grandfather in existing users

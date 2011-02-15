@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Test typical sessions of university student who is writing descriptions.
 
 require File.expand_path(File.dirname(__FILE__) + '/../boot')

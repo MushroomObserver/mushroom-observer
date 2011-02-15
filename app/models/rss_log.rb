@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = RSS Log Model
 #

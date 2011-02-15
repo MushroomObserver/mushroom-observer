@@ -1,3 +1,4 @@
+# encoding: utf-8
 #
 #  = Auto-completion Helpers
 #
