@@ -3922,8 +3922,8 @@ namespace :location do
     ])
 
   LOCATION_FIXES = {
-    "Bol'shoi Chukhtinsky island, Khanty-Mansi Autonomous Okrug—Yugra, Russia" => "Bol'shoi Chukhtinsky xisland, Khanty-Mansi Autonomous Okrug—Yugra, Russia",
-    "SOMA camp, Sonoma Co., California, USA" => "SOMA xcamp, Sonoma Co., California, USA",
+    "Bol'shoi Chukhtinsky xisland, Khanty-Mansi Autonomous Okrug—Yugra, Russia" => "Bol'shoi Chukhtinsky Island, Khanty-Mansi Autonomous Okrug—Yugra, Russia",
+    "SOMA xcamp, Sonoma Co., California, USA" => "SOMA Camp, Sonoma Co., California, USA",
   }
   
   def report_on_name(name)
