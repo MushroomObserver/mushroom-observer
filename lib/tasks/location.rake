@@ -3790,7 +3790,7 @@ namespace :location do
     "near Bluestone Reservoir, Summers Co., West Virginia, USA",
     "near Braselton, Georgia, USA",
     "near Brooklyn Heights, New River Gorge National River, Fayette Co., West Virginia, USA",
-    "near Bullards Bar Dam Reservoir, California, USA"
+    "near Bullards Bar Dam Reservoir, California, USA",
     "near Bullards Bar Dam Reservoir, California, USA",
     "near Cape Lookout, Tillamook Co., Oregon, USA",
     "near Carthage, Texas, USA",
