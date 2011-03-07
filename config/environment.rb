@@ -358,7 +358,7 @@ module ActiveRecord
     class Mysql2Adapter < AbstractAdapter
       alias :_old_execute_ :execute
       def execute(sql, name = nil)
-        _old_execute_(convert_to_old_encoding(str), name)
+        _old_execute_(convert_to_old_encoding(sql), name)
       end
       #
       def select(sql, name = nil)
