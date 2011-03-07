@@ -356,6 +356,13 @@ require 'mysql2' unless defined? Mysql2
 module ActiveRecord
   module ConnectionAdapters
     class Mysql2Adapter < AbstractAdapter
+      alias :_raw_execute_ :execute
+      def execute(sql, name = nil)
+        sql = sql.encode('utf-8')
+        sql.force_encoding('iso-8859-1')
+        sql = sql.encode('utf-8')
+        _raw_execute_(sql, name)
+      end
       def select(sql, name = nil)
         result = execute(sql, name).each(:as => :hash)
         result.each do |hash|
