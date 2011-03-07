@@ -356,32 +356,76 @@ require 'mysql2' unless defined? Mysql2
 module ActiveRecord
   module ConnectionAdapters
     class Mysql2Adapter < AbstractAdapter
-      alias :_raw_execute_ :execute
+      alias :_old_execute_ :execute
       def execute(sql, name = nil)
-        sql = sql.encode('utf-8')
-        sql.force_encoding('iso-8859-1')
-        sql = sql.encode('utf-8')
-        _raw_execute_(sql, name)
+        _old_execute_(convert_to_old_encoding(str), name)
       end
+      #
       def select(sql, name = nil)
         result = execute(sql, name).each(:as => :hash)
         result.each do |hash|
           for v in hash.values
-            v.replace(v.encode('iso-8859-1')).force_encoding('utf-8') \
-              if v.is_a?(String)
+            v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
           end
         end
         return result
       end
+      #
       def select_rows(sql, name = nil)
         result = execute(sql, name).to_a
         result.each do |a|
           for v in a
-            v.replace(v.encode('iso-8859-1')).force_encoding('utf-8') \
-              if v.is_a?(String)
+            v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
           end
         end
         return result
+      end
+      #
+      def convert_to_old_encoding(str)
+        str.force_encoding('windows-1252')
+        begin
+          str.encode('utf-8')
+        rescue Encoding::UndefinedConversionError
+          result = ""
+          result.force_encoding('binary')
+          str.each_char do |c|
+            c = begin
+              c.encode('utf-8')
+            rescue
+              c.force_encoding('binary')
+              d = "\xc2"
+              d.force_encoding('binary')
+              d + c
+            end
+            c.force_encoding('binary')
+            result += c
+          end
+          result.force_encoding('utf-8')
+          result
+        end
+      end
+      #
+      def convert_from_old_encoding(str)
+        begin
+          result = str.encode('windows-1252')
+          result.force_encoding('utf-8')
+          result
+        rescue Encoding::UndefinedConversionError
+          result = ""
+          result.force_encoding('binary')
+          str.each_char do |c|
+            c = begin
+              c.encode('windows-1252')
+            rescue
+              c.force_encoding('binary')
+              c[1,1]
+            end
+            c.force_encoding('binary')
+            result += c
+          end
+          result.force_encoding('utf-8')
+          result
+        end
       end
     end
   end
