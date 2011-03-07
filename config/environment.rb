@@ -342,4 +342,42 @@ if RUBY_VERSION >= '1.9'
   end 
 end
 
+# This is used by passenger?
+module ActionController
+  class Base
+    X_POWERED_BY = 'X-Powered-By'
+  end
+end
+
+# This is a temporary fix to allow ruby 1.9 to read the old (corrupt) database
+# correctly.  When we release the new server, we'll fix the database encoding,
+# and this will change to allow ruby 1.8 to read the new (correct) database.
+require 'mysql2' unless defined? Mysql2
+module ActiveRecord
+  module ConnectionAdapters
+    class Mysql2Adapter < AbstractAdapter
+      def select(sql, name = nil)
+        result = execute(sql, name).each(:as => :hash)
+        result.each do |hash|
+          for v in hash.values
+            v.replace(v.encode('iso-8859-1')).force_encoding('utf-8') \
+              if v.is_a?(String)
+          end
+        end
+        return result
+      end
+      def select_rows(sql, name = nil)
+        result = execute(sql, name).to_a
+        result.each do |a|
+          for v in a
+            v.replace(v.encode('iso-8859-1')).force_encoding('utf-8') \
+              if v.is_a?(String)
+          end
+        end
+        return result
+      end
+    end
+  end
+end
+
 ################################################################################

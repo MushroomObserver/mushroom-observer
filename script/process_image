@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 id=$1
 ext=$2
@@ -42,7 +42,7 @@ fi
 if [[ $1 == '-h' || $1 == '--help' ]]; then cat <<-EOH; exit -1
 
 	USAGE:
-	    script/process_image <id>
+	    script/process_image <id> <ext> <0|1>
 
 	DESCRIPTION:
 	    This is used by the webserver to resize and transfer uploaded
@@ -142,15 +142,15 @@ if (( $production )); then
   # Wait for other transfers to finish first.
   while (ps -e | grep ' scp$' > /dev/null); do sleep 5; done
 
+  run scp $thumb  $server/thumb/$id.jpg
+  run scp $small  $server/320/$id.jpg
+  run scp $medium $server/640/$id.jpg
+  run scp $large  $server/960/$id.jpg
+  run scp $huge   $server/1280/$id.jpg
+  run scp $full   $server/orig/$id.jpg
   if [[ $orig != $full ]]; then
     run scp $orig   $server/orig/$id.$ext
   fi
-  run scp $full   $server/orig/$id.jpg
-  run scp $huge   $server/1280/$id.jpg
-  run scp $large  $server/960/$id.jpg
-  run scp $medium $server/640/$id.jpg
-  run scp $small  $server/320/$id.jpg
-  run scp $thumb  $server/thumb/$id.jpg
 fi
 
 # ------------------------------
