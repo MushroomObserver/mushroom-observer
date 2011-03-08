@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+def convert_from_old_encoding(str)
+  begin
+    result = str.encode('windows-1252')
+    result.force_encoding('utf-8')
+    result
+  rescue Encoding::UndefinedConversionError
+    result = ""
+    result.force_encoding('binary')
+    str.each_char do |c|
+      c = begin
+        c.encode('windows-1252')
+      rescue
+        c.force_encoding('binary')
+        c[1,1]
+      end
+      c.force_encoding('binary')
+      result += c
+    end
+    result.force_encoding('utf-8')
+    result
+  end
+end
+
+for line in $stdin.readlines
+  $stdout.write(convert_from_old_encoding(line))
+end
