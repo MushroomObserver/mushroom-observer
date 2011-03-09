@@ -1659,8 +1659,9 @@ class AbstractQuery < ActiveRecord::Base
       # typically no avoiding it.  This optimizes away an extra query or two.
       self.letters = map = {}
       ids = []
-      select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},1)"
+      select = "DISTINCT #{model.table_name}.id, LEFT(#{need_letters},4)"
       for id, letter in select_rows(args.merge(:select => select))
+        letter = letter[0,1]
         if letter.match(/[a-zA-Z]/)
           map[id.to_i] = letter.upcase
         end
