@@ -429,18 +429,18 @@ module ActiveRecord
       end
     end
   end
+end
 
-  # This is a known bug in old ActionMailer versions.
-  module ActionMailer
-    class Base
-      def perform_delivery_smtp(mail)
-        destinations = mail.destinations
-        mail.ready_to_send
-        sender = mail['return-path'] || mail['from'] # <-- instead of "mail.from"
-        Net::SMTP.start(smtp_settings[:address], smtp_settings[:port], smtp_settings[:domain],
-            smtp_settings[:user_name], smtp_settings[:password], smtp_settings[:authentication]) do |smtp|
-          smtp.sendmail(mail.encoded, sender, destinations)
-        end
+# This is a known bug in old ActionMailer versions.
+module ActionMailer
+  class Base
+    def perform_delivery_smtp(mail)
+      destinations = mail.destinations
+      mail.ready_to_send
+      sender = mail['return-path'] || mail['from'] # <-- instead of "mail.from"
+      Net::SMTP.start(smtp_settings[:address], smtp_settings[:port], smtp_settings[:domain],
+          smtp_settings[:user_name], smtp_settings[:password], smtp_settings[:authentication]) do |smtp|
+        smtp.sendmail(mail.encoded, sender, destinations)
       end
     end
   end
