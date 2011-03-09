@@ -1,0 +1,261 @@
+# This is log of setup on ubuntu 10.10 on 6sync server, Feb-Mar 2011. -Jason
+# 
+# ubuntu 10.10
+# ruby 1.9.2-p136    (installs in 1.9.1, I have no idea why)
+# rubygems 1.5.2
+# passenger 3.0.4
+# apache2 2.2.16
+# postfix 2.7.1
+# mysql 14.14
+
+# Initial set up:
+local> ssh root@xxx.xxx.xxx.xxx
+root> passwd
+root> apt-get update
+root> apt-get install tcsh mlocate man vim lynx telnet emacs wget build-essential
+root> useradd -s /bin/tcsh mo
+root> vi /etc/shadow
+  # Replace "mo:!:..." with "mo:*:..." at end.
+root> visudo
+  # Add these lines to end:
+  %mo ALL = NOPASSWD: /bin/su mo
+  %mo ALL = NOPASSWD: /bin/su - mo
+root> useradd -G mo -s /bin/tcsh jason
+root> passwd jason
+root> mkdir /home/mo /home/jason
+root> chown mo:mo /home/mo
+root> chown jason:jason /home/jason
+root> logout
+
+# Password-less ssh:
+local> ssh-keygen -t rsa   # (if not already done)
+local> ssh-copy-id -i ~/.ssh/id_rsa.pub xxx.xxx.xxx.xxx
+
+# Setup user accounts:
+local> ssh xxx.xxx.xxx.xxx
+jason> vi .tcshrc
+  alias root sudo
+  alias cls clear
+  alias cd.. cd ..
+  alias dirf ls -alF
+  alias dirt ls -alFrt
+  alias md mkdir
+  alias rd rmdir
+  alias del rm
+  alias mv mv -i
+  alias cp cp -i
+  alias grep grep -s
+  alias +x chmod a+x
+  alias -x chmod a-x
+  alias mo 'cd /var/web/mo; sudo su - mo'
+  alias mosql  "mysql -u mo -p'xxx' mo_production"
+  alias mosqle "mysql -u mo -p'xxx' mo_production -e 'source \!^'"
+jason> vi .vimrc
+  syntax off
+  set nohlsearch
+  set ts=2
+  set sw=2
+  set et
+  set nowrap
+jason> source .tcshrc
+root> cp .tcshrc /root
+root> cp .tcshrc /home/mo
+root> cp .vimrc /root
+root> cp .vimrc /home/mo
+root> vi /home/mo/.tcshrc
+  # Change "alias mo..." to "alias mo 'cd /var/web/mo'".
+root> vi /home/mo/.login
+  setenv TZ 'Eastern Time (US & Canada)'
+  setenv RAILS_ENV production
+  cd /var/web/mo
+root> tcsh
+
+# Install the all the modules (except ruby) that we will need.
+root> apt-get install apache2 libapache2-mod-passenger \
+        mysql-server mysql-client libmysqlclient-dev \
+        subversion subversion-tools \
+        libcurl4-openssl-dev libssl-dev libopenssl-ruby \
+        apache2-prefork-dev libapr1-dev libaprutil1-dev
+
+# Build and install ruby from source to get good version.
+root> cd
+root> mkdir build
+root> cd build
+root> wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p136.tar.bz2
+root> tar -xjf ruby*.bz2
+root> cd ruby-1.9.2-p136
+root> ./configure
+root> make install
+root> rehash
+root> cd ext/openssl
+root> ruby extconf.rb
+root> make install
+root> rehash
+
+# Ditto for rubygems.
+root> cd ~/build
+root> wget http://production.cf.rubygems.org/rubygems/rubygems-1.5.2.tgz
+root> tar -xzf rubygems*.tgz
+root> cd rubygems-1.5.2
+root> ruby setup.rb --prefix=/usr/local
+root> rehash
+
+# Now we can install ruby gems properly:
+root> gem install rails --version=2.1.1 --verbose --no-rdoc --no-ri
+root> gem install mysql2 --verbose --no-rdoc --no-ri
+root> gem install test-unit --verbose --no-rdoc --no-ri
+root> gem install RedCloth --verbose --no-rdoc --no-ri
+
+# Install rails apps:
+root> mkdir /var/web
+root> mkdir /var/web/mo
+root> chown mo:mo /var/web/mo
+root> chmod 750 /var/web/mo
+root> cd /var/web
+root> su mo
+mo> svn co svn://user@repository.com/var/svn mo
+mo> mkdir mo/tmp
+mo> mkdir mo/log
+mo> touch mo/tmp/restart.txt
+mo> exit
+
+# Configure apache:
+root> vi /etc/apache2/sites-available/mo
+  <VirtualHost *:80>
+    ServerName mushroomobserver.org
+    DocumentRoot /var/web/mo/public
+    RailsEnv production
+    SetEnv TZ 'Eastern Time (US & Canada)'
+    <Directory /var/web/mo/public>
+      Options FollowSymLinks
+      AllowOverride limit
+      Order allow,deny
+      Allow from all
+    </Directory>
+    # Redirect all but thumbnails to image server.
+    RewriteEngine on
+    RewriteRule ^/images/640/(.*)$ http://images.digitalmycology.com/640/$1 [QSA]
+    RewriteRule ^/images/960/(.*)$ http://images.digitalmycology.com/960/$1 [QSA]
+    RewriteRule ^/images/1280/(.*)$ http://images.digitalmycology.com/1280/$1 [QSA]
+    RewriteRule ^/images/orig/(.*)$ http://images.digitalmycology.com/orig/$1 [QSA]
+  </VirtualHost>
+root> a2dissite default
+root> a2ensite mo
+root> a2enmod rewrite
+root> usermod -a -G mo www-data
+
+# Create database:
+root> mysql -u root -p
+  create database mo_production;
+  create user 'mo'@'localhost' identified by 'xxx';
+  grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
+root> cd /var/web/mo
+root> vi config/database.yml
+  # Change these values in production section: (other sections aren't needed)
+  adapter:  mysql2
+  database: mo
+  password: xxx
+  socket:   /var/run/mysqld/mysqld.sock
+  encoding: utf8
+root> cd /var/web/mo/db
+root> scp user@oldserver:/var/web/mo/db/checkpoint.gz .
+root> gunzip checkpoint.gz
+root> mosqle checkpoint
+
+# Install passenger:
+root> gem install passenger --verbose --no-rdoc --no-ri
+root> rehash
+root> passenger-install-apache2-module
+root> vi /etc/apache2/mods-available/passenger.conf
+  # Change root to /usr/local/lib/ruby/gems/1.9.1/gems/passenger-3.0.4
+  # Change ruby to /usr/local/bin/ruby
+root> vi /etc/apache2/mods-available/passenger.load
+  # Change to /usr/local/lib/ruby/gems/1.9.1/gems/passenger-3.0.4/ext/apache2/mod_passenger.so
+
+# For ImageMagick:
+root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev
+root> gem install rmagick --verbose --no-rdoc --no-ri
+root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+
+# Configure firewall: (probably not necessary)
+root> iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+root> iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
+# ...or...
+root> system-config-firewall-tui
+  (enabled: DNS, SMTP, SSH, HTTP, 3306:tcp)
+
+# Set up password-less ssh for image transfers:
+root> su - mo
+mo> ssh-keygen -t rsa
+  # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
+mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
+  # Enter password.
+mo> ssh cdmr@images.digitalmycology.com
+  # (just make sure it works)
+mo> exit
+
+# Set up simple mailserver using postfix.
+root> apt-get install postfix mutt
+  # Select internet host when it prompts you(?)
+  # Enter the proper hostname (should resolve back with reverse DNS).
+root> vi /etc/aliases
+  # Change where root's mail goes:
+  root: jason,...
+root> newaliases
+
+# Configure no-reply to bounce correctly.
+root> useradd no-reply
+root> mkdir /home/no-reply
+root> cp /var/web/mo/script/autoreply          /usr/local/bin/autoreply
+root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
+root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
+root> cp /var/web/mo/config/no-reply.forward   /home/no-reply/.forward
+root> chown -R no-reply:no-reply /home/no-reply
+root> chmod 644 /home/no-reply/.[maf]*
+root> chmod 755 /usr/local/bin/autoreply
+
+# Test mail server.
+root> su jason
+jason> cd
+jason> vi .muttrc
+  set realname="Jason Hollinger"
+  set from="jason@mushroomobserver.org"
+  set use_from=yes
+  set envelope_from=yes
+jason> vi .forward
+  pellaea@gmail.com
+jason> echo "This is a test." | mutt -s test pellaea@gmail.com
+jason> exit
+
+# Configure MO's mail.
+root> su mo
+mo> cd
+mo> vi .muttrc
+  set realname="Mushroom Observer"
+  set from="no-reply@mushroomobserver.org"
+  set use_from=yes
+  set envelope_from=yes
+mo> vi .forward
+  root
+mo> echo "This is a test." | mutt -s test pellaea@gmail.com
+mo> exit
+
+# Test Rails's mail.
+# (Ask yourself a question via the website.)
+# (Probably want to tail -f log/production.log if it's throwing errors.)
+
+# Make sure these services start up at boot:
+root> update-rc.d apache2 defaults
+root> update-rc.d mysql   defaults
+root> update-rc.d postfix defaults
+
+# Setup cron jobs:
+root> su mo
+mo> cd
+mo> crontab -e
+  */5 * * * * /var/web/mo/script/run_rake email:send
+  23  * * * * /var/web/mo/script/parse_log
+  13  3 * * * /var/web/mo/script/run_script refresh_name_lister_cache
+  43  3 * * * /var/web/mo/script/run_script update_lichen_list
+  13  4 * * * /var/web/mo/script/run_script update_images --clean
+  33 21 * * * /var/web/mo/script/makexml /var/web/mo/public/eol.xml
