@@ -250,7 +250,7 @@ class Name < AbstractModel
 
   # Callbacks whenever new version is created.
   versioned_class.before_save do |ver|
-    ver.user_id = User.current_id
+    ver.user_id = User.current_id || 0
     if (ver.version != 1) and
        Name.connection.select_value(%(
          SELECT COUNT(*) FROM names_versions
