@@ -161,7 +161,7 @@ Rails::Initializer.run do |config|
 
   # Configure SMTP settings for ActionMailer.
   config.action_mailer.smtp_settings = {
-    :address => MAIL_DOMAIN,
+    :address => 'localhost',
     :port    => 25,
     :domain  => DOMAIN,
     # :authentication => :login,
