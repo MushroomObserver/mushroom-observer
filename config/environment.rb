@@ -161,12 +161,17 @@ Rails::Initializer.run do |config|
 
   # Configure SMTP settings for ActionMailer.
   config.action_mailer.smtp_settings = {
-    :address => 'localhost',
-    :port    => 25,
-    :domain  => DOMAIN,
+    :address        => 'localhost',
+    :port           => 25,
+    :domain         => 'localhost',
+
+    # To use Dreamhost mailserver to send mail:
+    # :address        => 'mail.mushroomobserver.org',
+    # :port           => 587,
+    # :domain         => 'mushroomobserver.org',
     # :authentication => :login,
-    # :user_name      => "<username>",
-    # :password       => "<password>",
+    # :user_name      => 'mo@mushroomobserver.org',
+    # :password       => 'xxx',
   }
 
   # Include optional site-specific configs.

@@ -117,6 +117,25 @@ mo> svn co svn://user@repository.com/var/svn mo
 mo> mkdir mo/tmp
 mo> mkdir mo/log
 mo> touch mo/tmp/restart.txt
+mo> vi mo/config/consts-site.rb
+  # Override these defaults:
+  DOMAIN         = 'mushroomobserver.org'
+  HTTP_DOMAIN    = 'http://mushroomobserver.org'
+  SERVER_CODE    = 'us1'
+  DEFAULT_LOCALE = 'en-US'
+  BAD_DOMAINS    = ["www.#{DOMAIN}"]
+
+  # Use queued email mechanism.
+  QUEUE_EMAIL = true
+
+  # Nathan wants to be BCC'ed on every single email.
+  EXTRA_BCC_EMAIL_ADDRESSES = "mo@collectivesource.com"
+
+  # Date after which votes become public.
+  VOTE_CUTOFF = '20100405'
+
+  # Set timezone?
+  ENV['TZ'] = 'Eastern Time (US & Canada)'
 mo> exit
 
 # Configure apache:
@@ -240,7 +259,16 @@ mo> vi .forward
 mo> echo "This is a test." | mutt -s test pellaea@gmail.com
 mo> exit
 
-# Test Rails's mail.
+# Configure Rails's mail.
+root> vi /var/web/mo/config/environment.rb
+  config.action_mailer.smtp_settings = {
+    :address        => 'mail.digitalmycology.com',
+    :port           => 587,
+    :domain         => 'digitalmycology.com',
+    :authentication => :login,
+    :user_name      => 'mo@digitalmycology.com',
+    :password       => 'xxx',
+  }
 # (Ask yourself a question via the website.)
 # (Probably want to tail -f log/production.log if it's throwing errors.)
 
