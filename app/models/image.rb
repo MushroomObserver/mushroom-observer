@@ -466,8 +466,10 @@ class Image < AbstractModel
     if save_to_temp_file
       # Override whatever user gave us with result of "file --mime".
       type = File.read("| /usr/bin/file --mime #{upload_temp_file}").chomp.split[1]
-      self.upload_type = type if type
-      self.upload_type = self.upload_type.encode('utf-8') if self.upload_type.respond_to?(:encode)
+      if type
+        type.sub!(/;$/ '')
+        self.upload_type = type
+      end
       if upload_type.match(/^image\//)
         result = true
       else
