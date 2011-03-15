@@ -467,7 +467,7 @@ class Image < AbstractModel
       # Override whatever user gave us with result of "file --mime".
       type = File.read("| /usr/bin/file --mime #{upload_temp_file}").chomp.split[1]
       if type
-        type.sub!(/;$/ '')
+        type.sub!(/;$/, '')
         self.upload_type = type
       end
       if upload_type.match(/^image\//)
