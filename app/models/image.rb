@@ -464,9 +464,10 @@ class Image < AbstractModel
   # if okay, otherwise adds an error to the :image field.
   def validate_image_type
     if save_to_temp_file
-      # Override whatever user gave us with result of "file -i".
-      type = File.read("| file --mime #{upload_temp_file}").chomp.split[1]
+      # Override whatever user gave us with result of "file --mime".
+      type = File.read("| /usr/bin/file --mime #{upload_temp_file}").chomp.split[1]
       self.upload_type = type if type
+      self.upload_type = self.upload_type.encode('utf-8') if self.upload_type.respond_to?(:encode)
       if upload_type.match(/^image\//)
         result = true
       else
@@ -483,7 +484,7 @@ class Image < AbstractModel
   def validate_image_md5sum
     result = true
     if upload_md5sum and save_to_temp_file
-      if (sum = File.read("| md5sum #{upload_temp_file}")) &&
+      if (sum = File.read("| /usr/bin/md5sum #{upload_temp_file}")) &&
          (sum.split.first == content_md5)
         result = true
       else

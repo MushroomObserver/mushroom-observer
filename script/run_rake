@@ -1,4 +1,4 @@
 #!/bin/bash
 declare -x RUBYLIB="/usr/local/lib/ruby/site_ruby/1.9.1"
 declare -x GEM_HOME="/usr/local/lib/ruby/gems/1.9.1"
-/usr/bin/env rake $* RAILS_ENV=production -f /var/web/mo/Rakefile | grep -v '(in /home/'
+/usr/local/bin/rake $* RAILS_ENV=production -f /var/web/mo/Rakefile | grep -v '(in /home/'
