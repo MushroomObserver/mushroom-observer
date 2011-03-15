@@ -4,7 +4,7 @@ id=$1
 ext=$2
 set_size=$3
 
-server=velosa@images.mushroomobserver.org:images.mushroomobserver.org
+server=cdmr@digitalmycology.com:images.digitalmycology.com
 images=public/images
 
 orig=$images/orig/$id.$ext

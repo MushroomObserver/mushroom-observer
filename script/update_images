@@ -32,8 +32,9 @@ LOCAL_PATH = 'public/images'
 
 # Aliases for our image servers.
 SERVER_ALIASES = {
-  'dreamhost' => 'velosa@images.mushroomobserver.org:images.mushroomobserver.org',
-  'slicehost' => 'mushroomobserver.org:/var/web/mo/public/images',
+  'dreamhost' => 'cdmr@digitalmycology.com:images.digitalmycology.com',
+  'slicehost' => '174.143.24.209:/var/web/mo/public/images',
+  '6sync'     => '204.62.14.111:/var/web/mo/public/images',
 }
 
 # List of official image servers to keep updated from main webserver.
