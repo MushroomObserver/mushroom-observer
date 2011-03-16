@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 
-require 'config/boot'
-require 'config/environment'
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
 
 $stderr.puts("Getting our names...")
 names = Name.connection.select_rows %(

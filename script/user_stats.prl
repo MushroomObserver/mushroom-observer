@@ -6,7 +6,6 @@ my $USER = 'mo';
 my $PASS = 'mo';
 my $DB   = 'mo_development';
 
-
 printf "%-5s %5s %5s %5s %5s %5s %5s %5s %5s %5s\n",
   'year', 1, 3, 10, 32, 100, 316, 1000, 3162, 10000;
 for (my $year=2006; ; $year++) {

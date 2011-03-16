@@ -13,6 +13,7 @@ Agaricus californicus
 Agaricus campestris
 Agaricus cupreobrunneus
 Agaricus hondensis
+Agaricus moelleri
 Agaricus placomyces
 Agaricus praeclaresquamosus
 Agaricus semotus
@@ -30,7 +31,6 @@ Albatrellus ovinus
 Albatrellus pescaprae
 Alboleptonia sericella
 Aleuria aurantia
-Alloclavaria purpurea
 Amanita
 Amanita abrupta
 Amanita amerifulva
@@ -38,6 +38,7 @@ Amanita amerimuscaria
 Amanita ameripanthera
 Amanita amerirubescens
 Amanita aprica
+Amanita aprica group
 Amanita banningiana
 Amanita bisporigera
 Amanita borealisorora
@@ -46,7 +47,6 @@ Amanita brunnescens
 Amanita caesarea
 Amanita calyptratoides
 Amanita calyptroderma
-Amanita ceciliae group
 Amanita citrina
 Amanita citrina f. lavendula
 Amanita cokeri
@@ -69,9 +69,9 @@ Amanita multisquamosa
 Amanita muscaria
 Amanita muscaria group
 Amanita muscaria subsp. flavivolvata
-Amanita muscaria var. alba
 Amanita muscaria var. formosa
 Amanita muscaria var. guessowii
+Amanita muscaria var. muscaria
 Amanita muscaria var. persicina
 Amanita nothofagi
 Amanita novinupta
@@ -91,7 +91,9 @@ Amanita silvicola
 Amanita smithiana
 Amanita vaginata
 Amanita vaginata group
+Amanita velatipes
 Amanita velosa
+Amanita virosa
 Amanitaceae
 Amauroderma
 Ampulloclitocybe clavipes
@@ -103,10 +105,11 @@ Armillaria ostoyae
 Armillaria sinapina
 Armillaria solidipes
 Armillaria tabescens
+Arrhenia
 Arrhenia retiruga
 Artomyces pyxidatus
 Ascocoryne
-Ascocoryne cylichnium
+Ascocoryne sarcoides
 Ascomycota
 Aspicilia
 Asterophora lycoperdoides
@@ -140,13 +143,13 @@ Boletus barrowsii
 Boletus bicolor
 Boletus calopus
 Boletus chrysenteron
+Boletus dryophilus
 Boletus eastwoodiae
 Boletus edulis
 Boletus edulis var. grandedulis
 Boletus fibrillosus
 Boletus flaviporus
 Boletus frostii
-Boletus hortonii
 Boletus innixus
 Boletus longicurvipes
 Boletus luridus
@@ -161,6 +164,7 @@ Boletus sensibilis
 Boletus smithii
 Boletus subtomentosus
 Boletus subvelutipes
+Boletus truncatus
 Boletus variipes
 Boletus zelleri
 Bondarzewia berkeleyi
@@ -183,7 +187,6 @@ Calvatia sculpta
 Camarophyllus
 Camarophyllus pratensis
 Camarophyllus russocoriaceus
-Camarophyllus virgineus
 Candelaria
 Cantharellula umbonata
 Cantharellus
@@ -192,7 +195,6 @@ Cantharellus cibarius
 Cantharellus cibarius var. roseocanus
 Cantharellus cinnabarinus
 Cantharellus formosus
-Cantharellus ignicolor
 Cantharellus lateritius
 Cantharellus minor
 Cantharellus subalbidus
@@ -222,15 +224,15 @@ Cladonia chlorophaea
 Cladonia chlorophaea group
 Cladonia cristatella
 Cladonia furcata
-Clathrus columnatus
+Cladonia macilenta
 Clathrus ruber
 Clavaria
 Clavaria vermicularis
 Clavariaceae
-Clavariadelphus ligula
 Clavariadelphus occidentalis
 Clavariadelphus pistillaris
 Clavariadelphus truncatus
+Clavicipitaceae
 Clavulina
 Clavulina cinerea
 Clavulina cristata
@@ -241,7 +243,6 @@ Clavulinopsis fusiformis
 Clavulinopsis laeticolor
 Climacocystis borealis
 Clitocybe
-Clitocybe clavipes
 Clitocybe fragrans
 Clitocybe glacialis
 Clitocybe nebularis
@@ -249,6 +250,7 @@ Clitocybe nuda
 Clitocybe odora
 Clitocybe robusta
 Clitocybe sclerotoidea
+Clitocybe tarda
 Clitopilus nitellinus
 Clitopilus prunulus
 Collybia
@@ -263,10 +265,12 @@ Contumyces rosellus
 Contumyces rosellus var. vinacea
 Coprinellus
 Coprinellus disseminatus
+Coprinellus impatiens
 Coprinellus micaceus
 Coprinopsis
 Coprinopsis atramentaria
 Coprinopsis lagopus
+Coprinopsis nivea
 Coprinopsis variegata
 Coprinus
 Coprinus comatus
@@ -277,10 +281,10 @@ Cortinarius alboviolaceus
 Cortinarius caperatus
 Cortinarius cinnamomeus
 Cortinarius croceus
-Cortinarius distans
 Cortinarius glaucopus
 Cortinarius iodes
 Cortinarius laniger
+Cortinarius malicorius
 Cortinarius mucosus
 Cortinarius phoeniceus var. occidentalis
 Cortinarius ponderosus
@@ -291,7 +295,9 @@ Cortinarius trivialis
 Cortinarius vanduzerensis
 Cortinarius violaceus
 Craterellus
+Craterellus cinereus
 Craterellus cornucopioides
+Craterellus fallax
 Craterellus tubaeformis
 Crepidotus
 Crepidotus applanatus
@@ -306,9 +312,11 @@ Cystoderma
 Cystoderma amianthinum
 Cystoderma fallax
 Cystodermella cinnabarina
+Cystodermella granulosa
 Cystolepiota
 Dacrymyces
 Dacrymyces palmatus
+Dacrymyces stillatus
 Dacryopinax spathularia
 Daedalea quercina
 Daedaleopsis confragosa
@@ -318,9 +326,7 @@ Deconica
 Dermocybe
 Dermocybe cinnamomea
 Dermocybe phoenicea var. occidentalis
-Discina
 Discina perlata
-Disciotis venosa
 Elaphocordyceps capitata
 Elaphocordyceps ophioglossoides
 Entoloma
@@ -350,7 +356,6 @@ Fungi
 Galerina
 Galerina autumnalis
 Galerina clavata
-Galerina heterocystis
 Galerina marginata
 Galerina vittaeformis
 Galiella rufa
@@ -363,7 +368,6 @@ Ganoderma resinaceum
 Ganoderma tsugae
 Geastrum
 Geastrum fimbriatum
-Geastrum quadrifidum
 Geastrum saccatum
 Geastrum triplex
 Geoglossum
@@ -385,6 +389,7 @@ Gymnopilus
 Gymnopilus junonius
 Gymnopilus luteofolius
 Gymnopilus luteus
+Gymnopilus penetrans
 Gymnopilus sapineus
 Gymnopilus spectabilis
 Gymnopus
@@ -393,13 +398,13 @@ Gymnopus confluens
 Gymnopus dryophilus
 Gymnopus luxurians
 Gymnopus peronatus
-Gymnopus subpruinosus
 Gymnopus villosipes
 Gyrodon merulioides
 Gyromitra
 Gyromitra esculenta
 Gyromitra gigas
 Gyromitra infula
+Gyromitra korfii
 Gyroporus castaneus
 Hebeloma
 Hebeloma crustuliniforme
@@ -411,9 +416,9 @@ Helvella compressa
 Helvella crispa
 Helvella elastica
 Helvella lacunosa
-Helvella leucomelaena
 Helvella maculata
 Hemimycena
+Hemitrichia
 Hemitrichia calyculata
 Hemitrichia clavata
 Hericium
@@ -440,6 +445,7 @@ Hygrocybe cantharellus
 Hygrocybe coccinea
 Hygrocybe conica
 Hygrocybe flavescens
+Hygrocybe flavifolia
 Hygrocybe laeta
 Hygrocybe miniata
 Hygrocybe persistens
@@ -488,13 +494,13 @@ Inocybe geophylla var. lilacina
 Inocybe lilacina
 Inocybe sororia
 Inonotus
-Inonotus dryadeus
 Inonotus hispidus
 Inonotus obliquus
+Insecta
 Irpex lacteus
-Isaria
 Ischnoderma resinosum
 Jahnoporus hirtus
+Kretzschmaria deusta
 Kuehneromyces mutabilis
 Kuehneromyces vernalis
 Laccaria
@@ -513,7 +519,6 @@ Lactarius deceptivus
 Lactarius deliciosus
 Lactarius deliciosus group
 Lactarius deterrimus
-Lactarius fallax
 Lactarius hygrophoroides
 Lactarius indigo
 Lactarius luculentus
@@ -538,7 +543,6 @@ Lecanora
 Leccinum
 Leccinum albellum
 Leccinum cyaneobasileucum
-Leccinum insigne
 Leccinum manzanitae
 Leccinum rugosiceps
 Leccinum scabrum
@@ -581,6 +585,7 @@ Lichen
 Lichenomphalia umbellifera
 Limacella
 Lobaria pulmonaria
+Lycogala
 Lycogala epidendrum
 Lycoperdon
 Lycoperdon echinatum
@@ -595,6 +600,7 @@ Macowanites
 Macrocystidia cucumis
 Macrolepiota
 Macrolepiota procera
+Macrolepiota prominens
 Marasmiellus
 Marasmiellus candidus
 Marasmius
@@ -610,13 +616,15 @@ Megacollybia rodmani
 Melanoleuca
 Melanoleuca melaleuca
 Meripilus sumstinei
+Micromphale arbuticola
 Mollisia
-Monotropa uniflora
 Morchella
 Morchella elata
 Morchella esculenta
 Morchella rufobrunnea
 Morganella pyriformis
+Mutinus caninus
+Mutinus elegans
 Mycena
 Mycena abramsii
 Mycena acicula
@@ -629,7 +637,6 @@ Mycena capillaripes
 Mycena epipterygia
 Mycena galericulata
 Mycena haematopus
-Mycena inclinata
 Mycena leaiana
 Mycena leptocephala
 Mycena maculata
@@ -639,13 +646,13 @@ Mycena pura
 Mycena purpureofusca
 Mycena sanguinolenta
 Mycena subcaerulea
+Myxogastria
 Myxomphalia maura
 Myxomycetes
 Myxomycota
 Neolecta irregularis
 Nidula candida
 Nidula niveotomentosa
-Nivatogastrium nubigenum
 Nolanea
 Nolanea holoconiota
 Oligoporus caesius
@@ -659,12 +666,12 @@ Otidea
 Otidea onotica
 Pachylepyrium carbonicola
 Panaeolina foenisecii
-Panaeolopsis
 Panaeolus
 Panaeolus antillarum
 Panaeolus cinctulus
 Panaeolus foenisecii
 Panaeolus papilionaceus
+Panaeolus semiovatus
 Panaeolus subbalteatus
 Panellus serotinus
 Panellus stipticus
@@ -674,11 +681,9 @@ Parasola
 Parasola plicatilis
 Parmelia sulcata
 Parmotrema
-Parmotrema reticulatum
 Paxillus
 Paxillus involutus
 Peltigera
-Peltigera leucophlebia
 Peltigera membranacea
 Peltigera neopolydactyla
 Peltigera polydactylon
@@ -697,7 +702,7 @@ Phellinus ferreus
 Phellinus gilvus
 Phellinus igniarius
 Phellinus pini
-Phellodon
+Phellinus pomaceus
 Phellodon niger
 Phlebia
 Phlebia incarnata
@@ -722,7 +727,6 @@ Phyllotopsis nidulans
 Physcia
 Physcia aipolia
 Piptoporus betulinus
-Pisolithus arhizus
 Pisolithus arrhizus
 Platismatia glauca
 Plectania nannfeldtii
@@ -762,6 +766,7 @@ Prunulus purus
 Psathyrella
 Psathyrella bipellis
 Psathyrella candolleana
+Psathyrella conopilus
 Psathyrella delineata
 Psathyrella gracilis
 Psathyrella longipes
@@ -777,14 +782,13 @@ Psilocybe caerulipes
 Psilocybe cubensis
 Psilocybe cyanescens
 Psilocybe makarorae
-Psilocybe mexicana
 Psilocybe ovoideocystidiata
 Psilocybe semilanceata
-Psilocybe stuntzii
 Psilocybe subaeruginascens
 Psilocybe subaeruginosa
 Psilocybe weilii
 Psilocybe zapotecorum
+Pterula
 Pulveroboletus ravenelii
 Pycnoporellus alboluteus
 Pycnoporus cinnabarinus
@@ -822,11 +826,11 @@ Russula brevipes var. acrior
 Russula cascadensis
 Russula cessans
 Russula claroflava
+Russula clavipes
 Russula compacta
 Russula cremoricolor
 Russula crustosa
 Russula cyanoxantha
-Russula decolorans
 Russula dissimulans
 Russula eccentrica
 Russula emetica
@@ -844,6 +848,7 @@ Russula variata
 Russula versicolor
 Russula virescens
 Russula xerampelina
+Russulaceae
 Sarcodon
 Sarcodon fuscoindicus
 Sarcodon imbricatus
@@ -883,7 +888,6 @@ Strobilurus trullisatus
 Stropharia
 Stropharia aeruginosa
 Stropharia ambigua
-Stropharia aurantiaca
 Stropharia hornemannii
 Stropharia riparia
 Stropharia rugosoannulata
@@ -900,7 +904,6 @@ Suillus lakei
 Suillus luteus
 Suillus pictus
 Suillus ponderosus
-Suillus pseudobrevipes
 Suillus pungens
 Suillus spraguei
 Suillus tomentosus
@@ -915,6 +918,7 @@ Trametes
 Trametes elegans
 Trametes gibbosa
 Trametes hirsuta
+Trametes pubescens
 Trametes versicolor
 Tremella
 Tremella aurantia
@@ -940,8 +944,6 @@ Tricholoma imbricatum
 Tricholoma magnivelare
 Tricholoma moseri
 Tricholoma myomyces
-Tricholoma pardinum
-Tricholoma pessundatum
 Tricholoma portentosum
 Tricholoma saponaceum
 Tricholoma sejunctum
@@ -955,7 +957,9 @@ Tricholomopsis rutilans
 Tubaria
 Tubaria confragosa
 Tubaria furfuracea
+Tubaria punicea
 Tuber gibbosum
+Tuber oregonense
 Tubifera ferruginosa
 Tylopilus
 Tylopilus eximius
@@ -968,14 +972,12 @@ Tyromyces
 Tyromyces chioneus
 Urnula craterium
 Usnea
-Vascellum curtisii
 Vascellum pratense
 Verpa bohemica
 Verpa conica
 Volvariella
 Volvariella bombycina
 Volvariella gloiocephala
-Xanthoconium
 Xanthoconium affine
 Xanthoconium purpureum
 Xanthoconium separans
@@ -984,14 +986,12 @@ Xanthoria elegans
 Xanthoria parietina
 Xerocomus
 Xerocomus chrysenteron
-Xerocomus dryophilus
 Xeromphalina
 Xeromphalina campanella
 Xeromphalina cauticinalis
+Xeromphalina kauffmanii
 Xerula
 Xerula furfuracea
-Xerula megalospora
-Xerula radicata
 Xylaria
 Xylaria hypoxylon
 Xylaria longipes

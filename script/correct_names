@@ -1,15 +1,16 @@
 #!/usr/bin/ruby
-
-# Expects output as from script/find_misspellings.
-# Done in two parts to give the human operator a chance to verify changes.
 #
-#   script/find_misspellings > x
-#   vi x
-#   cat x | script/correct_names
+#  Expects output as from script/find_misspellings.
+#  Done in two parts to give the human operator a chance to verify changes.
 #
+#    script/find_misspellings > x
+#    vi x
+#    cat x | script/correct_names
+#
+################################################################################
 
-require 'config/boot'
-require 'config/environment'
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
 
 file = ARGV[0]
 puts "Getting corrections from #{file}..."

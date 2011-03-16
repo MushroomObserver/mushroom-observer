@@ -25,8 +25,8 @@
 #
 ################################################################################
 
-require File.dirname(__FILE__) + '/../config/boot'
-require File.dirname(__FILE__) + '/../config/environment'
+require File.expand_path('../../config/boot.rb', __FILE__)
+require File.expand_path('../../config/environment.rb', __FILE__)
 
 verbose = (ARGV[0] == '-v')
 

@@ -74,6 +74,7 @@ module ApplicationHelper::AutoComplete
       end
       if primer && !primer.empty?
         js_args += ', primer: [' + primer.map do |val|
+          # val = val.encode('utf-8') if val.respond_to?(:encode)
           "'" + escape_javascript(val) + "'"
         end.join(',') + ']'
       end
