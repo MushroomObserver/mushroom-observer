@@ -9,6 +9,7 @@ el_GR: Ελληνικά
 en_US: English
 es_ES: Español
 pt_BR: Português
+ru_RU: Русский
 
 ################################################################################
 #
@@ -2177,14 +2178,14 @@ thanks_title:  Thanks for Your Support!
 thanks_no_amount:  Sorry, we were unable to determine the amount of your donation.  Please send us a comment about this.
 thanks_note:  >
   Thank you for helping to support the Mushroom Observer.  Your support is
-  greatly appreciated and will help Mushroom Observer continue its mission. 
+  greatly appreciated and will help Mushroom Observer continue its mission.
   \n\n
   Your donation will be acknowledged by name on the "Mushroom Observer Donors
   Page":/support/donors once the funds are received unless you have requested
   special arrangements for your acknowledgement.  Examples of special
   arrangements might be to make the donation anonymously or to leave it in
   someone else's name.  If you would like special arrangements for your
-  acknowledgement please "send us a comment":/observer/ask_webmaster_question. 
+  acknowledgement please "send us a comment":/observer/ask_webmaster_question.
 
 
 
@@ -2206,23 +2207,23 @@ letter_body:  >
   I will soon not be able to afford it.  As a result, I would like to start
   asking for donations from the community.  Those of you who have gotten a lot
   out of the site and want to see it continue to grow and expand, now is your
-  chance to give a little back and help with the financial support of the site. 
+  chance to give a little back and help with the financial support of the site.
   \n\n
   To that end, we have setup a "donation page":/support/donate that can
-  securely accept money from a PayPal account or a regular credit card. 
+  securely accept money from a PayPal account or a regular credit card.
   \n\n
   I would like to raise at least $2000 to cover basic server costs.  The more
   we get, the more we can expand our capacity for traffic and growth.  And the
-  fewer times you will encounter server down time and failed uploads. 
+  fewer times you will encounter server down time and failed uploads.
   \n\n
   When you make a donation, your name by default will be added to our "donors
   page":/support/donors as soon as we confirm the donation.  If you would
   prefer to donate anonymously or make other special arrangements for your
   acknowledgement, "send a comment":/observer/ask_webmaster_question after you
-  make your donation. 
+  make your donation.
   \n\n
   Please help support this active internet community of people who enjoy
-  sharing and learning more about the mushrooms around us. 
+  sharing and learning more about the mushrooms around us.
   \n\n
   Thanks,\n
   -Nathan
@@ -4921,3 +4922,86 @@ system_status_clear_caches: Clear Caches
 system_status_gc: GC
 system_status_textile_name_size: Textile name cache size
 system_status_title: Server Status
+
+################################################################################
+
+# DISABLE SYNTAX CHECKER
+
+# Don't translate this, just correct the order in which dates are given.
+date_helper_order: [:day, :month, :year]
+
+# These two use UNIX date format codes.  Ask MO developers for help if you
+# aren't familiar with the syntax.
+date_helper_date_formats:
+  default: "%d.%m.%Y"
+  short: "%e. %b"
+  long: "%e. %B %Y"
+
+date_helper_time_formats:
+  default: "%a, %d. %b %Y, %H:%M:%S %z"
+  short: "%d. %b, %H:%M"
+  long: "%d. %B %Y, %H:%M"
+
+# Added at the end of date if not using a 24 hours system.
+date_helper_am: am
+date_helper_pm: pm
+
+# How to render a number.
+number_helper_separator: ","  # Between integer part and fraction.
+number_helper_delimiter: "."  # Between each group of thousands.
+
+# How to render a list.
+array_connector: 'und'          # Word between final two items.
+array_skip_last_comma: 'false'  # Include comma between final two items?
+
+# Month and day names.  Be careful not to change spacing or delete any lines.
+date_helper_month_names:
+  -
+    -
+  - Januar
+  - Februar
+  - März
+  - April
+  - Mai
+  - Juni
+  - Juli
+  - August
+  - September
+  - Oktober
+  - November
+  - Dezember
+
+date_helper_abbr_month_names:
+  -
+    -         
+  - Jan
+  - Feb
+  - Mar
+  - Apr
+  - Mai
+  - Jun
+  - Jul
+  - Aug
+  - Sep
+  - Okt
+  - Nov
+  - Dez
+
+date_helper_day_names:
+  - Sonntag
+  - Montag
+  - Dienstag
+  - Mittwoch
+  - Donnerstag
+  - Freitag
+  - Samstag
+
+date_helper_abbr_day_names:
+  - So
+  - Mo
+  - Di
+  - Mi
+  - Do
+  - Fr
+  - Sa
+

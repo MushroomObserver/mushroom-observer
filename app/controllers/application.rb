@@ -450,7 +450,7 @@ class ApplicationController < ActionController::Base
       result = locale_weights.sort {|a,b| b[1] <=> a[1]}.map {|a| a[0]}
     end
 
-    logger.debug "[globalite] client accepted locales: #{result.to_sentence}"
+    logger.debug "[globalite] client accepted locales: #{result.join(', ')}"
     return result
   end
 

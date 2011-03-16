@@ -148,6 +148,8 @@ class LanguagesTest < UnitTestCase
       num = lines.length
       while !lines.empty?
         case line = lines.shift
+        when /DISABLE SYNTAX CHECK/
+          lines = []
         when /^#/, /^ *$/
         when /^(?:\w+|"\w+"):  ?(?!>)(\S(.*\S)?)/
           validate_one_liner($1) do
@@ -232,6 +234,7 @@ class LanguagesTest < UnitTestCase
       # Now look for embedded refs.
       n = 0
       for line in File.readlines(file)
+        break if line.match(/DISABLE SYNTAX CHECK/)
         n += 1
         line.gsub(/[\[=]:(\w+)/) do
           if !tags.has_key?($1.downcase)

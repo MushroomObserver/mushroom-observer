@@ -9,6 +9,7 @@ el_GR: Ελληνικά
 en_US: English
 es_ES: Español
 pt_BR: Português
+ru_RU: Русский
 
 ################################################################################
 #
@@ -4011,3 +4012,86 @@ system_status_clear_caches:  Clear Caches
 system_status_gc:  GC
 system_status_textile_name_size:  Textile name cache size
 system_status_title:  Server Status
+
+################################################################################
+
+# DISABLE SYNTAX CHECKER
+
+# Don't translate this, just correct the order in which dates are given.
+date_helper_order: [:day, :month, :year]
+
+# These two use UNIX date format codes.  Ask MO developers for help if you
+# aren't familiar with the syntax.
+date_helper_date_formats:
+  default: "%d.%m.%Y"
+  short: "%e. %b"
+  long: "%e. %B %Y"
+
+date_helper_time_formats:
+  default: "%a, %d. %b %Y, %H:%M:%S %z"
+  short: "%d. %b, %H:%M"
+  long: "%d. %B %Y, %H:%M"
+
+# Added at the end of date if not using a 24 hours system.
+date_helper_am: am
+date_helper_pm: pm
+
+# How to render a number.
+number_helper_separator: ","  # Between integer part and fraction.
+number_helper_delimiter: "."  # Between each group of thousands.
+
+# How to render a list.
+array_connector:  'and'         # Word between final two items.
+array_skip_last_comma: 'false'  # Include comma between final two items?
+
+# Month and day names.  Be careful not to change spacing or delete any lines.
+date_helper_month_names:
+  -
+    -
+  - Ιανουάριος
+  - Φεβρουάριος
+  - Μάρτιος
+  - Απρίλιος
+  - Μάιος
+  - Ιούνιος
+  - Ιούλιος
+  - Αύγουστος
+  - Σεπτέμβριος
+  - Οκτώβριος
+  - Νοέμβριος
+  - Δεκέμβριος
+
+date_helper_abbr_month_names:
+  -
+    -
+  - Ιαν
+  - Φεβ
+  - Μάρ
+  - Απρ
+  - Μάι
+  - Ιού
+  - Ιού
+  - Αύγ
+  - Σεπ
+  - Οκτ
+  - Νοέ
+  - Δεκ
+
+date_helper_day_names:
+  - Κυριακή
+  - Δευτέρα
+  - Τρίτη
+  - Τετάρτη
+  - Πέμπτη
+  - Παρασκευή
+  - Σάββατο
+
+date_helper_abbr_day_names:
+  - Κυρ
+  - Δευ
+  - Τρί
+  - Τετ
+  - Πέμ
+  - Παρ
+  - Σάβ
+
