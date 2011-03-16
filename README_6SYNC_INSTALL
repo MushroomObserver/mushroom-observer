@@ -342,3 +342,44 @@ root> iptables-save
 root> ps -ef
   # Look for sshd, apache2, Passenger, mysqld, postfix.
 
+################################################################################
+
+The following are notes concerning problems I had migrating from one server
+to another.
+
+# In order to share database with another server.
+new_root> vi /etc/mysql/my/cnf
+  # Comment out the following line.
+  # bind-address = 127.0.0.1
+new_root> mysql -u root -p
+  create user 'mo'@'old.ip.adr.num' identified by 'xxx';
+  grant all privileges on mo_production.* to 'mo'@'old.ip.adr.num' with grant option;
+new_root> ssh root@old.ip.adr.num
+old_root> mysqladmin --protocol=tcp -u mo -p'xxx' --host=new.ip.adr.num ping
+
+# To switch databases once old server can connect to new database.
+old_root> service apache2 stop
+old_root> mo
+old_mo> cd db
+old_mo> ./dump
+old_mo> ssh root@new.ip.adr.num
+new_root> mo
+new_mo> cd db
+new_mo> scp root@old.ip.adr.num:/var/web/mo/db/checkpoint.gz .
+new_mo> gunzip checkpoint.gz
+new_mo> mosqle checkpoint
+new_mo> exit
+new_root> exit
+old_mo> cd ..
+old_mo> vi config/database.yml
+  production:
+    database: mo_production
+    host:     new.ip.adr.num
+    username: mo
+    password: xxx
+old_mo> rake db:version
+  # Make sure Rails can connect correctly.
+old_mo> exit
+old_root> service apache2 start
+old_root> exit
+

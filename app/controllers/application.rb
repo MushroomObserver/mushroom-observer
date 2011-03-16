@@ -1151,7 +1151,7 @@ class ApplicationController < ActionController::Base
          (new_query = query.send(method)) and
          (rss_log = new_query.current)
         query  = new_query
-        object = rss_log.object || rss_log
+        object = rss_log.target || rss_log
         id = object.id
 
       # Normal case: attempt to coerce the current query into an appropriate
