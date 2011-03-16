@@ -79,6 +79,11 @@ root> vi /home/mo/.login
 root> chown mo:mo /home/mo/.*
 root> tcsh
 
+# Disable direct root login.
+root> vi /etc/ssh/sshd_config
+  # Change this line to "no".
+  PermitRootLogin no
+
 # Configure firewall.
 root> iptables -F
 root> iptables -P INPUT ACCEPT
@@ -164,6 +169,16 @@ mo> vi mo/config/consts-site.rb
 
   # Set timezone?
   ENV['TZ'] = 'Eastern Time (US & Canada)'
+
+  # Use CDMR mail server for ActionMailer.
+  config.action_mailer.smtp_settings = {
+    :address        => 'mail.digitalmycology.com',
+    :port           => 587,
+    :domain         => 'digitalmycology.com',
+    :authentication => :login,
+    :user_name      => 'mo@digitalmycology.com',
+    :password       => 'xxx',
+  }
 mo> exit
 
 # Configure apache.
@@ -291,16 +306,6 @@ mo> echo "This is another test." | mutt -s test pellaea@gmail.com
 mo> exit
 
 # Configure Rails's mail.
-root> vi /var/web/mo/config/environment.rb
-  # Search for the following section and correct.
-  config.action_mailer.smtp_settings = {
-    :address        => 'mail.digitalmycology.com',
-    :port           => 587,
-    :domain         => 'digitalmycology.com',
-    :authentication => :login,
-    :user_name      => 'mo@digitalmycology.com',
-    :password       => 'xxx',
-  }
 # Ask yourself a question via the website:
 #   http://xxx.xxx.xxx.xxx/observer/ask_user_question/252
 # Probably want to tail -f log/production.log if it's throwing errors.

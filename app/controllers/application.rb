@@ -1141,15 +1141,15 @@ class ApplicationController < ActionController::Base
 
       # Special exception for prev/next in RssLog query: If go to "next" in
       # show_observation, for example, inside an RssLog query, go to the next
-      # object, even if it's not an observation.
-      if params[:q] and
+      # object, even if it's not an observation.    If...
+      if params[:q] and                             # ... query exists
          (query = Query.safe_find(params[:q].dealphabetize)) and
-         (query.model_symbol == :RssLog) and
-         (rss_log = object.rss_log rescue nil) and
-         query.index(rss_log) and
-         (query.current = object.rss_log) and
-         (new_query = query.send(method)) and
-         (rss_log = new_query.current)
+         (query.model_symbol == :RssLog) and        # ... and it's a RssLog query
+         (rss_log = object.rss_log rescue nil) and  # ... and current rss_log exists
+         query.index(rss_log) and                   # ... and it's in query results
+         (query.current = object.rss_log) and       # ... and can set current index in query results
+         (new_query = query.send(method)) and       # ... and next/prev doesn't return nil (at end)
+         (rss_log = new_query.current)              # ... and can get new rss_log object
         query  = new_query
         object = rss_log.target || rss_log
         id = object.id

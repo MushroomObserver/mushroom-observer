@@ -15,6 +15,11 @@ class LurkerTest < IntegrationTestCase
     assert_template('observer/show_observation')
     push_page
 
+    # Click on next (catches a bug ween in the wild).
+    push_page
+    click(:label => '« Prev', :in => 'div#left_tabs')
+    go_back
+
     # Click on the first image.
     click(:label => :image, :in => 'div.show_images')
     click(:label => :image, :href => /show_image.*full_size/)
