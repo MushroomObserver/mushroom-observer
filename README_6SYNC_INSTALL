@@ -188,14 +188,21 @@ root> vi /etc/apache2/sites-available/mo
     DocumentRoot /var/web/mo/public
     RailsEnv production
     SetEnv TZ 'Eastern Time (US & Canada)'
+
     <Directory /var/web/mo/public>
       Options FollowSymLinks
       AllowOverride limit
       Order allow,deny
       Allow from all
     </Directory>
-    # Redirect all but thumbnails to image server.
+
     RewriteEngine on
+
+    # Explicitly tell apache where to find static content in /public.
+    # (Applies to several specific subdirs and any URL like /blah.ext.)
+    RewriteRule ^/(lichens|stylesheets|javascripts|[\w\-\.]+\.\w+)(.*)$ /public/$1$2 [QSA]
+
+    # Redirect all but thumbnails to image server.
     # RewriteRule ^/images/thumb/(.*)$ http://images.digitalmycology.com/thumb/$1 [QSA]
     # RewriteRule ^/images/320/(.*)$ http://images.digitalmycology.com/320/$1 [QSA]
     RewriteRule ^/images/640/(.*)$ http://images.digitalmycology.com/640/$1 [QSA]
