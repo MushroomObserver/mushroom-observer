@@ -291,8 +291,7 @@ class Name < AbstractModel
 
       open(NAME_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
     else
-      result = open(NAME_PRIMER_CACHE_FILE).readlines.map(&:chomp)
-      result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
+      result = open(USER_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
     end
     return result
   end
