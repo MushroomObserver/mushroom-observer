@@ -78,3 +78,19 @@ SVN_REPOSITORY = "http://svn.collectivesource.com/mushroom_sightings" if !define
 
 # Date after which votes become public.
 VOTE_CUTOFF = '20100401'                                 if !defined? VOTE_CUTOFF
+
+# Mail configuration.  Moved here to allow easy site-specific configuration
+# by overriding in config/consts-site.rb.
+MAIL_CONFIG = {
+  :address        => 'localhost',
+  :port           => 25,
+  :domain         => DOMAIN,
+
+  # To use Dreamhost mailserver to send mail:
+  # :address        => 'mail.mushroomobserver.org',
+  # :port           => 587,
+  # :domain         => 'mushroomobserver.org',
+  # :authentication => :login,
+  # :user_name      => 'mo@mushroomobserver.org',
+  # :password       => 'xxx',
+} if !defined? MAIL_CONFIG

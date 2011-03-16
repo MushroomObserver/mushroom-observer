@@ -160,19 +160,7 @@ Rails::Initializer.run do |config|
   }
 
   # Configure SMTP settings for ActionMailer.
-  config.action_mailer.smtp_settings = {
-    :address        => 'localhost',
-    :port           => 25,
-    :domain         => 'localhost',
-
-    # To use Dreamhost mailserver to send mail:
-    # :address        => 'mail.mushroomobserver.org',
-    # :port           => 587,
-    # :domain         => 'mushroomobserver.org',
-    # :authentication => :login,
-    # :user_name      => 'mo@mushroomobserver.org',
-    # :password       => 'xxx',
-  }
+  config.action_mailer.smtp_settings = MAIL_CONFIG
 
   # Include optional site-specific configs.
   file = __FILE__.sub(/.rb$/, '-site.rb')
@@ -357,79 +345,81 @@ end
 # This is a temporary fix to allow ruby 1.9 to read the old (corrupt) database
 # correctly.  When we release the new server, we'll fix the database encoding,
 # and this will change to allow ruby 1.8 to read the new (correct) database.
-require 'mysql2' unless defined? Mysql2
-module ActiveRecord
-  module ConnectionAdapters
-    class Mysql2Adapter < AbstractAdapter
-      alias :_old_execute_ :execute
-      def execute(sql, name = nil)
-        _old_execute_(convert_to_old_encoding(sql), name)
-      end
-      #
-      def select(sql, name = nil)
-        result = execute(sql, name).each(:as => :hash)
-        result.each do |hash|
-          for v in hash.values
-            v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
-          end
+if RUBY_VERSION >= '1.9'
+  require 'mysql2' unless defined? Mysql2
+  module ActiveRecord
+    module ConnectionAdapters
+      class Mysql2Adapter < AbstractAdapter
+        alias :_old_execute_ :execute
+        def execute(sql, name = nil)
+          _old_execute_(convert_to_old_encoding(sql), name)
         end
-        return result
-      end
-      #
-      def select_rows(sql, name = nil)
-        result = execute(sql, name).to_a
-        result.each do |a|
-          for v in a
-            v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
-          end
-        end
-        return result
-      end
-      #
-      def convert_to_old_encoding(str)
-        str.force_encoding('windows-1252')
-        begin
-          str.encode('utf-8')
-        rescue Encoding::UndefinedConversionError
-          result = ""
-          result.force_encoding('binary')
-          str.each_char do |c|
-            c = begin
-              c.encode('utf-8')
-            rescue
-              c.force_encoding('binary')
-              d = "\xc2"
-              d.force_encoding('binary')
-              d + c
+        #
+        def select(sql, name = nil)
+          result = execute(sql, name).each(:as => :hash)
+          result.each do |hash|
+            for v in hash.values
+              v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
             end
-            c.force_encoding('binary')
-            result += c
           end
-          result.force_encoding('utf-8')
-          result
+          return result
         end
-      end
-      #
-      def convert_from_old_encoding(str)
-        begin
-          result = str.encode('windows-1252')
-          result.force_encoding('utf-8')
-          result
-        rescue Encoding::UndefinedConversionError
-          result = ""
-          result.force_encoding('binary')
-          str.each_char do |c|
-            c = begin
-              c.encode('windows-1252')
-            rescue
-              c.force_encoding('binary')
-              c[1,1]
+        #
+        def select_rows(sql, name = nil)
+          result = execute(sql, name).to_a
+          result.each do |a|
+            for v in a
+              v.replace(convert_from_old_encoding(v)) if v.is_a?(String)
             end
-            c.force_encoding('binary')
-            result += c
           end
-          result.force_encoding('utf-8')
-          result
+          return result
+        end
+        #
+        def convert_to_old_encoding(str)
+          str.force_encoding('windows-1252')
+          begin
+            str.encode('utf-8')
+          rescue Encoding::UndefinedConversionError
+            result = ""
+            result.force_encoding('binary')
+            str.each_char do |c|
+              c = begin
+                c.encode('utf-8')
+              rescue
+                c.force_encoding('binary')
+                d = "\xc2"
+                d.force_encoding('binary')
+                d + c
+              end
+              c.force_encoding('binary')
+              result += c
+            end
+            result.force_encoding('utf-8')
+            result
+          end
+        end
+        #
+        def convert_from_old_encoding(str)
+          begin
+            result = str.encode('windows-1252')
+            result.force_encoding('utf-8')
+            result
+          rescue Encoding::UndefinedConversionError
+            result = ""
+            result.force_encoding('binary')
+            str.each_char do |c|
+              c = begin
+                c.encode('windows-1252')
+              rescue
+                c.force_encoding('binary')
+                c[1,1]
+              end
+              c.force_encoding('binary')
+              result += c
+            end
+            result.force_encoding('utf-8')
+            result
+          end
         end
       end
     end
@@ -437,15 +427,17 @@ module ActiveRecord
 end
 
 # This is a known bug in old ActionMailer versions.
-module ActionMailer
-  class Base
-    def perform_delivery_smtp(mail)
-      destinations = mail.destinations
-      mail.ready_to_send
-      sender = mail['return-path'] || mail['from'] # <-- instead of "mail.from"
-      Net::SMTP.start(smtp_settings[:address], smtp_settings[:port], smtp_settings[:domain],
-          smtp_settings[:user_name], smtp_settings[:password], smtp_settings[:authentication]) do |smtp|
-        smtp.sendmail(mail.encoded, sender, destinations)
+if RUBY_VERSION >= '1.9'
+  module ActionMailer
+    class Base
+      def perform_delivery_smtp(mail)
+        destinations = mail.destinations
+        mail.ready_to_send
+        sender = mail['return-path'] || mail['from'] # <-- instead of "mail.from"
+        Net::SMTP.start(smtp_settings[:address], smtp_settings[:port], smtp_settings[:domain],
+            smtp_settings[:user_name], smtp_settings[:password], smtp_settings[:authentication]) do |smtp|
+          smtp.sendmail(mail.encoded, sender, destinations)
+        end
       end
     end
   end
