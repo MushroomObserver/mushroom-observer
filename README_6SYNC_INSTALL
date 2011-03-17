@@ -1,22 +1,42 @@
-# This is log of setup on ubuntu 10.10 on 6sync server, Feb-Mar 2011. -Jason
-# Tested Mar 14, 2011. -Jason
 #
-# NOTE: I have added the yum equivalents to apt-get for Fedora / CentOS in
-# comments next to each apt-get line.  I can't guarantee these are all the ones
-# required.  Also note that a few configuration files will be in different
-# locations, and you will need to use chkconfig instead of update-rc.d.
+#  This is a log of the installation of a production server in early 2011.
 #
-# ubuntu 10.10
-# ruby 1.9.2-p180
-# rubygems 1.6.2
-# passenger 3.0.5
-# apache2 2.2.16
-# postfix 2.7.1
-# mysql 14.14
+#  It starts out fairly generic, and becomes increasingly specific to Mushroom
+#  Observer.  Look for the following "variables:
+#
+#    IP_ADDR            ip address of new server
+#    OTHER_IP_ADDR      ip address of old server
+#    DOMAIN             mushroomobserver.org
+#    SITE               mo
+#    USER               jason
+#    USER_PASSWORD      xxx
+#    DATA_PASSWORD      xxx
+#    MAIL_PASSWORD      xxx
+#    $YOUR_EMAIL        pellaea@gmail.com
+#    $FULL_NAME         Jason Hollinger
+#
+#  Tested from scratch, Mar 14, 2011. -Jason
+#
+#  (Many changes have been made since that test, though. I hope to test it
+#  again in the next week or two, Mar 17, 2011. -Jason)
+#
+#  NOTE: I have added the yum equivalents to apt-get for Fedora / CentOS in
+#  comments next to each apt-get line.  I can't guarantee these are all the ones
+#  required.  Also note that a few configuration files will be in different
+#  locations, and you will need to use chkconfig instead of update-rc.d.
+#
+#  ubuntu 10.10
+#  ruby 1.9.2-p180
+#  rubygems 1.6.2
+#  passenger 3.0.5
+#  apache2 2.2.16
+#  postfix 2.7.1
+#  mysql 14.14
+#
+################################################################################
 
 # Initial set up.
-local> ssh root@xxx.xxx.xxx.xxx
-root> echo xxx.xxx.xxx.xxx > /etc/ip
+local> ssh root@$IP_ADDR
 root> passwd
 root> apt-get update
 root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
@@ -24,24 +44,26 @@ root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
 root> # yum update
 root> # yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
 
-# Create your user account:
-root> useradd -m -s /bin/tcsh mo
-root> passwd -l mo
+# Create account for webserver.
+root> useradd -m -s /bin/tcsh $SITE
+root> passwd -l $SITE
 root> visudo
   # Add these lines to end. Allows users in "mo" group to "sudo su mo".
-  %mo ALL = NOPASSWD: /bin/su mo
-  %mo ALL = NOPASSWD: /bin/su - mo
-root> useradd -m -G mo -s /bin/tcsh jason
-root> passwd jason
+  %$SITE ALL = NOPASSWD: /bin/su $SITE
+  %$SITE ALL = NOPASSWD: /bin/su - $SITE
+
+# Create account for yourself.
+root> useradd -m -G $SITE -s /bin/tcsh $USER
+root> passwd $USER_PASSWORD
 root> logout
 
 # Password-less ssh.
 local> ssh-keygen -t rsa   # (if not already done)
-local> ssh-copy-id -i ~/.ssh/id_rsa.pub `cat /etc/ip`
+local> ssh-copy-id -i ~/.ssh/id_rsa.pub $IP_ADDR
 
-# Setup user accounts.
-local> ssh xxx.xxx.xxx.xxx
-jason> vi .tcshrc
+# Set up your user account however you like.
+local> ssh $IP_ADDR
+user> vi .tcshrc
   alias root sudo
   alias cls clear
   alias cd.. cd ..
@@ -55,39 +77,41 @@ jason> vi .tcshrc
   alias grep grep -s
   alias +x chmod a+x
   alias -x chmod a-x
-  alias mo 'cd /var/web/mo; sudo su - mo'
-jason> vi .vimrc
+  alias $SITE 'cd /var/web/$SITE; sudo su - $SITE'
+user> vi .vimrc
   syntax off
   set nohlsearch
   set ts=2
   set sw=2
   set et
   set nowrap
-jason> source .tcshrc
-jason> su root
+user> source .tcshrc
+
+# Set up root's and website's accounts.
+user> su root
 root> cp .tcshrc /root
-root> cp .tcshrc /home/mo
+root> cp .tcshrc /home/$SITE
 root> cp .vimrc /root
-root> cp .vimrc /home/mo
+root> cp .vimrc /home/$SITE
 root> chmod 660 /home/*/.tcshrc
 root> vi /root/.tcshrc
-  # Add this line.
+  # Add this line to improve performance of custom-built packages.
+  # (Check lscpu and /proc/cpuinfo for cpu type.)
   setenv CFLAGS "-O3 -m64 -march=core2"
-root> vi /home/mo/.tcshrc
-  # Delete "alias mo..." and add these.
-  alias mo 'cd /var/web/mo'
-  alias mosql  "mysql -u mo -p'xxx' mo_production"
-  alias mosqle "mysql -u mo -p'xxx' mo_production -e 'source \!^'"
-root> vi /home/mo/.login
+root> vi /home/$SITE/.tcshrc
+  # Add these aliases to the end.
+  alias $SITE 'cd /var/web/$SITE'
+  alias ${SITE}sql  "mysql -u $SITE -p'$DATA_PASSWORD' ${SITE}_production"
+  alias ${SITE}sqle "mysql -u $SITE -p'$DATA_PASSWORD' ${SITE}_production -e 'source \!^'"
+root> vi /home/$SITE/.login
   setenv TZ 'Eastern Time (US & Canada)'
   setenv RAILS_ENV production
-  cd /var/web/mo
-root> chown mo:mo /home/mo/.*
+  cd /var/web/$SITE
+root> chown -R $SITE:$SITE /home/$SITE
 root> tcsh
 
-# Disable direct root login.
+# Disable direct root login for security purposes.
 root> vi /etc/ssh/sshd_config
-  # Change this line to "no".
   PermitRootLogin no
 
 # Configure firewall.
@@ -111,7 +135,7 @@ root> chmod 600 /etc/firewall.conf
 root> vi /etc/rc.local
   iptables-restore < /etc/firewall.conf
 
-# Install the all the modules (except ruby) that we will need.
+# Install most of the modules that we will need (except ruby).
 root> apt-get install apache2 libapache2-mod-passenger \
         mysql-server mysql-client libmysqlclient-dev \
         subversion subversion-tools \
@@ -126,11 +150,10 @@ root> cd build
 root> wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p180.tar.bz2
 root> tar -xjf ruby*.bz2
 root> cd ruby-1.9.2-p180
-root> # check lscpu and /proc/cpuinfo for cpu type
-root> setenv CFLAGS "-O3 -m64 -march=core2"
 root> ./configure --with-ruby-version=1.9.2
 root> make install
 root> rehash
+root> cd
 
 # Ditto for rubygems.
 root> cd ~/build
@@ -147,17 +170,47 @@ root> gem install mysql2 --verbose --no-rdoc --no-ri
 root> gem install test-unit --verbose --no-rdoc --no-ri
 root> gem install RedCloth --verbose --no-rdoc --no-ri
 
-# Install rails apps.
+# Install passenger.
+root> gem install passenger --verbose --no-rdoc --no-ri
+root> rehash
+root> passenger-install-apache2-module
+  # Pay attention to output at end and make sure values below are right.
+root> vi /etc/apache2/mods-available/passenger.conf
+  # Change root to /usr/local/lib/ruby/gems/1.9.2/gems/passenger-3.0.5
+  # Change ruby to /usr/local/bin/ruby
+root> vi /etc/apache2/mods-available/passenger.load
+  # Change to /usr/local/lib/ruby/gems/1.9.2/gems/passenger-3.0.5/ext/apache2/mod_passenger.so
+root> service apache2 stop
+root> service apache2 start
+# (For some reason reload and restart don't always work.)
+
+# Install ImageMagick.
+root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev
+root> # yum install ImageMagick-devel
+root> gem install rmagick --verbose --no-rdoc --no-ri
+root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+
+# Create directory for rails app.
 root> mkdir /var/web
-root> mkdir /var/web/mo
-root> chown mo:mo /var/web/mo
-root> chmod 750 /var/web/mo
-root> cd /var/web
-root> su mo
-mo> svn co svn://user@repository.com/var/svn mo
-mo> mkdir mo/tmp mo/log mo/public/images/{thumb,320,640,960,1280,orig}
-mo> touch mo/tmp/restart.txt
-mo> vi mo/config/consts-site.rb
+root> mkdir /var/web/$SITE
+root> mkdir /var/web/$SITE/{tmp,log}
+root> touch /var/web/$SITE/tmp/restart.txt
+root> chown -R $SITE:$SITE /var/web/$SITE
+root> chmod 750 /var/web/$SITE
+
+# Make sure apache user has access to rails directories.
+root> usermod -a -G $SITE www-data
+
+--------------------------------------------------------------------------------
+
+# Now we're done with the generic installation.  Start installing Mushroom
+# Observer in particular.
+
+# Install rails apps.
+root> mo
+mo> svn co http://svn.collectivesource.com/mushroom_sightings/trunk/ .
+mo> mkdir public/images/{thumb,320,640,960,1280,orig}
+mo> vi config/consts-site.rb
   # Override these defaults.
   DOMAIN         = 'mushroomobserver.org'
   HTTP_DOMAIN    = 'http://mushroomobserver.org'
@@ -184,7 +237,7 @@ mo> vi mo/config/consts-site.rb
     :domain         => 'digitalmycology.com',
     :authentication => :login,
     :user_name      => 'mo@digitalmycology.com',
-    :password       => 'xxx',
+    :password       => '$MAIL_PASSWORD',
   }
 mo> exit
 
@@ -220,58 +273,39 @@ root> vi /etc/apache2/sites-available/mo
 root> a2dissite default
 root> a2ensite mo
 root> a2enmod rewrite
-root> usermod -a -G mo www-data
 
 # Create database.
-root> mysql -u root -p
+root> mo
+mo> mysql -u root -p
   create database mo_production;
-  create user 'mo'@'localhost' identified by 'xxx';
-  # set password for 'mo'@'localhost' = password('xxx');
+  create user 'mo'@'localhost' identified by '$DATA_PASSWORD';
+  # set password for 'mo'@'localhost' = password('$DATA_PASSWORD');
   grant all privileges on mo_production.* to 'mo'@'localhost' with grant option;
-root> cd /var/web/mo
-root> cp config/database.yml-template config/database.yml
-root> vi config/database.yml
+mo> cp config/database.yml-template config/database.yml
+mo> vi config/database.yml
   # Change these values in production section: (other sections aren't needed)
   adapter:  mysql2
   database: mo
-  password: xxx
-  socket:   /var/run/mysqld/mysqld.sock
+  password: $DATA_PASSWORD
+  socket:   /var/run/mysqld/mysqld.sock    # ubuntu/debian
+  # socket:   /var/lib/mysql/mysql.sock    # fedora/centos?
   encoding: utf8
-root> cd /var/web/mo/db
-root> scp user@oldserver:/var/web/mo/db/checkpoint.gz .
-root> gunzip checkpoint.gz
-root> mosqle checkpoint
-
-# Install passenger.
-root> gem install passenger --verbose --no-rdoc --no-ri
-root> rehash
-root> passenger-install-apache2-module
-  # Pay attention to output at end and make sure values below are right.
-root> vi /etc/apache2/mods-available/passenger.conf
-  # Change root to /usr/local/lib/ruby/gems/1.9.2/gems/passenger-3.0.5
-  # Change ruby to /usr/local/bin/ruby
-root> vi /etc/apache2/mods-available/passenger.load
-  # Change to /usr/local/lib/ruby/gems/1.9.2/gems/passenger-3.0.5/ext/apache2/mod_passenger.so
-root> service apache2 stop
-root> service apache2 start
-# (For some reason reload and restart don't always work.)
-
-# For ImageMagick.
-root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev
-root> # yum install ImageMagick-devel
-root> gem install rmagick --verbose --no-rdoc --no-ri
-root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
+mo> cd db
+mo> scp $USER@$OLD_SERVER:/var/web/mo/db/checkpoint.gz .
+mo> gunzip checkpoint.gz
+mo> mosqle checkpoint
 
 # Set up password-less ssh for image transfers.
-root> mo
 mo> ssh-keygen -t rsa
   # Just press return three times, tell it to overwrite id_rsa.pub if it asks.
 mo> ssh-copy-id -i ~/.ssh/id_rsa.pub cdmr@images.digitalmycology.com
   # Enter password.
 mo> ssh cdmr@images.digitalmycology.com
   # (just make sure it works)
-cdmr@dm.com> exit
-mo> exit
+
+--------------------------------------------------------------------------------
+
+# This section deals with setting up email.  It's mostly generic.
 
 # Set up simple mailserver using postfix.
 root> apt-get install postfix mutt
@@ -280,35 +314,23 @@ root> apt-get install postfix mutt
 root> # yum install postfix mutt
 root> vi /etc/aliases
   # Change where root's mail goes.
-  root: jason,...
+  root: $USER,...
 root> newaliases
-root> vi /home/jason/.forward
-  pellaea@gmail.com
-
-# Configure no-reply to bounce correctly.
-root> useradd -m no-reply
-root> passwd -l no-reply
-root> cp /var/web/mo/script/autoreply          /usr/local/bin/autoreply
-root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
-root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
-root> cp /var/web/mo/config/no-reply.forward   /home/no-reply/.forward
-root> chown -R no-reply:no-reply /home/no-reply
-root> chmod 644 /home/no-reply/.[maf]*
-root> chmod 755 /usr/local/bin/autoreply
 
 # Test mail server.
-root> su jason
-jason> cd
-jason> vi .muttrc
-  set realname="Jason Hollinger"
-  set from="jason@mushroomobserver.org"
+root> su $USER
+user> cd
+user> echo $YOUR_EMAIL > .forward
+user> vi .muttrc
+  set realname="$FULL_NAME"
+  set from="$USER@$DOMAIN"
   set use_from=yes
   set envelope_from=yes
-jason> echo "This is a test." | mutt -s test pellaea@gmail.com
+user> echo "This is a test." | mutt -s test $YOUR_EMAIL
   # (Check /var/log/mail.log and /var/log/mail.err.)
-jason> exit
+user> exit
 
-# Configure MO's mail.
+# Configure mail for MO.
 root> mo
 mo> cd
 mo> vi .muttrc
@@ -318,36 +340,48 @@ mo> vi .muttrc
   set envelope_from=yes
 mo> vi .forward
   root
-mo> echo "This is another test." | mutt -s test pellaea@gmail.com
+mo> echo "This is another test." | mutt -s test $YOUR_EMAIL
 mo> exit
 
-# Configure Rails's mail.
-# Ask yourself a question via the website:
-#   http://xxx.xxx.xxx.xxx/observer/ask_user_question/252
+# Configure mail for rails.
+# Should come configured "out of the box".
+# Ask yourself a question via the website, e.g.:
+#   http://$IP_ADDR/observer/ask_user_question/252
 # Probably want to tail -f log/production.log if it's throwing errors.
 
-# Grab thumbnails from image server.
-root> mo
-mo> vi script/process_image
-  # Verify correct address for image server.
-mo> vi script/update_images
-  # Verify correct address for image server.
-mo> script/update_images -v --sync dreamhost --download --thumb --320
+# Configure no-reply to bounce correctly.
+root> useradd -m no-reply
+root> passwd -l no-reply
+root> cp /var/web/mo/script/autoreply          /usr/local/bin/autoreply
+root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
+root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
+root> cp /var/web/mo/config/no-reply.forward   /home/no-reply/.forward
+root> chmod 644 /home/no-reply/.[maf]*
+root> chmod 755 /usr/local/bin/autoreply
+
+--------------------------------------------------------------------------------
+
+# Now the site should be mostly working.  We need to do some configuration to
+# get image uploads to work, though.
+
+# Make sure these have the correct image server(s).
+mo> vim script/process_image
+mo> vim script/update_images
 
 # Test image upload on server:
-#   http://xxx.xxx.xxx.xxx/observer/create_observation
+#   http://$IP_ADDR/observer/create_observation
 # Might need to run process_image once by hand before it will be fully automatic.
 mo> ls public/images/orig
 mo> script/process_image NNNNN jpg 0
-mo> exit
 
-# Make sure these services start up at boot.
-root> update-rc.d apache2 defaults
-root> update-rc.d mysql   defaults
-root> update-rc.d postfix defaults
+# Grab thumbnails from image server.  (This takes hours!)
+mo> script/update_images -v --sync dreamhost --download --thumb --320
 
-# Setup cron jobs.
-root> mo
+--------------------------------------------------------------------------------
+
+# Install cron jobs.
+
+# They're all already present, just need to stick them in the crontab.
 mo> crontab -e
   */5 * * * * /var/web/mo/script/run_rake email:send
   23  * * * * /var/web/mo/script/parse_log
@@ -355,22 +389,20 @@ mo> crontab -e
   43  3 * * * /var/web/mo/script/run_script update_lichen_list
   13  4 * * * /var/web/mo/script/run_script update_images --clean
   33 21 * * * /var/web/mo/script/makexml /var/web/mo/public/eol.xml
-mo> exit
 
-# Tests to run after reboot.
-root> iptables-save
-  # If there are more than a few lines it is probably correct.
-root> ps -ef
-  # Look for sshd, apache2, Passenger, mysqld, postfix.
+--------------------------------------------------------------------------------
 
-# Create additional users for CDMR member access:
+# This section deals with creating all the additional user accounts for
+# members of CDMR to give them access to the server in case of emergency.
+
+# Create an email to send to CDMR members explaining what we're doing.
 root> cd
 root> cat > password_email <<EOB
       I've created an account on the new mushroomobserver.org server for you.
       Please log in using an ssh (Secure Shell) client and change your
       password at your earliest convenience: 
 
-        ssh USER@`cat /etc/ip`
+        ssh USER@$IP_ADDR
         (password = PASS)
 
       If you don't have an ssh client, or if you have any problems logging
@@ -391,60 +423,94 @@ root> cat > password_email <<EOB
       Jason Hollinger
       Mushroom Observer System Administrator
       EOB
+
+# Create user accounts, initialize with random password, mail password to root.
 root> foreach user (anne darv mgwood mike velosa)
         set pass=`cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c8`
         useradd -m -s /bin/tcsh $user
         echo "$user":"$pass" | chpasswd
         passwd -e $user
         cat password_email | sed "s/USER/$user/g" | sed "s/PASS/$pass/" | \
-          mail -s "account on mushroomobserver.org" pellaea@gmail.com
+          mail -s "account on mushroomobserver.org" root
       end
 
-# If you need to remove a user completely (e.g., a test user):
+# If you need to remove a user completely (e.g., a test user).
 # root> userdel -r $user
 
-# To copy over login information from another server instance:
-root> vi /etc/shadow
-  # (copy lines from the same file on the other server)
+# To copy over login information from another server instance.
+# (NOTE: this doesn't seem to work going from Fedora to Ubuntu,
+# it may only work if both are running the same distribution.)
+# root> vi /etc/shadow
+#   # (copy lines from the same file on the other server)
 
-################################################################################
+--------------------------------------------------------------------------------
 
-The following are notes concerning problems I had migrating from one server
-to another.
+# This section deals with sharing databases between multiple servers.
+# NOTE: This is also useful for running two servers in parallel while testing
+# a new installation
 
-# In order to share database with another server.
-new_root> vi /etc/mysql/my/cnf
-  # Comment out the following line.
+# Configure database to accept remote connections.
+root> vi /etc/mysql/my/cnf
+  # Comment out this line to allow remote connections.
   # bind-address = 127.0.0.1
-new_root> mysql -u root -p
-  create user 'mo'@'old.ip.adr.num' identified by 'xxx';
-  grant all privileges on mo_production.* to 'mo'@'old.ip.adr.num' with grant option;
-new_root> ssh root@old.ip.adr.num
-old_root> mysqladmin --protocol=tcp -u mo -p'xxx' --host=new.ip.adr.num ping
+root> mysql -u root -p
+  create user 'mo'@'$OTHER_IP_ADDR' identified by '$DATA_PASSWORD';
+  grant all privileges on mo_production.* to 'mo'@'$OTHER_IP_ADDR' with grant option;
+root> ssh $USER@$OTHER_IP_ADDR
+user> mysqladmin --protocol=tcp -u mo -p'$DATA_PASSWORD' --host=$IP_ADDR ping
+user> exit
 
-# To switch databases once old server can connect to new database.
-old_root> service apache2 stop
+# To switch databases from old server to new server.
+# First set up new server as above.
+# Make sure everyone can connect to the new server's database.
+
+# Shut down apache2 on all servers.
+xxx_root> service apache2 stop
+
+# Make snapshot of old database.
 old_root> mo
 old_mo> cd db
 old_mo> ./dump
-old_mo> ssh root@new.ip.adr.num
+
+# Copy snapshot to new server.
 new_root> mo
 new_mo> cd db
-new_mo> scp root@old.ip.adr.num:/var/web/mo/db/checkpoint.gz .
+new_mo> scp $USER@$OLD_IP_ADDR:/var/web/mo/db/checkpoint.gz .
 new_mo> gunzip checkpoint.gz
 new_mo> mosqle checkpoint
-new_mo> exit
-new_root> exit
-old_mo> cd ..
-old_mo> vi config/database.yml
+
+# Reconfigure and restart all servers.
+xxx_root> mo
+xxx_mo> vi config/database.yml
   production:
     database: mo_production
-    host:     new.ip.adr.num
+    host:     $IP_ADDR
     username: mo
-    password: xxx
-old_mo> rake db:version
-  # Make sure Rails can connect correctly.
-old_mo> exit
-old_root> service apache2 start
-old_root> exit
+    password: $DATA_PASSWORD
+xxx_mo> rake db:version   # (just a simple test)
+xxx_mo> exit
+xxx_root> service apache2 start
+
+--------------------------------------------------------------------------------
+
+# A few post-installation sanity-checks.  Reboot after everything is done,
+# then check the following.
+
+# Make sure firewall is working.  If there are more than a few lines it is
+# probably correct, but you can also compare it with another server.
+root> iptables-save
+
+# Make sure all the critical processes started automatically.
+# Look for sshd, apache2, Passenger, mysqld, postfix.
+root> ps -ef
+
+# If any are missing, do this on ubuntu/debian:
+root> update-rc.d apache2 defaults
+root> update-rc.d mysql   defaults
+root> update-rc.d postfix defaults
+
+# Or this on fedora/centos:
+# root> chkconfig --level 345 httpd   on
+# root> chkconfig --level 345 mysqld  on
+# root> chkconfig --level 345 postfix on
 
