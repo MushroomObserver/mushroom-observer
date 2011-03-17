@@ -1,6 +1,11 @@
 # This is log of setup on ubuntu 10.10 on 6sync server, Feb-Mar 2011. -Jason
-# Tested Mar 14, 2011. -Jaosn
-# 
+# Tested Mar 14, 2011. -Jason
+#
+# NOTE: I have added the yum equivalents to apt-get for Fedora / CentOS in
+# comments next to each apt-get line.  I can't guarantee these are all the ones
+# required.  Also note that a few configuration files will be in different
+# locations, and you will need to use chkconfig instead of update-rc.d.
+#
 # ubuntu 10.10
 # ruby 1.9.2-p180
 # rubygems 1.6.2
@@ -11,27 +16,28 @@
 
 # Initial set up.
 local> ssh root@xxx.xxx.xxx.xxx
+root> echo xxx.xxx.xxx.xxx > /etc/ip
 root> passwd
 root> apt-get update
 root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
                       build-essential iptables bison
-root> useradd -s /bin/tcsh mo
-root> vi /etc/shadow
-  # Replace "mo:!:..." with "mo:*:..." at end.
+root> # yum update
+root> # yum install tcsh mlocate gcc make vim lynx telnet emacs bind-utils
+
+# Create your user account:
+root> useradd -m -s /bin/tcsh mo
+root> passwd -l mo
 root> visudo
-  # Add these lines to end.
+  # Add these lines to end. Allows users in "mo" group to "sudo su mo".
   %mo ALL = NOPASSWD: /bin/su mo
   %mo ALL = NOPASSWD: /bin/su - mo
-root> useradd -G mo -s /bin/tcsh jason
+root> useradd -m -G mo -s /bin/tcsh jason
 root> passwd jason
-root> mkdir /home/mo /home/jason
-root> chown mo:mo /home/mo
-root> chown jason:jason /home/jason
 root> logout
 
 # Password-less ssh.
 local> ssh-keygen -t rsa   # (if not already done)
-local> ssh-copy-id -i ~/.ssh/id_rsa.pub xxx.xxx.xxx.xxx
+local> ssh-copy-id -i ~/.ssh/id_rsa.pub `cat /etc/ip`
 
 # Setup user accounts.
 local> ssh xxx.xxx.xxx.xxx
@@ -111,6 +117,7 @@ root> apt-get install apache2 libapache2-mod-passenger \
         subversion subversion-tools \
         libcurl4-openssl-dev libssl-dev libopenssl-ruby \
         apache2-prefork-dev libapr1-dev libaprutil1-dev
+root> # yum install httpd-devel mysql-devel mysql-server svn curl-devel
 
 # Build and install ruby from source to get good version.
 root> cd
@@ -120,7 +127,7 @@ root> wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.2-p180.tar.bz2
 root> tar -xjf ruby*.bz2
 root> cd ruby-1.9.2-p180
 root> # check lscpu and /proc/cpuinfo for cpu type
-root> setenv CFLAGS "-O3 -m64 -march=core2" 
+root> setenv CFLAGS "-O3 -m64 -march=core2"
 root> ./configure --with-ruby-version=1.9.2
 root> make install
 root> rehash
@@ -251,6 +258,7 @@ root> service apache2 start
 
 # For ImageMagick.
 root> apt-get install imagemagick libmagickcore-dev libmagickwand-dev
+root> # yum install ImageMagick-devel
 root> gem install rmagick --verbose --no-rdoc --no-ri
 root> gcc /var/web/mo/script/jpegresize.c -ljpeg -lm -O2 -o /usr/local/bin/jpegresize
 
@@ -269,6 +277,7 @@ mo> exit
 root> apt-get install postfix mutt
   # Select "internet site" when it prompts you.
   # Enter the proper hostname as "system mail name" (should resolve back with reverse DNS).
+root> # yum install postfix mutt
 root> vi /etc/aliases
   # Change where root's mail goes.
   root: jason,...
@@ -277,8 +286,8 @@ root> vi /home/jason/.forward
   pellaea@gmail.com
 
 # Configure no-reply to bounce correctly.
-root> useradd no-reply
-root> mkdir /home/no-reply
+root> useradd -m no-reply
+root> passwd -l no-reply
 root> cp /var/web/mo/script/autoreply          /usr/local/bin/autoreply
 root> cp /var/web/mo/config/no-reply.muttrc    /home/no-reply/.muttrc
 root> cp /var/web/mo/config/no-reply.autoreply /home/no-reply/.autoreply
@@ -323,7 +332,7 @@ mo> vi script/process_image
   # Verify correct address for image server.
 mo> vi script/update_images
   # Verify correct address for image server.
-mo> script/update_images -v --sync dreamhost --download --thumb --320 
+mo> script/update_images -v --sync dreamhost --download --thumb --320
 
 # Test image upload on server:
 #   http://xxx.xxx.xxx.xxx/observer/create_observation
@@ -353,6 +362,50 @@ root> iptables-save
   # If there are more than a few lines it is probably correct.
 root> ps -ef
   # Look for sshd, apache2, Passenger, mysqld, postfix.
+
+# Create additional users for CDMR member access:
+root> cd
+root> cat > password_email <<EOB
+      I've created an account on the new mushroomobserver.org server for you.
+      Please log in using an ssh (Secure Shell) client and change your
+      password at your earliest convenience: 
+
+        ssh USER@`cat /etc/ip`
+        (password = PASS)
+
+      If you don't have an ssh client, or if you have any problems logging
+      in, please let me know by replying to this email. 
+
+      As a member of CDMR, you should have already received a copy of the
+      administrative details for Mushroom Observer, including the root
+      password for this new server.  However, for security reasons, we do not
+      allow direct ssh log-in as root, so in the unlikely event that you need
+      to access the server, you will need to login using your individual
+      account, instead.  Once logged in you can switch to root via "su root". 
+
+      If you prefer, you do not need to do any of this (let me know), but we
+      would like at least a few members of CDMR to maintain active accounts
+      on our servers, in case of emergency. 
+
+      Thank you for your time,
+      Jason Hollinger
+      Mushroom Observer System Administrator
+      EOB
+root> foreach user (anne darv mgwood mike velosa)
+        set pass=`cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c8`
+        useradd -m -s /bin/tcsh $user
+        echo "$user":"$pass" | chpasswd
+        passwd -e $user
+        cat password_email | sed "s/USER/$user/g" | sed "s/PASS/$pass/" | \
+          mail -s "account on mushroomobserver.org" pellaea@gmail.com
+      end
+
+# If you need to remove a user completely (e.g., a test user):
+# root> userdel -r $user
+
+# To copy over login information from another server instance:
+root> vi /etc/shadow
+  # (copy lines from the same file on the other server)
 
 ################################################################################
 
