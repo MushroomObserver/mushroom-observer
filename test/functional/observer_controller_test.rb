@@ -122,6 +122,24 @@ class ObserverControllerTest < FunctionalTestCase
     assert_response('textile_sandbox')
   end
 
+  def test_altering_types_shown_by_rss_log_index
+    # Show none.
+    post(:index_rss_log)
+    assert_response('list_rss_logs')
+
+    # Show one.
+    post(:index_rss_log, :show_observations => '1')
+    assert_response('list_rss_logs')
+
+    # Show all.
+    params = {}
+    for type in RssLog.all_types
+      params["show_#{type}"] = '1'
+    end
+    post(:index_rss_log, params)
+    assert_response('list_rss_logs')
+  end
+
   def test_prev_and_next_observation
     # Uses default observation query
     get(:next_observation, :id => 4)
