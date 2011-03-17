@@ -499,7 +499,7 @@ class QueryTest < UnitTestCase
       query.result_ids = [1,3,5,7]
       assert_equal(4, query.num_results)
       assert_equal([1,3,5,7], query.result_ids)
-      assert_equal([@rolf,@junk,@katrina,nil], query.results)
+      assert_equal([@rolf,@junk,@katrina], query.results)
 
       # Should be able to set it this way, to.
       query.results = [@dick, @mary, @rolf]

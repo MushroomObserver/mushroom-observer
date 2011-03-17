@@ -1756,13 +1756,16 @@ class AbstractQuery < ActiveRecord::Base
     if !needed.empty?
       set = clean_id_set(needed)
       args2 = {}
+      # Note that "set" will be truncated to MAX_ARRAY if too large.
+      # This could result in some results not being returned. (See
+      # the reject(&:nil?) clause below.)
       args2[:conditions] = "#{model.table_name}.id IN (#{set})"
       args2[:include] = args[:include] if args[:include]
       model.all(args2).each do |obj|
         @results[obj.id] = obj
       end
     end
-    ids.map {|id| @results[id]}
+    ids.map {|id| @results[id]}.reject(&:nil?)
   end
 
   # Clear out the results cache.  Useful if you need to reload results with

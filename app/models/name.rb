@@ -291,7 +291,7 @@ class Name < AbstractModel
 
       open(NAME_PRIMER_CACHE_FILE, 'w').write(result.join("\n") + "\n")
     else
-      result = open(USER_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
+      result = open(NAME_PRIMER_CACHE_FILE, "r:UTF-8").readlines.map(&:chomp)
     end
     return result
   end
