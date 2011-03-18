@@ -545,7 +545,6 @@ case get_next_arg
 
   when '-c', '--clean'
     any_args_left?
-@@verbose = true
     files = @@use_cache ? get_cached_listings(:cron) : refresh_listings(:cron)
     uploads = check_for_mismatches(files, :cron)
     for server, files in uploads

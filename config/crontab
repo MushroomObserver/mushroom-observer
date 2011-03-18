@@ -1,0 +1,10 @@
+RAILS_ENV=production
+RUBYLIB=/usr/local/lib/ruby/site_ruby/1.9.2
+GEM_HOME=/usr/local/lib/ruby/gems/1.9.2
+
+*/5 * * * * /var/web/mo/script/run_rake email:send
+23  * * * * /var/web/mo/script/parse_log
+13  3 * * * /var/web/mo/script/run_script refresh_name_lister_cache
+43  3 * * * /var/web/mo/script/run_script update_lichen_list
+13  4 * * * /var/web/mo/script/run_script update_images --clean
+33 21 * * * /var/web/mo/script/makexml /var/web/mo/public/eol.xml
