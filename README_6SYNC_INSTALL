@@ -249,6 +249,9 @@ root> vi /etc/apache2/sites-available/mo
     RailsEnv production
     SetEnv TZ 'Eastern Time (US & Canada)'
 
+    # This was necessary for my local installation on Fedora Core 13.
+    # RailsBaseURI /
+
     <Directory /var/web/mo/public>
       Options FollowSymLinks
       AllowOverride limit
@@ -258,9 +261,13 @@ root> vi /etc/apache2/sites-available/mo
 
     RewriteEngine on
 
+    # Redirect Chris Parrish's lichens pages at CDMR.
+    RewriteRule ^/lichens/(.*)$ http://lichens.digitalmycology.com/$1 [QSA]
+
     # Explicitly tell apache where to find static content in /public.
     # (Applies to several specific subdirs and any URL like /blah.ext.)
-    RewriteRule ^/(lichens|stylesheets|javascripts|[\w\-\.]+\.\w+)(.*)$ /public/$1$2 [QSA]
+    # (I had to disable this on my local installation on Fedora Core 13.)
+    RewriteRule ^/(stylesheets|javascripts|[\w\-\.]+\.\w+)(.*)$ /public/$1$2 [QSA]
 
     # Redirect all but thumbnails to image server.
     # RewriteRule ^/images/thumb/(.*)$ http://images.digitalmycology.com/thumb/$1 [QSA]
