@@ -1,5 +1,0 @@
-*/5 * * * * /home/mo/bin/run_rake email:send
-23 * * * * /home/mo/bin/parse_log
-13 3 * * * /home/mo/bin/run_script refresh_name_lister_cache
-43 3 * * * /home/mo/bin/run_script update_lichen_list
-13 4 * * * /home/mo/bin/run_script update_images --clean
