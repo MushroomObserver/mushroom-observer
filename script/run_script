@@ -13,4 +13,4 @@ if [[ $2 == '-v' ]]; then
   echo Running $dir/script/$*
 fi
 
-exec $dir/script/$*
+$dir/script/$* 2>&1 | grep -v "29: warning: nested"
