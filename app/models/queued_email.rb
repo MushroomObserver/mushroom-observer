@@ -266,7 +266,7 @@ class QueuedEmail < AbstractModel
   def dump
     result = ''
     result += "#{self.id}: from => #{self.user and self.user.login}, "
-    result += "to => #{self.to_user.login}, type => #{self.type}, "
+    result += "to => #{self.to_user.login}, flavor => #{self.flavor}, "
     result += "queued => #{self.queued}\n"
     for i in self.queued_email_integers
       result += "\t#{i.key.to_s} => #{i.value}\n"
