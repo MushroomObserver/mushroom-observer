@@ -574,8 +574,8 @@ class NameControllerTest < FunctionalTestCase
   end
 
   def test_create_name_with_many_implicit_creates
-    text_name = "Genus species ssp. subspecies v. variety forma form"
-    text_name2 = "Genus species subsp. subspecies var. variety f. form"
+    text_name = "Genus spec ssp. subspecies v. variety forma form"
+    text_name2 = "Genus spec subsp. subspecies var. variety f. form"
     name = Name.find_by_text_name(text_name)
     count = Name.count
     assert_nil(name)
@@ -589,7 +589,7 @@ class NameControllerTest < FunctionalTestCase
     post(:create_name, params)
     assert_response(:action => :show_name)
     assert(name = Name.find_by_text_name(text_name2))
-    assert(count + 5, Name.count)
+    assert_equal(count + 5, Name.count)
   end
 
   # ----------------------------

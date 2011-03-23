@@ -758,7 +758,7 @@ class ObserverControllerTest < FunctionalTestCase
       :chosen_name => { :name_id => names(:lactarius_alpinus).id }
     }, 1,1,0)
     nam = assigns(:naming)
-    assert(nam.name, names(:lactarius_alpinus))
+    assert_equal(nam.name, names(:lactarius_alpinus))
 
     # Test an observation creation with a deprecated name that has been approved
     new_name = "Lactarius subalpinus"
@@ -2077,7 +2077,7 @@ class ObserverControllerTest < FunctionalTestCase
     img = Image.find_by_copyright_holder('zuul')
     assert(img)
     assert_equal([], img.observations)
-    assert([img.id], @controller.instance_variable_get('@good_images').map(&:to_s))
+    assert_equal([img.id], @controller.instance_variable_get('@good_images').map(&:id))
   end
 
   # ----------------------------

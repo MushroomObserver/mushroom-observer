@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/local/bin/ruby -Ilib:test /usr/local/lib/ruby/1.9.2/rake/rake_test_loader.rb $*

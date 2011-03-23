@@ -443,4 +443,25 @@ if RUBY_VERSION >= '1.9'
   end
 end
 
+# The test-unit plugin now provides this, but fails to give it all the same
+# functionality # of assert_match (ability to pass String instead of Regexp, in
+# particular). 
+if RUBY_VERSION >= '1.9'
+  gem 'test-unit'
+  require 'test/unit/assertions.rb' unless defined? Unit::Test::Assertions
+  module Test
+    module Unit
+      module Assertions
+        def assert_not_match(expect, actual, msg=nil)
+          _wrap_assertion do
+            expect = Regexp.new(expect) if expect.is_a?(String)
+            msg = build_message(msg, "Expected <?> not to match <?>.", actual, expect)
+            assert_block(msg) { actual !~ expect }
+          end
+        end
+      end
+    end
+  end
+end
+
 ################################################################################
