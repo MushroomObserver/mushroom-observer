@@ -1093,26 +1093,25 @@ class ApplicationController < ActionController::Base
   def find_query(model=nil, update=!is_robot?)
     model = model.to_s if model
     result = nil
-    if !params[:q].blank?
-      if query = Query.safe_find(params[:q].dealphabetize)
-        # This is right kind of query.
-        if !model or (query.model_string == model)
+    q = params[:q].dealphabetize rescue nil
+    if q && (query = Query.safe_find(q))
+      # This is right kind of query.
+      if !model or (query.model_string == model)
+        result = query
+      # If not, try coercing it.
+      elsif query2 = query.coerce(model)
+        result = query2
+      # If that fails, try the outer query coercing if necessary.
+      elsif query = query.outer
+        if query.model_string == model
           result = query
-        # If not, try coercing it.
         elsif query2 = query.coerce(model)
           result = query2
-        # If that fails, try the outer query coercing if necessary.
-        elsif query = query.outer
-          if query.model_string == model
-            result = query
-          elsif query2 = query.coerce(model)
-            result = query2
-          end
         end
-        if update && result
-          result.access_count += 1
-          result.save
-        end
+      end
+      if update && result
+        result.access_count += 1
+        result.save
       end
     end
     return result
@@ -1142,8 +1141,9 @@ class ApplicationController < ActionController::Base
       # Special exception for prev/next in RssLog query: If go to "next" in
       # show_observation, for example, inside an RssLog query, go to the next
       # object, even if it's not an observation.    If...
-      if params[:q] and                             # ... query exists
-         (query = Query.safe_find(params[:q].dealphabetize)) and
+      if params[:q] and                             # ... query parameter given
+         (q = params[:q].dealphabetize rescue nil) and
+         (query = Query.safe_find(q)) and           # ... and query exists
          (query.model_symbol == :RssLog) and        # ... and it's a RssLog query
          (rss_log = object.rss_log rescue nil) and  # ... and current rss_log exists
          query.index(rss_log) and                   # ... and it's in query results
