@@ -947,10 +947,10 @@ protected
 
     if !self.when
       errors.add(:when, :validate_observation_when_missing.t)
-    elsif self.when.is_a?(Date) && self.when > Date.today
+    elsif self.when.is_a?(Date) && self.when > Date.today + 1.day
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Date.today=#{Date.today}")
       errors.add(:when, :validate_observation_future_time.t)
-    elsif self.when.is_a?(Time) && self.when > Time.now + 6.hours
+    elsif self.when.is_a?(Time) && self.when > Time.now + 1.day
       errors.add(:when, "self.when=#{self.when.class.name}:#{self.when} Time.now=#{Time.now+6.hours}")
       errors.add(:when, :validate_observation_future_time.t)
     end

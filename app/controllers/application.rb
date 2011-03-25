@@ -202,7 +202,7 @@ class ApplicationController < ActionController::Base
 
       # Make currently logged-in user available to everyone.
       User.current = @user
-      logger.warn("user = #{@user ? @user.id : '--'}")
+      logger.warn("user=#{@user ? @user.id : '0'} robot=#{is_robot? ? 'Y' : 'N'}")
     end
 
     # Tell Rails to continue to process.
