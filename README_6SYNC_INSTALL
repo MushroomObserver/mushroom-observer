@@ -266,8 +266,8 @@ root> vi /etc/apache2/sites-available/mo
 
     # Explicitly tell apache where to find static content in /public.
     # (Applies to several specific subdirs and any URL like /blah.ext.)
-    # (I had to disable this on my local installation on Fedora Core 13.)
-    RewriteRule ^/(stylesheets|javascripts|[\w\-\.]+\.\w+)(.*)$ /public/$1$2 [QSA]
+    # (This is apparently only required for the old fedora installation?)
+    # RewriteRule ^/(stylesheets|javascripts|[\w\-\.]+\.\w+)(.*)$ /public/$1$2 [QSA]
 
     # Redirect all but thumbnails to image server.
     # RewriteRule ^/images/thumb/(.*)$ http://images.digitalmycology.com/thumb/$1 [QSA]
