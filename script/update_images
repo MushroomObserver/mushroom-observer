@@ -687,7 +687,7 @@ EXAMPLES
     Run this on slicehost to force it to upload any images missing on
     dreamhost.
 
-  update_images --root . --sync dreamhost --download --orig --local image_backup
+  update_images --root . --sync dreamhost --download --orig -P image_backup
     Run this on your local machine to update your backup copy of the original
     images in a directory called image_backup/orig.
 

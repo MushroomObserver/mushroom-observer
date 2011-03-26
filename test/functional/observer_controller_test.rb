@@ -29,10 +29,12 @@ class ObserverControllerTest < FunctionalTestCase
 
     post_requires_login(:create_observation, params)
     # either_requires_either(:post, :create_observation, nil, params, :username => user.login)
-    if o_num == 1
-      assert_response(:action => :create_location)
-    else
+    if o_num == 0
       assert_response(:success)
+    elsif Location.find_by_name(params[:observation][:place_name])
+      assert_response(:action => :show_observation)
+    else
+      assert_response(:action => :create_location)
     end
 
     assert_equal(o_count + o_num, Observation.count)
@@ -666,6 +668,17 @@ class ObserverControllerTest < FunctionalTestCase
     assert_form_action(:action => 'create_observation', :approved_name => '')
   end
 
+  def test_construct_observation_approved_place_name
+    where = "Albion, California, USA"
+    generic_construct_observation({
+      :observation => { :place_name => where},
+      :name => { :name => "Coprinus comatus"},
+      :approved_place_name => ""
+    }, 1, 1, 0)
+    obs = assigns(:observation)
+    assert_equal(where, obs.place_name)
+  end
+  
   def test_construct_observation
 
     # Test a simple observation creation with an approved unique name

@@ -94,9 +94,9 @@ end
 # Help message whenever screw up command line.
 $stderr.puts %(
   USAGE
-    script/jpegsize.rb <file>.jpg
-    script/jpegsize.rb -f <file_list>.txt
-    script/jpegsize.rb -s <id> <file>.jpg
+    script/jpegsize <file>.jpg
+    script/jpegsize -f <file_list>.txt
+    script/jpegsize -s <id> <file>.jpg
 
   DESCRIPTION
     Reports the size of one or more JPEG files.
