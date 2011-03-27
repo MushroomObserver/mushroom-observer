@@ -225,11 +225,12 @@ class QueuedEmail < AbstractModel
   # receiver, then passes it off to the subclass (via deliver_email). 
   def send_email
     return true if not RunLevel.is_normal?
-    self.class.debug_log("SEND #{self.flavor} " +
-         "from=#{user.login rescue 'nil'} " +
-         "to=#{to_user.login rescue 'nil'} " +
-         queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
-         queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' '))
+    log_msg = "SEND #{self.flavor} " +
+      "from=#{user.login rescue 'nil'} " +
+      "to=#{to_user.login rescue 'nil'} " +
+      queued_email_integers.map {|x| "#{x.key}=#{x.value}"}.join(' ') +
+      queued_email_strings.map {|x| "#{x.key}=\"#{x.value}\""}.join(' ')
+    self.class.debug_log(log_msg)
     current_locale = Locale.code
     result = false
     if user == to_user
@@ -241,7 +242,10 @@ class QueuedEmail < AbstractModel
     return result
   rescue => e
     raise e if TESTING
+    $stderr.puts('ERROR CREATING EMAIL')
+    $stderr.puts(log_msg)
     $stderr.puts(e.to_s)
+    $stderr.puts(e.backtrace)
     Locale.code = current_locale
     return false
   end
