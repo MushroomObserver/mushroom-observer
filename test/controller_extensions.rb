@@ -457,7 +457,7 @@ module ControllerExtensions
       # Find each occurrance of <form action="blah" method="post">.
       found_it = false
       found = {}
-      @response.body.split("<form action").each do |str|
+      @response.body.split(/<form [^<>]*action/).each do |str|
         if str =~ /^="([^"]*)" [^>]*method="post"/
           url2 = URI.unescape($1).gsub('&amp;', '&')
           if url == url2

@@ -444,7 +444,7 @@ if RUBY_VERSION >= '1.9'
 end
 
 # The test-unit plugin now provides this, but fails to give it all the same
-# functionality # of assert_match (ability to pass String instead of Regexp, in
+# functionality of assert_match (ability to pass String instead of Regexp, in
 # particular). 
 if RUBY_VERSION >= '1.9'
   gem 'test-unit'
@@ -459,6 +459,39 @@ if RUBY_VERSION >= '1.9'
             assert_block(msg) { actual !~ expect }
           end
         end
+      end
+    end
+  end
+end
+
+# Multipart form data is read in as ASCII-8BIT / BINARY.  Apparently we can
+# usually assume that it is actually UTF-8, so we just need to force the
+# correct encoding.
+if RUBY_VERSION >= '1.9'
+  module ActionController
+    class AbstractRequest
+      class << self
+        alias __get_typed_value get_typed_value
+        def get_typed_value(value)
+          result = __get_typed_value(value)
+          result.force_encoding('utf-8') if result.respond_to?(:force_encoding)
+          return result
+        end
+      end
+    end
+  end
+end
+
+# This tells browsers which encoding to use when sending POST data from forms.
+# The magic hidden field is a workaround to force IE to pay attention to the
+# requested character encoding.
+module ActionView
+  module Helpers
+    module FormTagHelper
+      alias __form_tag_html form_tag_html
+      def form_tag_html(args)
+        __form_tag_html(args.merge(:'accept-charset' => 'UTF-8')) +
+          '<input name="_utf8" type="hidden" value="&#9731;" />'
       end
     end
   end
