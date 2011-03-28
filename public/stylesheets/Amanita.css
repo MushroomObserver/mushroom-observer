@@ -11,8 +11,9 @@ pachycolea { background-color: #383138; color: #a39eb2; light-stipe: #aa9a83; da
 /* Global default colors */
 body { background-color: #383138; color: #bfc0bb; } /* pachycolea */
 
-div.textile table    { background: #bfc0bb; } /* pachycolea */
-div.textile table td { background: #383138; } /* pachycolea */
+div.textile table         { background: #bfc0bb; } /* pachycolea */
+div.textile table.noborder { background: #383138; } /* pachycolea */
+div.textile table td      { background: #383138; } /* pachycolea */
 
 a { color: #aa9a83; } /* pachycolea light-stipe */
 a:visited { color: #fff8c6; } /* muscaria yellow */
@@ -50,8 +51,9 @@ li.selected { background-color: #dd9d5f ! important }
       background-color: #954c23; color: #ebe4de; /* calyptroderma-fall */
 }
 
-.ListLine0 div.textile table    { background: #ebe4de; } /* calyptroderma-fall */
-.ListLine0 div.textile table td { background: #954c23; } /* calyptroderma-fall */
+.ListLine0 div.textile table         { background: #ebe4de; } /* calyptroderma-fall */
+.ListLine0 div.textile table.noborder { background: #954c23; } /* calyptroderma-fall */
+.ListLine0 div.textile table td      { background: #954c23; } /* calyptroderma-fall */
 
 .ListLine0 a {
       color: #f5bd5e; /* calyptroderma-fall light-cap */
@@ -66,8 +68,9 @@ li.selected { background-color: #dd9d5f ! important }
       background-color: #787133; color: #e6edd5; /* phalloides */
 }
 
-.ListLine1 div.textile table    { background: #e6edd5; } /* phalloides */
-.ListLine1 div.textile table td { background: #787133; } /* phalloides */
+.ListLine1 div.textile table         { background: #e6edd5; } /* phalloides */
+.ListLine1 div.textile table.noborder { background: #787133; } /* phalloides */
+.ListLine1 div.textile table td      { background: #787133; } /* phalloides */
 
 .ListLine1 a {
       color: #dfe4bc; /* phalloides light-cap */

@@ -14,8 +14,9 @@ body {
     color: #3b2821; /* cupreobrunneus */
 }
 
-div.textile table    { background: #3b2821; } /* cupreobrunneus */
-div.textile table td { background: #f6f0f2; } /* campestris */
+div.textile table         { background: #3b2821; } /* cupreobrunneus */
+div.textile table.noborder { background: #f6f0f2; } /* campestris */
+div.textile table td      { background: #f6f0f2; } /* campestris */
 
 a { color: #a06463; } /* brasiliensis */
 a:visited { color: #3b2821; }  /* cupreobrunneus */
@@ -59,8 +60,9 @@ li.selected { background-color: #eccf95 ! important }
       background-color: #d4a833; /* xanthodermus */
 }
 
-.ListLine0 div.textile table    { background: #3b2821; } /* cupreobrunneus */
-.ListLine0 div.textile table table td { background: #d4a833; } /* xanthodermus */
+.ListLine0 div.textile table         { background: #3b2821; } /* cupreobrunneus */
+.ListLine0 div.textile table.noborder { background: #d4a833; } /* xanthodermus */
+.ListLine0 div.textile table td      { background: #d4a833; } /* xanthodermus */
 
 .ListLine0 a {
       color: #b4725f; /* lilaceps */
@@ -76,8 +78,9 @@ li.selected { background-color: #eccf95 ! important }
       background-color: #b4725f; /* lilaceps */
 }
 
-.ListLine1 div.textile table    { background: #3b2821; } /* cupreobrunneus */
-.ListLine1 div.textile table td { background: #b4725f; } /* lilaceps */
+.ListLine1 div.textile table         { background: #3b2821; } /* cupreobrunneus */
+.ListLine1 div.textile table.noborder { background: #b4725f; } /* lilaceps */
+.ListLine1 div.textile table td      { background: #b4725f; } /* lilaceps */
 
 .ListLine1 a {
       color: #d4a833; /* xanthodermus */

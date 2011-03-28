@@ -6,8 +6,9 @@
 /* Global default colors */
 body { background-color: #fae8b8; /* californicus */ color: #10110b; /* cornucopioides dark-hymenium */ }
 
-div.textile table    { background: #10110b; } /* cornucopioides dark-hymenium */
-div.textile table td { background: #fae8b8; } /* californicus */
+div.textile table         { background: #10110b; } /* cornucopioides dark-hymenium */
+div.textile table.noborder { background: #fae8b8; } /* californicus */
+div.textile table td      { background: #fae8b8; } /* californicus */
 
 a { color: #ff6524; } /* cinnabarinus light-cap */
 a:visited { color: #c12900; } /* cinnabarinus dark-cap */
@@ -48,8 +49,9 @@ li.selected { background-color: #f6ae4a ! important }
       background-color: #603b29; color: #c2914c; /* tubaeformis */
 }
 
-.ListLine0 div.textile table    { background: #c2914c; } /* tubaeformis */
-.ListLine0 div.textile table td { background: #603b29; } /* tubaeformis */
+.ListLine0 div.textile table         { background: #c2914c; } /* tubaeformis */
+.ListLine0 div.textile table.noborder { background: #603b29; } /* tubaeformis */
+.ListLine0 div.textile table td      { background: #603b29; } /* tubaeformis */
 
 .ListLine0 a {
       color: #e5bb67; /* tubaeformis */
@@ -68,8 +70,9 @@ li.selected { background-color: #f6ae4a ! important }
       background-color: #4f4337; color: #e5bb67; /* cornucopioides & tubaeformis */
 }
 
-.ListLine1 div.textile table    { background: #e5bb67; } /* tubaeformis */
-.ListLine1 div.textile table td { background: #4f4337; } /* cornucopioides */
+.ListLine1 div.textile table         { background: #e5bb67; } /* tubaeformis */
+.ListLine1 div.textile table.noborder { background: #4f4337; } /* cornucopioides */
+.ListLine1 div.textile table td      { background: #4f4337; } /* cornucopioides */
 
 .ListLine1 a {
       color: #e6c987; /* cornucopioides */

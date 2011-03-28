@@ -6,8 +6,9 @@
 /* Global default colors */
 body { background-color: #e9e3af; /* punicea light-stipe */ color: #37372f; /* conica stain */ }
 
-div.textile table    { background: #37372f; } /* conica stain */
-div.textile table td { background: #e9e3af; } /* punicea light-stipe */
+div.textile table         { background: #37372f; } /* conica stain */
+div.textile table.noborder { background: #e9e3af; } /* punicea light-stipe */
+div.textile table td      { background: #e9e3af; } /* punicea light-stipe */
 
 a { color: #405536; } /* psittacina cap-green */
 a:visited { color: #eb9020; } /* psittacina cap-orange */
@@ -56,8 +57,9 @@ li.selected { background-color: #f19c05 ! important }
       background-color: #cc382a; /* punicea cap-light */
 }
 
-.ListLine0 div.textile table    { background: #37372f; } /* conica stain */
-.ListLine0 div.textile table td { background: #cc382a; } /* punicea cap-light */
+.ListLine0 div.textile table         { background: #37372f; } /* conica stain */
+.ListLine0 div.textile table.noborder { background: #cc382a; } /* punicea cap-light */
+.ListLine0 div.textile table td      { background: #cc382a; } /* punicea cap-light */
 
 .ListLine0 a {
       color: #e9e3af; /* punicea dark-stipe */
@@ -76,8 +78,9 @@ li.selected { background-color: #f19c05 ! important }
       background-color: #ffbf01; /* conica cap-yellow */
 }
 
-.ListLine1 div.textile table    { background: #37372f; } /* conica stain */
-.ListLine1 div.textile table td { background: #ffbf01; } /* conica cap-yellow */
+.ListLine1 div.textile table         { background: #37372f; } /* conica stain */
+.ListLine1 div.textile table.noborder { background: #ffbf01; } /* conica cap-yellow */
+.ListLine1 div.textile table td      { background: #ffbf01; } /* conica cap-yellow */
 
 .ListLine1 a {
       color: #a31404; /* conica cap-red */
