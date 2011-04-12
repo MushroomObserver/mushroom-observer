@@ -150,7 +150,7 @@ class LanguagesTest < UnitTestCase
         case line = lines.shift
         when /DISABLE SYNTAX CHECK/
           lines = []
-        when /^#/, /^ *$/
+        when /^﻿?#/, /^ *$/
         when /^(?:\w+|"\w+"):  ?(?!>)(\S(.*\S)?)/
           validate_one_liner($1) do
             errors << "#{file} line #{num - lines.length}: #{line}"

@@ -298,30 +298,34 @@ versions: versions
 # Common nouns/adjectives used as labels, never pluralized:
 ALL: All
 all: all
-EAST: East
-east: east
-HIGH: High
-high: high
-LESS: Less
-less: less
-LOW: Low
-low: low
-MORE: More
-more: more
-NEXT: Next
-next: next
 NONE: None
 none: none
-NORTH: North
-north: north
+HIGH: High
+high: high
+LOW: Low
+low: low
+LESS: Less
+less: less
+MORE: More
+more: more
 PREV: Prev
 prev: prev
+NEXT: Next
+next: next
+BACK: Prev
+back: prev
+FORWARD: Next
+forward: next
+EAST: East
+east: east
+NORTH: North
+north: north
 SOUTH: South
 south: south
 WEST: West
 west: west
 
-# Labels for fields answering: "What did you observer", "When did you observe
+# Labels for fields answering: "What did you observe?", "When did you observe
 # it?", "Where did you observe it?", and "Who observed it?".
 WHAT: What
 what: what

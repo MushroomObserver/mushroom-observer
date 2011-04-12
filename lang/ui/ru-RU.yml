@@ -1,4 +1,4 @@
-# Please see README in this same directory for notes on syntax and general
+﻿# Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
 
 # Do not translate these!
@@ -78,19 +78,19 @@ NAME: Название
 name: название
 NAMES: Названия
 names: названия
-NAME_DESCRIPTION: Описание названия
-name_description: описание названия
-NAME_DESCRIPTIONS: Описания названия
-name_descriptions: описания названия
-NAMING: Предложенное название
-naming: предложенное название
-NAMINGS: Предложенные названия
-namings: предложенные названия
+NAME_DESCRIPTION: Описание названия вида
+name_description: описание названия вида
+NAME_DESCRIPTIONS: Описания названий видов
+name_descriptions: описания названий видов
+NAMING: Предположительное название
+naming: предположительное название
+NAMINGS: Предположительные названия
+namings: предположительные названия
 NOTIFICATION: Уведомление
 notification: уведомление
 NOTIFICATIONS: Уведомления
 notifications: уведомления
-OBSERVATION: Наблюдение
+OBSERVATION: наблюдение
 observation: наблюдение
 OBSERVATIONS: Наблюдения
 observations: наблюдения
@@ -265,8 +265,8 @@ REVIEWERS: Рецензенты
 reviewers: рецензенты
 SIZE: Размер
 size: размер
-STATUS: Статус
 status: статус
+STATUS: Статус
 STATUSS: Статусы
 statuss: статусы
 SUBJECT: Тема
@@ -284,8 +284,8 @@ TAGS: Теги
 tags: теги
 TIME: раз
 time: раз
-TIMES: раз
-times: раз
+TIMES: раз(а)	
+times: раз(а)
 TITLE: Заголовок
 title: заголовок
 TITLES: Заголовки
@@ -298,24 +298,28 @@ versions: версии
 # Common nouns/adjectives used as labels, never pluralized:
 ALL: Все
 all: все
-EAST: Восток
-east: восток
-HIGH: Высокий
-high: высокий
-LESS: Меньше
-less: меньше
-LOW: Низкий
-low: низкий
-MORE: Больше
-more: больше
-NEXT: Следующий
-next: следующий
 NONE: Нет
 none: нет
-NORTH: Север
-north: север
+HIGH: Высокий
+high: высокий
+LOW: Низкий
+low: низкий
+LESS: Меньше
+less: меньше
+MORE: Больше
+more: больше
 PREV: Предыдущий
 prev: предыдущий
+NEXT: Следующий
+next: следующий
+BACK: Назад
+back: назад
+FORWARD: Вперёд
+forward: вперёд
+EAST: Восток
+east: восток
+NORTH: Север
+north: север
 SOUTH: Юг
 south: юг
 WEST: Запад
@@ -384,7 +388,7 @@ created: создано
 DESTROYED: Уничтожено
 destroyed: уничтожено
 MODIFIED: Изменено
-modified: modified
+modified: изменено
 OPTIONAL: Обязательно
 optional: обязательно
 REQUIRED: Необязательно
@@ -439,14 +443,14 @@ cancel_and_show: Отменить(Показать [TYPE])
 create_object: Создать [TYPE]
 destroy_object: Уничтожить [TYPE]
 edit_object: Редактировать [TYPE]
-list_objects: Показать список [TYPES]
+list_objects: "[TYPES] - показать список"
 remove_object: Удалить [TYPE]
 remove_objects: Удалить [TYPES]
 show_all: Показать все
 show_name: Подробнее о [NAME]
 show_object: Показать [TYPE]
 show_objects: Показать [TYPES]
-sort_by_object: Сортировать по [TYPE]
+sort_by_object: "Сортировка: [TYPE]"
 
 # Other generic phrases.
 and_num_more: Ещё [num] ...
@@ -471,9 +475,9 @@ units_meters: м
 # Quality values.
 image_vote_long_0: Без оценки.
 image_vote_long_1: **Пойдёт**, но вряд ли пригодится.
-image_vote_long_2: **Полезно** for identification.
-image_vote_long_3:  **Good** enough for a field guide.
-image_vote_long_4:  **Great!** Beyond the work of mortals.
+image_vote_long_2: **Полезно** для определения.
+image_vote_long_3: **Хорошо**, подойдёт для полевого определителя.
+image_vote_long_4: **Великолепно!**, такое не под силу простым смертным.
 
 image_vote_help_0: Без оценки.
 image_vote_help_1: Пойдёт, но вряд ли пригодится.
@@ -589,17 +593,17 @@ rank_plural_variety: разновидности
 # user statistics field names
 user_stats_comments: "[:COMMENTS]"
 user_stats_images: "[:IMAGES]"
-user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] - Автор"
-user_stats_location_descriptions_editors: "[:LOCATION_DESCRIPTIONS] отредактировано"
-user_stats_locations: "[:LOCATIONS] создано"
+user_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] - автор"
+user_stats_location_descriptions_editors: "[:LOCATION_DESCRIPTIONS] - отредактировано"
+user_stats_locations: "[:LOCATIONS] - создано"
 user_stats_locations_versions: "[:LOCATIONS] отредактировано"
 user_stats_name_descriptions_authors: "[:NAME_DESCRIPTIONS] - автор"
-user_stats_name_descriptions_editors: "[:NAME_DESCRIPTIONS] отредактировано"
-user_stats_names: "[:NAMES] создано"
-user_stats_names_versions: "[:NAMES] Отредактировано"
+user_stats_name_descriptions_editors: "[:NAME_DESCRIPTIONS] - отредактировано"
+user_stats_names: "[:NAMES] - создано"
+user_stats_names_versions: "[:NAMES] - отредактировано"
 user_stats_namings: Предложенные ID
 user_stats_observations: "[:OBSERVATIONS]"
-user_stats_species_list_entries: "[:SPECIES_LIST] Записей"
+user_stats_species_list_entries: "[:SPECIES_LIST] - число записей"
 user_stats_species_lists: "[:SPECIES_LISTS]"
 user_stats_votes: "[:VOTES]"
 
@@ -607,18 +611,18 @@ user_stats_votes: "[:VOTES]"
 site_stats_comments: "[:COMMENTS]"
 site_stats_images: "[:IMAGES]"
 site_stats_listed_taxa: "Таксоны в списке"
-site_stats_location_descriptions_authors: "Автор - [:LOCATION_DESCRIPTIONS]"
+site_stats_location_descriptions_authors: "[:LOCATION_DESCRIPTIONS] - автор"
 site_stats_location_descriptions_editors: ""
-site_stats_locations: "Определено [:LOCATIONS]"
+site_stats_locations: "[:LOCATIONS] - определено"
 site_stats_locations_versions: ""
-site_stats_name_descriptions_authors: "Автор - [:NAME_DESCRIPTIONS]"
+site_stats_name_descriptions_authors: "[:NAME_DESCRIPTIONS] - автор"
 site_stats_name_descriptions_editors: ""
 site_stats_names: ""
 site_stats_names_versions: ""
-site_stats_namings: Предложенные ID
+site_stats_namings: Предложенные определения
 site_stats_observations: "[:OBSERVATIONS]"
 site_stats_observed_taxa: "Таксоны в наблюдениях"
-site_stats_species_list_entries: "[:SPECIES_LIST] Записей"
+site_stats_species_list_entries: "[:SPECIES_LIST] - число записей"
 site_stats_species_lists: "[:SPECIES_LISTS]"
 site_stats_users: "Участники"
 site_stats_votes: "[:VOTES]"
@@ -647,14 +651,14 @@ vote_agreement_0: Точно не оно!
 #
 query_title_advanced_search: "[:app_advanced_search]"
 query_title_all: "[TYPE] Индекс"
-query_title_all_by: "[TYPES] по [ORDER]"
+query_title_all_by: "[TYPES], параметр сортировки - [ORDER]"
 query_title_at_location: "[TYPES] из [LOCATION]"
 query_title_at_where: "[TYPES] от пользователя '[USER_WHERE]'"
 query_title_by_author: "[TYPES], автор которых [USER]"
 query_title_by_editor: "[TYPES], отредактированные пользователем [USER]"
 query_title_by_rss_log: "[TYPES] в логе активности"
 query_title_by_user: "[TYPES], созданные [USER]"
-query_title_for_object: "[TYPES] по [OBJECT]"
+query_title_for_object: "[TYPES], параметр сортировки - [OBJECT]"
 query_title_for_user: "[TYPES] для пользователя [USER]"
 query_title_in_set: "Выбранные [TYPES]"
 query_title_in_species_list: "[TYPES] в списке [SPECIES_LIST]"
@@ -785,8 +789,8 @@ sort_by_name: "[:NAME]"
 sort_by_title: "[:TITLE]"
 sort_by_summary: "[:SUMMARY]"
 sort_by_date: "[:DATE]"
-sort_by_posted: Дата размещения
-sort_by_created: Дата создания
+sort_by_posted: дата размещения
+sort_by_created: дата создания
 sort_by_modified: Время последнего изменения
 sort_by_rss_log: "[:sort_by_modified]"
 sort_by_last_login: Последний вход
@@ -819,7 +823,7 @@ log_name_deprecated_with_comment: "[:log_name_deprecated] [comment]"
 log_name_merged: "[This] объединено с [that]."
 log_object_added_by_user: "[user] добавил(а) [Type]."
 log_object_added_by_user_with_name: "[user] добавил(а) [Type]: [name]"
-log_object_added_no_user: "Добавлено: [Type]."
+log_object_added_no_user: "добавлено: [Type]."
 log_object_created_by_user: "[user] создал(а) [Type]."
 log_object_created_by_user_with_name: "[user] создал(а) [Type]: [name]"
 log_object_created_no_user: "Создано: [Type]."
@@ -827,15 +831,15 @@ log_object_destroyed_by_user: "[user] уничтожил(а) [Type]."
 log_object_destroyed_by_user_with_name: "[user] уничтожил(а) [Type]: [name]"
 log_object_destroyed_no_user: "уничтожено: [Type]."
 log_object_merged_by_user: "[user] соединил(а) [from] с [to]."
-log_object_merged_no_user: "[from] - соединено с [to]."
+log_object_merged_no_user: "[from]: соединено с [to]."
 log_object_moved_by_user: "[user] переместил (а) [from] в [to]."
-log_object_moved_no_user: "[from] - перемещено в [to]."
-log_object_removed_by_user: "[Type] - удалено пользователем [user]."
-log_object_removed_by_user_with_name: "[Type] - удалено пользователем [user]: [name]"
-log_object_removed_no_user: "[Type] - удалено."
-log_object_updated_by_user: "[Type] - обновлено пользователем [user]."
-log_object_updated_by_user_with_name: "[Type] - обновлено пользователем [user]: [name]"
-log_object_updated_no_user: "[Type] - обновлено."
+log_object_moved_no_user: "[from]: перемещено в [to]."
+log_object_removed_by_user: "Пользователь [user] удалил [Type]."
+log_object_removed_by_user_with_name: "Пользователь [user] удалил [Type]: [name]"
+log_object_removed_no_user: "[Type]: удалено."
+log_object_updated_by_user: "Пользователь [user] удалил [Type]."
+log_object_updated_by_user_with_name: "[user] обновил(а) [Type]: [name]"
+log_object_updated_no_user: "[Type]: обновлено."
 log_orphan: "[Title]"
 log_published_description: "Пользователь [user] выполнил(а) описание: [name]"
 log_updated_by: Обновлено пользователем [user].
@@ -909,7 +913,7 @@ app_latest:  Latest
 app_latest_changes: "Последние изменения"
 app_newest_images: "[:IMAGES]"
 app_comments: "[:COMMENTS]"
-app_news: Функционал
+app_news: Функции
 app_observations_left: "[:OBSERVATIONS]"
 app_create_observation: "[:create_object(type=:observation)]"
 app_sort_by_date_obs: "[:sort_by_object(type=:date)]"
@@ -1250,7 +1254,7 @@ form_names_uses_help: >
   Используется ли этот таксон людьми, и если да, то как?
 
 form_names_notes_help: >
-  Пожалуйста, добавьте любые заметки о принятости этого названия, типичных ошибках в его использовании, а также о более подходящих названиях в случаях, когда это уместно.
+  Пожалуйста, добавьте любые заметки о статусе этого названия, типичных ошибках в его использовании, а также о более подходящих названиях в случаях, когда это уместно.
 
 form_names_refs_help: >
   Каждая строка считается за отдельную ссылку, однако другого форматирования не требуется.
@@ -1263,7 +1267,7 @@ form_naming_valid_synonyms: "Принятые синонимы:"
 form_naming_deprecated: Название '[name]' устарело.
 form_naming_not_recognized: Название '[name]' неизвестно.
 form_naming_name_help_create: >
-  Название, которое вы бы присвоили этому наблюддению. Если вы не знаете, что это, оставьте графу пустой. Если в будущем вы подберёте более подходящее название, наблюдение можно переименовать в любой момент.
+  Название, которое вы бы присвоили этому наблюдению. Если вы не знаете, что это, оставьте графу пустой. Если в будущем вы подберёте более подходящее название, наблюдение можно переименовать в любой момент.
 
 form_naming_name_help: >
   Научные названия в настоящее время дложны быть снабжены информацией об авторах, но не включают её. Если подходит несколько названий, вам будет предложено выбрать одно из них. Если название не распознаётся, вы сможете добавить его в нашу базу данных или исправить написание в случае, если это орфографическая ошибка.
@@ -1306,34 +1310,28 @@ form_observations_is_collection_location_help: >
 form_observations_notes_help: >
   Пожалуйста, расскажите, как вы пришли к определению, а также опишите любые необычные признаки и признаки, которые неочевидны на фотографии, например, вкус, запах.
 
-form_observations_remove_image_confirm:  >
-  Are you sure you want to remove this image?  This will only remove this image
-  from this observation.  If it is attached to other observations, it will
-  remain attached to them.
+form_observations_remove_image_confirm: >
+  Вы точно хотите удалить изображение? Изображение будет удалено только из этого наблюдения. Если оно используется в других наблюдениях, то в них оно будет отображаться и дальше.
 
-form_observations_specimen_available_help:  >
-  Check when there is a dried specimen available for further study.  This can
-  either be at an official herbarium or part of a personal herbarium.  Please
-  note where the specimen is in the notes.
+form_observations_specimen_available_help: >
+  Проставьте метку, если для этого наблюдения сохранён гербарный образец для последующего изучения. Такой образец может находиться как в официальном гербрии, так и в частной коллекции. Пожалуйста, укажите в примечании, где находится образец.
 
-form_observations_upload_help:  >
-  Use the checkboxes on the left to select the image you would like to use as
-  the thumbnail for this observation.
+form_observations_upload_help: >
+  Проставьте метку слева напротив изображения, которое вы хотите установить в качестве превью для этого наблюдения.
 
-form_observations_where_help:  >
-  Where the observation was made.  In the US this should be at least accurate
-  to the county.  Examples:\n
+form_observations_where_help: >
+ Где сделано наблюдение. Для США следует указать место с точностью до графства, для других стран - до аналогичной административной единицы (район области).  Примеры:\n
   Albion, Mendocino Co., California, USA\n
   Hotel Parque dos Coqueiros, Aracaju, Sergipe, Brazil
 
-form_observations_dubious_help:  >
-  Click '[button]' to use this location name or edit the text below to correct any typo.
+form_observations_dubious_help: >
+  Нажмите '[button]', чтобы использовать это название местонахождения, или отредактируйте текст ниже, если он содержит орфографические ошибки.
 
 
 
 # observer/_form_species_list
-form_species_lists_title:  Title
-form_species_lists_species_to_add:  Select Species to Add
+form_species_lists_title: название списка
+form_species_lists_species_to_add: выберите виды
 form_species_lists_write_in_species:  "Write-In Species: (enter a name on each line)"
 form_species_lists_list_notes:  Species List Notes
 form_species_lists_member_notes:  Notes for each new member
@@ -1403,7 +1401,7 @@ image_edit_title: "Редактирование изображения: [name]"
 # image/remove_images
 image_remove_edit: "[:edit_object(type=:observation)]"
 image_remove_remove: Удалить
-image_remove_title: Удалить изображения из [name]
+image_remove_title: "[name] - удалить изображения"
 
 
 
@@ -1427,7 +1425,7 @@ image_show_notes: "[:NOTES]"
 image_show_copyright:  Copyright
 image_show_quality: Качество
 image_show_your_vote: Ваш голос
-image_show_vote_and_next: "Голосовать & [:NEXT]"
+image_show_vote_and_next: "Голосовать и показать [:NEXT]"
 image_show_comments: "комментарии - [num]"
 image_show_observations: "[:OBSERVATIONS]"
 image_show_thumbnail: Превью
@@ -1670,7 +1668,7 @@ rss_by: "[user]"
 rss_title: "[:app_title]"
 rss_show: "Показать:"
 rss_hide: "Скрыть:"
-rss_all: Всё
+rss_all: Все
 rss_all_help: Показывать все типы объёктов.
 rss_one: "[TYPES]"
 rss_one_help: Показывать только [types].
@@ -2594,9 +2592,8 @@ no_email_locations_admin_note:  >
   You will no longer receive email notifications when other [:users] make changes
   to location descriptions you administrate.
 
-no_email_locations_author_note:  >
-  You will no longer receive email notifications when other [:users] make changes
-  to [:locations] you have created.
+no_email_locations_author_note: >
+  Вы больше не будете получать e-mail уведомлений, когда другие [:users] вносят изменения в созданные вами [:locations].
 
 no_email_locations_editor_note:  >
   You will no longer receive email notifications when other [:users] make changes
@@ -3149,7 +3146,7 @@ set_interest_user_mismatch:  Another [:user] is logged on at this machine.  Plea
 
 
 # observer/show_notifications
-show_notifications_title:  New Notifications for [user]
+show_notifications_title: Новые оповещения для [user]
 
 
 # observer/<Theme>
@@ -3157,40 +3154,31 @@ theme_agaricus:  _Agaricus_ Theme
 theme_amanita:  _Amanita_ Theme
 theme_cantharellaceae:  _Cantharellaceae_ Theme
 theme_hygrocybe:  _Hygrocybe_ Theme
-theme_random:  Random
+theme_random: случайное
 
 
 # observer/translators_note
-translators_note:  >
-  Please help us make this website available around the world!  It's easy.
-  There is somewhere around 1600 lines or 11000 words of text on this site at
-  the moment, but don't let that scare you.  We've organized it so someone with
-  limited time can concentrate on just the first few sections, and get the most
-  commonly-used text done first.  Then as time and energy permits, they or
-  someone else can continue working down the list until one day it is all
-  finished.  Please feel free to pick up a copy of the "translation
-  files":[repo] and start plugging away in any language you wish.  Then just
-  "pop us an email":/observer/ask_webmaster_question when you finish doing what
-  you can, and we'll tell you how to submit your work.  You will receive
-  prominant credit for your contribution, in addition to, of course, our
-  undying gratitude.
+translators_note: >
+  Пожалуйста, помогите сделать сайт доступным всему миру! Это просто. Сейчас на сайте около 1600 строк, или около 11000 слов, но, пожалуйста, не пугайтесь. Мы упорядочили их так, что даже очень занятой человек сможет в свободную минуту перевести хотя бы основные разделы с наиболее употребимыми терминами и фразами. По мере сил и возможностей вы (или другой человек) сможете продолжить работу над переводом, пока, наконец, перевод не будет готов. В любой момент Вы можете скачать копию "файлов для перевода":[repo] и с помощью текстового редактора сразу же начать над 
+  \n\n
+  переводом. Затем просто "напишите нам":/observer/ask_webmaster_question, и мы расскажем, как передать результаты перевода разработчикам. В ответ мы обещаем должным образом отметить Ваш вклад на страницах сайта... ну и, конечно, мы будем невыразимо благодарны!
 
-translators_note_title:  Translator's Note
+translators_note_title: На заметку переводчикам
 
 
 # observer/turn_javascript_nil
-turn_javascript_nil_body:  We will resume auto-detection of the state of javascript.
-turn_javascript_nil_title:  Auto-Detect Javascript
+turn_javascript_nil_body: javascript оопределяется автоматически.
+turn_javascript_nil_title: Автоматическое определение Javascript
 
 
 # observer/turn_javascript_off
-turn_javascript_off_body:  We will now ignore javascript.
-turn_javascript_off_title:  Turn Javascript Off
+turn_javascript_off_body: javascript теперь игнорируется.
+turn_javascript_off_title: Отключить Javascript
 
 
 # observer/turn_javascript_on
-turn_javascript_on_body:  We will now assume javascript is on.
-turn_javascript_on_title:  Turn Javascript On
+turn_javascript_on_body: По умолчанию Javascript включён
+turn_javascript_on_title: Включить Javascript
 
 
 # account/create_alert and show_alert
@@ -3361,18 +3349,18 @@ review_authors_title:  Reviewing Author(s) for [name]
 
 
 # observer/send_feature_email
-send_feature_email_success:  Delivered feature mail.
-send_feature_email_denied:  Only the admin can send feature mail.
+send_feature_email_success: специальная почта доставлена.
+send_feature_email_denied: только админ может отправлять специальную почту.
 
 
 # project/show_project
-show_project_add_members:  Add Members
-show_project_admin_group:  Admin Group
-show_project_admin_request:  Admin Request
-show_project_by:  Owned By
-show_project_created:  Created
-show_project_destroy:  Destroy Project
-show_project_drafts:  Drafts
+show_project_add_members: добавить участников
+show_project_admin_group: администрирование
+show_project_admin_request: запрос админу
+show_project_by: владелец
+show_project_created: создано
+show_project_destroy: уничтожить проект
+show_project_drafts: черновики
 show_project_edit:  Edit Project
 show_project_published:  Reviewed Published Names
 show_project_summary:  Summary
@@ -3385,11 +3373,11 @@ users_by_name_title:  Users by Name
 users_by_name_created:  Created
 users_by_name_groups:  Groups
 users_by_name_id:  ID
-users_by_name_last_login:  Last login
-users_by_name_login:  Login
-users_by_name_name:  Name
-users_by_name_theme:  Theme
-users_by_name_verified:  Verified
+users_by_name_last_login: последний логин
+users_by_name_login: логин
+users_by_name_name: имя
+users_by_name_theme: оформление
+users_by_name_verified: подтверждено
 
 
 # support/create_donation
@@ -3400,39 +3388,39 @@ create_donation_tab:  Record Donation
 
 
 # support/review_donations
-review_donations_title:  Review All Donations
-review_donations_not_allowed:  Only admins can review donations
-review_donations_update:  Update
-review_donations_tab:  Review Donations
-review_reviewed:  Reviewed
-review_id:  Id
-review_who:  Who
-review_anon:  Anon
-review_amount:  Amount
-review_email:  Email
+review_donations_title: просмотреть все пожертвования
+review_donations_not_allowed: лишь администраторы могут просматривать пожертвования
+review_donations_update: обновить
+review_donations_tab: просмотреть пожертвования
+review_reviewed: просмотрено
+review_id: Id
+review_who: кто	
+review_anon: анонимно
+review_amount: сумма
+review_email: E-mail
 
 ################################################################################
 
 # EMAIL MESSAGES
 
 # Subject lines.
-email_subject_comment:  "[:COMMENT] About [name]"
-email_subject_commercial_inquiry:  Commercial Inquiry About [Name]
-email_subject_consensus_change:  Consensus Rejected [old] in Favor of [new]
-email_subject_denied:  "[:USER] Creation Blocked"
-email_subject_features:  New [:app_title] Features
-email_subject_location_change:  "[name] Has Been Changed"
-email_subject_naming_for_observer:  Research Request
-email_subject_naming_for_tracker:  Naming Notification
-email_subject_name_change:  "[name] Has Been Changed"
-email_subject_name_proposal:  "[:OBSERVATION] #[id] May Be [name]"
-email_subject_new_password:  New Password
-email_subject_observation_change:  "[:OBSERVATION] Changed, [name]"
-email_subject_observation_destroy:  "[:OBSERVATION] Destroyed, [name]"
-email_subject_observation_question:  Question About [name]
-email_subject_publish_name:  Name Published
-email_subject_verify:  Email Verification
-email_subject_webmaster_question:  Question From [user]
+email_subject_comment: "[:COMMENT] о [name]"
+email_subject_commercial_inquiry: коммерческий запрос о [Name]
+email_subject_consensus_change: консенсус отверг [old] в пользу [new]
+email_subject_denied: "[:USER] - создание заблокировано"
+email_subject_features: новые [:app_title] функции
+email_subject_location_change: "[name] изменено"
+email_subject_naming_for_observer: запрос на исследование
+email_subject_naming_for_tracker: уведомление о наименовании
+email_subject_name_change: "[name] изменено"
+email_subject_name_proposal: "[:OBSERVATION] #[id], возможно, [name]"
+email_subject_new_password: новый пароль
+email_subject_observation_change: "внесены изменения в [:OBSERVATION], [name]"
+email_subject_observation_destroy: "[:OBSERVATION] удалено, [name]"
+email_subject_observation_question: вопрос о [name]
+email_subject_publish_name: опубликовано название
+email_subject_verify: e-mail подтверждение 
+email_subject_webmaster_question: вопрос от [user]
 
 # Field labels in the "object_change" emails.
 email_field_added_images:  Added image(s)
@@ -3452,30 +3440,29 @@ email_field_specimen_available:  Specimen is now available
 email_field_west:  "[:West] edge"
 
 # This is used like this: "<Label>: <old_value> changed to <new_value>"
-email_field_is_now:  changed to
+email_field_is_now: новый вариант
 
 # "Helpful" links at the bottom of the email.
-email_links_change_prefs:  Change your preferences
-email_links_disable_tracking:  Disable tracking for this [type]
-email_links_email_publisher:  Send email to the publisher
-email_links_latest_changes:  Latest changes at [:app_title]
-email_links_not_interested:  I'm not interested in this [type]
-email_links_post_comment:  Post a [:comment]
-email_links_show_object:  Show this [type]
-email_links_show_user:  Show [:user]'s profile
-email_links_show_observer:  Show [:observer]'s profile
-email_links_show_identifier:  Show [:identifier]'s profile
-email_links_stop_sending:  Stop sending me email like this
-email_links_your_interests:  Review your [:notifications]
+email_links_change_prefs: изменить настройки
+email_links_disable_tracking: отключить трекинг для [type]
+email_links_email_publisher: отправить e-mail опубликовавшему пользователю
+email_links_latest_changes: последние изменения на [:app_title]
+email_links_not_interested: меня не интересует [type]
+email_links_post_comment: опубликовать [:comment]
+email_links_show_object: показать [type]
+email_links_show_user: показать профиль [:user]
+email_links_show_observer: показать профиль [:observer]
+email_links_show_identifier: показать профиль [:identifier]
+email_links_stop_sending: я больше не хочу получать подобных писем
+email_links_your_interests: просмотреть свои [:notifications]
 
 # Some other common phrases and sections.
-email_can_respond:  >
-  It is entirely up to you whether you want to reply to [name] ([email]) by
-  replying directly to this email.
+email_can_respond: >
+  Вам решать, отвечать ли на пользователю [name] ([email]) напрямую, а не через сайт. Ответить напрямую можно, просто ответив на данное e-mail сообщение.
 
-email_handy_links:  "Here are some handy links:"
-email_no_respond:  Please do not reply to this email!
-email_report_abuse:  >
+email_handy_links: "Несколько полезных ссылок:"
+email_no_respond: Пожалуйста, не отвечайте на это письмо!
+email_report_abuse: >
   If you feel this user is abusing this service please forward this entire
   email message to: [email]
 
@@ -3757,13 +3744,12 @@ how_help_business_planning:  >
 # HOW TO USE PAGE (COMMON TASKS)
 
 # observer/how_to_use
-how_title:  How to Use [:app_title]
-how_common_tasks:  Common Tasks
-how_glossary:  Concepts Glossary
+how_title: Как использовать [:app_title]
+how_common_tasks: основные задачи
+how_glossary: словарь понятий
 
-how_intro:  >
-  This page provides some short descriptions of common uses of this website
-  followed by an overview of the basic concepts used.
+how_intro: >
+  На этой странице вкратце рассказано, для чего можно использовать этот сайт. Ниже приводится обзор основных использованных понятий.
 
 how_keeping_up:  >
   *Keeping Up with Changes* - The default page for [:app_title] is the
@@ -4007,7 +3993,7 @@ how_projects:  >
   will become the official description if no official description exists yet.
 
 how_maps:  >
-  *Working with Maps* - Currently there are three types of maps available on
+  *Работа с картами* - Currently there are three types of maps available on
   [:app_title]: Occurrence Maps (e.g., "Occurrence map for
   **__Craterellus cornucopioides__**":/name/map/284), Location Maps (e.g.,
   "Salt Point State Park":/location/show_location/4) and the
@@ -4265,27 +4251,10 @@ how_vote:  >
 
 # LOCATION HELP PAGE
 
-location_help_title:  Locations in Mushroom Observer
+location_help_title: Местонахождения на Mushroom Observer
 
-location_help_intro:  >
-  The Mushroom Observer provides two ways to represent the geographic location
-  of an observation.  The simplest are latitude and longitude positions associated
-  with the observation.  Please keep these accurate to within at least 300 meters
-  (or about 1000 feet).  However, the more widely used method is a simple phrase
-  describing the location.  For example, "Beebe Woods, Falmouth, Massachusetts, USA".
-  The goal of these location names is to provide a consistent, reusable way of talking
-  about where an observation was made without necessarily revealing a precise "spot".
-  If you are comfortable provide more precise lat/longs for an observation, the
-  location names are still useful for searches so you are encouraged to provide
-  them as well.  The location names should, by default, go from the smallest
-  contained area to the country name.  If you prefer to describe your locations
-  as going from the largest (country) down to the smallest contained area, you can
-  change your preference from the default, "Postal", to "Scientific" on your
-  preference page.  There are cases such as
-  "Great Smoky Mountains National Park, Blount Co., Tennessee, USA",
-  where the area you are describing overlaps a number of counties, states or
-  even countries.  In these cases, the country and other official political
-  boundaries should come at the end as shown in the example.
+location_help_intro: >
+  На Mushroom Observer есть два способа представить географическое местонахождение наблюдения. Простейший - это указать широту и долготу точки, где сделано наблюдение. Пожалуйста, указывайте их с точностью не менее 300 м (около 1000 футов). Однако чаще используется способ, когда место описывается словами. Например, "Парк Гагарина, Новокузнецк, Кемеровская область, Россия" или "Beebe Woods, Falmouth, Massachusetts, USA". Цель создания таких названий - обеспечить недвусмысленный, подходящий для неоднократного использования способ достаточно точно указать место наблюдения без необходимости дополнений и поправок, причём конкретная точка (полянка, опушка) не обязательна. При желании можно указать и более точные широту и долготу для наблюдения, поскольку названия местонахождений всё равно полезны для поиска - поэтому их тоже стоит указывать. По умолчанию описание местонахождений должно идти от наименьшей территориальной единицы до названия страны. Если Вам удобнее описывать местонахождения в обратном порядке (сначала страна, затем область, район, населённый пункт и т.д.), то переключите режим отображения местонахождения в настройках с "Почтового" на "Научный". Есть случаи, такие как, например, "Great Smoky Mountains National Park, Blount Co., Tennessee, USA", когда описываемый объект находится на территории сразу нескольких административных единиц или даже стран. В таком случае страна и прочие политические границы указываются в последнюю очередь, как это сделано в примере выше.
   \n\n
   Originally, the Mushroom Observer was very loose about these location names,
   hoping that the users would create a reasonably consistent set of rules and
@@ -4305,11 +4274,11 @@ location_help_intro:  >
   discussion and revision of them.
 
 location_help_example_help:  These are cases that are not detected automatically, so no warning would be given.
-location_help_example_title:  Some examples
-location_help_bad:  Bad
-location_help_good:  Good
-location_help_explanation:  Explanation
-location_help_rules_title:  The Current "Rules"
+location_help_example_title: Несколько примеров
+location_help_bad: "'плохое'"
+location_help_good: "'хорошее'"
+location_help_explanation: Пояснение
+location_help_rules_title: Текущие "правила"
 
 location_help_rule_reversible:  >
   *Consistent and Reversible Order* - You can now ask for location names to appear in the reverse order from the default.
@@ -4478,16 +4447,16 @@ validate_too_small:  "[Field] should be at least [min]."
 validate_too_small_or_large:  "[Field] should be between [min] and [max]."
 
 # One-time-use error messages.
-validate_image_content_type_images_only:  You can only upload [:images].
-validate_image_file_missing:  Had problems uploading [:image].
-validate_image_file_too_big:  We can't handle [:images] that big.  Please reduce it to less than [max] before uploading.
-validate_image_md5_mismatch:  The MD5 sum did not come out right.  Please try uploading your image again.
-validate_observation_future_time:  Time travel is not allowed, pick a date from the past.
-validate_observation_thumb_image_id_invalid:  Unable to find a corresponding [:image] for thumbnail.
-validate_observation_where_missing:  Please tell us where it was seen or collected.
+validate_image_content_type_images_only: Можно загружать лишь [:images].
+validate_image_file_missing: Возникли проблемы, [:image] не загружено.
+validate_image_file_too_big: "[:images] слишком большое, мы не смогли его загрузить. Пожалуйста, уменьшите его до [max] перед загрузкой."
+validate_image_md5_mismatch: Сумма MD5 оказалась неверной. Пожалуйста, повторите попытку.
+validate_observation_future_time: Путешествия во времени недопустимы - выберите дату из прошлого.
+validate_observation_thumb_image_id_invalid: Не удалось найти соответствующее [:image] для превью.
+validate_observation_where_missing: Пожалуйста, расскажите, где и при каких обстоятельствах сделана находка.
 validate_user_email_missing:  Please give us a valid email address so we can verify your [:account].
-validate_user_login_taken:  Sorry, that login name is already taken.
-validate_image_wrong_type:  The file you tried to upload is not recognized as an image.  It is of type '[type]'.
+validate_user_login_taken: К сожалению, это имя уже занято.
+validate_image_wrong_type: Загружаемый файл не распознался как изображение.  Тип этого файла - '[type]'.
 
 # These shouldn't need translating, but you are free to override if you need to.
 validate_comment_object_type_too_long:  "[:validate_too_long(field=''object_type'',max=30)]"
@@ -4551,68 +4520,68 @@ validate_vote_value_not_integer:  "[:validate_not_a_number(field=:vote)]"
 validate_vote_value_out_of_bounds:  "[:validate_not_in_range(field=:vote)]"
 
 # Runtime error and success messages.
-runtime_added:  "Successfully added [type]."
-runtime_added_id:  "Successfully added [type] #[value]."
-runtime_added_id_to:  "Successfully added [type] #[value] to [name]."
-runtime_added_name:  "Successfully added [type] '[value]'."
-runtime_added_name_to:  "Successfully added [type] '[value]' to [name]."
-runtime_added_to:  "Successfully added [type] to [name]."
-runtime_admin_only:  That operation is restricted to site admins.
-runtime_already_exists:  "[Type] already exists: '[value]'"
-runtime_already_used:  "[Type] is already in use: '[value]'"
-runtime_created:  "Successfully created [type]."
-runtime_created_id:  "Successfully created [type] #[value]."
-runtime_created_name:  "Successfully created [type] '[value]'."
-runtime_delivered_message:  Successfully delivered message.
-runtime_delivered_question:  Successfully delivered question.
-runtime_delivered_request:  Successfully delivered request.
-runtime_destroyed:  "Successfully destroyed [type]."
-runtime_destroyed_id:  "Successfully destroyed [type] #[value]."
-runtime_destroyed_name:  "Successfully destroyed [type] '[value]'."
-runtime_invalid:  "[Type] is invalid: '[value]'"
-runtime_lat_long_error:  "Latitude and longitude must be floating point numbers between -90 and 90, and -180 and 180 respectively."
-runtime_merge_success:  Successfully merged [type] [this] into [that].
-runtime_missing:  Missing [field].
-runtime_no_changes:  "No changes made."
-runtime_no_create:  "Unable to create [type]."
-runtime_no_create_id:  "Unable to create [type] #[value]."
-runtime_no_create_name:  "Unable to create [type] '[value]'."
-runtime_no_destroy:  "Unable to destroy [type]."
-runtime_no_destroy_id:  "Unable to destroy [type] #[value]."
-runtime_no_destroy_name:  "Unable to destroy [type] '[value]'."
-runtime_no_match:  "Can't find [type]."
-runtime_no_match_id:  "Can't find [type] #[value]."
-runtime_no_match_name:  "Can't find [type] matching '[value]'."
-runtime_no_matches:  "No matching [types] found."
-runtime_no_matches_pattern:  "No [types] matching '[value]' found."
-runtime_no_more:  There are no more [types].
-runtime_no_objects:  There are no [types].
-runtime_no_parse:  "Unable to parse: '[value]'"
-runtime_no_save:  "Unable to save [type]."
-runtime_no_update:  "Unable to update [type]."
-runtime_no_update_id:  "Unable to update [type] #[value]."
-runtime_no_update_name:  "Unable to update [type] '[value]'."
-runtime_not_owner:  "You are not the owner of [type] '[value]'."
-runtime_not_owner_id:  "You are not the owner of [type] #[value]."
-runtime_removed:  "Successfully removed [type]."
-runtime_removed_from:  "Successfully removed [type] from [name]."
-runtime_removed_id:  "Successfully removed [type] #[value]."
-runtime_removed_id_from:  "Successfully removed [type] #[value] from [name]."
-runtime_removed_name:  "Successfully removed [type] '[value]'."
-runtime_removed_name_from:  "Successfully removed [type] '[value]' from [name]."
-runtime_updated:  "Successfully updated [type]."
-runtime_updated_id:  "Successfully updated [type] #[value]."
-runtime_updated_name:  "Successfully updated [type] '[value]'."
-runtime_uploaded:  "Successfully uploaded [type]."
-runtime_uploaded_id:  "Successfully uploaded [type] #[value]."
-runtime_uploaded_name:  "Successfully uploaded [type] '[value]'."
-runtime_user_hasnt_authored:  "[user] hasn't written any [types]."
-runtime_user_hasnt_created:  "[user] hasn't created any [types]."
-runtime_user_hasnt_edited:  "[user] hasn't edited any [types]."
+runtime_added: "Получилось добавить [type]."
+runtime_added_id: "Получилось добавить [type] #[value]."
+runtime_added_id_to: "Получилось добавить [type] #[value] к [name]."
+runtime_added_name: "Получилось добавить [type] '[value]'."
+runtime_added_name_to: "Получилось добавить [type] '[value]' к [name]."
+runtime_added_to: "Получилось добавить [type] к [name]."
+runtime_admin_only: Это действие доступно лишь администраторам сайта.
+runtime_already_exists: "[Type] уже существует: '[value]'"
+runtime_already_used: "[Type] уже используется: '[value]'"
+runtime_created: "Получилось создать [type]."
+runtime_created_id: "Получилось создать [type] #[value]."
+runtime_created_name: "Получилось создать [type] '[value]'."
+runtime_delivered_message: Сообщение успешно доставлено.
+runtime_delivered_question: Вопрос успешно доставлен.
+runtime_delivered_request: Запрос успешно доставлен.
+runtime_destroyed: "Удалось уничтожить [type]."
+runtime_destroyed_id: "Удалось уничтожить [type] #[value]."
+runtime_destroyed_name: "Удалось уничтожить [type] '[value]'."
+runtime_invalid: "[Type] содержит недопустимое значение: '[value]'"
+runtime_lat_long_error: "Широта и долгота должны быть числами с плавающей точкой между -90 и 90, и -180 и 180, соответственно."
+runtime_merge_success: Получилось соединить [type] [this] в [that].
+runtime_missing: Отсутствует [field].
+runtime_no_changes: "Ничего не изменилось."
+runtime_no_create: "Не удалось создать [type]."
+runtime_no_create_id: "Не удалось создать [type] #[value]."
+runtime_no_create_name: "Не удалось создать [type] '[value]'."
+runtime_no_destroy: "Не удалось уничтожить [type]."
+runtime_no_destroy_id: "Не удалось уничтожить [type] #[value]."
+runtime_no_destroy_name: "Не удалось уничтожить [type] '[value]'."
+runtime_no_match: "Не удалось найти [type]."
+runtime_no_match_id: "Не удалось найти [type] #[value]."
+runtime_no_match_name: "Не удалось найти [type] с '[value]'."
+runtime_no_matches: "Соответствующие [types] не найдены."
+runtime_no_matches_pattern: "[types], соответствующие '[value]', не найдены."
+runtime_no_more: "[types] закончились, других нет."
+runtime_no_objects: "[types]! Их нет."
+runtime_no_parse: "Не удалось обработать: '[value]'"
+runtime_no_save: "Не удалось сохранить [type]."
+runtime_no_update: "Unable to update [type]."
+runtime_no_update_id: "Не удалось обновить [type] #[value]."
+runtime_no_update_name: "Не удалось обновить [type] '[value]'."
+runtime_not_owner: "[type] '[value]' - вы не являетесь владельцем!."
+runtime_not_owner_id: "[type] #[value] - вы не являетесь владельцем!"
+runtime_removed: "Мы успешно удалили [type]."
+runtime_removed_from: "Мы успешно удалили [type] из [name]."
+runtime_removed_id: "Мы успешно удалили [type] #[value]."
+runtime_removed_id_from: "Мы успешно удалили [type] #[value] из [name]."
+runtime_removed_name: "Мы успешно удалили [type] '[value]'."
+runtime_removed_name_from: "Мы успешно удалили [type] '[value]' из [name]."
+runtime_updated: "Удалось обновить [type]."
+runtime_updated_id: "Удалось обновить [type] #[value]."
+runtime_updated_name: "Удалось обновить [type] '[value]'."
+runtime_uploaded: "Удалось загрузить [type]."
+runtime_uploaded_id: "Удалось загрузить [type] #[value]."
+runtime_uploaded_name: "Удалось загрузить [type] '[value]'."
+runtime_user_hasnt_authored: "[user] не писал(а) [types]."
+runtime_user_hasnt_created: "[user] не создавал(а) [types]."
+runtime_user_hasnt_edited: "[user] не создавал(а) [types]."
 
 # One-time-use messages.
-runtime_dates_must_be_same_format:  If you give two dates, they must be the same format.
-runtime_description_added_admin:  Gave admin permission to [name].
+runtime_dates_must_be_same_format: Если вы задаёте две даты, то они должны быть в одном формате.
+runtime_description_added_admin: Gave admin permission to [name].
 runtime_description_added_reader:  Gave view permission to [name].
 runtime_description_added_writer:  Gave edit permission to [name].
 runtime_description_copy_success:  Successfully copied the description.
@@ -4798,30 +4767,26 @@ runtime_description_public_write_wrong:  >
 runtime_description_user_not_found:  >
   User or Group "[name]" not found!
 
-runtime_destroy_naming_someone_else:  >
-  Sorry, someone else has given this their strongest positive vote.  You are
-  free to propose alternate names, but we can no longer let you delete this
-  name.
+runtime_destroy_naming_someone_else: >
+  К сожалению, кто-то уже проколосовал положительно с максимальной степенью уверенности. Вы можете предложить альтернативное название, но уудалить это название теперь нельзя.
 
-runtime_edit_description_denied:  >
-  You have not been given permission to edit this description.
+runtime_edit_description_denied: >
+  У вас нет разрешения на редактирование этого описания.
 
-runtime_edit_naming_someone_else:  >
-  Sorry, someone else has given this a positive vote, so we had to create a new
-  name proposal to accomodate your changes.
+runtime_edit_naming_someone_else: >
+  К сожалению, кто-то уже проголосовал положительно, и нам пришлось создать новое предположительное название, чтобы внести ваши изменения.
 
-runtime_email_new_password_success:  >
-  Password successfully changed.  New password has been sent to your email
-  account.
+runtime_email_new_password_success: >
+  Пароль успешно изменён. Новый пароль выслан на ваш адрес электронной почты.
 
 runtime_form_names_misspelling_bad:  >
   The alternate spelling you entered is not recognized.
 
-runtime_form_names_misspelling_same:  >
-  Correct spelling and incorrect spelling are the same!
+runtime_form_names_misspelling_same: >
+  Ошибочное и корректное написания не различаются!
 
-runtime_image_changed_your_image:  >
-  Changed your profile image to image #[id].
+runtime_image_changed_your_image: >
+  Изображение в профиле заменено на #[id].
 
 runtime_image_move_failed:  >
   Something went wrong on the server and we failed to save image #[id].  Please
@@ -4961,11 +4926,11 @@ date_helper_day_names:
   - Суббота
 
 date_helper_abbr_day_names:
-  - Вос
-  - Пон
-  - Вто
-  - Сре
-  - Чет
-  - Пят
-  - Суб
+  - ВС
+  - ПН
+  - ВТ
+  - СР
+  - ЧТ
+  - ПТ
+  - CБ
 

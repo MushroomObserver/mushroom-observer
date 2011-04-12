@@ -37,7 +37,7 @@ module ApplicationHelper::Tabs
         :id         => object.id,
         :params     => query_params,
       }
-      add_tab("« #{:PREV.t}",  args.merge(:action => "prev_#{type}" ))
+      add_tab("« #{:BACK.t}",  args.merge(:action => "prev_#{type}" ))
       add_tab(:INDEX.t, args.merge(:action => "index_#{type}"))
       if mappable
         add_tab(:MAP.t,
@@ -46,7 +46,7 @@ module ApplicationHelper::Tabs
           :params => query_params
         )
       end
-      add_tab("#{:NEXT.t} »",  args.merge(:action => "next_#{type}"  ))
+      add_tab("#{:FORWARD.t} »",  args.merge(:action => "next_#{type}"  ))
     end
   end
 

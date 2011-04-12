@@ -1816,7 +1816,7 @@ class ObserverController < ApplicationController
       types = RssLog.all_types.select {|type| params["show_#{type}"] == '1'}
       types = 'all' if types.length == RssLog.all_types.length
       types = 'none' if types.empty?
-      types = types.map(&:to_s).join(' ')
+      types = types.map(&:to_s).join(' ') if types.is_a?(Array)
       query = find_or_create_query(:RssLog, :type => types)
     elsif !params[:type].blank?
       types = params[:type].split & (['all'] + RssLog.all_types)

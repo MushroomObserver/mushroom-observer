@@ -72,8 +72,11 @@ class QueuedEmail::NameChange < QueuedEmail
   end
 
   def deliver_email
-    AccountMailer.deliver_name_change(user, to_user, queued, name, description,
-      old_name_version, new_name_version, old_description_version,
-      new_description_version, review_status)
+    # Make sure name wasn't deleted or merged since email was queued.
+    if name
+      AccountMailer.deliver_name_change(user, to_user, queued, name, description,
+        old_name_version, new_name_version, old_description_version,
+        new_description_version, review_status)
+    end
   end
 end
