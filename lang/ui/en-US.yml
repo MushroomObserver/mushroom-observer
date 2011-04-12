@@ -1,5 +1,6 @@
 # Please see README in this same directory for notes on syntax and general
 # guidelines on how to translate text.
+__ignore__: junk
 
 # Do not translate these!
 de_DE: Deutsch
