@@ -249,6 +249,9 @@ root> vi /etc/apache2/sites-available/mo
     RailsEnv production
     SetEnv TZ 'Eastern Time (US & Canada)'
 
+    # Chris Parrish might need this for his Chrome browser to work right?
+    Header set Accept-Ranges none
+
     # This was necessary for my local installation on Fedora Core 13.
     # RailsBaseURI /
 
@@ -280,6 +283,7 @@ root> vi /etc/apache2/sites-available/mo
 root> a2dissite default
 root> a2ensite mo
 root> a2enmod rewrite
+root> a2enmod headers
 
 # Create database.
 root> mo

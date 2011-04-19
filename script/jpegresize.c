@@ -3,7 +3,7 @@
 /* runtime:  flags:
 /* 2.8956
 /* 2.1513    (ImageMagick's convert)
-/* 1.3060    -O2                      <------
+/* 1.3060    -O2                      <------ (i.e., probably makes no difference!)
 /* 1.3120    -O2 -m64
 /* 1.3122    -O2 -mmmx -msse -msse2
 /* 1.3175    -O3
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
     int mode;      /* resize mode (see M_SET_SIZE, etc.) */
     int quality;   /* jpeg quality: 0 to 100 */
     int len;       /* length of one line in data */
-    int w1, h1;    /* size of input image */
+    int w1, h1, z1; /* size of input image */
     int w2, h2;    /* size of output image */
     int w3, h3;    /* size of convolution kernel */
     int xo, yo;    /* number of cols/rows to side of center of kernel */
@@ -88,8 +88,8 @@ int main(int argc, char **argv) {
     /* Temporary variables. */
     float *ptr1, *ptr2, *ptr3;
     JSAMPLE *ptr4;
-    int x, y, i, j, c;
-    float f, r, g, b, s;
+    int x, y, i, j, k, c;
+    float f, r, g, b, s, *accum;
 
     /* Print help message. */
     if (argc <= 1 || get_flag(argv, &argc, "-h", "--help")) {
@@ -193,11 +193,7 @@ int main(int argc, char **argv) {
     jpeg_start_decompress(&dinfo);
     w1 = dinfo.output_width;
     h1 = dinfo.output_height;
-    if (dinfo.out_color_components != 3 ||
-        dinfo.output_components != 3) {
-        fprintf(stderr, "JPEG image is not standard RGB.\n");
-        exit(1);
-    }
+    z1 = dinfo.output_components;
 
     /* Choose output size. */
     if (mode == M_SET_SIZE) {
@@ -248,17 +244,17 @@ int main(int argc, char **argv) {
     }
 
     if (verbose) {
-        printf("input:   %dx%d %s\n", w1, h1, file1);
-        printf("output:  %dx%d %s\n", w2, h2, file2);
-        printf("quality: %d\n", quality);
-        printf("radius:  %f\n", radius);
-        printf("sharp:   %f\n", sharp);
-        if (filter == F_FLAT)    printf("filter:  flat\n");
-        if (filter == F_LINEAR)  printf("filter:  bilinear\n");
-        if (filter == F_HERMITE) printf("filter:  hermite\n");
-        if (filter == F_CATROM)  printf("filter:  Catmull-Rom (M=%f)\n", arg1);
-        if (filter == F_KEYS)    printf("filter:  Keys-family (B=%f, C=%f)\n", arg1, arg2);
-        if (filter == F_LANCZOS) printf("filter:  Lanczos (N=%f)\n", arg1);
+        fprintf(stderr, "input:   %dx%d (%d) %s\n", w1, h1, z1, file1);
+        fprintf(stderr, "output:  %dx%d (%d) %s\n", w2, h2, z1, file2);
+        fprintf(stderr, "quality: %d\n", quality);
+        fprintf(stderr, "radius:  %f\n", radius);
+        fprintf(stderr, "sharp:   %f\n", sharp);
+        if (filter == F_FLAT)    fprintf(stderr, "filter:  flat\n");
+        if (filter == F_LINEAR)  fprintf(stderr, "filter:  bilinear\n");
+        if (filter == F_HERMITE) fprintf(stderr, "filter:  hermite\n");
+        if (filter == F_CATROM)  fprintf(stderr, "filter:  Catmull-Rom (M=%f)\n", arg1);
+        if (filter == F_KEYS)    fprintf(stderr, "filter:  Keys-family (B=%f, C=%f)\n", arg1, arg2);
+        if (filter == F_LANCZOS) fprintf(stderr, "filter:  Lanczos (N=%f)\n", arg1);
     }
 
     /* Calculate size of convolution kernel. */
@@ -292,34 +288,35 @@ int main(int argc, char **argv) {
     }
 
     if (verbose) {
-        printf("w1-h1:   %d %d\n", w1, h1);
-        printf("xo-yo:   %d %d\n", xo, yo);
-        printf("w3-h3:   %d %d\n", w3, h3);
-        printf("ax-ay:  %8.5f %8.5f\n", ax, ay);
-        printf("c1-4:   %8.5f %8.5f %8.5f %8.5f\n", c1, c2, c3, c4);
-        printf("c5-8:   %8.5f %8.5f %8.5f %8.5f\n", c5, c6, c7, c8);
+        fprintf(stderr, "w1-h1:   %d %d\n", w1, h1);
+        fprintf(stderr, "xo-yo:   %d %d\n", xo, yo);
+        fprintf(stderr, "w3-h3:   %d %d\n", w3, h3);
+        fprintf(stderr, "ax-ay:  %8.5f %8.5f\n", ax, ay);
+        fprintf(stderr, "c1-4:   %8.5f %8.5f %8.5f %8.5f\n", c1, c2, c3, c4);
+        fprintf(stderr, "c5-8:   %8.5f %8.5f %8.5f %8.5f\n", c5, c6, c7, c8);
     }
 
     /* Debug convolution kernel. */
     if (kernel) {
-        g = -1;
+        f = -1;
         for (xf=0; xf<10.0; xf+=0.1) {
-            r = calc_factor(xf);
-            printf("%5.2f %7.4f\n", xf, r);
-            if (r == 0.0 && g == 0.0)
+            s = calc_factor(xf);
+            fprintf(stderr, "%5.2f %7.4f\n", xf, s);
+            if (s == 0.0 && f == 0.0)
                 break;
-            g = r;
+            f = s;
         }
         exit(0);
     }
 
     /* Allocate buffers. */
-    len  = w2 * 4;
-    data = (float*)malloc(h3 * len * sizeof(float));
-    ptrs = (float**)malloc(h3 * sizeof(float*));
-    line = (JSAMPLE*)malloc((w1 > w2 ? w1 : w2) * 3 * sizeof(JSAMPLE));
-    fx   = (float*)malloc(w2 * w3 * sizeof(float));
-    fy   = (float*)malloc(h2 * h3 * sizeof(float));
+    len   = w2 * (z1 + 1);
+    data  = (float*)malloc(h3 * len * sizeof(float));
+    ptrs  = (float**)malloc(h3 * sizeof(float*));
+    line  = (JSAMPLE*)malloc((w1 > w2 ? w1 : w2) * z1 * sizeof(JSAMPLE));
+    fx    = (float*)malloc(w2 * w3 * sizeof(float));
+    fy    = (float*)malloc(h2 * h3 * sizeof(float));
+    accum = (float*)malloc(z1 * sizeof(float));
 
     /* Cache horizontal and vertical components of kernel. */
     for (x2=0, ptr3=fx; x2<w2; x2++) {
@@ -345,8 +342,21 @@ int main(int argc, char **argv) {
     jpeg_stdio_dest(&cinfo, fh2);
     cinfo.image_width = w2;
     cinfo.image_height = h2;
-    cinfo.input_components = 3;
-    cinfo.in_color_space = JCS_RGB;
+    cinfo.input_components = z1;
+    switch (z1) {
+    case 1:
+        cinfo.in_color_space = JCS_GRAYSCALE;
+        break;
+    case 3:
+        cinfo.in_color_space = JCS_RGB;
+        break;
+    case 4:
+        cinfo.in_color_space = JCS_CMYK;
+        break;
+    default:
+        fprintf(stderr, "Not sure what colorspace to make output for input file with %d components.\n", z1);
+        exit(1);
+    }
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, quality, TRUE);
     jpeg_start_compress(&cinfo, TRUE);
@@ -383,33 +393,91 @@ int main(int argc, char **argv) {
 
                 /* Do horizontal part of convolution now.  Stores a partial
                 /* result for each output column for this input row. */
-                for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
-                    xf = ((float)x2) * w1 / w2;
-                    r = g = b = s = 0;
-                    for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
-                        f = *ptr3++;
-                        if (x >= 0 && x < w1 && fabs(f) > 1e-8) {
-                            ptr4 = line + x * 3;
-                            r += f * *ptr4++;
-                            g += f * *ptr4++;
-                            b += f * *ptr4++;
-                            s += f;
+/* ------------------------- start switch 1 on z1 ------------------------- */
+                switch (z1) {
+                case 1:
+                    for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
+                        xf = ((float)x2) * w1 / w2;
+                        r = s = 0;
+                        for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
+                            f = *ptr3++;
+                            if (x >= 0 && x < w1 && fabs(f) > 1e-8) {
+                                ptr4 = line + x;
+                                r += f * *ptr4++;
+                                s += f;
+                            }
+                        }
+                        if (fabs(s) > 1e-3) {
+                            *ptr2++ = r;
+                            *ptr2++ = s;
+                        } else {
+                            fprintf(stderr, "x factor near zero -- shouldn't happen!\n");
+                            ptr4 = line + (int)xf;
+                            *ptr2++ = *ptr4++;
+                            *ptr2++ = 1.0;
                         }
                     }
-                    if (fabs(s) > 1e-3) {
-                        *ptr2++ = r;
-                        *ptr2++ = g;
-                        *ptr2++ = b;
-                        *ptr2++ = s;
-                    } else {
-                        fprintf(stderr, "x factor near zero -- shouldn't happen!\n");
-                        ptr4 = line + (int)xf * 3;
-                        *ptr2++ = *ptr4++;
-                        *ptr2++ = *ptr4++;
-                        *ptr2++ = *ptr4++;
-                        *ptr2++ = 1.0;
+                    break;
+
+                case 3:
+                    for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
+                        xf = ((float)x2) * w1 / w2;
+                        r = g = b = s = 0;
+                        for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
+                            f = *ptr3++;
+                            if (x >= 0 && x < w1 && fabs(f) > 1e-8) {
+                                ptr4 = line + x + x + x;
+                                r += f * *ptr4++;
+                                g += f * *ptr4++;
+                                b += f * *ptr4++;
+                                s += f;
+                            }
+                        }
+                        if (fabs(s) > 1e-3) {
+                            *ptr2++ = r;
+                            *ptr2++ = g;
+                            *ptr2++ = b;
+                            *ptr2++ = s;
+                        } else {
+                            fprintf(stderr, "x factor near zero -- shouldn't happen!\n");
+                            ptr4 = line + (int)xf * 3;
+                            *ptr2++ = *ptr4++;
+                            *ptr2++ = *ptr4++;
+                            *ptr2++ = *ptr4++;
+                            *ptr2++ = 1.0;
+                        }
+                    }
+                    break;
+
+                default:
+                    for (x2=0, ptr2=ptrs[i], ptr3=fx; x2<w2; x2++) {
+                        xf = ((float)x2) * w1 / w2;
+                        for (s=k=0; k<z1; k++)
+                            accum[k] = 0;
+                        for (j=0, x=(int)xf-xo; j<w3; j++, x++) {
+                            f = *ptr3++;
+                            if (x >= 0 && x < w1 && fabs(f) > 1e-8) {
+                                ptr4 = line + x * z1;
+                                for (k=0; k<z1; k++)
+                                    accum[k] += f * *ptr4++;
+                                s += f;
+                            }
+                        }
+                        if (fabs(s) > 1e-3) {
+                            for (k=0; k<z1; k++)
+                                *ptr2++ = accum[k];
+                            *ptr2++ = s;
+                        } else {
+                            fprintf(stderr, "x factor near zero -- shouldn't happen!\n");
+                            ptr4 = line + (int)xf * z1;
+                            for (k=0; k<z1; k++)
+                                *ptr2++ = *ptr4++;
+                            *ptr2++ = 1.0;
+                        }
                     }
                 }
+/* ------------------------- end switch 1 on z1 ------------------------- */
+
             }
 /* printf("i=%d y2=%d yc=%d y1=%d n1=%d ptrs[i]=%d\n", i, y2, yc, y1, n1, (ptrs[i]-data)/len); */
         }
@@ -421,33 +489,90 @@ int main(int argc, char **argv) {
         /* Do vertical part of convolution now.  Finish off calculation for
         /* each output column in this output row by iterating over partial
         /* results for each corresponding input row we calculated above. */
-        for (x2=0, ptr4=line; x2<w2; x2++) {
-            xf = ((float)x2) * w1 / w2;
-            r = g = b = s = 0;
-            ptr3 = fy + y2 * h3;
-            for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
-                f = *ptr3++;
-                if (y >= 0 && y < h1 && fabs(f) > 1e-8) {
-                    ptr1 = ptrs[i] + x2 * 4;
-                    r += f * *ptr1++;
-                    g += f * *ptr1++;
-                    b += f * *ptr1++;
-                    s += f * *ptr1++;
-                }
+/* ------------------------- start switch 2 on z1 ------------------------- */
+        switch (z1) {
+        case 1:
+            for (x2=0, ptr4=line; x2<w2; x2++) {
+                xf = ((float)x2) * w1 / w2;
+                r = s = 0;
+                ptr3 = fy + y2 * h3;
+                for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
+                    f = *ptr3++;
+                    if (y >= 0 && y < h1 && fabs(f) > 1e-8) {
+                        ptr1 = ptrs[i] + x2 + x2;
+                        r += f * *ptr1++;
+                        s += f * *ptr1++;
+                    }
 /* printf("x2=%d y2=%d i=%d f=%f s=%f (y=%d ptr1=%d)\n", x2, y2, i, f, s, y, (ptr1-data)/len); */
+                }
+                if (fabs(s) > 1e-3) {
+                    *ptr4++ = (c = r / s) > 255 ? 255 : c < 0 ? 0 : c;
+                } else {
+                    fprintf(stderr, "y factor near zero -- shouldn't happen!\n");
+                    ptr1 = ptrs[h3/2] + ((int)xf) * 4;
+                    *ptr4++ = *ptr1++;
+                }
             }
-            if (fabs(s) > 1e-3) {
-                *ptr4++ = (c = r / s) > 255 ? 255 : c < 0 ? 0 : c;
-                *ptr4++ = (c = g / s) > 255 ? 255 : c < 0 ? 0 : c;
-                *ptr4++ = (c = b / s) > 255 ? 255 : c < 0 ? 0 : c;
-            } else {
-                fprintf(stderr, "y factor near zero -- shouldn't happen!\n");
-                ptr1 = ptrs[h3/2] + ((int)xf) * 4;
-                *ptr4++ = *ptr1++;
-                *ptr4++ = *ptr1++;
-                *ptr4++ = *ptr1++;
+            break;
+
+        case 3:
+            for (x2=0, ptr4=line; x2<w2; x2++) {
+                xf = ((float)x2) * w1 / w2;
+                r = g = b = s = 0;
+                ptr3 = fy + y2 * h3;
+                for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
+                    f = *ptr3++;
+                    if (y >= 0 && y < h1 && fabs(f) > 1e-8) {
+                        ptr1 = ptrs[i] + x2 * 4;
+                        r += f * *ptr1++;
+                        g += f * *ptr1++;
+                        b += f * *ptr1++;
+                        s += f * *ptr1++;
+                    }
+/* printf("x2=%d y2=%d i=%d f=%f s=%f (y=%d ptr1=%d)\n", x2, y2, i, f, s, y, (ptr1-data)/len); */
+                }
+                if (fabs(s) > 1e-3) {
+                    *ptr4++ = (c = r / s) > 255 ? 255 : c < 0 ? 0 : c;
+                    *ptr4++ = (c = g / s) > 255 ? 255 : c < 0 ? 0 : c;
+                    *ptr4++ = (c = b / s) > 255 ? 255 : c < 0 ? 0 : c;
+                } else {
+                    fprintf(stderr, "y factor near zero -- shouldn't happen!\n");
+                    ptr1 = ptrs[h3/2] + ((int)xf) * 4;
+                    *ptr4++ = *ptr1++;
+                    *ptr4++ = *ptr1++;
+                    *ptr4++ = *ptr1++;
+                }
+            }
+            break;
+
+        default:
+            for (x2=0, ptr4=line; x2<w2; x2++) {
+                xf = ((float)x2) * w1 / w2;
+                for (s=k=0; k<z1; k++)
+                    accum[k] = 0;
+                ptr3 = fy + y2 * h3;
+                for (i=0, y=(int)yf-yo; i<h3; i++, y++) {
+                    f = *ptr3++;
+                    if (y >= 0 && y < h1 && fabs(f) > 1e-8) {
+                        ptr1 = ptrs[i] + x2 * (z1 + 1);
+                        for (k=0; k<z1; k++)
+                            accum[k] += f * *ptr1++;
+                        s += f * *ptr1++;
+                    }
+/* printf("x2=%d y2=%d i=%d f=%f s=%f (y=%d ptr1=%d)\n", x2, y2, i, f, s, y, (ptr1-data)/len); */
+                }
+                if (fabs(s) > 1e-3) {
+                    for (k=0; k<z1; k++)
+                        *ptr4++ = (c = accum[k] / s) > 255 ? 255 : c < 0 ? 0 : c;
+                } else {
+                    fprintf(stderr, "y factor near zero -- shouldn't happen!\n");
+                    ptr1 = ptrs[h3/2] + ((int)xf) * 4;
+                    for (k=0; k<z1; k++)
+                        *ptr4++ = *ptr1++;
+                }
             }
         }
+/* ------------------------- end switch 2 on z1 ------------------------- */
 
         /* Write this output line. */
         jpeg_write_scanlines(&cinfo, &line, 1);
@@ -463,6 +588,7 @@ int main(int argc, char **argv) {
     free(line);
     free(ptrs);
     free(fx);
+    free(accum);
     exit(0);
 }
 
@@ -545,9 +671,9 @@ float x;
 void bad_usage(msg, arg)
 char *msg, *arg;
 {
-    printf("ERROR: ");
-    printf(msg, arg);
-    printf("\nUSAGE: %s\n", USAGE);
+    fprintf(stderr, "ERROR: ");
+    fprintf(stderr, msg, arg);
+    fprintf(stderr, "\nUSAGE: %s\n", USAGE);
     exit(1);
 }
 
