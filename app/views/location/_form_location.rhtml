@@ -47,7 +47,7 @@
           <td align="center">
             <label for="location_north"><%= :North.t %>:</label><br/>
             <%= form.text_field('north', :size => 12) %>
-            <%= javascript_tag("$('location_north').observe('blur', function (event) {
+            <%= javascript_tag("$('location_north').observe('keypress', function (event) {
               startKeyPressTimer();
             });") %>
           </td>
@@ -57,7 +57,7 @@
           <td align="center">
             <label for="location_west"><%= :West.t %>:</label><br/>
             <%= form.text_field('west', :size => 12) %>
-            <%= javascript_tag("$('location_west').observe('blur', function (event) {
+            <%= javascript_tag("$('location_west').observe('keypress', function (event) {
               startKeyPressTimer();
             });") %>
           </td>
@@ -67,7 +67,7 @@
           <td align="center">
             <label for="location_east"><%= :East.t %>:</label><br/>
             <%= form.text_field('east', :size => 12) %>
-            <%= javascript_tag("$('location_east').observe('blur', function (event) {
+            <%= javascript_tag("$('location_east').observe('keypress', function (event) {
               startKeyPressTimer();
             });") %>
           </td>
@@ -77,7 +77,7 @@
           <td align="center">
             <label for="location_south"><%= :South.t %>:</label><br/>
             <%= form.text_field('south', :size => 12) %>
-            <%= javascript_tag("$('location_south').observe('blur', function (event) {
+            <%= javascript_tag("$('location_south').observe('keypress', function (event) {
               startKeyPressTimer();
             });") %>
           </td>

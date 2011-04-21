@@ -45,10 +45,18 @@ function updateMapOverlay(north, south, east, west) {
   map.removeOverlay(mo_box);
   mo_box = new GPolyline([nw,nwe,ne,se,swe,sw,nw],"#00ff88",3,1.0);
   map.addOverlay(mo_box);
-  $("location_north").value = north;
-  $("location_south").value = south;
-  $("location_east").value = east;
-  $("location_west").value = west;
+  if (parseFloat($("location_north").value) != north) {
+    $("location_north").value = north;
+  }
+  if (parseFloat($("location_south").value) != south) {
+    $("location_south").value = south;
+  }
+  if (parseFloat($("location_east").value) != east) {
+    $("location_east").value = east;
+  }
+  if (parseFloat($("location_west").value) != west) {
+    $("location_west").value = west;
+  }
   clearTimeout(timeout_id);
   old_loc = null;
   reset = false;
