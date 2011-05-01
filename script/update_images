@@ -39,7 +39,8 @@ SERVER_ALIASES = {
 
 # List of official image servers to keep updated from main webserver.
 OFFICIAL_SERVERS = [
-  'dreamhost'
+  'dreamhost/bin/bash: dreamhost: command not found
+'
 ]
 
 # Default image server to use for --sync mode.
@@ -607,9 +608,7 @@ case get_next_arg
 ################################################################################
 
   when '-h', '--help'
-    puts <<"EOH"
-
-USAGE
+    puts "USAGE
   script/update_images --<mode> [args...]
 
 MODES
@@ -665,10 +664,13 @@ FILES
     user@host.url:path
 
   The aliases recognized currently are:
-
-    dreamhost   velosa@images.mushroomobserver.org:images.mushroomobserver.org
-    slicehost   mushroomobserver.org:/var/web/mo/public/images
-
+"
+    for k, v in SERVER_ALIASES
+      puts "    #{k} = #{v}\n"
+      # dreamhost   velosa@images.mushroomobserver.org:images.mushroomobserver.org
+      # slicehost   mushroomobserver.org:/var/web/mo/public/images
+    end
+    puts "
   The defaults are:
 
     root        /var/web/mo
@@ -698,8 +700,8 @@ EXAMPLES
   update_images --root . --sync dreamhost
     Run this on a hypothetical second image server to sync them up: copy
     images missing on the second from the first, and vice versa.
+"
 
-EOH
     exit 0
 
   else
