@@ -77,25 +77,6 @@ end %>
                               :cols => 60, :rows => 2) %><br/>
             <%= :Vote.t %>: <%= image_vote_tabs(image) %>
           </td>
-<% # These controls are dangerous because they cause you to lose any
-   # changes made in the form.  They should be re-cast as ajax requests.
-   if false %>
-          <td width="10"></td>
-          <td>
-            <%= link_to(:show_object.t(:type => :image),
-                        :controller => 'image', :action => 'show_image',
-                        :id => image.id, :obs => @observation.id,
-                        :params => query_params) %><br/>
-            <%= link_to(:form_observations_edit_image.t,
-                        :controller => 'image', :action => 'edit_image',
-                        :id => image.id, :params => query_params) %><br/>
-            <%= link_to(:form_observations_remove_image.t,
-                        { :controller => 'image', :action => 'remove_image',
-                        :observation_id => @observation.id,
-                        :image_id => image.id, :params => query_params  },
-                        { :confirm => :form_observations_remove_image_confirm.l }) %><br/>
-          </td>
-<% end %>
         </tr></table>
       </div>
     <% end %>

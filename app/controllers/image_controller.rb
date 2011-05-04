@@ -211,7 +211,8 @@ class ImageController < ApplicationController
       end
 
       # Cast user's vote if passed in 'vote' parameter.
-      if (val = params[:vote]) and
+      if @user and
+         (val = params[:vote]) and
          (val == '0' or (val = Image.validate_vote(val)))
         val = nil if val == '0'
         cur = @image.users_vote
