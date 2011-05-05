@@ -2450,11 +2450,16 @@ eol_preview_explanation: >
 
 # image/license_updater
 image_updater_count: Número
-image_updater_current: Licencia Actual
+image_updater_license: Licencia
 image_updater_holder: Titular de Derechos
-image_updater_new: Nueva Licencia
 image_updater_title: Actualizar Licencias para [user]
 image_updater_update: Actualizar
+image_updater_help: >
+  A continuación se enumeran todas las diferentes licencias que acabo de
+  publicar imágenes bajo, junto con el número de imágenes que utilizan esa
+  licencia.  A continuación realice los cambios que desee en la licencia o el
+  nombre que figura como titular de derechos de autor, y entonces haga clic en
+  «[:UPDATE]» para enviar los cambios. 
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.

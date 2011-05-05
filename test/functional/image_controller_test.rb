@@ -218,8 +218,11 @@ class ImageControllerTest < FunctionalTestCase
 
     params = {
       :updates => {
-        target_license.id.to_s => {
-          copyright_holder => new_license.id.to_s
+        "1" => {
+          "old_id" => target_license.id.to_s,
+          "new_id" => new_license.id.to_s,
+          "old_holder" => copyright_holder,
+          "new_holder" => copyright_holder
         }
       }
     }
@@ -232,6 +235,25 @@ class ImageControllerTest < FunctionalTestCase
     assert(target_count_after < target_count)
     assert(new_count_after > new_count)
     assert_equal(target_count_after + new_count_after, target_count + new_count)
+
+    # This empty string caused it to crash in the wild.
+    example_image.reload
+    example_image.copyright_holder = ''
+    example_image.save
+    params = {
+      :updates => {
+        "1" => {
+          "old_id" => new_license.id.to_s,
+          "new_id" => new_license.id.to_s,
+          "old_holder" => "",
+          "new_holder" => "A. H. Smith"
+        }
+      }
+    }
+    post_requires_login(:license_updater, params)
+    assert_response('license_updater')
+    example_image.reload
+    assert_equal("A. H. Smith", example_image.copyright_holder)
   end
 
   def test_delete_images

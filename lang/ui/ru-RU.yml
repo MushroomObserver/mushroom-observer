@@ -2314,11 +2314,15 @@ eol_preview_explanation:  >
 
 # image/license_updater
 image_updater_count:  Count
-image_updater_current:  Current License
+image_updater_license:  "[:LICENSE]"
 image_updater_holder:  "[:COPYRIGHT_HOLDER]"
-image_updater_new:  New License
 image_updater_title:  Updating Licenses for [user]
 image_updater_update:  Update
+image_updater_help:  >
+  Listed below are all the different licenses you've posted images under, along
+  with the number of your images which use that license.  Make any changes you
+  want to the license or the name listed as the copyright holder, then click
+  "[:UPDATE]" to submit changes. 
 
 
 # interest-related controls in name/show_name, observation/show_observation, etc.

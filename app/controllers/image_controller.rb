@@ -546,56 +546,58 @@ class ImageController < ApplicationController
   # a single row.  This lets you change all of Rolf's licenses in one stroke.
   # Linked from: account/prefs
   # Inputs:
-  #   params[:updates][license_id][copyright_holder]   (new license_id)
+  #   params[:updates][n][:old_id]      (old license_id)
+  #   params[:updates][n][:new_id]      (new license_id)
+  #   params[:updates][n][:old_holder]  (old copyright holder)
+  #   params[:updates][n][:new_holder]  (new copyright holder)
   # Outputs: @data
   #   @data[n]['copyright_holder']  Person who actually holds copyright.
   #   @data[n]['license_count']     Number of images this guy holds with this type of license.
-  #   @data[n]['selected']          ID of current license.
   #   @data[n]['license_id']        ID of current license.
   #   @data[n]['license_name']      Name of current license.
-  #   @data[n]['select_id']         ID of HTML select menu element.
-  #   @data[n]['select_name']       Name of HTML select menu element.
   #   @data[n]['licenses']          Options for select menu.
   def license_updater # :norobots:
 
     # Process any changes.
     if request.method == :post
-      for current_id, value in params[:updates]
-        current_id = current_id.to_i
-        current_license = License.find(current_id)
-        for copyright_holder, new_id in value
-          new_id = new_id.to_i
+      data = params[:updates]
+      for row in data.values
+        old_id = row[:old_id].to_i
+        new_id = row[:new_id].to_i
+        old_holder = row[:old_holder].to_s
+        new_holder = row[:new_holder].to_s
+        if old_id != new_id or
+           old_holder != new_holder
+          old_license = License.find(old_id)
           new_license = License.find(new_id)
-          if current_id != new_id
-            Image.connection.update %(
-              UPDATE images SET license_id = #{new_id}
-              WHERE copyright_holder = #{Image.connection.quote(copyright_holder.to_s)}
-                AND license_id = #{current_id} AND user_id = #{@user.id}
-            )
-            Transaction.put_image(
-              :copyright_holder => copyright_holder,
-              :license          => current_license,
-              :user             => @user,
-              :set_license      => new_license
-            )
-          end
+          Image.connection.update(%(
+            UPDATE images SET license_id = #{new_id},
+              copyright_holder = #{Image.connection.quote(new_holder)}
+            WHERE copyright_holder = #{Image.connection.quote(old_holder)}
+              AND license_id = #{old_id} AND user_id = #{@user.id}
+          ))
+          Transaction.put_image(
+            :user                 => @user,
+            :license              => old_license,
+            :set_license          => new_license,
+            :copyright_holder     => old_holder,
+            :set_copyright_holder => new_holder
+          )
         end
       end
     end
 
     # Gather data for form.
-    id = @user.id.to_i # Make sure it's an integer
-    query = "select count(*) as license_count, copyright_holder, license_id
-      from images where user_id = #{id} group by copyright_holder, license_id"
-    @data = Image.connection.select_all(query)
+    @data = Image.connection.select_all(%(
+      SELECT COUNT(*) AS license_count, copyright_holder, license_id
+      FROM images
+      WHERE user_id = #{@user.id.to_i}
+      GROUP BY copyright_holder, license_id
+    ))
     for datum in @data
-      lic_id = datum['license_id'] = datum['license_id'].to_s
-      license = License.find(lic_id)
+      license = License.find(datum['license_id'].to_i)
       datum['license_name'] = license.display_name
-      datum['select_id']    = "updates_#{lic_id}_#{datum['copyright_holder']}".gsub!(/\W/, '_')
-      datum['select_name']  = "updates[#{lic_id}][#{datum['copyright_holder']}]"
       datum['licenses']     = License.current_names_and_ids(license)
-      datum['selected']     = license.id
     end
   end
 end
