@@ -589,10 +589,11 @@ class ImageController < ApplicationController
       from images where user_id = #{id} group by copyright_holder, license_id"
     @data = Image.connection.select_all(query)
     for datum in @data
-      license = License.find(datum['license_id'])
+      lic_id = datum['license_id'] = datum['license_id'].to_s
+      license = License.find(lic_id)
       datum['license_name'] = license.display_name
-      datum['select_id']    = "updates_#{datum['license_id']}_#{datum['copyright_holder']}".gsub!(/\W/, '_')
-      datum['select_name']  = "updates[#{datum['license_id']}][#{datum['copyright_holder']}]"
+      datum['select_id']    = "updates_#{lic_id}_#{datum['copyright_holder']}".gsub!(/\W/, '_')
+      datum['select_name']  = "updates[#{lic_id}][#{datum['copyright_holder']}]"
       datum['licenses']     = License.current_names_and_ids(license)
       datum['selected']     = license.id
     end

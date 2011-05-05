@@ -31,7 +31,9 @@
           <%= datum['license_name'].to_s %>
         </td>
         <td>
-          <%= select_tag(datum['select_id'], options_for_select(datum['licenses'], datum['selected']), :name => datum['select_name']) %>
+          <%= select_tag(datum['select_id'],
+            options_for_select(datum['licenses'], datum['selected']),
+            :name => datum['select_name']) %>
         </td>
       </tr>
     <% end %>
