@@ -8,8 +8,7 @@ server=cdmr@digitalmycology.com:images.digitalmycology.com
 images=public/images
 
 orig=$images/orig/$id.$ext
-orig_first=$images/orig/$id-0.$ext
-orig_other=$images/orig/$id-'*'.$ext
+orig_layers=$images/orig/$id-'*'.jpg
 full=$images/orig/$id.jpg
 huge=$images/1280/$id.jpg
 large=$images/960/$id.jpg
@@ -103,13 +102,16 @@ while (ps -e | grep ' convert$' > /dev/null); do sleep 5; done
 
 # Do we need to convert the original to a JPEG?
 if [[ $orig != $full ]]; then
-  run convert -quality 70 $orig $full
+  run convert -quality 90 $orig $full
 
   # If there are multiple layers, ImageMagick saves them as 1234-N.jpg.
   # Take the first one, and delete the rest.
-  if [[ -e $orig_first ]]; then
-    run mv $orig_first $orig
-    rm $orig_other
+  if [[ ! -e $full ]]; then
+    biggest_layer=`ls -rS $orig_layers | tail -1`
+    if [[ -e $biggest_layer ]]; then
+      run mv $biggest_layer $full
+      run rm $orig_layers
+    fi
   fi
 fi
 
