@@ -38,7 +38,7 @@
 # Initial set up.
 local> ssh root@$IP_ADDR
 root> passwd
-root> apt-get update
+root> apt-get upgrade
 root> apt-get install tcsh mlocate man vim lynx telnet emacs wget \
                       build-essential iptables bison
 root> # yum update

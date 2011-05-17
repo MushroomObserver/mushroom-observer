@@ -1,0 +1,22 @@
+#!/bin/bash
+
+mo_user=mo
+mo_password=xxx
+mo_production=mo_production
+mo_development=mo_development
+
+mo_root=/var/web/mo
+backup_server=cdmr@digitalmycology.com:images.digitalmycology.com
+
+date=`date +%Y%m%d`
+
+mysqldump -u $mo_user -p$mo_password $mo_production > $mo_root/db/unstripped
+mysql -u $mo_user -p$mo_password $mo_development -e "source $mo_root/db/unstripped"
+mysql -u $mo_user -p$mo_password $mo_development -e "source $mo_root/db/strip.sql"
+mysqldump -u $mo_user -p$mo_password $mo_development > $mo_root/db/stripped
+gzip $mo_root/db/unstripped
+gzip $mo_root/db/stripped
+
+mv $mo_root/db/stripped.gz $mo_root/public/database-stripped.gz
+scp $mo_root/db/unstripped.gz $backup_server/database.$date.gz
+
