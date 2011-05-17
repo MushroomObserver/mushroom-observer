@@ -14,6 +14,8 @@ mysqldump -u $mo_user -p$mo_password $mo_production > $mo_root/db/unstripped
 mysql -u $mo_user -p$mo_password $mo_development -e "source $mo_root/db/unstripped"
 mysql -u $mo_user -p$mo_password $mo_development -e "source $mo_root/db/strip.sql"
 mysqldump -u $mo_user -p$mo_password $mo_development > $mo_root/db/stripped
+rm $mo_root/db/unstripped.gz
+rm $mo_root/db/stripped.gz
 gzip $mo_root/db/unstripped
 gzip $mo_root/db/stripped
 
