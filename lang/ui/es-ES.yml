@@ -972,7 +972,8 @@ app_no_session: Usted Ha Deshabilitado las Cookies
 app_rss: Mushroom Observer RSS
 
 # Donation stuff.
-app_donate_banner: "¡Gracias a los donantes! Hemos logrado nuestro objetivo para 2011 y han comenzado a trabajar en las mejoras."
+# app_donate_banner: '"¡Gracias a los donantes! Hemos logrado nuestro objetivo para 2011 y han comenzado a trabajar en las mejoras.":/support/donate'
+app_donate_banner: 'We have opened up our feature list and bug-tracker to the general public at "Pivotal":https://www.pivotaltracker.com/projects/224629/overview. <br>Please have a look and vote for your favorite features and comment on "open" issues.'
 app_donate: Donar
 
 ################################################################################

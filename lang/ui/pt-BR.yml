@@ -972,7 +972,7 @@ app_no_session:  You Have Cookies Disabled
 app_rss: RSS Observações de Cogumelo
 
 # Donation stuff.
-app_donate_banner: "Donating to Mushroom Observer is now easier and we are more than half way to our goal!"
+app_donate_banner:  '"Thank you for your donations!  We have reached our 2011 goal and are now working on improvements.":/support/donate'
 app_donate:  Donate
 
 ################################################################################

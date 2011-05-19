@@ -970,7 +970,8 @@ app_no_session: You Have Cookies Disabled
 app_rss: "[:app_title] RSS"
 
 # Donation stuff.
-app_donate_banner: "Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!"
+# app_donate_banner: '"Better than it was before. Better...Stronger...Faster! Thanks to donors and Jason!":/support/donate'
+app_donate_banner: 'We have opened up our feature list and bug-tracker to the general public at "Pivotal":https://www.pivotaltracker.com/projects/224629/overview. <br>Please have a look and vote for your favorite features and comment on "open" issues.'
 app_donate: Donate
 
 ################################################################################
