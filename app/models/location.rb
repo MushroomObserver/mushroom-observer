@@ -357,6 +357,7 @@ class Location < AbstractModel
     "North America" => 0,
     "Norway" => 0,
     "Panama" => 0,
+    "Philippines" => 0,
     "Poland" => 0,
     "Portugal" => 0,
     "Russia" => 0,
