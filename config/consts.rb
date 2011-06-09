@@ -94,3 +94,13 @@ MAIL_CONFIG = {
   # :user_name      => 'mo@mushroomobserver.org',
   # :password       => 'xxx',
 } if !defined? MAIL_CONFIG
+
+# Access data for Pivotal Tracker's API.
+PIVOTAL_URL      = 'www.pivotaltracker.com'              if !defined? PIVOTAL_URL
+PIVOTAL_PATH     = '/services/v3'                        if !defined? PIVOTAL_PATH
+PIVOTAL_USERNAME = 'username'                            if !defined? PIVOTAL_USERNAME
+PIVOTAL_PASSWORD = 'password'                            if !defined? PIVOTAL_PASSWORD
+PIVOTAL_PROJECT  = 'project_id'                          if !defined? PIVOTAL_PROJECT
+PIVOTAL_MAX_VOTE = 1                                     if !defined? PIVOTAL_MAX_VOTE
+PIVOTAL_MIN_VOTE = -1                                    if !defined? PIVOTAL_MIN_VOTE
+PIVOTAL_CACHE    = RAILS_ROOT + '/tmp/pivotal'           if !defined? PIVOTAL_CACHE

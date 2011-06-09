@@ -75,6 +75,7 @@ module ApplicationHelper::ObjectLink
       user_id = user.is_a?(Fixnum) ? user : user.id
       link_to(name, :controller => 'observer', :action => 'show_user', :id => user_id)
     rescue
+      (user || name).to_s
     end
   end
 

@@ -54,7 +54,7 @@ class ApiController < ApplicationController
       render_results(api)
     rescue => e
       api = API.new
-      @errors = api.convert_error(e, 501, nil, true) 
+      @errors = api.convert_error(e, 501, nil, true)
       render_results(api)
     end
   end
@@ -143,7 +143,9 @@ class ApiController < ApplicationController
     begin
       send("ajax_#{params[:method]}")
     rescue => e
-      render(:text => e.to_s, :layout => false, :status => 500)
+      msg = e.to_s
+      msg += "\n" + e.backtrace.join("\n") if DEVELOPMENT
+      render(:text => msg, :layout => false, :status => 500)
     end
   end
 
@@ -303,5 +305,39 @@ class ApiController < ApplicationController
       name = Location.reverse_name(name) if login_for_ajax.location_format == :scientific
     end
     render(:inline => Geocoder.new(name).ajax_response)
+  end
+
+  # Process AJAX requests for Pivotal stories.
+  # type::   Type of request: 'story', 'vote', 'comment'
+  # id::     ID of story.
+  # value::  Value of comment or vote (as necessary).
+  #
+  # Examples:
+  #
+  #   /ajax/pivotal/story/991235
+  #   /ajax/pivotal/vote/991235?value=2
+  #   /ajax/pivotal/comment/991235?value=Blah%20blah%20blah...
+  #
+  def ajax_pivotal
+    type  = params[:type].to_s
+    id    = params[:id].to_s
+    value = params[:value].to_s
+    case type
+    when 'story'
+      @story = Pivotal.get_story(id)
+      render(:inline => '<%= pivotal_story(@story) %>')
+    when 'vote'
+      @user = login_for_ajax
+      @story = Pivotal.cast_vote(id, @user, value)
+      render(:inline => '<%= pivotal_vote_controls(@story) %>')
+    when 'comment'
+      user = login_for_ajax
+      story = Pivotal.get_story(id)
+      @comment = Pivotal.post_comment(id, user, value)
+      @num = story.comments.length + 1
+      render(:inline => '<%= pivotal_comment(@comment, @num) %>')
+    else
+      raise("Invalid type \"#{type}\" in Pivotal AJAX controller.")
+    end
   end
 end

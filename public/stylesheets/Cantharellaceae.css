@@ -87,3 +87,26 @@ li.selected { background-color: #f6ae4a ! important }
 }
 
 table.vote_meter div.on { background: #10110b; } /* cornucopioides dark-hymenium */
+
+/* Pivotal page. */
+div.pivotal { background: #e1d0a5 }
+span.pivotal_name a, span.pivotal_name a:visited { color: #10110b }
+span.pivotal_unscheduled { color: #777 }
+span.pivotal_unstarted   { color: #222 }
+span.pivotal_started     { color: #000 }
+a.p0 { border: 1px solid #857c61 }
+a.p1 { border: 1px solid #857c61 }
+a.p2 { border: 1px solid #857c61 }
+a.p3 { border: 1px solid #857c61 }
+a.p4 { border: 1px solid #857c61 }
+a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
+a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
+a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
+a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
+a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
+a.p0, a.p0:visited { color: #10110b; background: #AAF }
+a.p1, a.p1:visited { color: #10110b; background: #F55 }
+a.p2, a.p2:visited { color: #10110b; background: #F83 }
+a.p3, a.p3:visited { color: #10110b; background: #FF0 }
+a.p4, a.p4:visited { color: #10110b; background: #FF0 }
+

@@ -1,3 +1,4 @@
+
 body, p, ol, ul, td {
   font-family: verdana, arial, helvetica, sans-serif;
   font-size:   13px;
@@ -471,3 +472,69 @@ p.bulk_pre {
   font-family: mono;
   font-size: 11px;
 }
+
+/* Pivotal Tracker pages */
+div.pivotal {
+  margin: 1em 0em 1em 0em;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+}
+
+div.pivotal_name {
+  font-size: 120%;
+}
+span.pivotal_name a {
+  text-decoration: none;
+}
+
+span.pivotal_votes {
+  margin-right: 1.0em;
+}
+span.pivotal_votes img {
+  border: 0px;
+  margin: 2px 0px -2px 0px;
+  padding: 0px;
+}
+span.pivotal_votes span {
+  margin:0px 5px 0px 5px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}
+
+span.pivotal_state {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 70%;
+  letter-spacing: 0.1em;
+}
+
+span.pivotal_num_comments {
+  margin-left: 1em;
+  font-size: 80%;
+}
+
+span.pivotal_labels {
+  margin-left: 1.5em;
+}
+a.p0, a.p1, a.p2, a.p3, a.p4 {
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 60%;
+  letter-spacing: 0.1em;
+  padding: 0em 0.3em 0em 0.3em;
+}
+
+p.pivotal_heading {
+  margin:1em 0em 1em 0em;
+}
+
+div.pivotal_popup {
+  position: absolute;
+}
+div.pivotal_popup, span.pivotal_loading {
+  border: 1px solid black;
+  padding: 1em 2em 1em 2em;
+  background: white;
+  color: black;
+}
+

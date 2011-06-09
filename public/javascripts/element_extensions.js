@@ -54,31 +54,23 @@ Element.ensureVisible = function(e) {
 
   // Scroll left/right to make entire object visible.  If impossible, scroll
   // as little as possible.
-  var dx = 0;
-  if (ex < sx) {
-    dx = ex-sx;
-    if (ex+ew > sx+sw+dx) dx = ex+ew-sx-sw;
-    if (dx > 0) dx = 0;
-  } else if (ex+ew > sx+sw) {
-    dx = ex+ew-sx-sw;
-    if (ex < sx+dx) dx = ex-sx;
-    if (dx < 0) dx = 0;
+  var nx = sx;
+  if (ex < sx && ex+ew < sx+sw) {
+    nx = ew<sw ? ex : ex+ew-sw;
+  } else if (ex > sx && ex+ew > sx+sw) {
+    nx = ew<sw ? ex+ew-sw : ex;
   }
 
   // Scroll up/down to make entire object visible.  Same deal.
-  var dy = 0;
-  if (ey < sy) {
-    dy = ey-sy;
-    if (ey+eh > sy+sh+dy) dy = ey+eh-sy-sh;
-    if (dy > 0) dy = 0;
-  } else if (ey+eh > sy+sh) {
-    dy = ey+eh-sy-sh;
-    if (ey < sy+dy) dy = ey-sy;
-    if (dy < 0) dy = 0;
+  var ny = sy;
+  if (ey < sy && ey+eh < sy+sh) {
+    ny = eh<sh ? ey : ey+eh-sh;
+  } else if (ey > sy && ey+eh > sy+sh) {
+    ny = eh<sh ? ey+eh-sh : ey;
   }
 
-  if (dx != 0 || dy != 0)
-    window.scrollTo(sx+dx, sy+dy);
+  if (nx != sx || ny != sy)
+    window.scrollTo(nx, ny);
 };
 
 // Try to center an object in the window.

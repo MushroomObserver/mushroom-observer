@@ -973,7 +973,7 @@ app_rss: Mushroom Observer RSS
 
 # Donation stuff.
 # app_donate_banner: '"¡Gracias a los donantes! Hemos logrado nuestro objetivo para 2011 y han comenzado a trabajar en las mejoras.":/support/donate'
-app_donate_banner: 'We have opened up our feature list and bug-tracker to the general public at "Pivotal":https://www.pivotaltracker.com/projects/224629/overview. <br>Please have a look and vote for your favorite features and comment on "open" issues.'
+app_donate_banner:  'Check out our new and improved "feature tracker":/pivotal/index.'
 app_donate: Donar
 
 ################################################################################
@@ -2289,6 +2289,90 @@ letter_body: >
   \n
   Gracias,\n
   -Nathan
+
+
+# pivotal/index
+pivotal_index_title:  Directions for Future Development
+pivotal_post_comment:  Post Comment
+pivotal_index_header:  >
+  Use this page to browse through the many features requested by users and
+  developers.  Some are very specific bug fixes or requests for new
+  capabilities.  Others are just general areas people are interested in seeing
+  Mushroom Observer grow.  Features are organized by use of the following set
+  of labels.  Click on a label to see a list of features with that label.
+  Click on a feature to see more detail and discussion.  If you are logged in,
+  you will be able to vote features up or down, and you can add your own
+  comments to the discussion.  If you would like to request a new feature, for
+  now we request that you "send us an email":/observer/ask_webmaster_question
+  describing what it is you'd like to do.  Please try to be as detailed as
+  possible; concrete examples are generally the best.
+
+pivotal_vote_failed:  >
+  We were unable to process your vote.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_story_failed:  >
+  We were unable to get the story you requested.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_comment_failed:  >
+  We were unable to post your comment.\n
+  If the problem persists please notify to admins.\n
+  Sorry for the inconvenience!\n
+
+pivotal_story_loading:  Loading story details...
+pivotal_posting_comment:  Posting comment...
+pivotal_posted_by:  Posted by
+
+pivotal_state_unscheduled:  unscheduled
+pivotal_state_unstarted:  in the queue
+pivotal_state_started:  in progress
+
+pivotal_head_critical:  anything impairing performance or interfering with many users
+pivotal_head_bottleneck:  features which are required by lots of other things
+pivotal_head_api:  programmer's interface via XML-RPC, etc.
+pivotal_head_design:  web layout and graphic design
+pivotal_head_email:  notification emails
+pivotal_head_eol:  EOL content sharing
+pivotal_head_i18n:  translation text and all the associated machinery
+pivotal_head_interface:  web interface
+pivotal_head_lists:  species lists, checklists, etc.
+pivotal_head_locations:  'location descriptions and/or geocoding'
+pivotal_head_names:  species descriptions
+pivotal_head_projects:  group projects
+pivotal_head_search:  search capabilities and data mining
+pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
+pivotal_head_voting:  voting on observations, their names, their images, etc.
+pivotal_head_other:  uncategorized
+pivotal_head_admin:  administration tasks
+pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
+pivotal_head_server:  server installation, configuration, and diagnostics
+pivotal_head_open:  areas where we are actively soliciting feedback
+pivotal_head_all:  show everything
+
+pivotal_label_critical:  critical
+pivotal_label_bottleneck:  bottleneck
+pivotal_label_api:  api
+pivotal_label_design:  design
+pivotal_label_email:  email
+pivotal_label_eol:  eol
+pivotal_label_i18n:  translations
+pivotal_label_interface:  interface
+pivotal_label_lists:  lists
+pivotal_label_locations:  locations
+pivotal_label_names:  names
+pivotal_label_projects:  projects
+pivotal_label_search:  searching
+pivotal_label_taxonomy:  taxonomy
+pivotal_label_voting:  voting
+pivotal_label_other:  other
+pivotal_label_admin:  admin
+pivotal_label_code:  code
+pivotal_label_server:  server
+pivotal_label_open:  open
+pivotal_label_all:  all
 
 ################################################################################
 
@@ -4937,6 +5021,9 @@ runtime_no_conditions: ¡Usted no ha indicado sus condiciones!
 runtime_no_upload_image: No se ha podido subir la imagen «[name]».
 runtime_object_deleted: Este objeto se ha eliminado.
 runtime_object_not_in_index: "No se puede encontrar [type] #[id] en la índice o la búsqueda actual."
+runtime_pivotal_getting_token:  Couldn't get access token from Pivotal.
+runtime_pivotal_getting_stories:  Couldn't get stories from Pivotal.
+runtime_pivotal_parsing_story:  Error parsing one or more stories from Pivotal.  Ignored them.
 runtime_prefs_password_no_match: La contraseña y la confirmación no coinciden.
 runtime_refine_search_expect_id:  "Invalid [type] in '[field]' -- expected a valid id."
 runtime_refine_search_field_required:  "Missing required field '[field]'."

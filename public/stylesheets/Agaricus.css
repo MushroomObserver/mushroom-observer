@@ -91,3 +91,27 @@ li.selected { background-color: #eccf95 ! important }
 }
 
 table.vote_meter div.on { background: #3b2821; } /* cupreobrunneus */
+
+/* Pivotal page. */
+div.pivotal { background: #ddd8d9 }
+span.pivotal_name a, span.pivotal_name a:visited { color: #3b2821 }
+span.pivotal_name a:hover                        { color: #743931 }
+span.pivotal_unscheduled { color: #777 }
+span.pivotal_unstarted   { color: #222 }
+span.pivotal_started     { color: #000 }
+a.p0 { border: 1px solid #7f7471 }
+a.p1 { border: 1px solid #7f7471 }
+a.p2 { border: 1px solid #7f7471 }
+a.p3 { border: 1px solid #7f7471 }
+a.p4 { border: 1px solid #7f7471 }
+a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
+a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
+a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
+a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
+a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
+a.p0, a.p0:visited { color: #3b2821; background: #AAF }
+a.p1, a.p1:visited { color: #3b2821; background: #F55 }
+a.p2, a.p2:visited { color: #3b2821; background: #F83 }
+a.p3, a.p3:visited { color: #3b2821; background: #FF0 }
+a.p4, a.p4:visited { color: #3b2821; background: #FF0 }
+

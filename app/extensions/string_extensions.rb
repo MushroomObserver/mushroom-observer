@@ -396,6 +396,12 @@ class String
     end
   end
 
+  # Escape a string to be safe to place in double-quotes inside javascript.
+  def escape_js_string
+    gsub(/(["\\])/, '\\\1').
+    gsub(/\n/, '\\n')
+  end
+
   # Remove HTML tags (not entities) from string.  Used to make sure title is
   # safe for HTML header field.
   def strip_html

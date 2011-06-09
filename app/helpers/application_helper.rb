@@ -26,6 +26,7 @@ module ApplicationHelper
   require_dependency 'map_helper'
   require_dependency 'object_link_helper'
   require_dependency 'paginator_helper'
+  require_dependency 'pivotal_tracker_helper'
   require_dependency 'tab_helper'
   require_dependency 'textile_helper'
 
@@ -36,6 +37,7 @@ module ApplicationHelper
   include Map
   include ObjectLink
   include Paginator
+  include PivotalTracker
   include Tabs
   include Textile
 

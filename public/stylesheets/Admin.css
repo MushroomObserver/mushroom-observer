@@ -32,3 +32,27 @@ li.selected { background-color: #ff0000 ! important }
 .ListLine1 div.textile table table td      { background: #aaaa00; }
 
 table.vote_meter div.on { background: #000000 }
+
+/* Pivotal page. */
+div.pivotal { background: #B0B }
+span.pivotal_name a, span.pivotal_name a:visited { color: #000 }
+span.pivotal_name a:hover                        { color: #00F }
+span.pivotal_unscheduled { color: #CC3 }
+span.pivotal_unstarted   { color: #FF7 }
+span.pivotal_started     { color: #FFF }
+a.p0 { border: 1px solid #606; background: #313 }
+a.p1 { border: 1px solid #606; background: #313 }
+a.p2 { border: 1px solid #606; background: #313 }
+a.p3 { border: 1px solid #606; background: #313 }
+a.p4 { border: 1px solid #606; background: #313 }
+a.p0:hover, a.p0:visited:hover { color: #000; background: #AAF }
+a.p1:hover, a.p1:visited:hover { color: #000; background: #F38 }
+a.p2:hover, a.p2:visited:hover { color: #000; background: #F83 }
+a.p3:hover, a.p3:visited:hover { color: #000; background: #FF0 }
+a.p4:hover, a.p4:visited:hover { color: #000; background: #FF0 }
+a.p0, a.p0:visited { color: #AAF }
+a.p1, a.p1:visited { color: #F38 }
+a.p2, a.p2:visited { color: #F83 }
+a.p3, a.p3:visited { color: #FF0 }
+a.p4, a.p4:visited { color: #FF0 }
+
