@@ -2132,8 +2132,8 @@ pivotal_state_unscheduled:  unscheduled
 pivotal_state_unstarted:  in the queue
 pivotal_state_started:  in progress
 
-pivotal_head_critical:  anything impairing performance or interfering with many users
-pivotal_head_bottleneck:  features which are required by lots of other things
+pivotal_head_critical:  serious bugs or mission-critical work
+pivotal_head_bottleneck:  stuff required by lots of other things
 pivotal_head_api:  programmer's interface via XML-RPC, etc.
 pivotal_head_design:  web layout and graphic design
 pivotal_head_email:  notification emails
@@ -2146,12 +2146,19 @@ pivotal_head_names:  species descriptions
 pivotal_head_projects:  group projects
 pivotal_head_search:  search capabilities and data mining
 pivotal_head_taxonomy:  synonymy, hierarchy, syntax, etc.
-pivotal_head_voting:  voting on observations, their names, their images, etc.
+pivotal_head_voting:  voting on observations, their names, images, etc.
 pivotal_head_other:  uncategorized
 pivotal_head_admin:  administration tasks
 pivotal_head_code:  internal code, e.g. documentation, refactoring, etc.
 pivotal_head_server:  server installation, configuration, and diagnostics
-pivotal_head_open:  areas where we are actively soliciting feedback
+pivotal_head_open:  areas we are actively soliciting feedback
+pivotal_head_started:  areas developers are actively working
+pivotal_head_unstarted:  scheduled for work soon
+pivotal_head_unscheduled:  for the indefinite future
+pivotal_head_day:  has comments within last day
+pivotal_head_week:  has comments within last week 
+pivotal_head_month:  has comments within last month  
+pivotal_head_none:  has no recent comments
 pivotal_head_all:  show everything
 
 pivotal_label_critical:  critical
@@ -2174,6 +2181,13 @@ pivotal_label_admin:  admin
 pivotal_label_code:  code
 pivotal_label_server:  server
 pivotal_label_open:  open
+pivotal_label_day:  day
+pivotal_label_week:  week
+pivotal_label_month:  month
+pivotal_label_none:  none 
+pivotal_label_unscheduled: "[:pivotal_state_unscheduled]"
+pivotal_label_unstarted: "[:pivotal_state_unstarted]"
+pivotal_label_started: "[:pivotal_state_started]"
 pivotal_label_all:  all
 
 ################################################################################

@@ -68,6 +68,8 @@ class Pivotal
         when 'notes'         ; @comments = elem.elements.map { |e| Pivotal::Comment.new(e) }
         end
       end
+
+      @labels = ['other'] if @labels.empty?
     end
 
     def description=(str)
@@ -88,9 +90,26 @@ class Pivotal
       ACTIVE_STATES[state] || false
     end
 
+    def activity
+      @activity ||= begin
+        result = 'none'
+        if comment = comments.last
+          time = Time.parse(comment.time)
+          if time > 1.day.ago
+            result = 'day'
+          elsif time > 1.week.ago
+            result = 'week'
+          elsif time > 1.month.ago
+            result = 'month'
+          end
+        end
+        result
+      end
+    end
+
     def story_order
       max = labels.map {|l| LABEL_VALUE[l].to_i}.max.to_i
-      @view_order ||= -(max * 1000 + score)
+      @view_order ||= -((max * 1000 + score) * 100 + comments.length)
     end
 
     def score

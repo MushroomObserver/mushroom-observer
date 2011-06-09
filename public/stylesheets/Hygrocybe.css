@@ -99,19 +99,24 @@ table.vote_meter div.on { background: #37372f; } /* conica stain */
 /* Pivotal page. */
 div.pivotal { background: #d1cc9d }
 span.pivotal_name a, span.pivotal_name a:visited { color: #37372f }
-span.pivotal_unscheduled { color: #777 }
-span.pivotal_unstarted   { color: #222 }
-span.pivotal_started     { color: #000 }
-a.p0 { border: 1px solid #908d6f }
-a.p1 { border: 1px solid #908d6f }
-a.p2 { border: 1px solid #908d6f }
-a.p3 { border: 1px solid #908d6f }
-a.p4 { border: 1px solid #908d6f }
+span.pivotal_unscheduled, a.pivotal_unscheduled, a.pivotal_unscheduled:visited { color: #777 }
+span.pivotal_unstarted,   a.pivotal_unstarted,   a.pivotal_unstarted:visited   { color: #222 }
+span.pivotal_started,     a.pivotal_started,     a.pivotal_started:visited     { color: #000 }
+a.pivotal_unscheduled:hover, a.pivotal_unstarted:hover, a.pivotal_started:hover { color: #777; background: #000 }
+a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started { border: 1px solid #908d6f }
+a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 { border: 1px solid #908d6f }
+a.pA:hover, a.pA:visited:hover { color: #AF8; background: #000 }
+a.pX:hover, a.pX:visited:hover { color: #FFF; background: #000 }
 a.p0:hover, a.p0:visited:hover { color: #AAF; background: #000 }
 a.p1:hover, a.p1:visited:hover { color: #F55; background: #000 }
 a.p2:hover, a.p2:visited:hover { color: #F83; background: #000 }
 a.p3:hover, a.p3:visited:hover { color: #FF0; background: #000 }
 a.p4:hover, a.p4:visited:hover { color: #FF0; background: #000 }
+a.p_day,   a.p_day:visited   { color: #37372f; background: #AAFF88 }
+a.p_week,  a.p_week:visited  { color: #37372f; background: #8ED672 }
+a.p_month, a.p_month:visited { color: #37372f; background: #78B460 }
+a.p_none,  a.p_none:visited  { color: #37372f; background: #669951 }
+a.pX, a.pX:visited { color: #37372f; background: #FFF }
 a.p0, a.p0:visited { color: #37372f; background: #AAF }
 a.p1, a.p1:visited { color: #37372f; background: #F55 }
 a.p2, a.p2:visited { color: #37372f; background: #F83 }

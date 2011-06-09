@@ -57,7 +57,7 @@ class PivotalTest < UnitTestCase
       assert_equal(@mary.id, story.user.id)
       assert_equal('temp', story.name)
       assert_equal("this is a test\n", story.description)
-      assert_equal([], story.labels)
+      assert_equal(['other'], story.labels)
       assert_equal([], story.comments)
       assert_equal([], story.votes)
 

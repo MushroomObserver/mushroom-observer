@@ -85,19 +85,24 @@ table.vote_meter div.on { background: #bfc0bb; } /* pachycolea */
 /* Pivotal page. */
 div.pivotal { background: #433A43 }
 span.pivotal_name a, span.pivotal_name a:visited { color: #aa9a83 }
-span.pivotal_unscheduled { color: #BB2 }
-span.pivotal_unstarted   { color: #FF7 }
-span.pivotal_started     { color: #FFF }
-a.p0 { border: 1px solid #7b7879; background: #383138 }
-a.p1 { border: 1px solid #7b7879; background: #383138 }
-a.p2 { border: 1px solid #7b7879; background: #383138 }
-a.p3 { border: 1px solid #7b7879; background: #383138 }
-a.p4 { border: 1px solid #7b7879; background: #383138 }
+span.pivotal_unscheduled, a.pivotal_unscheduled, a.pivotal_unscheduled:visited { color: #BB2 }
+span.pivotal_unstarted,   a.pivotal_unstarted,   a.pivotal_unstarted:visited   { color: #FF7 }
+span.pivotal_started,     a.pivotal_started,     a.pivotal_started:visited     { color: #FFF }
+a.pivotal_unscheduled:hover, a.pivotal_unstarted:hover, a.pivotal_started:hover { color: #000; background: #FFF }
+a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started { border: 1px solid #7b7879; background: #383138 }
+a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 { border: 1px solid #7b7879; background: #383138 }
+a.pA:hover, a.pA:visited:hover { color: #000; background: #AF8 }
+a.pX:hover, a.pX:visited:hover { color: #000; background: #FFF }
 a.p0:hover, a.p0:visited:hover { color: #000; background: #AAF }
 a.p1:hover, a.p1:visited:hover { color: #000; background: #F55 }
 a.p2:hover, a.p2:visited:hover { color: #000; background: #F83 }
 a.p3:hover, a.p3:visited:hover { color: #000; background: #FF0 }
 a.p4:hover, a.p4:visited:hover { color: #000; background: #FF0 }
+a.p_day,   a.p_day:visited   { color: #AAFF88 }
+a.p_week,  a.p_week:visited  { color: #8ED672 }
+a.p_month, a.p_month:visited { color: #78B460 }
+a.p_none,  a.p_none:visited  { color: #669951 }
+a.pX, a.pX:visited { color: #FFF }
 a.p0, a.p0:visited { color: #AAF }
 a.p1, a.p1:visited { color: #F55 }
 a.p2, a.p2:visited { color: #F83 }

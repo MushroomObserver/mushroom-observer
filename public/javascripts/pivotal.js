@@ -4,7 +4,7 @@ var PIVOTAL_STORY_FAILED;
 var PIVOTAL_COMMENT_FAILED;
 var PIVOTAL_STORY_LOADING;
 
-var CUR_LABEL = null;
+var CUR_LABEL = "all";
 var CUR_STORY = null;
 
 function click_on_label(label) {

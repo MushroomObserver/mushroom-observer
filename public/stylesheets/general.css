@@ -500,7 +500,7 @@ span.pivotal_votes span {
   letter-spacing: 0.1em;
 }
 
-span.pivotal_state {
+span.pivotal_state, a.pivotal_state {
   text-transform: uppercase;
   font-weight: bold;
   font-size: 70%;
@@ -515,13 +515,20 @@ span.pivotal_num_comments {
 span.pivotal_labels {
   margin-left: 1.5em;
 }
-a.p0, a.p1, a.p2, a.p3, a.p4 {
+a.pA, a.pX, a.p0, a.p1, a.p2, a.p3, a.p4 {
   text-transform: uppercase;
   text-decoration: none;
   font-weight: bold;
   font-size: 60%;
   letter-spacing: 0.1em;
   padding: 0em 0.3em 0em 0.3em;
+}
+a.pivotal_unscheduled, a.pivotal_unstarted, a.pivotal_started {
+  text-decoration: none;
+  padding: 0em 0.3em 0em 0.3em;
+}
+a.pX {
+  font-size: 80%;
 }
 
 p.pivotal_heading {
