@@ -12,8 +12,9 @@ function click_on_label(label) {
   var new_stories = STORIES[label]     || [];
   var state = {};
   var i, j, e;
-  if (CUR_STORY)
+  if (CUR_STORY) {
     click_on_story(CUR_STORY);
+  }
   for (i=0; i<old_stories.length; i++) {
     j = old_stories[i];
     state[j] = true;
@@ -38,29 +39,30 @@ function click_on_label(label) {
 
 function vote_on_story(story, user, value) {
   var div = $("pivotal_votes_" + story);
-  new Ajax.Request("/ajax/pivotal/vote/" + story + "?value=" + value, {// 
-    asynchronous: true,// 
-    onComplete: function(request) {// 
-      if (request.status == 200) {// 
-        div.innerHTML = request.responseText;// 
-      } else {// 
-        alert(PIVOTAL_VOTE_FAILED + request.responseText);// 
-      }// 
-    }// 
-  });// 
-  $("pivotal_vote_num_" + story).innerHTML = // 
-    '<img alt="Indicator" src="/images/indicator.gif" />';// 
+  new Ajax.Request("/ajax/pivotal/vote/" + story + "?value=" + value, {
+    asynchronous: true,
+    onComplete: function(request) {
+      if (request.status == 200) {
+        div.innerHTML = request.responseText;
+      } else {
+        alert(PIVOTAL_VOTE_FAILED + request.responseText);
+      }
+    }
+  });
+  $("pivotal_vote_num_" + story).innerHTML = 
+    '<img alt="Indicator" src="/images/indicator.gif" />';
 }
 
 function click_on_story(story) {
   var div = $("pivotal_body_" + story);
-  if (CUR_STORY)
+  if (CUR_STORY) {
     $("pivotal_body_" + CUR_STORY).hide();
+  }
   if (CUR_STORY === story) {
     CUR_STORY = null;
     return;
   }
-  CUR_STORY = story
+  CUR_STORY = story;
   new Ajax.Request("/ajax/pivotal/story/" + story, {
     asynchronous: true,
     onComplete: function(request) {
