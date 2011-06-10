@@ -39,18 +39,20 @@ function click_on_label(label) {
 
 function vote_on_story(story, user, value) {
   var div = $("pivotal_votes_" + story);
+  var span = $("pivotal_vote_num_" + story);
+  var old_score = span.innerHTML;
   new Ajax.Request("/ajax/pivotal/vote/" + story + "?value=" + value, {
     asynchronous: true,
     onComplete: function(request) {
       if (request.status == 200) {
         div.innerHTML = request.responseText;
       } else {
+        span.innerHTML = old_score;
         alert(PIVOTAL_VOTE_FAILED + request.responseText);
       }
     }
   });
-  $("pivotal_vote_num_" + story).innerHTML = 
-    '<img alt="Indicator" src="/images/indicator.gif" />';
+  span.innerHTML = '<img alt="Indicator" src="/images/indicator.gif" />';
 }
 
 function click_on_story(story) {
