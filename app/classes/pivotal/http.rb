@@ -60,7 +60,7 @@ class Pivotal
       xml = get_cache_or_request('story_' + id + '.xml',
         '/projects/' + PIVOTAL_PROJECT + '/stories/' + id)
       doc = REXML::Document.new(xml)
-      desc = doc.root.elements['description'].first.value
+      desc = doc.root.elements['description'].first.value.to_s
       desc = desc.split(/\n/).reject do |line|
         line.match(/VOTE:\s*(\d+)\s*(\d+)/) and $1.to_i == user.id
       end.join("\n")
